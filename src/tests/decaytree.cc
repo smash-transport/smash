@@ -52,7 +52,7 @@ TEST(decaytree_correctness) {
   ParticleTypePtrList initial_particles1 = {a, b}, initial_particles2 = {a, b},
                       initial_particles3 = {a, b}, final_particles1 = {rho0},
                       final_particles2 = {f2}, final_particles3 = {a, b};
-  const double sqrts = 3.;
+  const double sqrts = 3.5;
 
   auto& process_node1 =
       tree.add_action(rho0->name(), 30.0, std::move(initial_particles1),

@@ -107,13 +107,17 @@ void usage(const int rc, const std::string &progname) {
    * <tr><td>`-f` <td>`--force`
    * <tr><td>`-S <pdg1>,<pdg2>[,mass1,mass2]`
    * <td>`--cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
-   * <td> Dumps all final-state cross-sections of pdg1 + pdg2 with
-   *     masses mass1 and mass2. Masses are optional, default values are pole
-   *     masses. Optionally, the lab frame momenta (fixed target) in GeV can be
-   *     specified. (The value of plab depends on the order of the particles.
-   *     The first is considered to be the projectile, the second one the
-   *     target.) If strings are enabled, the results are non-deterministic for
-   *     some final states.
+   * <td> Dumps an approximation of the final-state cross-sections of pdg1 +
+   *     pdg2 with masses mass1 and mass2. Masses are optional, default values
+   *     are pole masses. Optionally, the lab frame momenta (fixed target) in
+   *     GeV can be specified. (The value of plab depends on the order of the
+   *     particles. The first is considered to be the projectile, the second
+   *     one the target.) After the initial collision, only decays are
+   *     considered and all resonances are assumed to have their pole mass. This
+   *     may yield different results than a full simulation with SMASH, where
+   *     the resonances masses are sampled from the spectral function.
+   *     Typically, this results in errors of less than 1 mb in the worst case.
+   *     Also, contributions from strings are not considered.
    * <tr><td>`-f` <td>`--force`
    * <td>Forces overwriting files in the output directory. Normally, if you
    *     specifiy an output directory with `-o`, the directory must be empty.
@@ -145,9 +149,11 @@ void usage(const int rc, const std::string &progname) {
       "                          dump all partial cross-sections of "
       "pdg1 + pdg2 reactions versus sqrt(s).\n"
       "  -S, --cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]] \n"
-      "                          dump all partial final-state cross-sections "
-      "of pdg1 + pdg2 reactions versus sqrt(s). Non-deterministic if strings "
-      "are enabled.\n"
+      "                          dump an approximation of the final-state"
+      " cross-sections\n"
+      "                          of pdg1 + pdg2 reactions versus sqrt(s).\n"
+      "                          Contributions from strings are not considered"
+      " for the final state.\n"
       "                          Masses are optional, by default pole masses"
       " are used.\n"
       "                          Note the required comma and no spaces.\n"
