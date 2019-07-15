@@ -43,7 +43,7 @@ class Potentials {
    */
   Potentials(Configuration conf, const DensityParameters &parameters);
   /// Standard destructor
-  ~Potentials();
+  virtual ~Potentials();
 
   /**
    * Evaluates skyrme potential given a baryon density.
