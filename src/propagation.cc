@@ -195,17 +195,10 @@ bool crosses_hypersurface(ParticleData &pdata_before_propagation,
                           ParticleData &pdata_after_propagation,
                           const double tau) {
   bool hypersurface_is_crossed = false;
-  // find t and z at start of propagation
-  const double t1 = pdata_before_propagation.position().x0();
-  const double z1 = pdata_before_propagation.position().x3();
 
-  // find t and z after propagation
-  const double t2 = pdata_after_propagation.position().x0();
-  const double z2 = pdata_after_propagation.position().x3();
-
-  // find corresponding proper times before and after propagation
-  const double tau_before = std::sqrt(t1 * t1 - z1 * z1);
-  const double tau_after = std::sqrt(t2 * t2 - z2 * z2);
+  // proper time before and after propagation
+  const double tau_before = pdata_before_propagation.position().tau();
+  const double tau_after = pdata_after_propagation.position().tau();
 
   if (tau_before <= tau && tau <= tau_after) {
     hypersurface_is_crossed = true;
