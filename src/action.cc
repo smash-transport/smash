@@ -115,7 +115,9 @@ void Action::perform(Particles *particles, uint32_t id_process) {
   /* Check the conservation laws if the modifications of the total kinetic
    * energy of the outgoing particles by the mean field potentials are not
    * taken into account. */
-  if (UB_lat_pointer == nullptr && UI3_lat_pointer == nullptr) {
+  bool IC_output_switch = true;
+  if (UB_lat_pointer == nullptr && UI3_lat_pointer == nullptr &&
+      !IC_output_switch) {
     check_conservation(id_process);
   }
 }

@@ -40,6 +40,11 @@ enum class ProcessType {
    *  by a thermalized ensemble
    */
   Thermalization = 7,
+  /** Hypersurface crossing
+   *  Particles are removed from the evolution and printed to a separate output
+   *  to serve as initial conditions for hybrid models.
+   */
+  HyperSurfaceCrossing = 8,
   /**
    * (41-45) soft string excitations. Here "soft" means that the process does
    *         not involve quark or gluon scattering. A string is formed by quark

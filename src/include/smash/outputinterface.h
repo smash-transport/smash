@@ -143,7 +143,7 @@ class OutputInterface {
   bool is_photon_output() const { return is_photon_output_; }
 
   /// Get, whether this is the IC output?
-  bool is_initial_condition_output() const { return is_IC_output_; }
+  bool is_IC_output() const { return is_IC_output_; }
 
   /**
    * Convert thermodynamic quantities to strings.

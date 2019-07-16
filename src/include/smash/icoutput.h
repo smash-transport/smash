@@ -55,6 +55,9 @@ class ICOutput : public OutputInterface {
   void at_intermediate_time(const Particles &particles, const Clock &clock,
                             const DensityParameters &dens_param) override;
 
+  void at_interaction(const Action &action, const double density) override;
+  // void at_hypersurface_crossing(const Particles &particles);
+
   /**
    * Prints the density lattice in VTK format on a grid.
    *

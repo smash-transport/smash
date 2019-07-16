@@ -21,6 +21,7 @@
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
 #include "grid.h"
+#include "hypersurfacecrossingaction.h"
 #include "outputparameters.h"
 #include "pauliblocking.h"
 #include "potential_globals.h"
@@ -474,6 +475,9 @@ class Experiment : public ExperimentBase {
   /// This indicates whether photons are switched on.
   const bool photons_switch_;
 
+  // This indicates whether the IC output is enabled.
+  const bool IC_output_switch_;
+
   /// This indicates whether to use time steps.
   const TimeStepMode time_step_mode_;
 
@@ -744,6 +748,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"General", "Expansion_Rate"}, 0.1)),
       dileptons_switch_(config.has_value({"Output", "Dileptons"})),
       photons_switch_(config.has_value({"Output", "Photons"})),
+      IC_output_switch_(config.has_value({"Output", "Initial_Conditions"})),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
@@ -1060,6 +1065,16 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
   }
 
+  // Add HyperurfaceActionsFinder to finders list after output was configured.
+  // Necessary because the proper time of the hypersurface is printed to the
+  // output header, but also required to create the finder. Read-in process
+  // occurs when setting up the outputs.
+  if (IC_output_switch_) {
+    double proper_time = output_parameters.IC_proper_time;
+    action_finders_.emplace_back(
+        make_unique<HyperSurfaceCrossActionsFinder>(proper_time));
+  }
+
   /* We can take away the Fermi motion flag, because the collider modus is
    * already initialized. We only need it when potentials are enabled, but we
    * always have to take it, otherwise SMASH will complain about unused
@@ -1373,7 +1388,12 @@ bool Experiment<Modus>::perform_action(
    */
   for (const auto &output : outputs_) {
     if (!output->is_dilepton_output() && !output->is_photon_output()) {
-      output->at_interaction(action, rho);
+      if (output->is_IC_output() &&
+          action.get_type() == ProcessType::HyperSurfaceCrossing) {
+        output->at_interaction(action, rho);
+      } else if (!output->is_IC_output()) {
+        output->at_interaction(action, rho);
+      }
     }
   }
 
@@ -1526,7 +1546,7 @@ void Experiment<Modus>::run_time_evolution() {
      * only in average.  If string fragmentation is on, then energy and
      * momentum are only very roughly conserved in high-energy collisions. */
     if (!potentials_ && !parameters_.strings_switch &&
-        metric_.mode_ == ExpansionMode::NoExpansion) {
+        metric_.mode_ == ExpansionMode::NoExpansion && !IC_output_switch_) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
         log.error() << err_msg;
@@ -1608,7 +1628,6 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
      * in the action object will be outdated as the particles have been
      * propagated since the construction of the action. */
     act->update_incoming(particles_);
-
     const bool performed = perform_action(*act, particles_);
 
     /* No need to update actions for outgoing particles
@@ -1668,27 +1687,6 @@ void Experiment<Modus>::intermediate_output() {
       continue;
     }
 
-    if (output->is_initial_condition_output()) {
-      Particles Particles_iso_tau;
-      const double t = parameters_.labclock.current_time();
-      for (auto &&particle : particles_) {
-        double z = particle.position()[3];
-        double tau = std::sqrt(t * t - z * z);
-
-        // 0.0001fm bin around tau = 0.5 fm
-        // make sure t>0, else this condition will already be fulfilled before
-        // nuclei interact.
-        if (t > 0.0 && 0.4999 < tau && tau < 0.5001) {
-          Particles_iso_tau.insert(particle);
-          particles_.remove(particle);
-        }
-      }
-      output->at_intermediate_time(Particles_iso_tau, parameters_.outputclock,
-                                   density_param_);
-      continue;
-      // Alternatively: Find time at which particle will have tau=0.5 and
-      // propagate to this time (timestepless).
-    }
     output->at_intermediate_time(particles_, parameters_.outputclock,
                                  density_param_);
 

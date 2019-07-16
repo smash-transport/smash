@@ -464,9 +464,13 @@ double inline FourVector::sqr3() const { return this->threevec().sqr(); }
 
 double inline FourVector::abs3() const { return this->threevec().abs(); }
 
-double inline FourVector::tau() const { return std::sqrt(this->x0() * this->x0() - this->x3() * this->x3()); }
+double inline FourVector::tau() const {
+  return std::sqrt(this->x0() * this->x0() - this->x3() * this->x3());
+}
 
-double inline FourVector::eta() const { return std::atanh(this->x3() / this->x0()); }
+double inline FourVector::eta() const {
+  return std::atanh(this->x3() / this->x0());
+}
 
 /**\ingroup logging
  * Writes the four components of the vector to the output stream.

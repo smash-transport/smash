@@ -111,6 +111,8 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
       break;
     case ProcessType::Wall:
       os << "Wall";
+    case ProcessType::HyperSurfaceCrossing:
+      os << "Hypersurface crossing";
       break;
     default:
       os.setstate(std::ios_base::failbit);

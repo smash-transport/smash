@@ -37,7 +37,8 @@ struct OutputParameters {
         coll_extended(false),
         coll_printstartend(false),
         dil_extended(false),
-        photons_extended(false) {}
+        photons_extended(false),
+        IC_proper_time() {}
 
   /// Constructor from configuration
   explicit OutputParameters(Configuration&& conf) : OutputParameters() {
@@ -81,6 +82,10 @@ struct OutputParameters {
 
     if (conf.has_value({"Photons"})) {
       photons_extended = conf.take({"Photons", "Extended"}, false);
+    }
+
+    if (conf.has_value({"Initial_Conditions"})) {
+      IC_proper_time = conf.take({"Initial_Conditions", "Proper_Time"});
     }
   }
 
@@ -148,6 +153,9 @@ struct OutputParameters {
 
   /// Extended format for photon output
   bool photons_extended;
+
+  /// Proper time at which to create initial conditions output
+  double IC_proper_time;
 };
 
 }  // namespace smash
