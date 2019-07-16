@@ -209,9 +209,9 @@ double Potentials::dVsym_drhoI3(const double rhoB, const double rhoI3) const {
   double term1 = 2. * symmetry_S_Pot_ / nuclear_density;
   if (symmetry_is_rhoB_dependent_) {
     double term2 = 2. * rhoI3 * symmetry_S(rhoB) / (rhoB * rhoB);
-    return term1 + term2;
+    return 1.e-3 * (term1 + term2);
   } else {
-    return term1;
+    return 1.e-3 * term1;
   }
 }
 
