@@ -229,7 +229,7 @@ class Potentials {
    * Wheter the baryon density dependence of the symmetry potential is
    * included
    */
-  bool symmetry_is_rhoB_dependent_;
+  bool symmetry_is_rhoB_dependent_ = false;
   /**
    * Power \f$ \gamma \f$ in formula for \f$ S(\rho) \f$:
    * \f[ S(\rho)=12.3\,\mathrm{MeV}\times
