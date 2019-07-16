@@ -124,13 +124,13 @@ double Potentials::symmetry_S(const double baryon_density) const {
 }
 double Potentials::symmetry_pot(const double baryon_isospin_density,
                                 const double baryon_density) const {
-  double potential =
+  double pot =
       1.0e-3 * 2. * symmetry_S_Pot_ * baryon_isospin_density / nuclear_density;
   if (symmetry_is_rhoB_dependent_) {
-    potential += 1.0e-3 * symmetry_S(baryon_density) * baryon_isospin_density *
+    pot += 1.0e-3 * symmetry_S(baryon_density) * baryon_isospin_density *
                  baryon_isospin_density / (baryon_density * baryon_density);
   }
-  return potential;
+  return pot;
 }
 
 double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
