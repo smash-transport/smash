@@ -170,6 +170,11 @@ CollisionBranchList CrossSections::generate_collision_list(
    * ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
    * Only use in cases when detailed balance MUST happen, i.e. in a box! */
   if (nnbar_treatment == NNbarTreatment::Resonances) {
+    if (included_2to2[IncludedReactions::NNbar] != 1) {
+      throw std::runtime_error(
+          "'NNbar' has to be in the list of allowed 2 to 2 processes "
+          "to enable annihilation to go through resonances");
+    }
     if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
       /* Has to be called after the other processes are already determined,
        * so that the sum of the cross sections includes all other processes. */

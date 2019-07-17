@@ -650,6 +650,8 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * nucleon + nucleon <--> delta + resonance \li \key "KN_to_KN" - kaon + nucleon
  * <--> kaon + nucleon \li \key "KN_to_KDelta" - kaon + nucleon <--> kaon + dela
  * \li \key "Strangeness_exchange" - processes with strangeness exchange
+ * \li \key "NNbar" - annihilation processes, when NNbar_treatment is set to
+ *  resonances; this is superseded if NNbar_treatment is set to anything else
  * \li \key "All" - include all binary processes, no necessity to list each
  * single category
  *
@@ -666,8 +668,9 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * \key NNbar_Treatment (string, optional, default = "strings")
  * \li \key "no annihilation" - No annihilation of NNbar is performed.
  * \li \key "resonances" - Annhilation through NNbar → ρh₁(1170); combined with
- *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average.
- * \li \key "strings" - Annihilation throug string fragmentation.
+ *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average. This option
+ *  requires "NNbar" to be enabled in Included_2to2.
+ * \li \key "strings" - Annihilation through string fragmentation.
  *
  * \key Use_AQM (bool, optional, default = \key true) \n
  * Turn on AQM cross-sections for exotic combination of particles
