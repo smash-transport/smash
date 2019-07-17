@@ -163,14 +163,42 @@ class Nucleus {
    */
   inline size_t number_of_particles() const {
     size_t nop = particles_.size() / testparticles_;
-    /* if size() is not a multiple of testparticles_, this will throw an
+    /* If size() is not a multiple of testparticles_, this will throw an
      * error. */
     if (nop * testparticles_ != particles_.size()) {
       throw TestparticleConfusion(
           "Number of test particles and test particles"
-          "per particle are incompatible");
+          "per particle are incompatible.");
     }
     return nop;
+  }
+
+  /**
+   * Number of physical protons in the nucleus:
+   *
+   * \return number of protons
+   * \throw Testparticleconfusion if the number of the protons is not a
+   *        multiple of testparticles_.
+   */
+  inline size_t number_of_protons() const {
+    size_t proton_counter = 0;
+    /* If n_protons is not a multiple of testparticles_, this will throw an
+     * error. */
+    for (auto &particle : particles_) {
+      if (particle.type().pdgcode() == pdg::p) {
+        proton_counter++;
+      }
+    }
+
+    size_t n_protons = proton_counter / testparticles_;
+
+    if (n_protons * testparticles_ != proton_counter) {
+      throw TestparticleConfusion(
+          "Number of test protons and test particles"
+          "per proton are incompatible.");
+    }
+
+    return n_protons;
   }
 
   /**

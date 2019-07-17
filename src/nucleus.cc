@@ -317,6 +317,29 @@ void Nucleus::set_parameters_automatic() {
       set_nuclear_radius(4.20641);
       set_saturation_density(0.1686);
       break;
+    case 96: {
+      size_t n_protons = Nucleus::number_of_protons();
+      if (n_protons == 40) {  // Zirconium
+        // Default values.
+        set_diffusiveness(0.46);
+        set_nuclear_radius(5.02);
+        set_saturation_density(0.1673);
+        break;
+      } else if (n_protons == 44) {  // Ruthenium
+        // Default values.
+        set_diffusiveness(0.46);
+        set_nuclear_radius(5.085);
+        set_saturation_density(0.1604);
+        break;
+      } else {
+        // radius and diffusiveness taken from \iref{Rybczynski:2013yba}
+        set_diffusiveness(0.54);
+        set_nuclear_radius(1.12 * std::pow(A, 1.0 / 3.0) -
+                           0.86 * std::pow(A, -1.0 / 3.0));
+        break;
+      }
+    }
+
     default:
       if (A <= 16) {
         // radius: rough guess for all nuclei not listed explicitly with A <= 16
