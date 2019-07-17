@@ -30,6 +30,9 @@ constexpr double fm2_mb = 0.1;
 /// GeV^-2 <-> mb conversion factor.
 constexpr double gev2_mb = hbarc * hbarc / fm2_mb;
 
+/// MeV to GeV conversion factor.
+constexpr double mev_to_gev = 1.e-3;
+
 /// Numerical error tolerance.
 constexpr double really_small = 1.0e-6;
 

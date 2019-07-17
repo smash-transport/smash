@@ -128,7 +128,7 @@ double Potentials::symmetry_pot(const double baryon_isospin_density,
       1.0e-3 * 2. * symmetry_S_Pot_ * baryon_isospin_density / nuclear_density;
   if (symmetry_is_rhoB_dependent_) {
     pot += 1.0e-3 * symmetry_S(baryon_density) * baryon_isospin_density *
-                 baryon_isospin_density / (baryon_density * baryon_density);
+           baryon_isospin_density / (baryon_density * baryon_density);
   }
   return pot;
 }
@@ -178,13 +178,12 @@ std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
 std::pair<ThreeVector, ThreeVector> Potentials::skyrme_force(
     const double density, const ThreeVector grad_rho, const ThreeVector dj_dt,
     const ThreeVector rot_j) const {
-  const double MeV_to_GeV = 1.0e-3;
   ThreeVector E_component(0.0, 0.0, 0.0), B_component(0.0, 0.0, 0.0);
   if (use_skyrme_) {
     const double dV_drho =
         (skyrme_a_ + skyrme_b_ * skyrme_tau_ *
                          std::pow(density / nuclear_density, skyrme_tau_ - 1)) *
-        MeV_to_GeV / nuclear_density;
+        mev_to_gev / nuclear_density;
     E_component -= dV_drho * (grad_rho + dj_dt);
     B_component += dV_drho * rot_j;
   }
@@ -209,9 +208,9 @@ double Potentials::dVsym_drhoI3(const double rhoB, const double rhoI3) const {
   double term1 = 2. * symmetry_S_Pot_ / nuclear_density;
   if (symmetry_is_rhoB_dependent_) {
     double term2 = 2. * rhoI3 * symmetry_S(rhoB) / (rhoB * rhoB);
-    return 1.e-3 * (term1 + term2);
+    return mev_to_gev * (term1 + term2);
   } else {
-    return 1.e-3 * term1;
+    return mev_to_gev * term1;
   }
 }
 
@@ -222,7 +221,7 @@ double Potentials::dVsym_drhoB(const double rhoB, const double rhoI3) const {
                    20. * symmetry_gamma_ *
                        std::pow(rhoB_over_rho0, symmetry_gamma_) / rhoB;
     double term2 = -2. * symmetry_S(rhoB) / rhoB;
-    return 1.e-3 * (term1 + term2) * rhoI3 * rhoI3 / (rhoB * rhoB);
+    return mev_to_gev * (term1 + term2) * rhoI3 * rhoI3 / (rhoB * rhoB);
   } else {
     return 0.;
   }
