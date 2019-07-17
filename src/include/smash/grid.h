@@ -135,6 +135,11 @@ class Grid : public GridBase {
       const std::function<void(const ParticleList &, const ParticleList &)>
           &neighbor_cell_callback) const;
 
+  /**
+   * \return the volume of a single grid cell
+   */
+  double cell_volume() const { return cell_volume_; }
+
  private:
   /**
    * \return the one-dimensional cell-index from the 3-dim index \p x, \p y, \p
@@ -152,6 +157,9 @@ class Grid : public GridBase {
 
   /// The 3 lengths of the complete grid. Used for periodic boundary wrapping.
   const std::array<double, 3> length_;
+
+  /// The volume of a single cell.
+  double cell_volume_;
 
   /// The number of cells in x, y, and z direction.
   std::array<int, 3> number_of_cells_;

@@ -26,6 +26,7 @@ namespace smash {
  * \ingroup action
  * A simple scatter finder:
  * Just loops through all particles and checks each pair for a collision.
+ * It supports two collision criteria: a geometric and stochastic criterion.
  */
 class ScatterActionsFinder : public ActionFinderInterface {
  public:
@@ -60,36 +61,44 @@ class ScatterActionsFinder : public ActionFinderInterface {
 
   /**
    * Determine the collision time of the two particles.
-   * Time of the closest approach is taken as collision time.
+   * Time of the closest approach is taken as collision time, if the geometric
+   * collision criterion is used. For stochastic criterion the time is
+   * distributed uniformly within the timestep as in \iref{Xu:2004mz}.
    *
    * \param[in] p1 First incoming particle
    * \param[in] p2 Second incoming particle
+   * \param[in] dt The maximum time interval at the current time step [fm]
    * \return How long does it take for the two incoming particles
    *         to propagate before scattering [fm/c]. It's set equal
    *         to -1 if the two particles are not moving relative to each
    *         other.
    */
-  static inline double collision_time(const ParticleData &p1,
-                                      const ParticleData &p2) {
-    /**
-     * UrQMD collision time in computational frame,
-     * see \iref{Bass:1998ca} (3.28):
-     * position of particle 1: \f$r_1\f$ [fm]
-     * position of particle 2: \f$r_2\f$ [fm]
-     * velocity of particle 1: \f$v_1\f$
-     * velocity of particle 1: \f$v_2\f$
-     * \f[t_{coll} = - (r_1 - r_2) . (v_1 - v_2) / (v_1 - v_2)^2\f] [fm/c]
-     */
-    const ThreeVector dv_times_e1e2 =
-        p1.momentum().threevec() * p2.momentum().x0() -
-        p2.momentum().threevec() * p1.momentum().x0();
-    const double dv_times_e1e2_sqr = dv_times_e1e2.sqr();
-    if (dv_times_e1e2_sqr < really_small) {
-      return -1.0;
+  inline double collision_time(const ParticleData &p1, const ParticleData &p2,
+                               double dt) const {
+    if (coll_crit_ == CollisionCriterion::Stochastic) {
+      return dt * random::uniform(0., 1.);
+    } else {
+      /**
+       * UrQMD collision time in computational frame,
+       * see \iref{Bass:1998ca} (3.28):
+       * position of particle 1: \f$r_1\f$ [fm]
+       * position of particle 2: \f$r_2\f$ [fm]
+       * velocity of particle 1: \f$v_1\f$
+       * velocity of particle 1: \f$v_2\f$
+       * \f[t_{coll} = - (r_1 - r_2) . (v_1 - v_2) / (v_1 - v_2)^2\f] [fm/c]
+       */
+      const ThreeVector dv_times_e1e2 =
+          p1.momentum().threevec() * p2.momentum().x0() -
+          p2.momentum().threevec() * p1.momentum().x0();
+      const double dv_times_e1e2_sqr = dv_times_e1e2.sqr();
+      if (dv_times_e1e2_sqr < really_small) {
+        return -1.0;
+      }
+      const ThreeVector dr =
+          p1.position().threevec() - p2.position().threevec();
+      return -(dr * dv_times_e1e2) *
+             (p1.momentum().x0() * p2.momentum().x0() / dv_times_e1e2_sqr);
     }
-    const ThreeVector dr = p1.position().threevec() - p2.position().threevec();
-    return -(dr * dv_times_e1e2) *
-           (p1.momentum().x0() * p2.momentum().x0() / dv_times_e1e2_sqr);
   }
 
   /**
@@ -100,11 +109,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * found since the scattered pairs cannot scatter again.)
    *
    * \param[in] search_list A list of particles within one cell
-   * \param[in] dt The maximum time interval at the current time step [fm/c]
+   * \param[in] dt The maximum time interval at the current time step [fm]
+   * \param[in] cell_vol Volume of searched grid cell [fm^3]
    * \return A list of possible scatter actions
    */
-  ActionList find_actions_in_cell(const ParticleList &search_list,
-                                  double dt) const override;
+  ActionList find_actions_in_cell(const ParticleList &search_list, double dt,
+                                  const double cell_vol) const override;
 
   /**
    * Search for all the possible collisions among the neighboring cells. This
@@ -214,16 +224,37 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * happen in the next timestep and create a corresponding Action object
    * in that case.
    *
+   * Two criteria for the collision decision are supported: 1. The default
+   * geometric criterion from UrQMD \iref{Bass:1998ca} (3.27). 2. A stochastic
+   * collision criterion e.g. employed by BAMPS \iref{Xu:2004mz} (Sec.IIB).
+   * Note, the latter is currently only tested for a box with a fixed elastic
+   * cross section.
+   *
+   * More details on the stochastic collision criterion can be found here:
+   * - P. Danielewicz and G. F. Bertsch, Nucl. Phys. A533, 712 (1991).
+   * - A. Lang, H. Babovsky, W. Cassing, U. Mosel, H. G. Reusch, and K. Weber,
+   *   J. Comp. Phys. 106, 391 (1993).
+   * - W. Cassing, Nucl. Phys. A700, 618 (2002).
+   *
    * \param[in] data_a First incoming particle
    * \param[in] data_b Second incoming particle
    * \param[in] dt Maximum time interval within which a collision can happen
+   * \param[in] cell_vol (optional) volume of grid cell in which the collision
+   *                                is checked
    * \return A null pointer if no collision happens or an action which contains
    *         the information of the outgoing particles.
+   *
+   * Note: cell_vol is optional, since only find_actions_in_cell has (and needs)
+   * this information for the stochastic collision criterion.
    */
   ActionPtr check_collision(const ParticleData &data_a,
-                            const ParticleData &data_b, double dt) const;
+                            const ParticleData &data_b, double dt,
+                            const double cell_vol = 0.0) const;
+
   /// Class that deals with strings, interfacing Pythia.
   std::unique_ptr<StringProcess> string_process_interface_;
+  /// Specifies which collision criterion is used
+  const CollisionCriterion coll_crit_;
   /// Elastic cross section parameter (in mb).
   const double elastic_parameter_;
   /// Number of test particles.

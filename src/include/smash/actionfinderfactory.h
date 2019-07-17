@@ -32,13 +32,15 @@ class ActionFinderInterface {
    * Abstract function for finding actions, given a list of particles.
    *
    * \param[in] search_list a list of particles where each pair needs to be
-   *                  tested  for possible interaction
+   *                  tested for possible interaction
    * \param[in] dt duration of the current time step [fm]
+   * \param[in] cell_vol volume of searched grid cell [fm^3]
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
   virtual ActionList find_actions_in_cell(const ParticleList &search_list,
-                                          double dt) const = 0;
+                                          double dt,
+                                          const double cell_vol) const = 0;
   /**
    * Abstract function for finding actions, given two lists of particles,
    * a search list and a neighbors list.

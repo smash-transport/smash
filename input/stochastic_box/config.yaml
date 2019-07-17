@@ -1,0 +1,37 @@
+Version: 1.5
+
+Logging:
+  default: INFO
+
+General:
+    Modus:         Box
+    Delta_Time:    0.01
+    End_Time:      100.0
+    Randomseed:    -1
+    Testparticles: 1
+    Nevents:       1
+
+Output:
+    Output_Interval:  1.0
+    Collisions:
+        Format:  ["Binary"]
+        Print_Start_End:    True
+
+Collision_Term:
+    Two_to_One:             False
+    Included_2to2: ["Elastic"]
+    Force_Decays_At_End:    False
+    Isotropic:              True
+    Elastic_Cross_Section:  10.0
+    Collision_Criterion: Stochastic
+
+
+Modi:
+    Box:
+        Length: 10.0
+        Temperature: 0.2
+        Initial_Condition: "thermal momenta"
+        Start_Time:    0.0
+
+        Init_Multiplicities:
+          111: 200

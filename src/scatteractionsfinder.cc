@@ -30,6 +30,16 @@
 namespace smash {
 /*!\Userguide
  * \page input_collision_term_ Collision_Term
+ * \key Collision_Criterion (string, optional, default = "Geometric") \n
+ * Choose collision criterion. Be aware that the stochastic criterion is only
+ * tested for specific setups. Currently, only two-to-two reactions with
+ * constant elastic cross
+ * section are supported.
+ * \li \key "Geometric" - Geometric collision criterion
+ * \li \key "Stochastic" - Stochastic Collision criterion see e.g. A. Lang, H.
+ * Babovsky, W. Cassing, U. Mosel, H. G. Reusch, and K. Weber, J. Comp. Phys.
+ * 106, 391 (1993).
+ *
  * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
  * If a non-negative value is given, it will override the parametrized
  * elastic cross sections (which are energy-dependent) with a constant value.
@@ -208,7 +218,9 @@ namespace smash {
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters& parameters,
     const std::vector<bool>& nucleon_has_interacted, int N_tot, int N_proj)
-    : elastic_parameter_(
+    : coll_crit_(config.take({"Collision_Term", "Collision_Criterion"},
+                             CollisionCriterion::Geometric)),
+      elastic_parameter_(
           config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.)),
       testparticles_(parameters.testparticles),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
@@ -224,6 +236,13 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_proj_(N_proj),
       string_formation_time_(config.take(
           {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)) {
+  if (coll_crit_ == CollisionCriterion::Stochastic &&
+      !(is_constant_elastic_isotropic())) {
+    throw std::invalid_argument(
+        "The stochastic collision criterion is only supported for elastic (and "
+        "isotropic)\n2-to-2 reactions of one particle species. Change you "
+        "config accordingly.");
+  }
   if (is_constant_elastic_isotropic()) {
     const auto& log = logger<LogArea::FindScatter>();
     log.info("Constant elastic isotropic cross-section mode:", " using ",
@@ -254,20 +273,12 @@ ScatterActionsFinder::ScatterActionsFinder(
 
 ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
                                                 const ParticleData& data_b,
-                                                double dt) const {
+                                                double dt,
+                                                const double cell_vol) const {
 #ifndef NDEBUG
   const auto& log = logger<LogArea::FindScatter>();
 #endif
 
-  // just collided with this particle
-  if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
-#ifndef NDEBUG
-    log.debug("Skipping collided particles at time ", data_a.position().x0(),
-              " due to process ", data_a.id_process(), "\n    ", data_a,
-              "\n<-> ", data_b);
-#endif
-    return nullptr;
-  }
   /* If the two particles
    * 1) belong to the two colliding nuclei
    * 2) are within the same nucleus
@@ -284,7 +295,7 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
   }
 
   // Determine time of collision.
-  const double time_until_collision = collision_time(data_a, data_b);
+  const double time_until_collision = collision_time(data_a, data_b, dt);
 
   // Check that collision happens in this timestep.
   if (time_until_collision < 0. || time_until_collision >= dt) {
@@ -294,38 +305,99 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
   // Create ScatterAction object.
   ScatterActionPtr act = make_unique<ScatterAction>(
       data_a, data_b, time_until_collision, isotropic_, string_formation_time_);
+
   if (strings_switch_) {
     act->set_string_interface(string_process_interface_.get());
   }
 
-  const double distance_squared = act->transverse_distance_sqr();
+  if (coll_crit_ == CollisionCriterion::Stochastic) {
+    // No grid or search in cell
+    if (cell_vol < really_small) {
+      return nullptr;
+    }
 
-  // Don't calculate cross section if the particles are very far apart.
-  if (distance_squared >= max_transverse_distance_sqr(testparticles_)) {
-    return nullptr;
-  }
+    // Add various subprocesses.
+    act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
+                             low_snn_cut_, strings_switch_, use_AQM_,
+                             strings_with_probability_, nnbar_treatment_);
 
-  // Add various subprocesses.
-  act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                           low_snn_cut_, strings_switch_, use_AQM_,
-                           strings_with_probability_, nnbar_treatment_);
+    const double xs = act->cross_section() * fm2_mb;
 
-  // Cross section for collision criterion
-  double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
-                                   static_cast<double>(testparticles_);
-  // Take cross section scaling factors into account
-  cross_section_criterion *= data_a.xsec_scaling_factor(time_until_collision);
-  cross_section_criterion *= data_b.xsec_scaling_factor(time_until_collision);
+    // Relative velocity calculation, see e.g. \iref{Seifert:2017oyb}, eq. (5)
+    const double m1 = act->incoming_particles()[0].effective_mass();
+    const double m1_sqr = m1 * m1;
+    const double m2 = act->incoming_particles()[1].effective_mass();
+    const double m2_sqr = m2 * m2;
+    const double e1 = act->incoming_particles()[0].momentum().x0();
+    const double e2 = act->incoming_particles()[1].momentum().x0();
+    const double m_s = act->mandelstam_s();
+    const double lambda = (m_s - m1_sqr - m2_sqr) * (m_s - m1_sqr - m2_sqr) -
+                          4. * m1_sqr * m2_sqr;
+    const double v_rel = std::sqrt(lambda) / (2. * e1 * e2);
 
-  // distance criterion according to cross_section
-  if (distance_squared >= cross_section_criterion) {
-    return nullptr;
-  }
+    // Collision probability, see e.g. \iref{Xu:2004mz}, eq. (11)
+    const double p_22 = xs * v_rel * dt / (cell_vol * testparticles_);
 
 #ifndef NDEBUG
-  log.debug("particle distance squared: ", distance_squared, "\n    ", data_a,
-            "\n<-> ", data_b);
+    log.debug("Stochastic collison criterion parameters:\np_22 = ", p_22,
+              ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
+              ", cell_vol = ", cell_vol, ", testparticles = ", testparticles_);
 #endif
+
+    if (p_22 > 1.) {
+      std::stringstream err;
+      err << "Probability larger than 1 for stochastic rates. ( P = " << p_22
+          << " )\nUse smaller timesteps.";
+      throw std::runtime_error(err.str());
+    }
+
+    // probability criterion
+    double random_no = random::uniform(0., 1.);
+    if (random_no > p_22) {
+      return nullptr;
+    }
+
+  } else if (coll_crit_ == CollisionCriterion::Geometric) {
+    // just collided with this particle
+    if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
+#ifndef NDEBUG
+      log.debug("Skipping collided particles at time ", data_a.position().x0(),
+                " due to process ", data_a.id_process(), "\n    ", data_a,
+                "\n<-> ", data_b);
+#endif
+      return nullptr;
+    }
+
+    const double distance_squared = act->transverse_distance_sqr();
+
+    // Don't calculate cross section if the particles are very far apart.
+    if (distance_squared >= max_transverse_distance_sqr(testparticles_)) {
+      return nullptr;
+    }
+
+    // Add various subprocesses.
+    act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
+                             low_snn_cut_, strings_switch_, use_AQM_,
+                             strings_with_probability_, nnbar_treatment_);
+
+    // Cross section for collision criterion
+    double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
+                                     static_cast<double>(testparticles_);
+
+    // Take cross section scaling factors into account
+    cross_section_criterion *= data_a.xsec_scaling_factor(time_until_collision);
+    cross_section_criterion *= data_b.xsec_scaling_factor(time_until_collision);
+
+    // distance criterion according to cross_section
+    if (distance_squared >= cross_section_criterion) {
+      return nullptr;
+    }
+
+#ifndef NDEBUG
+    log.debug("particle distance squared: ", distance_squared, "\n    ", data_a,
+              "\n<-> ", data_b);
+#endif
+  }
 
   // Using std::move here is redundant with newer compilers, but required for
   // supporting GCC 4.8. Once we drop this support, std::move should be removed.
@@ -333,13 +405,13 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
 }
 
 ActionList ScatterActionsFinder::find_actions_in_cell(
-    const ParticleList& search_list, double dt) const {
+    const ParticleList& search_list, double dt, const double cell_vol) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData& p1 : search_list) {
     for (const ParticleData& p2 : search_list) {
       if (p1.id() < p2.id()) {
         // Check if a collision is possible.
-        ActionPtr act = check_collision(p1, p2, dt);
+        ActionPtr act = check_collision(p1, p2, dt, cell_vol);
         if (act) {
           actions.push_back(std::move(act));
         }
@@ -353,6 +425,10 @@ ActionList ScatterActionsFinder::find_actions_with_neighbors(
     const ParticleList& search_list, const ParticleList& neighbors_list,
     double dt) const {
   std::vector<ActionPtr> actions;
+  if (coll_crit_ == CollisionCriterion::Stochastic) {
+    // Only search in cells
+    return actions;
+  }
   for (const ParticleData& p1 : search_list) {
     for (const ParticleData& p2 : neighbors_list) {
       assert(p1.id() != p2.id());
@@ -370,6 +446,10 @@ ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     const ParticleList& search_list, const Particles& surrounding_list,
     double dt) const {
   std::vector<ActionPtr> actions;
+  if (coll_crit_ == CollisionCriterion::Stochastic) {
+    // Only search in cells
+    return actions;
+  }
   for (const ParticleData& p2 : surrounding_list) {
     /* don't look for collisions if the particle from the surrounding list is
      * also in the search list */
