@@ -266,8 +266,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /// List of included 2<->2 reactions
   const ReactionsBitSet incl_set_;
   /**
-   * Elastic collsions between two nucleons with
-   * sqrt_s below low_snn_cut_ are excluded.
+   * Elastic collsions between two nucleons with sqrt_s below low_snn_cut_ are
+   * excluded.
    */
   const double low_snn_cut_;
   /// Switch to turn off string excitation.
@@ -279,8 +279,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /// Switch for NNbar reactions
   const NNbarTreatment nnbar_treatment_;
   /**
-   * Parameter to record whether the nucleon
-   * has experienced a collision or not
+   * Parameter to record whether the nucleon has experienced a collision or not.
    */
   const std::vector<bool> &nucleon_has_interacted_;
   /// Record the total number of the nucleons in the two colliding nuclei

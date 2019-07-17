@@ -59,9 +59,11 @@ class OutputInterface {
    * \param event_number Number of the current event.
    * \param impact_parameter Distance between centers of nuclei in this event.
    *          Only makes sense for collider modus.
+   * \param[in] empty_event Whether there was no interaction between the target
+   *            and the projectile.
    */
   virtual void at_eventend(const Particles &particles, const int event_number,
-                           double impact_parameter) = 0;
+                           double impact_parameter, bool empty_event) = 0;
 
   /**
    * Called whenever an action modified one or more particles.

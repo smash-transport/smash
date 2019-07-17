@@ -38,7 +38,7 @@ TEST(directory_is_created) {
 
 TEST(init_particletypes) { Test::create_smashon_particletypes(); }
 
-static const int current_format_version = 6;
+static const int current_format_version = 7;
 
 /* A set of convenient functions to read binary */
 
@@ -143,16 +143,25 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
 }
 
 /* function to read and compare event end line */
-static bool compare_final_block_header(const int &ev,
-                                       const double &impact_parameter,
+static bool compare_final_block_header(const int ev,
+                                       const double impact_parameter,
+                                       const bool empty_event,
                                        const FilePtr &file) {
   int ev_read;
   char c_read;
   double b_read;
+  char empty_event_read;
   COMPARE(std::fread(&c_read, sizeof(char), 1, file.get()), 1u);
   read_binary(ev_read, file);
   COMPARE(std::fread(&b_read, sizeof(double), 1, file.get()), 1u);
-  return (c_read == 'f') && (ev_read == ev) && (b_read == impact_parameter);
+  COMPARE(std::fread(&empty_event_read, sizeof(char), 1, file.get()), 1u);
+  return (c_read == 'f') && (ev_read == ev) && (b_read == impact_parameter) &&
+         (empty_event_read == empty_event);
+}
+
+/* function to check we reached the end of the file */
+static bool check_end_of_file(const FilePtr &file) {
+  return std::feof(file.get()) == 0;
 }
 
 TEST(fullhistory_format) {
@@ -164,6 +173,7 @@ TEST(fullhistory_format) {
   /* Create elastic interaction (smashon + smashon). */
   const int event_id = 0;
   const double impact_parameter = 1.473;
+  const bool empty_event = false;
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
                               true, false, false,
@@ -193,7 +203,7 @@ TEST(fullhistory_format) {
 
     /* Final state output */
     action->perform(&particles, 1);
-    bin_output->at_eventend(particles, event_id, impact_parameter);
+    bin_output->at_eventend(particles, event_id, impact_parameter, empty_event);
   }
   VERIFY(!bf::exists(collisionsoutputfilepath_unfinished));
   VERIFY(bf::exists(collisionsoutputfilepath));
@@ -238,7 +248,9 @@ TEST(fullhistory_format) {
     VERIFY(compare_particle(final_particles[1], binF));
 
     // event end line
-    VERIFY(compare_final_block_header(event_id, impact_parameter, binF));
+    VERIFY(compare_final_block_header(event_id, impact_parameter, empty_event,
+                                      binF));
+    VERIFY(check_end_of_file(binF));
   }
 
   VERIFY(bf::remove(collisionsoutputfilepath));
@@ -250,6 +262,7 @@ TEST(particles_format) {
       Test::create_particles(2, [] { return Test::smashon_random(); });
   const int event_id = 0;
   const double impact_parameter = 4.382;
+  const bool empty_event = false;
   const ParticleList initial_particles = particles->copy_to_vector();
 
   const bf::path particleoutputpath = testoutputpath / "particles_binary.bin";
@@ -277,7 +290,8 @@ TEST(particles_format) {
     bin_output->at_intermediate_time(*particles, clock, dens_par);
 
     /* Final state output */
-    bin_output->at_eventend(*particles, event_id, impact_parameter);
+    bin_output->at_eventend(*particles, event_id, impact_parameter,
+                            empty_event);
   }
   const ParticleList final_particles = particles->copy_to_vector();
   VERIFY(!bf::exists(particleoutputpath_unfinished));
@@ -323,7 +337,9 @@ TEST(particles_format) {
     VERIFY(compare_particle(final_particles[0], binF));
 
     // after end of event
-    VERIFY(compare_final_block_header(event_id, impact_parameter, binF));
+    VERIFY(compare_final_block_header(event_id, impact_parameter, empty_event,
+                                      binF));
+    VERIFY(check_end_of_file(binF));
   }
 
   VERIFY(bf::remove(particleoutputpath));
@@ -346,6 +362,7 @@ TEST(extended) {
 
   const int event_id = 0;
   const double impact_parameter = 1.473;
+  const bool empty_event = true;
   const bf::path collisionsoutputfilepath =
       testoutputpath / "collisions_binary.bin";
   bf::path collisionsoutputfilepath_unfinished = collisionsoutputfilepath;
@@ -366,7 +383,7 @@ TEST(extended) {
 
     /* Final state output */
     action->perform(&particles, 1);
-    bin_output->at_eventend(particles, event_id, impact_parameter);
+    bin_output->at_eventend(particles, event_id, impact_parameter, empty_event);
   }
   VERIFY(!bf::exists(collisionsoutputfilepath_unfinished));
   VERIFY(bf::exists(collisionsoutputfilepath));
@@ -416,7 +433,9 @@ TEST(extended) {
     }
 
     // event end line
-    VERIFY(compare_final_block_header(event_id, impact_parameter, binF));
+    VERIFY(compare_final_block_header(event_id, impact_parameter, empty_event,
+                                      binF));
+    VERIFY(check_end_of_file(binF));
   }
 
   VERIFY(bf::remove(collisionsoutputfilepath));

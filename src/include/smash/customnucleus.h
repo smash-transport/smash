@@ -11,7 +11,6 @@
 #include <map>
 #include <vector>
 
-#include "collidermodus.h"
 #include "nucleus.h"
 #include "pdgcode.h"
 #include "threevector.h"
@@ -47,8 +46,10 @@ class CustomNucleus : public Nucleus {
    * numbers of particles with a certain PDG code and also the path where
    * the external particle list is located
    * \param[in] testparticles represents the number of testparticles
+   * \param[in] same_file specifies if target and projectile nucleus are
+   * read in from the same file, which is important for the ifstream
    */
-  CustomNucleus(Configuration& config, int testparticles);
+  CustomNucleus(Configuration& config, int testparticles, bool same_file);
   /**
    * Fills Particlelist from vector containing data for one nucleus.
    * The data contains everything that is written in struct Nucleoncustom.
@@ -58,6 +59,8 @@ class CustomNucleus : public Nucleus {
   void fill_from_list(const std::vector<Nucleoncustom>& vec);
   /// Returns position of a nucleon as given in the external file
   ThreeVector distribute_nucleon() override;
+
+  void arrange_nucleons() override;
   /**
    * The returned vector contains Data for one nucleus given in the
    * particlelist.
@@ -69,49 +72,53 @@ class CustomNucleus : public Nucleus {
   std::vector<Nucleoncustom> readfile(std::ifstream& infile,
                                       int particle_number) const;
   /**
-   * Directory where the nucleon configurations are located.
-   * Name is read in from manual input in the config.yaml
-   */
-  std::string particle_list_file_directory_;
-  /**
-   * File name of the nucleon configurations.
-   * Name is read in from manual input in the config.yaml
-   */
-  std::string particle_list_file_name_;
-  /**
-   *  of Nucleons per Nucleus
-   * Set initally to zero to be modified in the constructor.
-   *  is obtained by adding the proton and neutron numbers
-   * specified in the config.yaml
-   */
-  int number_of_nucleons_ = 0;
-  /// Vector contianing Data for one nucleus given in the particlelist
-  std::vector<Nucleoncustom> custom_nucleon_;
-  /// Index needed to read out vector in distribute nucleon
-  size_t index = 0;
-
- private:
-  /**
    * Generates the name of the stream file.
    * \param[in] file_directory is the path to the external file
    * \param[in] file_name is the name of the external file
    */
-  static std::string streamfile(const std::string& file_directory,
-                                const std::string& file_name);
-  /// Variable carrying the output of the streamfile function
+  std::string file_path(const std::string& file_directory,
+                        const std::string& file_name);
+  /**
+   * Randomly generate Euler angles for rotation everytime a new
+   * custom nucleus is initialiezed.
+   */
+  void random_euler_angles();
+  /**
+   * Number of Nucleons per Nucleus
+   * Set initally to zero to be modified in the constructor.
+   * Is obtained by adding the proton and neutron numbers
+   * specified in the config.yaml
+   */
+  int number_of_nucleons_ = 0;
+  /// Vector contianing Data for one nucleus given in the particlelist
+  std::vector<Nucleoncustom> custom_nucleus_;
+  /// Index needed to read out vector in distribute nucleon
+  size_t index = 0;
+  /// Euler angel phi
+  double phi_;
+  /// Euler angel theta
+  double theta_;
+  /// Euler angel psi
+  double psi_;
+
+ private:
+  /**
+   * Filestream variable used if projectile and target are read in from the
+   * same file and they use the same static stream.
+   */
   /*
    * The unique_ptr is only required to work around a bug in GCC 4.8, because it
    * seems to be trying to use the non-existing copy-constructor of
    * `std::ifstream`. Newer compilers don't require this unneccessary
    * indirection.
    */
-  static std::unique_ptr<std::ifstream> filestream_;
-  /** Bool variable to check if the file was already opened. It ensures
-   *  to read in every nucleus configuration given only once. If the bool
-   *  is true the constructor uses the stream that was given the last time
-   *  the constructor was called.
+  static std::unique_ptr<std::ifstream> filestream_shared_;
+  /* Filestream variable used if projectile and target are read in from
+   * different files and they therefore use different streams.
    */
-  static bool checkfileopen_;
+  std::unique_ptr<std::ifstream> filestream_;
+  /// Pointer to the used filestream pointer
+  std::unique_ptr<std::ifstream>* used_filestream_;
 };
 
 }  // namespace smash

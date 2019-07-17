@@ -80,7 +80,7 @@ namespace smash {
  * See \iref{Bazow:2016oky} and \iref{Tindall:2016try} for further explanations
  * about the different distribution functions.
  *
- * \key Jet:\n
+ * \key Jet: \n
  * This subset of config values is used to put a single high energy particle
  * (a "jet") in the center of the sphere, on an outbound trajectory along
  * the x axis; if no pdg is specified no jet is produced.
@@ -174,7 +174,7 @@ SphereModus::SphereModus(Configuration modus_config,
       insert_jet_(modus_config.has_value({"Sphere", "Jet", "Jet_PDG"})),
       jet_pdg_(insert_jet_ ? modus_config.take({"Sphere", "Jet", "Jet_PDG"})
                                  .convert_for(jet_pdg_)
-                           : pdg::p),
+                           : pdg::p),  // dummy default; never used
       jet_mom_(modus_config.take({"Sphere", "Jet", "Jet_Momentum"}, 20.)) {}
 
 /* console output on startup of sphere specific parameters */

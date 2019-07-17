@@ -47,8 +47,10 @@ class Particles;
  * pdgid - PDG code of particle, that characterizes its sort,
  * ev - number of event particle encountered in,
  * tcounter - number of output block in a given event,
- * npart - number of particles and
- * impact_b - impact parameter.
+ * npart - number of particles,
+ * impact_b - impact parameter, and
+ * empty_event - whether there was no interaction between the projectile and
+ * the target.
  *
  * Here is an example of ROOT macro to read the ROOT output of SMASH:
  * \code
@@ -119,9 +121,11 @@ class RootOutput : public OutputInterface {
    * \param[in] particles Particles to be written to output.
    * \param[in] event_number event number to be used in ROOT output.
    * \param[in] impact_parameter event number to be used in ROOT output. [fm]
+   * \param[in] empty_event Whether there was no interaction between the target
+   *            and the projectile.
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter) override;
+                   double impact_parameter, bool empty_event) override;
   /**
    * Writes intermediate particles to a tree defined by treename,
    * if it is allowed (i.e., particles_only_final_ is false).
@@ -189,6 +193,7 @@ class RootOutput : public OutputInterface {
   std::array<int, max_buffer_size_> pdgcode;
   int npart, tcounter, ev, nin, nout;
   double wgt, par_wgt, impact_b;
+  bool empty_event_;
   //@}
 
   /// Option to write collisions tree.

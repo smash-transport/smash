@@ -45,8 +45,8 @@ namespace smash {
  * Every physical quantity is in a separate TBranch.
  * One entry in the \c particles TTree is:
  * \code
- * ev tcounter npart impact_b pdgcode[npart] t[npart] x[npart] y[npart]
- * z[npart] p0[npart] px[npart] py[npart] pz[npart]
+ * ev tcounter npart impact_b empty_event pdgcode[npart] t[npart] x[npart]
+ * y[npart] z[npart] p0[npart] px[npart] py[npart] pz[npart]
  * \endcode
  * One tree entry is analogous to an OSCAR output block, but the maximal
  * number of particles in one entry is limited to 10000. This is done to limit
@@ -59,6 +59,8 @@ namespace smash {
  * OSCAR
  * \li \c npart is number of particles in the block
  * \li \c impact_b is the impact parameter of the event
+ * \li \c empty_event gives whether the projectile did not interact with the
+ * target
  * \li \c pdgcode is PDG id array
  * \li \c t, \c x, \c y, \c z are position arrays
  * \li \c p0, \c px, \c py, \c pz are 4-momenta arrays
@@ -102,6 +104,7 @@ void RootOutput::init_trees() {
 
     particles_tree_->Branch("npart", &npart, "npart/I");
     particles_tree_->Branch("impact_b", &impact_b, "impact_b/D");
+    particles_tree_->Branch("empty_event", &empty_event_, "empty_event/O");
     particles_tree_->Branch("ev", &ev, "ev/I");
     particles_tree_->Branch("tcounter", &tcounter, "tcounter/I");
 
@@ -162,6 +165,7 @@ void RootOutput::at_eventstart(const Particles &particles,
     output_counter_ = 0;
     // This is to have only one output of positive impact parameter per event
     impact_b = -1.0;
+    empty_event_ = false;
     particles_to_tree(particles);
     output_counter_++;
   }
@@ -177,8 +181,9 @@ void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
 
 void RootOutput::at_eventend(const Particles &particles,
                              const int /*event_number*/,
-                             double impact_parameter) {
+                             double impact_parameter, bool empty_event) {
   impact_b = impact_parameter;
+  empty_event_ = empty_event;
   if (write_particles_) {
     particles_to_tree(particles);
   }

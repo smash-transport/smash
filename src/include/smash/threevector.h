@@ -65,12 +65,14 @@ class ThreeVector {
    * assume the standard basis x, y, z then this means applying the
    * matrix for a rotation of phi about z, followed by the matrix for
    * a rotation theta about the rotated x axis. Last, psi is a rotation
-   * about the rotated z axis.
+   * about the rotated z axis. To reverse the rotation one has to
+   * therefore exchange phi and psi and use the negative values for all angles.
    * \param[in] phi angle by which the first rotation is done about z axis.
+   *        Range:[0,2&pi]
    * \param[in] theta angle by which the second rotation is done
-   *        about the rotated x axis.
+   *        about the rotated x axis. Range:[0,&pi]
    * \param[in] psi angle by which the third rotation is done
-   *        about the rotated z axis.
+   *        about the rotated z axis. Range:[0,2&pi]
    *
    * Euler angles are used to make rotation of several (different) position
    * vectors belonging to one rigid body easy. A ThreeVector could be rotated

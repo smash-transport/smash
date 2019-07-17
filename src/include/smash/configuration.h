@@ -496,12 +496,14 @@ class Configuration {
           s.set(IncludedReactions::KN_to_KDelta);
         } else if (x == "Strangeness_exchange") {
           s.set(IncludedReactions::Strangeness_exchange);
+        } else if (x == "NNbar") {
+          s.set(IncludedReactions::NNbar);
         } else {
           throw IncorrectTypeInAssignment(
               "The value for key \"" + std::string(key_) +
               "\" should be \"All\", \"Elastic\", \"NN_to_NR\", \"NN_to_DR\","
-              "\"KN_to_KN\", \"KN_to_KDelta\" or \"strangeness_exchange\","
-              " or any combination of these.");
+              "\"KN_to_KN\", \"KN_to_KDelta\", \"strangeness_exchange\" or "
+              "\"NNbar\", or any combination of these.");
         }
       }
       return s;

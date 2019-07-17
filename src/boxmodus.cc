@@ -52,6 +52,11 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
     out << "Boltzmann momentum distribution with T = " << m.temperature_
         << " GeV.\n";
   }
+  if (m.insert_jet_) {
+    ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_);
+    out << "Adding a " << ptype->name() << " as a jet in the middle "
+        << "of the box with " << m.jet_mom_ << " GeV initial momentum.\n";
+  }
   return out;
 }
 
@@ -97,6 +102,18 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * Strangeness chemical potential \f$ \mu_S \f$ used in case if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
+ * \key Jet: \n
+ * This subset of config values is used to put a single high energy particle
+ * (a "jet") in the center of the box, on an trajectory along
+ * the x axis; if no pdg is specified no jet is produced.
+ *
+ * \li \key Jet_PDG (int, optional):
+ * The type of particle to be used as a jet, as given by its PDG code;
+ * if none is provided no jet is initialized.
+ *
+ * \li \key Jet_Momentum (double, optional, default = 20.):
+ * The initial momentum to give to the jet particle (in GeV)
+ *
  * \n
  * Examples: Configuring a Box Simulation
  * --------------
@@ -132,6 +149,19 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
          Baryon_Chemical_Potential: 0.0
          Strange_Chemical_Potential: 0.0
  \endverbatim
+ *
+ * If one wants to simulate a jet in the hadronic medium, this can be done
+ * by using the following configuration setup:
+ *\verbatim
+ Modi:
+     Box:
+         Length: 10.0
+         Temperature: 0.2
+         Use_Thermal_Multiplicities: True
+         Jet:
+             Jet_PDG: 211
+             Jet_Momentum: 100.0
+\endverbatim
  * \n
  *
  * \note
@@ -170,7 +200,12 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
       init_multipl_(use_thermal_
                         ? std::map<PdgCode, int>()
                         : modus_config.take({"Box", "Init_Multiplicities"})
-                              .convert_for(init_multipl_)) {}
+                              .convert_for(init_multipl_)),
+      insert_jet_(modus_config.has_value({"Box", "Jet", "Jet_PDG"})),
+      jet_pdg_(insert_jet_ ? modus_config.take({"Box", "Jet", "Jet_PDG"})
+                                 .convert_for(jet_pdg_)
+                           : pdg::p),  // dummy default; never used
+      jet_mom_(modus_config.take({"Box", "Jet", "Jet_Momentum"}, 20.)) {}
 
 double BoxModus::initial_conditions(Particles *particles,
                                     const ExperimentParameters &parameters) {
@@ -237,6 +272,15 @@ double BoxModus::initial_conditions(Particles *particles,
     data.set_4momentum(data.momentum().abs(),
                        data.momentum().threevec() -
                            momentum_total.threevec() / particles->size());
+  }
+
+  /* Add a single highly energetic particle in the center of the box (jet) */
+  if (insert_jet_) {
+    auto &jet_particle = particles->create(jet_pdg_);
+    jet_particle.set_formation_time(start_time_);
+    jet_particle.set_4position(FourVector(start_time_, 0., 0., 0.));
+    jet_particle.set_4momentum(ParticleType::find(jet_pdg_).mass(),
+                               ThreeVector(jet_mom_, 0., 0.));
   }
 
   /* Recalculate total momentum */

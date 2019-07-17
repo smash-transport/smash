@@ -343,6 +343,10 @@ class Experiment : public ExperimentBase {
    * the ColliderModus, so is set as an empty vector by default.
    */
   std::vector<bool> nucleon_has_interacted_ = {};
+  /**
+   * Whether the projectile and the target collided.
+   */
+  bool projectile_target_interact_ = false;
 
   /**
    * The initial nucleons in the ColliderModus propagate with
@@ -646,6 +650,8 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * nucleon + nucleon <--> delta + resonance \li \key "KN_to_KN" - kaon + nucleon
  * <--> kaon + nucleon \li \key "KN_to_KDelta" - kaon + nucleon <--> kaon + dela
  * \li \key "Strangeness_exchange" - processes with strangeness exchange
+ * \li \key "NNbar" - annihilation processes, when NNbar_treatment is set to
+ *  resonances; this is superseded if NNbar_treatment is set to anything else
  * \li \key "All" - include all binary processes, no necessity to list each
  * single category
  *
@@ -662,8 +668,9 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * \key NNbar_Treatment (string, optional, default = "strings")
  * \li \key "no annihilation" - No annihilation of NNbar is performed.
  * \li \key "resonances" - Annhilation through NNbar → ρh₁(1170); combined with
- *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average.
- * \li \key "strings" - Annihilation throug string fragmentation.
+ *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average. This option
+ *  requires "NNbar" to be enabled in Included_2to2.
+ * \li \key "strings" - Annihilation through string fragmentation.
  *
  * \key Use_AQM (bool, optional, default = \key true) \n
  * Turn on AQM cross-sections for exotic combination of particles
@@ -1029,7 +1036,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   std::vector<std::string> output_contents = output_conf.list_upmost_nodes();
   for (const auto &content : output_contents) {
     auto this_output_conf = output_conf[content.c_str()];
-    std::vector<std::string> formats = this_output_conf.take({"Format"});
+    const std::vector<std::string> formats = this_output_conf.take({"Format"});
+    if (output_path == "") {
+      continue;
+    }
     for (const auto &format : formats) {
       create_output(format, content, output_path, output_parameters);
     }
@@ -1266,6 +1276,7 @@ void Experiment<Modus>::initialize_new_event() {
   interactions_total_ = 0;
   previous_interactions_total_ = 0;
   total_pauli_blocked_ = 0;
+  projectile_target_interact_ = false;
   // Print output headers
   log.info() << hline;
   log.info() << "Time [fm]   Ediff [GeV]    Scatt.|Decays   "
@@ -1292,11 +1303,24 @@ bool Experiment<Modus>::perform_action(
   if (modus_.is_collider()) {
     /* Mark incoming nucleons as interacted - now they are permitted
      * to collide with nucleons from their native nucleus */
+    bool incoming_projectile = false;
+    bool incoming_target = false;
     for (const auto &incoming : action.incoming_particles()) {
       assert(incoming.id() >= 0);
       if (incoming.id() < modus_.total_N_number()) {
         nucleon_has_interacted_[incoming.id()] = true;
       }
+      if (incoming.id() < modus_.proj_N_number()) {
+        incoming_projectile = true;
+      }
+      if (incoming.id() >= modus_.proj_N_number() &&
+          incoming.id() < modus_.total_N_number()) {
+        incoming_target = true;
+      }
+    }
+    // Check whether particles from different nuclei interacted.
+    if (incoming_projectile & incoming_target) {
+      projectile_target_interact_ = true;
     }
   }
   /* Make sure to pick a non-zero integer, because 0 is reserved for "no
@@ -1787,7 +1811,8 @@ void Experiment<Modus>::final_output(const int evt_num) {
   }
 
   for (const auto &output : outputs_) {
-    output->at_eventend(particles_, evt_num, modus_.impact_parameter());
+    output->at_eventend(particles_, evt_num, modus_.impact_parameter(),
+                        !projectile_target_interact_);
   }
 }
 

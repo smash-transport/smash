@@ -136,8 +136,9 @@ executable with `chmod u+x ~/bin/my-binary`.
 
 ### Installing clang-format
 
-clang-format is a part of the clang compiler. You can download the most recent
-binaries here http://releases.llvm.org/download.html.
+clang-format is a part of the clang compiler. The usage of version 6.0.0 is
+enforced. You can download the binaries here
+http://releases.llvm.org/download.html.
 
 Make sure to pick a pre-built binary for your system. For example, for Ubuntu
 you could run:
@@ -377,9 +378,9 @@ Our Naming & Formatting Rules follow the Google Styleguide. We keep a copy of
 the relevant sections to be able to make small adjustments and hide the C++
 Coding Guidelines sections.
 
-Note that we use `clang-format` for formatting (see [README](README.md) for installation,
-usage explained below), so you can just use that instead of having to worry
-about formatting by hand in accordance with the style guide.
+Note that we use `clang-format` for formatting (installation explained above,
+usage explained below), so that you do not have to worry about formatting by
+hand to be in accordance with the style guide.
 
 A notable naming rule is that class member variables have to end in an
 underscore (`_`).

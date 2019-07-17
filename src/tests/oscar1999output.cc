@@ -82,6 +82,7 @@ TEST(fullhistory_format) {
 
   const int event_id = 0;
   const double impact_parameter = 3.7;
+  const bool empty_event = false;
 
   const bf::path outputfilepath =
       testoutputpath / "full_event_history.oscar1999";
@@ -104,7 +105,7 @@ TEST(fullhistory_format) {
     oscfull->at_interaction(*action, 0.);
 
     /* Final state output */
-    oscfull->at_eventend(particles, event_id, impact_parameter);
+    oscfull->at_eventend(particles, event_id, impact_parameter, empty_event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
@@ -208,7 +209,8 @@ TEST(particlelist_format) {
                               NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   const int event_id = 0;
-  double impact_parameter = 2.4;
+  const double impact_parameter = 2.4;
+  const bool empty_event = false;
 
   const bf::path outputfilepath = testoutputpath / "particle_lists.oscar1999";
   bf::path outputfilepath_unfinished = outputfilepath;
@@ -231,7 +233,7 @@ TEST(particlelist_format) {
 
     /* Final state output; this is the only thing we expect to find in file */
     action->perform(&particles, 1);
-    oscfinal->at_eventend(particles, event_id, impact_parameter);
+    oscfinal->at_eventend(particles, event_id, impact_parameter, empty_event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));

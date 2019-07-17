@@ -800,6 +800,7 @@ static void add_decays(Node& node, double sqrts) {
   for (const ParticleTypePtr ptype : node.state_) {
     if (!ptype->is_stable()) {
       const double sqrts_decay = sqrts_minus_masses + ptype->mass();
+      bool can_decay = false;
       for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
         // Make sure to skip kinematically impossible decays.
         // In principle, we would have to integrate over the mass of the
@@ -811,12 +812,19 @@ static void add_decays(Node& node, double sqrts) {
         if (final_state_mass > sqrts_decay) {
           continue;
         }
+        can_decay = true;
 
         ParticleTypePtrList parts;
         const auto name = make_decay_name(ptype->name(), decay, parts);
         auto& new_node = node.add_action(name, norm * decay->weight(), {ptype},
                                          std::move(parts));
         add_decays(new_node, sqrts_decay);
+      }
+      if (!can_decay) {
+        // Remove final-state cross sections with resonances that cannot
+        // decay due to our "mass = pole mass" approximation.
+        node.weight_ = 0;
+        return;
       }
     }
   }
@@ -943,6 +951,22 @@ void ScatterActionsFinder::dump_cross_sections(
         outgoing_total_mass[p.name_] = p.mass_;
         xs_dump[p.name_].push_back(std::make_pair(sqrts, p.cross_section_));
       }
+    }
+  }
+  // Get rid of cross sections that are zero.
+  // (This only happens if their is a resonance in the final state that cannot
+  // decay with our simplified assumptions.)
+  for (auto it = begin(xs_dump); it != end(xs_dump);) {
+    // Sum cross section over all energies.
+    const xs_saver& xs = (*it).second;
+    double sum = 0;
+    for (const auto& p : xs) {
+      sum += p.second;
+    }
+    if (sum == 0.) {
+      it = xs_dump.erase(it);
+    } else {
+      ++it;
     }
   }
 
