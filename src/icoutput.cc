@@ -33,18 +33,35 @@ ICOutput::~ICOutput() {}
 
 void ICOutput::at_eventstart(const Particles &particles,
                              const int event_number) {
-  // dummy, but virtual function needs to be declared, this function is never
-  // actually used
+  std::fprintf(file_.get(), "# event %i start\n", event_number + 1);
   SMASH_UNUSED(particles);
-  SMASH_UNUSED(event_number);
 };
 
 void ICOutput::at_eventend(const Particles &particles, const int event_number,
                            double impact_parameter, bool empty_event) {
-  // dummy, but virtual function needs to be declared, this function is never
-  // actually used
+  const auto &log = logger<LogArea::HyperSurfaceCrossing>();
+  std::fprintf(file_.get(), "# event %i end\n", event_number + 1);
+
+  bool runtime_too_short = false;
+  int below_hypersurface_counter = 0;
+  if (particles.size() != 0) {
+    for (auto &p : particles) {
+      double tau = p.position().tau();
+      if (tau < 0.5) {
+        runtime_too_short = true;
+        below_hypersurface_counter += 1;
+      }
+    }
+
+    // If the runtime is too short some particles might not yet have
+    // reached the hypersurface.
+    if (runtime_too_short) {
+      log.warn("End time might be too small. ",
+               below_hypersurface_counter,
+               " particles have not yet crossed the hypersurface.");
+    }
+  }
   SMASH_UNUSED(particles);
-  SMASH_UNUSED(event_number);
   SMASH_UNUSED(impact_parameter);
   SMASH_UNUSED(empty_event);
 };
@@ -52,6 +69,8 @@ void ICOutput::at_eventend(const Particles &particles, const int event_number,
 void ICOutput::at_intermediate_time(const Particles &particles,
                                     const Clock &clock,
                                     const DensityParameters &dens_param) {
+  // Dummy, but virtual function needs to be declared.
+  // It is never actually used.
   SMASH_UNUSED(particles);
   SMASH_UNUSED(clock);
   SMASH_UNUSED(dens_param);
