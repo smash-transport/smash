@@ -89,6 +89,18 @@ class ColliderModus : public ModusDefault {
   int total_N_number() const { return target_->size() + projectile_->size(); }
   /// \return The number of test particles in the projectile nucleus
   int proj_N_number() const { return projectile_->size(); }
+
+  /// Time until nuclei have passed through each other
+  double nuclei_passing_time() const {
+    const double passing_distance =
+        projectile_->get_nuclear_radius() + target_->get_nuclear_radius();
+    double passing_time =
+        passing_distance /
+        std::sqrt(sqrt_s_NN_ * sqrt_s_NN_ /
+                      ((2 * nucleon_mass) * (2 * nucleon_mass)) -
+                  1);
+    return passing_time;
+  }
   /**
    * \return the beam velocity of the projectile, which will be used to
    *         calculate the beam momenta in experiment.cc if Fermi motion is

@@ -783,6 +783,24 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (modus_l > 0.) {
     action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
   }
+  if (IC_output_switch_) {
+    if (!modus_.is_collider()) {
+      throw std::runtime_error(
+          "Initial conditions can only be extracted in collider modus.");
+    }
+    if (config.has_value({"Output", "Initial_Conditions", "Proper_Time"})) {
+      // Read in proper time from config
+      double proper_time =
+          config.take({"Output", "Initial_Conditions", "Proper_Time"});
+      action_finders_.emplace_back(
+          make_unique<HyperSurfaceCrossActionsFinder>(proper_time));
+    } else {
+      // Default proper time is the passing time of the two nuclei
+      double proper_time = modus_.nuclei_passing_time();
+      action_finders_.emplace_back(
+          make_unique<HyperSurfaceCrossActionsFinder>(proper_time));
+    }
+  }
 
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     log.info() << "Pauli blocking is ON.";
@@ -1063,16 +1081,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     for (const auto &format : formats) {
       create_output(format, content, output_path, output_parameters);
     }
-  }
-
-  // Add HyperurfaceActionsFinder to finders list after output was configured.
-  // Necessary because the proper time of the hypersurface is printed to the
-  // output header, but also required to create the finder. Read-in process
-  // occurs when setting up the outputs.
-  if (IC_output_switch_) {
-    double proper_time = output_parameters.IC_proper_time;
-    action_finders_.emplace_back(
-        make_unique<HyperSurfaceCrossActionsFinder>(proper_time));
   }
 
   /* We can take away the Fermi motion flag, because the collider modus is

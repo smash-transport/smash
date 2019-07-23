@@ -38,9 +38,10 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     ParticleData pdata_before_propagation = p;
     ParticleData pdata_after_propagation = p;  // Will receive updated position
     double t0 = p.position().x0();
+    double t_end = t0 + t_max;  // Time at the end of timestep
 
     // We don't want to remove particles before the nuclei have interacted
-    if (t0 < 0.0) {
+    if (t_end < 0.0) {
       continue;
     }
 
@@ -48,7 +49,7 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     const ThreeVector &v = p.velocity();
     const FourVector distance = FourVector(0.0, v * t_max);
     FourVector position = p.position() + distance;
-    position.set_x0(t0 + t_max);
+    position.set_x0(t_end);
     // update coordinates to the position corresponding to t_max
     pdata_after_propagation.set_4position(position);
 
@@ -88,13 +89,31 @@ bool HyperSurfaceCrossActionsFinder::crosses_hypersurface(
     ParticleData &pdata_before_propagation,
     ParticleData &pdata_after_propagation, const double tau) const {
   bool hypersurface_is_crossed = false;
+  const bool t_greater_z_before_prop =
+      (fabs(pdata_before_propagation.position().x0()) >
+               fabs(pdata_before_propagation.position().x3())
+           ? 1
+           : 0);
+  const bool t_greater_z_after_prop =
+      (fabs(pdata_after_propagation.position().x0()) >
+               fabs(pdata_after_propagation.position().x3())
+           ? 1
+           : 0);
 
-  // proper time before and after propagation
-  const double tau_before = pdata_before_propagation.position().tau();
-  const double tau_after = pdata_after_propagation.position().tau();
+  if (t_greater_z_before_prop && t_greater_z_after_prop) {
+    // proper time before and after propagation
+    const double tau_before = pdata_before_propagation.position().tau();
+    const double tau_after = pdata_after_propagation.position().tau();
 
-  if (tau_before <= tau && tau <= tau_after) {
-    hypersurface_is_crossed = true;
+    if (tau_before <= tau && tau <= tau_after) {
+      hypersurface_is_crossed = true;
+    }
+  } else if (!t_greater_z_before_prop && t_greater_z_after_prop) {
+    // proper time after propagation
+    const double tau_after = pdata_after_propagation.position().tau();
+    if (tau_after >= tau) {
+      hypersurface_is_crossed = true;
+    }
   }
 
   return hypersurface_is_crossed;

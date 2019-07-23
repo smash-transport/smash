@@ -80,6 +80,14 @@ class ICOutput : public OutputInterface {
   RenamingFilePtr file_;
   /// Structure that holds all the information about what to printout
   const OutputParameters out_par_;
+
+  /**
+   * Proper time at which hypersurface is created.
+   * By construction, tau > 0. Nevertheless it is initialized with a negative
+   * number to easily find the first particle that is removed from the evolution
+   * in at_interaction().
+   */
+  double IC_proper_time_ = -1.0;
 };
 
 }  // namespace smash

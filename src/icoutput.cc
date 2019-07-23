@@ -22,9 +22,7 @@ ICOutput::ICOutput(const bf::path &path, const std::string &name,
     : OutputInterface(name),
       file_{path / "SMASH_IC.dat", "w"},
       out_par_(out_par) {
-  const double prop_time = out_par_.IC_proper_time;
-  std::fprintf(file_.get(), "# %s initial conditions\n", VERSION_MAJOR);
-  std::fprintf(file_.get(), "# @ proper time: %7.4f fm \n", prop_time);
+  std::fprintf(file_.get(), "# %s initial conditions: hypersurface of constant proper time\n", VERSION_MAJOR);
   std::fprintf(file_.get(), "# tau x y eta mt px py Rap pdg ID charge \n");
   std::fprintf(file_.get(), "# fm fm fm none GeV GeV GeV none none none e \n");
 }
@@ -42,24 +40,27 @@ void ICOutput::at_eventend(const Particles &particles, const int event_number,
   const auto &log = logger<LogArea::HyperSurfaceCrossing>();
   std::fprintf(file_.get(), "# event %i end\n", event_number + 1);
 
+  // If the runtime is too short some particles might not yet have
+  // reached the hypersurface. Warning is printed.
   bool runtime_too_short = false;
-  int below_hypersurface_counter = 0;
   if (particles.size() != 0) {
     for (auto &p : particles) {
       double tau = p.position().tau();
-      if (tau < 0.5) {
+      double t = p.position().x0();
+      double z = p.position().x3();
+      if ((tau < IC_proper_time_) || (fabs(t) < fabs(z))) {
+        // If t < z, tau = sqrt(t^2 - z^2) returns NAN. Those particles are also
+        // below the hypersurface and need further propagation
         runtime_too_short = true;
-        below_hypersurface_counter += 1;
       }
     }
+  }
 
-    // If the runtime is too short some particles might not yet have
-    // reached the hypersurface.
-    if (runtime_too_short) {
-      log.warn("End time might be too small. ",
-               below_hypersurface_counter,
-               " particles have not yet crossed the hypersurface.");
-    }
+  if (runtime_too_short) {
+    log.warn(
+        "End time might be too small. Hypersurface has not yet been crossed "
+        "by ",
+        particles.size(), " particle(s).");
   }
   SMASH_UNUSED(particles);
   SMASH_UNUSED(impact_parameter);
@@ -99,6 +100,16 @@ void ICOutput::at_interaction(const Action &action, const double density) {
                particle.momentum()[1], particle.momentum()[2], rapidity,
                particle.pdgcode().string().c_str(), particle.id(),
                particle.type().charge());
+
+  if (IC_proper_time_ < 0.0) {
+    // First particle that is removed, overwrite negative default
+    IC_proper_time_ =  particle.position().tau();
+  } else {
+    // Verify that all other particles have the same proper time
+    double next_proper_time = particle.position().tau();
+    if (!((next_proper_time - IC_proper_time_) < really_small))
+      throw std::runtime_error("Hypersurface proper time changed during evolution.");
+  }
 }
 
 }  // namespace smash
