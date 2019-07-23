@@ -45,6 +45,7 @@ class Particles;
  * For each particle characteristic there is a separate branch.
  * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum),
  * pdgid - PDG code of particle, that characterizes its sort,
+ * charge - electric charge of the particle,
  * ev - number of event particle encountered in,
  * tcounter - number of output block in a given event,
  * npart - number of particles,
@@ -190,7 +191,7 @@ class RootOutput : public OutputInterface {
   //@{
   /// Buffer for filling TTree. See class documentation for definitions.
   std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z;
-  std::array<int, max_buffer_size_> pdgcode;
+  std::array<int, max_buffer_size_> pdgcode, charge;
   int npart, tcounter, ev, nin, nout;
   double wgt, par_wgt, impact_b;
   bool empty_event_;
