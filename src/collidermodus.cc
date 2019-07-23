@@ -262,7 +262,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   Configuration modus_cfg = modus_config["Collider"];
   // Get the reference frame for the collision calculation.
   if (modus_cfg.has_value({"Calculation_Frame"})) {
-    frame_ = modus_cfg.read({"Calculation_Frame"});
+    frame_ = modus_cfg.take({"Calculation_Frame"});
   }
 
   // Determine whether to allow the first collisions within the same nucleus
