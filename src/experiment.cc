@@ -173,6 +173,11 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle \n
  * \n
+ * - \b Initial_Conditions (Only ASCII format, see \ref IC_output_user_guide_)\n
+ *   \key Proper_Time (double, optional, default = time after which nuclei
+ *   have passed through each other): Proper time at which
+ *   hypersurface is created \n
+ * \n
  * \anchor Thermodynamics
  * - \b Thermodynamics \n
  *   The user can print thermodynamical quantities:
@@ -287,6 +292,16 @@ ExperimentPtr ExperimentBase::create(Configuration config,
          Quantities:    ["rho_eckart", "tmn_landau"]
          Position:    [0.0, 0.0, 0.0]
          Smearing: False
+ \endverbatim
+ * SMASH can further be applied to extract initial conditions for hydrodynamic
+ * simulations. The corresponding output, the "IC output" provides a
+ * hypersurface of constant proper time. If desired, the proper time can be set
+ * manually from the configuration file (in the following example at \f$\tau =
+ * 0.5 \f$ fm). The output can be enabled as follows:
+ *\verbatim
+     Initial_Conditions:
+         Format:    ["ASCII"]
+         Proper_Time: 0.5
  \endverbatim
  */
 

@@ -899,6 +899,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *          quantities, see \ref Thermodynamics.
    *    - Available formats: \ref thermodyn_output_user_guide_,
    *      \ref output_vtk_lattice_
+   * - \b Initial_Conditions  This output provides a hypersurface of constant
+   *                          proper time, see \ref IC_output_user_guide_
+   *   - Available formats: ASCII
    *
    * \n
    * \anchor list_of_output_formats
@@ -929,6 +932,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b "ASCII" - a human-readable text-format table of values
    *   - Used only for "Thermodynamics", see
    * \subpage thermodyn_output_user_guide_
+   * \subpage IC_output_user_guide_
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
