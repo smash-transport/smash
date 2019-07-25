@@ -45,8 +45,8 @@ namespace smash {
  * Every physical quantity is in a separate TBranch.
  * One entry in the \c particles TTree is:
  * \code
- * ev tcounter npart impact_b empty_event pdgcode[npart] t[npart] x[npart]
- * y[npart] z[npart] p0[npart] px[npart] py[npart] pz[npart]
+ * ev tcounter npart impact_b empty_event pdgcode[npart] charge[npart] t[npart]
+ * x[npart] y[npart] z[npart] p0[npart] px[npart] py[npart] pz[npart]
  * \endcode
  * One tree entry is analogous to an OSCAR output block, but the maximal
  * number of particles in one entry is limited to 10000. This is done to limit
@@ -62,6 +62,7 @@ namespace smash {
  * \li \c empty_event gives whether the projectile did not interact with the
  * target
  * \li \c pdgcode is PDG id array
+ * \li \c charge is the electric charge array
  * \li \c t, \c x, \c y, \c z are position arrays
  * \li \c p0, \c px, \c py, \c pz are 4-momenta arrays
  *
@@ -109,6 +110,7 @@ void RootOutput::init_trees() {
     particles_tree_->Branch("tcounter", &tcounter, "tcounter/I");
 
     particles_tree_->Branch("pdgcode", &pdgcode[0], "pdgcode[npart]/I");
+    particles_tree_->Branch("charge", &charge[0], "charge[npart]/I");
 
     particles_tree_->Branch("p0", &p0[0], "p0[npart]/D");
     particles_tree_->Branch("px", &px[0], "px[npart]/D");
@@ -132,6 +134,7 @@ void RootOutput::init_trees() {
     collisions_tree_->Branch("partial_weight", &par_wgt, "partial_weight/D");
 
     collisions_tree_->Branch("pdgcode", &pdgcode[0], "pdgcode[npart]/I");
+    collisions_tree_->Branch("charge", &charge[0], "charge[npart]/I");
 
     collisions_tree_->Branch("p0", &p0[0], "p0[npart]/D");
     collisions_tree_->Branch("px", &px[0], "px[npart]/D");
@@ -231,6 +234,7 @@ void RootOutput::particles_to_tree(const Particles &particles) {
       pz[i] = p.momentum().x3();
 
       pdgcode[i] = p.pdgcode().get_decimal();
+      charge[i] = p.type().charge();
 
       i++;
     }
@@ -272,6 +276,7 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
     pz[i] = p.momentum().x3();
 
     pdgcode[i] = p.pdgcode().get_decimal();
+    charge[i] = p.type().charge();
 
     i++;
   }
@@ -288,6 +293,7 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
     pz[i] = p.momentum().x3();
 
     pdgcode[i] = p.pdgcode().get_decimal();
+    charge[i] = p.type().charge();
 
     i++;
   }
