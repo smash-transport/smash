@@ -99,7 +99,10 @@ ICOutput::ICOutput(const bf::path &path, const std::string &name,
     : OutputInterface(name),
       file_{path / "SMASH_IC.dat", "w"},
       out_par_(out_par) {
-  std::fprintf(file_.get(), "# %s initial conditions: hypersurface of constant proper time\n", VERSION_MAJOR);
+  std::fprintf(
+      file_.get(),
+      "# %s initial conditions: hypersurface of constant proper time\n",
+      VERSION_MAJOR);
   std::fprintf(file_.get(), "# tau x y eta mt px py Rap pdg ID charge \n");
   std::fprintf(file_.get(), "# fm fm fm none GeV GeV GeV none none none e \n");
 }
@@ -180,12 +183,13 @@ void ICOutput::at_interaction(const Action &action, const double density) {
 
   if (IC_proper_time_ < 0.0) {
     // First particle that is removed, overwrite negative default
-    IC_proper_time_ =  particle.position().tau();
+    IC_proper_time_ = particle.position().tau();
   } else {
     // Verify that all other particles have the same proper time
     double next_proper_time = particle.position().tau();
     if (!((next_proper_time - IC_proper_time_) < really_small))
-      throw std::runtime_error("Hypersurface proper time changed during evolution.");
+      throw std::runtime_error(
+          "Hypersurface proper time changed during evolution.");
   }
 }
 

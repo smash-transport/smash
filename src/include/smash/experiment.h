@@ -529,6 +529,18 @@ class Experiment : public ExperimentBase {
    */
   uint64_t total_pauli_blocked_ = 0;
 
+  /**
+   *  Total number of particles removed from the evolution in
+   *  hypersurface crossing actions.
+   */
+  uint64_t total_hypersurface_crossing_actions_ = 0;
+
+  /**
+   * Total energy removed from the system in hypersurface crossing actions.
+   *
+   */
+  double total_energy_removed_ = 0.0;
+
   /// random seed for the next event.
   int64_t seed_ = -1;
 
@@ -1319,6 +1331,8 @@ void Experiment<Modus>::initialize_new_event() {
   previous_interactions_total_ = 0;
   total_pauli_blocked_ = 0;
   projectile_target_interact_ = false;
+  total_hypersurface_crossing_actions_ = 0;
+  total_energy_removed_ = 0.0;
   // Print output headers
   log.info() << hline;
   log.info() << "Time [fm]   Ediff [GeV]    Scatt.|Decays   "
@@ -1372,6 +1386,10 @@ bool Experiment<Modus>::perform_action(
   interactions_total_++;
   if (action.get_type() == ProcessType::Wall) {
     wall_actions_total_++;
+  }
+  if (action.get_type() == ProcessType::HyperSurfaceCrossing) {
+    total_hypersurface_crossing_actions_++;
+    total_energy_removed_ += action.incoming_particles()[0].momentum().x0();
   }
   // Calculate Eckart rest frame density at the interaction point
   double rho = 0.0;
@@ -1848,10 +1866,33 @@ void Experiment<Modus>::final_output(const int evt_num) {
     log.info() << format_measurements(particles_, interactions_this_interval,
                                       conserved_initial_, time_start_,
                                       parameters_.outputclock.current_time());
-    log.info() << hline;
-    log.info() << "Time real: " << SystemClock::now() - time_start_;
-    log.info() << "Final interaction number: "
-               << interactions_total_ - wall_actions_total_;
+    if (IC_output_switch_ && (particles_.size() == 0)) {
+      // Verify there is no more energy in the system if all particles were
+      // removed when crossing the hypersurface
+      const double remaining_energy =
+          conserved_initial_.momentum().x0() - total_energy_removed_;
+      if (remaining_energy > really_small) {
+        throw std::runtime_error(
+            "There is remaining energy in the system although all particles "
+            "were removed.\n"
+            "E_remain = " +
+            std::to_string(remaining_energy) + " [GeV]");
+      } else {
+        log.info() << hline;
+        log.info() << "Time real: " << SystemClock::now() - time_start_;
+        log.info() << "Interactions before reaching hypersurface: "
+                   << interactions_total_ - wall_actions_total_ -
+                          total_hypersurface_crossing_actions_;
+        log.info() << "Total number of particles removed on hypersurface: "
+                   << total_hypersurface_crossing_actions_;
+      }
+    } else {
+      log.info() << hline;
+      log.info() << "Time real: " << SystemClock::now() - time_start_;
+      log.info() << "Final interaction number: "
+                 << interactions_total_ - wall_actions_total_;
+    }
+
     // Check if there are unformed particles
     int unformed_particles_count = 0;
     for (const auto &particle : particles_) {
