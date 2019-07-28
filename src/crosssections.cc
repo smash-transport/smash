@@ -1914,8 +1914,7 @@ CollisionBranchList CrossSections::ypi_xx(ReactionsBitSet included_2to2) const {
   return process_list;
 }
 
-CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
-                                          included_2to2) const {
+CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet included_2to2) const {
   const auto& log = logger<LogArea::ScatterAction>();
   CollisionBranchList process_list;
   const double sqrts = sqrt_s_;
@@ -1976,11 +1975,10 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
   }
 
   // pi d -> pi d' (effectively pi d -> pi p n)  AND reverse, pi d' -> pi d
-  bool is_pid_or_pidprime = 
-      ((type_a.is_deuteron() || type_a.is_dprime()) &&
-       type_b.pdgcode().is_pion()) ||
-      ((type_b.is_deuteron() || type_b.is_dprime()) &&
-       type_a.pdgcode().is_pion());
+  bool is_pid_or_pidprime = ((type_a.is_deuteron() || type_a.is_dprime()) &&
+                             type_b.pdgcode().is_pion()) ||
+                            ((type_b.is_deuteron() || type_b.is_dprime()) &&
+                             type_a.pdgcode().is_pion());
   if (is_pid_or_pidprime &&
       included_2to2[IncludedReactions::PiDeuteron_to_pidprime] == 1) {
     const ParticleType& type_pi = type_a.pdgcode().is_pion() ? type_a : type_b;
@@ -2030,8 +2028,7 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
   return process_list;
 }
 
-CollisionBranchList CrossSections::dn_xx(
-    ReactionsBitSet included_2to2) const {
+CollisionBranchList CrossSections::dn_xx(ReactionsBitSet included_2to2) const {
   const ParticleType& type_a = incoming_particles_[0].type();
   const ParticleType& type_b = incoming_particles_[1].type();
   const ParticleType& type_N = type_a.is_nucleon() ? type_a : type_b;
