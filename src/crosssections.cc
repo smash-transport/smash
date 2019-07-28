@@ -906,7 +906,8 @@ CollisionBranchList CrossSections::nn_xx(ReactionsBitSet included_2to2) const {
   ParticleTypePtr pi0 = ParticleType::try_find(pdg::pi_z);
   ParticleTypePtr pip = ParticleType::try_find(pdg::pi_p);
   // Make sure all the necessary particle types are found
-  if (deutron && antideutron && pim && pi0 && pip) {
+  if (deutron && antideutron && pim && pi0 && pip &&
+      included_2to2[IncludedReactions::DeuteronPi_to_NN] == 1) {
     const ParticleTypePtrList deutron_list = {deutron};
     const ParticleTypePtrList antideutron_list = {antideutron};
     const ParticleTypePtrList pion_list = {pim, pi0, pip};
@@ -1914,7 +1915,7 @@ CollisionBranchList CrossSections::ypi_xx(ReactionsBitSet included_2to2) const {
 }
 
 CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
-                                          /*included_2to2*/) const {
+                                          included_2to2) const {
   const auto& log = logger<LogArea::ScatterAction>();
   CollisionBranchList process_list;
   const double sqrts = sqrt_s_;
@@ -1922,8 +1923,9 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
   const ParticleType& type_b = incoming_particles_[1].type();
 
   // pi d -> N N
-  if ((type_a.is_deuteron() && type_b.pdgcode().is_pion()) ||
-      (type_b.is_deuteron() && type_a.pdgcode().is_pion())) {
+  bool is_pid = (type_a.is_deuteron() && type_b.pdgcode().is_pion()) ||
+                (type_b.is_deuteron() && type_a.pdgcode().is_pion());
+  if (is_pid && included_2to2[IncludedReactions::DeuteronPi_to_NN] == 1) {
     const int baryon_number = type_a.baryon_number() + type_b.baryon_number();
     ParticleTypePtrList nuc = (baryon_number > 0)
                                   ? ParticleType::list_nucleons()
@@ -1974,10 +1976,13 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
   }
 
   // pi d -> pi d' (effectively pi d -> pi p n)  AND reverse, pi d' -> pi d
-  if (((type_a.is_deuteron() || type_a.is_dprime()) &&
+  bool is_pid_or_pidprime = 
+      ((type_a.is_deuteron() || type_a.is_dprime()) &&
        type_b.pdgcode().is_pion()) ||
       ((type_b.is_deuteron() || type_b.is_dprime()) &&
-       type_a.pdgcode().is_pion())) {
+       type_a.pdgcode().is_pion());
+  if (is_pid_or_pidprime &&
+      included_2to2[IncludedReactions::PiDeuteron_to_pidprime] == 1) {
     const ParticleType& type_pi = type_a.pdgcode().is_pion() ? type_a : type_b;
     const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
     ParticleTypePtrList nuclei = ParticleType::list_light_nuclei();
@@ -2026,12 +2031,15 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet
 }
 
 CollisionBranchList CrossSections::dn_xx(
-    ReactionsBitSet /*included_2to2*/) const {
+    ReactionsBitSet included_2to2) const {
   const ParticleType& type_a = incoming_particles_[0].type();
   const ParticleType& type_b = incoming_particles_[1].type();
   const ParticleType& type_N = type_a.is_nucleon() ? type_a : type_b;
   const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
   CollisionBranchList process_list;
+  if (included_2to2[IncludedReactions::NDeuteron_to_Ndprime] == 0) {
+    return process_list;
+  }
   ParticleTypePtrList nuclei = ParticleType::list_light_nuclei();
   const double s = sqrt_s_ * sqrt_s_;
   const double sqrts = sqrt_s_;

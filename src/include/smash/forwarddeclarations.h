@@ -206,10 +206,13 @@ enum IncludedReactions {
   KN_to_KDelta = 4,
   Strangeness_exchange = 5,
   NNbar = 6,
+  DeuteronPi_to_NN = 7,
+  PiDeuteron_to_pidprime = 8,
+  NDeuteron_to_Ndprime = 9,
 };
 
 /// Container for the 2 to 2 reactions in the code
-typedef std::bitset<7> ReactionsBitSet;
+typedef std::bitset<10> ReactionsBitSet;
 
 /**
  * Defines the algorithm used for the forced thermalization.

@@ -645,15 +645,25 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * optional, default = ["All"]) \n
  * List that contains all possible 2 <--> 2 process categories. Each process of
  * the listed category can be performed within the simulation. Possible
- * categories are: \li \key "Elastic" - elastic binary scatterings \li \key
- * "NN_to_NR" - nucleon + nucleon <--> nucleon + resonance \li \key "NN_to_DR" -
- * nucleon + nucleon <--> delta + resonance \li \key "KN_to_KN" - kaon + nucleon
- * <--> kaon + nucleon \li \key "KN_to_KDelta" - kaon + nucleon <--> kaon + dela
+ * categories are:
+ * \li \key "Elastic" - elastic binary scatterings
+ * \li \key "NN_to_NR" - nucleon + nucleon <--> nucleon + resonance
+ * \li \key "NN_to_DR" - nucleon + nucleon <--> delta + resonance
+ * \li \key "KN_to_KN" - kaon + nucleon <--> kaon + nucleon
+ * \li \key "KN_to_KDelta" - kaon + nucleon <--> kaon + delta
  * \li \key "Strangeness_exchange" - processes with strangeness exchange
  * \li \key "NNbar" - annihilation processes, when NNbar_treatment is set to
  *  resonances; this is superseded if NNbar_treatment is set to anything else
+ * \li \key "DeuteronPi_to_NN" - deuteron + pion <--> nucleon + nucleon and
+ *  its CPT-conjugate
+ * \li \key "PiDeuteron_to_pidprime" - deuteron + pion <--> d' + pion
+ * \li \key "NDeuteron_to_Ndprime" - deuteron + (anti-)nucleon <-->
+ *   d' + (anti-)nucleon, and their CPT-conjugates
  * \li \key "All" - include all binary processes, no necessity to list each
  * single category
+ *
+ * Detailed balance is preserved by these reaction switches: if a forward
+ * reaction is off then the reverse is automatically off too.
  *
  * \key Force_Decays_At_End (bool, optional, default = \key true): \n
  * \li \key true - Force all resonances to decay after last timestep \n
