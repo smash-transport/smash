@@ -498,7 +498,7 @@ class Configuration {
           s.set(IncludedReactions::Strangeness_exchange);
         } else if (x == "NNbar") {
           s.set(IncludedReactions::NNbar);
-        } else if (x == "DeuteronPi_to_NN"){
+        } else if (x == "DeuteronPi_to_NN") {
           s.set(IncludedReactions::DeuteronPi_to_NN);
         } else if (x == "PiDeuteron_to_pidprime") {
           s.set(IncludedReactions::PiDeuteron_to_pidprime);
