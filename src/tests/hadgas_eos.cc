@@ -52,7 +52,7 @@ TEST(solve_EoS_substitute) {
   const double e = HadronGasEos::energy_density(T, mub, mus);
   const double nb = HadronGasEos::net_baryon_density(T, mub, mus);
   const double ns = HadronGasEos::net_strange_density(T, mub, mus);
-  HadronGasEos eos = HadronGasEos(false);
+  HadronGasEos eos = HadronGasEos(false, false);
   const std::array<double, 3> sol = eos.solve_eos(e, nb, ns);
   COMPARE_ABSOLUTE_ERROR(sol[0], T, 1.e-4);
   COMPARE_ABSOLUTE_ERROR(sol[1], mub, 1.e-4);
@@ -61,7 +61,7 @@ TEST(solve_EoS_substitute) {
 
 TEST(EoS_table) {
   // make a small table of EoS
-  HadronGasEos eos = HadronGasEos(false);
+  HadronGasEos eos = HadronGasEos(false, false);
   EosTable table = EosTable(0.1, 0.05, 5, 5);
   table.compile_table(eos, "small_test_table_fakegas_eos.dat");
   EosTable::table_element x;
@@ -82,7 +82,7 @@ TEST(make_test_table) {
   Test::create_actual_particletypes();
   const double ns = 0.0;
   const double nb = 0.3;
-  HadronGasEos eos = HadronGasEos(false);
+  HadronGasEos eos = HadronGasEos(false, false);
   for (int ie = 0; ie < 1000; ie++) {
     const double e = nb + 0.001 + 0.001 * ie;
     const std::array<double, 3> sol = eos.solve_eos(e, nb, ns);

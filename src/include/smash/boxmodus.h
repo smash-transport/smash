@@ -146,6 +146,12 @@ class BoxModus : public ModusDefault {
    */
   const double mus_;
   /**
+   * In case of thermal initialization: true -- account for resonance
+   * spectral functions, while computing multiplicities and sampling masses,
+   * false -- simply use pole masses.
+   */
+  const bool account_for_resonance_widths_;
+  /**
    * Particle multiplicities at initialization;
    * required if use_thermal_ is false
    */

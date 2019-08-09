@@ -68,6 +68,11 @@ namespace smash {
  * Strangeness chemical potential \f$ \mu_S \f$ only used if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
+ * \key Account_Resonance_Widths (bool, optional, default = false): \n
+ * In case of thermal initialization: true -- account for resonance
+ * spectral functions, while computing multiplicities and sampling masses,
+ * false -- simply use pole masses.
+ *
  * \key Initial_Condition (string, optional, default = "thermal momenta") \n
  * Initial distribution to use for momenta of particles. Mainly used in the
  * expanding universe scenario, options are:
@@ -165,6 +170,8 @@ SphereModus::SphereModus(Configuration modus_config,
           modus_config.take({"Sphere", "Use_Thermal_Multiplicities"}, false)),
       mub_(modus_config.take({"Sphere", "Baryon_Chemical_Potential"}, 0.)),
       mus_(modus_config.take({"Sphere", "Strange_Chemical_Potential"}, 0.)),
+      account_for_resonance_widths_(
+          modus_config.take({"Sphere", "Account_Resonance_Widths"}, false)),
       init_multipl_(use_thermal_
                         ? std::map<PdgCode, int>()
                         : modus_config.take({"Sphere", "Init_Multiplicities"})
@@ -211,7 +218,8 @@ double SphereModus::initial_conditions(Particles *particles,
     if (average_multipl_.empty()) {
       for (const ParticleType &ptype : ParticleType::list_all()) {
         if (HadronGasEos::is_eos_particle(ptype)) {
-          const double n = HadronGasEos::partial_density(ptype, T, mub_, mus_);
+          const double n = HadronGasEos::partial_density(
+              ptype, T, mub_, mus_, account_for_resonance_widths_);
           average_multipl_[ptype.pdgcode()] = n * V * parameters.testparticles;
         }
       }
@@ -253,7 +261,9 @@ double SphereModus::initial_conditions(Particles *particles,
         break;
       case (SphereInitialCondition::ThermalMomenta):
       default:
-        mass = HadronGasEos::sample_mass_thermal(data.type(), 1.0 / T);
+        mass = (!account_for_resonance_widths_)
+                   ? data.type().mass()
+                   : HadronGasEos::sample_mass_thermal(data.type(), 1.0 / T);
         momentum_radial = sample_momenta_from_thermal(T, mass);
         break;
     }
