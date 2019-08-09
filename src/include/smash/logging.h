@@ -106,6 +106,8 @@ class Configuration;
      Lattice: INFO
      GrandcanThermalizer: INFO
      CrossSections: INFO
+     Output: INFO
+     HadronGasEos: INFO
  \endverbatim
  */
 
@@ -196,6 +198,7 @@ DECLARE_LOGAREA(24, Pythia);
 DECLARE_LOGAREA(25, GrandcanThermalizer);
 DECLARE_LOGAREA(26, CrossSections);
 DECLARE_LOGAREA(27, Output);
+DECLARE_LOGAREA(28, HadronGasEos);
 
 /**
  * This type collects all existing log areas so they will be created with the
@@ -206,7 +209,7 @@ using AreaTuple =
                ParticleType, FindScatter, Clock, DecayModes, Resonances,
                ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
                Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling, Pythia,
-               GrandcanThermalizer, CrossSections, Output>;
+               GrandcanThermalizer, CrossSections, Output, HadronGasEos>;
 }  // namespace LogArea
 
 /**
