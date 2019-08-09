@@ -30,8 +30,8 @@ TEST(partial_density) {
   const double T = 0.15, mub = 0.0, mus = 0.0;
   constexpr bool account_for_spectral_function = true;
   const double dpip = HadronGasEos::partial_density(pip, T, mub, mus);
-  const double drhop = HadronGasEos::partial_density(rhop, T, mub, mus,
-                                                account_for_spectral_function);
+  const double drhop = HadronGasEos::partial_density(
+      rhop, T, mub, mus, account_for_spectral_function);
   COMPARE_ABSOLUTE_ERROR(dpip, 0.0372145, 1.e-6);
   COMPARE(rhop.mass(), 0.776);
   COMPARE(rhop.width_at_pole(), 0.149);
