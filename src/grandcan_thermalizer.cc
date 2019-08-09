@@ -178,11 +178,11 @@ void GrandCanThermalizer::renormalize_momenta(
   // Renorm. momenta by factor (1+a) to get the right energy, binary search
   const double tolerance = really_small;
   double a, a_min, a_max, er;
-  const int max_iter = 50;
+  const int max_iter = 100;
   int iter = 0;
   if (E_expected >= E) {
     a_min = 0.0;
-    a_max = 1.0;
+    a_max = 10.0;
   } else {
     a_min = -1.0;
     a_max = 0.0;
