@@ -68,7 +68,7 @@ namespace smash {
  * Strangeness chemical potential \f$ \mu_S \f$ only used if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
- * \key Account_Resonance_Widths (bool, optional, default = false): \n
+ * \key Account_Resonance_Widths (bool, optional, default = true): \n
  * In case of thermal initialization: true -- account for resonance
  * spectral functions, while computing multiplicities and sampling masses,
  * false -- simply use pole masses.
@@ -171,7 +171,7 @@ SphereModus::SphereModus(Configuration modus_config,
       mub_(modus_config.take({"Sphere", "Baryon_Chemical_Potential"}, 0.)),
       mus_(modus_config.take({"Sphere", "Strange_Chemical_Potential"}, 0.)),
       account_for_resonance_widths_(
-          modus_config.take({"Sphere", "Account_Resonance_Widths"}, false)),
+          modus_config.take({"Sphere", "Account_Resonance_Widths"}, true)),
       init_multipl_(use_thermal_
                         ? std::map<PdgCode, int>()
                         : modus_config.take({"Sphere", "Init_Multiplicities"})
