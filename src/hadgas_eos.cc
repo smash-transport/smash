@@ -88,7 +88,7 @@ finish_consistency_check:
     std::cout << "Compiling an EoS table..." << std::endl;
     const double ns = 0.0;
     for (size_t ie = 0; ie < n_e_; ie++) {
-      std::cout << ie << "/" << n_e_ << std::endl;
+      std::cout << ie << "/" << n_e_ << "\r" << std::flush;
       const double e = de_ * ie;
       for (size_t inb = 0; inb < n_nb_; inb++) {
         const double nb = dnb_ * inb;
