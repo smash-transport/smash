@@ -160,6 +160,9 @@ void usage(const int rc, const std::string &progname) {
       "  -f, --force             force overwriting files in the output "
       "directory"
       "\n"
+      "  -x, --dump_iSS          Dump particle table in iSS format\n"
+      "                          This format is used in MUSIC and CLVisc\n"
+      "                          relativistic hydro codes\n"
       "  -v, --version\n\n");
   std::exit(rc);
 }
@@ -404,6 +407,7 @@ int main(int argc, char *argv[]) {
       {"resonance", required_argument, 0, 'r'},
       {"cross-sections", required_argument, 0, 's'},
       {"cross-sections-fs", required_argument, 0, 'S'},
+      {"dump-iSS", no_argument, 0, 'x'},
       {"version", no_argument, 0, 'v'},
       {nullptr, 0, 0, 0}};
 
@@ -420,12 +424,13 @@ int main(int argc, char *argv[]) {
     bool resonance_dump_activated = false;
     bool cross_section_dump_activated = false;
     bool final_state_cross_sections = false;
+    bool particles_dump_iSS_format = false;
 
     // parse command-line arguments
     int opt;
     bool suppress_disclaimer = false;
-    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:v", longopts,
-                              nullptr)) != -1) {
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xv",
+                              longopts, nullptr)) != -1) {
       switch (opt) {
         case 'c':
           extra_config.emplace_back(optarg);
@@ -470,6 +475,10 @@ int main(int argc, char *argv[]) {
           cross_section_dump_activated = true;
           cs_string = optarg;
           suppress_disclaimer = true;
+          break;
+        case 'x':
+          particles_dump_iSS_format = true;
+	  suppress_disclaimer = true;
           break;
         case 'v':
           std::printf(
@@ -553,6 +562,46 @@ int main(int argc, char *argv[]) {
       check_for_unused_config_values(configuration);
 
       scat_finder.dump_reactions();
+      std::exit(EXIT_SUCCESS);
+    }
+    if (particles_dump_iSS_format) {
+      for (const auto &ptype : ParticleType::list_all()) {
+        if (ptype.pdgcode().is_lepton() || ptype.baryon_number() < 0) {
+          continue;
+        }
+        const auto &decay_modes = ptype.decay_modes();
+        const auto &modelist = decay_modes.decay_mode_list();
+        int ndecays = ptype.is_stable() ? 1 : modelist.size();
+        printf("%13i %s %10.5f %10.5f %5i %5i %5i %5i %5i %5i %5i %5i\n",
+               ptype.pdgcode().get_decimal(),
+               smash::utf8::fill_left(ptype.name(), 12, ' ').c_str(),
+               ptype.mass(),
+               ptype.width_at_pole(),
+               ptype.pdgcode().spin_degeneracy(),
+               ptype.baryon_number(),
+               ptype.strangeness(),
+               ptype.pdgcode().charmness(),
+               ptype.pdgcode().bottomness(),
+               ptype.isospin() + 1,
+               ptype.charge(),
+               ndecays);
+        if (!ptype.is_stable()) {
+          for (const auto &decay : modelist) {
+            auto ptypes = decay->particle_types();
+            printf("%13i %13i %20.5f %13i %13i %13i %13i %13i\n",
+                   ptype.pdgcode().get_decimal(),
+                   2,
+                   decay->weight(),
+                   ptypes[0]->pdgcode().get_decimal(),
+                   ptypes[1]->pdgcode().get_decimal(), 0, 0, 0);
+          }
+        } else {
+          printf("%13i %13i %20.5f %13i %13i %13i %13i %13i\n",
+                   ptype.pdgcode().get_decimal(), 1,
+                   1.0, ptype.pdgcode().get_decimal(),
+                   0, 0, 0, 0);
+        }
+      }
       std::exit(EXIT_SUCCESS);
     }
     if (resonance_dump_activated) {
