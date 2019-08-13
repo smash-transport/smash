@@ -429,8 +429,8 @@ int main(int argc, char *argv[]) {
     // parse command-line arguments
     int opt;
     bool suppress_disclaimer = false;
-    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xv",
-                              longopts, nullptr)) != -1) {
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xv", longopts,
+                              nullptr)) != -1) {
       switch (opt) {
         case 'c':
           extra_config.emplace_back(optarg);
@@ -478,7 +478,7 @@ int main(int argc, char *argv[]) {
           break;
         case 'x':
           particles_dump_iSS_format = true;
-	  suppress_disclaimer = true;
+          suppress_disclaimer = true;
           break;
         case 'v':
           std::printf(
@@ -575,31 +575,23 @@ int main(int argc, char *argv[]) {
         printf("%13i %s %10.5f %10.5f %5i %5i %5i %5i %5i %5i %5i %5i\n",
                ptype.pdgcode().get_decimal(),
                smash::utf8::fill_left(ptype.name(), 12, ' ').c_str(),
-               ptype.mass(),
-               ptype.width_at_pole(),
-               ptype.pdgcode().spin_degeneracy(),
-               ptype.baryon_number(),
-               ptype.strangeness(),
-               ptype.pdgcode().charmness(),
-               ptype.pdgcode().bottomness(),
-               ptype.isospin() + 1,
-               ptype.charge(),
-               ndecays);
+               ptype.mass(), ptype.width_at_pole(),
+               ptype.pdgcode().spin_degeneracy(), ptype.baryon_number(),
+               ptype.strangeness(), ptype.pdgcode().charmness(),
+               ptype.pdgcode().bottomness(), ptype.isospin() + 1,
+               ptype.charge(), ndecays);
         if (!ptype.is_stable()) {
           for (const auto &decay : modelist) {
             auto ptypes = decay->particle_types();
             printf("%13i %13i %20.5f %13i %13i %13i %13i %13i\n",
-                   ptype.pdgcode().get_decimal(),
-                   2,
-                   decay->weight(),
+                   ptype.pdgcode().get_decimal(), 2, decay->weight(),
                    ptypes[0]->pdgcode().get_decimal(),
                    ptypes[1]->pdgcode().get_decimal(), 0, 0, 0);
           }
         } else {
           printf("%13i %13i %20.5f %13i %13i %13i %13i %13i\n",
-                   ptype.pdgcode().get_decimal(), 1,
-                   1.0, ptype.pdgcode().get_decimal(),
-                   0, 0, 0, 0);
+                 ptype.pdgcode().get_decimal(), 1, 1.0,
+                 ptype.pdgcode().get_decimal(), 0, 0, 0, 0);
         }
       }
       std::exit(EXIT_SUCCESS);
