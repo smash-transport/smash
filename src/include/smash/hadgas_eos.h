@@ -111,7 +111,23 @@ class EosTable {
  */
 class HadronGasEos {
  public:
-  /// Constructor of HadronGasEos
+  /**
+   *  Constructor of HadronGasEos
+   *  \param[in] tabulate Whether the equation of state should be tabulated
+   *             Tabulation takes time once (typically around 5 minutes), but
+   *             makes the further usage of the class much faster. Tabulated
+   *             values are saved in a file and loaded at the next run.
+   *  \param[in] account_for_widths Whether equation of state should account
+   *             for resonance spectral functions. Normally one wants to do it,
+   *             if HadronGasEos is used for density calculations,
+   *             for example in the box initialization. However, it is not
+   *             recommended to account for spectral functions if EoS is
+   *             tabulated (tabulate = true), because this makes tabulation
+   *             incredibly slow. Therefore, for HadronGasEos to be used
+   *             in thermalizer, this option has to be false. Also note that
+   *             presently width account is not implemented for energy density
+   *             calculation.
+   */
   HadronGasEos(bool tabulate, bool account_for_widths);
   ~HadronGasEos();
 
