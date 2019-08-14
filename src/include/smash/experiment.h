@@ -654,7 +654,7 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * \li \key "Strangeness_exchange" - processes with strangeness exchange
  * \li \key "NNbar" - annihilation processes, when NNbar_treatment is set to
  *  resonances; this is superseded if NNbar_treatment is set to anything else
- * \li \key "DeuteronPi_to_NN" - deuteron + pion <--> nucleon + nucleon and
+ * \li \key "PiDeuteron_to_NN" - deuteron + pion <--> nucleon + nucleon and
  *  its CPT-conjugate
  * \li \key "PiDeuteron_to_pidprime" - deuteron + pion <--> d' + pion
  * \li \key "NDeuteron_to_Ndprime" - deuteron + (anti-)nucleon <-->

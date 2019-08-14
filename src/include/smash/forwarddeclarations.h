@@ -206,7 +206,7 @@ enum IncludedReactions {
   KN_to_KDelta = 4,
   Strangeness_exchange = 5,
   NNbar = 6,
-  DeuteronPi_to_NN = 7,
+  PiDeuteron_to_NN = 7,
   PiDeuteron_to_pidprime = 8,
   NDeuteron_to_Ndprime = 9,
 };

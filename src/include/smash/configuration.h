@@ -498,8 +498,8 @@ class Configuration {
           s.set(IncludedReactions::Strangeness_exchange);
         } else if (x == "NNbar") {
           s.set(IncludedReactions::NNbar);
-        } else if (x == "DeuteronPi_to_NN"){
-          s.set(IncludedReactions::DeuteronPi_to_NN);
+        } else if (x == "PiDeuteron_to_NN"){
+          s.set(IncludedReactions::PiDeuteron_to_NN);
         } else if (x == "PiDeuteron_to_pidprime") {
           s.set(IncludedReactions::PiDeuteron_to_pidprime);
         } else if (x == "NDeuteron_to_Ndprime") {
@@ -508,7 +508,7 @@ class Configuration {
           throw IncorrectTypeInAssignment(
               "The value for key \"" + std::string(key_) +
               "\" should be \"All\", \"Elastic\", \"NN_to_NR\", \"NN_to_DR\","
-              "\"KN_to_KN\", \"KN_to_KDelta\", \"DeuteronPi_to_NN\", "
+              "\"KN_to_KN\", \"KN_to_KDelta\", \"PiDeuteron_to_NN\", "
               "\"PiDeuteron_to_pidprime\", \"NDeuteron_to_Ndprime\", "
               "\"Strangeness_exchange\" or "
               "\"NNbar\", or any combination of these.");

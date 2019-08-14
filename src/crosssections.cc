@@ -907,7 +907,7 @@ CollisionBranchList CrossSections::nn_xx(ReactionsBitSet included_2to2) const {
   ParticleTypePtr pip = ParticleType::try_find(pdg::pi_p);
   // Make sure all the necessary particle types are found
   if (deutron && antideutron && pim && pi0 && pip &&
-      included_2to2[IncludedReactions::DeuteronPi_to_NN] == 1) {
+      included_2to2[IncludedReactions::PiDeuteron_to_NN] == 1) {
     const ParticleTypePtrList deutron_list = {deutron};
     const ParticleTypePtrList antideutron_list = {antideutron};
     const ParticleTypePtrList pion_list = {pim, pi0, pip};
@@ -1924,7 +1924,7 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet included_2to2) const {
   // pi d -> N N
   bool is_pid = (type_a.is_deuteron() && type_b.pdgcode().is_pion()) ||
                 (type_b.is_deuteron() && type_a.pdgcode().is_pion());
-  if (is_pid && included_2to2[IncludedReactions::DeuteronPi_to_NN] == 1) {
+  if (is_pid && included_2to2[IncludedReactions::PiDeuteron_to_NN] == 1) {
     const int baryon_number = type_a.baryon_number() + type_b.baryon_number();
     ParticleTypePtrList nuc = (baryon_number > 0)
                                   ? ParticleType::list_nucleons()
