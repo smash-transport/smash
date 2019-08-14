@@ -615,11 +615,13 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  *
  * \key Time_Step_Mode (string, optional, default = Fixed): \n
  * The mode of time stepping. Possible values: \n
- * \li \key None - No time steps and no collision-finding grid are used.
- * Cannot be used with potentials. \n
- * \li \key Fixed - Fixed-sized time steps at
- * which collision-finding grid is used. More efficient for systems with many
- * particles. \n
+ * \li \key None - Delta_Time is set to the End_Time.  Cannot be used with
+ * potentials. \n
+ * \li \key Fixed - Fixed-sized time steps at which collision-finding grid is
+ * created.  More efficient for systems with many particles. The Delta_Time is
+ * provided by user.\n
+ *
+ * For Delta_Time explanation see \ref input_general_.
  *
  * \key Metric_Type (string, optional, default = NoExpansion): \n
  * Select which kind of expansion the metric should have. This needs only be

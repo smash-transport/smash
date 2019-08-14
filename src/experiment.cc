@@ -67,8 +67,20 @@ ExperimentPtr ExperimentBase::create(Configuration config,
 /*!\Userguide
  * \page input_general_ General
  * \key Delta_Time (double, optional, default: 1.0): \n
- * Time step for the calculation, in fm/c.
- * Not required for timestepless mode.
+ * Fixed time step at which the collision-finding grid is recreated, and, if
+ * potentials are on, momenta are updated according to the equations of motion.
+ * The collision-finding grid finds all the collisions from time
+ * t_{beginning_of_timestep} until time t_{beginning_of_timestep} + Delta_Time,
+ * and puts them into a vector. The collisions are then sorted in order of
+ * occurrence, and particles are propagated from collision to collision. After
+ * each performed collision, additional collisions are found for outgoing
+ * particles and merged into the sorted vector.
+ *
+ * If potentials are on, the Delta_Time should be small enough, typically
+ * around 0.1 fm/c. However, if potentials are off, it can be arbitrarily
+ * large. In this case it only influences the runtime, but not physics.
+ * If Time_Step_Mode = None is chosen, then the user-provided value of
+ * Delta_Time is ignored and Delta_Time is set to the End_Time.
  *
  * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particle should be simulated.
