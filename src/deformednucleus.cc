@@ -149,30 +149,39 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
   // Set the deformation parameters
   // reference for U, Pb, Au, Cu: \iref{Moller:1993ed}
   // reference for Zr and Ru: \iref{Schenke:2019ruo}
-  switch (Nucleus::number_of_particles()) {
+  int A = Nucleus::number_of_particles();
+  int Z = Nucleus::number_of_protons();
+  switch (A) {
     case 238:  // Uranium
-      set_beta_2(0.28);
-      set_beta_4(0.093);
-      break;
+      if (Z == 92) {
+        set_beta_2(0.28);
+        set_beta_4(0.093);
+        break;
+      }
     case 208:  // Lead
-      set_beta_2(0.0);
-      set_beta_4(0.0);
-      break;
-    case 197:  // Gold
-      set_beta_2(-0.131);
-      set_beta_4(-0.031);
-      break;
-    case 63:  // Copper
-      set_beta_2(0.162);
-      set_beta_4(-0.006);
-      break;
-    case 96: {
-      size_t n_protons = Nucleus::number_of_protons();
-      if (n_protons == 40) {  // Zirconium
+      if (Z == 82) {
         set_beta_2(0.0);
         set_beta_4(0.0);
         break;
-      } else if (n_protons == 44) {  // Ruthenium
+      }
+    case 197:  // Gold
+      if (Z == 79) {
+        set_beta_2(-0.131);
+        set_beta_4(-0.031);
+        break;
+      }
+    case 63:  // Copper
+      if (Z == 29) {
+        set_beta_2(0.162);
+        set_beta_4(-0.006);
+        break;
+      }
+    case 96: {
+      if (Z == 40) {  // Zirconium
+        set_beta_2(0.0);
+        set_beta_4(0.0);
+        break;
+      } else if (Z == 44) {  // Ruthenium
         set_beta_2(0.158);
         set_beta_4(0.0);
         break;
