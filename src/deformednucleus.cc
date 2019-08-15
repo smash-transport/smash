@@ -153,7 +153,7 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
   bool listed = 0;
   std::map<int, std::string> A_map = {
       {238, "Uranium"}, {208, "Lead"}, {197, "Gold"}, {63, "Copper"}};
-  std::map<int, std::string> Z_map = {
+  std::map<std::string, std::string> Z_map = {
       {"Uranium", "92"}, {"Lead", "82"}, {"Gold", "79"}, {"Copper", "29"}};
   int A = Nucleus::number_of_particles();
   int Z = Nucleus::number_of_protons();
