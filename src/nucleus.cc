@@ -326,7 +326,7 @@ void Nucleus::set_parameters_automatic() {
         set_saturation_density(0.1686);
         break;
       }
-    case 96:
+    case 96: {
       if (Z == 40) {  // Zirconium
         // Default values.
         set_diffusiveness(0.46);
