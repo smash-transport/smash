@@ -8,6 +8,7 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <map>
 
 #include "smash/angles.h"
 #include "smash/configuration.h"
