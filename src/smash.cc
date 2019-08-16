@@ -565,33 +565,42 @@ int main(int argc, char *argv[]) {
       std::exit(EXIT_SUCCESS);
     }
     if (particles_dump_iSS_format) {
+      ParticleTypePtrList list;
+      list.clear();
       for (const auto &ptype : ParticleType::list_all()) {
-        if (ptype.pdgcode().is_lepton() || ptype.baryon_number() < 0) {
+        list.push_back(&ptype);
+      }
+      std::sort(list.begin(), list.end(),
+                [](ParticleTypePtr a, ParticleTypePtr b) {
+                  return a->mass() < b->mass();
+                });
+      for (const ParticleTypePtr ptype : list) {
+        if (ptype->pdgcode().is_lepton() || ptype->baryon_number() < 0) {
           continue;
         }
-        const auto &decay_modes = ptype.decay_modes();
+        const auto &decay_modes = ptype->decay_modes();
         const auto &modelist = decay_modes.decay_mode_list();
-        int ndecays = ptype.is_stable() ? 1 : modelist.size();
+        int ndecays = ptype->is_stable() ? 1 : modelist.size();
         printf("%13i %s %10.5f %10.5f %5i %5i %5i %5i %5i %5i %5i %5i\n",
-               ptype.pdgcode().get_decimal(),
-               smash::utf8::fill_left(ptype.name(), 12, ' ').c_str(),
-               ptype.mass(), ptype.width_at_pole(),
-               ptype.pdgcode().spin_degeneracy(), ptype.baryon_number(),
-               ptype.strangeness(), ptype.pdgcode().charmness(),
-               ptype.pdgcode().bottomness(), ptype.isospin() + 1,
-               ptype.charge(), ndecays);
-        if (!ptype.is_stable()) {
+               ptype->pdgcode().get_decimal(),
+               smash::utf8::fill_left(ptype->name(), 12, ' ').c_str(),
+               ptype->mass(), ptype->width_at_pole(),
+               ptype->pdgcode().spin_degeneracy(), ptype->baryon_number(),
+               ptype->strangeness(), ptype->pdgcode().charmness(),
+               ptype->pdgcode().bottomness(), ptype->isospin() + 1,
+               ptype->charge(), ndecays);
+        if (!ptype->is_stable()) {
           for (const auto &decay : modelist) {
             auto ptypes = decay->particle_types();
             printf("%13i %13i %20.5f %13i %13i %13i %13i %13i\n",
-                   ptype.pdgcode().get_decimal(), 2, decay->weight(),
+                   ptype->pdgcode().get_decimal(), 2, decay->weight(),
                    ptypes[0]->pdgcode().get_decimal(),
                    ptypes[1]->pdgcode().get_decimal(), 0, 0, 0);
           }
         } else {
           printf("%13i %13i %20.5f %13i %13i %13i %13i %13i\n",
-                 ptype.pdgcode().get_decimal(), 1, 1.0,
-                 ptype.pdgcode().get_decimal(), 0, 0, 0, 0);
+                 ptype->pdgcode().get_decimal(), 1, 1.0,
+                 ptype->pdgcode().get_decimal(), 0, 0, 0, 0);
         }
       }
       std::exit(EXIT_SUCCESS);
