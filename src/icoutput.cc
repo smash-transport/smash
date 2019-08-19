@@ -103,8 +103,8 @@ ICOutput::ICOutput(const bf::path &path, const std::string &name,
       file_.get(),
       "# %s initial conditions: hypersurface of constant proper time\n",
       VERSION_MAJOR);
-  std::fprintf(file_.get(), "# tau x y eta mt px py Rap pdg ID charge \n");
-  std::fprintf(file_.get(), "# fm fm fm none GeV GeV GeV none none none e \n");
+  std::fprintf(file_.get(), "# tau x y eta mt px py Rap pdg ID charge\n");
+  std::fprintf(file_.get(), "# fm fm fm none GeV GeV GeV none none none e\n");
 }
 
 ICOutput::~ICOutput() {}
