@@ -125,6 +125,9 @@ class ModusDefault {
      * The lattice is placed such that the center is [0.0,0.0,0.0].
      * If one wants to have a central cell with center at [0.0,0.0,0.0] then
      * number of cells should be odd (2k+1) in every direction. \n
+     * Lattice_Sizes is required for all modi, except the box modus. In
+     * case of box modus it is set up automatically to match the box size,
+     * and the user should not (and is not allowed to) specify it.\n
      * \n
      * Example: Configure Forced Thermalization
      * --------------
