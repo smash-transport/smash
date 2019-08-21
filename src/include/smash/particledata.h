@@ -302,8 +302,8 @@ class ParticleData {
    * \param[in] v boost 3-velocity
    */
   void boost(const ThreeVector &v) {
-    set_4momentum(momentum_.LorentzBoost(v));
-    set_4position(position_.LorentzBoost(v));
+    set_4momentum(momentum_.lorentz_boost(v));
+    set_4position(position_.lorentz_boost(v));
   }
 
   /**
@@ -311,7 +311,7 @@ class ParticleData {
    * \param[in] v boost 3-veloctity
    */
   void boost_momentum(const ThreeVector &v) {
-    set_4momentum(momentum_.LorentzBoost(v));
+    set_4momentum(momentum_.lorentz_boost(v));
   }
 
   /**

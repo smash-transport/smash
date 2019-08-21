@@ -30,7 +30,7 @@ TEST(self_boost) {
     // u_mu is a real four-vector.
     double gamma = 1. / sqrt(1. - velocity.sqr());
     FourVector u_mu = FourVector(gamma, velocity * gamma);
-    FourVector boosted = u_mu.LorentzBoost(velocity);
+    FourVector boosted = u_mu.lorentz_boost(velocity);
     COMPARE_ABSOLUTE_ERROR(boosted.x0(), 1.0, accuracy) << " at loop " << i;
     COMPARE_ABSOLUTE_ERROR(boosted.x1(), 0.0, accuracy) << " at loop " << i;
     COMPARE_ABSOLUTE_ERROR(boosted.x2(), 0.0, accuracy) << " at loop " << i;
@@ -45,7 +45,7 @@ TEST(keep_invariant_length) {
     ThreeVector velocity = random_velocity();
     for (int j = 0; j < 1000; j++) {
       FourVector a(cos_like(), cos_like(), cos_like(), cos_like());
-      FourVector A = a.LorentzBoost(velocity);
+      FourVector A = a.lorentz_boost(velocity);
       COMPARE_RELATIVE_ERROR(a.sqr(), A.sqr(), accuracy)
           << " at loop " << i << "*" << j;
     }
@@ -59,8 +59,8 @@ TEST(keep_invariant_angle) {
     for (int j = 0; j < 1000; j++) {
       FourVector a(cos_like(), cos_like(), cos_like(), cos_like());
       FourVector b(cos_like(), cos_like(), cos_like(), cos_like());
-      FourVector A = a.LorentzBoost(velocity);
-      FourVector B = b.LorentzBoost(velocity);
+      FourVector A = a.lorentz_boost(velocity);
+      FourVector B = b.lorentz_boost(velocity);
       COMPARE_RELATIVE_ERROR(a.Dot(b), A.Dot(B), accuracy)
           << " at loop " << i << "*" << j;
     }
@@ -77,8 +77,8 @@ TEST(back_and_forth) {
     ThreeVector velocity = random_velocity();
     for (int j = 0; j < 1000; j++) {
       FourVector a(cos_like(), cos_like(), cos_like(), cos_like());
-      FourVector forward = a.LorentzBoost(velocity);
-      FourVector backward = forward.LorentzBoost(-velocity);
+      FourVector forward = a.lorentz_boost(velocity);
+      FourVector backward = forward.lorentz_boost(-velocity);
       COMPARE_RELATIVE_ERROR(backward.x0(), a.x0(), my_accuracy)
           << " at loop " << i << "*" << j;
       COMPARE_RELATIVE_ERROR(backward.x1(), a.x1(), my_accuracy)

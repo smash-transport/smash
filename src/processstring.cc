@@ -166,7 +166,7 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
     double gamma = 1. / intermediate_particles[i].inverse_gamma();
     // boost 4-momentum into the center of mass frame
     FourVector momentum =
-        intermediate_particles[i].momentum().LorentzBoost(-vstring);
+        intermediate_particles[i].momentum().lorentz_boost(-vstring);
     intermediate_particles[i].set_4momentum(momentum);
 
     if (mass_dependent_formation_times_) {
@@ -177,13 +177,13 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
       FourVector fragment_position = FourVector(t_prod, t_prod * velocity);
       /* boost formation position into the center of mass frame
        * and then into the lab frame */
-      fragment_position = fragment_position.LorentzBoost(-vstring);
-      fragment_position = fragment_position.LorentzBoost(-vcomAB_);
+      fragment_position = fragment_position.lorentz_boost(-vstring);
+      fragment_position = fragment_position.lorentz_boost(-vcomAB_);
       intermediate_particles[i].set_slow_formation_times(
           time_collision_,
           soft_t_form_ * fragment_position.x0() + time_collision_);
     } else {
-      ThreeVector v_calc = momentum.LorentzBoost(-vcomAB_).velocity();
+      ThreeVector v_calc = momentum.lorentz_boost(-vcomAB_).velocity();
       double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
       intermediate_particles[i].set_slow_formation_times(
           time_collision_,
@@ -210,8 +210,8 @@ void StringProcess::init(const ParticleList &incoming, double tcoll) {
   ucomAB_ = (plab_[0] + plab_[1]) / sqrtsAB_;
   vcomAB_ = ucomAB_.velocity();
 
-  pcom_[0] = plab_[0].LorentzBoost(vcomAB_);
-  pcom_[1] = plab_[1].LorentzBoost(vcomAB_);
+  pcom_[0] = plab_[0].lorentz_boost(vcomAB_);
+  pcom_[1] = plab_[1].lorentz_boost(vcomAB_);
 
   const double pabscomAB = pCM(sqrtsAB_, massA_, massB_);
   ThreeVector evec_coll = pcom_[0].threevec() / pabscomAB;
@@ -282,7 +282,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   const ThreeVector threeMomentum =
       is_AB_to_AX ? pcom_[1].threevec() : pcom_[0].threevec();
   const FourVector pnull = FourVector(threeMomentum.abs(), threeMomentum);
-  const FourVector prs = pnull.LorentzBoost(ustrXcom.velocity());
+  const FourVector prs = pnull.lorentz_boost(ustrXcom.velocity());
   ThreeVector evec = prs.threevec() / prs.threevec().abs();
   // perform fragmentation and add particles to final_state.
   ParticleList new_intermediate_particles;
@@ -336,7 +336,7 @@ bool StringProcess::set_mass_and_direction_2strings(
        * it would be the direction in which string ends are moving. */
       const ThreeVector mom = pcom_[i].threevec();
       const FourVector pnull(mom.abs(), mom);
-      const FourVector prs = pnull.LorentzBoost(pstr_com[i].velocity());
+      const FourVector prs = pnull.lorentz_boost(pstr_com[i].velocity());
       evec_str[i] = prs.threevec() / prs.threevec().abs();
     }
   }
