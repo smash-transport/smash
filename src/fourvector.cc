@@ -13,7 +13,7 @@
 
 namespace smash {
 
-FourVector FourVector::LorentzBoost(const ThreeVector& v) const {
+FourVector FourVector::lorentz_boost(const ThreeVector& v) const {
   const double velocity_squared = v.sqr();
 
   const double gamma =

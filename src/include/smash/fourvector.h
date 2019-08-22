@@ -164,7 +164,7 @@ class FourVector {
    *
    * Note: This function is equivalent to -velocity Boost from ROOT
    */
-  FourVector LorentzBoost(const ThreeVector &v) const;
+  FourVector lorentz_boost(const ThreeVector &v) const;
 
   /**
    * Check if all four vector components are almost equal

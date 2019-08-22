@@ -361,7 +361,7 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
   ThreeVector pscatt = phitheta.threevec();
   // 3-momentum of first incoming particle in center-of-mass frame
   ThreeVector pcm =
-      incoming_particles_[0].momentum().LorentzBoost(beta_cm()).threevec();
+      incoming_particles_[0].momentum().lorentz_boost(beta_cm()).threevec();
   pscatt.rotate_z_axis_to(pcm);
 
   // final-state CM momentum
