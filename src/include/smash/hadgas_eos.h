@@ -111,8 +111,24 @@ class EosTable {
  */
 class HadronGasEos {
  public:
-  /// Constructor of HadronGasEos
-  explicit HadronGasEos(const bool tabulate = false);
+  /**
+   *  Constructor of HadronGasEos
+   *  \param[in] tabulate Whether the equation of state should be tabulated
+   *             Tabulation takes time once (typically around 5 minutes), but
+   *             makes the further usage of the class much faster. Tabulated
+   *             values are saved in a file and loaded at the next run.
+   *  \param[in] account_for_widths Whether equation of state should account
+   *             for resonance spectral functions. Normally one wants to do it,
+   *             if HadronGasEos is used for density calculations,
+   *             for example in the box initialization. However, it is not
+   *             recommended to account for spectral functions if EoS is
+   *             tabulated (tabulate = true), because this makes tabulation
+   *             incredibly slow. Therefore, for HadronGasEos to be used
+   *             in thermalizer, this option has to be false. Also note that
+   *             presently width account is not implemented for energy density
+   *             calculation.
+   */
+  HadronGasEos(bool tabulate, bool account_for_widths);
   ~HadronGasEos();
 
   /**
@@ -144,9 +160,12 @@ class HadronGasEos {
    * \param[in] T temperature [GeV]
    * \param[in] mub baryon chemical potential [GeV]
    * \param[in] mus strangeness chemical potential [GeV]
+   * \param[in] account_for_resonance_widths if false, pole masses are used;
+   *            if true, then integration over spectral function is included
    * \return particle number density n [fm\f$^{-3}\f$]
    */
-  static double density(double T, double mub, double mus);
+  static double density(double T, double mub, double mus,
+                        bool account_for_resonance_widths = false);
 
   /**
    * Compute pressure \f$ p = n T \f$.
@@ -154,10 +173,13 @@ class HadronGasEos {
    * \param[in] T temperature [GeV]
    * \param[in] mub baryon chemical potential [GeV]
    * \param[in] mus strangeness chemical potential [GeV]
+   * \param[in] account_for_resonance_widths if false, pole masses are used;
+   *            if true, then integration over spectral function is included
    * \return pressure p [GeV/fm\f$^{-3}\f$]
    */
-  static double pressure(double T, double mub, double mus) {
-    return T * density(T, mub, mus);
+  static double pressure(double T, double mub, double mus,
+                         bool account_for_resonance_widths = false) {
+    return T * density(T, mub, mus, account_for_resonance_widths);
   }
 
   /**
@@ -172,9 +194,12 @@ class HadronGasEos {
    * \param[in] T temperature [GeV]
    * \param[in] mub baryon chemical potential [GeV]
    * \param[in] mus strangeness chemical potential [GeV]
+   * \param[in] account_for_resonance_widths if false, pole masses are used;
+   *            if true, then integration over spectral function is included
    * \return net baryon density density \f$n_B\f$ [fm\f$^{-3}\f$]
    */
-  static double net_baryon_density(double T, double mub, double mus);
+  static double net_baryon_density(double T, double mub, double mus,
+                                   bool account_for_resonance_widths = false);
 
   /**
    * \brief Compute net strangeness density.
@@ -188,9 +213,12 @@ class HadronGasEos {
    * \param[in] T temperature [GeV]
    * \param[in] mub baryon chemical potential [GeV]
    * \param[in] mus strangeness chemical potential [GeV]
+   * \param[in] account_for_resonance_widths if false, pole masses are used;
+   *            if true, then integration over spectral function is included
    * \return net strangeness density density \f$n_S\f$ [fm\f$^{-3}\f$]
    */
-  static double net_strange_density(double T, double mub, double mus);
+  static double net_strange_density(double T, double mub, double mus,
+                                    bool account_for_resonance_widths = false);
 
   /**
    * \brief Compute partial density of one hadron sort.
@@ -205,10 +233,13 @@ class HadronGasEos {
    * \param[in] T temperature [GeV]
    * \param[in] mub baryon chemical potential [GeV]
    * \param[in] mus strangeness chemical potential [GeV]
+   * \param[in] account_for_resonance_widths if false, pole masses are used;
+   *            if true, then integration over spectral function is included
    * \return partial density of the given hadron sort \f$n\f$ [fm\f$^{-3}\f$]
    */
   static double partial_density(const ParticleType& ptype, double T, double mub,
-                                double mus);
+                                double mus,
+                                bool account_for_resonance_widths = false);
   /**
    * \brief Sample resonance mass in a thermal medium
    *
@@ -281,6 +312,11 @@ class HadronGasEos {
   /// Create an EoS table or not?
   bool is_tabulated() const { return tabulate_; }
 
+  /// If resonance spectral functions are taken into account
+  bool account_for_resonance_widths() const {
+    return account_for_resonance_widths_;
+  }
+
  private:
   /// A structure for passing equation parameters to the gnu library
   struct rparams {
@@ -290,6 +326,8 @@ class HadronGasEos {
     double nb;
     /// net strange density
     double ns;
+    /// use pole masses of resonances, or integrate over spectral functions
+    bool account_for_width;
   };
 
   /// Another structure for passing energy density to the gnu library
@@ -314,11 +352,15 @@ class HadronGasEos {
    * \param[in] beta inverse temperature [1/GeV]
    * \param[in] mub baryon chemical potential [GeV]
    * \param[in] mus strangeness chemical potential [GeV]
+   * \param[in] account_for_width Take hadron spectral functions into account
+   *            or not. When taken into account, they result in a considerable
+   *            slow down.
    * \return partial (unnormalized) density of the given hadron sort
    *         \f$n\f$ [fm\f$^{-3}\f$]
    */
   static double scaled_partial_density(const ParticleType& ptype, double beta,
-                                       double mub, double mus);
+                                       double mub, double mus,
+                                       bool account_for_width = false);
 
   /// Interface EoS equations to be solved to gnu library
   static int set_eos_solver_equations(const gsl_vector* x, void* params,
@@ -361,6 +403,9 @@ class HadronGasEos {
 
   /// Create an EoS table or not?
   const bool tabulate_;
+
+  /// Use pole masses of resonances or integrate over spectral functions
+  const bool account_for_resonance_widths_;
 };
 
 }  // namespace smash

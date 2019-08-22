@@ -58,7 +58,7 @@ TEST(rest_frame_transformation) {
   BoxModus b = create_box_for_tests();
   b.initial_conditions(&P, par);
 
-  HadronGasEos eos = HadronGasEos(false);
+  HadronGasEos eos = HadronGasEos(false, false);
   ThermLatticeNode node = ThermLatticeNode();
   const ThreeVector v_boost(0.1, 0.2, 0.8);
   const double L = b.length();

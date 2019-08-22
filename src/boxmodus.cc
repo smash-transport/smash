@@ -102,6 +102,19 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * Strangeness chemical potential \f$ \mu_S \f$ used in case if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
+ * \key Account_Resonance_Widths (bool, optional, default = true): \n
+ * In case of thermal initialization: true -- account for resonance
+ * spectral functions, while computing multiplicities and sampling masses,
+ * false -- simply use pole masses.
+ *
+ * Normally, one wants this option true. For example for the detailed balance
+ * studies it is better to account for spectral functions, because then at t =
+ * 0 one has exactly the expected thermal grand-canonical multiplicities, that
+ * can be compared to final ones.  However, by switching true/false one can
+ * observe the effect of spectral function on the multiplicity. This is useful
+ * for understanding the implications of different ways of sampling resonances
+ * in hydrodynamics.
+ *
  * \key Jet: \n
  * This subset of config values is used to put a single high energy particle
  * (a "jet") in the center of the box, on an trajectory along
@@ -148,6 +161,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
          Use_Thermal_Multiplicities: True
          Baryon_Chemical_Potential: 0.0
          Strange_Chemical_Potential: 0.0
+         Account_Resonance_Widths: True
  \endverbatim
  *
  * If one wants to simulate a jet in the hadronic medium, this can be done
@@ -197,6 +211,8 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
           modus_config.take({"Box", "Use_Thermal_Multiplicities"}, false)),
       mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"}, 0.)),
       mus_(modus_config.take({"Box", "Strange_Chemical_Potential"}, 0.)),
+      account_for_resonance_widths_(
+          modus_config.take({"Box", "Account_Resonance_Widths"}, true)),
       init_multipl_(use_thermal_
                         ? std::map<PdgCode, int>()
                         : modus_config.take({"Box", "Init_Multiplicities"})
@@ -221,7 +237,8 @@ double BoxModus::initial_conditions(Particles *particles,
     if (average_multipl_.empty()) {
       for (const ParticleType &ptype : ParticleType::list_all()) {
         if (HadronGasEos::is_eos_particle(ptype)) {
-          const double n = HadronGasEos::partial_density(ptype, T, mub_, mus_);
+          const double n = HadronGasEos::partial_density(
+              ptype, T, mub_, mus_, account_for_resonance_widths_);
           average_multipl_[ptype.pdgcode()] = n * V * parameters.testparticles;
         }
       }
@@ -251,7 +268,9 @@ double BoxModus::initial_conditions(Particles *particles,
       mass = data.pole_mass();
     } else {
       /* thermal momentum according Maxwell-Boltzmann distribution */
-      mass = HadronGasEos::sample_mass_thermal(data.type(), 1.0 / T);
+      mass = (!account_for_resonance_widths_)
+                 ? data.type().mass()
+                 : HadronGasEos::sample_mass_thermal(data.type(), 1.0 / T);
       momentum_radial = sample_momenta_from_thermal(T, mass);
     }
     phitheta.distribute_isotropically();

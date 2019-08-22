@@ -463,7 +463,7 @@ class GrandCanThermalizer {
   /// Cells above critical energy density
   std::vector<size_t> cells_to_sample_;
   /// Hadron gas equation of state
-  HadronGasEos eos_ = HadronGasEos(true);
+  HadronGasEos eos_ = HadronGasEos(true, false);
   /// The lattice on which the thermodynamic quantities are calculated
   std::unique_ptr<RectangularLattice<ThermLatticeNode>> lat_;
   /// Particles to be removed after this thermalization step
