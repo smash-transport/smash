@@ -19,20 +19,16 @@ namespace smash {
 
 /*!\Userguide
  * \page IC_output_user_guide_ ASCII IC Output
- * The initial conditions output (SMASH_IC.dat) is used to create a hypersurface
- * of constant proper time. This output can be applied as an initial state
- * for hydrodynamic models. Curently, it is only available in ASCII format.
- * The provided particle data is printed in the computational frame.\n
- * \n
- * The proper time, at which the hypersurface is constructed can either be set
- * explicitly in the configuration file or determined from the collision system.
- * \n
- * By default, the proper time corresponds to the moment when the two nuclei
- * have entirely passed through each other:
- * \f$ \tau_0 = (r_a \ + \ r_b) \ \left(\left(\frac{\sqrt{s_\mathrm{NN}}}
- * {2 \ m_N}\right)^2 - 1\right)^{-1/2} \f$ \n
- * \n
- * The format of the file is the following: \n
+ * The ASCII initial conditions output (SMASH_IC.dat) is used to create a
+ * hypersurface of constant proper time. This output can be applied as an
+ * initial state for hydrodynamic models. Curently, it is only available in
+ * ASCII format. The provided particle data is printed in the computational
+ * frame.\n \n The proper time, at which the hypersurface is constructed can
+ * either be set explicitly in the configuration file or determined from the
+ * collision system. \n By default, the proper time corresponds to the moment
+ * when the two nuclei have entirely passed through each other: \f$ \tau_0 =
+ * (r_a \ + \ r_b) \ \left(\left(\frac{\sqrt{s_\mathrm{NN}}} {2 \ m_N}\right)^2
+ * - 1\right)^{-1/2} \f$ \n \n The format of the file is the following: \n
  *
  * \n
  * **Header**
@@ -49,7 +45,7 @@ namespace smash {
  *
  * **Output block header**
  *
- * The initial conditions output is, similar to the OSCAR output, based on a
+ * The ASCII initial conditions output is, similar to the OSCAR output, based on
  * a block structure, where each block consists of 1 event. The header for a
  * new event is structured as follows:
  * \code

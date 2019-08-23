@@ -173,10 +173,15 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle \n
  * \n
- * - \b Initial_Conditions (Only ASCII format, see \ref IC_output_user_guide_)\n
+ * - \b Initial_Conditions (Oscar1999, Oscar2013, binary, ROOT and special ASCII
+ * IC (\ref IC_output_user_guide_) formats)\n
  *   \key Proper_Time (double, optional, default = time after which nuclei
- *   have passed through each other): Proper time at which
- *   hypersurface is created \n
+ *                     have passed through each other): Proper time at which
+ *                     hypersurface is created \n
+ *   \key Extended (bool, optional, default = false, incompatible with
+ *                  Oscar1999, ROOT and ASCII format): \n
+ *   \li \key true - Print extended information for each particle \n
+ *   \li \key false - Regular output for each particle \n
  * \n
  * \anchor Thermodynamics
  * - \b Thermodynamics \n
@@ -297,10 +302,13 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * simulations. The corresponding output, the "IC output" provides a
  * hypersurface of constant proper time. If desired, the proper time can be set
  * manually from the configuration file (in the following example at \f$\tau =
- * 0.5 \f$ fm). The output can be enabled as follows:
+ * 0.5 \f$ fm). If not provided, the default proper time corresponds to the
+ * moment when both nuclei have entirely passed through each other.\n
+ * The initial conditions output can be enabled as follows:
  *\verbatim
      Initial_Conditions:
-         Format:    ["ASCII"]
+         Format:    ["ASCII", "Oscar1999", "Oscar2013", "Binary", "ROOT"]
+         Extended: False
          Proper_Time: 0.5
  \endverbatim
  */

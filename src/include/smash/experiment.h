@@ -574,8 +574,13 @@ void Experiment<Modus>::create_output(const std::string &format,
         make_unique<VtkOutput>(output_path, content, out_par));
   } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
-    outputs_.emplace_back(
-        make_unique<RootOutput>(output_path, content, out_par));
+    if (content == "Initial_Conditions") {
+      outputs_.emplace_back(
+          make_unique<RootOutput>(output_path, "SMASH_IC", out_par));
+    } else {
+      outputs_.emplace_back(
+          make_unique<RootOutput>(output_path, content, out_par));
+    }
 #else
     log.error("Root output requested, but Root support not compiled in");
 #endif
@@ -587,6 +592,9 @@ void Experiment<Modus>::create_output(const std::string &format,
     } else if (content == "Particles") {
       outputs_.emplace_back(
           make_unique<BinaryOutputParticles>(output_path, content, out_par));
+    } else if (content == "Initial_Conditions") {
+      outputs_.emplace_back(
+          make_unique<BinaryOutputICParticles>(output_path, content, out_par));
     }
   } else if (format == "Oscar1999" || format == "Oscar2013") {
     outputs_.emplace_back(
@@ -599,7 +607,8 @@ void Experiment<Modus>::create_output(const std::string &format,
     outputs_.emplace_back(
         make_unique<VtkOutput>(output_path, content, out_par));
   } else if (content == "Initial_Conditions" && format == "ASCII") {
-    outputs_.emplace_back(make_unique<ICOutput>(output_path, content, out_par));
+    outputs_.emplace_back(
+        make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
   } else {
     log.error() << "Unknown combination of format (" << format
                 << ") and content (" << content << "). Fix the config.";
@@ -911,9 +920,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *          quantities, see \ref Thermodynamics.
    *    - Available formats: \ref thermodyn_output_user_guide_,
    *      \ref output_vtk_lattice_
-   * - \b Initial_Conditions  This output provides a hypersurface of constant
-   *                          proper time, see \ref IC_output_user_guide_
-   *   - Available formats: ASCII
+   * - \b Initial_Conditions  Special initial conditions output, see
+   *                          \subpage input_ic for details
+   *   - Available formats: \ref format_oscar_particlelist, \ref
+   * IC_output_user_guide_
    *
    * \n
    * \anchor list_of_output_formats
@@ -1082,6 +1092,45 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * nor to the particle lists.
    **/
 
+  /*!\Userguide
+   * \page input_ic Initial Conditions
+   * The existance of an initial conditions subsection in the output section of
+   * the configuration file enables the IC output. In addition all particles
+   * that cross the hypersurface of predefined proper are removed from the
+   * evolution.\n
+   * If initial conditions are enabled, the output file named SMASH_IC (followed
+   * by the appropriate suffix) is generated when SMASH is executed. \n
+   * The output is available in Oscar1999, Oscar2013 and binary format, as well
+   * as in an aditional ASCII IC format (see \ref IC_output_user_guide_),
+   * designed to be fed into the vHLLE hydrodynamics code (I. Karpenko, P.
+   * Huovinen, M. Bleicher: Comput. Phys. Commun. 185, 3016 (2014)).\n
+   * \n
+   * ### Oscar output
+   * In case
+   * of the Oscar1999 and Oscar2013 format, the structure is identical to the
+   * Oscar Particles Format (see \ref format_oscar_particlelist). \n
+   * In contrast
+   * to the usual particles output, the initial conditions output provides a
+   * **list of all particles removed from the evolution** at the time when
+   * crossing the hypersurface. This implies that neither the initial particle
+   * list nor the particle list at each time step is printed.\n The general
+   * Oscar structure as described in \ref format_oscar_particlelist is
+   * preserved. \n
+   * \n
+   * ### Binary output
+   * The binary initial
+   * conditions output also provides a **list of all particles removed from the
+   * evolution** at the time when crossing the hypersurface. For each removed
+   * particle a 'p' block is created stores the particle data. The general
+   * binary output structure as described in \ref format_binary_ is preserved.\n
+   * \n
+   * ### ROOT output
+   * The initial conditions output in shype of a list of all particles removed
+   * from the SMASH evolution when crossing the hypersurface is also available
+   * in ROOT format. Neither the initial nor the final particle lists are
+   * printed, but the general structure as described for particles TTrees in
+   * \ref format_root is preserved.
+   */
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
   log.debug() << "Density type printed to headers: " << dens_type_;
 
@@ -1713,7 +1762,8 @@ void Experiment<Modus>::intermediate_output() {
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   // save evolution data
   for (const auto &output : outputs_) {
-    if (output->is_dilepton_output() || output->is_photon_output()) {
+    if (output->is_dilepton_output() || output->is_photon_output() ||
+        output->is_IC_output()) {
       continue;
     }
 

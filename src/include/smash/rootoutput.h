@@ -171,6 +171,11 @@ class RootOutput : public OutputInterface {
    */
   void particles_to_tree(const Particles &particles);
   /**
+   * Writes particles froma ParticleList to a tree defined by treename.
+   * \param[in] particles ParticleList to be written to output.
+   */
+  void particle_list_to_tree(const ParticleList &particles);
+  /**
    * Writes collisions to a tree defined by treename.
    * \param[in] incoming Incoming particles to be written to output.
    * \param[in] outgoing Outgoing particles to be written to output.
@@ -204,6 +209,9 @@ class RootOutput : public OutputInterface {
 
   /// Option to write particles tree.
   bool write_particles_;
+
+  /// Option to write particles tree for initial conditions
+  bool write_initial_conditions_;
 
   /// Print only final particles in the event, no intermediate output.
   bool particles_only_final_;

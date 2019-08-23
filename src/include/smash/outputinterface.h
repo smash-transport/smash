@@ -41,7 +41,7 @@ class OutputInterface {
   explicit OutputInterface(std::string name)
       : is_dilepton_output_(name == "Dileptons"),
         is_photon_output_(name == "Photons"),
-        is_IC_output_(name == "Initial_Conditions") {}
+        is_IC_output_(name == "SMASH_IC") {}
   virtual ~OutputInterface() = default;
 
   /**

@@ -238,6 +238,48 @@ class BinaryOutputParticles : public BinaryOutputBase {
   bool only_final_;
 };
 
+class BinaryOutputICParticles : public BinaryOutputBase {
+ public:
+  /**
+   * Create binary initial conditions particle output.
+   *
+   * \param[in] path Output path.
+   * \param[in] name Name of the ouput.
+   * \param[in] out_par A structure containing the parameters of the output.
+   */
+  BinaryOutputICParticles(const bf::path &path, std::string name,
+                          const OutputParameters &out_par);
+
+  /**
+   * Writes the initial particle information of an event to the binary output.
+   * Function unused for IC output. Needed since inherited.
+   * \param[in] particles Unused, needed since inherited.
+   * \param[in] event_number Unused, needed since inherited.
+   */
+  void at_eventstart(const Particles &particles,
+                     const int event_number) override;
+
+  /**
+   * Writes the final particle information of an event to the binary output.
+   * \param[in] particles Current list of particles.
+   * \param[in] event_number Number of event.
+   * \param[in] impact_parameter Impact parameter of this event.
+   * \param[in] empty_event Whether there was no collision between target
+   *            and projectile
+   */
+  void at_eventend(const Particles &particles, const int event_number,
+                   double impact_parameter, bool empty_event) override;
+
+  /**
+   * Writes particles that are removed when crossing the hypersurface to the
+   * output. Note that the particle information is written as a particle block,
+   * not as an interaction block.
+   * \param[in] action Action that holds the information of the interaction.
+   * \param[in] density Unused, needed since inherited.
+   */
+  void at_interaction(const Action &action, const double density) override;
+};
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_BINARYOUTPUT_H_

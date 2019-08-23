@@ -90,10 +90,12 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name,
       write_collisions_(name == "Collisions" || name == "Dileptons" ||
                         name == "Photons"),
       write_particles_(name == "Particles"),
+      write_initial_conditions_(name == "SMASH_IC"),
       particles_only_final_(out_par.part_only_final),
       autosave_frequency_(1000),
       part_extended_(out_par.part_extended),
-      coll_extended_(out_par.coll_extended) {
+      coll_extended_(out_par.coll_extended),
+      ic_extended_(out_par.ic_extended) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += ".unfinished";
   root_out_file_ =
@@ -102,7 +104,7 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name,
 }
 
 void RootOutput::init_trees() {
-  if (write_particles_) {
+  if (write_particles_ || write_initial_conditions_) {
     particles_tree_ = new TTree("particles", "particles");
 
     particles_tree_->Branch("npart", &npart, "npart/I");
@@ -233,7 +235,7 @@ void RootOutput::at_eventend(const Particles &particles,
   /* Forced regular dump from operational memory to disk. Very demanding!
    * If program crashes written data will NOT be lost. */
   if (current_event_ > 0 && current_event_ % autosave_frequency_ == 0) {
-    if (write_particles_) {
+    if (write_particles_ || write_initial_conditions_) {
       particles_tree_->AutoSave("SaveSelf");
     }
     if (write_collisions_) {
@@ -247,6 +249,11 @@ void RootOutput::at_interaction(const Action &action,
   if (write_collisions_) {
     collisions_to_tree(action.incoming_particles(), action.outgoing_particles(),
                        action.get_total_weight(), action.get_partial_weight());
+  }
+
+  if (write_initial_conditions_ &&
+      action.get_type() == ProcessType::HyperSurfaceCrossing) {
+    particle_list_to_tree(action.incoming_particles());
   }
 }
 
@@ -287,6 +294,41 @@ void RootOutput::particles_to_tree(const Particles &particles) {
         pdg_mother1_[i] = h.p1.get_decimal();
         pdg_mother2_[i] = h.p2.get_decimal();
       }
+
+      i++;
+    }
+  }
+  // Flush rest to tree
+  if (i > 0) {
+    npart = i;
+    particles_tree_->Fill();
+  }
+}
+
+void RootOutput::particle_list_to_tree(const ParticleList &particles) {
+  int i = 0;
+
+  tcounter = output_counter_;
+  ev = current_event_;
+
+  for (const auto &p : particles) {
+    // Buffer full - flush to tree, else fill with particles
+    if (i >= max_buffer_size_) {
+      npart = max_buffer_size_;
+      i = 0;
+      particles_tree_->Fill();
+    } else {
+      t[i] = p.position().x0();
+      x[i] = p.position().x1();
+      y[i] = p.position().x2();
+      z[i] = p.position().x3();
+
+      p0[i] = p.momentum().x0();
+      px[i] = p.momentum().x1();
+      py[i] = p.momentum().x2();
+      pz[i] = p.momentum().x3();
+
+      pdgcode[i] = p.pdgcode().get_decimal();
 
       i++;
     }

@@ -301,4 +301,43 @@ void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
   }
 }
 
+BinaryOutputICParticles::BinaryOutputICParticles(
+    const bf::path &path, std::string name, const OutputParameters &out_par)
+    : BinaryOutputBase(path / "SMASH_IC.bin", "wb", name, out_par.ic_extended) {
+}
+
+void BinaryOutputICParticles::at_eventstart(const Particles &particles,
+                                            const int) {
+  // Unused, but function needed since inherited
+  SMASH_UNUSED(particles);
+}
+
+void BinaryOutputICParticles::at_eventend(const Particles &particles,
+                                          const int event_number,
+                                          double impact_parameter,
+                                          bool empty_event) {
+  SMASH_UNUSED(particles);
+
+  // Event end line
+  const char fchar = 'f';
+  std::fwrite(&fchar, sizeof(char), 1, file_.get());
+  write(event_number);
+  write(impact_parameter);
+  const char empty = empty_event;
+  write(empty);
+
+  // Flush to disk
+  std::fflush(file_.get());
+}
+
+void BinaryOutputICParticles::at_interaction(const Action &action,
+                                             const double density) {
+  SMASH_UNUSED(density);
+  if (action.get_type() == ProcessType::HyperSurfaceCrossing) {
+    const char pchar = 'p';
+    std::fwrite(&pchar, sizeof(char), 1, file_.get());
+    write(action.incoming_particles().size());
+    write(action.incoming_particles());
+  }
+}
 }  // namespace smash
