@@ -109,7 +109,7 @@ void ICOutput::at_eventstart(const Particles &particles,
                              const int event_number) {
   std::fprintf(file_.get(), "# event %i start\n", event_number + 1);
   SMASH_UNUSED(particles);
-};
+}
 
 void ICOutput::at_eventend(const Particles &particles, const int event_number,
                            double impact_parameter, bool empty_event) {
@@ -141,7 +141,7 @@ void ICOutput::at_eventend(const Particles &particles, const int event_number,
   SMASH_UNUSED(particles);
   SMASH_UNUSED(impact_parameter);
   SMASH_UNUSED(empty_event);
-};
+}
 
 void ICOutput::at_intermediate_time(const Particles &particles,
                                     const Clock &clock,

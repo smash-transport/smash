@@ -288,3 +288,93 @@ TEST(particlelist_format) {
   }
   VERIFY(bf::remove(outputfilepath));
 }
+
+TEST(initial_conditions_format) {
+  // Create 1 particle
+  Particles particles;
+  ParticleData p1 = particles.insert(Test::smashon_random());
+  p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
+
+  // Create action ("hypersurface crossing")
+  ActionPtr action = make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
+  action->generate_final_state();
+
+  const int event_id = 0;
+  const bool empty_event = false;
+  const double impact_parameter = 2.4;
+
+  const bf::path outputfilepath = testoutputpath / "SMASH_IC.oscar1999";
+  bf::path outputfilepath_unfinished = outputfilepath;
+  outputfilepath_unfinished += ".unfinished";
+  {
+    OutputParameters out_par = OutputParameters();
+    out_par.ic_extended = false;
+
+    std::unique_ptr<OutputInterface> oscfinal = create_oscar_output(
+        "Oscar1999", "Initial_Conditions", testoutputpath, out_par);
+    VERIFY(bool(oscfinal));
+    VERIFY(bf::exists(outputfilepath_unfinished));
+
+    /* Initial state output (note that this should not do anything!) */
+    oscfinal->at_eventstart(particles, event_id);
+
+    /* Write particle removied in action to */
+    action->perform(&particles, 1);
+    oscfinal->at_interaction(*action, 0.);
+
+    /* Final state output; this is the only thing we expect to find in file */
+    oscfinal->at_eventend(particles, event_id, impact_parameter, empty_event);
+  }
+  VERIFY(!bf::exists(outputfilepath_unfinished));
+  VERIFY(bf::exists(outputfilepath));
+
+  {
+    bf::fstream outputfile;
+    outputfile.open(outputfilepath, std::ios_base::in);
+    if (outputfile.good()) {
+      std::string line, item;
+      /* Check header */
+      std::string output_header = "";
+      std::string header =
+          "# OSC1999A\n"
+          "# SMASH_IC\n"
+          "# " VERSION_MAJOR
+          "\n"
+          "# Block format:\n"
+          "# nin nout event_number\n"
+          "# id pdg 0 px py pz p0 mass x y z t\n"
+          "# End of event: 0 0 event_number impact_parameter\n"
+          "#\n";
+      do {
+        std::getline(outputfile, line);
+        output_header += line + '\n';
+      } while (line != "#");
+      COMPARE(output_header, header);
+      /* Check particle list: 1 particle that was removed */
+      outputfile >> item;
+      COMPARE(std::stoul(item), particles.size());
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), 1);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id + 1);
+
+      for (const ParticleData &data : action->incoming_particles()) {
+        std::array<std::string, 12> datastring;
+        for (int j = 0; j < 12; j++) {
+          outputfile >> datastring.at(j);
+        }
+        compare_particledata(datastring, data, data.id());
+      }
+      /* Check event end line */
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), 0);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), 0);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id + 1);
+      outputfile >> item;
+      COMPARE(std::stod(item.c_str()), impact_parameter);
+    }
+  }
+  VERIFY(bf::remove(outputfilepath));
+}

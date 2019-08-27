@@ -138,7 +138,7 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
       std::fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
                    event_number + 1);
     }
-    if (!(Contents & OscarParticlesIC)) {
+    if (!(Contents == OscarParticlesIC)) {
       // We do not want the inital particle list to be printed in case of IC
       // output
       write(particles);

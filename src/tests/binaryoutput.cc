@@ -440,3 +440,72 @@ TEST(extended) {
 
   VERIFY(bf::remove(collisionsoutputfilepath));
 }
+
+TEST(initial_conditions_format) {
+  // Create 1 particle
+  Particles particles;
+  ParticleData p1 = particles.insert(Test::smashon_random());
+  p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
+
+  // Create and perform action ("hypersurface crossing")
+  ActionPtr action = make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
+  action->generate_final_state();
+  action->perform(&particles, 1);
+
+  const int event_id = 0;
+  const bool empty_event = false;
+  const double impact_parameter = 0.0;
+
+  const bf::path particleoutputpath = testoutputpath / "SMASH_IC.bin";
+  bf::path particleoutputpath_unfinished = particleoutputpath;
+  particleoutputpath_unfinished += ".unfinished";
+
+  {
+    OutputParameters output_par = OutputParameters();
+    output_par.part_extended = false;
+    double density = 0.0;
+    /* Create an instance of binary output */
+    auto bin_output = make_unique<BinaryOutputICParticles>(
+        testoutputpath, "SMASH_IC", output_par);
+    VERIFY(bool(bin_output));
+    VERIFY(bf::exists(particleoutputpath_unfinished));
+
+    /* Write event start information: This should do nothing for IC output */
+    bin_output->at_interaction(*action, density);
+
+    /* Write particle line for hypersurface crossing */
+    bin_output->at_interaction(*action, density);
+
+    /* Event end output */
+    bin_output->at_eventend(particles, event_id, impact_parameter, empty_event);
+  }
+  VERIFY(!bf::exists(particleoutputpath_unfinished));
+  VERIFY(bf::exists(particleoutputpath));
+
+  /* Read the afore created output */
+  {
+    FilePtr binF = fopen(particleoutputpath.native(), "rb");
+    VERIFY(binF.get());
+    // Header
+    std::vector<char> buf(4);
+    std::string magic, smash_version;
+    int format_version_number;
+
+    COMPARE(std::fread(&buf[0], 1, 4, binF.get()), 4u);  // magic number
+    magic.assign(&buf[0], 4);
+    read_binary(format_version_number, binF);  // format version number
+    read_binary(smash_version, binF);          // smash version
+
+    COMPARE(magic, "SMSH");
+    COMPARE(format_version_number, current_format_version);
+    COMPARE(smash_version, VERSION_MAJOR);
+
+    int npart = 1;  // expect one particle in output
+
+    VERIFY(compare_particles_block_header(npart, binF));
+    VERIFY(compare_particle(p1, binF));
+
+    VERIFY(check_end_of_file(binF));
+  }
+  VERIFY(bf::remove(particleoutputpath));
+}
