@@ -89,7 +89,7 @@ class ModusDefault {
   /**
    * Get the passing time of the two nuclei in a collision. This time
    * corresponds to the moment when the nuclei have just passed entirely
-   * through each other.
+   * through each other and all primary collisions have occured.
    * Formula taken from: Eq. (1) in \iref{Karpenko:2015xea}
    *
    * Only used in ColliderModus for IC output.

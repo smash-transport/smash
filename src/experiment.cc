@@ -175,13 +175,12 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * \n
  * - \b Initial_Conditions (Oscar1999, Oscar2013, binary, ROOT and special ASCII
  * IC (\ref IC_output_user_guide_) formats)\n
- *   \key Proper_Time (double, optional, default = time after which nuclei
- *                     have passed through each other): Proper time at which
- *                     hypersurface is created \n
+ *   \key Proper_Time (double, optional, default = nuclei passing time): Proper
+ *       time at which hypersurface is created \n
  *   \key Extended (bool, optional, default = false, incompatible with
- *                  Oscar1999, ROOT and ASCII format): \n
- *   \li \key true - Print extended information for each particle \n
- *   \li \key false - Regular output for each particle \n
+ *                  Oscar1999, ROOT and ASCII format):\n
+ *   \li \key true - Print extended information for each particle
+ *   \li \key false - Regular output for each particle
  * \n
  * \anchor Thermodynamics
  * - \b Thermodynamics \n

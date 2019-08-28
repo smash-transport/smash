@@ -246,8 +246,11 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * see \ref output_content_specific_options_ "Content-specific output options"
  * for further details. \n
  * **Unless IC output is enabled, the Particle output always provides the
- *current particle list at a specific time.** See \subpage initial_conditions
- *for details about the particles IC output. \n \n Oscar1999
+ * current particle list at a specific time.** See \ref input_ic for details
+ * about the particles IC output. \n
+ *
+ * \n
+ * Oscar1999
  * ---------
  * Oscar1999 is an ASCII (text) human-readable output following the OSCAR 1999
  * standard. The format specifics are the following:
@@ -447,9 +450,6 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key 44: Soft string N-Nbar annihilation
  * \li \key 45: Soft sring excitation, non-diffractive
  * \li \key 46: Hard string excitation
- *
- * \page initial_conditions Initial Conditions
- * bla
  *
  * \page format_oscar_particlelist
  * \n

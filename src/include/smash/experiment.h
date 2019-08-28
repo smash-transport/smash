@@ -1096,21 +1096,35 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \page input_ic Initial Conditions
    * The existance of an initial conditions subsection in the output section of
    * the configuration file enables the IC output. In addition all particles
-   * that cross the hypersurface of predefined proper are removed from the
-   * evolution.\n
-   * If initial conditions are enabled, the output file named SMASH_IC (followed
-   * by the appropriate suffix) is generated when SMASH is executed. \n
-   * The output is available in Oscar1999, Oscar2013 and binary format, as well
-   * as in an aditional ASCII IC format (see \ref IC_output_user_guide_),
-   * designed to be fed into the vHLLE hydrodynamics code (I. Karpenko, P.
-   * Huovinen, M. Bleicher: Comput. Phys. Commun. 185, 3016 (2014)).\n
-   * \n
+   * that cross the hypersurface of predefined proper time are removed from the
+   * evolution. This proper time is taken from the \key Proper_Time field
+   * in the \key Initial_Conditions subsection when configuring the output. If
+   * this information
+   * is not provided, the default proper time corresponds to the passing time
+   * of the two nuclei, where all primary interactions are expected to have
+   * occured: \f[ \tau_0 =
+   * (r_\mathrm{p} \ + \ r_\mathrm{t}) \ \left(\left(\frac{\sqrt{s_\mathrm{NN}}}
+   * {2 \ m_\mathrm{N}}\right)^2
+   * - 1\right)^{-1/2} \f]
+   * Therein, \f$ r_\mathrm{p} \f$ and \f$ r_\mathrm{t} \f$ denote the radii of
+   * the projectile and target nucleus, respectively, \f$
+   * \sqrt{s_\mathrm{NN}}\f$
+   * is the collision energy per nucleon and \f$ m_\mathrm{N} \f$ the nucleon
+   * mass. \n If
+   * initial conditions are enabled, the output file named SMASH_IC (followed by
+   * the appropriate suffix) is generated when SMASH is executed. \n The output
+   * is available in Oscar1999, Oscar2013, binary and ROOT format, as well as in
+   * an aditional ASCII format (see \ref IC_output_user_guide_). The latter is
+   * meant to directly serve
+   * as an input for the vHLLE hydrodynamics code (I. Karpenko, P. Huovinen, M.
+   * Bleicher: Comput. Phys. Commun. 185, 3016 (2014)).\n \n
    * ### Oscar output
    * In case
    * of the Oscar1999 and Oscar2013 format, the structure is identical to the
    * Oscar Particles Format (see \ref format_oscar_particlelist). \n
    * In contrast
-   * to the usual particles output, the initial conditions output provides a
+   * to the usual particles output however, the initial conditions output
+   * provides a
    * **list of all particles removed from the evolution** at the time when
    * crossing the hypersurface. This implies that neither the initial particle
    * list nor the particle list at each time step is printed.\n The general
@@ -1119,17 +1133,17 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \n
    * ### Binary output
    * The binary initial
-   * conditions output also provides a **list of all particles removed from the
-   * evolution** at the time when crossing the hypersurface. For each removed
+   * conditions output also provides a list of all particles removed from the
+   * evolution at the time when crossing the hypersurface. For each removed
    * particle a 'p' block is created stores the particle data. The general
    * binary output structure as described in \ref format_binary_ is preserved.\n
    * \n
    * ### ROOT output
-   * The initial conditions output in shype of a list of all particles removed
+   * The initial conditions output in shape of a list of all particles removed
    * from the SMASH evolution when crossing the hypersurface is also available
    * in ROOT format. Neither the initial nor the final particle lists are
-   * printed, but the general structure as described for particles TTrees in
-   * \ref format_root is preserved.
+   * printed, but the general structure for particle TTrees, as described in
+   * \ref format_root, is preserved.
    */
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
   log.debug() << "Density type printed to headers: " << dens_type_;
