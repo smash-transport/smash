@@ -21,10 +21,8 @@ void HypersurfacecrossingAction::generate_final_state() {
 
   ParticleList empty_list;
 
-  // check that there is only 1 incoming particle which lies on the hypersurface
+  // check that there is only 1 incoming particle
   assert(incoming_particles_.size() == 1);
-  assert(abs(incoming_particles[0].position().tau() - prop_time_) <=
-         really_small);
 
   // Return empty list because we want to remove the incoming particle
   outgoing_particles_ = empty_list;
@@ -154,8 +152,7 @@ FourVector HyperSurfaceCrossActionsFinder::coordinates_on_hypersurface(
                       std::sqrt((1 - m * m) * tau * tau + n * n) / (1 - m * m);
 
   SMASH_UNUSED(sol2);  // only used in DEBUG output
-  // std::cout << t1 << " " << sol1 << " " << t2 << '\n';
-  // assert((sol1 >= t1 && sol1 <= t2));
+  assert((sol1 >= t1 && sol1 <= t2));
   assert(!(sol2 >= t1 && sol2 <= t2));
 
   // Propagate to point where hypersurface is crossed
