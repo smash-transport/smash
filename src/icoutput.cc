@@ -87,6 +87,10 @@ namespace smash {
  * Note that 'event' and 'end' are no variables, but words that are
  * printed in the header. \n
  *
+ * \note
+ * If SMASH is run with test particles (necessary e.g. for potentials), the
+ * ASCII output will contain Ntest * Npart particle entries. Remember to weigh
+ * each of those particles with 1/Ntest.
  */
 
 ICOutput::ICOutput(const bf::path &path, const std::string &name,
