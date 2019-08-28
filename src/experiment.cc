@@ -298,7 +298,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
          Smearing: False
  \endverbatim
  * SMASH can further be applied to extract initial conditions for hydrodynamic
- * simulations. The corresponding output, the "IC output" provides a
+ * simulations. The corresponding output provides the particle list on a
  * hypersurface of constant proper time. If desired, the proper time can be set
  * manually from the configuration file (in the following example at \f$\tau =
  * 0.5 \f$ fm). If not provided, the default proper time corresponds to the

@@ -475,7 +475,7 @@ class Experiment : public ExperimentBase {
   /// This indicates whether photons are switched on.
   const bool photons_switch_;
 
-  // This indicates whether the IC output is enabled.
+  /// This indicates whether the IC output is enabled.
   const bool IC_output_switch_;
 
   /// This indicates whether to use time steps.
@@ -593,8 +593,8 @@ void Experiment<Modus>::create_output(const std::string &format,
       outputs_.emplace_back(
           make_unique<BinaryOutputParticles>(output_path, content, out_par));
     } else if (content == "Initial_Conditions") {
-      outputs_.emplace_back(
-          make_unique<BinaryOutputICParticles>(output_path, content, out_par));
+      outputs_.emplace_back(make_unique<BinaryOutputInitialConditions>(
+          output_path, content, out_par));
     }
   } else if (format == "Oscar1999" || format == "Oscar2013") {
     outputs_.emplace_back(
@@ -809,18 +809,17 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       throw std::runtime_error(
           "Initial conditions can only be extracted in collider modus.");
     }
+    double proper_time;
     if (config.has_value({"Output", "Initial_Conditions", "Proper_Time"})) {
       // Read in proper time from config
-      double proper_time =
+      proper_time =
           config.take({"Output", "Initial_Conditions", "Proper_Time"});
-      action_finders_.emplace_back(
-          make_unique<HyperSurfaceCrossActionsFinder>(proper_time));
     } else {
       // Default proper time is the passing time of the two nuclei
-      double proper_time = modus_.nuclei_passing_time();
-      action_finders_.emplace_back(
-          make_unique<HyperSurfaceCrossActionsFinder>(proper_time));
+      proper_time = modus_.nuclei_passing_time();
     }
+    action_finders_.emplace_back(
+        make_unique<HyperSurfaceCrossActionsFinder>(proper_time));
   }
 
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
@@ -1095,7 +1094,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   /*!\Userguide
    * \page input_ic Initial Conditions
    * The existance of an initial conditions subsection in the output section of
-   * the configuration file enables the IC output. In addition all particles
+   * the configuration file enables the IC output. In addition, all particles
    * that cross the hypersurface of predefined proper time are removed from the
    * evolution. This proper time is taken from the \key Proper_Time field
    * in the \key Initial_Conditions subsection when configuring the output. If

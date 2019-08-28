@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2019
+ *    Copyright (c) 2019-2019
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -46,9 +46,13 @@ TEST(hypersurface_crossing_action) {
   double proper_time = 0.5;
   HyperSurfaceCrossActionsFinder finder(proper_time);
 
+  // no grid means no grid cell volume
+  const double grid_cell_vol = 0.0;
+
   // Find actions
   constexpr double time_step = 0.1;
-  ActionList actions = finder.find_actions_in_cell(part_list, time_step);
+  ActionList actions =
+      finder.find_actions_in_cell(part_list, time_step, grid_cell_vol);
 
   // Action list should only contain one element since one particle a crosses
   // the hypersurface in the given time step
@@ -68,7 +72,7 @@ TEST(hypersurface_crossing_action) {
     position.set_x0(action->time_of_execution());
     b.set_4position(position);
 
-    VERIFY(b.position().tau() == proper_time);
+    COMPARE_ABSOLUTE_ERROR(b.position().tau(), proper_time, 1e-7);
 
     // Perform action
     action->generate_final_state();

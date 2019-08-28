@@ -301,22 +301,23 @@ void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
   }
 }
 
-BinaryOutputICParticles::BinaryOutputICParticles(
+BinaryOutputInitialConditions::BinaryOutputInitialConditions(
     const bf::path &path, std::string name, const OutputParameters &out_par)
     : BinaryOutputBase(path / "SMASH_IC.bin", "wb", name, out_par.ic_extended) {
 }
 
-void BinaryOutputICParticles::at_eventstart(const Particles &particles,
-                                            const int) {
+void BinaryOutputInitialConditions::at_eventstart(const Particles &particles,
+                                                  const int) {
   // Unused, but function needed since inherited
   SMASH_UNUSED(particles);
 }
 
-void BinaryOutputICParticles::at_eventend(const Particles &particles,
-                                          const int event_number,
-                                          double impact_parameter,
-                                          bool empty_event) {
+void BinaryOutputInitialConditions::at_eventend(const Particles &particles,
+                                                const int event_number,
+                                                double impact_parameter,
+                                                bool empty_event) {
   SMASH_UNUSED(particles);
+  const auto &log = logger<LogArea::HyperSurfaceCrossing>();
 
   // Event end line
   const char fchar = 'f';
@@ -328,10 +329,19 @@ void BinaryOutputICParticles::at_eventend(const Particles &particles,
 
   // Flush to disk
   std::fflush(file_.get());
+
+  // If the runtime is too short some particles might not yet have
+  // reached the hypersurface. Warning is printed.
+  if (particles.size() != 0) {
+    log.warn(
+        "End time might be too small for initial conditions output. "
+        "Hypersurface has not yet been crossed by ",
+        particles.size(), " particle(s).");
+  }
 }
 
-void BinaryOutputICParticles::at_interaction(const Action &action,
-                                             const double density) {
+void BinaryOutputInitialConditions::at_interaction(const Action &action,
+                                                   const double density) {
   SMASH_UNUSED(density);
   if (action.get_type() == ProcessType::HyperSurfaceCrossing) {
     const char pchar = 'p';

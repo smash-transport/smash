@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016-2019
+ *    Copyright (c) 2019-2019
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -18,8 +18,9 @@ namespace smash {
 /**
  * \ingroup action
  * Hypersurfacecrossingaction is a special action which indicates that a
- * particle has crossed a hypersurface of given proper time. This is necessary
- * to generate initial conditions for hybrid models.
+ * particle has crossed a hypersurface of given proper time. This can be used
+ * to generate initial conditions for hybrid models. If this action is performed
+ * the incoming particles are removed from the evolution.
  */
 class HypersurfacecrossingAction : public Action {
  public:
@@ -42,10 +43,11 @@ class HypersurfacecrossingAction : public Action {
 
   /**
    * Generate the final state of the hypersurface crossing particles.
-   * Removes all particles from the evolution and redirects them to the output.
-   *
+   * Removes all particles crossing the hypersurface from the evolution.
    */
   void generate_final_state() override;
+
+  void check_conservation(const uint32_t id_process) const override;
 };
 
 /**
@@ -63,13 +65,14 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
   explicit HyperSurfaceCrossActionsFinder(double tau) : prop_time_{tau} {};
 
   /**
-   * Find the next hypersurface crossings for every particle before time t_max.
+   * Find the next hypersurface crossings for each particle that occur within
+   * the timestepless propagation.
    * \param[in] plist List of all particles.
-   * \param[in] t_max Time until crossing can appear. [fm]
+   * \param[in] dt Time until crossing can appear (until end of timestep). [fm]
    * \return List of all found wall crossings.
    */
-  ActionList find_actions_in_cell(const ParticleList &plist,
-                                  double t_max) const override;
+  ActionList find_actions_in_cell(const ParticleList &plist, double dt,
+                                  const double) const override;
 
   /// Ignore the neighbor searches for hypersurface crossing
   ActionList find_actions_with_neighbors(const ParticleList &,
@@ -94,9 +97,29 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
   /// Proper time of the hypersurface in fm.
   const double prop_time_;
 
+  /**
+   * Determine whether particle crosses hypersurface within next timestep
+   * during propagation
+   * \param[in] pdata_before_propagation Particle data at the beginning of time
+   *            step in question
+   * \param[in] pdata_after_propagation Particle data at the end of time step
+   *            in question
+   * \param[in] tau Proper time of the hypersurface that is tested
+   * \return Does particle cross the hypersurface?
+   */
   bool crosses_hypersurface(ParticleData &pdata_before_propagation,
                             ParticleData &pdata_after_propagation,
                             const double tau) const;
+
+  /**
+   * Find the coordinates where particle crosses hypersurface
+   * \param[in] pdata_before_propagation Particle data at the beginning of time
+   *            in question
+   * \param[in] pdata_after_propagation Particle data at the end of time step
+   *            in question
+   * \param[in] tau Proper time of the hypersurface that is crossed
+   * \return Fourvector of the crossing position
+   */
   FourVector coordinates_on_hypersurface(ParticleData &pdata_before_propagation,
                                          ParticleData &pdata_after_propagation,
                                          const double tau) const;

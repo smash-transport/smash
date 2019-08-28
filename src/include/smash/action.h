@@ -255,14 +255,7 @@ class Action {
    *
    * \param[in] id_process process id only used for debugging output
    */
-  void check_conservation(const uint32_t id_process) const;
-
-  /**
-   * Check that conservation laws are not fulfilled for hypersurface crossing.
-   * By construction, as particles are simply removed from the evolution.
-   *
-   */
-  void check_conservation_hypersurface_crossing() const;
+  virtual void check_conservation(const uint32_t id_process) const;
 
   /**
    * Determine the total energy in the center-of-mass frame [GeV]

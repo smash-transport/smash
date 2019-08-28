@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2019
+ *    Copyright (c) 2019-2019
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -121,27 +121,12 @@ void ICOutput::at_eventend(const Particles &particles, const int event_number,
 
   // If the runtime is too short some particles might not yet have
   // reached the hypersurface. Warning is printed.
-  bool runtime_too_short = false;
   if (particles.size() != 0) {
-    for (auto &p : particles) {
-      double tau = p.position().tau();
-      double t = p.position().x0();
-      double z = p.position().x3();
-      if ((tau < IC_proper_time_) || (fabs(t) < fabs(z))) {
-        // If t < z, tau = sqrt(t^2 - z^2) returns NAN. Those particles are also
-        // below the hypersurface and need further propagation
-        runtime_too_short = true;
-      }
-    }
-  }
-
-  if (runtime_too_short) {
     log.warn(
-        "End time might be too small. Hypersurface has not yet been crossed "
-        "by ",
+        "End time might be too small for initial conditions output. "
+        "Hypersurface has not yet been crossed by ",
         particles.size(), " particle(s).");
   }
-  SMASH_UNUSED(particles);
   SMASH_UNUSED(impact_parameter);
   SMASH_UNUSED(empty_event);
 }
@@ -164,11 +149,11 @@ void ICOutput::at_interaction(const Action &action, const double density) {
   ParticleData particle = action.incoming_particles()[0];
 
   // transverse mass
-  double m_trans = sqrt(particle.type().mass() * particle.type().mass() +
-                        particle.momentum()[1] * particle.momentum()[1] +
-                        particle.momentum()[2] * particle.momentum()[2]);
+  const double m_trans = sqrt(particle.type().mass() * particle.type().mass() +
+                              particle.momentum()[1] * particle.momentum()[1] +
+                              particle.momentum()[2] * particle.momentum()[2]);
   // momentum space rapidity
-  double rapidity =
+  const double rapidity =
       0.5 * log((particle.momentum()[0] + particle.momentum()[3]) /
                 (particle.momentum()[0] - particle.momentum()[3]));
 
@@ -185,7 +170,7 @@ void ICOutput::at_interaction(const Action &action, const double density) {
     IC_proper_time_ = particle.position().tau();
   } else {
     // Verify that all other particles have the same proper time
-    double next_proper_time = particle.position().tau();
+    const double next_proper_time = particle.position().tau();
     if (!((next_proper_time - IC_proper_time_) < really_small))
       throw std::runtime_error(
           "Hypersurface proper time changed during evolution.");

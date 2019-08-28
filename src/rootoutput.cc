@@ -126,7 +126,7 @@ void RootOutput::init_trees() {
     particles_tree_->Branch("y", &y[0], "y[npart]/D");
     particles_tree_->Branch("z", &z[0], "z[npart]/D");
 
-    if (part_extended_) {
+    if (part_extended_ || ic_extended_) {
       particles_tree_->Branch("coll_per_part", &coll_per_part_[0],
                               "coll_per_part[npart]/I");
       particles_tree_->Branch("formation_time", &formation_time_[0],
@@ -242,6 +242,18 @@ void RootOutput::at_eventend(const Particles &particles,
       collisions_tree_->AutoSave("SaveSelf");
     }
   }
+
+  if (write_initial_conditions_) {
+    // If the runtime is too short some particles might not yet have
+    // reached the hypersurface. Warning is printed.
+    if (particles.size() != 0) {
+      const auto &log = logger<LogArea::HyperSurfaceCrossing>();
+      log.warn(
+          "End time might be too small for initial conditions output. "
+          "Hypersurface has not yet been crossed by ",
+          particles.size(), " particle(s).");
+    }
+  }
 }
 
 void RootOutput::at_interaction(const Action &action,
@@ -253,11 +265,12 @@ void RootOutput::at_interaction(const Action &action,
 
   if (write_initial_conditions_ &&
       action.get_type() == ProcessType::HyperSurfaceCrossing) {
-    particle_list_to_tree(action.incoming_particles());
+    particles_to_tree(action.incoming_particles());
   }
 }
 
-void RootOutput::particles_to_tree(const Particles &particles) {
+template <typename T>
+void RootOutput::particles_to_tree(T &particles) {
   int i = 0;
 
   tcounter = output_counter_;
@@ -283,7 +296,7 @@ void RootOutput::particles_to_tree(const Particles &particles) {
       pdgcode[i] = p.pdgcode().get_decimal();
       charge[i] = p.type().charge();
 
-      if (part_extended_) {
+      if (part_extended_ || ic_extended_) {
         const auto h = p.get_history();
         formation_time_[i] = p.formation_time();
         xsec_factor_[i] = p.xsec_scaling_factor();
@@ -294,41 +307,6 @@ void RootOutput::particles_to_tree(const Particles &particles) {
         pdg_mother1_[i] = h.p1.get_decimal();
         pdg_mother2_[i] = h.p2.get_decimal();
       }
-
-      i++;
-    }
-  }
-  // Flush rest to tree
-  if (i > 0) {
-    npart = i;
-    particles_tree_->Fill();
-  }
-}
-
-void RootOutput::particle_list_to_tree(const ParticleList &particles) {
-  int i = 0;
-
-  tcounter = output_counter_;
-  ev = current_event_;
-
-  for (const auto &p : particles) {
-    // Buffer full - flush to tree, else fill with particles
-    if (i >= max_buffer_size_) {
-      npart = max_buffer_size_;
-      i = 0;
-      particles_tree_->Fill();
-    } else {
-      t[i] = p.position().x0();
-      x[i] = p.position().x1();
-      y[i] = p.position().x2();
-      z[i] = p.position().x3();
-
-      p0[i] = p.momentum().x0();
-      px[i] = p.momentum().x1();
-      py[i] = p.momentum().x2();
-      pz[i] = p.momentum().x3();
-
-      pdgcode[i] = p.pdgcode().get_decimal();
 
       i++;
     }

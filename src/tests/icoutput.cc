@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2019
+ *    Copyright (c) 2019-2019
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,6 +10,9 @@
 #include "unittest.h"  // This include has to be first
 
 #include "setup.h"
+
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 #include "../include/smash/icoutput.h"
 #include "../include/smash/outputinterface.h"

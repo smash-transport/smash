@@ -94,7 +94,7 @@ class ColliderModus : public ModusDefault {
   double nuclei_passing_time() const {
     const double passing_distance =
         projectile_->get_nuclear_radius() + target_->get_nuclear_radius();
-    double passing_time =
+    const double passing_time =
         passing_distance /
         std::sqrt(sqrt_s_NN_ * sqrt_s_NN_ /
                       ((2 * nucleon_mass) * (2 * nucleon_mass)) -

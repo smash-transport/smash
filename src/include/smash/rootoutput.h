@@ -167,14 +167,10 @@ class RootOutput : public OutputInterface {
   TTree *collisions_tree_;
   /**
    * Writes particles to a tree defined by treename.
-   * \param[in] particles Particles to be written to output.
+   * \param[in] particles Particles or ParticleList to be written to output.
    */
-  void particles_to_tree(const Particles &particles);
-  /**
-   * Writes particles froma ParticleList to a tree defined by treename.
-   * \param[in] particles ParticleList to be written to output.
-   */
-  void particle_list_to_tree(const ParticleList &particles);
+  template <typename T>
+  void particles_to_tree(T &particles);
   /**
    * Writes collisions to a tree defined by treename.
    * \param[in] incoming Incoming particles to be written to output.
@@ -231,6 +227,8 @@ class RootOutput : public OutputInterface {
   const bool part_extended_;
   /// Whether extended collisions output is on
   const bool coll_extended_;
+  /// Whether extended ic output is on
+  const bool ic_extended_;
 
   /**
    * Basic initialization routine, creating the TTree objects

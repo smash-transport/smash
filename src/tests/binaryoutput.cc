@@ -465,7 +465,7 @@ TEST(initial_conditions_format) {
     output_par.part_extended = false;
     double density = 0.0;
     /* Create an instance of binary output */
-    auto bin_output = make_unique<BinaryOutputICParticles>(
+    auto bin_output = make_unique<BinaryOutputInitialConditions>(
         testoutputpath, "SMASH_IC", output_par);
     VERIFY(bool(bin_output));
     VERIFY(bf::exists(particleoutputpath_unfinished));

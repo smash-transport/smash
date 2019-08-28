@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2017-2019
+ *    Copyright (c) 2019-2019
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,6 +12,7 @@
 #include "smash/logging.h"
 #include "smash/particledata.h"
 #include "smash/particles.h"
+#include "smash/quantumnumbers.h"
 
 namespace smash {
 
@@ -28,27 +29,48 @@ void HypersurfacecrossingAction::generate_final_state() {
   outgoing_particles_ = empty_list;
 }
 
+void HypersurfacecrossingAction::check_conservation(
+    const uint32_t id_process) const {
+  QuantumNumbers before(incoming_particles_);
+  QuantumNumbers after(outgoing_particles_);
+  if (before == after) {
+    // Conservation laws should not be conserved since particles are removed
+    // from the evolution
+    throw std::runtime_error(
+        "Conservation laws conserved in the hypersurface "
+        "crossing action. Particle was not properly removed in process: " +
+        std::to_string(id_process));
+  }
+
+  if (outgoing_particles_.size() != 0) {
+    throw std::runtime_error(
+        "Particle was not removed successfully in "
+        "hypersurface crossing action.");
+  }
+}
+
 ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
-    const ParticleList &plist, double t_max) const {
+    const ParticleList &plist, double dt, const double) const {
   std::vector<ActionPtr> actions;
 
   for (const ParticleData &p : plist) {
     ParticleData pdata_before_propagation = p;
     ParticleData pdata_after_propagation = p;  // Will receive updated position
     double t0 = p.position().x0();
-    double t_end = t0 + t_max;  // Time at the end of timestep
+    double t_end = t0 + dt;  // Time at the end of timestep
 
     // We don't want to remove particles before the nuclei have interacted
     if (t_end < 0.0) {
       continue;
     }
 
-    // propagate particles to position where they would be after t_max
+    // propagate particles to position where they would be at the end of the
+    // time step (after dt)
     const ThreeVector &v = p.velocity();
-    const FourVector distance = FourVector(0.0, v * t_max);
+    const FourVector distance = FourVector(0.0, v * dt);
     FourVector position = p.position() + distance;
     position.set_x0(t_end);
-    // update coordinates to the position corresponding to t_max
+    // update coordinates to the position corresponding to t_end
     pdata_after_propagation.set_4position(position);
 
     bool hypersurface_is_crossed = crosses_hypersurface(
@@ -71,18 +93,6 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
   return actions;
 }
 
-/**
- * Determine whether or not particle crosses hypersurface of given proper
- * time during timestepless propagation.
- *
- * \param[in] pdata_before_propagation data of the particle of interest before
- * it is propagated.
- * \param[in] pdata_after_propagation data of the particle of interest after it
- * was propagated.
- * \param[in] tau Proper time of hypersurface
- *
- * \return Does particle cross hypersurface?
- */
 bool HyperSurfaceCrossActionsFinder::crosses_hypersurface(
     ParticleData &pdata_before_propagation,
     ParticleData &pdata_after_propagation, const double tau) const {
@@ -117,18 +127,6 @@ bool HyperSurfaceCrossActionsFinder::crosses_hypersurface(
   return hypersurface_is_crossed;
 }
 
-/**
- * Find the coordinates at which a particle crosses a hypersurface of constant
- * proper time during timestepless propagation.
- *
- * \param[in] pdata_before_propagation data of the particle of interest before
- * it is propagated.
- * \param[in] pdata_after_propagation data of the particle of interest after it
- * was propagated.
- * \param[in] tau Proper time of hypersurface
- *
- * \return Coordinates when crossing hypersurface
- */
 FourVector HyperSurfaceCrossActionsFinder::coordinates_on_hypersurface(
     ParticleData &pdata_before_propagation,
     ParticleData &pdata_after_propagation, const double tau) const {
@@ -140,7 +138,8 @@ FourVector HyperSurfaceCrossActionsFinder::coordinates_on_hypersurface(
   const double t2 = pdata_after_propagation.position().x0();
   const double z2 = pdata_after_propagation.position().x3();
 
-  // find slope and intercept of linear function
+  // find slope and intercept of linear function that describes propagation on
+  // straight line
   const double m = (z2 - z1) / (t2 - t1);
   const double n = z1 - m * t1;
 

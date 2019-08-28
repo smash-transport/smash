@@ -177,6 +177,18 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
   }
   // Flush to disk
   std::fflush(file_.get());
+
+  if (Contents & OscarParticlesIC) {
+    const auto &log = logger<LogArea::HyperSurfaceCrossing>();
+    // If the runtime is too short some particles might not yet have
+    // reached the hypersurface. Warning is printed.
+    if (particles.size() != 0) {
+      log.warn(
+          "End time might be too small for initial conditions output. "
+          "Hypersurface has not yet been crossed by ",
+          particles.size(), " particle(s).");
+    }
+  }
 }
 
 template <OscarOutputFormat Format, int Contents>
@@ -210,7 +222,7 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
     for (const auto &p : action.outgoing_particles()) {
       write_particledata(p);
     }
-  } else if (Contents & OscarParticlesIC) {
+  } else if (Contents == OscarParticlesIC) {
     for (const auto &p : action.incoming_particles()) {
       write_particledata(p);
     }
@@ -443,7 +455,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key 5: Resonance decay
  * \li \key 6: Box wall crossing (due to periodic boundary conditions)
  * \li \key 7: Forced thermalization
- * \li \key 8: Hypersurface Crossing
+ * \li \key 8: Hypersurface crossing
  * \li \key 41: Soft string excitation, single diffractive AB -> AX
  * \li \key 42: Soft string excitation, single diffractive AB -> XB
  * \li \key 43: Soft string excitation, double diffractive

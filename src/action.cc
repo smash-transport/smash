@@ -115,14 +115,8 @@ void Action::perform(Particles *particles, uint32_t id_process) {
   /* Check the conservation laws if the modifications of the total kinetic
    * energy of the outgoing particles by the mean field potentials are not
    * taken into account. */
-  if (process_type_ != ProcessType::HyperSurfaceCrossing) {
-    if (UB_lat_pointer == nullptr && UI3_lat_pointer == nullptr) {
-      check_conservation(id_process);
-    }
-  } else {
-    // Separate check for hypersurface crossing: As particles are removed from
-    // the evolution, neither energy nor momentum are conserved.
-    check_conservation_hypersurface_crossing();
+  if (UB_lat_pointer == nullptr && UI3_lat_pointer == nullptr) {
+    check_conservation(id_process);
   }
 }
 
@@ -278,24 +272,6 @@ void Action::check_conservation(const uint32_t id_process) const {
       throw std::runtime_error("Conservation laws violated in process " +
                                std::to_string(id_process));
     }
-  }
-}
-
-void Action::check_conservation_hypersurface_crossing() const {
-  QuantumNumbers before(incoming_particles_);
-  QuantumNumbers after(outgoing_particles_);
-  if (before == after) {
-    // Conservation laws should not be conserved since particles are removed
-    // from the evolution
-    throw std::runtime_error(
-        "Conservation laws conserved in the hypersurface "
-        "crossing action. Particle was not properly removed.");
-  }
-
-  if (outgoing_particles_.size() != 0) {
-    throw std::runtime_error(
-        "Particle was not removed successfully in "
-        "hypersurface crossing action.");
   }
 }
 

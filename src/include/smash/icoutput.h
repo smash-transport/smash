@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2019
+ *    Copyright (c) 2019-2019
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -23,8 +23,10 @@ namespace smash {
 
 /**
  * \ingroup output
+ *
  * SMASH output in ASCII format containing initial conditions for hydrodynamic
- * codes.
+ * codes. Formatted such that it can be directly processed by vHLLE
+ * \iref{Karpenko:2015xea}.
  */
 class ICOutput : public OutputInterface {
  public:
@@ -44,7 +46,6 @@ class ICOutput : public OutputInterface {
    * \param[in] particles Unused, needed since inherited.
    * \param[in] event_number Number of the current event.
    */
-
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
 
@@ -69,9 +70,8 @@ class ICOutput : public OutputInterface {
   /**
    * Write particle data at the hypersurface crossing point to the IC output.
    *
-   * \param[in] particles The particle that is removed.
-   * \param[in] clock Time at which hypersurface is crossed.
-   * \param[in] dens_param Unused, needed since inherited.
+   * \param[in] action Details about the action
+   * \param[in] density Unused, needed since inherited
    */
   void at_interaction(const Action &action, const double density) override;
 
@@ -82,7 +82,10 @@ class ICOutput : public OutputInterface {
   const OutputParameters out_par_;
 
   /**
-   * Proper time at which hypersurface is created.
+   * Proper time of the particles removed when extracting initial conditions.
+   * Parameter used for testing purposes only. Used to verify that the initial
+   * proper time remains unchanged during the evolution. Dewtermined from the
+   * actually removed particles.
    * By construction, tau > 0. Nevertheless it is initialized with a negative
    * number to easily find the first particle that is removed from the evolution
    * in at_interaction().

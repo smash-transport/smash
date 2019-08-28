@@ -238,7 +238,20 @@ class BinaryOutputParticles : public BinaryOutputBase {
   bool only_final_;
 };
 
-class BinaryOutputICParticles : public BinaryOutputBase {
+/**
+ * \ingroup output
+ *
+ * \brief Writes the particles when crossing the hypersurface to the binary file
+ *
+ * This class writes each particle to the binary output at the time of crossing
+ * the hypersurface. This time corresponds to the proper time of the
+ * hypersruface, which is - if not specified differently in the configuration -
+ * the passing time of the two nuclei.
+ *
+ * Details of the output format can be found
+ * on the wiki in the User Guide section, look for Output: Initial Conditions.
+ */
+class BinaryOutputInitialConditions : public BinaryOutputBase {
  public:
   /**
    * Create binary initial conditions particle output.
@@ -247,8 +260,8 @@ class BinaryOutputICParticles : public BinaryOutputBase {
    * \param[in] name Name of the ouput.
    * \param[in] out_par A structure containing the parameters of the output.
    */
-  BinaryOutputICParticles(const bf::path &path, std::string name,
-                          const OutputParameters &out_par);
+  BinaryOutputInitialConditions(const bf::path &path, std::string name,
+                                const OutputParameters &out_par);
 
   /**
    * Writes the initial particle information of an event to the binary output.
