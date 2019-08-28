@@ -236,8 +236,7 @@ class GrandCanThermalizer {
                       const std::array<int, 3> n_cells,
                       const std::array<double, 3> origin, bool periodicity,
                       double e_critical, double t_start, double delta_t,
-                      ThermalizationAlgorithm algo,
-                      bool BF_microcanonical);
+                      ThermalizationAlgorithm algo, bool BF_microcanonical);
   /// \see GrandCanThermalizer Exactly the same but taking values from config
   GrandCanThermalizer(Configuration& conf,
                       const std::array<double, 3> lat_sizes,
