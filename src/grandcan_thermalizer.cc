@@ -100,13 +100,15 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
                                          const std::array<double, 3> origin,
                                          bool periodicity, double e_critical,
                                          double t_start, double delta_t,
-                                         ThermalizationAlgorithm algo)
+                                         ThermalizationAlgorithm algo,
+                                         bool BF_microcanonical)
     : eos_typelist_(list_eos_particles()),
       N_sorts_(eos_typelist_.size()),
       e_crit_(e_critical),
       t_start_(t_start),
       period_(delta_t),
-      algorithm_(algo) {
+      algorithm_(algo),
+      BF_enforce_microcanonical_(BF_microcanonical) {
   const LatticeUpdate upd = LatticeUpdate::EveryFixedInterval;
   lat_ = make_unique<RectangularLattice<ThermLatticeNode>>(
       lat_sizes, n_cells, origin, periodicity, upd);
@@ -178,11 +180,11 @@ void GrandCanThermalizer::renormalize_momenta(
   // Renorm. momenta by factor (1+a) to get the right energy, binary search
   const double tolerance = really_small;
   double a, a_min, a_max, er;
-  const int max_iter = 50;
+  const int max_iter = 100;
   int iter = 0;
   if (E_expected >= E) {
     a_min = 0.0;
-    a_max = 1.0;
+    a_max = 10.0;
   } else {
     a_min = -1.0;
     a_max = 0.0;
@@ -374,15 +376,17 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
     for (size_t itype = 0; itype < N_sorts_; itype++) {
       sample_in_random_cell_BF_algo(sampled_list_, time, itype);
     }
-    double e_tot;
-    const double e_init = conserved_initial.momentum().x0();
-    e_tot = 0.0;
-    for (auto &particle : sampled_list_) {
-      e_tot += particle.momentum().x0();
-    }
-    if (std::abs(e_tot - e_init) > 0.01 * e_init) {
-      log.debug("Rejecting: energy ", e_tot, " too far from e_init = ", e_init);
-      continue;
+    if (BF_enforce_microcanonical_) {
+      double e_tot;
+      const double e_init = conserved_initial.momentum().x0();
+      e_tot = 0.0;
+      for (auto &particle : sampled_list_) {
+        e_tot += particle.momentum().x0();
+      }
+      if (std::abs(e_tot - e_init) > 0.01 * e_init) {
+        log.info("Rejecting: energy ", e_tot, " too far from ", e_init);
+        continue;
+      }
     }
     break;
   }

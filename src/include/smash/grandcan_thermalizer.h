@@ -181,6 +181,18 @@ enum class HadronClass {
  * \li \key "biased BF" - faster, but theoretically less robust
  * \li \key "mode sampling" - fastest, but least robust
  *
+ * \key Microcanonical (bool, optional, default = false) \n
+ * Enforce energy conservation or not as part of sampling algorithm. Relevant
+ * for biased and unbiased Becattini-Ferroni (BF) algorithms. If this option is
+ * on, samples with energies deviating too far from the initial one will
+ * be rejected. This is different from simple energy and momentum
+ * renormalization, which is done in the end anyway. If energy conservation
+ * is enforced at sampling, the distributions become microcanonical instead
+ * of canonical. One particular effect is that multiplicity distributions
+ * become narrower.
+ *
+ * The downside of having this option on is that the sampling takes
+ * significantly longer time.
  */
 
 /**
@@ -217,12 +229,14 @@ class GrandCanThermalizer {
    * \param[in] t_start Starting time of the simulation
    * \param[in] delta_t Timestep of the simulation
    * \param[in] algo Choice of algorithm for the canonical sampling
+   * \param[in] BF_microcanonical Enforce energy conservation in BF sampling
+   *            algorithms or nor
    */
   GrandCanThermalizer(const std::array<double, 3> lat_sizes,
                       const std::array<int, 3> n_cells,
                       const std::array<double, 3> origin, bool periodicity,
                       double e_critical, double t_start, double delta_t,
-                      ThermalizationAlgorithm algo);
+                      ThermalizationAlgorithm algo, bool BF_microcanonical);
   /// \see GrandCanThermalizer Exactly the same but taking values from config
   GrandCanThermalizer(Configuration& conf,
                       const std::array<double, 3> lat_sizes,
@@ -231,7 +245,8 @@ class GrandCanThermalizer {
             lat_sizes, conf.take({"Cell_Number"}), origin, periodicity,
             conf.take({"Critical_Edens"}), conf.take({"Start_Time"}),
             conf.take({"Timestep"}),
-            conf.take({"Algorithm"}, ThermalizationAlgorithm::BiasedBF)) {}
+            conf.take({"Algorithm"}, ThermalizationAlgorithm::BiasedBF),
+            conf.take({"Microcanonical"}, false)) {}
   /**
    * Check that the clock is close to n * period of thermalization, since
    * the thermalization only happens at these times
@@ -505,6 +520,8 @@ class GrandCanThermalizer {
   const double period_;
   /// Algorithm to choose for sampling of particles obeying conservation laws
   const ThermalizationAlgorithm algorithm_;
+  /// Enforce energy conservation as part of BF sampling algorithm or not
+  const bool BF_enforce_microcanonical_;
 };
 
 }  // namespace smash

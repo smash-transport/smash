@@ -538,14 +538,14 @@ std::array<double, 3> HadronGasEos::solve_eos(
 
   if (residual_status != GSL_SUCCESS) {
     std::stringstream solver_parameters;
-    solver_parameters << "Solver run with "
+    solver_parameters << "\nSolver run with "
                       << "e = " << e << ", nb = " << nb << ", ns = " << ns
                       << ", init. approx.: " << initial_approximation[0] << " "
                       << initial_approximation[1] << " "
                       << initial_approximation[2] << std::endl;
-    throw std::runtime_error(gsl_strerror(residual_status) +
-                             solver_parameters.str() +
-                             print_solver_state(iter));
+    const auto &log = logger<LogArea::HadronGasEos>();
+    log.warn(gsl_strerror(residual_status) + solver_parameters.str() +
+             print_solver_state(iter));
   }
 
   return {gsl_vector_get(solver_->x, 0), gsl_vector_get(solver_->x, 1),
