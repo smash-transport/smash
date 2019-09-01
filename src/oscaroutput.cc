@@ -401,6 +401,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * time_last_coll pdg_mother1 pdg_mother2</span></div>
  * </div>
  *
+ * \anchor extended_output_format_
  * The additional particle properties available in the extended output format
  * are:
  * \li \key ncoll: Number of collisions the particle has undergone

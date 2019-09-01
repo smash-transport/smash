@@ -66,6 +66,10 @@ namespace smash {
  * \li \c t, \c x, \c y, \c z are position arrays
  * \li \c p0, \c px, \c py, \c pz are 4-momenta arrays
  *
+ * In case of extended output (see \ref output_content_specific_options_) more
+ * fields are added. Their description is the same that in case of OSCAR
+ * format, see \ref extended_output_format_.
+ *
  * The entries in the \c collisions tree are organized in the same way, but
  * a few additional fields are present:
  * \li \c nin and \c nout are added to characterize number of incoming and
@@ -87,11 +91,9 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name,
                         name == "Photons"),
       write_particles_(name == "Particles"),
       particles_only_final_(out_par.part_only_final),
-      autosave_frequency_(1000) {
-  const auto &log = logger<LogArea::Output>();
-  if (out_par.part_extended || out_par.coll_extended) {
-    log.warn() << "Creating Root output: There is no extended Root format.";
-  }
+      autosave_frequency_(1000),
+      part_extended_(out_par.part_extended),
+      coll_extended_(out_par.coll_extended) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += ".unfinished";
   root_out_file_ =
@@ -121,6 +123,25 @@ void RootOutput::init_trees() {
     particles_tree_->Branch("x", &x[0], "x[npart]/D");
     particles_tree_->Branch("y", &y[0], "y[npart]/D");
     particles_tree_->Branch("z", &z[0], "z[npart]/D");
+
+    if (part_extended_) {
+      particles_tree_->Branch("coll_per_part", &coll_per_part_[0],
+                              "coll_per_part[npart]/I");
+      particles_tree_->Branch("formation_time", &formation_time_[0],
+                              "formation_time[npart]/D");
+      particles_tree_->Branch("xsec_factor", &xsec_factor_[0],
+                              "xsec_factor[npart]/D");
+      particles_tree_->Branch("proc_id_origin", &proc_id_origin_[0],
+                              "proc_id_origin[npart]/I");
+      particles_tree_->Branch("proc_type_origin", &proc_type_origin_[0],
+                              "proc_type_origin[npart]/I");
+      particles_tree_->Branch("time_last_coll", &time_last_coll_[0],
+                              "time_last_coll[npart]/D");
+      particles_tree_->Branch("pdg_mother1", &pdg_mother1_[0],
+                              "pdg_mother1[npart]/I");
+      particles_tree_->Branch("pdg_mother2", &pdg_mother2_[0],
+                              "pdg_mother2[npart]/I");
+    }
   }
 
   if (write_collisions_) {
@@ -145,6 +166,25 @@ void RootOutput::init_trees() {
     collisions_tree_->Branch("x", &x[0], "x[npart]/D");
     collisions_tree_->Branch("y", &y[0], "y[npart]/D");
     collisions_tree_->Branch("z", &z[0], "z[npart]/D");
+
+    if (coll_extended_) {
+      collisions_tree_->Branch("coll_per_part", &coll_per_part_[0],
+                               "coll_per_part[npart]/I");
+      collisions_tree_->Branch("formation_time", &formation_time_[0],
+                               "formation_time[npart]/D");
+      collisions_tree_->Branch("xsec_factor", &xsec_factor_[0],
+                               "xsec_factor[npart]/D");
+      collisions_tree_->Branch("proc_id_origin", &proc_id_origin_[0],
+                               "proc_id_origin[npart]/I");
+      collisions_tree_->Branch("proc_type_origin", &proc_type_origin_[0],
+                               "proc_type_origin[npart]/I");
+      collisions_tree_->Branch("time_last_coll", &time_last_coll_[0],
+                               "time_last_coll[npart]/D");
+      collisions_tree_->Branch("pdg_mother1", &pdg_mother1_[0],
+                               "pdg_mother1[npart]/I");
+      collisions_tree_->Branch("pdg_mother2", &pdg_mother2_[0],
+                               "pdg_mother2[npart]/I");
+    }
   }
 }
 
@@ -236,6 +276,18 @@ void RootOutput::particles_to_tree(const Particles &particles) {
       pdgcode[i] = p.pdgcode().get_decimal();
       charge[i] = p.type().charge();
 
+      if (part_extended_) {
+        const auto h = p.get_history();
+        formation_time_[i] = p.formation_time();
+        xsec_factor_[i] = p.xsec_scaling_factor();
+        time_last_coll_[i] = h.time_last_collision;
+        coll_per_part_[i] = h.collisions_per_particle;
+        proc_id_origin_[i] = h.id_process;
+        proc_type_origin_[i] = static_cast<int>(h.process_type);
+        pdg_mother1_[i] = h.p1.get_decimal();
+        pdg_mother2_[i] = h.p2.get_decimal();
+      }
+
       i++;
     }
   }
@@ -264,38 +316,35 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
    * But if one wants initial/final particles written to collisions
    * then implementation should be updated. */
 
-  for (const auto &p : incoming) {
-    t[i] = p.position().x0();
-    x[i] = p.position().x1();
-    y[i] = p.position().x2();
-    z[i] = p.position().x3();
+  for (const ParticleList &plist : {incoming, outgoing}) {
+    for (const auto &p : plist) {
+      t[i] = p.position().x0();
+      x[i] = p.position().x1();
+      y[i] = p.position().x2();
+      z[i] = p.position().x3();
 
-    p0[i] = p.momentum().x0();
-    px[i] = p.momentum().x1();
-    py[i] = p.momentum().x2();
-    pz[i] = p.momentum().x3();
+      p0[i] = p.momentum().x0();
+      px[i] = p.momentum().x1();
+      py[i] = p.momentum().x2();
+      pz[i] = p.momentum().x3();
 
-    pdgcode[i] = p.pdgcode().get_decimal();
-    charge[i] = p.type().charge();
+      pdgcode[i] = p.pdgcode().get_decimal();
+      charge[i] = p.type().charge();
 
-    i++;
-  }
+      if (coll_extended_) {
+        const auto h = p.get_history();
+        formation_time_[i] = p.formation_time();
+        xsec_factor_[i] = p.xsec_scaling_factor();
+        time_last_coll_[i] = h.time_last_collision;
+        coll_per_part_[i] = h.collisions_per_particle;
+        proc_id_origin_[i] = h.id_process;
+        proc_type_origin_[i] = static_cast<int>(h.process_type);
+        pdg_mother1_[i] = h.p1.get_decimal();
+        pdg_mother2_[i] = h.p2.get_decimal();
+      }
 
-  for (const auto &p : outgoing) {
-    t[i] = p.position().x0();
-    x[i] = p.position().x1();
-    y[i] = p.position().x2();
-    z[i] = p.position().x3();
-
-    p0[i] = p.momentum().x0();
-    px[i] = p.momentum().x1();
-    py[i] = p.momentum().x2();
-    pz[i] = p.momentum().x3();
-
-    pdgcode[i] = p.pdgcode().get_decimal();
-    charge[i] = p.type().charge();
-
-    i++;
+      i++;
+    }
   }
 
   collisions_tree_->Fill();
