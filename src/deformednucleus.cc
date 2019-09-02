@@ -37,7 +37,8 @@ namespace smash {
  * The azimuthal angle by which to rotate the nucleus.
  *
  * \li \key Random_Rotation (bool, optional, default = false):\n
- * Whether the created nucleus object should be randomly rotated in space.
+ * Determines whether the created nucleus object should be randomly rotated in
+ * space.
  *
  * \n
  */
