@@ -495,6 +495,13 @@ FourVector Nucleus::center() const {
   return centerpoint;
 }
 
+void Nucleus::random_euler_angles() {
+  // Sample euler_theta_ such that cos(theta) is uniform
+  euler_phi_ = twopi * random::uniform(0., 1.);
+  euler_theta_ = std::acos(2 * random::uniform(0., 1.) - 1);
+  euler_psi_ = twopi * random::uniform(0., 1.);
+}
+
 std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
   return out << "  #particles   #testparticles   mass [GeV]   "
                 "radius [fm]  diffusiveness [fm]\n"

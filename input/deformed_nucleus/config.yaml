@@ -38,7 +38,6 @@ Modi:
                 Automatic: False
                 Beta_2: 2.0
                 Beta_4: 8.0
-                Theta: 0.8
-                Phi: 0.02
+                Random_Rotation: True
 
         E_Kin: 1.23

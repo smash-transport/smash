@@ -174,7 +174,7 @@ ThreeVector CustomNucleus::distribute_nucleon() {
   index++;
   ThreeVector nucleon_position(pos.x, pos.y, pos.z);
   // rotate nucleon about euler angle
-  nucleon_position.rotate(phi_, theta_, psi_);
+  nucleon_position.rotate(euler_phi_, euler_theta_, euler_psi_);
 
   return nucleon_position;
 }
@@ -184,7 +184,7 @@ void CustomNucleus::arrange_nucleons() {
    * custom nucleus is initialiezed. Therefore this is done 2 times per
    * event.
    */
-  random_euler_angles();
+  Nucleus::random_euler_angles();
 
   for (auto i = begin(); i != end(); i++) {
     // Initialize momentum
@@ -235,13 +235,6 @@ std::vector<Nucleoncustom> CustomNucleus::readfile(std::ifstream& infile,
     custom_nucleus.push_back(nucleon);
   }
   return custom_nucleus;
-}
-
-void CustomNucleus::random_euler_angles() {
-  // theta_ has to be sampled that way as cos(theta) should be uniform
-  phi_ = twopi * random::uniform(0., 1.);
-  theta_ = std::acos(2 * random::uniform(0., 1.) - 1);
-  psi_ = twopi * random::uniform(0., 1.);
 }
 
 }  // namespace smash

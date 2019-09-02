@@ -306,6 +306,18 @@ class Nucleus {
    * Writes the state of the Nucleus object to the output stream.
    */
   friend std::ostream &operator<<(std::ostream &, const Nucleus &);
+  /**
+   * Randomly generate Euler angles. Necessary for rotation of deformed and
+   * custom nuclei, whenever a new nucleus of this kind is initialized.
+   */
+  void random_euler_angles();
+
+  /// Euler angel phi
+  double euler_phi_;
+  /// Euler angel theta
+  double euler_theta_;
+  /// Euler angel psi
+  double euler_psi_;
 };
 
 }  // namespace smash
