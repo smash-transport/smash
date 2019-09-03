@@ -105,7 +105,8 @@ namespace smash {
  * default = (0.545 for A <= 16; 0.54 for A > 16)): \n
  * Diffusiveness of the Woods Saxon distribution for the nucleus in fm.
  *
- * \li \key Radius (double, optional, default = proton_rad * A^(1/3)): \n
+ * \li \key Radius (double, optional, default = proton_rad * A^(1/3) for A <=
+ 16, else 1.12 * A^(1/3) - 0.68 * A^(-1/3)): \n
  * Radius of nucleus in fm. The default radius is calculated as the proton
  * radius times the third root of the number of nucleons.
  *

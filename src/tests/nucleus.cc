@@ -62,7 +62,9 @@ TEST_CATCH(initialize_testparticles_wrong, Nucleus::TestparticleConfusion) {
 
 TEST(nuclear_radius) {
   Nucleus lead(list, 1);
-  FUZZY_COMPARE(lead.default_nuclear_radius(), 1.2 * std::pow(208., 1. / 3.));
+  FUZZY_COMPARE(
+      lead.default_nuclear_radius(),
+      1.12 * std::pow(208., 1. / 3.) - 0.86 * std::pow(208., -1. / 3.));
 }
 
 // check that center is at (0/0/0):

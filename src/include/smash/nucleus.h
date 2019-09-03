@@ -284,12 +284,22 @@ class Nucleus {
    */
   inline double get_saturation_density() const { return saturation_density_; }
   /**
-   * \return a default radius for the nucleus
-   * Nuclear radius is calculated with the proton radius times the third
-   * root of the number of nucleons.
+   * Default nuclear radius calculated as:
+   * \li \f$ r = r_\mathrm{proton} \ A^{1/3} \qquad \qquad \qquad \ \f$ for A <=
+   * 16 \li \f$ r = 1.12 \ A^{1/3} - 0.68 \ A^{-1/3} \qquad \f$ for A > 16
+   *
+   * \return default radius for the nucleus\n
    */
   inline double default_nuclear_radius() {
-    return proton_radius_ * std::pow(number_of_particles(), 1. / 3.);
+    int A = number_of_particles();
+
+    if (A <= 16) {
+      // radius: rough guess for all nuclei not listed explicitly with A <= 16
+      return (proton_radius_ * std::cbrt(A));
+    } else {
+      // radius taken from \iref{Rybczynski:2013yba}
+      return (1.12 * std::pow(A, 1.0 / 3.0) - 0.86 * std::pow(A, -1.0 / 3.0));
+    }
   }
   /**
    * Sets the nuclear radius
