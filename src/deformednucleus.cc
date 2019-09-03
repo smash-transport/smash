@@ -205,7 +205,8 @@ void DeformedNucleus::set_deformation_parameters_from_config(
     set_beta_4(static_cast<double>(config.take({"Deformed", "Beta_4"})));
   }
   if (config.has_value({"Deformed", "Theta"})) {
-    if (config.has_value({"Deformed", "Random_Rotation"})) {
+    if (config.has_value({"Deformed", "Random_Rotation"}) &&
+        config.take({"Deformed", "Random_Rotation"})) {
       throw std::domain_error(
           "Random rotation of nuclei is activated although"
           " theta is provided. Please specify only either of them. ");
@@ -214,7 +215,8 @@ void DeformedNucleus::set_deformation_parameters_from_config(
     }
   }
   if (config.has_value({"Deformed", "Phi"})) {
-    if (config.has_value({"Deformed", "Random_Rotation"})) {
+    if (config.has_value({"Deformed", "Random_Rotation"}) &&
+        config.take({"Deformed", "Random_Rotation"})) {
       throw std::domain_error(
           "Random rotation of nuclei is activated although"
           " phi is provided. Please specify only either of them. ");
