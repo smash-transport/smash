@@ -341,9 +341,9 @@ void Nucleus::set_parameters_automatic() {
     }
 
     default:
+      // saturation density already has reasonable default
       set_nuclear_radius(default_nuclear_radius());
       if (A <= 16) {
-        // saturation density already has reasonable default
         set_diffusiveness(0.545);
       } else {
         // diffusiveness taken from \iref{Rybczynski:2013yba}
