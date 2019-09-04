@@ -79,11 +79,6 @@ class CustomNucleus : public Nucleus {
   std::string file_path(const std::string& file_directory,
                         const std::string& file_name);
   /**
-   * Randomly generate Euler angles for rotation everytime a new
-   * custom nucleus is initialiezed.
-   */
-  void random_euler_angles();
-  /**
    * Number of Nucleons per Nucleus
    * Set initally to zero to be modified in the constructor.
    * Is obtained by adding the proton and neutron numbers
@@ -94,12 +89,6 @@ class CustomNucleus : public Nucleus {
   std::vector<Nucleoncustom> custom_nucleus_;
   /// Index needed to read out vector in distribute nucleon
   size_t index = 0;
-  /// Euler angel phi
-  double phi_;
-  /// Euler angel theta
-  double theta_;
-  /// Euler angel psi
-  double psi_;
 
  private:
   /**

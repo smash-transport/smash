@@ -246,6 +246,19 @@ class Nucleus {
   /// Particles associated with this nucleus.
   std::vector<ParticleData> particles_;
 
+  /**
+   * Randomly generate Euler angles. Necessary for rotation of deformed and
+   * custom nuclei, whenever a new nucleus of this kind is initialized.
+   */
+  void random_euler_angles();
+
+  /// Euler angel phi
+  double euler_phi_;
+  /// Euler angel theta
+  double euler_theta_;
+  /// Euler angel psi
+  double euler_psi_;
+
  public:
   /// For iterators over the particle list:
   inline std::vector<ParticleData>::iterator begin() {

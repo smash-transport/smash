@@ -36,6 +36,10 @@ namespace smash {
  * \li \key Phi (double, optional):\n
  * The azimuthal angle by which to rotate the nucleus.
  *
+ * \li \key Random_Rotation (bool, optional, default = false):\n
+ * Determines whether the created nucleus object should be randomly rotated in
+ * space.
+ *
  * \n
  */
 
@@ -88,6 +92,8 @@ Modi:
             Deformed:
                 # Automatically set deformation parameters
                 Automatic: True
+                # Randomly rotate nucleus
+                Random_Rotation: True
         E_kin: 1.2
         Calculation_Frame: "fixed target"
 \endverbatim
@@ -199,10 +205,32 @@ void DeformedNucleus::set_deformation_parameters_from_config(
     set_beta_4(static_cast<double>(config.take({"Deformed", "Beta_4"})));
   }
   if (config.has_value({"Deformed", "Theta"})) {
-    set_polar_angle(static_cast<double>(config.take({"Deformed", "Theta"})));
+    if (config.has_value({"Deformed", "Random_Rotation"}) &&
+        config.take({"Deformed", "Random_Rotation"})) {
+      throw std::domain_error(
+          "Random rotation of nuclei is activated although"
+          " theta is provided. Please specify only either of them. ");
+    } else {
+      set_polar_angle(static_cast<double>(config.take({"Deformed", "Theta"})));
+    }
   }
   if (config.has_value({"Deformed", "Phi"})) {
-    set_azimuthal_angle(static_cast<double>(config.take({"Deformed", "Phi"})));
+    if (config.has_value({"Deformed", "Random_Rotation"}) &&
+        config.take({"Deformed", "Random_Rotation"})) {
+      throw std::domain_error(
+          "Random rotation of nuclei is activated although"
+          " phi is provided. Please specify only either of them. ");
+    } else {
+      set_azimuthal_angle(
+          static_cast<double>(config.take({"Deformed", "Phi"})));
+    }
+  }
+  if (config.take({"Deformed", "Random_Rotation"}, false)) {
+    // Randomly generate euler angles for theta and phi. Psi needs not be
+    // assigned, as the nucleus objects are symmetric with respect to psi.
+    Nucleus::random_euler_angles();
+    set_azimuthal_angle(euler_phi_);
+    set_polar_angle(euler_theta_);
   }
 }
 
