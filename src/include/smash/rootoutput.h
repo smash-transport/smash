@@ -190,8 +190,10 @@ class RootOutput : public OutputInterface {
 
   //@{
   /// Buffer for filling TTree. See class documentation for definitions.
-  std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z;
-  std::array<int, max_buffer_size_> pdgcode, charge;
+  std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z,
+      formation_time_, xsec_factor_, time_last_coll_;
+  std::array<int, max_buffer_size_> pdgcode, charge, coll_per_part_,
+      proc_id_origin_, proc_type_origin_, pdg_mother1_, pdg_mother2_;
   int npart, tcounter, ev, nin, nout;
   double wgt, par_wgt, impact_b;
   bool empty_event_;
@@ -216,6 +218,11 @@ class RootOutput : public OutputInterface {
    * always a compromise between safety and speed.
    */
   int autosave_frequency_;
+
+  /// Whether extended particle output is on
+  const bool part_extended_;
+  /// Whether extended collisions output is on
+  const bool coll_extended_;
 
   /**
    * Basic initialization routine, creating the TTree objects
