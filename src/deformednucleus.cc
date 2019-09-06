@@ -111,6 +111,11 @@ DeformedNucleus::DeformedNucleus(Configuration &config, int nTest,
   } else {
     set_deformation_parameters_from_config(config);
   }
+
+  if (config.has_value({"Deformed", "Orientation"})) {
+    Configuration subconfig = config["Deformed"]["Orientation"];
+    set_orientation_from_config(subconfig);
+  }
 }
 
 double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
@@ -190,9 +195,6 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
           "parameters. Please specify at least \"Beta_2\" and \"Beta_4\" "
           "manually and set \"Automatic: False.\" ");
   }
-
-  // Set a random nuclear rotation.
-  nuclear_orientation_.distribute_isotropically();
 }
 
 void DeformedNucleus::set_deformation_parameters_from_config(
@@ -203,11 +205,6 @@ void DeformedNucleus::set_deformation_parameters_from_config(
   }
   if (config.has_value({"Deformed", "Beta_4"})) {
     set_beta_4(static_cast<double>(config.take({"Deformed", "Beta_4"})));
-  }
-
-  if (config.has_value({"Deformed", "Orientation"})) {
-    Configuration subconfig = config["Deformed"]["Orientation"];
-    set_orientation_from_config(subconfig);
   }
 }
 
