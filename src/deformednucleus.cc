@@ -113,14 +113,6 @@ DeformedNucleus::DeformedNucleus(Configuration &config, int nTest,
   }
 }
 
-double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
-  return Nucleus::get_saturation_density() /
-         (1 + std::exp((r - Nucleus::get_nuclear_radius() *
-                                (1 + beta2_ * y_l_0(2, cosx) +
-                                 beta4_ * y_l_0(4, cosx))) /
-                       Nucleus::get_diffusiveness()));
-}
-
 ThreeVector DeformedNucleus::distribute_nucleon() {
   double a_radius;
   Angles a_direction;
@@ -135,7 +127,7 @@ ThreeVector DeformedNucleus::distribute_nucleon() {
     // sample r**2 dr
     a_radius = radius_max * std::cbrt(random::canonical());
   } while (random::canonical() >
-           deformed_woods_saxon(a_radius, a_direction.costheta()) /
+           nucleon_density(a_radius, a_direction.costheta()) /
                Nucleus::get_saturation_density());
 
   // Update (x, y, z) positions.
@@ -247,11 +239,15 @@ void DeformedNucleus::rotate() {
   }
 }
 
-double DeformedNucleus::nucleon_density(double r, double costheta) {
-  return deformed_woods_saxon(r, costheta);
+double DeformedNucleus::nucleon_density(double r, double cosx) {
+  return Nucleus::get_saturation_density() /
+         (1 + std::exp((r - Nucleus::get_nuclear_radius() *
+                                (1 + beta2_ * y_l_0(2, cosx) +
+                                 beta4_ * y_l_0(4, cosx))) /
+                       Nucleus::get_diffusiveness()));
 }
 
-double DeformedNucleus::y_l_0(int l, double cosx) const {
+double DeformedNucleus::y_l_0(int l, double cosx) {
   if (l == 2) {
     return (1. / 4) * std::sqrt(5 / M_PI) * (3. * (cosx * cosx) - 1);
   } else if (l == 4) {
