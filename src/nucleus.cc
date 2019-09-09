@@ -388,8 +388,9 @@ void Nucleus::generate_fermi_momenta() {
       continue;
     }
     const double r = (i->position() - nucleus_center).abs3();
-    double rho = nuclear_density /
-                 (std::exp((r - nuclear_radius_) / diffusiveness_) + 1.);
+    const double theta = (i->position().threevec().get_theta());
+    double rho = nucleon_density(r, cos(theta));
+
     if (i->pdgcode() == pdg::p) {
       rho = rho * N_p / A;
     }
@@ -500,6 +501,11 @@ void Nucleus::random_euler_angles() {
   euler_phi_ = twopi * random::uniform(0., 1.);
   euler_theta_ = std::acos(2 * random::uniform(0., 1.) - 1);
   euler_psi_ = twopi * random::uniform(0., 1.);
+}
+
+double Nucleus::nucleon_density(double r, double) {
+  return nuclear_density /
+         (std::exp((r - nuclear_radius_) / diffusiveness_) + 1.);
 }
 
 std::ostream &operator<<(std::ostream &out, const Nucleus &n) {

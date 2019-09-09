@@ -89,10 +89,12 @@ class DeformedNucleus : public Nucleus {
   void rotate() override;
 
   /**
-   * Does not allow to generate Fermi-momenta for a deformed nucleus.
-   * \throws domain_error if this function is ever called
+   * Returns the nucleon dansity at given points described by r and theta.
+   * \param[in] r distance to point
+   * \param[in] costheta cosine of polar angle
+   * \return Woods-Saxon probability at given point
    */
-  void generate_fermi_momenta() override;
+  double nucleon_density(double r, double costheta) override;
 
   /**
    * Spherical harmonics Y_2_0 and Y_4_0.
