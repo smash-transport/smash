@@ -79,12 +79,12 @@ class DeformedNucleus : public Nucleus {
   void rotate() override;
 
   /**
-   * Return the deformed Woods-Saxon probability for the given position. This
-   * corresponds to the nuclear density at the very same position.
+   * Return the deformed Woods-Saxon probability density for the given position.
+   * This corresponds to the nuclear density at the very same position.
    *
    * \param[in] r The radius at which to sample
    * \param[in] cosx The cosine of the polar angle at which to sample
-   * \return The Woods-Saxon probability
+   * \return The Woods-Saxon density
    */
   double nucleon_density(double r, double cosx) override;
 

@@ -220,13 +220,13 @@ class Nucleus {
   }
 
   /**
-   * Return the Woods-Saxon probability for the given position. This
+   * Return the Woods-Saxon probability density for the given position. This
    * corresponds to the nuclear density at the very same position.
    *
    * \param[in] r The radius at which to sample
    * \param[in] cosx The cosine of the polar angle at which to sample (only
    *            used for deformed nuclei)
-   * \return The Woods-Saxon probability
+   * \return The Woods-Saxon density
    */
   virtual double nucleon_density(double r, double);
 
