@@ -32,7 +32,14 @@ class ThreeVector {
   /// default constructor (nulls all components)
   ThreeVector() : x_({0., 0., 0.}) {}
 
-  /// copy constructor
+  /**
+   * Constructor for ThreeVector that takes 3 doubles to set up a ThreeVector
+   * with desired values for the components
+   *
+   * \param[in] y1 value of the first component
+   * \param[in] y2 value of the second component
+   * \param[in] y3 value of the third component
+   */
   ThreeVector(double y1, double y2, double y3) : x_({y1, y2, y3}) {}
 
   /// access the component at offset \p i.
