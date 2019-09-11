@@ -103,7 +103,7 @@ class Nucleus {
    * The actual momenta \f$p_x\f$, \f$p_y\f$, \f$p_z\f$ are
    * uniformly distributed in the sphere with radius \f$p_F\f$.
    */
-  virtual void generate_fermi_momenta();
+  void generate_fermi_momenta();
 
   /**
    * Boosts the nuclei into the computational frame, such that
@@ -218,6 +218,17 @@ class Nucleus {
       p->set_4position(p->position() - centerpoint);
     }
   }
+
+  /**
+   * Return the Woods-Saxon probability density for the given position. This
+   * corresponds to the nuclear density at the very same position.
+   *
+   * \param[in] r The radius at which to sample
+   * \param[in] cosx The cosine of the polar angle at which to sample (only
+   *            used for deformed nuclei)
+   * \return The Woods-Saxon density
+   */
+  virtual double nucleon_density(double r, double);
 
   /// \ingroup exception
   struct TestparticleConfusion : public std::length_error {

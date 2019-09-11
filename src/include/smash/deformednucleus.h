@@ -43,16 +43,6 @@ class DeformedNucleus : public Nucleus {
    * should be set automatically
    */
   DeformedNucleus(Configuration &config, int nTest, bool auto_deformation);
-
-  /**
-   * Return the deformed Woods-Saxon probability for the given position.
-   *
-   * \param[in] r The radius at which to sample
-   * \param[in] cosx The cosine of the polar angle at which to sample
-   * \return The Woods-Saxon probability
-   */
-  double deformed_woods_saxon(double r, double cosx) const;
-
   /**
    * Deformed Woods-Saxon sampling routine.
    *
@@ -89,19 +79,14 @@ class DeformedNucleus : public Nucleus {
   void rotate() override;
 
   /**
-   * Does not allow to generate Fermi-momenta for a deformed nucleus.
-   * \throws domain_error if this function is ever called
+   * Return the deformed Woods-Saxon probability density for the given position.
+   * This corresponds to the nuclear density at the very same position.
+   *
+   * \param[in] r The radius at which to sample
+   * \param[in] cosx The cosine of the polar angle at which to sample
+   * \return The Woods-Saxon density
    */
-  void generate_fermi_momenta() override;
-
-  /**
-   * Spherical harmonics Y_2_0 and Y_4_0.
-   * \param[in] l Angular momentum value (2 and 4 are supported)
-   * \param[in] cosx Cosine of the polar angle
-   * \return Value of the corresponding spherical harmonic
-   * \throws domain_error if unsupported l is encountered
-   */
-  double y_l_0(int l, double cosx) const;
+  double nucleon_density(double r, double cosx) override;
 
   /**
    * Set deformation coefficient for Y_2_0.

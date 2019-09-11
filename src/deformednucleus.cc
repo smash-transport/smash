@@ -113,14 +113,6 @@ DeformedNucleus::DeformedNucleus(Configuration &config, int nTest,
   }
 }
 
-double DeformedNucleus::deformed_woods_saxon(double r, double cosx) const {
-  return Nucleus::get_saturation_density() /
-         (1 + std::exp((r - Nucleus::get_nuclear_radius() *
-                                (1 + beta2_ * y_l_0(2, cosx) +
-                                 beta4_ * y_l_0(4, cosx))) /
-                       Nucleus::get_diffusiveness()));
-}
-
 ThreeVector DeformedNucleus::distribute_nucleon() {
   double a_radius;
   Angles a_direction;
@@ -135,7 +127,7 @@ ThreeVector DeformedNucleus::distribute_nucleon() {
     // sample r**2 dr
     a_radius = radius_max * std::cbrt(random::canonical());
   } while (random::canonical() >
-           deformed_woods_saxon(a_radius, a_direction.costheta()) /
+           nucleon_density(a_radius, a_direction.costheta()) /
                Nucleus::get_saturation_density());
 
   // Update (x, y, z) positions.
@@ -247,13 +239,14 @@ void DeformedNucleus::rotate() {
   }
 }
 
-void DeformedNucleus::generate_fermi_momenta() {
-  throw std::domain_error(
-      "Fermi momenta currently not implemented"
-      " for a deformed nucleus.");
-}
-
-double DeformedNucleus::y_l_0(int l, double cosx) const {
+/**
+ * Spherical harmonics Y_2_0 and Y_4_0.
+ * \param[in] l Angular momentum value (2 and 4 are supported)
+ * \param[in] cosx Cosine of the polar angle
+ * \return Value of the corresponding spherical harmonic
+ * \throws domain_error if unsupported l is encountered
+ */
+static double y_l_0(int l, double cosx) {
   if (l == 2) {
     return (1. / 4) * std::sqrt(5 / M_PI) * (3. * (cosx * cosx) - 1);
   } else if (l == 4) {
@@ -261,9 +254,16 @@ double DeformedNucleus::y_l_0(int l, double cosx) const {
            (35. * (cosx * cosx) * (cosx * cosx) - 30. * (cosx * cosx) + 3);
   } else {
     throw std::domain_error(
-        "Not a valid angular momentum quantum number in"
-        "DeformedNucleus::y_l_0.");
+        "Not a valid angular momentum quantum number in y_l_0.");
   }
+}
+
+double DeformedNucleus::nucleon_density(double r, double cosx) {
+  return Nucleus::get_saturation_density() /
+         (1 + std::exp((r - Nucleus::get_nuclear_radius() *
+                                (1 + beta2_ * y_l_0(2, cosx) +
+                                 beta4_ * y_l_0(4, cosx))) /
+                       Nucleus::get_diffusiveness()));
 }
 
 }  // namespace smash
