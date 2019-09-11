@@ -237,15 +237,18 @@ void DeformedNucleus::set_orientation_from_config(
   }
 
   if (orientation_config.take({"Random_Rotation"}, false)) {
+    random_rotation_ = true;
+  }
+}
+
+void DeformedNucleus::rotate() {
+  if (random_rotation_) {
     // Randomly generate euler angles for theta and phi. Psi needs not be
     // assigned, as the nucleus objects are symmetric with respect to psi.
     Nucleus::random_euler_angles();
     set_azimuthal_angle(euler_phi_);
     set_polar_angle(euler_theta_);
   }
-}
-
-void DeformedNucleus::rotate() {
   for (auto &particle : *this) {
     /* Rotate every vector by the nuclear azimuth phi and polar angle
      * theta (the Euler angles). This means applying the matrix for a

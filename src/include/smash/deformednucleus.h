@@ -144,6 +144,10 @@ class DeformedNucleus : public Nucleus {
    * a pair of angles (theta, phi)
    */
   Angles nuclear_orientation_;
+  /**
+   * Whether the nuclei should be rotated randomly.
+   */
+  bool random_rotation_ = false;
 };
 
 }  // namespace smash
