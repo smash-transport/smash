@@ -73,6 +73,12 @@ class DeformedNucleus : public Nucleus {
   void set_deformation_parameters_from_config(Configuration &config);
 
   /**
+   * Set angles for orientation of nucleus from config file.
+   * \param[in] config The configuration for the deformation of this nucleus
+   * (projectile or target).
+   */
+  void set_orientation_from_config(Configuration &orientation_config);
+  /**
    * Rotates the nucleus according to members nucleus_polar_angle_
    * and nucleus_azimuthal_angle_ and updates nucleon positions.
    */
@@ -123,6 +129,10 @@ class DeformedNucleus : public Nucleus {
    * a pair of angles (theta, phi)
    */
   Angles nuclear_orientation_;
+  /**
+   * Whether the nuclei should be rotated randomly.
+   */
+  bool random_rotation_ = false;
 };
 
 }  // namespace smash

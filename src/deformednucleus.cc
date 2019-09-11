@@ -30,16 +30,14 @@ namespace smash {
  * \li \key Beta_4 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_4_0. \n
  *
- * \li \key Theta (double, optional): \n
- * The polar angle by which to rotate the nucleus. \n
- *
- * \li \key Phi (double, optional):\n
+ * \li \key Orientation:
+ *    - \key Theta (double, optional, default = pi/2): \n
+ * The polar angle by which to rotate the nucleus.
+ *    - \key Phi (double, optional, default = 0):\n
  * The azimuthal angle by which to rotate the nucleus.
- *
- * \li \key Random_Rotation (bool, optional, default = false):\n
+ *    - \key Random_Rotation (bool, optional, default = false):\n
  * Determines whether the created nucleus object should be randomly rotated in
- * space.
- *
+ * space. \n
  * \n
  */
 
@@ -50,8 +48,8 @@ namespace smash {
 /*!\Userguide
  * \page projectile_and_target Projectile and Target
  *
- * - \key Custom: \n
- *    \li \key File_Directory (path, required if \key Custom exists): \n
+ *   - \key Custom: \n
+ * \li \key File_Directory (path, required if \key Custom exists): \n
  *
  * The directory where the external list with the nucleon configurations
  * is located. Make sure to use an absolute path.\n
@@ -81,8 +79,9 @@ Modi:
                 Automatic: False
                 Beta_2: 0.1
                 Beta_4: 0.3
-                Theta: 0.8
-                Phi: 0.02
+                Orientation:
+                    Theta: 0.8
+                    Phi: 0.02
         Target:
             Particles:    {2212: 29, 2112: 34}
             # manually set woods saxon parameters
@@ -92,8 +91,9 @@ Modi:
             Deformed:
                 # Automatically set deformation parameters
                 Automatic: True
-                # Randomly rotate nucleus
-                Random_Rotation: True
+                Orientation:
+                    # Randomly rotate nucleus
+                    Random_Rotation: True
         E_kin: 1.2
         Calculation_Frame: "fixed target"
 \endverbatim
@@ -110,6 +110,11 @@ DeformedNucleus::DeformedNucleus(Configuration &config, int nTest,
     set_deformation_parameters_automatic();
   } else {
     set_deformation_parameters_from_config(config);
+  }
+
+  if (config.has_value({"Deformed", "Orientation"})) {
+    Configuration subconfig = config["Deformed"]["Orientation"];
+    set_orientation_from_config(subconfig);
   }
 }
 
@@ -182,9 +187,6 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
           "parameters. Please specify at least \"Beta_2\" and \"Beta_4\" "
           "manually and set \"Automatic: False.\" ");
   }
-
-  // Set a random nuclear rotation.
-  nuclear_orientation_.distribute_isotropically();
 }
 
 void DeformedNucleus::set_deformation_parameters_from_config(
@@ -196,37 +198,49 @@ void DeformedNucleus::set_deformation_parameters_from_config(
   if (config.has_value({"Deformed", "Beta_4"})) {
     set_beta_4(static_cast<double>(config.take({"Deformed", "Beta_4"})));
   }
-  if (config.has_value({"Deformed", "Theta"})) {
-    if (config.has_value({"Deformed", "Random_Rotation"}) &&
-        config.take({"Deformed", "Random_Rotation"})) {
+}
+
+void DeformedNucleus::set_orientation_from_config(
+    Configuration &orientation_config) {
+  // Read in orientation if provided, otherwise, the defaults are
+  // theta = pi/2, phi = 0, as declared in the angles class
+
+  if (orientation_config.has_value({"Theta"})) {
+    if (orientation_config.has_value({"Random_Rotation"}) &&
+        orientation_config.take({"Random_Rotation"})) {
       throw std::domain_error(
           "Random rotation of nuclei is activated although"
           " theta is provided. Please specify only either of them. ");
     } else {
-      set_polar_angle(static_cast<double>(config.take({"Deformed", "Theta"})));
+      set_polar_angle(static_cast<double>(orientation_config.take({"Theta"})));
     }
   }
-  if (config.has_value({"Deformed", "Phi"})) {
-    if (config.has_value({"Deformed", "Random_Rotation"}) &&
-        config.take({"Deformed", "Random_Rotation"})) {
+
+  if (orientation_config.has_value({"Phi"})) {
+    if (orientation_config.has_value({"Random_Rotation"}) &&
+        orientation_config.take({"Random_Rotation"})) {
       throw std::domain_error(
           "Random rotation of nuclei is activated although"
           " phi is provided. Please specify only either of them. ");
     } else {
       set_azimuthal_angle(
-          static_cast<double>(config.take({"Deformed", "Phi"})));
+          static_cast<double>(orientation_config.take({"Phi"})));
     }
   }
-  if (config.take({"Deformed", "Random_Rotation"}, false)) {
+
+  if (orientation_config.take({"Random_Rotation"}, false)) {
+    random_rotation_ = true;
+  }
+}
+
+void DeformedNucleus::rotate() {
+  if (random_rotation_) {
     // Randomly generate euler angles for theta and phi. Psi needs not be
     // assigned, as the nucleus objects are symmetric with respect to psi.
     Nucleus::random_euler_angles();
     set_azimuthal_angle(euler_phi_);
     set_polar_angle(euler_theta_);
   }
-}
-
-void DeformedNucleus::rotate() {
   for (auto &particle : *this) {
     /* Rotate every vector by the nuclear azimuth phi and polar angle
      * theta (the Euler angles). This means applying the matrix for a
