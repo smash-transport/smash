@@ -107,8 +107,7 @@ namespace smash {
  *
  * \li \key Radius (double, optional, default = proton_rad * A^(1/3) for A <=
  * 16, else 1.12 * A^(1/3) - 0.86 * A^(-1/3)): \n
- * Radius of nucleus in fm. The default radius is calculated as the proton
- * radius times the third root of the number of nucleons.
+ * Radius of nucleus in fm.
  *
  * \li \key Saturation_Density (double, optional, default = 0.168): \n
  * Saturation density of the nucleus in 1/fm^3.

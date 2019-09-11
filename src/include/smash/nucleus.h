@@ -288,7 +288,7 @@ class Nucleus {
    * \li \f$ r = r_\mathrm{proton} \ A^{1/3} \qquad \qquad \qquad \ \f$ for A <=
    * 16 \li \f$ r = 1.12 \ A^{1/3} - 0.86 \ A^{-1/3} \qquad \f$ for A > 16
    *
-   * \return default radius for the nucleus\n
+   * \return default radius for the nucleus in fm\n
    */
   inline double default_nuclear_radius() {
     int A = number_of_particles();
