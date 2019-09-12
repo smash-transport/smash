@@ -69,17 +69,17 @@ class ThreeVector {
   double inline get_theta() const;
   /**
    * Rotate vector by the given Euler angles phi, theta, psi. If we
-   * assume the standard basis x, y, z then this means applying the
-   * matrix for a rotation of phi about z, followed by the matrix for
-   * a rotation theta about the rotated x axis. Last, psi is a rotation
-   * about the rotated z axis. To reverse the rotation one has to
+   * assume the standard basis x, y, z, then this means applying the
+   * matrix for a rotation by phi about the z-axis, followed by the matrix for
+   * a rotation by theta about the rotated x-axis. Last, psi is a rotation
+   * about the rotated z-axis. To reverse the rotation one has to
    * therefore exchange phi and psi and use the negative values for all angles.
-   * \param[in] phi angle by which the first rotation is done about z axis.
-   *        Range:[0,2&pi]
+   * \param[in] phi angle by which the first rotation is done about the z-axis.
+   *        Range: [0,2&pi]
    * \param[in] theta angle by which the second rotation is done
-   *        about the rotated x axis. Range:[0,&pi]
+   *        about the rotated x-axis. Range: [0,&pi]
    * \param[in] psi angle by which the third rotation is done
-   *        about the rotated z axis. Range:[0,2&pi]
+   *        about the rotated z-axis. Range: [0,2&pi]
    *
    * Euler angles are used to make rotation of several (different) position
    * vectors belonging to one rigid body easy. A ThreeVector could be rotated
@@ -289,9 +289,8 @@ void inline ThreeVector::rotate(double phi, double theta, double psi) {
   x_[1] = (sin_phi * cos_psi + cos_phi * cos_theta * sin_psi) * x_old[0] +
           (-sin_phi * sin_psi + cos_phi * cos_theta * cos_psi) * x_old[1] +
           (-cos_phi * sin_theta) * x_old[2];
-  x_[2] = (sin_theta * sin_psi) * x_old[0] +
-          (sin_theta * cos_psi) * x_old[1] +
-          (cos_theta) * x_old[2];
+  x_[2] = (sin_theta * sin_psi) * x_old[0] + (sin_theta * cos_psi) * x_old[1] +
+          (cos_theta)*x_old[2];
 }
 
 void inline ThreeVector::rotate_around_y(double theta) {
