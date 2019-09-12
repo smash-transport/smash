@@ -284,13 +284,14 @@ void inline ThreeVector::rotate(double phi, double theta, double psi) {
   std::array<double, 3> x_old = x_;
   // Compute new coordinates.
   x_[0] = (cos_phi * cos_psi - sin_phi * cos_theta * sin_psi) * x_old[0] +
-          (sin_phi * cos_psi + cos_phi * cos_theta * sin_psi) * x_old[1] +
-          sin_theta * sin_psi * x_old[2];
-  x_[1] = (-cos_phi * sin_psi - sin_phi * cos_theta * cos_psi) * x_old[0] +
+          (-cos_phi * sin_psi - sin_phi * cos_theta * cos_psi) * x_old[1] +
+          (sin_phi * sin_theta) * x_old[2];
+  x_[1] = (sin_phi * cos_psi + cos_phi * cos_theta * sin_psi) * x_old[0] +
           (-sin_phi * sin_psi + cos_phi * cos_theta * cos_psi) * x_old[1] +
-          sin_theta * cos_psi * x_old[2];
-  x_[2] = sin_phi * sin_theta * x_old[0] - cos_phi * sin_theta * x_old[1] +
-          cos_theta * x_old[2];
+          (-cos_phi * sin_theta) * x_old[2];
+  x_[2] = (sin_theta * sin_psi) * x_old[0] +
+          (sin_theta * cos_psi) * x_old[1] +
+          (cos_theta) * x_old[2];
 }
 
 void inline ThreeVector::rotate_around_y(double theta) {
