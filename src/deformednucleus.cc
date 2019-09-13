@@ -31,10 +31,16 @@ namespace smash {
  * The deformation coefficient for the spherical harmonic Y_4_0. \n
  *
  * \li \key Orientation:
- *    - \key Theta (double, optional, default = pi/2): \n
- * The polar angle by which to rotate the nucleus.
+ * \n
+ * Determines the orientation of the nucleus by rotations
+ * which are performed about the axes of a coordinate system
+ * that is fixed with respect to the nucleus and whose axes
+ * are parallel to those of the computational frame before the first rotation.
+ * Note that the nucleus is first rotated by phi and then by theta.
  *    - \key Phi (double, optional, default = 0):\n
- * The azimuthal angle by which to rotate the nucleus.
+ * The angle by which to rotate the nucleus about the z-axis.
+ *    - \key Theta (double, optional, default = pi/2): \n
+ * The angle by which to rotate the nucleus about the rotated x-axis.
  *    - \key Random_Rotation (bool, optional, default = false):\n
  * Determines whether the created nucleus object should be randomly rotated in
  * space. \n
@@ -67,7 +73,7 @@ namespace smash {
 * spherical deformation is explicitly declared, it can be done according to the
 * following example. For explanatory (and not physics) reasons,
 * the projectile's Woods Saxon distribution is initialized automatically and
-* it's spherical deformation manually, while the target nucleus is configured
+* its spherical deformation manually, while the target nucleus is configured
 * just the opposite.
 *\verbatim
 Modi:
@@ -94,7 +100,7 @@ Modi:
                 Orientation:
                     # Randomly rotate nucleus
                     Random_Rotation: True
-        E_kin: 1.2
+        E_Kin: 1.2
         Calculation_Frame: "fixed target"
 \endverbatim
 */
