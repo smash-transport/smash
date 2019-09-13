@@ -37,6 +37,8 @@ TEST(rotate_phi) {
   // Plan is to rotate the (0, 1, 0, 1) vector by pi/2.
   // Rotation by pi/2 means (0, 1, 0, 1) -> (0, 0, 1, 1)
   dnucleus.set_azimuthal_angle(M_PI / 2);
+  // Set theta = 0 to avoid using default value of pi/2
+  dnucleus.set_polar_angle(0.0);
   FourVector expectation = FourVector(0., 0., 1., 1.);
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     i->set_4position(FourVector(0., 1., 0., 1.));
