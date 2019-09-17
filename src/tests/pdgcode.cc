@@ -759,3 +759,25 @@ TEST(deexcite) {
   COMPARE(pdg_codes[1], 0x323);
   COMPARE(pdg_codes[2], -0x2214);
 }
+
+TEST(valence_quarks) {
+  // pion0, meson, baryon number of 0
+  PdgCode pi0(0x111);
+  VERIFY(pi0.contains_enough_valence_quarks(1));
+  VERIFY(pi0.contains_enough_valence_quarks(-1));
+
+  // antineutron, baryon, baryon number of -1
+  PdgCode an(-0x2112);
+  VERIFY(an.contains_enough_valence_quarks(-2));
+  VERIFY(an.contains_enough_valence_quarks(-1));
+
+  // proton, baryon, baryon number of 1
+  PdgCode p(0x2212);
+  VERIFY(p.contains_enough_valence_quarks(1));
+  VERIFY(p.contains_enough_valence_quarks(2));
+
+  // pion-, meson, baryon number of 0
+  PdgCode pim(-0x211);
+  VERIFY(!(pim.contains_enough_valence_quarks(2)));
+  VERIFY(!(pim.contains_enough_valence_quarks(-2)));
+}
