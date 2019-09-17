@@ -72,7 +72,9 @@ class BoxModus : public ModusDefault {
                             const ExperimentParameters &parameters);
 
   /**
-   * Enforces that all particles are inside the box
+   * Enforces that all particles are inside the box at the beginning of
+   * an event. It checks if the particles were placed correctly inside the box
+   * at initialization and places them inside if they are not.
    *
    * \param[in] particles particles to check their position and possibly
    *            move it
@@ -80,7 +82,9 @@ class BoxModus : public ModusDefault {
    * \return The number of particles that were put back into the box
    *
    * In BoxModus if a particle crosses the wall of the box, it is
-   * inserted from the opposite side. Wall crossings are written to
+   * inserted from the opposite side. However these wall crossings are not
+   * performed by this function but in the Experiment constructor when the
+   * WallCrossActionsFinder are created. Wall crossings are written to
    * collision output: this is where OutputsList is used.
    */
   int impose_boundary_conditions(Particles *particles,
