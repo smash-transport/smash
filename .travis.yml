@@ -46,7 +46,7 @@ matrix:
       - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6"
   # most recent xcode (changes also clang version)
   - os: osx
-    osx_image: xcode10
+    osx_image: xcode11
     addons:
       homebrew:
         packages:
@@ -66,9 +66,8 @@ before_install:
     cd ..
   # clang-format
   - if [ $TRAVIS_OS_NAME = osx ]; then curl -# -o clang6_0_0.tar.xz http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
-    else  curl -# -o clang6_0_0.tar.xz http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz; fi &&
-    mkdir clang6_0_0 && tar -xf clang6_0_0.tar.xz -C clang6_0_0 --strip-components=1 &&
-    export PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH
+   else  curl -# -o clang6_0_0.tar.xz http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz; fi &&
+   mkdir clang6_0_0 && tar -xf clang6_0_0.tar.xz -C clang6_0_0 --strip-components=1
   # gsl
   - wget http://ftpmirror.gnu.org/gsl/gsl-1.15.tar.gz &&
     tar -zxf gsl-1.15.tar.gz && rm gsl-1.15.tar.gz &&
@@ -92,5 +91,6 @@ install:
   - make -j2
 
 script:
-  - ./../bin/clang-format-helper.bash -t
+  # use correct clang version for format helper
+  - PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/clang-format-helper.bash -t
   - CTEST_OUTPUT_ON_FAILURE=1 ctest -j2
