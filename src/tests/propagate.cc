@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2018
+ *    Copyright (c) 2014-2019
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -75,4 +75,20 @@ TEST(propagate_default_no_potentials) {
   COMPARE(it->momentum(), FourVector(0.51, -.3, 0.0, 0.4));
   COMPARE(it->position(),
           FourVector(1.0, 0.2 - 0.3 / 0.51, 0.0, 4.8 + 0.4 / 0.51));
+}
+
+TEST(hubble) {
+  // setting up some exeplary metrics with simple b_ for
+  // easy analytic values. All ExpansionModes are tested.
+  ExpansionProperties metric1(ExpansionMode::NoExpansion, 10.3);
+  COMPARE(calc_hubble(1.4, metric1), 0);
+
+  ExpansionProperties metric2(ExpansionMode::MasslessFRW, 1);
+  COMPARE(calc_hubble(4, metric2), 0.1);
+
+  ExpansionProperties metric3(ExpansionMode::MassiveFRW, 1.5);
+  COMPARE(calc_hubble(2, metric3), 0.25);
+
+  ExpansionProperties metric4(ExpansionMode::Exponential, 15);
+  COMPARE(calc_hubble(10, metric4), 150);
 }
