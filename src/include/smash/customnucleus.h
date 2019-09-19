@@ -79,9 +79,9 @@ class CustomNucleus : public Nucleus {
   std::string file_path(const std::string& file_directory,
                         const std::string& file_name);
   /**
-   * Generates Fermi Momenta as it is done in the mother class but in addition
-   * prints a warning that the fermi momenta are generated accoriding to Woods
-   * Saxon distributed nucleons.
+   * Generates Fermi momenta as it is done in the mother class but in addition
+   * prints a warning that the Fermi momenta are generated accoriding to
+   * Woods-Saxon distributed nucleons.
    */
   void generate_fermi_momenta() override;
   /**
