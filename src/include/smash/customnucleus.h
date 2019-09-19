@@ -59,7 +59,7 @@ class CustomNucleus : public Nucleus {
   void fill_from_list(const std::vector<Nucleoncustom>& vec);
   /// Returns position of a nucleon as given in the external file
   ThreeVector distribute_nucleon() override;
-
+  /// Sets the positions of the nucleons inside a nucleus.
   void arrange_nucleons() override;
   /**
    * The returned vector contains Data for one nucleus given in the
@@ -78,6 +78,12 @@ class CustomNucleus : public Nucleus {
    */
   std::string file_path(const std::string& file_directory,
                         const std::string& file_name);
+  /**
+   * Generates Fermi momenta as it is done in the mother class but in addition
+   * prints a warning that the Fermi momenta are generated accoriding to
+   * Woods-Saxon distributed nucleons.
+   */
+  void generate_fermi_momenta() override;
   /**
    * Number of Nucleons per Nucleus
    * Set initally to zero to be modified in the constructor.
