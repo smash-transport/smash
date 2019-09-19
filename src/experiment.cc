@@ -345,8 +345,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   }
   const bool potential_affect_threshold =
       config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);
-  return {{0., dt},
-          {0.0, output_dt},
+  return {make_unique<UniformClock>(0.0, dt),
+          make_unique<UniformClock>(0.0, output_dt),
           ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),

@@ -241,8 +241,8 @@ inline ReactionsBitSet all_reactions_included() {
  */
 inline ExperimentParameters default_parameters(int testparticles = 1,
                                                double dt = 0.1) {
-  return ExperimentParameters{{0., dt},       // labclock
-                              {0., 1.},       // outputclock
+  return ExperimentParameters{make_unique<UniformClock>(0., dt),  // labclock
+                              make_unique<UniformClock>(0., 1.),  // outputclock
                               testparticles,  // testparticles
                               1.0,            // Gaussian smearing width
                               4.0,            // Gaussian smearing cut-off

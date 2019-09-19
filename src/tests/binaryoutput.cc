@@ -285,9 +285,8 @@ TEST(particles_format) {
     ParticleList final_state = {Test::smashon_random()};
     particles->replace(initial_particles, final_state);
 
-    Clock clock;
     DensityParameters dens_par(Test::default_parameters());
-    bin_output->at_intermediate_time(*particles, clock, dens_par);
+    bin_output->at_intermediate_time(*particles, nullptr, dens_par);
 
     /* Final state output */
     bin_output->at_eventend(*particles, event_id, impact_parameter,

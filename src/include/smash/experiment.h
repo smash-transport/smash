@@ -293,7 +293,7 @@ class Experiment : public ExperimentBase {
 
   /// Shortcut for next output time
   double next_output_time() const {
-    return parameters_.outputclock.next_time();
+    return parameters_.outputclock->next_time();
   }
 
   /**
@@ -760,7 +760,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       particles_(),
       nevents_(config.take({"General", "Nevents"})),
       end_time_(config.take({"General", "End_Time"})),
-      delta_time_startup_(parameters_.labclock.timestep_duration()),
+      delta_time_startup_(parameters_.labclock->timestep_duration()),
       force_decays_(
           config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
       use_grid_(config.take({"General", "Use_Grid"}, true)),
@@ -1181,7 +1181,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           "with frozen Fermi momenta!");
     }
     log.info() << "Potentials are ON. Timestep is "
-               << parameters_.labclock.timestep_duration();
+               << parameters_.labclock->timestep_duration();
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
@@ -1369,20 +1369,23 @@ void Experiment<Modus>::initialize_new_event() {
       }
       break;
   }
-  Clock clock_for_this_event(start_time, timestep);
+  std::unique_ptr<UniformClock> clock_for_this_event;
+  clock_for_this_event = make_unique<UniformClock>(start_time, timestep);
   parameters_.labclock = std::move(clock_for_this_event);
 
   // Reset the output clock
-  const double dt_output = parameters_.outputclock.timestep_duration();
+  const double dt_output = parameters_.outputclock->timestep_duration();
   const double zeroth_output_time =
       std::floor(start_time / dt_output) * dt_output;
-  Clock output_clock(zeroth_output_time, dt_output);
+
+  std::unique_ptr<Clock> output_clock;
+  output_clock = make_unique<UniformClock>(zeroth_output_time, dt_output);
   parameters_.outputclock = std::move(output_clock);
 
-  log.debug("Lab clock: t_start = ", parameters_.labclock.current_time(),
-            ", dt = ", parameters_.labclock.timestep_duration());
-  log.debug("Output clock: t_start = ", parameters_.outputclock.current_time(),
-            ", dt = ", parameters_.outputclock.timestep_duration());
+  log.debug("Lab clock: t_start = ", parameters_.labclock->current_time(),
+            ", dt = ", parameters_.labclock->timestep_duration());
+  log.debug("Output clock: t_start = ", parameters_.outputclock->current_time(),
+            ", dt = ", parameters_.outputclock->timestep_duration());
 
   /* Save the initial conserved quantum numbers and total momentum in
    * the system for conservation checks */
@@ -1559,12 +1562,12 @@ void Experiment<Modus>::run_time_evolution() {
 
   log.info() << format_measurements(particles_, 0u, conserved_initial_,
                                     time_start_,
-                                    parameters_.labclock.current_time());
+                                    parameters_.labclock->current_time());
 
-  while (parameters_.labclock.current_time() < end_time_) {
-    const double t = parameters_.labclock.current_time();
+  while (parameters_.labclock->current_time() < end_time_) {
+    const double t = parameters_.labclock->current_time();
     const double dt =
-        std::min(parameters_.labclock.timestep_duration(), end_time_ - t);
+        std::min(parameters_.labclock->timestep_duration(), end_time_ - t);
     log.debug("Timestepless propagation for next ", dt, " fm/c.");
 
     // Perform forced thermalization if required
@@ -1573,7 +1576,7 @@ void Experiment<Modus>::run_time_evolution() {
       const bool ignore_cells_under_treshold = true;
       thermalizer_->update_thermalizer_lattice(particles_, density_param_,
                                                ignore_cells_under_treshold);
-      const double current_t = parameters_.labclock.current_time();
+      const double current_t = parameters_.labclock->current_time();
       thermalizer_->thermalize(particles_, current_t,
                                parameters_.testparticles);
       ThermalizationAction th_act(*thermalizer_, current_t);
@@ -1619,7 +1622,7 @@ void Experiment<Modus>::run_time_evolution() {
      *     compute new momenta according to equations of motion */
     if (potentials_) {
       update_potentials();
-      update_momenta(&particles_, parameters_.labclock.timestep_duration(),
+      update_momenta(&particles_, parameters_.labclock->timestep_duration(),
                      *potentials_, FB_lat_.get(), FI3_lat_.get());
     }
 
@@ -1629,7 +1632,7 @@ void Experiment<Modus>::run_time_evolution() {
       expand_space_time(&particles_, parameters_, metric_);
     }
 
-    ++parameters_.labclock;
+    ++(*parameters_.labclock);
 
     /* (5) Check conservation laws.
      *
@@ -1682,8 +1685,9 @@ template <typename Modus>
 void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
   const auto &log = logger<LogArea::Experiment>();
 
-  const double start_time = parameters_.labclock.current_time();
-  const double end_time = std::min(parameters_.labclock.next_time(), end_time_);
+  const double start_time = parameters_.labclock->current_time();
+  const double end_time =
+      std::min(parameters_.labclock->next_time(), end_time_);
   double time_left = end_time - start_time;
   log.debug("Timestepless propagation: ", "Actions size = ", actions.size(),
             ", start time = ", start_time, ", end time = ", end_time);
@@ -1705,7 +1709,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     while (next_output_time() <= act->time_of_execution()) {
       log.debug("Propagating until output time: ", next_output_time());
       propagate_and_shine(next_output_time());
-      ++parameters_.outputclock;
+      ++(*parameters_.outputclock);
       intermediate_output();
     }
 
@@ -1749,9 +1753,9 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
   while (next_output_time() <= end_time) {
     log.debug("Propagating until output time: ", next_output_time());
     propagate_and_shine(next_output_time());
-    ++parameters_.outputclock;
+    ++(*parameters_.outputclock);
     // Avoid duplicating printout at event end time
-    if (parameters_.outputclock.current_time() < end_time_) {
+    if (parameters_.outputclock->current_time() < end_time_) {
       intermediate_output();
     }
   }
@@ -1771,7 +1775,7 @@ void Experiment<Modus>::intermediate_output() {
   previous_interactions_total_ = interactions_total_;
   log.info() << format_measurements(particles_, interactions_this_interval,
                                     conserved_initial_, time_start_,
-                                    parameters_.outputclock.current_time());
+                                    parameters_.outputclock->current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   // save evolution data
   for (const auto &output : outputs_) {
@@ -1928,7 +1932,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
                                                 wall_actions_this_interval;
     log.info() << format_measurements(particles_, interactions_this_interval,
                                       conserved_initial_, time_start_,
-                                      parameters_.outputclock.current_time());
+                                      parameters_.outputclock->current_time());
     if (IC_output_switch_ && (particles_.size() == 0)) {
       // Verify there is no more energy in the system if all particles were
       // removed when crossing the hypersurface

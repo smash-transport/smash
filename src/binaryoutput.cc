@@ -291,7 +291,7 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
 }
 
 void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
-                                                 const Clock &,
+                                                 const std::unique_ptr<Clock> &,
                                                  const DensityParameters &) {
   const char pchar = 'p';
   if (!only_final_) {

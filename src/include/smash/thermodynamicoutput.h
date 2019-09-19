@@ -74,7 +74,8 @@ class ThermodynamicOutput : public OutputInterface {
    * dens_param set of parameters, defining smearing. For more info about
    * smearing see \ref thermodyn_output_user_guide_.
    */
-  void at_intermediate_time(const Particles &particles, const Clock &clock,
+  void at_intermediate_time(const Particles &particles,
+                            const std::unique_ptr<Clock> &clock,
                             const DensityParameters &dens_param) override;
 
   /**
