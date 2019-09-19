@@ -199,6 +199,15 @@ void CustomNucleus::arrange_nucleons() {
   align_center();
 }
 
+void CustomNucleus::generate_fermi_momenta() {
+  Nucleus::generate_fermi_momenta();
+  const auto& log = logger<LogArea::Collider>();
+  log.warn() << "Fermi Motion activated with a custom nucleus.\n";
+  log.warn() << "Be aware that generating the Fermi Momenta\n"
+             << "assumes nucleons distributed according to a\n"
+             << "Woods Saxon distribution.";
+}
+
 std::string CustomNucleus::file_path(const std::string& file_directory,
                                      const std::string& file_name) {
   if (file_directory.back() == '/') {
