@@ -79,11 +79,13 @@ class Clock {
 
   virtual double timestep_duration() const = 0;
 
-  virtual void set_timestep_duration(const double dt) = 0;
+  //virtual void set_timestep_duration(const double dt) = 0;
 
   virtual double current_time() const = 0;
 
   virtual double next_time() const = 0;
+
+  virtual void reset(double reset_time) = 0; 
 
   /**
    * Advances the clock by one tick.
@@ -205,7 +207,7 @@ class UniformClock : public Clock {
    *
    * \param[in] dt new time step size
    */
-  void set_timestep_duration(const double dt) override {
+  void set_timestep_duration(const double dt) {
     if (dt < 0.) {
       throw std::range_error("No negative time increment allowed");
     }
@@ -223,7 +225,7 @@ class UniformClock : public Clock {
    *
    * \param[in] reset_time New time
    */
-  void reset(const double reset_time) {
+  void reset(const double reset_time) override {
     if (reset_time < current_time()) {
       logger<LogArea::Clock>().debug("Resetting clock from", current_time(),
                                      " fm/c to ", reset_time, " fm/c");
@@ -283,7 +285,29 @@ class UniformClock : public Clock {
   /// The time of last reset (when counter_ was set to 0).
   Representation reset_time_ = 0;
 };
+class CustomClock : public Clock {
+ public:
+  CustomClock(std::vector<double> times)
+    :custom_times_(times) {
+    std::sort(custom_times_.begin(), custom_times_.end());
+  }
 
+  double current_time() const override {
+    return custom_times_[counter_];
+  }
+  double next_time() const override {
+    return custom_times_[counter_ + 1];
+  }
+  double timestep_duration() const override {
+    return next_time() - current_time();
+  }
+  void reset(double) override {
+    counter_ = 0;
+  }
+
+ private:
+  std::vector<double> custom_times_;
+};
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_CLOCK_H_

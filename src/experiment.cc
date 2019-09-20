@@ -330,7 +330,25 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
    */
   const double dt = config.take({"General", "Delta_Time"}, 1.);
   const double t_end = config.read({"General", "End_Time"});
-  const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
+
+  // define output clock
+  std::unique_ptr<Clock> output_clock = nullptr; 
+  if (!(config.has_value({"Output", "Output_Interval"}) ^
+      config.has_value({"Output", "Output_Times"}))) {
+      throw std::invalid_argument("Please specify either Output_Interval or Output_Times");
+  }
+  if (config.has_value({"Output", "Output_Interval"})) { 
+    const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
+    output_clock = make_unique<UniformClock>(0.0, output_dt);
+  }
+  else{
+    std::vector<double> output_times = config.take({"Output", "Output_Times"});
+    output_times.push_back(t_end);
+    output_clock = make_unique<CustomClock>(output_times);
+  }
+
+
+    
   auto config_coll = config["Collision_Term"];
   /* Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded. */
@@ -346,7 +364,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const bool potential_affect_threshold =
       config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);
   return {make_unique<UniformClock>(0.0, dt),
-          make_unique<UniformClock>(0.0, output_dt),
+          std::move(output_clock),
           ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),

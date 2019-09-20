@@ -1378,9 +1378,7 @@ void Experiment<Modus>::initialize_new_event() {
   const double zeroth_output_time =
       std::floor(start_time / dt_output) * dt_output;
 
-  std::unique_ptr<Clock> output_clock;
-  output_clock = make_unique<UniformClock>(zeroth_output_time, dt_output);
-  parameters_.outputclock = std::move(output_clock);
+  parameters_.outputclock->reset(zeroth_output_time);
 
   log.debug("Lab clock: t_start = ", parameters_.labclock->current_time(),
             ", dt = ", parameters_.labclock->timestep_duration());
