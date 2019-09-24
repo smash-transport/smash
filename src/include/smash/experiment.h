@@ -1930,7 +1930,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
                                                 wall_actions_this_interval;
     log.info() << format_measurements(particles_, interactions_this_interval,
                                       conserved_initial_, time_start_,
-                                      parameters_.outputclock->current_time());
+                                      end_time_);
     if (IC_output_switch_ && (particles_.size() == 0)) {
       // Verify there is no more energy in the system if all particles were
       // removed when crossing the hypersurface

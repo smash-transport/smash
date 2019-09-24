@@ -332,23 +332,22 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double t_end = config.read({"General", "End_Time"});
 
   // define output clock
-  std::unique_ptr<Clock> output_clock = nullptr; 
-  if (!(config.has_value({"Output", "Output_Interval"}) ^
-      config.has_value({"Output", "Output_Times"}))) {
-      throw std::invalid_argument("Please specify either Output_Interval or Output_Times");
-  }
-  if (config.has_value({"Output", "Output_Interval"})) { 
+  std::unique_ptr<Clock> output_clock = nullptr;
+  if (config.has_value({"Output", "Output_Times"})) {
+    if (config.has_value({"Output", "Output_Interval"})) {
+      throw std::invalid_argument(
+          "Please specify either Output_Interval or Output_Times");
+    }
+    std::vector<double> output_times = config.take({"Output", "Output_Times"});
+    // Add a output time larger than the end time so that the next time is
+    // always defined during the time evolution
+    output_times.push_back(t_end + 1.);
+    output_clock = make_unique<CustomClock>(output_times);
+  } else {
     const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
     output_clock = make_unique<UniformClock>(0.0, output_dt);
   }
-  else{
-    std::vector<double> output_times = config.take({"Output", "Output_Times"});
-    output_times.push_back(t_end);
-    output_clock = make_unique<CustomClock>(output_times);
-  }
 
-
-    
   auto config_coll = config["Collision_Term"];
   /* Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded. */

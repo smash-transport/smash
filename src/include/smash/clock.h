@@ -79,13 +79,11 @@ class Clock {
 
   virtual double timestep_duration() const = 0;
 
-  //virtual void set_timestep_duration(const double dt) = 0;
-
   virtual double current_time() const = 0;
 
   virtual double next_time() const = 0;
 
-  virtual void reset(double reset_time) = 0; 
+  virtual void reset(double reset_time) = 0;
 
   /**
    * Advances the clock by one tick.
@@ -142,6 +140,8 @@ class Clock {
    * \param[in] time The other time.
    */
   bool operator>(double time) const { return current_time() > time; }
+
+  virtual ~Clock() = default;
 
  protected:
   /**
@@ -287,23 +287,17 @@ class UniformClock : public Clock {
 };
 class CustomClock : public Clock {
  public:
-  CustomClock(std::vector<double> times)
-    :custom_times_(times) {
+  CustomClock(std::vector<double> times) : custom_times_(times) {
     std::sort(custom_times_.begin(), custom_times_.end());
+    counter_ = -1;
   }
 
-  double current_time() const override {
-    return custom_times_[counter_];
-  }
-  double next_time() const override {
-    return custom_times_[counter_ + 1];
-  }
+  double current_time() const override { return custom_times_[counter_]; }
+  double next_time() const override { return custom_times_[counter_ + 1]; }
   double timestep_duration() const override {
     return next_time() - current_time();
   }
-  void reset(double) override {
-    counter_ = 0;
-  }
+  void reset(double) override { counter_ = -1; }
 
  private:
   std::vector<double> custom_times_;
