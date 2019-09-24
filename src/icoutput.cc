@@ -108,14 +108,12 @@ ICOutput::ICOutput(const bf::path &path, const std::string &name,
 
 ICOutput::~ICOutput() {}
 
-void ICOutput::at_eventstart(const Particles &particles,
-                             const int event_number) {
+void ICOutput::at_eventstart(const Particles &, const int event_number) {
   std::fprintf(file_.get(), "# event %i start\n", event_number + 1);
-  SMASH_UNUSED(particles);
 }
 
 void ICOutput::at_eventend(const Particles &particles, const int event_number,
-                           double impact_parameter, bool empty_event) {
+                           double, bool) {
   const auto &log = logger<LogArea::HyperSurfaceCrossing>();
   std::fprintf(file_.get(), "# event %i end\n", event_number + 1);
 
@@ -127,22 +125,14 @@ void ICOutput::at_eventend(const Particles &particles, const int event_number,
         "Hypersurface has not yet been crossed by ",
         particles.size(), " particle(s).");
   }
-  SMASH_UNUSED(impact_parameter);
-  SMASH_UNUSED(empty_event);
 }
 
-void ICOutput::at_intermediate_time(const Particles &particles,
-                                    const Clock &clock,
-                                    const DensityParameters &dens_param) {
+void ICOutput::at_intermediate_time(const Particles &, const Clock &,
+                                    const DensityParameters &) {
   // Dummy, but virtual function needs to be declared.
-  // It is never actually used.
-  SMASH_UNUSED(particles);
-  SMASH_UNUSED(clock);
-  SMASH_UNUSED(dens_param);
 }
 
-void ICOutput::at_interaction(const Action &action, const double density) {
-  SMASH_UNUSED(density);
+void ICOutput::at_interaction(const Action &action, const double) {
   assert(action.get_type() == ProcessType::HyperSurfaceCrossing);
   assert(action.incoming_particles().size() == 1);
 

@@ -35,7 +35,8 @@ class DecayActionsFinder : public ActionFinderInterface {
    * \return List with the found (Decay)Action objects.
    */
   ActionList find_actions_in_cell(const ParticleList &search_list, double dt,
-                                  const double) const override;
+                                  const double,
+                                  const std::vector<FourVector>) const override;
 
   /// Ignore the neighbor searches for decays
   ActionList find_actions_with_neighbors(const ParticleList &,

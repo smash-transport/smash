@@ -77,20 +77,26 @@ TEST(collision_order) {
   // no grid means no grid cell volume
   const double grid_cell_vol = 0.0;
 
+  // no hypersurface crossings are tested, so we do not need the beam info
+  const std::vector<FourVector> beam_mom = {};
+
   // delta t (in fermi)
   double dt;
 
   // test for different times
   dt = 0.9;
-  auto actions_1 = finder.find_actions_in_cell(search_list, dt, grid_cell_vol);
+  auto actions_1 =
+      finder.find_actions_in_cell(search_list, dt, grid_cell_vol, beam_mom);
   COMPARE(actions_1.size(), 0u) << "timestep 0.9, expect no collision";
 
   dt = 1.0;
-  auto actions_2 = finder.find_actions_in_cell(search_list, dt, grid_cell_vol);
+  auto actions_2 =
+      finder.find_actions_in_cell(search_list, dt, grid_cell_vol, beam_mom);
   COMPARE(actions_2.size(), 1u) << "timestep 1.0, expect 1 collision";
 
   dt = 2.0;
-  auto actions_3 = finder.find_actions_in_cell(search_list, dt, grid_cell_vol);
+  auto actions_3 =
+      finder.find_actions_in_cell(search_list, dt, grid_cell_vol, beam_mom);
   COMPARE(actions_3.size(), 3u) << "timestep 2.0, expect 3 collisions";
 
   // perform actions from actions_3
@@ -149,11 +155,13 @@ TEST(scatter_particle_pair_only_once) {
                           std::to_string(elastic_parameter) + "}");
   ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
   ParticleList search_list = p.copy_to_vector();
-  double dt = 0.9;                   // fm/c
-  const double grid_cell_vol = 0.0;  // no grid
+  double dt = 0.9;                              // fm/c
+  const double grid_cell_vol = 0.0;             // no grid
+  const std::vector<FourVector> beam_mom = {};  // no hypersurface crossings
 
   // look for scatters, we expect one
-  auto actions = finder.find_actions_in_cell(search_list, dt, grid_cell_vol);
+  auto actions =
+      finder.find_actions_in_cell(search_list, dt, grid_cell_vol, beam_mom);
   COMPARE(actions.size(), 1u);
 
   // ok, the exepected Action exists, so let's perform it
@@ -177,7 +185,8 @@ TEST(scatter_particle_pair_only_once) {
   }
   for (auto i = 10; i; --i) {  // make "sure" it's not the random numbers that
                                // suppress the problem
-    actions = finder.find_actions_in_cell(search_list, dt, grid_cell_vol);
+    actions =
+        finder.find_actions_in_cell(search_list, dt, grid_cell_vol, beam_mom);
     COMPARE(actions.size(), 0u);
   }
 }
@@ -244,7 +253,8 @@ TEST(increasing_scaling_factors) {
   // Quadratic increase of scaling factor with time leads to linear increase of
   // the maximum distance, at which particles still collide, with time.
   constexpr double alpha = 2.;
-  constexpr double grid_cell_vol = 0.0;  // no grid
+  constexpr double grid_cell_vol = 0.0;         // no grid
+  const std::vector<FourVector> beam_mom = {};  // no hypersurface crossings
   constexpr double delta_t_coll = dx / (2. * v);
   ParticleData p_a = ParticleData{ParticleType::find(0x661), 1};
   p_a.set_4position(FourVector(time, 0, 0, 0));
@@ -263,14 +273,16 @@ TEST(increasing_scaling_factors) {
   ExperimentParameters exp_par = Test::default_parameters();
   const std::vector<bool> has_interacted = {};
   ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
-  COMPARE(
-      finder.find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll, grid_cell_vol)
-          .size(),
-      1u);
+  COMPARE(finder
+              .find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll,
+                                    grid_cell_vol, beam_mom)
+              .size(),
+          1u);
   // For a Power smaller than alpha, the particles should not collide.
   ParticleData::formation_power_ = alpha + 0.1;
-  COMPARE(
-      finder.find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll, grid_cell_vol)
-          .size(),
-      0u);
+  COMPARE(finder
+              .find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll,
+                                    grid_cell_vol, beam_mom)
+              .size(),
+          0u);
 }

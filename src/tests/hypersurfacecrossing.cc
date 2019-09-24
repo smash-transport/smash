@@ -49,10 +49,13 @@ TEST(hypersurface_crossing_action) {
   // no grid means no grid cell volume
   const double grid_cell_vol = 0.0;
 
+  // We do not test with frozen Fermi motion, so beam_mom vector is empty
+  const std::vector<FourVector> beam_mom = {};
+
   // Find actions
   constexpr double time_step = 0.1;
-  ActionList actions =
-      finder.find_actions_in_cell(part_list, time_step, grid_cell_vol);
+  ActionList actions = finder.find_actions_in_cell(part_list, time_step,
+                                                   grid_cell_vol, beam_mom);
 
   // Action list should only contain one element since one particle a crosses
   // the hypersurface in the given time step

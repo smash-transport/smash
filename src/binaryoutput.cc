@@ -306,17 +306,13 @@ BinaryOutputInitialConditions::BinaryOutputInitialConditions(
     : BinaryOutputBase(path / "SMASH_IC.bin", "wb", name, out_par.ic_extended) {
 }
 
-void BinaryOutputInitialConditions::at_eventstart(const Particles &particles,
-                                                  const int) {
-  // Unused, but function needed since inherited
-  SMASH_UNUSED(particles);
-}
+void BinaryOutputInitialConditions::at_eventstart(const Particles &,
+                                                  const int) {}
 
 void BinaryOutputInitialConditions::at_eventend(const Particles &particles,
                                                 const int event_number,
                                                 double impact_parameter,
                                                 bool empty_event) {
-  SMASH_UNUSED(particles);
   const auto &log = logger<LogArea::HyperSurfaceCrossing>();
 
   // Event end line
@@ -341,8 +337,7 @@ void BinaryOutputInitialConditions::at_eventend(const Particles &particles,
 }
 
 void BinaryOutputInitialConditions::at_interaction(const Action &action,
-                                                   const double density) {
-  SMASH_UNUSED(density);
+                                                   const double) {
   if (action.get_type() == ProcessType::HyperSurfaceCrossing) {
     const char pchar = 'p';
     std::fwrite(&pchar, sizeof(char), 1, file_.get());

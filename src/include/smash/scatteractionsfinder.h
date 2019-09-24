@@ -114,7 +114,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \return A list of possible scatter actions
    */
   ActionList find_actions_in_cell(const ParticleList &search_list, double dt,
-                                  const double cell_vol) const override;
+                                  const double cell_vol,
+                                  const std::vector<FourVector>) const override;
 
   /**
    * Search for all the possible collisions among the neighboring cells. This

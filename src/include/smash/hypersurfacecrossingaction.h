@@ -69,10 +69,13 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
    * the timestepless propagation.
    * \param[in] plist List of all particles.
    * \param[in] dt Time until crossing can appear (until end of timestep). [fm]
-   * \return List of all found wall crossings.
+   * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
+   * necessary if frozen Fermi Motion is activated \return List of all found
+   * wall crossings.
    */
-  ActionList find_actions_in_cell(const ParticleList &plist, double dt,
-                                  const double) const override;
+  ActionList find_actions_in_cell(
+      const ParticleList &plist, double dt, const double,
+      const std::vector<FourVector> beam_momentum) const override;
 
   /// Ignore the neighbor searches for hypersurface crossing
   ActionList find_actions_with_neighbors(const ParticleList &,

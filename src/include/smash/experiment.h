@@ -1597,8 +1597,8 @@ void Experiment<Modus>::run_time_evolution() {
       grid.iterate_cells(
           [&](const ParticleList &search_list) {
             for (const auto &finder : action_finders_) {
-              actions.insert(
-                  finder->find_actions_in_cell(search_list, dt, cell_vol));
+              actions.insert(finder->find_actions_in_cell(
+                  search_list, dt, cell_vol, beam_momentum_));
             }
           },
           [&](const ParticleList &search_list,
@@ -1737,7 +1737,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     for (const auto &finder : action_finders_) {
       // Outgoing particles can still decay, cross walls...
       actions.insert(finder->find_actions_in_cell(outgoing_particles, time_left,
-                                                  cell_vol));
+                                                  cell_vol, beam_momentum_));
       // ... and collide with other particles.
       actions.insert(finder->find_actions_with_surrounding_particles(
           outgoing_particles, particles_, time_left));

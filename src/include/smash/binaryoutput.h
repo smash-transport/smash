@@ -266,11 +266,8 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
   /**
    * Writes the initial particle information of an event to the binary output.
    * Function unused for IC output. Needed since inherited.
-   * \param[in] particles Unused, needed since inherited.
-   * \param[in] event_number Unused, needed since inherited.
    */
-  void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+  void at_eventstart(const Particles &, const int) override;
 
   /**
    * Writes the final particle information of an event to the binary output.
@@ -288,9 +285,8 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
    * output. Note that the particle information is written as a particle block,
    * not as an interaction block.
    * \param[in] action Action that holds the information of the interaction.
-   * \param[in] density Unused, needed since inherited.
    */
-  void at_interaction(const Action &action, const double density) override;
+  void at_interaction(const Action &action, const double) override;
 };
 
 }  // namespace smash

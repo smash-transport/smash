@@ -20,7 +20,8 @@
 namespace smash {
 
 ActionList DecayActionsFinder::find_actions_in_cell(
-    const ParticleList &search_list, double dt, const double) const {
+    const ParticleList &search_list, double dt, const double,
+    const std::vector<FourVector>) const {
   ActionList actions;
   /* for short time steps this seems reasonable to expect
    * less than 10 decays in most time steps */

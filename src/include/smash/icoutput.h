@@ -43,37 +43,29 @@ class ICOutput : public OutputInterface {
 
   /**
    * Write event start line.
-   * \param[in] particles Unused, needed since inherited.
    * \param[in] event_number Number of the current event.
    */
-  void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+  void at_eventstart(const Particles &, const int event_number) override;
 
   /**
    * Write event end line.
-   * \param[in] particles Unused, needed since inherited.
+   * \param[in] particles Particles at end of event, expected to be empty
    * \param[in] event_number Number of the current event.
-   * \param[in] impact_parameter Unused, needed since inherited.
-   * \param[in] empty_event Unused, needed since inherited.
    */
-  void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter, bool empty_event) override;
+  void at_eventend(const Particles &particles, const int event_number, double,
+                   bool) override;
 
   /**
    * Unused, but needed since virtually declared in mother class.
-   * \param[in] particles Unused, needed since inherited.
-   * \param[in] clock Unused, needed since inherited.
-   * \param[in] dens_param Unused, needed since inherited.
    */
-  void at_intermediate_time(const Particles &particles, const Clock &clock,
-                            const DensityParameters &dens_param) override;
+  void at_intermediate_time(const Particles &, const Clock &,
+                            const DensityParameters &) override;
   /**
    * Write particle data at the hypersurface crossing point to the IC output.
    *
    * \param[in] action Details about the action
-   * \param[in] density Unused, needed since inherited
    */
-  void at_interaction(const Action &action, const double density) override;
+  void at_interaction(const Action &action, const double) override;
 
  private:
   /// Pointer to output file

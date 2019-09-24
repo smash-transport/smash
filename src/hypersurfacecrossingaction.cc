@@ -50,7 +50,8 @@ void HypersurfacecrossingAction::check_conservation(
 }
 
 ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
-    const ParticleList &plist, double dt, const double) const {
+    const ParticleList &plist, double dt, const double,
+    const std::vector<FourVector> beam_momentum) const {
   std::vector<ActionPtr> actions;
 
   for (const ParticleData &p : plist) {
@@ -60,13 +61,36 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     double t_end = t0 + dt;  // Time at the end of timestep
 
     // We don't want to remove particles before the nuclei have interacted
+    // because those would not yet be part of the newly-created medium.
     if (t_end < 0.0) {
       continue;
     }
 
+    // For frozen Fermi motion:
+    // Fermi momenta are only applied if particles interact. The particle
+    // properties p.velocity() and p.momentum() already contain the values
+    // corrected by Fermi motion, but those particles that have not yet
+    // interacted are propagated along the beam-axis with v = (0, 0, beam_v)
+    // (and not with p.velocity()).
+    // To identify the corresponding hypersurface crossings the finding for
+    // those paricles without prior interactions has to be performed with
+    // v = vbeam instead of p.velcocity().
+    // Note: The beam_momentum vector is empty in case frozen Fermi motion is
+    // not applied.
+    const bool no_prior_interactions =
+        (static_cast<uint64_t>(p.id()) <                  // particle from
+         static_cast<uint64_t>(beam_momentum.size())) &&  // initial nucleus
+        (p.get_history().collisions_per_particle == 0);
+    ThreeVector v;
+    if (no_prior_interactions) {
+      const FourVector vbeam = beam_momentum[p.id()];
+      v = vbeam.velocity();
+    } else {
+      v = p.velocity();
+    }
+
     // propagate particles to position where they would be at the end of the
     // time step (after dt)
-    const ThreeVector &v = p.velocity();
     const FourVector distance = FourVector(0.0, v * dt);
     FourVector position = p.position() + distance;
     position.set_x0(t_end);

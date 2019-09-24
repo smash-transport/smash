@@ -405,7 +405,8 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
 }
 
 ActionList ScatterActionsFinder::find_actions_in_cell(
-    const ParticleList& search_list, double dt, const double cell_vol) const {
+    const ParticleList& search_list, double dt, const double cell_vol,
+    const std::vector<FourVector>) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData& p1 : search_list) {
     for (const ParticleData& p2 : search_list) {
