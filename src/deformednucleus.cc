@@ -7,8 +7,8 @@
 #include "smash/deformednucleus.h"
 
 #include <cmath>
-#include <stdexcept>
 #include <map>
+#include <stdexcept>
 
 #include "smash/angles.h"
 #include "smash/configuration.h"
