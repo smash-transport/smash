@@ -40,7 +40,7 @@ TEST(init_decay_channels) {
   ParticleType::check_consistency();
   sha256::Hash hash;
   hash.fill(0);
-  IsoParticleType::tabulate_integrals(hash);
+  IsoParticleType::tabulate_integrals(hash, "");
 }
 
 TEST(pp_DeltaDelta_integral) {
@@ -67,7 +67,7 @@ TEST(pp_DeltaDelta_integral) {
   for (size_t i = 0; i < sqrts_list.size(); i++) {
     const double integral_from_SMASH =
         delta_plus.iso_multiplet()->get_integral_RR(delta_plus.iso_multiplet(),
-            sqrts_list[i]);
+                                                    sqrts_list[i]);
     double rel_err = 1.e-4;
     if (i == sqrts_list.size() - 2) {
       // the error gets larger because the SMASH tabulation is extrapolated
@@ -107,9 +107,9 @@ TEST(f2_width) {
   FUZZY_COMPARE(rho.width_at_pole(), 0.149);
   FUZZY_COMPARE(f2.mass(), 1.275);
   FUZZY_COMPARE(f2.width_at_pole(), 0.185);
-  COMPARE_RELATIVE_ERROR(rho.iso_multiplet()->get_integral_RR(
-                                            rho.iso_multiplet(), 2.0),
-                         0.417261, 5e-4);
+  COMPARE_RELATIVE_ERROR(
+      rho.iso_multiplet()->get_integral_RR(rho.iso_multiplet(), 2.0), 0.417261,
+      5e-4);
   COMPARE_ABSOLUTE_ERROR(post_ff_sqr(2.0, f2.mass(), mpi * 4.0, 0.6),
                          0.00366995, 1e-8);
 

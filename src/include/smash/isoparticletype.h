@@ -104,8 +104,8 @@ class IsoParticleType {
    * Return a multiplet of antiparticles, if it is different from
    * the original multiplet. Otherwise, return a nullptr.
    */
-  const IsoParticleType* anti_multiplet() const;
-    
+  const IsoParticleType *anti_multiplet() const;
+
   /**
    * Check if there is a multiplet of antiparticles, which is different from
    * the original multiplet.
@@ -117,7 +117,7 @@ class IsoParticleType {
 
   /// Returns a list of all IsoParticleTypes that are baryon
   /// resonances.
-  static const std::vector<const IsoParticleType*> list_baryon_resonances();
+  static const std::vector<const IsoParticleType *> list_baryon_resonances();
 
   /**
    * Returns the IsoParticleType pointer for the given \p name.
@@ -187,8 +187,11 @@ class IsoParticleType {
    * \param hash The hash of the particle properties.
    *             This is used to determine whether a cached tabulation can be
    *             reused or not.
+   * \param tabulations_path The path to the directory where the tabulations are
+   * cached.
    */
-  static void tabulate_integrals(sha256::Hash hash);
+  static void tabulate_integrals(sha256::Hash hash,
+                                 const bf::path &tabulations_path);
 
   /**
    * Look up the tabulated resonance integral for the XX -> NR cross section.
@@ -241,28 +244,28 @@ class IsoParticleType {
   ParticleTypePtrList states_;
 
   /// A tabulation of the spectral integral for the dpi -> d'pi cross sections.
-  Tabulation* XS_piR_tabulation_ = nullptr;
+  Tabulation *XS_piR_tabulation_ = nullptr;
   /// A tabulation of the spectral integral for the NK -> RK cross sections.
-  Tabulation* XS_RK_tabulation_ = nullptr;
+  Tabulation *XS_RK_tabulation_ = nullptr;
   /**
    * A tabulation for the NN -> NR cross sections,
    * where R is a resonance from this multiplet.
    */
-  Tabulation* XS_NR_tabulation_ = nullptr;
+  Tabulation *XS_NR_tabulation_ = nullptr;
   /**
    * A tabulation for the NN -> DR cross sections,
    * where R is a resonance from this multiplet.
    */
-  Tabulation* XS_DR_tabulation_ = nullptr;
+  Tabulation *XS_DR_tabulation_ = nullptr;
   /**
    * A tabulation for the NN -> RΔ cross sections,
    * where R is a resonance from this multiplet.
    */
-  Tabulation* XS_DeltaR_tabulation_ = nullptr;
+  Tabulation *XS_DeltaR_tabulation_ = nullptr;
   /**
    * A tabulation for the ρρ integrals.
    */
-  Tabulation* XS_rhoR_tabulation_ = nullptr;
+  Tabulation *XS_rhoR_tabulation_ = nullptr;
 
   /**
    * Private version of the 'find' method that returns a non-const reference.

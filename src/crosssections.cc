@@ -892,7 +892,7 @@ CollisionBranchList CrossSections::nn_xx(ReactionsBitSet included_2to2) const {
         [&sqrts](const ParticleType& type_res_1,
                  const ParticleType& type_res_2) {
           return type_res_1.iso_multiplet()->get_integral_RR(
-                                  type_res_2.iso_multiplet(), sqrts);
+              type_res_2.iso_multiplet(), sqrts);
         });
     process_list.reserve(process_list.size() + channel_list.size());
     std::move(channel_list.begin(), channel_list.end(),

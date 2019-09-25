@@ -1,9 +1,9 @@
 #ifndef SRC_INCLUDE_SHA256_H_
 #define SRC_INCLUDE_SHA256_H_
 
+#include <array>
 #include <cstdint>
 #include <cstdio>
-#include <array>
 
 namespace smash {
 namespace sha256 {
@@ -26,11 +26,10 @@ class Context {
    *  Compress 512-bits
    */
   void transform_function(uint8_t const* buffer);
+
  public:
   /// Construct a SHA256 context.
-  Context() {
-    reset();
-  }
+  Context() { reset(); }
 
   /// Reset the SHA256 context.
   void reset();

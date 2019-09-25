@@ -7,6 +7,9 @@
 
 #include "smash/isoparticletype.h"
 
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 #include "smash/integrate.h"
 #include "smash/kinematics.h"
 #include "smash/logging.h"
@@ -22,8 +25,8 @@ IsoParticleType::list_baryon_resonances() {
   if (iso_baryon_resonances.empty()) {
     // Initialize.
     for (const auto &res : IsoParticleType::list_all()) {
-      if (res.states_[0]->is_stable() ||
-          res.states_[0]->pdgcode().baryon_number() != 1) {
+      const auto baryon_number = res.states_[0]->pdgcode().baryon_number();
+      if (res.states_[0]->is_stable() || (baryon_number <= 0)) {
         continue;
       }
       iso_baryon_resonances.push_back(&res);
@@ -100,7 +103,7 @@ static std::string multiplet_name(std::string name) {
   }
 }
 
-const IsoParticleType* IsoParticleType::anti_multiplet() const {
+const IsoParticleType *IsoParticleType::anti_multiplet() const {
   if (states_[0]->has_antiparticle()) {
     ParticleTypePtr anti = states_[0]->get_antiparticle();
     if (states_[0]->name() != multiplet_name(anti->name())) {
@@ -214,56 +217,85 @@ static std::unordered_map<std::string, Tabulation> DeltaR_tabulations;
  */
 static std::unordered_map<std::string, Tabulation> rhoR_tabulations;
 
-void IsoParticleType::tabulate_integrals(sha256::Hash hash) {
+static bf::path generate_tabulation_path(const bf::path &dir,
+                                         const std::string &prefix,
+                                         const std::string &res_name) {
+  return dir / (prefix + res_name + ".bin");
+}
+
+inline void cache_integral(
+    std::unordered_map<std::string, Tabulation> &tabulations,
+    const bf::path &dir, sha256::Hash hash, const IsoParticleType &part,
+    const IsoParticleType &res, const IsoParticleType *antires, bool unstable) {
+  constexpr double spacing = 2.0;
+  constexpr double spacing2d = 3.0;
+  const auto path =
+      generate_tabulation_path(dir, part.name(), res.name()).string();
+  Tabulation integral;
+  if (!dir.empty() && bf::exists(path)) {
+    std::cout << "Tabulation found at " << path << std::endl;
+    std::ifstream file(path);
+    integral = Tabulation::from_file(file, hash);
+    if (!integral.is_empty()) {
+      std::cout << "-> loaded." << std::endl;
+    } else {
+      std::cout << "-> discarded." << std::endl;
+    }
+  }
+  if (integral.is_empty()) {
+    if (!unstable) {
+      integral = spectral_integral_semistable(integrate, *res.get_states()[0],
+                                              *part.get_states()[0], spacing);
+    } else {
+      integral = spectral_integral_unstable(integrate2d, *res.get_states()[0],
+                                            *part.get_states()[0], spacing2d);
+    }
+    if (!dir.empty()) {
+      std::ofstream file(path);
+      integral.write(file, hash);
+      std::cout << "Tabulation written to " << path << std::endl;
+    }
+  }
+  tabulations.emplace(std::make_pair(res.name(), integral));
+  if (antires != nullptr) {
+    tabulations.emplace(std::make_pair(antires->name(), integral));
+  }
+}
+
+void IsoParticleType::tabulate_integrals(sha256::Hash hash,
+                                         const bf::path &tabulations_path) {
   const auto nuc = IsoParticleType::try_find("N");
   const auto pion = IsoParticleType::try_find("π");
   const auto kaon = IsoParticleType::try_find("K");
   const auto delta = IsoParticleType::try_find("Δ");
   const auto rho = IsoParticleType::try_find("ρ");
   const auto h1 = IsoParticleType::try_find("h₁(1170)");
-  constexpr double spacing = 2.0;
-  constexpr double spacing2d = 3.0;
   for (const auto &res : IsoParticleType::list_baryon_resonances()) {
     const auto antires = res->anti_multiplet();
-    ParticleTypePtr res_ptype = res->states_[0];
     if (nuc) {
-      const auto integral = spectral_integral_semistable(integrate, *res_ptype, *nuc->get_states()[0], spacing);
-      NR_tabulations.emplace(std::make_pair(res->name(), integral));
-      if (antires != nullptr) {
-        NR_tabulations.emplace(std::make_pair(antires->name(), integral));
-      }
+      cache_integral(NR_tabulations, tabulations_path, hash, *nuc, *res,
+                     antires, false);
     }
     if (pion) {
-      const auto integral = spectral_integral_semistable(integrate, *res_ptype, *pion->get_states()[0], spacing);
-      piR_tabulations.emplace(std::make_pair(res->name(), integral));
-      if (antires != nullptr) {
-        piR_tabulations.emplace(std::make_pair(antires->name(), integral));
-      }
+      cache_integral(piR_tabulations, tabulations_path, hash, *pion, *res,
+                     antires, false);
     }
     if (kaon) {
-      const auto integral = spectral_integral_semistable(integrate, *res_ptype, *kaon->get_states()[0], spacing);
-      RK_tabulations.emplace(std::make_pair(res->name(), integral));
-      if (antires != nullptr) {
-        RK_tabulations.emplace(std::make_pair(antires->name(), integral));
-      }
+      cache_integral(RK_tabulations, tabulations_path, hash, *kaon, *res,
+                     antires, false);
     }
     if (delta) {
-      const auto integral = spectral_integral_unstable(integrate2d, *res_ptype, *delta->get_states()[0], spacing2d);
-      DeltaR_tabulations.emplace(std::make_pair(res->name(), integral));
-      if (antires != nullptr) {
-        DeltaR_tabulations.emplace(std::make_pair(antires->name(), integral));
-      }
+      cache_integral(DeltaR_tabulations, tabulations_path, hash, *delta, *res,
+                     antires, true);
     }
   }
   if (rho) {
-    rhoR_tabulations.emplace(std::make_pair(
-        "ρ",
-        spectral_integral_unstable(integrate2d, *rho->get_states()[0], *rho->get_states()[0], spacing2d)));
+    cache_integral(rhoR_tabulations, tabulations_path, hash, *rho, *rho,
+                   nullptr, true);
   }
   if (rho && h1) {
-    rhoR_tabulations.emplace(std::make_pair(
-        h1->name(),
-        spectral_integral_unstable(integrate2d, *h1->get_states()[0], *rho->get_states()[0], spacing2d)));
+    cache_integral(rhoR_tabulations, tabulations_path, hash, *rho, *h1, nullptr,
+                   true);
   }
 }
 
@@ -291,7 +323,7 @@ double IsoParticleType::get_integral_RK(double sqrts) {
   return XS_RK_tabulation_->get_value_linear(sqrts);
 }
 
-double IsoParticleType::get_integral_rhoR(double sqrts) {  // TODO
+double IsoParticleType::get_integral_rhoR(double sqrts) {
   if (XS_rhoR_tabulation_ == nullptr) {
     const auto res = states_[0]->iso_multiplet();
     XS_rhoR_tabulation_ = &rhoR_tabulations.at(res->name());
@@ -320,7 +352,7 @@ double IsoParticleType::get_integral_RR(IsoParticleType *type_res_2,
     }
     return XS_rhoR_tabulation_->get_value_linear(sqrts);
   }
-  std::stringstream err; 
+  std::stringstream err;
   err << "RR=" << name() << type_res_2->name() << " is not implemented";
   throw std::runtime_error(err.str());
 }

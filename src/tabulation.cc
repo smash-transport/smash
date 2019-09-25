@@ -152,11 +152,11 @@ static void swrite(std::ofstream& stream, sha256::Hash x) {
  */
 static sha256::Hash sread_hash(std::ifstream& stream) {
   sha256::Hash x;
-  stream.read(reinterpret_cast<char*>(x.data()), sizeof(double) * x.size());
+  stream.read(reinterpret_cast<char*>(x.data()), x.size());
   return x;
 }
 
-void Tabulation::write(std::ofstream& stream, sha256::Hash hash) {
+void Tabulation::write(std::ofstream& stream, sha256::Hash hash) const {
   swrite(stream, hash);
   swrite(stream, x_min_);
   swrite(stream, x_max_);
@@ -164,15 +164,17 @@ void Tabulation::write(std::ofstream& stream, sha256::Hash hash) {
   swrite(stream, values_);
 }
 
-Tabulation::Tabulation(std::ifstream& stream, sha256::Hash hash) {
+Tabulation Tabulation::from_file(std::ifstream& stream, sha256::Hash hash) {
   sha256::Hash hash_from_stream = sread_hash(stream);
+  Tabulation t;
   if (hash != hash_from_stream) {
-    throw std::runtime_error("tried to read cache with invalid hash");
+    return t;
   }
-  x_min_ = sread_double(stream);
-  x_max_ = sread_double(stream);
-  inv_dx_ = sread_double(stream);
-  values_ = sread_vector(stream);
+  t.x_min_ = sread_double(stream);
+  t.x_max_ = sread_double(stream);
+  t.inv_dx_ = sread_double(stream);
+  t.values_ = sread_vector(stream);
+  return t;
 }
 
 }  // namespace smash

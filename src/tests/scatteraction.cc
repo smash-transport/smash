@@ -26,7 +26,7 @@ TEST(init_particle_types) {
   ParticleType::check_consistency();
   sha256::Hash hash;
   hash.fill(0);
-  IsoParticleType::tabulate_integrals(hash);
+  IsoParticleType::tabulate_integrals(hash, "");
 }
 
 constexpr double r_x = 0.1;

@@ -543,7 +543,7 @@ class ParticleType {
 
   /**
    * \throw runtime_error if unstable particles have no decay modes
-   * 
+   *
    * Note that the particles and decay modes have to be initialized, otherwise
    * calling this is undefined behavior.
    */
