@@ -85,6 +85,7 @@ class Clock {
 
   virtual void reset(double reset_time) = 0;
 
+  virtual void remove_times_in_past(double start_time) = 0;
   /**
    * Advances the clock by one tick.
    *
@@ -233,6 +234,9 @@ class UniformClock : public Clock {
     reset_time_ = convert(reset_time);
     counter_ = 0;
   }
+
+  void remove_times_in_past(double) override{};
+
   /**
    * Advances the clock by an arbitrary timestep (multiple of 0.000001 fm/c).
    *
@@ -298,6 +302,25 @@ class CustomClock : public Clock {
     return next_time() - current_time();
   }
   void reset(double) override { counter_ = -1; }
+
+  /**
+   * Remove all custom times before start_time.
+   *
+   * \param[in] start_time starting time of the simulation
+   */
+  void remove_times_in_past(double start_time) override {
+    std::remove_if(
+        custom_times_.begin(), custom_times_.end(), [start_time](double x) {
+          if (x <= start_time) {
+            logger<LogArea::Clock>().warn("Removing custom output time ", x,
+                                          " fm since it is earlier than the "
+                                          "starting time of the simulation");
+            return true;
+          } else {
+            return false;
+          }
+        });
+  }
 
  private:
   std::vector<double> custom_times_;

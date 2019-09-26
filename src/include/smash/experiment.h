@@ -1379,6 +1379,8 @@ void Experiment<Modus>::initialize_new_event() {
       std::floor(start_time / dt_output) * dt_output;
 
   parameters_.outputclock->reset(zeroth_output_time);
+  // remove time before starting time in case of custom output times.
+  parameters_.outputclock->remove_times_in_past(start_time);
 
   log.debug("Lab clock: t_start = ", parameters_.labclock->current_time(),
             ", dt = ", parameters_.labclock->timestep_duration());
