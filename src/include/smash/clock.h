@@ -31,8 +31,8 @@ namespace smash {
  * Potential usage for adapting time steps:
  * ------
  * \code
- *   Clock labtime(0., 0.1);
- *   Clock endtime(10., 0.);
+ *   UniformClock labtime(0., 0.1);
+ *   UniformClock endtime(10., 0.);
  *   while (labtime < endtime) {
  *     // do something
  *     // adapt the timestep size to external circumstances:
@@ -76,14 +76,26 @@ class Clock {
  public:
   /// The type used for counting ticks/time.
   using Representation = std::int64_t;
-
+  /// \return the duration of the current time step
   virtual double timestep_duration() const = 0;
-
+  /// \return the current time
   virtual double current_time() const = 0;
-
+  /// \return the time of the next time step
   virtual double next_time() const = 0;
-
-  virtual void reset(double reset_time) = 0;
+  /**
+   * reset the clock to the starting time of the simulation
+   *
+   * \param[in] start_time starting time of the imulation
+   * \param[in] is_output_clock whether this is an output clock rather than a
+   *                            lab clock
+   */
+  virtual void reset(double start_time, const bool is_output_clock) = 0;
+  /**
+   * Remove output times before the starting time of the simulation if this
+   * is a custom clock.
+   *
+   * \param[in] start_time starting time of the simulation
+   */
 
   virtual void remove_times_in_past(double start_time) = 0;
   /**
@@ -151,6 +163,7 @@ class Clock {
   Representation counter_ = 0;
 };
 
+/// Clock with uniformly spaced time steps
 class UniformClock : public Clock {
   /**
    * Defines the resolution of the clock (i.e. the smallest representable time
@@ -218,15 +231,19 @@ class UniformClock : public Clock {
   }
 
   /**
-   * Resets the time to a pre-defined value \p reset_time.
+   * Resets the time to the starting time of an event.
    *
-   * This is the only way of turning the clock back. It is needed so
-   * that the time can be adjusted after initialization (different
-   * initial conditions may require different starting times).
-   *
-   * \param[in] reset_time New time
+   * \param[in] start_time Starting time of the simulation
+   * \param[in] is_output_clock whether this is an output clock or a lab clock
    */
-  void reset(const double reset_time) override {
+  void reset(const double start_time, const bool is_output_clock) override {
+    double reset_time;
+    if (is_output_clock) {
+      reset_time =
+          std::floor(start_time / timestep_duration()) * timestep_duration();
+    } else {
+      reset_time = start_time;
+    }
     if (reset_time < current_time()) {
       logger<LogArea::Clock>().debug("Resetting clock from", current_time(),
                                      " fm/c to ", reset_time, " fm/c");
@@ -289,19 +306,35 @@ class UniformClock : public Clock {
   /// The time of last reset (when counter_ was set to 0).
   Representation reset_time_ = 0;
 };
+
+/// Clock with explicitly defined time steps
 class CustomClock : public Clock {
  public:
+  /**
+   * Initialises a custom clock with explicitly given output times
+   *
+   * \param[in] times vector of desired output times
+   */
   CustomClock(std::vector<double> times) : custom_times_(times) {
     std::sort(custom_times_.begin(), custom_times_.end());
     counter_ = -1;
   }
-
-  double current_time() const override { return custom_times_[counter_]; }
+  /**
+   * \copydoc Clock::current_time
+   * \throw runtime_error if the clock has never been advanced
+   */
+  double current_time() const override {
+    if (counter_ < 0) {
+      throw std::runtime_error("Trying to access undefined zeroth output time");
+    }
+    return custom_times_[counter_];
+  }
+  /// \copydoc Clock::next_time
   double next_time() const override { return custom_times_[counter_ + 1]; }
   double timestep_duration() const override {
     return next_time() - current_time();
   }
-  void reset(double) override { counter_ = -1; }
+  void reset(double, bool) override { counter_ = -1; }
 
   /**
    * Remove all custom times before start_time.
@@ -310,9 +343,9 @@ class CustomClock : public Clock {
    */
   void remove_times_in_past(double start_time) override {
     std::remove_if(
-        custom_times_.begin(), custom_times_.end(), [start_time](double x) {
-          if (x <= start_time) {
-            logger<LogArea::Clock>().warn("Removing custom output time ", x,
+        custom_times_.begin(), custom_times_.end(), [start_time](double t) {
+          if (t <= start_time) {
+            logger<LogArea::Clock>().warn("Removing custom output time ", t,
                                           " fm since it is earlier than the "
                                           "starting time of the simulation");
             return true;
@@ -323,6 +356,7 @@ class CustomClock : public Clock {
   }
 
  private:
+  /// Vector of times where output is generated
   std::vector<double> custom_times_;
 };
 }  // namespace smash

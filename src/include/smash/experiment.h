@@ -1374,18 +1374,12 @@ void Experiment<Modus>::initialize_new_event() {
   parameters_.labclock = std::move(clock_for_this_event);
 
   // Reset the output clock
-  const double dt_output = parameters_.outputclock->timestep_duration();
-  const double zeroth_output_time =
-      std::floor(start_time / dt_output) * dt_output;
-
-  parameters_.outputclock->reset(zeroth_output_time);
+  parameters_.outputclock->reset(start_time, true);
   // remove time before starting time in case of custom output times.
   parameters_.outputclock->remove_times_in_past(start_time);
 
   log.debug("Lab clock: t_start = ", parameters_.labclock->current_time(),
             ", dt = ", parameters_.labclock->timestep_duration());
-  log.debug("Output clock: t_start = ", parameters_.outputclock->current_time(),
-            ", dt = ", parameters_.outputclock->timestep_duration());
 
   /* Save the initial conserved quantum numbers and total momentum in
    * the system for conservation checks */
