@@ -282,6 +282,7 @@ void Nucleus::arrange_nucleons() {
 
 void Nucleus::set_parameters_automatic() {
   int A = Nucleus::number_of_particles();
+  int Z = Nucleus::number_of_protons();
   switch (A) {
     case 1:  // single particle
       /* In case of testparticles, an infinite reaction loop will be
@@ -295,37 +296,44 @@ void Nucleus::set_parameters_automatic() {
       break;
     case 238:  // Uranium
       // Default values.
-      set_diffusiveness(0.556);
-      set_nuclear_radius(6.86);
-      set_saturation_density(0.166);
-      break;
+      if (Z == 92) {
+        set_diffusiveness(0.556);
+        set_nuclear_radius(6.86);
+        set_saturation_density(0.166);
+        break;
+      }
     case 208:  // Lead
       // Default values.
-      set_diffusiveness(0.54);
-      set_nuclear_radius(6.67);
-      set_saturation_density(0.161);
-      break;
+      if (Z == 82) {
+        set_diffusiveness(0.54);
+        set_nuclear_radius(6.67);
+        set_saturation_density(0.161);
+        break;
+      }
     case 197:  // Gold
       // Default values.
-      set_diffusiveness(0.535);
-      set_nuclear_radius(6.38);
-      set_saturation_density(0.1695);
-      break;
+      if (Z == 79) {
+        set_diffusiveness(0.535);
+        set_nuclear_radius(6.38);
+        set_saturation_density(0.1695);
+        break;
+      }
     case 63:  // Copper
       // Default values.
-      set_diffusiveness(0.5977);
-      set_nuclear_radius(4.20641);
-      set_saturation_density(0.1686);
-      break;
+      if (Z == 29) {
+        set_diffusiveness(0.5977);
+        set_nuclear_radius(4.20641);
+        set_saturation_density(0.1686);
+        break;
+      }
     case 96: {
-      size_t n_protons = Nucleus::number_of_protons();
-      if (n_protons == 40) {  // Zirconium
+      if (Z == 40) {  // Zirconium
         // Default values.
         set_diffusiveness(0.46);
         set_nuclear_radius(5.02);
         set_saturation_density(0.1673);
         break;
-      } else if (n_protons == 44) {  // Ruthenium
+      } else if (Z == 44) {  // Ruthenium
         // Default values.
         set_diffusiveness(0.46);
         set_nuclear_radius(5.085);

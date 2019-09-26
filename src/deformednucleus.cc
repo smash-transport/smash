@@ -7,6 +7,7 @@
 #include "smash/deformednucleus.h"
 
 #include <cmath>
+#include <map>
 #include <stdexcept>
 
 #include "smash/angles.h"
@@ -149,30 +150,48 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
   // Set the deformation parameters
   // reference for U, Pb, Au, Cu: \iref{Moller:1993ed}
   // reference for Zr and Ru: \iref{Schenke:2019ruo}
-  switch (Nucleus::number_of_particles()) {
+  bool listed = 0;
+  std::map<int, std::string> A_map = {
+      {238, "Uranium"}, {208, "Lead"}, {197, "Gold"}, {63, "Copper"}};
+  std::map<std::string, std::string> Z_map = {
+      {"Uranium", "92"}, {"Lead", "82"}, {"Gold", "79"}, {"Copper", "29"}};
+  int A = Nucleus::number_of_particles();
+  int Z = Nucleus::number_of_protons();
+  switch (A) {
     case 238:  // Uranium
-      set_beta_2(0.28);
-      set_beta_4(0.093);
-      break;
+      listed = 1;
+      if (Z == 92) {
+        set_beta_2(0.28);
+        set_beta_4(0.093);
+        break;
+      }
     case 208:  // Lead
-      set_beta_2(0.0);
-      set_beta_4(0.0);
-      break;
-    case 197:  // Gold
-      set_beta_2(-0.131);
-      set_beta_4(-0.031);
-      break;
-    case 63:  // Copper
-      set_beta_2(0.162);
-      set_beta_4(-0.006);
-      break;
-    case 96: {
-      size_t n_protons = Nucleus::number_of_protons();
-      if (n_protons == 40) {  // Zirconium
+      listed = 1;
+      if (Z == 82) {
         set_beta_2(0.0);
         set_beta_4(0.0);
         break;
-      } else if (n_protons == 44) {  // Ruthenium
+      }
+    case 197:  // Gold
+      listed = 1;
+      if (Z == 79) {
+        set_beta_2(-0.131);
+        set_beta_4(-0.031);
+        break;
+      }
+    case 63:  // Copper
+      listed = 1;
+      if (Z == 29) {
+        set_beta_2(0.162);
+        set_beta_4(-0.006);
+        break;
+      }
+    case 96: {
+      if (Z == 40) {  // Zirconium
+        set_beta_2(0.0);
+        set_beta_4(0.0);
+        break;
+      } else if (Z == 44) {  // Ruthenium
         set_beta_2(0.158);
         set_beta_4(0.0);
         break;
@@ -188,10 +207,24 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
       break;
     }
     default:
-      throw std::domain_error(
-          "Mass number not listed for automatically setting deformation "
-          "parameters. Please specify at least \"Beta_2\" and \"Beta_4\" "
-          "manually and set \"Automatic: False.\" ");
+      if (listed) {
+        throw std::domain_error(
+            "Mass number is listed under " + A_map[A] +
+            " but the proton "
+            "number of " +
+            std::to_string(Z) +
+            " does not match "
+            "its " +
+            Z_map[A_map[A]] +
+            " protons."
+            "Please specify at least \"Beta_2\" and \"Beta_4\" "
+            "manually and set \"Automatic: False.\" ");
+      } else {
+        throw std::domain_error(
+            "Mass number not listed for automatically setting deformation "
+            "parameters. Please specify at least \"Beta_2\" and \"Beta_4\" "
+            "manually and set \"Automatic: False.\" ");
+      }
   }
 }
 
