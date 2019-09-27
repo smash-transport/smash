@@ -21,6 +21,7 @@
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
 #include "grid.h"
+#include "hypersurfacecrossingaction.h"
 #include "outputparameters.h"
 #include "pauliblocking.h"
 #include "potential_globals.h"
@@ -33,6 +34,7 @@
 #include "thermalizationaction.h"
 // Output
 #include "binaryoutput.h"
+#include "icoutput.h"
 #include "oscaroutput.h"
 #include "thermodynamicoutput.h"
 #ifdef SMASH_USE_ROOT
@@ -473,6 +475,9 @@ class Experiment : public ExperimentBase {
   /// This indicates whether photons are switched on.
   const bool photons_switch_;
 
+  /// This indicates whether the IC output is enabled.
+  const bool IC_output_switch_;
+
   /// This indicates whether to use time steps.
   const TimeStepMode time_step_mode_;
 
@@ -524,6 +529,18 @@ class Experiment : public ExperimentBase {
    */
   uint64_t total_pauli_blocked_ = 0;
 
+  /**
+   *  Total number of particles removed from the evolution in
+   *  hypersurface crossing actions.
+   */
+  uint64_t total_hypersurface_crossing_actions_ = 0;
+
+  /**
+   * Total energy removed from the system in hypersurface crossing actions.
+   *
+   */
+  double total_energy_removed_ = 0.0;
+
   /// random seed for the next event.
   int64_t seed_ = -1;
 
@@ -557,8 +574,13 @@ void Experiment<Modus>::create_output(const std::string &format,
         make_unique<VtkOutput>(output_path, content, out_par));
   } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
-    outputs_.emplace_back(
-        make_unique<RootOutput>(output_path, content, out_par));
+    if (content == "Initial_Conditions") {
+      outputs_.emplace_back(
+          make_unique<RootOutput>(output_path, "SMASH_IC", out_par));
+    } else {
+      outputs_.emplace_back(
+          make_unique<RootOutput>(output_path, content, out_par));
+    }
 #else
     log.error("Root output requested, but Root support not compiled in");
 #endif
@@ -570,6 +592,9 @@ void Experiment<Modus>::create_output(const std::string &format,
     } else if (content == "Particles") {
       outputs_.emplace_back(
           make_unique<BinaryOutputParticles>(output_path, content, out_par));
+    } else if (content == "Initial_Conditions") {
+      outputs_.emplace_back(make_unique<BinaryOutputInitialConditions>(
+          output_path, content, out_par));
     }
   } else if (format == "Oscar1999" || format == "Oscar2013") {
     outputs_.emplace_back(
@@ -581,6 +606,9 @@ void Experiment<Modus>::create_output(const std::string &format,
     printout_lattice_td_ = true;
     outputs_.emplace_back(
         make_unique<VtkOutput>(output_path, content, out_par));
+  } else if (content == "Initial_Conditions" && format == "ASCII") {
+    outputs_.emplace_back(
+        make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
   } else {
     log.error() << "Unknown combination of format (" << format
                 << ") and content (" << content << "). Fix the config.";
@@ -741,6 +769,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"General", "Expansion_Rate"}, 0.1)),
       dileptons_switch_(config.has_value({"Output", "Dileptons"})),
       photons_switch_(config.has_value({"Output", "Photons"})),
+      IC_output_switch_(config.has_value({"Output", "Initial_Conditions"})),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   const auto &log = logger<LogArea::Experiment>();
@@ -774,6 +803,23 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   const double modus_l = modus_.length();
   if (modus_l > 0.) {
     action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
+  }
+  if (IC_output_switch_) {
+    if (!modus_.is_collider()) {
+      throw std::runtime_error(
+          "Initial conditions can only be extracted in collider modus.");
+    }
+    double proper_time;
+    if (config.has_value({"Output", "Initial_Conditions", "Proper_Time"})) {
+      // Read in proper time from config
+      proper_time =
+          config.take({"Output", "Initial_Conditions", "Proper_Time"});
+    } else {
+      // Default proper time is the passing time of the two nuclei
+      proper_time = modus_.nuclei_passing_time();
+    }
+    action_finders_.emplace_back(
+        make_unique<HyperSurfaceCrossActionsFinder>(proper_time));
   }
 
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
@@ -873,6 +919,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *          quantities, see \ref Thermodynamics.
    *    - Available formats: \ref thermodyn_output_user_guide_,
    *      \ref output_vtk_lattice_
+   * - \b Initial_Conditions  Special initial conditions output, see
+   *                          \subpage input_ic for details
+   *   - Available formats: \ref format_oscar_particlelist, \ref
+   * IC_output_user_guide_
    *
    * \n
    * \anchor list_of_output_formats
@@ -903,6 +953,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b "ASCII" - a human-readable text-format table of values
    *   - Used only for "Thermodynamics", see
    * \subpage thermodyn_output_user_guide_
+   * \subpage IC_output_user_guide_
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
@@ -1040,6 +1091,59 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * nor to the particle lists.
    **/
 
+  /*!\Userguide
+   * \page input_ic Initial Conditions
+   * The existance of an initial conditions subsection in the output section of
+   * the configuration file enables the IC output. In addition, all particles
+   * that cross the hypersurface of predefined proper time are removed from the
+   * evolution. This proper time is taken from the \key Proper_Time field
+   * in the \key Initial_Conditions subsection when configuring the output. If
+   * this information
+   * is not provided, the default proper time corresponds to the passing time
+   * of the two nuclei, where all primary interactions are expected to have
+   * occured: \f[ \tau_0 =
+   * (r_\mathrm{p} \ + \ r_\mathrm{t}) \ \left(\left(\frac{\sqrt{s_\mathrm{NN}}}
+   * {2 \ m_\mathrm{N}}\right)^2
+   * - 1\right)^{-1/2} \f]
+   * Therein, \f$ r_\mathrm{p} \f$ and \f$ r_\mathrm{t} \f$ denote the radii of
+   * the projectile and target nucleus, respectively, \f$
+   * \sqrt{s_\mathrm{NN}}\f$
+   * is the collision energy per nucleon and \f$ m_\mathrm{N} \f$ the nucleon
+   * mass. \n If
+   * initial conditions are enabled, the output file named SMASH_IC (followed by
+   * the appropriate suffix) is generated when SMASH is executed. \n The output
+   * is available in Oscar1999, Oscar2013, binary and ROOT format, as well as in
+   * an aditional ASCII format (see \ref IC_output_user_guide_). The latter is
+   * meant to directly serve
+   * as an input for the vHLLE hydrodynamics code (I. Karpenko, P. Huovinen, M.
+   * Bleicher: Comput. Phys. Commun. 185, 3016 (2014)).\n \n
+   * ### Oscar output
+   * In case
+   * of the Oscar1999 and Oscar2013 format, the structure is identical to the
+   * Oscar Particles Format (see \ref format_oscar_particlelist). \n
+   * In contrast
+   * to the usual particles output however, the initial conditions output
+   * provides a
+   * **list of all particles removed from the evolution** at the time when
+   * crossing the hypersurface. This implies that neither the initial particle
+   * list nor the particle list at each time step is printed.\n The general
+   * Oscar structure as described in \ref format_oscar_particlelist is
+   * preserved. \n
+   * \n
+   * ### Binary output
+   * The binary initial
+   * conditions output also provides a list of all particles removed from the
+   * evolution at the time when crossing the hypersurface. For each removed
+   * particle a 'p' block is created stores the particle data. The general
+   * binary output structure as described in \ref format_binary_ is preserved.\n
+   * \n
+   * ### ROOT output
+   * The initial conditions output in shape of a list of all particles removed
+   * from the SMASH evolution when crossing the hypersurface is also available
+   * in ROOT format. Neither the initial nor the final particle lists are
+   * printed, but the general structure for particle TTrees, as described in
+   * \ref format_root, is preserved.
+   */
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
   log.debug() << "Density type printed to headers: " << dens_type_;
 
@@ -1289,6 +1393,8 @@ void Experiment<Modus>::initialize_new_event() {
   previous_interactions_total_ = 0;
   total_pauli_blocked_ = 0;
   projectile_target_interact_ = false;
+  total_hypersurface_crossing_actions_ = 0;
+  total_energy_removed_ = 0.0;
   // Print output headers
   log.info() << hline;
   log.info() << "Time [fm]   Ediff [GeV]    Scatt.|Decays   "
@@ -1343,6 +1449,10 @@ bool Experiment<Modus>::perform_action(
   if (action.get_type() == ProcessType::Wall) {
     wall_actions_total_++;
   }
+  if (action.get_type() == ProcessType::HyperSurfaceCrossing) {
+    total_hypersurface_crossing_actions_++;
+    total_energy_removed_ += action.incoming_particles()[0].momentum().x0();
+  }
   // Calculate Eckart rest frame density at the interaction point
   double rho = 0.0;
   if (dens_type_ != DensityType::None) {
@@ -1370,7 +1480,12 @@ bool Experiment<Modus>::perform_action(
    */
   for (const auto &output : outputs_) {
     if (!output->is_dilepton_output() && !output->is_photon_output()) {
-      output->at_interaction(action, rho);
+      if (output->is_IC_output() &&
+          action.get_type() == ProcessType::HyperSurfaceCrossing) {
+        output->at_interaction(action, rho);
+      } else if (!output->is_IC_output()) {
+        output->at_interaction(action, rho);
+      }
     }
   }
 
@@ -1482,8 +1597,8 @@ void Experiment<Modus>::run_time_evolution() {
       grid.iterate_cells(
           [&](const ParticleList &search_list) {
             for (const auto &finder : action_finders_) {
-              actions.insert(
-                  finder->find_actions_in_cell(search_list, dt, cell_vol));
+              actions.insert(finder->find_actions_in_cell(
+                  search_list, dt, cell_vol, beam_momentum_));
             }
           },
           [&](const ParticleList &search_list,
@@ -1523,7 +1638,7 @@ void Experiment<Modus>::run_time_evolution() {
      * only in average.  If string fragmentation is on, then energy and
      * momentum are only very roughly conserved in high-energy collisions. */
     if (!potentials_ && !parameters_.strings_switch &&
-        metric_.mode_ == ExpansionMode::NoExpansion) {
+        metric_.mode_ == ExpansionMode::NoExpansion && !IC_output_switch_) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
         log.error() << err_msg;
@@ -1605,7 +1720,6 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
      * in the action object will be outdated as the particles have been
      * propagated since the construction of the action. */
     act->update_incoming(particles_);
-
     const bool performed = perform_action(*act, particles_);
 
     /* No need to update actions for outgoing particles
@@ -1623,7 +1737,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     for (const auto &finder : action_finders_) {
       // Outgoing particles can still decay, cross walls...
       actions.insert(finder->find_actions_in_cell(outgoing_particles, time_left,
-                                                  cell_vol));
+                                                  cell_vol, beam_momentum_));
       // ... and collide with other particles.
       actions.insert(finder->find_actions_with_surrounding_particles(
           outgoing_particles, particles_, time_left));
@@ -1641,7 +1755,6 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
       intermediate_output();
     }
   }
-
   log.debug("Propagating to time ", end_time);
   propagate_and_shine(end_time);
 }
@@ -1662,9 +1775,11 @@ void Experiment<Modus>::intermediate_output() {
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   // save evolution data
   for (const auto &output : outputs_) {
-    if (output->is_dilepton_output() || output->is_photon_output()) {
+    if (output->is_dilepton_output() || output->is_photon_output() ||
+        output->is_IC_output()) {
       continue;
     }
+
     output->at_intermediate_time(particles_, parameters_.outputclock,
                                  density_param_);
 
@@ -1814,10 +1929,33 @@ void Experiment<Modus>::final_output(const int evt_num) {
     log.info() << format_measurements(particles_, interactions_this_interval,
                                       conserved_initial_, time_start_,
                                       parameters_.outputclock.current_time());
-    log.info() << hline;
-    log.info() << "Time real: " << SystemClock::now() - time_start_;
-    log.info() << "Final interaction number: "
-               << interactions_total_ - wall_actions_total_;
+    if (IC_output_switch_ && (particles_.size() == 0)) {
+      // Verify there is no more energy in the system if all particles were
+      // removed when crossing the hypersurface
+      const double remaining_energy =
+          conserved_initial_.momentum().x0() - total_energy_removed_;
+      if (remaining_energy > really_small) {
+        throw std::runtime_error(
+            "There is remaining energy in the system although all particles "
+            "were removed.\n"
+            "E_remain = " +
+            std::to_string(remaining_energy) + " [GeV]");
+      } else {
+        log.info() << hline;
+        log.info() << "Time real: " << SystemClock::now() - time_start_;
+        log.info() << "Interactions before reaching hypersurface: "
+                   << interactions_total_ - wall_actions_total_ -
+                          total_hypersurface_crossing_actions_;
+        log.info() << "Total number of particles removed on hypersurface: "
+                   << total_hypersurface_crossing_actions_;
+      }
+    } else {
+      log.info() << hline;
+      log.info() << "Time real: " << SystemClock::now() - time_start_;
+      log.info() << "Final interaction number: "
+                 << interactions_total_ - wall_actions_total_;
+    }
+
     // Check if there are unformed particles
     int unformed_particles_count = 0;
     for (const auto &particle : particles_) {

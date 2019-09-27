@@ -301,4 +301,48 @@ void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
   }
 }
 
+BinaryOutputInitialConditions::BinaryOutputInitialConditions(
+    const bf::path &path, std::string name, const OutputParameters &out_par)
+    : BinaryOutputBase(path / "SMASH_IC.bin", "wb", name, out_par.ic_extended) {
+}
+
+void BinaryOutputInitialConditions::at_eventstart(const Particles &,
+                                                  const int) {}
+
+void BinaryOutputInitialConditions::at_eventend(const Particles &particles,
+                                                const int event_number,
+                                                double impact_parameter,
+                                                bool empty_event) {
+  const auto &log = logger<LogArea::HyperSurfaceCrossing>();
+
+  // Event end line
+  const char fchar = 'f';
+  std::fwrite(&fchar, sizeof(char), 1, file_.get());
+  write(event_number);
+  write(impact_parameter);
+  const char empty = empty_event;
+  write(empty);
+
+  // Flush to disk
+  std::fflush(file_.get());
+
+  // If the runtime is too short some particles might not yet have
+  // reached the hypersurface. Warning is printed.
+  if (particles.size() != 0) {
+    log.warn(
+        "End time might be too small for initial conditions output. "
+        "Hypersurface has not yet been crossed by ",
+        particles.size(), " particle(s).");
+  }
+}
+
+void BinaryOutputInitialConditions::at_interaction(const Action &action,
+                                                   const double) {
+  if (action.get_type() == ProcessType::HyperSurfaceCrossing) {
+    const char pchar = 'p';
+    std::fwrite(&pchar, sizeof(char), 1, file_.get());
+    write(action.incoming_particles().size());
+    write(action.incoming_particles());
+  }
+}
 }  // namespace smash

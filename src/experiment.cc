@@ -173,6 +173,15 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle \n
  * \n
+ * - \b Initial_Conditions (Oscar1999, Oscar2013, binary, ROOT and special ASCII
+ * IC (\ref IC_output_user_guide_) formats)\n
+ *   \key Proper_Time (double, optional, default = nuclei passing time): Proper
+ *       time at which hypersurface is created \n
+ *   \key Extended (bool, optional, default = false, incompatible with
+ *                  Oscar1999, ROOT and ASCII format):\n
+ *   \li \key true - Print extended information for each particle
+ *   \li \key false - Regular output for each particle
+ * \n
  * \anchor Thermodynamics
  * - \b Thermodynamics \n
  *   The user can print thermodynamical quantities:
@@ -287,6 +296,19 @@ ExperimentPtr ExperimentBase::create(Configuration config,
          Quantities:    ["rho_eckart", "tmn_landau"]
          Position:    [0.0, 0.0, 0.0]
          Smearing: False
+ \endverbatim
+ * SMASH can further be applied to extract initial conditions for hydrodynamic
+ * simulations. The corresponding output provides the particle list on a
+ * hypersurface of constant proper time. If desired, the proper time can be set
+ * manually from the configuration file (in the following example at \f$\tau =
+ * 0.5 \f$ fm). If not provided, the default proper time corresponds to the
+ * moment when both nuclei have entirely passed through each other.\n
+ * The initial conditions output can be enabled as follows:
+ *\verbatim
+     Initial_Conditions:
+         Format:    ["ASCII", "Oscar1999", "Oscar2013", "Binary", "ROOT"]
+         Extended: False
+         Proper_Time: 0.5
  \endverbatim
  */
 

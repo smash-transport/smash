@@ -419,3 +419,81 @@ TEST(full_extended_oscar) {
   }
   VERIFY(bf::remove(outputfilepath));
 }
+
+TEST(initial_conditions_2013_format) {
+  // Create 1 particle
+  Particles particles;
+  ParticleData p1 = particles.insert(Test::smashon_random());
+  p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
+
+  // Create action ("hypersurface crossing")
+  ActionPtr action = make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
+  action->generate_final_state();
+
+  const int event_id = 0;
+  const bool empty_event = false;
+  const double impact_parameter = 1.783;
+
+  const bf::path outputfilename = "SMASH_IC.oscar";
+  const bf::path outputfilepath = testoutputpath / outputfilename;
+  bf::path outputfilepath_unfinished = outputfilepath;
+  outputfilepath_unfinished += ".unfinished";
+  {
+    OutputParameters out_par = OutputParameters();
+    out_par.ic_extended = false;
+
+    std::unique_ptr<OutputInterface> osc2013full = create_oscar_output(
+        "Oscar2013", "Initial_Conditions", testoutputpath, out_par);
+    VERIFY(bool(osc2013full));
+    VERIFY(bf::exists(outputfilepath_unfinished));
+
+    osc2013full->at_eventstart(particles, event_id);
+    action->perform(&particles, 1);
+    osc2013full->at_interaction(*action, 0.);
+    osc2013full->at_eventend(particles, event_id, impact_parameter,
+                             empty_event);
+  }
+  VERIFY(!bf::exists(outputfilepath_unfinished));
+  VERIFY(bf::exists(outputfilepath));
+
+  {
+    bf::fstream outputfile;
+    outputfile.open(outputfilepath, std::ios_base::in);
+    VERIFY(outputfile.good());
+    if (outputfile.good()) {
+      std::string line;
+      /* Check header */
+      std::getline(outputfile, line);
+      COMPARE(line,
+              "#!OSCAR2013 SMASH_IC t x y z mass p0 px py pz"
+              " pdg ID charge");
+      std::getline(outputfile, line);
+      COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none e");
+      std::getline(outputfile, line);
+      COMPARE(line, "# " VERSION_MAJOR);
+      /* Check initial particle list description line */
+      std::string initial_line = "# event " + std::to_string(event_id + 1) +
+                                 " in " + std::to_string(1);
+      std::getline(outputfile, line);
+      COMPARE(line, initial_line);
+      /* Check initial particle data lines item by item */
+      for (const ParticleData &data : action->incoming_particles()) {
+        std::array<std::string, data_elements> datastring;
+        for (int j = 0; j < data_elements; j++) {
+          outputfile >> datastring.at(j);
+        }
+
+        compare_particledata(datastring, data, data.id());
+      }
+
+      /* Get the dangling newline character */
+      outputfile.get();
+      /* Check for event end line */
+      std::getline(outputfile, line);
+      std::string end_line = "# event " + std::to_string(event_id + 1) +
+                             " end 0" + " impact   1.783 empty no";
+      COMPARE(line, end_line);
+    }
+  }
+  VERIFY(bf::remove(outputfilepath));
+}

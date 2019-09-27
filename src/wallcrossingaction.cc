@@ -12,7 +12,8 @@
 namespace smash {
 
 ActionList WallCrossActionsFinder::find_actions_in_cell(
-    const ParticleList& plist, double t_max, const double) const {
+    const ParticleList& plist, double t_max, const double,
+    const std::vector<FourVector>) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData& p : plist) {
     const ThreeVector& r = p.position().threevec();

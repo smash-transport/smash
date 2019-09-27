@@ -40,7 +40,8 @@ class OutputInterface {
    */
   explicit OutputInterface(std::string name)
       : is_dilepton_output_(name == "Dileptons"),
-        is_photon_output_(name == "Photons") {}
+        is_photon_output_(name == "Photons"),
+        is_IC_output_(name == "SMASH_IC") {}
   virtual ~OutputInterface() = default;
 
   /**
@@ -141,6 +142,9 @@ class OutputInterface {
   /// Get, whether this is the photon output?
   bool is_photon_output() const { return is_photon_output_; }
 
+  /// Get, whether this is the IC output?
+  bool is_IC_output() const { return is_IC_output_; }
+
   /**
    * Convert thermodynamic quantities to strings.
    * \param[in] tq Enum value of the thermodynamic quantity.
@@ -195,6 +199,9 @@ class OutputInterface {
 
   /// Is this the photon output?
   const bool is_photon_output_;
+
+  /// Is this the IC output?
+  const bool is_IC_output_;
 };
 
 }  // namespace smash

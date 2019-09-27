@@ -129,6 +129,8 @@ set(smash_src
         grandcan_thermalizer.cc
         grid.cc
         hadgas_eos.cc
+        hypersurfacecrossingaction.cc
+        icoutput.cc
         inputfunctions.cc
         interpolation.cc
         isoparticletype.cc

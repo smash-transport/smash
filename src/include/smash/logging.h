@@ -57,6 +57,7 @@ class Configuration;
  * \li \key GrandcanThermalizer
  * \li \key CrossSections
  * \li \key Output
+ * \li \key HyperSurfaceCrossing
  *
  * Each key can have one of the following values:
  * \li ALL   - Log all messages (default)
@@ -108,6 +109,7 @@ class Configuration;
      CrossSections: INFO
      Output: INFO
      HadronGasEos: INFO
+     HyperSurfaceCrossing: INFO
  \endverbatim
  */
 
@@ -199,6 +201,7 @@ DECLARE_LOGAREA(25, GrandcanThermalizer);
 DECLARE_LOGAREA(26, CrossSections);
 DECLARE_LOGAREA(27, Output);
 DECLARE_LOGAREA(28, HadronGasEos);
+DECLARE_LOGAREA(29, HyperSurfaceCrossing);
 
 /**
  * This type collects all existing log areas so they will be created with the
@@ -209,7 +212,8 @@ using AreaTuple =
                ParticleType, FindScatter, Clock, DecayModes, Resonances,
                ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
                Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling, Pythia,
-               GrandcanThermalizer, CrossSections, Output, HadronGasEos>;
+               GrandcanThermalizer, CrossSections, Output, HadronGasEos,
+               HyperSurfaceCrossing>;
 }  // namespace LogArea
 
 /**

@@ -90,10 +90,12 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name,
       write_collisions_(name == "Collisions" || name == "Dileptons" ||
                         name == "Photons"),
       write_particles_(name == "Particles"),
+      write_initial_conditions_(name == "SMASH_IC"),
       particles_only_final_(out_par.part_only_final),
       autosave_frequency_(1000),
       part_extended_(out_par.part_extended),
-      coll_extended_(out_par.coll_extended) {
+      coll_extended_(out_par.coll_extended),
+      ic_extended_(out_par.ic_extended) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += ".unfinished";
   root_out_file_ =
@@ -102,7 +104,7 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name,
 }
 
 void RootOutput::init_trees() {
-  if (write_particles_) {
+  if (write_particles_ || write_initial_conditions_) {
     particles_tree_ = new TTree("particles", "particles");
 
     particles_tree_->Branch("npart", &npart, "npart/I");
@@ -124,7 +126,7 @@ void RootOutput::init_trees() {
     particles_tree_->Branch("y", &y[0], "y[npart]/D");
     particles_tree_->Branch("z", &z[0], "z[npart]/D");
 
-    if (part_extended_) {
+    if (part_extended_ || ic_extended_) {
       particles_tree_->Branch("coll_per_part", &coll_per_part_[0],
                               "coll_per_part[npart]/I");
       particles_tree_->Branch("formation_time", &formation_time_[0],
@@ -233,11 +235,23 @@ void RootOutput::at_eventend(const Particles &particles,
   /* Forced regular dump from operational memory to disk. Very demanding!
    * If program crashes written data will NOT be lost. */
   if (current_event_ > 0 && current_event_ % autosave_frequency_ == 0) {
-    if (write_particles_) {
+    if (write_particles_ || write_initial_conditions_) {
       particles_tree_->AutoSave("SaveSelf");
     }
     if (write_collisions_) {
       collisions_tree_->AutoSave("SaveSelf");
+    }
+  }
+
+  if (write_initial_conditions_) {
+    // If the runtime is too short some particles might not yet have
+    // reached the hypersurface. Warning is printed.
+    if (particles.size() != 0) {
+      const auto &log = logger<LogArea::HyperSurfaceCrossing>();
+      log.warn(
+          "End time might be too small for initial conditions output. "
+          "Hypersurface has not yet been crossed by ",
+          particles.size(), " particle(s).");
     }
   }
 }
@@ -248,9 +262,15 @@ void RootOutput::at_interaction(const Action &action,
     collisions_to_tree(action.incoming_particles(), action.outgoing_particles(),
                        action.get_total_weight(), action.get_partial_weight());
   }
+
+  if (write_initial_conditions_ &&
+      action.get_type() == ProcessType::HyperSurfaceCrossing) {
+    particles_to_tree(action.incoming_particles());
+  }
 }
 
-void RootOutput::particles_to_tree(const Particles &particles) {
+template <typename T>
+void RootOutput::particles_to_tree(T &particles) {
   int i = 0;
 
   tcounter = output_counter_;
@@ -276,7 +296,7 @@ void RootOutput::particles_to_tree(const Particles &particles) {
       pdgcode[i] = p.pdgcode().get_decimal();
       charge[i] = p.type().charge();
 
-      if (part_extended_) {
+      if (part_extended_ || ic_extended_) {
         const auto h = p.get_history();
         formation_time_[i] = p.formation_time();
         xsec_factor_[i] = p.xsec_scaling_factor();

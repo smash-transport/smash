@@ -255,7 +255,7 @@ class Action {
    *
    * \param[in] id_process process id only used for debugging output
    */
-  void check_conservation(const uint32_t id_process) const;
+  virtual void check_conservation(const uint32_t id_process) const;
 
   /**
    * Determine the total energy in the center-of-mass frame [GeV]

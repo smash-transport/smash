@@ -138,7 +138,11 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
       std::fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
                    event_number + 1);
     }
-    write(particles);
+    if (!(Contents == OscarParticlesIC)) {
+      // We do not want the inital particle list to be printed in case of IC
+      // output
+      write(particles);
+    }
   }
 }
 
@@ -173,6 +177,18 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
   }
   // Flush to disk
   std::fflush(file_.get());
+
+  if (Contents & OscarParticlesIC) {
+    const auto &log = logger<LogArea::HyperSurfaceCrossing>();
+    // If the runtime is too short some particles might not yet have
+    // reached the hypersurface. Warning is printed.
+    if (particles.size() != 0) {
+      log.warn(
+          "End time might be too small for initial conditions output. "
+          "Hypersurface has not yet been crossed by ",
+          particles.size(), " particle(s).");
+    }
+  }
 }
 
 template <OscarOutputFormat Format, int Contents>
@@ -206,6 +222,10 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
     for (const auto &p : action.outgoing_particles()) {
       write_particledata(p);
     }
+  } else if (Contents == OscarParticlesIC) {
+    for (const auto &p : action.incoming_particles()) {
+      write_particledata(p);
+    }
   }
 }
 
@@ -237,8 +257,10 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * produced when executing SMASH. It allows for a certain degree of flexibility,
  * see \ref output_content_specific_options_ "Content-specific output options"
  * for further details. \n
- * **The Particle output always provides the current particle list at a
- * specific time.** \n
+ * **Unless IC output is enabled, the Particle output always provides the
+ * current particle list at a specific time.** See \ref input_ic for details
+ * about the particles IC output. \n
+ *
  * \n
  * Oscar1999
  * ---------
@@ -433,6 +455,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key 5: Resonance decay
  * \li \key 6: Box wall crossing (due to periodic boundary conditions)
  * \li \key 7: Forced thermalization
+ * \li \key 8: Hypersurface crossing
  * \li \key 41: Soft string excitation, single diffractive AB -> AX
  * \li \key 42: Soft string excitation, single diffractive AB -> XB
  * \li \key 43: Soft string excitation, double diffractive
@@ -793,6 +816,22 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     } else if (!modern_format && out_par.photons_extended) {
       log.warn() << "Creating Oscar output: "
                  << "There is no extended Oscar1999 (photons) format.";
+    }
+  } else if (content == "Initial_Conditions") {
+    if (modern_format && !out_par.ic_extended) {
+      return make_unique<OscarOutput<OscarFormat2013, OscarParticlesIC>>(
+          path, "SMASH_IC");
+    } else if (modern_format && out_par.ic_extended) {
+      return make_unique<
+          OscarOutput<OscarFormat2013Extended, OscarParticlesIC>>(path,
+                                                                  "SMASH_IC");
+    } else if (!modern_format && !out_par.ic_extended) {
+      return make_unique<OscarOutput<OscarFormat1999, OscarParticlesIC>>(
+          path, "SMASH_IC");
+    } else if (!modern_format && out_par.ic_extended) {
+      log.warn()
+          << "Creating Oscar output: "
+          << "There is no extended Oscar1999 (initial conditions) format.";
     }
   }
 

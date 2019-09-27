@@ -35,12 +35,15 @@ class ActionFinderInterface {
    *                  tested for possible interaction
    * \param[in] dt duration of the current time step [fm]
    * \param[in] cell_vol volume of searched grid cell [fm^3]
+   * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
+   * only necessary if frozen Fermi motion is used in combination with
+   * HyperSurfaceCrossing Actions
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
-  virtual ActionList find_actions_in_cell(const ParticleList &search_list,
-                                          double dt,
-                                          const double cell_vol) const = 0;
+  virtual ActionList find_actions_in_cell(
+      const ParticleList &search_list, double dt, const double cell_vol,
+      const std::vector<FourVector> beam_momentum) const = 0;
   /**
    * Abstract function for finding actions, given two lists of particles,
    * a search list and a neighbors list.

@@ -45,7 +45,9 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
       history_.p2 = 0x0;
       break;
     case ProcessType::Elastic:
-      // Parent particles are not updated by the elastic scatterings
+    case ProcessType::HyperSurfaceCrossing:
+      // Parent particles are not updated by the elastic scatterings or
+      // hypersurface crossings
       break;
     case ProcessType::TwoToOne:
     case ProcessType::TwoToTwo:

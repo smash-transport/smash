@@ -130,6 +130,18 @@ class FourVector {
    */
   double inline abs3() const;
 
+  /**
+   * calculate the proper time from the given four vector
+   * \return \f$\sqrt{t^2 - z^2}\f$
+   */
+  double inline tau() const;
+
+  /**
+   * calculate the space-time rapidity from the given four vector
+   * \return \f$atanh(z/t)\f$
+   */
+  double inline eta() const;
+
   /** Returns the FourVector boosted with velocity v.
    *
    * The current FourVector is not changed.
@@ -451,6 +463,14 @@ double inline FourVector::abs() const {
 double inline FourVector::sqr3() const { return this->threevec().sqr(); }
 
 double inline FourVector::abs3() const { return this->threevec().abs(); }
+
+double inline FourVector::tau() const {
+  return std::sqrt(this->x0() * this->x0() - this->x3() * this->x3());
+}
+
+double inline FourVector::eta() const {
+  return std::atanh(this->x3() / this->x0());
+}
 
 /**\ingroup logging
  * Writes the four components of the vector to the output stream.
