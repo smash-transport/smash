@@ -74,8 +74,8 @@ class DeformedNucleus : public Nucleus {
 
   /**
    * Set angles for orientation of nucleus from config file.
-   * \param[in] config The configuration for the deformation of this nucleus
-   * (projectile or target).
+   * \param[in] orientation_config The configuration for the deformation of this
+   * nucleus (projectile or target).
    */
   void set_orientation_from_config(Configuration &orientation_config);
   /**
