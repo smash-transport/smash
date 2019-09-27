@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_CLOCK_H_
 #define SRC_INCLUDE_CLOCK_H_
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
