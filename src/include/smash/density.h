@@ -409,12 +409,13 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
   const double norm_factor = par.norm_factor_sf();
   for (const auto &part : particles) {
     const double dens_factor = density_factor(part.type(), dens_type);
-    if (std::abs(dens_factor) < really_small) {
+    // Agnieszka modified
+    if (std::abs(dens_factor) < really_small/par.ntest()) {
       continue;
     }
     const FourVector p = part.momentum();
     const double m = p.abs();
-    if (unlikely(m < really_small)) {
+    if (unlikely(m < really_small/par.ntest())) {
       const auto &log = logger<LogArea::Density>();
       log.warn("Gaussian smearing is undefined for momentum ", p);
       continue;
@@ -427,7 +428,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
           const ThreeVector r = lat->cell_center(ix, iy, iz);
           const auto sf = unnormalized_smearing_factor(pos - r, p, m_inv, par,
                                                        compute_gradient);
-          if (sf.first * norm_factor > really_small) {
+          if (sf.first * norm_factor > really_small/par.ntest()) {
             node.add_particle(part, sf.first * norm_factor * dens_factor);
           }
           if (compute_gradient) {
