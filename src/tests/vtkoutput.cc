@@ -220,11 +220,11 @@ TEST(vtkoutputfile) {
         outputfile >> item;
         COMPARE(item, "0");
       }
-      /* Check SCALARS ID */
+      /* Check SCALARS particle_ID */
       outputfile >> item;
       COMPARE(item, "SCALARS");
       outputfile >> item;
-      COMPARE(item, "ID");
+      COMPARE(item, "particle_ID");
       outputfile >> item;
       COMPARE(item, "int");
       outputfile >> item;

@@ -141,7 +141,7 @@ void VtkOutput::write(const Particles &particles) {
   for (const auto &p : particles) {
     std::fprintf(file_.get(), "%i\n", p.get_history().collisions_per_particle);
   }
-  std::fprintf(file_.get(), "SCALARS ID int 1\n");
+  std::fprintf(file_.get(), "SCALARS particle_ID int 1\n");
   std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
   for (const auto &p : particles) {
     std::fprintf(file_.get(), "%i\n", p.id());
