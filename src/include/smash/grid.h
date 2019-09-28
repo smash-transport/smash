@@ -100,6 +100,7 @@ class Grid : public GridBase {
    * Constructs a grid with the given minimum grid coordinates and grid length.
    * If you need periodic boundaries you have to use this constructor to set the
    * correct length to use for wrapping particles around the borders.
+   * Throws an error if your box length is smaller than the grid length.
    *
    * \param[in] min_and_length A pair consisting of the three min coordinates
    * and the three lengths.

@@ -158,11 +158,10 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
     if (number_of_cells_[i] == 0) {
       throw std::domain_error(
           "Input error: Your Box is too small for the grid."
-          "\nThe minimal length of the box is given by:\n"
-          "sqrt(4*dt^2+6.3662)\nwhich corresponds to " +
+          "\nThe minimal length of the box is given by:\n" +
           std::to_string(max_interaction_length) +
-          " with your current timestep size dt. If you "
-          "have large timesteps you should reduce them."
+          " fm with your current timestep size dt.\n"
+          "If you have large timesteps please reduce them."
           "\nPlease take a look at your config.");
     }
     // std::nextafter implements a safety margin so that no valid position
