@@ -108,7 +108,8 @@ class CustomNucleus : public Nucleus {
    * indirection.
    */
   static std::unique_ptr<std::ifstream> filestream_shared_;
-  /* Filestream variable used if projectile and target are read in from
+  /**
+   * Filestream variable used if projectile and target are read in from
    * different files and they therefore use different streams.
    */
   std::unique_ptr<std::ifstream> filestream_;
