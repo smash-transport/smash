@@ -130,8 +130,15 @@ enum class TimeStepMode : char {
  * In either case, the positions in space are chosen randomly.
  */
 enum class BoxInitialCondition {
-  ThermalMomenta,
+  // ****************************************************************************
+  // Agnieszka modification begins
+  // ****************************************************************************
+  ThermalMomentaQuantum,
+  ThermalMomentaBoltzmann,
   PeakedMomenta,
+  // ****************************************************************************
+  // Agnieszka modification ends
+  // ****************************************************************************
 };
 
 /**
