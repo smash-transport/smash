@@ -30,6 +30,16 @@
 #include "smash/spheremodus.h"
 #include "smash/threevector.h"
 
+// ******************************************************************************
+// Agnieszka input begins
+// ******************************************************************************
+#include "smash/Agnieszka_chemical_potential.h"
+#include "smash/Agnieszka_distribution.h"
+#include "smash/Agnieszka_sampling.h"
+// ******************************************************************************
+// Agnieszka input ends
+// ******************************************************************************
+
 namespace smash {
 static constexpr int LSphere = LogArea::Sphere::id;
 
@@ -178,7 +188,7 @@ SphereModus::SphereModus(Configuration modus_config,
                         : modus_config.take({"Sphere", "Init_Multiplicities"})
                               .convert_for(init_multipl_)),
       init_distr_(modus_config.take({"Sphere", "Initial_Condition"},
-                                    SphereInitialCondition::ThermalMomenta)),
+                                    SphereInitialCondition::ThermalMomentaBoltzmann)),
       insert_jet_(modus_config.has_value({"Sphere", "Jet", "Jet_PDG"})),
       jet_pdg_(insert_jet_ ? modus_config.take({"Sphere", "Jet", "Jet_PDG"})
                                  .convert_for(jet_pdg_)
@@ -242,6 +252,23 @@ double SphereModus::initial_conditions(Particles *particles,
                           p.second);
     }
   }
+  // ****************************************************************************
+  // Agnieszka input begins
+  // ****************************************************************************
+  /*
+   * We define maps that are intended to store:
+   * the PdgCode and the corresponding effective chemical potential,
+   * the PdgCode and the corresponding distribution function maximum.
+   * These maps will be needed for momenta sampling. For each particle, we will 
+   * check if the associated effective chemical potential and distribution 
+   * function maximum have been calculated already, so that we will only 
+   * calculate these quantities once.
+   */
+  std::map <PdgCode, double> effective_chemical_potentials;
+  std::map <PdgCode, double> distribution_function_maximums;
+  // ****************************************************************************
+  // Agnieszka input ends
+  // ****************************************************************************
   /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : *particles) {
     Angles phitheta;
@@ -261,13 +288,36 @@ double SphereModus::initial_conditions(Particles *particles,
       case (SphereInitialCondition::IC_Massive):
         momentum_radial = sample_momenta_non_eq_mass(T, mass);
         break;
-      case (SphereInitialCondition::ThermalMomenta):
+      case (SphereInitialCondition::ThermalMomentaBoltzmann):
       default:
         mass = (!account_for_resonance_widths_)
                    ? data.type().mass()
                    : HadronGasEos::sample_mass_thermal(data.type(), 1.0 / T);
         momentum_radial = sample_momenta_from_thermal(T, mass);
         break;
+      // ************************************************************************
+      // Agnieszka input begins
+      // ************************************************************************
+      case (SphereInitialCondition::ThermalMomentaQuantum):
+	/*
+	 * **********************************************************************
+	 * Sampling the thermal momentum according Bose/Fermi/Boltzmann 
+	 * distribution.
+	 * We take the pole mass as the mass.
+	 * **********************************************************************
+	 */
+	mass = data.type().mass();
+	PdgCode pdg_code = data.pdgcode();
+	momentum_radial = sample_quantum_momenta (mass,
+						  pdg_code,
+						  T,
+						  &effective_chemical_potentials,
+						  &distribution_function_maximums,
+						  init_multipl_);
+	break;
+      // ************************************************************************
+      // Agnieszka input ends
+      // ************************************************************************
     }
     phitheta.distribute_isotropically();
     logg[LSphere].debug(data.type().name(), "(id ", data.id(),
@@ -312,4 +362,184 @@ double SphereModus::initial_conditions(Particles *particles,
                         << momentum_total;
   return start_time_;
 }
+
+// ******************************************************************************
+// Agnieszka input begins
+// ******************************************************************************
+double SphereModus::sample_quantum_momenta
+   (double particle_mass,
+    PdgCode pdg_code,
+    double temperature,
+    std::map <PdgCode, double> *effective_chemical_potentials,
+    std::map <PdgCode, double> *distribution_function_maximums,
+    const std::map<PdgCode, int> initial_multiplicities)
+{
+  /*
+   * ****************************************************************************
+   * Quantum statistics of the particle species is established here
+   * ****************************************************************************
+   */
+  
+  double quantum_statistics = 0.0;
+  if ( pdg_code.is_baryon() )
+    {
+      quantum_statistics = 1.0;
+    }
+  if ( pdg_code.is_meson() )
+    {
+      quantum_statistics = -1.0;
+    }
+  if ( pdg_code.is_lepton() )
+    {
+      std::cout << "\n\n\n\n*****\npdg_code = " << pdg_code
+		<< "\nThis particle is a lepton."
+		<< "\nFor sampling, we will use the Boltmann distribution "
+		<< "(statistics=0)."
+		<< "\n\nPress any key"
+		<< "\n\n(You can silence this warning in boxmodus.cc)"
+		<< "\n\n*****\n\n\n"
+		<< std::endl;
+      std::cin.get();
+    }
+
+  /* 
+   * ****************************************************************************
+   * Effective chemical potential is established here
+   * ****************************************************************************
+   */
+  /*
+   * Check if the chemical potential associated with the sampled species 
+   * has already been calculated.
+   */
+  double effective_chemical_potential = 0.0;
+  for (const auto &auxiliaryMap : *effective_chemical_potentials)
+    {
+      if ( auxiliaryMap.first == pdg_code )
+	{ effective_chemical_potential = auxiliaryMap.second; }	  
+    }
+  /*
+   * Calculate the chemical potential associated with the sampled species 
+   * if it has NOT already been calculated.
+   */
+  if (effective_chemical_potential == 0.0)
+    {
+      /*
+       * Need to readout the number of particles of given species
+       */
+      double number_of_particles = 0.0;
+      for (const auto &p : initial_multiplicities) {
+	if ( p.first == pdg_code ) { number_of_particles = p.second; }
+      }
+
+      /*
+       * The initial number density of a given particle species in GeV^3
+       */
+      const double R_in_GeV = (radius_/hbarc);
+      const double V_in_GeV = (4.0/3.0) * M_PI  * R_in_GeV * R_in_GeV * R_in_GeV;
+      const double number_density = number_of_particles/V_in_GeV;
+	      
+      const double spin_degeneracy = pdg_code.spin_degeneracy();
+	      
+      /*
+       * This is the precision which we expect from the solution;
+       * note that solution precision also goes into the precision 
+       * of calculating all of the integrals involved etc.
+       * Recommended precision is at least 1e-6.
+       */
+      const double solution_precision = 1e-8;
+
+      try{
+	/// Calling the wrapper for the GSL chemical potential finder
+	effective_chemical_potential =
+	  agnieszka::effective_chemical_potential
+	  (spin_degeneracy,
+	   particle_mass,
+	   number_density,
+	   temperature,
+	   quantum_statistics,
+	   solution_precision);
+      } catch(...)
+	{
+	  throw std::runtime_error
+	    ("Well controlled error messages should be displayed above."
+	     "\nIf an uncontrolled GSL crash message is displayed, it"
+	     "\nmay mean that the number density of bosonic particles"
+	     "\nis too big at the given temperature and Bose-Einstein "
+	     "\ncondensate is produced."
+	     "\nTry decreasing the number density or increasing the "
+	     "temperature.\n");
+	}
+
+      effective_chemical_potentials->
+	insert(std::make_pair(pdg_code, effective_chemical_potential));	      
+    }
+
+  /* 
+   * ****************************************************************************
+   * Distribution maximum is established here
+   * ****************************************************************************
+   */	  
+  /*
+   * Check if the maximum of the distribution function associated with 
+   * the sampled species has already been calculated.
+   */
+  double distribution_function_maximum = 0.0;
+  for (const auto &auxiliaryMap : *distribution_function_maximums)
+    {
+      if ( auxiliaryMap.first == pdg_code )
+	{ distribution_function_maximum = auxiliaryMap.second; }	  
+    }
+  /*
+   * Calculate the maximum of the distribution function associated with 
+   * the sampled species in case it has NOT already been calculated.
+   */
+  if (distribution_function_maximum == 0.0)
+    {
+      /*
+       * This is the precision which we expect from the solution;
+       * note that solution precision also goes into the precision 
+       * of calculating all of the integrals involved etc.
+       * Recommended precision is at least 1e-6.
+       */
+      const double solution_precision = 1e-8;
+
+      distribution_function_maximum =
+	agnieszka::maximum_of_the_distribution
+	(particle_mass,
+	 temperature,
+	 effective_chemical_potential,
+	 quantum_statistics,
+	 solution_precision);
+	      
+      distribution_function_maximums->
+	insert(std::make_pair(pdg_code, distribution_function_maximum));
+    }
+
+  /* 
+   * ****************************************************************************
+   * Momentum is sampled here
+   * ****************************************************************************
+   */	  
+  /*
+   * The variable maximum_momentum denotes the "far right" boundary of 
+   * the sampled region; i.e., we assume that no particles have momenta 
+   * larger than 50 GeV. Seems to be inclusive enough :)
+   */
+  const double maximum_momentum = 50.0; // in [GeV]
+
+  double momentum_radial =
+    agnieszka::sample_momenta_from_Juttner (particle_mass,
+					    temperature,
+					    effective_chemical_potential, 
+					    quantum_statistics,
+					    maximum_momentum,
+					    distribution_function_maximum);
+
+  return momentum_radial;
+}
+// ******************************************************************************
+// Agnieszka input ends
+// ******************************************************************************
+
+  
 }  // namespace smash

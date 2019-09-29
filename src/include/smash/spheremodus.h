@@ -73,6 +73,35 @@ class SphereModus : public ModusDefault {
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
 
+// ******************************************************************************
+// Agnieszka input begins
+// ******************************************************************************
+  /**
+   * Convenience wrapper for sampling quantum momenta in the Sphere Modus. 
+   *
+   * \param[in] particle_mass (pole) mass of the particle
+   * \param[in] pdg_code the PDG code of the particle
+   * \param[in] temperature temperature of the system in the box, in GeV
+   * \param[in] effective_chemical_potentials a map which allows to calculate 
+   *                                          effective chemical potential only
+   *                                          once per particle species
+   * \param[in] distribution_function_maximums a map which allows to calculate
+   *                                           distribution function maximum only
+   *                                           once per particle species
+   * \param[in] initial_multiplicities initial multiplicities of the particles in
+   *                                   the box
+   */
+  double sample_quantum_momenta
+   (double particle_mass,
+    PdgCode pdg_code,
+    double temperature,
+    std::map <PdgCode, double> *effective_chemical_potentials,
+    std::map <PdgCode, double> *distribution_function_maximums,
+    const std::map<PdgCode, int> initial_multiplicities);
+// ******************************************************************************
+// Agnieszka input ends
+// ******************************************************************************
+  
  private:
   /// Sphere radius (in fm/c)
   double radius_;

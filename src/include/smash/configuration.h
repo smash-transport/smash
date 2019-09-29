@@ -866,8 +866,14 @@ class Configuration {
      */
     operator SphereInitialCondition() const {
       const std::string s = operator std::string();
+      // ************************************************************************
+      // Agnieszka modification begins
+      // ************************************************************************
       if (s == "thermal momenta") {
-        return SphereInitialCondition::ThermalMomenta;
+        return SphereInitialCondition::ThermalMomentaBoltzmann;
+      }
+      if (s == "thermal momenta quantum") {
+        return SphereInitialCondition::ThermalMomentaQuantum;
       }
       if (s == "IC_ES") {
         return SphereInitialCondition::IC_ES;
@@ -883,8 +889,11 @@ class Configuration {
       }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
-          "\" should be \"thermal momenta\", \"IC_ES\", " +
-          "\"IC_1M\", \"IC_2M\" or" + "\"IC_Massive\".");
+          "\" should be \"thermal momenta\", \"thermal momenta quantum\", " +
+          "\"IC_ES\", \"IC_1M\", \"IC_2M\" or" + "\"IC_Massive\".");
+      // ************************************************************************
+      // Agnieszka modification ends
+      // ************************************************************************
     }
 
     /**

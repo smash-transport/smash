@@ -109,14 +109,15 @@ class BoxModus : public ModusDefault {
    * \param[in] initial_multiplicities initial multiplicities of the particles in
    *                                   the box
    */
-double sample_quantum_momenta (double particle_mass,
-			       PdgCode pdg_code,
-			       double temperature,
-			       std::map <PdgCode, double> *effective_chemical_potentials,
-			       std::map <PdgCode, double> *distribution_function_maximums,
-			       const std::map<PdgCode, int> initial_multiplicities);
-// ******************************************************************************
-// Agnieszka input begins
+double sample_quantum_momenta
+   (double particle_mass,
+    PdgCode pdg_code,
+    double temperature,
+    std::map <PdgCode, double> *effective_chemical_potentials,
+    std::map <PdgCode, double> *distribution_function_maximums,
+    const std::map<PdgCode, int> initial_multiplicities);
+  // ******************************************************************************
+// Agnieszka input ends
 // ******************************************************************************
 
   /// \copydoc smash::ModusDefault::create_grid

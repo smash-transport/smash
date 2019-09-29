@@ -431,12 +431,13 @@ int BoxModus::impose_boundary_conditions(Particles *particles,
 // ******************************************************************************
 // Agnieszka input begins
 // ******************************************************************************
-double BoxModus::sample_quantum_momenta (double particle_mass,
-					 PdgCode pdg_code,
-					 double temperature,
-					 std::map <PdgCode, double> *effective_chemical_potentials,
-					 std::map <PdgCode, double> *distribution_function_maximums,
-					 const std::map<PdgCode, int> initial_multiplicities)
+double BoxModus::sample_quantum_momenta
+   (double particle_mass,
+    PdgCode pdg_code,
+    double temperature,
+    std::map <PdgCode, double> *effective_chemical_potentials,
+    std::map <PdgCode, double> *distribution_function_maximums,
+    const std::map<PdgCode, int> initial_multiplicities)
 {
   /*
    * ****************************************************************************
@@ -536,7 +537,6 @@ double BoxModus::sample_quantum_momenta (double particle_mass,
 
       effective_chemical_potentials->
 	insert(std::make_pair(pdg_code, effective_chemical_potential));
-	      
     }
 
   /* 
