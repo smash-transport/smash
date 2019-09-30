@@ -85,7 +85,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
        * perform action finding with beam momentum instead of Fermi motion
        * corrected momentum. That is because the particles are propagated with
        * the beam momentum until they interact.
-      */
+       */
       const bool p1_has_no_prior_interactions =
           (static_cast<uint64_t>(p1.id()) <                 // particle from
            static_cast<uint64_t>(beam_momentum.size())) &&  // initial nucleus
