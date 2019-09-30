@@ -109,7 +109,13 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * \key Output_Times (doubles, optinal, no default): \n
  * Explicitly defines the the times where output is generated in the form of
  * a list. Cannot be used in combination with Output_Interval. Output times
- * outside the simulation time are ignored.
+ * outside the simulation time are ignored. The following example will produce
+ * output at event start, event end and at the specified times as long as they
+ * are within the simulation time.
+ *\verbatim
+ Output:
+     Output_Times: [-0.1, 0.0, 1.0, 2.0, 10.0]
+ \endverbatim
  *
  * \key Density_Type (string, optional, default = "none"): \n
  * Determines which kind of density is printed into the headers of the
@@ -344,7 +350,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           "Please specify either Output_Interval or Output_Times");
     }
     std::vector<double> output_times = config.take({"Output", "Output_Times"});
-    // Add a output time larger than the end time so that the next time is
+    // Add an output time larger than the end time so that the next time is
     // always defined during the time evolution
     output_times.push_back(t_end + 1.);
     output_clock = make_unique<CustomClock>(output_times);

@@ -64,14 +64,6 @@ namespace smash {
  * \see operator<(float) const
  * \see operator>(float) const
  *
- * Internals
- * ---------
- *
- * Clock stores a time step size \f$\Delta t\f$ and a base time
- * \f$t_0\f$ as well as a counter \f$n\f$. The current time is
- * calculated from \f$t = t_0 + n \cdot \Delta t\f$. When \f$\Delta t\f$
- * is changed, \f$t_0\f$ is reset.
- *
  **/
 class Clock {
  public:
@@ -164,7 +156,17 @@ class Clock {
   Representation counter_ = 0;
 };
 
-/// Clock with uniformly spaced time steps
+/** Clock with uniformly spaced time steps
+ *
+ * Internals
+ * ---------
+ *
+ * Clock stores a time step size \f$\Delta t\f$ and a base time
+ * \f$t_0\f$ as well as a counter \f$n\f$. The current time is
+ * calculated from \f$t = t_0 + n \cdot \Delta t\f$. When \f$\Delta t\f$
+ * is changed, \f$t_0\f$ is reset.
+ *
+ */
 class UniformClock : public Clock {
   /**
    * Defines the resolution of the clock (i.e. the smallest representable time
