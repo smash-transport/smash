@@ -33,7 +33,7 @@ TEST(impossible_collision) {
   const std::vector<bool> has_interacted = {};
   ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
 
-  VERIFY(finder.collision_time(a, b, 0.0) < 0.0);
+  VERIFY(finder.collision_time(a, b, 0.0, {}) < 0.0);
 }
 
 // test particle_distance:

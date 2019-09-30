@@ -73,11 +73,36 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *         to -1 if the two particles are not moving relative to each
    *         other.
    */
-  inline double collision_time(const ParticleData &p1, const ParticleData &p2,
-                               double dt) const {
+  inline double collision_time(
+      const ParticleData &p1, const ParticleData &p2, double dt,
+      const std::vector<FourVector> beam_momentum) const {
     if (coll_crit_ == CollisionCriterion::Stochastic) {
       return dt * random::uniform(0., 1.);
     } else {
+      /*
+       * For frozen Fermi motion:
+       * If particles have not yet interacted and are the initial nucleons,
+       * perform action finding with beam momentum instead of Fermi motion
+       * corrected momentum. That is because the particles are propagated with
+       * the beam momentum until they interact.
+      */
+      const bool p1_has_no_prior_interactions =
+          (static_cast<uint64_t>(p1.id()) <                 // particle from
+           static_cast<uint64_t>(beam_momentum.size())) &&  // initial nucleus
+          (p1.get_history().collisions_per_particle == 0);
+
+      const bool p2_has_no_prior_interactions =
+          (static_cast<uint64_t>(p2.id()) <                 // particle from
+           static_cast<uint64_t>(beam_momentum.size())) &&  // initial nucleus
+          (p2.get_history().collisions_per_particle == 0);
+
+      const FourVector p1_mom = (p1_has_no_prior_interactions)
+                                    ? beam_momentum[p1.id()]
+                                    : p1.momentum();
+      const FourVector p2_mom = (p2_has_no_prior_interactions)
+                                    ? beam_momentum[p2.id()]
+                                    : p2.momentum();
+
       /**
        * UrQMD collision time in computational frame,
        * see \iref{Bass:1998ca} (3.28):
@@ -88,8 +113,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
        * \f[t_{coll} = - (r_1 - r_2) . (v_1 - v_2) / (v_1 - v_2)^2\f] [fm/c]
        */
       const ThreeVector dv_times_e1e2 =
-          p1.momentum().threevec() * p2.momentum().x0() -
-          p2.momentum().threevec() * p1.momentum().x0();
+          p1_mom.threevec() * p2_mom.x0() - p2_mom.threevec() * p1_mom.x0();
       const double dv_times_e1e2_sqr = dv_times_e1e2.sqr();
       if (dv_times_e1e2_sqr < really_small) {
         return -1.0;
@@ -97,7 +121,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
       const ThreeVector dr =
           p1.position().threevec() - p2.position().threevec();
       return -(dr * dv_times_e1e2) *
-             (p1.momentum().x0() * p2.momentum().x0() / dv_times_e1e2_sqr);
+             (p1_mom.x0() * p2_mom.x0() / dv_times_e1e2_sqr);
     }
   }
 
@@ -113,9 +137,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] cell_vol Volume of searched grid cell [fm^3]
    * \return A list of possible scatter actions
    */
-  ActionList find_actions_in_cell(const ParticleList &search_list, double dt,
-                                  const double cell_vol,
-                                  const std::vector<FourVector>) const override;
+  ActionList find_actions_in_cell(
+      const ParticleList &search_list, double dt, const double cell_vol,
+      const std::vector<FourVector> beam_momentum) const override;
 
   /**
    * Search for all the possible collisions among the neighboring cells. This
@@ -127,9 +151,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] dt The maximum time interval at the current time step [fm/c]
    * \return A list of possible scatter actions
    */
-  ActionList find_actions_with_neighbors(const ParticleList &search_list,
-                                         const ParticleList &neighbors_list,
-                                         double dt) const override;
+  ActionList find_actions_with_neighbors(
+      const ParticleList &search_list, const ParticleList &neighbors_list,
+      double dt, const std::vector<FourVector> beam_momentum) const override;
 
   /**
    * Search for all the possible secondary collisions between the outgoing
@@ -142,7 +166,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   ActionList find_actions_with_surrounding_particles(
       const ParticleList &search_list, const Particles &surrounding_list,
-      double dt) const override;
+      double dt, const std::vector<FourVector> beam_momentum) const override;
 
   /**
    * Find some final collisions at the end of the simulation.
@@ -250,6 +274,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   ActionPtr check_collision(const ParticleData &data_a,
                             const ParticleData &data_b, double dt,
+                            const std::vector<FourVector> beam_momentum = {},
                             const double cell_vol = 0.0) const;
 
   /// Class that deals with strings, interfacing Pythia.

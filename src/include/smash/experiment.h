@@ -1605,7 +1605,7 @@ void Experiment<Modus>::run_time_evolution() {
               const ParticleList &neighbors_list) {
             for (const auto &finder : action_finders_) {
               actions.insert(finder->find_actions_with_neighbors(
-                  search_list, neighbors_list, dt));
+                  search_list, neighbors_list, dt, beam_momentum_));
             }
           });
     }
@@ -1740,7 +1740,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
                                                   cell_vol, beam_momentum_));
       // ... and collide with other particles.
       actions.insert(finder->find_actions_with_surrounding_particles(
-          outgoing_particles, particles_, time_left));
+          outgoing_particles, particles_, time_left, beam_momentum_));
     }
 
     check_interactions_total(interactions_total_);

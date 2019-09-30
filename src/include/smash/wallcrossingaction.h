@@ -66,16 +66,16 @@ class WallCrossActionsFinder : public ActionFinderInterface {
                                   const std::vector<FourVector>) const override;
 
   /// Ignore the neighbor searches for wall crossing
-  ActionList find_actions_with_neighbors(const ParticleList &,
-                                         const ParticleList &,
-                                         double) const override {
+  ActionList find_actions_with_neighbors(
+      const ParticleList &, const ParticleList &, double,
+      std::vector<FourVector>) const override {
     return {};
   }
 
   /// Ignore the surrounding searches for wall crossing
-  ActionList find_actions_with_surrounding_particles(const ParticleList &,
-                                                     const Particles &,
-                                                     double) const override {
+  ActionList find_actions_with_surrounding_particles(
+      const ParticleList &, const Particles &, double,
+      const std::vector<FourVector>) const override {
     return {};
   }
 
