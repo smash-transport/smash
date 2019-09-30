@@ -31,7 +31,7 @@ namespace smash {
  * \li \key Beta_4 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_4_0. \n
  *
- * \li \key Orientation:
+ * \li \key Orientation
  * \n
  * Determines the orientation of the nucleus by rotations
  * which are performed about the axes of a coordinate system
@@ -101,7 +101,7 @@ Modi:
                 Orientation:
                     # Randomly rotate nucleus
                     Random_Rotation: True
-        E_Kin: 1.2
+        E_kin: 1.2
         Calculation_Frame: "fixed target"
 \endverbatim
 */
@@ -159,36 +159,44 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
   int Z = Nucleus::number_of_protons();
   switch (A) {
     case 238:  // Uranium
-      listed = 1;
       if (Z == 92) {
         set_beta_2(0.28);
         set_beta_4(0.093);
         break;
+      } else {
+        listed = true;
       }
     case 208:  // Lead
-      listed = 1;
       if (Z == 82) {
         set_beta_2(0.0);
         set_beta_4(0.0);
         break;
+      } else {
+        listed = true;
       }
     case 197:  // Gold
-      listed = 1;
       if (Z == 79) {
         set_beta_2(-0.131);
         set_beta_4(-0.031);
         break;
+      } else {
+        listed = true;
       }
     case 63:  // Copper
-      listed = 1;
       if (Z == 29) {
         set_beta_2(0.162);
         set_beta_4(-0.006);
         break;
+      } else {
+        listed = true;
       }
-    case 96: {
+    case 96:
       if (Z == 40) {  // Zirconium
         set_beta_2(0.0);
+        set_beta_4(0.0);
+        break;
+      } else if (Z == 44) {  // Ruthenium
+        set_beta_2(0.158);
         set_beta_4(0.0);
         break;
       } else if (Z == 44) {  // Ruthenium
@@ -205,26 +213,23 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
         break;
       }
       break;
-    }
     default:
-      if (listed) {
-        throw std::domain_error(
-            "Mass number is listed under " + A_map[A] +
-            " but the proton "
-            "number of " +
-            std::to_string(Z) +
-            " does not match "
-            "its " +
-            Z_map[A_map[A]] +
-            " protons."
-            "Please specify at least \"Beta_2\" and \"Beta_4\" "
-            "manually and set \"Automatic: False.\" ");
-      } else {
-        throw std::domain_error(
-            "Mass number not listed for automatically setting deformation "
-            "parameters. Please specify at least \"Beta_2\" and \"Beta_4\" "
-            "manually and set \"Automatic: False.\" ");
-      }
+      throw std::domain_error(
+          "Mass number not listed for automatically setting deformation "
+          "parameters. Please specify at least \"Beta_2\" and \"Beta_4\" "
+          "manually and set \"Automatic: False.\" ");
+  }
+  if (listed) {
+    throw std::domain_error("Mass number is listed under " + A_map[A] +
+                            " but the proton "
+                            "number of " +
+                            std::to_string(Z) +
+                            " does not match "
+                            "its " +
+                            Z_map[A_map[A]] +
+                            " protons."
+                            "Please specify at least \"Beta_2\" and \"Beta_4\" "
+                            "manually and set \"Automatic: False.\" ");
   }
 }
 
