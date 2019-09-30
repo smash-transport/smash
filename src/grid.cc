@@ -156,7 +156,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                   // boundaries.
                   (O == GridOptions::Normal ? 1 : 0);
     if (number_of_cells_[i] == 0) {
-      throw std::domain_error(
+      throw std::runtime_error(
           "Input error: Your Box is too small for the grid."
           "\nThe minimal length of the box is given by:\n" +
           std::to_string(max_interaction_length) +

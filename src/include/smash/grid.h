@@ -100,7 +100,6 @@ class Grid : public GridBase {
    * Constructs a grid with the given minimum grid coordinates and grid length.
    * If you need periodic boundaries you have to use this constructor to set the
    * correct length to use for wrapping particles around the borders.
-   * Throws an error if your box length is smaller than the grid length.
    *
    * \param[in] min_and_length A pair consisting of the three min coordinates
    * and the three lengths.
@@ -108,6 +107,7 @@ class Grid : public GridBase {
    * \param[in] min_cell_length The minimal length a cell must have.
    * \param[in] timestep_duration duration of the timestep in fm/c
    * \param[in] strategy The strategy for determining the cell size
+   * \throws runtime_error if your box length is smaller than the grid length.
    */
   Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
            &min_and_length,
