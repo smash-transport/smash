@@ -31,15 +31,8 @@
 #include "smash/threevector.h"
 #include "smash/wallcrossingaction.h"
 
-// ******************************************************************************
-// Agnieszka input begins
-// ******************************************************************************
 #include "smash/Agnieszka_chemical_potential.h"
-#include "smash/Agnieszka_distribution.h"
 #include "smash/Agnieszka_sampling.h"
-// ******************************************************************************
-// Agnieszka input ends
-// ******************************************************************************
 
 namespace smash {
 static constexpr int LBox = LogArea::Box::id;
@@ -476,17 +469,17 @@ double BoxModus::sample_quantum_momenta
    * Check if the chemical potential associated with the sampled species 
    * has already been calculated.
    */
-  double effective_chemical_potential = 0.0;
+  double chemical_potential = 0.0;
   for (const auto &auxiliaryMap : *effective_chemical_potentials)
     {
       if ( auxiliaryMap.first == pdg_code )
-	{ effective_chemical_potential = auxiliaryMap.second; }	  
+	{ chemical_potential = auxiliaryMap.second; }	  
     }
   /*
    * Calculate the chemical potential associated with the sampled species 
    * if it has NOT already been calculated.
    */
-  if (effective_chemical_potential == 0.0)
+  if (chemical_potential == 0.0)
     {
       /*
        * Need to readout the number of particles of given species
@@ -515,8 +508,8 @@ double BoxModus::sample_quantum_momenta
 
       try{
 	/// Calling the wrapper for the GSL chemical potential finder
-	effective_chemical_potential =
-	  agnieszka::effective_chemical_potential
+	chemical_potential =
+	  effective_chemical_potential
 	  (spin_degeneracy,
 	   particle_mass,
 	   number_density,
@@ -536,7 +529,7 @@ double BoxModus::sample_quantum_momenta
 	}
 
       effective_chemical_potentials->
-	insert(std::make_pair(pdg_code, effective_chemical_potential));
+	insert(std::make_pair(pdg_code, chemical_potential));
     }
 
   /* 
@@ -569,10 +562,10 @@ double BoxModus::sample_quantum_momenta
       const double solution_precision = 1e-8;
 
       distribution_function_maximum =
-	agnieszka::maximum_of_the_distribution
+	maximum_of_the_distribution
 	(particle_mass,
 	 temperature,
-	 effective_chemical_potential,
+	 chemical_potential,
 	 quantum_statistics,
 	 solution_precision);
 	      
@@ -593,12 +586,12 @@ double BoxModus::sample_quantum_momenta
   const double maximum_momentum = 50.0; // in [GeV]
 
   double momentum_radial =
-    agnieszka::sample_momenta_from_Juttner (particle_mass,
-					    temperature,
-					    effective_chemical_potential, 
-					    quantum_statistics,
-					    maximum_momentum,
-					    distribution_function_maximum);
+    sample_momenta_from_Juttner (particle_mass,
+				 temperature,
+				 chemical_potential, 
+				 quantum_statistics,
+				 maximum_momentum,
+				 distribution_function_maximum);
 
   return momentum_radial;
 }

@@ -11,9 +11,6 @@
 #define SRC_INCLUDE_AGNIESZKA_CHEMICAL_POTENTIAL_H_
 
 
-
-// agnieszka included the following libraries:
-
 #include <cmath>
 
 // needed for solving for the distribution maximum
@@ -22,8 +19,8 @@
 // needed to handle GSL vectors which are in declarations of functions
 #include <gsl/gsl_vector.h>
 
-namespace agnieszka {
 
+namespace smash {
   /** 
    * ****************************************************************************
    *
@@ -272,8 +269,7 @@ namespace agnieszka {
    double temperature,
    double statistics,
    double solution_precision);
-  
-  
-}  // namespace agnieszka
+
+} // namespace smash
 
 #endif  // SRC_INCLUDE_AGNIESZKA_CHEMICAL_POTENTIAL_H_
