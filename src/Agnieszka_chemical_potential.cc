@@ -20,7 +20,6 @@
 #include "./include/smash/constants.h"
 #include "./include/smash/distributions.h"
 
-
 namespace smash {
 
 /**
@@ -39,8 +38,8 @@ double density_integrand_one_species_unit_range(
     double x, double degeneracy, double mass, double temperature,
     double effective_chemical_potential, double statistics) {
   const double distribution_term =
-    juttner_distribution_func((1.0 - x) / x, mass, temperature,
-			      effective_chemical_potential, statistics);
+      juttner_distribution_func((1.0 - x) / x, mass, temperature,
+                                effective_chemical_potential, statistics);
 
   return (degeneracy / (2.0 * M_PI * M_PI)) *
          ((1.0 - x) * (1.0 - x) / (x * x * x * x)) * distribution_term;
@@ -419,4 +418,4 @@ double effective_chemical_potential(double degeneracy, double mass,
   return effective_chemical_potential;
 }
 
-} // namespace smash
+}  // namespace smash
