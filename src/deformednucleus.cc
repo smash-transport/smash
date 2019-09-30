@@ -31,8 +31,7 @@ namespace smash {
  * \li \key Beta_4 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_4_0. \n
  *
- * \li \key Orientation:
-<<<<<<< HEAD
+ * \li \key Orientation
  * \n
  * Determines the orientation of the nucleus by rotations
  * which are performed about the axes of a coordinate system
@@ -43,12 +42,6 @@ namespace smash {
  * The angle by which to rotate the nucleus about the z-axis.
  *    - \key Theta (double, optional, default = pi/2): \n
  * The angle by which to rotate the nucleus about the rotated x-axis.
-=======
- *    - \key Theta (double, optional, default = pi/2): \n
- * The polar angle by which to rotate the nucleus.
- *    - \key Phi (double, optional, default = 0):\n
- * The azimuthal angle by which to rotate the nucleus.
->>>>>>> Added better filters for automatic parameters
  *    - \key Random_Rotation (bool, optional, default = false):\n
  * Determines whether the created nucleus object should be randomly rotated in
  * space. \n
