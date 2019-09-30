@@ -46,7 +46,7 @@ VtkOutput::~VtkOutput() {}
  * pos_ev<event>_tstep<output_number>.vtk.
  *
  * Files contain particle coordinates, momenta, PDG codes, cross-section
- * scaling factors and masses. VTK
+ * scaling factors, ID, number of collisions and masses. VTK
  * output is known to work with paraview, a free visualization and data
  * analysis software. Files of this format are supposed to be used as a black
  * box and opened with paraview, but at the same time they are
@@ -135,6 +135,16 @@ void VtkOutput::write(const Particles &particles) {
   std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
   for (const auto &p : particles) {
     std::fprintf(file_.get(), "%g\n", p.effective_mass());
+  }
+  std::fprintf(file_.get(), "SCALARS N_coll int 1\n");
+  std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
+  for (const auto &p : particles) {
+    std::fprintf(file_.get(), "%i\n", p.get_history().collisions_per_particle);
+  }
+  std::fprintf(file_.get(), "SCALARS particle_ID int 1\n");
+  std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
+  for (const auto &p : particles) {
+    std::fprintf(file_.get(), "%i\n", p.id());
   }
 
   std::fprintf(file_.get(), "VECTORS momentum double\n");

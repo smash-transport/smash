@@ -203,6 +203,41 @@ TEST(vtkoutputfile) {
         outputfile >> item;
         COMPARE(item, "0.123");
       }
+      /* Check SCALARS N_coll */
+      outputfile >> item;
+      COMPARE(item, "SCALARS");
+      outputfile >> item;
+      COMPARE(item, "N_coll");
+      outputfile >> item;
+      COMPARE(item, "int");
+      outputfile >> item;
+      COMPARE(item, "1");
+      outputfile >> item;
+      COMPARE(item, "LOOKUP_TABLE");
+      outputfile >> item;
+      COMPARE(item, "default");
+      for (int i = 0; i < number_of_particles; i++) {
+        outputfile >> item;
+        COMPARE(item, "0");
+      }
+      /* Check SCALARS particle_ID */
+      outputfile >> item;
+      COMPARE(item, "SCALARS");
+      outputfile >> item;
+      COMPARE(item, "particle_ID");
+      outputfile >> item;
+      COMPARE(item, "int");
+      outputfile >> item;
+      COMPARE(item, "1");
+      outputfile >> item;
+      COMPARE(item, "LOOKUP_TABLE");
+      outputfile >> item;
+      COMPARE(item, "default");
+      for (int i = 0; i < number_of_particles; i++) {
+        outputfile >> item;
+        COMPARE(item, std::to_string(i));
+      }
+
       /* Check momentum vectors */
       outputfile >> item;
       COMPARE(item, "VECTORS");
