@@ -58,7 +58,7 @@ class ActionFinderInterface {
    */
   virtual ActionList find_actions_with_neighbors(
       const ParticleList &search_list, const ParticleList &neighbors_list,
-      double dt, std::vector<FourVector> beam_momentum) const = 0;
+      double dt, const std::vector<FourVector> beam_momentum) const = 0;
 
   /**
    * Abstract function for finding actions between a list of particles and

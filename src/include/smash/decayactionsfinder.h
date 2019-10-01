@@ -41,7 +41,7 @@ class DecayActionsFinder : public ActionFinderInterface {
   /// Ignore the neighbor searches for decays
   ActionList find_actions_with_neighbors(
       const ParticleList &, const ParticleList &, double,
-      std::vector<FourVector>) const override {
+      const std::vector<FourVector>) const override {
     return {};
   }
 
