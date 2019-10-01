@@ -297,14 +297,7 @@ void DeformedNucleus::rotate() {
   }
 }
 
-/**
- * Spherical harmonics Y_2_0 and Y_4_0.
- * \param[in] l Angular momentum value (2 and 4 are supported)
- * \param[in] cosx Cosine of the polar angle
- * \return Value of the corresponding spherical harmonic
- * \throws domain_error if unsupported l is encountered
- */
-static double y_l_0(int l, double cosx) {
+double y_l_0(int l, double cosx) {
   if (l == 2) {
     return (1. / 4) * std::sqrt(5 / M_PI) * (3. * (cosx * cosx) - 1);
   } else if (l == 4) {
