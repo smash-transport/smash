@@ -51,7 +51,7 @@ void HypersurfacecrossingAction::check_conservation(
 
 ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     const ParticleList &plist, double dt, const double,
-    const std::vector<FourVector>& beam_momentum) const {
+    const std::vector<FourVector> &beam_momentum) const {
   std::vector<ActionPtr> actions;
 
   for (const ParticleData &p : plist) {
