@@ -61,21 +61,21 @@ class WallCrossActionsFinder : public ActionFinderInterface {
    * \param[in] t_max Time until crossing can appear. [fm]
    * \return List of all found wall crossings.
    */
-  ActionList find_actions_in_cell(const ParticleList &plist, double t_max,
-                                  const double,
-                                  const std::vector<FourVector>) const override;
+  ActionList find_actions_in_cell(
+      const ParticleList &plist, double t_max, const double,
+      const std::vector<FourVector> &) const override;
 
   /// Ignore the neighbor searches for wall crossing
-  ActionList find_actions_with_neighbors(const ParticleList &,
-                                         const ParticleList &,
-                                         double) const override {
+  ActionList find_actions_with_neighbors(
+      const ParticleList &, const ParticleList &, double,
+      const std::vector<FourVector> &) const override {
     return {};
   }
 
   /// Ignore the surrounding searches for wall crossing
-  ActionList find_actions_with_surrounding_particles(const ParticleList &,
-                                                     const Particles &,
-                                                     double) const override {
+  ActionList find_actions_with_surrounding_particles(
+      const ParticleList &, const Particles &, double,
+      const std::vector<FourVector> &) const override {
     return {};
   }
 

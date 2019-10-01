@@ -34,21 +34,21 @@ class DecayActionsFinder : public ActionFinderInterface {
    * \param[in] dt Size of timestep [fm]
    * \return List with the found (Decay)Action objects.
    */
-  ActionList find_actions_in_cell(const ParticleList &search_list, double dt,
-                                  const double,
-                                  const std::vector<FourVector>) const override;
+  ActionList find_actions_in_cell(
+      const ParticleList &search_list, double dt, const double,
+      const std::vector<FourVector> &) const override;
 
   /// Ignore the neighbor searches for decays
-  ActionList find_actions_with_neighbors(const ParticleList &,
-                                         const ParticleList &,
-                                         double) const override {
+  ActionList find_actions_with_neighbors(
+      const ParticleList &, const ParticleList &, double,
+      const std::vector<FourVector> &) const override {
     return {};
   }
 
   /// Ignore the surrounding searches for decays
-  ActionList find_actions_with_surrounding_particles(const ParticleList &,
-                                                     const Particles &,
-                                                     double) const override {
+  ActionList find_actions_with_surrounding_particles(
+      const ParticleList &, const Particles &, double,
+      const std::vector<FourVector> &) const override {
     return {};
   }
 

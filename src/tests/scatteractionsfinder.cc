@@ -77,7 +77,7 @@ TEST(collision_order) {
   // no grid means no grid cell volume
   const double grid_cell_vol = 0.0;
 
-  // no hypersurface crossings are tested, so we do not need the beam info
+  // frozen Fermi motion is not tested, so we do not need the beam momentum
   const std::vector<FourVector> beam_mom = {};
 
   // delta t (in fermi)
@@ -155,13 +155,12 @@ TEST(scatter_particle_pair_only_once) {
                           std::to_string(elastic_parameter) + "}");
   ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
   ParticleList search_list = p.copy_to_vector();
-  double dt = 0.9;                              // fm/c
-  const double grid_cell_vol = 0.0;             // no grid
-  const std::vector<FourVector> beam_mom = {};  // no hypersurface crossings
+  double dt = 0.9;                   // fm/c
+  const double grid_cell_vol = 0.0;  // no grid
 
   // look for scatters, we expect one
   auto actions =
-      finder.find_actions_in_cell(search_list, dt, grid_cell_vol, beam_mom);
+      finder.find_actions_in_cell(search_list, dt, grid_cell_vol, {});
   COMPARE(actions.size(), 1u);
 
   // ok, the exepected Action exists, so let's perform it
@@ -185,8 +184,7 @@ TEST(scatter_particle_pair_only_once) {
   }
   for (auto i = 10; i; --i) {  // make "sure" it's not the random numbers that
                                // suppress the problem
-    actions =
-        finder.find_actions_in_cell(search_list, dt, grid_cell_vol, beam_mom);
+    actions = finder.find_actions_in_cell(search_list, dt, grid_cell_vol, {});
     COMPARE(actions.size(), 0u);
   }
 }
@@ -225,13 +223,13 @@ TEST(find_next_action) {
   // prepare list of particles that will be checked for possible actions
   ParticleList particle_list = particles.copy_to_vector();
   ActionList action_list = finder.find_actions_with_surrounding_particles(
-      particle_list, particles, 10000.);
+      particle_list, particles, 10000., {});
   // we expect to find no actions because there are no surrounding particles
   COMPARE(action_list.size(), 0u);
   // remove one particle from the list so that the interaction can be found
   particle_list.pop_back();
   action_list = finder.find_actions_with_surrounding_particles(
-      particle_list, particles, 10000.);
+      particle_list, particles, 10000., {});
   // we expect to find one collision between the two particles
   COMPARE(action_list.size(), 1u);
   ActionPtr action = std::move(action_list[0]);
@@ -253,8 +251,7 @@ TEST(increasing_scaling_factors) {
   // Quadratic increase of scaling factor with time leads to linear increase of
   // the maximum distance, at which particles still collide, with time.
   constexpr double alpha = 2.;
-  constexpr double grid_cell_vol = 0.0;         // no grid
-  const std::vector<FourVector> beam_mom = {};  // no hypersurface crossings
+  constexpr double grid_cell_vol = 0.0;  // no grid
   constexpr double delta_t_coll = dx / (2. * v);
   ParticleData p_a = ParticleData{ParticleType::find(0x661), 1};
   p_a.set_4position(FourVector(time, 0, 0, 0));
@@ -275,14 +272,14 @@ TEST(increasing_scaling_factors) {
   ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
   COMPARE(finder
               .find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll,
-                                    grid_cell_vol, beam_mom)
+                                    grid_cell_vol, {})
               .size(),
           1u);
   // For a Power smaller than alpha, the particles should not collide.
   ParticleData::formation_power_ = alpha + 0.1;
   COMPARE(finder
               .find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll,
-                                    grid_cell_vol, beam_mom)
+                                    grid_cell_vol, {})
               .size(),
           0u);
 }
