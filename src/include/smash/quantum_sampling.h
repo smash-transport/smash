@@ -21,15 +21,11 @@
 namespace smash {
 
 /*
- * ****************************************************************************
- *
  * This block is for:
  * Root equations and GSL procedure for finding the momentum for which the
  * maximum of a given Juttner distribution occurs. This is needed for a method
  * of sampling the distribution function in which one samples uniformly below
  * the maximum of the distribution.
- *
- * ****************************************************************************
  */
 
 /**
@@ -128,8 +124,6 @@ double maximum_of_the_distribution(double mass, double temperature,
                                    double solution_precision);
 
 /*
- * ****************************************************************************
- *
  * This block is for:
  * Sampling radial momenta of given particle species from Bose, Boltzmann, or
  * Fermi distribution. The choice between the distributions is made based on
@@ -140,12 +134,12 @@ double maximum_of_the_distribution(double mass, double temperature,
  * The information about degeneracy is not needed for sampling. The chemical
  * potential associated with the given particle species must be calculated
  * before sampling.
- *
- * ****************************************************************************
  */
 
 /**
- * Sampler for radial momenta based on a given Juttner distribution function.
+ * Sampler for radial momenta based on a Juttner distribution function at
+ * given temperature and chemical potential, for a given quantum
+ * statistics.
  * \param[in] mass (pole) mass of the particle species
  * \param[in] temperature temperature of the system
  * \param[in[ effective_chemical_potential effective chemical potential of

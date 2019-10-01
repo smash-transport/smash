@@ -851,7 +851,7 @@ class Configuration {
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
           "\" should be \"thermal momenta\", \"thermal momenta quantum\", " +
-	  "or \"peaked momenta\".");
+          "or \"peaked momenta\".");
       // ************************************************************************
       // Agnieszka modification ends
       // ************************************************************************

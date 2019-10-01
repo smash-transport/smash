@@ -30,8 +30,8 @@
 #include "smash/spheremodus.h"
 #include "smash/threevector.h"
 
-#include "smash/Agnieszka_chemical_potential.h"
-#include "smash/Agnieszka_sampling.h"
+#include "smash/chemical_potential.h"
+#include "smash/quantum_sampling.h"
 
 namespace smash {
 static constexpr int LSphere = LogArea::Sphere::id;
@@ -246,9 +246,6 @@ double SphereModus::initial_conditions(Particles *particles,
                           p.second);
     }
   }
-  // ****************************************************************************
-  // Agnieszka input begins
-  // ****************************************************************************
   /*
    * We define maps that are intended to store:
    * the PdgCode and the corresponding effective chemical potential,
@@ -260,9 +257,6 @@ double SphereModus::initial_conditions(Particles *particles,
    */
   std::map<PdgCode, double> effective_chemical_potentials;
   std::map<PdgCode, double> distribution_function_maximums;
-  // ****************************************************************************
-  // Agnieszka input ends
-  // ****************************************************************************
   /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : *particles) {
     Angles phitheta;
@@ -289,9 +283,6 @@ double SphereModus::initial_conditions(Particles *particles,
                    : HadronGasEos::sample_mass_thermal(data.type(), 1.0 / T);
         momentum_radial = sample_momenta_from_thermal(T, mass);
         break;
-      // ************************************************************************
-      // Agnieszka input begins
-      // ************************************************************************
       case (SphereInitialCondition::ThermalMomentaQuantum):
         /*
          * **********************************************************************
@@ -306,9 +297,6 @@ double SphereModus::initial_conditions(Particles *particles,
             mass, pdg_code, T, &effective_chemical_potentials,
             &distribution_function_maximums, init_multipl_);
         break;
-        // ************************************************************************
-        // Agnieszka input ends
-        // ************************************************************************
     }
     phitheta.distribute_isotropically();
     logg[LSphere].debug(data.type().name(), "(id ", data.id(),
@@ -354,18 +342,13 @@ double SphereModus::initial_conditions(Particles *particles,
   return start_time_;
 }
 
-// ******************************************************************************
-// Agnieszka input begins
-// ******************************************************************************
 double SphereModus::sample_quantum_momenta(
     double particle_mass, PdgCode pdg_code, double temperature,
     std::map<PdgCode, double> *effective_chemical_potentials,
     std::map<PdgCode, double> *distribution_function_maximums,
     const std::map<PdgCode, int> initial_multiplicities) {
   /*
-   * ****************************************************************************
    * Quantum statistics of the particle species is established here
-   * ****************************************************************************
    */
 
   double quantum_statistics = 0.0;
@@ -388,10 +371,9 @@ double SphereModus::sample_quantum_momenta(
   }
 
   /*
-   * ****************************************************************************
    * Effective chemical potential is established here
-   * ****************************************************************************
    */
+
   /*
    * Check if the chemical potential associated with the sampled species
    * has already been calculated.
@@ -455,9 +437,7 @@ double SphereModus::sample_quantum_momenta(
   }
 
   /*
-   * ****************************************************************************
    * Distribution maximum is established here
-   * ****************************************************************************
    */
   /*
    * Check if the maximum of the distribution function associated with
@@ -491,9 +471,7 @@ double SphereModus::sample_quantum_momenta(
   }
 
   /*
-   * ****************************************************************************
    * Momentum is sampled here
-   * ****************************************************************************
    */
   /*
    * The variable maximum_momentum denotes the "far right" boundary of
@@ -508,8 +486,5 @@ double SphereModus::sample_quantum_momenta(
 
   return momentum_radial;
 }
-// ******************************************************************************
-// Agnieszka input ends
-// ******************************************************************************
 
 }  // namespace smash

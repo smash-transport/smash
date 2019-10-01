@@ -31,8 +31,8 @@
 #include "smash/threevector.h"
 #include "smash/wallcrossingaction.h"
 
-#include "smash/Agnieszka_chemical_potential.h"
-#include "smash/Agnieszka_sampling.h"
+#include "smash/chemical_potential.h"
+#include "smash/quantum_sampling.h"
 
 namespace smash {
 static constexpr int LBox = LogArea::Box::id;
@@ -294,9 +294,6 @@ double BoxModus::initial_conditions(Particles *particles,
                        p.second);
     }
   }
-  // ****************************************************************************
-  // Agnieszka input begins
-  // ****************************************************************************
   /*
    * We define maps that are intended to store:
    * the PdgCode and the corresponding effective chemical potential,
@@ -308,9 +305,6 @@ double BoxModus::initial_conditions(Particles *particles,
    */
   std::map<PdgCode, double> effective_chemical_potentials;
   std::map<PdgCode, double> distribution_function_maximums;
-  // ****************************************************************************
-  // Agnieszka input ends
-  // ****************************************************************************
   for (ParticleData &data : *particles) {
     /* Set MOMENTUM SPACE distribution */
     if (this->initial_condition_ == BoxInitialCondition::PeakedMomenta) {
@@ -318,9 +312,6 @@ double BoxModus::initial_conditions(Particles *particles,
       momentum_radial = 3.0 * T;
       mass = data.pole_mass();
     } else {
-      // ************************************************************************
-      // Agnieszka input begins
-      // ************************************************************************
       if (this->initial_condition_ ==
           BoxInitialCondition::ThermalMomentaBoltzmann) {
         /* thermal momentum according Maxwell-Boltzmann distribution */
@@ -331,22 +322,16 @@ double BoxModus::initial_conditions(Particles *particles,
       } else if (this->initial_condition_ ==
                  BoxInitialCondition::ThermalMomentaQuantum) {
         /*
-         * ********************************************************************
          * Sampling the thermal momentum according Bose/Fermi/Boltzmann
          * distribution.
          * We take the pole mass as the mass.
-         * ********************************************************************
          */
         mass = data.type().mass();
         PdgCode pdg_code = data.pdgcode();
         momentum_radial = sample_quantum_momenta(
             mass, pdg_code, T, &effective_chemical_potentials,
             &distribution_function_maximums, init_multipl_);
-
-      }  // end of "else if BoxInitialCondition::ThermalMomentaQuantum"
-      // ************************************************************************
-      // Agnieszka input ends
-      // ************************************************************************
+      }
     }
     phitheta.distribute_isotropically();
     logg[LBox].debug(data.type().name(), "(id ", data.id(),
@@ -415,20 +400,14 @@ int BoxModus::impose_boundary_conditions(Particles *particles,
   return wraps;
 }
 
-// ******************************************************************************
-// Agnieszka input begins
-// ******************************************************************************
 double BoxModus::sample_quantum_momenta(
     double particle_mass, PdgCode pdg_code, double temperature,
     std::map<PdgCode, double> *effective_chemical_potentials,
     std::map<PdgCode, double> *distribution_function_maximums,
     const std::map<PdgCode, int> initial_multiplicities) {
   /*
-   * ****************************************************************************
    * Quantum statistics of the particle species is established here
-   * ****************************************************************************
    */
-
   double quantum_statistics = 0.0;
   if (pdg_code.is_baryon()) {
     quantum_statistics = 1.0;
@@ -449,13 +428,8 @@ double BoxModus::sample_quantum_momenta(
   }
 
   /*
-   * ****************************************************************************
-   * Effective chemical potential is established here
-   * ****************************************************************************
-   */
-  /*
-   * Check if the chemical potential associated with the sampled species
-   * has already been calculated.
+   * Check if the chemical potential associated with the sampled species has
+   * already been calculated.
    */
   double chemical_potential = 0.0;
   for (const auto &auxiliaryMap : *effective_chemical_potentials) {
@@ -464,13 +438,11 @@ double BoxModus::sample_quantum_momenta(
     }
   }
   /*
-   * Calculate the chemical potential associated with the sampled species
-   * if it has NOT already been calculated.
+   * Calculate the chemical potential associated with the sampled species if it
+   * has NOT already been calculated.
    */
   if (chemical_potential == 0.0) {
-    /*
-     * Need to readout the number of particles of given species
-     */
+    /// Need to readout the number of particles of given species
     double number_of_particles = 0.0;
     for (const auto &p : initial_multiplicities) {
       if (p.first == pdg_code) {
@@ -478,9 +450,7 @@ double BoxModus::sample_quantum_momenta(
       }
     }
 
-    /*
-     * The initial number density of a given particle species in GeV^3
-     */
+    /// The initial number density of a given particle species in GeV^3
     const double L_in_GeV = (length_ / hbarc);
     const double V_in_GeV = L_in_GeV * L_in_GeV * L_in_GeV;
     const double number_density = number_of_particles / V_in_GeV;
@@ -488,10 +458,9 @@ double BoxModus::sample_quantum_momenta(
     const double spin_degeneracy = pdg_code.spin_degeneracy();
 
     /*
-     * This is the precision which we expect from the solution;
-     * note that solution precision also goes into the precision
-     * of calculating all of the integrals involved etc.
-     * Recommended precision is at least 1e-6.
+     * This is the precision which we expect from the solution; note that
+     * solution precision also goes into the precision of calculating all of the
+     * integrals involved etc. Recommended precision is at least 1e-6.
      */
     const double solution_precision = 1e-8;
 
@@ -516,13 +485,8 @@ double BoxModus::sample_quantum_momenta(
   }
 
   /*
-   * ****************************************************************************
-   * Distribution maximum is established here
-   * ****************************************************************************
-   */
-  /*
-   * Check if the maximum of the distribution function associated with
-   * the sampled species has already been calculated.
+   * Check if the maximum of the distribution function associated with the
+   * sampled species has already been calculated.
    */
   double distribution_function_maximum = 0.0;
   for (const auto &auxiliaryMap : *distribution_function_maximums) {
@@ -531,15 +495,14 @@ double BoxModus::sample_quantum_momenta(
     }
   }
   /*
-   * Calculate the maximum of the distribution function associated with
-   * the sampled species in case it has NOT already been calculated.
+   * Calculate the maximum of the distribution function associated with the
+   * sampled species in case it has NOT already been calculated.
    */
   if (distribution_function_maximum == 0.0) {
     /*
-     * This is the precision which we expect from the solution;
-     * note that solution precision also goes into the precision
-     * of calculating all of the integrals involved etc.
-     * Recommended precision is at least 1e-6.
+     * This is the precision which we expect from the solution; note that
+     * solution precision also goes into the precision of calculating all of the
+     * integrals involved etc. Recommended precision is at least 1e-6.
      */
     const double solution_precision = 1e-8;
 
@@ -551,11 +514,6 @@ double BoxModus::sample_quantum_momenta(
         std::make_pair(pdg_code, distribution_function_maximum));
   }
 
-  /*
-   * ****************************************************************************
-   * Momentum is sampled here
-   * ****************************************************************************
-   */
   /*
    * The variable maximum_momentum denotes the "far right" boundary of
    * the sampled region; i.e., we assume that no particles have momenta
@@ -569,8 +527,5 @@ double BoxModus::sample_quantum_momenta(
 
   return momentum_radial;
 }
-// ******************************************************************************
-// Agnieszka input ends
-// ******************************************************************************
 
 }  // namespace smash

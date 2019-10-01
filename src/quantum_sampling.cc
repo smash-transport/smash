@@ -7,14 +7,14 @@
  *
  */
 
-#include "./include/smash/Agnieszka_sampling.h"
+#include "./include/smash/quantum_sampling.h"
 
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <random>
 
-#include "./include/smash/Agnieszka_chemical_potential.h"
+#include "./include/smash/chemical_potential.h"
 #include "./include/smash/distributions.h"
 
 // needed for solving for the distribution maximum
@@ -25,15 +25,11 @@
 namespace smash {
 
 /*
- * ****************************************************************************
- *
  * This block is for:
  * Root equations and GSL procedure for finding the momentum for which the
  * maximum of a given Juttner distribution occurs. This is needed for a method
  * of sampling the distribution function in which one samples uniformly below
- * the maximum of the distribution).
- *
- * ****************************************************************************
+ * the maximum of the distribution.
  */
 
 double p_max_root_equation(double p, double mass, double temperature,
@@ -191,9 +187,7 @@ double maximum_of_the_distribution(double mass, double temperature,
   return distribution_function_maximum;
 }
 
-/**
- * ****************************************************************************
- *
+/*
  * This block is for:
  * Sampling radial momenta of given particle species from Bose, Boltzmann, or
  * Fermi distribution. The choice between the distributions is made based on
@@ -205,7 +199,6 @@ double maximum_of_the_distribution(double mass, double temperature,
  * potential associated with the given particle species must be calculated
  * before sampling.
  *
- * ****************************************************************************
  */
 
 /**

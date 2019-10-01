@@ -7,7 +7,7 @@
  *
  */
 
-#include "./include/smash/Agnieszka_chemical_potential.h"
+#include "./include/smash/chemical_potential.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -22,16 +22,12 @@
 
 namespace smash {
 
-/**
- * ****************************************************************************
- *
+/*
  * This block is for:
  * Calculating the vector number density of one particle species from
  * integrating the distribution function over the momentum space. The procedure
  * is needed for finding the effective chemical potential for that species. The
  * block includes the auxiliary functions and the integration itself.
- *
- * ****************************************************************************
  */
 
 double density_integrand_one_species_unit_range(
@@ -96,9 +92,7 @@ double density_integration_one_species_unit_range(
   return result;
 }
 
-/**
- * ****************************************************************************
- *
+/*
  * This block is for:
  * Root equations, and procedure for finding the effective chemical potential
  * for a given particle species. This chemical potential is NOT the equilibrium
@@ -114,8 +108,6 @@ double density_integration_one_species_unit_range(
  * TODO2: Sometime in the future, attempt to implement calculating the real
  * chemical potential (it would involve summing over all particle species
  * present, which probably would mean passing the initial multiplicities etc.).
- *
- * ****************************************************************************
  */
 
 double root_equation_for_effective_chemical_potential(
@@ -123,7 +115,7 @@ double root_equation_for_effective_chemical_potential(
     double effective_chemical_potential, double statistics, double precision) {
   double result = 0.0;
 
-  /**
+  /*
    * At finite and positive baryon number density this should never be
    * supported. [Is there a big risk of the solver trying to check this value
    * though?]
@@ -245,7 +237,7 @@ int find_effective_chemical_potential(double degeneracy, double mass,
 
     if (status == GSL_SUCCESS) {
       effective_chemical_potential[0] = gsl_vector_get(Root_finder->x, 0);
-      /**
+      /*
        * Make sure that the calculated chemical potential reproduces
        * the input number density within accepted error.
        */
@@ -279,7 +271,7 @@ int find_effective_chemical_potential(double degeneracy, double mass,
                   << "calculation of the chemical potential. \nTry "
                   << "adjusting the initial guess or the solution "
                   << "comparison precision."
-                  << "\n(in Agnieszka_chemical_potential.cc)\n\n\n"
+                  << "\n(in chemical_potential.cc)\n\n\n"
                   << std::endl;
         throw std::runtime_error(
             "Chemical potential calculation does not reproduce the "
@@ -296,26 +288,27 @@ int find_effective_chemical_potential(double degeneracy, double mass,
 }
 
 /*
- * ***************************************************************************
- *
  * This block is for:
  * A convenience wrapper for finding the effective chemical potential for a
  * given particle species and performing sanity checks.
- *
- * ***************************************************************************
  */
 
 double effective_chemical_potential(double degeneracy, double mass,
                                     double number_density, double temperature,
                                     double statistics,
                                     double solution_precision) {
-  /**
+  /*
    * The initial guess for the GSL chemical potential finding
    * procedure; the guess has to be different for Bose and Fermi
    * particles.
    */
   double initial_guess = 0.0;
   if (statistics == -1.0) {
+    /*
+     * Such initial guess allows one to sample really close to the Bose
+     * condensate region; at the same time, it works fine in other regions as
+     * well.
+     */
     initial_guess = 0.999999 * mass;
   } else {
     initial_guess = 1.05 * mass;
@@ -330,7 +323,7 @@ double effective_chemical_potential(double degeneracy, double mass,
   double chemical_potential[1];
   chemical_potential[0] = 0.0;
 
-  /**
+  /*
    * Call the GSL effective chemical potential finding procedure, which yields
    * the value of the effective chemical potential.
    */
@@ -338,17 +331,16 @@ double effective_chemical_potential(double degeneracy, double mass,
                                     temperature, statistics, initial_guess,
                                     solution_precision, chemical_potential);
 
-  /**
+  /*
    * Sanity checks are performed for the obtained value of the chemical
    * potential .
    */
-  // *************************************************************************
-  // We need mu < mass for the Bose distribution.
-  // *************************************************************************
+
   /*
    * Check if the obtained value of the effective chemical potential indicates
    * that the number density is such that for bosons one has encountered the
-   * Bose-Einstein condensate.
+   * Bose-Einstein condensate. We need mu < mass for the Bose distribution NOT
+   * to be in the Bose-Einstein condensate region.
    */
   if ((statistics == -1) && (chemical_potential[0] > mass)) {
     const double conversion_factor = smash::hbarc * smash::hbarc * smash::hbarc;
@@ -374,14 +366,10 @@ double effective_chemical_potential(double degeneracy, double mass,
         "condensate is produced.");
   }
 
-  // ***********************************************************************
-  // We need f(small_p) > 0 (Bose statistics may produce pathological
-  // distributions for which f(p) < 1 ).
-  // ***********************************************************************
-  /**
+  /*
    * Check if the distribution is pathological, i.e., has negative values
-   * for low momenta (if it happens it means one encounters a Bose-Einstein
-   * condensate).
+   * for low momenta (Bose statistics, in the Bose-Einstein condensate regime,
+   *  may produce pathological distributions for which f(p) < 0 ).
    */
   /// value of small_p in GeV; value is chosen to be small;
   /// possibly an arbitrary choice

@@ -19,17 +19,13 @@
 #include <gsl/gsl_vector.h>
 
 namespace smash {
-/**
- * ****************************************************************************
- *
+/*
  * This block is for:
  * Calculating the vector number density of one particle species from
  * integrating the distribution function over the momentum space. The procedure
  * is needed for finding the effective chemical potential for that species. The
  * block includes the struct that holds the parameters, auxiliary functions,
  * and the integration itself.
- *
- * ****************************************************************************
  */
 
 /**
@@ -92,8 +88,6 @@ double density_integration_one_species_unit_range(
     double effective_chemical_potential, double statistics, double precision);
 
 /**
- * ****************************************************************************
- *
  * This block is for:
  * Struct, root equations, and procedure for finding the effective chemical
  * potential for a given particle species. This chemical potential is NOT the
@@ -110,8 +104,6 @@ double density_integration_one_species_unit_range(
  * TODO2: Sometime in the future, attempt to implement calculating the real
  * chemical potential (it would involve summing over all particle species
  * present, which probably would mean passing the initial multiplicities etc.).
- *
- * ****************************************************************************
  */
 
 /**
@@ -202,13 +194,9 @@ int find_effective_chemical_potential(double degeneracy, double mass,
                                       double* effective_chemical_potential);
 
 /**
- * ***************************************************************************
- *
  * This block is for:
  * Convenience wrapper for finding the effective chemical potential for a
  * given particle species and performing sanity checks.
- *
- * ***************************************************************************
  */
 
 /**

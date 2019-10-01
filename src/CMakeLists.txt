@@ -124,8 +124,7 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
 # list the source files
 set(smash_src
         action.cc
-        Agnieszka_chemical_potential.cc
-        Agnieszka_sampling.cc
+        chemical_potential.cc
         boxmodus.cc
         binaryoutput.cc
         bremsstrahlungaction.cc
@@ -174,6 +173,7 @@ set(smash_src
         processbranch.cc
         stringprocess.cc
         propagation.cc
+        quantum_sampling.cc
         quantumnumbers.cc
         random.cc
         scatteraction.cc

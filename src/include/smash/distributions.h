@@ -99,23 +99,22 @@ double density_integrand_2M_IC(const double energy, const double momentum_sqr,
                                const double temperature);
 
 /**
-  * Relativistic Juttner distribution function is just a convenience wrapper for 
-  * displaying Fermi, Bose, and Boltzmann distributions in one mathematical form. 
-  * \param[in] momentum_radial the length of the momentum vector
-  * \param[in] mass (pole) mass of the particle species
-  * \param[in] temperature temperature of the system
-  * \param[in[ effective_chemical_potential effective chemical potential of 
-  *            the system
-  * \param[in] statistics quantum statistics of the particles species 
-  *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
-  * \return the Juttner distribution function
-  */
-double juttner_distribution_func (double momentum_radial,
-				  double mass,
-				  double temperature,
-				  double effective_chemical_potential,
-				  double statistics);
-  
+ * Relativistic Juttner distribution function is just a convenience wrapper for
+ * displaying Fermi, Bose, and Boltzmann distributions in one mathematical form.
+ * \param[in] momentum_radial the length of the momentum vector
+ * \param[in] mass (pole) mass of the particle species
+ * \param[in] temperature temperature of the system
+ * \param[in[ effective_chemical_potential effective chemical potential of
+ *            the system
+ * \param[in] statistics quantum statistics of the particles species
+ *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
+ * \return the Juttner distribution function
+ */
+double juttner_distribution_func(double momentum_radial, double mass,
+                                 double temperature,
+                                 double effective_chemical_potential,
+                                 double statistics);
+
 /**
  * Samples a momentum via rejection method from the non-equilibrium
  * distribution
