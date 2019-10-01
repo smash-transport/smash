@@ -86,6 +86,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
        * corrected momentum. That is because the particles are propagated with
        * the beam momentum until they interact.
        */
+      if (p1.id() < 0 || p2.id() < 0) {
+        throw std::runtime_error("Invalid particle ID for Fermi motion");
+      }
       const bool p1_has_no_prior_interactions =
           (static_cast<uint64_t>(p1.id()) <                 // particle from
            static_cast<uint64_t>(beam_momentum.size())) &&  // initial nucleus
