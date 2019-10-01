@@ -15,10 +15,10 @@
 #include "smash/quantumnumbers.h"
 
 namespace smash {
+inline constexpr int HyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 void HypersurfacecrossingAction::generate_final_state() {
-  const auto &log = logger<LogArea::HyperSurfaceCrossing>();
-  log.debug("Process: Hypersurface Crossing. ");
+  logg[HyperSurfaceCrossing].debug("Process: Hypersurface Crossing. ");
 
   ParticleList empty_list;
 

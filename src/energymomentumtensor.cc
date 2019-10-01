@@ -18,11 +18,11 @@
 #include "smash/numerics.h"
 
 namespace smash {
+inline constexpr int Tmn = LogArea::Tmn::id;
 
 FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   using Eigen::Matrix4d;
   using Eigen::Vector4d;
-  const auto &log = logger<LogArea::Tmn>();
   /* We want to solve the generalized eigenvalue problem
      T^{\mu \nu} h_{nu} = \lambda g^{\mu \nu} h_{nu}, or in the other way
      T_{\mu}^{\nu} h_{nu} = \lambda h_{mu}. The eigenvector
@@ -46,7 +46,7 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
        -Tmn_[3], -Tmn_[6], -Tmn_[8], -Tmn_[9];
   // clang-format on
 
-  log.debug("Looking for Landau frame for T_{mu}^{nu} ", A);
+  logg[Tmn].debug("Looking for Landau frame for T_{mu}^{nu} ", A);
   Eigen::EigenSolver<Matrix4d> es(A);
 
 // Eigen values should be strictly real and non-negative.
@@ -71,7 +71,7 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   assert(eig_re(0) >= eig_re(1));
   assert(eig_re(0) >= eig_re(2));
   assert(eig_re(0) >= eig_re(3));
-  log.debug("eigenvalues: ", eig_re);
+  logg[Tmn].debug("eigenvalues: ", eig_re);
 #endif
 
   Vector4d tmp = es.eigenvectors().col(0).real();
@@ -85,10 +85,10 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   if (u_sqr > really_small) {
     u /= std::sqrt(u_sqr);
   } else {
-    log.error("Landau frame is not defined.", " Eigen vector", u, " of ", A,
-              " is not time-like and",
-              " cannot be 4-velocity. This may happen if energy-momentum",
-              " tensor was constructed for a massless particle.");
+    logg[Tmn].error("Landau frame is not defined.", " Eigen vector", u, " of ",
+                    A, " is not time-like and",
+                    " cannot be 4-velocity. This may happen if energy-momentum",
+                    " tensor was constructed for a massless particle.");
     u = FourVector(1., 0., 0., 0.);
   }
   return u;

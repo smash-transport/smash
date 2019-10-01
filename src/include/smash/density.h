@@ -25,6 +25,7 @@
 #include "threevector.h"
 
 namespace smash {
+inline constexpr int Density = LogArea::Density::id;
 
 /**
  * Allows to choose which kind of density to calculate.
@@ -415,8 +416,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
     const FourVector p = part.momentum();
     const double m = p.abs();
     if (unlikely(m < really_small)) {
-      const auto &log = logger<LogArea::Density>();
-      log.warn("Gaussian smearing is undefined for momentum ", p);
+      logg[Density].warn("Gaussian smearing is undefined for momentum ", p);
       continue;
     }
     const double m_inv = 1.0 / m;

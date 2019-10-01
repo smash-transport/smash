@@ -13,6 +13,7 @@
 #include "smash/logging.h"
 
 namespace smash {
+inline constexpr int Resonances = LogArea::Resonances::id;
 
 double clebsch_gordan(const int j_a, const int j_b, const int j_c,
                       const int m_a, const int m_b, const int m_c) {
@@ -26,9 +27,9 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
   result *= (j % 2 == 0) * 2 - 1;  // == (-1)**j
 
 #ifndef NDEBUG
-  const auto &log = logger<LogArea::Resonances>();
-  log.debug("CG: ", result, " I1: ", j_a, " I2: ", j_b, " IR: ", j_c,
-            " iz1: ", m_a, " iz2: ", m_b, " izR: ", m_c);
+  logg[Resonances].debug("CG: ", result, " I1: ", j_a, " I2: ", j_b,
+                         " IR: ", j_c, " iz1: ", m_a, " iz2: ", m_b,
+                         " izR: ", m_c);
 #endif
 
   return result;

@@ -25,16 +25,7 @@ void set_default_loglevel(einhard::LogLevel level) {
   global_default_loglevel = level;
 }
 
-/**
- * An array that stores all pre-configured Logger objects. The objects can be
- * accessed via the logger function.
- */
-static std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value>
-    global_logger_collection;
-
-einhard::Logger<> &retrieve_logger_impl(int id) {
-  return global_logger_collection[id];
-}
+einhard::Logger<> &retrieve_logger_impl(int id) { return logg[id]; }
 
 /**
  * \internal
@@ -89,7 +80,7 @@ inline typename std::enable_if<(index == 0)>::type create_all_loggers_impl(
  * ended via the overload above.)
  *
  * For every entry in the list the corresponding Logger object in
- * global_logger_collection is set up with area name and verbosity.
+ * log is set up with area name and verbosity.
  *
  * \tparam index Recursion index.
  * \tparam longest_name Length of longest log area name.
@@ -105,7 +96,7 @@ inline typename std::enable_if<(index != 0)>::type create_all_loggers_impl(
                 "The order of types in LogArea::AreaTuple does not match the "
                 "id values in the LogArea types. Please fix! (see top of "
                 "'include/logging.h')");
-  auto &logger = global_logger_collection[LogAreaTag::id];
+  auto &logger = logg[LogAreaTag::id];
   const auto tmp = utf8::fill_both(LogAreaTag::textual(), longest_name);
   logger.setAreaName(tmp);
   logger.setVerbosity(

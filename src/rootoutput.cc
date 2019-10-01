@@ -16,6 +16,7 @@
 #include "smash/particles.h"
 
 namespace smash {
+inline constexpr int HyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 /*!\Userguide
  * \page format_root ROOT Format
@@ -247,8 +248,7 @@ void RootOutput::at_eventend(const Particles &particles,
     // If the runtime is too short some particles might not yet have
     // reached the hypersurface. Warning is printed.
     if (particles.size() != 0) {
-      const auto &log = logger<LogArea::HyperSurfaceCrossing>();
-      log.warn(
+      logg[HyperSurfaceCrossing].warn(
           "End time might be too small for initial conditions output. "
           "Hypersurface has not yet been crossed by ",
           particles.size(), " particle(s).");
