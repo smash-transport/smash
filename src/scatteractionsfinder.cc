@@ -273,7 +273,7 @@ ScatterActionsFinder::ScatterActionsFinder(
 
 ActionPtr ScatterActionsFinder::check_collision(
     const ParticleData& data_a, const ParticleData& data_b, double dt,
-    const std::vector<FourVector> beam_momentum, const double cell_vol) const {
+    const std::vector<FourVector>& beam_momentum, const double cell_vol) const {
 #ifndef NDEBUG
   const auto& log = logger<LogArea::FindScatter>();
 #endif
@@ -406,7 +406,7 @@ ActionPtr ScatterActionsFinder::check_collision(
 
 ActionList ScatterActionsFinder::find_actions_in_cell(
     const ParticleList& search_list, double dt, const double cell_vol,
-    const std::vector<FourVector> beam_momentum) const {
+    const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData& p1 : search_list) {
     for (const ParticleData& p2 : search_list) {
@@ -424,7 +424,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
 
 ActionList ScatterActionsFinder::find_actions_with_neighbors(
     const ParticleList& search_list, const ParticleList& neighbors_list,
-    double dt, const std::vector<FourVector> beam_momentum) const {
+    double dt, const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
   if (coll_crit_ == CollisionCriterion::Stochastic) {
     // Only search in cells
@@ -445,7 +445,7 @@ ActionList ScatterActionsFinder::find_actions_with_neighbors(
 
 ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     const ParticleList& search_list, const Particles& surrounding_list,
-    double dt, const std::vector<FourVector> beam_momentum) const {
+    double dt, const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
   if (coll_crit_ == CollisionCriterion::Stochastic) {
     // Only search in cells

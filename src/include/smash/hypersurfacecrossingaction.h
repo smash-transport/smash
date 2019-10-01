@@ -75,19 +75,19 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
    */
   ActionList find_actions_in_cell(
       const ParticleList &plist, double dt, const double,
-      const std::vector<FourVector> beam_momentum) const override;
+      const std::vector<FourVector>& beam_momentum) const override;
 
   /// Ignore the neighbor searches for hypersurface crossing
   ActionList find_actions_with_neighbors(
       const ParticleList &, const ParticleList &, double,
-      const std::vector<FourVector>) const override {
+      const std::vector<FourVector>&) const override {
     return {};
   }
 
   /// Ignore the surrounding searches for hypersurface crossing
   ActionList find_actions_with_surrounding_particles(
       const ParticleList &, const Particles &, double,
-      const std::vector<FourVector>) const override {
+      const std::vector<FourVector>&) const override {
     return {};
   }
 

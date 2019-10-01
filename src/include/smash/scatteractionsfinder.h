@@ -75,7 +75,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   inline double collision_time(
       const ParticleData &p1, const ParticleData &p2, double dt,
-      const std::vector<FourVector> beam_momentum) const {
+      const std::vector<FourVector>& beam_momentum) const {
     if (coll_crit_ == CollisionCriterion::Stochastic) {
       return dt * random::uniform(0., 1.);
     } else {
@@ -139,7 +139,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   ActionList find_actions_in_cell(
       const ParticleList &search_list, double dt, const double cell_vol,
-      const std::vector<FourVector> beam_momentum) const override;
+      const std::vector<FourVector>& beam_momentum) const override;
 
   /**
    * Search for all the possible collisions among the neighboring cells. This
@@ -153,7 +153,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   ActionList find_actions_with_neighbors(
       const ParticleList &search_list, const ParticleList &neighbors_list,
-      double dt, const std::vector<FourVector> beam_momentum) const override;
+      double dt, const std::vector<FourVector>& beam_momentum) const override;
 
   /**
    * Search for all the possible secondary collisions between the outgoing
@@ -166,7 +166,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   ActionList find_actions_with_surrounding_particles(
       const ParticleList &search_list, const Particles &surrounding_list,
-      double dt, const std::vector<FourVector> beam_momentum) const override;
+      double dt, const std::vector<FourVector>& beam_momentum) const override;
 
   /**
    * Find some final collisions at the end of the simulation.
@@ -274,7 +274,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   ActionPtr check_collision(const ParticleData &data_a,
                             const ParticleData &data_b, double dt,
-                            const std::vector<FourVector> beam_momentum = {},
+                            const std::vector<FourVector>& beam_momentum = {},
                             const double cell_vol = 0.0) const;
 
   /// Class that deals with strings, interfacing Pythia.
