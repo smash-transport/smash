@@ -217,13 +217,6 @@ using AreaTuple =
 }  // namespace LogArea
 
 /**
- * An array that stores all pre-configured Logger objects. The objects can be
- * accessed via the logger function.
- */
-std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value>
-    log;
-
-/**
  * Called from main() right after the Configuration object is fully set up to
  * create all logger objects (as defined by LogArea::AreaTuple) with the correct
  * area names and log levels.

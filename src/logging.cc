@@ -25,8 +25,15 @@ void set_default_loglevel(einhard::LogLevel level) {
   global_default_loglevel = level;
 }
 
+/**
+ * An array that stores all pre-configured Logger objects. The objects can be
+ * accessed via the logger function.
+ */
+static std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value>
+    global_logger_collection;
+
 einhard::Logger<> &retrieve_logger_impl(int id) {
-  return log[id];
+  return global_logger_collection[id];
 }
 
 /**
@@ -98,7 +105,7 @@ inline typename std::enable_if<(index != 0)>::type create_all_loggers_impl(
                 "The order of types in LogArea::AreaTuple does not match the "
                 "id values in the LogArea types. Please fix! (see top of "
                 "'include/logging.h')");
-  auto &logger = log[LogAreaTag::id];
+  auto &logger = global_logger_collection[LogAreaTag::id];
   const auto tmp = utf8::fill_both(LogAreaTag::textual(), longest_name);
   logger.setAreaName(tmp);
   logger.setVerbosity(
