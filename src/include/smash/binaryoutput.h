@@ -230,7 +230,8 @@ class BinaryOutputParticles : public BinaryOutputBase {
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
    */
-  void at_intermediate_time(const Particles &particles, const Clock &clock,
+  void at_intermediate_time(const Particles &particles,
+                            const std::unique_ptr<Clock> &clock,
                             const DensityParameters &dens_param) override;
 
  private:

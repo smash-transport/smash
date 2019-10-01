@@ -106,6 +106,17 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * system in Standard Output and other output formats which support this
  * functionality.
  *
+ * \key Output_Times (doubles, optinal, no default): \n
+ * Explicitly defines the the times where output is generated in the form of
+ * a list. Cannot be used in combination with Output_Interval. Output times
+ * outside the simulation time are ignored. The following example will produce
+ * output at event start, event end and at the specified times as long as they
+ * are within the simulation time.
+ *\verbatim
+ Output:
+     Output_Times: [-0.1, 0.0, 1.0, 2.0, 10.0]
+ \endverbatim
+ *
  * \key Density_Type (string, optional, default = "none"): \n
  * Determines which kind of density is printed into the headers of the
  * collision files.
@@ -330,7 +341,24 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
    */
   const double dt = config.take({"General", "Delta_Time"}, 1.);
   const double t_end = config.read({"General", "End_Time"});
-  const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
+
+  // define output clock
+  std::unique_ptr<Clock> output_clock = nullptr;
+  if (config.has_value({"Output", "Output_Times"})) {
+    if (config.has_value({"Output", "Output_Interval"})) {
+      throw std::invalid_argument(
+          "Please specify either Output_Interval or Output_Times");
+    }
+    std::vector<double> output_times = config.take({"Output", "Output_Times"});
+    // Add an output time larger than the end time so that the next time is
+    // always defined during the time evolution
+    output_times.push_back(t_end + 1.);
+    output_clock = make_unique<CustomClock>(output_times);
+  } else {
+    const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
+    output_clock = make_unique<UniformClock>(0.0, output_dt);
+  }
+
   auto config_coll = config["Collision_Term"];
   /* Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded. */
@@ -345,8 +373,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   }
   const bool potential_affect_threshold =
       config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);
-  return {{0., dt},
-          {0.0, output_dt},
+  return {make_unique<UniformClock>(0.0, dt),
+          std::move(output_clock),
           ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),

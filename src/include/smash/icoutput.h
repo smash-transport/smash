@@ -58,7 +58,7 @@ class ICOutput : public OutputInterface {
   /**
    * Unused, but needed since virtually declared in mother class.
    */
-  void at_intermediate_time(const Particles &, const Clock &,
+  void at_intermediate_time(const Particles &, const std::unique_ptr<Clock> &,
                             const DensityParameters &) override;
   /**
    * Write particle data at the hypersurface crossing point to the IC output.

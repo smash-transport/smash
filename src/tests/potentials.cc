@@ -77,7 +77,7 @@ TEST(nucleus_potential_profile) {
   const ParticleType &proton = ParticleType::find(0x2212);
 
   std::ofstream a_file;
-  const double timestep = param.labclock.timestep_duration();
+  const double timestep = param.labclock->timestep_duration();
   for (auto it = 0; it < 20; it++) {
     {
       a_file.open(("Nucleus_U_xy.vtk." + std::to_string(it)).c_str(),

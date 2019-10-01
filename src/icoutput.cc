@@ -127,7 +127,8 @@ void ICOutput::at_eventend(const Particles &particles, const int event_number,
   }
 }
 
-void ICOutput::at_intermediate_time(const Particles &, const Clock &,
+void ICOutput::at_intermediate_time(const Particles &,
+                                    const std::unique_ptr<Clock> &,
                                     const DensityParameters &) {
   // Dummy, but virtual function needs to be declared.
 }

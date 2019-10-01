@@ -252,11 +252,11 @@ class GrandCanThermalizer {
    * the thermalization only happens at these times
    * \param[in] clock Current system time
    */
-  bool is_time_to_thermalize(const Clock& clock) const {
-    const double t = clock.current_time();
+  bool is_time_to_thermalize(std::unique_ptr<Clock>& clock) const {
+    const double t = clock->current_time();
     const int n = static_cast<int>(std::floor((t - t_start_) / period_));
     return (t > t_start_ &&
-            t < t_start_ + n * period_ + clock.timestep_duration());
+            t < t_start_ + n * period_ + clock->timestep_duration());
   }
   /**
    * Compute all the thermodynamical quantities on the lattice from particles.

@@ -85,7 +85,7 @@ class OutputInterface {
    * \param dens_param Parameters for density calculation.
    */
   virtual void at_intermediate_time(const Particles &particles,
-                                    const Clock &clock,
+                                    const std::unique_ptr<Clock> &clock,
                                     const DensityParameters &dens_param) {
     SMASH_UNUSED(particles);
     SMASH_UNUSED(clock);
