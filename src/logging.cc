@@ -29,7 +29,7 @@ void set_default_loglevel(einhard::LogLevel level) {
  * An array that stores all pre-configured Logger objects. The objects can be
  * accessed via the logger function.
  */
-static std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value>
+std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value>
     global_logger_collection;
 
 einhard::Logger<> &retrieve_logger_impl(int id) {
