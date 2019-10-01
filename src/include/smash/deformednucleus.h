@@ -95,25 +95,6 @@ class DeformedNucleus : public Nucleus {
   double nucleon_density(double r, double cosx) override;
 
   /**
-   * Spherical harmonics Y_2_0 and Y_4_0.
-   * \param[in] l Angular momentum value (2 and 4 are supported)
-   * \param[in] cosx Cosine of the polar angle
-   * \return Value of the corresponding spherical harmonic
-   * \throws domain_error if unsupported l is encountered
-   */
-  static double y_l_0(int l, double cosx) {
-    if (l == 2) {
-      return (1. / 4) * std::sqrt(5 / M_PI) * (3. * (cosx * cosx) - 1);
-    } else if (l == 4) {
-      return (3. / 16) * std::sqrt(1 / M_PI) *
-             (35. * (cosx * cosx) * (cosx * cosx) - 30. * (cosx * cosx) + 3);
-    } else {
-      throw std::domain_error(
-          "Not a valid angular momentum quantum number in y_l_0.");
-    }
-  }
-
-  /**
    * Set deformation coefficient for Y_2_0.
    * \param[in] b2 deformation coefficient for l=2
    */
