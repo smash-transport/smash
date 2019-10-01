@@ -409,12 +409,12 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
   const double norm_factor = par.norm_factor_sf();
   for (const auto &part : particles) {
     const double dens_factor = density_factor(part.type(), dens_type);
-    if (std::abs(dens_factor) < really_small / par.ntest()) {
+    if (std::abs(dens_factor) < really_small) {
       continue;
     }
     const FourVector p = part.momentum();
     const double m = p.abs();
-    if (unlikely(m < really_small / par.ntest())) {
+    if (unlikely(m < really_small)) {
       const auto &log = logger<LogArea::Density>();
       log.warn("Gaussian smearing is undefined for momentum ", p);
       continue;

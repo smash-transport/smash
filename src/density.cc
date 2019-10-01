@@ -84,18 +84,18 @@ current_eckart_impl(const ThreeVector &r, const T &plist,
 
   for (const auto &p : plist) {
     const double dens_factor = density_factor(p.type(), dens_type);
-    if (std::fabs(dens_factor) < really_small / par.ntest()) {
+    if (std::fabs(dens_factor) < really_small) {
       continue;
     }
     const FourVector mom = p.momentum();
     const double m = mom.abs();
-    if (m < really_small / par.ntest()) {
+    if (m < really_small) {
       continue;
     }
     const double m_inv = 1.0 / m;
     const auto sf_and_grad = unnormalized_smearing_factor(
         p.position().threevec() - r, mom, m_inv, par, compute_gradient);
-    if (smearing && sf_and_grad.first < really_small / par.ntest()) {
+    if (smearing && sf_and_grad.first < really_small) {
       continue;
     }
     const FourVector tmp = mom * (dens_factor / mom.x0());
