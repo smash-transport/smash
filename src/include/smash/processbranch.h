@@ -176,12 +176,6 @@ class ProcessBranch {
   mutable double threshold_ = -1.;
 };
 
-/**
- * Set the weight of the branch.
- * In other words, how probable this branch is
- * compared to other branches.
- * \param[in] process_weight weight of the branch
- */
 inline void ProcessBranch::set_weight(double process_weight) {
   branch_weight_ = process_weight;
 }

@@ -117,7 +117,6 @@ class ListModus : public ModusDefault {
    * insufficient number of significant digits in the input file + rounding.
    *
    * \param[in] pdgcode pdg code of added particle
-   * \param[in] pdgcode pdg code of added particle
    * \param[in] t       time of added particle
    * \param[in] x       x-coordinate of added particle
    * \param[in] y       y-coordinate of added particle

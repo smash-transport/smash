@@ -22,7 +22,7 @@ namespace smash {
 namespace transit_high_energy {
 /// transition range in N-pi collisions
 const std::array<double, 2> sqrts_range_Npi = {1.9, 2.2};
-/* transition range in N-N collisions:
+/** transition range in N-N collisions:
  * Tuned to reproduce experimental exclusive cross section data, and at the same
  * produce excitation functions that are as smooth as possible. The default of
  * a 1 GeV range is preserved.
