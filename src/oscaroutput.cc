@@ -178,7 +178,7 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
   // Flush to disk
   std::fflush(file_.get());
 
-  if (Contents & OscarParticlesIC) {
+  if (Contents == OscarParticlesIC) {
     const auto &log = logger<LogArea::HyperSurfaceCrossing>();
     // If the runtime is too short some particles might not yet have
     // reached the hypersurface. Warning is printed.
