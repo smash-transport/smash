@@ -10,6 +10,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
+#include "smash/filelock.h"
 #include "smash/integrate.h"
 #include "smash/kinematics.h"
 #include "smash/logging.h"
@@ -264,6 +265,12 @@ inline void cache_integral(
 
 void IsoParticleType::tabulate_integrals(sha256::Hash hash,
                                          const bf::path &tabulations_path) {
+  // To avoid race conditions, make sure we are the only ones currently storing
+  // tabulations. Otherwise, we ignore any stored tabulations and don't store
+  // our results.
+  FileLock lock(tabulations_path / "tabulations.lock");
+  const bf::path &dir = lock.acquire() ? tabulations_path : "";
+
   const auto nuc = IsoParticleType::try_find("N");
   const auto pion = IsoParticleType::try_find("π");
   const auto kaon = IsoParticleType::try_find("K");
