@@ -274,13 +274,6 @@ class IsoParticleType {
    * \throw ParticleNotFoundFailure if \p name not found.
    */
   static IsoParticleType &find_private(const std::string &name);
-
-  /**
-   * Utility function to help compute various XX->RR spectral integrals
-   *
-   * \param type_res_2 Type of the two resonances in the final state.
-   */
-  Tabulation integrate_RR(ParticleTypePtr &type_res_2);
 };
 
 }  // namespace smash

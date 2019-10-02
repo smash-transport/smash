@@ -357,9 +357,4 @@ double IsoParticleType::get_integral_RR(IsoParticleType *type_res_2,
   throw std::runtime_error(err.str());
 }
 
-Tabulation IsoParticleType::integrate_RR(ParticleTypePtr &res2) {
-  ParticleTypePtr res1 = states_[0];
-  return spectral_integral_unstable(integrate2d, *res1, *res2, 3.);
-}
-
 }  // namespace smash
