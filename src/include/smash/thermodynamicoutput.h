@@ -84,7 +84,7 @@ class ThermodynamicOutput : public OutputInterface {
    * \param[in] file_name name of the file to print out
    * \param[in] param Parameters for density calculation
    * \param[in] plist particles, from which density is computed
-   * \param[in] dens_type type of density, see ::DensityType
+   * \param[in] dens_type type of density
    * \param[in] line_start starting point of the line
    * \param[in] line_end ending point of the line
    * \param[in] n_points number of points along the line, where density

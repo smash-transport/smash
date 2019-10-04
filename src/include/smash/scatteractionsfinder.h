@@ -68,6 +68,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] p1 First incoming particle
    * \param[in] p2 Second incoming particle
    * \param[in] dt The maximum time interval at the current time step [fm]
+   * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
+   * only necessary for frozen Fermi motion
    * \return How long does it take for the two incoming particles
    *         to propagate before scattering [fm/c]. It's set equal
    *         to -1 if the two particles are not moving relative to each
@@ -138,6 +140,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] search_list A list of particles within one cell
    * \param[in] dt The maximum time interval at the current time step [fm]
    * \param[in] cell_vol Volume of searched grid cell [fm^3]
+   * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
+   * only necessary for frozen Fermi motion
    * \return A list of possible scatter actions
    */
   ActionList find_actions_in_cell(
@@ -152,6 +156,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] search_list A list of particles within the current cell
    * \param[in] neighbors_list A list of particles within the neighboring cell
    * \param[in] dt The maximum time interval at the current time step [fm/c]
+   * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
+   * only necessary for frozen Fermi motion
    * \return A list of possible scatter actions
    */
   ActionList find_actions_with_neighbors(
@@ -165,6 +171,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] search_list A list of particles within the current cell
    * \param[in] surrounding_list The whole particle list
    * \param[in] dt The maximum time interval at the current time step [fm/c]
+   * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
+   * only necessary for frozen Fermi motion
    * \return A list of possible scatter actions
    */
   ActionList find_actions_with_surrounding_particles(
@@ -267,6 +275,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] data_a First incoming particle
    * \param[in] data_b Second incoming particle
    * \param[in] dt Maximum time interval within which a collision can happen
+   * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
+   * only necessary for frozen Fermi motion
    * \param[in] cell_vol (optional) volume of grid cell in which the collision
    *                                is checked
    * \return A null pointer if no collision happens or an action which contains

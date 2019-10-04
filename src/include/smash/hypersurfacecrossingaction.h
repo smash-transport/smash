@@ -70,6 +70,7 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
    * \param[in] plist List of all particles.
    * \param[in] dt Time until crossing can appear (until end of timestep). [fm]
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
+   * only necessary for frozen Fermi motion
    * necessary if frozen Fermi Motion is activated \return List of all found
    * wall crossings.
    */
