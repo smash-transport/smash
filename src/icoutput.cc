@@ -33,8 +33,8 @@ namespace smash {
  * **Header**
  * \code
  * # **smash_version** initial conditions: hypersurface of constant proper time
- * # tau x y eta mt px py Rap pdg ID charge
- * # fm fm fm none GeV GeV GeV none none none e
+ * # tau x y eta mt px py Rap ID charge
+ * # fm fm fm none GeV GeV GeV none none e
  * \endcode
  * The header consists of 3 lines starting with a '#', containing the following
  * information:
@@ -60,7 +60,7 @@ namespace smash {
  *
  * The particle lines are formatted as follows:
  * \code
- * tau x y eta mt px py Rap pdg ID charge
+ * tau x y eta mt px py Rap ID charge
  * \endcode
  * where
  * \li \key tau: Proper time of the particle
@@ -69,8 +69,6 @@ namespace smash {
  * \li \key mt: Transverse mass of the particle
  * \li \key px, \key py: x and y components of the particle's momentum
  * \li \key Rap: Momentum space rapidity of the particle
- * \li \key pdg: PDG code of the particle (see http://pdg.lbl.gov/). It contains
- * all quantum numbers and uniquely identifies its type.
  * \li \key ID: Particle identifier in terms of an integer. It is unique for
  * every particle in the event.
  * \li \key charge: electric charge of the particle
@@ -102,8 +100,8 @@ ICOutput::ICOutput(const bf::path &path, const std::string &name,
       file_.get(),
       "# %s initial conditions: hypersurface of constant proper time\n",
       VERSION_MAJOR);
-  std::fprintf(file_.get(), "# tau x y eta mt px py Rap pdg ID charge\n");
-  std::fprintf(file_.get(), "# fm fm fm none GeV GeV GeV none none none e\n");
+  std::fprintf(file_.get(), "# tau x y eta mt px py Rap ID charge\n");
+  std::fprintf(file_.get(), "# fm fm fm none GeV GeV GeV none none e\n");
 }
 
 ICOutput::~ICOutput() {}
@@ -149,12 +147,11 @@ void ICOutput::at_interaction(const Action &action, const double) {
                 (particle.momentum()[0] - particle.momentum()[3]));
 
   // write particle data
-  std::fprintf(file_.get(), "%g %g %g %g %g %g %g %g %s %i %i \n",
+  std::fprintf(file_.get(), "%g %g %g %g %g %g %g %g %i %i \n",
                particle.position().tau(), particle.position()[1],
                particle.position()[2], particle.position().eta(), m_trans,
                particle.momentum()[1], particle.momentum()[2], rapidity,
-               particle.pdgcode().string().c_str(), particle.id(),
-               particle.type().charge());
+               particle.id(), particle.type().charge());
 
   if (IC_proper_time_ < 0.0) {
     // First particle that is removed, overwrite negative default
