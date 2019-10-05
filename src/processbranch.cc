@@ -111,6 +111,7 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
       break;
     case ProcessType::Wall:
       os << "Wall";
+      break;
     case ProcessType::HyperSurfaceCrossing:
       os << "Hypersurface crossing";
       break;
