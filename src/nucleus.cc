@@ -388,7 +388,7 @@ void Nucleus::generate_fermi_momenta() {
     if (i->pdgcode() != pdg::p && i->pdgcode() != pdg::n) {
       if (i->is_baryon()) {
         logg[nucleus].warn() << "No rule to calculate Fermi momentum "
-                   << "for particle " << i->pdgcode();
+                             << "for particle " << i->pdgcode();
       }
       continue;
     }
@@ -409,10 +409,10 @@ void Nucleus::generate_fermi_momenta() {
     const ThreeVector ith_3momentum = phitheta.threevec() * p;
     ptot += ith_3momentum;
     i->set_3momentum(ith_3momentum);
-    logg[nucleus].debug() << "Particle: " << *i
-                << ", pF[GeV]: " << hbarc * std::pow(pi2_3 * rho, 1.0 / 3.0)
-                << " r[fm]: " << r
-                << " Nuclear radius[fm]: " << nuclear_radius_;
+    logg[nucleus].debug() << "Particle: " << *i << ", pF[GeV]: "
+                          << hbarc * std::pow(pi2_3 * rho, 1.0 / 3.0)
+                          << " r[fm]: " << r
+                          << " Nuclear radius[fm]: " << nuclear_radius_;
   }
   if (A == 0) {
     // No Fermi momenta should be assigned

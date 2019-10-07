@@ -755,7 +755,7 @@ std::unique_ptr<OutputInterface> create_select_format(
   } else {
     // Only remaining possibility: (!modern_format && extended_format)
     logg[Output].warn() << "Creating Oscar output: "
-               << "There is no extended Oscar1999 format.";
+                        << "There is no extended Oscar1999 format.";
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
   }
 }
@@ -798,8 +798,9 @@ std::unique_ptr<OutputInterface> create_oscar_output(
       return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Dileptons");
     } else if (!modern_format && out_par.dil_extended) {
-      logg[Output].warn() << "Creating Oscar output: "
-                 << "There is no extended Oscar1999 (dileptons) format.";
+      logg[Output].warn()
+          << "Creating Oscar output: "
+          << "There is no extended Oscar1999 (dileptons) format.";
     }
   } else if (content == "Photons") {
     if (modern_format && !out_par.photons_extended) {
@@ -814,7 +815,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(
           path, "Photons");
     } else if (!modern_format && out_par.photons_extended) {
       logg[Output].warn() << "Creating Oscar output: "
-                 << "There is no extended Oscar1999 (photons) format.";
+                          << "There is no extended Oscar1999 (photons) format.";
     }
   } else if (content == "Initial_Conditions") {
     if (modern_format && !out_par.ic_extended) {

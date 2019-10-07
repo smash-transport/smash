@@ -339,7 +339,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   if (proton && pion &&
       low_snn_cut > proton->mass() + proton->mass() + pion->mass()) {
     logg[experiment].warn("The cut-off should be below the threshold energy",
-             " of the process: NN to NNpi");
+                          " of the process: NN to NNpi");
   }
   const bool potential_affect_threshold =
       config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);

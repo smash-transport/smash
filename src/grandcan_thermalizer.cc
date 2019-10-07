@@ -152,10 +152,10 @@ ThreeVector GrandCanThermalizer::uniform_in_cell() const {
 
 void GrandCanThermalizer::renormalize_momenta(
     ParticleList &plist, const FourVector required_total_momentum) {
-
   // Centralize momenta
   QuantumNumbers conserved = QuantumNumbers(plist);
-  logg[GrandcanThermalizer].info("Required 4-momentum: ", required_total_momentum);
+  logg[GrandcanThermalizer].info("Required 4-momentum: ",
+                                 required_total_momentum);
   logg[GrandcanThermalizer].info("Sampled 4-momentum: ", conserved.momentum());
   const ThreeVector mom_to_add =
       (required_total_momentum.threevec() - conserved.momentum().threevec()) /
@@ -203,11 +203,13 @@ void GrandCanThermalizer::renormalize_momenta(
     } else {
       a_min = a;
     }
-    logg[GrandcanThermalizer].debug("Iteration ", iter, ": a = ", a, ", Δ = ", er);
+    logg[GrandcanThermalizer].debug("Iteration ", iter, ": a = ", a,
+                                    ", Δ = ", er);
     iter++;
   } while (std::abs(er) > tolerance && iter < max_iter);
 
-  logg[GrandcanThermalizer].info("Renormalizing momenta by factor 1+a, a = ", a);
+  logg[GrandcanThermalizer].info("Renormalizing momenta by factor 1+a, a = ",
+                                 a);
   for (auto &particle : plist) {
     particle.set_4momentum(particle.type().mass(),
                            (1 + a) * particle.momentum().threevec());
@@ -288,7 +290,6 @@ void GrandCanThermalizer::sample_in_random_cell_BF_algo(ParticleList &plist,
 
 void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
                                              double time, int ntest) {
-
   std::fill(mult_sort_.begin(), mult_sort_.end(), 0.0);
   for (auto cell_index : cells_to_sample_) {
     const ThermLatticeNode cell = (*lat_)[cell_index];
@@ -383,7 +384,8 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
         e_tot += particle.momentum().x0();
       }
       if (std::abs(e_tot - e_init) > 0.01 * e_init) {
-        logg[GrandcanThermalizer].info("Rejecting: energy ", e_tot, " too far from ", e_init);
+        logg[GrandcanThermalizer].info("Rejecting: energy ", e_tot,
+                                       " too far from ", e_init);
         continue;
       }
     }
@@ -494,7 +496,8 @@ void GrandCanThermalizer::thermalize_mode_algo(
 
 void GrandCanThermalizer::thermalize(const Particles &particles, double time,
                                      int ntest) {
-  logg[GrandcanThermalizer].info("Starting forced thermalization, time ", time, " fm/c");
+  logg[GrandcanThermalizer].info("Starting forced thermalization, time ", time,
+                                 " fm/c");
   to_remove_.clear();
   sampled_list_.clear();
   /* Remove particles from the cells with e > e_crit_,
@@ -532,10 +535,12 @@ void GrandCanThermalizer::thermalize(const Particles &particles, double time,
       cells_to_sample_.push_back(i);
     }
   }
-  logg[GrandcanThermalizer].info("Number of cells in the thermalization region = ",
-           cells_to_sample_.size(), ", its total volume [fm^3]: ",
-           cells_to_sample_.size() * cell_volume_, ", in % of lattice: ",
-           100.0 * cells_to_sample_.size() / lattice_total_cells);
+  logg[GrandcanThermalizer].info(
+      "Number of cells in the thermalization region = ",
+      cells_to_sample_.size(),
+      ", its total volume [fm^3]: ", cells_to_sample_.size() * cell_volume_,
+      ", in % of lattice: ",
+      100.0 * cells_to_sample_.size() / lattice_total_cells);
 
   switch (algorithm_) {
     case ThermalizationAlgorithm::BiasedBF:
@@ -550,7 +555,8 @@ void GrandCanThermalizer::thermalize(const Particles &particles, double time,
           "This thermalization algorithm is"
           " not yet implemented");
   }
-  logg[GrandcanThermalizer].info("Sampled ", sampled_list_.size(), " particles.");
+  logg[GrandcanThermalizer].info("Sampled ", sampled_list_.size(),
+                                 " particles.");
 
   // Adjust momenta
   renormalize_momenta(sampled_list_, conserved_initial.momentum());

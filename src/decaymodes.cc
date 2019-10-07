@@ -104,11 +104,12 @@ bool DecayModes::renormalize(const std::string &name) {
   }
   if (std::abs(sum - 1.) < really_small) {
     logg[Decaymodes].debug("Particle ", name,
-              ": Extremely small renormalization constant: ", sum,
-              "\n=> Skipping the renormalization.");
+                           ": Extremely small renormalization constant: ", sum,
+                           "\n=> Skipping the renormalization.");
   } else {
     is_large_renormalization = (std::abs(sum - 1.) > 0.01);
-    logg[Decaymodes].debug("Particle ", name, ": Renormalizing decay modes with ", sum);
+    logg[Decaymodes].debug("Particle ", name,
+                           ": Renormalizing decay modes with ", sum);
     double new_sum = 0.0;
     for (auto &mode : decay_modes_) {
       mode->set_weight(mode->weight() / sum);
@@ -199,7 +200,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
     if (isotype_mother->has_anti_multiplet()) {
       /* Construct the decay modes for the anti-multiplet.  */
       logg[Decaymodes].debug("generating decay modes for anti-multiplet: " +
-                isotype_mother->name());
+                             isotype_mother->name());
       for (const auto &state : mother_states) {
         PdgCode pdg = state->pdgcode();
         PdgCode pdg_anti = pdg.get_antiparticle();
@@ -421,8 +422,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
         bool no_decays = true;
         for (size_t m = 0; m < mother_states.size(); m++) {
           if (mother_states[m]->charge() == charge) {
-            logg[Decaymodes].debug("decay mode found: " + mother_states[m]->name() + " -> " +
-                      std::to_string(decay_particles.size()));
+            logg[Decaymodes].debug(
+                "decay mode found: " + mother_states[m]->name() + " -> " +
+                std::to_string(decay_particles.size()));
             decay_modes_to_add[m].add_mode(mother_states[m], ratio, L, types);
             no_decays = false;
           }
@@ -485,8 +487,9 @@ void DecayModes::load_decaymodes(const std::string &input) {
     }
   }
   if (total_large_renormalized > 0) {
-    logg[Decaymodes].warn("Branching ratios of ", total_large_renormalized,
-             " hadrons were renormalized by more than 1% to have sum 1.");
+    logg[Decaymodes].warn(
+        "Branching ratios of ", total_large_renormalized,
+        " hadrons were renormalized by more than 1% to have sum 1.");
   }
 }
 

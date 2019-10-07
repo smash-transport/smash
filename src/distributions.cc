@@ -80,7 +80,8 @@ double juttner_distribution_func(const double momentum_radial,
 }
 
 double sample_momenta_non_eq_mass(const double temperature, const double mass) {
-  logg[Distributions].debug("Sample momenta with mass ", mass, " and T ", temperature);
+  logg[Distributions].debug("Sample momenta with mass ", mass, " and T ",
+                            temperature);
 
   /* Calculate range on momentum values to use
    * ideally 0.0 and as large as possible but we want to be efficient! */
@@ -113,7 +114,8 @@ double sample_momenta_non_eq_mass(const double temperature, const double mass) {
 }
 
 double sample_momenta_1M_IC(const double temperature, const double mass) {
-  logg[Distributions].debug("Sample momenta with mass ", mass, " and T ", temperature);
+  logg[Distributions].debug("Sample momenta with mass ", mass, " and T ",
+                            temperature);
   // Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T)
   double energy_average;
   if (mass > 0.) {
@@ -149,7 +151,8 @@ double sample_momenta_1M_IC(const double temperature, const double mass) {
 }
 
 double sample_momenta_2M_IC(const double temperature, const double mass) {
-  logg[Distributions].debug("Sample momenta with mass ", mass, " and T ", temperature);
+  logg[Distributions].debug("Sample momenta with mass ", mass, " and T ",
+                            temperature);
   /* Maxwell-Boltzmann average E <E>=3T + m * K_1(m/T) / K_2(m/T) */
   double energy_average;
   if (mass > 0.) {
@@ -186,7 +189,8 @@ double sample_momenta_2M_IC(const double temperature, const double mass) {
 
 double sample_momenta_from_thermal(const double temperature,
                                    const double mass) {
-  logg[Distributions].debug("Sample momenta with mass ", mass, " and T ", temperature);
+  logg[Distributions].debug("Sample momenta with mass ", mass, " and T ",
+                            temperature);
   double momentum_radial, energy;
   // when temperature/mass
   if (temperature > 0.6 * mass) {

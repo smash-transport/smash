@@ -566,8 +566,8 @@ void Experiment<Modus>::create_output(const std::string &format,
                                       const std::string &content,
                                       const bf::path &output_path,
                                       const OutputParameters &out_par) {
-  logg[experiment].info() << "Adding output " << content << " of format " << format
-             << std::endl;
+  logg[experiment].info() << "Adding output " << content << " of format "
+                          << format << std::endl;
 
   if (format == "VTK" && content == "Particles") {
     outputs_.emplace_back(
@@ -582,7 +582,8 @@ void Experiment<Modus>::create_output(const std::string &format,
           make_unique<RootOutput>(output_path, content, out_par));
     }
 #else
-    logg[experiment].error("Root output requested, but Root support not compiled in");
+    logg[experiment].error(
+        "Root output requested, but Root support not compiled in");
 #endif
   } else if (format == "Binary") {
     if (content == "Collisions" || content == "Dileptons" ||
@@ -610,8 +611,9 @@ void Experiment<Modus>::create_output(const std::string &format,
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
   } else {
-    logg[experiment].error() << "Unknown combination of format (" << format
-                << ") and content (" << content << "). Fix the config.";
+    logg[experiment].error()
+        << "Unknown combination of format (" << format << ") and content ("
+        << content << "). Fix the config.";
   }
 }
 
@@ -1173,14 +1175,15 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       throw std::invalid_argument("Can't use potentials without time steps!");
     }
     if (motion == FermiMotion::Frozen) {
-      logg[experiment].error() << "Potentials don't work with frozen Fermi momenta! "
-                     "Use normal Fermi motion instead.";
+      logg[experiment].error()
+          << "Potentials don't work with frozen Fermi momenta! "
+             "Use normal Fermi motion instead.";
       throw std::invalid_argument(
           "Can't use potentials "
           "with frozen Fermi momenta!");
     }
     logg[experiment].info() << "Potentials are ON. Timestep is "
-               << parameters_.labclock.timestep_duration();
+                            << parameters_.labclock.timestep_duration();
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
   }
@@ -1323,7 +1326,6 @@ const std::string hline(67, '-');
 
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event() {
-
   random::set_seed(seed_);
   logg[experiment].info() << "random number seed: " << seed_;
   /* Set seed for the next event. It has to be positive, so it can be entered
@@ -1377,10 +1379,12 @@ void Experiment<Modus>::initialize_new_event() {
   Clock output_clock(zeroth_output_time, dt_output);
   parameters_.outputclock = std::move(output_clock);
 
-  logg[experiment].debug("Lab clock: t_start = ", parameters_.labclock.current_time(),
-            ", dt = ", parameters_.labclock.timestep_duration());
-  logg[experiment].debug("Output clock: t_start = ", parameters_.outputclock.current_time(),
-            ", dt = ", parameters_.outputclock.timestep_duration());
+  logg[experiment].debug(
+      "Lab clock: t_start = ", parameters_.labclock.current_time(),
+      ", dt = ", parameters_.labclock.timestep_duration());
+  logg[experiment].debug(
+      "Output clock: t_start = ", parameters_.outputclock.current_time(),
+      ", dt = ", parameters_.outputclock.timestep_duration());
 
   /* Save the initial conserved quantum numbers and total momentum in
    * the system for conservation checks */
@@ -1396,7 +1400,7 @@ void Experiment<Modus>::initialize_new_event() {
   // Print output headers
   logg[experiment].info() << hline;
   logg[experiment].info() << "Time [fm]   Ediff [GeV]    Scatt.|Decays   "
-                "Particles         Timing";
+                             "Particles         Timing";
   logg[experiment].info() << hline;
 }
 
@@ -1406,7 +1410,8 @@ bool Experiment<Modus>::perform_action(
     Action &action, const Container &particles_before_actions) {
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles_)) {
-    logg[experiment].debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
+    logg[experiment].debug(~einhard::DRed(), "✘ ", action,
+                           " (discarded: invalid)");
     return false;
   }
   action.generate_final_state();
@@ -1552,9 +1557,9 @@ template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
   Actions actions;
 
-  logg[experiment].info() << format_measurements(particles_, 0u, conserved_initial_,
-                                    time_start_,
-                                    parameters_.labclock.current_time());
+  logg[experiment].info() << format_measurements(
+      particles_, 0u, conserved_initial_, time_start_,
+      parameters_.labclock.current_time());
 
   while (parameters_.labclock.current_time() < end_time_) {
     const double t = parameters_.labclock.current_time();
@@ -1580,7 +1585,8 @@ void Experiment<Modus>::run_time_evolution() {
     if (particles_.size() > 0 && action_finders_.size() > 0) {
       /* (1.a) Create grid. */
       double min_cell_length = compute_min_cell_length(dt);
-      logg[experiment].debug("Creating grid with minimal cell length ", min_cell_length);
+      logg[experiment].debug("Creating grid with minimal cell length ",
+                             min_cell_length);
       const auto &grid =
           use_grid_ ? modus_.create_grid(particles_, min_cell_length, dt)
                     : modus_.create_grid(particles_, min_cell_length, dt,
@@ -1643,8 +1649,9 @@ void Experiment<Modus>::run_time_evolution() {
   }
 
   if (pauli_blocker_) {
-    logg[experiment].info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked_,
-             "/", interactions_total_ - wall_actions_total_);
+    logg[experiment].info(
+        "Interactions: Pauli-blocked/performed = ", total_pauli_blocked_, "/",
+        interactions_total_ - wall_actions_total_);
   }
 }
 
@@ -1675,29 +1682,32 @@ inline void check_interactions_total(uint64_t interactions_total) {
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
-
   const double start_time = parameters_.labclock.current_time();
   const double end_time = std::min(parameters_.labclock.next_time(), end_time_);
   double time_left = end_time - start_time;
-  logg[experiment].debug("Timestepless propagation: ", "Actions size = ", actions.size(),
-            ", start time = ", start_time, ", end time = ", end_time);
+  logg[experiment].debug(
+      "Timestepless propagation: ", "Actions size = ", actions.size(),
+      ", start time = ", start_time, ", end time = ", end_time);
 
   // iterate over all actions
   while (!actions.is_empty()) {
     // get next action
     ActionPtr act = actions.pop();
     if (!act->is_valid(particles_)) {
-      logg[experiment].debug(~einhard::DRed(), "✘ ", act, " (discarded: invalid)");
+      logg[experiment].debug(~einhard::DRed(), "✘ ", act,
+                             " (discarded: invalid)");
       continue;
     }
     if (act->time_of_execution() > end_time) {
-      logg[experiment].error(act, " scheduled later than end time: t_action[fm/c] = ",
-                act->time_of_execution(), ", t_end[fm/c] = ", end_time);
+      logg[experiment].error(
+          act, " scheduled later than end time: t_action[fm/c] = ",
+          act->time_of_execution(), ", t_end[fm/c] = ", end_time);
     }
     logg[experiment].debug(~einhard::Green(), "✔ ", act);
 
     while (next_output_time() <= act->time_of_execution()) {
-      logg[experiment].debug("Propagating until output time: ", next_output_time());
+      logg[experiment].debug("Propagating until output time: ",
+                             next_output_time());
       propagate_and_shine(next_output_time());
       ++parameters_.outputclock;
       intermediate_output();
@@ -1705,7 +1715,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
 
     /* (1) Propagate to the next action. */
     logg[experiment].debug("Propagating until next action ", act,
-              ", action time = ", act->time_of_execution());
+                           ", action time = ", act->time_of_execution());
     propagate_and_shine(act->time_of_execution());
 
     /* (2) Perform action.
@@ -1741,7 +1751,8 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
   }
 
   while (next_output_time() <= end_time) {
-    logg[experiment].debug("Propagating until output time: ", next_output_time());
+    logg[experiment].debug("Propagating until output time: ",
+                           next_output_time());
     propagate_and_shine(next_output_time());
     ++parameters_.outputclock;
     // Avoid duplicating printout at event end time
@@ -1762,9 +1773,9 @@ void Experiment<Modus>::intermediate_output() {
                                               previous_interactions_total_ -
                                               wall_actions_this_interval;
   previous_interactions_total_ = interactions_total_;
-  logg[experiment].info() << format_measurements(particles_, interactions_this_interval,
-                                    conserved_initial_, time_start_,
-                                    parameters_.outputclock.current_time());
+  logg[experiment].info() << format_measurements(
+      particles_, interactions_this_interval, conserved_initial_, time_start_,
+      parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   // save evolution data
   for (const auto &output : outputs_) {
@@ -1918,9 +1929,9 @@ void Experiment<Modus>::final_output(const int evt_num) {
     const uint64_t interactions_this_interval = interactions_total_ -
                                                 previous_interactions_total_ -
                                                 wall_actions_this_interval;
-    logg[experiment].info() << format_measurements(particles_, interactions_this_interval,
-                                      conserved_initial_, time_start_,
-                                      parameters_.outputclock.current_time());
+    logg[experiment].info() << format_measurements(
+        particles_, interactions_this_interval, conserved_initial_, time_start_,
+        parameters_.outputclock.current_time());
     if (IC_output_switch_ && (particles_.size() == 0)) {
       // Verify there is no more energy in the system if all particles were
       // removed when crossing the hypersurface
@@ -1934,18 +1945,21 @@ void Experiment<Modus>::final_output(const int evt_num) {
             std::to_string(remaining_energy) + " [GeV]");
       } else {
         logg[experiment].info() << hline;
-        logg[experiment].info() << "Time real: " << SystemClock::now() - time_start_;
+        logg[experiment].info()
+            << "Time real: " << SystemClock::now() - time_start_;
         logg[experiment].info() << "Interactions before reaching hypersurface: "
-                   << interactions_total_ - wall_actions_total_ -
-                          total_hypersurface_crossing_actions_;
-        logg[experiment].info() << "Total number of particles removed on hypersurface: "
-                   << total_hypersurface_crossing_actions_;
+                                << interactions_total_ - wall_actions_total_ -
+                                       total_hypersurface_crossing_actions_;
+        logg[experiment].info()
+            << "Total number of particles removed on hypersurface: "
+            << total_hypersurface_crossing_actions_;
       }
     } else {
       logg[experiment].info() << hline;
-      logg[experiment].info() << "Time real: " << SystemClock::now() - time_start_;
+      logg[experiment].info()
+          << "Time real: " << SystemClock::now() - time_start_;
       logg[experiment].info() << "Final interaction number: "
-                 << interactions_total_ - wall_actions_total_;
+                              << interactions_total_ - wall_actions_total_;
     }
 
     // Check if there are unformed particles
@@ -1956,8 +1970,9 @@ void Experiment<Modus>::final_output(const int evt_num) {
       }
     }
     if (unformed_particles_count > 0) {
-      logg[experiment].warn("End time might be too small. ", unformed_particles_count,
-               " unformed particles were found at the end of the evolution.");
+      logg[experiment].warn(
+          "End time might be too small. ", unformed_particles_count,
+          " unformed particles were found at the end of the evolution.");
     }
   }
 

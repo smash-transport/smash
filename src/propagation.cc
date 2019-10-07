@@ -94,7 +94,8 @@ void expand_space_time(Particles *particles,
     FourVector expan_dist =
         FourVector(0.0, h * data.position().threevec() * dt);
 
-    logg[Propagation].debug("Particle ", data, " expansion motion: ", expan_dist);
+    logg[Propagation].debug("Particle ", data,
+                            " expansion motion: ", expan_dist);
     // New position and momentum
     FourVector position = data.position() + expan_dist;
     FourVector momentum = data.momentum() - delta_mom;
@@ -168,9 +169,10 @@ void update_momenta(
   // warn if the time step is too big
   constexpr double safety_factor = 0.1;
   if (dt > safety_factor * min_time_scale) {
-    logg[Propagation].warn() << "The time step size is too large for an accurate propagation "
-               << "with potentials. Maximum safe value: "
-               << safety_factor * min_time_scale << " fm/c.";
+    logg[Propagation].warn()
+        << "The time step size is too large for an accurate propagation "
+        << "with potentials. Maximum safe value: "
+        << safety_factor * min_time_scale << " fm/c.";
   }
 }
 

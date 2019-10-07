@@ -315,7 +315,6 @@ void BinaryOutputInitialConditions::at_eventend(const Particles &particles,
                                                 const int event_number,
                                                 double impact_parameter,
                                                 bool empty_event) {
-
   // Event end line
   const char fchar = 'f';
   std::fwrite(&fchar, sizeof(char), 1, file_.get());

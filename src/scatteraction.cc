@@ -48,7 +48,6 @@ void ScatterAction::add_collisions(CollisionBranchList pv) {
 }
 
 void ScatterAction::generate_final_state() {
-
   logg[Scatteraction].debug("Incoming particles: ", incoming_particles_);
 
   /* Decide for a particular final state. */
@@ -58,7 +57,8 @@ void ScatterAction::generate_final_state() {
   outgoing_particles_ = proc->particle_list();
   partial_cross_section_ = proc->weight();
 
-  logg[Scatteraction].debug("Chosen channel: ", process_type_, outgoing_particles_);
+  logg[Scatteraction].debug("Chosen channel: ", process_type_,
+                            outgoing_particles_);
 
   /* The production point of the new particles.  */
   FourVector middle_point = get_interaction_point();
@@ -179,8 +179,8 @@ double ScatterAction::transverse_distance_sqr() const {
       p_a.momentum().threevec() - p_b.momentum().threevec();
 
   logg[Scatteraction].debug("Particle ", incoming_particles_,
-            " position difference [fm]: ", pos_diff,
-            ", momentum difference [GeV]: ", mom_diff);
+                            " position difference [fm]: ", pos_diff,
+                            ", momentum difference [GeV]: ", mom_diff);
 
   const double dp2 = mom_diff.sqr();
   const double dr2 = pos_diff.sqr();
@@ -365,8 +365,10 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
   // final-state CM momentum
   const double p_f = pCM(kinetic_energy_cm, mass_a, mass_b);
   if (!(p_f > 0.0)) {
-    logg[Scatteraction].warn("Particle: ", p_a->pdgcode(), " radial momentum: ", p_f);
-    logg[Scatteraction].warn("Etot: ", kinetic_energy_cm, " m_a: ", mass_a, " m_b: ", mass_b);
+    logg[Scatteraction].warn("Particle: ", p_a->pdgcode(),
+                             " radial momentum: ", p_f);
+    logg[Scatteraction].warn("Etot: ", kinetic_energy_cm, " m_a: ", mass_a,
+                             " m_b: ", mass_b);
   }
   p_a->set_4momentum(mass_a, pscatt * p_f);
   p_b->set_4momentum(mass_b, -pscatt * p_f);
@@ -421,7 +423,6 @@ void ScatterAction::inelastic_scattering() {
 }
 
 void ScatterAction::resonance_formation() {
-
   if (outgoing_particles_.size() != 1) {
     std::string s =
         "resonance_formation: "
@@ -454,7 +455,7 @@ void ScatterAction::resonance_formation() {
   }
   /* this momentum is evaluated in the computational frame. */
   logg[Scatteraction].debug("Momentum of the new particle: ",
-            outgoing_particles_[0].momentum());
+                            outgoing_particles_[0].momentum());
 }
 
 /* This function will generate outgoing particles in computational frame

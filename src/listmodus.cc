@@ -187,10 +187,12 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
     if (particle.type().is_stable() &&
         std::abs(mass - particle.pole_mass()) > really_small) {
       if (n_warns_precision_ < max_warns_precision) {
-        logg[list].warn() << "Provided mass of " << particle.type().name() << " = "
-                   << mass << " [GeV] is inconsistent with SMASH value = "
-                   << particle.pole_mass() << ". Forcing E = sqrt(p^2 + m^2)"
-                   << ", where m is SMASH mass.";
+        logg[list].warn() << "Provided mass of " << particle.type().name()
+                          << " = " << mass
+                          << " [GeV] is inconsistent with SMASH value = "
+                          << particle.pole_mass()
+                          << ". Forcing E = sqrt(p^2 + m^2)"
+                          << ", where m is SMASH mass.";
         n_warns_precision_++;
       } else if (n_warns_precision_ == max_warns_precision) {
         logg[list].warn(
@@ -204,10 +206,11 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
     // On-shell condition consistency check
     if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
       if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
-        logg[list].warn() << "Provided 4-momentum " << particle.momentum() << " and "
-                   << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
-                   << " This may originate from the lack of numerical"
-                   << " precision in the input. Setting E to sqrt(p^2 + m^2).";
+        logg[list].warn()
+            << "Provided 4-momentum " << particle.momentum() << " and "
+            << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
+            << " This may originate from the lack of numerical"
+            << " precision in the input. Setting E to sqrt(p^2 + m^2).";
         n_warns_mass_consistency_++;
       } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
         logg[list].warn(
@@ -223,7 +226,7 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
     particle.set_cross_section_scaling_factor(1.0);
   } catch (ParticleType::PdgNotFoundFailure &) {
     logg[list].warn() << "SMASH does not recognize pdg code " << pdgcode
-               << " loaded from file. This particle will be ignored.\n";
+                      << " loaded from file. This particle will be ignored.\n";
   }
 }
 
@@ -247,7 +250,8 @@ double ListModus::initial_conditions(Particles *particles,
                              line));
     }
     PdgCode pdgcode(pdg_string);
-    logg[list].debug("Particle ", pdgcode, " (x,y,z)= (", x, ", ", y, ", ", z, ")");
+    logg[list].debug("Particle ", pdgcode, " (x,y,z)= (", x, ", ", y, ", ", z,
+                     ")");
 
     // Charge consistency check
     if (pdgcode.charge() != charge) {
@@ -278,14 +282,14 @@ bf::path ListModus::file_path_(const int file_id) {
 
   if (!bf::exists(fpath)) {
     logg[list].fatal() << fpath.filename().native() << " does not exist! \n"
-                << "\n Usage of smash with external particle lists:\n"
-                << "1. Put the external particle lists in file \n"
-                << "File_Directory/File_Prefix{id} where {id} "
-                << "traversal [Shift_Id, Nevent-1]\n"
-                << "2. Particles info: t x y z mass p0 px py pz"
-                << " pdg ID charge\n"
-                << "in units of: fm fm fm fm GeV GeV GeV GeV GeV"
-                << " none none none\n";
+                       << "\n Usage of smash with external particle lists:\n"
+                       << "1. Put the external particle lists in file \n"
+                       << "File_Directory/File_Prefix{id} where {id} "
+                       << "traversal [Shift_Id, Nevent-1]\n"
+                       << "2. Particles info: t x y z mass p0 px py pz"
+                       << " pdg ID charge\n"
+                       << "in units of: fm fm fm fm GeV GeV GeV GeV GeV"
+                       << " none none none\n";
     throw std::runtime_error("External particle list does not exist!");
   }
 
@@ -293,7 +297,6 @@ bf::path ListModus::file_path_(const int file_id) {
 }
 
 std::string ListModus::next_event_() {
-
   const bf::path fpath = file_path_(file_id_);
   bf::ifstream ifs{fpath};
   ifs.seekg(last_read_position_);
@@ -355,7 +358,8 @@ bool ListModus::file_has_events_(bf::path filepath,
   }
 
   if (!ifs.good()) {
-    logg[list].fatal() << "Error while reading " << filepath.filename().native();
+    logg[list].fatal() << "Error while reading "
+                       << filepath.filename().native();
     throw std::runtime_error("Error while reading external particle list");
   }
 

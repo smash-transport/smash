@@ -99,7 +99,6 @@ double PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
 }
 
 void PauliBlocker::init_weights_analytical() {
-
   const double pi = M_PI;
   const double sqrt2 = std::sqrt(2.);
   const double sqrt_2pi = std::sqrt(2. * pi);

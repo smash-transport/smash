@@ -25,9 +25,7 @@ void set_default_loglevel(einhard::LogLevel level) {
   global_default_loglevel = level;
 }
 
-einhard::Logger<> &retrieve_logger_impl(int id) {
-  return logg[id];
-}
+einhard::Logger<> &retrieve_logger_impl(int id) { return logg[id]; }
 
 /**
  * \internal

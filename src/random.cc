@@ -34,18 +34,21 @@ random::BesselSampler::BesselSampler(const double poisson_mean1,
       N_is_positive_(fixed_difference >= 0) {
   assert(poisson_mean1 >= 0.0);
   assert(poisson_mean2 >= 0.0);
-  logg[GrandcanThermalizer].debug("Bessel sampler", ": Poisson mean N1 = ", poisson_mean1,
-            ", Poisson mean N2 = ", poisson_mean2, ", N1 - N2 fixed to ",
-            fixed_difference);
+  logg[GrandcanThermalizer].debug("Bessel sampler",
+                                  ": Poisson mean N1 = ", poisson_mean1,
+                                  ", Poisson mean N2 = ", poisson_mean2,
+                                  ", N1 - N2 fixed to ", fixed_difference);
   m_ = 0.5 * (std::sqrt(a_ * a_ + N_ * N_) - N_);
   if (m_ >= m_switch_method_) {
     mu_ = 0.5 * a_ * r_(N_, a_);
     const double mean_sqr = mu_ * (1.0 + 0.5 * a_ * r_(N_ + 1, a_));
     sigma_ = std::sqrt(mean_sqr - mu_ * mu_);
-    logg[GrandcanThermalizer].debug("m = ", m_, " -> using gaussian sampling with mean = ", mu_,
-              ", sigma = ", sigma_);
+    logg[GrandcanThermalizer].debug(
+        "m = ", m_, " -> using gaussian sampling with mean = ", mu_,
+        ", sigma = ", sigma_);
   } else {
-    logg[GrandcanThermalizer].debug("m = ", m_, " -> using direct sampling method");
+    logg[GrandcanThermalizer].debug("m = ", m_,
+                                    " -> using direct sampling method");
     std::vector<double> probabilities;
     double wi = 1.0, sum = 0.0;
     int i = 0;

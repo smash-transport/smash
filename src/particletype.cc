@@ -37,7 +37,6 @@ namespace smash {
 inline constexpr int particletype = LogArea::ParticleType::id;
 inline constexpr int Resonances = LogArea::ParticleType::id;
 
-
 namespace {
 /// Global pointer to the Particle Type list.
 const ParticleTypeList *all_particle_types = nullptr;
@@ -279,7 +278,8 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
         full_name += chargestr(pdgcode[i].charge());
       }
       type_list.emplace_back(full_name, mass, width, parity, pdgcode[i]);
-      logg[particletype].debug() << "Setting     particle type: " << type_list.back();
+      logg[particletype].debug()
+          << "Setting     particle type: " << type_list.back();
       if (pdgcode[i].has_antiparticle()) {
         /* add corresponding antiparticle */
         PdgCode anti = pdgcode[i].get_antiparticle();
@@ -287,7 +287,8 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
         const auto anti_parity = (anti.spin() % 2 == 0) ? parity : -parity;
         full_name = antiname(full_name, pdgcode[i]);
         type_list.emplace_back(full_name, mass, width, anti_parity, anti);
-        logg[particletype].debug() << "Setting antiparticle type: " << type_list.back();
+        logg[particletype].debug()
+            << "Setting antiparticle type: " << type_list.back();
       }
     }
   }
@@ -662,9 +663,10 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
 
     // check that we are using the proper maximum value
     if (val > max) {
-      logg[Resonances].debug("maximum is being increased in sample_resonance_mass: ",
-                this->max_factor1_, " ", val / max, " ", this->pdgcode(), " ",
-                mass_stable, " ", cms_energy, " ", mass_res);
+      logg[Resonances].debug(
+          "maximum is being increased in sample_resonance_mass: ",
+          this->max_factor1_, " ", val / max, " ", this->pdgcode(), " ",
+          mass_stable, " ", cms_energy, " ", mass_res);
       this->max_factor1_ *= val / max;
     } else {
       break;  // maximum ok, exit loop
@@ -713,9 +715,10 @@ std::pair<double, double> ParticleType::sample_resonance_masses(
     } while (val < random::uniform(0., max));
 
     if (val > max) {
-      logg[Resonances].debug("maximum is being increased in sample_resonance_masses: ",
-                t1.max_factor2_, " ", val / max, " ", t1.pdgcode(), " ",
-                t2.pdgcode(), " ", cms_energy, " ", mass_1, " ", mass_2);
+      logg[Resonances].debug(
+          "maximum is being increased in sample_resonance_masses: ",
+          t1.max_factor2_, " ", val / max, " ", t1.pdgcode(), " ", t2.pdgcode(),
+          " ", cms_energy, " ", mass_1, " ", mass_2);
       t1.max_factor2_ *= val / max;
     } else {
       break;  // maximum ok, exit loop

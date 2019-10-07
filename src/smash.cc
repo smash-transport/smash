@@ -529,20 +529,22 @@ int main(int argc, char *argv[]) {
      * Hovever, warn in case of conflict.
      */
     if (configuration.has_value({"particles"}) && particles) {
-      logg[Main].warn("Ambiguity: particles from external file ", particles,
-               " requested, but there is also particle list in the config."
-               " Using particles from ",
-               particles);
+      logg[Main].warn(
+          "Ambiguity: particles from external file ", particles,
+          " requested, but there is also particle list in the config."
+          " Using particles from ",
+          particles);
     }
     if (!configuration.has_value({"particles"}) || particles) {
       configuration["particles"] = particles_and_decays.first;
     }
 
     if (configuration.has_value({"decaymodes"}) && decaymodes) {
-      logg[Main].warn("Ambiguity: decaymodes from external file ", decaymodes,
-               " requested, but there is also decaymodes list in the config."
-               " Using decaymodes from",
-               decaymodes);
+      logg[Main].warn(
+          "Ambiguity: decaymodes from external file ", decaymodes,
+          " requested, but there is also decaymodes list in the config."
+          " Using decaymodes from",
+          decaymodes);
     }
     if (!configuration.has_value({"decaymodes"}) || decaymodes) {
       configuration["decaymodes"] = particles_and_decays.second;
@@ -713,7 +715,8 @@ int main(int argc, char *argv[]) {
     logg[Main].trace(source_location, " run the Experiment");
     experiment->run();
   } catch (std::exception &e) {
-    logg[Main].fatal() << "SMASH failed with the following error:\n" << e.what();
+    logg[Main].fatal() << "SMASH failed with the following error:\n"
+                       << e.what();
     return EXIT_FAILURE;
   }
 

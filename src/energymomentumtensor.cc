@@ -85,10 +85,10 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   if (u_sqr > really_small) {
     u /= std::sqrt(u_sqr);
   } else {
-    logg[Tmn].error("Landau frame is not defined.", " Eigen vector", u, " of ", A,
-              " is not time-like and",
-              " cannot be 4-velocity. This may happen if energy-momentum",
-              " tensor was constructed for a massless particle.");
+    logg[Tmn].error("Landau frame is not defined.", " Eigen vector", u, " of ",
+                    A, " is not time-like and",
+                    " cannot be 4-velocity. This may happen if energy-momentum",
+                    " tensor was constructed for a massless particle.");
     u = FourVector(1., 0., 0., 0.);
   }
   return u;

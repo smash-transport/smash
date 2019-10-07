@@ -354,10 +354,10 @@ class Action {
     }
     /* Should never get here. */
     logg[Act].fatal(source_location,
-              "Problem in choose_channel: ", subprocesses.size(), " ",
-              weight_sum, " ", total_weight, " ",
-              //          random_weight, "\n", *this);
-              random_weight, "\n");
+                    "Problem in choose_channel: ", subprocesses.size(), " ",
+                    weight_sum, " ", total_weight, " ",
+                    //          random_weight, "\n", *this);
+                    random_weight, "\n");
     std::abort();
   }
 

@@ -379,10 +379,10 @@ double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
             ptype.spectral_function_simple(m);
       } while (q < random::uniform(0., max_ratio));
       if (q > max_ratio) {
-        logg[Resonances].warn(ptype.name(), " - maximum increased in",
-                 " sample_mass_thermal from ", max_ratio, " to ", q,
-                 ", mass = ", m,
-                 " previously assumed maximum at m = ", m_where_max);
+        logg[Resonances].warn(
+            ptype.name(), " - maximum increased in",
+            " sample_mass_thermal from ", max_ratio, " to ", q, ", mass = ", m,
+            " previously assumed maximum at m = ", m_where_max);
         max_ratio = q;
         m_where_max = m;
       } else {
@@ -542,8 +542,8 @@ std::array<double, 3> HadronGasEos::solve_eos(
                       << ", init. approx.: " << initial_approximation[0] << " "
                       << initial_approximation[1] << " "
                       << initial_approximation[2] << std::endl;
-    logg[Resonances].warn(gsl_strerror(residual_status) + solver_parameters.str() +
-             print_solver_state(iter));
+    logg[Resonances].warn(gsl_strerror(residual_status) +
+                          solver_parameters.str() + print_solver_state(iter));
   }
 
   return {gsl_vector_get(solver_->x, 0), gsl_vector_get(solver_->x, 1),

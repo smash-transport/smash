@@ -47,7 +47,8 @@ bool Action::is_pauli_blocked(const Particles &particles,
           p_bl.phasespace_dens(p.position().threevec(), p.momentum().threevec(),
                                particles, p.pdgcode(), incoming_particles_);
       if (f > random::uniform(0., 1.)) {
-        logg[PauliBlocking].debug("Action ", *this, " is pauli-blocked with f = ", f);
+        logg[PauliBlocking].debug("Action ", *this,
+                                  " is pauli-blocked with f = ", f);
         return true;
       }
     }
@@ -181,7 +182,6 @@ std::pair<double, double> Action::sample_masses(
 
 void Action::sample_angles(std::pair<double, double> masses,
                            const double kinetic_energy_cm) {
-
   ParticleData *p_a = &outgoing_particles_[0];
   ParticleData *p_b = &outgoing_particles_[1];
 
@@ -189,7 +189,7 @@ void Action::sample_angles(std::pair<double, double> masses,
   if (!(pcm > 0.0)) {
     logg[Act].warn("Particle: ", p_a->pdgcode(), " radial momentum: ", pcm);
     logg[Act].warn("Ektot: ", kinetic_energy_cm, " m_a: ", masses.first,
-             " m_b: ", masses.second);
+                   " m_b: ", masses.second);
   }
   /* Here we assume an isotropic angular distribution. */
   Angles phitheta;

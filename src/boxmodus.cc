@@ -275,7 +275,7 @@ double BoxModus::initial_conditions(Particles *particles,
     }
     phitheta.distribute_isotropically();
     logg[Box].debug(data.type().name(), "(id ", data.id(), ") radial momentum ",
-              momentum_radial, ", direction", phitheta);
+                    momentum_radial, ", direction", phitheta);
     data.set_4momentum(mass, phitheta.threevec() * momentum_radial);
     momentum_total += data.momentum();
 
