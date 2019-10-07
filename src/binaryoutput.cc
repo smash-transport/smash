@@ -20,6 +20,8 @@
 
 namespace smash {
 
+static constexpr int HyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
+
 /*!\Userguide
  * \page format_binary_ Binary Format
  * SMASH supports a binary output version similar to the OSCAR 2013 standard.
@@ -313,7 +315,6 @@ void BinaryOutputInitialConditions::at_eventend(const Particles &particles,
                                                 const int event_number,
                                                 double impact_parameter,
                                                 bool empty_event) {
-  const auto &log = logger<LogArea::HyperSurfaceCrossing>();
 
   // Event end line
   const char fchar = 'f';
@@ -329,7 +330,7 @@ void BinaryOutputInitialConditions::at_eventend(const Particles &particles,
   // If the runtime is too short some particles might not yet have
   // reached the hypersurface. Warning is printed.
   if (particles.size() != 0) {
-    log.warn(
+    logg[HyperSurfaceCrossing].warn(
         "End time might be too small for initial conditions output. "
         "Hypersurface has not yet been crossed by ",
         particles.size(), " particle(s).");

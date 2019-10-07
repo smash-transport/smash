@@ -63,6 +63,7 @@ static std::ostream &operator<<(std::ostream &out, const std::array<T, N> &a) {
 }  // namespace std
 
 namespace smash {
+inline constexpr int grid = LogArea::Grid::id;
 
 ////////////////////////////////////////////////////////////////////////////////
 // GridBase
@@ -189,7 +190,6 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                  (length_[1] / number_of_cells_[1]) *
                  (length_[2] / number_of_cells_[2]);
 
-  const auto &log = logger<LogArea::Grid>();
   if (O == GridOptions::Normal &&
       all_of(number_of_cells_, [](SizeType n) { return n <= 2; })) {
     // dilute limit:
@@ -198,7 +198,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
     // fall back to not using the grid at all
     // For a grid with periodic boundaries the situation is different and we
     // never want to have a grid smaller than 2x2x2.
-    log.debug("There would only be ", number_of_cells_,
+    logg[grid].debug("There would only be ", number_of_cells_,
               " cells. Therefore the Grid falls back to a single cell / "
               "particle list.");
     number_of_cells_ = {1, 1, 1};
@@ -212,7 +212,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                  });  // filter out the particles that can not interact
   } else {
     // construct a normal grid
-    log.debug("min: ", min_position, "\nlength: ", length_,
+    logg[grid].debug("min: ", min_position, "\nlength: ", length_,
               "\ncell_volume: ", cell_volume_, "\ncells: ", number_of_cells_,
               "\nindex_factor: ", index_factor);
 
@@ -237,7 +237,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
         const auto idx = cell_index_for(p);
 #ifndef NDEBUG
         if (idx >= SizeType(cells_.size())) {
-          log.fatal(
+          logg[grid].fatal(
               source_location,
               "\nan out-of-bounds access would be necessary for the "
               "particle ",
@@ -253,7 +253,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
     }
   }
 
-  log.debug(cells_);
+  logg[grid].debug(cells_);
 }
 
 template <GridOptions Options>
@@ -340,7 +340,6 @@ void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
     const std::function<void(const ParticleList &)> &search_cell_callback,
     const std::function<void(const ParticleList &, const ParticleList &)>
         &neighbor_cell_callback) const {
-  const auto &log = logger<LogArea::Grid>();
 
   std::array<SizeType, 3> search_index;
   SizeType &x = search_index[0];
@@ -441,7 +440,7 @@ void Grid<GridOptions::PeriodicBoundaries>::iterate_cells(
               }
 
               if (wrap_vector != current_wrap_vector) {
-                log.debug("translating search cell by ",
+                logg[grid].debug("translating search cell by ",
                           wrap_vector - current_wrap_vector);
                 for_each(search, [&](ParticleData &p) {
                   p = p.translated(wrap_vector - current_wrap_vector);

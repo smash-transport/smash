@@ -318,6 +318,13 @@ FormattingHelper<T> format(const T &value, const char *unit, int width = -1,
                            int precision = -1) {
   return {value, width, precision, unit};
 }
+
+/**
+ * An array that stores all pre-configured Logger objects. The objects can be
+ * accessed via the logger function.
+ */
+static std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value>
+    logg;
 }  // namespace smash
 
 namespace YAML {

@@ -22,6 +22,7 @@
 #include "particledata.h"
 
 namespace smash {
+inline constexpr int pythia = LogArea::Pythia::id;
 
 // \todo Sangwook: make file (processstring) and class (StringProcess) name
 // consistent
@@ -274,12 +275,11 @@ class StringProcess {
    * \see smash::maximum_rndm_seed_in_pythia
    */
   void init_pythia_hadron_rndm() {
-    const auto &log = logger<LogArea::Pythia>();
     const int seed_new =
         random::uniform_int(1, maximum_rndm_seed_in_pythia);
 
     pythia_hadron_->rndm.init(seed_new);
-    log.debug("pythia_hadron_ : rndm is initialized with seed ", seed_new);
+    logg[pythia].debug("pythia_hadron_ : rndm is initialized with seed ", seed_new);
   }
 
   // clang-format on

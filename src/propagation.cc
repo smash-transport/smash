@@ -16,6 +16,7 @@
 #include "smash/spheremodus.h"
 
 namespace smash {
+inline constexpr int Propagation = LogArea::Propagation::id;
 
 double calc_hubble(double time, const ExpansionProperties &metric) {
   double h;  // Hubble parameter
@@ -42,7 +43,6 @@ double calc_hubble(double time, const ExpansionProperties &metric) {
 
 double propagate_straight_line(Particles *particles, double to_time,
                                const std::vector<FourVector> &beam_momentum) {
-  const auto &log = logger<LogArea::Propagation>();
   bool negative_dt_error = false;
   double dt = 0.0;
   for (ParticleData &data : *particles) {
@@ -51,7 +51,7 @@ double propagate_straight_line(Particles *particles, double to_time,
     if (dt < 0.0 && !negative_dt_error) {
       // Print error message once, not for every particle
       negative_dt_error = true;
-      log.error("propagate_straight_line - negative dt = ", dt);
+      logg[Propagation].error("propagate_straight_line - negative dt = ", dt);
     }
     assert(dt >= 0.0);
     /* "Frozen Fermi motion": Fermi momenta are only used for collisions,
@@ -75,7 +75,7 @@ double propagate_straight_line(Particles *particles, double to_time,
       v = data.velocity();
     }
     const FourVector distance = FourVector(0.0, v * dt);
-    log.debug("Particle ", data, " motion: ", distance);
+    logg[Propagation].debug("Particle ", data, " motion: ", distance);
     FourVector position = data.position() + distance;
     position.set_x0(to_time);
     data.set_4position(position);
@@ -86,7 +86,6 @@ double propagate_straight_line(Particles *particles, double to_time,
 void expand_space_time(Particles *particles,
                        const ExperimentParameters &parameters,
                        const ExpansionProperties &metric) {
-  const auto &log = logger<LogArea::Propagation>();
   const double dt = parameters.labclock.timestep_duration();
   for (ParticleData &data : *particles) {
     // Momentum and position modification to ensure appropriate expansion
@@ -95,7 +94,7 @@ void expand_space_time(Particles *particles,
     FourVector expan_dist =
         FourVector(0.0, h * data.position().threevec() * dt);
 
-    log.debug("Particle ", data, " expansion motion: ", expan_dist);
+    logg[Propagation].debug("Particle ", data, " expansion motion: ", expan_dist);
     // New position and momentum
     FourVector position = data.position() + expan_dist;
     FourVector momentum = data.momentum() - delta_mom;
@@ -115,7 +114,6 @@ void update_momenta(
   // Copy particles before propagation to calculate potentials from them
   const ParticleList plist = particles->copy_to_vector();
 
-  const auto &log = logger<LogArea::Propagation>();
   bool possibly_use_lattice =
       (pot.use_skyrme() ? (FB_lat != nullptr) : true) &&
       (pot.use_symmetry() ? (FI3_lat != nullptr) : true);
@@ -152,7 +150,7 @@ void update_momenta(
             (FB.first + data.momentum().velocity().CrossProduct(FB.second)) +
         scale.second * data.type().isospin3_rel() *
             (FI3.first + data.momentum().velocity().CrossProduct(FI3.second));
-    log.debug("Update momenta: F [GeV/fm] = ", Force);
+    logg[Propagation].debug("Update momenta: F [GeV/fm] = ", Force);
     data.set_4momentum(data.effective_mass(),
                        data.momentum().threevec() + Force * dt);
 
@@ -170,7 +168,7 @@ void update_momenta(
   // warn if the time step is too big
   constexpr double safety_factor = 0.1;
   if (dt > safety_factor * min_time_scale) {
-    log.warn() << "The time step size is too large for an accurate propagation "
+    logg[Propagation].warn() << "The time step size is too large for an accurate propagation "
                << "with potentials. Maximum safe value: "
                << safety_factor * min_time_scale << " fm/c.";
   }

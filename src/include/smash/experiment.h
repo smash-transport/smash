@@ -73,6 +73,7 @@ static ostream &operator<<(ostream &out,
 }  // namespace std
 
 namespace smash {
+inline constexpr int experiment = LogArea::Experiment::id;
 
 /**
  * Non-template interface to Experiment<Modus>.
@@ -565,8 +566,7 @@ void Experiment<Modus>::create_output(const std::string &format,
                                       const std::string &content,
                                       const bf::path &output_path,
                                       const OutputParameters &out_par) {
-  const auto &log = logger<LogArea::Experiment>();
-  log.info() << "Adding output " << content << " of format " << format
+  logg[experiment].info() << "Adding output " << content << " of format " << format
              << std::endl;
 
   if (format == "VTK" && content == "Particles") {
@@ -582,7 +582,7 @@ void Experiment<Modus>::create_output(const std::string &format,
           make_unique<RootOutput>(output_path, content, out_par));
     }
 #else
-    log.error("Root output requested, but Root support not compiled in");
+    logg[experiment].error("Root output requested, but Root support not compiled in");
 #endif
   } else if (format == "Binary") {
     if (content == "Collisions" || content == "Dileptons" ||
@@ -610,7 +610,7 @@ void Experiment<Modus>::create_output(const std::string &format,
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
   } else {
-    log.error() << "Unknown combination of format (" << format
+    logg[experiment].error() << "Unknown combination of format (" << format
                 << ") and content (" << content << "). Fix the config.";
   }
 }
@@ -772,8 +772,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       IC_output_switch_(config.has_value({"Output", "Initial_Conditions"})),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
-  const auto &log = logger<LogArea::Experiment>();
-  log.info() << *this;
+  logg[experiment].info() << *this;
 
   // create finders
   if (dileptons_switch_) {
@@ -823,7 +822,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
 
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
-    log.info() << "Pauli blocking is ON.";
+    logg[experiment].info() << "Pauli blocking is ON.";
     pauli_blocker_ = make_unique<PauliBlocker>(
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
   }
@@ -864,7 +863,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
 
   // create outputs
-  log.trace(source_location, " create OutputInterface objects");
+  logg[experiment].trace(source_location, " create OutputInterface objects");
 
   auto output_conf = config["Output"];
   /*!\Userguide
@@ -1145,7 +1144,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \ref format_root, is preserved.
    */
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
-  log.debug() << "Density type printed to headers: " << dens_type_;
+  logg[experiment].debug() << "Density type printed to headers: " << dens_type_;
 
   const OutputParameters output_parameters(std::move(output_conf));
 
@@ -1170,17 +1169,17 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       config.take({"Modi", "Collider", "Fermi_Motion"}, FermiMotion::Off);
   if (config.has_value({"Potentials"})) {
     if (time_step_mode_ == TimeStepMode::None) {
-      log.error() << "Potentials only work with time steps!";
+      logg[experiment].error() << "Potentials only work with time steps!";
       throw std::invalid_argument("Can't use potentials without time steps!");
     }
     if (motion == FermiMotion::Frozen) {
-      log.error() << "Potentials don't work with frozen Fermi momenta! "
+      logg[experiment].error() << "Potentials don't work with frozen Fermi momenta! "
                      "Use normal Fermi motion instead.";
       throw std::invalid_argument(
           "Can't use potentials "
           "with frozen Fermi momenta!");
     }
-    log.info() << "Potentials are ON. Timestep is "
+    logg[experiment].info() << "Potentials are ON. Timestep is "
                << parameters_.labclock.timestep_duration();
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
@@ -1297,7 +1296,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                                                     LatticeUpdate::AtOutput);
     }
   } else if (printout_lattice_td_) {
-    log.error(
+    logg[experiment].error(
         "If you want Thermodynamic VTK output, configure a lattice for it.");
   }
 
@@ -1324,10 +1323,9 @@ const std::string hline(67, '-');
 
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event() {
-  const auto &log = logger<LogArea::Experiment>();
 
   random::set_seed(seed_);
-  log.info() << "random number seed: " << seed_;
+  logg[experiment].info() << "random number seed: " << seed_;
   /* Set seed for the next event. It has to be positive, so it can be entered
    * in the config.
    *
@@ -1379,9 +1377,9 @@ void Experiment<Modus>::initialize_new_event() {
   Clock output_clock(zeroth_output_time, dt_output);
   parameters_.outputclock = std::move(output_clock);
 
-  log.debug("Lab clock: t_start = ", parameters_.labclock.current_time(),
+  logg[experiment].debug("Lab clock: t_start = ", parameters_.labclock.current_time(),
             ", dt = ", parameters_.labclock.timestep_duration());
-  log.debug("Output clock: t_start = ", parameters_.outputclock.current_time(),
+  logg[experiment].debug("Output clock: t_start = ", parameters_.outputclock.current_time(),
             ", dt = ", parameters_.outputclock.timestep_duration());
 
   /* Save the initial conserved quantum numbers and total momentum in
@@ -1396,24 +1394,23 @@ void Experiment<Modus>::initialize_new_event() {
   total_hypersurface_crossing_actions_ = 0;
   total_energy_removed_ = 0.0;
   // Print output headers
-  log.info() << hline;
-  log.info() << "Time [fm]   Ediff [GeV]    Scatt.|Decays   "
+  logg[experiment].info() << hline;
+  logg[experiment].info() << "Time [fm]   Ediff [GeV]    Scatt.|Decays   "
                 "Particles         Timing";
-  log.info() << hline;
+  logg[experiment].info() << hline;
 }
 
 template <typename Modus>
 template <typename Container>
 bool Experiment<Modus>::perform_action(
     Action &action, const Container &particles_before_actions) {
-  const auto &log = logger<LogArea::Experiment>();
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles_)) {
-    log.debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
+    logg[experiment].debug(~einhard::DRed(), "✘ ", action, " (discarded: invalid)");
     return false;
   }
   action.generate_final_state();
-  log.debug("Process Type is: ", action.get_type());
+  logg[experiment].debug("Process Type is: ", action.get_type());
   if (pauli_blocker_ && action.is_pauli_blocked(particles_, *pauli_blocker_)) {
     total_pauli_blocked_++;
     return false;
@@ -1522,7 +1519,7 @@ bool Experiment<Modus>::perform_action(
 
     photon_act.perform_photons(outputs_);
   }
-  log.debug(~einhard::Green(), "✔ ", action);
+  logg[experiment].debug(~einhard::Green(), "✔ ", action);
   return true;
 }
 
@@ -1555,9 +1552,7 @@ template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
   Actions actions;
 
-  const auto &log = logger<LogArea::Experiment>();
-
-  log.info() << format_measurements(particles_, 0u, conserved_initial_,
+  logg[experiment].info() << format_measurements(particles_, 0u, conserved_initial_,
                                     time_start_,
                                     parameters_.labclock.current_time());
 
@@ -1565,7 +1560,7 @@ void Experiment<Modus>::run_time_evolution() {
     const double t = parameters_.labclock.current_time();
     const double dt =
         std::min(parameters_.labclock.timestep_duration(), end_time_ - t);
-    log.debug("Timestepless propagation for next ", dt, " fm/c.");
+    logg[experiment].debug("Timestepless propagation for next ", dt, " fm/c.");
 
     // Perform forced thermalization if required
     if (thermalizer_ &&
@@ -1585,7 +1580,7 @@ void Experiment<Modus>::run_time_evolution() {
     if (particles_.size() > 0 && action_finders_.size() > 0) {
       /* (1.a) Create grid. */
       double min_cell_length = compute_min_cell_length(dt);
-      log.debug("Creating grid with minimal cell length ", min_cell_length);
+      logg[experiment].debug("Creating grid with minimal cell length ", min_cell_length);
       const auto &grid =
           use_grid_ ? modus_.create_grid(particles_, min_cell_length, dt)
                     : modus_.create_grid(particles_, min_cell_length, dt,
@@ -1641,14 +1636,14 @@ void Experiment<Modus>::run_time_evolution() {
         metric_.mode_ == ExpansionMode::NoExpansion && !IC_output_switch_) {
       std::string err_msg = conserved_initial_.report_deviations(particles_);
       if (!err_msg.empty()) {
-        log.error() << err_msg;
+        logg[experiment].error() << err_msg;
         throw std::runtime_error("Violation of conserved quantities!");
       }
     }
   }
 
   if (pauli_blocker_) {
-    log.info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked_,
+    logg[experiment].info("Interactions: Pauli-blocked/performed = ", total_pauli_blocked_,
              "/", interactions_total_ - wall_actions_total_);
   }
 }
@@ -1680,12 +1675,11 @@ inline void check_interactions_total(uint64_t interactions_total) {
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
-  const auto &log = logger<LogArea::Experiment>();
 
   const double start_time = parameters_.labclock.current_time();
   const double end_time = std::min(parameters_.labclock.next_time(), end_time_);
   double time_left = end_time - start_time;
-  log.debug("Timestepless propagation: ", "Actions size = ", actions.size(),
+  logg[experiment].debug("Timestepless propagation: ", "Actions size = ", actions.size(),
             ", start time = ", start_time, ", end time = ", end_time);
 
   // iterate over all actions
@@ -1693,24 +1687,24 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     // get next action
     ActionPtr act = actions.pop();
     if (!act->is_valid(particles_)) {
-      log.debug(~einhard::DRed(), "✘ ", act, " (discarded: invalid)");
+      logg[experiment].debug(~einhard::DRed(), "✘ ", act, " (discarded: invalid)");
       continue;
     }
     if (act->time_of_execution() > end_time) {
-      log.error(act, " scheduled later than end time: t_action[fm/c] = ",
+      logg[experiment].error(act, " scheduled later than end time: t_action[fm/c] = ",
                 act->time_of_execution(), ", t_end[fm/c] = ", end_time);
     }
-    log.debug(~einhard::Green(), "✔ ", act);
+    logg[experiment].debug(~einhard::Green(), "✔ ", act);
 
     while (next_output_time() <= act->time_of_execution()) {
-      log.debug("Propagating until output time: ", next_output_time());
+      logg[experiment].debug("Propagating until output time: ", next_output_time());
       propagate_and_shine(next_output_time());
       ++parameters_.outputclock;
       intermediate_output();
     }
 
     /* (1) Propagate to the next action. */
-    log.debug("Propagating until next action ", act,
+    logg[experiment].debug("Propagating until next action ", act,
               ", action time = ", act->time_of_execution());
     propagate_and_shine(act->time_of_execution());
 
@@ -1747,7 +1741,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
   }
 
   while (next_output_time() <= end_time) {
-    log.debug("Propagating until output time: ", next_output_time());
+    logg[experiment].debug("Propagating until output time: ", next_output_time());
     propagate_and_shine(next_output_time());
     ++parameters_.outputclock;
     // Avoid duplicating printout at event end time
@@ -1755,13 +1749,12 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
       intermediate_output();
     }
   }
-  log.debug("Propagating to time ", end_time);
+  logg[experiment].debug("Propagating to time ", end_time);
   propagate_and_shine(end_time);
 }
 
 template <typename Modus>
 void Experiment<Modus>::intermediate_output() {
-  const auto &log = logger<LogArea::Experiment>();
   const uint64_t wall_actions_this_interval =
       wall_actions_total_ - previous_wall_actions_total_;
   previous_wall_actions_total_ = wall_actions_total_;
@@ -1769,7 +1762,7 @@ void Experiment<Modus>::intermediate_output() {
                                               previous_interactions_total_ -
                                               wall_actions_this_interval;
   previous_interactions_total_ = interactions_total_;
-  log.info() << format_measurements(particles_, interactions_this_interval,
+  logg[experiment].info() << format_measurements(particles_, interactions_this_interval,
                                     conserved_initial_, time_start_,
                                     parameters_.outputclock.current_time());
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
@@ -1916,7 +1909,6 @@ void Experiment<Modus>::do_final_decays() {
 
 template <typename Modus>
 void Experiment<Modus>::final_output(const int evt_num) {
-  const auto &log = logger<LogArea::Experiment>();
   /* make sure the experiment actually ran (note: we should compare this
    * to the start time, but we don't know that. Therefore, we check that
    * the time is positive, which should heuristically be the same). */
@@ -1926,7 +1918,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
     const uint64_t interactions_this_interval = interactions_total_ -
                                                 previous_interactions_total_ -
                                                 wall_actions_this_interval;
-    log.info() << format_measurements(particles_, interactions_this_interval,
+    logg[experiment].info() << format_measurements(particles_, interactions_this_interval,
                                       conserved_initial_, time_start_,
                                       parameters_.outputclock.current_time());
     if (IC_output_switch_ && (particles_.size() == 0)) {
@@ -1941,18 +1933,18 @@ void Experiment<Modus>::final_output(const int evt_num) {
             "E_remain = " +
             std::to_string(remaining_energy) + " [GeV]");
       } else {
-        log.info() << hline;
-        log.info() << "Time real: " << SystemClock::now() - time_start_;
-        log.info() << "Interactions before reaching hypersurface: "
+        logg[experiment].info() << hline;
+        logg[experiment].info() << "Time real: " << SystemClock::now() - time_start_;
+        logg[experiment].info() << "Interactions before reaching hypersurface: "
                    << interactions_total_ - wall_actions_total_ -
                           total_hypersurface_crossing_actions_;
-        log.info() << "Total number of particles removed on hypersurface: "
+        logg[experiment].info() << "Total number of particles removed on hypersurface: "
                    << total_hypersurface_crossing_actions_;
       }
     } else {
-      log.info() << hline;
-      log.info() << "Time real: " << SystemClock::now() - time_start_;
-      log.info() << "Final interaction number: "
+      logg[experiment].info() << hline;
+      logg[experiment].info() << "Time real: " << SystemClock::now() - time_start_;
+      logg[experiment].info() << "Final interaction number: "
                  << interactions_total_ - wall_actions_total_;
     }
 
@@ -1964,7 +1956,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
       }
     }
     if (unformed_particles_count > 0) {
-      log.warn("End time might be too small. ", unformed_particles_count,
+      logg[experiment].warn("End time might be too small. ", unformed_particles_count,
                " unformed particles were found at the end of the evolution.");
     }
   }

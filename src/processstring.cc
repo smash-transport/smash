@@ -16,6 +16,7 @@
 #include "smash/random.h"
 
 namespace smash {
+inline constexpr int Output = LogArea::Output::id;
 
 StringProcess::StringProcess(
     double string_tension, double time_formation, double gluon_beta,
@@ -510,11 +511,10 @@ bool StringProcess::next_NDiffSoft() {
 
 // hard non-diffractive
 bool StringProcess::next_NDiffHard() {
-  const auto &log = logger<LogArea::Pythia>();
   NpartFinal_ = 0;
   final_state_.clear();
 
-  log.debug("Hard non-diff. with ", PDGcodes_[0], " + ", PDGcodes_[1],
+  logg[pythia].debug("Hard non-diff. with ", PDGcodes_[0], " + ", PDGcodes_[1],
             " at CM energy [GeV] ", sqrtsAB_);
 
   std::array<int, 2> pdg_for_pythia;
@@ -528,7 +528,7 @@ bool StringProcess::next_NDiffHard() {
 
     // get PDG id used in PYTHIA event generation
     pdg_for_pythia[i] = pdg_map_for_pythia(PDGcodes_[i]);
-    log.debug("  incoming particle ", i, " : ", PDGcodes_[i],
+    logg[pythia].debug("  incoming particle ", i, " : ", PDGcodes_[i],
               " is mapped onto ", pdg_for_pythia[i]);
 
     PdgCode pdgcode_for_pythia(std::to_string(pdg_for_pythia[i]));
@@ -536,10 +536,10 @@ bool StringProcess::next_NDiffHard() {
      * compared to the mapped one. */
     find_excess_constituent(PDGcodes_[i], pdgcode_for_pythia, excess_quark[i],
                             excess_antiq[i]);
-    log.debug("    excess_quark[", i, "] = (", excess_quark[i][0], ", ",
+    logg[pythia].debug("    excess_quark[", i, "] = (", excess_quark[i][0], ", ",
               excess_quark[i][1], ", ", excess_quark[i][2], ", ",
               excess_quark[i][3], ", ", excess_quark[i][4], ")");
-    log.debug("    excess_antiq[", i, "] = (", excess_antiq[i][0], ", ",
+    logg[pythia].debug("    excess_antiq[", i, "] = (", excess_antiq[i][0], ", ",
               excess_antiq[i][1], ", ", excess_antiq[i][2], ", ",
               excess_antiq[i][3], ", ", excess_antiq[i][4], ")");
   }
@@ -560,7 +560,7 @@ bool StringProcess::next_NDiffHard() {
     pythia_parton_->settings.parm("Beams:eCM", sqrtsAB_);
 
     pythia_parton_initialized_ = pythia_parton_->init();
-    log.debug("Pythia initialized with ", pdg_for_pythia[0], " + ",
+    logg[pythia].debug("Pythia initialized with ", pdg_for_pythia[0], " + ",
               pdg_for_pythia[1], " at CM energy [GeV] ", sqrtsAB_);
     if (!pythia_parton_initialized_) {
       throw std::runtime_error("Pythia failed to initialize.");
@@ -572,13 +572,13 @@ bool StringProcess::next_NDiffHard() {
    * for every event if one knows SMASH random seed. */
   const int seed_new = random::uniform_int(1, maximum_rndm_seed_in_pythia);
   pythia_parton_->rndm.init(seed_new);
-  log.debug("pythia_parton_ : rndm is initialized with seed ", seed_new);
+  logg[pythia].debug("pythia_parton_ : rndm is initialized with seed ", seed_new);
 
   // Short notation for Pythia event
   Pythia8::Event &event_hadron = pythia_hadron_->event;
-  log.debug("Pythia hard event created");
+  logg[pythia].debug("Pythia hard event created");
   bool final_state_success = pythia_parton_->next();
-  log.debug("Pythia final state computed, success = ", final_state_success);
+  logg[pythia].debug("Pythia final state computed, success = ", final_state_success);
   if (!final_state_success) {
     return false;
   }
@@ -626,7 +626,7 @@ bool StringProcess::next_NDiffHard() {
   bool correct_constituents =
       restore_constituent(event_intermediate_, excess_quark, excess_antiq);
   if (!correct_constituents) {
-    log.debug("failed to find correct partonic constituents.");
+    logg[pythia].debug("failed to find correct partonic constituents.");
     return false;
   }
 
@@ -637,13 +637,13 @@ bool StringProcess::next_NDiffHard() {
     if (event_intermediate_[ipart].isFinal() &&
         !event_intermediate_[ipart].isParton() &&
         !pythia_parton_->particleData.isOctetHadron(pdgid)) {
-      log.debug("PDG ID from Pythia: ", pdgid);
+      logg[pythia].debug("PDG ID from Pythia: ", pdgid);
       FourVector momentum = reorient(event_intermediate_[ipart], evecBasisAB_);
-      log.debug("4-momentum from Pythia: ", momentum);
+      logg[pythia].debug("4-momentum from Pythia: ", momentum);
       bool found_ptype =
           append_intermediate_list(pdgid, momentum, new_non_hadron_particles);
       if (!found_ptype) {
-        log.warn("PDG ID ", pdgid,
+        logg[pythia].warn("PDG ID ", pdgid,
                  " does not exist in ParticleType - start over.");
         final_state_success = false;
       }
@@ -656,14 +656,14 @@ bool StringProcess::next_NDiffHard() {
 
   bool hadronize_success = false;
   bool find_forward_string = true;
-  log.debug("Hard non-diff: partonic process gives ",
+  logg[pythia].debug("Hard non-diff: partonic process gives ",
             event_intermediate_.size(), " partons.");
   // identify and fragment strings until there is no parton left.
   while (event_intermediate_.size() > 1) {
     // dummy event to initialize the internal variables of PYTHIA.
     pythia_hadron_->event.reset();
     if (!pythia_hadron_->next()) {
-      log.debug("  Dummy event in hard string routine failed.");
+      logg[pythia].debug("  Dummy event in hard string routine failed.");
       hadronize_success = false;
       break;
     }
@@ -681,14 +681,14 @@ bool StringProcess::next_NDiffHard() {
 
     // fragment the (identified) string into hadrons.
     hadronize_success = pythia_hadron_->forceHadronLevel(false);
-    log.debug("Pythia hadronized, success = ", hadronize_success);
+    logg[pythia].debug("Pythia hadronized, success = ", hadronize_success);
 
     new_intermediate_particles.clear();
     if (hadronize_success) {
       for (int i = 0; i < event_hadron.size(); i++) {
         if (event_hadron[i].isFinal()) {
           int pythia_id = event_hadron[i].id();
-          log.debug("PDG ID from Pythia: ", pythia_id);
+          logg[pythia].debug("PDG ID from Pythia: ", pythia_id);
           /* K_short and K_long need to be converted to K0
            * since SMASH only knows K0 */
           convert_KaonLS(pythia_id);
@@ -701,8 +701,8 @@ bool StringProcess::next_NDiffHard() {
            * in two transverse directions evecBasisAB_[1] and evecBasisAB_[2].
            */
           FourVector momentum = reorient(event_hadron[i], evecBasisAB_);
-          log.debug("4-momentum from Pythia: ", momentum);
-          log.debug("appending the particle ", pythia_id,
+          logg[pythia].debug("4-momentum from Pythia: ", momentum);
+          logg[pythia].debug("appending the particle ", pythia_id,
                     " to the intermediate particle list.");
           bool found_ptype = false;
           if (event_hadron[i].isHadron()) {
@@ -713,7 +713,7 @@ bool StringProcess::next_NDiffHard() {
                                                    new_non_hadron_particles);
           }
           if (!found_ptype) {
-            log.warn("PDG ID ", pythia_id,
+            logg[pythia].warn("PDG ID ", pythia_id,
                      " does not exist in ParticleType - start over.");
             hadronize_success = false;
           }
@@ -785,7 +785,6 @@ void StringProcess::find_excess_constituent(PdgCode &pdg_actual,
 
 void StringProcess::replace_constituent(
     Pythia8::Particle &particle, std::array<int, 5> &excess_constituent) {
-  const auto &log = logger<LogArea::Pythia>();
 
   // If the particle is neither quark nor diquark, nothing to do.
   if (!particle.isQuark() && !particle.isDiquark()) {
@@ -857,7 +856,7 @@ void StringProcess::replace_constituent(
       pdgid_new *= -1;
     }
   }
-  log.debug("  parton id = ", particle.id(), " is converted to ", pdgid_new);
+  logg[pythia].debug("  parton id = ", particle.id(), " is converted to ", pdgid_new);
 
   // update the constituent mass and energy.
   Pythia8::Vec4 pquark = particle.p();
@@ -902,7 +901,6 @@ bool StringProcess::splitting_gluon_qqbar(
     Pythia8::Event &event_intermediate, std::array<int, 5> &nquark_total,
     std::array<int, 5> &nantiq_total, bool sign_constituent,
     std::array<std::array<int, 5>, 2> &excess_constituent) {
-  const auto &log = logger<LogArea::Pythia>();
 
   Pythia8::Vec4 pSum = event_intermediate[0].p();
 
@@ -930,7 +928,7 @@ bool StringProcess::splitting_gluon_qqbar(
     /* If that is the case, a gluon will be splitted into
      * a quark-antiquark pair with the desired flavor. */
     if (!enough_quark) {
-      log.debug("  not enough constituents with flavor ", iflav + 1,
+      logg[pythia].debug("  not enough constituents with flavor ", iflav + 1,
                 " : try to split a gluon to qqbar.");
       for (int ic = 0; ic < std::abs(nquark_final); ic++) {
         /* Since each incoming hadron has its own count of the excess,
@@ -960,7 +958,7 @@ bool StringProcess::splitting_gluon_qqbar(
         }
 
         if (!event_intermediate[iforward].isGluon()) {
-          log.debug("There is no gluon to split into qqbar.");
+          logg[pythia].debug("There is no gluon to split into qqbar.");
           return false;
         }
 
@@ -1014,7 +1012,7 @@ bool StringProcess::splitting_gluon_qqbar(
         // then remove the gluon from the record
         event_intermediate.remove(iforward, iforward);
 
-        log.debug("  gluon at iforward = ", iforward, " is splitted into ",
+        logg[pythia].debug("  gluon at iforward = ", iforward, " is splitted into ",
                   pdgid, ",", -pdgid, " qqbar pair.");
         /* Increase the total number of quarks and antiquarks by 1,
          * as we have extra ones from a gluon. */
@@ -1036,7 +1034,6 @@ void StringProcess::rearrange_excess(
     std::array<int, 5> &nquark_total,
     std::array<std::array<int, 5>, 2> &excess_quark,
     std::array<std::array<int, 5>, 2> &excess_antiq) {
-  const auto &log = logger<LogArea::Pythia>();
 
   for (int iflav = 0; iflav < 5; iflav++) {
     /* Find how many constituent will be in the system after
@@ -1052,7 +1049,7 @@ void StringProcess::rearrange_excess(
     bool enough_quark = nquark_final >= 0;
     // If that is the case, excess of constituents will be modified
     if (!enough_quark) {
-      log.debug("  not enough constituents with flavor ", iflav + 1,
+      logg[pythia].debug("  not enough constituents with flavor ", iflav + 1,
                 " : try to modify excess of constituents.");
       for (int ic = 0; ic < std::abs(nquark_final); ic++) {
         /* Since each incoming hadron has its own count of the excess,
@@ -1095,11 +1092,10 @@ bool StringProcess::restore_constituent(
     Pythia8::Event &event_intermediate,
     std::array<std::array<int, 5>, 2> &excess_quark,
     std::array<std::array<int, 5>, 2> &excess_antiq) {
-  const auto &log = logger<LogArea::Pythia>();
 
   Pythia8::Vec4 pSum = event_intermediate[0].p();
   const double energy_init = pSum.e();
-  log.debug("  initial total energy [GeV] : ", energy_init);
+  logg[pythia].debug("  initial total energy [GeV] : ", energy_init);
 
   // Total number of quarks and antiquarks, respectively.
   std::array<int, 5> nquark_total;
@@ -1123,22 +1119,22 @@ bool StringProcess::restore_constituent(
   for (int iflav = 0; iflav < 5; iflav++) {
     if (nquark_total[iflav] + excess_quark[0][iflav] + excess_quark[1][iflav] <
         0) {
-      log.debug("Not enough quark constituents of flavor ", iflav + 1);
+      logg[pythia].debug("Not enough quark constituents of flavor ", iflav + 1);
       return false;
     }
 
     if (nantiq_total[iflav] + excess_antiq[0][iflav] + excess_antiq[1][iflav] <
         0) {
-      log.debug("Not enough antiquark constituents of flavor ", -(iflav + 1));
+      logg[pythia].debug("Not enough antiquark constituents of flavor ", -(iflav + 1));
       return false;
     }
   }
 
   for (int ih = 0; ih < 2; ih++) {
-    log.debug("  initial excess_quark[", ih, "] = (", excess_quark[ih][0], ", ",
+    logg[pythia].debug("  initial excess_quark[", ih, "] = (", excess_quark[ih][0], ", ",
               excess_quark[ih][1], ", ", excess_quark[ih][2], ", ",
               excess_quark[ih][3], ", ", excess_quark[ih][4], ")");
-    log.debug("  initial excess_antiq[", ih, "] = (", excess_antiq[ih][0], ", ",
+    logg[pythia].debug("  initial excess_antiq[", ih, "] = (", excess_antiq[ih][0], ", ",
               excess_antiq[ih][1], ", ", excess_antiq[ih][2], ", ",
               excess_antiq[ih][3], ", ", excess_antiq[ih][4], ")");
   }
@@ -1164,12 +1160,12 @@ bool StringProcess::restore_constituent(
 
         if (event_intermediate[iforward].id() > 0) {  // quark and diquark
           replace_constituent(event_intermediate[iforward], excess_quark[ih]);
-          log.debug("    excess_quark[", ih, "] = (", excess_quark[ih][0], ", ",
+          logg[pythia].debug("    excess_quark[", ih, "] = (", excess_quark[ih][0], ", ",
                     excess_quark[ih][1], ", ", excess_quark[ih][2], ", ",
                     excess_quark[ih][3], ", ", excess_quark[ih][4], ")");
         } else {  // antiquark and anti-diquark
           replace_constituent(event_intermediate[iforward], excess_antiq[ih]);
-          log.debug("    excess_antiq[", ih, "] = (", excess_antiq[ih][0], ", ",
+          logg[pythia].debug("    excess_antiq[", ih, "] = (", excess_antiq[ih][0], ", ",
                     excess_antiq[ih][1], ", ", excess_antiq[ih][2], ", ",
                     excess_antiq[ih][3], ", ", excess_antiq[ih][4], ")");
         }
@@ -1201,9 +1197,9 @@ bool StringProcess::restore_constituent(
      * quark content is considered to be correct. */
     recovered_quarks = excess_total == excess_null;
   }
-  log.debug("  valence quark contents of hadons are recovered.");
+  logg[pythia].debug("  valence quark contents of hadons are recovered.");
 
-  log.debug("  current total energy [GeV] : ", pSum.e());
+  logg[pythia].debug("  current total energy [GeV] : ", pSum.e());
   /* rescale momenta of all partons by a constant factor
    * to conserve the total energy. */
   while (true) {
@@ -1232,10 +1228,10 @@ bool StringProcess::restore_constituent(
       event_intermediate[i].e(std::sqrt(mass * mass + pabs * pabs));
       pSum += event_intermediate[i].p();
     }
-    log.debug("  parton momenta are rescaled by factor of ", rescale_factor);
+    logg[pythia].debug("  parton momenta are rescaled by factor of ", rescale_factor);
   }
 
-  log.debug("  final total energy [GeV] : ", pSum.e());
+  logg[pythia].debug("  final total energy [GeV] : ", pSum.e());
   /* The zeroth entry of event record is supposed to have the information
    * on the whole system. Specify the total momentum and invariant mass. */
   event_intermediate[0].p(pSum);
@@ -1247,14 +1243,13 @@ bool StringProcess::restore_constituent(
 void StringProcess::compose_string_parton(bool find_forward_string,
                                           Pythia8::Event &event_intermediate,
                                           Pythia8::Event &event_hadronize) {
-  const auto &log = logger<LogArea::Pythia>();
 
   Pythia8::Vec4 pSum = 0.;
   event_hadronize.reset();
 
   // select the most forward or backward parton.
   int iforward = get_index_forward(find_forward_string, 0, event_intermediate);
-  log.debug("Hard non-diff: iforward = ", iforward, "(",
+  logg[pythia].debug("Hard non-diff: iforward = ", iforward, "(",
             event_intermediate[iforward].id(), ")");
 
   pSum += event_intermediate[iforward].p();
@@ -1263,12 +1258,12 @@ void StringProcess::compose_string_parton(bool find_forward_string,
   int col_to_find = event_intermediate[iforward].acol();
   int acol_to_find = event_intermediate[iforward].col();
   event_intermediate.remove(iforward, iforward);
-  log.debug("Hard non-diff: event_intermediate reduces in size to ",
+  logg[pythia].debug("Hard non-diff: event_intermediate reduces in size to ",
             event_intermediate.size());
 
   // trace color and anti-color indices and find corresponding partons.
   while (col_to_find != 0 || acol_to_find != 0) {
-    log.debug("  col_to_find = ", col_to_find,
+    logg[pythia].debug("  col_to_find = ", col_to_find,
               ", acol_to_find = ", acol_to_find);
 
     int ifound = -1;
@@ -1279,11 +1274,11 @@ void StringProcess::compose_string_parton(bool find_forward_string,
       bool found_acol =
           acol_to_find != 0 && acol_to_find == event_intermediate[i].acol();
       if (found_col) {
-        log.debug("  col_to_find ", col_to_find, " from i ", i, "(", pdgid,
+        logg[pythia].debug("  col_to_find ", col_to_find, " from i ", i, "(", pdgid,
                   ") found");
       }
       if (found_acol) {
-        log.debug("  acol_to_find ", acol_to_find, " from i ", i, "(", pdgid,
+        logg[pythia].debug("  acol_to_find ", acol_to_find, " from i ", i, "(", pdgid,
                   ") found");
       }
 
@@ -1309,10 +1304,10 @@ void StringProcess::compose_string_parton(bool find_forward_string,
       event_hadronize.list();
       event_hadronize.listJunctions();
       if (col_to_find != 0) {
-        log.error("No parton with col = ", col_to_find);
+        logg[pythia].error("No parton with col = ", col_to_find);
       }
       if (acol_to_find != 0) {
-        log.error("No parton with acol = ", acol_to_find);
+        logg[pythia].error("No parton with acol = ", acol_to_find);
       }
       throw std::runtime_error("Hard string could not be identified.");
     } else {
@@ -1321,7 +1316,7 @@ void StringProcess::compose_string_parton(bool find_forward_string,
       event_hadronize.append(event_intermediate[ifound]);
       // then remove from the original event record.
       event_intermediate.remove(ifound, ifound);
-      log.debug("Hard non-diff: event_intermediate reduces in size to ",
+      logg[pythia].debug("Hard non-diff: event_intermediate reduces in size to ",
                 event_intermediate.size());
     }
   }
@@ -1335,7 +1330,6 @@ void StringProcess::compose_string_parton(bool find_forward_string,
 void StringProcess::compose_string_junction(bool &find_forward_string,
                                             Pythia8::Event &event_intermediate,
                                             Pythia8::Event &event_hadronize) {
-  const auto &log = logger<LogArea::Pythia>();
 
   event_hadronize.reset();
 
@@ -1353,7 +1347,7 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
   }
   event_hadronize.appendJunction(kind, col[0], col[1], col[2]);
   event_intermediate.eraseJunction(0);
-  log.debug("junction (", col[0], ", ", col[1], ", ", col[2], ") with kind ",
+  logg[pythia].debug("junction (", col[0], ", ", col[1], ", ", col[2], ") with kind ",
             kind, " will be handled.");
 
   bool found_string = false;
@@ -1367,7 +1361,7 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
     if (!found_string) {
       /* if there is any leg which is not closed with parton,
        * look over junctions and find connected ones. */
-      log.debug("  still has leg(s) unfinished.");
+      logg[pythia].debug("  still has leg(s) unfinished.");
       sign_color = !sign_color;
       std::vector<int> junction_to_move;
       for (int i = 0; i < event_intermediate.sizeJunction(); i++) {
@@ -1406,7 +1400,7 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
               col.push_back(col_new[k]);
             }
           }
-          log.debug("  junction ", i, " (",
+          logg[pythia].debug("  junction ", i, " (",
                     event_intermediate.colJunction(i, 0), ", ",
                     event_intermediate.colJunction(i, 1), ", ",
                     event_intermediate.colJunction(i, 2), ") with kind ",
@@ -1440,7 +1434,6 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
 void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
                                       Pythia8::Event &event_intermediate,
                                       Pythia8::Event &event_hadronize) {
-  const auto &log = logger<LogArea::Pythia>();
 
   Pythia8::Vec4 pSum = event_hadronize[0].p();
   for (unsigned int j = 0; j < col.size(); j++) {
@@ -1453,13 +1446,13 @@ void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
       for (int i = 1; i < event_intermediate.size(); i++) {
         const int pdgid = event_intermediate[i].id();
         if (sign_color && col[j] == event_intermediate[i].col()) {
-          log.debug("  col[", j, "] = ", col[j], " from i ", i, "(", pdgid,
+          logg[pythia].debug("  col[", j, "] = ", col[j], " from i ", i, "(", pdgid,
                     ") found");
           ifound = i;
           col[j] = event_intermediate[i].acol();
           break;
         } else if (!sign_color && col[j] == event_intermediate[i].acol()) {
-          log.debug("  acol[", j, "] = ", col[j], " from i ", i, "(", pdgid,
+          logg[pythia].debug("  acol[", j, "] = ", col[j], " from i ", i, "(", pdgid,
                     ") found");
           ifound = i;
           col[j] = event_intermediate[i].col();
@@ -1474,7 +1467,7 @@ void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
           event_intermediate.listJunctions();
           event_hadronize.list();
           event_hadronize.listJunctions();
-          log.error("No parton with col = ", col[j],
+          logg[pythia].error("No parton with col = ", col[j],
                     " connected with junction leg ", j);
           throw std::runtime_error("Hard string could not be identified.");
         }
@@ -1484,7 +1477,7 @@ void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
         event_hadronize.append(event_intermediate[ifound]);
         // then remove from the original event record.
         event_intermediate.remove(ifound, ifound);
-        log.debug("Hard non-diff: event_intermediate reduces in size to ",
+        logg[pythia].debug("Hard non-diff: event_intermediate reduces in size to ",
                   event_intermediate.size());
         if (col[j] == 0) {
           found_leg = true;
@@ -1501,7 +1494,6 @@ void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
 
 // baryon-antibaryon annihilation
 bool StringProcess::next_BBbarAnn() {
-  const auto &log = logger<LogArea::Pythia>();
   const std::array<FourVector, 2> ustrcom = {FourVector(1., 0., 0., 0.),
                                              FourVector(1., 0., 0., 0.)};
 
@@ -1510,7 +1502,7 @@ bool StringProcess::next_BBbarAnn() {
   NpartString_[1] = 0;
   final_state_.clear();
 
-  log.debug("Annihilation occurs between ", PDGcodes_[0], "+", PDGcodes_[1],
+  logg[pythia].debug("Annihilation occurs between ", PDGcodes_[0], "+", PDGcodes_[1],
             " at CM energy [GeV] ", sqrtsAB_);
 
   // check if the initial state is baryon-antibaryon pair.
@@ -1749,12 +1741,11 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
                                    ThreeVector &evecLong, bool flip_string_ends,
                                    bool separate_fragment_baryon,
                                    ParticleList &intermediate_particles) {
-  const auto &log = logger<LogArea::Pythia>();
   pythia_hadron_->event.reset();
   intermediate_particles.clear();
 
-  log.debug("initial quark content for fragment_string : ", idq1, ", ", idq2);
-  log.debug("initial string mass (GeV) for fragment_string : ", mString);
+  logg[pythia].debug("initial quark content for fragment_string : ", idq1, ", ", idq2);
+  logg[pythia].debug("initial string mass (GeV) for fragment_string : ", mString);
   // PDG id of quark constituents of string ends
   std::array<int, 2> idqIn;
   idqIn[0] = idq1;
@@ -1770,7 +1761,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
 
     m_const[i] = pythia_hadron_->particleData.m0(idqIn[i]);
   }
-  log.debug("baryon number of string times 3 : ", bstring);
+  logg[pythia].debug("baryon number of string times 3 : ", bstring);
 
   if (flip_string_ends && random::uniform_int(0, 1) == 0) {
     /* in the case where we flip the string ends,
@@ -2005,7 +1996,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       /* If the kinematics makes sense, add fragmented hadrons so far
        * to the intermediate particle list. */
       for (int i_frag = 0; i_frag < n_frag_prior; i_frag++) {
-        log.debug("appending the the fragmented hadron ",
+        logg[pythia].debug("appending the the fragmented hadron ",
                   pdgid_frag_prior[i_frag],
                   " to the intermediate particle list.");
 
@@ -2013,7 +2004,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
                                                     momentum_frag_prior[i_frag],
                                                     intermediate_particles);
         if (!found_ptype) {
-          log.error("PDG ID ", pdgid_frag_prior[i_frag],
+          logg[pythia].error("PDG ID ", pdgid_frag_prior[i_frag],
                     " should exist in ParticleType.");
           throw std::runtime_error("string fragmentation failed.");
         }
@@ -2168,7 +2159,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
   }
 
   if (do_string_fragmentation) {
-    log.debug("fragmenting a string with ", idqIn[0], ", ", idqIn[1]);
+    logg[pythia].debug("fragmenting a string with ", idqIn[0], ", ", idqIn[1]);
     // implement PYTHIA fragmentation
     pythia_hadron_->event[0].p(pSum);
     pythia_hadron_->event[0].m(pSum.mCalc());
@@ -2198,12 +2189,12 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
       FourVector momentum(
           pythia_hadron_->event[ipyth].e(), pythia_hadron_->event[ipyth].px(),
           pythia_hadron_->event[ipyth].py(), pythia_hadron_->event[ipyth].pz());
-      log.debug("appending the fragmented hadron ", pythia_id,
+      logg[pythia].debug("appending the fragmented hadron ", pythia_id,
                 " to the intermediate particle list.");
       bool found_ptype =
           append_intermediate_list(pythia_id, momentum, intermediate_particles);
       if (!found_ptype) {
-        log.warn("PDG ID ", pythia_id,
+        logg[pythia].warn("PDG ID ", pythia_id,
                  " does not exist in ParticleType - start over.");
         intermediate_particles.clear();
         return 0;
@@ -2223,7 +2214,6 @@ int StringProcess::fragment_off_hadron(
     Pythia8::FlavContainer &flav_string_pos,
     Pythia8::FlavContainer &flav_string_neg, std::vector<int> &pdgid_frag,
     std::vector<FourVector> &momentum_frag) {
-  const auto &log = logger<LogArea::Pythia>();
   /* How many times we try to find flavor of qqbar pair and corresponding
    * hadronic species */
   const int n_try = 10;
@@ -2247,7 +2237,7 @@ int StringProcess::fragment_off_hadron(
   }
   // Mass of the original string
   double mass_string = std::sqrt(mTsqr_string - QTsqr_string_tot);
-  log.debug("  Fragment off one hadron from a string ( ", flav_string_pos.id,
+  logg[pythia].debug("  Fragment off one hadron from a string ( ", flav_string_pos.id,
             " , ", flav_string_neg.id, " ) with mass ", mass_string, " GeV.");
 
   // Take relevant parameters from PYTHIA.
@@ -2278,7 +2268,7 @@ int StringProcess::fragment_off_hadron(
       random::normal(0., fac_enhance_qt * sigma_qt_frag * M_SQRT1_2);
   double QTry_new =
       random::normal(0., fac_enhance_qt * sigma_qt_frag * M_SQRT1_2);
-  log.debug("  Transverse momentum (", QTrx_new, ", ", QTry_new,
+  logg[pythia].debug("  Transverse momentum (", QTrx_new, ", ", QTry_new,
             ") GeV selected for the new qqbar pair.");
 
   /* Determine the transverse momentum of the (first) fragmented hadron.
@@ -2319,7 +2309,7 @@ int StringProcess::fragment_off_hadron(
     if (pdgid_had_1st != 0) {
       // If the PDG id is found, determine mass.
       mass_had_1st = pythia_hadron_->particleData.mSel(pdgid_had_1st);
-      log.debug("    number of tries of flavor selection : ", i_try + 1,
+      logg[pythia].debug("    number of tries of flavor selection : ", i_try + 1,
                 " in StringProcess::fragment_off_hadron.");
       break;
     }
@@ -2327,15 +2317,15 @@ int StringProcess::fragment_off_hadron(
   if (pdgid_had_1st == 0) {
     return 0;
   }
-  log.debug("  New flavor ", flav_new.id, " selected for the string end with ",
+  logg[pythia].debug("  New flavor ", flav_new.id, " selected for the string end with ",
             flav_old.id);
-  log.debug("  PDG id ", pdgid_had_1st,
+  logg[pythia].debug("  PDG id ", pdgid_had_1st,
             " selected for the (first) fragmented hadron.");
   bool had_1st_baryon = pythia_hadron_->particleData.isBaryon(pdgid_had_1st);
   // Transverse mass of the (first) fragmented hadron
   double mTrn_had_1st =
       std::sqrt(mass_had_1st * mass_had_1st + QTrn_had_1st * QTrn_had_1st);
-  log.debug("  Transverse momentum (", QTrx_had_1st, ", ", QTry_had_1st,
+  logg[pythia].debug("  Transverse momentum (", QTrx_had_1st, ", ", QTry_had_1st,
             ") GeV selected for the (first) fragmented hadron.");
 
   /* Compute the mass threshold to continue string fragmentation.
@@ -2350,7 +2340,7 @@ int StringProcess::fragment_off_hadron(
    * the string breaks into the last two hadrons. */
   bool string_into_final_two = mass_string < mass_min_to_continue;
   if (string_into_final_two) {
-    log.debug("  The string mass is below the mass threshold ",
+    logg[pythia].debug("  The string mass is below the mass threshold ",
               mass_min_to_continue, " GeV : finishing with two hadrons.");
   }
 
@@ -2403,7 +2393,7 @@ int StringProcess::fragment_off_hadron(
     if (pdgid_had_2nd == 0) {
       return 0;
     }
-    log.debug("  PDG id ", pdgid_had_2nd,
+    logg[pythia].debug("  PDG id ", pdgid_had_2nd,
               " selected for the (second) fragmented hadron.");
     bool had_2nd_baryon = pythia_hadron_->particleData.isBaryon(pdgid_had_2nd);
 
@@ -2421,7 +2411,7 @@ int StringProcess::fragment_off_hadron(
         std::sqrt(QTrx_had_2nd * QTrx_had_2nd + QTry_had_2nd * QTry_had_2nd);
     double mTrn_had_2nd =
         std::sqrt(mass_had_2nd * mass_had_2nd + QTrn_had_2nd * QTrn_had_2nd);
-    log.debug("  Transverse momentum (", QTrx_had_2nd, ", ", QTry_had_2nd,
+    logg[pythia].debug("  Transverse momentum (", QTrx_had_2nd, ", ", QTry_had_2nd,
               ") GeV selected for the (second) fragmented hadron.");
 
     double ppos_had_2nd = 0.;
@@ -2544,7 +2534,6 @@ int StringProcess::fragment_off_hadron(
 }
 
 int StringProcess::get_hadrontype_from_quark(int idq1, int idq2) {
-  const auto &log = logger<LogArea::Pythia>();
 
   const int baryon_number =
       pythia_hadron_->particleData.baryonNumberType(idq1) +
@@ -2583,7 +2572,7 @@ int StringProcess::get_hadrontype_from_quark(int idq1, int idq2) {
   const int frag_strange = -frag_net_q[2];
   const int frag_charm = frag_net_q[3];
   const int frag_bottom = -frag_net_q[4];
-  log.debug("  conserved charges : iso3 = ", frag_iso3,
+  logg[pythia].debug("  conserved charges : iso3 = ", frag_iso3,
             ", strangeness = ", frag_strange, ", charmness = ", frag_charm,
             ", bottomness = ", frag_bottom);
 
@@ -2610,7 +2599,7 @@ int StringProcess::get_hadrontype_from_quark(int idq1, int idq2) {
       pdgid_possible.push_back(pdgid);
       weight_possible.push_back(weight);
 
-      log.debug("  PDG id ", pdgid, " is possible with weight ", weight);
+      logg[pythia].debug("  PDG id ", pdgid, " is possible with weight ", weight);
     }
   }
   const int n_possible = pdgid_possible.size();
@@ -2632,7 +2621,6 @@ int StringProcess::get_hadrontype_from_quark(int idq1, int idq2) {
 }
 
 int StringProcess::get_resonance_from_quark(int idq1, int idq2, double mass) {
-  const auto &log = logger<LogArea::Pythia>();
 
   // if the mass is too low, return 0 (failure).
   if (mass < pion_mass) {
@@ -2753,7 +2741,7 @@ int StringProcess::get_resonance_from_quark(int idq1, int idq2, double mass) {
       mass_diff_min = mass_diff[ires];
     }
   }
-  log.debug("Quark constituents ", idq1, " and ", idq2, " with mass ", mass,
+  logg[pythia].debug("Quark constituents ", idq1, " and ", idq2, " with mass ", mass,
             " (GeV) turned into a resonance ", pdgid_possible[ires_closest]);
   return pdgid_possible[ires_closest];
 }
@@ -2860,26 +2848,25 @@ bool StringProcess::remake_kinematics_fragments(
     double ppos_string, double pneg_string, double QTrx_string,
     double QTry_string, double QTrx_add_pos, double QTry_add_pos,
     double QTrx_add_neg, double QTry_add_neg) {
-  const auto &log = logger<LogArea::Pythia>();
-  log.debug("Correcting the kinematics of fragmented hadrons...");
+  logg[pythia].debug("Correcting the kinematics of fragmented hadrons...");
 
   if (ppos_string < 0. || pneg_string < 0.) {
-    log.debug("  wrong lightcone momenta of string : ppos_string (GeV) = ",
+    logg[pythia].debug("  wrong lightcone momenta of string : ppos_string (GeV) = ",
               ppos_string, " pneg_string (GeV) = ", pneg_string);
     return false;
   }
   // Momentum rapidity of the final string
   const double yrapid_string = 0.5 * std::log(ppos_string / pneg_string);
-  log.debug("Momentum-space rapidity of the string should be ", yrapid_string);
+  logg[Output].debug("Momentum-space rapidity of the string should be ", yrapid_string);
 
   // Transverse mass of the final string
   const double mTrn_string = std::sqrt(2. * ppos_string * pneg_string);
-  log.debug("Transvere mass (GeV) of the string should be ", mTrn_string);
+  logg[Output].debug("Transvere mass (GeV) of the string should be ", mTrn_string);
   // Transverse momentum of the final string
   const double QTrn_string =
       std::sqrt(QTrx_string * QTrx_string + QTry_string * QTry_string);
   if (mTrn_string < QTrn_string) {
-    log.debug("  wrong transverse mass of string : mTrn_string (GeV) = ",
+    logg[Output].debug("  wrong transverse mass of string : mTrn_string (GeV) = ",
               mTrn_string, " QTrn_string (GeV) = ", QTrn_string);
     return false;
   }
@@ -2887,7 +2874,7 @@ bool StringProcess::remake_kinematics_fragments(
       mTrn_string * mTrn_string - QTrn_string * QTrn_string;
   // Mass of the final string
   const double mass_string = std::sqrt(msqr_string);
-  log.debug("The string mass (GeV) should be ", mass_string);
+  logg[Output].debug("The string mass (GeV) should be ", mass_string);
 
   /* If there is no transverse momentum to be added to the string ends,
    * skip the entire procedure and return. */
@@ -2895,7 +2882,7 @@ bool StringProcess::remake_kinematics_fragments(
       std::fabs(QTry_add_pos) < small_number * mass_string &&
       std::fabs(QTrx_add_neg) < small_number * mass_string &&
       std::fabs(QTry_add_neg) < small_number * mass_string) {
-    log.debug("  no need to add transverse momenta - skipping.");
+    logg[Output].debug("  no need to add transverse momenta - skipping.");
     return true;
   }
 
@@ -2950,9 +2937,9 @@ bool StringProcess::remake_kinematics_fragments(
       y_backward = y_current;
     }
   }
-  log.debug("  The most forward hadron is ip_forward = ", ip_forward,
+  logg[Output].debug("  The most forward hadron is ip_forward = ", ip_forward,
             " with rapidity ", y_forward);
-  log.debug("  The most backward hadron is ip_backward = ", ip_backward,
+  logg[Output].debug("  The most backward hadron is ip_backward = ", ip_backward,
             " with rapidity ", y_backward);
 
   const double px_string_ini = ptot_string_ini.threevec() * evec_basis[1];
@@ -2963,7 +2950,7 @@ bool StringProcess::remake_kinematics_fragments(
   bool correct_px = std::fabs(px_string_ini + QTrx_add_pos + QTrx_add_neg -
                               QTrx_string) < small_number * mass_string;
   if (!correct_px) {
-    log.debug("  input transverse momenta in x-axis are not consistent.");
+    logg[Output].debug("  input transverse momenta in x-axis are not consistent.");
     return false;
   }
   /* Check if the transverse momentum py is conserved i.e.,
@@ -2971,14 +2958,14 @@ bool StringProcess::remake_kinematics_fragments(
   bool correct_py = std::fabs(py_string_ini + QTry_add_pos + QTry_add_neg -
                               QTry_string) < small_number * mass_string;
   if (!correct_py) {
-    log.debug("  input transverse momenta in y-axis are not consistent.");
+    logg[Output].debug("  input transverse momenta in y-axis are not consistent.");
     return false;
   }
 
   Pythia8::Vec4 pvec_string_now =
       set_Vec4(ptot_string_ini.x0(), ptot_string_ini.threevec());
 
-  log.debug("  Adding transverse momentum to the most forward hadron.");
+  logg[Output].debug("  Adding transverse momentum to the most forward hadron.");
   pvec_string_now -= event_fragments[ip_forward].p();
   const double mass_frag_pos = event_fragments[ip_forward].p().mCalc();
   // Four-momentum of the most forward hadron
@@ -2997,7 +2984,7 @@ bool StringProcess::remake_kinematics_fragments(
   // Update the event record.
   event_fragments[ip_forward].p(pvec_new_frag_pos);
 
-  log.debug("  Adding transverse momentum to the most backward hadron.");
+  logg[Output].debug("  Adding transverse momentum to the most backward hadron.");
   pvec_string_now -= event_fragments[ip_backward].p();
   const double mass_frag_neg = event_fragments[ip_backward].p().mCalc();
   // Four-momentum of the most backward hadron
@@ -3041,12 +3028,12 @@ bool StringProcess::remake_kinematics_fragments(
     const double mTrn_frag = std::sqrt(2. * ppos_frag * pneg_frag);
     mTrn_frag_all += mTrn_frag;
   }
-  log.debug("Sum of transverse masses (GeV) of all fragmented hadrons : ",
+  logg[Output].debug("Sum of transverse masses (GeV) of all fragmented hadrons : ",
             mTrn_frag_all);
   /* If the transverse mass of the (final) string is smaller than
    * the sum of transverse masses, kinematics cannot be determined. */
   if (mTrn_string < mTrn_frag_all) {
-    log.debug("  which is larger than mT of the actual string ", mTrn_string);
+    logg[Output].debug("  which is larger than mT of the actual string ", mTrn_string);
     return false;
   }
 
@@ -3058,14 +3045,14 @@ bool StringProcess::remake_kinematics_fragments(
                  pvec_string_now.py(), pvec_string_now.pz());
   double E_string_now = p_string_now.x0();
   double pz_string_now = p_string_now.threevec() * evec_basis[0];
-  log.debug("The string mass (GeV) at this point : ", mass_string_now);
+  logg[Output].debug("The string mass (GeV) at this point : ", mass_string_now);
   double ppos_string_now = (E_string_now + pz_string_now) * M_SQRT1_2;
   double pneg_string_now = (E_string_now - pz_string_now) * M_SQRT1_2;
   // Momentum rapidity of the current string
   double yrapid_string_now = 0.5 * std::log(ppos_string_now / pneg_string_now);
-  log.debug("The momentum-space rapidity of string at this point : ",
+  logg[Output].debug("The momentum-space rapidity of string at this point : ",
             yrapid_string_now);
-  log.debug("The momentum-space rapidities of hadrons will be changed.");
+  logg[Output].debug("The momentum-space rapidities of hadrons will be changed.");
   const int niter_max = 10000;
   bool accepted = false;
   double fac_all_yrapid = 1.;
@@ -3119,21 +3106,21 @@ bool StringProcess::remake_kinematics_fragments(
     ppos_string_now = (E_string_now + pz_string_now) * M_SQRT1_2;
     pneg_string_now = (E_string_now - pz_string_now) * M_SQRT1_2;
     yrapid_string_now = 0.5 * std::log(ppos_string_now / pneg_string_now);
-    log.debug("  step ", iiter + 1, " : fac_yrapid = ", fac_yrapid,
+    logg[Output].debug("  step ", iiter + 1, " : fac_yrapid = ", fac_yrapid,
               " , string mass (GeV) = ", mass_string_now,
               " , string rapidity = ", yrapid_string_now);
   }
 
   if (!accepted) {
-    log.debug("  Too many iterations in rapidity rescaling.");
+    logg[Output].debug("  Too many iterations in rapidity rescaling.");
     return false;
   }
-  log.debug("The overall factor multiplied to the rapidities of hadrons = ",
+  logg[Output].debug("The overall factor multiplied to the rapidities of hadrons = ",
             fac_all_yrapid);
-  log.debug("The momentum-space rapidity of string at this point : ",
+  logg[Output].debug("The momentum-space rapidity of string at this point : ",
             yrapid_string_now);
   const double y_diff = yrapid_string - yrapid_string_now;
-  log.debug("The hadrons will be boosted by rapidity ", y_diff,
+  logg[Output].debug("The hadrons will be boosted by rapidity ", y_diff,
             " for the longitudinal momentum conservation.");
 
   // Boost the hadrons back into the original frame.

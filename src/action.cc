@@ -25,6 +25,7 @@
 namespace smash {
 /// Destructor
 Action::~Action() = default;
+static constexpr int PauliBlocking = LogArea::PauliBlocking::id;
 
 bool Action::is_valid(const Particles &particles) const {
   return std::all_of(
@@ -40,14 +41,13 @@ bool Action::is_pauli_blocked(const Particles &particles,
   if (process_type_ == ProcessType::Wall) {
     return false;
   }
-  const auto &log = logger<LogArea::PauliBlocking>();
   for (const auto &p : outgoing_particles_) {
     if (p.is_baryon()) {
       const auto f =
           p_bl.phasespace_dens(p.position().threevec(), p.momentum().threevec(),
                                particles, p.pdgcode(), incoming_particles_);
       if (f > random::uniform(0., 1.)) {
-        log.debug("Action ", *this, " is pauli-blocked with f = ", f);
+        logg[PauliBlocking].debug("Action ", *this, " is pauli-blocked with f = ", f);
         return true;
       }
     }
@@ -93,7 +93,6 @@ std::pair<FourVector, FourVector> Action::get_potential_at_interaction_point()
 
 void Action::perform(Particles *particles, uint32_t id_process) {
   assert(id_process != 0);
-  const auto &log = logger<LogArea::Action>();
 
   for (ParticleData &p : outgoing_particles_) {
     // store the history info
@@ -110,7 +109,7 @@ void Action::perform(Particles *particles, uint32_t id_process) {
                     (process_type_ != ProcessType::Elastic) &&
                         (process_type_ != ProcessType::Wall));
 
-  log.debug("Particle map now has ", particles->size(), " elements.");
+  logg[Act].debug("Particle map now has ", particles->size(), " elements.");
 
   /* Check the conservation laws if the modifications of the total kinetic
    * energy of the outgoing particles by the mean field potentials are not
@@ -182,15 +181,14 @@ std::pair<double, double> Action::sample_masses(
 
 void Action::sample_angles(std::pair<double, double> masses,
                            const double kinetic_energy_cm) {
-  const auto &log = logger<LogArea::Action>();
 
   ParticleData *p_a = &outgoing_particles_[0];
   ParticleData *p_b = &outgoing_particles_[1];
 
   const double pcm = pCM(kinetic_energy_cm, masses.first, masses.second);
   if (!(pcm > 0.0)) {
-    log.warn("Particle: ", p_a->pdgcode(), " radial momentum: ", pcm);
-    log.warn("Ektot: ", kinetic_energy_cm, " m_a: ", masses.first,
+    logg[Act].warn("Particle: ", p_a->pdgcode(), " radial momentum: ", pcm);
+    logg[Act].warn("Ektot: ", kinetic_energy_cm, " m_a: ", masses.first,
              " m_b: ", masses.second);
   }
   /* Here we assume an isotropic angular distribution. */
@@ -202,7 +200,7 @@ void Action::sample_angles(std::pair<double, double> masses,
   /* Debug message is printed before boost, so that p_a and p_b are
    * the momenta in the center of mass frame and thus opposite to
    * each other.*/
-  log.debug("p_a: ", *p_a, "\np_b: ", *p_b);
+  logg[Act].debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }
 
 void Action::sample_2body_phasespace() {
@@ -257,9 +255,8 @@ void Action::check_conservation(const uint32_t id_process) const {
       particle_names << p.type().name();
     }
     particle_names << "\n";
-    const auto &log = logger<LogArea::Action>();
     std::string err_msg = before.report_deviations(after);
-    log.error() << particle_names.str() << err_msg;
+    logg[Act].error() << particle_names.str() << err_msg;
     /* Pythia does not conserve energy and momentum at high energy, so we just
      * print the error and continue. */
     if ((is_string_soft_process(process_type_)) ||

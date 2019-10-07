@@ -20,6 +20,7 @@
 #include "smash/stringfunctions.h"
 
 namespace smash {
+inline constexpr int Decaymodes = LogArea::DecayModes::id;
 
 /// Global pointer to the decay modes list
 std::vector<DecayModes> *DecayModes::all_decay_modes = nullptr;
@@ -96,25 +97,24 @@ DecayType *DecayModes::get_decay_type(ParticleTypePtr mother,
 }
 
 bool DecayModes::renormalize(const std::string &name) {
-  const auto &log = logger<LogArea::DecayModes>();
   double sum = 0.;
   bool is_large_renormalization = false;
   for (auto &mode : decay_modes_) {
     sum += mode->weight();
   }
   if (std::abs(sum - 1.) < really_small) {
-    log.debug("Particle ", name,
+    logg[Decaymodes].debug("Particle ", name,
               ": Extremely small renormalization constant: ", sum,
               "\n=> Skipping the renormalization.");
   } else {
     is_large_renormalization = (std::abs(sum - 1.) > 0.01);
-    log.debug("Particle ", name, ": Renormalizing decay modes with ", sum);
+    logg[Decaymodes].debug("Particle ", name, ": Renormalizing decay modes with ", sum);
     double new_sum = 0.0;
     for (auto &mode : decay_modes_) {
       mode->set_weight(mode->weight() / sum);
       new_sum += mode->weight();
     }
-    log.debug("After renormalization sum of ratios is ", new_sum);
+    logg[Decaymodes].debug("After renormalization sum of ratios is ", new_sum);
   }
   return is_large_renormalization;
 }
@@ -161,7 +161,6 @@ static int min_angular_momentum(int s0, int s1, int s2, int s3) {
 }
 
 void DecayModes::load_decaymodes(const std::string &input) {
-  const auto &log = logger<LogArea::DecayModes>();
   // create the DecayType vector first, then it outlives the DecayModes vector,
   // which references the DecayType objects.
   static std::vector<DecayTypePtr> decaytypes;
@@ -199,7 +198,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
     }
     if (isotype_mother->has_anti_multiplet()) {
       /* Construct the decay modes for the anti-multiplet.  */
-      log.debug("generating decay modes for anti-multiplet: " +
+      logg[Decaymodes].debug("generating decay modes for anti-multiplet: " +
                 isotype_mother->name());
       for (const auto &state : mother_states) {
         PdgCode pdg = state->pdgcode();
@@ -236,7 +235,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
       mother_states = isotype_mother->get_states();
       decay_modes_to_add.clear();
       decay_modes_to_add.resize(mother_states.size());
-      log.debug("reading decay modes for " + name);
+      logg[Decaymodes].debug("reading decay modes for " + name);
       // check if any of the states have decay modes already
       for (size_t m = 0; m < mother_states.size(); m++) {
         PdgCode pdgcode = mother_states[m]->pdgcode();
@@ -310,7 +309,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
                       *daughter1, *daughter2, *mother_states[m]);
                   if (cg_sqr > 0.) {
                     // add mode
-                    log.debug(
+                    logg[Decaymodes].debug(
                         "decay mode generated: " + mother_states[m]->name() +
                         " -> " + daughter1->name() + " " + daughter2->name() +
                         " (" + std::to_string(ratio * cg_sqr) + ")");
@@ -360,7 +359,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
                         *daughter1, *daughter2, *daughter3, *mother_states[m]);
                     if (cg_sqr > 0.) {
                       // add mode
-                      log.debug(
+                      logg[Decaymodes].debug(
                           "decay mode generated: " + mother_states[m]->name() +
                           " -> " + daughter1->name() + " " + daughter2->name() +
                           " " + daughter3->name() + " (" +
@@ -422,7 +421,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
         bool no_decays = true;
         for (size_t m = 0; m < mother_states.size(); m++) {
           if (mother_states[m]->charge() == charge) {
-            log.debug("decay mode found: " + mother_states[m]->name() + " -> " +
+            logg[Decaymodes].debug("decay mode found: " + mother_states[m]->name() + " -> " +
                       std::to_string(decay_particles.size()));
             decay_modes_to_add[m].add_mode(mother_states[m], ratio, L, types);
             no_decays = false;
@@ -486,7 +485,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
     }
   }
   if (total_large_renormalized > 0) {
-    log.warn("Branching ratios of ", total_large_renormalized,
+    logg[Decaymodes].warn("Branching ratios of ", total_large_renormalized,
              " hadrons were renormalized by more than 1% to have sum 1.");
   }
 }
