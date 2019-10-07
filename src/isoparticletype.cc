@@ -111,7 +111,7 @@ const IsoParticleType *IsoParticleType::anti_multiplet() const {
       return anti->iso_multiplet();
     } else {
       return nullptr;
-    };
+    }
   } else {
     return nullptr;
   }
