@@ -253,11 +253,6 @@ class IsoParticleType {
    */
   Tabulation *XS_NR_tabulation_ = nullptr;
   /**
-   * A tabulation for the NN -> DR cross sections,
-   * where R is a resonance from this multiplet.
-   */
-  Tabulation *XS_DR_tabulation_ = nullptr;
-  /**
    * A tabulation for the NN -> RΔ cross sections,
    * where R is a resonance from this multiplet.
    */
