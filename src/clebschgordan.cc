@@ -25,11 +25,9 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
   double result = std::sqrt(j_c + 1) * wigner_3j;
   result *= (j % 2 == 0) * 2 - 1;  // == (-1)**j
 
-#ifndef NDEBUG
   const auto &log = logger<LogArea::Resonances>();
   log.debug("CG: ", result, " I1: ", j_a, " I2: ", j_b, " IR: ", j_c,
             " iz1: ", m_a, " iz2: ", m_b, " izR: ", m_c);
-#endif
 
   return result;
 }

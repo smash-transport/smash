@@ -274,9 +274,7 @@ ScatterActionsFinder::ScatterActionsFinder(
 ActionPtr ScatterActionsFinder::check_collision(
     const ParticleData& data_a, const ParticleData& data_b, double dt,
     const std::vector<FourVector>& beam_momentum, const double cell_vol) const {
-#ifndef NDEBUG
   const auto& log = logger<LogArea::FindScatter>();
-#endif
 
   /* If the two particles
    * 1) belong to the two colliding nuclei
@@ -338,11 +336,9 @@ ActionPtr ScatterActionsFinder::check_collision(
     // Collision probability, see e.g. \iref{Xu:2004mz}, eq. (11)
     const double p_22 = xs * v_rel * dt / (cell_vol * testparticles_);
 
-#ifndef NDEBUG
     log.debug("Stochastic collison criterion parameters:\np_22 = ", p_22,
               ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
               ", cell_vol = ", cell_vol, ", testparticles = ", testparticles_);
-#endif
 
     if (p_22 > 1.) {
       std::stringstream err;
@@ -360,11 +356,9 @@ ActionPtr ScatterActionsFinder::check_collision(
   } else if (coll_crit_ == CollisionCriterion::Geometric) {
     // just collided with this particle
     if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
-#ifndef NDEBUG
       log.debug("Skipping collided particles at time ", data_a.position().x0(),
                 " due to process ", data_a.id_process(), "\n    ", data_a,
                 "\n<-> ", data_b);
-#endif
       return nullptr;
     }
 
@@ -393,10 +387,8 @@ ActionPtr ScatterActionsFinder::check_collision(
       return nullptr;
     }
 
-#ifndef NDEBUG
     log.debug("particle distance squared: ", distance_squared, "\n    ", data_a,
               "\n<-> ", data_b);
-#endif
   }
 
   // Using std::move here is redundant with newer compilers, but required for
