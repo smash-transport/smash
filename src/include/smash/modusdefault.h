@@ -69,6 +69,8 @@ class ModusDefault {
   bool cll_in_nucleus() const { return false; }
   /// \return Checks if modus is collider; overwritten in ColliderModus
   bool is_collider() const { return false; }
+  /// \return Checks if modus is list modus; overwritten in ListModus
+  bool is_list() const { return false; }
   /// \return The impact parameter; overwritten in ColliderModus
   double impact_parameter() const { return 0.0; }
   /** \return The beam velocity of the projectile required in the Collider

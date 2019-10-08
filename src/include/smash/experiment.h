@@ -1370,6 +1370,12 @@ void Experiment<Modus>::initialize_new_event() {
       break;
   }
   std::unique_ptr<UniformClock> clock_for_this_event;
+  if (modus_.is_list() && (timestep < 0.0)) {
+    throw std::runtime_error(
+        "Timestep for the given event is negative. \n"
+        "This might happen if the formation times of the input particles are "
+        "larger than the specified end time of the simulation.");
+  }
   clock_for_this_event = make_unique<UniformClock>(start_time, timestep);
   parameters_.labclock = std::move(clock_for_this_event);
 
