@@ -183,7 +183,7 @@ void Context::update(const std::string& buffer) {
 }
 
 Hash Context::finalize() {
-  Hash digest{};
+  Hash digest{{}};
   if (curlen_ >= sizeof(buf_)) {
     return digest;
   }
