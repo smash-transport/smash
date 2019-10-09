@@ -280,29 +280,24 @@ void IsoParticleType::tabulate_integrals(sha256::Hash hash,
   for (const auto &res : IsoParticleType::list_baryon_resonances()) {
     const auto antires = res->anti_multiplet();
     if (nuc) {
-      cache_integral(NR_tabulations, dir, hash, *nuc, *res,
-                     antires, false);
+      cache_integral(NR_tabulations, dir, hash, *nuc, *res, antires, false);
     }
     if (pion) {
-      cache_integral(piR_tabulations, dir, hash, *pion, *res,
-                     antires, false);
+      cache_integral(piR_tabulations, dir, hash, *pion, *res, antires, false);
     }
     if (kaon) {
-      cache_integral(RK_tabulations, dir, hash, *kaon, *res,
-                     antires, false);
+      cache_integral(RK_tabulations, dir, hash, *kaon, *res, antires, false);
     }
     if (delta) {
-      cache_integral(DeltaR_tabulations, dir, hash, *delta, *res,
-                     antires, true);
+      cache_integral(DeltaR_tabulations, dir, hash, *delta, *res, antires,
+                     true);
     }
   }
   if (rho) {
-    cache_integral(rhoR_tabulations, dir, hash, *rho, *rho,
-                   nullptr, true);
+    cache_integral(rhoR_tabulations, dir, hash, *rho, *rho, nullptr, true);
   }
   if (rho && h1) {
-    cache_integral(rhoR_tabulations, dir, hash, *rho, *h1, nullptr,
-                   true);
+    cache_integral(rhoR_tabulations, dir, hash, *rho, *h1, nullptr, true);
   }
 }
 
