@@ -18,7 +18,7 @@
 #include "smash/logging.h"
 
 namespace smash {
-inline constexpr int Fpe = LogArea::Fpe::id;
+inline constexpr int LFpe = LogArea::Fpe::id;
 
 #if !defined _GNU_SOURCE && defined __SSE__ && !defined __clang__
 bool enable_float_traps(int femask) {
@@ -62,7 +62,7 @@ bool enable_float_traps(int femask) {
 
 void DisableFloatTraps::reenable_traps(int mask) {
   if (!enable_float_traps(mask)) {
-    logg[Fpe].warn("Failed to setup traps on ", mask);
+    logg[LFpe].warn("Failed to setup traps on ", mask);
   }
 }
 
@@ -70,18 +70,18 @@ void setup_default_float_traps() {
   {
     // pole error occurred in a floating-point operation:
     if (!enable_float_traps(FE_DIVBYZERO)) {
-      logg[Fpe].warn("Failed to setup trap on pole error.");
+      logg[LFpe].warn("Failed to setup trap on pole error.");
     }
 
     // domain error occurred in an earlier floating-point operation:
     if (!enable_float_traps(FE_INVALID)) {
-      logg[Fpe].warn("Failed to setup trap on domain error.");
+      logg[LFpe].warn("Failed to setup trap on domain error.");
     }
 
     /* The result of the earlier floating-point operation was too large to be
      * representable: */
     if (!enable_float_traps(FE_OVERFLOW)) {
-      logg[Fpe].warn("Failed to setup trap on overflow.");
+      logg[LFpe].warn("Failed to setup trap on overflow.");
     }
 
     /* There's also FE_UNDERFLOW, where the result of the earlier
@@ -127,10 +127,11 @@ void setup_default_float_traps() {
           msg = "unknown";
           break;
       }
-      logg[Fpe].fatal("Floating point trap was raised: ", msg);
+      logg[LFpe].fatal(source_location,
+                       "Floating point trap was raised: ", msg);
     } else {
-      logg[Fpe].fatal("Unexpected Signal ", signal,
-                      " received in the FPE signal handler. Aborting.");
+      logg[LFpe].fatal(source_location, "Unexpected Signal ", signal,
+                       " received in the FPE signal handler. Aborting.");
     }
     std::abort();
   };

@@ -21,8 +21,8 @@
 #include "smash/particles.h"
 
 namespace smash {
-inline constexpr int HyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
-inline constexpr int Output = LogArea::Output::id;
+inline constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
+inline constexpr int LOutput = LogArea::Output::id;
 
 template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
@@ -184,7 +184,7 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
     // If the runtime is too short some particles might not yet have
     // reached the hypersurface. Warning is printed.
     if (particles.size() != 0) {
-      logg[HyperSurfaceCrossing].warn(
+      logg[LHyperSurfaceCrossing].warn(
           "End time might be too small for initial conditions output. "
           "Hypersurface has not yet been crossed by ",
           particles.size(), " particle(s).");
@@ -754,8 +754,8 @@ std::unique_ptr<OutputInterface> create_select_format(
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
   } else {
     // Only remaining possibility: (!modern_format && extended_format)
-    logg[Output].warn() << "Creating Oscar output: "
-                        << "There is no extended Oscar1999 format.";
+    logg[LOutput].warn() << "Creating Oscar output: "
+                         << "There is no extended Oscar1999 format.";
     return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
   }
 }
@@ -798,7 +798,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(
       return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Dileptons");
     } else if (!modern_format && out_par.dil_extended) {
-      logg[Output].warn()
+      logg[LOutput].warn()
           << "Creating Oscar output: "
           << "There is no extended Oscar1999 (dileptons) format.";
     }
@@ -814,8 +814,9 @@ std::unique_ptr<OutputInterface> create_oscar_output(
       return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Photons");
     } else if (!modern_format && out_par.photons_extended) {
-      logg[Output].warn() << "Creating Oscar output: "
-                          << "There is no extended Oscar1999 (photons) format.";
+      logg[LOutput].warn()
+          << "Creating Oscar output: "
+          << "There is no extended Oscar1999 (photons) format.";
     }
   } else if (content == "Initial_Conditions") {
     if (modern_format && !out_par.ic_extended) {
@@ -829,7 +830,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(
       return make_unique<OscarOutput<OscarFormat1999, OscarParticlesIC>>(
           path, "SMASH_IC");
     } else if (!modern_format && out_par.ic_extended) {
-      logg[Output].warn()
+      logg[LOutput].warn()
           << "Creating Oscar output: "
           << "There is no extended Oscar1999 (initial conditions) format.";
     }

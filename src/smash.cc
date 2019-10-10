@@ -26,7 +26,7 @@
 #include "smash/config.h"
 
 namespace smash {
-inline constexpr int Main = LogArea::Main::id;
+inline constexpr int LMain = LogArea::Main::id;
 
 namespace {
 /**
@@ -521,7 +521,7 @@ int main(int argc, char *argv[]) {
     // check if version matches before doing anything else
     check_config_version_is_compatible(configuration);
 
-    logg[Main].trace(source_location, " create ParticleType and DecayModes");
+    logg[LMain].trace(source_location, " create ParticleType and DecayModes");
 
     auto particles_and_decays =
         load_particles_and_decaymodes(particles, decaymodes);
@@ -529,7 +529,7 @@ int main(int argc, char *argv[]) {
      * Hovever, warn in case of conflict.
      */
     if (configuration.has_value({"particles"}) && particles) {
-      logg[Main].warn(
+      logg[LMain].warn(
           "Ambiguity: particles from external file ", particles,
           " requested, but there is also particle list in the config."
           " Using particles from ",
@@ -540,7 +540,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (configuration.has_value({"decaymodes"}) && decaymodes) {
-      logg[Main].warn(
+      logg[LMain].warn(
           "Ambiguity: decaymodes from external file ", decaymodes,
           " requested, but there is also decaymodes list in the config."
           " Using decaymodes from",
@@ -681,7 +681,7 @@ int main(int argc, char *argv[]) {
           "output directory. If you are sure this is not the case, remove \"" +
           lock_path.native() + "\".");
     }
-    logg[Main].debug("output path: ", output_path);
+    logg[LMain].debug("output path: ", output_path);
     if (!force_overwrite && bf::exists(output_path / "config.yaml")) {
       throw std::runtime_error(
           "Output directory would get overwritten. Select a different output "
@@ -703,7 +703,7 @@ int main(int argc, char *argv[]) {
     configuration.take({"decaymodes"});
 
     // Create an experiment
-    logg[Main].trace(source_location, " create Experiment");
+    logg[LMain].trace(source_location, " create Experiment");
     auto experiment = ExperimentBase::create(configuration, output_path);
 
     // Version value is not used in experiment. Get rid of it to prevent
@@ -712,14 +712,14 @@ int main(int argc, char *argv[]) {
     check_for_unused_config_values(configuration);
 
     // Run the experiment
-    logg[Main].trace(source_location, " run the Experiment");
+    logg[LMain].trace(source_location, " run the Experiment");
     experiment->run();
   } catch (std::exception &e) {
-    logg[Main].fatal() << "SMASH failed with the following error:\n"
-                       << e.what();
+    logg[LMain].fatal() << "SMASH failed with the following error:\n"
+                        << e.what();
     return EXIT_FAILURE;
   }
 
-  logg[Main].trace() << source_location << " about to return from main";
+  logg[LMain].trace() << source_location << " about to return from main";
   return 0;
 }

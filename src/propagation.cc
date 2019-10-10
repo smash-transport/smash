@@ -16,7 +16,7 @@
 #include "smash/spheremodus.h"
 
 namespace smash {
-inline constexpr int Propagation = LogArea::Propagation::id;
+inline constexpr int LPropagation = LogArea::Propagation::id;
 
 double calc_hubble(double time, const ExpansionProperties &metric) {
   double h;  // Hubble parameter
@@ -51,7 +51,7 @@ double propagate_straight_line(Particles *particles, double to_time,
     if (dt < 0.0 && !negative_dt_error) {
       // Print error message once, not for every particle
       negative_dt_error = true;
-      logg[Propagation].error("propagate_straight_line - negative dt = ", dt);
+      logg[LPropagation].error("propagate_straight_line - negative dt = ", dt);
     }
     assert(dt >= 0.0);
     /* "Frozen Fermi motion": Fermi momenta are only used for collisions,
@@ -75,7 +75,7 @@ double propagate_straight_line(Particles *particles, double to_time,
       v = data.velocity();
     }
     const FourVector distance = FourVector(0.0, v * dt);
-    logg[Propagation].debug("Particle ", data, " motion: ", distance);
+    logg[LPropagation].debug("Particle ", data, " motion: ", distance);
     FourVector position = data.position() + distance;
     position.set_x0(to_time);
     data.set_4position(position);
@@ -94,8 +94,8 @@ void expand_space_time(Particles *particles,
     FourVector expan_dist =
         FourVector(0.0, h * data.position().threevec() * dt);
 
-    logg[Propagation].debug("Particle ", data,
-                            " expansion motion: ", expan_dist);
+    logg[LPropagation].debug("Particle ", data,
+                             " expansion motion: ", expan_dist);
     // New position and momentum
     FourVector position = data.position() + expan_dist;
     FourVector momentum = data.momentum() - delta_mom;
@@ -151,7 +151,7 @@ void update_momenta(
             (FB.first + data.momentum().velocity().CrossProduct(FB.second)) +
         scale.second * data.type().isospin3_rel() *
             (FI3.first + data.momentum().velocity().CrossProduct(FI3.second));
-    logg[Propagation].debug("Update momenta: F [GeV/fm] = ", Force);
+    logg[LPropagation].debug("Update momenta: F [GeV/fm] = ", Force);
     data.set_4momentum(data.effective_mass(),
                        data.momentum().threevec() + Force * dt);
 
@@ -169,7 +169,7 @@ void update_momenta(
   // warn if the time step is too big
   constexpr double safety_factor = 0.1;
   if (dt > safety_factor * min_time_scale) {
-    logg[Propagation].warn()
+    logg[LPropagation].warn()
         << "The time step size is too large for an accurate propagation "
         << "with potentials. Maximum safe value: "
         << safety_factor * min_time_scale << " fm/c.";

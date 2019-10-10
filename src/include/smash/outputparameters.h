@@ -16,6 +16,7 @@
 #include "logging.h"
 
 namespace smash {
+inline constexpr int LExperiment = LogArea::Experiment::id;
 
 /**
  * Helper structure for Experiment to hold output options and parameters.
@@ -42,8 +43,7 @@ struct OutputParameters {
 
   /// Constructor from configuration
   explicit OutputParameters(Configuration&& conf) : OutputParameters() {
-    const auto& log = logger<LogArea::Experiment>();
-    log.trace(source_location);
+    logg[LExperiment].trace(source_location);
 
     if (conf.has_value({"Thermodynamics"})) {
       auto subcon = conf["Thermodynamics"];
@@ -60,8 +60,9 @@ struct OutputParameters {
       td_dens_type = subcon.take({"Type"}, DensityType::Baryon);
       if (td_dens_type == DensityType::None &&
           (td_rho_eckart || td_tmn || td_tmn_landau || td_v_landau)) {
-        log.warn("Requested Thermodynamics output with Density type None. ",
-                 "Change the density type to avoid output being dropped.");
+        logg[LExperiment].warn(
+            "Requested Thermodynamics output with Density type None. ",
+            "Change the density type to avoid output being dropped.");
       }
       td_smearing = subcon.take({"Smearing"}, true);
     }

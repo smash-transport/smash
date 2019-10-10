@@ -28,6 +28,12 @@ void set_default_loglevel(einhard::LogLevel level) {
 einhard::Logger<> &retrieve_logger_impl(int id) { return logg[id]; }
 
 /**
+ * An array that stores all pre-configured Logger objects. The objects can be
+ * accessed via the logger function.
+ */
+std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value> logg;
+
+/**
  * \internal
  * Recursively find the longest logger name at compile time.
  *

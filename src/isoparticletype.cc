@@ -12,7 +12,7 @@
 #include "smash/logging.h"
 
 namespace smash {
-inline constexpr int particletype = LogArea::ParticleType::id;
+inline constexpr int LParticleType = LogArea::ParticleType::id;
 
 static IsoParticleTypeList iso_type_list;
 
@@ -114,17 +114,17 @@ void IsoParticleType::add_state(const ParticleType &type) {
 
   // check if isospin symmetry is fulfilled
   if (std::abs(mass() - type.mass()) > really_small) {
-    logg[particletype].warn()
+    logg[LParticleType].warn()
         << "Isospin symmetry is broken by mass of " << type.name() << ": "
         << type.mass() << " vs. " << mass();
   }
   if (std::abs(width() - type.width_at_pole()) > really_small) {
-    logg[particletype].warn()
+    logg[LParticleType].warn()
         << "Isospin symmetry is broken by width of " << type.name() << ": "
         << type.width_at_pole() << " vs. " << width();
   }
   if (spin() != type.spin()) {
-    logg[particletype].error()
+    logg[LParticleType].error()
         << "Isospin symmetry is broken by spin of " << type.name() << ": "
         << type.spin() << " vs. " << spin();
   }
@@ -136,7 +136,7 @@ void IsoParticleType::create_multiplet(const ParticleType &type) {
   if (!exists(multiname)) {
     iso_type_list.emplace_back(multiname, type.mass(), type.width_at_pole(),
                                type.spin(), type.parity());
-    logg[particletype].debug()
+    logg[LParticleType].debug()
         << "Creating isospin multiplet " << multiname
         << " [ m = " << type.mass() << ", Γ = " << type.width_at_pole() << " ]";
   }

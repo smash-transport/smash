@@ -33,7 +33,7 @@
 #include "smash/random.h"
 
 namespace smash {
-inline constexpr int Collider = LogArea::Collider::id;
+inline constexpr int LCollider = LogArea::Collider::id;
 /*!\Userguide
  * \page input_modi_collider_ Collider
  *
@@ -465,7 +465,7 @@ double ColliderModus::initial_conditions(Particles *particles,
                                          const ExperimentParameters &) {
   sample_impact();
 
-  logg[Collider].info() << "Impact parameter = " << format(impact_, "fm");
+  logg[LCollider].info() << "Impact parameter = " << format(impact_, "fm");
   // Populate the nuclei with appropriately distributed nucleons.
   // If deformed, this includes rotating the nucleus.
   projectile_->arrange_nucleons();
@@ -500,13 +500,13 @@ double ColliderModus::initial_conditions(Particles *particles,
     projectile_->generate_fermi_momenta();
     target_->generate_fermi_momenta();
     if (fermi_motion_ == FermiMotion::On) {
-      logg[Collider].info() << "Fermi motion is ON.";
+      logg[LCollider].info() << "Fermi motion is ON.";
     } else {
-      logg[Collider].info() << "FROZEN Fermi motion is on.";
+      logg[LCollider].info() << "FROZEN Fermi motion is on.";
     }
   } else if (fermi_motion_ == FermiMotion::Off) {
     // No Fermi-momenta are generated in this case
-    logg[Collider].info() << "Fermi motion is OFF.";
+    logg[LCollider].info() << "Fermi motion is OFF.";
   } else {
     throw std::domain_error("Invalid Fermi_Motion input.");
   }

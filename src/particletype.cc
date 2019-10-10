@@ -34,8 +34,8 @@
 #include "smash/stringfunctions.h"
 
 namespace smash {
-inline constexpr int particletype = LogArea::ParticleType::id;
-inline constexpr int Resonances = LogArea::ParticleType::id;
+inline constexpr int LParticleType = LogArea::ParticleType::id;
+inline constexpr int LResonances = LogArea::Resonances::id;
 
 namespace {
 /// Global pointer to the Particle Type list.
@@ -278,7 +278,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
         full_name += chargestr(pdgcode[i].charge());
       }
       type_list.emplace_back(full_name, mass, width, parity, pdgcode[i]);
-      logg[particletype].debug()
+      logg[LParticleType].debug()
           << "Setting     particle type: " << type_list.back();
       if (pdgcode[i].has_antiparticle()) {
         /* add corresponding antiparticle */
@@ -287,7 +287,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
         const auto anti_parity = (anti.spin() % 2 == 0) ? parity : -parity;
         full_name = antiname(full_name, pdgcode[i]);
         type_list.emplace_back(full_name, mass, width, anti_parity, anti);
-        logg[particletype].debug()
+        logg[LParticleType].debug()
             << "Setting antiparticle type: " << type_list.back();
       }
     }
@@ -663,7 +663,7 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
 
     // check that we are using the proper maximum value
     if (val > max) {
-      logg[Resonances].debug(
+      logg[LResonances].debug(
           "maximum is being increased in sample_resonance_mass: ",
           this->max_factor1_, " ", val / max, " ", this->pdgcode(), " ",
           mass_stable, " ", cms_energy, " ", mass_res);
@@ -715,7 +715,7 @@ std::pair<double, double> ParticleType::sample_resonance_masses(
     } while (val < random::uniform(0., max));
 
     if (val > max) {
-      logg[Resonances].debug(
+      logg[LResonances].debug(
           "maximum is being increased in sample_resonance_masses: ",
           t1.max_factor2_, " ", val / max, " ", t1.pdgcode(), " ", t2.pdgcode(),
           " ", cms_energy, " ", mass_1, " ", mass_2);

@@ -19,6 +19,7 @@
 #include "smash/random.h"
 
 namespace smash {
+inline constexpr int LCollider = LogArea::Collider::id;
 
 /*!\Userguide
  * \page projectile_and_target Projectile and Target
@@ -201,11 +202,10 @@ void CustomNucleus::arrange_nucleons() {
 
 void CustomNucleus::generate_fermi_momenta() {
   Nucleus::generate_fermi_momenta();
-  const auto& log = logger<LogArea::Collider>();
-  log.warn() << "Fermi motion activated with a custom nucleus.\n";
-  log.warn() << "Be aware that generating the Fermi momenta\n"
-             << "assumes nucleons distributed according to a\n"
-             << "Woods-Saxon distribution.";
+  logg[LCollider].warn() << "Fermi motion activated with a custom nucleus.\n";
+  logg[LCollider].warn() << "Be aware that generating the Fermi momenta\n"
+                         << "assumes nucleons distributed according to a\n"
+                         << "Woods-Saxon distribution.";
 }
 
 std::string CustomNucleus::file_path(const std::string& file_directory,

@@ -22,7 +22,7 @@
 #include "random.h"
 
 namespace smash {
-inline constexpr int Act = LogArea::Action::id;
+inline constexpr int LAction = LogArea::Action::id;
 
 /**
  * \ingroup action
@@ -353,11 +353,11 @@ class Action {
       }
     }
     /* Should never get here. */
-    logg[Act].fatal(source_location,
-                    "Problem in choose_channel: ", subprocesses.size(), " ",
-                    weight_sum, " ", total_weight, " ",
-                    //          random_weight, "\n", *this);
-                    random_weight, "\n");
+    logg[LAction].fatal(source_location,
+                        "Problem in choose_channel: ", subprocesses.size(), " ",
+                        weight_sum, " ", total_weight, " ",
+                        //          random_weight, "\n", *this);
+                        random_weight, "\n");
     std::abort();
   }
 

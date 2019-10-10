@@ -32,7 +32,7 @@
 #include "smash/wallcrossingaction.h"
 
 namespace smash {
-inline constexpr int Box = LogArea::Box::id;
+inline constexpr int LBox = LogArea::Box::id;
 
 /* console output on startup of box specific parameters */
 std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
@@ -249,14 +249,15 @@ double BoxModus::initial_conditions(Particles *particles,
       particles->create(thermal_mult_int, mult.first);
       nb_init += mult.second * mult.first.baryon_number();
       ns_init += mult.second * mult.first.strangeness();
-      logg[Box].debug(mult.first, " initial multiplicity ", thermal_mult_int);
+      logg[LBox].debug(mult.first, " initial multiplicity ", thermal_mult_int);
     }
-    logg[Box].info("Initial hadron gas baryon density ", nb_init);
-    logg[Box].info("Initial hadron gas strange density ", ns_init);
+    logg[LBox].info("Initial hadron gas baryon density ", nb_init);
+    logg[LBox].info("Initial hadron gas strange density ", ns_init);
   } else {
     for (const auto &p : init_multipl_) {
       particles->create(p.second * parameters.testparticles, p.first);
-      logg[Box].debug("Particle ", p.first, " initial multiplicity ", p.second);
+      logg[LBox].debug("Particle ", p.first, " initial multiplicity ",
+                       p.second);
     }
   }
 
@@ -274,8 +275,9 @@ double BoxModus::initial_conditions(Particles *particles,
       momentum_radial = sample_momenta_from_thermal(T, mass);
     }
     phitheta.distribute_isotropically();
-    logg[Box].debug(data.type().name(), "(id ", data.id(), ") radial momentum ",
-                    momentum_radial, ", direction", phitheta);
+    logg[LBox].debug(data.type().name(), "(id ", data.id(),
+                     ") radial momentum ", momentum_radial, ", direction",
+                     phitheta);
     data.set_4momentum(mass, phitheta.threevec() * momentum_radial);
     momentum_total += data.momentum();
 
@@ -307,10 +309,10 @@ double BoxModus::initial_conditions(Particles *particles,
   for (ParticleData &data : *particles) {
     momentum_total += data.momentum();
     /* IC: debug checks */
-    logg[Box].debug() << data;
+    logg[LBox].debug() << data;
   }
   /* allows to check energy conservation */
-  logg[Box].debug() << "Initial total 4-momentum [GeV]: " << momentum_total;
+  logg[LBox].debug() << "Initial total 4-momentum [GeV]: " << momentum_total;
   return start_time_;
 }
 
@@ -335,7 +337,7 @@ int BoxModus::impose_boundary_conditions(Particles *particles,
       }
     }
   }
-  logg[Box].debug("Moved ", wraps, " particles back into the box.");
+  logg[LBox].debug("Moved ", wraps, " particles back into the box.");
   return wraps;
 }
 

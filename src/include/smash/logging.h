@@ -323,7 +323,7 @@ FormattingHelper<T> format(const T &value, const char *unit, int width = -1,
  * An array that stores all pre-configured Logger objects. The objects can be
  * accessed via the logger function.
  */
-static std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value>
+extern std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value>
     logg;
 }  // namespace smash
 

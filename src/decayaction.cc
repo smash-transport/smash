@@ -17,7 +17,7 @@
 #include "smash/potential_globals.h"
 
 namespace smash {
-inline constexpr int DecayModes = LogArea::DecayModes::id;
+inline constexpr int LDecayModes = LogArea::DecayModes::id;
 
 DecayAction::DecayAction(const ParticleData &p, double time)
     : Action({p}, time), total_width_(0.) {}
@@ -31,7 +31,7 @@ void DecayAction::add_decay(DecayBranchPtr p) {
 }
 
 void DecayAction::generate_final_state() {
-  logg[DecayModes].debug("Process: Resonance decay. ");
+  logg[LDecayModes].debug("Process: Resonance decay. ");
   /* Execute a decay process for the selected particle.
    *
    * randomly select one of the decay modes of the particle
@@ -68,12 +68,12 @@ void DecayAction::generate_final_state() {
 
   // Set formation time.
   for (auto &p : outgoing_particles_) {
-    logg[DecayModes].debug("particle momenta in lrf ", p);
+    logg[LDecayModes].debug("particle momenta in lrf ", p);
     // assuming decaying particles are always fully formed
     p.set_formation_time(time_of_execution_);
     // Boost to the computational frame
     p.boost_momentum(-total_momentum_of_outgoing_particles().velocity());
-    logg[DecayModes].debug("particle momenta in comp ", p);
+    logg[LDecayModes].debug("particle momenta in comp ", p);
   }
 }
 

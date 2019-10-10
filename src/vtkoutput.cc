@@ -18,7 +18,7 @@
 #include "smash/vtkoutput.h"
 
 namespace smash {
-inline constexpr int Output = LogArea::Output::id;
+inline constexpr int LOutput = LogArea::Output::id;
 
 VtkOutput::VtkOutput(const bf::path &path, const std::string &name,
                      const OutputParameters &out_par)
@@ -26,7 +26,7 @@ VtkOutput::VtkOutput(const bf::path &path, const std::string &name,
       base_path_(std::move(path)),
       is_thermodynamics_output_(name == "Thermodynamics") {
   if (out_par.part_extended) {
-    logg[Output].warn()
+    logg[LOutput].warn()
         << "Creating VTK output: There is no extended VTK format.";
   }
 }

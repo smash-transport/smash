@@ -12,7 +12,7 @@
 #include "smash/logging.h"
 
 namespace smash {
-inline constexpr int PauliBlocking = LogArea::PauliBlocking::id;
+inline constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
 
 PauliBlocker::PauliBlocker(Configuration conf,
                            const ExperimentParameters &param)
@@ -35,14 +35,14 @@ PauliBlocker::PauliBlocker(Configuration conf,
    */
 
   if (ntest_ < 20) {
-    logg[PauliBlocking].warn(
+    logg[LPauliBlocking].warn(
         "Phase-space density calculation in Pauli blocking"
         " will not work reasonably for a small number of testparticles."
         " The recommended number of testparticles is 20.");
   }
 
   if (rc_ < rr_ || rr_ < 0.0 || rp_ < 0) {
-    logg[PauliBlocking].error(
+    logg[LPauliBlocking].error(
         "Please choose reasonable parameters for Pauli blocking:"
         "All radii have to be positive and Gaussian_Cutoff should"
         "be larger than Spatial_Averaging_Radius");
@@ -140,7 +140,7 @@ void PauliBlocker::init_weights_analytical() {
     }
     integral *= 2 * pi / std::pow(2 * pi * sig_ * sig_, 1.5);
     weights_[k] = integral / norm / phase_volume;
-    logg[PauliBlocking].debug("Analytical weights[", k, "] = ", weights_[k]);
+    logg[LPauliBlocking].debug("Analytical weights[", k, "] = ", weights_[k]);
   }
 }
 

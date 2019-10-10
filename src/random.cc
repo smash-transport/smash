@@ -12,7 +12,7 @@
 #include "smash/logging.h"
 
 namespace smash {
-inline constexpr int GrandcanThermalizer = LogArea::GrandcanThermalizer::id;
+inline constexpr int LGrandcanThermalizer = LogArea::GrandcanThermalizer::id;
 /*thread_local (see #3075)*/ random::Engine random::engine;
 
 int64_t random::generate_63bit_seed() {
@@ -34,21 +34,21 @@ random::BesselSampler::BesselSampler(const double poisson_mean1,
       N_is_positive_(fixed_difference >= 0) {
   assert(poisson_mean1 >= 0.0);
   assert(poisson_mean2 >= 0.0);
-  logg[GrandcanThermalizer].debug("Bessel sampler",
-                                  ": Poisson mean N1 = ", poisson_mean1,
-                                  ", Poisson mean N2 = ", poisson_mean2,
-                                  ", N1 - N2 fixed to ", fixed_difference);
+  logg[LGrandcanThermalizer].debug("Bessel sampler",
+                                   ": Poisson mean N1 = ", poisson_mean1,
+                                   ", Poisson mean N2 = ", poisson_mean2,
+                                   ", N1 - N2 fixed to ", fixed_difference);
   m_ = 0.5 * (std::sqrt(a_ * a_ + N_ * N_) - N_);
   if (m_ >= m_switch_method_) {
     mu_ = 0.5 * a_ * r_(N_, a_);
     const double mean_sqr = mu_ * (1.0 + 0.5 * a_ * r_(N_ + 1, a_));
     sigma_ = std::sqrt(mean_sqr - mu_ * mu_);
-    logg[GrandcanThermalizer].debug(
+    logg[LGrandcanThermalizer].debug(
         "m = ", m_, " -> using gaussian sampling with mean = ", mu_,
         ", sigma = ", sigma_);
   } else {
-    logg[GrandcanThermalizer].debug("m = ", m_,
-                                    " -> using direct sampling method");
+    logg[LGrandcanThermalizer].debug("m = ", m_,
+                                     " -> using direct sampling method");
     std::vector<double> probabilities;
     double wi = 1.0, sum = 0.0;
     int i = 0;
@@ -61,7 +61,7 @@ random::BesselSampler::BesselSampler(const double poisson_mean1,
     i = 0;
     for (double p : probabilities) {
       p /= sum;
-      logg[GrandcanThermalizer].debug("Probability (", i, ") = ", p);
+      logg[LGrandcanThermalizer].debug("Probability (", i, ") = ", p);
       i++;
     }
     dist_.reset_weights(probabilities);

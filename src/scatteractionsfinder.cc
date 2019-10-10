@@ -28,6 +28,7 @@
 #include "smash/stringfunctions.h"
 
 namespace smash {
+inline constexpr int LFindScatter = LogArea::FindScatter::id;
 /*!\Userguide
  * \page input_collision_term_ Collision_Term
  * \key Collision_Criterion (string, optional, default = "Geometric") \n
@@ -244,9 +245,9 @@ ScatterActionsFinder::ScatterActionsFinder(
         "config accordingly.");
   }
   if (is_constant_elastic_isotropic()) {
-    const auto& log = logger<LogArea::FindScatter>();
-    log.info("Constant elastic isotropic cross-section mode:", " using ",
-             elastic_parameter_, " mb as maximal cross-section.");
+    logg[LFindScatter].info(
+        "Constant elastic isotropic cross-section mode:", " using ",
+        elastic_parameter_, " mb as maximal cross-section.");
   }
   if (strings_switch_) {
     auto subconfig = config["Collision_Term"]["String_Parameters"];
@@ -275,10 +276,6 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
                                                 const ParticleData& data_b,
                                                 double dt,
                                                 const double cell_vol) const {
-#ifndef NDEBUG
-  const auto& log = logger<LogArea::FindScatter>();
-#endif
-
   /* If the two particles
    * 1) belong to the two colliding nuclei
    * 2) are within the same nucleus
@@ -339,9 +336,10 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
     const double p_22 = xs * v_rel * dt / (cell_vol * testparticles_);
 
 #ifndef NDEBUG
-    log.debug("Stochastic collison criterion parameters:\np_22 = ", p_22,
-              ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
-              ", cell_vol = ", cell_vol, ", testparticles = ", testparticles_);
+    logg[LFindScatter].debug(
+        "Stochastic collison criterion parameters:\np_22 = ", p_22,
+        ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
+        ", cell_vol = ", cell_vol, ", testparticles = ", testparticles_);
 #endif
 
     if (p_22 > 1.) {
@@ -361,9 +359,10 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
     // just collided with this particle
     if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
 #ifndef NDEBUG
-      log.debug("Skipping collided particles at time ", data_a.position().x0(),
-                " due to process ", data_a.id_process(), "\n    ", data_a,
-                "\n<-> ", data_b);
+      logg[LFindScatter].debug("Skipping collided particles at time ",
+                               data_a.position().x0(), " due to process ",
+                               data_a.id_process(), "\n    ", data_a, "\n<-> ",
+                               data_b);
 #endif
       return nullptr;
     }
@@ -394,8 +393,8 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
     }
 
 #ifndef NDEBUG
-    log.debug("particle distance squared: ", distance_squared, "\n    ", data_a,
-              "\n<-> ", data_b);
+    logg[LFindScatter].debug("particle distance squared: ", distance_squared,
+                             "\n    ", data_a, "\n<-> ", data_b);
 #endif
   }
 

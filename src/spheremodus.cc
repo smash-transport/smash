@@ -31,7 +31,7 @@
 #include "smash/threevector.h"
 
 namespace smash {
-inline constexpr int sphere = LogArea::Sphere::id;
+inline constexpr int LSphere = LogArea::Sphere::id;
 
 /*!\Userguide
  * \page input_modi_sphere_ Sphere
@@ -230,16 +230,16 @@ double SphereModus::initial_conditions(Particles *particles,
       particles->create(thermal_mult_int, mult.first);
       nb_init += mult.second * mult.first.baryon_number();
       ns_init += mult.second * mult.first.strangeness();
-      logg[sphere].debug(mult.first, " initial multiplicity ",
-                         thermal_mult_int);
+      logg[LSphere].debug(mult.first, " initial multiplicity ",
+                          thermal_mult_int);
     }
-    logg[sphere].info("Initial hadron gas baryon density ", nb_init);
-    logg[sphere].info("Initial hadron gas strange density ", ns_init);
+    logg[LSphere].info("Initial hadron gas baryon density ", nb_init);
+    logg[LSphere].info("Initial hadron gas strange density ", ns_init);
   } else {
     for (const auto &p : init_multipl_) {
       particles->create(p.second * parameters.testparticles, p.first);
-      logg[sphere].debug("Particle ", p.first, " initial multiplicity ",
-                         p.second);
+      logg[LSphere].debug("Particle ", p.first, " initial multiplicity ",
+                          p.second);
     }
   }
   /* loop over particle data to fill in momentum and position information */
@@ -270,9 +270,9 @@ double SphereModus::initial_conditions(Particles *particles,
         break;
     }
     phitheta.distribute_isotropically();
-    logg[sphere].debug(data.type().name(), "(id ", data.id(),
-                       ") radial momentum ", momentum_radial, ", direction",
-                       phitheta);
+    logg[LSphere].debug(data.type().name(), "(id ", data.id(),
+                        ") radial momentum ", momentum_radial, ", direction",
+                        phitheta);
     data.set_4momentum(mass, phitheta.threevec() * momentum_radial);
     momentum_total += data.momentum();
     /* uniform sampling in a sphere with radius r */
@@ -305,11 +305,11 @@ double SphereModus::initial_conditions(Particles *particles,
   for (ParticleData &data : *particles) {
     momentum_total += data.momentum();
     /* IC: debug checks */
-    logg[sphere].debug() << data;
+    logg[LSphere].debug() << data;
   }
   /* allows to check energy conservation */
-  logg[sphere].debug() << "Sphere initial total 4-momentum [GeV]: "
-                       << momentum_total;
+  logg[LSphere].debug() << "Sphere initial total 4-momentum [GeV]: "
+                        << momentum_total;
   return start_time_;
 }
 }  // namespace smash

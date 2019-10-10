@@ -25,7 +25,7 @@
 #include "smash/tabulation.h"
 
 namespace smash {
-inline constexpr int Scatteraction = LogArea::ScatterAction::id;
+inline constexpr int LScatterAction = LogArea::ScatterAction::id;
 
 ScatterActionPhoton::ScatterActionPhoton(
     const ParticleList &in, const double time, const int n_frac_photons,
@@ -194,7 +194,7 @@ bool ScatterActionPhoton::is_kinematically_possible(const double s_sqrt,
 void ScatterActionPhoton::generate_final_state() {
   // we have only one reaction per incoming particle pair
   if (collision_processes_photons_.size() != 1) {
-    logg[Scatteraction].fatal()
+    logg[LScatterAction].fatal()
         << "Problem in ScatterActionPhoton::generate_final_state().\n";
     throw std::runtime_error("");
   }
@@ -239,7 +239,7 @@ void ScatterActionPhoton::generate_final_state() {
   // on very rare occasions near the kinematic threshold numerical issues give
   // unphysical angles.
   if (costheta > 1 || costheta < -1) {
-    logg[Scatteraction].warn()
+    logg[LScatterAction].warn()
         << "Cos(theta)of photon scattering out of physical bounds in "
            "the following scattering: "
         << incoming_particles_ << "Clamping to [-1,1].";
@@ -405,9 +405,9 @@ CollisionBranchList ScatterActionPhoton::photon_cross_sections(
 
   if (xsection <= 0) {
     xsection = 0.1;
-    logg[Scatteraction].warn("Calculated negative cross section.\nParticles ",
-                             incoming_particles_, " mass rho particle: ", m_rho,
-                             ", sqrt_s: ", std::sqrt(s));
+    logg[LScatterAction].warn(
+        "Calculated negative cross section.\nParticles ", incoming_particles_,
+        " mass rho particle: ", m_rho, ", sqrt_s: ", std::sqrt(s));
   }
   process_list.push_back(make_unique<CollisionBranch>(
       *hadron_out_t_, *photon_particle, xsection, ProcessType::TwoToTwo));
