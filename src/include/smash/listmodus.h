@@ -139,6 +139,9 @@ class ListModus : public ModusDefault {
     using std::runtime_error::runtime_error;
   };
 
+  /// \return whether the modus is list modus (which is, yes, trivially true)
+  bool is_list() const { return true; }
+
  protected:
   /// Starting time for the List; changed to the earliest formation time
   double start_time_ = 0.;
