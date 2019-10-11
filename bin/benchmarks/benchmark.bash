@@ -1,31 +1,50 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+usage() {
+cat <<END
+-------------------------------------------
+Executing several SMASH run benchmarks
+-------------------------------------------
+Note: Prepare the build directory yourself.
+Clean it and compile the SMASH version you
+want to benchmark.
+
+Usage: $0 PREPARED_BUILD_DIR
+
+Give '-h' or '--help' as the argument to
+display this help.
+-------------------------------------------
+END
+}
 
 fail() {
   echo "$*" >&2
   exit 1
 }
 
-if [[ "$#" -ne 1 ]]; then
-    echo "Executing several SMASH run benchmarks"
-    echo "--------------------------------------"
-    echo "Note: Prepare the build directory yourself. "
-    echo "Clean it and compile the SMASH version you"
-    echo "want to benchmark."
-    echo
-    echo "Usage: $0 PREPARED_BUILD_DIR"
-    exit 1
-fi
-
 type perf  >/dev/null 2>&1 || fail "Failed to find perf (This script only works on Linux)."
 type uname >/dev/null 2>&1 || fail "Failed to find uname."
 type lshw  >/dev/null 2>&1 || fail "Failed to find lshw."
 
-BUILD_DIR=$1
+if [[ $# -ne 1 ]]; then
+  fail "Script requires exactly one argument. Use '-h' for help."
+fi
+
+if [[ $1 == "-h" || $1 == "--help" ]]; then
+  usage
+  exit 0
+else
+  BUILD_DIR=$1
+  if [[ ! -f "${BUILD_DIR}/smash" ]]; then
+    fail "Given build directory \"${BUILD_DIR}\" does not contain a smash executable."
+  fi
+fi
+
+
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd )"
 SMASH_ROOT="${SCRIPTPATH}/../.."
 
 cd $BUILD_DIR
-
 
 echo "Collecting System Information ..."
 
@@ -40,6 +59,7 @@ echo "(Runs for roughly 2h.)"
 
 
 benchmark_run() {
+  local YAML_DIR DECAYM_DIR PART_DIR
   YAML_DIR=$1
   DECAYM_DIR=$2
   PART_DIR=$3
