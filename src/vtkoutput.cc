@@ -78,7 +78,8 @@ void VtkOutput::at_eventend(const Particles & /*particles*/,
                             double /*impact_parameter*/, bool /*empty_event*/) {
 }
 
-void VtkOutput::at_intermediate_time(const Particles &particles, const Clock &,
+void VtkOutput::at_intermediate_time(const Particles &particles,
+                                     const std::unique_ptr<Clock> &,
                                      const DensityParameters &) {
   if (!is_thermodynamics_output_) {
     write(particles);

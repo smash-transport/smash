@@ -9,6 +9,8 @@
 
 #include "unittest.h"  // This include has to be first
 
+#include <cinttypes>
+
 #include "histogram.h"
 
 #include "../include/smash/random.h"
@@ -19,7 +21,7 @@ TEST(set_random_seed) {
   std::random_device rd;
   int64_t seed = rd();
   random::set_seed(seed);
-  std::printf("random number seed: %lld\n", seed);
+  std::printf("random number seed: %" PRId64 "\n", seed);
 }
 
 int tst_cnt = 0;  // test_counter

@@ -24,16 +24,16 @@ TEST(init_particle_types) { Test::create_smashon_particletypes(); }
 // parallel momenta => impossible collision
 TEST(impossible_collision) {
   const auto a =
-      Test::smashon(Position{1., 1., 1., 1.}, Momentum{0.1, 0.3, -0.1, 0.2});
+      Test::smashon(Position{1., 1., 1., 1.}, Momentum{0.1, 0.3, -0.1, 0.2}, 1);
   const auto b =
-      Test::smashon(Position{2., 2., 2., 2.}, Momentum{0.1, 0.3, -0.1, 0.2});
+      Test::smashon(Position{2., 2., 2., 2.}, Momentum{0.1, 0.3, -0.1, 0.2}, 2);
 
   Configuration config = Test::configuration("");
   ExperimentParameters exp_par = Test::default_parameters();
   const std::vector<bool> has_interacted = {};
   ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
 
-  VERIFY(finder.collision_time(a, b, 0.0) < 0.0);
+  VERIFY(finder.collision_time(a, b, 0.0, {}) < 0.0);
 }
 
 // test particle_distance:

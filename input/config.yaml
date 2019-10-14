@@ -1,4 +1,4 @@
-Version: 1.5 # minimal SMASH version to use with this config file
+Version: 1.7 # minimal SMASH version to use with this config file
 
 Logging:
     default: INFO

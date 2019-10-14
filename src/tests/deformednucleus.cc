@@ -99,10 +99,8 @@ TEST(rotate_both) {
 // returns correct values for given l and cosx
 // simple values for cosx for demonstration purposes
 TEST(yl0) {
-  COMPARE_ABSOLUTE_ERROR(DeformedNucleus::y_l_0(2, 1.),
-                         std::sqrt(5. / M_PI) / 2., 1e-7);
-  COMPARE_ABSOLUTE_ERROR(DeformedNucleus::y_l_0(4, 1.),
-                         3. / (2. * std::sqrt(M_PI)), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(y_l_0(2, 1.), std::sqrt(5. / M_PI) / 2., 1e-7);
+  COMPARE_ABSOLUTE_ERROR(y_l_0(4, 1.), 3. / (2. * std::sqrt(M_PI)), 1e-7);
 }
 
 TEST(deformation_parameters_from_config) {

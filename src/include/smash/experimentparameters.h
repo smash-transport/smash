@@ -22,10 +22,10 @@ namespace smash {
  */
 struct ExperimentParameters {
   /// System clock (for simulation time keeping in the computational frame)
-  Clock labclock;
+  std::unique_ptr<Clock> labclock;
 
   /// Output clock to keep track of the next output time
-  Clock outputclock;
+  std::unique_ptr<Clock> outputclock;
 
   /// Number of test particle
   int testparticles;

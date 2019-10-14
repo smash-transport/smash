@@ -162,47 +162,44 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
       if (Z == 92) {
         set_beta_2(0.28);
         set_beta_4(0.093);
-        break;
       } else {
         listed = true;
       }
+      break;
     case 208:  // Lead
       if (Z == 82) {
         set_beta_2(0.0);
         set_beta_4(0.0);
-        break;
       } else {
         listed = true;
       }
+      break;
     case 197:  // Gold
       if (Z == 79) {
         set_beta_2(-0.131);
         set_beta_4(-0.031);
-        break;
       } else {
         listed = true;
       }
+      break;
     case 63:  // Copper
       if (Z == 29) {
         set_beta_2(0.162);
         set_beta_4(-0.006);
-        break;
       } else {
         listed = true;
       }
+      break;
     case 96:
       if (Z == 40) {  // Zirconium
         set_beta_2(0.0);
         set_beta_4(0.0);
-        break;
       } else if (Z == 44) {  // Ruthenium
         set_beta_2(0.158);
         set_beta_4(0.0);
-        break;
       } else if (Z == 44) {  // Ruthenium
         set_beta_2(0.158);
         set_beta_4(0.0);
-        break;
       } else {
         throw std::domain_error(
             "Number of protons for nuclei with mass number A = 96 does not "
@@ -210,7 +207,6 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
             "for additional isobars are currently not implemented."
             " Please specify at least \"Beta_2\" and \"Beta_4\" "
             "manually and set \"Automatic: False.\" ");
-        break;
       }
       break;
     default:
@@ -297,14 +293,7 @@ void DeformedNucleus::rotate() {
   }
 }
 
-/**
- * Spherical harmonics Y_2_0 and Y_4_0.
- * \param[in] l Angular momentum value (2 and 4 are supported)
- * \param[in] cosx Cosine of the polar angle
- * \return Value of the corresponding spherical harmonic
- * \throws domain_error if unsupported l is encountered
- */
-static double y_l_0(int l, double cosx) {
+double y_l_0(int l, double cosx) {
   if (l == 2) {
     return (1. / 4) * std::sqrt(5 / M_PI) * (3. * (cosx * cosx) - 1);
   } else if (l == 4) {

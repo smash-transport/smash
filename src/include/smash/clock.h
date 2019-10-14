@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_CLOCK_H_
 #define SRC_INCLUDE_CLOCK_H_
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -31,8 +32,8 @@ namespace smash {
  * Potential usage for adapting time steps:
  * ------
  * \code
- *   Clock labtime(0., 0.1);
- *   Clock endtime(10., 0.);
+ *   UniformClock labtime(0., 0.1);
+ *   UniformClock endtime(10., 0.);
  *   while (labtime < endtime) {
  *     // do something
  *     // adapt the timestep size to external circumstances:
@@ -63,6 +64,100 @@ namespace smash {
  * \see operator<(float) const
  * \see operator>(float) const
  *
+ **/
+class Clock {
+ public:
+  /// The type used for counting ticks/time.
+  using Representation = std::int64_t;
+  /// \return the duration of the current time step
+  virtual double timestep_duration() const = 0;
+  /// \return the current time
+  virtual double current_time() const = 0;
+  /// \return the time of the next time step
+  virtual double next_time() const = 0;
+  /**
+   * reset the clock to the starting time of the simulation
+   *
+   * \param[in] start_time starting time of the imulation
+   * \param[in] is_output_clock whether this is an output clock rather than a
+   *                            lab clock
+   */
+  virtual void reset(double start_time, const bool is_output_clock) = 0;
+  /**
+   * Remove output times before the starting time of the simulation if this
+   * is a custom clock.
+   *
+   * \param[in] start_time starting time of the simulation
+   */
+
+  virtual void remove_times_in_past(double start_time) = 0;
+  /**
+   * Advances the clock by one tick.
+   *
+   * This operator is used as `++clock`. The operator `clock++` is not
+   * implemented deliberately, because that requires a copy of the clock
+   * being created.
+   */
+  Clock& operator++() {
+    // guard against overflow:
+    if (counter_ >= std::numeric_limits<Representation>::max() - 1) {
+      throw std::overflow_error("Too many timesteps, clock overflow imminent");
+    }
+    ++counter_;
+    return *this;
+  }
+
+  /**
+   * advances the clock by an arbitrary number of ticks.
+   *
+   * \param[in] advance_several_timesteps Number of the timesteps added
+   *                                      to the clock
+   * \throw OverflowError if the number of the added timesteps exceeds
+   *                      the maximum value.
+   */
+  Clock& operator+=(Representation advance_several_timesteps) {
+    if (counter_ >= std::numeric_limits<Representation>::max() -
+                        advance_several_timesteps) {
+      throw std::overflow_error("Too many timesteps, clock overflow imminent");
+    }
+    counter_ += advance_several_timesteps;
+    return *this;
+  }
+
+  /**
+   * Compares the times between two clocks.
+   *
+   * \param[in] rhs The other clock.
+   */
+  bool operator<(const Clock& rhs) const {
+    return current_time() < rhs.current_time();
+  }
+
+  /**
+   * Compares the time of the clock against a fixed time.
+   *
+   * \param[in] time The other time.
+   */
+  bool operator<(double time) const { return current_time() < time; }
+
+  /**
+   * Compares the time of the clock against a fixed time.
+   *
+   * \param[in] time The other time.
+   */
+  bool operator>(double time) const { return current_time() > time; }
+
+  virtual ~Clock() = default;
+
+ protected:
+  /**
+   * Internally used to count the number of time steps.
+   */
+  Representation counter_ = 0;
+};
+
+/** Clock with uniformly spaced time steps
+ *
  * Internals
  * ---------
  *
@@ -71,8 +166,8 @@ namespace smash {
  * calculated from \f$t = t_0 + n \cdot \Delta t\f$. When \f$\Delta t\f$
  * is changed, \f$t_0\f$ is reset.
  *
- **/
-class Clock {
+ */
+class UniformClock : public Clock {
   /**
    * Defines the resolution of the clock (i.e. the smallest representable time
    * difference).
@@ -88,26 +183,22 @@ class Clock {
   static constexpr double resolution = 0.000001;
 
  public:
-  /// The type used for counting ticks/time.
-  using Representation = std::int64_t;
-
- public:
   /// default initializer: Timestep size is set to 0!
-  Clock() = default;
+  UniformClock() = default;
   /**
    * Initialize with base time and time step size.
    *
    * \param[in] time base time
    * \param[in] dt step size
    */
-  Clock(const double time, const double dt)
+  UniformClock(const double time, const double dt)
       : timestep_duration_(convert(dt)), reset_time_(convert(time)) {
     if (dt < 0.) {
       throw std::range_error("No negative time increment allowed");
     }
   }
   /// \return the current time.
-  double current_time() const {
+  double current_time() const override {
     return convert(reset_time_ + timestep_duration_ * counter_);
   }
   /**
@@ -117,7 +208,7 @@ class Clock {
    * is not the same as the next tick (numerically; this is due to
    * floating point arithmetic).
    */
-  double next_time() const {
+  double next_time() const override {
     if (counter_ * timestep_duration_ >=
         std::numeric_limits<Representation>::max() - timestep_duration_) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
@@ -125,7 +216,9 @@ class Clock {
     return convert(reset_time_ + timestep_duration_ * (counter_ + 1));
   }
   /// \return the time step size.
-  double timestep_duration() const { return convert(timestep_duration_); }
+  double timestep_duration() const override {
+    return convert(timestep_duration_);
+  }
   /**
    * Sets the time step size (and resets the counter).
    *
@@ -139,81 +232,21 @@ class Clock {
     counter_ = 0;
     timestep_duration_ = convert(dt);
   }
+
   /**
-   * Checks if a multiple of a given interval is reached within the
-   * next tick.
+   * Resets the time to the starting time of an event.
    *
-   * \param[in] interval The interval \f$t_i\f$ at which, for instance,
-   * output is expected to happen
-   *
-   * \return is there a natural number n so that \f$n \cdot t_i\f$ is
-   * between the current time and the next time: \f$\exists n \in
-   * \mathbb{N}: t \le n \cdot t_i < t + \Delta t\f$.
-   *
-   * Internally, it checks if \f$n\f$ is the same for this time step as
-   * for the next time step. If so, the next multiple is outside the
-   * current time step, if not, then the multiple must be within.
-   *
+   * \param[in] start_time Starting time of the simulation
+   * \param[in] is_output_clock whether this is an output clock or a lab clock
    */
-  bool multiple_is_in_next_tick(const double interval) const {
-    if (interval < 0.) {
-      throw std::range_error("Negative interval makes no sense for clock");
-    }
-    const Representation int_interval = convert(interval);
-    // if the interval is less than or equal to the time step size, one
-    // multiple will surely be within the next tick!
-    if (int_interval <= timestep_duration_) {
-      return true;
-    }
-    const auto next = reset_time_ + timestep_duration_ * counter_;
-    if (unlikely(next < 0)) {
-      return -next % int_interval < timestep_duration_;
-    }
-    return (timestep_duration_ - 1 + next) % int_interval < timestep_duration_;
-  }
-  /**
-   * Returns the next multiple of a given interval.
-   *
-   * \param[in] interval the given interval
-   *
-   * \return The smallest multiple of \p interval that is larger than
-   * the current time.
-   */
-  double next_multiple(const double interval) const {
-    const Representation int_interval = convert(interval);
-    const auto current = reset_time_ + timestep_duration_ * counter_;
-    if (unlikely(current < 0)) {
-      return convert(current / int_interval * int_interval);
-    }
-    return convert((current / int_interval + 1) * int_interval);
-  }
-  /**
-   * Set the time step such that it ends on the next multiple of the interval.
-   *
-   * \param interval The given interval
-   */
-  void end_tick_on_multiple(const double interval) {
-    const Representation int_interval = convert(interval);
-    const auto current = reset_time_ + timestep_duration_ * counter_;
-    reset_time_ = current;
-    counter_ = 0;
-    if (unlikely(current < 0)) {
-      timestep_duration_ = current / int_interval * int_interval - current;
+  void reset(const double start_time, const bool is_output_clock) override {
+    double reset_time;
+    if (is_output_clock) {
+      reset_time =
+          std::floor(start_time / timestep_duration()) * timestep_duration();
     } else {
-      timestep_duration_ =
-          (current / int_interval + 1) * int_interval - current;
+      reset_time = start_time;
     }
-  }
-  /**
-   * Resets the time to a pre-defined value \p reset_time.
-   *
-   * This is the only way of turning the clock back. It is needed so
-   * that the time can be adjusted after initialization (different
-   * initial conditions may require different starting times).
-   *
-   * \param[in] reset_time New time
-   */
-  void reset(const double reset_time) {
     if (reset_time < current_time()) {
       logger<LogArea::Clock>().debug("Resetting clock from", current_time(),
                                      " fm/c to ", reset_time, " fm/c");
@@ -221,21 +254,9 @@ class Clock {
     reset_time_ = convert(reset_time);
     counter_ = 0;
   }
-  /**
-   * Advances the clock by one tick (\f$\Delta t\f$).
-   *
-   * This operator is used as `++clock`. The operator `clock++` is not
-   * implemented deliberately, because that requires a copy of the clock
-   * being created.
-   */
-  Clock& operator++() {
-    // guard against overflow:
-    if (counter_ >= std::numeric_limits<Representation>::max() - 1) {
-      throw std::overflow_error("Too many timesteps, clock overflow imminent");
-    }
-    ++counter_;
-    return *this;
-  }
+
+  void remove_times_in_past(double) override{};
+
   /**
    * Advances the clock by an arbitrary timestep (multiple of 0.000001 fm/c).
    *
@@ -269,27 +290,6 @@ class Clock {
     counter_ += advance_several_timesteps;
     return *this;
   }
-  /**
-   * Compares the times between two clocks.
-   *
-   * \param[in] rhs The other clock.
-   */
-  bool operator<(const Clock& rhs) const {
-    return (reset_time_ + timestep_duration_ * counter_) <
-           (rhs.reset_time_ + rhs.timestep_duration_ * rhs.counter_);
-  }
-  /**
-   * Compares the time of the clock against a fixed time.
-   *
-   * \param[in] time The other time.
-   */
-  bool operator<(double time) const { return current_time() < time; }
-  /**
-   * Compares the time of the clock against a fixed time.
-   *
-   * \param[in] time The other time.
-   */
-  bool operator>(double time) const { return current_time() > time; }
 
  private:
   /// A multiplier transfering the internal integer to the real time.
@@ -304,17 +304,64 @@ class Clock {
   /// Convert an internal int value \p x into the double representation.
   static double convert(Representation x) { return x * to_double; }
 
-  /**
-   * Clock tick. This is purely internal and will be reset when the
-   * timestep size is changed.
-   */
-  Representation counter_ = 0;
   /// The time step size \f$\Delta t\f$ in $10^{-3}$ fm.
   Representation timestep_duration_ = 0u;
   /// The time of last reset (when counter_ was set to 0).
   Representation reset_time_ = 0;
 };
 
+/// Clock with explicitly defined time steps
+class CustomClock : public Clock {
+ public:
+  /**
+   * Initialises a custom clock with explicitly given output times
+   *
+   * \param[in] times vector of desired output times
+   */
+  CustomClock(std::vector<double> times) : custom_times_(times) {
+    std::sort(custom_times_.begin(), custom_times_.end());
+    counter_ = -1;
+  }
+  /**
+   * \copydoc Clock::current_time
+   * \throw runtime_error if the clock has never been advanced
+   */
+  double current_time() const override {
+    if (counter_ < 0) {
+      throw std::runtime_error("Trying to access undefined zeroth output time");
+    }
+    return custom_times_[counter_];
+  }
+  /// \copydoc Clock::next_time
+  double next_time() const override { return custom_times_[counter_ + 1]; }
+  double timestep_duration() const override {
+    return next_time() - current_time();
+  }
+  void reset(double, bool) override { counter_ = -1; }
+
+  /**
+   * Remove all custom times before start_time.
+   *
+   * \param[in] start_time starting time of the simulation
+   */
+  void remove_times_in_past(double start_time) override {
+    std::remove_if(
+        custom_times_.begin(), custom_times_.end(), [start_time](double t) {
+          if (t <= start_time) {
+            logger<LogArea::Clock>().warn("Removing custom output time ", t,
+                                          " fm since it is earlier than the "
+                                          "starting time of the simulation");
+            return true;
+          } else {
+            return false;
+          }
+        });
+  }
+
+ private:
+  /// Vector of times where output is generated
+  std::vector<double> custom_times_;
+};
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_CLOCK_H_

@@ -69,7 +69,8 @@ class VtkOutput : public OutputInterface {
    * \param clock Unused, needed since inherited.
    * \param dens_param Unused, needed since inherited.
    */
-  void at_intermediate_time(const Particles &particles, const Clock &clock,
+  void at_intermediate_time(const Particles &particles,
+                            const std::unique_ptr<Clock> &clock,
                             const DensityParameters &dens_param) override;
 
   /**

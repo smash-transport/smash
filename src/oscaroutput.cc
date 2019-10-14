@@ -180,7 +180,7 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
   // Flush to disk
   std::fflush(file_.get());
 
-  if (Contents & OscarParticlesIC) {
+  if (Contents == OscarParticlesIC) {
     // If the runtime is too short some particles might not yet have
     // reached the hypersurface. Warning is printed.
     if (particles.size() != 0) {
@@ -232,7 +232,8 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_intermediate_time(
-    const Particles &particles, const Clock &, const DensityParameters &) {
+    const Particles &particles, const std::unique_ptr<Clock> &,
+    const DensityParameters &) {
   if (Contents & OscarTimesteps) {
     if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
       std::fprintf(file_.get(), "# event %i out %zu\n", current_event_ + 1,

@@ -69,9 +69,8 @@ TEST(vtkoutputfile) {
   const bf::path outputfilepath = testoutputpath / outputfilename;
   VERIFY(bf::exists(outputfilepath));
   /* Time step output */
-  Clock clock(0.0, 1.0);
   DensityParameters dens_par(Test::default_parameters());
-  vtkop->at_intermediate_time(particles, clock, dens_par);
+  vtkop->at_intermediate_time(particles, nullptr, dens_par);
   const bf::path outputfile2path =
       testoutputpath / "pos_ev00000_tstep00001.vtk";
   VERIFY(bf::exists(outputfile2path));

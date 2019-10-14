@@ -272,10 +272,9 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
 }
 
-ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
-                                                const ParticleData& data_b,
-                                                double dt,
-                                                const double cell_vol) const {
+ActionPtr ScatterActionsFinder::check_collision(
+    const ParticleData& data_a, const ParticleData& data_b, double dt,
+    const std::vector<FourVector>& beam_momentum, const double cell_vol) const {
   /* If the two particles
    * 1) belong to the two colliding nuclei
    * 2) are within the same nucleus
@@ -292,7 +291,8 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
   }
 
   // Determine time of collision.
-  const double time_until_collision = collision_time(data_a, data_b, dt);
+  const double time_until_collision =
+      collision_time(data_a, data_b, dt, beam_momentum);
 
   // Check that collision happens in this timestep.
   if (time_until_collision < 0. || time_until_collision >= dt) {
@@ -335,12 +335,10 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
     // Collision probability, see e.g. \iref{Xu:2004mz}, eq. (11)
     const double p_22 = xs * v_rel * dt / (cell_vol * testparticles_);
 
-#ifndef NDEBUG
     logg[LFindScatter].debug(
         "Stochastic collison criterion parameters:\np_22 = ", p_22,
         ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
         ", cell_vol = ", cell_vol, ", testparticles = ", testparticles_);
-#endif
 
     if (p_22 > 1.) {
       std::stringstream err;
@@ -358,12 +356,11 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
   } else if (coll_crit_ == CollisionCriterion::Geometric) {
     // just collided with this particle
     if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
-#ifndef NDEBUG
       logg[LFindScatter].debug("Skipping collided particles at time ",
                                data_a.position().x0(), " due to process ",
                                data_a.id_process(), "\n    ", data_a, "\n<-> ",
                                data_b);
-#endif
+
       return nullptr;
     }
 
@@ -392,10 +389,8 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
       return nullptr;
     }
 
-#ifndef NDEBUG
     logg[LFindScatter].debug("particle distance squared: ", distance_squared,
                              "\n    ", data_a, "\n<-> ", data_b);
-#endif
   }
 
   // Using std::move here is redundant with newer compilers, but required for
@@ -405,13 +400,13 @@ ActionPtr ScatterActionsFinder::check_collision(const ParticleData& data_a,
 
 ActionList ScatterActionsFinder::find_actions_in_cell(
     const ParticleList& search_list, double dt, const double cell_vol,
-    const std::vector<FourVector>) const {
+    const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData& p1 : search_list) {
     for (const ParticleData& p2 : search_list) {
       if (p1.id() < p2.id()) {
         // Check if a collision is possible.
-        ActionPtr act = check_collision(p1, p2, dt, cell_vol);
+        ActionPtr act = check_collision(p1, p2, dt, beam_momentum, cell_vol);
         if (act) {
           actions.push_back(std::move(act));
         }
@@ -423,7 +418,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
 
 ActionList ScatterActionsFinder::find_actions_with_neighbors(
     const ParticleList& search_list, const ParticleList& neighbors_list,
-    double dt) const {
+    double dt, const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
   if (coll_crit_ == CollisionCriterion::Stochastic) {
     // Only search in cells
@@ -433,7 +428,7 @@ ActionList ScatterActionsFinder::find_actions_with_neighbors(
     for (const ParticleData& p2 : neighbors_list) {
       assert(p1.id() != p2.id());
       // Check if a collision is possible.
-      ActionPtr act = check_collision(p1, p2, dt);
+      ActionPtr act = check_collision(p1, p2, dt, beam_momentum);
       if (act) {
         actions.push_back(std::move(act));
       }
@@ -444,7 +439,7 @@ ActionList ScatterActionsFinder::find_actions_with_neighbors(
 
 ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     const ParticleList& search_list, const Particles& surrounding_list,
-    double dt) const {
+    double dt, const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
   if (coll_crit_ == CollisionCriterion::Stochastic) {
     // Only search in cells
@@ -461,7 +456,7 @@ ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     }
     for (const ParticleData& p1 : search_list) {
       // Check if a collision is possible.
-      ActionPtr act = check_collision(p1, p2, dt);
+      ActionPtr act = check_collision(p1, p2, dt, beam_momentum);
       if (act) {
         actions.push_back(std::move(act));
       }

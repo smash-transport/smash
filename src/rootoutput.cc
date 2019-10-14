@@ -217,7 +217,8 @@ void RootOutput::at_eventstart(const Particles &particles,
   }
 }
 
-void RootOutput::at_intermediate_time(const Particles &particles, const Clock &,
+void RootOutput::at_intermediate_time(const Particles &particles,
+                                      const std::unique_ptr<Clock> &,
                                       const DensityParameters &) {
   if (write_particles_ && !particles_only_final_) {
     particles_to_tree(particles);

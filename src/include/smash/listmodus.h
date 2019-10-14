@@ -117,7 +117,6 @@ class ListModus : public ModusDefault {
    * insufficient number of significant digits in the input file + rounding.
    *
    * \param[in] pdgcode pdg code of added particle
-   * \param[in] pdgcode pdg code of added particle
    * \param[in] t       time of added particle
    * \param[in] x       x-coordinate of added particle
    * \param[in] y       y-coordinate of added particle
@@ -139,6 +138,9 @@ class ListModus : public ModusDefault {
   struct LoadFailure : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
+
+  /// \return whether the modus is list modus (which is, yes, trivially true)
+  bool is_list() const { return true; }
 
  protected:
   /// Starting time for the List; changed to the earliest formation time
