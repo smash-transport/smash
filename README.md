@@ -1,10 +1,12 @@
 # SMASH
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3485108.svg)](https://doi.org/10.5281/zenodo.3485108)
+
 SMASH (Simulating Many Accelerated Strongly-interacting Hadrons) is a
 relativistic hadronic transport approach for the dynamical description of heavy
 ion reactions.
 Please see [Phys. Rev. C 94, 054905
-(2016)](https://arxiv.org/abs/1606.06642) for details and cite this reference,
+(2016)](https://arxiv.org/abs/1606.06642) for details and cite this reference and the software DOI,
 if you are using SMASH.
 
 See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User Guide
