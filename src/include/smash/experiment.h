@@ -1385,7 +1385,7 @@ void Experiment<Modus>::initialize_new_event() {
   parameters_.outputclock->remove_times_in_past(start_time);
 
   logg[LExperiment].debug(
-      "Lab clock: t_start = ", parameters_.labclock.current_time(),
+      "Lab clock: t_start = ", parameters_.labclock->current_time(),
       ", dt = ", parameters_.labclock->timestep_duration());
 
   /* Save the initial conserved quantum numbers and total momentum in
