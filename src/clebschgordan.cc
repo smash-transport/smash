@@ -13,7 +13,7 @@
 #include "smash/logging.h"
 
 namespace smash {
-inline constexpr int LResonances = LogArea::Resonances::id;
+static constexpr int LResonances = LogArea::Resonances::id;
 
 double clebsch_gordan(const int j_a, const int j_b, const int j_c,
                       const int m_a, const int m_b, const int m_c) {

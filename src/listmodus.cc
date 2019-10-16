@@ -37,7 +37,7 @@
 #include "smash/threevector.h"
 
 namespace smash {
-inline constexpr int LList = LogArea::List::id;
+static constexpr int LList = LogArea::List::id;
 
 /*!\Userguide
  * \page input_modi_list_ List

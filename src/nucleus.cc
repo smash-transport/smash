@@ -24,7 +24,7 @@
 #include "smash/threevector.h"
 
 namespace smash {
-inline constexpr int LNucleus = LogArea::Nucleus::id;
+static constexpr int LNucleus = LogArea::Nucleus::id;
 
 Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
   fill_from_list(particle_list, nTest);

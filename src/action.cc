@@ -25,7 +25,7 @@
 namespace smash {
 /// Destructor
 Action::~Action() = default;
-inline constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
+static constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
 
 bool Action::is_valid(const Particles &particles) const {
   return std::all_of(

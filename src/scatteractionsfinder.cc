@@ -28,7 +28,7 @@
 #include "smash/stringfunctions.h"
 
 namespace smash {
-inline constexpr int LFindScatter = LogArea::FindScatter::id;
+static constexpr int LFindScatter = LogArea::FindScatter::id;
 /*!\Userguide
  * \page input_collision_term_ Collision_Term
  * \key Collision_Criterion (string, optional, default = "Geometric") \n

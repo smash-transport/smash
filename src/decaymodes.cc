@@ -20,7 +20,7 @@
 #include "smash/stringfunctions.h"
 
 namespace smash {
-inline constexpr int LDecayModes = LogArea::DecayModes::id;
+static constexpr int LDecayModes = LogArea::DecayModes::id;
 
 /// Global pointer to the decay modes list
 std::vector<DecayModes> *DecayModes::all_decay_modes = nullptr;

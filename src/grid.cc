@@ -63,7 +63,7 @@ static std::ostream &operator<<(std::ostream &out, const std::array<T, N> &a) {
 }  // namespace std
 
 namespace smash {
-inline constexpr int LGrid = LogArea::Grid::id;
+static constexpr int LGrid = LogArea::Grid::id;
 
 ////////////////////////////////////////////////////////////////////////////////
 // GridBase

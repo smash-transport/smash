@@ -12,7 +12,7 @@
 #include "smash/logging.h"
 
 namespace smash {
-inline constexpr int LParticleType = LogArea::ParticleType::id;
+static constexpr int LParticleType = LogArea::ParticleType::id;
 
 static IsoParticleTypeList iso_type_list;
 

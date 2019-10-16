@@ -18,8 +18,8 @@
 #include "smash/pow.h"
 
 namespace smash {
-inline constexpr int LCrossSections = LogArea::CrossSections::id;
-inline constexpr int LScatterAction = LogArea::ScatterAction::id;
+static constexpr int LCrossSections = LogArea::CrossSections::id;
+static constexpr int LScatterAction = LogArea::ScatterAction::id;
 
 /**
  * Helper function:

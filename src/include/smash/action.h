@@ -22,7 +22,7 @@
 #include "random.h"
 
 namespace smash {
-inline constexpr int LAction = LogArea::Action::id;
+static constexpr int LAction = LogArea::Action::id;
 
 /**
  * \ingroup action

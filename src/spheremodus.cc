@@ -31,7 +31,7 @@
 #include "smash/threevector.h"
 
 namespace smash {
-inline constexpr int LSphere = LogArea::Sphere::id;
+static constexpr int LSphere = LogArea::Sphere::id;
 
 /*!\Userguide
  * \page input_modi_sphere_ Sphere

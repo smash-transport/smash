@@ -19,7 +19,7 @@
 #include "smash/random.h"
 
 namespace smash {
-inline constexpr int LGrandcanThermalizer = LogArea::GrandcanThermalizer::id;
+static constexpr int LGrandcanThermalizer = LogArea::GrandcanThermalizer::id;
 
 ThermLatticeNode::ThermLatticeNode()
     : Tmu0_(FourVector()),

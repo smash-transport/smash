@@ -25,7 +25,7 @@
 #include "smash/tabulation.h"
 
 namespace smash {
-inline constexpr int LScatterAction = LogArea::ScatterAction::id;
+static constexpr int LScatterAction = LogArea::ScatterAction::id;
 
 ScatterActionPhoton::ScatterActionPhoton(
     const ParticleList &in, const double time, const int n_frac_photons,

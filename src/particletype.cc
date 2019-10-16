@@ -34,8 +34,8 @@
 #include "smash/stringfunctions.h"
 
 namespace smash {
-inline constexpr int LParticleType = LogArea::ParticleType::id;
-inline constexpr int LResonances = LogArea::Resonances::id;
+static constexpr int LParticleType = LogArea::ParticleType::id;
+static constexpr int LResonances = LogArea::Resonances::id;
 
 namespace {
 /// Global pointer to the Particle Type list.

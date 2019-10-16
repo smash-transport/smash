@@ -12,7 +12,7 @@
 #include "smash/logging.h"
 
 namespace smash {
-inline constexpr int LGrandcanThermalizer = LogArea::GrandcanThermalizer::id;
+static constexpr int LGrandcanThermalizer = LogArea::GrandcanThermalizer::id;
 /*thread_local (see #3075)*/ random::Engine random::engine;
 
 int64_t random::generate_63bit_seed() {

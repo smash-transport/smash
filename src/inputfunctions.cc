@@ -16,7 +16,7 @@
 #include "smash/stringfunctions.h"
 
 namespace smash {
-inline constexpr int LInputParser = LogArea::InputParser::id;
+static constexpr int LInputParser = LogArea::InputParser::id;
 
 std::vector<Line> line_parser(const std::string &input) {
   logg[LInputParser].trace() << source_location << input;

@@ -18,7 +18,7 @@
 #include "smash/numerics.h"
 
 namespace smash {
-inline constexpr int LTmn = LogArea::Tmn::id;
+static constexpr int LTmn = LogArea::Tmn::id;
 
 FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   using Eigen::Matrix4d;

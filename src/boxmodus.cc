@@ -32,7 +32,7 @@
 #include "smash/wallcrossingaction.h"
 
 namespace smash {
-inline constexpr int LBox = LogArea::Box::id;
+static constexpr int LBox = LogArea::Box::id;
 
 /* console output on startup of box specific parameters */
 std::ostream &operator<<(std::ostream &out, const BoxModus &m) {

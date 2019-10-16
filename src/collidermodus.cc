@@ -33,7 +33,7 @@
 #include "smash/random.h"
 
 namespace smash {
-inline constexpr int LCollider = LogArea::Collider::id;
+static constexpr int LCollider = LogArea::Collider::id;
 /*!\Userguide
  * \page input_modi_collider_ Collider
  *

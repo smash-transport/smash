@@ -22,7 +22,7 @@
 #include "numerics.h"
 
 namespace smash {
-inline constexpr int LLattice = LogArea::Lattice::id;
+static constexpr int LLattice = LogArea::Lattice::id;
 
 /**
  * Enumerator option for lattice updates.

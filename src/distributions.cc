@@ -18,7 +18,7 @@
 #include "smash/random.h"
 
 namespace smash {
-inline constexpr int LDistributions = LogArea::Distributions::id;
+static constexpr int LDistributions = LogArea::Distributions::id;
 
 // Relativistic Breit-Wigner distribution
 double breit_wigner(const double m, const double pole, const double width) {

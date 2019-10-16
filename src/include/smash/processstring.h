@@ -22,7 +22,7 @@
 #include "particledata.h"
 
 namespace smash {
-inline constexpr int LPythia = LogArea::Pythia::id;
+static constexpr int LPythia = LogArea::Pythia::id;
 
 // \todo Sangwook: make file (processstring) and class (StringProcess) name
 // consistent

@@ -15,7 +15,7 @@
 #include "smash/quantumnumbers.h"
 
 namespace smash {
-inline constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
+static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 void HypersurfacecrossingAction::generate_final_state() {
   logg[LHyperSurfaceCrossing].debug("Process: Hypersurface Crossing. ");

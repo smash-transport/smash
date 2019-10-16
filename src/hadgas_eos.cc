@@ -25,7 +25,7 @@
 #include "smash/random.h"
 
 namespace smash {
-inline constexpr int LResonances = LogArea::Resonances::id;
+static constexpr int LResonances = LogArea::Resonances::id;
 
 EosTable::EosTable(double de, double dnb, size_t n_e, size_t n_nb)
     : de_(de), dnb_(dnb), n_e_(n_e), n_nb_(n_nb) {

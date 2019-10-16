@@ -25,7 +25,7 @@
 #include "threevector.h"
 
 namespace smash {
-inline constexpr int LDensity = LogArea::Density::id;
+static constexpr int LDensity = LogArea::Density::id;
 
 /**
  * Allows to choose which kind of density to calculate.

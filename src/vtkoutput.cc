@@ -18,7 +18,7 @@
 #include "smash/vtkoutput.h"
 
 namespace smash {
-inline constexpr int LOutput = LogArea::Output::id;
+static constexpr int LOutput = LogArea::Output::id;
 
 VtkOutput::VtkOutput(const bf::path &path, const std::string &name,
                      const OutputParameters &out_par)

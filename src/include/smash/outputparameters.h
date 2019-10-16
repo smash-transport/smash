@@ -16,7 +16,7 @@
 #include "logging.h"
 
 namespace smash {
-inline constexpr int LExperiment = LogArea::Experiment::id;
+static constexpr int LExperiment = LogArea::Experiment::id;
 
 /**
  * Helper structure for Experiment to hold output options and parameters.

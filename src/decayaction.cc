@@ -17,7 +17,7 @@
 #include "smash/potential_globals.h"
 
 namespace smash {
-inline constexpr int LDecayModes = LogArea::DecayModes::id;
+static constexpr int LDecayModes = LogArea::DecayModes::id;
 
 DecayAction::DecayAction(const ParticleData &p, double time)
     : Action({p}, time), total_width_(0.) {}

@@ -12,7 +12,7 @@
 #include "smash/logging.h"
 
 namespace smash {
-inline constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
+static constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
 
 PauliBlocker::PauliBlocker(Configuration conf,
                            const ExperimentParameters &param)

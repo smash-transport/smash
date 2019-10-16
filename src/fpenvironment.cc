@@ -18,7 +18,7 @@
 #include "smash/logging.h"
 
 namespace smash {
-inline constexpr int LFpe = LogArea::Fpe::id;
+static constexpr int LFpe = LogArea::Fpe::id;
 
 #if !defined _GNU_SOURCE && defined __SSE__ && !defined __clang__
 bool enable_float_traps(int femask) {

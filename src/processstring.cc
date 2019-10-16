@@ -16,7 +16,7 @@
 #include "smash/random.h"
 
 namespace smash {
-inline constexpr int LOutput = LogArea::Output::id;
+static constexpr int LOutput = LogArea::Output::id;
 
 StringProcess::StringProcess(
     double string_tension, double time_formation, double gluon_beta,

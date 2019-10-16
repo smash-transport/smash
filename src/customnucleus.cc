@@ -19,7 +19,7 @@
 #include "smash/random.h"
 
 namespace smash {
-inline constexpr int LCollider = LogArea::Collider::id;
+static constexpr int LCollider = LogArea::Collider::id;
 
 /*!\Userguide
  * \page projectile_and_target Projectile and Target

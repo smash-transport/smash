@@ -16,7 +16,7 @@
 #include "smash/action.h"
 
 namespace smash {
-inline constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
+static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 /*!\Userguide
  * \page IC_output_user_guide_ ASCII IC Output

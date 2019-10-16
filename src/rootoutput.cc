@@ -16,7 +16,7 @@
 #include "smash/particles.h"
 
 namespace smash {
-inline constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
+static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 /*!\Userguide
  * \page format_root ROOT Format

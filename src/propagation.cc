@@ -16,7 +16,7 @@
 #include "smash/spheremodus.h"
 
 namespace smash {
-inline constexpr int LPropagation = LogArea::Propagation::id;
+static constexpr int LPropagation = LogArea::Propagation::id;
 
 double calc_hubble(double time, const ExpansionProperties &metric) {
   double h;  // Hubble parameter

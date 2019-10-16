@@ -28,7 +28,7 @@
 #include "smash/random.h"
 
 namespace smash {
-inline constexpr int LScatterAction = LogArea::ScatterAction::id;
+static constexpr int LScatterAction = LogArea::ScatterAction::id;
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b, double time,
