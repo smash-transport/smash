@@ -164,6 +164,7 @@ void usage(const int rc, const std::string &progname) {
       "  -x, --dump_iSS          Dump particle table in iSS format\n"
       "                          This format is used in MUSIC and CLVisc\n"
       "                          relativistic hydro codes\n"
+      "  -n, --no-cache          Don't cache integrals on disk\n"
       "  -v, --version\n\n");
   std::exit(rc);
 }
@@ -425,6 +426,7 @@ int main(int argc, char *argv[]) {
       {"cross-sections-fs", required_argument, 0, 'S'},
       {"dump-iSS", no_argument, 0, 'x'},
       {"version", no_argument, 0, 'v'},
+      {"no-cache", no_argument, 0, 'n'},
       {nullptr, 0, 0, 0}};
 
   // strip any path to progname
@@ -441,11 +443,12 @@ int main(int argc, char *argv[]) {
     bool cross_section_dump_activated = false;
     bool final_state_cross_sections = false;
     bool particles_dump_iSS_format = false;
+    bool cache_integrals = true;
 
     // parse command-line arguments
     int opt;
     bool suppress_disclaimer = false;
-    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xv", longopts,
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xv:n", longopts,
                               nullptr)) != -1) {
       switch (opt) {
         case 'c':
@@ -504,6 +507,9 @@ int main(int argc, char *argv[]) {
               VERSION_MAJOR, GIT_BRANCH, CMAKE_SYSTEM, CMAKE_CXX_COMPILER_ID,
               CMAKE_CXX_COMPILER_VERSION, CMAKE_BUILD_TYPE, BUILD_DATE);
           std::exit(EXIT_SUCCESS);
+        case 'n':
+          cache_integrals = false;
+          break;
         default:
           usage(EXIT_FAILURE, progname);
       }
@@ -578,9 +584,14 @@ int main(int argc, char *argv[]) {
     const auto hash = hash_context.finalize();
     std::cout << "config hash: " << sha256::hash_to_string(hash) << std::endl;
 
-    const bf::path tabulations_path = output_path.parent_path() / "tabulations";
-    bf::create_directories(tabulations_path);
-    std::cout << "tabulations path: " << tabulations_path << std::endl;
+    bf::path tabulations_path;
+    if (cache_integrals) {
+      tabulations_path = output_path.parent_path() / "tabulations";
+      bf::create_directories(tabulations_path);
+      std::cout << "tabulations path: " << tabulations_path << std::endl;
+    } else {
+      tabulations_path = "";
+    }
     if (list2n_activated) {
       /* Print only 2->n, n > 1. Do not dump decays, which can be found in
        * decaymodes.txt anyway */
