@@ -136,10 +136,15 @@ class Configuration;
  *
  * To output something from your code do the following:
  * \code
- * const auto &log = logger<LogArea::Action>();
- * log.trace(source_location);
- * log.debug("particle: ", p);
- * log.warn("something is fishy");
+ * logg[LAreaName].trace(source_location);
+ * logg[LAreaName].debug("particle", p);
+ * logg[LAreaName].warn("Something happened.");
+ * \endcode
+ *
+ * Note that `LAreaName` needs to be declared within the smash namespace of the
+ * respective file in a form of (using PauliBlocking as an example area):
+ * \code
+ * static constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
  * \endcode
  *
  * The einhard::Logger class supports two ways of writing to an output stream:
@@ -225,26 +230,6 @@ using AreaTuple =
  *               keys.
  */
 void create_all_loggers(Configuration config);
-
-/** \internal
- * \return The einhard::Logger object created for the area with the associated
- * index \p id.
- */
-einhard::Logger<> &retrieve_logger_impl(int id);
-
-/**
- * \return The einhard::Logger object created for the named area (see the
- * LogArea types).
- * \tparam LogAreaTag Type determining the logging area.
- */
-template <typename LogAreaTag>
-inline einhard::Logger<> &logger() {
-  static_assert(LogAreaTag::id < std::tuple_size<LogArea::AreaTuple>::value &&
-                    LogAreaTag::id >= 0,
-                "The LogArea::AreaTuple is out of sync with the declared log "
-                "areas. Please fix! (see top of 'include/logging.h')");
-  return retrieve_logger_impl(LogAreaTag::id);
-}
 
 /**
  * Hackery that is required to output the location in the source code where the

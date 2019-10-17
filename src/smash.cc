@@ -26,7 +26,6 @@
 #include "smash/config.h"
 
 namespace smash {
-static constexpr int LMain = LogArea::Main::id;
 
 namespace {
 /**

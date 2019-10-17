@@ -73,6 +73,7 @@ static ostream &operator<<(ostream &out,
 }  // namespace std
 
 namespace smash {
+static constexpr int LMain = LogArea::Main::id;
 
 /**
  * Non-template interface to Experiment<Modus>.
@@ -1988,7 +1989,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
 
 template <typename Modus>
 void Experiment<Modus>::run() {
-  const auto &mainlog = logger<LogArea::Main>();
+  const auto &mainlog = logg[LMain];
   for (int j = 0; j < nevents_; j++) {
     mainlog.info() << "Event " << j;
 

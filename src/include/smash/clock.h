@@ -21,6 +21,8 @@
 
 namespace smash {
 
+static constexpr int LClock = LogArea::Clock::id;
+
 /**
  * Clock tracks the time in the simulation.
  *
@@ -248,8 +250,8 @@ class UniformClock : public Clock {
       reset_time = start_time;
     }
     if (reset_time < current_time()) {
-      logger<LogArea::Clock>().debug("Resetting clock from", current_time(),
-                                     " fm/c to ", reset_time, " fm/c");
+      logg[LClock].debug("Resetting clock from", current_time(), " fm/c to ",
+                         reset_time, " fm/c");
     }
     reset_time_ = convert(reset_time);
     counter_ = 0;
@@ -345,17 +347,17 @@ class CustomClock : public Clock {
    * \param[in] start_time starting time of the simulation
    */
   void remove_times_in_past(double start_time) override {
-    std::remove_if(
-        custom_times_.begin(), custom_times_.end(), [start_time](double t) {
-          if (t <= start_time) {
-            logger<LogArea::Clock>().warn("Removing custom output time ", t,
-                                          " fm since it is earlier than the "
-                                          "starting time of the simulation");
-            return true;
-          } else {
-            return false;
-          }
-        });
+    std::remove_if(custom_times_.begin(), custom_times_.end(),
+                   [start_time](double t) {
+                     if (t <= start_time) {
+                       logg[LClock].warn("Removing custom output time ", t,
+                                         " fm since it is earlier than the "
+                                         "starting time of the simulation");
+                       return true;
+                     } else {
+                       return false;
+                     }
+                   });
   }
 
  private:

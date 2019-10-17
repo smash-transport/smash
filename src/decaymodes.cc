@@ -424,7 +424,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
           if (mother_states[m]->charge() == charge) {
             logg[LDecayModes].debug(
                 "decay mode found: ", mother_states[m]->name(), " -> ",
-                std::to_string(decay_particles.size()));
+                decay_particles.size());
             decay_modes_to_add[m].add_mode(mother_states[m], ratio, L, types);
             no_decays = false;
           }

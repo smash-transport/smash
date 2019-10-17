@@ -25,11 +25,16 @@ void set_default_loglevel(einhard::LogLevel level) {
   global_default_loglevel = level;
 }
 
-einhard::Logger<> &retrieve_logger_impl(int id) { return logg[id]; }
-
 /**
- * An array that stores all pre-configured Logger objects. The objects can be
- * accessed via the logger function.
+ * An array that stores all pre-configured Logger objects.
+ * To access its elements use `logg[LAreaName]` where AreaName is the respective
+ * areas name declared in `loggin.h`.
+ * Note that `LAreaName` needs to be declared within the smash namespace of the
+ * respective file in a form of (using PauliBlocking as an example area):
+ * \code
+ * static constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
+ * \endcode
+ * For further documentation see `logging.h`.
  */
 std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value> logg;
 
@@ -86,7 +91,7 @@ inline typename std::enable_if<(index == 0)>::type create_all_loggers_impl(
  * ended via the overload above.)
  *
  * For every entry in the list the corresponding Logger object in
- * log is set up with area name and verbosity.
+ * logg is set up with area name and verbosity.
  *
  * \tparam index Recursion index.
  * \tparam longest_name Length of longest log area name.
