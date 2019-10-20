@@ -16,6 +16,7 @@
 #include "smash/action.h"
 
 namespace smash {
+static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 /*!\Userguide
  * \page IC_output_user_guide_ ASCII IC Output
@@ -112,13 +113,12 @@ void ICOutput::at_eventstart(const Particles &, const int event_number) {
 
 void ICOutput::at_eventend(const Particles &particles, const int event_number,
                            double, bool) {
-  const auto &log = logger<LogArea::HyperSurfaceCrossing>();
   std::fprintf(file_.get(), "# event %i end\n", event_number + 1);
 
   // If the runtime is too short some particles might not yet have
   // reached the hypersurface. Warning is printed.
   if (particles.size() != 0) {
-    log.warn(
+    logg[LHyperSurfaceCrossing].warn(
         "End time might be too small for initial conditions output. "
         "Hypersurface has not yet been crossed by ",
         particles.size(), " particle(s).");

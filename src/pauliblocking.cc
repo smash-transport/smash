@@ -12,6 +12,7 @@
 #include "smash/logging.h"
 
 namespace smash {
+static constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
 
 PauliBlocker::PauliBlocker(Configuration conf,
                            const ExperimentParameters &param)
@@ -33,17 +34,15 @@ PauliBlocker::PauliBlocker(Configuration conf,
    * Radius [GeV/c] of sphere for averaging in the momentum space
    */
 
-  const auto &log = logger<LogArea::PauliBlocking>();
-
   if (ntest_ < 20) {
-    log.warn(
+    logg[LPauliBlocking].warn(
         "Phase-space density calculation in Pauli blocking"
         " will not work reasonably for a small number of testparticles."
         " The recommended number of testparticles is 20.");
   }
 
   if (rc_ < rr_ || rr_ < 0.0 || rp_ < 0) {
-    log.error(
+    logg[LPauliBlocking].error(
         "Please choose reasonable parameters for Pauli blocking:"
         "All radii have to be positive and Gaussian_Cutoff should"
         "be larger than Spatial_Averaging_Radius");
@@ -100,8 +99,6 @@ double PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
 }
 
 void PauliBlocker::init_weights_analytical() {
-  const auto &log = logger<LogArea::PauliBlocking>();
-
   const double pi = M_PI;
   const double sqrt2 = std::sqrt(2.);
   const double sqrt_2pi = std::sqrt(2. * pi);
@@ -143,7 +140,7 @@ void PauliBlocker::init_weights_analytical() {
     }
     integral *= 2 * pi / std::pow(2 * pi * sig_ * sig_, 1.5);
     weights_[k] = integral / norm / phase_volume;
-    log.debug("Analytical weights[", k, "] = ", weights_[k]);
+    logg[LPauliBlocking].debug("Analytical weights[", k, "] = ", weights_[k]);
   }
 }
 

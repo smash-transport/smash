@@ -37,6 +37,7 @@
 #include "smash/threevector.h"
 
 namespace smash {
+static constexpr int LList = LogArea::List::id;
 
 /*!\Userguide
  * \page input_modi_list_ List
@@ -180,20 +181,21 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
                                     double mass, double E, double px, double py,
                                     double pz) {
   constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
-  const auto &log = logger<LogArea::List>();
   try {
     ParticleData &particle = particles.create(pdgcode);
     // SMASH mass versus input mass consistency check
     if (particle.type().is_stable() &&
         std::abs(mass - particle.pole_mass()) > really_small) {
       if (n_warns_precision_ < max_warns_precision) {
-        log.warn() << "Provided mass of " << particle.type().name() << " = "
-                   << mass << " [GeV] is inconsistent with SMASH value = "
-                   << particle.pole_mass() << ". Forcing E = sqrt(p^2 + m^2)"
-                   << ", where m is SMASH mass.";
+        logg[LList].warn() << "Provided mass of " << particle.type().name()
+                           << " = " << mass
+                           << " [GeV] is inconsistent with SMASH value = "
+                           << particle.pole_mass()
+                           << ". Forcing E = sqrt(p^2 + m^2)"
+                           << ", where m is SMASH mass.";
         n_warns_precision_++;
       } else if (n_warns_precision_ == max_warns_precision) {
-        log.warn(
+        logg[LList].warn(
             "Further warnings about SMASH mass versus input mass"
             " inconsistencies will be suppressed.");
         n_warns_precision_++;
@@ -204,13 +206,14 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
     // On-shell condition consistency check
     if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
       if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
-        log.warn() << "Provided 4-momentum " << particle.momentum() << " and "
-                   << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
-                   << " This may originate from the lack of numerical"
-                   << " precision in the input. Setting E to sqrt(p^2 + m^2).";
+        logg[LList].warn()
+            << "Provided 4-momentum " << particle.momentum() << " and "
+            << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
+            << " This may originate from the lack of numerical"
+            << " precision in the input. Setting E to sqrt(p^2 + m^2).";
         n_warns_mass_consistency_++;
       } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
-        log.warn(
+        logg[LList].warn(
             "Further warnings about E != sqrt(p^2 + m^2) will"
             " be suppressed.");
         n_warns_mass_consistency_++;
@@ -222,15 +225,14 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
     particle.set_formation_time(t);
     particle.set_cross_section_scaling_factor(1.0);
   } catch (ParticleType::PdgNotFoundFailure &) {
-    log.warn() << "SMASH does not recognize pdg code " << pdgcode
-               << " loaded from file. This particle will be ignored.\n";
+    logg[LList].warn() << "SMASH does not recognize pdg code " << pdgcode
+                       << " loaded from file. This particle will be ignored.\n";
   }
 }
 
 /* initial_conditions - sets particle data for @particles */
 double ListModus::initial_conditions(Particles *particles,
                                      const ExperimentParameters &) {
-  const auto &log = logger<LogArea::List>();
   std::string particle_list = next_event_();
 
   for (const Line &line : line_parser(particle_list)) {
@@ -248,11 +250,12 @@ double ListModus::initial_conditions(Particles *particles,
                              line));
     }
     PdgCode pdgcode(pdg_string);
-    log.debug("Particle ", pdgcode, " (x,y,z)= (", x, ", ", y, ", ", z, ")");
+    logg[LList].debug("Particle ", pdgcode, " (x,y,z)= (", x, ", ", y, ", ", z,
+                      ")");
 
     // Charge consistency check
     if (pdgcode.charge() != charge) {
-      log.error() << "Charge of pdg = " << pdgcode << " != " << charge;
+      logg[LList].error() << "Charge of pdg = " << pdgcode << " != " << charge;
       throw std::invalid_argument("Inconsistent input (charge).");
     }
     try_create_particle(*particles, pdgcode, t, x, y, z, mass, E, px, py, pz);
@@ -268,7 +271,6 @@ double ListModus::initial_conditions(Particles *particles,
 }
 
 bf::path ListModus::file_path_(const int file_id) {
-  const auto &log = logger<LogArea::List>();
   std::stringstream fname;
   fname << particle_list_file_prefix_ << file_id;
 
@@ -276,18 +278,18 @@ bf::path ListModus::file_path_(const int file_id) {
 
   const bf::path fpath = default_path / fname.str();
 
-  log.debug() << fpath.filename().native() << '\n';
+  logg[LList].debug() << fpath.filename().native() << '\n';
 
   if (!bf::exists(fpath)) {
-    log.fatal() << fpath.filename().native() << " does not exist! \n"
-                << "\n Usage of smash with external particle lists:\n"
-                << "1. Put the external particle lists in file \n"
-                << "File_Directory/File_Prefix{id} where {id} "
-                << "traversal [Shift_Id, Nevent-1]\n"
-                << "2. Particles info: t x y z mass p0 px py pz"
-                << " pdg ID charge\n"
-                << "in units of: fm fm fm fm GeV GeV GeV GeV GeV"
-                << " none none none\n";
+    logg[LList].fatal() << fpath.filename().native() << " does not exist! \n"
+                        << "\n Usage of smash with external particle lists:\n"
+                        << "1. Put the external particle lists in file \n"
+                        << "File_Directory/File_Prefix{id} where {id} "
+                        << "traversal [Shift_Id, Nevent-1]\n"
+                        << "2. Particles info: t x y z mass p0 px py pz"
+                        << " pdg ID charge\n"
+                        << "in units of: fm fm fm fm GeV GeV GeV GeV GeV"
+                        << " none none none\n";
     throw std::runtime_error("External particle list does not exist!");
   }
 
@@ -295,8 +297,6 @@ bf::path ListModus::file_path_(const int file_id) {
 }
 
 std::string ListModus::next_event_() {
-  const auto &log = logger<LogArea::List>();
-
   const bf::path fpath = file_path_(file_id_);
   bf::ifstream ifs{fpath};
   ifs.seekg(last_read_position_);
@@ -324,7 +324,7 @@ std::string ListModus::next_event_() {
   }
 
   if (!ifs.eof() && (ifs.fail() || ifs.bad())) {
-    log.fatal() << "Error while reading " << fpath.filename().native();
+    logg[LList].fatal() << "Error while reading " << fpath.filename().native();
     throw std::runtime_error("Error while reading external particle list");
   }
   // save position for next event read
@@ -336,7 +336,6 @@ std::string ListModus::next_event_() {
 
 bool ListModus::file_has_events_(bf::path filepath,
                                  std::streampos last_position) {
-  const auto &log = logger<LogArea::List>();
   bf::ifstream ifs{filepath};
   std::string line;
 
@@ -359,7 +358,8 @@ bool ListModus::file_has_events_(bf::path filepath,
   }
 
   if (!ifs.good()) {
-    log.fatal() << "Error while reading " << filepath.filename().native();
+    logg[LList].fatal() << "Error while reading "
+                        << filepath.filename().native();
     throw std::runtime_error("Error while reading external particle list");
   }
 

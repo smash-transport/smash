@@ -22,6 +22,7 @@
 #include "random.h"
 
 namespace smash {
+static constexpr int LAction = LogArea::Action::id;
 
 /**
  * \ingroup action
@@ -340,7 +341,6 @@ class Action {
   template <typename Branch>
   const Branch *choose_channel(const ProcessBranchList<Branch> &subprocesses,
                                double total_weight) {
-    const auto &log = logger<LogArea::Action>();
     double random_weight = random::uniform(0., total_weight);
     double weight_sum = 0.;
     /* Loop through all subprocesses and select one by Monte Carlo, based on
@@ -353,11 +353,11 @@ class Action {
       }
     }
     /* Should never get here. */
-    log.fatal(source_location,
-              "Problem in choose_channel: ", subprocesses.size(), " ",
-              weight_sum, " ", total_weight, " ",
-              //          random_weight, "\n", *this);
-              random_weight, "\n");
+    logg[LAction].fatal(source_location,
+                        "Problem in choose_channel: ", subprocesses.size(), " ",
+                        weight_sum, " ", total_weight, " ",
+                        //          random_weight, "\n", *this);
+                        random_weight, "\n");
     std::abort();
   }
 

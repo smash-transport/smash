@@ -24,8 +24,7 @@ namespace smash {
 /* ExperimentBase carries everything that is needed for the evolution */
 ExperimentPtr ExperimentBase::create(Configuration config,
                                      const bf::path &output_path) {
-  const auto &log = logger<LogArea::Experiment>();
-  log.trace() << source_location;
+  logg[LExperiment].trace() << source_location;
   /*!\Userguide
    * \page input_general_ General
    * \key Modus (string, required): \n
@@ -48,7 +47,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
    * \li \subpage input_modi_list_
    */
   const std::string modus_chooser = config.read({"General", "Modus"});
-  log.debug() << "Modus for this calculation: " << modus_chooser;
+  logg[LExperiment].debug() << "Modus for this calculation: " << modus_chooser;
 
   if (modus_chooser == "Box") {
     return make_unique<Experiment<BoxModus>>(config, output_path);
@@ -324,8 +323,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  */
 
 ExperimentParameters create_experiment_parameters(Configuration config) {
-  const auto &log = logger<LogArea::Experiment>();
-  log.trace() << source_location;
+  logg[LExperiment].trace() << source_location;
 
   const int ntest = config.take({"General", "Testparticles"}, 1);
   if (ntest <= 0) {
@@ -368,8 +366,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const auto pion = ParticleType::try_find(pdg::pi_z);
   if (proton && pion &&
       low_snn_cut > proton->mass() + proton->mass() + pion->mass()) {
-    log.warn("The cut-off should be below the threshold energy",
-             " of the process: NN to NNpi");
+    logg[LExperiment].warn("The cut-off should be below the threshold energy",
+                           " of the process: NN to NNpi");
   }
   const bool potential_affect_threshold =
       config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);

@@ -22,6 +22,7 @@
 #include "numerics.h"
 
 namespace smash {
+static constexpr int LLattice = LogArea::Lattice::id;
 
 /**
  * Enumerator option for lattice updates.
@@ -73,12 +74,11 @@ class RectangularLattice {
         periodic_(per),
         when_update_(upd) {
     lattice_.resize(n_cells_[0] * n_cells_[1] * n_cells_[2]);
-    const auto& log = logger<LogArea::Lattice>();
-    log.debug("Rectangular lattice created: sizes[fm] = (", lattice_sizes_[0],
-              ",", lattice_sizes_[1], ",", lattice_sizes_[2], "), dims = (",
-              n_cells_[0], ",", n_cells_[1], ",", n_cells_[2], "), origin = (",
-              origin_[0], ",", origin_[1], ",", origin_[2],
-              "), periodic: ", periodic_);
+    logg[LLattice].debug(
+        "Rectangular lattice created: sizes[fm] = (", lattice_sizes_[0], ",",
+        lattice_sizes_[1], ",", lattice_sizes_[2], "), dims = (", n_cells_[0],
+        ",", n_cells_[1], ",", n_cells_[2], "), origin = (", origin_[0], ",",
+        origin_[1], ",", origin_[2], "), periodic: ", periodic_);
     if (n_cells_[0] < 1 || n_cells_[1] < 1 || n_cells_[2] < 1 ||
         lattice_sizes_[0] < 0.0 || lattice_sizes_[1] < 0.0 ||
         lattice_sizes_[2] < 0.0) {
@@ -232,11 +232,10 @@ class RectangularLattice {
   template <typename F>
   void iterate_sublattice(const std::array<int, 3>& lower_bounds,
                           const std::array<int, 3>& upper_bounds, F&& func) {
-    const auto& log = logger<LogArea::Lattice>();
-    log.debug("Iterating sublattice with lower bound index (", lower_bounds[0],
-              ",", lower_bounds[1], ",", lower_bounds[2],
-              "), upper bound index (", upper_bounds[0], ",", upper_bounds[1],
-              ",", upper_bounds[2], ")");
+    logg[LLattice].debug(
+        "Iterating sublattice with lower bound index (", lower_bounds[0], ",",
+        lower_bounds[1], ",", lower_bounds[2], "), upper bound index (",
+        upper_bounds[0], ",", upper_bounds[1], ",", upper_bounds[2], ")");
 
     if (periodic_) {
       for (int iz = lower_bounds[2]; iz < upper_bounds[2]; iz++) {

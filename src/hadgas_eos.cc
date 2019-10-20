@@ -25,6 +25,7 @@
 #include "smash/random.h"
 
 namespace smash {
+static constexpr int LResonances = LogArea::Resonances::id;
 
 EosTable::EosTable(double de, double dnb, size_t n_e, size_t n_nb)
     : de_(de), dnb_(dnb), n_e_(n_e), n_nb_(n_nb) {
@@ -166,8 +167,7 @@ HadronGasEos::HadronGasEos(bool tabulate, bool account_for_width)
   solver_type = gsl_multiroot_fsolver_hybrid;
   solver_ = gsl_multiroot_fsolver_alloc(solver_type, n_equations_);
   if (tabulate_ && account_for_resonance_widths_) {
-    const auto &log = logger<LogArea::Resonances>();
-    log.error(
+    logg[LResonances].error(
         "Compilation of hadron gas EoS table requested with"
         " account of resonance spectral functions. This is not "
         "advised, as it will likely take a few days to finish."
@@ -379,11 +379,10 @@ double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
             ptype.spectral_function_simple(m);
       } while (q < random::uniform(0., max_ratio));
       if (q > max_ratio) {
-        const auto &log = logger<LogArea::Resonances>();
-        log.warn(ptype.name(), " - maximum increased in",
-                 " sample_mass_thermal from ", max_ratio, " to ", q,
-                 ", mass = ", m,
-                 " previously assumed maximum at m = ", m_where_max);
+        logg[LResonances].warn(
+            ptype.name(), " - maximum increased in",
+            " sample_mass_thermal from ", max_ratio, " to ", q, ", mass = ", m,
+            " previously assumed maximum at m = ", m_where_max);
         max_ratio = q;
         m_where_max = m;
       } else {
@@ -543,9 +542,8 @@ std::array<double, 3> HadronGasEos::solve_eos(
                       << ", init. approx.: " << initial_approximation[0] << " "
                       << initial_approximation[1] << " "
                       << initial_approximation[2] << std::endl;
-    const auto &log = logger<LogArea::HadronGasEos>();
-    log.warn(gsl_strerror(residual_status) + solver_parameters.str() +
-             print_solver_state(iter));
+    logg[LResonances].warn(gsl_strerror(residual_status) +
+                           solver_parameters.str() + print_solver_state(iter));
   }
 
   return {gsl_vector_get(solver_->x, 0), gsl_vector_get(solver_->x, 1),

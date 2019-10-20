@@ -24,6 +24,7 @@
 #include "smash/threevector.h"
 
 namespace smash {
+static constexpr int LNucleus = LogArea::Nucleus::id;
 
 Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
   fill_from_list(particle_list, nTest);
@@ -375,17 +376,16 @@ void Nucleus::generate_fermi_momenta() {
   const FourVector nucleus_center = center();
   const int A = N_n + N_p;
   constexpr double pi2_3 = 3.0 * M_PI * M_PI;
-  const auto &log = logger<LogArea::Nucleus>();
 
-  log.debug() << N_n << " neutrons, " << N_p << " protons.";
+  logg[LNucleus].debug() << N_n << " neutrons, " << N_p << " protons.";
 
   ThreeVector ptot = ThreeVector(0.0, 0.0, 0.0);
   for (auto i = begin(); i != end(); i++) {
     // Only protons and neutrons get Fermi momenta
     if (i->pdgcode() != pdg::p && i->pdgcode() != pdg::n) {
       if (i->is_baryon()) {
-        log.warn() << "No rule to calculate Fermi momentum "
-                   << "for particle " << i->pdgcode();
+        logg[LNucleus].warn() << "No rule to calculate Fermi momentum "
+                              << "for particle " << i->pdgcode();
       }
       continue;
     }
@@ -406,10 +406,10 @@ void Nucleus::generate_fermi_momenta() {
     const ThreeVector ith_3momentum = phitheta.threevec() * p;
     ptot += ith_3momentum;
     i->set_3momentum(ith_3momentum);
-    log.debug() << "Particle: " << *i
-                << ", pF[GeV]: " << hbarc * std::pow(pi2_3 * rho, 1.0 / 3.0)
-                << " r[fm]: " << r
-                << " Nuclear radius[fm]: " << nuclear_radius_;
+    logg[LNucleus].debug() << "Particle: " << *i << ", pF[GeV]: "
+                           << hbarc * std::pow(pi2_3 * rho, 1.0 / 3.0)
+                           << " r[fm]: " << r
+                           << " Nuclear radius[fm]: " << nuclear_radius_;
   }
   if (A == 0) {
     // No Fermi momenta should be assigned

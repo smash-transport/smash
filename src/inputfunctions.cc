@@ -16,10 +16,10 @@
 #include "smash/stringfunctions.h"
 
 namespace smash {
+static constexpr int LInputParser = LogArea::InputParser::id;
 
 std::vector<Line> line_parser(const std::string &input) {
-  const auto &log = logger<LogArea::InputParser>();
-  log.trace() << source_location << input;
+  logg[LInputParser].trace() << source_location << input;
   std::istringstream input_stream(input);
   std::vector<Line> lines;
   lines.reserve(50);
