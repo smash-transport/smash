@@ -66,15 +66,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -fPIC")
 # considerably in optimizing mathematical expressions.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno")
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-   # GCC-specific compiler flags
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op")
-endif()
-
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-   # Clang-specific compiler flags
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")
-
    option(CLANG_USE_LIBC++ "If turned on clang will explicitly be asked to use libc++ (otherwise it uses the system default)" OFF)
    if(CLANG_USE_LIBC++)
       include(cmake/AddCompilerFlag.cmake)
