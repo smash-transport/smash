@@ -79,9 +79,9 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * \page potentials_sym_ Symmetry
    *
    * The symmetry potential has the form
-   * \f[ U_{Sym} = \pm 2 S_{pot} \frac{\rho_n - \rho_p}{\rho_0} \,, \f]
-   * where \f$ \rho_n\f$ is neutron density and \f$ \rho_p\f$ is proton
-   * density. Definition and implementation are still to be worked out.
+   * \f[ U_{Sym} = \pm 2 S_{pot} \frac{I_3}{I} \frac{\rho_{I3}}{\rho_0} \,, \f]
+   * where \f$ \rho_{I3}\f$ is the density of the relative isospin \f$ I_3/I
+   * \f$.
    *
    * \key S_pot (double, required, no default): \n
    *      Parameter \f$S_{pot}\f$ of symmetry potential in MeV
