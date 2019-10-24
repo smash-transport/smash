@@ -160,8 +160,9 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
 }
 
 std::pair<double, int> Potentials::force_scale(const ParticleType &data) {
-  const auto& pdg = data.pdgcode();
-  const double skyrme_scale = (3 - std::abs(pdg.strangeness())) / 3. * pdg.baryon_number();
+  const auto &pdg = data.pdgcode();
+  const double skyrme_scale =
+      (3 - std::abs(pdg.strangeness())) / 3. * pdg.baryon_number();
   const int symmetry_scale = pdg.baryon_number();
   return std::make_pair(skyrme_scale, symmetry_scale);
 }
