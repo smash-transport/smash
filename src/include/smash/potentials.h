@@ -114,7 +114,7 @@ class Potentials {
    * \return (\f$Q_B(1-\frac{Q_S}{3}), Q_B\f$) where \f$Q_B\f$ is the baryon
    *         charge and \f$Q_S\f$ is the strangeness.
    */
-  std::pair<double, int> force_scale(const ParticleType &data) const;
+  static std::pair<double, int> force_scale(const ParticleType &data);
 
   /**
    * Evaluates the electrical and magnetic components of the skyrme force.

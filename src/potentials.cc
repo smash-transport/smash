@@ -159,7 +159,7 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
   return total_potential;
 }
 
-std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
+std::pair<double, int> Potentials::force_scale(const ParticleType &data) {
   double skyrme_scale = data.is_baryon() ? 1.0 : 0.0;
   if (data.pdgcode().is_hyperon()) {
     if (data.pdgcode().is_Xi()) {

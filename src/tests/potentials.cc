@@ -32,9 +32,32 @@ using namespace smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
-      "N+ 0.938 0.0 + 2212\n"
-      "N0 0.938 0.0 + 2112\n"
-      "π+ 0.138 0.0 - 211\n");
+      "π 0.138 7.7e-9 - 111 211\n"
+      "N 0.938 0 + 2112 2212\n"
+      "Λ 1.116 0 + 3122\n"
+      "Σ 1.189 0 + 3112 3212 3222\n"
+      "Ξ 1.318 0 + 3312 3322\n"
+      "Ω⁻ 1.672 0 + 3334\n"
+      );
+}
+
+TEST(force_scale) {
+  const auto& p = ParticleType::find(0x2212);
+  const auto& antip = ParticleType::find(-0x2212);
+  const auto& n = ParticleType::find(0x2112);
+  const auto& lambda = ParticleType::find(0x3122);
+  const auto& antilambda = ParticleType::find(-0x3122);
+  const auto& sigma = ParticleType::find(0x3112);
+  const auto& xi = ParticleType::find(0x3312);
+  const auto& omega = ParticleType::find(0x3334);
+  COMPARE(Potentials::force_scale(p), std::make_pair(1., 1));
+  COMPARE(Potentials::force_scale(antip), std::make_pair(-1., -1));
+  COMPARE(Potentials::force_scale(n), std::make_pair(1., 1));
+  COMPARE(Potentials::force_scale(lambda), std::make_pair(2./3., 1));
+  COMPARE(Potentials::force_scale(antilambda), std::make_pair(-2./3., -1));
+  COMPARE(Potentials::force_scale(sigma), std::make_pair(2./3., 1));
+  COMPARE(Potentials::force_scale(xi), std::make_pair(1./3., 1));
+  COMPARE(Potentials::force_scale(omega), std::make_pair(0., 1));
 }
 
 static ParticleData create_proton(int id = -1) {
