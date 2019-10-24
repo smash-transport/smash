@@ -41,6 +41,11 @@ TEST(init_particle_types) {
       );
 }
 
+static void compare_pair(const std::pair<double, int>& a, const std::pair<double, int>& b) {
+  COMPARE(a.first, b.first);
+  COMPARE(a.second, b.second);
+}
+
 TEST(force_scale) {
   const auto& p = ParticleType::find(0x2212);
   const auto& antip = ParticleType::find(-0x2212);
@@ -50,14 +55,14 @@ TEST(force_scale) {
   const auto& sigma = ParticleType::find(0x3112);
   const auto& xi = ParticleType::find(0x3312);
   const auto& omega = ParticleType::find(0x3334);
-  COMPARE(Potentials::force_scale(p), std::make_pair(1., 1));
-  COMPARE(Potentials::force_scale(antip), std::make_pair(-1., -1));
-  COMPARE(Potentials::force_scale(n), std::make_pair(1., 1));
-  COMPARE(Potentials::force_scale(lambda), std::make_pair(2./3., 1));
-  COMPARE(Potentials::force_scale(antilambda), std::make_pair(-2./3., -1));
-  COMPARE(Potentials::force_scale(sigma), std::make_pair(2./3., 1));
-  COMPARE(Potentials::force_scale(xi), std::make_pair(1./3., 1));
-  COMPARE(Potentials::force_scale(omega), std::make_pair(0., 1));
+  compare_pair(Potentials::force_scale(p), std::make_pair(1., 1));
+  compare_pair(Potentials::force_scale(antip), std::make_pair(-1., -1));
+  compare_pair(Potentials::force_scale(n), std::make_pair(1., 1));
+  compare_pair(Potentials::force_scale(lambda), std::make_pair(2./3., 1));
+  compare_pair(Potentials::force_scale(antilambda), std::make_pair(-2./3., -1));
+  compare_pair(Potentials::force_scale(sigma), std::make_pair(2./3., 1));
+  compare_pair(Potentials::force_scale(xi), std::make_pair(1./3., 1));
+  compare_pair(Potentials::force_scale(omega), std::make_pair(0., 1));
 }
 
 static ParticleData create_proton(int id = -1) {

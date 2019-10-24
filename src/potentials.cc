@@ -160,18 +160,9 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
 }
 
 std::pair<double, int> Potentials::force_scale(const ParticleType &data) {
-  double skyrme_scale = data.is_baryon() ? 1.0 : 0.0;
-  if (data.pdgcode().is_hyperon()) {
-    if (data.pdgcode().is_Xi()) {
-      skyrme_scale = 1. / 3.;
-    } else if (data.pdgcode().is_Omega()) {
-      skyrme_scale = 0.;
-    } else {
-      skyrme_scale = 2. / 3.;
-    }
-  }
-  skyrme_scale = skyrme_scale * data.pdgcode().baryon_number();
-  const int symmetry_scale = data.pdgcode().baryon_number();
+  const auto& pdg = data.pdgcode();
+  const double skyrme_scale = (3 - std::abs(pdg.strangeness())) / 3. * pdg.baryon_number();
+  const int symmetry_scale = pdg.baryon_number();
   return std::make_pair(skyrme_scale, symmetry_scale);
 }
 
