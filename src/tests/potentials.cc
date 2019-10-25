@@ -32,9 +32,38 @@ using namespace smash;
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
-      "N+ 0.938 0.0 + 2212\n"
-      "N0 0.938 0.0 + 2112\n"
-      "π+ 0.138 0.0 - 211\n");
+      "π 0.138 7.7e-9 - 111 211\n"
+      "N 0.938 0 + 2112 2212\n"
+      "Λ 1.116 0 + 3122\n"
+      "Σ 1.189 0 + 3112 3212 3222\n"
+      "Ξ 1.318 0 + 3312 3322\n"
+      "Ω⁻ 1.672 0 + 3334\n");
+}
+
+static void compare_pair(const std::pair<double, int>& a,
+                         const std::pair<double, int>& b) {
+  COMPARE(a.first, b.first);
+  COMPARE(a.second, b.second);
+}
+
+TEST(force_scale) {
+  const auto& p = ParticleType::find(0x2212);
+  const auto& antip = ParticleType::find(-0x2212);
+  const auto& n = ParticleType::find(0x2112);
+  const auto& lambda = ParticleType::find(0x3122);
+  const auto& antilambda = ParticleType::find(-0x3122);
+  const auto& sigma = ParticleType::find(0x3112);
+  const auto& xi = ParticleType::find(0x3312);
+  const auto& omega = ParticleType::find(0x3334);
+  compare_pair(Potentials::force_scale(p), std::make_pair(1., 1));
+  compare_pair(Potentials::force_scale(antip), std::make_pair(-1., -1));
+  compare_pair(Potentials::force_scale(n), std::make_pair(1., 1));
+  compare_pair(Potentials::force_scale(lambda), std::make_pair(2. / 3., 1));
+  compare_pair(Potentials::force_scale(antilambda),
+               std::make_pair(-2. / 3., -1));
+  compare_pair(Potentials::force_scale(sigma), std::make_pair(2. / 3., 1));
+  compare_pair(Potentials::force_scale(xi), std::make_pair(1. / 3., 1));
+  compare_pair(Potentials::force_scale(omega), std::make_pair(0., 1));
 }
 
 static ParticleData create_proton(int id = -1) {
@@ -74,7 +103,7 @@ TEST(nucleus_potential_profile) {
   const int nx = 50, ny = 50;
   const double dx = 0.2, dy = 0.2;
   double pot_value;
-  const ParticleType &proton = ParticleType::find(0x2212);
+  const ParticleType& proton = ParticleType::find(0x2212);
 
   std::ofstream a_file;
   const double timestep = param.labclock->timestep_duration();
@@ -128,12 +157,12 @@ TEST(propagation_in_test_potential) {
   // Create a dummy potential
   class Dummy_Pot : public Potentials {
    public:
-    Dummy_Pot(Configuration conf, const ExperimentParameters &param,
+    Dummy_Pot(Configuration conf, const ExperimentParameters& param,
               const double U0, const double d, const double B0)
         : Potentials(conf, param), U0_(U0), d_(d), B0_(B0) {}
 
     std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector> all_forces(
-        const ThreeVector &r, const ParticleList &) const override {
+        const ThreeVector& r, const ParticleList&) const override {
       const double tmp = std::exp(r.x1() / d_);
       return std::make_tuple(
           ThreeVector(U0_ / d_ * tmp / ((1.0 + tmp) * (1.0 + tmp)), 0.0, 0.0),

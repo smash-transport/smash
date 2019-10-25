@@ -79,9 +79,9 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * \page potentials_sym_ Symmetry
    *
    * The symmetry potential has the form
-   * \f[ U_{Sym} = \pm 2 S_{pot} \frac{\rho_n - \rho_p}{\rho_0} \,, \f]
-   * where \f$ \rho_n\f$ is neutron density and \f$ \rho_p\f$ is proton
-   * density. Definition and implementation are still to be worked out.
+   * \f[ U_{Sym} = \pm 2 S_{pot} \frac{I_3}{I} \frac{\rho_{I3}}{\rho_0} \,, \f]
+   * where \f$ \rho_{I3}\f$ is the density of the relative isospin \f$ I_3/I
+   * \f$.
    *
    * \key S_pot (double, required, no default): \n
    *      Parameter \f$S_{pot}\f$ of symmetry potential in MeV
@@ -159,19 +159,11 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
   return total_potential;
 }
 
-std::pair<double, int> Potentials::force_scale(const ParticleType &data) const {
-  double skyrme_scale = data.is_baryon() ? 1.0 : 0.0;
-  if (data.pdgcode().is_hyperon()) {
-    if (data.pdgcode().is_Xi()) {
-      skyrme_scale = 1. / 3.;
-    } else if (data.pdgcode().is_Omega()) {
-      skyrme_scale = 0.;
-    } else {
-      skyrme_scale = 2. / 3.;
-    }
-  }
-  skyrme_scale = skyrme_scale * data.pdgcode().baryon_number();
-  const int symmetry_scale = data.pdgcode().baryon_number();
+std::pair<double, int> Potentials::force_scale(const ParticleType &data) {
+  const auto &pdg = data.pdgcode();
+  const double skyrme_scale =
+      (3 - std::abs(pdg.strangeness())) / 3. * pdg.baryon_number();
+  const int symmetry_scale = pdg.baryon_number();
   return std::make_pair(skyrme_scale, symmetry_scale);
 }
 

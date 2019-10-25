@@ -111,11 +111,10 @@ class Potentials {
    * force acting on baryons but with an opposite direction.
    *
    * \param[in] data Type of particle on which potential is going to act.
-   * \return (\f$Q_B(1-\frac{Q_S}{3}), 2I_3\f$) where \f$Q_B\f$ is the baryon
-   *         charge, \f$Q_S\f$ is the strangeness, and \f$I_3\f$ is the third
-   *         component of the isospin.
+   * \return (\f$Q_B(1-\frac{|Q_S|}{3}), Q_B\f$) where \f$Q_B\f$ is the baryon
+   *         charge and \f$Q_S\f$ is the strangeness.
    */
-  std::pair<double, int> force_scale(const ParticleType &data) const;
+  static std::pair<double, int> force_scale(const ParticleType &data);
 
   /**
    * Evaluates the electrical and magnetic components of the skyrme force.

@@ -148,9 +148,9 @@ void update_momenta(
     }
     const ThreeVector Force =
         scale.first *
-            (FB.first + data.momentum().velocity().CrossProduct(FB.second)) +
+            (FB.first + data.momentum().velocity().cross_product(FB.second)) +
         scale.second * data.type().isospin3_rel() *
-            (FI3.first + data.momentum().velocity().CrossProduct(FI3.second));
+            (FI3.first + data.momentum().velocity().cross_product(FI3.second));
     logg[LPropagation].debug("Update momenta: F [GeV/fm] = ", Force);
     data.set_4momentum(data.effective_mass(),
                        data.momentum().threevec() + Force * dt);
