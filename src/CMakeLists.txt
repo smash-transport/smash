@@ -187,7 +187,7 @@ configure_file (
 )
 
 # copy config file to build directory
-configure_file(${CMAKE_SOURCE_DIR}/input/config.yaml
+configure_file(${PROJECT_SOURCE_DIR}/input/config.yaml
                ${PROJECT_BINARY_DIR}/config.yaml
                COPYONLY)
 # generate headers from input files
@@ -198,11 +198,11 @@ macro(generate_headers)
       add_custom_command(
          OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h
          COMMAND ${CMAKE_COMMAND}
-         -D INPUT_FILE=${CMAKE_SOURCE_DIR}/input/${filename}
+         -D INPUT_FILE=${PROJECT_SOURCE_DIR}/input/${filename}
          -D OUTPUT_FILE=${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h
          -D NAME=data
          -P ${PROJECT_SOURCE_DIR}/cmake/copy_file_contents_to_string.cmake
-         DEPENDS ${CMAKE_SOURCE_DIR}/input/${filename}
+         DEPENDS ${PROJECT_SOURCE_DIR}/input/${filename}
          COMMENT "Convert ${CMAKE_SOURCE_DIR}/input/${filename} to ${CMAKE_CURRENT_BINARY_DIR}/include/${filename}.h"
          VERBATIM)
       add_custom_target(generate_${filename}.h ALL DEPENDS
