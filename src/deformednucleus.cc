@@ -197,9 +197,6 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
       } else if (Z == 44) {  // Ruthenium
         set_beta_2(0.158);
         set_beta_4(0.0);
-      } else if (Z == 44) {  // Ruthenium
-        set_beta_2(0.158);
-        set_beta_4(0.0);
       } else {
         throw std::domain_error(
             "Number of protons for nuclei with mass number A = 96 does not "
