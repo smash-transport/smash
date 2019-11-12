@@ -151,9 +151,9 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
   // reference for U, Pb, Au, Cu: \iref{Moller:1993ed}
   // reference for Zr and Ru: \iref{Schenke:2019ruo}
   bool listed = 0;
-  std::map<int, std::string> A_map = {
+  const std::map<int, std::string> A_map = {
       {238, "Uranium"}, {208, "Lead"}, {197, "Gold"}, {63, "Copper"}};
-  std::map<std::string, std::string> Z_map = {
+  const std::map<std::string, std::string> Z_map = {
       {"Uranium", "92"}, {"Lead", "82"}, {"Gold", "79"}, {"Copper", "29"}};
   int A = Nucleus::number_of_particles();
   int Z = Nucleus::number_of_protons();
@@ -213,13 +213,13 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
           "manually and set \"Automatic: False.\" ");
   }
   if (listed) {
-    throw std::domain_error("Mass number is listed under " + A_map[A] +
+    throw std::domain_error("Mass number is listed under " + A_map.at(A) +
                             " but the proton "
                             "number of " +
                             std::to_string(Z) +
                             " does not match "
                             "its " +
-                            Z_map[A_map[A]] +
+                            Z_map.at(A_map.at(A)) +
                             " protons."
                             "Please specify at least \"Beta_2\" and \"Beta_4\" "
                             "manually and set \"Automatic: False.\" ");
