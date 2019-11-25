@@ -385,11 +385,10 @@ void ignore_simulation_config_values(Configuration &configuration) {
 void initialize_particles_and_decays(Configuration &configuration,
                                      sha256::Hash hash,
                                      bf::path tabulations_path) {
-  const auto &log = logger<LogArea::Main>();
   ParticleType::create_type_list(configuration.take({"particles"}));
   DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
   ParticleType::check_consistency();
-  log.info("Tabulating cross section integrals...");
+  logg[LMain].info("Tabulating cross section integrals...");
   IsoParticleType::tabulate_integrals(hash, tabulations_path);
 }
 
@@ -741,7 +740,7 @@ int main(int argc, char *argv[]) {
         << "# Build    : " << CMAKE_BUILD_TYPE << '\n'
         << "# Date     : " << BUILD_DATE << '\n'
         << configuration.to_string() << '\n';
-    log.trace(source_location, " create ParticleType and DecayModes");
+    logg[LMain].trace(source_location, " create ParticleType and DecayModes");
     initialize_particles_and_decays(configuration, hash, tabulations_path);
 
     // Create an experiment
