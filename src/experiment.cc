@@ -227,6 +227,8 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *      The velocity is obtained from the energy-momentum tensor
  *      \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the generalized eigenvalue
  *      equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
+ *   \li \key "j_QBS" - Electric (Q), baryonic (B) and strange (S) currents
+ *      \f$j^{\mu}_{QBS}(t,x,y,z) \f$
  *
  *   \key Position (list of 3 doubles, optional, default = [0.0, 0.0, 0.0]): \n
  *   Point, at which thermodynamic quantities are computed.
