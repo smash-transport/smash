@@ -100,15 +100,16 @@ class Potentials {
                    const ParticleType &acts_on) const;
 
   /**
-   * Evaluates the scaling factor of the forces acting on the particles. The
-   * forces are equal to the product of the scaling factor and the gradient of
-   * the potential. We need these scaling factors to describe the motions of
+   * Evaluates the scaling factor of the forces acting on the particles.
+   *
+   * The forces are equal to the product of the scaling factor and the gradient
+   * of the potential. We need these scaling factors to describe the motions of
    * the hyperons as well as the anti-particles in the potentials. For Lambda
    * and Sigma, since they carry 2 light (u or d) quarks, they are affected by
-   * 2/3 of the Skyrme force. Xi carries 1 light quark, it is affected by 1/3
-   * of the Skyrme force. Omega carries no light quark, so it's not affected by
-   * the Skyrme force. Anti-baryons are affected by the force as large as the
-   * force acting on baryons but with an opposite direction.
+   * 2/3 of the Skyrme force. Xi carries 1 light quark, it is affected by 1/3 of
+   * the Skyrme force. Omega carries no light quark, so it's not affected by the
+   * Skyrme force. Anti-baryons are affected by the force as large as the force
+   * acting on baryons but with an opposite direction.
    *
    * \param[in] data Type of particle on which potential is going to act.
    * \return (\f$Q_B(1-\frac{|Q_S|}{3}), Q_B\f$) where \f$Q_B\f$ is the baryon
@@ -119,18 +120,17 @@ class Potentials {
   /**
    * Evaluates the electrical and magnetic components of the skyrme force.
    *
-   * \param[in] density Eckart density [fm\f$^{-3}\f$].
-   * \param[in] grad_rho Gradient of density [fm\f$^{-4}\f$]. This density is
-   *            evaluated in the computational frame.
-   * \param[in] dj_dt Time derivative of the current density [fm\f$^{-4}\f$
-   * \param[in] rot_j Curl of the current density [fm\f$^{-4}\f$
-   * \return (\f$E_B, B_B\f$), where
-   *         \f[E_B = -V_B^\prime(\rho^\ast)(\nabla\rho_B
+   * \param[in] density Eckart baryon density [fm\f$^{-3}\f$].
+   * \param[in] grad_rho Gradient of baryon density [fm\f$^{-4}\f$]. This
+   * density is evaluated in the computational frame. \param[in] dj_dt Time
+   * derivative of the baryon current density [fm\f$^{-4}\f$ \param[in] rot_j
+   * Curl of the baryon current density [fm\f$^{-4}\f$ \return (\f$E_B, B_B\f$),
+   * where \f[E_B = -V_B^\prime(\rho^\ast)(\nabla\rho_B
    *                   + \partial_t \vec j_B)\f]
    *         is the electro component of Skyrme force and
    *         \f[B_B = V_B^\prime(\rho^\ast) \nabla\times\vec j_B\f]
    *         is the magnetic component of the Skyrme force
-   *         with \f$\rho^\ast\f$ being the Eckart density.
+   *         with \f$\rho^\ast\f$ being the Eckart baryon density.
    */
   std::pair<ThreeVector, ThreeVector> skyrme_force(
       const double density, const ThreeVector grad_rho, const ThreeVector dj_dt,
@@ -140,16 +140,18 @@ class Potentials {
    * Evaluates the electrical and magnetic components of the symmetry force.
    *
    * \param[in] rhoI3 Relative isospin 3 density.
-   * \param[in] grad_rhoI3 Gradient of density [fm\f$^{-4}\f$]. This density is
-   *            evaluated in the computational frame.
-   * \param[in] djI3_dt Time derivative of the current density [fm\f$^{-4}\f$]
-   * \param[in] rot_jI3 Curl of the current density [fm\f$^{-4}\f$]
+   * \param[in] grad_rhoI3 Gradient of I3/I density [fm\f$^{-4}\f$]. This
+   *            density is evaluated in the computational frame.
+   * \param[in] djI3_dt Time derivative of the I3/I current density
+   *            [fm\f$^{-4}\f$]
+   * \param[in] rot_jI3 Curl of the I3/I current density [fm\f$^{-4}\f$]
    * \param[in] rhoB Net-baryon density
    * \param[in] grad_rhoB Gradient of the net-baryon density
    * \param[in] djB_dt Time derivative of the net-baryon current density
-   * \param[in] rot_jB Curl of the net-baryon current density
-   * \return (\f$E_I3, B_I3\f$) [GeV/fm], where
-   *         \f[\vec{E} = - \frac{\partial V^\ast}{\partial\rho_{I_3}^\ast}
+   * \param[in] rot_jB Curl of the net-baryon current density \return (\f$E_I3,
+   *         B_I3\f$) [GeV/fm],
+   *         where \f[\vec{E} = - \frac{\partial
+   *         V^\ast}{\partial\rho_{I_3}^\ast}
    *         (\nabla\rho_{I_3} + \partial_t \vec j_{I_3})
    *         - \frac{\partial V^\ast}{\partial\rho_B^\ast}(\nabla\rho_B
    *         + \partial_t \vec j_B)\f]
@@ -159,7 +161,7 @@ class Potentials {
    *         + \frac{\partial V^\ast}{\rho_B^\ast}
    *         \nabla\times\vec j_B \f]
    *         is the magnetic component of the symmetry force
-   *         with \f$\rho^\ast\f$ being the Eckart density.
+   *         with \f$\rho^\ast\f$ being the respective Eckart density.
    */
   std::pair<ThreeVector, ThreeVector> symmetry_force(
       const double rhoI3, const ThreeVector grad_rhoI3,
@@ -225,7 +227,7 @@ class Potentials {
   double symmetry_S_Pot_;
 
   /**
-   * Wheter the baryon density dependence of the symmetry potential is
+   * Whether the baryon density dependence of the symmetry potential is
    * included
    */
   bool symmetry_is_rhoB_dependent_ = false;
