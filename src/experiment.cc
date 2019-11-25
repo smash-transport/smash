@@ -185,7 +185,8 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * \n
  * - \b Initial_Conditions (Oscar1999, Oscar2013, binary, ROOT and special ASCII
  * IC (\ref IC_output_user_guide_) formats)\n
- *   \key Proper_Time (double, optional, default = nuclei passing time): Proper
+ *   \key Proper_Time (double, optional, default = nuclei passing time, if
+ *                     > 0.5 fm, else Proper_Time = 0.5 fm): Proper
  *       time at which hypersurface is created \n
  *   \key Extended (bool, optional, default = false, incompatible with
  *                  Oscar1999, ROOT and ASCII format):\n
@@ -315,14 +316,15 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * simulations. The corresponding output provides the particle list on a
  * hypersurface of constant proper time. If desired, the proper time can be set
  * manually from the configuration file (in the following example at \f$\tau =
- * 0.5 \f$ fm). If not provided, the default proper time corresponds to the
- * moment when both nuclei have entirely passed through each other.\n
+ * 1.5 \f$ fm). If not provided, the default proper time corresponds to the
+ * moment when both nuclei have entirely passed through each other, while this
+ * proper time is greater than 0.5 fm. Else it is set to \f$\tau = 0.5 \f$ fm.\n
  * The initial conditions output can be enabled as follows:
  *\verbatim
      Initial_Conditions:
          Format:    ["ASCII", "Oscar1999", "Oscar2013", "Binary", "ROOT"]
          Extended: False
-         Proper_Time: 0.5
+         Proper_Time: 1.5
  \endverbatim
  */
 

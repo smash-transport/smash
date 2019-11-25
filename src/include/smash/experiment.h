@@ -847,7 +847,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"Output", "Initial_Conditions", "Proper_Time"});
     } else {
       // Default proper time is the passing time of the two nuclei
-      proper_time = modus_.nuclei_passing_time();
+      double default_proper_time = modus_.nuclei_passing_time();
+      if (default_proper_time >= 0.5) {
+        proper_time = default_proper_time;
+      } else {
+        proper_time = minimum_proper_time;
+      }
     }
     action_finders_.emplace_back(
         make_unique<HyperSurfaceCrossActionsFinder>(proper_time));
@@ -1140,7 +1145,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * the projectile and target nucleus, respectively, \f$
    * \sqrt{s_\mathrm{NN}}\f$
    * is the collision energy per nucleon and \f$ m_\mathrm{N} \f$ the nucleon
-   * mass. \n If
+   * mass. Note though that, if the passing time is smaller than 0.5 fm, the
+   * default porper time of the hypersurface is taken to be \f$\tau = 0.5 \f$
+   * as a minimum bound to ensure the proper time is large enough
+   * to also extract reasonable initial conditions at RHIC/LHC energies. \n If
    * initial conditions are enabled, the output file named SMASH_IC (followed by
    * the appropriate suffix) is generated when SMASH is executed. \n The output
    * is available in Oscar1999, Oscar2013, binary and ROOT format, as well as in
