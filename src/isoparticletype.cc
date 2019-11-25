@@ -230,20 +230,22 @@ inline void cache_integral(
     const IsoParticleType &res, const IsoParticleType *antires, bool unstable) {
   constexpr double spacing = 2.0;
   constexpr double spacing2d = 3.0;
-  const auto path =
-      generate_tabulation_path(dir, part.name(), res.name()).string();
+  const auto path = generate_tabulation_path(dir, part.name(), res.name());
   Tabulation integral;
   if (!dir.empty() && bf::exists(path)) {
-    std::cout << "Tabulation found at " << path << std::endl;
-    std::ifstream file(path);
+    std::ifstream file(path.string());
     integral = Tabulation::from_file(file, hash);
     if (!integral.is_empty()) {
-      std::cout << "-> loaded." << std::endl;
-    } else {
-      std::cout << "-> discarded." << std::endl;
+      // Only print message if the found tabulation was valid.
+      std::cout << "Tabulation found at " << path.filename() << '\r'
+                << std::flush;
     }
   }
   if (integral.is_empty()) {
+    if (!dir.empty()) {
+      std::cout << "Caching tabulation to " << path.filename() << '\r'
+                << std::flush;
+    }
     if (!unstable) {
       integral = spectral_integral_semistable(integrate, *res.get_states()[0],
                                               *part.get_states()[0], spacing);
@@ -252,9 +254,8 @@ inline void cache_integral(
                                             *part.get_states()[0], spacing2d);
     }
     if (!dir.empty()) {
-      std::ofstream file(path);
+      std::ofstream file(path.string());
       integral.write(file, hash);
-      std::cout << "Tabulation written to " << path << std::endl;
     }
   }
   tabulations.emplace(std::make_pair(res.name(), integral));

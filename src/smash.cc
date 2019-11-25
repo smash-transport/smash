@@ -581,13 +581,15 @@ int main(int argc, char *argv[]) {
     hash_context.update(particle_string);
     hash_context.update(decay_string);
     const auto hash = hash_context.finalize();
-    std::cout << "config hash: " << sha256::hash_to_string(hash) << std::endl;
+    logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash)
+                       << std::endl;
 
     bf::path tabulations_path;
     if (cache_integrals) {
       tabulations_path = output_path.parent_path() / "tabulations";
       bf::create_directories(tabulations_path);
-      std::cout << "tabulations path: " << tabulations_path << std::endl;
+      logg[LMain].info() << "Tabulations path: " << tabulations_path
+                         << std::endl;
     } else {
       tabulations_path = "";
     }
