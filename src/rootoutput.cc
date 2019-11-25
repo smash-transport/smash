@@ -128,12 +128,10 @@ void RootOutput::init_trees() {
     particles_tree_->Branch("z", &z[0], "z[npart]/D");
 
     if (part_extended_ || ic_extended_) {
-      particles_tree_->Branch("coll_per_part", &coll_per_part_[0],
-                              "coll_per_part[npart]/I");
-      particles_tree_->Branch("formation_time", &formation_time_[0],
-                              "formation_time[npart]/D");
-      particles_tree_->Branch("xsec_factor", &xsec_factor_[0],
-                              "xsec_factor[npart]/D");
+      particles_tree_->Branch("ncoll", &coll_per_part_[0], "ncoll[npart]/I");
+      particles_tree_->Branch("form_time", &formation_time_[0],
+                              "form_time[npart]/D");
+      particles_tree_->Branch("xsecfac", &xsec_factor_[0], "xsecfac[npart]/D");
       particles_tree_->Branch("proc_id_origin", &proc_id_origin_[0],
                               "proc_id_origin[npart]/I");
       particles_tree_->Branch("proc_type_origin", &proc_type_origin_[0],
@@ -171,12 +169,10 @@ void RootOutput::init_trees() {
     collisions_tree_->Branch("z", &z[0], "z[npart]/D");
 
     if (coll_extended_) {
-      collisions_tree_->Branch("coll_per_part", &coll_per_part_[0],
-                               "coll_per_part[npart]/I");
-      collisions_tree_->Branch("formation_time", &formation_time_[0],
-                               "formation_time[npart]/D");
-      collisions_tree_->Branch("xsec_factor", &xsec_factor_[0],
-                               "xsec_factor[npart]/D");
+      collisions_tree_->Branch("ncoll", &coll_per_part_[0], "ncoll[npart]/I");
+      collisions_tree_->Branch("form_time", &formation_time_[0],
+                               "form_time[npart]/D");
+      collisions_tree_->Branch("xsecfac", &xsec_factor_[0], "xsecfac[npart]/D");
       collisions_tree_->Branch("proc_id_origin", &proc_id_origin_[0],
                                "proc_id_origin[npart]/I");
       collisions_tree_->Branch("proc_type_origin", &proc_type_origin_[0],
