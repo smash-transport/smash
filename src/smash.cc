@@ -21,6 +21,7 @@
 #include "smash/random.h"
 #include "smash/scatteractionsfinder.h"
 #include "smash/setup_particles_decaymodes.h"
+#include "smash/sha256.h"
 #include "smash/stringfunctions.h"
 /* build dependent variables */
 #include "smash/config.h"
@@ -163,6 +164,7 @@ void usage(const int rc, const std::string &progname) {
       "  -x, --dump_iSS          Dump particle table in iSS format\n"
       "                          This format is used in MUSIC and CLVisc\n"
       "                          relativistic hydro codes\n"
+      "  -n, --no-cache          Don't cache integrals on disk\n"
       "  -v, --version\n\n");
   std::exit(rc);
 }
@@ -379,6 +381,17 @@ void ignore_simulation_config_values(Configuration &configuration) {
   }
 }
 
+/// Initialize the particles and decays from the configuration.
+void initialize_particles_and_decays(Configuration &configuration,
+                                     sha256::Hash hash,
+                                     bf::path tabulations_path) {
+  ParticleType::create_type_list(configuration.take({"particles"}));
+  DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+  ParticleType::check_consistency();
+  logg[LMain].info("Tabulating cross section integrals...");
+  IsoParticleType::tabulate_integrals(hash, tabulations_path);
+}
+
 }  // unnamed namespace
 
 }  // namespace smash
@@ -412,6 +425,7 @@ int main(int argc, char *argv[]) {
       {"cross-sections-fs", required_argument, 0, 'S'},
       {"dump-iSS", no_argument, 0, 'x'},
       {"version", no_argument, 0, 'v'},
+      {"no-cache", no_argument, 0, 'n'},
       {nullptr, 0, 0, 0}};
 
   // strip any path to progname
@@ -428,12 +442,13 @@ int main(int argc, char *argv[]) {
     bool cross_section_dump_activated = false;
     bool final_state_cross_sections = false;
     bool particles_dump_iSS_format = false;
+    bool cache_integrals = true;
 
     // parse command-line arguments
     int opt;
     bool suppress_disclaimer = false;
-    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xv", longopts,
-                              nullptr)) != -1) {
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xv:n",
+                              longopts, nullptr)) != -1) {
       switch (opt) {
         case 'c':
           extra_config.emplace_back(optarg);
@@ -491,6 +506,9 @@ int main(int argc, char *argv[]) {
               VERSION_MAJOR, GIT_BRANCH, CMAKE_SYSTEM, CMAKE_CXX_COMPILER_ID,
               CMAKE_CXX_COMPILER_VERSION, CMAKE_BUILD_TYPE, BUILD_DATE);
           std::exit(EXIT_SUCCESS);
+        case 'n':
+          cache_integrals = false;
+          break;
         default:
           usage(EXIT_FAILURE, progname);
       }
@@ -553,14 +571,33 @@ int main(int argc, char *argv[]) {
     if (!configuration.has_value({"decaymodes"}) || decaymodes) {
       configuration["decaymodes"] = particles_and_decays.second;
     }
-    ParticleType::create_type_list(configuration.read({"particles"}));
-    DecayModes::load_decaymodes(configuration.read({"decaymodes"}));
-    ParticleType::check_consistency();
 
+    // Calculate a hash of the SMASH version, the particles and decaymodes.
+    const std::string version(VERSION_MAJOR);
+    const std::string particle_string = configuration["particles"].to_string();
+    const std::string decay_string = configuration["decaymodes"].to_string();
+    sha256::Context hash_context;
+    hash_context.update(version);
+    hash_context.update(particle_string);
+    hash_context.update(decay_string);
+    const auto hash = hash_context.finalize();
+    logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash)
+                       << std::endl;
+
+    bf::path tabulations_path;
+    if (cache_integrals) {
+      tabulations_path = output_path.parent_path() / "tabulations";
+      bf::create_directories(tabulations_path);
+      logg[LMain].info() << "Tabulations path: " << tabulations_path
+                         << std::endl;
+    } else {
+      tabulations_path = "";
+    }
     if (list2n_activated) {
       /* Print only 2->n, n > 1. Do not dump decays, which can be found in
        * decaymodes.txt anyway */
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
+      initialize_particles_and_decays(configuration, hash, tabulations_path);
       auto scat_finder = actions_finder_for_dump(configuration);
 
       ignore_simulation_config_values(configuration);
@@ -616,12 +653,14 @@ int main(int argc, char *argv[]) {
       ignore_simulation_config_values(configuration);
       check_for_unused_config_values(configuration);
 
+      initialize_particles_and_decays(configuration, hash, tabulations_path);
       PdgCode pdg(pdg_string);
       const ParticleType &res = ParticleType::find(pdg);
       res.dump_width_and_spectral_function();
       std::exit(EXIT_SUCCESS);
     }
     if (cross_section_dump_activated) {
+      initialize_particles_and_decays(configuration, hash, tabulations_path);
       std::string arg_string(cs_string);
       std::vector<std::string> args = split(arg_string, ',');
       const unsigned int n_arg = args.size();
@@ -703,8 +742,8 @@ int main(int argc, char *argv[]) {
         << "# Build    : " << CMAKE_BUILD_TYPE << '\n'
         << "# Date     : " << BUILD_DATE << '\n'
         << configuration.to_string() << '\n';
-    configuration.take({"particles"});
-    configuration.take({"decaymodes"});
+    logg[LMain].trace(source_location, " create ParticleType and DecayModes");
+    initialize_particles_and_decays(configuration, hash, tabulations_path);
 
     // Create an experiment
     logg[LMain].trace(source_location, " create Experiment");

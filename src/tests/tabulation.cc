@@ -13,6 +13,11 @@
 
 using namespace smash;
 
+TEST(empty) {
+  const Tabulation tab;
+  VERIFY(tab.is_empty());
+}
+
 TEST(constant) {
   // tabulate a constant function
   const Tabulation tab(0., 10., 10, [](double) { return 1.; });

@@ -23,6 +23,10 @@ using smash::Test::Position;
 TEST(init_particle_types) {
   Test::create_actual_particletypes();
   Test::create_actual_decaymodes();
+  ParticleType::check_consistency();
+  sha256::Hash hash;
+  hash.fill(0);
+  IsoParticleType::tabulate_integrals(hash, "");
 }
 
 constexpr double r_x = 0.1;

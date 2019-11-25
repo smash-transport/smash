@@ -8,6 +8,7 @@
 #ifndef SRC_INCLUDE_TABULATION_H_
 #define SRC_INCLUDE_TABULATION_H_
 
+#include <fstream>
 #include <functional>
 #include <map>
 #include <memory>
@@ -17,6 +18,7 @@
 #include "integrate.h"
 #include "kinematics.h"
 #include "particletype.h"
+#include "sha256.h"
 
 namespace smash {
 
@@ -33,6 +35,11 @@ enum class Extrapolation {
 class Tabulation {
  public:
   /**
+   * Construct an empty tabulation object.
+   */
+  Tabulation() : values_({}), x_min_(0.0), x_max_(0.0), inv_dx_(0.0) {}
+
+  /**
    * Construct a new tabulation object.
    *
    * \param x_min lower bound of tabulation domain
@@ -40,9 +47,26 @@ class Tabulation {
    * \param num number of intervals (the number of tabulated points is actually
    * num+1)
    * \param f one-dimensional function f(x) which is supposed to be tabulated
+   * \return Construct object.
+   * \throws if less than two values are tabulated.
    */
-  Tabulation(double x_min, double range, int num,
+  Tabulation(double x_min, double range, size_t num,
              std::function<double(double)> f);
+
+  /**
+   * \returns whether the tabulation is empty.
+   */
+  bool is_empty() const { return values_.empty(); }
+
+  /**
+   * Construct a tabulation object by reading binary data from a stream.
+   *
+   * \param stream Stream containing the binary representation of the
+   * tabulation. \param hash Hash corresponding to the particle properties for
+   * which the tabulation was created. \returns (true, tabulation) if the given
+   * hash matches the one given by the stream, (false, empty) otherwise.
+   */
+  static Tabulation from_file(std::ifstream& stream, sha256::Hash hash);
 
   /**
    * Look up a value from the tabulation (without any interpolation, simply
@@ -72,18 +96,27 @@ class Tabulation {
   double get_value_linear(
       double x, Extrapolation extrapolation = Extrapolation::Linear) const;
 
+  /**
+   * Write a binary representation of the tabulation to a stream.
+   *
+   * \param stream Stream to which the binary representation is written.
+   * \param hash Hash corresponding to the particle properties for which the
+   *             tabulation was created.
+   */
+  void write(std::ofstream& stream, sha256::Hash hash) const;
+
  protected:
   /// vector for storing tabulated values
   std::vector<double> values_;
 
   /// lower bound for tabulation
-  const double x_min_;
+  double x_min_;
 
   /// upper bound for tabulation
-  const double x_max_;
+  double x_max_;
 
   /// inverse step size 1/dx
-  const double inv_dx_;
+  double inv_dx_;
 };
 
 /**
@@ -153,17 +186,17 @@ inline double spec_func_integrand_2res(double sqrts, double res_mass_1,
  * \param[in] range Distance between tabulation points [GeV].
  * \return Tabulation of the given integral.
  */
-inline std::unique_ptr<Tabulation> spectral_integral_semistable(
-    Integrator& integrate, const ParticleType& resonance,
-    const ParticleType& stable, double range) {
+inline Tabulation spectral_integral_semistable(Integrator& integrate,
+                                               const ParticleType& resonance,
+                                               const ParticleType& stable,
+                                               double range) {
   const double m_min = resonance.min_mass_kinematic();
   const double m_stable = stable.mass();
-  return make_unique<Tabulation>(
-      m_min + m_stable, range, 100, [&](double srts) {
-        return integrate(m_min, srts - m_stable, [&](double m) {
-          return spec_func_integrand_1res(m, srts, m_stable, resonance);
-        });
-      });
+  return Tabulation(m_min + m_stable, range, 100, [&](double srts) {
+    return integrate(m_min, srts - m_stable, [&](double m) {
+      return spec_func_integrand_1res(m, srts, m_stable, resonance);
+    });
+  });
 }
 
 /**
@@ -175,12 +208,13 @@ inline std::unique_ptr<Tabulation> spectral_integral_semistable(
  * \param[in] range Distance between tabulation points [GeV].
  * \return Tabulation of the given integral.
  */
-inline std::unique_ptr<Tabulation> spectral_integral_unstable(
-    Integrator2dCuhre& integrate2d, const ParticleType& res1,
-    const ParticleType& res2, double range) {
+inline Tabulation spectral_integral_unstable(Integrator2dCuhre& integrate2d,
+                                             const ParticleType& res1,
+                                             const ParticleType& res2,
+                                             double range) {
   const double m1_min = res1.min_mass_kinematic();
   const double m2_min = res2.min_mass_kinematic();
-  return make_unique<Tabulation>(m1_min + m2_min, range, 100, [&](double srts) {
+  return Tabulation(m1_min + m2_min, range, 125, [&](double srts) {
     const double m1_max = srts - m2_min;
     const double m2_max = srts - m1_min;
     return integrate2d(

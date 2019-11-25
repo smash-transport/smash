@@ -31,6 +31,10 @@ TEST(init_particle_types) {
   DecayModes::load_decaymodes(
       "Δ          \n"
       "1.  1  N π \n");
+  ParticleType::check_consistency();
+  sha256::Hash hash;
+  hash.fill(0);
+  IsoParticleType::tabulate_integrals(hash, "");
 }
 
 static ScatterAction *set_up_action(const ParticleData &proj,

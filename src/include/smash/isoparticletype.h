@@ -12,6 +12,7 @@
 #include <unordered_map>
 
 #include "particletype.h"
+#include "sha256.h"
 #include "tabulation.h"
 
 namespace smash {
@@ -100,6 +101,12 @@ class IsoParticleType {
   void add_state(const ParticleType &type);
 
   /**
+   * Return a multiplet of antiparticles, if it is different from
+   * the original multiplet. Otherwise, return a nullptr.
+   */
+  const IsoParticleType *anti_multiplet() const;
+
+  /**
    * Check if there is a multiplet of antiparticles, which is different from
    * the original multiplet.
    */
@@ -107,6 +114,10 @@ class IsoParticleType {
 
   /// Returns a list of all IsoParticleTypes.
   static const IsoParticleTypeList &list_all();
+
+  /// Returns a list of all IsoParticleTypes that are baryon
+  /// resonances.
+  static const std::vector<const IsoParticleType *> list_baryon_resonances();
 
   /**
    * Returns the IsoParticleType pointer for the given \p name.
@@ -171,6 +182,18 @@ class IsoParticleType {
   static void create_multiplet(const ParticleType &type);
 
   /**
+   * Tabulate all relevant integrals.
+   *
+   * \param hash The hash of the particle properties.
+   *             This is used to determine whether a cached tabulation can be
+   *             reused or not.
+   * \param tabulations_path The path to the directory where the tabulations are
+   * cached.
+   */
+  static void tabulate_integrals(sha256::Hash hash,
+                                 const bf::path &tabulations_path);
+
+  /**
    * Look up the tabulated resonance integral for the XX -> NR cross section.
    *
    * \param sqrts The center-of-mass energy.
@@ -183,14 +206,7 @@ class IsoParticleType {
    * \param type_res_2 Type of the two resonances in the final state.
    * \param sqrts The center-of-mass energy.
    */
-  double get_integral_RR(const ParticleType &type_res_2, double sqrts);
-
-  /**
-   * Utility function to help compute various XX->RR spectral integrals
-   *
-   * \param type_res_2 Type of the two resonances in the final state.
-   */
-  TabulationPtr integrate_RR(ParticleTypePtr &type_res_2);
+  double get_integral_RR(IsoParticleType *type_res_2, double sqrts);
 
   /**
    * Look up the tabulated resonance integral for the XX -> RK cross section.
@@ -205,6 +221,13 @@ class IsoParticleType {
    * \param sqrts The center-of-mass energy.
    */
   double get_integral_piR(double sqrts);
+
+  /**
+   * Look up the tabulated resonance integral for the XX -> rhoR cross section.
+   *
+   * \param sqrts The center-of-mass energy.
+   */
+  double get_integral_rhoR(double sqrts);
 
  private:
   /// name of the multiplet
@@ -221,26 +244,23 @@ class IsoParticleType {
   ParticleTypePtrList states_;
 
   /// A tabulation of the spectral integral for the dpi -> d'pi cross sections.
-  TabulationPtr XS_piR_tabulation_;
+  Tabulation *XS_piR_tabulation_ = nullptr;
   /// A tabulation of the spectral integral for the NK -> RK cross sections.
-  TabulationPtr XS_RK_tabulation_;
+  Tabulation *XS_RK_tabulation_ = nullptr;
   /**
    * A tabulation for the NN -> NR cross sections,
    * where R is a resonance from this multiplet.
    */
-  TabulationPtr XS_NR_tabulation_;
+  Tabulation *XS_NR_tabulation_ = nullptr;
   /**
-   * A tabulation for the NN -> DR cross sections,
+   * A tabulation for the NN -> RΔ cross sections,
    * where R is a resonance from this multiplet.
    */
-  TabulationPtr XS_DR_tabulation_;
+  Tabulation *XS_DeltaR_tabulation_ = nullptr;
   /**
-   * A tabulation list for the NN -> RR' cross sections,
-   * where R is this multiplet and R' is a baryon resonance, associated
-   * with a list of resonances R' for the NN -> RR' cross sections;
-   * used to calculate every multiplet spectral function only once
+   * A tabulation for the ρρ integrals.
    */
-  std::unordered_map<IsoParticleType *, TabulationPtr> XS_RR_tabulations;
+  Tabulation *XS_rhoR_tabulation_ = nullptr;
 
   /**
    * Private version of the 'find' method that returns a non-const reference.
