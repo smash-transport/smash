@@ -512,12 +512,13 @@ double calculate_mean_field_energy
 						 mean_field_contribution_2 );
 	}
 
-      density_mean = density_mean/(number_of_nodes);
-      density_variance = density_variance/(number_of_nodes);
-      double density_scaled_variance =
-	sqrt(density_variance - density_mean * density_mean)/density_mean;
+      
 
       // (optional) displaying of statistical properties of the density calculation
+      //density_mean = density_mean/(number_of_nodes);
+      //density_variance = density_variance/(number_of_nodes);
+      //double density_scaled_variance =
+      //	sqrt(density_variance - density_mean * density_mean)/density_mean;
       //std::cout << "\t\t\t\t\t";
       //std::cout.precision(10);
       //std::cout << "\n\t\t\t\t\t            density mean = "
@@ -545,7 +546,7 @@ double calculate_mean_field_energy
       if ( abs (tmp) > 0.01 )
 	{
 	  std::cout
-	    << "\n\t\t\t\t\t The mean field on lattice differs from "
+	    << "\n\n\n\t\t\t\t\t The mean field on lattice differs from "
 	    << "the theoretical prediction:"
 	    << "\n\t\t\t\t\t              theory_mean_field_total * N_T = "
 	    << theory_mean_field_total * parameters.testparticles << " [GeV]"
