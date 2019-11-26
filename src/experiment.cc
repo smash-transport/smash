@@ -390,19 +390,179 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
 std::string format_measurements(const Particles &particles,
                                 uint64_t scatterings_this_interval,
                                 const QuantumNumbers &conserved_initial,
-                                SystemTimePoint time_start, double time) {
+                                SystemTimePoint time_start, double time,
+				double E_mean_field,
+				double E_mean_field_initial) {
   const SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
 
   const QuantumNumbers current_values(particles);
-  const QuantumNumbers difference = conserved_initial - current_values;
+  const QuantumNumbers difference = current_values - conserved_initial;
 
   std::ostringstream ss;
   // clang-format off
-  ss << field<8, 3> << time << field<13, 3> << difference.momentum().x0()
-     << field<16, 3> << scatterings_this_interval
-     << field<11, 3> << particles.size() << field<10, 3> << elapsed_seconds;
+  ss << field<7, 3> << time
+    // total kinetic energy in the system
+     << field<11, 3> << current_values.momentum().x0()
+    // total mean field energy in the system
+     << field<11, 3> << E_mean_field
+    // total energy in the system
+     << field<12, 3> << current_values.momentum().x0() + E_mean_field
+    // total energy per particle in the system
+     << field<12, 6>
+     << (current_values.momentum().x0() + E_mean_field)/particles.size()
+    // change in energy per particle
+     << field<13, 6> << (difference.momentum().x0()
+                         + E_mean_field - E_mean_field_initial)
+                        /particles.size()
+     << field<14, 3> << scatterings_this_interval
+     << field<10, 3> << particles.size()
+     << field<9, 3> << elapsed_seconds;
   // clang-format on
   return ss.str();
+}
+
+
+  
+
+double calculate_mean_field_energy
+   (const Potentials &potentials,
+    const double modus_length,
+    RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
+    const Particles &particles,
+    const ExperimentParameters &parameters)
+{
+  // ****************************************************************************
+  // basic parameters and variables
+  // ****************************************************************************
+  const double V = modus_length * modus_length * modus_length;
+  const double V_cell =
+    ( jmu_B_lat.cell_sizes() )[0] * ( jmu_B_lat.cell_sizes() )[1] *
+    ( jmu_B_lat.cell_sizes() )[2];
+  const double number_of_particles =
+    ( particles.size() ) / ( parameters.testparticles );
+  const double input_nB = ( particles.size() ) /
+    ( V * parameters.testparticles );
+
+  double E_mean_field = 0.0;
+  double density_mean = 0.0;
+  double density_variance = 0.0;
+  
+  // we anticipate having other options, like the vector DFT potentials,
+  // in the future
+  if (potentials.use_skyrme() )
+    {
+      // ****************************************************************************
+      // Skyrme potential parameters;
+      // the coefficients are converted to GeV;
+      // note the exponents for energy density of the system are larger by 1 than
+      // those for the energy of a particle (as used in Potentials class)
+      // ****************************************************************************
+      double C1GeV = ( potentials.skyrme_a() )/1000.0;
+      double C2GeV = ( potentials.skyrme_b() )/1000.0;
+      double b1 = 2.0;
+      double b2 = ( potentials.skyrme_tau() ) + 1.0;
+
+      // ************************************************************************
+      // we iterate over the baryon density lattice to calculate the mean field
+      // ************************************************************************
+      int number_of_nodes = 0;
+      double lattice_mean_field_total = 0.0;
+      for (auto &node : jmu_B_lat)
+	{
+	  number_of_nodes++;
+	  // the rest frame density
+	  double nB = node.density();
+	  // the computational frame density
+	  const double j0 = node.jmu_net().x0();
+
+	  density_mean += j0;
+	  density_variance += j0 * j0;
+
+	  // in order not to divide by zero in the formula for the mean field
+	  if ( abs(nB) < 1e-12 )
+	    {
+	      continue;
+	    }
+	  if ( abs(j0) < 1e-12 )
+	    {
+	      continue;
+	    }
+
+	  
+
+	  // naive expression for the mean-field energy 1:
+	  //double mean_field_contribution_1 = (C1GeV/b1) * pow(nB, b1)
+	  //                                            / pow(nuclear_density, b1-1);
+	  //double mean_field_contribution_2 = (C2GeV/b2) * pow(nB, b2)
+	  //                                            / pow(nuclear_density, b2-1);
+
+	  // naive expression for the mean-field energy 2:
+	  //double mean_field_contribution_1 = (C1GeV/b1) * pow(j0, b1)
+	  //                                            / pow(nuclear_density, b1-1);
+	  //double mean_field_contribution_2 = (C2GeV/b2) * pow(j0, b2)
+	  //                                            / pow(nuclear_density, b2-1);
+
+	  // proper expression for the mean-field energy:
+	  double mean_field_contribution_1 = C1GeV * pow(nB, b1 - 2.0) *
+	    ( j0 * j0 - ( (b1 - 1.0)/b1 ) * nB * nB )/pow(nuclear_density, b1-1);
+	  double mean_field_contribution_2 = C2GeV * pow(nB, b2 - 2.0) *
+	    ( j0 * j0 - ( (b2 - 1.0)/b2 ) * nB * nB )/pow(nuclear_density, b2-1);
+
+	  lattice_mean_field_total += V_cell * ( mean_field_contribution_1 +
+						 mean_field_contribution_2 );
+	}
+
+      density_mean = density_mean/(number_of_nodes);
+      density_variance = density_variance/(number_of_nodes);
+      double density_scaled_variance =
+	sqrt(density_variance - density_mean * density_mean)/density_mean;
+
+      // (optional) displaying of statistical properties of the density calculation
+      //std::cout << "\t\t\t\t\t";
+      //std::cout.precision(10);
+      //std::cout << "\n\t\t\t\t\t            density mean = "
+      //	  << density_mean;
+      //std::cout.precision(10);
+      //std::cout << "\n\t\t\t\t\t density scaled variance = "
+      //	  << density_scaled_variance;
+      //std::cout.precision(10);
+      //std::cout << "\n\t\t\t\t\t         total mean_field = "
+      //	<< lattice_mean_field_total * parameters.testparticles
+      //	<< "\n";
+
+      // ************************************************************************
+      // mean field as from the theory, to compare with
+      // ************************************************************************
+      double theory_mean_field_total = number_of_particles *
+	( (C1GeV / b1) * pow( input_nB/nuclear_density, b1-1) +
+	  (C2GeV / b2) * pow( input_nB/nuclear_density, b2-1) );
+
+      double tmp = (lattice_mean_field_total - theory_mean_field_total)/
+	(lattice_mean_field_total + theory_mean_field_total);
+      // this comes onto the display when the system evolves away from uniform
+      // matter (which is where the mean field energy in the box deviates from
+      // the prediction for the total mean field energy in a uniform box)
+      if ( abs (tmp) > 0.01 )
+	{
+	  std::cout
+	    << "\n\t\t\t\t\t The mean field on lattice differs from "
+	    << "the theoretical prediction:"
+	    << "\n\t\t\t\t\t              theory_mean_field_total * N_T = "
+	    << theory_mean_field_total * parameters.testparticles << " [GeV]"
+	    << "\n\t\t\t\t\t abs[(lattice - theory)/(lattice + theory)] = "
+	    << abs(tmp)
+	    << "\n\t\t\t\t\t                             lattice/theory = "
+	    << lattice_mean_field_total/theory_mean_field_total
+	    << "\n\n";
+	}
+
+      // ***********************************************************************
+      // this is going to be put into format_measurements()
+      // ***********************************************************************
+      E_mean_field = lattice_mean_field_total * parameters.testparticles;
+    }
+
+  return E_mean_field;
 }
 
 }  // namespace smash

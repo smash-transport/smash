@@ -493,7 +493,13 @@ class Experiment : public ExperimentBase {
    * used to regularly check if they are still good.
    */
   QuantumNumbers conserved_initial_;
-
+  
+  /**
+   * The initial total mean field energy in the system;
+   * could become a member of conserved_initial_ in the future?
+   */
+  double initial_mean_field_energy_;
+  
   /// system starting time of the simulation
   SystemTimePoint time_start_ = SystemClock::now();
 
@@ -1323,7 +1329,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 }
 
 /// String representing a horizontal line.
-const std::string hline(67, '-');
+const std::string hline(113, '-');
 
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event() {
@@ -1402,9 +1408,23 @@ void Experiment<Modus>::initialize_new_event() {
   total_energy_removed_ = 0.0;
   // Print output headers
   logg[LExperiment].info() << hline;
-  logg[LExperiment].info() << "Time [fm]   Ediff [GeV]    Scatt.|Decays   "
-                              "Particles         Timing";
+  logg[LExperiment].info() << "Time[fm]   Ekin[GeV]   E_MF[GeV]  ETotal[GeV]  "
+			   << "ETot/N[GeV]  D(ETot/N)[GeV] Scatt&Decays  "
+			   << "Particles     Comp.Time";
   logg[LExperiment].info() << hline;
+  double E_mean_field = 0.0;
+  if (potentials_)
+    {
+      update_potentials();
+      E_mean_field = calculate_mean_field_energy (*potentials_, modus_.length(),
+  						  *jmu_B_lat_, particles_,
+  						  parameters_);
+    }
+  initial_mean_field_energy_ = E_mean_field;
+  logg[LExperiment].info() << format_measurements(
+      particles_, 0u, conserved_initial_, time_start_,
+      parameters_.labclock->current_time(), E_mean_field,
+      initial_mean_field_energy_);
 }
 
 template <typename Modus>
@@ -1554,15 +1574,20 @@ bool Experiment<Modus>::perform_action(
 std::string format_measurements(const Particles &particles,
                                 uint64_t scatterings_this_interval,
                                 const QuantumNumbers &conserved_initial,
-                                SystemTimePoint time_start, double time);
+                                SystemTimePoint time_start, double time,
+				double E_mean_field,
+				double E_mean_field_initial);
+
+double calculate_mean_field_energy
+   (const Potentials &potentials, const double modus_length,
+    RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
+    const Particles &particles, const ExperimentParameters &parameters);
+
+
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
   Actions actions;
-
-  logg[LExperiment].info() << format_measurements(
-      particles_, 0u, conserved_initial_, time_start_,
-      parameters_.labclock->current_time());
 
   while (parameters_.labclock->current_time() < end_time_) {
     const double t = parameters_.labclock->current_time();
@@ -1777,9 +1802,17 @@ void Experiment<Modus>::intermediate_output() {
                                               previous_interactions_total_ -
                                               wall_actions_this_interval;
   previous_interactions_total_ = interactions_total_;
+  double E_mean_field = 0.0;
+  if (potentials_)
+    {
+      E_mean_field = calculate_mean_field_energy (*potentials_, modus_.length(),
+  						  *jmu_B_lat_, particles_,
+  						  parameters_);
+    }
   logg[LExperiment].info() << format_measurements(
       particles_, interactions_this_interval, conserved_initial_, time_start_,
-      parameters_.outputclock->current_time());
+      parameters_.outputclock->current_time(), E_mean_field,
+      initial_mean_field_energy_);
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   // save evolution data
   for (const auto &output : outputs_) {
@@ -1933,9 +1966,17 @@ void Experiment<Modus>::final_output(const int evt_num) {
     const uint64_t interactions_this_interval = interactions_total_ -
                                                 previous_interactions_total_ -
                                                 wall_actions_this_interval;
+    double E_mean_field = 0.0;
+    if (potentials_)
+      {
+	E_mean_field = calculate_mean_field_energy (*potentials_, modus_.length(),
+						    *jmu_B_lat_, particles_,
+						    parameters_);
+      }
     logg[LExperiment].info()
         << format_measurements(particles_, interactions_this_interval,
-                               conserved_initial_, time_start_, end_time_);
+                               conserved_initial_, time_start_, end_time_,
+			       E_mean_field, initial_mean_field_energy_);
     if (IC_output_switch_ && (particles_.size() == 0)) {
       // Verify there is no more energy in the system if all particles were
       // removed when crossing the hypersurface
