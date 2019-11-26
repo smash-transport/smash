@@ -431,9 +431,9 @@ double calculate_mean_field_energy
     const Particles &particles,
     const ExperimentParameters &parameters)
 {
-  // ****************************************************************************
+  //
   // basic parameters and variables
-  // ****************************************************************************
+  //
   const double V = modus_length * modus_length * modus_length;
   const double V_cell =
     ( jmu_B_lat.cell_sizes() )[0] * ( jmu_B_lat.cell_sizes() )[1] *
@@ -451,20 +451,20 @@ double calculate_mean_field_energy
   // in the future
   if (potentials.use_skyrme() )
     {
-      // ****************************************************************************
+      // 
       // Skyrme potential parameters;
       // the coefficients are converted to GeV;
       // note the exponents for energy density of the system are larger by 1 than
       // those for the energy of a particle (as used in Potentials class)
-      // ****************************************************************************
+      // 
       double C1GeV = ( potentials.skyrme_a() )/1000.0;
       double C2GeV = ( potentials.skyrme_b() )/1000.0;
       double b1 = 2.0;
       double b2 = ( potentials.skyrme_tau() ) + 1.0;
 
-      // ************************************************************************
+      // 
       // we iterate over the baryon density lattice to calculate the mean field
-      // ************************************************************************
+      //
       int number_of_nodes = 0;
       double lattice_mean_field_total = 0.0;
       for (auto &node : jmu_B_lat)
@@ -487,8 +487,6 @@ double calculate_mean_field_energy
 	    {
 	      continue;
 	    }
-
-	  
 
 	  // naive expression for the mean-field energy 1:
 	  //double mean_field_contribution_1 = (C1GeV/b1) * pow(nB, b1)
@@ -515,6 +513,7 @@ double calculate_mean_field_energy
       
 
       // (optional) displaying of statistical properties of the density calculation
+      //
       //density_mean = density_mean/(number_of_nodes);
       //density_variance = density_variance/(number_of_nodes);
       //double density_scaled_variance =
@@ -531,9 +530,9 @@ double calculate_mean_field_energy
       //	<< lattice_mean_field_total * parameters.testparticles
       //	<< "\n";
 
-      // ************************************************************************
+      // 
       // mean field as from the theory, to compare with
-      // ************************************************************************
+      // 
       double theory_mean_field_total = number_of_particles *
 	( (C1GeV / b1) * pow( input_nB/nuclear_density, b1-1) +
 	  (C2GeV / b2) * pow( input_nB/nuclear_density, b2-1) );
@@ -557,9 +556,9 @@ double calculate_mean_field_energy
 	    << "\n\n";
 	}
 
-      // ***********************************************************************
-      // this is going to be put into format_measurements()
-      // ***********************************************************************
+      // E_mean_field is multiplied by the number of testparticles because
+      // the total energy tracked in SMASH is that of all particles,
+      // including testparticles, and so this is more consistent with SMASH
       E_mean_field = lattice_mean_field_total * parameters.testparticles;
     }
 
