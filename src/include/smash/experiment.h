@@ -74,6 +74,7 @@ static ostream &operator<<(ostream &out,
 
 namespace smash {
 static constexpr int LMain = LogArea::Main::id;
+static constexpr int LInitialConditions = LogArea::InitialConditions::id;
 
 /**
  * Non-template interface to Experiment<Modus>.
@@ -851,6 +852,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       if (default_proper_time >= 0.5) {
         proper_time = default_proper_time;
       } else {
+        logg[LInitialConditions].warn()
+            << "Nuclei passing time is too short, hypersurface proper time set "
+               "to tau = 0.5 fm.";
         proper_time = minimum_proper_time;
       }
     }
