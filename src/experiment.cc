@@ -228,7 +228,9 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *      \f$T^{\mu\nu}(t,x,y,z) \f$ by solving the generalized eigenvalue
  *      equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0 \f$.
  *   \li \key "j_QBS" - Electric (Q), baryonic (B) and strange (S) currents
- *      \f$j^{\mu}_{QBS}(t,x,y,z) \f$
+ *      \f$j^{\mu}_{QBS}(t,x,y,z) \f$; note that all currents are given in
+ *      units of "number of charges"; multiply the electric current by the
+ *      elementary charge \f$\sqrt{4 \pi \alpha_{EM}} \f$ for charge units.
  *
  *   \key Position (list of 3 doubles, optional, default = [0.0, 0.0, 0.0]): \n
  *   Point, at which thermodynamic quantities are computed.

@@ -93,10 +93,11 @@ namespace smash {
  * Note, that 'event' is not a variable but a word that is printed. \n
  *
  * The event indication line is followed by the data lines formatted as:
- * \code
+ * <div class="fragment">
+ * <div class="line"> <span class="preprocessor">
  * time [density] [10 cols Tmunu_Lab] [10 cols Tmunu_Landau] [3 cols v_Landau]
- * [4 cols el_current] [4 cols bar_current] [4 cols str_current]
- * \endcode
+ * [4 cols el_current] [4 cols bar_current] [4 cols str_current] </span></div>
+ * </div>
  * where
  * \li \key density: The density specified in the configuration file.
  * \li \key Tmunu_Lab: Energy-momentum tensor in the lab frame (10 columns).
@@ -106,6 +107,7 @@ namespace smash {
  * \li \key el_current: The electric current in the lab frame (4 columns).
  * \li \key bar_current: The baryonic current in the lab frame (4 columns).
  * \li \key str_current: The strange current in the lab frame (4 columns).
+ *
  * Note that the number of columns depends on what was specified in the
  * configuration file,
  * i.e. all quantities in brackets will only be there if specifically asked for.
