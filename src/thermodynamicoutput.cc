@@ -31,14 +31,15 @@ namespace smash {
  * The thermodynamics output (thermodynamics.dat) is used to output either:
  * \li thermodynamic quantities at one point (\key Smearing: on)
  * \li thermodynamic quantities averaged over every particle
- *     in SMASH (\key Smearing: off - mostly useful for box setups).
+ *     in an event (\key Smearing: off - mostly useful for box setups).
  *
  * Smearing can be switched on or off in the configuration file, see
  * \ref output_content_specific_options_ "content-specific output options".
  *
  * The calculated quantities of the file can include: the Eckart density, the
- * energy-momentum tensor in the lab and/or Landau frame, and the
- * Landau velocity (they will also be outputted in this order); note that the
+ * energy-momentum tensor in the lab and/or Landau frame, the Landau
+ * velocity and the electric/baryonic/strange currents (they will also be
+ * outputted in this order); note that the
  * Eckart density is currently not affected by turning smearing off, and
  * will always return the density at a point.
  * \n
@@ -92,15 +93,21 @@ namespace smash {
  * Note, that 'event' is not a variable but a word that is printed. \n
  *
  * The event indication line is followed by the data lines formatted as:
- * \code
+ * <div class="fragment">
+ * <div class="line"> <span class="preprocessor">
  * time [density] [10 cols Tmunu_Lab] [10 cols Tmunu_Landau] [3 cols v_Landau]
- * \endcode
+ * [4 cols el_current] [4 cols bar_current] [4 cols str_current] </span></div>
+ * </div>
  * where
  * \li \key density: The density specified in the configuration file.
  * \li \key Tmunu_Lab: Energy-momentum tensor in the lab frame (10 columns).
  * \li \key Tmunu_Landau: Energy-momentum tensor in the Landau frame
  *          (10 columns).
  * \li \key v_Landau: The velocity in Landau frame (3 columns).
+ * \li \key el_current: The electric current in the lab frame (4 columns).
+ * \li \key bar_current: The baryonic current in the lab frame (4 columns).
+ * \li \key str_current: The strange current in the lab frame (4 columns).
+ *
  * Note that the number of columns depends on what was specified in the
  * configuration file,
  * i.e. all quantities in brackets will only be there if specifically asked for.
