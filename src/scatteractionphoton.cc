@@ -483,7 +483,7 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
    * takes the shape: FF = (2*Lambda^2/(2*Lambda^2 - t))^2 with
    * Lambda = 1.0 GeV. t depends on the lightest possible exchange particle in
    * the different channels. This could either be a pion or an omega meson. For
-   * the computation the parametrizations given in (\iref{Turbide:2006})
+   * the computation the parametrizations given in (\iref{Turbide:2006zz})
    * are used.
    */
 

@@ -100,10 +100,10 @@ class CrosssectionsPhoton<ComputationMethod::Analytic> {
  private:
   /** @name Constants
    * The choice of these parameters, necessary to determine the photon cross
-   * sections, follows from (\iref{Turbide:2006}). Here, different combinations
+   * sections, follows from (\iref{Turbide:2006zz}). Here, different combinations
    * of parameters were proposed and investigated. We decided to use the
    * parameters of set II in their categorization. They are named identically,
-   * except for "Const", which corresponds to "C" in \iref{Turbide:2006}.
+   * except for "Const", which corresponds to "C" in \iref{Turbide:2006zz}.
    */
   ///@{
   constexpr static double Const = 0.059;
