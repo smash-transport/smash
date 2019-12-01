@@ -321,10 +321,10 @@ question what should be documented:
 In order to refer to a paper inside a doxygen comment, the `iref` command should
 be used:
 
-```
+\code
 /** ... this function implements ... as described in \iref{XXX}. */
 int fun int(x);
-```
+\endcode
 
 Here, `XXX` should be the BibTex key for the paper from Inspire e.g.
 `Weil:2016zrk`. In order to find it, search for the paper on
@@ -333,9 +333,18 @@ BibTex entry (you only need the key, which is in the first line). Doxygen will
 automatically translate `\iref{XXX}` into a link to the paper on Inspire.
 
 After adding a new reference, you should run the script `doc/get_bibtex.sh`,
-which will update the file
-"/doc/smash.bib"
-by fetching the BibTex entries of all `iref` references from Inspire.
+which will update the file `/doc/inspire.bib` by fetching the BibTex entries of
+all `iref` references from Inspire. It also reports references that are not
+found on Inspire.
+
+References that are not contained in the Inspire database can be handled as
+follows: A corresponding BibTex entry should be put into `doc/non_inspire.bib`
+manually. It can then be referenced via the `cite` command:
+
+\code
+/** ... this function implements ... as described in \cite XXX. */
+int fun int(x);
+\endcode
 
 
 ### User Guide
