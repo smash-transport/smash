@@ -369,7 +369,7 @@ T beta_a0(T xmin, T b) {
  * The distribution of \f$ min(N_1,N_2) \f$ is a so-called Bessel distribution.
  * Denoting \f$ a = \sqrt{\nu_1 \nu_2}\f$, \f$ p(N_{smaller} = k) =
  * \frac{(a/2)^{2k+N}}{I_N(a) k! (N+k)!} \f$. We sample this distribution using
- * the method suggested by Yuan and Kalbfleisch \iref{Yuan2000}: if
+ * the method suggested by Yuan and Kalbfleisch \cite Yuan2000 : if
  * \f$ m = \frac{1}{2} (\sqrt{a^2 + N^2} - N) > 6\f$, then the distribution is
  * approximated well by a Gaussian, else probabilities are computed explicitely
  * and a table sampling is applied.
@@ -398,7 +398,7 @@ class BesselSampler {
   /**
    * Compute the ratio of two Bessel functions
    * r(n,a) = bessel_I(n+1,a)/bessel_I(n,a) using the continued fraction
-   * representation (see \iref{Yuan2000}).
+   * representation (see \cite Yuan2000).
    *
    * \param[in] n First Bessel parameter.
    * \param[in] a Second Bessel parameter.
@@ -409,13 +409,13 @@ class BesselSampler {
   /// Vector to store tabulated values of probabilities for small m case (m <6).
   random::discrete_dist<double> dist_;
 
-  /// Mode of the Bessel function, see \iref{Yuan2000} for details.
+  /// Mode of the Bessel function, see \cite Yuan2000 for details.
   double m_;
 
-  /// Second parameter of Bessel distribution, see \iref{Yuan2000} for details.
+  /// Second parameter of Bessel distribution, see \cite Yuan2000 for details.
   const double a_;
 
-  /// First parameter of Bessel distribution (= \f$ \nu \f$ in \iref{Yuan2000}).
+  /// First parameter of Bessel distribution (= \f$ \nu \f$ in \cite Yuan2000).
   const int N_;
 
   /// Boolean variable to verify that N > 0.
@@ -424,7 +424,7 @@ class BesselSampler {
   /**
    * Switching mode to normal approximation.
    * \note Normal approximation of Bessel functions is possible for modes >= 6.
-   * See \iref{Yuan2000} for details.
+   * See \cite Yuan2000 for details.
    */
   static constexpr double m_switch_method_ = 6.0;
 

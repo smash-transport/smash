@@ -2056,14 +2056,14 @@ CollisionBranchList CrossSections::dn_xx(ReactionsBitSet included_2to2) const {
     assert(tmp >= 0.0);
     if (std::signbit(type_N.baryon_number()) ==
         std::signbit(type_nucleus.baryon_number())) {
-      // Nd → Nd', N̅d̅→ N̅d̅' and reverse
-      /* Fit to match experimental cross-section Nd -> Nnp from
-       * [\iref{Carlson1973}] */
+      /** Nd → Nd', N̅d̅→ N̅d̅' and reverse:
+       * Fit to match experimental cross-section Nd -> Nnp from
+       * \cite Carlson1973. */
       matrix_element = 79.0474 / std::pow(tmp, 0.7897) + 654.596 * tmp;
     } else {
-      /* N̅d →  N̅d', Nd̅→ Nd̅' and reverse
+      /** N̅d →  N̅d', Nd̅→ Nd̅' and reverse:
        * Fit to roughly match experimental cross-section N̅d -> N̅ np from
-       * [\iref{Bizzarri:1973sp}]. */
+       * \iref{Bizzarri:1973sp}. */
       matrix_element = 342.572 / std::pow(tmp, 0.6);
     }
     const double spin_factor =
