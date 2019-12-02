@@ -205,7 +205,7 @@ ALIASES                = "NucleusModus=smash::NucleusModus" \
                          "key=\c" \
                          "Userguide=" \
                          "mocking=\xrefitem unittest_mocking \"\" \"\"" \
-                         "iref{1}=<a href="http://inspirehep.net/search?p=\1&of=hd">\1</a>"
+                         "iref{1}=<a href="http://inspirehep.net/search?p=\1&of=hd">\1</a> \cite \1"
 
 # This tag can be used to specify a number of word-keyword mappings (TCL only).
 # A mapping has the form "name=value". For example adding
@@ -600,7 +600,7 @@ LAYOUT_FILE            = doc/DoxygenLayout.xml
 # feature you need bibtex and perl available in the search path. Do not use
 # file names with spaces, bibtex cannot handle them.
 
-CITE_BIB_FILES         = @CMAKE_CURRENT_SOURCE_DIR@/non_inspire.bib
+CITE_BIB_FILES         = @CMAKE_CURRENT_SOURCE_DIR@/inspire.bib @CMAKE_CURRENT_SOURCE_DIR@/non_inspire.bib
 
 #---------------------------------------------------------------------------
 # configuration options related to warning and progress messages
