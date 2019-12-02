@@ -87,7 +87,7 @@ double random::BesselSampler::r_(int n, double a) {
   for (; i > 0; i--) {
     res = 1.0 / (a_inv * 2 * (n + i) + res);
   }
-  // Check the known property of r(n,a) function, see iref{Yuan2000}.
+  // Check the known property of r(n,a) function, see \cite Yuan2000.
   assert(a / (std::sqrt(a * a + (n + 1) * (n + 1)) + n + 1) <= res);
   assert(res <= a / (std::sqrt(a * a + n * n) + n));
   return res;
