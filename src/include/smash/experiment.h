@@ -1309,6 +1309,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     logg[LExperiment].error(
         "If you want Thermodynamic VTK output, configure a lattice for it.");
   }
+  // Warning for the mean field calculation if lattice is not on.
+  if ( (potentials_ != nullptr) && (jmu_B_lat_ == nullptr) )
+    {
+      logg[LExperiment].warn() << "Lattice is NOT used. Mean fields are "
+			       << "not going to be calculated.";
+    }
 
   // Store pointers to potential and lattice accessible for Action
   if (parameters_.potential_affect_threshold) {
@@ -1330,6 +1336,55 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
 /// String representing a horizontal line.
 const std::string hline(113, '-');
+
+/**
+ * Generate the tabulated string which will be printed to the screen when
+ * SMASH is running
+ *
+ * \param[in] particles The interacting particles. Their information will be
+ *            used to check the conservation of the total energy and momentum.
+ *	      the total number of the particles will be used and printed as
+ *	      well.
+ * \param[in] scatterings_this_interval Number of the scatterings occur within
+ *            the current timestep.
+ * \param[in] conserved_initial Initial quantum numbers needed to check the
+ *            conservations
+ * \param[in] time_start Moment in the REAL WORLD when SMASH starts to run [s]
+ * \param[in] time Current moment in SMASH [fm/c]
+ * \return 'Current time in SMASH [fm/c]', 'Deviation of the energy from the
+ *          initial value [GeV]', 'Deviation of the momentum from the initial
+ *          value [GeV]', 'Averaged collisional rate [c/fm]', 'Number of the
+ *          scatterings occur within the timestep', 'Total particle number',
+ *          'Computing time consumed'
+ */
+std::string format_measurements(const Particles &particles,
+                                uint64_t scatterings_this_interval,
+                                const QuantumNumbers &conserved_initial,
+                                SystemTimePoint time_start, double time,
+                                double E_mean_field,
+                                double E_mean_field_initial);
+/**
+ * Calculate the total mean field energy of the system; this will be printed to
+ * the screen when SMASH is running. Using the baryon density lattice is
+ * necessary. 
+ *
+ * \param[in] potentials Parameters of the potentials used in the simulation.
+ * \param[in] modus_length Length of the Box, in fm.
+ * \param[in] jmu_B_lat Lattice of baryon density and baryon current values as
+ *            well as their gradients at each lattice node.
+ * \param[in] particles The interacting particles. Their information will be
+ *            used to check the conservation of the total energy and momentum.
+ *	      the total number of the particles will be used and printed as
+ *	      well.
+ * \param[in] parameters Parameters of the experiment, needed for the access to 
+ *            the number of testparticles.
+ * \return total mean field energy in the Box.
+ */
+  
+double calculate_mean_field_energy(
+    const Potentials &potentials, const double modus_length,
+    RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
+    const Particles &particles, const ExperimentParameters &parameters);
 
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event() {
@@ -1415,8 +1470,13 @@ void Experiment<Modus>::initialize_new_event() {
   double E_mean_field = 0.0;
   if (potentials_) {
     update_potentials();
-    E_mean_field = calculate_mean_field_energy(
-        *potentials_, modus_.length(), *jmu_B_lat_, particles_, parameters_);
+    // using the lattice is necessary
+    if ( (jmu_B_lat_ != nullptr) )
+      {
+        E_mean_field = calculate_mean_field_energy(
+	    *potentials_, modus_.length(), *jmu_B_lat_, particles_, parameters_);
+      }
+    
   }
   initial_mean_field_energy_ = E_mean_field;
   logg[LExperiment].info() << format_measurements(
@@ -1549,37 +1609,6 @@ bool Experiment<Modus>::perform_action(
   return true;
 }
 
-/**
- * Generate the tabulated string which will be printed to the screen when
- * SMASH is running
- *
- * \param[in] particles The interacting particles. Their information will be
- *            used to check the conservation of the total energy and momentum.
- *	      the total number of the particles will be used and printed as
- *	      well.
- * \param[in] scatterings_this_interval Number of the scatterings occur within
- *            the current timestep.
- * \param[in] conserved_initial Initial quantum numbers needed to check the
- *            conservations
- * \param[in] time_start Moment in the REAL WORLD when SMASH starts to run [s]
- * \param[in] time Current moment in SMASH [fm/c]
- * \return 'Current time in SMASH [fm/c]', 'Deviation of the energy from the
- *          initial value [GeV]', 'Deviation of the momentum from the initial
- *          value [GeV]', 'Averaged collisional rate [c/fm]', 'Number of the
- *          scatterings occur within the timestep', 'Total particle number',
- *          'Computing time consumed'
- */
-std::string format_measurements(const Particles &particles,
-                                uint64_t scatterings_this_interval,
-                                const QuantumNumbers &conserved_initial,
-                                SystemTimePoint time_start, double time,
-                                double E_mean_field,
-                                double E_mean_field_initial);
-
-double calculate_mean_field_energy(
-    const Potentials &potentials, const double modus_length,
-    RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
-    const Particles &particles, const ExperimentParameters &parameters);
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
@@ -1800,8 +1829,12 @@ void Experiment<Modus>::intermediate_output() {
   previous_interactions_total_ = interactions_total_;
   double E_mean_field = 0.0;
   if (potentials_) {
-    E_mean_field = calculate_mean_field_energy(
-        *potentials_, modus_.length(), *jmu_B_lat_, particles_, parameters_);
+    // using the lattice is necessary
+    if ( (jmu_B_lat_ != nullptr) )
+      {
+        E_mean_field = calculate_mean_field_energy(
+	    *potentials_, modus_.length(), *jmu_B_lat_, particles_, parameters_);
+      }
   }
   logg[LExperiment].info() << format_measurements(
       particles_, interactions_this_interval, conserved_initial_, time_start_,
@@ -1962,8 +1995,12 @@ void Experiment<Modus>::final_output(const int evt_num) {
                                                 wall_actions_this_interval;
     double E_mean_field = 0.0;
     if (potentials_) {
-      E_mean_field = calculate_mean_field_energy(
-          *potentials_, modus_.length(), *jmu_B_lat_, particles_, parameters_);
+      // using the lattice is necessary
+      if ( (jmu_B_lat_ != nullptr) )
+	{
+	  E_mean_field = calculate_mean_field_energy(
+	      *potentials_, modus_.length(), *jmu_B_lat_, particles_, parameters_);
+	}
     }
     logg[LExperiment].info() << format_measurements(
         particles_, interactions_this_interval, conserved_initial_, time_start_,
