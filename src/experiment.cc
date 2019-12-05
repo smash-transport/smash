@@ -425,14 +425,13 @@ double calculate_mean_field_energy(
     const Potentials &potentials, const double modus_length,
     RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
     const Particles &particles, const ExperimentParameters &parameters) {
-  
   //
   // basic parameters and variables
-  //  
+  //
   const double V_cell = (jmu_B_lat.cell_sizes())[0] *
                         (jmu_B_lat.cell_sizes())[1] *
                         (jmu_B_lat.cell_sizes())[2];
-  
+
   double E_mean_field = 0.0;
   double density_mean = 0.0;
   double density_variance = 0.0;
@@ -539,44 +538,41 @@ double calculate_mean_field_energy(
 
     //
     // Mean field calculated in a uniform box and in the rest frame, to compare
-    // with the value in a dynamic box (deviations from this value may signal for
-    // example a phase transition. The comparison only makes sense in the Box
-    // Modus, hence the condition.
-    //    
-    if ( modus_length > 0.0 )
-      {
-	const double V = modus_length * modus_length * modus_length;
-	const double input_nB = (particles.size()) /
-	  (V * parameters.testparticles);
-	const double number_of_particles =
-	  (particles.size()) / (parameters.testparticles);
-	
-        double theory_mean_field_total =
-	  number_of_particles *
-	  ((C1GeV / b1) * pow(input_nB / nuclear_density, b1 - 1) +
-	   (C2GeV / b2) * pow(input_nB / nuclear_density, b2 - 1));
-	double tmp = (lattice_mean_field_total - theory_mean_field_total) /
-	  (lattice_mean_field_total + theory_mean_field_total);
+    // with the value in a dynamic box (deviations from this value may signal
+    // for example a phase transition. The comparison only makes sense in the
+    // Box Modus, hence the condition.
+    //
+    if (modus_length > 0.0) {
+      const double V = modus_length * modus_length * modus_length;
+      const double input_nB =
+          (particles.size()) / (V * parameters.testparticles);
+      const double number_of_particles =
+          (particles.size()) / (parameters.testparticles);
 
-	//
-	// This is displayed when the system evolves away from uniform matter
-	// (which is where the total mean field energy in the box deviates from
-	// the prediction for the total mean field energy in a uniform box).
-	//
-	if (abs(tmp) > 0.01) {
-	  logg[LExperiment].info()
-	    << "\n\n\n\t The mean field on lattice differs from the "
-	    << "theoretical prediction:"
-	    << "\n\t\t              theory_mean_field_total * N_T = "
-	    << theory_mean_field_total * parameters.testparticles
-	    << " [GeV]"
-	    << "\n\t\t abs[(lattice - theory)/(lattice + theory)] = "
-	    << abs(tmp)
-	    << "\n\t\t                             lattice/theory = "
-	    << lattice_mean_field_total / theory_mean_field_total << "\n\n";
-	}
+      double theory_mean_field_total =
+          number_of_particles *
+          ((C1GeV / b1) * pow(input_nB / nuclear_density, b1 - 1) +
+           (C2GeV / b2) * pow(input_nB / nuclear_density, b2 - 1));
+      double tmp = (lattice_mean_field_total - theory_mean_field_total) /
+                   (lattice_mean_field_total + theory_mean_field_total);
+
+      //
+      // This is displayed when the system evolves away from uniform matter
+      // (which is where the total mean field energy in the box deviates from
+      // the prediction for the total mean field energy in a uniform box).
+      //
+      if (abs(tmp) > 0.01) {
+        logg[LExperiment].info()
+            << "\n\n\n\t The mean field on lattice differs from the "
+            << "theoretical prediction:"
+            << "\n\t\t              theory_mean_field_total * N_T = "
+            << theory_mean_field_total * parameters.testparticles << " [GeV]"
+            << "\n\t\t abs[(lattice - theory)/(lattice + theory)] = "
+            << abs(tmp)
+            << "\n\t\t                             lattice/theory = "
+            << lattice_mean_field_total / theory_mean_field_total << "\n\n";
       }
-    
+    }
 
     //
     // E_mean_field is multiplied by the number of testparticles because the
