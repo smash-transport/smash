@@ -422,9 +422,9 @@ std::string format_measurements(const Particles &particles,
 }
 
 double calculate_mean_field_energy(
-    const Potentials &potentials, const double modus_length,
+    const Potentials &potentials,
     RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
-    const Particles &particles, const ExperimentParameters &parameters) {
+    const ExperimentParameters &parameters) {
   // basic parameters and variables
   const double V_cell = (jmu_B_lat.cell_sizes())[0] *
                         (jmu_B_lat.cell_sizes())[1] *
@@ -442,12 +442,11 @@ double calculate_mean_field_energy(
     /*
      * Skyrme potential parameters:
      * C1GeV are the Skyrme coefficients converted to GeV,
-     * b1 are the powers of the baryon number density entering the expression 
-     * for the energy density of the system. Note that these exponents are larger
-     * by 1 than those for the energy of a particle (which are used in Potentials
-     * class).
-     * The formula for a total mean field energy due to a Skyrme potential is
-     * E_MF = \sum_i (C_i/b_i) ( n_B^b_i )/( n_0^(b_i - 1) )
+     * b1 are the powers of the baryon number density entering the expression
+     * for the energy density of the system. Note that these exponents are
+     * larger by 1 than those for the energy of a particle (which are used in
+     * Potentials class). The formula for a total mean field energy due to a
+     * Skyrme potential is E_MF = \sum_i (C_i/b_i) ( n_B^b_i )/( n_0^(b_i - 1) )
      * where nB is the local rest frame baryon number density and n_0 is the
      * saturation density. Then the single particle potential follows from
      * V = d E_MF / d n_B .
@@ -489,18 +488,20 @@ double calculate_mean_field_energy(
       //                                    std::pow(nuclear_density, b2 - 1);
 
       //
-      // Proper expression for the mean-field energy; it's based on a vector DFT
-      // derivation, and in the rest frame conforms to the one above:
+      // Correct expression for the mean-field energy; it's based on a vector
+      // DFT derivation, and in the rest frame conforms to the Skyrme one:
       //
       // in order to prevent dividing by ~zero in case any b_i < 2.0
       if (std::abs(nB) < 1e-12 || std::abs(j0) < 1e-12) {
         continue;
       }
-      double mean_field_contribution_1 = C1GeV *
-          std::pow(nB, b1 - 2.0) * (j0 * j0 - ((b1 - 1.0) / b1) * nB * nB) /
+      double mean_field_contribution_1 =
+          C1GeV * std::pow(nB, b1 - 2.0) *
+          (j0 * j0 - ((b1 - 1.0) / b1) * nB * nB) /
           std::pow(nuclear_density, b1 - 1);
-      double mean_field_contribution_2 = C2GeV *
-          std::pow(nB, b2 - 2.0) * (j0 * j0 - ((b2 - 1.0) / b2) * nB * nB) /
+      double mean_field_contribution_2 =
+          C2GeV * std::pow(nB, b2 - 2.0) *
+          (j0 * j0 - ((b2 - 1.0) / b2) * nB * nB) /
           std::pow(nuclear_density, b2 - 1);
 
       lattice_mean_field_total +=
@@ -511,59 +512,15 @@ double calculate_mean_field_energy(
     density_mean = density_mean / number_of_nodes;
     density_variance = density_variance / number_of_nodes;
     double density_scaled_variance =
-    sqrt(density_variance - density_mean * density_mean) / density_mean;
+        sqrt(density_variance - density_mean * density_mean) / density_mean;
     logg[LExperiment].debug() << "\t\t\t\t\t";
-    logg[LExperiment].debug() << "\n\t\t\t\t\t            density mean = "
-        << density_mean;
-    logg[LExperiment].debug() << "\n\t\t\t\t\t density scaled variance = "
-        << density_scaled_variance;
-    logg[LExperiment].debug() << "\n\t\t\t\t\t        total mean_field = "
-        << lattice_mean_field_total * parameters.testparticles
-        << "\n";
-
-    /*
-     * Mean field calculated in a uniform box and in the rest frame, to compare
-     * with the value in a dynamic box (deviations from this value may signal
-     * for example a phase transition). The comparison only makes sense in the
-     * Box Modus, hence the condition.
-     *
-     * TO DO (Agnieszka): this could be probably exchanged for a comparison with
-     * initial_mean_field_energy.
-     */
-
-    /*
-    if (modus_length > 0.0) {
-      const double V = modus_length * modus_length * modus_length;
-      const double input_nB =
-          (particles.size()) / (V * parameters.testparticles);
-      const double number_of_particles =
-          (particles.size()) / (parameters.testparticles);
-
-      double theory_mean_field_total =
-          number_of_particles *
-          ((C1GeV / b1) * std::pow(input_nB / nuclear_density, b1 - 1) +
-           (C2GeV / b2) * std::pow(input_nB / nuclear_density, b2 - 1));
-      double tmp = (lattice_mean_field_total - theory_mean_field_total) /
-                   (lattice_mean_field_total + theory_mean_field_total);
-
-      //
-       // This is displayed when the system evolves away from uniform matter
-       // (which is when the total mean field energy in the box deviates from the
-       // prediction for the total mean field energy in a uniform box at rest).
-       //
-      if (std::abs(tmp) > 0.001) {
-        logg[LExperiment].info()
-            << "\n\n\n\t The mean field on lattice differs from the "
-            << "theoretical prediction:"
-            << "\n\t\t              theory_mean_field_total * N_T = "
-            << theory_mean_field_total * parameters.testparticles << " [GeV]"
-            << "\n\t\t abs[(lattice - theory)/(lattice + theory)] = "
-            << std::abs(tmp)
-            << "\n\t\t                             lattice/theory = "
-            << lattice_mean_field_total / theory_mean_field_total << "\n\n";
-      }
-    }
-    */
+    logg[LExperiment].debug()
+        << "\n\t\t\t\t\t            density mean = " << density_mean;
+    logg[LExperiment].debug()
+        << "\n\t\t\t\t\t density scaled variance = " << density_scaled_variance;
+    logg[LExperiment].debug()
+        << "\n\t\t\t\t\t        total mean_field = "
+        << lattice_mean_field_total * parameters.testparticles << "\n";
 
     /*
      * E_mean_field is multiplied by the number of testparticles because the
