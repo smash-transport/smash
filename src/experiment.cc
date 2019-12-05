@@ -425,9 +425,7 @@ double calculate_mean_field_energy(
     const Potentials &potentials, const double modus_length,
     RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
     const Particles &particles, const ExperimentParameters &parameters) {
-  //
   // basic parameters and variables
-  //
   const double V_cell = (jmu_B_lat.cell_sizes())[0] *
                         (jmu_B_lat.cell_sizes())[1] *
                         (jmu_B_lat.cell_sizes())[2];
@@ -436,38 +434,37 @@ double calculate_mean_field_energy(
   double density_mean = 0.0;
   double density_variance = 0.0;
 
-  //
-  // we anticipate having other options, like the vector DFT potentials, in the
-  // future, hence we include checking which potentials are used
-  //
+  /*
+   * We anticipate having other options, like the vector DFT potentials, in the
+   * future, hence we include checking which potentials are used.
+   */
   if (potentials.use_skyrme()) {
-    //
-    // Skyrme potential parameters:
-    // C1GeV are the Skyrme coefficients converted to GeV,
-    // b1 are the exponents for energy density of the system.
-    // Note that the exponents are larger by 1 than those for the energy of a
-    // particle (which are the ones used in Potentials class).
-    // The formula for a total mean field energy due to a Skyrme potential is
-    // E_MF = \sum_i (C_i/b_i) ( n_B^b_i )/( n_0^(b_i - 1) )
-    // where nB is the local rest frame baryon number density and n_0 is the
-    // saturation density. Then the single particle potential follows from
-    // V = delta E_MF / delta n_B .
-    //
+    /*
+     * Skyrme potential parameters:
+     * C1GeV are the Skyrme coefficients converted to GeV,
+     * b1 are the powers of the baryon number density entering the expression 
+     * for the energy density of the system. Note that these exponents are larger
+     * by 1 than those for the energy of a particle (which are used in Potentials
+     * class).
+     * The formula for a total mean field energy due to a Skyrme potential is
+     * E_MF = \sum_i (C_i/b_i) ( n_B^b_i )/( n_0^(b_i - 1) )
+     * where nB is the local rest frame baryon number density and n_0 is the
+     * saturation density. Then the single particle potential follows from
+     * V = d E_MF / d n_B .
+     */
     double C1GeV = (potentials.skyrme_a()) / 1000.0;
     double C2GeV = (potentials.skyrme_b()) / 1000.0;
     double b1 = 2.0;
     double b2 = (potentials.skyrme_tau()) + 1.0;
 
-    //
-    // we iterate over the nodes of the baryon density lattice nodes to
-    // calculate the mean field
-    //
+    /*
+     * Note: calculating the mean field only works if lattice is used.
+     * We iterate over the nodes of the baryon density lattice to sum their
+     * contributions to the total mean field.
+     */
     int number_of_nodes = 0;
     double lattice_mean_field_total = 0.0;
 
-    //
-    // calculating the mean field only works if lattice is used
-    //
     for (auto &node : jmu_B_lat) {
       number_of_nodes++;
       // the rest frame density
@@ -478,8 +475,13 @@ double calculate_mean_field_energy(
       density_mean += j0;
       density_variance += j0 * j0;
 
+      // THESE COMMENTS SHOULD BE REMOVED WHEN THE DECISION IS MADE AS TO
+      // WHICH EXPRESSION SHOULD BE USED
       //
-      // naive expression for the mean-field energy 1:
+      // Naive expression for the mean-field energy; it's consistent with how
+      // the Skyrme potentials are defined, and consistent with Feng Li's
+      // derivation of the equations of motion, however, it's not correct away
+      // from the rest frame:
       //
       // double mean_field_contribution_1 = (C1GeV/b1) * std::pow(nB, b1) /
       //                                    std::pow(nuclear_density, b1 - 1);
@@ -487,15 +489,8 @@ double calculate_mean_field_energy(
       //                                    std::pow(nuclear_density, b2 - 1);
 
       //
-      // naive expression for the mean-field energy 2:
-      //
-      // double mean_field_contribution_1 = (C1GeV/b1) * std::pow(j0, b1) /
-      //                                    std::pow(nuclear_density, b1 - 1);
-      // double mean_field_contribution_2 = (C2GeV/b2) * std::pow(j0, b2) /
-      //                                    std::pow(nuclear_density, b2 - 1);
-
-      //
-      // proper expression for the mean-field energy:
+      // Proper expression for the mean-field energy; it's based on a vector DFT
+      // derivation, and in the rest frame conforms to the one above:
       //
       // in order to prevent dividing by ~zero in case any b_i < 2.0
       if (std::abs(nB) < 1e-12 || std::abs(j0) < 1e-12) {
@@ -512,10 +507,7 @@ double calculate_mean_field_energy(
           V_cell * (mean_field_contribution_1 + mean_field_contribution_2);
     }
 
-    //
-    // (optional) displaying of statistical properties of the density
-    // calculation
-    //
+    // logging statistical properties of the density calculation
     density_mean = density_mean / number_of_nodes;
     density_variance = density_variance / number_of_nodes;
     double density_scaled_variance =
@@ -525,16 +517,21 @@ double calculate_mean_field_energy(
         << density_mean;
     logg[LExperiment].debug() << "\n\t\t\t\t\t density scaled variance = "
         << density_scaled_variance;
-    logg[LExperiment].debug() << "\n\t\t\t\t\t         total mean_field = "
+    logg[LExperiment].debug() << "\n\t\t\t\t\t        total mean_field = "
         << lattice_mean_field_total * parameters.testparticles
         << "\n";
 
-    //
-    // Mean field calculated in a uniform box and in the rest frame, to compare
-    // with the value in a dynamic box (deviations from this value may signal
-    // for example a phase transition. The comparison only makes sense in the
-    // Box Modus, hence the condition.
-    //
+    /*
+     * Mean field calculated in a uniform box and in the rest frame, to compare
+     * with the value in a dynamic box (deviations from this value may signal
+     * for example a phase transition). The comparison only makes sense in the
+     * Box Modus, hence the condition.
+     *
+     * TO DO (Agnieszka): this could be probably exchanged for a comparison with
+     * initial_mean_field_energy.
+     */
+
+    /*
     if (modus_length > 0.0) {
       const double V = modus_length * modus_length * modus_length;
       const double input_nB =
@@ -550,11 +547,11 @@ double calculate_mean_field_energy(
                    (lattice_mean_field_total + theory_mean_field_total);
 
       //
-      // This is displayed when the system evolves away from uniform matter
-      // (which is where the total mean field energy in the box deviates from
-      // the prediction for the total mean field energy in a uniform box).
-      //
-      if (std::abs(tmp) > 0.01) {
+       // This is displayed when the system evolves away from uniform matter
+       // (which is when the total mean field energy in the box deviates from the
+       // prediction for the total mean field energy in a uniform box at rest).
+       //
+      if (std::abs(tmp) > 0.001) {
         logg[LExperiment].info()
             << "\n\n\n\t The mean field on lattice differs from the "
             << "theoretical prediction:"
@@ -566,12 +563,13 @@ double calculate_mean_field_energy(
             << lattice_mean_field_total / theory_mean_field_total << "\n\n";
       }
     }
+    */
 
-    //
-    // E_mean_field is multiplied by the number of testparticles because the
-    // total kinetic energy tracked is that of all particles, including
-    // testparticles, and so this is more consistent with the general paradigm.
-    //
+    /*
+     * E_mean_field is multiplied by the number of testparticles because the
+     * total kinetic energy tracked is that of all particles, including
+     * testparticles, and so this is more consistent with the general paradigm.
+     */
     E_mean_field = lattice_mean_field_total * parameters.testparticles;
   }
 

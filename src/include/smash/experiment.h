@@ -1829,8 +1829,40 @@ void Experiment<Modus>::intermediate_output() {
     if ((jmu_B_lat_ != nullptr)) {
       E_mean_field = calculate_mean_field_energy(
           *potentials_, modus_.length(), *jmu_B_lat_, particles_, parameters_);
+      /////////
+
+      /*
+       * Mean field calculated in a box should remain approximately constant if
+       * the system is in equilibrium, and so deviations from its original value
+       * may signal a phase transition or other dynamical process. This
+       * comparison only makes sense in the Box Modus, hence the condition.
+       */
+      if (modus_.length() > 0.0) {
+	double tmp = (E_mean_field - initial_mean_field_energy_) /
+	  (E_mean_field + initial_mean_field_energy_);
+	/*
+	 * This is displayed when the system evolves away from its initial
+	 * configuration (which is when the total mean field energy in the box
+	 *  deviates from its initial value).
+	 */
+	if (std::abs(tmp) > 0.01) {
+	  logg[LExperiment].info()
+	    << "\n\n\n\t The mean field at t = "
+	    << parameters_.outputclock->current_time()
+	    << " [fm/c] differs from the mean field at t = 0:"
+	    << "\n\t\t                 initial_mean_field_energy_ = "
+	    << initial_mean_field_energy_ << " [GeV]"
+	    << "\n\t\t abs[(E_MF - E_MF(t=0))/(E_MF + E_MF(t=0))] = "
+	    << std::abs(tmp)
+	    << "\n\t\t                             E_MF/E_MF(t=0) = "
+	    << E_mean_field / initial_mean_field_energy_ << "\n\n";
+	}
+      }
+
+      ////////
     }
   }
+  
   logg[LExperiment].info() << format_measurements(
       particles_, interactions_this_interval, conserved_initial_, time_start_,
       parameters_.outputclock->current_time(), E_mean_field,
