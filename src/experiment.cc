@@ -481,39 +481,32 @@ double calculate_mean_field_energy(
       //
       // naive expression for the mean-field energy 1:
       //
-      // double mean_field_contribution_1 = (C1GeV/b1) * pow(nB, b1)
-      //                                            / pow(nuclear_density,
-      //                                            b1-1);
-      // double mean_field_contribution_2 = (C2GeV/b2) * pow(nB, b2)
-      //                                            / pow(nuclear_density,
-      //                                            b2-1);
+      // double mean_field_contribution_1 = (C1GeV/b1) * std::pow(nB, b1) /
+      //                                    std::pow(nuclear_density, b1 - 1);
+      // double mean_field_contribution_2 = (C2GeV/b2) * std::pow(nB, b2) /
+      //                                    std::pow(nuclear_density, b2 - 1);
 
       //
       // naive expression for the mean-field energy 2:
       //
-      // double mean_field_contribution_1 = (C1GeV/b1) * pow(j0, b1)
-      //                                            / pow(nuclear_density,
-      //                                            b1-1);
-      // double mean_field_contribution_2 = (C2GeV/b2) * pow(j0, b2)
-      //                                            / pow(nuclear_density,
-      //                                            b2-1);
+      // double mean_field_contribution_1 = (C1GeV/b1) * std::pow(j0, b1) /
+      //                                    std::pow(nuclear_density, b1 - 1);
+      // double mean_field_contribution_2 = (C2GeV/b2) * std::pow(j0, b2) /
+      //                                    std::pow(nuclear_density, b2 - 1);
 
       //
       // proper expression for the mean-field energy:
       //
       // in order to prevent dividing by ~zero in case any b_i < 2.0
-      if (abs(nB) < 1e-12) {
+      if (std::abs(nB) < 1e-12 || std::abs(j0) < 1e-12) {
         continue;
       }
-      if (abs(j0) < 1e-12) {
-        continue;
-      }
-      double mean_field_contribution_1 =
-          C1GeV * pow(nB, b1 - 2.0) * (j0 * j0 - ((b1 - 1.0) / b1) * nB * nB) /
-          pow(nuclear_density, b1 - 1);
-      double mean_field_contribution_2 =
-          C2GeV * pow(nB, b2 - 2.0) * (j0 * j0 - ((b2 - 1.0) / b2) * nB * nB) /
-          pow(nuclear_density, b2 - 1);
+      double mean_field_contribution_1 = C1GeV *
+          std::pow(nB, b1 - 2.0) * (j0 * j0 - ((b1 - 1.0) / b1) * nB * nB) /
+          std::pow(nuclear_density, b1 - 1);
+      double mean_field_contribution_2 = C2GeV *
+          std::pow(nB, b2 - 2.0) * (j0 * j0 - ((b2 - 1.0) / b2) * nB * nB) /
+          std::pow(nuclear_density, b2 - 1);
 
       lattice_mean_field_total +=
           V_cell * (mean_field_contribution_1 + mean_field_contribution_2);
@@ -523,18 +516,18 @@ double calculate_mean_field_energy(
     // (optional) displaying of statistical properties of the density
     // calculation
     //
-    // density_mean = density_mean/(number_of_nodes);
-    // density_variance = density_variance/(number_of_nodes);
-    // double density_scaled_variance =
-    //	sqrt(density_variance - density_mean * density_mean)/density_mean;
-    // logg[LExperiment].info() << "\t\t\t\t\t";
-    // logg[LExperiment].info() << "\n\t\t\t\t\t            density mean = "
-    //	  << density_mean;
-    // logg[LExperiment].info() << "\n\t\t\t\t\t density scaled variance = "
-    //	  << density_scaled_variance;
-    // logg[LExperiment].info() << "\n\t\t\t\t\t         total mean_field = "
-    //	<< lattice_mean_field_total * parameters.testparticles
-    //	<< "\n";
+    density_mean = density_mean / number_of_nodes;
+    density_variance = density_variance / number_of_nodes;
+    double density_scaled_variance =
+    sqrt(density_variance - density_mean * density_mean) / density_mean;
+    logg[LExperiment].debug() << "\t\t\t\t\t";
+    logg[LExperiment].debug() << "\n\t\t\t\t\t            density mean = "
+        << density_mean;
+    logg[LExperiment].debug() << "\n\t\t\t\t\t density scaled variance = "
+        << density_scaled_variance;
+    logg[LExperiment].debug() << "\n\t\t\t\t\t         total mean_field = "
+        << lattice_mean_field_total * parameters.testparticles
+        << "\n";
 
     //
     // Mean field calculated in a uniform box and in the rest frame, to compare
@@ -551,8 +544,8 @@ double calculate_mean_field_energy(
 
       double theory_mean_field_total =
           number_of_particles *
-          ((C1GeV / b1) * pow(input_nB / nuclear_density, b1 - 1) +
-           (C2GeV / b2) * pow(input_nB / nuclear_density, b2 - 1));
+          ((C1GeV / b1) * std::pow(input_nB / nuclear_density, b1 - 1) +
+           (C2GeV / b2) * std::pow(input_nB / nuclear_density, b2 - 1));
       double tmp = (lattice_mean_field_total - theory_mean_field_total) /
                    (lattice_mean_field_total + theory_mean_field_total);
 
@@ -561,14 +554,14 @@ double calculate_mean_field_energy(
       // (which is where the total mean field energy in the box deviates from
       // the prediction for the total mean field energy in a uniform box).
       //
-      if (abs(tmp) > 0.01) {
+      if (std::abs(tmp) > 0.01) {
         logg[LExperiment].info()
             << "\n\n\n\t The mean field on lattice differs from the "
             << "theoretical prediction:"
             << "\n\t\t              theory_mean_field_total * N_T = "
             << theory_mean_field_total * parameters.testparticles << " [GeV]"
             << "\n\t\t abs[(lattice - theory)/(lattice + theory)] = "
-            << abs(tmp)
+            << std::abs(tmp)
             << "\n\t\t                             lattice/theory = "
             << lattice_mean_field_total / theory_mean_field_total << "\n\n";
       }
