@@ -1063,7 +1063,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * ### Photon production in SMASH
    * Photons are treated perturbatively and are produced from binary
    * scattering processes. Their production follows the framework from Turbide
-   * et al. described in \iref{Turbide:2006}. Following the perturbative
+   * et al. described in \iref{Turbide:2006zz}. Following the perturbative
    * treatment, the produced photons do not contribute to the evolution of the
    * hadronic system. They are rather direcly printed to the photon output.
    * The mechanism for photon production is the following:
