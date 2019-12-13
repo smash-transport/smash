@@ -29,6 +29,11 @@ constexpr int p = 0x2212;
 /// Neutron.
 constexpr int n = 0x2112;
 
+/// N(1520)⁺.
+constexpr int N1520_p = 0x2124;
+/// N(1520)⁰.
+constexpr int N1520_z = 0x1214;
+
 /// N(1535)⁺.
 constexpr int N1535_p = 0x22212;
 /// N(1535)⁰.

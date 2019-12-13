@@ -360,7 +360,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
         // width for decay into 2γ
         const double gamma_2g = t->get_partial_width(m_par, {&photon, &photon});
         double ff = em_form_factor_ps(pdg, m_dil);  // form factor
-        /// see \iref{Landsberg:1986fd}, equation (3.8)
+        /// π⁰, η, η': see \iref{Landsberg:1986fd}, equation (3.8)
         return (4. * fine_structure / (3. * M_PI)) * gamma_2g / m_dil *
                pow_int(1. - m_dil / m_par * m_dil / m_par, 3) * ff * ff *
                ph_sp_factor;
@@ -370,7 +370,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
         const double gamma_pg = t->get_partial_width(m_par, {other, &photon});
         double ff_sqr =
             em_form_factor_sqr_vec(pdg, m_dil);  // form factor squared
-        /// see \iref{Landsberg:1986fd}, equation (3.4)
+        /// ω, φ: see \iref{Landsberg:1986fd}, equation (3.4)
         const double n1 = m_par_sqr - m_other_sqr;
         const double rad = pow_int(1. + m_dil_sqr / n1, 2) -
                            4. * m_par_sqr * m_dil_sqr / (n1 * n1);
@@ -392,7 +392,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
       case -pdg::Delta_p:
       case pdg::Delta_z:
       case -pdg::Delta_z: /* Δ⁺, Δ⁰ (and antiparticles) */ {
-        /// see \iref{Krivoruchenko:2001hs}
+        /// Δ(1232): see \iref{Krivoruchenko:2001hs}, equations (2) - (4)
         const double rad1 = (m_par + m_other) * (m_par + m_other) - m_dil_sqr;
         const double rad2 = (m_par - m_other) * (m_par - m_other) - m_dil_sqr;
         if (rad1 < 0.) {
@@ -408,6 +408,30 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
           const double t2 = pow_int(std::sqrt(rad2), 3);
           const double ff = form_factor_delta(m_dil);
           const double gamma_vi = t1 * t2 * ff * ff;
+          return 2. * fine_structure / (3. * M_PI) * gamma_vi / m_dil *
+                 ph_sp_factor;
+        }
+      }
+      case pdg::N1520_p:
+      case -pdg::N1520_p:
+      case pdg::N1520_z:
+      case -pdg::N1520_z: {
+        /// N*(1520): see \iref{Krivoruchenko:2001jk}, equation (III.22)
+        const double rad1 = (m_par - m_other) * (m_par - m_other) - m_dil_sqr;
+        const double rad2 = (m_par + m_other) * (m_par + m_other) - m_dil_sqr;
+        if (rad1 < 0.) {
+          assert(rad1 > -1E-5);
+          return 0.;
+        } else if (rad2 < 0.) {
+          assert(rad2 > -1E-5);
+          return 0.;
+        } else {
+          const double t1 = fine_structure / 16. * (m_par - m_other) *
+                            (m_par - m_other) / (m_par_cubed * m_other_sqr) *
+                            std::sqrt(rad1);
+          const double t2 = pow_int(std::sqrt(rad2), 3);
+          const double ff = 1.182;
+          const double gamma_vi = t1 * t2 * ff;
           return 2. * fine_structure / (3. * M_PI) * gamma_vi / m_dil *
                  ph_sp_factor;
         }
