@@ -167,7 +167,7 @@ double sample_momenta_2M_IC(const double temperature, const double mass);
  * \f$ p^2 e^{-E/T} dp = dE \frac{E}{p} p^2 e^{-E/T} \f$
  * \f$ = dK \frac{p}{E} (K+m)^2 e^{-K/T} e^{-m/T} \f$
  * \f$ = dK (K^2 + 2mK + m^2) e^{-K/T} \frac{p}{E}\f$
- *  where \frac{p}{E} is used as rejection weight.
+ *  where \f$ \frac{p}{E} \f$ is used as rejection weight.
  *
  * \param[in] temperature Temperature \f$T\f$ [GeV]
  * \param[in] mass Mass of the particle: \f$m = \sqrt{E^2 - p^2}\f$ [GeV]
