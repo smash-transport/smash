@@ -146,12 +146,21 @@ void ICOutput::at_interaction(const Action &action, const double) {
       0.5 * log((particle.momentum()[0] + particle.momentum()[3]) /
                 (particle.momentum()[0] - particle.momentum()[3]));
 
-  // write particle data
-  std::fprintf(file_.get(), "%g %g %g %g %g %g %g %g %i %i \n",
-               particle.position().tau(), particle.position()[1],
-               particle.position()[2], particle.position().eta(), m_trans,
-               particle.momentum()[1], particle.momentum()[2], rapidity,
-               particle.id(), particle.type().charge());
+  // Determine if particle is spectator:
+  // Fulfilled if particle is initial nucleon and has no prior interactions
+  bool is_spectator = (particle.id() <= 394 &&
+                       particle.get_history().collisions_per_particle == 0)
+                          ? true
+                          : false;
+
+  // write particle data excluding spectators
+  if (!is_spectator) {
+    std::fprintf(file_.get(), "%g %g %g %g %g %g %g %g %s %i \n",
+                 particle.position().tau(), particle.position()[1],
+                 particle.position()[2], particle.position().eta(), m_trans,
+                 particle.momentum()[1], particle.momentum()[2], rapidity,
+                 particle.pdgcode().string().c_str(), particle.type().charge());
+  }
 
   if (IC_proper_time_ < 0.0) {
     // First particle that is removed, overwrite negative default
