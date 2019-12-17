@@ -17,9 +17,13 @@ typedef std::array<uint8_t, HASH_SIZE> Hash;
 /// A SHA256 context.
 class Context {
  private:
+  /// Length of the SHA256 hash.
   uint64_t length_;
+  /// State of the SHA256 hash.
   uint32_t state_[8];
+  /// Current length of the SHA256 hash.
   size_t curlen_;
+  /// Buffer of the SHA256 hash.
   uint8_t buf_[64];
 
   /**
