@@ -495,8 +495,8 @@ class Experiment : public ExperimentBase {
   QuantumNumbers conserved_initial_;
 
   /**
-   * The initial total mean field energy in the system;
-   * could become a member of conserved_initial_ in the future?
+   * The initial total mean field energy in the system.
+   * Note: will only be calculated if lattice is on.
    */
   double initial_mean_field_energy_;
 
@@ -1347,14 +1347,19 @@ const std::string hline(113, '-');
  * \param[in] scatterings_this_interval Number of the scatterings occur within
  *            the current timestep.
  * \param[in] conserved_initial Initial quantum numbers needed to check the
- *            conservations
- * \param[in] time_start Moment in the REAL WORLD when SMASH starts to run [s]
- * \param[in] time Current moment in SMASH [fm/c]
- * \return 'Current time in SMASH [fm/c]', 'Deviation of the energy from the
- *          initial value [GeV]', 'Deviation of the momentum from the initial
- *          value [GeV]', 'Averaged collisional rate [c/fm]', 'Number of the
- *          scatterings occur within the timestep', 'Total particle number',
- *          'Computing time consumed'
+ *            conservations.
+ * \param[in] time_start Moment in the REAL WORLD when SMASH starts to run [s].
+ * \param[in] time Current moment in SMASH [fm/c].
+ * \param[in] E_mean_field Value of the mean-field contribution to the total
+ *            energy of the system at the current time.
+ * \param[in] E_mean_field_initial Value of the mean-field contribution to the
+ *            total energy of the system at t=0.
+ * \return 'Current time in SMASH [fm/c]', 'Total kinetic energy in the system 
+ *         [GeV]', 'Total mean field energy in the system [GeV]', 'Total energy
+ *         in the system [GeV]', 'Total energy per particle [GeV]', 'Deviation
+ *         of the energy per particle from the initial value [GeV]', 'Number of
+ *         scatterings that occurred within the timestep', 'Total particle 
+ *         number', 'Computing time consumed'.
  */
 std::string format_measurements(const Particles &particles,
                                 uint64_t scatterings_this_interval,
@@ -1368,16 +1373,11 @@ std::string format_measurements(const Particles &particles,
  * necessary.
  *
  * \param[in] potentials Parameters of the potentials used in the simulation.
- * \param[in] modus_length Length of the Box, in fm.
  * \param[in] jmu_B_lat Lattice of baryon density and baryon current values as
  *            well as their gradients at each lattice node.
- * \param[in] particles The interacting particles. Their information will be
- *            used to check the conservation of the total energy and momentum.
- *	      the total number of the particles will be used and printed as
- *	      well.
  * \param[in] parameters Parameters of the experiment, needed for the access to
  *            the number of testparticles.
- * \return total mean field energy in the Box.
+ * \return Total mean field energy in the Box.
  */
 
 double calculate_mean_field_energy(

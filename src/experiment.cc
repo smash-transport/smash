@@ -478,35 +478,18 @@ double calculate_mean_field_energy(
       density_mean += j0;
       density_variance += j0 * j0;
 
-      // THESE COMMENTS SHOULD BE REMOVED WHEN THE DECISION IS MADE AS TO
-      // WHICH EXPRESSION SHOULD BE USED
-      //
-      // Naive expression for the mean-field energy; it's consistent with how
-      // the Skyrme potentials are defined, and consistent with Feng Li's
-      // derivation of the equations of motion, however, it's not correct away
-      // from the rest frame:
-      //
-      // double mean_field_contribution_1 = (C1GeV/b1) * std::pow(nB, b1) /
-      //                                    std::pow(nuclear_density, b1 - 1);
-      // double mean_field_contribution_2 = (C2GeV/b2) * std::pow(nB, b2) /
-      //                                    std::pow(nuclear_density, b2 - 1);
-
-      //
-      // Correct expression for the mean-field energy; it's based on a vector
-      // DFT derivation, and in the rest frame conforms to the Skyrme one:
-      //
-      // in order to prevent dividing by ~zero in case any b_i < 2.0
-      if (std::abs(nB) < 1e-12 || std::abs(j0) < 1e-12) {
-        continue;
-      }
-      double mean_field_contribution_1 =
-          C1GeV * std::pow(nB, b1 - 2.0) *
-          (j0 * j0 - ((b1 - 1.0) / b1) * nB * nB) /
-          std::pow(nuclear_density, b1 - 1);
-      double mean_field_contribution_2 =
-          C2GeV * std::pow(nB, b2 - 2.0) *
-          (j0 * j0 - ((b2 - 1.0) / b2) * nB * nB) /
-          std::pow(nuclear_density, b2 - 1);
+      /*
+       * The mean-field energy for the Skyrme potential. Note: this expression
+       * is only exact in the rest frame, and is expected to significantly 
+       * deviate from the correct value for systems that are considerably 
+       * relativistic. Note: symmetry energy is not taken into the account.
+       * 
+       * TODO: Add symmetry energy.
+       */
+      double mean_field_contribution_1 = (C1GeV/b1) * std::pow(nB, b1) /
+                                          std::pow(nuclear_density, b1 - 1);
+      double mean_field_contribution_2 = (C2GeV/b2) * std::pow(nB, b2) /
+                                          std::pow(nuclear_density, b2 - 1);
 
       lattice_mean_field_total +=
           V_cell * (mean_field_contribution_1 + mean_field_contribution_2);
