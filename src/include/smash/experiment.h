@@ -1354,11 +1354,11 @@ const std::string hline(113, '-');
  *            energy of the system at the current time.
  * \param[in] E_mean_field_initial Value of the mean-field contribution to the
  *            total energy of the system at t=0.
- * \return 'Current time in SMASH [fm/c]', 'Total kinetic energy in the system 
+ * \return 'Current time in SMASH [fm/c]', 'Total kinetic energy in the system
  *         [GeV]', 'Total mean field energy in the system [GeV]', 'Total energy
  *         in the system [GeV]', 'Total energy per particle [GeV]', 'Deviation
  *         of the energy per particle from the initial value [GeV]', 'Number of
- *         scatterings that occurred within the timestep', 'Total particle 
+ *         scatterings that occurred within the timestep', 'Total particle
  *         number', 'Computing time consumed'.
  */
 std::string format_measurements(const Particles &particles,

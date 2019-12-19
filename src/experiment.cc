@@ -444,6 +444,18 @@ double calculate_mean_field_energy(
    */
   if (potentials.use_skyrme()) {
     /*
+     * Calculating the symmetry energy contribution to the total mean field
+     * energy in the system is not implemented at this time.
+     */
+    if (potentials.use_symmetry() &&
+        parameters.outputclock->current_time() == 0.0) {
+      logg[LExperiment].warn()
+          << "Note:"
+          << "\nSymmetry energy is not included in the mean field calculation."
+          << "\n\n";
+    }
+
+    /*
      * Skyrme potential parameters:
      * C1GeV are the Skyrme coefficients converted to GeV,
      * b1 are the powers of the baryon number density entering the expression
@@ -480,16 +492,16 @@ double calculate_mean_field_energy(
 
       /*
        * The mean-field energy for the Skyrme potential. Note: this expression
-       * is only exact in the rest frame, and is expected to significantly 
-       * deviate from the correct value for systems that are considerably 
+       * is only exact in the rest frame, and is expected to significantly
+       * deviate from the correct value for systems that are considerably
        * relativistic. Note: symmetry energy is not taken into the account.
-       * 
+       *
        * TODO: Add symmetry energy.
        */
-      double mean_field_contribution_1 = (C1GeV/b1) * std::pow(nB, b1) /
-                                          std::pow(nuclear_density, b1 - 1);
-      double mean_field_contribution_2 = (C2GeV/b2) * std::pow(nB, b2) /
-                                          std::pow(nuclear_density, b2 - 1);
+      double mean_field_contribution_1 =
+          (C1GeV / b1) * std::pow(nB, b1) / std::pow(nuclear_density, b1 - 1);
+      double mean_field_contribution_2 =
+          (C2GeV / b2) * std::pow(nB, b2) / std::pow(nuclear_density, b2 - 1);
 
       lattice_mean_field_total +=
           V_cell * (mean_field_contribution_1 + mean_field_contribution_2);
