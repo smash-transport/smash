@@ -138,8 +138,27 @@ class TwoBodyDecayStable : public TwoBodyDecay {
    */
   TwoBodyDecayStable(ParticleTypePtrList part_types, int l);
 
+  /**
+   * Get the mass-dependent width of a two-body decay into stable particles
+   * according to \iref{Manley:1992yb}.
+   *
+   * \param m0 Pole mass of the decaying particle [GeV].
+   * \param G0 Partial width at the pole mass [GeV].
+   * \param m Actual mass of the decaying particle [GeV].
+   */
   double width(double m0, double G0, double m) const override;
 
+  /**
+   * Get the mass-dependent in-width for a resonance formation process from two
+   * stable particles according to \iref{Manley:1992yb},
+   * see also \iref{Effenberger:1999wlg}, eq. (2.77).
+   *
+   * \param m0 Pole mass of the produced resonance [GeV].
+   * \param G0 Partial width at the pole mass [GeV].
+   * \param m Actual mass of the produced resonance [GeV].
+   * \param m1 Actual mass of the first incoming particle [GeV].
+   * \param m2 Actual mass of the second incoming particle [GeV].
+   */
   double in_width(double m0, double G0, double m, double m1,
                   double m2) const override;
 
@@ -162,8 +181,27 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
    */
   TwoBodyDecaySemistable(ParticleTypePtrList part_types, int l);
 
+  /**
+   * Get the mass-dependent width of a two-body decay into one stable and one
+   * unstable particle according to \iref{Manley:1992yb}.
+   *
+   * \param m0 Pole mass of the decaying particle [GeV].
+   * \param G0 Partial width at the pole mass [GeV].
+   * \param m Actual mass of the decaying particle [GeV].
+   */
   double width(double m0, double G0, double m) const override;
 
+  /**
+   * Get the mass-dependent in-width for a resonance formation process from one
+   * stable and one unstable particle according to \iref{Manley:1992yb},
+   * see also \iref{Effenberger:1999wlg}, eq. (2.77).
+   *
+   * \param m0 Pole mass of the produced resonance [GeV].
+   * \param G0 Partial width at the pole mass [GeV].
+   * \param m Actual mass of the produced resonance [GeV].
+   * \param m1 Actual mass of the first incoming particle [GeV].
+   * \param m2 Actual mass of the second incoming particle [GeV].
+   */
   double in_width(double m0, double G0, double m, double m1,
                   double m2) const override;
 

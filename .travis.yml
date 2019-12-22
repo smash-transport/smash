@@ -21,17 +21,17 @@ matrix:
           - g++-4.8
     env:
       - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8"
-  # most recent gcc version
-  - os: linux
-    addons:
-      apt:
-        sources:
-          - ubuntu-toolchain-r-test
-        packages:
-          - libboost-all-dev
-          - g++-8
-    env:
-      - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+  # most recent gcc version, temporalily disabled, see #389 and #395
+  # - os: linux
+  #   addons:
+  #     apt:
+  #       sources:
+  #         - ubuntu-toolchain-r-test
+  #       packages:
+  #         - libboost-all-dev
+  #         - g++-8
+  #   env:
+  #     - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
   # clang on linux
   - os: linux
     addons:
