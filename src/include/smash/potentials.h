@@ -191,6 +191,13 @@ class Potentials {
   /// \return Is symmetry potential on?
   virtual bool use_symmetry() const { return use_symmetry_; }
 
+  /// \return Skyrme parameter skyrme_a, in MeV
+  double skyrme_a() const { return skyrme_a_; }
+  /// \return Skyrme parameter skyrme_b, in MeV
+  double skyrme_b() const { return skyrme_b_; }
+  /// \return Skyrme parameter skyrme_tau
+  double skyrme_tau() const { return skyrme_tau_; }
+
  private:
   /**
    * Struct that contains the gaussian smearing width \f$\sigma\f$,

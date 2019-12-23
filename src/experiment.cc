@@ -394,19 +394,142 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
 std::string format_measurements(const Particles &particles,
                                 uint64_t scatterings_this_interval,
                                 const QuantumNumbers &conserved_initial,
-                                SystemTimePoint time_start, double time) {
+                                SystemTimePoint time_start, double time,
+                                double E_mean_field,
+                                double E_mean_field_initial) {
   const SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
 
   const QuantumNumbers current_values(particles);
-  const QuantumNumbers difference = conserved_initial - current_values;
+  const QuantumNumbers difference = current_values - conserved_initial;
 
   std::ostringstream ss;
   // clang-format off
-  ss << field<8, 3> << time << field<13, 3> << difference.momentum().x0()
-     << field<16, 3> << scatterings_this_interval
-     << field<11, 3> << particles.size() << field<10, 3> << elapsed_seconds;
+  ss << field<7, 3> << time
+    // total kinetic energy in the system
+     << field<11, 3> << current_values.momentum().x0()
+    // total mean field energy in the system
+     << field<11, 3> << E_mean_field
+    // total energy in the system
+     << field<12, 3> << current_values.momentum().x0() + E_mean_field
+    // total energy per particle in the system
+     << field<12, 6>
+     << (current_values.momentum().x0() + E_mean_field)/particles.size()
+    // change in energy per particle
+     << field<13, 6> << (difference.momentum().x0()
+                         + E_mean_field - E_mean_field_initial)
+                        /particles.size()
+     << field<14, 3> << scatterings_this_interval
+     << field<10, 3> << particles.size()
+     << field<9, 3> << elapsed_seconds;
   // clang-format on
   return ss.str();
+}
+
+double calculate_mean_field_energy(
+    const Potentials &potentials,
+    RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
+    const ExperimentParameters &parameters) {
+  // basic parameters and variables
+  const double V_cell = (jmu_B_lat.cell_sizes())[0] *
+                        (jmu_B_lat.cell_sizes())[1] *
+                        (jmu_B_lat.cell_sizes())[2];
+
+  double E_mean_field = 0.0;
+  double density_mean = 0.0;
+  double density_variance = 0.0;
+
+  /*
+   * We anticipate having other options, like the vector DFT potentials, in the
+   * future, hence we include checking which potentials are used.
+   */
+  if (potentials.use_skyrme()) {
+    /*
+     * Calculating the symmetry energy contribution to the total mean field
+     * energy in the system is not implemented at this time.
+     */
+    if (potentials.use_symmetry() &&
+        parameters.outputclock->current_time() == 0.0) {
+      logg[LExperiment].warn()
+          << "Note:"
+          << "\nSymmetry energy is not included in the mean field calculation."
+          << "\n\n";
+    }
+
+    /*
+     * Skyrme potential parameters:
+     * C1GeV are the Skyrme coefficients converted to GeV,
+     * b1 are the powers of the baryon number density entering the expression
+     * for the energy density of the system. Note that these exponents are
+     * larger by 1 than those for the energy of a particle (which are used in
+     * Potentials class). The formula for a total mean field energy due to a
+     * Skyrme potential is E_MF = \sum_i (C_i/b_i) ( n_B^b_i )/( n_0^(b_i - 1) )
+     * where nB is the local rest frame baryon number density and n_0 is the
+     * saturation density. Then the single particle potential follows from
+     * V = d E_MF / d n_B .
+     */
+    double C1GeV = (potentials.skyrme_a()) / 1000.0;
+    double C2GeV = (potentials.skyrme_b()) / 1000.0;
+    double b1 = 2.0;
+    double b2 = (potentials.skyrme_tau()) + 1.0;
+
+    /*
+     * Note: calculating the mean field only works if lattice is used.
+     * We iterate over the nodes of the baryon density lattice to sum their
+     * contributions to the total mean field.
+     */
+    int number_of_nodes = 0;
+    double lattice_mean_field_total = 0.0;
+
+    for (auto &node : jmu_B_lat) {
+      number_of_nodes++;
+      // the rest frame density
+      double nB = node.density();
+      // the computational frame density
+      const double j0 = node.jmu_net().x0();
+
+      density_mean += j0;
+      density_variance += j0 * j0;
+
+      /*
+       * The mean-field energy for the Skyrme potential. Note: this expression
+       * is only exact in the rest frame, and is expected to significantly
+       * deviate from the correct value for systems that are considerably
+       * relativistic. Note: symmetry energy is not taken into the account.
+       *
+       * TODO: Add symmetry energy.
+       */
+      double mean_field_contribution_1 =
+          (C1GeV / b1) * std::pow(nB, b1) / std::pow(nuclear_density, b1 - 1);
+      double mean_field_contribution_2 =
+          (C2GeV / b2) * std::pow(nB, b2) / std::pow(nuclear_density, b2 - 1);
+
+      lattice_mean_field_total +=
+          V_cell * (mean_field_contribution_1 + mean_field_contribution_2);
+    }
+
+    // logging statistical properties of the density calculation
+    density_mean = density_mean / number_of_nodes;
+    density_variance = density_variance / number_of_nodes;
+    double density_scaled_variance =
+        sqrt(density_variance - density_mean * density_mean) / density_mean;
+    logg[LExperiment].debug() << "\t\t\t\t\t";
+    logg[LExperiment].debug()
+        << "\n\t\t\t\t\t            density mean = " << density_mean;
+    logg[LExperiment].debug()
+        << "\n\t\t\t\t\t density scaled variance = " << density_scaled_variance;
+    logg[LExperiment].debug()
+        << "\n\t\t\t\t\t        total mean_field = "
+        << lattice_mean_field_total * parameters.testparticles << "\n";
+
+    /*
+     * E_mean_field is multiplied by the number of testparticles because the
+     * total kinetic energy tracked is that of all particles, including
+     * testparticles, and so this is more consistent with the general paradigm.
+     */
+    E_mean_field = lattice_mean_field_total * parameters.testparticles;
+  }
+
+  return E_mean_field;
 }
 
 }  // namespace smash
