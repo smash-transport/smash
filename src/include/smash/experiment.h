@@ -14,6 +14,7 @@
 
 #include "actionfinderfactory.h"
 #include "actions.h"
+#include "bremsstrahlungaction.h"
 #include "chrono.h"
 #include "decayactionsfinder.h"
 #include "decayactionsfinderdilepton.h"
@@ -477,6 +478,9 @@ class Experiment : public ExperimentBase {
   /// This indicates whether photons are switched on.
   const bool photons_switch_;
 
+  /// This indicates whether bremsstrahlung is switched on.
+  const bool bremsstrahlung_switch_;
+
   /// This indicates whether the IC output is enabled.
   const bool IC_output_switch_;
 
@@ -790,6 +794,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"General", "Expansion_Rate"}, 0.1)),
       dileptons_switch_(config.has_value({"Output", "Dileptons"})),
       photons_switch_(config.has_value({"Output", "Photons"})),
+      bremsstrahlung_switch_(config.take({"Output", "Photons", "Bremsstrahlung"}, true)),
       IC_output_switch_(config.has_value({"Output", "Initial_Conditions"})),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
@@ -1643,6 +1648,38 @@ bool Experiment<Modus>::perform_action(
 
     photon_act.perform_photons(outputs_);
   }
+
+  if (bremsstrahlung_switch_ &&
+      BremsstrahlungAction::is_bremsstrahlung_reaction(action.incoming_particles())) {
+    /* Time in the action constructor is relative to
+     * current time of incoming */
+    constexpr double action_time = 0.;
+
+    BremsstrahlungAction brems_act(action.incoming_particles(), action_time,
+                                   n_fractional_photons_,
+                                   action.get_total_weight());
+
+   /**
+    * Add a completely dummy process to the bremsstrahlung action. The only important
+    * thing is that its cross-section is equal to the cross-section of the
+    * hadronic action. This can be done, because the bremsstrahlung action is never
+    * actually performed, only the final state is generated and printed to
+    * the photon output.
+    * Note: The cross_section_scaling_factor can be neglected here, since it
+    * cancels out for the weighting, where a ratio of (unscaled) photon
+    * cross section and (unscaled) hadronic cross section is taken.
+    */
+
+    brems_act.add_dummy_hadronic_process(action.get_total_weight());
+
+    // Now add the actual bremsstrahlung reaction channel.
+    brems_act.add_single_process();
+
+    brems_act.perform_bremsstrahlung(outputs_);
+  }
+
+
+
   logg[LExperiment].debug(~einhard::Green(), "✔ ", action);
   return true;
 }

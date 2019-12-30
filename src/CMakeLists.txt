@@ -111,6 +111,7 @@ set(smash_src
         action.cc
         boxmodus.cc
         binaryoutput.cc
+        bremsstrahlungaction.cc
         clebschgordan.cc
         collidermodus.cc
         configuration.cc
