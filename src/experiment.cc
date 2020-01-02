@@ -391,7 +391,6 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           config_coll.take({"Resonance_Lifetime_Modifier"}, 1.),
           config_coll.take({"Strings_with_Probability"}, true),
           config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
-          config.has_value({"Output", "Photons"}),
           low_snn_cut,
           potential_affect_threshold};
 }

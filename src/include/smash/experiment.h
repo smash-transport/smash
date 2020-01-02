@@ -793,8 +793,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"General", "Metric_Type"}, ExpansionMode::NoExpansion),
           config.take({"General", "Expansion_Rate"}, 0.1)),
       dileptons_switch_(config.has_value({"Output", "Dileptons"})),
-      photons_switch_(config.has_value({"Output", "Photons"})),
-      bremsstrahlung_switch_(config.take({"Output", "Photons", "Bremsstrahlung"}, true)),
+      photons_switch_(config.take({"Photons", "2to2_Scatterings"}, false)),
+      bremsstrahlung_switch_(config.take({"Photons", "Bremsstrahlung"}, false)),
       IC_output_switch_(config.has_value({"Output", "Initial_Conditions"})),
       time_step_mode_(
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
@@ -804,8 +804,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if (dileptons_switch_) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
   }
-  if (parameters_.photons_switch) {
-    n_fractional_photons_ = config.take({"Output", "Photons", "Fractions"});
+  if (photons_switch_ || bremsstrahlung_switch_) {
+    n_fractional_photons_ = config.take({"Photons", "Fractional_Photons"});
   }
   if (parameters_.two_to_one) {
     if (parameters_.res_lifetime_factor < 0.) {

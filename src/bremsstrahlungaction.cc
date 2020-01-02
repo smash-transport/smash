@@ -82,15 +82,17 @@ void BremsstrahlungAction::generate_final_state() {
 
   outgoing_particles_ = proc->particle_list();
   process_type_ = proc->get_type();
+  FourVector interaction_point = get_interaction_point();
 
   // This samples the phase space isotropically in the local rest frame
   sample_3body_phasespace();
 
-  // Set formation time and boost back to computational frame
-  for (auto &p : outgoing_particles_) {
+  // Set position and formation time and boost back to computational frame
+  for (auto &new_particle : outgoing_particles_) {
     // assuming decaying particles are always fully formed
-    p.set_formation_time(time_of_execution_);
-    p.boost_momentum(-total_momentum_of_outgoing_particles().velocity());
+    new_particle.set_formation_time(time_of_execution_);
+    new_particle.set_4position(interaction_point);
+    new_particle.boost_momentum(-total_momentum_of_outgoing_particles().velocity());
   }
 
   // Weighing of the fractional photons
