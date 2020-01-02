@@ -1613,7 +1613,8 @@ bool Experiment<Modus>::perform_action(
   }
 
   if (bremsstrahlung_switch_ &&
-      BremsstrahlungAction::is_bremsstrahlung_reaction(action.incoming_particles())) {
+      BremsstrahlungAction::is_bremsstrahlung_reaction(
+          action.incoming_particles())) {
     /* Time in the action constructor is relative to
      * current time of incoming */
     constexpr double action_time = 0.;
@@ -1622,16 +1623,16 @@ bool Experiment<Modus>::perform_action(
                                    n_fractional_photons_,
                                    action.get_total_weight());
 
-   /**
-    * Add a completely dummy process to the bremsstrahlung action. The only important
-    * thing is that its cross-section is equal to the cross-section of the
-    * hadronic action. This can be done, because the bremsstrahlung action is never
-    * actually performed, only the final state is generated and printed to
-    * the photon output.
-    * Note: The cross_section_scaling_factor can be neglected here, since it
-    * cancels out for the weighting, where a ratio of (unscaled) photon
-    * cross section and (unscaled) hadronic cross section is taken.
-    */
+    /**
+     * Add a completely dummy process to the bremsstrahlung action. The only
+     * important thing is that its cross-section is equal to the cross-section
+     * of the hadronic action. This can be done, because the bremsstrahlung
+     * action is never actually performed, only the final state is generated and
+     * printed to the photon output. Note: The cross_section_scaling_factor can
+     * be neglected here, since it cancels out for the weighting, where a ratio
+     * of (unscaled) photon cross section and (unscaled) hadronic cross section
+     * is taken.
+     */
 
     brems_act.add_dummy_hadronic_process(action.get_total_weight());
 
@@ -1640,8 +1641,6 @@ bool Experiment<Modus>::perform_action(
 
     brems_act.perform_bremsstrahlung(outputs_);
   }
-
-
 
   logg[LExperiment].debug(~einhard::Green(), "✔ ", action);
   return true;

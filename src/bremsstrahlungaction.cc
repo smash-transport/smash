@@ -22,41 +22,41 @@ BremsstrahlungAction::BremsstrahlungAction(
       number_of_fractional_photons_(n_frac_photons),
       hadronic_cross_section_(hadronic_cross_section_input) {}
 
-BremsstrahlungAction::ReactionType BremsstrahlungAction::bremsstrahlung_reaction_type(
-    const ParticleList &in) {
-    if (in.size() != 2) {
+BremsstrahlungAction::ReactionType
+BremsstrahlungAction::bremsstrahlung_reaction_type(const ParticleList &in) {
+  if (in.size() != 2) {
+    return ReactionType::no_reaction;
+  }
+
+  PdgCode a = in[0].pdgcode();
+  PdgCode b = in[1].pdgcode();
+
+  switch (pack(a.code(), b.code())) {
+    case (pack(pdg::pi_z, pdg::pi_z)):
+      return ReactionType::pi_z_pi_z;
+
+    case (pack(pdg::pi_z, pdg::pi_m)):
+    case (pack(pdg::pi_m, pdg::pi_z)):
+      return ReactionType::pi_z_pi_m;
+
+    case (pack(pdg::pi_z, pdg::pi_p)):
+    case (pack(pdg::pi_p, pdg::pi_z)):
+      return ReactionType::pi_z_pi_p;
+
+    case (pack(pdg::pi_m, pdg::pi_p)):
+    case (pack(pdg::pi_p, pdg::pi_m)):
+      return ReactionType::pi_p_pi_m;
+
+    case (pack(pdg::pi_m, pdg::pi_m)):
+      return ReactionType::pi_m_pi_m;
+
+    case (pack(pdg::pi_p, pdg::pi_p)):
+      return ReactionType::pi_p_pi_p;
+
+    default:
       return ReactionType::no_reaction;
-    }
-
-    PdgCode a = in[0].pdgcode();
-    PdgCode b = in[1].pdgcode();
-
-    switch (pack(a.code(), b.code())) {
-      case (pack(pdg::pi_z, pdg::pi_z)):
-        return ReactionType::pi_z_pi_z;
-
-      case (pack(pdg::pi_z, pdg::pi_m)):
-      case (pack(pdg::pi_m, pdg::pi_z)):
-        return ReactionType::pi_z_pi_m;
-
-      case (pack(pdg::pi_z, pdg::pi_p)):
-      case (pack(pdg::pi_p, pdg::pi_z)):
-        return ReactionType::pi_z_pi_p;
-
-      case (pack(pdg::pi_m, pdg::pi_p)):
-      case (pack(pdg::pi_p, pdg::pi_m)):
-        return ReactionType::pi_p_pi_m;
-
-      case (pack(pdg::pi_m, pdg::pi_m)):
-        return ReactionType::pi_m_pi_m;
-
-      case (pack(pdg::pi_p, pdg::pi_p)):
-        return ReactionType::pi_p_pi_p;
-
-      default:
-        return ReactionType::no_reaction;
-      }
-    };
+  }
+};
 
 void BremsstrahlungAction::perform_bremsstrahlung(const OutputsList &outputs) {
   for (int i = 0; i < number_of_fractional_photons_; i++) {
@@ -92,12 +92,14 @@ void BremsstrahlungAction::generate_final_state() {
     // assuming decaying particles are always fully formed
     new_particle.set_formation_time(time_of_execution_);
     new_particle.set_4position(interaction_point);
-    new_particle.boost_momentum(-total_momentum_of_outgoing_particles().velocity());
+    new_particle.boost_momentum(
+        -total_momentum_of_outgoing_particles().velocity());
   }
 
   // Weighing of the fractional photons
   if (number_of_fractional_photons_ > 1) {
-    throw std::runtime_error("Fractional photons currently not implemented for bremsstrahlung.");
+    throw std::runtime_error(
+        "Fractional photons currently not implemented for bremsstrahlung.");
   } else {
     weight_ = proc->weight() / hadronic_cross_section();
   }
@@ -109,11 +111,11 @@ void BremsstrahlungAction::generate_final_state() {
 }
 
 void BremsstrahlungAction::add_dummy_hadronic_process(
-  double reaction_cross_section) {
+    double reaction_cross_section) {
   CollisionBranchPtr dummy_process = make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
       reaction_cross_section, ProcessType::Bremsstrahlung);
-      add_collision(std::move(dummy_process));
+  add_collision(std::move(dummy_process));
 }
 
 CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
@@ -122,9 +124,9 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
 
   double xsection = 10.0;
   process_list.push_back(make_unique<CollisionBranch>(
-      incoming_particles_[0].type(), incoming_particles_[1].type(), *photon_particle, xsection, ProcessType::Bremsstrahlung));
+      incoming_particles_[0].type(), incoming_particles_[1].type(),
+      *photon_particle, xsection, ProcessType::Bremsstrahlung));
   return process_list;
-
 };
 
-} // namespace smash
+}  // namespace smash

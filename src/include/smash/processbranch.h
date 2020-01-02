@@ -250,8 +250,7 @@ class CollisionBranch : public ProcessBranch {
    * \param[in] p_type Process type of created branch.
    */
   CollisionBranch(const ParticleType &type_a, const ParticleType &type_b,
-                  const ParticleType &type_c,
-                  double w, ProcessType p_type)
+                  const ParticleType &type_c, double w, ProcessType p_type)
       : ProcessBranch(w), process_type_(p_type) {
     particle_types_.reserve(3);
     particle_types_.push_back(&type_a);

@@ -362,30 +362,33 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
     output_clock = make_unique<UniformClock>(0.0, output_dt);
   }
 
-// Add proper error messages if photons are not configured properly.
-// 1) Missing Photon config section.
-  if (config["Output"].has_value({"Photons"}) && (!config.has_value({"Photons"}))) {
+  // Add proper error messages if photons are not configured properly.
+  // 1) Missing Photon config section.
+  if (config["Output"].has_value({"Photons"}) &&
+      (!config.has_value({"Photons"}))) {
     throw std::invalid_argument(
-      "Photon output is enabled although photon production is disabled. Photon production can be configured in the \"Photon\" section.");
+        "Photon output is enabled although photon production is disabled. "
+        "Photon production can be configured in the \"Photon\" section.");
   }
 
-// 2) Missing Photon output section.
-bool missing_output_2to2 = false;
-bool missing_output_brems = false;
-if (!(config["Output"].has_value({"Photons"}))) {
-  if (config.has_value({"Photons", "2to2_Scatterings"})) {
-    missing_output_2to2 = config.read({"Photons", "2to2_Scatterings"}) ? 1 : 0;
-  }
-  if (config.has_value({"Photons", "Bremsstrahlung"})) {
-    missing_output_brems = config.read({"Photons", "Bremsstrahlung"}) ? 1 : 0;
-  }
+  // 2) Missing Photon output section.
+  bool missing_output_2to2 = false;
+  bool missing_output_brems = false;
+  if (!(config["Output"].has_value({"Photons"}))) {
+    if (config.has_value({"Photons", "2to2_Scatterings"})) {
+      missing_output_2to2 =
+          config.read({"Photons", "2to2_Scatterings"}) ? 1 : 0;
+    }
+    if (config.has_value({"Photons", "Bremsstrahlung"})) {
+      missing_output_brems = config.read({"Photons", "Bremsstrahlung"}) ? 1 : 0;
+    }
 
-  if (missing_output_2to2 || missing_output_brems) {
-    throw std::invalid_argument(
-        "Photon output is disabled although photon production is enabled. Please enable the photon output.");
+    if (missing_output_2to2 || missing_output_brems) {
+      throw std::invalid_argument(
+          "Photon output is disabled although photon production is enabled. "
+          "Please enable the photon output.");
+    }
   }
-}
-
 
   auto config_coll = config["Collision_Term"];
   /* Elastic collisions between the nucleons with the square root s
