@@ -1100,43 +1100,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * The photon output is available in binary, OSCAR1999, OSCAR2013 and
    * OSCAR2013 extended format. \n
    *
-   * \n
-   * ### Photon production in SMASH
-   * Photons are treated perturbatively and are produced from binary
-   * scattering processes. Their production follows the framework from Turbide
-   * et al. described in \iref{Turbide:2006zz}. Following the perturbative
-   * treatment, the produced photons do not contribute to the evolution of the
-   * hadronic system. They are rather direcly printed to the photon output.
-   * The mechanism for photon production is the following:
-   * -# Look for hadronic interactions of particles that are also incoming
-   * particles of a photon process. Currently, the latter include binary
-   * scatterings of \f$ \pi \f$ and \f$ \rho \f$ mesons.
-   * -# Perform the photon action and write the results to the photon output.
-   * The final state particles are not of interest anymore as they are not
-   * propagated further in the evolution. To account for the probability that
-   * photon processes are significantly less likely than hadronic processes,
-   * the produced photons are weighted according to the ratio of the photon
-   * cross section to the hadronic cross section used to find the interaction,
-   * \f$  W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\f$.
-   * This weight can be found in the weight element of the photon output,
-   *denoted as \key photon_weight in the above.
-   * -# Perform the original hadronic action based on which the photon action
-   * was found. Propagate all final states particles throughout the hadronic
-   * evolution as if no photon action had occured.
-   *
-   * As photons are produced very rarely, a lot of statistics is necessery to
-   * yield useful results. Alternatively, it it possible to use fractional
-   * photons (see \ref output_content_specific_options_
-   * "Content-specific output options" on how to activate them).
-   * This means that for each produced photon, \f$ N_{\text{Frac}} \f$
-   * photons are actually sampled with different kinematic properties so that
-   * more phase space is covered. In case fractional photons are used, the
-   * weight es redefined as
-   *\f$ W = \frac{\frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}t} \ (t_2 - t_1)}{
-   *			  N_\mathrm{frac} \ \sigma_{\mathrm{had}}} \f$.
-   * \note As photons are treated perturbatively, the produced photons are only
-   * written to the photon output, but neither to the usual collision output,
-   * nor to the particle lists.
    **/
 
   /*!\Userguide

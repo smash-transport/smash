@@ -253,7 +253,6 @@ inline ExperimentParameters default_parameters(int testparticles = 1,
                               1.0,
                               false,  // string_with_probability
                               NNbarTreatment::NoAnnihilation,
-                              false,   // photons switch
                               0.,      // low energy sigma_NN cut-off
                               false};  // potential_affect_threshold
 }

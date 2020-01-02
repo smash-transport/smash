@@ -98,6 +98,7 @@ namespace smash {
  * \li \subpage input_lattice_
  * \li \subpage input_potentials_
  * \li \subpage input_forced_thermalization_
+ * \li \subpage input_photons_
  *
  * \par Information on formatting of the input file can be found here:
  * \li \subpage input_indentation_
@@ -281,6 +282,64 @@ namespace smash {
  * Note further, that the decaymodes file will need to be modified when running
  * a box simulation in which detailed balance is expected to be conserved. See
  * \ref input_modi_box_ for further information.
+ */
+
+/*!\Userguide
+ * \page input_photons_ Photons
+ * Photon production can be enabled in the corresponding \key Photon section of
+ * the configuration file. There are the following options: \n
+ * \n
+ * \key 2to2_Scatterings (bool, optional, default = false):\n
+ * Whether or not to enable photon production in mesonic scattering processes.
+ *
+ * \key Bremsstrahlung (bool, optional, default = false):\n
+ * Whether or not to enable photon production in bremsstrahlung processes.
+ *
+ * \key Fractional_Photons (int, required):\n
+ * Number of fractional photons sampled per single perturbatively produced
+ * photon. Currently, \key Fractional_Photons > 1 is only compatible with
+ * \key Bremsstrahlung: false.
+ *
+ * \n
+ * ### Photon production in SMASH
+ * Photons are treated perturbatively and are produced either from binary
+ * scatterings or in bremsstrahlung processes.
+ * Their production in scatterings follows the framework from Turbide
+ * et al. described in \iref{Turbide:2006zz}. Following the perturbative
+ * treatment, the produced photons do not contribute to the evolution of the
+ * hadronic system. They are rather direcly printed to the photon output.
+ * The mechanism for photon production is the following:
+ * -# Look for hadronic interactions of particles that are also incoming
+ * particles of a photon process. Currently, the latter include binary
+ * scatterings of \f$ \pi \f$ and \f$ \rho \f$ mesons.
+ * -# Perform the photon action and write the results to the photon output.
+ * The final state particles are not of interest anymore as they are not
+ * propagated further in the evolution. To account for the probability that
+ * photon processes are significantly less likely than hadronic processes,
+ * the produced photons are weighted according to the ratio of the photon
+ * cross section to the hadronic cross section used to find the interaction,
+ * \f$  W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\f$.
+ * This weight can be found in the weight element of the photon output,
+ *denoted as \key photon_weight in the above.
+ * -# Perform the original hadronic action based on which the photon action
+ * was found. Propagate all final states particles throughout the hadronic
+ * evolution as if no photon action had occured.
+ *
+ * As photons are produced very rarely, a lot of statistics is necessery to
+ * yield useful results. Alternatively, it it possible to use fractional
+ * photons (see \ref output_content_specific_options_
+ * "Content-specific output options" on how to activate them).
+ * This means that for each produced photon, \f$ N_{\text{Frac}} \f$
+ * photons are actually sampled with different kinematic properties so that
+ * more phase space is covered. In case fractional photons are used, the
+ * weight es redefined as
+ *\f$ W = \frac{\frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}t} \ (t_2 - t_1)}{
+ *			  N_\mathrm{frac} \ \sigma_{\mathrm{had}}} \f$.
+ * Note though that fractional photons are currently only available when used in
+ * combination with hadronic scatterings, but not with bremsstrahlung.
+ * \note As photons are treated perturbatively, the produced photons are only
+ * written to the photon output, but neither to the usual collision output,
+ * nor to the particle lists.
  */
 
 /**
