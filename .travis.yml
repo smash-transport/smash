@@ -37,9 +37,9 @@ matrix:
       apt:
         packages:
           - libboost-all-dev
-          - clang-3.6
+          - clang-3.5
     env:
-      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6"
+      - MATRIX_EVAL="CC=clang-3.5 && CXX=clang++-3.5"
   # newer clang version on linux
   - os: linux
     dist: bionic
