@@ -24,7 +24,7 @@ matrix:
     addons:
       apt:
         sources:
-          - ubuntu-toolchain-r-test
+          - sourceline: 'ppa:ubuntu-toolchain-r/test'
         packages:
           - libboost-all-dev
           - g++-9
