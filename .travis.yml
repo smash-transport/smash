@@ -30,7 +30,7 @@ matrix:
           - g++-9
     env:
       - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
-  # clang on linux
+  # old clang version on linux
   - os: linux
     dist: trusty
     addons:
@@ -40,6 +40,16 @@ matrix:
           - clang-3.6
     env:
       - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6"
+  # newer clang version on linux
+  - os: linux
+    dist: bionic
+    addons:
+      apt:
+        packages:
+          - libboost-all-dev
+          - clang-6.0
+    env:
+      - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
   # most recent xcode (changes also clang version)
   - os: osx
     osx_image: xcode11
