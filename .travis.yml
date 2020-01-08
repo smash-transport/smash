@@ -2,8 +2,6 @@ language: cpp
 
 sudo: required
 
-dist: trusty
-
 branches:
   only:
   - master
@@ -12,38 +10,46 @@ matrix:
   include:
   # minimal gcc version (also on loewe cluster)
   - os: linux
+    dist: trusty
     addons:
       apt:
-        sources:
-          - ubuntu-toolchain-r-test
         packages:
           - libboost-all-dev
           - g++-4.8
     env:
       - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8"
-  # most recent gcc version, temporalily disabled, see #389 and #395
-  # - os: linux
-  #   addons:
-  #     apt:
-  #       sources:
-  #         - ubuntu-toolchain-r-test
-  #       packages:
-  #         - libboost-all-dev
-  #         - g++-8
-  #   env:
-  #     - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
-  # clang on linux
+  # most recent gcc version
   - os: linux
+    dist: bionic
     addons:
       apt:
         sources:
-          - ubuntu-toolchain-r-test
-          - llvm-toolchain-trusty-3.6
+          - sourceline: 'ppa:ubuntu-toolchain-r/test'
         packages:
           - libboost-all-dev
-          - clang-3.6
+          - g++-9
     env:
-      - MATRIX_EVAL="CC=clang-3.6 && CXX=clang++-3.6"
+      - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+  # old clang version on linux
+  - os: linux
+    dist: trusty
+    addons:
+      apt:
+        packages:
+          - libboost-all-dev
+          - clang-3.5
+    env:
+      - MATRIX_EVAL="CC=clang-3.5 && CXX=clang++-3.5"
+  # newer clang version on linux
+  - os: linux
+    dist: bionic
+    addons:
+      apt:
+        packages:
+          - libboost-all-dev
+          - clang-6.0
+    env:
+      - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
   # most recent xcode (changes also clang version)
   - os: osx
     osx_image: xcode11
