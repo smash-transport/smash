@@ -79,7 +79,7 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * \page potentials_sym_ Symmetry
    *
    * The symmetry potential has the form
-   * \f[ U_{Sym} = \pm 2 S_{pot} \frac{I_3}{I} \frac{\rho_{I_3}}{\rho_0} 
+   * \f[ U_{Sym} = \pm 2 S_{pot} \frac{I_3}{I} \frac{\rho_{I_3}}{\rho_0}
    * + S(\rho_B)\left(\frac{\rho_{I_3}}{\rho_B}\right)^2 \,, \f]
    * where \f$ \rho_{I_3}\f$ is the density of the relative isospin \f$ I_3/I
    * \f$ and \f$ \rho_B \f$ is the net baryon density.
@@ -89,7 +89,8 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    *
    * \key gamma (double, no default): \n
    *      Power \f$ \gamma \f$ in formula for \f$ S(\rho_B) \f$:
-   * \f[ S(\rho_B)=12.3\,\mathrm{MeV}\times \left(\frac{\rho_B}{\rho_0}\right)^{2/3}+
+   * \f[ S(\rho_B)=12.3\,\mathrm{MeV}\times
+   * \left(\frac{\rho_B}{\rho_0}\right)^{2/3}+
    * 20\,\mathrm{MeV}\times\left(\frac{\rho_B}{\rho_0}\right)^\gamma \f]
    * If gamma is specified, the baryon density dependence is included in the
    * potential. Otherwise only the first term of the potential will be taken
