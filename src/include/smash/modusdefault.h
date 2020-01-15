@@ -69,6 +69,8 @@ class ModusDefault {
   bool cll_in_nucleus() const { return false; }
   /// \return Checks if modus is collider; overwritten in ColliderModus
   bool is_collider() const { return false; }
+  /// \return Checks if modus is a box; overwritten in BoxModus
+  bool is_box() const { return false; }
   /// \return Checks if modus is list modus; overwritten in ListModus
   bool is_list() const { return false; }
   /// \return The impact parameter; overwritten in ColliderModus
@@ -84,9 +86,10 @@ class ModusDefault {
   FermiMotion fermi_motion() const { return FermiMotion::Off; }
   /// \return Maximal timestep accepted by this modus. Negative means infinity.
   double max_timestep(double) const { return -1.; }
-
   /// \return Length of the box; overwritten in BoxModus
   double length() const { return -1.; }
+  /// \return equilibration time of the box; overwritten in BoxModus
+  double equilibration_time() const { return -1.; }
 
   /**
    * Get the passing time of the two nuclei in a collision. This time

@@ -124,12 +124,18 @@ class BoxModus : public ModusDefault {
 
   /// \return Length of the box
   double length() const { return length_; }
+  /// \return equilibration time of the box
+  double equilibration_time() const { return equilibration_time_; }
+  /// \return whether the modus is box (also, trivially true)
+  bool is_box() const { return true; }
 
  private:
   /// Initial momenta distribution: thermal or peaked momenta
   const BoxInitialCondition initial_condition_;
   /// Length of the cube's edge in fm/c
   const double length_;
+  /// time after which output is written
+  const double equilibration_time_;
   /// Temperature of the Box in GeV
   const double temperature_;
   /// Initial time of the box

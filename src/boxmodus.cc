@@ -207,6 +207,7 @@ BoxModus::BoxModus(Configuration modus_config,
                    const ExperimentParameters &parameters)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
       length_(modus_config.take({"Box", "Length"})),
+      equilibration_time_(modus_config.take({"Box", "Equilibration_Time"}, -1.)),
       temperature_(modus_config.take({"Box", "Temperature"})),
       start_time_(modus_config.take({"Box", "Start_Time"}, 0.)),
       use_thermal_(
