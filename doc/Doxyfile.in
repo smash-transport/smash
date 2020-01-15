@@ -786,6 +786,7 @@ INPUT                  = doc/ \
                          src/tests/setup.h \
                          src/ \
                          CONTRIBUTING.md \
+                         bin/benchmarks/README.md \
                          3rdparty/einhard/einhard.hpp
 
 # This tag can be used to specify the character encoding of the source files

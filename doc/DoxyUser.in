@@ -783,6 +783,7 @@ INPUT                  = doc/ \
                          AUTHORS \
                          README.md \
                          CONTRIBUTING.md \
+                         bin/benchmarks/README.md \
                          @CMAKE_CURRENT_BINARY_DIR@/userguide.dox
 
 # This tag can be used to specify the character encoding of the source files
