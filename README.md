@@ -24,7 +24,7 @@ T. Sjöstrand, S. Mrenna and P. Skands,
 
 
 Report issues at https://github.com/smash-transport/smash/issues or contact us by email
-at elfner@th.physik.uni-frankfurt.de.
+at elfner@itp.uni-frankfurt.de.
 
 ## How to Build SMASH
 

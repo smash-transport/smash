@@ -4,7 +4,7 @@ If you are reading this, it is probable that you are going to contribute to
 SMASH. First of all, we welcome your interest and thank you for your work.
 Hopefully, you find what you need in the following. Otherwise feel free to
 contact the development team by reporting issues at
-https://github.com/smash-transport/smash/issues or contact us by email at elfner@th.physik.uni-frankfurt.de.
+https://github.com/smash-transport/smash/issues or contact us by email at elfner@itp.uni-frankfurt.de.
 
 Note that any contributions must be licensed under the same terms as SMASH, see
 [LICENSE](LICENSE).
