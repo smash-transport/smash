@@ -24,8 +24,13 @@ namespace smash {
  */
 class DecayActionsFinder : public ActionFinderInterface {
  public:
-  /// Initialize the finder
-  DecayActionsFinder() {}
+  /* Initialize the finder
+   *
+   * \param[in] res_lifetime_factor The multiplicative factor to be applied to
+   *                                resonance lifetimes; default is 1
+   */
+  DecayActionsFinder(double res_lifetime_factor)
+      : res_lifetime_factor_(res_lifetime_factor) {}
 
   /**
    * Check the whole particle list for decays.
@@ -63,6 +68,9 @@ class DecayActionsFinder : public ActionFinderInterface {
    */
   ActionList find_final_actions(const Particles &search_list,
                                 bool only_res = false) const override;
+
+  /// Multiplicative factor to be applied to resonance lifetimes
+  const double res_lifetime_factor_ = 1.;
 };
 
 }  // namespace smash

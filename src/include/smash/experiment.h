@@ -738,6 +738,18 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * reference process such as PP for which solid parametrizations exist.
  * (\iref{Bass:1998ca})
  *
+ * \key Resonance_Lifetime_Modifier (double, optional, default = 1.0)
+ * Multiplicative factor by which to scale the resonance lifetimes up or down.
+ * This additionally has the effect of modifying the initial densities by
+ * the same factor in the case of a box initialized with thermal multiplicities
+ * (see \ref Use_Thermal_Multiplicities). WARNING: This option is not fully
+ * physically consistent with some of the other asssumptions used in SMASH;
+ * notably, modifying this value WILL break detailed balance in any gas
+ * which allows resonances to collide inelastically, as this option breaks the
+ * relationship between the width and lifetime of resonances. Note as well that
+ * in such gases, using a value of 0.0 is known to make SMASH hang; it is
+ * recommended to use a small non-zero value instead in these cases.
+
  * \key Strings_with_Probability (bool, optional, default = \key true): \n
  * \li \key true - String processes are triggered according to a probability
  *                 increasing smoothly with the collisional energy from 0 to 1
@@ -790,7 +802,19 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     n_fractional_photons_ = config.take({"Output", "Photons", "Fractions"});
   }
   if (parameters_.two_to_one) {
-    action_finders_.emplace_back(make_unique<DecayActionsFinder>());
+    if (parameters_.res_lifetime_factor < 0.) {
+      throw std::invalid_argument(
+          "Resonance lifetime modifier cannot be negative!");
+    }
+    if (parameters_.res_lifetime_factor < really_small) {
+      logg[LExperiment].warn(
+          "Resonance lifetime set to zero. Make sure resonances cannot "
+          "interact",
+          "inelastically (e.g. resonance chains), else SMASH is known to "
+          "hang.");
+    }
+    action_finders_.emplace_back(
+        make_unique<DecayActionsFinder>(parameters_.res_lifetime_factor));
   }
   bool no_coll = config.take({"Collision_Term", "No_Collisions"}, false);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||

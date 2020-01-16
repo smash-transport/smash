@@ -203,7 +203,8 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * ('../input', if the build directory is located in the smash
  * folder).
  */
-BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
+BoxModus::BoxModus(Configuration modus_config,
+                   const ExperimentParameters &parameters)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
       length_(modus_config.take({"Box", "Length"})),
       temperature_(modus_config.take({"Box", "Temperature"})),
@@ -222,7 +223,12 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
       jet_pdg_(insert_jet_ ? modus_config.take({"Box", "Jet", "Jet_PDG"})
                                  .convert_for(jet_pdg_)
                            : pdg::p),  // dummy default; never used
-      jet_mom_(modus_config.take({"Box", "Jet", "Jet_Momentum"}, 20.)) {}
+      jet_mom_(modus_config.take({"Box", "Jet", "Jet_Momentum"}, 20.)) {
+  if (parameters.res_lifetime_factor < 0.) {
+    throw std::invalid_argument(
+        "Resonance lifetime modifier cannot be negative!");
+  }
+}
 
 double BoxModus::initial_conditions(Particles *particles,
                                     const ExperimentParameters &parameters) {
@@ -237,8 +243,11 @@ double BoxModus::initial_conditions(Particles *particles,
     if (average_multipl_.empty()) {
       for (const ParticleType &ptype : ParticleType::list_all()) {
         if (HadronGasEos::is_eos_particle(ptype)) {
-          const double n = HadronGasEos::partial_density(
-              ptype, T, mub_, mus_, account_for_resonance_widths_);
+          const double lifetime_factor =
+              ptype.is_stable() ? 1. : parameters.res_lifetime_factor;
+          const double n = lifetime_factor * HadronGasEos::partial_density(
+                                                 ptype, T, mub_, mus_,
+                                                 account_for_resonance_widths_);
           average_multipl_[ptype.pdgcode()] = n * V * parameters.testparticles;
         }
       }

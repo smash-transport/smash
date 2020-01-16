@@ -384,6 +384,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           config_coll.take({"Included_2to2"}, ReactionsBitSet().set()),
           config_coll.take({"Strings"}, modus_chooser != "Box"),
           config_coll.take({"Use_AQM"}, true),
+          config_coll.take({"Resonance_Lifetime_Modifier"}, 1.),
           config_coll.take({"Strings_with_Probability"}, true),
           config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
           config.has_value({"Output", "Photons"}),

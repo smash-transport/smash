@@ -48,6 +48,14 @@ struct ExperimentParameters {
   /// Whether to use the AQM or not
   bool use_AQM;
 
+  /*
+   * Multiplicative factor to be applied to resonance lifetimes; in the case of
+   * thermal multiplicities this should also be applied to initial
+   * multiplicities of resonances, so that one does not artificially introduce
+   * a non-zero pion chemical potential.
+   */
+  double res_lifetime_factor;
+
   /**
    * This indicates whether the string fragmentation is swiched on with
    * a probability smoothly increasing with energy. If it's set equal to
