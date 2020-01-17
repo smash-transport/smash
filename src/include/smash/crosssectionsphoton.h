@@ -34,12 +34,15 @@ class CrosssectionsPhoton<ComputationMethod::Analytic> {
   /** @name Total cross-section
    * The functions in this group calculate the analytical value of the total
    * cross-section for a photon process.
+   */
+  ///@{
+  /**
+   * Total cross sections for given photon process:
    *
    * \param[in] s Mandelstam-s [GeV^2]
    * \param[in] m_rho Mass of participating rho-meson [GeV]
    * \returns photon cross-section [mb]
    */
-  ///@{
   static double xs_pi_pi_rho0(const double s, const double m_rho);
   static double xs_pi_pi0_rho(const double s, const double m_rho);
   static double xs_pi0_rho0_pi0(const double s, const double m_rho);
@@ -59,13 +62,16 @@ class CrosssectionsPhoton<ComputationMethod::Analytic> {
   /** @name Differential cross-section
    * The functions in this group calculate the analytical value of the
    * differential cross-section for a photon process.
+   */
+  ///@{
+  /**
+   * Differential cross section for given photon process.
    *
    * \param[in] s Mandelstam-s [GeV^2]
    * \param[in] t Mandelstam-t [GeV^2]
    * \param[in] m_rho Mass of participating rho-meson [GeV]
    * \returns photon cross-section [mb]
    */
-  ///@{
   static double xs_diff_pi_pi_rho0(const double s, const double t,
                                    const double m_rho);
   static double xs_diff_pi_pi0_rho(const double s, const double t,
@@ -107,6 +113,9 @@ class CrosssectionsPhoton<ComputationMethod::Analytic> {
    * \iref{Turbide:2006zz}.
    */
   ///@{
+  /**
+   * Constant in the computation of photon cross sections.
+   */
   constexpr static double Const = 0.059;
   constexpr static double g_POR = 22.6;
   constexpr static double ghat = 6.4483;

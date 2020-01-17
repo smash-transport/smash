@@ -190,8 +190,11 @@ class RootOutput : public OutputInterface {
   /// Maximal buffer size.
   static const int max_buffer_size_ = 10000;
 
+  /** @name Buffer for filling TTree
+   * See class documentation for definitions.
+   */
   //@{
-  /// Buffer for filling TTree. See class documentation for definitions.
+  /// Property that is written to ROOT output.
   std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z,
       formation_time_, xsec_factor_, time_last_coll_;
   std::array<int, max_buffer_size_> pdgcode, charge, coll_per_part_,
