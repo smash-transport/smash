@@ -40,16 +40,19 @@ matrix:
           - clang-3.5
     env:
       - MATRIX_EVAL="CC=clang-3.5 && CXX=clang++-3.5"
-  # newer clang version on linux
+  # most recent clang version on linux
   - os: linux
     dist: bionic
     addons:
       apt:
+        sources:
+          - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main'
+            key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
         packages:
           - libboost-all-dev
-          - clang-6.0
+          - clang-9
     env:
-      - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
+      - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
   # most recent xcode (changes also clang version)
   - os: osx
     osx_image: xcode11
