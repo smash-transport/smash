@@ -71,7 +71,7 @@ before_install:
     tar xf pythia8235.tgz && rm pythia8235.tgz &&
     cd pythia8235 &&
     ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC' &&
-    make -j2 &&
+    make -j$(nproc) &&
     cd ..
   # clang-format
   - if [ $TRAVIS_OS_NAME = osx ]; then curl -# -o clang6_0_0.tar.xz http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
@@ -83,7 +83,7 @@ before_install:
     export GSL=$(pwd)/gsl-1.15 &&
     cd $GSL &&
     ./configure --prefix $GSL &&
-    make -j2 --silent &&
+    make -j$(nproc) --silent &&
     make install --silent &&
     cd $SMASH_ROOT
   # eigen
@@ -97,9 +97,9 @@ install:
   - mkdir build
   - cd build
   - cmake -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8235/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-eigen-b3f3d4950030/ -DGSL_ROOT_DIR=$GSL ..
-  - make -j2
+  - make -j$(nproc)
 
 script:
   # use correct clang version for format helper
   - PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/clang-format-helper.bash -t
-  - CTEST_OUTPUT_ON_FAILURE=1 ctest -j2
+  - CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
