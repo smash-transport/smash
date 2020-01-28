@@ -447,7 +447,7 @@ int main(int argc, char *argv[]) {
     // parse command-line arguments
     int opt;
     bool suppress_disclaimer = false;
-    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xv:n",
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xvn",
                               longopts, nullptr)) != -1) {
       switch (opt) {
         case 'c':
