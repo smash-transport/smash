@@ -84,6 +84,8 @@ if(Pythia_FOUND)
   )
 endif()
 
+# TODO Create universal way to include HepMC with CMake builds
+
 # set up include paths
 include_directories(include)
 include_directories(
@@ -93,6 +95,7 @@ include_directories(SYSTEM
     ${GSL_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
+    "/usr/local/include/HepMC3/"
     )
 
 
@@ -104,6 +107,7 @@ set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    einhard
    yaml-cpp
    cuhre suave divonne vegas  # Cuba multidimensional integration
+   "/usr/local/lib/libHepMC3_static.a"
    )
 
 # list the source files
@@ -136,6 +140,7 @@ set(smash_src
         grandcan_thermalizer.cc
         grid.cc
         hadgas_eos.cc
+        hepmcoutput.cc
         hypersurfacecrossingaction.cc
         icoutput.cc
         inputfunctions.cc

@@ -35,6 +35,9 @@
 #include "thermalizationaction.h"
 // Output
 #include "binaryoutput.h"
+#include "hepmcoutput.h"
+#include "HepMC3/GenParticle.h"
+// TODO Possible to get rid of include above
 #include "icoutput.h"
 #include "oscaroutput.h"
 #include "thermodynamicoutput.h"
@@ -579,7 +582,9 @@ void Experiment<Modus>::create_output(const std::string &format,
                                       const OutputParameters &out_par) {
   logg[LExperiment].info() << "Adding output " << content << " of format "
                            << format << std::endl;
-
+                           
+  // TODO Create config option for HepMC output
+  outputs_.emplace_back(make_unique<HepMcOutput>(output_path, "SMASH_HepMC", out_par));
   if (format == "VTK" && content == "Particles") {
     outputs_.emplace_back(
         make_unique<VtkOutput>(output_path, content, out_par));
