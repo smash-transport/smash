@@ -372,12 +372,16 @@ void ignore_simulation_config_values(Configuration &configuration) {
 }
 
 /// Initialize the particles and decays from the configuration.
-void initialize_particles_and_decays(Configuration &configuration,
-                                     sha256::Hash hash,
-                                     bf::path tabulations_path) {
+void initialize_particles_and_decays(Configuration &configuration) {
   ParticleType::create_type_list(configuration.take({"particles"}));
   DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
   ParticleType::check_consistency();
+}
+
+void initialize_particles_and_decays(Configuration &configuration,
+                                     sha256::Hash hash,
+                                     bf::path tabulations_path) {
+  initialize_particles_and_decays(configuration);
   logg[LMain].info("Tabulating cross section integrals...");
   IsoParticleType::tabulate_integrals(hash, tabulations_path);
 }
@@ -571,15 +575,13 @@ int main(int argc, char *argv[]) {
     hash_context.update(particle_string);
     hash_context.update(decay_string);
     const auto hash = hash_context.finalize();
-    logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash)
-                       << std::endl;
+    logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash);
 
     bf::path tabulations_path;
     if (cache_integrals) {
       tabulations_path = output_path.parent_path() / "tabulations";
       bf::create_directories(tabulations_path);
-      logg[LMain].info() << "Tabulations path: " << tabulations_path
-                         << std::endl;
+      logg[LMain].info() << "Tabulations path: " << tabulations_path;
     } else {
       tabulations_path = "";
     }
@@ -587,6 +589,7 @@ int main(int argc, char *argv[]) {
       /* Print only 2->n, n > 1. Do not dump decays, which can be found in
        * decaymodes.txt anyway */
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
+      logg[LMain].info() << "Tabulations path: " << tabulations_path;
       initialize_particles_and_decays(configuration, hash, tabulations_path);
       auto scat_finder = actions_finder_for_dump(configuration);
 
@@ -597,6 +600,7 @@ int main(int argc, char *argv[]) {
       std::exit(EXIT_SUCCESS);
     }
     if (particles_dump_iSS_format) {
+      initialize_particles_and_decays(configuration);
       ParticleTypePtrList list;
       list.clear();
       for (const auto &ptype : ParticleType::list_all()) {
