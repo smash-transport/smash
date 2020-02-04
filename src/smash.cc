@@ -362,22 +362,12 @@ void check_for_unused_config_values(const Configuration &configuration) {
  * outputs cross sections, resonance properties or possible reactions.
  */
 void ignore_simulation_config_values(Configuration &configuration) {
-  configuration.take({"Version"});
-  configuration.take({"particles"});
-  configuration.take({"decaymodes"});
-  configuration.take({"Modi"});
-  configuration.take({"General"});
-  if (configuration.has_value({"Output"})) {
-    configuration.take({"Output"});
-  }
-  if (configuration.has_value({"Lattice"})) {
-    configuration.take({"Lattice"});
-  }
-  if (configuration.has_value({"Potentials"})) {
-    configuration.take({"Potentials"});
-  }
-  if (configuration.has_value({"Forced_Thermalization"})) {
-    configuration.take({"Forced_Thermalization"});
+  for (const std::string s : {"Version", "particles", "decaymodes",
+                              "Modi", "General", "Output", "Lattice",
+                              "Potentials", "Forced_Thermalization"}) {
+    if (configuration.has_value({s.c_str()})) {
+      configuration.take({s.c_str()});
+    }
   }
 }
 
