@@ -643,11 +643,11 @@ int main(int argc, char *argv[]) {
     }
     if (resonance_dump_activated) {
       // Ignore config values that don't make sense.
+      initialize_particles_and_decays(configuration, hash, tabulations_path);
       const auto _dummy = ExperimentBase::create(configuration, "");
       ignore_simulation_config_values(configuration);
       check_for_unused_config_values(configuration);
 
-      initialize_particles_and_decays(configuration, hash, tabulations_path);
       PdgCode pdg(pdg_string);
       const ParticleType &res = ParticleType::find(pdg);
       res.dump_width_and_spectral_function();
