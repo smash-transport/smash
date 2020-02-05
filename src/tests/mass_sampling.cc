@@ -33,7 +33,7 @@ TEST(init_decay_modes) {
   DecayModes::load_decaymodes(
       "ρ \n"
       "1.      1  π π   \n"
-      "4.72e-5 1  e⁻ e⁺ \n"
+      "4.72e-5 0  e⁻ e⁺ \n"
       "\n"
       "ω \n"
       "1.  1  π ρ \n");
