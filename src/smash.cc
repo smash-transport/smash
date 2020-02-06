@@ -362,9 +362,9 @@ void check_for_unused_config_values(const Configuration &configuration) {
  * outputs cross sections, resonance properties or possible reactions.
  */
 void ignore_simulation_config_values(Configuration &configuration) {
-  for (const std::string s : {"Version", "particles", "decaymodes",
-                              "Modi", "General", "Output", "Lattice",
-                              "Potentials", "Forced_Thermalization"}) {
+  for (const std::string s :
+       {"Version", "particles", "decaymodes", "Modi", "General", "Output",
+        "Lattice", "Potentials", "Forced_Thermalization"}) {
     if (configuration.has_value({s.c_str()})) {
       configuration.take({s.c_str()});
     }
