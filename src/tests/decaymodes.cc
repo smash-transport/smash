@@ -66,7 +66,7 @@ const std::string decays_input(
     " ρ\t# rho\n"
     "\n"
     "0.99\t1\tπ π\t# pi pi \n"
-    "0.01  1  e⁻ e⁺\n"
+    "0.01  0  e⁻ e⁺\n"
     "\n"
     "\n"
     "ω      # omega\n"
