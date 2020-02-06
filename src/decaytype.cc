@@ -430,7 +430,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
                             (m_par - m_other) / (m_par_cubed * m_other_sqr) *
                             std::sqrt(rad1);
           const double t2 = pow_int(std::sqrt(rad2), 3);
-          const double ff = 1.182;
+          const double ff = 1.10;
           const double gamma_vi = t1 * t2 * ff;
           return 2. * fine_structure / (3. * M_PI) * gamma_vi / m_dil *
                  ph_sp_factor;
