@@ -317,6 +317,10 @@ smash_add_runtest(sphere_steps smash smash -e 2.0
                   -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
                   -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
                   -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}")
+smash_add_runtest(particle_table_dump smash smash -x)
+smash_add_runtest(reactions_dump smash smash -l)
+smash_add_runtest(crosssection_dump smash smash -s 2112,2212)
+smash_add_runtest(resonance_spectral_function_dump smash smash -r 113)
 
 # verify that default run has no mem leaks
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
