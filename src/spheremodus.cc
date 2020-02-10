@@ -201,13 +201,27 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
       out << ptype->name() << " initial multiplicity " << p.second << '\n';
     }
   }
-  if ( m.init_distr_ == SphereInitialCondition::ThermalMomentaBoltzmann ){
+  switch (m.init_distr_){
+  case SphereInitialCondition::ThermalMomentaBoltzmann:
     out << "Boltzmann momentum distribution with T = " << m.sphere_temperature_
 	<< " GeV.\n";
-  }
-  else if ( m.init_distr_ == SphereInitialCondition::ThermalMomentaQuantum ){
+    break;
+  case SphereInitialCondition::ThermalMomentaQuantum:
     out << "Fermi/Bose momentum distribution with T = " << m.sphere_temperature_
 	<< " GeV.\n";
+    break;
+  case SphereInitialCondition::IC_ES:
+    out << "Sphere Initial Condition is IC_ES";
+    break;
+  case SphereInitialCondition::IC_1M:
+    out << "Sphere Initial Condition is IC_1M";
+    break;
+  case SphereInitialCondition::IC_2M:
+    out << "Sphere Initial Condition is IC_2M";
+    break;
+  case SphereInitialCondition::IC_Massive:
+    out << "Sphere Initial Condition is IC_Massive";
+    break;
   }
   if (m.insert_jet_) {
     ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_);

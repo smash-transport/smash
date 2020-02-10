@@ -50,15 +50,18 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
       out << ptype->name() << " initial multiplicity " << p.second << '\n';
     }
   }
-  if (m.initial_condition_ == BoxInitialCondition::PeakedMomenta) {
+  switch (m.initial_condition_){
+  case BoxInitialCondition::PeakedMomenta:
     out << "All initial momenta = 3T = " << 3 * m.temperature_ << " GeV\n";
-  } else if ( m.initial_condition_ == BoxInitialCondition::ThermalMomentaBoltzmann ) {
+    break;
+  case BoxInitialCondition::ThermalMomentaBoltzmann:
     out << "Boltzmann momentum distribution with T = " << m.temperature_
         << " GeV.\n";
-  }
-  else if ( m.initial_condition_ == BoxInitialCondition::ThermalMomentaQuantum ){
+    break;
+  case BoxInitialCondition::ThermalMomentaQuantum:
     out << "Fermi/Bose momentum distribution with T = " << m.temperature_
 	<< " GeV.\n";
+    break;
   }
   if (m.insert_jet_) {
     ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_);
