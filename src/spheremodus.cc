@@ -201,8 +201,14 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
       out << ptype->name() << " initial multiplicity " << p.second << '\n';
     }
   }
-  out << "Boltzmann momentum distribution with T = " << m.sphere_temperature_
-      << " GeV.\n";
+  if ( m.init_distr_ == SphereInitialCondition::ThermalMomentaBoltzmann ){
+    out << "Boltzmann momentum distribution with T = " << m.sphere_temperature_
+	<< " GeV.\n";
+  }
+  else if ( m.init_distr_ == SphereInitialCondition::ThermalMomentaQuantum ){
+    out << "Fermi/Bose momentum distribution with T = " << m.sphere_temperature_
+	<< " GeV.\n";
+  }
   if (m.insert_jet_) {
     ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_);
     out << "Adding a " << ptype->name() << " as a jet in the middle "
@@ -361,7 +367,7 @@ double SphereModus::sample_quantum_momenta(
   if (pdg_code.is_lepton()) {
     std::cout << "\n\n\n\n*****\npdg_code = " << pdg_code
               << "\nThis particle is a lepton."
-              << "\nFor sampling, we will use the Boltmann distribution "
+              << "\nFor sampling, we will use the Boltzmann distribution "
               << "(statistics=0)."
               << "\n\nPress any key"
               << "\n\n(You can silence this warning in spheremodus.cc)"

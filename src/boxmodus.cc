@@ -52,9 +52,13 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
   }
   if (m.initial_condition_ == BoxInitialCondition::PeakedMomenta) {
     out << "All initial momenta = 3T = " << 3 * m.temperature_ << " GeV\n";
-  } else {
+  } else if ( m.initial_condition_ == BoxInitialCondition::ThermalMomentaBoltzmann ) {
     out << "Boltzmann momentum distribution with T = " << m.temperature_
         << " GeV.\n";
+  }
+  else if ( m.initial_condition_ == BoxInitialCondition::ThermalMomentaQuantum ){
+    out << "Fermi/Bose momentum distribution with T = " << m.temperature_
+	<< " GeV.\n";
   }
   if (m.insert_jet_) {
     ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_);
@@ -418,7 +422,7 @@ double BoxModus::sample_quantum_momenta(
   if (pdg_code.is_lepton()) {
     std::cout << "\n\n\n\n*****\npdg_code = " << pdg_code
               << "\nThis particle is a lepton."
-              << "\nFor sampling, we will use the Boltmann distribution "
+              << "\nFor sampling, we will use the Boltzmann distribution "
               << "(statistics=0)."
               << "\n\nPress any key"
               << "\n\n(You can silence this warning in boxmodus.cc)"
