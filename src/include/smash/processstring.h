@@ -988,7 +988,7 @@ class StringProcess {
    * \param[in] mTrn transverse mass of the fragmented hadron
    * \return sampled lightcone momentum fraction
    */
-  double sample_zLund(double a, double b, double mTrn);
+  static double sample_zLund(double a, double b, double mTrn);
 
   /**
    * \param[out] event_fragments event record which contains information of particles
@@ -1130,6 +1130,31 @@ class StringProcess {
    *        if the incoming particle is neither hadron nor lepton.
    */
   static int pdg_map_for_pythia(PdgCode &pdg);
+
+
+  /**
+   * \return forward lightcone momentum incoming particle A in CM-frame [GeV]
+   * \see PPosA_
+   */
+  double getPPosA() { return PPosA_;}
+
+  /**
+   * \return backward lightcone momentum incoming particle Af in CM-frame [GeV]
+   * \see PNegA_
+   */
+  double getPNegA() { return PNegA_;}
+
+  /**
+   * \return forward lightcone momentum incoming particle B in CM-frame [GeV]
+   * \see PPosB_
+   */
+  double getPPosB() { return PPosB_;}
+
+  /**
+   * \return backward lightcone momentum incoming particle B in CM-frame [GeV]
+   * \see PNegB_
+   */
+  double getPnegB() { return PNegB_;}
 
   // clang-format on
 };
