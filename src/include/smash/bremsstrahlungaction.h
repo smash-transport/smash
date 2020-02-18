@@ -12,6 +12,8 @@
 
 #include "scatteraction.h"
 
+#include "smash/crosssectionsbrems.h"
+
 namespace smash {
 /**
  * \ingroup action
@@ -152,6 +154,27 @@ class BremsstrahlungAction : public ScatterAction {
 
   /// Total hadronic cross section
   const double hadronic_cross_section_;
+
+  /**
+   * Create interpolation objects for tabularized cross sections. There are only
+   * two channels; one involving two charged pions (marked pipi) and one
+   * involving a charged and a neutral pion (marked pi0pi). All other cross
+   * sections can be determined from crossing symmetries.
+   */
+  void create_interpolations() {
+    // Read in tabularized cross section data (sqrt(s) and sigma)
+    std::vector<double> x_pipi = BREMS_PIPI_SQRTS;
+    std::vector<double> y_pipi = BREMS_PIPI_SIG;
+
+    std::vector<double> x_pi0pi = BREMS_PI0PI_SQRTS;
+    std::vector<double> y_pi0pi = BREMS_PI0PI_SIG;
+
+    // Create interpolation object containing linear interpolations
+    pipi_interpolation =
+        make_unique<InterpolateDataLinear<double>>(x_pipi, y_pipi);
+    pi0pi_interpolation =
+        make_unique<InterpolateDataLinear<double>>(x_pi0pi, y_pi0pi);
+  }
 
   /**
    * Computes the total cross section of the bremsstrahlung process.

@@ -122,7 +122,18 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
   CollisionBranchList process_list;
   static ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
 
+  // Create interpolation object, if not yet existent
+  if (pipi_interpolation == nullptr || pi0pi_interpolation == nullptr) {
+    create_interpolations();
+  }
+
+  // Find cross section corresponding to given sqrt(s)
+  double sqrts = sqrt_s();
+  double sigma_pipi = (*pipi_interpolation)(sqrts);
+  double sigma_pi0pi = (*pi0pi_interpolation)(sqrts);
+
   double xsection = 10.0;
+
   process_list.push_back(make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
       *photon_particle, xsection, ProcessType::Bremsstrahlung));
