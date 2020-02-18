@@ -32,7 +32,6 @@ matrix:
       - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
   # old clang version on linux
   - os: linux
-    dist: trusty
     addons:
       apt:
         packages:
