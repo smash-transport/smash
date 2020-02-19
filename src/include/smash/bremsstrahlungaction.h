@@ -98,7 +98,6 @@ class BremsstrahlungAction : public ScatterAction {
    */
   enum class ReactionType {
     no_reaction,
-    pi_z_pi_z,
     pi_z_pi_m,
     pi_z_pi_p,
     pi_p_pi_m,
