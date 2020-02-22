@@ -308,6 +308,13 @@ class ScatterActionsFinder : public ActionFinderInterface {
                             const std::vector<FourVector> &beam_momentum = {},
                             const double cell_vol = 0.0) const;
 
+  // TODO Write documentation
+  ActionPtr check_collision_three_particles(
+      const ParticleData &data_a, const ParticleData &data_b,
+      const ParticleData &data_c, double dt,
+      const std::vector<FourVector> &beam_momentum = {},
+      const double cell_vol = 0.0) const;
+
   /// Class that deals with strings, interfacing Pythia.
   std::unique_ptr<StringProcess> string_process_interface_;
   /// Specifies which collision criterion is used

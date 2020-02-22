@@ -399,10 +399,20 @@ ActionPtr ScatterActionsFinder::check_collision(
   return std::move(act);
 }
 
+ActionPtr ScatterActionsFinder::check_collision_three_particles(
+    const ParticleData& data_a, const ParticleData& data_b,
+    const ParticleData& data_c, double dt,
+    const std::vector<FourVector>& beam_momentum, const double cell_vol) const {
+  // TODO Implementation
+  return nullptr;
+}
+
 ActionList ScatterActionsFinder::find_actions_in_cell(
     const ParticleList& search_list, double dt, const double cell_vol,
     const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
+
+  // Check for 2 particle scattering
   for (const ParticleData& p1 : search_list) {
     for (const ParticleData& p2 : search_list) {
       if (p1.id() < p2.id()) {
@@ -414,6 +424,23 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
       }
     }
   }
+
+  // Check for 3 particle scatterings
+  for (const ParticleData& p1 : search_list) {
+    for (const ParticleData& p2 : search_list) {
+      for (const ParticleData& p3 : search_list) {
+        if (p1.id() < p2.id() && p2.id() < p3.id()) {
+          // Check if a collision is possible.
+          ActionPtr act = check_collision_three_particles(
+              p1, p2, p3, dt, beam_momentum, cell_vol);
+          if (act) {
+            actions.push_back(std::move(act));
+          }
+        }
+      }
+    }
+  }
+
   return actions;
 }
 
