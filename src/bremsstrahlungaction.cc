@@ -71,7 +71,10 @@ void BremsstrahlungAction::generate_final_state() {
   // we have only one reaction per incoming particle pair
   if (collision_processes_bremsstrahlung_.size() != 1) {
     logg[LScatterAction].fatal()
-        << "Problem in BremsstrahlungAction::generate_final_state().\n";
+        << "Problem in BremsstrahlungAction::generate_final_state().\nThe "
+           "brocess branch has "
+        << collision_processes_bremsstrahlung_.size()
+        << " entries. It should however have 1.";
     throw std::runtime_error("");
   }
 
