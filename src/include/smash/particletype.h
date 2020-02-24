@@ -264,7 +264,11 @@ class ParticleType {
    * Calculate the the smallest mass where the spectral function still has a
    * contribution. This value can be different from min_mass_kinematic,
    * if the spectral function becomes zero at masses higher than
-   * min_mass_kinematic.
+   * min_mass_kinematic, since the width is put to zero due to the width_cutoff.
+   *
+   * The distinction between it and min_mass_kinematic() might be necessary in
+   * edge cases, where a reaction is very close to the kinematic threshold or
+   * for optimizations.
    *
    * \return The minimum mass that a particle of this type can assume, where the
    * spectral function still has a non-zero value.
