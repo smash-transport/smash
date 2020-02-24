@@ -159,6 +159,10 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
 
     xsection = proc->weight();
 
+    if (xsection <= 0.0) {
+      xsection = 5.42204397e-06;
+    }
+
     process_list.push_back(make_unique<CollisionBranch>(
         proc->particle_list()[0].type(), proc->particle_list()[1].type(),
         *photon_particle, xsection, ProcessType::Bremsstrahlung));
@@ -171,6 +175,10 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
       xsection = (*pi0pi_interpolation)(sqrts);
     } else {
       throw std::runtime_error("Unknown ReactionType in BremsstrahlungAction.");
+    }
+
+    if (xsection <= 0.0) {
+      xsection = 5.42204397e-06;
     }
 
     process_list.push_back(make_unique<CollisionBranch>(
