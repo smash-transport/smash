@@ -403,8 +403,36 @@ ActionPtr ScatterActionsFinder::check_collision_three_particles(
     const ParticleData& data_a, const ParticleData& data_b,
     const ParticleData& data_c, double dt,
     const std::vector<FourVector>& beam_momentum, const double cell_vol) const {
-  // TODO Implementation
-  return nullptr;
+
+  // TODO Implementation //
+
+  // 1. Determine time of collision.
+  const double time_until_collision = dt * random::uniform(0., 1.);
+
+  // 2. Create ScatterAction object.
+
+
+  // 3. Add various subprocesses.
+
+
+  // 4. Calculate collision probability
+  double p_31 = 0.0;
+
+  // 5. Check that probability is smaller than one
+  if (p_31 > 1.) {
+    std::stringstream err;
+    err << "Probability larger than 1 for stochastic rates. ( P_31 = " << p_31
+        << " )\nUse smaller timesteps.";
+    throw std::runtime_error(err.str());
+  }
+
+  // 6. Perform probability decisions
+  double random_no = random::uniform(0., 1.);
+  if (random_no > p_31) {
+    return nullptr;
+  }
+
+  return nullptr;  // Replace later with: return std::move(act);
 }
 
 ActionList ScatterActionsFinder::find_actions_in_cell(
