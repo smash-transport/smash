@@ -423,11 +423,34 @@ ActionPtr ScatterActionsFinder::check_collision_three_particles(
   // 3.a) Add various subprocesses. Not necessary.
 
 
+  // 3.a) Add various subprocesses.
+
   // 3.b) Verify that is correct reaction 3 to 1 and correct particle types
 
 
   // 4. Calculate collision probability
   double p_31 = 0.0;
+
+  const double e1 = act->incoming_particles()[0].momentum().x0();
+  const double e2 = act->incoming_particles()[1].momentum().x0();
+  const double e3 = act->incoming_particles()[2].momentum().x0();
+  const double sqrts = (act->incoming_particles()[0].momentum() +
+                        act->incoming_particles()[1].momentum() +
+                        act->incoming_particles()[2].momentum()).abs();
+
+  // For later:
+  // Could also be replaced by a function call to the the inverse processbranch
+  const double gamma_decay = 0.00758;  // For omega to 3 pions constant ATM
+
+  const double I_3 = 0.07514;
+  const double ph_sp_3 = 1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
+
+  const double spec_f_val = act->outgoing_particles()[0].type().spectral_function(sqrts);
+
+  p_31 = dt / (cell_vol * cell_vol) *
+         M_PI / (2 * e1 * e2 * e3) *
+         gamma_decay / ph_sp_3 *
+         spec_f_val;
 
   // 5. Check that probability is smaller than one
   if (p_31 > 1.) {
