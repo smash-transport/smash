@@ -16,11 +16,8 @@ namespace smash {
 
 class ScatterActionThree : public Action {
  public:
-
-  ScatterActionThree(const ParticleData& in_part1,
-                     const ParticleData& in_part2,
-                     const ParticleData& in_part3,
-                     const ParticleData& out_part,
+  ScatterActionThree(const ParticleData& in_part1, const ParticleData& in_part2,
+                     const ParticleData& in_part3, const ParticleData& out_part,
                      double time);
 
   void generate_final_state() override;
@@ -35,7 +32,6 @@ class ScatterActionThree : public Action {
    * Writes information about this action to the \p out stream.
    */
   void format_debug_output(std::ostream& out) const override;
-
 };
 
 }  // namespace smash

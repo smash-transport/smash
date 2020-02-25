@@ -400,33 +400,43 @@ ActionPtr ScatterActionsFinder::check_collision(
   return std::move(act);
 }
 
+bool three_pions_incoming(const ParticleData& data_a,
+                          const ParticleData& data_b,
+                          const ParticleData& data_c) {
+  // We want a combination of pi+, pi- and pi0
+  const PdgCode pdg_a = data_a.pdgcode();
+  const PdgCode pdg_b = data_b.pdgcode();
+  const PdgCode pdg_c = data_c.pdgcode();
+
+  return (pdg_a == pdg::pi_p && pdg_b == pdg::pi_m && pdg_c == pdg::pi_z) ||
+         (pdg_a == pdg::pi_m && pdg_b == pdg::pi_p && pdg_c == pdg::pi_z) ||
+         (pdg_a == pdg::pi_z && pdg_b == pdg::pi_p && pdg_c == pdg::pi_m) ||
+         (pdg_a == pdg::pi_z && pdg_b == pdg::pi_m && pdg_c == pdg::pi_p) ||
+         (pdg_a == pdg::pi_p && pdg_b == pdg::pi_z && pdg_c == pdg::pi_m) ||
+         (pdg_a == pdg::pi_m && pdg_b == pdg::pi_z && pdg_c == pdg::pi_p);
+}
+
 ActionPtr ScatterActionsFinder::check_collision_three_particles(
     const ParticleData& data_a, const ParticleData& data_b,
     const ParticleData& data_c, double dt,
     const std::vector<FourVector>& beam_momentum, const double cell_vol) const {
-
   // TODO Implementation //
 
-  // 0. If statement for 3 pion as incoming
+  // 0. If statement to check if 3 pions are incoming
+  if (!(three_pions_incoming(data_a, data_b, data_c))) {
+    return nullptr;
+  }
 
-  // 0.5 Create omega as final state particle (needs )
-  const ParticleType &type_omega = ParticleType::find(0x223);
+  // 1 Create omega as final state particle (needs )
+  const ParticleType& type_omega = ParticleType::find(0x223);
   ParticleData data_final{type_omega};
 
-  // 1. Determine time of collision.
+  // 2. Determine time of collision.
   const double time_until_collision = dt * random::uniform(0., 1.);
 
-  // 2. Create ScatterAction object.
+  // 3. Create ScatterAction object.
   ScatterActionThreePtr act = make_unique<ScatterActionThree>(
-      data_a, data_b, data_c, data_final ,time_until_collision);
-
-  // 3.a) Add various subprocesses. Not necessary.
-
-
-  // 3.a) Add various subprocesses.
-
-  // 3.b) Verify that is correct reaction 3 to 1 and correct particle types
-
+      data_a, data_b, data_c, data_final, time_until_collision);
 
   // 4. Calculate collision probability
   double p_31 = 0.0;
@@ -434,23 +444,21 @@ ActionPtr ScatterActionsFinder::check_collision_three_particles(
   const double e1 = act->incoming_particles()[0].momentum().x0();
   const double e2 = act->incoming_particles()[1].momentum().x0();
   const double e3 = act->incoming_particles()[2].momentum().x0();
-  const double sqrts = (act->incoming_particles()[0].momentum() +
-                        act->incoming_particles()[1].momentum() +
-                        act->incoming_particles()[2].momentum()).abs();
+  const double sqrt_s = act->sqrt_s();
 
   // For later:
   // Could also be replaced by a function call to the the inverse processbranch
   const double gamma_decay = 0.00758;  // For omega to 3 pions constant ATM
 
   const double I_3 = 0.07514;
-  const double ph_sp_3 = 1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
+  const double ph_sp_3 =
+      1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrt_s * sqrt_s) * I_3;
 
-  const double spec_f_val = act->outgoing_particles()[0].type().spectral_function(sqrts);
+  const double spec_f_val =
+      act->outgoing_particles()[0].type().spectral_function(sqrt_s);
 
-  p_31 = dt / (cell_vol * cell_vol) *
-         M_PI / (2 * e1 * e2 * e3) *
-         gamma_decay / ph_sp_3 *
-         spec_f_val;
+  p_31 = dt / (cell_vol * cell_vol) * M_PI / (2 * e1 * e2 * e3) * gamma_decay /
+         ph_sp_3 * spec_f_val;
 
   // 5. Check that probability is smaller than one
   if (p_31 > 1.) {
@@ -466,7 +474,7 @@ ActionPtr ScatterActionsFinder::check_collision_three_particles(
     return nullptr;
   }
 
-  return nullptr;  // Replace later with: return std::move(act);
+  return std::move(act);
 }
 
 ActionList ScatterActionsFinder::find_actions_in_cell(
