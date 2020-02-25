@@ -25,6 +25,7 @@
 #include "smash/particles.h"
 #include "smash/scatteraction.h"
 #include "smash/scatteractionphoton.h"
+#include "smash/scatteractionthree.h"
 #include "smash/stringfunctions.h"
 
 namespace smash {
@@ -406,13 +407,23 @@ ActionPtr ScatterActionsFinder::check_collision_three_particles(
 
   // TODO Implementation //
 
+  // 0. If statement for 3 pion as incoming
+
+  // 0.5 Create omega as final state particle (needs )
+  const ParticleType &type_omega = ParticleType::find(0x223);
+  ParticleData data_final{type_omega};
+
   // 1. Determine time of collision.
   const double time_until_collision = dt * random::uniform(0., 1.);
 
   // 2. Create ScatterAction object.
+  ScatterActionThreePtr act = make_unique<ScatterActionThree>(
+      data_a, data_b, data_c, data_final ,time_until_collision);
+
+  // 3.a) Add various subprocesses. Not necessary.
 
 
-  // 3. Add various subprocesses.
+  // 3.b) Verify that is correct reaction 3 to 1 and correct particle types
 
 
   // 4. Calculate collision probability
