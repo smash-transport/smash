@@ -420,7 +420,18 @@ ActionPtr ScatterActionsFinder::check_collision_three_particles(
     const ParticleData& data_a, const ParticleData& data_b,
     const ParticleData& data_c, double dt,
     const std::vector<FourVector>& beam_momentum, const double cell_vol) const {
-  // TODO Implementation //
+  // TODO Decide on sensible logging
+
+  // No grid or search in cell
+  if (cell_vol < really_small) {
+    return nullptr;
+  }
+
+  if (testparticles_ != 1) {
+    std::stringstream err;
+    err << "3-body reactions do not scale with testparticles yet. Use 1.";
+    throw std::runtime_error(err.str());
+  }
 
   // 0. If statement to check if 3 pions are incoming
   if (!(three_pions_incoming(data_a, data_b, data_c))) {
