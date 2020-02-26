@@ -16,7 +16,7 @@ ScatterActionThree::ScatterActionThree(const ParticleData &in_part_a,
                                        const ParticleData &in_part_c,
                                        const ParticleData &out_part,
                                        double time)
-    : Action({in_part_a, in_part_b, in_part_c}, {out_part}, time,
+    : Action({in_part_a, in_part_b, in_part_c}, {out_part}, time + in_part_a.position().x0(),
              ProcessType::MultiParticle) {}
 
 void ScatterActionThree::generate_final_state() {
