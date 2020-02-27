@@ -174,6 +174,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
          Length: 10.0
          Temperature: 0.2
          Use_Thermal_Multiplicities: True
+         Initial_Condition: "thermal momenta"
          Jet:
              Jet_PDG: 211
              Jet_Momentum: 100.0
