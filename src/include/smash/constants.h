@@ -131,15 +131,6 @@ constexpr double minimum_sqrts_pythia_can_handle = 10.0;  // GeV
 constexpr std::uint32_t ID_PROCESS_PHOTON =
     std::numeric_limits<std::uint32_t>::max();
 
-/**
- * Lower bound for the proper time of the hypersurface at which initial
- * conditions are extracted.
- * For collisions at RHIC/LHC energies, the default proper time (passing time of
- * the two nuclei), might get too small to extract reasonable initial
- * conditions.
- */
-constexpr double minimum_proper_time = 0.5;  // fm
-
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_CONSTANTS_H_

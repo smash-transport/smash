@@ -186,8 +186,10 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * - \b Initial_Conditions (Oscar1999, Oscar2013, binary, ROOT and special ASCII
  * IC (\ref IC_output_user_guide_) formats)\n
  *   \key Proper_Time (double, optional, default = nuclei passing time, if
- *                     > 0.5 fm, else Proper_Time = 0.5 fm): Proper
- *       time at which hypersurface is created \n
+ *   nuclei passing time > \key Lower_Bound, else \key Lower_Bound):
+ *   Proper time at which hypersurface is created \n
+ *   \key Lower_Bound (double, optional, default = 0.5 fm): Lower bound for the
+ *    IC proper time if \key Proper_Time is not provided.\n
  *   \key Extended (bool, optional, default = false, incompatible with
  *                  Oscar1999, ROOT and ASCII format):\n
  *   \li \key true - Print extended information for each particle
