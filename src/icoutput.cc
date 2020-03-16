@@ -151,11 +151,8 @@ void ICOutput::at_interaction(const Action &action, const double) {
                 (particle.momentum()[0] - particle.momentum()[3]));
 
   // Determine if particle is spectator:
-  // Fulfilled if particle is initial nucleon and has no prior interactions
-  bool is_spectator = (particle.id() <= 394 &&
-                       particle.get_history().collisions_per_particle == 0)
-                          ? true
-                          : false;
+  // Fulfilled if particle is initial nucleon, aka has no prior interactions
+  bool is_spectator = particle.get_history().collisions_per_particle == 0;
 
   // write particle data excluding spectators
   if (!is_spectator) {
