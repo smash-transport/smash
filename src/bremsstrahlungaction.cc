@@ -126,7 +126,9 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
   static const ParticleTypePtr pi_z_particle = &ParticleType::find(pdg::pi_z);
 
   // Create interpolation object, if not yet existent
-  if (pipi_interpolation == nullptr || pi0pi_interpolation == nullptr) {
+  if (pipi_opp_charge_interpolation == nullptr ||
+      pipi_same_charge_interpolation == nullptr ||
+      pi0pi_interpolation == nullptr) {
     create_interpolations();
   }
 
@@ -137,7 +139,7 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
   if (reac_ == ReactionType::pi_p_pi_m) {
     // In the case of two oppositely charged pions as incoming particles,
     // there are two potential final states: pi+ + pi- and pi0 + pi0
-    double xsection_pipi = (*pipi_interpolation)(sqrts);
+    double xsection_pipi = (*pipi_opp_charge_interpolation)(sqrts);
     double xsection_pi0pi0 = (*pi0pi_interpolation)(sqrts);
 
     // Necessary only to decide for a final state with pi+ and pi- as incoming
@@ -169,7 +171,7 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
 
   } else {
     if (reac_ == ReactionType::pi_m_pi_m || reac_ == ReactionType::pi_p_pi_p) {
-      xsection = (*pipi_interpolation)(sqrts);
+      xsection = (*pipi_same_charge_interpolation)(sqrts);
     } else if (reac_ == ReactionType::pi_z_pi_m ||
                reac_ == ReactionType::pi_z_pi_p) {
       xsection = (*pi0pi_interpolation)(sqrts);

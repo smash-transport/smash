@@ -162,15 +162,20 @@ class BremsstrahlungAction : public ScatterAction {
    */
   void create_interpolations() {
     // Read in tabularized cross section data (sqrt(s) and sigma)
-    std::vector<double> x_pipi = BREMS_PIPI_SQRTS;
-    std::vector<double> y_pipi = BREMS_PIPI_SIG;
+    std::vector<double> x_pipi_opp_charge = BREMS_PIPI_OPP_C_SQRTS;
+    std::vector<double> y_pipi_opp_charge = BREMS_PIPI_OPP_C_SIG;
+
+    std::vector<double> x_pipi_same_charge = BREMS_PIPI_SAME_C_SQRTS;
+    std::vector<double> y_pipi_same_charge = BREMS_PIPI_SAME_C_SIG;
 
     std::vector<double> x_pi0pi = BREMS_PI0PI_SQRTS;
     std::vector<double> y_pi0pi = BREMS_PI0PI_SIG;
 
     // Create interpolation object containing linear interpolations
-    pipi_interpolation =
-        make_unique<InterpolateDataLinear<double>>(x_pipi, y_pipi);
+    pipi_opp_charge_interpolation = make_unique<InterpolateDataLinear<double>>(
+        x_pipi_opp_charge, y_pipi_opp_charge);
+    pipi_same_charge_interpolation = make_unique<InterpolateDataLinear<double>>(
+        x_pipi_same_charge, y_pipi_same_charge);
     pi0pi_interpolation =
         make_unique<InterpolateDataLinear<double>>(x_pi0pi, y_pi0pi);
   }
