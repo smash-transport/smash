@@ -73,8 +73,8 @@ before_install:
     make -j$(nproc) &&
     cd ..
   # clang-format
-  - if [ $TRAVIS_OS_NAME = osx ]; then curl -# -o clang6_0_0.tar.xz http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
-   else  curl -# -o clang6_0_0.tar.xz http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz; fi &&
+  - if [ $TRAVIS_OS_NAME = osx ]; then curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
+   else  curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz; fi &&
    mkdir clang6_0_0 && tar -xf clang6_0_0.tar.xz -C clang6_0_0 --strip-components=1
   # gsl
   - wget http://ftpmirror.gnu.org/gsl/gsl-1.15.tar.gz &&
