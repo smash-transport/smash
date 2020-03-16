@@ -1889,8 +1889,8 @@ void Experiment<Modus>::intermediate_output() {
       initial_mean_field_energy_);
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   // save evolution data
-  // Pass the print function if t < equilibration time in the box modus
-  if (!(modus_.is_box() && parameters_.outputclock->current_time() < modus_.equilibration_time())){
+  if (!(modus_.is_box() && parameters_.outputclock->current_time() <
+        modus_.equilibration_time())){
     for (const auto &output : outputs_) {
       if (output->is_dilepton_output() || output->is_photon_output() ||
           output->is_IC_output()) {
