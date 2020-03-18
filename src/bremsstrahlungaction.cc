@@ -50,6 +50,9 @@ BremsstrahlungAction::bremsstrahlung_reaction_type(const ParticleList &in) {
     case (pack(pdg::pi_p, pdg::pi_p)):
       return ReactionType::pi_p_pi_p;
 
+    case (pack(pdg::pi_z, pdg::pi_z)):
+      return ReactionType::pi_z_pi_z;
+
     default:
       return ReactionType::no_reaction;
   }
@@ -124,6 +127,8 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
   static const ParticleTypePtr photon_particle =
       &ParticleType::find(pdg::photon);
   static const ParticleTypePtr pi_z_particle = &ParticleType::find(pdg::pi_z);
+  static const ParticleTypePtr pi_p_particle = &ParticleType::find(pdg::pi_p);
+  static const ParticleTypePtr pi_m_particle = &ParticleType::find(pdg::pi_m);
 
   // Create interpolation object, if not yet existent
   if (pipi_opp_charge_interpolation == nullptr ||
@@ -137,11 +142,21 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
   double xsection;
 
   if (reac_ == ReactionType::pi_p_pi_m) {
+    // Here the final state is determined by the the final state provided by the
+    // picked process
+
     // In the case of two oppositely charged pions as incoming particles,
     // there are two potential final states: pi+ + pi- and pi0 + pi0
     double xsection_pipi = (*pipi_opp_charge_interpolation)(sqrts);
-    double xsection_pi0pi0 = (*pi0pi_interpolation)(sqrts);
+    double xsection_pi0pi0 = (*pip_pim_pi0_pi0_interpolation)(sqrts);
 
+    if (xsection_pipi <= 0.0) {
+      xsection_pipi = really_small;
+    }
+
+    if (xsection_pi0pi0 <= 0.0) {
+      xsection_pi0pi0 = really_small;
+    }
     // Necessary only to decide for a final state with pi+ and pi- as incoming
     // particles.
     CollisionBranchList process_list_pipi;
@@ -162,30 +177,46 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
     xsection = proc->weight();
 
     if (xsection <= 0.0) {
-      xsection = 5.42204397e-06;
+      xsection = really_small;
     }
 
     process_list.push_back(make_unique<CollisionBranch>(
         proc->particle_list()[0].type(), proc->particle_list()[1].type(),
         *photon_particle, xsection, ProcessType::Bremsstrahlung));
 
-  } else {
+  } else if (reac_ == ReactionType::pi_m_pi_m ||
+             reac_ == ReactionType::pi_p_pi_p ||
+             reac_ == ReactionType::pi_z_pi_m ||
+             reac_ == ReactionType::pi_z_pi_p) {
+    // Here the final state hadrons are identical to the initial state hadrons
     if (reac_ == ReactionType::pi_m_pi_m || reac_ == ReactionType::pi_p_pi_p) {
       xsection = (*pipi_same_charge_interpolation)(sqrts);
-    } else if (reac_ == ReactionType::pi_z_pi_m ||
-               reac_ == ReactionType::pi_z_pi_p) {
-      xsection = (*pi0pi_interpolation)(sqrts);
     } else {
-      throw std::runtime_error("Unknown ReactionType in BremsstrahlungAction.");
+      // Pi0 in initial state
+      xsection = (*pi0pi_interpolation)(sqrts);
     }
 
     if (xsection <= 0.0) {
-      xsection = 5.42204397e-06;
+      xsection = really_small;
     }
 
     process_list.push_back(make_unique<CollisionBranch>(
         incoming_particles_[0].type(), incoming_particles_[1].type(),
         *photon_particle, xsection, ProcessType::Bremsstrahlung));
+
+  } else if (reac_ == ReactionType::pi_z_pi_z) {
+    // Here we have a hard-coded final state that differs from the initial
+    // state, namely: pi0 + pi0 -> pi+ + pi- + gamma
+    xsection = (*pi0_pi0_pip_pim_interpolation)(sqrts);
+
+    if (xsection <= 0.0) {
+      xsection = really_small;
+    }
+    process_list.push_back(make_unique<CollisionBranch>(
+        *pi_p_particle, *pi_m_particle, *photon_particle, xsection,
+        ProcessType::Bremsstrahlung));
+  } else {
+    throw std::runtime_error("Unknown ReactionType in BremsstrahlungAction.");
   }
 
   return process_list;

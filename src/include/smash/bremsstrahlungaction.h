@@ -102,7 +102,8 @@ class BremsstrahlungAction : public ScatterAction {
     pi_z_pi_p,
     pi_p_pi_m,
     pi_m_pi_m,
-    pi_p_pi_p
+    pi_p_pi_p,
+    pi_z_pi_z
   };
 
   /**
@@ -171,6 +172,12 @@ class BremsstrahlungAction : public ScatterAction {
     std::vector<double> x_pi0pi = BREMS_PI0PI_SQRTS;
     std::vector<double> y_pi0pi = BREMS_PI0PI_SIG;
 
+    std::vector<double> x_pipi_pi0pi0 = BREMS_PIP_PIM_PI0_PI0_SQRTS;
+    std::vector<double> y_pipi_pi0pi0 = BREMS_PIP_PIM_PI0_PI0_SIG;
+
+    std::vector<double> x_pi0pi0_pipi = BREMS_PI0_PI0_PIP_PIM_SQRTS;
+    std::vector<double> y_pi0pi0_pipi = BREMS_PI0_PI0_PIP_PIM_SIG;
+
     // Create interpolation object containing linear interpolations
     pipi_opp_charge_interpolation = make_unique<InterpolateDataLinear<double>>(
         x_pipi_opp_charge, y_pipi_opp_charge);
@@ -178,6 +185,10 @@ class BremsstrahlungAction : public ScatterAction {
         x_pipi_same_charge, y_pipi_same_charge);
     pi0pi_interpolation =
         make_unique<InterpolateDataLinear<double>>(x_pi0pi, y_pi0pi);
+    pip_pim_pi0_pi0_interpolation = make_unique<InterpolateDataLinear<double>>(
+        x_pipi_pi0pi0, y_pipi_pi0pi0);
+    pi0_pi0_pip_pim_interpolation = make_unique<InterpolateDataLinear<double>>(
+        x_pi0pi0_pipi, y_pi0pi0_pipi);
   }
 
   /**
