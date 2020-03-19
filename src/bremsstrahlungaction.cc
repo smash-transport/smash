@@ -89,9 +89,11 @@ void BremsstrahlungAction::generate_final_state() {
   FourVector interaction_point = get_interaction_point();
 
   // Sample k and theta:
-  double k_max = sqrt_s() - outgoing_particles_[0].type().mass() -
-                 outgoing_particles_[1].type().mass();
-  k_ = random::uniform(0.0, k_max);
+  double k_max =
+      (sqrt_s() * sqrt_s() - 2 * outgoing_particles_[0].type().mass() * 2 *
+                                 outgoing_particles_[1].type().mass()) /
+      (2 * sqrt_s());
+  k_ = random::uniform(0.001, k_max);
   theta_ = random::uniform(0.0, M_PI);
 
   // Sample the phase space anisotropically in the local rest frame
