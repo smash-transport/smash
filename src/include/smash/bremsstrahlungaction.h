@@ -55,6 +55,13 @@ class BremsstrahlungAction : public ScatterAction {
   void generate_final_state() override;
 
   /**
+   * We want to sample the final state anisotropically, considering the
+   * differential cross sections with respect to theta and k. The overwritten
+   * function from the mother class would sample the final state isotropically.
+   */
+  void sample_3body_phasespace() override;
+
+  /**
    * Return the weight of the last created photon.
    *
    * \return The total weight.
@@ -154,6 +161,12 @@ class BremsstrahlungAction : public ScatterAction {
 
   /// Total hadronic cross section
   const double hadronic_cross_section_;
+
+  /// Sampled value of k (photon momentum)
+  double k_;
+
+  /// Sampled value of theta (angle of the photon)
+  double theta_;
 
   /**
    * Create interpolation objects for tabularized cross sections. There are only

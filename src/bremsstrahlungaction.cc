@@ -10,6 +10,7 @@
 #include "smash/bremsstrahlungaction.h"
 
 #include "smash/outputinterface.h"
+#include "smash/random.h"
 
 namespace smash {
 static constexpr int LScatterAction = LogArea::ScatterAction::id;
@@ -87,8 +88,28 @@ void BremsstrahlungAction::generate_final_state() {
   process_type_ = proc->get_type();
   FourVector interaction_point = get_interaction_point();
 
-  // This samples the phase space isotropically in the local rest frame
+  // Sample k and theta:
+  double k_max = sqrt_s() - outgoing_particles_[0].type().mass() -
+                 outgoing_particles_[1].type().mass();
+  k_ = random::uniform(0.0, k_max);
+  theta_ = random::uniform(0.0, M_PI);
+
+  // Sample the phase space anisotropically in the local rest frame
   sample_3body_phasespace();
+
+  if (number_of_fractional_photons_ > 1) {
+    // Find the differential cross sections dSigma/dTheta and dSigma/dk
+    const double diff_xs_theta = 2.0;
+    const double diff_xs_k = 2.0;
+
+    // Assign weighting factor
+    const double W_theta = diff_xs_theta * (M_PI - 0.0);
+    const double W_k = diff_xs_k * (k_max - 0.0);
+    weight_ = sqrt(W_theta * W_k) /
+              (number_of_fractional_photons_ * hadronic_cross_section());
+  } else {
+    weight_ = proc->weight() / hadronic_cross_section();
+  }
 
   // Set position and formation time and boost back to computational frame
   for (auto &new_particle : outgoing_particles_) {
@@ -99,18 +120,37 @@ void BremsstrahlungAction::generate_final_state() {
         -total_momentum_of_outgoing_particles().velocity());
   }
 
-  // Weighing of the fractional photons
-  if (number_of_fractional_photons_ > 1) {
-    throw std::runtime_error(
-        "Fractional photons currently not implemented for bremsstrahlung.");
-  } else {
-    weight_ = proc->weight() / hadronic_cross_section();
-  }
-
   // Photons are not really part of the normal processes, so we have to set a
   // constant arbitrary number.
   const auto id_process = ID_PROCESS_PHOTON;
   Action::check_conservation(id_process);
+}
+
+void BremsstrahlungAction::sample_3body_phasespace() {
+  assert(outgoing_part.size() == 3);
+  const double m_a = outgoing_particles_[0].type().mass(),
+               m_b = outgoing_particles_[1].type().mass(),
+               m_c = outgoing_particles_[2].type().mass();
+
+  const double sqrts = sqrt_s();
+  const double E_ab = sqrts - m_c - k_;  // Ekin of the pion pair in cm frame
+  const double pcm =
+      pCM(sqrts, E_ab, m_c);  // cm momentum of (pion pair - photon)
+  const double pcm_pions = pCM(E_ab, m_a, m_b);  // cm momentum within pion pair
+
+  // Photon angle: Phi random, theta from theta_ sampled above
+  const Angles phitheta_photon(random::uniform(0.0, twopi), std::cos(theta_));
+  outgoing_particles_[2].set_4momentum(m_c, pcm * phitheta_photon.threevec());
+  const ThreeVector beta_cm =
+      pcm * phitheta_photon.threevec() / std::sqrt(pcm * pcm + E_ab * E_ab);
+
+  // Sample pion pair isotropically
+  Angles phitheta;
+  phitheta.distribute_isotropically();
+  outgoing_particles_[0].set_4momentum(m_a, pcm_pions * phitheta.threevec());
+  outgoing_particles_[1].set_4momentum(m_b, -pcm_pions * phitheta.threevec());
+  outgoing_particles_[0].boost_momentum(beta_cm);
+  outgoing_particles_[1].boost_momentum(beta_cm);
 }
 
 void BremsstrahlungAction::add_dummy_hadronic_process(
