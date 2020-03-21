@@ -12,6 +12,8 @@
 #include "smash/outputinterface.h"
 #include "smash/random.h"
 
+#include "smash/interpolation2D.h"
+
 namespace smash {
 static constexpr int LScatterAction = LogArea::ScatterAction::id;
 
@@ -99,10 +101,30 @@ void BremsstrahlungAction::generate_final_state() {
   // Sample the phase space anisotropically in the local rest frame
   sample_3body_phasespace();
 
+  // ToDo: Update implementation and saveguards if sqrts, k, theta are out of
+  // range
   if (number_of_fractional_photons_ > 1) {
-    // Find the differential cross sections dSigma/dTheta and dSigma/dk
-    const double diff_xs_theta = 2.0;
-    const double diff_xs_k = 2.0;
+    double diff_xs_theta = 0.0;
+    double diff_xs_k = 0.0;
+    if (reac_ == ReactionType::pi_m_pi_m || reac_ == ReactionType::pi_p_pi_p) {
+      double energy;
+
+      if (sqrt_s() < 0.3) {
+        energy = 0.3;
+      } else if (sqrt_s() > 1.99) {
+        energy = 1.99;
+      } else {
+        energy = sqrt_s();
+      }
+
+      double photon_mom = (k_ > 1.0) ? 1.0 : k_;
+      double theta_val = (theta_ > 3.14159) ? 3.14159 : theta_;
+
+      diff_xs_k =
+          (*pipi_same_charge_interpolation_diff_sigma_k)(photon_mom, energy);
+      diff_xs_theta =
+          (*pipi_same_charge_interpolation_diff_sigma_theta)(theta_val, energy);
+    }
 
     // Assign weighting factor
     const double W_theta = diff_xs_theta * (M_PI - 0.0);

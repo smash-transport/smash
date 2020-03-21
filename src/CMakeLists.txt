@@ -140,6 +140,7 @@ set(smash_src
         icoutput.cc
         inputfunctions.cc
         interpolation.cc
+        interpolation2D.cc
         isoparticletype.cc
         listmodus.cc
         logging.cc
