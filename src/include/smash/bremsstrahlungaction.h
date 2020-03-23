@@ -148,8 +148,8 @@ class BremsstrahlungAction : public ScatterAction {
 
   /**
    * Number of photons created for each hadronic scattering, needed for correct
-   * weighting. Note that in generate_final_state() only one photon + hadron is
-   * created.
+   * weighting. Note that in generate_final_state() only one photon + two pions
+   * are created.
    */
   const int number_of_fractional_photons_;
 
@@ -169,53 +169,86 @@ class BremsstrahlungAction : public ScatterAction {
   double theta_;
 
   /**
-   * Create interpolation objects for tabularized cross sections. There are only
-   * two channels; one involving two charged pions (marked pipi) and one
-   * involving a charged and a neutral pion (marked pi0pi). All other cross
-   * sections can be determined from crossing symmetries.
+   * Create interpolation objects for tabularized cross sections:
+   * total cross section, differential dSigma/dk, differential dSigma/dtheta
    */
   void create_interpolations() {
-    // Read in tabularized cross section data (sqrt(s) and sigma)
-    std::vector<double> x_pipi_opp_charge = BREMS_PIPI_OPP_C_SQRTS;
-    std::vector<double> y_pipi_opp_charge = BREMS_PIPI_OPP_C_SIG;
+    // Read in tabularized values for sqrt(s), k and theta
+    std::vector<double> sqrts = BREMS_SQRTS;
+    std::vector<double> photon_momentum = BREMS_K;
+    std::vector<double> photon_angle = BREMS_THETA;
 
-    std::vector<double> x_pipi_same_charge = BREMS_PIPI_SAME_C_SQRTS;
-    std::vector<double> y_pipi_same_charge = BREMS_PIPI_SAME_C_SIG;
+    // Read in tabularized total cross sections
+    std::vector<double> sigma_pipi_pipi_opp = BREMS_PIPI_PIPI_OPP_SIG;
+    std::vector<double> sigma_pipi_pipi_same = BREMS_PIPI_PIPI_SAME_SIG;
+    std::vector<double> sigma_pipi0_pipi0 = BREMS_PIPI0_PIPI0_SIG;
+    std::vector<double> sigma_pipi_pi0pi0 = BREMS_PIPI_PI0PI0_SIG;
+    std::vector<double> sigma_pi0pi0_pipi = BREMS_PI0PI0_PIPI_SIG;
 
-    std::vector<double> x_pi0pi = BREMS_PI0PI_SQRTS;
-    std::vector<double> y_pi0pi = BREMS_PI0PI_SIG;
+    // Read in tabularized differential cross sections dSigma/dk
+    std::vector<double> dsigma_dk_pipi_pipi_opp =
+        BREMS_PIPI_PIPI_OPP_DIFF_SIG_K;
+    std::vector<double> dsigma_dk_pipi_pipi_same =
+        BREMS_PIPI_PIPI_SAME_DIFF_SIG_K;
+    std::vector<double> dsigma_dk_pipi0_pipi0 = BREMS_PIPI0_PIPI0_DIFF_SIG_K;
+    std::vector<double> dsigma_dk_pipi_pi0pi0 = BREMS_PIPI_PI0PI0_DIFF_SIG_K;
+    std::vector<double> dsigma_dk_pi0pi0_pipi = BREMS_PI0PI0_PIPI_DIFF_SIG_K;
 
-    std::vector<double> x_pipi_pi0pi0 = BREMS_PIP_PIM_PI0_PI0_SQRTS;
-    std::vector<double> y_pipi_pi0pi0 = BREMS_PIP_PIM_PI0_PI0_SIG;
+    // Read in tabularized differential cross sections dSigma/dtheta
+    std::vector<double> dsigma_dtheta_pipi_pipi_opp =
+        BREMS_PIPI_PIPI_OPP_DIFF_SIG_THETA;
+    std::vector<double> dsigma_dtheta_pipi_pipi_same =
+        BREMS_PIPI_PIPI_SAME_DIFF_SIG_THETA;
+    std::vector<double> dsigma_dtheta_pipi0_pipi0 =
+        BREMS_PIPI0_PIPI0_DIFF_SIG_THETA;
+    std::vector<double> dsigma_dtheta_pipi_pi0pi0 =
+        BREMS_PIPI_PI0PI0_DIFF_SIG_THETA;
+    std::vector<double> dsigma_dtheta_pi0pi0_pipi =
+        BREMS_PI0PI0_PIPI_DIFF_SIG_THETA;
 
-    std::vector<double> x_pi0pi0_pipi = BREMS_PI0_PI0_PIP_PIM_SQRTS;
-    std::vector<double> y_pi0pi0_pipi = BREMS_PI0_PI0_PIP_PIM_SIG;
+    // Create interpolation objects containing linear interpolations for
+    // total cross sections
+    pipi_pipi_opp_interpolation =
+        make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi_pipi_opp);
+    pipi_pipi_same_interpolation =
+        make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi_pipi_same);
+    pipi0_pipi0_interpolation =
+        make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi0_pipi0);
+    pipi_pi0pi0_interpolation =
+        make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi_pi0pi0);
+    pi0pi0_pipi_interpolation =
+        make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pi0pi0_pipi);
 
-    // Create interpolation object containing linear interpolations
-    pipi_opp_charge_interpolation = make_unique<InterpolateDataLinear<double>>(
-        x_pipi_opp_charge, y_pipi_opp_charge);
-    pipi_same_charge_interpolation = make_unique<InterpolateDataLinear<double>>(
-        x_pipi_same_charge, y_pipi_same_charge);
-    pi0pi_interpolation =
-        make_unique<InterpolateDataLinear<double>>(x_pi0pi, y_pi0pi);
-    pip_pim_pi0_pi0_interpolation = make_unique<InterpolateDataLinear<double>>(
-        x_pipi_pi0pi0, y_pipi_pi0pi0);
-    pi0_pi0_pip_pim_interpolation = make_unique<InterpolateDataLinear<double>>(
-        x_pi0pi0_pipi, y_pi0pi0_pipi);
+    // Create interpolation objects containing bicubic interpolations for
+    // differential dSigma/dk
+    pipi_pipi_opp_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
+        photon_momentum, sqrts, dsigma_dk_pipi_pipi_opp);
+    pipi_pipi_same_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
+        photon_momentum, sqrts, dsigma_dk_pipi_pipi_same);
+    pipi0_pipi0_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
+        photon_momentum, sqrts, dsigma_dk_pipi0_pipi0);
+    pipi_pi0pi0_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
+        photon_momentum, sqrts, dsigma_dk_pipi_pi0pi0);
+    pi0pi0_pipi_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
+        photon_momentum, sqrts, dsigma_dk_pi0pi0_pipi);
 
-    std::vector<double> sqrts_vec = BREMS_PIPI_SAME_C_SQRTS;
-    std::vector<double> k_vec = BREMS_PIPI_SAME_C_K;
-    std::vector<double> theta_vec = BREMS_PIPI_SAME_C_THETA;
-    std::vector<double> diff_sigma_vec_k = BREMS_PIPI_SAME_C_DIFF_SIG_K;
-    std::vector<double> diff_sigma_vec_theta = BREMS_PIPI_SAME_C_DIFF_SIG_THETA;
-
-    pipi_same_charge_interpolation_diff_sigma_k =
-        make_unique<InterpolateData2DSpline>(k_vec, sqrts_vec,
-                                             diff_sigma_vec_k);
-
-    pipi_same_charge_interpolation_diff_sigma_theta =
-        make_unique<InterpolateData2DSpline>(theta_vec, sqrts_vec,
-                                             diff_sigma_vec_theta);
+    // Create interpolation objects containing bicubic interpolations for
+    // differential dSigma/dtheta
+    pipi_pipi_opp_dsigma_dtheta_interpolation =
+        make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
+                                             dsigma_dtheta_pipi_pipi_opp);
+    pipi_pipi_same_dsigma_dtheta_interpolation =
+        make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
+                                             dsigma_dtheta_pipi_pipi_same);
+    pipi0_pipi0_dsigma_dtheta_interpolation =
+        make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
+                                             dsigma_dtheta_pipi0_pipi0);
+    pipi_pi0pi0_dsigma_dtheta_interpolation =
+        make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
+                                             dsigma_dtheta_pipi_pi0pi0);
+    pi0pi0_pipi_dsigma_dtheta_interpolation =
+        make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
+                                             dsigma_dtheta_pi0pi0_pipi);
   }
 
   /**
@@ -224,6 +257,22 @@ class BremsstrahlungAction : public ScatterAction {
    * \returns List of photon reaction branches.
    */
   CollisionBranchList brems_cross_sections();
+
+  /**
+   * Computes the differential cross section digma/dk of the bremsstrahlung
+   * process.
+   *
+   * \returns Value of the differential cross section.
+   */
+  double brems_dsigma_dk();
+
+  /**
+   * Computes the differential cross section digma/dtheta of the bremsstrahlung
+   * process.
+   *
+   * \returns Value of the differential cross section.
+   */
+  double brems_dsigma_dtheta();
 };
 
 }  // namespace smash

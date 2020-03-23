@@ -101,24 +101,9 @@ void BremsstrahlungAction::generate_final_state() {
   // Sample the phase space anisotropically in the local rest frame
   sample_3body_phasespace();
 
-  // ToDo: Update implementation and saveguards if sqrts, k, theta are out of
-  // range
   if (number_of_fractional_photons_ > 1) {
-    double diff_xs_theta = 0.0;
-    double diff_xs_k = 0.0;
-    double energy = sqrt_s();
-    if (reac_ == ReactionType::pi_m_pi_m || reac_ == ReactionType::pi_p_pi_p) {
-      diff_xs_k = (*pipi_same_charge_interpolation_diff_sigma_k)(k_, energy);
-      diff_xs_theta =
-          (*pipi_same_charge_interpolation_diff_sigma_theta)(theta_, energy);
-      if (diff_xs_k < 0.0) {
-        diff_xs_k = really_small;
-      }
-
-      if (diff_xs_theta < 0.0) {
-        diff_xs_theta = really_small;
-      }
-    }
+    double diff_xs_k = brems_dsigma_dk();
+    double diff_xs_theta = brems_dsigma_dtheta();
 
     // Assign weighting factor
     const double W_theta = diff_xs_theta * (M_PI - 0.0);
@@ -188,10 +173,9 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
   static const ParticleTypePtr pi_p_particle = &ParticleType::find(pdg::pi_p);
   static const ParticleTypePtr pi_m_particle = &ParticleType::find(pdg::pi_m);
 
-  // Create interpolation object, if not yet existent
-  if (pipi_opp_charge_interpolation == nullptr ||
-      pipi_same_charge_interpolation == nullptr ||
-      pi0pi_interpolation == nullptr) {
+  // Create interpolation objects, if not yet existent; only trigger for one
+  // of them as either all or none is created
+  if (pi0pi0_pipi_dsigma_dtheta_interpolation == nullptr) {
     create_interpolations();
   }
 
@@ -201,20 +185,17 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
 
   if (reac_ == ReactionType::pi_p_pi_m) {
     // Here the final state is determined by the the final state provided by the
-    // picked process
+    // sampled process using Monte Carlo techniqus
 
     // In the case of two oppositely charged pions as incoming particles,
     // there are two potential final states: pi+ + pi- and pi0 + pi0
-    double xsection_pipi = (*pipi_opp_charge_interpolation)(sqrts);
-    double xsection_pi0pi0 = (*pip_pim_pi0_pi0_interpolation)(sqrts);
+    double xsection_pipi = (*pipi_pipi_opp_interpolation)(sqrts);
+    double xsection_pi0pi0 = (*pipi_pi0pi0_interpolation)(sqrts);
 
-    if (xsection_pipi <= 0.0) {
-      xsection_pipi = really_small;
-    }
+    // Prevent negative cross sections due to numerics in interpolation
+    xsection_pipi = (xsection_pipi <= 0.0) ? really_small : xsection_pipi;
+    xsection_pi0pi0 = (xsection_pi0pi0 <= 0.0) ? really_small : xsection_pi0pi0;
 
-    if (xsection_pi0pi0 <= 0.0) {
-      xsection_pi0pi0 = really_small;
-    }
     // Necessary only to decide for a final state with pi+ and pi- as incoming
     // particles.
     CollisionBranchList process_list_pipi;
@@ -234,10 +215,6 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
 
     xsection = proc->weight();
 
-    if (xsection <= 0.0) {
-      xsection = really_small;
-    }
-
     process_list.push_back(make_unique<CollisionBranch>(
         proc->particle_list()[0].type(), proc->particle_list()[1].type(),
         *photon_particle, xsection, ProcessType::Bremsstrahlung));
@@ -248,15 +225,14 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
              reac_ == ReactionType::pi_z_pi_p) {
     // Here the final state hadrons are identical to the initial state hadrons
     if (reac_ == ReactionType::pi_m_pi_m || reac_ == ReactionType::pi_p_pi_p) {
-      xsection = (*pipi_same_charge_interpolation)(sqrts);
+      xsection = (*pipi_pipi_same_interpolation)(sqrts);
     } else {
-      // Pi0 in initial state
-      xsection = (*pi0pi_interpolation)(sqrts);
+      // One pi0 in initial and final state
+      xsection = (*pipi0_pipi0_interpolation)(sqrts);
     }
 
-    if (xsection <= 0.0) {
-      xsection = really_small;
-    }
+    // Prevent negative cross sections due to numerics in interpolation
+    xsection = (xsection <= 0.0) ? really_small : xsection;
 
     process_list.push_back(make_unique<CollisionBranch>(
         incoming_particles_[0].type(), incoming_particles_[1].type(),
@@ -264,12 +240,12 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
 
   } else if (reac_ == ReactionType::pi_z_pi_z) {
     // Here we have a hard-coded final state that differs from the initial
-    // state, namely: pi0 + pi0 -> pi+ + pi- + gamma
-    xsection = (*pi0_pi0_pip_pim_interpolation)(sqrts);
+    // state, namely: pi0 + pi0 -> pi+- + pi-+ + gamma
+    xsection = (*pi0pi0_pipi_interpolation)(sqrts);
 
-    if (xsection <= 0.0) {
-      xsection = really_small;
-    }
+    // Prevent negative cross sections due to numerics in interpolation
+    xsection = (xsection <= 0.0) ? really_small : xsection;
+
     process_list.push_back(make_unique<CollisionBranch>(
         *pi_p_particle, *pi_m_particle, *photon_particle, xsection,
         ProcessType::Bremsstrahlung));
@@ -278,6 +254,78 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
   }
 
   return process_list;
+}
+
+double BremsstrahlungAction::brems_dsigma_dk() {
+  static const ParticleTypePtr pi_z_particle = &ParticleType::find(pdg::pi_z);
+  const double collision_energy = sqrt_s();
+  double dsigma_dk;
+
+  if (reac_ == ReactionType::pi_p_pi_m) {
+    if (outgoing_particles_[0].type() != *pi_z_particle) {
+      // pi+- + pi+-- -> pi+- + pi+- + gamma
+      dsigma_dk =
+          (*pipi_pipi_opp_dsigma_dk_interpolation)(k_, collision_energy);
+    } else {
+      // pi+- + pi+-- -> pi0 + pi0 + gamma
+      dsigma_dk = (*pipi_pi0pi0_dsigma_dk_interpolation)(k_, collision_energy);
+    }
+  } else if (reac_ == ReactionType::pi_p_pi_p ||
+             reac_ == ReactionType::pi_m_pi_m) {
+    dsigma_dk = (*pipi_pipi_same_dsigma_dk_interpolation)(k_, collision_energy);
+  } else if (reac_ == ReactionType::pi_z_pi_p ||
+             reac_ == ReactionType::pi_z_pi_m) {
+    dsigma_dk = (*pipi0_pipi0_dsigma_dk_interpolation)(k_, collision_energy);
+  } else if (reac_ == ReactionType::pi_z_pi_z) {
+    dsigma_dk = (*pi0pi0_pipi_dsigma_dk_interpolation)(k_, collision_energy);
+  } else {
+    throw std::runtime_error(
+        "Unkown channel when computing dSigma/dk for Bremsstrahlung "
+        "processes.");
+  }
+
+  // Prevent negative cross sections due to numerics in interpolation
+  dsigma_dk = (dsigma_dk < 0.0) ? really_small : dsigma_dk;
+
+  return dsigma_dk;
+}
+
+double BremsstrahlungAction::brems_dsigma_dtheta() {
+  static const ParticleTypePtr pi_z_particle = &ParticleType::find(pdg::pi_z);
+  const double collision_energy = sqrt_s();
+  double dsigma_dtheta;
+
+  if (reac_ == ReactionType::pi_p_pi_m) {
+    if (outgoing_particles_[0].type() != *pi_z_particle) {
+      // pi+- + pi+-- -> pi+- + pi+- + gamma
+      dsigma_dtheta = (*pipi_pipi_opp_dsigma_dtheta_interpolation)(
+          theta_, collision_energy);
+    } else {
+      // pi+- + pi+-- -> pi0 + pi0 + gamma
+      dsigma_dtheta =
+          (*pipi_pi0pi0_dsigma_dtheta_interpolation)(theta_, collision_energy);
+    }
+  } else if (reac_ == ReactionType::pi_p_pi_p ||
+             reac_ == ReactionType::pi_m_pi_m) {
+    dsigma_dtheta =
+        (*pipi_pipi_same_dsigma_dtheta_interpolation)(theta_, collision_energy);
+  } else if (reac_ == ReactionType::pi_z_pi_p ||
+             reac_ == ReactionType::pi_z_pi_m) {
+    dsigma_dtheta =
+        (*pipi0_pipi0_dsigma_dtheta_interpolation)(theta_, collision_energy);
+  } else if (reac_ == ReactionType::pi_z_pi_z) {
+    dsigma_dtheta =
+        (*pi0pi0_pipi_dsigma_dtheta_interpolation)(theta_, collision_energy);
+  } else {
+    throw std::runtime_error(
+        "Unkown channel when computing dSigma/dk for Bremsstrahlung "
+        "processes.");
+  }
+
+  // Prevent negative cross sections due to numerics in interpolation
+  dsigma_dtheta = (dsigma_dtheta < 0.0) ? really_small : dsigma_dtheta;
+
+  return dsigma_dtheta;
 }
 
 }  // namespace smash
