@@ -15,8 +15,8 @@ namespace smash {
 InterpolateData2DSpline::InterpolateData2DSpline(const std::vector<double>& x,
                                                  const std::vector<double>& y,
                                                  const std::vector<double>& z) {
-  const int M = x.size();
-  const int N = y.size();
+  const size_t M = x.size();
+  const size_t N = y.size();
 
   if (z.size() != N * M) {
     throw std::runtime_error(
