@@ -203,15 +203,19 @@ class BremsstrahlungAction : public ScatterAction {
     pi0_pi0_pip_pim_interpolation = make_unique<InterpolateDataLinear<double>>(
         x_pi0pi0_pipi, y_pi0pi0_pipi);
 
+    std::vector<double> sqrts_vec = BREMS_PIPI_SAME_C_SQRTS;
+    std::vector<double> k_vec = BREMS_PIPI_SAME_C_K;
+    std::vector<double> theta_vec = BREMS_PIPI_SAME_C_THETA;
+    std::vector<double> diff_sigma_vec_k = BREMS_PIPI_SAME_C_DIFF_SIG_K;
+    std::vector<double> diff_sigma_vec_theta = BREMS_PIPI_SAME_C_DIFF_SIG_THETA;
+
     pipi_same_charge_interpolation_diff_sigma_k =
-        make_unique<InterpolateData2DSpline>(
-            BREMS_PIPI_SAME_C_SQRTS_VEC, BREMS_PIPI_SAME_C_K,
-            BREMS_PIPI_SAME_C_DIFF_SIG_K, 170, 100);
+        make_unique<InterpolateData2DSpline>(k_vec, sqrts_vec,
+                                             diff_sigma_vec_k);
 
     pipi_same_charge_interpolation_diff_sigma_theta =
-        make_unique<InterpolateData2DSpline>(
-            BREMS_PIPI_SAME_C_SQRTS_VEC, BREMS_PIPI_SAME_C_THETA,
-            BREMS_PIPI_SAME_C_DIFF_SIG_THETA, 170, 80);
+        make_unique<InterpolateData2DSpline>(theta_vec, sqrts_vec,
+                                             diff_sigma_vec_theta);
   }
 
   /**

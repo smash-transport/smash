@@ -59,7 +59,7 @@ BremsstrahlungAction::bremsstrahlung_reaction_type(const ParticleList &in) {
     default:
       return ReactionType::no_reaction;
   }
-};
+}
 
 void BremsstrahlungAction::perform_bremsstrahlung(const OutputsList &outputs) {
   for (int i = 0; i < number_of_fractional_photons_; i++) {
@@ -71,7 +71,7 @@ void BremsstrahlungAction::perform_bremsstrahlung(const OutputsList &outputs) {
       }
     }
   }
-};
+}
 
 void BremsstrahlungAction::generate_final_state() {
   // we have only one reaction per incoming particle pair
@@ -106,24 +106,18 @@ void BremsstrahlungAction::generate_final_state() {
   if (number_of_fractional_photons_ > 1) {
     double diff_xs_theta = 0.0;
     double diff_xs_k = 0.0;
+    double energy = sqrt_s();
     if (reac_ == ReactionType::pi_m_pi_m || reac_ == ReactionType::pi_p_pi_p) {
-      double energy;
-
-      if (sqrt_s() < 0.3) {
-        energy = 0.3;
-      } else if (sqrt_s() > 1.99) {
-        energy = 1.99;
-      } else {
-        energy = sqrt_s();
+      diff_xs_k = (*pipi_same_charge_interpolation_diff_sigma_k)(k_, energy);
+      diff_xs_theta =
+          (*pipi_same_charge_interpolation_diff_sigma_theta)(theta_, energy);
+      if (diff_xs_k < 0.0) {
+        diff_xs_k = really_small;
       }
 
-      double photon_mom = (k_ > 1.0) ? 1.0 : k_;
-      double theta_val = (theta_ > 3.14159) ? 3.14159 : theta_;
-
-      diff_xs_k =
-          (*pipi_same_charge_interpolation_diff_sigma_k)(photon_mom, energy);
-      diff_xs_theta =
-          (*pipi_same_charge_interpolation_diff_sigma_theta)(theta_val, energy);
+      if (diff_xs_theta < 0.0) {
+        diff_xs_theta = really_small;
+      }
     }
 
     // Assign weighting factor
@@ -284,6 +278,6 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
   }
 
   return process_list;
-};
+}
 
 }  // namespace smash
