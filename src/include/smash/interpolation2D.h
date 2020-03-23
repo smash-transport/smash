@@ -41,8 +41,8 @@ class InterpolateData2DSpline {
   /**
    * Calculate bicubic interpolation for given x and y.
    *
-   *  \param x Interpolation argument in first dimension.
-   *  \param y Interpolation argument in second dimension.
+   *  \param xi Interpolation argument in first dimension.
+   *  \param yi Interpolation argument in second dimension.
    *  \return Interpolated value.
    */
   double operator()(double xi, double yi) const;

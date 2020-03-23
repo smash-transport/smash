@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016-2019
+ *    Copyright (c) 2020 -
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,8 +11,6 @@
 #define SRC_INCLUDE_BREMSSTRAHLUNG_H_
 
 #include "scatteraction.h"
-
-#include "smash/crosssectionsbrems.h"
 
 namespace smash {
 /**
@@ -172,84 +170,7 @@ class BremsstrahlungAction : public ScatterAction {
    * Create interpolation objects for tabularized cross sections:
    * total cross section, differential dSigma/dk, differential dSigma/dtheta
    */
-  void create_interpolations() {
-    // Read in tabularized values for sqrt(s), k and theta
-    std::vector<double> sqrts = BREMS_SQRTS;
-    std::vector<double> photon_momentum = BREMS_K;
-    std::vector<double> photon_angle = BREMS_THETA;
-
-    // Read in tabularized total cross sections
-    std::vector<double> sigma_pipi_pipi_opp = BREMS_PIPI_PIPI_OPP_SIG;
-    std::vector<double> sigma_pipi_pipi_same = BREMS_PIPI_PIPI_SAME_SIG;
-    std::vector<double> sigma_pipi0_pipi0 = BREMS_PIPI0_PIPI0_SIG;
-    std::vector<double> sigma_pipi_pi0pi0 = BREMS_PIPI_PI0PI0_SIG;
-    std::vector<double> sigma_pi0pi0_pipi = BREMS_PI0PI0_PIPI_SIG;
-
-    // Read in tabularized differential cross sections dSigma/dk
-    std::vector<double> dsigma_dk_pipi_pipi_opp =
-        BREMS_PIPI_PIPI_OPP_DIFF_SIG_K;
-    std::vector<double> dsigma_dk_pipi_pipi_same =
-        BREMS_PIPI_PIPI_SAME_DIFF_SIG_K;
-    std::vector<double> dsigma_dk_pipi0_pipi0 = BREMS_PIPI0_PIPI0_DIFF_SIG_K;
-    std::vector<double> dsigma_dk_pipi_pi0pi0 = BREMS_PIPI_PI0PI0_DIFF_SIG_K;
-    std::vector<double> dsigma_dk_pi0pi0_pipi = BREMS_PI0PI0_PIPI_DIFF_SIG_K;
-
-    // Read in tabularized differential cross sections dSigma/dtheta
-    std::vector<double> dsigma_dtheta_pipi_pipi_opp =
-        BREMS_PIPI_PIPI_OPP_DIFF_SIG_THETA;
-    std::vector<double> dsigma_dtheta_pipi_pipi_same =
-        BREMS_PIPI_PIPI_SAME_DIFF_SIG_THETA;
-    std::vector<double> dsigma_dtheta_pipi0_pipi0 =
-        BREMS_PIPI0_PIPI0_DIFF_SIG_THETA;
-    std::vector<double> dsigma_dtheta_pipi_pi0pi0 =
-        BREMS_PIPI_PI0PI0_DIFF_SIG_THETA;
-    std::vector<double> dsigma_dtheta_pi0pi0_pipi =
-        BREMS_PI0PI0_PIPI_DIFF_SIG_THETA;
-
-    // Create interpolation objects containing linear interpolations for
-    // total cross sections
-    pipi_pipi_opp_interpolation =
-        make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi_pipi_opp);
-    pipi_pipi_same_interpolation =
-        make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi_pipi_same);
-    pipi0_pipi0_interpolation =
-        make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi0_pipi0);
-    pipi_pi0pi0_interpolation =
-        make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi_pi0pi0);
-    pi0pi0_pipi_interpolation =
-        make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pi0pi0_pipi);
-
-    // Create interpolation objects containing bicubic interpolations for
-    // differential dSigma/dk
-    pipi_pipi_opp_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
-        photon_momentum, sqrts, dsigma_dk_pipi_pipi_opp);
-    pipi_pipi_same_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
-        photon_momentum, sqrts, dsigma_dk_pipi_pipi_same);
-    pipi0_pipi0_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
-        photon_momentum, sqrts, dsigma_dk_pipi0_pipi0);
-    pipi_pi0pi0_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
-        photon_momentum, sqrts, dsigma_dk_pipi_pi0pi0);
-    pi0pi0_pipi_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
-        photon_momentum, sqrts, dsigma_dk_pi0pi0_pipi);
-
-    // Create interpolation objects containing bicubic interpolations for
-    // differential dSigma/dtheta
-    pipi_pipi_opp_dsigma_dtheta_interpolation =
-        make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                             dsigma_dtheta_pipi_pipi_opp);
-    pipi_pipi_same_dsigma_dtheta_interpolation =
-        make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                             dsigma_dtheta_pipi_pipi_same);
-    pipi0_pipi0_dsigma_dtheta_interpolation =
-        make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                             dsigma_dtheta_pipi0_pipi0);
-    pipi_pi0pi0_dsigma_dtheta_interpolation =
-        make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                             dsigma_dtheta_pipi_pi0pi0);
-    pi0pi0_pipi_dsigma_dtheta_interpolation =
-        make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                             dsigma_dtheta_pi0pi0_pipi);
-  }
+  void create_interpolations();
 
   /**
    * Computes the total cross section of the bremsstrahlung process.
