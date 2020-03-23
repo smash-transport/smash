@@ -193,7 +193,9 @@ enum class CollisionCriterion {
   /// (Default) geometric criterion.
   Geometric,
   /// Stochastic Criteiron.
-  Stochastic
+  Stochastic,
+  /// Covariant Criterion
+  Covariant
 };
 
 /// Whether and when only final state particles should be printed.

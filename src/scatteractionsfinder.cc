@@ -383,7 +383,8 @@ ActionPtr ScatterActionsFinder::check_collision(
       return nullptr;
     }
 
-  } else if (coll_crit_ == CollisionCriterion::Geometric) {
+  } else if (coll_crit_ == CollisionCriterion::Geometric ||
+             coll_crit_ == CollisionCriterion::Covariant) {
     // just collided with this particle
     if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
       logg[LFindScatter].debug("Skipping collided particles at time ",
@@ -393,6 +394,23 @@ ActionPtr ScatterActionsFinder::check_collision(
 
       return nullptr;
     }
+    //calculate transeverse distance squared depending on criterion
+    double distance_squared;
+    if (coll_crit_ == CollisionCriterion::Geometric) {
+      distance_squared = act->transverse_distance_sqr();
+    } else {
+      distance_squared = act->cov_transverse_distance_sqr();
+    }
+
+    // Don't calculate cross section if the particles are very far apart.
+    if (distance_squared >= max_transverse_distance_sqr(testparticles_)) {
+      return nullptr;
+    }
+
+    // Add various subprocesses.
+    act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
+                             low_snn_cut_, strings_switch_, use_AQM_,
+                             strings_with_probability_, nnbar_treatment_);
 
     // Cross section for collision criterion
     const double cross_section_criterion = xs * M_1_PI;

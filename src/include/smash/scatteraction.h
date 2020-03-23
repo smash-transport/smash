@@ -74,6 +74,7 @@ class ScatterAction : public Action {
    */
   double transverse_distance_sqr() const;
 
+  double cov_transverse_distance_sqr() const;
   /**
    * Determine the Mandelstam s variable,
    *
