@@ -235,8 +235,8 @@ class BinaryOutputParticles : public BinaryOutputBase {
                             const DensityParameters &dens_param) override;
 
  private:
-  /// Write only final particles (True) or both, inital and final (False).
-  bool only_final_;
+  /// Whether final- or initial-state particles should be written.
+  OutputOnlyFinal only_final_;
 };
 
 /**

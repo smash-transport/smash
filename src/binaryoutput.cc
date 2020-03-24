@@ -264,7 +264,7 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
 void BinaryOutputParticles::at_eventstart(const Particles &particles,
                                           const int) {
   const char pchar = 'p';
-  if (!only_final_) {
+  if (only_final_ == OutputOnlyFinal::No) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(particles.size());
     write(particles);
@@ -276,9 +276,12 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
                                         double impact_parameter,
                                         bool empty_event) {
   const char pchar = 'p';
-  std::fwrite(&pchar, sizeof(char), 1, file_.get());
-  write(particles.size());
-  write(particles);
+  if (only_final_ == OutputOnlyFinal::Yes ||
+      (only_final_ == OutputOnlyFinal::IfNotEmpty && !empty_event)) {
+    std::fwrite(&pchar, sizeof(char), 1, file_.get());
+    write(particles.size());
+    write(particles);
+  }
 
   // Event end line
   const char fchar = 'f';
@@ -296,7 +299,7 @@ void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
                                                  const std::unique_ptr<Clock> &,
                                                  const DensityParameters &) {
   const char pchar = 'p';
-  if (!only_final_) {
+  if (only_final_ == OutputOnlyFinal::No) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(particles.size());
     write(particles);
