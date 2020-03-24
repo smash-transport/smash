@@ -24,9 +24,12 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * particles on a hypersurface of constant proper time. This output is formatted
  * such that it is directly compatible with the
  * vHLLE hydrodynamics code (I. Karpenko, P. Huovinen, M.
- * Bleicher: Comput. Phys. Commun. 185, 3016 (2014)). The particle data is
- * provided in the computational frame. See \ref input_ic for further details.
- * \n
+ * Bleicher: Comput. Phys. Commun. 185, 3016 (2014)). As a consequence,
+ * **spectators are not written to the ASCII IC output** as they would need to
+ * be excluded anyways in order to initialize the hydrodynamics evolution. Note
+ * though that for all other output formats the full particle list is printed to
+ * the IC output, including spectators. The particle data is provided in the
+ * computational frame. For further details, see \ref input_ic. \n
  *
  * \n
  * The ASCII initial conditions output is formatted as follows:
@@ -34,7 +37,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * **Header**
  * \code
  * # **smash_version** initial conditions: hypersurface of constant proper time
- * # tau x y eta mt px py Rap ID charge
+ * # tau x y eta mt px py Rap pdg charge
  * # fm fm fm none GeV GeV GeV none none e
  * \endcode
  * The header consists of 3 lines starting with a '#', containing the following
@@ -61,7 +64,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  *
  * The particle lines are formatted as follows:
  * \code
- * tau x y eta mt px py Rap ID charge
+ * tau x y eta mt px py Rap pdg charge
  * \endcode
  * where
  * \li \key tau: Proper time of the particle
@@ -70,7 +73,8 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * \li \key mt: Transverse mass of the particle
  * \li \key px, \key py: x and y components of the particle's momentum
  * \li \key Rap: Momentum space rapidity of the particle
- * \li \key ID: Particle identifier in terms of an integer. It is unique for
+ * \li \key pdg: PDG code of the particle (see http://pdg.lbl.gov/).
+ * It contains all quantum numbers and uniquely identifies its type.
  * every particle in the event.
  * \li \key charge: electric charge of the particle
  *
@@ -101,7 +105,7 @@ ICOutput::ICOutput(const bf::path &path, const std::string &name,
       file_.get(),
       "# %s initial conditions: hypersurface of constant proper time\n",
       VERSION_MAJOR);
-  std::fprintf(file_.get(), "# tau x y eta mt px py Rap ID charge\n");
+  std::fprintf(file_.get(), "# tau x y eta mt px py Rap pdg charge\n");
   std::fprintf(file_.get(), "# fm fm fm none GeV GeV GeV none none e\n");
 }
 
@@ -146,12 +150,18 @@ void ICOutput::at_interaction(const Action &action, const double) {
       0.5 * log((particle.momentum()[0] + particle.momentum()[3]) /
                 (particle.momentum()[0] - particle.momentum()[3]));
 
-  // write particle data
-  std::fprintf(file_.get(), "%g %g %g %g %g %g %g %g %i %i \n",
-               particle.position().tau(), particle.position()[1],
-               particle.position()[2], particle.position().eta(), m_trans,
-               particle.momentum()[1], particle.momentum()[2], rapidity,
-               particle.id(), particle.type().charge());
+  // Determine if particle is spectator:
+  // Fulfilled if particle is initial nucleon, aka has no prior interactions
+  bool is_spectator = particle.get_history().collisions_per_particle == 0;
+
+  // write particle data excluding spectators
+  if (!is_spectator) {
+    std::fprintf(file_.get(), "%g %g %g %g %g %g %g %g %s %i \n",
+                 particle.position().tau(), particle.position()[1],
+                 particle.position()[2], particle.position().eta(), m_trans,
+                 particle.momentum()[1], particle.momentum()[2], rapidity,
+                 particle.pdgcode().string().c_str(), particle.type().charge());
+  }
 
   if (IC_proper_time_ < 0.0) {
     // First particle that is removed, overwrite negative default
