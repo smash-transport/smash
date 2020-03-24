@@ -152,10 +152,13 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
- *   \key Only_Final (bool, optional, default = true, incompatible with
+ *   \key Only_Final (string, optional, default = Yes, incompatible with
                       VTK format): \n
- *   \li \key true - Print only final particle list \n
- *   \li \key false - Particle list at output interval including initial time \n
+ *   \li \key Yes - Print only final particle list \n
+ *   \li \key IfNotEmpty - Print only final particle list and only if event
+ *                         is not empty i.e. a collisions happened between
+ *                         projectile and target to save disk space. \n
+ *   \li \key No - Particle list at output interval including initial time \n
  * \n
  * - \b Collisions (VTK not available) \n
  *   \key Extended (bool, optional, default = false, incompatible with
@@ -278,7 +281,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
      Particles:
          Format:    ["Oscar1999", "VTK", "Root"]
          Extended: False
-         Only_Final: False
+         Only_Final: No
      Collisions:
          Format:    ["Oscar2013"]
          Extended: True
