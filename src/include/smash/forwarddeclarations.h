@@ -204,7 +204,7 @@ enum class OutputOnlyFinal {
   No,
   /// Only print final-state particles, and only if the event is not empty.
   IfNotEmpty,
-}
+};
 
 /// The different groups of 2 to 2 reactions that one can include
 enum IncludedReactions {
