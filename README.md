@@ -37,7 +37,7 @@ required C++11 features):
 
 It requires the following tools & libraries:
 - cmake >= 2.8.11
-- the GNU Scientific Library >= 1.15
+- the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
 - Pythia = 8.235
