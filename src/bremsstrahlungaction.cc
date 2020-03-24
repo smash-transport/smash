@@ -100,18 +100,15 @@ void BremsstrahlungAction::generate_final_state() {
   // Sample the phase space anisotropically in the local rest frame
   sample_3body_phasespace();
 
-  if (number_of_fractional_photons_ > 1) {
-    double diff_xs_k = brems_dsigma_dk();
-    double diff_xs_theta = brems_dsigma_dtheta();
+  // Get differential cross sections
+  double diff_xs_k = brems_dsigma_dk();
+  double diff_xs_theta = brems_dsigma_dtheta();
 
-    // Assign weighting factor
-    const double W_theta = diff_xs_theta * (M_PI - 0.0);
-    const double W_k = diff_xs_k * (k_max - 0.0);
-    weight_ = sqrt(W_theta * W_k) /
-              (number_of_fractional_photons_ * hadronic_cross_section());
-  } else {
-    weight_ = proc->weight() / hadronic_cross_section();
-  }
+  // Assign weighting factor
+  const double W_theta = diff_xs_theta * (M_PI - 0.0);
+  const double W_k = diff_xs_k * (k_max - 0.0);
+  weight_ = sqrt(W_theta * W_k) /
+            (number_of_fractional_photons_ * hadronic_cross_section());
 
   // Set position and formation time and boost back to computational frame
   for (auto &new_particle : outgoing_particles_) {
