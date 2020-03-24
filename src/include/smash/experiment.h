@@ -856,7 +856,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       } else {
         logg[LInitialConditions].warn()
             << "Nuclei passing time is too short, hypersurface proper time set "
-               "to tau = " << lower_bound << " fm.";
+               "to tau = "
+            << lower_bound << " fm.";
         proper_time = lower_bound;
       }
     }
