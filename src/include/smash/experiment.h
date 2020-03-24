@@ -74,6 +74,7 @@ static ostream &operator<<(ostream &out,
 
 namespace smash {
 static constexpr int LMain = LogArea::Main::id;
+static constexpr int LInitialConditions = LogArea::InitialConditions::id;
 
 /**
  * Non-template interface to Experiment<Modus>.
@@ -847,7 +848,18 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"Output", "Initial_Conditions", "Proper_Time"});
     } else {
       // Default proper time is the passing time of the two nuclei
-      proper_time = modus_.nuclei_passing_time();
+      double default_proper_time = modus_.nuclei_passing_time();
+      double lower_bound =
+          config.take({"Output", "Initial_Conditions", "Lower_Bound"}, 0.5);
+      if (default_proper_time >= lower_bound) {
+        proper_time = default_proper_time;
+      } else {
+        logg[LInitialConditions].warn()
+            << "Nuclei passing time is too short, hypersurface proper time set "
+               "to tau = "
+            << lower_bound << " fm.";
+        proper_time = lower_bound;
+      }
     }
     action_finders_.emplace_back(
         make_unique<HyperSurfaceCrossActionsFinder>(proper_time));
@@ -1140,7 +1152,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * the projectile and target nucleus, respectively, \f$
    * \sqrt{s_\mathrm{NN}}\f$
    * is the collision energy per nucleon and \f$ m_\mathrm{N} \f$ the nucleon
-   * mass. \n If
+   * mass. Note though that, if the passing time is smaller than 0.5 fm, the
+   * default porper time of the hypersurface is taken to be \f$\tau = 0.5 \f$
+   * as a minimum bound to ensure the proper time is large enough
+   * to also extract reasonable initial conditions at RHIC/LHC energies. If
+   * desired, this lowest possible value can also be specifie in the
+   * configuration file in the \key Lower_Bound field. \n Once
    * initial conditions are enabled, the output file named SMASH_IC (followed by
    * the appropriate suffix) is generated when SMASH is executed. \n The output
    * is available in Oscar1999, Oscar2013, binary and ROOT format, as well as in
