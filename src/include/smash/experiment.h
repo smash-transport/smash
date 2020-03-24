@@ -1502,12 +1502,6 @@ void Experiment<Modus>::initialize_new_event() {
   total_hypersurface_crossing_actions_ = 0;
   total_energy_removed_ = 0.0;
   // Print output headers
-  if (IC_output_switch_) {
-    logg[LExperiment].warn(
-        "You have enabled the initial conditions output.\nOnce all particles "
-        "have crossed the hypersurface, the D(ETot/N)[GeV] column will instead "
-        "contain D(ETot)[GeV].");
-  }
   logg[LExperiment].info() << hline;
   logg[LExperiment].info() << "Time[fm]   Ekin[GeV]   E_MF[GeV]  ETotal[GeV]  "
                            << "ETot/N[GeV]  D(ETot/N)[GeV] Scatt&Decays  "

@@ -417,14 +417,6 @@ std::string format_measurements(const Particles &particles,
                 particles.size()
           : 0.0;
 
-  const double DeltaE_tot =
-      (difference.momentum().x0() + E_mean_field - E_mean_field_initial);
-  // If IC output is enabled and there are no remaining particles, the total
-  // energy difference is printed. There is also a warning about this behaviour
-  // at the beginning of each new event.
-  const double E_diff =
-      (particles.size() > 0) ? DeltaE_tot / particles.size() : DeltaE_tot;
-
   std::ostringstream ss;
   // clang-format off
   ss << field<7, 3> << time
@@ -435,10 +427,16 @@ std::string format_measurements(const Particles &particles,
     // total energy in the system
      << field<12, 3> << current_energy + E_mean_field
     // total energy per particle in the system
-     << field<12, 6> << energy_per_part
+     << field<12, 6> << energy_per_part;
     // change in total energy per particle (unless IC output is enabled)
-     << field<13, 6> << E_diff
-     << field<12, 3> << scatterings_this_interval
+    if (particles.size() == 0) {
+     ss << field<13, 6> << "N/A";
+    } else {
+     ss << field<13, 6> << (difference.momentum().x0()
+                            + E_mean_field - E_mean_field_initial)
+                            / particles.size();
+    }
+    ss << field<14, 3> << scatterings_this_interval
      << field<10, 3> << particles.size()
      << field<9, 3> << elapsed_seconds;
   // clang-format on
