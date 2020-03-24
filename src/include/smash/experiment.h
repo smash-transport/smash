@@ -1890,7 +1890,7 @@ void Experiment<Modus>::intermediate_output() {
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   // save evolution data
   if (!(modus_.is_box() && parameters_.outputclock->current_time() <
-        modus_.equilibration_time())){
+                               modus_.equilibration_time())) {
     for (const auto &output : outputs_) {
       if (output->is_dilepton_output() || output->is_photon_output() ||
           output->is_IC_output()) {
@@ -1909,8 +1909,9 @@ void Experiment<Modus>::intermediate_output() {
                                         DensityType::Baryon, *jmu_B_lat_);
           break;
         case DensityType::BaryonicIsospin:
-          update_lattice(jmu_I3_lat_.get(), lat_upd, DensityType::BaryonicIsospin,
-                         density_param_, particles_, false);
+          update_lattice(jmu_I3_lat_.get(), lat_upd,
+                         DensityType::BaryonicIsospin, density_param_,
+                         particles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::BaryonicIsospin,
                                         *jmu_I3_lat_);
@@ -1919,8 +1920,8 @@ void Experiment<Modus>::intermediate_output() {
           break;
         default:
           update_lattice(jmu_custom_lat_.get(), lat_upd,
-                         dens_type_lattice_printout_, density_param_, particles_,
-                         false);
+                         dens_type_lattice_printout_, density_param_,
+                         particles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         dens_type_lattice_printout_,
                                         *jmu_custom_lat_);
