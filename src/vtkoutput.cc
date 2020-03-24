@@ -47,10 +47,10 @@ VtkOutput::~VtkOutput() {}
  * pos_ev<event>_tstep<output_number>.vtk.
  *
  * Files contain particle coordinates, momenta, PDG codes, cross-section
- * scaling factors, ID, number of collisions and masses. VTK
- * output is known to work with paraview, a free visualization and data
- * analysis software. Files of this format are supposed to be used as a black
- * box and opened with paraview, but at the same time they are
+ * scaling factors, ID, number of collisions baryon number, strangeness and
+ * masses. VTK output is known to work with paraview, a free visualization and
+ * data analysis software. Files of this format are supposed to be used as a
+ * black box and opened with paraview, but at the same time they are
  * human-readable text files.
  *
  * There is also a possibility to print a lattice with thermodynamical
@@ -148,7 +148,16 @@ void VtkOutput::write(const Particles &particles) {
   for (const auto &p : particles) {
     std::fprintf(file_.get(), "%i\n", p.id());
   }
-
+  std::fprintf(file_.get(), "SCALARS baryon_number int 1\n");
+  std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
+  for (const auto &p : particles) {
+    std::fprintf(file_.get(), "%i\n", p.pdgcode().baryon_number());
+  }
+  std::fprintf(file_.get(), "SCALARS strangeness int 1\n");
+  std::fprintf(file_.get(), "LOOKUP_TABLE default\n");
+  for (const auto &p : particles) {
+    std::fprintf(file_.get(), "%i\n", p.pdgcode().strangeness());
+  }
   std::fprintf(file_.get(), "VECTORS momentum double\n");
   for (const auto &p : particles) {
     std::fprintf(file_.get(), "%g %g %g\n", p.momentum().x1(),
