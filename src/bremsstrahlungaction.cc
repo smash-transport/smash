@@ -90,11 +90,13 @@ void BremsstrahlungAction::generate_final_state() {
   FourVector interaction_point = get_interaction_point();
 
   // Sample k and theta:
+  // minimum cutoff for k to be in accordance with cross section calculations
+  double k_min = 0.001;
   double k_max =
       (sqrt_s() * sqrt_s() - 2 * outgoing_particles_[0].type().mass() * 2 *
                                  outgoing_particles_[1].type().mass()) /
       (2 * sqrt_s());
-  k_ = random::uniform(0.001, k_max);
+  k_ = random::uniform(k_min, k_max);
   theta_ = random::uniform(0.0, M_PI);
 
   // Sample the phase space anisotropically in the local rest frame
@@ -106,7 +108,7 @@ void BremsstrahlungAction::generate_final_state() {
 
   // Assign weighting factor
   const double W_theta = diff_xs_theta * (M_PI - 0.0);
-  const double W_k = diff_xs_k * (k_max - 0.0);
+  const double W_k = diff_xs_k * (k_max - k_min);
   weight_ = sqrt(W_theta * W_k) /
             (number_of_fractional_photons_ * hadronic_cross_section());
 
