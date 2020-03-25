@@ -285,6 +285,9 @@ smash_add_runtest(custom_nucleus_run smash smash
                   -c "General: {Nevents: 2}"
                   -c "Modi: {Collider: {Projectile: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
                   -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}")
+smash_add_runtest(initial_conditions_run smash smash
+                  -i ${PROJECT_SOURCE_DIR}/input/config.yaml
+                  -c "Output: {Initial_Conditions: {Format: [Binary, Oscar2013]}}")
 
 # Test the shipped config files for potentials and deformed nuclei by verifying
 # the binary runs with them.

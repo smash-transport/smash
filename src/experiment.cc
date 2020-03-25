@@ -407,23 +407,36 @@ std::string format_measurements(const Particles &particles,
   const QuantumNumbers current_values(particles);
   const QuantumNumbers difference = current_values - conserved_initial;
 
+  // Make sure there are no FPEs in case of IC output, were there will
+  // eventually be no more particles in the system
+  const double current_energy =
+      (particles.size() > 0) ? current_values.momentum().x0() : 0.0;
+  const double energy_per_part =
+      (particles.size() > 0)
+          ? (current_energy + E_mean_field - E_mean_field_initial) /
+                particles.size()
+          : 0.0;
+
   std::ostringstream ss;
   // clang-format off
   ss << field<7, 3> << time
     // total kinetic energy in the system
-     << field<11, 3> << current_values.momentum().x0()
+     << field<11, 3> << current_energy
     // total mean field energy in the system
      << field<11, 3> << E_mean_field
     // total energy in the system
-     << field<12, 3> << current_values.momentum().x0() + E_mean_field
+     << field<12, 3> << current_energy + E_mean_field
     // total energy per particle in the system
-     << field<12, 6>
-     << (current_values.momentum().x0() + E_mean_field)/particles.size()
-    // change in energy per particle
-     << field<13, 6> << (difference.momentum().x0()
-                         + E_mean_field - E_mean_field_initial)
-                        /particles.size()
-     << field<14, 3> << scatterings_this_interval
+     << field<12, 6> << energy_per_part;
+    // change in total energy per particle (unless IC output is enabled)
+    if (particles.size() == 0) {
+     ss << field<13, 6> << "N/A";
+    } else {
+     ss << field<13, 6> << (difference.momentum().x0()
+                            + E_mean_field - E_mean_field_initial)
+                            / particles.size();
+    }
+    ss << field<14, 3> << scatterings_this_interval
      << field<10, 3> << particles.size()
      << field<9, 3> << elapsed_seconds;
   // clang-format on
