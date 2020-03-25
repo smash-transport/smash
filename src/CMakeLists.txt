@@ -54,7 +54,7 @@ endif (GIT_FOUND)
 
 string(TIMESTAMP BUILD_DATE)
 
-find_package(GSL 1.15 REQUIRED)
+find_package(GSL 2.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 
