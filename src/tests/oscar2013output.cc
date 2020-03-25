@@ -216,7 +216,7 @@ TEST(final2013_format) {
   // Set options
   const bf::path configfilename = "oscar_2013.yaml";
   const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream(configfilepath) << "    Only_Final:      True\n";
+  bf::ofstream(configfilepath) << "    Only_Final:      Yes\n";
   VERIFY(bf::exists(configfilepath));
 
   /* Create 2 particles */
@@ -240,7 +240,7 @@ TEST(final2013_format) {
   outputfilepath_unfinished += ".unfinished";
   {
     OutputParameters out_par = OutputParameters();
-    out_par.part_only_final = true;
+    out_par.part_only_final = OutputOnlyFinal::Yes;
     out_par.part_extended = false;
 
     std::unique_ptr<OutputInterface> osc2013final =

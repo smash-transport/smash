@@ -272,7 +272,7 @@ TEST(particles_format) {
     /* Set the most verbose option */
     OutputParameters output_par = OutputParameters();
     output_par.part_extended = false;
-    output_par.part_only_final = false;
+    output_par.part_only_final = OutputOnlyFinal::No;
     /* Create an instance of binary output */
     auto bin_output = make_unique<BinaryOutputParticles>(
         testoutputpath, "Particles", output_par);

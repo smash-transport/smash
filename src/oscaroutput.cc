@@ -825,14 +825,14 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     }
   } else if (content == "Initial_Conditions") {
     if (modern_format && !out_par.ic_extended) {
-      return make_unique<OscarOutput<OscarFormat2013, OscarParticlesIC>>(
+      return make_unique<OscarOutput<OscarFormat2013, OscarParticlesIC | OscarAtEventstart>>(
           path, "SMASH_IC");
     } else if (modern_format && out_par.ic_extended) {
       return make_unique<
-          OscarOutput<OscarFormat2013Extended, OscarParticlesIC>>(path,
+          OscarOutput<OscarFormat2013Extended, OscarParticlesIC | OscarAtEventstart>>(path,
                                                                   "SMASH_IC");
     } else if (!modern_format && !out_par.ic_extended) {
-      return make_unique<OscarOutput<OscarFormat1999, OscarParticlesIC>>(
+      return make_unique<OscarOutput<OscarFormat1999, OscarParticlesIC | OscarAtEventstart>>(
           path, "SMASH_IC");
     } else if (!modern_format && out_par.ic_extended) {
       logg[LOutput].warn()

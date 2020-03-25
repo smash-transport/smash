@@ -276,8 +276,7 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
                                         double impact_parameter,
                                         bool empty_event) {
   const char pchar = 'p';
-  if (only_final_ == OutputOnlyFinal::Yes ||
-      (only_final_ == OutputOnlyFinal::IfNotEmpty && !empty_event)) {
+  if (!(empty_event && only_final_ == OutputOnlyFinal::IfNotEmpty )) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(particles.size());
     write(particles);
