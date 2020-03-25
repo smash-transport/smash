@@ -20,3 +20,6 @@ build
 3rdparty/pythia8215/Makefile.inc
 3rdparty/pythia8215/examples/Makefile.inc
 .vscode
+
+# Convenience directory for your own files that should not be tracked
+tmp
