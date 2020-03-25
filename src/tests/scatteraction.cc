@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "setup.h"
 
@@ -235,7 +235,7 @@ TEST(cross_sections_symmetric) {
     VERIFY(act21->cross_section() >= 0.);
 
     // fuzzyness needs to be slightly larger than 1 for some compilers
-    UnitTest::setFuzzyness<double>(5);
+    vir::test::setFuzzyness<double>(5);
 
     // check symmetry of the cross-section, i.e. xsec_AB == xsec_BA
     FUZZY_COMPARE(act12->cross_section(), act21->cross_section())

@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "../include/smash/cxx14compat.h"
 #include "../include/smash/fourvector.h"

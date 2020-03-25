@@ -7,10 +7,9 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "setup.h"
-#include "unittest.h"
 
 #include <map>
 

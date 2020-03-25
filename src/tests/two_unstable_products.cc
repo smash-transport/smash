@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"
+#include <vir/test.h>
 
 #include "setup.h"
 

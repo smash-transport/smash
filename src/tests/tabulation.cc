@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "../include/smash/tabulation.h"
 
@@ -66,7 +66,7 @@ TEST(quadratic) {
   // tabulate a quadratic function
   const Tabulation tab(-2., 4., 20, [](double x) { return x * x; });
   const double error = 1E-5;
-  UnitTest::setFuzzyness<double>(2);
+  vir::test::setFuzzyness<double>(2);
   // check closest-point values
   FUZZY_COMPARE(tab.get_value_step(-3.), 0.);
   FUZZY_COMPARE(tab.get_value_step(-2.), 4.);

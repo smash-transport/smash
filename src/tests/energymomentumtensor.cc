@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "../include/smash/energymomentumtensor.h"
 #include "../include/smash/fourvector.h"
@@ -142,7 +142,7 @@ TEST(Landau_frame_values) {
    */
   const FourVector u = T.landau_frame_4velocity();
   // Allow 8ulp, seen to fail for 3 ulp
-  UnitTest::setFuzzyness<double>(8);
+  vir::test::setFuzzyness<double>(8);
   FUZZY_COMPARE(u[0], 1.0030526944248855612);
   FUZZY_COMPARE(u[1], -0.004483908837502199607);
   FUZZY_COMPARE(u[2], -0.07605947885039531450);

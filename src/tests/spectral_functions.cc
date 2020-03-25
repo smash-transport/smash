@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "histogram.h"
 #include "setup.h"
@@ -18,7 +18,6 @@
 #include "../include/smash/stringfunctions.h"
 
 using namespace smash;
-using namespace UnitTest;
 
 TEST(spectral_functions) {
   smash::Test::create_actual_particletypes();
@@ -52,15 +51,15 @@ TEST(spectral_functions) {
              (t * t);
     });
     if (result_no_norm.value() > 1 + warning_level) {
-      std::cout << AnsiColor::blue;
+      std::cout << vir::detail::color::blue;
     } else if (result_no_norm.value() < 1 - warning_level) {
-      std::cout << AnsiColor::yellow;
+      std::cout << vir::detail::color::yellow;
     }
     std::cout << utf8::fill_right(type.name(), 11) << ": "
               << format(result_no_norm.value(), nullptr, -1, 4) << " ± "
               << result_no_norm.error() << ", " << result_const.value() << " ± "
               << result_const.error() << ", " << result.value() << " ± "
-              << result.error() << AnsiColor::normal << "\n";
+              << result.error() << vir::detail::color::normal << "\n";
     // check if integral is approximately equal to one
     COMPARE_ABSOLUTE_ERROR(result_no_norm.value(), 1., error_tolerance_no_norm);
     COMPARE_ABSOLUTE_ERROR(result_const.value(), 1., error_tolerance_const);

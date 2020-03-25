@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "../include/smash/pdgcode.h"
 #include "../include/smash/pdgcode_constants.h"
@@ -458,7 +458,7 @@ TEST(spin) {
   COMPARE(omega_bc.spin(), 1u);
 }
 TEST(spin_higgs) {
-  UnitTest::EXPECT_FAILURE();
+  vir::test::expect_failure();
   COMPARE(higgs.spin(), 0u);
 }
 TEST(spin_degeneracy) {
@@ -489,7 +489,7 @@ TEST(spin_degeneracy) {
   COMPARE(omega_bc.spin_degeneracy(), 2u);
 }
 TEST(spin_degeneracy_higgs) {
-  UnitTest::EXPECT_FAILURE();
+  vir::test::expect_failure();
   COMPARE(higgs.spin_degeneracy(), 1u);
 }
 

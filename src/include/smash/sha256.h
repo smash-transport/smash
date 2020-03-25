@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 #include <cstdio>
+#include <string>
 
 namespace smash {
 namespace sha256 {

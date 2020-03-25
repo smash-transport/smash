@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This has to be the first include
+#include <vir/test.h>  // This has to be the first include
 
 #include "setup.h"
 

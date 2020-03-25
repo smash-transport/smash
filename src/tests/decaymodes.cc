@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "setup.h"
 
@@ -87,7 +87,7 @@ const std::string decays_input(
 TEST(load_decay_modes) {
   DecayModes::load_decaymodes(decays_input);
 
-  UnitTest::setFuzzyness<double>(2);
+  vir::test::setFuzzyness<double>(2);
   // check that the decays of the rho and omega are generated correctly
   {
     const auto &rho_0 = ParticleType::find(0x113).decay_modes();

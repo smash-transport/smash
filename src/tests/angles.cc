@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "../include/smash/angles.h"
 
@@ -131,7 +131,7 @@ TEST(setting_phi_does_not_change_z) {
 }
 
 TEST(add_theta) {
-  UnitTest::setFuzzyness<double>(64);
+  vir::test::setFuzzyness<double>(64);
   for (double current_phi = 0.0; current_phi < 2 * M_PI;
        current_phi += M_PI / 180.0) {
     dir.set_phi(current_phi);

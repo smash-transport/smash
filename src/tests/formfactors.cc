@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "setup.h"
 
@@ -17,7 +17,7 @@
 using namespace smash;
 
 TEST(blatt_weisskopf) {
-  UnitTest::setFuzzyness<double>(2);
+  vir::test::setFuzzyness<double>(2);
   const double x = 0.5 * hbarc;
   COMPARE(blatt_weisskopf_sqr(x, 0), 1.);
   const double x2 = 0.5 * 0.5;
