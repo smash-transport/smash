@@ -27,7 +27,8 @@ InterpolateData2DSpline::InterpolateData2DSpline(const std::vector<double>& x,
 
   if (M < 4 || N < 4) {
     throw std::runtime_error(
-        "Need at least 4 data points for bicubic spline interpolation.");
+        "Need at least 4 data points in each dimension for bicubic spline "
+        "interpolation.");
   }
 
   // Assign lower and upper bounds for constant extrapolation

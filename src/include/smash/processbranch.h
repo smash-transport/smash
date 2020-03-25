@@ -243,9 +243,9 @@ class CollisionBranch : public ProcessBranch {
 
   /**
    * Construct collision branch with 3 particles in final state.
-   * \param[in] type_a Particle types of first final state particle.
-   * \param[in] type_b Particle types of second final state particle.
-   * \param[in] type_c Particle types of third final state particle.
+   * \param[in] type_a Particle type of first final state particle.
+   * \param[in] type_b Particle type of second final state particle.
+   * \param[in] type_c Particle type of third final state particle.
    * \param[in] w Weight of created branch.
    * \param[in] p_type Process type of created branch.
    */

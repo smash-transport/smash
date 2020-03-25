@@ -103,8 +103,9 @@ void BremsstrahlungAction::generate_final_state() {
   sample_3body_phasespace();
 
   // Get differential cross sections
-  double diff_xs_k = brems_dsigma_dk();
-  double diff_xs_theta = brems_dsigma_dtheta();
+  std::pair<double, double> diff_xs_pair = brems_diff_cross_sections();
+  double diff_xs_k = diff_xs_pair.first;
+  double diff_xs_theta = diff_xs_pair.second;
 
   // Assign weighting factor
   const double W_theta = diff_xs_theta * (M_PI - 0.0);
@@ -117,8 +118,7 @@ void BremsstrahlungAction::generate_final_state() {
     // assuming decaying particles are always fully formed
     new_particle.set_formation_time(time_of_execution_);
     new_particle.set_4position(interaction_point);
-    new_particle.boost_momentum(
-        -total_momentum_of_outgoing_particles().velocity());
+    new_particle.boost_momentum(-beta_cm());
   }
 
   // Photons are not really part of the normal processes, so we have to set a
@@ -132,16 +132,15 @@ void BremsstrahlungAction::sample_3body_phasespace() {
   const double m_a = outgoing_particles_[0].type().mass(),
                m_b = outgoing_particles_[1].type().mass(),
                m_c = outgoing_particles_[2].type().mass();
-
   const double sqrts = sqrt_s();
   const double E_ab = sqrts - m_c - k_;  // Ekin of the pion pair in cm frame
-  const double pcm =
-      pCM(sqrts, E_ab, m_c);  // cm momentum of (pion pair - photon)
+  const double pcm = pCM(sqrts, E_ab, m_c);  // cm momentum of (π pair - photon)
   const double pcm_pions = pCM(E_ab, m_a, m_b);  // cm momentum within pion pair
 
   // Photon angle: Phi random, theta from theta_ sampled above
   const Angles phitheta_photon(random::uniform(0.0, twopi), std::cos(theta_));
   outgoing_particles_[2].set_4momentum(m_c, pcm * phitheta_photon.threevec());
+  // Boost factor to cm frame of (π pair - photon)
   const ThreeVector beta_cm =
       pcm * phitheta_photon.threevec() / std::sqrt(pcm * pcm + E_ab * E_ab);
 
@@ -254,76 +253,53 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
   return process_list;
 }
 
-double BremsstrahlungAction::brems_dsigma_dk() {
+std::pair<double,double> BremsstrahlungAction::brems_diff_cross_sections() {
   static const ParticleTypePtr pi_z_particle = &ParticleType::find(pdg::pi_z);
   const double collision_energy = sqrt_s();
   double dsigma_dk;
+  double dsigma_dtheta;
 
   if (reac_ == ReactionType::pi_p_pi_m) {
     if (outgoing_particles_[0].type() != *pi_z_particle) {
       // pi+- + pi+-- -> pi+- + pi+- + gamma
       dsigma_dk =
           (*pipi_pipi_opp_dsigma_dk_interpolation)(k_, collision_energy);
-    } else {
-      // pi+- + pi+-- -> pi0 + pi0 + gamma
-      dsigma_dk = (*pipi_pi0pi0_dsigma_dk_interpolation)(k_, collision_energy);
-    }
-  } else if (reac_ == ReactionType::pi_p_pi_p ||
-             reac_ == ReactionType::pi_m_pi_m) {
-    dsigma_dk = (*pipi_pipi_same_dsigma_dk_interpolation)(k_, collision_energy);
-  } else if (reac_ == ReactionType::pi_z_pi_p ||
-             reac_ == ReactionType::pi_z_pi_m) {
-    dsigma_dk = (*pipi0_pipi0_dsigma_dk_interpolation)(k_, collision_energy);
-  } else if (reac_ == ReactionType::pi_z_pi_z) {
-    dsigma_dk = (*pi0pi0_pipi_dsigma_dk_interpolation)(k_, collision_energy);
-  } else {
-    throw std::runtime_error(
-        "Unkown channel when computing dSigma/dk for Bremsstrahlung "
-        "processes.");
-  }
-
-  // Prevent negative cross sections due to numerics in interpolation
-  dsigma_dk = (dsigma_dk < 0.0) ? really_small : dsigma_dk;
-
-  return dsigma_dk;
-}
-
-double BremsstrahlungAction::brems_dsigma_dtheta() {
-  static const ParticleTypePtr pi_z_particle = &ParticleType::find(pdg::pi_z);
-  const double collision_energy = sqrt_s();
-  double dsigma_dtheta;
-
-  if (reac_ == ReactionType::pi_p_pi_m) {
-    if (outgoing_particles_[0].type() != *pi_z_particle) {
-      // pi+- + pi+-- -> pi+- + pi+- + gamma
       dsigma_dtheta = (*pipi_pipi_opp_dsigma_dtheta_interpolation)(
           theta_, collision_energy);
     } else {
       // pi+- + pi+-- -> pi0 + pi0 + gamma
+      dsigma_dk = (*pipi_pi0pi0_dsigma_dk_interpolation)(k_, collision_energy);
       dsigma_dtheta =
           (*pipi_pi0pi0_dsigma_dtheta_interpolation)(theta_, collision_energy);
     }
   } else if (reac_ == ReactionType::pi_p_pi_p ||
              reac_ == ReactionType::pi_m_pi_m) {
+    dsigma_dk = (*pipi_pipi_same_dsigma_dk_interpolation)(k_, collision_energy);
     dsigma_dtheta =
         (*pipi_pipi_same_dsigma_dtheta_interpolation)(theta_, collision_energy);
   } else if (reac_ == ReactionType::pi_z_pi_p ||
              reac_ == ReactionType::pi_z_pi_m) {
+    dsigma_dk = (*pipi0_pipi0_dsigma_dk_interpolation)(k_, collision_energy);
     dsigma_dtheta =
         (*pipi0_pipi0_dsigma_dtheta_interpolation)(theta_, collision_energy);
   } else if (reac_ == ReactionType::pi_z_pi_z) {
+    dsigma_dk = (*pi0pi0_pipi_dsigma_dk_interpolation)(k_, collision_energy);
     dsigma_dtheta =
         (*pi0pi0_pipi_dsigma_dtheta_interpolation)(theta_, collision_energy);
   } else {
     throw std::runtime_error(
-        "Unkown channel when computing dSigma/dk for Bremsstrahlung "
-        "processes.");
+        "Unkown channel when computing differential cross sections for "
+        "bremsstrahlung processes.");
   }
 
   // Prevent negative cross sections due to numerics in interpolation
+  dsigma_dk = (dsigma_dk < 0.0) ? really_small : dsigma_dk;
   dsigma_dtheta = (dsigma_dtheta < 0.0) ? really_small : dsigma_dtheta;
 
-  return dsigma_dtheta;
+  // Combine differential cross sections to a pair
+  std::pair<double, double> diff_x_sections = {dsigma_dk, dsigma_dtheta};
+
+  return diff_x_sections;
 }
 
 void BremsstrahlungAction::create_interpolations() {

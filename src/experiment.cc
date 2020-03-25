@@ -376,11 +376,10 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   bool missing_output_brems = false;
   if (!(config["Output"].has_value({"Photons"}))) {
     if (config.has_value({"Photons", "2to2_Scatterings"})) {
-      missing_output_2to2 =
-          config.read({"Photons", "2to2_Scatterings"}) ? 1 : 0;
+      missing_output_2to2 = config.read({"Photons", "2to2_Scatterings"});
     }
     if (config.has_value({"Photons", "Bremsstrahlung"})) {
-      missing_output_brems = config.read({"Photons", "Bremsstrahlung"}) ? 1 : 0;
+      missing_output_brems = config.read({"Photons", "Bremsstrahlung"});
     }
 
     if (missing_output_2to2 || missing_output_brems) {

@@ -53,9 +53,8 @@ class BremsstrahlungAction : public ScatterAction {
   void generate_final_state() override;
 
   /**
-   * We want to sample the final state anisotropically, considering the
-   * differential cross sections with respect to theta and k. The overwritten
-   * function from the mother class would sample the final state isotropically.
+   * Sample the final state anisotropically, considering the differential
+   * cross sections with respect to theta and k.
    */
   void sample_3body_phasespace() override;
 
@@ -180,20 +179,14 @@ class BremsstrahlungAction : public ScatterAction {
   CollisionBranchList brems_cross_sections();
 
   /**
-   * Computes the differential cross section digma/dk of the bremsstrahlung
-   * process.
+   * Computes the differential cross sections dSigma/dk and dSigma/dtheta of the
+   * bremsstrahlung process.
    *
-   * \returns Value of the differential cross section.
+   * \returns Pair containing dSigma/dk as a first argument and dSigma/dtheta
+   *          as a second argument
    */
-  double brems_dsigma_dk();
+  std::pair<double, double> brems_diff_cross_sections();
 
-  /**
-   * Computes the differential cross section digma/dtheta of the bremsstrahlung
-   * process.
-   *
-   * \returns Value of the differential cross section.
-   */
-  double brems_dsigma_dtheta();
 };
 
 }  // namespace smash
