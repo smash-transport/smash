@@ -81,6 +81,12 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * Starting time of the simulation.
  * All particles in the box are initialized with \f$x^0\f$ = Start_Time.
  *
+ * \key Equilibration_Time (double, optional): \n
+ * Time after which the output of the box is written out. The first time however
+ * will be printed. This is useful if one wants to simulate boxes for very long
+ * times and knows at which time the box reaches its thermal and chemical
+ * equilibrium.
+ *
  * \key Init_Multiplicities (int, required): \n
  * Map of PDG number and quantity of this PDG number.
  * Controls how many particles of each sort will be initialized.
@@ -209,6 +215,8 @@ BoxModus::BoxModus(Configuration modus_config,
                    const ExperimentParameters &parameters)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
       length_(modus_config.take({"Box", "Length"})),
+      equilibration_time_(
+          modus_config.take({"Box", "Equilibration_Time"}, -1.)),
       temperature_(modus_config.take({"Box", "Temperature"})),
       start_time_(modus_config.take({"Box", "Start_Time"}, 0.)),
       use_thermal_(

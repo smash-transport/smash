@@ -1906,59 +1906,63 @@ void Experiment<Modus>::intermediate_output() {
       initial_mean_field_energy_);
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
   // save evolution data
-  for (const auto &output : outputs_) {
-    if (output->is_dilepton_output() || output->is_photon_output() ||
-        output->is_IC_output()) {
-      continue;
-    }
-
-    output->at_intermediate_time(particles_, parameters_.outputclock,
-                                 density_param_);
-
-    // Thermodynamic output on the lattice versus time
-    switch (dens_type_lattice_printout_) {
-      case DensityType::Baryon:
-        update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
-                       density_param_, particles_, false);
-        output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
-                                      DensityType::Baryon, *jmu_B_lat_);
-        break;
-      case DensityType::BaryonicIsospin:
-        update_lattice(jmu_I3_lat_.get(), lat_upd, DensityType::BaryonicIsospin,
-                       density_param_, particles_, false);
-        output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
-                                      DensityType::BaryonicIsospin,
-                                      *jmu_I3_lat_);
-        break;
-      case DensityType::None:
-        break;
-      default:
-        update_lattice(jmu_custom_lat_.get(), lat_upd,
-                       dens_type_lattice_printout_, density_param_, particles_,
-                       false);
-        output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
-                                      dens_type_lattice_printout_,
-                                      *jmu_custom_lat_);
-    }
-    if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
-      update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
-                     density_param_, particles_);
-      if (printout_tmn_) {
-        output->thermodynamics_output(ThermodynamicQuantity::Tmn,
-                                      dens_type_lattice_printout_, *Tmn_);
+  if (!(modus_.is_box() && parameters_.outputclock->current_time() <
+                               modus_.equilibration_time())) {
+    for (const auto &output : outputs_) {
+      if (output->is_dilepton_output() || output->is_photon_output() ||
+          output->is_IC_output()) {
+        continue;
       }
-      if (printout_tmn_landau_) {
-        output->thermodynamics_output(ThermodynamicQuantity::TmnLandau,
-                                      dens_type_lattice_printout_, *Tmn_);
-      }
-      if (printout_v_landau_) {
-        output->thermodynamics_output(ThermodynamicQuantity::LandauVelocity,
-                                      dens_type_lattice_printout_, *Tmn_);
-      }
-    }
 
-    if (thermalizer_) {
-      output->thermodynamics_output(*thermalizer_);
+      output->at_intermediate_time(particles_, parameters_.outputclock,
+                                   density_param_);
+
+      // Thermodynamic output on the lattice versus time
+      switch (dens_type_lattice_printout_) {
+        case DensityType::Baryon:
+          update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
+                         density_param_, particles_, false);
+          output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
+                                        DensityType::Baryon, *jmu_B_lat_);
+          break;
+        case DensityType::BaryonicIsospin:
+          update_lattice(jmu_I3_lat_.get(), lat_upd,
+                         DensityType::BaryonicIsospin, density_param_,
+                         particles_, false);
+          output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
+                                        DensityType::BaryonicIsospin,
+                                        *jmu_I3_lat_);
+          break;
+        case DensityType::None:
+          break;
+        default:
+          update_lattice(jmu_custom_lat_.get(), lat_upd,
+                         dens_type_lattice_printout_, density_param_,
+                         particles_, false);
+          output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
+                                        dens_type_lattice_printout_,
+                                        *jmu_custom_lat_);
+      }
+      if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
+        update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
+                       density_param_, particles_);
+        if (printout_tmn_) {
+          output->thermodynamics_output(ThermodynamicQuantity::Tmn,
+                                        dens_type_lattice_printout_, *Tmn_);
+        }
+        if (printout_tmn_landau_) {
+          output->thermodynamics_output(ThermodynamicQuantity::TmnLandau,
+                                        dens_type_lattice_printout_, *Tmn_);
+        }
+        if (printout_v_landau_) {
+          output->thermodynamics_output(ThermodynamicQuantity::LandauVelocity,
+                                        dens_type_lattice_printout_, *Tmn_);
+        }
+      }
+
+      if (thermalizer_) {
+        output->thermodynamics_output(*thermalizer_);
+      }
     }
   }
 }
