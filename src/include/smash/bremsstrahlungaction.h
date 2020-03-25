@@ -186,7 +186,6 @@ class BremsstrahlungAction : public ScatterAction {
    *          as a second argument
    */
   std::pair<double, double> brems_diff_cross_sections();
-
 };
 
 }  // namespace smash

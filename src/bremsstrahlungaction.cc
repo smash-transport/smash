@@ -140,8 +140,8 @@ void BremsstrahlungAction::sample_3body_phasespace() {
   // Photon angle: Phi random, theta from theta_ sampled above
   const Angles phitheta_photon(random::uniform(0.0, twopi), std::cos(theta_));
   outgoing_particles_[2].set_4momentum(m_c, pcm * phitheta_photon.threevec());
-  // Boost factor to cm frame of (π pair - photon)
-  const ThreeVector beta_cm =
+  // Boost velocity to cm frame of (π pair - photon)
+  const ThreeVector beta_cm_pion_pair_photon =
       pcm * phitheta_photon.threevec() / std::sqrt(pcm * pcm + E_ab * E_ab);
 
   // Sample pion pair isotropically
@@ -149,8 +149,8 @@ void BremsstrahlungAction::sample_3body_phasespace() {
   phitheta.distribute_isotropically();
   outgoing_particles_[0].set_4momentum(m_a, pcm_pions * phitheta.threevec());
   outgoing_particles_[1].set_4momentum(m_b, -pcm_pions * phitheta.threevec());
-  outgoing_particles_[0].boost_momentum(beta_cm);
-  outgoing_particles_[1].boost_momentum(beta_cm);
+  outgoing_particles_[0].boost_momentum(beta_cm_pion_pair_photon);
+  outgoing_particles_[1].boost_momentum(beta_cm_pion_pair_photon);
 }
 
 void BremsstrahlungAction::add_dummy_hadronic_process(
@@ -253,7 +253,7 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
   return process_list;
 }
 
-std::pair<double,double> BremsstrahlungAction::brems_diff_cross_sections() {
+std::pair<double, double> BremsstrahlungAction::brems_diff_cross_sections() {
   static const ParticleTypePtr pi_z_particle = &ParticleType::find(pdg::pi_z);
   const double collision_energy = sqrt_s();
   double dsigma_dk;
