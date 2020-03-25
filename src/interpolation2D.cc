@@ -9,6 +9,7 @@
 
 #include <initializer_list>
 #include <iostream>
+#include <stdexcept>
 
 namespace smash {
 
