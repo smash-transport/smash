@@ -185,8 +185,11 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * \n
  * - \b Initial_Conditions (Oscar1999, Oscar2013, binary, ROOT and special ASCII
  * IC (\ref IC_output_user_guide_) formats)\n
- *   \key Proper_Time (double, optional, default = nuclei passing time): Proper
- *       time at which hypersurface is created \n
+ *   \key Proper_Time (double, optional, default = nuclei passing time, if
+ *   nuclei passing time > \key Lower_Bound, else \key Lower_Bound):
+ *   Proper time at which hypersurface is created \n
+ *   \key Lower_Bound (double, optional, default = 0.5 fm): Lower bound for the
+ *    IC proper time if \key Proper_Time is not provided.\n
  *   \key Extended (bool, optional, default = false, incompatible with
  *                  Oscar1999, ROOT and ASCII format):\n
  *   \li \key true - Print extended information for each particle
@@ -315,14 +318,15 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * simulations. The corresponding output provides the particle list on a
  * hypersurface of constant proper time. If desired, the proper time can be set
  * manually from the configuration file (in the following example at \f$\tau =
- * 0.5 \f$ fm). If not provided, the default proper time corresponds to the
- * moment when both nuclei have entirely passed through each other.\n
+ * 1.5 \f$ fm). If not provided, the default proper time corresponds to the
+ * moment when both nuclei have entirely passed through each other, while this
+ * proper time is greater than 0.5 fm. Else it is set to \f$\tau = 0.5 \f$ fm.\n
  * The initial conditions output can be enabled as follows:
  *\verbatim
      Initial_Conditions:
          Format:    ["ASCII", "Oscar1999", "Oscar2013", "Binary", "ROOT"]
          Extended: False
-         Proper_Time: 0.5
+         Proper_Time: 1.5
  \endverbatim
  */
 
@@ -384,6 +388,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           config_coll.take({"Included_2to2"}, ReactionsBitSet().set()),
           config_coll.take({"Strings"}, modus_chooser != "Box"),
           config_coll.take({"Use_AQM"}, true),
+          config_coll.take({"Resonance_Lifetime_Modifier"}, 1.),
           config_coll.take({"Strings_with_Probability"}, true),
           config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
           config.has_value({"Output", "Photons"}),
@@ -402,23 +407,36 @@ std::string format_measurements(const Particles &particles,
   const QuantumNumbers current_values(particles);
   const QuantumNumbers difference = current_values - conserved_initial;
 
+  // Make sure there are no FPEs in case of IC output, were there will
+  // eventually be no more particles in the system
+  const double current_energy =
+      (particles.size() > 0) ? current_values.momentum().x0() : 0.0;
+  const double energy_per_part =
+      (particles.size() > 0)
+          ? (current_energy + E_mean_field - E_mean_field_initial) /
+                particles.size()
+          : 0.0;
+
   std::ostringstream ss;
   // clang-format off
   ss << field<7, 3> << time
     // total kinetic energy in the system
-     << field<11, 3> << current_values.momentum().x0()
+     << field<11, 3> << current_energy
     // total mean field energy in the system
      << field<11, 3> << E_mean_field
     // total energy in the system
-     << field<12, 3> << current_values.momentum().x0() + E_mean_field
+     << field<12, 3> << current_energy + E_mean_field
     // total energy per particle in the system
-     << field<12, 6>
-     << (current_values.momentum().x0() + E_mean_field)/particles.size()
-    // change in energy per particle
-     << field<13, 6> << (difference.momentum().x0()
-                         + E_mean_field - E_mean_field_initial)
-                        /particles.size()
-     << field<14, 3> << scatterings_this_interval
+     << field<12, 6> << energy_per_part;
+    // change in total energy per particle (unless IC output is enabled)
+    if (particles.size() == 0) {
+     ss << field<13, 6> << "N/A";
+    } else {
+     ss << field<13, 6> << (difference.momentum().x0()
+                            + E_mean_field - E_mean_field_initial)
+                            / particles.size();
+    }
+    ss << field<14, 3> << scatterings_this_interval
      << field<10, 3> << particles.size()
      << field<9, 3> << elapsed_seconds;
   // clang-format on

@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This has to be the first include
+#include <vir/test.h>  // This has to be the first include
 
 #include "setup.h"
 
@@ -235,6 +235,42 @@ TEST(vtkoutputfile) {
       for (int i = 0; i < number_of_particles; i++) {
         outputfile >> item;
         COMPARE(item, std::to_string(i));
+      }
+
+      /* Check SCALARS baryon_number */
+      outputfile >> item;
+      COMPARE(item, "SCALARS");
+      outputfile >> item;
+      COMPARE(item, "baryon_number");
+      outputfile >> item;
+      COMPARE(item, "int");
+      outputfile >> item;
+      COMPARE(item, "1");
+      outputfile >> item;
+      COMPARE(item, "LOOKUP_TABLE");
+      outputfile >> item;
+      COMPARE(item, "default");
+      for (int i = 0; i < number_of_particles; i++) {
+        outputfile >> item;
+        COMPARE(item, std::to_string(0));
+      }
+
+      /* Check SCALARS strangeness */
+      outputfile >> item;
+      COMPARE(item, "SCALARS");
+      outputfile >> item;
+      COMPARE(item, "strangeness");
+      outputfile >> item;
+      COMPARE(item, "int");
+      outputfile >> item;
+      COMPARE(item, "1");
+      outputfile >> item;
+      COMPARE(item, "LOOKUP_TABLE");
+      outputfile >> item;
+      COMPARE(item, "default");
+      for (int i = 0; i < number_of_particles; i++) {
+        outputfile >> item;
+        COMPARE(item, std::to_string(0));
       }
 
       /* Check momentum vectors */

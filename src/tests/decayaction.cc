@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "setup.h"
 
@@ -56,7 +56,7 @@ TEST(create_decayaction) {
   COMPARE(m_H, 4.0);
   COMPARE(m0_A1, 0.4);
   // Check consistency for width at pole
-  UnitTest::setFuzzyness<double>(2);
+  vir::test::setFuzzyness<double>(2);
   FUZZY_COMPARE(H.type().total_width(m0_H), G0_H);
 
   // Initialize decays of H and check their properties

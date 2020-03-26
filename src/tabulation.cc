@@ -66,7 +66,7 @@ static void swrite(std::ofstream& stream, double x) {
 /**
  * Read binary representation of a double.
  *
- * \param Input stream.
+ * \param[in] stream Input stream.
  * \return Read value.
  */
 static double sread_double(std::ifstream& stream) {
@@ -92,7 +92,7 @@ static void swrite(std::ofstream& stream, size_t x) {
 /**
  * Read binary representation of a size_t.
  *
- * \param Input stream.
+ * \param[in] stream Input stream.
  * \return Read value.
  */
 static size_t sread_size(std::ifstream& stream) {
@@ -121,7 +121,7 @@ static void swrite(std::ofstream& stream, const std::vector<double> x) {
 /**
  * Read binary representation of a vector of doubles.
  *
- * \param Input stream.
+ * \param[in] stream Input stream.
  * \return Read value.
  */
 static std::vector<double> sread_vector(std::ifstream& stream) {
@@ -147,7 +147,7 @@ static void swrite(std::ofstream& stream, sha256::Hash x) {
 /**
  * Read binary representation of a SHA256 hash.
  *
- * \param Input stream.
+ * \param[in] stream Input stream.
  * \return Read value.
  */
 static sha256::Hash sread_hash(std::ifstream& stream) {

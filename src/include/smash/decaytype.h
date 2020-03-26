@@ -327,7 +327,8 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
    * This differential width is used directly for the dilepton shining weights.
    * It is calculated according to \iref{Weil:2013mya}, eq. (30)-(36).
    *
-   * \todo{Cite SMASH dilepton paper.}
+   * Also see \iref{Staudenmaier:2017vtq} for a description of dilepton
+   * production in SMASH.
    *
    * \param[in] m_par Mass of the parent.
    * \param[in] m_l Mass of the lepton species.

@@ -81,6 +81,12 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * Starting time of the simulation.
  * All particles in the box are initialized with \f$x^0\f$ = Start_Time.
  *
+ * \key Equilibration_Time (double, optional): \n
+ * Time after which the output of the box is written out. The first time however
+ * will be printed. This is useful if one wants to simulate boxes for very long
+ * times and knows at which time the box reaches its thermal and chemical
+ * equilibrium.
+ *
  * \key Init_Multiplicities (int, required): \n
  * Map of PDG number and quantity of this PDG number.
  * Controls how many particles of each sort will be initialized.
@@ -160,6 +166,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
          Length: 10.0
          Temperature: 0.2
          Use_Thermal_Multiplicities: True
+         Initial_Condition: "thermal momenta"
          Baryon_Chemical_Potential: 0.0
          Strange_Chemical_Potential: 0.0
          Account_Resonance_Widths: True
@@ -173,6 +180,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
          Length: 10.0
          Temperature: 0.2
          Use_Thermal_Multiplicities: True
+         Initial_Condition: "thermal momenta"
          Jet:
              Jet_PDG: 211
              Jet_Momentum: 100.0
@@ -203,9 +211,12 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
  * ('../input', if the build directory is located in the smash
  * folder).
  */
-BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
+BoxModus::BoxModus(Configuration modus_config,
+                   const ExperimentParameters &parameters)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
       length_(modus_config.take({"Box", "Length"})),
+      equilibration_time_(
+          modus_config.take({"Box", "Equilibration_Time"}, -1.)),
       temperature_(modus_config.take({"Box", "Temperature"})),
       start_time_(modus_config.take({"Box", "Start_Time"}, 0.)),
       use_thermal_(
@@ -222,7 +233,12 @@ BoxModus::BoxModus(Configuration modus_config, const ExperimentParameters &)
       jet_pdg_(insert_jet_ ? modus_config.take({"Box", "Jet", "Jet_PDG"})
                                  .convert_for(jet_pdg_)
                            : pdg::p),  // dummy default; never used
-      jet_mom_(modus_config.take({"Box", "Jet", "Jet_Momentum"}, 20.)) {}
+      jet_mom_(modus_config.take({"Box", "Jet", "Jet_Momentum"}, 20.)) {
+  if (parameters.res_lifetime_factor < 0.) {
+    throw std::invalid_argument(
+        "Resonance lifetime modifier cannot be negative!");
+  }
+}
 
 double BoxModus::initial_conditions(Particles *particles,
                                     const ExperimentParameters &parameters) {
@@ -237,8 +253,11 @@ double BoxModus::initial_conditions(Particles *particles,
     if (average_multipl_.empty()) {
       for (const ParticleType &ptype : ParticleType::list_all()) {
         if (HadronGasEos::is_eos_particle(ptype)) {
-          const double n = HadronGasEos::partial_density(
-              ptype, T, mub_, mus_, account_for_resonance_widths_);
+          const double lifetime_factor =
+              ptype.is_stable() ? 1. : parameters.res_lifetime_factor;
+          const double n = lifetime_factor * HadronGasEos::partial_density(
+                                                 ptype, T, mub_, mus_,
+                                                 account_for_resonance_widths_);
           average_multipl_[ptype.pdgcode()] = n * V * parameters.testparticles;
         }
       }

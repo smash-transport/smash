@@ -22,7 +22,7 @@ namespace smash {
  *            See \ref inputparticles.
  * \param[in] decaymodes_file a file containing decay modes of
  *            the resonances. See \ref inputdecaymodes.
- * \param[out] a pair of strings -- the contents of particle
+ * \return a pair of strings -- the contents of particle
  *             and decaymode files.
  */
 std::pair<std::string, std::string> load_particles_and_decaymodes(

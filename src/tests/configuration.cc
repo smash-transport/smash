@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "setup.h"
 
@@ -94,7 +94,7 @@ TEST(take_removes_entry) {
 }
 
 // Sorry, but I have to put this in the std namespace, otherwise it doesn't
-// compile. That's because the << operator is called from inside the UnitTest
+// compile. That's because the << operator is called from inside the vir::test
 // namespace and all involved types are in the std namespace.
 namespace std {
 static ostream &operator<<(ostream &s, const vector<string> &v) {

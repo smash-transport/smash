@@ -280,7 +280,6 @@ void DecayModes::load_decaymodes(const std::string &input) {
         lineinput >> name;
       }
       Parity parity;
-      bool is_strong_decay;
       const int s0 = isotype_mother->spin();
       int min_L = 0;
       int max_L = 0;
@@ -294,8 +293,6 @@ void DecayModes::load_decaymodes(const std::string &input) {
             const IsoParticleType &isotype_daughter_2 =
                 IsoParticleType::find(decay_particles[1]);
             parity = isotype_daughter_1.parity() * isotype_daughter_2.parity();
-            is_strong_decay = isotype_daughter_1.is_hadron() &&
-                              isotype_daughter_2.is_hadron();
             const int s1 = isotype_daughter_1.spin();
             const int s2 = isotype_daughter_2.spin();
             min_L = min_angular_momentum(s0, s1, s2);
@@ -342,9 +339,6 @@ void DecayModes::load_decaymodes(const std::string &input) {
                 IsoParticleType::find(decay_particles[2]);
             parity = isotype_daughter_1.parity() * isotype_daughter_2.parity() *
                      isotype_daughter_3.parity();
-            is_strong_decay = isotype_daughter_1.is_hadron() &&
-                              isotype_daughter_2.is_hadron() &&
-                              isotype_daughter_3.is_hadron();
             const int s1 = isotype_daughter_1.spin();
             const int s2 = isotype_daughter_2.spin();
             const int s3 = isotype_daughter_2.spin();
@@ -388,7 +382,6 @@ void DecayModes::load_decaymodes(const std::string &input) {
         ParticleTypePtrList types;
         int charge = 0;
         parity = Parity::Pos;
-        is_strong_decay = true;
         for (auto part : decay_particles) {
           try {
             types.push_back(IsoParticleType::find_state(part));
@@ -399,7 +392,6 @@ void DecayModes::load_decaymodes(const std::string &input) {
           }
           charge += types.back()->charge();
           parity *= types.back()->parity();
-          is_strong_decay &= types.back()->is_hadron();
         }
         if (types.size() == 2) {
           const int s1 = types[0]->spin();
@@ -441,7 +433,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
         parity = -parity;
       }
       // Make sure the decay has the correct parity.
-      if (is_strong_decay && parity != mother_states[0]->parity()) {
+      if (parity != mother_states[0]->parity()) {
         throw InvalidDecay(mother_states[0]->name() +
                            " decay mode violates parity conservation " +
                            "(line " + std::to_string(linenumber) + ": \"" +

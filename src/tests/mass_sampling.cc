@@ -5,7 +5,7 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "histogram.h"
 #include "setup.h"
@@ -33,7 +33,7 @@ TEST(init_decay_modes) {
   DecayModes::load_decaymodes(
       "ρ \n"
       "1.      1  π π   \n"
-      "4.72e-5 1  e⁻ e⁺ \n"
+      "4.72e-5 0  e⁻ e⁺ \n"
       "\n"
       "ω \n"
       "1.  1  π ρ \n");

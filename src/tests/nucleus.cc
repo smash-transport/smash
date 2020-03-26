@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include <map>
 
@@ -140,7 +140,7 @@ TEST(shift_zero) {
   // nucleus!
   lead.shift(0, 0.0, 0.0);
   FourVector postcenter = lead.center();
-  UnitTest::setFuzzyness<double>(30);
+  vir::test::setFuzzyness<double>(30);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
   FUZZY_COMPARE(postcenter.x3(), precenter.x3());
@@ -155,7 +155,7 @@ TEST(shift_x) {
   // shift only in x.
   lead.shift(0, 4.0, 0.0);
   FourVector postcenter = lead.center();
-  UnitTest::setFuzzyness<double>(30);
+  vir::test::setFuzzyness<double>(30);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1() + 4.0);
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
   FUZZY_COMPARE(postcenter.x3(), precenter.x3());
@@ -169,7 +169,7 @@ TEST(shift_z) {
   FourVector precenter = lead.center();
   lead.shift(4.0, 0.0, 0.0);
   FourVector postcenter = lead.center();
-  UnitTest::setFuzzyness<double>(30);
+  vir::test::setFuzzyness<double>(30);
   FUZZY_COMPARE(postcenter.x1(), precenter.x1());
   FUZZY_COMPARE(postcenter.x2(), precenter.x2());
   FUZZY_COMPARE(postcenter.x3(), precenter.x3() + 4.0);
@@ -249,7 +249,7 @@ TEST(Fermi_motion) {
       COMPARE(mom3.x2(), 0.0);
       COMPARE(mom3.x3(), 0.0);
     }
-    UnitTest::setFuzzyness<double>(3);
+    vir::test::setFuzzyness<double>(3);
     FUZZY_COMPARE(p.momentum().sqr(), p.pole_mass() * p.pole_mass());
   }
   COMPARE_ABSOLUTE_ERROR(ptot.x1(), 0.0, 1.0e-15) << ptot.x1();

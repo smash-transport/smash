@@ -22,6 +22,8 @@ if(FORMAT_TEST_OUTPUT_FOR_VIM)
    set(UNITTEST_ARGS "-v")
 endif()
 
+# add 3rd-party virtest library
+include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rdparty/virtest")
 
 # tests:
 # Helper macro that adds a run_<name> target
@@ -232,6 +234,7 @@ smash_add_unittest(pdgcode)
 smash_add_unittest(photons)
 smash_add_unittest(potentials)
 smash_add_unittest(processbranch)
+smash_add_unittest(processstring)
 smash_add_unittest(propagate)
 smash_add_unittest(quantumnumbers)
 smash_add_unittest(random)
@@ -284,6 +287,9 @@ smash_add_runtest(custom_nucleus_run smash smash
                   -c "General: {Nevents: 2}"
                   -c "Modi: {Collider: {Projectile: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
                   -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}")
+smash_add_runtest(initial_conditions_run smash smash
+                  -i ${PROJECT_SOURCE_DIR}/input/config.yaml
+                  -c "Output: {Initial_Conditions: {Format: [Binary, Oscar2013]}}")
 
 # Test the shipped config files for potentials and deformed nuclei by verifying
 # the binary runs with them.
@@ -317,6 +323,10 @@ smash_add_runtest(sphere_steps smash smash -e 2.0
                   -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
                   -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
                   -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}")
+smash_add_runtest(particle_table_dump smash smash -x)
+smash_add_runtest(reactions_dump smash smash -l)
+smash_add_runtest(crosssection_dump smash smash -s 2112,2212)
+smash_add_runtest(resonance_spectral_function_dump smash smash -r 113)
 
 # verify that default run has no mem leaks
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)

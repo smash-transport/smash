@@ -79,19 +79,22 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * \page potentials_sym_ Symmetry
    *
    * The symmetry potential has the form
-   * \f[ U_{Sym} = \pm 2 S_{pot} \frac{I_3}{I} \frac{\rho_{I3}}{\rho_0} \,, \f]
-   * where \f$ \rho_{I3}\f$ is the density of the relative isospin \f$ I_3/I
-   * \f$.
+   * \f[ U_{Sym} = \pm 2 S_{pot} \frac{I_3}{I} \frac{\rho_{I_3}}{\rho_0}
+   * + S(\rho_B)\left(\frac{\rho_{I_3}}{\rho_B}\right)^2 \,, \f]
+   * where \f$ \rho_{I_3}\f$ is the density of the relative isospin \f$ I_3/I
+   * \f$ and \f$ \rho_B \f$ is the net baryon density.
    *
    * \key S_pot (double, required, no default): \n
    *      Parameter \f$S_{pot}\f$ of symmetry potential in MeV
    *
    * \key gamma (double, no default): \n
-   *      Power \f$ \gamma \f$ in formula for \f$ S(\rho) \f$:
-   * \f[ S(\rho)=12.3\,\mathrm{MeV}\times (\frac{\rho}{\rho_0})^{2/3}+
-   * 20\,\mathrm{MeV}\times(\frac{\rho}{\rho_0})^\gamma \f]
-   * Specify either this or S_pot. If gamma is specified, the factor S will
-   * depend on the baryon density. Otherwise it wil be constant.
+   *      Power \f$ \gamma \f$ in formula for \f$ S(\rho_B) \f$:
+   * \f[ S(\rho_B)=12.3\,\mathrm{MeV}\times
+   * \left(\frac{\rho_B}{\rho_0}\right)^{2/3}+
+   * 20\,\mathrm{MeV}\times\left(\frac{\rho_B}{\rho_0}\right)^\gamma \f]
+   * If gamma is specified, the baryon density dependence is included in the
+   * potential. Otherwise only the first term of the potential will be taken
+   * into account.
    */
   if (use_symmetry_) {
     symmetry_S_Pot_ = conf.take({"Symmetry", "S_Pot"});

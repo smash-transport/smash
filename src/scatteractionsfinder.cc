@@ -769,6 +769,7 @@ static std::string make_decay_name(const std::string& res_name,
  * children.
  *
  * \param node Starting node.
+ * \param[in] sqrts center-of-mass energy.
  */
 static void add_decays(Node& node, double sqrts) {
   // If there is more than one unstable particle in the current state, then

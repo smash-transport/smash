@@ -126,6 +126,11 @@ static constexpr int LCollider = LogArea::Collider::id;
  * \key Impact: \n
  * A section for the impact parameter (= distance in fm of the two
  * straight lines that the center of masses of the nuclei travel on).
+ * The separation of the two colliding nuclei is by default along the x axis.
+ *
+ * \key Random_Reaction_Plane (bool, optional, default = false): \n
+ * Rotate the direction of the separation of the two nuclei due to the impact
+ * parameter with a uniform random angle in the x-y plane.
  *
  * \key Value (double, optional, optional, default = 0.0): \n
  * Fixed value for
@@ -422,7 +427,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
     }
   }
   /// \todo include a check that only one method of specifying impact is used
-
+  // whether the direction of separation should be ramdomly smapled
+  random_reaction_plane_ =
+      modus_cfg.take({"Impact", "Random_Reaction_Plane"}, false);
   // Look for user-defined initial separation between nuclei.
   if (modus_cfg.has_value({"Initial_Distance"})) {
     initial_z_displacement_ = modus_cfg.take({"Initial_Distance"});
@@ -528,13 +535,29 @@ double ColliderModus::initial_conditions(Particles *particles,
   const double proj_z = -dz - std::sqrt(1.0 - v_a * v_a) * (r_a + d_a);
   const double targ_z =
       +dz * std::abs(v_b / v_a) + std::sqrt(1.0 - v_b * v_b) * (r_b + d_b);
+  // rotation angle in the transverse plane
+  const double phi =
+      random_reaction_plane_ ? random::uniform(0.0, 2.0 * M_PI) : 0.0;
+
   projectile_->shift(proj_z, +impact_ / 2.0, simulation_time);
   target_->shift(targ_z, -impact_ / 2.0, simulation_time);
 
   // Put the particles in the nuclei into code particles.
   projectile_->copy_particles(particles);
   target_->copy_particles(particles);
+  rotate_reaction_plane(phi, particles);
   return simulation_time;
+}
+
+void ColliderModus::rotate_reaction_plane(double phi, Particles *particles) {
+  for (ParticleData &p : *particles) {
+    ThreeVector pos = p.position().threevec();
+    ThreeVector mom = p.momentum().threevec();
+    pos.rotate_around_z(phi);
+    mom.rotate_around_z(phi);
+    p.set_3position(pos);
+    p.set_3momentum(mom);
+  }
 }
 
 void ColliderModus::sample_impact() {

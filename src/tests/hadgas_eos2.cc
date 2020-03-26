@@ -9,7 +9,7 @@
 
 #include <gsl/gsl_sf_bessel.h>
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "histogram.h"
 #include "setup.h"

@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "../include/smash/distributions.h"
 
@@ -56,7 +56,7 @@ TEST(cauchy) {
 TEST(maxwell) {
   // tests the Maxwell-Boltzmann implementation for energies between 0
   // and 10 GeV and Temperatures between 0.01 and 1 GeV.
-  UnitTest::setFuzzyness<double>(2);
+  vir::test::setFuzzyness<double>(2);
   for (int e_i = 0; e_i < 200; ++e_i) {
     const double energy = e_i * 0.05;
     const double fourpie2 = (4.0 * M_PI) * (energy * energy);

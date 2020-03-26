@@ -250,6 +250,7 @@ inline ExperimentParameters default_parameters(int testparticles = 1,
                               all_reactions_included(),
                               false,  // strings switch
                               false,  // use_AQM
+                              1.0,
                               false,  // string_with_probability
                               NNbarTreatment::NoAnnihilation,
                               false,   // photons switch

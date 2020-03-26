@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "setup.h"
 
@@ -66,7 +66,7 @@ const std::string decays_input(
     " ρ\t# rho\n"
     "\n"
     "0.99\t1\tπ π\t# pi pi \n"
-    "0.01  1  e⁻ e⁺\n"
+    "0.01  0  e⁻ e⁺\n"
     "\n"
     "\n"
     "ω      # omega\n"
@@ -87,7 +87,7 @@ const std::string decays_input(
 TEST(load_decay_modes) {
   DecayModes::load_decaymodes(decays_input);
 
-  UnitTest::setFuzzyness<double>(2);
+  vir::test::setFuzzyness<double>(2);
   // check that the decays of the rho and omega are generated correctly
   {
     const auto &rho_0 = ParticleType::find(0x113).decay_modes();

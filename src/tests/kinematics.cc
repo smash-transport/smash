@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "../include/smash/constants.h"
 #include "../include/smash/kinematics.h"
@@ -33,7 +33,7 @@ TEST(fixed_target_projectile_v) {
   const double gamma = 1.0 / std::sqrt(1.0 - v * v);
   const double E = gamma * ma + mb;
   const double p = gamma * v * ma;
-  UnitTest::setFuzzyness<double>(2);
+  vir::test::setFuzzyness<double>(2);
   FUZZY_COMPARE(s, E * E - p * p);
 }
 
@@ -93,6 +93,6 @@ TEST(s_from_plab) {
   const double ma = 0.6;
   const double mb = 1.2;
   const double E = std::sqrt(plab * plab + ma * ma) + mb;
-  UnitTest::setFuzzyness<double>(2);
+  vir::test::setFuzzyness<double>(2);
   FUZZY_COMPARE(s_from_plab(plab, ma, mb), E * E - plab * plab);
 }

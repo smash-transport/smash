@@ -7,7 +7,7 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "setup.h"
 
@@ -73,7 +73,7 @@ TEST(decaytree_correctness) {
   auto final_state_xs = tree.final_state_cross_sections();
   deduplicate(final_state_xs);
 
-  UnitTest::setFuzzyness<double>(4);
+  vir::test::setFuzzyness<double>(4);
   double xs_partial_sum = 0.0;
   for (const auto& p : final_state_xs) {
     if (p.name_ == a->name() + b->name()) {

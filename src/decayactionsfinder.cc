@@ -49,10 +49,11 @@ ActionList DecayActionsFinder::find_actions_in_cell(
      * timestep, it can be proven that this still overall obeys
      * the exponential decay law.
      */
-    double decay_time = random::exponential<double>(
-        /* The clock goes slower in the rest
-         * frame of the resonance */
-        one_over_hbarc * p.inverse_gamma() * width);
+    double decay_time =
+        res_lifetime_factor_ * random::exponential<double>(
+                                   /* The clock goes slower in the rest
+                                    * frame of the resonance */
+                                   one_over_hbarc * p.inverse_gamma() * width);
     /* If the particle is not yet formed, shift the decay time by the time it
      * takes the particle to form */
     if (p.xsec_scaling_factor() < 1.0) {

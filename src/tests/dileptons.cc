@@ -5,7 +5,7 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
 #include "setup.h"
 
@@ -28,11 +28,11 @@ TEST(init_particle_types) {
 TEST(init_decay_modes) {
   DecayModes::load_decaymodes(
       "π\n"
-      "0.98823 0 γ γ\n"
+      "0.98823 1 γ γ\n"
       "0.01174 0  e⁻ e⁺ γ\n"
       "\n"
       "η\n"
-      "0.393   0  γ γ\n"
+      "0.393   1  γ γ\n"
       "0.326   0  π⁰ π⁰ π⁰\n"
       "0.227   0  π⁺ π⁻ π⁰\n"
       "0.046   1  π⁺ π⁻ γ\n"

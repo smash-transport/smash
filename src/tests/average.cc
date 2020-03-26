@@ -7,8 +7,9 @@
  *
  */
 
-#include "unittest.h"  // This include has to be first
+#include <vir/test.h>  // This include has to be first
 
+#include <tuple>
 #include "../include/smash/average.h"
 
 using namespace smash;

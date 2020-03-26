@@ -188,6 +188,8 @@ class ColliderModus : public ModusDefault {
    * distance apart from each other.
    */
   double impact_ = 0.;
+  /// Whether the reaction plane should be randomized
+  bool random_reaction_plane_;
   /// Method used for sampling of impact parameter.
   Sampling sampling_ = Sampling::Quadratic;
   /// Minimum value of impact parameter.
@@ -199,6 +201,9 @@ class ColliderModus : public ModusDefault {
   /// Pointer to the impact parameter interpolation.
   std::unique_ptr<InterpolateDataLinear<double>> impact_interpolation_ =
       nullptr;
+
+  void rotate_reaction_plane(double phi, Particles *particles);
+
   /** Sample impact parameter.
    *
    * Samples the impact parameter from values between imp_min_ and imp_max_, if
