@@ -217,7 +217,7 @@ TEST(particlelist_format) {
   outputfilepath_unfinished += ".unfinished";
   {
     OutputParameters out_par = OutputParameters();
-    out_par.part_only_final = true;
+    out_par.part_only_final = OutputOnlyFinal::Yes;
     out_par.part_extended = false;
 
     std::unique_ptr<OutputInterface> oscfinal =

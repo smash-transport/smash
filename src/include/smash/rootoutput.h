@@ -129,7 +129,7 @@ class RootOutput : public OutputInterface {
                    double impact_parameter, bool empty_event) override;
   /**
    * Writes intermediate particles to a tree defined by treename,
-   * if it is allowed (i.e., particles_only_final_ is false).
+   * if it is allowed (i.e., particles_only_final_ is No).
    * \param[in] particles Particles to be written to output.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
@@ -214,7 +214,7 @@ class RootOutput : public OutputInterface {
   bool write_initial_conditions_;
 
   /// Print only final particles in the event, no intermediate output.
-  bool particles_only_final_;
+  OutputOnlyFinal particles_only_final_;
 
   /**
    * Root file cannot be read if it was not properly closed and finalized.

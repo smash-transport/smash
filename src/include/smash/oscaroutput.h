@@ -48,8 +48,10 @@ enum OscarOutputContents {
   OscarAtEventstart = 0x004,
   /// store the state at the end of each event (at_eventend)
   OscarParticlesAtEventend = 0x008,
+  /// store the state at the end of each event if it is not empty (at_eventend)
+  OscarParticlesAtEventendIfNotEmpty = 0x010,
   /// store the particles that are removed on the hypersurface
-  OscarParticlesIC = 0x016
+  OscarParticlesIC = 0x020
 };
 
 /**

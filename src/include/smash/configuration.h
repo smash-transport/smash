@@ -814,6 +814,29 @@ class Configuration {
                                       std::string(key_) + "\" should be " +
                                       "\"Geometric\" or \"Stochastic\".");
     }
+
+    /**
+     * Set OutputOnlyFinal for particles output from configuration values.
+     *
+     * \return OutputOnlyFinal.
+     * \throw IncorrectTypeInAssignment in case only_final value that is
+     * not available is provided as a configuration value.
+     */
+    operator OutputOnlyFinal() const {
+      const std::string s = operator std::string();
+      if (s == "Yes") {
+        return OutputOnlyFinal::Yes;
+      }
+      if (s == "No") {
+        return OutputOnlyFinal::No;
+      }
+      if (s == "IfNotEmpty") {
+        return OutputOnlyFinal::IfNotEmpty;
+      }
+      throw IncorrectTypeInAssignment("The value for key \"" +
+                                      std::string(key_) + "\" should be " +
+                                      "\"Yes\", \"No\" or \"IfNotEmpty\".");
+    }
   };
 
   /**

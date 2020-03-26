@@ -140,7 +140,7 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
       std::fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
                    event_number + 1);
     }
-    if (!(Contents == OscarParticlesIC)) {
+    if (!(Contents & OscarParticlesIC)) {
       // We do not want the inital particle list to be printed in case of IC
       // output
       write(particles);
@@ -154,7 +154,8 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
                                                 double impact_parameter,
                                                 bool empty_event) {
   if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
-    if (Contents & OscarParticlesAtEventend) {
+    if (Contents & OscarParticlesAtEventend ||
+        (Contents & OscarParticlesAtEventendIfNotEmpty && !empty_event)) {
       std::fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
                    particles.size());
       write(particles);
@@ -168,7 +169,8 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
      * Last block of an event: initial = number of particles, final = 0
      * Block ends with null interaction. */
     const size_t zero = 0;
-    if (Contents & OscarParticlesAtEventend) {
+    if (Contents & OscarParticlesAtEventend ||
+        (Contents & OscarParticlesAtEventendIfNotEmpty && !empty_event)) {
       std::fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
                    event_number + 1);
       write(particles);
@@ -180,7 +182,7 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
   // Flush to disk
   std::fflush(file_.get());
 
-  if (Contents == OscarParticlesIC) {
+  if (Contents & OscarParticlesIC) {
     // If the runtime is too short some particles might not yet have
     // reached the hypersurface. Warning is printed.
     if (particles.size() != 0) {
@@ -223,7 +225,7 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
     for (const auto &p : action.outgoing_particles()) {
       write_particledata(p);
     }
-  } else if (Contents == OscarParticlesIC) {
+  } else if (Contents & OscarParticlesIC) {
     for (const auto &p : action.incoming_particles()) {
       write_particledata(p);
     }
@@ -770,10 +772,14 @@ std::unique_ptr<OutputInterface> create_oscar_output(
   }
   const bool modern_format = (format == "Oscar2013");
   if (content == "Particles") {
-    if (out_par.part_only_final) {
+    if (out_par.part_only_final == OutputOnlyFinal::Yes) {
       return create_select_format<OscarParticlesAtEventend>(
           modern_format, path, out_par, "particle_lists");
-    } else {
+    } else if (out_par.part_only_final == OutputOnlyFinal::IfNotEmpty) {
+      return create_select_format<OscarParticlesAtEventendIfNotEmpty>(
+          modern_format, path, out_par, "particle_lists");
+
+    } else {  // out_par.part_only_final == OutputOnlyFinal::No
       return create_select_format<OscarTimesteps | OscarAtEventstart |
                                   OscarParticlesAtEventend>(
           modern_format, path, out_par, "particle_lists");
@@ -821,14 +827,16 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     }
   } else if (content == "Initial_Conditions") {
     if (modern_format && !out_par.ic_extended) {
-      return make_unique<OscarOutput<OscarFormat2013, OscarParticlesIC>>(
+      return make_unique<
+          OscarOutput<OscarFormat2013, OscarParticlesIC | OscarAtEventstart>>(
           path, "SMASH_IC");
     } else if (modern_format && out_par.ic_extended) {
-      return make_unique<
-          OscarOutput<OscarFormat2013Extended, OscarParticlesIC>>(path,
-                                                                  "SMASH_IC");
+      return make_unique<OscarOutput<OscarFormat2013Extended,
+                                     OscarParticlesIC | OscarAtEventstart>>(
+          path, "SMASH_IC");
     } else if (!modern_format && !out_par.ic_extended) {
-      return make_unique<OscarOutput<OscarFormat1999, OscarParticlesIC>>(
+      return make_unique<
+          OscarOutput<OscarFormat1999, OscarParticlesIC | OscarAtEventstart>>(
           path, "SMASH_IC");
     } else if (!modern_format && out_par.ic_extended) {
       logg[LOutput].warn()

@@ -34,7 +34,7 @@ struct OutputParameters {
         td_jQBS(false),
         td_smearing(true),
         part_extended(false),
-        part_only_final(true),
+        part_only_final(OutputOnlyFinal::Yes),
         coll_extended(false),
         coll_printstartend(false),
         dil_extended(false),
@@ -69,7 +69,8 @@ struct OutputParameters {
 
     if (conf.has_value({"Particles"})) {
       part_extended = conf.take({"Particles", "Extended"}, false);
-      part_only_final = conf.take({"Particles", "Only_Final"}, true);
+      part_only_final =
+          conf.take({"Particles", "Only_Final"}, OutputOnlyFinal::Yes);
     }
 
     if (conf.has_value({"Collisions"})) {
@@ -141,7 +142,7 @@ struct OutputParameters {
   bool part_extended;
 
   /// Print only final particles in event
-  bool part_only_final;
+  OutputOnlyFinal part_only_final;
 
   /// Extended format for collisions output
   bool coll_extended;

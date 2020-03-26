@@ -14,7 +14,7 @@ Output:
     Output_Interval: 5.0
     Particles:
         Format:          ["Oscar2013"]
-        Only_Final: False
+        Only_Final:      No
 
 Modi:
     Box:

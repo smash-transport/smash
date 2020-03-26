@@ -76,7 +76,7 @@ static void create_non_oscar_particlefile(
   // Write oscar output, but write only one event and remove all comment lines.
   // This mimics the output of some hydro codes
   OutputParameters out_par = OutputParameters();
-  out_par.part_only_final = true;
+  out_par.part_only_final = OutputOnlyFinal::Yes;
   out_par.part_extended = false;
   auto input_path =
       create_particlefile(out_par, file_number, init_particle_vec);
@@ -232,7 +232,7 @@ TEST(multiple_file_non_oscar_output) {
 TEST(list_from_oscar2013_output) {
   // Create OSCAR 2013 output
   OutputParameters out_par = OutputParameters();
-  out_par.part_only_final = true;
+  out_par.part_only_final = OutputOnlyFinal::Yes;
   out_par.part_extended = false;
 
   std::vector<ParticleList> init_particles;
@@ -291,7 +291,7 @@ TEST(list_from_oscar2013_output) {
 
 TEST(multiple_files_one_event) {
   OutputParameters out_par = OutputParameters();
-  out_par.part_only_final = true;
+  out_par.part_only_final = OutputOnlyFinal::Yes;
   out_par.part_extended = false;
 
   std::vector<ParticleList> init_particles;
@@ -351,7 +351,7 @@ TEST(multiple_files_one_event) {
 
 TEST(multiple_files_multiple_events) {
   OutputParameters out_par = OutputParameters();
-  out_par.part_only_final = true;
+  out_par.part_only_final = OutputOnlyFinal::Yes;
   out_par.part_extended = false;
 
   std::vector<ParticleList> init_particles;
@@ -411,7 +411,7 @@ TEST(multiple_files_multiple_events) {
 
 TEST(multiple_events_in_file) {
   OutputParameters out_par = OutputParameters();
-  out_par.part_only_final = true;
+  out_par.part_only_final = OutputOnlyFinal::Yes;
   out_par.part_extended = false;
 
   constexpr int max_events = 2;

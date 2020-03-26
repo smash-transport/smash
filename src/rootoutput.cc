@@ -203,7 +203,7 @@ void RootOutput::at_eventstart(const Particles &particles,
   // save event number
   current_event_ = event_number;
 
-  if (write_particles_ && !particles_only_final_) {
+  if (write_particles_ && particles_only_final_ == OutputOnlyFinal::No) {
     output_counter_ = 0;
     // This is to have only one output of positive impact parameter per event
     impact_b = -1.0;
@@ -216,7 +216,7 @@ void RootOutput::at_eventstart(const Particles &particles,
 void RootOutput::at_intermediate_time(const Particles &particles,
                                       const std::unique_ptr<Clock> &,
                                       const DensityParameters &) {
-  if (write_particles_ && !particles_only_final_) {
+  if (write_particles_ && particles_only_final_ == OutputOnlyFinal::No) {
     particles_to_tree(particles);
     output_counter_++;
   }
@@ -227,7 +227,10 @@ void RootOutput::at_eventend(const Particles &particles,
                              double impact_parameter, bool empty_event) {
   impact_b = impact_parameter;
   empty_event_ = empty_event;
-  if (write_particles_) {
+  if (write_particles_ &&
+      (particles_only_final_ == OutputOnlyFinal::Yes ||
+       (particles_only_final_ == OutputOnlyFinal::IfNotEmpty &&
+        !empty_event_)) {
     particles_to_tree(particles);
   }
   /* Forced regular dump from operational memory to disk. Very demanding!
