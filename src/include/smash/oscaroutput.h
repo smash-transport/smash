@@ -54,10 +54,6 @@ enum OscarOutputContents {
   OscarParticlesIC = 0x020
 };
 
-
-
-
-
 /**
  * \tparam Format Determines the variant of OSCAR formatting that is used. See
  *                OscarOutputFormat.

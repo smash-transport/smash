@@ -155,9 +155,9 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \key Only_Final (string, optional, default = Yes, incompatible with
                       VTK format): \n
  *   \li \key Yes - Print only final particle list \n
- *   \li \key IfNotEmpty - Print only final particle list and only if event
- *                         is not empty i.e. a collisions happened between
- *                         projectile and target to save disk space. \n
+ *   \li \key IfNotEmpty - Print only final particle list, but only if event
+ *                         is not empty (i.e. any collisions happened between
+ *                         projectile and target). Useful to save disk space. \n
  *   \li \key No - Particle list at output interval including initial time \n
  * \n
  * - \b Collisions (VTK not available) \n

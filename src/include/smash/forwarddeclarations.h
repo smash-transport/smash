@@ -198,11 +198,12 @@ enum class CollisionCriterion {
 
 /// Whether and when only final state particles should be printed.
 enum class OutputOnlyFinal {
-  /// Only print final-state particles.
+  /// Print only final-state particles.
   Yes,
-  /// Print initial- and final-state particles.
+  /// Print initial, intermediate and final-state particles.
   No,
-  /// Only print final-state particles, and only if the event is not empty.
+  /// Print only final-state particles, and those only if the event is not
+  /// empty.
   IfNotEmpty,
 };
 

@@ -154,7 +154,8 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
                                                 double impact_parameter,
                                                 bool empty_event) {
   if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
-    if (Contents & OscarParticlesAtEventend || (Contents & OscarParticlesAtEventendIfNotEmpty && !empty_event)) {
+    if (Contents & OscarParticlesAtEventend ||
+        (Contents & OscarParticlesAtEventendIfNotEmpty && !empty_event)) {
       std::fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
                    particles.size());
       write(particles);
@@ -168,7 +169,8 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
      * Last block of an event: initial = number of particles, final = 0
      * Block ends with null interaction. */
     const size_t zero = 0;
-    if (Contents & OscarParticlesAtEventend || (Contents & OscarParticlesAtEventendIfNotEmpty && !empty_event)) {
+    if (Contents & OscarParticlesAtEventend ||
+        (Contents & OscarParticlesAtEventendIfNotEmpty && !empty_event)) {
       std::fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
                    event_number + 1);
       write(particles);
@@ -777,7 +779,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(
       return create_select_format<OscarParticlesAtEventendIfNotEmpty>(
           modern_format, path, out_par, "particle_lists");
 
-    } else { // out_par.part_only_final == OutputOnlyFinal::No
+    } else {  // out_par.part_only_final == OutputOnlyFinal::No
       return create_select_format<OscarTimesteps | OscarAtEventstart |
                                   OscarParticlesAtEventend>(
           modern_format, path, out_par, "particle_lists");
@@ -825,14 +827,16 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     }
   } else if (content == "Initial_Conditions") {
     if (modern_format && !out_par.ic_extended) {
-      return make_unique<OscarOutput<OscarFormat2013, OscarParticlesIC | OscarAtEventstart>>(
+      return make_unique<
+          OscarOutput<OscarFormat2013, OscarParticlesIC | OscarAtEventstart>>(
           path, "SMASH_IC");
     } else if (modern_format && out_par.ic_extended) {
-      return make_unique<
-          OscarOutput<OscarFormat2013Extended, OscarParticlesIC | OscarAtEventstart>>(path,
-                                                                  "SMASH_IC");
+      return make_unique<OscarOutput<OscarFormat2013Extended,
+                                     OscarParticlesIC | OscarAtEventstart>>(
+          path, "SMASH_IC");
     } else if (!modern_format && !out_par.ic_extended) {
-      return make_unique<OscarOutput<OscarFormat1999, OscarParticlesIC | OscarAtEventstart>>(
+      return make_unique<
+          OscarOutput<OscarFormat1999, OscarParticlesIC | OscarAtEventstart>>(
           path, "SMASH_IC");
     } else if (!modern_format && out_par.ic_extended) {
       logg[LOutput].warn()
