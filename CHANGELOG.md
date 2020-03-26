@@ -14,7 +14,7 @@ The major categories to group changes in this log are:
 * `Fixed` for any bug fixes.
 * `Removed` for now removed features.
 
-Also possible, but for this project less relevant, are `Deprecated` for soon-to-be removed features and `Security` in case of vulnerabilities. Major changes might be highlighted.
+Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 
 ## [Unreleased](https://github.com/smash-transport/smash-devel/compare/SMASH-1.7...HEAD)
@@ -26,7 +26,7 @@ Also possible, but for this project less relevant, are `Deprecated` for soon-to-
   * `formation_time` -> `form_time`
   * `xsec_factor` -> `xsecfac`
 * Add strangeness and baryon number to VTK particles output.
-* The `Only_Final` option for the Particles output has the new possibility if `IfNotEmpty` is entered. Then only output is written if the event is not empty i.e. there was a collision between projectile and target to save disk space. The other two options are now `Yes` or `No` (previously `True` or `False`).
+* The `Only_Final` option for the Particles output has the new possibility if `IfNotEmpty` is entered. Then only output is written if the event is not empty i.e. there was a collision between projectile and target to save disk space. The other two options are now the default `Yes` or `No` (previously `True` or `False`).
 * Restructure photon configuration:
   * Add new `Photon` section, with options `2to2_Scatterings: True/False`, `Bremsstrahlung: True/False` and `Fractional_Photons: Nfrac`, where `Nfrac` is an arbitrary integer
   * From now on, only the format and whether or not it shall be extended, can be set in the Output subsection `Photons`,
@@ -35,7 +35,7 @@ Also possible, but for this project less relevant, are `Deprecated` for soon-to-
 * Photon production from pion-pion bremsstrahlung
 * Option to randomize the reaction plane (rotate all particles by a random angle around the z axis).
 * Test to verify that cross sections do not depend on particle order.
-* Proper CHANGELOG.md file
+* CHANGELOG.md file
 
 ### Changed
 * Extend box examples in user guide to directly run.
