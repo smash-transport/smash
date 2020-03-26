@@ -45,9 +45,9 @@ TEST(pCM) {
   const double pcm = pCM(srts, ma, mb);
   FUZZY_COMPARE(std::sqrt(pcm_sqr + ma * ma) + std::sqrt(pcm_sqr + mb * mb),
                 srts);
-  COMPARE(pcm * pcm, pcm_sqr);
-  COMPARE(pCM_sqr_from_s(srts * srts, ma, mb), pcm_sqr);
-  COMPARE(pCM_from_s(srts * srts, ma, mb), pcm);
+  FUZZY_COMPARE(pcm * pcm, pcm_sqr);
+  FUZZY_COMPARE(pCM_sqr_from_s(srts * srts, ma, mb), pcm_sqr);
+  FUZZY_COMPARE(pCM_from_s(srts * srts, ma, mb), pcm);
 }
 
 TEST(plab_from_s_NN) {
