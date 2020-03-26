@@ -91,12 +91,22 @@ void BremsstrahlungAction::generate_final_state() {
 
   // Sample k and theta:
   // minimum cutoff for k to be in accordance with cross section calculations
+  double delta_k;  // k-range
   double k_min = 0.001;
   double k_max =
       (sqrt_s() * sqrt_s() - 2 * outgoing_particles_[0].type().mass() * 2 *
                                  outgoing_particles_[1].type().mass()) /
       (2 * sqrt_s());
-  k_ = random::uniform(k_min, k_max);
+
+  if ((k_max - k_min) < 0.0) {
+    // Make sure it is kinematically even possible to create a photon that is
+    // in accordance with the cross section cutoff
+    k_ = 0.0;
+    delta_k = 0.0;
+  } else {
+    k_ = random::uniform(k_min, k_max);
+    delta_k = (k_max - k_min);
+  }
   theta_ = random::uniform(0.0, M_PI);
 
   // Sample the phase space anisotropically in the local rest frame
@@ -109,7 +119,7 @@ void BremsstrahlungAction::generate_final_state() {
 
   // Assign weighting factor
   const double W_theta = diff_xs_theta * (M_PI - 0.0);
-  const double W_k = diff_xs_k * (k_max - k_min);
+  const double W_k = diff_xs_k * delta_k;
   weight_ = sqrt(W_theta * W_k) /
             (number_of_fractional_photons_ * hadronic_cross_section());
 
