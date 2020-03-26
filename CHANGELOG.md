@@ -26,7 +26,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
   * `formation_time` -> `form_time`
   * `xsec_factor` -> `xsecfac`
 * Add strangeness and baryon number to VTK particles output.
-* The `Only_Final` option for the Particles output has the new possibility if `IfNotEmpty` is entered. Then only output is written if the event is not empty i.e. there was a collision between projectile and target to save disk space. The other two options are now the default `Yes` or `No` (previously `True` or `False`).
+* The `Only_Final` option for the Particles output has the new possibility if `IfNotEmpty` is entered. Then only output is written if the event is not empty i.e. there was a collision between projectile and target to save disk space. The other two options are now `Yes` or `No` (previously `True` or `False`). The default is `Yes` (same functionality as the previous default `True`).
 * Restructure photon configuration:
   * Add new `Photon` section, with options `2to2_Scatterings: True/False`, `Bremsstrahlung: True/False` and `Fractional_Photons: Nfrac`, where `Nfrac` is an arbitrary integer
   * From now on, only the format and whether or not it shall be extended, can be set in the Output subsection `Photons`,
