@@ -16,6 +16,8 @@
 #include "../include/smash/scatteraction.h"
 #include "Pythia8/Pythia.h"
 
+#include <algorithm>
+
 using namespace smash;
 using smash::Test::Momentum;
 using smash::Test::Position;
@@ -407,4 +409,90 @@ TEST(update_incoming) {
   // update the action
   act.update_incoming(particles);
   COMPARE(act.incoming_particles()[0].position(), new_position);
+}
+
+bool collisionbranches_equal(const CollisionBranchPtr& b1,
+                             const CollisionBranchPtr& b2) {
+  bool same_particle_number = b1->particle_number() == b2->particle_number();
+  bool same_weight = b1->weight() == b2->weight();
+  if (b1->get_type() == ProcessType::StringSoftSingleDiffractiveAX) {
+    return same_weight && same_particle_number &&
+           b2->get_type() == ProcessType::StringSoftSingleDiffractiveXB;
+  } else if (b1->get_type() == ProcessType::StringSoftSingleDiffractiveXB) {
+    return same_weight && same_particle_number &&
+           b2->get_type() == ProcessType::StringSoftSingleDiffractiveAX;
+  } else {
+    return same_weight && same_particle_number &&
+           b1->get_type() == b2->get_type();
+  }
+}
+
+TEST(particle_ordering) {
+  // test if particle order in a scatteraction matters.
+  //
+  // create a list of all particles
+  const auto& all_types = ParticleType::list_all();
+  int ntypes = all_types.size();
+  int64_t seed = random::generate_63bit_seed();
+  random::set_seed(seed);
+  for (int i = 0; i < 42 + 1; i++) {
+    // create a random pair of particles
+    ParticleData p1{ParticleType::find(
+        all_types[random::uniform_int(0, ntypes - 1)].pdgcode())};
+    ParticleData p2{ParticleType::find(
+        all_types[random::uniform_int(0, ntypes - 1)].pdgcode())};
+
+    constexpr double p_x = 3.0;
+    // set momenta
+    p1.set_4momentum(p1.pole_mass(), p_x, 0., 0.);
+    p2.set_4momentum(p2.pole_mass(), -p_x, 0., 0.);
+
+    // put in particles object
+    Particles particles;
+    particles.insert(p1);
+    particles.insert(p2);
+
+    // construct actions
+    ScatterActionPtr act12, act21;
+    act12 = make_unique<ScatterAction>(p1, p2, 0.2, false, 1.0);
+    act21 = make_unique<ScatterAction>(p2, p1, 0.2, false, 1.0);
+    std::unique_ptr<StringProcess> string_process_interface =
+        make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081,
+                                   0.7, 0.7, 0.25, 0.68, 0.98, 0.25, 1.0, true,
+                                   1. / 3., true, 0.15);
+    act12->set_string_interface(string_process_interface.get());
+    act21->set_string_interface(string_process_interface.get());
+    VERIFY(act12 != nullptr);
+    VERIFY(act21 != nullptr);
+
+    // add processes
+    constexpr double elastic_parameter = -10.;  // no added elastic x-sections
+    constexpr bool two_to_one = true;
+    const ReactionsBitSet included_2to2 = ReactionsBitSet().flip();
+    constexpr double low_snn_cut = 0.;
+    constexpr bool strings_switch = true;
+    constexpr bool use_AQM = true;
+    constexpr bool strings_with_probability = true;
+    const NNbarTreatment nnbar_treatment = NNbarTreatment::Strings;
+    act12->add_all_scatterings(elastic_parameter, two_to_one, included_2to2,
+                               low_snn_cut, strings_switch, use_AQM,
+                               strings_with_probability, nnbar_treatment);
+    act21->add_all_scatterings(elastic_parameter, two_to_one, included_2to2,
+                               low_snn_cut, strings_switch, use_AQM,
+                               strings_with_probability, nnbar_treatment);
+
+    VERIFY(act12->cross_section() >= 0.);
+    VERIFY(act21->cross_section() >= 0.);
+
+    const auto& branch12 = act12->collision_channels();
+    const auto& branch21 = act21->collision_channels();
+    VERIFY(branch12.size() == branch21.size());
+    for (const CollisionBranchPtr& branchptr1 : branch12) {
+      VERIFY(std::find_if(branch21.begin(), branch21.end(),
+                          [&branchptr1](const CollisionBranchPtr& branchptr2) {
+                            return collisionbranches_equal(branchptr1,
+                                                           branchptr2);
+                          }) != branch21.end());
+    }
+  }
 }
