@@ -48,7 +48,7 @@ struct ExperimentParameters {
   /// Whether to use the AQM or not
   bool use_AQM;
 
-  /*
+  /**
    * Multiplicative factor to be applied to resonance lifetimes; in the case of
    * thermal multiplicities this should also be applied to initial
    * multiplicities of resonances, so that one does not artificially introduce

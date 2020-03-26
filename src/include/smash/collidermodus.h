@@ -202,6 +202,12 @@ class ColliderModus : public ModusDefault {
   std::unique_ptr<InterpolateDataLinear<double>> impact_interpolation_ =
       nullptr;
 
+  /**
+   * Rotate the reaction plane about the angle phi
+   *
+   * \param[in] phi Angle about which to rotate
+   * \param[in] particles Particles, whose position is rotated
+   */
   void rotate_reaction_plane(double phi, Particles *particles);
 
   /** Sample impact parameter.
