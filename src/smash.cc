@@ -378,6 +378,9 @@ void initialize_particles_and_decays(Configuration &configuration) {
   ParticleType::check_consistency();
 }
 
+/** Initialize the particles and decays from the configuration,
+ *  the hash and the path to the cashed resonance integrals.
+ */
 void initialize_particles_and_decays(Configuration &configuration,
                                      sha256::Hash hash,
                                      bf::path tabulations_path) {
