@@ -140,7 +140,7 @@ void BremsstrahlungAction::sample_3body_phasespace() {
   // Photon angle: Phi random, theta from theta_ sampled above
   const Angles phitheta_photon(random::uniform(0.0, twopi), std::cos(theta_));
   outgoing_particles_[2].set_4momentum(m_c, pcm * phitheta_photon.threevec());
-  // Boost velocity to cm frame of (π pair - photon)
+  // Boost velocity to cm frame of the two pions
   const ThreeVector beta_cm_pion_pair_photon =
       pcm * phitheta_photon.threevec() / std::sqrt(pcm * pcm + E_ab * E_ab);
 
