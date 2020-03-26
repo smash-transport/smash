@@ -739,11 +739,11 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * reference process such as PP for which solid parametrizations exist.
  * (\iref{Bass:1998ca})
  *
- * \key Resonance_Lifetime_Modifier (double, optional, default = 1.0)
+ * \key Resonance_Lifetime_Modifier (double, optional, default = 1.0)\n
  * Multiplicative factor by which to scale the resonance lifetimes up or down.
  * This additionally has the effect of modifying the initial densities by
  * the same factor in the case of a box initialized with thermal multiplicities
- * (see \ref Use_Thermal_Multiplicities). WARNING: This option is not fully
+ * (see \key Use_Thermal_Multiplicities). WARNING: This option is not fully
  * physically consistent with some of the other asssumptions used in SMASH;
  * notably, modifying this value WILL break detailed balance in any gas
  * which allows resonances to collide inelastically, as this option breaks the

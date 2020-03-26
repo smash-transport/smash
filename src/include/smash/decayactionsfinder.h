@@ -24,7 +24,8 @@ namespace smash {
  */
 class DecayActionsFinder : public ActionFinderInterface {
  public:
-  /* Initialize the finder
+  /**
+   * Initialize the finder
    *
    * \param[in] res_lifetime_factor The multiplicative factor to be applied to
    *                                resonance lifetimes; default is 1
