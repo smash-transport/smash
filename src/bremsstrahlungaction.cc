@@ -138,7 +138,7 @@ void BremsstrahlungAction::generate_final_state() {
 }
 
 void BremsstrahlungAction::sample_3body_phasespace() {
-  assert(outgoing_part.size() == 3);
+  assert(outgoing_particles_.size() == 3);
   const double m_a = outgoing_particles_[0].type().mass(),
                m_b = outgoing_particles_[1].type().mass(),
                m_c = outgoing_particles_[2].type().mass();

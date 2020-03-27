@@ -228,9 +228,7 @@ void RootOutput::at_eventend(const Particles &particles,
   impact_b = impact_parameter;
   empty_event_ = empty_event;
   if (write_particles_ &&
-      (particles_only_final_ == OutputOnlyFinal::Yes ||
-       (particles_only_final_ == OutputOnlyFinal::IfNotEmpty &&
-        !empty_event_)) {
+      !(empty_event && particles_only_final_ == OutputOnlyFinal::IfNotEmpty)) {
     particles_to_tree(particles);
   }
   /* Forced regular dump from operational memory to disk. Very demanding!
