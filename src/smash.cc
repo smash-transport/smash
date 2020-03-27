@@ -323,8 +323,8 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
  * invalid
  */
 void check_config_version_is_compatible(Configuration configuration) {
-  const std::string smash_version = "1.7";
-  const std::set<std::string> compatible_config_versions = {"1.7"};
+  const std::string smash_version = "1.8";
+  const std::set<std::string> compatible_config_versions = {"1.8"};
 
   const std::string config_version = configuration.read({"Version"});
 
