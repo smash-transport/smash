@@ -373,9 +373,25 @@ Sections into `doc/userguide.dox` which is then included into the User Guide
 Doxygen tree. Currently, the cmake script processes all `src/include/*.h` and
 `src/*.cc` files.
 
+
 ### Markdown Documents
 
 The markdown documents included in the repository follow the Markdown dialect of Github that is specified [here](https://github.github.com/gfm/).
+
+
+### Changelog
+
+Major code changes are tracked in the [CHANGELOG.md](CHANGELOG.md) file. This
+file is meant to inform the users, but also the other developers. The structure
+of the sections is explained at the beginning of the file itself. Every version
+has its own section with the date it was tagged. Starting from the bottom with
+the section for the first public release. On top of these sections an
+_Unreleased_ section is kept. The file is meant to be kept up-to-date together
+with the code changes itself, so that at all times the code status is reflected.
+Most important are (breaking) changes to our in- or output file. Here, all
+details have to be specified. For all other code updates only major changes like
+new features or bug fixes have to be given.
+
 
 ## Coding Rules
 
