@@ -17,25 +17,29 @@ The major categories to group changes in this log are:
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 
+
 ## [Unreleased](https://github.com/smash-transport/smash-devel/compare/SMASH-1.7...HEAD)
 
-
-#### Input / Output
+### Input / Output
 * Some column names in the extended ROOT output have changed to be agreement with those in the extended OSCAR output:
   * `coll_per_part` -> `ncoll`
   * `formation_time` -> `form_time`
   * `xsec_factor` -> `xsecfac`
 * Add strangeness and baryon number to VTK particles output.
-* The `Only_Final` option for the Particles output has the new possibility if `IfNotEmpty` is entered. Then only output is written if the event is not empty i.e. there was a collision between projectile and target to save disk space. The other two options are now `Yes` or `No` (previously `True` or `False`). The default is `Yes` (same functionality as the previous default `True`).
+* The `Only_Final` option for the Particles output has the new possibility if `IfNotEmpty` is entered. Then only output is written if the event is not empty i.e. there was a collision between projectile and target to save disk space. The other two options are now `Yes` or `No` (previously `True` or `False`).
 * Restructure photon configuration:
   * Add new `Photon` section, with options `2to2_Scatterings: True/False`, `Bremsstrahlung: True/False` and `Fractional_Photons: Nfrac`, where `Nfrac` is an arbitrary integer
-  * From now on, only the format and whether or not it shall be extended, can be set in the Output subsection `Photons`,
+  * From now on, only the format and whether or not it shall be extended, can be set in the Output subsection `Photons`.
 
 ### Added
 * Photon production from pion-pion bremsstrahlung
 * Option to randomize the reaction plane (rotate all particles by a random angle around the z axis).
 * Test to verify that cross sections do not depend on particle order.
-* CHANGELOG.md file
+* Various tests for deformed nuclei
+* Various tests for string processes
+* Proper CHANGELOG.md file
+* Option to set up an equilibration time for the box modus, after which the output is written.
+* Most resonance integrals are now cached on disk, reducing the time until the simulation starts.
 
 ### Changed
 * Extend box examples in user guide to directly run.
@@ -45,8 +49,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * ASCII initial conditions output:
   * Bugfix: write PDG ID instead of unique particle ID.
   * Exclude spectators.
-* Add lower bound for IC proper time.
-* Fix floating point exceptions that were raised if IC output is enabled
+* Add lower bound for initial conditions proper time.
+* Fix floating point exceptions that were raised if initial conditions output is enabled
+
 
 
 ## [SMASH-1.7](https://github.com/smash-transport/smash/compare/SMASH-1.6...SMASH-1.7)
