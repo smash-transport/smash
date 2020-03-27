@@ -178,9 +178,6 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key false - Regular output for each particle \n
  * \n
  * - \b Photons (Only Oscar1999, Oscar2013 and binary formats) \n
- *   \key Fractions (int, required):
- *   Number of fractional photons sampled per single perturbatively produced
- *   photon. See \ref input_photons for further information. \n
  *   \key Extended (bool, optional, default = false, incompatible with
  *                  Oscar1999 format): \n
  *   \li \key true - Print extended information for each particle \n
@@ -368,6 +365,33 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
     output_clock = make_unique<UniformClock>(0.0, output_dt);
   }
 
+  // Add proper error messages if photons are not configured properly.
+  // 1) Missing Photon config section.
+  if (config["Output"].has_value({"Photons"}) &&
+      (!config.has_value({"Photons"}))) {
+    throw std::invalid_argument(
+        "Photon output is enabled although photon production is disabled. "
+        "Photon production can be configured in the \"Photon\" section.");
+  }
+
+  // 2) Missing Photon output section.
+  bool missing_output_2to2 = false;
+  bool missing_output_brems = false;
+  if (!(config["Output"].has_value({"Photons"}))) {
+    if (config.has_value({"Photons", "2to2_Scatterings"})) {
+      missing_output_2to2 = config.read({"Photons", "2to2_Scatterings"});
+    }
+    if (config.has_value({"Photons", "Bremsstrahlung"})) {
+      missing_output_brems = config.read({"Photons", "Bremsstrahlung"});
+    }
+
+    if (missing_output_2to2 || missing_output_brems) {
+      throw std::invalid_argument(
+          "Photon output is disabled although photon production is enabled. "
+          "Please enable the photon output.");
+    }
+  }
+
   auto config_coll = config["Collision_Term"];
   /* Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded. */
@@ -394,7 +418,6 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           config_coll.take({"Resonance_Lifetime_Modifier"}, 1.),
           config_coll.take({"Strings_with_Probability"}, true),
           config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
-          config.has_value({"Output", "Photons"}),
           low_snn_cut,
           potential_affect_threshold};
 }

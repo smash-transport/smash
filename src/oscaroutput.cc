@@ -460,6 +460,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key 6: Box wall crossing (due to periodic boundary conditions)
  * \li \key 7: Forced thermalization
  * \li \key 8: Hypersurface crossing
+ * \li \key 9: Bremsstrahlung
  * \li \key 41: Soft string excitation, single diffractive AB -> AX
  * \li \key 42: Soft string excitation, single diffractive AB -> XB
  * \li \key 43: Soft string excitation, double diffractive

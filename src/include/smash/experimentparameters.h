@@ -71,9 +71,6 @@ struct ExperimentParameters {
    */
   NNbarTreatment nnbar_treatment;
 
-  /// This indicates whether photons are switched on.
-  bool photons_switch;
-
   /**
    * Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded.

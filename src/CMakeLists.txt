@@ -54,7 +54,7 @@ endif (GIT_FOUND)
 
 string(TIMESTAMP BUILD_DATE)
 
-find_package(GSL 1.15 REQUIRED)
+find_package(GSL 2.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 
@@ -111,6 +111,7 @@ set(smash_src
         action.cc
         boxmodus.cc
         binaryoutput.cc
+        bremsstrahlungaction.cc
         clebschgordan.cc
         collidermodus.cc
         configuration.cc
@@ -139,6 +140,7 @@ set(smash_src
         icoutput.cc
         inputfunctions.cc
         interpolation.cc
+        interpolation2D.cc
         isoparticletype.cc
         listmodus.cc
         logging.cc

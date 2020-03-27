@@ -220,6 +220,7 @@ void Action::sample_3body_phasespace() {
                m_b = outgoing_particles_[1].type().mass(),
                m_c = outgoing_particles_[2].type().mass();
   const double sqrts = sqrt_s();
+
   // sample mab from pCM(sqrt, mab, mc) pCM (mab, ma, mb) <= sqrts^2/4
   double mab, r, probability, pcm_ab, pcm;
   do {

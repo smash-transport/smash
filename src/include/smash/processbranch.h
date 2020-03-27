@@ -45,6 +45,8 @@ enum class ProcessType {
    *  to serve as initial conditions for hybrid models.
    */
   HyperSurfaceCrossing = 8,
+  /// bremsstrahlung process: a + b -> a + b + photon
+  Bremsstrahlung = 9,
   /**
    * (41-45) soft string excitations. Here "soft" means that the process does
    *         not involve quark or gluon scattering. A string is formed by quark
@@ -238,6 +240,24 @@ class CollisionBranch : public ProcessBranch {
     particle_types_.push_back(&type_a);
     particle_types_.push_back(&type_b);
   }
+
+  /**
+   * Construct collision branch with 3 particles in final state.
+   * \param[in] type_a Particle type of first final state particle.
+   * \param[in] type_b Particle type of second final state particle.
+   * \param[in] type_c Particle type of third final state particle.
+   * \param[in] w Weight of created branch.
+   * \param[in] p_type Process type of created branch.
+   */
+  CollisionBranch(const ParticleType &type_a, const ParticleType &type_b,
+                  const ParticleType &type_c, double w, ProcessType p_type)
+      : ProcessBranch(w), process_type_(p_type) {
+    particle_types_.reserve(3);
+    particle_types_.push_back(&type_a);
+    particle_types_.push_back(&type_b);
+    particle_types_.push_back(&type_c);
+  }
+
   /**
    * Construct collision branch with a list of particles in final state.
    * \param[in] new_types List of particle types of final state particles.
