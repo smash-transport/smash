@@ -42,6 +42,245 @@ void test_distribution(int n_test, double dx, Chi get_chi,
 
 using namespace smash;
 
+TEST(common_setup) {
+  // StringProcess to use member functions
+  std::unique_ptr<StringProcess> sp =
+      make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5,
+                                 .0, .0, .0, .0, true, 1. / 3., true, 0.);
+
+  // Pythia object to work with
+  Pythia8::Pythia pythia_interface{PYTHIA_XML_DIR, false};
+  sp->common_setup_pythia(&pythia_interface, 1.0, 1.0, .3, .5, .7, .9);
+
+  // Verify that all parameters were set accordingly
+  VERIFY(pythia_interface.settings.mode("ParticleData:modeBreitWigner") == 4);
+  FUZZY_COMPARE(pythia_interface.settings.parm("MultipartonInteractions:pTmin"),
+                1.5);
+  VERIFY(pythia_interface.settings.mode("MultipartonInteractions:nSample") ==
+         10000);
+  FUZZY_COMPARE(pythia_interface.settings.parm("StringPT:sigma"), .9);
+  FUZZY_COMPARE(pythia_interface.settings.parm("StringFlav:probQQtoQ"), 1.0);
+  FUZZY_COMPARE(pythia_interface.settings.parm("StringFlav:probStoUD"), 1.0);
+  FUZZY_COMPARE(pythia_interface.settings.parm("StringFlav:popcornRate"), .3);
+  FUZZY_COMPARE(pythia_interface.settings.parm("StringZ:aLund"), .5);
+  FUZZY_COMPARE(pythia_interface.settings.parm("StringZ:bLund"), .7);
+  VERIFY(pythia_interface.settings.word("PDF:pSet") == "13");
+  VERIFY(pythia_interface.settings.word("PDF:pSetB") == "13");
+  VERIFY(pythia_interface.settings.word("PDF:piSet") == "1");
+  VERIFY(pythia_interface.settings.word("PDF:piSetB") == "1");
+  VERIFY(pythia_interface.settings.mode("Beams:idA") == 2212);
+  VERIFY(pythia_interface.settings.mode("Beams:idB") == 2212);
+  FUZZY_COMPARE(pythia_interface.settings.parm("Beams:eCM"), 10.);
+  VERIFY(pythia_interface.settings.flag("Random:setSeed") == 1);
+  VERIFY(pythia_interface.settings.flag("Print:quiet") == 1);
+  VERIFY(pythia_interface.settings.flag("HadronLevel:Decay") == 0);
+  VERIFY(pythia_interface.settings.parm("Check:epTolErr") == 1e-6);
+  VERIFY(pythia_interface.settings.parm("Check:epTolWarn") == 1e-8);
+}
+
+TEST(initialization) {
+  std::unique_ptr<StringProcess> sp =
+      make_unique<StringProcess>(1.0, 1.0, .0, 0.001, .0, .0, 1., 1., .0, .0,
+                                 .5, .0, .0, .0, .0, true, 1. / 3., true, 0.);
+
+  ParticleData a{ParticleType::find(0x2212)};
+  a.set_4momentum(1., 0., 0., 1.);
+
+  ParticleData b{ParticleType::find(0x2212)};
+  b.set_4momentum(0.9380, 0., 0., -1.);
+
+  sp->init({a, b}, 0.);
+
+  // Check if all values are as expected
+  VERIFY(sp->get_PDGs()[0] == pdg::p);
+  VERIFY(sp->get_PDGs()[1] == pdg::p);
+  COMPARE_ABSOLUTE_ERROR(sp->get_massA(), 1.00, 1e-3);
+  COMPARE_ABSOLUTE_ERROR(sp->get_massB(), 0.938, 1e-3);
+  COMPARE_ABSOLUTE_ERROR(sp->get_sqrts(), 2.78529, 1e-5);
+  COMPARE_ABSOLUTE_ERROR(sp->get_tcoll(), 0.00000, 1e-5);
+
+  // Test vectors to compare with
+  FourVector plab0_test{1.41421, 0.00000, 0.00000, 1.00000};
+  FourVector plab1_test{1.37107, 0.00000, 0.00000, -1.00000};
+  FourVector pcom0_test{1.41421, 0.00000, 0.00000, 1.00000};
+  FourVector pcom1_test{1.37107, 0.00000, 0.00000, -1.00000};
+  FourVector ucom_test{1.00000, 0.00000, 0.00000, 0.00000};
+  ThreeVector vcom_test{0.00000, 0.00000, 0.00000};
+
+  // Vector comparison
+  for (int i = 0; i < 4; ++i) {
+    COMPARE_ABSOLUTE_ERROR(sp->get_plab()[0][i], plab0_test[i], 1e-5);
+    COMPARE_ABSOLUTE_ERROR(sp->get_plab()[1][i], plab1_test[i], 1e-5);
+    COMPARE_ABSOLUTE_ERROR(sp->get_pcom()[0][i], pcom0_test[i], 1e-5);
+    COMPARE_ABSOLUTE_ERROR(sp->get_pcom()[1][i], pcom1_test[i], 1e-5);
+    COMPARE_ABSOLUTE_ERROR(sp->get_ucom()[i], ucom_test[i], 1e-5);
+    // ThreeVector comparison excludes i = 3
+    if (i < 3)
+      COMPARE_ABSOLUTE_ERROR(sp->get_vcom()[i], vcom_test[i], 1e-5);
+  }
+}
+
+TEST(rearrange_ex) {
+  // StringProcess to use member functions
+  std::unique_ptr<StringProcess> sp =
+      make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5,
+                                 .0, .0, .0, .0, true, 1. / 3., true, 0.);
+
+  // Array for total quark numbers
+  std::array<int, 5> tot_quark = {0, 0, 0, 0, 0};
+  // Arrays with the excess constituents
+  std::array<std::array<int, 5>, 2> exc_quark = {
+      {{1, 0, 1, 0, 0}, {0, 1, 1, 0, 0}}};
+  std::array<std::array<int, 5>, 2> exc_antiq = {
+      {{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}}};
+  // Test arrays, nothing has changed as all nquark_final are positive
+  std::array<std::array<int, 5>, 2> quark_test = {
+      {{1, 0, 1, 0, 0}, {0, 1, 1, 0, 0}}};
+  std::array<std::array<int, 5>, 2> antiq_test = {
+      {{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}}};
+
+  // Rearrange the excess constituents
+  sp->rearrange_excess(tot_quark, exc_quark, exc_antiq);
+  // Verify that nothing has changed
+  VERIFY(exc_quark == quark_test);
+  VERIFY(exc_antiq == antiq_test);
+
+  tot_quark = {-1, 0, 0, 0, 0};
+  exc_quark = {{{-1, 0, 0, 0, 0}, {1, 0, 0, 0, 0}}};
+  exc_antiq = {{{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}}};
+  quark_test = {{{0, 0, 0, 0, 0}, {1, 0, 0, 0, 0}}};
+  antiq_test = {{{1, 0, 0, 0, 0}, {0, 0, 0, 0, 0}}};
+  sp->rearrange_excess(tot_quark, exc_quark, exc_antiq);
+  VERIFY(exc_quark == quark_test);
+  VERIFY(exc_antiq == antiq_test);
+}
+
+TEST(find_excess) {
+  // StringProcess to use member functions
+  std::unique_ptr<StringProcess> sp =
+      make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5,
+                                 .0, .0, .0, .0, true, 1. / 3., true, 0.);
+
+  // PDG codes for proton and neutron
+  PdgCode actual = pdg::p;
+  PdgCode mapped = pdg::n;
+  // Arrays for excess numbers
+  std::array<int, 5> q_excess = {0, 0, 0, 0, 0};
+  std::array<int, 5> antiq_excess = {0, 0, 0, 0, 0};
+  // Test arrays with expected outcome
+  std::array<int, 5> q_test = {-1, 1, 0, 0, 0};
+  std::array<int, 5> antiq_test = {0, 0, 0, 0, 0};
+  // Find excess quarks
+  sp->find_excess_constituent(actual, mapped, q_excess, antiq_excess);
+  // Verify predicted values
+  VERIFY(q_excess == q_test);
+  VERIFY(antiq_excess == antiq_test);
+
+  // Same as the above using different particles
+  actual = pdg::pi_m;
+  mapped = pdg::n;
+  q_excess = {0, 0, 0, 0, 0};
+  antiq_excess = {0, 0, 0, 0, 0};
+  q_test = {-1, -1, 0, 0, 0};
+  antiq_test = {0, 1, 0, 0, 0};
+  sp->find_excess_constituent(actual, mapped, q_excess, antiq_excess);
+  VERIFY(q_excess == q_test);
+  VERIFY(antiq_excess == antiq_test);
+}
+
+TEST(replace_const) {
+  // Create StringProcess to work with member functions
+  std::unique_ptr<StringProcess> sp =
+      make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5,
+                                 .0, .0, .0, .0, true, 1. / 3., true, 0.);
+
+  // Create particle entry for an electron
+  Pythia8::ParticleDataEntry entry1(11, "e", "e+");
+  // Create Pythia Particle, an electron in this case
+  Pythia8::Particle part1(11);
+  // Set Data Entry Pointer to the corresponding entry
+  part1.setPDEPtr(&entry1);
+
+  // Initialize array with excess constituents
+  // Initialize array to check correct function behavior
+  // Expected output is the same as the input as an electron
+  // is neither quark nor diquark
+  std::array<int, 5> exc_const = {0, 1, 0, 1, 0};
+  std::array<int, 5> test_const = {0, 1, 0, 1, 0};
+
+  // Call function to be tested
+  sp->replace_constituent(part1, exc_const);
+
+  // Check content of excess consituent array
+  VERIFY(exc_const == test_const);
+  VERIFY(part1.id() == 11);
+
+  // Case 2: Particle is a quark but excess array is zero
+  Pythia8::ParticleDataEntry entry2(1, "d", "dbar");
+  Pythia8::Particle part2(1);
+  exc_const = {0, 0, 0, 0, 0};
+  test_const = {0, 0, 0, 0, 0};
+  sp->replace_constituent(part2, exc_const);
+  VERIFY(exc_const == test_const);
+  VERIFY(part2.id() == 1);
+
+  // Case 3: Particle is a quark, excess reaches 0
+  Pythia8::ParticleDataEntry entry3(1, "d", "dbar");
+  Pythia8::Particle part3(1);
+  part3.setPDEPtr(&entry3);
+  exc_const = {-1, 0, 0, 1, 0};
+  // Outcome is expected to be 0 as the charm converts to down
+  test_const = {0, 0, 0, 0, 0};
+  sp->replace_constituent(part3, exc_const);
+  VERIFY(exc_const == test_const);
+  VERIFY(part3.id() == 4);
+
+  // Case 4: Particle is a diquark, excess reaches 0
+  Pythia8::ParticleDataEntry entry4(2101, "ud", "udbar");
+  Pythia8::Particle part4(2101);
+  part4.setPDEPtr(&entry4);
+  exc_const = {-1, -1, 0, 1, 1};
+  // Outcome is expected to be 0 again
+  test_const = {0, 0, 0, 0, 0};
+  sp->replace_constituent(part4, exc_const);
+  VERIFY(exc_const == test_const);
+  VERIFY(part4.id() == 5401);
+}
+
+TEST(find_total_number_constituent) {
+  // Create Pythia event to fill with an event later
+  Pythia8::Event intermediate;
+
+  // Create Pythia object to work with
+  std::unique_ptr<Pythia8::Pythia> pythia_hadron =
+      make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
+  pythia_hadron->readString("Print:quiet = on");
+  pythia_hadron->readString("ProcessLevel:all = off");
+  pythia_hadron->readString("Top:gg2ttbar = on");
+  pythia_hadron->readString("Beams:eCM = 8000.");
+  pythia_hadron->init();
+
+  // Initialize the intermediate event trivially
+  intermediate.init("intermediate partons", &pythia_hadron->particleData);
+
+  // String process to be able to call the member functions
+  std::unique_ptr<StringProcess> sp =
+      make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5,
+                                 .0, .0, .0, .0, true, 1. / 3., true, 0.);
+
+  // Arrays for quark and antiquark content
+  std::array<int, 5> nquark;
+  std::array<int, 5> nantiq;
+
+  // Call tested function
+  sp->find_total_number_constituent(intermediate, nquark, nantiq);
+
+  // All should contain 0 due to the default initialization
+  for (int i = 0; i < 5; ++i) {
+    VERIFY((nquark[i] == 0) && (nantiq[i] == 0));
+  }
+}
+
 /**
  * Compare sampled values of the LUND function to analytical ones via:
  * \f$ f(z) = \frac{1}{z} (1 - z)^a \exp{ \left(- \frac{b m_T^2}{z} \right) }

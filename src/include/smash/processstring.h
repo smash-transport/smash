@@ -499,7 +499,7 @@ class StringProcess {
                                       std::array<int, 5> &excess_quark,
                                       std::array<int, 5> &excess_antiq);
   /**
-   * Convert a partonic PYTHIA partice into the desired species
+   * Convert a partonic PYTHIA particle into the desired species
    * and update the excess of constituents.
    * If the quark flavor i is converted into another flavor j,
    * excess_constituent[i - 1] increases by 1 and
@@ -571,7 +571,7 @@ class StringProcess {
 
   /**
    * Take total number of quarks and check if the system has
-   * enough constitents that need to be converted into other flavors.
+   * enough constituents that need to be converted into other flavors.
    * If that is not the case, excesses of quarks and antiquarks are
    * modified such that the net quark number of each flavor is
    * conserved.
@@ -1155,6 +1155,60 @@ class StringProcess {
    * \see PNegB_
    */
   double getPnegB() { return PNegB_;}
+
+  /**
+   * \return mass of incoming particle A [GeV]
+   * \see massA_
+   */
+  double get_massA() { return massA_;}
+
+  /**
+   * \return mass of incoming particle B [GeV]
+   * \see massB_
+   */
+  double get_massB() { return massB_;}
+
+  /**
+   * \return sqrt of mandelstam s [GeV]
+   * \see sqrtsAB_
+   */
+  double get_sqrts() { return sqrtsAB_;}
+
+  /**
+   * \return array with PDG Codes of incoming particles
+   * \see PDGcodes_
+   */
+  std::array<PdgCode, 2> get_PDGs() { return PDGcodes_;}
+
+  /**
+   * \return momenta of incoming particles in lab frame [GeV]
+   * \see plab_
+   */
+  std::array<FourVector, 2> get_plab() { return plab_;}
+
+  /**
+   * \return momenta of incoming particles in center of mass frame [GeV]
+   * \see pcom_
+   */
+  std::array<FourVector, 2> get_pcom() { return pcom_;}
+
+  /**
+   * \return velocity four vector of the COM in the lab frame
+   * \see ucomAB_
+   */
+  FourVector get_ucom() { return ucomAB_;}
+
+  /**
+   * \return velocity three vector of the COM in the lab frame
+   * \see vcomAB_
+   */
+  ThreeVector get_vcom() { return vcomAB_;}
+
+  /**
+   * \return collision time
+   * \see time_collision_
+   */
+  double get_tcoll() { return time_collision_;}
 
   // clang-format on
 };
