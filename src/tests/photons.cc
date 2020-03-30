@@ -9,6 +9,7 @@
 
 #include "setup.h"
 
+#include "../include/smash/bremsstrahlungaction.h"
 #include "../include/smash/scatteractionphoton.h"
 
 using namespace smash;
@@ -21,6 +22,10 @@ TEST(init_particle_types) {
 }
 
 TEST(init_decay_modes) { Test::create_actual_decaymodes(); }
+
+////
+// Test photon production in binary scatterings
+////
 
 TEST(pi_rho0_pi_gamma) {
   // set up a π+ and a ρ0 in center-of-momentum-frame
@@ -112,4 +117,64 @@ TEST(check_kinematic_thresholds) {
       photonAct_highE.is_kinematically_possible(energy_a + energy_b, in_highE));
   VERIFY(
       !photonAct_lowE.is_kinematically_possible(energy_a + energy_c, in_lowE));
+}
+
+////
+// Test photon production in Bremsstrahlung processes
+////
+
+TEST(gen_final_state) {
+  // set up a π+ and a π- in center-of-momentum-frame
+  const ParticleType &type_pip = ParticleType::find(0x211);
+  ParticleData pip{type_pip};
+  pip.set_4momentum(type_pip.mass(), ThreeVector(0., 0., 2.));
+  const ParticleType &type_pim = ParticleType::find(-0x211);
+  ParticleData pim{type_pim};
+  pim.set_4momentum(type_pim.mass(), ThreeVector(0., 0., -2.));
+  const ParticleType &type_photon = ParticleType::find(0x22);
+  const int number_of_photons = 10;
+  ParticleList in{pip, pim};
+
+  // create bremsstrahlung action
+  const auto act =
+      make_unique<BremsstrahlungAction>(in, 0.05, number_of_photons, 20.0);
+  act->add_single_process();
+
+  // Sample photons, implicitly test sample_3body_phasespace() and
+  // cross section functions
+  for (int i = 0; i < number_of_photons; i++) {
+    act->generate_final_state();
+    VERIFY(act->outgoing_particles().size() == 3);
+    VERIFY(act->outgoing_particles()[0].type() == type_pip);
+    VERIFY(act->outgoing_particles()[1].type() == type_pim);
+    VERIFY(act->outgoing_particles()[2].type() == type_photon);
+  }
+}
+
+TEST(bremsstrahlung_reaction_type_function) {
+  const ParticleData pip{ParticleType::find(0x211)};
+  const ParticleData pim{ParticleType::find(-0x211)};
+  const ParticleData piz{ParticleType::find(0x111)};
+  const ParticleData eta{ParticleType::find(0x221)};
+  const ParticleData p{ParticleType::find(0x2112)};
+
+  const ParticleList l1{pip, pim}, l2{piz, pim}, l3{pip, pip}, l4{piz, piz},
+      l5{pim, pim}, l6{pip, piz}, l7{p, pim}, l8{pip, eta};
+
+  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l1) ==
+         BremsstrahlungAction::ReactionType::pi_p_pi_m);
+  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l2) ==
+         BremsstrahlungAction::ReactionType::pi_z_pi_m);
+  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l3) ==
+         BremsstrahlungAction::ReactionType::pi_p_pi_p);
+  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l4) ==
+         BremsstrahlungAction::ReactionType::pi_z_pi_z);
+  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l5) ==
+         BremsstrahlungAction::ReactionType::pi_m_pi_m);
+  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l6) ==
+         BremsstrahlungAction::ReactionType::pi_z_pi_p);
+  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l7) ==
+         BremsstrahlungAction::ReactionType::no_reaction);
+  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l8) ==
+         BremsstrahlungAction::ReactionType::no_reaction);
 }
