@@ -142,13 +142,16 @@ TEST(gen_final_state) {
 
   // Sample photons, implicitly test sample_3body_phasespace() and
   // cross section functions
+  double tot_weight = 0.0;
   for (int i = 0; i < number_of_photons; i++) {
     act->generate_final_state();
+    tot_weight += act->get_total_weight();
     VERIFY(act->outgoing_particles().size() == 3);
     VERIFY(act->outgoing_particles()[0].type() == type_pip);
     VERIFY(act->outgoing_particles()[1].type() == type_pim);
     VERIFY(act->outgoing_particles()[2].type() == type_photon);
   }
+  COMPARE_RELATIVE_ERROR(tot_weight, 0.0282709, 1e-5);
 }
 
 TEST(bremsstrahlung_reaction_type_function) {
