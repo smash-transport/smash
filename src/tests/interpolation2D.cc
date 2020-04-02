@@ -16,7 +16,7 @@
 
 using namespace smash;
 
-static std::unique_ptr<InterpolateData2DSpline> interp = nullptr;
+std::unique_ptr<InterpolateData2DSpline> interp = nullptr;
 const double accuracy = 1e-6;
 
 TEST(fail_N_points) {
