@@ -13,7 +13,11 @@ General:
 Output:
     Photons:
         Format: ["Oscar2013"]
-        Fractions: 100
+
+Photons:
+    2to2_Scatterings: True 
+    Bremsstrahlung: True 
+    Fractional_Photons: 100
 
 Modi:
     Box:
