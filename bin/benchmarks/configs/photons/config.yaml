@@ -16,7 +16,7 @@ Output:
 
 Photons:
     2to2_Scatterings: True 
-    Bremsstrahlung: False 
+    Bremsstrahlung: True 
     Fractional_Photons: 100
 
 Modi:
