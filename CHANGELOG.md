@@ -51,6 +51,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
   * Exclude spectators.
 * Add lower bound for initial conditions proper time.
 * Fix floating point exceptions that were raised if initial conditions output is enabled
+* Fix light nuclei not being affected by potentials
 
 
 

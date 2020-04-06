@@ -143,7 +143,7 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
   const bool smearing = true;
   const auto scale = force_scale(acts_on);
 
-  if (!acts_on.is_baryon()) {
+  if (!(acts_on.is_baryon() || acts_on.is_nucleus())) {
     return total_potential;
   }
   const double rho_B = std::get<0>(current_eckart(

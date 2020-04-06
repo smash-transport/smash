@@ -122,8 +122,8 @@ void update_momenta(
   double min_time_scale = std::numeric_limits<double>::infinity();
 
   for (ParticleData &data : *particles) {
-    // Only baryons will be affected by the potentials
-    if (!data.is_baryon()) {
+    // Only baryons and nuclei will be affected by the potentials
+    if (!(data.is_baryon() || data.is_nucleus())) {
       continue;
     }
     const auto scale = pot.force_scale(data.type());

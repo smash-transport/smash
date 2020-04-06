@@ -87,6 +87,9 @@ class ParticleData {
   /// \copydoc PdgCode::is_baryon
   bool is_baryon() const { return pdgcode().is_baryon(); }
 
+  /// \copydoc PdgCode::is_nucleus
+  bool is_nucleus() const { return pdgcode().is_nucleus(); }
+
   /// \copydoc PdgCode::is_rho
   bool is_rho() const { return type_->is_rho(); }
   /**
