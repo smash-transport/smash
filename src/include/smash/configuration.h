@@ -371,10 +371,11 @@ namespace smash {
  Output:
      Photons:
          Format:             ["Binary"]
- Photons:
-     2to2_Scatterings:    True
-     Bremsstrahlung:    True
-     Fractional_Photons:    1000
+Collision_Term:
+     Photons:
+         2to2_Scatterings:    True
+         Bremsstrahlung:    True
+         Fractional_Photons:    1000
  \endverbatim
  */
 

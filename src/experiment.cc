@@ -289,15 +289,13 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * generate the output, the corresponding subsections need to be present in the
  * configuration file. In the following example, the dilepton output is
  * generated in extended "Oscar2013" and "Binary" format. The photon output
- * is printed in "Oscar2013" format while the calculation is performed with
- * 100 fractional photons.
+ * is printed in "Oscar2013" format.
  *\verbatim
      Dileptons:
          Format:    ["Oscar2013", "Binary"]
          Extended: True
      Photons:
          Format:    ["Oscar2013"]
-         Fractions: 100
  \endverbatim
  *
  * Additionally, the thermodynsamics output can be activated. In this example,
@@ -368,21 +366,24 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // Add proper error messages if photons are not configured properly.
   // 1) Missing Photon config section.
   if (config["Output"].has_value({"Photons"}) &&
-      (!config.has_value({"Photons"}))) {
+      (!config.has_value({"Collision_Term", "Photons"}))) {
     throw std::invalid_argument(
         "Photon output is enabled although photon production is disabled. "
-        "Photon production can be configured in the \"Photon\" section.");
+        "Photon production can be configured in the \"Photon\" subsection "
+        "of the \"Collision_Term\".");
   }
 
   // 2) Missing Photon output section.
   bool missing_output_2to2 = false;
   bool missing_output_brems = false;
   if (!(config["Output"].has_value({"Photons"}))) {
-    if (config.has_value({"Photons", "2to2_Scatterings"})) {
-      missing_output_2to2 = config.read({"Photons", "2to2_Scatterings"});
+    if (config.has_value({"Collision_Term", "Photons", "2to2_Scatterings"})) {
+      missing_output_2to2 =
+          config.read({"Collision_Term", "Photons", "2to2_Scatterings"});
     }
-    if (config.has_value({"Photons", "Bremsstrahlung"})) {
-      missing_output_brems = config.read({"Photons", "Bremsstrahlung"});
+    if (config.has_value({"Collision_Term", "Photons", "Bremsstrahlung"})) {
+      missing_output_brems =
+          config.read({"Collision_Term", "Photons", "Bremsstrahlung"});
     }
 
     if (missing_output_2to2 || missing_output_brems) {
