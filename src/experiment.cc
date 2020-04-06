@@ -400,15 +400,15 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
         "of the \"Collision_Term\".");
   }
 
-  // 2) Missing Photon output section.
-  bool missing_resonance_decays = false;
+  // 2) Missing Dilepton output section.
+  bool missing_output_decays = false;
   if (!(config["Output"].has_value({"Dileptons"}))) {
-    if (config.has_value({"Collision_Term", "Dileptons", "Resonance_Decays"})) {
-      missing_resonance_decays =
-          config.read({"Collision_Term", "Dileptons", "Resonance_Decays"});
+    if (config.has_value({"Collision_Term", "Dileptons", "Decays"})) {
+      missing_output_decays =
+          config.read({"Collision_Term", "Dileptons", "Decays"});
     }
 
-    if (missing_resonance_decays) {
+    if (missing_output_decays) {
       throw std::invalid_argument(
           "Dilepton output is disabled although dilepton production is "
           "enabled. "

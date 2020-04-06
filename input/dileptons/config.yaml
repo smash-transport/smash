@@ -27,4 +27,4 @@ Modi:
 
 Collision_Term:
     Dileptons:
-        Resonance_Decays: True
+        Decays: True

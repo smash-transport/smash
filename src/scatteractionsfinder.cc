@@ -220,7 +220,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * via
  *\verbatim
      Dileptons:
-        Resonance_Decays: True
+        Decays: True
 
      Photons:
          2to2_Scatterings: True

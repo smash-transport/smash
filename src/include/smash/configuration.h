@@ -383,7 +383,7 @@ namespace smash {
  * section of the configuration file. Currently, there are the following
  * options: \n
  * \n
- * \key Resonance_Decays (bool, optional, default = false):\n
+ * \key Decays (bool, optional, default = false):\n
  * Whether or not to enable dilepton production from resonance decays.
  * This includes direct decays as well as Dalitz decays.
  *
@@ -428,7 +428,7 @@ namespace smash {
        Extended: True
  Collision_Term:
    Dileptons:
-       Resonance_Decays:    True
+       Decays:    True
  \endverbatim
  */
 
