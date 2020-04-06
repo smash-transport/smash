@@ -24,8 +24,7 @@ static constexpr int LCollider = LogArea::Collider::id;
 /*!\Userguide
  * \page projectile_and_target Projectile and Target
  * \n
- * Example: Configuring custom nuclei from external file
- * --------------
+ * **Example: Configuring custom nuclei from external file**\n
  * The following example illustrates how to configure a center-of-mass
  * heavy-ion collision with nuclei generated from an external file.
  * The nucleon positions are not sampled by smash but read in from an

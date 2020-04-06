@@ -74,8 +74,7 @@ class Configuration;
  * debugging builds (i.e. with -DCMAKE_BUILD_TYPE=Debug). \n
  *
  * \n
- * Example: Configuring the Logging Area
- * --------------
+ * **Example: Configuring the Logging Area**\n
  * To activate all informational messages (\key INFO) for all logging areas,
  * include the following in the configuration file:
  *\verbatim

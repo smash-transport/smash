@@ -68,8 +68,7 @@ namespace smash {
 
 /*!\Userguide
 * \n
-* Example: Configuring a deformed nucleus
-* --------------
+* **Example: Configuring a deformed nucleus**\n
 * To configure a fixed target heavy-ion collision with deformed nuclei, whose
 * spherical deformation is explicitly declared, it can be done according to the
 * following example. For explanatory (and not physics) reasons,

@@ -50,8 +50,7 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    *
    * \page input_potentials_ Potentials
    * \n
-   * Example: Configuring Potentials
-   * --------------
+   * **Example: Configuring Potentials**\n
    *
    * The following extract from the configuration file configures SMASH such
    * that the Skyrme as well as the Symmetry potential are activated for the

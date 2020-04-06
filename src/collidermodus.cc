@@ -217,8 +217,7 @@ static constexpr int LCollider = LogArea::Collider::id;
  *
  ** \page input_modi_collider_ Collider
  * \n
- * Examples: Configuring Heavy-ion Collisions
- * --------------
+ * **Examples: Configuring Heavy-ion Collisions**\n
  * The following example configures a Cu63-Cu63 collision at
  \f$\sqrt{s_{NN}}=3.0\f$
  * GeV with zero impact parameter and Fermi motion taken into consideration. The
