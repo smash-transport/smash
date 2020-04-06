@@ -792,8 +792,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       metric_(
           config.take({"General", "Metric_Type"}, ExpansionMode::NoExpansion),
           config.take({"General", "Expansion_Rate"}, 0.1)),
-      dileptons_switch_(config.take(
-          {"Collision_Term", "Dileptons", "Decays"}, false)),
+      dileptons_switch_(
+          config.take({"Collision_Term", "Dileptons", "Decays"}, false)),
       photons_switch_(config.take(
           {"Collision_Term", "Photons", "2to2_Scatterings"}, false)),
       bremsstrahlung_switch_(
