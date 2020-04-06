@@ -208,12 +208,12 @@ double ScatterAction::cov_transverse_distance_sqr() const {
   ParticleData p_b = incoming_particles_[1];
 
   const FourVector delta_x = p_a.position() - p_b.position();
-  const double mom_diff_sqr = 
+  const double mom_diff_sqr =
       (p_a.momentum().threevec() - p_b.momentum().threevec()).sqr();
   const double x_sqr = delta_x.sqr();
 
   if (mom_diff_sqr < really_small) {
-    return - x_sqr;
+    return -x_sqr;
   }
 
   const double p_a_sqr = p_a.momentum().sqr();
@@ -221,14 +221,14 @@ double ScatterAction::cov_transverse_distance_sqr() const {
   const double p_a_dot_x = p_a.momentum().Dot(delta_x);
   const double p_b_dot_x = p_b.momentum().Dot(delta_x);
   const double p_a_dot_p_b = p_a.momentum().Dot(p_b.momentum());
-  
-  const double b_sqr = - x_sqr - (p_a_sqr * pow(p_b_dot_x,2) +
-                                  p_b_sqr * pow(p_a_dot_x,2) -
-                                  2 * p_a_dot_p_b * p_a_dot_x * p_b_dot_x)
-                               / (pow(p_a_dot_p_b,2) - p_a_sqr * p_b_sqr);
+
+  const double b_sqr =
+      -x_sqr - (p_a_sqr * pow(p_b_dot_x, 2) + p_b_sqr * pow(p_a_dot_x, 2) -
+                2 * p_a_dot_p_b * p_a_dot_x * p_b_dot_x) /
+                   (pow(p_a_dot_p_b, 2) - p_a_sqr * p_b_sqr);
   return b_sqr > 0.0 ? b_sqr : 0.0;
 }
-  
+
 /**
  * Computes the B coefficients from the Cugnon parametrization of the angular
  * distribution in elastic pp scattering.

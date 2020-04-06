@@ -79,7 +79,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
       const ParticleData &p1, const ParticleData &p2, double dt,
       const std::vector<FourVector> &beam_momentum) const {
     if (coll_crit_ == CollisionCriterion::Stochastic) {
-      return dt * random::uniform(0., 1.); 
+      return dt * random::uniform(0., 1.);
     } else {
       /*
        * For frozen Fermi motion:
@@ -109,23 +109,21 @@ class ScatterActionsFinder : public ActionFinderInterface {
                                     : p2.momentum();
       if (coll_crit_ == CollisionCriterion::Covariant) {
         /**
-        * see \iref{Hirano/Nara:2012}
-        */
-         const FourVector delta_x = p1.position() - p2.position();
-         const double p1_sqr = p1_mom.sqr();
-         const double p2_sqr = p2_mom.sqr();
-         const double p1_dot_x = p1_mom.Dot(delta_x);
-         const double p2_dot_x = p2_mom.Dot(delta_x);
-         const double p1_dot_p2 = p1_mom.Dot(p2_mom);
-         const double denominator = pow(p1_dot_p2,2) - p1_sqr * p2_sqr;
+         * see \iref{Hirano/Nara:2012}
+         */
+        const FourVector delta_x = p1.position() - p2.position();
+        const double p1_sqr = p1_mom.sqr();
+        const double p2_sqr = p2_mom.sqr();
+        const double p1_dot_x = p1_mom.Dot(delta_x);
+        const double p2_dot_x = p2_mom.Dot(delta_x);
+        const double p1_dot_p2 = p1_mom.Dot(p2_mom);
+        const double denominator = pow(p1_dot_p2, 2) - p1_sqr * p2_sqr;
 
-         const double time_1 = 
-             (p2_sqr * p1_dot_x - p1_dot_p2 * p2_dot_x) * p1_mom.x0()
-             / denominator;
-         const double time_2 =  
-             (p1_sqr * p2_dot_x - p1_dot_p2 * p1_dot_x) * p2_mom.x0()
-             / denominator;
-         return (time_1 + time_2) / 2;
+        const double time_1 = (p2_sqr * p1_dot_x - p1_dot_p2 * p2_dot_x) *
+                              p1_mom.x0() / denominator;
+        const double time_2 = -(p1_sqr * p2_dot_x - p1_dot_p2 * p1_dot_x) *
+                              p2_mom.x0() / denominator;
+        return (time_1 + time_2) / 2;
       } else {
         /**
          * UrQMD collision time in computational frame,
