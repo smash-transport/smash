@@ -385,7 +385,9 @@ namespace smash {
  * \n
  * \key Decays (bool, optional, default = false):\n
  * Whether or not to enable dilepton production from hadron decays.
- * This includes direct decays as well as Dalitz decays.
+ * This includes direct decays as well as Dalitz decays. Dilepton decays
+ * additionally have to be uncommented in the used decaymodes.txt (see also note
+ * below).
  *
  * Remember to also activate the dilepton output in the output section.
  *

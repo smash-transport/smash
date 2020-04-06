@@ -1015,14 +1015,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \page output_dileptons Dileptons
    * The existence of a dilepton subsection in the collision term section of the
    * configuration file enables the dilepton production. In addition, the
-   * dilepton output also needs to be enabled in the output section.
-   * The output file named Dileptons (followed by the
-   * appropriate suffix) is generated when SMASH is executed. It's format is
-   * identical to the collision output (see \ref format_oscar_collisions),
-   * it does however only contain information about the dilepton decays. \n
-   * Further, the block headers differ from the usual collision output:
-   * <div class="fragment">
-   * <div class="line"> <span class="preprocessor">
+   * dilepton output also needs to be enabled in the output section and dilepton
+   * decays have to be uncommented in the used decaymodes.txt file. The output
+   * file named Dileptons (followed by the appropriate suffix) is generated when
+   * SMASH is executed. It's format is identical to the collision output (see
+   * \ref format_oscar_collisions), it does however only contain information
+   * about the dilepton decays. \n Further, the block headers differ from the
+   * usual collision output: <div class="fragment"> <div class="line"> <span
+   * class="preprocessor">
    *  \# interaction in nin out nout rho density weight shining_weight partial
    *  part_weight type proc_type </span></div>
    * </div>
