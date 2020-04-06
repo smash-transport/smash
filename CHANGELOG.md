@@ -28,7 +28,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Add strangeness and baryon number to VTK particles output.
 * The `Only_Final` option for the Particles output has the new possibility if `IfNotEmpty` is entered. Then only output is written if the event is not empty i.e. there was a collision between projectile and target to save disk space. The other two options are now `Yes` or `No` (previously `True` or `False`).
 * Restructure photon configuration:
-  * Add new `Photon` section, with options `2to2_Scatterings: True/False`, `Bremsstrahlung: True/False` and `Fractional_Photons: Nfrac`, where `Nfrac` is an arbitrary integer
+  * Add new `Photon` subsection to `Collision_Term` section, with options `2to2_Scatterings: True/False`, `Bremsstrahlung: True/False` and `Fractional_Photons: Nfrac`, where `Nfrac` is an arbitrary integer
+  * Add new `Dilepton` subsection to `Collision_Term`, with option `Resonance_Decays: True/False` 
   * From now on, only the format and whether or not it shall be extended, can be set in the Output subsection `Photons`.
 
 ### Added
