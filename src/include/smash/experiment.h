@@ -792,7 +792,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       metric_(
           config.take({"General", "Metric_Type"}, ExpansionMode::NoExpansion),
           config.take({"General", "Expansion_Rate"}, 0.1)),
-      dileptons_switch_(config.has_value({"Output", "Dileptons"})),
+      dileptons_switch_(config.take(
+          {"Collision_Term", "Dileptons", "Resonance_Decays"}, false)),
       photons_switch_(config.take(
           {"Collision_Term", "Photons", "2to2_Scatterings"}, false)),
       bremsstrahlung_switch_(
@@ -885,8 +886,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \page input_general_
    *
    * \n
-   * Example: Configuring General Properties
-   * --------------
+   * **Example: Configuring General Properties**\n
    * The following example provides a possibility for the \key General
    * configuration.
    *
@@ -960,10 +960,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *                 is printed out.
    *   - Available formats: \ref format_oscar_collisions, \ref format_binary_,
    *                 \ref format_root
-   * - \b Dileptons  Special dilepton output, see \subpage input_dileptons.
+   * - \b Dileptons  Special dilepton output, see \subpage output_dileptons.
    *   - Available formats: \ref format_oscar_collisions,
    *                   \ref format_binary_ and \ref format_root
-   * - \b Photons    Special photon output, see \subpage input_photons.
+   * - \b Photons    Special photon output, see \subpage output_photons.
    *   - Available formats: \ref format_oscar_collisions,
    *                   \ref format_binary_ and \ref format_root.
    * - \b Thermodynamics   This output allows to print out thermodynamic
@@ -1012,9 +1012,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    */
 
   /*!\Userguide
-   * \page input_dileptons Dileptons
-   * The existence of a dilepton subsection in the output section of the
-   * configuration file enables the dilepton output.
+   * \page output_dileptons Dileptons
+   * The existence of a dilepton subsection in the collision term section of the
+   * configuration file enables the dilepton production. In addition, the
+   * dilepton output also needs to be enabled in the output section.
    * The output file named Dileptons (followed by the
    * appropriate suffix) is generated when SMASH is executed. It's format is
    * identical to the collision output (see \ref format_oscar_collisions),
@@ -1040,31 +1041,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * OSCAR2013 extended format. \n
    *
    * \n
-   * The treatment of Dilepton Decays is special:
-   *
-   * \li Dileptons are treated via the time integration method, also called
-   * 'shining', as e.g. described in \iref{Schmidt:2008hm}, chapter 2D.
-   * This means that, because dilepton decays are so rare, possible decays are
-   * written in the output at every hadron propagation without ever performing
-   * them. The are weighted with a "shining weight" to compensate for the
-   * over-production.
-   * \li The shining weight can be found in the weight element of the output.
-   * \li The shining method is implemented in the DecayActionsFinderDilepton,
-   * which is automatically enabled together with the dilepton output.
-   *
-   * \n
-   * \note If you want dilepton decays, you have to modify the decaymodes.txt
-   * of your choice, which you then specify as the input with the `-d` command
-   * line option. Without this decay modes modification the dilepton output will
-   * be empty.\n
-   * Dilepton decays are commented out by default. You therefore need to
-   * uncomment them. Note, that for dilepton decays, new decay channels can
-   * \b not simply be added to the decaymodes.txt file. You also have to modify
-   * the decay width formulas \key TwoBodyDecayDilepton::width and
-   * \key ThreeBodyDecayDilepton::diff_width in
-   * '$SMASH_SRC_DIRECTORY/src/decaytype.cc'.
-   *
-   * \n
    * \note
    * As dileptons are treated perturbatively, the produced dileptons are
    * only written to the dilepton output, but neither to the usual collision
@@ -1072,10 +1048,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
 
   /*!\Userguide
-   * \page input_photons Photons
+   * \page output_photons Photons
    * The existance of a photon subsection in the output section of the
-   * configuration file enables the photon output together with the possible
-   * photon producing scattering processes.
+   * configuration file enables the photon output.
    * If photons are enabled, the output file named Photons (followed by the
    * appropriate suffix) is generated when SMASH is executed. It's format is
    * identical to the collision output (see \ref format_oscar_collisions),

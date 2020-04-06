@@ -98,7 +98,6 @@ namespace smash {
  * \li \subpage input_lattice_
  * \li \subpage input_potentials_
  * \li \subpage input_forced_thermalization_
- * \li \subpage input_photons_
  *
  * \par Information on formatting of the input file can be found here:
  * \li \subpage input_indentation_
@@ -285,9 +284,9 @@ namespace smash {
  */
 
 /*!\Userguide
- * \page input_photons_ Photons
- * Photon production can be enabled in the corresponding \key Photon section of
- * the configuration file. There are the following options: \n
+ * \page input_photons Photons
+ * Photon production can be enabled in the corresponding \key Photon section
+ * of the configuration file. There are the following options: \n
  * \n
  * \key 2to2_Scatterings (bool, optional, default = false):\n
  * Whether or not to enable photon production in mesonic scattering processes.
@@ -302,7 +301,7 @@ namespace smash {
  * Remember to also activate the photon output in the output section.
  *
  * \n
- * ### Photon production in SMASH
+ * **Photon production in SMASH**\n
  * Photons are treated perturbatively and are produced from binary
  * scattering processes. Their production follows the framework from Turbide
  * et al. described in \iref{Turbide:2006zz}. Following the perturbative
@@ -360,8 +359,7 @@ namespace smash {
  * nor to the particle lists.
  *
  * \n
- * Examples: Configuring Photons
- * --------------
+ * **Examples: Configuring Photons**\n
  * The following example configures the photon production in both binary
  * scatterings and bremsstrahlung processes, where 1000 fractional photons are
  * sampled per single perturbatively produced photon. In addition, the binary
@@ -369,13 +367,68 @@ namespace smash {
  *
  *\verbatim
  Output:
-     Photons:
-         Format:             ["Binary"]
-Collision_Term:
-     Photons:
-         2to2_Scatterings:    True
-         Bremsstrahlung:    True
-         Fractional_Photons:    1000
+   Photons:
+       Format:             ["Binary"]
+ Collision_Term:
+   Photons:
+       2to2_Scatterings:    True
+       Bremsstrahlung:    True
+       Fractional_Photons:    1000
+ \endverbatim
+ */
+
+/*!\Userguide
+ * \page input_dileptons Dileptons
+ * Dilepton production can be enabled in the corresponding \key Dilepton
+ * section of the configuration file. Currently, there are the following
+ * options: \n
+ * \n
+ * \key Resonance_Decays (bool, optional, default = false):\n
+ * Whether or not to enable dilepton production from resonance decays.
+ * This includes direct decays as well as Dalitz decays.
+ *
+ * Remember to also activate the dilepton output in the output section.
+ *
+ * \n
+ * **Dilepton production in SMASH**\n
+ * \n
+ * The treatment of Dilepton Decays is special:
+ *
+ * \li Dileptons are treated via the time integration method, also called
+ * 'shining', as e.g. described in \iref{Schmidt:2008hm}, chapter 2D.
+ * This means that, because dilepton decays are so rare, possible decays are
+ * written in the output at every hadron propagation without ever performing
+ * them. The are weighted with a "shining weight" to compensate for the
+ * over-production.
+ * \li The shining weight can be found in the weight element of the output.
+ * \li The shining method is implemented in the DecayActionsFinderDilepton,
+ * which is automatically enabled together with the dilepton output.
+ *
+ * \note If you want dilepton decays, you have to modify the decaymodes.txt
+ * of your choice, which you then specify as the input with the `-d` command
+ * line option. Without this decay modes modification the dilepton output will
+ * be empty.\n
+ * Dilepton decays are commented out by default. You therefore need to
+ * uncomment them. Note, that for dilepton decays, new decay channels can
+ * \b not simply be added to the decaymodes.txt file. You also have to modify
+ * the decay width formulas \key TwoBodyDecayDilepton::width and
+ * \key ThreeBodyDecayDilepton::diff_width in
+ * '$SMASH_SRC_DIRECTORY/src/decaytype.cc'.
+ *
+ * \n
+ * **Examples: Configuring Dileptons**\n
+ * The following example configures the dilepton production for dileptons
+ * originating from resonance decays. In addition, the extended OSCAR2013
+ * dilepton output is enabled.
+ *
+ *\verbatim
+ Output:
+   Dileptons:
+       Format:             ["Oscar2013"]
+       Extended: True
+ Collision_Term:
+   Dileptons:
+       Resonance_Decays:    True
  \endverbatim
  */
 

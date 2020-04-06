@@ -263,8 +263,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *
  * \n
  * \page configuring_output_ Output Configuration
- * Example: Configuring the SMASH Output
- * --------------
+ * **Example: Configuring the SMASH Output**\n
  * The following example configures the output to be printed in an interval of
  * 1 fm and with the net baryon density being printed to the header.
  * The particles output is generated in "Oscar1999", VTK and "Root" format,
@@ -285,11 +284,9 @@ ExperimentPtr ExperimentBase::create(Configuration config,
          Print_Start_End: True
  \endverbatim
  *
- * To further activate photons and dileptons in the SMASH simulation and to also
- * generate the output, the corresponding subsections need to be present in the
- * configuration file. In the following example, the dilepton output is
- * generated in extended "Oscar2013" and "Binary" format. The photon output
- * is printed in "Oscar2013" format.
+ * In addition, the photon and dilepton output can be enabled as follows, where
+ * the dilepton output is generated in extended "Oscar2013" and "Binary" format
+ * and the photon output is printed in "Oscar2013" format.
  *\verbatim
      Dileptons:
          Format:    ["Oscar2013", "Binary"]
@@ -390,6 +387,32 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       throw std::invalid_argument(
           "Photon output is disabled although photon production is enabled. "
           "Please enable the photon output.");
+    }
+  }
+
+  // Add proper error messages if dileptons are not configured properly.
+  // 1) Missing Dilepton config section.
+  if (config["Output"].has_value({"Dileptons"}) &&
+      (!config.has_value({"Collision_Term", "Dileptons"}))) {
+    throw std::invalid_argument(
+        "Dilepton output is enabled although dilepton production is disabled. "
+        "Dilepton production can be configured in the \"Dileptons\" subsection "
+        "of the \"Collision_Term\".");
+  }
+
+  // 2) Missing Photon output section.
+  bool missing_resonance_decays = false;
+  if (!(config["Output"].has_value({"Dileptons"}))) {
+    if (config.has_value({"Collision_Term", "Dileptons", "Resonance_Decays"})) {
+      missing_resonance_decays =
+          config.read({"Collision_Term", "Dileptons", "Resonance_Decays"});
+    }
+
+    if (missing_resonance_decays) {
+      throw std::invalid_argument(
+          "Dilepton output is disabled although dilepton production is "
+          "enabled. "
+          "Please enable the dilepton output.");
     }
   }
 
