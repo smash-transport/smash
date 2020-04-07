@@ -40,7 +40,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * \c collisions tree contains the same information as OSCAR collision output.
  *
  * In case that the ROOT format is used for dilepton output
- * (see \ref input_dileptons), the file is called \c Dileptons.root and
+ * (see \ref output_dileptons), the file is called \c Dileptons.root and
  * only contains a \c collisions tree with all the dilepton decays.
  *
  * Every physical quantity is in a separate TBranch.

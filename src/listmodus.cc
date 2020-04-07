@@ -58,8 +58,7 @@ static constexpr int LList = LogArea::List::id;
  * Starting id for file_id_, i.e. the first file which is read.
  *
  * \n
- * Example: Configuring an Afterburner Simulation
- * --------------
+ * **Example: Configuring an Afterburner Simulation**\n
  * The following example sets up an afterburner simulation for a set of particle
  * files located in "particle_lists_in". The files are named as
  * "event{event_id}". SMASH is run once for each event in the folder.

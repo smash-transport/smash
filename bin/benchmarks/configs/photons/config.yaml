@@ -14,11 +14,6 @@ Output:
     Photons:
         Format: ["Oscar2013"]
 
-Photons:
-    2to2_Scatterings: True 
-    Bremsstrahlung: True 
-    Fractional_Photons: 100
-
 Modi:
     Box:
         Length: 10.0
@@ -30,3 +25,7 @@ Collision_Term:
     Force_Decays_At_End: False
     Strings: False
     Elastic_Cross_Section:  30.0
+    Photons:
+        2to2_Scatterings: True
+        Bremsstrahlung: True
+        Fractional_Photons: 100

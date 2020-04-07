@@ -786,6 +786,7 @@ INPUT                  = doc/ \
                          src/tests/setup.h \
                          src/ \
                          CONTRIBUTING.md \
+                         CHANGELOG.md \
                          bin/benchmarks/README.md \
                          3rdparty/einhard/einhard.hpp
 

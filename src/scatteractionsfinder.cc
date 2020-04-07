@@ -61,9 +61,12 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \n \li \key true - String excitation is enabled\n \li \key false - String
  * excitation is disabled
  *
- * To further configure Pauli blocking and the string parameters, see \n
+ * For further information about the configuration of Pauli blocking,
+ * string parameters, dileptons and photons see \n
  * \li \subpage pauliblocker
  * \li \subpage string_parameters
+ * \li \subpage input_dileptons
+ * \li \subpage input_photons
  *
  * \page string_parameters String Parameters
  * A set of parameters with which the string fragmentation can be modified.
@@ -159,8 +162,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  *
  * \page input_collision_term_ Collision_Term
  * \n
- * Example: Configuring the Collision Term
- * --------------
+ * **Example: Configuring the Collision Term**\n
  * The following example configures SMASH to include all but
  * strangeness exchange involving 2 <--> 2 scatterings, to treat N + Nbar
  * processes as resonance formations and to not force decays at the end of the
@@ -214,6 +216,17 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
          Momentum_Averaging_Radius: 0.08
          Gaussian_Cutoff: 2.2
  \endverbatim
+ * In addition, dilepton and photon production can be independently  activated
+ * via
+ *\verbatim
+     Dileptons:
+        Decays: True
+
+     Photons:
+         2to2_Scatterings: True
+         Bremsstrahlung: True
+ \endverbatim
+ *
  */
 
 ScatterActionsFinder::ScatterActionsFinder(
