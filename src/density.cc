@@ -21,7 +21,7 @@ double density_factor(const ParticleType &type, DensityType dens_type) {
     case DensityType::Baryon:
       return static_cast<double>(type.baryon_number());
     case DensityType::BaryonicIsospin:
-      return type.is_baryon() ? type.isospin3_rel() : 0.;
+      return type.is_baryon() || type.is_nucleus() ? type.isospin3_rel() : 0.;
     case DensityType::Pion:
       return type.pdgcode().is_pion() ? 1. : 0.;
     case DensityType::Isospin3_tot:
