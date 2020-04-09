@@ -88,9 +88,8 @@ before_install:
   # eigen
   - wget http://bitbucket.org/eigen/eigen/get/3.3.5.tar.gz &&
     tar -xf 3.3.5.tar.gz -C $HOME
-  # cpplint (errored with new macOS build, a bit hacky ATM)
-  - if [ $TRAVIS_OS_NAME = osx ]; then pip3 install --user cpplint &&  export PATH=$PATH:/Users/travis/Library/Python/3.7/bin;
-    else pip install --user cpplint; fi
+  # cpplint
+  - pip install --user cpplint
 
 install:
   - cd $SMASH_ROOT
