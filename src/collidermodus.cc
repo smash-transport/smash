@@ -200,7 +200,7 @@ static constexpr int LCollider = LogArea::Collider::id;
  Modi:
      Collider:
          Impact:
-             Sample: "uniform"
+             Sample: "quadratic"
              Range: [3.0, 6.0]
  \endverbatim
  *
