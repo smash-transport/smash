@@ -193,9 +193,10 @@ static constexpr int LCollider = LogArea::Collider::id;
              Value: 0.1
              Initial_Distance: 3.0
  \endverbatim
- ** The impact parameter may further be sampled within a certain impact parameter
- * range. By default, a quadratic distribution is used for the sampling. 
- * However, this may be set to \key "uniform" if necessary.  
+ *
+ * The impact parameter may further be sampled within a certain impact parameter
+ * range. By default, a quadratic distribution is used for the sampling.
+ * However, this may be set to "uniform" if necessary.
  *
  *\verbatim
  Modi:
