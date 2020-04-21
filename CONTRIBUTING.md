@@ -118,21 +118,6 @@ The following tools can be helpful for development:
 
 Note: The above mentioned clang-format version is enforced at each merge to master.
 
-### Installing Binaries as a User
-
-If you do not have administrator privileges on the machine you are using, you can
-still install software locally. Just copy the binary (in this example
-`clang-format`) to a local folder and update your path:
-
-    mkdir ~/bin
-    cp ./clang-format ~/bin
-    echo 'export PATH=$PATH:~/bin' >> ~/.bashrc
-    source ~/.bashrc
-
-After this, you can just copy executable files to `~/bin` to install them. This
-also works for other exectuables like cpplint. You might have to set them to be
-executable with `chmod u+x ~/bin/my-binary`.
-
 
 ### Installing clang-format
 
@@ -155,7 +140,7 @@ look for an older version to get pre-built binaries.)
 
 It is sufficient to unpack the archive with `tar xf` and to copy only the
 binary you need (`clang-format` in the `bin` folder of the archive), see
-"Installing binaries as a user" above.
+"Installing binaries as a user" below.
 
 
 ### Installing cpplint
@@ -190,6 +175,22 @@ it like this:
     pip install --user codespell
 
 It is the same as installing cpplint.
+
+
+### Installing Binaries as a User
+
+If you do not have administrator privileges on the machine you are using, you can
+still install software locally. Just copy the binary (in this example
+`clang-format`) to a local folder and update your path:
+
+    mkdir ~/bin
+    cp ./clang-format ~/bin
+    echo 'export PATH=$PATH:~/bin' >> ~/.bashrc
+    source ~/.bashrc
+
+After this, you can just copy executable files to `~/bin` to install them. This
+also works for other exectuables like cpplint. You might have to set them to be
+executable with `chmod u+x ~/bin/my-binary`.
 
 
 ## Code Documentation
