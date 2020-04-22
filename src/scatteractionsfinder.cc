@@ -346,7 +346,11 @@ ActionPtr ScatterActionsFinder::check_collision(
     const double v_rel = std::sqrt(lambda) / (2. * e1 * e2);
 
     // Collision probability, see e.g. \iref{Xu:2004mz}, eq. (11)
-    const double p_22 = xs * v_rel * dt / (cell_vol * testparticles_);
+    double p_22 = xs * v_rel * dt / (cell_vol * static_cast<double>(testparticles_));
+
+    // Take cross section scaling factors into account
+    p_22 *= data_a.xsec_scaling_factor(time_until_collision);
+    p_22 *= data_b.xsec_scaling_factor(time_until_collision);
 
     logg[LFindScatter].debug(
         "Stochastic collison criterion parameters:\np_22 = ", p_22,
