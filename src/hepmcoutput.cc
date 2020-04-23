@@ -10,6 +10,7 @@
 #include "smash/hepmcoutput.h"
 
 #include "HepMC3/GenParticle.h"
+#include "HepMC3/Print.h"
 
 namespace smash {
 
@@ -24,6 +25,18 @@ void HepMcOutput::at_eventstart(const Particles &particles,
                                 const int event_number) {
   // TODO What other meta-data is needed for event or vertex?
   current_event_ = HepMC3::GenEvent(HepMC3::Units::GEV,HepMC3::Units::MM);
+
+  // Set cross section attribute
+  std::shared_ptr<HepMC3::GenCrossSection> cross_section = std::make_shared<HepMC3::GenCrossSection>();
+  current_event_.add_attribute("GenCrossSection",cross_section);
+  // TODO Replace dummy XS
+  cross_section->set_cross_section(1.0, 1.0);
+
+  // Set heavy ion attribute
+  std::shared_ptr<HepMC3::GenHeavyIon> heavy_ion = std::make_shared<HepMC3::GenHeavyIon>();
+  current_event_.add_attribute("GenHeavyIon",heavy_ion);
+  heavy_ion->set(-1, -1, -1, -1, -1, -1, -1, -1, -1, 0.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+
   current_event_.set_event_number(event_number);
   vertex_ =  HepMC3::make_shared<HepMC3::GenVertex>();
   current_event_.add_vertex(vertex_);
