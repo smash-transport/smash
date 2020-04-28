@@ -493,29 +493,24 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
     const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
 
-  // Check for 2 particle scattering
   for (const ParticleData& p1 : search_list) {
     for (const ParticleData& p2 : search_list) {
+      // Check for 2 particle scattering
       if (p1.id() < p2.id()) {
-        // Check if a collision is possible.
         ActionPtr act = check_collision(p1, p2, dt, beam_momentum, cell_vol);
         if (act) {
           actions.push_back(std::move(act));
         }
       }
-    }
-  }
-
-  // Check for 3 particle scatterings
-  for (const ParticleData& p1 : search_list) {
-    for (const ParticleData& p2 : search_list) {
-      for (const ParticleData& p3 : search_list) {
-        if (p1.id() < p2.id() && p2.id() < p3.id()) {
-          // Check if a collision is possible.
-          ActionPtr act = check_collision_three_particles(
-              p1, p2, p3, dt, beam_momentum, cell_vol);
-          if (act) {
-            actions.push_back(std::move(act));
+      // Also, check for 3 particle scatterings with stochastic criterion
+      if (coll_crit_ == CollisionCriterion::Stochastic) {
+        for (const ParticleData& p3 : search_list) {
+          if (p1.id() < p2.id() && p2.id() < p3.id()) {
+            ActionPtr act = check_collision_three_particles(
+                p1, p2, p3, dt, beam_momentum, cell_vol);
+            if (act) {
+              actions.push_back(std::move(act));
+            }
           }
         }
       }
