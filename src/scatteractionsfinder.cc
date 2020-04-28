@@ -280,7 +280,7 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
 }
 
-ActionPtr ScatterActionsFinder::check_collision(
+ActionPtr ScatterActionsFinder::check_collision_two_part(
     const ParticleData& data_a, const ParticleData& data_b, double dt,
     const std::vector<FourVector>& beam_momentum, const double cell_vol) const {
   /* If the two particles
@@ -416,10 +416,9 @@ bool three_pions_incoming(const ParticleData& data_a,
          (pdg_a == pdg::pi_m && pdg_b == pdg::pi_z && pdg_c == pdg::pi_p);
 }
 
-ActionPtr ScatterActionsFinder::check_collision_three_particles(
+ActionPtr ScatterActionsFinder::check_collision_three_part(
     const ParticleData& data_a, const ParticleData& data_b,
-    const ParticleData& data_c, double dt,
-    const std::vector<FourVector>& beam_momentum, const double cell_vol) const {
+    const ParticleData& data_c, double dt, const double cell_vol) const {
   // TODO Decide on sensible logging
 
   // No grid or search in cell
@@ -497,7 +496,8 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
     for (const ParticleData& p2 : search_list) {
       // Check for 2 particle scattering
       if (p1.id() < p2.id()) {
-        ActionPtr act = check_collision(p1, p2, dt, beam_momentum, cell_vol);
+        ActionPtr act =
+            check_collision_two_part(p1, p2, dt, beam_momentum, cell_vol);
         if (act) {
           actions.push_back(std::move(act));
         }
@@ -506,8 +506,9 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
       if (coll_crit_ == CollisionCriterion::Stochastic) {
         for (const ParticleData& p3 : search_list) {
           if (p1.id() < p2.id() && p2.id() < p3.id()) {
-            ActionPtr act = check_collision_three_particles(
-                p1, p2, p3, dt, beam_momentum, cell_vol);
+            std::cout << "p1 in find_action in cell: " << &p1 << '\n';
+            ActionPtr act =
+                check_collision_three_part(p1, p2, p3, dt, cell_vol);
             if (act) {
               actions.push_back(std::move(act));
             }
@@ -532,7 +533,7 @@ ActionList ScatterActionsFinder::find_actions_with_neighbors(
     for (const ParticleData& p2 : neighbors_list) {
       assert(p1.id() != p2.id());
       // Check if a collision is possible.
-      ActionPtr act = check_collision(p1, p2, dt, beam_momentum);
+      ActionPtr act = check_collision_two_part(p1, p2, dt, beam_momentum);
       if (act) {
         actions.push_back(std::move(act));
       }
@@ -560,7 +561,7 @@ ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     }
     for (const ParticleData& p1 : search_list) {
       // Check if a collision is possible.
-      ActionPtr act = check_collision(p1, p2, dt, beam_momentum);
+      ActionPtr act = check_collision_two_part(p1, p2, dt, beam_momentum);
       if (act) {
         actions.push_back(std::move(act));
       }

@@ -303,17 +303,16 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * Note: cell_vol is optional, since only find_actions_in_cell has (and needs)
    * this information for the stochastic collision criterion.
    */
-  ActionPtr check_collision(const ParticleData &data_a,
-                            const ParticleData &data_b, double dt,
-                            const std::vector<FourVector> &beam_momentum = {},
-                            const double cell_vol = 0.0) const;
-
-  // TODO Write documentation
-  ActionPtr check_collision_three_particles(
-      const ParticleData &data_a, const ParticleData &data_b,
-      const ParticleData &data_c, double dt,
+  ActionPtr check_collision_two_part(
+      const ParticleData &data_a, const ParticleData &data_b, double dt,
       const std::vector<FourVector> &beam_momentum = {},
       const double cell_vol = 0.0) const;
+
+  // TODO Write documentation
+  ActionPtr check_collision_three_part(const ParticleData &data_a,
+                                       const ParticleData &data_b,
+                                       const ParticleData &data_c, double dt,
+                                       const double cell_vol) const;
 
   /// Class that deals with strings, interfacing Pythia.
   std::unique_ptr<StringProcess> string_process_interface_;
