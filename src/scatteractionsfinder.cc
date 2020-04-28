@@ -303,6 +303,11 @@ ActionPtr ScatterActionsFinder::check_collision(
     return nullptr;
   }
 
+  // No grid or search in cell means no collision for stochastic criterion
+  if (coll_crit_ == CollisionCriterion::Stochastic && cell_vol < really_small) {
+    return nullptr;
+  }
+
   // Determine time of collision.
   const double time_until_collision =
       collision_time(data_a, data_b, dt, beam_momentum);
@@ -320,19 +325,31 @@ ActionPtr ScatterActionsFinder::check_collision(
     act->set_string_interface(string_process_interface_.get());
   }
 
+  // Distance squared calculation only needed for geometric criterion
+  const double distance_squared = (coll_crit_ == CollisionCriterion::Geometric)
+                                      ? act->transverse_distance_sqr()
+                                      : 0.0;
+
+  // Don't calculate cross section if the particles are very far apart for
+  // geometric criterion.
+  if (coll_crit_ == CollisionCriterion::Geometric &&
+      distance_squared >= max_transverse_distance_sqr(testparticles_)) {
+    return nullptr;
+  }
+
+  // Add various subprocesses.
+  act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
+                           low_snn_cut_, strings_switch_, use_AQM_,
+                           strings_with_probability_, nnbar_treatment_);
+
+  double xs =
+      act->cross_section() * fm2_mb / static_cast<double>(testparticles_);
+
+  // Take cross section scaling factors into account
+  xs *= data_a.xsec_scaling_factor(time_until_collision);
+  xs *= data_b.xsec_scaling_factor(time_until_collision);
+
   if (coll_crit_ == CollisionCriterion::Stochastic) {
-    // No grid or search in cell
-    if (cell_vol < really_small) {
-      return nullptr;
-    }
-
-    // Add various subprocesses.
-    act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                             low_snn_cut_, strings_switch_, use_AQM_,
-                             strings_with_probability_, nnbar_treatment_);
-
-    const double xs = act->cross_section() * fm2_mb;
-
     // Relative velocity calculation, see e.g. \iref{Seifert:2017oyb}, eq. (5)
     const double m1 = act->incoming_particles()[0].effective_mass();
     const double m1_sqr = m1 * m1;
@@ -346,11 +363,7 @@ ActionPtr ScatterActionsFinder::check_collision(
     const double v_rel = std::sqrt(lambda) / (2. * e1 * e2);
 
     // Collision probability, see e.g. \iref{Xu:2004mz}, eq. (11)
-    double p_22 = xs * v_rel * dt / (cell_vol * static_cast<double>(testparticles_));
-
-    // Take cross section scaling factors into account
-    p_22 *= data_a.xsec_scaling_factor(time_until_collision);
-    p_22 *= data_b.xsec_scaling_factor(time_until_collision);
+    const double p_22 = xs * v_rel * dt / cell_vol;
 
     logg[LFindScatter].debug(
         "Stochastic collison criterion parameters:\np_22 = ", p_22,
@@ -381,25 +394,8 @@ ActionPtr ScatterActionsFinder::check_collision(
       return nullptr;
     }
 
-    const double distance_squared = act->transverse_distance_sqr();
-
-    // Don't calculate cross section if the particles are very far apart.
-    if (distance_squared >= max_transverse_distance_sqr(testparticles_)) {
-      return nullptr;
-    }
-
-    // Add various subprocesses.
-    act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                             low_snn_cut_, strings_switch_, use_AQM_,
-                             strings_with_probability_, nnbar_treatment_);
-
     // Cross section for collision criterion
-    double cross_section_criterion = act->cross_section() * fm2_mb * M_1_PI /
-                                     static_cast<double>(testparticles_);
-
-    // Take cross section scaling factors into account
-    cross_section_criterion *= data_a.xsec_scaling_factor(time_until_collision);
-    cross_section_criterion *= data_b.xsec_scaling_factor(time_until_collision);
+    const double cross_section_criterion = xs * M_1_PI;
 
     // distance criterion according to cross_section
     if (distance_squared >= cross_section_criterion) {
