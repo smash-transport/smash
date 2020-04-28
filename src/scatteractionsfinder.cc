@@ -416,10 +416,13 @@ bool three_pions_incoming(const ParticleData& data_a,
          (pdg_a == pdg::pi_m && pdg_b == pdg::pi_z && pdg_c == pdg::pi_p);
 }
 
-ActionPtr ScatterActionsFinder::check_collision_three_part(
-    const ParticleData& data_a, const ParticleData& data_b,
-    const ParticleData& data_c, double dt, const double cell_vol) const {
+ActionPtr ScatterActionsFinder::check_collision_multi_part(
+    const ParticleList& plist, double dt, const double cell_vol) const {
   // TODO Decide on sensible logging
+
+  const ParticleData& data_a = plist[0];
+  const ParticleData& data_b = plist[1];
+  const ParticleData& data_c = plist[2];
 
   // No grid or search in cell
   if (cell_vol < really_small) {
@@ -506,8 +509,10 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
       if (coll_crit_ == CollisionCriterion::Stochastic) {
         for (const ParticleData& p3 : search_list) {
           if (p1.id() < p2.id() && p2.id() < p3.id()) {
+            // TODO Clarify if I accidentally copy costly by passing
+            // ParticleList with initalizer list as argument
             ActionPtr act =
-                check_collision_three_part(p1, p2, p3, dt, cell_vol);
+                check_collision_multi_part({p1, p2, p3}, dt, cell_vol);
             if (act) {
               actions.push_back(std::move(act));
             }
