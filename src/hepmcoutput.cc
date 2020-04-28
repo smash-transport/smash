@@ -40,12 +40,33 @@ void HepMcOutput::at_eventstart(const Particles &particles,
   current_event_.set_event_number(event_number);
   vertex_ =  HepMC3::make_shared<HepMC3::GenVertex>();
   current_event_.add_vertex(vertex_);
+
+  // Add projectile and target
+  const int pdg_nuclear_code_au = 1000791970;
+  const int  n_nucleons_au= 197;
+
+  FourVector total_mom_proj;
+  FourVector total_mom_target;
+  int counter = 0;
   for (const ParticleData &data : particles) {
-    const FourVector mom = data.momentum();
-    // TODO Does make_shared really makes sense here?
-    HepMC3::GenParticlePtr p =  HepMC3::make_shared<HepMC3::GenParticle>(HepMC3::FourVector(mom.x1(), mom.x2(), mom.x3(), mom.x0()), data.pdgcode().get_decimal(), status_code_for_beam_particles);
-    vertex_->add_particle_in(p);
+    if (data.id() < n_nucleons_au) {
+      total_mom_proj += data.momentum();
+    } else {
+      total_mom_target += data.momentum();
+    }
+    counter++;
   }
+
+  if (counter != 2*n_nucleons_au) {
+    throw std::invalid_argument("HepMC currently only supported for AuAu nuclei ATM");
+  }
+
+  // TODO Does make_shared really makes sense here?
+  HepMC3::GenParticlePtr projectile_p =  HepMC3::make_shared<HepMC3::GenParticle>(HepMC3::FourVector(total_mom_proj.x1(), total_mom_proj.x2(), total_mom_proj.x3(), total_mom_proj.x0()), pdg_nuclear_code_au, status_code_for_beam_particles);
+  vertex_->add_particle_in(projectile_p);
+  HepMC3::GenParticlePtr target_p =  HepMC3::make_shared<HepMC3::GenParticle>(HepMC3::FourVector(total_mom_target.x1(), total_mom_target.x2(), total_mom_target.x3(), total_mom_target.x0()), pdg_nuclear_code_au, status_code_for_beam_particles);
+  vertex_->add_particle_in(target_p);
+
 }
 
 
