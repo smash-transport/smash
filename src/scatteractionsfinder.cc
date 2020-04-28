@@ -506,7 +506,6 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
       if (coll_crit_ == CollisionCriterion::Stochastic) {
         for (const ParticleData& p3 : search_list) {
           if (p1.id() < p2.id() && p2.id() < p3.id()) {
-            std::cout << "p1 in find_action in cell: " << &p1 << '\n';
             ActionPtr act =
                 check_collision_three_part(p1, p2, p3, dt, cell_vol);
             if (act) {
