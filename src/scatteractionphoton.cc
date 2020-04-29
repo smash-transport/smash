@@ -275,6 +275,10 @@ void ScatterActionPhoton::generate_final_state() {
   } else {
     weight_ = proc->weight() / hadronic_cross_section();
   }
+  // Scale weight by cross section scaling factor of incoming particles
+  weight_ *= incoming_particles_[0].xsec_scaling_factor() *
+             incoming_particles_[1].xsec_scaling_factor();
+
   // Photons are not really part of the normal processes, so we have to set a
   // constant arbitrary number.
   const auto id_process = ID_PROCESS_PHOTON;
