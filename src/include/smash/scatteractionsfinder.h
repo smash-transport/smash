@@ -309,8 +309,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
       const double cell_vol = 0.0) const;
 
   // TODO Write documentation
-  ActionPtr check_collision_multi_part(const ParticleList &plist,
-                                       double dt,
+  ActionPtr check_collision_multi_part(const ParticleList &plist, double dt,
                                        const double cell_vol) const;
 
   /// Class that deals with strings, interfacing Pythia.

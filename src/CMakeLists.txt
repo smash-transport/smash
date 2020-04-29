@@ -175,7 +175,7 @@ set(smash_src
         quantumnumbers.cc
         random.cc
         scatteraction.cc
-        scatteractionthree.cc
+        scatteractionmulti.cc
         scatteractionphoton.cc
         scatteractionsfinder.cc
         setup_particles_decaymodes.cc
