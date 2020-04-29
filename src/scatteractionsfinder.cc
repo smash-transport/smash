@@ -400,8 +400,6 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   return std::move(act);
 }
 
-
-
 ActionPtr ScatterActionsFinder::check_collision_multi_part(
     const ParticleList& plist, double dt, const double cell_vol) const {
   // TODO Decide on sensible logging
@@ -413,7 +411,6 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
 
   // Could be an optimisation for later to already check here at the beginning
   // if collision with plist is possible
-
 
   if (testparticles_ != 1) {
     std::stringstream err;
@@ -431,7 +428,7 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
   act->add_final_state();
 
   // TODO Verfiy that this check works
-  if (act->process_type() == ProcessType::None) {
+  if (act->get_type() == ProcessType::None) {
     // No fitting final state found
     return nullptr;
   }

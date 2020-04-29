@@ -27,7 +27,7 @@ class ScatterActionMulti : public Action {
 
   double get_partial_weight() const override;
 
-  void add_scattering();
+  void add_final_state();
 
   double probability_multi(double dt, const double cell_vol) const;
 

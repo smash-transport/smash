@@ -12,7 +12,11 @@
 namespace smash {
 
 ScatterActionMulti::ScatterActionMulti(const ParticleList &in_plist, double time)
-    : Action(in_plist, time), process_type_(ProcessType::None) {}
+    : Action(in_plist, time) {
+      // Make sure process_type_ is set to None by default,
+      // used to check if mulitparticle action possible
+      process_type_ = ProcessType::None;
+    }
 
 void ScatterActionMulti::generate_final_state() {
   /* The production point of the new particles.  */
@@ -81,7 +85,7 @@ void ScatterActionMulti::add_final_state() {
     // Add omega as final state particle
     const ParticleType& type_omega = ParticleType::find(0x223);
     ParticleData data_final{type_omega};
-    outgoing_particles_[0] = data_final;
+    outgoing_particles_.push_back(data_final);
   }
 
 }
@@ -91,12 +95,12 @@ double ScatterActionMulti::probability_multi(double dt, const double cell_vol) c
   double p_nm = 0.0;
 
   switch (process_type_) {
-    case ProcessType::MultiParticleThreePionsToOneOmega:
+    case ProcessType::MultiParticleThreePionsToOneOmega: {
 
       const double e1 = incoming_particles()[0].momentum().x0();
       const double e2 = incoming_particles()[1].momentum().x0();
       const double e3 = incoming_particles()[2].momentum().x0();
-      const double sqrt_s = sqrt_s();
+      const double sqrts = sqrt_s();
 
       // For later:
       // Could also be replaced by a function call to the the inverse processbranch
@@ -104,17 +108,17 @@ double ScatterActionMulti::probability_multi(double dt, const double cell_vol) c
 
       const double I_3 = 0.07514;
       const double ph_sp_3 =
-          1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrt_s * sqrt_s) * I_3;
+          1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
 
       const double spec_f_val =
-          outgoing_particles()[0].type().spectral_function(sqrt_s);
+          outgoing_particles()[0].type().spectral_function(sqrts);
 
       const double p_31 = dt / (cell_vol * cell_vol) * M_PI / (2 * e1 * e2 * e3) * gamma_decay /
              ph_sp_3 * spec_f_val;
 
       p_nm = p_31;
       break;
-
+    }
     default:
       throw InvalidScatterActionMulti(
               "ScatterActionMulti::probability_multi: Invalid process type " +
