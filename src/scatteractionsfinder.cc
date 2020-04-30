@@ -409,8 +409,21 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
     return nullptr;
   }
 
-  // Could be an optimisation for later to already check here at the beginning
-  // if collision with plist is possible
+  // just collided with those particle
+  // TODO Find out if this is should be done or not
+  if (plist.size() == 3) {
+    if (plist[0].id_process() > 0 && plist[0].id_process() == plist[1].id_process() && plist[1].id_process() == plist[2].id_process()) {
+      logg[LFindScatter].debug("Skipping collided multiple particles at time ",
+                               plist[0].position().x0());
+      return nullptr;
+    }
+  } else {
+    logg[LFindScatter].warn("Preventing direct recombination currently not done for this number of particles pairing.");
+  }
+
+
+  /* Could be an optimisation for later to already check here at the beginning
+   * if collision with plist is possible. */
 
   if (testparticles_ != 1) {
     std::stringstream err;
@@ -439,10 +452,12 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
 
   // 5. Check that probability is smaller than one
   if (p_nm > 1.) {
-    std::stringstream err;
-    err << "Probability larger than 1 for stochastic rates. ( P_nm = " << p_nm
-        << " )\nUse smaller timesteps.";
-    throw std::runtime_error(err.str());
+    // std::stringstream err;
+    // err << "Probability larger than 1 for stochastic rates. ( P_nm = " << p_nm
+    //     << " )\nUse smaller timesteps.";
+    // throw std::runtime_error(err.str());
+    std::cout << "WARN: Probability larger than 1 for stochastic rates. ( P_nm = " << p_nm
+        << " )\nUse smaller timesteps." << '\n';
   }
 
   // 6. Perform probability decisions
