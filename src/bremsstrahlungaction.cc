@@ -123,6 +123,10 @@ void BremsstrahlungAction::generate_final_state() {
   weight_ = sqrt(W_theta * W_k) /
             (number_of_fractional_photons_ * hadronic_cross_section());
 
+  // Scale weight by cross section scaling factor of incoming particles
+  weight_ *= incoming_particles_[0].xsec_scaling_factor() *
+             incoming_particles_[1].xsec_scaling_factor();
+
   // Set position and formation time and boost back to computational frame
   for (auto &new_particle : outgoing_particles_) {
     // assuming decaying particles are always fully formed
