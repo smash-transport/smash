@@ -78,6 +78,36 @@ TEST(common_setup) {
   VERIFY(pythia_interface.settings.parm("Check:epTolWarn") == 1e-8);
 }
 
+TEST(append_final) {
+  // Create StringProcess to work with
+  std::unique_ptr<StringProcess> sp =
+      make_unique<StringProcess>(1.0, 1.0, .0, 0.001, .0, .0, 1., 1., .0, .0,
+                                 .5, .0, .0, .0, .0, true, 1. / 3., true, 0.);
+
+  // ParticleData object to calculate final state for
+  ParticleData a{ParticleType::find(0x2212)};
+  // Easy momentum for easier test values
+  a.set_4momentum(1., 0., 0., 1.);
+  ParticleList intermediate = {a};
+
+  // Vectors for use in tested function
+  // Values make for easily calucated test values
+  FourVector uString = {1., .0, .0, .0};
+  ThreeVector evecLong = {.0, .0, .0};
+
+  // Call tested function
+  sp->append_final_state(intermediate, uString, evecLong);
+
+  // Formation time is 0 due to the soft_t_form_ in the StringProcess
+  // vx and vy remain 0 even with boosting
+  // As vz starts at 1 it simply gets boosted to inverse_gamma
+  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].formation_time(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].velocity().x1(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].velocity().x2(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.7071067812, sp->get_final_state()[0].velocity().x3(),
+                         1e-7);
+}
+
 TEST(initialization) {
   std::unique_ptr<StringProcess> sp =
       make_unique<StringProcess>(1.0, 1.0, .0, 0.001, .0, .0, 1., 1., .0, .0,
@@ -186,6 +216,63 @@ TEST(find_excess) {
   sp->find_excess_constituent(actual, mapped, q_excess, antiq_excess);
   VERIFY(q_excess == q_test);
   VERIFY(antiq_excess == antiq_test);
+}
+
+TEST(restore_constituents) {
+  // Create StringProcess to work with member functions
+  std::unique_ptr<StringProcess> sp =
+      make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5,
+                                 .0, .0, .0, .0, true, 1. / 3., true, 0.);
+
+  // create Pythia class object to simulate p-p collision
+  Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
+  pythia.readString("Print:quiet = on");
+  pythia.readString("Top:gg2ttbar = on");
+  pythia.readString("Beams:eCM = 8000.");
+  pythia.init();
+
+  // Arrays which contain the excess quark flavours
+  // First array ensures conversion of a top quark to a down quark
+  std::array<std::array<int, 5>, 2> exc_quark = {
+      {{1, 0, 0, 0, 0}, {-1, 0, 0, 0, 0}}};
+  std::array<std::array<int, 5>, 2> exc_antiq = {
+      {{0, 0, 0, 0, 0}, {0, 0, 0, 0, 0}}};
+
+  // Generate first event
+  pythia.next();
+
+  // Apply restore_constituent function
+  sp->restore_constituent(pythia.process, exc_quark, exc_antiq);
+
+  // Add total system momentum to substract from
+  double px = pythia.process[0].px();
+  double py = pythia.process[0].py();
+
+  bool top_exists = false;
+  bool down_exists = false;
+
+  // Loop over particles and substract momenta
+  // Also check that there is no top quark and a new down quark
+  for (int i = 1; i < pythia.process.size(); ++i) {
+    px -= pythia.process[i].px();
+    py -= pythia.process[i].py();
+    if (pythia.process[i].id() == 6) {
+      top_exists = true;
+    } else if (pythia.process[i].id() == 1) {
+      down_exists = true;
+    }
+  }
+
+  // Check that the sum of momenta in x and y direction remains 0
+  COMPARE_ABSOLUTE_ERROR(px, .0, 1e-7);
+  COMPARE_ABSOLUTE_ERROR(py, .0, 1e-7);
+
+  // Verify that the energy is conserved at 8000
+  COMPARE_ABSOLUTE_ERROR(pythia.process[0].e(), 8000., 1e-3);
+
+  // Verify that there is no top quark and a new down quark
+  VERIFY(top_exists == false);
+  VERIFY(down_exists == true);
 }
 
 TEST(replace_const) {

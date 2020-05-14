@@ -12,8 +12,8 @@
 #include "smash/angles.h"
 #include "smash/kinematics.h"
 #include "smash/pow.h"
-#include "smash/processstring.h"
 #include "smash/random.h"
+#include "smash/stringprocess.h"
 
 namespace smash {
 static constexpr int LOutput = LogArea::Output::id;
@@ -1211,7 +1211,8 @@ bool StringProcess::restore_constituent(
   /* rescale momenta of all partons by a constant factor
    * to conserve the total energy. */
   while (true) {
-    if (std::abs(pSum.e() - energy_init) < really_small * energy_init) {
+    if (std::abs(pSum.e() - energy_init) <=
+        std::abs(really_small * energy_init)) {
       break;
     }
 

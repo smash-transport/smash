@@ -155,7 +155,7 @@ set(smash_src
         potentials.cc
         potential_globals.cc
         processbranch.cc
-        processstring.cc
+        stringprocess.cc
         propagation.cc
         quantumnumbers.cc
         random.cc

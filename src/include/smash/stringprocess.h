@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_PROCESSSTRING_H_
-#define SRC_INCLUDE_PROCESSSTRING_H_
+#ifndef SRC_INCLUDE_STRINGPROCESS_H_
+#define SRC_INCLUDE_STRINGPROCESS_H_
 
 #include <memory>
 #include <string>
@@ -23,9 +23,6 @@
 
 namespace smash {
 static constexpr int LPythia = LogArea::Pythia::id;
-
-// \todo Sangwook: make file (processstring) and class (StringProcess) name
-// consistent
 
 /**
  * \brief String excitation processes used in SMASH
@@ -766,6 +763,12 @@ class StringProcess {
   ParticleList get_final_state() { return final_state_; }
 
   /**
+   * a function that clears the final state particle list
+   * which is used for testing mainly
+   */
+  void clear_final_state() { final_state_.clear(); }
+
+  /**
    * compute the formation time and fill the arrays with final-state particles
    * as described in \iref{Andersson:1983ia}.
    * \param[out] intermediate_particles list of fragmented particles
@@ -1215,4 +1218,4 @@ class StringProcess {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_PROCESSSTRING_H_
+#endif  // SRC_INCLUDE_STRINGPROCESS_H_

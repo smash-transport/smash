@@ -14,7 +14,7 @@
 #include "isoparticletype.h"
 #include "particles.h"
 #include "potential_globals.h"
-#include "processstring.h"
+#include "stringprocess.h"
 
 namespace smash {
 

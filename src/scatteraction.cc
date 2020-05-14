@@ -24,8 +24,8 @@
 #include "smash/pdgcode.h"
 #include "smash/potential_globals.h"
 #include "smash/pow.h"
-#include "smash/processstring.h"
 #include "smash/random.h"
+#include "smash/stringprocess.h"
 
 namespace smash {
 static constexpr int LScatterAction = LogArea::ScatterAction::id;

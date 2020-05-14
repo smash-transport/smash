@@ -27,11 +27,11 @@
 #include "pauliblocking.h"
 #include "potential_globals.h"
 #include "potentials.h"
-#include "processstring.h"
 #include "propagation.h"
 #include "quantumnumbers.h"
 #include "scatteractionphoton.h"
 #include "scatteractionsfinder.h"
+#include "stringprocess.h"
 #include "thermalizationaction.h"
 // Output
 #include "binaryoutput.h"
