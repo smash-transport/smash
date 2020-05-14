@@ -16,7 +16,7 @@ rm -f inspire.bib
 for line in `grep -hor '\\iref{[A-Z,a-z,0-9,:]*}' ../src | sort -u | sed 's/\\iref{//g; s/}/ /g'`; do
   echo "fetching $line ..."
   # search for bibtex key on Inspire, extract bib entry and append it to bibtex file
-  wget -q -O - "http://inspirehep.net/search?p=$line&of=hx" | \
+  wget -q -O - "http://old.inspirehep.net/search?p=$line&of=hx" | \
       sed -n "/<pre>/,/<\/pre>/p" | sed '$ d; 1d' | sed 's/&gt;/>/g'> tmp.bib
   nl=`cat tmp.bib | wc -l`
   if [ $nl -eq 0 ]; then
