@@ -139,10 +139,10 @@ static constexpr int LCollider = LogArea::Collider::id;
  *
  * \key Sample (string, optional, default = \key quadratic): \n
  * \li \key "uniform" - use uniform sampling of the impact parameter
- * (\f$dP(b) = db\f$)
+ * (uniform in $b$: \f$dP(b) = db\f$)
  * \li \key "quadratic" - use areal (aka quadratic) input
  * sampling (the probability of an input parameter range is proportional to the
- * area corresponding to that range, \f$dP(b) = b\cdot db\f$).
+ * area corresponding to that range, uniform in $b^2$: \f$dP(b) = b\cdot db\f$).
  * \li \key "custom" - use \key Values and \key Yields to interpolate the
  * impact parameter distribution and use rejection sampling.
  *
@@ -193,8 +193,10 @@ static constexpr int LCollider = LogArea::Collider::id;
              Value: 0.1
              Initial_Distance: 3.0
  \endverbatim
- ** The impact parameter may further be sampled from a uniform or quadratic
- * distribution in a certain impact parameter range:
+ *
+ * The impact parameter may further be sampled within a certain impact parameter
+ * range. By default, a quadratic distribution is used for the sampling.
+ * However, this may be set to "uniform" if necessary.
  *
  *\verbatim
  Modi:
