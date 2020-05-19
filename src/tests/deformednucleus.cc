@@ -17,6 +17,7 @@
 #include "../include/smash/nucleus.h"
 #include "../include/smash/particledata.h"
 #include "../include/smash/pdgcode.h"
+#include "../include/smash/pow.h"
 
 #include <map>
 #include <vector>
@@ -228,4 +229,80 @@ TEST(nucleon_density) {
   DeformedNucleus dnucleus2(proj_conf2, 1, 0);
   COMPARE_ABSOLUTE_ERROR(dnucleus2.nucleon_density(.0892, .1802), 0.16099917,
                          1e-7);
+}
+
+TEST(nucleon_density_norm) {
+  const std::map<PdgCode, int> copper = {{0x2212, 29}, {0x2112, 63 - 29}};
+  const std::map<PdgCode, int> zirconium = {{0x2212, 40}, {0x2112, 96 - 40}};
+  const std::map<PdgCode, int> ruthenium = {{0x2212, 44}, {0x2112, 96 - 44}};
+  const std::map<PdgCode, int> gold = {{0x2212, 79}, {0x2112, 197 - 79}};
+  const std::map<PdgCode, int> lead = {{0x2212, 82}, {0x2112, 208 - 82}};
+  const std::map<PdgCode, int> uranium = {{0x2212, 92}, {0x2112, 238 - 92}};
+  Integrator2d integrate;
+  {
+    DeformedNucleus nucl(copper, 1);
+    // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
+    const auto result = integrate(0, 1, -1, 1, [&](double t, double cosx) {
+      const double r = (1 - t) / t;
+      return twopi * square(r) * nucl.nucleon_density(r, cosx) / square(t);
+    });
+    std::cout << "Z: " << nucl.number_of_protons() << "  A: " << nucl.number_of_particles() << std::endl;
+    std::cout << result.value() << " ± " << result.error() << std::endl;
+    COMPARE_ABSOLUTE_ERROR(result.value(), 63., 1.);
+  }
+  {
+    DeformedNucleus nucl(zirconium, 1);
+    // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
+    const auto result = integrate(0, 1, -1, 1, [&](double t, double cosx) {
+      const double r = (1 - t) / t;
+      return twopi * square(r) * nucl.nucleon_density(r, cosx) / square(t);
+    });
+    std::cout << "Z: " << nucl.number_of_protons() << "  A: " << nucl.number_of_particles() << std::endl;
+    std::cout << result.value() << " ± " << result.error() << std::endl;
+    COMPARE_ABSOLUTE_ERROR(result.value(), 96., 1.);
+  }
+  {
+    DeformedNucleus nucl(ruthenium, 1);
+    // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
+    const auto result = integrate(0, 1, -1, 1, [&](double t, double cosx) {
+      const double r = (1 - t) / t;
+      return twopi * square(r) * nucl.nucleon_density(r, cosx) / square(t);
+    });
+    std::cout << "Z: " << nucl.number_of_protons() << "  A: " << nucl.number_of_particles() << std::endl;
+    std::cout << result.value() << " ± " << result.error() << std::endl;
+    COMPARE_ABSOLUTE_ERROR(result.value(), 96., 1.);
+  }
+  {
+    DeformedNucleus nucl(gold, 1);
+    // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
+    const auto result = integrate(0, 1, -1, 1, [&](double t, double cosx) {
+      const double r = (1 - t) / t;
+      return twopi * square(r) * nucl.nucleon_density(r, cosx) / square(t);
+    });
+    std::cout << "Z: " << nucl.number_of_protons() << "  A: " << nucl.number_of_particles() << std::endl;
+    std::cout << result.value() << " ± " << result.error() << std::endl;
+    COMPARE_ABSOLUTE_ERROR(result.value(), 197., 1.);
+  }
+  {
+    DeformedNucleus nucl(lead, 1);
+    // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
+    const auto result = integrate(0, 1, -1, 1, [&](double t, double cosx) {
+      const double r = (1 - t) / t;
+      return twopi * square(r) * nucl.nucleon_density(r, cosx) / square(t);
+    });
+    std::cout << "Z: " << nucl.number_of_protons() << "  A: " << nucl.number_of_particles() << std::endl;
+    std::cout << result.value() << " ± " << result.error() << std::endl;
+    COMPARE_ABSOLUTE_ERROR(result.value(), 208., 6.);
+  }
+  {
+    DeformedNucleus nucl(uranium, 1);
+    // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
+    const auto result = integrate(0, 1, -1, 1, [&](double t, double cosx) {
+      const double r = (1 - t) / t;
+      return twopi * square(r) * nucl.nucleon_density(r, cosx) / square(t);
+    });
+    std::cout << "Z: " << nucl.number_of_protons() << "  A: " << nucl.number_of_particles() << std::endl;
+    std::cout << result.value() << " ± " << result.error() << std::endl;
+    COMPARE_ABSOLUTE_ERROR(result.value(), 238., 2.);
+  }
 }
