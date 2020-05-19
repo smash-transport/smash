@@ -15,8 +15,8 @@
 namespace smash {
 
 class ScatterActionMulti : public Action {
-
   // TODO Write documentation
+  // TODO Sensible (debug) logging for functions
 
  public:
   ScatterActionMulti(const ParticleList& in_plist, double time);
@@ -29,19 +29,16 @@ class ScatterActionMulti : public Action {
 
   void add_possible_reactions(double dt, const double cell_vol);
 
-  double probability() const {
-    return total_probability_;
-  }
+  double probability() const { return total_probability_; }
 
   /**
    * \ingroup exception
-   * TODO Thrown when ScatterAction is called to perform with unknown combination of
-   * incoming and outgoing number of particles.
+   * TODO Thrown when ScatterAction is called to perform with unknown
+   * combination of incoming and outgoing number of particles.
    */
   class InvalidScatterActionMulti : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
-
 
  protected:
   /*
@@ -51,10 +48,18 @@ class ScatterActionMulti : public Action {
   void format_debug_output(std::ostream& out) const override;
 
  private:
+  void add_reaction(CollisionBranchPtr p);
 
-   void add_reaction(CollisionBranchPtr p);
+  void add_reactions(CollisionBranchList pv);
 
-   void add_reactions(CollisionBranchList pv);
+  void annihilation();
+
+  double probability_three_pi_to_omega(const ParticleType& type_out, double dt,
+                                       const double cell_vol) const;
+
+  bool three_different_pions(const ParticleData& data_a,
+                             const ParticleData& data_b,
+                             const ParticleData& data_c) const;
 
   /// Total probability of reaction
   double total_probability_;
@@ -64,7 +69,6 @@ class ScatterActionMulti : public Action {
 
   /// List of possible collisions
   CollisionBranchList reaction_channels_;
-
 };
 
 }  // namespace smash

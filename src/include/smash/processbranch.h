@@ -48,7 +48,7 @@ enum class ProcessType {
   /// bremsstrahlung process: a + b -> a + b + photon
   Bremsstrahlung = 9,
   /// multi particle scattering 3pi->omega
-  MultiParticleThreePionsToOneOmega = 91,
+  MultiParticleThreePionsToOmega = 91,
   /**
    * (41-45) soft string excitations. Here "soft" means that the process does
    *         not involve quark or gluon scattering. A string is formed by quark
@@ -292,7 +292,6 @@ class CollisionBranch : public ProcessBranch {
   }
 
  private:
-
   /// List of particles appearing in this process outcome.
   ParticleTypePtrList particle_types_;
 
