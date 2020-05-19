@@ -27,13 +27,15 @@ class ScatterActionMulti : public Action {
 
   double get_partial_weight() const override;
 
-  void add_final_state();
+  void add_possible_reactions(double dt, const double cell_vol);
 
-  double probability_multi(double dt, const double cell_vol) const;
+  double probability() const {
+    return total_probability_;
+  }
 
   /**
    * \ingroup exception
-   * Thrown when ScatterAction is called to perform with unknown combination of
+   * TODO Thrown when ScatterAction is called to perform with unknown combination of
    * incoming and outgoing number of particles.
    */
   class InvalidScatterActionMulti : public std::invalid_argument {
@@ -47,6 +49,21 @@ class ScatterActionMulti : public Action {
    * Writes information about this action to the \p out stream.
    */
   void format_debug_output(std::ostream& out) const override;
+
+ private:
+
+   void add_reaction(CollisionBranchPtr p);
+
+   void add_reactions(CollisionBranchList pv);
+
+  /// Total probability of reaction
+  double total_probability_;
+
+  /// Partial probability of the chosen outgoing channel
+  double partial_probability_;
+
+  /// List of possible collisions
+  CollisionBranchList reaction_channels_;
 
 };
 

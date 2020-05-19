@@ -411,15 +411,15 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
 
   // just collided with those particle
   // TODO Find out if this is should be done or not
-  if (plist.size() == 3) {
-    if (plist[0].id_process() > 0 && plist[0].id_process() == plist[1].id_process() && plist[1].id_process() == plist[2].id_process()) {
-      logg[LFindScatter].debug("Skipping collided multiple particles at time ",
-                               plist[0].position().x0());
-      return nullptr;
-    }
-  } else {
-    logg[LFindScatter].warn("Preventing direct recombination currently not done for this number of particles pairing.");
-  }
+  // if (plist.size() == 3) {
+  //   if (plist[0].id_process() > 0 && plist[0].id_process() == plist[1].id_process() && plist[1].id_process() == plist[2].id_process()) {
+  //     logg[LFindScatter].debug("Skipping collided multiple particles at time ",
+  //                              plist[0].position().x0());
+  //     return nullptr;
+  //   }
+  // } else {
+  //   logg[LFindScatter].warn("Preventing direct recombination currently not done for this number of particles pairing.");
+  // }
 
 
   /* Could be an optimisation for later to already check here at the beginning
@@ -431,24 +431,17 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
     throw std::runtime_error(err.str());
   }
 
-  // New 1. Determine time of collision.
+  // 1. Determine time of collision.
   const double time_until_collision = dt * random::uniform(0., 1.);
 
-  // New 2. Create ScatterAction object.
+  // 2. Create ScatterAction object.
   ScatterActionMultiPtr act = make_unique<ScatterActionMulti>(plist, time_until_collision);
 
-  // New 3. Add final state
-  act->add_final_state();
+  // 3. Add possible final states (dt and cell_vol for probability calculation)
+  act->add_possible_reactions(dt, cell_vol);
 
-  // TODO Verfiy that this check works
-  if (act->get_type() == ProcessType::None) {
-    // No fitting final state found
-    return nullptr;
-  }
-
-  // New 4. Calculate collision probability
-  const double p_nm = act->probability_multi(dt, cell_vol);
-
+  // 4. Return total collision probability
+  const double p_nm = act->probability();
 
   // 5. Check that probability is smaller than one
   if (p_nm > 1.) {

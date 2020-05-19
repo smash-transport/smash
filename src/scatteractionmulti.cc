@@ -12,13 +12,38 @@
 namespace smash {
 
 ScatterActionMulti::ScatterActionMulti(const ParticleList &in_plist, double time)
-    : Action(in_plist, time) {
-      // Make sure process_type_ is set to None by default,
-      // used to check if mulitparticle action possible
-      process_type_ = ProcessType::None;
-    }
+    : Action(in_plist, time),
+      total_probability_(0.) {}
+
+void ScatterActionMulti::add_reaction(CollisionBranchPtr p) {
+  add_process<CollisionBranch>(p, reaction_channels_, total_probability_);
+}
+
+void ScatterActionMulti::add_reactions(CollisionBranchList pv) {
+  add_processes<CollisionBranch>(std::move(pv), reaction_channels_,
+                                 total_probability_);
+}
+
+double ScatterActionMulti::get_total_weight() const {
+  // TODO Maybe add xs_scaling factor to probability
+  return total_probability_;
+}
+
+double ScatterActionMulti::get_partial_weight() const {
+  // TODO Maybe add xs_scaling factor to probability
+  return partial_probability_;
+}
 
 void ScatterActionMulti::generate_final_state() {
+
+  /* Decide for a particular final state. */
+  const CollisionBranch *proc = choose_channel<CollisionBranch>(
+      reaction_channels_, total_probability_);
+  process_type_ = proc->get_type();
+  outgoing_particles_ = proc->particle_list();
+  partial_probability_ = proc->weight();
+
+
   /* The production point of the new particles.  */
   FourVector middle_point = get_interaction_point();
 
@@ -45,18 +70,6 @@ void ScatterActionMulti::generate_final_state() {
   }
 }
 
-double ScatterActionMulti::get_total_weight() const {
-  // No cross section for mulitparticle scatterings
-  // TODO Maybe put probability here?
-  return 0.0;
-}
-
-double ScatterActionMulti::get_partial_weight() const {
-  // No cross section for mulitparticle scatterings
-  // TODO Maybe put probability here?
-  return 0.0;
-}
-
 bool three_pions_incoming(const ParticleData& data_a,
                           const ParticleData& data_b,
                           const ParticleData& data_c) {
@@ -74,58 +87,39 @@ bool three_pions_incoming(const ParticleData& data_a,
          (pdg_a == pdg::pi_m && pdg_b == pdg::pi_z && pdg_c == pdg::pi_p);
 }
 
-void ScatterActionMulti::add_final_state() {
 
-  // 3pi --> omega //
+void ScatterActionMulti::add_possible_reactions(double dt, const double cell_vol) {
+
   if (incoming_particles().size() == 3 &&
       three_pions_incoming(incoming_particles()[0],
                            incoming_particles()[1],
                            incoming_particles()[2])){
-    process_type_ = ProcessType::MultiParticleThreePionsToOneOmega;
-    // Add omega as final state particle
-    const ParticleType& type_omega = ParticleType::find(0x223);
-    ParticleData data_final{type_omega};
-    outgoing_particles_.push_back(data_final);
+
+     // Add omega as final state particle
+     const ParticleType& type_omega = ParticleType::find(0x223);
+
+     const double e1 = incoming_particles()[0].momentum().x0();
+     const double e2 = incoming_particles()[1].momentum().x0();
+     const double e3 = incoming_particles()[2].momentum().x0();
+     const double sqrts = sqrt_s();
+
+     // For later:
+     // Could also be replaced by a function call to the the inverse processbranch
+     const double gamma_decay = 0.00758;  // For omega to 3 pions constant ATM
+
+     const double I_3 = 0.07514;
+     const double ph_sp_3 =
+         1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
+
+     const double spec_f_val = type_omega.spectral_function(sqrts);
+
+     const double p_31 = dt / (cell_vol * cell_vol) * M_PI / (2 * e1 * e2 * e3) * gamma_decay /
+            ph_sp_3 * spec_f_val;
+
+     add_reaction(make_unique<CollisionBranch>(
+         type_omega, p_31, ProcessType::MultiParticleThreePionsToOneOmega));
+
   }
-
-}
-
-double ScatterActionMulti::probability_multi(double dt, const double cell_vol) const {
-
-  double p_nm = 0.0;
-
-  switch (process_type_) {
-    case ProcessType::MultiParticleThreePionsToOneOmega: {
-
-      const double e1 = incoming_particles()[0].momentum().x0();
-      const double e2 = incoming_particles()[1].momentum().x0();
-      const double e3 = incoming_particles()[2].momentum().x0();
-      const double sqrts = sqrt_s();
-
-      // For later:
-      // Could also be replaced by a function call to the the inverse processbranch
-      const double gamma_decay = 0.00758;  // For omega to 3 pions constant ATM
-
-      const double I_3 = 0.07514;
-      const double ph_sp_3 =
-          1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
-
-      const double spec_f_val =
-          outgoing_particles()[0].type().spectral_function(sqrts);
-
-      const double p_31 = dt / (cell_vol * cell_vol) * M_PI / (2 * e1 * e2 * e3) * gamma_decay /
-             ph_sp_3 * spec_f_val;
-
-      p_nm = p_31;
-      break;
-    }
-    default:
-      throw InvalidScatterActionMulti(
-              "ScatterActionMulti::probability_multi: Invalid process type " +
-              std::to_string(static_cast<int>(process_type_)) + " was requested.");
-    }
-
-    return p_nm;
 
 }
 

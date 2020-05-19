@@ -292,14 +292,10 @@ class CollisionBranch : public ProcessBranch {
   }
 
  private:
-  /**
-   * List of particles appearing in this process outcome.
-   *
-   * \note This currently uses a std::vector and thus works for any number of
-   * particles. But this number is bounded (4?) and a std::array may therefore
-   * be more efficient.
-   */
+
+  /// List of particles appearing in this process outcome.
   ParticleTypePtrList particle_types_;
+
   /**
    * Process type are used to distinguish different types of processes,
    * e.g. string formation, resonance formation, elastic scattering and so on.
