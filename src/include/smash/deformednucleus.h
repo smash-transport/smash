@@ -101,7 +101,7 @@ class DeformedNucleus : public Nucleus {
    * \param[in] cosx The cosine of the polar angle at which to sample
    * \return The Woods-Saxon density
    */
-  double nucleon_density(double r, double cosx) override;
+  double nucleon_density(double r, double cosx) const override;
 
   /**
    * Set deformation coefficient for Y_2_0.

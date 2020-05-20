@@ -505,7 +505,7 @@ void Nucleus::random_euler_angles() {
   euler_psi_ = twopi * random::uniform(0., 1.);
 }
 
-double Nucleus::nucleon_density(double r, double) {
+double Nucleus::nucleon_density(double r, double) const {
   return nuclear_density /
          (std::exp((r - nuclear_radius_) / diffusiveness_) + 1.);
 }
