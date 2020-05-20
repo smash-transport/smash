@@ -85,6 +85,14 @@ class ScatterAction : public Action {
   double mandelstam_s() const;
 
   /**
+   * Get the relative velocity of the two incoming
+   * particles. For a defintion see e.g. \iref{Seifert:2017oyb}, eq. (5)
+   *
+   * \return relative velocity.
+   */
+  double relative_velocity() const;
+
+  /**
    * Generate the final-state of the scattering process.
    * Performs either elastic or inelastic scattering.
    *
@@ -185,6 +193,7 @@ class ScatterAction : public Action {
    * \return center of mass momentum squared.
    */
   double cm_momentum_squared() const;
+
   /**
    * Get the velocity of the center of mass of the scattering particles
    * in the calculation frame.
