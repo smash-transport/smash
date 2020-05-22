@@ -54,7 +54,7 @@ class ScatterActionMulti : public Action {
 
   void annihilation();
 
-  double probability_three_pi_to_omega(const ParticleType& type_out, double dt,
+  double probability_three_pi_to_one(const ParticleType& type_out, double dt,
                                        const double cell_vol) const;
 
   bool three_different_pions(const ParticleData& data_a,

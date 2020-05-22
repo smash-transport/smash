@@ -39,12 +39,17 @@ void ScatterActionMulti::add_possible_reactions(double dt,
   if (incoming_particles().size() == 3 &&
       three_different_pions(incoming_particles()[0], incoming_particles()[1],
                             incoming_particles()[2])) {
-    // Currently only reaction is 3pi -> omega
+    // TODO: Make sure that particle types exist
+    // 3pi -> omega
     const ParticleType& type_omega = ParticleType::find(0x223);
-
     add_reaction(make_unique<CollisionBranch>(
-        type_omega, probability_three_pi_to_omega(type_omega, dt, cell_vol),
+        type_omega, probability_three_pi_to_one(type_omega, dt, cell_vol),
         ProcessType::MultiParticleThreePionsToOmega));
+    // 3pi -> phi
+    const ParticleType& type_phi = ParticleType::find(0x223);
+    add_reaction(make_unique<CollisionBranch>(
+        type_omega, probability_three_pi_to_one(type_phi, dt, cell_vol),
+        ProcessType::MultiParticleThreePionsToPhi));
   }
 }
 
@@ -58,6 +63,7 @@ void ScatterActionMulti::generate_final_state() {
 
   switch (process_type_) {
     case ProcessType::MultiParticleThreePionsToOmega:
+    case ProcessType::MultiParticleThreePionsToPhi:
       /* n->1 annihilation */
       annihilation();
       break;
@@ -79,7 +85,7 @@ void ScatterActionMulti::generate_final_state() {
   }
 }
 
-double ScatterActionMulti::probability_three_pi_to_omega(
+double ScatterActionMulti::probability_three_pi_to_one(
     const ParticleType& type_out, double dt, const double cell_vol) const {
   const double e1 = incoming_particles()[0].momentum().x0();
   const double e2 = incoming_particles()[1].momentum().x0();
