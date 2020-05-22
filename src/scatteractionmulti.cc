@@ -15,7 +15,6 @@ ScatterActionMulti::ScatterActionMulti(const ParticleList& in_plist,
                                        double time)
     : Action(in_plist, time), total_probability_(0.) {}
 
-
 void ScatterActionMulti::add_reaction(CollisionBranchPtr p) {
   add_process<CollisionBranch>(p, reaction_channels_, total_probability_);
 }
@@ -44,8 +43,7 @@ void ScatterActionMulti::add_possible_reactions(double dt,
     const ParticleType& type_omega = ParticleType::find(0x223);
 
     add_reaction(make_unique<CollisionBranch>(
-        type_omega,
-        probability_three_pi_to_omega(type_omega, dt, cell_vol),
+        type_omega, probability_three_pi_to_omega(type_omega, dt, cell_vol),
         ProcessType::MultiParticleThreePionsToOmega));
   }
 }
@@ -88,18 +86,18 @@ double ScatterActionMulti::probability_three_pi_to_omega(
   const double e3 = incoming_particles()[2].momentum().x0();
   const double sqrts = sqrt_s();
 
-  // For later:
-  // Could also be replaced by a function call to the the inverse processbranch
-  const double gamma_decay = 0.00758;  // For omega to 3 pions constant ATM
+  const double gamma_decay = type_out.get_partial_width(
+      sqrts, {&incoming_particles()[0].type(), &incoming_particles()[1].type(),
+              &incoming_particles()[2].type()});
 
-  const double I_3 = 0.07514;
+  const double I_3_pi = 0.07514;
   const double ph_sp_3 =
-      1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
+      1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3_pi;
 
   const double spec_f_val = type_out.spectral_function(sqrts);
 
   return dt / (cell_vol * cell_vol) * M_PI / (2 * e1 * e2 * e3) * gamma_decay /
-         ph_sp_3 * spec_f_val;
+         ph_sp_3 * spec_f_val * std::pow(hbarc, 5.0);
 }
 
 void ScatterActionMulti::annihilation() {

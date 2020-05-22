@@ -319,12 +319,11 @@ class ParticleType {
    * decaying into two given daughter particles.
    *
    * \param[in] m Invariant mass of the decaying resonance.
-   * \param[in] t_a Type of first daughter particle.
-   * \param[in] t_b Type of second daughter particle.
+   * \param[in] dlist List of daughter particle.
    * \return the partial width for this mass and this specific decay channel
    */
-  double get_partial_width(const double m, const ParticleType &t_a,
-                           const ParticleType &t_b) const;
+  double get_partial_width(const double m,
+                           const ParticleTypePtrList dlist) const;
 
   /**
    * Get the mass-dependent partial in-width of a resonance with mass m,

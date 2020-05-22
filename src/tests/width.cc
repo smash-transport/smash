@@ -124,15 +124,16 @@ TEST(photon_widths) {
   // The partial widths should be given by the width of the resonance times the
   // branching ratio. This test breaks whenever the branching ratios or width of
   // the involved particles are changed.
-  COMPARE_ABSOLUTE_ERROR(pi0.get_partial_width(pi0.mass(), photon, photon),
+  COMPARE_ABSOLUTE_ERROR(pi0.get_partial_width(pi0.mass(), {&photon, &photon}),
                          7.699999749e-09, err);
-  COMPARE_ABSOLUTE_ERROR(eta.get_partial_width(eta.mass(), photon, photon),
+  COMPARE_ABSOLUTE_ERROR(eta.get_partial_width(eta.mass(), {&photon, &photon}),
                          5.203024193548386e-7, err);
-  COMPARE_ABSOLUTE_ERROR(etap.get_partial_width(etap.mass(), photon, photon),
-                         4.3889449263667536e-6, err);
+  COMPARE_ABSOLUTE_ERROR(
+      etap.get_partial_width(etap.mass(), {&photon, &photon}),
+      4.3889449263667536e-6, err);
 
-  COMPARE_ABSOLUTE_ERROR(omega.get_partial_width(omega.mass(), pi0, photon),
+  COMPARE_ABSOLUTE_ERROR(omega.get_partial_width(omega.mass(), {&pi0, &photon}),
                          0.0007194189448, err);
-  COMPARE_ABSOLUTE_ERROR(phi.get_partial_width(phi.mass(), pi0, photon),
+  COMPARE_ABSOLUTE_ERROR(phi.get_partial_width(phi.mass(), {&pi0, &photon}),
                          5.4068538571729e-6, err);
 }
