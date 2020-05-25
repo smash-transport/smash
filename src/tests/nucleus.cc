@@ -270,7 +270,8 @@ TEST(nucleon_density_norm) {
       const double r = (1 - t) / t;
       return 2 * twopi * square(r) * nucl.nucleon_density(r, 0.) / square(t);
     });
-    std::cout << "Z: " << nucl.number_of_protons() << "  A: " << nucl.number_of_particles() << std::endl;
+    std::cout << "Z: " << nucl.number_of_protons()
+              << "  A: " << nucl.number_of_particles() << std::endl;
     std::cout << result.value() << " ± " << result.error() << std::endl;
     // Compare to value calculated with CAS:
     COMPARE_ABSOLUTE_ERROR(result.value(), 5.5934, 1e-4);
@@ -282,7 +283,8 @@ TEST(nucleon_density_norm) {
       const double r = (1 - t) / t;
       return 2 * twopi * square(r) * nucl.nucleon_density(r, 0.) / square(t);
     });
-    std::cout << "Z: " << nucl.number_of_protons() << "  A: " << nucl.number_of_particles() << std::endl;
+    std::cout << "Z: " << nucl.number_of_protons()
+              << "  A: " << nucl.number_of_particles() << std::endl;
     std::cout << result.value() << " ± " << result.error() << std::endl;
     // Compare to value calculated with CAS:
     COMPARE_ABSOLUTE_ERROR(result.value(), 20.2643, 1e-4);
@@ -294,7 +296,8 @@ TEST(nucleon_density_norm) {
       const double r = (1 - t) / t;
       return 2 * twopi * square(r) * nucl.nucleon_density(r, 0.) / square(t);
     });
-    std::cout << "Z: " << nucl.number_of_protons() << "  A: " << nucl.number_of_particles() << std::endl;
+    std::cout << "Z: " << nucl.number_of_protons()
+              << "  A: " << nucl.number_of_particles() << std::endl;
     std::cout << result.value() << " ± " << result.error() << std::endl;
     // Compare to number of nucleons:
     COMPARE_ABSOLUTE_ERROR(result.value(), 208., 15);
