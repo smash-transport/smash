@@ -329,13 +329,16 @@ ActionPtr ScatterActionsFinder::check_collision(
   }
 
   // Distance squared calculation only needed for geometric criterion
-  const double distance_squared = (coll_crit_ == CollisionCriterion::Geometric)
-                                      ? act->transverse_distance_sqr()
-                                      : 0.0;
+  const double distance_squared =
+      (coll_crit_ == CollisionCriterion::Geometric)
+          ? act->transverse_distance_sqr()
+          : (coll_crit_ == CollisionCriterion::Covariant)
+                ? act->cov_transverse_distance_sqr()
+                : 0.0;
 
   // Don't calculate cross section if the particles are very far apart for
   // geometric criterion.
-  if (coll_crit_ == CollisionCriterion::Geometric &&
+  if (coll_crit_ != CollisionCriterion::Stochastic &&
       distance_squared >= max_transverse_distance_sqr(testparticles_)) {
     return nullptr;
   }
@@ -397,14 +400,6 @@ ActionPtr ScatterActionsFinder::check_collision(
 
       return nullptr;
     }
-    //calculate transeverse distance squared depending on criterion
-    double distance_squared;
-    if (coll_crit_ == CollisionCriterion::Geometric) {
-      distance_squared = act->transverse_distance_sqr();
-    } else {
-      distance_squared = act->cov_transverse_distance_sqr();
-    }
-
     // Don't calculate cross section if the particles are very far apart.
     if (distance_squared >= max_transverse_distance_sqr(testparticles_)) {
       return nullptr;
