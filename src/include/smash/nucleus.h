@@ -226,7 +226,7 @@ class Nucleus {
    * \param[in] r The radius at which to sample
    * \return The Woods-Saxon density
    */
-  virtual double nucleon_density(double r, double);
+  virtual double nucleon_density(double r, double) const;
 
   /// \ingroup exception
   struct TestparticleConfusion : public std::length_error {

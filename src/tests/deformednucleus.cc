@@ -17,6 +17,7 @@
 #include "../include/smash/nucleus.h"
 #include "../include/smash/particledata.h"
 #include "../include/smash/pdgcode.h"
+#include "../include/smash/pow.h"
 
 #include <map>
 #include <vector>
@@ -228,4 +229,32 @@ TEST(nucleon_density) {
   DeformedNucleus dnucleus2(proj_conf2, 1, 0);
   COMPARE_ABSOLUTE_ERROR(dnucleus2.nucleon_density(.0892, .1802), 0.16099917,
                          1e-7);
+}
+
+TEST(nucleon_density_norm) {
+  const std::map<PdgCode, int> copper = {{pdg::p, 29}, {pdg::n, 63 - 29}},
+                               zirconium = {{pdg::p, 40}, {pdg::n, 96 - 40}},
+                               ruthenium = {{pdg::p, 44}, {pdg::n, 96 - 44}},
+                               gold = {{pdg::p, 79}, {pdg::n, 197 - 79}},
+                               lead = {{pdg::p, 82}, {pdg::n, 208 - 82}},
+                               uranium = {{pdg::p, 92}, {pdg::n, 238 - 92}};
+  std::vector<DeformedNucleus> deformed_nuclei{{copper, 1},    {zirconium, 1},
+                                               {ruthenium, 1}, {gold, 1},
+                                               {lead, 1},      {uranium, 1}};
+  std::vector<double> allowed_errors = {1.0, 1.0, 1.0, 1.0, 6.0, 2.0};
+
+  Integrator2d integrate;
+  for (const DeformedNucleus &nucl : deformed_nuclei) {
+    // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
+    const auto result = integrate(0, 1, -1, 1, [&](double t, double cosx) {
+      const double r = (1 - t) / t;
+      return twopi * square(r) * nucl.nucleon_density(r, cosx) / square(t);
+    });
+    const size_t Z = nucl.number_of_protons(), A = nucl.number_of_particles();
+    std::cout << "Z: " << Z << "  A: " << A << std::endl;
+    std::cout << result.value() << " ± " << result.error() << std::endl;
+    size_t index = &nucl - &deformed_nuclei[0];
+    COMPARE_ABSOLUTE_ERROR(result.value(), static_cast<double>(A),
+                           allowed_errors[index]);
+  }
 }

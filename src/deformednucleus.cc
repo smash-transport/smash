@@ -301,7 +301,7 @@ double y_l_0(int l, double cosx) {
   }
 }
 
-double DeformedNucleus::nucleon_density(double r, double cosx) {
+double DeformedNucleus::nucleon_density(double r, double cosx) const {
   return Nucleus::get_saturation_density() /
          (1 + std::exp((r - Nucleus::get_nuclear_radius() *
                                 (1 + beta2_ * y_l_0(2, cosx) +
