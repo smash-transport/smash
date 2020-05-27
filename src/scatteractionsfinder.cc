@@ -36,10 +36,13 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * tested for specific setups. Currently, only two-to-two reactions with
  * constant elastic cross
  * section are supported.
+ *
  * \li \key "Geometric" - Geometric collision criterion
- * \li \key "Stochastic" - Stochastic Collision criterion see e.g. A. Lang, H.
+ * \li \key "Stochastic" - Stochastic collision criterion see e.g. A. Lang, H.
  * Babovsky, W. Cassing, U. Mosel, H. G. Reusch, and K. Weber, J. Comp. Phys.
  * 106, 391 (1993).
+ * \li \key "Covariant" - Covariant collision criterion see e.g. T. Hirano and
+ * Y. Nara, PTEP Issue 1, 16 (2012).
  *
  * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
  * If a non-negative value is given, it will override the parametrized
