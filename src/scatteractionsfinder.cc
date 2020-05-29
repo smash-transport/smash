@@ -33,9 +33,8 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \page input_collision_term_ Collision_Term
  * \key Collision_Criterion (string, optional, default = "Geometric") \n
  * Choose collision criterion. Be aware that the stochastic criterion is only
- * tested for specific setups. Currently, only two-to-two reactions with
- * constant elastic cross
- * section are supported.
+ * applicable within limits. Most notably, it might not lead reasonable results
+ * for very dilute systems like e.g. pp collisions.
  * \li \key "Geometric" - Geometric collision criterion
  * \li \key "Stochastic" - Stochastic Collision criterion see e.g. A. Lang, H.
  * Babovsky, W. Cassing, U. Mosel, H. G. Reusch, and K. Weber, J. Comp. Phys.
@@ -250,13 +249,6 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_proj_(N_proj),
       string_formation_time_(config.take(
           {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)) {
-  if (coll_crit_ == CollisionCriterion::Stochastic &&
-      !(is_constant_elastic_isotropic())) {
-    throw std::invalid_argument(
-        "The stochastic collision criterion is only supported for elastic (and "
-        "isotropic)\n2-to-2 reactions of one particle species. Change you "
-        "config accordingly.");
-  }
   if (is_constant_elastic_isotropic()) {
     logg[LFindScatter].info(
         "Constant elastic isotropic cross-section mode:", " using ",
