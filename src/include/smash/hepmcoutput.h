@@ -20,9 +20,12 @@
 
 namespace smash {
 
-
+// TODO make constexpr?
 const int status_code_for_beam_particles = 4;
 const int status_code_for_final_particles = 1;
+
+// TODO Write documentation, especially document our usage of HepMC (one vertex,
+// projectile and target as one particle, ...)
 
 class HepMcOutput : public OutputInterface {
  public:

@@ -23,33 +23,51 @@ HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
 
 void HepMcOutput::at_eventstart(const Particles &particles,
                                 const int event_number) {
-  // TODO What other meta-data is needed for event or vertex?
+
+  // TODO Is MM the correct unit?
   current_event_ = HepMC3::GenEvent(HepMC3::Units::GEV,HepMC3::Units::MM);
 
-  // Set cross section attribute
+  /* Rivet needs a value for the cross section, but SMASH only knows about
+   * nucleon cross sections, not about cross sections between nuclei,
+   * so a dummy is used. */
   std::shared_ptr<HepMC3::GenCrossSection> cross_section = std::make_shared<HepMC3::GenCrossSection>();
   current_event_.add_attribute("GenCrossSection",cross_section);
-  // TODO Replace dummy XS
+  const double dummy_xs = 1.0;
   cross_section->set_cross_section(1.0, 1.0);
-
-  // Set heavy ion attribute
-  std::shared_ptr<HepMC3::GenHeavyIon> heavy_ion = std::make_shared<HepMC3::GenHeavyIon>();
-  current_event_.add_attribute("GenHeavyIon",heavy_ion);
-  heavy_ion->set(-1, -1, -1, -1, -1, -1, -1, -1, -1, 0.0, -1.0, -1.0, -1.0, -1.0, -1.0);
 
   current_event_.set_event_number(event_number);
   vertex_ =  HepMC3::make_shared<HepMC3::GenVertex>();
   current_event_.add_vertex(vertex_);
 
+
   // Add projectile and target
-  const int pdg_nuclear_code_au = 1000791970;
-  const int  n_nucleons_au= 197;
+
+  // TODO Properly create two nuclei "particles" (do not hardcode information about nuclei!)
+
+  const int na = 197;
+  const int nz = 97;
+  const int nl = 0;
+
+  // Construct pdg nuclear code
+  const int pdg_nuclear_code_prefix = 10 * 1E8;
+  const int pdg_nuclear_code_lambda = nl * 1E7;
+  const int pdg_nuclear_code_charge = nz * 1E4;
+  const int pdg_nuclear_code_baryon = na * 1E1;
+  const int pdg_nuclear_code_isomer =  0 * 1E0;  // we do not do isomers in SMASH
+
+  const int pdg_nuclear_code = pdg_nuclear_code_prefix
+                             + pdg_nuclear_code_lambda
+                             + pdg_nuclear_code_charge
+                             + pdg_nuclear_code_baryon
+                             + pdg_nuclear_code_excite;
+
+  // TODO Put nuclear code construction in proper function and into class (maybe pdgcode class, static function?)
 
   FourVector total_mom_proj;
   FourVector total_mom_target;
   int counter = 0;
   for (const ParticleData &data : particles) {
-    if (data.id() < n_nucleons_au) {
+    if (data.id() < na) {
       total_mom_proj += data.momentum();
     } else {
       total_mom_target += data.momentum();
@@ -57,7 +75,7 @@ void HepMcOutput::at_eventstart(const Particles &particles,
     counter++;
   }
 
-  if (counter != 2*n_nucleons_au) {
+  if (counter != 2*na) {
     throw std::invalid_argument("HepMC currently only supported for AuAu nuclei ATM");
   }
 
@@ -71,7 +89,14 @@ void HepMcOutput::at_eventstart(const Particles &particles,
 
 
 void HepMcOutput::at_eventend(const Particles &particles, const int32_t /*event_number*/,
-                 double /*impact_parameter*/, bool /*empty_event*/) {
+                 double impact_parameter, bool /*empty_event*/) {
+
+   // Set heavy ion attribute, only the impact parameter is known
+   // TODO Test if it works to add the heavy ion attribute here
+   std::shared_ptr<HepMC3::GenHeavyIon> heavy_ion = std::make_shared<HepMC3::GenHeavyIon>();
+   current_event_.add_attribute("GenHeavyIon", heavy_ion);
+   heavy_ion->set(-1, -1, -1, -1, -1, -1, -1, -1, -1, impact_parameter, -1.0, -1.0, -1.0, -1.0, -1.0);
+
   for (const ParticleData &data : particles) {
     const FourVector mom = data.momentum();
     HepMC3::GenParticlePtr p =  HepMC3::make_shared<HepMC3::GenParticle>(HepMC3::FourVector(mom.x1(), mom.x2(), mom.x3(), mom.x0()), data.pdgcode().get_decimal(), status_code_for_final_particles);
