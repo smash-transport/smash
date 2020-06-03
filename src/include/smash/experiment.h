@@ -582,9 +582,9 @@ void Experiment<Modus>::create_output(const std::string &format,
                                       const OutputParameters &out_par) {
   logg[LExperiment].info() << "Adding output " << content << " of format "
                            << format << std::endl;
-                           
+
   // TODO Create config option for HepMC output
-  outputs_.emplace_back(make_unique<HepMcOutput>(output_path, "SMASH_HepMC", out_par));
+  outputs_.emplace_back(make_unique<HepMcOutput>(output_path, "Particles", out_par, modus_.total_N_number(), modus_.proj_N_number()));
   if (format == "VTK" && content == "Particles") {
     outputs_.emplace_back(
         make_unique<VtkOutput>(output_path, content, out_par));

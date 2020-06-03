@@ -10,19 +10,18 @@
 #ifndef SRC_INCLUDE_HEPMCOUTPUT_H_
 #define SRC_INCLUDE_HEPMCOUTPUT_H_
 
-
+#include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"
+
 #include "HepMC3/WriterAscii.h"
 #include "HepMC3/GenEvent.h"
 #include "HepMC3/GenVertex.h"
 
 
+
 namespace smash {
 
-// TODO make constexpr?
-const int status_code_for_beam_particles = 4;
-const int status_code_for_final_particles = 1;
 
 // TODO Write documentation, especially document our usage of HepMC (one vertex,
 // projectile and target as one particle, ...)
@@ -37,7 +36,9 @@ class HepMcOutput : public OutputInterface {
    * \param[in] out_par A structure containing parameters of the output.
    */
   HepMcOutput(const bf::path &path, std::string name,
-              const OutputParameters &out_par);
+              const OutputParameters &out_par,
+              const int total_N,
+              const int proj_N);
 
   /**
    * Writes the initial particle information list of an event to the binary
@@ -60,19 +61,30 @@ class HepMcOutput : public OutputInterface {
   void at_eventend(const Particles &particles, const int32_t event_number,
                    double impact_parameter, bool empty_event) override;
 
-  /**
-   * Writes an interaction block, including information about the incoming and
-   * outgoing particles, to the binary output.
-   * \param[in] action Action that holds the information of the interaction.
-   * \param[in] density Density at the interaction point.
-   */
-  void at_interaction(const Action &action, const double density) override;
-
 private:
+
+  /// HepMC status code for target and projecticle particles
+  static const int status_code_for_beam_particles;
+  /// HepMC status code for final particles
+  static const int status_code_for_final_particles;
+
+  /**
+   * Total number of nucleons in projectile and target,
+   * needed for converting nuclei to single particles.
+   */
+  const int total_N_;
+  /**
+   * Total number of nucleons in projectile,
+   * needed for converting nuclei to single particles.
+   */
+  const int proj_N_;
+
+  // Note isomers and lambda + no sense to construct seperate pdgcode, refeeence to nuclear pdg codes
+  int construct_nuclear_pdg_code(int na, int nz) const;
 
   HepMC3::WriterAscii output_file_;
   //
-  HepMC3::GenEvent current_event_;
+  std::unique_ptr<HepMC3::GenEvent> current_event_;
   //
   HepMC3::GenVertexPtr vertex_;
 

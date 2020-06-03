@@ -92,6 +92,13 @@ class ParticleData {
 
   /// \copydoc PdgCode::is_rho
   bool is_rho() const { return type_->is_rho(); }
+
+  /// \copydoc PdgCode::is_proton
+  bool is_proton() const { return pdgcode().is_proton(); }
+
+  /// \copydoc PdgCode::is_neutron
+  bool is_neutron() const { return pdgcode().is_neutron(); }
+
   /**
    * Get the particle's pole mass ("on-shell").
    * \return pole mass of the particle [GeV]
