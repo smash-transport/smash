@@ -409,22 +409,6 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
     return nullptr;
   }
 
-  // just collided with those particle
-  // TODO Find out if this is should be done or not
-  // if (plist.size() == 3) {
-  //   if (plist[0].id_process() > 0 && plist[0].id_process() ==
-  //   plist[1].id_process() && plist[1].id_process() == plist[2].id_process())
-  //   {
-  //     logg[LFindScatter].debug("Skipping collided multiple particles at time
-  //     ",
-  //                              plist[0].position().x0());
-  //     return nullptr;
-  //   }
-  // } else {
-  //   logg[LFindScatter].warn("Preventing direct recombination currently not
-  //   done for this number of particles pairing.");
-  // }
-
   /* Could be an optimisation for later to already check here at the beginning
    * if collision with plist is possible. */
 
