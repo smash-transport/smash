@@ -10,7 +10,6 @@
 #include "smash/hepmcoutput.h"
 
 #include <boost/filesystem.hpp>
-#include "HepMC3/GenParticle.h"
 #include "HepMC3/Print.h"
 
 namespace smash {

@@ -36,8 +36,6 @@
 // Output
 #include "binaryoutput.h"
 #include "hepmcoutput.h"
-#include "HepMC3/GenParticle.h"
-// TODO Possible to get rid of include above
 #include "icoutput.h"
 #include "oscaroutput.h"
 #include "thermodynamicoutput.h"
