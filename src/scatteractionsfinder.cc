@@ -400,15 +400,6 @@ ActionPtr ScatterActionsFinder::check_collision(
 
       return nullptr;
     }
-    // Don't calculate cross section if the particles are very far apart.
-    if (distance_squared >= max_transverse_distance_sqr(testparticles_)) {
-      return nullptr;
-    }
-
-    // Add various subprocesses.
-    act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                             low_snn_cut_, strings_switch_, use_AQM_,
-                             strings_with_probability_, nnbar_treatment_);
 
     // Cross section for collision criterion
     const double cross_section_criterion = xs * M_1_PI;
