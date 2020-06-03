@@ -165,6 +165,18 @@ double ScatterAction::cm_momentum_squared() const {
   return pCM_sqr(sqrt_s(), m1, m2);
 }
 
+double ScatterAction::relative_velocity() const {
+  const double m1 = incoming_particles()[0].effective_mass();
+  const double m1_sqr = m1 * m1;
+  const double m2 = incoming_particles()[1].effective_mass();
+  const double m2_sqr = m2 * m2;
+  const double m_s = mandelstam_s();
+  const double lambda =
+      (m_s - m1_sqr - m2_sqr) * (m_s - m1_sqr - m2_sqr) - 4. * m1_sqr * m2_sqr;
+  return std::sqrt(lambda) / (2. * incoming_particles()[0].momentum().x0() *
+                              incoming_particles()[1].momentum().x0());
+}
+
 double ScatterAction::transverse_distance_sqr() const {
   // local copy of particles (since we need to boost them)
   ParticleData p_a = incoming_particles_[0];

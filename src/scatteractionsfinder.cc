@@ -33,10 +33,8 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \page input_collision_term_ Collision_Term
  * \key Collision_Criterion (string, optional, default = "Geometric") \n
  * Choose collision criterion. Be aware that the stochastic criterion is only
- * tested for specific setups. Currently, only two-to-two reactions with
- * constant elastic cross
- * section are supported.
- *
+ * applicable within limits. Most notably, it might not lead reasonable results
+ * for very dilute systems like e.g. pp collisions.
  * \li \key "Geometric" - Geometric collision criterion
  * \li \key "Stochastic" - Stochastic collision criterion see e.g. A. Lang, H.
  * Babovsky, W. Cassing, U. Mosel, H. G. Reusch, and K. Weber, J. Comp. Phys.
@@ -253,13 +251,6 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_proj_(N_proj),
       string_formation_time_(config.take(
           {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)) {
-  if (coll_crit_ == CollisionCriterion::Stochastic &&
-      !(is_constant_elastic_isotropic())) {
-    throw std::invalid_argument(
-        "The stochastic collision criterion is only supported for elastic (and "
-        "isotropic)\n2-to-2 reactions of one particle species. Change you "
-        "config accordingly.");
-  }
   if (is_constant_elastic_isotropic()) {
     logg[LFindScatter].info(
         "Constant elastic isotropic cross-section mode:", " using ",
@@ -356,36 +347,26 @@ ActionPtr ScatterActionsFinder::check_collision(
   xs *= data_b.xsec_scaling_factor(time_until_collision);
 
   if (coll_crit_ == CollisionCriterion::Stochastic) {
-    // Relative velocity calculation, see e.g. \iref{Seifert:2017oyb}, eq. (5)
-    const double m1 = act->incoming_particles()[0].effective_mass();
-    const double m1_sqr = m1 * m1;
-    const double m2 = act->incoming_particles()[1].effective_mass();
-    const double m2_sqr = m2 * m2;
-    const double e1 = act->incoming_particles()[0].momentum().x0();
-    const double e2 = act->incoming_particles()[1].momentum().x0();
-    const double m_s = act->mandelstam_s();
-    const double lambda = (m_s - m1_sqr - m2_sqr) * (m_s - m1_sqr - m2_sqr) -
-                          4. * m1_sqr * m2_sqr;
-    const double v_rel = std::sqrt(lambda) / (2. * e1 * e2);
-
-    // Collision probability, see e.g. \iref{Xu:2004mz}, eq. (11)
-    const double p_22 = xs * v_rel * dt / cell_vol;
+    const double v_rel = act->relative_velocity();
+    /* Collision probability for 2-particle scattering, see e.g.
+     * \iref{Xu:2004mz}, eq. (11) */
+    const double prob = xs * v_rel * dt / cell_vol;
 
     logg[LFindScatter].debug(
-        "Stochastic collison criterion parameters:\np_22 = ", p_22,
+        "Stochastic collison criterion parameters:\nprob = ", prob,
         ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
         ", cell_vol = ", cell_vol, ", testparticles = ", testparticles_);
 
-    if (p_22 > 1.) {
+    if (prob > 1.) {
       std::stringstream err;
-      err << "Probability larger than 1 for stochastic rates. ( P = " << p_22
+      err << "Probability larger than 1 for stochastic rates. ( P = " << prob
           << " )\nUse smaller timesteps.";
       throw std::runtime_error(err.str());
     }
 
     // probability criterion
     double random_no = random::uniform(0., 1.);
-    if (random_no > p_22) {
+    if (random_no > prob) {
       return nullptr;
     }
 
