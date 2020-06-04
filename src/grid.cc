@@ -183,6 +183,15 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
         index_factor[i] = std::nextafter(index_factor[i], 0.);
       }
       assert(index_factor[i] * length_[i] < number_of_cells_[i]);
+      // Verify that cell length did not become smaller than
+      // the max. interaction length by increasing the number of cells
+      if (1. / index_factor[i] <= max_interaction_length) {
+        throw std::runtime_error(
+            "Input error: Your Box is too small for the grid. \nThe length of "
+            "a grid cell exceeds the minimal cell length. \nIf you have large "
+            "timesteps please reduce them.\nA larger box or the use of "
+            "testparticles also helps. \nPlease take a look at your config.");
+      }
     }
   }
 
