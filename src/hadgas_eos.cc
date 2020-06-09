@@ -7,11 +7,11 @@
  *
  */
 
+#include <gsl/gsl_sf_bessel.h>
+
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-
-#include <gsl/gsl_sf_bessel.h>
 
 #include <boost/filesystem.hpp>
 
