@@ -190,6 +190,9 @@ class ParticleType {
   /// \copydoc PdgCode::spin
   unsigned int spin() const { return pdgcode_.spin(); }
 
+  /// \copydoc PdgCode::spin_degeneracy
+  unsigned int spin_degeneracy() const { return pdgcode_.spin_degeneracy(); }
+
   /// \copydoc PdgCode::is_hadron
   bool is_hadron() const { return pdgcode_.is_hadron(); }
 
