@@ -36,9 +36,11 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * applicable within limits. Most notably, it might not lead reasonable results
  * for very dilute systems like e.g. pp collisions.
  * \li \key "Geometric" - Geometric collision criterion
- * \li \key "Stochastic" - Stochastic Collision criterion see e.g. A. Lang, H.
+ * \li \key "Stochastic" - Stochastic collision criterion see e.g. A. Lang, H.
  * Babovsky, W. Cassing, U. Mosel, H. G. Reusch, and K. Weber, J. Comp. Phys.
  * 106, 391 (1993).
+ * \li \key "Covariant" - Covariant collision criterion see e.g. T. Hirano and
+ * Y. Nara, PTEP Issue 1, 16 (2012).
  *
  * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
  * If a non-negative value is given, it will override the parametrized
@@ -318,13 +320,16 @@ ActionPtr ScatterActionsFinder::check_collision(
   }
 
   // Distance squared calculation only needed for geometric criterion
-  const double distance_squared = (coll_crit_ == CollisionCriterion::Geometric)
-                                      ? act->transverse_distance_sqr()
-                                      : 0.0;
+  const double distance_squared =
+      (coll_crit_ == CollisionCriterion::Geometric)
+          ? act->transverse_distance_sqr()
+          : (coll_crit_ == CollisionCriterion::Covariant)
+                ? act->cov_transverse_distance_sqr()
+                : 0.0;
 
   // Don't calculate cross section if the particles are very far apart for
   // geometric criterion.
-  if (coll_crit_ == CollisionCriterion::Geometric &&
+  if (coll_crit_ != CollisionCriterion::Stochastic &&
       distance_squared >= max_transverse_distance_sqr(testparticles_)) {
     return nullptr;
   }
@@ -365,7 +370,8 @@ ActionPtr ScatterActionsFinder::check_collision(
       return nullptr;
     }
 
-  } else if (coll_crit_ == CollisionCriterion::Geometric) {
+  } else if (coll_crit_ == CollisionCriterion::Geometric ||
+             coll_crit_ == CollisionCriterion::Covariant) {
     // just collided with this particle
     if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
       logg[LFindScatter].debug("Skipping collided particles at time ",

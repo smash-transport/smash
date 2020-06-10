@@ -107,26 +107,44 @@ class ScatterActionsFinder : public ActionFinderInterface {
       const FourVector p2_mom = (p2_has_no_prior_interactions)
                                     ? beam_momentum[p2.id()]
                                     : p2.momentum();
+      if (coll_crit_ == CollisionCriterion::Covariant) {
+        /**
+         * see \iref{Hirano/Nara:2012}
+         */
+        const FourVector delta_x = p1.position() - p2.position();
+        const double p1_sqr = p1_mom.sqr();
+        const double p2_sqr = p2_mom.sqr();
+        const double p1_dot_x = p1_mom.Dot(delta_x);
+        const double p2_dot_x = p2_mom.Dot(delta_x);
+        const double p1_dot_p2 = p1_mom.Dot(p2_mom);
+        const double denominator = pow(p1_dot_p2, 2) - p1_sqr * p2_sqr;
 
-      /**
-       * UrQMD collision time in computational frame,
-       * see \iref{Bass:1998ca} (3.28):
-       * position of particle 1: \f$r_1\f$ [fm]
-       * position of particle 2: \f$r_2\f$ [fm]
-       * velocity of particle 1: \f$v_1\f$
-       * velocity of particle 1: \f$v_2\f$
-       * \f[t_{coll} = - (r_1 - r_2) . (v_1 - v_2) / (v_1 - v_2)^2\f] [fm/c]
-       */
-      const ThreeVector dv_times_e1e2 =
-          p1_mom.threevec() * p2_mom.x0() - p2_mom.threevec() * p1_mom.x0();
-      const double dv_times_e1e2_sqr = dv_times_e1e2.sqr();
-      if (dv_times_e1e2_sqr < really_small) {
-        return -1.0;
+        const double time_1 = (p2_sqr * p1_dot_x - p1_dot_p2 * p2_dot_x) *
+                              p1_mom.x0() / denominator;
+        const double time_2 = -(p1_sqr * p2_dot_x - p1_dot_p2 * p1_dot_x) *
+                              p2_mom.x0() / denominator;
+        return (time_1 + time_2) / 2;
+      } else {
+        /**
+         * UrQMD collision time in computational frame,
+         * see \iref{Bass:1998ca} (3.28):
+         * position of particle 1: \f$r_1\f$ [fm]
+         * position of particle 2: \f$r_2\f$ [fm]
+         * velocity of particle 1: \f$v_1\f$
+         * velocity of particle 1: \f$v_2\f$
+         * \f[t_{coll} = - (r_1 - r_2) . (v_1 - v_2) / (v_1 - v_2)^2\f] [fm/c]
+         */
+        const ThreeVector dv_times_e1e2 =
+            p1_mom.threevec() * p2_mom.x0() - p2_mom.threevec() * p1_mom.x0();
+        const double dv_times_e1e2_sqr = dv_times_e1e2.sqr();
+        if (dv_times_e1e2_sqr < really_small) {
+          return -1.0;
+        }
+        const ThreeVector dr =
+            p1.position().threevec() - p2.position().threevec();
+        return -(dr * dv_times_e1e2) *
+               (p1_mom.x0() * p2_mom.x0() / dv_times_e1e2_sqr);
       }
-      const ThreeVector dr =
-          p1.position().threevec() - p2.position().threevec();
-      return -(dr * dv_times_e1e2) *
-             (p1_mom.x0() * p2_mom.x0() / dv_times_e1e2_sqr);
     }
   }
 

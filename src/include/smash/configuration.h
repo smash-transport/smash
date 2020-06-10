@@ -961,9 +961,12 @@ class Configuration {
       if (s == "Stochastic") {
         return CollisionCriterion::Stochastic;
       }
-      throw IncorrectTypeInAssignment("The value for key \"" +
-                                      std::string(key_) + "\" should be " +
-                                      "\"Geometric\" or \"Stochastic\".");
+      if (s == "Covariant") {
+        return CollisionCriterion::Covariant;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) + "\" should be " +
+          "\"Geometric\", \"Stochastic\" " + "or \"Covariant\".");
     }
 
     /**
