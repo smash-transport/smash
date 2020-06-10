@@ -223,10 +223,10 @@ class StringProcess {
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
-   * \see pythia8235/share/Pythia8/xmldoc/FlavourSelection.xml
-   * \see pythia8235/share/Pythia8/xmldoc/Fragmentation.xml
-   * \see pythia8235/share/Pythia8/xmldoc/MasterSwitches.xml
-   * \see pythia8235/share/Pythia8/xmldoc/MultipartonInteractions.xml
+   * \see pythia8302/share/Pythia8/xmldoc/FlavourSelection.xml
+   * \see pythia8302/share/Pythia8/xmldoc/Fragmentation.xml
+   * \see pythia8302/share/Pythia8/xmldoc/MasterSwitches.xml
+   * \see pythia8302/share/Pythia8/xmldoc/MultipartonInteractions.xml
    */
   StringProcess(double string_tension, double time_formation,
                 double gluon_beta, double gluon_pmin,
@@ -257,8 +257,8 @@ class StringProcess {
    * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
    *        in fragmentation [GeV]
    *
-   * \see pythia8235/share/Pythia8/xmldoc/FlavourSelection.xml
-   * \see pythia8235/share/Pythia8/xmldoc/Fragmentation.xml
+   * \see pythia8302/share/Pythia8/xmldoc/FlavourSelection.xml
+   * \see pythia8302/share/Pythia8/xmldoc/Fragmentation.xml
    */
   void common_setup_pythia(Pythia8::Pythia *pythia_in, double strange_supp,
                            double diquark_supp, double popcorn_rate,

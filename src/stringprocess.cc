@@ -62,11 +62,24 @@ StringProcess::StringProcess(
 
   /* initialize PYTHIA */
   pythia_hadron_->init();
-  pythia_sigmatot_.init(&pythia_hadron_->info, pythia_hadron_->settings,
-                        &pythia_hadron_->particleData, &pythia_hadron_->rndm);
-  pythia_stringflav_.init(pythia_hadron_->settings,
-                          &pythia_hadron_->particleData, &pythia_hadron_->rndm,
-                          &pythia_hadron_->info);
+
+  /*
+   * The const_cast<type>() function is used to obtain the reference of the
+   * PrivateInfo object in the pythia_hadron_.
+   * This cast is needed since Pythia 8.302 which included a major architecture
+   * change. The Info object of a Pythia object is now private, only a const
+   * reference can be obtained.
+   * In order to reference the PrivateInfo object during initialization, we
+   * cast the const reference to obtain the stored address.
+   */
+  pythia_sigmatot_.initInfoPtr(
+      const_cast<Pythia8::Info &>(pythia_hadron_->info));
+  pythia_sigmatot_.init();
+
+  pythia_stringflav_.initInfoPtr(
+      const_cast<Pythia8::Info &>(pythia_hadron_->info));
+  pythia_stringflav_.init();
+
   event_intermediate_.init("intermediate partons",
                            &pythia_hadron_->particleData);
 
@@ -2175,6 +2188,7 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
     pythia_hadron_->event[0].p(pSum);
     pythia_hadron_->event[0].m(pSum.mCalc());
     bool successful_hadronization = pythia_hadron_->next();
+    // update_info();
     if (!successful_hadronization) {
       return 0;
     }
