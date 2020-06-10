@@ -15,6 +15,8 @@
 #include "outputinterface.h"
 #include "outputparameters.h"
 
+#include <boost/filesystem.hpp>
+
 #include "HepMC3/GenEvent.h"
 #include "HepMC3/GenParticle.h"
 #include "HepMC3/GenVertex.h"
@@ -48,6 +50,9 @@ class HepMcOutput : public OutputInterface {
               const OutputParameters &out_par, const int total_N,
               const int proj_N);
 
+  /// Destructor renames file
+  ~HepMcOutput();
+
   /**
    * Add the initial particles information of an event to the central vertex.
    * Construct projectile and target particles with nuclear pdg code if
@@ -76,6 +81,11 @@ class HepMcOutput : public OutputInterface {
   /// HepMC status code for final particles
   static const int status_code_for_final_particles;
 
+  /// Filename of output
+  const bf::path filename_;
+  /// Filename of output as long as simulation is still running.
+  bf::path filename_unfinished_;
+
   /**
    * Total number of nucleons in projectile and target,
    * needed for converting nuclei to single particles.
@@ -102,10 +112,10 @@ class HepMcOutput : public OutputInterface {
    */
   int construct_nuclear_pdg_code(int na, int nz) const;
 
-  /// Asciiv3 HepMC3 output file
-  HepMC3::WriterAscii output_file_;
+  /// Pointer to Ascii HepMC3 output file
+  std::unique_ptr<HepMC3::WriterAscii> output_file_;
 
-  /// HepMC3::GenEvent class for current event
+  /// HepMC3::GenEvent pointer for current event
   std::unique_ptr<HepMC3::GenEvent> current_event_;
 
   /// HepMC3::GenVertex pointer for central vertex in event

@@ -143,7 +143,7 @@ TEST(dump) {
   COMPARE(lambda.dump(), 0x3122u);
   COMPARE(antixi.dump(), 0x80103312u);
 }
-TEST(string) {
+TEST(pdg_string) {
   COMPARE(electron.string(), "11");
   COMPARE(antimu.string(), "-13");
   COMPARE(photon.string(), "22");

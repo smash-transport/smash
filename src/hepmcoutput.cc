@@ -9,7 +9,6 @@
 
 #include "smash/hepmcoutput.h"
 
-#include <boost/filesystem.hpp>
 #include "HepMC3/Print.h"
 
 namespace smash {
@@ -47,9 +46,17 @@ HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
                          const OutputParameters & /*out_par*/,
                          const int total_N, const int proj_N)
     : OutputInterface(name),
+      filename_(path / (name + ".asciiv3")),
       total_N_(total_N),
-      proj_N_(proj_N),
-      output_file_(path.string() + "/" + name + ".asciiv3") {}
+      proj_N_(proj_N) {
+  filename_unfinished_ = filename_;
+  filename_unfinished_ += + ".unfinished";
+  output_file_ = make_unique<HepMC3::WriterAscii>(filename_unfinished_.string());
+      }
+
+HepMcOutput::~HepMcOutput() {
+  bf::rename(filename_unfinished_, filename_);
+}
 
 int HepMcOutput::construct_nuclear_pdg_code(int na, int nz) const {
   const int pdg_nuclear_code_prefix = 10 * 1E8;
@@ -161,7 +168,7 @@ void HepMcOutput::at_eventend(const Particles &particles,
     vertex_->add_particle_out(p);
   }
 
-  output_file_.write_event(*current_event_);
+  output_file_->write_event(*current_event_);
 }
 
 }  // namespace smash
