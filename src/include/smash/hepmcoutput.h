@@ -1,3 +1,4 @@
+
 /*
  *
  *    Copyright (c) 2014-2019
@@ -14,55 +15,62 @@
 #include "outputinterface.h"
 #include "outputparameters.h"
 
-#include "HepMC3/WriterAscii.h"
 #include "HepMC3/GenEvent.h"
-#include "HepMC3/GenVertex.h"
 #include "HepMC3/GenParticle.h"
-
+#include "HepMC3/GenVertex.h"
+#include "HepMC3/WriterAscii.h"
 
 namespace smash {
 
-
-// TODO Write documentation, especially document our usage of HepMC (one vertex,
-// projectile and target as one particle, ...)
-
+/**
+ * \ingroup output
+ * \brief SMASH output to HepMC file
+ *
+ * This class writes on vertex connecting all intial particles with all final
+ * particles into a HepMC outputfile. In collider mode, projectile and target
+ * are combined into single intial particles with a nuclear pdg code. The output
+ * file is a human-readable ASCII file. HepMC version 3 is used.
+ *
+ * More details of the output format can be found in the User Guide.
+ */
 class HepMcOutput : public OutputInterface {
  public:
   /**
-   * Create binary particle output.
+   * Create HepMC particle output.
    *
    * \param[in] path Output path.
    * \param[in] name Name of the output.
-   * \param[in] out_par A structure containing parameters of the output.
+   * \param[in] out_par Unused, needed since inhertied.
+   * \param[in] total_N Total number of particles in both nuclei.
+   * \param[in] proj_N  Number of particles in projectile.
    */
   HepMcOutput(const bf::path &path, std::string name,
-              const OutputParameters &out_par,
-              const int total_N,
+              const OutputParameters &out_par, const int total_N,
               const int proj_N);
 
   /**
-   * Writes the initial particle information list of an event to the binary
-   * output.
-   * \param[in] particles Current list of all particles.
-   * \param[in] event_number Unused, needed since inherited.
+   * Add the initial particles information of an event to the central vertex.
+   * Construct projectile and target particles with nuclear pdg code if
+   * collider. \param[in] particles Current list of all particles. \param[in]
+   * event_number Current event number \throw std::invalid_argument if nuclei
+   * with non-nucleon particle (like a hypernuclei) is trying to be constructed
    */
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
 
   /**
-   * Writes the final particle information list of an event to the binary
-   * output.
+   * Add the final particles information of an event to the central vertex.
+   * Store impact paramter and write event.
+   *
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.
    * \param[in] impact_parameter Impact parameter of this event.
-   * \param[in] empty_event Whether there was no collision between target
-   *            and projectile
+   * \param[in] empty_event Unused, needed since inhertied.
    */
   void at_eventend(const Particles &particles, const int32_t event_number,
                    double impact_parameter, bool empty_event) override;
 
-private:
-
+ private:
   /// HepMC status code for target and projecticle particles
   static const int status_code_for_beam_particles;
   /// HepMC status code for final particles
@@ -79,15 +87,29 @@ private:
    */
   const int proj_N_;
 
-  // Note isomers and lambda + no sense to construct seperate pdgcode, refeeence to nuclear pdg codes
+  /**
+   * Construct nulcear pdg code for porjectile and target, see PDG chapter
+   "Monte Carlo particle numbering scheme" for details.
+   *
+   * \param[in] na Number of all particles in nucleus (A)
+   * \param[in] nz Number of all charged particles in nucleus (Z).
+   *
+   * Note: Isomers and hypernuclei are not suported. Also, in principle it would
+   * be possible to define full PdgCode class, since the pdg number is just
+   * written directly into the output we stick to int. A possible improvemnt
+   would
+   * be to include this function into the PdgCode class.
+   */
   int construct_nuclear_pdg_code(int na, int nz) const;
 
+  /// Asciiv3 HepMC3 output file
   HepMC3::WriterAscii output_file_;
-  //
-  std::unique_ptr<HepMC3::GenEvent> current_event_;
-  //
-  HepMC3::GenVertexPtr vertex_;
 
+  /// HepMC3::GenEvent class for current event
+  std::unique_ptr<HepMC3::GenEvent> current_event_;
+
+  /// HepMC3::GenVertex pointer for central vertex in event
+  HepMC3::GenVertexPtr vertex_;
 };
 
 }  // namespace smash

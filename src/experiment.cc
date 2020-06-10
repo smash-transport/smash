@@ -193,7 +193,10 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \key Extended (bool, optional, default = false, incompatible with
  *                  Oscar1999, ROOT and ASCII format):\n
  *   \li \key true - Print extended information for each particle
- *   \li \key false - Regular output for each particle
+ *   \li \key false - Regular output for each particle \n
+ * \n
+ * - \b HepMC (Only ASCII format)\n
+ *   No content-specific output options \n
  * \n
  * \anchor Thermodynamics
  * - \b Thermodynamics \n
@@ -322,6 +325,12 @@ ExperimentPtr ExperimentBase::create(Configuration config,
          Format:    ["ASCII", "Oscar1999", "Oscar2013", "Binary", "ROOT"]
          Extended: False
          Proper_Time: 1.5
+ \endverbatim
+ * SMASH can also output a form of HepMC event record in the HepMC ASCII format.
+ * The HepMC output is enabled as follows:
+ *\verbatim
+     HepMC:
+         Format:   ["ASCII"]
  \endverbatim
  */
 

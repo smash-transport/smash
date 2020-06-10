@@ -581,8 +581,6 @@ void Experiment<Modus>::create_output(const std::string &format,
   logg[LExperiment].info() << "Adding output " << content << " of format "
                            << format << std::endl;
 
-  // TODO Create config option for HepMC output
-  outputs_.emplace_back(make_unique<HepMcOutput>(output_path, "Particles", out_par, modus_.total_N_number(), modus_.proj_N_number()));
   if (format == "VTK" && content == "Particles") {
     outputs_.emplace_back(
         make_unique<VtkOutput>(output_path, content, out_par));
@@ -624,6 +622,10 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Initial_Conditions" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
+  } else if (content == "HepMC" && format == "ASCII") {
+    outputs_.emplace_back(make_unique<HepMcOutput>(
+        output_path, "SMASH_HepMC", out_par, modus_.total_N_number(),
+        modus_.proj_N_number()));
   } else {
     logg[LExperiment].error()
         << "Unknown combination of format (" << format << ") and content ("
@@ -977,6 +979,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *                          \subpage input_ic for details
    *   - Available formats: \ref format_oscar_particlelist, \ref
    * IC_output_user_guide_
+   * - \b HepMC  List of intial and final particles in HepMC3 event record, see
+   *                          \subpage hepmc_output_user_guide_ for details
+   *   - Available formats: \ref hepmc_output_user_guide_format_
    *
    * \n
    * \anchor list_of_output_formats
@@ -1005,9 +1010,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *   - For "Particles" content \subpage format_vtk
    *   - For "Thermodynamics" content \subpage output_vtk_lattice_
    * - \b "ASCII" - a human-readable text-format table of values
-   *   - Used only for "Thermodynamics", see
+   *   - Used for "Thermodynamics", "Initial_Conditions" and "HepMC", see
    * \subpage thermodyn_output_user_guide_
    * \subpage IC_output_user_guide_
+   * \ref hepmc_output_user_guide_
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
