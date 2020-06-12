@@ -38,7 +38,6 @@ endif(NOT CMAKE_BUILD_TYPE)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.6.2/include")
-include_directories(SYSTEM "/Users/stdnmr/Code/bin/HepMC3/include")
 add_subdirectory(3rdparty)
 
 # Set compiler flags

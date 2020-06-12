@@ -35,7 +35,9 @@
 #include "thermalizationaction.h"
 // Output
 #include "binaryoutput.h"
+#ifdef SMASH_USE_HEPMC
 #include "hepmcoutput.h"
+#endif
 #include "icoutput.h"
 #include "oscaroutput.h"
 #include "thermodynamicoutput.h"
@@ -623,9 +625,14 @@ void Experiment<Modus>::create_output(const std::string &format,
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
   } else if (content == "HepMC" && format == "ASCII") {
+#ifdef SMASH_USE_HEPMC
     outputs_.emplace_back(make_unique<HepMcOutput>(
         output_path, "SMASH_HepMC", out_par, modus_.total_N_number(),
         modus_.proj_N_number()));
+#else
+    logg[LExperiment].error(
+        "HepMC output requested, but HepMC support not compiled in");
+#endif
   } else {
     logg[LExperiment].error()
         << "Unknown combination of format (" << format << ") and content ("
