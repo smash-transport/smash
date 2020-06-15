@@ -50,13 +50,12 @@ HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
       total_N_(total_N),
       proj_N_(proj_N) {
   filename_unfinished_ = filename_;
-  filename_unfinished_ += + ".unfinished";
-  output_file_ = make_unique<HepMC3::WriterAscii>(filename_unfinished_.string());
-      }
-
-HepMcOutput::~HepMcOutput() {
-  bf::rename(filename_unfinished_, filename_);
+  filename_unfinished_ += +".unfinished";
+  output_file_ =
+      make_unique<HepMC3::WriterAscii>(filename_unfinished_.string());
 }
+
+HepMcOutput::~HepMcOutput() { bf::rename(filename_unfinished_, filename_); }
 
 int HepMcOutput::construct_nuclear_pdg_code(int na, int nz) const {
   const int pdg_nuclear_code_prefix = 10 * 1E8;
