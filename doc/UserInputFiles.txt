@@ -23,4 +23,5 @@ set(files_with_input
  ${PROJECT_SOURCE_DIR}/src/boxmodus.cc
  ${PROJECT_SOURCE_DIR}/src/deformednucleus.cc
  ${PROJECT_SOURCE_DIR}/src/customnucleus.cc
+ ${PROJECT_SOURCE_DIR}/src/hepmcoutput.cc
  )
