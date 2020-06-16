@@ -42,8 +42,8 @@ It requires the following tools & libraries:
 - boost filesystem >= 1.49
 - Pythia = 8.302
 
-Support for ROOT and HepMC output is automatically enabled if a suitable version
- (ROOT >= 5.34, HepMC3) is found on the system.
+Support for ROOT and HepMC3 output is automatically enabled if a suitable version
+ (ROOT >= 5.34, HepMC3 >= 3.1.2) is found on the system.
 
 ### Building Pythia
 
@@ -173,7 +173,7 @@ See http://hepmc.web.cern.ch/hepmc/ for download and the projects' README for
 installation. If the HepMC installation is not found, provide the
 install destination (`$HEPMC_INS`) with
 
-   cmake -DHEPMC_DIR=$HEPMC_INS ..
+   cmake -DCMAKE_PREFIX_PATH=$HEPMC_INS ..
 
 
 ### Using a Custom GSL Build
