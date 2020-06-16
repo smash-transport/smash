@@ -28,7 +28,7 @@ namespace smash {
  * \ingroup output
  * \brief SMASH output to HepMC file
  *
- * This class writes on vertex connecting all intial particles with all final
+ * This class writes a vertex connecting all intial particles with all final
  * particles into a HepMC outputfile. In collider mode, projectile and target
  * are combined into single intial particles with a nuclear pdg code. The output
  * file is a human-readable ASCII file. HepMC version 3 is used.
@@ -56,9 +56,11 @@ class HepMcOutput : public OutputInterface {
   /**
    * Add the initial particles information of an event to the central vertex.
    * Construct projectile and target particles with nuclear pdg code if
-   * collider. \param[in] particles Current list of all particles. \param[in]
-   * event_number Current event number \throw std::invalid_argument if nuclei
-   * with non-nucleon particle (like a hypernuclei) is trying to be constructed
+   * collider.
+   * \param[in] particles Current list of all particles.
+   * \param[in] event_number Current event number
+   * \throw std::invalid_argument if nuclei with non-nucleon particle
+   *                              (like hypernuclei) are tried to be constructed
    */
   void at_eventstart(const Particles &particles,
                      const int event_number) override;
@@ -76,9 +78,9 @@ class HepMcOutput : public OutputInterface {
                    double impact_parameter, bool empty_event) override;
 
  private:
-  /// HepMC status code for target and projecticle particles
+  /// HepMC convention: status code for target and projecticle particles
   static const int status_code_for_beam_particles;
-  /// HepMC status code for final particles
+  /// HepMC convention: status code for final particles
   static const int status_code_for_final_particles;
 
   /// Filename of output
@@ -105,7 +107,7 @@ class HepMcOutput : public OutputInterface {
    * \param[in] nz Number of all charged particles in nucleus (Z).
    *
    * Note: Isomers and hypernuclei are not suported. Also, in principle it would
-   * be possible to define full PdgCode class, since the pdg number is just
+   * be possible to define a full PdgCode class, since the pdg number is just
    * written directly into the output we stick to int. A possible improvemnt
    would
    * be to include this function into the PdgCode class.

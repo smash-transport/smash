@@ -37,6 +37,10 @@ namespace smash {
  *
  * The output is written in Asciiv3, the HepMC3 native plain text format. See
  * https://arxiv.org/abs/1912.08005 for documentation of the format.
+ *
+ * Note: Since some HepMC readers (e.g. Rivet) need a value for the
+ * nuclei-nuclei cross section, a dummy cross section of 1.0 is written to the
+ * output.
  */
 
 const int HepMcOutput::status_code_for_beam_particles = 4;
@@ -155,7 +159,7 @@ void HepMcOutput::at_eventend(const Particles &particles,
       std::make_shared<HepMC3::GenHeavyIon>();
   current_event_->add_attribute("GenHeavyIon", heavy_ion);
   // Impact paramter has to converted to mm (x1E-12), since fm not a supported
-  // unit in HepMC
+  // unit in HepMC, -1(.0) are placeholders
   heavy_ion->set(-1, -1, -1, -1, -1, -1, -1, -1, -1, impact_parameter * 1E-12,
                  -1.0, -1.0, -1.0, -1.0, -1.0);
 
