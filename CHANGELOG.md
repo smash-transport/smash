@@ -17,13 +17,20 @@ The major categories to group changes in this log are:
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 
-## Changes Since Last Tag
+## [Unreleased](https://github.com/smash-transport/smash/compare/SMASH-1.8...HEAD)
+
+### Added
+* HepMC3 output
+
 ### Fixed
 * Consider cross section scaling factor of incoming particles for photon production. This factor was previously neglected, resulting in exploding weights and overestimated photon production.
+
 ### Changed
 * The Pythia version is increased to 8.302
 
-## [SMASH-1.8](https://github.com/smash-transport/smash-devel/compare/SMASH-1.7...SMASH-1.8)
+
+
+## [SMASH-1.8](https://github.com/smash-transport/smash/compare/SMASH-1.7...SMASH-1.8)
 Date: 2020-04-07
 
 ### Input / Output
