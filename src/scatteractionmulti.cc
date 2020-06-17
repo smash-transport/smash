@@ -10,6 +10,8 @@
 #include "smash/scatteractionmulti.h"
 
 namespace smash {
+  
+// TODO(stdnmr) Sensible (debug) logging for functions
 
 ScatterActionMulti::ScatterActionMulti(const ParticleList& in_plist,
                                        double time)
@@ -59,7 +61,6 @@ void ScatterActionMulti::generate_final_state() {
 
   switch (process_type_) {
     case ProcessType::MultiParticleThreePionsToOmega:
-    case ProcessType::MultiParticleThreePionsToPhi:
       /* n->1 annihilation */
       annihilation();
       break;
