@@ -43,6 +43,14 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \li \key "Covariant" - Covariant collision criterion see e.g. T. Hirano and
  * Y. Nara, PTEP Issue 1, 16 (2012).
  *
+ * \key Include_Stochastic_3to1 (bool, optional, default = \key false) \n
+ * Enable 3 --> 1 processes via the stochastic criterion. This option can only
+ * be used with the \key Collision_Criterion set to \key "Stochastic".
+ * Implemented 3 --> 1 processes: \f$\pi^+\pi^-\pi^0\rightarrow\omega\f$. Note
+ * that detailed balance is conserved. So if the reverse 1 --> 3 decay process
+ * is e.g. not part of the decay modes (in decaymodes.txt), the 3 --> 1 process
+ * will also not happen.
+ *
  * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
  * If a non-negative value is given, it will override the parametrized
  * elastic cross sections (which are energy-dependent) with a constant value.
@@ -242,6 +250,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(parameters.two_to_one),
       incl_set_(parameters.included_2to2),
+      three_to_one_(config.take({"Collision_Term", "Include_Stochastic_3to1"}, false)),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
       use_AQM_(parameters.use_AQM),
@@ -257,6 +266,11 @@ ScatterActionsFinder::ScatterActionsFinder(
         "Constant elastic isotropic cross-section mode:", " using ",
         elastic_parameter_, " mb as maximal cross-section.");
   }
+  if (three_to_one_ && coll_crit_ != CollisionCriterion::Stochastic) {
+    throw std::invalid_argument(
+           "3-to-1 reactions are only possible with the stochastic collision criterion. Change your config accordingly.");
+  }
+
   if (strings_switch_) {
     auto subconfig = config["Collision_Term"]["String_Parameters"];
     string_process_interface_ = make_unique<StringProcess>(
@@ -402,7 +416,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
 
 ActionPtr ScatterActionsFinder::check_collision_multi_part(
     const ParticleList& plist, double dt, const double gcell_vol) const {
-  // TODO Decide on sensible logging
+  // TODO(stdnmr) Decide on sensible logging
 
   // No grid or search in cell
   if (gcell_vol < really_small) {
@@ -426,7 +440,7 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
       make_unique<ScatterActionMulti>(plist, time_until_collision);
 
   // 3. Add possible final states (dt and gcell_vol for probability calculation)
-  act->add_possible_reactions(dt, gcell_vol);
+  act->add_possible_reactions(dt, gcell_vol, three_to_one_);
 
   // 4. Return total collision probability
   const double p_nm = act->probability();
@@ -468,7 +482,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
         }
       }
       // Also, check for 3 particle scatterings with stochastic criterion
-      if (coll_crit_ == CollisionCriterion::Stochastic) {
+      if (three_to_one_) {
         for (const ParticleData& p3 : search_list) {
           if (p1.id() < p2.id() && p2.id() < p3.id()) {
             // TODO Clarify if I accidentally copy costly by passing

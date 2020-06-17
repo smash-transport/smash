@@ -27,7 +27,7 @@ class ScatterActionMulti : public Action {
 
   double get_partial_weight() const override;
 
-  void add_possible_reactions(double dt, const double gcell_vol);
+  void add_possible_reactions(double dt, const double gcell_vol, const bool three_to_one);
 
   double probability() const { return total_probability_; }
 

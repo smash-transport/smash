@@ -35,8 +35,9 @@ double ScatterActionMulti::get_partial_weight() const {
 }
 
 void ScatterActionMulti::add_possible_reactions(double dt,
-                                                const double gcell_vol) {
-  if (incoming_particles().size() == 3 &&
+                                                const double gcell_vol,
+                                                const bool three_to_one) {
+  if (three_to_one && incoming_particles().size() == 3 &&
       three_different_pions(incoming_particles()[0], incoming_particles()[1],
                             incoming_particles()[2])) {
     // TODO(stdnmr): Make sure that particle types exist
