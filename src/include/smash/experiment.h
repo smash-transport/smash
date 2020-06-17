@@ -1675,14 +1675,14 @@ void Experiment<Modus>::run_time_evolution() {
                     : modus_.create_grid(particles_, min_cell_length, dt,
                                          CellSizeStrategy::Largest);
 
-      const double cell_vol = grid.cell_volume();
+      const double gcell_vol = grid.cell_volume();
 
       /* (1.b) Iterate over cells and find actions. */
       grid.iterate_cells(
           [&](const ParticleList &search_list) {
             for (const auto &finder : action_finders_) {
               actions.insert(finder->find_actions_in_cell(
-                  search_list, dt, cell_vol, beam_momentum_));
+                  search_list, dt, gcell_vol, beam_momentum_));
             }
           },
           [&](const ParticleList &search_list,
@@ -1820,12 +1820,12 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
 
     time_left = end_time - act->time_of_execution();
     const ParticleList &outgoing_particles = act->outgoing_particles();
-    // Cell volume set to zero, since there is no grid
-    const double cell_vol = 0.0;
+    // Grid cell volume set to zero, since there is no grid
+    const double gcell_vol = 0.0;
     for (const auto &finder : action_finders_) {
       // Outgoing particles can still decay, cross walls...
       actions.insert(finder->find_actions_in_cell(outgoing_particles, time_left,
-                                                  cell_vol, beam_momentum_));
+                                                  gcell_vol, beam_momentum_));
       // ... and collide with other particles.
       actions.insert(finder->find_actions_with_surrounding_particles(
           outgoing_particles, particles_, time_left, beam_momentum_));

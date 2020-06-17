@@ -15,8 +15,8 @@
 namespace smash {
 
 class ScatterActionMulti : public Action {
-  // TODO Write documentation
-  // TODO Sensible (debug) logging for functions
+  // TODO(stdnmr) Write documentation
+  // TODO(stdnmr) Sensible (debug) logging for functions
 
  public:
   ScatterActionMulti(const ParticleList& in_plist, double time);
@@ -27,13 +27,13 @@ class ScatterActionMulti : public Action {
 
   double get_partial_weight() const override;
 
-  void add_possible_reactions(double dt, const double cell_vol);
+  void add_possible_reactions(double dt, const double gcell_vol);
 
   double probability() const { return total_probability_; }
 
   /**
    * \ingroup exception
-   * TODO Thrown when ScatterAction is called to perform with unknown
+   * TODO(stdnmr) Thrown when ScatterAction is called to perform with unknown
    * combination of incoming and outgoing number of particles.
    */
   class InvalidScatterActionMulti : public std::invalid_argument {
@@ -55,7 +55,7 @@ class ScatterActionMulti : public Action {
   void annihilation();
 
   double probability_three_pi_to_one(const ParticleType& type_out, double dt,
-                                       const double cell_vol) const;
+                                       const double gcell_vol) const;
 
   bool three_different_pions(const ParticleData& data_a,
                              const ParticleData& data_b,

@@ -282,7 +282,7 @@ ScatterActionsFinder::ScatterActionsFinder(
 
 ActionPtr ScatterActionsFinder::check_collision_two_part(
     const ParticleData& data_a, const ParticleData& data_b, double dt,
-    const std::vector<FourVector>& beam_momentum, const double cell_vol) const {
+    const std::vector<FourVector>& beam_momentum, const double gcell_vol) const {
   /* If the two particles
    * 1) belong to the two colliding nuclei
    * 2) are within the same nucleus
@@ -299,7 +299,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   }
 
   // No grid or search in cell means no collision for stochastic criterion
-  if (coll_crit_ == CollisionCriterion::Stochastic && cell_vol < really_small) {
+  if (coll_crit_ == CollisionCriterion::Stochastic && gcell_vol < really_small) {
     return nullptr;
   }
 
@@ -351,12 +351,12 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     const double v_rel = act->relative_velocity();
     /* Collision probability for 2-particle scattering, see e.g.
      * \iref{Xu:2004mz}, eq. (11) */
-    const double prob = xs * v_rel * dt / cell_vol;
+    const double prob = xs * v_rel * dt / gcell_vol;
 
     logg[LFindScatter].debug(
         "Stochastic collison criterion parameters:\nprob = ", prob,
         ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
-        ", cell_vol = ", cell_vol, ", testparticles = ", testparticles_);
+        ", gcell_vol = ", gcell_vol, ", testparticles = ", testparticles_);
 
     if (prob > 1.) {
       std::stringstream err;
@@ -401,11 +401,11 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
 }
 
 ActionPtr ScatterActionsFinder::check_collision_multi_part(
-    const ParticleList& plist, double dt, const double cell_vol) const {
+    const ParticleList& plist, double dt, const double gcell_vol) const {
   // TODO Decide on sensible logging
 
   // No grid or search in cell
-  if (cell_vol < really_small) {
+  if (gcell_vol < really_small) {
     return nullptr;
   }
 
@@ -425,8 +425,8 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
   ScatterActionMultiPtr act =
       make_unique<ScatterActionMulti>(plist, time_until_collision);
 
-  // 3. Add possible final states (dt and cell_vol for probability calculation)
-  act->add_possible_reactions(dt, cell_vol);
+  // 3. Add possible final states (dt and gcell_vol for probability calculation)
+  act->add_possible_reactions(dt, gcell_vol);
 
   // 4. Return total collision probability
   const double p_nm = act->probability();
@@ -453,7 +453,7 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
 }
 
 ActionList ScatterActionsFinder::find_actions_in_cell(
-    const ParticleList& search_list, double dt, const double cell_vol,
+    const ParticleList& search_list, double dt, const double gcell_vol,
     const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
 
@@ -462,7 +462,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
       // Check for 2 particle scattering
       if (p1.id() < p2.id()) {
         ActionPtr act =
-            check_collision_two_part(p1, p2, dt, beam_momentum, cell_vol);
+            check_collision_two_part(p1, p2, dt, beam_momentum, gcell_vol);
         if (act) {
           actions.push_back(std::move(act));
         }
@@ -474,7 +474,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
             // TODO Clarify if I accidentally copy costly by passing
             // ParticleList with initalizer list as argument
             ActionPtr act =
-                check_collision_multi_part({p1, p2, p3}, dt, cell_vol);
+                check_collision_multi_part({p1, p2, p3}, dt, gcell_vol);
             if (act) {
               actions.push_back(std::move(act));
             }

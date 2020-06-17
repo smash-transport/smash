@@ -157,13 +157,13 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *
    * \param[in] search_list A list of particles within one cell
    * \param[in] dt The maximum time interval at the current time step [fm]
-   * \param[in] cell_vol Volume of searched grid cell [fm^3]
+   * \param[in] gcell_vol Volume of searched grid cell [fm^3]
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
    * only necessary for frozen Fermi motion
    * \return A list of possible scatter actions
    */
   ActionList find_actions_in_cell(
-      const ParticleList &search_list, double dt, const double cell_vol,
+      const ParticleList &search_list, double dt, const double gcell_vol,
       const std::vector<FourVector> &beam_momentum) const override;
 
   /**
@@ -295,22 +295,22 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] dt Maximum time interval within which a collision can happen
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
    * only necessary for frozen Fermi motion
-   * \param[in] cell_vol (optional) volume of grid cell in which the collision
+   * \param[in] gcell_vol (optional) volume of grid cell in which the collision
    *                                is checked
    * \return A null pointer if no collision happens or an action which contains
    *         the information of the outgoing particles.
    *
-   * Note: cell_vol is optional, since only find_actions_in_cell has (and needs)
+   * Note: gcell_vol is optional, since only find_actions_in_cell has (and needs)
    * this information for the stochastic collision criterion.
    */
   ActionPtr check_collision_two_part(
       const ParticleData &data_a, const ParticleData &data_b, double dt,
       const std::vector<FourVector> &beam_momentum = {},
-      const double cell_vol = 0.0) const;
+      const double gcell_vol = 0.0) const;
 
-  // TODO Write documentation
+  // TODO(stdnmr) Write documentation
   ActionPtr check_collision_multi_part(const ParticleList &plist, double dt,
-                                       const double cell_vol) const;
+                                       const double gcell_vol) const;
 
   /// Class that deals with strings, interfacing Pythia.
   std::unique_ptr<StringProcess> string_process_interface_;

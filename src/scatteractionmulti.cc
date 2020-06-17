@@ -25,25 +25,25 @@ void ScatterActionMulti::add_reactions(CollisionBranchList pv) {
 }
 
 double ScatterActionMulti::get_total_weight() const {
-  // TODO Maybe add xs_scaling factor to probability
+  // TODO(stdnmr) Maybe add xs_scaling factor to probability
   return total_probability_;
 }
 
 double ScatterActionMulti::get_partial_weight() const {
-  // TODO Maybe add xs_scaling factor to probability
+  // TODO(stdnmr) Maybe add xs_scaling factor to probability
   return partial_probability_;
 }
 
 void ScatterActionMulti::add_possible_reactions(double dt,
-                                                const double cell_vol) {
+                                                const double gcell_vol) {
   if (incoming_particles().size() == 3 &&
       three_different_pions(incoming_particles()[0], incoming_particles()[1],
                             incoming_particles()[2])) {
-    // TODO: Make sure that particle types exist
+    // TODO(stdnmr): Make sure that particle types exist
     // 3pi -> omega
     const ParticleType& type_omega = ParticleType::find(0x223);
     add_reaction(make_unique<CollisionBranch>(
-        type_omega, probability_three_pi_to_one(type_omega, dt, cell_vol),
+        type_omega, probability_three_pi_to_one(type_omega, dt, gcell_vol),
         ProcessType::MultiParticleThreePionsToOmega));
   }
 }
@@ -81,7 +81,7 @@ void ScatterActionMulti::generate_final_state() {
 }
 
 double ScatterActionMulti::probability_three_pi_to_one(
-    const ParticleType& type_out, double dt, const double cell_vol) const {
+    const ParticleType& type_out, double dt, const double gcell_vol) const {
   const double e1 = incoming_particles()[0].momentum().x0();
   const double e2 = incoming_particles()[1].momentum().x0();
   const double e3 = incoming_particles()[2].momentum().x0();
@@ -98,7 +98,7 @@ double ScatterActionMulti::probability_three_pi_to_one(
 
   const double spec_f_val = type_out.spectral_function(sqrts);
 
-  return dt / (cell_vol * cell_vol) * M_PI / (2 * e1 * e2 * e3) * gamma_decay /
+  return dt / (gcell_vol * gcell_vol) * M_PI / (2 * e1 * e2 * e3) * gamma_decay /
          ph_sp_3 * spec_f_val * std::pow(hbarc, 5.0) * spin_deg;
 }
 
@@ -114,7 +114,7 @@ void ScatterActionMulti::annihilation() {
   outgoing_particles_[0].set_4momentum(
       total_momentum_of_outgoing_particles().abs(), 0., 0., 0.);
 
-  // TODO Deal with/have formation (time) of formed particles (?)
+  // TODO(stdnmr) Deal with/have formation (time) of formed particles (?)
 }
 
 bool ScatterActionMulti::three_different_pions(
@@ -134,7 +134,7 @@ bool ScatterActionMulti::three_different_pions(
 }
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
-  // TODO Distinguish rejected from accepted reaction (Possible with set final
+  // TODO(stdnmr) Distinguish rejected from accepted reaction (Possible with set final
   // state?)
   out << "MultiParticleScatter of " << incoming_particles_;
   out << " to " << outgoing_particles_;
