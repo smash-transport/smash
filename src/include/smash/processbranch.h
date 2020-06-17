@@ -49,8 +49,6 @@ enum class ProcessType {
   Bremsstrahlung = 9,
   /// multi particle scattering 3pi->omega
   MultiParticleThreePionsToOmega = 91,
-  /// multi particle scattering 3pi->phi
-  MultiParticleThreePionsToPhi = 92,
 
   /**
    * (41-45) soft string excitations. Here "soft" means that the process does

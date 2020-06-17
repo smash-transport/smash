@@ -481,8 +481,8 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
           actions.push_back(std::move(act));
         }
       }
-      // Also, check for 3 particle scatterings with stochastic criterion
       if (three_to_one_) {
+        // Also, check for 3 particle scatterings with stochastic criterion
         for (const ParticleData& p3 : search_list) {
           if (p1.id() < p2.id() && p2.id() < p3.id()) {
             // TODO Clarify if I accidentally copy costly by passing
