@@ -213,7 +213,6 @@ DECLARE_LOGAREA(29, HyperSurfaceCrossing);
 DECLARE_LOGAREA(30, InitialConditions);
 DECLARE_LOGAREA(31, ScatterActionMulti);
 
-
 /**
  * This type collects all existing log areas so they will be created with the
  * correct log level automatically.

@@ -126,7 +126,7 @@ void ScatterActionMulti::annihilation() {
   // TODO(stdnmr) Set formation (time) of outgoing particle?
 
   logg[LScatterActionMulti].debug("Momentum of the new particle: ",
-                                   outgoing_particles_[0].momentum());
+                                  outgoing_particles_[0].momentum());
 }
 
 bool ScatterActionMulti::three_different_pions(
