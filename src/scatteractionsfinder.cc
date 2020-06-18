@@ -250,7 +250,8 @@ ScatterActionsFinder::ScatterActionsFinder(
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(parameters.two_to_one),
       incl_set_(parameters.included_2to2),
-      three_to_one_(config.take({"Collision_Term", "Include_Stochastic_3to1"}, false)),
+      three_to_one_(
+          config.take({"Collision_Term", "Include_Stochastic_3to1"}, false)),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
       use_AQM_(parameters.use_AQM),
@@ -268,7 +269,8 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
   if (three_to_one_ && coll_crit_ != CollisionCriterion::Stochastic) {
     throw std::invalid_argument(
-           "3-to-1 reactions are only possible with the stochastic collision criterion. Change your config accordingly.");
+        "3-to-1 reactions are only possible with the stochastic collision "
+        "criterion. Change your config accordingly.");
   }
 
   if (strings_switch_) {
@@ -296,7 +298,8 @@ ScatterActionsFinder::ScatterActionsFinder(
 
 ActionPtr ScatterActionsFinder::check_collision_two_part(
     const ParticleData& data_a, const ParticleData& data_b, double dt,
-    const std::vector<FourVector>& beam_momentum, const double gcell_vol) const {
+    const std::vector<FourVector>& beam_momentum,
+    const double gcell_vol) const {
   /* If the two particles
    * 1) belong to the two colliding nuclei
    * 2) are within the same nucleus
@@ -313,7 +316,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   }
 
   // No grid or search in cell means no collision for stochastic criterion
-  if (coll_crit_ == CollisionCriterion::Stochastic && gcell_vol < really_small) {
+  if (coll_crit_ == CollisionCriterion::Stochastic &&
+      gcell_vol < really_small) {
     return nullptr;
   }
 
@@ -368,8 +372,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     const double prob = xs * v_rel * dt / gcell_vol;
 
     logg[LFindScatter].debug(
-        "Stochastic collison criterion parameters:\nprob = ", prob,
-        ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
+        "Stochastic collison criterion parameters (2-particles):\nprob = ",
+        prob, ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
         ", gcell_vol = ", gcell_vol, ", testparticles = ", testparticles_);
 
     if (prob > 1.) {
@@ -416,8 +420,6 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
 
 ActionPtr ScatterActionsFinder::check_collision_multi_part(
     const ParticleList& plist, double dt, const double gcell_vol) const {
-  // TODO(stdnmr) Decide on sensible logging
-
   // No grid or search in cell
   if (gcell_vol < really_small) {
     return nullptr;
@@ -428,7 +430,7 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
 
   if (testparticles_ != 1) {
     std::stringstream err;
-    err << "Multi-body reactions do not scale with testparticles yet. Use 1.";
+    err << "Multi-particle reactions do not scale with testparticles. Use 1.";
     throw std::runtime_error(err.str());
   }
 
@@ -447,14 +449,10 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
 
   // 5. Check that probability is smaller than one
   if (p_nm > 1.) {
-    // std::stringstream err;
-    // err << "Probability larger than 1 for stochastic rates. ( P_nm = " <<
-    // p_nm
-    //     << " )\nUse smaller timesteps.";
-    // throw std::runtime_error(err.str());
-    std::cout
-        << "WARN: Probability larger than 1 for stochastic rates. ( P_nm = "
-        << p_nm << " )\nUse smaller timesteps." << '\n';
+    std::stringstream err;
+    err << "Probability larger than 1 for stochastic rates. ( P_nm = " << p_nm
+        << " )\nUse smaller timesteps.";
+    throw std::runtime_error(err.str());
   }
 
   // 6. Perform probability decisions
@@ -485,8 +483,6 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
         // Also, check for 3 particle scatterings with stochastic criterion
         for (const ParticleData& p3 : search_list) {
           if (p1.id() < p2.id() && p2.id() < p3.id()) {
-            // TODO Clarify if I accidentally copy costly by passing
-            // ParticleList with initalizer list as argument
             ActionPtr act =
                 check_collision_multi_part({p1, p2, p3}, dt, gcell_vol);
             if (act) {

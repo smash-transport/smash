@@ -616,8 +616,8 @@ void GrandCanThermalizer::print_statistics(const Clock &clock) const {
             << "nb[fm^-3], ns[fm^-3]: " << in_therm_reg.T << " "
             << in_therm_reg.mub << " " << in_therm_reg.mus << " "
             << in_therm_reg.nb << " " << in_therm_reg.ns << std::endl;
-  std::cout << "Volume with e > e_crit [fm^3]: " << lat_cell_volume_ * node_counter
-            << std::endl;
+  std::cout << "Volume with e > e_crit [fm^3]: "
+            << lat_cell_volume_ * node_counter << std::endl;
 }
 
 }  // namespace smash
