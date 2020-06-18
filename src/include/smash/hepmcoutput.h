@@ -101,16 +101,18 @@ class HepMcOutput : public OutputInterface {
 
   /**
    * Construct nulcear pdg code for porjectile and target, see PDG chapter
-   "Monte Carlo particle numbering scheme" for details.
+   * "Monte Carlo particle numbering scheme" for details.
    *
    * \param[in] na Number of all particles in nucleus (A)
    * \param[in] nz Number of all charged particles in nucleus (Z).
    *
-   * Note: Isomers and hypernuclei are not suported. Also, in principle it would
-   * be possible to define a full PdgCode class, since the pdg number is just
-   * written directly into the output we stick to int. A possible improvemnt
-   would
-   * be to include this function into the PdgCode class.
+   * Note: Isomers and hypernuclei are not suported.Also note that one would
+   * usually create a PdgCode object to store the PDG code of the nuclei.
+   * This PdgCode object however would be first constructed with the integer
+   * determined here and then directly returned again with a method of the
+   * PdgCode class, making the creation of a PdgCode  class instance overkill.
+   * A possible improvement would be the inclusion of this function in the
+   * PdgCode class.
    */
   int construct_nuclear_pdg_code(int na, int nz) const;
 

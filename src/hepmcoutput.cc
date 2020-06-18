@@ -38,7 +38,7 @@ namespace smash {
  * The output is written in Asciiv3, the HepMC3 native plain text format. See
  * https://arxiv.org/abs/1912.08005 for documentation of the format.
  *
- * Note: Since some HepMC readers (e.g. Rivet) need a value for the
+ * \note Since some HepMC readers (e.g. Rivet) need a value for the
  * nuclei-nuclei cross section, a dummy cross section of 1.0 is written to the
  * output.
  */
