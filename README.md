@@ -42,8 +42,8 @@ It requires the following tools & libraries:
 - boost filesystem >= 1.49
 - Pythia = 8.302
 
-Support for ROOT output is automatically enabled if a suitable version of ROOT
-(>= 5.34) is found on the system.
+Support for ROOT and HepMC3 output is automatically enabled if a suitable version
+ (ROOT >= 5.34, HepMC3 >= 3.1.2) is found on the system.
 
 ### Building Pythia
 
@@ -155,7 +155,7 @@ Note: The FPE environment only works with gcc, so e.g. you won't get backtraces
 from floating point traps with clang.
 
 
-### Disabling ROOT Support
+### Disabling ROOT or HepMC Support
 
 Producing ROOT output requires ROOT installed (see http://root.cern.ch).
 If ROOT is found, the support for ROOT output is automatically enabled.
@@ -163,6 +163,17 @@ In order to disable it, one can do the following:
 
     cmake -DUSE_ROOT=OFF <source_dir>
     make
+
+The same rules apply to the HepMC output.
+
+    cmake -DUSE_HEPMC=OFF <source_dir>
+    make
+
+See http://hepmc.web.cern.ch/hepmc/ for download and the projects' README for
+installation. If the HepMC installation is not found, provide the
+install destination (`$HEPMC_INS`) with
+
+   cmake -DCMAKE_PREFIX_PATH=$HEPMC_INS ..
 
 
 ### Using a Custom GSL Build

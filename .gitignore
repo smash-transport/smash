@@ -7,7 +7,7 @@
 # Top-level build directory
 #
 *~
-build
+build*
 .directory
 .push_default
 *.diff

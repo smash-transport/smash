@@ -326,6 +326,18 @@ class PdgCode {
     return (abs_code == pdg::p || abs_code == pdg::n);
   }
 
+  /// \return whether this is a proton/anti-proton
+  inline bool is_proton() const {
+    const auto abs_code = std::abs(code());
+    return (abs_code == pdg::p);
+  }
+
+  /// \return whether this is a neutron/anti-neutron
+  inline bool is_neutron() const {
+    const auto abs_code = std::abs(code());
+    return (abs_code == pdg::n);
+  }
+
   /// \return whether this is a N*(1535) (+/0)
   inline bool is_Nstar1535() const {
     const auto abs_code = std::abs(code());

@@ -68,6 +68,22 @@ if(USE_ROOT)
   endif()
 endif()
 
+option(USE_HEPMC "Turn this off to disable HepMC output support in SMASH." ON)
+if(USE_HEPMC)
+  find_package(HepMC3 3.1.2)
+  if(HepMC3_FOUND)
+    message(STATUS "Found HepMC ${HepMC3_VERSION} at ${HEPMC3_LIB}.")
+    include_directories(SYSTEM "${HEPMC3_INCLUDE_DIR}")
+    set(SMASH_LIBRARIES
+        ${SMASH_LIBRARIES}
+        ${HEPMC3_LIB}
+    )
+    add_definitions(-DSMASH_USE_HEPMC)
+  else()
+    message(STATUS "HepMC not found. Support disabled.")
+  endif()
+endif()
+
 # find Pythia
 find_package(Pythia 8.302 EXACT REQUIRED)
 if(Pythia_FOUND)
@@ -94,7 +110,6 @@ include_directories(SYSTEM
     ${Boost_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
     )
-
 
 # set default libraries for linking
 set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
@@ -177,6 +192,10 @@ set(smash_src
 
 if(USE_ROOT AND ROOT_FOUND)
   set(smash_src ${smash_src} rootoutput.cc)
+endif()
+
+if(USE_HEPMC AND HepMC3_FOUND)
+  set(smash_src ${smash_src} hepmcoutput.cc)
 endif()
 
 # this is the "object library" target: compiles the sources only once
