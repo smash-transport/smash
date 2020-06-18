@@ -106,11 +106,11 @@ class HepMcOutput : public OutputInterface {
    * \param[in] na Number of all particles in nucleus (A)
    * \param[in] nz Number of all charged particles in nucleus (Z).
    *
-   * Note: Isomers and hypernuclei are not suported.Also note that one would
+   * Note: Isomers and hypernuclei are not supported. Also note that one would
    * usually create a PdgCode object to store the PDG code of the nuclei.
    * This PdgCode object however would be first constructed with the integer
    * determined here and then directly returned again with a method of the
-   * PdgCode class, making the creation of a PdgCode  class instance overkill.
+   * PdgCode class, making the creation of a PdgCode class instance overkill.
    * A possible improvement would be the inclusion of this function in the
    * PdgCode class.
    */
