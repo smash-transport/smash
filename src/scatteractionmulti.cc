@@ -9,9 +9,10 @@
 
 #include "smash/scatteractionmulti.h"
 
+#include "smash/logging.h"
+
 namespace smash {
-  
-// TODO(stdnmr) Sensible (debug) logging for functions
+static constexpr int LScatterActionMulti = LogArea::ScatterActionMulti::id;
 
 ScatterActionMulti::ScatterActionMulti(const ParticleList& in_plist,
                                        double time)
@@ -53,12 +54,17 @@ void ScatterActionMulti::add_possible_reactions(double dt,
 }
 
 void ScatterActionMulti::generate_final_state() {
+  logg[LScatterActionMulti].debug("Incoming particles: ", incoming_particles_);
+
   /* Decide for a particular final state. */
   const CollisionBranch* proc =
       choose_channel<CollisionBranch>(reaction_channels_, total_probability_);
   process_type_ = proc->get_type();
   outgoing_particles_ = proc->particle_list();
   partial_probability_ = proc->weight();
+
+  logg[LScatterActionMulti].debug("Chosen channel: ", process_type_,
+                                  outgoing_particles_);
 
   switch (process_type_) {
     case ProcessType::MultiParticleThreePionsToOmega:
@@ -118,6 +124,9 @@ void ScatterActionMulti::annihilation() {
       total_momentum_of_outgoing_particles().abs(), 0., 0., 0.);
 
   // TODO(stdnmr) Set formation (time) of outgoing particle?
+
+  logg[LScatterActionMulti].debug("Momentum of the new particle: ",
+                                   outgoing_particles_[0].momentum());
 }
 
 bool ScatterActionMulti::three_different_pions(
