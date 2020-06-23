@@ -9,6 +9,7 @@
 
 #include "smash/scatteractionmulti.h"
 
+#include "smash/integrate.h"
 #include "smash/logging.h"
 
 namespace smash {
@@ -53,7 +54,7 @@ void ScatterActionMulti::add_possible_reactions(double dt,
     const ParticleTypePtr type_omega = ParticleType::try_find(0x223);
     if (type_omega) {
       add_reaction(make_unique<CollisionBranch>(
-          *type_omega, probability_three_pi_to_one(*type_omega, dt, gcell_vol),
+          *type_omega, probability_three_meson_to_one(*type_omega, dt, gcell_vol),
           ProcessType::MultiParticleThreePionsToOmega));
     }
   }
@@ -95,7 +96,34 @@ void ScatterActionMulti::generate_final_state() {
   }
 }
 
-double ScatterActionMulti::probability_three_pi_to_one(
+double ScatterActionMulti::calculate_I3(const double sqrts) const {
+  static Integrator integrate;
+  const double m1 = incoming_particles()[0].effective_mass();
+  const double m2 = incoming_particles()[1].effective_mass();
+  const double m3 = incoming_particles()[2].effective_mass();
+  const double lower_bound = (m1 + m2) * (m1 + m2);
+  const double upper_bound = (sqrts - m3) * (sqrts - m3);
+  const auto result = integrate(lower_bound, upper_bound, [&](double m12_sqr) {
+    const double m12 = std::sqrt(m12_sqr);
+    const double e2_star = (m12_sqr - m1 * m1 + m2 * m2) / (2 * m12);
+    const double e3_star = (sqrts * sqrts - m12_sqr - m3 * m3) / (2 * m12);
+    const double m23_sqr_min =
+        (e2_star + e3_star) * (e2_star + e3_star) -
+        std::pow(std::sqrt(e2_star * e2_star - m2 * m2) +
+                     std::sqrt(e3_star * e3_star - m3 * m3),
+                 2.0);
+    const double m23_sqr_max =
+        (e2_star + e3_star) * (e2_star + e3_star) -
+        std::pow(std::sqrt(e2_star * e2_star - m2 * m2) -
+                     std::sqrt(e3_star * e3_star - m3 * m3),
+                 2.0);
+    return m23_sqr_max - m23_sqr_min;
+  });
+
+  return result;
+}
+
+double ScatterActionMulti::probability_three_meson_to_one(
     const ParticleType& type_out, double dt, const double gcell_vol) const {
   const double e1 = incoming_particles()[0].momentum().x0();
   const double e2 = incoming_particles()[1].momentum().x0();
@@ -107,9 +135,9 @@ double ScatterActionMulti::probability_three_pi_to_one(
               &incoming_particles()[2].type()});
 
   const int spin_deg = type_out.spin_degeneracy();
-  const double I_3_pi = 0.07514;  // approx. ATM (value at omega pole mass)
+  const double I_3 = calculate_I3(sqrts);
   const double ph_sp_3 =
-      1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3_pi;
+      1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
 
   const double spec_f_val = type_out.spectral_function(sqrts);
 
