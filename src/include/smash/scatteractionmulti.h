@@ -165,9 +165,8 @@ class ScatterActionMulti : public Action {
    * \param[in] data_c data for third incoming particle
    * \return true if combination of π⁺,π⁻,η or π⁰,π⁰,η
    */
-  bool two_pions_eta(const ParticleData& data_a,
-                            const ParticleData& data_b,
-                            const ParticleData& data_c) const;
+  bool two_pions_eta(const ParticleData& data_a, const ParticleData& data_b,
+                     const ParticleData& data_c) const;
 
   /// Total probability of reaction
   double total_probability_;

@@ -49,12 +49,13 @@ void ScatterActionMulti::add_possible_reactions(double dt,
                                                 const bool three_to_one) {
   if (three_to_one && incoming_particles().size() == 3) {
     if (three_different_pions(incoming_particles()[0], incoming_particles()[1],
-                            incoming_particles()[2])) {
+                              incoming_particles()[2])) {
       // 3pi -> omega
       const ParticleTypePtr type_omega = ParticleType::try_find(0x223);
       if (type_omega) {
         add_reaction(make_unique<CollisionBranch>(
-            *type_omega, probability_three_meson_to_one(*type_omega, dt, gcell_vol),
+            *type_omega,
+            probability_three_meson_to_one(*type_omega, dt, gcell_vol),
             ProcessType::MultiParticleThreeMesonsToOne));
       }
       // 3pi -> phi
@@ -65,13 +66,14 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             ProcessType::MultiParticleThreeMesonsToOne));
       }
     } else if (two_pions_eta(incoming_particles()[0], incoming_particles()[1],
-                            incoming_particles()[2])) {
+                             incoming_particles()[2])) {
       // eta2pi -> eta-prime
       const ParticleTypePtr type_eta_prime = ParticleType::try_find(0x331);
       if (type_eta_prime) {
         // TODO(stdnmr) Do we need a symmetry factor if we have two pi0?
         add_reaction(make_unique<CollisionBranch>(
-            *type_eta_prime, probability_three_meson_to_one(*type_eta_prime, dt, gcell_vol),
+            *type_eta_prime,
+            probability_three_meson_to_one(*type_eta_prime, dt, gcell_vol),
             ProcessType::MultiParticleThreeMesonsToOne));
       }
     }
@@ -193,25 +195,24 @@ bool ScatterActionMulti::three_different_pions(
          (pdg_a != pdg_b && pdg_b != pdg_c && pdg_c != pdg_a);
 }
 
-
-bool ScatterActionMulti::two_pions_eta(
-    const ParticleData& data_a, const ParticleData& data_b,
-    const ParticleData& data_c) const {
+bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
+                                       const ParticleData& data_b,
+                                       const ParticleData& data_c) const {
   // We want a combination of pi0, pi0 and eta or pi+, pi- and eta
   const PdgCode pdg_a = data_a.pdgcode();
   const PdgCode pdg_b = data_b.pdgcode();
   const PdgCode pdg_c = data_c.pdgcode();
 
-  return (pdg_a == pdg::pi_z && pdg_b == pdg::pi_z && pdg_c == pdg::eta ) ||
-         (pdg_a == pdg::pi_z && pdg_b == pdg::eta  && pdg_c == pdg::pi_z) ||
-         (pdg_a == pdg::eta  && pdg_b == pdg::pi_z && pdg_c == pdg::pi_z) ||
+  return (pdg_a == pdg::pi_z && pdg_b == pdg::pi_z && pdg_c == pdg::eta) ||
+         (pdg_a == pdg::pi_z && pdg_b == pdg::eta && pdg_c == pdg::pi_z) ||
+         (pdg_a == pdg::eta && pdg_b == pdg::pi_z && pdg_c == pdg::pi_z) ||
 
-         (pdg_a == pdg::eta  && pdg_b == pdg::pi_m && pdg_c == pdg::pi_p) ||
-         (pdg_a == pdg::pi_m && pdg_b == pdg::pi_p && pdg_c == pdg::eta ) ||
-         (pdg_a == pdg::eta  && pdg_b == pdg::pi_p && pdg_c == pdg::pi_m) ||
-         (pdg_a == pdg::eta  && pdg_b == pdg::pi_m && pdg_c == pdg::pi_p) ||
-         (pdg_a == pdg::pi_p && pdg_b == pdg::eta  && pdg_c == pdg::pi_m) ||
-         (pdg_a == pdg::pi_m && pdg_b == pdg::eta  && pdg_c == pdg::pi_p);
+         (pdg_a == pdg::eta && pdg_b == pdg::pi_m && pdg_c == pdg::pi_p) ||
+         (pdg_a == pdg::pi_m && pdg_b == pdg::pi_p && pdg_c == pdg::eta) ||
+         (pdg_a == pdg::eta && pdg_b == pdg::pi_p && pdg_c == pdg::pi_m) ||
+         (pdg_a == pdg::eta && pdg_b == pdg::pi_m && pdg_c == pdg::pi_p) ||
+         (pdg_a == pdg::pi_p && pdg_b == pdg::eta && pdg_c == pdg::pi_m) ||
+         (pdg_a == pdg::pi_m && pdg_b == pdg::eta && pdg_c == pdg::pi_p);
 }
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
