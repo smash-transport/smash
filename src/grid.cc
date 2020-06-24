@@ -135,12 +135,8 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
           ? std::cbrt(particle_count)
           : std::max(2, static_cast<int>(std::cbrt(particle_count)));
 
-  // Error message for too small box size. Thrown at two instances. Hence it is
-  // saved in a string to prevent code code duplication.
   std::string error_box_too_small =
       "Input error: Your box is too small for the grid.\n"
-      "The minimal cell length exceeds the length of "
-      "a grid cell in the given setup.\n"
       "The minimal length of the box is given by: " +
       std::to_string(2 * max_interaction_length) +
       " fm with the given timestep size.\n"
@@ -169,7 +165,10 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                   // default number of cells one less than for non-periodic
                   // boundaries.
                   (O == GridOptions::Normal ? 1 : 0);
+    // Only in the case of periodic boundaries (i.e. GridOptions != Normal) the
+    // number of cells can be set to zero by the "? :" operator above.
     if (number_of_cells_[i] == 0) {
+      // The minimal cell length exceeds the length of the box.
       throw std::runtime_error(error_box_too_small);
     }
     // std::nextafter implements a safety margin so that no valid position
@@ -193,6 +192,8 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
       // Verify that cell length did not become smaller than
       // the max. interaction length by increasing the number of cells
       if (1. / index_factor[i] <= std::nextafter(max_interaction_length, 0.)) {
+        // The minimal cell length exceeds
+        // the length of a grid cell in the box.
         throw std::runtime_error(error_box_too_small);
       }
     }
