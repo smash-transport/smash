@@ -135,6 +135,15 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
           ? std::cbrt(particle_count)
           : std::max(2, static_cast<int>(std::cbrt(particle_count)));
 
+  std::string error_box_too_small =
+      "Input error: Your box is too small for the grid.\n"
+      "The minimal length of the box is given by: " +
+      std::to_string(2 * max_interaction_length) +
+      " fm with the given timestep size.\n"
+      "If you have large timesteps please reduce them.\n"
+      "A larger box or the use of testparticles also helps.\n"
+      "Please take a look at your config.";
+
   // This normally equals 1/max_interaction_length, but if the number of cells
   // is reduced (because of low density) then this value is smaller.
   std::array<double, 3> index_factor = {1. / max_interaction_length,
@@ -156,14 +165,11 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                   // default number of cells one less than for non-periodic
                   // boundaries.
                   (O == GridOptions::Normal ? 1 : 0);
+    // Only in the case of periodic boundaries (i.e. GridOptions != Normal) the
+    // number of cells can be zero.
     if (number_of_cells_[i] == 0) {
-      throw std::runtime_error(
-          "Input error: Your Box is too small for the grid."
-          "\nThe minimal length of the box is given by:\n" +
-          std::to_string(max_interaction_length) +
-          " fm with your current timestep size dt.\n"
-          "If you have large timesteps please reduce them."
-          "\nPlease take a look at your config.");
+      // The minimal cell length exceeds the length of the box.
+      throw std::runtime_error(error_box_too_small);
     }
     // std::nextafter implements a safety margin so that no valid position
     // inside the grid can reference an out-of-bounds cell
@@ -186,11 +192,9 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
       // Verify that cell length did not become smaller than
       // the max. interaction length by increasing the number of cells
       if (1. / index_factor[i] <= std::nextafter(max_interaction_length, 0.)) {
-        throw std::runtime_error(
-            "Input error: Your Box is too small for the grid. \nThe length of "
-            "a grid cell exceeds the minimal cell length. \nIf you have large "
-            "timesteps please reduce them.\nA larger box or the use of "
-            "testparticles also helps. \nPlease take a look at your config.");
+        // The minimal cell length exceeds
+        // the length of a grid cell in the box.
+        throw std::runtime_error(error_box_too_small);
       }
     }
   }
