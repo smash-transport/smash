@@ -166,7 +166,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                   // boundaries.
                   (O == GridOptions::Normal ? 1 : 0);
     // Only in the case of periodic boundaries (i.e. GridOptions != Normal) the
-    // number of cells can be set to zero by the "? :" operator above.
+    // number of cells can be zero.
     if (number_of_cells_[i] == 0) {
       // The minimal cell length exceeds the length of the box.
       throw std::runtime_error(error_box_too_small);
