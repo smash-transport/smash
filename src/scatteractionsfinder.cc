@@ -468,7 +468,6 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
     const ParticleList& search_list, double dt, const double gcell_vol,
     const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
-
   for (const ParticleData& p1 : search_list) {
     for (const ParticleData& p2 : search_list) {
       // Check for 2 particle scattering

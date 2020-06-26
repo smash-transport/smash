@@ -322,7 +322,7 @@ class ParticleType {
    * decaying into two given daughter particles.
    *
    * \param[in] m Invariant mass of the decaying resonance.
-   * \param[in] dlist List of daughter particle.
+   * \param[in] dlist List of daughter particles.
    * \return the partial width for this mass and this specific decay channel
    */
   double get_partial_width(const double m,
