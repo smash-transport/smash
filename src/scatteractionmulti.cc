@@ -28,13 +28,19 @@ void ScatterActionMulti::add_reactions(CollisionBranchList pv) {
 }
 
 double ScatterActionMulti::get_total_weight() const {
-  // TODO(stdnmr) Weight probability with xs_scaling factor?
-  return total_probability_;
+  double xsec_scaling = 1.0;
+  for (const ParticleData& in_part : incoming_particles_) {
+    xsec_scaling *= in_part.xsec_scaling_factor();
+  }
+  return total_probability_ * xsec_scaling;
 }
 
 double ScatterActionMulti::get_partial_weight() const {
-  // TODO(stdnmr) Weight probability with xs_scaling factor?
-  return partial_probability_;
+  double xsec_scaling = 1.0;
+  for (const ParticleData& in_part : incoming_particles_) {
+    xsec_scaling *= in_part.xsec_scaling_factor();
+  }
+  return partial_probability_ * xsec_scaling;
 }
 
 void ScatterActionMulti::add_possible_reactions(double dt,

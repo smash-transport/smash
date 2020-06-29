@@ -39,14 +39,16 @@ class ScatterActionMulti : public Action {
   void generate_final_state() override;
 
   /**
-   * Get the total probability for the reaction.
+   * Get the total probability for the reaction (scaled with the cross section
+   * scaling factors of the incoming particles).
    *
    * \return total probability.
    */
   double get_total_weight() const override;
 
   /**
-   * Get the partial probability for the chosen channel.
+   * Get the partial probability for the chosen channel (scaled with the cross
+   * section scaling factors of the incoming particles).
    *
    * \return partial probability.
    */
@@ -61,14 +63,6 @@ class ScatterActionMulti : public Action {
    */
   void add_possible_reactions(double dt, const double gcell_vol,
                               const bool three_to_one);
-
-  /**
-   * Get the total probability for the reaction. More expressive get function
-   * than get_total_weight.
-   *
-   * \return total probability.
-   */
-  double probability() const { return total_probability_; }
 
   /**
    * \ingroup exception

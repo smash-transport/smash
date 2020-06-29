@@ -445,19 +445,19 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
   act->add_possible_reactions(dt, gcell_vol, three_to_one_);
 
   // 4. Return total collision probability
-  const double p_nm = act->probability();
+  const double prob = act->get_total_weight();
 
   // 5. Check that probability is smaller than one
-  if (p_nm > 1.) {
+  if (prob > 1.) {
     std::stringstream err;
-    err << "Probability larger than 1 for stochastic rates. ( P_nm = " << p_nm
+    err << "Probability larger than 1 for stochastic rates. ( prob = " << prob
         << " )\nUse smaller timesteps.";
     throw std::runtime_error(err.str());
   }
 
   // 6. Perform probability decisions
   double random_no = random::uniform(0., 1.);
-  if (random_no > p_nm) {
+  if (random_no > prob) {
     return nullptr;
   }
 
