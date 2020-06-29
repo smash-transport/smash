@@ -137,12 +137,8 @@ bool ScatterActionMulti::three_different_pions(
   const PdgCode pdg_b = data_b.pdgcode();
   const PdgCode pdg_c = data_c.pdgcode();
 
-  return (pdg_a == pdg::pi_p && pdg_b == pdg::pi_m && pdg_c == pdg::pi_z) ||
-         (pdg_a == pdg::pi_m && pdg_b == pdg::pi_p && pdg_c == pdg::pi_z) ||
-         (pdg_a == pdg::pi_z && pdg_b == pdg::pi_p && pdg_c == pdg::pi_m) ||
-         (pdg_a == pdg::pi_z && pdg_b == pdg::pi_m && pdg_c == pdg::pi_p) ||
-         (pdg_a == pdg::pi_p && pdg_b == pdg::pi_z && pdg_c == pdg::pi_m) ||
-         (pdg_a == pdg::pi_m && pdg_b == pdg::pi_z && pdg_c == pdg::pi_p);
+  return (pdg_a.is_pion() && pdg_b.is_pion() && pdg_c.is_pion()) &&
+         (pdg_a != pdg_b && pdg_b != pdg_c && pdg_c != pdg_a);
 }
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
