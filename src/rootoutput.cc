@@ -109,6 +109,9 @@ void RootOutput::init_trees() {
     particles_tree_ = new TTree("particles", "particles");
 
     particles_tree_->Branch("npart", &npart, "npart/I");
+    particles_tree_->Branch("test_p", &test_p, "test_p/I");
+    particles_tree_->Branch("modus_l", &modus_l, "modus_l/D");
+    particles_tree_->Branch("current_t", &current_t, "current_t/D");
     particles_tree_->Branch("impact_b", &impact_b, "impact_b/D");
     particles_tree_->Branch("empty_event", &empty_event_, "empty_event/O");
     particles_tree_->Branch("ev", &ev, "ev/I");
@@ -126,6 +129,10 @@ void RootOutput::init_trees() {
     particles_tree_->Branch("x", &x[0], "x[npart]/D");
     particles_tree_->Branch("y", &y[0], "y[npart]/D");
     particles_tree_->Branch("z", &z[0], "z[npart]/D");
+
+    particles_tree_->Branch("E_kinetic_tot", &E_kinetic_tot, "E_kinetic_tot/D");
+    particles_tree_->Branch("E_fields_tot", &E_fields_tot, "E_fields_tot/D");
+    particles_tree_->Branch("E_tot", &E_tot, "E_tot/D");
 
     if (part_extended_ || ic_extended_) {
       particles_tree_->Branch("ncoll", &coll_per_part_[0], "ncoll[npart]/I");
@@ -200,9 +207,16 @@ RootOutput::~RootOutput() {
 
 void RootOutput::at_eventstart(const Particles &particles,
                                const int event_number,
-                               const event_info &) {
+                               const event_info &event) {
   // save event number
   current_event_ = event_number;
+
+  modus_l = event.modus_length;
+  test_p = event.test_particles;
+  current_t = event.current_time;
+  E_kinetic_tot = event.total_kinetic_energy;
+  E_fields_tot = event.total_mean_field_energy;
+  E_tot = event.total_energy;
 
   if (write_particles_ && particles_only_final_ == OutputOnlyFinal::No) {
     output_counter_ = 0;
@@ -217,7 +231,14 @@ void RootOutput::at_eventstart(const Particles &particles,
 void RootOutput::at_intermediate_time(const Particles &particles,
                                       const std::unique_ptr<Clock> &,
                                       const DensityParameters &,
-                                      const event_info &) {
+                                      const event_info &event) {
+  modus_l = event.modus_length;
+  test_p = event.test_particles;
+  current_t = event.current_time;
+  E_kinetic_tot = event.total_kinetic_energy;
+  E_fields_tot = event.total_mean_field_energy;
+  E_tot = event.total_energy;
+
   if (write_particles_ && particles_only_final_ == OutputOnlyFinal::No) {
     particles_to_tree(particles);
     output_counter_++;
@@ -227,6 +248,13 @@ void RootOutput::at_intermediate_time(const Particles &particles,
 void RootOutput::at_eventend(const Particles &particles,
                              const int /*event_number*/,
                              const event_info &event) {
+  modus_l = event.modus_length;
+  test_p = event.test_particles;
+  current_t = event.current_time;
+  E_kinetic_tot = event.total_kinetic_energy;
+  E_fields_tot = event.total_mean_field_energy;
+  E_tot = event.total_energy;
+
   impact_b = event.impact_parameter;
   empty_event_ = event.empty_event;
   if (write_particles_ &&

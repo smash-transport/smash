@@ -201,8 +201,9 @@ class RootOutput : public OutputInterface {
       formation_time_, xsec_factor_, time_last_coll_;
   std::array<int, max_buffer_size_> pdgcode, charge, coll_per_part_,
       proc_id_origin_, proc_type_origin_, pdg_mother1_, pdg_mother2_;
-  int npart, tcounter, ev, nin, nout;
-  double wgt, par_wgt, impact_b;
+  int npart, tcounter, ev, nin, nout, test_p;
+  double wgt, par_wgt, impact_b, modus_l, current_t;
+  double E_kinetic_tot, E_fields_tot, E_tot;
   bool empty_event_;
   //@}
 
