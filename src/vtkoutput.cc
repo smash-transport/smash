@@ -58,8 +58,7 @@ VtkOutput::~VtkOutput() {}
  **/
 
 void VtkOutput::at_eventstart(const Particles &particles,
-                              const int event_number,
-                              const EventInfo &) {
+                              const int event_number, const EventInfo &) {
   vtk_output_counter_ = 0;
   vtk_density_output_counter_ = 0;
   vtk_tmn_output_counter_ = 0;
@@ -75,9 +74,7 @@ void VtkOutput::at_eventstart(const Particles &particles,
 }
 
 void VtkOutput::at_eventend(const Particles & /*particles*/,
-                            const int /*event_number*/,
-                            const EventInfo &) {
-}
+                            const int /*event_number*/, const EventInfo &) {}
 
 void VtkOutput::at_intermediate_time(const Particles &particles,
                                      const std::unique_ptr<Clock> &,

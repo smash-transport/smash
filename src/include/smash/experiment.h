@@ -1488,12 +1488,14 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
   double E_kinetic_total = current_values.momentum().x0();
   double E_total = E_kinetic_total + E_mean_field;
 
-  EventInfo event_info {
-    modus_.impact_parameter(), modus_.length(),
-    parameters_.outputclock->current_time(),
-    E_kinetic_total, E_mean_field, E_total, parameters_.testparticles,
-    !projectile_target_interact_
-  };
+  EventInfo event_info{modus_.impact_parameter(),
+                       modus_.length(),
+                       parameters_.outputclock->current_time(),
+                       E_kinetic_total,
+                       E_mean_field,
+                       E_total,
+                       parameters_.testparticles,
+                       !projectile_target_interact_};
 
   // Output at event start
   for (const auto &output : outputs_) {
@@ -1919,12 +1921,14 @@ void Experiment<Modus>::intermediate_output() {
   double E_kinetic_total = current_values.momentum().x0();
   double E_total = E_kinetic_total + E_mean_field;
 
-  EventInfo event_info {
-    modus_.impact_parameter(), modus_.length(),
-    parameters_.outputclock->current_time(),
-    E_kinetic_total, E_mean_field, E_total, parameters_.testparticles,
-    !projectile_target_interact_
-  };
+  EventInfo event_info{modus_.impact_parameter(),
+                       modus_.length(),
+                       parameters_.outputclock->current_time(),
+                       E_kinetic_total,
+                       E_mean_field,
+                       E_total,
+                       parameters_.testparticles,
+                       !projectile_target_interact_};
   // save evolution data
   if (!(modus_.is_box() && parameters_.outputclock->current_time() <
                                modus_.equilibration_time())) {
@@ -2141,12 +2145,14 @@ void Experiment<Modus>::final_output(const int evt_num) {
   double E_kinetic_total = current_values.momentum().x0();
   double E_total = E_kinetic_total + E_mean_field;
 
-  EventInfo event_info {
-    modus_.impact_parameter(), modus_.length(),
-    parameters_.outputclock->current_time(),
-    E_kinetic_total, E_mean_field, E_total, parameters_.testparticles,
-    !projectile_target_interact_
-  };
+  EventInfo event_info{modus_.impact_parameter(),
+                       modus_.length(),
+                       parameters_.outputclock->current_time(),
+                       E_kinetic_total,
+                       E_mean_field,
+                       E_total,
+                       parameters_.testparticles,
+                       !projectile_target_interact_};
 
   for (const auto &output : outputs_) {
     output->at_eventend(particles_, evt_num, event_info);

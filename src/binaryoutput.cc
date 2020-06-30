@@ -205,7 +205,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
       print_start_end_(out_par.coll_printstartend) {}
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
-                                           const int, const EventInfo&) {
+                                           const int, const EventInfo &) {
   const char pchar = 'p';
   if (print_start_end_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
@@ -216,7 +216,7 @@ void BinaryOutputCollisions::at_eventstart(const Particles &particles,
 
 void BinaryOutputCollisions::at_eventend(const Particles &particles,
                                          const int32_t event_number,
-                                         const EventInfo& event) {
+                                         const EventInfo &event) {
   const char pchar = 'p';
   if (print_start_end_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
@@ -260,8 +260,8 @@ BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
                        out_par.part_extended),
       only_final_(out_par.part_only_final) {}
 
-void BinaryOutputParticles::at_eventstart(const Particles &particles,
-                                          const int, const EventInfo&) {
+void BinaryOutputParticles::at_eventstart(const Particles &particles, const int,
+                                          const EventInfo &) {
   const char pchar = 'p';
   if (only_final_ == OutputOnlyFinal::No) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
@@ -272,7 +272,7 @@ void BinaryOutputParticles::at_eventstart(const Particles &particles,
 
 void BinaryOutputParticles::at_eventend(const Particles &particles,
                                         const int event_number,
-                                        const EventInfo& event) {
+                                        const EventInfo &event) {
   const char pchar = 'p';
   if (!(event.empty_event && only_final_ == OutputOnlyFinal::IfNotEmpty)) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
@@ -309,12 +309,12 @@ BinaryOutputInitialConditions::BinaryOutputInitialConditions(
     : BinaryOutputBase(path / "SMASH_IC.bin", "wb", name, out_par.ic_extended) {
 }
 
-void BinaryOutputInitialConditions::at_eventstart(const Particles &,
-                                                  const int, const EventInfo&) {}
+void BinaryOutputInitialConditions::at_eventstart(const Particles &, const int,
+                                                  const EventInfo &) {}
 
 void BinaryOutputInitialConditions::at_eventend(const Particles &particles,
                                                 const int event_number,
-                                                const EventInfo& event) {
+                                                const EventInfo &event) {
   // Event end line
   const char fchar = 'f';
   std::fwrite(&fchar, sizeof(char), 1, file_.get());

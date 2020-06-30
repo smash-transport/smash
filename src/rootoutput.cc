@@ -206,8 +206,7 @@ RootOutput::~RootOutput() {
 }
 
 void RootOutput::at_eventstart(const Particles &particles,
-                               const int event_number,
-                               const EventInfo &event) {
+                               const int event_number, const EventInfo &event) {
   // save event number
   current_event_ = event_number;
 
@@ -258,7 +257,8 @@ void RootOutput::at_eventend(const Particles &particles,
   impact_b = event.impact_parameter;
   empty_event_ = event.empty_event;
   if (write_particles_ &&
-      !(event.empty_event && particles_only_final_ == OutputOnlyFinal::IfNotEmpty)) {
+      !(event.empty_event &&
+        particles_only_final_ == OutputOnlyFinal::IfNotEmpty)) {
     particles_to_tree(particles);
   }
   /* Forced regular dump from operational memory to disk. Very demanding!

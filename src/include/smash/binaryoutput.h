@@ -151,9 +151,8 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * \param[in] event_number Unused, needed since inherited.
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles,
-                     const int event_number,
-                     const EventInfo& event) override;
+  void at_eventstart(const Particles &particles, const int event_number,
+                     const EventInfo &event) override;
 
   /**
    * Writes the final particle information list of an event to the binary
@@ -163,7 +162,7 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int32_t event_number,
-                   const EventInfo& event) override;
+                   const EventInfo &event) override;
 
   /**
    * Writes an interaction block, including information about the incoming and
@@ -210,9 +209,8 @@ class BinaryOutputParticles : public BinaryOutputBase {
    * \param[in] particles Current list of all particles.
    * \param[in] event_number Unused, needed since inherited.
    * \param[in] event Event info, see \ref event_info
-  */
-  void at_eventstart(const Particles &particles,
-                     const int event_number,
+   */
+  void at_eventstart(const Particles &particles, const int event_number,
                      const EventInfo &event) override;
 
   /**

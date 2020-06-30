@@ -260,7 +260,7 @@ inline ExperimentParameters default_parameters(int testparticles = 1,
 
 /// Creates default EventInfo object for testing purposes
 inline EventInfo default_event_info(double impact_parameter = 0.0,
-                                     bool empty_event = false) {
+                                    bool empty_event = false) {
   return EventInfo{impact_parameter, 0.0, 0.0, 0.0, 0.0, 0.0, 1, empty_event};
 }
 

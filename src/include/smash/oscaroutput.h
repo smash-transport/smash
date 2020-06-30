@@ -78,8 +78,7 @@ class OscarOutput : public OutputInterface {
    * \param[in] event_number Number of event.
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles,
-                     const int event_number,
+  void at_eventstart(const Particles &particles, const int event_number,
                      const EventInfo &event) override;
 
   /**

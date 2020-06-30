@@ -32,22 +32,22 @@ namespace smash {
  * auxiliary info.
  */
 struct EventInfo {
- /// Impact parameter for collider modus, otherwise dummy
- double impact_parameter;
- /// Box length in case of box simulation, otherwise dummy
- double modus_length;
- /// Time in fm/c
- double current_time;
- /// Sum of kinetic energies of all particles
- double total_kinetic_energy;
- /// Total energy in the mean field
- double total_mean_field_energy;
- /// Kinetic + mean field energy
- double total_energy;
- /// Testparticle number, see Testparticles in \ref input_general_
- int test_particles;
- /// True if no collisions happened
- bool empty_event;
+  /// Impact parameter for collider modus, otherwise dummy
+  double impact_parameter;
+  /// Box length in case of box simulation, otherwise dummy
+  double modus_length;
+  /// Time in fm/c
+  double current_time;
+  /// Sum of kinetic energies of all particles
+  double total_kinetic_energy;
+  /// Total energy in the mean field
+  double total_mean_field_energy;
+  /// Kinetic + mean field energy
+  double total_energy;
+  /// Testparticle number, see Testparticles in \ref input_general_
+  int test_particles;
+  /// True if no collisions happened
+  bool empty_event;
 };
 
 /**
@@ -80,9 +80,8 @@ class OutputInterface {
    * \param event_number Number of the current event.
    * \param[in] info Event info, see \ref event_info
    */
-  virtual void at_eventstart(const Particles &particles,
-                             const int event_number,
-                             const EventInfo& info) = 0;
+  virtual void at_eventstart(const Particles &particles, const int event_number,
+                             const EventInfo &info) = 0;
 
   /**
    * Output launched at event end. Event end is determined by maximal timestep
@@ -92,7 +91,7 @@ class OutputInterface {
    * \param[in] info Event info, see \ref event_info
    */
   virtual void at_eventend(const Particles &particles, const int event_number,
-                           const EventInfo& info) = 0;
+                           const EventInfo &info) = 0;
 
   /**
    * Called whenever an action modified one or more particles.
@@ -116,7 +115,7 @@ class OutputInterface {
   virtual void at_intermediate_time(const Particles &particles,
                                     const std::unique_ptr<Clock> &clock,
                                     const DensityParameters &dens_param,
-                                    const EventInfo& info) {
+                                    const EventInfo &info) {
     SMASH_UNUSED(particles);
     SMASH_UNUSED(clock);
     SMASH_UNUSED(dens_param);

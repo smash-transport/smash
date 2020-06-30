@@ -46,8 +46,7 @@ class VtkOutput : public OutputInterface {
    * \param event_number Number of the current event.
    * \param event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles,
-                     const int event_number,
+  void at_eventstart(const Particles &particles, const int event_number,
                      const EventInfo &event) override;
 
   /**

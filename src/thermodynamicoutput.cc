@@ -181,8 +181,7 @@ void ThermodynamicOutput::at_eventend(const Particles & /*particles*/,
 
 void ThermodynamicOutput::at_intermediate_time(
     const Particles &particles, const std::unique_ptr<Clock> &clock,
-    const DensityParameters &dens_param,
-    const EventInfo &) {
+    const DensityParameters &dens_param, const EventInfo &) {
   std::fprintf(file_.get(), "%6.2f ", clock->current_time());
   constexpr bool compute_gradient = false;
   if (out_par_.td_rho_eckart) {
