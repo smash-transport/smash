@@ -111,6 +111,7 @@ TEST(full2013_format) {
   const double impact_parameter = 1.783;
   const bool empty_event = false;
   const int event_id = 0;
+  EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
   const bf::path outputfilename = "full_event_history.oscar";
   const bf::path outputfilepath = testoutputpath / outputfilename;
@@ -126,11 +127,10 @@ TEST(full2013_format) {
     VERIFY(bool(osc2013full));
     VERIFY(bf::exists(outputfilepath_unfinished));
 
-    osc2013full->at_eventstart(particles, event_id);
+    osc2013full->at_eventstart(particles, event_id, event);
     osc2013full->at_interaction(*action, 0.);
     action->perform(&particles, 1);
-    osc2013full->at_eventend(particles, event_id, impact_parameter,
-                             empty_event);
+    osc2013full->at_eventend(particles, event_id, event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
@@ -226,6 +226,7 @@ TEST(final2013_format) {
   const int event_id = 0;
   const double impact_parameter = 2.34;
   const bool empty_event = true;
+  EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
   /* Create interaction ("elastic scattering") */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
@@ -248,13 +249,12 @@ TEST(final2013_format) {
     VERIFY(bool(osc2013final));
     VERIFY(bf::exists(outputfilepath_unfinished));
     /* Initial state output (note that this should not do anything!) */
-    osc2013final->at_eventstart(particles, event_id);
+    osc2013final->at_eventstart(particles, event_id, event);
     /* As with initial state output, this should not do anything */
     osc2013final->at_interaction(*action, 0.);
     /* Final state output; this is the only thing we expect to find in file */
     action->perform(&particles, 1);
-    osc2013final->at_eventend(particles, event_id, impact_parameter,
-                              empty_event);
+    osc2013final->at_eventend(particles, event_id, event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
@@ -319,6 +319,7 @@ TEST(full_extended_oscar) {
   const int event_id = 0;
   const double impact_parameter = 1.783;
   const bool empty_event = false;
+  EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
   {
     OutputParameters out_par = OutputParameters();
@@ -331,12 +332,11 @@ TEST(full_extended_oscar) {
     VERIFY(bf::exists(outputfilepath_unfinished));
 
     /* Initial state output */
-    osc2013full->at_eventstart(particles, event_id);
+    osc2013full->at_eventstart(particles, event_id, event);
     osc2013full->at_interaction(*action, 0.);
     /* Final state output */
     action->perform(&particles, 1);
-    osc2013full->at_eventend(particles, event_id, impact_parameter,
-                             empty_event);
+    osc2013full->at_eventend(particles, event_id, event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
@@ -433,6 +433,7 @@ TEST(initial_conditions_2013_format) {
   const int event_id = 0;
   const bool empty_event = false;
   const double impact_parameter = 1.783;
+  EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
   const bf::path outputfilename = "SMASH_IC.oscar";
   const bf::path outputfilepath = testoutputpath / outputfilename;
@@ -447,11 +448,10 @@ TEST(initial_conditions_2013_format) {
     VERIFY(bool(osc2013full));
     VERIFY(bf::exists(outputfilepath_unfinished));
 
-    osc2013full->at_eventstart(particles, event_id);
+    osc2013full->at_eventstart(particles, event_id, event);
     action->perform(&particles, 1);
     osc2013full->at_interaction(*action, 0.);
-    osc2013full->at_eventend(particles, event_id, impact_parameter,
-                             empty_event);
+    osc2013full->at_eventend(particles, event_id, event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));

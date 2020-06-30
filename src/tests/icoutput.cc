@@ -59,6 +59,7 @@ TEST(particlelist_format) {
   const int event_id = 0;
   const bool empty_event = false;
   const double impact_parameter = 0.0;
+  EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
   const bf::path outputfilepath = testoutputpath / "SMASH_IC.dat";
   bf::path outputfilepath_unfinished = outputfilepath;
@@ -73,13 +74,13 @@ TEST(particlelist_format) {
     VERIFY(bf::exists(outputfilepath_unfinished));
 
     /* Initial state output (write event number) */
-    IC_output->at_eventstart(particles, event_id);
+    IC_output->at_eventstart(particles, event_id, event);
 
     /* Interaction Output (write particle's coordinates on hypersurface) */
     IC_output->at_interaction(*action, 0.);
 
     /* Final state output (event end line) */
-    IC_output->at_eventend(particles, event_id, impact_parameter, empty_event);
+    IC_output->at_eventend(particles, event_id, event);
   }
 
   VERIFY(!bf::exists(outputfilepath_unfinished));

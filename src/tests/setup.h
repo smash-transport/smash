@@ -13,6 +13,7 @@
 #include "../include/smash/cxx14compat.h"
 #include "../include/smash/decaymodes.h"
 #include "../include/smash/experiment.h"
+#include "../include/smash/outputinterface.h"
 #include "../include/smash/particledata.h"
 #include "../include/smash/particles.h"
 #include "../include/smash/particletype.h"
@@ -255,6 +256,11 @@ inline ExperimentParameters default_parameters(int testparticles = 1,
                               NNbarTreatment::NoAnnihilation,
                               0.,      // low energy sigma_NN cut-off
                               false};  // potential_affect_threshold
+}
+
+inline EventInfo default_event_info(double impact_parameter = 0.0,
+                                     bool empty_event = false) {
+  return EventInfo{impact_parameter, 0.0, 0.0, 0.0, 0.0, 0.0, 1, empty_event};
 }
 
 /**
