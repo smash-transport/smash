@@ -1488,7 +1488,7 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
   double E_kinetic_total = current_values.momentum().x0();
   double E_total = E_kinetic_total + E_mean_field;
 
-  EventInfo EventInfo_output {
+  EventInfo event_info {
     modus_.impact_parameter(), modus_.length(),
     parameters_.outputclock->current_time(),
     E_kinetic_total, E_mean_field, E_total, parameters_.testparticles,
@@ -1497,7 +1497,7 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
 
   // Output at event start
   for (const auto &output : outputs_) {
-    output->at_eventstart(particles_, event_number, EventInfo_output);
+    output->at_eventstart(particles_, event_number, event_info);
   }
 }
 
@@ -1919,7 +1919,7 @@ void Experiment<Modus>::intermediate_output() {
   double E_kinetic_total = current_values.momentum().x0();
   double E_total = E_kinetic_total + E_mean_field;
 
-  EventInfo EventInfo_output {
+  EventInfo event_info {
     modus_.impact_parameter(), modus_.length(),
     parameters_.outputclock->current_time(),
     E_kinetic_total, E_mean_field, E_total, parameters_.testparticles,
@@ -1935,7 +1935,7 @@ void Experiment<Modus>::intermediate_output() {
       }
 
       output->at_intermediate_time(particles_, parameters_.outputclock,
-                                   density_param_, EventInfo_output);
+                                   density_param_, event_info);
 
       // Thermodynamic output on the lattice versus time
       switch (dens_type_lattice_printout_) {
@@ -2075,13 +2075,13 @@ void Experiment<Modus>::final_output(const int evt_num) {
   /* make sure the experiment actually ran (note: we should compare this
    * to the start time, but we don't know that. Therefore, we check that
    * the time is positive, which should heuristically be the same). */
+  double E_mean_field = 0.0;
   if (likely(parameters_.labclock > 0)) {
     const uint64_t wall_actions_this_interval =
         wall_actions_total_ - previous_wall_actions_total_;
     const uint64_t interactions_this_interval = interactions_total_ -
                                                 previous_interactions_total_ -
                                                 wall_actions_this_interval;
-    double E_mean_field = 0.0;
     if (potentials_) {
       // using the lattice is necessary
       if ((jmu_B_lat_ != nullptr)) {
@@ -2137,10 +2137,11 @@ void Experiment<Modus>::final_output(const int evt_num) {
     }
   }
 
-  // Todo: compute energies
-  double E_kinetic_total = 0.0, E_mean_field = 0.0, E_total = 0.0;
+  const QuantumNumbers current_values(particles_);
+  double E_kinetic_total = current_values.momentum().x0();
+  double E_total = E_kinetic_total + E_mean_field;
 
-  EventInfo EventInfo_output {
+  EventInfo event_info {
     modus_.impact_parameter(), modus_.length(),
     parameters_.outputclock->current_time(),
     E_kinetic_total, E_mean_field, E_total, parameters_.testparticles,
@@ -2148,7 +2149,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
   };
 
   for (const auto &output : outputs_) {
-    output->at_eventend(particles_, evt_num, EventInfo_output);
+    output->at_eventend(particles_, evt_num, event_info);
   }
 }
 
