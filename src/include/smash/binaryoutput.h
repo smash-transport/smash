@@ -149,6 +149,7 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * output.
    * \param[in] particles Current list of all particles.
    * \param[in] event_number Unused, needed since inherited.
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventstart(const Particles &particles,
                      const int event_number,
@@ -159,9 +160,7 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * output.
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.
-   * \param[in] impact_parameter Impact parameter of this event.
-   * \param[in] empty_event Whether there was no collision between target
-   *            and projectile
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int32_t event_number,
                    const EventInfo& event) override;
@@ -210,7 +209,8 @@ class BinaryOutputParticles : public BinaryOutputBase {
    * Writes the initial particle information of an event to the binary output.
    * \param[in] particles Current list of all particles.
    * \param[in] event_number Unused, needed since inherited.
-   */
+   * \param[in] event Event info, see \ref event_info
+  */
   void at_eventstart(const Particles &particles,
                      const int event_number,
                      const EventInfo &event) override;
@@ -219,9 +219,7 @@ class BinaryOutputParticles : public BinaryOutputBase {
    * Writes the final particle information of an event to the binary output.
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.
-   * \param[in] impact_parameter Impact parameter of this event.
-   * \param[in] empty_event Whether there was no collision between target
-   *            and projectile
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int event_number,
                    const EventInfo &event) override;
@@ -231,6 +229,7 @@ class BinaryOutputParticles : public BinaryOutputBase {
    * \param[in] particles Current list of particles.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
+   * \param[in] event Event info, see \ref event_info.
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
@@ -277,9 +276,7 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
    * Writes the final particle information of an event to the binary output.
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.
-   * \param[in] impact_parameter Impact parameter of this event.
-   * \param[in] empty_event Whether there was no collision between target
-   *            and projectile
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int event_number,
                    const EventInfo &event) override;

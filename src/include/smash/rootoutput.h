@@ -113,6 +113,7 @@ class RootOutput : public OutputInterface {
    * update event number and writes intermediate particles to a tree.
    * \param[in] particles Particles to be written to output.
    * \param[in] event_number event number to be used in ROOT output.
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventstart(const Particles &particles,
                      const int event_number,
@@ -122,9 +123,7 @@ class RootOutput : public OutputInterface {
    * and writes intermediate particles to a tree.
    * \param[in] particles Particles to be written to output.
    * \param[in] event_number event number to be used in ROOT output.
-   * \param[in] impact_parameter event number to be used in ROOT output. [fm]
-   * \param[in] empty_event Whether there was no interaction between the target
-   *            and the projectile.
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int event_number,
                    const EventInfo &event) override;
@@ -134,6 +133,7 @@ class RootOutput : public OutputInterface {
    * \param[in] particles Particles to be written to output.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
+   * \param[in] event Event info, see \ref event_info
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,

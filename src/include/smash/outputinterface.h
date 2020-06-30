@@ -22,20 +22,31 @@
 namespace smash {
 
 /**
+ * \ingroup output
+ *
  * \brief Structure to contain custom data for output
  *
+ * \anchor event_info
  * This structure is intended to hold and conveniently pass information about
  * event such as impact parameter, total potential energy, and similar
  * auxiliary info.
  */
 struct EventInfo {
+ /// Impact parameter for collider modus, otherwise dummy
  double impact_parameter;
+ /// Box length in case of box simulation, otherwise dummy
  double modus_length;
+ /// Time in fm/c
  double current_time;
+ /// Sum of kinetic energies of all particles
  double total_kinetic_energy;
+ /// Total energy in the mean field
  double total_mean_field_energy;
+ /// Kinetic + mean field energy
  double total_energy;
+ /// Testparticle number, see Testparticles in \ref input_general_
  int test_particles;
+ /// True if no collisions happened
  bool empty_event;
 };
 
@@ -67,6 +78,7 @@ class OutputInterface {
    * generated but not yet propagated.
    * \param particles List of particles.
    * \param event_number Number of the current event.
+   * \param[in] info Event info, see \ref event_info
    */
   virtual void at_eventstart(const Particles &particles,
                              const int event_number,
@@ -77,10 +89,7 @@ class OutputInterface {
    * option.
    * \param particles List of particles.
    * \param event_number Number of the current event.
-   * \param impact_parameter Distance between centers of nuclei in this event.
-   *          Only makes sense for collider modus.
-   * \param[in] empty_event Whether there was no interaction between the target
-   *            and the projectile.
+   * \param[in] info Event info, see \ref event_info
    */
   virtual void at_eventend(const Particles &particles, const int event_number,
                            const EventInfo& info) = 0;
@@ -102,6 +111,7 @@ class OutputInterface {
    * \param particles List of particles.
    * \param clock System clock.
    * \param dens_param Parameters for density calculation.
+   * \param[in] info Event info, see \ref event_info
    */
   virtual void at_intermediate_time(const Particles &particles,
                                     const std::unique_ptr<Clock> &clock,
