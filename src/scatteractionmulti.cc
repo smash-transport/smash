@@ -128,8 +128,8 @@ void ScatterActionMulti::annihilation() {
   // Set the momentum of the formed particle in its rest frame.
   outgoing_particles_[0].set_4momentum(
       total_momentum_of_outgoing_particles().abs(), 0., 0., 0.);
-
-  // TODO(stdnmr) Set formation (time) of outgoing particle?
+  // Make sure to assign formation times before boost to the computational frame
+  assign_formation_time_to_outgoing_particles();
 
   logg[LScatterActionMulti].debug("Momentum of the new particle: ",
                                   outgoing_particles_[0].momentum());
