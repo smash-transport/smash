@@ -115,7 +115,8 @@ class RootOutput : public OutputInterface {
    * \param[in] event_number event number to be used in ROOT output.
    */
   void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+                     const int event_number,
+                     const event_info &event) override;
   /**
    * update event number and impact parameter,
    * and writes intermediate particles to a tree.
@@ -126,7 +127,7 @@ class RootOutput : public OutputInterface {
    *            and the projectile.
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const event_info &event) override;
   /**
    * Writes intermediate particles to a tree defined by treename,
    * if it is allowed (i.e., particles_only_final_ is No).
@@ -136,7 +137,8 @@ class RootOutput : public OutputInterface {
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
-                            const DensityParameters &dens_param) override;
+                            const DensityParameters &dens_param,
+                            const event_info &event) override;
   /**
    * Writes collisions to a tree defined by treename.
    * \param[in] action an Action object containing incoming, outgoing particles

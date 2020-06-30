@@ -111,12 +111,13 @@ ICOutput::ICOutput(const bf::path &path, const std::string &name,
 
 ICOutput::~ICOutput() {}
 
-void ICOutput::at_eventstart(const Particles &, const int event_number) {
+void ICOutput::at_eventstart(const Particles &, const int event_number,
+                             const event_info &) {
   std::fprintf(file_.get(), "# event %i start\n", event_number + 1);
 }
 
 void ICOutput::at_eventend(const Particles &particles, const int event_number,
-                           double, bool) {
+                           const event_info &) {
   std::fprintf(file_.get(), "# event %i end\n", event_number + 1);
 
   // If the runtime is too short some particles might not yet have
@@ -131,7 +132,8 @@ void ICOutput::at_eventend(const Particles &particles, const int event_number,
 
 void ICOutput::at_intermediate_time(const Particles &,
                                     const std::unique_ptr<Clock> &,
-                                    const DensityParameters &) {
+                                    const DensityParameters &,
+                                    const event_info &) {
   // Dummy, but virtual function needs to be declared.
 }
 

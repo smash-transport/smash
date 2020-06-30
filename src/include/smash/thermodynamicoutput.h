@@ -54,7 +54,8 @@ class ThermodynamicOutput : public OutputInterface {
    *             that will be written to the header
    */
   void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+                     const int event_number,
+                     const event_info &event) override;
 
   /**
    *  only flushes the output the file
@@ -64,7 +65,7 @@ class ThermodynamicOutput : public OutputInterface {
    *  \param[in] empty_event Dummy, is just here to satisfy inheritance
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const event_info& event) override;
 
   /**
    *  Writes thermodynamics every fixed time interval. For configuring
@@ -76,7 +77,8 @@ class ThermodynamicOutput : public OutputInterface {
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
-                            const DensityParameters &dens_param) override;
+                            const DensityParameters &dens_param,
+                            const event_info& event) override;
 
   /**
    * Prints density along the specified line. Useful to make 1D plots of

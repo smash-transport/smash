@@ -199,7 +199,7 @@ class Experiment : public ExperimentBase {
    * according to selected modus, resets the clock and saves the initial
    * conserved quantities for subsequent sanity checks.
    */
-  void initialize_new_event();
+  void initialize_new_event(int event_number);
 
   /**
    * Runs the time evolution of an event with fixed-sized time steps or without
@@ -1389,7 +1389,7 @@ double calculate_mean_field_energy(
     const ExperimentParameters &parameters);
 
 template <typename Modus>
-void Experiment<Modus>::initialize_new_event() {
+void Experiment<Modus>::initialize_new_event(int event_number) {
   random::set_seed(seed_);
   logg[LExperiment].info() << "random number seed: " << seed_;
   /* Set seed for the next event. It has to be positive, so it can be entered
@@ -1483,6 +1483,22 @@ void Experiment<Modus>::initialize_new_event() {
       particles_, 0u, conserved_initial_, time_start_,
       parameters_.labclock->current_time(), E_mean_field,
       initial_mean_field_energy_);
+
+  const QuantumNumbers current_values(particles_);
+  double E_kinetic_total = current_values.momentum().x0();
+  double E_total = E_kinetic_total + E_mean_field;
+
+  event_info event_info_output {
+    modus_.impact_parameter(), modus_.length(),
+    parameters_.outputclock->current_time(),
+    E_kinetic_total, E_mean_field, E_total, parameters_.testparticles,
+    !projectile_target_interact_
+  };
+
+  // Output at event start
+  for (const auto &output : outputs_) {
+    output->at_eventstart(particles_, event_number, event_info_output);
+  }
 }
 
 template <typename Modus>
@@ -1898,6 +1914,17 @@ void Experiment<Modus>::intermediate_output() {
       parameters_.outputclock->current_time(), E_mean_field,
       initial_mean_field_energy_);
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
+
+  const QuantumNumbers current_values(particles_);
+  double E_kinetic_total = current_values.momentum().x0();
+  double E_total = E_kinetic_total + E_mean_field;
+
+  event_info event_info_output {
+    modus_.impact_parameter(), modus_.length(),
+    parameters_.outputclock->current_time(),
+    E_kinetic_total, E_mean_field, E_total, parameters_.testparticles,
+    !projectile_target_interact_
+  };
   // save evolution data
   if (!(modus_.is_box() && parameters_.outputclock->current_time() <
                                modus_.equilibration_time())) {
@@ -1908,7 +1935,7 @@ void Experiment<Modus>::intermediate_output() {
       }
 
       output->at_intermediate_time(particles_, parameters_.outputclock,
-                                   density_param_);
+                                   density_param_, event_info_output);
 
       // Thermodynamic output on the lattice versus time
       switch (dens_type_lattice_printout_) {
@@ -2110,9 +2137,18 @@ void Experiment<Modus>::final_output(const int evt_num) {
     }
   }
 
+  // Todo: compute energies
+  double E_kinetic_total = 0.0, E_mean_field = 0.0, E_total = 0.0;
+
+  event_info event_info_output {
+    modus_.impact_parameter(), modus_.length(),
+    parameters_.outputclock->current_time(),
+    E_kinetic_total, E_mean_field, E_total, parameters_.testparticles,
+    !projectile_target_interact_
+  };
+
   for (const auto &output : outputs_) {
-    output->at_eventend(particles_, evt_num, modus_.impact_parameter(),
-                        !projectile_target_interact_);
+    output->at_eventend(particles_, evt_num, event_info_output);
   }
 }
 
@@ -2123,7 +2159,7 @@ void Experiment<Modus>::run() {
     mainlog.info() << "Event " << j;
 
     // Sample initial particles, start clock, some printout and book-keeping
-    initialize_new_event();
+    initialize_new_event(j);
     /* In the ColliderModus, if the first collisions within the same nucleus are
      * forbidden, 'nucleon_has_interacted_', which records whether a nucleon has
      * collided with another nucleon, is initialized equal to false. If allowed,
@@ -2150,11 +2186,6 @@ void Experiment<Modus>::run() {
         beam_momentum_.emplace_back(FourVector(gamma * mass_beam, 0.0, 0.0,
                                                gamma * v_beam * mass_beam));
       }
-    }
-
-    // Output at event start
-    for (const auto &output : outputs_) {
-      output->at_eventstart(particles_, j);
     }
 
     run_time_evolution();

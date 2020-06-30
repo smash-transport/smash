@@ -45,21 +45,23 @@ class ICOutput : public OutputInterface {
    * Write event start line.
    * \param[in] event_number Number of the current event.
    */
-  void at_eventstart(const Particles &, const int event_number) override;
+  void at_eventstart(const Particles &, const int event_number,
+                     const event_info &) override;
 
   /**
    * Write event end line.
    * \param[in] particles Particles at end of event, expected to be empty
    * \param[in] event_number Number of the current event.
    */
-  void at_eventend(const Particles &particles, const int event_number, double,
-                   bool) override;
+  void at_eventend(const Particles &particles, const int event_number,
+                   const event_info &) override;
 
   /**
    * Unused, but needed since virtually declared in mother class.
    */
   void at_intermediate_time(const Particles &, const std::unique_ptr<Clock> &,
-                            const DensityParameters &) override;
+                            const DensityParameters &,
+                            const event_info &) override;
   /**
    * Write particle data at the hypersurface crossing point to the IC output.
    *

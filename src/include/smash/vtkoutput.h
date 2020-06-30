@@ -46,7 +46,8 @@ class VtkOutput : public OutputInterface {
    * \param event_number Number of the current event.
    */
   void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+                     const int event_number,
+                     const event_info &event) override;
 
   /**
    * Writes the final particle information list of an event to the VTK
@@ -60,7 +61,7 @@ class VtkOutput : public OutputInterface {
    *        collide.
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const event_info &event) override;
 
   /**
    * Writes out all current particles.
@@ -71,7 +72,8 @@ class VtkOutput : public OutputInterface {
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
-                            const DensityParameters &dens_param) override;
+                            const DensityParameters &dens_param,
+                            const event_info &event) override;
 
   /**
    * Prints the density lattice in VTK format on a grid.

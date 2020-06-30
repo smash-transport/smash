@@ -78,7 +78,8 @@ class OscarOutput : public OutputInterface {
    * \param[in] event_number Number of event.
    */
   void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+                     const int event_number,
+                     const event_info &) override;
 
   /**
    * Writes the final particle information of an event to the oscar output.
@@ -89,7 +90,7 @@ class OscarOutput : public OutputInterface {
    *            and the projectile.
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const event_info &) override;
 
   /**
    * Writes a interaction prefix line and a line for every incoming and
@@ -108,7 +109,8 @@ class OscarOutput : public OutputInterface {
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
-                            const DensityParameters &dens_param) override;
+                            const DensityParameters &dens_param,
+                            const event_info &) override;
 
  private:
   /**

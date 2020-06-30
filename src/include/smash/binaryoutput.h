@@ -151,7 +151,8 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * \param[in] event_number Unused, needed since inherited.
    */
   void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+                     const int event_number,
+                     const event_info& event) override;
 
   /**
    * Writes the final particle information list of an event to the binary
@@ -163,7 +164,7 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    *            and projectile
    */
   void at_eventend(const Particles &particles, const int32_t event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const event_info& event) override;
 
   /**
    * Writes an interaction block, including information about the incoming and
@@ -211,7 +212,8 @@ class BinaryOutputParticles : public BinaryOutputBase {
    * \param[in] event_number Unused, needed since inherited.
    */
   void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+                     const int event_number,
+                     const event_info &event) override;
 
   /**
    * Writes the final particle information of an event to the binary output.
@@ -222,7 +224,7 @@ class BinaryOutputParticles : public BinaryOutputBase {
    *            and projectile
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const event_info &event) override;
 
   /**
    * Writes particles at each time interval; fixed by option OUTPUT_INTERVAL.
@@ -232,7 +234,8 @@ class BinaryOutputParticles : public BinaryOutputBase {
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
-                            const DensityParameters &dens_param) override;
+                            const DensityParameters &dens_param,
+                            const event_info &event) override;
 
  private:
   /// Whether final- or initial-state particles should be written.
@@ -268,7 +271,7 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
    * Writes the initial particle information of an event to the binary output.
    * Function unused for IC output. Needed since inherited.
    */
-  void at_eventstart(const Particles &, const int) override;
+  void at_eventstart(const Particles &, const int, const event_info &) override;
 
   /**
    * Writes the final particle information of an event to the binary output.
@@ -279,7 +282,7 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
    *            and projectile
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const event_info &event) override;
 
   /**
    * Writes particles that are removed when crossing the hypersurface to the
