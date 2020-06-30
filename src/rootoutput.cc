@@ -207,7 +207,7 @@ RootOutput::~RootOutput() {
 
 void RootOutput::at_eventstart(const Particles &particles,
                                const int event_number,
-                               const event_info &event) {
+                               const EventInfo &event) {
   // save event number
   current_event_ = event_number;
 
@@ -231,7 +231,7 @@ void RootOutput::at_eventstart(const Particles &particles,
 void RootOutput::at_intermediate_time(const Particles &particles,
                                       const std::unique_ptr<Clock> &,
                                       const DensityParameters &,
-                                      const event_info &event) {
+                                      const EventInfo &event) {
   modus_l = event.modus_length;
   test_p = event.test_particles;
   current_t = event.current_time;
@@ -247,7 +247,7 @@ void RootOutput::at_intermediate_time(const Particles &particles,
 
 void RootOutput::at_eventend(const Particles &particles,
                              const int /*event_number*/,
-                             const event_info &event) {
+                             const EventInfo &event) {
   modus_l = event.modus_length;
   test_p = event.test_particles;
   current_t = event.current_time;

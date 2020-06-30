@@ -28,7 +28,7 @@ namespace smash {
  * event such as impact parameter, total potential energy, and similar
  * auxiliary info.
  */
-struct event_info {
+struct EventInfo {
  double impact_parameter;
  double modus_length;
  double current_time;
@@ -70,7 +70,7 @@ class OutputInterface {
    */
   virtual void at_eventstart(const Particles &particles,
                              const int event_number,
-                             const event_info& info) = 0;
+                             const EventInfo& info) = 0;
 
   /**
    * Output launched at event end. Event end is determined by maximal timestep
@@ -83,7 +83,7 @@ class OutputInterface {
    *            and the projectile.
    */
   virtual void at_eventend(const Particles &particles, const int event_number,
-                           const event_info& info) = 0;
+                           const EventInfo& info) = 0;
 
   /**
    * Called whenever an action modified one or more particles.
@@ -106,7 +106,7 @@ class OutputInterface {
   virtual void at_intermediate_time(const Particles &particles,
                                     const std::unique_ptr<Clock> &clock,
                                     const DensityParameters &dens_param,
-                                    const event_info& info) {
+                                    const EventInfo& info) {
     SMASH_UNUSED(particles);
     SMASH_UNUSED(clock);
     SMASH_UNUSED(dens_param);

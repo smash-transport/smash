@@ -169,20 +169,20 @@ ThermodynamicOutput::~ThermodynamicOutput() {}
 
 void ThermodynamicOutput::at_eventstart(const Particles & /*particles*/,
                                         const int event_number,
-                                        const event_info &) {
+                                        const EventInfo &) {
   std::fprintf(file_.get(), "# event %i\n", event_number);
 }
 
 void ThermodynamicOutput::at_eventend(const Particles & /*particles*/,
                                       const int /*event_number*/,
-                                      const event_info &) {
+                                      const EventInfo &) {
   std::fflush(file_.get());
 }
 
 void ThermodynamicOutput::at_intermediate_time(
     const Particles &particles, const std::unique_ptr<Clock> &clock,
     const DensityParameters &dens_param,
-    const event_info &) {
+    const EventInfo &) {
   std::fprintf(file_.get(), "%6.2f ", clock->current_time());
   constexpr bool compute_gradient = false;
   if (out_par_.td_rho_eckart) {

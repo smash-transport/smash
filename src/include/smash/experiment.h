@@ -1488,7 +1488,7 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
   double E_kinetic_total = current_values.momentum().x0();
   double E_total = E_kinetic_total + E_mean_field;
 
-  event_info event_info_output {
+  EventInfo EventInfo_output {
     modus_.impact_parameter(), modus_.length(),
     parameters_.outputclock->current_time(),
     E_kinetic_total, E_mean_field, E_total, parameters_.testparticles,
@@ -1497,7 +1497,7 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
 
   // Output at event start
   for (const auto &output : outputs_) {
-    output->at_eventstart(particles_, event_number, event_info_output);
+    output->at_eventstart(particles_, event_number, EventInfo_output);
   }
 }
 
@@ -1919,7 +1919,7 @@ void Experiment<Modus>::intermediate_output() {
   double E_kinetic_total = current_values.momentum().x0();
   double E_total = E_kinetic_total + E_mean_field;
 
-  event_info event_info_output {
+  EventInfo EventInfo_output {
     modus_.impact_parameter(), modus_.length(),
     parameters_.outputclock->current_time(),
     E_kinetic_total, E_mean_field, E_total, parameters_.testparticles,
@@ -1935,7 +1935,7 @@ void Experiment<Modus>::intermediate_output() {
       }
 
       output->at_intermediate_time(particles_, parameters_.outputclock,
-                                   density_param_, event_info_output);
+                                   density_param_, EventInfo_output);
 
       // Thermodynamic output on the lattice versus time
       switch (dens_type_lattice_printout_) {
@@ -2140,7 +2140,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
   // Todo: compute energies
   double E_kinetic_total = 0.0, E_mean_field = 0.0, E_total = 0.0;
 
-  event_info event_info_output {
+  EventInfo EventInfo_output {
     modus_.impact_parameter(), modus_.length(),
     parameters_.outputclock->current_time(),
     E_kinetic_total, E_mean_field, E_total, parameters_.testparticles,
@@ -2148,7 +2148,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
   };
 
   for (const auto &output : outputs_) {
-    output->at_eventend(particles_, evt_num, event_info_output);
+    output->at_eventend(particles_, evt_num, EventInfo_output);
   }
 }
 
