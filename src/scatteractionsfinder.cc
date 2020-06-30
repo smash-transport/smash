@@ -425,14 +425,8 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
     return nullptr;
   }
 
-  /* Could be an optimisation for later to already check here at the beginning
-   * if collision with plist is possible. */
-
-  if (testparticles_ != 1) {
-    std::stringstream err;
-    err << "Multi-particle reactions do not scale with testparticles. Use 1.";
-    throw std::runtime_error(err.str());
-  }
+  /* Optimisation for later: Already check here at the beginning
+   * if collision with plist is possible before constructing actions. */
 
   // 1. Determine time of collision.
   const double time_until_collision = dt * random::uniform(0., 1.);
@@ -444,8 +438,11 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
   // 3. Add possible final states (dt and gcell_vol for probability calculation)
   act->add_possible_reactions(dt, gcell_vol, three_to_one_);
 
-  // 4. Return total collision probability
-  const double prob = act->get_total_weight();
+  /* 4. Return total collision probability
+   *    Scales with 1 over the number of testpartciles to the power of the
+   *    number of incoming particles - 1) */
+  const double prob =
+      act->get_total_weight() / std::pow(testparticles_, plist.size() - 1);
 
   // 5. Check that probability is smaller than one
   if (prob > 1.) {
