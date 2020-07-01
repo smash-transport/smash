@@ -429,11 +429,13 @@ void DecayModes::load_decaymodes(const std::string &input) {
         }
       }
       // Take angular momentum into account.
+      // FIXME: At the moment this is not correct for 3-body decays (see #517),
+      // therefore only check paritiy for 2-body decays below.
       if (L % 2 == 1) {
         parity = -parity;
       }
-      // Make sure the decay has the correct parity.
-      if (parity != mother_states[0]->parity()) {
+      // Make sure the decay has the correct parity for 2-body decays
+      if (decay_particles.size() == 2 && parity != mother_states[0]->parity()) {
         throw InvalidDecay(mother_states[0]->name() +
                            " decay mode violates parity conservation " +
                            "(line " + std::to_string(linenumber) + ": \"" +
