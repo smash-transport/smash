@@ -203,16 +203,15 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
   const PdgCode pdg_b = data_b.pdgcode();
   const PdgCode pdg_c = data_c.pdgcode();
 
-  return (pdg_a == pdg::pi_z && pdg_b == pdg::pi_z && pdg_c == pdg::eta) ||
-         (pdg_a == pdg::pi_z && pdg_b == pdg::eta && pdg_c == pdg::pi_z) ||
-         (pdg_a == pdg::eta && pdg_b == pdg::pi_z && pdg_c == pdg::pi_z) ||
-
-         (pdg_a == pdg::eta && pdg_b == pdg::pi_m && pdg_c == pdg::pi_p) ||
-         (pdg_a == pdg::pi_m && pdg_b == pdg::pi_p && pdg_c == pdg::eta) ||
-         (pdg_a == pdg::eta && pdg_b == pdg::pi_p && pdg_c == pdg::pi_m) ||
-         (pdg_a == pdg::eta && pdg_b == pdg::pi_m && pdg_c == pdg::pi_p) ||
-         (pdg_a == pdg::pi_p && pdg_b == pdg::eta && pdg_c == pdg::pi_m) ||
-         (pdg_a == pdg::pi_m && pdg_b == pdg::eta && pdg_c == pdg::pi_p);
+  return (pdg_a == pdg::pi_z && pdg_b == pdg::pi_z && pdg_c == pdg::eta)  ||
+         (pdg_a == pdg::pi_z && pdg_b == pdg::eta  && pdg_c == pdg::pi_z) ||
+         (pdg_a == pdg::eta  && pdg_b == pdg::pi_z && pdg_c == pdg::pi_z) ||
+         (pdg_a == pdg::eta  && pdg_b == pdg::pi_m && pdg_c == pdg::pi_p) ||
+         (pdg_a == pdg::eta  && pdg_b == pdg::pi_p && pdg_c == pdg::pi_m) ||
+         (pdg_a == pdg::pi_m && pdg_b == pdg::pi_p && pdg_c == pdg::eta)  ||
+         (pdg_a == pdg::pi_m && pdg_b == pdg::eta  && pdg_c == pdg::pi_p) ||
+         (pdg_a == pdg::pi_p && pdg_b == pdg::pi_m && pdg_c == pdg::eta)  ||
+         (pdg_a == pdg::pi_p && pdg_b == pdg::eta  && pdg_c == pdg::pi_m);
 }
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
