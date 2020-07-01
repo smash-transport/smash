@@ -154,15 +154,28 @@ double ScatterActionMulti::probability_three_meson_to_one(
       sqrts, {&incoming_particles()[0].type(), &incoming_particles()[1].type(),
               &incoming_particles()[2].type()});
 
-  const int spin_deg = type_out.spin_degeneracy();
+  // Spin degneracy of outgoing particles (incoming p. assumed to have no spin)
+  const int spin_deg_out = type_out.spin_degeneracy();
   const double I_3 = calculate_I3(sqrts);
   const double ph_sp_3 =
       1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
 
   const double spec_f_val = type_out.spectral_function(sqrts);
 
+  // Symmetry factor for incoming particles
+  int sym_factor_in = 1;
+  if (incoming_particles()[0].type() == incoming_particles()[1].type() &&
+      incoming_particles()[1].type() == incoming_particles()[2].type()) {
+    sym_factor_in = 6;  // 3!
+  } else if (incoming_particles()[0].type() == incoming_particles()[1].type() ||
+             incoming_particles()[1].type() == incoming_particles()[2].type() ||
+             incoming_particles()[2].type() == incoming_particles()[0].type()) {
+    sym_factor_in = 2;  // 2!
+  }
+
   return dt / (gcell_vol * gcell_vol) * M_PI / (4. * e1 * e2 * e3) *
-         gamma_decay / ph_sp_3 * spec_f_val * std::pow(hbarc, 5.0) * spin_deg;
+         gamma_decay / ph_sp_3 * spec_f_val * std::pow(hbarc, 5.0) *
+         spin_deg_out * sym_factor_in;
 }
 
 void ScatterActionMulti::annihilation() {
@@ -203,15 +216,15 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
   const PdgCode pdg_b = data_b.pdgcode();
   const PdgCode pdg_c = data_c.pdgcode();
 
-  return (pdg_a == pdg::pi_z && pdg_b == pdg::pi_z && pdg_c == pdg::eta)  ||
-         (pdg_a == pdg::pi_z && pdg_b == pdg::eta  && pdg_c == pdg::pi_z) ||
-         (pdg_a == pdg::eta  && pdg_b == pdg::pi_z && pdg_c == pdg::pi_z) ||
-         (pdg_a == pdg::eta  && pdg_b == pdg::pi_m && pdg_c == pdg::pi_p) ||
-         (pdg_a == pdg::eta  && pdg_b == pdg::pi_p && pdg_c == pdg::pi_m) ||
-         (pdg_a == pdg::pi_m && pdg_b == pdg::pi_p && pdg_c == pdg::eta)  ||
-         (pdg_a == pdg::pi_m && pdg_b == pdg::eta  && pdg_c == pdg::pi_p) ||
-         (pdg_a == pdg::pi_p && pdg_b == pdg::pi_m && pdg_c == pdg::eta)  ||
-         (pdg_a == pdg::pi_p && pdg_b == pdg::eta  && pdg_c == pdg::pi_m);
+  return (pdg_a == pdg::pi_z && pdg_b == pdg::pi_z && pdg_c == pdg::eta) ||
+         (pdg_a == pdg::pi_z && pdg_b == pdg::eta && pdg_c == pdg::pi_z) ||
+         (pdg_a == pdg::eta && pdg_b == pdg::pi_z && pdg_c == pdg::pi_z) ||
+         (pdg_a == pdg::eta && pdg_b == pdg::pi_m && pdg_c == pdg::pi_p) ||
+         (pdg_a == pdg::eta && pdg_b == pdg::pi_p && pdg_c == pdg::pi_m) ||
+         (pdg_a == pdg::pi_m && pdg_b == pdg::pi_p && pdg_c == pdg::eta) ||
+         (pdg_a == pdg::pi_m && pdg_b == pdg::eta && pdg_c == pdg::pi_p) ||
+         (pdg_a == pdg::pi_p && pdg_b == pdg::pi_m && pdg_c == pdg::eta) ||
+         (pdg_a == pdg::pi_p && pdg_b == pdg::eta && pdg_c == pdg::pi_m);
 }
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
