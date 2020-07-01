@@ -53,13 +53,13 @@ void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos &eos) {
     }
     const double gamma_inv = std::sqrt(1.0 - v_.sqr());
     EosTable::table_element tabulated;
-    eos.from_table(tabulated, e_, gamma_inv * nb_);
+    eos.from_table(tabulated, e_, gamma_inv * nb_, 0.0);
     if (!eos.is_tabulated() || tabulated.p < 0.0) {
-      auto T_mub_mus = eos.solve_eos(e_, gamma_inv * nb_, gamma_inv * ns_);
+      auto T_mub_mus = eos.solve_eos(e_, gamma_inv * nb_, gamma_inv * ns_, 0.0);
       T_ = T_mub_mus[0];
       mub_ = T_mub_mus[1];
       mus_ = T_mub_mus[2];
-      p_ = HadronGasEos::pressure(T_, mub_, mus_);
+      p_ = HadronGasEos::pressure(T_, mub_, mus_, 0.0);
     } else {
       p_ = tabulated.p;
       T_ = tabulated.T;
@@ -82,10 +82,10 @@ void ThermLatticeNode::set_rest_frame_quantities(double T0, double mub0,
   mub_ = mub0;
   mus_ = mus0;
   v_ = v0;
-  e_ = HadronGasEos::energy_density(T_, mub_, mus_);
-  p_ = HadronGasEos::pressure(T_, mub_, mus_);
-  nb_ = HadronGasEos::net_baryon_density(T_, mub_, mus_);
-  ns_ = HadronGasEos::net_strange_density(T_, mub_, mus_);
+  e_ = HadronGasEos::energy_density(T_, mub_, mus_, 0.0);
+  p_ = HadronGasEos::pressure(T_, mub_, mus_, 0.0);
+  nb_ = HadronGasEos::net_baryon_density(T_, mub_, mus_, 0.0);
+  ns_ = HadronGasEos::net_strange_density(T_, mub_, mus_, 0.0);
 }
 
 std::ostream &operator<<(std::ostream &out, const ThermLatticeNode &node) {
@@ -253,7 +253,7 @@ void GrandCanThermalizer::sample_in_random_cell_BF_algo(ParticleList &plist,
     const double N_this_cell =
         lat_cell_volume_ * gamma *
         HadronGasEos::partial_density(*eos_typelist_[type_index], cell.T(),
-                                      cell.mub(), cell.mus());
+                                      cell.mub(), cell.mus(), 0.0);
     N_in_cells_.push_back(N_this_cell);
     N_total_in_cells_ += N_this_cell;
   }
@@ -298,7 +298,7 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
       // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
       mult_sort_[i] += lat_cell_volume_ * gamma * ntest *
                        HadronGasEos::partial_density(
-                           *eos_typelist_[i], cell.T(), cell.mub(), cell.mus());
+                           *eos_typelist_[i], cell.T(), cell.mub(), cell.mus(), 0.0);
     }
   }
 

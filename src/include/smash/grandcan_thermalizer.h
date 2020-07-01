@@ -338,7 +338,7 @@ class GrandCanThermalizer {
           // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
           N_tot += lat_cell_volume_ * gamma *
                    HadronGasEos::partial_density(*i, cell.T(), cell.mub(),
-                                                 cell.mus());
+                                                 cell.mus(), 0.0);
         }
       }
       N_in_cells_.push_back(N_tot);
@@ -382,7 +382,7 @@ class GrandCanThermalizer {
       }
       N_sum +=
           lat_cell_volume_ * gamma *
-          HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
+          HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus(), 0.0);
       if (N_sum >= r) {
         type_to_sample = i;
         break;
