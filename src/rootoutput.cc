@@ -17,6 +17,7 @@
 
 namespace smash {
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
+static constexpr int LOutput = LogArea::Output::id;
 
 /*!\Userguide
  * \page format_root ROOT Format
@@ -303,10 +304,24 @@ void RootOutput::particles_to_tree(T &particles) {
 
   tcounter = output_counter_;
   ev = current_event_;
+  bool exceeded_buffer_message = true;
 
   for (const auto &p : particles) {
     // Buffer full - flush to tree, else fill with particles
     if (i >= max_buffer_size_) {
+      if ( exceeded_buffer_message ){
+	logg[LOutput].warn()
+	  << "\nThe number of particles N = "
+	  << particles.size()
+	  << " exceeds the maximum buffer size B = "
+	  << max_buffer_size_
+	  << ".\nceil(N/B) = "
+	  << ceil( 1.0 * particles.size()/(1.0 *max_buffer_size_) )
+	  << " separate ROOT Tree entries will be created at this output."
+	  << "\nMaximum buffer size (max_buffer_size_) can be changed in "
+	  << "rootoutput.h\n\n";
+	exceeded_buffer_message = false;
+      }
       npart = max_buffer_size_;
       i = 0;
       particles_tree_->Fill();
