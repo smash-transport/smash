@@ -192,7 +192,7 @@ class RootOutput : public OutputInterface {
    * Maximal buffer size.
    * When the number of particles N exceeds the buffer size B, data is flushed
    * to the ROOT file every B particles. This creates ceil(N/B) entries in the
-   * ROOT Tree at every output. 
+   * ROOT Tree at every output.
    */
   static const int max_buffer_size_ = 500000;
 
