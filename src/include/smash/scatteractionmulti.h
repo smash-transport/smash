@@ -103,7 +103,7 @@ class ScatterActionMulti : public Action {
   void annihilation();
 
   /**
-   * Calculate the probability for a 3pi-to-1 reaction according to the
+   * Calculate the probability for a 3m-to-1 reaction according to the
    * stochastic collision criterion (e.g. \iref{Xu:2004mz} (Sec.IIB)).
    *
    * The formula for the probablilty is not taken from a reference, but derived
@@ -116,17 +116,32 @@ class ScatterActionMulti : public Action {
    * where \f$\Phi_3\f$ represents the 3-body phase space:
    * \f[\Phi_3 = \frac{1}{(2\pi)^3)}\frac{1}{16M^2}I_3.\f]
    *
-   * The defintion for the integral \f$I_3\f$ can be found in the PDG. Currently
-   * \f$I_3\f$ is fixed for the reaction  \f$3\pi\rightarrow\omega\f$ with the
-   * mass of the \f$\omega\f$ approximated to be at the pole.
+   * The defintion for the integral \f$I_3\f$ is given in the documentation of
+   * calculate_I3().
    *
    * \param[in] type_out type of outgoing particle
    * \param[in] dt timestep size
    * \param[in] gcell_vol grid cell volume
    * \return probabilty for 3pi-to-1 reaction
    */
-  double probability_three_pi_to_one(const ParticleType& type_out, double dt,
-                                     const double gcell_vol) const;
+  double probability_three_meson_to_one(const ParticleType& type_out, double dt,
+                                        const double gcell_vol) const;
+
+  /**
+   * Calculate the integration necessary for the three-body phase space. The
+   * defintion for the integral is given by
+   * \f[I_3 = \int dm^2_{23}dm^2_{12} =
+   * \int^{(M-m_3)^2}_{(m_1+m_2)^2}[m^2_{23, max}- m^2_{23, min}]dm^2_{12}\f]
+   * see PDG book (chapter Kinematics) for defintions of variables. The numbered
+   * masses reference the incoming particles and \f$M\f$ the mass of the
+   * outgoing particles in this case, since we are looking at the backreaction
+   * to the 1-to-3 decay.
+   *
+   * \param[in] sqrts center of mass energy of incoming particles
+   *                  (= mass of outgoing particle)
+   * \return result of integral
+   */
+  double calculate_I3(const double sqrts) const;
 
   /**
    * Check wether the three incoming particles are π⁺,π⁻,π⁰ in any order.

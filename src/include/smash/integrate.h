@@ -180,7 +180,7 @@ class Integrator {
  *
  * Example:
  * \code
- * Integrator integrate;
+ * Integrator1dMonte integrate;
  * const auto result = integrate(0.1, 0.9,
  *                               [](double x) { return x * x; });
  * \endcode
@@ -280,7 +280,7 @@ class Integrator1dMonte {
  *
  * Example:
  * \code
- * Integrator integrate;
+ * Integrator2d integrate;
  * const auto result = integrate(0.1, 0.9, 0., 0.5,
  *                               [](double x, double y) { return x * y; });
  * \endcode
