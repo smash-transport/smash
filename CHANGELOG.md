@@ -21,7 +21,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Added
 * HepMC3 output
-* 3-to-1 mesonic reactions via the stochastic collision criterion
+* 3-to-1 reactions via the stochastic collision criterion
 
 ### Fixed
 * Consider cross section scaling factor of incoming particles for photon production. This factor was previously neglected, resulting in exploding weights and overestimated photon production.
