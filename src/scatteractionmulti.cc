@@ -166,11 +166,11 @@ double ScatterActionMulti::probability_three_meson_to_one(
   int sym_factor_in = 1;
   if (incoming_particles()[0].type() == incoming_particles()[1].type() &&
       incoming_particles()[1].type() == incoming_particles()[2].type()) {
-    sym_factor_in = 6;  // 3!
+    sym_factor_in = 6;  // 3 factorial
   } else if (incoming_particles()[0].type() == incoming_particles()[1].type() ||
              incoming_particles()[1].type() == incoming_particles()[2].type() ||
              incoming_particles()[2].type() == incoming_particles()[0].type()) {
-    sym_factor_in = 2;  // 2!
+    sym_factor_in = 2;  // 2 factorial
   }
 
   return dt / (gcell_vol * gcell_vol) * M_PI / (4. * e1 * e2 * e3) *
@@ -219,6 +219,7 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
   return (pdg_a == pdg::pi_z && pdg_b == pdg::pi_z && pdg_c == pdg::eta) ||
          (pdg_a == pdg::pi_z && pdg_b == pdg::eta && pdg_c == pdg::pi_z) ||
          (pdg_a == pdg::eta && pdg_b == pdg::pi_z && pdg_c == pdg::pi_z) ||
+
          (pdg_a == pdg::eta && pdg_b == pdg::pi_m && pdg_c == pdg::pi_p) ||
          (pdg_a == pdg::eta && pdg_b == pdg::pi_p && pdg_c == pdg::pi_m) ||
          (pdg_a == pdg::pi_m && pdg_b == pdg::pi_p && pdg_c == pdg::eta) ||
