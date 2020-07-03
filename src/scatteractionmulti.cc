@@ -54,7 +54,8 @@ void ScatterActionMulti::add_possible_reactions(double dt,
     const ParticleTypePtr type_omega = ParticleType::try_find(0x223);
     if (type_omega) {
       add_reaction(make_unique<CollisionBranch>(
-          *type_omega, probability_three_meson_to_one(*type_omega, dt, gcell_vol),
+          *type_omega,
+          probability_three_meson_to_one(*type_omega, dt, gcell_vol),
           ProcessType::MultiParticleThreePionsToOmega));
     }
   }
