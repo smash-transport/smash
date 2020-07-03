@@ -336,7 +336,7 @@ class GrandCanThermalizer {
       for (ParticleTypePtr i : eos_typelist_) {
         if (condition(i->strangeness(), i->baryon_number(), i->charge())) {
           // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
-          N_tot += cell_volume_ * gamma *
+          N_tot += lat_cell_volume_ * gamma *
                    HadronGasEos::partial_density(*i, cell.T(), cell.mub(),
                                                  cell.mus());
         }
@@ -381,7 +381,7 @@ class GrandCanThermalizer {
         continue;
       }
       N_sum +=
-          cell_volume_ * gamma *
+          lat_cell_volume_ * gamma *
           HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
       if (N_sum >= r) {
         type_to_sample = i;
@@ -508,10 +508,10 @@ class GrandCanThermalizer {
   /// Total number of particles over all cells in thermalization region
   double N_total_in_cells_;
   /**
-   * Volume of a single cell, necessary to convert thermal densities to
+   * Volume of a single lattice cell, necessary to convert thermal densities to
    * actual particle numbers
    */
-  double cell_volume_;
+  double lat_cell_volume_;
   /// Critical energy density above which cells are thermalized
   const double e_crit_;
   /// Starting time of the simulation

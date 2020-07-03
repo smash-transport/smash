@@ -114,7 +114,7 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
   lat_ = make_unique<RectangularLattice<ThermLatticeNode>>(
       lat_sizes, n_cells, origin, periodicity, upd);
   const std::array<double, 3> abc = lat_->cell_sizes();
-  cell_volume_ = abc[0] * abc[1] * abc[2];
+  lat_cell_volume_ = abc[0] * abc[1] * abc[2];
   cells_to_sample_.resize(50000);
   mult_sort_.resize(N_sorts_);
   mult_int_.resize(N_sorts_);
@@ -251,7 +251,7 @@ void GrandCanThermalizer::sample_in_random_cell_BF_algo(ParticleList &plist,
     const ThermLatticeNode cell = (*lat_)[cell_index];
     const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
     const double N_this_cell =
-        cell_volume_ * gamma *
+        lat_cell_volume_ * gamma *
         HadronGasEos::partial_density(*eos_typelist_[type_index], cell.T(),
                                       cell.mub(), cell.mus());
     N_in_cells_.push_back(N_this_cell);
@@ -296,7 +296,7 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
     const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
     for (size_t i = 0; i < N_sorts_; i++) {
       // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
-      mult_sort_[i] += cell_volume_ * gamma * ntest *
+      mult_sort_[i] += lat_cell_volume_ * gamma * ntest *
                        HadronGasEos::partial_density(
                            *eos_typelist_[i], cell.T(), cell.mub(), cell.mus());
     }
@@ -538,7 +538,7 @@ void GrandCanThermalizer::thermalize(const Particles &particles, double time,
   logg[LGrandcanThermalizer].info(
       "Number of cells in the thermalization region = ",
       cells_to_sample_.size(),
-      ", its total volume [fm^3]: ", cells_to_sample_.size() * cell_volume_,
+      ", its total volume [fm^3]: ", cells_to_sample_.size() * lat_cell_volume_,
       ", in % of lattice: ",
       100.0 * cells_to_sample_.size() / lattice_total_cells);
 
@@ -616,8 +616,8 @@ void GrandCanThermalizer::print_statistics(const Clock &clock) const {
             << "nb[fm^-3], ns[fm^-3]: " << in_therm_reg.T << " "
             << in_therm_reg.mub << " " << in_therm_reg.mus << " "
             << in_therm_reg.nb << " " << in_therm_reg.ns << std::endl;
-  std::cout << "Volume with e > e_crit [fm^3]: " << cell_volume_ * node_counter
-            << std::endl;
+  std::cout << "Volume with e > e_crit [fm^3]: "
+            << lat_cell_volume_ * node_counter << std::endl;
 }
 
 }  // namespace smash

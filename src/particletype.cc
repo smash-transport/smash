@@ -538,8 +538,8 @@ DecayBranchList ParticleType::get_partial_widths(const FourVector p,
   return partial;
 }
 
-double ParticleType::get_partial_width(const double m, const ParticleType &t_a,
-                                       const ParticleType &t_b) const {
+double ParticleType::get_partial_width(const double m,
+                                       const ParticleTypePtrList dlist) const {
   /* Get all decay modes. */
   const auto &decaymodes = decay_modes().decay_mode_list();
 
@@ -547,8 +547,7 @@ double ParticleType::get_partial_width(const double m, const ParticleType &t_a,
   double w = 0.;
   for (const auto &mode : decaymodes) {
     double partial_width_at_pole = width_at_pole() * mode->weight();
-    const ParticleTypePtrList l = {&t_a, &t_b};
-    if (mode->type().has_particles(l)) {
+    if (mode->type().has_particles(dlist)) {
       w += mode->type().width(mass(), partial_width_at_pole, m);
     }
   }

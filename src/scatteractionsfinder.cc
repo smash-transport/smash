@@ -24,6 +24,7 @@
 #include "smash/macros.h"
 #include "smash/particles.h"
 #include "smash/scatteraction.h"
+#include "smash/scatteractionmulti.h"
 #include "smash/scatteractionphoton.h"
 #include "smash/stringfunctions.h"
 
@@ -41,6 +42,14 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * 106, 391 (1993).
  * \li \key "Covariant" - Covariant collision criterion see e.g. T. Hirano and
  * Y. Nara, PTEP Issue 1, 16 (2012).
+ *
+ * \key Include_Stochastic_3to1 (bool, optional, default = \key false) \n
+ * Enable 3 --> 1 processes via the stochastic criterion. This option can only
+ * be used with the \key Collision_Criterion set to \key "Stochastic".
+ * Implemented 3 --> 1 processes: \f$\pi^+\pi^-\pi^0\rightarrow\omega\f$. Note
+ * that detailed balance is conserved. So if the reverse 1 --> 3 decay process
+ * is e.g. not part of the decay modes (in decaymodes.txt), the 3 --> 1 process
+ * will also not happen.
  *
  * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
  * If a non-negative value is given, it will override the parametrized
@@ -241,6 +250,8 @@ ScatterActionsFinder::ScatterActionsFinder(
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(parameters.two_to_one),
       incl_set_(parameters.included_2to2),
+      three_to_one_(
+          config.take({"Collision_Term", "Include_Stochastic_3to1"}, false)),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
       use_AQM_(parameters.use_AQM),
@@ -256,6 +267,12 @@ ScatterActionsFinder::ScatterActionsFinder(
         "Constant elastic isotropic cross-section mode:", " using ",
         elastic_parameter_, " mb as maximal cross-section.");
   }
+  if (three_to_one_ && coll_crit_ != CollisionCriterion::Stochastic) {
+    throw std::invalid_argument(
+        "3-to-1 reactions are only possible with the stochastic collision "
+        "criterion. Change your config accordingly.");
+  }
+
   if (strings_switch_) {
     auto subconfig = config["Collision_Term"]["String_Parameters"];
     string_process_interface_ = make_unique<StringProcess>(
@@ -279,9 +296,10 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
 }
 
-ActionPtr ScatterActionsFinder::check_collision(
+ActionPtr ScatterActionsFinder::check_collision_two_part(
     const ParticleData& data_a, const ParticleData& data_b, double dt,
-    const std::vector<FourVector>& beam_momentum, const double cell_vol) const {
+    const std::vector<FourVector>& beam_momentum,
+    const double gcell_vol) const {
   /* If the two particles
    * 1) belong to the two colliding nuclei
    * 2) are within the same nucleus
@@ -298,7 +316,8 @@ ActionPtr ScatterActionsFinder::check_collision(
   }
 
   // No grid or search in cell means no collision for stochastic criterion
-  if (coll_crit_ == CollisionCriterion::Stochastic && cell_vol < really_small) {
+  if (coll_crit_ == CollisionCriterion::Stochastic &&
+      gcell_vol < really_small) {
     return nullptr;
   }
 
@@ -350,12 +369,12 @@ ActionPtr ScatterActionsFinder::check_collision(
     const double v_rel = act->relative_velocity();
     /* Collision probability for 2-particle scattering, see e.g.
      * \iref{Xu:2004mz}, eq. (11) */
-    const double prob = xs * v_rel * dt / cell_vol;
+    const double prob = xs * v_rel * dt / gcell_vol;
 
     logg[LFindScatter].debug(
-        "Stochastic collison criterion parameters:\nprob = ", prob,
-        ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
-        ", cell_vol = ", cell_vol, ", testparticles = ", testparticles_);
+        "Stochastic collison criterion parameters (2-particles):\nprob = ",
+        prob, ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
+        ", gcell_vol = ", gcell_vol, ", testparticles = ", testparticles_);
 
     if (prob > 1.) {
       std::stringstream err;
@@ -399,21 +418,78 @@ ActionPtr ScatterActionsFinder::check_collision(
   return std::move(act);
 }
 
+ActionPtr ScatterActionsFinder::check_collision_multi_part(
+    const ParticleList& plist, double dt, const double gcell_vol) const {
+  // No grid or search in cell
+  if (gcell_vol < really_small) {
+    return nullptr;
+  }
+
+  /* Optimisation for later: Already check here at the beginning
+   * if collision with plist is possible before constructing actions. */
+
+  // 1. Determine time of collision.
+  const double time_until_collision = dt * random::uniform(0., 1.);
+
+  // 2. Create ScatterAction object.
+  ScatterActionMultiPtr act =
+      make_unique<ScatterActionMulti>(plist, time_until_collision);
+
+  // 3. Add possible final states (dt and gcell_vol for probability calculation)
+  act->add_possible_reactions(dt, gcell_vol, three_to_one_);
+
+  /* 4. Return total collision probability
+   *    Scales with 1 over the number of testpartciles to the power of the
+   *    number of incoming particles - 1) */
+  const double prob =
+      act->get_total_weight() / std::pow(testparticles_, plist.size() - 1);
+
+  // 5. Check that probability is smaller than one
+  if (prob > 1.) {
+    std::stringstream err;
+    err << "Probability larger than 1 for stochastic rates. ( prob = " << prob
+        << " )\nUse smaller timesteps.";
+    throw std::runtime_error(err.str());
+  }
+
+  // 6. Perform probability decisions
+  double random_no = random::uniform(0., 1.);
+  if (random_no > prob) {
+    return nullptr;
+  }
+
+  return std::move(act);
+}
+
 ActionList ScatterActionsFinder::find_actions_in_cell(
-    const ParticleList& search_list, double dt, const double cell_vol,
+    const ParticleList& search_list, double dt, const double gcell_vol,
     const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
   for (const ParticleData& p1 : search_list) {
     for (const ParticleData& p2 : search_list) {
+      // Check for 2 particle scattering
       if (p1.id() < p2.id()) {
-        // Check if a collision is possible.
-        ActionPtr act = check_collision(p1, p2, dt, beam_momentum, cell_vol);
+        ActionPtr act =
+            check_collision_two_part(p1, p2, dt, beam_momentum, gcell_vol);
         if (act) {
           actions.push_back(std::move(act));
         }
       }
+      if (three_to_one_) {
+        // Also, check for 3 particle scatterings with stochastic criterion
+        for (const ParticleData& p3 : search_list) {
+          if (p1.id() < p2.id() && p2.id() < p3.id()) {
+            ActionPtr act =
+                check_collision_multi_part({p1, p2, p3}, dt, gcell_vol);
+            if (act) {
+              actions.push_back(std::move(act));
+            }
+          }
+        }
+      }
     }
   }
+
   return actions;
 }
 
@@ -429,7 +505,7 @@ ActionList ScatterActionsFinder::find_actions_with_neighbors(
     for (const ParticleData& p2 : neighbors_list) {
       assert(p1.id() != p2.id());
       // Check if a collision is possible.
-      ActionPtr act = check_collision(p1, p2, dt, beam_momentum);
+      ActionPtr act = check_collision_two_part(p1, p2, dt, beam_momentum);
       if (act) {
         actions.push_back(std::move(act));
       }
@@ -457,7 +533,7 @@ ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     }
     for (const ParticleData& p1 : search_list) {
       // Check if a collision is possible.
-      ActionPtr act = check_collision(p1, p2, dt, beam_momentum);
+      ActionPtr act = check_collision_two_part(p1, p2, dt, beam_momentum);
       if (act) {
         actions.push_back(std::move(act));
       }

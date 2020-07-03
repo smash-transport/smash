@@ -66,7 +66,8 @@ std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch) {
   } else if (ptype == ProcessType::StringHard) {
     os << "hard";
   } else if (ptype == ProcessType::TwoToOne || ptype == ProcessType::TwoToTwo ||
-             ptype == ProcessType::Elastic || ptype == ProcessType::Decay) {
+             ptype == ProcessType::Elastic || ptype == ProcessType::Decay ||
+             ptype == ProcessType::MultiParticleThreePionsToOmega) {
     ParticleTypePtrList ptype_list = cbranch.particle_types();
     /* Sorting ensures unique name for every channel
      * It avoids duplicates, such as Δ⁰Δ⁺⁺ and Δ⁺⁺Δ⁰,
@@ -114,6 +115,9 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
       break;
     case ProcessType::HyperSurfaceCrossing:
       os << "Hypersurface crossing";
+      break;
+    case ProcessType::MultiParticleThreePionsToOmega:
+      os << "3PiToOmega";
       break;
     default:
       os.setstate(std::ios_base::failbit);

@@ -151,6 +151,31 @@ FourVector Action::total_momentum_of_outgoing_particles() const {
          potentials.second * scale_I3;
 }
 
+void Action::assign_formation_time_to_outgoing_particles() {
+  /* Find incoming particle with largest formation time i.e. the last formed
+   * incoming particle. */
+  auto last_formed_in_part =
+      std::max_element(incoming_particles_.begin(), incoming_particles_.end(),
+                       [](const ParticleData &a, const ParticleData &b) {
+                         return a.formation_time() < b.formation_time();
+                       });
+
+  const double form_time_begin = last_formed_in_part->begin_formation_time();
+  const double sc = last_formed_in_part->initial_xsec_scaling_factor();
+
+  if (last_formed_in_part->formation_time() > time_of_execution_) {
+    for (ParticleData &new_particle : outgoing_particles_) {
+      new_particle.set_slow_formation_times(
+          form_time_begin, last_formed_in_part->formation_time());
+      new_particle.set_cross_section_scaling_factor(sc);
+    }
+  } else {
+    for (ParticleData &new_particle : outgoing_particles_) {
+      new_particle.set_formation_time(time_of_execution_);
+    }
+  }
+}
+
 std::pair<double, double> Action::sample_masses(
     const double kinetic_energy_cm) const {
   const ParticleType &t_a = outgoing_particles_[0].type();

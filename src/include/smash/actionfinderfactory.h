@@ -34,14 +34,14 @@ class ActionFinderInterface {
    * \param[in] search_list a list of particles where each pair needs to be
    *                  tested for possible interaction
    * \param[in] dt duration of the current time step [fm]
-   * \param[in] cell_vol volume of searched grid cell [fm^3]
+   * \param[in] gcell_vol volume of searched grid cell [fm^3]
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
    * only necessary for frozen Fermi motion
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
   virtual ActionList find_actions_in_cell(
-      const ParticleList &search_list, double dt, const double cell_vol,
+      const ParticleList &search_list, double dt, const double gcell_vol,
       const std::vector<FourVector> &beam_momentum) const = 0;
   /**
    * Abstract function for finding actions, given two lists of particles,

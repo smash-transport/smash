@@ -157,13 +157,13 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *
    * \param[in] search_list A list of particles within one cell
    * \param[in] dt The maximum time interval at the current time step [fm]
-   * \param[in] cell_vol Volume of searched grid cell [fm^3]
+   * \param[in] gcell_vol Volume of searched grid cell [fm^3]
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
    * only necessary for frozen Fermi motion
    * \return A list of possible scatter actions
    */
   ActionList find_actions_in_cell(
-      const ParticleList &search_list, double dt, const double cell_vol,
+      const ParticleList &search_list, double dt, const double gcell_vol,
       const std::vector<FourVector> &beam_momentum) const override;
 
   /**
@@ -281,8 +281,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * Two criteria for the collision decision are supported: 1. The default
    * geometric criterion from UrQMD \iref{Bass:1998ca} (3.27). 2. A stochastic
    * collision criterion e.g. employed by BAMPS \iref{Xu:2004mz} (Sec.IIB).
-   * Note, the latter is currently only tested for a box with a fixed elastic
-   * cross section.
    *
    * More details on the stochastic collision criterion can be found here:
    * - P. Danielewicz and G. F. Bertsch, Nucl. Phys. A533, 712 (1991).
@@ -295,18 +293,36 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] dt Maximum time interval within which a collision can happen
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
    * only necessary for frozen Fermi motion
-   * \param[in] cell_vol (optional) volume of grid cell in which the collision
+   * \param[in] gcell_vol (optional) volume of grid cell in which the collision
    *                                is checked
    * \return A null pointer if no collision happens or an action which contains
    *         the information of the outgoing particles.
    *
-   * Note: cell_vol is optional, since only find_actions_in_cell has (and needs)
-   * this information for the stochastic collision criterion.
+   * Note: gcell_vol is optional, since only find_actions_in_cell has (and
+   * needs) this information for the stochastic collision criterion.
    */
-  ActionPtr check_collision(const ParticleData &data_a,
-                            const ParticleData &data_b, double dt,
-                            const std::vector<FourVector> &beam_momentum = {},
-                            const double cell_vol = 0.0) const;
+  ActionPtr check_collision_two_part(
+      const ParticleData &data_a, const ParticleData &data_b, double dt,
+      const std::vector<FourVector> &beam_momentum = {},
+      const double gcell_vol = 0.0) const;
+
+  /**
+   * Check for multiple i.e. more than 2 particles if a collision will happen in
+   * the next timestep and create a corresponding Action object in that case.
+   *
+   * This is only possible for the stochastic collision criterion e.g. employed
+   * by BAMPS \iref{Xu:2004mz} (Sec.IIB). Following the same general idea as for
+   * the 2-particle scatterings, probabilities for multi-particle scatterings
+   * can be derived.
+   *
+   * \param[in] plist List of incoming particles
+   * \param[in] dt Maximum time interval within which a collision can happen
+   * \param[in] gcell_vol volume of grid cell in which the collision is checked
+   * \return A null pointer if no collision happens or an action which contains
+   *         the information of the outgoing particles.
+   */
+  ActionPtr check_collision_multi_part(const ParticleList &plist, double dt,
+                                       const double gcell_vol) const;
 
   /// Class that deals with strings, interfacing Pythia.
   std::unique_ptr<StringProcess> string_process_interface_;
@@ -322,6 +338,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool two_to_one_;
   /// List of included 2<->2 reactions
   const ReactionsBitSet incl_set_;
+  /// Enable 3->1 processes with the stochastic criterion.
+  const bool three_to_one_;
   /**
    * Elastic collsions between two nucleons with sqrt_s below low_snn_cut_ are
    * excluded.

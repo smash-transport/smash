@@ -59,6 +59,7 @@ class Configuration;
  * \li \key Output
  * \li \key HyperSurfaceCrossing
  * \li \key InitialConditions
+ * \li \key ScatterActionMulti
  *
  * Each key can have one of the following values:
  * \li ALL   - Log all messages (default)
@@ -111,6 +112,7 @@ class Configuration;
      HadronGasEos: INFO
      HyperSurfaceCrossing: INFO
      InitialConditions: INFO
+     ScatterActionMulti: INFO
  \endverbatim
  */
 
@@ -209,6 +211,7 @@ DECLARE_LOGAREA(27, Output);
 DECLARE_LOGAREA(28, HadronGasEos);
 DECLARE_LOGAREA(29, HyperSurfaceCrossing);
 DECLARE_LOGAREA(30, InitialConditions);
+DECLARE_LOGAREA(31, ScatterActionMulti);
 
 /**
  * This type collects all existing log areas so they will be created with the
@@ -220,7 +223,7 @@ using AreaTuple =
                ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
                Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling, Pythia,
                GrandcanThermalizer, CrossSections, Output, HadronGasEos,
-               HyperSurfaceCrossing, InitialConditions>;
+               HyperSurfaceCrossing, InitialConditions, ScatterActionMulti>;
 }  // namespace LogArea
 
 /**
