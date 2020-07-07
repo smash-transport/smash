@@ -62,8 +62,8 @@ class HepMcOutput : public OutputInterface {
    * \throw std::invalid_argument if nuclei with non-nucleon particle
    *                              (like hypernuclei) are tried to be constructed
    */
-  void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+  void at_eventstart(const Particles &particles, const int event_number,
+                     const EventInfo &) override;
 
   /**
    * Add the final particles information of an event to the central vertex.
@@ -71,11 +71,10 @@ class HepMcOutput : public OutputInterface {
    *
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.
-   * \param[in] impact_parameter Impact parameter of this event.
-   * \param[in] empty_event Unused, needed since inhertied.
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int32_t event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const EventInfo &event) override;
 
  private:
   /// HepMC convention: status code for target and projecticle particles
