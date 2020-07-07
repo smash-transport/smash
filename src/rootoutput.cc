@@ -51,9 +51,9 @@ static constexpr int LOutput = LogArea::Output::id;
  * x[npart] y[npart] z[npart] p0[npart] px[npart] py[npart] pz[npart]
  * \endcode
  * One tree entry is analogous to an OSCAR output block, but the maximal
- * number of particles in one entry is limited to 10000. This is done to limit
+ * number of particles in one entry is limited to 500000. This is done to limit
  * the buffer size needed for ROOT output. If the number of particles in one
- * block exceeds 10000, then they are written in separate blocks with the same
+ * block exceeds 500000, then they are written in separate blocks with the same
  * \c tcounter and \c ev. The fields have the following meaning:
  *
  * \li \c ev is event number
