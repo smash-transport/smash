@@ -201,8 +201,8 @@ class RootOutput : public OutputInterface {
    */
   //@{
   /// Property that is written to ROOT output.
-  std::vector<double> p0, px, py, pz, t, x, y, z, formation_time_,
-      xsec_factor_, time_last_coll_;
+  std::vector<double> p0, px, py, pz, t, x, y, z, formation_time_, xsec_factor_,
+      time_last_coll_;
   std::vector<int> pdgcode, charge, coll_per_part_, proc_id_origin_,
       proc_type_origin_, pdg_mother1_, pdg_mother2_;
   int npart, tcounter, ev, nin, nout, test_p;
@@ -245,8 +245,8 @@ class RootOutput : public OutputInterface {
    * Used for initializing buffer vectors to the maximum allowed size.
    */
   template <typename T>
-  void resize_vector(std::vector<T> &vec){
-    for (int i = 0; i < max_buffer_size_; i++){
+  void resize_vector(std::vector<T> &vec) {
+    for (int i = 0; i < max_buffer_size_; i++) {
       vec.push_back(0.0);
     }
   }
