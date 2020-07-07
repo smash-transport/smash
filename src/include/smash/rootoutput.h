@@ -201,10 +201,10 @@ class RootOutput : public OutputInterface {
    */
   //@{
   /// Property that is written to ROOT output.
-  std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z,
-      formation_time_, xsec_factor_, time_last_coll_;
-  std::array<int, max_buffer_size_> pdgcode, charge, coll_per_part_,
-      proc_id_origin_, proc_type_origin_, pdg_mother1_, pdg_mother2_;
+  std::vector<double> p0, px, py, pz, t, x, y, z, formation_time_,
+      xsec_factor_, time_last_coll_;
+  std::vector<int> pdgcode, charge, coll_per_part_, proc_id_origin_,
+      proc_type_origin_, pdg_mother1_, pdg_mother2_;
   int npart, tcounter, ev, nin, nout, test_p;
   double wgt, par_wgt, impact_b, modus_l, current_t;
   double E_kinetic_tot, E_fields_tot, E_tot;
@@ -240,6 +240,16 @@ class RootOutput : public OutputInterface {
   const bool coll_extended_;
   /// Whether extended ic output is on
   const bool ic_extended_;
+
+  /**
+   * Used for initializing buffer vectors to the maximum allowed size.
+   */
+  template <typename T>
+  void resize_vector(std::vector<T> &vec){
+    for (int i = 0; i < max_buffer_size_; i++){
+      vec.push_back(0.0);
+    }
+  }
 
   /**
    * Basic initialization routine, creating the TTree objects
