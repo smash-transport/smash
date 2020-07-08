@@ -32,26 +32,41 @@ class Particles;
  * \brief SMASH output to ROOT file
  * ----------------------------------------------------------------------------
  * SMASH supports ROOT output as an option (see http://root.cern.ch).
- * The ROOT framework needs to be installed when building SMASH, otherwise
+ * The ROOT framework needs to be installed before building SMASH, otherwise
  * ROOT support will be disabled.
  *
- * This class produces file smash_run.root, which contains a
- * ROOT TTree. TTree contains information about particles
- * during simulation from all SMASH events.
+ * This class produces file Particles.root, which contains a
+ * ROOT TTree. TTree contains information about particles from all SMASH events
+ * comprising a simulation.
  * Output is happening in blocks. All particles in a block
  * are at the same time and in the same event. However, it is possible that
  * different blocks are at the same time and from the same event.
  * Particle information is stored in TBranches.
  * For each particle characteristic there is a separate branch.
  * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum),
- * pdgid - PDG code of particle, that characterizes its sort,
+ * pdgcode - PDG code of the particle, characterizing its type,
  * charge - electric charge of the particle,
- * ev - number of event particle encountered in,
- * tcounter - number of output block in a given event,
- * npart - number of particles,
- * impact_b - impact parameter, and
+ * ev - event number in a given block,
+ * tcounter - number of the output block in a given event,
+ * npart - number of particles in the block,
+ * test_p - number of testpartciles per particle,
+ * modus_l - modus length,
+ * current_t - time associated with the output block, in fm/c,
+ * impact_b - impact parameter of the event,
  * empty_event - whether there was no interaction between the projectile and
- * the target.
+ * the target,
+ * E_kinetic_tot - total kinetic energy in the system,
+ * E_fields_tot - total mean field energy * test_p,
+ * E_total - sum of E_kinetic_tot and E_fields_tot.
+ *
+ * This class also produces file Collisions.root, organized in the same way,
+ * with a few additional fields:
+ * nin and nout - characterize number of incoming and outgoing particles in the
+ * reaction, with nin + nout = npart,
+ * weight - an action weight, whose meaning depends on the type of action: For
+ * collisions it is the total cross section, for decays it is the total decay
+ * width and for dilepton decays it is the shining weight.
+ * 
  *
  * Here is an example of a basic ROOT macro to read the ROOT output of SMASH:
  * \code
