@@ -21,7 +21,7 @@ static constexpr int LOutput = LogArea::Output::id;
 
 /*!\Userguide
  * \page format_root ROOT Format
- * SMASH ROOT output has the same functionality as OSCAR output, but ROOT
+ * SMASH ROOT output shares functionalities with the OSCAR output, but ROOT
  * files are faster to read and write and they need less disk space for the
  * same amount of information. This is achieved due to an optimized internal
  * structure of ROOT files (and compression). ROOT files are not
@@ -29,26 +29,31 @@ static constexpr int LOutput = LogArea::Output::id;
  * access them using ROOT functions. The full memory structure of the ROOT
  * files can be found here: http://root.cern.ch/root/html/TFile.html. We only
  * desribe the logical structure of the SMASH ROOT output. Knowing the logical
- * structure is enough to read and write ROOT files and understand their view
- * in TBrowser.
+ * structure is enough to read and write ROOT files, be able to view them in
+ * TBrowser, or write a ROOT macro to analyze them.
  *
  * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
  *
  * SMASH produces one ROOT file per run: \c smash_run.root. This file contains
  * a TTree called \c particles and a TTree called \c collisions, depending
  * on the required content (see \ref output_general_). The \c particles
- * tree contains the same information as OSCAR particles output and the
- * \c collisions tree contains the same information as OSCAR collision output.
+ * tree contains information about the parameters of the run (such as the number
+ * of testparticles and event number), information relating to individual
+ * particles (such as their position or charge), and information about bulk
+ * observables in the system (kinetic energy, mean field energy, and total
+ * energy). The \c collisions tree contains the same information as OSCAR
+ * collision output.
  *
  * In case that the ROOT format is used for dilepton output
- * (see \ref output_dileptons), the file is called \c Dileptons.root and
+ * (see \ref output_dileptons), the ROOT file is called \c Dileptons.root and
  * only contains a \c collisions tree with all the dilepton decays.
  *
- * Every physical quantity is in a separate TBranch.
+ * Every physical quantity corresponds to a separate TBranch.
  * One entry in the \c particles TTree is:
  * \code
- * ev tcounter npart impact_b empty_event pdgcode[npart] charge[npart] t[npart]
- * x[npart] y[npart] z[npart] p0[npart] px[npart] py[npart] pz[npart]
+ * ev tcounter npart test_p modus_l current_t impact_b empty_event
+ * pdgcode[npart] charge[npart] t[npart] x[npart] y[npart] z[npart] p0[npart]
+ * px[npart] py[npart] pz[npart] E_kinetic_tot E_fields_tot E_tot
  * \endcode
  * One tree entry is analogous to an OSCAR output block, but the maximal
  * number of particles in one entry is limited to 500000. This is done to limit
@@ -60,13 +65,19 @@ static constexpr int LOutput = LogArea::Output::id;
  * \li \c tcounter is number of output block in a given event in terms of
  * OSCAR
  * \li \c npart is number of particles in the block
+ * \li \c test_p is number of testparticles per particle
+ * \li \c modus_l is modus length
+ * \li \c current_t is time associated with the output block, in fm/c
  * \li \c impact_b is the impact parameter of the event
- * \li \c empty_event gives whether the projectile did not interact with the
+ * \li \c empty_event indicates whether the projectile did not interact with the
  * target
  * \li \c pdgcode is PDG id array
  * \li \c charge is the electric charge array
- * \li \c t, \c x, \c y, \c z are position arrays
  * \li \c p0, \c px, \c py, \c pz are 4-momenta arrays
+ * \li \c t, \c x, \c y, \c z are position arrays
+ * \li \c E_kinetic_tot is total kinetic energy in the system
+ * \li \c E_fields_tot is total mean field energy * test_p
+ * \li \c E_total is the sum of E_kinetic_tot and E_fields_tot
  *
  * In case of extended output (see \ref output_content_specific_options_) more
  * fields are added. Their description is the same that in case of OSCAR
@@ -102,6 +113,8 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name,
   filename_unfinished_ += ".unfinished";
   root_out_file_ =
       make_unique<TFile>(filename_unfinished_.native().c_str(), "NEW");
+  resize_vector(pdgcode_);
+  resize_vector(charge_);
   resize_vector(p0_);
   resize_vector(px_);
   resize_vector(py_);
@@ -113,8 +126,6 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name,
   resize_vector(formation_time_);
   resize_vector(xsec_factor_);
   resize_vector(time_last_coll_);
-  resize_vector(pdgcode_);
-  resize_vector(charge_);
   resize_vector(coll_per_part_);
   resize_vector(proc_id_origin_);
   resize_vector(proc_type_origin_);
@@ -127,14 +138,14 @@ void RootOutput::init_trees() {
   if (write_particles_ || write_initial_conditions_) {
     particles_tree_ = new TTree("particles", "particles");
 
+    particles_tree_->Branch("ev", &ev_, "ev/I");
+    particles_tree_->Branch("tcounter", &tcounter_, "tcounter/I");
     particles_tree_->Branch("npart", &npart_, "npart/I");
     particles_tree_->Branch("test_p", &test_p_, "test_p/I");
     particles_tree_->Branch("modus_l", &modus_l_, "modus_l/D");
     particles_tree_->Branch("current_t", &current_t_, "current_t/D");
     particles_tree_->Branch("impact_b", &impact_b_, "impact_b/D");
     particles_tree_->Branch("empty_event", &empty_event_, "empty_event/O");
-    particles_tree_->Branch("ev", &ev_, "ev/I");
-    particles_tree_->Branch("tcounter", &tcounter_, "tcounter/I");
 
     particles_tree_->Branch("pdgcode", &pdgcode_[0], "pdgcode[npart]/I");
     particles_tree_->Branch("charge", &charge_[0], "charge[npart]/I");
@@ -320,8 +331,8 @@ template <typename T>
 void RootOutput::particles_to_tree(T &particles) {
   int i = 0;
 
-  tcounter_ = output_counter_;
   ev_ = current_event_;
+  tcounter_ = output_counter_;
   bool exceeded_buffer_message = true;
 
   for (const auto &p : particles) {
@@ -342,18 +353,18 @@ void RootOutput::particles_to_tree(T &particles) {
       i = 0;
       particles_tree_->Fill();
     } else {
-      t_[i] = p.position().x0();
-      x_[i] = p.position().x1();
-      y_[i] = p.position().x2();
-      z_[i] = p.position().x3();
+      pdgcode_[i] = p.pdgcode().get_decimal();
+      charge_[i] = p.type().charge();
 
       p0_[i] = p.momentum().x0();
       px_[i] = p.momentum().x1();
       py_[i] = p.momentum().x2();
       pz_[i] = p.momentum().x3();
 
-      pdgcode_[i] = p.pdgcode().get_decimal();
-      charge_[i] = p.type().charge();
+      t_[i] = p.position().x0();
+      x_[i] = p.position().x1();
+      y_[i] = p.position().x2();
+      z_[i] = p.position().x3();
 
       if (part_extended_ || ic_extended_) {
         const auto h = p.get_history();
@@ -397,18 +408,18 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
 
   for (const ParticleList &plist : {incoming, outgoing}) {
     for (const auto &p : plist) {
-      t_[i] = p.position().x0();
-      x_[i] = p.position().x1();
-      y_[i] = p.position().x2();
-      z_[i] = p.position().x3();
+      pdgcode_[i] = p.pdgcode().get_decimal();
+      charge_[i] = p.type().charge();
 
       p0_[i] = p.momentum().x0();
       px_[i] = p.momentum().x1();
       py_[i] = p.momentum().x2();
       pz_[i] = p.momentum().x3();
 
-      pdgcode_[i] = p.pdgcode().get_decimal();
-      charge_[i] = p.type().charge();
+      t_[i] = p.position().x0();
+      x_[i] = p.position().x1();
+      y_[i] = p.position().x2();
+      z_[i] = p.position().x3();
 
       if (coll_extended_) {
         const auto h = p.get_history();
