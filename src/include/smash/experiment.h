@@ -1414,9 +1414,9 @@ double calculate_mean_field_energy(
  */
 
 EventInfo fill_event_info(const Particles &particles, double E_mean_field,
-			  double modus_impact_parameter, double modus_length,
-			  const ExperimentParameters &parameters,
-			  bool projectile_target_interact);
+                          double modus_impact_parameter, double modus_length,
+                          const ExperimentParameters &parameters,
+                          bool projectile_target_interact);
 
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event(int event_number) {
@@ -1515,8 +1515,8 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
       initial_mean_field_energy_);
 
   auto event_info = fill_event_info(particles_, E_mean_field,
-      modus_.impact_parameter(), modus_.length(), parameters_,
-      projectile_target_interact_);
+                                    modus_.impact_parameter(), modus_.length(),
+                                    parameters_, projectile_target_interact_);
 
   // Output at event start
   for (const auto &output : outputs_) {
@@ -1939,8 +1939,8 @@ void Experiment<Modus>::intermediate_output() {
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
 
   auto event_info = fill_event_info(particles_, E_mean_field,
-      modus_.impact_parameter(), modus_.length(), parameters_,
-      projectile_target_interact_);
+                                    modus_.impact_parameter(), modus_.length(),
+                                    parameters_, projectile_target_interact_);
   // save evolution data
   if (!(modus_.is_box() && parameters_.outputclock->current_time() <
                                modus_.equilibration_time())) {
@@ -2154,8 +2154,8 @@ void Experiment<Modus>::final_output(const int evt_num) {
   }
 
   auto event_info = fill_event_info(particles_, E_mean_field,
-      modus_.impact_parameter(), modus_.length(), parameters_,
-      projectile_target_interact_);
+                                    modus_.impact_parameter(), modus_.length(),
+                                    parameters_, projectile_target_interact_);
 
   for (const auto &output : outputs_) {
     output->at_eventend(particles_, evt_num, event_info);
