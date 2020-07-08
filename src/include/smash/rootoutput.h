@@ -143,7 +143,8 @@ class Particles;
  *
  *      // A loop over all particles in the entry
  *      for (int i = 0; i < npart; i++) {
- *        const double p = sqrt( px[i] * px[i] + py[i] * py[i] + pz[i] * pz[i] );
+ *        const double p = sqrt( px[i] * px[i] + py[i] * py[i] + pz[i] * pz[i]
+ * );
  *        // filling the j_entry-th histogram
  *        h_p_avg[j_entry]->Fill(p, 1.0/(p*p));
  *      }

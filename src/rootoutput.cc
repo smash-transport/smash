@@ -160,7 +160,8 @@ void RootOutput::init_trees() {
     particles_tree_->Branch("y", &y_[0], "y[npart]/D");
     particles_tree_->Branch("z", &z_[0], "z[npart]/D");
 
-    particles_tree_->Branch("E_kinetic_tot", &E_kinetic_tot_, "E_kinetic_tot/D");
+    particles_tree_->Branch("E_kinetic_tot", &E_kinetic_tot_,
+                            "E_kinetic_tot/D");
     particles_tree_->Branch("E_fields_tot", &E_fields_tot_, "E_fields_tot/D");
     particles_tree_->Branch("E_tot", &E_tot_, "E_tot/D");
 
