@@ -1388,6 +1388,36 @@ double calculate_mean_field_energy(
     RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
     const ExperimentParameters &parameters);
 
+/**
+ * Generate the EventInfo object which is passed to outputs_.
+ *
+ * \param[in] particles The interacting particles. Their information will be
+ *            used to check the conservation of the total energy and momentum.
+ *	      the total number of the particles will be used and printed as
+ *	      well.
+ * \param[in] E_mean_field Value of the mean-field contribution to the total
+ *            energy of the system at the current time.
+ * \param[in] modus_impact_parameter The impact parameter
+ * \param[in] modus_length The modus length
+ * \param[]
+ * \param[in] scatterings_this_interval Number of the scatterings occur within
+ *            the current timestep.
+ * \param[in] conserved_initial Initial quantum numbers needed to check the
+ *            conservations.
+ * \param[in] time_start Moment in the REAL WORLD when SMASH starts to run [s].
+ * \param[in] time Current moment in SMASH [fm/c].
+ * \param[in] parameters Parameters of the experiment, needed for the access to
+ *            the current_time and the number of testparticles.
+ * \param[in] projectile_target_interact Whether the projectile and the target
+ *            collided.
+ * \return EventInfo object.
+ */
+
+EventInfo fill_event_info(const Particles &particles, double E_mean_field,
+			  double modus_impact_parameter, double modus_length,
+			  const ExperimentParameters &parameters,
+			  bool projectile_target_interact);
+
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event(int event_number) {
   random::set_seed(seed_);
@@ -1484,18 +1514,9 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
       parameters_.labclock->current_time(), E_mean_field,
       initial_mean_field_energy_);
 
-  const QuantumNumbers current_values(particles_);
-  double E_kinetic_total = current_values.momentum().x0();
-  double E_total = E_kinetic_total + E_mean_field;
-
-  EventInfo event_info{modus_.impact_parameter(),
-                       modus_.length(),
-                       parameters_.outputclock->current_time(),
-                       E_kinetic_total,
-                       E_mean_field,
-                       E_total,
-                       parameters_.testparticles,
-                       !projectile_target_interact_};
+  auto event_info = fill_event_info(particles_, E_mean_field,
+      modus_.impact_parameter(), modus_.length(), parameters_,
+      projectile_target_interact_);
 
   // Output at event start
   for (const auto &output : outputs_) {
@@ -1917,18 +1938,9 @@ void Experiment<Modus>::intermediate_output() {
       initial_mean_field_energy_);
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
 
-  const QuantumNumbers current_values(particles_);
-  double E_kinetic_total = current_values.momentum().x0();
-  double E_total = E_kinetic_total + E_mean_field;
-
-  EventInfo event_info{modus_.impact_parameter(),
-                       modus_.length(),
-                       parameters_.outputclock->current_time(),
-                       E_kinetic_total,
-                       E_mean_field,
-                       E_total,
-                       parameters_.testparticles,
-                       !projectile_target_interact_};
+  auto event_info = fill_event_info(particles_, E_mean_field,
+      modus_.impact_parameter(), modus_.length(), parameters_,
+      projectile_target_interact_);
   // save evolution data
   if (!(modus_.is_box() && parameters_.outputclock->current_time() <
                                modus_.equilibration_time())) {
@@ -2141,18 +2153,9 @@ void Experiment<Modus>::final_output(const int evt_num) {
     }
   }
 
-  const QuantumNumbers current_values(particles_);
-  double E_kinetic_total = current_values.momentum().x0();
-  double E_total = E_kinetic_total + E_mean_field;
-
-  EventInfo event_info{modus_.impact_parameter(),
-                       modus_.length(),
-                       parameters_.outputclock->current_time(),
-                       E_kinetic_total,
-                       E_mean_field,
-                       E_total,
-                       parameters_.testparticles,
-                       !projectile_target_interact_};
+  auto event_info = fill_event_info(particles_, E_mean_field,
+      modus_.impact_parameter(), modus_.length(), parameters_,
+      projectile_target_interact_);
 
   for (const auto &output : outputs_) {
     output->at_eventend(particles_, evt_num, event_info);
