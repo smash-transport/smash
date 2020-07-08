@@ -102,19 +102,19 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name,
   filename_unfinished_ += ".unfinished";
   root_out_file_ =
       make_unique<TFile>(filename_unfinished_.native().c_str(), "NEW");
-  resize_vector(p0);
-  resize_vector(px);
-  resize_vector(py);
-  resize_vector(pz);
-  resize_vector(t);
-  resize_vector(x);
-  resize_vector(y);
-  resize_vector(z);
+  resize_vector(p0_);
+  resize_vector(px_);
+  resize_vector(py_);
+  resize_vector(pz_);
+  resize_vector(t_);
+  resize_vector(x_);
+  resize_vector(y_);
+  resize_vector(z_);
   resize_vector(formation_time_);
   resize_vector(xsec_factor_);
   resize_vector(time_last_coll_);
-  resize_vector(pdgcode);
-  resize_vector(charge);
+  resize_vector(pdgcode_);
+  resize_vector(charge_);
   resize_vector(coll_per_part_);
   resize_vector(proc_id_origin_);
   resize_vector(proc_type_origin_);
@@ -127,31 +127,31 @@ void RootOutput::init_trees() {
   if (write_particles_ || write_initial_conditions_) {
     particles_tree_ = new TTree("particles", "particles");
 
-    particles_tree_->Branch("npart", &npart, "npart/I");
-    particles_tree_->Branch("test_p", &test_p, "test_p/I");
-    particles_tree_->Branch("modus_l", &modus_l, "modus_l/D");
-    particles_tree_->Branch("current_t", &current_t, "current_t/D");
-    particles_tree_->Branch("impact_b", &impact_b, "impact_b/D");
+    particles_tree_->Branch("npart", &npart_, "npart/I");
+    particles_tree_->Branch("test_p", &test_p_, "test_p/I");
+    particles_tree_->Branch("modus_l", &modus_l_, "modus_l/D");
+    particles_tree_->Branch("current_t", &current_t_, "current_t/D");
+    particles_tree_->Branch("impact_b", &impact_b_, "impact_b/D");
     particles_tree_->Branch("empty_event", &empty_event_, "empty_event/O");
-    particles_tree_->Branch("ev", &ev, "ev/I");
-    particles_tree_->Branch("tcounter", &tcounter, "tcounter/I");
+    particles_tree_->Branch("ev", &ev_, "ev/I");
+    particles_tree_->Branch("tcounter", &tcounter_, "tcounter/I");
 
-    particles_tree_->Branch("pdgcode", &pdgcode[0], "pdgcode[npart]/I");
-    particles_tree_->Branch("charge", &charge[0], "charge[npart]/I");
+    particles_tree_->Branch("pdgcode", &pdgcode_[0], "pdgcode[npart]/I");
+    particles_tree_->Branch("charge", &charge_[0], "charge[npart]/I");
 
-    particles_tree_->Branch("p0", &p0[0], "p0[npart]/D");
-    particles_tree_->Branch("px", &px[0], "px[npart]/D");
-    particles_tree_->Branch("py", &py[0], "py[npart]/D");
-    particles_tree_->Branch("pz", &pz[0], "pz[npart]/D");
+    particles_tree_->Branch("p0", &p0_[0], "p0[npart]/D");
+    particles_tree_->Branch("px", &px_[0], "px[npart]/D");
+    particles_tree_->Branch("py", &py_[0], "py[npart]/D");
+    particles_tree_->Branch("pz", &pz_[0], "pz[npart]/D");
 
-    particles_tree_->Branch("t", &t[0], "t[npart]/D");
-    particles_tree_->Branch("x", &x[0], "x[npart]/D");
-    particles_tree_->Branch("y", &y[0], "y[npart]/D");
-    particles_tree_->Branch("z", &z[0], "z[npart]/D");
+    particles_tree_->Branch("t", &t_[0], "t[npart]/D");
+    particles_tree_->Branch("x", &x_[0], "x[npart]/D");
+    particles_tree_->Branch("y", &y_[0], "y[npart]/D");
+    particles_tree_->Branch("z", &z_[0], "z[npart]/D");
 
-    particles_tree_->Branch("E_kinetic_tot", &E_kinetic_tot, "E_kinetic_tot/D");
-    particles_tree_->Branch("E_fields_tot", &E_fields_tot, "E_fields_tot/D");
-    particles_tree_->Branch("E_tot", &E_tot, "E_tot/D");
+    particles_tree_->Branch("E_kinetic_tot", &E_kinetic_tot_, "E_kinetic_tot/D");
+    particles_tree_->Branch("E_fields_tot", &E_fields_tot_, "E_fields_tot/D");
+    particles_tree_->Branch("E_tot", &E_tot_, "E_tot/D");
 
     if (part_extended_ || ic_extended_) {
       particles_tree_->Branch("ncoll", &coll_per_part_[0], "ncoll[npart]/I");
@@ -174,25 +174,25 @@ void RootOutput::init_trees() {
   if (write_collisions_) {
     collisions_tree_ = new TTree("collisions", "collisions");
 
-    collisions_tree_->Branch("nin", &nin, "nin/I");
-    collisions_tree_->Branch("nout", &nout, "nout/I");
-    collisions_tree_->Branch("npart", &npart, "npart/I");
-    collisions_tree_->Branch("ev", &ev, "ev/I");
-    collisions_tree_->Branch("weight", &wgt, "weight/D");
-    collisions_tree_->Branch("partial_weight", &par_wgt, "partial_weight/D");
+    collisions_tree_->Branch("nin", &nin_, "nin/I");
+    collisions_tree_->Branch("nout", &nout_, "nout/I");
+    collisions_tree_->Branch("npart", &npart_, "npart/I");
+    collisions_tree_->Branch("ev", &ev_, "ev/I");
+    collisions_tree_->Branch("weight", &wgt_, "weight/D");
+    collisions_tree_->Branch("partial_weight", &par_wgt_, "partial_weight/D");
 
-    collisions_tree_->Branch("pdgcode", &pdgcode[0], "pdgcode[npart]/I");
-    collisions_tree_->Branch("charge", &charge[0], "charge[npart]/I");
+    collisions_tree_->Branch("pdgcode", &pdgcode_[0], "pdgcode[npart]/I");
+    collisions_tree_->Branch("charge", &charge_[0], "charge[npart]/I");
 
-    collisions_tree_->Branch("p0", &p0[0], "p0[npart]/D");
-    collisions_tree_->Branch("px", &px[0], "px[npart]/D");
-    collisions_tree_->Branch("py", &py[0], "py[npart]/D");
-    collisions_tree_->Branch("pz", &pz[0], "pz[npart]/D");
+    collisions_tree_->Branch("p0", &p0_[0], "p0[npart]/D");
+    collisions_tree_->Branch("px", &px_[0], "px[npart]/D");
+    collisions_tree_->Branch("py", &py_[0], "py[npart]/D");
+    collisions_tree_->Branch("pz", &pz_[0], "pz[npart]/D");
 
-    collisions_tree_->Branch("t", &t[0], "t[npart]/D");
-    collisions_tree_->Branch("x", &x[0], "x[npart]/D");
-    collisions_tree_->Branch("y", &y[0], "y[npart]/D");
-    collisions_tree_->Branch("z", &z[0], "z[npart]/D");
+    collisions_tree_->Branch("t", &t_[0], "t[npart]/D");
+    collisions_tree_->Branch("x", &x_[0], "x[npart]/D");
+    collisions_tree_->Branch("y", &y_[0], "y[npart]/D");
+    collisions_tree_->Branch("z", &z_[0], "z[npart]/D");
 
     if (coll_extended_) {
       collisions_tree_->Branch("ncoll", &coll_per_part_[0], "ncoll[npart]/I");
@@ -229,17 +229,17 @@ void RootOutput::at_eventstart(const Particles &particles,
   // save event number
   current_event_ = event_number;
 
-  modus_l = event.modus_length;
-  test_p = event.test_particles;
-  current_t = event.current_time;
-  E_kinetic_tot = event.total_kinetic_energy;
-  E_fields_tot = event.total_mean_field_energy;
-  E_tot = event.total_energy;
+  modus_l_ = event.modus_length;
+  test_p_ = event.test_particles;
+  current_t_ = event.current_time;
+  E_kinetic_tot_ = event.total_kinetic_energy;
+  E_fields_tot_ = event.total_mean_field_energy;
+  E_tot_ = event.total_energy;
 
   if (write_particles_ && particles_only_final_ == OutputOnlyFinal::No) {
     output_counter_ = 0;
     // This is to have only one output of positive impact parameter per event
-    impact_b = -1.0;
+    impact_b_ = -1.0;
     empty_event_ = false;
     particles_to_tree(particles);
     output_counter_++;
@@ -250,12 +250,12 @@ void RootOutput::at_intermediate_time(const Particles &particles,
                                       const std::unique_ptr<Clock> &,
                                       const DensityParameters &,
                                       const EventInfo &event) {
-  modus_l = event.modus_length;
-  test_p = event.test_particles;
-  current_t = event.current_time;
-  E_kinetic_tot = event.total_kinetic_energy;
-  E_fields_tot = event.total_mean_field_energy;
-  E_tot = event.total_energy;
+  modus_l_ = event.modus_length;
+  test_p_ = event.test_particles;
+  current_t_ = event.current_time;
+  E_kinetic_tot_ = event.total_kinetic_energy;
+  E_fields_tot_ = event.total_mean_field_energy;
+  E_tot_ = event.total_energy;
 
   if (write_particles_ && particles_only_final_ == OutputOnlyFinal::No) {
     particles_to_tree(particles);
@@ -266,14 +266,14 @@ void RootOutput::at_intermediate_time(const Particles &particles,
 void RootOutput::at_eventend(const Particles &particles,
                              const int /*event_number*/,
                              const EventInfo &event) {
-  modus_l = event.modus_length;
-  test_p = event.test_particles;
-  current_t = event.current_time;
-  E_kinetic_tot = event.total_kinetic_energy;
-  E_fields_tot = event.total_mean_field_energy;
-  E_tot = event.total_energy;
+  modus_l_ = event.modus_length;
+  test_p_ = event.test_particles;
+  current_t_ = event.current_time;
+  E_kinetic_tot_ = event.total_kinetic_energy;
+  E_fields_tot_ = event.total_mean_field_energy;
+  E_tot_ = event.total_energy;
 
-  impact_b = event.impact_parameter;
+  impact_b_ = event.impact_parameter;
   empty_event_ = event.empty_event;
   if (write_particles_ &&
       !(event.empty_event &&
@@ -320,8 +320,8 @@ template <typename T>
 void RootOutput::particles_to_tree(T &particles) {
   int i = 0;
 
-  tcounter = output_counter_;
-  ev = current_event_;
+  tcounter_ = output_counter_;
+  ev_ = current_event_;
   bool exceeded_buffer_message = true;
 
   for (const auto &p : particles) {
@@ -338,22 +338,22 @@ void RootOutput::particles_to_tree(T &particles) {
             << "rootoutput.h\n\n";
         exceeded_buffer_message = false;
       }
-      npart = max_buffer_size_;
+      npart_ = max_buffer_size_;
       i = 0;
       particles_tree_->Fill();
     } else {
-      t[i] = p.position().x0();
-      x[i] = p.position().x1();
-      y[i] = p.position().x2();
-      z[i] = p.position().x3();
+      t_[i] = p.position().x0();
+      x_[i] = p.position().x1();
+      y_[i] = p.position().x2();
+      z_[i] = p.position().x3();
 
-      p0[i] = p.momentum().x0();
-      px[i] = p.momentum().x1();
-      py[i] = p.momentum().x2();
-      pz[i] = p.momentum().x3();
+      p0_[i] = p.momentum().x0();
+      px_[i] = p.momentum().x1();
+      py_[i] = p.momentum().x2();
+      pz_[i] = p.momentum().x3();
 
-      pdgcode[i] = p.pdgcode().get_decimal();
-      charge[i] = p.type().charge();
+      pdgcode_[i] = p.pdgcode().get_decimal();
+      charge_[i] = p.type().charge();
 
       if (part_extended_ || ic_extended_) {
         const auto h = p.get_history();
@@ -372,7 +372,7 @@ void RootOutput::particles_to_tree(T &particles) {
   }
   // Flush rest to tree
   if (i > 0) {
-    npart = i;
+    npart_ = i;
     particles_tree_->Fill();
   }
 }
@@ -381,12 +381,12 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
                                     const ParticleList &outgoing,
                                     const double weight,
                                     const double partial_weight) {
-  ev = current_event_;
-  nin = incoming.size();
-  nout = outgoing.size();
-  npart = nin + nout;
-  wgt = weight;
-  par_wgt = partial_weight;
+  ev_ = current_event_;
+  nin_ = incoming.size();
+  nout_ = outgoing.size();
+  npart_ = nin_ + nout_;
+  wgt_ = weight;
+  par_wgt_ = partial_weight;
 
   int i = 0;
 
@@ -397,18 +397,18 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
 
   for (const ParticleList &plist : {incoming, outgoing}) {
     for (const auto &p : plist) {
-      t[i] = p.position().x0();
-      x[i] = p.position().x1();
-      y[i] = p.position().x2();
-      z[i] = p.position().x3();
+      t_[i] = p.position().x0();
+      x_[i] = p.position().x1();
+      y_[i] = p.position().x2();
+      z_[i] = p.position().x3();
 
-      p0[i] = p.momentum().x0();
-      px[i] = p.momentum().x1();
-      py[i] = p.momentum().x2();
-      pz[i] = p.momentum().x3();
+      p0_[i] = p.momentum().x0();
+      px_[i] = p.momentum().x1();
+      py_[i] = p.momentum().x2();
+      pz_[i] = p.momentum().x3();
 
-      pdgcode[i] = p.pdgcode().get_decimal();
-      charge[i] = p.type().charge();
+      pdgcode_[i] = p.pdgcode().get_decimal();
+      charge_[i] = p.type().charge();
 
       if (coll_extended_) {
         const auto h = p.get_history();

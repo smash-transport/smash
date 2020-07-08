@@ -201,13 +201,13 @@ class RootOutput : public OutputInterface {
    */
   //@{
   /// Property that is written to ROOT output.
-  std::vector<double> p0, px, py, pz, t, x, y, z, formation_time_, xsec_factor_,
-      time_last_coll_;
-  std::vector<int> pdgcode, charge, coll_per_part_, proc_id_origin_,
+  std::vector<double> p0_, px_, py_, pz_, t_, x_, y_, z_, formation_time_,
+      xsec_factor_, time_last_coll_;
+  std::vector<int> pdgcode_, charge_, coll_per_part_, proc_id_origin_,
       proc_type_origin_, pdg_mother1_, pdg_mother2_;
-  int npart, tcounter, ev, nin, nout, test_p;
-  double wgt, par_wgt, impact_b, modus_l, current_t;
-  double E_kinetic_tot, E_fields_tot, E_tot;
+  int npart_, tcounter_, ev_, nin_, nout_, test_p_;
+  double wgt_, par_wgt_, impact_b_, modus_l_, current_t_;
+  double E_kinetic_tot_, E_fields_tot_, E_tot_;
   bool empty_event_;
   //@}
 
