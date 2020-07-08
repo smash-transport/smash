@@ -66,7 +66,7 @@ class Particles;
  * weight - an action weight, whose meaning depends on the type of action: For
  * collisions it is the total cross section, for decays it is the total decay
  * width and for dilepton decays it is the shining weight.
- * 
+ *
  *
  * Here is an example of a basic ROOT macro to read the ROOT output of SMASH:
  * \code
