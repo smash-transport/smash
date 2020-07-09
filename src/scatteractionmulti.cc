@@ -47,35 +47,45 @@ double ScatterActionMulti::get_partial_weight() const {
 void ScatterActionMulti::add_possible_reactions(double dt,
                                                 const double gcell_vol,
                                                 const bool three_to_one) {
-  if (three_to_one && incoming_particles().size() == 3) {
-    if (three_different_pions(incoming_particles()[0], incoming_particles()[1],
-                              incoming_particles()[2])) {
-      // 3pi -> omega
-      const ParticleTypePtr type_omega = ParticleType::try_find(0x223);
-      if (type_omega) {
-        add_reaction(make_unique<CollisionBranch>(
-            *type_omega,
-            probability_three_meson_to_one(*type_omega, dt, gcell_vol),
-            ProcessType::MultiParticleThreeMesonsToOne));
+  if (incoming_particles().size() == 3) {
+    if (three_to_one) {
+      if (three_different_pions(incoming_particles()[0], incoming_particles()[1],
+                                incoming_particles()[2])) {
+        // 3pi -> omega
+        const ParticleTypePtr type_omega = ParticleType::try_find(0x223);
+        if (type_omega) {
+          add_reaction(make_unique<CollisionBranch>(
+              *type_omega,
+              probability_three_meson_to_one(*type_omega, dt, gcell_vol),
+              ProcessType::MultiParticleThreeMesonsToOne));
+        }
+        // 3pi -> phi
+        const ParticleTypePtr type_phi = ParticleType::try_find(0x333);
+        if (type_phi) {
+          add_reaction(make_unique<CollisionBranch>(
+              *type_phi, probability_three_meson_to_one(*type_phi, dt, gcell_vol),
+              ProcessType::MultiParticleThreeMesonsToOne));
+        }
+      } else if (two_pions_eta(incoming_particles()[0], incoming_particles()[1],
+                               incoming_particles()[2])) {
+        // eta2pi -> eta-prime
+        const ParticleTypePtr type_eta_prime = ParticleType::try_find(0x331);
+        if (type_eta_prime) {
+          // TODO(stdnmr) Do we need a symmetry factor if we have two pi0?
+          add_reaction(make_unique<CollisionBranch>(
+              *type_eta_prime,
+              probability_three_meson_to_one(*type_eta_prime, dt, gcell_vol),
+              ProcessType::MultiParticleThreeMesonsToOne));
+        }
       }
-      // 3pi -> phi
-      const ParticleTypePtr type_phi = ParticleType::try_find(0x333);
-      if (type_phi) {
-        add_reaction(make_unique<CollisionBranch>(
-            *type_phi, probability_three_meson_to_one(*type_phi, dt, gcell_vol),
-            ProcessType::MultiParticleThreeMesonsToOne));
-      }
-    } else if (two_pions_eta(incoming_particles()[0], incoming_particles()[1],
-                             incoming_particles()[2])) {
-      // eta2pi -> eta-prime
-      const ParticleTypePtr type_eta_prime = ParticleType::try_find(0x331);
-      if (type_eta_prime) {
-        // TODO(stdnmr) Do we need a symmetry factor if we have two pi0?
-        add_reaction(make_unique<CollisionBranch>(
-            *type_eta_prime,
-            probability_three_meson_to_one(*type_eta_prime, dt, gcell_vol),
-            ProcessType::MultiParticleThreeMesonsToOne));
-      }
+    }
+
+    // 3-to-2
+    if (possible_three_to_two_reaction(incoming_particles())) {
+      add_reaction(make_unique<CollisionBranch>(
+          *type_out1, *type_out2, probability_three_to_two(*type_out1, *type_out2, dt, gcell_vol),
+          ProcessType::MultiParticleThreeToTwo));
+
     }
   }
 }
@@ -93,10 +103,15 @@ void ScatterActionMulti::generate_final_state() {
   logg[LScatterActionMulti].debug("Chosen channel: ", process_type_,
                                   outgoing_particles_);
 
+  logg[LScatterActionMulti].info("Performing 3-to-1 reactions with outgoing ", outgoing_particles_);
+
   switch (process_type_) {
     case ProcessType::MultiParticleThreeMesonsToOne:
       /* n->1 annihilation */
       annihilation();
+      break;
+    case ProcessType::MultiParticleThreeToTwo:
+      three_to_two();
       break;
     default:
       throw InvalidScatterActionMulti(
@@ -178,6 +193,34 @@ double ScatterActionMulti::probability_three_meson_to_one(
          spin_deg_out * sym_factor_in;
 }
 
+double ScatterActionMulti::probability_three_to_two(
+    const ParticleType& type_out1, const ParticleType& type_out2, double dt, const double gcell_vol) const {
+  const double e1 = incoming_particles()[0].momentum().x0();
+  const double e2 = incoming_particles()[1].momentum().x0();
+  const double e3 = incoming_particles()[2].momentum().x0();
+  const double sqrts = sqrt_s();
+
+  // TODO(stdnmr): Problem, since not known before sampling for outgoing
+  const double e4 = 1.; // ???
+  const double e5 = 1.; // ???
+  const double v_rel = act->relative_velocity(); // TODO(stdnmr) this is for incoming particles, but needed for outgoing(!)
+
+  const double xs = get_xs(type_out1, type_out2);  // TODO(stdnmr) pseude-code
+  const double ph_sp_2 = -1. ; // TODO(stdnmr)
+
+  const int degen = 1;  // TODO(stdnmr) do later
+  const double I_3 = calculate_I3(sqrts);
+  const double ph_sp_3 =
+      1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
+
+  // TODO(stdnmr) How many hbarc?
+  return dt / (gcell_vol * gcell_vol) * (e4 * e5) / (2. * e1 * e2 * e3) *
+         ph_sp_2 / ph_sp_3 * xs * v_rel * std::pow(hbarc, 5.0) *
+         degen;
+}
+
+
+
 void ScatterActionMulti::annihilation() {
   if (outgoing_particles_.size() != 1) {
     std::string s =
@@ -194,6 +237,10 @@ void ScatterActionMulti::annihilation() {
 
   logg[LScatterActionMulti].debug("Momentum of the new particle: ",
                                   outgoing_particles_[0].momentum());
+}
+
+void ScatterActionMulti::three_to_two() {
+  // TODO(stdnmr)
 }
 
 bool ScatterActionMulti::three_different_pions(
