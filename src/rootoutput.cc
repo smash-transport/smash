@@ -113,24 +113,6 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name,
   filename_unfinished_ += ".unfinished";
   root_out_file_ =
       make_unique<TFile>(filename_unfinished_.native().c_str(), "NEW");
-  resize_vector(pdgcode_);
-  resize_vector(charge_);
-  resize_vector(p0_);
-  resize_vector(px_);
-  resize_vector(py_);
-  resize_vector(pz_);
-  resize_vector(t_);
-  resize_vector(x_);
-  resize_vector(y_);
-  resize_vector(z_);
-  resize_vector(formation_time_);
-  resize_vector(xsec_factor_);
-  resize_vector(time_last_coll_);
-  resize_vector(coll_per_part_);
-  resize_vector(proc_id_origin_);
-  resize_vector(proc_type_origin_);
-  resize_vector(pdg_mother1_);
-  resize_vector(pdg_mother2_);
   init_trees();
 }
 
