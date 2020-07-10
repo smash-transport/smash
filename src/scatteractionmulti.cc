@@ -209,7 +209,7 @@ double ScatterActionMulti::probability_three_to_two(
       1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
 
   // TODO(stdnmr) How many hbarc?
-  return dt / (gcell_vol * gcell_vol) * 1. / (2. * e1 * e2 * e3) *
+  return dt / (gcell_vol * gcell_vol) * 1. / (4. * e1 * e2 * e3) *
          lambda / (ph_sp_3 * 8 * M_PI * * sqrts * sqrts) * xs * std::pow(hbarc, 5.0) *
          degen;
 }
