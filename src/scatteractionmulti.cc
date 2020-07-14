@@ -48,10 +48,10 @@ double ScatterActionMulti::get_partial_weight() const {
 void ScatterActionMulti::add_possible_reactions(double dt,
                                                 const double gcell_vol,
                                                 const bool three_to_one) {
-  if (incoming_particles().size() == 3) {
+  if (incoming_particles_.size() == 3) {
     if (three_to_one) {
-      if (three_different_pions(incoming_particles()[0], incoming_particles()[1],
-                                incoming_particles()[2])) {
+      if (three_different_pions(incoming_particles_[0], incoming_particles_[1],
+                                incoming_particles_[2])) {
         // 3pi -> omega
         const ParticleTypePtr type_omega = ParticleType::try_find(0x223);
         if (type_omega) {
@@ -67,8 +67,8 @@ void ScatterActionMulti::add_possible_reactions(double dt,
               *type_phi, probability_three_meson_to_one(*type_phi, dt, gcell_vol),
               ProcessType::MultiParticleThreeMesonsToOne));
         }
-      } else if (two_pions_eta(incoming_particles()[0], incoming_particles()[1],
-                               incoming_particles()[2])) {
+      } else if (two_pions_eta(incoming_particles_[0], incoming_particles_[1],
+                               incoming_particles_[2])) {
         // eta2pi -> eta-prime
         const ParticleTypePtr type_eta_prime = ParticleType::try_find(0x331);
         if (type_eta_prime) {
@@ -82,8 +82,8 @@ void ScatterActionMulti::add_possible_reactions(double dt,
     }
 
     // 3-to-2
-    if (possible_three_to_two_reaction(incoming_particles()[0], incoming_particles()[1],
-                              incoming_particles()[2])) {
+    if (possible_three_to_two_reaction(incoming_particles_[0], incoming_particles_[1],
+                              incoming_particles_[2])) {
 
       const ParticleTypePtr type_out1 = ParticleType::try_find(pdg::p);
       const ParticleTypePtr type_out2 = ParticleType::try_find(-pdg::p);
@@ -139,9 +139,9 @@ void ScatterActionMulti::generate_final_state() {
 
 double ScatterActionMulti::calculate_I3(const double sqrts) const {
   static Integrator integrate;
-  const double m1 = incoming_particles()[0].effective_mass();
-  const double m2 = incoming_particles()[1].effective_mass();
-  const double m3 = incoming_particles()[2].effective_mass();
+  const double m1 = incoming_particles_[0].effective_mass();
+  const double m2 = incoming_particles_[1].effective_mass();
+  const double m3 = incoming_particles_[2].effective_mass();
   const double lower_bound = (m1 + m2) * (m1 + m2);
   const double upper_bound = (sqrts - m3) * (sqrts - m3);
   const auto result = integrate(lower_bound, upper_bound, [&](double m12_sqr) {
@@ -166,14 +166,14 @@ double ScatterActionMulti::calculate_I3(const double sqrts) const {
 
 double ScatterActionMulti::probability_three_meson_to_one(
     const ParticleType& type_out, double dt, const double gcell_vol) const {
-  const double e1 = incoming_particles()[0].momentum().x0();
-  const double e2 = incoming_particles()[1].momentum().x0();
-  const double e3 = incoming_particles()[2].momentum().x0();
+  const double e1 = incoming_particles_[0].momentum().x0();
+  const double e2 = incoming_particles_[1].momentum().x0();
+  const double e3 = incoming_particles_[2].momentum().x0();
   const double sqrts = sqrt_s();
 
   const double gamma_decay = type_out.get_partial_width(
-      sqrts, {&incoming_particles()[0].type(), &incoming_particles()[1].type(),
-              &incoming_particles()[2].type()});
+      sqrts, {&incoming_particles_[0].type(), &incoming_particles_[1].type(),
+              &incoming_particles_[2].type()});
 
   // Spin degneracy of outgoing particles (incoming p. assumed to have no spin)
   const int spin_deg_out = type_out.spin_degeneracy();
@@ -185,12 +185,12 @@ double ScatterActionMulti::probability_three_meson_to_one(
 
   // Symmetry factor for incoming particles
   int sym_factor_in = 1;
-  if (incoming_particles()[0].type() == incoming_particles()[1].type() &&
-      incoming_particles()[1].type() == incoming_particles()[2].type()) {
+  if (incoming_particles_[0].type() == incoming_particles_[1].type() &&
+      incoming_particles_[1].type() == incoming_particles_[2].type()) {
     sym_factor_in = 6;  // 3 factorial
-  } else if (incoming_particles()[0].type() == incoming_particles()[1].type() ||
-             incoming_particles()[1].type() == incoming_particles()[2].type() ||
-             incoming_particles()[2].type() == incoming_particles()[0].type()) {
+  } else if (incoming_particles_[0].type() == incoming_particles_[1].type() ||
+             incoming_particles_[1].type() == incoming_particles_[2].type() ||
+             incoming_particles_[2].type() == incoming_particles_[0].type()) {
     sym_factor_in = 2;  // 2 factorial
   }
 
@@ -201,19 +201,15 @@ double ScatterActionMulti::probability_three_meson_to_one(
 
 double ScatterActionMulti::probability_three_to_two(
     const ParticleType& type_out1, const ParticleType& type_out2, double dt, const double gcell_vol) const {
-  const double e1 = incoming_particles()[0].momentum().x0();
-  const double e2 = incoming_particles()[1].momentum().x0();
-  const double e3 = incoming_particles()[2].momentum().x0();
+  const double e1 = incoming_particles_[0].momentum().x0();
+  const double e2 = incoming_particles_[1].momentum().x0();
+  const double e3 = incoming_particles_[2].momentum().x0();
   const double sqrts = sqrt_s();
 
   const double m4 = type_out1.mass();
   const double m5 = type_out2.mass();
 
-  // One has to be a bit careful here, since this assumes that the cross section
-  // only depends on sqrt(s). The outgoing (stable) particles, which are incoming here, do not have sampled momenta
-  // yet, only a mass.
-  const double xs_val = CrossSections::two_to_three_xs(type_out1, type_out2, sqrts) / gev2_mb;  // TODO(stdnmr)
-
+  const double xs_val = CrossSections::two_to_three_xs(type_out1, type_out2, sqrts) / gev2_mb;
 
   const double lamb = lambda_tilde(sqrts * sqrts, m4 * m4, m5 * m5) ;
 
