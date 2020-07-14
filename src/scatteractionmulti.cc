@@ -82,7 +82,12 @@ void ScatterActionMulti::add_possible_reactions(double dt,
     }
 
     // 3-to-2
-    if (possible_three_to_two_reaction(incoming_particles())) {
+    if (possible_three_to_two_reaction(incoming_particles()[0], incoming_particles()[1],
+                              incoming_particles()[2])) {
+
+      const ParticleTypePtr type_out1 = ParticleType::try_find(pdg::p);
+      const ParticleTypePtr type_out2 = ParticleType::try_find(-pdg::p);
+
       add_reaction(make_unique<CollisionBranch>(
           *type_out1, *type_out2, probability_three_to_two(*type_out1, *type_out2, dt, gcell_vol),
           ProcessType::MultiParticleThreeToTwo));
@@ -246,9 +251,6 @@ void ScatterActionMulti::annihilation() {
                                   outgoing_particles_[0].momentum());
 }
 
-void ScatterActionMulti::three_to_two() {
-  // TODO(stdnmr)
-}
 
 bool ScatterActionMulti::three_different_pions(
     const ParticleData& data_a, const ParticleData& data_b,

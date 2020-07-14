@@ -102,6 +102,11 @@ class ScatterActionMulti : public Action {
    */
   void annihilation();
 
+
+  void three_to_two() {
+    // TODO(stdnmr)
+  }
+
   /**
    * Calculate the probability for a 3m-to-1 reaction according to the
    * stochastic collision criterion (e.g. \iref{Xu:2004mz} (Sec.IIB)).
@@ -125,6 +130,9 @@ class ScatterActionMulti : public Action {
    * \return probabilty for 3pi-to-1 reaction
    */
   double probability_three_meson_to_one(const ParticleType& type_out, double dt,
+                                        const double gcell_vol) const;
+
+  double probability_three_to_two(const ParticleType& type_out1, const ParticleType& type_out2, double dt,
                                         const double gcell_vol) const;
 
   /**
@@ -167,6 +175,12 @@ class ScatterActionMulti : public Action {
    */
   bool two_pions_eta(const ParticleData& data_a, const ParticleData& data_b,
                      const ParticleData& data_c) const;
+
+  bool possible_three_to_two_reaction(const ParticleData& data_a, const ParticleData& data_b,
+                     const ParticleData& data_c) const {
+   // TODO(stdnmr)
+   return false;
+  };
 
   /// Total probability of reaction
   double total_probability_;
