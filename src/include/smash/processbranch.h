@@ -47,8 +47,9 @@ enum class ProcessType {
   HyperSurfaceCrossing = 8,
   /// bremsstrahlung process: a + b -> a + b + photon
   Bremsstrahlung = 9,
-  /// multi particle scattering
+  /// multi particle scatterings
   MultiParticleThreeMesonsToOne = 10,
+  MultiParticleThreeToTwo = 11,
 
   /**
    * (41-45) soft string excitations. Here "soft" means that the process does

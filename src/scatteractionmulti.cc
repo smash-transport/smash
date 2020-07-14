@@ -85,7 +85,6 @@ void ScatterActionMulti::add_possible_reactions(double dt,
       add_reaction(make_unique<CollisionBranch>(
           *type_out1, *type_out2, probability_three_to_two(*type_out1, *type_out2, dt, gcell_vol),
           ProcessType::MultiParticleThreeToTwo));
-
     }
   }
 }
@@ -111,6 +110,7 @@ void ScatterActionMulti::generate_final_state() {
       annihilation();
       break;
     case ProcessType::MultiParticleThreeToTwo:
+      /* 3->2 scattering */
       three_to_two();
       break;
     default:
@@ -200,17 +200,19 @@ double ScatterActionMulti::probability_three_to_two(
   const double e3 = incoming_particles()[2].momentum().x0();
   const double sqrts = sqrt_s();
 
-  const double xs = get_xs(type_out1, type_out2);  // TODO(stdnmr) pseude-code
-  const double lambda = -1. ; // TODO(stdnmr)
+  const double m4 = type_out1.mass();
+  const double m5 = type_out2.mass();
 
-  const int degen = 1;  // TODO(stdnmr) do later
+  const double xs = get_xs_in_mb(type_out1, type_out2) / gev2_mb;  // TODO(stdnmr) pseude-code
+  const double lamb = lambda_tilde(sqrts * sqrts, m4 * m4, m5 * m5) ;
+
+  const int degen = 1;  // TODO(stdnmr) do later, since depends on reactions
   const double I_3 = calculate_I3(sqrts);
   const double ph_sp_3 =
       1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
 
-  // TODO(stdnmr) How many hbarc?
   return dt / (gcell_vol * gcell_vol) * 1. / (4. * e1 * e2 * e3) *
-         lambda / (ph_sp_3 * 8 * M_PI * * sqrts * sqrts) * xs * std::pow(hbarc, 5.0) *
+         lamb / (ph_sp_3 * 8 * M_PI * sqrts * sqrts) * xs * std::pow(hbarc, 5.0) *
          degen;
 }
 
