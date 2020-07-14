@@ -9,6 +9,7 @@
 
 #include "smash/scatteractionmulti.h"
 
+#include "smash/crosssections.h"
 #include "smash/integrate.h"
 #include "smash/logging.h"
 
@@ -203,7 +204,16 @@ double ScatterActionMulti::probability_three_to_two(
   const double m4 = type_out1.mass();
   const double m5 = type_out2.mass();
 
-  const double xs = get_xs_in_mb(type_out1, type_out2) / gev2_mb;  // TODO(stdnmr) pseude-code
+  // One has to be a bit careful here, since this assumes that the cross section
+  // only depends on sqrt(s). The outgoing (stable) particles, which are incoming here, do not have sampled momenta
+  // yet, only a mass.
+  std::pair<FourVector, FourVector> no_potentials;
+  const ParticleData data_out1 {type_out1};
+  const ParticleData data_out2 {type_out2};
+  CrossSections xs({&data_out1, &data_out2}, sqrts, no_potentials);
+  const double xs_val = CrossSections::sum_xs_of(xs.two_to_three()) / gev2_mb;  // TODO(stdnmr)
+
+
   const double lamb = lambda_tilde(sqrts * sqrts, m4 * m4, m5 * m5) ;
 
   const int degen = 1;  // TODO(stdnmr) do later, since depends on reactions
@@ -212,7 +222,7 @@ double ScatterActionMulti::probability_three_to_two(
       1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
 
   return dt / (gcell_vol * gcell_vol) * 1. / (4. * e1 * e2 * e3) *
-         lamb / (ph_sp_3 * 8 * M_PI * sqrts * sqrts) * xs * std::pow(hbarc, 5.0) *
+         lamb / (ph_sp_3 * 8 * M_PI * sqrts * sqrts) * xs_val * std::pow(hbarc, 5.0) *
          degen;
 }
 
