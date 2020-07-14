@@ -31,6 +31,8 @@ enum class ProcessType {
   TwoToOne = 2,
   /// 2->2 inelastic scattering
   TwoToTwo = 3,
+  /// 2->3 scattering
+  TwoToThree = 4,
   /// resonance decays
   Decay = 5,
   /// box wall crossing

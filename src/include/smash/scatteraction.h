@@ -216,6 +216,9 @@ class ScatterAction : public Action {
   /// Perform an inelastic two-body scattering, i.e. new particles are formed
   void inelastic_scattering();
 
+  /// Perform a two-to-three-body scattering
+  void two_to_three_scattering();
+
   /**
    * Todo(ryu): document better - it is not really UrQMD-based, isn't it?
    * Perform the UrQMD-based string excitation and decay

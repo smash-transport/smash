@@ -77,6 +77,10 @@ void ScatterAction::generate_final_state() {
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
       break;
+    case ProcessType::TwoToThree:
+      /* 2->3 scattering */
+      two_to_three_scattering();
+      break;
     case ProcessType::StringSoftSingleDiffractiveAX:
     case ProcessType::StringSoftSingleDiffractiveXB:
     case ProcessType::StringSoftDoubleDiffractive:
@@ -456,6 +460,11 @@ void ScatterAction::inelastic_scattering() {
     outgoing_particles_[0].set_formation_time(time_of_execution_);
     outgoing_particles_[1].set_formation_time(time_of_execution_);
   }
+}
+
+void ScatterAction::two_to_three_scattering() {
+  sample_3body_phasespace();
+  assign_formation_time_to_outgoing_particles();
 }
 
 void ScatterAction::resonance_formation() {
