@@ -180,6 +180,11 @@ class CrossSections {
   CollisionBranchList two_to_two(ReactionsBitSet included_2to2) const;
 
   /**
+   * TODO(stdnmr) Docu
+   */
+  CollisionBranchList two_to_three() const;
+
+  /**
    * Determine the cross section for string excitations, which is given by the
    * difference between the parametrized total cross section and all the
    * explicitly implemented channels at low energy (elastic, resonance
@@ -228,13 +233,10 @@ class CrossSections {
   CollisionBranchList NNbar_creation() const;
 
   /**
-   * Dtermine inelastic 2->3 cross section for the given scattering.
+   * Determine inelastic 2->3 cross section for the given scattering.
    * Made static in order to call it for 3-to-2 collision probability calculation.
    */
-  static double two_to_three_xs(const ParticleType& type_out1, const ParticleType& type_out2, double sqrts) {
-    // TODO(stdnmr)
-    return 0.0;
-  }
+  static double two_to_three_xs(const ParticleType& type_in1, const ParticleType& type_in2, double sqrts);
 
   /**
    * Determine the parametrized total cross section at high energies

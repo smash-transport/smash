@@ -155,6 +155,8 @@ CollisionBranchList CrossSections::generate_collision_list(
       // 2->2 (inelastic)
       append_list(process_list, two_to_two(included_2to2), 1. - p_pythia);
     }
+    // 2->3
+    append_list(process_list, two_to_three(), 1. - p_pythia);
   }
   /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
    * ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
@@ -816,6 +818,42 @@ CollisionBranchList CrossSections::two_to_two(
   }
   return process_list;
 }
+
+CollisionBranchList CrossSections::two_to_three() const {
+  CollisionBranchList process_list;
+  const ParticleData& data_a = incoming_particles_[0];
+  const ParticleData& data_b = incoming_particles_[1];
+  const ParticleType& type_a = data_a.type();
+  const ParticleType& type_b = data_b.type();
+
+  // Testreaction pp-bar <-> pi+pi-pi0
+  const double xsection_two_three = two_to_three_xs(type_a, type_b, sqrt_s_);
+
+  if (xsection_two_three > really_small) {
+
+    ParticleTypePtr pim = ParticleType::try_find(pdg::pi_m);
+    ParticleTypePtr pi0 = ParticleType::try_find(pdg::pi_z);
+    ParticleTypePtr pip = ParticleType::try_find(pdg::pi_p);
+
+    process_list.push_back(make_unique<CollisionBranch>(
+        *pim, *pi0, *pip, xsection_two_three, ProcessType::TwoToThree));
+  }
+  return process_list;
+}
+
+double CrossSections::two_to_three_xs(const ParticleType& type_in1, const ParticleType& type_in2, double sqrts) {
+  double x_sec = 0.0;
+  const auto& pdg_a = type_in1.pdgcode();
+  const auto& pdg_b = type_in2.pdgcode();
+
+  if (pdg_a.is_proton() && pdg_b.is_proton() &&
+      pdg_a.antiparticle_sign() != pdg_b.antiparticle_sign()) {
+    x_sec = 50.0;  // TODO(stdnmr) currently rough approximation
+  }
+
+  return x_sec;
+}
+
 
 CollisionBranchList CrossSections::bb_xx_except_nn(
     ReactionsBitSet included_2to2) const {

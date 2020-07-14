@@ -102,7 +102,7 @@ class ScatterActionMulti : public Action {
    */
   void annihilation();
 
-  /// Perform a 3->2 process.   
+  /// Perform a 3->2 process.
   void three_to_two();
 
   /**
@@ -176,8 +176,8 @@ class ScatterActionMulti : public Action {
 
   bool possible_three_to_two_reaction(const ParticleData& data_a, const ParticleData& data_b,
                      const ParticleData& data_c) const {
-   // TODO(stdnmr)
-   return false;
+   // Dummy process 3pi to pp-bar
+   return three_different_pions(data_a, data_b, data_c);
   };
 
   /// Total probability of reaction
