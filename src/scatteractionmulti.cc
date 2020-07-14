@@ -242,6 +242,11 @@ void ScatterActionMulti::annihilation() {
                                   outgoing_particles_[0].momentum());
 }
 
+void ScatterActionMulti::three_to_two() {
+  sample_2body_phasespace();
+  // Make sure to assign formation times before boost to the computational frame
+  assign_formation_time_to_outgoing_particles();
+}
 
 bool ScatterActionMulti::three_different_pions(
     const ParticleData& data_a, const ParticleData& data_b,
