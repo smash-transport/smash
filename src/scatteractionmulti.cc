@@ -212,11 +212,7 @@ double ScatterActionMulti::probability_three_to_two(
   // One has to be a bit careful here, since this assumes that the cross section
   // only depends on sqrt(s). The outgoing (stable) particles, which are incoming here, do not have sampled momenta
   // yet, only a mass.
-  std::pair<FourVector, FourVector> no_potentials;
-  const ParticleData data_out1 {type_out1};
-  const ParticleData data_out2 {type_out2};
-  CrossSections xs({&data_out1, &data_out2}, sqrts, no_potentials);
-  const double xs_val = CrossSections::sum_xs_of(xs.two_to_three()) / gev2_mb;  // TODO(stdnmr)
+  const double xs_val = CrossSections::two_to_three_xs(type_out1, type_out2, sqrts) / gev2_mb;  // TODO(stdnmr)
 
 
   const double lamb = lambda_tilde(sqrts * sqrts, m4 * m4, m5 * m5) ;
