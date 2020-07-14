@@ -102,6 +102,18 @@ class CrossSections {
       NNbarTreatment nnbar_treatment, StringProcess* string_process) const;
 
   /**
+   * Helper function:
+   * Sum all cross sections of the given process list.
+   */
+  static double sum_xs_of(const CollisionBranchList& list) {
+    double xs_sum = 0.0;
+    for (auto& proc : list) {
+      xs_sum += proc->weight();
+    }
+    return xs_sum;
+  }
+
+  /**
    * Determine the elastic cross section for this collision. If elastic_par is
    * given (and positive), we just use a constant cross section of that size,
    * otherwise a parametrization of the elastic cross section is used

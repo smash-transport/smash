@@ -99,18 +99,6 @@ static void append_list(CollisionBranchList& main_list,
   }
 }
 
-/**
- * Helper function:
- * Sum all cross sections of the given process list.
- */
-static double sum_xs_of(CollisionBranchList& list) {
-  double xs_sum = 0.0;
-  for (auto& proc : list) {
-    xs_sum += proc->weight();
-  }
-  return xs_sum;
-}
-
 CrossSections::CrossSections(const ParticleList& incoming_particles,
                              const double sqrt_s,
                              const std::pair<FourVector, FourVector> potentials)
