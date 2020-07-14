@@ -72,7 +72,6 @@ void ScatterActionMulti::add_possible_reactions(double dt,
         // eta2pi -> eta-prime
         const ParticleTypePtr type_eta_prime = ParticleType::try_find(0x331);
         if (type_eta_prime) {
-          // TODO(stdnmr) Do we need a symmetry factor if we have two pi0?
           add_reaction(make_unique<CollisionBranch>(
               *type_eta_prime,
               probability_three_meson_to_one(*type_eta_prime, dt, gcell_vol),
