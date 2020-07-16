@@ -9,6 +9,7 @@
 
 #include "smash/crosssections.h"
 
+#include "smash/action.h"
 #include "smash/clebschgordan.h"
 #include "smash/constants.h"
 #include "smash/kinematics.h"
@@ -854,7 +855,7 @@ double CrossSections::two_to_three_xs(const ParticleType& type_in1, const Partic
     const double s = sqrts * sqrts;
 
     // Cassings parametrization of cross section
-    x_sec = 50.0 * s / (2. * std::sqrt(lambda_tilde(s, m1 * m1, m2 * m2)));
+    x_sec = 50.0 * s / (2. * std::sqrt(Action::lambda_tilde(s, m1 * m1, m2 * m2)));
   }
 
   return x_sec;

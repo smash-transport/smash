@@ -290,6 +290,16 @@ class Action {
   std::pair<FourVector, FourVector> get_potential_at_interaction_point() const;
 
   /**
+   * Little helper function that calculates the lambda function (sometimes
+   * written with a tilde to better distinguish it) that appears e.g. in the
+   * relative velocity or 3-to-2 probability calculation.
+   * Defintion found e.g. in \iref{Seifert:2017oyb}, eq. (5).
+   */
+  static double lambda_tilde(double a, double b, double c) {
+    return (a - b - c) * (a - b - c) - 4. * b * c;
+  }
+
+  /**
    * \ingroup exception
    * Thrown for example when ScatterAction is called to perform with a wrong
    * number of final-state particles or when the energy is too low to produce
@@ -327,16 +337,6 @@ class Action {
       mom += p.momentum();
     }
     return mom;
-  }
-
-  /**
-   * Little helper function that calculates the lambda function (sometimes
-   * written with a tilde to better distinguish it) that appears e.g. in the
-   * relative velocity or 3-to-2 probability calculation.
-   * Defintion found e.g. in \iref{Seifert:2017oyb}, eq. (5).
-   */
-  double lambda_tilde(double a, double b, double c) const {
-    return (a - b - c) * (a - b - c) - 4. * b * c;
   }
 
   /**
