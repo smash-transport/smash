@@ -848,7 +848,13 @@ double CrossSections::two_to_three_xs(const ParticleType& type_in1, const Partic
 
   if (pdg_a.is_proton() && pdg_b.is_proton() &&
       pdg_a.antiparticle_sign() != pdg_b.antiparticle_sign()) {
-    x_sec = 50.0;  // TODO(stdnmr) currently rough approximation
+
+    const double m1 = type_in1.mass();
+    const double m2 = type_in2.mass();
+    const double s = sqrts * sqrts;
+
+    // Cassings parametrization of cross section
+    x_sec = 50.0 * s / (2. * std::sqrt(lambda_tilde(s, m1 * m1, m2 * m2)));
   }
 
   return x_sec;
