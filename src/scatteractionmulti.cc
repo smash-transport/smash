@@ -83,7 +83,7 @@ void ScatterActionMulti::add_possible_reactions(double dt,
     // 3-to-2
     if (possible_three_to_two_reaction(incoming_particles_[0], incoming_particles_[1],
                               incoming_particles_[2])) {
-
+      // example reaction: 3pi-to-pp_bar
       const ParticleTypePtr type_out1 = ParticleType::try_find(pdg::p);
       const ParticleTypePtr type_out2 = ParticleType::try_find(-pdg::p);
 
@@ -212,14 +212,15 @@ double ScatterActionMulti::probability_three_to_two(
 
   const double lamb = lambda_tilde(sqrts * sqrts, m4 * m4, m5 * m5) ;
 
-  const int degen = 1;  // TODO(stdnmr) do later, since depends on reactions
+  // Degneracy for 3pi-to-pp_bar
+  const int spin_deg_out = type_out1.spin_degeneracy() * type_out2.spin_degeneracy();
   const double I_3 = calculate_I3(sqrts);
   const double ph_sp_3 =
       1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
 
   return dt / (gcell_vol * gcell_vol) * 1. / (4. * e1 * e2 * e3) *
          lamb / (ph_sp_3 * 8 * M_PI * sqrts * sqrts) * xs_val * std::pow(hbarc, 5.0) *
-         degen;
+         spin_deg_out;
 }
 
 
