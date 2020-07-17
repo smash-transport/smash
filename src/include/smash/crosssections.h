@@ -234,7 +234,9 @@ class CrossSections {
 
   /**
    * Determine inelastic 2->3 cross section for the given scattering.
-   * Made static in order to call it for 3-to-2 collision probability calculation.
+   * TODO(stdnmr) Finish Docu
+   * Note: Static function in order to call it for 3-to-2 collision probability
+   * calculation.
    */
   static double two_to_three_xs(const ParticleType& type_in1, const ParticleType& type_in2, double sqrts);
 

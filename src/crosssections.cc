@@ -821,44 +821,14 @@ CollisionBranchList CrossSections::two_to_two(
 }
 
 CollisionBranchList CrossSections::two_to_three() const {
-  CollisionBranchList process_list;
-  const ParticleData& data_a = incoming_particles_[0];
-  const ParticleData& data_b = incoming_particles_[1];
-  const ParticleType& type_a = data_a.type();
-  const ParticleType& type_b = data_b.type();
-
-  // Testreaction pp-bar <-> pi+pi-pi0
-  const double xsection_two_three = two_to_three_xs(type_a, type_b, sqrt_s_);
-
-  if (xsection_two_three > really_small) {
-
-    ParticleTypePtr pim = ParticleType::try_find(pdg::pi_m);
-    ParticleTypePtr pi0 = ParticleType::try_find(pdg::pi_z);
-    ParticleTypePtr pip = ParticleType::try_find(pdg::pi_p);
-
-    process_list.push_back(make_unique<CollisionBranch>(
-        *pim, *pi0, *pip, xsection_two_three, ProcessType::TwoToThree));
-  }
-  return process_list;
+  // No 2-to-3 collisons at the moment
+  return {};
 }
 
-double CrossSections::two_to_three_xs(const ParticleType& type_in1, const ParticleType& type_in2, double sqrts) {
-  double x_sec = 0.0;
-  const auto& pdg_a = type_in1.pdgcode();
-  const auto& pdg_b = type_in2.pdgcode();
-
-  if (pdg_a.is_proton() && pdg_b.is_proton() &&
-      pdg_a.antiparticle_sign() != pdg_b.antiparticle_sign()) {
-
-    const double m1 = type_in1.mass();
-    const double m2 = type_in2.mass();
-    const double s = sqrts * sqrts;
-
-    // Cassings parametrization of cross section
-    x_sec = 50.0 * s / (2. * std::sqrt(Action::lambda_tilde(s, m1 * m1, m2 * m2)));
-  }
-
-  return x_sec;
+double CrossSections::two_to_three_xs(const ParticleType& /*type_in1*/,
+                                      const ParticleType& /*type_in2*/,
+                                      double /*sqrts*/) {
+  return 0.0;
 }
 
 
