@@ -63,8 +63,7 @@ class ScatterActionMulti : public Action {
    * \param[in] two_to_three 3<->2 reactions enabled?
    */
   void add_possible_reactions(double dt, const double gcell_vol,
-                              const bool three_to_one,
-                              const bool two_to_three);
+                              const bool three_to_one, const bool two_to_three);
 
   /**
    * \ingroup exception
@@ -132,11 +131,14 @@ class ScatterActionMulti : public Action {
    * \return probabilty for 3pi-to-1 reaction
    */
   double probability_three_meson_to_one(const ParticleType& type_out, double dt,
-                                        const double gcell_vol, const int degen_factor = 1) const;
+                                        const double gcell_vol,
+                                        const int degen_factor = 1) const;
 
   /// TODO(stdnmr) Docu
-  double probability_three_to_two(const ParticleType& type_out1, const ParticleType& type_out2, double dt,
-                                        const double gcell_vol, const int degen_factor = 1) const;
+  double probability_three_to_two(const ParticleType& type_out1,
+                                  const ParticleType& type_out2, double dt,
+                                  const double gcell_vol,
+                                  const int degen_factor = 1) const;
 
   /**
    * Calculate the integration necessary for the three-body phase space. The
@@ -180,9 +182,10 @@ class ScatterActionMulti : public Action {
                      const ParticleData& data_c) const;
 
   /// TODO(stdnmr) Docu
-  bool possible_three_to_two_reaction(const ParticleData& /*data_a*/, const ParticleData& /*data_b*/,
-                     const ParticleData& /*data_c*/) const {
-   return false;  // No 3-to-2 reactions at the moment
+  bool possible_three_to_two_reaction(const ParticleData& /*data_a*/,
+                                      const ParticleData& /*data_b*/,
+                                      const ParticleData& /*data_c*/) const {
+    return false;  // No 3-to-2 reactions at the moment
   };
 
   /// Total probability of reaction

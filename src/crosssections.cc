@@ -833,7 +833,6 @@ double CrossSections::two_to_three_xs(const ParticleType& /*type_in1*/,
   return 0.0;
 }
 
-
 CollisionBranchList CrossSections::bb_xx_except_nn(
     ReactionsBitSet included_2to2) const {
   CollisionBranchList process_list;

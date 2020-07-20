@@ -60,14 +60,17 @@ void ScatterActionMulti::add_possible_reactions(double dt,
         if (type_omega) {
           add_reaction(make_unique<CollisionBranch>(
               *type_omega,
-              probability_three_meson_to_one(*type_omega, dt, gcell_vol, type_omega->spin_degeneracy()),
+              probability_three_meson_to_one(*type_omega, dt, gcell_vol,
+                                             type_omega->spin_degeneracy()),
               ProcessType::MultiParticleThreeMesonsToOne));
         }
         // 3pi -> phi
         const ParticleTypePtr type_phi = ParticleType::try_find(0x333);
         if (type_phi) {
           add_reaction(make_unique<CollisionBranch>(
-              *type_phi, probability_three_meson_to_one(*type_phi, dt, gcell_vol, type_phi->spin_degeneracy()),
+              *type_phi,
+              probability_three_meson_to_one(*type_phi, dt, gcell_vol,
+                                             type_phi->spin_degeneracy()),
               ProcessType::MultiParticleThreeMesonsToOne));
         }
       } else if (two_pions_eta(incoming_particles_[0], incoming_particles_[1],
@@ -85,15 +88,18 @@ void ScatterActionMulti::add_possible_reactions(double dt,
         if (type_eta_prime) {
           add_reaction(make_unique<CollisionBranch>(
               *type_eta_prime,
-              probability_three_meson_to_one(*type_eta_prime, dt, gcell_vol, sym_factor_in * type_eta_prime->spin_degeneracy()),
+              probability_three_meson_to_one(
+                  *type_eta_prime, dt, gcell_vol,
+                  sym_factor_in * type_eta_prime->spin_degeneracy()),
               ProcessType::MultiParticleThreeMesonsToOne));
         }
       }
     }
     if (two_to_three) {
       // 3 -> 2
-      if (possible_three_to_two_reaction(incoming_particles_[0], incoming_particles_[1],
-                                incoming_particles_[2])) {
+      if (possible_three_to_two_reaction(incoming_particles_[0],
+                                         incoming_particles_[1],
+                                         incoming_particles_[2])) {
         // Add 3-to-2 reactions here
       }
     }
@@ -168,7 +174,8 @@ double ScatterActionMulti::calculate_I3(const double sqrts) const {
 }
 
 double ScatterActionMulti::probability_three_meson_to_one(
-    const ParticleType& type_out, double dt, const double gcell_vol, const int degen_factor) const {
+    const ParticleType& type_out, double dt, const double gcell_vol,
+    const int degen_factor) const {
   const double e1 = incoming_particles_[0].momentum().x0();
   const double e2 = incoming_particles_[1].momentum().x0();
   const double e3 = incoming_particles_[2].momentum().x0();
@@ -190,7 +197,8 @@ double ScatterActionMulti::probability_three_meson_to_one(
 }
 
 double ScatterActionMulti::probability_three_to_two(
-    const ParticleType& type_out1, const ParticleType& type_out2, double dt, const double gcell_vol, const int degen_factor) const {
+    const ParticleType& type_out1, const ParticleType& type_out2, double dt,
+    const double gcell_vol, const int degen_factor) const {
   const double e1 = incoming_particles_[0].momentum().x0();
   const double e2 = incoming_particles_[1].momentum().x0();
   const double e3 = incoming_particles_[2].momentum().x0();
@@ -198,19 +206,18 @@ double ScatterActionMulti::probability_three_to_two(
   const double m5 = type_out2.mass();
 
   const double sqrts = sqrt_s();
-  const double xs = CrossSections::two_to_three_xs(type_out1, type_out2, sqrts) / gev2_mb;
+  const double xs =
+      CrossSections::two_to_three_xs(type_out1, type_out2, sqrts) / gev2_mb;
   const double lamb = lambda_tilde(sqrts * sqrts, m4 * m4, m5 * m5);
 
   const double I_3 = calculate_I3(sqrts);
   const double ph_sp_3 =
       1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
 
-  return dt / (gcell_vol * gcell_vol) * 1. / (4. * e1 * e2 * e3) *
-         lamb / (ph_sp_3 * 8 * M_PI * sqrts * sqrts) * xs * std::pow(hbarc, 5.0) *
+  return dt / (gcell_vol * gcell_vol) * 1. / (4. * e1 * e2 * e3) * lamb /
+         (ph_sp_3 * 8 * M_PI * sqrts * sqrts) * xs * std::pow(hbarc, 5.0) *
          degen_factor;
 }
-
-
 
 void ScatterActionMulti::annihilation() {
   if (outgoing_particles_.size() != 1) {

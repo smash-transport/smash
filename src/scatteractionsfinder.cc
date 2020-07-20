@@ -274,9 +274,10 @@ ScatterActionsFinder::ScatterActionsFinder(
         elastic_parameter_, " mb as maximal cross-section.");
   }
   if ((three_to_one_ || two_to_three_) &&
-       coll_crit_ != CollisionCriterion::Stochastic) {
+      coll_crit_ != CollisionCriterion::Stochastic) {
     throw std::invalid_argument(
-        "3-body reactions (3->1 or 3->2) are only possible with the stochastic collision "
+        "3-body reactions (3->1 or 3->2) are only possible with the stochastic "
+        "collision "
         "criterion. Change your config accordingly.");
   }
 
@@ -361,10 +362,9 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   }
 
   // Add various subprocesses.
-  act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                           low_snn_cut_, strings_switch_, use_AQM_,
-                           strings_with_probability_, nnbar_treatment_,
-                           two_to_three_);
+  act->add_all_scatterings(
+      elastic_parameter_, two_to_one_, incl_set_, low_snn_cut_, strings_switch_,
+      use_AQM_, strings_with_probability_, nnbar_treatment_, two_to_three_);
 
   double xs =
       act->cross_section() * fm2_mb / static_cast<double>(testparticles_);

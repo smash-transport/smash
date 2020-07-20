@@ -240,7 +240,8 @@ class CrossSections {
    * Note: Static function in order to call it for 3-to-2 collision probability
    * calculation.
    */
-  static double two_to_three_xs(const ParticleType& type_in1, const ParticleType& type_in2, double sqrts);
+  static double two_to_three_xs(const ParticleType& type_in1,
+                                const ParticleType& type_in2, double sqrts);
 
   /**
    * Determine the parametrized total cross section at high energies

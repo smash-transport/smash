@@ -142,8 +142,7 @@ class ScatterAction : public Action {
                            ReactionsBitSet included_2to2, double low_snn_cut,
                            bool strings_switch, bool use_AQM,
                            bool strings_with_probability,
-                           NNbarTreatment nnbar_treatment,
-                           bool two_to_three);
+                           NNbarTreatment nnbar_treatment, bool two_to_three);
 
   /**
    * Get list of possible collision channels.
