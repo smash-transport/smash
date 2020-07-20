@@ -97,9 +97,7 @@ void ScatterActionMulti::add_possible_reactions(double dt,
     }
     if (two_to_three) {
       // 3 -> 2
-      if (possible_three_to_two_reaction(incoming_particles_[0],
-                                         incoming_particles_[1],
-                                         incoming_particles_[2])) {
+      if (possible_three_to_two_reaction()) {
         // Add 3-to-2 reactions here
       }
     }
