@@ -256,8 +256,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       two_to_one_(parameters.two_to_one),
       incl_set_(parameters.included_2to2),
       two_to_three_(config.take({"Collision_Term", "Include_2to3"}, false)),
-      three_to_one_(
-          config.take({"Collision_Term", "Include_3to1"}, false)),
+      three_to_one_(config.take({"Collision_Term", "Include_3to1"}, false)),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
       use_AQM_(parameters.use_AQM),

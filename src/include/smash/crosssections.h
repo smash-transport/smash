@@ -182,7 +182,12 @@ class CrossSections {
   CollisionBranchList two_to_two(ReactionsBitSet included_2to2) const;
 
   /**
-   * TODO(stdnmr) Docu
+   * Find all 2->3 processes for the given scattering.
+   *
+   * This function calls the different, more specific functions for
+   * the different scatterings.
+   *
+   * \return List of all possibe 2->3 processes.
    */
   CollisionBranchList two_to_three() const;
 
@@ -235,10 +240,20 @@ class CrossSections {
   CollisionBranchList NNbar_creation() const;
 
   /**
-   * Determine inelastic 2->3 cross section for the given scattering.
-   * TODO(stdnmr) Finish Docu
-   * Note: Static function in order to call it for 3-to-2 collision probability
-   * calculation.
+   * Determine 2->3 cross section for the scattering of the given particle
+   * types.
+   *
+   * That the function only depends on the types of particles (plus sqrt(s)) and
+   * not on the specific particles, is an assumption needed in order to treat
+   * the 3->2 back-reaction with the stochastic criterion, where this function
+   * also needs to be called for 3-to-2 collision probability with only types
+   * and sqrt(s) known at this point. Therefore the function is also made
+   * static.
+   *
+   * \param[in] type_in1 first scatterning particle type
+   * \param[in] type_in2 second scatterning particle type
+   * \param[in] sqrts center-of-mass energy of scattering
+   * \return cross section for 2->3 process
    */
   static double two_to_three_xs(const ParticleType& type_in1,
                                 const ParticleType& type_in2, double sqrts);
