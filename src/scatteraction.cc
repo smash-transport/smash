@@ -111,12 +111,12 @@ void ScatterAction::generate_final_state() {
 void ScatterAction::add_all_scatterings(
     double elastic_parameter, bool two_to_one, ReactionsBitSet included_2to2,
     double low_snn_cut, bool strings_switch, bool use_AQM,
-    bool strings_with_probability, NNbarTreatment nnbar_treatment) {
+    bool strings_with_probability, NNbarTreatment nnbar_treatment, bool two_to_three) {
   CrossSections xs(incoming_particles_, sqrt_s(),
                    get_potential_at_interaction_point());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
-      use_AQM, strings_with_probability, nnbar_treatment, string_process_);
+      use_AQM, strings_with_probability, nnbar_treatment, two_to_three, string_process_);
 
   /* Add various subprocesses.*/
   add_collisions(std::move(processes));

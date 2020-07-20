@@ -91,6 +91,7 @@ class CrossSections {
    *            according to a probability?
    * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
    *                                                        none
+   * \param[in] include_two_to_three 2<->3 reactions enabled?
    * \param[in] string_process a pointer to the StringProcess object,
    *            which is used for string excitation and fragmentation.
    * \return List of all possible collisions.
@@ -99,7 +100,8 @@ class CrossSections {
       double elastic_parameter, bool two_to_one_switch,
       ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
       bool use_AQM, bool strings_with_probability,
-      NNbarTreatment nnbar_treatment, StringProcess* string_process) const;
+      NNbarTreatment nnbar_treatment, bool include_two_to_three,
+      StringProcess* string_process) const;
 
   /**
    * Helper function:

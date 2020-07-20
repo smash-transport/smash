@@ -115,7 +115,7 @@ CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
     ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
     bool use_AQM, bool strings_with_probability, NNbarTreatment nnbar_treatment,
-    StringProcess* string_process) const {
+    bool include_two_to_three, StringProcess* string_process) const {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
@@ -156,8 +156,10 @@ CollisionBranchList CrossSections::generate_collision_list(
       // 2->2 (inelastic)
       append_list(process_list, two_to_two(included_2to2), 1. - p_pythia);
     }
-    // 2->3
-    append_list(process_list, two_to_three(), 1. - p_pythia);
+    if (include_two_to_three) {
+      // 2->3
+      append_list(process_list, two_to_three(), 1. - p_pythia);
+    }
   }
   /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
    * ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.

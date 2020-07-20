@@ -43,6 +43,11 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \li \key "Covariant" - Covariant collision criterion see e.g. T. Hirano and
  * Y. Nara, PTEP Issue 1, 16 (2012).
  *
+ * \key Include_2to3 (bool, optional, default = \key false) \n
+ * Enable 2 <--> 3 forward and backward reactions via the stochastic criterion.
+ * This option can only be used with the \key Collision_Criterion set to
+ * \key "Stochastic".
+ *
  * \key Include_Stochastic_3to1 (bool, optional, default = \key false) \n
  * Enable 3 --> 1 processes via the stochastic criterion. This option can only
  * be used with the \key Collision_Criterion set to \key "Stochastic".
@@ -250,6 +255,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(parameters.two_to_one),
       incl_set_(parameters.included_2to2),
+      two_to_three_(config.take({"Collision_Term", "Include_2to3"}, false)),
       three_to_one_(
           config.take({"Collision_Term", "Include_Stochastic_3to1"}, false)),
       low_snn_cut_(parameters.low_snn_cut),
@@ -267,9 +273,10 @@ ScatterActionsFinder::ScatterActionsFinder(
         "Constant elastic isotropic cross-section mode:", " using ",
         elastic_parameter_, " mb as maximal cross-section.");
   }
-  if (three_to_one_ && coll_crit_ != CollisionCriterion::Stochastic) {
+  if ((three_to_one_ || two_to_three_) &&
+       coll_crit_ != CollisionCriterion::Stochastic) {
     throw std::invalid_argument(
-        "3-to-1 reactions are only possible with the stochastic collision "
+        "3-body reactions (3->1 or 3->2) are only possible with the stochastic collision "
         "criterion. Change your config accordingly.");
   }
 
@@ -356,7 +363,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   // Add various subprocesses.
   act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                            low_snn_cut_, strings_switch_, use_AQM_,
-                           strings_with_probability_, nnbar_treatment_);
+                           strings_with_probability_, nnbar_treatment_,
+                           two_to_three_);
 
   double xs =
       act->cross_section() * fm2_mb / static_cast<double>(testparticles_);
@@ -436,7 +444,7 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
       make_unique<ScatterActionMulti>(plist, time_until_collision);
 
   // 3. Add possible final states (dt and gcell_vol for probability calculation)
-  act->add_possible_reactions(dt, gcell_vol, three_to_one_);
+  act->add_possible_reactions(dt, gcell_vol, three_to_one_, two_to_three_);
 
   /* 4. Return total collision probability
    *    Scales with 1 over the number of testpartciles to the power of the
@@ -475,7 +483,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
           actions.push_back(std::move(act));
         }
       }
-      if (three_to_one_) {
+      if (three_to_one_ || two_to_three_) {
         // Also, check for 3 particle scatterings with stochastic criterion
         for (const ParticleData& p3 : search_list) {
           if (p1.id() < p2.id() && p2.id() < p3.id()) {
@@ -576,7 +584,7 @@ void ScatterActionsFinder::dump_reactions() const {
             act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                                      low_snn_cut_, strings_switch_, use_AQM_,
                                      strings_with_probability_,
-                                     nnbar_treatment_);
+                                     nnbar_treatment_, two_to_three_);
             const double total_cs = act->cross_section();
             if (total_cs <= 0.0) {
               continue;
@@ -969,7 +977,8 @@ void ScatterActionsFinder::dump_cross_sections(
     }
     act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                              low_snn_cut_, strings_switch_, use_AQM_,
-                             strings_with_probability_, nnbar_treatment_);
+                             strings_with_probability_, nnbar_treatment_,
+                             two_to_three_);
     decaytree::Node tree(a.name() + b.name(), act->cross_section(), {&a, &b},
                          {&a, &b}, {&a, &b}, {});
     const CollisionBranchList& processes = act->collision_channels();

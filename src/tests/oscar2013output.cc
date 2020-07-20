@@ -105,7 +105,7 @@ TEST(full2013_format) {
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
                               true, false, false,
-                              NNbarTreatment::NoAnnihilation);
+                              NNbarTreatment::NoAnnihilation, false);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double impact_parameter = 1.783;
@@ -231,7 +231,7 @@ TEST(final2013_format) {
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
                               true, false, false,
-                              NNbarTreatment::NoAnnihilation);
+                              NNbarTreatment::NoAnnihilation, false);
   action->generate_final_state();
 
   const bf::path outputfilename = "particle_lists.oscar";
@@ -313,7 +313,7 @@ TEST(full_extended_oscar) {
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
                               true, false, false,
-                              NNbarTreatment::NoAnnihilation);
+                              NNbarTreatment::NoAnnihilation, false);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const int event_id = 0;

@@ -47,7 +47,8 @@ double ScatterActionMulti::get_partial_weight() const {
 
 void ScatterActionMulti::add_possible_reactions(double dt,
                                                 const double gcell_vol,
-                                              const bool three_to_one) {
+                                                const bool three_to_one,
+                                                const bool two_to_three) {
   // 3 -> m
   if (incoming_particles_.size() == 3) {
     // 3 -> 1
@@ -89,10 +90,12 @@ void ScatterActionMulti::add_possible_reactions(double dt,
         }
       }
     }
-    // 3 -> 2
-    if (possible_three_to_two_reaction(incoming_particles_[0], incoming_particles_[1],
-                              incoming_particles_[2])) {
-      // Add 3-to-2 reactions here
+    if (two_to_three) {
+      // 3 -> 2
+      if (possible_three_to_two_reaction(incoming_particles_[0], incoming_particles_[1],
+                                incoming_particles_[2])) {
+        // Add 3-to-2 reactions here
+      }
     }
   }
 }

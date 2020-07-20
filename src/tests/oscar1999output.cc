@@ -76,7 +76,7 @@ TEST(fullhistory_format) {
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
                               true, false, false,
-                              NNbarTreatment::NoAnnihilation);
+                              NNbarTreatment::NoAnnihilation, false);
   action->generate_final_state();
   const ParticleList final_particles = action->outgoing_particles();
 
@@ -206,7 +206,7 @@ TEST(particlelist_format) {
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
                               true, false, false,
-                              NNbarTreatment::NoAnnihilation);
+                              NNbarTreatment::NoAnnihilation, false);
   action->generate_final_state();
   const int event_id = 0;
   const double impact_parameter = 2.4;
