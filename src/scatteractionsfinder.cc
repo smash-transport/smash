@@ -48,7 +48,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * This option can only be used with the \key Collision_Criterion set to
  * \key "Stochastic".
  *
- * \key Include_Stochastic_3to1 (bool, optional, default = \key false) \n
+ * \key Include_3to1 (bool, optional, default = \key false) \n
  * Enable 3 --> 1 processes via the stochastic criterion. This option can only
  * be used with the \key Collision_Criterion set to \key "Stochastic".
  * Implemented 3 --> 1 processes: \f$\pi^+\pi^-\pi^0\rightarrow\omega\f$. Note
@@ -257,7 +257,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       incl_set_(parameters.included_2to2),
       two_to_three_(config.take({"Collision_Term", "Include_2to3"}, false)),
       three_to_one_(
-          config.take({"Collision_Term", "Include_Stochastic_3to1"}, false)),
+          config.take({"Collision_Term", "Include_3to1"}, false)),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
       use_AQM_(parameters.use_AQM),
