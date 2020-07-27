@@ -21,11 +21,8 @@ static constexpr int LOutput = LogArea::Output::id;
 
 /*!\Userguide
  * \page format_root ROOT Format
- * SMASH ROOT output shares functionalities with the OSCAR output, but ROOT
- * files are faster to read and write and they need less disk space for the
- * same amount of information. This is achieved due to an optimized internal
- * structure of ROOT files (and compression). ROOT files are not
- * human-readable, but they can be viewed using ROOT's TBrowser. One can also
+ * SMASH ROOT output is a fast and disk-space efficient, but not human-readable
+ * output. ROOT output files can be viewed using ROOT's TBrowser. One can also
  * access them using ROOT functions. The full memory structure of the ROOT
  * files can be found here: http://root.cern.ch/root/html/TFile.html. We only
  * desribe the logical structure of the SMASH ROOT output. Knowing the logical
@@ -34,15 +31,17 @@ static constexpr int LOutput = LogArea::Output::id;
  *
  * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
  *
- * SMASH produces one ROOT file per run: \c smash_run.root. This file contains
- * a TTree called \c particles and a TTree called \c collisions, depending
- * on the required content (see \ref output_general_). The \c particles
- * tree contains information about the parameters of the run (such as the number
- * of testparticles and event number), information relating to individual
- * particles (such as their position or charge), and information about bulk
- * observables in the system (kinetic energy, mean field energy, and total
- * energy). The \c collisions tree contains the same information as OSCAR
- * collision output.
+ * Depending on configuration (see \ref output_general_) SMASH can produces up
+ * to two ROOT files per run: \c Particles.root and \c Collisions.root. These
+ * files contain a TTree called \c particles and a TTree called \c collisions.
+ * The \c particles tree contains information about the parameters of the run
+ * (such as the number of testparticles and event number), information relating
+ * to individual particles (such as their position or charge), and information
+ * about bulk observables in the system (kinetic energy, mean field energy, and
+ * total energy). The \c collisions tree contains the same information about
+ * each collision, such as number of incoming and outgoing particles. It also
+ * has the full information about the incoming and outgoing particles of each
+ * collision.
  *
  * In case that the ROOT format is used for dilepton output
  * (see \ref output_dileptons), the ROOT file is called \c Dileptons.root and
@@ -55,7 +54,7 @@ static constexpr int LOutput = LogArea::Output::id;
  * pdgcode[npart] charge[npart] t[npart] x[npart] y[npart] z[npart] p0[npart]
  * px[npart] py[npart] pz[npart] E_kinetic_tot E_fields_tot E_tot
  * \endcode
- * One tree entry is analogous to an OSCAR output block, but the maximal
+ * The maximal
  * number of particles in one entry is limited to 500000. This is done to limit
  * the buffer size needed for ROOT output. If the number of particles in one
  * block exceeds 500000, then they are written in separate blocks with the same
@@ -95,6 +94,131 @@ static constexpr int LOutput = LogArea::Output::id;
  * not supported.
  *
  * See also \ref collisions_output_in_box_modus_.
+ *
+ * Here is an example of a basic ROOT macro to read the ROOT output of SMASH:
+ * \code
+ * // file name: basic_macro.C
+ *
+ * #include <TFile.h>
+ * #include <TTree.h>
+ *
+ * int rootfile_basic_example() {
+ *   // open SMASH output file to be read in
+ *   TFile *input_file = TFile::Open("../build/data/0/Particles.root");
+ *   if (input_file->IsOpen()) {
+ *     printf("Successfully opened file %s\n", input_file->GetName());
+ *   } else {
+ *     printf("Error at opening file %s\n", input_file->GetName());
+ *   }
+ *
+ *   // Get a tree from file
+ *   TTree *tree = static_cast<TTree*>(input_file->Get("particles"));
+ *
+ *   // Get number of entries in a tree
+ *   Int_t nentries = tree->GetEntries();
+ *   printf("Number of entries in a tree is %d\n", nentries);
+ *
+ *   // This draws p_T distribution at initialization
+ *   // tree->Draw("sqrt(px*px + py*py)","tcounter==0");
+ *
+ *   // This draws 3D momentum space distribution at initialization
+ *   tree->Draw("px:py:pz","tcounter==0");
+ *
+ *   return 0;
+ * }
+ * \endcode
+ * To execute this macro:
+ * \code
+ * root -l
+ * .L basic_macro.C+
+ * rootfile_basic_example()
+ * \endcode
+ *
+ * To generate a ROOT macro for a more involved analysis:
+ * \code
+ * root -l Particles.root
+ * particles->MakeClass("analysis")
+ * \endcode
+ * This creates analysis.h and analysis.C, the latter of which provides an
+ * example of a basic loop over entries. The user can modify the Loop() function
+ * and build a more complicated analysis. The following is an example of a macro
+ * using an array of histograms to obtain the radial momentum distribution for
+ * each of the entries in the Particles.root:
+ * \code
+ * #define analysis_cxx
+ * #include "analysis.h"
+ * #include <TH2.h>
+ * #include <TStyle.h>
+ * #include <TCanvas.h>
+ * #include <iostream>
+ *
+ * void analysis::Loop()
+ * {
+ *    if (fChain == 0) return;
+ *    Long64_t n_entries = fChain->GetEntriesFast();
+ *
+ *    // an array of histograms
+ *    TH1D *h_p_avg[n_entries];
+ *    // Each histogram needs to be declared with a unique name and title
+ *    for (int i = 0; i < n_entries; i++){
+ *      char h_p_avg_name[256];
+ *      char h_p_avg_title[256];
+ *
+ *      sprintf(h_p_avg_name, "h_p_avg_entry_%d", i);
+ *      sprintf(h_p_avg_title, "momentum distribution at entry %d", i);
+ *      h_p_avg[i] = new TH1D(h_p_avg_name, h_p_avg_title, 50, 0, 1.0);
+ *      h_p_avg[i]->Sumw2();
+ *      h_p_avg[i]->SetStats(1);
+ *    }
+ *
+ *    Long64_t nb = 0;
+ *    // A loop over all entries
+ *    for (Long64_t j_entry = 0; j_entry < n_entries; j_entry++){
+ *      //Load the TTree data for that entry
+ *      Long64_t i_entry = LoadTree(j_entry);
+ *      if (i_entry < 0){
+ *        std::cout << "Failed to load the TTree at j_entry = "
+ * 		    << j_entry << std::endl;
+ *        break;
+ *      }
+ *      nb = fChain->GetEntry(j_entry);
+ *
+ *      // A loop over all particles in the entry
+ *      for (int i = 0; i < npart; i++) {
+ *        const double p = sqrt( px[i] * px[i] + py[i] * py[i] + pz[i] * pz[i]
+ * );
+ *        // filling the j_entry-th histogram
+ *        h_p_avg[j_entry]->Fill(p, 1.0/(p*p));
+ *      }
+ *    }
+ *
+ *    // drawing the histogram corresponding to the j_entry = 0 entry
+ *    h_p_avg[0]->Draw();
+ * }
+ * /endcode
+ * To run this analysis:
+ * \code
+ * root -l
+ * .L analysis.C+
+ * analysis t
+ * t.Loop()
+ * \endcode
+ *
+ * To quickly view a ROOT file from the command line:
+ * \code
+ * root -l Particles.root  // attaches the .root file
+ * .ls  // lists objects contained in the .root file; here: particles
+ * particles->Draw("p0", "tcounter == 0")
+ * \endcode
+ *
+ * Viewing a ROOT file can be also done in a TBrowser:
+ * \code
+ * root -l
+ * new TBrowser
+ * \endcode
+ *
+ * For more examples of extracting info from .root file see root.cern.ch
+ *
  */
 RootOutput::RootOutput(const bf::path &path, const std::string &name,
                        const OutputParameters &out_par)
