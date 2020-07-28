@@ -38,7 +38,7 @@ static constexpr int LOutput = LogArea::Output::id;
  * (such as the number of testparticles and event number), information relating
  * to individual particles (such as their position or charge), and information
  * about bulk observables in the system (kinetic energy, mean field energy, and
- * total energy). The \c collisions tree contains the same information about
+ * total energy). The \c collisions tree contains information about
  * each collision, such as number of incoming and outgoing particles. It also
  * has the full information about the incoming and outgoing particles of each
  * collision.
