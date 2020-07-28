@@ -64,13 +64,14 @@ TEST(vtkoutputfile) {
       make_unique<VtkOutput>(testoutputpath, "Particles", out_par);
   int event_id = 0;
   /* Initial output */
-  vtkop->at_eventstart(particles, event_id);
+  EventInfo event = Test::default_event_info();
+  vtkop->at_eventstart(particles, event_id, event);
   const bf::path outputfilename = "pos_ev00000_tstep00000.vtk";
   const bf::path outputfilepath = testoutputpath / outputfilename;
   VERIFY(bf::exists(outputfilepath));
   /* Time step output */
   DensityParameters dens_par(Test::default_parameters());
-  vtkop->at_intermediate_time(particles, nullptr, dens_par);
+  vtkop->at_intermediate_time(particles, nullptr, dens_par, event);
   const bf::path outputfile2path =
       testoutputpath / "pos_ev00000_tstep00001.vtk";
   VERIFY(bf::exists(outputfile2path));

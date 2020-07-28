@@ -76,20 +76,19 @@ class OscarOutput : public OutputInterface {
    * Writes the initial particle information of an event to the oscar output.
    * \param[in] particles Current list of all particles.
    * \param[in] event_number Number of event.
+   * \param[in] event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+  void at_eventstart(const Particles &particles, const int event_number,
+                     const EventInfo &event) override;
 
   /**
    * Writes the final particle information of an event to the oscar output.
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.
-   * \param[in] impact_parameter Impact parameter of this event.
-   * \param[in] empty_event Whether there was no interaction between the target
-   *            and the projectile.
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const EventInfo &) override;
 
   /**
    * Writes a interaction prefix line and a line for every incoming and
@@ -105,10 +104,12 @@ class OscarOutput : public OutputInterface {
    * \param[in] particles Current list of particles.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
+   * \param[in] event Event info, see \ref event_info
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
-                            const DensityParameters &dens_param) override;
+                            const DensityParameters &dens_param,
+                            const EventInfo &event) override;
 
  private:
   /**

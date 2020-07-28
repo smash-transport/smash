@@ -199,7 +199,7 @@ class Experiment : public ExperimentBase {
    * according to selected modus, resets the clock and saves the initial
    * conserved quantities for subsequent sanity checks.
    */
-  void initialize_new_event();
+  void initialize_new_event(int event_number);
 
   /**
    * Runs the time evolution of an event with fixed-sized time steps or without
@@ -1382,14 +1382,34 @@ std::string format_measurements(const Particles &particles,
  *            the number of testparticles.
  * \return Total mean field energy in the Box.
  */
-
 double calculate_mean_field_energy(
     const Potentials &potentials,
     RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
     const ExperimentParameters &parameters);
 
+/**
+ * Generate the EventInfo object which is passed to outputs_.
+ *
+ * \param[in] particles The interacting particles. Their information will be
+ *            used to check the conservation of the total energy and momentum.
+ *	      the total number of the particles will be used and printed as
+ *	      well.
+ * \param[in] E_mean_field Value of the mean-field contribution to the total
+ *            energy of the system at the current time.
+ * \param[in] modus_impact_parameter The impact parameter
+ * \param[in] modus_length The modus length
+ * \param[in] parameters structure that holds various global parameters
+ *            such as testparticle number, see \ref ExperimentParameters
+ * \param[in] projectile_target_interact true if there was at least one
+ *            collision
+ */
+EventInfo fill_event_info(const Particles &particles, double E_mean_field,
+                          double modus_impact_parameter, double modus_length,
+                          const ExperimentParameters &parameters,
+                          bool projectile_target_interact);
+
 template <typename Modus>
-void Experiment<Modus>::initialize_new_event() {
+void Experiment<Modus>::initialize_new_event(int event_number) {
   random::set_seed(seed_);
   logg[LExperiment].info() << "random number seed: " << seed_;
   /* Set seed for the next event. It has to be positive, so it can be entered
@@ -1483,6 +1503,15 @@ void Experiment<Modus>::initialize_new_event() {
       particles_, 0u, conserved_initial_, time_start_,
       parameters_.labclock->current_time(), E_mean_field,
       initial_mean_field_energy_);
+
+  auto event_info = fill_event_info(particles_, E_mean_field,
+                                    modus_.impact_parameter(), modus_.length(),
+                                    parameters_, projectile_target_interact_);
+
+  // Output at event start
+  for (const auto &output : outputs_) {
+    output->at_eventstart(particles_, event_number, event_info);
+  }
 }
 
 template <typename Modus>
@@ -1898,6 +1927,10 @@ void Experiment<Modus>::intermediate_output() {
       parameters_.outputclock->current_time(), E_mean_field,
       initial_mean_field_energy_);
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
+
+  auto event_info = fill_event_info(particles_, E_mean_field,
+                                    modus_.impact_parameter(), modus_.length(),
+                                    parameters_, projectile_target_interact_);
   // save evolution data
   if (!(modus_.is_box() && parameters_.outputclock->current_time() <
                                modus_.equilibration_time())) {
@@ -1908,7 +1941,7 @@ void Experiment<Modus>::intermediate_output() {
       }
 
       output->at_intermediate_time(particles_, parameters_.outputclock,
-                                   density_param_);
+                                   density_param_, event_info);
 
       // Thermodynamic output on the lattice versus time
       switch (dens_type_lattice_printout_) {
@@ -2048,13 +2081,13 @@ void Experiment<Modus>::final_output(const int evt_num) {
   /* make sure the experiment actually ran (note: we should compare this
    * to the start time, but we don't know that. Therefore, we check that
    * the time is positive, which should heuristically be the same). */
+  double E_mean_field = 0.0;
   if (likely(parameters_.labclock > 0)) {
     const uint64_t wall_actions_this_interval =
         wall_actions_total_ - previous_wall_actions_total_;
     const uint64_t interactions_this_interval = interactions_total_ -
                                                 previous_interactions_total_ -
                                                 wall_actions_this_interval;
-    double E_mean_field = 0.0;
     if (potentials_) {
       // using the lattice is necessary
       if ((jmu_B_lat_ != nullptr)) {
@@ -2110,9 +2143,12 @@ void Experiment<Modus>::final_output(const int evt_num) {
     }
   }
 
+  auto event_info = fill_event_info(particles_, E_mean_field,
+                                    modus_.impact_parameter(), modus_.length(),
+                                    parameters_, projectile_target_interact_);
+
   for (const auto &output : outputs_) {
-    output->at_eventend(particles_, evt_num, modus_.impact_parameter(),
-                        !projectile_target_interact_);
+    output->at_eventend(particles_, evt_num, event_info);
   }
 }
 
@@ -2123,7 +2159,7 @@ void Experiment<Modus>::run() {
     mainlog.info() << "Event " << j;
 
     // Sample initial particles, start clock, some printout and book-keeping
-    initialize_new_event();
+    initialize_new_event(j);
     /* In the ColliderModus, if the first collisions within the same nucleus are
      * forbidden, 'nucleon_has_interacted_', which records whether a nucleon has
      * collided with another nucleon, is initialized equal to false. If allowed,
@@ -2150,11 +2186,6 @@ void Experiment<Modus>::run() {
         beam_momentum_.emplace_back(FourVector(gamma * mass_beam, 0.0, 0.0,
                                                gamma * v_beam * mass_beam));
       }
-    }
-
-    // Output at event start
-    for (const auto &output : outputs_) {
-      output->at_eventstart(particles_, j);
     }
 
     run_time_evolution();

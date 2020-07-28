@@ -174,6 +174,7 @@ TEST(fullhistory_format) {
   const int event_id = 0;
   const double impact_parameter = 1.473;
   const bool empty_event = false;
+  EventInfo event = Test::default_event_info(impact_parameter, empty_event);
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
                               true, false, false,
@@ -198,12 +199,12 @@ TEST(fullhistory_format) {
     VERIFY(bf::exists(collisionsoutputfilepath_unfinished));
 
     /* Write initial state output: the two smashons we created */
-    bin_output->at_eventstart(particles, event_id);
+    bin_output->at_eventstart(particles, event_id, event);
     bin_output->at_interaction(*action, rho);
 
     /* Final state output */
     action->perform(&particles, 1);
-    bin_output->at_eventend(particles, event_id, impact_parameter, empty_event);
+    bin_output->at_eventend(particles, event_id, event);
   }
   VERIFY(!bf::exists(collisionsoutputfilepath_unfinished));
   VERIFY(bf::exists(collisionsoutputfilepath));
@@ -263,6 +264,7 @@ TEST(particles_format) {
   const int event_id = 0;
   const double impact_parameter = 4.382;
   const bool empty_event = false;
+  EventInfo event = Test::default_event_info(impact_parameter, empty_event);
   const ParticleList initial_particles = particles->copy_to_vector();
 
   const bf::path particleoutputpath = testoutputpath / "particles_binary.bin";
@@ -280,17 +282,16 @@ TEST(particles_format) {
     VERIFY(bf::exists(particleoutputpath_unfinished));
 
     /* Write initial state output: the two smashons we created */
-    bin_output->at_eventstart(*particles, event_id);
+    bin_output->at_eventstart(*particles, event_id, event);
     /* Interaction smashon + smashon -> smashon */
     ParticleList final_state = {Test::smashon_random()};
     particles->replace(initial_particles, final_state);
 
     DensityParameters dens_par(Test::default_parameters());
-    bin_output->at_intermediate_time(*particles, nullptr, dens_par);
+    bin_output->at_intermediate_time(*particles, nullptr, dens_par, event);
 
     /* Final state output */
-    bin_output->at_eventend(*particles, event_id, impact_parameter,
-                            empty_event);
+    bin_output->at_eventend(*particles, event_id, event);
   }
   const ParticleList final_particles = particles->copy_to_vector();
   VERIFY(!bf::exists(particleoutputpath_unfinished));
@@ -362,6 +363,8 @@ TEST(extended) {
   const int event_id = 0;
   const double impact_parameter = 1.473;
   const bool empty_event = true;
+  EventInfo event = Test::default_event_info(impact_parameter, empty_event);
+
   const bf::path collisionsoutputfilepath =
       testoutputpath / "collisions_binary.bin";
   bf::path collisionsoutputfilepath_unfinished = collisionsoutputfilepath;
@@ -377,12 +380,12 @@ TEST(extended) {
     VERIFY(bf::exists(collisionsoutputfilepath_unfinished));
 
     /* Write initial state output: the two smashons we created */
-    bin_output->at_eventstart(particles, event_id);
+    bin_output->at_eventstart(particles, event_id, event);
     bin_output->at_interaction(*action, rho);
 
     /* Final state output */
     action->perform(&particles, 1);
-    bin_output->at_eventend(particles, event_id, impact_parameter, empty_event);
+    bin_output->at_eventend(particles, event_id, event);
   }
   VERIFY(!bf::exists(collisionsoutputfilepath_unfinished));
   VERIFY(bf::exists(collisionsoutputfilepath));
@@ -454,6 +457,7 @@ TEST(initial_conditions_format) {
   const int event_id = 0;
   const bool empty_event = false;
   const double impact_parameter = 0.0;
+  EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
   const bf::path particleoutputpath = testoutputpath / "SMASH_IC.bin";
   bf::path particleoutputpath_unfinished = particleoutputpath;
@@ -476,7 +480,7 @@ TEST(initial_conditions_format) {
     bin_output->at_interaction(*action, density);
 
     /* Event end output */
-    bin_output->at_eventend(particles, event_id, impact_parameter, empty_event);
+    bin_output->at_eventend(particles, event_id, event);
   }
   VERIFY(!bf::exists(particleoutputpath_unfinished));
   VERIFY(bf::exists(particleoutputpath));

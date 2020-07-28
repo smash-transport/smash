@@ -44,9 +44,10 @@ class VtkOutput : public OutputInterface {
    *
    * \param particles Current list of all particles.
    * \param event_number Number of the current event.
+   * \param event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+  void at_eventstart(const Particles &particles, const int event_number,
+                     const EventInfo &event) override;
 
   /**
    * Writes the final particle information list of an event to the VTK
@@ -55,12 +56,10 @@ class VtkOutput : public OutputInterface {
    *
    * \param particles Unused. Current list of particles.
    * \param event_number Unused. Number of event.
-   * \param impact_parameter Unused. Impact parameter of this event.
-   * \param empty_event Unused. Whether the projectile and target did not
-   *        collide.
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const EventInfo &event) override;
 
   /**
    * Writes out all current particles.
@@ -68,10 +67,12 @@ class VtkOutput : public OutputInterface {
    * \param particles Current list of particles.
    * \param clock Unused, needed since inherited.
    * \param dens_param Unused, needed since inherited.
+   * \param event Event info, see \ref event_info
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
-                            const DensityParameters &dens_param) override;
+                            const DensityParameters &dens_param,
+                            const EventInfo &event) override;
 
   /**
    * Prints the density lattice in VTK format on a grid.

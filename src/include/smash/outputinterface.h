@@ -24,6 +24,35 @@ namespace smash {
 /**
  * \ingroup output
  *
+ * \brief Structure to contain custom data for output
+ *
+ * \anchor event_info
+ * This structure is intended to hold and conveniently pass information about
+ * event such as impact parameter, total potential energy, and similar
+ * auxiliary info.
+ */
+struct EventInfo {
+  /// Impact parameter for collider modus, otherwise dummy
+  double impact_parameter;
+  /// Box length in case of box simulation, otherwise dummy
+  double modus_length;
+  /// Time in fm/c
+  double current_time;
+  /// Sum of kinetic energies of all particles
+  double total_kinetic_energy;
+  /// Total energy in the mean field
+  double total_mean_field_energy;
+  /// Kinetic + mean field energy
+  double total_energy;
+  /// Testparticle number, see Testparticles in \ref input_general_
+  int test_particles;
+  /// True if no collisions happened
+  bool empty_event;
+};
+
+/**
+ * \ingroup output
+ *
  * \brief Abstraction of generic output
  *
  * Any output should inherit this class. It provides virtual methods that will
@@ -49,22 +78,20 @@ class OutputInterface {
    * generated but not yet propagated.
    * \param particles List of particles.
    * \param event_number Number of the current event.
+   * \param[in] info Event info, see \ref event_info
    */
-  virtual void at_eventstart(const Particles &particles,
-                             const int event_number) = 0;
+  virtual void at_eventstart(const Particles &particles, const int event_number,
+                             const EventInfo &info) = 0;
 
   /**
    * Output launched at event end. Event end is determined by maximal timestep
    * option.
    * \param particles List of particles.
    * \param event_number Number of the current event.
-   * \param impact_parameter Distance between centers of nuclei in this event.
-   *          Only makes sense for collider modus.
-   * \param[in] empty_event Whether there was no interaction between the target
-   *            and the projectile.
+   * \param[in] info Event info, see \ref event_info
    */
   virtual void at_eventend(const Particles &particles, const int event_number,
-                           double impact_parameter, bool empty_event) = 0;
+                           const EventInfo &info) = 0;
 
   /**
    * Called whenever an action modified one or more particles.
@@ -83,13 +110,16 @@ class OutputInterface {
    * \param particles List of particles.
    * \param clock System clock.
    * \param dens_param Parameters for density calculation.
+   * \param[in] info Event info, see \ref event_info
    */
   virtual void at_intermediate_time(const Particles &particles,
                                     const std::unique_ptr<Clock> &clock,
-                                    const DensityParameters &dens_param) {
+                                    const DensityParameters &dens_param,
+                                    const EventInfo &info) {
     SMASH_UNUSED(particles);
     SMASH_UNUSED(clock);
     SMASH_UNUSED(dens_param);
+    SMASH_UNUSED(info);
   }
 
   /**

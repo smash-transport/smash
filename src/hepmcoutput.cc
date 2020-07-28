@@ -76,7 +76,7 @@ int HepMcOutput::construct_nuclear_pdg_code(int na, int nz) const {
 }
 
 void HepMcOutput::at_eventstart(const Particles &particles,
-                                const int event_number) {
+                                const int event_number, const EventInfo &) {
   current_event_ =
       make_unique<HepMC3::GenEvent>(HepMC3::Units::GEV, HepMC3::Units::MM);
 
@@ -153,15 +153,15 @@ void HepMcOutput::at_eventstart(const Particles &particles,
 
 void HepMcOutput::at_eventend(const Particles &particles,
                               const int32_t /*event_number*/,
-                              double impact_parameter, bool /*empty_event*/) {
+                              const EventInfo &event) {
   // Set heavy ion attribute, only the impact parameter is known
   std::shared_ptr<HepMC3::GenHeavyIon> heavy_ion =
       std::make_shared<HepMC3::GenHeavyIon>();
   current_event_->add_attribute("GenHeavyIon", heavy_ion);
   // Impact paramter has to converted to mm (x1E-12), since fm not a supported
   // unit in HepMC, -1(.0) are placeholders
-  heavy_ion->set(-1, -1, -1, -1, -1, -1, -1, -1, -1, impact_parameter * 1E-12,
-                 -1.0, -1.0, -1.0, -1.0, -1.0);
+  heavy_ion->set(-1, -1, -1, -1, -1, -1, -1, -1, -1,
+                 event.impact_parameter * 1E-12, -1.0, -1.0, -1.0, -1.0, -1.0);
 
   for (const ParticleData &data : particles) {
     const FourVector mom = data.momentum();

@@ -149,21 +149,20 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * output.
    * \param[in] particles Current list of all particles.
    * \param[in] event_number Unused, needed since inherited.
+   * \param[in] event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+  void at_eventstart(const Particles &particles, const int event_number,
+                     const EventInfo &event) override;
 
   /**
    * Writes the final particle information list of an event to the binary
    * output.
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.
-   * \param[in] impact_parameter Impact parameter of this event.
-   * \param[in] empty_event Whether there was no collision between target
-   *            and projectile
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int32_t event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const EventInfo &event) override;
 
   /**
    * Writes an interaction block, including information about the incoming and
@@ -209,30 +208,31 @@ class BinaryOutputParticles : public BinaryOutputBase {
    * Writes the initial particle information of an event to the binary output.
    * \param[in] particles Current list of all particles.
    * \param[in] event_number Unused, needed since inherited.
+   * \param[in] event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+  void at_eventstart(const Particles &particles, const int event_number,
+                     const EventInfo &event) override;
 
   /**
    * Writes the final particle information of an event to the binary output.
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.
-   * \param[in] impact_parameter Impact parameter of this event.
-   * \param[in] empty_event Whether there was no collision between target
-   *            and projectile
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const EventInfo &event) override;
 
   /**
    * Writes particles at each time interval; fixed by option OUTPUT_INTERVAL.
    * \param[in] particles Current list of particles.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
+   * \param[in] event Event info, see \ref event_info.
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
-                            const DensityParameters &dens_param) override;
+                            const DensityParameters &dens_param,
+                            const EventInfo &event) override;
 
  private:
   /// Whether final- or initial-state particles should be written.
@@ -268,18 +268,16 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
    * Writes the initial particle information of an event to the binary output.
    * Function unused for IC output. Needed since inherited.
    */
-  void at_eventstart(const Particles &, const int) override;
+  void at_eventstart(const Particles &, const int, const EventInfo &) override;
 
   /**
    * Writes the final particle information of an event to the binary output.
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.
-   * \param[in] impact_parameter Impact parameter of this event.
-   * \param[in] empty_event Whether there was no collision between target
-   *            and projectile
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const EventInfo &event) override;
 
   /**
    * Writes particles that are removed when crossing the hypersurface to the

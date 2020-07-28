@@ -32,65 +32,47 @@ class Particles;
  * \brief SMASH output to ROOT file
  * ----------------------------------------------------------------------------
  * SMASH supports ROOT output as an option (see http://root.cern.ch).
- * The ROOT framework needs to be installed when building SMASH, otherwise
+ * The ROOT framework needs to be installed before building SMASH, otherwise
  * ROOT support will be disabled.
  *
- * This class produces file smash_run.root, which contains a
- * ROOT TTree. TTree contains information about particles
- * during simulation from all SMASH events.
+ * This class produces file Particles.root, which contains a
+ * ROOT TTree. TTree contains information about particles from all SMASH events
+ * comprising a simulation.
  * Output is happening in blocks. All particles in a block
  * are at the same time and in the same event. However, it is possible that
  * different blocks are at the same time and from the same event.
  * Particle information is stored in TBranches.
  * For each particle characteristic there is a separate branch.
  * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum),
- * pdgid - PDG code of particle, that characterizes its sort,
+ * pdgcode - PDG code of the particle, characterizing its type,
  * charge - electric charge of the particle,
- * ev - number of event particle encountered in,
- * tcounter - number of output block in a given event,
- * npart - number of particles,
- * impact_b - impact parameter, and
+ * ev - event number in a given block,
+ * tcounter - number of the output block in a given event,
+ * npart - number of particles in the block,
+ * test_p - number of testpartciles per particle,
+ * modus_l - modus length,
+ * current_t - time associated with the output block, in fm/c,
+ * impact_b - impact parameter of the event,
  * empty_event - whether there was no interaction between the projectile and
- * the target.
+ * the target,
+ * E_kinetic_tot - total kinetic energy in the system,
+ * E_fields_tot - total mean field energy * test_p,
+ * E_total - sum of E_kinetic_tot and E_fields_tot.
  *
- * Here is an example of ROOT macro to read the ROOT output of SMASH:
- * \code
- * int rootfile_analysis_example() {
- *   // open SMASH output file to be read in
- *   TFile *input_file = TFile::Open("../build/data/0/smash_run.root");
- *   if (input_file->IsOpen()) {
- *     printf("Successfully opened file %s\n", input_file->GetName());
- *   } else {
- *     printf("Error at opening file %s\n", input_file->GetName());
- *   }
+ * This class also produces file Collisions.root, organized in the same way,
+ * with a few additional fields:
+ * nin and nout - characterize number of incoming and outgoing particles in the
+ * reaction, with nin + nout = npart,
+ * weight - an action weight, whose meaning depends on the type of action: For
+ * collisions it is the total cross section, for decays it is the total decay
+ * width and for dilepton decays it is the shining weight.
  *
- *   // Get a tree from file
- *   TTree *tree = static_cast<TTree*>(input_file->Get("particles"));
- *
- *   // Get number of entries in a tree
- *   Int_t nentries = tree->GetEntries();
- *   printf("Number of entries in a tree is %d\n", nentries);
- *
- *   // This draws p_T distribution at initialization
- *   // tree->Draw("sqrt(px*px + py*py)","tcounter==0");
- *
- *   // This draws 3D momentum space distribution at initialization
- *   tree->Draw("px:py:pz","tcounter==0");
- *
- *   return 0;
- * }
- * \endcode
- * For examples of extracting info from .root file see root.cern.ch
- * To view ROOT file use TBrowser:
- * \code
- * root -l
- * new TBrowser
- * \endcode
- * If option write_collisions is set True, then in addition to particles
- * TTree a collision TTree is created. Information about each collision is
- * written as one leaf: nin, nout - number of incoming and outgoing particles,
- * ev - event number, weight - total weight of the collision (wgt),
- * partial_weight - partial weight of the collision (par_wgt), (t,x,y,z),
+ * If "Collisions:" section is present, then in addition to a file
+ * Particles.root with particles TTree, another file Collisions.root is
+ * created. It contains information about each collision, written as one leaf:
+ * nin, nout - number of incoming and outgoing particles, ev - event number,
+ * weight - total weight of the collision (wgt), partial_weight - partial
+ * weight of the collision (par_wgt), (t,x,y,z),
  * (p0,px,py,pz) - arrays of dimension nin+nout
  * that contain coordinates and momenta.
  */
@@ -113,30 +95,31 @@ class RootOutput : public OutputInterface {
    * update event number and writes intermediate particles to a tree.
    * \param[in] particles Particles to be written to output.
    * \param[in] event_number event number to be used in ROOT output.
+   * \param[in] event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles,
-                     const int event_number) override;
+  void at_eventstart(const Particles &particles, const int event_number,
+                     const EventInfo &event) override;
   /**
    * update event number and impact parameter,
    * and writes intermediate particles to a tree.
    * \param[in] particles Particles to be written to output.
    * \param[in] event_number event number to be used in ROOT output.
-   * \param[in] impact_parameter event number to be used in ROOT output. [fm]
-   * \param[in] empty_event Whether there was no interaction between the target
-   *            and the projectile.
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   double impact_parameter, bool empty_event) override;
+                   const EventInfo &event) override;
   /**
    * Writes intermediate particles to a tree defined by treename,
    * if it is allowed (i.e., particles_only_final_ is No).
    * \param[in] particles Particles to be written to output.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
+   * \param[in] event Event info, see \ref event_info
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
-                            const DensityParameters &dens_param) override;
+                            const DensityParameters &dens_param,
+                            const EventInfo &event) override;
   /**
    * Writes collisions to a tree defined by treename.
    * \param[in] action an Action object containing incoming, outgoing particles
@@ -187,20 +170,42 @@ class RootOutput : public OutputInterface {
   /// Number of current event.
   int current_event_ = 0;
 
-  /// Maximal buffer size.
-  static const int max_buffer_size_ = 10000;
+  /*
+   * Maximal buffer size.
+   * When the number of particles N exceeds the buffer size B, data is flushed
+   * to the ROOT file every B particles. This creates ceil(N/B) entries in the
+   * ROOT Tree at every output.
+   */
+  static const int max_buffer_size_ = 500000;
 
   /** @name Buffer for filling TTree
    * See class documentation for definitions.
    */
   //@{
   /// Property that is written to ROOT output.
-  std::array<double, max_buffer_size_> p0, px, py, pz, t, x, y, z,
-      formation_time_, xsec_factor_, time_last_coll_;
-  std::array<int, max_buffer_size_> pdgcode, charge, coll_per_part_,
-      proc_id_origin_, proc_type_origin_, pdg_mother1_, pdg_mother2_;
-  int npart, tcounter, ev, nin, nout;
-  double wgt, par_wgt, impact_b;
+  std::vector<double> p0_ = std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> px_ = std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> py_ = std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> pz_ = std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> t_ = std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> x_ = std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> y_ = std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> z_ = std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> formation_time_ =
+      std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> xsec_factor_ = std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> time_last_coll_ =
+      std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<int> pdgcode_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<int> charge_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<int> coll_per_part_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<int> proc_id_origin_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<int> proc_type_origin_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<int> pdg_mother1_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<int> pdg_mother2_ = std::vector<int>(max_buffer_size_, 0);
+  int npart_, tcounter_, ev_, nin_, nout_, test_p_;
+  double wgt_, par_wgt_, impact_b_, modus_l_, current_t_;
+  double E_kinetic_tot_, E_fields_tot_, E_tot_;
   bool empty_event_;
   //@}
 

@@ -609,4 +609,23 @@ double calculate_mean_field_energy(
   return E_mean_field;
 }
 
+EventInfo fill_event_info(const Particles &particles, double E_mean_field,
+                          double modus_impact_parameter, double modus_length,
+                          const ExperimentParameters &parameters,
+                          bool projectile_target_interact) {
+  const QuantumNumbers current_values(particles);
+  const double E_kinetic_total = current_values.momentum().x0();
+  const double E_total = E_kinetic_total + E_mean_field;
+
+  EventInfo event_info{modus_impact_parameter,
+                       modus_length,
+                       parameters.outputclock->current_time(),
+                       E_kinetic_total,
+                       E_mean_field,
+                       E_total,
+                       parameters.testparticles,
+                       !projectile_target_interact};
+  return event_info;
+}
+
 }  // namespace smash

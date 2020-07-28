@@ -83,6 +83,7 @@ TEST(fullhistory_format) {
   const int event_id = 0;
   const double impact_parameter = 3.7;
   const bool empty_event = false;
+  EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
   const bf::path outputfilepath =
       testoutputpath / "full_event_history.oscar1999";
@@ -100,12 +101,12 @@ TEST(fullhistory_format) {
     VERIFY(bf::exists(outputfilepath_unfinished));
 
     /* Initial state output */
-    oscfull->at_eventstart(particles, event_id);
+    oscfull->at_eventstart(particles, event_id, event);
 
     oscfull->at_interaction(*action, 0.);
 
     /* Final state output */
-    oscfull->at_eventend(particles, event_id, impact_parameter, empty_event);
+    oscfull->at_eventend(particles, event_id, event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
@@ -211,6 +212,7 @@ TEST(particlelist_format) {
   const int event_id = 0;
   const double impact_parameter = 2.4;
   const bool empty_event = false;
+  EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
   const bf::path outputfilepath = testoutputpath / "particle_lists.oscar1999";
   bf::path outputfilepath_unfinished = outputfilepath;
@@ -226,14 +228,14 @@ TEST(particlelist_format) {
     VERIFY(bf::exists(outputfilepath_unfinished));
 
     /* Initial state output (note that this should not do anything!) */
-    oscfinal->at_eventstart(particles, event_id);
+    oscfinal->at_eventstart(particles, event_id, event);
 
     /* As with initial state output, this should not do anything */
     oscfinal->at_interaction(*action, 0.);
 
     /* Final state output; this is the only thing we expect to find in file */
     action->perform(&particles, 1);
-    oscfinal->at_eventend(particles, event_id, impact_parameter, empty_event);
+    oscfinal->at_eventend(particles, event_id, event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
@@ -302,6 +304,7 @@ TEST(initial_conditions_format) {
   const int event_id = 0;
   const bool empty_event = false;
   const double impact_parameter = 2.4;
+  EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
   const bf::path outputfilepath = testoutputpath / "SMASH_IC.oscar1999";
   bf::path outputfilepath_unfinished = outputfilepath;
@@ -316,14 +319,14 @@ TEST(initial_conditions_format) {
     VERIFY(bf::exists(outputfilepath_unfinished));
 
     /* Initial state output (note that this should not do anything!) */
-    oscfinal->at_eventstart(particles, event_id);
+    oscfinal->at_eventstart(particles, event_id, event);
 
     /* Write particle removied in action to */
     action->perform(&particles, 1);
     oscfinal->at_interaction(*action, 0.);
 
     /* Final state output; this is the only thing we expect to find in file */
-    oscfinal->at_eventend(particles, event_id, impact_parameter, empty_event);
+    oscfinal->at_eventend(particles, event_id, event);
   }
   VERIFY(!bf::exists(outputfilepath_unfinished));
   VERIFY(bf::exists(outputfilepath));
