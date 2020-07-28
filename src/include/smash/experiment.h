@@ -1382,7 +1382,6 @@ std::string format_measurements(const Particles &particles,
  *            the number of testparticles.
  * \return Total mean field energy in the Box.
  */
-
 double calculate_mean_field_energy(
     const Potentials &potentials,
     RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
@@ -1399,20 +1398,11 @@ double calculate_mean_field_energy(
  *            energy of the system at the current time.
  * \param[in] modus_impact_parameter The impact parameter
  * \param[in] modus_length The modus length
- * \param[]
- * \param[in] scatterings_this_interval Number of the scatterings occur within
- *            the current timestep.
- * \param[in] conserved_initial Initial quantum numbers needed to check the
- *            conservations.
- * \param[in] time_start Moment in the REAL WORLD when SMASH starts to run [s].
- * \param[in] time Current moment in SMASH [fm/c].
- * \param[in] parameters Parameters of the experiment, needed for the access to
- *            the current_time and the number of testparticles.
- * \param[in] projectile_target_interact Whether the projectile and the target
- *            collided.
- * \return EventInfo object.
+ * \param[in] parameters structure that holds various global parameters
+ *            such as testparticle number, see \ref ExperimentParameters
+ * \param[in] projectile_target_interact true if there was at least one
+ *            collision
  */
-
 EventInfo fill_event_info(const Particles &particles, double E_mean_field,
                           double modus_impact_parameter, double modus_length,
                           const ExperimentParameters &parameters,
