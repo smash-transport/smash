@@ -33,7 +33,7 @@ enum class ProcessType {
   TwoToTwo = 3,
   /// 2->3 scattering
   TwoToThree = 4,
-  /// resonance decays
+  /// resonance decay
   Decay = 5,
   /// box wall crossing
   Wall = 6,
@@ -49,7 +49,7 @@ enum class ProcessType {
   HyperSurfaceCrossing = 8,
   /// bremsstrahlung process: a + b -> a + b + photon
   Bremsstrahlung = 9,
-  /// multi particle scatterings
+  /// multi particle scattering
   MultiParticleThreeMesonsToOne = 10,
   MultiParticleThreeToTwo = 11,
 

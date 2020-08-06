@@ -405,6 +405,8 @@ class Action {
   /**
    * Sample the full 3-body phase-space (masses, momenta, angles)
    * in the center-of-mass frame for the final state particles.
+   *
+   * \throw std::invalid_argument if one outgoing particle is a resonance
    */
   virtual void sample_3body_phasespace();
 
