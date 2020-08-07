@@ -176,7 +176,7 @@ class RootOutput : public OutputInterface {
    * to the ROOT file every B particles. This creates ceil(N/B) entries in the
    * ROOT Tree at every output.
    */
-  static const int max_buffer_size_ = 500000;
+  static const int max_buffer_size_;
 
   /** @name Buffer for filling TTree
    * See class documentation for definitions.

@@ -19,6 +19,8 @@ namespace smash {
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 static constexpr int LOutput = LogArea::Output::id;
 
+const int RootOutput::max_buffer_size_ = 500000;
+
 /*!\Userguide
  * \page format_root ROOT Format
  * SMASH ROOT output is a fast and disk-space efficient, but not human-readable
