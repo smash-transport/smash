@@ -32,11 +32,11 @@ class HadronGasEos;
 class EosTable {
  public:
   /**
-   * Sets up a table p/T/muB/mus/muQ versus (e, nb), where e is energy density,
-   * nb is net baryon density, p - pressure, T - temperature, muB -
-   * net baryon chemical potential, muS - net strangeness potential, muQ - net charge potential.
-   * Net strangeness density and isospin projection density and charge density are assumed to be 0
-   * (Note that corresponding chemical potentials are still non-zero,
+   * Sets up a table p/T/muB/mus/muQ versus (e, nb, nq), where e - energy density,
+   * nb - net baryon density, nq - net charge density, p - pressure, T - temperature, muB -
+   * net baryon chemical potential, muS - net strangeness potential, muQ - net charge chemical potential.
+   * Net strangeness density and isospin projection density are assumed to be 0
+   * (Note that the corresponding chemical potential is still non-zero,
    * because muB != 0).
    *
    * After calling this constructor the table is allocated, but it is
@@ -78,7 +78,7 @@ class EosTable {
                      const std::string& eos_savefile_name = "hadgas_eos.dat");
   /**
    * Obtain interpolated p/T/muB/muS/muQ from the tabulated equation of state
-   * given energy density, net baryon density and charge density
+   * given energy density, net baryon density and net charge density
    *
    * \param[in] e energy density
    * \param[in] nb net baryon density
@@ -88,7 +88,7 @@ class EosTable {
   void get(table_element& res, double e, double nb, double nq) const;
 
  private:
-  /// proper index in a 1d vector, where the 2d table is stored
+  /// proper index in a 1d vector, where the 3d table is stored
   size_t index(size_t ie, size_t inb, size_t inq) const { return ie * (n_nb_ * n_q_) + inb * n_q_ + inq; }
   /// Storage for the tabulated equation of state
   std::vector<table_element> table_;
@@ -108,12 +108,13 @@ class EosTable {
 
 /**
  * Class to handle the equation of state (EoS) of the hadron gas, consisting
- * of all hadrons included into SMASH. This implementation deals with ideal
+ * of all hadrons included in SMASH. This implementation deals with an ideal
  * Boltzmann gas and allows to compute:
  *   - energy density \f$\epsilon\f$, pressure \f$p\f$, density \f$n\f$,
- *     net baryon density \f$n_B\f$ and net strangeness \f$n_S\f$ as a
- *     function of temperature \f$T\f$, baryon chemical potential \f$\mu_B\f$
- *     and strange chemical potential \f$\mu_S\f$.
+ *     net baryon density \f$n_B\f$, net strangeness \f$n_S\f$ and net charge
+ *     density \f$n_Q\f$ as a function of temperature \f$T\f$, baryon chemical
+ *     potential \f$\mu_B\f$, strange chemical potential \f$\mu_S\f$ and charge
+ *     chemical potential \f$\mu_Q\f$.
  *   - Temperature and chemical potentials given energy-, net baryon- and
  *     net strangeness density. This requires solving a system of
  *     nonlinear equations.
@@ -209,7 +210,7 @@ class HadronGasEos {
    * \param[in] muq charge chemical potential [GeV]
    * \param[in] account_for_resonance_widths if false, pole masses are used;
    *            if true, then integration over spectral function is included
-   * \return net baryon density density \f$n_B\f$ [fm\f$^{-3}\f$]
+   * \return net baryon density \f$n_B\f$ [fm\f$^{-3}\f$]
    */
   static double net_baryon_density(double T, double mub, double mus, double muq,
                                    bool account_for_resonance_widths = false);
@@ -238,7 +239,7 @@ class HadronGasEos {
    * \brief Compute net charge density.
    *
    * Grand-canonical Boltzmann ideal gas, consisting of all hadrons in SMASH:
-   * \f[ n_S = \sum S_i \frac{g_i m_i^2 T}{2\pi^2(\hbar c)^3}
+   * \f[ n_Q = \sum Q_i \frac{g_i m_i^2 T}{2\pi^2(\hbar c)^3}
    *               exp \left(\frac{\mu_B B_i + \mu_S S_i + \mu_Q Q_i}{T} \right)
    *               K_2\left( \frac{m_i}{T}\right)
    * \f]
@@ -289,7 +290,8 @@ class HadronGasEos {
   static double sample_mass_thermal(const ParticleType& ptype, double beta);
   /**
    * Compute temperature and chemical potentials given energy-,
-   * net baryon-, net strangeness density and an inital approximation.
+   * net baryon-, net strangeness- and net charge density and an
+   * inital approximation.
    *
    * \param[in] e energy density [GeV/fm\f$^3\f$]
    * \param[in] nb net baryon density [fm\f$^{-3}\f$]
@@ -305,7 +307,8 @@ class HadronGasEos {
 
   /**
    * Compute temperature and chemical potentials given energy-,
-   * net baryon- and net strangeness density without an inital approximation.
+   * net baryon-, net strangeness- and net charge density without an
+   * inital approximation.
    *
    * \param[in] e energy density [GeV/fm\f$^3\f$]
    * \param[in] nb net baryon density [fm\f$^{-3}\f$]

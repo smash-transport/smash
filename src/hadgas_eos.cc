@@ -138,7 +138,6 @@ finish_consistency_check:
     file.open(eos_savefile_name, std::ios::out);
     file << de_ << " " << dnb_ << " " << dq_ << std::endl;
     file << n_e_ << " " << n_nb_ << " " << n_q_ << std::endl;
-    // file << "# e nb nq T p mub mus muq" << std::endl;
     file << std::setprecision(7);
     file << std::fixed;
     for (size_t ie = 0; ie < n_e_; ie++) {
@@ -148,7 +147,6 @@ finish_consistency_check:
         for (size_t iq = 0; iq < n_q_; iq++) {
           const double nq = dq_ * iq;
           const EosTable::table_element x = table_[index(ie, inb, iq)];
-          // file << e << " " << nb << " " << nq << " " <<  x.T << " " << x.p << " " << x.mub << " " << x.mus << " " << x.muq << std::endl;
           file << x.p << " " << x.T << " " << x.mub << " " << x.mus << " " << x.muq << std::endl;
         }
       }
@@ -550,7 +548,8 @@ std::array<double, 4> HadronGasEos::solve_eos_initial_approximation(double e,
 
   gsl_root_fsolver_free(e_solver);
 
-  // 2. Get the baryon chemical potential for mus = 0 and previously obtained T
+  // 2. Get the baryon chemical potential for muS = muQ = 0 with previously
+  //    obtained T
   double n_only_baryons = 0.0;
   for (const ParticleType &ptype : ParticleType::list_all()) {
     if (is_eos_particle(ptype) && ptype.baryon_number() == 1) {
@@ -560,7 +559,8 @@ std::array<double, 4> HadronGasEos::solve_eos_initial_approximation(double e,
   const double nb_scaled = nb / prefactor_ / (T_init * T_init * T_init);
   double mub_init = T_init * std::asinh(nb_scaled / n_only_baryons / 2.0);
 
-  // 3. get charge chemical potential
+  // 3. Get the charge chemical potential assuming muB = muS = 0 with previously
+  //    obtained T
   double n_only_charge1 = 0.0;
   for (const ParticleType &ptype : ParticleType::list_all()) {
     if (is_eos_particle(ptype) && ptype.charge() == 1) {
@@ -570,8 +570,8 @@ std::array<double, 4> HadronGasEos::solve_eos_initial_approximation(double e,
   const double q_scaled = nq / prefactor_ / (T_init * T_init * T_init);
   double muq_init = T_init * std::asinh(q_scaled / n_only_charge1 / 2.0);
 
-  // 4. mus = 0 is typically a good initial approximation
-
+  // 4. Get the strange chemical potential, where mus = 0 is typically a good
+  //    initial approximation
   std::array<double, 4> initial_approximation = {T_init, mub_init, 0.0, muq_init};
   return initial_approximation;
 }
