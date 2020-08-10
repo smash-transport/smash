@@ -87,13 +87,15 @@ class ThermLatticeNode {
    * \param[out] v0 Velocity of the rest frame
    */
   void set_rest_frame_quantities(double T0, double mub0, double mus0,
-                                 const ThreeVector v0);
+                                 double muq0, const ThreeVector v0);
   /// Get Four-momentum flow of the cell
   FourVector Tmu0() const { return Tmu0_; }
   /// Get net baryon density of the cell in the computational frame
   double nb() const { return nb_; }
   /// Get net strangeness density of the cell in the computational frame
   double ns() const { return ns_; }
+  /// Get net charge density of the cell in the computational frame
+  double nq() const { return nq_; }
   /// Get energy density in the rest frame
   double e() const { return e_; }
   /// Get pressure in the rest frame
@@ -106,6 +108,8 @@ class ThermLatticeNode {
   double mub() const { return mub_; }
   /// Get the net strangeness chemical potential
   double mus() const { return mus_; }
+  /// Get the net charge chemical potential
+  double muq() const { return muq_; }
 
  private:
   /// Four-momentum flow of the cell
@@ -114,6 +118,8 @@ class ThermLatticeNode {
   double nb_;
   /// Net strangeness density of the cell in the computational frame
   double ns_;
+  /// Net charge density of the cell in the computational frame
+  double nq_;
   /// Energy density in the rest frame
   double e_;
   /// Pressure in the rest frame
@@ -126,6 +132,8 @@ class ThermLatticeNode {
   double mub_;
   /// Net strangeness chemical potential
   double mus_;
+  /// Net charge chemical potential
+  double muq_;
 };
 
 /**
