@@ -288,7 +288,7 @@ bf::path ListModus::file_path_(const int file_id) {
                         << "2. Particles info: t x y z mass p0 px py pz"
                         << " pdg ID charge\n"
                         << "in units of: fm fm fm fm GeV GeV GeV GeV GeV"
-                        << " none none none\n";
+                        << " none none e\n";
     throw std::runtime_error("External particle list does not exist!");
   }
 
