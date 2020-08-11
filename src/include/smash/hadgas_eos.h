@@ -89,7 +89,7 @@ class EosTable {
 
  private:
   /// proper index in a 1d vector, where the 3d table is stored
-  size_t index(size_t ie, size_t inb, size_t inq) const { return ie * (n_nb_ * n_q_) + inb * n_q_ + inq; }
+  size_t index(size_t ie, size_t inb, size_t inq) const { return n_q_ * (ie * n_nb_ + inb) + inq; }
   /// Storage for the tabulated equation of state
   std::vector<table_element> table_;
   /// Step in energy density
