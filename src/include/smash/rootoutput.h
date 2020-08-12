@@ -170,7 +170,7 @@ class RootOutput : public OutputInterface {
   /// Number of current event.
   int current_event_ = 0;
 
-  /*
+  /**
    * Maximal buffer size.
    * When the number of particles N exceeds the buffer size B, data is flushed
    * to the ROOT file every B particles. This creates ceil(N/B) entries in the

@@ -109,7 +109,10 @@ class ScatterActionsFinder : public ActionFinderInterface {
                                     : p2.momentum();
       if (coll_crit_ == CollisionCriterion::Covariant) {
         /**
-         * see \iref{Hirano/Nara:2012}
+         * JAM collision times from the closest approach
+         * in the two-particle center-of-mass-framem,
+         * see \iref{Hirano:2012yy} (5.13) and (5.14).
+         * The scatteraction is performed at the mean of these two times.
          */
         const FourVector delta_x = p1.position() - p2.position();
         const double p1_sqr = p1_mom.sqr();
