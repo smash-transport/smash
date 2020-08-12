@@ -141,11 +141,8 @@ finish_consistency_check:
     file << std::setprecision(7);
     file << std::fixed;
     for (size_t ie = 0; ie < n_e_; ie++) {
-      const double e = de_ * ie;
       for (size_t inb = 0; inb < n_nb_; inb++) {
-        const double nb = dnb_ * inb;
         for (size_t iq = 0; iq < n_q_; iq++) {
-          const double nq = dq_ * iq;
           const EosTable::table_element x = table_[index(ie, inb, iq)];
           file << x.p << " " << x.T << " " << x.mub << " " << x.mus << " " << x.muq << std::endl;
         }
