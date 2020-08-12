@@ -292,8 +292,9 @@ class Action {
   /**
    * Little helper function that calculates the lambda function (sometimes
    * written with a tilde to better distinguish it) that appears e.g. in the
-   * relative velocity or 3-to-2 probability calculation.
-   * Defintion found e.g. in \iref{Seifert:2017oyb}, eq. (5).
+   * relative velocity or 3-to-2 probability calculation, where it is used with
+   * a=s, b=m1^2 and c=m2^2. Defintion found e.g. in \iref{Seifert:2017oyb},
+   * eq. (5).
    */
   static double lambda_tilde(double a, double b, double c) {
     return (a - b - c) * (a - b - c) - 4. * b * c;
