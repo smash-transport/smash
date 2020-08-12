@@ -60,9 +60,10 @@ class ScatterActionMulti : public Action {
    * \param[in] dt timestep size
    * \param[in] gcell_vol gcell_vol grid cell volume
    * \param[in] three_to_one 3->1 reactions enabled?
+   * \param[in] two_to_three 3<->2 reactions enabled?
    */
   void add_possible_reactions(double dt, const double gcell_vol,
-                              const bool three_to_one);
+                              const bool three_to_one, const bool two_to_three);
 
   /**
    * \ingroup exception
@@ -102,6 +103,9 @@ class ScatterActionMulti : public Action {
    */
   void annihilation();
 
+  /// Perform a 3->2 process.
+  void three_to_two();
+
   /**
    * Calculate the probability for a 3m-to-1 reaction according to the
    * stochastic collision criterion (e.g. \iref{Xu:2004mz} (Sec.IIB)).
@@ -117,15 +121,46 @@ class ScatterActionMulti : public Action {
    * \f[\Phi_3 = \frac{1}{(2\pi)^3)}\frac{1}{16M^2}I_3.\f]
    *
    * The defintion for the integral \f$I_3\f$ is given in the documentation of
-   * calculate_I3().
+   * calculate_I3(). Degeneracy and symmetry factors are neglected in the
+   * formula, since they are treated as input for the function.
    *
    * \param[in] type_out type of outgoing particle
    * \param[in] dt timestep size
    * \param[in] gcell_vol grid cell volume
-   * \return probabilty for 3pi-to-1 reaction
+   * \param[in] degen_factor degeneracy factor for reaction (including symmetry
+   *                                                         factors)
+   * \return probabilty for 3-to-1 reaction
    */
   double probability_three_meson_to_one(const ParticleType& type_out, double dt,
-                                        const double gcell_vol) const;
+                                        const double gcell_vol,
+                                        const int degen_factor = 1) const;
+
+  /**
+   * Calculate the probability for a 3-to-2 reaction according to the
+   * stochastic collision criterion (similar to \iref{Cassing:2001ds}).
+   *
+   * \f[ P_{3 \rightarrow 2} = \frac{1}{4E_1E_2E_3} \frac{\Delta t}{\Delta^3 x}
+   * \frac{\tilde{\lambda}}{\Phi_38\pi s}\sigma_{2 \rightarrow 3},\f]
+   *
+   * where \f$\Phi_3\f$ represents the 3-body phase space:
+   * \f[\Phi_3 = \frac{1}{(2\pi)^3)}\frac{1}{16M^2}I_3.\f]
+   *
+   * The defintion for the integral \f$I_3\f$ is given in the documentation of
+   * calculate_I3(). Degeneracy and symmetry factors are neglected in the
+   * formula, since they are treated as input for the function.
+   *
+   * \param[in] type_out1 type of outgoing particle 1
+   * \param[in] type_out2 type of outgoing particle 1
+   * \param[in] dt timestep size
+   * \param[in] gcell_vol grid cell volume
+   * \param[in] degen_factor degeneracy factor for reaction (including symmetry
+   *                                                         factors)
+   * \return probabilty for 3-to-2 reaction
+   */
+  double probability_three_to_two(const ParticleType& type_out1,
+                                  const ParticleType& type_out2, double dt,
+                                  const double gcell_vol,
+                                  const int degen_factor = 1) const;
 
   /**
    * Calculate the integration necessary for the three-body phase space. The
@@ -167,6 +202,16 @@ class ScatterActionMulti : public Action {
    */
   bool two_pions_eta(const ParticleData& data_a, const ParticleData& data_b,
                      const ParticleData& data_c) const;
+
+  /**
+   * Check wether the three incoming particles can be part of 3-to-2 reaction.
+   * Wrapper for unwieldy if statment.
+   *
+   * \return true if possible 3-to-2 reaction
+   */
+  bool possible_three_to_two_reaction() const {
+    return false;  // No 3-to-2 reactions at the moment
+  };
 
   /// Total probability of reaction
   double total_probability_;

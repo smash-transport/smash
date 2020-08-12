@@ -91,6 +91,7 @@ class CrossSections {
    *            according to a probability?
    * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
    *                                                        none
+   * \param[in] include_two_to_three 2<->3 reactions enabled?
    * \param[in] string_process a pointer to the StringProcess object,
    *            which is used for string excitation and fragmentation.
    * \return List of all possible collisions.
@@ -99,7 +100,20 @@ class CrossSections {
       double elastic_parameter, bool two_to_one_switch,
       ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
       bool use_AQM, bool strings_with_probability,
-      NNbarTreatment nnbar_treatment, StringProcess* string_process) const;
+      NNbarTreatment nnbar_treatment, bool include_two_to_three,
+      StringProcess* string_process) const;
+
+  /**
+   * Helper function:
+   * Sum all cross sections of the given process list.
+   */
+  static double sum_xs_of(const CollisionBranchList& list) {
+    double xs_sum = 0.0;
+    for (auto& proc : list) {
+      xs_sum += proc->weight();
+    }
+    return xs_sum;
+  }
 
   /**
    * Determine the elastic cross section for this collision. If elastic_par is
@@ -168,6 +182,16 @@ class CrossSections {
   CollisionBranchList two_to_two(ReactionsBitSet included_2to2) const;
 
   /**
+   * Find all 2->3 processes for the given scattering.
+   *
+   * This function calls the different, more specific functions for
+   * the different scatterings.
+   *
+   * \return List of all possibe 2->3 processes.
+   */
+  CollisionBranchList two_to_three() const;
+
+  /**
    * Determine the cross section for string excitations, which is given by the
    * difference between the parametrized total cross section and all the
    * explicitly implemented channels at low energy (elastic, resonance
@@ -214,6 +238,25 @@ class CrossSections {
    * section
    */
   CollisionBranchList NNbar_creation() const;
+
+  /**
+   * Determine 2->3 cross section for the scattering of the given particle
+   * types.
+   *
+   * That the function only depends on the types of particles (plus sqrt(s)) and
+   * not on the specific particles, is an assumption needed in order to treat
+   * the 3->2 back-reaction with the stochastic criterion, where this function
+   * also needs to be called for 3-to-2 collision probability with only types
+   * and sqrt(s) known at this point. Therefore the function is also made
+   * static.
+   *
+   * \param[in] type_in1 first scatterning particle type
+   * \param[in] type_in2 second scatterning particle type
+   * \param[in] sqrts center-of-mass energy of scattering
+   * \return cross section for 2->3 process
+   */
+  static double two_to_three_xs(const ParticleType& type_in1,
+                                const ParticleType& type_in2, double sqrts);
 
   /**
    * Determine the parametrized total cross section at high energies

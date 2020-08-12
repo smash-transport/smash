@@ -82,7 +82,7 @@ TEST(elastic_collision) {
   constexpr bool strings_switch = false;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act.add_all_scatterings(sigma, true, Test::all_reactions_included(), 0.,
-                          strings_switch, false, false, nnbar_treatment);
+                          strings_switch, false, false, nnbar_treatment, false);
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -157,7 +157,7 @@ TEST(outgoing_valid) {
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_scatterings(elastic_parameter, true,
                            Test::all_reactions_included(), 0., strings_switch,
-                           false, false, nnbar_treatment);
+                           false, false, nnbar_treatment, false);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -226,12 +226,15 @@ TEST(cross_sections_symmetric) {
     constexpr bool use_AQM = true;
     constexpr bool strings_with_probability = true;
     const NNbarTreatment nnbar_treatment = NNbarTreatment::Strings;
+    const bool two_to_three = true;
     act12->add_all_scatterings(elastic_parameter, two_to_one, included_2to2,
                                low_snn_cut, strings_switch, use_AQM,
-                               strings_with_probability, nnbar_treatment);
+                               strings_with_probability, nnbar_treatment,
+                               two_to_three);
     act21->add_all_scatterings(elastic_parameter, two_to_one, included_2to2,
                                low_snn_cut, strings_switch, use_AQM,
-                               strings_with_probability, nnbar_treatment);
+                               strings_with_probability, nnbar_treatment,
+                               two_to_three);
 
     VERIFY(act12->cross_section() >= 0.);
     VERIFY(act21->cross_section() >= 0.);
@@ -286,7 +289,8 @@ TEST(pythia_running) {
   constexpr bool strings_switch = true;
   constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act->add_all_scatterings(elastic_parameter, false, ReactionsBitSet(), 0.,
-                           strings_switch, false, false, nnbar_treatment);
+                           strings_switch, false, false, nnbar_treatment,
+                           false);
 
   VERIFY(act->cross_section() > 0.);
 
@@ -358,7 +362,7 @@ TEST(no_strings) {
     constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
     act->add_all_scatterings(elastic_parameter, true,
                              Test::all_reactions_included(), 0., strings_switch,
-                             false, false, nnbar_treatment);
+                             false, false, nnbar_treatment, false);
 
     VERIFY(act->cross_section() > 0.);
 
@@ -400,7 +404,7 @@ TEST(update_incoming) {
   bool string_switch = true;
   NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
   act.add_all_scatterings(sigma, true, Test::all_reactions_included(), 0.,
-                          string_switch, false, false, nnbar_treatment);
+                          string_switch, false, false, nnbar_treatment, false);
 
   // change the position of one of the particles
   const FourVector new_position(0.1, 0., 0., 0.);
@@ -473,13 +477,16 @@ TEST(particle_ordering) {
     constexpr bool strings_switch = true;
     constexpr bool use_AQM = true;
     constexpr bool strings_with_probability = true;
+    const bool two_to_three = true;
     const NNbarTreatment nnbar_treatment = NNbarTreatment::Strings;
     act12->add_all_scatterings(elastic_parameter, two_to_one, included_2to2,
                                low_snn_cut, strings_switch, use_AQM,
-                               strings_with_probability, nnbar_treatment);
+                               strings_with_probability, nnbar_treatment,
+                               two_to_three);
     act21->add_all_scatterings(elastic_parameter, two_to_one, included_2to2,
                                low_snn_cut, strings_switch, use_AQM,
-                               strings_with_probability, nnbar_treatment);
+                               strings_with_probability, nnbar_treatment,
+                               two_to_three);
 
     VERIFY(act12->cross_section() >= 0.);
     VERIFY(act21->cross_section() >= 0.);

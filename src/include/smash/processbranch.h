@@ -31,7 +31,9 @@ enum class ProcessType {
   TwoToOne = 2,
   /// 2->2 inelastic scattering
   TwoToTwo = 3,
-  /// resonance decays
+  /// 2->3 scattering
+  TwoToThree = 4,
+  /// resonance decay
   Decay = 5,
   /// box wall crossing
   Wall = 6,
@@ -49,6 +51,7 @@ enum class ProcessType {
   Bremsstrahlung = 9,
   /// multi particle scattering
   MultiParticleThreeMesonsToOne = 10,
+  MultiParticleThreeToTwo = 11,
 
   /**
    * (41-45) soft string excitations. Here "soft" means that the process does

@@ -290,21 +290,15 @@ class Action {
   std::pair<FourVector, FourVector> get_potential_at_interaction_point() const;
 
   /**
-   * Assign the formation time to the outgoing particles.
-   *
-   * The formation time is set to the largest formation time of the incoming
-   * particles, if it is larger than the execution time. The newly produced
-   * particles are supposed to continue forming exactly like the latest forming
-   * ingoing particle. Therefore the details on the formation are adopted.
-   * The initial cross section scaling factor of the incoming particles is
-   * considered to also be the scaling factor of the newly produced outgoing
-   * particles. If the formation time is smaller than the exectution time,  the
-   * execution time is taken to be the formation time.
-   *
-   * Note: Make sure to assign the formation times before boosting the outgoing
-   * particles to the computational frame.
+   * Little helper function that calculates the lambda function (sometimes
+   * written with a tilde to better distinguish it) that appears e.g. in the
+   * relative velocity or 3-to-2 probability calculation, where it is used with
+   * a=s, b=m1^2 and c=m2^2. Defintion found e.g. in \iref{Seifert:2017oyb},
+   * eq. (5).
    */
-  void assign_formation_time_to_outgoing_particles();
+  static double lambda_tilde(double a, double b, double c) {
+    return (a - b - c) * (a - b - c) - 4. * b * c;
+  }
 
   /**
    * \ingroup exception
@@ -412,8 +406,27 @@ class Action {
   /**
    * Sample the full 3-body phase-space (masses, momenta, angles)
    * in the center-of-mass frame for the final state particles.
+   *
+   * \throw std::invalid_argument if one outgoing particle is a resonance
    */
   virtual void sample_3body_phasespace();
+
+  /**
+   * Assign the formation time to the outgoing particles.
+   *
+   * The formation time is set to the largest formation time of the incoming
+   * particles, if it is larger than the execution time. The newly produced
+   * particles are supposed to continue forming exactly like the latest forming
+   * ingoing particle. Therefore the details on the formation are adopted.
+   * The initial cross section scaling factor of the incoming particles is
+   * considered to also be the scaling factor of the newly produced outgoing
+   * particles. If the formation time is smaller than the exectution time,  the
+   * execution time is taken to be the formation time.
+   *
+   * Note: Make sure to assign the formation times before boosting the outgoing
+   * particles to the computational frame.
+   */
+  void assign_formation_time_to_outgoing_particles();
 
   /**
    * \ingroup logging

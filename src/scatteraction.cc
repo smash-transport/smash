@@ -77,6 +77,10 @@ void ScatterAction::generate_final_state() {
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
       break;
+    case ProcessType::TwoToThree:
+      /* 2->3 scattering */
+      two_to_three_scattering();
+      break;
     case ProcessType::StringSoftSingleDiffractiveAX:
     case ProcessType::StringSoftSingleDiffractiveXB:
     case ProcessType::StringSoftDoubleDiffractive:
@@ -107,12 +111,14 @@ void ScatterAction::generate_final_state() {
 void ScatterAction::add_all_scatterings(
     double elastic_parameter, bool two_to_one, ReactionsBitSet included_2to2,
     double low_snn_cut, bool strings_switch, bool use_AQM,
-    bool strings_with_probability, NNbarTreatment nnbar_treatment) {
+    bool strings_with_probability, NNbarTreatment nnbar_treatment,
+    bool two_to_three) {
   CrossSections xs(incoming_particles_, sqrt_s(),
                    get_potential_at_interaction_point());
   CollisionBranchList processes = xs.generate_collision_list(
       elastic_parameter, two_to_one, included_2to2, low_snn_cut, strings_switch,
-      use_AQM, strings_with_probability, nnbar_treatment, string_process_);
+      use_AQM, strings_with_probability, nnbar_treatment, two_to_three,
+      string_process_);
 
   /* Add various subprocesses.*/
   add_collisions(std::move(processes));
@@ -167,14 +173,11 @@ double ScatterAction::cm_momentum_squared() const {
 
 double ScatterAction::relative_velocity() const {
   const double m1 = incoming_particles()[0].effective_mass();
-  const double m1_sqr = m1 * m1;
   const double m2 = incoming_particles()[1].effective_mass();
-  const double m2_sqr = m2 * m2;
   const double m_s = mandelstam_s();
-  const double lambda =
-      (m_s - m1_sqr - m2_sqr) * (m_s - m1_sqr - m2_sqr) - 4. * m1_sqr * m2_sqr;
-  return std::sqrt(lambda) / (2. * incoming_particles()[0].momentum().x0() *
-                              incoming_particles()[1].momentum().x0());
+  const double lamb = lambda_tilde(m_s, m1 * m1, m2 * m2);
+  return std::sqrt(lamb) / (2. * incoming_particles()[0].momentum().x0() *
+                            incoming_particles()[1].momentum().x0());
 }
 
 double ScatterAction::transverse_distance_sqr() const {
@@ -459,6 +462,11 @@ void ScatterAction::inelastic_scattering() {
     outgoing_particles_[0].set_formation_time(time_of_execution_);
     outgoing_particles_[1].set_formation_time(time_of_execution_);
   }
+}
+
+void ScatterAction::two_to_three_scattering() {
+  sample_3body_phasespace();
+  assign_formation_time_to_outgoing_particles();
 }
 
 void ScatterAction::resonance_formation() {

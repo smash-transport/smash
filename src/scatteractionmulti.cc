@@ -9,6 +9,7 @@
 
 #include "smash/scatteractionmulti.h"
 
+#include "smash/crosssections.h"
 #include "smash/integrate.h"
 #include "smash/logging.h"
 
@@ -46,35 +47,58 @@ double ScatterActionMulti::get_partial_weight() const {
 
 void ScatterActionMulti::add_possible_reactions(double dt,
                                                 const double gcell_vol,
-                                                const bool three_to_one) {
-  if (three_to_one && incoming_particles().size() == 3) {
-    if (three_different_pions(incoming_particles()[0], incoming_particles()[1],
-                              incoming_particles()[2])) {
-      // 3pi -> omega
-      const ParticleTypePtr type_omega = ParticleType::try_find(0x223);
-      if (type_omega) {
-        add_reaction(make_unique<CollisionBranch>(
-            *type_omega,
-            probability_three_meson_to_one(*type_omega, dt, gcell_vol),
-            ProcessType::MultiParticleThreeMesonsToOne));
+                                                const bool three_to_one,
+                                                const bool two_to_three) {
+  // 3 -> m
+  if (incoming_particles_.size() == 3) {
+    // 3 -> 1
+    if (three_to_one) {
+      if (three_different_pions(incoming_particles_[0], incoming_particles_[1],
+                                incoming_particles_[2])) {
+        // 3pi -> omega
+        const ParticleTypePtr type_omega = ParticleType::try_find(0x223);
+        if (type_omega) {
+          add_reaction(make_unique<CollisionBranch>(
+              *type_omega,
+              probability_three_meson_to_one(*type_omega, dt, gcell_vol,
+                                             type_omega->spin_degeneracy()),
+              ProcessType::MultiParticleThreeMesonsToOne));
+        }
+        // 3pi -> phi
+        const ParticleTypePtr type_phi = ParticleType::try_find(0x333);
+        if (type_phi) {
+          add_reaction(make_unique<CollisionBranch>(
+              *type_phi,
+              probability_three_meson_to_one(*type_phi, dt, gcell_vol,
+                                             type_phi->spin_degeneracy()),
+              ProcessType::MultiParticleThreeMesonsToOne));
+        }
+      } else if (two_pions_eta(incoming_particles_[0], incoming_particles_[1],
+                               incoming_particles_[2])) {
+        // eta2pi -> eta-prime
+        const ParticleTypePtr type_eta_prime = ParticleType::try_find(0x331);
+
+        int sym_factor_in = 1;
+        if (incoming_particles_[0].type() == incoming_particles_[1].type() ||
+            incoming_particles_[1].type() == incoming_particles_[2].type() ||
+            incoming_particles_[2].type() == incoming_particles_[0].type()) {
+          sym_factor_in = 2;  // 2 factorial
+        }
+
+        if (type_eta_prime) {
+          add_reaction(make_unique<CollisionBranch>(
+              *type_eta_prime,
+              probability_three_meson_to_one(
+                  *type_eta_prime, dt, gcell_vol,
+                  sym_factor_in * type_eta_prime->spin_degeneracy()),
+              ProcessType::MultiParticleThreeMesonsToOne));
+        }
       }
-      // 3pi -> phi
-      const ParticleTypePtr type_phi = ParticleType::try_find(0x333);
-      if (type_phi) {
-        add_reaction(make_unique<CollisionBranch>(
-            *type_phi, probability_three_meson_to_one(*type_phi, dt, gcell_vol),
-            ProcessType::MultiParticleThreeMesonsToOne));
-      }
-    } else if (two_pions_eta(incoming_particles()[0], incoming_particles()[1],
-                             incoming_particles()[2])) {
-      // eta2pi -> eta-prime
-      const ParticleTypePtr type_eta_prime = ParticleType::try_find(0x331);
-      if (type_eta_prime) {
-        // TODO(stdnmr) Do we need a symmetry factor if we have two pi0?
-        add_reaction(make_unique<CollisionBranch>(
-            *type_eta_prime,
-            probability_three_meson_to_one(*type_eta_prime, dt, gcell_vol),
-            ProcessType::MultiParticleThreeMesonsToOne));
+    }
+    if (two_to_three) {
+      // 3 -> 2
+      if (possible_three_to_two_reaction()) {
+        // Add 3-to-2 reactions here
       }
     }
   }
@@ -98,6 +122,10 @@ void ScatterActionMulti::generate_final_state() {
       /* n->1 annihilation */
       annihilation();
       break;
+    case ProcessType::MultiParticleThreeToTwo:
+      /* 3->2 scattering */
+      three_to_two();
+      break;
     default:
       throw InvalidScatterActionMulti(
           "ScatterActionMulti::generate_final_state: Invalid process type " +
@@ -118,9 +146,9 @@ void ScatterActionMulti::generate_final_state() {
 
 double ScatterActionMulti::calculate_I3(const double sqrts) const {
   static Integrator integrate;
-  const double m1 = incoming_particles()[0].effective_mass();
-  const double m2 = incoming_particles()[1].effective_mass();
-  const double m3 = incoming_particles()[2].effective_mass();
+  const double m1 = incoming_particles_[0].effective_mass();
+  const double m2 = incoming_particles_[1].effective_mass();
+  const double m3 = incoming_particles_[2].effective_mass();
   const double lower_bound = (m1 + m2) * (m1 + m2);
   const double upper_bound = (sqrts - m3) * (sqrts - m3);
   const auto result = integrate(lower_bound, upper_bound, [&](double m12_sqr) {
@@ -144,38 +172,49 @@ double ScatterActionMulti::calculate_I3(const double sqrts) const {
 }
 
 double ScatterActionMulti::probability_three_meson_to_one(
-    const ParticleType& type_out, double dt, const double gcell_vol) const {
-  const double e1 = incoming_particles()[0].momentum().x0();
-  const double e2 = incoming_particles()[1].momentum().x0();
-  const double e3 = incoming_particles()[2].momentum().x0();
+    const ParticleType& type_out, double dt, const double gcell_vol,
+    const int degen_factor) const {
+  const double e1 = incoming_particles_[0].momentum().x0();
+  const double e2 = incoming_particles_[1].momentum().x0();
+  const double e3 = incoming_particles_[2].momentum().x0();
   const double sqrts = sqrt_s();
 
   const double gamma_decay = type_out.get_partial_width(
-      sqrts, {&incoming_particles()[0].type(), &incoming_particles()[1].type(),
-              &incoming_particles()[2].type()});
+      sqrts, {&incoming_particles_[0].type(), &incoming_particles_[1].type(),
+              &incoming_particles_[2].type()});
 
-  // Spin degneracy of outgoing particles (incoming p. assumed to have no spin)
-  const int spin_deg_out = type_out.spin_degeneracy();
   const double I_3 = calculate_I3(sqrts);
   const double ph_sp_3 =
       1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
 
   const double spec_f_val = type_out.spectral_function(sqrts);
 
-  // Symmetry factor for incoming particles
-  int sym_factor_in = 1;
-  if (incoming_particles()[0].type() == incoming_particles()[1].type() &&
-      incoming_particles()[1].type() == incoming_particles()[2].type()) {
-    sym_factor_in = 6;  // 3 factorial
-  } else if (incoming_particles()[0].type() == incoming_particles()[1].type() ||
-             incoming_particles()[1].type() == incoming_particles()[2].type() ||
-             incoming_particles()[2].type() == incoming_particles()[0].type()) {
-    sym_factor_in = 2;  // 2 factorial
-  }
-
   return dt / (gcell_vol * gcell_vol) * M_PI / (4. * e1 * e2 * e3) *
          gamma_decay / ph_sp_3 * spec_f_val * std::pow(hbarc, 5.0) *
-         spin_deg_out * sym_factor_in;
+         degen_factor;
+}
+
+double ScatterActionMulti::probability_three_to_two(
+    const ParticleType& type_out1, const ParticleType& type_out2, double dt,
+    const double gcell_vol, const int degen_factor) const {
+  const double e1 = incoming_particles_[0].momentum().x0();
+  const double e2 = incoming_particles_[1].momentum().x0();
+  const double e3 = incoming_particles_[2].momentum().x0();
+  const double m4 = type_out1.mass();
+  const double m5 = type_out2.mass();
+
+  const double sqrts = sqrt_s();
+  const double xs =
+      CrossSections::two_to_three_xs(type_out1, type_out2, sqrts) / gev2_mb;
+  const double lamb = lambda_tilde(sqrts * sqrts, m4 * m4, m5 * m5);
+
+  const double I_3 = calculate_I3(sqrts);
+  const double ph_sp_3 =
+      1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
+
+  return dt / (gcell_vol * gcell_vol) * 1. / (4. * e1 * e2 * e3) * lamb /
+         (ph_sp_3 * 8 * M_PI * sqrts * sqrts) * xs * std::pow(hbarc, 5.0) *
+         degen_factor;
 }
 
 void ScatterActionMulti::annihilation() {
@@ -194,6 +233,12 @@ void ScatterActionMulti::annihilation() {
 
   logg[LScatterActionMulti].debug("Momentum of the new particle: ",
                                   outgoing_particles_[0].momentum());
+}
+
+void ScatterActionMulti::three_to_two() {
+  sample_2body_phasespace();
+  // Make sure to assign formation times before boost to the computational frame
+  assign_formation_time_to_outgoing_particles();
 }
 
 bool ScatterActionMulti::three_different_pions(

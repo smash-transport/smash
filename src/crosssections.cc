@@ -9,6 +9,7 @@
 
 #include "smash/crosssections.h"
 
+#include "smash/action.h"
 #include "smash/clebschgordan.h"
 #include "smash/constants.h"
 #include "smash/kinematics.h"
@@ -99,18 +100,6 @@ static void append_list(CollisionBranchList& main_list,
   }
 }
 
-/**
- * Helper function:
- * Sum all cross sections of the given process list.
- */
-static double sum_xs_of(CollisionBranchList& list) {
-  double xs_sum = 0.0;
-  for (auto& proc : list) {
-    xs_sum += proc->weight();
-  }
-  return xs_sum;
-}
-
 CrossSections::CrossSections(const ParticleList& incoming_particles,
                              const double sqrt_s,
                              const std::pair<FourVector, FourVector> potentials)
@@ -126,7 +115,7 @@ CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
     ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
     bool use_AQM, bool strings_with_probability, NNbarTreatment nnbar_treatment,
-    StringProcess* string_process) const {
+    bool include_two_to_three, StringProcess* string_process) const {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
@@ -166,6 +155,10 @@ CollisionBranchList CrossSections::generate_collision_list(
     if (included_2to2.any()) {
       // 2->2 (inelastic)
       append_list(process_list, two_to_two(included_2to2), 1. - p_pythia);
+    }
+    if (include_two_to_three) {
+      // 2->3
+      append_list(process_list, two_to_three(), 1. - p_pythia);
     }
   }
   /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
@@ -827,6 +820,17 @@ CollisionBranchList CrossSections::two_to_two(
     }
   }
   return process_list;
+}
+
+CollisionBranchList CrossSections::two_to_three() const {
+  // No 2-to-3 collisons at the moment
+  return {};
+}
+
+double CrossSections::two_to_three_xs(const ParticleType& /*type_in1*/,
+                                      const ParticleType& /*type_in2*/,
+                                      double /*sqrts*/) {
+  return 0.0;
 }
 
 CollisionBranchList CrossSections::bb_xx_except_nn(

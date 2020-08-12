@@ -241,6 +241,14 @@ void Action::sample_2body_phasespace() {
 
 void Action::sample_3body_phasespace() {
   assert(outgoing_particles_.size() == 3);
+  if (!outgoing_particles_[0].type().is_stable() ||
+      !outgoing_particles_[1].type().is_stable() ||
+      !outgoing_particles_[2].type().is_stable()) {
+    throw std::invalid_argument(
+        "sample_3body_phasespace: Found resonance in to be sampled outgoing "
+        "particles, but assumes stable particles.");
+  }
+
   const double m_a = outgoing_particles_[0].type().mass(),
                m_b = outgoing_particles_[1].type().mass(),
                m_c = outgoing_particles_[2].type().mass();

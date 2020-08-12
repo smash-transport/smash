@@ -136,12 +136,13 @@ class ScatterAction : public Action {
    *            according to a probability?
    * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
    *                                                        none
+   * \param[in] two_to_three 2<->3 reactions enabled?
    */
   void add_all_scatterings(double elastic_parameter, bool two_to_one,
                            ReactionsBitSet included_2to2, double low_snn_cut,
                            bool strings_switch, bool use_AQM,
                            bool strings_with_probability,
-                           NNbarTreatment nnbar_treatment);
+                           NNbarTreatment nnbar_treatment, bool two_to_three);
 
   /**
    * Get list of possible collision channels.
@@ -215,6 +216,9 @@ class ScatterAction : public Action {
 
   /// Perform an inelastic two-body scattering, i.e. new particles are formed
   void inelastic_scattering();
+
+  /// Perform a two-to-three-body scattering
+  void two_to_three_scattering();
 
   /**
    * Todo(ryu): document better - it is not really UrQMD-based, isn't it?
