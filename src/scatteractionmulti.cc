@@ -98,7 +98,17 @@ void ScatterActionMulti::add_possible_reactions(double dt,
     if (two_to_three) {
       // 3 -> 2
       if (possible_three_to_two_reaction()) {
-        // Add 3-to-2 reactions here
+
+        // nppi -> dpi
+        const ParticleTypePtr type_out1 = ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_d));
+        const ParticleTypePtr type_out2 = ParticleType::try_find(-pdg::p);  // TODO(stdnmr) whatever pion comes in
+
+        const int degen = 1;  // TODO(stdnmr) think about later
+
+        add_reaction(make_unique<CollisionBranch>(
+            *type_out1, *type_out2,
+            probability_three_to_two(*type_out1, *type_out2, dt, gcell_vol, degen),
+            ProcessType::MultiParticleThreeToTwo));
       }
     }
   }
