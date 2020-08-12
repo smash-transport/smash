@@ -390,9 +390,9 @@ class GrandCanThermalizer {
       if (!condition(i->strangeness(), i->baryon_number(), i->charge())) {
         continue;
       }
-      N_sum +=
-          lat_cell_volume_ * gamma *
-          HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus(), 0.0);
+      N_sum += lat_cell_volume_ * gamma *
+               HadronGasEos::partial_density(*i, cell.T(), cell.mub(),
+                                             cell.mus(), 0.0);
       if (N_sum >= r) {
         type_to_sample = i;
         break;

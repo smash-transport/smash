@@ -32,11 +32,12 @@ TEST(td_simple_gas) {
                          -0.03686360221, 1.e-6);
   COMPARE_ABSOLUTE_ERROR(HadronGasEos::net_charge_density(T, mub, mus, muq),
                          0.4201279754, 1.e-6);
-  COMPARE_ABSOLUTE_ERROR(HadronGasEos::density(T, mub, mus, muq), 0.6190973942, 1.e-6);
-  COMPARE_ABSOLUTE_ERROR(HadronGasEos::pressure(T, mub, mus, muq), 0.06190973942,
+  COMPARE_ABSOLUTE_ERROR(HadronGasEos::density(T, mub, mus, muq), 0.6190973942,
                          1.e-6);
-  COMPARE_ABSOLUTE_ERROR(HadronGasEos::energy_density(T, mub, mus, muq), 0.7252341309,
-                         1.e-6);
+  COMPARE_ABSOLUTE_ERROR(HadronGasEos::pressure(T, mub, mus, muq),
+                         0.06190973942, 1.e-6);
+  COMPARE_ABSOLUTE_ERROR(HadronGasEos::energy_density(T, mub, mus, muq),
+                         0.7252341309, 1.e-6);
 }
 
 TEST(mu_zero_net_strangeness) {
@@ -74,12 +75,12 @@ TEST(EoS_table) {
   const double my_e = 0.39, my_nb = 0.09, my_nq = 0.06;
   table.get(x, my_e, my_nb, my_nq);
   // check if tabulated values are the right solutions
-  COMPARE_ABSOLUTE_ERROR(HadronGasEos::energy_density(x.T, x.mub, x.mus, x.muq), my_e,
-                         1.e-2);
-  COMPARE_ABSOLUTE_ERROR(HadronGasEos::net_baryon_density(x.T, x.mub, x.mus, x.muq),
-                         my_nb, 1.e-2);
-  COMPARE_ABSOLUTE_ERROR(HadronGasEos::net_charge_density(x.T, x.mub, x.mus, x.muq),
-                         my_nq, 1.e-2);
+  COMPARE_ABSOLUTE_ERROR(HadronGasEos::energy_density(x.T, x.mub, x.mus, x.muq),
+                         my_e, 1.e-2);
+  COMPARE_ABSOLUTE_ERROR(
+      HadronGasEos::net_baryon_density(x.T, x.mub, x.mus, x.muq), my_nb, 1.e-2);
+  COMPARE_ABSOLUTE_ERROR(
+      HadronGasEos::net_charge_density(x.T, x.mub, x.mus, x.muq), my_nq, 1.e-2);
   remove("small_test_table_eos.dat");
 }
 

@@ -32,12 +32,12 @@ class HadronGasEos;
 class EosTable {
  public:
   /**
-   * Sets up a table p/T/muB/mus/muQ versus (e, nb, nq), where e - energy density,
-   * nb - net baryon density, nq - net charge density, p - pressure, T - temperature, muB -
-   * net baryon chemical potential, muS - net strangeness potential, muQ - net charge chemical potential.
-   * Net strangeness density and isospin projection density are assumed to be 0
-   * (Note that the corresponding chemical potential is still non-zero,
-   * because muB != 0).
+   * Sets up a table p/T/muB/mus/muQ versus (e, nb, nq), where e - energy
+   * density, nb - net baryon density, nq - net charge density, p - pressure, T
+   * - temperature, muB - net baryon chemical potential, muS - net strangeness
+   * potential, muQ - net charge chemical potential. Net strangeness density and
+   * isospin projection density are assumed to be 0 (Note that the corresponding
+   * chemical potential is still non-zero, because muB != 0).
    *
    * After calling this constructor the table is allocated, but it is
    * still empty. To compute values call compile_table.
@@ -49,10 +49,11 @@ class EosTable {
    * \param[in] n_b number of steps in net baryon density
    * \param[in] n_q number of steps in net charge density
    *
-   * Entry at (ie, inb, inq) corresponds to energy density and net baryon density
-   * (e, nb, nq) = (ie*de, inb*dnb, inq*dnq) [GeV/fm^4, GeV/fm^3].
+   * Entry at (ie, inb, inq) corresponds to energy density and net baryon
+   * density (e, nb, nq) = (ie*de, inb*dnb, inq*dnq) [GeV/fm^4, GeV/fm^3].
    */
-  EosTable(double de, double dnb, double dq, size_t n_e, size_t n_b, size_t n_q);
+  EosTable(double de, double dnb, double dq, size_t n_e, size_t n_b,
+           size_t n_q);
   /// Define the data structure for one element of the table.
   struct table_element {
     /// Pressure
@@ -89,7 +90,9 @@ class EosTable {
 
  private:
   /// proper index in a 1d vector, where the 3d table is stored
-  size_t index(size_t ie, size_t inb, size_t inq) const { return n_q_ * (ie * n_nb_ + inb) + inq; }
+  size_t index(size_t ie, size_t inb, size_t inq) const {
+    return n_q_ * (ie * n_nb_ + inb) + inq;
+  }
   /// Storage for the tabulated equation of state
   std::vector<table_element> table_;
   /// Step in energy density
@@ -146,10 +149,9 @@ class HadronGasEos {
    *
    * Grand-canonical Boltzmann ideal gas, consisting of all hadrons in SMASH:
    * \f[ \epsilon = \sum \frac{g_i m_i^2 T^2}{2\pi^2(\hbar c)^3}
-   *               exp \left(\frac{\mu_B B_i + \mu_S S_i + \mu_Q Q_i}{T} \right) \times
-   *               \left[ 3 K_2\left( \frac{m_i}{T}\right) +
-   *               \frac{m_i}{T} K_1\left( \frac{m_i}{T}\right)\right]
-   * \f]
+   *               exp \left(\frac{\mu_B B_i + \mu_S S_i + \mu_Q Q_i}{T} \right)
+   * \times \left[ 3 K_2\left( \frac{m_i}{T}\right) + \frac{m_i}{T} K_1\left(
+   * \frac{m_i}{T}\right)\right] \f]
    *
    * \param[in] T temperature [GeV]
    * \param[in] mub baryon chemical potential [GeV]
@@ -232,7 +234,8 @@ class HadronGasEos {
    *            if true, then integration over spectral function is included
    * \return net strangeness density density \f$n_S\f$ [fm\f$^{-3}\f$]
    */
-  static double net_strange_density(double T, double mub, double mus, double muq,
+  static double net_strange_density(double T, double mub, double mus,
+                                    double muq,
                                     bool account_for_resonance_widths = false);
 
   /**
@@ -253,8 +256,7 @@ class HadronGasEos {
    * \return net charge density density \f$n_S\f$ [fm\f$^{-3}\f$]
    */
   static double net_charge_density(double T, double mub, double mus, double muq,
-                                    bool account_for_resonance_widths = false);
-
+                                   bool account_for_resonance_widths = false);
 
   /**
    * \brief Compute partial density of one hadron sort.
@@ -330,19 +332,22 @@ class HadronGasEos {
    * \return array of 3 values: temperature, baryon chemical potential
    *         and strange chemical potential
    */
-  std::array<double, 4> solve_eos_initial_approximation(double e, double nb, double nq);
+  std::array<double, 4> solve_eos_initial_approximation(double e, double nb,
+                                                        double nq);
 
   /**
    * Compute strangeness chemical potential, requiring that net strangeness = 0
    *
-   * \param[in] mub baryon chemical potential [GeV]
    * \param[in] T temperature [GeV]
+   * \param[in] mub baryon chemical potential [GeV]
+   * \param[in] muq charge chemical potential [GeV]
    * \return strangeness chemical potential [GeV]
    */
   static double mus_net_strangeness0(double T, double mub, double muq);
 
   /// Get the element of eos table
-  void from_table(EosTable::table_element& res, double e, double nb, double nq) const {
+  void from_table(EosTable::table_element& res, double e, double nb,
+                  double nq) const {
     eos_table_.get(res, e, nb, nq);
   }
 

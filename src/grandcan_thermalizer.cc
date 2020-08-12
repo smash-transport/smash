@@ -58,7 +58,8 @@ void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos &eos) {
     EosTable::table_element tabulated;
     eos.from_table(tabulated, e_, gamma_inv * nb_, nq_);
     if (!eos.is_tabulated() || tabulated.p < 0.0) {
-      auto T_mub_mus_muq = eos.solve_eos(e_, gamma_inv * nb_, gamma_inv * ns_, nq_);
+      auto T_mub_mus_muq =
+          eos.solve_eos(e_, gamma_inv * nb_, gamma_inv * ns_, nq_);
       T_ = T_mub_mus_muq[0];
       mub_ = T_mub_mus_muq[1];
       mus_ = T_mub_mus_muq[2];
@@ -303,9 +304,10 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
     const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
     for (size_t i = 0; i < N_sorts_; i++) {
       // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
-      mult_sort_[i] += lat_cell_volume_ * gamma * ntest *
-                       HadronGasEos::partial_density(
-                           *eos_typelist_[i], cell.T(), cell.mub(), cell.mus(), cell.muq());
+      mult_sort_[i] +=
+          lat_cell_volume_ * gamma * ntest *
+          HadronGasEos::partial_density(*eos_typelist_[i], cell.T(), cell.mub(),
+                                        cell.mus(), cell.muq());
     }
   }
 
@@ -626,13 +628,16 @@ void GrandCanThermalizer::print_statistics(const Clock &clock) const {
 
   std::cout << "Current time [fm/c]: " << clock.current_time() << std::endl;
   std::cout << "Averages on the lattice - T[GeV], mub[GeV], mus[GeV], muq[GeV] "
-            << "nb[fm^-3], ns[fm^-3], nq[fm^-3]: " << on_lattice.T << " " << on_lattice.mub
-            << " " << on_lattice.mus << " " << on_lattice.muq << " " << on_lattice.nb << " "
-            << on_lattice.ns << " " << on_lattice.nq << std::endl;
-  std::cout << "Averages in therm. region - T[GeV], mub[GeV], mus[GeV], muq[GeV] "
-            << "nb[fm^-3], ns[fm^-3], nq[fm^-3]: " << in_therm_reg.T << " "
-            << in_therm_reg.mub << " " << in_therm_reg.mus << " " << in_therm_reg.muq << " "
-            << in_therm_reg.nb << " " << in_therm_reg.ns << " " << in_therm_reg.nq << std::endl;
+            << "nb[fm^-3], ns[fm^-3], nq[fm^-3]: " << on_lattice.T << " "
+            << on_lattice.mub << " " << on_lattice.mus << " " << on_lattice.muq
+            << " " << on_lattice.nb << " " << on_lattice.ns << " "
+            << on_lattice.nq << std::endl;
+  std::cout
+      << "Averages in therm. region - T[GeV], mub[GeV], mus[GeV], muq[GeV] "
+      << "nb[fm^-3], ns[fm^-3], nq[fm^-3]: " << in_therm_reg.T << " "
+      << in_therm_reg.mub << " " << in_therm_reg.mus << " " << in_therm_reg.muq
+      << " " << in_therm_reg.nb << " " << in_therm_reg.ns << " "
+      << in_therm_reg.nq << std::endl;
   std::cout << "Volume with e > e_crit [fm^3]: "
             << lat_cell_volume_ * node_counter << std::endl;
 }

@@ -27,7 +27,8 @@
 namespace smash {
 static constexpr int LResonances = LogArea::Resonances::id;
 
-EosTable::EosTable(double de, double dnb, double dq, size_t n_e, size_t n_nb, size_t n_q)
+EosTable::EosTable(double de, double dnb, double dq, size_t n_e, size_t n_nb,
+                   size_t n_q)
     : de_(de), dnb_(dnb), dq_(dq), n_e_(n_e), n_nb_(n_nb), n_q_(n_q) {
   table_.resize(n_e_ * n_nb_ * n_q_);
 }
@@ -68,20 +69,26 @@ void EosTable::compile_table(HadronGasEos &eos,
           const table_element x = table_[index(ie, inb, iq)];
           const bool w = eos.account_for_resonance_widths();
           const double e_comp = eos.energy_density(x.T, x.mub, x.mus, x.muq);
-          const double nb_comp = eos.net_baryon_density(x.T, x.mub, x.mus, x.muq, w);
-          const double ns_comp = eos.net_strange_density(x.T, x.mub, x.mus, x.muq, w);
+          const double nb_comp =
+              eos.net_baryon_density(x.T, x.mub, x.mus, x.muq, w);
+          const double ns_comp =
+              eos.net_strange_density(x.T, x.mub, x.mus, x.muq, w);
           const double p_comp = eos.pressure(x.T, x.mub, x.mus, x.muq, w);
-          const double nq_comp = eos.net_charge_density(x.T, x.mub, x.mus, x.muq, w);
-          // Precision is just 10^-3, this is precision of saved data in the file
+          const double nq_comp =
+              eos.net_charge_density(x.T, x.mub, x.mus, x.muq, w);
+          // Precision is just 10^-3, this is precision of saved data in the
+          // file
           const double eps = 1.e-3;
           // Only check the physical region, hence T > 0 condition
           if ((std::abs(de_ * ie - e_comp) > eps ||
-               std::abs(dnb_ * inb - nb_comp) > eps || std::abs(ns_comp) > eps ||
-               std::abs(x.p - p_comp) > eps || std::abs(dq_ * iq - nq_comp) > eps) &&
+               std::abs(dnb_ * inb - nb_comp) > eps ||
+               std::abs(ns_comp) > eps || std::abs(x.p - p_comp) > eps ||
+               std::abs(dq_ * iq - nq_comp) > eps) &&
               (x.T > 0.0)) {
             std::cout << "discrepancy: " << de_ * ie << " = " << e_comp << ", "
                       << dnb_ * inb << " = " << nb_comp << ", " << x.p << " = "
-                      << p_comp << ", 0 = " << ns_comp << ", " << dq_ * iq << " = " << nq_comp << std::endl;
+                      << p_comp << ", 0 = " << ns_comp << ", " << dq_ * iq
+                      << " = " << nq_comp << std::endl;
             table_consistency = false;
             goto finish_consistency_check;
           }
@@ -101,8 +108,8 @@ finish_consistency_check:
         const double nb = dnb_ * inb;
         for (size_t iq = 0; iq < n_q_; iq++) {
           const double q = dq_ * iq;
-          // It is physically impossible to have energy density > nucleon mass*nb,
-          // therefore eqns have no solutions.
+          // It is physically impossible to have energy density > nucleon
+          // mass*nb, therefore eqns have no solutions.
           if (nb >= e || q >= e) {
             table_[index(ie, inb, iq)] = {0.0, 0.0, 0.0, 0.0, 0.0};
             continue;
@@ -122,13 +129,15 @@ finish_consistency_check:
           } else {
             init_approx = eos.solve_eos_initial_approximation(e, nb, q);
           }
-          const std::array<double, 4> res = eos.solve_eos(e, nb, ns, q, init_approx);
+          const std::array<double, 4> res =
+              eos.solve_eos(e, nb, ns, q, init_approx);
           const double T = res[0];
           const double mub = res[1];
           const double mus = res[2];
           const double muq = res[3];
           const bool w = eos.account_for_resonance_widths();
-          table_[index(ie, inb, iq)] = {eos.pressure(T, mub, mus, muq, w), T, mub, mus, muq};
+          table_[index(ie, inb, iq)] = {eos.pressure(T, mub, mus, muq, w), T,
+                                        mub, mus, muq};
         }
       }
     }
@@ -144,14 +153,16 @@ finish_consistency_check:
       for (size_t inb = 0; inb < n_nb_; inb++) {
         for (size_t iq = 0; iq < n_q_; iq++) {
           const EosTable::table_element x = table_[index(ie, inb, iq)];
-          file << x.p << " " << x.T << " " << x.mub << " " << x.mus << " " << x.muq << std::endl;
+          file << x.p << " " << x.T << " " << x.mub << " " << x.mus << " "
+               << x.muq << std::endl;
         }
       }
     }
   }
 }
 
-void EosTable::get(EosTable::table_element &res, double e, double nb, double q) const {
+void EosTable::get(EosTable::table_element &res, double e, double nb,
+                   double q) const {
   const size_t ie = static_cast<size_t>(std::floor(e / de_));
   const size_t inb = static_cast<size_t>(std::floor(nb / dnb_));
   const size_t iq = static_cast<size_t>(std::floor(q / dq_));
@@ -172,27 +183,26 @@ void EosTable::get(EosTable::table_element &res, double e, double nb, double q) 
     const EosTable::table_element s7 = table_[index(ie, inb + 1, iq + 1)];
     const EosTable::table_element s8 = table_[index(ie + 1, inb + 1, iq + 1)];
 
-
     res.p = aq * (ae * (an * s8.p + (1.0 - an) * s6.p) +
-            (1.0 - ae) * (an * s7.p + (1.0 - an) * s5.p)) +
+                  (1.0 - ae) * (an * s7.p + (1.0 - an) * s5.p)) +
             (1 - aq) * (ae * (an * s4.p + (1.0 - an) * s2.p) +
-            (1.0 - ae) * (an * s3.p + (1.0 - an) * s1.p));
+                        (1.0 - ae) * (an * s3.p + (1.0 - an) * s1.p));
     res.T = aq * (ae * (an * s8.T + (1.0 - an) * s6.T) +
-            (1.0 - ae) * (an * s7.T + (1.0 - an) * s5.T)) +
+                  (1.0 - ae) * (an * s7.T + (1.0 - an) * s5.T)) +
             (1 - aq) * (ae * (an * s4.T + (1.0 - an) * s2.T) +
-            (1.0 - ae) * (an * s3.T + (1.0 - an) * s1.T));
+                        (1.0 - ae) * (an * s3.T + (1.0 - an) * s1.T));
     res.mub = aq * (ae * (an * s8.mub + (1.0 - an) * s6.mub) +
-            (1.0 - ae) * (an * s7.mub + (1.0 - an) * s5.mub)) +
-            (1 - aq) * (ae * (an * s4.mub + (1.0 - an) * s2.mub) +
-            (1.0 - ae) * (an * s3.mub + (1.0 - an) * s1.mub));
+                    (1.0 - ae) * (an * s7.mub + (1.0 - an) * s5.mub)) +
+              (1 - aq) * (ae * (an * s4.mub + (1.0 - an) * s2.mub) +
+                          (1.0 - ae) * (an * s3.mub + (1.0 - an) * s1.mub));
     res.mus = aq * (ae * (an * s8.mus + (1.0 - an) * s6.mus) +
-            (1.0 - ae) * (an * s7.mus + (1.0 - an) * s5.mus)) +
-            (1 - aq) * (ae * (an * s4.mus + (1.0 - an) * s2.mus) +
-            (1.0 - ae) * (an * s3.mus + (1.0 - an) * s1.mus));
+                    (1.0 - ae) * (an * s7.mus + (1.0 - an) * s5.mus)) +
+              (1 - aq) * (ae * (an * s4.mus + (1.0 - an) * s2.mus) +
+                          (1.0 - ae) * (an * s3.mus + (1.0 - an) * s1.mus));
     res.muq = aq * (ae * (an * s8.muq + (1.0 - an) * s6.muq) +
-            (1.0 - ae) * (an * s7.muq + (1.0 - an) * s5.muq)) +
-            (1 - aq) * (ae * (an * s4.muq + (1.0 - an) * s2.muq) +
-            (1.0 - ae) * (an * s3.muq + (1.0 - an) * s1.muq));
+                    (1.0 - ae) * (an * s7.muq + (1.0 - an) * s5.muq)) +
+              (1 - aq) * (ae * (an * s4.muq + (1.0 - an) * s2.muq) +
+                          (1.0 - ae) * (an * s3.muq + (1.0 - an) * s1.muq));
   }
 }
 
@@ -237,11 +247,12 @@ double HadronGasEos::scaled_partial_density_auxiliary(double m_over_T,
 }
 
 double HadronGasEos::scaled_partial_density(const ParticleType &ptype,
-                                            double beta, double mub, double mus, double muq,
+                                            double beta, double mub, double mus,
+                                            double muq,
                                             bool account_for_width) {
   const double m_over_T = ptype.mass() * beta;
-  double mu_over_T =
-      beta * (ptype.baryon_number() * mub + ptype.strangeness() * mus + ptype.charge() * muq);
+  double mu_over_T = beta * (ptype.baryon_number() * mub +
+                             ptype.strangeness() * mus + ptype.charge() * muq);
   const double g = ptype.spin() + 1;
   if (ptype.is_stable() || !account_for_width) {
     return g * scaled_partial_density_auxiliary(m_over_T, mu_over_T);
@@ -275,10 +286,12 @@ double HadronGasEos::partial_density(const ParticleType &ptype, double T,
     return 0.0;
   }
   return prefactor_ * T * T * T *
-         scaled_partial_density(ptype, 1.0 / T, mub, mus, muq, account_for_width);
+         scaled_partial_density(ptype, 1.0 / T, mub, mus, muq,
+                                account_for_width);
 }
 
-double HadronGasEos::energy_density(double T, double mub, double mus, double muq) {
+double HadronGasEos::energy_density(double T, double mub, double mus,
+                                    double muq) {
   if (T < really_small) {
     return 0.0;
   }
@@ -289,8 +302,8 @@ double HadronGasEos::energy_density(double T, double mub, double mus, double muq
       continue;
     }
     const double z = ptype.mass() * beta;
-    double x = beta * (mub * ptype.baryon_number() + mus * ptype.strangeness() + muq * ptype.charge() -
-                       ptype.mass());
+    double x = beta * (mub * ptype.baryon_number() + mus * ptype.strangeness() +
+                       muq * ptype.charge() - ptype.mass());
     if (x < -500.0) {
       return 0.0;
     }
@@ -317,14 +330,15 @@ double HadronGasEos::density(double T, double mub, double mus, double muq,
     if (!is_eos_particle(ptype)) {
       continue;
     }
-    rho += scaled_partial_density(ptype, beta, mub, mus, muq, account_for_width);
+    rho +=
+        scaled_partial_density(ptype, beta, mub, mus, muq, account_for_width);
   }
   rho *= prefactor_ * T * T * T;
   return rho;
 }
 
-double HadronGasEos::net_baryon_density(double T, double mub, double mus, double muq,
-                                        bool account_for_width) {
+double HadronGasEos::net_baryon_density(double T, double mub, double mus,
+                                        double muq, bool account_for_width) {
   if (T < really_small) {
     return 0.0;
   }
@@ -334,15 +348,16 @@ double HadronGasEos::net_baryon_density(double T, double mub, double mus, double
     if (!ptype.is_baryon() || !is_eos_particle(ptype)) {
       continue;
     }
-    rho += scaled_partial_density(ptype, beta, mub, mus, muq, account_for_width) *
-           ptype.baryon_number();
+    rho +=
+        scaled_partial_density(ptype, beta, mub, mus, muq, account_for_width) *
+        ptype.baryon_number();
   }
   rho *= prefactor_ * T * T * T;
   return rho;
 }
 
-double HadronGasEos::net_strange_density(double T, double mub, double mus, double muq,
-                                         bool account_for_width) {
+double HadronGasEos::net_strange_density(double T, double mub, double mus,
+                                         double muq, bool account_for_width) {
   if (T < really_small) {
     return 0.0;
   }
@@ -352,15 +367,16 @@ double HadronGasEos::net_strange_density(double T, double mub, double mus, doubl
     if (ptype.strangeness() == 0 || !is_eos_particle(ptype)) {
       continue;
     }
-    rho += scaled_partial_density(ptype, beta, mub, mus, muq, account_for_width) *
-           ptype.strangeness();
+    rho +=
+        scaled_partial_density(ptype, beta, mub, mus, muq, account_for_width) *
+        ptype.strangeness();
   }
   rho *= prefactor_ * T * T * T;
   return rho;
 }
 
-double HadronGasEos::net_charge_density(double T, double mub, double mus, double muq,
-                                         bool account_for_width) {
+double HadronGasEos::net_charge_density(double T, double mub, double mus,
+                                        double muq, bool account_for_width) {
   if (T < really_small) {
     return 0.0;
   }
@@ -370,8 +386,9 @@ double HadronGasEos::net_charge_density(double T, double mub, double mus, double
     if (ptype.charge() == 0 || !is_eos_particle(ptype)) {
       continue;
     }
-    rho += scaled_partial_density(ptype, beta, mub, mus, muq, account_for_width) *
-           ptype.charge();
+    rho +=
+        scaled_partial_density(ptype, beta, mub, mus, muq, account_for_width) *
+        ptype.charge();
   }
   rho *= prefactor_ * T * T * T;
   return rho;
@@ -499,7 +516,8 @@ double HadronGasEos::e_equation(double T, void *params) {
 }
 
 std::array<double, 4> HadronGasEos::solve_eos_initial_approximation(double e,
-                                                                    double nb, double nq) {
+                                                                    double nb,
+                                                                    double nq) {
   assert(e >= 0.0);
   // 1. Get temperature from energy density assuming zero chemical potentials
   int degeneracies_sum = 0.0;
@@ -550,7 +568,8 @@ std::array<double, 4> HadronGasEos::solve_eos_initial_approximation(double e,
   double n_only_baryons = 0.0;
   for (const ParticleType &ptype : ParticleType::list_all()) {
     if (is_eos_particle(ptype) && ptype.baryon_number() == 1) {
-      n_only_baryons += scaled_partial_density(ptype, 1.0 / T_init, 0.0, 0.0, 0.0);
+      n_only_baryons +=
+          scaled_partial_density(ptype, 1.0 / T_init, 0.0, 0.0, 0.0);
     }
   }
   const double nb_scaled = nb / prefactor_ / (T_init * T_init * T_init);
@@ -561,15 +580,18 @@ std::array<double, 4> HadronGasEos::solve_eos_initial_approximation(double e,
   double n_only_charge_1_particles = 0.0;
   for (const ParticleType &ptype : ParticleType::list_all()) {
     if (is_eos_particle(ptype) && ptype.charge() == 1) {
-      n_only_charge_1_particles += scaled_partial_density(ptype, 1.0 / T_init, 0.0, 0.0, 0.0);
+      n_only_charge_1_particles +=
+          scaled_partial_density(ptype, 1.0 / T_init, 0.0, 0.0, 0.0);
     }
   }
   const double q_scaled = nq / prefactor_ / (T_init * T_init * T_init);
-  double muq_init = T_init * std::asinh(q_scaled / n_only_charge_1_particles / 2.0);
+  double muq_init =
+      T_init * std::asinh(q_scaled / n_only_charge_1_particles / 2.0);
 
   // 4. Get the strange chemical potential, where mus = 0 is typically a good
   //    initial approximation
-  std::array<double, 4> initial_approximation = {T_init, mub_init, 0.0, muq_init};
+  std::array<double, 4> initial_approximation = {T_init, mub_init, 0.0,
+                                                 muq_init};
   return initial_approximation;
 }
 
@@ -609,7 +631,8 @@ std::array<double, 4> HadronGasEos::solve_eos(
   if (residual_status != GSL_SUCCESS) {
     std::stringstream solver_parameters;
     solver_parameters << "\nSolver run with "
-                      << "e = " << e << ", nb = " << nb << ", ns = " << ns << ", nq = " << nq
+                      << "e = " << e << ", nb = " << nb << ", ns = " << ns
+                      << ", nq = " << nq
                       << ", init. approx.: " << initial_approximation[0] << " "
                       << initial_approximation[1] << " "
                       << initial_approximation[2] << " "

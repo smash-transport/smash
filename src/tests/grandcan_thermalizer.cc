@@ -83,9 +83,10 @@ TEST(rest_frame_transformation) {
   const double gamma = 1.0 / std::sqrt(1.0 - node.v().sqr());
   const double tolerance = 5.e-2;
   COMPARE_ABSOLUTE_ERROR(node.p(), eos.pressure(T, mub, mus, muq), tolerance);
-  COMPARE_ABSOLUTE_ERROR(node.e(), eos.energy_density(T, mub, mus, muq), tolerance);
-  COMPARE_ABSOLUTE_ERROR(node.nb(), eos.net_baryon_density(T, mub, mus, muq) * gamma,
+  COMPARE_ABSOLUTE_ERROR(node.e(), eos.energy_density(T, mub, mus, muq),
                          tolerance);
+  COMPARE_ABSOLUTE_ERROR(
+      node.nb(), eos.net_baryon_density(T, mub, mus, muq) * gamma, tolerance);
   COMPARE_ABSOLUTE_ERROR(
       node.ns(), eos.net_strange_density(T, mub, mus, muq) * gamma, tolerance);
 }

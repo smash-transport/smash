@@ -156,9 +156,9 @@ class BoxModus : public ModusDefault {
    */
   const double mus_;
   /**
-    * Charge chemical potential for thermal initialization;
-    * only used if use_thermal_ is true
-    */
+   * Charge chemical potential for thermal initialization;
+   * only used if use_thermal_ is true
+   */
   const double muq_;
   /**
    * In case of thermal initialization: true -- account for resonance
