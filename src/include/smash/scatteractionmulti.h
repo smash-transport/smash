@@ -209,10 +209,8 @@ class ScatterActionMulti : public Action {
    *
    * \return true if possible 3-to-2 reaction
    */
-  bool possible_three_to_two_reaction() const {
-    // TODO(stdnmr) Check for nppi
-    return false;  // No 3-to-2 reactions at the moment
-  }
+  bool possible_three_to_two_reaction(const ParticleData& data_a, const ParticleData& data_b,
+                                      const ParticleData& data_c) const;
 
   /// Total probability of reaction
   double total_probability_;

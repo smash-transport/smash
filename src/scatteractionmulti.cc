@@ -97,11 +97,20 @@ void ScatterActionMulti::add_possible_reactions(double dt,
     }
     if (two_to_three) {
       // 3 -> 2
-      if (possible_three_to_two_reaction()) {
+      if (possible_three_to_two_reaction(incoming_particles_[0], incoming_particles_[1],
+                                         incoming_particles_[2])) {
 
         // nppi -> dpi
         const ParticleTypePtr type_out1 = ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_d));
-        const ParticleTypePtr type_out2 = ParticleType::try_find(-pdg::p);  // TODO(stdnmr) whatever pion comes in
+
+        PdgCode pdg_of_inc_pion;
+        for (auto &part : incoming_particles_) {
+          if (part.is_pion()) {
+            pdg_of_inc_pion = part.pdgcode();
+            break;
+          }
+        }
+        const ParticleTypePtr type_out2 = ParticleType::try_find(pdg_of_inc_pion);
 
         const int degen = 1;  // TODO(stdnmr) think about later
 
@@ -281,6 +290,20 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
          (pdg_a == pdg::pi_m && pdg_b == pdg::eta && pdg_c == pdg::pi_p) ||
          (pdg_a == pdg::pi_p && pdg_b == pdg::pi_m && pdg_c == pdg::eta) ||
          (pdg_a == pdg::pi_p && pdg_b == pdg::eta && pdg_c == pdg::pi_m);
+}
+
+bool ScatterActionMulti::possible_three_to_two_reaction(const ParticleData& data_a, const ParticleData& data_b,
+                                                        const ParticleData& data_c) const {
+  // TODO(stdnmr) Rename function for deuterons
+
+  const PdgCode pdg_a = data_a.pdgcode();
+  const PdgCode pdg_b = data_b.pdgcode();
+  const PdgCode pdg_c = data_c.pdgcode();
+
+  // We want nppi
+  return ((pdg_a.is_pion() && ((pdg_b == pdg::p && pdg_c == pdg::n) || (pdg_b == pdg::n && pdg_c == pdg::p))) ||
+          (pdg_b.is_pion() && ((pdg_a == pdg::p && pdg_c == pdg::n) || (pdg_a == pdg::n && pdg_c == pdg::p))) ||
+          (pdg_c.is_pion() && ((pdg_b == pdg::p && pdg_a == pdg::n) || (pdg_b == pdg::n && pdg_a == pdg::p))));
 }
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
