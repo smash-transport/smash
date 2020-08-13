@@ -74,6 +74,13 @@ class ScatterAction : public Action {
    */
   double transverse_distance_sqr() const;
 
+  /**
+   * Calculate the transverse distance of the two incoming particles in their
+   * local rest frame written in a covariant form. Equivalent to the UrQMD
+   * transverse distance. See \iref{Hirano:2012yy} (5.6)-(5.11).
+   *
+   * \return squared distance  \f$d^2_\mathrm{coll}\f$.
+   */
   double cov_transverse_distance_sqr() const;
   /**
    * Determine the Mandelstam s variable,
