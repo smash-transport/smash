@@ -438,7 +438,7 @@ class HadronGasEos {
   static constexpr size_t n_equations_ = 4;
 
   /// EOS Table to be used
-  EosTable eos_table_ = EosTable(1.e-2, 1.e-2, 1.e-2, 900, 900, 900);
+  EosTable eos_table_ = EosTable(1.e-1, 1.e-1, 1.e-1, 90, 90, 90);
 
   /**
    * Variables used by gnu equation solver. They are stored here to allocate
