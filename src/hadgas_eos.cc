@@ -20,6 +20,7 @@
 #include "smash/fpenvironment.h"
 #include "smash/hadgas_eos.h"
 #include "smash/integrate.h"
+#include "smash/interpolation.h"
 #include "smash/logging.h"
 #include "smash/pow.h"
 #include "smash/random.h"
@@ -183,26 +184,16 @@ void EosTable::get(EosTable::table_element &res, double e, double nb,
     const EosTable::table_element s7 = table_[index(ie, inb + 1, iq + 1)];
     const EosTable::table_element s8 = table_[index(ie + 1, inb + 1, iq + 1)];
 
-    res.p = aq * (ae * (an * s8.p + (1.0 - an) * s6.p) +
-                  (1.0 - ae) * (an * s7.p + (1.0 - an) * s5.p)) +
-            (1 - aq) * (ae * (an * s4.p + (1.0 - an) * s2.p) +
-                        (1.0 - ae) * (an * s3.p + (1.0 - an) * s1.p));
-    res.T = aq * (ae * (an * s8.T + (1.0 - an) * s6.T) +
-                  (1.0 - ae) * (an * s7.T + (1.0 - an) * s5.T)) +
-            (1 - aq) * (ae * (an * s4.T + (1.0 - an) * s2.T) +
-                        (1.0 - ae) * (an * s3.T + (1.0 - an) * s1.T));
-    res.mub = aq * (ae * (an * s8.mub + (1.0 - an) * s6.mub) +
-                    (1.0 - ae) * (an * s7.mub + (1.0 - an) * s5.mub)) +
-              (1 - aq) * (ae * (an * s4.mub + (1.0 - an) * s2.mub) +
-                          (1.0 - ae) * (an * s3.mub + (1.0 - an) * s1.mub));
-    res.mus = aq * (ae * (an * s8.mus + (1.0 - an) * s6.mus) +
-                    (1.0 - ae) * (an * s7.mus + (1.0 - an) * s5.mus)) +
-              (1 - aq) * (ae * (an * s4.mus + (1.0 - an) * s2.mus) +
-                          (1.0 - ae) * (an * s3.mus + (1.0 - an) * s1.mus));
-    res.muq = aq * (ae * (an * s8.muq + (1.0 - an) * s6.muq) +
-                    (1.0 - ae) * (an * s7.muq + (1.0 - an) * s5.muq)) +
-              (1 - aq) * (ae * (an * s4.muq + (1.0 - an) * s2.muq) +
-                          (1.0 - ae) * (an * s3.muq + (1.0 - an) * s1.muq));
+    res.p = interpolate_trilinear(ae, an, aq, s1.p, s2.p, s3.p, s4.p, s5.p,
+                                  s6.p, s7.p, s8.p);
+    res.T = interpolate_trilinear(ae, an, aq, s1.T, s2.T, s3.T, s4.T, s5.T,
+                                  s6.T, s7.T, s8.T);
+    res.mub = interpolate_trilinear(ae, an, aq, s1.mub, s2.mub, s3.mub, s4.mub,
+                                    s5.mub, s6.mub, s7.mub, s8.mub);
+    res.mus = interpolate_trilinear(ae, an, aq, s1.mus, s2.mus, s3.mus, s4.mus,
+                                    s5.mus, s6.mus, s7.mus, s8.mus);
+    res.muq = interpolate_trilinear(ae, an, aq, s1.muq, s2.muq, s3.muq, s4.muq,
+                                    s5.muq, s6.muq, s7.muq, s8.muq);
   }
 }
 
