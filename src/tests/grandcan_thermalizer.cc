@@ -20,15 +20,8 @@ using namespace smash;
 TEST(init) { set_default_loglevel(einhard::INFO); }
 
 TEST(create_part_list) {
-  // Note that antiparticles are also created!
-  /* At least one baryon and one strange particle have to be in the list.
-     Otherwise nb or ns is always 0, which makes degenerate Jacobian in
-     the system to be solved.
-   */
-  ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
-      "N⁺ 0.938 0.0 + 2212\n"
-      "K⁰ 0.494 0.0 -  311\n");
+  Test::create_actual_particletypes();
+  Test::create_actual_decaymodes();
 }
 
 static BoxModus create_box_for_tests() {
@@ -79,14 +72,18 @@ TEST(rest_frame_transformation) {
   const double T = node.T();
   const double mub = node.mub();
   const double mus = node.mus();
+  const double muq = node.muq();
   const double gamma = 1.0 / std::sqrt(1.0 - node.v().sqr());
-  const double tolerance = 5.e-4;
-  COMPARE_ABSOLUTE_ERROR(node.p(), eos.pressure(T, mub, mus), tolerance);
-  COMPARE_ABSOLUTE_ERROR(node.e(), eos.energy_density(T, mub, mus), tolerance);
-  COMPARE_ABSOLUTE_ERROR(node.nb(), eos.net_baryon_density(T, mub, mus) * gamma,
+  const double tolerance = 5.e-2;
+  COMPARE_ABSOLUTE_ERROR(node.p(), eos.pressure(T, mub, mus, muq), tolerance);
+  COMPARE_ABSOLUTE_ERROR(node.e(), eos.energy_density(T, mub, mus, muq),
                          tolerance);
   COMPARE_ABSOLUTE_ERROR(
-      node.ns(), eos.net_strange_density(T, mub, mus) * gamma, tolerance);
+      node.nb(), eos.net_baryon_density(T, mub, mus, muq) * gamma, tolerance);
+  COMPARE_ABSOLUTE_ERROR(
+      node.ns(), eos.net_strange_density(T, mub, mus, muq) * gamma, tolerance);
+  COMPARE_ABSOLUTE_ERROR(
+      node.nq(), eos.net_charge_density(T, mub, mus, muq) * gamma, tolerance);
 }
 
 TEST(thermalization_action) {
@@ -109,6 +106,6 @@ TEST(thermalization_action) {
   thermalizer->update_thermalizer_lattice(P, dens_par, true);
   std::cout << "Thermalizing" << std::endl;
   thermalizer->thermalize(P, 0.0, par.testparticles);
-  ThermalizationAction th_act(*thermalizer, 0.0);
+  // ThermalizationAction th_act(*thermalizer, 0.0);
   // If all this did not crash - the test is passed.
 }

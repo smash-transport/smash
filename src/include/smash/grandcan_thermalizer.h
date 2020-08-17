@@ -29,8 +29,8 @@ namespace smash {
  * energy-momentum tensor \f$ T^{\mu 0}\f$, net baryon density nb and net
  * strangeness densities in the computational frame. From these quantities
  * it allows to compute the local rest frame quantites: temperature T,
- * chemical potentials mub and mus, the velocity of the local rest frame with
- * respect to the computational frame.
+ * chemical potentials mub, mus and muq, the velocity of the local rest frame
+ * with respect to the computational frame.
  *
  * An example of the intended use is:
  *
@@ -51,13 +51,14 @@ class ThermLatticeNode {
    * Default constructor of thermal quantities on the lattice returning
    * thermodynamic quantities in computational frame
    * \return Tmu0_ Four vector \f$T^{\mu 0}\f$, nb_ Net baryon density at
-   * this location, ns_ Net strangeness density, e_ Energy density,
-   * v_ 3 vector velocity of local rest frame, T_ Temperature
-   * mub_ Net baryon chemical potential, mus_ Net strangeness chemical potential
+   * this location, ns_ Net strangeness density, nq_ Net charge density,
+   * e_ Energy density, v_ 3 vector velocity of local rest frame, T_ Temperature
+   * mub_ Net baryon chemical potential, mus_ Net strangeness chemical
+   * potential, muq_ Net charge chemical potential
    */
   ThermLatticeNode();
   /**
-   *  Add particle contribution to Tmu0, nb and ns
+   *  Add particle contribution to Tmu0, nb, ns and nq
    *  May look like unused at first glance, but it is actually used
    *  by update_lattice, where the node type of the lattice
    *  is templated.
@@ -68,13 +69,13 @@ class ThermLatticeNode {
   /**
    * Temperature, chemical potentials and rest frame velocity are
    * calculated given the hadron gas equation of state object
-   * \param[in] eos \see HadronGasEos based on Tmu0, nb and ns
+   * \param[in] eos \see HadronGasEos based on Tmu0, nb, ns and nq
    * \return Temperature T, net baryon chemical potential mub,
-   * net strangeness chemical potential mus and the velocity of the
-   * Landau rest frame, under assumption that energy-momentum tensor
-   * has an ideal-fluid form. For more details and discussion see
-   * \iref{Oliinychenko:2015lva}. The advantage of this rest frame
-   * transformation is that it conserves energy and momentum, even
+   * net strangeness chemical potential mus, net charge chemical potential muq
+   * and the velocity of the Landau rest frame, under assumption that the
+   * energy-momentum tensor has an ideal-fluid form. For more details and
+   * discussion see \iref{Oliinychenko:2015lva}. The advantage of this rest
+   * frame transformation is that it conserves energy and momentum, even
    * though the dissipative part of the energy-momentum tensor is neglected.
    */
   void compute_rest_frame_quantities(HadronGasEos& eos);
@@ -84,16 +85,19 @@ class ThermLatticeNode {
    * \param[out] T0 Rest frame temperature
    * \param[out] mub0 Rest frame net baryon chemical potential
    * \param[out] mus0 Rest frame net strangeness chemical potential
+   * \param[out] muq0 Rest frame net charge chemical potential
    * \param[out] v0 Velocity of the rest frame
    */
   void set_rest_frame_quantities(double T0, double mub0, double mus0,
-                                 const ThreeVector v0);
+                                 double muq0, const ThreeVector v0);
   /// Get Four-momentum flow of the cell
   FourVector Tmu0() const { return Tmu0_; }
   /// Get net baryon density of the cell in the computational frame
   double nb() const { return nb_; }
   /// Get net strangeness density of the cell in the computational frame
   double ns() const { return ns_; }
+  /// Get net charge density of the cell in the computational frame
+  double nq() const { return nq_; }
   /// Get energy density in the rest frame
   double e() const { return e_; }
   /// Get pressure in the rest frame
@@ -106,6 +110,8 @@ class ThermLatticeNode {
   double mub() const { return mub_; }
   /// Get the net strangeness chemical potential
   double mus() const { return mus_; }
+  /// Get the net charge chemical potential
+  double muq() const { return muq_; }
 
  private:
   /// Four-momentum flow of the cell
@@ -114,6 +120,8 @@ class ThermLatticeNode {
   double nb_;
   /// Net strangeness density of the cell in the computational frame
   double ns_;
+  /// Net charge density of the cell in the computational frame
+  double nq_;
   /// Energy density in the rest frame
   double e_;
   /// Pressure in the rest frame
@@ -126,6 +134,8 @@ class ThermLatticeNode {
   double mub_;
   /// Net strangeness chemical potential
   double mus_;
+  /// Net charge chemical potential
+  double muq_;
 };
 
 /**
@@ -338,7 +348,7 @@ class GrandCanThermalizer {
           // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
           N_tot += lat_cell_volume_ * gamma *
                    HadronGasEos::partial_density(*i, cell.T(), cell.mub(),
-                                                 cell.mus());
+                                                 cell.mus(), 0.0);
         }
       }
       N_in_cells_.push_back(N_tot);
@@ -380,9 +390,9 @@ class GrandCanThermalizer {
       if (!condition(i->strangeness(), i->baryon_number(), i->charge())) {
         continue;
       }
-      N_sum +=
-          lat_cell_volume_ * gamma *
-          HadronGasEos::partial_density(*i, cell.T(), cell.mub(), cell.mus());
+      N_sum += lat_cell_volume_ * gamma *
+               HadronGasEos::partial_density(*i, cell.T(), cell.mub(),
+                                             cell.mus(), 0.0);
       if (N_sum >= r) {
         type_to_sample = i;
         break;

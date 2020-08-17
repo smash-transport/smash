@@ -100,6 +100,38 @@ T InterpolateLinear<T>::operator()(T x) const {
   return slope_ * x + yintercept_;
 }
 
+/**
+ * Perform a trilinear 1st order interpolation
+ *
+ * Assume, we seek the value of a function f at position (x, y, z). We know the
+ * position (x, y, z) lies within a 3D cube, for which the values of the
+ * function f are known at each corner (f1, ..., f8). We can now interpolate
+ * those values trilinearly to obtain an estimate of f at position (x, y, z).
+ *
+ * \param[in] ax fraction of the step in x-direction
+ * \param[in] ay fraction of the step in y-direction
+ * \param[in] az fraction of the step in z-direction
+ * \param[in] f1 Value at the lower left front corner of the cube
+ * \param[in] f2 Value at the lower right front corner of the cube
+ * \param[in] f3 Value at the upper left front corner of the cube
+ * \param[in] f4 Value at the upper right front corner of the cube
+ * \param[in] f5 Value at the lower left back corner of the cube
+ * \param[in] f6 Value at the lower right back corner of the cube
+ * \param[in] f7 Value at the upper left back corner of the cube
+ * \param[in] f8 Value at the upper right back corner of the cube
+ *
+ * \return Interpolated value
+ */
+template <typename T>
+T interpolate_trilinear(T ax, T ay, T az, T f1, T f2, T f3, T f4, T f5, T f6,
+                        T f7, T f8) {
+  T res = az * (ax * (ay * f8 + (1.0 - ay) * f6) +
+                (1.0 - ax) * (ay * f7 + (1.0 - ay) * f5)) +
+          (1 - az) * (ax * (ay * f4 + (1.0 - ay) * f2) +
+                      (1.0 - ax) * (ay * f3 + (1.0 - ay) * f1));
+  return res;
+}
+
 /// Represent a permutation.
 using Permutation = std::vector<size_t>;
 

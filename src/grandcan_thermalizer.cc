@@ -25,17 +25,20 @@ ThermLatticeNode::ThermLatticeNode()
     : Tmu0_(FourVector()),
       nb_(0.0),
       ns_(0.0),
+      nq_(0.0),
       e_(0.0),
       p_(0.0),
       v_(ThreeVector()),
       T_(0.0),
       mub_(0.0),
-      mus_(0.0) {}
+      mus_(0.0),
+      muq_(0.0) {}
 
 void ThermLatticeNode::add_particle(const ParticleData &part, double factor) {
   Tmu0_ += part.momentum() * factor;
   nb_ += static_cast<double>(part.type().baryon_number()) * factor;
   ns_ += static_cast<double>(part.type().strangeness()) * factor;
+  nq_ += static_cast<double>(part.type().charge()) * factor;
 }
 
 void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos &eos) {
@@ -53,18 +56,21 @@ void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos &eos) {
     }
     const double gamma_inv = std::sqrt(1.0 - v_.sqr());
     EosTable::table_element tabulated;
-    eos.from_table(tabulated, e_, gamma_inv * nb_);
+    eos.from_table(tabulated, e_, gamma_inv * nb_, nq_);
     if (!eos.is_tabulated() || tabulated.p < 0.0) {
-      auto T_mub_mus = eos.solve_eos(e_, gamma_inv * nb_, gamma_inv * ns_);
-      T_ = T_mub_mus[0];
-      mub_ = T_mub_mus[1];
-      mus_ = T_mub_mus[2];
-      p_ = HadronGasEos::pressure(T_, mub_, mus_);
+      auto T_mub_mus_muq =
+          eos.solve_eos(e_, gamma_inv * nb_, gamma_inv * ns_, nq_);
+      T_ = T_mub_mus_muq[0];
+      mub_ = T_mub_mus_muq[1];
+      mus_ = T_mub_mus_muq[2];
+      muq_ = T_mub_mus_muq[3];
+      p_ = HadronGasEos::pressure(T_, mub_, mus_, muq_);
     } else {
       p_ = tabulated.p;
       T_ = tabulated.T;
       mub_ = tabulated.mub;
       mus_ = tabulated.mus;
+      muq_ = tabulated.muq;
     }
     v_ = Tmu0_.threevec() / (Tmu0_.x0() + p_);
   }
@@ -76,16 +82,18 @@ void ThermLatticeNode::compute_rest_frame_quantities(HadronGasEos &eos) {
 }
 
 void ThermLatticeNode::set_rest_frame_quantities(double T0, double mub0,
-                                                 double mus0,
+                                                 double mus0, double muq0,
                                                  const ThreeVector v0) {
   T_ = T0;
   mub_ = mub0;
   mus_ = mus0;
+  muq_ = muq0;
   v_ = v0;
-  e_ = HadronGasEos::energy_density(T_, mub_, mus_);
-  p_ = HadronGasEos::pressure(T_, mub_, mus_);
-  nb_ = HadronGasEos::net_baryon_density(T_, mub_, mus_);
-  ns_ = HadronGasEos::net_strange_density(T_, mub_, mus_);
+  e_ = HadronGasEos::energy_density(T_, mub_, mus_, muq_);
+  p_ = HadronGasEos::pressure(T_, mub_, mus_, muq_);
+  nb_ = HadronGasEos::net_baryon_density(T_, mub_, mus_, muq_);
+  ns_ = HadronGasEos::net_strange_density(T_, mub_, mus_, muq_);
+  nq_ = HadronGasEos::net_charge_density(T_, mub_, mus_, muq_);
 }
 
 std::ostream &operator<<(std::ostream &out, const ThermLatticeNode &node) {
@@ -93,7 +101,7 @@ std::ostream &operator<<(std::ostream &out, const ThermLatticeNode &node) {
              << ", ns: " << node.ns() << ", v: " << node.v()
              << ", e: " << node.e() << ", p: " << node.p()
              << ", T: " << node.T() << ", mub: " << node.mub()
-             << ", mus: " << node.mus();
+             << ", mus: " << node.mus() << ", muq: " << node.muq();
 }
 
 GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
@@ -253,7 +261,7 @@ void GrandCanThermalizer::sample_in_random_cell_BF_algo(ParticleList &plist,
     const double N_this_cell =
         lat_cell_volume_ * gamma *
         HadronGasEos::partial_density(*eos_typelist_[type_index], cell.T(),
-                                      cell.mub(), cell.mus());
+                                      cell.mub(), cell.mus(), cell.muq());
     N_in_cells_.push_back(N_this_cell);
     N_total_in_cells_ += N_this_cell;
   }
@@ -296,9 +304,10 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
     const double gamma = 1.0 / std::sqrt(1.0 - cell.v().sqr());
     for (size_t i = 0; i < N_sorts_; i++) {
       // N_i = n u^mu dsigma_mu = (isochronous hypersurface) n * V * gamma
-      mult_sort_[i] += lat_cell_volume_ * gamma * ntest *
-                       HadronGasEos::partial_density(
-                           *eos_typelist_[i], cell.T(), cell.mub(), cell.mus());
+      mult_sort_[i] +=
+          lat_cell_volume_ * gamma * ntest *
+          HadronGasEos::partial_density(*eos_typelist_[i], cell.T(), cell.mub(),
+                                        cell.mus(), cell.muq());
     }
   }
 
@@ -567,11 +576,13 @@ void GrandCanThermalizer::print_statistics(const Clock &clock) const {
     double T;
     double mub;
     double mus;
+    double muq;
     double nb;
     double ns;
+    double nq;
   };
-  struct to_average on_lattice = {0.0, 0.0, 0.0, 0.0, 0.0};
-  struct to_average in_therm_reg = {0.0, 0.0, 0.0, 0.0, 0.0};
+  struct to_average on_lattice = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  struct to_average in_therm_reg = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
   double e_sum_on_lattice = 0.0, e_sum_in_therm_reg = 0.0;
   int node_counter = 0;
   for (const auto &node : *lat_) {
@@ -579,15 +590,19 @@ void GrandCanThermalizer::print_statistics(const Clock &clock) const {
     on_lattice.T += node.T() * e;
     on_lattice.mub += node.mub() * e;
     on_lattice.mus += node.mus() * e;
+    on_lattice.muq += node.muq() * e;
     on_lattice.nb += node.nb() * e;
     on_lattice.ns += node.ns() * e;
+    on_lattice.nq += node.nq() * e;
     e_sum_on_lattice += e;
     if (e >= e_crit_) {
       in_therm_reg.T += node.T() * e;
       in_therm_reg.mub += node.mub() * e;
       in_therm_reg.mus += node.mus() * e;
+      in_therm_reg.muq += node.muq() * e;
       in_therm_reg.nb += node.nb() * e;
       in_therm_reg.ns += node.ns() * e;
+      in_therm_reg.nq += node.nq() * e;
       e_sum_in_therm_reg += e;
       node_counter++;
     }
@@ -596,26 +611,33 @@ void GrandCanThermalizer::print_statistics(const Clock &clock) const {
     on_lattice.T /= e_sum_on_lattice;
     on_lattice.mub /= e_sum_on_lattice;
     on_lattice.mus /= e_sum_on_lattice;
+    on_lattice.muq /= e_sum_on_lattice;
     on_lattice.nb /= e_sum_on_lattice;
     on_lattice.ns /= e_sum_on_lattice;
+    on_lattice.nq /= e_sum_on_lattice;
   }
   if (e_sum_in_therm_reg > really_small) {
     in_therm_reg.T /= e_sum_in_therm_reg;
     in_therm_reg.mub /= e_sum_in_therm_reg;
     in_therm_reg.mus /= e_sum_in_therm_reg;
+    in_therm_reg.muq /= e_sum_in_therm_reg;
     in_therm_reg.nb /= e_sum_in_therm_reg;
     in_therm_reg.ns /= e_sum_in_therm_reg;
+    in_therm_reg.nq /= e_sum_in_therm_reg;
   }
 
   std::cout << "Current time [fm/c]: " << clock.current_time() << std::endl;
-  std::cout << "Averages on the lattice - T[GeV], mub[GeV], mus[GeV], "
-            << "nb[fm^-3], ns[fm^-3]: " << on_lattice.T << " " << on_lattice.mub
-            << " " << on_lattice.mus << " " << on_lattice.nb << " "
-            << on_lattice.ns << std::endl;
-  std::cout << "Averages in therm. region - T[GeV], mub[GeV], mus[GeV], "
-            << "nb[fm^-3], ns[fm^-3]: " << in_therm_reg.T << " "
-            << in_therm_reg.mub << " " << in_therm_reg.mus << " "
-            << in_therm_reg.nb << " " << in_therm_reg.ns << std::endl;
+  std::cout << "Averages on the lattice - T[GeV], mub[GeV], mus[GeV], muq[GeV] "
+            << "nb[fm^-3], ns[fm^-3], nq[fm^-3]: " << on_lattice.T << " "
+            << on_lattice.mub << " " << on_lattice.mus << " " << on_lattice.muq
+            << " " << on_lattice.nb << " " << on_lattice.ns << " "
+            << on_lattice.nq << std::endl;
+  std::cout
+      << "Averages in therm. region - T[GeV], mub[GeV], mus[GeV], muq[GeV] "
+      << "nb[fm^-3], ns[fm^-3], nq[fm^-3]: " << in_therm_reg.T << " "
+      << in_therm_reg.mub << " " << in_therm_reg.mus << " " << in_therm_reg.muq
+      << " " << in_therm_reg.nb << " " << in_therm_reg.ns << " "
+      << in_therm_reg.nq << std::endl;
   std::cout << "Volume with e > e_crit [fm^3]: "
             << lat_cell_volume_ * node_counter << std::endl;
 }

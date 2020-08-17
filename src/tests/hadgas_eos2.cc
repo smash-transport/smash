@@ -27,11 +27,11 @@ TEST(create_particles_table) {
 TEST(partial_density) {
   const ParticleType& pip = ParticleType::find(0x211);
   const ParticleType& rhop = ParticleType::find(0x213);
-  const double T = 0.15, mub = 0.0, mus = 0.0;
+  const double T = 0.15, mub = 0.0, mus = 0.0, muq = 0.0;
   constexpr bool account_for_spectral_function = true;
-  const double dpip = HadronGasEos::partial_density(pip, T, mub, mus);
+  const double dpip = HadronGasEos::partial_density(pip, T, mub, mus, muq);
   const double drhop = HadronGasEos::partial_density(
-      rhop, T, mub, mus, account_for_spectral_function);
+      rhop, T, mub, mus, muq, account_for_spectral_function);
   COMPARE_ABSOLUTE_ERROR(dpip, 0.0372145, 1.e-6);
   COMPARE(rhop.mass(), 0.776);
   COMPARE(rhop.width_at_pole(), 0.149);
@@ -52,7 +52,7 @@ TEST(sample_mass_thermal) {
   hist.test(
       [&](double m) {
         return rhop.spectral_function(m) * m * m * gsl_sf_bessel_Kn(2, m / T) *
-               HadronGasEos::partial_density(rhop, T, 0.0, 0.0);
+               HadronGasEos::partial_density(rhop, T, 0.0, 0.0, 0.0);
       },
       "mass_sampling.dat");
 }
