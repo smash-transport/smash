@@ -151,7 +151,7 @@ TEST(gen_final_state) {
     VERIFY(act->outgoing_particles()[1].type() == type_pim);
     VERIFY(act->outgoing_particles()[2].type() == type_photon);
   }
-  COMPARE_RELATIVE_ERROR(tot_weight, 0.0282709, 1e-5);
+  COMPARE_RELATIVE_ERROR(tot_weight, 1.84592, 1e-5);
 }
 
 TEST(bremsstrahlung_reaction_type_function) {
