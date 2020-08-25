@@ -71,7 +71,7 @@ if(DOXYGEN)
       add_custom_target(undocumented ${DOXYGEN}
          ${CMAKE_CURRENT_BINARY_DIR}/DoxyfileOnlyDocumented 2>&1 |
          ${SORT} -u |
-         ${GREP} -i warning: | ${GREP} -iv "einhard"
+         ${GREP} -i warning: | ${GREP} -iv "einhard" || true
          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
          COMMENT "Building Doxygen Code Documentation (only with documented entities) and output doxgen warnings"
          VERBATIM
