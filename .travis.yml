@@ -86,8 +86,8 @@ before_install:
     make install --silent &&
     cd $SMASH_ROOT
   # eigen
-  - wget http://bitbucket.org/eigen/eigen/get/3.3.5.tar.gz &&
-    tar -xf 3.3.5.tar.gz -C $HOME
+  - wget http://gitlab.com/libeigen/eigen/-/archive/3.3.5/eigen-3.3.5.tar.gz &&
+    tar -xf eigen-3.3.5.tar.gz -C $HOME
   # cpplint
   - pip install --user cpplint
 
@@ -95,7 +95,7 @@ install:
   - cd $SMASH_ROOT
   - mkdir build
   - cd build
-  - cmake -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8302/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-eigen-b3f3d4950030/ -DGSL_ROOT_DIR=$GSL ..
+  - cmake -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8302/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.5/ -DGSL_ROOT_DIR=$GSL ..
   - make -j$(nproc)
 
 script:
