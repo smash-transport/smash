@@ -823,14 +823,86 @@ CollisionBranchList CrossSections::two_to_two(
 }
 
 CollisionBranchList CrossSections::two_to_three() const {
-  // No 2-to-3 collisons at the moment
-  return {};
+  CollisionBranchList process_list;
+  const ParticleType& type_a = incoming_particles_[0].type();
+  const ParticleType& type_b = incoming_particles_[1].type();
+
+  if ((type_a.is_deuteron() && type_b.pdgcode().is_pion())
+    || (type_b.is_deuteron() && type_a.pdgcode().is_pion())) {
+      // pi d -> pi p n
+      const ParticleType& type_pi =
+          type_a.pdgcode().is_pion() ? type_a : type_b;
+      const auto& type_p = ParticleType::find(pdg::p);
+      const auto& type_n = ParticleType::find(pdg::n);
+
+      // TODO(stdnmr) Check that all particles types exist
+      process_list.push_back(make_unique<CollisionBranch>(
+          type_pi, type_p, type_n, two_to_three_xs(type_a, type_b, sqrt_s_),
+          ProcessType::TwoToThree));
+      // TODO(stdnmr) Sensible Debug Output
+      // logg[LScatterAction].debug(type_pi.name(), type_nucleus.name(), "→ ",
+      //                            type_pi.name(), produced_nucleus->name(),
+      //                            " at ", sqrts, " GeV, xs[mb] = ", xsection);
+    }
+  return process_list;
 }
 
-double CrossSections::two_to_three_xs(const ParticleType& /*type_in1*/,
-                                      const ParticleType& /*type_in2*/,
-                                      double /*sqrts*/) {
-  return 0.0;
+double CrossSections::two_to_three_xs(const ParticleType& type_a,
+                                      const ParticleType& type_b,
+                                      double sqrts) {
+  double xsection = 0.0;
+  bool is_pid = (type_a.is_deuteron() && type_b.pdgcode().is_pion()) ||
+                (type_b.is_deuteron() && type_a.pdgcode().is_pion());
+  if (is_pid) {
+    // TODO(stdnmr) Note, that cross section calculation is not fully correct ATM
+    const ParticleType& type_pi = type_a.pdgcode().is_pion() ? type_a : type_b;
+    // const ParticleType& type_deuteron = type_a.is_nucleus() ? type_a : type_b;  // Unused
+    const auto& type_p = ParticleType::find(pdg::p);
+    const auto& type_n = ParticleType::find(pdg::n);
+    const double s = sqrts * sqrts;
+
+    // matrix element for πd
+    const double tmp = sqrts - pion_mass - deuteron_mass;
+    // Matrix element is fit to match the inelastic pi+ d -> pi+ n p
+    // cross-section from the Fig. 5 of [\iref{Arndt:1994bs}].
+    const double matrix_element =
+        295.5 + 2.862 / (0.00283735 + pow_int(sqrts - 2.181, 2)) +
+        0.0672 / pow_int(tmp, 2) - 6.61753 / tmp;
+    // TODO(stdnmr) Verify that spin factor is correct
+    const double spin_factor =
+        (type_p.spin() + 1) * (type_n.spin() + 1) * (type_pi.spin() + 1);
+    /* Isospin factor is always the same, so it is included into the
+     * matrix element.
+     * Symmetry factor is always 1 here.
+     * The (hbarc)^2/16 pi factor is absorbed into matrix element. */
+    xsection = matrix_element * spin_factor / (s * pCM_from_s(s, type_a.mass(),type_a.mass()));
+
+    // TODO(stdnmr) Use crude xs approx for now
+    xsection = 60.;
+
+
+
+
+    // TODO(stdnmr) Clarify how those xs fromulas for two-particle final states
+    //              translate to three-body final states (probably simpler)
+    //   ParticleTypePtrList nuclei = ParticleType::list_light_nuclei();
+    //  for (ParticleTypePtr produced_nucleus : nuclei) {
+    //    if (produced_nucleus->is_stable()) {
+    //      assert(!type_nucleus.is_stable());
+    //      xsection *= pCM_from_s(s, type_pi.mass(), produced_nucleus->mass());
+    //    } else {
+    //      assert(type_nucleus.is_stable());
+    //      const double resonance_integral =
+    //          produced_nucleus->iso_multiplet()->get_integral_piR(sqrts);
+    //      xsection *= resonance_integral;
+    //      logg[LScatterAction].debug("Resonance integral ",
+    //      resonance_integral,
+    //                                 ", matrix element: ", matrix_element,
+    //                                 ", cm_momentum: ", cm_momentum());
+    //    }
+    // }
+  }
+  return xsection;
 }
 
 CollisionBranchList CrossSections::bb_xx_except_nn(
