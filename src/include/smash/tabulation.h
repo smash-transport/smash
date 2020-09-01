@@ -208,7 +208,7 @@ inline Tabulation spectral_integral_semistable(Integrator& integrate,
  * \param[in] range Distance between tabulation points [GeV].
  * \return Tabulation of the given integral.
  */
-inline Tabulation spectral_integral_unstable(Integrator2dCuhre& integrate2d,
+inline Tabulation spectral_integral_unstable(Integrator2d& integrate2d,
                                              const ParticleType& res1,
                                              const ParticleType& res2,
                                              double range) {

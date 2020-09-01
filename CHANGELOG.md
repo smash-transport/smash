@@ -30,6 +30,10 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Changed
 * The Pythia version is increased to 8.302
 
+### Removed
+* Integrator1dMonte as it was not used anymore
+* Integrator2d with the GSL Monte-Carlo integration functions. Replaced by the Integrator2dCuhre which performs 2D integrations according to the Cuhre algorithm. The latter was now renamed to Integrator2d.
+
 
 
 ## [SMASH-1.8](https://github.com/smash-transport/smash/compare/SMASH-1.7...SMASH-1.8)
