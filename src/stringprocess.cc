@@ -35,6 +35,10 @@ StringProcess::StringProcess(
       stringz_b_leading_(stringz_b_leading),
       stringz_a_produce_(stringz_a),
       stringz_b_produce_(stringz_b),
+      strange_supp_(strange_supp),
+      diquark_supp_(diquark_supp),
+      popcorn_rate_(popcorn_rate),
+      string_sigma_T_(string_sigma_T),
       kappa_tension_string_(string_tension),
       additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
@@ -43,16 +47,6 @@ StringProcess::StringProcess(
       mass_dependent_formation_times_(mass_dependent_formation_times),
       prob_proton_to_d_uu_(prob_proton_to_d_uu),
       separate_fragment_baryon_(separate_fragment_baryon) {
-  // setup and initialize pythia for hard string process
-  pythia_parton_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
-  /* select only non-diffractive events
-   * diffractive ones are implemented in a separate routine */
-  pythia_parton_->readString("SoftQCD:nonDiffractive = on");
-  pythia_parton_->readString("MultipartonInteractions:pTmin = 1.5");
-  pythia_parton_->readString("HadronLevel:all = off");
-  common_setup_pythia(pythia_parton_.get(), strange_supp, diquark_supp,
-                      popcorn_rate, stringz_a, stringz_b, string_sigma_T);
-
   // setup and initialize pythia for fragmentation
   pythia_hadron_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* turn off all parton-level processes to implement only hadronization */
@@ -559,41 +553,48 @@ bool StringProcess::next_NDiffHard() {
                         ")");
   }
 
-  int previous_idA = pythia_parton_->mode("Beams:idA"),
-      previous_idB = pythia_parton_->mode("Beams:idB");
-  double previous_eCM = pythia_parton_->parm("Beams:eCM");
-  // check if the initial state for PYTHIA remains same.
-  bool same_initial_state = previous_idA == pdg_for_pythia[0] &&
-                            previous_idB == pdg_for_pythia[1] &&
-                            std::abs(previous_eCM - sqrtsAB_) < really_small;
+  std::pair<int, int> idAB{pdg_for_pythia[0], pdg_for_pythia[1]};
 
-  /* Perform PYTHIA initialization if it was not previously initialized
-   * or the initial state changed. */
-  if (!pythia_parton_initialized_ || !same_initial_state) {
-    pythia_parton_->settings.mode("Beams:idA", pdg_for_pythia[0]);
-    pythia_parton_->settings.mode("Beams:idB", pdg_for_pythia[1]);
-    pythia_parton_->settings.parm("Beams:eCM", sqrtsAB_);
+  // If an entry for the calculated particle IDs does not exist, create one and
+  // initialize it accordingly
+  if (hard_map_.count(idAB) == 0) {
+    hard_map_[idAB] = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
+    hard_map_[idAB]->readString("SoftQCD:nonDiffractive = on");
+    hard_map_[idAB]->readString("MultipartonInteractions:pTmin = 1.5");
+    hard_map_[idAB]->readString("HadronLevel:all = off");
 
-    pythia_parton_initialized_ = pythia_parton_->init();
-    logg[LPythia].debug("Pythia initialized with ", pdg_for_pythia[0], " + ",
-                        pdg_for_pythia[1], " at CM energy [GeV] ", sqrtsAB_);
-    if (!pythia_parton_initialized_) {
+    common_setup_pythia(hard_map_[idAB].get(), strange_supp_, diquark_supp_,
+                        popcorn_rate_, stringz_a_produce_, stringz_b_produce_,
+                        string_sigma_T_);
+
+    hard_map_[idAB]->settings.flag("Beams:allowVariableEnergy", true);
+
+    hard_map_[idAB]->settings.mode("Beams:idA", idAB.first);
+    hard_map_[idAB]->settings.mode("Beams:idB", idAB.second);
+    hard_map_[idAB]->settings.parm("Beams:eCM", sqrtsAB_);
+
+    logg[LPythia].debug("Pythia object initialized with ", pdg_for_pythia[0],
+                        " + ", pdg_for_pythia[1], " at CM energy [GeV] ",
+                        sqrtsAB_);
+
+    if (!hard_map_[idAB]->init()) {
       throw std::runtime_error("Pythia failed to initialize.");
     }
   }
-  /* Set the random seed of the Pythia random Number Generator.
-   * Pythia's random is controlled by SMASH in every single collision.
-   * In this way we ensure that the results are reproducible
-   * for every event if one knows SMASH random seed. */
+
+  // Else just pick the existing and initialized entry and go on
+  // Initialize Pythias random number generator using SMASHs seed
   const int seed_new = random::uniform_int(1, maximum_rndm_seed_in_pythia);
-  pythia_parton_->rndm.init(seed_new);
-  logg[LPythia].debug("pythia_parton_ : rndm is initialized with seed ",
-                      seed_new);
+  hard_map_[idAB]->rndm.init(seed_new);
+  logg[LPythia].debug("hard_map_[", idAB.first, "][", idAB.second,
+                      "] : rndm is initialized with seed ", seed_new);
+
+  // Change the energy using the Pythia 8.302+ feature
 
   // Short notation for Pythia event
   Pythia8::Event &event_hadron = pythia_hadron_->event;
   logg[LPythia].debug("Pythia hard event created");
-  bool final_state_success = pythia_parton_->next();
+  bool final_state_success = hard_map_[idAB]->next(sqrtsAB_);
   logg[LPythia].debug("Pythia final state computed, success = ",
                       final_state_success);
   if (!final_state_success) {
@@ -608,27 +609,28 @@ bool StringProcess::next_NDiffHard() {
   /* Update the partonic intermediate state from PYTHIA output.
    * Note that hadronization will be performed separately,
    * after identification of strings and replacement of constituents. */
-  for (int i = 0; i < pythia_parton_->event.size(); i++) {
-    if (pythia_parton_->event[i].isFinal()) {
-      const int pdgid = pythia_parton_->event[i].id();
-      Pythia8::Vec4 pquark = pythia_parton_->event[i].p();
-      const double mass = pythia_parton_->particleData.m0(pdgid);
+  for (int i = 0; i < hard_map_[idAB]->event.size(); i++) {
+    if (hard_map_[idAB]->event[i].isFinal()) {
+      const int pdgid = hard_map_[idAB]->event[i].id();
+      Pythia8::Vec4 pquark = hard_map_[idAB]->event[i].p();
+      const double mass = hard_map_[idAB]->particleData.m0(pdgid);
 
-      const int status = pythia_parton_->event[i].status();
-      const int color = pythia_parton_->event[i].col();
-      const int anticolor = pythia_parton_->event[i].acol();
+      const int status = hard_map_[idAB]->event[i].status();
+      const int color = hard_map_[idAB]->event[i].col();
+      const int anticolor = hard_map_[idAB]->event[i].acol();
 
       pSum += pquark;
+      convert_KaonLS(const_cast<int &>(pdgid));
       event_intermediate_.append(pdgid, status, color, anticolor, pquark, mass);
     }
   }
   // add junctions to the intermediate state if there is any.
   event_intermediate_.clearJunctions();
-  for (int i = 0; i < pythia_parton_->event.sizeJunction(); i++) {
-    const int kind = pythia_parton_->event.kindJunction(i);
+  for (int i = 0; i < hard_map_[idAB]->event.sizeJunction(); i++) {
+    const int kind = hard_map_[idAB]->event.kindJunction(i);
     std::array<int, 3> col;
     for (int j = 0; j < 3; j++) {
-      col[j] = pythia_parton_->event.colJunction(i, j);
+      col[j] = hard_map_[idAB]->event.colJunction(i, j);
     }
     event_intermediate_.appendJunction(kind, col[0], col[1], col[2]);
   }
@@ -653,7 +655,7 @@ bool StringProcess::next_NDiffHard() {
     const int pdgid = event_intermediate_[ipart].id();
     if (event_intermediate_[ipart].isFinal() &&
         !event_intermediate_[ipart].isParton() &&
-        !pythia_parton_->particleData.isOctetHadron(pdgid)) {
+        !hard_map_[idAB]->particleData.isOctetHadron(pdgid)) {
       logg[LPythia].debug("PDG ID from Pythia: ", pdgid);
       FourVector momentum = reorient(event_intermediate_[ipart], evecBasisAB_);
       logg[LPythia].debug("4-momentum from Pythia: ", momentum);

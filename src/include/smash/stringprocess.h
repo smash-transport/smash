@@ -120,6 +120,14 @@ class StringProcess {
    * of other (produced) hadrons in soft non-diffractive string processes
    */
   double stringz_b_produce_;
+  /// strange quark suppression factor
+  double strange_supp_;
+  /// diquark suppression factor
+  double diquark_supp_;
+  /// popcorn rate
+  double popcorn_rate_;
+  /// transverse momentum spread in string fragmentation
+  double string_sigma_T_;
   /// string tension [GeV/fm]
   double kappa_tension_string_;
   /**
@@ -153,8 +161,6 @@ class StringProcess {
 
   /// Whether to use a separate fragmentation function for leading baryons.
   bool separate_fragment_baryon_;
-  /// Remembers if Pythia is initialized or not
-  bool pythia_parton_initialized_ = false;
 
   /**
    * final state array
@@ -162,8 +168,15 @@ class StringProcess {
    */
   ParticleList final_state_;
 
-  /// PYTHIA object used in hard string routine
-  std::unique_ptr<Pythia8::Pythia> pythia_parton_;
+  /* Map containing PYTHIA objects for hard string routines.
+   * Particle IDs are used as the keys to obtain the respective object.
+   * This was introduced to reduce the amount of Pythia init() calls.
+   */
+  typedef std::map<std::pair<int, int>, std::unique_ptr<Pythia8::Pythia>>
+      pythia_map;
+
+  /// Map object to contain the different pythia objects
+  pythia_map hard_map_;
 
   /// PYTHIA object used in fragmentation
   std::unique_ptr<Pythia8::Pythia> pythia_hadron_;
@@ -280,12 +293,6 @@ class StringProcess {
   }
 
   // clang-format on
-
-  /**
-   * Function to get the PYTHIA object for hard string routine
-   * \return pointer to the PYTHIA object used in hard string routine
-   */
-  Pythia8::Pythia *get_ptr_pythia_parton() { return pythia_parton_.get(); }
 
   /**
    * Interface to pythia_sigmatot_ to compute cross-sections of A+B->
