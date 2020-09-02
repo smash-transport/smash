@@ -97,27 +97,129 @@ void ScatterActionMulti::add_possible_reactions(double dt,
     }
     if (two_to_three) {
       // 3 -> 2
-      if (possible_three_to_two_reaction(incoming_particles_[0], incoming_particles_[1],
-                                         incoming_particles_[2])) {
 
-        // nppi -> dpi
-        const ParticleTypePtr type_out1 = ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_d));
+      const PdgCode pdg_a = incoming_particles_[0].pdgcode();
+      const PdgCode pdg_b = incoming_particles_[1].pdgcode();
+      const PdgCode pdg_c = incoming_particles_[2].pdgcode();
+      const ParticleTypePtr type_deuteron = ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_d));
+      const ParticleTypePtr type_anti_deuteron = ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_antid));
 
-        PdgCode pdg_of_inc_pion;
-        for (auto &part : incoming_particles_) {
-          if (part.is_pion()) {
-            pdg_of_inc_pion = part.pdgcode();
-            break;
+      const int degen = 1;  // TODO(stdnmr) think about later
+
+      if (type_deuteron && type_anti_deuteron) {
+
+        // TODO(stdnmr) Optimze ugly, lengthy if statements
+
+        // πpn → πd
+        if ((pdg_a.is_pion() && pdg_b == pdg::p && pdg_c == pdg::n) ||
+            (pdg_a.is_pion() && pdg_b == pdg::n && pdg_c == pdg::p) ||
+            (pdg_a == pdg::p && pdg_b.is_pion() && pdg_c == pdg::n) ||
+            (pdg_a == pdg::n && pdg_b.is_pion() && pdg_c == pdg::p) ||
+            (pdg_a == pdg::p && pdg_b == pdg::n && pdg_c.is_pion()) ||
+            (pdg_a == pdg::n && pdg_b == pdg::p && pdg_c.is_pion())) {
+
+          const ParticleType& type_pi;
+          for (auto &part : incoming_particles_) {
+            if (part.is_pion()) {
+              type_pi = part.type();
+              break;
+            }
           }
-        }
-        const ParticleTypePtr type_out2 = ParticleType::try_find(pdg_of_inc_pion);
 
-        const int degen = 1;  // TODO(stdnmr) think about later
-
-        add_reaction(make_unique<CollisionBranch>(
-            *type_out1, *type_out2,
-            probability_three_to_two(*type_out1, *type_out2, dt, gcell_vol, degen),
+          add_reaction(make_unique<CollisionBranch>(
+            type_pi, *type_deuteron,
+            probability_three_to_two(type_pi, *type_deuteron, dt, gcell_vol, degen),
             ProcessType::MultiParticleThreeToTwo));
+
+        }
+
+        // πp̅n̅ → πd̅
+        if ((pdg_a.is_pion() && pdg_b == -pdg::p && pdg_c == -pdg::n) ||
+            (pdg_a.is_pion() && pdg_b == -pdg::n && pdg_c == -pdg::p) ||
+            (pdg_a == -pdg::p && pdg_b.is_pion() && pdg_c == -pdg::n) ||
+            (pdg_a == -pdg::n && pdg_b.is_pion() && pdg_c == -pdg::p) ||
+            (pdg_a == -pdg::p && pdg_b == -pdg::n && pdg_c.is_pion()) ||
+            (pdg_a == -pdg::n && pdg_b == -pdg::p && pdg_c.is_pion())) {
+
+          const ParticleType& type_pi;
+          for (auto &part : incoming_particles_) {
+            if (part.is_pion()) {
+              type_pi = part.type();
+              break;
+            }
+          }
+
+          add_reaction(make_unique<CollisionBranch>(
+            type_pi, *type_anti_deuteron,
+            probability_three_to_two(type_pi, *type_anti_deuteron, dt, gcell_vol, degen),
+            ProcessType::MultiParticleThreeToTwo));
+
+
+        }
+
+        // Nnp → Nd, N̅np → N̅d
+        if ((pdg_a.is_nucleon() && pdg_b == pdg::p && pdg_c == pdg::n) ||
+            (pdg_a.is_nucleon() && pdg_b == pdg::n && pdg_c == pdg::p) ||
+            (pdg_a == pdg::p && pdg_b.is_nucleon() && pdg_c == pdg::n) ||
+            (pdg_a == pdg::n && pdg_b.is_nucleon() && pdg_c == pdg::p) ||
+            (pdg_a == pdg::p && pdg_b == pdg::n && pdg_c.is_nucleon()) ||
+            (pdg_a == pdg::n && pdg_b == pdg::p && pdg_c.is_nucleon())) {
+
+          const ParticleType& type_N;
+          for (auto &part : incoming_particles_) {
+            // in case of N̅np → N̅d
+            if (part.antiparticle_sign() == -1) {
+              type_N = part.type();
+              break;
+            }
+            // in case of Nnp → Nd
+            // find particle type that is double, but not from the same particle
+            for (auto &part_comp: incoming_particles_) {
+              if ((part != part_comp) && (part.type() == part_comp.type())) {
+                type_N = part.type();
+                break;
+              }
+            }
+          }
+
+          add_reaction(make_unique<CollisionBranch>(
+            type_N, *type_deuteron,
+            probability_three_to_two(type_N, *type_deuteron, dt, gcell_vol, degen),
+            ProcessType::MultiParticleThreeToTwo));
+
+        }
+
+        // Np̅n̅ → Nd̅, N̅p̅n̅ → N̅d̅
+        if ((pdg_a.is_nucleon() && pdg_b == -pdg::p && pdg_c == -pdg::n) ||
+            (pdg_a.is_nucleon() && pdg_b == -pdg::n && pdg_c == -pdg::p) ||
+            (pdg_a == -pdg::p && pdg_b.is_nucleon() && pdg_c == -pdg::n) ||
+            (pdg_a == -pdg::n && pdg_b.is_nucleon() && pdg_c == -pdg::p) ||
+            (pdg_a == -pdg::p && pdg_b == -pdg::n && pdg_c.is_nucleon()) ||
+            (pdg_a == -pdg::n && pdg_b == -pdg::p && pdg_c.is_nucleon())) {
+
+          const ParticleType& type_N;
+          for (auto &part : incoming_particles_) {
+            // in case of Np̅n̅ → Nd̅
+            if (part.pdgcode().antiparticle_sign() == 1) {
+              type_N = part.type();
+              break;
+            }
+            // in case of N̅p̅n̅ → N̅d̅
+            // find particle type that is double, but not from the same particle
+            for (auto &part_comp: incoming_particles_) {
+              if ((part != part_comp) && (part.type() == part_comp.type())) {
+                type_N = part.type();
+                break;
+              }
+            }
+          }
+
+          add_reaction(make_unique<CollisionBranch>(
+            type_N, *type_anti_deuteron,
+            probability_three_to_two(type_N, *type_anti_deuteron, dt, gcell_vol, degen),
+            ProcessType::MultiParticleThreeToTwo));
+
+        }
       }
     }
   }
