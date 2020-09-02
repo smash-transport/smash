@@ -11,6 +11,7 @@
 
 #include "../include/smash/bremsstrahlungaction.h"
 #include "../include/smash/scatteractionphoton.h"
+#include "../include/smash/crosssectionsphoton.h"
 
 using namespace smash;
 using smash::Test::Momentum;
@@ -50,7 +51,15 @@ TEST(pi_rho0_pi_gamma) {
   COMPARE_RELATIVE_ERROR(tot_weight, 0.000722419008, 0.08);
 }
 
-TEST(photon_reaction_type_function) {
+TEST(photon_and_hadron_reaction_type_function) {
+  /*
+   *creates possible photon reactions and also some that
+   *produce no photons. Checks if the computed photon reaction type
+   *is correct. Continues to check if the respective hadron types
+   *are correct.
+   */
+
+  // setup for the particles
   const ParticleData pip{ParticleType::find(0x211)};
   const ParticleData pim{ParticleType::find(-0x211)};
   const ParticleData piz{ParticleType::find(0x111)};
@@ -60,8 +69,24 @@ TEST(photon_reaction_type_function) {
   const ParticleData eta{ParticleType::find(0x221)};
   const ParticleData p{ParticleType::find(0x2112)};
 
-  const ParticleList l1{pip, pim}, l2{rhop, pim}, l3{p, pim}, l4{pip, eta};
+  // gets all possible outgoing hadrons
+  static const ParticleTypePtr rho_z_particle_ptr =
+      &ParticleType::find(pdg::rho_z);
+  static const ParticleTypePtr rho_p_particle_ptr =
+      &ParticleType::find(pdg::rho_p);
+  static const ParticleTypePtr rho_m_particle_ptr =
+      &ParticleType::find(pdg::rho_m);
+  static const ParticleTypePtr pi_z_particle_ptr =
+      &ParticleType::find(pdg::pi_z);
+  static const ParticleTypePtr pi_m_particle_ptr =
+      &ParticleType::find(pdg::pi_m);
 
+  // puts the particles in lists
+  const ParticleList l1{pip, pim}, l2{rhop, pim}, l3{p, pim}, l4{pip, eta},
+      l5{pip, piz}, l6{piz, pip}, l7{pim, piz}, l8{piz, pim}, l9{pim, rhoz},
+      l10{piz, rhom}, l11{piz, rhoz};
+
+  // test if the photon reaction type is correct
   VERIFY(ScatterActionPhoton::photon_reaction_type(l1) !=
          ScatterActionPhoton::ReactionType::no_reaction);
   VERIFY(ScatterActionPhoton::photon_reaction_type(l2) !=
@@ -70,6 +95,22 @@ TEST(photon_reaction_type_function) {
          ScatterActionPhoton::ReactionType::no_reaction);
   VERIFY(ScatterActionPhoton::photon_reaction_type(l4) ==
          ScatterActionPhoton::ReactionType::no_reaction);
+
+  // test if the respective reactions from above result in
+  // the right hadron type.
+
+  // these also test if the produced hadron is invariant
+  // if you swap the partners
+  VERIFY(ScatterActionPhoton::outgoing_hadron_type(l5) == rho_p_particle_ptr);
+  VERIFY(ScatterActionPhoton::outgoing_hadron_type(l6) == rho_p_particle_ptr);
+  VERIFY(ScatterActionPhoton::outgoing_hadron_type(l7) == rho_m_particle_ptr);
+  VERIFY(ScatterActionPhoton::outgoing_hadron_type(l8) == rho_m_particle_ptr);
+
+  // these simply test more cases
+  VERIFY(ScatterActionPhoton::outgoing_hadron_type(l9) == pi_m_particle_ptr);
+  VERIFY(ScatterActionPhoton::outgoing_hadron_type(l10) == pi_m_particle_ptr);
+  VERIFY(ScatterActionPhoton::outgoing_hadron_type(l1) == rho_z_particle_ptr);
+  VERIFY(ScatterActionPhoton::outgoing_hadron_type(l11) == pi_z_particle_ptr);
 }
 
 TEST(check_kinematic_thresholds) {
@@ -180,4 +221,114 @@ TEST(bremsstrahlung_reaction_type_function) {
          BremsstrahlungAction::ReactionType::no_reaction);
   VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l8) ==
          BremsstrahlungAction::ReactionType::no_reaction);
+}
+
+TEST(photon_cross_sections) {
+  // calculate crosssections and compare to analytic values
+
+  // (6a)
+  double cross1 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi_rho0(
+          0.996, 0.776);
+  std::cout << "Cross1:    " << cross1 << std::endl;
+  std::cout << "Analytic1: " << 0.661515*0.3894 << std::endl;
+  // COMPARE_ABSOLUTE_ERROR(cross1, .0, 1e-5);
+
+  // (6b)
+  double cross2 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi0_rho(
+          1.12, 0.9);
+  std::cout << "Cross2:    " << cross2 << std::endl;
+  std::cout << "Analytic2: " << 1.89737*0.3894 << std::endl;
+  // COMPARE_ABSOLUTE_ERROR(cross2, .0, 1e-5);
+
+  // (6c)
+  double cross3 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho0_pi(
+          1.224, 0.776);
+  std::cout << "Cross3:    " << cross3 << std::endl;
+  std::cout << "Analytic3: " << 0.171629*0.3894 << std::endl;
+  // COMPARE_ABSOLUTE_ERROR(cross3, .0, 1e-5);
+
+  // (6f)
+  double cross4 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
+          4.979, 0.776);
+  std::cout << "Cross4:    " << cross4 << std::endl;
+  std::cout << "Analytic4: " << 1.96799*0.3894 << std::endl;
+  // COMPARE_ABSOLUTE_ERROR(cross4, .0, 1e-5);
+
+  // (6d) + (6h)
+  double cross5 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi(
+          1.103+5.058, 0.8+0.9);
+  std::cout << "Cross5:    " << cross5 << std::endl;
+  std::cout << "Analytic5: " << (0.0750229+1.63798)*0.3894 << std::endl;
+
+  // COMPARE_ABSOLUTE_ERROR(cross5, .0, 1e-5);
+
+  // (6e) + (6g)
+  double cross6 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0(
+          2.948+0.973, 0.9+0.8);
+  std::cout << "Cross6:    " << cross6 << std::endl;
+  std::cout << "Analytic6: " << (0.195696+0.0552201)*0.3894 << std::endl;
+  // COMPARE_ABSOLUTE_ERROR(cross6, .0, 1e-5);
+}
+
+TEST(diff_cross_section) {
+  // calculate crosssections and compare with analytic values
+
+  // (6a)
+  double cross1 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0(
+          1., -0.367612, 0.776);
+  std::cout << "Cross1:    " << cross1 << std::endl;
+  std::cout << "Analytic1: " << 8.79811*0.3894 << std::endl;
+  // COMPARE_ABSOLUTE_ERROR(cross4, 0.033093, 1e-5);
+
+  // (6b)
+  double cross2 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
+          1., -0.07066, 0.9);
+  std::cout << "Cross2:    " << cross2 << std::endl;
+  std::cout << "Analytic2: " << 4.85461*0.3894 << std::endl;
+  // COMPARE_ABSOLUTE_ERROR(cross2, .0, 1e-5);
+
+  // (6c)
+  double cross3 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
+          1., -0.316209, 0.776);
+  std::cout << "Cross3:    " << cross3 << std::endl;
+  std::cout << "Analytic3: " << 1.04421*0.3894 << std::endl;
+  // COMPARE_ABSOLUTE_ERROR(cross3, .0, 1e-5);
+
+  // (6f)
+  double cross4 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
+          1., -0.248786, 0.776);
+  std::cout << "Cross4:    " << cross4 << std::endl;
+  std::cout << "Analytic4: " << 0.13775*0.3894 << std::endl;
+  // COMPARE_ABSOLUTE_ERROR(cross4, .0, 1e-5);
+
+
+  // These two functions are defined in crosssectionsphoton.h
+  // but were never implemented !!!
+
+  // // (6d) + (6h)
+  // double cross5 =
+  //     CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
+  //         1.14301, -0.423672, 0.739093);
+  // std::cout << "Cross5:    " << cross5 << std::endl;
+  // std::cout << "Analytic5: " << 0.070465*0.3894 << std::endl;
+  // // COMPARE_ABSOLUTE_ERROR(cross5, .0, 1e-5);
+  //
+  // // (6e) + (6g)
+  // double cross6 =
+  //     CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
+  //         1., -0.599925, 0.592348);
+  // std::cout << "Cross6:    " << cross6 << std::endl;
+  // std::cout << "Analytic6: " << 0.216896*0.3894 << std::endl;
+  // // COMPARE_ABSOLUTE_ERROR(cross6, .0, 1e-5);
+
 }
