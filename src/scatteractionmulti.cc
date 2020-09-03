@@ -118,13 +118,14 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             (pdg_a == pdg::p && pdg_b == pdg::n && pdg_c.is_pion()) ||
             (pdg_a == pdg::n && pdg_b == pdg::p && pdg_c.is_pion())) {
 
-          const ParticleType& type_pi;
-          for (auto &part : incoming_particles_) {
-            if (part.is_pion()) {
-              type_pi = part.type();
-              break;
+          // Get type of incoming π
+          std::size_t idx_of_pi;
+          for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
+            if (incoming_particles_[i].is_pion()) {
+              idx_of_pi = i;
             }
           }
+          const ParticleType& type_pi = incoming_particles_[idx_of_pi].type();
 
           add_reaction(make_unique<CollisionBranch>(
             type_pi, *type_deuteron,
@@ -141,19 +142,19 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             (pdg_a == -pdg::p && pdg_b == -pdg::n && pdg_c.is_pion()) ||
             (pdg_a == -pdg::n && pdg_b == -pdg::p && pdg_c.is_pion())) {
 
-          const ParticleType& type_pi;
-          for (auto &part : incoming_particles_) {
-            if (part.is_pion()) {
-              type_pi = part.type();
-              break;
+          // Get type of incoming π
+          std::size_t idx_of_pi;
+          for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
+            if (incoming_particles_[i].is_pion()) {
+              idx_of_pi = i;
             }
           }
+          const ParticleType& type_pi = incoming_particles_[idx_of_pi].type();
 
           add_reaction(make_unique<CollisionBranch>(
             type_pi, *type_anti_deuteron,
             probability_three_to_two(type_pi, *type_anti_deuteron, dt, gcell_vol, degen),
             ProcessType::MultiParticleThreeToTwo));
-
 
         }
 
@@ -165,22 +166,25 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             (pdg_a == pdg::p && pdg_b == pdg::n && pdg_c.is_nucleon()) ||
             (pdg_a == pdg::n && pdg_b == pdg::p && pdg_c.is_nucleon())) {
 
-          const ParticleType& type_N;
-          for (auto &part : incoming_particles_) {
+          std::size_t idx_of_N;
+          for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
             // in case of N̅np → N̅d
-            if (part.antiparticle_sign() == -1) {
-              type_N = part.type();
+            if (incoming_particles_[i].pdgcode().antiparticle_sign() == -1) {
+              idx_of_N = i;
               break;
             }
             // in case of Nnp → Nd
-            // find particle type that is double, but not from the same particle
-            for (auto &part_comp: incoming_particles_) {
-              if ((part != part_comp) && (part.type() == part_comp.type())) {
-                type_N = part.type();
+            // find particle type that is double, but not the same particle
+            // note: this actually finds the last particle that is double, since
+            // the `break` does not break the outter for loop
+            for (const auto &part_comp: incoming_particles_) {
+              if (!(incoming_particles_[i] == part_comp) && (incoming_particles_[i].type() == part_comp.type())) {
+                idx_of_N = i;
                 break;
               }
             }
           }
+          const ParticleType& type_N = incoming_particles_[idx_of_N].type();
 
           add_reaction(make_unique<CollisionBranch>(
             type_N, *type_deuteron,
@@ -197,22 +201,25 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             (pdg_a == -pdg::p && pdg_b == -pdg::n && pdg_c.is_nucleon()) ||
             (pdg_a == -pdg::n && pdg_b == -pdg::p && pdg_c.is_nucleon())) {
 
-          const ParticleType& type_N;
-          for (auto &part : incoming_particles_) {
+          std::size_t idx_of_N;
+          for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
             // in case of Np̅n̅ → Nd̅
-            if (part.pdgcode().antiparticle_sign() == 1) {
-              type_N = part.type();
+            if (incoming_particles_[i].pdgcode().antiparticle_sign() == 1) {
+              idx_of_N = i;
               break;
             }
             // in case of N̅p̅n̅ → N̅d̅
-            // find particle type that is double, but not from the same particle
-            for (auto &part_comp: incoming_particles_) {
-              if ((part != part_comp) && (part.type() == part_comp.type())) {
-                type_N = part.type();
+            // find particle type that is double, but not the same particle
+            // note: this actually finds the last particle that is double, since
+            // the `break` does not break the outter for loop
+            for (const auto &part_comp: incoming_particles_) {
+              if (!(incoming_particles_[i] == part_comp) && (incoming_particles_[i].type() == part_comp.type())) {
+                idx_of_N = i;
                 break;
               }
             }
           }
+          const ParticleType& type_N = incoming_particles_[idx_of_N].type();
 
           add_reaction(make_unique<CollisionBranch>(
             type_N, *type_anti_deuteron,
@@ -246,6 +253,7 @@ void ScatterActionMulti::generate_final_state() {
     case ProcessType::MultiParticleThreeToTwo:
       /* 3->2 scattering */
       three_to_two();
+      logg[LScatterActionMulti].info("3->2 scattering:", incoming_particles_, " -> ", outgoing_particles_);
       break;
     default:
       throw InvalidScatterActionMulti(
