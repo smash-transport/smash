@@ -852,11 +852,11 @@ CollisionBranchList CrossSections::two_to_three() const {
       }
   }
 
-  if ((type_a.is_nucleon() && type_b.is_nucleus()) ||
-      (type_b.is_nucleon() && type_a.is_nucleus())) {
+  if ((type_a.is_nucleon() && type_b.is_deuteron()) ||
+      (type_b.is_nucleon() && type_a.is_deuteron())) {
 
     const ParticleType& type_N = type_a.is_nucleon() ? type_a : type_b;
-    const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
+    const ParticleType& type_nucleus = type_a.is_deuteron() ? type_a : type_b;
 
     if (type_nucleus.baryon_number() > 0) {
       // Nd → Nnp, N̅d → N̅np
