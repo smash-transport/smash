@@ -150,7 +150,7 @@ CollisionBranchList CrossSections::generate_collision_list(
   if (p_pythia < 1.) {
     if (two_to_one_switch) {
       // resonance formation (2->1)
-      append_list(process_list, two_to_one(), 1. - p_pythia);
+      append_list(process_list, two_to_one(include_two_to_three), 1. - p_pythia);
     }
     if (included_2to2.any()) {
       // 2->2 (inelastic)
@@ -695,7 +695,7 @@ double CrossSections::nk_el() const {
   }
 }
 
-CollisionBranchList CrossSections::two_to_one() const {
+CollisionBranchList CrossSections::two_to_one(const bool include_two_to_three) const {
   CollisionBranchList resonance_process_list;
   const ParticleType& type_particle_a = incoming_particles_[0].type();
   const ParticleType& type_particle_b = incoming_particles_[1].type();
@@ -708,6 +708,12 @@ CollisionBranchList CrossSections::two_to_one() const {
   for (const ParticleType& type_resonance : ParticleType::list_all()) {
     /* Not a resonance, go to next type of particle */
     if (type_resonance.is_stable()) {
+      continue;
+    }
+
+    // TODO(stdnmr) Do we keep this?
+    // Skip d' froming, when doing 2-to-3 deuteron reactions indirectly
+    if (include_two_to_three && type_resonance.is_dprime()) {
       continue;
     }
 

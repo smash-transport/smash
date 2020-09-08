@@ -144,7 +144,7 @@ class CrossSections {
    * Each element in the list contains the type of the final-state particle
    * and the cross section for that particular process.
    */
-  CollisionBranchList two_to_one() const;
+  CollisionBranchList two_to_one(const bool include_two_to_three) const;
 
   /**
    * Return the 2-to-1 resonance production cross section for a given resonance.
