@@ -443,9 +443,27 @@ class CrossSections {
    */
   CollisionBranchList dn_xx(ReactionsBitSet included_2to2) const;
 
-  // TODO(stdnmr) Docu
+  /**
+   * Parametrized cross section for πd→ πd' (mockup for πd→ πnp), πd̅→ πd̅' and
+   * reverse, see \iref{Oliinychenko:2018ugs} for details.
+   * \param[in] sqrts square-root of mandelstam s
+   * \param[in] cm_mom center of mass momentum of incoming particles
+   * \param[in] produced_nucleus type of outgoing deuteron or d-prime
+   * \param[in] type_pi type of scattering pion
+   * \return cross section for given scattering
+   */
   static double xs_dpi_dprimepi(const double sqrts, const double cm_mom, ParticleTypePtr produced_nucleus, const ParticleType& type_pi);
 
+  /**
+   * Parametrized cross section for Nd → Nd', N̅d →  N̅d', N̅d̅→ N̅d̅', Nd̅→ Nd̅' and
+   * reverse (e.g. Nd'→ Nd), see \iref{Oliinychenko:2018ugs} for details.
+   * \param[in] sqrts square-root of mandelstam s
+   * \param[in] cm_mom center of mass momentum of incoming particles
+   * \param[in] produced_nucleus type of outgoing deuteron or d-prime
+   * \param[in] type_nucleus type of scattering (incoming) deuteron or d-prime
+   * \param[in] type_N type of scattering nucleon
+   * \return cross section for given scattering
+   */
   static double xs_dn_dprimen(const double sqrts, const double cm_mom, ParticleTypePtr produced_nucleus, const ParticleType& type_nucleus, const ParticleType& type_N);
 
   /**
