@@ -443,6 +443,11 @@ class CrossSections {
    */
   CollisionBranchList dn_xx(ReactionsBitSet included_2to2) const;
 
+  // TODO(stdnmr) Docu
+  static double xs_dpi_dprimepi(const double sqrts, const double cm_mom, ParticleTypePtr produced_nucleus, const ParticleType& type_pi);
+
+  static double xs_dn_dprimen(const double sqrts, const double cm_mom, ParticleTypePtr produced_nucleus, const ParticleType& type_nucleus, const ParticleType& type_N);
+
   /**
    * Determine the (parametrized) hard non-diffractive string cross section
    * for this collision.

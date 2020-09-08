@@ -177,6 +177,7 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             // find particle type that is double, but not the same particle
             // note: this actually finds the last particle that is double, since
             // the `break` does not break the outter for loop
+            // (cant think of better way w/o using goto atm)
             for (const auto &part_comp: incoming_particles_) {
               if (!(incoming_particles_[i] == part_comp) && (incoming_particles_[i].type() == part_comp.type())) {
                 idx_of_N = i;
@@ -212,6 +213,7 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             // find particle type that is double, but not the same particle
             // note: this actually finds the last particle that is double, since
             // the `break` does not break the outter for loop
+            // (cant think of better way w/o using goto atm)
             for (const auto &part_comp: incoming_particles_) {
               if (!(incoming_particles_[i] == part_comp) && (incoming_particles_[i].type() == part_comp.type())) {
                 idx_of_N = i;
