@@ -131,7 +131,7 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
   current_event_ = event_number;
   if (Contents & OscarAtEventstart) {
     if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
-      std::fprintf(file_.get(), "# event %i in %zu\n", event_number + 1,
+      std::fprintf(file_.get(), "# event %i in %zu\n", event_number,
                    particles.size());
     } else {
       /* OSCAR line prefix : initial particles; final particles; event id
@@ -139,7 +139,7 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
        */
       const size_t zero = 0;
       std::fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
-                   event_number + 1);
+                   event_number);
     }
     if (!(Contents & OscarParticlesIC)) {
       // We do not want the inital particle list to be printed in case of IC
@@ -156,14 +156,14 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
   if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
     if (Contents & OscarParticlesAtEventend ||
         (Contents & OscarParticlesAtEventendIfNotEmpty && !event.empty_event)) {
-      std::fprintf(file_.get(), "# event %i out %zu\n", event_number + 1,
+      std::fprintf(file_.get(), "# event %i out %zu\n", event_number,
                    particles.size());
       write(particles);
     }
     // Comment end of an event
     const char *empty_event_str = event.empty_event ? "yes" : "no";
     std::fprintf(file_.get(), "# event %i end 0 impact %7.3f empty %s\n",
-                 event_number + 1, event.impact_parameter, empty_event_str);
+                 event_number, event.impact_parameter, empty_event_str);
   } else {
     /* OSCAR line prefix : initial particles; final particles; event id
      * Last block of an event: initial = number of particles, final = 0
@@ -172,12 +172,12 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
     if (Contents & OscarParticlesAtEventend ||
         (Contents & OscarParticlesAtEventendIfNotEmpty && !event.empty_event)) {
       std::fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
-                   event_number + 1);
+                   event_number);
       write(particles);
     }
     // Null interaction marks the end of an event
-    std::fprintf(file_.get(), "%zu %zu %i %7.3f\n", zero, zero,
-                 event_number + 1, event.impact_parameter);
+    std::fprintf(file_.get(), "%zu %zu %i %7.3f\n", zero, zero, event_number,
+                 event.impact_parameter);
   }
   // Flush to disk
   std::fflush(file_.get());

@@ -86,7 +86,16 @@ TEST(rest_frame_transformation) {
       node.nq(), eos.net_charge_density(T, mub, mus, muq) * gamma, tolerance);
 }
 
-TEST(thermalization_action) {
+// Disabled because runtime exceeds maximum test runtime.
+// It can however be executed if the hadron gas EoS table is pre-compiled. To do
+// so, run SMASH once enabling the grandcanonical thermalizer (instructions can
+// be found in the user guide). This produces the file 'hadrongas_eos.dat' in
+// the build directory. From now on, the EoS is read from this spicifiy file
+// whenever the thermalizer is used. You can execute all tests normally,
+// including the `thermalization_action` test below, once the hadron gas file
+// was created.
+
+/*TEST(thermalization_action) {
   Particles P;
   BoxModus b = create_box_for_tests();
   const ExperimentParameters par = smash::Test::default_parameters();
@@ -108,4 +117,4 @@ TEST(thermalization_action) {
   thermalizer->thermalize(P, 0.0, par.testparticles);
   // ThermalizationAction th_act(*thermalizer, 0.0);
   // If all this did not crash - the test is passed.
-}
+} */

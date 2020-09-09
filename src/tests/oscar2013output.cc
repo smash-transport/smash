@@ -151,8 +151,8 @@ TEST(full2013_format) {
       std::getline(outputfile, line);
       COMPARE(line, "# " VERSION_MAJOR);
       /* Check initial particle list description line */
-      std::string initial_line = "# event " + std::to_string(event_id + 1) +
-                                 " in " + std::to_string(2);
+      std::string initial_line =
+          "# event " + std::to_string(event_id) + " in " + std::to_string(2);
       std::getline(outputfile, line);
       COMPARE(line, initial_line);
       /* Check initial particle data lines item by item */
@@ -190,8 +190,8 @@ TEST(full2013_format) {
       outputfile.get();
       /* Check final particle list */
       std::getline(outputfile, line);
-      std::string final_line = "# event " + std::to_string(event_id + 1) +
-                               " out " + std::to_string(particles.size());
+      std::string final_line = "# event " + std::to_string(event_id) + " out " +
+                               std::to_string(particles.size());
       COMPARE(line, final_line);
       for (ParticleData &data : particles) {
         std::array<std::string, data_elements> datastring;
@@ -204,8 +204,8 @@ TEST(full2013_format) {
       outputfile.get();
       /* Check for event end line */
       std::getline(outputfile, line);
-      std::string end_line = "# event " + std::to_string(event_id + 1) +
-                             " end 0" + " impact   1.783 empty no";
+      std::string end_line = "# event " + std::to_string(event_id) + " end 0" +
+                             " impact   1.783 empty no";
       COMPARE(line, end_line);
     }
   }
@@ -278,8 +278,8 @@ TEST(final2013_format) {
       COMPARE(line, "# " VERSION_MAJOR);
       /* Check final particle list */
       std::getline(outputfile, line);
-      std::string final_line = "# event " + std::to_string(event_id + 1) +
-                               " out " + std::to_string(particles.size());
+      std::string final_line = "# event " + std::to_string(event_id) + " out " +
+                               std::to_string(particles.size());
       COMPARE(line, final_line);
       for (ParticleData &data : particles) {
         std::array<std::string, data_elements> datastring;
@@ -292,8 +292,8 @@ TEST(final2013_format) {
       outputfile.get();
       /* Check for event end line */
       std::getline(outputfile, line);
-      std::string end_line = "# event " + std::to_string(event_id + 1) +
-                             " end 0" + " impact   2.340 empty yes";
+      std::string end_line = "# event " + std::to_string(event_id) + " end 0" +
+                             " impact   2.340 empty yes";
       COMPARE(line, end_line);
     }
   }
@@ -361,7 +361,7 @@ TEST(full_extended_oscar) {
     COMPARE(line, "# " VERSION_MAJOR);
     /* Check initial particle list description line */
     std::string initial_line =
-        "# event " + std::to_string(event_id + 1) + " in " + std::to_string(2);
+        "# event " + std::to_string(event_id) + " in " + std::to_string(2);
     std::getline(outputfile, line);
     COMPARE(line, initial_line);
     /* Check initial particle data lines item by item */
@@ -399,8 +399,8 @@ TEST(full_extended_oscar) {
     outputfile.get();
     /* Check final particle list */
     std::getline(outputfile, line);
-    std::string final_line = "# event " + std::to_string(event_id + 1) +
-                             " out " + std::to_string(particles.size());
+    std::string final_line = "# event " + std::to_string(event_id) + " out " +
+                             std::to_string(particles.size());
     COMPARE(line, final_line);
     for (ParticleData &data : particles) {
       std::array<std::string, data_elements_extended> datastring;
@@ -413,8 +413,8 @@ TEST(full_extended_oscar) {
     outputfile.get();
     /* Check for event end line */
     std::getline(outputfile, line);
-    std::string end_line = "# event " + std::to_string(event_id + 1) +
-                           " end 0" + " impact   1.783 empty no";
+    std::string end_line = "# event " + std::to_string(event_id) + " end 0" +
+                           " impact   1.783 empty no";
     COMPARE(line, end_line);
   }
   VERIFY(bf::remove(outputfilepath));
@@ -472,8 +472,8 @@ TEST(initial_conditions_2013_format) {
       std::getline(outputfile, line);
       COMPARE(line, "# " VERSION_MAJOR);
       /* Check initial particle list description line */
-      std::string initial_line = "# event " + std::to_string(event_id + 1) +
-                                 " in " + std::to_string(1);
+      std::string initial_line =
+          "# event " + std::to_string(event_id) + " in " + std::to_string(1);
       std::getline(outputfile, line);
       COMPARE(line, initial_line);
       /* Check initial particle data lines item by item */
@@ -490,8 +490,8 @@ TEST(initial_conditions_2013_format) {
       outputfile.get();
       /* Check for event end line */
       std::getline(outputfile, line);
-      std::string end_line = "# event " + std::to_string(event_id + 1) +
-                             " end 0" + " impact   1.783 empty no";
+      std::string end_line = "# event " + std::to_string(event_id) + " end 0" +
+                             " impact   1.783 empty no";
       COMPARE(line, end_line);
     }
   }
