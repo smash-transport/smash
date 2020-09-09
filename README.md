@@ -40,7 +40,7 @@ It requires the following tools & libraries:
 - the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
-- Pythia = 8.302
+- Pythia = 8.303
 
 Support for ROOT and HepMC3 output is automatically enabled if a suitable version
  (ROOT >= 5.34, HepMC3 >= 3.1.2) is found on the system.
@@ -51,9 +51,9 @@ SMASH is tightly coupled to Pythia and thus requires a specific version. Using
 a different version than specified above may or may not work. It is recommended
 to build Pythia with similar flags as used for SMASH:
 
-    wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8302.tgz
-    tar xf pythia8302.tgz && rm pythia8302.tgz
-    cd pythia8302
+    wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8303.tgz
+    tar xf pythia8303.tgz && rm pythia8303.tgz
+    cd pythia8303
     ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC'
     make
 
