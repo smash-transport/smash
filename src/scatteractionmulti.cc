@@ -273,7 +273,7 @@ void ScatterActionMulti::generate_final_state() {
     case ProcessType::MultiParticleThreeToTwo:
       /* 3->2 scattering */
       three_to_two();
-      logg[LScatterActionMulti].info("3->2 scattering:", incoming_particles_, " -> ", outgoing_particles_);
+      // logg[LScatterActionMulti].info("3->2 scattering:", incoming_particles_, " -> ", outgoing_particles_);
       break;
     default:
       throw InvalidScatterActionMulti(
@@ -345,7 +345,7 @@ double ScatterActionMulti::probability_three_meson_to_one(
 
 double ScatterActionMulti::probability_three_to_two(
     const ParticleType& type_out1, const ParticleType& type_out2, double dt,
-    const double gcell_vol, const int degen_factor) const {
+    const double gcell_vol, const double degen_factor) const {
   const double e1 = incoming_particles_[0].momentum().x0();
   const double e2 = incoming_particles_[1].momentum().x0();
   const double e3 = incoming_particles_[2].momentum().x0();
