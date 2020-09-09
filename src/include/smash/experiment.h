@@ -1240,7 +1240,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * The following example configures the lattice with the origin in (0,0,0),
    * 20 cells of 10 fm size in each direction and with periodic boundary
    * conditions. The potential effects on the thresholds are taken into
-   * consideration.
+   * consideration. Note that, as the origin is by definition the left down near
+   * corner of the cell, center is located at (5, 5, 5).
    *
    *\verbatim
    Lattice:
