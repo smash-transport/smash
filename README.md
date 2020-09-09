@@ -81,7 +81,7 @@ Use the following commands to build SMASH in a separate directory:
 
     mkdir build
     cd build
-    cmake .. -DPythia_CONFIG_EXECUTABLE=[...]/pythia8302/bin/pythia8-config
+    cmake .. -DPythia_CONFIG_EXECUTABLE=[...]/pythia8303/bin/pythia8-config
     make
 
 To build in parallel on N cores:
