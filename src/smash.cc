@@ -123,6 +123,9 @@ void usage(const int rc, const std::string &progname) {
    * <td>Forces overwriting files in the output directory. Normally, if you
    *     specifiy an output directory with `-o`, the directory must be empty.
    *     With `-f` this check is skipped.
+   * <tr><td>`-q` <td>`--quiet`
+   * <td> Quiets the disclaimer for scenarios where no printout is wanted. To
+   * get no printout, you also need to disable logging from the config.
    * </table>
    */
   std::printf("\nUsage: %s [option]\n\n", progname.c_str());
@@ -164,6 +167,7 @@ void usage(const int rc, const std::string &progname) {
       "  -x, --dump_iSS          Dump particle table in iSS format\n"
       "                          This format is used in MUSIC and CLVisc\n"
       "                          relativistic hydro codes\n"
+      "  -q, --quiet             Supress disclaimer print-out\n"
       "  -n, --no-cache          Don't cache integrals on disk\n"
       "  -v, --version\n\n");
   std::exit(rc);
@@ -423,6 +427,7 @@ int main(int argc, char *argv[]) {
       {"dump-iSS", no_argument, 0, 'x'},
       {"version", no_argument, 0, 'v'},
       {"no-cache", no_argument, 0, 'n'},
+      {"quiet", no_argument, 0, 'q'},
       {nullptr, 0, 0, 0}};
 
   // strip any path to progname
@@ -444,7 +449,7 @@ int main(int argc, char *argv[]) {
     // parse command-line arguments
     int opt;
     bool suppress_disclaimer = false;
-    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xvn",
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xvnq",
                               longopts, nullptr)) != -1) {
       switch (opt) {
         case 'c':
@@ -505,6 +510,9 @@ int main(int argc, char *argv[]) {
           std::exit(EXIT_SUCCESS);
         case 'n':
           cache_integrals = false;
+          break;
+        case 'q':
+          suppress_disclaimer = true;
           break;
         default:
           usage(EXIT_FAILURE, progname);
