@@ -160,7 +160,7 @@ class ScatterActionMulti : public Action {
   double probability_three_to_two(const ParticleType& type_out1,
                                   const ParticleType& type_out2, double dt,
                                   const double gcell_vol,
-                                  const int degen_factor = 1) const;
+                                  const double degen_factor = 1.0) const;
 
   /**
    * Calculate the integration necessary for the three-body phase space. The

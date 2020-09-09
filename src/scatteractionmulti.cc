@@ -95,8 +95,8 @@ void ScatterActionMulti::add_possible_reactions(double dt,
         }
       }
     }
+    // 3 -> 2
     if (two_to_three) {
-      // 3 -> 2
 
       const PdgCode pdg_a = incoming_particles_[0].pdgcode();
       const PdgCode pdg_b = incoming_particles_[1].pdgcode();
@@ -104,7 +104,7 @@ void ScatterActionMulti::add_possible_reactions(double dt,
       const ParticleTypePtr type_deuteron = ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_d));
       const ParticleTypePtr type_anti_deuteron = ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_antid));
 
-      const int degen = 1;  // TODO(stdnmr) think about later
+      const int spin_factor_inc = pdg_a.spin_degeneracy() * pdg_b.spin_degeneracy() * pdg_c.spin_degeneracy();
 
       if (type_deuteron && type_anti_deuteron) {
 
@@ -127,9 +127,12 @@ void ScatterActionMulti::add_possible_reactions(double dt,
           }
           const ParticleType& type_pi = incoming_particles_[idx_of_pi].type();
 
+          const int spin_factor_out = type_pi.spin_degeneracy() * type_deuteron->spin_degeneracy();
+          const double spin_degn =  static_cast<double>(spin_factor_out)/static_cast<double>(spin_factor_inc);
+
           add_reaction(make_unique<CollisionBranch>(
             type_pi, *type_deuteron,
-            probability_three_to_two(type_pi, *type_deuteron, dt, gcell_vol, degen),
+            probability_three_to_two(type_pi, *type_deuteron, dt, gcell_vol, spin_degn),
             ProcessType::MultiParticleThreeToTwo));
 
         }
@@ -151,9 +154,12 @@ void ScatterActionMulti::add_possible_reactions(double dt,
           }
           const ParticleType& type_pi = incoming_particles_[idx_of_pi].type();
 
+          const int spin_factor_out = type_pi.spin_degeneracy() * type_anti_deuteron->spin_degeneracy();
+          const double spin_degn =  static_cast<double>(spin_factor_out)/static_cast<double>(spin_factor_inc);
+
           add_reaction(make_unique<CollisionBranch>(
             type_pi, *type_anti_deuteron,
-            probability_three_to_two(type_pi, *type_anti_deuteron, dt, gcell_vol, degen),
+            probability_three_to_two(type_pi, *type_anti_deuteron, dt, gcell_vol, spin_degn),
             ProcessType::MultiParticleThreeToTwo));
 
         }
@@ -166,11 +172,14 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             (pdg_a == pdg::p && pdg_b == pdg::n && pdg_c.is_nucleon()) ||
             (pdg_a == pdg::n && pdg_b == pdg::p && pdg_c.is_nucleon())) {
 
+          int symmetry_factor = 2;  // for Nnp → Nd (2 factorial)
+
           std::size_t idx_of_N;
           for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
             // in case of N̅np → N̅d
             if (incoming_particles_[i].pdgcode().antiparticle_sign() == -1) {
               idx_of_N = i;
+              symmetry_factor = 1; // for N̅np → N̅d
               break;
             }
             // in case of Nnp → Nd
@@ -187,9 +196,12 @@ void ScatterActionMulti::add_possible_reactions(double dt,
           }
           const ParticleType& type_N = incoming_particles_[idx_of_N].type();
 
+          const int spin_factor_out = type_N.spin_degeneracy() * type_deuteron->spin_degeneracy();
+          const double spin_degn =  static_cast<double>(spin_factor_out)/static_cast<double>(spin_factor_inc);
+
           add_reaction(make_unique<CollisionBranch>(
             type_N, *type_deuteron,
-            probability_three_to_two(type_N, *type_deuteron, dt, gcell_vol, degen),
+            probability_three_to_two(type_N, *type_deuteron, dt, gcell_vol, symmetry_factor * spin_degn),
             ProcessType::MultiParticleThreeToTwo));
 
         }
@@ -202,11 +214,14 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             (pdg_a == -pdg::p && pdg_b == -pdg::n && pdg_c.is_nucleon()) ||
             (pdg_a == -pdg::n && pdg_b == -pdg::p && pdg_c.is_nucleon())) {
 
+          int symmetry_factor = 2;  // for N̅p̅n̅ → N̅d̅ (2 factorial)
+
           std::size_t idx_of_N;
           for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
             // in case of Np̅n̅ → Nd̅
             if (incoming_particles_[i].pdgcode().antiparticle_sign() == 1) {
               idx_of_N = i;
+              symmetry_factor = 1; // for Np̅n̅ → Nd̅
               break;
             }
             // in case of N̅p̅n̅ → N̅d̅
@@ -223,9 +238,12 @@ void ScatterActionMulti::add_possible_reactions(double dt,
           }
           const ParticleType& type_N = incoming_particles_[idx_of_N].type();
 
+          const int spin_factor_out = type_N.spin_degeneracy() * type_anti_deuteron->spin_degeneracy();
+          const double spin_degn =  static_cast<double>(spin_factor_out)/static_cast<double>(spin_factor_inc);
+
           add_reaction(make_unique<CollisionBranch>(
             type_N, *type_anti_deuteron,
-            probability_three_to_two(type_N, *type_anti_deuteron, dt, gcell_vol, degen),
+            probability_three_to_two(type_N, *type_anti_deuteron, dt, gcell_vol, symmetry_factor * spin_degn),
             ProcessType::MultiParticleThreeToTwo));
 
         }
