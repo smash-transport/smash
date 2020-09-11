@@ -76,7 +76,7 @@ if(CPPLINT)
    message(STATUS "cpplint.py found at ${CPPLINT}")
    set(CPPLINT_ARGS --filter=-build/c++11,-build/include_subdir,+build/include_alpha,-runtime/operator,-readability/streams,-readability/function,-runtime/references,-whitespace/operators --counting=detailed --repository=${PROJECT_SOURCE_DIR})
    file(GLOB CPPLINT_FILES
-        ${PROJECT_SOURCE_DIR}/src/include/*.h ${PROJECT_SOURCE_DIR}/src/*.cc)
+   ${PROJECT_SOURCE_DIR}/src/smash/include/*.h ${PROJECT_SOURCE_DIR}/src/*.cc)
    add_custom_target(cpplint
                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -102,7 +102,7 @@ if(CPPLINT)
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      COMMENT "Executing test cpplint_whitespace")
    file(GLOB_RECURSE CPPLINT_FILES_FULL
-        ${PROJECT_SOURCE_DIR}/src/*.h ${PROJECT_SOURCE_DIR}/src/*.cc)
+        ${PROJECT_SOURCE_DIR}/src/include/smash/*.h ${PROJECT_SOURCE_DIR}/src/*.cc)
    add_custom_target(cpplint_full
                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES_FULL}
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
