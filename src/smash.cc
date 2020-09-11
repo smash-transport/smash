@@ -530,8 +530,6 @@ int main(int argc, char *argv[]) {
       print_disclaimer();
     }
 
-    setup_default_float_traps();
-
     // Read in config file
     Configuration configuration(input_path.parent_path(),
                                 input_path.filename());
@@ -544,6 +542,8 @@ int main(int argc, char *argv[]) {
     set_default_loglevel(
         configuration.take({"Logging", "default"}, einhard::ALL));
     create_all_loggers(configuration["Logging"]);
+
+    setup_default_float_traps();
 
     // check if version matches before doing anything else
     check_config_version_is_compatible(configuration);
