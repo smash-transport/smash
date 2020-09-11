@@ -174,7 +174,7 @@ void ScatterActionMulti::add_possible_reactions(double dt,
 
           int symmetry_factor = 2;  // for Nnp → Nd (2 factorial)
 
-          std::size_t idx_of_N;
+          std::size_t idx_of_N;  //TODO(stdnmr) gcc complains about that this might be used uninitialized
           for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
             // in case of N̅np → N̅d
             if (incoming_particles_[i].pdgcode().antiparticle_sign() == -1) {
