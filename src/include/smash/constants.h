@@ -108,7 +108,7 @@ constexpr double fine_structure = 7.2973525698e-3;
  * The only exception of physical cross sections going above 200 mb are the
  * elastic NN and KN cross sections, which diverge at threshold.
  */
-constexpr double maximum_cross_section = 200.;  // mb
+constexpr double maximum_cross_section = 2000.;  // mb
 
 /**
  * The maximum value of the random seed used in PYTHIA.
