@@ -230,86 +230,67 @@ TEST(photon_cross_sections) {
   double cross1 =
       CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi_rho0(
           0.996, 0.776);
-  std::cout << "Cross1:    " << cross1 << std::endl;
-  std::cout << "Analytic1: " << 0.661515*0.3894 << std::endl;
-  // COMPARE_ABSOLUTE_ERROR(cross1, .0, 1e-5);
+  COMPARE_ABSOLUTE_ERROR(cross1, 0.724102, 1e-5);
 
   // (6b)
   double cross2 =
       CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi0_rho(
           1.12, 0.9);
-  std::cout << "Cross2:    " << cross2 << std::endl;
-  std::cout << "Analytic2: " << 1.89737*0.3894 << std::endl;
-  // COMPARE_ABSOLUTE_ERROR(cross2, .0, 1e-5);
+  COMPARE_ABSOLUTE_ERROR(cross2, 0.403305, 1e-5);
 
   // (6c)
   double cross3 =
       CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho0_pi(
           1.224, 0.776);
-  std::cout << "Cross3:    " << cross3 << std::endl;
-  std::cout << "Analytic3: " << 0.171629*0.3894 << std::endl;
-  // COMPARE_ABSOLUTE_ERROR(cross3, .0, 1e-5);
+  COMPARE_ABSOLUTE_ERROR(cross3, 0.107805, 1e-5);
 
   // (6f)
   double cross4 =
       CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
-          4.979, 0.776);
-  std::cout << "Cross4:    " << cross4 << std::endl;
-  std::cout << "Analytic4: " << 1.96799*0.3894 << std::endl;
-  // COMPARE_ABSOLUTE_ERROR(cross4, .0, 1e-5);
+          2.979, 0.776);
+  COMPARE_ABSOLUTE_ERROR(cross4, 0.779838, 1e-5);
 
   // (6d) + (6h)
   double cross5 =
       CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi(
-          1.103+5.058, 0.8+0.9);
-  std::cout << "Cross5:    " << cross5 << std::endl;
-  std::cout << "Analytic5: " << (0.0750229+1.63798)*0.3894 << std::endl;
-
-  // COMPARE_ABSOLUTE_ERROR(cross5, .0, 1e-5);
+          1.103, 0.776);
+  COMPARE_ABSOLUTE_ERROR(cross5, 0.079938, 1e-5);
 
   // (6e) + (6g)
   double cross6 =
       CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0(
-          2.948+0.973, 0.9+0.8);
-  std::cout << "Cross6:    " << cross6 << std::endl;
-  std::cout << "Analytic6: " << (0.195696+0.0552201)*0.3894 << std::endl;
-  // COMPARE_ABSOLUTE_ERROR(cross6, .0, 1e-5);
+          1.351, 0.9);
+  COMPARE_ABSOLUTE_ERROR(cross6, 0.494252, 1e-5);
 }
 
 TEST(diff_cross_section) {
-  // calculate crosssections and compare with analytic values
+  // calculate differential crosssections and compare with analytic values
 
   // (6a)
-  double cross1 =
+  double diff_cross1 =
       CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0(
-          1., -0.367612, 0.776);
-  std::cout << "Cross1:    " << cross1 << std::endl;
-  std::cout << "Analytic1: " << 8.79811*0.3894 << std::endl;
-  // COMPARE_ABSOLUTE_ERROR(cross4, 0.033093, 1e-5);
+          1.0, -0.367612, 0.6);
+  COMPARE_ABSOLUTE_ERROR(diff_cross1, 0.383808, 1e-5);
 
   // (6b)
-  double cross2 =
+  double diff_cross2 =
       CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
           1., -0.07066, 0.9);
-  std::cout << "Cross2:    " << cross2 << std::endl;
-  std::cout << "Analytic2: " << 4.85461*0.3894 << std::endl;
-  // COMPARE_ABSOLUTE_ERROR(cross2, .0, 1e-5);
+  COMPARE_ABSOLUTE_ERROR(diff_cross2, 1.89971, 1e-5);
 
   // (6c)
-  double cross3 =
+  double diff_cross3 =
       CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
           1., -0.316209, 0.776);
-  std::cout << "Cross3:    " << cross3 << std::endl;
-  std::cout << "Analytic3: " << 1.04421*0.3894 << std::endl;
-  // COMPARE_ABSOLUTE_ERROR(cross3, .0, 1e-5);
+  COMPARE_ABSOLUTE_ERROR(diff_cross3, 0.510809, 1e-5);
 
   // (6f)
-  double cross4 =
+  double diff_cross4 =
       CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
           1., -0.248786, 0.776);
   std::cout << "Cross4:    " << cross4 << std::endl;
   std::cout << "Analytic4: " << 0.13775*0.3894 << std::endl;
-  // COMPARE_ABSOLUTE_ERROR(cross4, .0, 1e-5);
+  // COMPARE_ABSOLUTE_ERROR(diff_cross4, .0, 1e-5);
 
 
   // These two functions are defined in crosssectionsphoton.h
