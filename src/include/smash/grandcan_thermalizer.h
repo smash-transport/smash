@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_GRANDCAN_THERMALIZER_H_
-#define SRC_INCLUDE_GRANDCAN_THERMALIZER_H_
+#ifndef SRC_INCLUDE_SMASH_GRANDCAN_THERMALIZER_H_
+#define SRC_INCLUDE_SMASH_GRANDCAN_THERMALIZER_H_
 
 #include <memory>
 #include <vector>
@@ -536,4 +536,4 @@ class GrandCanThermalizer {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_GRANDCAN_THERMALIZER_H_
+#endif  // SRC_INCLUDE_SMASH_GRANDCAN_THERMALIZER_H_

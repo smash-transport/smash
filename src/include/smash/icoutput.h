@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_ICOUTPUT_H_
-#define SRC_INCLUDE_ICOUTPUT_H_
+#ifndef SRC_INCLUDE_SMASH_ICOUTPUT_H_
+#define SRC_INCLUDE_SMASH_ICOUTPUT_H_
 
 #include <string>
 
@@ -89,4 +89,4 @@ class ICOutput : public OutputInterface {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_ICOUTPUT_H_
+#endif  // SRC_INCLUDE_SMASH_ICOUTPUT_H_

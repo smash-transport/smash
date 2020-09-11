@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_BOXMODUS_H_
-#define SRC_INCLUDE_BOXMODUS_H_
+#ifndef SRC_INCLUDE_SMASH_BOXMODUS_H_
+#define SRC_INCLUDE_SMASH_BOXMODUS_H_
 
 #include <map>
 #include <memory>
@@ -205,4 +205,4 @@ class BoxModus : public ModusDefault {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_BOXMODUS_H_
+#endif  // SRC_INCLUDE_SMASH_BOXMODUS_H_

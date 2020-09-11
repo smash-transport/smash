@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_CONSTANTS_H_
-#define SRC_INCLUDE_CONSTANTS_H_
+#ifndef SRC_INCLUDE_SMASH_CONSTANTS_H_
+#define SRC_INCLUDE_SMASH_CONSTANTS_H_
 
 #include <cmath>
 #include <cstdint>
@@ -133,4 +133,4 @@ constexpr std::uint32_t ID_PROCESS_PHOTON =
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_CONSTANTS_H_
+#endif  // SRC_INCLUDE_SMASH_CONSTANTS_H_

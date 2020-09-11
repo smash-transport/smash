@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_BREMSSTRAHLUNG_H_
-#define SRC_INCLUDE_BREMSSTRAHLUNG_H_
+#ifndef SRC_INCLUDE_SMASH_BREMSSTRAHLUNG_H_
+#define SRC_INCLUDE_SMASH_BREMSSTRAHLUNG_H_
 
 #include "scatteraction.h"
 
@@ -190,4 +190,4 @@ class BremsstrahlungAction : public ScatterAction {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_BREMSSTRAHLUNG_H_
+#endif  // SRC_INCLUDE_SMASH_BREMSSTRAHLUNG_H_

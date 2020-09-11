@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_WALLCROSSINGACTION_H_
-#define SRC_INCLUDE_WALLCROSSINGACTION_H_
+#ifndef SRC_INCLUDE_SMASH_WALLCROSSINGACTION_H_
+#define SRC_INCLUDE_SMASH_WALLCROSSINGACTION_H_
 
 #include "action.h"
 #include "actionfinderfactory.h"
@@ -91,4 +91,4 @@ class WallCrossActionsFinder : public ActionFinderInterface {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_WALLCROSSINGACTION_H_
+#endif  // SRC_INCLUDE_SMASH_WALLCROSSINGACTION_H_

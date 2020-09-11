@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_SCATTERACTIONMULTI_H_
-#define SRC_INCLUDE_SCATTERACTIONMULTI_H_
+#ifndef SRC_INCLUDE_SMASH_SCATTERACTIONMULTI_H_
+#define SRC_INCLUDE_SMASH_SCATTERACTIONMULTI_H_
 
 #include "action.h"
 
@@ -225,4 +225,4 @@ class ScatterActionMulti : public Action {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SCATTERACTIONMULTI_H_
+#endif  // SRC_INCLUDE_SMASH_SCATTERACTIONMULTI_H_

@@ -5,8 +5,8 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#ifndef SRC_INCLUDE_CLEBSCHGORDAN_H_
-#define SRC_INCLUDE_CLEBSCHGORDAN_H_
+#ifndef SRC_INCLUDE_SMASH_CLEBSCHGORDAN_H_
+#define SRC_INCLUDE_SMASH_CLEBSCHGORDAN_H_
 
 #include <algorithm>
 
@@ -182,4 +182,4 @@ class I_tot_range {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_CLEBSCHGORDAN_H_
+#endif  // SRC_INCLUDE_SMASH_CLEBSCHGORDAN_H_

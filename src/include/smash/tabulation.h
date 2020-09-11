@@ -5,8 +5,8 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#ifndef SRC_INCLUDE_TABULATION_H_
-#define SRC_INCLUDE_TABULATION_H_
+#ifndef SRC_INCLUDE_SMASH_TABULATION_H_
+#define SRC_INCLUDE_SMASH_TABULATION_H_
 
 #include <fstream>
 #include <functional>
@@ -226,4 +226,4 @@ inline Tabulation spectral_integral_unstable(Integrator2d& integrate2d,
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_TABULATION_H_
+#endif  // SRC_INCLUDE_SMASH_TABULATION_H_

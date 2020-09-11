@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_STRINGFUNCTIONS_H_
-#define SRC_INCLUDE_STRINGFUNCTIONS_H_
+#ifndef SRC_INCLUDE_SMASH_STRINGFUNCTIONS_H_
+#define SRC_INCLUDE_SMASH_STRINGFUNCTIONS_H_
 
 #include <string>
 #include <vector>
@@ -118,4 +118,4 @@ sequence_length(octet_iterator lead_it) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_STRINGFUNCTIONS_H_
+#endif  // SRC_INCLUDE_SMASH_STRINGFUNCTIONS_H_

@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_HEPMCOUTPUT_H_
-#define SRC_INCLUDE_HEPMCOUTPUT_H_
+#ifndef SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
+#define SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
@@ -127,4 +127,4 @@ class HepMcOutput : public OutputInterface {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_HEPMCOUTPUT_H_
+#endif  // SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_

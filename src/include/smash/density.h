@@ -6,8 +6,8 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#ifndef SRC_INCLUDE_DENSITY_H_
-#define SRC_INCLUDE_DENSITY_H_
+#ifndef SRC_INCLUDE_SMASH_DENSITY_H_
+#define SRC_INCLUDE_SMASH_DENSITY_H_
 
 #include <iostream>
 #include <typeinfo>
@@ -440,4 +440,4 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_DENSITY_H_
+#endif  // SRC_INCLUDE_SMASH_DENSITY_H_

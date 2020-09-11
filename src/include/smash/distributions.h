@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_DISTRIBUTIONS_H_
-#define SRC_INCLUDE_DISTRIBUTIONS_H_
+#ifndef SRC_INCLUDE_SMASH_DISTRIBUTIONS_H_
+#define SRC_INCLUDE_SMASH_DISTRIBUTIONS_H_
 
 namespace smash {
 
@@ -186,4 +186,4 @@ double sample_momenta_from_thermal(const double temperature, const double mass);
 double sample_momenta_IC_ES(const double temperature);
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_DISTRIBUTIONS_H_
+#endif  // SRC_INCLUDE_SMASH_DISTRIBUTIONS_H_

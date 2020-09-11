@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_PARTICLES_H_
-#define SRC_INCLUDE_PARTICLES_H_
+#ifndef SRC_INCLUDE_SMASH_PARTICLES_H_
+#define SRC_INCLUDE_SMASH_PARTICLES_H_
 
 #include <memory>
 #include <type_traits>
@@ -491,4 +491,4 @@ class Particles {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_PARTICLES_H_
+#endif  // SRC_INCLUDE_SMASH_PARTICLES_H_

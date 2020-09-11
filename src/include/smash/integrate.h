@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_INTEGRATE_H_
-#define SRC_INCLUDE_INTEGRATE_H_
+#ifndef SRC_INCLUDE_SMASH_INTEGRATE_H_
+#define SRC_INCLUDE_SMASH_INTEGRATE_H_
 
 #include <cuba.h>
 #include <gsl/gsl_integration.h>
@@ -325,4 +325,4 @@ class Integrator2d {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_INTEGRATE_H_
+#endif  // SRC_INCLUDE_SMASH_INTEGRATE_H_

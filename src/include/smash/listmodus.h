@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_LISTMODUS_H_
-#define SRC_INCLUDE_LISTMODUS_H_
+#ifndef SRC_INCLUDE_SMASH_LISTMODUS_H_
+#define SRC_INCLUDE_SMASH_LISTMODUS_H_
 
 #include <cmath>
 #include <cstdint>
@@ -214,4 +214,4 @@ class ListModus : public ModusDefault {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_LISTMODUS_H_
+#endif  // SRC_INCLUDE_SMASH_LISTMODUS_H_

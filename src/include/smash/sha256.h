@@ -1,5 +1,5 @@
-#ifndef SRC_INCLUDE_SHA256_H_
-#define SRC_INCLUDE_SHA256_H_
+#ifndef SRC_INCLUDE_SMASH_SHA256_H_
+#define SRC_INCLUDE_SMASH_SHA256_H_
 
 #include <array>
 #include <cstdint>
@@ -74,4 +74,4 @@ std::string hash_to_string(Hash hash);
 }  // namespace sha256
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SHA256_H_
+#endif  // SRC_INCLUDE_SMASH_SHA256_H_

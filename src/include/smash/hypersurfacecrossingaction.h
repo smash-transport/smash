@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_HYPERSURFACECROSSINGACTION_H_
-#define SRC_INCLUDE_HYPERSURFACECROSSINGACTION_H_
+#ifndef SRC_INCLUDE_SMASH_HYPERSURFACECROSSINGACTION_H_
+#define SRC_INCLUDE_SMASH_HYPERSURFACECROSSINGACTION_H_
 
 #include "action.h"
 #include "actionfinderfactory.h"
@@ -131,4 +131,4 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_HYPERSURFACECROSSINGACTION_H_
+#endif  // SRC_INCLUDE_SMASH_HYPERSURFACECROSSINGACTION_H_

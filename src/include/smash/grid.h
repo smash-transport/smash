@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_GRID_H_
-#define SRC_INCLUDE_GRID_H_
+#ifndef SRC_INCLUDE_SMASH_GRID_H_
+#define SRC_INCLUDE_SMASH_GRID_H_
 
 #include <array>
 #include <cmath>
@@ -171,4 +171,4 @@ class Grid : public GridBase {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_GRID_H_
+#endif  // SRC_INCLUDE_SMASH_GRID_H_

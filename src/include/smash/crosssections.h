@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_CROSSSECTIONS_H_
-#define SRC_INCLUDE_CROSSSECTIONS_H_
+#ifndef SRC_INCLUDE_SMASH_CROSSSECTIONS_H_
+#define SRC_INCLUDE_SMASH_CROSSSECTIONS_H_
 
 #include "forwarddeclarations.h"
 #include "isoparticletype.h"
@@ -569,4 +569,4 @@ class CrossSections {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_CROSSSECTIONS_H_
+#endif  // SRC_INCLUDE_SMASH_CROSSSECTIONS_H_

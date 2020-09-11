@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_CLOCK_H_
-#define SRC_INCLUDE_CLOCK_H_
+#ifndef SRC_INCLUDE_SMASH_CLOCK_H_
+#define SRC_INCLUDE_SMASH_CLOCK_H_
 
 #include <algorithm>
 #include <cmath>
@@ -366,4 +366,4 @@ class CustomClock : public Clock {
 };
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_CLOCK_H_
+#endif  // SRC_INCLUDE_SMASH_CLOCK_H_

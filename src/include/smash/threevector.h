@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_THREEVECTOR_H_
-#define SRC_INCLUDE_THREEVECTOR_H_
+#ifndef SRC_INCLUDE_SMASH_THREEVECTOR_H_
+#define SRC_INCLUDE_SMASH_THREEVECTOR_H_
 
 #include <array>
 #include <cmath>
@@ -323,4 +323,4 @@ void inline ThreeVector::rotate_z_axis_to(ThreeVector &r) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_THREEVECTOR_H_
+#endif  // SRC_INCLUDE_SMASH_THREEVECTOR_H_

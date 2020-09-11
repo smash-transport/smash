@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_ENERGYMOMENTUMTENSOR_H_
-#define SRC_INCLUDE_ENERGYMOMENTUMTENSOR_H_
+#ifndef SRC_INCLUDE_SMASH_ENERGYMOMENTUMTENSOR_H_
+#define SRC_INCLUDE_SMASH_ENERGYMOMENTUMTENSOR_H_
 
 #include <cmath>
 
@@ -210,4 +210,4 @@ EnergyMomentumTensor inline operator/(EnergyMomentumTensor a, const double b) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_ENERGYMOMENTUMTENSOR_H_
+#endif  // SRC_INCLUDE_SMASH_ENERGYMOMENTUMTENSOR_H_

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_BINARYOUTPUT_H_
-#define SRC_INCLUDE_BINARYOUTPUT_H_
+#ifndef SRC_INCLUDE_SMASH_BINARYOUTPUT_H_
+#define SRC_INCLUDE_SMASH_BINARYOUTPUT_H_
 
 #include <string>
 
@@ -290,4 +290,4 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_BINARYOUTPUT_H_
+#endif  // SRC_INCLUDE_SMASH_BINARYOUTPUT_H_

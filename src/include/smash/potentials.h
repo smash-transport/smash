@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_POTENTIALS_H_
-#define SRC_INCLUDE_POTENTIALS_H_
+#ifndef SRC_INCLUDE_SMASH_POTENTIALS_H_
+#define SRC_INCLUDE_SMASH_POTENTIALS_H_
 
 #include <utility>
 #include <vector>
@@ -286,4 +286,4 @@ class Potentials {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_POTENTIALS_H_
+#endif  // SRC_INCLUDE_SMASH_POTENTIALS_H_

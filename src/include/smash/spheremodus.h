@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_SPHEREMODUS_H_
-#define SRC_INCLUDE_SPHEREMODUS_H_
+#ifndef SRC_INCLUDE_SMASH_SPHEREMODUS_H_
+#define SRC_INCLUDE_SMASH_SPHEREMODUS_H_
 
 #include <stdint.h>
 #include <cmath>
@@ -140,4 +140,4 @@ class SphereModus : public ModusDefault {
   friend std::ostream &operator<<(std::ostream &, const SphereModus &);
 };
 }  // namespace smash
-#endif  // SRC_INCLUDE_SPHEREMODUS_H_
+#endif  // SRC_INCLUDE_SMASH_SPHEREMODUS_H_

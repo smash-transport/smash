@@ -5,8 +5,8 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#ifndef SRC_INCLUDE_PROPAGATION_H_
-#define SRC_INCLUDE_PROPAGATION_H_
+#ifndef SRC_INCLUDE_SMASH_PROPAGATION_H_
+#define SRC_INCLUDE_SMASH_PROPAGATION_H_
 
 #include <vector>
 
@@ -105,4 +105,4 @@ void update_momenta(
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat);
 
 }  // namespace smash
-#endif  // SRC_INCLUDE_PROPAGATION_H_
+#endif  // SRC_INCLUDE_SMASH_PROPAGATION_H_

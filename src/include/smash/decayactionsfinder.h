@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_DECAYACTIONSFINDER_H_
-#define SRC_INCLUDE_DECAYACTIONSFINDER_H_
+#ifndef SRC_INCLUDE_SMASH_DECAYACTIONSFINDER_H_
+#define SRC_INCLUDE_SMASH_DECAYACTIONSFINDER_H_
 
 #include <vector>
 
@@ -76,4 +76,4 @@ class DecayActionsFinder : public ActionFinderInterface {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_DECAYACTIONSFINDER_H_
+#endif  // SRC_INCLUDE_SMASH_DECAYACTIONSFINDER_H_

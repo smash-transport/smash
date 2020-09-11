@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_THERMODYNAMICOUTPUT_H_
-#define SRC_INCLUDE_THERMODYNAMICOUTPUT_H_
+#ifndef SRC_INCLUDE_SMASH_THERMODYNAMICOUTPUT_H_
+#define SRC_INCLUDE_SMASH_THERMODYNAMICOUTPUT_H_
 
 #include <set>
 #include <string>
@@ -106,4 +106,4 @@ class ThermodynamicOutput : public OutputInterface {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_THERMODYNAMICOUTPUT_H_
+#endif  // SRC_INCLUDE_SMASH_THERMODYNAMICOUTPUT_H_

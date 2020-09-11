@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_CROSSSECTIONSBREMS_H_
-#define SRC_INCLUDE_CROSSSECTIONSBREMS_H_
+#ifndef SRC_INCLUDE_SMASH_CROSSSECTIONSBREMS_H_
+#define SRC_INCLUDE_SMASH_CROSSSECTIONSBREMS_H_
 
 #include <initializer_list>
 
@@ -45660,4 +45660,4 @@ const std::initializer_list<double> BREMS_PI0PI0_PIPI_DIFF_SIG_THETA = {
     1.28168,     1.08361,     0.781843,    0.412897,    2.81756e-05};
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_CROSSSECTIONSBREMS_H_
+#endif  // SRC_INCLUDE_SMASH_CROSSSECTIONSBREMS_H_

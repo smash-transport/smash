@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_PARTICLETYPE_H_
-#define SRC_INCLUDE_PARTICLETYPE_H_
+#ifndef SRC_INCLUDE_SMASH_PARTICLETYPE_H_
+#define SRC_INCLUDE_SMASH_PARTICLETYPE_H_
 
 #include <cassert>
 #include <string>
@@ -750,4 +750,4 @@ inline ParticleTypePtr ParticleType::get_antiparticle() const {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_PARTICLETYPE_H_
+#endif  // SRC_INCLUDE_SMASH_PARTICLETYPE_H_

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_RANDOM_H_
-#define SRC_INCLUDE_RANDOM_H_
+#ifndef SRC_INCLUDE_SMASH_RANDOM_H_
+#define SRC_INCLUDE_SMASH_RANDOM_H_
 
 #include <cassert>
 #include <limits>
@@ -441,4 +441,4 @@ class BesselSampler {
 }  // namespace random
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_RANDOM_H_
+#endif  // SRC_INCLUDE_SMASH_RANDOM_H_

@@ -5,8 +5,8 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#ifndef SRC_INCLUDE_DECAYTYPE_H_
-#define SRC_INCLUDE_DECAYTYPE_H_
+#ifndef SRC_INCLUDE_SMASH_DECAYTYPE_H_
+#define SRC_INCLUDE_SMASH_DECAYTYPE_H_
 
 #include <memory>
 #include <vector>
@@ -353,4 +353,4 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_DECAYTYPE_H_
+#endif  // SRC_INCLUDE_SMASH_DECAYTYPE_H_

@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_EXPERIMENT_H_
-#define SRC_INCLUDE_EXPERIMENT_H_
+#ifndef SRC_INCLUDE_SMASH_EXPERIMENT_H_
+#define SRC_INCLUDE_SMASH_EXPERIMENT_H_
 
 #include <limits>
 #include <memory>
@@ -2202,4 +2202,4 @@ void Experiment<Modus>::run() {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_EXPERIMENT_H_
+#endif  // SRC_INCLUDE_SMASH_EXPERIMENT_H_

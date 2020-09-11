@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_LATTICE_H_
-#define SRC_INCLUDE_LATTICE_H_
+#ifndef SRC_INCLUDE_SMASH_LATTICE_H_
+#define SRC_INCLUDE_SMASH_LATTICE_H_
 
 #include <array>
 #include <cstring>
@@ -366,4 +366,4 @@ class RectangularLattice {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_LATTICE_H_
+#endif  // SRC_INCLUDE_SMASH_LATTICE_H_

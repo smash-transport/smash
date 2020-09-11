@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
-#define SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
+#ifndef SRC_INCLUDE_SMASH_EXPERIMENTPARAMETERS_H_
+#define SRC_INCLUDE_SMASH_EXPERIMENTPARAMETERS_H_
 
 #include <set>
 
@@ -86,4 +86,4 @@ struct ExperimentParameters {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_EXPERIMENTPARAMETERS_H_
+#endif  // SRC_INCLUDE_SMASH_EXPERIMENTPARAMETERS_H_

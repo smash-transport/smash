@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_FORWARDDECLARATIONS_H_
-#define SRC_INCLUDE_FORWARDDECLARATIONS_H_
+#ifndef SRC_INCLUDE_SMASH_FORWARDDECLARATIONS_H_
+#define SRC_INCLUDE_SMASH_FORWARDDECLARATIONS_H_
 
 /// @cond
 // exclude most content here from documentation
@@ -275,4 +275,4 @@ namespace bf = boost::filesystem;
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_FORWARDDECLARATIONS_H_
+#endif  // SRC_INCLUDE_SMASH_FORWARDDECLARATIONS_H_
