@@ -90,7 +90,7 @@ TEST(rest_frame_transformation) {
 // It can however be executed if the hadron gas EoS table is pre-compiled. To do
 // so, run SMASH once enabling the grandcanonical thermalizer (instructions can
 // be found in the user guide). This produces the file 'hadrongas_eos.dat' in
-// the build directory. From now on, the EoS is read from this spicifiy file
+// the build directory. From now on, the EoS is read from this specific file
 // whenever the thermalizer is used. You can execute all tests normally,
 // including the `thermalization_action` test below, once the hadron gas file
 // was created.
