@@ -30,7 +30,7 @@ class DecayActionsFinder : public ActionFinderInterface {
    * \param[in] res_lifetime_factor The multiplicative factor to be applied to
    *                                resonance lifetimes; default is 1
    */
-  DecayActionsFinder(double res_lifetime_factor)
+  explicit DecayActionsFinder(double res_lifetime_factor)
       : res_lifetime_factor_(res_lifetime_factor) {}
 
   /**

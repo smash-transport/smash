@@ -10,6 +10,7 @@
 #define SRC_INCLUDE_SMASH_DENSITY_H_
 
 #include <iostream>
+#include <tuple>
 #include <typeinfo>
 #include <utility>
 #include <vector>

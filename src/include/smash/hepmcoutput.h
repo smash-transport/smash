@@ -11,6 +11,8 @@
 #ifndef SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 #define SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 
+#include <string>
+
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"

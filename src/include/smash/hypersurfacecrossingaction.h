@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_SMASH_HYPERSURFACECROSSINGACTION_H_
 #define SRC_INCLUDE_SMASH_HYPERSURFACECROSSINGACTION_H_
 
+#include <vector>
+
 #include "action.h"
 #include "actionfinderfactory.h"
 

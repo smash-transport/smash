@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_POTENTIALS_H_
 #define SRC_INCLUDE_SMASH_POTENTIALS_H_
 
+#include <tuple>
 #include <utility>
 #include <vector>
 

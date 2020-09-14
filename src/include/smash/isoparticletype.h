@@ -10,6 +10,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "particletype.h"
 #include "sha256.h"

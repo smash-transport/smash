@@ -8,6 +8,7 @@
 #ifndef SRC_INCLUDE_SMASH_PROPAGATION_H_
 #define SRC_INCLUDE_SMASH_PROPAGATION_H_
 
+#include <utility>
 #include <vector>
 
 #include "lattice.h"

@@ -211,7 +211,7 @@ class ScatterActionMulti : public Action {
    */
   bool possible_three_to_two_reaction() const {
     return false;  // No 3-to-2 reactions at the moment
-  };
+  }
 
   /// Total probability of reaction
   double total_probability_;

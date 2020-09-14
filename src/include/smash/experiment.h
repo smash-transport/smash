@@ -7,9 +7,11 @@
 #ifndef SRC_INCLUDE_SMASH_EXPERIMENT_H_
 #define SRC_INCLUDE_SMASH_EXPERIMENT_H_
 
+#include <algorithm>
 #include <limits>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "actionfinderfactory.h"

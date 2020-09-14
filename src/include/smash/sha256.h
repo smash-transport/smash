@@ -1,3 +1,12 @@
+/*
+ *
+ *    Copyright (c) 2019-2020
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
+ */
+
 #ifndef SRC_INCLUDE_SMASH_SHA256_H_
 #define SRC_INCLUDE_SMASH_SHA256_H_
 

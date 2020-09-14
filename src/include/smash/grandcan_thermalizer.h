@@ -65,7 +65,7 @@ class ThermLatticeNode {
    */
   void add_particle(const ParticleData& p, double factor);
   /// dummy function for update_lattice
-  void add_particle_for_derivatives(const ParticleData&, double, ThreeVector){};
+  void add_particle_for_derivatives(const ParticleData&, double, ThreeVector) {}
   /**
    * Temperature, chemical potentials and rest frame velocity are
    * calculated given the hadron gas equation of state object

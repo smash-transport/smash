@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_SMASH_CROSSSECTIONS_H_
 #define SRC_INCLUDE_SMASH_CROSSSECTIONS_H_
 
+#include <utility>
+
 #include "forwarddeclarations.h"
 #include "isoparticletype.h"
 #include "particles.h"

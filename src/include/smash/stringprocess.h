@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_STRINGPROCESS_H_
 #define SRC_INCLUDE_SMASH_STRINGPROCESS_H_
 
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
@@ -289,7 +290,8 @@ class StringProcess {
         random::uniform_int(1, maximum_rndm_seed_in_pythia);
 
     pythia_hadron_->rndm.init(seed_new);
-    logg[LPythia].debug("pythia_hadron_ : rndm is initialized with seed ", seed_new);
+    logg[LPythia].debug("pythia_hadron_ : rndm is initialized with seed ",
+                        seed_new);
   }
 
   // clang-format on
@@ -841,9 +843,11 @@ class StringProcess {
    * \param[in] pdgcode_in is PdgCode of hadron which transforms into a string.
    * \param[out] idq1 is PDG id of quark or anti-diquark.
    * \param[out] idq2 is PDG id of anti-quark or diquark.
-   * \param[in] xi probability to split a nucleon into the quark it has only once and a diquark of another flavour.
+   * \param[in] xi probability to split a nucleon into the quark it has only
+   * once and a diquark of another flavour.
    */
-  static void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2, double xi);
+  static void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2,
+                               double xi);
 
   /**
    * Easy setter of Pythia Vec4 from SMASH

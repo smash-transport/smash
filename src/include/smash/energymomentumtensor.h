@@ -108,8 +108,8 @@ class EnergyMomentumTensor {
    */
   void add_particle(const ParticleData &p, double factor);
   /// Dummy function need for update_general_lattice
-  void add_particle_for_derivatives(const ParticleData &, double,
-                                    ThreeVector){};
+  void add_particle_for_derivatives(const ParticleData &, double, ThreeVector) {
+  }
 
   /**
    * Returns an iterator starting at the (0,0) component.
