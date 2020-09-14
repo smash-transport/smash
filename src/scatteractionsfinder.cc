@@ -186,9 +186,8 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \key "Stochastic" - Stochastic collision criterion \n
  * The stochastic collision criterion employs a probability to decide whether
  * particles collide inside a given grid cell. The probability is derived
- * directly from the scattering rate given by the Boltzmann equation. The
- * criterion is currently only used for 2-particle scatterings i.e. 2<->2,
- * 2<->1. \n For more details, see e.g. Lang et al. (1993) \cite Lang1993.
+ * directly from the scattering rate given by the Boltzmann equation. \n
+ * For more details, see e.g. Lang et al. (1993) \cite Lang1993.
  *
  * \key "Covariant" - Covariant collision criterion \n
  * The covariant collision criterion uses a covariant expression of the
