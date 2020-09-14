@@ -175,7 +175,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * It is possible to produce a popcorn meson from the diquark end of a string
  * with certain probability (i.e., diquark to meson + diquark).
  *
- * \page collision_criterion Collision_Criterion
+ * \page collision_criterion Collision Criterion
  * \key "Geometric" - Geometric collision criterion \n
  * The geometric collision criterion calculates the two-particle impact
  * parameter as the closest approach distance in the two-particle
