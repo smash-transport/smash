@@ -18,8 +18,8 @@
 
 */
 
-#ifndef SRC_INCLUDE_TSC_H_
-#define SRC_INCLUDE_TSC_H_
+#ifndef SRC_INCLUDE_SMASH_TSC_H_
+#define SRC_INCLUDE_SMASH_TSC_H_
 
 #include <cstdint>
 #include <iosfwd>
@@ -92,4 +92,4 @@ std::ostream &operator<<(std::ostream &out, const TimeStampCounter &tsc);
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_TSC_H_
+#endif  // SRC_INCLUDE_SMASH_TSC_H_

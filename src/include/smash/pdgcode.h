@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_PDGCODE_H_
-#define SRC_INCLUDE_PDGCODE_H_
+#ifndef SRC_INCLUDE_SMASH_PDGCODE_H_
+#define SRC_INCLUDE_SMASH_PDGCODE_H_
 
 #include <algorithm>
 #include <array>
@@ -1009,4 +1009,4 @@ inline bool has_lepton_pair(const PdgCode pdg1, const PdgCode pdg2,
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_PDGCODE_H_
+#endif  // SRC_INCLUDE_SMASH_PDGCODE_H_

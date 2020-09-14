@@ -5,11 +5,12 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#ifndef SRC_INCLUDE_ISOPARTICLETYPE_H_
-#define SRC_INCLUDE_ISOPARTICLETYPE_H_
+#ifndef SRC_INCLUDE_SMASH_ISOPARTICLETYPE_H_
+#define SRC_INCLUDE_SMASH_ISOPARTICLETYPE_H_
 
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "particletype.h"
 #include "sha256.h"
@@ -273,4 +274,4 @@ class IsoParticleType {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_ISOPARTICLETYPE_H_
+#endif  // SRC_INCLUDE_SMASH_ISOPARTICLETYPE_H_

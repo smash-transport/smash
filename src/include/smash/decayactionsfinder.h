@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_DECAYACTIONSFINDER_H_
-#define SRC_INCLUDE_DECAYACTIONSFINDER_H_
+#ifndef SRC_INCLUDE_SMASH_DECAYACTIONSFINDER_H_
+#define SRC_INCLUDE_SMASH_DECAYACTIONSFINDER_H_
 
 #include <vector>
 
@@ -30,7 +30,7 @@ class DecayActionsFinder : public ActionFinderInterface {
    * \param[in] res_lifetime_factor The multiplicative factor to be applied to
    *                                resonance lifetimes; default is 1
    */
-  DecayActionsFinder(double res_lifetime_factor)
+  explicit DecayActionsFinder(double res_lifetime_factor)
       : res_lifetime_factor_(res_lifetime_factor) {}
 
   /**
@@ -76,4 +76,4 @@ class DecayActionsFinder : public ActionFinderInterface {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_DECAYACTIONSFINDER_H_
+#endif  // SRC_INCLUDE_SMASH_DECAYACTIONSFINDER_H_

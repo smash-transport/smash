@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_INTERPOLATION2D_H_
-#define SRC_INCLUDE_INTERPOLATION2D_H_
+#ifndef SRC_INCLUDE_SMASH_INTERPOLATION2D_H_
+#define SRC_INCLUDE_SMASH_INTERPOLATION2D_H_
 
 #include <gsl/gsl_spline2d.h>
 
@@ -67,4 +67,4 @@ class InterpolateData2DSpline {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_INTERPOLATION2D_H_
+#endif  // SRC_INCLUDE_SMASH_INTERPOLATION2D_H_

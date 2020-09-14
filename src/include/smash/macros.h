@@ -2,8 +2,8 @@
  *    Copyright (c) 2012-2018
  *              none
  */
-#ifndef SRC_INCLUDE_MACROS_H_
-#define SRC_INCLUDE_MACROS_H_
+#ifndef SRC_INCLUDE_SMASH_MACROS_H_
+#define SRC_INCLUDE_SMASH_MACROS_H_
 
 /* support for gcc branch prediction */
 #ifdef __GNUC__
@@ -26,4 +26,4 @@
 /// Mark as deprecated, generating compiler warnings when used.
 #define SMASH_DEPRECATED(msg) __attribute__((deprecated(msg)))
 
-#endif  // SRC_INCLUDE_MACROS_H_
+#endif  // SRC_INCLUDE_SMASH_MACROS_H_

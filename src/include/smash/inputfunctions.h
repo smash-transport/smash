@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_INPUTFUNCTIONS_H_
-#define SRC_INCLUDE_INPUTFUNCTIONS_H_
+#ifndef SRC_INCLUDE_SMASH_INPUTFUNCTIONS_H_
+#define SRC_INCLUDE_SMASH_INPUTFUNCTIONS_H_
 
 #include <iostream>
 #include <string>
@@ -97,4 +97,4 @@ inline bool has_crlf_line_ending(const std::string in) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_INPUTFUNCTIONS_H_
+#endif  // SRC_INCLUDE_SMASH_INPUTFUNCTIONS_H_

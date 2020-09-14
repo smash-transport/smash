@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_FOURVECTOR_H_
-#define SRC_INCLUDE_FOURVECTOR_H_
+#ifndef SRC_INCLUDE_SMASH_FOURVECTOR_H_
+#define SRC_INCLUDE_SMASH_FOURVECTOR_H_
 
 #include <array>
 #include <cmath>
@@ -483,4 +483,4 @@ std::ostream &operator<<(std::ostream &os, const FourVector &vec);
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_FOURVECTOR_H_
+#endif  // SRC_INCLUDE_SMASH_FOURVECTOR_H_

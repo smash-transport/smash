@@ -5,8 +5,8 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#ifndef SRC_INCLUDE_FORMFACTORS_H_
-#define SRC_INCLUDE_FORMFACTORS_H_
+#ifndef SRC_INCLUDE_SMASH_FORMFACTORS_H_
+#define SRC_INCLUDE_SMASH_FORMFACTORS_H_
 
 #include <complex>
 #include <string>
@@ -148,4 +148,4 @@ inline double form_factor_delta(double m) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_FORMFACTORS_H_
+#endif  // SRC_INCLUDE_SMASH_FORMFACTORS_H_

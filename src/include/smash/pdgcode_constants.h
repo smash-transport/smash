@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_PDGCODE_CONSTANTS_H_
-#define SRC_INCLUDE_PDGCODE_CONSTANTS_H_
+#ifndef SRC_INCLUDE_SMASH_PDGCODE_CONSTANTS_H_
+#define SRC_INCLUDE_SMASH_PDGCODE_CONSTANTS_H_
 
 namespace smash {
 /**
@@ -112,4 +112,4 @@ constexpr uint64_t pack(int32_t x, int32_t y) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_PDGCODE_CONSTANTS_H_
+#endif  // SRC_INCLUDE_SMASH_PDGCODE_CONSTANTS_H_

@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_CHRONO_H_
-#define SRC_INCLUDE_CHRONO_H_
+#ifndef SRC_INCLUDE_SMASH_CHRONO_H_
+#define SRC_INCLUDE_SMASH_CHRONO_H_
 
 #include <chrono>
 
@@ -29,4 +29,4 @@ using SystemTimeSpan = SystemClock::duration;
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_CHRONO_H_
+#endif  // SRC_INCLUDE_SMASH_CHRONO_H_

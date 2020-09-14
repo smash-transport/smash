@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_FILE_H_
-#define SRC_INCLUDE_FILE_H_
+#ifndef SRC_INCLUDE_SMASH_FILE_H_
+#define SRC_INCLUDE_SMASH_FILE_H_
 
 #include <cerrno>
 #include <cstdio>
@@ -109,4 +109,4 @@ FilePtr fopen(const bf::path& filename, const std::string& mode);
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_FILE_H_
+#endif  // SRC_INCLUDE_SMASH_FILE_H_

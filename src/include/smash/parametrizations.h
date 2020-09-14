@@ -6,8 +6,8 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#ifndef SRC_INCLUDE_PARAMETRIZATIONS_H_
-#define SRC_INCLUDE_PARAMETRIZATIONS_H_
+#ifndef SRC_INCLUDE_SMASH_PARAMETRIZATIONS_H_
+#define SRC_INCLUDE_SMASH_PARAMETRIZATIONS_H_
 
 #include <unordered_map>
 #include <utility>
@@ -694,4 +694,4 @@ double sigmaplussigmaminus_xi0n(double sqrts_sqrts0);
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_PARAMETRIZATIONS_H_
+#endif  // SRC_INCLUDE_SMASH_PARAMETRIZATIONS_H_

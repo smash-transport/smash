@@ -6,8 +6,8 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#ifndef SRC_INCLUDE_PARAMETRIZATIONS_DATA_H_
-#define SRC_INCLUDE_PARAMETRIZATIONS_DATA_H_
+#ifndef SRC_INCLUDE_SMASH_PARAMETRIZATIONS_DATA_H_
+#define SRC_INCLUDE_SMASH_PARAMETRIZATIONS_DATA_H_
 
 #include <initializer_list>
 #include <memory>
@@ -819,4 +819,4 @@ static std::unique_ptr<InterpolateDataSpline>
     piplusp_elastic_res_interpolation = nullptr;
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_PARAMETRIZATIONS_DATA_H_
+#endif  // SRC_INCLUDE_SMASH_PARAMETRIZATIONS_DATA_H_

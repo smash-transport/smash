@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_DECAYACTIONDILEPTON_H_
-#define SRC_INCLUDE_DECAYACTIONDILEPTON_H_
+#ifndef SRC_INCLUDE_SMASH_DECAYACTIONDILEPTON_H_
+#define SRC_INCLUDE_SMASH_DECAYACTIONDILEPTON_H_
 
 #include "decayaction.h"
 
@@ -64,4 +64,4 @@ class DecayActionDilepton : public DecayAction {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_DECAYACTIONDILEPTON_H_
+#endif  // SRC_INCLUDE_SMASH_DECAYACTIONDILEPTON_H_

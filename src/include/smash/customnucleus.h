@@ -4,11 +4,13 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_CUSTOMNUCLEUS_H_
-#define SRC_INCLUDE_CUSTOMNUCLEUS_H_
+#ifndef SRC_INCLUDE_SMASH_CUSTOMNUCLEUS_H_
+#define SRC_INCLUDE_SMASH_CUSTOMNUCLEUS_H_
 
 #include <fstream>
 #include <map>
+#include <memory>
+#include <string>
 #include <vector>
 
 #include "nucleus.h"
@@ -120,4 +122,4 @@ class CustomNucleus : public Nucleus {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_CUSTOMNUCLEUS_H_
+#endif  // SRC_INCLUDE_SMASH_CUSTOMNUCLEUS_H_

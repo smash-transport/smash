@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_SETUP_PARTICLES_DECAYMODES_H_
-#define SRC_INCLUDE_SETUP_PARTICLES_DECAYMODES_H_
+#ifndef SRC_INCLUDE_SMASH_SETUP_PARTICLES_DECAYMODES_H_
+#define SRC_INCLUDE_SMASH_SETUP_PARTICLES_DECAYMODES_H_
 
 #include <string>
 #include <utility>
@@ -32,4 +32,4 @@ void load_default_particles_and_decaymodes();
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SETUP_PARTICLES_DECAYMODES_H_
+#endif  // SRC_INCLUDE_SMASH_SETUP_PARTICLES_DECAYMODES_H_

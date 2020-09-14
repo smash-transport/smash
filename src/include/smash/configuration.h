@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_CONFIGURATION_H_
-#define SRC_INCLUDE_CONFIGURATION_H_
+#ifndef SRC_INCLUDE_SMASH_CONFIGURATION_H_
+#define SRC_INCLUDE_SMASH_CONFIGURATION_H_
 
 #include <array>
 #include <set>
@@ -1182,4 +1182,4 @@ class Configuration {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_CONFIGURATION_H_
+#endif  // SRC_INCLUDE_SMASH_CONFIGURATION_H_

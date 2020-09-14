@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_FPENVIRONMENT_H_
-#define SRC_INCLUDE_FPENVIRONMENT_H_
+#ifndef SRC_INCLUDE_SMASH_FPENVIRONMENT_H_
+#define SRC_INCLUDE_SMASH_FPENVIRONMENT_H_
 
 #include <cfenv>
 
@@ -133,4 +133,4 @@ void without_float_traps(F &&f) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_FPENVIRONMENT_H_
+#endif  // SRC_INCLUDE_SMASH_FPENVIRONMENT_H_

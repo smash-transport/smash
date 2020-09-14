@@ -4,12 +4,14 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_EXPERIMENT_H_
-#define SRC_INCLUDE_EXPERIMENT_H_
+#ifndef SRC_INCLUDE_SMASH_EXPERIMENT_H_
+#define SRC_INCLUDE_SMASH_EXPERIMENT_H_
 
+#include <algorithm>
 #include <limits>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "actionfinderfactory.h"
@@ -2202,4 +2204,4 @@ void Experiment<Modus>::run() {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_EXPERIMENT_H_
+#endif  // SRC_INCLUDE_SMASH_EXPERIMENT_H_

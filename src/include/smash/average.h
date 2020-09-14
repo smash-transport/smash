@@ -5,8 +5,8 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#ifndef SRC_INCLUDE_AVERAGE_H_
-#define SRC_INCLUDE_AVERAGE_H_
+#ifndef SRC_INCLUDE_SMASH_AVERAGE_H_
+#define SRC_INCLUDE_SMASH_AVERAGE_H_
 
 #include <cassert>
 #include <cstdint>
@@ -97,4 +97,4 @@ std::pair<std::vector<T>, std::vector<T>> dedup_avg(const std::vector<T>& x,
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_AVERAGE_H_
+#endif  // SRC_INCLUDE_SMASH_AVERAGE_H_

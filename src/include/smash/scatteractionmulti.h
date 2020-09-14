@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_SCATTERACTIONMULTI_H_
-#define SRC_INCLUDE_SCATTERACTIONMULTI_H_
+#ifndef SRC_INCLUDE_SMASH_SCATTERACTIONMULTI_H_
+#define SRC_INCLUDE_SMASH_SCATTERACTIONMULTI_H_
 
 #include "action.h"
 
@@ -211,7 +211,7 @@ class ScatterActionMulti : public Action {
    */
   bool possible_three_to_two_reaction() const {
     return false;  // No 3-to-2 reactions at the moment
-  };
+  }
 
   /// Total probability of reaction
   double total_probability_;
@@ -225,4 +225,4 @@ class ScatterActionMulti : public Action {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SCATTERACTIONMULTI_H_
+#endif  // SRC_INCLUDE_SMASH_SCATTERACTIONMULTI_H_

@@ -1,5 +1,14 @@
-#ifndef SRC_INCLUDE_SHA256_H_
-#define SRC_INCLUDE_SHA256_H_
+/*
+ *
+ *    Copyright (c) 2019-2020
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
+ */
+
+#ifndef SRC_INCLUDE_SMASH_SHA256_H_
+#define SRC_INCLUDE_SMASH_SHA256_H_
 
 #include <array>
 #include <cstdint>
@@ -74,4 +83,4 @@ std::string hash_to_string(Hash hash);
 }  // namespace sha256
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SHA256_H_
+#endif  // SRC_INCLUDE_SMASH_SHA256_H_
