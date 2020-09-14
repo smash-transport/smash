@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_ICOUTPUT_H_
 #define SRC_INCLUDE_SMASH_ICOUTPUT_H_
 
+#include <memory>
 #include <string>
 
 #include <boost/filesystem.hpp>

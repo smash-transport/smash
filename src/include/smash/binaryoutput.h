@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_BINARYOUTPUT_H_
 #define SRC_INCLUDE_SMASH_BINARYOUTPUT_H_
 
+#include <memory>
 #include <string>
 
 #include <boost/numeric/conversion/cast.hpp>

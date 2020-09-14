@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_OUTPUTINTERFACE_H_
 #define SRC_INCLUDE_SMASH_OUTPUTINTERFACE_H_
 
+#include <memory>
 #include <string>
 
 #include "density.h"

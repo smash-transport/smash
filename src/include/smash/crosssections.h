@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_CROSSSECTIONS_H_
 #define SRC_INCLUDE_SMASH_CROSSSECTIONS_H_
 
+#include <memory>
 #include <utility>
 
 #include "forwarddeclarations.h"

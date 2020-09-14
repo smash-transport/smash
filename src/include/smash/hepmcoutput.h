@@ -11,6 +11,7 @@
 #ifndef SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 #define SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 
+#include <memory>
 #include <string>
 
 #include "forwarddeclarations.h"

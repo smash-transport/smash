@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_CROSSSECTIONSBREMS_H_
 
 #include <initializer_list>
+#include <memory>
 
 #include "interpolation.h"
 #include "interpolation2D.h"

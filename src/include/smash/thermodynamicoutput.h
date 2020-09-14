@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_THERMODYNAMICOUTPUT_H_
 #define SRC_INCLUDE_SMASH_THERMODYNAMICOUTPUT_H_
 
+#include <memory>
 #include <set>
 #include <string>
 
