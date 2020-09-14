@@ -844,7 +844,7 @@ class StringProcess {
    * \param[out] idq1 is PDG id of quark or anti-diquark.
    * \param[out] idq2 is PDG id of anti-quark or diquark.
    * \param[in] xi probability to split a nucleon into the quark it has only
-   * once and a diquark of another flavour.
+   *            once and a diquark of another flavour.
    */
   static void make_string_ends(const PdgCode &pdgcode_in, int &idq1, int &idq2,
                                double xi);
