@@ -29,7 +29,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Changed
 * The Pythia version is increased to 8.302
-
+* The Pythia version is increased to 8.303 
 
 
 ## [SMASH-1.8](https://github.com/smash-transport/smash/compare/SMASH-1.7...SMASH-1.8)
