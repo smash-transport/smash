@@ -711,8 +711,7 @@ CollisionBranchList CrossSections::two_to_one(const bool include_two_to_three) c
       continue;
     }
 
-    // TODO(stdnmr) Do we keep this?
-    // Skip d' froming, when doing 2-to-3 deuteron reactions indirectly
+    // Skip d' froming, when doing 2-to-3 deuteron reactions directly (w/o d')
     if (include_two_to_three && type_resonance.is_dprime()) {
       continue;
     }
