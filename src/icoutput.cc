@@ -113,12 +113,12 @@ ICOutput::~ICOutput() {}
 
 void ICOutput::at_eventstart(const Particles &, const int event_number,
                              const EventInfo &) {
-  std::fprintf(file_.get(), "# event %i start\n", event_number + 1);
+  std::fprintf(file_.get(), "# event %i start\n", event_number);
 }
 
 void ICOutput::at_eventend(const Particles &particles, const int event_number,
                            const EventInfo &) {
-  std::fprintf(file_.get(), "# event %i end\n", event_number + 1);
+  std::fprintf(file_.get(), "# event %i end\n", event_number);
 
   // If the runtime is too short some particles might not yet have
   // reached the hypersurface. Warning is printed.
