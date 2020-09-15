@@ -422,19 +422,6 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
          (pdg_a == pdg::pi_p && pdg_b == pdg::eta && pdg_c == pdg::pi_m);
 }
 
-bool ScatterActionMulti::possible_three_to_two_reaction(const ParticleData& data_a, const ParticleData& data_b,
-                                                        const ParticleData& data_c) const {
-  // TODO(stdnmr) Rename function for deuterons
-
-  const PdgCode pdg_a = data_a.pdgcode();
-  const PdgCode pdg_b = data_b.pdgcode();
-  const PdgCode pdg_c = data_c.pdgcode();
-
-  // We want nppi
-  return ((pdg_a.is_pion() && ((pdg_b == pdg::p && pdg_c == pdg::n) || (pdg_b == pdg::n && pdg_c == pdg::p))) ||
-          (pdg_b.is_pion() && ((pdg_a == pdg::p && pdg_c == pdg::n) || (pdg_a == pdg::n && pdg_c == pdg::p))) ||
-          (pdg_c.is_pion() && ((pdg_b == pdg::p && pdg_a == pdg::n) || (pdg_b == pdg::n && pdg_a == pdg::p))));
-}
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
   out << "MultiParticleScatter of " << incoming_particles_;

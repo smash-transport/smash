@@ -203,15 +203,6 @@ class ScatterActionMulti : public Action {
   bool two_pions_eta(const ParticleData& data_a, const ParticleData& data_b,
                      const ParticleData& data_c) const;
 
-  /**
-   * Check wether the three incoming particles can be part of 3-to-2 reaction.
-   * Wrapper for unwieldy if statment.
-   *
-   * \return true if possible 3-to-2 reaction
-   */
-  bool possible_three_to_two_reaction(const ParticleData& data_a, const ParticleData& data_b,
-                                      const ParticleData& data_c) const;
-
   /// Total probability of reaction
   double total_probability_;
 
