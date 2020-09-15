@@ -161,9 +161,11 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
       write(particles);
     }
     // Comment end of an event
-    const char *empty_event_str = event.empty_event ? "yes" : "no";
-    std::fprintf(file_.get(), "# event %i end 0 impact %7.3f empty %s\n",
-                 event_number, event.impact_parameter, empty_event_str);
+    const char *empty_event_str = event.empty_event ? "no" : "yes";
+    std::fprintf(
+        file_.get(),
+        "# event %i end 0 impact %7.3f scattering_projectile_target %s\n",
+        event_number, event.impact_parameter, empty_event_str);
   } else {
     /* OSCAR line prefix : initial particles; final particles; event id
      * Last block of an event: initial = number of particles, final = 0

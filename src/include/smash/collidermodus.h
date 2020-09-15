@@ -4,11 +4,12 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_COLLIDERMODUS_H_
-#define SRC_INCLUDE_COLLIDERMODUS_H_
+#ifndef SRC_INCLUDE_SMASH_COLLIDERMODUS_H_
+#define SRC_INCLUDE_SMASH_COLLIDERMODUS_H_
 
 #include <cstring>
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "deformednucleus.h"
@@ -272,4 +273,4 @@ class ColliderModus : public ModusDefault {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_COLLIDERMODUS_H_
+#endif  // SRC_INCLUDE_SMASH_COLLIDERMODUS_H_

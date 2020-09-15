@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_ROOTOUTPUT_H_
-#define SRC_INCLUDE_ROOTOUTPUT_H_
+#ifndef SRC_INCLUDE_SMASH_ROOTOUTPUT_H_
+#define SRC_INCLUDE_SMASH_ROOTOUTPUT_H_
 
 #include <memory>
 #include <string>
@@ -248,4 +248,4 @@ class RootOutput : public OutputInterface {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_ROOTOUTPUT_H_
+#endif  // SRC_INCLUDE_SMASH_ROOTOUTPUT_H_

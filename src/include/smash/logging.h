@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_LOGGING_H_
-#define SRC_INCLUDE_LOGGING_H_
+#ifndef SRC_INCLUDE_SMASH_LOGGING_H_
+#define SRC_INCLUDE_SMASH_LOGGING_H_
 
 #include <stdexcept>
 #include <tuple>
@@ -355,4 +355,4 @@ struct convert<einhard::LogLevel> {
 
 // @}
 
-#endif  // SRC_INCLUDE_LOGGING_H_
+#endif  // SRC_INCLUDE_SMASH_LOGGING_H_

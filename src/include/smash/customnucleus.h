@@ -4,11 +4,13 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_CUSTOMNUCLEUS_H_
-#define SRC_INCLUDE_CUSTOMNUCLEUS_H_
+#ifndef SRC_INCLUDE_SMASH_CUSTOMNUCLEUS_H_
+#define SRC_INCLUDE_SMASH_CUSTOMNUCLEUS_H_
 
 #include <fstream>
 #include <map>
+#include <memory>
+#include <string>
 #include <vector>
 
 #include "nucleus.h"
@@ -66,11 +68,8 @@ class CustomNucleus : public Nucleus {
    * particlelist.
    *
    * \param[in] infile is needed to read in from the external file
-   * \param[in] particle_number ensures that only as many lines are read in
-   * as the nucleus contains nucleons.
    */
-  std::vector<Nucleoncustom> readfile(std::ifstream& infile,
-                                      int particle_number) const;
+  std::vector<Nucleoncustom> readfile(std::ifstream& infile) const;
   /**
    * Generates the name of the stream file.
    * \param[in] file_directory is the path to the external file
@@ -84,17 +83,6 @@ class CustomNucleus : public Nucleus {
    * Woods-Saxon distributed nucleons.
    */
   void generate_fermi_momenta() override;
-  /**
-   * Number of Nucleons per Nucleus
-   * Set initally to zero to be modified in the constructor.
-   * Is obtained by adding the proton and neutron numbers
-   * specified in the config.yaml
-   */
-  int number_of_nucleons_ = 0;
-  /// Vector contianing Data for one nucleus given in the particlelist
-  std::vector<Nucleoncustom> custom_nucleus_;
-  /// Index needed to read out vector in distribute nucleon
-  size_t index = 0;
 
  private:
   /**
@@ -115,8 +103,23 @@ class CustomNucleus : public Nucleus {
   std::unique_ptr<std::ifstream> filestream_;
   /// Pointer to the used filestream pointer
   std::unique_ptr<std::ifstream>* used_filestream_;
+  /**
+   * Number of nucleons per nucleus
+   * Set initally to zero to be modified in the constructor.
+   * Is obtained by adding the proton and neutron numbers
+   * specified in the config.yaml
+   */
+  int number_of_nucleons_ = 0;
+  /// Number of protons per nucleus
+  int number_of_protons_ = 0;
+  /// Number of neutrons per nucleus
+  int number_of_neutrons_ = 0;
+  /// Vector contianing Data for one nucleus given in the particlelist
+  std::vector<Nucleoncustom> custom_nucleus_;
+  /// Index needed to read out vector in distribute nucleon
+  size_t index_ = 0;
 };
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_CUSTOMNUCLEUS_H_
+#endif  // SRC_INCLUDE_SMASH_CUSTOMNUCLEUS_H_

@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_OUTPUTPARAMETERS_H_
-#define SRC_INCLUDE_OUTPUTPARAMETERS_H_
+#ifndef SRC_INCLUDE_SMASH_OUTPUTPARAMETERS_H_
+#define SRC_INCLUDE_SMASH_OUTPUTPARAMETERS_H_
 
 #include <set>
 #include <string>
@@ -162,4 +162,4 @@ struct OutputParameters {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_OUTPUTPARAMETERS_H_
+#endif  // SRC_INCLUDE_SMASH_OUTPUTPARAMETERS_H_

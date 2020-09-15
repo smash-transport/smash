@@ -181,7 +181,7 @@ void IsoParticleType::create_multiplet(const ParticleType &type) {
 }
 
 static Integrator integrate;
-static Integrator2dCuhre integrate2d;
+static Integrator2d integrate2d;
 
 /**
  * Tabulation of all N R integrals.

@@ -7,9 +7,10 @@
  *
  */
 
-#ifndef SRC_INCLUDE_VTKOUTPUT_H_
-#define SRC_INCLUDE_VTKOUTPUT_H_
+#ifndef SRC_INCLUDE_SMASH_VTKOUTPUT_H_
+#define SRC_INCLUDE_SMASH_VTKOUTPUT_H_
 
+#include <memory>
 #include <string>
 
 #include <boost/filesystem.hpp>
@@ -190,4 +191,4 @@ class VtkOutput : public OutputInterface {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_VTKOUTPUT_H_
+#endif  // SRC_INCLUDE_SMASH_VTKOUTPUT_H_

@@ -345,7 +345,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     act->set_string_interface(string_process_interface_.get());
   }
 
-  // Distance squared calculation only needed for geometric criterion
+  // Distance squared calculation not needed for stochastic criterion
   const double distance_squared =
       (coll_crit_ == CollisionCriterion::Geometric)
           ? act->transverse_distance_sqr()
@@ -353,8 +353,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
                 ? act->cov_transverse_distance_sqr()
                 : 0.0;
 
-  // Don't calculate cross section if the particles are very far apart for
-  // geometric criterion.
+  // Don't calculate cross section if the particles are very far apart.
+  // Not needed for stochastic criterion because of cell structure.
   if (coll_crit_ != CollisionCriterion::Stochastic &&
       distance_squared >= max_transverse_distance_sqr(testparticles_)) {
     return nullptr;

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_SCATTERACTIONSFINDER_H_
-#define SRC_INCLUDE_SCATTERACTIONSFINDER_H_
+#ifndef SRC_INCLUDE_SMASH_SCATTERACTIONSFINDER_H_
+#define SRC_INCLUDE_SMASH_SCATTERACTIONSFINDER_H_
 
 #include <memory>
 #include <set>
@@ -372,4 +372,4 @@ class ScatterActionsFinder : public ActionFinderInterface {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SCATTERACTIONSFINDER_H_
+#endif  // SRC_INCLUDE_SMASH_SCATTERACTIONSFINDER_H_

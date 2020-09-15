@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_ENERGYMOMENTUMTENSOR_H_
-#define SRC_INCLUDE_ENERGYMOMENTUMTENSOR_H_
+#ifndef SRC_INCLUDE_SMASH_ENERGYMOMENTUMTENSOR_H_
+#define SRC_INCLUDE_SMASH_ENERGYMOMENTUMTENSOR_H_
 
 #include <cmath>
 
@@ -108,8 +108,8 @@ class EnergyMomentumTensor {
    */
   void add_particle(const ParticleData &p, double factor);
   /// Dummy function need for update_general_lattice
-  void add_particle_for_derivatives(const ParticleData &, double,
-                                    ThreeVector){};
+  void add_particle_for_derivatives(const ParticleData &, double, ThreeVector) {
+  }
 
   /**
    * Returns an iterator starting at the (0,0) component.
@@ -210,4 +210,4 @@ EnergyMomentumTensor inline operator/(EnergyMomentumTensor a, const double b) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_ENERGYMOMENTUMTENSOR_H_
+#endif  // SRC_INCLUDE_SMASH_ENERGYMOMENTUMTENSOR_H_

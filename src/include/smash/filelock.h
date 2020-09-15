@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_FILELOCK_H_
-#define SRC_INCLUDE_FILELOCK_H_
+#ifndef SRC_INCLUDE_SMASH_FILELOCK_H_
+#define SRC_INCLUDE_SMASH_FILELOCK_H_
 
 #include <boost/filesystem.hpp>
 
@@ -58,4 +58,4 @@ class FileLock {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_FILELOCK_H_
+#endif  // SRC_INCLUDE_SMASH_FILELOCK_H_

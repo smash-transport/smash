@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_OSCAROUTPUT_H_
-#define SRC_INCLUDE_OSCAROUTPUT_H_
+#ifndef SRC_INCLUDE_SMASH_OSCAROUTPUT_H_
+#define SRC_INCLUDE_SMASH_OSCAROUTPUT_H_
 
 #include <memory>
 #include <string>
@@ -153,4 +153,4 @@ std::unique_ptr<OutputInterface> create_oscar_output(
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_OSCAROUTPUT_H_
+#endif  // SRC_INCLUDE_SMASH_OSCAROUTPUT_H_

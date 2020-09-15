@@ -124,6 +124,11 @@ There are three possible ways to fix this issue:
 Note that the same applies to any other libraries you compile with
 `-march=native`, like for instance Pythia.
 
+#### SMASH does not compile with pre-compiled ROOT binaries
+
+If compilation of SMASH in combination with a pre-compiled ROOT binary fails,
+please install and compile ROOT locally from source (see http://root.cern.ch)
+and compile SMASH again in a clean build directory.
 
 ### Size of the Code
 

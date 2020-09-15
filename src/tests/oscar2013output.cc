@@ -204,8 +204,9 @@ TEST(full2013_format) {
       outputfile.get();
       /* Check for event end line */
       std::getline(outputfile, line);
-      std::string end_line = "# event " + std::to_string(event_id) + " end 0" +
-                             " impact   1.783 empty no";
+      std::string end_line = "# event " + std::to_string(event_id) +
+                             " end 0" +
+                             " impact   1.783 scattering_projectile_target yes";
       COMPARE(line, end_line);
     }
   }
@@ -292,8 +293,9 @@ TEST(final2013_format) {
       outputfile.get();
       /* Check for event end line */
       std::getline(outputfile, line);
-      std::string end_line = "# event " + std::to_string(event_id) + " end 0" +
-                             " impact   2.340 empty yes";
+      std::string end_line = "# event " + std::to_string(event_id) +
+                             " end 0" +
+                             " impact   2.340 scattering_projectile_target no";
       COMPARE(line, end_line);
     }
   }
@@ -413,8 +415,9 @@ TEST(full_extended_oscar) {
     outputfile.get();
     /* Check for event end line */
     std::getline(outputfile, line);
-    std::string end_line = "# event " + std::to_string(event_id) + " end 0" +
-                           " impact   1.783 empty no";
+    std::string end_line = "# event " + std::to_string(event_id) +
+                           " end 0" +
+                           " impact   1.783 scattering_projectile_target yes";
     COMPARE(line, end_line);
   }
   VERIFY(bf::remove(outputfilepath));
@@ -490,8 +493,9 @@ TEST(initial_conditions_2013_format) {
       outputfile.get();
       /* Check for event end line */
       std::getline(outputfile, line);
-      std::string end_line = "# event " + std::to_string(event_id) + " end 0" +
-                             " impact   1.783 empty no";
+      std::string end_line = "# event " + std::to_string(event_id) +
+                             " end 0" +
+                             " impact   1.783 scattering_projectile_target yes";
       COMPARE(line, end_line);
     }
   }

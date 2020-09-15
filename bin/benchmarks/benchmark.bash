@@ -8,6 +8,8 @@ Executing several SMASH run benchmarks
 Note: Prepare the build directory yourself.
 Clean it and compile the SMASH version you
 want to benchmark.
+Further, make sure to free enough disk
+space as the output files require 38 GB.
 
 Usage: $0 PREPARED_BUILD_DIR
 

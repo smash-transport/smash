@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_ALGORITHMS_H_
-#define SRC_INCLUDE_ALGORITHMS_H_
+#ifndef SRC_INCLUDE_SMASH_ALGORITHMS_H_
+#define SRC_INCLUDE_SMASH_ALGORITHMS_H_
 
 #include <algorithm>
 #include <cmath>
@@ -100,4 +100,4 @@ inline UnaryFunction for_each(Container &&c, UnaryFunction &&f) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_ALGORITHMS_H_
+#endif  // SRC_INCLUDE_SMASH_ALGORITHMS_H_

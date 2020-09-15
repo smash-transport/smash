@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_IOMANIPULATORS_H_
-#define SRC_INCLUDE_IOMANIPULATORS_H_
+#ifndef SRC_INCLUDE_SMASH_IOMANIPULATORS_H_
+#define SRC_INCLUDE_SMASH_IOMANIPULATORS_H_
 
 #include <ostream>
 
@@ -38,4 +38,4 @@ inline std::basic_ostream<CharT, Traits> &field(
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_IOMANIPULATORS_H_
+#endif  // SRC_INCLUDE_SMASH_IOMANIPULATORS_H_

@@ -6,8 +6,8 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#ifndef SRC_INCLUDE_HADGAS_EOS_H_
-#define SRC_INCLUDE_HADGAS_EOS_H_
+#ifndef SRC_INCLUDE_SMASH_HADGAS_EOS_H_
+#define SRC_INCLUDE_SMASH_HADGAS_EOS_H_
 
 #include <gsl/gsl_multiroots.h>
 #include <gsl/gsl_roots.h>
@@ -460,4 +460,4 @@ class HadronGasEos {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_HADGAS_EOS_H_
+#endif  // SRC_INCLUDE_SMASH_HADGAS_EOS_H_

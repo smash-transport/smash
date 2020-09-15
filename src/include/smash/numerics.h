@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_NUMERICS_H_
-#define SRC_INCLUDE_NUMERICS_H_
+#ifndef SRC_INCLUDE_SMASH_NUMERICS_H_
+#define SRC_INCLUDE_SMASH_NUMERICS_H_
 
 #include <cmath>
 #include "constants.h"
@@ -67,4 +67,4 @@ bool almost_equal_physics(const N x, const N y) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_NUMERICS_H_
+#endif  // SRC_INCLUDE_SMASH_NUMERICS_H_

@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_DEFORMEDNUCLEUS_H_
-#define SRC_INCLUDE_DEFORMEDNUCLEUS_H_
+#ifndef SRC_INCLUDE_SMASH_DEFORMEDNUCLEUS_H_
+#define SRC_INCLUDE_SMASH_DEFORMEDNUCLEUS_H_
 
 #include <map>
 
@@ -154,4 +154,4 @@ class DeformedNucleus : public Nucleus {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_DEFORMEDNUCLEUS_H_
+#endif  // SRC_INCLUDE_SMASH_DEFORMEDNUCLEUS_H_
