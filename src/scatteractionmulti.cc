@@ -117,14 +117,8 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             (pdg_a == pdg::n && pdg_b == pdg::p && pdg_c.is_pion())) {
 
           // Get type of incoming π
-          // TODO(stdnmr) Use std::find_if
-          std::size_t idx_of_pi;
-          for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
-            if (incoming_particles_[i].is_pion()) {
-              idx_of_pi = i;
-            }
-          }
-          const ParticleType& type_pi = incoming_particles_[idx_of_pi].type();
+          ParticleList::iterator it = std::find_if(incoming_particles_.begin(), incoming_particles_.end(), [](ParticleData x) {return x.is_pion();});
+          const ParticleType& type_pi = it->type();
 
           const int spin_factor_out = type_pi.spin_degeneracy() * type_deuteron->spin_degeneracy();
           const double spin_degn =  static_cast<double>(spin_factor_out)/static_cast<double>(spin_factor_inc);
@@ -145,13 +139,8 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             (pdg_a == -pdg::n && pdg_b == -pdg::p && pdg_c.is_pion())) {
 
           // Get type of incoming π
-          std::size_t idx_of_pi;
-          for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
-            if (incoming_particles_[i].is_pion()) {
-              idx_of_pi = i;
-            }
-          }
-          const ParticleType& type_pi = incoming_particles_[idx_of_pi].type();
+          ParticleList::iterator it = std::find_if(incoming_particles_.begin(), incoming_particles_.end(), [](ParticleData x) {return x.is_pion();});
+          const ParticleType& type_pi = it->type();
 
           const int spin_factor_out = type_pi.spin_degeneracy() * type_anti_deuteron->spin_degeneracy();
           const double spin_degn =  static_cast<double>(spin_factor_out)/static_cast<double>(spin_factor_inc);
@@ -171,29 +160,22 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             (pdg_a == pdg::p && pdg_b == pdg::n && pdg_c.is_nucleon()) ||
             (pdg_a == pdg::n && pdg_b == pdg::p && pdg_c.is_nucleon())) {
 
-          int symmetry_factor = 2;  // for Nnp → Nd (2 factorial)
+          int symmetry_factor = 1; // already true for N̅np → N̅d case
 
-          std::size_t idx_of_N;  //TODO(stdnmr) gcc complains about that this might be used uninitialized
-          for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
-            // in case of N̅np → N̅d
-            if (incoming_particles_[i].pdgcode().antiparticle_sign() == -1) {
-              idx_of_N = i;
-              symmetry_factor = 1; // for N̅np → N̅d
-              break;
-            }
-            // in case of Nnp → Nd
-            // find particle type that is double, but not the same particle
-            // note: this actually finds the last particle that is double, since
-            // the `break` does not break the outter for loop
-            // (cant think of better way w/o using goto atm)
-            for (const auto &part_comp: incoming_particles_) {
-              if (!(incoming_particles_[i] == part_comp) && (incoming_particles_[i].type() == part_comp.type())) {
-                idx_of_N = i;
-                break;
-              }
+          ParticleList::iterator it = std::find_if(incoming_particles_.begin(), incoming_particles_.end(), [](ParticleData x) {return x.pdgcode().antiparticle_sign() == -1;});
+          if (it == incoming_particles_.end()) {
+            /* Meaning no anti-N found by find_if,
+             * therefore not N̅np → N̅d, but Nnp → Nd. */
+            symmetry_factor = 2;  // for Nnp → Nd (2 factorial)
+            // It is already clear here that we have a double of two N
+            if (pdg_a == pdg_b) {
+              it = incoming_particles_.begin();
+            } else {
+              // If a and b are not the double, then c has to be part of it
+              it = incoming_particles_.begin()+2;
             }
           }
-          const ParticleType& type_N = incoming_particles_[idx_of_N].type();
+          const ParticleType& type_N = it->type();
 
           const int spin_factor_out = type_N.spin_degeneracy() * type_deuteron->spin_degeneracy();
           const double spin_degn =  static_cast<double>(spin_factor_out)/static_cast<double>(spin_factor_inc);
@@ -213,29 +195,23 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             (pdg_a == -pdg::p && pdg_b == -pdg::n && pdg_c.is_nucleon()) ||
             (pdg_a == -pdg::n && pdg_b == -pdg::p && pdg_c.is_nucleon())) {
 
-          int symmetry_factor = 2;  // for N̅p̅n̅ → N̅d̅ (2 factorial)
+          int symmetry_factor = 1; // already true for Np̅n̅ → Nd̅ case
 
-          std::size_t idx_of_N;
-          for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
-            // in case of Np̅n̅ → Nd̅
-            if (incoming_particles_[i].pdgcode().antiparticle_sign() == 1) {
-              idx_of_N = i;
-              symmetry_factor = 1; // for Np̅n̅ → Nd̅
-              break;
-            }
-            // in case of N̅p̅n̅ → N̅d̅
-            // find particle type that is double, but not the same particle
-            // note: this actually finds the last particle that is double, since
-            // the `break` does not break the outter for loop
-            // (cant think of better way w/o using goto atm)
-            for (const auto &part_comp: incoming_particles_) {
-              if (!(incoming_particles_[i] == part_comp) && (incoming_particles_[i].type() == part_comp.type())) {
-                idx_of_N = i;
-                break;
-              }
+          ParticleList::iterator it = std::find_if(incoming_particles_.begin(), incoming_particles_.end(), [](ParticleData x) {return x.pdgcode().antiparticle_sign() == 1;});
+          if (it == incoming_particles_.end()) {
+            /* Meaning no N found by find_if,
+             * therefore not Np̅n̅ → Nd̅, but N̅p̅n̅ → N̅d̅. */
+            symmetry_factor = 2;  // for N̅p̅n̅ → N̅d̅ (2 factorial)
+            // It is already clear here that we have a double of two N̅
+            if (pdg_a == pdg_b) {
+              it = incoming_particles_.begin();
+            } else {
+              // If a and b are not the double, then c has to be part of it
+              it = incoming_particles_.begin()+2;
             }
           }
-          const ParticleType& type_N = incoming_particles_[idx_of_N].type();
+          const ParticleType& type_N = it->type();
+
 
           const int spin_factor_out = type_N.spin_degeneracy() * type_anti_deuteron->spin_degeneracy();
           const double spin_degn =  static_cast<double>(spin_factor_out)/static_cast<double>(spin_factor_inc);
