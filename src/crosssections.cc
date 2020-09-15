@@ -881,8 +881,6 @@ CollisionBranchList CrossSections::two_to_three() const {
           ProcessType::TwoToThree));
     }
   }
-
-  // TODO(stdnmr) Sensible Debug Output
   return process_list;
 }
 

@@ -108,8 +108,6 @@ void ScatterActionMulti::add_possible_reactions(double dt,
 
       if (type_deuteron && type_anti_deuteron) {
 
-        // TODO(stdnmr) Optimze ugly, lengthy if statements
-
         // πpn → πd
         if ((pdg_a.is_pion() && pdg_b == pdg::p && pdg_c == pdg::n) ||
             (pdg_a.is_pion() && pdg_b == pdg::n && pdg_c == pdg::p) ||
@@ -119,6 +117,7 @@ void ScatterActionMulti::add_possible_reactions(double dt,
             (pdg_a == pdg::n && pdg_b == pdg::p && pdg_c.is_pion())) {
 
           // Get type of incoming π
+          // TODO(stdnmr) Use std::find_if
           std::size_t idx_of_pi;
           for (std::size_t i = 0; i < incoming_particles_.size(); ++i) {
             if (incoming_particles_[i].is_pion()) {
