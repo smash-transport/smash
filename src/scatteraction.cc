@@ -83,7 +83,6 @@ void ScatterAction::generate_final_state() {
     case ProcessType::TwoToThree:
       /* 2->3 scattering */
       two_to_three_scattering();
-      // logg[LScatterAction].info("2->3 scattering:", incoming_particles_, " -> ", outgoing_particles_);
       break;
     case ProcessType::StringSoftSingleDiffractiveAX:
     case ProcessType::StringSoftSingleDiffractiveXB:
@@ -471,6 +470,7 @@ void ScatterAction::inelastic_scattering() {
 void ScatterAction::two_to_three_scattering() {
   sample_3body_phasespace();
   assign_formation_time_to_outgoing_particles();
+  logg[LScatterAction].debug("2->3 scattering:", incoming_particles_, " -> ", outgoing_particles_);
 }
 
 void ScatterAction::resonance_formation() {

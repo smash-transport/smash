@@ -248,7 +248,6 @@ void ScatterActionMulti::generate_final_state() {
     case ProcessType::MultiParticleThreeToTwo:
       /* 3->2 scattering */
       three_to_two();
-      // logg[LScatterActionMulti].info("3->2 scattering:", incoming_particles_, " -> ", outgoing_particles_);
       break;
     default:
       throw InvalidScatterActionMulti(
@@ -363,6 +362,8 @@ void ScatterActionMulti::three_to_two() {
   sample_2body_phasespace();
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
+  logg[LScatterActionMulti].debug("3->2 scattering:", incoming_particles_, " -> ", outgoing_particles_);
+
 }
 
 bool ScatterActionMulti::three_different_pions(
@@ -396,7 +397,6 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
          (pdg_a == pdg::pi_p && pdg_b == pdg::pi_m && pdg_c == pdg::eta) ||
          (pdg_a == pdg::pi_p && pdg_b == pdg::eta && pdg_c == pdg::pi_m);
 }
-
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
   out << "MultiParticleScatter of " << incoming_particles_;
