@@ -40,7 +40,7 @@ It requires the following tools & libraries:
 - the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
-- Pythia = 8.303
+- Pythia >= 8.302
 
 Support for ROOT and HepMC3 output is automatically enabled if a suitable version
  (ROOT >= 5.34, HepMC3 >= 3.1.2) is found on the system.
