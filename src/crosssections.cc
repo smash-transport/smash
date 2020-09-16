@@ -150,7 +150,8 @@ CollisionBranchList CrossSections::generate_collision_list(
   if (p_pythia < 1.) {
     if (two_to_one_switch) {
       // resonance formation (2->1)
-      append_list(process_list, two_to_one(include_two_to_three), 1. - p_pythia);
+      append_list(process_list, two_to_one(include_two_to_three),
+                  1. - p_pythia);
     }
     if (included_2to2.any()) {
       // 2->2 (inelastic)
@@ -695,7 +696,8 @@ double CrossSections::nk_el() const {
   }
 }
 
-CollisionBranchList CrossSections::two_to_one(const bool include_two_to_three) const {
+CollisionBranchList CrossSections::two_to_one(
+    const bool include_two_to_three) const {
   CollisionBranchList resonance_process_list;
   const ParticleType& type_particle_a = incoming_particles_[0].type();
   const ParticleType& type_particle_b = incoming_particles_[1].type();
@@ -834,32 +836,30 @@ CollisionBranchList CrossSections::two_to_three() const {
 
   if ((type_a.is_deuteron() && type_b.pdgcode().is_pion()) ||
       (type_b.is_deuteron() && type_a.pdgcode().is_pion())) {
+    const ParticleType& type_pi = type_a.pdgcode().is_pion() ? type_a : type_b;
+    const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
 
-      const ParticleType& type_pi = type_a.pdgcode().is_pion() ? type_a : type_b;
-      const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
+    if (type_nucleus.baryon_number() > 0) {
+      // πd → πpn
+      const auto& type_p = ParticleType::find(pdg::p);
+      const auto& type_n = ParticleType::find(pdg::n);
 
-      if (type_nucleus.baryon_number() > 0) {
-        // πd → πpn
-        const auto& type_p = ParticleType::find(pdg::p);
-        const auto& type_n = ParticleType::find(pdg::n);
+      process_list.push_back(make_unique<CollisionBranch>(
+          type_pi, type_p, type_n, two_to_three_xs(type_a, type_b, sqrt_s_),
+          ProcessType::TwoToThree));
+    } else {
+      // πd̅ → πp̅n̅
+      const auto& type_anti_p = ParticleType::find(-pdg::p);
+      const auto& type_anti_n = ParticleType::find(-pdg::n);
 
-        process_list.push_back(make_unique<CollisionBranch>(
-            type_pi, type_p, type_n, two_to_three_xs(type_a, type_b, sqrt_s_),
-            ProcessType::TwoToThree));
-      } else {
-        // πd̅ → πp̅n̅
-        const auto& type_anti_p = ParticleType::find(-pdg::p);
-        const auto& type_anti_n = ParticleType::find(-pdg::n);
-
-        process_list.push_back(make_unique<CollisionBranch>(
-            type_pi, type_anti_p, type_anti_n, two_to_three_xs(type_a, type_b, sqrt_s_),
-            ProcessType::TwoToThree));
-      }
+      process_list.push_back(make_unique<CollisionBranch>(
+          type_pi, type_anti_p, type_anti_n,
+          two_to_three_xs(type_a, type_b, sqrt_s_), ProcessType::TwoToThree));
+    }
   }
 
   if ((type_a.is_nucleon() && type_b.is_deuteron()) ||
       (type_b.is_nucleon() && type_a.is_deuteron())) {
-
     const ParticleType& type_N = type_a.is_nucleon() ? type_a : type_b;
     const ParticleType& type_nucleus = type_a.is_deuteron() ? type_a : type_b;
 
@@ -877,8 +877,8 @@ CollisionBranchList CrossSections::two_to_three() const {
       const auto& type_anti_n = ParticleType::find(-pdg::n);
 
       process_list.push_back(make_unique<CollisionBranch>(
-          type_N, type_anti_p, type_anti_n, two_to_three_xs(type_a, type_b, sqrt_s_),
-          ProcessType::TwoToThree));
+          type_N, type_anti_p, type_anti_n,
+          two_to_three_xs(type_a, type_b, sqrt_s_), ProcessType::TwoToThree));
     }
   }
   return process_list;
@@ -890,26 +890,34 @@ double CrossSections::two_to_three_xs(const ParticleType& type_a,
   double xsection = 0.0;
   bool is_dpi = (type_a.is_deuteron() && type_b.pdgcode().is_pion()) ||
                 (type_b.is_deuteron() && type_a.pdgcode().is_pion());
-  bool is_dn =  (type_a.is_nucleon() && type_b.is_nucleus()) ||
-                (type_b.is_nucleon() && type_a.is_nucleus());
+  bool is_dn = (type_a.is_nucleon() && type_b.is_nucleus()) ||
+               (type_b.is_nucleon() && type_a.is_nucleus());
 
   if (is_dpi || is_dn) {
     /* The cross section is parametrized using the d' resonance pole mass and
      * width. To be consitent with the two-step treatment employing the d',
      * the same parametrization is used for 2-to-3 case. */
-    const ParticleTypePtr type_dprime = ParticleType::try_find(PdgCode::from_decimal(1000010021));
+    const ParticleTypePtr type_dprime =
+        ParticleType::try_find(PdgCode::from_decimal(1000010021));
     if (!type_dprime) {
-      throw std::invalid_argument("d' (pdg: 1000010021) resonance not found in particles.txt.\nThe resonance is required for the cross section calculation of 2->3 scatterings involing deuterons.");
+      throw std::invalid_argument(
+          "d' (pdg: 1000010021) resonance not found in particles.txt.\nThe "
+          "resonance is required for the cross section calculation of 2->3 "
+          "scatterings involing deuterons.");
     }
 
     if (is_dpi) {
-      const ParticleType& type_pi = type_a.pdgcode().is_pion() ? type_a : type_b;
-      xsection = xs_dpi_dprimepi(sqrts, pCM(sqrts, type_a.mass(), type_b.mass()), type_dprime, type_pi);
+      const ParticleType& type_pi =
+          type_a.pdgcode().is_pion() ? type_a : type_b;
+      xsection =
+          xs_dpi_dprimepi(sqrts, pCM(sqrts, type_a.mass(), type_b.mass()),
+                          type_dprime, type_pi);
     }
     if (is_dn) {
       const ParticleType& type_N = type_a.is_nucleon() ? type_a : type_b;
       const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
-      xsection = xs_dn_dprimen(sqrts, pCM(sqrts, type_a.mass(), type_b.mass()), type_dprime, type_nucleus, type_N);
+      xsection = xs_dn_dprimen(sqrts, pCM(sqrts, type_a.mass(), type_b.mass()),
+                               type_dprime, type_nucleus, type_N);
     }
   }
   return xsection;
@@ -2003,7 +2011,9 @@ CollisionBranchList CrossSections::ypi_xx(ReactionsBitSet included_2to2) const {
   return process_list;
 }
 
-double CrossSections::xs_dpi_dprimepi(const double sqrts, const double cm_mom, ParticleTypePtr produced_nucleus, const ParticleType& type_pi) {
+double CrossSections::xs_dpi_dprimepi(const double sqrts, const double cm_mom,
+                                      ParticleTypePtr produced_nucleus,
+                                      const ParticleType& type_pi) {
   const double s = sqrts * sqrts;
   // same matrix element for πd and πd̅
   const double tmp = sqrts - pion_mass - deuteron_mass;
@@ -2021,10 +2031,8 @@ double CrossSections::xs_dpi_dprimepi(const double sqrts, const double cm_mom, P
    * The (hbarc)^2/16 pi factor is absorbed into matrix element. */
   double xsection = matrix_element * spin_factor / (s * cm_mom);
   if (produced_nucleus->is_stable()) {
-    assert(!type_nucleus.is_stable());
     xsection *= pCM_from_s(s, type_pi.mass(), produced_nucleus->mass());
   } else {
-    assert(type_nucleus.is_stable());
     const double resonance_integral =
         produced_nucleus->iso_multiplet()->get_integral_piR(sqrts);
     xsection *= resonance_integral;
@@ -2112,7 +2120,8 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet included_2to2) const {
           produced_nucleus->baryon_number() != type_nucleus.baryon_number()) {
         continue;
       }
-      const double xsection = xs_dpi_dprimepi(sqrts, cm_momentum(), produced_nucleus, type_pi);
+      const double xsection =
+          xs_dpi_dprimepi(sqrts, cm_momentum(), produced_nucleus, type_pi);
       process_list.push_back(make_unique<CollisionBranch>(
           type_pi, *produced_nucleus, xsection, ProcessType::TwoToTwo));
       logg[LScatterAction].debug(type_pi.name(), type_nucleus.name(), "→ ",
@@ -2123,7 +2132,10 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet included_2to2) const {
   return process_list;
 }
 
-double CrossSections::xs_dn_dprimen(const double sqrts, const double cm_mom, ParticleTypePtr produced_nucleus, const ParticleType& type_nucleus, const ParticleType& type_N) {
+double CrossSections::xs_dn_dprimen(const double sqrts, const double cm_mom,
+                                    ParticleTypePtr produced_nucleus,
+                                    const ParticleType& type_nucleus,
+                                    const ParticleType& type_N) {
   const double s = sqrts * sqrts;
   double matrix_element = 0.0;
   double tmp = sqrts - nucleon_mass - deuteron_mass;
@@ -2176,7 +2188,8 @@ CollisionBranchList CrossSections::dn_xx(ReactionsBitSet included_2to2) const {
         produced_nucleus->baryon_number() != type_nucleus.baryon_number()) {
       continue;
     }
-    const double xsection = xs_dn_dprimen(sqrt_s_, cm_momentum(), produced_nucleus, type_nucleus, type_N);
+    const double xsection = xs_dn_dprimen(
+        sqrt_s_, cm_momentum(), produced_nucleus, type_nucleus, type_N);
     process_list.push_back(make_unique<CollisionBranch>(
         type_N, *produced_nucleus, xsection, ProcessType::TwoToTwo));
     logg[LScatterAction].debug(type_N.name(), type_nucleus.name(), "→ ",

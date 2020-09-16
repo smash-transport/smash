@@ -452,7 +452,9 @@ class CrossSections {
    * \param[in] type_pi type of scattering pion
    * \return cross section for given scattering
    */
-  static double xs_dpi_dprimepi(const double sqrts, const double cm_mom, ParticleTypePtr produced_nucleus, const ParticleType& type_pi);
+  static double xs_dpi_dprimepi(const double sqrts, const double cm_mom,
+                                ParticleTypePtr produced_nucleus,
+                                const ParticleType& type_pi);
 
   /**
    * Parametrized cross section for Nd → Nd', N̅d →  N̅d', N̅d̅→ N̅d̅', Nd̅→ Nd̅' and
@@ -464,7 +466,10 @@ class CrossSections {
    * \param[in] type_N type of scattering nucleon
    * \return cross section for given scattering
    */
-  static double xs_dn_dprimen(const double sqrts, const double cm_mom, ParticleTypePtr produced_nucleus, const ParticleType& type_nucleus, const ParticleType& type_N);
+  static double xs_dn_dprimen(const double sqrts, const double cm_mom,
+                              ParticleTypePtr produced_nucleus,
+                              const ParticleType& type_nucleus,
+                              const ParticleType& type_N);
 
   /**
    * Determine the (parametrized) hard non-diffractive string cross section
