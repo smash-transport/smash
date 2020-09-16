@@ -95,7 +95,7 @@ install:
   - cd $SMASH_ROOT
   - mkdir build
   - cd build
-  - cmake -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8302/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.5/ -DGSL_ROOT_DIR=$GSL ..
+  - cmake -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.5/ -DGSL_ROOT_DIR=$GSL ..
   - make -j$(nproc)
 
 script:
