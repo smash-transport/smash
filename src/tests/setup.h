@@ -255,7 +255,9 @@ inline ExperimentParameters default_parameters(int testparticles = 1,
                               false,  // string_with_probability
                               NNbarTreatment::NoAnnihilation,
                               0.,      // low energy sigma_NN cut-off
-                              false};  // potential_affect_threshold
+                              false,  // potential_affect_threshold
+                              -1.0    // box_length
+                              };
 }
 
 /// Creates default EventInfo object for testing purposes

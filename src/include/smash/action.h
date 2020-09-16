@@ -331,6 +331,13 @@ class Action {
   /// type of process
   ProcessType process_type_;
 
+  /**
+   * Box length: needed to determine coordinates of collision
+   * correctly in case of collision through the wall.
+   * Ignored if negative.
+   */
+  double box_length_ = -1.0;
+
   /// Sum of 4-momenta of incoming particles
   FourVector total_momentum() const {
     FourVector mom(0.0, 0.0, 0.0, 0.0);

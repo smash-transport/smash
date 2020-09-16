@@ -346,6 +346,11 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // remove config maps of unused Modi
   config["Modi"].remove_all_but(modus_chooser);
 
+  double box_length = -1.0;
+  if (config.has_value({"Box", "Length"})) {
+    box_length = config.read({"Box", "Length"});
+  }
+
   /* If this Delta_Time option is absent (this can be for timestepless mode)
    * just assign 1.0 fm/c, reasonable value will be set at event initialization
    */
@@ -452,7 +457,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           config_coll.take({"Strings_with_Probability"}, true),
           config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
           low_snn_cut,
-          potential_affect_threshold};
+          potential_affect_threshold,
+          box_length};
 }
 
 std::string format_measurements(const Particles &particles,

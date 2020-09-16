@@ -284,6 +284,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       use_AQM_(parameters.use_AQM),
       strings_with_probability_(parameters.strings_with_probability),
       nnbar_treatment_(parameters.nnbar_treatment),
+      box_length_(parameters.box_length),
       nucleon_has_interacted_(nucleon_has_interacted),
       N_tot_(N_tot),
       N_proj_(N_proj),
@@ -361,7 +362,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
 
   // Create ScatterAction object.
   ScatterActionPtr act = make_unique<ScatterAction>(
-      data_a, data_b, time_until_collision, isotropic_, string_formation_time_);
+      data_a, data_b, time_until_collision, isotropic_, string_formation_time_,
+      box_length_);
 
   if (strings_switch_) {
     act->set_string_interface(string_process_interface_.get());
