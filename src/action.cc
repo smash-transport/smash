@@ -73,6 +73,13 @@ FourVector Action::get_interaction_point() const {
     interaction_point += part.position();
   }
   interaction_point /= incoming_particles_.size();
+  for (const auto &part : incoming_particles_) {
+    if (std::abs(part.position().x1() - interaction_point.x1()) > 4.0) {
+      std::cout << part.type().name() << ": x = "
+                << part.position().x1() << ", interaction at x = "
+                << interaction_point.x1() << std::endl;
+    }
+  }
   return interaction_point;
 }
 
