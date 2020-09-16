@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_QUANTUMNUMBERS_H_
-#define SRC_INCLUDE_QUANTUMNUMBERS_H_
+#ifndef SRC_INCLUDE_SMASH_QUANTUMNUMBERS_H_
+#define SRC_INCLUDE_SMASH_QUANTUMNUMBERS_H_
 
 #include <string>
 
@@ -318,4 +318,4 @@ class QuantumNumbers {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_QUANTUMNUMBERS_H_
+#endif  // SRC_INCLUDE_SMASH_QUANTUMNUMBERS_H_

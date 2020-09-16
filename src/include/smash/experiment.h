@@ -4,12 +4,14 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_EXPERIMENT_H_
-#define SRC_INCLUDE_EXPERIMENT_H_
+#ifndef SRC_INCLUDE_SMASH_EXPERIMENT_H_
+#define SRC_INCLUDE_SMASH_EXPERIMENT_H_
 
+#include <algorithm>
 #include <limits>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "actionfinderfactory.h"
@@ -1240,7 +1242,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * The following example configures the lattice with the origin in (0,0,0),
    * 20 cells of 10 fm size in each direction and with periodic boundary
    * conditions. The potential effects on the thresholds are taken into
-   * consideration.
+   * consideration. Note that, as the origin is by definition the left down near
+   * corner of the cell, center is located at (5, 5, 5).
    *
    *\verbatim
    Lattice:
@@ -2201,4 +2204,4 @@ void Experiment<Modus>::run() {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_EXPERIMENT_H_
+#endif  // SRC_INCLUDE_SMASH_EXPERIMENT_H_

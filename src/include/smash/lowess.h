@@ -11,8 +11,8 @@
  *    Copyright (c) 1999-2001 Robert Gentleman, Ross Ihaka and the R
  *                            Development Core Team
  */
-#ifndef SRC_INCLUDE_LOWESS_H_
-#define SRC_INCLUDE_LOWESS_H_
+#ifndef SRC_INCLUDE_SMASH_LOWESS_H_
+#define SRC_INCLUDE_SMASH_LOWESS_H_
 
 #include <algorithm>
 #include <cassert>
@@ -302,4 +302,4 @@ std::vector<T> smooth(const std::vector<T> &x, const std::vector<T> &y,
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_LOWESS_H_
+#endif  // SRC_INCLUDE_SMASH_LOWESS_H_

@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_DECAYMODES_H_
-#define SRC_INCLUDE_DECAYMODES_H_
+#ifndef SRC_INCLUDE_SMASH_DECAYMODES_H_
+#define SRC_INCLUDE_SMASH_DECAYMODES_H_
 
 #include <stdexcept>
 #include <string>
@@ -134,4 +134,4 @@ class DecayModes {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_DECAYMODES_H_
+#endif  // SRC_INCLUDE_SMASH_DECAYMODES_H_

@@ -99,7 +99,7 @@ TEST(particlelist_format) {
           " initial conditions: hypersurface of constant proper time\n"
           "# tau x y eta mt px py Rap pdg charge\n"
           "# fm fm fm none GeV GeV GeV none none e\n"
-          "# event 1 start\n";
+          "# event 0 start\n";
       int line_number = 0;
       do {
         line_number++;

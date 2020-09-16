@@ -54,45 +54,8 @@ TEST(one_dim_result_conversion_to_value) {
 }
 
 // test two-dimensional Monte-Carlo integration
-
 TEST(two_dim) {
   smash::Integrator2d integrate;
-  /* Here the errors are statistical. We check that the values agree within
-   * 4 sigma. It is very unlikely that they lie outside the 4 sigma band. */
-  constexpr int Nsigma = 4;
-  // constant integrand
-  for (int i = 0; i < 10; ++i) {
-    const auto result =
-        integrate(0, i, 0, i, [](double, double) { return 1.; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), double(i * i),
-                           Nsigma* result.error());
-  }
-  // linear only in one dim
-  for (int i = 0; i < 10; ++i) {
-    const auto result =
-        integrate(0, i, 0, i, [](double x, double) { return x; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * i * 0.5,
-                           Nsigma * result.error());
-  }
-  // linear in both dims (factorizable)
-  for (int i = 0; i < 10; ++i) {
-    const auto result =
-        integrate(0, i, 0, i, [](double x, double y) { return x * y; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * i * i * 0.25,
-                           Nsigma * result.error());
-  }
-  // non-factorizable
-  for (int i = 0; i < 10; ++i) {
-    const auto result = integrate(
-        0, i, 0, i, [](double x, double y) { return std::sqrt(x + y); });
-    COMPARE_ABSOLUTE_ERROR(
-        result.value(), 8. / 15. * (2. * std::sqrt(2.) - 1.) * pow(i, 5. / 2.),
-        Nsigma * result.error());
-  }
-}
-
-TEST(two_dim_cuhre) {
-  smash::Integrator2dCuhre integrate;
   /* Here the errors are statistical. We check that the values agree within
    * 4 sigma. It is very unlikely that they lie outside the 4 sigma band. */
   constexpr int Nsigma = 4;

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_PAULIBLOCKING_H_
-#define SRC_INCLUDE_PAULIBLOCKING_H_
+#ifndef SRC_INCLUDE_SMASH_PAULIBLOCKING_H_
+#define SRC_INCLUDE_SMASH_PAULIBLOCKING_H_
 
 #include "configuration.h"
 #include "experimentparameters.h"
@@ -92,4 +92,4 @@ class PauliBlocker {
 };
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_PAULIBLOCKING_H_
+#endif  // SRC_INCLUDE_SMASH_PAULIBLOCKING_H_

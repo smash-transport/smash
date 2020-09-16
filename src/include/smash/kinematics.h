@@ -5,8 +5,8 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#ifndef SRC_INCLUDE_KINEMATICS_H_
-#define SRC_INCLUDE_KINEMATICS_H_
+#ifndef SRC_INCLUDE_SMASH_KINEMATICS_H_
+#define SRC_INCLUDE_SMASH_KINEMATICS_H_
 
 #include <array>
 #include <cassert>
@@ -227,4 +227,4 @@ inline double s_from_plab(double plab, double m_P, double m_T) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_KINEMATICS_H_
+#endif  // SRC_INCLUDE_SMASH_KINEMATICS_H_

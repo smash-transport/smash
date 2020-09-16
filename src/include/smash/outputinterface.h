@@ -7,9 +7,10 @@
  *
  */
 
-#ifndef SRC_INCLUDE_OUTPUTINTERFACE_H_
-#define SRC_INCLUDE_OUTPUTINTERFACE_H_
+#ifndef SRC_INCLUDE_SMASH_OUTPUTINTERFACE_H_
+#define SRC_INCLUDE_SMASH_OUTPUTINTERFACE_H_
 
+#include <memory>
 #include <string>
 
 #include "density.h"
@@ -236,4 +237,4 @@ class OutputInterface {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_OUTPUTINTERFACE_H_
+#endif  // SRC_INCLUDE_SMASH_OUTPUTINTERFACE_H_

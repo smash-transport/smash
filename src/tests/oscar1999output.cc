@@ -139,7 +139,7 @@ TEST(fullhistory_format) {
       outputfile >> item;
       COMPARE(std::stoul(item), 2u);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id + 1);
+      COMPARE(std::atoi(item.c_str()), event_id);
       /* Check initial particle data lines item by item */
       for (const ParticleData &data : action->incoming_particles()) {
         std::array<std::string, 12> datastring;
@@ -175,7 +175,7 @@ TEST(fullhistory_format) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 0);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id + 1);
+      COMPARE(std::atoi(item.c_str()), event_id);
       for (ParticleData &data : particles) {
         std::array<std::string, 12> datastring;
         for (int j = 0; j < 12; j++) {
@@ -189,7 +189,7 @@ TEST(fullhistory_format) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 0);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id + 1);
+      COMPARE(std::atoi(item.c_str()), event_id);
       outputfile >> item;
       COMPARE(std::stod(item.c_str()), impact_parameter);
     }
@@ -268,7 +268,7 @@ TEST(particlelist_format) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 0);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id + 1);
+      COMPARE(std::atoi(item.c_str()), event_id);
 
       for (ParticleData &data : particles) {
         std::array<std::string, 12> datastring;
@@ -283,7 +283,7 @@ TEST(particlelist_format) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 0);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id + 1);
+      COMPARE(std::atoi(item.c_str()), event_id);
       outputfile >> item;
       COMPARE(std::stod(item.c_str()), impact_parameter);
     }
@@ -359,7 +359,7 @@ TEST(initial_conditions_format) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 1);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id + 1);
+      COMPARE(std::atoi(item.c_str()), event_id);
 
       for (const ParticleData &data : action->incoming_particles()) {
         std::array<std::string, 12> datastring;
@@ -374,7 +374,7 @@ TEST(initial_conditions_format) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 0);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id + 1);
+      COMPARE(std::atoi(item.c_str()), event_id);
       outputfile >> item;
       COMPARE(std::stod(item.c_str()), impact_parameter);
     }

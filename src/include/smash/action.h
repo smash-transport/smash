@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_ACTION_H_
-#define SRC_INCLUDE_ACTION_H_
+#ifndef SRC_INCLUDE_SMASH_ACTION_H_
+#define SRC_INCLUDE_SMASH_ACTION_H_
 
 #include <stdexcept>
 #include <utility>
@@ -502,4 +502,4 @@ std::ostream &operator<<(std::ostream &out, const ActionList &actions);
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_ACTION_H_
+#endif  // SRC_INCLUDE_SMASH_ACTION_H_

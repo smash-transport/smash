@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_THERMALIZATIONACTION_H_
-#define SRC_INCLUDE_THERMALIZATIONACTION_H_
+#ifndef SRC_INCLUDE_SMASH_THERMALIZATIONACTION_H_
+#define SRC_INCLUDE_SMASH_THERMALIZATIONACTION_H_
 
 #include "action.h"
 #include "grandcan_thermalizer.h"
@@ -52,4 +52,4 @@ class ThermalizationAction : public Action {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_THERMALIZATIONACTION_H_
+#endif  // SRC_INCLUDE_SMASH_THERMALIZATIONACTION_H_

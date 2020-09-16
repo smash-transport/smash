@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_GRANDCAN_THERMALIZER_H_
-#define SRC_INCLUDE_GRANDCAN_THERMALIZER_H_
+#ifndef SRC_INCLUDE_SMASH_GRANDCAN_THERMALIZER_H_
+#define SRC_INCLUDE_SMASH_GRANDCAN_THERMALIZER_H_
 
 #include <memory>
 #include <vector>
@@ -65,7 +65,7 @@ class ThermLatticeNode {
    */
   void add_particle(const ParticleData& p, double factor);
   /// dummy function for update_lattice
-  void add_particle_for_derivatives(const ParticleData&, double, ThreeVector){};
+  void add_particle_for_derivatives(const ParticleData&, double, ThreeVector) {}
   /**
    * Temperature, chemical potentials and rest frame velocity are
    * calculated given the hadron gas equation of state object
@@ -536,4 +536,4 @@ class GrandCanThermalizer {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_GRANDCAN_THERMALIZER_H_
+#endif  // SRC_INCLUDE_SMASH_GRANDCAN_THERMALIZER_H_

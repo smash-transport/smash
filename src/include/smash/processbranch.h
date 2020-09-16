@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_PROCESSBRANCH_H_
-#define SRC_INCLUDE_PROCESSBRANCH_H_
+#ifndef SRC_INCLUDE_SMASH_PROCESSBRANCH_H_
+#define SRC_INCLUDE_SMASH_PROCESSBRANCH_H_
 
 #include <iostream>
 #include <memory>
@@ -351,4 +351,4 @@ class DecayBranch : public ProcessBranch {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_PROCESSBRANCH_H_
+#endif  // SRC_INCLUDE_SMASH_PROCESSBRANCH_H_

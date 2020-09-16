@@ -92,10 +92,11 @@ std::unique_ptr<std::ifstream> CustomNucleus::filestream_shared_ = nullptr;
 CustomNucleus::CustomNucleus(Configuration& config, int testparticles,
                              bool same_file) {
   // Read in file directory from config
-  std::string particle_list_file_directory =
+  const std::string particle_list_file_directory =
       config.take({"Custom", "File_Directory"});
   // Read in file name from config
-  std::string particle_list_file_name = config.take({"Custom", "File_Name"});
+  const std::string particle_list_file_name =
+      config.take({"Custom", "File_Name"});
 
   if (particles_.size() != 0) {
     throw std::runtime_error(
@@ -111,8 +112,18 @@ CustomNucleus::CustomNucleus(Configuration& config, int testparticles,
    * nucleus as one does not want to read configurations twice.
    */
   std::map<PdgCode, int> particle_list = config.take({"Particles"});
-  for (const auto& particle : particle_list)
-    number_of_nucleons_ += particle.second * testparticles;
+  for (const auto& particle : particle_list) {
+    if (particle.first == pdg::p) {
+      number_of_protons_ = particle.second * testparticles;
+    } else if (particle.first == pdg::n) {
+      number_of_neutrons_ = particle.second * testparticles;
+    } else {
+      throw std::runtime_error(
+          "Your nucleus can only contain protons and/or neutrons."
+          "Please check what particles you have specified in the config");
+    }
+    number_of_nucleons_ = number_of_protons_ + number_of_neutrons_;
+  }
   /*
    * "if" statement makes sure the streams to the file are initialized
    * properly.
@@ -129,7 +140,7 @@ CustomNucleus::CustomNucleus(Configuration& config, int testparticles,
     used_filestream_ = &filestream_shared_;
   }
 
-  custom_nucleus_ = readfile(**used_filestream_, number_of_nucleons_);
+  custom_nucleus_ = readfile(**used_filestream_);
   fill_from_list(custom_nucleus_);
   // Inherited from nucleus class (see nucleus.h)
   set_parameters_automatic();
@@ -137,7 +148,7 @@ CustomNucleus::CustomNucleus(Configuration& config, int testparticles,
 
 void CustomNucleus::fill_from_list(const std::vector<Nucleoncustom>& vec) {
   particles_.clear();
-  index = 0;
+  index_ = 0;
   // checking if particle is proton or neutron
   for (const auto& it : vec) {
     PdgCode pdgcode;
@@ -147,7 +158,7 @@ void CustomNucleus::fill_from_list(const std::vector<Nucleoncustom>& vec) {
       pdgcode = pdg::n;
     } else {
       throw std::runtime_error(
-          "Your particles charges are not 1 = proton or 0 = neutron."
+          "Your particles charges are not 1 = proton or 0 = neutron.\n"
           "Check whether your list is correct or there is an error.");
     }
     // setting parameters for the particles in the particlelist in smash
@@ -166,12 +177,12 @@ ThreeVector CustomNucleus::distribute_nucleon() {
    * called twice to initialize the first target and projectile.
    * Therefore this if statement is implemented.
    */
-  if (index >= custom_nucleus_.size()) {
-    custom_nucleus_ = readfile(**used_filestream_, number_of_nucleons_);
+  if (index_ >= custom_nucleus_.size()) {
+    custom_nucleus_ = readfile(**used_filestream_);
     fill_from_list(custom_nucleus_);
   }
-  const auto& pos = custom_nucleus_.at(index);
-  index++;
+  const auto& pos = custom_nucleus_.at(index_);
+  index_++;
   ThreeVector nucleon_position(pos.x, pos.y, pos.z);
   // rotate nucleon about euler angle
   nucleon_position.rotate(euler_phi_, euler_theta_, euler_psi_);
@@ -181,7 +192,7 @@ ThreeVector CustomNucleus::distribute_nucleon() {
 
 void CustomNucleus::arrange_nucleons() {
   /* Randomly generate Euler angles for rotation everytime a new
-   * custom nucleus is initialiezed. Therefore this is done 2 times per
+   * custom nucleus is initialized. Therefore this is done 2 times per
    * event.
    */
   Nucleus::random_euler_angles();
@@ -216,13 +227,14 @@ std::string CustomNucleus::file_path(const std::string& file_directory,
   }
 }
 
-std::vector<Nucleoncustom> CustomNucleus::readfile(std::ifstream& infile,
-                                                   int particle_number) const {
-  int A = particle_number;
+std::vector<Nucleoncustom> CustomNucleus::readfile(
+    std::ifstream& infile) const {
+  int proton_counter = 0;
+  int neutron_counter = 0;
   std::string line;
   std::vector<Nucleoncustom> custom_nucleus;
   // read in only A particles for one nucleus
-  for (int i = 0; i < A; ++i) {
+  for (int i = 0; i < number_of_nucleons_; ++i) {
     std::getline(infile, line);
     // make sure the stream goes back to the beginning when it hits end of file
     if (infile.eof()) {
@@ -236,13 +248,25 @@ std::vector<Nucleoncustom> CustomNucleus::readfile(std::ifstream& infile,
           nucleon.spinprojection >> nucleon.isospin)) {
       throw std::runtime_error(
           "SMASH could not read in a line from your initial nuclei input file."
-          "Check if your file has the following format: x y z spinprojection "
-          "isospin");
-      break;
+          "\nCheck if your file has the following format: x y z "
+          "spinprojection isospin");
+    }
+    if (nucleon.isospin == 1) {
+      proton_counter++;
+    } else if (nucleon.isospin == 0) {
+      neutron_counter++;
     }
     custom_nucleus.push_back(nucleon);
   }
-  return custom_nucleus;
+  if (proton_counter != number_of_protons_ ||
+      neutron_counter != number_of_neutrons_) {
+    throw std::runtime_error(
+        "Number of protons and/or neutrons in the nuclei input file does not "
+        "correspond to the number specified in the config.\nCheck the config "
+        "and your input file.");
+  } else {
+    return custom_nucleus;
+  }
 }
 
 }  // namespace smash

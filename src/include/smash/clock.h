@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_CLOCK_H_
-#define SRC_INCLUDE_CLOCK_H_
+#ifndef SRC_INCLUDE_SMASH_CLOCK_H_
+#define SRC_INCLUDE_SMASH_CLOCK_H_
 
 #include <algorithm>
 #include <cmath>
@@ -16,6 +16,7 @@
 #include <cstdio>
 #include <limits>
 #include <stdexcept>
+#include <vector>
 
 #include "logging.h"
 
@@ -320,7 +321,7 @@ class CustomClock : public Clock {
    *
    * \param[in] times vector of desired output times
    */
-  CustomClock(std::vector<double> times) : custom_times_(times) {
+  explicit CustomClock(std::vector<double> times) : custom_times_(times) {
     std::sort(custom_times_.begin(), custom_times_.end());
     counter_ = -1;
   }
@@ -329,17 +330,24 @@ class CustomClock : public Clock {
    * \throw runtime_error if the clock has never been advanced
    */
   double current_time() const override {
-    if (counter_ < 0) {
+    if (counter_ == -1) {
+      // current time before the first output should be the starting time
+      return start_time_;
+    } else if (counter_ < -1) {
       throw std::runtime_error("Trying to access undefined zeroth output time");
+    } else {
+      return custom_times_[counter_];
     }
-    return custom_times_[counter_];
   }
   /// \copydoc Clock::next_time
   double next_time() const override { return custom_times_[counter_ + 1]; }
   double timestep_duration() const override {
     return next_time() - current_time();
   }
-  void reset(double, bool) override { counter_ = -1; }
+  void reset(double start_time, bool) override {
+    counter_ = -1;
+    start_time_ = start_time;
+  }
 
   /**
    * Remove all custom times before start_time.
@@ -349,7 +357,7 @@ class CustomClock : public Clock {
   void remove_times_in_past(double start_time) override {
     std::remove_if(custom_times_.begin(), custom_times_.end(),
                    [start_time](double t) {
-                     if (t <= start_time) {
+                     if (t < start_time) {
                        logg[LClock].warn("Removing custom output time ", t,
                                          " fm since it is earlier than the "
                                          "starting time of the simulation");
@@ -363,7 +371,9 @@ class CustomClock : public Clock {
  private:
   /// Vector of times where output is generated
   std::vector<double> custom_times_;
+  /// Starting time of the simulation
+  double start_time_ = 0.;
 };
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_CLOCK_H_
+#endif  // SRC_INCLUDE_SMASH_CLOCK_H_

@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_DECAYACTION_H_
-#define SRC_INCLUDE_DECAYACTION_H_
+#ifndef SRC_INCLUDE_SMASH_DECAYACTION_H_
+#define SRC_INCLUDE_SMASH_DECAYACTION_H_
 
 #include <utility>
 
@@ -108,4 +108,4 @@ class DecayAction : public Action {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_DECAYACTION_H_
+#endif  // SRC_INCLUDE_SMASH_DECAYACTION_H_

@@ -34,14 +34,14 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \page input_collision_term_ Collision_Term
  * \key Collision_Criterion (string, optional, default = "Geometric") \n
  * Choose collision criterion. Be aware that the stochastic criterion is only
- * applicable within limits. Most notably, it might not lead reasonable results
- * for very dilute systems like e.g. pp collisions.
+ * applicable within limits. Most notably, it might not lead to reasonable
+ * results for very dilute systems like e.g. pp collisions.
  * \li \key "Geometric" - Geometric collision criterion
- * \li \key "Stochastic" - Stochastic collision criterion see e.g. A. Lang, H.
- * Babovsky, W. Cassing, U. Mosel, H. G. Reusch, and K. Weber, J. Comp. Phys.
- * 106, 391 (1993).
- * \li \key "Covariant" - Covariant collision criterion see e.g. T. Hirano and
- * Y. Nara, PTEP Issue 1, 16 (2012).
+ * \li \key "Stochastic" - Stochastic collision criterion
+ * \li \key "Covariant" - Covariant collision criterion
+ *
+ * For further information about the different collision criteria see
+ * \subpage collision_criterion
  *
  * \key Include_2to3 (bool, optional, default = \key false) \n
  * Enable 2 <--> 3 forward and backward reactions via the stochastic criterion.
@@ -174,6 +174,28 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * popcorn mesons in string fragmentation.
  * It is possible to produce a popcorn meson from the diquark end of a string
  * with certain probability (i.e., diquark to meson + diquark).
+ *
+ * \page collision_criterion Collision Criterion
+ * \key "Geometric" - Geometric collision criterion \n
+ * The geometric collision criterion calculates the two-particle impact
+ * parameter as the closest approach distance in the two-particle
+ * center-of-momentum frame by boosting to the respective frame. The collision
+ * time used for the ordering is calculated as the time of the closest approach
+ * in the computational frame. \n For further details, see \iref{Bass:1998ca}.
+ *
+ * \key "Stochastic" - Stochastic collision criterion \n
+ * The stochastic collision criterion employs a probability to decide whether
+ * particles collide inside a given grid cell. The probability is derived
+ * directly from the scattering rate given by the Boltzmann equation. \n
+ * For more details, see e.g. Lang et al. (1993) \cite Lang1993.
+ *
+ * \key "Covariant" - Covariant collision criterion \n
+ * The covariant collision criterion uses a covariant expression of the
+ * two-particle impact parameter in the two-particle center-of-momentum frame,
+ * which allows for its calculation in the computational frame without boosting.
+ * Furthermore, it calculates the collision times used for the collision
+ * ordering in the two-particle center-of-momentum frame. \n
+ * Further details are described in \iref{Hirano:2012yy}.
  *
  * \page input_collision_term_ Collision_Term
  * \n
@@ -345,7 +367,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     act->set_string_interface(string_process_interface_.get());
   }
 
-  // Distance squared calculation only needed for geometric criterion
+  // Distance squared calculation not needed for stochastic criterion
   const double distance_squared =
       (coll_crit_ == CollisionCriterion::Geometric)
           ? act->transverse_distance_sqr()
@@ -353,8 +375,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
                 ? act->cov_transverse_distance_sqr()
                 : 0.0;
 
-  // Don't calculate cross section if the particles are very far apart for
-  // geometric criterion.
+  // Don't calculate cross section if the particles are very far apart.
+  // Not needed for stochastic criterion because of cell structure.
   if (coll_crit_ != CollisionCriterion::Stochastic &&
       distance_squared >= max_transverse_distance_sqr(testparticles_)) {
     return nullptr;

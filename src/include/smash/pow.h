@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_POW_H_
-#define SRC_INCLUDE_POW_H_
+#ifndef SRC_INCLUDE_SMASH_POW_H_
+#define SRC_INCLUDE_SMASH_POW_H_
 
 namespace smash {
 
@@ -41,4 +41,4 @@ inline constexpr T square(const T base) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_POW_H_
+#endif  // SRC_INCLUDE_SMASH_POW_H_

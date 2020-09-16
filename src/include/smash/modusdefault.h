@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_MODUSDEFAULT_H_
-#define SRC_INCLUDE_MODUSDEFAULT_H_
+#ifndef SRC_INCLUDE_SMASH_MODUSDEFAULT_H_
+#define SRC_INCLUDE_SMASH_MODUSDEFAULT_H_
 
 #include <memory>
 
@@ -195,4 +195,4 @@ class ModusDefault {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_MODUSDEFAULT_H_
+#endif  // SRC_INCLUDE_SMASH_MODUSDEFAULT_H_

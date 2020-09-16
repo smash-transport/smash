@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_INTERPOLATION_H_
-#define SRC_INCLUDE_INTERPOLATION_H_
+#ifndef SRC_INCLUDE_SMASH_INTERPOLATION_H_
+#define SRC_INCLUDE_SMASH_INTERPOLATION_H_
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_spline.h>
@@ -293,4 +293,4 @@ class InterpolateDataSpline {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_INTERPOLATION_H_
+#endif  // SRC_INCLUDE_SMASH_INTERPOLATION_H_

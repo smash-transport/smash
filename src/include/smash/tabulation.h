@@ -5,8 +5,8 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#ifndef SRC_INCLUDE_TABULATION_H_
-#define SRC_INCLUDE_TABULATION_H_
+#ifndef SRC_INCLUDE_SMASH_TABULATION_H_
+#define SRC_INCLUDE_SMASH_TABULATION_H_
 
 #include <fstream>
 #include <functional>
@@ -208,7 +208,7 @@ inline Tabulation spectral_integral_semistable(Integrator& integrate,
  * \param[in] range Distance between tabulation points [GeV].
  * \return Tabulation of the given integral.
  */
-inline Tabulation spectral_integral_unstable(Integrator2dCuhre& integrate2d,
+inline Tabulation spectral_integral_unstable(Integrator2d& integrate2d,
                                              const ParticleType& res1,
                                              const ParticleType& res2,
                                              double range) {
@@ -226,4 +226,4 @@ inline Tabulation spectral_integral_unstable(Integrator2dCuhre& integrate2d,
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_TABULATION_H_
+#endif  // SRC_INCLUDE_SMASH_TABULATION_H_

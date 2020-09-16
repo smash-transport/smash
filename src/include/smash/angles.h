@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_ANGLES_H_
-#define SRC_INCLUDE_ANGLES_H_
+#ifndef SRC_INCLUDE_SMASH_ANGLES_H_
+#define SRC_INCLUDE_SMASH_ANGLES_H_
 
 #include <iostream>
 #include <stdexcept>
@@ -273,4 +273,4 @@ double inline Angles::theta() const { return std::acos(costheta_); }
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_ANGLES_H_
+#endif  // SRC_INCLUDE_SMASH_ANGLES_H_

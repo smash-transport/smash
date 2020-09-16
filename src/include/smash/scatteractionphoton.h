@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_SCATTERACTIONPHOTON_H_
-#define SRC_INCLUDE_SCATTERACTIONPHOTON_H_
+#ifndef SRC_INCLUDE_SMASH_SCATTERACTIONPHOTON_H_
+#define SRC_INCLUDE_SMASH_SCATTERACTIONPHOTON_H_
 
 #include <utility>
 
@@ -328,4 +328,4 @@ class ScatterActionPhoton : public ScatterAction {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SCATTERACTIONPHOTON_H_
+#endif  // SRC_INCLUDE_SMASH_SCATTERACTIONPHOTON_H_

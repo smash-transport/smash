@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_CXX14COMPAT_H_
-#define SRC_INCLUDE_CXX14COMPAT_H_
+#ifndef SRC_INCLUDE_SMASH_CXX14COMPAT_H_
+#define SRC_INCLUDE_SMASH_CXX14COMPAT_H_
 
 #include <memory>
 #include <utility>
@@ -28,4 +28,4 @@ inline std::unique_ptr<T> make_unique(Args &&... args) {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_CXX14COMPAT_H_
+#endif  // SRC_INCLUDE_SMASH_CXX14COMPAT_H_

@@ -4,8 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#ifndef SRC_INCLUDE_PARTICLEDATA_H_
-#define SRC_INCLUDE_PARTICLEDATA_H_
+#ifndef SRC_INCLUDE_SMASH_PARTICLEDATA_H_
+#define SRC_INCLUDE_SMASH_PARTICLEDATA_H_
 
 #include <limits>
 
@@ -495,4 +495,4 @@ std::ostream &operator<<(std::ostream &out,
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_PARTICLEDATA_H_
+#endif  // SRC_INCLUDE_SMASH_PARTICLEDATA_H_
