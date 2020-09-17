@@ -855,9 +855,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     max_transverse_distance_sqr_ = maximum_cross_section / M_PI * fm2_mb;
     process_string_ptr_ = NULL;
   }
-  const double modus_l = modus_.length();
-  if (modus_l > 0.) {
-    action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(modus_l));
+  if (modus_.is_box()) {
+    action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(
+        parameters_.box_length));
   }
   if (IC_output_switch_) {
     if (!modus_.is_collider()) {
@@ -1400,14 +1400,13 @@ double calculate_mean_field_energy(
  * \param[in] E_mean_field Value of the mean-field contribution to the total
  *            energy of the system at the current time.
  * \param[in] modus_impact_parameter The impact parameter
- * \param[in] modus_length The modus length
  * \param[in] parameters structure that holds various global parameters
  *            such as testparticle number, see \ref ExperimentParameters
  * \param[in] projectile_target_interact true if there was at least one
  *            collision
  */
 EventInfo fill_event_info(const Particles &particles, double E_mean_field,
-                          double modus_impact_parameter, double modus_length,
+                          double modus_impact_parameter,
                           const ExperimentParameters &parameters,
                           bool projectile_target_interact);
 
@@ -1508,7 +1507,7 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
       initial_mean_field_energy_);
 
   auto event_info = fill_event_info(particles_, E_mean_field,
-                                    modus_.impact_parameter(), modus_.length(),
+                                    modus_.impact_parameter(),
                                     parameters_, projectile_target_interact_);
 
   // Output at event start
@@ -1901,7 +1900,7 @@ void Experiment<Modus>::intermediate_output() {
        * may signal a phase transition or other dynamical process. This
        * comparison only makes sense in the Box Modus, hence the condition.
        */
-      if (modus_.length() > 0.0) {
+      if (modus_.is_box()) {
         double tmp = (E_mean_field - initial_mean_field_energy_) /
                      (E_mean_field + initial_mean_field_energy_);
         /*
@@ -1932,7 +1931,7 @@ void Experiment<Modus>::intermediate_output() {
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
 
   auto event_info = fill_event_info(particles_, E_mean_field,
-                                    modus_.impact_parameter(), modus_.length(),
+                                    modus_.impact_parameter(),
                                     parameters_, projectile_target_interact_);
   // save evolution data
   if (!(modus_.is_box() && parameters_.outputclock->current_time() <
@@ -2147,7 +2146,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
   }
 
   auto event_info = fill_event_info(particles_, E_mean_field,
-                                    modus_.impact_parameter(), modus_.length(),
+                                    modus_.impact_parameter(),
                                     parameters_, projectile_target_interact_);
 
   for (const auto &output : outputs_) {

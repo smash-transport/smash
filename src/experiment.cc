@@ -616,7 +616,7 @@ double calculate_mean_field_energy(
 }
 
 EventInfo fill_event_info(const Particles &particles, double E_mean_field,
-                          double modus_impact_parameter, double modus_length,
+                          double modus_impact_parameter,
                           const ExperimentParameters &parameters,
                           bool projectile_target_interact) {
   const QuantumNumbers current_values(particles);
@@ -624,7 +624,7 @@ EventInfo fill_event_info(const Particles &particles, double E_mean_field,
   const double E_total = E_kinetic_total + E_mean_field;
 
   EventInfo event_info{modus_impact_parameter,
-                       modus_length,
+                       parameters.box_length,
                        parameters.outputclock->current_time(),
                        E_kinetic_total,
                        E_mean_field,

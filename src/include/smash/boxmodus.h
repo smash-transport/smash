@@ -122,8 +122,6 @@ class BoxModus : public ModusDefault {
     return 0.5 * std::sqrt(length_ * length_ - max_transverse_distance_sqr);
   }
 
-  /// \return Length of the box
-  double length() const { return length_; }
   /// \return equilibration time of the box
   double equilibration_time() const { return equilibration_time_; }
   /// \return whether the modus is box (also, trivially true)
