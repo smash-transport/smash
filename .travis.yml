@@ -66,9 +66,9 @@ before_install:
   - eval "${MATRIX_EVAL}"
   - export SMASH_ROOT=$(pwd)
   # pythia
-  - wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8302.tgz &&
-    tar xf pythia8302.tgz && rm pythia8302.tgz &&
-    cd pythia8302 &&
+  - wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8303.tgz &&
+    tar xf pythia8303.tgz && rm pythia8303.tgz &&
+    cd pythia8303 &&
     ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC' &&
     make -j$(nproc) &&
     cd ..
@@ -95,7 +95,7 @@ install:
   - cd $SMASH_ROOT
   - mkdir build
   - cd build
-  - cmake -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8302/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.5/ -DGSL_ROOT_DIR=$GSL ..
+  - cmake -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.5/ -DGSL_ROOT_DIR=$GSL ..
   - make -j$(nproc)
 
 script:

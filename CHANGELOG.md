@@ -29,8 +29,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Consider cross section scaling factor of incoming particles for photon production. This factor was previously neglected, resulting in exploding weights and overestimated photon production.
 
 ### Changed
-* The Pythia version is increased to 8.302
-* The photon bremsstrahlung cross sections are updated to also contain contributions from the f resonance
+* The Pythia version is increased to 8.302 (or newer)
 
 ### Removed
 * Integrator1dMonte as it was not used anymore
