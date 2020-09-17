@@ -347,8 +347,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   config["Modi"].remove_all_but(modus_chooser);
 
   double box_length = -1.0;
-  if (config.has_value({"Box", "Length"})) {
-    box_length = config.read({"Box", "Length"});
+  if (config.has_value({"Modi", "Box", "Length"})) {
+    box_length = config.read({"Modi", "Box", "Length"});
   }
 
   /* If this Delta_Time option is absent (this can be for timestepless mode)
