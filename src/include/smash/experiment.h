@@ -856,8 +856,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     process_string_ptr_ = NULL;
   }
   if (modus_.is_box()) {
-    action_finders_.emplace_back(make_unique<WallCrossActionsFinder>(
-        parameters_.box_length));
+    action_finders_.emplace_back(
+        make_unique<WallCrossActionsFinder>(parameters_.box_length));
   }
   if (IC_output_switch_) {
     if (!modus_.is_collider()) {
@@ -1506,9 +1506,9 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
       parameters_.labclock->current_time(), E_mean_field,
       initial_mean_field_energy_);
 
-  auto event_info = fill_event_info(particles_, E_mean_field,
-                                    modus_.impact_parameter(),
-                                    parameters_, projectile_target_interact_);
+  auto event_info =
+      fill_event_info(particles_, E_mean_field, modus_.impact_parameter(),
+                      parameters_, projectile_target_interact_);
 
   // Output at event start
   for (const auto &output : outputs_) {
@@ -1930,9 +1930,9 @@ void Experiment<Modus>::intermediate_output() {
       initial_mean_field_energy_);
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
 
-  auto event_info = fill_event_info(particles_, E_mean_field,
-                                    modus_.impact_parameter(),
-                                    parameters_, projectile_target_interact_);
+  auto event_info =
+      fill_event_info(particles_, E_mean_field, modus_.impact_parameter(),
+                      parameters_, projectile_target_interact_);
   // save evolution data
   if (!(modus_.is_box() && parameters_.outputclock->current_time() <
                                modus_.equilibration_time())) {
@@ -2145,9 +2145,9 @@ void Experiment<Modus>::final_output(const int evt_num) {
     }
   }
 
-  auto event_info = fill_event_info(particles_, E_mean_field,
-                                    modus_.impact_parameter(),
-                                    parameters_, projectile_target_interact_);
+  auto event_info =
+      fill_event_info(particles_, E_mean_field, modus_.impact_parameter(),
+                      parameters_, projectile_target_interact_);
 
   for (const auto &output : outputs_) {
     output->at_eventend(particles_, evt_num, event_info);

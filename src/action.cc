@@ -78,9 +78,9 @@ FourVector Action::get_interaction_point() const {
   for (const auto &part : incoming_particles_) {
     if (std::abs(part.position().x1() - interaction_point.x1()) > 4.0) {
       printout = true;
-      std::cout << "BEFORE: " << part.type().name() << ": x = "
-                << part.position().x1() << ", interaction at x = "
-                << interaction_point.x1()
+      std::cout << "BEFORE: " << part.type().name()
+                << ": x = " << part.position().x1()
+                << ", interaction at x = " << interaction_point.x1()
                 << ", L[fm] = " << box_length_ << std::endl;
     }
   }
@@ -98,8 +98,7 @@ FourVector Action::get_interaction_point() const {
   if (box_length_ > 0) {
     assert(incoming_particles_.size() == 2);
     const FourVector r1 = incoming_particles_[0].position(),
-                     r2 = incoming_particles_[1].position(),
-                     r = r1 -r2;
+                     r2 = incoming_particles_[1].position(), r = r1 - r2;
     for (int i = 1; i < 4; i++) {
       const double d = std::abs(r[i]);
       if (d > 0.5 * box_length_) {
@@ -114,9 +113,9 @@ FourVector Action::get_interaction_point() const {
 
   for (const auto &part : incoming_particles_) {
     if (printout) {
-      std::cout << "AFTER:" << part.type().name() << ": x = "
-                << part.position().x1() << ", interaction at x = "
-                << interaction_point.x1()
+      std::cout << "AFTER:" << part.type().name()
+                << ": x = " << part.position().x1()
+                << ", interaction at x = " << interaction_point.x1()
                 << ", L[fm] = " << box_length_ << std::endl;
     }
   }

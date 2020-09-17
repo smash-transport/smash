@@ -242,22 +242,23 @@ inline ReactionsBitSet all_reactions_included() {
  */
 inline ExperimentParameters default_parameters(int testparticles = 1,
                                                double dt = 0.1) {
-  return ExperimentParameters{make_unique<UniformClock>(0., dt),  // labclock
-                              make_unique<UniformClock>(0., 1.),  // outputclock
-                              testparticles,  // testparticles
-                              1.0,            // Gaussian smearing width
-                              4.0,            // Gaussian smearing cut-off
-                              true,           // two_to_one
-                              all_reactions_included(),
-                              false,  // strings switch
-                              false,  // use_AQM
-                              1.0,
-                              false,  // string_with_probability
-                              NNbarTreatment::NoAnnihilation,
-                              0.,      // low energy sigma_NN cut-off
-                              false,  // potential_affect_threshold
-                              -1.0    // box_length
-                              };
+  return ExperimentParameters{
+      make_unique<UniformClock>(0., dt),  // labclock
+      make_unique<UniformClock>(0., 1.),  // outputclock
+      testparticles,                      // testparticles
+      1.0,                                // Gaussian smearing width
+      4.0,                                // Gaussian smearing cut-off
+      true,                               // two_to_one
+      all_reactions_included(),
+      false,  // strings switch
+      false,  // use_AQM
+      1.0,
+      false,  // string_with_probability
+      NNbarTreatment::NoAnnihilation,
+      0.,     // low energy sigma_NN cut-off
+      false,  // potential_affect_threshold
+      -1.0    // box_length
+  };
 }
 
 /// Creates default EventInfo object for testing purposes

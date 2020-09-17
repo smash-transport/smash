@@ -44,8 +44,7 @@ class ScatterAction : public Action {
    */
   ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
                 double time, bool isotropic = false,
-                double string_formation_time = 1.0,
-                double box_length = -1.0);
+                double string_formation_time = 1.0, double box_length = -1.0);
 
   /**
    * Add a new collision channel.
