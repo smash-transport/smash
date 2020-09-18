@@ -244,6 +244,10 @@ BoxModus::BoxModus(Configuration modus_config,
     throw std::invalid_argument(
         "Resonance lifetime modifier cannot be negative!");
   }
+  // Check consistency, just in case
+  if (std::abs(length_ - parameters.box_length) > really_small) {
+    throw std::runtime_error("Box length inconsistency");
+  }
 }
 
 double BoxModus::initial_conditions(Particles *particles,
