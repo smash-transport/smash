@@ -24,19 +24,17 @@ TEST(create_part_list) {
   Test::create_actual_decaymodes();
 }
 
-static BoxModus create_box_for_tests() {
+static BoxModus create_box_for_tests(const ExperimentParameters& par) {
   auto conf = Test::configuration();
   const int N = 30;
-  const double L = 10.;
   const double T_init = 0.2;
   conf["Modus"] = "Box";
   conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = N;
   conf["Modi"]["Box"]["Init_Multiplicities"]["311"] = N;
-  conf["Modi"]["Box"]["Length"] = L;
+  conf["Modi"]["Box"]["Length"] = par.box_length;
   conf["Modi"]["Box"]["Temperature"] = T_init;
   conf["Modi"]["Box"]["Initial_Condition"] = "thermal momenta";
   conf["Modi"]["Box"]["Start_Time"] = 0.0;
-  const ExperimentParameters par = smash::Test::default_parameters();
   return BoxModus(conf["Modi"], par);
 }
 
@@ -47,15 +45,16 @@ TEST(rest_frame_transformation) {
   //  4. Check Tmu0 = (e+p)umu unu - p gmunu
   //  5. Check that EoS is satisfied
   Particles P;
-  const ExperimentParameters par = smash::Test::default_parameters();
-  BoxModus b = create_box_for_tests();
+  ExperimentParameters par = smash::Test::default_parameters();
+  par.box_length = 10.0;
+  BoxModus b = create_box_for_tests(par);
   b.initial_conditions(&P, par);
 
   HadronGasEos eos = HadronGasEos(false, false);
   ThermLatticeNode node = ThermLatticeNode();
   const ThreeVector v_boost(0.1, 0.2, 0.8);
   const double L = par.box_length;
-  for (auto &part : P) {
+  for (auto& part : P) {
     part.boost(v_boost);
     node.add_particle(part, std::sqrt(1.0 - v_boost.sqr()) / (L * L * L));
   }
@@ -97,8 +96,9 @@ TEST(rest_frame_transformation) {
 
 /*TEST(thermalization_action) {
   Particles P;
-  BoxModus b = create_box_for_tests();
-  const ExperimentParameters par = smash::Test::default_parameters();
+  ExperimentParameters par = smash::Test::default_parameters();
+  par.box_length = 10.0;
+  BoxModus b = create_box_for_tests(par);
   b.initial_conditions(&P, par);
 
   Configuration th_conf = Test::configuration();
