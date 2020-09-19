@@ -97,6 +97,7 @@ TEST(sanity_box) {
   conf["Modi"]["Box"]["Init_Multiplicities"]["111"] = 100;
   conf["Modi"]["Box"]["Init_Multiplicities"]["-211"] = 100;
   ExperimentParameters param = smash::Test::default_parameters();
+  param.box_length = 5.0;
   BoxModus b(conf["Modi"], param);
   Particles P;
   create_particle_list(P);

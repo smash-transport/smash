@@ -24,18 +24,19 @@ TEST(init_particle_types) {
 
 TEST(initialize_box) {
   einhard::Logger<> log(einhard::ALL);
+  ExperimentParameters par = Test::default_parameters();
+  par.box_length = 7.9615;
   BoxModus b(Configuration("Box:\n"
                            "  Initial_Condition: \"peaked momenta\"\n"
                            "  Length: 7.9615\n"
                            "  Temperature: 0.5\n"
                            "  Start_Time: 0.2\n"
                            "  Init_Multiplicities:\n"
-                           "    661: 724\n"),
-             Test::default_parameters());
+                           "    661: 724\n"), par);
 
   Particles P;
   // should return START_TIME and set P:
-  COMPARE(b.initial_conditions(&P, Test::default_parameters()), 0.2);
+  COMPARE(b.initial_conditions(&P, par), 0.2);
   COMPARE(P.size(), 724u);
   for (const auto &pd : P) {
     COMPARE(pd.pdgcode(), 0x661);
