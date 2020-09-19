@@ -32,7 +32,8 @@ TEST(initialize_box) {
                            "  Temperature: 0.5\n"
                            "  Start_Time: 0.2\n"
                            "  Init_Multiplicities:\n"
-                           "    661: 724\n"), par);
+                           "    661: 724\n"),
+             par);
 
   Particles P;
   // should return START_TIME and set P:
