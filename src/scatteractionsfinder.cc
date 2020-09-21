@@ -432,6 +432,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
         "Stochastic collison criterion parameters (2-particles):\nprob = ",
         prob, ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
         ", gcell_vol = ", gcell_vol, ", testparticles = ", testparticles_);
+    std::cout << "gcell_vol = " << gcell_vol << '\n';
 
     if (prob > 1.) {
       // std::stringstream err;
