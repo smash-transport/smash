@@ -7,10 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_AGNIESZKA_SAMPLING_H_
-#define SRC_INCLUDE_AGNIESZKA_SAMPLING_H_
-
-#include <cmath>
+#ifndef SRC_INCLUDE_QUANTUM_SAMPLING_H_
+#define SRC_INCLUDE_QUANTUM_SAMPLING_H_
 
 // needed for solving for the distribution maximum
 // and the chemical potential
@@ -158,4 +156,4 @@ double sample_momenta_from_Juttner(double mass, double temperature,
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_AGNIESZKA_SAMPLING_H_
+#endif  // SRC_INCLUDE_QUANTUM_SAMPLING_H_

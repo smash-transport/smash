@@ -262,7 +262,7 @@ BoxModus::BoxModus(Configuration modus_config,
 
 double BoxModus::initial_conditions(Particles *particles,
                                     const ExperimentParameters &parameters) {
-  double momentum_radial = 0, mass;
+  double momentum_radial = 0.0, mass = 0.0;
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
   auto uniform_length = random::make_uniform_distribution(0.0, this->length_);
