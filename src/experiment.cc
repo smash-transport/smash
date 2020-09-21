@@ -472,8 +472,7 @@ std::string format_measurements(const Particles &particles,
       (particles.size() > 0) ? current_values.momentum().x0() : 0.0;
   const double energy_per_part =
       (particles.size() > 0)
-          ? (current_energy + E_mean_field - E_mean_field_initial) /
-                particles.size()
+          ? (current_energy + E_mean_field) / particles.size()
           : 0.0;
 
   std::ostringstream ss;
