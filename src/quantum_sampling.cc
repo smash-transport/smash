@@ -7,7 +7,7 @@
  *
  */
 
-#include "./include/smash/quantum_sampling.h"
+#include "smash/quantum_sampling.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -33,7 +33,7 @@ namespace smash {
  * the maximum of the distribution.
  */
 
-double p_max_root_equation(double p, double mass, double temperature,
+double QuantumSampling::p_max_root_equation(double p, double mass, double temperature,
                            double effective_chemical_potential,
                            double statistics) {
   const double Ekin = std::sqrt(p * p + mass * mass);
@@ -45,7 +45,7 @@ double p_max_root_equation(double p, double mass, double temperature,
   return term1 - term2;
 }
 
-int p_max_root_equation_for_GSL(const gsl_vector *roots_array, void *parameters,
+int QuantumSampling::p_max_root_equation_for_GSL(const gsl_vector *roots_array, void *parameters,
                                 gsl_vector *function) {
   struct ParametersForMaximumMomentumRootFinder *par =
       static_cast<struct ParametersForMaximumMomentumRootFinder *>(parameters);
@@ -65,7 +65,7 @@ int p_max_root_equation_for_GSL(const gsl_vector *roots_array, void *parameters,
   return GSL_SUCCESS;
 }
 
-void cout_state_p_max(unsigned int iter, gsl_multiroot_fsolver *solver) {
+void QuantumSampling::cout_state_p_max(unsigned int iter, gsl_multiroot_fsolver *solver) {
   printf(
       "\n***\nfind_maximum_of_the_distribution(): iter = %3u \t"
       "x = % .3f \t"
@@ -73,7 +73,7 @@ void cout_state_p_max(unsigned int iter, gsl_multiroot_fsolver *solver) {
       iter, gsl_vector_get(solver->x, 0), gsl_vector_get(solver->f, 0));
 }
 
-int find_maximum_of_the_distribution(double mass, double temperature,
+int QuantumSampling::find_maximum_of_the_distribution(double mass, double temperature,
                                      double effective_chemical_potential,
                                      double statistics,
                                      double p_max_initial_guess,
@@ -156,7 +156,7 @@ int find_maximum_of_the_distribution(double mass, double temperature,
   return 0;
 }
 
-double maximum_of_the_distribution(double mass, double temperature,
+double QuantumSampling::maximum_of_the_distribution(double mass, double temperature,
                                    double effective_chemical_potential,
                                    double statistics,
                                    double solution_precision) {
@@ -202,43 +202,7 @@ double maximum_of_the_distribution(double mass, double temperature,
  *
  */
 
-/**
- * This sampler is the simplest implementation of sampling based on sampling
- * from a uniform distribution. [elaborate?]
- */
-double sample_momenta_from_Juttner(double mass, double temperature,
-                                   double effective_chemical_potential,
-                                   double statistics, double p_range,
-                                   double distribution_maximum) {
-  std::random_device rd;
-  std::mt19937 generate(rd());
 
-  double sampled_momentum = 0.0;
-  bool success = false;
-
-  int iter = 0;
-
-  while (!success) {
-    iter++;
-
-    sampled_momentum = p_range * std::generate_canonical<double, 1>(generate);
-    double distribution_at_sampled_p =
-        sampled_momentum * sampled_momentum *
-        juttner_distribution_func(sampled_momentum, mass, temperature,
-                                  effective_chemical_potential, statistics);
-    double sampled_ratio = distribution_at_sampled_p / distribution_maximum;
-    double accept_or_reject = std::generate_canonical<double, 1>(generate);
-
-    if (sampled_ratio > accept_or_reject) {
-      success = true;
-    }
-  }
-
-  return sampled_momentum;
-}
-
-
-// ALTERNATIVE
 QuantumSampling::QuantumSampling(
     const std::map<PdgCode, int> &initial_multiplicities,
     double volume, double temperature) :
@@ -285,7 +249,10 @@ QuantumSampling::QuantumSampling(
   }
 }
 
-
+/**
+ * This sampler is the simplest implementation of sampling based on sampling
+ * from a uniform distribution. [elaborate?]
+ */
 double QuantumSampling::sample(const PdgCode pdg) {
   const ParticleType &ptype = ParticleType::find(pdg);
   const double mass = ptype.mass();
