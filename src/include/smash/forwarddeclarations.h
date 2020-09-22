@@ -130,15 +130,9 @@ enum class TimeStepMode : char {
  * In either case, the positions in space are chosen randomly.
  */
 enum class BoxInitialCondition {
-  // ****************************************************************************
-  // Agnieszka modification begins
-  // ****************************************************************************
   ThermalMomentaBoltzmann,
   ThermalMomentaQuantum,
   PeakedMomenta,
-  // ****************************************************************************
-  // Agnieszka modification ends
-  // ****************************************************************************
 };
 
 /**
@@ -155,18 +149,12 @@ enum class BoxInitialCondition {
  * distribution and thus generates a thermal ensemble.
  */
 enum class SphereInitialCondition {
-  // ****************************************************************************
-  // Agnieszka modification begins
-  // ****************************************************************************
   ThermalMomentaBoltzmann,
   ThermalMomentaQuantum,
   IC_ES,
   IC_1M,
   IC_2M,
   IC_Massive,
-  // ****************************************************************************
-  // Agnieszka modification ends
-  // ****************************************************************************
 };
 
 /**

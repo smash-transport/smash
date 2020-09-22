@@ -836,9 +836,6 @@ class Configuration {
      */
     operator BoxInitialCondition() const {
       const std::string s = operator std::string();
-      // ************************************************************************
-      // Agnieszka modification begins
-      // ************************************************************************
       if (s == "thermal momenta") {
         return BoxInitialCondition::ThermalMomentaBoltzmann;
       }
@@ -852,9 +849,6 @@ class Configuration {
           "The value for key \"" + std::string(key_) +
           "\" should be \"thermal momenta\", \"thermal momenta quantum\", " +
           "or \"peaked momenta\".");
-      // ************************************************************************
-      // Agnieszka modification ends
-      // ************************************************************************
     }
 
     /**
@@ -866,9 +860,6 @@ class Configuration {
      */
     operator SphereInitialCondition() const {
       const std::string s = operator std::string();
-      // ************************************************************************
-      // Agnieszka modification begins
-      // ************************************************************************
       if (s == "thermal momenta") {
         return SphereInitialCondition::ThermalMomentaBoltzmann;
       }
@@ -891,9 +882,6 @@ class Configuration {
           "The value for key \"" + std::string(key_) +
           "\" should be \"thermal momenta\", \"thermal momenta quantum\", " +
           "\"IC_ES\", \"IC_1M\", \"IC_2M\" or" + "\"IC_Massive\".");
-      // ************************************************************************
-      // Agnieszka modification ends
-      // ************************************************************************
     }
 
     /**

@@ -17,6 +17,7 @@
 
 #include "smash/algorithms.h"
 #include "smash/angles.h"
+#include "smash/chemicalpotential.h"
 #include "smash/configuration.h"
 #include "smash/constants.h"
 #include "smash/distributions.h"
@@ -26,12 +27,12 @@
 #include "smash/logging.h"
 #include "smash/macros.h"
 #include "smash/particles.h"
+#include "smash/quantumsampling.h"
 #include "smash/random.h"
 #include "smash/spheremodus.h"
 #include "smash/threevector.h"
 
-#include "smash/chemical_potential.h"
-#include "smash/quantum_sampling.h"
+
 
 namespace smash {
 static constexpr int LSphere = LogArea::Sphere::id;
@@ -266,18 +267,6 @@ double SphereModus::initial_conditions(Particles *particles,
                           p.second);
     }
   }
-  /*
-   * We define maps that are intended to store:
-   * the PdgCode and the corresponding effective chemical potential,
-   * the PdgCode and the corresponding distribution function maximum.
-   * These maps will be needed for momenta sampling. For each particle, we will
-   * check if the associated effective chemical potential and distribution
-   * function maximum have been calculated already, so that we will only
-   * calculate these quantities once.
-   */
-  std::map<PdgCode, double> effective_chemical_potentials;
-  std::map<PdgCode, double> distribution_function_maximums;
-  // ALTERNATIVE
   std::unique_ptr<QuantumSampling> quantum_sampling;
    if (this->init_distr_ ==
        SphereInitialCondition::ThermalMomentaQuantum) {
@@ -287,7 +276,7 @@ double SphereModus::initial_conditions(Particles *particles,
   for (ParticleData &data : *particles) {
     Angles phitheta;
     /* thermal momentum according Maxwell-Boltzmann distribution */
-    double momentum_radial, mass = data.pole_mass();
+    double momentum_radial = 0.0, mass = data.pole_mass();
     /* assign momentum_radial according to requested distribution */
     switch (init_distr_) {
       case (SphereInitialCondition::IC_ES):

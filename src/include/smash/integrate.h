@@ -162,7 +162,9 @@ class Integrator {
     return result;
   }
 
-
+  /**
+   * Set precision for the absolute and relative error of the integration.
+   */
  void set_precision(double absolute, double relative) {
    accuracy_absolute_ = absolute;
    accuracy_relative_ = relative;
