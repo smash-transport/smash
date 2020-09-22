@@ -7,7 +7,7 @@
  *
  */
 
-#include "./include/smash/chemical_potential.h"
+#include "smash/chemical_potential.h"
 
 #include <cmath>
 #include <cstdlib>
@@ -17,8 +17,8 @@
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_multiroots.h>
-#include "./include/smash/constants.h"
-#include "./include/smash/distributions.h"
+#include "smash/constants.h"
+#include "smash/distributions.h"
 
 namespace smash {
 

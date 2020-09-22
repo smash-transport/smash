@@ -13,14 +13,15 @@
 #include <cstdlib>
 #include <iostream>
 #include <random>
-
-#include "./include/smash/chemical_potential.h"
-#include "./include/smash/distributions.h"
-
-// needed for solving for the distribution maximum
-// and the chemical potential
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_multiroots.h>
+
+#include "smash/constants.h"
+#include "smash/chemical_potential.h"
+#include "smash/distributions.h"
+#include "smash/particletype.h"
+
+
 
 namespace smash {
 
@@ -38,7 +39,7 @@ double p_max_root_equation(double p, double mass, double temperature,
   const double Ekin = std::sqrt(p * p + mass * mass);
   const double term1 =
       2 * (1 + statistics *
-                   exp(-(Ekin - effective_chemical_potential) / temperature));
+	   std::exp(-(Ekin - effective_chemical_potential) / temperature));
   const double term2 = (p * p) / (temperature * Ekin);
 
   return term1 - term2;
@@ -235,5 +236,89 @@ double sample_momenta_from_Juttner(double mass, double temperature,
 
   return sampled_momentum;
 }
+
+
+// ALTERNATIVE
+QuantumSampling::QuantumSampling(
+    const std::map<PdgCode, int> &initial_multiplicities,
+    double volume, double temperature) :
+  volume_(volume),
+  temperature_(temperature) {
+  /*
+   * This is the precision which we expect from the solution; note that
+   * solution precision also goes into the precision of calculating all of the
+   * integrals involved etc. Recommended precision is at least 1e-6.
+   */
+  constexpr double solution_precision = 1e-8;
+
+  for (const auto &pdg_and_mult : initial_multiplicities) {
+    const PdgCode pdg = pdg_and_mult.first;
+    const int number_of_particles = pdg_and_mult.second;
+    const double V_in_GeV = volume_ / (hbarc * hbarc * hbarc);
+    const double number_density = number_of_particles / V_in_GeV;
+    const double spin_degeneracy = pdg.spin_degeneracy();
+    // '+' for fermions, '-' for bosons
+    const double quantum_statistics = (pdg.spin() % 2 == 0) ? -1.0 : 1.0;
+    const ParticleType& ptype = ParticleType::find(pdg);
+    const double particle_mass = ptype.mass();
+    double chemical_potential = 0.0;
+    try {
+      // Calling the wrapper for the GSL chemical potential finder
+      chemical_potential = effective_chemical_potential(
+           spin_degeneracy, particle_mass, number_density, temperature_,
+           quantum_statistics, solution_precision);
+    } catch (...) {
+      throw std::runtime_error(
+			       "Well controlled error messages should be displayed above."
+			       "\nIf an uncontrolled GSL crash message is displayed, it"
+			       "\nmay mean that the number density of bosonic particles"
+			       "\nis too big at the given temperature and Bose-Einstein "
+			       "\ncondensate is produced."
+			       "\nTry decreasing the number density or increasing the "
+			       "temperature.\n");
+    }
+    effective_chemical_potentials_[pdg] = chemical_potential;
+    const double distribution_function_maximum = maximum_of_the_distribution(
+         particle_mass, temperature_, chemical_potential, quantum_statistics,
+         solution_precision);
+    distribution_function_maximums_[pdg] = distribution_function_maximum;
+  }
+}
+
+
+double QuantumSampling::sample(const PdgCode pdg) {
+  const ParticleType &ptype = ParticleType::find(pdg);
+  const double mass = ptype.mass();
+  const double mu = effective_chemical_potentials_.find(pdg)->second;
+  const double distr_max = distribution_function_maximums_.find(pdg)->second;
+  /*
+   * The variable maximum_momentum denotes the "far right" boundary of the 
+   * sampled region; we assume that no particle has momentum larger than 10 GeV
+   */
+  constexpr double maximum_momentum = 10.0;  // in [GeV]
+  const double statistics = (pdg.spin() % 2 == 0) ? -1.0 : 1.0;
+  double sampled_momentum = 0.0, sampled_ratio = 0.0;
+
+  std::cout << "\n\n"
+	    << "\nQuantumSampling::sample:"
+	    << "\nmass = " << mass
+	    << "\nmu = " << mu
+	    << "\ndistr_max = " << distr_max
+	    << "\nstatistics = " << statistics
+	    << "\n\n" << std::endl;
+  std::cin.get();
+  
+  do {
+    sampled_momentum = random::uniform(0.0, maximum_momentum);
+    double distribution_at_sampled_p =
+      sampled_momentum * sampled_momentum *
+      juttner_distribution_func(sampled_momentum, mass, temperature_,
+				mu, statistics);
+    sampled_ratio = distribution_at_sampled_p / distr_max;
+  } while (random::canonical() > sampled_ratio);
+
+  return sampled_momentum;
+}
+  
 
 }  // namespace smash

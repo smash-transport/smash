@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_AGNIESZKA_CHEMICAL_POTENTIAL_H_
-#define SRC_INCLUDE_AGNIESZKA_CHEMICAL_POTENTIAL_H_
+#ifndef SRC_INCLUDE_CHEMICAL_POTENTIAL_H_
+#define SRC_INCLUDE_CHEMICAL_POTENTIAL_H_
 
 #include <cmath>
 
@@ -229,4 +229,4 @@ double effective_chemical_potential(double degeneracy, double mass,
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_AGNIESZKA_CHEMICAL_POTENTIAL_H_
+#endif  // SRC_INCLUDE_CHEMICAL_POTENTIAL_H_

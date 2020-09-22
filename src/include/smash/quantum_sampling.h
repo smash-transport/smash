@@ -10,11 +10,13 @@
 #ifndef SRC_INCLUDE_QUANTUM_SAMPLING_H_
 #define SRC_INCLUDE_QUANTUM_SAMPLING_H_
 
-// needed for solving for the distribution maximum
-// and the chemical potential
+#include <map>
 #include <gsl/gsl_multiroots.h>
-// needed to handle GSL vectors which are in declarations of functions
 #include <gsl/gsl_vector.h>
+#include "smash/pdgcode.h"
+#include "smash/random.h"
+
+
 
 namespace smash {
 
@@ -153,6 +155,28 @@ double sample_momenta_from_Juttner(double mass, double temperature,
                                    double effective_chemical_potential,
                                    double statistics, double p_range,
                                    double distribution_maximum);
+
+
+class QuantumSampling {
+  public:
+   QuantumSampling(const std::map<PdgCode, int> &initial_multiplicities,
+                   double volume, double temperature);
+   /*
+    * Sampling radial momenta of given particle species from Boltzmann, Bose, or
+    * Fermi distribution. This sampler uses the simplest rejection sampling.
+    */
+   double sample(const PdgCode pdg);
+  private:
+   /// Tabulated effective chemical potentials for every particle species
+   std::map<PdgCode, double> effective_chemical_potentials_;
+   /// Tabulated distribution function maxima for every particle species
+   std::map<PdgCode, double> distribution_function_maximums_;
+   /// Volume [fm^3] in which particles sre sampled
+   const double volume_;
+   /// Temperature [GeV]
+   const double temperature_;
+};
+  
 
 }  // namespace smash
 

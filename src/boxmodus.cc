@@ -267,9 +267,9 @@ double BoxModus::initial_conditions(Particles *particles,
   FourVector momentum_total(0, 0, 0, 0);
   auto uniform_length = random::make_uniform_distribution(0.0, this->length_);
   const double T = this->temperature_;
+  const double V = length_ * length_ * length_;
   /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
   if (use_thermal_) {
-    const double V = length_ * length_ * length_;
     if (average_multipl_.empty()) {
       for (const ParticleType &ptype : ParticleType::list_all()) {
         if (HadronGasEos::is_eos_particle(ptype)) {
@@ -312,6 +312,12 @@ double BoxModus::initial_conditions(Particles *particles,
    */
   std::map<PdgCode, double> effective_chemical_potentials;
   std::map<PdgCode, double> distribution_function_maximums;
+  // ALTERNATIVE
+  std::unique_ptr<QuantumSampling> quantum_sampling;
+  if (this->initial_condition_ ==
+      BoxInitialCondition::ThermalMomentaQuantum) {
+    quantum_sampling = make_unique<QuantumSampling>(init_multipl_, V, T);
+  }
   for (ParticleData &data : *particles) {
     /* Set MOMENTUM SPACE distribution */
     if (this->initial_condition_ == BoxInitialCondition::PeakedMomenta) {
@@ -338,6 +344,15 @@ double BoxModus::initial_conditions(Particles *particles,
         momentum_radial = sample_quantum_momenta(
             mass, pdg_code, T, &effective_chemical_potentials,
             &distribution_function_maximums, init_multipl_);
+	// ALTERNATIVE
+	std::cout << "\n\n" << std::endl;
+	std::cout << "momentum_radial old = "
+		  << momentum_radial << std::endl;
+	momentum_radial = quantum_sampling->sample(data.pdgcode());
+	std::cout << "momentum_radial new = "
+		  << momentum_radial << std::endl;
+	std::cout << "\n\n" << std::endl;
+	std::cin.get();
       }
     }
     phitheta.distribute_isotropically();
@@ -520,6 +535,12 @@ double BoxModus::sample_quantum_momenta(
     distribution_function_maximums->insert(
         std::make_pair(pdg_code, distribution_function_maximum));
   }
+
+  std::cout << "\n\n" << std::endl;
+  std::cout << "chemical_potential old = "
+	    << chemical_potential << std::endl;
+  std::cout << "distribution_function_maximum old  = "
+	    << distribution_function_maximum << std::endl;
 
   /*
    * The variable maximum_momentum denotes the "far right" boundary of

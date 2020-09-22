@@ -236,9 +236,9 @@ double SphereModus::initial_conditions(Particles *particles,
                                        const ExperimentParameters &parameters) {
   FourVector momentum_total(0, 0, 0, 0);
   const double T = this->sphere_temperature_;
+  const double V = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_;
   /* Create NUMBER OF PARTICLES according to configuration */
   if (use_thermal_) {
-    const double V = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_;
     if (average_multipl_.empty()) {
       for (const ParticleType &ptype : ParticleType::list_all()) {
         if (HadronGasEos::is_eos_particle(ptype)) {
@@ -277,6 +277,12 @@ double SphereModus::initial_conditions(Particles *particles,
    */
   std::map<PdgCode, double> effective_chemical_potentials;
   std::map<PdgCode, double> distribution_function_maximums;
+  // ALTERNATIVE
+  std::unique_ptr<QuantumSampling> quantum_sampling;
+   if (this->init_distr_ ==
+       SphereInitialCondition::ThermalMomentaQuantum) {
+     quantum_sampling = make_unique<QuantumSampling>(init_multipl_, V, T);
+   }
   /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : *particles) {
     Angles phitheta;
@@ -316,6 +322,15 @@ double SphereModus::initial_conditions(Particles *particles,
         momentum_radial = sample_quantum_momenta(
             mass, pdg_code, T, &effective_chemical_potentials,
             &distribution_function_maximums, init_multipl_);
+	// ALTERNATIVE
+	std::cout << "\n\n" << std::endl;
+	std::cout << "momentum_radial old = "
+		  << momentum_radial << std::endl;
+	momentum_radial = quantum_sampling->sample(data.pdgcode());
+	std::cout << "momentum_radial new = "
+		  << momentum_radial << std::endl;
+	std::cout << "\n\n" << std::endl;
+	std::cin.get();
         break;
     }
     phitheta.distribute_isotropically();
