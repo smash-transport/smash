@@ -10,7 +10,6 @@
 #ifndef SRC_INCLUDE_CHEMICAL_POTENTIAL_H_
 #define SRC_INCLUDE_CHEMICAL_POTENTIAL_H_
 
-#include <cmath>
 
 // needed for solving for the distribution maximum
 // and the chemical potential
@@ -28,46 +27,6 @@ namespace smash {
  * and the integration itself.
  */
 
-/**
- * Struct object that holds the parameters relevant to momentum integrals
- * where the integration is done for one particle species.
- */
-struct ParametersForThermalMomentumIntegralsOneSpecies {
-  double degeneracy;
-  double mass;
-  double temperature;
-  double effective_chemical_potential;
-  double statistics;
-};
-
-/**
- * Vector number density integrand for obtaining density of one particle
- * species; integrand written for integration on the (0,1) interval.
- * \param[in] x integration variable
- * \param[in] degeneracy degeneracy of the particle species
- * \param[in] mass (pole) mass of the particle species
- * \param[in] temperature temperature of the system
- * \param[in] effective_chemical_potential effective chemical potential of
- *            the system
- * \param[in] statistics quantum statistics of the particles species
- *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
- * \return the complete integrand for the vector number density integration
- */
-double density_integrand_one_species_unit_range(
-    double x, double degeneracy, double mass, double temperature,
-    double effective_chemical_potential, double statistics);
-
-/**
- * Vector number density integrand for obtaining density of one particle
- * species as used in the GSL integration procedure (which requires that the
- * integrand depends explicitly only on the <integration variable> and
- * <parameters>).
- * \param[in] x integration variable
- * \param[in] parameters parameters provided in the struct/integration
- * \return the complete integrand for the vector number density integration
- */
-double density_integrand_one_species_unit_range_for_GSL(double momentum,
-                                                        void* parameters);
 
 /**
  * Vector number density of one particle species, obtained through integrating
@@ -133,7 +92,7 @@ struct ParametersForEffectiveChemicalPotentialRootFinderOneSpecies {
  * \param[in] precision used for the precision of the number density integral
  * \return the root equation
  */
-double root_equation_for_effective_chemical_potential(
+double root_equation_effective_chemical_potential(
     double degeneracy, double mass, double number_density, double temperature,
     double effective_chemical_potential, double statistics, double precision);
 

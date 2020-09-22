@@ -19,6 +19,7 @@
 #include <gsl/gsl_multiroots.h>
 #include "smash/constants.h"
 #include "smash/distributions.h"
+#include "smash/integrate.h"
 
 namespace smash {
 
@@ -30,66 +31,23 @@ namespace smash {
  * block includes the auxiliary functions and the integration itself.
  */
 
-double density_integrand_one_species_unit_range(
-    double x, double degeneracy, double mass, double temperature,
-    double effective_chemical_potential, double statistics) {
-  const double distribution_term =
-      juttner_distribution_func((1.0 - x) / x, mass, temperature,
-                                effective_chemical_potential, statistics);
-
-  return (degeneracy / (2.0 * M_PI * M_PI)) *
-         ((1.0 - x) * (1.0 - x) / (x * x * x * x)) * distribution_term;
-}
-
-double density_integrand_one_species_unit_range_for_GSL(double momentum,
-                                                        void *parameters) {
-  struct ParametersForThermalMomentumIntegralsOneSpecies *params =
-      static_cast<ParametersForThermalMomentumIntegralsOneSpecies *>(
-          parameters);
-
-  const double degeneracy = (params->degeneracy);
-  const double mass = (params->mass);
-  const double temperature = (params->temperature);
-  const double effective_chemical_potential =
-      (params->effective_chemical_potential);
-  const double statistics = (params->statistics);
-
-  return density_integrand_one_species_unit_range(
-      momentum, degeneracy, mass, temperature, effective_chemical_potential,
-      statistics);
-}
-
 double density_integration_one_species_unit_range(
     double degeneracy, double mass, double temperature,
     double effective_chemical_potential, double statistics, double precision) {
-  gsl_function Integrand;
-  struct ParametersForThermalMomentumIntegralsOneSpecies params = {
-      degeneracy, mass, temperature, effective_chemical_potential, statistics};
+  Integrator integrator = Integrator(1E6);
+  // Integration precision should be better than solving precision
+  const double integration_precision = 0.1 * precision;
+  integrator.set_precision(integration_precision, integration_precision);
+  const auto integral = integrator(0.0, 1.0, [&](double x)
+    {
+      return ((1.0 - x) * (1.0 - x) / (x * x * x * x)) *
+	juttner_distribution_func((1.0 - x) / x, mass, temperature,
+				  effective_chemical_potential, statistics);
+    });
+  const double integrated_number_density =
+    ( degeneracy/(2.0 * M_PI * M_PI) ) * integral;
 
-  Integrand.params = &params;
-
-  const double epsabs = precision;
-  const double epsrel = precision;
-  gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000000);
-  double result;
-  double error;
-
-  Integrand.function = &density_integrand_one_species_unit_range_for_GSL;
-
-  const int error_code = gsl_integration_qags(
-      &Integrand, precision, 1.0, epsabs, epsrel, 1000000, w, &result, &error);
-
-  if (error_code) {
-    std::stringstream err;
-    err << "\n\n\ndensity_integration_one_species_unit_range(): "
-        << gsl_strerror(error_code) << "\n\n"
-        << std::endl;
-    throw std::runtime_error(err.str());
-  }
-
-  gsl_integration_workspace_free(w);
-
-  return result;
+  return integrated_number_density;
 }
 
 /*
@@ -110,26 +68,16 @@ double density_integration_one_species_unit_range(
  * present, which probably would mean passing the initial multiplicities etc.).
  */
 
-double root_equation_for_effective_chemical_potential(
+double root_equation_effective_chemical_potential(
     double degeneracy, double mass, double number_density, double temperature,
     double effective_chemical_potential, double statistics, double precision) {
-  double result = 0.0;
+  
+  const double integrated_number_density =
+    density_integration_one_species_unit_range(
+      degeneracy, mass, temperature, effective_chemical_potential, statistics,
+      precision);
 
-  /*
-   * At finite and positive baryon number density this should never be
-   * supported. [Is there a big risk of the solver trying to check this value
-   * though?]
-   */
-  if (effective_chemical_potential < 0) {
-    result = 10000000000.0;
-  } else {
-    result = (number_density - density_integration_one_species_unit_range(
-                                   degeneracy, mass, temperature,
-                                   effective_chemical_potential, statistics,
-                                   precision));
-  }
-
-  return result;
+  return number_density - integrated_number_density;
 }
 
 int root_equation_effective_chemical_potential_for_GSL(
@@ -149,7 +97,7 @@ int root_equation_effective_chemical_potential_for_GSL(
   const double effective_chemical_potential = gsl_vector_get(roots_array, 0);
 
   gsl_vector_set(function, 0,
-                 root_equation_for_effective_chemical_potential(
+                 root_equation_effective_chemical_potential(
                      degeneracy, mass, number_density, temperature,
                      effective_chemical_potential, statistics, precision));
 
