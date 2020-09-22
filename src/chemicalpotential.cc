@@ -27,14 +27,11 @@ namespace smash {
 /**
  * Vector number density of one particle species.
  */
-double density_integration_one_species_unit_range(
-    double degeneracy, double mass, double temperature,
-    double effective_chemical_potential, double statistics, double precision) {
-  Integrator integrator = Integrator(1E6);
-  // Integration precision should be better than solving precision
-  const double integration_precision = 0.1 * precision;
-  integrator.set_precision(integration_precision, integration_precision);
-  const auto integral = integrator(0.0, 1.0, [&](double x)
+double ChemicalPotentialSolver::density_one_species
+  (double degeneracy, double mass, double temperature,
+   double effective_chemical_potential, double statistics,
+   Integrator *integrator) {
+  const auto integral = (*integrator)(0.0, 1.0, [&](double x)
     {
       return ((1.0 - x) * (1.0 - x) / (x * x * x * x)) *
 	juttner_distribution_func((1.0 - x) / x, mass, temperature,
@@ -51,19 +48,20 @@ double density_integration_one_species_unit_range(
  * for a given particle species.
  */
 
-double root_equation_effective_chemical_potential(
-    double degeneracy, double mass, double number_density, double temperature,
-    double effective_chemical_potential, double statistics, double precision) {
+double ChemicalPotentialSolver::root_equation_effective_chemical_potential
+  (double degeneracy, double mass, double number_density, double temperature,
+   double effective_chemical_potential, double statistics,
+   Integrator *integrator) {
   
   const double integrated_number_density =
-    density_integration_one_species_unit_range(
+    density_one_species(
       degeneracy, mass, temperature, effective_chemical_potential, statistics,
-      precision);
+      integrator);
 
   return number_density - integrated_number_density;
 }
 
-int root_equation_effective_chemical_potential_for_GSL(
+int ChemicalPotentialSolver::root_equation_effective_chemical_potential_for_GSL(
     const gsl_vector *roots_array, void *parameters, gsl_vector *function) {
   struct ParametersForEffectiveChemicalPotentialRootFinderOneSpecies *par =
       static_cast<
@@ -75,19 +73,19 @@ int root_equation_effective_chemical_potential_for_GSL(
   const double number_density = (par->number_density);
   const double temperature = (par->temperature);
   const double statistics = (par->statistics);
-  const double precision = (par->precision);
+  Integrator *integrator = (par->integrator);
 
   const double effective_chemical_potential = gsl_vector_get(roots_array, 0);
 
   gsl_vector_set(function, 0,
                  root_equation_effective_chemical_potential(
                      degeneracy, mass, number_density, temperature,
-                     effective_chemical_potential, statistics, precision));
+                     effective_chemical_potential, statistics, integrator));
 
   return GSL_SUCCESS;
 }
 
-void print_state_effective_chemical_potential(unsigned int iter,
+void ChemicalPotentialSolver::print_state_effective_chemical_potential(unsigned int iter,
                                              gsl_multiroot_fsolver *solver) {
   printf(
       "\n***\nfind_effective_chemical_potential(): iter = %3u \t"
@@ -96,12 +94,11 @@ void print_state_effective_chemical_potential(unsigned int iter,
       iter, gsl_vector_get(solver->x, 0), gsl_vector_get(solver->f, 0));
 }
 
-int find_effective_chemical_potential(double degeneracy, double mass,
-                                      double number_density, double temperature,
-                                      double statistics,
-                                      double mu_initial_guess,
-                                      double solution_precision,
-                                      double *effective_chemical_potential) {
+int ChemicalPotentialSolver::find_effective_chemical_potential(
+  double degeneracy, double mass, double number_density, double temperature,
+  double statistics, double mu_initial_guess, double solution_precision,
+  Integrator *integrator,
+  double *effective_chemical_potential) {
   const gsl_multiroot_fsolver_type *Solver_name;
   gsl_multiroot_fsolver *Root_finder;
 
@@ -111,11 +108,12 @@ int find_effective_chemical_potential(double degeneracy, double mass,
   const size_t problem_dimension = 1;
 
   struct ParametersForEffectiveChemicalPotentialRootFinderOneSpecies
-      parameters = {degeneracy,  mass,       number_density,
-                    temperature, statistics, solution_precision};
+      parameters = {degeneracy, mass, number_density,
+                    temperature, statistics, integrator};
 
-  gsl_multiroot_function EffectiveChemicalPotential = {
-      &root_equation_effective_chemical_potential_for_GSL, problem_dimension,
+  gsl_multiroot_function EffectiveChemicalPotential =
+    {&(ChemicalPotentialSolver::root_equation_effective_chemical_potential_for_GSL),
+      problem_dimension,
       &parameters};
 
   double roots_array_initial[problem_dimension] = {mu_initial_guess};
@@ -180,10 +178,9 @@ int find_effective_chemical_potential(double degeneracy, double mass,
  * given particle species and performing sanity checks.
  */
 
-double effective_chemical_potential(double degeneracy, double mass,
-                                    double number_density, double temperature,
-                                    double statistics,
-                                    double solution_precision) {
+double ChemicalPotentialSolver::effective_chemical_potential
+  (double degeneracy, double mass, double number_density, double temperature,
+   double statistics, double solution_precision) {
   assert(temperature > 0);  // zero temperature case is not considered here
   assert(degeneracy > 0);
   assert(mass > 0);
@@ -203,6 +200,10 @@ double effective_chemical_potential(double degeneracy, double mass,
     initial_guess = 1.05 * mass;
   }
 
+  /// Integration precision should be better than solving precision
+  const double integration_precision = 0.1 * solution_precision;
+  integrator_.set_precision(integration_precision, integration_precision);
+
   /*
    * Array for the GSL chemical potential finder.
    * Use of array is motivated by anticipating a generalization or overloading
@@ -218,7 +219,8 @@ double effective_chemical_potential(double degeneracy, double mass,
    */
   find_effective_chemical_potential(degeneracy, mass, number_density,
                                     temperature, statistics, initial_guess,
-                                    solution_precision, chemical_potential);
+                                    solution_precision, &integrator_,
+				    chemical_potential);
 
   /*
    * Sanity checks are performed for the obtained value of the chemical
@@ -233,9 +235,9 @@ double effective_chemical_potential(double degeneracy, double mass,
       smash::hbarc * smash::hbarc * smash::hbarc;
   // precision for number density in units of fm^-3
   const double precision_fm = 1e-4;
-  double nDensityCheck = density_integration_one_species_unit_range
-    (degeneracy, mass, temperature, chemical_potential[0],
-     statistics, solution_precision);
+  double nDensityCheck = density_one_species(
+    degeneracy, mass, temperature, chemical_potential[0],
+    statistics, &integrator_);
 
   if (abs((number_density - nDensityCheck)/conversion_factor) > precision_fm) {
     logg[LogArea::Main::id].warn
@@ -323,8 +325,7 @@ double effective_chemical_potential(double degeneracy, double mass,
         "indicate that the Bose-Einstein condensate is produced.");
   }
 
-  double effective_chemical_potential = chemical_potential[0];
-  return effective_chemical_potential;
+  return chemical_potential[0];
 }
 
 }  // namespace smash

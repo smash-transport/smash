@@ -218,8 +218,10 @@ QuantumSampling::QuantumSampling(
     const ParticleType& ptype = ParticleType::find(pdg);
     const double particle_mass = ptype.mass();
     double chemical_potential = 0.0;
+    ChemicalPotentialSolver mu_solver;
     // Calling the wrapper for the GSL chemical potential finder
-    chemical_potential = effective_chemical_potential(
+    chemical_potential =
+      mu_solver.effective_chemical_potential(
          spin_degeneracy, particle_mass, number_density, temperature_,
          quantum_statistics, solution_precision);
     effective_chemical_potentials_[pdg] = chemical_potential;
