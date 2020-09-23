@@ -273,7 +273,10 @@ void ScatterActionPhoton::generate_final_state() {
     weight_ = diff_xs * (t2 - t1) /
               (number_of_fractional_photons_ * hadronic_cross_section());
   } else {
-    weight_ = proc->weight() / hadronic_cross_section();
+    const double xsec_with_FF = total_cross_section_w_ff(E_Photon);
+    const double xsec_without_FF = proc->weight();
+    std::cout << xsec_with_FF << " " << xsec_without_FF << '\n';
+    weight_ = xsec_with_FF / hadronic_cross_section();
   }
   // Scale weight by cross section scaling factor of incoming particles
   weight_ *= incoming_particles_[0].xsec_scaling_factor() *
@@ -335,84 +338,12 @@ double ScatterActionPhoton::rho_mass() const {
   }
 }
 
-CollisionBranchList ScatterActionPhoton::photon_cross_sections(
-    MediatorType mediator) {
+CollisionBranchList ScatterActionPhoton::create_collision_branch() {
   CollisionBranchList process_list;
-  CrosssectionsPhoton<ComputationMethod::Analytic> xs_object;
 
   static ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
+  double xsection = total_cross_section();
 
-  const double s = mandelstam_s();
-  // the mass of the mediating particle depends on the channel. For an incoming
-  // rho it is the mass of the incoming particle, for an outgoing rho it is the
-  // sampled mass
-  const double m_rho = rho_mass();
-  double xsection = 0.0;
-
-  switch (reac_) {
-    case ReactionType::pi_p_pi_m_rho_z:
-      xsection = xs_object.xs_pi_pi_rho0(s, m_rho);
-      break;
-
-    case ReactionType::pi_z_pi_m_rho_m:
-    case ReactionType::pi_z_pi_p_rho_p:
-      xsection = xs_object.xs_pi_pi0_rho(s, m_rho);
-      break;
-
-    case ReactionType::pi_m_rho_z_pi_m:
-    case ReactionType::pi_p_rho_z_pi_p:
-      xsection = xs_object.xs_pi_rho0_pi(s, m_rho);
-      break;
-
-    case ReactionType::pi_m_rho_p_pi_z:
-    case ReactionType::pi_p_rho_m_pi_z:
-      if (mediator == MediatorType::SUM) {
-        xsection = xs_object.xs_pi_rho_pi0(s, m_rho);
-        break;
-      } else if (mediator == MediatorType::PION) {
-        xsection = xs_object.xs_pi_rho_pi0_rho_mediated(s, m_rho);
-        break;
-      } else if (mediator == MediatorType::OMEGA) {
-        xsection = xs_object.xs_pi_rho_pi0_omega_mediated(s, m_rho);
-        break;
-      } else {
-        throw std::runtime_error("");
-      }
-    case ReactionType::pi_z_rho_m_pi_m:
-    case ReactionType::pi_z_rho_p_pi_p:
-      if (mediator == MediatorType::SUM) {
-        xsection = xs_object.xs_pi0_rho_pi(s, m_rho);
-        break;
-      } else if (mediator == MediatorType::PION) {
-        xsection = xs_object.xs_pi0_rho_pi_rho_mediated(s, m_rho);
-        break;
-      } else if (mediator == MediatorType::OMEGA) {
-        xsection = xs_object.xs_pi0_rho_pi_omega_mediated(s, m_rho);
-        break;
-      } else {
-        throw std::runtime_error("");
-      }
-
-    case ReactionType::pi_z_rho_z_pi_z:
-      xsection = xs_object.xs_pi0_rho0_pi0(s, m_rho);
-      break;
-
-    case ReactionType::no_reaction:
-      // never reached
-      break;
-  }
-
-  // Due to numerical reasons it can happen that the calculated cross sections
-  // are negative (approximately -1e-15) if sqrt(s) is close to the threshold
-  // energy. In those cases the cross section is manually set to 0.1 mb, which
-  // is a reasonable value for the processes we are looking at (C14,C15,C16).
-
-  if (xsection <= 0) {
-    xsection = 0.1;
-    logg[LScatterAction].warn(
-        "Calculated negative cross section.\nParticles ", incoming_particles_,
-        " mass rho particle: ", m_rho, ", sqrt_s: ", std::sqrt(s));
-  }
   process_list.push_back(make_unique<CollisionBranch>(
       *hadron_out_t_, *photon_particle, xsection, ProcessType::TwoToTwo));
   return process_list;
@@ -544,6 +475,147 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
   }
 }
 
+double ScatterActionPhoton::total_cross_section(MediatorType mediator) const {
+  CollisionBranchList process_list;
+  CrosssectionsPhoton<ComputationMethod::Analytic> xs_object;
+
+  const double s = mandelstam_s();
+  // the mass of the mediating particle depends on the channel. For an incoming
+  // rho it is the mass of the incoming particle, for an outgoing rho it is the
+  // sampled mass
+  const double m_rho = rho_mass();
+  double xsection = 0.0;
+
+  switch (reac_) {
+    case ReactionType::pi_p_pi_m_rho_z:
+      xsection = xs_object.xs_pi_pi_rho0(s, m_rho);
+      break;
+
+    case ReactionType::pi_z_pi_m_rho_m:
+    case ReactionType::pi_z_pi_p_rho_p:
+      xsection = xs_object.xs_pi_pi0_rho(s, m_rho);
+      break;
+
+    case ReactionType::pi_m_rho_z_pi_m:
+    case ReactionType::pi_p_rho_z_pi_p:
+      xsection = xs_object.xs_pi_rho0_pi(s, m_rho);
+      break;
+
+    case ReactionType::pi_m_rho_p_pi_z:
+    case ReactionType::pi_p_rho_m_pi_z:
+      if (mediator == MediatorType::SUM) {
+        xsection = xs_object.xs_pi_rho_pi0(s, m_rho);
+        break;
+      } else if (mediator == MediatorType::PION) {
+        xsection = xs_object.xs_pi_rho_pi0_rho_mediated(s, m_rho);
+        break;
+      } else if (mediator == MediatorType::OMEGA) {
+        xsection = xs_object.xs_pi_rho_pi0_omega_mediated(s, m_rho);
+        break;
+      } else {
+        throw std::runtime_error("");
+      }
+    case ReactionType::pi_z_rho_m_pi_m:
+    case ReactionType::pi_z_rho_p_pi_p:
+      if (mediator == MediatorType::SUM) {
+        xsection = xs_object.xs_pi0_rho_pi(s, m_rho);
+        break;
+      } else if (mediator == MediatorType::PION) {
+        xsection = xs_object.xs_pi0_rho_pi_rho_mediated(s, m_rho);
+        break;
+      } else if (mediator == MediatorType::OMEGA) {
+        xsection = xs_object.xs_pi0_rho_pi_omega_mediated(s, m_rho);
+        break;
+      } else {
+        throw std::runtime_error("");
+      }
+
+    case ReactionType::pi_z_rho_z_pi_z:
+      xsection = xs_object.xs_pi0_rho0_pi0(s, m_rho);
+      break;
+
+    case ReactionType::no_reaction:
+      // never reached
+      break;
+  }
+
+  // Due to numerical reasons it can happen that the calculated cross sections
+  // are negative (approximately -1e-15) if sqrt(s) is close to the threshold
+  // energy. In those cases the cross section is manually set to 0.1 mb, which
+  // is a reasonable value for the processes we are looking at (C14,C15,C16).
+
+  if (xsection <= 0) {
+    xsection = 0.1;
+    logg[LScatterAction].warn(
+        "Calculated negative cross section.\nParticles ", incoming_particles_,
+        " mass rho particle: ", m_rho, ", sqrt_s: ", std::sqrt(s));
+  }
+  return xsection;
+}
+
+double ScatterActionPhoton::total_cross_section_w_ff(const double E_photon) {
+  /**
+   * The form factor is assumed to be a hadronic dipole form factor which
+   * takes the shape: FF = (2*Lambda^2/(2*Lambda^2 - t))^2 with
+   * Lambda = 1.0 GeV. t depends on the lightest possible exchange particle in
+   * the different channels. This could either be a pion or an omega meson. For
+   * the computation the parametrizations given in (\iref{Turbide:2006zz})
+   * are used.
+   */
+
+  /* C12, C13, C15, C16 need special treatment. These processes have identical
+     incoming and outgoing particles, but diffrent mediating particles and
+     hence different form factors. If both channels are added up
+     (MediatorType::SUM), each contribution is corrected by the corresponding
+     form factor.
+  */
+  switch (reac_) {
+    case ReactionType::pi_m_rho_p_pi_z:
+    case ReactionType::pi_p_rho_m_pi_z:
+    case ReactionType::pi_z_rho_m_pi_m:
+    case ReactionType::pi_z_rho_p_pi_p: {
+      if (default_mediator_ == MediatorType::SUM) {
+        std::pair<double, double> FF = form_factor_single(E_photon);
+        std::pair<double, double> xs = total_cross_section_single();
+        const double xs_ff = pow_int(FF.first, 4) * xs.first +
+                             pow_int(FF.second, 4) * xs.second;
+        return xs_ff;
+      } else if (default_mediator_ == MediatorType::PION) {
+        const double FF = form_factor_pion(E_photon);
+        const double xs = total_cross_section();
+        return pow_int(FF, 4) * xs;
+      } else if (default_mediator_ == MediatorType::OMEGA) {
+        const double FF = form_factor_omega(E_photon);
+        const double xs = total_cross_section();
+        return pow_int(FF, 4) * xs;
+      }
+      break;
+    }
+    case ReactionType::pi_z_pi_p_rho_p:
+    case ReactionType::pi_z_pi_m_rho_m:
+    case ReactionType::pi_p_rho_z_pi_p:
+    case ReactionType::pi_m_rho_z_pi_m:
+    case ReactionType::pi_p_pi_m_rho_z: {
+      const double FF = form_factor_pion(E_photon);
+      const double xs = total_cross_section();
+      const double xs_ff = pow_int(FF, 4) * xs;
+      return xs_ff;
+    }
+
+    case ReactionType::pi_z_rho_z_pi_z: {
+      const double FF = form_factor_omega(E_photon);
+      const double xs = total_cross_section();
+      const double xs_ff = pow_int(FF, 4) * xs;
+      return xs_ff;
+    }
+
+    case ReactionType::no_reaction:
+    default:
+      throw std::runtime_error("");
+      return 0;
+  }
+}
+
 double ScatterActionPhoton::form_factor_pion(const double E_photon) const {
   const double Lambda = 1.0;
   const double Lambda2 = Lambda * Lambda;
@@ -582,6 +654,13 @@ std::pair<double, double> ScatterActionPhoton::diff_cross_section_single(
       diff_cross_section(t, m_rho, MediatorType::OMEGA);
 
   return std::pair<double, double>(diff_xs_rho, diff_xs_omega);
+}
+
+std::pair<double, double> ScatterActionPhoton::total_cross_section_single() {
+  const double xs_rho = total_cross_section();
+  const double xs_omega = total_cross_section();
+
+  return std::pair<double, double>(xs_rho, xs_omega);
 }
 
 }  // namespace smash

@@ -98,7 +98,7 @@ class ScatterActionPhoton : public ScatterAction {
    * effect.
    */
   void add_single_process() {
-    add_processes<CollisionBranch>(photon_cross_sections(),
+    add_processes<CollisionBranch>(create_collision_branch(),
                                    collision_processes_photons_,
                                    cross_section_photons_);
   }
@@ -238,6 +238,7 @@ class ScatterActionPhoton : public ScatterAction {
   double diff_cross_section(const double t, const double m_rho,
                             MediatorType mediator = default_mediator_) const;
 
+  double total_cross_section(MediatorType mediator = default_mediator_) const;
   /**
    * Find the mass of the participating rho-particle.
    *
@@ -252,13 +253,14 @@ class ScatterActionPhoton : public ScatterAction {
   double rho_mass() const;
 
   /**
-   * Computes the total cross section of the photon process.
+   * Creates a CollisionBranchList containing the photon processes.
+   * By construction (perturbative treatment) this list will always contain only
+   * one branch.
    *
-   * \param[in] mediator Switch for determing which mediating particle to use.
-   * \returns List of photon reaction branches.
+   * \returns List containing the photon collision branch
+   *
    */
-  CollisionBranchList photon_cross_sections(
-      MediatorType mediator = default_mediator_);
+  CollisionBranchList create_collision_branch();
 
   /**
    * For processes which can happen via (pi, a1, rho) and omega exchange,
@@ -274,6 +276,7 @@ class ScatterActionPhoton : public ScatterAction {
    */
   std::pair<double, double> diff_cross_section_single(const double t,
                                                       const double m_rho);
+  std::pair<double, double> total_cross_section_single();
 
   /**
    * For processes which can happen via (pi, a1, rho) and omega exchange,
@@ -324,6 +327,8 @@ class ScatterActionPhoton : public ScatterAction {
    */
   double diff_cross_section_w_ff(const double t, const double m_rho,
                                  const double E_photon);
+
+  double total_cross_section_w_ff(const double E_photon);
 };
 
 }  // namespace smash
