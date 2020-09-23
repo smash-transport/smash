@@ -241,7 +241,7 @@ QuantumSampling::QuantumSampling(
  * +1 for Fermi
  *
  * This sampler is the simplest implementation of sampling based on sampling
- * from a uniform distribution. [elaborate?]
+ * from a uniform distribution.
  */
 double QuantumSampling::sample(const PdgCode pdg) {
   const ParticleType &ptype = ParticleType::find(pdg);
@@ -255,15 +255,6 @@ double QuantumSampling::sample(const PdgCode pdg) {
   constexpr double maximum_momentum = 10.0;  // in [GeV]
   const double statistics = (pdg.spin() % 2 == 0) ? -1.0 : 1.0;
   double sampled_momentum = 0.0, sampled_ratio = 0.0;
-
-  std::cout << "\n\n"
-	    << "\nQuantumSampling::sample:"
-	    << "\n      mass = " << mass
-	    << "\n        mu = " << mu
-	    << "\n distr_max = " << distr_max
-	    << "\nstatistics = " << statistics
-	    << "\n\n" << std::endl;
-  std::cin.get();
   
   do {
     sampled_momentum = random::uniform(0.0, maximum_momentum);

@@ -231,10 +231,10 @@ double ChemicalPotentialSolver::effective_chemical_potential
    * Check that the calculated chemical potential reproduces the input number
    * density within acceptable error.
    */
+  // precision for number density in units of fm^-3
+  const double precision_fm = 1e-3;
   const double conversion_factor =
       smash::hbarc * smash::hbarc * smash::hbarc;
-  // precision for number density in units of fm^-3
-  const double precision_fm = 1e-4;
   double nDensityCheck = density_one_species(
     degeneracy, mass, temperature, chemical_potential[0],
     statistics, &integrator_);
