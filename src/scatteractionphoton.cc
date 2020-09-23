@@ -648,19 +648,19 @@ std::pair<double, double> ScatterActionPhoton::form_factor_pair(
 }
 
 std::pair<double, double> ScatterActionPhoton::total_cross_section_pair() {
-  const double xs_rho = total_cross_section();
-  const double xs_omega = total_cross_section();
+  const double xs_pion = total_cross_section(MediatorType::PION);
+  const double xs_omega = total_cross_section(MediatorType::OMEGA);
 
-  return std::pair<double, double>(xs_rho, xs_omega);
+  return std::pair<double, double>(xs_pion, xs_omega);
 }
 
 std::pair<double, double> ScatterActionPhoton::diff_cross_section_pair(
     const double t, const double m_rho) {
-  const double diff_xs_rho = diff_cross_section(t, m_rho, MediatorType::PION);
+  const double diff_xs_pion = diff_cross_section(t, m_rho, MediatorType::PION);
   const double diff_xs_omega =
       diff_cross_section(t, m_rho, MediatorType::OMEGA);
 
-  return std::pair<double, double>(diff_xs_rho, diff_xs_omega);
+  return std::pair<double, double>(diff_xs_pion, diff_xs_omega);
 }
 
 }  // namespace smash
