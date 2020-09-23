@@ -33,8 +33,6 @@
 #include "smash/threevector.h"
 #include "smash/wallcrossingaction.h"
 
-
-
 namespace smash {
 static constexpr int LBox = LogArea::Box::id;
 
@@ -51,18 +49,18 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
       out << ptype->name() << " initial multiplicity " << p.second << '\n';
     }
   }
-  switch (m.initial_condition_){
-  case BoxInitialCondition::PeakedMomenta:
-    out << "All initial momenta = 3T = " << 3 * m.temperature_ << " GeV\n";
-    break;
-  case BoxInitialCondition::ThermalMomentaBoltzmann:
-    out << "Boltzmann momentum distribution with T = " << m.temperature_
-        << " GeV.\n";
-    break;
-  case BoxInitialCondition::ThermalMomentaQuantum:
-    out << "Fermi/Bose momentum distribution with T = " << m.temperature_
-	<< " GeV.\n";
-    break;
+  switch (m.initial_condition_) {
+    case BoxInitialCondition::PeakedMomenta:
+      out << "All initial momenta = 3T = " << 3 * m.temperature_ << " GeV\n";
+      break;
+    case BoxInitialCondition::ThermalMomentaBoltzmann:
+      out << "Boltzmann momentum distribution with T = " << m.temperature_
+          << " GeV.\n";
+      break;
+    case BoxInitialCondition::ThermalMomentaQuantum:
+      out << "Fermi/Bose momentum distribution with T = " << m.temperature_
+          << " GeV.\n";
+      break;
   }
   if (m.insert_jet_) {
     ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_);
@@ -303,8 +301,7 @@ double BoxModus::initial_conditions(Particles *particles,
     }
   }
   std::unique_ptr<QuantumSampling> quantum_sampling;
-  if (this->initial_condition_ ==
-      BoxInitialCondition::ThermalMomentaQuantum) {
+  if (this->initial_condition_ == BoxInitialCondition::ThermalMomentaQuantum) {
     quantum_sampling = make_unique<QuantumSampling>(init_multipl_, V, T);
   }
   for (ParticleData &data : *particles) {
@@ -329,7 +326,7 @@ double BoxModus::initial_conditions(Particles *particles,
          * We take the pole mass as the mass.
          */
         mass = data.type().mass();
-	momentum_radial = quantum_sampling->sample(data.pdgcode());
+        momentum_radial = quantum_sampling->sample(data.pdgcode());
       }
     }
     phitheta.distribute_isotropically();

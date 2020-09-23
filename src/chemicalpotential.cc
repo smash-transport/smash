@@ -27,18 +27,17 @@ namespace smash {
 /**
  * Vector number density of one particle species.
  */
-double ChemicalPotentialSolver::density_one_species
-  (double degeneracy, double mass, double temperature,
-   double effective_chemical_potential, double statistics,
-   Integrator *integrator) {
-  const auto integral = (*integrator)(0.0, 1.0, [&](double x)
-    {
-      return ((1.0 - x) * (1.0 - x) / (x * x * x * x)) *
-	juttner_distribution_func((1.0 - x) / x, mass, temperature,
-				  effective_chemical_potential, statistics);
-    });
+double ChemicalPotentialSolver::density_one_species(
+    double degeneracy, double mass, double temperature,
+    double effective_chemical_potential, double statistics,
+    Integrator *integrator) {
+  const auto integral = (*integrator)(0.0, 1.0, [&](double x) {
+    return ((1.0 - x) * (1.0 - x) / (x * x * x * x)) *
+           juttner_distribution_func((1.0 - x) / x, mass, temperature,
+                                     effective_chemical_potential, statistics);
+  });
   const double integrated_number_density =
-    ( degeneracy/(2.0 * M_PI * M_PI) ) * integral;
+      (degeneracy / (2.0 * M_PI * M_PI)) * integral;
 
   return integrated_number_density;
 }
@@ -48,15 +47,13 @@ double ChemicalPotentialSolver::density_one_species
  * for a given particle species.
  */
 
-double ChemicalPotentialSolver::root_equation_effective_chemical_potential
-  (double degeneracy, double mass, double number_density, double temperature,
-   double effective_chemical_potential, double statistics,
-   Integrator *integrator) {
-  
+double ChemicalPotentialSolver::root_equation_effective_chemical_potential(
+    double degeneracy, double mass, double number_density, double temperature,
+    double effective_chemical_potential, double statistics,
+    Integrator *integrator) {
   const double integrated_number_density =
-    density_one_species(
-      degeneracy, mass, temperature, effective_chemical_potential, statistics,
-      integrator);
+      density_one_species(degeneracy, mass, temperature,
+                          effective_chemical_potential, statistics, integrator);
 
   return number_density - integrated_number_density;
 }
@@ -85,8 +82,8 @@ int ChemicalPotentialSolver::root_equation_effective_chemical_potential_for_GSL(
   return GSL_SUCCESS;
 }
 
-void ChemicalPotentialSolver::print_state_effective_chemical_potential(unsigned int iter,
-                                             gsl_multiroot_fsolver *solver) {
+void ChemicalPotentialSolver::print_state_effective_chemical_potential(
+    unsigned int iter, gsl_multiroot_fsolver *solver) {
   printf(
       "\n***\nfind_effective_chemical_potential(): iter = %3u \t"
       "x = % .3f \t"
@@ -95,10 +92,9 @@ void ChemicalPotentialSolver::print_state_effective_chemical_potential(unsigned 
 }
 
 int ChemicalPotentialSolver::find_effective_chemical_potential(
-  double degeneracy, double mass, double number_density, double temperature,
-  double statistics, double mu_initial_guess, double solution_precision,
-  Integrator *integrator,
-  double *effective_chemical_potential) {
+    double degeneracy, double mass, double number_density, double temperature,
+    double statistics, double mu_initial_guess, double solution_precision,
+    Integrator *integrator, double *effective_chemical_potential) {
   const gsl_multiroot_fsolver_type *Solver_name;
   gsl_multiroot_fsolver *Root_finder;
 
@@ -108,13 +104,13 @@ int ChemicalPotentialSolver::find_effective_chemical_potential(
   const size_t problem_dimension = 1;
 
   struct ParametersForEffectiveChemicalPotentialRootFinderOneSpecies
-      parameters = {degeneracy, mass, number_density,
+      parameters = {degeneracy,  mass,       number_density,
                     temperature, statistics, integrator};
 
-  gsl_multiroot_function EffectiveChemicalPotential =
-    {&(ChemicalPotentialSolver::root_equation_effective_chemical_potential_for_GSL),
-      problem_dimension,
-      &parameters};
+  gsl_multiroot_function EffectiveChemicalPotential = {
+      &(ChemicalPotentialSolver::
+            root_equation_effective_chemical_potential_for_GSL),
+      problem_dimension, &parameters};
 
   double roots_array_initial[problem_dimension] = {mu_initial_guess};
 
@@ -141,21 +137,21 @@ int ChemicalPotentialSolver::find_effective_chemical_potential(
     if (status) {
       const double conversion_factor =
           smash::hbarc * smash::hbarc * smash::hbarc;
-      logg[LogArea::Main::id].warn
-	("\n\nThe GSL solver\nfind_effective_chemical_potential\nis stuck!"
-	 "\n\nInput parameters:"
-	 "\n            degeneracy = ", degeneracy,
-	 "\n            mass [GeV] = ", mass,
-	 "\nnumber_density [fm^-3] = ", number_density / (conversion_factor),
-	 "\n     temperature [GeV] = ", temperature,
-	 "\n            statistics = ", statistics,
-	 "\n    solution_precision = ", solution_precision,
-	 "\n\n"
-	 "Initialization cannot continue without calculating the "
-	 "chemical potential. \nTry adjusting the initial "
-	 "guess or the solution precision.\n\n\n");
-      throw std::runtime_error
-	("Chemical potential calculation returned no result.\n\n");
+      logg[LogArea::Main::id].warn(
+          "\n\nThe GSL solver\nfind_effective_chemical_potential\nis stuck!"
+          "\n\nInput parameters:"
+          "\n            degeneracy = ",
+          degeneracy, "\n            mass [GeV] = ", mass,
+          "\nnumber_density [fm^-3] = ", number_density / (conversion_factor),
+          "\n     temperature [GeV] = ", temperature,
+          "\n            statistics = ", statistics,
+          "\n    solution_precision = ", solution_precision,
+          "\n\n"
+          "Initialization cannot continue without calculating the "
+          "chemical potential. \nTry adjusting the initial "
+          "guess or the solution precision.\n\n\n");
+      throw std::runtime_error(
+          "Chemical potential calculation returned no result.\n\n");
       continue;
     }
 
@@ -178,9 +174,9 @@ int ChemicalPotentialSolver::find_effective_chemical_potential(
  * given particle species and performing sanity checks.
  */
 
-double ChemicalPotentialSolver::effective_chemical_potential
-  (double degeneracy, double mass, double number_density, double temperature,
-   double statistics, double solution_precision) {
+double ChemicalPotentialSolver::effective_chemical_potential(
+    double degeneracy, double mass, double number_density, double temperature,
+    double statistics, double solution_precision) {
   assert(temperature > 0);  // zero temperature case is not considered here
   assert(degeneracy > 0);
   assert(mass > 0);
@@ -209,7 +205,7 @@ double ChemicalPotentialSolver::effective_chemical_potential
    * Use of array is motivated by anticipating a generalization or overloading
    * of this solver to include effective mass calculation, which will lead to
    * multidimensional root finding, in which case the result is best passed as
-   * an array. 
+   * an array.
    */
   double chemical_potential[1];
   chemical_potential[0] = 0.0;
@@ -217,10 +213,9 @@ double ChemicalPotentialSolver::effective_chemical_potential
   /*
    * Call the GSL effective chemical potential finding procedure.
    */
-  find_effective_chemical_potential(degeneracy, mass, number_density,
-                                    temperature, statistics, initial_guess,
-                                    solution_precision, &integrator_,
-				    chemical_potential);
+  find_effective_chemical_potential(
+      degeneracy, mass, number_density, temperature, statistics, initial_guess,
+      solution_precision, &integrator_, chemical_potential);
 
   /*
    * Sanity checks are performed for the obtained value of the chemical
@@ -233,36 +228,37 @@ double ChemicalPotentialSolver::effective_chemical_potential
    */
   // precision for number density in units of fm^-3
   const double precision_fm = 1e-3;
-  const double conversion_factor =
-      smash::hbarc * smash::hbarc * smash::hbarc;
-  double nDensityCheck = density_one_species(
-    degeneracy, mass, temperature, chemical_potential[0],
-    statistics, &integrator_);
+  const double conversion_factor = smash::hbarc * smash::hbarc * smash::hbarc;
+  double nDensityCheck =
+      density_one_species(degeneracy, mass, temperature, chemical_potential[0],
+                          statistics, &integrator_);
 
-  if (abs((number_density - nDensityCheck)/conversion_factor) > precision_fm) {
-    logg[LogArea::Main::id].warn
-      ("\n\nThe calculated chemical potential = ", chemical_potential[0],
-       " [GeV] does not reproduce the input number density to within ",
-       precision_fm, "!"
-       "\nnumber_density [GeV^3] = ", number_density,
-       "\n nDensityCheck [GeV^3] = ", nDensityCheck,
-       "\nnumber_density [fm^-3] = ", number_density / (conversion_factor),
-       "\n nDensityCheck [fm^-3] = ", nDensityCheck / (conversion_factor),
-       "\n\n"
-       "Input parameters:"
-       "\n            degeneracy = ", degeneracy,
-       "\n            mass [GeV] = ", mass,
-       "\nnumber_density [fm^-3] = ", number_density / (conversion_factor),
-       "\n     temperature [GeV] = ", temperature,
-       "\n            statistics = ", statistics,
-       "\n    solution_precision = ", solution_precision,
-       "\n\n"
-       "Initialization cannot continue without a correct "
-       "calculation of the chemical potential."
-       "\nTry adjusting the initial guess or the solution precision.\n\n\n");
-    throw std::runtime_error
-      ("Chemical potential calculation does not reproduce the "
-       "input number density.\n\n");
+  if (abs((number_density - nDensityCheck) / conversion_factor) >
+      precision_fm) {
+    logg[LogArea::Main::id].warn(
+        "\n\nThe calculated chemical potential = ", chemical_potential[0],
+        " [GeV] does not reproduce the input number density to within ",
+        precision_fm,
+        "!"
+        "\nnumber_density [GeV^3] = ",
+        number_density, "\n nDensityCheck [GeV^3] = ", nDensityCheck,
+        "\nnumber_density [fm^-3] = ", number_density / (conversion_factor),
+        "\n nDensityCheck [fm^-3] = ", nDensityCheck / (conversion_factor),
+        "\n\n"
+        "Input parameters:"
+        "\n            degeneracy = ",
+        degeneracy, "\n            mass [GeV] = ", mass,
+        "\nnumber_density [fm^-3] = ", number_density / (conversion_factor),
+        "\n     temperature [GeV] = ", temperature,
+        "\n            statistics = ", statistics,
+        "\n    solution_precision = ", solution_precision,
+        "\n\n"
+        "Initialization cannot continue without a correct "
+        "calculation of the chemical potential."
+        "\nTry adjusting the initial guess or the solution precision.\n\n\n");
+    throw std::runtime_error(
+        "Chemical potential calculation does not reproduce the "
+        "input number density.\n\n");
   }
 
   /*
@@ -272,22 +268,22 @@ double ChemicalPotentialSolver::effective_chemical_potential
    * be in the Bose-Einstein condensate region.
    */
   if ((statistics == -1) && (chemical_potential[0] > mass)) {
-    logg[LogArea::Main::id].warn
-      ("\n\nThe calculated chemical potential indicates the "
-       "input number density is such that Bose-Einstein "
-       "condensate is encountered."
-       "Input parameters:"
-       "\n            degeneracy = ", degeneracy,
-       "\n            mass [GeV] = ", mass,
-       "\nnumber_density [fm^-3] = ", number_density / (conversion_factor),
-       "\n     temperature [GeV] = ", temperature,
-       "\n            statistics = ", statistics,
-       "\n    solution_precision = ", solution_precision,
-       "\n\n"
-       "Initialization cannot proceed with a pathological "
-       "distribution function leading to the Bose-Einstein "
-       "condensate. \nTry increasing the temperature or "
-       "decreasing the number density.\n\n\n");
+    logg[LogArea::Main::id].warn(
+        "\n\nThe calculated chemical potential indicates the "
+        "input number density is such that Bose-Einstein "
+        "condensate is encountered."
+        "Input parameters:"
+        "\n            degeneracy = ",
+        degeneracy, "\n            mass [GeV] = ", mass,
+        "\nnumber_density [fm^-3] = ", number_density / (conversion_factor),
+        "\n     temperature [GeV] = ", temperature,
+        "\n            statistics = ", statistics,
+        "\n    solution_precision = ", solution_precision,
+        "\n\n"
+        "Initialization cannot proceed with a pathological "
+        "distribution function leading to the Bose-Einstein "
+        "condensate. \nTry increasing the temperature or "
+        "decreasing the number density.\n\n\n");
     throw std::runtime_error(
         "Chemical potential calculation indicates that the Bose-Einstein "
         "condensate is produced.");
@@ -303,23 +299,23 @@ double ChemicalPotentialSolver::effective_chemical_potential
   const double distribution_at_small_p = juttner_distribution_func(
       small_p, mass, temperature, chemical_potential[0], statistics);
   if (distribution_at_small_p < 0.0) {
-    logg[LogArea::Main::id].warn
-      ("\n\nNegative values of the distribution function at "
-       "small momenta indicate that Bose-Einstein "
-       "condensate is encountered."
-       "Input parameters:"
-       "\n            degeneracy = ", degeneracy,
-       "\n            mass [GeV] = ", mass,
-       "\nnumber_density [fm^-3] = ", number_density / (conversion_factor),
-       "\n     temperature [GeV] = ", temperature,
-       "\n            statistics = ", statistics,
-       "\n    solution_precision = ", solution_precision,
-       "\n\nf(p=", small_p, ") = ", distribution_at_small_p,
-       "\n\n"
-       "Initialization cannot proceed with a pathological "
-       "distribution function leading to the Bose-Einstein "
-       "condensate. \nTry increasing the temperature or "
-       "decreasing the number density.\n\n\n");
+    logg[LogArea::Main::id].warn(
+        "\n\nNegative values of the distribution function at "
+        "small momenta indicate that Bose-Einstein "
+        "condensate is encountered."
+        "Input parameters:"
+        "\n            degeneracy = ",
+        degeneracy, "\n            mass [GeV] = ", mass,
+        "\nnumber_density [fm^-3] = ", number_density / (conversion_factor),
+        "\n     temperature [GeV] = ", temperature,
+        "\n            statistics = ", statistics,
+        "\n    solution_precision = ", solution_precision, "\n\nf(p=", small_p,
+        ") = ", distribution_at_small_p,
+        "\n\n"
+        "Initialization cannot proceed with a pathological "
+        "distribution function leading to the Bose-Einstein "
+        "condensate. \nTry increasing the temperature or "
+        "decreasing the number density.\n\n\n");
     throw std::runtime_error(
         "Negative values of the distribution function at low momenta "
         "indicate that the Bose-Einstein condensate is produced.");

@@ -165,11 +165,11 @@ class Integrator {
   /**
    * Set precision for the absolute and relative error of the integration.
    */
- void set_precision(double absolute, double relative) {
-   accuracy_absolute_ = absolute;
-   accuracy_relative_ = relative;
- }
-  
+  void set_precision(double absolute, double relative) {
+    accuracy_absolute_ = absolute;
+    accuracy_relative_ = relative;
+  }
+
  private:
   /// Holds the workspace pointer.
   std::unique_ptr<gsl_integration_cquad_workspace, GslWorkspaceDeleter>

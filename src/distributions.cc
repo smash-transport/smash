@@ -69,20 +69,21 @@ double density_integrand_2M_IC(const double energy, const double momentum_sqr,
 }
 
 /**
-  * Juttner distribution is a unified way of introducing quantum thermal
-  * distributions, in which the "statistics" variable controls the type of the
-  * distribution used:
-  * statistics = 0: Boltzmann distribution
-  * statistics = -1: Bose distribution
-  * statistics = +1: Fermi distribution
-  */
+ * Juttner distribution is a unified way of introducing quantum thermal
+ * distributions, in which the "statistics" variable controls the type of the
+ * distribution used:
+ * statistics = 0: Boltzmann distribution
+ * statistics = -1: Bose distribution
+ * statistics = +1: Fermi distribution
+ */
 double juttner_distribution_func(double momentum_radial, double mass,
                                  double temperature,
                                  double effective_chemical_potential,
                                  double statistics) {
   const double Boltzmann_factor =
-    std::exp(-(std::sqrt(momentum_radial * momentum_radial + mass * mass) -
-	       effective_chemical_potential) / temperature);
+      std::exp(-(std::sqrt(momentum_radial * momentum_radial + mass * mass) -
+                 effective_chemical_potential) /
+               temperature);
   // exp(-x) / [1 + exp(-x)] is numerically more stable than 1 / [exp(x) + 1]
   return Boltzmann_factor / (1 + statistics * Boltzmann_factor);
 }
