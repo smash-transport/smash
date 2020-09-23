@@ -12,6 +12,7 @@
 
 #include <gsl/gsl_multiroots.h>
 #include <gsl/gsl_vector.h>
+
 #include <smash/integrate.h>
 
 namespace smash {

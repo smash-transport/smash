@@ -10,10 +10,10 @@
 #ifndef SRC_INCLUDE_SMASH_QUANTUMSAMPLING_H_
 #define SRC_INCLUDE_SMASH_QUANTUMSAMPLING_H_
 
-#include <map>
-
 #include <gsl/gsl_multiroots.h>
 #include <gsl/gsl_vector.h>
+#include <map>
+
 #include "smash/pdgcode.h"
 #include "smash/random.h"
 
