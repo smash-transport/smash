@@ -341,9 +341,6 @@ class ScatterActionPhoton : public ScatterAction {
    * one process exists, both values are the same.Helper function to easier
    * combine processes with different mediating particles.
    *
-   * \param[in] t Mandelstam-t [GeV^2]
-   * \param[in] m_rho Mass of the incoming or outgoing rho-particle [GeV]
-   *
    * \returns total cross section for (pi,a1,rho) in the first argument,
    *           for omega in the second.
    */
