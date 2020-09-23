@@ -10,8 +10,8 @@
 #include "setup.h"
 
 #include "../include/smash/bremsstrahlungaction.h"
-#include "../include/smash/scatteractionphoton.h"
 #include "../include/smash/crosssectionsphoton.h"
+#include "../include/smash/scatteractionphoton.h"
 
 using namespace smash;
 using smash::Test::Momentum;
@@ -28,7 +28,7 @@ TEST(init_decay_modes) { Test::create_actual_decaymodes(); }
 // Test photon production in binary scatterings
 ////
 
-TEST(pi_rho0_pi_gamma) {
+TEST(binary_scatterings_pi_rho0_pi_gamma) {
   // set up a π+ and a ρ0 in center-of-momentum-frame
   const ParticleType &type_pi = ParticleType::find(0x211);
   ParticleData pi{type_pi};
@@ -51,7 +51,7 @@ TEST(pi_rho0_pi_gamma) {
   COMPARE_RELATIVE_ERROR(tot_weight, 0.000722419008, 0.08);
 }
 
-TEST(photon_and_hadron_reaction_type_function) {
+TEST(binary_scatterings_photon_and_hadron_reaction_type_function) {
   /*
    *creates possible photon reactions and also some that
    *produce no photons. Checks if the computed photon reaction type
@@ -113,7 +113,7 @@ TEST(photon_and_hadron_reaction_type_function) {
   VERIFY(ScatterActionPhoton::outgoing_hadron_type(l11) == pi_z_particle_ptr);
 }
 
-TEST(check_kinematic_thresholds) {
+TEST(binary_scatterings_check_kinematic_thresholds) {
   /*
    * Make sure pi + pi -> rho + photon process is only executed if sqrt(s) is
    * high enough to not only create final state rho, but also to assign momentum
@@ -160,11 +160,79 @@ TEST(check_kinematic_thresholds) {
       !photonAct_lowE.is_kinematically_possible(energy_a + energy_c, in_lowE));
 }
 
+TEST(binary_scatterings_total_cross_sections) {
+  // calculate crosssections and compare to analytic values
+
+  // (6a)
+  double cross1 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi_rho0(0.996,
+                                                                      0.776);
+  COMPARE_ABSOLUTE_ERROR(cross1, 0.724102, 1e-5);
+
+  // (6b)
+  double cross2 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi0_rho(1.12,
+                                                                      0.9);
+  COMPARE_ABSOLUTE_ERROR(cross2, 0.403305, 1e-5);
+
+  // (6c)
+  double cross3 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho0_pi(1.224,
+                                                                      0.776);
+  COMPARE_ABSOLUTE_ERROR(cross3, 0.107805, 1e-5);
+
+  // (6f)
+  double cross4 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(2.979,
+                                                                        0.776);
+  COMPARE_ABSOLUTE_ERROR(cross4, 0.779838, 1e-5);
+
+  // (6d) + (6h)
+  double cross5 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi(1.103,
+                                                                      0.776);
+  COMPARE_ABSOLUTE_ERROR(cross5, 0.079938, 1e-5);
+
+  // (6e) + (6g)
+  double cross6 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0(1.351,
+                                                                      0.9);
+  COMPARE_ABSOLUTE_ERROR(cross6, 0.494252, 1e-5);
+}
+
+TEST(binary_scatterings_diff_cross_sections) {
+  // calculate differential crosssections and compare with analytic values
+
+  // (6a)
+  double diff_cross1 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0(
+          1.0, -0.367612, 0.6);
+  COMPARE_ABSOLUTE_ERROR(diff_cross1, 0.383808, 1e-5);
+
+  // (6b)
+  double diff_cross2 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
+          1., -0.07066, 0.9);
+  COMPARE_ABSOLUTE_ERROR(diff_cross2, 1.89971, 1e-5);
+
+  // (6c)
+  double diff_cross3 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
+          1., -0.316209, 0.776);
+  COMPARE_ABSOLUTE_ERROR(diff_cross3, 0.510809, 1e-5);
+
+  // (6f)
+  double diff_cross4 =
+      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
+          1., -0.248786, 0.776);
+  COMPARE_ABSOLUTE_ERROR(diff_cross4, 0.6907271, 1e-5);
+}
+
 ////
 // Test photon production in Bremsstrahlung processes
 ////
 
-TEST(gen_final_state) {
+TEST(bremsstrahlung_gen_final_state) {
   // set up a π+ and a π- in center-of-momentum-frame
   const ParticleType &type_pip = ParticleType::find(0x211);
   ParticleData pip{type_pip};
@@ -221,95 +289,4 @@ TEST(bremsstrahlung_reaction_type_function) {
          BremsstrahlungAction::ReactionType::no_reaction);
   VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l8) ==
          BremsstrahlungAction::ReactionType::no_reaction);
-}
-
-TEST(photon_cross_sections) {
-  // calculate crosssections and compare to analytic values
-
-  // (6a)
-  double cross1 =
-      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi_rho0(
-          0.996, 0.776);
-  COMPARE_ABSOLUTE_ERROR(cross1, 0.724102, 1e-5);
-
-  // (6b)
-  double cross2 =
-      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_pi0_rho(
-          1.12, 0.9);
-  COMPARE_ABSOLUTE_ERROR(cross2, 0.403305, 1e-5);
-
-  // (6c)
-  double cross3 =
-      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho0_pi(
-          1.224, 0.776);
-  COMPARE_ABSOLUTE_ERROR(cross3, 0.107805, 1e-5);
-
-  // (6f)
-  double cross4 =
-      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho0_pi0(
-          2.979, 0.776);
-  COMPARE_ABSOLUTE_ERROR(cross4, 0.779838, 1e-5);
-
-  // (6d) + (6h)
-  double cross5 =
-      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi0_rho_pi(
-          1.103, 0.776);
-  COMPARE_ABSOLUTE_ERROR(cross5, 0.079938, 1e-5);
-
-  // (6e) + (6g)
-  double cross6 =
-      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_pi_rho_pi0(
-          1.351, 0.9);
-  COMPARE_ABSOLUTE_ERROR(cross6, 0.494252, 1e-5);
-}
-
-TEST(diff_cross_section) {
-  // calculate differential crosssections and compare with analytic values
-
-  // (6a)
-  double diff_cross1 =
-      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi_rho0(
-          1.0, -0.367612, 0.6);
-  COMPARE_ABSOLUTE_ERROR(diff_cross1, 0.383808, 1e-5);
-
-  // (6b)
-  double diff_cross2 =
-      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_pi0_rho(
-          1., -0.07066, 0.9);
-  COMPARE_ABSOLUTE_ERROR(diff_cross2, 1.89971, 1e-5);
-
-  // (6c)
-  double diff_cross3 =
-      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi_rho0_pi(
-          1., -0.316209, 0.776);
-  COMPARE_ABSOLUTE_ERROR(diff_cross3, 0.510809, 1e-5);
-
-  // (6f)
-  double diff_cross4 =
-      CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho0_pi0(
-          1., -0.248786, 0.776);
-  std::cout << "Cross4:    " << cross4 << std::endl;
-  std::cout << "Analytic4: " << 0.13775*0.3894 << std::endl;
-  // COMPARE_ABSOLUTE_ERROR(diff_cross4, .0, 1e-5);
-
-
-  // These two functions are defined in crosssectionsphoton.h
-  // but were never implemented !!!
-
-  // // (6d) + (6h)
-  // double cross5 =
-  //     CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
-  //         1.14301, -0.423672, 0.739093);
-  // std::cout << "Cross5:    " << cross5 << std::endl;
-  // std::cout << "Analytic5: " << 0.070465*0.3894 << std::endl;
-  // // COMPARE_ABSOLUTE_ERROR(cross5, .0, 1e-5);
-  //
-  // // (6e) + (6g)
-  // double cross6 =
-  //     CrosssectionsPhoton<ComputationMethod::Analytic>::xs_diff_pi0_rho_pi(
-  //         1., -0.599925, 0.592348);
-  // std::cout << "Cross6:    " << cross6 << std::endl;
-  // std::cout << "Analytic6: " << 0.216896*0.3894 << std::endl;
-  // // COMPARE_ABSOLUTE_ERROR(cross6, .0, 1e-5);
-
 }

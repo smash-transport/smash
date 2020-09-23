@@ -81,16 +81,12 @@ class CrosssectionsPhoton<ComputationMethod::Analytic> {
   static double xs_diff_pi_rho0_pi(const double s, const double t,
                                    const double m_rho);
 
-  static double xs_diff_pi_rho_pi0(const double s, const double t,
-                                   const double m_rho);
   static double xs_diff_pi_rho_pi0_rho_mediated(const double s, const double t,
                                                 const double m_rho);
   static double xs_diff_pi_rho_pi0_omega_mediated(const double s,
                                                   const double t,
                                                   const double m_rho);
 
-  static double xs_diff_pi0_rho_pi(const double s, const double t,
-                                   const double m_rho);
   static double xs_diff_pi0_rho_pi_rho_mediated(const double s, const double t,
                                                 const double m_rho);
   static double xs_diff_pi0_rho_pi_omega_mediated(const double s,
