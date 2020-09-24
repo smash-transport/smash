@@ -160,7 +160,6 @@ int ChemicalPotentialSolver::find_effective_chemical_potential(
     if (status == GSL_SUCCESS) {
       effective_chemical_potential[0] = gsl_vector_get(Root_finder->x, 0);
     }
-
   } while (status == GSL_CONTINUE && iter < 100000);
 
   gsl_multiroot_fsolver_free(Root_finder);
