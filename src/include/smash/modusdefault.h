@@ -86,8 +86,6 @@ class ModusDefault {
   FermiMotion fermi_motion() const { return FermiMotion::Off; }
   /// \return Maximal timestep accepted by this modus. Negative means infinity.
   double max_timestep(double) const { return -1.; }
-  /// \return Length of the box; overwritten in BoxModus
-  double length() const { return -1.; }
   /// \return equilibration time of the box; overwritten in BoxModus
   double equilibration_time() const { return -1.; }
 

@@ -38,10 +38,13 @@ class ScatterAction : public Action {
    * \param[in] time Time at which the action is supposed to take place
    * \param[in] isotropic if true, do the collision isotropically
    * \param[in] string_formation_time Time string fragments take to form
+   * \param[in] box_length Passing box length to determine
+   *            coordinate of the collision, in case it happened through
+   *            the wall in a box. If negative, then there is no wrapping.
    */
   ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
                 double time, bool isotropic = false,
-                double string_formation_time = 1.0);
+                double string_formation_time = 1.0, double box_length = -1.0);
 
   /**
    * Add a new collision channel.

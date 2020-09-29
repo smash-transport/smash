@@ -83,6 +83,11 @@ struct ExperimentParameters {
    * or decaying processes by shifting the threshold energies.
    */
   bool potential_affect_threshold;
+
+  /**
+   * Length of the box in fm in case of box modus, otherwise -1
+   */
+  double box_length;
 };
 
 }  // namespace smash

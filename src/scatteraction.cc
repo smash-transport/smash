@@ -32,11 +32,14 @@ static constexpr int LScatterAction = LogArea::ScatterAction::id;
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b, double time,
-                             bool isotropic, double string_formation_time)
+                             bool isotropic, double string_formation_time,
+                             double box_length)
     : Action({in_part_a, in_part_b}, time),
       total_cross_section_(0.),
       isotropic_(isotropic),
-      string_formation_time_(string_formation_time) {}
+      string_formation_time_(string_formation_time) {
+  box_length_ = box_length;
+}
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
   add_process<CollisionBranch>(p, collision_channels_, total_cross_section_);

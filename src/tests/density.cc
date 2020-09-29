@@ -161,7 +161,8 @@ TEST(smearing_factor_normalization) {
   conf["Modi"]["Box"]["Initial_Condition"] = "thermal momenta";
   conf["Modi"]["Box"]["Temperature"] = 0.2;
   conf["Modi"]["Box"]["Start_Time"] = 0.0;
-  const ExperimentParameters par = smash::Test::default_parameters();
+  ExperimentParameters par = smash::Test::default_parameters();
+  par.box_length = L;
   const DensityParameters dens_par = DensityParameters(par);
   std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
   Particles P;

@@ -346,6 +346,11 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // remove config maps of unused Modi
   config["Modi"].remove_all_but(modus_chooser);
 
+  double box_length = -1.0;
+  if (config.has_value({"Modi", "Box", "Length"})) {
+    box_length = config.read({"Modi", "Box", "Length"});
+  }
+
   /* If this Delta_Time option is absent (this can be for timestepless mode)
    * just assign 1.0 fm/c, reasonable value will be set at event initialization
    */
@@ -452,7 +457,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           config_coll.take({"Strings_with_Probability"}, true),
           config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
           low_snn_cut,
-          potential_affect_threshold};
+          potential_affect_threshold,
+          box_length};
 }
 
 std::string format_measurements(const Particles &particles,
@@ -609,7 +615,7 @@ double calculate_mean_field_energy(
 }
 
 EventInfo fill_event_info(const Particles &particles, double E_mean_field,
-                          double modus_impact_parameter, double modus_length,
+                          double modus_impact_parameter,
                           const ExperimentParameters &parameters,
                           bool projectile_target_interact) {
   const QuantumNumbers current_values(particles);
@@ -617,7 +623,7 @@ EventInfo fill_event_info(const Particles &particles, double E_mean_field,
   const double E_total = E_kinetic_total + E_mean_field;
 
   EventInfo event_info{modus_impact_parameter,
-                       modus_length,
+                       parameters.box_length,
                        parameters.outputclock->current_time(),
                        E_kinetic_total,
                        E_mean_field,

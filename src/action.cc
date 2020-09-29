@@ -73,6 +73,31 @@ FourVector Action::get_interaction_point() const {
     interaction_point += part.position();
   }
   interaction_point /= incoming_particles_.size();
+  /*
+   * In case of periodic boundaries interaction point is not necessarily
+   * (x1 + x2)/2. Consider only one dimension, e.g. x, the rest are analogous.
+   * Instead of x, there can be x + k * L, where k is any integer and L
+   * is period.Interaction point is either. Therefore, interaction point is
+   * (x1 + k * L + x2 + m * L) / 2  = (x1 + x2) / 2 + n * L / 2. We need
+   * this interaction point to be with [0, L], so n can be {-1, 0, 1}.
+   * Which n to choose? Our guiding principle is that n should be such that
+   * interaction point is closest to interacting particles.
+   */
+  if (box_length_ > 0) {
+    assert(incoming_particles_.size() == 2);
+    const FourVector r1 = incoming_particles_[0].position(),
+                     r2 = incoming_particles_[1].position(), r = r1 - r2;
+    for (int i = 1; i < 4; i++) {
+      const double d = std::abs(r[i]);
+      if (d > 0.5 * box_length_) {
+        if (interaction_point[i] >= 0.5 * box_length_) {
+          interaction_point[i] -= 0.5 * box_length_;
+        } else {
+          interaction_point[i] += 0.5 * box_length_;
+        }
+      }
+    }
+  }
   return interaction_point;
 }
 

@@ -359,6 +359,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /// Switch for NNbar reactions
   const NNbarTreatment nnbar_treatment_;
   /**
+   * Box length: needed to determine coordinates of collision
+   * correctly in case of collision through the wall.
+   * Ignored if negative.
+   */
+  const double box_length_;
+  /**
    * Parameter to record whether the nucleon has experienced a collision or not.
    */
   const std::vector<bool> &nucleon_has_interacted_;
