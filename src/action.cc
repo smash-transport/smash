@@ -73,18 +73,6 @@ FourVector Action::get_interaction_point() const {
     interaction_point += part.position();
   }
   interaction_point /= incoming_particles_.size();
-
-  bool printout = false;
-  for (const auto &part : incoming_particles_) {
-    if (std::abs(part.position().x1() - interaction_point.x1()) > 4.0) {
-      printout = true;
-      std::cout << "BEFORE: " << part.type().name()
-                << ": x = " << part.position().x1()
-                << ", interaction at x = " << interaction_point.x1()
-                << ", L[fm] = " << box_length_ << std::endl;
-    }
-  }
-
   /*
    * In case of periodic boundaries interaction point is not necessarily
    * (x1 + x2)/2. Consider only one dimension, e.g. x, the rest are analogous.
@@ -108,15 +96,6 @@ FourVector Action::get_interaction_point() const {
           interaction_point[i] += 0.5 * box_length_;
         }
       }
-    }
-  }
-
-  for (const auto &part : incoming_particles_) {
-    if (printout) {
-      std::cout << "AFTER:" << part.type().name()
-                << ": x = " << part.position().x1()
-                << ", interaction at x = " << interaction_point.x1()
-                << ", L[fm] = " << box_length_ << std::endl;
     }
   }
   return interaction_point;
