@@ -19,18 +19,10 @@
 
 namespace smash {
 
-/*
- * This block is for:
- * Root equations and GSL procedure for finding the momentum for which the
- * maximum of a given Juttner distribution occurs. This is needed for a method
- * of sampling the distribution function in which one samples uniformly below
- * the maximum of the distribution.
- */
-
 /**
  * This class:
- * - Tabulates chemical potential of quantum distribution given density (WRONG)
- * - Tabulates maxima of a Juttner distribution for these chemical potentials
+ * - Calculates chemical potentials given density of particle species
+ * - Calculates maxima of a Juttner distribution for these chemical potentials
  * - Samples Juttner distribution. This is the main intent of this class,
  *   while previous points are auxiliary calculations for it.
  */
