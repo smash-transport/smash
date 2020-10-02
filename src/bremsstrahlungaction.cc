@@ -132,7 +132,8 @@ void BremsstrahlungAction::generate_final_state() {
     // assuming decaying particles are always fully formed
     new_particle.set_formation_time(time_of_execution_);
     new_particle.set_4position(interaction_point);
-    new_particle.boost_momentum(-beta_cm());
+    new_particle.boost_momentum(
+        -total_momentum_of_outgoing_particles().velocity());
   }
 
   // Photons are not really part of the normal processes, so we have to set a
