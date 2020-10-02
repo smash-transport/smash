@@ -207,8 +207,12 @@ class ScatterAction : public Action {
   double cm_momentum_squared() const;
 
   /**
-   * Get the velocity of the center of mass of the scattering particles
+   * Get the velocity of the center of mass of the scattering/incoming particles
    * in the calculation frame.
+   *
+   * Note: Do not use this function to boost the outgoing
+   * particles. Use total_momentum_of_outgoing_particles(), which corrects for
+   * the effect of potentials on intial and final state.
    *
    * \return boost velocity between center of mass and calculation frame.
    */

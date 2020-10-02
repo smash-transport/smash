@@ -268,8 +268,10 @@ class Action {
   /**
    * Calculate the total kinetic momentum of the outgoing particles
    *
-   * This function is used when the species of the outgoing
-   * particles are already determined.
+   * Use this to determine the momemtum and boost of the outgoing particles by
+   * calcluating the total momentum of the incoming particles and correcting it
+   * for the effect of potentials. This function is used when the species and
+   * postion of the outgoing particles are already determined.
    *
    * \return total kinetic momentum of the outgoing particles [GeV]
    */
