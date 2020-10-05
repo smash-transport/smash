@@ -257,7 +257,8 @@ inline ExperimentParameters default_parameters(int testparticles = 1,
       NNbarTreatment::NoAnnihilation,
       0.,     // low energy sigma_NN cut-off
       false,  // potential_affect_threshold
-      -1.0    // box_length
+      -1.0,   // box_length
+      200.0   // max. cross section
   };
 }
 

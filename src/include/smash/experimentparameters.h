@@ -88,6 +88,16 @@ struct ExperimentParameters {
    * Length of the box in fm in case of box modus, otherwise -1
    */
   double box_length;
+
+  /**
+   * The maximal cross section (in mb) for which it is guaranteed that all
+   * collisions with this cross section will be found.
+   *
+   * This means that all particle pairs, where the transverse distance
+   * is smaller or equal to \f$ \sqrt{\sigma_{max}/\pi} \f$,
+   * will be checked for collions.
+   */
+  double maximum_cross_section; // mb
 };
 
 }  // namespace smash

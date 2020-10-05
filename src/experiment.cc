@@ -444,6 +444,18 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   }
   const bool potential_affect_threshold =
       config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);
+  /**
+   * The maximum around 200 mb occurs in the Delta peak of the pi+p
+   * cross section. Many SMASH cross sections diverge at the threshold,
+   * these divergent parts are effectively cut off. If deuteron production
+   * via d' is considered, then the default should be increased to 2000 mb
+   * to function correctly (see \iref{Oliinychenko:2018ugs}).
+   */
+  double maximum_cross_section_default =
+      ParticleType::exists("d'") ? 2000.0 : 200.0;
+  double maximum_cross_section =
+      config.take({"Collision_Term", "Maximum_Cross_Section"},
+          maximum_cross_section_default);
   return {make_unique<UniformClock>(0.0, dt),
           std::move(output_clock),
           ntest,
@@ -458,7 +470,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
           low_snn_cut,
           potential_affect_threshold,
-          box_length};
+          box_length,
+          maximum_cross_section};
 }
 
 std::string format_measurements(const Particles &particles,
