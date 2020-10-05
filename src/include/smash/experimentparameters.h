@@ -97,7 +97,7 @@ struct ExperimentParameters {
    * is smaller or equal to \f$ \sqrt{\sigma_{max}/\pi} \f$,
    * will be checked for collions.
    */
-  double maximum_cross_section; // mb
+  double maximum_cross_section;  // mb
 };
 
 }  // namespace smash
