@@ -256,7 +256,8 @@ void ScatterActionPhoton::generate_final_state() {
   // Set positions & boost to computational frame.
   for (ParticleData &new_particle : outgoing_particles_) {
     new_particle.set_4position(middle_point);
-    new_particle.boost_momentum(-beta_cm());
+    new_particle.boost_momentum(
+        -total_momentum_of_outgoing_particles().velocity());
   }
 
   const double E_Photon = outgoing_particles_[1].momentum()[0];
