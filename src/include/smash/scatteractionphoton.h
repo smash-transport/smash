@@ -98,7 +98,7 @@ class ScatterActionPhoton : public ScatterAction {
    * effect.
    */
   void add_single_process() {
-    add_processes<CollisionBranch>(photon_cross_sections(),
+    add_processes<CollisionBranch>(create_collision_branch(),
                                    collision_processes_photons_,
                                    cross_section_photons_);
   }
@@ -226,19 +226,6 @@ class ScatterActionPhoton : public ScatterAction {
   const double hadronic_cross_section_;
 
   /**
-   * Calculate the differential cross section of  photon process.
-   * Formfactors are not included
-   *
-   * \param[in] t Mandelstam-t [GeV^2].
-   * \param[in] m_rho Mass of the incoming or outgoing rho-particle [GeV]
-   * \param[in] mediator Switch for determing which mediating particle to use
-   *
-   * \return Differential cross section. [mb/\f$GeV^2\f$]
-   */
-  double diff_cross_section(const double t, const double m_rho,
-                            MediatorType mediator = default_mediator_) const;
-
-  /**
    * Find the mass of the participating rho-particle.
    *
    * In case of a rho in the incoming channel it is the mass of the incoming
@@ -252,41 +239,64 @@ class ScatterActionPhoton : public ScatterAction {
   double rho_mass() const;
 
   /**
-   * Computes the total cross section of the photon process.
+   * Creates a CollisionBranchList containing the photon processes.
+   * By construction (perturbative treatment) this list will always contain only
+   * one branch.
    *
-   * \param[in] mediator Switch for determing which mediating particle to use.
-   * \returns List of photon reaction branches.
+   * \returns List containing the photon collision branch
+   *
    */
-  CollisionBranchList photon_cross_sections(
-      MediatorType mediator = default_mediator_);
+  CollisionBranchList create_collision_branch();
 
   /**
-   * For processes which can happen via (pi, a1, rho) and omega exchange,
-   * return the differential cross section for the (pi, a1, rho) process in
-   * the first argument, for the omega process in the second. If only
-   * one process exists, both values are the same.
+   * Calculate the total cross section of the photon process.
+   * Formfactors are not included
+   *
+   * \param[in] mediator Switch for determing which mediating particle to use
+   *
+   * \return Total cross section. [mb]
+   */
+  double total_cross_section(MediatorType mediator = default_mediator_) const;
+
+  /**
+   * Compute the total cross corrected for form factors.
+   *
+   * Takes care of correct handling of reactions with multiple processes by
+   * reading the default_mediator_ member variable.
+   *
+   * \param[in] E_photon of outgoing photon [GeV]
+   *
+   * \returns total cross section including form factors [mb]
+   */
+  double total_cross_section_w_ff(const double E_photon);
+
+  /**
+   * Calculate the differential cross section of the photon process.
+   * Formfactors are not included
+   *
+   * \param[in] t Mandelstam-t [GeV^2].
+   * \param[in] m_rho Mass of the incoming or outgoing rho-particle [GeV]
+   * \param[in] mediator Switch for determing which mediating particle to use
+   *
+   * \return Differential cross section. [mb/\f$GeV^2\f$]
+   */
+  double diff_cross_section(const double t, const double m_rho,
+                            MediatorType mediator = default_mediator_) const;
+
+  /**
+   * Compute the differential cross section corrected for form factors
+   *
+   * Takes care of correct handling of reactions with multiple processes by
+   * reading the default_mediator_ member variable.
    *
    * \param[in] t Mandelstam-t [GeV^2]
    * \param[in] m_rho Mass of the incoming or outgoing rho-particle [GeV]
+   * \param[in] E_photon of outgoing photon [GeV]
    *
-   * \returns diff. cross section for (pi,a1,rho) in the first argument,
-   *           for omega in the second.
+   * \returns diff. cross section [mb / GeV \f$^2\f$]
    */
-  std::pair<double, double> diff_cross_section_single(const double t,
-                                                      const double m_rho);
-
-  /**
-   * For processes which can happen via (pi, a1, rho) and omega exchange,
-   * return the form factor for the (pi, a1, rho) process in
-   * the first argument, for the omega process in the second. If only
-   * one process exists, both values are the same.
-   *
-   * \param[in] E_photon Energy of the photon [GeV]
-   *
-   * \return Form factor for (pi,a1,rho) in the first argument,
-   * for omega in the second.
-   */
-  std::pair<double, double> form_factor_single(const double E_photon);
+  double diff_cross_section_w_ff(const double t, const double m_rho,
+                                 const double E_photon);
 
   /**
    * Compute the form factor for a process with a pion as the lightest exchange
@@ -311,19 +321,46 @@ class ScatterActionPhoton : public ScatterAction {
   double form_factor_omega(const double E_photon) const;
 
   /**
-   * Compute the differential cross section with form factors included.
+   * For processes which can happen via (pi, a1, rho) and omega exchange,
+   * return the form factor for the (pi, a1, rho) process in
+   * the first argument, for the omega process in the second. If only
+   * one process exists, both values are the same. Helper function to easier
+   * combine processes with different mediating particles.
    *
-   * Takes care of correct handling of reactions with multiple processes by
-   * reading the default_mediator_ member variable.
+   * \param[in] E_photon Energy of the photon [GeV]
+   *
+   * \return Form factor for (pi,a1,rho) in the first argument,
+   * for omega in the second.
+   */
+  std::pair<double, double> form_factor_pair(const double E_photon);
+
+  /**
+   * For processes which can happen via (pi, a1, rho) and omega exchange,
+   * return the total cross section for the (pi, a1, rho) process in
+   * the first argument, for the omega process in the second. If only
+   * one process exists, both values are the same.Helper function to easier
+   * combine processes with different mediating particles.
+   *
+   * \returns total cross section for (pi,a1,rho) in the first argument,
+   *           for omega in the second.
+   */
+  std::pair<double, double> total_cross_section_pair();
+
+  /**
+   * For processes which can happen via (pi, a1, rho) and omega exchange,
+   * return the differential cross section for the (pi, a1, rho) process in
+   * the first argument, for the omega process in the second. If only
+   * one process exists, both values are the same.Helper function to easier
+   * combine processes with different mediating particles.
    *
    * \param[in] t Mandelstam-t [GeV^2]
    * \param[in] m_rho Mass of the incoming or outgoing rho-particle [GeV]
-   * \param[in] E_photon of outgoing photon [GeV]
    *
-   * \returns diff. cross section [mb / GeV \f$^2\f$]
+   * \returns diff. cross section for (pi,a1,rho) in the first argument,
+   *           for omega in the second.
    */
-  double diff_cross_section_w_ff(const double t, const double m_rho,
-                                 const double E_photon);
+  std::pair<double, double> diff_cross_section_pair(const double t,
+                                                    const double m_rho);
 };
 
 }  // namespace smash

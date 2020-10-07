@@ -169,7 +169,8 @@ class StringProcess {
    */
   ParticleList final_state_;
 
-  /* Map containing PYTHIA objects for hard string routines.
+  /**
+   * Map containing PYTHIA objects for hard string routines.
    * Particle IDs are used as the keys to obtain the respective object.
    * This was introduced to reduce the amount of Pythia init() calls.
    */

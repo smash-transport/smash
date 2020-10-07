@@ -27,6 +27,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Fixed
 * Consider cross section scaling factor of incoming particles for photon production. This factor was previously neglected, resulting in exploding weights and overestimated photon production.
+* Use form factors for binary scattering photons also in the case of Nfrac=1
 
 ### Changed
 * The Pythia version is increased to 8.302 (or newer)
