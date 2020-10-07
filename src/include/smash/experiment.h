@@ -2008,7 +2008,6 @@ void Experiment<Modus>::update_potentials() {
       update_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
                      DensityType::Baryon, density_param_, particles_, true);
       const size_t UBlattice_size = UB_lat_->size();
-      assert(UBlattice_size == UI3_lat_->size());
       for (size_t i = 0; i < UBlattice_size; i++) {
         auto jB = (*jmu_B_lat_)[i];
         const FourVector flow_four_velocity_B =
