@@ -51,6 +51,29 @@ TEST(binary_scatterings_pi_rho0_pi_gamma) {
   COMPARE_RELATIVE_ERROR(tot_weight, 0.000722419008, 0.08);
 }
 
+TEST(binary_scatterings_pi_rho0_pi_gamma_Nfrac_1) {
+  // set up a π+ and a ρ0 in center-of-momentum-frame
+  const ParticleType &type_pi = ParticleType::find(0x211);
+  ParticleData pi{type_pi};
+  pi.set_4momentum(type_pi.mass(),  // pole mass
+                   ThreeVector(0., 0., 2.));
+  const ParticleType &type_rho0 = ParticleType::find(0x113);
+  ParticleData rho0{type_rho0};
+  rho0.set_4momentum(type_rho0.mass(),  // pole mass
+                     ThreeVector(0., 0., -2.));
+  const int number_of_photons = 1;
+  ParticleList in{pi, rho0};
+  const auto act2 =
+      make_unique<ScatterActionPhoton>(in, 0.05, number_of_photons, 5.0);
+  act2->add_single_process();
+  double tot_weight2 = 0.0;
+  for (int i = 0; i < number_of_photons; i++) {
+    act2->generate_final_state();
+    tot_weight2 += act2->get_total_weight();
+  }
+  COMPARE_RELATIVE_ERROR(tot_weight2, 0.000722419008, 0.08);
+}
+
 TEST(binary_scatterings_photon_and_hadron_reaction_type_function) {
   /*
    *creates possible photon reactions and also some that
@@ -162,6 +185,7 @@ TEST(binary_scatterings_check_kinematic_thresholds) {
 
 TEST(binary_scatterings_total_cross_sections) {
   // calculate crosssections and compare to analytic values
+  // naming follows arXiv:1902.07564
 
   // (6a)
   double cross1 =
@@ -202,6 +226,7 @@ TEST(binary_scatterings_total_cross_sections) {
 
 TEST(binary_scatterings_diff_cross_sections) {
   // calculate differential crosssections and compare with analytic values
+  // naming follows arXiv:1902.07564
 
   // (6a)
   double diff_cross1 =
