@@ -91,6 +91,8 @@ before_install:
     tar -xf eigen-3.3.5.tar.gz -C $HOME
   # cpplint
   - pip install --user cpplint
+  # doxgen
+  - sudo apt-get install doxygen
 
 install:
   - cd $SMASH_ROOT
