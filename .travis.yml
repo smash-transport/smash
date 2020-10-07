@@ -30,15 +30,16 @@ matrix:
           - g++-9
     env:
       - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
-  # old clang version on linux
+  # test fias gcc version
   - os: linux
+    dist: xenial
     addons:
       apt:
         packages:
           - libboost-all-dev
-          - clang-3.5
+          - g++-5
     env:
-      - MATRIX_EVAL="CC=clang-3.5 && CXX=clang++-3.5"
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
   # most recent clang version on linux
   - os: linux
     dist: bionic
