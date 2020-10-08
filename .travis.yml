@@ -17,6 +17,8 @@ matrix:
           - libboost-all-dev
           - g++-4.8
           - doxygen
+          - graphviz
+          - texlive-binaries
     env:
       - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8"
   # most recent gcc version
@@ -30,6 +32,8 @@ matrix:
           - libboost-all-dev
           - g++-9
           - doxygen
+          - graphviz
+          - texlive-binaries
     env:
       - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
   # test fias gcc version
@@ -41,6 +45,8 @@ matrix:
           - libboost-all-dev
           - g++-5
           - doxygen
+          - graphviz
+          - texlive-binaries
     env:
       - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
   # most recent clang version on linux
@@ -55,6 +61,8 @@ matrix:
           - libboost-all-dev
           - clang-9
           - doxygen
+          - graphviz
+          - texlive-binaries
     env:
       - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
   # most recent xcode (changes also clang version)
@@ -65,6 +73,7 @@ matrix:
         packages:
         - boost
         - doxygen
+        - graphviz
     env:
       - MATRIX_EVAL="CC=clang && CXX=clang++"
 
