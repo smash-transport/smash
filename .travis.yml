@@ -109,4 +109,6 @@ script:
   - PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/clang-format-helper.bash -t
   - CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
   # test that everything is documented
+  - make undocumented
+  - make undocumented_count
   - (if [[ $(make undocumented_count | grep -E '============ There are ' | grep -o '[[:digit:]]\+') = 0 ]]; then echo 'Everything documented.' && exit 0; else echo 'Some functions are missing documentation. Check `make undocumented`.' && exit 1; fi)
