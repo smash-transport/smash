@@ -455,7 +455,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       ParticleType::exists("d'") ? 2000.0 : 200.0;
   double maximum_cross_section =
       config.take({"Collision_Term", "Maximum_Cross_Section"},
-          maximum_cross_section_default);
+                  maximum_cross_section_default);
   return {make_unique<UniformClock>(0.0, dt),
           std::move(output_clock),
           ntest,
