@@ -103,7 +103,7 @@ install:
 
 script:
   # test that everything is documented (only for one build)
-  - if [ "$MATRIX_EVAL" = "CC=gcc-5 && CXX=g++-5" ]; then (if [[ $(make undocumented_count | grep -E '============ There are ' | grep -o '[[:digit:]]\+') = 0 ]]; then echo 'PASS: Everything documented.' && exit 0; else echo 'ERROR: Some functions are missing documentation. See below.' && make undocumented  && exit 1; fi); fi
+  - if [ "$MATRIX_EVAL" = "CC=gcc-5 && CXX=g++-5" ]; then (if [[ $(make undocumented_count | grep -E '============ There are ' | grep -o '[[:digit:]]\+') = 0 ]]; then echo 'Everything documented.' && exit 0; else echo 'Some functions are missing documentation. See below.' && make undocumented  && exit 1; fi); fi
   # use correct clang version for format helper
   - PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/clang-format-helper.bash -t
   - CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
