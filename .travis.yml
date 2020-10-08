@@ -16,9 +16,8 @@ matrix:
         packages:
           - libboost-all-dev
           - g++-4.8
-          - doxygen
+          - doxygen-latex
           - graphviz
-          - texlive-binaries
     env:
       - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8"
   # most recent gcc version
@@ -31,9 +30,8 @@ matrix:
         packages:
           - libboost-all-dev
           - g++-9
-          - doxygen
+          - doxygen-latex
           - graphviz
-          - texlive-binaries
     env:
       - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
   # test fias gcc version
@@ -44,9 +42,8 @@ matrix:
         packages:
           - libboost-all-dev
           - g++-5
-          - doxygen
+          - doxygen-latex
           - graphviz
-          - texlive-binaries
     env:
       - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
   # most recent clang version on linux
@@ -60,9 +57,8 @@ matrix:
         packages:
           - libboost-all-dev
           - clang-9
-          - doxygen
+          - doxygen-latex
           - graphviz
-          - texlive-binaries
     env:
       - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
   # most recent xcode (changes also clang version)
@@ -74,6 +70,7 @@ matrix:
         - boost
         - doxygen
         - graphviz
+        casks: basictex
     env:
       - MATRIX_EVAL="CC=clang && CXX=clang++"
 
@@ -114,10 +111,10 @@ install:
   - make -j$(nproc)
 
 script:
-  # use correct clang version for format helper
-  - PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/clang-format-helper.bash -t
-  - CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
   # test that everything is documented
   - make undocumented
   - make undocumented_count
   - (if [[ $(make undocumented_count | grep -E '============ There are ' | grep -o '[[:digit:]]\+') = 0 ]]; then echo 'Everything documented.' && exit 0; else echo 'Some functions are missing documentation. Check `make undocumented`.' && exit 1; fi)
+  # use correct clang version for format helper
+  - PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/clang-format-helper.bash -t
+  - CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
