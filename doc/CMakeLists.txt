@@ -87,6 +87,16 @@ if(DOXYGEN)
          COMMENT "Building Doxygen Code Documentation (only with documented entities) and count doxgen warnings"
          VERBATIM
          )
+
+      add_custom_target(undocumented_test ${DOXYGEN}
+        ${CMAKE_CURRENT_BINARY_DIR}/DoxyfileOnlyDocumented 2>&1 |
+        ${GREP} -v 3rdparty |
+        ${SORT} -u |
+        ${GREP} -i warning: | ${GREP} -icv "einhard" | ${GREP} -q "0"
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        COMMENT "Testing Doxygen Code Documentation for CI. Errors if there are warnings."
+        VERBATIM
+        )
    endif()
    mark_as_advanced(XARGS PRINTF SORT SED GREP DOT_EXECUTABLE DOXYGEN)
 else()
