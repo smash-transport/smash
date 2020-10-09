@@ -593,7 +593,8 @@ double calculate_mean_field_energy(
     density_mean = density_mean / number_of_nodes;
     density_variance = density_variance / number_of_nodes;
     double density_scaled_variance =
-        sqrt(density_variance - density_mean * density_mean) / density_mean;
+        std::sqrt(density_variance - density_mean * density_mean) /
+        density_mean;
     logg[LExperiment].debug() << "\t\t\t\t\t";
     logg[LExperiment].debug()
         << "\n\t\t\t\t\t            density mean = " << density_mean;

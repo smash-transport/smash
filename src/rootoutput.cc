@@ -452,7 +452,8 @@ void RootOutput::particles_to_tree(T &particles) {
             << "\nThe number of particles N = " << particles.size()
             << " exceeds the maximum buffer size B = " << max_buffer_size_
             << ".\nceil(N/B) = "
-            << ceil(particles.size() / static_cast<double>(max_buffer_size_))
+            << std::ceil(particles.size() /
+                         static_cast<double>(max_buffer_size_))
             << " separate ROOT Tree entries will be created at this output."
             << "\nMaximum buffer size (max_buffer_size_) can be changed in "
             << "rootoutput.h\n\n";

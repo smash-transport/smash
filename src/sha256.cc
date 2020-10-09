@@ -165,7 +165,7 @@ void Context::update(uint8_t const* buffer, size_t buffer_size) {
       buffer_size -= BLOCK_SIZE;
     } else {
       n = MIN(buffer_size, (BLOCK_SIZE - curlen_));
-      memcpy(buf_ + curlen_, buffer, n);
+      std::memcpy(buf_ + curlen_, buffer, n);
       curlen_ += n;
       buffer += n;
       buffer_size -= n;

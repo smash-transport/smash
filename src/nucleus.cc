@@ -391,7 +391,7 @@ void Nucleus::generate_fermi_momenta() {
     }
     const double r = (i->position() - nucleus_center).abs3();
     const double theta = (i->position().threevec().get_theta());
-    double rho = nucleon_density(r, cos(theta));
+    double rho = nucleon_density(r, std::cos(theta));
 
     if (i->pdgcode() == pdg::p) {
       rho = rho * N_p / A;

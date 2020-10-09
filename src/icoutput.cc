@@ -144,13 +144,14 @@ void ICOutput::at_interaction(const Action &action, const double) {
   ParticleData particle = action.incoming_particles()[0];
 
   // transverse mass
-  const double m_trans = sqrt(particle.type().mass() * particle.type().mass() +
-                              particle.momentum()[1] * particle.momentum()[1] +
-                              particle.momentum()[2] * particle.momentum()[2]);
+  const double m_trans =
+      std::sqrt(particle.type().mass() * particle.type().mass() +
+                particle.momentum()[1] * particle.momentum()[1] +
+                particle.momentum()[2] * particle.momentum()[2]);
   // momentum space rapidity
   const double rapidity =
-      0.5 * log((particle.momentum()[0] + particle.momentum()[3]) /
-                (particle.momentum()[0] - particle.momentum()[3]));
+      0.5 * std::log((particle.momentum()[0] + particle.momentum()[3]) /
+                     (particle.momentum()[0] - particle.momentum()[3]));
 
   // Determine if particle is spectator:
   // Fulfilled if particle is initial nucleon, aka has no prior interactions
