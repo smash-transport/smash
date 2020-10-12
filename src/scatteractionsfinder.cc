@@ -435,7 +435,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     if (prob > 1.) {
       std::stringstream err;
       err << "Probability larger than 1 for stochastic rates. ( P = " << prob
-          << " )\nUse smaller timesteps.\n";
+          << " )\nUse smaller timesteps.";
       throw std::runtime_error(err.str());
     }
 
