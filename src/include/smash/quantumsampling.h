@@ -90,7 +90,7 @@ class QuantumSampling {
   /**
    * A GSL root solver for finding the radial momentum value at which the
    * maximum of the given Juttner distribution function occurs. For the value of
-   * the distribution at the maximu, one shoud use the function
+   * the distribution at the maximum, one shoud use the function
    * maximum_of_the_distribution().
    * \param[in] mass (pole) mass of the particle species
    * \param[in] temperature temperature of the system
@@ -105,15 +105,16 @@ class QuantumSampling {
    * \param[out] p_max the solution (momentum for which the distribution takes
    *             on the maximum value) stored in an array object
    */
-  static int find_maximum_of_the_distribution(
+  static int find_p_at_maximum_of_the_distribution(
       double mass, double temperature, double effective_chemical_potential,
       double statistics, double p_max_initial_guess, double solution_precision,
       double* p_max);
 
   /**
-   * A convenience wrapper for find_maximum_of_the_distribution(), yielding the
-   * maximum value of the distribution corresponding to the momentum at maximum
-   * found by find_maximum_of_the_distribution().
+   * A convenience wrapper for finding the maximum value of the Juttner
+   * distribution, returning the value of the distribution for the momentum
+   * at which the maximum occurs, identified by
+   * find_p_at_maximum_of_the_distribution().
    * \param[in] mass (pole) mass of the particle species
    * \param[in] temperature temperature of the system
    * \param[in[ effective_chemical_potential effective chemical potential of

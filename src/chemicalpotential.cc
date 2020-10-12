@@ -60,10 +60,8 @@ double ChemicalPotentialSolver::root_equation_effective_chemical_potential(
 
 int ChemicalPotentialSolver::root_equation_effective_chemical_potential_for_GSL(
     const gsl_vector *roots_array, void *parameters, gsl_vector *function) {
-  struct ParametersForEffectiveChemicalPotentialRootFinderOneSpecies *par =
-      static_cast<
-          ParametersForEffectiveChemicalPotentialRootFinderOneSpecies *>(
-          parameters);
+  struct ParametersForChemPotSolver *par =
+      static_cast<ParametersForChemPotSolver *>(parameters);
 
   const double degeneracy = (par->degeneracy);
   const double mass = (par->mass);
@@ -103,9 +101,8 @@ int ChemicalPotentialSolver::find_effective_chemical_potential(
 
   const size_t problem_dimension = 1;
 
-  struct ParametersForEffectiveChemicalPotentialRootFinderOneSpecies
-      parameters = {degeneracy,  mass,       number_density,
-                    temperature, statistics, integrator};
+  struct ParametersForChemPotSolver parameters = {
+      degeneracy, mass, number_density, temperature, statistics, integrator};
 
   gsl_multiroot_function EffectiveChemicalPotential = {
       &(ChemicalPotentialSolver::
@@ -127,14 +124,21 @@ int ChemicalPotentialSolver::find_effective_chemical_potential(
   do {
     iter++;
 
+    /*
+     * gsl_multiroot_fsolver_iterate returns either 0 for a correct behavior,
+     * or an error code (a positive integer) when the solver is stuck
+     */
     status = gsl_multiroot_fsolver_iterate(Root_finder);
 
     // print_state_effective_chemical_potential (iter, Root_finder);
 
     /*
-     * Check if the solver is stuck
+     * Check whether the solver is stuck
      */
     if (status) {
+      std::cout << "\nGSL error message:\n"
+                << gsl_strerror(status) << "\n\n"
+                << std::endl;
       const double conversion_factor =
           smash::hbarc * smash::hbarc * smash::hbarc;
       logg[LogArea::Main::id].warn(

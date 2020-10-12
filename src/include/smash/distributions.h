@@ -101,11 +101,11 @@ double density_integrand_2M_IC(const double energy, const double momentum_sqr,
 /**
  * Relativistic Juttner distribution function is just a convenience wrapper for
  * displaying Fermi, Bose, and Boltzmann distributions in one mathematical form.
- * \param[in] momentum_radial the length of the momentum vector
- * \param[in] mass (pole) mass of the particle species
- * \param[in] temperature temperature of the system
+ * \param[in] momentum_radial length of the momentum vector [GeV]
+ * \param[in] mass (pole) mass of the particle species [GeV]
+ * \param[in] temperature temperature of the system [GeV]
  * \param[in[ effective_chemical_potential effective chemical potential of
- *            the system
+ *            the system [GeV]
  * \param[in] statistics quantum statistics of the particles species
  *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
  * \return the Juttner distribution function

@@ -53,7 +53,7 @@ class ChemicalPotentialSolver {
    * Struct object that holds the parameters relevant to finding the effective
    * chemical potential of one particle species.
    */
-  struct ParametersForEffectiveChemicalPotentialRootFinderOneSpecies {
+  struct ParametersForChemPotSolver {
     double degeneracy;
     double mass;
     double number_density;
@@ -109,7 +109,7 @@ class ChemicalPotentialSolver {
 
   /**
    * A GSL root solver for finding the effective chemical potential. In practice
-   * one should use the convenience wrapper find_effective_chemical_potential(),
+   * one should use the convenience wrapper effective_chemical_potential(),
    * which also performs sanity checks on the obtained solution.
    *
    * Solver of the equation for chemical potential \f$ \mu \f$
@@ -131,9 +131,10 @@ class ChemicalPotentialSolver {
    *            precision of the integrals calculated in the process
    * \param[out] effective_chemical_potential the solution stored in an array
    *             object (we use an array for that in anticipation of
-   * generalizing to multidimensional root finding, needed for example when
-   * scalar interactions are present and effective mass has to be calculated at
-   * the same time as the effective chemical potential)
+   *             generalizing to multidimensional root finding, needed for
+   *             example when scalar interactions are present and effective mass
+   *             has to be calculated at the same time as the effective chemical
+   *             potential)
    */
   static int find_effective_chemical_potential(
       double degeneracy, double mass, double number_density, double temperature,

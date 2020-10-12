@@ -350,5 +350,4 @@ double SphereModus::initial_conditions(Particles *particles,
                         << momentum_total;
   return start_time_;
 }
-
 }  // namespace smash

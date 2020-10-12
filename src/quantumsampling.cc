@@ -67,13 +67,13 @@ int QuantumSampling::p_max_root_equation_for_GSL(const gsl_vector *roots_array,
 void QuantumSampling::print_state_p_max(unsigned int iter,
                                         gsl_multiroot_fsolver *solver) {
   printf(
-      "\n***\nfind_maximum_of_the_distribution(): iter = %3u \t"
+      "\n***\nfind_p_at_maximum_of_the_distribution(): iter = %3u \t"
       "x = % .3f \t"
       "f(x) = % .3e \n",
       iter, gsl_vector_get(solver->x, 0), gsl_vector_get(solver->f, 0));
 }
 
-int QuantumSampling::find_maximum_of_the_distribution(
+int QuantumSampling::find_p_at_maximum_of_the_distribution(
     double mass, double temperature, double effective_chemical_potential,
     double statistics, double p_max_initial_guess, double solution_precision,
     double *p_max) {
@@ -106,26 +106,39 @@ int QuantumSampling::find_maximum_of_the_distribution(
   do {
     iter++;
 
+    /*
+     * gsl_multiroot_fsolver_iterate returns either 0 for a correct behavior,
+     * or an error code (a positive integer) when the solver is stuck
+     */
     status = gsl_multiroot_fsolver_iterate(Root_finder);
 
     // print_state_p_max (iter, Root_finder);
 
     /*
-     * Check if the solver is stuck
+     * Check whether the solver is stuck
      */
     if (status) {
       if (initial_guess_update < 100) {
-        // we're updating the starting point
+        /*
+         * In case the solution is not found for the (somewhat small) default
+         * initial guess of p_max_initial_guess = 0.05 [GeV], the value of the
+         * p_max_initial_guess is increased and the root solving procedure is
+         * restarted. This can take place up to a 100 times, with the largest
+         * possible initial guess of p_max_initial_guess = 5.05 [GeV].
+         */
+        p_max_initial_guess += 0.05;
         initial_guess_update++;
-        p_max_initial_guess = initial_guess_update * 0.05;
         roots_array_initial[0] = p_max_initial_guess;
         gsl_vector_set(roots_array, 0, roots_array_initial[0]);
         gsl_multiroot_fsolver_set(Root_finder, &MaximumOfDistribution,
                                   roots_array);
         iter = 0;
       } else {
+        std::cout << "\n\nGSL error message:\n"
+                  << gsl_strerror(status) << std::endl;
         logg[LogArea::Distributions::id].warn(
-            "\n\nThe GSL solver\nfind_maximum_of_the_distribution\nis stuck!"
+            "\n\nThe GSL solver"
+            "\nfind_p_at_maximum_of_the_distribution\nis stuck!"
             "\n\nInput parameters:"
             "\n                  mass [GeV] = ",
             mass, "\n           temperature [GeV] = ", temperature,
@@ -140,7 +153,7 @@ int QuantumSampling::find_maximum_of_the_distribution(
             "solution precision."
             "\nUncomment print_state_p_max to check solver progress.\n\n\n");
         throw std::runtime_error(
-            "QuantumSampling::find_maximum_of_the_distribution returned "
+            "QuantumSampling::find_p_at_maximum_of_the_distribution returned "
             "no result.\n\n");
         continue;
       }
@@ -178,7 +191,7 @@ double QuantumSampling::maximum_of_the_distribution(
   /*
    * Calling the GSL distribution maximum finder
    */
-  find_maximum_of_the_distribution(
+  find_p_at_maximum_of_the_distribution(
       mass, temperature, effective_chemical_potential, statistics,
       initial_guess_p_max, solution_precision, p_max);
 
