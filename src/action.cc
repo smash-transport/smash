@@ -98,6 +98,13 @@ FourVector Action::get_interaction_point() const {
       }
     }
   }
+  /* In case of scatterings via the stochastic criterion, use postion of random
+   * incoming particle to prevent density hotspots in grid cell centers. */
+  if (false) {
+   const int max_inc_idx = incoming_particles_.size()-1;
+   const int rnd_inc_idx = random::uniform_int(0, max_inc_idx);
+   interaction_point = incoming_particles_[rnd_inc_idx].position();
+  }
   return interaction_point;
 }
 
