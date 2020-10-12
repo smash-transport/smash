@@ -1,4 +1,3 @@
-
 /*
  *
  *    Copyright (c) 2014-2019
@@ -434,10 +433,10 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
         ", gcell_vol = ", gcell_vol, ", testparticles = ", testparticles_);
 
     if (prob > 1.) {
-      // std::stringstream err;
-      std::cout << "Probability larger than 1 for stochastic rates. ( P = " << prob
+      std::stringstream err;
+      err << "Probability larger than 1 for stochastic rates. ( P = " << prob
           << " )\nUse smaller timesteps.\n";
-      // throw std::runtime_error(err.str());
+      throw std::runtime_error(err.str());
     }
 
     // probability criterion
@@ -503,10 +502,10 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
 
   // 5. Check that probability is smaller than one
   if (prob > 1.) {
-    // std::stringstream err;
-    std::cout  << "Probability larger than 1 for stochastic rates. ( prob = " << prob
+    std::stringstream err;
+    err << "Probability larger than 1 for stochastic rates. ( prob = " << prob
         << " )\nUse smaller timesteps.";
-    // throw std::runtime_error(err.str());
+    throw std::runtime_error(err.str());
   }
 
   // 6. Perform probability decisions
