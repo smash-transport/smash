@@ -419,6 +419,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     if (random_no > prob) {
       return nullptr;
     }
+    act->set_stochastic();
 
   } else if (coll_crit_ == CollisionCriterion::Geometric ||
              coll_crit_ == CollisionCriterion::Covariant) {
@@ -488,6 +489,8 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
   if (random_no > prob) {
     return nullptr;
   }
+
+  act->set_stochastic();
 
   return std::move(act);
 }

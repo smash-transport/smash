@@ -292,6 +292,13 @@ class Action {
   std::pair<FourVector, FourVector> get_potential_at_interaction_point() const;
 
   /**
+   * Setter function that labels the action as found by the stochastic criterion
+   */
+  void set_stochastic() {
+    stochastic_ = true;
+  }
+
+  /**
    * Little helper function that calculates the lambda function (sometimes
    * written with a tilde to better distinguish it) that appears e.g. in the
    * relative velocity or 3-to-2 probability calculation, where it is used with
@@ -339,6 +346,12 @@ class Action {
    * Ignored if negative.
    */
   double box_length_ = -1.0;
+
+  /**
+   * Action found via the stochastic criterion. If true, the postion of a random
+   * incoming particle is chosen as the interaction point.
+   */
+  bool stochastic_ = false;
 
   /// Sum of 4-momenta of incoming particles
   FourVector total_momentum() const {
