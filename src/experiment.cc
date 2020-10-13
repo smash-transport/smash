@@ -463,6 +463,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
           config_coll.take({"Two_to_One"}, true),
           config_coll.take({"Included_2to2"}, ReactionsBitSet().set()),
+          config_coll.take({"Multi_Particle_Reactions"},
+                           MultiParticleReactionsBitSet().reset()),
           config_coll.take({"Strings"}, modus_chooser != "Box"),
           config_coll.take({"Use_AQM"}, true),
           config_coll.take({"Resonance_Lifetime_Modifier"}, 1.),

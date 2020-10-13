@@ -45,14 +45,13 @@ double ScatterActionMulti::get_partial_weight() const {
   return partial_probability_ * xsec_scaling;
 }
 
-void ScatterActionMulti::add_possible_reactions(double dt,
-                                                const double gcell_vol,
-                                                const bool three_to_one,
-                                                const bool two_to_three) {
+void ScatterActionMulti::add_possible_reactions(
+    double dt, const double gcell_vol,
+    const MultiParticleReactionsBitSet incl_multi) {
   // 3 -> m
   if (incoming_particles_.size() == 3) {
     // 3 -> 1
-    if (three_to_one) {
+    if (incl_multi[IncludedMultiParticleReactions::Meson_3to1] == 1) {
       if (three_different_pions(incoming_particles_[0], incoming_particles_[1],
                                 incoming_particles_[2])) {
         // 3pi -> omega
@@ -96,7 +95,7 @@ void ScatterActionMulti::add_possible_reactions(double dt,
       }
     }
     // 3 -> 2
-    if (two_to_three) {
+    if (incl_multi[IncludedMultiParticleReactions::Deuteron_3to2] == 1) {
       const PdgCode pdg_a = incoming_particles_[0].pdgcode();
       const PdgCode pdg_b = incoming_particles_[1].pdgcode();
       const PdgCode pdg_c = incoming_particles_[2].pdgcode();

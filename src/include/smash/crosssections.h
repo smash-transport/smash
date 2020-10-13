@@ -87,6 +87,7 @@ class CrossSections {
    *            The parametrized elastic cross section is used otherwise.
    * \param[in] two_to_one_switch 2->1 reactions enabled?
    * \param[in] included_2to2 Which 2->2 ractions are enabled?
+   * \param[in] included_multi Which multi-particle reactions are enabled?
    * \param[in] low_snn_cut Elastic collisions with CME below are forbidden.
    * \param[in] strings_switch Are string processes enabled?
    * \param[in] use_AQM Is the Additive Quark Model enabled?
@@ -94,17 +95,16 @@ class CrossSections {
    *            according to a probability?
    * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
    *                                                        none
-   * \param[in] include_two_to_three 2<->3 reactions enabled?
    * \param[in] string_process a pointer to the StringProcess object,
    *            which is used for string excitation and fragmentation.
    * \return List of all possible collisions.
    */
   CollisionBranchList generate_collision_list(
       double elastic_parameter, bool two_to_one_switch,
-      ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
-      bool use_AQM, bool strings_with_probability,
-      NNbarTreatment nnbar_treatment, bool include_two_to_three,
-      StringProcess* string_process) const;
+      ReactionsBitSet included_2to2,
+      MultiParticleReactionsBitSet included_multi, double low_snn_cut,
+      bool strings_switch, bool use_AQM, bool strings_with_probability,
+      NNbarTreatment nnbar_treatment, StringProcess* string_process) const;
 
   /**
    * Helper function:

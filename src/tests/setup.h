@@ -233,6 +233,10 @@ inline ReactionsBitSet all_reactions_included() {
   return ReactionsBitSet().set();
 }
 
+inline MultiParticleReactionsBitSet no_multiparticle_reactions() {
+  return MultiParticleReactionsBitSet().reset();
+}
+
 /**
  * Creates a standard ExperimentParameters object which works for almost all
  * testing purposes.
@@ -250,6 +254,7 @@ inline ExperimentParameters default_parameters(int testparticles = 1,
       4.0,                                // Gaussian smearing cut-off
       true,                               // two_to_one
       all_reactions_included(),
+      no_multiparticle_reactions(),
       false,  // strings switch
       false,  // use_AQM
       1.0,

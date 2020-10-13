@@ -228,6 +228,16 @@ enum IncludedReactions {
 /// Container for the 2 to 2 reactions in the code
 typedef std::bitset<10> ReactionsBitSet;
 
+/// The different groups of multi-particle reactions that one can include
+enum IncludedMultiParticleReactions {
+  AllMulti = 51,  // TODO(stdnmr) is this correct? Do we even need this?
+  Meson_3to1 = 0,
+  Deuteron_3to2 = 1,
+};
+
+/// Container for the 2 to 2 reactions in the code
+typedef std::bitset<2> MultiParticleReactionsBitSet;
+
 /**
  * Defines the algorithm used for the forced thermalization.
  *  For the description of algorithms see \iref{Oliinychenko:2016vkg}.

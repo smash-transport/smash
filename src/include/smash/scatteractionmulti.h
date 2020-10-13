@@ -59,11 +59,10 @@ class ScatterActionMulti : public Action {
    *
    * \param[in] dt timestep size
    * \param[in] gcell_vol gcell_vol grid cell volume
-   * \param[in] three_to_one 3->1 reactions enabled?
-   * \param[in] two_to_three 3<->2 reactions enabled?
+   * \param[in] incl_multi Which multi-particle reactions are enabled?
    */
   void add_possible_reactions(double dt, const double gcell_vol,
-                              const bool three_to_one, const bool two_to_three);
+                              const MultiParticleReactionsBitSet incl_multi);
 
   /**
    * \ingroup exception

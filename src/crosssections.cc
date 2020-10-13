@@ -113,9 +113,10 @@ CrossSections::CrossSections(const ParticleList& incoming_particles,
 
 CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
-    ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
-    bool use_AQM, bool strings_with_probability, NNbarTreatment nnbar_treatment,
-    bool include_two_to_three, StringProcess* string_process) const {
+    ReactionsBitSet included_2to2, MultiParticleReactionsBitSet included_multi,
+    double low_snn_cut, bool strings_switch, bool use_AQM,
+    bool strings_with_probability, NNbarTreatment nnbar_treatment,
+    StringProcess* string_process) const {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
@@ -157,8 +158,8 @@ CollisionBranchList CrossSections::generate_collision_list(
       // 2->2 (inelastic)
       append_list(process_list, two_to_two(included_2to2), 1. - p_pythia);
     }
-    if (include_two_to_three) {
-      // 2->3
+    if (included_multi[IncludedMultiParticleReactions::Deuteron_3to2] == 1) {
+      // 2->3 (deuterons only 2-to-3 reaction at the moment)
       append_list(process_list, two_to_three(), 1. - p_pythia);
     }
   }

@@ -340,10 +340,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool two_to_one_;
   /// List of included 2<->2 reactions
   const ReactionsBitSet incl_set_;
-  /// Enable 2<->3 forward and backward process with the stochastic criterion.
-  const bool two_to_three_;
-  /// Enable 3->1 processes with the stochastic criterion.
-  const bool three_to_one_;
+  /// List of included multi-particle reactions
+  const MultiParticleReactionsBitSet incl_multi_set_;
   /**
    * Elastic collsions between two nucleons with sqrt_s below low_snn_cut_ are
    * excluded.
