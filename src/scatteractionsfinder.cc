@@ -282,8 +282,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration config, const ExperimentParameters& parameters,
     const std::vector<bool>& nucleon_has_interacted, int N_tot, int N_proj)
-    : coll_crit_(config.take({"Collision_Term", "Collision_Criterion"},
-                             CollisionCriterion::Geometric)),
+    : coll_crit_(parameters.coll_crit),
       elastic_parameter_(
           config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.)),
       testparticles_(parameters.testparticles),
@@ -322,7 +321,8 @@ ScatterActionsFinder::ScatterActionsFinder(
     throw std::invalid_argument(
         "To prevent double counting it is not possible to enable deuteron 3->2 "
         "reactions\nand reactions involving the d' at the same time\ni.e. do "
-        "include `Deuteron_3to2` in `Multi_Particle_Reactions` and\n \"PiDeuteron_to_pidprime\" "
+        "include `Deuteron_3to2` in `Multi_Particle_Reactions` and\n "
+        "\"PiDeuteron_to_pidprime\" "
         "or \"NDeuteron_to_Ndprime\" in `Included_2to2` at the same time.\n"
         "Change your config accordingly.");
   }

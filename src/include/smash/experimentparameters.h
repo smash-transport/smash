@@ -37,6 +37,9 @@ struct ExperimentParameters {
   /// Distance at which gaussian is cut, i.e. set to zero, IN SIGMA (not fm)
   double gauss_cutoff_in_sigma;
 
+  // Employed collision criterion
+  const CollisionCriterion coll_crit;
+
   /// This indicates whether two to one reactions are switched on.
   bool two_to_one;
 

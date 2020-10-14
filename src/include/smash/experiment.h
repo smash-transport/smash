@@ -817,6 +817,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   logg[LExperiment].info() << *this;
 
+  if (parameters_.coll_crit == CollisionCriterion::Stochastic &&
+      time_step_mode_ != TimeStepMode::Fixed) {
+    throw std::invalid_argument(
+        "The stochastic criterion can only be employed for fixed time step "
+        "mode!");
+  }
+
   // create finders
   if (dileptons_switch_) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();

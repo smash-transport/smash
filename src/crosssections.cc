@@ -151,9 +151,9 @@ CollisionBranchList CrossSections::generate_collision_list(
   if (p_pythia < 1.) {
     if (two_to_one_switch) {
       // resonance formation (2->1)
-      const bool prevent_dprime_form = included_multi[IncludedMultiParticleReactions::Deuteron_3to2];
-      append_list(process_list, two_to_one(prevent_dprime_form),
-                  1. - p_pythia);
+      const bool prevent_dprime_form =
+          included_multi[IncludedMultiParticleReactions::Deuteron_3to2];
+      append_list(process_list, two_to_one(prevent_dprime_form), 1. - p_pythia);
     }
     if (included_2to2.any()) {
       // 2->2 (inelastic)
