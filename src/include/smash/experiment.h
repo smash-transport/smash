@@ -722,6 +722,27 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * Detailed balance is preserved by these reaction switches: if a forward
  * reaction is off then the reverse is automatically off too.
  *
+ * \key Multi_Particle_Reactions (list of reactions with more than 2 in- or
+ * outgoing particles, optional, default = []) \n
+ * List that contains all possible multi-particle process categories. Multi
+ * particle reactions only work with the stochastic collison criterion.
+ * See also example below. Possible categories are:
+ * \li \key "Meson_3to1" - Mesonic 3-to-1 reactions:
+ * \f$\pi^0\pi^+\pi^-\leftrightarrow\omega\f$,
+ * \f$\pi^0\pi^+\pi^-\leftrightarrow\phi\f$,
+ * \f$\eta\pi^+\pi^-\leftrightarrow\eta'\f$ and
+ * \f$\eta\pi^0\pi^0\leftrightarrow\eta'\f$. Since detailed balance is enforced,
+ * the corresponding decays also have to be added in decaymodes.txt to enable
+ * the reactions.
+ * \li \key "Deuteron_3to2" - Deuteron 3-to-2 reactions:
+ * \f$\pi pn\leftrightarrow\pi d\f$, \f$Npn\leftrightarrow Nd\f$ and
+ * \f$\bar{N}pn\leftrightarrow \bar{N}d\f$. The deuteron has to be uncommented
+ * in particles.txt, too. 2-body reactions involving the d' have to be exluded
+ * (no \key "PiDeuteron_to_pidprime" and \key "NDeuteron_to_Ndprime" in
+ * \key Included_2to2), since they effectively yield the same reaction.
+ * (The same cross section is used as for the d' reactions, therefore the d' in
+ * particles.txt and its decay in decaymodest.txt also need to be uncommented.)
+ *
  * \key Force_Decays_At_End (bool, optional, default = \key true): \n
  * \li \key true - Force all resonances to decay after last timestep \n
  * \li \key false - Don't force decays (final output can contain resonances)
