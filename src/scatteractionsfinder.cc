@@ -32,16 +32,6 @@ namespace smash {
 static constexpr int LFindScatter = LogArea::FindScatter::id;
 /*!\Userguide
  * \page input_collision_term_ Collision_Term
- * \key Collision_Criterion (string, optional, default = "Geometric") \n
- * Choose collision criterion. Be aware that the stochastic criterion is only
- * applicable within limits. Most notably, it might not lead to reasonable
- * results for very dilute systems like e.g. pp collisions.
- * \li \key "Geometric" - Geometric collision criterion
- * \li \key "Stochastic" - Stochastic collision criterion
- * \li \key "Covariant" - Covariant collision criterion
- *
- * For further information about the different collision criteria see
- * \subpage collision_criterion
  *
  * \key Include_2to3 (bool, optional, default = \key false) \n
  * Enable 2 <--> 3 forward and backward reactions via the stochastic criterion.
@@ -89,7 +79,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \n \li \key true - String excitation is enabled\n \li \key false - String
  * excitation is disabled
  *
- * For more information about Collision_Term configuration options see the
+ * For information about more configuration options see the
  * following subpages \n
  * \li \subpage collision_criterion
  * \li \subpage pauliblocker
@@ -97,7 +87,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \li \subpage input_dileptons
  * \li \subpage input_photons
  *
- * \page string_parameters String Parameters
+ * \page string_parameters String_Parameters
  * A set of parameters with which the string fragmentation can be modified.
  *
  * \key String_Tension (double, optional, default = 1.0 GeV/fm) \n
@@ -189,67 +179,13 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * It is possible to produce a popcorn meson from the diquark end of a string
  * with certain probability (i.e., diquark to meson + diquark).
  *
- * \page collision_criterion Collision Criterion
- * \key "Geometric" - Geometric collision criterion \n
- * The geometric collision criterion calculates the two-particle impact
- * parameter as the closest approach distance in the two-particle
- * center-of-momentum frame by boosting to the respective frame. The collision
- * time used for the ordering is calculated as the time of the closest approach
- * in the computational frame. \n For further details, see \iref{Bass:1998ca}.
+ * **Examples: Configuring the String Paramters**\n
  *
- * \key "Stochastic" - Stochastic collision criterion \n
- * The stochastic collision criterion employs a probability to decide whether
- * particles collide inside a given space-time cell. The probability is derived
- * directly from the scattering rate given by the Boltzmann equation. The
- * stochastic criterion is the only criterion that allows to treat
- multi-particle
- * reactions.\n
- * For more details, see e.g. Lang et al. (1993) \cite Lang1993.
- *
- * \note The stochastic criterion only works with fixed time step mode. The
- * assumption for the criterion is that only one reaction per particle per
- * timestep occurs. Therefore, small enough timesteps (\key Delta_Time) have to
- * be used. In doubt, test if the results change with smaller timesteps. Since
- * the probability value is not by defintion limited to 1 in case of large
- * timesteps, an error is thrown if it gets larger than 1.
- *
- * \key "Covariant" - Covariant collision criterion \n
- * The covariant collision criterion uses a covariant expression of the
- * two-particle impact parameter in the two-particle center-of-momentum frame,
- * which allows for its calculation in the computational frame without boosting.
- * Furthermore, it calculates the collision times used for the collision
- * ordering in the two-particle center-of-momentum frame. \n
- * Further details are described in \iref{Hirano:2012yy}.
- *
- * \page input_collision_term_ Collision_Term
- * \n
- * **Example: Configuring the Collision Term**\n
- * The following example configures SMASH to include all but
- * strangeness exchange involving 2 <--> 2 scatterings, to treat N + Nbar
- * processes as resonance formations and to not force decays at the end of the
- * simulation. The elastic cross section is globally set to 30 mbarn and the
- * \f$ \sqrt{s} \f$ cutoff for elastic nucleon + nucleon collisions is 1.93 GeV.
- * All collisions are performed isotropically and 2 <--> 1 processes are
- * forbidden.
+ * String fragmentation is activated and if desired, the string parameters can
+ * be altered as shown below.
  *
  *\verbatim
  Collision_Term:
-     Included_2to2:    ["Elastic", "NN_to_NR", "NN_to_DR", "KN_to_KN",
- "KN_to_KDelta"] Two_to_One: True Force_Decays_At_End: False NNbar_Treatment:
- "resonances" Elastic_Cross_Section: 30.0 Elastic_NN_Cutoff_Sqrts: 1.93
-     Isotropic: True
- \endverbatim
- *
- * If necessary, all collisions can be turned off by inserting
- *\verbatim
-     No_Collisions: True
- \endverbatim
- * in the configuration file. \n
- * \n
- * Additionally, string fragmentation can be activated. If desired, the user can
- * also configure the string parameters.
- *
- *\verbatim
      Strings: True
      String_Parameters:
          String_Tension: 1.0
@@ -268,26 +204,69 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
          Prob_proton_to_d_uu: 0.33
          Separate_Fragment_Baryon: True
          Popcorn_Rate: 0.15
+  \endverbatim
+ *
+ *
+ * \page collision_criterion Collision_Criterion
+ * \key "Geometric" - Geometric collision criterion \n
+ * The geometric collision criterion calculates the two-particle impact
+ * parameter as the closest approach distance in the two-particle
+ * center-of-momentum frame by boosting to the respective frame. The collision
+ * time used for the ordering is calculated as the time of the closest approach
+ * in the computational frame. \n For further details, see \iref{Bass:1998ca}.
+ *
+ * \key "Stochastic" - Stochastic collision criterion \n
+ * The stochastic collision criterion employs a probability to decide whether
+ * particles collide inside a given space-time cell. The probability is derived
+ * directly from the scattering rate given by the Boltzmann equation. The
+ * stochastic criterion is the only criterion that allows to treat
+ * multi-particle reactions.\n
+ * For more details, see e.g. Lang et al. (1993) \cite Lang1993.
+ *
+ * \note The stochastic criterion is only applicable within limits. For example,
+ * it might not lead to reasonable results for very dilute systems like pp
+ * collisions. Futhermore, the fixed time step mode is require. The
+ * assumption for the criterion is that only one reaction per particle per
+ * timestep occurs. Therefore, small enough timesteps (\key Delta_Time) have to
+ * be used. In doubt, test if the results change with smaller timesteps. Since
+ * the probability value is not by defintion limited to 1 in case of large
+ * timesteps, an error is thrown if it gets larger than 1.
+ *
+ * \key "Covariant" - Covariant collision criterion \n
+ * The covariant collision criterion uses a covariant expression of the
+ * two-particle impact parameter in the two-particle center-of-momentum frame,
+ * which allows for its calculation in the computational frame without boosting.
+ * Furthermore, it calculates the collision times used for the collision
+ * ordering in the two-particle center-of-momentum frame. \n
+ * Further details are described in \iref{Hirano:2012yy}.
+ *
+ * \page input_collision_term_ Collision_Term
+ * \n
+ * **Examples: Configuring the Collision Term**\n
+ * The following example configures SMASH to include all but
+ * strangeness exchange involving 2 <--> 2 scatterings, to treat N + Nbar
+ * processes as resonance formations and to not force decays at the end of the
+ * simulation. The elastic cross section is globally set to 30 mbarn and the
+ * \f$ \sqrt{s} \f$ cutoff for elastic nucleon + nucleon collisions is 1.93 GeV.
+ * All collisions are performed isotropically and 2 <--> 1 processes are
+ * forbidden.
+ *
+ *\verbatim
+ Collision_Term:
+     Included_2to2:["Elastic","NN_to_NR","NN_to_DR","KN_to_KN","KN_to_KDelta"]
+     Two_to_One: True
+     Force_Decays_At_End: False
+     NNbar_Treatment: "resonances"
+     Elastic_Cross_Section: 30.0
+     Elastic_NN_Cutoff_Sqrts: 1.93
+     Isotropic: True
  \endverbatim
  *
- * Pauli Blocking can further be activated by means of the following subsection
+ * If necessary, all collisions can be turned off by adding
  *\verbatim
-     Pauli_Blocking:
-         Spatial_Averaging_Radius: 1.86
-         Momentum_Averaging_Radius: 0.08
-         Gaussian_Cutoff: 2.2
+     No_Collisions: True
  \endverbatim
- * In addition, dilepton and photon production can be independently  activated
- * via
- *\verbatim
-     Dileptons:
-        Decays: True
-
-     Photons:
-         2to2_Scatterings: True
-         Bremsstrahlung: True
- \endverbatim
- *
+ * in the configuration file. \n
  */
 
 ScatterActionsFinder::ScatterActionsFinder(
