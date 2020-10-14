@@ -44,7 +44,7 @@ struct ExperimentParameters {
   const ReactionsBitSet included_2to2;
 
   /// This indicates which multi-particle reactions are switched on.
-  const MultiParticleReactionsBitSet included_multi_;
+  const MultiParticleReactionsBitSet included_multi;
 
   /// This indicates whether string fragmentation is switched on.
   bool strings_switch;

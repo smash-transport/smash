@@ -842,7 +842,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
   bool no_coll = config.take({"Collision_Term", "No_Collisions"}, false);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
-       parameters_.strings_switch) &&
+       parameters_.included_multi.any() || parameters_.strings_switch) &&
       !no_coll) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),

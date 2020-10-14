@@ -290,7 +290,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
       two_to_one_(parameters.two_to_one),
       incl_set_(parameters.included_2to2),
-      incl_multi_set_(parameters.included_multi_),
+      incl_multi_set_(parameters.included_multi),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
       use_AQM_(parameters.use_AQM),

@@ -230,7 +230,6 @@ typedef std::bitset<10> ReactionsBitSet;
 
 /// The different groups of multi-particle reactions that one can include
 enum IncludedMultiParticleReactions {
-  AllMulti = 51,  // TODO(stdnmr) is this correct? Do we even need this?
   Meson_3to1 = 0,
   Deuteron_3to2 = 1,
 };
