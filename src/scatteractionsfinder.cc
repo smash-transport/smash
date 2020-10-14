@@ -89,8 +89,9 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \n \li \key true - String excitation is enabled\n \li \key false - String
  * excitation is disabled
  *
- * For further information about the configuration of Pauli blocking,
- * string parameters, dileptons and photons see \n
+ * For more information about Collision_Term configuration options see the
+ * following subpages \n
+ * \li \subpage collision_criterion
  * \li \subpage pauliblocker
  * \li \subpage string_parameters
  * \li \subpage input_dileptons
@@ -198,9 +199,19 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  *
  * \key "Stochastic" - Stochastic collision criterion \n
  * The stochastic collision criterion employs a probability to decide whether
- * particles collide inside a given grid cell. The probability is derived
- * directly from the scattering rate given by the Boltzmann equation. \n
+ * particles collide inside a given space-time cell. The probability is derived
+ * directly from the scattering rate given by the Boltzmann equation. The
+ * stochastic criterion is the only criterion that allows to treat
+ multi-particle
+ * reactions.\n
  * For more details, see e.g. Lang et al. (1993) \cite Lang1993.
+ *
+ * \note The stochastic criterion only works with fixed time step mode. The
+ * assumption for the criterion is that only one reaction per particle per
+ * timestep occurs. Therefore, small enough timesteps (\key Delta_Time) have to
+ * be used. In doubt, test if the results change with smaller timesteps. Since
+ * the probability value is not by defintion limited to 1 in case of large
+ * timesteps, an error is thrown if it gets larger than 1.
  *
  * \key "Covariant" - Covariant collision criterion \n
  * The covariant collision criterion uses a covariant expression of the
