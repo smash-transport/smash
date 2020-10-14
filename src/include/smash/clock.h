@@ -357,7 +357,7 @@ class CustomClock : public Clock {
   void remove_times_in_past(double start_time) override {
     std::remove_if(custom_times_.begin(), custom_times_.end(),
                    [start_time](double t) {
-                     if (t < start_time) {
+                     if (t <= start_time) {
                        logg[LClock].warn("Removing custom output time ", t,
                                          " fm since it is earlier than the "
                                          "starting time of the simulation");
