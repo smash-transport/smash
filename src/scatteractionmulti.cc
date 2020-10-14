@@ -60,7 +60,7 @@ void ScatterActionMulti::add_possible_reactions(
           add_reaction(make_unique<CollisionBranch>(
               *type_omega,
               probability_three_to_one(*type_omega, dt, gcell_vol,
-                                             type_omega->spin_degeneracy()),
+                                       type_omega->spin_degeneracy()),
               ProcessType::MultiParticleThreeMesonsToOne));
         }
         // 3pi -> phi
@@ -69,7 +69,7 @@ void ScatterActionMulti::add_possible_reactions(
           add_reaction(make_unique<CollisionBranch>(
               *type_phi,
               probability_three_to_one(*type_phi, dt, gcell_vol,
-                                             type_phi->spin_degeneracy()),
+                                       type_phi->spin_degeneracy()),
               ProcessType::MultiParticleThreeMesonsToOne));
         }
       } else if (two_pions_eta(incoming_particles_[0], incoming_particles_[1],

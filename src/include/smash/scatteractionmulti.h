@@ -131,8 +131,8 @@ class ScatterActionMulti : public Action {
    * \return probabilty for 3-to-1 reaction
    */
   double probability_three_to_one(const ParticleType& type_out, double dt,
-                                        const double gcell_vol,
-                                        const int degen_factor = 1) const;
+                                  const double gcell_vol,
+                                  const int degen_factor = 1) const;
 
   /**
    * Calculate the probability for a 3-to-2 reaction according to the
