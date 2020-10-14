@@ -140,11 +140,14 @@ class CrossSections {
    * create a list of possible resonance production processes
    * and their cross sections.
    *
+   * \param[in] prevent_dprime_form In the case of using direct 3-to-2 deuteron
+   * reactions, prevent the d' from forming via the decay back reaction.
+   *
    * \return A list of processes with resonance in the final state.
    * Each element in the list contains the type of the final-state particle
    * and the cross section for that particular process.
    */
-  CollisionBranchList two_to_one(const bool include_two_to_three) const;
+  CollisionBranchList two_to_one(const bool prevent_dprime_form) const;
 
   /**
    * Return the 2-to-1 resonance production cross section for a given resonance.

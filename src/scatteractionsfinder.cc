@@ -316,14 +316,14 @@ ScatterActionsFinder::ScatterActionsFinder(
         "criterion. Change your config accordingly.");
   }
 
-  if (two_to_three_ &&
+  if (incl_multi_set_[IncludedMultiParticleReactions::Deuteron_3to2] == 1 &&
       (incl_set_[IncludedReactions::PiDeuteron_to_pidprime] == 1 ||
        incl_set_[IncludedReactions::NDeuteron_to_Ndprime] == 1)) {
     throw std::invalid_argument(
         "To prevent double counting it is not possible to enable deuteron 3->2 "
         "reactions\nand reactions involving the d' at the same time\ni.e. do "
-        "not set `Include_2to3: True` and\ninclude \"PiDeuteron_to_pidprime\" "
-        "and \"NDeuteron_to_Ndprime\" in `Included_2to2`.\n"
+        "include `Deuteron_3to2` in `Multi_Particle_Reactions` and\n \"PiDeuteron_to_pidprime\" "
+        "or \"NDeuteron_to_Ndprime\" in `Included_2to2` at the same time.\n"
         "Change your config accordingly.");
   }
 
