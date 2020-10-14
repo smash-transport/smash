@@ -294,9 +294,7 @@ class Action {
   /**
    * Setter function that labels the action as found by the stochastic criterion
    */
-  void set_stochastic() {
-    stochastic_ = true;
-  }
+  void set_stochastic() { stochastic_ = true; }
 
   /**
    * Little helper function that calculates the lambda function (sometimes
