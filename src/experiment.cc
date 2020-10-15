@@ -583,8 +583,8 @@ double calculate_mean_field_energy(
       const double j0 = node.jmu_net().x0();
 
       const double abs_nB = std::abs(nB);
-      if ( (abs_nB < really_small) || (std::abs(j0) < really_small) ){
-	continue;
+      if ((abs_nB < really_small) || (std::abs(j0) < really_small)) {
+        continue;
       }
       density_mean += j0;
       density_variance += j0 * j0;
@@ -597,28 +597,28 @@ double calculate_mean_field_energy(
        *
        * TODO: Add symmetry energy.
        */
-      double mean_field_contribution_1 =
-	(C1GeV / b1) * std::pow(abs_nB, b1) / std::pow(nuclear_density, b1 - 1);
-      double mean_field_contribution_2 =
-	(C2GeV / b2) * std::pow(abs_nB, b2) / std::pow(nuclear_density, b2 - 1);
+      double mean_field_contribution_1 = (C1GeV / b1) * std::pow(abs_nB, b1) /
+                                         std::pow(nuclear_density, b1 - 1);
+      double mean_field_contribution_2 = (C2GeV / b2) * std::pow(abs_nB, b2) /
+                                         std::pow(nuclear_density, b2 - 1);
 
       lattice_mean_field_total +=
-	V_cell * (mean_field_contribution_1 + mean_field_contribution_2);
+          V_cell * (mean_field_contribution_1 + mean_field_contribution_2);
     }
 
     // logging statistical properties of the density calculation
     density_mean = density_mean / number_of_nodes;
     density_variance = density_variance / number_of_nodes;
     double density_scaled_variance =
-      sqrt(density_variance - density_mean * density_mean) / density_mean;
+        sqrt(density_variance - density_mean * density_mean) / density_mean;
     logg[LExperiment].debug() << "\t\t\t\t\t";
     logg[LExperiment].debug()
-      << "\n\t\t\t\t\t            density mean = " << density_mean;
+        << "\n\t\t\t\t\t            density mean = " << density_mean;
     logg[LExperiment].debug()
-      << "\n\t\t\t\t\t density scaled variance = " << density_scaled_variance;
+        << "\n\t\t\t\t\t density scaled variance = " << density_scaled_variance;
     logg[LExperiment].debug()
-      << "\n\t\t\t\t\t        total mean_field = "
-      << lattice_mean_field_total * parameters.testparticles << "\n";
+        << "\n\t\t\t\t\t        total mean_field = "
+        << lattice_mean_field_total * parameters.testparticles << "\n";
 
     /*
      * E_mean_field is multiplied by the number of testparticles because the

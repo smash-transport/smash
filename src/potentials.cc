@@ -177,9 +177,11 @@ std::pair<ThreeVector, ThreeVector> Potentials::skyrme_force(
     const int sgn = density > 0 ? 1 : -1;
     const double abs_density = std::abs(density);
     const double dV_drho =
-      sgn * (skyrme_a_ + skyrme_b_ * skyrme_tau_ *
-	     std::pow(abs_density / nuclear_density, skyrme_tau_ - 1)) *
-      mev_to_gev / nuclear_density;
+        sgn *
+        (skyrme_a_ +
+         skyrme_b_ * skyrme_tau_ *
+             std::pow(abs_density / nuclear_density, skyrme_tau_ - 1)) *
+        mev_to_gev / nuclear_density;
     E_component -= dV_drho * (grad_rho + dj_dt);
     B_component += dV_drho * rot_j;
   }
