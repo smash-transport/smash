@@ -852,7 +852,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     process_string_ptr_ = scat_finder->get_process_string_ptr();
     action_finders_.emplace_back(std::move(scat_finder));
   } else {
-    max_transverse_distance_sqr_ = maximum_cross_section / M_PI * fm2_mb;
+    max_transverse_distance_sqr_ =
+        parameters_.maximum_cross_section / M_PI * fm2_mb;
     process_string_ptr_ = NULL;
   }
   if (modus_.is_box()) {

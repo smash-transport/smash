@@ -64,6 +64,19 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \key Isotropic (bool, optional, default = \key false) \n
  * Do all collisions isotropically.
  *
+ * \key Maximum_Cross_Section (double, optional, default = 200 mb or 2000 mb
+ *                             in case d' is present) \n
+ * The maximal cross section for which it is guaranteed that all
+ * collisions with this cross section will be found.
+ * This means that all particle pairs, where the transverse distance
+ * is smaller or equal to \f$ \sqrt{\sigma_{max}/\pi} \f$,
+ * will be checked for collions.
+ * The maximum around 200 mb occurs in the Delta peak of the pi+p
+ * cross section. Many SMASH cross sections diverge close at the threshold,
+ * these divergent parts are effectively cut off. If deuteron production
+ * via d' is considered, then the default should be increased to 2000 mb
+ * to function correctly (see \iref{Oliinychenko:2018ugs}).
+ *
  * \key Elastic_NN_Cutoff_Sqrts (double, optional, default = 1.98): \n
  * The elastic collisions betwen two nucleons with sqrt_s below
  * Elastic_NN_Cutoff_Sqrts, in GeV, cannot happen. \n
@@ -289,7 +302,8 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_tot_(N_tot),
       N_proj_(N_proj),
       string_formation_time_(config.take(
-          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)) {
+          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
+      maximum_cross_section_(parameters.maximum_cross_section) {
   if (is_constant_elastic_isotropic()) {
     logg[LFindScatter].info(
         "Constant elastic isotropic cross-section mode:", " using ",

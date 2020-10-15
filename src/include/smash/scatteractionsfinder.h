@@ -17,7 +17,6 @@
 #include "action.h"
 #include "actionfinderfactory.h"
 #include "configuration.h"
-#include "constants.h"
 #include "scatteraction.h"
 
 namespace smash {
@@ -236,7 +235,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   double max_transverse_distance_sqr(int testparticles) const {
     return (is_constant_elastic_isotropic() ? elastic_parameter_
-                                            : maximum_cross_section) /
+                                            : maximum_cross_section_) /
            testparticles * fm2_mb * M_1_PI;
   }
 
@@ -374,6 +373,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const int N_proj_;
   /// Parameter for formation time
   const double string_formation_time_;
+  /// \see input_collision_term_
+  const double maximum_cross_section_;
 };
 
 }  // namespace smash
