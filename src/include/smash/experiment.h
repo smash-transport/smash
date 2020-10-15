@@ -2167,10 +2167,25 @@ void Experiment<Modus>::final_output(const int evt_num) {
       logg[LExperiment].info() << hline;
       logg[LExperiment].info()
           << "Time real: " << SystemClock::now() - time_start_;
+
       logg[LExperiment].debug()
           << "Discarded interaction number: " << discarded_interactions_total_
           << " (" << precent_discarded
           << " % of total interaction number, incl. wall crossings)";
+      if (parameters_.coll_crit == CollisionCriterion::Stochastic &&
+          precent_discarded > 1.0) {
+        // The choosen threshold of 1% is a heuristical value
+        logg[LExperiment].warn()
+            << "The number of discarded interactions is large, which means the "
+               "assumption for the stochastic criterion of 1 interaction per "
+               "particle per timestep is probably violated. Consider reducing "
+               "the timestep size."
+            << "(Discarded interaction number: "
+            << discarded_interactions_total_ << ", which equals "
+            << precent_discarded
+            << " % of total interaction number, incl. wall crossings)";
+      }
+
       logg[LExperiment].info() << "Final interaction number: "
                                << interactions_total_ - wall_actions_total_;
     }
