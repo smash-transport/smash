@@ -553,6 +553,12 @@ class Experiment : public ExperimentBase {
   uint64_t total_hypersurface_crossing_actions_ = 0;
 
   /**
+   *  Total number of discarded interactions, because they were invalidated
+   *  before they could be performed.
+   */
+  uint64_t discarded_interactions_total_ = 0;
+
+  /**
    * Total energy removed from the system in hypersurface crossing actions.
    *
    */
@@ -1510,6 +1516,7 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
   previous_wall_actions_total_ = 0;
   interactions_total_ = 0;
   previous_interactions_total_ = 0;
+  discarded_interactions_total_ = 0;
   total_pauli_blocked_ = 0;
   projectile_target_interact_ = false;
   total_hypersurface_crossing_actions_ = 0;
@@ -1551,6 +1558,7 @@ bool Experiment<Modus>::perform_action(
     Action &action, const Container &particles_before_actions) {
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles_)) {
+    discarded_interactions_total_++;
     logg[LExperiment].debug(~einhard::DRed(), "✘ ", action,
                             " (discarded: invalid)");
     return false;
@@ -1838,6 +1846,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     // get next action
     ActionPtr act = actions.pop();
     if (!act->is_valid(particles_)) {
+      discarded_interactions_total_++;
       logg[LExperiment].debug(~einhard::DRed(), "✘ ", act,
                               " (discarded: invalid)");
       continue;
@@ -2152,9 +2161,16 @@ void Experiment<Modus>::final_output(const int evt_num) {
             << total_hypersurface_crossing_actions_;
       }
     } else {
+      const double precent_discarded =
+          static_cast<double>(discarded_interactions_total_) * 100. /
+          interactions_total_;
       logg[LExperiment].info() << hline;
       logg[LExperiment].info()
           << "Time real: " << SystemClock::now() - time_start_;
+      logg[LExperiment].debug()
+          << "Discarded interaction number: " << discarded_interactions_total_
+          << " (" << precent_discarded
+          << " % of total interaction number, incl. wall crossings)";
       logg[LExperiment].info() << "Final interaction number: "
                                << interactions_total_ - wall_actions_total_;
     }
