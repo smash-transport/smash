@@ -437,34 +437,7 @@ void ScatterAction::elastic_scattering() {
 void ScatterAction::inelastic_scattering() {
   // create new particles
   sample_2body_phasespace();
-  /* Set the formation time of the 2 particles to the larger formation time of
-   * the incoming particles, if it is larger than the execution time;
-   * execution time is otherwise taken to be the formation time */
-  const double t0 = incoming_particles_[0].formation_time();
-  const double t1 = incoming_particles_[1].formation_time();
-
-  const size_t index_tmax = (t0 > t1) ? 0 : 1;
-  const double form_time_begin =
-      incoming_particles_[index_tmax].begin_formation_time();
-  const double sc =
-      incoming_particles_[index_tmax].initial_xsec_scaling_factor();
-  if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    /* The newly produced particles are supposed to continue forming exactly
-     * like the latest forming ingoing particle. Therefore the details on the
-     * formation are adopted. The initial cross section scaling factor of the
-     * incoming particles is considered to also be the scaling factor of the
-     * newly produced outgoing particles.
-     */
-    outgoing_particles_[0].set_slow_formation_times(form_time_begin,
-                                                    std::max(t0, t1));
-    outgoing_particles_[1].set_slow_formation_times(form_time_begin,
-                                                    std::max(t0, t1));
-    outgoing_particles_[0].set_cross_section_scaling_factor(sc);
-    outgoing_particles_[1].set_cross_section_scaling_factor(sc);
-  } else {
-    outgoing_particles_[0].set_formation_time(time_of_execution_);
-    outgoing_particles_[1].set_formation_time(time_of_execution_);
-  }
+  assign_formation_time_to_outgoing_particles();
 }
 
 void ScatterAction::two_to_three_scattering() {
@@ -485,24 +458,7 @@ void ScatterAction::resonance_formation() {
   // Set the momentum of the formed resonance in its rest frame.
   outgoing_particles_[0].set_4momentum(
       total_momentum_of_outgoing_particles().abs(), 0., 0., 0.);
-  /* Set the formation time of the resonance to the larger formation time of the
-   * incoming particles, if it is larger than the execution time; execution time
-   * is otherwise taken to be the formation time */
-  const double t0 = incoming_particles_[0].formation_time();
-  const double t1 = incoming_particles_[1].formation_time();
-
-  const size_t index_tmax = (t0 > t1) ? 0 : 1;
-  const double begin_form_time =
-      incoming_particles_[index_tmax].begin_formation_time();
-  const double sc =
-      incoming_particles_[index_tmax].initial_xsec_scaling_factor();
-  if (t0 > time_of_execution_ || t1 > time_of_execution_) {
-    outgoing_particles_[0].set_slow_formation_times(begin_form_time,
-                                                    std::max(t0, t1));
-    outgoing_particles_[0].set_cross_section_scaling_factor(sc);
-  } else {
-    outgoing_particles_[0].set_formation_time(time_of_execution_);
-  }
+  assign_formation_time_to_outgoing_particles();
   /* this momentum is evaluated in the computational frame. */
   logg[LScatterAction].debug("Momentum of the new particle: ",
                              outgoing_particles_[0].momentum());
@@ -568,34 +524,7 @@ void ScatterAction::string_excitation() {
       elastic_scattering();
     } else {
       outgoing_particles_ = string_process_->get_final_state();
-      /* If the incoming particles already were unformed, the formation
-       * times and cross section scaling factors need to be adjusted */
-      const double tform_in = std::max(incoming_particles_[0].formation_time(),
-                                       incoming_particles_[1].formation_time());
-      if (tform_in > time_of_execution_) {
-        const double fin =
-            (incoming_particles_[0].formation_time() >
-             incoming_particles_[1].formation_time())
-                ? incoming_particles_[0].initial_xsec_scaling_factor()
-                : incoming_particles_[1].initial_xsec_scaling_factor();
-        for (size_t i = 0; i < outgoing_particles_.size(); i++) {
-          const double tform_out = outgoing_particles_[i].formation_time();
-          const double fout =
-              outgoing_particles_[i].initial_xsec_scaling_factor();
-          /* The new cross section scaling factor will be the product of the
-           * cross section scaling factor of the ingoing particles and of the
-           * outgoing ones (since the outgoing ones are also string fragments
-           * and thus take time to form). */
-          outgoing_particles_[i].set_cross_section_scaling_factor(fin * fout);
-          /* If the unformed incoming particles' formation time is larger than
-           * the current outgoing particle's formation time, then the latter
-           * is overwritten by the former*/
-          if (tform_in > tform_out) {
-            outgoing_particles_[i].set_slow_formation_times(time_of_execution_,
-                                                            tform_in);
-          }
-        }
-      }
+      assign_formation_time_to_outgoing_particles();
       /* Check momentum difference for debugging */
       FourVector out_mom;
       for (ParticleData data : outgoing_particles_) {
