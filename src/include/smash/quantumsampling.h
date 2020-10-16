@@ -46,11 +46,11 @@ class QuantumSampling {
   /**
    * Root equation for finding the radial momentum at which the Juttner
    * distribution function has its maximum.
-   * \param[in] p radial momentum, i.e., the length of the momentum vector
-   * \param[in] mass (pole) mass of the particle species
-   * \param[in] temperature temperature of the system
-   * \param[in[ effective_chemical_potential effective chemical potential of
-   *            the system
+   * \param[in] p radial momentum, i.e., length of the momentum vector [GeV]
+   * \param[in] mass (pole) mass m of the particle species [GeV]
+   * \param[in] temperature temperature T of the system [GeV]
+   * \param[in] effective_chemical_potential effective chemical potential mu of
+   *            the system [GeV]
    * \param[in] statistics quantum statistics of the particles species
    *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
    * \return the extremum equation for the maximum of the Juttner distribution
@@ -92,18 +92,17 @@ class QuantumSampling {
    * maximum of the given Juttner distribution function occurs. For the value of
    * the distribution at the maximum, one shoud use the function
    * maximum_of_the_distribution().
-   * \param[in] mass (pole) mass of the particle species
-   * \param[in] temperature temperature of the system
-   * \param[in[ effective_chemical_potential effective chemical potential of
-   *            the system
+   * \param[in] mass (pole) mass m of the particle species [GeV]
+   * \param[in] temperature temperature T of the system [GeV]
+   * \param[in] effective_chemical_potential effective chemical potential mu of
+   *            the system [GeV]
    * \param[in] statistics quantum statistics of the particles species
    *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
    * \param[in] p_max_initial_guess the initial guess for the value of the
-   *            solution
-   * \param[in] solution_precision used for the precision with which the
-   *            solution is found
+   *            solution [GeV]
+   * \param[in] solution_precision precision with which the solution is found
    * \param[out] p_max the solution (momentum for which the distribution takes
-   *             on the maximum value) stored in an array object
+   *             on the maximum value) stored in an array object [GeV]
    */
   static int find_p_at_maximum_of_the_distribution(
       double mass, double temperature, double effective_chemical_potential,
@@ -115,14 +114,13 @@ class QuantumSampling {
    * distribution, returning the value of the distribution for the momentum
    * at which the maximum occurs, identified by
    * find_p_at_maximum_of_the_distribution().
-   * \param[in] mass (pole) mass of the particle species
-   * \param[in] temperature temperature of the system
-   * \param[in[ effective_chemical_potential effective chemical potential of
-   *            the system
+   * \param[in] mass (pole) mass m of the particle species [GeV]
+   * \param[in] temperature temperature T of the system [GeV]
+   * \param[in] effective_chemical_potential effective chemical potential mu of
+   *            the system [GeV]
    * \param[in] statistics quantum statistics of the particles species
    *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
-   * \param[in] solution_precision used for the precision with which the
-   *            solution is found
+   * \param[in] solution_precision precision with which the solution is found
    */
   static double maximum_of_the_distribution(double mass, double temperature,
                                             double effective_chemical_potential,

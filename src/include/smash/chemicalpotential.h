@@ -22,16 +22,15 @@ class ChemicalPotentialSolver {
   /**
    * Vector number density of one particle species, obtained through integrating
    * the Juttner distribution function over the momentum space.
-   * \param[in] degeneracy degeneracy of the particle species
-   * \param[in] mass (pole) mass of the particle species
-   * \param[in] temperature temperature of the system
-   * \param[in[ effective_chemical_potential effective chemical potential in
-   *            the system
+   * \param[in] degeneracy degeneracy g of the particle species
+   * \param[in] mass (pole) mass m of the particle species [GeV]
+   * \param[in] temperature temperature T of the system [GeV]
+   * \param[in] effective_chemical_potential effective chemical potential of the
+   *            system [GeV]
    * \param[in] statistics quantum statistics of the particles species
    *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
-   * \param[in] precision used for absolute error, relative error, and the lower
-   *            limit of the integration interval
-   * \return the vector number density for a given species of particles
+   * \param[in] integrator wrapper for gsl numerical integration
+   * \return the vector number density for a given species of particles [GeV^3]
    */
   static double density_one_species(double degeneracy, double mass,
                                     double temperature,
@@ -65,15 +64,15 @@ class ChemicalPotentialSolver {
   /**
    * Root equation for finding the value of the effective chemical potential
    * for one particle species.
-   * \param[in] degeneracy degeneracy of the particle species
-   * \param[in] mass (pole) mass of the particle species
-   * \param[in] number_density number density of the particle species
-   * \param[in] temperature temperature of the system
-   * \param[in[ effective_chemical_potential effective chemical potential in
-   *            the system
+   * \param[in] degeneracy degeneracy g of the particle species
+   * \param[in] mass (pole) mass m of the particle species
+   * \param[in] number_density number density n of the particle species [GeV^3]
+   * \param[in] temperature temperature T of the system [GeV]
+   * \param[in] effective_chemical_potential effective chemical potential of the
+   *            system [GeV]
    * \param[in] statistics quantum statistics of the particles species
    *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
-   * \param[in] precision used for the precision of the number density integral
+   * \param[in] integrator wrapper for gsl numerical integration
    * \return the root equation
    */
   static double root_equation_effective_chemical_potential(
@@ -100,7 +99,7 @@ class ChemicalPotentialSolver {
    * during the root finding procedure.
    * \param[in] iter variable keeping track of how many steps in the root
    *            solving procedure have been taken
-   * \param[in] solver GSL solver object, which has acces to the current best
+   * \param[in] solver GSL solver object, which has access to the current best
    *            estimate of the roots and the corresponding function values
    * \return message about the current state of the solver
    */
@@ -113,28 +112,26 @@ class ChemicalPotentialSolver {
    * which also performs sanity checks on the obtained solution.
    *
    * Solver of the equation for chemical potential \f$ \mu \f$
-   * \f[ n = \frac{g}{2 \pi^2 \hbar^3} \int
+   * \f[ n = \frac{g}{2 \pi^2} \int
    *          \frac{p^2 dp}{ e^{(\sqrt{p^2 + m^2} - \mu)/T} \pm 1}
    * \f] given the density \f$ n \f$, and temperature \f$ T \f$.
    * \param[in] degeneracy degeneracy g of the particle species
-   * \param[in] mass m (pole) mass of the particle species in GeV
-   * \param[in] number_density number density of the particle species n in GeV^3
+   * \param[in] mass m (pole) mass m of the particle species [GeV]
+   * \param[in] number_density number density n of the particle species n [GeV^3]
    * \param[in] temperature temperature T of the system in GeV
-   * \param[in[ effective_chemical_potential effective chemical potential of
-   *            the system
    * \param[in] statistics quantum statistics of the particles species
    *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
    * \param[in] mu_initial_guess the initial guess for the value of the
-   *            effective chemical potential
-   * \param[in] solution_precision used for the precision with which the
-   *            solution is found; note that this precision also goes into the
-   *            precision of the integrals calculated in the process
+   *            effective chemical potential [GeV]
+   * \param[in] solution_precision precision with which the solution is found;
+   *            note that this precision also goes into the precision of
+   *            integrals calculated in the process
+   * \param[in] integrator wrapper for gsl numerical integration
    * \param[out] effective_chemical_potential the solution stored in an array
-   *             object (we use an array for that in anticipation of
-   *             generalizing to multidimensional root finding, needed for
-   *             example when scalar interactions are present and effective mass
-   *             has to be calculated at the same time as the effective chemical
-   *             potential)
+   *             object (we use an array in anticipation of generalizing to
+   *             multidimensional root finding, needed for example when scalar
+   *             interactions are present and effective mass is calculated at
+   *             the same time as the effective chemical potential)
    */
   static int find_effective_chemical_potential(
       double degeneracy, double mass, double number_density, double temperature,
@@ -145,31 +142,16 @@ class ChemicalPotentialSolver {
    * Convenience wrapper for finding the effective chemical potential for a
    * given particle species and performing sanity checks on the result.
    *
-   *
    * \param[in] degeneracy degeneracy g of the particle species
-   * \param[in] mass m (pole) mass of the particle species in GeV
-   * \param[in] number_density number density n in GeV^3
-   * \param[in] temperature temperature T of the system in GeV
+   * \param[in] mass (pole) mass m of the particle species [GeV]
+   * \param[in] number_density number density n of the particle species [GeV^3]
+   * \param[in] temperature temperature T of the system [GeV]
    * \param[in] statistics quantum statistics of the particles species
    *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
-   * \param[in] precision absolute precision with which the
-   *            solution is found; note that this precision also goes into the
-   *            precision of the integrals calculated in the process
-   * \param[out] mu chemical potential, the solution in GeV
-   * \param[in] degeneracy degeneracy of the particle species
-   * \param[in] mass (pole) mass of the particle species
-   * \param[in] number_density number density of the particle species
-   * \param[in] temperature temperature of the system
-   * \param[in[ effective_chemical_potential effective chemical potential of
-   *            the system
-   * \param[in] statistics quantum statistics of the particles species
-   *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
-   * \param[in] mu_initial_guess the initial guess for the value of the
-   *            effective chemical potential
-   * \param[in] solution_precision used for the precision with which the
-   *            solution is found; note that this precision also goes into the
-   *            precision of the integrals calculated in the process
-   * \param[out] effective_chemical_potential the solution
+   * \param[in] solution_precision precision with which the solution is found;
+   *            note that this precision also goes into the precision of
+   *            integrals calculated in the process
+   * \return effective chemical potential mu, the solution [GeV]
    */
   double effective_chemical_potential(double degeneracy, double mass,
                                       double number_density, double temperature,
