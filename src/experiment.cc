@@ -582,6 +582,10 @@ double calculate_mean_field_energy(
       // the computational frame density
       const double j0 = node.jmu_net().x0();
 
+      const double abs_nB = std::abs(nB);
+      if ((abs_nB < really_small) || (std::abs(j0) < really_small)) {
+        continue;
+      }
       density_mean += j0;
       density_variance += j0 * j0;
 
@@ -593,10 +597,10 @@ double calculate_mean_field_energy(
        *
        * TODO: Add symmetry energy.
        */
-      double mean_field_contribution_1 =
-          (C1GeV / b1) * std::pow(nB, b1) / std::pow(nuclear_density, b1 - 1);
-      double mean_field_contribution_2 =
-          (C2GeV / b2) * std::pow(nB, b2) / std::pow(nuclear_density, b2 - 1);
+      double mean_field_contribution_1 = (C1GeV / b1) * std::pow(abs_nB, b1) /
+                                         std::pow(nuclear_density, b1 - 1);
+      double mean_field_contribution_2 = (C2GeV / b2) * std::pow(abs_nB, b2) /
+                                         std::pow(nuclear_density, b2 - 1);
 
       lattice_mean_field_total +=
           V_cell * (mean_field_contribution_1 + mean_field_contribution_2);
