@@ -100,8 +100,9 @@ FourVector Action::get_interaction_point() const {
   }
   /* In case of scatterings via the stochastic criterion, use postion of random
    * incoming particle to prevent density hotspots in grid cell centers. */
-  if (stochastic_position_idx_ >= 0 ) {
-    interaction_point = incoming_particles_[stochastic_position_idx_].position();
+  if (stochastic_position_idx_ >= 0) {
+    interaction_point =
+        incoming_particles_[stochastic_position_idx_].position();
   }
   return interaction_point;
 }
