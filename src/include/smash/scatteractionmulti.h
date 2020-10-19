@@ -179,6 +179,26 @@ class ScatterActionMulti : public Action {
   double calculate_I3(const double sqrts) const;
 
   /**
+   * Determine the spin degeneracy factor (\f$D_{spin}\f$) for the 3->2
+   * reaction.
+   *
+   * \f[D_{spin} = \frac{(2J_{out1}+1)(2J_{out2}+1)}
+   * {(2J_{in1}+1)(2J_{in2}+1)(2J_{in3}+1)}\f]
+   *
+   * \param[in] spin_factor_inc product of incoming spin degeneracy
+   *                            (denominator in above expression)
+   * \param[in] spin_degen_out1 degeneracy factor of outgoing particle 1
+   * \param[in] spin_degen_out2 degeneracy factor of outgoing particle 2
+   * \return spin degeneracy factor
+   */
+  double react_degen_factor(const int spin_factor_inc,
+                            const int spin_degen_out1,
+                            const int spin_degen_out2) const {
+    return static_cast<double>(spin_degen_out1 * spin_degen_out2) /
+           static_cast<double>(spin_factor_inc);
+  }
+
+  /**
    * Check wether the three incoming particles are π⁺,π⁻,π⁰ in any order.
    * Wrapper for unwieldy if statment.
    *

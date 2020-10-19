@@ -123,10 +123,9 @@ void ScatterActionMulti::add_possible_reactions(double dt,
               [](ParticleData x) { return x.is_pion(); });
           const ParticleType& type_pi = it->type();
 
-          const int spin_factor_out =
-              type_pi.spin_degeneracy() * type_deuteron->spin_degeneracy();
-          const double spin_degn = static_cast<double>(spin_factor_out) /
-                                   static_cast<double>(spin_factor_inc);
+          const double spin_degn =
+              react_degen_factor(spin_factor_inc, type_pi.spin_degeneracy(),
+                                 type_deuteron->spin_degeneracy());
 
           add_reaction(make_unique<CollisionBranch>(
               type_pi, *type_deuteron,
@@ -148,10 +147,9 @@ void ScatterActionMulti::add_possible_reactions(double dt,
               [](ParticleData x) { return x.is_pion(); });
           const ParticleType& type_pi = it->type();
 
-          const int spin_factor_out =
-              type_pi.spin_degeneracy() * type_anti_deuteron->spin_degeneracy();
-          const double spin_degn = static_cast<double>(spin_factor_out) /
-                                   static_cast<double>(spin_factor_inc);
+          const double spin_degn =
+              react_degen_factor(spin_factor_inc, type_pi.spin_degeneracy(),
+                                 type_anti_deuteron->spin_degeneracy());
 
           add_reaction(make_unique<CollisionBranch>(
               type_pi, *type_anti_deuteron,
@@ -188,10 +186,9 @@ void ScatterActionMulti::add_possible_reactions(double dt,
           }
           const ParticleType& type_N = it->type();
 
-          const int spin_factor_out =
-              type_N.spin_degeneracy() * type_deuteron->spin_degeneracy();
-          const double spin_degn = static_cast<double>(spin_factor_out) /
-                                   static_cast<double>(spin_factor_inc);
+          const double spin_degn =
+              react_degen_factor(spin_factor_inc, type_N.spin_degeneracy(),
+                                 type_deuteron->spin_degeneracy());
 
           add_reaction(make_unique<CollisionBranch>(
               type_N, *type_deuteron,
@@ -228,10 +225,9 @@ void ScatterActionMulti::add_possible_reactions(double dt,
           }
           const ParticleType& type_N = it->type();
 
-          const int spin_factor_out =
-              type_N.spin_degeneracy() * type_anti_deuteron->spin_degeneracy();
-          const double spin_degn = static_cast<double>(spin_factor_out) /
-                                   static_cast<double>(spin_factor_inc);
+          const double spin_degn =
+              react_degen_factor(spin_factor_inc, type_N.spin_degeneracy(),
+                                 type_anti_deuteron->spin_degeneracy());
 
           add_reaction(make_unique<CollisionBranch>(
               type_N, *type_anti_deuteron,
