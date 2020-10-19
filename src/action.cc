@@ -83,7 +83,7 @@ FourVector Action::get_interaction_point() const {
    * Which n to choose? Our guiding principle is that n should be such that
    * interaction point is closest to interacting particles.
    */
-  if (box_length_ > 0 && !stochastic_) {
+  if (box_length_ > 0 && stochastic_position_idx_ < 0) {
     assert(incoming_particles_.size() == 2);
     const FourVector r1 = incoming_particles_[0].position(),
                      r2 = incoming_particles_[1].position(), r = r1 - r2;
@@ -100,10 +100,8 @@ FourVector Action::get_interaction_point() const {
   }
   /* In case of scatterings via the stochastic criterion, use postion of random
    * incoming particle to prevent density hotspots in grid cell centers. */
-  if (stochastic_) {
-    const int max_inc_idx = incoming_particles_.size() - 1;
-    const int rnd_inc_idx = random::uniform_int(0, max_inc_idx);
-    interaction_point = incoming_particles_[rnd_inc_idx].position();
+  if (stochastic_position_idx_ >= 0 ) {
+    interaction_point = incoming_particles_[stochastic_position_idx_].position();
   }
   return interaction_point;
 }
