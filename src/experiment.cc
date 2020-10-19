@@ -461,6 +461,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           ntest,
           config.take({"General", "Gaussian_Sigma"}, 1.),
           config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
+          config_coll.take({"Collision_Criterion"},
+                           CollisionCriterion::Geometric),
           config_coll.take({"Two_to_One"}, true),
           config_coll.take({"Included_2to2"}, ReactionsBitSet().set()),
           config_coll.take({"Multi_Particle_Reactions"},
