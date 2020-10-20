@@ -273,12 +273,13 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * reactions scatterings. Note, that all 2-to-2 reactions, in particular \key
  * "PiDeuteron_to_NN", are included except the d' reactions, since they
  * effectively yield the same reaction. Before using the example, if important,
- * check for completeness of all 2-to-2 reactions (potentially out of date).
+ * check for completeness of all 2-to-2 reactions. The list of 2-to-2 reactions
+ * might have grown and the example is therefore potentially out of date.
  *
  *\verbatim
  Collision_Term:
      Collision_Criterion: Stochastic
-     # All (potentially out of date!) 2-to-2 reactions except d'
+     # All (check for completeness, if important) 2-to-2 reactions except d'
      Included_2to2: ["Elastic","NN_to_NR", "NN_to_DR", "KN_to_KN",
                      "Strangeness_exchange", "NNbar", "PiDeuteron_to_NN"]
      Multi_Particle_Reactions: ["Deuteron_3to2"]

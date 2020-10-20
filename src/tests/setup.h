@@ -253,7 +253,8 @@ inline ExperimentParameters default_parameters(int testparticles = 1,
       testparticles,                      // testparticles
       1.0,                                // Gaussian smearing width
       4.0,                                // Gaussian smearing cut-off
-      true,                               // two_to_one
+      CollisionCriterion::Geometric,
+      true,  // two_to_one
       all_reactions_included(),
       no_multiparticle_reactions(),
       false,  // strings switch
