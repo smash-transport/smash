@@ -390,6 +390,10 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
       data_a, data_b, time_until_collision, isotropic_, string_formation_time_,
       box_length_);
 
+  if (coll_crit_ == CollisionCriterion::Stochastic) {
+    act->set_stochastic_pos_idx();
+  }
+
   if (strings_switch_) {
     act->set_string_interface(string_process_interface_.get());
   }
@@ -490,6 +494,8 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
   // 2. Create ScatterAction object.
   ScatterActionMultiPtr act =
       make_unique<ScatterActionMulti>(plist, time_until_collision);
+
+  act->set_stochastic_pos_idx();
 
   // 3. Add possible final states (dt and gcell_vol for probability calculation)
   act->add_possible_reactions(dt, gcell_vol, three_to_one_, two_to_three_);

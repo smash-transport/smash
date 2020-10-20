@@ -292,6 +292,15 @@ class Action {
   std::pair<FourVector, FourVector> get_potential_at_interaction_point() const;
 
   /**
+   * Setter function that stores a random incoming particle index latter used to
+   * determine the interaction point
+   */
+  void set_stochastic_pos_idx() {
+    const int max_inc_idx = incoming_particles_.size() - 1;
+    stochastic_position_idx_ = random::uniform_int(0, max_inc_idx);
+  }
+
+  /**
    * Little helper function that calculates the lambda function (sometimes
    * written with a tilde to better distinguish it) that appears e.g. in the
    * relative velocity or 3-to-2 probability calculation, where it is used with
@@ -339,6 +348,13 @@ class Action {
    * Ignored if negative.
    */
   double box_length_ = -1.0;
+
+  /**
+   * This stores a randomly-chosen index to an incoming particle. If
+   * non-negative, the the interaction point equals the postion of the
+   * chosen particle (index). This is done for the stochastic criterion.
+   */
+  int stochastic_position_idx_ = -1;
 
   /// Sum of 4-momenta of incoming particles
   FourVector total_momentum() const {
