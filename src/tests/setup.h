@@ -233,6 +233,7 @@ inline ReactionsBitSet all_reactions_included() {
   return ReactionsBitSet().set();
 }
 
+/// returns BitSet for multi-particle reactions, where everything is off
 inline MultiParticleReactionsBitSet no_multiparticle_reactions() {
   return MultiParticleReactionsBitSet().reset();
 }

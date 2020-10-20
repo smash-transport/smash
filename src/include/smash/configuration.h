@@ -675,7 +675,6 @@ class Configuration {
      * \throw IncorrectTypeInAssignment in case a reaction type that is not
      * available is provided as a configuration value.
      */
-    // TODO(stdnmr) Write proper documentation for paramters in user guide
     operator MultiParticleReactionsBitSet() const {
       const std::vector<std::string> v = operator std::vector<std::string>();
       MultiParticleReactionsBitSet s;

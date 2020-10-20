@@ -222,9 +222,9 @@ TEST(cross_sections_symmetric) {
     // add processes
     constexpr double elastic_parameter = -10.;  // no added elastic x-sections
     constexpr bool two_to_one = true;
-    const ReactionsBitSet included_2to2 = ReactionsBitSet().flip();
+    const ReactionsBitSet included_2to2 = Test::all_reactions_included();
     const MultiParticleReactionsBitSet included_multi =
-        MultiParticleReactionsBitSet().reset();
+        Test::no_multiparticle_reactions();
     constexpr double low_snn_cut = 0.;
     constexpr bool strings_switch = true;
     constexpr bool use_AQM = true;
@@ -477,9 +477,9 @@ TEST(particle_ordering) {
     // add processes
     constexpr double elastic_parameter = -10.;  // no added elastic x-sections
     constexpr bool two_to_one = true;
-    const ReactionsBitSet included_2to2 = ReactionsBitSet().flip();
+    const ReactionsBitSet included_2to2 = Test::all_reactions_included();
     const MultiParticleReactionsBitSet included_multi =
-        MultiParticleReactionsBitSet().reset();
+        Test::no_multiparticle_reactions();
     constexpr double low_snn_cut = 0.;
     constexpr bool strings_switch = true;
     constexpr bool use_AQM = true;

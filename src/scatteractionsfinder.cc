@@ -328,7 +328,7 @@ ScatterActionsFinder::ScatterActionsFinder(
        incl_set_[IncludedReactions::NDeuteron_to_Ndprime] == 1)) {
     throw std::invalid_argument(
         "To prevent double counting it is not possible to enable deuteron 3->2 "
-        "reactions\nand reactions involving the d' at the same time\ni.e. do "
+        "reactions\nand reactions involving the d' at the same time\ni.e. to "
         "include `Deuteron_3to2` in `Multi_Particle_Reactions` and\n "
         "\"PiDeuteron_to_pidprime\" "
         "or \"NDeuteron_to_Ndprime\" in `Included_2to2` at the same time.\n"
