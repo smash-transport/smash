@@ -45,14 +45,13 @@ double ScatterActionMulti::get_partial_weight() const {
   return partial_probability_ * xsec_scaling;
 }
 
-void ScatterActionMulti::add_possible_reactions(double dt,
-                                                const double gcell_vol,
-                                                const bool three_to_one,
-                                                const bool two_to_three) {
+void ScatterActionMulti::add_possible_reactions(
+    double dt, const double gcell_vol,
+    const MultiParticleReactionsBitSet incl_multi) {
   // 3 -> m
   if (incoming_particles_.size() == 3) {
     // 3 -> 1
-    if (three_to_one) {
+    if (incl_multi[IncludedMultiParticleReactions::Meson_3to1] == 1) {
       if (three_different_pions(incoming_particles_[0], incoming_particles_[1],
                                 incoming_particles_[2])) {
         // 3pi -> omega
@@ -60,8 +59,8 @@ void ScatterActionMulti::add_possible_reactions(double dt,
         if (type_omega) {
           add_reaction(make_unique<CollisionBranch>(
               *type_omega,
-              probability_three_meson_to_one(*type_omega, dt, gcell_vol,
-                                             type_omega->spin_degeneracy()),
+              probability_three_to_one(*type_omega, dt, gcell_vol,
+                                       type_omega->spin_degeneracy()),
               ProcessType::MultiParticleThreeMesonsToOne));
         }
         // 3pi -> phi
@@ -69,8 +68,8 @@ void ScatterActionMulti::add_possible_reactions(double dt,
         if (type_phi) {
           add_reaction(make_unique<CollisionBranch>(
               *type_phi,
-              probability_three_meson_to_one(*type_phi, dt, gcell_vol,
-                                             type_phi->spin_degeneracy()),
+              probability_three_to_one(*type_phi, dt, gcell_vol,
+                                       type_phi->spin_degeneracy()),
               ProcessType::MultiParticleThreeMesonsToOne));
         }
       } else if (two_pions_eta(incoming_particles_[0], incoming_particles_[1],
@@ -88,7 +87,7 @@ void ScatterActionMulti::add_possible_reactions(double dt,
         if (type_eta_prime) {
           add_reaction(make_unique<CollisionBranch>(
               *type_eta_prime,
-              probability_three_meson_to_one(
+              probability_three_to_one(
                   *type_eta_prime, dt, gcell_vol,
                   sym_factor_in * type_eta_prime->spin_degeneracy()),
               ProcessType::MultiParticleThreeMesonsToOne));
@@ -96,7 +95,7 @@ void ScatterActionMulti::add_possible_reactions(double dt,
       }
     }
     // 3 -> 2
-    if (two_to_three) {
+    if (incl_multi[IncludedMultiParticleReactions::Deuteron_3to2] == 1) {
       const PdgCode pdg_a = incoming_particles_[0].pdgcode();
       const PdgCode pdg_b = incoming_particles_[1].pdgcode();
       const PdgCode pdg_c = incoming_particles_[2].pdgcode();
@@ -307,7 +306,7 @@ double ScatterActionMulti::calculate_I3(const double sqrts) const {
   return result;
 }
 
-double ScatterActionMulti::probability_three_meson_to_one(
+double ScatterActionMulti::probability_three_to_one(
     const ParticleType& type_out, double dt, const double gcell_vol,
     const int degen_factor) const {
   const double e1 = incoming_particles_[0].momentum().x0();

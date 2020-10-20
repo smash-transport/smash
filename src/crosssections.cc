@@ -113,9 +113,10 @@ CrossSections::CrossSections(const ParticleList& incoming_particles,
 
 CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
-    ReactionsBitSet included_2to2, double low_snn_cut, bool strings_switch,
-    bool use_AQM, bool strings_with_probability, NNbarTreatment nnbar_treatment,
-    bool include_two_to_three, StringProcess* string_process) const {
+    ReactionsBitSet included_2to2, MultiParticleReactionsBitSet included_multi,
+    double low_snn_cut, bool strings_switch, bool use_AQM,
+    bool strings_with_probability, NNbarTreatment nnbar_treatment,
+    StringProcess* string_process) const {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
@@ -150,15 +151,16 @@ CollisionBranchList CrossSections::generate_collision_list(
   if (p_pythia < 1.) {
     if (two_to_one_switch) {
       // resonance formation (2->1)
-      append_list(process_list, two_to_one(include_two_to_three),
-                  1. - p_pythia);
+      const bool prevent_dprime_form =
+          included_multi[IncludedMultiParticleReactions::Deuteron_3to2];
+      append_list(process_list, two_to_one(prevent_dprime_form), 1. - p_pythia);
     }
     if (included_2to2.any()) {
       // 2->2 (inelastic)
       append_list(process_list, two_to_two(included_2to2), 1. - p_pythia);
     }
-    if (include_two_to_three) {
-      // 2->3
+    if (included_multi[IncludedMultiParticleReactions::Deuteron_3to2] == 1) {
+      // 2->3 (deuterons only 2-to-3 reaction at the moment)
       append_list(process_list, two_to_three(), 1. - p_pythia);
     }
   }
@@ -697,7 +699,7 @@ double CrossSections::nk_el() const {
 }
 
 CollisionBranchList CrossSections::two_to_one(
-    const bool include_two_to_three) const {
+    const bool prevent_dprime_form) const {
   CollisionBranchList resonance_process_list;
   const ParticleType& type_particle_a = incoming_particles_[0].type();
   const ParticleType& type_particle_b = incoming_particles_[1].type();
@@ -714,7 +716,7 @@ CollisionBranchList CrossSections::two_to_one(
     }
 
     // Skip d' froming, when doing 2-to-3 deuteron reactions directly (w/o d')
-    if (include_two_to_three && type_resonance.is_dprime()) {
+    if (prevent_dprime_form && type_resonance.is_dprime()) {
       continue;
     }
 

@@ -553,6 +553,12 @@ class Experiment : public ExperimentBase {
   uint64_t total_hypersurface_crossing_actions_ = 0;
 
   /**
+   *  Total number of discarded interactions, because they were invalidated
+   *  before they could be performed.
+   */
+  uint64_t discarded_interactions_total_ = 0;
+
+  /**
    * Total energy removed from the system in hypersurface crossing actions.
    *
    */
@@ -722,6 +728,27 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * Detailed balance is preserved by these reaction switches: if a forward
  * reaction is off then the reverse is automatically off too.
  *
+ * \key Multi_Particle_Reactions (list of reactions with more than 2 in- or
+ * outgoing particles, optional, default = []) \n
+ * List that contains all possible multi-particle process categories. Multi
+ * particle reactions only work with the stochastic collison criterion.
+ * See also example below. Possible categories are:
+ * \li \key "Meson_3to1" - Mesonic 3-to-1 reactions:
+ * \f$\pi^0\pi^+\pi^-\leftrightarrow\omega\f$,
+ * \f$\pi^0\pi^+\pi^-\leftrightarrow\phi\f$,
+ * \f$\eta\pi^+\pi^-\leftrightarrow\eta'\f$ and
+ * \f$\eta\pi^0\pi^0\leftrightarrow\eta'\f$. Since detailed balance is enforced,
+ * the corresponding decays also have to be added in decaymodes.txt to enable
+ * the reactions.
+ * \li \key "Deuteron_3to2" - Deuteron 3-to-2 reactions:
+ * \f$\pi pn\leftrightarrow\pi d\f$, \f$Npn\leftrightarrow Nd\f$ and
+ * \f$\bar{N}pn\leftrightarrow \bar{N}d\f$. The deuteron has to be uncommented
+ * in particles.txt, too. 2-body reactions involving the d' have to be exluded
+ * (no \key "PiDeuteron_to_pidprime" and \key "NDeuteron_to_Ndprime" in
+ * \key Included_2to2), since they effectively yield the same reaction.
+ * (The same cross section is used as for the d' reactions, therefore the d' in
+ * particles.txt and its decay in decaymodest.txt also need to be uncommented.)
+ *
  * \key Force_Decays_At_End (bool, optional, default = \key true): \n
  * \li \key true - Force all resonances to decay after last timestep \n
  * \li \key false - Don't force decays (final output can contain resonances)
@@ -817,6 +844,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   logg[LExperiment].info() << *this;
 
+  if (parameters_.coll_crit == CollisionCriterion::Stochastic &&
+      time_step_mode_ != TimeStepMode::Fixed) {
+    throw std::invalid_argument(
+        "The stochastic criterion can only be employed for fixed time step "
+        "mode!");
+  }
+
   // create finders
   if (dileptons_switch_) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
@@ -842,7 +876,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
   bool no_coll = config.take({"Collision_Term", "No_Collisions"}, false);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
-       parameters_.strings_switch) &&
+       parameters_.included_multi.any() || parameters_.strings_switch) &&
       !no_coll) {
     auto scat_finder = make_unique<ScatterActionsFinder>(
         config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
@@ -1482,6 +1516,7 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
   previous_wall_actions_total_ = 0;
   interactions_total_ = 0;
   previous_interactions_total_ = 0;
+  discarded_interactions_total_ = 0;
   total_pauli_blocked_ = 0;
   projectile_target_interact_ = false;
   total_hypersurface_crossing_actions_ = 0;
@@ -1523,6 +1558,7 @@ bool Experiment<Modus>::perform_action(
     Action &action, const Container &particles_before_actions) {
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles_)) {
+    discarded_interactions_total_++;
     logg[LExperiment].debug(~einhard::DRed(), "✘ ", action,
                             " (discarded: invalid)");
     return false;
@@ -1810,6 +1846,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     // get next action
     ActionPtr act = actions.pop();
     if (!act->is_valid(particles_)) {
+      discarded_interactions_total_++;
       logg[LExperiment].debug(~einhard::DRed(), "✘ ", act,
                               " (discarded: invalid)");
       continue;
@@ -2124,9 +2161,31 @@ void Experiment<Modus>::final_output(const int evt_num) {
             << total_hypersurface_crossing_actions_;
       }
     } else {
+      const double precent_discarded =
+          static_cast<double>(discarded_interactions_total_) * 100. /
+          interactions_total_;
+      std::stringstream msg_discarded;
+      msg_discarded
+          << "Discarded interaction number: " << discarded_interactions_total_
+          << " (" << precent_discarded
+          << "% of the total interaction number including wall crossings)";
+
       logg[LExperiment].info() << hline;
       logg[LExperiment].info()
           << "Time real: " << SystemClock::now() - time_start_;
+      logg[LExperiment].debug() << msg_discarded.str();
+
+      if (parameters_.coll_crit == CollisionCriterion::Stochastic &&
+          precent_discarded > 1.0) {
+        // The choosen threshold of 1% is a heuristical value
+        logg[LExperiment].warn()
+            << msg_discarded.str()
+            << "\nThe number of discarded interactions is large, which means "
+               "the assumption for the stochastic criterion of\n1 interaction"
+               "per particle per timestep is probably violated. Consider "
+               "reducing the timestep size.";
+      }
+
       logg[LExperiment].info() << "Final interaction number: "
                                << interactions_total_ - wall_actions_total_;
     }

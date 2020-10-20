@@ -37,11 +37,17 @@ struct ExperimentParameters {
   /// Distance at which gaussian is cut, i.e. set to zero, IN SIGMA (not fm)
   double gauss_cutoff_in_sigma;
 
+  /// Employed collision criterion
+  const CollisionCriterion coll_crit;
+
   /// This indicates whether two to one reactions are switched on.
   bool two_to_one;
 
   /// This indicates which two to two reactions are switched off.
   const ReactionsBitSet included_2to2;
+
+  /// This indicates which multi-particle reactions are switched on.
+  const MultiParticleReactionsBitSet included_multi;
 
   /// This indicates whether string fragmentation is switched on.
   bool strings_switch;
