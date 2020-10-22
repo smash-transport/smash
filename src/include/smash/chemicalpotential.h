@@ -117,7 +117,8 @@ class ChemicalPotentialSolver {
    * \f] given the density \f$ n \f$, and temperature \f$ T \f$.
    * \param[in] degeneracy degeneracy g of the particle species
    * \param[in] mass m (pole) mass m of the particle species [GeV]
-   * \param[in] number_density number density n of the particle species n [GeV^3]
+   * \param[in] number_density number density n of the particle species n
+   *            [GeV^3]
    * \param[in] temperature temperature T of the system in GeV
    * \param[in] statistics quantum statistics of the particles species
    *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
