@@ -590,8 +590,8 @@ void ScatterActionsFinder::dump_reactions() const {
       }
       bool any_nonzero_cs = false;
       std::vector<std::string> r_list;
-      for (const ParticleTypePtr& A_type : A_isotype.get_states()) {
-        for (const ParticleTypePtr& B_type : B_isotype.get_states()) {
+      for (const ParticleTypePtr A_type : A_isotype.get_states()) {
+        for (const ParticleTypePtr B_type : B_isotype.get_states()) {
           if (A_type > B_type) {
             continue;
           }
@@ -892,7 +892,7 @@ static void add_decays(Node& node, double sqrts) {
   // much.
   uint32_t n_unstable = 0;
   double sqrts_minus_masses = sqrts;
-  for (const ParticleTypePtr& ptype : node.state_) {
+  for (const ParticleTypePtr ptype : node.state_) {
     if (!ptype->is_stable()) {
       n_unstable += 1;
     }
@@ -901,7 +901,7 @@ static void add_decays(Node& node, double sqrts) {
   const double norm =
       n_unstable != 0 ? 1. / static_cast<double>(n_unstable) : 1.;
 
-  for (const ParticleTypePtr& ptype : node.state_) {
+  for (const ParticleTypePtr ptype : node.state_) {
     if (!ptype->is_stable()) {
       const double sqrts_decay = sqrts_minus_masses + ptype->mass();
       bool can_decay = false;

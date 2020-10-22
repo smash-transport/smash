@@ -738,7 +738,7 @@ void ParticleType::dump_width_and_spectral_function() const {
   const auto &decaymodes = decay_modes().decay_mode_list();
   for (const auto &mode : decaymodes) {
     double pole_mass_sum = 0.0;
-    for (const ParticleTypePtr &p : mode->type().particle_types()) {
+    for (const ParticleTypePtr p : mode->type().particle_types()) {
       pole_mass_sum += p->mass();
     }
     if (pole_mass_sum > rightmost_pole) {

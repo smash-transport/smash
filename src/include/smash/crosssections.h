@@ -541,7 +541,7 @@ class CrossSections {
     bool is_below_threshold;
     FourVector incoming_momentum = FourVector();
     if (pot_pointer != nullptr) {
-      for (const auto& p : incoming_particles_) {
+      for (const auto p : incoming_particles_) {
         incoming_momentum += p.momentum();
         scale_B += pot_pointer->force_scale(p.type()).first;
         scale_I3 +=
