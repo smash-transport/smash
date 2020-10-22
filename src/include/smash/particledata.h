@@ -99,6 +99,9 @@ class ParticleData {
   /// \copydoc PdgCode::is_neutron
   bool is_neutron() const { return pdgcode().is_neutron(); }
 
+  /// \copydoc PdgCode::is_pion
+  bool is_pion() const { return pdgcode().is_pion(); }
+
   /**
    * Get the particle's pole mass ("on-shell").
    * \return pole mass of the particle [GeV]

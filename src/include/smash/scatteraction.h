@@ -139,6 +139,7 @@ class ScatterAction : public Action {
    *            elastic cross section.
    * \param[in] two_to_one  2->1 reactions enabled?
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
+   * \param[in] included_multi Which multi-particle reactions are enabled?
    * \param[in] low_snn_cut Elastic collisions with CME below are forbidden.
    * \param[in] strings_switch Are string processes enabled?
    * \param[in] use_AQM use elastic cross sections via AQM?
@@ -146,13 +147,13 @@ class ScatterAction : public Action {
    *            according to a probability?
    * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
    *                                                        none
-   * \param[in] two_to_three 2<->3 reactions enabled?
    */
   void add_all_scatterings(double elastic_parameter, bool two_to_one,
-                           ReactionsBitSet included_2to2, double low_snn_cut,
-                           bool strings_switch, bool use_AQM,
-                           bool strings_with_probability,
-                           NNbarTreatment nnbar_treatment, bool two_to_three);
+                           ReactionsBitSet included_2to2,
+                           MultiParticleReactionsBitSet included_multi,
+                           double low_snn_cut, bool strings_switch,
+                           bool use_AQM, bool strings_with_probability,
+                           NNbarTreatment nnbar_treatment);
 
   /**
    * Get list of possible collision channels.
@@ -207,8 +208,12 @@ class ScatterAction : public Action {
   double cm_momentum_squared() const;
 
   /**
-   * Get the velocity of the center of mass of the scattering particles
+   * Get the velocity of the center of mass of the scattering/incoming particles
    * in the calculation frame.
+   *
+   * Note: Do not use this function to boost the outgoing
+   * particles. Use total_momentum_of_outgoing_particles(), which corrects for
+   * the effect of potentials on intial and final state.
    *
    * \return boost velocity between center of mass and calculation frame.
    */

@@ -18,6 +18,18 @@ matrix:
           - g++-4.8
     env:
       - MATRIX_EVAL="CC=gcc-4.8 && CXX=g++-4.8"
+  # test fias machine gcc version
+  - os: linux
+    dist: xenial
+    addons:
+      apt:
+        packages:
+          - libboost-all-dev
+          - g++-5
+          - doxygen-latex
+          - graphviz
+    env:
+      - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
   # most recent gcc version
   - os: linux
     dist: bionic
@@ -30,15 +42,6 @@ matrix:
           - g++-9
     env:
       - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
-  # old clang version on linux
-  - os: linux
-    addons:
-      apt:
-        packages:
-          - libboost-all-dev
-          - clang-3.5
-    env:
-      - MATRIX_EVAL="CC=clang-3.5 && CXX=clang++-3.5"
   # most recent clang version on linux
   - os: linux
     dist: bionic
@@ -99,6 +102,8 @@ install:
   - make -j$(nproc)
 
 script:
+  # test that everything is documented (only for one build)
+  - if [ "$MATRIX_EVAL" = "CC=gcc-5 && CXX=g++-5" ]; then make undocumented && make undocumented_test; fi
   # use correct clang version for format helper
   - PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/clang-format-helper.bash -t
   - CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)

@@ -444,21 +444,38 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   }
   const bool potential_affect_threshold =
       config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);
-  return {make_unique<UniformClock>(0.0, dt),
-          std::move(output_clock),
-          ntest,
-          config.take({"General", "Gaussian_Sigma"}, 1.),
-          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
-          config_coll.take({"Two_to_One"}, true),
-          config_coll.take({"Included_2to2"}, ReactionsBitSet().set()),
-          config_coll.take({"Strings"}, modus_chooser != "Box"),
-          config_coll.take({"Use_AQM"}, true),
-          config_coll.take({"Resonance_Lifetime_Modifier"}, 1.),
-          config_coll.take({"Strings_with_Probability"}, true),
-          config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
-          low_snn_cut,
-          potential_affect_threshold,
-          box_length};
+  /**
+   * The maximum around 200 mb occurs in the Delta peak of the pi+p
+   * cross section. Many SMASH cross sections diverge at the threshold,
+   * these divergent parts are effectively cut off. If deuteron production
+   * via d' is considered, then the default should be increased to 2000 mb
+   * to function correctly (see \iref{Oliinychenko:2018ugs}).
+   */
+  double maximum_cross_section_default =
+      ParticleType::exists("d'") ? 2000.0 : 200.0;
+  double maximum_cross_section =
+      config.take({"Collision_Term", "Maximum_Cross_Section"},
+                  maximum_cross_section_default);
+  return {
+      make_unique<UniformClock>(0.0, dt),
+      std::move(output_clock),
+      ntest,
+      config.take({"General", "Gaussian_Sigma"}, 1.),
+      config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
+      config_coll.take({"Collision_Criterion"}, CollisionCriterion::Geometric),
+      config_coll.take({"Two_to_One"}, true),
+      config_coll.take({"Included_2to2"}, ReactionsBitSet().set()),
+      config_coll.take({"Multi_Particle_Reactions"},
+                       MultiParticleReactionsBitSet().reset()),
+      config_coll.take({"Strings"}, modus_chooser != "Box"),
+      config_coll.take({"Use_AQM"}, true),
+      config_coll.take({"Resonance_Lifetime_Modifier"}, 1.),
+      config_coll.take({"Strings_with_Probability"}, true),
+      config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
+      low_snn_cut,
+      potential_affect_threshold,
+      box_length,
+      maximum_cross_section};
 }
 
 std::string format_measurements(const Particles &particles,
@@ -569,6 +586,10 @@ double calculate_mean_field_energy(
       // the computational frame density
       const double j0 = node.jmu_net().x0();
 
+      const double abs_nB = std::abs(nB);
+      if ((abs_nB < really_small) || (std::abs(j0) < really_small)) {
+        continue;
+      }
       density_mean += j0;
       density_variance += j0 * j0;
 
@@ -580,10 +601,10 @@ double calculate_mean_field_energy(
        *
        * TODO: Add symmetry energy.
        */
-      double mean_field_contribution_1 =
-          (C1GeV / b1) * std::pow(nB, b1) / std::pow(nuclear_density, b1 - 1);
-      double mean_field_contribution_2 =
-          (C2GeV / b2) * std::pow(nB, b2) / std::pow(nuclear_density, b2 - 1);
+      double mean_field_contribution_1 = (C1GeV / b1) * std::pow(abs_nB, b1) /
+                                         std::pow(nuclear_density, b1 - 1);
+      double mean_field_contribution_2 = (C2GeV / b2) * std::pow(abs_nB, b2) /
+                                         std::pow(nuclear_density, b2 - 1);
 
       lattice_mean_field_total +=
           V_cell * (mean_field_contribution_1 + mean_field_contribution_2);
@@ -593,7 +614,8 @@ double calculate_mean_field_energy(
     density_mean = density_mean / number_of_nodes;
     density_variance = density_variance / number_of_nodes;
     double density_scaled_variance =
-        sqrt(density_variance - density_mean * density_mean) / density_mean;
+        std::sqrt(density_variance - density_mean * density_mean) /
+        density_mean;
     logg[LExperiment].debug() << "\t\t\t\t\t";
     logg[LExperiment].debug()
         << "\n\t\t\t\t\t            density mean = " << density_mean;

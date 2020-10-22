@@ -98,19 +98,6 @@ constexpr double deuteron_mass = 1.8756;
 constexpr double fine_structure = 7.2973525698e-3;
 
 /**
- * The maximal cross section (in mb) for which it is guaranteed that all
- * collisions with this cross section will be found.
- *
- * This means that all particle pairs, where the transverse distance is smaller
- * or equal to \f$ \sqrt{200mb/\pi} \f$, will be checked for collions.
- *
- * This maximum occurs in the Delta peak of the pi+p cross section.
- * The only exception of physical cross sections going above 200 mb are the
- * elastic NN and KN cross sections, which diverge at threshold.
- */
-constexpr double maximum_cross_section = 200.;  // mb
-
-/**
  * The maximum value of the random seed used in PYTHIA.
  */
 constexpr int maximum_rndm_seed_in_pythia = 900000000;

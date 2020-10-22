@@ -83,7 +83,7 @@ FourVector Action::get_interaction_point() const {
    * Which n to choose? Our guiding principle is that n should be such that
    * interaction point is closest to interacting particles.
    */
-  if (box_length_ > 0) {
+  if (box_length_ > 0 && stochastic_position_idx_ < 0) {
     assert(incoming_particles_.size() == 2);
     const FourVector r1 = incoming_particles_[0].position(),
                      r2 = incoming_particles_[1].position(), r = r1 - r2;
@@ -97,6 +97,12 @@ FourVector Action::get_interaction_point() const {
         }
       }
     }
+  }
+  /* In case of scatterings via the stochastic criterion, use postion of random
+   * incoming particle to prevent density hotspots in grid cell centers. */
+  if (stochastic_position_idx_ >= 0) {
+    interaction_point =
+        incoming_particles_[stochastic_position_idx_].position();
   }
   return interaction_point;
 }
@@ -190,13 +196,33 @@ void Action::assign_formation_time_to_outgoing_particles() {
 
   if (last_formed_in_part->formation_time() > time_of_execution_) {
     for (ParticleData &new_particle : outgoing_particles_) {
-      new_particle.set_slow_formation_times(
-          form_time_begin, last_formed_in_part->formation_time());
-      new_particle.set_cross_section_scaling_factor(sc);
+      if (new_particle.initial_xsec_scaling_factor() < 1.0) {
+        /* The new cross section scaling factor will be the product of the
+         * cross section scaling factor of the ingoing particles and of the
+         * outgoing ones (since the outgoing ones are also string fragments
+         * and thus take time to form). */
+        double sc_out = new_particle.initial_xsec_scaling_factor();
+        new_particle.set_cross_section_scaling_factor(sc * sc_out);
+        if (last_formed_in_part->formation_time() >
+            new_particle.formation_time()) {
+          /* If the unformed incoming particles' formation time is larger than
+           * the current outgoing particle's formation time, then the latter
+           * is overwritten by the former*/
+          new_particle.set_slow_formation_times(
+              time_of_execution_, last_formed_in_part->formation_time());
+        }
+      } else {
+        // not a string product
+        new_particle.set_slow_formation_times(
+            form_time_begin, last_formed_in_part->formation_time());
+        new_particle.set_cross_section_scaling_factor(sc);
+      }
     }
   } else {
     for (ParticleData &new_particle : outgoing_particles_) {
-      new_particle.set_formation_time(time_of_execution_);
+      if (new_particle.initial_xsec_scaling_factor() == 1.0) {
+        new_particle.set_formation_time(time_of_execution_);
+      }
     }
   }
 }

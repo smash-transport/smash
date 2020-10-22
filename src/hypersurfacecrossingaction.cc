@@ -122,13 +122,13 @@ bool HyperSurfaceCrossActionsFinder::crosses_hypersurface(
     ParticleData &pdata_after_propagation, const double tau) const {
   bool hypersurface_is_crossed = false;
   const bool t_greater_z_before_prop =
-      (fabs(pdata_before_propagation.position().x0()) >
-               fabs(pdata_before_propagation.position().x3())
+      (std::fabs(pdata_before_propagation.position().x0()) >
+               std::fabs(pdata_before_propagation.position().x3())
            ? 1
            : 0);
   const bool t_greater_z_after_prop =
-      (fabs(pdata_after_propagation.position().x0()) >
-               fabs(pdata_after_propagation.position().x3())
+      (std::fabs(pdata_after_propagation.position().x0()) >
+               std::fabs(pdata_after_propagation.position().x3())
            ? 1
            : 0);
 

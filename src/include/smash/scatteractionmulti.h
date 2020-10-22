@@ -59,11 +59,10 @@ class ScatterActionMulti : public Action {
    *
    * \param[in] dt timestep size
    * \param[in] gcell_vol gcell_vol grid cell volume
-   * \param[in] three_to_one 3->1 reactions enabled?
-   * \param[in] two_to_three 3<->2 reactions enabled?
+   * \param[in] incl_multi Which multi-particle reactions are enabled?
    */
   void add_possible_reactions(double dt, const double gcell_vol,
-                              const bool three_to_one, const bool two_to_three);
+                              const MultiParticleReactionsBitSet incl_multi);
 
   /**
    * \ingroup exception
@@ -131,9 +130,9 @@ class ScatterActionMulti : public Action {
    *                                                         factors)
    * \return probabilty for 3-to-1 reaction
    */
-  double probability_three_meson_to_one(const ParticleType& type_out, double dt,
-                                        const double gcell_vol,
-                                        const int degen_factor = 1) const;
+  double probability_three_to_one(const ParticleType& type_out, double dt,
+                                  const double gcell_vol,
+                                  const int degen_factor = 1) const;
 
   /**
    * Calculate the probability for a 3-to-2 reaction according to the
@@ -160,7 +159,7 @@ class ScatterActionMulti : public Action {
   double probability_three_to_two(const ParticleType& type_out1,
                                   const ParticleType& type_out2, double dt,
                                   const double gcell_vol,
-                                  const int degen_factor = 1) const;
+                                  const double degen_factor = 1.0) const;
 
   /**
    * Calculate the integration necessary for the three-body phase space. The
@@ -177,6 +176,26 @@ class ScatterActionMulti : public Action {
    * \return result of integral
    */
   double calculate_I3(const double sqrts) const;
+
+  /**
+   * Determine the spin degeneracy factor (\f$D_{spin}\f$) for the 3->2
+   * reaction.
+   *
+   * \f[D_{spin} = \frac{(2J_{out1}+1)(2J_{out2}+1)}
+   * {(2J_{in1}+1)(2J_{in2}+1)(2J_{in3}+1)}\f]
+   *
+   * \param[in] spin_factor_inc product of incoming spin degeneracy
+   *                            (denominator in above expression)
+   * \param[in] spin_degen_out1 degeneracy factor of outgoing particle 1
+   * \param[in] spin_degen_out2 degeneracy factor of outgoing particle 2
+   * \return spin degeneracy factor
+   */
+  double react_degen_factor(const int spin_factor_inc,
+                            const int spin_degen_out1,
+                            const int spin_degen_out2) const {
+    return static_cast<double>(spin_degen_out1 * spin_degen_out2) /
+           static_cast<double>(spin_factor_inc);
+  }
 
   /**
    * Check wether the three incoming particles are π⁺,π⁻,π⁰ in any order.
@@ -202,16 +221,6 @@ class ScatterActionMulti : public Action {
    */
   bool two_pions_eta(const ParticleData& data_a, const ParticleData& data_b,
                      const ParticleData& data_c) const;
-
-  /**
-   * Check wether the three incoming particles can be part of 3-to-2 reaction.
-   * Wrapper for unwieldy if statment.
-   *
-   * \return true if possible 3-to-2 reaction
-   */
-  bool possible_three_to_two_reaction() const {
-    return false;  // No 3-to-2 reactions at the moment
-  }
 
   /// Total probability of reaction
   double total_probability_;

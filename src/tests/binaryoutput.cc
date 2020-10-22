@@ -176,9 +176,9 @@ TEST(fullhistory_format) {
   const bool empty_event = false;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
-  action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, false, false,
-                              NNbarTreatment::NoAnnihilation, false);
+  action->add_all_scatterings(10., true, Test::all_reactions_included(),
+                              Test::no_multiparticle_reactions(), 0., true,
+                              false, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;
@@ -353,9 +353,9 @@ TEST(extended) {
 
   /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
-  action->add_all_scatterings(10., true, Test::all_reactions_included(), 0.,
-                              true, false, false,
-                              NNbarTreatment::NoAnnihilation, false);
+  action->add_all_scatterings(10., true, Test::all_reactions_included(),
+                              Test::no_multiparticle_reactions(), 0., true,
+                              false, false, NNbarTreatment::NoAnnihilation);
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;

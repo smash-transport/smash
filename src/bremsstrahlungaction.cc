@@ -120,7 +120,7 @@ void BremsstrahlungAction::generate_final_state() {
   // Assign weighting factor
   const double W_theta = diff_xs_theta * (M_PI - 0.0);
   const double W_k = diff_xs_k * delta_k;
-  weight_ = sqrt(W_theta * W_k) /
+  weight_ = std::sqrt(W_theta * W_k) /
             (number_of_fractional_photons_ * hadronic_cross_section());
 
   // Scale weight by cross section scaling factor of incoming particles
@@ -132,7 +132,8 @@ void BremsstrahlungAction::generate_final_state() {
     // assuming decaying particles are always fully formed
     new_particle.set_formation_time(time_of_execution_);
     new_particle.set_4position(interaction_point);
-    new_particle.boost_momentum(-beta_cm());
+    new_particle.boost_momentum(
+        -total_momentum_of_outgoing_particles().velocity());
   }
 
   // Photons are not really part of the normal processes, so we have to set a

@@ -17,7 +17,6 @@
 #include "action.h"
 #include "actionfinderfactory.h"
 #include "configuration.h"
-#include "constants.h"
 #include "scatteraction.h"
 
 namespace smash {
@@ -120,7 +119,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
         const double p1_dot_x = p1_mom.Dot(delta_x);
         const double p2_dot_x = p2_mom.Dot(delta_x);
         const double p1_dot_p2 = p1_mom.Dot(p2_mom);
-        const double denominator = pow(p1_dot_p2, 2) - p1_sqr * p2_sqr;
+        const double denominator = std::pow(p1_dot_p2, 2) - p1_sqr * p2_sqr;
 
         const double time_1 = (p2_sqr * p1_dot_x - p1_dot_p2 * p2_dot_x) *
                               p1_mom.x0() / denominator;
@@ -236,7 +235,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    */
   double max_transverse_distance_sqr(int testparticles) const {
     return (is_constant_elastic_isotropic() ? elastic_parameter_
-                                            : maximum_cross_section) /
+                                            : maximum_cross_section_) /
            testparticles * fm2_mb * M_1_PI;
   }
 
@@ -341,10 +340,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const bool two_to_one_;
   /// List of included 2<->2 reactions
   const ReactionsBitSet incl_set_;
-  /// Enable 2<->3 forward and backward process with the stochastic criterion.
-  const bool two_to_three_;
-  /// Enable 3->1 processes with the stochastic criterion.
-  const bool three_to_one_;
+  /// List of included multi-particle reactions
+  const MultiParticleReactionsBitSet incl_multi_set_;
   /**
    * Elastic collsions between two nucleons with sqrt_s below low_snn_cut_ are
    * excluded.
@@ -374,6 +371,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const int N_proj_;
   /// Parameter for formation time
   const double string_formation_time_;
+  /// \see input_collision_term_
+  const double maximum_cross_section_;
 };
 
 }  // namespace smash

@@ -467,7 +467,7 @@ void DecayModes::load_decaymodes(const std::string &input) {
       if (mother.mass() <= decay->threshold()) {
         std::stringstream s;
         s << mother.name() << " →  ";
-        for (const auto p : decay->particle_types()) {
+        for (const auto &p : decay->particle_types()) {
           s << p->name();
         }
         s << " with " << mother.mass() << " ≤ " << decay->threshold();

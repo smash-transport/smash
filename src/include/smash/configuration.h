@@ -669,6 +669,34 @@ class Configuration {
     }
 
     /**
+     * Set MultiParticleReactionsBitSet from configuration values.
+     *
+     * \return MultiParticleReactionsBitSet with all included reaction types.
+     * \throw IncorrectTypeInAssignment in case a reaction type that is not
+     * available is provided as a configuration value.
+     */
+    operator MultiParticleReactionsBitSet() const {
+      const std::vector<std::string> v = operator std::vector<std::string>();
+      MultiParticleReactionsBitSet s;
+      for (const auto &x : v) {
+        if (x == "All") {
+          s.set();
+          break;
+        } else if (x == "Meson_3to1") {
+          s.set(IncludedMultiParticleReactions::Meson_3to1);
+        } else if (x == "Deuteron_3to2") {
+          s.set(IncludedMultiParticleReactions::Deuteron_3to2);
+        } else {
+          throw IncorrectTypeInAssignment(
+              "The value for key \"" + std::string(key_) +
+              "\" should be \"All\", \"Meson_3to1\" or "
+              "\"Deuteron_3to2\", or any combination of these.");
+        }
+      }
+      return s;
+    }
+
+    /**
      * Set thermodynamic quantity from configuration values.
      *
      * \return Set of thermodynamic quantity.
