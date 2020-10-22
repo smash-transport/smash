@@ -245,15 +245,16 @@ inline MultiParticleReactionsBitSet no_multiparticle_reactions() {
  * If needed you can set the testparticles parameter to a different value than
  * 1.
  */
-inline ExperimentParameters default_parameters(int testparticles = 1,
-                                               double dt = 0.1) {
+inline ExperimentParameters default_parameters(
+    int testparticles = 1, double dt = 0.1,
+    CollisionCriterion crit = CollisionCriterion::Geometric) {
   return ExperimentParameters{
       make_unique<UniformClock>(0., dt),  // labclock
       make_unique<UniformClock>(0., 1.),  // outputclock
       testparticles,                      // testparticles
       1.0,                                // Gaussian smearing width
       4.0,                                // Gaussian smearing cut-off
-      CollisionCriterion::Geometric,
+      crit,
       true,  // two_to_one
       all_reactions_included(),
       no_multiparticle_reactions(),

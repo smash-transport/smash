@@ -283,3 +283,59 @@ TEST(increasing_scaling_factors) {
               .size(),
           0u);
 }
+
+TEST(check_stochastic_collision) {
+  // create two particles with some momentum
+  Particles p;
+  p.insert(Test::smashon(Test::Momentum{0.11, 0., .1, 0.},
+                         Test::Position{0., 1., .9, 1.}));
+  p.insert(Test::smashon(Test::Momentum{0.11, 0., -.1, 0.},
+                         Test::Position{0., 1., 1.1, 1.}));
+
+  // use fictious numbers for collisions search
+  const double grid_cell_vol = 8.0;
+  const double dt = 0.1;
+  const int testparticles = 1;
+
+  // prepare scatteractionsfinder
+  const double elastic_parameter = 10.0;  // in mb
+  const std::vector<bool> has_interacted = {};
+  ExperimentParameters exp_par = Test::default_parameters(
+      testparticles, dt, CollisionCriterion::Stochastic);
+  Configuration config =
+      Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
+                          std::to_string(elastic_parameter) + "}");
+  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
+
+  // prepare lists
+  ParticleList search_list = p.copy_to_vector();
+
+  // calcluate the relative velocity by hand
+  const double m1 = search_list[0].effective_mass();
+  const double m2 = search_list[1].effective_mass();
+  FourVector mom(0.0, 0.0, 0.0, 0.0);
+  mom += search_list[0].momentum();
+  mom += search_list[1].momentum();
+  const double m_s = mom.sqr();
+  const double lamb = Action::lambda_tilde(m_s, m1 * m1, m2 * m2);
+  const double v_rel = std::sqrt(lamb) / (2. * search_list[0].momentum().x0() *
+                                          search_list[1].momentum().x0());
+
+  const int N_samples = 1E6;
+  int found_actions = 0;
+  for (int i = 0; i < N_samples; i++) {
+    auto actions =
+        finder.find_actions_in_cell(search_list, dt, grid_cell_vol, {});
+    found_actions += actions.size();
+  }
+
+  // probability of finding an action
+  const double ratio_found =
+      static_cast<double>(found_actions) / static_cast<double>(N_samples);
+
+  // calculate probability od stochastic criterion by hand
+  const double prob = elastic_parameter * fm2_mb * v_rel * dt / grid_cell_vol;
+
+  // compare probability to the probability of finding an action
+  COMPARE_RELATIVE_ERROR(ratio_found, prob, 0.05);
+}
