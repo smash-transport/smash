@@ -120,7 +120,7 @@ void BremsstrahlungAction::generate_final_state() {
   // Assign weighting factor
   const double W_theta = diff_xs_theta * (M_PI - 0.0);
   const double W_k = diff_xs_k * delta_k;
-  weight_ = sqrt(W_theta * W_k) /
+  weight_ = std::sqrt(W_theta * W_k) /
             (number_of_fractional_photons_ * hadronic_cross_section());
 
   // Scale weight by cross section scaling factor of incoming particles

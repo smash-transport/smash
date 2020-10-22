@@ -1116,7 +1116,7 @@ void ScatterActionsFinder::dump_cross_sections(
 
   // Nice ordering of channels by summed pole mass of products
   std::vector<std::string> all_channels;
-  for (const auto channel : xs_dump) {
+  for (const auto& channel : xs_dump) {
     all_channels.push_back(channel.first);
   }
   std::sort(all_channels.begin(), all_channels.end(),
@@ -1131,7 +1131,7 @@ void ScatterActionsFinder::dump_cross_sections(
   // Align everything to 16 unicode characters.
   // This should be enough for the longest channel name (7 final-state
   // particles).
-  for (const auto channel : all_channels) {
+  for (const auto& channel : all_channels) {
     std::cout << utf8::fill_left(channel, 16, ' ');
   }
   std::cout << std::endl;
@@ -1148,7 +1148,7 @@ void ScatterActionsFinder::dump_cross_sections(
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
     std::printf("%9.6f", sqrts);
-    for (const auto channel : all_channels) {
+    for (const auto& channel : all_channels) {
       const xs_saver energy_and_xs = xs_dump[channel];
       size_t j = 0;
       for (; j < energy_and_xs.size() && energy_and_xs[j].first < sqrts; j++) {

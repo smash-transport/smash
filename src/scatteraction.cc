@@ -241,9 +241,10 @@ double ScatterAction::cov_transverse_distance_sqr() const {
   const double p_a_dot_p_b = p_a.momentum().Dot(p_b.momentum());
 
   const double b_sqr =
-      -x_sqr - (p_a_sqr * pow(p_b_dot_x, 2) + p_b_sqr * pow(p_a_dot_x, 2) -
-                2 * p_a_dot_p_b * p_a_dot_x * p_b_dot_x) /
-                   (pow(p_a_dot_p_b, 2) - p_a_sqr * p_b_sqr);
+      -x_sqr -
+      (p_a_sqr * std::pow(p_b_dot_x, 2) + p_b_sqr * std::pow(p_a_dot_x, 2) -
+       2 * p_a_dot_p_b * p_a_dot_x * p_b_dot_x) /
+          (std::pow(p_a_dot_p_b, 2) - p_a_sqr * p_b_sqr);
   return b_sqr > 0.0 ? b_sqr : 0.0;
 }
 

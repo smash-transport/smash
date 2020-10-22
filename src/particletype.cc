@@ -325,7 +325,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
 
   // Create nucleons/anti-nucleons list
   if (IsoParticleType::exists("N")) {
-    for (const auto state : IsoParticleType::find("N").get_states()) {
+    for (const auto &state : IsoParticleType::find("N").get_states()) {
       nucleons_list.push_back(state);
       anti_nucs_list.push_back(state->get_antiparticle());
     }
@@ -333,7 +333,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
 
   // Create deltas list
   if (IsoParticleType::exists("Δ")) {
-    for (const auto state : IsoParticleType::find("Δ").get_states()) {
+    for (const auto &state : IsoParticleType::find("Δ").get_states()) {
       deltas_list.push_back(state);
       anti_deltas_list.push_back(state->get_antiparticle());
     }
@@ -519,7 +519,7 @@ DecayBranchList ParticleType::get_partial_widths(const FourVector p,
     if (pot_pointer != nullptr) {
       scale_B += pot_pointer->force_scale(*this).first;
       scale_I3 += pot_pointer->force_scale(*this).second * isospin3_rel();
-      for (const auto finaltype : FinalTypes) {
+      for (const auto &finaltype : FinalTypes) {
         scale_B -= pot_pointer->force_scale(*finaltype).first;
         scale_I3 -= pot_pointer->force_scale(*finaltype).second *
                     finaltype->isospin3_rel();

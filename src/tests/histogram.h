@@ -112,7 +112,7 @@ void Histogram1d::test(Analytical analyt, const std::string& dbg_file) const {
       file = fopen(dbg_file, "w");
     }
 
-    for (const auto b : data_) {
+    for (const auto& b : data_) {
       // center of the bin
       const double x = (b.first + 0.5) * dx();
       // the number N of counts in that bin
