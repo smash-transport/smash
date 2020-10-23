@@ -14,6 +14,7 @@
 #include "../include/smash/angles.h"
 #include "../include/smash/random.h"
 #include "../include/smash/scatteraction.h"
+#include "../include/smash/scatteractionmulti.h"
 #include "Pythia8/Pythia.h"
 
 #include <algorithm>
@@ -508,4 +509,41 @@ TEST(particle_ordering) {
                           }) != branch21.end());
     }
   }
+}
+
+TEST(add_multi_particle_reactions) {
+  // put particles in list
+  Particles particles;
+  Momentum some_momentum{1.1, 1.0, 0., 0.};
+  ParticleData pip{ParticleType::find(0x211)};  // pi+
+  a.set_4position(pos_a);
+  a.set_4momentum(some_momentum);
+
+  ParticleData pim{ParticleType::find(-0x211)};  // pi-
+  b.set_4position(pos_b);
+  b.set_4momentum(some_momentum);
+
+  ParticleData piz{ParticleType::find(0x111)};  // pi0
+  b.set_4position(pos_b);
+  b.set_4momentum(some_momentum);
+
+  particles.insert(pip);
+  particles.insert(pim);
+  particles.insert(piz);
+
+  ScatterActionPtr act1;
+  act1 = make_unique<ScatterActionMulti>({pip, pim, piz}, 0.05);
+
+  incl_multi_set = ...; // TODO
+
+  act1->add_possible_reactions(0.1, 8.0, incl_multi_set)
+
+
+  COMPARE(act1.reaction_channels().size(), 2u);  // phi and omega reaction should be found
+
+  // TODO Plus verify that Process Type is correct
+
+
+
+
 }
