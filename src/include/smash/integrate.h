@@ -162,16 +162,24 @@ class Integrator {
     return result;
   }
 
+  /**
+   * Set precision for the absolute and relative error of the integration.
+   */
+  void set_precision(double absolute, double relative) {
+    accuracy_absolute_ = absolute;
+    accuracy_relative_ = relative;
+  }
+
  private:
   /// Holds the workspace pointer.
   std::unique_ptr<gsl_integration_cquad_workspace, GslWorkspaceDeleter>
       workspace_;
 
   /// Parameter to the GSL integration function: desired absolute error limit
-  const double accuracy_absolute_ = 1.0e-9;
+  double accuracy_absolute_ = 1.0e-9;
 
   /// Parameter to the GSL integration function: desired relative error limit
-  const double accuracy_relative_ = 5.0e-4;
+  double accuracy_relative_ = 5.0e-4;
 };
 
 /**

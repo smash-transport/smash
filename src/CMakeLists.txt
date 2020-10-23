@@ -127,6 +127,7 @@ set(smash_src
         boxmodus.cc
         binaryoutput.cc
         bremsstrahlungaction.cc
+        chemicalpotential.cc
         clebschgordan.cc
         collidermodus.cc
         configuration.cc
@@ -173,6 +174,7 @@ set(smash_src
         stringprocess.cc
         propagation.cc
         quantumnumbers.cc
+        quantumsampling.cc
         random.cc
         scatteraction.cc
         scatteractionmulti.cc

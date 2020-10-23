@@ -15,6 +15,7 @@
 #include "smash/algorithms.h"
 #include "smash/angles.h"
 #include "smash/boxmodus.h"
+#include "smash/chemicalpotential.h"
 #include "smash/configuration.h"
 #include "smash/constants.h"
 #include "smash/cxx14compat.h"
@@ -27,6 +28,7 @@
 #include "smash/particles.h"
 #include "smash/processbranch.h"
 #include "smash/quantumnumbers.h"
+#include "smash/quantumsampling.h"
 #include "smash/random.h"
 #include "smash/threevector.h"
 #include "smash/wallcrossingaction.h"
@@ -47,11 +49,18 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
       out << ptype->name() << " initial multiplicity " << p.second << '\n';
     }
   }
-  if (m.initial_condition_ == BoxInitialCondition::PeakedMomenta) {
-    out << "All initial momenta = 3T = " << 3 * m.temperature_ << " GeV\n";
-  } else {
-    out << "Boltzmann momentum distribution with T = " << m.temperature_
-        << " GeV.\n";
+  switch (m.initial_condition_) {
+    case BoxInitialCondition::PeakedMomenta:
+      out << "All initial momenta = 3T = " << 3 * m.temperature_ << " GeV\n";
+      break;
+    case BoxInitialCondition::ThermalMomentaBoltzmann:
+      out << "Boltzmann momentum distribution with T = " << m.temperature_
+          << " GeV.\n";
+      break;
+    case BoxInitialCondition::ThermalMomentaQuantum:
+      out << "Fermi/Bose momentum distribution with T = " << m.temperature_
+          << " GeV.\n";
+      break;
   }
   if (m.insert_jet_) {
     ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_);
@@ -252,14 +261,14 @@ BoxModus::BoxModus(Configuration modus_config,
 
 double BoxModus::initial_conditions(Particles *particles,
                                     const ExperimentParameters &parameters) {
-  double momentum_radial = 0, mass;
+  double momentum_radial = 0.0, mass = 0.0;
   Angles phitheta;
   FourVector momentum_total(0, 0, 0, 0);
   auto uniform_length = random::make_uniform_distribution(0.0, this->length_);
   const double T = this->temperature_;
+  const double V = length_ * length_ * length_;
   /* Create NUMBER OF PARTICLES according to configuration, or thermal case */
   if (use_thermal_) {
-    const double V = length_ * length_ * length_;
     if (average_multipl_.empty()) {
       for (const ParticleType &ptype : ParticleType::list_all()) {
         if (HadronGasEos::is_eos_particle(ptype)) {
@@ -291,7 +300,10 @@ double BoxModus::initial_conditions(Particles *particles,
                        p.second);
     }
   }
-
+  std::unique_ptr<QuantumSampling> quantum_sampling;
+  if (this->initial_condition_ == BoxInitialCondition::ThermalMomentaQuantum) {
+    quantum_sampling = make_unique<QuantumSampling>(init_multipl_, V, T);
+  }
   for (ParticleData &data : *particles) {
     /* Set MOMENTUM SPACE distribution */
     if (this->initial_condition_ == BoxInitialCondition::PeakedMomenta) {
@@ -299,11 +311,23 @@ double BoxModus::initial_conditions(Particles *particles,
       momentum_radial = 3.0 * T;
       mass = data.pole_mass();
     } else {
-      /* thermal momentum according Maxwell-Boltzmann distribution */
-      mass = (!account_for_resonance_widths_)
-                 ? data.type().mass()
-                 : HadronGasEos::sample_mass_thermal(data.type(), 1.0 / T);
-      momentum_radial = sample_momenta_from_thermal(T, mass);
+      if (this->initial_condition_ ==
+          BoxInitialCondition::ThermalMomentaBoltzmann) {
+        /* thermal momentum according Maxwell-Boltzmann distribution */
+        mass = (!account_for_resonance_widths_)
+                   ? data.type().mass()
+                   : HadronGasEos::sample_mass_thermal(data.type(), 1.0 / T);
+        momentum_radial = sample_momenta_from_thermal(T, mass);
+      } else if (this->initial_condition_ ==
+                 BoxInitialCondition::ThermalMomentaQuantum) {
+        /*
+         * Sampling the thermal momentum according Bose/Fermi/Boltzmann
+         * distribution.
+         * We take the pole mass as the mass.
+         */
+        mass = data.type().mass();
+        momentum_radial = quantum_sampling->sample(data.pdgcode());
+      }
     }
     phitheta.distribute_isotropically();
     logg[LBox].debug(data.type().name(), "(id ", data.id(),

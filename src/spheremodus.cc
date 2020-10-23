@@ -17,6 +17,7 @@
 
 #include "smash/algorithms.h"
 #include "smash/angles.h"
+#include "smash/chemicalpotential.h"
 #include "smash/configuration.h"
 #include "smash/constants.h"
 #include "smash/distributions.h"
@@ -26,6 +27,7 @@
 #include "smash/logging.h"
 #include "smash/macros.h"
 #include "smash/particles.h"
+#include "smash/quantumsampling.h"
 #include "smash/random.h"
 #include "smash/spheremodus.h"
 #include "smash/threevector.h"
@@ -177,8 +179,9 @@ SphereModus::SphereModus(Configuration modus_config,
                         ? std::map<PdgCode, int>()
                         : modus_config.take({"Sphere", "Init_Multiplicities"})
                               .convert_for(init_multipl_)),
-      init_distr_(modus_config.take({"Sphere", "Initial_Condition"},
-                                    SphereInitialCondition::ThermalMomenta)),
+      init_distr_(
+          modus_config.take({"Sphere", "Initial_Condition"},
+                            SphereInitialCondition::ThermalMomentaBoltzmann)),
       insert_jet_(modus_config.has_value({"Sphere", "Jet", "Jet_PDG"})),
       jet_pdg_(insert_jet_ ? modus_config.take({"Sphere", "Jet", "Jet_PDG"})
                                  .convert_for(jet_pdg_)
@@ -197,8 +200,28 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
       out << ptype->name() << " initial multiplicity " << p.second << '\n';
     }
   }
-  out << "Boltzmann momentum distribution with T = " << m.sphere_temperature_
-      << " GeV.\n";
+  switch (m.init_distr_) {
+    case SphereInitialCondition::ThermalMomentaBoltzmann:
+      out << "Boltzmann momentum distribution with T = "
+          << m.sphere_temperature_ << " GeV.\n";
+      break;
+    case SphereInitialCondition::ThermalMomentaQuantum:
+      out << "Fermi/Bose momentum distribution with T = "
+          << m.sphere_temperature_ << " GeV.\n";
+      break;
+    case SphereInitialCondition::IC_ES:
+      out << "Sphere Initial Condition is IC_ES";
+      break;
+    case SphereInitialCondition::IC_1M:
+      out << "Sphere Initial Condition is IC_1M";
+      break;
+    case SphereInitialCondition::IC_2M:
+      out << "Sphere Initial Condition is IC_2M";
+      break;
+    case SphereInitialCondition::IC_Massive:
+      out << "Sphere Initial Condition is IC_Massive";
+      break;
+  }
   if (m.insert_jet_) {
     ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_);
     out << "Adding a " << ptype->name() << " as a jet in the middle "
@@ -212,9 +235,9 @@ double SphereModus::initial_conditions(Particles *particles,
                                        const ExperimentParameters &parameters) {
   FourVector momentum_total(0, 0, 0, 0);
   const double T = this->sphere_temperature_;
+  const double V = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_;
   /* Create NUMBER OF PARTICLES according to configuration */
   if (use_thermal_) {
-    const double V = 4.0 / 3.0 * M_PI * radius_ * radius_ * radius_;
     if (average_multipl_.empty()) {
       for (const ParticleType &ptype : ParticleType::list_all()) {
         if (HadronGasEos::is_eos_particle(ptype)) {
@@ -242,11 +265,15 @@ double SphereModus::initial_conditions(Particles *particles,
                           p.second);
     }
   }
+  std::unique_ptr<QuantumSampling> quantum_sampling;
+  if (this->init_distr_ == SphereInitialCondition::ThermalMomentaQuantum) {
+    quantum_sampling = make_unique<QuantumSampling>(init_multipl_, V, T);
+  }
   /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : *particles) {
     Angles phitheta;
     /* thermal momentum according Maxwell-Boltzmann distribution */
-    double momentum_radial, mass = data.pole_mass();
+    double momentum_radial = 0.0, mass = data.pole_mass();
     /* assign momentum_radial according to requested distribution */
     switch (init_distr_) {
       case (SphereInitialCondition::IC_ES):
@@ -261,12 +288,23 @@ double SphereModus::initial_conditions(Particles *particles,
       case (SphereInitialCondition::IC_Massive):
         momentum_radial = sample_momenta_non_eq_mass(T, mass);
         break;
-      case (SphereInitialCondition::ThermalMomenta):
+      case (SphereInitialCondition::ThermalMomentaBoltzmann):
       default:
         mass = (!account_for_resonance_widths_)
                    ? data.type().mass()
                    : HadronGasEos::sample_mass_thermal(data.type(), 1.0 / T);
         momentum_radial = sample_momenta_from_thermal(T, mass);
+        break;
+      case (SphereInitialCondition::ThermalMomentaQuantum):
+        /*
+         * **********************************************************************
+         * Sampling the thermal momentum according Bose/Fermi/Boltzmann
+         * distribution.
+         * We take the pole mass as the mass.
+         * **********************************************************************
+         */
+        mass = data.type().mass();
+        momentum_radial = quantum_sampling->sample(data.pdgcode());
         break;
     }
     phitheta.distribute_isotropically();

@@ -99,22 +99,22 @@ double density_integrand_2M_IC(const double energy, const double momentum_sqr,
                                const double temperature);
 
 /**
- * Relativistic Juttner distribution function
- *
- * \param[in] momentum_radial \f$|\vec{p}|\f$ in units of [GeV]
- * \param[in] mass Mass of the particle: in units of [GeV]
- * \param[in] temperature Temperature of the system \f$T\f$ in units of [GeV]
- * \param[in] baryon_chemical_potential \f$n*\mu_{B}\f$ default = 0
- * \param[in] lam +/-1 or 0 to determine the distribution type
- * lam=0,  for Juttner distribution
- * lam=-1, for Bose-Einstein distribution
- * lam=1,  for Fermi-Dirac distribution
- * \return Unnormalized probability of relativistic Juttner distribution
+ * Relativistic Juttner distribution function is just a convenience wrapper for
+ * displaying Fermi, Bose, and Boltzmann distributions in one mathematical form.
+ * \param[in] momentum_radial length of the momentum vector [GeV]
+ * \param[in] mass (pole) mass of the particle species [GeV]
+ * \param[in] temperature temperature of the system [GeV]
+ * \param[in] effective_chemical_potential effective chemical potential of
+ *            the system [GeV]
+ * \param[in] statistics quantum statistics of the particles species
+ *            (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
+ * \return the Juttner distribution function
  */
-double juttner_distribution_func(const double momentum_radial,
-                                 const double mass, const double temperature,
-                                 const double baryon_chemical_potential,
-                                 const double lam);
+double juttner_distribution_func(double momentum_radial, double mass,
+                                 double temperature,
+                                 double effective_chemical_potential,
+                                 double statistics);
+
 /**
  * Samples a momentum via rejection method from the non-equilibrium
  * distribution
