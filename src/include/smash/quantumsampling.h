@@ -29,6 +29,14 @@ namespace smash {
 
 class QuantumSampling {
  public:
+  /**
+   * Constructor of a QuantumSampling object.
+   * \param[in] initial_multiplicities a map of pdg codes of samples particle
+   *            species and corresponding multiplicities
+   * \param[in] volume volume V in which the particles are sampled [fm^3],
+   *            needed to calculate the density of the species
+   * \param[in] temperature temperature T of the system [GeV]
+   */
   QuantumSampling(const std::map<PdgCode, int>& initial_multiplicities,
                   double volume, double temperature);
 
@@ -37,9 +45,16 @@ class QuantumSampling {
    * for which the maximum of the distribution occurs.
    */
   struct ParametersForMaximumMomentumRootFinder {
+    /// mass m of a particle [GeV]
     double mass;
+    /// temperature T of the system [GeV]
     double temperature;
+    /// effective chemical potential mu^* of the particle species
     double effective_chemical_potential;
+    /**
+     * quantum statistics of the particles species
+     * (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
+     */
     double statistics;
   };
 
@@ -127,9 +142,11 @@ class QuantumSampling {
                                             double statistics,
                                             double solution_precision);
 
-  /*
+  /**
    * Sampling radial momenta of given particle species from Boltzmann, Bose, or
    * Fermi distribution. This sampler uses the simplest rejection sampling.
+   * \param[in] pdg the pdg code of the sampled particle species
+   * return the sampled momentum [GeV]
    */
   double sample(const PdgCode pdg);
 

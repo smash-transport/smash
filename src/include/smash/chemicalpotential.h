@@ -17,6 +17,10 @@
 
 namespace smash {
 
+/**
+ * A class which encapsulates a GSL algorithm for finding the effective
+ * chemical potential and supporting functions.
+ */
 class ChemicalPotentialSolver {
  public:
   /**
@@ -53,11 +57,25 @@ class ChemicalPotentialSolver {
    * chemical potential of one particle species.
    */
   struct ParametersForChemPotSolver {
+    /// degeneracy g of the particle species
     double degeneracy;
+
+    /// (pole) mass m of the particle species
     double mass;
+
+    /// number density n of the particle species [GeV^3]
     double number_density;
+
+    /// temperature T of the system [GeV]
     double temperature;
+
+    /**
+     * statistics quantum statistics of the particles species
+     * (+1 for Fermi, -1 for Bose, 0 for Boltzmann)
+     */
     double statistics;
+
+    /// wrapper for gsl numerical integration
     Integrator* integrator;
   };
 
@@ -160,6 +178,9 @@ class ChemicalPotentialSolver {
                                       double solution_precision);
 
  private:
+  /**
+   * A wrapper for gsl numerical integration
+   */
   Integrator integrator_ = Integrator(1E6);
 };
 
