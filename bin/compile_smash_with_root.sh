@@ -1,8 +1,9 @@
 #!/bin/bash
 
 # Bash script to compile and run SMASH in combination with ROOT and HepMC3 on
-# the gsi kronos cluster. Both modules are available in
-# /cvmfs/it.gsi.de/modulefiles/ and need only be loaded
+# the gsi kronos cluster. ROOT is available in
+# /cvmfs/it.gsi.de/modulefiles/ and needs only be loaded.
+# To use the HepMC3 module, follow the instructions in the SMASH wiki. 
 
 # For compilation, the paths to the SMASH source directory, to the eigen library
 # as well as to the gsl and pythia directories are necessary and need to be
@@ -23,7 +24,8 @@ module use /cvmfs/it.gsi.de/modulefiles/
 module load root/v6.06-06
 
 # load HepMC3
-#Todo: Add HepMC instructions
+module load use.own
+module load hepmc3
 
 smash_dir=$1
 eigen_dir=$2
