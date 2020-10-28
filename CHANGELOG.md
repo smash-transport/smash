@@ -26,6 +26,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Added covariant collision criterion as an option
 * Hadron Gas EoS extended by nQ and muQ
 * Various tests for photons
+* Various tests for the stochastic criterion
+* Various tests for multi-particle reactions 
 
 ### Fixed
 * Consider cross section scaling factor of incoming particles for photon production. This factor was previously neglected, resulting in exploding weights and overestimated photon production.

@@ -69,9 +69,7 @@ class ScatterActionMulti : public Action {
    *
    * \return list of possible reaction channels.
    */
-  const CollisionBranchList& reaction_channels() {
-    return reaction_channels_;
-  }
+  const CollisionBranchList& reaction_channels() { return reaction_channels_; }
 
   /**
    * \ingroup exception
