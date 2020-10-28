@@ -333,7 +333,7 @@ TEST(check_stochastic_collision) {
   const double ratio_found =
       static_cast<double>(found_actions) / static_cast<double>(N_samples);
 
-  // calculate probability od stochastic criterion by hand
+  // calculate probability of stochastic criterion by hand
   const double prob = elastic_parameter * fm2_mb * v_rel * dt / grid_cell_vol;
 
   // compare probability to the probability of finding an action
