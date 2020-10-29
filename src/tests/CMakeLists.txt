@@ -242,6 +242,7 @@ smash_add_unittest(quantumsampling)
 smash_add_unittest(random)
 smash_add_unittest(sanity)
 smash_add_unittest(scatteraction)
+smash_add_unittest(scatteractionmulti)
 smash_add_unittest(scatteractionsfinder)
 smash_add_unittest(sha256)
 smash_add_unittest(spectral_functions)
@@ -269,6 +270,10 @@ smash_add_runtest(stochastic_box_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/stochastic_box/config.yaml
                   -p ${PROJECT_SOURCE_DIR}/input/stochastic_box/particles_only_pi0.txt
                   -d ${PROJECT_SOURCE_DIR}/input/stochastic_box/decaymodes_all_off.txt)
+smash_add_runtest(multi_particle_box_run smash smash
+                  -i ${PROJECT_SOURCE_DIR}/input/multi_particle_box/config.yaml
+                  -p ${PROJECT_SOURCE_DIR}/input/multi_particle_box/particles.txt
+                  -d ${PROJECT_SOURCE_DIR}/input/multi_particle_box/decaymodes.txt)
 smash_add_runtest(collider_run smash smash -m Collider)
 smash_add_runtest(collider_frozen_fermi_run smash smash -m Collider
                   -c "Modi: {Collider: {Fermi_Motion: frozen}}")

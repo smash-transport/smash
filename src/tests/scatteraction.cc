@@ -14,6 +14,7 @@
 #include "../include/smash/angles.h"
 #include "../include/smash/random.h"
 #include "../include/smash/scatteraction.h"
+#include "../include/smash/scatteractionmulti.h"
 #include "Pythia8/Pythia.h"
 
 #include <algorithm>

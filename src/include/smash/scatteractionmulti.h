@@ -65,6 +65,13 @@ class ScatterActionMulti : public Action {
                               const MultiParticleReactionsBitSet incl_multi);
 
   /**
+   * Get list of possible reaction channels.
+   *
+   * \return list of possible reaction channels.
+   */
+  const CollisionBranchList& reaction_channels() { return reaction_channels_; }
+
+  /**
    * \ingroup exception
    * Thrown when ScatterActionMulti is called to perform with unknown
    * combination of incoming and outgoing number of particles or unknown process
