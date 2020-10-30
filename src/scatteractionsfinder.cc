@@ -212,7 +212,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  *
  * \note The stochastic criterion is only applicable within limits. For example,
  * it might not lead to reasonable results for very dilute systems like pp
- * collisions. Futhermore, the fixed time step mode is require. The
+ * collisions. Futhermore, the fixed time step mode is required. The
  * assumption for the criterion is that only one reaction per particle per
  * timestep occurs. Therefore, small enough timesteps (\key Delta_Time) have to
  * be used. In doubt, test if the results change with smaller timesteps. Since
