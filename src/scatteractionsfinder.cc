@@ -33,19 +33,6 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
 /*!\Userguide
  * \page input_collision_term_ Collision_Term
  *
- * \key Include_2to3 (bool, optional, default = \key false) \n
- * Enable 2 <--> 3 forward and backward reactions via the stochastic criterion.
- * This option can only be used with the \key Collision_Criterion set to
- * \key "Stochastic".
- *
- * \key Include_3to1 (bool, optional, default = \key false) \n
- * Enable 3 --> 1 processes via the stochastic criterion. This option can only
- * be used with the \key Collision_Criterion set to \key "Stochastic".
- * Implemented 3 --> 1 processes: \f$\pi^+\pi^-\pi^0\rightarrow\omega\f$. Note
- * that detailed balance is conserved. So if the reverse 1 --> 3 decay process
- * is e.g. not part of the decay modes (in decaymodes.txt), the 3 --> 1 process
- * will also not happen.
- *
  * \key Elastic_Cross_Section (double, optional, default = -1.0 [mb]) \n
  * If a non-negative value is given, it will override the parametrized
  * elastic cross sections (which are energy-dependent) with a constant value.
