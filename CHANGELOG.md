@@ -20,7 +20,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## [Unreleased](https://github.com/smash-transport/smash/compare/SMASH-1.8...HEAD)
 
 ### Input / Output
-* Unify event number counting: The event number counting now starts at 0 for all output formats. Previously, the counting started at 1 for all Oscar output formats as well as the IC output. Note that this might be a breaking change for analysis scripts that rely on the specific number of the event printed to the output file.
+* Unify event number counting: The event number counting now starts at 0 for all output formats. 
 
 
 ### Added
