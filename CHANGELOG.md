@@ -19,6 +19,10 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## [Unreleased](https://github.com/smash-transport/smash/compare/SMASH-1.8...HEAD)
 
+### Input / Output
+* Unify event number counting: The event number counting now starts at 0 for all output formats. 
+
+
 ### Added
 * HepMC3 output
 * 3-to-1 reactions for mesons via the stochastic collision criterion
