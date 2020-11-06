@@ -475,6 +475,27 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
 
 ActionPtr ScatterActionsFinder::check_collision_multi_part(
     const ParticleList& plist, double dt, const double gcell_vol) const {
+  /* If the two particles
+   * 1) belong to the two colliding nuclei
+   * 2) are within the same nucleus
+   * 3) both of them have never experienced any collisons,
+   * then the collision between them are banned also for multi-particle
+   * interactions. */
+  if (std::all_of(
+          plist.begin(), plist.end(),
+          [&](const ParticleData& data) { return data.id() < N_tot_; }) &&
+      (std::all_of(
+           plist.begin(), plist.end(),
+           [&](const ParticleData& data) { return data.id() < N_proj_; }) ||
+       std::all_of(
+           plist.begin(), plist.end(),
+           [&](const ParticleData& data) { return data.id() >= N_proj_; })) &&
+      std::none_of(plist.begin(), plist.end(), [&](const ParticleData& data) {
+        return nucleon_has_interacted_[data.id()];
+      })) {
+    return nullptr;
+  }
+
   // No grid or search in cell
   if (gcell_vol < really_small) {
     return nullptr;
