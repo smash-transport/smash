@@ -105,7 +105,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * system in Standard Output and other output formats which support this
  * functionality.
  *
- * \key Output_Times (doubles, optinal, no default): \n
+ * \key Output_Times (doubles, optional, no default): \n
  * Explicitly defines the the times where output is generated in the form of
  * a list. Cannot be used in combination with Output_Interval. Output times
  * outside the simulation time are ignored. The following example will produce
