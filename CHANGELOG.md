@@ -38,7 +38,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Use form factors for binary scattering photons also in the case of Nfrac=1
 
 ### Changed
-* The Pythia version is increased to 8.302 (or newer)
+* The Pythia version is increased to 8.303
+* In collisions of unformed particles with equal formation time the outgoing particles now always inherit the smaller scaling factor
 
 ### Removed
 * Integrator1dMonte as it was not used anymore
