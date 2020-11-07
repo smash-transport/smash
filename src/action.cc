@@ -187,7 +187,7 @@ void Action::assign_formation_time_to_outgoing_particles() {
    * incoming particle. If all particles form at the same time, take the one
    * with the lowest cross section scaling factor */
   bool all_incoming_same_formation_time = true;
-  std::__1::__wrap_iter<smash::ParticleData *> last_formed_in_part;
+  ParticleList::iterator last_formed_in_part;
   for (size_t i = 1; i < incoming_particles_.size(); i++) {
     all_incoming_same_formation_time =
         all_incoming_same_formation_time &&
