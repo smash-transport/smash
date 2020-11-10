@@ -806,10 +806,16 @@ class StringProcess {
                                        ParticleList &intermediate_particles) {
     const std::string s = std::to_string(pdgid);
     PdgCode pythia_code(s);
-    ParticleData new_particle(ParticleType::find(pythia_code));
-    new_particle.set_4momentum(momentum);
-    intermediate_particles.push_back(new_particle);
-    return true;
+    ParticleTypePtr new_type = ParticleType::try_find(pythia_code);
+    if (new_type) {
+      ParticleData new_particle(ParticleType::find(pythia_code));
+      new_particle.set_4momentum(momentum);
+      intermediate_particles.push_back(new_particle);
+      return true;
+    } else {
+      // if the particle does not exist in SMASH the pythia event is rerun
+      return false;
+    }
   }
 
   /**
