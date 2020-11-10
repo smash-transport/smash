@@ -66,9 +66,12 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \n \li \key true - String excitation is enabled\n \li \key false - String
  * excitation is disabled
  *
+ * \key Collision Criterion (string, optional, default = "Covariant"): \n
+ * Choose collision criterion. For more information see
+ * \subpage collision_criterion
+ *
  * For information about more configuration options see the
  * following subpages \n
- * \li \subpage collision_criterion
  * \li \subpage pauliblocker
  * \li \subpage string_parameters
  * \li \subpage input_dileptons

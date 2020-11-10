@@ -39,6 +39,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Changed
 * The Pythia version is increased to 8.302 (or newer)
+* The default collision criterion changed from "geometric" to "covariant"
 
 ### Removed
 * Integrator1dMonte as it was not used anymore
