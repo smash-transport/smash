@@ -18,7 +18,7 @@
 #include "forwarddeclarations.h"
 #include "grandcan_thermalizer.h"
 #include "lattice.h"
-#include "macros.h"
+// #include "macros.h"
 
 namespace smash {
 

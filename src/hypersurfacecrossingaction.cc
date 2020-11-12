@@ -10,8 +10,8 @@
 #include "smash/hypersurfacecrossingaction.h"
 
 #include "smash/logging.h"
-#include "smash/particledata.h"
-#include "smash/particles.h"
+// #include "smash/particledata.h"
+// #include "smash/particles.h"
 #include "smash/quantumnumbers.h"
 
 namespace smash {

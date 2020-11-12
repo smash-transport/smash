@@ -9,7 +9,7 @@
 
 #include "smash/bremsstrahlungaction.h"
 #include "smash/crosssectionsbrems.h"
-#include "smash/interpolation2D.h"
+// #include "smash/interpolation2D.h"
 #include "smash/outputinterface.h"
 #include "smash/random.h"
 

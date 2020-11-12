@@ -4,30 +4,30 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
-#include <cmath>
-#include <cstdio>
-#include <cstdlib>
-#include <list>
-#include <map>
-#include <utility>
-#include <vector>
+// #include <cmath>
+// #include <cstdio>
+// #include <cstdlib>
+// #include <list>
+// #include <map>
+// #include <utility>
+// #include <vector>
 
 #include "smash/algorithms.h"
 #include "smash/angles.h"
 #include "smash/boxmodus.h"
-#include "smash/chemicalpotential.h"
-#include "smash/configuration.h"
-#include "smash/constants.h"
+// #include "smash/chemicalpotential.h"
+// #include "smash/configuration.h"
+// #include "smash/constants.h"
 #include "smash/cxx14compat.h"
-#include "smash/distributions.h"
+// #include "smash/distributions.h"
 #include "smash/experimentparameters.h"
-#include "smash/hadgas_eos.h"
+// #include "smash/hadgas_eos.h"
 #include "smash/logging.h"
-#include "smash/macros.h"
-#include "smash/outputinterface.h"
-#include "smash/particles.h"
-#include "smash/processbranch.h"
-#include "smash/quantumnumbers.h"
+// #include "smash/macros.h"
+// #include "smash/outputinterface.h"
+// #include "smash/particles.h"
+// #include "smash/processbranch.h"
+// #include "smash/quantumnumbers.h"
 #include "smash/quantumsampling.h"
 #include "smash/random.h"
 #include "smash/threevector.h"

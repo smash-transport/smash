@@ -15,10 +15,10 @@
 #include "smash/action.h"
 #include "smash/clock.h"
 #include "smash/config.h"
-#include "smash/configuration.h"
+// #include "smash/configuration.h"
 #include "smash/cxx14compat.h"
 #include "smash/forwarddeclarations.h"
-#include "smash/particles.h"
+// #include "smash/particles.h"
 
 namespace smash {
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;

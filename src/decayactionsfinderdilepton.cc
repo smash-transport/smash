@@ -9,11 +9,11 @@
 
 #include "smash/decayactionsfinderdilepton.h"
 
-#include "smash/constants.h"
+// #include "smash/constants.h"
 #include "smash/cxx14compat.h"
 #include "smash/decayactiondilepton.h"
 #include "smash/decaymodes.h"
-#include "smash/particles.h"
+// #include "smash/particles.h"
 
 namespace smash {
 

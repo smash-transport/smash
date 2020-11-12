@@ -19,7 +19,7 @@
 #include "grandcan_thermalizer.h"
 #include "grid.h"
 #include "outputinterface.h"
-#include "potentials.h"
+// #include "potentials.h"
 
 namespace smash {
 

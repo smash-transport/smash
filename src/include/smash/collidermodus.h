@@ -18,7 +18,7 @@
 #include "interpolation.h"
 #include "modusdefault.h"
 #include "nucleus.h"
-#include "pdgcode.h"
+// #include "pdgcode.h"
 
 namespace smash {
 

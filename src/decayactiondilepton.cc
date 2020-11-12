@@ -10,7 +10,7 @@
 #include "smash/decayactiondilepton.h"
 
 #include "smash/angles.h"
-#include "smash/kinematics.h"
+// #include "smash/kinematics.h"
 
 namespace smash {
 

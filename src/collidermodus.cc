@@ -7,6 +7,7 @@
 
 #include "smash/collidermodus.h"
 
+
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -18,18 +19,18 @@
 #include <utility>
 #include <vector>
 
-#include "smash/angles.h"
+// #include "smash/angles.h"
 #include "smash/configuration.h"
 #include "smash/customnucleus.h"
 #include "smash/cxx14compat.h"
 #include "smash/experimentparameters.h"
 #include "smash/fourvector.h"
-#include "smash/interpolation.h"
-#include "smash/kinematics.h"
+// #include "smash/interpolation.h"
+// #include "smash/kinematics.h"
 #include "smash/logging.h"
-#include "smash/numerics.h"
-#include "smash/particles.h"
-#include "smash/pdgcode.h"
+// #include "smash/numerics.h"
+// #include "smash/particles.h"
+// #include "smash/pdgcode.h"
 #include "smash/random.h"
 
 namespace smash {

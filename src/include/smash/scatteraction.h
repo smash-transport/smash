@@ -18,7 +18,7 @@
 #include "action.h"
 #include "cxx14compat.h"
 #include "isoparticletype.h"
-#include "kinematics.h"
+// #include "kinematics.h"
 #include "stringprocess.h"
 
 namespace smash {
