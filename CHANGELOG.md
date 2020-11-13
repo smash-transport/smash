@@ -40,6 +40,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Changed
 * The Pythia version is increased to 8.303
 * In collisions of unformed particles with equal formation time the outgoing particles now always inherit the smaller scaling factor
+* The default collision criterion changed from "geometric" to "covariant"
+
 
 ### Removed
 * Integrator1dMonte as it was not used anymore
