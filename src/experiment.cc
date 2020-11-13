@@ -357,6 +357,13 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const double dt = config.take({"General", "Delta_Time"}, 1.);
   const double t_end = config.read({"General", "End_Time"});
 
+  // Enforce a small time step, if the box modus is used
+  if (box_length > 0.0 and dt > box_length / 10.0){
+    throw std::invalid_argument(
+        "Please decrease the timestep size. "
+        "A value of (dt < l_box / 10) is recommended in the boxmodus.");
+  }
+
   // define output clock
   std::unique_ptr<Clock> output_clock = nullptr;
   if (config.has_value({"Output", "Output_Times"})) {
