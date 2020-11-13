@@ -142,7 +142,8 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * Factor to be multiplied with the formation time of string fragments from
  * the soft string routine.
  *
- * \key Power_Particle_Formation (double, optional, default = 2.0) \n
+ * \key Power_Particle_Formation (double, optional, default = 1.0 or -1 for
+ collisions at sqrt(s) = 200 GeV or higher) \n
  * If positive, the power with which the cross section scaling factor of
  * string fragments grows in time until it reaches 1. If negative, the scaling
  * factor will be constant and jump to 1 once the particle forms.

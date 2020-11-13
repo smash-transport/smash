@@ -73,6 +73,8 @@ class ModusDefault {
   bool is_box() const { return false; }
   /// \return Checks if modus is list modus; overwritten in ListModus
   bool is_list() const { return false; }
+  /// \return Center of mass energy per nucleon pair in ColliderModus
+  double sqrt_s_NN() const { return 0.; }
   /// \return The impact parameter; overwritten in ColliderModus
   double impact_parameter() const { return 0.0; }
   /** \return The beam velocity of the projectile required in the Collider

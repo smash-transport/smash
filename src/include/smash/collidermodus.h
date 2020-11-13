@@ -121,6 +121,8 @@ class ColliderModus : public ModusDefault {
   FermiMotion fermi_motion() { return fermi_motion_; }
   /// \return whether the modus is collider (which is, yes, trivially true)
   bool is_collider() const { return true; }
+  /// \return center of mass energy per nucleon pair
+  double sqrt_s_NN() const { return sqrt_s_NN_; }
   /// \return impact parameter of the collision
   double impact_parameter() const { return impact_; }
   /**

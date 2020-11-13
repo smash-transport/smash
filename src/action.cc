@@ -186,14 +186,13 @@ void Action::assign_formation_time_to_outgoing_particles() {
   /* Find incoming particle with largest formation time i.e. the last formed
    * incoming particle. If all particles form at the same time, take the one
    * with the lowest cross section scaling factor */
-  bool all_incoming_same_formation_time = true;
   ParticleList::iterator last_formed_in_part;
-  for (size_t i = 1; i < incoming_particles_.size(); i++) {
-    all_incoming_same_formation_time =
-        all_incoming_same_formation_time &&
-        abs(incoming_particles_[i].formation_time() -
-            incoming_particles_[1].formation_time()) < really_small;
-  }
+  bool all_incoming_same_formation_time =
+      std::all_of(incoming_particles_.begin() + 1, incoming_particles_.end(),
+                  [&](const ParticleData &data_comp) {
+                    return abs(incoming_particles_[0].formation_time() -
+                               data_comp.formation_time()) < really_small;
+                  });
   if (all_incoming_same_formation_time) {
     last_formed_in_part =
         std::min_element(incoming_particles_.begin(), incoming_particles_.end(),
