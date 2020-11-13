@@ -620,7 +620,6 @@ bool StringProcess::next_NDiffHard() {
       const int anticolor = hard_map_[idAB]->event[i].acol();
 
       pSum += pquark;
-      convert_KaonLS(const_cast<int &>(pdgid));
       event_intermediate_.append(pdgid, status, color, anticolor, pquark, mass);
     }
   }

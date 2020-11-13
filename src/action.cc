@@ -184,12 +184,29 @@ FourVector Action::total_momentum_of_outgoing_particles() const {
 
 void Action::assign_formation_time_to_outgoing_particles() {
   /* Find incoming particle with largest formation time i.e. the last formed
-   * incoming particle. */
-  auto last_formed_in_part =
-      std::max_element(incoming_particles_.begin(), incoming_particles_.end(),
-                       [](const ParticleData &a, const ParticleData &b) {
-                         return a.formation_time() < b.formation_time();
-                       });
+   * incoming particle. If all particles form at the same time, take the one
+   * with the lowest cross section scaling factor */
+  ParticleList::iterator last_formed_in_part;
+  bool all_incoming_same_formation_time =
+      std::all_of(incoming_particles_.begin() + 1, incoming_particles_.end(),
+                  [&](const ParticleData &data_comp) {
+                    return abs(incoming_particles_[0].formation_time() -
+                               data_comp.formation_time()) < really_small;
+                  });
+  if (all_incoming_same_formation_time) {
+    last_formed_in_part =
+        std::min_element(incoming_particles_.begin(), incoming_particles_.end(),
+                         [](const ParticleData &a, const ParticleData &b) {
+                           return a.initial_xsec_scaling_factor() <
+                                  b.initial_xsec_scaling_factor();
+                         });
+  } else {
+    last_formed_in_part =
+        std::max_element(incoming_particles_.begin(), incoming_particles_.end(),
+                         [](const ParticleData &a, const ParticleData &b) {
+                           return a.formation_time() < b.formation_time();
+                         });
+  }
 
   const double form_time_begin = last_formed_in_part->begin_formation_time();
   const double sc = last_formed_in_part->initial_xsec_scaling_factor();
