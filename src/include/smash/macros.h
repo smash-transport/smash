@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2018
+ *    Copyright (c) 2012-2020
  *              none
  */
 #ifndef SRC_INCLUDE_SMASH_MACROS_H_
