@@ -2164,8 +2164,10 @@ void Experiment<Modus>::final_output(const int evt_num) {
       }
     } else {
       const double precent_discarded =
-          static_cast<double>(discarded_interactions_total_) * 100. /
-          interactions_total_;
+          interactions_total_ > 0
+              ? static_cast<double>(discarded_interactions_total_) * 100.0 /
+                    interactions_total_
+              : 0.0;
       std::stringstream msg_discarded;
       msg_discarded
           << "Discarded interaction number: " << discarded_interactions_total_
