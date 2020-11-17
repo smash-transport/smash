@@ -20,8 +20,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## [Unreleased](https://github.com/smash-transport/smash/compare/SMASH-1.8...HEAD)
 
 ### Input / Output
-* Unify event number counting: The event number counting now starts at 0 for all output formats. 
-
+* Unify event number counting: The event number counting now starts at 0 for all output formats.
+* Added charge chemical potential to the box modus as an option.
 
 ### Added
 * HepMC3 output
@@ -31,17 +31,17 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Hadron Gas EoS extended by nQ and muQ
 * Various tests for photons
 * Various tests for the stochastic criterion
-* Various tests for multi-particle reactions 
+* Various tests for multi-particle reactions
 
 ### Fixed
 * Consider cross section scaling factor of incoming particles for photon production. This factor was previously neglected, resulting in exploding weights and overestimated photon production.
 * Use form factors for binary scattering photons also in the case of Nfrac=1
+* The evaluation of the interaction point in the boxmodus is considering interactions through the wall properly.
 
 ### Changed
 * The Pythia version is increased to 8.303
 * In collisions of unformed particles with equal formation time the outgoing particles now always inherit the smaller scaling factor
 * The default collision criterion changed from "geometric" to "covariant"
-
 
 ### Removed
 * Integrator1dMonte as it was not used anymore
