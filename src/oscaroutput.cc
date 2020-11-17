@@ -469,6 +469,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key 44: Soft string N-Nbar annihilation
  * \li \key 45: Soft sring excitation, non-diffractive
  * \li \key 46: Hard string excitation
+ * \li \key 47: Failed string process
  *
  * \page format_oscar_particlelist
  * \n
