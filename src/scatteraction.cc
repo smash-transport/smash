@@ -523,7 +523,7 @@ void ScatterAction::string_excitation() {
       outgoing_particles_.reserve(2);
       outgoing_particles_.push_back(ParticleData{incoming_particles_[0]});
       outgoing_particles_.push_back(ParticleData{incoming_particles_[1]});
-      process_type_ =  ProcessType::FailedString;
+      process_type_ = ProcessType::FailedString;
       elastic_scattering();
     } else {
       outgoing_particles_ = string_process_->get_final_state();

@@ -84,11 +84,11 @@ enum class ProcessType {
    *  do not simply form a string. They actually scatter on parton level first.
    */
   StringHard = 46,
-    
-    /**
-     *  Soft String NNbar annihilation process can fail by lack of energy. This is a tag we
-     *  add to avoid mislabeling the events. 
-     */
+
+  /**
+   *  Soft String NNbar annihilation process can fail by lack of energy. This is
+   *  a tag we add to avoid mislabeling the events.
+   */
   FailedString = 47
 };
 
