@@ -83,7 +83,13 @@ enum class ProcessType {
    *  hard string process involving 2->2 QCD process by PYTHIA. Here quarks
    *  do not simply form a string. They actually scatter on parton level first.
    */
-  StringHard = 46
+  StringHard = 46,
+
+  /**
+   *  Soft String NNbar annihilation process can fail by lack of energy. This is
+   *  a tag we add to avoid mislabeling the events.
+   */
+  FailedString = 47
 };
 
 /**
