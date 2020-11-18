@@ -8,10 +8,10 @@ All notable changes to this project will be documented in this file. The format 
 * `Y` is incremented for minor changes like an external pull-request that adds one feature and
 * `Z` for the indication of a bug fix or other very small changes that are not backwards incompatible.
 
-Major change for SMASH-2.0: 
-- Multi-particle interactions: There is infrastructure for 3<->2 and 3<->1 interactions and example processes are implemented.
-- The SMASH hybrid is available under this link including SMASH in initial and final state as well as the vHLLE viscous hydrodynamics code.  
-- Updated to Pythia 8.303 and optimised the function calls to allow SMASH runs at LHC and high RHIC energies.
+### Major change for SMASH-2.0: 
+* Multi-particle interactions: There is infrastructure for 3<->2 and 3<->1 interactions and example processes are implemented.
+* The SMASH hybrid is available under this [link](https://github.com/smash-transport/smash-vhlle-hybrid) including SMASH in initial and final state as well as the vHLLE viscous hydrodynamics code.  
+* Updated to Pythia 8.303 and optimised the function calls to allow SMASH runs at LHC and high RHIC energies.
 
 The major categories to group changes in this log are:
 
@@ -31,7 +31,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Added charge chemical potential to the box modus as an option.
 * Added option to specify the `Maximum_Cross_Section` that is considered from the config file.
 * Clarify naming of empty events output flag: changing `empty` to `scattering_projectile_target`.
-* HepMC3 output.
+* Newly available HepMC3 output.
 
 ### Added
 * 3-to-1 reactions for mesons via the stochastic collision criterion.
