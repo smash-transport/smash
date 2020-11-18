@@ -1,10 +1,17 @@
 # Changelog
 
+
+
 All notable changes to this project will be documented in this file. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). This project does not adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html), but it uses versioning inspired by it. Given a version number `X.Y.Z`,
 
 * `X` is incremented for major changes in particular large backwards incompatible updates,
 * `Y` is incremented for minor changes like an external pull-request that adds one feature and
 * `Z` for the indication of a bug fix or other very small changes that are not backwards incompatible.
+
+Major change for SMASH-2.0: 
+- Multi-particle interactions: There is infrastructure for 3<->2 and 3<->1 interactions and example processes are implemented.
+- The SMASH hybrid is available under this link including SMASH in initial and final state as well as the vHLLE viscous hydrodynamics code.  
+- Updated to Pythia 8.303 and optimised the function calls to allow SMASH runs at LHC and high RHIC energies.
 
 The major categories to group changes in this log are:
 
@@ -22,33 +29,50 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Input / Output
 * Unify event number counting: The event number counting now starts at 0 for all output formats.
 * Added charge chemical potential to the box modus as an option.
+* Added option to specify the `Maximum_Cross_Section` that is considered from the config file.
+* Clarify naming of empty events output flag: changing `empty` to `scattering_projectile_target`.
+* HepMC3 output.
 
 ### Added
-* HepMC3 output
-* 3-to-1 reactions for mesons via the stochastic collision criterion
-* 3-to-2 reactions for deuterons via the stochastic collision criterion
-* New covariant collision criterion
-* Hadron Gas EoS extended by nQ and muQ
-* Various tests for photons
-* Various tests for the stochastic criterion
-* Various tests for multi-particle reactions
-* Command-line option to enable completely silent output again
-* Travis CI check to ensure zero doxygen warning about undocumented instances
+* 3-to-1 reactions for mesons via the stochastic collision criterion.
+* 3-to-2 reactions for deuterons via the stochastic collision criterion.
+* New covariant collision criterion.
+* Hadron Gas EoS extended by nQ and muQ.
+* Various tests for photons.
+* Various tests for the stochastic criterion.
+* Various tests for multi-particle reactions.
+* Command-line option to enable completely silent output again.
+* Travis CI check to ensure zero doxygen warning about undocumented instances.
+* Added a new Process Type to tag for failed string processes.
+* Option to initialize the box with Bose or Fermi distributions.
+* More extensive documentation for the different collision criteria.
+* A map of Pythia objects to reduce number of Pythia initializations.
+* f-resonance to pi-pi-photon Bremmstrahlung channel. 
+* Tests for nucleon density normalization.
 
 ### Fixed
 * Consider cross section scaling factor of incoming particles for photon production. This factor was previously neglected, resulting in exploding weights and overestimated photon production.
-* Use form factors for binary scattering photons also in the case of Nfrac=1
+* Use form factors for binary scattering photons also in the case of Nfrac=1.
 * The evaluation of the interaction point in the boxmodus is considering interactions through the wall properly.
+* Enforced a small time step if the box modus is used.
+* Bug in displaying the total energy per particle.
 
 ### Changed
-* The Pythia version is increased to 8.303
-* In collisions of unformed particles with equal formation time the outgoing particles now always inherit the smaller scaling factor
-* The default collision criterion changed from "geometric" to "covariant"
+* The Pythia version is increased to 8.303.
+* In collisions of unformed particles with equal formation time the outgoing particles now always inherit the smaller scaling factor.
+* The default collision criterion changed from "geometric" to "covariant".
 * The interaction point for the stochastic criterion is the coordinate of a random incoming particle instead of the middle point. This prevents density artifacts in the center of grid cells.
 
 ### Removed
-* Integrator1dMonte as it was not used anymore
+* Integrator1dMonte as it was not used anymore.
 * Integrator2d with the GSL Monte-Carlo integration functions. Replaced by the Integrator2dCuhre which performs 2D integrations according to the Cuhre algorithm. The latter was now renamed to Integrator2d.
+
+
+
+## [SMASH-1.8.1](https://github.com/smash-transport/smash/compare/SMASH-1.8...SMASH-1.8.1)
+Date: 2020-08-13
+### Changed
+* Improve version determination for Pythia.
 
 
 
