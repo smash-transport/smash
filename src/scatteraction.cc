@@ -18,14 +18,10 @@
 #include "smash/crosssections.h"
 #include "smash/cxx14compat.h"
 #include "smash/fpenvironment.h"
-#include "smash/kinematics.h"
 #include "smash/logging.h"
-#include "smash/parametrizations.h"
 #include "smash/pdgcode.h"
-#include "smash/potential_globals.h"
 #include "smash/pow.h"
 #include "smash/random.h"
-#include "smash/stringprocess.h"
 
 namespace smash {
 static constexpr int LScatterAction = LogArea::ScatterAction::id;

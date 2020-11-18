@@ -9,12 +9,9 @@
 
 #include "smash/decayaction.h"
 
-#include "smash/angles.h"
 #include "smash/decaymodes.h"
-#include "smash/kinematics.h"
 #include "smash/logging.h"
 #include "smash/pdgcode.h"
-#include "smash/potential_globals.h"
 
 namespace smash {
 static constexpr int LDecayModes = LogArea::DecayModes::id;

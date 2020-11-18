@@ -13,16 +13,10 @@
 #include <map>
 #include <vector>
 
-#include "smash/configuration.h"
 #include "smash/constants.h"
-#include "smash/crosssections.h"
 #include "smash/cxx14compat.h"
 #include "smash/decaymodes.h"
-#include "smash/experimentparameters.h"
-#include "smash/isoparticletype.h"
 #include "smash/logging.h"
-#include "smash/macros.h"
-#include "smash/particles.h"
 #include "smash/scatteraction.h"
 #include "smash/scatteractionmulti.h"
 #include "smash/scatteractionphoton.h"

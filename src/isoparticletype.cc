@@ -12,7 +12,6 @@
 
 #include "smash/filelock.h"
 #include "smash/integrate.h"
-#include "smash/kinematics.h"
 #include "smash/logging.h"
 
 namespace smash {

@@ -20,7 +20,6 @@
 #include "smash/clebschgordan.h"
 #include "smash/constants.h"
 #include "smash/cxx14compat.h"
-#include "smash/interpolation.h"
 #include "smash/kinematics.h"
 #include "smash/lowess.h"
 #include "smash/pow.h"

@@ -11,11 +11,9 @@
 
 #include <cstdint>
 
-#include "smash/actions.h"
 #include "smash/boxmodus.h"
 #include "smash/collidermodus.h"
 #include "smash/cxx14compat.h"
-#include "smash/fourvector.h"
 #include "smash/listmodus.h"
 #include "smash/spheremodus.h"
 

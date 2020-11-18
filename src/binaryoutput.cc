@@ -16,7 +16,6 @@
 #include "smash/action.h"
 #include "smash/clock.h"
 #include "smash/config.h"
-#include "smash/particles.h"
 
 namespace smash {
 

@@ -10,7 +10,6 @@
 #include "smash/density.h"
 #include "smash/constants.h"
 #include "smash/logging.h"
-#include "smash/particles.h"
 
 namespace smash {
 

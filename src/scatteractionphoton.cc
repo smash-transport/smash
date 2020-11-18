@@ -16,13 +16,10 @@
 #include "smash/crosssectionsphoton.h"
 #include "smash/cxx14compat.h"
 #include "smash/forwarddeclarations.h"
-#include "smash/kinematics.h"
 #include "smash/outputinterface.h"
 #include "smash/particletype.h"
-#include "smash/pdgcode.h"
 #include "smash/pow.h"
 #include "smash/random.h"
-#include "smash/tabulation.h"
 
 namespace smash {
 static constexpr int LScatterAction = LogArea::ScatterAction::id;

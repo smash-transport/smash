@@ -10,11 +10,9 @@
 #include <map>
 #include <stdexcept>
 
-#include "smash/angles.h"
 #include "smash/configuration.h"
 #include "smash/constants.h"
 #include "smash/fourvector.h"
-#include "smash/particledata.h"
 #include "smash/random.h"
 #include "smash/threevector.h"
 

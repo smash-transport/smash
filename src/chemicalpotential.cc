@@ -19,7 +19,6 @@
 
 #include "smash/constants.h"
 #include "smash/distributions.h"
-#include "smash/integrate.h"
 #include "smash/logging.h"
 
 namespace smash {

@@ -15,11 +15,9 @@
 
 #include "smash/angles.h"
 #include "smash/constants.h"
-#include "smash/kinematics.h"
 #include "smash/logging.h"
 #include "smash/pauliblocking.h"
 #include "smash/potential_globals.h"
-#include "smash/processbranch.h"
 #include "smash/quantumnumbers.h"
 
 namespace smash {

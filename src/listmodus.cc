@@ -22,18 +22,12 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "smash/algorithms.h"
-#include "smash/angles.h"
 #include "smash/configuration.h"
 #include "smash/constants.h"
-#include "smash/distributions.h"
 #include "smash/experimentparameters.h"
 #include "smash/fourvector.h"
 #include "smash/inputfunctions.h"
 #include "smash/logging.h"
-#include "smash/macros.h"
-#include "smash/particles.h"
-#include "smash/random.h"
 #include "smash/threevector.h"
 
 namespace smash {
