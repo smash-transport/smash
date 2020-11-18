@@ -411,10 +411,6 @@ hand to be in accordance with the style guide.
 A notable naming rule is that class member variables have to end in an
 underscore (`_`).
 
-* Guidline to include header files
-Include only those header files in the class which are directly being used by
-the file.
-
 ### Specific Naming Conventions for SMASH
 
 * for particles going into or coming out of an interaction we use:
@@ -492,6 +488,12 @@ lot of false positives:
 ### Floating-Point Precision
 
 All floating point numbers are represented using doubles.
+
+### Guideline to include header files
+
+As a guideline, try to include only those header files in the class which are directly being used by
+the file.
+
 
 ## General Policies
 
