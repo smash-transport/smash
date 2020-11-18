@@ -27,11 +27,13 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * HepMC3 output
 * 3-to-1 reactions for mesons via the stochastic collision criterion
 * 3-to-2 reactions for deuterons via the stochastic collision criterion
-* Added covariant collision criterion as an option
+* New covariant collision criterion
 * Hadron Gas EoS extended by nQ and muQ
 * Various tests for photons
 * Various tests for the stochastic criterion
 * Various tests for multi-particle reactions
+* Command-line option to enable completely silent output again
+* Travis CI check to ensure zero doxygen warning about undocumented instances
 
 ### Fixed
 * Consider cross section scaling factor of incoming particles for photon production. This factor was previously neglected, resulting in exploding weights and overestimated photon production.
@@ -42,6 +44,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * The Pythia version is increased to 8.303
 * In collisions of unformed particles with equal formation time the outgoing particles now always inherit the smaller scaling factor
 * The default collision criterion changed from "geometric" to "covariant"
+* The interaction point for the stochastic criterion is the coordinate of a random incoming particle instead of the middle point. This prevents density artifacts in the center of grid cells.
 
 ### Removed
 * Integrator1dMonte as it was not used anymore
