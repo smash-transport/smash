@@ -47,7 +47,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Option to initialize the box with Bose or Fermi distributions.
 * More extensive documentation for the different collision criteria.
 * A map of Pythia objects to reduce number of Pythia initializations.
-* f-resonance to pi-pi-photon Bremmstrahlung channel. 
+* f-resonance to pi-pi-photon Bremsstrahlung cross-sections. 
 * Tests for nucleon density normalization.
 
 ### Fixed
