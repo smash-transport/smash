@@ -10,12 +10,9 @@
 #include <algorithm>
 #include <cmath>
 
-// #include "smash/constants.h"
+#include "smash/constants.h"
 #include "smash/cxx14compat.h"
 #include "smash/formfactors.h"
-// #include "smash/integrate.h"
-// #include "smash/kinematics.h"
-// #include "smash/pdgcode_constants.h"
 #include "smash/pow.h"
 
 namespace smash {

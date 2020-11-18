@@ -19,8 +19,6 @@
 #include "smash/density.h"
 #include "smash/energymomentumtensor.h"
 #include "smash/experimentparameters.h"
-// #include "smash/forwarddeclarations.h"
-// #include "smash/particles.h"
 #include "smash/vtkoutput.h"
 
 namespace smash {

@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "smash/clebschgordan.h"
-// #include "smash/constants.h"
+#include "smash/constants.h"
 #include "smash/cxx14compat.h"
 #include "smash/inputfunctions.h"
 #include "smash/isoparticletype.h"

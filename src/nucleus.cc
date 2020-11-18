@@ -15,12 +15,8 @@
 #include "smash/angles.h"
 #include "smash/random.h"
 #include "smash/logging.h"
-// #include "smash/constants.h"
+#include "smash/constants.h"
 #include "smash/fourvector.h"
-// #include "smash/inputfunctions.h"
-// #include "smash/numerics.h"
-// #include "smash/particles.h"
-// #include "smash/pdgcode.h"
 #include "smash/threevector.h"
 
 namespace smash {

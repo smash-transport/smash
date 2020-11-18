@@ -17,17 +17,14 @@
 
 
 #include "smash/spheremodus.h"
-// #include "smash/algorithms.h"
 #include "smash/angles.h"
 #include "smash/chemicalpotential.h"
 #include "smash/configuration.h"
-// #include "smash/constants.h"
-// #include "smash/distributions.h"
+#include "smash/constants.h"
 #include "smash/experimentparameters.h"
 #include "smash/fourvector.h"
 #include "smash/hadgas_eos.h"
 #include "smash/logging.h"
-// #include "smash/macros.h"
 #include "smash/particles.h"
 #include "smash/quantumsampling.h"
 #include "smash/random.h"

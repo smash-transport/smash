@@ -9,12 +9,10 @@
 
 #include "smash/decayactionsfinder.h"
 
-// #include "smash/constants.h"
+#include "smash/constants.h"
 #include "smash/cxx14compat.h"
 #include "smash/decayaction.h"
-// #include "smash/experimentparameters.h"
 #include "smash/fourvector.h"
-// #include "smash/particles.h"
 #include "smash/random.h"
 
 namespace smash {

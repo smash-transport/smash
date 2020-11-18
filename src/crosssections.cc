@@ -9,13 +9,10 @@
 
 #include "smash/crosssections.h"
 
-// #include "smash/action.h"
 #include "smash/clebschgordan.h"
-// #include "smash/constants.h"
-// #include "smash/kinematics.h"
+#include "smash/constants.h"
 #include "smash/logging.h"
 #include "smash/parametrizations.h"
-// #include "smash/particletype.h"
 #include "smash/pow.h"
 
 namespace smash {

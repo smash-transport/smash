@@ -10,13 +10,10 @@
 #include <string>
 #include <vector>
 
-// #include "smash/constants.h"
+#include "smash/constants.h"
 #include "smash/customnucleus.h"
-// #include "smash/particledata.h"
 #include "smash/particletype.h"
 #include "smash/pdgcode.h"
-// #include "smash/pdgcode_constants.h"
-// #include "smash/random.h"
 
 namespace smash {
 static constexpr int LCollider = LogArea::Collider::id;

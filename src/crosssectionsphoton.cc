@@ -10,8 +10,6 @@
 #include "smash/crosssectionsphoton.h"
 #include <memory>
 #include "smash/logging.h"
-// #include "smash/particletype.h"
-// #include "smash/pdgcode.h"
 
 namespace {
 

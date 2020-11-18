@@ -14,7 +14,7 @@
 #include <map>
 #include <vector>
 
-// #include "smash/constants.h"
+#include "smash/constants.h"
 #include "smash/cxx14compat.h"
 #include "smash/decaymodes.h"
 #include "smash/distributions.h"
@@ -23,14 +23,8 @@
 #include "smash/integrate.h"
 #include "smash/iomanipulators.h"
 #include "smash/isoparticletype.h"
-// #include "smash/kinematics.h"
 #include "smash/logging.h"
-// #include "smash/numerics.h"
-// #include "smash/particledata.h"
-// #include "smash/pdgcode.h"
 #include "smash/potential_globals.h"
-// #include "smash/pow.h"
-// #include "smash/processbranch.h"
 #include "smash/stringfunctions.h"
 
 namespace smash {

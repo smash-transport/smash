@@ -16,13 +16,10 @@
 #include <boost/filesystem.hpp>
 
 #include "smash/hadgas_eos.h"
-// #include "smash/constants.h"
-// #include "smash/forwarddeclarations.h"
-// #include "smash/fpenvironment.h"
+#include "smash/constants.h"
 #include "smash/integrate.h"
 #include "smash/interpolation.h"
 #include "smash/logging.h"
-// #include "smash/pow.h"
 #include "smash/random.h"
 
 namespace smash {

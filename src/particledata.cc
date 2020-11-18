@@ -13,7 +13,7 @@
 #include <iostream>
 #include <vector>
 
-// #include "smash/constants.h"
+#include "smash/constants.h"
 #include "smash/iomanipulators.h"
 
 namespace smash {

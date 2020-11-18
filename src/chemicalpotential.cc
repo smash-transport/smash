@@ -9,9 +9,9 @@
 
 #include "smash/chemicalpotential.h"
 
-// #include <gsl/gsl_errno.h>
-// #include <gsl/gsl_integration.h>
-// #include <gsl/gsl_multiroots.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_multiroots.h>
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -19,7 +19,6 @@
 
 #include "smash/constants.h"
 #include "smash/distributions.h"
-// #include "smash/integrate.h"
 #include "smash/logging.h"
 
 namespace smash {
