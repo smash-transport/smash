@@ -15,8 +15,6 @@
 #include <utility>
 #include <vector>
 
-
-#include "smash/spheremodus.h"
 #include "smash/angles.h"
 #include "smash/chemicalpotential.h"
 #include "smash/configuration.h"
@@ -28,6 +26,7 @@
 #include "smash/particles.h"
 #include "smash/quantumsampling.h"
 #include "smash/random.h"
+#include "smash/spheremodus.h"
 #include "smash/threevector.h"
 
 namespace smash {

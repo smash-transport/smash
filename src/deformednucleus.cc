@@ -10,7 +10,6 @@
 #include <map>
 #include <stdexcept>
 
-
 #include "smash/configuration.h"
 #include "smash/constants.h"
 #include "smash/fourvector.h"

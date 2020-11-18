@@ -22,7 +22,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-
 #include "smash/configuration.h"
 #include "smash/constants.h"
 #include "smash/experimentparameters.h"

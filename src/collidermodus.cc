@@ -7,7 +7,6 @@
 
 #include "smash/collidermodus.h"
 
-
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -18,7 +17,6 @@
 #include <tuple>
 #include <utility>
 #include <vector>
-
 
 #include "smash/configuration.h"
 #include "smash/customnucleus.h"

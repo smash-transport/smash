@@ -11,12 +11,11 @@
 
 #include <cstdint>
 
-
 #include "smash/boxmodus.h"
 #include "smash/collidermodus.h"
+#include "smash/cxx14compat.h"
 #include "smash/listmodus.h"
 #include "smash/spheremodus.h"
-#include "smash/cxx14compat.h"
 
 namespace smash {
 

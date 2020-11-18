@@ -13,10 +13,10 @@
 #include <string>
 
 #include "smash/angles.h"
-#include "smash/random.h"
-#include "smash/logging.h"
 #include "smash/constants.h"
 #include "smash/fourvector.h"
+#include "smash/logging.h"
+#include "smash/random.h"
 #include "smash/threevector.h"
 
 namespace smash {

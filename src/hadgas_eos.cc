@@ -15,8 +15,8 @@
 
 #include <boost/filesystem.hpp>
 
-#include "smash/hadgas_eos.h"
 #include "smash/constants.h"
+#include "smash/hadgas_eos.h"
 #include "smash/integrate.h"
 #include "smash/interpolation.h"
 #include "smash/logging.h"
