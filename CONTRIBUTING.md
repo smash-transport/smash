@@ -411,6 +411,9 @@ hand to be in accordance with the style guide.
 A notable naming rule is that class member variables have to end in an
 underscore (`_`).
 
+* Guidline to include header files
+Include only those header files in the class which are directly being used by
+the file.
 
 ### Specific Naming Conventions for SMASH
 
