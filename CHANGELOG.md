@@ -8,11 +8,6 @@ All notable changes to this project will be documented in this file. The format 
 * `Y` is incremented for minor changes like an external pull-request that adds one feature and
 * `Z` for the indication of a bug fix or other very small changes that are not backwards incompatible.
 
-### Major change for SMASH-2.0: 
-* Multi-particle interactions: There is infrastructure for 3<->2 and 3<->1 interactions and example processes are implemented.
-* The SMASH hybrid is available under this [link](https://github.com/smash-transport/smash-vhlle-hybrid) including SMASH in initial and final state as well as the vHLLE viscous hydrodynamics code.  
-* Updated to Pythia 8.303 and optimised the function calls to allow SMASH runs at LHC and high RHIC energies.
-
 The major categories to group changes in this log are:
 
 * `Input / Output` for all, in particular breaking, changes, fixes and additions to the in- and output files.
@@ -25,6 +20,11 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 
 ## [Unreleased](https://github.com/smash-transport/smash/compare/SMASH-1.8...HEAD)
+
+### Major change for SMASH-2.0:
+* Multi-particle interactions: There is infrastructure for 3<->2 and 3<->1 interactions and example processes are implemented.
+* The SMASH hybrid is available under this [link](https://github.com/smash-transport/smash-vhlle-hybrid) including SMASH in initial and final state as well as the vHLLE viscous hydrodynamics code.
+* Updated to Pythia 8.303 and optimised the function calls to allow SMASH runs at LHC and high RHIC energies.
 
 ### Input / Output
 * Unify event number counting: The event number counting now starts at 0 for all output formats.
@@ -41,7 +41,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Various tests for photons.
 * Various tests for the stochastic criterion.
 * Various tests for multi-particle reactions.
-* Command-line option to enable completely silent output again.
+* Command-line option to enable completely silent output.
 * Travis CI check to ensure zero doxygen warning about undocumented instances.
 * Added a new Process Type to tag for failed string processes.
 * Option to initialize the box with Bose or Fermi distributions.
