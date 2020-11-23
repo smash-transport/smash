@@ -28,6 +28,9 @@ struct ExperimentParameters {
   /// Output clock to keep track of the next output time
   std::unique_ptr<Clock> outputclock;
 
+  /// Number of parallel ensembles
+  int n_ensembles;
+
   /// Number of test particle
   int testparticles;
 

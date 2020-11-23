@@ -251,6 +251,7 @@ inline ExperimentParameters default_parameters(
   return ExperimentParameters{
       make_unique<UniformClock>(0., dt),  // labclock
       make_unique<UniformClock>(0., 1.),  // outputclock
+      1,                                  // ensembles
       testparticles,                      // testparticles
       1.0,                                // Gaussian smearing width
       4.0,                                // Gaussian smearing cut-off

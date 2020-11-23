@@ -79,8 +79,37 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * If Time_Step_Mode = None is chosen, then the user-provided value of
  * Delta_Time is ignored and Delta_Time is set to the End_Time.
  *
+ * \key Ensembles (int, optional, default = 1): \n
+ * Number of parallel ensembles. Without mean field potentials
+ * ensembles are not different from events. Ensembles are
+ * independent simulations: initialization, collisions, decays,
+ * box wall crossings, propagation of particles is performed independently
+ * in each ensemble. However, mean field potentials are computed
+ * from all ensebles combined. This inceases statistics necessary
+ * for precise density calculation, without increasing the number
+ * of collisions. Such technique is called *parallel ensemble* technique.
+ * It is computationally faster than the full ensemble technique described
+ * below.
+ *
  * \key Testparticles (int, optional, default = 1): \n
  * How many test particles per real particle should be simulated.
+ *
+ * Amount of initial sampled particles is increased by this factor,
+ * while all cross sections are decreased by this factor. In this
+ * way mean free path does not change. Larger number of testparticles
+ * helps to reduce spurious effects of geometric collision criterion
+ * (see \iref{Cheng:2001dz}). It also reduces correlations related
+ * to collisions and decays (but not the ones related to mean fields),
+ * therefore the larger the number of testparticles, the closer the results
+ * of the simulations should be to the solution of Boltzmann equation.
+ * These advantages come at cost of computational time.
+ *
+ * Testparticles are a way to increase statistics necessary for
+ * precise density calculation, that is why they are needed for mean field
+ * potentials. The technique of using testparticles for mean field
+ * is called *full ensemble* technique. The simulation time scales
+ * as square of the number of testparticles, that is why full ensemble
+ * is slower than parallel ensemble.
  *
  * \key Gaussian_Sigma (double, optional, default = 1.0): \n
  * Width of gaussians that represent Wigner density of particles, in fm.
@@ -464,6 +493,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   return {
       make_unique<UniformClock>(0.0, dt),
       std::move(output_clock),
+      config.take({"General", "Ensembles"}, 1),
       ntest,
       config.take({"General", "Gaussian_Sigma"}, 1.),
       config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
