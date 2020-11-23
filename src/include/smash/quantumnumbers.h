@@ -98,9 +98,10 @@ class QuantumNumbers {
   /**
    * Construct QuantumNumbers from several sets of particles.
    * \param[in] ensembles structure holding several sets of particles
-   * \return Constructed object. 
+   * \return Constructed object.
    */
-  explicit QuantumNumbers(const std::vector<Particles>& ensembles) : QuantumNumbers() {
+  explicit QuantumNumbers(const std::vector<Particles>& ensembles)
+      : QuantumNumbers() {
     for (const Particles& particles : ensembles) {
       for (const ParticleData& data : particles) {
         add_values(data);

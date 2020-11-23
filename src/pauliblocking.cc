@@ -49,7 +49,8 @@ PauliBlocker::PauliBlocker(Configuration conf,
   if (ntest_ * n_ensembles_ < 20) {
     logg[LPauliBlocking].warn(
         "Phase-space density calculation in Pauli blocking"
-        " will not work reasonably. Either use testparticles or ensembles, or both."
+        " will not work reasonably. Either use testparticles or ensembles, or "
+        "both."
         " The recommended testparticles * ensembles is at least 20");
   }
 
@@ -101,14 +102,15 @@ double PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
         continue;
       }
       // 1st order interpolation using tabulated values
-      const double i_real = std::sqrt(rdist_sqr) / (rr_ + rc_) * weights_.size();
+      const double i_real =
+          std::sqrt(rdist_sqr) / (rr_ + rc_) * weights_.size();
       const size_t i = std::floor(i_real);
       const double rest = i_real - i;
       if (likely(i + 1 < weights_.size())) {
         f += weights_[i] * rest + weights_[i + 1] * (1. - rest);
       }
     }  // loop over particles in one ensemble
-  }  // loop over ensembles
+  }    // loop over ensembles
   return f / ntest_ / n_ensembles_;
 }
 

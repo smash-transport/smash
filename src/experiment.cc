@@ -524,7 +524,7 @@ std::string format_measurements(const std::vector<Particles> &ensembles,
   const QuantumNumbers current_values(ensembles);
   const QuantumNumbers difference = current_values - conserved_initial;
   int total_particles = 0;
-  for (const Particles& particles : ensembles) {
+  for (const Particles &particles : ensembles) {
     total_particles += particles.size();
   }
 
@@ -532,9 +532,8 @@ std::string format_measurements(const std::vector<Particles> &ensembles,
   // eventually be no more particles in the system
   const double current_energy = current_values.momentum().x0();
   const double energy_per_part =
-      (total_particles > 0)
-          ? (current_energy + E_mean_field) / total_particles
-          : 0.0;
+      (total_particles > 0) ? (current_energy + E_mean_field) / total_particles
+                            : 0.0;
 
   std::ostringstream ss;
   // clang-format off
@@ -674,8 +673,8 @@ double calculate_mean_field_energy(
   return E_mean_field;
 }
 
-EventInfo fill_event_info(const std::vector<Particles> &ensembles, double E_mean_field,
-                          double modus_impact_parameter,
+EventInfo fill_event_info(const std::vector<Particles> &ensembles,
+                          double E_mean_field, double modus_impact_parameter,
                           const ExperimentParameters &parameters,
                           bool projectile_target_interact) {
   const QuantumNumbers current_values(ensembles);

@@ -277,7 +277,7 @@ class GrandCanThermalizer {
    * \see DensityParameters
    * \param[in] ignore_cells_under_threshold Boolean that is true by default
    */
-  void update_thermalizer_lattice(const std::vector<Particles> &ensembles,
+  void update_thermalizer_lattice(const std::vector<Particles>& ensembles,
                                   const DensityParameters& par,
                                   bool ignore_cells_under_threshold = true);
   /// \return 3 vector uniformly sampled from the rectangular cell.

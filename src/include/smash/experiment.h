@@ -251,8 +251,7 @@ class Experiment : public ExperimentBase {
    *                 rejected either due to invalidity or
    *                 Pauli-blocking, or true if it's accepted and performed.
    */
-  bool perform_action(Action &action,
-                      Particles& particles);
+  bool perform_action(Action &action, Particles &particles);
   /**
    * Create a list of output files
    *
@@ -271,7 +270,7 @@ class Experiment : public ExperimentBase {
    * \param[in] to_time Time at the end of propagation [fm/c]
    * \param[in, out] particles Particles to be propagated
    */
-  void propagate_and_shine(double to_time, Particles& particles);
+  void propagate_and_shine(double to_time, Particles &particles);
 
   /**
    * Performs all the propagations and actions during a certain time interval
@@ -1450,8 +1449,8 @@ double calculate_mean_field_energy(
  * \param[in] projectile_target_interact true if there was at least one
  *            collision
  */
-EventInfo fill_event_info(const std::vector<Particles> &ensembles, double E_mean_field,
-                          double modus_impact_parameter,
+EventInfo fill_event_info(const std::vector<Particles> &ensembles,
+                          double E_mean_field, double modus_impact_parameter,
                           const ExperimentParameters &parameters,
                           bool projectile_target_interact);
 
@@ -1477,19 +1476,19 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
     process_string_ptr_->init_pythia_hadron_rndm();
   }
 
-  for (Particles& particles : ensembles_) {
+  for (Particles &particles : ensembles_) {
     particles.reset();
   }
 
   // Sample particles according to the initial conditions
   double start_time;
-  for (Particles& particles : ensembles_) {
+  for (Particles &particles : ensembles_) {
     start_time = modus_.initial_conditions(&particles, parameters_);
   }
   /* For box modus make sure that particles are in the box. In principle, after
    * a correct initialization they should be, so this is just playing it safe.
    */
-  for (Particles& particles : ensembles_) {
+  for (Particles &particles : ensembles_) {
     modus_.impose_boundary_conditions(&particles, outputs_);
   }
   // Reset the simulation clock
@@ -1572,7 +1571,7 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
 }
 
 template <typename Modus>
-bool Experiment<Modus>::perform_action(Action &action, Particles& particles) {
+bool Experiment<Modus>::perform_action(Action &action, Particles &particles) {
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles)) {
     discarded_interactions_total_++;
@@ -1632,9 +1631,9 @@ bool Experiment<Modus>::perform_action(Action &action, Particles& particles) {
     FourVector current();
     // todo(oliiny): it's a rough density estimate from a single ensemble.
     // It might actually be appropriate for output. Discuss.
-    rho = std::get<0>(current_eckart(r_interaction.threevec(),
-                                 particles, density_param_,       
-                                 dens_type_, compute_grad, smearing));
+    rho = std::get<0>(current_eckart(r_interaction.threevec(), particles,
+                                     density_param_, dens_type_, compute_grad,
+                                     smearing));
   }
   /*!\Userguide
    * \page collisions_output_in_box_modus_ Collision Output in Box Modus
@@ -1732,7 +1731,6 @@ bool Experiment<Modus>::perform_action(Action &action, Particles& particles) {
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
-
   while (parameters_.labclock->current_time() < end_time_) {
     const double t = parameters_.labclock->current_time();
     const double dt =
@@ -1758,7 +1756,7 @@ void Experiment<Modus>::run_time_evolution() {
       }
     }
 
-    for (Particles& particles : ensembles_) {
+    for (Particles &particles : ensembles_) {
       Actions actions;
       if (particles.size() > 0 && action_finders_.size() > 0) {
         /* (1.a) Create grid. */
@@ -1840,7 +1838,7 @@ void Experiment<Modus>::run_time_evolution() {
 
 template <typename Modus>
 void Experiment<Modus>::propagate_and_shine(double to_time,
-                                            Particles& particles) {
+                                            Particles &particles) {
   const double dt =
       propagate_straight_line(&particles, to_time, beam_momentum_);
   if (dilepton_finder_ != nullptr) {
@@ -2290,7 +2288,8 @@ void Experiment<Modus>::run() {
     // there should be as many beam_momentum vectors as ensembles
     if (modus_.is_collider() && modus_.fermi_motion() == FermiMotion::Frozen) {
       for (int i = 0; i < modus_.total_N_number(); i++) {
-        const auto mass_beam = ensembles_[0].copy_to_vector()[i].effective_mass();
+        const auto mass_beam =
+            ensembles_[0].copy_to_vector()[i].effective_mass();
         const auto v_beam = i < modus_.proj_N_number()
                                 ? modus_.velocity_projectile()
                                 : modus_.velocity_target();
