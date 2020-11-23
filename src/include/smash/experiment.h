@@ -225,7 +225,10 @@ class Experiment : public ExperimentBase {
    * Provides external access to SMASH particles. This is helpful if SMASH
    * is used as a 3rd-party library.
    */
-  Particles *particles() { return &particles_; }
+  // todo(oliiny): this should be made compatible with JetScape on
+  // the JetScape side
+  Particles *first_ensemble() { return &ensembles_[0]; }
+  std::vector<Particles> *all_ensembles() { return &ensembles_; }
 
   /**
    * Provides external access to SMASH calculation modus. This is helpful if
@@ -237,17 +240,19 @@ class Experiment : public ExperimentBase {
   /**
    * Perform the given action.
    *
-   * \tparam Container type that holds the particles before the action.
-   * \param[in] action The action to perform. If it performs, it'll modify
-   *                   the private member particles_.
-   * \param[in] particles_before_actions A container with the ParticleData
-   *                 from this time step before any actions were performed.
-   * \return False if the action is rejected either due to invalidity or
-   *         Pauli-blocking, or true if it's accepted and performed.
+   * \param[in] action The action to perform
+   * \param[in] particles A container with the ParticleData. It is
+   *                 used to check if action is valid (incoming particles of
+   *                 the action are still present). If the action is performed
+   *                 it replaces its incoming particles in the container into
+   *                 its outgoing particles.  from this time step before any
+   *                 actions were performed.
+   * \return False if the action is
+   *                 rejected either due to invalidity or
+   *                 Pauli-blocking, or true if it's accepted and performed.
    */
-  template <typename Container>
   bool perform_action(Action &action,
-                      const Container &particles_before_actions);
+                      Particles& particles);
   /**
    * Create a list of output files
    *
@@ -264,8 +269,9 @@ class Experiment : public ExperimentBase {
    * and shine dileptons.
    *
    * \param[in] to_time Time at the end of propagation [fm/c]
+   * \param[in, out] particles Particles to be propagated
    */
-  void propagate_and_shine(double to_time);
+  void propagate_and_shine(double to_time, Particles& particles);
 
   /**
    * Performs all the propagations and actions during a certain time interval
@@ -278,8 +284,10 @@ class Experiment : public ExperimentBase {
    * \param[in, out] actions Actions occur during a certain time interval.
    *                 They provide the ending times of the propagations and
    *                 are updated during the time interval.
+   * \param[in, out] particles Particle container on which actions
+   *                 will be performed
    */
-  void run_time_evolution_timestepless(Actions &actions);
+  void run_time_evolution_timestepless(Actions &actions, Particles &particles);
 
   /// Intermediate output during an event
   void intermediate_output();
@@ -320,8 +328,8 @@ class Experiment : public ExperimentBase {
    */
   Modus modus_;
 
-  /// Complete particle list
-  Particles particles_;
+  /// Complete particle list, all ensembles in one vector
+  std::vector<Particles> ensembles_;
 
   /**
    * An instance of potentials class, that stores parameters of potentials,
@@ -823,7 +831,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     : parameters_(create_experiment_parameters(config)),
       density_param_(DensityParameters(parameters_)),
       modus_(config["Modi"], parameters_),
-      particles_(),
+      ensembles_(parameters_.n_ensembles),
       nevents_(config.take({"General", "Nevents"})),
       end_time_(config.take({"General", "End_Time"})),
       delta_time_startup_(parameters_.labclock->timestep_duration()),
@@ -1383,7 +1391,7 @@ const std::string hline(113, '-');
  * Generate the tabulated string which will be printed to the screen when
  * SMASH is running
  *
- * \param[in] particles The interacting particles. Their information will be
+ * \param[in] ensembles The interacting particles. Their information will be
  *            used to check the conservation of the total energy and momentum.
  *	      the total number of the particles will be used and printed as
  *	      well.
@@ -1404,7 +1412,7 @@ const std::string hline(113, '-');
  *         scatterings that occurred within the timestep', 'Total particle
  *         number', 'Computing time consumed'.
  */
-std::string format_measurements(const Particles &particles,
+std::string format_measurements(const std::vector<Particles> &ensembles,
                                 uint64_t scatterings_this_interval,
                                 const QuantumNumbers &conserved_initial,
                                 SystemTimePoint time_start, double time,
@@ -1430,7 +1438,7 @@ double calculate_mean_field_energy(
 /**
  * Generate the EventInfo object which is passed to outputs_.
  *
- * \param[in] particles The interacting particles. Their information will be
+ * \param[in] ensembles The interacting particles. Their information will be
  *            used to check the conservation of the total energy and momentum.
  *	      the total number of the particles will be used and printed as
  *	      well.
@@ -1442,7 +1450,7 @@ double calculate_mean_field_energy(
  * \param[in] projectile_target_interact true if there was at least one
  *            collision
  */
-EventInfo fill_event_info(const Particles &particles, double E_mean_field,
+EventInfo fill_event_info(const std::vector<Particles> &ensembles, double E_mean_field,
                           double modus_impact_parameter,
                           const ExperimentParameters &parameters,
                           bool projectile_target_interact);
@@ -1469,14 +1477,21 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
     process_string_ptr_->init_pythia_hadron_rndm();
   }
 
-  particles_.reset();
+  for (Particles& particles : ensembles_) {
+    particles.reset();
+  }
 
   // Sample particles according to the initial conditions
-  double start_time = modus_.initial_conditions(&particles_, parameters_);
+  double start_time;
+  for (Particles& particles : ensembles_) {
+    start_time = modus_.initial_conditions(&particles, parameters_);
+  }
   /* For box modus make sure that particles are in the box. In principle, after
    * a correct initialization they should be, so this is just playing it safe.
    */
-  modus_.impose_boundary_conditions(&particles_, outputs_);
+  for (Particles& particles : ensembles_) {
+    modus_.impose_boundary_conditions(&particles, outputs_);
+  }
   // Reset the simulation clock
   double timestep = delta_time_startup_;
 
@@ -1513,7 +1528,7 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
 
   /* Save the initial conserved quantum numbers and total momentum in
    * the system for conservation checks */
-  conserved_initial_ = QuantumNumbers(particles_);
+  conserved_initial_ = QuantumNumbers(ensembles_);
   wall_actions_total_ = 0;
   previous_wall_actions_total_ = 0;
   interactions_total_ = 0;
@@ -1540,26 +1555,26 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
   }
   initial_mean_field_energy_ = E_mean_field;
   logg[LExperiment].info() << format_measurements(
-      particles_, 0u, conserved_initial_, time_start_,
+      ensembles_, 0u, conserved_initial_, time_start_,
       parameters_.labclock->current_time(), E_mean_field,
       initial_mean_field_energy_);
 
   auto event_info =
-      fill_event_info(particles_, E_mean_field, modus_.impact_parameter(),
+      fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
                       parameters_, projectile_target_interact_);
 
   // Output at event start
   for (const auto &output : outputs_) {
-    output->at_eventstart(particles_, event_number, event_info);
+    for (const Particles &particles : ensembles_) {
+      output->at_eventstart(particles, event_number, event_info);
+    }
   }
 }
 
 template <typename Modus>
-template <typename Container>
-bool Experiment<Modus>::perform_action(
-    Action &action, const Container &particles_before_actions) {
+bool Experiment<Modus>::perform_action(Action &action, Particles& particles) {
   // Make sure to skip invalid and Pauli-blocked actions.
-  if (!action.is_valid(particles_)) {
+  if (!action.is_valid(particles)) {
     discarded_interactions_total_++;
     logg[LExperiment].debug(~einhard::DRed(), "✘ ", action,
                             " (discarded: invalid)");
@@ -1567,10 +1582,12 @@ bool Experiment<Modus>::perform_action(
   }
   action.generate_final_state();
   logg[LExperiment].debug("Process Type is: ", action.get_type());
-  if (pauli_blocker_ && action.is_pauli_blocked(particles_, *pauli_blocker_)) {
+  if (pauli_blocker_ && action.is_pauli_blocked(ensembles_, *pauli_blocker_)) {
     total_pauli_blocked_++;
     return false;
   }
+  // todo(oliiny): ensembles > 1 breaks the logic of this block
+  // Needs to be fixed
   if (modus_.is_collider()) {
     /* Mark incoming nucleons as interacted - now they are permitted
      * to collide with nucleons from their native nucleus */
@@ -1597,7 +1614,7 @@ bool Experiment<Modus>::perform_action(
   /* Make sure to pick a non-zero integer, because 0 is reserved for "no
    * interaction yet". */
   const auto id_process = static_cast<uint32_t>(interactions_total_ + 1);
-  action.perform(&particles_, id_process);
+  action.perform(&particles, id_process);
   interactions_total_++;
   if (action.get_type() == ProcessType::Wall) {
     wall_actions_total_++;
@@ -1612,9 +1629,12 @@ bool Experiment<Modus>::perform_action(
     const FourVector r_interaction = action.get_interaction_point();
     constexpr bool compute_grad = false;
     const bool smearing = true;
+    FourVector current();
+    // todo(oliiny): it's a rough density estimate from a single ensemble.
+    // It might actually be appropriate for output. Discuss.
     rho = std::get<0>(current_eckart(r_interaction.threevec(),
-                                     particles_before_actions, density_param_,
-                                     dens_type_, compute_grad, smearing));
+                                 particles, density_param_,       
+                                 dens_type_, compute_grad, smearing));
   }
   /*!\Userguide
    * \page collisions_output_in_box_modus_ Collision Output in Box Modus
@@ -1712,7 +1732,6 @@ bool Experiment<Modus>::perform_action(
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution() {
-  Actions actions;
 
   while (parameters_.labclock->current_time() < end_time_) {
     const double t = parameters_.labclock->current_time();
@@ -1724,63 +1743,74 @@ void Experiment<Modus>::run_time_evolution() {
     if (thermalizer_ &&
         thermalizer_->is_time_to_thermalize(parameters_.labclock)) {
       const bool ignore_cells_under_treshold = true;
-      thermalizer_->update_thermalizer_lattice(particles_, density_param_,
+      // Thermodynamics in thermalizer is computed from all ensembles,
+      // but thermalization actions act on each ensemble independently
+      thermalizer_->update_thermalizer_lattice(ensembles_, density_param_,
                                                ignore_cells_under_treshold);
       const double current_t = parameters_.labclock->current_time();
-      thermalizer_->thermalize(particles_, current_t,
-                               parameters_.testparticles);
-      ThermalizationAction th_act(*thermalizer_, current_t);
-      if (th_act.any_particles_thermalized()) {
-        perform_action(th_act, particles_);
+      for (Particles &particles : ensembles_) {
+        thermalizer_->thermalize(particles, current_t,
+                                 parameters_.testparticles);
+        ThermalizationAction th_act(*thermalizer_, current_t);
+        if (th_act.any_particles_thermalized()) {
+          perform_action(th_act, particles);
+        }
       }
     }
 
-    if (particles_.size() > 0 && action_finders_.size() > 0) {
-      /* (1.a) Create grid. */
-      double min_cell_length = compute_min_cell_length(dt);
-      logg[LExperiment].debug("Creating grid with minimal cell length ",
-                              min_cell_length);
-      const auto &grid =
-          use_grid_ ? modus_.create_grid(particles_, min_cell_length, dt)
-                    : modus_.create_grid(particles_, min_cell_length, dt,
-                                         CellSizeStrategy::Largest);
+    for (Particles& particles : ensembles_) {
+      Actions actions;
+      if (particles.size() > 0 && action_finders_.size() > 0) {
+        /* (1.a) Create grid. */
+        double min_cell_length = compute_min_cell_length(dt);
+        logg[LExperiment].debug("Creating grid with minimal cell length ",
+                                min_cell_length);
+        const auto &grid =
+            use_grid_ ? modus_.create_grid(particles, min_cell_length, dt)
+                      : modus_.create_grid(particles, min_cell_length, dt,
+                                           CellSizeStrategy::Largest);
 
-      const double gcell_vol = grid.cell_volume();
+        const double gcell_vol = grid.cell_volume();
 
-      /* (1.b) Iterate over cells and find actions. */
-      grid.iterate_cells(
-          [&](const ParticleList &search_list) {
-            for (const auto &finder : action_finders_) {
-              actions.insert(finder->find_actions_in_cell(
-                  search_list, dt, gcell_vol, beam_momentum_));
-            }
-          },
-          [&](const ParticleList &search_list,
-              const ParticleList &neighbors_list) {
-            for (const auto &finder : action_finders_) {
-              actions.insert(finder->find_actions_with_neighbors(
-                  search_list, neighbors_list, dt, beam_momentum_));
-            }
-          });
+        /* (1.b) Iterate over cells and find actions. */
+        grid.iterate_cells(
+            [&](const ParticleList &search_list) {
+              for (const auto &finder : action_finders_) {
+                actions.insert(finder->find_actions_in_cell(
+                    search_list, dt, gcell_vol, beam_momentum_));
+              }
+            },
+            [&](const ParticleList &search_list,
+                const ParticleList &neighbors_list) {
+              for (const auto &finder : action_finders_) {
+                actions.insert(finder->find_actions_with_neighbors(
+                    search_list, neighbors_list, dt, beam_momentum_));
+              }
+            });
+      }
+
+      /* \todo (optimizations) Adapt timestep size here */
+
+      /* (2) Propagation from action to action until the end of timestep */
+      run_time_evolution_timestepless(actions, particles);
     }
-
-    /* \todo (optimizations) Adapt timestep size here */
-
-    /* (2) Propagation from action to action until the end of timestep */
-    run_time_evolution_timestepless(actions);
 
     /* (3) Update potentials (if computed on the lattice) and
      *     compute new momenta according to equations of motion */
     if (potentials_) {
       update_potentials();
-      update_momenta(&particles_, parameters_.labclock->timestep_duration(),
-                     *potentials_, FB_lat_.get(), FI3_lat_.get());
+      for (Particles &particles : ensembles_) {
+        update_momenta(&particles, parameters_.labclock->timestep_duration(),
+                       *potentials_, FB_lat_.get(), FI3_lat_.get());
+      }
     }
 
     /* (4) Expand universe if non-minkowskian metric; updates
      *     positions and momenta according to the selected expansion */
     if (metric_.mode_ != ExpansionMode::NoExpansion) {
-      expand_space_time(&particles_, parameters_, metric_);
+      for (Particles &particles : ensembles_) {
+        expand_space_time(&particles, parameters_, metric_);
+      }
     }
 
     ++(*parameters_.labclock);
@@ -1793,7 +1823,7 @@ void Experiment<Modus>::run_time_evolution() {
      * momentum are only very roughly conserved in high-energy collisions. */
     if (!potentials_ && !parameters_.strings_switch &&
         metric_.mode_ == ExpansionMode::NoExpansion && !IC_output_switch_) {
-      std::string err_msg = conserved_initial_.report_deviations(particles_);
+      std::string err_msg = conserved_initial_.report_deviations(ensembles_);
       if (!err_msg.empty()) {
         logg[LExperiment].error() << err_msg;
         throw std::runtime_error("Violation of conserved quantities!");
@@ -1809,12 +1839,13 @@ void Experiment<Modus>::run_time_evolution() {
 }
 
 template <typename Modus>
-void Experiment<Modus>::propagate_and_shine(double to_time) {
+void Experiment<Modus>::propagate_and_shine(double to_time,
+                                            Particles& particles) {
   const double dt =
-      propagate_straight_line(&particles_, to_time, beam_momentum_);
+      propagate_straight_line(&particles, to_time, beam_momentum_);
   if (dilepton_finder_ != nullptr) {
     for (const auto &output : outputs_) {
-      dilepton_finder_->shine(particles_, output.get(), dt);
+      dilepton_finder_->shine(particles, output.get(), dt);
     }
   }
 }
@@ -1834,7 +1865,8 @@ inline void check_interactions_total(uint64_t interactions_total) {
 }
 
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
+void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions,
+                                                        Particles &particles) {
   const double start_time = parameters_.labclock->current_time();
   const double end_time =
       std::min(parameters_.labclock->next_time(), end_time_);
@@ -1847,7 +1879,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
   while (!actions.is_empty()) {
     // get next action
     ActionPtr act = actions.pop();
-    if (!act->is_valid(particles_)) {
+    if (!act->is_valid(particles)) {
       discarded_interactions_total_++;
       logg[LExperiment].debug(~einhard::DRed(), "✘ ", act,
                               " (discarded: invalid)");
@@ -1863,7 +1895,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     while (next_output_time() <= act->time_of_execution()) {
       logg[LExperiment].debug("Propagating until output time: ",
                               next_output_time());
-      propagate_and_shine(next_output_time());
+      propagate_and_shine(next_output_time(), particles);
       ++(*parameters_.outputclock);
       intermediate_output();
     }
@@ -1871,15 +1903,15 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     /* (1) Propagate to the next action. */
     logg[LExperiment].debug("Propagating until next action ", act,
                             ", action time = ", act->time_of_execution());
-    propagate_and_shine(act->time_of_execution());
+    propagate_and_shine(act->time_of_execution(), particles);
 
     /* (2) Perform action.
      *
      * Update the positions of the incoming particles, because the information
      * in the action object will be outdated as the particles have been
      * propagated since the construction of the action. */
-    act->update_incoming(particles_);
-    const bool performed = perform_action(*act, particles_);
+    act->update_incoming(particles);
+    const bool performed = perform_action(*act, particles);
 
     /* No need to update actions for outgoing particles
      * if the action is not performed. */
@@ -1899,7 +1931,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
                                                   gcell_vol, beam_momentum_));
       // ... and collide with other particles.
       actions.insert(finder->find_actions_with_surrounding_particles(
-          outgoing_particles, particles_, time_left, beam_momentum_));
+          outgoing_particles, particles, time_left, beam_momentum_));
     }
 
     check_interactions_total(interactions_total_);
@@ -1908,7 +1940,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
   while (next_output_time() <= end_time) {
     logg[LExperiment].debug("Propagating until output time: ",
                             next_output_time());
-    propagate_and_shine(next_output_time());
+    propagate_and_shine(next_output_time(), particles);
     ++(*parameters_.outputclock);
     // Avoid duplicating printout at event end time
     if (parameters_.outputclock->current_time() < end_time_) {
@@ -1916,7 +1948,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions) {
     }
   }
   logg[LExperiment].debug("Propagating to time ", end_time);
-  propagate_and_shine(end_time);
+  propagate_and_shine(end_time, particles);
 }
 
 template <typename Modus>
@@ -1965,13 +1997,13 @@ void Experiment<Modus>::intermediate_output() {
   }
 
   logg[LExperiment].info() << format_measurements(
-      particles_, interactions_this_interval, conserved_initial_, time_start_,
+      ensembles_, interactions_this_interval, conserved_initial_, time_start_,
       parameters_.outputclock->current_time(), E_mean_field,
       initial_mean_field_energy_);
   const LatticeUpdate lat_upd = LatticeUpdate::AtOutput;
 
   auto event_info =
-      fill_event_info(particles_, E_mean_field, modus_.impact_parameter(),
+      fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
                       parameters_, projectile_target_interact_);
   // save evolution data
   if (!(modus_.is_box() && parameters_.outputclock->current_time() <
@@ -1982,21 +2014,23 @@ void Experiment<Modus>::intermediate_output() {
         continue;
       }
 
-      output->at_intermediate_time(particles_, parameters_.outputclock,
-                                   density_param_, event_info);
+      for (const Particles &particles : ensembles_) {
+        output->at_intermediate_time(particles, parameters_.outputclock,
+                                     density_param_, event_info);
+      }
 
       // Thermodynamic output on the lattice versus time
       switch (dens_type_lattice_printout_) {
         case DensityType::Baryon:
           update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
-                         density_param_, particles_, false);
+                         density_param_, ensembles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::Baryon, *jmu_B_lat_);
           break;
         case DensityType::BaryonicIsospin:
           update_lattice(jmu_I3_lat_.get(), lat_upd,
                          DensityType::BaryonicIsospin, density_param_,
-                         particles_, false);
+                         ensembles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::BaryonicIsospin,
                                         *jmu_I3_lat_);
@@ -2006,14 +2040,14 @@ void Experiment<Modus>::intermediate_output() {
         default:
           update_lattice(jmu_custom_lat_.get(), lat_upd,
                          dens_type_lattice_printout_, density_param_,
-                         particles_, false);
+                         ensembles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         dens_type_lattice_printout_,
                                         *jmu_custom_lat_);
       }
       if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
         update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
-                       density_param_, particles_);
+                       density_param_, ensembles_);
         if (printout_tmn_) {
           output->thermodynamics_output(ThermodynamicQuantity::Tmn,
                                         dens_type_lattice_printout_, *Tmn_);
@@ -2040,13 +2074,13 @@ void Experiment<Modus>::update_potentials() {
   if (potentials_) {
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
       update_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::BaryonicIsospin, density_param_, particles_,
+                     DensityType::BaryonicIsospin, density_param_, ensembles_,
                      true);
     }
     if ((potentials_->use_skyrme() || potentials_->use_symmetry()) &&
         jmu_B_lat_ != nullptr) {
       update_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::Baryon, density_param_, particles_, true);
+                     DensityType::Baryon, density_param_, ensembles_, true);
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {
         auto jB = (*jmu_B_lat_)[i];
@@ -2085,26 +2119,27 @@ template <typename Modus>
 void Experiment<Modus>::do_final_decays() {
   /* At end of time evolution: Force all resonances to decay. In order to handle
    * decay chains, we need to loop until no further actions occur. */
-  uint64_t interactions_old;
-  const auto particles_before_actions = particles_.copy_to_vector();
+  uint64_t interactions_old = 0;
   do {
-    Actions actions;
+    for (Particles &particles : ensembles_) {
+      Actions actions;
 
-    interactions_old = interactions_total_;
+      interactions_old = interactions_total_;
 
-    // Dileptons: shining of remaining resonances
-    if (dilepton_finder_ != nullptr) {
-      for (const auto &output : outputs_) {
-        dilepton_finder_->shine_final(particles_, output.get(), true);
+      // Dileptons: shining of remaining resonances
+      if (dilepton_finder_ != nullptr) {
+        for (const auto &output : outputs_) {
+          dilepton_finder_->shine_final(particles, output.get(), true);
+        }
       }
-    }
-    // Find actions.
-    for (const auto &finder : action_finders_) {
-      actions.insert(finder->find_final_actions(particles_));
-    }
-    // Perform actions.
-    while (!actions.is_empty()) {
-      perform_action(*actions.pop(), particles_before_actions);
+      // Find actions.
+      for (const auto &finder : action_finders_) {
+        actions.insert(finder->find_final_actions(particles));
+      }
+      // Perform actions.
+      while (!actions.is_empty()) {
+        perform_action(*actions.pop(), particles);
+      }
     }
     // loop until no more decays occur
   } while (interactions_total_ > interactions_old);
@@ -2112,7 +2147,9 @@ void Experiment<Modus>::do_final_decays() {
   // Dileptons: shining of stable particles at the end
   if (dilepton_finder_ != nullptr) {
     for (const auto &output : outputs_) {
-      dilepton_finder_->shine_final(particles_, output.get(), false);
+      for (Particles &particles : ensembles_) {
+        dilepton_finder_->shine_final(particles, output.get(), false);
+      }
     }
   }
 }
@@ -2137,9 +2174,13 @@ void Experiment<Modus>::final_output(const int evt_num) {
       }
     }
     logg[LExperiment].info() << format_measurements(
-        particles_, interactions_this_interval, conserved_initial_, time_start_,
+        ensembles_, interactions_this_interval, conserved_initial_, time_start_,
         end_time_, E_mean_field, initial_mean_field_energy_);
-    if (IC_output_switch_ && (particles_.size() == 0)) {
+    int total_particles = 0;
+    for (const Particles &particles : ensembles_) {
+      total_particles += particles.size();
+    }
+    if (IC_output_switch_ && (total_particles == 0)) {
       // Verify there is no more energy in the system if all particles were
       // removed when crossing the hypersurface
       const double remaining_energy =
@@ -2196,9 +2237,11 @@ void Experiment<Modus>::final_output(const int evt_num) {
 
     // Check if there are unformed particles
     int unformed_particles_count = 0;
-    for (const auto &particle : particles_) {
-      if (particle.formation_time() > end_time_) {
-        unformed_particles_count++;
+    for (const Particles &particles : ensembles_) {
+      for (const ParticleData &particle : particles) {
+        if (particle.formation_time() > end_time_) {
+          unformed_particles_count++;
+        }
       }
     }
     if (unformed_particles_count > 0) {
@@ -2209,11 +2252,13 @@ void Experiment<Modus>::final_output(const int evt_num) {
   }
 
   auto event_info =
-      fill_event_info(particles_, E_mean_field, modus_.impact_parameter(),
+      fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
                       parameters_, projectile_target_interact_);
 
   for (const auto &output : outputs_) {
-    output->at_eventend(particles_, evt_num, event_info);
+    for (const Particles &particles : ensembles_) {
+      output->at_eventend(particles, evt_num, event_info);
+    }
   }
 }
 
@@ -2241,9 +2286,11 @@ void Experiment<Modus>::run() {
     }
     /* In the ColliderModus, if Fermi motion is frozen, assign the beam momenta
      * to the nucleons in both the projectile and the target. */
+    // todo(oliiny): ensembles break logic of frozen fermi momenta,
+    // there should be as many beam_momentum vectors as ensembles
     if (modus_.is_collider() && modus_.fermi_motion() == FermiMotion::Frozen) {
       for (int i = 0; i < modus_.total_N_number(); i++) {
-        const auto mass_beam = particles_.copy_to_vector()[i].effective_mass();
+        const auto mass_beam = ensembles_[0].copy_to_vector()[i].effective_mass();
         const auto v_beam = i < modus_.proj_N_number()
                                 ? modus_.velocity_projectile()
                                 : modus_.velocity_target();

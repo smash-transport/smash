@@ -42,13 +42,13 @@ TEST(phase_space_density) {
   ExperimentParameters param = smash::Test::default_parameters();
   std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(
       conf["Collision_Term"]["Pauli_Blocking"], param);
-  Particles part;
+  std::vector<Particles> part(1);
   PdgCode pdg = 0x2112;
   ParticleData one_particle{ParticleType::find(pdg)};
   one_particle.set_4position(FourVector(0.0, 0.0, 0.0, 0.0));
   one_particle.set_4momentum(0.0, 0.0, 0.0, 0.0);
-  part.insert(one_particle);
-  COMPARE(part.size(), 1u);
+  part[0].insert(one_particle);
+  COMPARE(part[0].size(), 1u);
   ThreeVector r(1.218, 0.0, 0.0), p(0.0, 0.0, 0.0);
   ParticleList disregard;
   const double f = pb->phasespace_dens(r, p, part, pdg, disregard);
@@ -99,8 +99,8 @@ TEST(phase_space_density_nucleus) {
   Au.arrange_nucleons();
   Au.generate_fermi_momenta();
 
-  Particles part_Au;
-  Au.copy_particles(&part_Au);
+  std::vector<Particles> part_Au(1);
+  Au.copy_particles(&part_Au[0]);
 
   ExperimentParameters param = smash::Test::default_parameters(Ntest);
   std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(

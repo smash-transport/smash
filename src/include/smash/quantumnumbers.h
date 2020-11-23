@@ -96,6 +96,19 @@ class QuantumNumbers {
   }
 
   /**
+   * Construct QuantumNumbers from several sets of particles.
+   * \param[in] ensembles structure holding several sets of particles
+   * \return Constructed object. 
+   */
+  explicit QuantumNumbers(const std::vector<Particles>& ensembles) : QuantumNumbers() {
+    for (const Particles& particles : ensembles) {
+      for (const ParticleData& data : particles) {
+        add_values(data);
+      }
+    }
+  }
+
+  /**
    * Construct QuantumNumbers collection from a particle list.
    * \param[in] part list of particles for which
    *            quantum numbers are calculated and constructed
@@ -240,13 +253,13 @@ class QuantumNumbers {
   /**
    * Checks if the current particle list has still the same values and
    * reports about differences.
-   * \param[in] particles Set of particles whose quantum number is compared
+   * \param[in] ensembles Set of particles whose quantum number is compared
    * \return String reporting the deviations.
    *
    * \see QuantumNumbers::report_deviations(const QuantumNumbers&) const
    */
-  std::string report_deviations(const Particles& particles) const {
-    QuantumNumbers current_values(particles);
+  std::string report_deviations(const std::vector<Particles>& ensembles) const {
+    QuantumNumbers current_values(ensembles);
     return report_deviations(current_values);
   }
 

@@ -270,12 +270,14 @@ class GrandCanThermalizer {
   }
   /**
    * Compute all the thermodynamical quantities on the lattice from particles.
-   * \param[in] particles Current list of particles \see Particles
+   * \param[in] ensembles Current list of particles in all ensembles
+   *            \see Particles
+   *            \see ExperimentParameters
    * \param[in] par Parameters necessary for density determination
    * \see DensityParameters
    * \param[in] ignore_cells_under_threshold Boolean that is true by default
    */
-  void update_thermalizer_lattice(const Particles& particles,
+  void update_thermalizer_lattice(const std::vector<Particles> &ensembles,
                                   const DensityParameters& par,
                                   bool ignore_cells_under_threshold = true);
   /// \return 3 vector uniformly sampled from the rectangular cell.

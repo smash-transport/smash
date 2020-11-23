@@ -129,10 +129,10 @@ TEST(count_from_particles) {
   FourVector P(1, 2, 3, 4);
   particle.set_4momentum(P);
   // create particle list:
-  Particles list;
-  list.insert(particle);
+  std::vector<Particles> list(1);
+  list[0].insert(particle);
 
-  QuantumNumbers onlyone(list);
+  QuantumNumbers onlyone(list[0]);
   QuantumNumbers check1(P, 1, 2, 0, 0, 0, 0);
   // won't print anything if the following VERIFY succeeds
   std::printf("%s", check1.report_deviations(onlyone).c_str());
@@ -141,9 +141,9 @@ TEST(count_from_particles) {
   ParticleData particleQ(ParticleType::find(PdgCode("123")));
   FourVector Q(2, 3, 4, 5);
   particleQ.set_4momentum(Q);
-  list.insert(particleQ);
+  list[0].insert(particleQ);
 
-  QuantumNumbers two(list);
+  QuantumNumbers two(list[0]);
   QuantumNumbers check2(P + Q, 2, 4, 0, 0, 0, 0);
   std::printf("%s", check2.report_deviations(two).c_str());
   COMPARE(two, check2);
@@ -151,9 +151,9 @@ TEST(count_from_particles) {
   ParticleData particleR(ParticleType::find(PdgCode("2346")));
   FourVector R(3, 4, 5, 6);
   particleR.set_4momentum(R);
-  list.insert(particleR);
+  list[0].insert(particleR);
 
-  QuantumNumbers three(list);
+  QuantumNumbers three(list[0]);
   QuantumNumbers check3(P + Q + R, 3, 5, -1, 1, 0, 1);
   std::printf("%s", check3.report_deviations(three).c_str());
   COMPARE(three, check3);
@@ -161,14 +161,13 @@ TEST(count_from_particles) {
   ParticleData particleS(ParticleType::find(PdgCode("-1234568")));
   FourVector S(-6, -9, -12, -15);
   particleS.set_4momentum(S);
-  list.insert(particleS);
+  list[0].insert(particleS);
 
-  QuantumNumbers four(list);
+  QuantumNumbers four(list[0]);
   QuantumNumbers check4(P + Q + R + S, 2, 5, -1, 0, 1, 0);
   std::printf("%s", check4.report_deviations(four).c_str());
   COMPARE(four, check4);
 
-  //
   COMPARE(three.report_deviations(list),
           "Conservation law violations detected (old vs. new)\n"
           "Deviation in Four-Momentum:\n"

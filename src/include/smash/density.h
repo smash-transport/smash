@@ -401,7 +401,7 @@ typedef RectangularLattice<DensityOnLattice> DensityLattice;
 template <typename T>
 void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
                     const DensityType dens_type, const DensityParameters &par,
-                    const Particles &particles,
+                    const std::vector<Particles> &ensembles,
                     const bool compute_gradient = false) {
   // Do not proceed if lattice does not exists/update not required
   if (lat == nullptr || lat->when_update() != update) {
@@ -409,33 +409,35 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
   }
   lat->reset();
   const double norm_factor = par.norm_factor_sf();
-  for (const auto &part : particles) {
-    const double dens_factor = density_factor(part.type(), dens_type);
-    if (std::abs(dens_factor) < really_small) {
-      continue;
-    }
-    const FourVector p = part.momentum();
-    const double m = p.abs();
-    if (unlikely(m < really_small)) {
-      logg[LDensity].warn("Gaussian smearing is undefined for momentum ", p);
-      continue;
-    }
-    const double m_inv = 1.0 / m;
+  for (const Particles &particles : ensembles) {
+    for (const ParticleData &part : particles) {
+      const double dens_factor = density_factor(part.type(), dens_type);
+      if (std::abs(dens_factor) < really_small) {
+        continue;
+      }
+      const FourVector p = part.momentum();
+      const double m = p.abs();
+      if (unlikely(m < really_small)) {
+        logg[LDensity].warn("Gaussian smearing is undefined for momentum ", p);
+        continue;
+      }
+      const double m_inv = 1.0 / m;
 
-    const ThreeVector pos = part.position().threevec();
-    lat->iterate_in_radius(
-        pos, par.r_cut(), [&](T &node, int ix, int iy, int iz) {
-          const ThreeVector r = lat->cell_center(ix, iy, iz);
-          const auto sf = unnormalized_smearing_factor(pos - r, p, m_inv, par,
-                                                       compute_gradient);
-          if (sf.first * norm_factor > really_small / par.ntest()) {
-            node.add_particle(part, sf.first * norm_factor * dens_factor);
-          }
-          if (compute_gradient) {
-            node.add_particle_for_derivatives(part, dens_factor,
-                                              sf.second * norm_factor);
-          }
-        });
+      const ThreeVector pos = part.position().threevec();
+      lat->iterate_in_radius(
+          pos, par.r_cut(), [&](T &node, int ix, int iy, int iz) {
+            const ThreeVector r = lat->cell_center(ix, iy, iz);
+            const auto sf = unnormalized_smearing_factor(pos - r, p, m_inv, par,
+                                                         compute_gradient);
+            if (sf.first * norm_factor > really_small / par.ntest()) {
+              node.add_particle(part, sf.first * norm_factor * dens_factor);
+            }
+            if (compute_gradient) {
+              node.add_particle_for_derivatives(part, dens_factor,
+                                                sf.second * norm_factor);
+            }
+          });
+    }
   }
 }
 

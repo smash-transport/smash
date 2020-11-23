@@ -31,7 +31,7 @@ bool Action::is_valid(const Particles &particles) const {
       [&particles](const ParticleData &p) { return particles.is_valid(p); });
 }
 
-bool Action::is_pauli_blocked(const Particles &particles,
+bool Action::is_pauli_blocked(const std::vector<Particles> &ensembles,
                               const PauliBlocker &p_bl) const {
   // Wall-crossing actions should never be blocked: currently
   // if the action is blocked, a particle continues to propagate in a straight
@@ -43,7 +43,7 @@ bool Action::is_pauli_blocked(const Particles &particles,
     if (p.is_baryon()) {
       const auto f =
           p_bl.phasespace_dens(p.position().threevec(), p.momentum().threevec(),
-                               particles, p.pdgcode(), incoming_particles_);
+                               ensembles, p.pdgcode(), incoming_particles_);
       if (f > random::uniform(0., 1.)) {
         logg[LPauliBlocking].debug("Action ", *this,
                                    " is pauli-blocked with f = ", f);

@@ -62,7 +62,7 @@ class PauliBlocker {
    * \return Phase-space density
    */
   double phasespace_dens(const ThreeVector &r, const ThreeVector &p,
-                         const Particles &particles, const PdgCode pdg,
+                         const std::vector<Particles> &ensembles, const PdgCode pdg,
                          const ParticleList &disregard) const;
 
  private:
@@ -86,6 +86,9 @@ class PauliBlocker {
 
   /// Testparticles number
   int ntest_;
+
+  /// Number of ensembles
+  int n_ensembles_;
 
   /// Weights: tabulated results of numerical integration
   std::array<double, 30> weights_;

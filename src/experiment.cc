@@ -513,7 +513,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       maximum_cross_section};
 }
 
-std::string format_measurements(const Particles &particles,
+std::string format_measurements(const std::vector<Particles> &ensembles,
                                 uint64_t scatterings_this_interval,
                                 const QuantumNumbers &conserved_initial,
                                 SystemTimePoint time_start, double time,
@@ -521,16 +521,19 @@ std::string format_measurements(const Particles &particles,
                                 double E_mean_field_initial) {
   const SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
 
-  const QuantumNumbers current_values(particles);
+  const QuantumNumbers current_values(ensembles);
   const QuantumNumbers difference = current_values - conserved_initial;
+  int total_particles = 0;
+  for (const Particles& particles : ensembles) {
+    total_particles += particles.size();
+  }
 
   // Make sure there are no FPEs in case of IC output, were there will
   // eventually be no more particles in the system
-  const double current_energy =
-      (particles.size() > 0) ? current_values.momentum().x0() : 0.0;
+  const double current_energy = current_values.momentum().x0();
   const double energy_per_part =
-      (particles.size() > 0)
-          ? (current_energy + E_mean_field) / particles.size()
+      (total_particles > 0)
+          ? (current_energy + E_mean_field) / total_particles
           : 0.0;
 
   std::ostringstream ss;
@@ -545,15 +548,15 @@ std::string format_measurements(const Particles &particles,
     // total energy per particle in the system
      << field<12, 6> << energy_per_part;
     // change in total energy per particle (unless IC output is enabled)
-    if (particles.size() == 0) {
+    if (total_particles == 0) {
      ss << field<13, 6> << "N/A";
     } else {
      ss << field<13, 6> << (difference.momentum().x0()
                             + E_mean_field - E_mean_field_initial)
-                            / particles.size();
+                            / total_particles;
     }
     ss << field<14, 3> << scatterings_this_interval
-     << field<10, 3> << particles.size()
+     << field<10, 3> << total_particles
      << field<9, 3> << elapsed_seconds;
   // clang-format on
   return ss.str();
@@ -671,11 +674,11 @@ double calculate_mean_field_energy(
   return E_mean_field;
 }
 
-EventInfo fill_event_info(const Particles &particles, double E_mean_field,
+EventInfo fill_event_info(const std::vector<Particles> &ensembles, double E_mean_field,
                           double modus_impact_parameter,
                           const ExperimentParameters &parameters,
                           bool projectile_target_interact) {
-  const QuantumNumbers current_values(particles);
+  const QuantumNumbers current_values(ensembles);
   const double E_kinetic_total = current_values.momentum().x0();
   const double E_total = E_kinetic_total + E_mean_field;
 

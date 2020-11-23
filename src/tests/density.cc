@@ -165,11 +165,11 @@ TEST(smearing_factor_normalization) {
   par.box_length = L;
   const DensityParameters dens_par = DensityParameters(par);
   std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
-  Particles P;
-  b->initial_conditions(&P, par);
+  std::vector<Particles> ensembles(1);
+  b->initial_conditions(&ensembles[0], par);
   // Fill lattice from particles
   update_lattice(lat.get(), LatticeUpdate::EveryTimestep, DensityType::Baryon,
-                 dens_par, P, false);
+                 dens_par, ensembles, false);
   // Compute integral rho(r) d^r. Should be equal to N.
   double int_rho_r_d3r = 0.0;
   for (auto &node : *lat) {

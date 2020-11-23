@@ -82,7 +82,7 @@ TEST(access_particles) {
   Configuration config = Test::configuration();
   boost::filesystem::path output_path(".");
   auto exp = make_unique<Experiment<ColliderModus>>(config, output_path);
-  Particles* part = exp->particles();
+  Particles* part = exp->first_ensemble();
   part->create(0x211);
   ParticleList part_list = part->copy_to_vector();
   VERIFY(part_list.size() == 1);

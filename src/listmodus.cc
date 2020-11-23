@@ -113,7 +113,8 @@ static constexpr int LList = LogArea::List::id;
  * folder).
  */
 
-ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
+ListModus::ListModus(Configuration modus_config,
+                     const ExperimentParameters &param)
     : shift_id_(modus_config.take({"List", "Shift_Id"})) {
   std::string fd = modus_config.take({"List", "File_Directory"});
   particle_list_file_directory_ = fd;
@@ -123,6 +124,10 @@ ListModus::ListModus(Configuration modus_config, const ExperimentParameters &)
 
   event_id_ = 0;
   file_id_ = shift_id_;
+
+  if (param.n_ensembles > 1) {
+    throw std::runtime_error("ListModus only makes sense with one ensemble");
+  }
 }
 
 /* console output on startup of List specific parameters */
