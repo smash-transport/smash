@@ -1548,12 +1548,13 @@ void Experiment<Modus>::initialize_new_event() {
   for (const auto &output : outputs_) {
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
       auto event_info =
-        fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
-                        parameters_, projectile_target_interact_[i_ens]);
+          fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
+                          parameters_, projectile_target_interact_[i_ens]);
 
       output->at_eventstart(ensembles_[i_ens],
-          // Pretend each ensemble is an independent event
-          event_ * parameters_.n_ensembles + i_ens, event_info);
+                            // Pretend each ensemble is an independent event
+                            event_ * parameters_.n_ensembles + i_ens,
+                            event_info);
     }
   }
 
@@ -1765,9 +1766,10 @@ void Experiment<Modus>::run_time_evolution() {
         logg[LExperiment].debug("Creating grid with minimal cell length ",
                                 min_cell_length);
         const auto &grid =
-          use_grid_ ? modus_.create_grid(ensembles_[i_ens], min_cell_length, dt)
-                    : modus_.create_grid(ensembles_[i_ens], min_cell_length, dt,
-                                         CellSizeStrategy::Largest);
+            use_grid_
+                ? modus_.create_grid(ensembles_[i_ens], min_cell_length, dt)
+                : modus_.create_grid(ensembles_[i_ens], min_cell_length, dt,
+                                     CellSizeStrategy::Largest);
 
         const double gcell_vol = grid.cell_volume();
 
@@ -2012,11 +2014,11 @@ void Experiment<Modus>::intermediate_output() {
       }
       for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
         auto event_info =
-          fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
-                          parameters_, projectile_target_interact_[i_ens]);
+            fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
+                            parameters_, projectile_target_interact_[i_ens]);
 
-        output->at_intermediate_time(ensembles_[i_ens],
-            parameters_.outputclock, density_param_, event_info);
+        output->at_intermediate_time(ensembles_[i_ens], parameters_.outputclock,
+                                     density_param_, event_info);
       }
 
       // Thermodynamic output on the lattice versus time
@@ -2256,9 +2258,9 @@ void Experiment<Modus>::final_output() {
       auto event_info =
           fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
                           parameters_, projectile_target_interact_[i_ens]);
-      output->at_eventend(ensembles_[i_ens], 
-          // Pretend each ensemble is an independent event
-          event_ * parameters_.n_ensembles + i_ens, event_info);
+      output->at_eventend(ensembles_[i_ens],
+                          // Pretend each ensemble is an independent event
+                          event_ * parameters_.n_ensembles + i_ens, event_info);
     }
   }
 }
