@@ -201,7 +201,7 @@ class Experiment : public ExperimentBase {
    * according to selected modus, resets the clock and saves the initial
    * conserved quantities for subsequent sanity checks.
    */
-  void initialize_new_event(int event_number);
+  void initialize_new_event();
 
   /**
    * Runs the time evolution of an event with fixed-sized time steps or without
@@ -214,12 +214,8 @@ class Experiment : public ExperimentBase {
   /// Performs the final decays of an event
   void do_final_decays();
 
-  /**
-   * Output at the end of an event
-   *
-   * \param[in] evt_num Number of the event
-   */
-  void final_output(const int evt_num);
+  /// Output at the end of an event
+  void final_output();
 
   /**
    * Provides external access to SMASH particles. This is helpful if SMASH
@@ -455,6 +451,9 @@ class Experiment : public ExperimentBase {
    * or nucleus-nucleus collision) will be simulated.
    */
   const int nevents_;
+
+  /// Current event
+  int event_ = 0;
 
   /// simulation time at which the evolution is stopped.
   const double end_time_;
@@ -1447,7 +1446,7 @@ EventInfo fill_event_info(const std::vector<Particles> &ensembles,
                           bool projectile_target_interact);
 
 template <typename Modus>
-void Experiment<Modus>::initialize_new_event(int event_number) {
+void Experiment<Modus>::initialize_new_event() {
   random::set_seed(seed_);
   logg[LExperiment].info() << "random number seed: " << seed_;
   /* Set seed for the next event. It has to be positive, so it can be entered
@@ -1557,7 +1556,7 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
   // Output at event start
   for (const auto &output : outputs_) {
     for (const Particles &particles : ensembles_) {
-      output->at_eventstart(particles, event_number, event_info);
+      output->at_eventstart(particles, event_, event_info);
     }
   }
 
@@ -2161,7 +2160,7 @@ void Experiment<Modus>::do_final_decays() {
 }
 
 template <typename Modus>
-void Experiment<Modus>::final_output(const int evt_num) {
+void Experiment<Modus>::final_output() {
   /* make sure the experiment actually ran (note: we should compare this
    * to the start time, but we don't know that. Therefore, we check that
    * the time is positive, which should heuristically be the same). */
@@ -2263,7 +2262,7 @@ void Experiment<Modus>::final_output(const int evt_num) {
 
   for (const auto &output : outputs_) {
     for (const Particles &particles : ensembles_) {
-      output->at_eventend(particles, evt_num, event_info);
+      output->at_eventend(particles, event_, event_info);
     }
   }
 }
@@ -2271,11 +2270,11 @@ void Experiment<Modus>::final_output(const int evt_num) {
 template <typename Modus>
 void Experiment<Modus>::run() {
   const auto &mainlog = logg[LMain];
-  for (int j = 0; j < nevents_; j++) {
-    mainlog.info() << "Event " << j;
+  for (event_ = 0; event_ < nevents_; event_++) {
+    mainlog.info() << "Event " << event_;
 
     // Sample initial particles, start clock, some printout and book-keeping
-    initialize_new_event(j);
+    initialize_new_event();
 
     run_time_evolution();
 
@@ -2284,7 +2283,7 @@ void Experiment<Modus>::run() {
     }
 
     // Output at event end
-    final_output(j);
+    final_output();
   }
 }
 
