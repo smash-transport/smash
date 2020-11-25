@@ -107,6 +107,9 @@ struct ExperimentParameters {
    * will be checked for collions.
    */
   double maximum_cross_section;  // mb
+
+  /// Allow or forbid the first collisions within the same nucleus
+  bool allow_collisions_within_nucleus;
 };
 
 }  // namespace smash

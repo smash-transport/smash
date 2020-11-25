@@ -86,10 +86,6 @@ class ColliderModus : public ModusDefault {
    */
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
-  /// \return The total number of test particles in the initial nuclei
-  int total_N_number() const { return target_->size() + projectile_->size(); }
-  /// \return The number of test particles in the projectile nucleus
-  int proj_N_number() const { return projectile_->size(); }
 
   /// Time until nuclei have passed through each other
   double nuclei_passing_time() const {
@@ -113,10 +109,6 @@ class ColliderModus : public ModusDefault {
    *         the beam momenta in experiment.cc if Fermi motion is frozen.
    */
   double velocity_target() const { return velocity_target_; }
-  /**
-   * \return A flag: whether to allow first collisions within the same nucleus.
-   */
-  bool cll_in_nucleus() { return cll_in_nucleus_; }
   /// \return The Fermi motion type
   FermiMotion fermi_motion() { return fermi_motion_; }
   /// \return whether the modus is collider (which is, yes, trivially true)

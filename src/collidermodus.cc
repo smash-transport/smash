@@ -271,10 +271,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
     frame_ = modus_cfg.take({"Calculation_Frame"});
   }
 
-  // Determine whether to allow the first collisions within the same nucleus
-  if (modus_cfg.has_value({"Collisions_Within_Nucleus"})) {
-    cll_in_nucleus_ = modus_cfg.take({"Collisions_Within_Nucleus"});
-  }
   Configuration proj_cfg = modus_cfg["Projectile"];
   Configuration targ_cfg = modus_cfg["Target"];
   /* Needed to check if projectile and target in customnucleus are read from
@@ -294,6 +290,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   if (projectile_->size() < 1) {
     throw ColliderEmpty("Input Error: Projectile nucleus is empty.");
   }
+  projectile_->set_label(BelongsTo::Projectile);
 
   // Set up the target nucleus
   if (targ_cfg.has_value({"Deformed"})) {
@@ -307,6 +304,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   if (target_->size() < 1) {
     throw ColliderEmpty("Input Error: Target nucleus is empty.");
   }
+  target_->set_label(BelongsTo::Target);
 
   // Get the Fermi-Motion input (off, on, frozen)
   if (modus_cfg.has_value({"Fermi_Motion"})) {

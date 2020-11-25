@@ -355,12 +355,6 @@ class Experiment : public ExperimentBase {
   OutputPtr photon_output_;
 
   /**
-   * nucleon_has_interacted_ labels whether the particles in the nuclei
-   * have experienced any collisions or not. It's only valid in
-   * the ColliderModus, so is set as an empty vector by default.
-   */
-  std::vector<bool> nucleon_has_interacted_ = {};
-  /**
    * Whether the projectile and the target collided.
    */
   bool projectile_target_interact_ = false;
@@ -885,9 +879,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
        parameters_.included_multi.any() || parameters_.strings_switch) &&
       !no_coll) {
-    auto scat_finder = make_unique<ScatterActionsFinder>(
-        config, parameters_, nucleon_has_interacted_, modus_.total_N_number(),
-        modus_.proj_N_number());
+    auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_);
     max_transverse_distance_sqr_ =
         scat_finder->max_transverse_distance_sqr(parameters_.testparticles);
     process_string_ptr_ = scat_finder->get_process_string_ptr();
@@ -1568,6 +1560,27 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
       output->at_eventstart(particles, event_number, event_info);
     }
   }
+
+  /* In the ColliderModus, if Fermi motion is frozen, assign the beam momenta
+   * to the nucleons in both the projectile and the target. Every ensemble
+   * gets the same beam momenta, so no need to create beam_momenta_ vector
+   * for every ensemble.
+   */
+  if (modus_.is_collider() && modus_.fermi_motion() == FermiMotion::Frozen) {
+    for (ParticleData &particle : ensembles_[0]) {
+      const double m = particle.effective_mass();
+      double v_beam = 0.0;
+      if (particle.belongs_to() == BelongsTo::Projectile) {
+        v_beam = modus_.velocity_projectile();
+      } else if (particle.belongs_to() == BelongsTo::Target) {
+        modus_.velocity_target();
+      }
+      const double gamma = 1.0 / std::sqrt(1.0 - v_beam * v_beam);
+      beam_momentum_.emplace_back(
+          FourVector(gamma * m, 0.0, 0.0, gamma * v_beam * m));
+    }  // loop over particles
+  }
+
 }
 
 template <typename Modus>
@@ -1585,31 +1598,27 @@ bool Experiment<Modus>::perform_action(Action &action, Particles &particles) {
     total_pauli_blocked_++;
     return false;
   }
-  // todo(oliiny): ensembles > 1 breaks the logic of this block
-  // Needs to be fixed
+
+  // Prepare projectile_target_interact_, it's used for output
+  // to signal that there was some interaction in this event
+  // todo(oliiny): There is a little complication here. The variable
+  // projectile_target_interact_ is for the whole event, not for each ensemble.
+  // In fact, if nuclei interacted or not should be determined by
+  //  interactions counter and not by this fragile heuristics. Discuss?
   if (modus_.is_collider()) {
-    /* Mark incoming nucleons as interacted - now they are permitted
-     * to collide with nucleons from their native nucleus */
-    bool incoming_projectile = false;
-    bool incoming_target = false;
+    int count_target = 0, count_projectile = 0;
     for (const auto &incoming : action.incoming_particles()) {
-      assert(incoming.id() >= 0);
-      if (incoming.id() < modus_.total_N_number()) {
-        nucleon_has_interacted_[incoming.id()] = true;
-      }
-      if (incoming.id() < modus_.proj_N_number()) {
-        incoming_projectile = true;
-      }
-      if (incoming.id() >= modus_.proj_N_number() &&
-          incoming.id() < modus_.total_N_number()) {
-        incoming_target = true;
+      if (incoming.belongs_to() == BelongsTo::Projectile) {
+        count_projectile++;
+      } else if (incoming.belongs_to() == BelongsTo::Target) {
+        count_target++;
       }
     }
-    // Check whether particles from different nuclei interacted.
-    if (incoming_projectile & incoming_target) {
+    if (count_target > 0 && count_projectile > 0) {
       projectile_target_interact_ = true;
     }
   }
+
   /* Make sure to pick a non-zero integer, because 0 is reserved for "no
    * interaction yet". */
   const auto id_process = static_cast<uint32_t>(interactions_total_ + 1);
@@ -2268,36 +2277,6 @@ void Experiment<Modus>::run() {
 
     // Sample initial particles, start clock, some printout and book-keeping
     initialize_new_event(j);
-    /* In the ColliderModus, if the first collisions within the same nucleus are
-     * forbidden, 'nucleon_has_interacted_', which records whether a nucleon has
-     * collided with another nucleon, is initialized equal to false. If allowed,
-     * 'nucleon_has_interacted' is initialized equal to true, which means these
-     * incoming particles have experienced some fake scatterings, they can
-     * therefore collide with each other later on since these collisions are not
-     * "first" to them. */
-    if (modus_.is_collider()) {
-      if (!modus_.cll_in_nucleus()) {
-        nucleon_has_interacted_.assign(modus_.total_N_number(), false);
-      } else {
-        nucleon_has_interacted_.assign(modus_.total_N_number(), true);
-      }
-    }
-    /* In the ColliderModus, if Fermi motion is frozen, assign the beam momenta
-     * to the nucleons in both the projectile and the target. */
-    // todo(oliiny): ensembles break logic of frozen fermi momenta,
-    // there should be as many beam_momentum vectors as ensembles
-    if (modus_.is_collider() && modus_.fermi_motion() == FermiMotion::Frozen) {
-      for (int i = 0; i < modus_.total_N_number(); i++) {
-        const auto mass_beam =
-            ensembles_[0].copy_to_vector()[i].effective_mass();
-        const auto v_beam = i < modus_.proj_N_number()
-                                ? modus_.velocity_projectile()
-                                : modus_.velocity_target();
-        const auto gamma = 1.0 / std::sqrt(1.0 - v_beam * v_beam);
-        beam_momentum_.emplace_back(FourVector(gamma * mass_beam, 0.0, 0.0,
-                                               gamma * v_beam * mass_beam));
-      }
-    }
 
     run_time_evolution();
 

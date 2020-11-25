@@ -61,12 +61,6 @@ class ModusDefault {
     return 0;
   }
 
-  /// \return Number of nucleons in both nuclei; only used in ColliderModus
-  int total_N_number() const { return 0; }
-  /// \return Number of nucleons in projectile; only used in ColliderModus
-  int proj_N_number() const { return 0; }
-  /// \return Whether to allow collisions in nuclei; only used in ColliderModus
-  bool cll_in_nucleus() const { return false; }
   /// \return Checks if modus is collider; overwritten in ColliderModus
   bool is_collider() const { return false; }
   /// \return Checks if modus is a box; overwritten in BoxModus

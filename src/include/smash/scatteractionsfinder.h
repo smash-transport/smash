@@ -54,9 +54,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] N_proj Total projectile number
    */
   ScatterActionsFinder(Configuration config,
-                       const ExperimentParameters &parameters,
-                       const std::vector<bool> &nucleon_has_interacted,
-                       int N_tot, int N_proj);
+                       const ExperimentParameters &parameters);
 
   /**
    * Determine the collision time of the two particles.
@@ -361,18 +359,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * Ignored if negative.
    */
   const double box_length_;
-  /**
-   * Parameter to record whether the nucleon has experienced a collision or not.
-   */
-  const std::vector<bool> &nucleon_has_interacted_;
-  /// Record the total number of the nucleons in the two colliding nuclei
-  const int N_tot_;
-  /// Record the number of the nucleons in the projectile
-  const int N_proj_;
   /// Parameter for formation time
   const double string_formation_time_;
   /// \see input_collision_term_
   const double maximum_cross_section_;
+  /// If particles within nucleus are allowed to collide for their first time
+  const bool allow_first_collisions_within_nucleus_;
 };
 
 }  // namespace smash

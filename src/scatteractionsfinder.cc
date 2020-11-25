@@ -274,8 +274,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  */
 
 ScatterActionsFinder::ScatterActionsFinder(
-    Configuration config, const ExperimentParameters& parameters,
-    const std::vector<bool>& nucleon_has_interacted, int N_tot, int N_proj)
+    Configuration config, const ExperimentParameters& parameters)
     : coll_crit_(parameters.coll_crit),
       elastic_parameter_(
           config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.)),
@@ -290,12 +289,11 @@ ScatterActionsFinder::ScatterActionsFinder(
       strings_with_probability_(parameters.strings_with_probability),
       nnbar_treatment_(parameters.nnbar_treatment),
       box_length_(parameters.box_length),
-      nucleon_has_interacted_(nucleon_has_interacted),
-      N_tot_(N_tot),
-      N_proj_(N_proj),
       string_formation_time_(config.take(
           {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
-      maximum_cross_section_(parameters.maximum_cross_section) {
+      maximum_cross_section_(parameters.maximum_cross_section),
+      allow_first_collisions_within_nucleus_(
+        parameters.allow_collisions_within_nucleus) {
   if (is_constant_elastic_isotropic()) {
     logg[LFindScatter].info(
         "Constant elastic isotropic cross-section mode:", " using ",
@@ -348,19 +346,20 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     const ParticleData& data_a, const ParticleData& data_b, double dt,
     const std::vector<FourVector>& beam_momentum,
     const double gcell_vol) const {
-  /* If the two particles
-   * 1) belong to the two colliding nuclei
-   * 2) are within the same nucleus
-   * 3) both of them have never experienced any collisons,
-   * then the collision between them are banned. */
-  assert(data_a.id() >= 0);
-  assert(data_b.id() >= 0);
-  if (data_a.id() < N_tot_ && data_b.id() < N_tot_ &&
-      ((data_a.id() < N_proj_ && data_b.id() < N_proj_) ||
-       (data_a.id() >= N_proj_ && data_b.id() >= N_proj_)) &&
-      !(nucleon_has_interacted_[data_a.id()] ||
-        nucleon_has_interacted_[data_b.id()])) {
-    return nullptr;
+  if (!allow_first_collisions_within_nucleus_) {
+    assert(data_a.id() >= 0);
+    assert(data_b.id() >= 0);
+    bool in_same_nucleus =
+      (data_a.belongs_to() == BelongsTo::Projectile &&
+       data_b.belongs_to() == BelongsTo::Projectile) ||
+      (data_a.belongs_to() == BelongsTo::Target &&
+       data_b.belongs_to() == BelongsTo::Target);
+    bool never_interacted_before = 
+      data_a.get_history().collisions_per_particle == 0 &&
+      data_b.get_history().collisions_per_particle == 0;
+    if (in_same_nucleus && never_interacted_before) {
+      return nullptr;
+    }
   }
 
   // No grid or search in cell means no collision for stochastic criterion
@@ -479,21 +478,26 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
    * 3) both of them have never experienced any collisons,
    * then the collision between them are banned also for multi-particle
    * interactions. */
-  if (std::all_of(
-          plist.begin(), plist.end(),
-          [&](const ParticleData& data) { return data.id() < N_tot_; }) &&
-      (std::all_of(
-           plist.begin(), plist.end(),
-           [&](const ParticleData& data) { return data.id() < N_proj_; }) ||
-       std::all_of(
-           plist.begin(), plist.end(),
-           [&](const ParticleData& data) { return data.id() >= N_proj_; })) &&
-      std::none_of(plist.begin(), plist.end(), [&](const ParticleData& data) {
-        return nucleon_has_interacted_[data.id()];
-      })) {
-    return nullptr;
+  if (!allow_first_collisions_within_nucleus_) {
+    bool all_projectile = std::all_of(
+            plist.begin(), plist.end(),
+            [&](const ParticleData& data) {
+              return data.belongs_to() == BelongsTo::Projectile;
+            });
+    bool all_target = std::all_of(    
+            plist.begin(), plist.end(),
+            [&](const ParticleData& data) {
+              return data.belongs_to() == BelongsTo::Target;
+            });
+    bool none_collided = std::all_of(
+            plist.begin(), plist.end(),
+            [&](const ParticleData& data) { 
+              return data.get_history().collisions_per_particle == 0; 
+            });
+    if ((all_projectile || all_target) && none_collided) {
+      return nullptr;
+    }
   }
-
   // No grid or search in cell
   if (gcell_vol < really_small) {
     return nullptr;

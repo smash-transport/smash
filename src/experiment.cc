@@ -490,6 +490,9 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   double maximum_cross_section =
       config.take({"Collision_Term", "Maximum_Cross_Section"},
                   maximum_cross_section_default);
+
+  bool cll_in_nucleus = 
+         config.take({"Modi", "Collider", "Collisions_Within_Nucleus"}, false);
   return {
       make_unique<UniformClock>(0.0, dt),
       std::move(output_clock),
@@ -510,7 +513,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       low_snn_cut,
       potential_affect_threshold,
       box_length,
-      maximum_cross_section};
+      maximum_cross_section,
+      cll_in_nucleus};
 }
 
 std::string format_measurements(const std::vector<Particles> &ensembles,

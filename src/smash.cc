@@ -307,15 +307,8 @@ void ensure_path_is_valid(const bf::path &path) {
  * \return The constructed Scatteractionsfinder.
  */
 ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
-  // The following parameters are only relevant for nucleus-nucleus collisions.
-  // Setting them to the valuing values makes sure they don't have any effect.
-  const std::vector<bool> nucleon_has_interacted = {};
-  const int N_tot = 0;
-  const int N_proj = 0;
-
   ExperimentParameters params = create_experiment_parameters(configuration);
-  return ScatterActionsFinder(configuration, params, nucleon_has_interacted,
-                              N_tot, N_proj);
+  return ScatterActionsFinder(configuration, params);
 }
 
 /** Checks if the SMASH version is compatible with the version of the
