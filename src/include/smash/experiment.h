@@ -1580,7 +1580,6 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
           FourVector(gamma * m, 0.0, 0.0, gamma * v_beam * m));
     }  // loop over particles
   }
-
 }
 
 template <typename Modus>

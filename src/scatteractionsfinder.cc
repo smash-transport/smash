@@ -293,7 +293,7 @@ ScatterActionsFinder::ScatterActionsFinder(
           {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
       maximum_cross_section_(parameters.maximum_cross_section),
       allow_first_collisions_within_nucleus_(
-        parameters.allow_collisions_within_nucleus) {
+          parameters.allow_collisions_within_nucleus) {
   if (is_constant_elastic_isotropic()) {
     logg[LFindScatter].info(
         "Constant elastic isotropic cross-section mode:", " using ",
@@ -349,14 +349,13 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   if (!allow_first_collisions_within_nucleus_) {
     assert(data_a.id() >= 0);
     assert(data_b.id() >= 0);
-    bool in_same_nucleus =
-      (data_a.belongs_to() == BelongsTo::Projectile &&
-       data_b.belongs_to() == BelongsTo::Projectile) ||
-      (data_a.belongs_to() == BelongsTo::Target &&
-       data_b.belongs_to() == BelongsTo::Target);
-    bool never_interacted_before = 
-      data_a.get_history().collisions_per_particle == 0 &&
-      data_b.get_history().collisions_per_particle == 0;
+    bool in_same_nucleus = (data_a.belongs_to() == BelongsTo::Projectile &&
+                            data_b.belongs_to() == BelongsTo::Projectile) ||
+                           (data_a.belongs_to() == BelongsTo::Target &&
+                            data_b.belongs_to() == BelongsTo::Target);
+    bool never_interacted_before =
+        data_a.get_history().collisions_per_particle == 0 &&
+        data_b.get_history().collisions_per_particle == 0;
     if (in_same_nucleus && never_interacted_before) {
       return nullptr;
     }
@@ -479,21 +478,18 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
    * then the collision between them are banned also for multi-particle
    * interactions. */
   if (!allow_first_collisions_within_nucleus_) {
-    bool all_projectile = std::all_of(
-            plist.begin(), plist.end(),
-            [&](const ParticleData& data) {
-              return data.belongs_to() == BelongsTo::Projectile;
-            });
-    bool all_target = std::all_of(    
-            plist.begin(), plist.end(),
-            [&](const ParticleData& data) {
-              return data.belongs_to() == BelongsTo::Target;
-            });
-    bool none_collided = std::all_of(
-            plist.begin(), plist.end(),
-            [&](const ParticleData& data) { 
-              return data.get_history().collisions_per_particle == 0; 
-            });
+    bool all_projectile =
+        std::all_of(plist.begin(), plist.end(), [&](const ParticleData& data) {
+          return data.belongs_to() == BelongsTo::Projectile;
+        });
+    bool all_target =
+        std::all_of(plist.begin(), plist.end(), [&](const ParticleData& data) {
+          return data.belongs_to() == BelongsTo::Target;
+        });
+    bool none_collided =
+        std::all_of(plist.begin(), plist.end(), [&](const ParticleData& data) {
+          return data.get_history().collisions_per_particle == 0;
+        });
     if ((all_projectile || all_target) && none_collided) {
       return nullptr;
     }

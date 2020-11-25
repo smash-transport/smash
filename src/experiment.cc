@@ -491,8 +491,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       config.take({"Collision_Term", "Maximum_Cross_Section"},
                   maximum_cross_section_default);
 
-  bool cll_in_nucleus = 
-         config.take({"Modi", "Collider", "Collisions_Within_Nucleus"}, false);
+  bool cll_in_nucleus =
+      config.take({"Modi", "Collider", "Collisions_Within_Nucleus"}, false);
   return {
       make_unique<UniformClock>(0.0, dt),
       std::move(output_clock),
