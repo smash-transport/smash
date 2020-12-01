@@ -404,6 +404,7 @@ class ParticleData {
     dst.formation_time_ = formation_time_;
     dst.initial_xsec_scaling_factor_ = initial_xsec_scaling_factor_;
     dst.begin_formation_time_ = begin_formation_time_;
+    dst.belongs_to_ = belongs_to_;
   }
 
   /**
