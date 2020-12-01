@@ -440,7 +440,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   if (fermi_motion_ == FermiMotion::On) {
     logg[LCollider].info() << "Fermi motion is ON.";
   } else if (fermi_motion_ == FermiMotion::Frozen) {
-      logg[LCollider].info() << "FROZEN Fermi motion is on.";
+    logg[LCollider].info() << "FROZEN Fermi motion is on.";
   } else if (fermi_motion_ == FermiMotion::Off) {
     logg[LCollider].info() << "Fermi motion is OFF.";
   }
@@ -510,8 +510,8 @@ double ColliderModus::initial_conditions(Particles *particles,
     // avoid that the nuclei will fly apart.
     projectile_->generate_fermi_momenta();
     target_->generate_fermi_momenta();
- } else if (fermi_motion_ == FermiMotion::Off) {
- } else {
+  } else if (fermi_motion_ == FermiMotion::Off) {
+  } else {
     throw std::domain_error("Invalid Fermi_Motion input.");
   }
 
