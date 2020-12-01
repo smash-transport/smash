@@ -71,6 +71,8 @@ class ModusDefault {
   double sqrt_s_NN() const { return 0.; }
   /// \return The impact parameter; overwritten in ColliderModus
   double impact_parameter() const { return 0.0; }
+  /// sample impact parameter for collider modus
+  void sample_impact();
   /** \return The beam velocity of the projectile required in the Collider
    * modus. In the other modus, return zero. */
   double velocity_projectile() const { return 0.0; }

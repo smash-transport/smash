@@ -444,11 +444,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
   } else if (fermi_motion_ == FermiMotion::Off) {
     logg[LCollider].info() << "Fermi motion is OFF.";
   }
-
-  // Sample impact parameter only once per all ensembles
-  // It should be the same for all ensembles
-  sample_impact();
-  logg[LCollider].info() << "Impact parameter = " << format(impact_, "fm");
 }
 
 std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {

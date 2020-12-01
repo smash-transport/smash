@@ -87,6 +87,18 @@ class ColliderModus : public ModusDefault {
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
 
+  /** Sample impact parameter.
+   *
+   * Samples the impact parameter from values between imp_min_ and imp_max_, if
+   * linear or quadratic sampling is used. By specifying impact parameters and
+   * corresponding yields, custom sampling can be used.
+   * This depends on the value of sampling_.
+   *
+   * Note that imp_max_ less than imp_min_ also works fine.
+   *
+   **/
+  void sample_impact();
+ 
   /// Time until nuclei have passed through each other
   double nuclei_passing_time() const {
     const double passing_distance =
@@ -205,18 +217,7 @@ class ColliderModus : public ModusDefault {
    */
   void rotate_reaction_plane(double phi, Particles *particles);
 
-  /** Sample impact parameter.
-   *
-   * Samples the impact parameter from values between imp_min_ and imp_max_, if
-   * linear or quadratic sampling is used. By specifying impact parameters and
-   * corresponding yields, custom sampling can be used.
-   * This depends on the value of sampling_.
-   *
-   * Note that imp_max_ less than imp_min_ also works fine.
-   *
-   **/
-  void sample_impact();
-  /** Initial z-displacement of nuclei.
+ /** Initial z-displacement of nuclei.
    *
    * Projectile is shifted on -(this value) in z-direction
    * and target on +(this value)*v_target/v_projectile. In this way
