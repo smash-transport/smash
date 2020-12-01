@@ -106,7 +106,7 @@ class OutputInterface {
     SMASH_UNUSED(event_number);
     SMASH_UNUSED(info);
   }
-  virtual void at_eventend(const  std::vector<Particles> &ensembles,
+  virtual void at_eventend(const std::vector<Particles> &ensembles,
                            const int event_number) {
     SMASH_UNUSED(ensembles);
     SMASH_UNUSED(event_number);

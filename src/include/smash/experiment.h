@@ -2022,7 +2022,8 @@ void Experiment<Modus>::intermediate_output() {
                                      density_param_, event_info);
       }
       // For thermodynamic output
-      output->at_intermediate_time(ensembles_, parameters_.outputclock, density_param_);
+      output->at_intermediate_time(ensembles_, parameters_.outputclock,
+                                   density_param_);
 
       // Thermodynamic output on the lattice versus time
       switch (dens_type_lattice_printout_) {
