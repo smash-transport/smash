@@ -1473,8 +1473,8 @@ void Experiment<Modus>::initialize_new_event() {
   // It should be the same for all ensembles
   if (modus_.is_collider()) {
     modus_.sample_impact();
-    logg[LExperiment].info("Impact parameter = ",
-                           modus_.impact_parameter(), "fm");
+    logg[LExperiment].info("Impact parameter = ", modus_.impact_parameter(),
+                           " fm");
   }
   for (Particles &particles : ensembles_) {
     start_time = modus_.initial_conditions(&particles, parameters_);

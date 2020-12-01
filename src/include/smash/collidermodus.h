@@ -98,7 +98,7 @@ class ColliderModus : public ModusDefault {
    *
    **/
   void sample_impact();
- 
+
   /// Time until nuclei have passed through each other
   double nuclei_passing_time() const {
     const double passing_distance =
@@ -217,7 +217,7 @@ class ColliderModus : public ModusDefault {
    */
   void rotate_reaction_plane(double phi, Particles *particles);
 
- /** Initial z-displacement of nuclei.
+  /** Initial z-displacement of nuclei.
    *
    * Projectile is shifted on -(this value) in z-direction
    * and target on +(this value)*v_target/v_projectile. In this way
