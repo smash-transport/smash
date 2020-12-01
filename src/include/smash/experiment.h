@@ -1550,12 +1550,13 @@ void Experiment<Modus>::initialize_new_event() {
       auto event_info =
           fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
                           parameters_, projectile_target_interact_[i_ens]);
-
       output->at_eventstart(ensembles_[i_ens],
                             // Pretend each ensemble is an independent event
                             event_ * parameters_.n_ensembles + i_ens,
                             event_info);
     }
+    // For thermodynamic output
+    output->at_eventstart(ensembles_, event_);
   }
 
   /* In the ColliderModus, if Fermi motion is frozen, assign the beam momenta
@@ -2020,6 +2021,8 @@ void Experiment<Modus>::intermediate_output() {
         output->at_intermediate_time(ensembles_[i_ens], parameters_.outputclock,
                                      density_param_, event_info);
       }
+      // For thermodynamic output
+      output->at_intermediate_time(ensembles_, parameters_.outputclock, density_param_);
 
       // Thermodynamic output on the lattice versus time
       switch (dens_type_lattice_printout_) {
@@ -2262,6 +2265,8 @@ void Experiment<Modus>::final_output() {
                           // Pretend each ensemble is an independent event
                           event_ * parameters_.n_ensembles + i_ens, event_info);
     }
+    // For thermodynamic output
+    output->at_eventend(ensembles_, event_);
   }
 }
 

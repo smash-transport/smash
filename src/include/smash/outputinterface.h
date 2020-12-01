@@ -82,7 +82,16 @@ class OutputInterface {
    * \param[in] info Event info, see \ref event_info
    */
   virtual void at_eventstart(const Particles &particles, const int event_number,
-                             const EventInfo &info) = 0;
+                             const EventInfo &info) {
+    SMASH_UNUSED(particles);
+    SMASH_UNUSED(event_number);
+    SMASH_UNUSED(info);
+  }
+  virtual void at_eventstart(const std::vector<Particles> &ensembles,
+                             int event_number) {
+    SMASH_UNUSED(ensembles);
+    SMASH_UNUSED(event_number);
+  }
 
   /**
    * Output launched at event end. Event end is determined by maximal timestep
@@ -92,7 +101,16 @@ class OutputInterface {
    * \param[in] info Event info, see \ref event_info
    */
   virtual void at_eventend(const Particles &particles, const int event_number,
-                           const EventInfo &info) = 0;
+                           const EventInfo &info) {
+    SMASH_UNUSED(particles);
+    SMASH_UNUSED(event_number);
+    SMASH_UNUSED(info);
+  }
+  virtual void at_eventend(const  std::vector<Particles> &ensembles,
+                           const int event_number) {
+    SMASH_UNUSED(ensembles);
+    SMASH_UNUSED(event_number);
+  }
 
   /**
    * Called whenever an action modified one or more particles.
@@ -121,6 +139,13 @@ class OutputInterface {
     SMASH_UNUSED(clock);
     SMASH_UNUSED(dens_param);
     SMASH_UNUSED(info);
+  }
+  virtual void at_intermediate_time(const std::vector<Particles> &ensembles,
+                                    const std::unique_ptr<Clock> &clock,
+                                    const DensityParameters &dens_param) {
+    SMASH_UNUSED(ensembles);
+    SMASH_UNUSED(clock);
+    SMASH_UNUSED(dens_param);
   }
 
   /**

@@ -165,49 +165,53 @@ ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
 
 ThermodynamicOutput::~ThermodynamicOutput() {}
 
-void ThermodynamicOutput::at_eventstart(const Particles & /*particles*/,
-                                        const int event_number,
-                                        const EventInfo &) {
+void ThermodynamicOutput::at_eventstart(const std::vector<Particles> & /*particles*/,
+                                        const int event_number) {
   std::fprintf(file_.get(), "# event %i\n", event_number);
 }
 
-void ThermodynamicOutput::at_eventend(const Particles & /*particles*/,
-                                      const int /*event_number*/,
-                                      const EventInfo &) {
+void ThermodynamicOutput::at_eventend(const std::vector<Particles> & /*particles*/,
+                                      const int /*event_number*/) {
   std::fflush(file_.get());
 }
 
 void ThermodynamicOutput::at_intermediate_time(
-    const Particles &particles, const std::unique_ptr<Clock> &clock,
-    const DensityParameters &dens_param, const EventInfo &) {
+    const std::vector<Particles> &ensembles, const std::unique_ptr<Clock> &clock,
+    const DensityParameters &dens_param) {
+  const double n_ensembles = ensembles.size();
   std::fprintf(file_.get(), "%6.2f ", clock->current_time());
   constexpr bool compute_gradient = false;
   if (out_par_.td_rho_eckart) {
-    const double rho = std::get<0>(current_eckart(
+    FourVector jmu = FourVector();
+    for (const Particles &particles: ensembles) {
+      jmu += std::get<1>(current_eckart(
         out_par_.td_position, particles, dens_param, out_par_.td_dens_type,
         compute_gradient, out_par_.td_smearing));
-    std::fprintf(file_.get(), "%7.4f ", rho);
+    }
+    std::fprintf(file_.get(), "%7.4f ", jmu.abs() / n_ensembles);
   }
   if (out_par_.td_tmn || out_par_.td_tmn_landau || out_par_.td_v_landau) {
     EnergyMomentumTensor Tmn;
-    for (const auto &p : particles) {
-      const double dens_factor =
-          density_factor(p.type(), out_par_.td_dens_type);
-      if (std::abs(dens_factor) < really_small) {
-        continue;
-      }
-      if (out_par_.td_smearing) {
-        const auto sf =
-            unnormalized_smearing_factor(
-                p.position().threevec() - out_par_.td_position, p.momentum(),
-                1.0 / p.momentum().abs(), dens_param, compute_gradient)
-                .first;
-        if (sf < really_small) {
+    for (const Particles &particles: ensembles) {
+      for (const auto &p : particles) {
+        const double dens_factor =
+            density_factor(p.type(), out_par_.td_dens_type) / n_ensembles;
+        if (std::abs(dens_factor) < really_small) {
           continue;
         }
-        Tmn.add_particle(p, dens_factor * sf * dens_param.norm_factor_sf());
-      } else {
-        Tmn.add_particle(p, dens_factor);
+        if (out_par_.td_smearing) {
+          const auto sf =
+              unnormalized_smearing_factor(
+                  p.position().threevec() - out_par_.td_position, p.momentum(),
+                  1.0 / p.momentum().abs(), dens_param, compute_gradient)
+                  .first;
+          if (sf < really_small) {
+            continue;
+          }
+          Tmn.add_particle(p, dens_factor * sf * dens_param.norm_factor_sf());
+        } else {
+          Tmn.add_particle(p, dens_factor);
+        }
       }
     }
     const FourVector u = Tmn.landau_frame_4velocity();
@@ -228,15 +232,23 @@ void ThermodynamicOutput::at_intermediate_time(
     }
   }
   if (out_par_.td_jQBS) {
-    FourVector jQ = std::get<1>(current_eckart(
+    FourVector jQ = FourVector(),
+               jB = FourVector(),
+               jS = FourVector();
+    for (const Particles &particles : ensembles) {
+      jQ += std::get<1>(current_eckart(
         out_par_.td_position, particles, dens_param, DensityType::Charge,
         compute_gradient, out_par_.td_smearing));
-    FourVector jB = std::get<1>(current_eckart(
+      jB += std::get<1>(current_eckart(
         out_par_.td_position, particles, dens_param, DensityType::Baryon,
         compute_gradient, out_par_.td_smearing));
-    FourVector jS = std::get<1>(current_eckart(
+      jS += std::get<1>(current_eckart(
         out_par_.td_position, particles, dens_param, DensityType::Strangeness,
         compute_gradient, out_par_.td_smearing));
+    }
+    jQ /= n_ensembles;
+    jS /= n_ensembles;
+    jB /= n_ensembles;
     std::fprintf(file_.get(), "%15.12f %15.12f %15.12f %15.12f ", jQ[0], jQ[1],
                  jQ[2], jQ[3]);
     std::fprintf(file_.get(), "%15.12f %15.12f %15.12f %15.12f ", jB[0], jB[1],

@@ -394,7 +394,7 @@ typedef RectangularLattice<DensityOnLattice> DensityLattice;
  * \param[in] dens_type density type to be computed on the lattice
  * \param[in] par a structure containing testparticles number and gaussian
  *            smearing parameters.
- * \param[in] particles the particles vector
+ * \param[in] ensembles the particles vector for each ensemble
  * \param[in] compute_gradient Whether to compute the gradients
  * \tparam T LatticeType
  */
@@ -408,7 +408,8 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
     return;
   }
   lat->reset();
-  const double norm_factor = par.norm_factor_sf();
+  const int n_ensembles = ensembles.size();
+  const double norm_factor = par.norm_factor_sf() / n_ensembles;
   for (const Particles &particles : ensembles) {
     for (const ParticleData &part : particles) {
       const double dens_factor = density_factor(part.type(), dens_type);
