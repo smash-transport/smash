@@ -295,7 +295,8 @@ ScatterActionsFinder::ScatterActionsFinder(
       N_proj_(N_proj),
       string_formation_time_(config.take(
           {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
-      maximum_cross_section_(parameters.maximum_cross_section) {
+      maximum_cross_section_(parameters.maximum_cross_section),
+      only_warn_for_high_prob_(false) {
   if (is_constant_elastic_isotropic()) {
     logg[LFindScatter].info(
         "Constant elastic isotropic cross-section mode:", " using ",
@@ -431,9 +432,13 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
 
     if (prob > 1.) {
       std::stringstream err;
-      err << "Probability larger than 1 for stochastic rates. ( P = " << prob
-          << " )\nUse smaller timesteps.";
-      throw std::runtime_error(err.str());
+      err << "Probability larger than 1 for stochastic rates. ( P_22 = " << prob
+          << " )\nConsider using smaller timesteps.";
+      if (only_warn_for_high_prob_) {
+        logg[LFindScatter].warn(err.str());
+      } else {
+        throw std::runtime_error(err.str());
+      }
     }
 
     // probability criterion
@@ -523,9 +528,13 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
   // 5. Check that probability is smaller than one
   if (prob > 1.) {
     std::stringstream err;
-    err << "Probability larger than 1 for stochastic rates. ( prob = " << prob
-        << " )\nUse smaller timesteps.";
-    throw std::runtime_error(err.str());
+    err << "Probability larger than 1 for stochastic rates. ( P_nm = " << prob
+        << " )\nConsider using smaller timesteps.";
+    if (only_warn_for_high_prob_){
+      logg[LFindScatter].warn(err.str());
+    } else {
+      throw std::runtime_error(err.str());
+    }
   }
 
   // 6. Perform probability decisions
