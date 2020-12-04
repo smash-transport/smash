@@ -113,7 +113,8 @@ CollisionBranchList CrossSections::generate_collision_list(
     ReactionsBitSet included_2to2, MultiParticleReactionsBitSet included_multi,
     double low_snn_cut, bool strings_switch, bool use_AQM,
     bool strings_with_probability, NNbarTreatment nnbar_treatment,
-    StringProcess* string_process) const {
+    StringProcess* string_process, double scale_xs,
+    double add_elastic_xs) const {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
@@ -132,33 +133,37 @@ CollisionBranchList CrossSections::generate_collision_list(
       t1.antiparticle_sign() == t2.antiparticle_sign() && sqrt_s_ < low_snn_cut;
   bool incl_elastic = included_2to2[IncludedReactions::Elastic];
   if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
-    process_list.emplace_back(elastic(elastic_parameter, use_AQM));
+    process_list.emplace_back(
+        elastic(elastic_parameter, use_AQM, add_elastic_xs, scale_xs));
   }
   if (p_pythia > 0.) {
     /* String-excitation cross section =
      * Parametrized total cross - the contributions
      * from all other present channels. */
     const double sig_current = sum_xs_of(process_list);
-    const double sig_string = std::max(0., high_energy() - sig_current);
+    const double sig_string =
+        std::max(0., scale_xs * high_energy() - sig_current);
     append_list(process_list,
                 string_excitation(sig_string, string_process, use_AQM),
                 p_pythia);
-    append_list(process_list, rare_two_to_two(), p_pythia);
+    append_list(process_list, rare_two_to_two(), p_pythia * scale_xs);
   }
   if (p_pythia < 1.) {
     if (two_to_one_switch) {
       // resonance formation (2->1)
       const bool prevent_dprime_form =
           included_multi[IncludedMultiParticleReactions::Deuteron_3to2];
-      append_list(process_list, two_to_one(prevent_dprime_form), 1. - p_pythia);
+      append_list(process_list, two_to_one(prevent_dprime_form),
+                  (1. - p_pythia) * scale_xs);
     }
     if (included_2to2.any()) {
       // 2->2 (inelastic)
-      append_list(process_list, two_to_two(included_2to2), 1. - p_pythia);
+      append_list(process_list, two_to_two(included_2to2),
+                  (1. - p_pythia) * scale_xs);
     }
     if (included_multi[IncludedMultiParticleReactions::Deuteron_3to2] == 1) {
       // 2->3 (deuterons only 2-to-3 reaction at the moment)
-      append_list(process_list, two_to_three(), 1. - p_pythia);
+      append_list(process_list, two_to_three(), (1. - p_pythia) * scale_xs);
     }
   }
   /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
@@ -173,18 +178,20 @@ CollisionBranchList CrossSections::generate_collision_list(
     if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
       /* Has to be called after the other processes are already determined,
        * so that the sum of the cross sections includes all other processes. */
-      process_list.emplace_back(NNbar_annihilation(sum_xs_of(process_list)));
+      process_list.emplace_back(
+          NNbar_annihilation(sum_xs_of(process_list), scale_xs));
     }
     if ((t1.pdgcode() == pdg::rho_z && t2.pdgcode() == pdg::h1) ||
         (t1.pdgcode() == pdg::h1 && t2.pdgcode() == pdg::rho_z)) {
-      append_list(process_list, NNbar_creation());
+      append_list(process_list, NNbar_creation(), scale_xs);
     }
   }
   return process_list;
 }
 
-CollisionBranchPtr CrossSections::elastic(double elast_par,
-                                          bool use_AQM) const {
+CollisionBranchPtr CrossSections::elastic(double elast_par, bool use_AQM,
+                                          double add_el_xs,
+                                          double scale_xs) const {
   double elastic_xs = 0.;
   if (elast_par >= 0.) {
     // use constant elastic cross section from config file
@@ -193,9 +200,9 @@ CollisionBranchPtr CrossSections::elastic(double elast_par,
     // use parametrization
     elastic_xs = elastic_parametrization(use_AQM);
   }
-  return make_unique<CollisionBranch>(incoming_particles_[0].type(),
-                                      incoming_particles_[1].type(), elastic_xs,
-                                      ProcessType::Elastic);
+  return make_unique<CollisionBranch>(
+      incoming_particles_[0].type(), incoming_particles_[1].type(),
+      elastic_xs * scale_xs + add_el_xs, ProcessType::Elastic);
 }
 
 CollisionBranchList CrossSections::rare_two_to_two() const {
@@ -2421,11 +2428,11 @@ double CrossSections::string_hard_cross_section() const {
 }
 
 CollisionBranchPtr CrossSections::NNbar_annihilation(
-    const double current_xs) const {
+    const double current_xs, const double scale_xs) const {
   /* Calculate NNbar cross section:
    * Parametrized total minus all other present channels.*/
   const double s = sqrt_s_ * sqrt_s_;
-  double nnbar_xsec = std::max(0., ppbar_total(s) - current_xs);
+  double nnbar_xsec = std::max(0., ppbar_total(s) * scale_xs - current_xs);
   logg[LCrossSections].debug("NNbar cross section is: ", nnbar_xsec);
   // Make collision channel NNbar -> ρh₁(1170); eventually decays into 5π
   return make_unique<CollisionBranch>(ParticleType::find(pdg::h1),

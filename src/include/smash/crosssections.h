@@ -97,6 +97,8 @@ class CrossSections {
    *                                                        none
    * \param[in] string_process a pointer to the StringProcess object,
    *            which is used for string excitation and fragmentation.
+   * \param[in] scale_xs Factor by which all (partial) cross sections are scaled
+   * \param[in] add_elastic_xs Additional constant elastic cross section
    * \return List of all possible collisions.
    */
   CollisionBranchList generate_collision_list(
@@ -104,7 +106,8 @@ class CrossSections {
       ReactionsBitSet included_2to2,
       MultiParticleReactionsBitSet included_multi, double low_snn_cut,
       bool strings_switch, bool use_AQM, bool strings_with_probability,
-      NNbarTreatment nnbar_treatment, StringProcess* string_process) const;
+      NNbarTreatment nnbar_treatment, StringProcess* string_process,
+      double scale_xs = 1.0, double add_elastic_xs = 0.0) const;
 
   /**
    * Helper function:
@@ -122,15 +125,22 @@ class CrossSections {
    * Determine the elastic cross section for this collision. If elastic_par is
    * given (and positive), we just use a constant cross section of that size,
    * otherwise a parametrization of the elastic cross section is used
-   * (if available).
+   * (if available). Optional a constant addtional elastic cross section is
+   * added
    *
    * \param[in] elast_par Elastic cross section parameter from the input file.
    * \param[in] use_AQM Whether to extend elastic cross-sections with AQM.
+   * \param[in] add_el_xs Additional constant elastic cross section
+   * \param[in] scale_xs Factor by which all (partial) cross sections are scaled
+   *
+   * \note The additional constant elastic cross section contribution is added
+   * after the scaling of the cross section.
    *
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  CollisionBranchPtr elastic(double elast_par, bool use_AQM) const;
+  CollisionBranchPtr elastic(double elast_par, bool use_AQM, double add_el_xs,
+                             double scale_xs) const;
 
   /**
    * Find all resonances that can be produced in a 2->1 collision of the two
@@ -227,6 +237,7 @@ class CrossSections {
    * explicitly implemented channels at low energy (in this case only elastic).
    * \param[in] current_xs Sum of all cross sections of already determined
    *                                                     processes
+   * \param[in] scale_xs Factor by which all (partial) cross sections are scaled
    * \return Collision Branch with NNbar annihilation process and its cross
    *   section
    *
@@ -234,7 +245,8 @@ class CrossSections {
    * have been determined.
    * \todo Same assumption made by string_excitation. Resolve.
    */
-  CollisionBranchPtr NNbar_annihilation(const double current_xs) const;
+  CollisionBranchPtr NNbar_annihilation(const double current_xs,
+                                        const double scale_xs) const;
 
   /**
    * Determine the cross section for NNbar creation, which is given by
