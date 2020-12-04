@@ -284,6 +284,8 @@ ScatterActionsFinder::ScatterActionsFinder(
       two_to_one_(parameters.two_to_one),
       incl_set_(parameters.included_2to2),
       incl_multi_set_(parameters.included_multi),
+      scale_xs_(config.take({"Collision_Term", "Cross_Section_Scaling"}, 1.0)),
+      additional_el_xs_(config.take({"Collision_Term", "Addtional_Elastic_Cross_Section"}, 0.0)),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
       use_AQM_(parameters.use_AQM),
@@ -409,7 +411,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   // Add various subprocesses.
   act->add_all_scatterings(
       elastic_parameter_, two_to_one_, incl_set_, incl_multi_set_, low_snn_cut_,
-      strings_switch_, use_AQM_, strings_with_probability_, nnbar_treatment_);
+      strings_switch_, use_AQM_, strings_with_probability_, nnbar_treatment_, scale_xs_, additional_el_xs_);
 
   double xs =
       act->cross_section() * fm2_mb / static_cast<double>(testparticles_);
@@ -652,7 +654,7 @@ void ScatterActionsFinder::dump_reactions() const {
             act->add_all_scatterings(
                 elastic_parameter_, two_to_one_, incl_set_, incl_multi_set_,
                 low_snn_cut_, strings_switch_, use_AQM_,
-                strings_with_probability_, nnbar_treatment_);
+                strings_with_probability_, nnbar_treatment_, scale_xs_, additional_el_xs_);
             const double total_cs = act->cross_section();
             if (total_cs <= 0.0) {
               continue;
@@ -1046,7 +1048,7 @@ void ScatterActionsFinder::dump_cross_sections(
     act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                              incl_multi_set_, low_snn_cut_, strings_switch_,
                              use_AQM_, strings_with_probability_,
-                             nnbar_treatment_);
+                             nnbar_treatment_, scale_xs_, additional_el_xs_);
     decaytree::Node tree(a.name() + b.name(), act->cross_section(), {&a, &b},
                          {&a, &b}, {&a, &b}, {});
     const CollisionBranchList& processes = act->collision_channels();

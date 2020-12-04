@@ -146,13 +146,16 @@ class ScatterAction : public Action {
    *            according to a probability?
    * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
    *                                                        none
+   * \param[in] scale_xs Factor by which all (partial) cross sections are scaled
+   * \param[in] additional_el_xs Additional constant elastic cross section
    */
   void add_all_scatterings(double elastic_parameter, bool two_to_one,
                            ReactionsBitSet included_2to2,
                            MultiParticleReactionsBitSet included_multi,
                            double low_snn_cut, bool strings_switch,
                            bool use_AQM, bool strings_with_probability,
-                           NNbarTreatment nnbar_treatment);
+                           NNbarTreatment nnbar_treatment, double scale_xs,
+                           double additional_el_xs);
 
   /**
    * Get list of possible collision channels.
