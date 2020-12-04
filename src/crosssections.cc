@@ -114,7 +114,7 @@ CollisionBranchList CrossSections::generate_collision_list(
     double low_snn_cut, bool strings_switch, bool use_AQM,
     bool strings_with_probability, NNbarTreatment nnbar_treatment,
     StringProcess* string_process, double scale_xs,
-    double add_elastic_xs) const {
+    double additional_el_xs) const {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
@@ -134,7 +134,7 @@ CollisionBranchList CrossSections::generate_collision_list(
   bool incl_elastic = included_2to2[IncludedReactions::Elastic];
   if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
     process_list.emplace_back(
-        elastic(elastic_parameter, use_AQM, add_elastic_xs, scale_xs));
+        elastic(elastic_parameter, use_AQM, additional_el_xs, scale_xs));
   }
   if (p_pythia > 0.) {
     /* String-excitation cross section =

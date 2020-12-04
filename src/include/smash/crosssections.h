@@ -98,7 +98,7 @@ class CrossSections {
    * \param[in] string_process a pointer to the StringProcess object,
    *            which is used for string excitation and fragmentation.
    * \param[in] scale_xs Factor by which all (partial) cross sections are scaled
-   * \param[in] add_elastic_xs Additional constant elastic cross section
+   * \param[in] additional_el_xs Additional constant elastic cross section
    * \return List of all possible collisions.
    */
   CollisionBranchList generate_collision_list(
@@ -107,7 +107,7 @@ class CrossSections {
       MultiParticleReactionsBitSet included_multi, double low_snn_cut,
       bool strings_switch, bool use_AQM, bool strings_with_probability,
       NNbarTreatment nnbar_treatment, StringProcess* string_process,
-      double scale_xs = 1.0, double add_elastic_xs = 0.0) const;
+      double scale_xs, double additional_el_xs) const;
 
   /**
    * Helper function:
