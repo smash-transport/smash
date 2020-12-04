@@ -356,12 +356,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /// Switch for NNbar reactions
   const NNbarTreatment nnbar_treatment_;
   /**
-   * Switch to turn off throwing an exception for collision probabilities larger
-   * than 1. In larger production runs it is ok, if the probability rarely slips
-   * over 1.
-   */
-  const bool only_warn_for_high_prob_;
-  /**
    * Box length: needed to determine coordinates of collision
    * correctly in case of collision through the wall.
    * Ignored if negative.
@@ -379,6 +373,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const double string_formation_time_;
   /// \see input_collision_term_
   const double maximum_cross_section_;
+  /**
+   * Switch to turn off throwing an exception for collision probabilities larger
+   * than 1. In larger production runs it is ok, if the probability rarely slips
+   * over 1.
+   */
+  const bool only_warn_for_high_prob_;
 };
 
 }  // namespace smash
