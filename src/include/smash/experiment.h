@@ -630,8 +630,7 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "HepMC" && format == "ASCII") {
 #ifdef SMASH_USE_HEPMC
     outputs_.emplace_back(make_unique<HepMcOutput>(
-        output_path, "SMASH_HepMC", out_par, modus_.total_N_number(),
-        modus_.proj_N_number()));
+        output_path, "SMASH_HepMC", out_par));
 #else
     logg[LExperiment].error(
         "HepMC output requested, but HepMC support not compiled in");

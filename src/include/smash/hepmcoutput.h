@@ -46,12 +46,9 @@ class HepMcOutput : public OutputInterface {
    * \param[in] path Output path.
    * \param[in] name Name of the output.
    * \param[in] out_par Unused, needed since inhertied.
-   * \param[in] total_N Total number of particles in both nuclei.
-   * \param[in] proj_N  Number of particles in projectile.
    */
   HepMcOutput(const bf::path &path, std::string name,
-              const OutputParameters &out_par, const int total_N,
-              const int proj_N);
+              const OutputParameters &out_par);
 
   /// Destructor renames file
   ~HepMcOutput();
@@ -91,24 +88,14 @@ class HepMcOutput : public OutputInterface {
   bf::path filename_unfinished_;
 
   /**
-   * Total number of nucleons in projectile and target,
-   * needed for converting nuclei to single particles.
-   */
-  const int total_N_;
-  /**
-   * Total number of nucleons in projectile,
-   * needed for converting nuclei to single particles.
-   */
-  const int proj_N_;
-
-  /**
-   * Construct nulcear pdg code for porjectile and target, see PDG chapter
+   * Construct nuclear pdg code for projectile and target, see PDG chapter
    * "Monte Carlo particle numbering scheme" for details.
    *
    * \param[in] na Number of all particles in nucleus (A)
    * \param[in] nz Number of all charged particles in nucleus (Z).
+   * \param[in] nl Number of Lambdas in nucleus
    *
-   * Note: Isomers and hypernuclei are not supported. Also note that one would
+   * Note: Isomers are not supported. Also note that one would
    * usually create a PdgCode object to store the PDG code of the nuclei.
    * This PdgCode object however would be first constructed with the integer
    * determined here and then directly returned again with a method of the
@@ -116,7 +103,7 @@ class HepMcOutput : public OutputInterface {
    * A possible improvement would be the inclusion of this function in the
    * PdgCode class.
    */
-  int construct_nuclear_pdg_code(int na, int nz) const;
+  int construct_nuclear_pdg_code(int na, int nz, int nl) const;
 
   /// Pointer to Ascii HepMC3 output file
   std::unique_ptr<HepMC3::WriterAscii> output_file_;
