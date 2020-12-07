@@ -2135,10 +2135,10 @@ void Experiment<Modus>::do_final_decays() {
    * decay chains, we need to loop until no further actions occur. */
   uint64_t interactions_old = 0;
   do {
+    interactions_old = interactions_total_;
+
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
       Actions actions;
-
-      interactions_old = interactions_total_;
 
       // Dileptons: shining of remaining resonances
       if (dilepton_finder_ != nullptr) {
