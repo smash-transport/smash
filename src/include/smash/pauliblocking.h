@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_SMASH_PAULIBLOCKING_H_
 #define SRC_INCLUDE_SMASH_PAULIBLOCKING_H_
 
+#include <vector>
+
 #include "configuration.h"
 #include "experimentparameters.h"
 #include "forwarddeclarations.h"

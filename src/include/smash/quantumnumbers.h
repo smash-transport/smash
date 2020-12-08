@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_QUANTUMNUMBERS_H_
 
 #include <string>
+#include <vector>
 
 #include "particles.h"
 
