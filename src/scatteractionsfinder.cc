@@ -60,9 +60,16 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \n \li \key true - String excitation is enabled\n \li \key false - String
  * excitation is disabled
  *
- * \key Collision Criterion (string, optional, default = "Covariant"): \n
+ * \key Collision_Criterion (string, optional, default = "Covariant"): \n
  * Choose collision criterion. For more information see
  * \subpage collision_criterion
+ *
+ * \key Only_Warn_For_High_Probability (bool, optional, default = \key false):
+ * \n Only warn and not error for reaction probabilities higher than 1.
+ * This switch is meant for very long production runs with the stochastic
+ * criterion. It has no effect on the other criteria. If enabled the users
+ * for themself have to make sure that the warning, that the probability has
+ * slipped above 1, is printed very rarely.
  *
  * For information about more configuration options see the
  * following subpages \n
@@ -293,7 +300,9 @@ ScatterActionsFinder::ScatterActionsFinder(
           {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
       maximum_cross_section_(parameters.maximum_cross_section),
       allow_first_collisions_within_nucleus_(
-          parameters.allow_collisions_within_nucleus) {
+          parameters.allow_collisions_within_nucleus),
+      only_warn_for_high_prob_(config.take(
+          {"Collision_Term", "Only_Warn_For_High_Probability"}, false)) {
   if (is_constant_elastic_isotropic()) {
     logg[LFindScatter].info(
         "Constant elastic isotropic cross-section mode:", " using ",
@@ -429,9 +438,13 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
 
     if (prob > 1.) {
       std::stringstream err;
-      err << "Probability larger than 1 for stochastic rates. ( P = " << prob
-          << " )\nUse smaller timesteps.";
-      throw std::runtime_error(err.str());
+      err << "Probability larger than 1 for stochastic rates. ( P_22 = " << prob
+          << " )\nConsider using smaller timesteps.";
+      if (only_warn_for_high_prob_) {
+        logg[LFindScatter].warn(err.str());
+      } else {
+        throw std::runtime_error(err.str());
+      }
     }
 
     // probability criterion
@@ -523,9 +536,13 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
   // 5. Check that probability is smaller than one
   if (prob > 1.) {
     std::stringstream err;
-    err << "Probability larger than 1 for stochastic rates. ( prob = " << prob
-        << " )\nUse smaller timesteps.";
-    throw std::runtime_error(err.str());
+    err << "Probability larger than 1 for stochastic rates. ( P_nm = " << prob
+        << " )\nConsider using smaller timesteps.";
+    if (only_warn_for_high_prob_) {
+      logg[LFindScatter].warn(err.str());
+    } else {
+      throw std::runtime_error(err.str());
+    }
   }
 
   // 6. Perform probability decisions

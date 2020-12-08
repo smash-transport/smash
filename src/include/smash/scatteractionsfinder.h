@@ -355,6 +355,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const double maximum_cross_section_;
   /// If particles within nucleus are allowed to collide for their first time
   const bool allow_first_collisions_within_nucleus_;
+  /**
+   * Switch to turn off throwing an exception for collision probabilities larger
+   * than 1. In larger production runs it is ok, if the probability rarely slips
+   * over 1.
+   */
+  const bool only_warn_for_high_prob_;
 };
 
 }  // namespace smash
