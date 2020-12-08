@@ -111,8 +111,7 @@ void ScatterAction::add_all_scatterings(
     double elastic_parameter, bool two_to_one, ReactionsBitSet included_2to2,
     MultiParticleReactionsBitSet included_multi, double low_snn_cut,
     bool strings_switch, bool use_AQM, bool strings_with_probability,
-    NNbarTreatment nnbar_treatment, double scale_xs,
-    double additional_el_xs) {
+    NNbarTreatment nnbar_treatment, double scale_xs, double additional_el_xs) {
   CrossSections xs(incoming_particles_, sqrt_s(),
                    get_potential_at_interaction_point());
   CollisionBranchList processes = xs.generate_collision_list(
