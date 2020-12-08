@@ -1638,7 +1638,6 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble) {
     const FourVector r_interaction = action.get_interaction_point();
     constexpr bool compute_grad = false;
     const bool smearing = true;
-    FourVector current();
     // todo(oliiny): it's a rough density estimate from a single ensemble.
     // It might actually be appropriate for output. Discuss.
     rho = std::get<0>(current_eckart(r_interaction.threevec(), particles,
