@@ -1,7 +1,6 @@
 # Changelog
 
 
-
 All notable changes to this project will be documented in this file. The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). This project does not adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html), but it uses versioning inspired by it. Given a version number `X.Y.Z`,
 
 * `X` is incremented for major changes in particular large backwards incompatible updates,
@@ -19,12 +18,17 @@ The major categories to group changes in this log are:
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 
+
 ## [Unreleased](https://github.com/smash-transport/smash/compare/SMASH-1.8...HEAD)
 
-### Major change for SMASH-2.0:
+**New major version of SMASH**
+
+Major changes:
+
 * Multi-particle interactions: There is infrastructure for 3<->2 and 3<->1 interactions and example processes are implemented.
-* The SMASH hybrid is available under this [link](https://github.com/smash-transport/smash-vhlle-hybrid) including SMASH in initial and final state as well as the vHLLE viscous hydrodynamics code.
+* The [SMASH hybrid is available](https://github.com/smash-transport/smash-vhlle-hybrid) including SMASH in initial and final state as well as the vHLLE viscous hydrodynamics code.
 * Updated to Pythia 8.303 and optimised the function calls to allow SMASH runs at LHC and high RHIC energies.
+* No large backwards incompatible updates for this major version.
 
 ### Input / Output
 * Unify event number counting: The event number counting now starts at 0 for all output formats.
@@ -47,7 +51,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Option to initialize the box with Bose or Fermi distributions.
 * More extensive documentation for the different collision criteria.
 * A map of Pythia objects to reduce number of Pythia initializations.
-* f-resonance to pi-pi-photon Bremsstrahlung cross-sections. 
+* f-resonance to pi-pi-photon Bremsstrahlung cross-sections.
 * Tests for nucleon density normalization.
 
 ### Fixed
@@ -71,6 +75,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## [SMASH-1.8.1](https://github.com/smash-transport/smash/compare/SMASH-1.8...SMASH-1.8.1)
 Date: 2020-08-13
+
 ### Changed
 * Improve version determination for Pythia.
 
