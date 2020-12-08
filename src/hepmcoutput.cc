@@ -48,8 +48,7 @@ const int HepMcOutput::status_code_for_final_particles = 1;
 
 HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
                          const OutputParameters & /*out_par*/)
-    : OutputInterface(name),
-      filename_(path / (name + ".asciiv3")) {
+    : OutputInterface(name), filename_(path / (name + ".asciiv3")) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += +".unfinished";
   output_file_ =

@@ -629,8 +629,8 @@ void Experiment<Modus>::create_output(const std::string &format,
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
   } else if (content == "HepMC" && format == "ASCII") {
 #ifdef SMASH_USE_HEPMC
-    outputs_.emplace_back(make_unique<HepMcOutput>(
-        output_path, "SMASH_HepMC", out_par));
+    outputs_.emplace_back(
+        make_unique<HepMcOutput>(output_path, "SMASH_HepMC", out_par));
 #else
     logg[LExperiment].error(
         "HepMC output requested, but HepMC support not compiled in");
@@ -1803,10 +1803,11 @@ void Experiment<Modus>::run_time_evolution() {
 
     /* (2) Propagate from action to action until next output or timestep end */
     const double end_timestep_time =
-      std::min(parameters_.labclock->next_time(), end_time_);
+        std::min(parameters_.labclock->next_time(), end_time_);
     while (next_output_time() <= end_timestep_time) {
       for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
-        run_time_evolution_timestepless(actions[i_ens], i_ens, next_output_time());
+        run_time_evolution_timestepless(actions[i_ens], i_ens,
+                                        next_output_time());
       }
       ++(*parameters_.outputclock);
 
@@ -1814,7 +1815,7 @@ void Experiment<Modus>::run_time_evolution() {
       if (parameters_.outputclock->current_time() < end_time_) {
         intermediate_output();
       }
-     }
+    }
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
       run_time_evolution_timestepless(actions[i_ens], i_ens, end_timestep_time);
     }
