@@ -42,7 +42,7 @@ namespace smash {
  * nuclei-nuclei cross section, a dummy cross section of 1.0 is written to the
  * output. Furthermore, if you use Fermi motion and want to read in the HepMC
  * ouput into Rivet, you need to disable the check for the beam particle
- * energies with the \key —ignore_beams option.
+ * energies with the \key --ignore-beams option.
  */
 
 const int HepMcOutput::status_code_for_beam_particles = 4;
