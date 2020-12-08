@@ -53,7 +53,7 @@ class PauliBlocker {
    *
    * \param[in] r Position vector of the particle.
    * \param[in] p Momentum vector of the particle.
-   * \param[in] particles List of all current particles.
+   * \param[in] ensembles List of all current particles.
    * \param[in] pdg PDG number of species for which density to be calculated.
    * \param[in] disregard Do not count particles that should be disregarded.
    *                       This is intended to avoid counting incoming

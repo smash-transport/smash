@@ -137,7 +137,7 @@ class SphereModus : public ModusDefault {
    * \param[in] out The ostream into which to output
    * \param[in] m The SphereModus object to write into out
    */
-  friend std::ostream &operator<<(std::ostream &, const SphereModus &);
+  friend std::ostream &operator<<(std::ostream &out, const SphereModus &m);
 };
 }  // namespace smash
 #endif  // SRC_INCLUDE_SMASH_SPHEREMODUS_H_

@@ -87,6 +87,12 @@ class OutputInterface {
     SMASH_UNUSED(event_number);
     SMASH_UNUSED(info);
   }
+  /**
+   * Output launched at event start after initialization, when particles are
+   * generated but not yet propagated.
+   * \param ensembles List of particles.
+   * \param[in] event_number Number of the current event.
+   */
   virtual void at_eventstart(const std::vector<Particles> &ensembles,
                              int event_number) {
     SMASH_UNUSED(ensembles);
@@ -106,6 +112,12 @@ class OutputInterface {
     SMASH_UNUSED(event_number);
     SMASH_UNUSED(info);
   }
+  /**
+   * Output launched at event end. Event end is determined by maximal timestep
+   * option.
+   * \param ensembles List of particles.
+   * \param event_number Number of the current event.
+   */
   virtual void at_eventend(const std::vector<Particles> &ensembles,
                            const int event_number) {
     SMASH_UNUSED(ensembles);
@@ -140,6 +152,12 @@ class OutputInterface {
     SMASH_UNUSED(dens_param);
     SMASH_UNUSED(info);
   }
+  /**
+   * Output launched after every N'th timestep. N is controlled by an option.
+   * \param ensembles List of particles.
+   * \param clock System clock.
+   * \param dens_param Parameters for density calculation.
+   */
   virtual void at_intermediate_time(const std::vector<Particles> &ensembles,
                                     const std::unique_ptr<Clock> &clock,
                                     const DensityParameters &dens_param) {

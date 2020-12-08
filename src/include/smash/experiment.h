@@ -224,6 +224,7 @@ class Experiment : public ExperimentBase {
   // todo(oliiny): this should be made compatible with JetScape on
   // the JetScape side
   Particles *first_ensemble() { return &ensembles_[0]; }
+  /// Getter for all ensembles
   std::vector<Particles> *all_ensembles() { return &ensembles_; }
 
   /**

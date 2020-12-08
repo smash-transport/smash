@@ -42,16 +42,6 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] parameters Struct of parameters determining whether to
    *            exclude some certain types of scatterings and switching
    *            among the methods to treat with the NNbar collisions.
-   * \param[in] nucleon_has_interacted Flags to record whether an initial
-   *            nucleon has interacted with another particle not from the
-   *            same nucleus. The flags are used if we want to exclude
-   *            the first collisions among the nucleons within the same
-   *            nucleus.
-   * \param[in] N_tot Total number of the initial nucleons. This number,
-   *            as well as the next parameter, will be used to determine
-   *            whether two intial nucleons are within the same nucleus
-   *            if we'd like to exclude the first collisions among them.
-   * \param[in] N_proj Total projectile number
    */
   ScatterActionsFinder(Configuration config,
                        const ExperimentParameters &parameters);

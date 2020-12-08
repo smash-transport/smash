@@ -333,7 +333,9 @@ class ParticleData {
     set_4momentum(momentum_.lorentz_boost(v));
   }
 
+  /// Setter for belongs_to label
   void set_belongs_to(BelongsTo label) { belongs_to_ = label; }
+  /// Getter for belongs_to label
   BelongsTo belongs_to() const { return belongs_to_; }
 
   /**
