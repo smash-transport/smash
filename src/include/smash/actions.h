@@ -66,6 +66,9 @@ class Actions {
     return act;
   }
 
+  /// Return time of execution of earliest action
+  double earliest_time() const { return data_.front()->time_of_execution(); }
+
   /**
    * Insert a list of actions into this object.
    *

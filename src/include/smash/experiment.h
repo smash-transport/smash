@@ -266,17 +266,16 @@ class Experiment : public ExperimentBase {
   /**
    * Performs all the propagations and actions during a certain time interval
    * neglecting the influence of the potentials. This function is called in
-   * either the time stepless cases or the cases with time steps. In a time
-   * stepless case, the time interval should be equal to the whole evolution
-   * time, while in the case with time step, the intervals are given by the
-   * time steps.
+   * either the time stepless cases or the cases with time steps.
    *
    * \param[in, out] actions Actions occur during a certain time interval.
    *                 They provide the ending times of the propagations and
    *                 are updated during the time interval.
    * \param[in]      i_ensemble index of ensemble to be evolved
+   * \param[in]      end_time time until evolution should be performed
    */
-  void run_time_evolution_timestepless(Actions &actions, int i_ensemble);
+  void run_time_evolution_timestepless(Actions &actions, int i_ensemble,
+                                       double end_time);
 
   /// Intermediate output during an event
   void intermediate_output();
@@ -1766,8 +1765,9 @@ void Experiment<Modus>::run_time_evolution() {
       }
     }
 
+    std::vector<Actions> actions(parameters_.n_ensembles);
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
-      Actions actions;
+      actions[i_ens].clear();
       if (ensembles_[i_ens].size() > 0 && action_finders_.size() > 0) {
         /* (1.a) Create grid. */
         double min_cell_length = compute_min_cell_length(dt);
@@ -1780,28 +1780,42 @@ void Experiment<Modus>::run_time_evolution() {
                                      CellSizeStrategy::Largest);
 
         const double gcell_vol = grid.cell_volume();
-
         /* (1.b) Iterate over cells and find actions. */
         grid.iterate_cells(
             [&](const ParticleList &search_list) {
               for (const auto &finder : action_finders_) {
-                actions.insert(finder->find_actions_in_cell(
+                actions[i_ens].insert(finder->find_actions_in_cell(
                     search_list, dt, gcell_vol, beam_momentum_));
               }
             },
             [&](const ParticleList &search_list,
                 const ParticleList &neighbors_list) {
               for (const auto &finder : action_finders_) {
-                actions.insert(finder->find_actions_with_neighbors(
+                actions[i_ens].insert(finder->find_actions_with_neighbors(
                     search_list, neighbors_list, dt, beam_momentum_));
               }
             });
       }
+    }
 
-      /* \todo (optimizations) Adapt timestep size here */
+    /* \todo (optimizations) Adapt timestep size here */
 
-      /* (2) Propagation from action to action until the end of timestep */
-      run_time_evolution_timestepless(actions, i_ens);
+    /* (2) Propagate from action to action until next output or timestep end */
+    const double end_timestep_time =
+      std::min(parameters_.labclock->next_time(), end_time_);
+    while (next_output_time() <= end_timestep_time) {
+      for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
+        run_time_evolution_timestepless(actions[i_ens], i_ens, next_output_time());
+      }
+      ++(*parameters_.outputclock);
+
+      // Avoid duplication of final output
+      if (parameters_.outputclock->current_time() < end_time_) {
+        intermediate_output();
+      }
+     }
+    for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
+      run_time_evolution_timestepless(actions[i_ens], i_ens, end_timestep_time);
     }
 
     /* (3) Update potentials (if computed on the lattice) and
@@ -1875,18 +1889,17 @@ inline void check_interactions_total(uint64_t interactions_total) {
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions,
-                                                        int i_ensemble) {
+                                                        int i_ensemble,
+                                                        double end_time) {
   Particles &particles = ensembles_[i_ensemble];
-  const double start_time = parameters_.labclock->current_time();
-  const double end_time =
-      std::min(parameters_.labclock->next_time(), end_time_);
-  double time_left = end_time - start_time;
-  logg[LExperiment].debug(
-      "Timestepless propagation: ", "Actions size = ", actions.size(),
-      ", start time = ", start_time, ", end time = ", end_time);
+  logg[LExperiment].debug("Timestepless propagation: ", "Actions size = ",
+                          actions.size(), ", end time = ", end_time);
 
   // iterate over all actions
   while (!actions.is_empty()) {
+    if (actions.earliest_time() > end_time) {
+      break;
+    }
     // get next action
     ActionPtr act = actions.pop();
     if (!act->is_valid(particles)) {
@@ -1895,24 +1908,10 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions,
                               " (discarded: invalid)");
       continue;
     }
-    if (act->time_of_execution() > end_time) {
-      logg[LExperiment].error(
-          act, " scheduled later than end time: t_action[fm/c] = ",
-          act->time_of_execution(), ", t_end[fm/c] = ", end_time);
-    }
-    logg[LExperiment].debug(~einhard::Green(), "✔ ", act);
-
-    while (next_output_time() <= act->time_of_execution()) {
-      logg[LExperiment].debug("Propagating until output time: ",
-                              next_output_time());
-      propagate_and_shine(next_output_time(), particles);
-      ++(*parameters_.outputclock);
-      intermediate_output();
-    }
+    logg[LExperiment].debug(~einhard::Green(), "✔ ", act,
+                            ", action time = ", act->time_of_execution());
 
     /* (1) Propagate to the next action. */
-    logg[LExperiment].debug("Propagating until next action ", act,
-                            ", action time = ", act->time_of_execution());
     propagate_and_shine(act->time_of_execution(), particles);
 
     /* (2) Perform action.
@@ -1931,7 +1930,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions,
 
     /* (3) Update actions for newly-produced particles. */
 
-    time_left = end_time - act->time_of_execution();
+    const double time_left = end_time - act->time_of_execution();
     const ParticleList &outgoing_particles = act->outgoing_particles();
     // Grid cell volume set to zero, since there is no grid
     const double gcell_vol = 0.0;
@@ -1947,17 +1946,6 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions,
     check_interactions_total(interactions_total_);
   }
 
-  while (next_output_time() <= end_time) {
-    logg[LExperiment].debug("Propagating until output time: ",
-                            next_output_time());
-    propagate_and_shine(next_output_time(), particles);
-    ++(*parameters_.outputclock);
-    // Avoid duplicating printout at event end time
-    if (parameters_.outputclock->current_time() < end_time_) {
-      intermediate_output();
-    }
-  }
-  logg[LExperiment].debug("Propagating to time ", end_time);
   propagate_and_shine(end_time, particles);
 }
 
