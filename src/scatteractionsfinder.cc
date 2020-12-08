@@ -67,7 +67,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * \key Only_Warn_For_High_Probability (bool, optional, default = \key false):
  * \n Only warn and not error for reaction probabilities higher than 1.
  * This switch is meant for very long production runs with the stochastic
- * criterion. It has no effect for the other criterions. If enabled the users
+ * criterion. It has no effect on the other criteria. If enabled the users
  * for themself have to make sure that the warning, that the probability has
  * slipped above 1, is printed very rarely.
  *
