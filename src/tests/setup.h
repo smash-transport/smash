@@ -266,7 +266,9 @@ inline ExperimentParameters default_parameters(
       0.,     // low energy sigma_NN cut-off
       false,  // potential_affect_threshold
       -1.0,   // box_length
-      200.0   // max. cross section
+      200.0,  // max. cross section
+      1.0,    // cross section scaling
+      0.0     // addtional elastic cross section
   };
 }
 

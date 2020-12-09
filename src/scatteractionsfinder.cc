@@ -46,14 +46,15 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * cross section. Many SMASH cross sections diverge close at the threshold,
  * these divergent parts are effectively cut off. If deuteron production
  * via d' is considered, then the default should be increased to 2000 mb
- * to function correctly (see \iref{Oliinychenko:2018ugs}).
+ * to function correctly (see \iref{Oliinychenko:2018ugs}). The maximal cross
+ * section is scaled with \key Cross_Section_Scaling factor.
  *
  * \key Cross_Section_Scaling (double, optional, default = 1.0) \n
  * Scale all cross sections by a global factor. WARNING: Most cross sections are
  * constrained by experimental data. Scaling them will therefore lead to
  * unphysical results and is only meant for explorative studies.
  *
- * \key Addtional_Elastic_Cross_Section (double, optional, default = 0.0)
+ * \key Addtional_Elastic_Cross_Section (double, optional, default = 0.0 mb) \n
  * Add an addtional constant contribution to the elastic cross section. WARNING:
  * Most elastic cross sections are constrained by experimental data. Adding an
  * addtional contribution to them will therefore lead to unphysical results and
@@ -296,9 +297,8 @@ ScatterActionsFinder::ScatterActionsFinder(
       two_to_one_(parameters.two_to_one),
       incl_set_(parameters.included_2to2),
       incl_multi_set_(parameters.included_multi),
-      scale_xs_(config.take({"Collision_Term", "Cross_Section_Scaling"}, 1.0)),
-      additional_el_xs_(config.take(
-          {"Collision_Term", "Addtional_Elastic_Cross_Section"}, 0.0)),
+      scale_xs_(parameters.scale_xs),
+      additional_el_xs_(parameters.additional_el_xs),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
       use_AQM_(parameters.use_AQM),
