@@ -344,7 +344,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const MultiParticleReactionsBitSet incl_multi_set_;
   /// Factor by which all (partial) cross sections are scaled
   const double scale_xs_;
-  // Additional constant elastic cross section
+  /// Additional constant elastic cross section
   const double additional_el_xs_;
   /**
    * Elastic collsions between two nucleons with sqrt_s below low_snn_cut_ are
