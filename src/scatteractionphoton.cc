@@ -344,6 +344,7 @@ CollisionBranchList ScatterActionPhoton::create_collision_branch() {
 
   process_list.push_back(make_unique<CollisionBranch>(
       *hadron_out_t_, *photon_particle, xsection, ProcessType::TwoToTwo));
+  collision_branch_created_ = true;
   return process_list;
 }
 
@@ -411,12 +412,23 @@ double ScatterActionPhoton::total_cross_section(MediatorType mediator) const {
       break;
   }
 
-  // Due to numerical reasons it can happen that the calculated cross sections
-  // are negative (approximately -1e-15) if sqrt(s) is close to the threshold
-  // energy. In those cases the cross section is manually set to 0.1 mb, which
-  // is a reasonable value for the processes we are looking at (C14,C15,C16).
-
-  if (xsection < 0) {
+  if (xsection == 0.0) {
+    // Vanishing cross sections are problematic for the creation of a
+    // CollisionBranch. For infrastructure reasons it is however necessary to
+    // create such a collision branch whenever the underlying hadronic
+    // scattering is a candidate for a photon interaction. In these cases we
+    // need to manually set a dummy value for the cross section and produce the
+    // photon. This photon will however automatically be assigned a 0 weight
+    // because of the vanishing cross section and therefore not be of relevance
+    // for any analysis.
+    // In other cases, where the collision branch was already created, we
+    // do not want to overwrite the cross section, of course.
+    xsection = collision_branch_created_ ? 0.0 : 0.01;
+  } else if (xsection < 0) {
+    // Due to numerical reasons it can happen that the calculated cross sections
+    // are negative (approximately -1e-15) if sqrt(s) is close to the threshold
+    // energy. In those cases the cross section is manually set to 0.1 mb, which
+    // is a reasonable value for the processes we are looking at (C14,C15,C16).
     xsection = 0.1;
     logg[LScatterAction].warn(
         "Calculated negative cross section.\nParticles ", incoming_particles_,
