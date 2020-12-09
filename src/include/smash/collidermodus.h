@@ -233,10 +233,6 @@ class ColliderModus : public ModusDefault {
    */
   FermiMotion fermi_motion_ = FermiMotion::Off;
   /**
-   * An option to accept first collisions within the same nucleus
-   */
-  bool cll_in_nucleus_ = false;
-  /**
    * Beam velocity of the projectile
    */
   double velocity_projectile_ = 0.0;
