@@ -259,21 +259,21 @@ void ScatterActionPhoton::generate_final_state() {
 
   const double E_Photon = outgoing_particles_[1].momentum()[0];
 
-  // if rho in final state take already sampled mass (same as m_out). If rho is
-  // incoming take the mass of the incoming particle
-  const double m_rho = rho_mass();
-
-  // compute the differential cross section with form factor included
-  const double diff_xs = diff_cross_section_w_ff(t, m_rho, E_Photon);
-
-  // compute the total cross section with form factor included
-  const double total_xs = total_cross_section_w_ff(E_Photon);
-
   // Weighing of the fractional photons
   if (number_of_fractional_photons_ > 1) {
+    // if rho in final state take already sampled mass (same as m_out). If rho
+    // is incoming take the mass of the incoming particle
+    const double m_rho = rho_mass();
+
+    // compute the differential cross section with form factor included
+    const double diff_xs = diff_cross_section_w_ff(t, m_rho, E_Photon);
+
     weight_ = diff_xs * (t2 - t1) /
               (number_of_fractional_photons_ * hadronic_cross_section());
   } else {
+    // compute the total cross section with form factor included
+    const double total_xs = total_cross_section_w_ff(E_Photon);
+
     weight_ = total_xs / hadronic_cross_section();
   }
   // Scale weight by cross section scaling factor of incoming particles
@@ -416,7 +416,7 @@ double ScatterActionPhoton::total_cross_section(MediatorType mediator) const {
   // energy. In those cases the cross section is manually set to 0.1 mb, which
   // is a reasonable value for the processes we are looking at (C14,C15,C16).
 
-  if (xsection <= 0) {
+  if (xsection < 0) {
     xsection = 0.1;
     logg[LScatterAction].warn(
         "Calculated negative cross section.\nParticles ", incoming_particles_,
