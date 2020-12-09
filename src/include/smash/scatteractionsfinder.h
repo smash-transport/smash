@@ -108,6 +108,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
         const double p2_dot_x = p2_mom.Dot(delta_x);
         const double p1_dot_p2 = p1_mom.Dot(p2_mom);
         const double denominator = std::pow(p1_dot_p2, 2) - p1_sqr * p2_sqr;
+        if (unlikely(std::abs(denominator) < really_small * really_small)) {
+          return -1.0;
+        }
 
         const double time_1 = (p2_sqr * p1_dot_x - p1_dot_p2 * p2_dot_x) *
                               p1_mom.x0() / denominator;
