@@ -187,6 +187,9 @@ class ScatterActionPhoton : public ScatterAction {
    */
   CollisionBranchList collision_processes_photons_;
 
+  /// Was the collision branch already created?
+  bool collision_branch_created_ = false;
+
   /// Photonic process as determined from incoming particles.
   const ReactionType reac_;
 
