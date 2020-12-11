@@ -55,10 +55,10 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * unphysical results and is only meant for explorative studies.
  *
  * \key Additional_Elastic_Cross_Section (double, optional, default = 0.0 mb) \n
- * Add an additional constant contribution to the elastic cross section. WARNING:
- * Most elastic cross sections are constrained by experimental data. Adding an
- * additional contribution to them will therefore lead to unphysical results and
- * is only meant for explorative studies.
+ * Add an additional constant contribution to the elastic cross section.
+ * WARNING: Most elastic cross sections are constrained by experimental data.
+ * Adding an additional contribution to them will therefore lead to unphysical
+ * results and is only meant for explorative studies.
  *
  * \key Elastic_NN_Cutoff_Sqrts (double, optional, default = 1.98): \n
  * The elastic collisions betwen two nucleons with sqrt_s below
