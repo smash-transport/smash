@@ -125,7 +125,7 @@ class CrossSections {
    * Determine the elastic cross section for this collision. If elastic_par is
    * given (and positive), we just use a constant cross section of that size,
    * otherwise a parametrization of the elastic cross section is used
-   * (if available). Optional a constant addtional elastic cross section is
+   * (if available). Optional a constant additional elastic cross section is
    * added
    *
    * \param[in] elast_par Elastic cross section parameter from the input file.

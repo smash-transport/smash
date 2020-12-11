@@ -484,7 +484,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       box_length,
       maximum_cross_section,
       scale_xs,
-      config_coll.take({"Addtional_Elastic_Cross_Section"}, 0.0)};
+      config_coll.take({"Additional_Elastic_Cross_Section"}, 0.0)};
 }
 
 std::string format_measurements(const Particles &particles,

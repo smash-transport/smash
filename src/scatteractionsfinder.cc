@@ -54,10 +54,10 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * constrained by experimental data. Scaling them will therefore lead to
  * unphysical results and is only meant for explorative studies.
  *
- * \key Addtional_Elastic_Cross_Section (double, optional, default = 0.0 mb) \n
- * Add an addtional constant contribution to the elastic cross section. WARNING:
+ * \key Additional_Elastic_Cross_Section (double, optional, default = 0.0 mb) \n
+ * Add an additional constant contribution to the elastic cross section. WARNING:
  * Most elastic cross sections are constrained by experimental data. Adding an
- * addtional contribution to them will therefore lead to unphysical results and
+ * additional contribution to them will therefore lead to unphysical results and
  * is only meant for explorative studies.
  *
  * \key Elastic_NN_Cutoff_Sqrts (double, optional, default = 1.98): \n

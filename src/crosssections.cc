@@ -200,7 +200,7 @@ CollisionBranchPtr CrossSections::elastic(double elast_par, bool use_AQM,
     // use parametrization
     elastic_xs = elastic_parametrization(use_AQM);
   }
-  /* when using a factor to scale the cross section and an addtional
+  /* when using a factor to scale the cross section and an additional
    * contribution to the elastic cross section, the contribution is added first
    * and then everything is scaled */
   return make_unique<CollisionBranch>(

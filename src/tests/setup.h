@@ -268,7 +268,7 @@ inline ExperimentParameters default_parameters(
       -1.0,   // box_length
       200.0,  // max. cross section
       1.0,    // cross section scaling
-      0.0     // addtional elastic cross section
+      0.0     // additional elastic cross section
   };
 }
 

@@ -117,7 +117,7 @@ struct ExperimentParameters {
   double scale_xs;
 
   /**
-   * Addtional constant contribution (in mb) to the elastic cross sections.
+   * Additional constant contribution (in mb) to the elastic cross sections.
    *
    * Using it will break agreement with experimental data for elastic cross
    * sections that are constrained with data.
