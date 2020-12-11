@@ -46,7 +46,19 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * cross section. Many SMASH cross sections diverge close at the threshold,
  * these divergent parts are effectively cut off. If deuteron production
  * via d' is considered, then the default should be increased to 2000 mb
- * to function correctly (see \iref{Oliinychenko:2018ugs}).
+ * to function correctly (see \iref{Oliinychenko:2018ugs}). The maximal cross
+ * section is scaled with \key Cross_Section_Scaling factor.
+ *
+ * \key Cross_Section_Scaling (double, optional, default = 1.0) \n
+ * Scale all cross sections by a global factor. WARNING: Most cross sections are
+ * constrained by experimental data. Scaling them will therefore lead to
+ * unphysical results and is only meant for explorative studies.
+ *
+ * \key Addtional_Elastic_Cross_Section (double, optional, default = 0.0 mb) \n
+ * Add an addtional constant contribution to the elastic cross section. WARNING:
+ * Most elastic cross sections are constrained by experimental data. Adding an
+ * addtional contribution to them will therefore lead to unphysical results and
+ * is only meant for explorative studies.
  *
  * \key Elastic_NN_Cutoff_Sqrts (double, optional, default = 1.98): \n
  * The elastic collisions betwen two nucleons with sqrt_s below
@@ -55,6 +67,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * elastic collsion, no effect \n
  * \li \key Elastic_NN_Cutoff_Sqrts > 2.02 - Beyond the threshold energy of the
  * inelastic collision NN->NNpi, not suggested
+ *
  *
  * \key Strings (bool, optional, default = \key true for each setup except box):
  * \n \li \key true - String excitation is enabled\n \li \key false - String
@@ -291,6 +304,8 @@ ScatterActionsFinder::ScatterActionsFinder(
       two_to_one_(parameters.two_to_one),
       incl_set_(parameters.included_2to2),
       incl_multi_set_(parameters.included_multi),
+      scale_xs_(parameters.scale_xs),
+      additional_el_xs_(parameters.additional_el_xs),
       low_snn_cut_(parameters.low_snn_cut),
       strings_switch_(parameters.strings_switch),
       use_AQM_(parameters.use_AQM),
@@ -416,9 +431,10 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   }
 
   // Add various subprocesses.
-  act->add_all_scatterings(
-      elastic_parameter_, two_to_one_, incl_set_, incl_multi_set_, low_snn_cut_,
-      strings_switch_, use_AQM_, strings_with_probability_, nnbar_treatment_);
+  act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
+                           incl_multi_set_, low_snn_cut_, strings_switch_,
+                           use_AQM_, strings_with_probability_,
+                           nnbar_treatment_, scale_xs_, additional_el_xs_);
 
   double xs =
       act->cross_section() * fm2_mb / static_cast<double>(testparticles_);
@@ -669,7 +685,8 @@ void ScatterActionsFinder::dump_reactions() const {
             act->add_all_scatterings(
                 elastic_parameter_, two_to_one_, incl_set_, incl_multi_set_,
                 low_snn_cut_, strings_switch_, use_AQM_,
-                strings_with_probability_, nnbar_treatment_);
+                strings_with_probability_, nnbar_treatment_, scale_xs_,
+                additional_el_xs_);
             const double total_cs = act->cross_section();
             if (total_cs <= 0.0) {
               continue;
@@ -1063,7 +1080,7 @@ void ScatterActionsFinder::dump_cross_sections(
     act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
                              incl_multi_set_, low_snn_cut_, strings_switch_,
                              use_AQM_, strings_with_probability_,
-                             nnbar_treatment_);
+                             nnbar_treatment_, scale_xs_, additional_el_xs_);
     decaytree::Node tree(a.name() + b.name(), act->cross_section(), {&a, &b},
                          {&a, &b}, {&a, &b}, {});
     const CollisionBranchList& processes = act->collision_channels();
