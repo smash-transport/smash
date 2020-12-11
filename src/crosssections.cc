@@ -202,7 +202,7 @@ CollisionBranchPtr CrossSections::elastic(double elast_par, bool use_AQM,
   }
   return make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
-      elastic_xs * scale_xs + add_el_xs, ProcessType::Elastic);
+      (elastic_xs + add_el_xs) * scale_xs, ProcessType::Elastic);
 }
 
 CollisionBranchList CrossSections::rare_two_to_two() const {
