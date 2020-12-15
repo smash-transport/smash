@@ -259,21 +259,21 @@ void ScatterActionPhoton::generate_final_state() {
 
   const double E_Photon = outgoing_particles_[1].momentum()[0];
 
-  // if rho in final state take already sampled mass (same as m_out). If rho is
-  // incoming take the mass of the incoming particle
-  const double m_rho = rho_mass();
-
-  // compute the differential cross section with form factor included
-  const double diff_xs = diff_cross_section_w_ff(t, m_rho, E_Photon);
-
-  // compute the total cross section with form factor included
-  const double total_xs = total_cross_section_w_ff(E_Photon);
-
   // Weighing of the fractional photons
   if (number_of_fractional_photons_ > 1) {
+    // if rho in final state take already sampled mass (same as m_out). If rho
+    // is incoming take the mass of the incoming particle
+    const double m_rho = rho_mass();
+
+    // compute the differential cross section with form factor included
+    const double diff_xs = diff_cross_section_w_ff(t, m_rho, E_Photon);
+
     weight_ = diff_xs * (t2 - t1) /
               (number_of_fractional_photons_ * hadronic_cross_section());
   } else {
+    // compute the total cross section with form factor included
+    const double total_xs = total_cross_section_w_ff(E_Photon);
+
     weight_ = total_xs / hadronic_cross_section();
   }
   // Scale weight by cross section scaling factor of incoming particles
@@ -344,6 +344,7 @@ CollisionBranchList ScatterActionPhoton::create_collision_branch() {
 
   process_list.push_back(make_unique<CollisionBranch>(
       *hadron_out_t_, *photon_particle, xsection, ProcessType::TwoToTwo));
+  collision_branch_created_ = true;
   return process_list;
 }
 
@@ -411,12 +412,23 @@ double ScatterActionPhoton::total_cross_section(MediatorType mediator) const {
       break;
   }
 
-  // Due to numerical reasons it can happen that the calculated cross sections
-  // are negative (approximately -1e-15) if sqrt(s) is close to the threshold
-  // energy. In those cases the cross section is manually set to 0.1 mb, which
-  // is a reasonable value for the processes we are looking at (C14,C15,C16).
-
-  if (xsection <= 0) {
+  if (xsection == 0.0) {
+    // Vanishing cross sections are problematic for the creation of a
+    // CollisionBranch. For infrastructure reasons it is however necessary to
+    // create such a collision branch whenever the underlying hadronic
+    // scattering is a candidate for a photon interaction. In these cases we
+    // need to manually set a dummy value for the cross section and produce the
+    // photon. This photon will however automatically be assigned a 0 weight
+    // because of the vanishing cross section and therefore not be of relevance
+    // for any analysis.
+    // In other cases, where the collision branch was already created, we
+    // do not want to overwrite the cross section, of course.
+    xsection = collision_branch_created_ ? 0.0 : 0.01;
+  } else if (xsection < 0) {
+    // Due to numerical reasons it can happen that the calculated cross sections
+    // are negative (approximately -1e-15) if sqrt(s) is close to the threshold
+    // energy. In those cases the cross section is manually set to 0.1 mb, which
+    // is a reasonable value for the processes we are looking at (C14,C15,C16).
     xsection = 0.1;
     logg[LScatterAction].warn(
         "Calculated negative cross section.\nParticles ", incoming_particles_,

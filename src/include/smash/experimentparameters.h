@@ -105,11 +105,29 @@ struct ExperimentParameters {
    * This means that all particle pairs, where the transverse distance
    * is smaller or equal to \f$ \sqrt{\sigma_{max}/\pi} \f$,
    * will be checked for collions.
+   *
+   * The maximal cross section is also scaled with the cross section
+   * scaling factor.
    */
   double maximum_cross_section;  // mb
 
   /// Allow or forbid the first collisions within the same nucleus
   bool allow_collisions_within_nucleus;
+  /**
+   * Global factor which all cross sections are scaled with.
+   *
+   * Using it will break agreement with experimental data for cross sections
+   * that are constrained with data.
+   */
+  double scale_xs;
+
+  /**
+   * Additional constant contribution (in mb) to the elastic cross sections.
+   *
+   * Using it will break agreement with experimental data for elastic cross
+   * sections that are constrained with data.
+   */
+  double additional_el_xs;  // mb
 };
 
 }  // namespace smash

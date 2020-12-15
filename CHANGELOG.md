@@ -36,6 +36,9 @@ Major changes:
 * Added option to specify the `Maximum_Cross_Section` that is considered from the config file.
 * Clarify naming of empty events output flag: changing `empty` to `scattering_projectile_target`.
 * Newly available HepMC3 output.
+* Option to scale all cross sections by a global `Cross_Section_Scaling` factor from the config file.
+* New `Additional_Elastic_Cross_Section` option to add an additional constant contribution to the elastic cross section in the config file.
+* Option to `Only_Warn_For_High_Probability` in case of long production runs with the stochastic criterion.
 
 ### Added
 * 3-to-1 reactions for mesons via the stochastic collision criterion.

@@ -268,7 +268,9 @@ inline ExperimentParameters default_parameters(
       false,  // potential_affect_threshold
       -1.0,   // box_length
       200.0,  // max. cross section
-      false   // allow collisions within nucleus
+      false,  // allow collisions within nucleus
+      1.0,    // cross section scaling
+      0.0     // additional elastic cross section
   };
 }
 
