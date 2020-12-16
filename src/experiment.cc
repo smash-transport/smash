@@ -668,14 +668,17 @@ double calculate_mean_field_energy(
         << "\n\t\t\t\t\t density scaled variance = " << density_scaled_variance;
     logg[LExperiment].debug()
         << "\n\t\t\t\t\t        total mean_field = "
-        << lattice_mean_field_total * parameters.testparticles << "\n";
+        << lattice_mean_field_total * parameters.testparticles *
+               parameters.n_ensembles
+        << "\n";
 
     /*
      * E_mean_field is multiplied by the number of testparticles because the
      * total kinetic energy tracked is that of all particles, including
      * testparticles, and so this is more consistent with the general paradigm.
      */
-    E_mean_field = lattice_mean_field_total * parameters.testparticles;
+    E_mean_field = lattice_mean_field_total * parameters.testparticles *
+                   parameters.n_ensembles;
   }
 
   return E_mean_field;
