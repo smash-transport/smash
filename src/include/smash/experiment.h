@@ -845,6 +845,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         "mode!");
   }
 
+  logg[LExperiment].info(
+      "Using", parameters_.testparticles, "testparticles per particle.");
+  logg[LExperiment].info(
+      "Using", parameters_.n_ensembles, "parallel ensembles.");
+
   // create finders
   if (dileptons_switch_) {
     dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
