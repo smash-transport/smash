@@ -88,6 +88,16 @@ class RectangularLattice {
     }
   }
 
+  /// Copy-constructor
+  RectangularLattice(RectangularLattice<T> const& rl)
+      : lattice_(rl.lattice_),
+        lattice_sizes_(rl.lattice_sizes_),
+        n_cells_(rl.n_cells_),
+        cell_sizes_(rl.cell_sizes_),
+        origin_(rl.origin_),
+        periodic_(rl.periodic_),
+        when_update_(rl.when_update_) {}
+
   /// Sets all values on lattice to zeros.
   void reset() { std::fill(lattice_.begin(), lattice_.end(), T()); }
 

@@ -179,3 +179,26 @@ TEST(iterate_in_radius) {
         }
       });
 }
+
+TEST(copy_constructor) {
+  const std::array<double, 3> l = {10., 6., 2.};
+  const std::array<int, 3> n = {4, 8, 3};
+  const std::array<double, 3> origin = {0., 3., 7.};
+  RectangularLattice<double> lattice(l, n, origin, false,
+                                     LatticeUpdate::EveryTimestep);
+  int i = 0;
+  for (auto &node : lattice) {
+    node = static_cast<double>(i++);
+  }
+
+  // Use copy constructor to create a new lattice
+  RectangularLattice<double> lattice2 = lattice;
+
+  // Make sure lattice2 is indeed identical to lattice
+  VERIFY(lattice2.identical_to_lattice(&lattice));
+
+  lattice.iterate_sublattice({0, 0, 0}, lattice.dimensions(),
+                             [&](double &node, int ix, int iy, int iz) {
+                               COMPARE(node, lattice2.node(ix, iy, iz));
+                             });
+}
