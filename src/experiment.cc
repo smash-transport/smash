@@ -696,6 +696,7 @@ EventInfo fill_event_info(const std::vector<Particles> &ensembles,
                        E_mean_field,
                        E_total,
                        parameters.testparticles,
+                       parameters.n_ensembles,
                        !projectile_target_interact};
   return event_info;
 }

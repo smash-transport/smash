@@ -48,6 +48,8 @@ struct EventInfo {
   double total_energy;
   /// Testparticle number, see Testparticles in \ref input_general_
   int test_particles;
+  /// Number of ensembles
+  int n_ensembles;
   /// True if no collisions happened
   bool empty_event;
 };
