@@ -31,7 +31,7 @@ struct ExperimentParameters {
   /// Number of parallel ensembles
   int n_ensembles;
 
-  /// Number of test particle
+  /// Number of test-particles
   int testparticles;
 
   /// Width of gaussian Wigner density of particles

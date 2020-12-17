@@ -1377,13 +1377,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 const std::string hline(113, '-');
 
 /**
- * Generate the tabulated string which will be printed to the screen when
- * SMASH is running
+ * Generate a string which will be printed to the screen when SMASH is running
  *
- * \param[in] ensembles The interacting particles. Their information will be
- *            used to check the conservation of the total energy and momentum.
- *	      the total number of the particles will be used and printed as
- *	      well.
+ * \param[in] ensembles The simulated particles: one Particles object per
+ *            ensemble. The information about particles is used to check the
+ *            conservation of the total energy and momentum as well as print
+ *            other useful information.
  * \param[in] scatterings_this_interval Number of the scatterings occur within
  *            the current timestep.
  * \param[in] conserved_initial Initial quantum numbers needed to check the
@@ -1427,10 +1426,9 @@ double calculate_mean_field_energy(
 /**
  * Generate the EventInfo object which is passed to outputs_.
  *
- * \param[in] ensembles The interacting particles. Their information will be
- *            used to check the conservation of the total energy and momentum.
- *	      the total number of the particles will be used and printed as
- *	      well.
+ * \param[in] ensembles The simulated particles: one Particles object per
+ *            ensemble. Information about all particles (positions, momenta,
+ *            etc.)is passed to the output.
  * \param[in] E_mean_field Value of the mean-field contribution to the total
  *            energy of the system at the current time.
  * \param[in] modus_impact_parameter The impact parameter

@@ -118,17 +118,20 @@ class DensityParameters {
   DensityParameters(const ExperimentParameters &par)  // NOLINT
       : sig_(par.gaussian_sigma),
         r_cut_(par.gauss_cutoff_in_sigma * par.gaussian_sigma),
-        ntest_(par.testparticles) {
+        ntest_(par.testparticles),
+	nensembles_(par.n_ensembles) {
     r_cut_sqr_ = r_cut_ * r_cut_;
     const double two_sig_sqr = 2 * sig_ * sig_;
     two_sig_sqr_inv_ = 1. / two_sig_sqr;
     const double norm = smearing_factor_norm(two_sig_sqr);
     const double corr_factor =
         smearing_factor_rcut_correction(par.gauss_cutoff_in_sigma);
-    norm_factor_sf_ = 1. / (norm * ntest_ * corr_factor);
+    norm_factor_sf_ = 1. / (norm * ntest_ * nensembles_ * corr_factor);
   }
   /// \return Testparticle number
   int ntest() const { return ntest_; }
+  /// \return Number of ensembles
+  int nensembles() const { return nensembles_; }
   /// \return Cut-off radius [fm]
   double r_cut() const { return r_cut_; }
   /// \return Squared cut-off radius [fm\f$^2\f$]
@@ -155,6 +158,8 @@ class DensityParameters {
   double norm_factor_sf_;
   /// Testparticle number
   const int ntest_;
+  /// Number of ensembles
+  const int nensembles_;
 };
 
 /**
@@ -408,8 +413,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
     return;
   }
   lat->reset();
-  const int n_ensembles = ensembles.size();
-  const double norm_factor = par.norm_factor_sf() / n_ensembles;
+  const double norm_factor = par.norm_factor_sf();
   for (const Particles &particles : ensembles) {
     for (const ParticleData &part : particles) {
       const double dens_factor = density_factor(part.type(), dens_type);
@@ -431,7 +435,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
             const auto sf = unnormalized_smearing_factor(pos - r, p, m_inv, par,
                                                          compute_gradient);
             if (sf.first * norm_factor >
-                really_small / (par.ntest() * n_ensembles)) {
+                really_small / (par.ntest() * par.nensembles())) {
               node.add_particle(part, sf.first * norm_factor * dens_factor);
             }
             if (compute_gradient) {

@@ -80,19 +80,26 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * Delta_Time is ignored and Delta_Time is set to the End_Time.
  *
  * \key Ensembles (int, optional, default = 1): \n
- * Number of parallel ensembles. Without mean field potentials
- * ensembles are not different from events. Ensembles are
- * independent simulations: initialization, collisions, decays,
- * box wall crossings, propagation of particles is performed independently
- * in each ensemble. However, mean field potentials are computed
- * from all ensebles combined. This inceases statistics necessary
- * for precise density calculation, without increasing the number
- * of collisions. Such technique is called *parallel ensemble* technique.
- * It is computationally faster than the full ensemble technique described
- * below.
+ * Number of parallel ensembles in the simulation.
+ *
+ * An ensemble is an instance of the system, and without mean-field potentials
+ * it is practically equivalent to a completely separate and uncorrelated event.
+ * Each ensemble is an independent simulation: initialization, collisions,
+ * decays, box wall crossings, and propagation of particles is performed
+ * independently within each ensemble.
+ *
+ * However, the densities and mean-field potentials are computed as averages
+ * over all ensembles (within a given event). This process can be also viewed as
+ * calculating densities and mean-fields by summing over particles in all
+ * ensembles combined, where each particle carries a fraction 1/n_ensembles of
+ * its "real" charge. Such technique is called *parallel ensemble* technique. It
+ * increases statistics necessary for precise density calculation without
+ * increasing the number of collisions, which is not the case in the *full
+ * ensemble* method (see below). Because of this, the parallel ensembles
+ * technique is computationally faster than the full ensemble technique.
  *
  * \key Testparticles (int, optional, default = 1): \n
- * How many test particles per real particle should be simulated.
+ * Number of test-particles per real particle in the simulation.
  *
  * Amount of initial sampled particles is increased by this factor,
  * while all cross sections are decreased by this factor. In this
@@ -102,14 +109,15 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * to collisions and decays (but not the ones related to mean fields),
  * therefore the larger the number of testparticles, the closer the results
  * of the simulations should be to the solution of Boltzmann equation.
- * These advantages come at cost of computational time.
+ * These advantages come at a cost of computational time.
  *
  * Testparticles are a way to increase statistics necessary for
- * precise density calculation, that is why they are needed for mean field
+ * precise density calculation, which is why they are needed for mean field
  * potentials. The technique of using testparticles for mean field
- * is called *full ensemble* technique. The simulation time scales
- * as square of the number of testparticles, that is why full ensemble
- * is slower than parallel ensemble.
+ * is called *full ensemble* technique. The number of collisions (and
+ * consequently the simulation time) scales as square of the number of
+ * testparticles, and that is why full ensemble is slower than parallel
+ * ensemble.
  *
  * \key Gaussian_Sigma (double, optional, default = 1.0): \n
  * Width of gaussians that represent Wigner density of particles, in fm.

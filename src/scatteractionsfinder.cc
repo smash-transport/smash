@@ -370,6 +370,10 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     const ParticleData& data_a, const ParticleData& data_b, double dt,
     const std::vector<FourVector>& beam_momentum,
     const double gcell_vol) const {
+  /* If the two particles
+   * 1) belong to one of the two colliding nuclei, and
+   * 2) both of them have never experienced any collisions,
+   * then the collisions between them are banned. */
   if (!allow_first_collisions_within_nucleus_) {
     assert(data_a.id() >= 0);
     assert(data_b.id() >= 0);

@@ -98,7 +98,7 @@ class QuantumNumbers {
 
   /**
    * Construct QuantumNumbers from several sets of particles.
-   * \param[in] ensembles structure holding several sets of particles
+   * \param[in] ensembles Current list of particles in all ensembles
    * \return Constructed object.
    */
   explicit QuantumNumbers(const std::vector<Particles>& ensembles)
@@ -255,7 +255,8 @@ class QuantumNumbers {
   /**
    * Checks if the current particle list has still the same values and
    * reports about differences.
-   * \param[in] ensembles Set of particles whose quantum number is compared
+   * \param[in] ensembles Current list of particles in all ensembles, whose
+   * quantum number is compared
    * \return String reporting the deviations.
    *
    * \see QuantumNumbers::report_deviations(const QuantumNumbers&) const
