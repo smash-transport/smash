@@ -119,7 +119,7 @@ class DensityParameters {
       : sig_(par.gaussian_sigma),
         r_cut_(par.gauss_cutoff_in_sigma * par.gaussian_sigma),
         ntest_(par.testparticles),
-	nensembles_(par.n_ensembles) {
+        nensembles_(par.n_ensembles) {
     r_cut_sqr_ = r_cut_ * r_cut_;
     const double two_sig_sqr = 2 * sig_ * sig_;
     two_sig_sqr_inv_ = 1. / two_sig_sqr;
