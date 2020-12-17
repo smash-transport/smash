@@ -19,14 +19,14 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 
 
-## [Unreleased](https://github.com/smash-transport/smash/compare/SMASH-1.8...HEAD)
+## [SMASH-2.0](https://github.com/smash-transport/smash/compare/SMASH-1.8...2.0)
 
 **New major version of SMASH**
 
 Major changes:
 
 * Multi-particle interactions: There is infrastructure for 3<->2 and 3<->1 interactions and example processes are implemented.
-* The [SMASH hybrid is available](https://github.com/smash-transport/smash-vhlle-hybrid) including SMASH in initial and final state as well as the vHLLE viscous hydrodynamics code.
+* The [SMASH hybrid](https://github.com/smash-transport/smash-vhlle-hybrid) is available including SMASH in initial and final state as well as the vHLLE viscous hydrodynamics code.
 * Updated to Pythia 8.303 and optimised the function calls to allow SMASH runs at LHC and high RHIC energies.
 * No large backwards incompatible updates for this major version.
 
