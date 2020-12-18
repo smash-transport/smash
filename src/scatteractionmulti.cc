@@ -244,7 +244,6 @@ void ScatterActionMulti::add_possible_reactions(
       bool all_incoming_particles_are_pions = false;
       // TODO(stdnmr) add the proper if statement
       if (all_incoming_particles_are_pions) {
-
         // TODO(stdnmr) calculate correct symmetry and spin factors
         const double spin_degn = 1.0;
         const double symmetry_factor = 1.0;
@@ -252,14 +251,14 @@ void ScatterActionMulti::add_possible_reactions(
         const ParticleTypePtr type_N = ParticleType::try_find(pdg::p);
         const ParticleTypePtr type_anti_N = ParticleType::try_find(-pdg::p);
         if (type_N) {
-        // TODO(stdnmr) probably also need to add the neutron reactions here
-        add_reaction(make_unique<CollisionBranch>(
-            *type_N, *type_anti_N,
-            probability_five_to_two(*type_N, dt,
-                                     gcell_vol, symmetry_factor * spin_degn),
-            ProcessType::MultiParticleFiveToTwo));
-       }
-     }
+          // TODO(stdnmr) probably also need to add the neutron reactions here
+          add_reaction(make_unique<CollisionBranch>(
+              *type_N, *type_anti_N,
+              probability_five_to_two(*type_N, dt, gcell_vol,
+                                      symmetry_factor * spin_degn),
+              ProcessType::MultiParticleFiveToTwo));
+        }
+      }
     }
   }
 }
@@ -378,12 +377,11 @@ double ScatterActionMulti::probability_three_to_two(
 }
 
 double ScatterActionMulti::probability_five_to_two(
-    const ParticleType& type_out, double dt,
-    const double gcell_vol, const double degen_factor) const {
+    const ParticleType& type_out, double dt, const double gcell_vol,
+    const double degen_factor) const {
   // TODO(stdnmr)
   return 0.0;
 }
-
 
 void ScatterActionMulti::annihilation() {
   if (outgoing_particles_.size() != 1) {

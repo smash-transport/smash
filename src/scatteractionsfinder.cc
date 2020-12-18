@@ -617,615 +617,610 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
         }
       }
     }
+  }
+  return actions;
+}
 
+ActionList ScatterActionsFinder::find_actions_with_neighbors(
+    const ParticleList& search_list, const ParticleList& neighbors_list,
+    double dt, const std::vector<FourVector>& beam_momentum) const {
+  std::vector<ActionPtr> actions;
+  if (coll_crit_ == CollisionCriterion::Stochastic) {
+    // Only search in cells
     return actions;
   }
+  for (const ParticleData& p1 : search_list) {
+    for (const ParticleData& p2 : neighbors_list) {
+      assert(p1.id() != p2.id());
+      // Check if a collision is possible.
+      ActionPtr act = check_collision_two_part(p1, p2, dt, beam_momentum);
+      if (act) {
+        actions.push_back(std::move(act));
+      }
+    }
+  }
+  return actions;
+}
 
-  ActionList ScatterActionsFinder::find_actions_with_neighbors(
-      const ParticleList& search_list, const ParticleList& neighbors_list,
-      double dt, const std::vector<FourVector>& beam_momentum) const {
-    std::vector<ActionPtr> actions;
-    if (coll_crit_ == CollisionCriterion::Stochastic) {
-      // Only search in cells
-      return actions;
+ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
+    const ParticleList& search_list, const Particles& surrounding_list,
+    double dt, const std::vector<FourVector>& beam_momentum) const {
+  std::vector<ActionPtr> actions;
+  if (coll_crit_ == CollisionCriterion::Stochastic) {
+    // Only search in cells
+    return actions;
+  }
+  for (const ParticleData& p2 : surrounding_list) {
+    /* don't look for collisions if the particle from the surrounding list is
+     * also in the search list */
+    auto result = std::find_if(
+        search_list.begin(), search_list.end(),
+        [&p2](const ParticleData& p) { return p.id() == p2.id(); });
+    if (result != search_list.end()) {
+      continue;
     }
     for (const ParticleData& p1 : search_list) {
-      for (const ParticleData& p2 : neighbors_list) {
-        assert(p1.id() != p2.id());
-        // Check if a collision is possible.
-        ActionPtr act = check_collision_two_part(p1, p2, dt, beam_momentum);
-        if (act) {
-          actions.push_back(std::move(act));
-        }
+      // Check if a collision is possible.
+      ActionPtr act = check_collision_two_part(p1, p2, dt, beam_momentum);
+      if (act) {
+        actions.push_back(std::move(act));
       }
     }
-    return actions;
   }
+  return actions;
+}
 
-  ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
-      const ParticleList& search_list, const Particles& surrounding_list,
-      double dt, const std::vector<FourVector>& beam_momentum) const {
-    std::vector<ActionPtr> actions;
-    if (coll_crit_ == CollisionCriterion::Stochastic) {
-      // Only search in cells
-      return actions;
-    }
-    for (const ParticleData& p2 : surrounding_list) {
-      /* don't look for collisions if the particle from the surrounding list is
-       * also in the search list */
-      auto result = std::find_if(
-          search_list.begin(), search_list.end(),
-          [&p2](const ParticleData& p) { return p.id() == p2.id(); });
-      if (result != search_list.end()) {
+void ScatterActionsFinder::dump_reactions() const {
+  constexpr double time = 0.0;
+
+  const size_t N_isotypes = IsoParticleType::list_all().size();
+  const size_t N_pairs = N_isotypes * (N_isotypes - 1) / 2;
+
+  std::cout << N_isotypes << " iso-particle types." << std::endl;
+  std::cout << "They can make " << N_pairs << " pairs." << std::endl;
+  std::vector<double> momentum_scan_list = {0.1, 0.3, 0.5, 1.0,
+                                            2.0, 3.0, 5.0, 10.0};
+  for (const IsoParticleType& A_isotype : IsoParticleType::list_all()) {
+    for (const IsoParticleType& B_isotype : IsoParticleType::list_all()) {
+      if (&A_isotype > &B_isotype) {
         continue;
       }
-      for (const ParticleData& p1 : search_list) {
-        // Check if a collision is possible.
-        ActionPtr act = check_collision_two_part(p1, p2, dt, beam_momentum);
-        if (act) {
-          actions.push_back(std::move(act));
-        }
-      }
-    }
-    return actions;
-  }
-
-  void ScatterActionsFinder::dump_reactions() const {
-    constexpr double time = 0.0;
-
-    const size_t N_isotypes = IsoParticleType::list_all().size();
-    const size_t N_pairs = N_isotypes * (N_isotypes - 1) / 2;
-
-    std::cout << N_isotypes << " iso-particle types." << std::endl;
-    std::cout << "They can make " << N_pairs << " pairs." << std::endl;
-    std::vector<double> momentum_scan_list = {0.1, 0.3, 0.5, 1.0,
-                                              2.0, 3.0, 5.0, 10.0};
-    for (const IsoParticleType& A_isotype : IsoParticleType::list_all()) {
-      for (const IsoParticleType& B_isotype : IsoParticleType::list_all()) {
-        if (&A_isotype > &B_isotype) {
-          continue;
-        }
-        bool any_nonzero_cs = false;
-        std::vector<std::string> r_list;
-        for (const ParticleTypePtr A_type : A_isotype.get_states()) {
-          for (const ParticleTypePtr B_type : B_isotype.get_states()) {
-            if (A_type > B_type) {
+      bool any_nonzero_cs = false;
+      std::vector<std::string> r_list;
+      for (const ParticleTypePtr A_type : A_isotype.get_states()) {
+        for (const ParticleTypePtr B_type : B_isotype.get_states()) {
+          if (A_type > B_type) {
+            continue;
+          }
+          ParticleData A(*A_type), B(*B_type);
+          for (auto mom : momentum_scan_list) {
+            A.set_4momentum(A.pole_mass(), mom, 0.0, 0.0);
+            B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
+            ScatterActionPtr act = make_unique<ScatterAction>(
+                A, B, time, isotropic_, string_formation_time_);
+            if (strings_switch_) {
+              act->set_string_interface(string_process_interface_.get());
+            }
+            act->add_all_scatterings(
+                elastic_parameter_, two_to_one_, incl_set_, incl_multi_set_,
+                low_snn_cut_, strings_switch_, use_AQM_,
+                strings_with_probability_, nnbar_treatment_, scale_xs_,
+                additional_el_xs_);
+            const double total_cs = act->cross_section();
+            if (total_cs <= 0.0) {
               continue;
             }
-            ParticleData A(*A_type), B(*B_type);
-            for (auto mom : momentum_scan_list) {
-              A.set_4momentum(A.pole_mass(), mom, 0.0, 0.0);
-              B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
-              ScatterActionPtr act = make_unique<ScatterAction>(
-                  A, B, time, isotropic_, string_formation_time_);
-              if (strings_switch_) {
-                act->set_string_interface(string_process_interface_.get());
+            any_nonzero_cs = true;
+            for (const auto& channel : act->collision_channels()) {
+              const auto type = channel->get_type();
+              std::string r;
+              if (is_string_soft_process(type) ||
+                  type == ProcessType::StringHard) {
+                r = A_type->name() + B_type->name() + std::string(" → strings");
+              } else {
+                std::string r_type =
+                    (type == ProcessType::Elastic)
+                        ? std::string(" (el)")
+                        : (channel->get_type() == ProcessType::TwoToTwo)
+                              ? std::string(" (inel)")
+                              : std::string(" (?)");
+                r = A_type->name() + B_type->name() + std::string(" → ") +
+                    channel->particle_types()[0]->name() +
+                    channel->particle_types()[1]->name() + r_type;
               }
-              act->add_all_scatterings(
-                  elastic_parameter_, two_to_one_, incl_set_, incl_multi_set_,
-                  low_snn_cut_, strings_switch_, use_AQM_,
-                  strings_with_probability_, nnbar_treatment_, scale_xs_,
-                  additional_el_xs_);
-              const double total_cs = act->cross_section();
-              if (total_cs <= 0.0) {
-                continue;
-              }
-              any_nonzero_cs = true;
-              for (const auto& channel : act->collision_channels()) {
-                const auto type = channel->get_type();
-                std::string r;
-                if (is_string_soft_process(type) ||
-                    type == ProcessType::StringHard) {
-                  r = A_type->name() + B_type->name() +
-                      std::string(" → strings");
-                } else {
-                  std::string r_type =
-                      (type == ProcessType::Elastic)
-                          ? std::string(" (el)")
-                          : (channel->get_type() == ProcessType::TwoToTwo)
-                                ? std::string(" (inel)")
-                                : std::string(" (?)");
-                  r = A_type->name() + B_type->name() + std::string(" → ") +
-                      channel->particle_types()[0]->name() +
-                      channel->particle_types()[1]->name() + r_type;
-                }
-                isoclean(r);
-                r_list.push_back(r);
-              }
+              isoclean(r);
+              r_list.push_back(r);
             }
           }
         }
-        std::sort(r_list.begin(), r_list.end());
-        r_list.erase(std::unique(r_list.begin(), r_list.end()), r_list.end());
-        if (any_nonzero_cs) {
-          for (auto r : r_list) {
-            std::cout << r;
-            if (r_list.back() != r) {
-              std::cout << ", ";
-            }
+      }
+      std::sort(r_list.begin(), r_list.end());
+      r_list.erase(std::unique(r_list.begin(), r_list.end()), r_list.end());
+      if (any_nonzero_cs) {
+        for (auto r : r_list) {
+          std::cout << r;
+          if (r_list.back() != r) {
+            std::cout << ", ";
           }
-          std::cout << std::endl;
         }
+        std::cout << std::endl;
       }
     }
   }
+}
 
-  /// Represent a final-state cross section.
-  struct FinalStateCrossSection {
-    /// Name of the final state.
-    std::string name_;
+/// Represent a final-state cross section.
+struct FinalStateCrossSection {
+  /// Name of the final state.
+  std::string name_;
 
-    /// Corresponding cross section in mb.
-    double cross_section_;
+  /// Corresponding cross section in mb.
+  double cross_section_;
 
-    /// Total mass of final state particles.
-    double mass_;
-
-    /**
-     * Construct a final-state cross section.
-     *
-     * \param name Name of the final state.
-     * \param cross_section Corresponding cross section in mb.
-     * \param mass Total mass of final state particles.
-     * \return Constructed object.
-     */
-    FinalStateCrossSection(const std::string& name, double cross_section,
-                           double mass)
-        : name_(name), cross_section_(cross_section), mass_(mass) {}
-  };
-
-  namespace decaytree {
+  /// Total mass of final state particles.
+  double mass_;
 
   /**
-   * Node of a decay tree, representing a possible action (2-to-2 or 1-to-2).
+   * Construct a final-state cross section.
    *
-   * This data structure can be used to build a tree going from the initial
-   * state (a collision of two particles) to all possible final states by
-   * recursively performing all possible decays. The tree can be used to
-   * calculate the final state cross sections.
-   *
-   * The initial actions are 2-to-2 or 2-to-1 scatterings, all other actions are
-   * 1-to-2 decays.
+   * \param name Name of the final state.
+   * \param cross_section Corresponding cross section in mb.
+   * \param mass Total mass of final state particles.
+   * \return Constructed object.
    */
-  struct Node {
-   public:
-    /// Name for printing.
-    std::string name_;
+  FinalStateCrossSection(const std::string& name, double cross_section,
+                         double mass)
+      : name_(name), cross_section_(cross_section), mass_(mass) {}
+};
 
-    /// Weight (cross section or branching ratio).
-    double weight_;
+namespace decaytree {
 
-    /// Initial-state particle types in this action.
-    ParticleTypePtrList initial_particles_;
+/**
+ * Node of a decay tree, representing a possible action (2-to-2 or 1-to-2).
+ *
+ * This data structure can be used to build a tree going from the initial
+ * state (a collision of two particles) to all possible final states by
+ * recursively performing all possible decays. The tree can be used to
+ * calculate the final state cross sections.
+ *
+ * The initial actions are 2-to-2 or 2-to-1 scatterings, all other actions are
+ * 1-to-2 decays.
+ */
+struct Node {
+ public:
+  /// Name for printing.
+  std::string name_;
 
-    /// Final-state particle types in this action.
-    ParticleTypePtrList final_particles_;
+  /// Weight (cross section or branching ratio).
+  double weight_;
 
-    /// Particle types corresponding to the global state after this action.
-    ParticleTypePtrList state_;
+  /// Initial-state particle types in this action.
+  ParticleTypePtrList initial_particles_;
 
-    /// Possible actions after this action.
-    std::vector<Node> children_;
+  /// Final-state particle types in this action.
+  ParticleTypePtrList final_particles_;
 
-    /// Cannot be copied
-    Node(const Node&) = delete;
-    /// Move constructor
-    Node(Node&&) = default;
+  /// Particle types corresponding to the global state after this action.
+  ParticleTypePtrList state_;
 
-    /**
-     * \return A new decay tree node.
-     *
-     * \param name Name for printing.
-     * \param weight Cross section or branching ratio.
-     * \param initial_particles Initial-state particle types in this node.
-     * \param final_particles Final-state particle types in this node.
-     * \param state Curent particle types of the system.
-     * \param children Possible actions after this action.
-     */
-    Node(const std::string& name, double weight,
-         ParticleTypePtrList&& initial_particles,
-         ParticleTypePtrList&& final_particles, ParticleTypePtrList&& state,
-         std::vector<Node>&& children)
-        : name_(name),
-          weight_(weight),
-          initial_particles_(std::move(initial_particles)),
-          final_particles_(std::move(final_particles)),
-          state_(std::move(state)),
-          children_(std::move(children)) {}
+  /// Possible actions after this action.
+  std::vector<Node> children_;
 
-    /**
-     * Add an action to the children of this node.
-     *
-     * The current particle state of the new action is automatically calculated.
-     *
-     * \param name Name of the action used for output.
-     * \param weight Cross section/branching ratio of the action.
-     * \param initial_particles Initial-state particle types of the action.
-     * \param final_particles Final-state particle types of the action.
-     * \return Newly added node by reference.
-     */
-    Node& add_action(const std::string& name, double weight,
-                     ParticleTypePtrList&& initial_particles,
-                     ParticleTypePtrList&& final_particles) {
-      // Copy parent state and update it.
-      ParticleTypePtrList state(state_);
-      for (const auto& p : initial_particles) {
-        state.erase(std::find(state.begin(), state.end(), p));
-      }
-      for (const auto& p : final_particles) {
-        state.push_back(p);
-      }
-      // Sort the state to normalize the output.
-      std::sort(state.begin(), state.end(),
-                [](ParticleTypePtr a, ParticleTypePtr b) {
-                  return a->name() < b->name();
-                });
-      // Push new node to children.
-      Node new_node(name, weight, std::move(initial_particles),
-                    std::move(final_particles), std::move(state), {});
-      children_.emplace_back(std::move(new_node));
-      return children_.back();
-    }
-
-    /// Print the decay tree starting with this node.
-    void print() const { print_helper(0); }
-
-    /**
-     * \return Final-state cross sections.
-     */
-    std::vector<FinalStateCrossSection> final_state_cross_sections() const {
-      std::vector<FinalStateCrossSection> result;
-      final_state_cross_sections_helper(0, result, "", 1.);
-      return result;
-    }
-
-   private:
-    /**
-     * Internal helper function for `print`, to be called recursively to print
-     * all nodes.
-     *
-     * \param depth Recursive call depth.
-     */
-    void print_helper(uint64_t depth) const {
-      for (uint64_t i = 0; i < depth; i++) {
-        std::cout << " ";
-      }
-      std::cout << name_ << " " << weight_ << std::endl;
-      for (const auto& child : children_) {
-        child.print_helper(depth + 1);
-      }
-    }
-
-    /**
-     * Internal helper function for `final_state_cross_sections`, to be called
-     * recursively to calculate all final-state cross sections.
-     *
-     * \param depth Recursive call depth.
-     * \param result Pairs of process names and exclusive cross sections.
-     * \param name Current name.
-     * \param weight current Weight/cross section.
-     * \param show_intermediate_states Whether intermediate states should be
-     * shown.
-     */
-    void final_state_cross_sections_helper(
-        uint64_t depth, std::vector<FinalStateCrossSection>& result,
-        const std::string& name, double weight,
-        bool show_intermediate_states = false) const {
-      // The first node corresponds to the total cross section and has to be
-      // ignored. The second node corresponds to the partial cross section. All
-      // further nodes correspond to branching ratios.
-      if (depth > 0) {
-        weight *= weight_;
-      }
-
-      std::string new_name;
-      double mass = 0.;
-
-      if (show_intermediate_states) {
-        new_name = name;
-        if (!new_name.empty()) {
-          new_name += "->";
-        }
-        new_name += name_;
-        new_name += "{";
-      } else {
-        new_name = "";
-      }
-      for (const auto& s : state_) {
-        new_name += s->name();
-        mass += s->mass();
-      }
-      if (show_intermediate_states) {
-        new_name += "}";
-      }
-
-      if (children_.empty()) {
-        result.emplace_back(FinalStateCrossSection(new_name, weight, mass));
-        return;
-      }
-      for (const auto& child : children_) {
-        child.final_state_cross_sections_helper(
-            depth + 1, result, new_name, weight, show_intermediate_states);
-      }
-    }
-  };
+  /// Cannot be copied
+  Node(const Node&) = delete;
+  /// Move constructor
+  Node(Node&&) = default;
 
   /**
-   * Generate name for decay and update final state.
+   * \return A new decay tree node.
    *
-   * \param[in] res_name Name of resonance.
-   * \param[in] decay Decay branch.
-   * \param[out] final_state Final state of decay.
-   * \return Name of decay.
+   * \param name Name for printing.
+   * \param weight Cross section or branching ratio.
+   * \param initial_particles Initial-state particle types in this node.
+   * \param final_particles Final-state particle types in this node.
+   * \param state Curent particle types of the system.
+   * \param children Possible actions after this action.
    */
-  static std::string make_decay_name(const std::string& res_name,
-                                     const DecayBranchPtr& decay,
-                                     ParticleTypePtrList& final_state) {
-    std::stringstream name;
-    name << "[" << res_name << "->";
-    for (const auto& p : decay->particle_types()) {
-      name << p->name();
-      final_state.push_back(p);
+  Node(const std::string& name, double weight,
+       ParticleTypePtrList&& initial_particles,
+       ParticleTypePtrList&& final_particles, ParticleTypePtrList&& state,
+       std::vector<Node>&& children)
+      : name_(name),
+        weight_(weight),
+        initial_particles_(std::move(initial_particles)),
+        final_particles_(std::move(final_particles)),
+        state_(std::move(state)),
+        children_(std::move(children)) {}
+
+  /**
+   * Add an action to the children of this node.
+   *
+   * The current particle state of the new action is automatically calculated.
+   *
+   * \param name Name of the action used for output.
+   * \param weight Cross section/branching ratio of the action.
+   * \param initial_particles Initial-state particle types of the action.
+   * \param final_particles Final-state particle types of the action.
+   * \return Newly added node by reference.
+   */
+  Node& add_action(const std::string& name, double weight,
+                   ParticleTypePtrList&& initial_particles,
+                   ParticleTypePtrList&& final_particles) {
+    // Copy parent state and update it.
+    ParticleTypePtrList state(state_);
+    for (const auto& p : initial_particles) {
+      state.erase(std::find(state.begin(), state.end(), p));
     }
-    name << "]";
-    return name.str();
+    for (const auto& p : final_particles) {
+      state.push_back(p);
+    }
+    // Sort the state to normalize the output.
+    std::sort(state.begin(), state.end(),
+              [](ParticleTypePtr a, ParticleTypePtr b) {
+                return a->name() < b->name();
+              });
+    // Push new node to children.
+    Node new_node(name, weight, std::move(initial_particles),
+                  std::move(final_particles), std::move(state), {});
+    children_.emplace_back(std::move(new_node));
+    return children_.back();
+  }
+
+  /// Print the decay tree starting with this node.
+  void print() const { print_helper(0); }
+
+  /**
+   * \return Final-state cross sections.
+   */
+  std::vector<FinalStateCrossSection> final_state_cross_sections() const {
+    std::vector<FinalStateCrossSection> result;
+    final_state_cross_sections_helper(0, result, "", 1.);
+    return result;
+  }
+
+ private:
+  /**
+   * Internal helper function for `print`, to be called recursively to print
+   * all nodes.
+   *
+   * \param depth Recursive call depth.
+   */
+  void print_helper(uint64_t depth) const {
+    for (uint64_t i = 0; i < depth; i++) {
+      std::cout << " ";
+    }
+    std::cout << name_ << " " << weight_ << std::endl;
+    for (const auto& child : children_) {
+      child.print_helper(depth + 1);
+    }
   }
 
   /**
-   * Add nodes for all decays possible from the given node and all of its
-   * children.
+   * Internal helper function for `final_state_cross_sections`, to be called
+   * recursively to calculate all final-state cross sections.
    *
-   * \param node Starting node.
-   * \param[in] sqrts center-of-mass energy.
+   * \param depth Recursive call depth.
+   * \param result Pairs of process names and exclusive cross sections.
+   * \param name Current name.
+   * \param weight current Weight/cross section.
+   * \param show_intermediate_states Whether intermediate states should be
+   * shown.
    */
-  static void add_decays(Node& node, double sqrts) {
-    // If there is more than one unstable particle in the current state, then
-    // there will be redundant paths in the decay tree, corresponding to
-    // reorderings of the decays. To avoid double counting, we normalize by the
-    // number of possible decay orderings. Normalizing by the number of unstable
-    // particles recursively corresponds to normalizing by the factorial that
-    // gives the number of reorderings.
-    //
-    // Ideally, the redundant paths should never be added to the decay tree, but
-    // we never have more than two redundant paths, so it probably does not
-    // matter much.
-    uint32_t n_unstable = 0;
-    double sqrts_minus_masses = sqrts;
-    for (const ParticleTypePtr ptype : node.state_) {
-      if (!ptype->is_stable()) {
-        n_unstable += 1;
-      }
-      sqrts_minus_masses -= ptype->mass();
+  void final_state_cross_sections_helper(
+      uint64_t depth, std::vector<FinalStateCrossSection>& result,
+      const std::string& name, double weight,
+      bool show_intermediate_states = false) const {
+    // The first node corresponds to the total cross section and has to be
+    // ignored. The second node corresponds to the partial cross section. All
+    // further nodes correspond to branching ratios.
+    if (depth > 0) {
+      weight *= weight_;
     }
-    const double norm =
-        n_unstable != 0 ? 1. / static_cast<double>(n_unstable) : 1.;
 
-    for (const ParticleTypePtr ptype : node.state_) {
-      if (!ptype->is_stable()) {
-        const double sqrts_decay = sqrts_minus_masses + ptype->mass();
-        bool can_decay = false;
-        for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
-          // Make sure to skip kinematically impossible decays.
-          // In principle, we would have to integrate over the mass of the
-          // resonance, but as an approximation we just assume it at its pole.
-          double final_state_mass = 0.;
-          for (const auto& p : decay->particle_types()) {
-            final_state_mass += p->mass();
-          }
-          if (final_state_mass > sqrts_decay) {
-            continue;
-          }
-          can_decay = true;
+    std::string new_name;
+    double mass = 0.;
 
-          ParticleTypePtrList parts;
-          const auto name = make_decay_name(ptype->name(), decay, parts);
-          auto& new_node = node.add_action(name, norm * decay->weight(),
-                                           {ptype}, std::move(parts));
-          add_decays(new_node, sqrts_decay);
-        }
-        if (!can_decay) {
-          // Remove final-state cross sections with resonances that cannot
-          // decay due to our "mass = pole mass" approximation.
-          node.weight_ = 0;
-          return;
-        }
+    if (show_intermediate_states) {
+      new_name = name;
+      if (!new_name.empty()) {
+        new_name += "->";
       }
+      new_name += name_;
+      new_name += "{";
+    } else {
+      new_name = "";
+    }
+    for (const auto& s : state_) {
+      new_name += s->name();
+      mass += s->mass();
+    }
+    if (show_intermediate_states) {
+      new_name += "}";
+    }
+
+    if (children_.empty()) {
+      result.emplace_back(FinalStateCrossSection(new_name, weight, mass));
+      return;
+    }
+    for (const auto& child : children_) {
+      child.final_state_cross_sections_helper(depth + 1, result, new_name,
+                                              weight, show_intermediate_states);
     }
   }
+};
 
-  }  // namespace decaytree
-
-  /**
-   * Deduplicate the final-state cross sections by summing.
-   *
-   * \param[inout] final_state_xs Final-state cross sections.
-   */
-  static void deduplicate(std::vector<FinalStateCrossSection> &
-                          final_state_xs) {
-    std::sort(
-        final_state_xs.begin(), final_state_xs.end(),
-        [](const FinalStateCrossSection& a, const FinalStateCrossSection& b) {
-          return a.name_ < b.name_;
-        });
-    auto current = final_state_xs.begin();
-    while (current != final_state_xs.end()) {
-      auto adjacent = std::adjacent_find(
-          current, final_state_xs.end(),
-          [](const FinalStateCrossSection& a, const FinalStateCrossSection& b) {
-            return a.name_ == b.name_;
-          });
-      current = adjacent;
-      if (adjacent != final_state_xs.end()) {
-        adjacent->cross_section_ += (adjacent + 1)->cross_section_;
-        final_state_xs.erase(adjacent + 1);
-      }
-    }
+/**
+ * Generate name for decay and update final state.
+ *
+ * \param[in] res_name Name of resonance.
+ * \param[in] decay Decay branch.
+ * \param[out] final_state Final state of decay.
+ * \return Name of decay.
+ */
+static std::string make_decay_name(const std::string& res_name,
+                                   const DecayBranchPtr& decay,
+                                   ParticleTypePtrList& final_state) {
+  std::stringstream name;
+  name << "[" << res_name << "->";
+  for (const auto& p : decay->particle_types()) {
+    name << p->name();
+    final_state.push_back(p);
   }
+  name << "]";
+  return name.str();
+}
 
-  void ScatterActionsFinder::dump_cross_sections(
-      const ParticleType& a, const ParticleType& b, double m_a, double m_b,
-      bool final_state, std::vector<double>& plab) const {
-    typedef std::vector<std::pair<double, double>> xs_saver;
-    std::map<std::string, xs_saver> xs_dump;
-    std::map<std::string, double> outgoing_total_mass;
+/**
+ * Add nodes for all decays possible from the given node and all of its
+ * children.
+ *
+ * \param node Starting node.
+ * \param[in] sqrts center-of-mass energy.
+ */
+static void add_decays(Node& node, double sqrts) {
+  // If there is more than one unstable particle in the current state, then
+  // there will be redundant paths in the decay tree, corresponding to
+  // reorderings of the decays. To avoid double counting, we normalize by the
+  // number of possible decay orderings. Normalizing by the number of unstable
+  // particles recursively corresponds to normalizing by the factorial that
+  // gives the number of reorderings.
+  //
+  // Ideally, the redundant paths should never be added to the decay tree, but
+  // we never have more than two redundant paths, so it probably does not
+  // matter much.
+  uint32_t n_unstable = 0;
+  double sqrts_minus_masses = sqrts;
+  for (const ParticleTypePtr ptype : node.state_) {
+    if (!ptype->is_stable()) {
+      n_unstable += 1;
+    }
+    sqrts_minus_masses -= ptype->mass();
+  }
+  const double norm =
+      n_unstable != 0 ? 1. / static_cast<double>(n_unstable) : 1.;
 
-    ParticleData a_data(a), b_data(b);
-    int n_momentum_points = 200;
-    constexpr double momentum_step = 0.02;
-    /*
-    // Round to output precision.
-    for (auto& p : plab) {
-      p = std::floor((p * 100000) + 0.5) / 100000;
-    }
-    */
-    if (plab.size() > 0) {
-      n_momentum_points = plab.size();
-      // Remove duplicates.
-      std::sort(plab.begin(), plab.end());
-      plab.erase(std::unique(plab.begin(), plab.end()), plab.end());
-    }
-    for (int i = 0; i < n_momentum_points; i++) {
-      double momentum;
-      if (plab.size() > 0) {
-        momentum = pCM_from_s(s_from_plab(plab.at(i), m_a, m_b), m_a, m_b);
-      } else {
-        momentum = momentum_step * (i + 1);
-      }
-      a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
-      b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
-      const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
-      const ParticleList incoming = {a_data, b_data};
-      ScatterActionPtr act = make_unique<ScatterAction>(
-          a_data, b_data, 0., isotropic_, string_formation_time_);
-      if (strings_switch_) {
-        act->set_string_interface(string_process_interface_.get());
-      }
-      act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                               incl_multi_set_, low_snn_cut_, strings_switch_,
-                               use_AQM_, strings_with_probability_,
-                               nnbar_treatment_, scale_xs_, additional_el_xs_);
-      decaytree::Node tree(a.name() + b.name(), act->cross_section(), {&a, &b},
-                           {&a, &b}, {&a, &b}, {});
-      const CollisionBranchList& processes = act->collision_channels();
-      for (const auto& process : processes) {
-        const double xs = process->weight();
-        if (xs <= 0.0) {
+  for (const ParticleTypePtr ptype : node.state_) {
+    if (!ptype->is_stable()) {
+      const double sqrts_decay = sqrts_minus_masses + ptype->mass();
+      bool can_decay = false;
+      for (const auto& decay : ptype->decay_modes().decay_mode_list()) {
+        // Make sure to skip kinematically impossible decays.
+        // In principle, we would have to integrate over the mass of the
+        // resonance, but as an approximation we just assume it at its pole.
+        double final_state_mass = 0.;
+        for (const auto& p : decay->particle_types()) {
+          final_state_mass += p->mass();
+        }
+        if (final_state_mass > sqrts_decay) {
           continue;
         }
-        if (!final_state) {
-          std::stringstream process_description_stream;
-          process_description_stream << *process;
-          const std::string& description = process_description_stream.str();
-          double m_tot = 0.0;
-          for (const auto& ptype : process->particle_types()) {
-            m_tot += ptype->mass();
-          }
-          outgoing_total_mass[description] = m_tot;
-          if (!xs_dump[description].empty() &&
-              std::abs(xs_dump[description].back().first - sqrts) <
-                  really_small) {
-            xs_dump[description].back().second += xs;
-          } else {
-            xs_dump[description].push_back(std::make_pair(sqrts, xs));
-          }
-        } else {
-          std::stringstream process_description_stream;
-          process_description_stream << *process;
-          const std::string& description = process_description_stream.str();
-          ParticleTypePtrList initial_particles = {&a, &b};
-          ParticleTypePtrList final_particles = process->particle_types();
-          auto& process_node =
-              tree.add_action(description, xs, std::move(initial_particles),
-                              std::move(final_particles));
-          decaytree::add_decays(process_node, sqrts);
-        }
-      }
-      xs_dump["total"].push_back(std::make_pair(sqrts, act->cross_section()));
-      // Total cross-section should be the first in the list -> negative mass
-      outgoing_total_mass["total"] = -1.0;
-      if (final_state) {
-        // tree.print();
-        auto final_state_xs = tree.final_state_cross_sections();
-        deduplicate(final_state_xs);
-        for (const auto& p : final_state_xs) {
-          // Don't print empty columns.
-          //
-          // FIXME(steinberg): The better fix would be to not have them in the
-          // first place.
-          if (p.name_ == "") {
-            continue;
-          }
-          outgoing_total_mass[p.name_] = p.mass_;
-          xs_dump[p.name_].push_back(std::make_pair(sqrts, p.cross_section_));
-        }
-      }
-    }
-    // Get rid of cross sections that are zero.
-    // (This only happens if their is a resonance in the final state that cannot
-    // decay with our simplified assumptions.)
-    for (auto it = begin(xs_dump); it != end(xs_dump);) {
-      // Sum cross section over all energies.
-      const xs_saver& xs = (*it).second;
-      double sum = 0;
-      for (const auto& p : xs) {
-        sum += p.second;
-      }
-      if (sum == 0.) {
-        it = xs_dump.erase(it);
-      } else {
-        ++it;
-      }
-    }
+        can_decay = true;
 
-    // Nice ordering of channels by summed pole mass of products
-    std::vector<std::string> all_channels;
-    for (const auto& channel : xs_dump) {
-      all_channels.push_back(channel.first);
-    }
-    std::sort(all_channels.begin(), all_channels.end(),
-              [&](const std::string& str_a, const std::string& str_b) {
-                return outgoing_total_mass[str_a] < outgoing_total_mass[str_b];
-              });
-
-    // Print header
-    std::cout << "# Dumping partial " << a.name() << b.name()
-              << " cross-sections in mb, energies in GeV" << std::endl;
-    std::cout << "   sqrt_s";
-    // Align everything to 16 unicode characters.
-    // This should be enough for the longest channel name (7 final-state
-    // particles).
-    for (const auto& channel : all_channels) {
-      std::cout << utf8::fill_left(channel, 16, ' ');
-    }
-    std::cout << std::endl;
-
-    // Print out all partial cross-sections in mb
-    for (int i = 0; i < n_momentum_points; i++) {
-      double momentum;
-      if (plab.size() > 0) {
-        momentum = pCM_from_s(s_from_plab(plab.at(i), m_a, m_b), m_a, m_b);
-      } else {
-        momentum = momentum_step * (i + 1);
+        ParticleTypePtrList parts;
+        const auto name = make_decay_name(ptype->name(), decay, parts);
+        auto& new_node = node.add_action(name, norm * decay->weight(), {ptype},
+                                         std::move(parts));
+        add_decays(new_node, sqrts_decay);
       }
-      a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
-      b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
-      const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
-      std::printf("%9.6f", sqrts);
-      for (const auto& channel : all_channels) {
-        const xs_saver energy_and_xs = xs_dump[channel];
-        size_t j = 0;
-        for (; j < energy_and_xs.size() && energy_and_xs[j].first < sqrts;
-             j++) {
-        }
-        double xs = 0.0;
-        if (j < energy_and_xs.size() &&
-            std::abs(energy_and_xs[j].first - sqrts) < really_small) {
-          xs = energy_and_xs[j].second;
-        }
-        std::printf("%16.6f", xs);  // Same alignment as in the header.
+      if (!can_decay) {
+        // Remove final-state cross sections with resonances that cannot
+        // decay due to our "mass = pole mass" approximation.
+        node.weight_ = 0;
+        return;
       }
-      std::printf("\n");
     }
   }
+}
+
+}  // namespace decaytree
+
+/**
+ * Deduplicate the final-state cross sections by summing.
+ *
+ * \param[inout] final_state_xs Final-state cross sections.
+ */
+static void deduplicate(std::vector<FinalStateCrossSection>& final_state_xs) {
+  std::sort(final_state_xs.begin(), final_state_xs.end(),
+            [](const FinalStateCrossSection& a,
+               const FinalStateCrossSection& b) { return a.name_ < b.name_; });
+  auto current = final_state_xs.begin();
+  while (current != final_state_xs.end()) {
+    auto adjacent = std::adjacent_find(
+        current, final_state_xs.end(),
+        [](const FinalStateCrossSection& a, const FinalStateCrossSection& b) {
+          return a.name_ == b.name_;
+        });
+    current = adjacent;
+    if (adjacent != final_state_xs.end()) {
+      adjacent->cross_section_ += (adjacent + 1)->cross_section_;
+      final_state_xs.erase(adjacent + 1);
+    }
+  }
+}
+
+void ScatterActionsFinder::dump_cross_sections(
+    const ParticleType& a, const ParticleType& b, double m_a, double m_b,
+    bool final_state, std::vector<double>& plab) const {
+  typedef std::vector<std::pair<double, double>> xs_saver;
+  std::map<std::string, xs_saver> xs_dump;
+  std::map<std::string, double> outgoing_total_mass;
+
+  ParticleData a_data(a), b_data(b);
+  int n_momentum_points = 200;
+  constexpr double momentum_step = 0.02;
+  /*
+  // Round to output precision.
+  for (auto& p : plab) {
+    p = std::floor((p * 100000) + 0.5) / 100000;
+  }
+  */
+  if (plab.size() > 0) {
+    n_momentum_points = plab.size();
+    // Remove duplicates.
+    std::sort(plab.begin(), plab.end());
+    plab.erase(std::unique(plab.begin(), plab.end()), plab.end());
+  }
+  for (int i = 0; i < n_momentum_points; i++) {
+    double momentum;
+    if (plab.size() > 0) {
+      momentum = pCM_from_s(s_from_plab(plab.at(i), m_a, m_b), m_a, m_b);
+    } else {
+      momentum = momentum_step * (i + 1);
+    }
+    a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
+    b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
+    const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
+    const ParticleList incoming = {a_data, b_data};
+    ScatterActionPtr act = make_unique<ScatterAction>(
+        a_data, b_data, 0., isotropic_, string_formation_time_);
+    if (strings_switch_) {
+      act->set_string_interface(string_process_interface_.get());
+    }
+    act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
+                             incl_multi_set_, low_snn_cut_, strings_switch_,
+                             use_AQM_, strings_with_probability_,
+                             nnbar_treatment_, scale_xs_, additional_el_xs_);
+    decaytree::Node tree(a.name() + b.name(), act->cross_section(), {&a, &b},
+                         {&a, &b}, {&a, &b}, {});
+    const CollisionBranchList& processes = act->collision_channels();
+    for (const auto& process : processes) {
+      const double xs = process->weight();
+      if (xs <= 0.0) {
+        continue;
+      }
+      if (!final_state) {
+        std::stringstream process_description_stream;
+        process_description_stream << *process;
+        const std::string& description = process_description_stream.str();
+        double m_tot = 0.0;
+        for (const auto& ptype : process->particle_types()) {
+          m_tot += ptype->mass();
+        }
+        outgoing_total_mass[description] = m_tot;
+        if (!xs_dump[description].empty() &&
+            std::abs(xs_dump[description].back().first - sqrts) <
+                really_small) {
+          xs_dump[description].back().second += xs;
+        } else {
+          xs_dump[description].push_back(std::make_pair(sqrts, xs));
+        }
+      } else {
+        std::stringstream process_description_stream;
+        process_description_stream << *process;
+        const std::string& description = process_description_stream.str();
+        ParticleTypePtrList initial_particles = {&a, &b};
+        ParticleTypePtrList final_particles = process->particle_types();
+        auto& process_node =
+            tree.add_action(description, xs, std::move(initial_particles),
+                            std::move(final_particles));
+        decaytree::add_decays(process_node, sqrts);
+      }
+    }
+    xs_dump["total"].push_back(std::make_pair(sqrts, act->cross_section()));
+    // Total cross-section should be the first in the list -> negative mass
+    outgoing_total_mass["total"] = -1.0;
+    if (final_state) {
+      // tree.print();
+      auto final_state_xs = tree.final_state_cross_sections();
+      deduplicate(final_state_xs);
+      for (const auto& p : final_state_xs) {
+        // Don't print empty columns.
+        //
+        // FIXME(steinberg): The better fix would be to not have them in the
+        // first place.
+        if (p.name_ == "") {
+          continue;
+        }
+        outgoing_total_mass[p.name_] = p.mass_;
+        xs_dump[p.name_].push_back(std::make_pair(sqrts, p.cross_section_));
+      }
+    }
+  }
+  // Get rid of cross sections that are zero.
+  // (This only happens if their is a resonance in the final state that cannot
+  // decay with our simplified assumptions.)
+  for (auto it = begin(xs_dump); it != end(xs_dump);) {
+    // Sum cross section over all energies.
+    const xs_saver& xs = (*it).second;
+    double sum = 0;
+    for (const auto& p : xs) {
+      sum += p.second;
+    }
+    if (sum == 0.) {
+      it = xs_dump.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  // Nice ordering of channels by summed pole mass of products
+  std::vector<std::string> all_channels;
+  for (const auto& channel : xs_dump) {
+    all_channels.push_back(channel.first);
+  }
+  std::sort(all_channels.begin(), all_channels.end(),
+            [&](const std::string& str_a, const std::string& str_b) {
+              return outgoing_total_mass[str_a] < outgoing_total_mass[str_b];
+            });
+
+  // Print header
+  std::cout << "# Dumping partial " << a.name() << b.name()
+            << " cross-sections in mb, energies in GeV" << std::endl;
+  std::cout << "   sqrt_s";
+  // Align everything to 16 unicode characters.
+  // This should be enough for the longest channel name (7 final-state
+  // particles).
+  for (const auto& channel : all_channels) {
+    std::cout << utf8::fill_left(channel, 16, ' ');
+  }
+  std::cout << std::endl;
+
+  // Print out all partial cross-sections in mb
+  for (int i = 0; i < n_momentum_points; i++) {
+    double momentum;
+    if (plab.size() > 0) {
+      momentum = pCM_from_s(s_from_plab(plab.at(i), m_a, m_b), m_a, m_b);
+    } else {
+      momentum = momentum_step * (i + 1);
+    }
+    a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
+    b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
+    const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
+    std::printf("%9.6f", sqrts);
+    for (const auto& channel : all_channels) {
+      const xs_saver energy_and_xs = xs_dump[channel];
+      size_t j = 0;
+      for (; j < energy_and_xs.size() && energy_and_xs[j].first < sqrts; j++) {
+      }
+      double xs = 0.0;
+      if (j < energy_and_xs.size() &&
+          std::abs(energy_and_xs[j].first - sqrts) < really_small) {
+        xs = energy_and_xs[j].second;
+      }
+      std::printf("%16.6f", xs);  // Same alignment as in the header.
+    }
+    std::printf("\n");
+  }
+}
 
 }  // namespace smash
