@@ -549,7 +549,7 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
 
   /* 4. Return total collision probability
    *    Scales with 1 over the number of testpartciles to the power of the
-   *    number of incoming particles - 1) */
+   *    number of incoming particles - 1 */
   const double prob =
       act->get_total_weight() / std::pow(testparticles_, plist.size() - 1);
 
