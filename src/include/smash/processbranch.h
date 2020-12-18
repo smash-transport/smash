@@ -52,6 +52,7 @@ enum class ProcessType {
   /// multi particle scattering
   MultiParticleThreeMesonsToOne = 10,
   MultiParticleThreeToTwo = 11,
+  MultiParticleFiveToTwo = 12,
 
   /**
    * (41-45) soft string excitations. Here "soft" means that the process does
