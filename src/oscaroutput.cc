@@ -238,12 +238,12 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
     const DensityParameters &, const EventInfo &) {
   if (Contents & OscarTimesteps) {
     if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
-      std::fprintf(file_.get(), "# event %i out %zu\n", current_event_ + 1,
+      std::fprintf(file_.get(), "# event %i out %zu\n", current_event_,
                    particles.size());
     } else {
       const size_t zero = 0;
       std::fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
-                   current_event_ + 1);
+                   current_event_);
     }
     write(particles);
   }
