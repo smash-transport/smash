@@ -18,6 +18,10 @@ The major categories to group changes in this log are:
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 
+## [SMASH-2.0.1](https://github.com/smash-transport/smash/compare/SMASH-2.0...2.0.1)
+
+### Input / Output
+* Fixed event number counting for intermediate OSCAR output
 
 ## [SMASH-2.0](https://github.com/smash-transport/smash/compare/SMASH-1.8...2.0)
 
