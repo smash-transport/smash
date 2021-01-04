@@ -208,6 +208,13 @@ class Nucleus {
    */
   FourVector center() const;
 
+  /// Sets target / projectile labels on nucleons
+  void set_label(BelongsTo label) {
+    for (ParticleData &data : particles_) {
+      data.set_belongs_to(label);
+    }
+  }
+
   /**
    * Shifts the nucleus so that its center is at (0,0,0)
    * \see center()

@@ -61,12 +61,6 @@ class ModusDefault {
     return 0;
   }
 
-  /// \return Number of nucleons in both nuclei; only used in ColliderModus
-  int total_N_number() const { return 0; }
-  /// \return Number of nucleons in projectile; only used in ColliderModus
-  int proj_N_number() const { return 0; }
-  /// \return Whether to allow collisions in nuclei; only used in ColliderModus
-  bool cll_in_nucleus() const { return false; }
   /// \return Checks if modus is collider; overwritten in ColliderModus
   bool is_collider() const { return false; }
   /// \return Checks if modus is a box; overwritten in BoxModus
@@ -77,6 +71,8 @@ class ModusDefault {
   double sqrt_s_NN() const { return 0.; }
   /// \return The impact parameter; overwritten in ColliderModus
   double impact_parameter() const { return 0.0; }
+  /// sample impact parameter for collider modus
+  void sample_impact() const {}
   /** \return The beam velocity of the projectile required in the Collider
    * modus. In the other modus, return zero. */
   double velocity_projectile() const { return 0.0; }

@@ -47,6 +47,7 @@ Major changes:
 ### Added
 * 3-to-1 reactions for mesons via the stochastic collision criterion.
 * 3-to-2 reactions for deuterons via the stochastic collision criterion.
+* Parallel ensembles technique to run simulations with mean field potentials faster
 * New covariant collision criterion.
 * Hadron Gas EoS extended by nQ and muQ.
 * Various tests for photons.

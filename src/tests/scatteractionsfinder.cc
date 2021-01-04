@@ -64,12 +64,11 @@ TEST(collision_order) {
   // prepare scatteractionsfinder
   const double radius = 0.11;                                        // in fm
   const double elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
-  const std::vector<bool> has_interacted = {};
   ExperimentParameters exp_par = Test::default_parameters();
   Configuration config =
       Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
                           std::to_string(elastic_parameter) + "}");
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
+  ScatterActionsFinder finder(config, exp_par);
 
   // prepare lists
   ParticleList search_list = particles.copy_to_vector();
@@ -148,12 +147,11 @@ TEST(scatter_particle_pair_only_once) {
   // prepare scatteractionsfinder
   const double radius = 0.11;                                        // in fm
   const double elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
-  const std::vector<bool> has_interacted = {};
   ExperimentParameters exp_par = Test::default_parameters();
   Configuration config =
       Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
                           std::to_string(elastic_parameter) + "}");
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
+  ScatterActionsFinder finder(config, exp_par);
   ParticleList search_list = p.copy_to_vector();
   double dt = 0.9;                   // fm/c
   const double grid_cell_vol = 0.0;  // no grid
@@ -213,12 +211,11 @@ TEST(find_next_action) {
   constexpr double radius = 0.11;  // in fm
   constexpr double elastic_parameter =
       radius * radius * M_PI / fm2_mb;  // in mb
-  const std::vector<bool> has_interacted = {};
   ExperimentParameters exp_par = Test::default_parameters();
   Configuration config =
       Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
                           std::to_string(elastic_parameter) + "}");
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
+  ScatterActionsFinder finder(config, exp_par);
 
   // prepare list of particles that will be checked for possible actions
   ParticleList particle_list = particles.copy_to_vector();
@@ -268,8 +265,7 @@ TEST(increasing_scaling_factors) {
   // For a power of larger than alpha, the particles should collide.
   ParticleData::formation_power_ = alpha - 0.1;
   ExperimentParameters exp_par = Test::default_parameters();
-  const std::vector<bool> has_interacted = {};
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
+  ScatterActionsFinder finder(config, exp_par);
   COMPARE(finder
               .find_actions_in_cell({p_a, p_b}, 2. * delta_t_coll,
                                     grid_cell_vol, {})
@@ -299,13 +295,12 @@ TEST(check_stochastic_collision) {
 
   // prepare scatteractionsfinder
   const double elastic_parameter = 10.0;  // in mb
-  const std::vector<bool> has_interacted = {};
   ExperimentParameters exp_par = Test::default_parameters(
       testparticles, dt, CollisionCriterion::Stochastic);
   Configuration config =
       Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
                           std::to_string(elastic_parameter) + "}");
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
+  ScatterActionsFinder finder(config, exp_par);
 
   // prepare lists
   ParticleList search_list = p.copy_to_vector();

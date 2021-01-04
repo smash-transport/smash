@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "density.h"
 #include "energymomentumtensor.h"
@@ -47,6 +48,8 @@ struct EventInfo {
   double total_energy;
   /// Testparticle number, see Testparticles in \ref input_general_
   int test_particles;
+  /// Number of ensembles
+  int n_ensembles;
   /// True if no collisions happened
   bool empty_event;
 };
@@ -82,7 +85,22 @@ class OutputInterface {
    * \param[in] info Event info, see \ref event_info
    */
   virtual void at_eventstart(const Particles &particles, const int event_number,
-                             const EventInfo &info) = 0;
+                             const EventInfo &info) {
+    SMASH_UNUSED(particles);
+    SMASH_UNUSED(event_number);
+    SMASH_UNUSED(info);
+  }
+  /**
+   * Output launched at event start after initialization, when particles are
+   * generated but not yet propagated.
+   * \param ensembles List of particles.
+   * \param[in] event_number Number of the current event.
+   */
+  virtual void at_eventstart(const std::vector<Particles> &ensembles,
+                             int event_number) {
+    SMASH_UNUSED(ensembles);
+    SMASH_UNUSED(event_number);
+  }
 
   /**
    * Output launched at event end. Event end is determined by maximal timestep
@@ -92,7 +110,22 @@ class OutputInterface {
    * \param[in] info Event info, see \ref event_info
    */
   virtual void at_eventend(const Particles &particles, const int event_number,
-                           const EventInfo &info) = 0;
+                           const EventInfo &info) {
+    SMASH_UNUSED(particles);
+    SMASH_UNUSED(event_number);
+    SMASH_UNUSED(info);
+  }
+  /**
+   * Output launched at event end. Event end is determined by maximal timestep
+   * option.
+   * \param ensembles List of particles.
+   * \param event_number Number of the current event.
+   */
+  virtual void at_eventend(const std::vector<Particles> &ensembles,
+                           const int event_number) {
+    SMASH_UNUSED(ensembles);
+    SMASH_UNUSED(event_number);
+  }
 
   /**
    * Called whenever an action modified one or more particles.
@@ -121,6 +154,19 @@ class OutputInterface {
     SMASH_UNUSED(clock);
     SMASH_UNUSED(dens_param);
     SMASH_UNUSED(info);
+  }
+  /**
+   * Output launched after every N'th timestep. N is controlled by an option.
+   * \param ensembles List of particles.
+   * \param clock System clock.
+   * \param dens_param Parameters for density calculation.
+   */
+  virtual void at_intermediate_time(const std::vector<Particles> &ensembles,
+                                    const std::unique_ptr<Clock> &clock,
+                                    const DensityParameters &dens_param) {
+    SMASH_UNUSED(ensembles);
+    SMASH_UNUSED(clock);
+    SMASH_UNUSED(dens_param);
   }
 
   /**

@@ -79,8 +79,45 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * If Time_Step_Mode = None is chosen, then the user-provided value of
  * Delta_Time is ignored and Delta_Time is set to the End_Time.
  *
+ * \key Ensembles (int, optional, default = 1): \n
+ * Number of parallel ensembles in the simulation.
+ *
+ * An ensemble is an instance of the system, and without mean-field potentials
+ * it is practically equivalent to a completely separate and uncorrelated event.
+ * Each ensemble is an independent simulation: initialization, collisions,
+ * decays, box wall crossings, and propagation of particles is performed
+ * independently within each ensemble.
+ *
+ * However, the densities and mean-field potentials are computed as averages
+ * over all ensembles (within a given event). This process can be also viewed as
+ * calculating densities and mean-fields by summing over particles in all
+ * ensembles combined, where each particle carries a fraction 1/n_ensembles of
+ * its "real" charge. Such technique is called *parallel ensemble* technique. It
+ * increases statistics necessary for precise density calculation without
+ * increasing the number of collisions, which is not the case in the *full
+ * ensemble* method (see below). Because of this, the parallel ensembles
+ * technique is computationally faster than the full ensemble technique.
+ *
  * \key Testparticles (int, optional, default = 1): \n
- * How many test particles per real particle should be simulated.
+ * Number of test-particles per real particle in the simulation.
+ *
+ * Amount of initial sampled particles is increased by this factor,
+ * while all cross sections are decreased by this factor. In this
+ * way mean free path does not change. Larger number of testparticles
+ * helps to reduce spurious effects of geometric collision criterion
+ * (see \iref{Cheng:2001dz}). It also reduces correlations related
+ * to collisions and decays (but not the ones related to mean fields),
+ * therefore the larger the number of testparticles, the closer the results
+ * of the simulations should be to the solution of Boltzmann equation.
+ * These advantages come at a cost of computational time.
+ *
+ * Testparticles are a way to increase statistics necessary for
+ * precise density calculation, which is why they are needed for mean field
+ * potentials. The technique of using testparticles for mean field
+ * is called *full ensemble* technique. The number of collisions (and
+ * consequently the simulation time) scales as square of the number of
+ * testparticles, and that is why full ensemble is slower than parallel
+ * ensemble.
  *
  * \key Gaussian_Sigma (double, optional, default = 1.0): \n
  * Width of gaussians that represent Wigner density of particles, in fm.
@@ -460,12 +497,16 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
    */
   const double maximum_cross_section_default =
       ParticleType::exists("d'") ? 2000.0 : 200.0;
+
+  bool cll_in_nucleus =
+      config.take({"Modi", "Collider", "Collisions_Within_Nucleus"}, false);
   double maximum_cross_section = config_coll.take(
       {"Maximum_Cross_Section"}, maximum_cross_section_default);
   maximum_cross_section *= scale_xs;
   return {
       make_unique<UniformClock>(0.0, dt),
       std::move(output_clock),
+      config.take({"General", "Ensembles"}, 1),
       ntest,
       config.take({"General", "Gaussian_Sigma"}, 1.),
       config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
@@ -483,11 +524,12 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       potential_affect_threshold,
       box_length,
       maximum_cross_section,
+      cll_in_nucleus,
       scale_xs,
       config_coll.take({"Additional_Elastic_Cross_Section"}, 0.0)};
 }
 
-std::string format_measurements(const Particles &particles,
+std::string format_measurements(const std::vector<Particles> &ensembles,
                                 uint64_t scatterings_this_interval,
                                 const QuantumNumbers &conserved_initial,
                                 SystemTimePoint time_start, double time,
@@ -495,17 +537,19 @@ std::string format_measurements(const Particles &particles,
                                 double E_mean_field_initial) {
   const SystemTimeSpan elapsed_seconds = SystemClock::now() - time_start;
 
-  const QuantumNumbers current_values(particles);
+  const QuantumNumbers current_values(ensembles);
   const QuantumNumbers difference = current_values - conserved_initial;
+  int total_particles = 0;
+  for (const Particles &particles : ensembles) {
+    total_particles += particles.size();
+  }
 
   // Make sure there are no FPEs in case of IC output, were there will
   // eventually be no more particles in the system
-  const double current_energy =
-      (particles.size() > 0) ? current_values.momentum().x0() : 0.0;
+  const double current_energy = current_values.momentum().x0();
   const double energy_per_part =
-      (particles.size() > 0)
-          ? (current_energy + E_mean_field) / particles.size()
-          : 0.0;
+      (total_particles > 0) ? (current_energy + E_mean_field) / total_particles
+                            : 0.0;
 
   std::ostringstream ss;
   // clang-format off
@@ -519,15 +563,15 @@ std::string format_measurements(const Particles &particles,
     // total energy per particle in the system
      << field<12, 6> << energy_per_part;
     // change in total energy per particle (unless IC output is enabled)
-    if (particles.size() == 0) {
+    if (total_particles == 0) {
      ss << field<13, 6> << "N/A";
     } else {
      ss << field<13, 6> << (difference.momentum().x0()
                             + E_mean_field - E_mean_field_initial)
-                            / particles.size();
+                            / total_particles;
     }
     ss << field<14, 3> << scatterings_this_interval
-     << field<10, 3> << particles.size()
+     << field<10, 3> << total_particles
      << field<9, 3> << elapsed_seconds;
   // clang-format on
   return ss.str();
@@ -632,24 +676,27 @@ double calculate_mean_field_energy(
         << "\n\t\t\t\t\t density scaled variance = " << density_scaled_variance;
     logg[LExperiment].debug()
         << "\n\t\t\t\t\t        total mean_field = "
-        << lattice_mean_field_total * parameters.testparticles << "\n";
+        << lattice_mean_field_total * parameters.testparticles *
+               parameters.n_ensembles
+        << "\n";
 
     /*
      * E_mean_field is multiplied by the number of testparticles because the
      * total kinetic energy tracked is that of all particles, including
      * testparticles, and so this is more consistent with the general paradigm.
      */
-    E_mean_field = lattice_mean_field_total * parameters.testparticles;
+    E_mean_field = lattice_mean_field_total * parameters.testparticles *
+                   parameters.n_ensembles;
   }
 
   return E_mean_field;
 }
 
-EventInfo fill_event_info(const Particles &particles, double E_mean_field,
-                          double modus_impact_parameter,
+EventInfo fill_event_info(const std::vector<Particles> &ensembles,
+                          double E_mean_field, double modus_impact_parameter,
                           const ExperimentParameters &parameters,
                           bool projectile_target_interact) {
-  const QuantumNumbers current_values(particles);
+  const QuantumNumbers current_values(ensembles);
   const double E_kinetic_total = current_values.momentum().x0();
   const double E_total = E_kinetic_total + E_mean_field;
 
@@ -660,6 +707,7 @@ EventInfo fill_event_info(const Particles &particles, double E_mean_field,
                        E_mean_field,
                        E_total,
                        parameters.testparticles,
+                       parameters.n_ensembles,
                        !projectile_target_interact};
   return event_info;
 }

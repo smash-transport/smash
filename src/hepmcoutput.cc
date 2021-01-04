@@ -49,12 +49,8 @@ const int HepMcOutput::status_code_for_beam_particles = 4;
 const int HepMcOutput::status_code_for_final_particles = 1;
 
 HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
-                         const OutputParameters & /*out_par*/,
-                         const int total_N, const int proj_N)
-    : OutputInterface(name),
-      filename_(path / (name + ".asciiv3")),
-      total_N_(total_N),
-      proj_N_(proj_N) {
+                         const OutputParameters & /*out_par*/)
+    : OutputInterface(name), filename_(path / (name + ".asciiv3")) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += +".unfinished";
   output_file_ =
@@ -63,10 +59,9 @@ HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
 
 HepMcOutput::~HepMcOutput() { bf::rename(filename_unfinished_, filename_); }
 
-int HepMcOutput::construct_nuclear_pdg_code(int na, int nz) const {
+int HepMcOutput::construct_nuclear_pdg_code(int na, int nz, int nl) const {
   const int pdg_nuclear_code_prefix = 10 * 1E8;
-  // Hypernuclei not supported here
-  const int pdg_nuclear_code_lambda = 0 * 1E7;
+  const int pdg_nuclear_code_lambda = nl * 1E7;
   const int pdg_nuclear_code_charge = nz * 1E4;
   const int pdg_nuclear_code_baryon = na * 1E1;
   // SMASH does not do isomers
@@ -95,40 +90,34 @@ void HepMcOutput::at_eventstart(const Particles &particles,
   vertex_ = std::make_shared<HepMC3::GenVertex>();
   current_event_->add_vertex(vertex_);
 
-  if (proj_N_ > 0) {
-    // Collider modus: Construct and write projectile and target as two intial
-    // particles
-    int targ_N = total_N_ - proj_N_;
-    int proj_Z = 0;
-    int targ_Z = 0;
-    FourVector total_mom_proj;
-    FourVector total_mom_targ;
-    for (const ParticleData &data : particles) {
-      if (data.id() < proj_N_) {
-        total_mom_proj += data.momentum();
-        if (data.is_proton()) {
-          proj_Z += 1;
-        } else if (!data.is_neutron()) {
-          throw std::invalid_argument(
-              "HepMC output in SMASH only supports colliding nuclei consisting "
-              "of p and n.");
-        }
-      } else {
-        total_mom_targ += data.momentum();
-        if (data.is_proton()) {
-          targ_Z += 1;
-        } else if (!data.is_neutron()) {
-          throw std::invalid_argument(
-              "HepMC output in SMASH only supports colliding nuclei consisting "
-              "of p and n.");
-        }
-      }
+  FourVector total_mom_proj = FourVector(), total_mom_targ = FourVector();
+  int targ_A = 0, targ_Z = 0, targ_L = 0;
+  int proj_A = 0, proj_Z = 0, proj_L = 0;
+  int total_proj_targ = 0;
+  for (const ParticleData &data : particles) {
+    if (data.belongs_to() == BelongsTo::Projectile) {
+      total_proj_targ++;
+      total_mom_proj += data.momentum();
+      proj_A += data.type().baryon_number();
+      proj_Z += data.type().charge();
+      proj_L += data.type().pdgcode().is_Lambda();
+    } else if (data.belongs_to() == BelongsTo::Target) {
+      total_proj_targ++;
+      total_mom_targ += data.momentum();
+      targ_A += data.type().baryon_number();
+      targ_Z += data.type().charge();
+      targ_L += data.type().pdgcode().is_Lambda();
     }
+  }
+
+  if (total_proj_targ > 0) {
+    // Collider modus: Construct and write projectile and target as two initial
+    // particles
 
     const int proj_nuclear_pdg_code =
-        construct_nuclear_pdg_code(proj_N_, proj_Z);
+        construct_nuclear_pdg_code(proj_A, proj_Z, proj_L);
     const int targ_nuclear_pdg_code =
-        construct_nuclear_pdg_code(targ_N, targ_Z);
+        construct_nuclear_pdg_code(targ_A, targ_Z, targ_L);
 
     HepMC3::GenParticlePtr projectile_p = std::make_shared<HepMC3::GenParticle>(
         HepMC3::FourVector(total_mom_proj.x1(), total_mom_proj.x2(),

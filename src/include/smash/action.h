@@ -214,12 +214,12 @@ class Action {
    * denotes the phase-space density at the position of i-th final-state
    * fermion.
    *
-   * \param[in] particles current particle list
+   * \param[in] ensembles current particle list, all ensembles
    * \param[in] p_bl PauliBlocker that stores the configurations concerning
    *                                                              Pauli-blocking.
    * \return true, if the action is Pauli-blocked, false otherwise
    */
-  bool is_pauli_blocked(const Particles &particles,
+  bool is_pauli_blocked(const std::vector<Particles> &ensembles,
                         const PauliBlocker &p_bl) const;
 
   /**

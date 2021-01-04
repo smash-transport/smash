@@ -30,8 +30,7 @@ TEST(impossible_collision) {
 
   Configuration config = Test::configuration("");
   ExperimentParameters exp_par = Test::default_parameters();
-  const std::vector<bool> has_interacted = {};
-  ScatterActionsFinder finder(config, exp_par, has_interacted, 0, 0);
+  ScatterActionsFinder finder(config, exp_par);
 
   VERIFY(finder.collision_time(a, b, 0.0, {}) < 0.0);
 }

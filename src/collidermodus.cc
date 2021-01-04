@@ -271,10 +271,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
     frame_ = modus_cfg.take({"Calculation_Frame"});
   }
 
-  // Determine whether to allow the first collisions within the same nucleus
-  if (modus_cfg.has_value({"Collisions_Within_Nucleus"})) {
-    cll_in_nucleus_ = modus_cfg.take({"Collisions_Within_Nucleus"});
-  }
   Configuration proj_cfg = modus_cfg["Projectile"];
   Configuration targ_cfg = modus_cfg["Target"];
   /* Needed to check if projectile and target in customnucleus are read from
@@ -294,6 +290,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   if (projectile_->size() < 1) {
     throw ColliderEmpty("Input Error: Projectile nucleus is empty.");
   }
+  projectile_->set_label(BelongsTo::Projectile);
 
   // Set up the target nucleus
   if (targ_cfg.has_value({"Deformed"})) {
@@ -307,6 +304,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   if (target_->size() < 1) {
     throw ColliderEmpty("Input Error: Target nucleus is empty.");
   }
+  target_->set_label(BelongsTo::Target);
 
   // Get the Fermi-Motion input (off, on, frozen)
   if (modus_cfg.has_value({"Fermi_Motion"})) {
@@ -438,6 +436,14 @@ ColliderModus::ColliderModus(Configuration modus_config,
     // initial_z_displacement_ away from origin)
     initial_z_displacement_ /= 2.0;
   }
+
+  if (fermi_motion_ == FermiMotion::On) {
+    logg[LCollider].info() << "Fermi motion is ON.";
+  } else if (fermi_motion_ == FermiMotion::Frozen) {
+    logg[LCollider].info() << "FROZEN Fermi motion is on.";
+  } else if (fermi_motion_ == FermiMotion::Off) {
+    logg[LCollider].info() << "Fermi motion is OFF.";
+  }
 }
 
 std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
@@ -471,9 +477,6 @@ std::unique_ptr<DeformedNucleus> ColliderModus::create_deformed_nucleus(
 
 double ColliderModus::initial_conditions(Particles *particles,
                                          const ExperimentParameters &) {
-  sample_impact();
-
-  logg[LCollider].info() << "Impact parameter = " << format(impact_, "fm");
   // Populate the nuclei with appropriately distributed nucleons.
   // If deformed, this includes rotating the nucleus.
   projectile_->arrange_nucleons();
@@ -507,14 +510,7 @@ double ColliderModus::initial_conditions(Particles *particles,
     // avoid that the nuclei will fly apart.
     projectile_->generate_fermi_momenta();
     target_->generate_fermi_momenta();
-    if (fermi_motion_ == FermiMotion::On) {
-      logg[LCollider].info() << "Fermi motion is ON.";
-    } else {
-      logg[LCollider].info() << "FROZEN Fermi motion is on.";
-    }
   } else if (fermi_motion_ == FermiMotion::Off) {
-    // No Fermi-momenta are generated in this case
-    logg[LCollider].info() << "Fermi motion is OFF.";
   } else {
     throw std::domain_error("Invalid Fermi_Motion input.");
   }

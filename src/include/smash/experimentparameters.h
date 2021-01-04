@@ -28,7 +28,10 @@ struct ExperimentParameters {
   /// Output clock to keep track of the next output time
   std::unique_ptr<Clock> outputclock;
 
-  /// Number of test particle
+  /// Number of parallel ensembles
+  int n_ensembles;
+
+  /// Number of test-particles
   int testparticles;
 
   /// Width of gaussian Wigner density of particles
@@ -108,6 +111,8 @@ struct ExperimentParameters {
    */
   double maximum_cross_section;  // mb
 
+  /// Allow or forbid the first collisions within the same nucleus
+  bool allow_collisions_within_nucleus;
   /**
    * Global factor which all cross sections are scaled with.
    *

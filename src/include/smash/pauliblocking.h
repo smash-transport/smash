@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_SMASH_PAULIBLOCKING_H_
 #define SRC_INCLUDE_SMASH_PAULIBLOCKING_H_
 
+#include <vector>
+
 #include "configuration.h"
 #include "experimentparameters.h"
 #include "forwarddeclarations.h"
@@ -53,7 +55,7 @@ class PauliBlocker {
    *
    * \param[in] r Position vector of the particle.
    * \param[in] p Momentum vector of the particle.
-   * \param[in] particles List of all current particles.
+   * \param[in] ensembles Current list of particles in all ensembles.
    * \param[in] pdg PDG number of species for which density to be calculated.
    * \param[in] disregard Do not count particles that should be disregarded.
    *                       This is intended to avoid counting incoming
@@ -62,7 +64,8 @@ class PauliBlocker {
    * \return Phase-space density
    */
   double phasespace_dens(const ThreeVector &r, const ThreeVector &p,
-                         const Particles &particles, const PdgCode pdg,
+                         const std::vector<Particles> &ensembles,
+                         const PdgCode pdg,
                          const ParticleList &disregard) const;
 
  private:
@@ -86,6 +89,9 @@ class PauliBlocker {
 
   /// Testparticles number
   int ntest_;
+
+  /// Number of ensembles
+  int n_ensembles_;
 
   /// Weights: tabulated results of numerical integration
   std::array<double, 30> weights_;

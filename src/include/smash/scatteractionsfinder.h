@@ -42,21 +42,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] parameters Struct of parameters determining whether to
    *            exclude some certain types of scatterings and switching
    *            among the methods to treat with the NNbar collisions.
-   * \param[in] nucleon_has_interacted Flags to record whether an initial
-   *            nucleon has interacted with another particle not from the
-   *            same nucleus. The flags are used if we want to exclude
-   *            the first collisions among the nucleons within the same
-   *            nucleus.
-   * \param[in] N_tot Total number of the initial nucleons. This number,
-   *            as well as the next parameter, will be used to determine
-   *            whether two intial nucleons are within the same nucleus
-   *            if we'd like to exclude the first collisions among them.
-   * \param[in] N_proj Total projectile number
    */
   ScatterActionsFinder(Configuration config,
-                       const ExperimentParameters &parameters,
-                       const std::vector<bool> &nucleon_has_interacted,
-                       int N_tot, int N_proj);
+                       const ExperimentParameters &parameters);
 
   /**
    * Determine the collision time of the two particles.
@@ -120,6 +108,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
         const double p2_dot_x = p2_mom.Dot(delta_x);
         const double p1_dot_p2 = p1_mom.Dot(p2_mom);
         const double denominator = std::pow(p1_dot_p2, 2) - p1_sqr * p2_sqr;
+        if (unlikely(std::abs(denominator) < really_small * really_small)) {
+          return -1.0;
+        }
 
         const double time_1 = (p2_sqr * p1_dot_x - p1_dot_p2 * p2_dot_x) *
                               p1_mom.x0() / denominator;
@@ -365,18 +356,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * Ignored if negative.
    */
   const double box_length_;
-  /**
-   * Parameter to record whether the nucleon has experienced a collision or not.
-   */
-  const std::vector<bool> &nucleon_has_interacted_;
-  /// Record the total number of the nucleons in the two colliding nuclei
-  const int N_tot_;
-  /// Record the number of the nucleons in the projectile
-  const int N_proj_;
   /// Parameter for formation time
   const double string_formation_time_;
   /// \see input_collision_term_
   const double maximum_cross_section_;
+  /// If particles within nucleus are allowed to collide for their first time
+  const bool allow_first_collisions_within_nucleus_;
   /**
    * Switch to turn off throwing an exception for collision probabilities larger
    * than 1. In larger production runs it is ok, if the probability rarely slips

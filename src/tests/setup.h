@@ -251,6 +251,7 @@ inline ExperimentParameters default_parameters(
   return ExperimentParameters{
       make_unique<UniformClock>(0., dt),  // labclock
       make_unique<UniformClock>(0., 1.),  // outputclock
+      1,                                  // ensembles
       testparticles,                      // testparticles
       1.0,                                // Gaussian smearing width
       4.0,                                // Gaussian smearing cut-off
@@ -267,6 +268,7 @@ inline ExperimentParameters default_parameters(
       false,  // potential_affect_threshold
       -1.0,   // box_length
       200.0,  // max. cross section
+      false,  // allow collisions within nucleus
       1.0,    // cross section scaling
       0.0     // additional elastic cross section
   };
@@ -275,7 +277,8 @@ inline ExperimentParameters default_parameters(
 /// Creates default EventInfo object for testing purposes
 inline EventInfo default_event_info(double impact_parameter = 0.0,
                                     bool empty_event = false) {
-  return EventInfo{impact_parameter, 0.0, 0.0, 0.0, 0.0, 0.0, 1, empty_event};
+  return EventInfo{impact_parameter, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1,
+                   empty_event};
 }
 
 /**

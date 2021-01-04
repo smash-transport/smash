@@ -17,6 +17,12 @@
 
 namespace smash {
 
+enum class BelongsTo : uint8_t {
+  Nothing = 0,
+  Projectile = 1,
+  Target = 2,
+};
+
 /**
  * A structure to hold information about the history of the particle,
  * e.g. the last interaction etc.
@@ -327,6 +333,11 @@ class ParticleData {
     set_4momentum(momentum_.lorentz_boost(v));
   }
 
+  /// Setter for belongs_to label
+  void set_belongs_to(BelongsTo label) { belongs_to_ = label; }
+  /// Getter for belongs_to label
+  BelongsTo belongs_to() const { return belongs_to_; }
+
   /**
    * Check whether two particles have the same id
    * \param[in] a particle to compare to
@@ -395,6 +406,7 @@ class ParticleData {
     dst.formation_time_ = formation_time_;
     dst.initial_xsec_scaling_factor_ = initial_xsec_scaling_factor_;
     dst.begin_formation_time_ = begin_formation_time_;
+    dst.belongs_to_ = belongs_to_;
   }
 
   /**
@@ -454,6 +466,8 @@ class ParticleData {
   double initial_xsec_scaling_factor_ = 1.0;
   /// history information
   HistoryData history_;
+  /// is it part of projectile or target nuclei?
+  BelongsTo belongs_to_ = BelongsTo::Nothing;
 };
 
 /**

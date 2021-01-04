@@ -13,6 +13,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <vector>
 
 #include "density.h"
 #include "experimentparameters.h"
@@ -50,36 +51,35 @@ class ThermodynamicOutput : public OutputInterface {
 
   /**
    *  writes the event header
-   *  \param[in] particles Dummy, is just here to satisfy inheritance
+   *  \param[in] ensembles Dummy, is just here to satisfy inheritance
    *  \param[in] event_number Current event number,
    *             that will be written to the header
-   *  \param[in] event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles, const int event_number,
-                     const EventInfo &event) override;
+  void at_eventstart(const std::vector<Particles> &ensembles,
+                     const int event_number) override;
 
   /**
    *  only flushes the output the file
-   *  \param[in] particles Dummy, is just here to satisfy inheritance
+   *  \param[in] ensembles Dummy, is just here to satisfy inheritance
    *  \param[in] event_number Dummy, is just here to satisfy inheritance
-   *  \param[in] event Dummy, is just here to satisfy inheritance
    */
-  void at_eventend(const Particles &particles, const int event_number,
-                   const EventInfo &event) override;
+  void at_eventend(const std::vector<Particles> &ensembles,
+                   const int event_number) override;
 
   /**
    *  Writes thermodynamics every fixed time interval. For configuring
    *  the output see \ref thermodyn_output_user_guide_.
-   *  \param[in] particles Particles, from which thermodynamic variables are
-   * computed \param[in] clock Clock, needed to get current time \param[in]
-   * dens_param set of parameters, defining smearing. For more info about
-   * smearing see \ref thermodyn_output_user_guide_.
-   * \param[in] event Event info, see \ref event_info
+   *
+   * \param[in] ensembles Particles, from which thermodynamic variables are
+   *            computed
+   * \param[in] clock Clock, needed to get current time
+   * \param[in] dens_param set of parameters, defining smearing.
+   *            For more info about
+   *            smearing see \ref thermodyn_output_user_guide_.
    */
-  void at_intermediate_time(const Particles &particles,
+  void at_intermediate_time(const std::vector<Particles> &ensembles,
                             const std::unique_ptr<Clock> &clock,
-                            const DensityParameters &dens_param,
-                            const EventInfo &event) override;
+                            const DensityParameters &dens_param) override;
 
   /**
    * Prints density along the specified line. Useful to make 1D plots of

@@ -86,10 +86,18 @@ class ColliderModus : public ModusDefault {
    */
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
-  /// \return The total number of test particles in the initial nuclei
-  int total_N_number() const { return target_->size() + projectile_->size(); }
-  /// \return The number of test particles in the projectile nucleus
-  int proj_N_number() const { return projectile_->size(); }
+
+  /** Sample impact parameter.
+   *
+   * Samples the impact parameter from values between imp_min_ and imp_max_, if
+   * linear or quadratic sampling is used. By specifying impact parameters and
+   * corresponding yields, custom sampling can be used.
+   * This depends on the value of sampling_.
+   *
+   * Note that imp_max_ less than imp_min_ also works fine.
+   *
+   **/
+  void sample_impact();
 
   /// Time until nuclei have passed through each other
   double nuclei_passing_time() const {
@@ -113,10 +121,6 @@ class ColliderModus : public ModusDefault {
    *         the beam momenta in experiment.cc if Fermi motion is frozen.
    */
   double velocity_target() const { return velocity_target_; }
-  /**
-   * \return A flag: whether to allow first collisions within the same nucleus.
-   */
-  bool cll_in_nucleus() { return cll_in_nucleus_; }
   /// \return The Fermi motion type
   FermiMotion fermi_motion() { return fermi_motion_; }
   /// \return whether the modus is collider (which is, yes, trivially true)
@@ -213,17 +217,6 @@ class ColliderModus : public ModusDefault {
    */
   void rotate_reaction_plane(double phi, Particles *particles);
 
-  /** Sample impact parameter.
-   *
-   * Samples the impact parameter from values between imp_min_ and imp_max_, if
-   * linear or quadratic sampling is used. By specifying impact parameters and
-   * corresponding yields, custom sampling can be used.
-   * This depends on the value of sampling_.
-   *
-   * Note that imp_max_ less than imp_min_ also works fine.
-   *
-   **/
-  void sample_impact();
   /** Initial z-displacement of nuclei.
    *
    * Projectile is shifted on -(this value) in z-direction
@@ -239,10 +232,6 @@ class ColliderModus : public ModusDefault {
    * An option to include Fermi motion ("off", "on", "frozen")
    */
   FermiMotion fermi_motion_ = FermiMotion::Off;
-  /**
-   * An option to accept first collisions within the same nucleus
-   */
-  bool cll_in_nucleus_ = false;
   /**
    * Beam velocity of the projectile
    */

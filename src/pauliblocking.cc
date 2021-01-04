@@ -20,7 +20,8 @@ PauliBlocker::PauliBlocker(Configuration conf,
       rc_(conf.take({"Gaussian_Cutoff"}, 2.2)),
       rr_(conf.take({"Spatial_Averaging_Radius"}, 1.86)),
       rp_(conf.take({"Momentum_Averaging_Radius"}, 0.08)),
-      ntest_(param.testparticles) {
+      ntest_(param.testparticles),
+      n_ensembles_(param.n_ensembles) {
   /*!\Userguide
    * \page pauliblocker Pauli_Blocking
    *
@@ -45,11 +46,12 @@ PauliBlocker::PauliBlocker(Configuration conf,
    \endverbatim
    */
 
-  if (ntest_ < 20) {
+  if (ntest_ * n_ensembles_ < 20) {
     logg[LPauliBlocking].warn(
         "Phase-space density calculation in Pauli blocking"
-        " will not work reasonably for a small number of testparticles."
-        " The recommended number of testparticles is 20.");
+        " will not work reasonably. Either use testparticles or ensembles, or "
+        "both."
+        " The recommended testparticles * ensembles is at least 20");
   }
 
   if (rc_ < rr_ || rr_ < 0.0 || rp_ < 0) {
@@ -65,7 +67,7 @@ PauliBlocker::PauliBlocker(Configuration conf,
 PauliBlocker::~PauliBlocker() {}
 
 double PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
-                                     const Particles &particles,
+                                     const std::vector<Particles> &ensembles,
                                      const PdgCode pdg,
                                      const ParticleList &disregard) const {
   double f = 0.0;
@@ -73,40 +75,43 @@ double PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
   /* TODO(oliiny): looping over all particles is inefficient,
    * I need only particles within rp_ radius in momentum and
    * within rr_+rc_ in coordinate space. Some search algorithm might help. */
-  for (const auto &part : particles) {
-    // Only consider identical particles
-    if (part.pdgcode() != pdg) {
-      continue;
-    }
-    // Only consider momenta in sphere of radius rp_ with center at p
-    const double pdist_sqr = (part.momentum().threevec() - p).sqr();
-    if (pdist_sqr > rp_ * rp_) {
-      continue;
-    }
-    const double rdist_sqr = (part.position().threevec() - r).sqr();
-    // Only consider coordinates in sphere of radius rr_+rc_ with center at r
-    if (rdist_sqr >= (rr_ + rc_) * (rr_ + rc_)) {
-      continue;
-    }
-    // Do not count particles that should be disregarded.
-    bool to_disregard = false;
-    for (const auto &disregard_part : disregard) {
-      if (part.id() == disregard_part.id()) {
-        to_disregard = true;
+  for (const Particles &particles : ensembles) {
+    for (const ParticleData &part : particles) {
+      // Only consider identical particles
+      if (part.pdgcode() != pdg) {
+        continue;
       }
-    }
-    if (to_disregard) {
-      continue;
-    }
-    // 1st order interpolation using tabulated values
-    const double i_real = std::sqrt(rdist_sqr) / (rr_ + rc_) * weights_.size();
-    const size_t i = std::floor(i_real);
-    const double rest = i_real - i;
-    if (likely(i + 1 < weights_.size())) {
-      f += weights_[i] * rest + weights_[i + 1] * (1. - rest);
-    }
-  }
-  return f / ntest_;
+      // Only consider momenta in sphere of radius rp_ with center at p
+      const double pdist_sqr = (part.momentum().threevec() - p).sqr();
+      if (pdist_sqr > rp_ * rp_) {
+        continue;
+      }
+      const double rdist_sqr = (part.position().threevec() - r).sqr();
+      // Only consider coordinates in sphere of radius rr_+rc_ with center at r
+      if (rdist_sqr >= (rr_ + rc_) * (rr_ + rc_)) {
+        continue;
+      }
+      // Do not count particles that should be disregarded.
+      bool to_disregard = false;
+      for (const auto &disregard_part : disregard) {
+        if (part.id() == disregard_part.id()) {
+          to_disregard = true;
+        }
+      }
+      if (to_disregard) {
+        continue;
+      }
+      // 1st order interpolation using tabulated values
+      const double i_real =
+          std::sqrt(rdist_sqr) / (rr_ + rc_) * weights_.size();
+      const size_t i = std::floor(i_real);
+      const double rest = i_real - i;
+      if (likely(i + 1 < weights_.size())) {
+        f += weights_[i] * rest + weights_[i + 1] * (1. - rest);
+      }
+    }  // loop over particles in one ensemble
+  }    // loop over ensembles
+  return f / ntest_ / n_ensembles_;
 }
 
 void PauliBlocker::init_weights_analytical() {
