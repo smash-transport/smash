@@ -81,7 +81,7 @@ benchmark_run() {
                -i ${SCRIPTPATH}/configs/${YAML_DIR}/config.yaml \
                -d ${DECAYM_DIR}/decaymodes.txt \
                -p ${PART_DIR}/particles.txt \
-               -q)
+               2>&1 >/dev/null)
   fi
   echo "$PERF_OUT"
 }
@@ -90,37 +90,37 @@ benchmark_run() {
 PART_DEF="${SMASH_ROOT}/input"
 DECAYM_DEF="${SMASH_ROOT}/input"
 
-# echo "   Started benchmark for collider ..."
-# coll_perf=$(benchmark_run collider $DECAYM_DEF $PART_DEF)
-# echo "$coll_perf" | grep -E "time elapsed"
-# 
-# echo "   Started benchmark for timestepless ..."
-# nots_perf=$(benchmark_run collider $DECAYM_DEF $PART_DEF 'General: { Time_Step_Mode: None }')
-# echo "$nots_perf" | grep -E "time elapsed"
-# 
-# echo "   Started benchmark for box ..."
-# box_perf=$(benchmark_run box "${SMASH_ROOT}/input/box" "${SMASH_ROOT}/input/box")
-# echo "$box_perf" | grep -E "time elapsed"
-# 
-# echo "   Started benchmark for sphere ..."
-# sphere_perf=$(benchmark_run sphere $DECAYM_DEF $PART_DEF)
-# echo "$sphere_perf" | grep -E "time elapsed"
+echo "   Started benchmark for collider ..."
+coll_perf=$(benchmark_run collider $DECAYM_DEF $PART_DEF)
+echo "$coll_perf" | grep -E "time elapsed"
+
+echo "   Started benchmark for timestepless ..."
+nots_perf=$(benchmark_run collider $DECAYM_DEF $PART_DEF 'General: { Time_Step_Mode: None }')
+echo "$nots_perf" | grep -E "time elapsed"
+
+echo "   Started benchmark for box ..."
+box_perf=$(benchmark_run box "${SMASH_ROOT}/input/box" "${SMASH_ROOT}/input/box")
+echo "$box_perf" | grep -E "time elapsed"
+
+echo "   Started benchmark for sphere ..."
+sphere_perf=$(benchmark_run sphere $DECAYM_DEF $PART_DEF)
+echo "$sphere_perf" | grep -E "time elapsed"
 
 echo "   Started benchmark for dileptons ..."
 dilepton_perf=$(benchmark_run dileptons "${SMASH_ROOT}/input/dileptons" $PART_DEF)
 echo "$dilepton_perf" | grep -E "time elapsed"
 
-# echo "   Started benchmark for photons ..."
-# photons_perf=$(benchmark_run photons "${SCRIPTPATH}/configs/photons" "${SCRIPTPATH}/configs/photons")
-# echo "$photons_perf" | grep -E "time elapsed"
-# 
-# echo "   Started benchmark for testparticles ..."
-# testp_perf=$(benchmark_run testparticles $DECAYM_DEF $PART_DEF)
-# echo "$testp_perf" | grep -E "time elapsed"
-# 
-# echo "   Started benchmark for potentials ..."
-# potentials_perf=$(benchmark_run potentials $DECAYM_DEF $PART_DEF)
-# echo "$potentials_perf" | grep -E "time elapsed"
+echo "   Started benchmark for photons ..."
+photons_perf=$(benchmark_run photons "${SCRIPTPATH}/configs/photons" "${SCRIPTPATH}/configs/photons")
+echo "$photons_perf" | grep -E "time elapsed"
+
+echo "   Started benchmark for testparticles ..."
+testp_perf=$(benchmark_run testparticles $DECAYM_DEF $PART_DEF)
+echo "$testp_perf" | grep -E "time elapsed"
+
+echo "   Started benchmark for potentials ..."
+potentials_perf=$(benchmark_run potentials $DECAYM_DEF $PART_DEF)
+echo "$potentials_perf" | grep -E "time elapsed"
 
 
 OUTPUT_FILE=${SCRIPTPATH}/bm-results-${SMASH_VER_NUM}.md
