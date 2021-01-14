@@ -379,8 +379,23 @@ double ScatterActionMulti::probability_three_to_two(
 double ScatterActionMulti::probability_five_to_two(
     const ParticleType& type_out, double dt, const double gcell_vol,
     const double degen_factor) const {
-  // TODO(stdnmr)
-  return 0.0;
+  const double e1 = incoming_particles_[0].momentum().x0();
+  const double e2 = incoming_particles_[1].momentum().x0();
+  const double e3 = incoming_particles_[2].momentum().x0();
+  const double e4 = incoming_particles_[3].momentum().x0();
+  const double e5 = incoming_particles_[4].momentum().x0();
+  const double m6 = type_out1.mass();
+  const double m7 = type_out2.mass();
+
+  const double sqrts = sqrt_s();
+  const double lamb = lambda_tilde(sqrts * sqrts, m6 * m6, m7 * m7);
+
+  const double ph_sp_5 = 1.0;  // TODO(stdnmr)
+  const double xs = 1.0;       // TODO(stdnmr)
+
+  // TODO(stdnmr) Add correct hbarc factor
+  return dt / std::pow(gcell_vol, 4.0) * 1. / (32. * e1 * e2 * e3 * e4 * e5) *
+         xs / (4. * M_PI * sqrts * sqrts) * lamb / ph_sp_5 * degen_factor;
 }
 
 void ScatterActionMulti::annihilation() {
