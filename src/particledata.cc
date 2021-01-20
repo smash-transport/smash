@@ -53,6 +53,7 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
     case ProcessType::TwoToOne:
     case ProcessType::TwoToTwo:
     case ProcessType::TwoToThree:
+    case ProcessType::TwoToFive:
     case ProcessType::StringSoftSingleDiffractiveAX:
     case ProcessType::StringSoftSingleDiffractiveXB:
     case ProcessType::StringSoftDoubleDiffractive:

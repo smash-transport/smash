@@ -166,6 +166,11 @@ CollisionBranchList CrossSections::generate_collision_list(
       append_list(process_list, two_to_three(), (1. - p_pythia) * scale_xs);
     }
   }
+  if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
+    // NNbar directly to 5 pions (2-to-5), TODO(stdnmr) currently only 5pi0
+    process_list.emplace_back(NNbar_to_5pi(sum_xs_of(process_list), scale_xs));
+  }
+
   /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
    * ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
    * Only use in cases when detailed balance MUST happen, i.e. in a box! */
@@ -2429,6 +2434,21 @@ double CrossSections::string_hard_cross_section() const {
 
   return cross_sec;
 }
+
+CollisionBranchPtr CrossSections::NNbar_to_5pi(
+    const double current_xs, const double scale_xs) const {
+  /* Calculate NNbar cross section:
+   * Parametrized total minus all other present channels.*/
+  const double s = sqrt_s_ * sqrt_s_;
+  double nnbar_xsec = std::max(0., ppbar_total(s) * scale_xs - current_xs);
+  logg[LCrossSections].debug("NNbar cross section is: ", nnbar_xsec);
+  // Make collision channel NNbar -> 5π
+  // TODO(stdnmr) Include all pion final states, not just the pi zero example
+  const auto& type_pi = ParticleType::find(pdg::pi_z);
+  return make_unique<CollisionBranch>(type_pi, type_pi, type_pi, type_pi, type_pi,
+                                       nnbar_xsec, ProcessType::TwoToFive);
+}
+
 
 CollisionBranchPtr CrossSections::NNbar_annihilation(
     const double current_xs, const double scale_xs) const {

@@ -33,6 +33,8 @@ enum class ProcessType {
   TwoToTwo = 3,
   /// 2->3 scattering
   TwoToThree = 4,
+  /// 2->5 scattering
+  TwoToFive = 13,
   /// resonance decay
   Decay = 5,
   /// box wall crossing
@@ -269,6 +271,27 @@ class CollisionBranch : public ProcessBranch {
     particle_types_.push_back(&type_a);
     particle_types_.push_back(&type_b);
     particle_types_.push_back(&type_c);
+  }
+
+  /**
+   * Construct collision branch with 5 particles in final state.
+   * \param[in] type_a Particle type of first final state particle.
+   * \param[in] type_b Particle type of second final state particle.
+   * \param[in] type_c Particle type of third final state particle.
+   * \param[in] type_d Particle type of fourth final state particle.
+   * \param[in] type_e Particle type of fith final state particle.
+   * \param[in] w Weight of created branch.
+   * \param[in] p_type Process type of created branch.
+   */
+  CollisionBranch(const ParticleType &type_a, const ParticleType &type_b,
+                  const ParticleType &type_c, const ParticleType &type_d, const ParticleType &type_e, double w, ProcessType p_type)
+      : ProcessBranch(w), process_type_(p_type) {
+    particle_types_.reserve(5);
+    particle_types_.push_back(&type_a);
+    particle_types_.push_back(&type_b);
+    particle_types_.push_back(&type_c);
+    particle_types_.push_back(&type_d);
+    particle_types_.push_back(&type_e);
   }
 
   /**

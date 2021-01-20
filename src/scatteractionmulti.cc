@@ -240,7 +240,7 @@ void ScatterActionMulti::add_possible_reactions(
   }
   // 5 -> 2
   if (incoming_particles_.size() == 5) {
-    // TODO(stdnmr) Introduce config falg for 5-to-2 here
+    // TODO(stdnmr) Introduce config flag for 5-to-2 here
     if (true) {
       bool all_incoming_particles_are_pions_and_have_charge_zero = false;
       // TODO(stdnmr) add the proper if statement
