@@ -112,6 +112,9 @@ class ScatterActionMulti : public Action {
   /// Perform a 3->2 process.
   void three_to_two();
 
+  /// Perform a 5->2 process.
+  void five_to_two();
+
   /**
    * Calculate the probability for a 3m-to-1 reaction according to the
    * stochastic collision criterion (e.g. \iref{Xu:2004mz} (Sec.IIB)).

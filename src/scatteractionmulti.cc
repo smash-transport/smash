@@ -12,6 +12,7 @@
 #include "smash/crosssections.h"
 #include "smash/integrate.h"
 #include "smash/logging.h"
+#include "smash/parametrizations.h"
 
 namespace smash {
 static constexpr int LScatterActionMulti = LogArea::ScatterActionMulti::id;
@@ -285,6 +286,10 @@ void ScatterActionMulti::generate_final_state() {
       /* 3->2 scattering */
       three_to_two();
       break;
+    case ProcessType::MultiParticleFiveToTwo:
+      /* 5->2 scattering */
+      five_to_two();
+      break;
     default:
       throw InvalidScatterActionMulti(
           "ScatterActionMulti::generate_final_state: Invalid process type " +
@@ -384,18 +389,17 @@ double ScatterActionMulti::probability_five_to_two(
   const double e3 = incoming_particles_[2].momentum().x0();
   const double e4 = incoming_particles_[3].momentum().x0();
   const double e5 = incoming_particles_[4].momentum().x0();
-  const double m6 = type_out1.mass();
-  const double m7 = type_out2.mass();
+  const double mout = type_out.mass();
 
   const double sqrts = sqrt_s();
-  const double lamb = lambda_tilde(sqrts * sqrts, m6 * m6, m7 * m7);
+  const double lamb = lambda_tilde(sqrts * sqrts, mout * mout, mout * mout);
 
   const double ph_sp_5 = 1.0;  // TODO(stdnmr)
-  const double xs = 1.0;       // TODO(stdnmr)
+  // TODO(stdnmr) Clarify if want to account for other baryons than p
+  const double xs = xs_ppbar_annihilation(sqrts * sqrts) / gev2_mb;
 
-  // TODO(stdnmr) Add correct hbarc factor
   return dt / std::pow(gcell_vol, 4.0) * 1. / (32. * e1 * e2 * e3 * e4 * e5) *
-         xs / (4. * M_PI * sqrts * sqrts) * lamb / ph_sp_5 * degen_factor;
+         xs / (4. * M_PI * sqrts * sqrts) * lamb / ph_sp_5 * std::pow(hbarc, 9.0) * degen_factor;
 }
 
 void ScatterActionMulti::annihilation() {
@@ -421,6 +425,14 @@ void ScatterActionMulti::three_to_two() {
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
   logg[LScatterActionMulti].debug("3->2 scattering:", incoming_particles_,
+                                  " -> ", outgoing_particles_);
+}
+
+void ScatterActionMulti::five_to_two() {
+  sample_2body_phasespace();
+  // Make sure to assign formation times before boost to the computational frame
+  assign_formation_time_to_outgoing_particles();
+  logg[LScatterActionMulti].debug("5->2 scattering:", incoming_particles_,
                                   " -> ", outgoing_particles_);
 }
 
