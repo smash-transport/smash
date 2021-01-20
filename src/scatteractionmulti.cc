@@ -242,9 +242,9 @@ void ScatterActionMulti::add_possible_reactions(
   if (incoming_particles_.size() == 5) {
     // TODO(stdnmr) Introduce config falg for 5-to-2 here
     if (true) {
-      bool all_incoming_particles_are_pions = false;
+      bool all_incoming_particles_are_pions_and_have_charge_zero = false;
       // TODO(stdnmr) add the proper if statement
-      if (all_incoming_particles_are_pions) {
+      if (all_incoming_particles_are_pions_and_have_charge_zero) {
         // TODO(stdnmr) calculate correct symmetry and spin factors
         const double spin_degn = 1.0;
         const double symmetry_factor = 1.0;
@@ -391,15 +391,20 @@ double ScatterActionMulti::probability_five_to_two(
   const double e5 = incoming_particles_[4].momentum().x0();
   const double mout = type_out.mass();
 
-  const double sqrts = sqrt_s();
-  const double lamb = lambda_tilde(sqrts * sqrts, mout * mout, mout * mout);
+  const double man_s = sqrt_s() * sqrt_s();
+  const double lamb = lambda_tilde(man_s, mout * mout, mout * mout);
 
-  const double ph_sp_5 = 1.0;  // TODO(stdnmr)
+  // Oscars parametrization for phi5
+  const double s_zero = 25 * pion_mass * pion_mass;
+  const double fit_a = 5.02560248e-11;
+  const double fit_alpha = 1.982;
+  const double ph_sp_5 = fit_a * std::pow(man_s - s_zero, 5.0) * std::pow(1 + man_s / s_zero, -fit_alpha);
+  
   // TODO(stdnmr) Clarify if want to account for other baryons than p
-  const double xs = xs_ppbar_annihilation(sqrts * sqrts) / gev2_mb;
+  const double xs = xs_ppbar_annihilation(man_s) / gev2_mb;
 
   return dt / std::pow(gcell_vol, 4.0) * 1. / (32. * e1 * e2 * e3 * e4 * e5) *
-         xs / (4. * M_PI * sqrts * sqrts) * lamb / ph_sp_5 * std::pow(hbarc, 9.0) * degen_factor;
+         xs / (4. * M_PI * man_s) * lamb / ph_sp_5 * std::pow(hbarc, 11.0) * degen_factor;
 }
 
 void ScatterActionMulti::annihilation() {

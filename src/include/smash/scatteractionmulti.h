@@ -171,6 +171,7 @@ class ScatterActionMulti : public Action {
                                   const double gcell_vol,
                                   const double degen_factor = 1.0) const;
 
+  // TODO(stdnmr) Docu incl. mention of phase space parametrization
   double probability_five_to_two(const ParticleType& type_out, double dt,
                                  const double gcell_vol,
                                  const double degen_factor = 1.0) const;
