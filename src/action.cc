@@ -342,6 +342,11 @@ void Action::sample_3body_phasespace() {
   outgoing_particles_[1].boost_momentum(beta_cm);
 }
 
+void Action::sample_5body_phasespace() {
+  // TODO(stdnmr)
+}
+
+
 void Action::check_conservation(const uint32_t id_process) const {
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);
