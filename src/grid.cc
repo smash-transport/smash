@@ -153,50 +153,37 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
     number_of_cells_[i] =
         (strategy == CellSizeStrategy::Largest)
             ? 2
-            : static_cast<int>(std::floor(length_[i] * index_factor[i])) +
-                  // The last cell in each direction can be smaller than
-                  // max_interaction_length. In that case periodic boundaries
-                  // will not work correctly. Thus, we need to reduce the number
-                  // of cells in that direction by one and make the last cell
-                  // larger. This basically merges a smaller boundary cell into
-                  // a full cell inside the grid. There's a ~0% chance that the
-                  // given boundaries create an integral number of cells with
-                  // length of max_interaction_length. Therefore, just make the
-                  // default number of cells one less than for non-periodic
-                  // boundaries.
-                  (O == GridOptions::Normal ? 1 : 0);
+            : static_cast<int>(std::floor(length_[i] * index_factor[i]));
+
     // Only in the case of periodic boundaries (i.e. GridOptions != Normal) the
     // number of cells can be zero.
     if (number_of_cells_[i] == 0) {
       // The minimal cell length exceeds the length of the box.
       throw std::runtime_error(error_box_too_small);
     }
-    // std::nextafter implements a safety margin so that no valid position
-    // inside the grid can reference an out-of-bounds cell
     if (number_of_cells_[i] > max_cells) {
       number_of_cells_[i] = max_cells;
-      index_factor[i] = number_of_cells_[i] / length_[i];
-      while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
-        index_factor[i] = std::nextafter(index_factor[i], 0.);
-      }
-      assert(index_factor[i] * length_[i] < number_of_cells_[i]);
     } else if (O == GridOptions::PeriodicBoundaries) {
       if (number_of_cells_[i] == 1) {
         number_of_cells_[i] = 2;
       }
-      index_factor[i] = number_of_cells_[i] / length_[i];
-      while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
-        index_factor[i] = std::nextafter(index_factor[i], 0.);
-      }
-      assert(index_factor[i] * length_[i] < number_of_cells_[i]);
-      // Verify that cell length did not become smaller than
-      // the max. interaction length by increasing the number of cells
-      if (1. / index_factor[i] <= std::nextafter(max_interaction_length, 0.)) {
-        // The minimal cell length exceeds
-        // the length of a grid cell in the box.
-        throw std::runtime_error(error_box_too_small);
-      }
     }
+    // std::nextafter implements a safety margin so that no valid position
+    // inside the grid can reference an out-of-bounds cell
+    index_factor[i] = number_of_cells_[i] / length_[i];
+    while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
+      index_factor[i] = std::nextafter(index_factor[i], 0.);
+    }
+    assert(index_factor[i] * length_[i] < number_of_cells_[i]);
+    // Verify that cell length did not become smaller than
+    // the max. interaction length by increasing the number of cells from 1 to 2
+    // for periodic boundaries
+    if (1. / index_factor[i] <= std::nextafter(max_interaction_length, 0.)) {
+      // The minimal cell length exceeds
+      // the length of a grid cell in the box.
+      throw std::runtime_error(error_box_too_small);
+    }
+
   }
 
   cell_volume_ = (length_[0] / number_of_cells_[0]) *
