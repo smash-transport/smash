@@ -127,7 +127,6 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
           ? std::cbrt(particle_count)
           : std::max(2, static_cast<int>(std::cbrt(particle_count)));
 
-
   // This normally equals 1/max_interaction_length. If the number of cells
   // is reduced (because of low density) then this value is smaller. If only
   // one cell is used than this value might also be larger.
@@ -146,7 +145,8 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
       // are inside the same cell, except for the box with peroidic boundary
       // conditions, where we need a 2x2x2 grid.
       number_of_cells_[i] = 1;
-    } else if (number_of_cells_[i] < 2 && O == GridOptions::PeriodicBoundaries) {
+    } else if (number_of_cells_[i] < 2 &&
+               O == GridOptions::PeriodicBoundaries) {
       // Double the minimal cell length exceeds the length of the box, but we
       // need at least 2x2x2 cells for periodic boundaries.
       std::string error_box_too_small =
