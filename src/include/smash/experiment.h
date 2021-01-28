@@ -2231,7 +2231,7 @@ void Experiment<Modus>::final_output() {
         logg[LExperiment].warn()
             << msg_discarded.str()
             << "\nThe number of discarded interactions is large, which means "
-               "the assumption for the stochastic criterion of\n1 interaction"
+               "the assumption for the stochastic criterion of\n1 interaction "
                "per particle per timestep is probably violated. Consider "
                "reducing the timestep size.";
       }
