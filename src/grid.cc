@@ -122,30 +122,15 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
   // But don't let the number of cells exceed the actual number of particles.
   // That would be overkill. Let max_cells³ ≤ particle_count (conversion to
   // int truncates).
-  // Consider that particle placement into cells uses half-open intervals. Thus
-  // a cell includes particles in [0, a[. The next cell [a, 2a[. And so on. This
-  // is important for calculating the number of cells. If length * index_factor
-  // (equivalent to length / max_interaction_length) is integral, then
-  // length * index_factor + 1 determines the number of required cells. That's
-  // because the last cell will then store particles in the interval
-  // [length, length + max_interaction_length[. The code below achieves this
-  // effect by rounding down (floor) and adding 1 afterwards.
   const int max_cells =
       (O == GridOptions::Normal)
           ? std::cbrt(particle_count)
           : std::max(2, static_cast<int>(std::cbrt(particle_count)));
 
-  std::string error_box_too_small =
-      "Input error: Your box is too small for the grid.\n"
-      "The minimal length of the box is given by: " +
-      std::to_string(2 * max_interaction_length) +
-      " fm with the given timestep size.\n"
-      "If you have large timesteps please reduce them.\n"
-      "A larger box or the use of testparticles also helps.\n"
-      "Please take a look at your config.";
 
-  // This normally equals 1/max_interaction_length, but if the number of cells
-  // is reduced (because of low density) then this value is smaller.
+  // This normally equals 1/max_interaction_length. If the number of cells
+  // is reduced (because of low density) then this value is smaller. If only
+  // one cell is used than this value might also be larger.
   std::array<double, 3> index_factor = {1. / max_interaction_length,
                                         1. / max_interaction_length,
                                         1. / max_interaction_length};
@@ -155,18 +140,26 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
             ? 2
             : static_cast<int>(std::floor(length_[i] * index_factor[i]));
 
-    // Only in the case of periodic boundaries (i.e. GridOptions != Normal) the
-    // number of cells can be zero.
     if (number_of_cells_[i] == 0) {
-      // The minimal cell length exceeds the length of the box.
+      // In case of zero cells, make at least one cell that is then smaller than
+      // the minimal cell length. This is ok for all setups, since all particles
+      // are inside the same cell, except for the box with peroidic boundary
+      // conditions, where we need a 2x2x2 grid.
+      number_of_cells_[i] = 1;
+    } else if (number_of_cells_[i] < 2 && O == GridOptions::PeriodicBoundaries) {
+      // Double the minimal cell length exceeds the length of the box, but we
+      // need at least 2x2x2 cells for periodic boundaries.
+      std::string error_box_too_small =
+          "Input error: Your box is too small for the grid.\n"
+          "The minimal length of the box is given by: " +
+          std::to_string(2 * max_interaction_length) +
+          " fm with the given timestep size.\n"
+          "If you have large timesteps please reduce them.\n"
+          "A larger box or the use of testparticles also helps.\n"
+          "Please take a look at your config.";
       throw std::runtime_error(error_box_too_small);
-    }
-    if (number_of_cells_[i] > max_cells) {
+    } else if (number_of_cells_[i] > max_cells) {
       number_of_cells_[i] = max_cells;
-    } else if (O == GridOptions::PeriodicBoundaries) {
-      if (number_of_cells_[i] == 1) {
-        number_of_cells_[i] = 2;
-      }
     }
     // std::nextafter implements a safety margin so that no valid position
     // inside the grid can reference an out-of-bounds cell
@@ -175,15 +168,6 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
       index_factor[i] = std::nextafter(index_factor[i], 0.);
     }
     assert(index_factor[i] * length_[i] < number_of_cells_[i]);
-    // Verify that cell length did not become smaller than
-    // the max. interaction length by increasing the number of cells from 1 to 2
-    // for periodic boundaries
-    if (1. / index_factor[i] <= std::nextafter(max_interaction_length, 0.)) {
-      // The minimal cell length exceeds
-      // the length of a grid cell in the box.
-      throw std::runtime_error(error_box_too_small);
-    }
-
   }
 
   cell_volume_ = (length_[0] / number_of_cells_[0]) *
