@@ -399,8 +399,9 @@ double ScatterActionMulti::probability_five_to_two(
   const double fit_a = 5.02560248e-11;
   const double fit_alpha = 1.982;
   const double ph_sp_5 = fit_a * std::pow(man_s - s_zero, 5.0) * std::pow(1 + man_s / s_zero, -fit_alpha);
-  
-  // TODO(stdnmr) Clarify if want to account for other baryons than p
+
+  // TODO(stdnmr) Clarify if want to account for other baryons than p and if
+  // this is the same cross section as for the inverse process
   const double xs = xs_ppbar_annihilation(man_s) / gev2_mb;
 
   return dt / std::pow(gcell_vol, 4.0) * 1. / (32. * e1 * e2 * e3 * e4 * e5) *
