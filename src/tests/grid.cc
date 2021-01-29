@@ -147,7 +147,7 @@ TEST(grid_construction) {
          }) {
       Particles list;
       for (auto p : param.particles) {
-        p.set_4position(min_cell_length * p.position());
+        p.set_4position(1.5 * min_cell_length * p.position());
         list.insert(p);
       }
       Grid<GridOptions::Normal> grid(list, min_cell_length, timestep);
