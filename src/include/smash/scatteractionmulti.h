@@ -237,6 +237,13 @@ class ScatterActionMulti : public Action {
   bool two_pions_eta(const ParticleData& data_a, const ParticleData& data_b,
                      const ParticleData& data_c) const;
 
+  // TODO(stdnmr): Extend to also check correct pion inital state + documentation
+  bool all_incoming_particles_are_pions_and_have_charge_zero_together(const ParticleData& data_a,
+                                                            const ParticleData& data_b,
+                                                            const ParticleData& data_c,
+                                                            const ParticleData& data_d,
+                                                            const ParticleData& data_e) const;
+
   /// Total probability of reaction
   double total_probability_;
 

@@ -378,12 +378,12 @@ void Action::sample_5body_phasespace() {
   Angles phitheta;
   phitheta.distribute_isotropically();
 
-  outgoing_particles_[0].set_4momentum(m_a, pcm * phitheta.threevec() / 2);
-  outgoing_particles_[1].set_4momentum(m_b, pcm * phitheta.threevec() / 2);
+  outgoing_particles_[0].set_4momentum(m_a, pcm * phitheta.threevec() * 0.500001);
+  outgoing_particles_[1].set_4momentum(m_b, pcm * phitheta.threevec() * 0.499999);
 
-  outgoing_particles_[2].set_4momentum(m_c, -pcm * phitheta.threevec() / 3);
-  outgoing_particles_[3].set_4momentum(m_d, -pcm * phitheta.threevec() / 3);
-  outgoing_particles_[4].set_4momentum(m_e, -pcm * phitheta.threevec() / 3);
+  outgoing_particles_[2].set_4momentum(m_c, -pcm * phitheta.threevec() * 0.33334);
+  outgoing_particles_[3].set_4momentum(m_d, -pcm * phitheta.threevec() * 0.33335);
+  outgoing_particles_[4].set_4momentum(m_e, -pcm * phitheta.threevec() * 0.33331);
 }
 
 

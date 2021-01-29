@@ -242,9 +242,9 @@ void ScatterActionMulti::add_possible_reactions(
   if (incoming_particles_.size() == 5) {
     // TODO(stdnmr) Introduce config flag for 5-to-2 here
     if (true) {
-      bool all_incoming_particles_are_pions_and_have_charge_zero = false;
-      // TODO(stdnmr) add the proper if statement
-      if (all_incoming_particles_are_pions_and_have_charge_zero) {
+      // TODO(stdnmr) finalize the inc. pion if statement
+      if (all_incoming_particles_are_pions_and_have_charge_zero_together(incoming_particles_[0], incoming_particles_[1],
+                                incoming_particles_[2], incoming_particles_[3], incoming_particles_[4])) {
         // TODO(stdnmr) calculate correct symmetry and spin factors
         const double spin_degn = 1.0;
         const double symmetry_factor = 1.0;
@@ -472,6 +472,22 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
          (pdg_a == pdg::pi_p && pdg_b == pdg::pi_m && pdg_c == pdg::eta) ||
          (pdg_a == pdg::pi_p && pdg_b == pdg::eta && pdg_c == pdg::pi_m);
 }
+
+bool ScatterActionMulti::all_incoming_particles_are_pions_and_have_charge_zero_together(const ParticleData& data_a,
+                                       const ParticleData& data_b,
+                                       const ParticleData& data_c,
+                                       const ParticleData& data_d,
+                                       const ParticleData& data_e) const {
+     const PdgCode pdg_a = data_a.pdgcode();
+     const PdgCode pdg_b = data_b.pdgcode();
+     const PdgCode pdg_c = data_c.pdgcode();
+     const PdgCode pdg_d = data_d.pdgcode();
+     const PdgCode pdg_e = data_e.pdgcode();
+  return (pdg_a.is_pion() && pdg_b.is_pion() && pdg_c.is_pion() && pdg_d.is_pion() && pdg_e.is_pion()) &&
+         (pdg_a.charge() + pdg_b.charge() + pdg_c.charge() + pdg_d.charge() + pdg_e.charge() == 0);
+
+}
+
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
   out << "MultiParticleScatter of " << incoming_particles_;
