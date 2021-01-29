@@ -343,7 +343,47 @@ void Action::sample_3body_phasespace() {
 }
 
 void Action::sample_5body_phasespace() {
-  // TODO(stdnmr)
+  assert(outgoing_particles_.size() == 5);
+  if (!outgoing_particles_[0].type().is_stable() ||
+      !outgoing_particles_[1].type().is_stable() ||
+      !outgoing_particles_[2].type().is_stable() ||
+      !outgoing_particles_[3].type().is_stable() ||
+      !outgoing_particles_[4].type().is_stable()) {
+    throw std::invalid_argument(
+        "sample_5body_phasespace: Found resonance in to be sampled outgoing "
+        "particles, but assumes stable particles.");
+  }
+  const double m_a = outgoing_particles_[0].type().mass(),
+               m_b = outgoing_particles_[1].type().mass(),
+               m_c = outgoing_particles_[2].type().mass(),
+               m_d = outgoing_particles_[3].type().mass(),
+               m_e = outgoing_particles_[4].type().mass();
+  const double sqrts = sqrt_s();
+
+  // WIP: TODO(stdnmr)
+  // mab = random::uniform(m_a + m_b, sqrts - m_c - m_d - m_e);
+  // mcde = sqrts - mab;
+  // pcm_ab = pCM(mab, m_a, m_b);
+  //
+  // // Sample particles 1 and 2 isotropically
+  // Angles phitheta;
+  // phitheta.distribute_isotropically();
+  //
+  // outgoing_particles_[0].set_4momentum(m_a, pcm_ab * phitheta.threevec());
+  // outgoing_particles_[1].set_4momentum(m_b, -pcm_ab * phitheta.threevec());
+
+  // Solution that does something and maybe conserves momentum
+  const double pcm = pCM(sqrts, m_a + m_b, m_c + m_d + m_e);
+
+  Angles phitheta;
+  phitheta.distribute_isotropically();
+
+  outgoing_particles_[0].set_4momentum(m_a, pcm * phitheta.threevec() / 2);
+  outgoing_particles_[1].set_4momentum(m_b, pcm * phitheta.threevec() / 2);
+
+  outgoing_particles_[2].set_4momentum(m_c, -pcm * phitheta.threevec() / 3);
+  outgoing_particles_[3].set_4momentum(m_d, -pcm * phitheta.threevec() / 3);
+  outgoing_particles_[4].set_4momentum(m_e, -pcm * phitheta.threevec() / 3);
 }
 
 
