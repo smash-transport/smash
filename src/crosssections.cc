@@ -2443,9 +2443,11 @@ CollisionBranchPtr CrossSections::NNbar_to_5pi(
   double nnbar_xsec = std::max(0., ppbar_total(s) * scale_xs - current_xs);
   logg[LCrossSections].debug("NNbar cross section is: ", nnbar_xsec);
   // Make collision channel NNbar -> 5π
-  // TODO(stdnmr) Include all pion final states, not just the pi zero example
-  const auto& type_pi = ParticleType::find(pdg::pi_z);
-  return make_unique<CollisionBranch>(type_pi, type_pi, type_pi, type_pi, type_pi,
+  // TODO(stdnmr) Is this really the only possible pion outcome?
+  const auto& type_piz = ParticleType::find(pdg::pi_z);
+  const auto& type_pip = ParticleType::find(pdg::pi_p);
+  const auto& type_pim = ParticleType::find(pdg::pi_m);
+  return make_unique<CollisionBranch>(type_pip, type_pim, type_pip, type_pim, type_piz,
                                        nnbar_xsec, ProcessType::TwoToFive);
 }
 

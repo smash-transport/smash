@@ -80,7 +80,7 @@ void ScatterAction::generate_final_state() {
       /* 2->3 scattering */
       two_to_three_scattering();
       break;
-    case ProcessType::TwoToThree:
+    case ProcessType::TwoToFive:
       /* 2->5 scattering */
       two_to_five_scattering();
       break;
