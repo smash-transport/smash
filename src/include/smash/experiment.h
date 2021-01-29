@@ -845,10 +845,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         "mode!");
   }
 
-  logg[LExperiment].info("Using", parameters_.testparticles,
-                         "testparticles per particle.");
-  logg[LExperiment].info("Using", parameters_.n_ensembles,
-                         "parallel ensembles.");
+  logg[LExperiment].info("Using ", parameters_.testparticles,
+                         " testparticles per particle.");
+  logg[LExperiment].info("Using ", parameters_.n_ensembles,
+                         " parallel ensembles.");
 
   // create finders
   if (dileptons_switch_) {
@@ -2231,7 +2231,7 @@ void Experiment<Modus>::final_output() {
         logg[LExperiment].warn()
             << msg_discarded.str()
             << "\nThe number of discarded interactions is large, which means "
-               "the assumption for the stochastic criterion of\n1 interaction"
+               "the assumption for the stochastic criterion of\n1 interaction "
                "per particle per timestep is probably violated. Consider "
                "reducing the timestep size.";
       }
