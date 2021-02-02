@@ -107,7 +107,7 @@ sphere_perf=$(benchmark_run sphere $DECAYM_DEF $PART_DEF)
 echo "$sphere_perf" | grep -E "time elapsed"
 
 echo "   Started benchmark for dileptons ..."
-dilepton_perf=$(benchmark_run collider "${SMASH_ROOT}/input/dileptons" $PART_DEF 'Output: { Dileptons: {Format: ["Binary"], Extended: True} }')
+dilepton_perf=$(benchmark_run dileptons "${SMASH_ROOT}/input/dileptons" $PART_DEF)
 echo "$dilepton_perf" | grep -E "time elapsed"
 
 echo "   Started benchmark for photons ..."
