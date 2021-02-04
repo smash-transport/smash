@@ -393,7 +393,6 @@ void Action::sample_5body_phasespace() {
   outgoing_particles_[0].boost_momentum(beta_cm);
   outgoing_particles_[1].boost_momentum(beta_cm);
 
-
   // Sample 2-body PS for 4 and 5
   const double pcm_de = pCM(mde, m_d, m_e);
 
@@ -405,9 +404,9 @@ void Action::sample_5body_phasespace() {
   outgoing_particles_[3].boost_momentum(beta_cm45);
   outgoing_particles_[4].boost_momentum(beta_cm45);
 
-  outgoing_particles_[0].boost_momentum(beta_cm123);
-  outgoing_particles_[1].boost_momentum(beta_cm123);
-  outgoing_particles_[2].boost_momentum(beta_cm123);
+  outgoing_particles_[0].boost_momentum(-beta_cm123);
+  outgoing_particles_[1].boost_momentum(-beta_cm123);
+  outgoing_particles_[2].boost_momentum(-beta_cm123);
 }
 
 
