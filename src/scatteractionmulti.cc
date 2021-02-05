@@ -257,19 +257,24 @@ void ScatterActionMulti::add_possible_reactions(
 
         const double symmetry_factor = 4.0; // Maybe? 2! * 2!
 
-        const ParticleTypePtr type_N = ParticleType::try_find(pdg::p);
-        const ParticleTypePtr type_anti_N = ParticleType::try_find(-pdg::p);
+        const ParticleTypePtr type_p = ParticleType::try_find(pdg::p);
+        const ParticleTypePtr type_anti_p = ParticleType::try_find(-pdg::p);
+        const ParticleTypePtr type_n = ParticleType::try_find(pdg::n);
+        const ParticleTypePtr type_anti_n = ParticleType::try_find(-pdg::n);
+
 
         const double spin_degn =
-            react_degen_factor(spin_factor_inc, type_N->spin_degeneracy(),
-                               type_anti_N->spin_degeneracy());
+            react_degen_factor(spin_factor_inc, type_p->spin_degeneracy(),
+                               type_anti_p->spin_degeneracy());
 
-        if (type_N) {
-          // TODO(stdnmr) probably also need to add the neutron reactions here
+        if (type_p && type_p) {
+          const double prob = probability_five_to_two(*type_p, dt, gcell_vol,
+                                  symmetry_factor * spin_degn); // same for p and n
           add_reaction(make_unique<CollisionBranch>(
-              *type_N, *type_anti_N,
-              probability_five_to_two(*type_N, dt, gcell_vol,
-                                      symmetry_factor * spin_degn),
+              *type_p, *type_anti_p, prob,
+              ProcessType::MultiParticleFiveToTwo));
+          add_reaction(make_unique<CollisionBranch>(
+              *type_n, *type_anti_n, prob,
               ProcessType::MultiParticleFiveToTwo));
         }
       }
@@ -278,7 +283,7 @@ void ScatterActionMulti::add_possible_reactions(
 }
 
 void ScatterActionMulti::generate_final_state() {
-  logg[LScatterActionMulti].info("Incoming particles for ScatterActionMulti: ",
+  logg[LScatterActionMulti].debug("Incoming particles for ScatterActionMulti: ",
                                  incoming_particles_);
 
   /* Decide for a particular final state. */
