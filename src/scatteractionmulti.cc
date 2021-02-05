@@ -474,21 +474,28 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
          (pdg_a == pdg::pi_p && pdg_b == pdg::eta && pdg_c == pdg::pi_m);
 }
 
-bool ScatterActionMulti::all_incoming_particles_are_pions_and_have_charge_zero_together(const ParticleData& data_a,
-                                       const ParticleData& data_b,
-                                       const ParticleData& data_c,
-                                       const ParticleData& data_d,
-                                       const ParticleData& data_e) const {
-     const PdgCode pdg_a = data_a.pdgcode();
-     const PdgCode pdg_b = data_b.pdgcode();
-     const PdgCode pdg_c = data_c.pdgcode();
-     const PdgCode pdg_d = data_d.pdgcode();
-     const PdgCode pdg_e = data_e.pdgcode();
+bool ScatterActionMulti::
+    all_incoming_particles_are_pions_and_have_charge_zero_together(
+        const ParticleData& data_a, const ParticleData& data_b,
+        const ParticleData& data_c, const ParticleData& data_d,
+        const ParticleData& data_e) const {
+          // TODO(stdnmr) Make this prettier/shorter
+          // We want to have pi+ pi- pi+ pi- pi0 incoming (so only 1 pi0)
+  const PdgCode pdg_a = data_a.pdgcode();
+  const PdgCode pdg_b = data_b.pdgcode();
+  const PdgCode pdg_c = data_c.pdgcode();
+  const PdgCode pdg_d = data_d.pdgcode();
+  const PdgCode pdg_e = data_e.pdgcode();
   return (pdg_a.is_pion() && pdg_b.is_pion() && pdg_c.is_pion() && pdg_d.is_pion() && pdg_e.is_pion()) &&
-         (pdg_a.charge() + pdg_b.charge() + pdg_c.charge() + pdg_d.charge() + pdg_e.charge() == 0);
-
+         ((pdg_a.charge() + pdg_b.charge() + pdg_c.charge() + pdg_d.charge() + pdg_e.charge()) == 0) &&
+         (
+           (pdg_a == pdg::pi_z && pdg_b != pdg::pi_z && pdg_c != pdg::pi_z && pdg_d != pdg::pi_z && pdg_e != pdg::pi_z) ||
+           (pdg_a != pdg::pi_z && pdg_b == pdg::pi_z && pdg_c != pdg::pi_z && pdg_d != pdg::pi_z && pdg_e != pdg::pi_z) ||
+           (pdg_a != pdg::pi_z && pdg_b != pdg::pi_z && pdg_c == pdg::pi_z && pdg_d != pdg::pi_z && pdg_e != pdg::pi_z) ||
+           (pdg_a != pdg::pi_z && pdg_b != pdg::pi_z && pdg_c != pdg::pi_z && pdg_d == pdg::pi_z && pdg_e != pdg::pi_z) ||
+           (pdg_a != pdg::pi_z && pdg_b != pdg::pi_z && pdg_c != pdg::pi_z && pdg_d != pdg::pi_z && pdg_e == pdg::pi_z)
+         );
 }
-
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
   out << "MultiParticleScatter of " << incoming_particles_;
