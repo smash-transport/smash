@@ -243,14 +243,27 @@ void ScatterActionMulti::add_possible_reactions(
     // TODO(stdnmr) Introduce config flag for 5-to-2 here
     if (true) {
       // TODO(stdnmr) finalize the inc. pion if statement
-      if (all_incoming_particles_are_pions_and_have_charge_zero_together(incoming_particles_[0], incoming_particles_[1],
-                                incoming_particles_[2], incoming_particles_[3], incoming_particles_[4])) {
-        // TODO(stdnmr) calculate correct symmetry and spin factors
-        const double spin_degn = 1.0;
-        const double symmetry_factor = 1.0;
+      if (all_incoming_particles_are_pions_and_have_charge_zero_together(
+              incoming_particles_[0], incoming_particles_[1],
+              incoming_particles_[2], incoming_particles_[3],
+              incoming_particles_[4])) {
+
+        // TODO(stdnmr) Check if symmetry and spin factors are correct
+        const int spin_factor_inc = incoming_particles_[0].pdgcode().spin_degeneracy() *
+                                    incoming_particles_[1].pdgcode().spin_degeneracy() *
+                                    incoming_particles_[2].pdgcode().spin_degeneracy() *
+                                    incoming_particles_[3].pdgcode().spin_degeneracy() *
+                                    incoming_particles_[4].pdgcode().spin_degeneracy() ;
+
+        const double symmetry_factor = 4.0; // Maybe? 2! * 2!
 
         const ParticleTypePtr type_N = ParticleType::try_find(pdg::p);
         const ParticleTypePtr type_anti_N = ParticleType::try_find(-pdg::p);
+
+        const double spin_degn =
+            react_degen_factor(spin_factor_inc, type_N->spin_degeneracy(),
+                               type_anti_N->spin_degeneracy());
+
         if (type_N) {
           // TODO(stdnmr) probably also need to add the neutron reactions here
           add_reaction(make_unique<CollisionBranch>(
@@ -265,7 +278,8 @@ void ScatterActionMulti::add_possible_reactions(
 }
 
 void ScatterActionMulti::generate_final_state() {
-  logg[LScatterActionMulti].debug("Incoming particles: ", incoming_particles_);
+  logg[LScatterActionMulti].info("Incoming particles for ScatterActionMulti: ",
+                                 incoming_particles_);
 
   /* Decide for a particular final state. */
   const CollisionBranch* proc =
@@ -398,14 +412,16 @@ double ScatterActionMulti::probability_five_to_two(
   const double s_zero = 25 * pion_mass * pion_mass;
   const double fit_a = 5.02560248e-11;
   const double fit_alpha = 1.982;
-  const double ph_sp_5 = fit_a * std::pow(man_s - s_zero, 5.0) * std::pow(1 + man_s / s_zero, -fit_alpha);
+  const double ph_sp_5 = fit_a * std::pow(man_s - s_zero, 5.0) *
+                         std::pow(1 + man_s / s_zero, -fit_alpha);
 
   // TODO(stdnmr) Clarify if want to account for other baryons than p and if
   // this is the same cross section as for the inverse process
   const double xs = xs_ppbar_annihilation(man_s) / gev2_mb;
 
   return dt / std::pow(gcell_vol, 4.0) * 1. / (32. * e1 * e2 * e3 * e4 * e5) *
-         xs / (4. * M_PI * man_s) * lamb / ph_sp_5 * std::pow(hbarc, 11.0) * degen_factor;
+         xs / (4. * M_PI * man_s) * lamb / ph_sp_5 * std::pow(hbarc, 11.0) *
+         degen_factor;
 }
 
 void ScatterActionMulti::annihilation() {
@@ -438,8 +454,8 @@ void ScatterActionMulti::five_to_two() {
   sample_2body_phasespace();
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
-  logg[LScatterActionMulti].debug("5->2 scattering:", incoming_particles_,
-                                  " -> ", outgoing_particles_);
+  logg[LScatterActionMulti].info("5->2 scattering:", incoming_particles_,
+                                 " -> ", outgoing_particles_);
 }
 
 bool ScatterActionMulti::three_different_pions(
