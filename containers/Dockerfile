@@ -1,9 +1,13 @@
+#we import a basic GNU/Linux distribution from the Docker repositories
+
 FROM ubuntu:20.04
+
+#we add some info about authors and contacts
 
 LABEL maintainer.name="Gabriele Inghirami - SMASH team"
 LABEL maintainer.email="g.inghirami@gsi.de"
 
-ENV LANG=C.UTF-8
+#we set the repositories to be used to upgrade and expand the basic GNU/Linux distribution
 
 RUN echo "deb http://ftp.uni-mainz.de/ubuntu/ focal restricted multiverse main universe" > /etc/apt/sources.list \
 && echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-updates restricted multiverse main universe" >> /etc/apt/sources.list \
@@ -76,6 +80,8 @@ cracklib-runtime  \
 crda  \
 cups-pk-helper  \
 curl  \
+cython \
+cython3 \
 dash  \
 davix-dev:amd64  \
 dbus  \
@@ -1285,18 +1291,20 @@ zlib1g:amd64  \
 zlib1g-dev:amd64  
 
 
+#we set the number of concurrent processes used by Docker to build the container image when executing make/cmake
+
+ARG NUMBER_OF_PROCS_FOR_COMPILATION=2
+
+#we create the /SMASH directory
+
+WORKDIR /SMASH 
 
 #we use pip to install a few python2 libraries (seaborn and, automatically as dependencies, matplotlib, scipy, pandas, yaml and numpy)    
-WORKDIR /SMASH 
 
 RUN wget https://raw.githubusercontent.com/pypa/get-pip/master/2.7/get-pip.py
 RUN python2 get-pip.py 
 RUN pip install seaborn && \
 rm get-pip.py 
-
-
-#we create the /SMASH directory
-
 
 #here we download and install several libraries/programs used by SMASH
 
@@ -1304,7 +1312,7 @@ RUN wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8303.tgz && \
 tar xf pythia8303.tgz && rm pythia8303.tgz && \
 cd pythia8303 && \
 ./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC' --prefix=/SMASH/pythia_8_303 && \
-make -j4 && \
+make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 make install && \
 echo /SMASH/pythia_8_303/lib >> /etc/ld.so.conf && ldconfig && \
   
@@ -1314,7 +1322,7 @@ tar xf HepMC3-3.2.3.tar.gz && \
 mkdir -p HepMC3_build && \
 cd HepMC3_build && \
 cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=OFF -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse" ../HepMC3-3.2.3 && \
-make -j4 && \
+make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 make install && \
   
 cd /SMASH && \
@@ -1325,7 +1333,7 @@ mkdir -p root_6_22_06 && \
 mkdir -p root_build && \
 cd root_build && \
 cmake -DCMAKE_INSTALL_PREFIX=../root_6_22_06 ../root_src && \
-cmake --build . --target install -j4 && \
+cmake --build . --target install -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 ROOTSYS=/SMASH/root_6_22_06 &&  \
 export PATH=$ROOTSYS/bin:$PATH && \
 export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH && \
@@ -1356,14 +1364,13 @@ git clone https://github.com/smash-transport/smash.git && \
 mkdir -p smash_bin && \
 cd smash_bin && \
 cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_8_303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse" && \
-make -j4 && \
+make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 
 #we remove most of the sources
 cd /SMASH && \
 rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.06.source.tar.gz root_build root_src /var/cache/apt/archives/*.deb 
 
 #we set up the shell prompt during the container execution
-ENV PS1 "S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
