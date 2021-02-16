@@ -37,11 +37,20 @@ endif(NOT CMAKE_BUILD_TYPE)
 # add 3rd-party libraries (before setting compiler flags etc)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.6.2/include")
+
+find_package(yaml-cpp 0.6 QUIET NO_MODULE)
+if (yaml-cpp_FOUND)
+  # target doesn't set include directory for some reason
+  get_filename_component(yaml_cpp_include_dir ${YAML_CPP_INCLUDE_DIR} ABSOLUTE)
+  include_directories(SYSTEM ${yaml_cpp_include_dir})
+else()
+  include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.6.2/include")
+endif()
+
 add_subdirectory(3rdparty)
 
 # Set compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -mfpmath=sse")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpmath=sse")
 
 # Disable DEBUG and TRACE output in Release builds
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG" CACHE
@@ -105,3 +114,5 @@ include(CTest)
 # subdirectories where the code is
 add_subdirectory(src)
 add_subdirectory(doc)
+
+install(DIRECTORY input/ DESTINATION share/smash)
