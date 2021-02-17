@@ -343,6 +343,13 @@ ScatterActionsFinder::ScatterActionsFinder(
         "Change your config accordingly.");
   }
 
+  if (nnbar_treatment_ == NNbarTreatment::Resonances &&
+      incl_set_[IncludedReactions::NNbar] != 1) {
+    throw std::invalid_argument(
+        "'NNbar' has to be in the list of allowed 2 to 2 processes "
+        "to enable annihilation to go through resonances");
+  }
+
   if (strings_switch_) {
     auto subconfig = config["Collision_Term"]["String_Parameters"];
     string_process_interface_ = make_unique<StringProcess>(

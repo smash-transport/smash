@@ -175,21 +175,13 @@ CollisionBranchList CrossSections::generate_collision_list(
    * ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
    * Only use in cases when detailed balance MUST happen, i.e. in a box! */
   if (nnbar_treatment == NNbarTreatment::Resonances) {
-    if (included_2to2[IncludedReactions::NNbar] != 1) {
-      throw std::runtime_error(
-          "'NNbar' has to be in the list of allowed 2 to 2 processes "
-          "to enable annihilation to go through resonances");
-    }
     if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
       /* Has to be called after the other processes are already determined,
        * so that the sum of the cross sections includes all other processes. */
       process_list.emplace_back(
           NNbar_annihilation(sum_xs_of(process_list), scale_xs));
     }
-    if ((t1.pdgcode() == pdg::rho_z && t2.pdgcode() == pdg::h1) ||
-        (t1.pdgcode() == pdg::h1 && t2.pdgcode() == pdg::rho_z)) {
-      append_list(process_list, NNbar_creation(), scale_xs);
-    }
+    append_list(process_list, NNbar_creation(), scale_xs);
   }
   return process_list;
 }
@@ -2435,22 +2427,23 @@ double CrossSections::string_hard_cross_section() const {
   return cross_sec;
 }
 
-CollisionBranchPtr CrossSections::NNbar_to_5pi(
-    const double current_xs, const double scale_xs) const {
+CollisionBranchPtr CrossSections::NNbar_to_5pi(const double current_xs,
+                                               const double scale_xs) const {
   /* Calculate NNbar cross section:
    * Parametrized total minus all other present channels.*/
   const double s = sqrt_s_ * sqrt_s_;
   double nnbar_xsec = std::max(0., ppbar_total(s) * scale_xs - current_xs);
-  logg[LCrossSections].debug("NNbar cross section is: ", nnbar_xsec);
+  logg[LCrossSections].debug("NNbar cross section in NNbar_to_5pi is: ",
+                             nnbar_xsec);
   // Make collision channel NNbar -> 5π
   // TODO(stdnmr) Is this really the only possible pion outcome?
   const auto& type_piz = ParticleType::find(pdg::pi_z);
   const auto& type_pip = ParticleType::find(pdg::pi_p);
   const auto& type_pim = ParticleType::find(pdg::pi_m);
-  return make_unique<CollisionBranch>(type_pip, type_pim, type_pip, type_pim, type_piz,
-                                       nnbar_xsec, ProcessType::TwoToFive);
+  return make_unique<CollisionBranch>(type_pip, type_pim, type_pip, type_pim,
+                                      type_piz, nnbar_xsec,
+                                      ProcessType::TwoToFive);
 }
-
 
 CollisionBranchPtr CrossSections::NNbar_annihilation(
     const double current_xs, const double scale_xs) const {
@@ -2467,29 +2460,33 @@ CollisionBranchPtr CrossSections::NNbar_annihilation(
 
 CollisionBranchList CrossSections::NNbar_creation() const {
   CollisionBranchList channel_list;
-  /* Calculate NNbar reverse cross section:
-   * from reverse reaction (see NNbar_annihilation_cross_section).*/
-  const double s = sqrt_s_ * sqrt_s_;
-  const double pcm = cm_momentum();
+  const ParticleType& type_a = incoming_particles_[0].type();
+  const ParticleType& type_b = incoming_particles_[1].type();
+  if ((type_a.pdgcode() == pdg::rho_z && type_b.pdgcode() == pdg::h1) ||
+      (type_a.pdgcode() == pdg::h1 && type_b.pdgcode() == pdg::rho_z)) {
+    /* Calculate NNbar reverse cross section:
+     * from reverse reaction (see NNbar_annihilation_cross_section).*/
+    const double s = sqrt_s_ * sqrt_s_;
+    const double pcm = cm_momentum();
 
-  const auto& type_N = ParticleType::find(pdg::p);
-  const auto& type_Nbar = ParticleType::find(-pdg::p);
+    const auto& type_N = ParticleType::find(pdg::p);
+    const auto& type_Nbar = ParticleType::find(-pdg::p);
 
-  // Check available energy
-  if (sqrt_s_ - 2 * type_N.mass() < 0) {
-    return channel_list;
+    // Check available energy
+    if (sqrt_s_ - 2 * type_N.mass() < 0) {
+      return channel_list;
+    }
+
+    double xsection = detailed_balance_factor_RR(sqrt_s_, pcm, type_a, type_b,
+                                                 type_N, type_Nbar) *
+                      std::max(0., ppbar_total(s) - ppbar_elastic(s));
+    logg[LCrossSections].debug("NNbar reverse cross section is: ", xsection);
+    channel_list.push_back(make_unique<CollisionBranch>(
+        type_N, type_Nbar, xsection, ProcessType::TwoToTwo));
+    channel_list.push_back(make_unique<CollisionBranch>(
+        ParticleType::find(pdg::n), ParticleType::find(-pdg::n), xsection,
+        ProcessType::TwoToTwo));
   }
-
-  double xsection = detailed_balance_factor_RR(
-                        sqrt_s_, pcm, incoming_particles_[0].type(),
-                        incoming_particles_[1].type(), type_N, type_Nbar) *
-                    std::max(0., ppbar_total(s) - ppbar_elastic(s));
-  logg[LCrossSections].debug("NNbar reverse cross section is: ", xsection);
-  channel_list.push_back(make_unique<CollisionBranch>(
-      type_N, type_Nbar, xsection, ProcessType::TwoToTwo));
-  channel_list.push_back(make_unique<CollisionBranch>(
-      ParticleType::find(pdg::n), ParticleType::find(-pdg::n), xsection,
-      ProcessType::TwoToTwo));
   return channel_list;
 }
 
