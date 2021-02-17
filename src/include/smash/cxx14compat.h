@@ -21,11 +21,14 @@ namespace smash {
  *
  * \see http://en.cppreference.com/w/cpp/memory/unique_ptr/make_unique
  */
+#if __cplusplus < 201402L
 template <typename T, typename... Args>
 inline std::unique_ptr<T> make_unique(Args &&... args) {
   return std::unique_ptr<T>{new T{std::forward<Args>(args)...}};
 }
-
+#else
+  using std::make_unique;
+#endif
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_CXX14COMPAT_H_
