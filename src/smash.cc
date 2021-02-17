@@ -548,7 +548,7 @@ int main(int argc, char *argv[]) {
     // check if version matches before doing anything else
     check_config_version_is_compatible(configuration);
 
-    logg[LMain].trace(source_location, " create ParticleType and DecayModes");
+    logg[LMain].trace(SMASH_SOURCE_LOCATION, " create ParticleType and DecayModes");
 
     auto particles_and_decays =
         load_particles_and_decaymodes(particles, decaymodes);
@@ -747,11 +747,11 @@ int main(int argc, char *argv[]) {
         << "# Build    : " << CMAKE_BUILD_TYPE << '\n'
         << "# Date     : " << BUILD_DATE << '\n'
         << configuration.to_string() << '\n';
-    logg[LMain].trace(source_location, " create ParticleType and DecayModes");
+    logg[LMain].trace(SMASH_SOURCE_LOCATION, " create ParticleType and DecayModes");
     initialize_particles_and_decays(configuration, hash, tabulations_path);
 
     // Create an experiment
-    logg[LMain].trace(source_location, " create Experiment");
+    logg[LMain].trace(SMASH_SOURCE_LOCATION, " create Experiment");
     auto experiment = ExperimentBase::create(configuration, output_path);
 
     // Version value is not used in experiment. Get rid of it to prevent
@@ -760,7 +760,7 @@ int main(int argc, char *argv[]) {
     check_for_unused_config_values(configuration);
 
     // Run the experiment
-    logg[LMain].trace(source_location, " run the Experiment");
+    logg[LMain].trace(SMASH_SOURCE_LOCATION, " run the Experiment");
     experiment->run();
   } catch (std::exception &e) {
     logg[LMain].fatal() << "SMASH failed with the following error:\n"
@@ -768,6 +768,6 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  logg[LMain].trace() << source_location << " about to return from main";
+  logg[LMain].trace() << SMASH_SOURCE_LOCATION << " about to return from main";
   return 0;
 }
