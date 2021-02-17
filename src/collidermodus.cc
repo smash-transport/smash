@@ -41,12 +41,18 @@ static constexpr int LCollider = LogArea::Collider::id;
  * \li \key E_Kin (double, optional, no default): \n
  * Defines the energy of the collision by the kinetic energy per nucleon of
  * the projectile nucleus (in AGeV). This assumes the target nucleus is at rest.
+ * Note, this can also be given per-beam.
  *
  * \li \key P_Lab (double, optional, no default): \n
  * Defines the energy of the collision by the initial momentum per nucleon
  * of the projectile nucleus (in AGeV). This assumes the target nucleus is at
- * rest.
+ * rest.  Note, this can also be given per-beam.
  *
+ * \li Alternatively, one can specify the individual beam energies or
+ * momenta in the * \key Projectile and \key Target sections.  Note,
+ * one must give either \key E_Kin for both \key Projectile and \key
+ * Target or \key P_Lab for both \key Projectile and \key Target.
+
  * Note that using \key E_kin or \key P_Lab to quantify the collision energy is
  * not sufficient to configure a collision in a fixed target frame. You need to
  * additionally change the \key Calculation_Frame. Any format of incident energy
@@ -121,6 +127,45 @@ static constexpr int LCollider = LogArea::Collider::id;
  * false - Manually set parameters of spherical deformation. This requires the
  * additional specification of \key Beta_2, \key Beta_4, \key Theta and
  * \key Phi, which follow \iref{Moller:1993ed} and \iref{Schenke:2019ruo}. \n
+ *
+ * \li \key E_Kin (double, optional, no default) Set the kinetic
+ * energy (in GeV) per particle of the beam.  This key, if used, must
+ * be present for both \key Projectile and \key Target.
+ *
+ * \li \key P_Lab (double, optional, no default) Set the momentum (in
+ * GeV/c) per particle of the beam.  This key, if used, must be
+ * present for both \key Projectile and \key Target.
+ 
+ * \note Note on \key E_Kin and \key P_Lab.  If the beam specific
+ * kinetic energy or momentum is set using either of these keys, then
+ * it must be specified in the same way (not necessarily same value)
+ * for both beams.  This is useful to simulate for example p-Pb
+ * collisions at the LHC where the centre-of-mass system does not
+ * correspond to the laboratory system.  E.g.,
+ *
+ *\verbatim
+Modi:
+  Collider:
+    Calculation_Frame: center of velocity
+    Impact:
+      Random_Reaction_Plane: True
+      Range: [0, 8.5]
+    Projectile:
+      E_Kin: 1580
+      Particles:
+        2212: 82
+        2112: 126
+    Target:
+      E_Kin: 4000
+      Particles:
+        2212: 1
+        2112: 0
+ \endverbatim
+ *
+ * Note that SMASH performs it's calculation in the centre-of-velocity
+ * and the particles are returned in the centre-of-mass frame.  The
+ * particles therefore need to be boosted by the rapidity of the
+ * centre-of-mass (-0.465 for p-Pb at 5.02TeV).
  *
  * \page input_impact_parameter_ Impact Parameter
  * \key Impact: \n
@@ -368,6 +413,36 @@ ColliderModus::ColliderModus(Configuration modus_config,
     total_s_ = s_from_plab(p_lab * projectile_->number_of_particles(),
                            mass_projec, mass_target);
     sqrt_s_NN_ = std::sqrt(s_from_plab(p_lab, mass_a, mass_b));
+    energy_input++;
+  }
+  // Option 4: Kinetic energy per nucleon of _each_ beam
+  if (proj_cfg.has_value({"E_Kin"}) and targ_cfg.has_value({"E_Kin"})) {
+    const double e_kin_p = proj_cfg.take({"E_Kin"});
+    const double e_kin_t = targ_cfg.take({"E_Kin"});
+    if (e_kin_p < 0 or e_kin_t < 0) {
+      throw ModusDefault::InvalidEnergy(
+          "Input Error: "
+          "E_Kin must be nonnegative.");
+    }
+    total_s_ = s_from_Ekin(e_kin_p * projectile_->number_of_particles(),
+			   e_kin_t * target_    ->number_of_particles(),
+			   mass_projec, mass_target);
+    sqrt_s_NN_ = std::sqrt(s_from_Ekin(e_kin_p,e_kin_t,mass_a,mass_b));
+    energy_input++;
+  }
+  // Option 5: Momentum per nucleon of _each_ beam
+  if (proj_cfg.has_value({"P_Lab"}) and targ_cfg.has_value({"P_Lab"})) {
+    const double p_lab_p = proj_cfg.take({"P_Lab"});
+    const double p_lab_t = targ_cfg.take({"P_Lab"});
+    if (p_lab_p < 0 or p_lab_t < 0) { // Really!?
+      throw ModusDefault::InvalidEnergy(
+          "Input Error: "
+          "P_Lab must be nonnegative.");
+    }
+    total_s_ = s_from_plab(p_lab_p * projectile_->number_of_particles(),
+			   p_lab_t * target_    ->number_of_particles(),
+			   mass_projec, mass_target);
+    sqrt_s_NN_ = std::sqrt(s_from_plab(p_lab_p,p_lab_t,mass_a,mass_b));
     energy_input++;
   }
   if (energy_input == 0) {

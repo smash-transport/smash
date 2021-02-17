@@ -1044,17 +1044,15 @@ class Configuration {
    */
   explicit Configuration(const bf::path &path, const bf::path &filename);
 
-#ifdef BUILD_TESTS
   /**
-   * \mocking
-   * Unit tests can use this constructor to get a Configuration object from a
-   * built-in string.
-   * This function is only available to tests and should never be used/needed in
-   * actual SMASH code. The intention is to avoid creating a mock object for
-   * Configuration to test other classes of SMASH.
+   * Initialize configuration with a YAML formatted string.  This is
+   * useful in 3-rd party application where we may not be able or
+   * willing to read in external files. This constructor is also used
+   * in the test-suite.
+   * 
+   * \param[in] yaml YAML formatted configuration data.
    */
-  explicit Configuration(const char *yaml) : root_node_(YAML::Load(yaml)) {}
-#endif
+  explicit Configuration(const char *yaml) { merge_yaml(yaml); }
 
   /// If you want to copy this you're doing it wrong
   Configuration(const Configuration &) = default;
