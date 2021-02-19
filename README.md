@@ -93,7 +93,26 @@ To run it with specific settings:
     vi config.yaml
     ./smash
 
+### Installation 
 
+To install SMASH do 
+
+    make install 
+
+This will install into `/usr/local`.  If you want to change the installation directory, 
+define [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html) 
+when configuring the source tree.  For example, if you want to install in `~/.local`, do 
+
+    cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local
+    make install 
+
+With `CMAKE_INSTALL_PREFIX`=_prefix_ the installation will be 
+
+- _prefix_`/bin` will contain programs - e.g., `smash`, 
+- _prefix_`/lib` will contain libraries - e.g., `libsmash.so`, 
+- _prefix_/`include/smash` will contain headers, and
+- _prefix_/`share/smash` will contain data files 
+    
 ### Troubleshooting
 
 #### SMASH does not compile
