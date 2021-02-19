@@ -985,7 +985,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
 
   // create outputs
-  logg[LExperiment].trace(source_location, " create OutputInterface objects");
+  logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
+                          " create OutputInterface objects");
 
   auto output_conf = config["Output"];
   /*!\Userguide
