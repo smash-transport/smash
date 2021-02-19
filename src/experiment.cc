@@ -22,7 +22,7 @@ namespace smash {
 /* ExperimentBase carries everything that is needed for the evolution */
 ExperimentPtr ExperimentBase::create(Configuration config,
                                      const bf::path &output_path) {
-  logg[LExperiment].trace() << source_location;
+  logg[LExperiment].trace() << SMASH_SOURCE_LOCATION;
   /*!\Userguide
    * \page input_general_ General
    * \key Modus (string, required): \n
@@ -333,7 +333,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  */
 
 ExperimentParameters create_experiment_parameters(Configuration config) {
-  logg[LExperiment].trace() << source_location;
+  logg[LExperiment].trace() << SMASH_SOURCE_LOCATION;
 
   const int ntest = config.take({"General", "Testparticles"}, 1);
   if (ntest <= 0) {

@@ -253,7 +253,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
 #ifndef NDEBUG
         if (idx >= SizeType(cells_.size())) {
           logg[LGrid].fatal(
-              source_location,
+              SMASH_SOURCE_LOCATION,
               "\nan out-of-bounds access would be necessary for the "
               "particle ",
               p, "\nfor a grid with the following parameters:\nmin: ",

@@ -19,7 +19,7 @@ namespace smash {
 static constexpr int LInputParser = LogArea::InputParser::id;
 
 std::vector<Line> line_parser(const std::string &input) {
-  logg[LInputParser].trace() << source_location << input;
+  logg[LInputParser].trace() << SMASH_SOURCE_LOCATION << input;
   std::istringstream input_stream(input);
   std::vector<Line> lines;
   lines.reserve(50);
