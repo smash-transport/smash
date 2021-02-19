@@ -40,6 +40,9 @@
 #ifdef SMASH_USE_HEPMC
 #include "hepmcoutput.h"
 #endif
+#ifdef SMASH_USE_HEPMC
+#include "rivetoutput.h"
+#endif
 #include "icoutput.h"
 #include "oscaroutput.h"
 #include "thermodynamicoutput.h"
@@ -632,14 +635,45 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Initial_Conditions" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
-  } else if (content == "HepMC" && format == "ASCII") {
+  } else if (content == "HepMC") {
 #ifdef SMASH_USE_HEPMC
-    outputs_.emplace_back(make_unique<HepMcOutput>(
-        output_path, "SMASH_HepMC", out_par, modus_.total_N_number(),
-        modus_.proj_N_number()));
+    if (format == "ASCII") {
+      outputs_.emplace_back(make_unique<HepMcOutput>(
+          output_path, "SMASH_HepMC", out_par, modus_.total_N_number(),
+          modus_.proj_N_number()));
+    } else if (format == "ASCII-full") {
+      auto lout_par(out_par);
+      lout_par.part_only_final = OutputOnlyFinal::No;
+      outputs_.emplace_back(make_unique<HepMcOutput>(
+          output_path, "SMASH_HepMC", lout_par, modus_.total_N_number(),
+          modus_.proj_N_number()));
+    } else {
+      logg[LExperiment].error("HepMC format " + format +
+                              "not one of ASCII or ASCII-full");
+    }
 #else
     logg[LExperiment].error(
         "HepMC output requested, but HepMC support not compiled in");
+#endif
+  } else if (content == "Rivet") {
+#ifdef SMASH_USE_RIVET
+    if (format == "YODA") {
+      outputs_.emplace_back(make_unique<RivetOutput>(
+          output_path, "SMASH_Rivet", out_par, modus_.total_N_number(),
+          modus_.proj_N_number()));
+    } else if (format == "YODA-full") {
+      auto lout_par(out_par);
+      lout_par.part_only_final = OutputOnlyFinal::No;
+      outputs_.emplace_back(make_unique<RivetOutput>(
+          output_path, "SMASH_Rivet", lout_par, modus_.total_N_number(),
+          modus_.proj_N_number()));
+    } else {
+      logg[LExperiment].error("Rivet format " + format +
+                              "not one of YODA or YODA-full");
+    }
+#else
+    logg[LExperiment].error(
+        "Rivet output requested, but HepMC support not compiled in");
 #endif
   } else {
     logg[LExperiment].error()
@@ -966,7 +1000,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
 
   // create outputs
-  logg[LExperiment].trace(source_location, " create OutputInterface objects");
+  logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
+                          " create OutputInterface objects");
 
   auto output_conf = config["Output"];
   /*!\Userguide
@@ -1028,6 +1063,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b HepMC  List of intial and final particles in HepMC3 event record, see
    *                          \subpage hepmc_output_user_guide_ for details
    *   - Available formats: \ref hepmc_output_user_guide_format_
+   * - \b Rivet Run Rivet analysis on generated events and output
+   *    results, see \subpage rivet_output_user_guide_ for details.
+   *    - Available formats: \ref rivet_output_user_guide_
+   *
    *
    * \n
    * \anchor list_of_output_formats
@@ -1208,6 +1247,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
     for (const auto &format : formats) {
       create_output(format, content, output_path, output_parameters);
+#ifdef SMASH_USE_RIVET
+      // Hack to allow configuration to specify Rivet set-up
+      if (content == "Rivet") {
+        auto ro = dynamic_cast<RivetOutput *>(outputs_.back().get());
+        if (ro)
+          ro->setup(this_output_conf);
+      }
+#endif
     }
   }
 

@@ -194,7 +194,11 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key false - Regular output for each particle \n
  * \n
  * - \b HepMC (Only ASCII format)\n
- *   No content-specific output options \n
+ *   No content-specific output options - see also \ref
+     hepmc_output_user_guide_ \n
+ * \n
+ * - \b Rivet (Only YODA format)\n
+ *   See also \ref rivet_output_user_guide_ "more on Rivet configuration"
  * \n
  * \anchor Thermodynamics
  * - \b Thermodynamics \n

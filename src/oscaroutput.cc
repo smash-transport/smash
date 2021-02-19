@@ -8,9 +8,8 @@
  */
 #include "smash/oscaroutput.h"
 
-#include <string>
-
 #include <boost/filesystem.hpp>
+#include <string>
 
 #include "smash/action.h"
 #include "smash/clock.h"
@@ -20,7 +19,6 @@
 
 namespace smash {
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
-static constexpr int LOutput = LogArea::Output::id;
 
 template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
