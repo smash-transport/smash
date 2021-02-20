@@ -251,7 +251,9 @@ class Experiment : public ExperimentBase {
       nt += nucleon_has_interacted_[i] ? 1 : 0;
     return nt;
   }
-  bool has_interaction() const { return projectile_target_interact_; }
+  /** Return true if any two beam particles interacted */
+  bool projectile_target_have_interacted() () const {
+    return projectile_target_interact_; }
  private:
   /**
    * Perform the given action.
@@ -1491,8 +1493,9 @@ void Experiment<Modus>::initialize_new_event(int event_number) {
 
   particles_.reset();
   // make sure this is initialized
-  if (modus_.is_collider())
+  if (modus_.is_collider()) {
     nucleon_has_interacted_.assign(modus_.total_N_number(),false);
+  }
   
   // Sample particles according to the initial conditions
   double start_time = modus_.initial_conditions(&particles_, parameters_);
