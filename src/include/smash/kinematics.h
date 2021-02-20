@@ -200,6 +200,35 @@ inline double plab_from_s(double mandelstam_s, double m_projectile,
 }
 
 /**
+ * Convert E_tot to Mandelstam-s for a fixed-target setup,
+ * with a projectile of mass m_P and a kinetic energy e_kin
+ * and a target of mass m_T at rest.
+ * \param[in] e_kin kinetic energy of the projectile in the lab frame [GeV]
+ * \param[in] m_P mass of the projectile [GeV]
+ * \param[in] m_T mass of the target [GeV]
+ * \return The Mandelstam variable s [GeV^2]
+ */
+inline double s_from_Etot(double e_tot, double m_P, double m_T) {
+  return m_P * m_P + m_T * m_T + 2 * m_T * e_tot;
+}
+/** 
+ * Convert E_tot to Mandelstam-s for two beams with total energies and
+ * masses (E,m)
+ *
+ * \param[in] e_tot_p Total energy of projectile [GeV]     
+ * \param[in] e_tot_t Total energy of target [GeV]     
+ * \param[in] m_p     Mass of projectile [GeV]
+ * \param[in] m_t     Mass of target     [GeV]
+ * \return Mandelstam-s [GeV^2]
+ */
+inline double s_from_Etot(double e_tot_p, double e_tot_t,
+			  double m_p,     double m_t)
+{
+  double pz_p = std::sqrt(e_kin_p * e_kin_p - m_p * m_p);
+  double pz_t = std::sqrt(e_kin_t * e_kin_t - m_t * m_t);
+  return std::pow(e_kin_p+e_kin_t,2)-std::pow(pz_p-pz_t,2);
+}
+/**
  * Convert E_kin to Mandelstam-s for a fixed-target setup,
  * with a projectile of mass m_P and a kinetic energy e_kin
  * and a target of mass m_T at rest.
@@ -209,11 +238,11 @@ inline double plab_from_s(double mandelstam_s, double m_projectile,
  * \return The Mandelstam variable s [GeV^2]
  */
 inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
-  return m_P * m_P + m_T * m_T + 2 * m_T * (m_P + e_kin);
+  return s_from_Etot(e_kin+m_P, m_P, m_T);
 }
 /** 
- * Convert E_kin to Mandelstam-s for two beams with total energies and masses 
- * (E,m) (E_kin gives per nucleon, E=E_kin*A) 
+ * Convert E_kin=(E_tot-m) to Mandelstam-s for two beams with total
+ * energies and masses (E,m) 
  *
  * \param[in] e_kin_p Kinetic energy of projectile [GeV]     
  * \param[in] e_kin_t Kinetic energy of target [GeV]     
@@ -224,9 +253,7 @@ inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
 inline double s_from_Ekin(double e_kin_p, double e_kin_t,
 			  double m_p,     double m_t)
 {
-  double pz_p = std::sqrt(e_kin_p * e_kin_p - m_p * m_p);
-  double pz_t = std::sqrt(e_kin_t * e_kin_t - m_t * m_t);
-  return std::pow(e_kin_p+e_kin_t,2)-pow(pz_p-pz_t,2);
+  return s_from_Etot(e_kin_p+m_t, e_kin_t+m_t,m_p,m_t);
 }
 /**
  * Convert p_lab to Mandelstam-s for a fixed-target setup,
@@ -253,9 +280,9 @@ inline double s_from_plab(double plab, double m_P, double m_T) {
 inline double s_from_plab(double plab_p, double plab_t,
 			  double m_p,    double m_t)
 {
-  double e_p = std::sqrt(m_p * m_p + plab_p*plab_p);
-  double e_t = std::sqrt(m_t * m_t + plab_t*plab_t);
-  return std::pow(e_p+e_t,2)-pow(plab_p-plab_t,2);
+  return s_from_Etot(std::sqrt(m_p * m_p + plab_p*plab_p),
+		     std::sqrt(m_t * m_t + plab_t*plab_t),
+		     plap_p, plab_t);
 }
 
 }  // namespace smash

@@ -43,21 +43,28 @@ static constexpr int LCollider = LogArea::Collider::id;
  * the projectile nucleus (in AGeV). This assumes the target nucleus is at rest.
  * Note, this can also be given per-beam.
  *
+ * \li \key E_Tot (double, optional, no default): \n
+ * Defines the energy of the collision by the total energy per nucleon of
+ * the projectile nucleus (in AGeV). This assumes the target nucleus is at rest.
+ * Note, this can also be given per-beam.
+ *
  * \li \key P_Lab (double, optional, no default): \n
  * Defines the energy of the collision by the initial momentum per nucleon
  * of the projectile nucleus (in AGeV). This assumes the target nucleus is at
- * rest.  Note, this can also be given per-beam.
+ * rest.  This must be positive.  Note, this can also be given per-beam.
  *
  * \li Alternatively, one can specify the individual beam energies or
- * momenta in the * \key Projectile and \key Target sections.  Note,
- * one must give either \key E_Kin for both \key Projectile and \key
- * Target or \key P_Lab for both \key Projectile and \key Target.
+ * momenta in the \key Projectile and \key Target sections.  Note,
+ * one must give either \key E_Tot for both \key Projectile and \key
+ * Target, \key E_Kin for both \key Projectile and \key
+ * Target, or \key P_Lab for both \key Projectile and \key Target.
 
- * Note that using \key E_kin or \key P_Lab to quantify the collision energy is
- * not sufficient to configure a collision in a fixed target frame. You need to
- * additionally change the \key Calculation_Frame. Any format of incident energy
- * can however be combined with any calculation frame, the provided incident
- * energy is then intrinsically translated to the quantity needed for the
+ * Note that using \key E_Tot, \key E_kin or \key P_Lab to quantify
+ * the collision energy is not sufficient to configure a collision in
+ * a fixed target frame. You need to additionally change the \key
+ * Calculation_Frame. Any format of incident energy can however be
+ * combined with any calculation frame, the provided incident energy
+ * is then intrinsically translated to the quantity needed for the
  * computation.
  *
  * \key Calculation_Frame (string, optional, default = "center of velocity"): \n
@@ -128,20 +135,26 @@ static constexpr int LCollider = LogArea::Collider::id;
  * additional specification of \key Beta_2, \key Beta_4, \key Theta and
  * \key Phi, which follow \iref{Moller:1993ed} and \iref{Schenke:2019ruo}. \n
  *
+ * \li \key E_Tot (double, optional, no default) Set the total
+ * energy (in GeV) per particle of the beam.  This key, if used, must
+ * be present for both \key Projectile and \key Target.
+ *
  * \li \key E_Kin (double, optional, no default) Set the kinetic
  * energy (in GeV) per particle of the beam.  This key, if used, must
  * be present for both \key Projectile and \key Target.
  *
  * \li \key P_Lab (double, optional, no default) Set the momentum (in
  * GeV/c) per particle of the beam.  This key, if used, must be
- * present for both \key Projectile and \key Target.
- 
- * \note Note on \key E_Kin and \key P_Lab.  If the beam specific
- * kinetic energy or momentum is set using either of these keys, then
- * it must be specified in the same way (not necessarily same value)
- * for both beams.  This is useful to simulate for example p-Pb
- * collisions at the LHC where the centre-of-mass system does not
- * correspond to the laboratory system.  E.g.,
+ * present for both \key Projectile and \key Target, and must be
+ * _positive_ for both beams.
+ *
+ * \note If the beam specific kinetic energy or momentum is set using
+ * either of these keys, then it must be specified in the same way
+ * (not necessarily same value) for both beams.  
+ * 
+ * This is useful to simulate for example p-Pb collisions at the LHC
+ * where the centre-of-mass system does not correspond to the
+ * laboratory system.  E.g.,
  *
  *\verbatim
 Modi:
@@ -151,12 +164,12 @@ Modi:
       Random_Reaction_Plane: True
       Range: [0, 8.5]
     Projectile:
-      E_Kin: 1580
+      E_Tot: 1580
       Particles:
         2212: 82
         2112: 126
     Target:
-      E_Kin: 4000
+      E_Tot: 4000
       Particles:
         2212: 1
         2112: 0
@@ -386,7 +399,22 @@ ColliderModus::ColliderModus(Configuration modus_config,
                mass_projec * mass_projec + mass_target * mass_target;
     energy_input++;
   }
-  /* Option 2: Kinetic energy per nucleon of the projectile nucleus
+  /* Option 2: Total energy per nucleon of the projectile nucleus
+   * (target at rest).  */
+  if (modus_cfg.has_value({"E_Tot"})) {
+    const double e_tot = modus_cfg.take({"E_Tot"});
+    if (e_kin < 0) {
+      throw ModusDefault::InvalidEnergy(
+          "Input Error: "
+          "E_Tot must be nonnegative.");
+    }
+    // Set the total nucleus-nucleus collision energy.
+    total_s_ = s_from_Etot(e_tot * projectile_->number_of_particles(),
+                           mass_projec, mass_target);
+    sqrt_s_NN_ = std::sqrt(s_from_Etot(e_kin, mass_a, mass_b));
+    energy_input++;
+  }
+  /* Option 3: Kinetic energy per nucleon of the projectile nucleus
    * (target at rest).  */
   if (modus_cfg.has_value({"E_Kin"})) {
     const double e_kin = modus_cfg.take({"E_Kin"});
@@ -401,7 +429,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
     sqrt_s_NN_ = std::sqrt(s_from_Ekin(e_kin, mass_a, mass_b));
     energy_input++;
   }
-  // Option 3: Momentum of the projectile nucleus (target at rest).
+  // Option 4: Momentum of the projectile nucleus (target at rest).
   if (modus_cfg.has_value({"P_Lab"})) {
     const double p_lab = modus_cfg.take({"P_Lab"});
     if (p_lab < 0) {
@@ -415,7 +443,22 @@ ColliderModus::ColliderModus(Configuration modus_config,
     sqrt_s_NN_ = std::sqrt(s_from_plab(p_lab, mass_a, mass_b));
     energy_input++;
   }
-  // Option 4: Kinetic energy per nucleon of _each_ beam
+  // Option 5: Total energy per nucleon of _each_ beam
+  if (proj_cfg.has_value({"E_Tot"}) and targ_cfg.has_value({"E_Tot"})) {
+    const double e_tot_p = proj_cfg.take({"E_Tot"});
+    const double e_tot_t = targ_cfg.take({"E_tot"});
+    if (e_tot_p < 0 or e_tot_t < 0) {
+      throw ModusDefault::InvalidEnergy(
+          "Input Error: "
+          "E_Tot must be nonnegative.");
+    }
+    total_s_ = s_from_Etot(e_tot_p * projectile_->number_of_particles(),
+			   e_tot_t * target_    ->number_of_particles(),
+			   mass_projec, mass_target);
+    sqrt_s_NN_ = std::sqrt(s_from_Ekin(e_tot_p,e_tot_t,mass_a,mass_b));
+    energy_input++;
+  }
+  // Option 6: Kinetic energy per nucleon of _each_ beam
   if (proj_cfg.has_value({"E_Kin"}) and targ_cfg.has_value({"E_Kin"})) {
     const double e_kin_p = proj_cfg.take({"E_Kin"});
     const double e_kin_t = targ_cfg.take({"E_Kin"});
@@ -430,11 +473,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
     sqrt_s_NN_ = std::sqrt(s_from_Ekin(e_kin_p,e_kin_t,mass_a,mass_b));
     energy_input++;
   }
-  // Option 5: Momentum per nucleon of _each_ beam
+  // Option 7: Momentum per nucleon of _each_ beam
   if (proj_cfg.has_value({"P_Lab"}) and targ_cfg.has_value({"P_Lab"})) {
     const double p_lab_p = proj_cfg.take({"P_Lab"});
     const double p_lab_t = targ_cfg.take({"P_Lab"});
-    if (p_lab_p < 0 or p_lab_t < 0) { // Really!?
+    if (p_lab_p < 0 or p_lab_t < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
           "P_Lab must be nonnegative.");
