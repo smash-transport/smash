@@ -252,7 +252,7 @@ class Experiment : public ExperimentBase {
     return nt;
   }
   /** Return true if any two beam particles interacted */
-  bool projectile_target_have_interacted() () const {
+  bool projectile_target_have_interacted() const {
     return projectile_target_interact_; }
  private:
   /**

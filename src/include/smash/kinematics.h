@@ -224,9 +224,9 @@ inline double s_from_Etot(double e_tot, double m_P, double m_T) {
 inline double s_from_Etot(double e_tot_p, double e_tot_t,
 			  double m_p,     double m_t)
 {
-  double pz_p = std::sqrt(e_kin_p * e_kin_p - m_p * m_p);
-  double pz_t = std::sqrt(e_kin_t * e_kin_t - m_t * m_t);
-  return std::pow(e_kin_p+e_kin_t,2)-std::pow(pz_p-pz_t,2);
+  double pz_p = std::sqrt(e_tot_p * e_tot_p - m_p * m_p);
+  double pz_t = std::sqrt(e_tot_t * e_tot_t - m_t * m_t);
+  return std::pow(e_tot_p+e_tot_t,2)-std::pow(pz_p-pz_t,2);
 }
 /**
  * Convert E_kin to Mandelstam-s for a fixed-target setup,
@@ -282,7 +282,7 @@ inline double s_from_plab(double plab_p, double plab_t,
 {
   return s_from_Etot(std::sqrt(m_p * m_p + plab_p*plab_p),
 		     std::sqrt(m_t * m_t + plab_t*plab_t),
-		     plap_p, plab_t);
+		     plab_p, plab_t);
 }
 
 }  // namespace smash

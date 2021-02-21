@@ -403,7 +403,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
    * (target at rest).  */
   if (modus_cfg.has_value({"E_Tot"})) {
     const double e_tot = modus_cfg.take({"E_Tot"});
-    if (e_kin < 0) {
+    if (e_tot < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
           "E_Tot must be nonnegative.");
@@ -411,7 +411,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
     // Set the total nucleus-nucleus collision energy.
     total_s_ = s_from_Etot(e_tot * projectile_->number_of_particles(),
                            mass_projec, mass_target);
-    sqrt_s_NN_ = std::sqrt(s_from_Etot(e_kin, mass_a, mass_b));
+    sqrt_s_NN_ = std::sqrt(s_from_Etot(e_tot, mass_a, mass_b));
     energy_input++;
   }
   /* Option 3: Kinetic energy per nucleon of the projectile nucleus
