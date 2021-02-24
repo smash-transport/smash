@@ -150,8 +150,8 @@ static constexpr int LCollider = LogArea::Collider::id;
  *
  * \note If the beam specific kinetic energy or momentum is set using
  * either of these keys, then it must be specified in the same way
- * (not necessarily same value) for both beams.  
- * 
+ * (not necessarily same value) for both beams.
+ *
  * This is useful to simulate for example p-Pb collisions at the LHC
  * where the centre-of-mass system does not correspond to the
  * laboratory system.  E.g.,
@@ -453,9 +453,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
           "E_Tot must be nonnegative.");
     }
     total_s_ = s_from_Etot(e_tot_p * projectile_->number_of_particles(),
-			   e_tot_t * target_    ->number_of_particles(),
-			   mass_projec, mass_target);
-    sqrt_s_NN_ = std::sqrt(s_from_Ekin(e_tot_p,e_tot_t,mass_a,mass_b));
+                           e_tot_t * target_->number_of_particles(),
+                           mass_projec, mass_target);
+    sqrt_s_NN_ = std::sqrt(s_from_Ekin(e_tot_p, e_tot_t, mass_a, mass_b));
     energy_input++;
   }
   // Option 6: Kinetic energy per nucleon of _each_ beam
@@ -468,9 +468,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
           "E_Kin must be nonnegative.");
     }
     total_s_ = s_from_Ekin(e_kin_p * projectile_->number_of_particles(),
-			   e_kin_t * target_    ->number_of_particles(),
-			   mass_projec, mass_target);
-    sqrt_s_NN_ = std::sqrt(s_from_Ekin(e_kin_p,e_kin_t,mass_a,mass_b));
+                           e_kin_t * target_->number_of_particles(),
+                           mass_projec, mass_target);
+    sqrt_s_NN_ = std::sqrt(s_from_Ekin(e_kin_p, e_kin_t, mass_a, mass_b));
     energy_input++;
   }
   // Option 7: Momentum per nucleon of _each_ beam
@@ -483,9 +483,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
           "P_Lab must be nonnegative.");
     }
     total_s_ = s_from_plab(p_lab_p * projectile_->number_of_particles(),
-			   p_lab_t * target_    ->number_of_particles(),
-			   mass_projec, mass_target);
-    sqrt_s_NN_ = std::sqrt(s_from_plab(p_lab_p,p_lab_t,mass_a,mass_b));
+                           p_lab_t * target_->number_of_particles(),
+                           mass_projec, mass_target);
+    sqrt_s_NN_ = std::sqrt(s_from_plab(p_lab_p, p_lab_t, mass_a, mass_b));
     energy_input++;
   }
   if (energy_input == 0) {

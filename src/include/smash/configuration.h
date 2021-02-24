@@ -1049,7 +1049,7 @@ class Configuration {
    * useful in 3-rd party application where we may not be able or
    * willing to read in external files. This constructor is also used
    * in the test-suite.
-   * 
+   *
    * \param[in] yaml YAML formatted configuration data.
    */
   explicit Configuration(const char *yaml) { merge_yaml(yaml); }
