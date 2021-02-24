@@ -1048,7 +1048,7 @@ class Configuration {
    * Initialize configuration with a YAML formatted string.  This is
    * useful in 3-rd party application where we may not be able or
    * willing to read in external files. This constructor is also used
-   * in the test-suite.
+   * in the test-suite. It should never be used/needed in actual SMASH code.
    *
    * \param[in] yaml YAML formatted configuration data.
    */
