@@ -1311,7 +1311,7 @@ rm get-pip.py
 RUN wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8303.tgz && \
 tar xf pythia8303.tgz && rm pythia8303.tgz && \
 cd pythia8303 && \
-./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC' --prefix=/SMASH/pythia_8_303 && \
+./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC -march=x86-64' --prefix=/SMASH/pythia_8_303 && \
 make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 make install && \
 echo /SMASH/pythia_8_303/lib >> /etc/ld.so.conf && ldconfig && \
@@ -1321,7 +1321,7 @@ wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-3.2.3.tar.gz && \
 tar xf HepMC3-3.2.3.tar.gz && \
 mkdir -p HepMC3_build && \
 cd HepMC3_build && \
-cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=OFF -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse" ../HepMC3-3.2.3 && \
+cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=OFF -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" ../HepMC3-3.2.3 && \
 make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 make install && \
   
@@ -1332,7 +1332,7 @@ mv root-6.22.06 root_src && \
 mkdir -p root_6_22_06 && \
 mkdir -p root_build && \
 cd root_build && \
-cmake -DCMAKE_INSTALL_PREFIX=../root_6_22_06 ../root_src && \
+cmake -DCMAKE_INSTALL_PREFIX=../root_6_22_06 ../root_src  -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64"&& \
 cmake --build . --target install -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 ROOTSYS=/SMASH/root_6_22_06 &&  \
 export PATH=$ROOTSYS/bin:$PATH && \
@@ -1363,7 +1363,7 @@ cd /SMASH && \
 git clone https://github.com/smash-transport/smash.git && \
 mkdir -p smash_bin && \
 cd smash_bin && \
-cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_8_303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse" && \
+cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_8_303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" && \
 make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 
 #we remove most of the sources
