@@ -201,9 +201,9 @@ inline double plab_from_s(double mandelstam_s, double m_projectile,
 
 /**
  * Convert E_tot to Mandelstam-s for a fixed-target setup,
- * with a projectile of mass m_P and a kinetic energy e_kin
+ * with a projectile of mass m_P and a total energy e_tot
  * and a target of mass m_T at rest.
- * \param[in] e_kin kinetic energy of the projectile in the lab frame [GeV]
+ * \param[in] e_tot energy of the projectile in the lab frame [GeV]
  * \param[in] m_P mass of the projectile [GeV]
  * \param[in] m_T mass of the target [GeV]
  * \return The Mandelstam variable s [GeV^2]

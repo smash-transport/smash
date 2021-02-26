@@ -53,13 +53,14 @@ static constexpr int LCollider = LogArea::Collider::id;
  * of the projectile nucleus (in AGeV). This assumes the target nucleus is at
  * rest.  This must be positive.  Note, this can also be given per-beam.
  *
- * \li Alternatively, one can specify the individual beam energies or
- * momenta in the \key Projectile and \key Target sections.  Note,
+ * Alternatively, one can specify the individual beam energies or
+ * momenta in the \key Projectile and \key Target sections (see \ref
+ projectile_and_target for details).  In this case,
  * one must give either \key E_Tot for both \key Projectile and \key
  * Target, \key E_Kin for both \key Projectile and \key
  * Target, or \key P_Lab for both \key Projectile and \key Target.
 
- * Note that using \key E_Tot, \key E_kin or \key P_Lab to quantify
+ * \note Using \key E_Tot, \key E_kin or \key P_Lab to quantify
  * the collision energy is not sufficient to configure a collision in
  * a fixed target frame. You need to additionally change the \key
  * Calculation_Frame. Any format of incident energy can however be
@@ -125,60 +126,65 @@ static constexpr int LCollider = LogArea::Collider::id;
  * For copper, zirconium, ruthenium, gold, lead and uranium, a more specific
  * default value is used.
  *
- * - \key Deformed: \n
- *    \li \key Automatic (bool, required if \key Deformed exists, no default):
- \n
- * true - Set parameters of spherical deformation based on mass number of the
- * nucleus. Currently the following deformed nuclei are implemented: Cu, Zr, Ru,
- Au, Pb, U. \n
- * false - Manually set parameters of spherical deformation. This requires the
- * additional specification of \key Beta_2, \key Beta_4, \key Theta and
- * \key Phi, which follow \iref{Moller:1993ed} and \iref{Schenke:2019ruo}. \n
+ * - Possible incident energies when given per beam:
  *
- * \li \key E_Tot (double, optional, no default) Set the total
+ *   - \key E_Tot (double, optional, no default) Set the total
  * energy (in GeV) per particle of the beam.  This key, if used, must
  * be present for both \key Projectile and \key Target.
  *
- * \li \key E_Kin (double, optional, no default) Set the kinetic
+ *   - \key E_Kin (double, optional, no default) Set the kinetic
  * energy (in GeV) per particle of the beam.  This key, if used, must
  * be present for both \key Projectile and \key Target.
  *
- * \li \key P_Lab (double, optional, no default) Set the momentum (in
+ *   - \key P_Lab (double, optional, no default) Set the momentum (in
  * GeV/c) per particle of the beam.  This key, if used, must be
  * present for both \key Projectile and \key Target, and must be
  * _positive_ for both beams.
  *
- * \note If the beam specific kinetic energy or momentum is set using
+ *   \note If the beam specific kinetic energy or momentum is set using
  * either of these keys, then it must be specified in the same way
- * (not necessarily same value) for both beams.
- *
- * This is useful to simulate for example p-Pb collisions at the LHC
+ * (not necessarily same value) for both beams. This is for example useful to
+ simulate for p-Pb collisions at the LHC,
  * where the centre-of-mass system does not correspond to the
- * laboratory system.  E.g.,
+ * laboratory system (see example below).
  *
- *\verbatim
-Modi:
-  Collider:
-    Calculation_Frame: center of velocity
-    Impact:
-      Random_Reaction_Plane: True
-      Range: [0, 8.5]
-    Projectile:
-      E_Tot: 1580
-      Particles:
-        2212: 82
-        2112: 126
-    Target:
-      E_Tot: 4000
-      Particles:
-        2212: 1
-        2112: 0
- \endverbatim
+ *   **Example: p-Pb collisions at the LHC**\n
  *
- * Note that SMASH performs it's calculation in the centre-of-velocity
+ *   Note that SMASH performs it's calculation in the centre-of-velocity
  * and the particles are returned in the centre-of-mass frame.  The
  * particles therefore need to be boosted by the rapidity of the
  * centre-of-mass (-0.465 for p-Pb at 5.02TeV).
+ * \verbatim
+ Modi:
+   Collider:
+     Calculation_Frame: center of velocity
+     Impact:
+       Random_Reaction_Plane: True
+       Range: [0, 8.5]
+     Projectile:
+       E_Tot: 1580
+       Particles:
+         2212: 82
+         2112: 126
+     Target:
+       E_Tot: 4000
+       Particles:
+         2212: 1
+         2112: 0
+  \endverbatim
+ *
+ * - \key Deformed: \n
+ *   - \key Automatic (bool, required if \key Deformed exists, no default):
+ \n
+ *     - \key true - Set parameters of spherical deformation based on mass
+ number of the
+ * nucleus. Currently the following deformed nuclei are implemented: Cu, Zr, Ru,
+ Au, Pb, U. \n
+ *     - \key false - Manually set parameters of spherical deformation. This
+ requires the
+ * additional specification of \key Beta_2, \key Beta_4, \key Theta and
+ * \key Phi, which follow \iref{Moller:1993ed} and \iref{Schenke:2019ruo}. \n
+ *     .
  *
  * \page input_impact_parameter_ Impact Parameter
  * \key Impact: \n
