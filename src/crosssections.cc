@@ -166,8 +166,9 @@ CollisionBranchList CrossSections::generate_collision_list(
       append_list(process_list, two_to_three(), (1. - p_pythia) * scale_xs);
     }
   }
-  if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
-    // NNbar directly to 5 pions (2-to-5), TODO(stdnmr) currently only 5pi0
+  if ((t1.pdgcode() ==  pdg::p && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) ||
+      (t1.pdgcode() == -pdg::p && t2.pdgcode() == t1.get_antiparticle()->pdgcode())) {
+    // ppbar directly to 5 pions (2-to-5), TODO(stdnmr) currently only 5pi0
     process_list.emplace_back(NNbar_to_5pi(sum_xs_of(process_list), scale_xs));
   }
 
@@ -2429,12 +2430,11 @@ double CrossSections::string_hard_cross_section() const {
 
 CollisionBranchPtr CrossSections::NNbar_to_5pi(const double current_xs,
                                                const double scale_xs) const {
-  /* Calculate NNbar cross section:
-   * Parametrized total minus all other present channels.*/
   const double s = sqrt_s_ * sqrt_s_;
-  double nnbar_xsec = std::max(0., ppbar_total(s) * scale_xs - current_xs);
-  logg[LCrossSections].debug("NNbar cross section in NNbar_to_5pi is: ",
+  const double nnbar_xsec = xs_ppbar_annihilation(s);
+  logg[LCrossSections].debug("Now using directly parametrized value is: ",
                              nnbar_xsec);
+
   // Make collision channel NNbar -> 5π
   // TODO(stdnmr) Is this really the only possible pion outcome?
   const auto& type_piz = ParticleType::find(pdg::pi_z);

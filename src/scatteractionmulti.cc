@@ -247,35 +247,36 @@ void ScatterActionMulti::add_possible_reactions(
               incoming_particles_[0], incoming_particles_[1],
               incoming_particles_[2], incoming_particles_[3],
               incoming_particles_[4])) {
-
         // TODO(stdnmr) Check if symmetry and spin factors are correct
-        const int spin_factor_inc = incoming_particles_[0].pdgcode().spin_degeneracy() *
-                                    incoming_particles_[1].pdgcode().spin_degeneracy() *
-                                    incoming_particles_[2].pdgcode().spin_degeneracy() *
-                                    incoming_particles_[3].pdgcode().spin_degeneracy() *
-                                    incoming_particles_[4].pdgcode().spin_degeneracy() ;
+        const int spin_factor_inc =
+            incoming_particles_[0].pdgcode().spin_degeneracy() *
+            incoming_particles_[1].pdgcode().spin_degeneracy() *
+            incoming_particles_[2].pdgcode().spin_degeneracy() *
+            incoming_particles_[3].pdgcode().spin_degeneracy() *
+            incoming_particles_[4].pdgcode().spin_degeneracy();
 
-        const double symmetry_factor = 4.0; // Maybe? 2! * 2!
+        const double symmetry_factor = 4.0;  // 2! * 2!
 
         const ParticleTypePtr type_p = ParticleType::try_find(pdg::p);
         const ParticleTypePtr type_anti_p = ParticleType::try_find(-pdg::p);
         const ParticleTypePtr type_n = ParticleType::try_find(pdg::n);
         const ParticleTypePtr type_anti_n = ParticleType::try_find(-pdg::n);
 
-
         const double spin_degn =
             react_degen_factor(spin_factor_inc, type_p->spin_degeneracy(),
                                type_anti_p->spin_degeneracy());
 
-        if (type_p && type_p) {
-          const double prob = probability_five_to_two(*type_p, dt, gcell_vol,
-                                  symmetry_factor * spin_degn); // same for p and n
+        if (type_p && type_n) {
+          const double prob = probability_five_to_two(
+              *type_p, dt, gcell_vol,
+              symmetry_factor * spin_degn);  // same for p and n
+          // TODO(stdnmr) Correct to just have same p for both?
           add_reaction(make_unique<CollisionBranch>(
               *type_p, *type_anti_p, prob,
               ProcessType::MultiParticleFiveToTwo));
-          add_reaction(make_unique<CollisionBranch>(
-              *type_n, *type_anti_n, prob,
-              ProcessType::MultiParticleFiveToTwo));
+          // add_reaction(make_unique<CollisionBranch>(
+          //     *type_n, *type_anti_n, prob,
+          //     ProcessType::MultiParticleFiveToTwo));
         }
       }
     }
@@ -415,7 +416,8 @@ double ScatterActionMulti::probability_five_to_two(
 
   // Oscars parametrization for phi5
   const double s_zero = 25 * pion_mass * pion_mass;
-  const double fit_a = 5.02560248e-11;
+  // const double fit_a = 5.02560248e-11;  // Oscar
+  const double fit_a = 2.1018e-10; // Juan
   const double fit_alpha = 1.982;
   const double ph_sp_5 = fit_a * std::pow(man_s - s_zero, 5.0) *
                          std::pow(1 + man_s / s_zero, -fit_alpha);
