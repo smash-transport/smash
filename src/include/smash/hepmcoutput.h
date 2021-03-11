@@ -11,19 +11,11 @@
 #ifndef SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 #define SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 
-#include <memory>
-#include <string>
-
-#include "forwarddeclarations.h"
-#include "outputinterface.h"
-#include "outputparameters.h"
+#include <HepMC3/WriterAscii.h>
 
 #include <boost/filesystem.hpp>
 
-#include "HepMC3/GenEvent.h"
-#include "HepMC3/GenParticle.h"
-#include "HepMC3/GenVertex.h"
-#include "HepMC3/WriterAscii.h"
+#include "hepmcinterface.h"
 
 namespace smash {
 
@@ -38,8 +30,9 @@ namespace smash {
  *
  * More details of the output format can be found in the User Guide.
  */
-class HepMcOutput : public OutputInterface {
+class HepMcOutput : public HepMcInterface {
  public:
+  using Base = HepMcInterface;
   /**
    * Create HepMC particle output.
    *
@@ -55,19 +48,6 @@ class HepMcOutput : public OutputInterface {
 
   /// Destructor renames file
   ~HepMcOutput();
-
-  /**
-   * Add the initial particles information of an event to the central vertex.
-   * Construct projectile and target particles with nuclear pdg code if
-   * collider.
-   * \param[in] particles Current list of all particles.
-   * \param[in] event_number Current event number
-   * \throw std::invalid_argument if nuclei with non-nucleon particle
-   *                              (like hypernuclei) are tried to be constructed
-   */
-  void at_eventstart(const Particles &particles, const int event_number,
-                     const EventInfo &) override;
-
   /**
    * Add the final particles information of an event to the central vertex.
    * Store impact paramter and write event.
@@ -80,52 +60,12 @@ class HepMcOutput : public OutputInterface {
                    const EventInfo &event) override;
 
  private:
-  /// HepMC convention: status code for target and projecticle particles
-  static const int status_code_for_beam_particles;
-  /// HepMC convention: status code for final particles
-  static const int status_code_for_final_particles;
-
   /// Filename of output
   const bf::path filename_;
   /// Filename of output as long as simulation is still running.
   bf::path filename_unfinished_;
-
-  /**
-   * Total number of nucleons in projectile and target,
-   * needed for converting nuclei to single particles.
-   */
-  const int total_N_;
-  /**
-   * Total number of nucleons in projectile,
-   * needed for converting nuclei to single particles.
-   */
-  const int proj_N_;
-
-  /**
-   * Construct nulcear pdg code for porjectile and target, see PDG chapter
-   * "Monte Carlo particle numbering scheme" for details.
-   *
-   * \param[in] na Number of all particles in nucleus (A)
-   * \param[in] nz Number of all charged particles in nucleus (Z).
-   *
-   * Note: Isomers and hypernuclei are not supported. Also note that one would
-   * usually create a PdgCode object to store the PDG code of the nuclei.
-   * This PdgCode object however would be first constructed with the integer
-   * determined here and then directly returned again with a method of the
-   * PdgCode class, making the creation of a PdgCode class instance overkill.
-   * A possible improvement would be the inclusion of this function in the
-   * PdgCode class.
-   */
-  int construct_nuclear_pdg_code(int na, int nz) const;
-
   /// Pointer to Ascii HepMC3 output file
   std::unique_ptr<HepMC3::WriterAscii> output_file_;
-
-  /// HepMC3::GenEvent pointer for current event
-  std::unique_ptr<HepMC3::GenEvent> current_event_;
-
-  /// HepMC3::GenVertex pointer for central vertex in event
-  HepMC3::GenVertexPtr vertex_;
 };
 
 }  // namespace smash

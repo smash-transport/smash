@@ -69,7 +69,7 @@ if(USE_ROOT)
 endif()
 
 option(USE_HEPMC "Turn this off to disable HepMC output support in SMASH." ON)
-if(USE_HEPMC)
+if(USE_HEPMC OR USE_RIVET)
   find_package(HepMC3)
   if(HepMC3_FOUND)
     message(STATUS "Found HepMC ${HepMC3_VERSION} at ${HEPMC3_LIB}.")
@@ -81,6 +81,31 @@ if(USE_HEPMC)
     add_definitions(-DSMASH_USE_HEPMC)
   else()
     message(STATUS "HepMC not found. Support disabled.")
+  endif()
+endif()
+
+option(USE_RIVET "Turn this off to disable Rivet output support in SMASH." ON)
+set(Rivet_FOUND FALSE)
+if(USE_RIVET AND HepMC3_FOUND)
+  find_program(RIVET_CONFIG rivet-config
+    DOC "Path to the Rivet configuration script")
+  if(RIVET_CONFIG)
+    execute_process(COMMAND ${RIVET_CONFIG} --version
+      OUTPUT_VARIABLE RIVET_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND ${RIVET_CONFIG} --includedir
+      OUTPUT_VARIABLE RIVET_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND ${RIVET_CONFIG} --libs
+      OUTPUT_VARIABLE RIVET_LIB OUTPUT_STRIP_TRAILING_WHITESPACE)
+    message(STATUS "Found Rivet ${RIVET_VERSION} ${RIVET_INCLUDE_DIR} ${RIVET_LIB}.")
+    include_directories(SYSTEM "${RIVET_INCLUDE_DIR}")
+    set(SMASH_LIBRARIES
+      ${SMASH_LIBRARIES}
+      ${RIVET_LIB}
+      )
+    add_definitions(-DSMASH_USE_RIVET)
+    set(Rivet_FOUND TRUE)
+  else()
+    message(STATUS "Rivet not found. Support disabled.")
   endif()
 endif()
 
@@ -199,7 +224,10 @@ if(USE_ROOT AND ROOT_FOUND)
 endif()
 
 if(USE_HEPMC AND HepMC3_FOUND)
-  set(smash_src ${smash_src} hepmcoutput.cc)
+  set(smash_src ${smash_src} hepmcoutput.cc hepmcinterface.cc)
+  if(USE_RIVET AND Rivet_FOUND)
+    set(smash_src ${smash_src} rivetoutput.cc)
+  endif()
 endif()
 
 # this is the "object library" target: compiles the sources only once
