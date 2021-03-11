@@ -200,6 +200,34 @@ inline double plab_from_s(double mandelstam_s, double m_projectile,
 }
 
 /**
+ * Convert E_tot to Mandelstam-s for a fixed-target setup,
+ * with a projectile of mass m_P and a total energy e_tot
+ * and a target of mass m_T at rest.
+ * \param[in] e_tot energy of the projectile in the lab frame [GeV]
+ * \param[in] m_P mass of the projectile [GeV]
+ * \param[in] m_T mass of the target [GeV]
+ * \return The Mandelstam variable s [GeV^2]
+ */
+inline double s_from_Etot(double e_tot, double m_P, double m_T) {
+  return m_P * m_P + m_T * m_T + 2 * m_T * e_tot;
+}
+/**
+ * Convert E_tot to Mandelstam-s for two beams with total energies and
+ * masses (E,m)
+ *
+ * \param[in] e_tot_p Total energy of projectile [GeV]
+ * \param[in] e_tot_t Total energy of target [GeV]
+ * \param[in] m_p     Mass of projectile [GeV]
+ * \param[in] m_t     Mass of target     [GeV]
+ * \return Mandelstam-s [GeV^2]
+ */
+inline double s_from_Etot(double e_tot_p, double e_tot_t, double m_p,
+                          double m_t) {
+  double pz_p = std::sqrt(e_tot_p * e_tot_p - m_p * m_p);
+  double pz_t = std::sqrt(e_tot_t * e_tot_t - m_t * m_t);
+  return std::pow(e_tot_p + e_tot_t, 2) - std::pow(pz_p - pz_t, 2);
+}
+/**
  * Convert E_kin to Mandelstam-s for a fixed-target setup,
  * with a projectile of mass m_P and a kinetic energy e_kin
  * and a target of mass m_T at rest.
@@ -209,9 +237,22 @@ inline double plab_from_s(double mandelstam_s, double m_projectile,
  * \return The Mandelstam variable s [GeV^2]
  */
 inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
-  return m_P * m_P + m_T * m_T + 2 * m_T * (m_P + e_kin);
+  return s_from_Etot(e_kin + m_P, m_P, m_T);
 }
-
+/**
+ * Convert E_kin=(E_tot-m) to Mandelstam-s for two beams with total
+ * energies and masses (E,m)
+ *
+ * \param[in] e_kin_p Kinetic energy of projectile [GeV]
+ * \param[in] e_kin_t Kinetic energy of target [GeV]
+ * \param[in] m_p     Mass of projectile [GeV]
+ * \param[in] m_t     Mass of target     [GeV]
+ * \return Mandelstam-s [GeV^2]
+ */
+inline double s_from_Ekin(double e_kin_p, double e_kin_t, double m_p,
+                          double m_t) {
+  return s_from_Etot(e_kin_p + m_t, e_kin_t + m_t, m_p, m_t);
+}
 /**
  * Convert p_lab to Mandelstam-s for a fixed-target setup,
  * with a projectile of mass m_P and momentum plab
@@ -223,6 +264,21 @@ inline double s_from_Ekin(double e_kin, double m_P, double m_T) {
  */
 inline double s_from_plab(double plab, double m_P, double m_T) {
   return m_P * m_P + m_T * m_T + 2 * m_T * std::sqrt(m_P * m_P + plab * plab);
+}
+/**
+ * Convert P_lab to Mandelstam-s for two beams with total momenta and masses
+ * (P,m) (P_lab gives per nucleon, P=P_lab*A)
+ *
+ * \param[in] plab_p Kinetic energy of projectile [GeV]
+ * \param[in] plab_t Kinetic energy of target [GeV]
+ * \param[in] m_p    Mass of projectile [GeV]
+ * \param[in] m_t    Mass of target     [GeV]
+ * \return Mandelstam-s [GeV^2]
+ */
+inline double s_from_plab(double plab_p, double plab_t, double m_p,
+                          double m_t) {
+  return s_from_Etot(std::sqrt(m_p * m_p + plab_p * plab_p),
+                     std::sqrt(m_t * m_t + plab_t * plab_t), plab_p, plab_t);
 }
 
 }  // namespace smash
