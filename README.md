@@ -65,18 +65,15 @@ Note that although Pythia is statically linked into SMASH, access to
 
 ### Including Eigen Header Files from Custom Location
 
-Let's assume Eigen headers will be unpacked in `$HOME`. First, download latest
-package from http://eigen.tuxfamily.org
+Let's assume Eigen headers will be unpacked in `$HOME`.
+
+1. download latest the package from http://eigen.tuxfamily.org
 
        [latest-eigen].tar.gz
        tar -xf [latest-eigen].tar.gz -C $HOME`
 
-Second, either in `smash/build/`, create build files with
-`cmake -DOWN_EIGEN_PATH=$HOME/[latest-eigen]/ ..` or run `make install` in the
-unpacked Eigen directory to install headers on the system (follow the provided
-INSTALL file). For the later, it might be necessary to change the
-`CMAKE_INSTALL_PREFIX`, see _Installation_ section below.
-
+2. in `smash/build/`, create build files with
+`cmake -DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/ ..`
 
 ### Building SMASH
 
@@ -201,6 +198,9 @@ installation. If the HepMC installation is not found, provide the
 install destination (`$HEPMC_INS`) with
 
    cmake -DCMAKE_PREFIX_PATH=$HEPMC_INS ..
+
+Note that if multiple CMAKE_PREFIX_PATHs are necessary, a semicolon-separated
+list of directories can be specified.
 
 
 ### Using a Custom GSL Build

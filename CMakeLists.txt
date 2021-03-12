@@ -16,7 +16,11 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 endif()
 
 # Minimum cmake version this is tested on
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.1)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Tell cmake where to find our modules
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -87,6 +91,10 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 # check that C++11 code compiles
+# in order for this to work the policy on respecting the CXX_STANDARD for
+# try_compile has to be changed first
+# see https://cmake.org/cmake/help/v3.8/policy/CMP0067.html
+cmake_policy(SET CMP0067 NEW)
 include(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("
 #include <initializer_list>
