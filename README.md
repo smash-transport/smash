@@ -65,14 +65,17 @@ Note that although Pythia is statically linked into SMASH, access to
 
 ### Including Eigen Header Files from Custom Location
 
-Let's assume Eigen headers will be unpacked in `$HOME`.
-
-1. Download latest package from http://eigen.tuxfamily.org
+Let's assume Eigen headers will be unpacked in `$HOME`. First, download latest
+package from http://eigen.tuxfamily.org
 
        [latest-eigen].tar.gz
        tar -xf [latest-eigen].tar.gz -C $HOME`
 
-2. in `smash/build/`, create build files with `cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..`
+Second, either in `smash/build/`, create build files with
+`cmake -DOWN_EIGEN_PATH=$HOME/[latest-eigen]/ ..` or run `make install` in the
+unpacked Eigen directory to install headers on the system (follow the provided
+INSTALL file). For the later, it might be necessary to change the
+`CMAKE_INSTALL_PREFIX`, see _Installation_ section below.
 
 
 ### Building SMASH
@@ -93,26 +96,26 @@ To run it with specific settings:
     vi config.yaml
     ./smash
 
-### Installation 
+### Installation
 
-To install SMASH do 
+To install SMASH do
 
-    make install 
+    make install
 
-This will install into `/usr/local`.  If you want to change the installation directory, 
-define [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html) 
-when configuring the source tree.  For example, if you want to install in `~/.local`, do 
+This will install into `/usr/local`.  If you want to change the installation directory,
+define [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html)
+when configuring the source tree.  For example, if you want to install in `~/.local`, do
 
-    cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local
-    make install 
+    cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
+    make install
 
-With `CMAKE_INSTALL_PREFIX`=_prefix_ the installation will be 
+With `CMAKE_INSTALL_PREFIX`=_prefix_ the installation will be
 
-- _prefix_`/bin` will contain programs - e.g., `smash`, 
-- _prefix_`/lib` will contain libraries - e.g., `libsmash.so`, 
+- _prefix_`/bin` will contain programs - e.g., `smash`,
+- _prefix_`/lib` will contain libraries - e.g., `libsmash.so`,
 - _prefix_/`include/smash` will contain headers, and
-- _prefix_/`share/smash` will contain data files 
-    
+- _prefix_/`share/smash` will contain data files
+
 ### Troubleshooting
 
 #### SMASH does not compile

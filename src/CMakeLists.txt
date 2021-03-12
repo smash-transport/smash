@@ -55,7 +55,7 @@ endif (GIT_FOUND)
 string(TIMESTAMP BUILD_DATE)
 
 find_package(GSL 2.0 REQUIRED)
-find_package(Eigen3 REQUIRED)
+find_package(Eigen3 REQUIRED PATHS OWN_EIGEN_PATH)
 find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 
 option(USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
