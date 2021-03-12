@@ -60,11 +60,11 @@ void HepMcInterface::at_eventstart(const Particles& particles,
   smash::FourVector p_targ;
   AZ az_proj;
   AZ az_targ;
-  bool is_coll = proj_N_ > 0 and total_N_ > 0;
+  bool is_coll = proj_N_ > 0 && total_N_ > 0;
 
   for (auto& data : particles) {
     if (is_coll) {
-      if (!data.is_neutron() and !data.is_proton()) {
+      if (!data.is_neutron() && !data.is_proton()) {
         throw std::runtime_error(
             "Particle of PID=" + std::to_string(data.pdgcode().get_decimal()) +
             " is not a valid HepMC beam particle!");
@@ -78,7 +78,7 @@ void HepMcInterface::at_eventstart(const Particles& particles,
       az.first++;
     }
 
-    if (only_final_ and is_coll)
+    if (only_final_ && is_coll)
       continue;
 
     // If we are not only adding final state particles, but all
@@ -136,7 +136,7 @@ void HepMcInterface::at_interaction(const Action& action,
     }
   }
   // --- Check if this a collision and count it --------------------
-  bool is_coll = has_proj and has_targ;
+  bool is_coll = has_proj && has_targ;
   if (is_coll) {
     ncoll_++;
     if (type == ProcessType::StringHard) {
@@ -190,8 +190,9 @@ void HepMcInterface::at_eventend(const Particles& particles,
     if (only_final_) {
       auto h = make_register(p, Status::fnal);
       ip_->add_particle_out(h);
-    } else if (map_.find(p.id()) == map_.end())
+    } else if (map_.find(p.id()) == map_.end()) {
       throw std::runtime_error("Dangling particle " + std::to_string(p.id()));
+    }
   }
 }
 //==================================================================
@@ -208,7 +209,8 @@ int HepMcInterface::get_status(const ProcessType& t) const {
   if (t == ProcessType::Decay)
     return Status::dcy;
 
-  return int(t) + int(Status::off);  // Make all other codes EG specific
+  // Make all other codes EG specific
+  return static_cast<int>(t) + static_cast<int>(Status::off);
 }
 //==================================================================
 HepMC3::GenParticlePtr HepMcInterface::make_gen(int pid, int status,
@@ -236,7 +238,7 @@ HepMC3::GenParticlePtr HepMcInterface::find_or_make(const ParticleData& p,
                                                     int status,
                                                     bool force_new) {
   int id = p.id();
-  if (not force_new) {
+  if (! force_new) {
     auto it = map_.find(id);
     if (it != map_.end()) {
       // if (it->second.expired()) {
@@ -251,9 +253,9 @@ HepMC3::GenParticlePtr HepMcInterface::find_or_make(const ParticleData& p,
 }
 //==================================================================
 int HepMcInterface::ion_pdg(const AZ& az) const {
-  if (az.second == 1 and az.first == 1)
+  if (az.second == 1 && az.first == 1)
     return 2212;  // Proton
-  if (az.second == 1 and az.first == 0)
+  if (az.second == 1 && az.first == 0)
     return 2112;  // Neutron
 
   return 1'000'000'000 + az.second * 10'000 + az.first * 10;

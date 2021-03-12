@@ -9,17 +9,19 @@
 #ifndef SRC_INCLUDE_SMASH_HEPMCINTERFACE_H_
 #define SRC_INCLUDE_SMASH_HEPMCINTERFACE_H_
 
+#include <map>
 #include <memory>
 #include <string>
+#include <utility>
 #include <valarray>
 
+#include "action.h"
+#include "forwarddeclarations.h"
 #include "HepMC3/GenCrossSection.h"
 #include "HepMC3/GenEvent.h"
 #include "HepMC3/GenHeavyIon.h"
 #include "HepMC3/GenParticle.h"
 #include "HepMC3/GenVertex.h"
-#include "action.h"
-#include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"
 namespace smash {
@@ -226,4 +228,4 @@ class HepMcInterface : public OutputInterface {
 };
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SMASH_RIVETOUTPUT_H_
+#endif  // SRC_INCLUDE_SMASH_HEPMCINTERFACE_H_

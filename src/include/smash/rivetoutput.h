@@ -10,6 +10,11 @@
 #define SRC_INCLUDE_SMASH_RIVETOUTPUT_H_
 
 #include <Rivet/AnalysisHandler.hh>
+
+#include <memory>
+#include <string>
+#include <utility>
+
 #include <boost/filesystem.hpp>
 
 #include "smash/fpenvironment.h"
@@ -102,7 +107,7 @@ class RivetOutput : public HepMcInterface {
     /** Type of handler */
     using Handler = std::shared_ptr<Rivet::AnalysisHandler>;
     /** Construct proxy */
-    Proxy(Handler h) : h_(h), g_(0) {}
+    explicit Proxy(Handler h) : h_(h), g_(0) {}
     /** Move construct */
     Proxy(Proxy&& p) : h_(p.h_), g_(std::move(p.g_)) {}
     /** Forward calls to handler */

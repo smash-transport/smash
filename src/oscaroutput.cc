@@ -6,10 +6,12 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
+
 #include "smash/oscaroutput.h"
 
-#include <boost/filesystem.hpp>
 #include <string>
+
+#include <boost/filesystem.hpp>
 
 #include "smash/action.h"
 #include "smash/clock.h"
