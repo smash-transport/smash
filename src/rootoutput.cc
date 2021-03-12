@@ -17,7 +17,6 @@
 
 namespace smash {
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
-static constexpr int LOutput = LogArea::Output::id;
 
 const int RootOutput::max_buffer_size_ = 500000;
 
