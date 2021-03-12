@@ -40,7 +40,7 @@
 #ifdef SMASH_USE_HEPMC
 #include "hepmcoutput.h"
 #endif
-#ifdef SMASH_USE_HEPMC
+#ifdef SMASH_USE_RIVET
 #include "rivetoutput.h"
 #endif
 #include "icoutput.h"
