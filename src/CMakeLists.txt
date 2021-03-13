@@ -310,8 +310,8 @@ if(BUILD_TESTING)
    add_subdirectory(tests)
 endif()
 
-install(TARGETS smash_shared LIBRARY)
-install(TARGETS smash RUNTIME)
+install(TARGETS smash_shared DESTINATION lib)
+install(TARGETS smash DESTINATION bin)
 
 install(DIRECTORY include/smash DESTINATION include)
 install(FILES ${generated_headers} DESTINATION include/smash)
