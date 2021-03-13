@@ -36,7 +36,7 @@ required C++11 features):
 - clang >= 3.2
 
 It requires the following tools & libraries:
-- cmake >= 2.8.11
+- cmake >= 3.1
 - the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
@@ -67,13 +67,13 @@ Note that although Pythia is statically linked into SMASH, access to
 
 Let's assume Eigen headers will be unpacked in `$HOME`.
 
-1. Download latest package from http://eigen.tuxfamily.org
+1. download latest the package from http://eigen.tuxfamily.org
 
        [latest-eigen].tar.gz
        tar -xf [latest-eigen].tar.gz -C $HOME`
 
-2. in `smash/build/`, create build files with `cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..`
-
+2. in `smash/build/`, create build files with
+`cmake -DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/ ..`
 
 ### Building SMASH
 
@@ -93,6 +93,25 @@ To run it with specific settings:
     vi config.yaml
     ./smash
 
+### Installation
+
+To install SMASH do
+
+    make install
+
+This will install into `/usr/local`.  If you want to change the installation directory,
+define [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html)
+when configuring the source tree.  For example, if you want to install in `~/.local`, do
+
+    cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
+    make install
+
+With `CMAKE_INSTALL_PREFIX`=_prefix_ the installation will be
+
+- _prefix_`/bin` will contain programs - e.g., `smash`,
+- _prefix_`/lib` will contain libraries - e.g., `libsmash.so`,
+- _prefix_/`include/smash` will contain headers, and
+- _prefix_/`share/smash` will contain data files
 
 ### Troubleshooting
 
@@ -179,6 +198,9 @@ installation. If the HepMC installation is not found, provide the
 install destination (`$HEPMC_INS`) with
 
    cmake -DCMAKE_PREFIX_PATH=$HEPMC_INS ..
+
+Note that if multiple CMAKE_PREFIX_PATHs are necessary, a semicolon-separated
+list of directories can be specified.
 
 
 ### Using a Custom GSL Build
