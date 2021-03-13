@@ -42,4 +42,4 @@ add_subdirectory(src/suave)
 add_subdirectory(src/vegas)
 add_subdirectory(src/divonne)
 
-install(FILES cuba.h TYPE INCLUDE)
+install(FILES cuba.h DESTINATION include)
