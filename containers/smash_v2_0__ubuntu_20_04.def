@@ -1298,7 +1298,7 @@ NUMBER_OF_PROCS_FOR_COMPILATION=2
 #we use pip to install a few python2 libraries (seaborn and, automatically as dependencies, matplotlib, scipy, pandas, yaml and numpy)    
 
 cd /tmp
-wget https://raw.githubusercontent.com/pypa/get-pip/master/2.7/get-pip.py
+wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
 python2 get-pip.py
 pip install seaborn
 rm get-pip.py
@@ -1417,7 +1417,7 @@ export CLING_STANDARD_PCH=none
 
 %labels
 Author Gabriele Inghirami
-Version v_06_02_21_ubuntu2004
+Version v_08_03_21_ubuntu2004
 
 
 %help

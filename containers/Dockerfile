@@ -1301,7 +1301,7 @@ WORKDIR /SMASH
 
 #we use pip to install a few python2 libraries (seaborn and, automatically as dependencies, matplotlib, scipy, pandas, yaml and numpy)    
 
-RUN wget https://raw.githubusercontent.com/pypa/get-pip/master/2.7/get-pip.py
+RUN https://bootstrap.pypa.io/pip/2.7/get-pip.py
 RUN python2 get-pip.py 
 RUN pip install seaborn && \
 rm get-pip.py 
