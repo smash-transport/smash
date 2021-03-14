@@ -1029,6 +1029,11 @@ class Configuration {
   };
 
   /**
+   * Flag to mark initialization with a YAML formatted string.
+  */ 
+  static const char InitializeFromYAMLString = 'S';
+
+  /**
    * Reads config.yaml from the specified path.
    *
    * \param[in] path The directory where the SMASH config files are located.
@@ -1047,12 +1052,33 @@ class Configuration {
   /**
    * Initialize configuration with a YAML formatted string.  This is
    * useful in 3-rd party application where we may not be able or
-   * willing to read in external files. This constructor is also used
-   * in the test-suite. It should never be used/needed in actual SMASH code.
+   * willing to read in external files. 
    *
    * \param[in] yaml YAML formatted configuration data.
+   * \param[in] sflag control flag InitializeFromYAMLString.
    */
-  explicit Configuration(const char *yaml) { merge_yaml(yaml); }
+  explicit Configuration(const char *yaml, const char sflag) {
+    if (sflag==InitializeFromYAMLString) {
+      merge_yaml(yaml);
+    } else {
+             throw std::runtime_error(
+             "Unknown control flag in Configuration constructor"
+             " with a YAML formatted string. Please, use"
+             " Configuration::InitializeFromYAMLString.");
+    }
+  }
+
+#ifdef BUILD_TESTS
+  /**
+   * \mocking
+   * Unit tests can use this constructor to get a Configuration object from a
+   * built-in string.
+   * This function is only available to tests and should never be used/needed in
+   * actual SMASH code. The intention is to avoid creating a mock object for
+   * Configuration to test other classes of SMASH.
+   */
+  explicit Configuration(const char *yaml) : root_node_(YAML::Load(yaml)) {}
+#endif
 
   /// If you want to copy this you're doing it wrong
   Configuration(const Configuration &) = default;
