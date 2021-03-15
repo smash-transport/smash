@@ -25,12 +25,12 @@ namespace smash {
  *
  * \section hepmc_output_user_guide_format_ ASCII HepMC Format
  *
- * HepMC generaly structures each event into particles and vertices
+ * HepMC generally structures each event into particles and vertices
  * connecting them, basically storing a graph of the event. Since the
  * purpose of this output is to only provide a particle list of the
  * final state produced the output format is adapted accordingly for
  * the SMASH implementation: Only one central vertex is used. All
- * intial state particles are incoming particles and all final state
+ * initial state particles are incoming particles and all final state
  * particles are outgoing particles of this vertex. Scatterings
  * happening during the SMASH event are not recorded. For the collider
  * modus, the intial state particles are combined into two single

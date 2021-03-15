@@ -82,7 +82,7 @@ namespace smash {
  *     - \key YODA-full Full event structure present to analyse
  *
  *   - \key Paths (list of strings, no default)
- *     This key specifies the diretories that Rivet will search for
+ *     This key specifies the directories that Rivet will search for
  *     analyses and data files related to the analyses.
  *   - \key Analyses (list of strings, no default)
  *     This key specifies the analyses (including opossible options)

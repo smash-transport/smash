@@ -51,10 +51,10 @@ namespace smash {
  * particles as "in" particles to that vertex.  We also set the
  * appropriate "state" of the incoming particles.  That is, if the
  * interaction corresponded to a decay, then the HepMC state is set to
- * two (2).  All other interactions are set to ten (10) plus the SMASH
- * interaction code (since there is no standard for these codes other
- * than 1: final state, 2: particle has decayed, 4: particle is beam
- * particle).
+ * two (2).  All other interactions are set to one hundred (100) plus
+ * the SMASH interaction code (since there is no standard for these
+ * codes other than 1: final state, 2: particle has decayed,
+ * 4: particle is beam particle).
  *
  * For outgoing particles this is a bit different.  In case of elastic
  * scatterings, SMASH will keep the incoming particle around as an
@@ -128,7 +128,7 @@ class HepMcInterface : public OutputInterface {
     beam = 4,  // Beam particle
     fnal = 1,  // final state `final` is a reserved word
     dcy = 2,   // Decay
-    off = 10
+    off = 100
   };
   /** Type of mapping from SMASH ID to HepMC ID */
   using IdMap = std::map<int, HepMC3::GenParticlePtr>;
