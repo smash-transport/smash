@@ -270,13 +270,13 @@ void ScatterActionMulti::add_possible_reactions(
           const double prob = probability_five_to_two(
               *type_p, dt, gcell_vol,
               symmetry_factor * spin_degn);  // same for p and n
-          // TODO(stdnmr) Correct to just have same p for both?
+          // TODO(stdnmr) Correct to just have same P for both?
           add_reaction(make_unique<CollisionBranch>(
               *type_p, *type_anti_p, prob,
               ProcessType::MultiParticleFiveToTwo));
-          // add_reaction(make_unique<CollisionBranch>(
-          //     *type_n, *type_anti_n, prob,
-          //     ProcessType::MultiParticleFiveToTwo));
+          add_reaction(make_unique<CollisionBranch>(
+              *type_n, *type_anti_n, prob,
+              ProcessType::MultiParticleFiveToTwo));
         }
       }
     }
@@ -461,7 +461,7 @@ void ScatterActionMulti::five_to_two() {
   sample_2body_phasespace();
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
-  logg[LScatterActionMulti].info("5->2 scattering:", incoming_particles_,
+  logg[LScatterActionMulti].debug("5->2 scattering:", incoming_particles_,
                                  " -> ", outgoing_particles_);
 }
 

@@ -166,16 +166,16 @@ CollisionBranchList CrossSections::generate_collision_list(
       append_list(process_list, two_to_three(), (1. - p_pythia) * scale_xs);
     }
   }
-  if ((t1.pdgcode() ==  pdg::p && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) ||
-      (t1.pdgcode() == -pdg::p && t2.pdgcode() == t1.get_antiparticle()->pdgcode())) {
-    // ppbar directly to 5 pions (2-to-5), TODO(stdnmr) currently only 5pi0
+  if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
+    // NNbar directly to 5 pions (2-to-5) // TODO(stdnmr) config option
     process_list.emplace_back(NNbar_to_5pi(sum_xs_of(process_list), scale_xs));
   }
 
   /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
    * ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
    * Only use in cases when detailed balance MUST happen, i.e. in a box! */
-  if (nnbar_treatment == NNbarTreatment::Resonances) {
+  // if (nnbar_treatment == NNbarTreatment::Resonances) {
+  if (false) {
     if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
       /* Has to be called after the other processes are already determined,
        * so that the sum of the cross sections includes all other processes. */
@@ -2436,7 +2436,8 @@ CollisionBranchPtr CrossSections::NNbar_to_5pi(const double current_xs,
                              nnbar_xsec);
 
   // Make collision channel NNbar -> 5π
-  // TODO(stdnmr) Is this really the only possible pion outcome?
+  // TODO(stdnmr) Is this really the only possible pion outcome? Yes, at least
+  // to replicate rho h1 resonance approach.
   const auto& type_piz = ParticleType::find(pdg::pi_z);
   const auto& type_pip = ParticleType::find(pdg::pi_p);
   const auto& type_pim = ParticleType::find(pdg::pi_m);
