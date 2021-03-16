@@ -233,14 +233,31 @@ class Experiment : public ExperimentBase {
    */
   Modus *modus() { return &modus_; }
 
-  /** Number of projectile participants */
+  /** Number of projectile participants
+   *
+   * This includes all particles of the projectile that did not take part in
+   * any scattering. Note that this definition might not be accurate because
+   * there can be many secondary interactions with low momentum transfer within
+   * the projectile nucleus.
+   *
+   * \return Number of projectile participants
+   * */
   int npart_projectile() const {
     int np = 0;
     for (size_t i = 0; i < this->modus_.proj_N_number(); i++)
       np += nucleon_has_interacted_[i] ? 1 : 0;
     return np;
   }
-  /** Number of projectile participants */
+
+  /** Number of target participants
+   *
+   * This includes all particles of the target that did not take part in
+   * any scattering. Note that this definition might not be accurate because
+   * there can be many secondary interactions with low momentum transfer within
+   * the target nucleus.
+   *
+   * \return Number of target participants
+   * */
   int npart_target() const {
     int nt = 0;
     for (size_t i = this->modus_.proj_N_number();
