@@ -74,7 +74,7 @@ namespace smash {
  * we check if the outgoing particle was part of the beam particles.
  * If so, we remove the outgoing particle from the register of
  * identifiers that make up the beam particle, and create a new beam
- * particle.  This ensures that the HepMC event record is sound (in
+ * particle. This ensures that the HepMC event record is sound (in
  * most cases).
  */
 class HepMcInterface : public OutputInterface {
@@ -197,7 +197,7 @@ class HepMcInterface : public OutputInterface {
    * end,
    *
    * \f{eqnarray}{
-   N_{\mathrm{part}} &=$ \sum_i \begin{cases} 1 & c_i>0\\ 0 &c_i=0\end{case}\\
+   N_{\mathrm{part}} &=& \sum_i \begin{cases} 1 & c_i>0\\ 0 &c_i=0\end{cases}\\
    N_{\mathrm{coll}} &=& \sum_i^{N_{\mathrm{pro}}} c_i\\
    \f}
    *

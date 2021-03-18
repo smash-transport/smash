@@ -198,7 +198,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
      hepmc_output_user_guide_ \n
  * \n
  * - \b Rivet (Only YODA format)\n
- *   See also \ref rivet_output_user_guide_ "more on Rivet configuration"
+ *   See \ref rivet_output_user_guide_ for more information
  * \n
  * \anchor Thermodynamics
  * - \b Thermodynamics \n

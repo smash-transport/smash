@@ -96,7 +96,7 @@ if(USE_RIVET AND HepMC3_FOUND)
       OUTPUT_VARIABLE RIVET_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
     execute_process(COMMAND ${RIVET_CONFIG} --libs
       OUTPUT_VARIABLE RIVET_LIB OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "Found Rivet ${RIVET_VERSION} ${RIVET_INCLUDE_DIR} ${RIVET_LIB}.")
+    message(STATUS "Found Rivet ${RIVET_VERSION} at ${RIVET_INCLUDE_DIR} ${RIVET_LIB}.")
     include_directories(SYSTEM "${RIVET_INCLUDE_DIR}")
     set(SMASH_LIBRARIES
       ${SMASH_LIBRARIES}
@@ -340,10 +340,7 @@ endif()
 
 install(TARGETS smash_shared LIBRARY)
 install(TARGETS smash RUNTIME)
-  
+
 install(DIRECTORY include/smash TYPE INCLUDE)
 install(FILES ${generated_headers} DESTINATION include/smash)
 install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" TYPE INCLUDE)
-
-
-

@@ -142,28 +142,28 @@ namespace smash {
  \endverbatim
  *
  */
-//--------------------------------------------------------------------
+
 RivetOutput::RivetOutput(const bf::path& path, std::string name,
                          const OutputParameters& out_par, const int total_N,
                          const int proj_N)
-    : Base(name, out_par, total_N, proj_N),
+    : HepMcInterface(name, out_par, total_N, proj_N),
       handler_(),
       filename_(path / (name + ".yoda")),
       need_init_(true) {
   handler_ = std::make_shared<Rivet::AnalysisHandler>();
 }
-//--------------------------------------------------------------------
+
 RivetOutput::~RivetOutput() {
   logg[LOutput].debug() << "Writing Rivet results to " << filename_
                         << std::endl;
   proxy()->finalize();
   proxy()->writeData(filename_.string());
 }
-//--------------------------------------------------------------------
+
 void RivetOutput::at_eventend(const Particles& particles,
                               const int32_t event_number,
                               const EventInfo& event) {
-  Base::at_eventend(particles, event_number, event);
+  HepMcInterface::at_eventend(particles, event_number, event);
 
   // Initialize Rivet on first event
   if (need_init_) {
@@ -172,30 +172,30 @@ void RivetOutput::at_eventend(const Particles& particles,
     proxy()->init(event_);
   }
 
-  logg[LOutput].debug() << "analysing event " << event_number << std::endl;
+  logg[LOutput].debug() << "Analysing event " << event_number << std::endl;
   // Let Rivet analyse the event
   proxy()->analyze(event_);
 }
-//--------------------------------------------------------------------
+
 void RivetOutput::add_analysis(const std::string& name) {
   proxy()->addAnalysis(name);
 }
-//--------------------------------------------------------------------
+
 void RivetOutput::add_path(const std::string& path) {
   Rivet::addAnalysisLibPath(path);
   Rivet::addAnalysisDataPath(path);
 }
-//--------------------------------------------------------------------
+
 void RivetOutput::add_preload(const std::string& file) {
   proxy()->readData(file);
 }
-//--------------------------------------------------------------------
+
 void RivetOutput::set_ignore_beams(bool ignore) {
-  logg[LOutput].info() << "ignore beams? " << (ignore ? "yes" : "no")
+  logg[LOutput].info() << "Ignore beams? " << (ignore ? "yes" : "no")
                        << std::endl;
   proxy()->setIgnoreBeams(ignore);
 }
-//--------------------------------------------------------------------
+
 void RivetOutput::set_log_level(const std::string& name,
                                 const std::string& level) {
   std::string fname(name);
@@ -215,16 +215,16 @@ void RivetOutput::set_log_level(const std::string& name,
   } catch (...) {
   }
 }
-//--------------------------------------------------------------------
+
 void RivetOutput::set_cross_section(double xs, double xserr) {
   proxy()->setCrossSection(xs, xserr, true);
 }
-//--------------------------------------------------------------------
+
 void RivetOutput::setup(Configuration& rconf) {
   logg[LOutput].debug() << "Setting up from configuration:\n"
                         << rconf.to_string() << std::endl;
 
-  // --- Paths to analyses libraries and data ----------------------
+  // Paths to analyses libraries and data
   if (rconf.has_value({"Paths"})) {
     logg[LOutput].info() << "Processing paths" << std::endl;
     std::vector<std::string> path = rconf.take({"Paths"});
@@ -232,7 +232,7 @@ void RivetOutput::setup(Configuration& rconf) {
       add_path(p);
   }
 
-  // --- Data files to pre-load e.g., for centrality configuratios -
+  // Data files to pre-load e.g., for centrality configurations
   if (rconf.has_value({"Preloads"})) {
     logg[LOutput].info() << "Processing preloads" << std::endl;
     std::vector<std::string> prel = rconf.take({"Preloads"});
@@ -240,7 +240,7 @@ void RivetOutput::setup(Configuration& rconf) {
       add_preload(p);
   }
 
-  // --- Analyses (including options) to add to run ----------------
+  // Analyses (including options) to add to run
   if (rconf.has_value({"Analyses"})) {
     logg[LOutput].info() << "Processing analyses" << std::endl;
     std::vector<std::string> anas = rconf.take({"Analyses"});
@@ -248,49 +248,49 @@ void RivetOutput::setup(Configuration& rconf) {
       add_analysis(p);
   }
 
-  // --- Whether Rivet should ignore beams -------------------------
+  // Whether Rivet should ignore beams
   if (rconf.has_value({"Ignore_Beams"})) {
     set_ignore_beams(rconf.take({"Ignore_Beams"}));
   }
 
-  // --- Whether Rivet should ignore beams -------------------------
+  // Whether Rivet should ignore beams
   if (rconf.has_value({"Cross_Section"})) {
     std::array<double, 2> xs = rconf.take({"Cross_Section"});
     set_cross_section(xs[0], xs[1]);
   }
 
-  // --- Logging in Rivet ------------------------------------------
+  // Logging in Rivet
   if (rconf.has_value({"Logging"})) {
     std::map<std::string, std::string> logs = rconf.take({"Logging"});
     for (auto nl : logs)
       set_log_level(nl.first, nl.second);
   }
 
-  // --- Treatment of event weights in Rivet -----------------------
+  // Treatment of event weights in Rivet
   if (rconf.has_value({"Weights"})) {
     auto wconf = rconf["Weights"];
 
-    // --- Do not care about multi weights - bool ------------------
+    // Do not care about multi weights - bool
     if (wconf.has_value({"No_Multi"})) {
       proxy()->skipMultiWeights(wconf.take({"No_Multi"}));
     }
 
-    // --- Set nominal weight name ---------------------------------
+    // Set nominal weight name
     if (wconf.has_value({"Nominal"})) {
       proxy()->setNominalWeightName(wconf.take({"Nominal"}));
     }
 
-    // --- Set cap (maximum) on weights ----------------------------
+    // Set cap (maximum) on weights
     if (wconf.has_value({"Cap"})) {
       proxy()->setWeightCap(wconf.take({"Cap"}));
     }
 
-    // --- Whether to smear for NLO calculations -------------------
+    // Whether to smear for NLO calculations
     if (wconf.has_value({"NLO_Smearing"})) {
       proxy()->setNLOSmearing(wconf.take({"NLO_Smearing"}));
     }
 
-    // --- Select which weights to enable --------------------------
+    // Select which weights to enable
     if (wconf.has_value({"Select"})) {
       std::vector<std::string> sel = wconf.take({"Select"});
       std::stringstream s;
@@ -300,7 +300,7 @@ void RivetOutput::setup(Configuration& rconf) {
       proxy()->selectMultiWeights(s.str());
     }
 
-    // --- Select weights to disable -------------------------------
+    // Select weights to disable
     if (wconf.has_value({"Deselect"})) {
       std::vector<std::string> sel = wconf.take({"Deselect"});
       std::stringstream s;
@@ -314,4 +314,3 @@ void RivetOutput::setup(Configuration& rconf) {
                         << rconf.to_string() << std::endl;
 }
 }  // namespace smash
-// EOF

@@ -35,7 +35,6 @@ namespace smash {
  */
 class RivetOutput : public HepMcInterface {
  public:
-  using Base = HepMcInterface;
   /**
    * Create HepMC particle output.
    *
@@ -48,7 +47,6 @@ class RivetOutput : public HepMcInterface {
   RivetOutput(const bf::path& path, std::string name,
               const OutputParameters& out_par, const int total_N,
               const int proj_N);
-
   /**
    * Destructor. Finalises the analzyses and writes out results to file
    */
@@ -75,7 +73,6 @@ class RivetOutput : public HepMcInterface {
   void add_path(const std::string& path);
   /**
    * Add preload to Rivet handler.
-   *
    */
   void add_preload(const std::string& file);
   /**

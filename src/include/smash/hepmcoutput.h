@@ -33,7 +33,6 @@ namespace smash {
  */
 class HepMcOutput : public HepMcInterface {
  public:
-  using Base = HepMcInterface;
   /**
    * Create HepMC particle output.
    *
@@ -51,7 +50,7 @@ class HepMcOutput : public HepMcInterface {
   ~HepMcOutput();
   /**
    * Add the final particles information of an event to the central vertex.
-   * Store impact paramter and write event.
+   * Store impact parameter and write event.
    *
    * \param[in] particles Current list of particles.
    * \param[in] event_number Number of event.

@@ -61,7 +61,7 @@ namespace smash {
 HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
                          const OutputParameters &out_par, const int total_N,
                          const int proj_N)
-    : Base(name, out_par, total_N, proj_N),
+    : HepMcInterface(name, out_par, total_N, proj_N),
       filename_(path / (name + ".asciiv3")) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += +".unfinished";
@@ -77,7 +77,7 @@ HepMcOutput::~HepMcOutput() {
 void HepMcOutput::at_eventend(const Particles &particles,
                               const int32_t event_number,
                               const EventInfo &event) {
-  Base::at_eventend(particles, event_number, event);
+  HepMcInterface::at_eventend(particles, event_number, event);
   logg[LOutput].debug() << "Writing event " << event_number << " with "
                         << event_.particles().size() << " particles and "
                         << event_.vertices().size() << " vertices to output "
