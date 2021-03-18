@@ -36,7 +36,7 @@ namespace smash {
  * particle).
  *
  * The class serves as a base class for output routines that utilizes
- * the HepMC event format (currently HepMcOutput and RivetOutput).
+ * the HepMC event format (currently HepMcOutput and RivetOutput). TODO(stdnmr) Outputnames likely to change
  *
  * A techincal point: We need to generate HepMC::GenParticle objects,
  * and we need to keep track of which HepMC::GenParticle corresponds
@@ -200,6 +200,7 @@ class HepMcInterface : public OutputInterface {
    N_{\mathrm{part}} &=& \sum_i \begin{cases} 1 & c_i>0\\ 0 &c_i=0\end{cases}\\
    N_{\mathrm{coll}} &=& \sum_i^{N_{\mathrm{pro}}} c_i\\
    \f}
+   * TODO(stdnmr) What is Npro?
    *
    */
   CollCounter coll_;
@@ -221,9 +222,9 @@ class HepMcInterface : public OutputInterface {
   const int proj_N_;
   /** Whether to only write final-state particles */
   bool only_final_;
-  /** Extended particle information - not used? */
+  /** Extended particle information - not used? */  // TODO(stdnmr) not used!?
   bool part_extended_;
-  /** Collsition (interaction) extended information - not used? */
+  /** Collision (interaction) extended information - not used? */  // TODO(stdnmr) not used!?
   bool coll_extended_;
 };
 }  // namespace smash

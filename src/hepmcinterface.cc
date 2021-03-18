@@ -180,6 +180,7 @@ void HepMcInterface::at_eventend(const Particles& particles,
   CollCounter targ_coll = coll_[std::slice(proj_N_, total_N_ - proj_N_, 1)];
   ion_->Ncoll_hard = ncoll_hard_;
   ion_->Ncoll = ncoll_;
+  // TODO(stdnmr) What Npart defintion is this? Do we leave this in?
   ion_->Npart_proj = CollCounter(part_coll[part_coll > 0]).sum();
   ion_->Npart_targ = CollCounter(targ_coll[targ_coll > 0]).sum();
 
@@ -242,6 +243,7 @@ HepMC3::GenParticlePtr HepMcInterface::find_or_make(const ParticleData& p,
   if (! force_new) {
     auto it = map_.find(id);
     if (it != map_.end()) {
+      // TODO(stdnmr) What is this? Why is it commented out?
       // if (it->second.expired()) {
       //   throw std::runtime_error("Weak reference has expired!");
       // }

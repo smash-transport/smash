@@ -663,7 +663,7 @@ void Experiment<Modus>::create_output(const std::string &format,
           modus_.proj_N_number()));
     } else if (format == "ASCII-full") {
       auto lout_par(out_par);
-      lout_par.part_only_final = OutputOnlyFinal::No;
+      lout_par.part_only_final = OutputOnlyFinal::No;  // TODO(stdnmr) this seems wrong
       outputs_.emplace_back(make_unique<HepMcOutput>(
           output_path, "SMASH_HepMC", lout_par, modus_.total_N_number(),
           modus_.proj_N_number()));
@@ -683,7 +683,7 @@ void Experiment<Modus>::create_output(const std::string &format,
           modus_.proj_N_number()));
     } else if (format == "YODA-full") {
       auto lout_par(out_par);
-      lout_par.part_only_final = OutputOnlyFinal::No;
+      lout_par.part_only_final = OutputOnlyFinal::No;  // TODO(stdnmr) this seems wrong
       outputs_.emplace_back(make_unique<RivetOutput>(
           output_path, "SMASH_Rivet", lout_par, modus_.total_N_number(),
           modus_.proj_N_number()));
@@ -1267,7 +1267,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
     for (const auto &format : formats) {
       create_output(format, content, output_path, output_parameters);
-#ifdef SMASH_USE_RIVET
+#ifdef SMASH_USE_RIVET  // TODO(stdnmr) this seems like a bad hack? Understand what is happening!
       // Hack to allow configuration to specify Rivet set-up
       if (content == "Rivet") {
         auto ro = dynamic_cast<RivetOutput *>(outputs_.back().get());
