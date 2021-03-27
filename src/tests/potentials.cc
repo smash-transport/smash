@@ -88,8 +88,8 @@ TEST(nucleus_potential_profile) {
 
   ExperimentParameters param = smash::Test::default_parameters();
   ColliderModus c(conf["Modi"], param);
-  Particles P;
-  c.initial_conditions(&P, param);
+  std::vector<Particles> P(1);
+  c.initial_conditions(&(P[0]), param);
   ParticleList plist;
 
   // Create potentials
@@ -111,7 +111,7 @@ TEST(nucleus_potential_profile) {
     {
       a_file.open(("Nucleus_U_xy.vtk." + std::to_string(it)).c_str(),
                   std::ios::out);
-      plist = P.copy_to_vector();
+      plist = P[0].copy_to_vector();
       a_file << "# vtk DataFile Version 2.0\n"
              << "potential\n"
              << "ASCII\n"
@@ -137,8 +137,8 @@ TEST(nucleus_potential_profile) {
 
     for (auto i = 0; i < 50; i++) {
       const double time_to = 5.0 * it + i * timestep;
-      const double dt = propagate_straight_line(&P, time_to, {});
-      update_momenta(&P, dt, pot, nullptr, nullptr);
+      const double dt = propagate_straight_line(&(P[0]), time_to, {});
+      update_momenta(P, dt, pot, nullptr, nullptr);
     }
   }
 }
@@ -197,36 +197,36 @@ TEST(propagation_in_test_potential) {
   ParticleData part1 = create_proton();
   part1.set_4momentum(p_mass, 2.0, -1.0, 1.0);
   part1.set_4position(FourVector(0.0, -20 * d, 0.0, 0.0));
-  Particles P1;
-  P1.insert(part1);
-  COMPARE(P1.back().id(), 0);
+  std::vector<Particles> P1(1);
+  P1[0].insert(part1);
+  COMPARE(P1[0].back().id(), 0);
 
   // This particle is expected to do circular motion with a constant speed.
   ParticleData part2 = create_proton();
   // The speed of the particle is 0.6
   part2.set_4momentum(4., 3., 0., 0.);
   part2.set_4position(FourVector(0.0, 0.0, 2.0, 0.0));
-  Particles P2;
-  P2.insert(part2);
-  COMPARE(P2.back().id(), 0);
+  std::vector<Particles> P2(1);
+  P2[0].insert(part2);
+  COMPARE(P2[0].back().id(), 0);
 
   /* Propagate the first particle, until particle1 is at x>>d,
    * where d is parameter of potential */
   const double timestep = 0.01;
   double time_to = 0.0;
-  while (P1.front().position().x1() < 20 * d) {
+  while (P1[0].front().position().x1() < 20 * d) {
     time_to += timestep;
-    const double dt1 = propagate_straight_line(&P1, time_to, {});
-    update_momenta(&P1, dt1, *pot1, nullptr, nullptr);
+    const double dt1 = propagate_straight_line(&(P1[0]), time_to, {});
+    update_momenta(P1, dt1, *pot1, nullptr, nullptr);
   }
 
   // Propagate the second particle for one period.
   const double period = twopi * 5. / B0;
   time_to = 0.0;
-  while (P2.front().position().x0() < period) {
+  while (P2[0].front().position().x0() < period) {
     time_to += timestep;
-    const double dt2 = propagate_straight_line(&P2, time_to, {});
-    update_momenta(&P2, dt2, *pot2, nullptr, nullptr);
+    const double dt2 = propagate_straight_line(&(P2[0]), time_to, {});
+    update_momenta(P2, dt2, *pot2, nullptr, nullptr);
   }
 
   // Calculate 4-momentum, expected from conservation laws
@@ -235,28 +235,28 @@ TEST(propagation_in_test_potential) {
       pm.x0() + U0, std::sqrt(pm.x1() * pm.x1() + 2 * pm.x0() * U0 + U0 * U0),
       pm.x2(), pm.x3());
 
-  COMPARE_ABSOLUTE_ERROR(expected_p.x0(), P1.front().momentum().x0(), 1.e-6)
+  COMPARE_ABSOLUTE_ERROR(expected_p.x0(), P1[0].front().momentum().x0(), 1.e-6)
       << "Expected energy " << expected_p.x0() << ", obtained "
-      << P1.front().momentum().x0();
-  COMPARE_ABSOLUTE_ERROR(expected_p.x1(), P1.front().momentum().x1(), 1.e-6)
+      << P1[0].front().momentum().x0();
+  COMPARE_ABSOLUTE_ERROR(expected_p.x1(), P1[0].front().momentum().x1(), 1.e-6)
       << "Expected px " << expected_p.x1() << ", obtained "
-      << P1.front().momentum().x1();
+      << P1[0].front().momentum().x1();
   // y and z components did not have to change at all, so check is precise
-  COMPARE(expected_p.x2(), P1.front().momentum().x2());
-  COMPARE(expected_p.x3(), P1.front().momentum().x3());
+  COMPARE(expected_p.x2(), P1[0].front().momentum().x2());
+  COMPARE(expected_p.x3(), P1[0].front().momentum().x3());
 
   /* compare the final velocity of the second particle, component by component,
    * with the initial values,
    * the test is passed if the errors are within 0.003, which is 0.5 percent of
    * the initial speed. */
 
-  COMPARE_ABSOLUTE_ERROR(P2.front().momentum().velocity().x1(), 0.6, 0.003)
+  COMPARE_ABSOLUTE_ERROR(P2[0].front().momentum().velocity().x1(), 0.6, 0.003)
       << "Expected x-component of velocity " << 0.6 << ", obtained "
-      << P2.front().momentum().velocity().x1();
-  COMPARE_ABSOLUTE_ERROR(P2.front().momentum().velocity().x2(), 0.0, 0.003)
+      << P2[0].front().momentum().velocity().x1();
+  COMPARE_ABSOLUTE_ERROR(P2[0].front().momentum().velocity().x2(), 0.0, 0.003)
       << "Expected y-component of velocity " << 0 << ", obtained "
-      << P2.front().momentum().velocity().x2();
-  COMPARE_ABSOLUTE_ERROR(P2.front().momentum().velocity().x3(), 0.0, 0.003)
+      << P2[0].front().momentum().velocity().x2();
+  COMPARE_ABSOLUTE_ERROR(P2[0].front().momentum().velocity().x3(), 0.0, 0.003)
       << "Expected z-component of velocity " << 0 << ", obtained "
-      << P2.front().momentum().velocity().x3();
+      << P2[0].front().momentum().velocity().x3();
 }

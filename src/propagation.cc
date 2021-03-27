@@ -109,11 +109,16 @@ void expand_space_time(Particles *particles,
 }
 
 void update_momenta(
-    Particles *particles, double dt, const Potentials &pot,
+    std::vector<Particles> &ensembles, double dt, const Potentials &pot,
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FB_lat,
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat) {
-  // Copy particles before propagation to calculate potentials from them
-  const ParticleList plist = particles->copy_to_vector();
+  // Copy particles from ALL ensembles to a single list before propagation
+  // and calculate potentials from this list
+  ParticleList plist;
+  for (Particles &particles : ensembles) {
+    const ParticleList tmp = particles.copy_to_vector();
+    plist.insert(plist.end(), tmp.begin(), tmp.end());
+  }
 
   bool possibly_use_lattice =
       (pot.use_skyrme() ? (FB_lat != nullptr) : true) &&
@@ -121,51 +126,53 @@ void update_momenta(
   std::pair<ThreeVector, ThreeVector> FB, FI3;
   double min_time_scale = std::numeric_limits<double>::infinity();
 
-  for (ParticleData &data : *particles) {
-    // Only baryons and nuclei will be affected by the potentials
-    if (!(data.is_baryon() || data.is_nucleus())) {
-      continue;
-    }
-    const auto scale = pot.force_scale(data.type());
-    const ThreeVector r = data.position().threevec();
-    /* Lattices can be used for calculation if 1-2 are fulfilled:
-     * 1) Required lattices are not nullptr - possibly_use_lattice
-     * 2) r is not out of required lattices */
-    const bool use_lattice =
-        possibly_use_lattice &&
-        (pot.use_skyrme() ? FB_lat->value_at(r, FB) : true) &&
-        (pot.use_symmetry() ? FI3_lat->value_at(r, FI3) : true);
-    if (!pot.use_skyrme()) {
-      FB = std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
-    }
-    if (!pot.use_symmetry()) {
-      FI3 = std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
-    }
-    if (!use_lattice) {
-      const auto tmp = pot.all_forces(r, plist);
-      FB = std::make_pair(std::get<0>(tmp), std::get<1>(tmp));
-      FI3 = std::make_pair(std::get<2>(tmp), std::get<3>(tmp));
-    }
-    const ThreeVector Force =
-        scale.first *
-            (FB.first + data.momentum().velocity().cross_product(FB.second)) +
-        scale.second * data.type().isospin3_rel() *
-            (FI3.first + data.momentum().velocity().cross_product(FI3.second));
-    logg[LPropagation].debug("Update momenta: F [GeV/fm] = ", Force);
-    data.set_4momentum(data.effective_mass(),
-                       data.momentum().threevec() + Force * dt);
+  for (Particles &particles : ensembles) {
+    for (ParticleData &data : particles) {
+      // Only baryons and nuclei will be affected by the potentials
+      if (!(data.is_baryon() || data.is_nucleus())) {
+        continue;
+      }
+      const auto scale = pot.force_scale(data.type());
+      const ThreeVector r = data.position().threevec();
+      /* Lattices can be used for calculation if 1-2 are fulfilled:
+       * 1) Required lattices are not nullptr - possibly_use_lattice
+       * 2) r is not out of required lattices */
+      const bool use_lattice =
+          possibly_use_lattice &&
+          (pot.use_skyrme() ? FB_lat->value_at(r, FB) : true) &&
+          (pot.use_symmetry() ? FI3_lat->value_at(r, FI3) : true);
+      if (!pot.use_skyrme()) {
+        FB = std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
+      }
+      if (!pot.use_symmetry()) {
+        FI3 = std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
+      }
+      if (!use_lattice) {
+        const auto tmp = pot.all_forces(r, plist);
+        FB = std::make_pair(std::get<0>(tmp), std::get<1>(tmp));
+        FI3 = std::make_pair(std::get<2>(tmp), std::get<3>(tmp));
+      }
+      const ThreeVector Force =
+          scale.first *
+              (FB.first + data.momentum().velocity().cross_product(FB.second)) +
+          scale.second * data.type().isospin3_rel() *
+              (FI3.first +
+               data.momentum().velocity().cross_product(FI3.second));
+      logg[LPropagation].debug("Update momenta: F [GeV/fm] = ", Force);
+      data.set_4momentum(data.effective_mass(),
+                         data.momentum().threevec() + Force * dt);
 
-    // calculate the time scale of the change in momentum
-    const double Force_abs = Force.abs();
-    if (Force_abs < really_small) {
-      continue;
-    }
-    const double time_scale = data.momentum().x0() / Force_abs;
-    if (time_scale < min_time_scale) {
-      min_time_scale = time_scale;
+      // calculate the time scale of the change in momentum
+      const double Force_abs = Force.abs();
+      if (Force_abs < really_small) {
+        continue;
+      }
+      const double time_scale = data.momentum().x0() / Force_abs;
+      if (time_scale < min_time_scale) {
+        min_time_scale = time_scale;
+      }
     }
   }
-
   // warn if the time step is too big
   constexpr double safety_factor = 0.1;
   if (dt > safety_factor * min_time_scale) {

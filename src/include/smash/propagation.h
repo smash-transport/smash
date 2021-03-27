@@ -101,7 +101,7 @@ void expand_space_time(Particles *particles,
  *            components of the symmetry force
  */
 void update_momenta(
-    Particles *particles, double dt, const Potentials &pot,
+    std::vector<Particles> &particles, double dt, const Potentials &pot,
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FB_lat,
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat);
 
