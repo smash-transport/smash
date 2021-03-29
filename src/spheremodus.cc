@@ -67,6 +67,10 @@ static constexpr int LSphere = LogArea::Sphere::id;
  * \key Strange_Chemical_Potential (double, optional, default = 0.0): \n
  * Strangeness chemical potential \f$ \mu_S \f$ only used if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
+ * 
+ * \key Charge_Chemical_Potential (double, optional, default = 0.0): \n
+ * Charge chemical potential \f$ \mu_Q \f$ only used if
+ * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
  *
  * \key Account_Resonance_Widths (bool, optional, default = true): \n
  * In case of thermal initialization: true -- account for resonance
@@ -170,6 +174,7 @@ SphereModus::SphereModus(Configuration modus_config,
           modus_config.take({"Sphere", "Use_Thermal_Multiplicities"}, false)),
       mub_(modus_config.take({"Sphere", "Baryon_Chemical_Potential"}, 0.)),
       mus_(modus_config.take({"Sphere", "Strange_Chemical_Potential"}, 0.)),
+      muq_(modus_config.take({"Sphere", "Charge_Chemical_Potential"}, 0.)),
       account_for_resonance_widths_(
           modus_config.take({"Sphere", "Account_Resonance_Widths"}, true)),
       init_multipl_(use_thermal_
@@ -190,7 +195,8 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   out << "-- Sphere Modus:\nRadius of the sphere: " << m.radius_ << " fm\n";
   if (m.use_thermal_) {
     out << "Thermal multiplicities (T = " << m.sphere_temperature_
-        << " GeV, muB = " << m.mub_ << " GeV, muS = " << m.mus_ << " GeV)\n";
+        << " GeV, muB = " << m.mub_ << " GeV, muS = " << m.mus_ <<
+        " GeV, muQ = " << m.muq_ << " GeV)\n";
   } else {
     for (const auto &p : m.init_multipl_) {
       ParticleTypePtr ptype = &ParticleType::find(p.first);
@@ -239,22 +245,24 @@ double SphereModus::initial_conditions(Particles *particles,
       for (const ParticleType &ptype : ParticleType::list_all()) {
         if (HadronGasEos::is_eos_particle(ptype)) {
           const double n = HadronGasEos::partial_density(
-              ptype, T, mub_, mus_, account_for_resonance_widths_);
+              ptype, T, mub_, mus_, muq_, account_for_resonance_widths_);
           average_multipl_[ptype.pdgcode()] = n * V * parameters.testparticles;
         }
       }
     }
-    double nb_init = 0.0, ns_init = 0.0;
+    double nb_init = 0.0, ns_init = 0.0, nq_init = 0.0;
     for (const auto &mult : average_multipl_) {
       const int thermal_mult_int = random::poisson(mult.second);
       particles->create(thermal_mult_int, mult.first);
       nb_init += mult.second * mult.first.baryon_number();
       ns_init += mult.second * mult.first.strangeness();
+      nq_init += mult.second * mult.first.charge();
       logg[LSphere].debug(mult.first, " initial multiplicity ",
                           thermal_mult_int);
     }
     logg[LSphere].info("Initial hadron gas baryon density ", nb_init);
     logg[LSphere].info("Initial hadron gas strange density ", ns_init);
+    logg[LSphere].info("Initial hadron gas charge density ", nq_init);
   } else {
     for (const auto &p : init_multipl_) {
       particles->create(p.second * parameters.testparticles, p.first);
