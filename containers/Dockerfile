@@ -1303,6 +1303,7 @@ WORKDIR /SMASH
 
 RUN https://bootstrap.pypa.io/pip/2.7/get-pip.py
 RUN python2 get-pip.py 
+RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
 RUN pip install seaborn && \
 rm get-pip.py 
 
