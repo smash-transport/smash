@@ -42,6 +42,7 @@
 #endif
 #include "icoutput.h"
 #include "oscaroutput.h"
+#include "thermodynamiclatticeoutput.h"
 #include "thermodynamicoutput.h"
 #ifdef SMASH_USE_ROOT
 #include "rootoutput.h"
@@ -620,6 +621,9 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Thermodynamics" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ThermodynamicOutput>(output_path, content, out_par));
+  } else if (content == "Thermodynamics" && format == "Lattice") {
+    outputs_.emplace_back(
+        make_unique<ThermodynamicLatticeOutput>(output_path, content, out_par));
   } else if (content == "Thermodynamics" && format == "VTK") {
     printout_lattice_td_ = true;
     outputs_.emplace_back(
@@ -1017,6 +1021,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b Thermodynamics   This output allows to print out thermodynamic
    *          quantities, see \ref Thermodynamics.
    *    - Available formats: \ref thermodyn_output_user_guide_,
+   *      \ref thermodyn_lattice_output_,
    *      \ref output_vtk_lattice_
    * - \b Initial_Conditions  Special initial conditions output, see
    *                          \subpage input_ic for details
@@ -1055,6 +1060,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b "ASCII" - a human-readable text-format table of values
    *   - Used for "Thermodynamics", "Initial_Conditions" and "HepMC", see
    * \subpage thermodyn_output_user_guide_
+   * \subpage thermodyn_lattice_output_
    * \subpage IC_output_user_guide_
    * \ref hepmc_output_user_guide_
    *
@@ -1243,7 +1249,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * of the lattice. Intermediate values are interpolated. \n
    * The configuration of a lattice is usually not necessary, it is however
    * required if the Thermodynamic VTK Output (see
-   * \ref output_vtk_lattice_) or the \key Potentials_Affect_Thresholds option
+   * \ref output_vtk_lattice_), the Thermodynamic Lattice Output (see
+   * \ref thermodyn_lattice_output_ ) or the \key Potentials_Affect_Thresholds option
    * is enabled. \n
    * The following parameters are only required, if the \key Lattice section is
    * used in the configuration file. Otherwise, no lattice will be used at all.
@@ -1267,7 +1274,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * energies of the actions.
    *
    * For information on the format of the lattice output see
-   * \ref output_vtk_lattice_. To configure the
+   * \ref output_vtk_lattice_ or \ref thermodyn_lattice_output_. To configure the
    * thermodynamic output, see \ref input_output_options_.
    *
    * \n

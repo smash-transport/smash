@@ -186,6 +186,7 @@ set(smash_src
         stringfunctions.cc
         tabulation.cc
         thermalizationaction.cc
+        thermodynamiclatticeoutput.cc
         thermodynamicoutput.cc
         threevector.cc
         tsc.cc
