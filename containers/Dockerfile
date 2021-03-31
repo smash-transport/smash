@@ -13,12 +13,12 @@ RUN echo "deb http://ftp.uni-mainz.de/ubuntu/ focal restricted multiverse main u
 && echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-updates restricted multiverse main universe" >> /etc/apt/sources.list \
 && echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-security restricted multiverse main universe" >> /etc/apt/sources.list \
 
-#we want to install the packages non interactively    
+#we want to install the packages non interactively
 
 && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
 
 
-#we update the distribution and we install several additional packages 
+#we update the distribution and we install several additional packages
 
 && apt-get update && \
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime && \
@@ -1288,7 +1288,7 @@ zenity  \
 zenity-common  \
 zip  \
 zlib1g:amd64  \
-zlib1g-dev:amd64  
+zlib1g-dev:amd64
 
 
 #we set the number of concurrent processes used by Docker to build the container image when executing make/cmake
@@ -1297,14 +1297,14 @@ ARG NUMBER_OF_PROCS_FOR_COMPILATION=2
 
 #we create the /SMASH directory
 
-WORKDIR /SMASH 
+WORKDIR /SMASH
 
-#we use pip to install a few python2 libraries (seaborn and, automatically as dependencies, matplotlib, scipy, pandas, yaml and numpy)    
+#we use pip to install a few python2 libraries (seaborn and, automatically as dependencies, matplotlib, scipy, pandas, yaml and numpy)
 
-RUN https://bootstrap.pypa.io/pip/2.7/get-pip.py
-RUN python2 get-pip.py 
+RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
+RUN python2 get-pip.py
 RUN pip install seaborn && \
-rm get-pip.py 
+rm get-pip.py
 
 #here we download and install several libraries/programs used by SMASH
 
@@ -1314,18 +1314,18 @@ cd pythia8303 && \
 ./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC -march=x86-64' --prefix=/SMASH/pythia_8_303 && \
 make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 make install && \
-echo /SMASH/pythia_8_303/lib >> /etc/ld.so.conf && ldconfig && \
-  
-cd /SMASH && \
+echo /SMASH/pythia_8_303/lib >> /etc/ld.so.conf && ldconfig
+
+RUN cd /SMASH && \
 wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-3.2.3.tar.gz && \
 tar xf HepMC3-3.2.3.tar.gz && \
 mkdir -p HepMC3_build && \
 cd HepMC3_build && \
 cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=OFF -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" ../HepMC3-3.2.3 && \
 make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
-make install && \
-  
-cd /SMASH && \
+make install
+
+RUN cd /SMASH && \
 wget https://root.cern/download/root_v6.22.06.source.tar.gz && \
 tar xf root_v6.22.06.source.tar.gz && \
 mv root-6.22.06 root_src && \
@@ -1342,9 +1342,9 @@ export LIBPATH=$ROOTSYS/lib && \
 export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH && \
 export MANPATH=$ROOTSYS/man:$MANPATH && \
 export CMAKE_PREFIX_PATH=$ROOTSYS:$CMAKE_PREFIX_PATH && \
-echo /SMASH/root/lib >> /etc/ld.so.conf && ldconfig && \
+echo /SMASH/root/lib >> /etc/ld.so.conf && ldconfig
 
-cd /SMASH && \
+RUN cd /SMASH && \
 git clone git://github.com/hoxu/gitstats.git && \
 cd gitstats && \
 make install && \
@@ -1357,9 +1357,9 @@ g++ -o cppcheck -std=c++11 -Iexternals -Iexternals/simplecpp -Iexternals/tinyxml
 wget https://raw.githubusercontent.com/cpplint/cpplint/develop/cpplint.py && \
 mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck cpplint.py /SMASH/auxiliary_progs/  && \
 chmod +x /SMASH/auxiliary_progs/* && \
-PATH=$PATH:/SMASH/auxiliary_progs && \
+PATH=$PATH:/SMASH/auxiliary_progs
 
-cd /SMASH && \
+RUN cd /SMASH && \
 git clone https://github.com/smash-transport/smash.git && \
 mkdir -p smash_bin && \
 cd smash_bin && \
@@ -1368,7 +1368,7 @@ make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 
 #we remove most of the sources
 cd /SMASH && \
-rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.06.source.tar.gz root_build root_src /var/cache/apt/archives/*.deb 
+rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.06.source.tar.gz root_build root_src /var/cache/apt/archives/*.deb
 
 #we set up the shell prompt during the container execution
 ENV LC_ALL en_US.UTF-8
@@ -1394,4 +1394,3 @@ ENV CMAKE_PREFIX_PATH $ROOTSYS:$CMAKE_PREFIX_PATH
 ENV JUPYTER_PATH $ROOTSYS/etc/notebook:$JUPYTER_PATH
 ENV JUPYTER_CONFIG_DIR $ROOTSYS/etc/notebook:$JUPYTER_CONFIG_DIR
 ENV CLING_STANDARD_PCH none
-
