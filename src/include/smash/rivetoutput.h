@@ -47,7 +47,7 @@ class RivetOutput : public HepMcInterface {
    */
   RivetOutput(const bf::path& path, std::string name,
               const bool full_event, const int total_N,
-              const int proj_N);
+              const int proj_N, const OutputParameters& out_par);
   /**
    * Destructor. Finalises the analzyses and writes out results to file
    */
@@ -94,7 +94,7 @@ class RivetOutput : public HepMcInterface {
   /**
    * Read configuration of Rivet from SMASH configuration
    */
-  void setup(Configuration& rconf);
+  void setup();
 
  private:
   /**
@@ -125,6 +125,8 @@ class RivetOutput : public HepMcInterface {
   bf::path filename_;
   /** Whether we need initialisation */
   bool need_init_;
+  /** Configutations for rivet */
+  Configuration rivet_confs_
 };
 
 }  // namespace smash

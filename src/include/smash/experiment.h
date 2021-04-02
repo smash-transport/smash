@@ -678,11 +678,11 @@ void Experiment<Modus>::create_output(const std::string &format,
     if (format == "YODA") {
       outputs_.emplace_back(make_unique<RivetOutput>(
           output_path, "SMASH_Rivet", false, modus_.total_N_number(),
-          modus_.proj_N_number()));
+          modus_.proj_N_number(), out_par));
     } else if (format == "YODA-full") {
       outputs_.emplace_back(make_unique<RivetOutput>(
           output_path, "SMASH_Rivet", true, modus_.total_N_number(),
-          modus_.proj_N_number()));
+          modus_.proj_N_number(), out_par));
     } else {
       logg[LExperiment].error("Rivet format " + format +
                               "not one of YODA or YODA-full");
@@ -1263,14 +1263,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
     for (const auto &format : formats) {
       create_output(format, content, output_path, output_parameters);
-#ifdef SMASH_USE_RIVET  // TODO(stdnmr) this seems like a bad hack? Understand what is happening!
-      // Hack to allow configuration to specify Rivet set-up
-      if (content == "Rivet") {
-        auto ro = dynamic_cast<RivetOutput *>(outputs_.back().get());
-        if (ro)
-          ro->setup(this_output_conf);
-      }
-#endif
     }
   }
 

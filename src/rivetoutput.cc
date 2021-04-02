@@ -145,12 +145,14 @@ namespace smash {
 
 RivetOutput::RivetOutput(const bf::path& path, std::string name,
                          const bool full_event, const int total_N,
-                         const int proj_N)
+                         const int proj_N, const OutputParameters& out_par)
     : HepMcInterface(name, full_event, total_N, proj_N),
       handler_(),
       filename_(path / (name + ".yoda")),
-      need_init_(true) {
+      need_init_(true),
+      rivet_confs_(out_par.subcon_for_rivet) {
   handler_ = std::make_shared<Rivet::AnalysisHandler>();
+     setup()
 }
 
 RivetOutput::~RivetOutput() {
@@ -221,55 +223,55 @@ void RivetOutput::set_cross_section(double xs, double xserr) {
   proxy()->setCrossSection(xs, xserr, true);
 }
 
-void RivetOutput::setup(Configuration& rconf) {
+void RivetOutput::setup() {
   logg[LOutput].debug() << "Setting up from configuration:\n"
-                        << rconf.to_string() << std::endl;
+                        << rivet_confs_.to_string() << std::endl;
 
   // Paths to analyses libraries and data
-  if (rconf.has_value({"Paths"})) {
+  if (rivet_confs_.has_value({"Paths"})) {
     logg[LOutput].info() << "Processing paths" << std::endl;
-    std::vector<std::string> path = rconf.take({"Paths"});
+    std::vector<std::string> path = rivet_confs_.take({"Paths"});
     for (auto p : path)
       add_path(p);
   }
 
   // Data files to pre-load e.g., for centrality configurations
-  if (rconf.has_value({"Preloads"})) {
+  if (rivet_confs_.has_value({"Preloads"})) {
     logg[LOutput].info() << "Processing preloads" << std::endl;
-    std::vector<std::string> prel = rconf.take({"Preloads"});
+    std::vector<std::string> prel = rivet_confs_.take({"Preloads"});
     for (auto p : prel)
       add_preload(p);
   }
 
   // Analyses (including options) to add to run
-  if (rconf.has_value({"Analyses"})) {
+  if (rivet_confs_.has_value({"Analyses"})) {
     logg[LOutput].info() << "Processing analyses" << std::endl;
-    std::vector<std::string> anas = rconf.take({"Analyses"});
+    std::vector<std::string> anas = rivet_confs_.take({"Analyses"});
     for (auto p : anas)
       add_analysis(p);
   }
 
   // Whether Rivet should ignore beams
-  if (rconf.has_value({"Ignore_Beams"})) {
-    set_ignore_beams(rconf.take({"Ignore_Beams"}));
+  if (rivet_confs_.has_value({"Ignore_Beams"})) {
+    set_ignore_beams(rivet_confs_.take({"Ignore_Beams"}));
   }
 
   // Whether Rivet should ignore beams
-  if (rconf.has_value({"Cross_Section"})) {
-    std::array<double, 2> xs = rconf.take({"Cross_Section"});
+  if (rivet_confs_.has_value({"Cross_Section"})) {
+    std::array<double, 2> xs = rivet_confs_.take({"Cross_Section"});
     set_cross_section(xs[0], xs[1]);
   }
 
   // Logging in Rivet
-  if (rconf.has_value({"Logging"})) {
-    std::map<std::string, std::string> logs = rconf.take({"Logging"});
+  if (rivet_confs_.has_value({"Logging"})) {
+    std::map<std::string, std::string> logs = rivet_confs_.take({"Logging"});
     for (auto nl : logs)
       set_log_level(nl.first, nl.second);
   }
 
   // Treatment of event weights in Rivet
-  if (rconf.has_value({"Weights"})) {
-    auto wconf = rconf["Weights"];
+  if (rivet_confs_.has_value({"Weights"})) {
+    auto wconf = rivet_confs_["Weights"];
 
     // Do not care about multi weights - bool
     if (wconf.has_value({"No_Multi"})) {
@@ -312,6 +314,6 @@ void RivetOutput::setup(Configuration& rconf) {
     }
   }
   logg[LOutput].debug() << "After processing configuration:\n"
-                        << rconf.to_string() << std::endl;
+                        << rivet_confs_.to_string() << std::endl;
 }
 }  // namespace smash
