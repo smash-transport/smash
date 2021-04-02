@@ -36,17 +36,17 @@ namespace smash {
 class RivetOutput : public HepMcInterface {
  public:
   /**
-   * // TODO(stdnmr) Docu copy&pasted?
-   * Create HepMC particle output.
+   * Create Rivet output.
    *
    * \param[in] path Output path.
    * \param[in] name Name of the output.
-   * \param[in] out_par Unused, needed since inhertied.
+   * \param[in] full_event Whether the full event or only final-state particles
+                           are printed in the output
    * \param[in] total_N Total number of particles in both nuclei.
    * \param[in] proj_N  Number of particles in projectile.
    */
   RivetOutput(const bf::path& path, std::string name,
-              const OutputParameters& out_par, const int total_N,
+              const bool full_event, const int total_N,
               const int proj_N);
   /**
    * Destructor. Finalises the analzyses and writes out results to file

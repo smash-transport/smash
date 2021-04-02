@@ -655,21 +655,19 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Initial_Conditions" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
-  } else if (content == "HepMC") {
+  } else if (format == "HepMC") {
 #ifdef SMASH_USE_HEPMC
-    if (format == "ASCII") {
+    if (content == "Particles") {
       outputs_.emplace_back(make_unique<HepMcOutput>(
-          output_path, "SMASH_HepMC", out_par, modus_.total_N_number(),
+          output_path, "SMASH_HepMC_particles", false, modus_.total_N_number(),
           modus_.proj_N_number()));
-    } else if (format == "ASCII-full") {
-      auto lout_par(out_par);
-      lout_par.part_only_final = OutputOnlyFinal::No;  // TODO(stdnmr) this seems wrong
+    } else if (content == "Collisions") {
       outputs_.emplace_back(make_unique<HepMcOutput>(
-          output_path, "SMASH_HepMC_full", lout_par, modus_.total_N_number(),
+          output_path, "SMASH_HepMC_collisions", true, modus_.total_N_number(),
           modus_.proj_N_number()));
     } else {
-      logg[LExperiment].error("HepMC format " + format +
-                              "not one of ASCII or ASCII-full");
+      logg[LExperiment].error("HepMC only available for Particles and "
+                        "Collisions content. Requested for " + content + ".");
     }
 #else
     logg[LExperiment].error(
@@ -679,13 +677,11 @@ void Experiment<Modus>::create_output(const std::string &format,
 #ifdef SMASH_USE_RIVET
     if (format == "YODA") {
       outputs_.emplace_back(make_unique<RivetOutput>(
-          output_path, "SMASH_Rivet", out_par, modus_.total_N_number(),
+          output_path, "SMASH_Rivet", false, modus_.total_N_number(),
           modus_.proj_N_number()));
     } else if (format == "YODA-full") {
-      auto lout_par(out_par);
-      lout_par.part_only_final = OutputOnlyFinal::No;  // TODO(stdnmr) this seems wrong
       outputs_.emplace_back(make_unique<RivetOutput>(
-          output_path, "SMASH_Rivet", lout_par, modus_.total_N_number(),
+          output_path, "SMASH_Rivet", true, modus_.total_N_number(),
           modus_.proj_N_number()));
     } else {
       logg[LExperiment].error("Rivet format " + format +
@@ -693,7 +689,7 @@ void Experiment<Modus>::create_output(const std::string &format,
     }
 #else
     logg[LExperiment].error(
-        "Rivet output requested, but HepMC support not compiled in");
+        "Rivet output requested, but Rivet support not compiled in");
 #endif
   } else {
     logg[LExperiment].error()

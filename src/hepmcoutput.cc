@@ -59,9 +59,9 @@ namespace smash {
  * energies with the \key --ignore-beams option.
  */
 HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
-                         const OutputParameters &out_par, const int total_N,
+                         const bool full_event, const int total_N,
                          const int proj_N)
-    : HepMcInterface(name, out_par, total_N, proj_N),
+    : HepMcInterface(name, full_event, total_N, proj_N),
       filename_(path / (name + ".asciiv3")) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += +".unfinished";

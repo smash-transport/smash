@@ -16,7 +16,7 @@
 namespace smash {
 
 HepMcInterface::HepMcInterface(const std::string& name,
-                               const OutputParameters& out_par,
+                               const bool full_event,
                                const int total_N, const int proj_N)
     : OutputInterface(name),
       event_(HepMC3::Units::GEV, HepMC3::Units::MM),
@@ -25,11 +25,9 @@ HepMcInterface::HepMcInterface(const std::string& name,
       ip_(),
       total_N_(total_N),
       proj_N_(proj_N),
-      only_final_(out_par.part_only_final == OutputOnlyFinal::Yes),
-      part_extended_(out_par.part_extended),
-      coll_extended_(out_par.coll_extended) {
+      full_event_(full_event) {
   logg[LOutput].debug() << "Name of output: " << name << " "
-                        << (only_final_ ? "final state only" : "full event")
+                        << (full_event_ ? "final state only" : "full event")
                         << " output" << std::endl;
   ion_ = std::make_shared<HepMC3::GenHeavyIon>();
   xs_ = std::make_shared<HepMC3::GenCrossSection>();
@@ -78,7 +76,7 @@ void HepMcInterface::at_eventstart(const Particles& particles,
       az.first++;
     }
 
-    if (only_final_ && is_coll) {
+    if (full_event_ && is_coll) {
       continue;
     }
 
@@ -112,7 +110,7 @@ void HepMcInterface::at_interaction(const Action& action,
   auto type = action.get_type();
   int status = get_status(type);
 
-  if (!only_final_) {
+  if (!full_event_) {
     FourVector v = action.get_interaction_point();
     vp = std::make_shared<HepMC3::GenVertex>(
         HepMC3::FourVector(v.x1(), v.x2(), v.x3(), v.x0()));
@@ -151,7 +149,7 @@ void HepMcInterface::at_interaction(const Action& action,
       coll_[i.id()]++;
     }
 
-    if (only_final_)
+    if (full_event_)
       continue;
 
     // Create tree
@@ -159,7 +157,7 @@ void HepMcInterface::at_interaction(const Action& action,
     ip->set_status(status);
     vp->add_particle_in(ip);
   }
-  if (only_final_)
+  if (full_event_)
     return;
 
   // Add outgoing particles
@@ -189,7 +187,7 @@ void HepMcInterface::at_eventend(const Particles& particles,
   // state
   // Take all passed particles and add as outgoing particles to event
   for (auto& p : particles) {
-    if (only_final_) {
+    if (full_event_) {
       auto h = make_register(p, Status::fnal);
       ip_->add_particle_out(h);
     } else if (map_.find(p.id()) == map_.end()) {

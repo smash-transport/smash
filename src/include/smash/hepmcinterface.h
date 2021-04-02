@@ -84,11 +84,12 @@ class HepMcInterface : public OutputInterface {
    * Create HepMC particle event in memory.
    *
    * \param[in] name    Name of output
-   * \param[in] out_par Unused, needed since inhertied.
+   * \param[in] full_event Whether the full event or only final-state particles
+                           are printed in the output
    * \param[in] total_N Total number of particles in both nuclei.
    * \param[in] proj_N  Number of particles in projectile.
    */
-  HepMcInterface(const std::string& name, const OutputParameters& out_par,
+  HepMcInterface(const std::string& name, const bool full_event,
                  const int total_N, const int proj_N);
   /**
    * Add the initial particles information of an event to the
@@ -220,12 +221,8 @@ class HepMcInterface : public OutputInterface {
    * needed for converting nuclei to single particles.
    */
   const int proj_N_;
-  /** Whether to only write final-state particles */
-  bool only_final_;
-  /** Extended particle information - not used? */  // TODO(stdnmr) not used!?
-  bool part_extended_;
-  /** Collision (interaction) extended information - not used? */  // TODO(stdnmr) not used!?
-  bool coll_extended_;
+  /** Whether the full event or only final-state particles are in the output */
+  bool full_event_;
 };
 }  // namespace smash
 
