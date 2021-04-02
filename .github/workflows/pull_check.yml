@@ -72,7 +72,7 @@ steps:
     #make install --silent &&
     #cd $SMASH_ROOT
   # eigen
-  -# wget http://gitlab.com/libeigen/eigen/-/archive/3.3.5/eigen-3.3.5.tar.gz &&
+  # wget http://gitlab.com/libeigen/eigen/-/archive/3.3.5/eigen-3.3.5.tar.gz &&
     #tar -xf eigen-3.3.5.tar.gz -C $HOME
   # cpplint
   #- pip install --user cpplint
