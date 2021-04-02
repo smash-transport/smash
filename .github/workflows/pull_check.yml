@@ -9,10 +9,10 @@ on:
       - main
 
 jobs:
-  build:
+  check_pull:
     runs-on: ${{ matrix.os }}
     strategy:
-    matrix: 
+      matrix: 
        os: [ubuntu-16.04,ubuntu-18.04]
        include:
          # minimal gcc version (also on loewe cluster)
@@ -37,7 +37,7 @@ jobs:
    
          #sudo apt-get install -y "clang-<version>" "lldb-<version>" "lld-<version>" "clang-format-<version>"
          #sudo apt-get install -y "clang-8" "lldb-8" "lld-8" "clang-format-8"
-  steps:
+    steps:
      - uses: actions/checkout@v2
        env:
          CC ${{ matrix.c_compiler_to_use }}
