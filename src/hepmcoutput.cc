@@ -25,26 +25,23 @@ namespace smash {
  *
  * \section hepmc_output_user_guide_format_ ASCII HepMC Format
  *
- * TODO{stdnmr} Adapt documentation to new configuration here
- *
  * HepMC generally structures each event into particles and vertices
- * connecting them, basically storing a graph of the event. Since the
- * purpose of this output is to only provide a particle list of the
- * final state produced the output format is adapted accordingly for
- * the SMASH implementation: Only one central vertex is used. All
- * initial state particles are incoming particles and all final state
+ * connecting them, basically storing a graph of the event.
+
+ * Two versions of HepMC are possible, if the HepMC format is specficified
+ * under \key Particles. The output only provides a particle list of the
+ * final state. For this only one central vertex is used. All initial state
+ * particles are incoming particles and all final state
  * particles are outgoing particles of this vertex. Scatterings
  * happening during the SMASH event are not recorded. For the collider
  * modus, the intial state particles are combined into two single
  * colliding nucleus "particles" with a nuclear pdg code.
  *
- * This reduced event format is selected by the \key Format value \key ASCII.
- *
- * However, in certain circumstances one may be interested in the full
+ * In certain circumstances one may be interested in the full
  * event structure.  To that end, the output module provides the
- * format \key ASCII-full.  With this format, the full event tree is
- * written.  Furthermore, as above, for collider modus, we lump all
- * incoming nucleons into nuclei, but split them out immediately
+ * HepMC format also for the \key Collisions content. With this format, the
+ * full event tree is written.  Furthermore, as above, for collider modus,
+ * we lump all incoming nucleons into nuclei, but split them out immediately
  * afterwards to allow tracking of the individual nucleons.
  *
  * In all cases, the module will track the number of binary, inelastic

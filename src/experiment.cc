@@ -324,6 +324,15 @@ ExperimentPtr ExperimentBase::create(Configuration config,
          Extended: False
          Proper_Time: 1.5
  \endverbatim
+ * The HepMC ASCII ouput is enabled by specifying the HepmC output under
+ * Particles or Collisions depdening on the content wanted.
+ *\verbatim
+ Output:
+     Particles:
+         Format:          ["HepMC"]
+     Collisions:
+         Format:          ["HepMC"]
+ \endverbatim
  */
 
 ExperimentParameters create_experiment_parameters(Configuration config) {

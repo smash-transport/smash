@@ -178,7 +178,7 @@ void HepMcInterface::at_eventend(const Particles& particles,
   CollCounter targ_coll = coll_[std::slice(proj_N_, total_N_ - proj_N_, 1)];
   ion_->Ncoll_hard = ncoll_hard_;
   ion_->Ncoll = ncoll_;
-  // TODO(stdnmr) What Npart defintion is this? Do we leave this in?
+  // TODO(stdnmr) What Npart defintion is this? Do we leave this in? Probably no.
   ion_->Npart_proj = CollCounter(part_coll[part_coll > 0]).sum();
   ion_->Npart_targ = CollCounter(targ_coll[targ_coll > 0]).sum();
 
