@@ -158,8 +158,8 @@ RivetOutput::RivetOutput(const bf::path& path, std::string name,
 RivetOutput::~RivetOutput() {
   logg[LOutput].debug() << "Writing Rivet results to " << filename_
                         << std::endl;
-  proxy()->finalize();
-  proxy()->writeData(filename_.string());
+  analysis_handler_proxy()->finalize();
+  analysis_handler_proxy()->writeData(filename_.string());
 }
 
 void RivetOutput::at_eventend(const Particles& particles,
@@ -171,17 +171,17 @@ void RivetOutput::at_eventend(const Particles& particles,
   if (need_init_) {
     logg[LOutput].debug() << "Initialising Rivet" << std::endl;
     need_init_ = false;
-    proxy()->init(event_);
+    analysis_handler_proxy()->init(event_);
   }
 
   logg[LOutput].debug() << "Analysing event " << event_number << std::endl;
   // Let Rivet analyse the event
-  proxy()->analyze(event_);
+  analysis_handler_proxy()->analyze(event_);
 }
 
 // TODO(stdnmr) Why do we need all this one-line functions in the following?
 void RivetOutput::add_analysis(const std::string& name) {
-  proxy()->addAnalysis(name);
+  analysis_handler_proxy()->addAnalysis(name);
 }
 
 void RivetOutput::add_path(const std::string& path) {
@@ -190,13 +190,13 @@ void RivetOutput::add_path(const std::string& path) {
 }
 
 void RivetOutput::add_preload(const std::string& file) {
-  proxy()->readData(file);
+  analysis_handler_proxy()->readData(file);
 }
 
 void RivetOutput::set_ignore_beams(bool ignore) {
   logg[LOutput].info() << "Ignore beams? " << (ignore ? "yes" : "no")
                        << std::endl;
-  proxy()->setIgnoreBeams(ignore);
+  analysis_handler_proxy()->setIgnoreBeams(ignore);
 }
 
 void RivetOutput::set_log_level(const std::string& name,
@@ -220,7 +220,7 @@ void RivetOutput::set_log_level(const std::string& name,
 }
 
 void RivetOutput::set_cross_section(double xs, double xserr) {
-  proxy()->setCrossSection(xs, xserr, true);
+  analysis_handler_proxy()->setCrossSection(xs, xserr, true);
 }
 
 void RivetOutput::setup() {
@@ -275,22 +275,22 @@ void RivetOutput::setup() {
 
     // Do not care about multi weights - bool
     if (wconf.has_value({"No_Multi"})) {
-      proxy()->skipMultiWeights(wconf.take({"No_Multi"}));
+      analysis_handler_proxy()->skipMultiWeights(wconf.take({"No_Multi"}));
     }
 
     // Set nominal weight name
     if (wconf.has_value({"Nominal"})) {
-      proxy()->setNominalWeightName(wconf.take({"Nominal"}));
+      analysis_handler_proxy()->setNominalWeightName(wconf.take({"Nominal"}));
     }
 
     // Set cap (maximum) on weights
     if (wconf.has_value({"Cap"})) {
-      proxy()->setWeightCap(wconf.take({"Cap"}));
+      analysis_handler_proxy()->setWeightCap(wconf.take({"Cap"}));
     }
 
     // Whether to smear for NLO calculations
     if (wconf.has_value({"NLO_Smearing"})) {
-      proxy()->setNLOSmearing(wconf.take({"NLO_Smearing"}));
+      analysis_handler_proxy()->setNLOSmearing(wconf.take({"NLO_Smearing"}));
     }
 
     // Select which weights to enable
@@ -300,7 +300,7 @@ void RivetOutput::setup() {
       int comma = 0;
       for (auto w : sel)
         s << (comma++ ? "," : "") << w;
-      proxy()->selectMultiWeights(s.str());
+      analysis_handler_proxy()->selectMultiWeights(s.str());
     }
 
     // Select weights to disable
@@ -310,7 +310,7 @@ void RivetOutput::setup() {
       int comma = 0;
       for (auto w : sel)
         s << (comma++ ? "," : "") << w;
-      proxy()->deselectMultiWeights(s.str());
+      analysis_handler_proxy()->deselectMultiWeights(s.str());
     }
   }
   logg[LOutput].debug() << "After processing configuration:\n"

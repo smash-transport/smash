@@ -117,7 +117,7 @@ class RivetOutput : public HepMcInterface {
   };
   // TODO(stdnmr) I do not like the name proxy (obsurces what is happening in .cc file)
   /** Return a proxy that temporarily disables FP exceptions */
-  Proxy proxy() { return Proxy(handler_); }
+  Proxy analysis_handler_proxy() { return Proxy(handler_); }
 
   /**  Rivet analysis handler */
   std::shared_ptr<Rivet::AnalysisHandler> handler_;
