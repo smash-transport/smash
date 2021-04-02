@@ -179,7 +179,6 @@ void RivetOutput::at_eventend(const Particles& particles,
   analysis_handler_proxy()->analyze(event_);
 }
 
-// TODO(stdnmr) Why do we need all this one-line functions in the following?
 void RivetOutput::add_analysis(const std::string& name) {
   analysis_handler_proxy()->addAnalysis(name);
 }

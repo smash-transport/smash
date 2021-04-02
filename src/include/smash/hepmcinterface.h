@@ -36,7 +36,7 @@ namespace smash {
  * particle).
  *
  * The class serves as a base class for output routines that utilizes
- * the HepMC event format (currently HepMcOutput and RivetOutput). TODO(stdnmr) Outputnames likely to change
+ * the HepMC event format (currently HepMcOutput and RivetOutput).
  *
  * A techincal point: We need to generate HepMC::GenParticle objects,
  * and we need to keep track of which HepMC::GenParticle corresponds

@@ -99,7 +99,7 @@ class RivetOutput : public HepMcInterface {
  private:
   /**
    * A proxy object that wraps all Rivet::AnalysisHandler calls in an
-   * environment where FP errors are disabled.  //TODO(stdnmr) What?
+   * environment where FP errors are disabled.
    */
   struct Proxy {
     /** Type of handler */
@@ -115,7 +115,6 @@ class RivetOutput : public HepMcInterface {
     /// FP traps temporaryly disabled
     DisableFloatTraps g_;
   };
-  // TODO(stdnmr) I do not like the name proxy (obsurces what is happening in .cc file)
   /** Return a proxy that temporarily disables FP exceptions */
   Proxy analysis_handler_proxy() { return Proxy(handler_); }
 
