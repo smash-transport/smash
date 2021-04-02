@@ -665,7 +665,7 @@ void Experiment<Modus>::create_output(const std::string &format,
       auto lout_par(out_par);
       lout_par.part_only_final = OutputOnlyFinal::No;  // TODO(stdnmr) this seems wrong
       outputs_.emplace_back(make_unique<HepMcOutput>(
-          output_path, "SMASH_HepMC", lout_par, modus_.total_N_number(),
+          output_path, "SMASH_HepMC_full", lout_par, modus_.total_N_number(),
           modus_.proj_N_number()));
     } else {
       logg[LExperiment].error("HepMC format " + format +
