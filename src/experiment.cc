@@ -146,12 +146,12 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *
  * - \b Particles \n
  *   \key Extended (bool, optional, default = false, incompatible with
- *                  Oscar1999, VTK and Root formats): \n
+ *                  Oscar1999, VTK, HepMC and Root formats): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
  *   \key Only_Final (string, optional, default = Yes, incompatible with
-                      VTK format): \n
+                      VTK and HepMC format): \n
  *   \li \key Yes - Print only final particle list \n
  *   \li \key IfNotEmpty - Print only final particle list, but only if event
  *                         is not empty (i.e. any collisions happened between
@@ -160,12 +160,12 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * \n
  * - \b Collisions (VTK not available) \n
  *   \key Extended (bool, optional, default = false, incompatible with
- *                  Oscar1999 and Root formats): \n
+ *                  Oscar1999, HepMC and Root formats): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
  *   \key Print_Start_End (bool, optional, default = false, incompatible with
- *                  Root format): \n
+ *                  Root and HepMC format): \n
  *   \li \key true - Initial and final particle list is printed out \n
  *   \li \key false - Initial and final particle list is not printed out \n
  * \n
@@ -192,10 +192,6 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *                  Oscar1999, ROOT and ASCII format):\n
  *   \li \key true - Print extended information for each particle
  *   \li \key false - Regular output for each particle \n
- * \n
- * - \b HepMC (Only ASCII format)\n
- *   No content-specific output options - see also \ref
-     hepmc_output_user_guide_ \n
  * \n
  * - \b Rivet (Only YODA format)\n
  *   See \ref rivet_output_user_guide_ for more information
@@ -327,12 +323,6 @@ ExperimentPtr ExperimentBase::create(Configuration config,
          Format:    ["ASCII", "Oscar1999", "Oscar2013", "Binary", "ROOT"]
          Extended: False
          Proper_Time: 1.5
- \endverbatim
- * SMASH can also output a form of HepMC event record in the HepMC ASCII format.
- * The HepMC output is enabled as follows:
- *\verbatim
-     HepMC:
-         Format:   ["ASCII"]
  \endverbatim
  */
 

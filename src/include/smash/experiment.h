@@ -681,7 +681,7 @@ void Experiment<Modus>::create_output(const std::string &format,
           modus_.proj_N_number(), out_par));
     } else if (format == "YODA-full") {
       outputs_.emplace_back(make_unique<RivetOutput>(
-          output_path, "SMASH_Rivet", true, modus_.total_N_number(),
+          output_path, "SMASH_Rivet_full", true, modus_.total_N_number(),
           modus_.proj_N_number(), out_par));
     } else {
       logg[LExperiment].error("Rivet format " + format +
@@ -1055,13 +1055,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b Particles  List of particles at regular time intervals in the
    *                 computational frame or (optionally) only at the event end.
    *   - Available formats: \ref format_oscar_particlelist,
-   *      \ref format_binary_, \ref format_root, \ref format_vtk
+   *      \ref format_binary_, \ref format_root, \ref format_vtk, \ref hepmc_output_user_guide_
    * - \b Collisions List of interactions: collisions, decays, box wall
    *                 crossings and forced thermalizations. Information about
    *                 incoming, outgoing particles and the interaction itself
    *                 is printed out.
    *   - Available formats: \ref format_oscar_collisions, \ref format_binary_,
-   *                 \ref format_root
+   *                 \ref format_root, \ref hepmc_output_user_guide_
    * - \b Dileptons  Special dilepton output, see \subpage output_dileptons.
    *   - Available formats: \ref format_oscar_collisions,
    *                   \ref format_binary_ and \ref format_root
@@ -1076,9 +1076,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *                          \subpage input_ic for details
    *   - Available formats: \ref format_oscar_particlelist, \ref
    * IC_output_user_guide_
-   * - \b HepMC  List of intial and final particles in HepMC3 event record, see
-   *                          \subpage hepmc_output_user_guide_ for details
-   *   - Available formats: \ref hepmc_output_user_guide_format_
    * - \b Rivet Run Rivet analysis on generated events and output
    *    results, see \subpage rivet_output_user_guide_ for details.
    *    - Available formats: \ref rivet_output_user_guide_
@@ -1114,7 +1111,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *   - Used for "Thermodynamics", "Initial_Conditions" and "HepMC", see
    * \subpage thermodyn_output_user_guide_
    * \subpage IC_output_user_guide_
-   * \ref hepmc_output_user_guide_
+   * - \b "HepMC" - human-readble asciiv3 format see \subpage hepmc_output_user_guide_ for details
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:

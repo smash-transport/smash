@@ -25,6 +25,8 @@ namespace smash {
  *
  * \section hepmc_output_user_guide_format_ ASCII HepMC Format
  *
+ * TODO{stdnmr} Adapt documentation to new configuration here
+ *
  * HepMC generally structures each event into particles and vertices
  * connecting them, basically storing a graph of the event. Since the
  * purpose of this output is to only provide a particle list of the
