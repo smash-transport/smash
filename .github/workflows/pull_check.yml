@@ -9,17 +9,18 @@ on:
       - main
 
 jobs:
-  build:
-      strategy:
-      matrix:
+   runs-on: ${{ matrix.os }}
+   strategy:
+   matrix: 
+       os: [ubuntu-16.04,ubuntu-18.04]
        include:
          # minimal gcc version (also on loewe cluster)
-         - runs-on: ubuntu-16.04
+         - os: ubuntu-16.04
            packages_to_add: "libboost-all-dev g++-4.8"
            c_compiler_to_use: "gcc-4.8"
            cxx_compiler_to_use: "g++-4.8"
          # test fias machine gcc version
-         - runs_on: ubuntu-18.04
+         - os: ubuntu-18.04
            packages_to_add: "libboost-all-dev g++-5 doxygen-latex graphviz"
            c_compiler_to_use: "gcc-5"
            cxx_compiler_to_use: "g++-5"
@@ -35,13 +36,14 @@ jobs:
    
          #sudo apt-get install -y "clang-<version>" "lldb-<version>" "lld-<version>" "clang-format-<version>"
          #sudo apt-get install -y "clang-8" "lldb-8" "lld-8" "clang-format-8"
-  steps:
+steps:
      - uses: actions/checkout@v2
-       ENV CC ${{ matrix.c_compiler_to_use }}
-       ENV CXX ${{ matrix.cxx_compiler_to_use }}
+       env:
+         CC ${{ matrix.c_compiler_to_use }}
+         CXX ${{ matrix.cxx_compiler_to_use }}
      - name: distro completion
        #first, we install the packages that we need:
-       apt-get install ${{ matrix.packages_to_add }} -y
+       #apt-get install ${{ matrix.packages_to_add }} -y
        run: 
          echo $PWD
          echo $CC
