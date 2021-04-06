@@ -14,6 +14,8 @@ jobs:
     # the OS to be used for the test is taken from the current matrix element
     runs-on: ${{ matrix.os }}
     strategy:
+      # we want to avoid to stop all the tests the first time that one of them gets an error 
+      fail-fast: false
       matrix: 
         include:
         #here we set up the various matrix elements
@@ -38,18 +40,17 @@ jobs:
           packages_to_add: "boost gsl"
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
-        # th matrix element, default compiler in Goethe cluster       
-        #- os: ubuntu-16.04
-        #  packages_to_add: "libboost-all-dev g++-4.8 libgsl-dev"
-        #  c_compiler_to_use: "gcc-4.8"
-        #  cxx_compiler_to_use: "g++-4.8"
+        # 5th matrix element, default compiler in Goethe cluster       
+        - os: ubuntu-16.04
+          # this time we do not include boost and gsl, we compile them later by ourselves
+          packages_to_add: "g++-4.8"
+          c_compiler_to_use: "gcc-4.8"
+          cxx_compiler_to_use: "g++-4.8"
     steps:   
     # this is an action provided by GitHub to checkout the repository
     - uses: actions/checkout@v2
     # we set the name of the step, collecting all the tests in just one step
-    - name: code_check
-      # uncomment the following line (and align with "env" below) to avoid to stop all the tests as soon as one of them gets an error 
-      # continue-on-error: true
+    - name: code_check     
     # we set some environment variables for the specific OS version
       env:
         CC: ${{ matrix.c_compiler_to_use }}
@@ -72,6 +73,13 @@ jobs:
         if [ $OS_NAME == "macos-latest" ]; then curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
         else curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz; fi &&
         mkdir clang6_0_0 && tar -xf clang6_0_0.tar.xz -C clang6_0_0 --strip-components=1
+        # if we use gcc-4.8 we download and build also boost and gsl
+        if [ $CXX == "g++-4.8" ]; then
+            curl https://deac-fra.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz -o boost_1_63_0.tar.gz --silent && tar -xf boost_1_63_0.tar.gz
+            cd boost_1_63_0 && ./bootstrap.sh --with-libraries=filesystem,system && ./b2 toolset=gcc-4.8 && export BOOST_DIR=$PWD && cd ..
+            wget https://ftp.wayne.edu/gnu/gsl/gsl-2.6.tar.gz && tar xf gsl-2.6.tar.gz && export GSL=$PWD && ./configure --prefix $GSL && make -j$(nproc) &&
+            make install && cd ..
+        fi        
         # we get eigen
         wget http://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz && tar -xf eigen-3.3.9.tar.gz -C $HOME
         # we get cpplint
@@ -79,7 +87,12 @@ jobs:
         export PATH=$HOME/bin:$PATH
         # now we build SMASH
         cd $SMASH_ROOT && mkdir build && cd build
-        cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.9/
+        # if we use gcc-4.8 we use our self built boost
+        if [ $CXX == "g++-4.8" ]; then
+            cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DBOOST_ROOT=$BOOST_DIR -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.9/ -DGSL_ROOT_DIR=$GSL
+        else
+            cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.9/
+        fi
         make -j$(nproc)
         # we check the building of the documentation for a specific case
         if [ $OS_NAME == ubuntu-18.04 ]; then make undocumented && make undocumented_test; fi
