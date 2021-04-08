@@ -42,8 +42,8 @@ jobs:
           cxx_compiler_to_use: "clang++"
         # 5th matrix element, default compiler in Goethe cluster       
         - os: ubuntu-16.04
-          # this time we do not include boost and gsl, we compile them later by ourselves
-          packages_to_add: "g++-4.8"
+          # this time we do not include boost, we compile it later by ourselves
+          packages_to_add: "g++-4.8 libgsl-dev"
           c_compiler_to_use: "gcc-4.8"
           cxx_compiler_to_use: "g++-4.8"
     steps:   
@@ -73,12 +73,10 @@ jobs:
         if [ $OS_NAME == "macos-latest" ]; then curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
         else curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz; fi &&
         mkdir clang6_0_0 && tar -xf clang6_0_0.tar.xz -C clang6_0_0 --strip-components=1
-        # if we use gcc-4.8 we download and build also boost and gsl
+        # if we use gcc-4.8 we download and build also boost
         if [ $CXX == "g++-4.8" ]; then
-            curl https://deac-fra.dl.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.gz -o boost_1_63_0.tar.gz --silent && tar -xf boost_1_63_0.tar.gz
-            cd boost_1_63_0 && ./bootstrap.sh --with-libraries=filesystem,system && ./b2 toolset=gcc-4.8 && export BOOST_DIR=$PWD && cd ..
-            wget https://ftp.wayne.edu/gnu/gsl/gsl-2.6.tar.gz && tar xf gsl-2.6.tar.gz && export GSL=$PWD && ./configure --prefix $GSL && make -j$(nproc) &&
-            make install && cd ..
+            curl https://deac-fra.dl.sourceforge.net/project/boost/boost/1.75.0/boost_1_75_0.tar.gz -o boost_1_75_0.tar.gz --silent && tar -xf boost_1_75_0.tar.gz
+            cd boost_1_75_0 && ./bootstrap.sh --with-libraries=filesystem,system && ./b2 toolset=gcc-4.8 && export BOOST_DIR=$PWD && cd ..            
         fi        
         # we get eigen
         wget http://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz && tar -xf eigen-3.3.9.tar.gz -C $HOME
@@ -89,7 +87,7 @@ jobs:
         cd $SMASH_ROOT && mkdir build && cd build
         # if we use gcc-4.8 we use our self built boost
         if [ $CXX == "g++-4.8" ]; then
-            cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DBOOST_ROOT=$BOOST_DIR -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.9/ -DGSL_ROOT_DIR=$GSL
+            cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DBOOST_ROOT=$BOOST_DIR -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.9/ 
         else
             cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.9/
         fi
