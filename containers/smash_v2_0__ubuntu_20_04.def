@@ -1364,30 +1364,20 @@ mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck cpplint.py /SMASH/auxiliary_prog
 chmod +x /SMASH/auxiliary_progs/*
 PATH=$PATH:/SMASH/auxiliary_progs
 
-#now we install Yoda for the Rivet environment. We do that temporarily to fix an installation problem
-wget https://yoda.hepforge.org/downloads?f=YODA-1.8.5.tar.bz2
-mv 'downloads?f=YODA-1.8.5.tar.bz2' YODA-1.8.5.tar.bz2
-tar xf YODA-1.8.5.tar.bz2
-cd YODA-1.8.5
-#we remove this linking to libPyROOT, not present in the ROOT installation
-sed -i "s/-lPyROOT//" pyext/setup.py.in
-./configure --prefix=/usr
-make -j2
-make install
-/sbin/ldconfig
-
 #now we install Rivet, first fixing a few details in the bootstrap script
-wget https://gitlab.com/hepcedar/rivetbootstrap/raw/3.1.3/rivet-bootstrap
-sed -i "6s/\$PWD\/local/\/SMASH\/Rivet_3_1_3_install/" rivet-bootstrap
-sed -i "7s/j2/j3/" rivet-bootstrap
-#we disable the installation of hepmc3
+wget https://gitlab.com/hepcedar/rivetbootstrap/raw/3.1.4/rivet-bootstrap
+#we set the Rivet installation directory
+sed -i "6s/\$PWD\/local/\/SMASH\/Rivet_3_1_4_install/" rivet-bootstrap
+#we set the number of concurrent compilation processes
+sed -i "7s/j$NUMBER_OF_PROCS_FOR_COMPILATION/j3/" rivet-bootstrap
+#we disable the installation of hepmc3, already installed
 sed -i "9s/1/0/" rivet-bootstrap
-#we disable the installation of yoda
-sed -i "12s/1/0/" rivet-bootstrap
 #we update the hepmc3 version
 sed -i "18s/2.06.11/3.2.3/" rivet-bootstrap
 #we provide the hepm3 installation path
-sed -i "44s/usr/\SMASH\/hepmc3-install/" rivet-bootstrap
+sed -i "50s/usr/\SMASH\/hepmc3-install/" rivet-bootstrap
+
+#now we really compile and install Rivet
 
 chmod +x rivet-bootstrap
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/SMASH/hepmc3-install/lib
@@ -1402,7 +1392,7 @@ make -j$NUMBER_OF_PROCS_FOR_COMPILATION
 
 #we remove most of the sources
 cd /SMASH
-rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.08.source.tar.gz root_build root_src Rivet-3.1.3 /var/cache/apt/archives/*.deb
+rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.08.source.tar.gz root_build root_src Rivet-3.1.4 rivet-bootstrap /var/cache/apt/archives/*.deb
 
 #we set up the shell prompt during the container execution
 #!/bin/bash
@@ -1445,13 +1435,13 @@ export JUPYTER_CONFIG_DIR=$ROOTSYS/etc/notebook:$JUPYTER_CONFIG_DIR
 export CLING_STANDARD_PCH=none
 
 #environment variables for Rivet
-prefix=/SMASH/Rivet_3_1_3_install
+prefix=/SMASH/Rivet_3_1_4_install
 exec_prefix=${prefix}
 datarootdir=${prefix}/share
 
 export PATH=$exec_prefix/bin:$PATH
-export LD_LIBRARY_PATH="${exec_prefix}/lib:/SMASH/Rivet_3_1_3_install/lib64:/SMASH/hepmc3-install/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="/SMASH/Rivet_3_1_3_install/lib/python2.7/site-packages:$PYTHONPATH"
+export LD_LIBRARY_PATH="${exec_prefix}/lib:/SMASH/Rivet_3_1_4_install/lib64:/SMASH/hepmc3-install/lib:$LD_LIBRARY_PATH"
+export PYTHONPATH="/SMASH/Rivet_3_1_4_install/lib/python2.7/site-packages:$PYTHONPATH"
 export TEXMFHOME="${datarootdir}/Rivet/texmf:$TEXMFHOME"
 export HOMETEXMF="${datarootdir}/Rivet/texmf:$HOMETEXMF"
 export TEXMFCNF="${datarootdir}/Rivet/texmf/cnf:$TEXMFCNF"
@@ -1461,9 +1451,8 @@ export LATEXINPUTS="${datarootdir}/Rivet/texmf/tex//:$LATEXINPUTS"
 
 %labels
 Author Gabriele Inghirami
-Version v_28_03_21_ubuntu2004
+Version v_10_04_21_ubuntu2004
 
 
 %help
 Container based on Ubuntu 20.04 x86-64 providing a complete SMASH master development environment.
-

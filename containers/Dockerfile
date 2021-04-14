@@ -11,16 +11,16 @@ LABEL maintainer.email="g.inghirami@gsi.de"
 
 RUN echo "deb http://ftp.uni-mainz.de/ubuntu/ focal restricted multiverse main universe" > /etc/apt/sources.list \
 && echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-updates restricted multiverse main universe" >> /etc/apt/sources.list \
-&& echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-security restricted multiverse main universe" >> /etc/apt/sources.list \
+&& echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-security restricted multiverse main universe" >> /etc/apt/sources.list 
 
 #we want to install the packages non interactively
 
-&& echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections 
 
 
 #we update the distribution and we install several additional packages
 
-&& apt-get update && \
+RUN apt-get update && \
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime && \
 apt-get -y upgrade && \
 apt-get -y install \
@@ -231,6 +231,7 @@ ibus-gtk:amd64  \
 ibus-gtk3:amd64  \
 icu-devtools  \
 iio-sensor-proxy  \
+imagemagick \
 im-config  \
 init-system-helpers  \
 ippusbxd  \
@@ -1213,6 +1214,8 @@ systemd-sysv  \
 systemd-timesyncd  \
 sysvinit-utils  \
 tar  \
+texlive-latex-base \
+texlive-pstricks \
 tk8.6-blt2.5  \
 ttf-bitstream-vera  \
 tzdata  \
@@ -1300,8 +1303,9 @@ ARG NUMBER_OF_PROCS_FOR_COMPILATION=2
 WORKDIR /SMASH
 
 #we use pip to install a few python2 libraries (seaborn and, automatically as dependencies, matplotlib, scipy, pandas, yaml and numpy)
+#we use the -O option to overwrite a possible pre-exhisting older local version of get-pip.py
 
-RUN wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
+RUN wget -O get-pip.py https://bootstrap.pypa.io/pip/2.7/get-pip.py
 RUN python2 get-pip.py
 RUN pip install seaborn && \
 rm get-pip.py
@@ -1326,15 +1330,15 @@ make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 make install
 
 RUN cd /SMASH && \
-wget https://root.cern/download/root_v6.22.06.source.tar.gz && \
-tar xf root_v6.22.06.source.tar.gz && \
-mv root-6.22.06 root_src && \
-mkdir -p root_6_22_06 && \
+wget https://root.cern/download/root_v6.22.08.source.tar.gz && \
+tar xf root_v6.22.08.source.tar.gz && \
+mv root-6.22.08 root_src && \
+mkdir -p root_6_22_08 && \
 mkdir -p root_build && \
 cd root_build && \
-cmake -DCMAKE_INSTALL_PREFIX=../root_6_22_06 ../root_src  -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64"&& \
+cmake -DCMAKE_INSTALL_PREFIX=../root_6_22_08 ../root_src  -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64"&& \
 cmake --build . --target install -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
-ROOTSYS=/SMASH/root_6_22_06 &&  \
+ROOTSYS=/SMASH/root_6_22_08 &&  \
 export PATH=$ROOTSYS/bin:$PATH && \
 export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH && \
 export SHLIB_PATH=$ROOTSYS/lib && \
@@ -1359,18 +1363,42 @@ mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck cpplint.py /SMASH/auxiliary_prog
 chmod +x /SMASH/auxiliary_progs/* && \
 PATH=$PATH:/SMASH/auxiliary_progs
 
+#now we install Rivet, first fixing a few details in the bootstrap script
+
+RUN wget https://gitlab.com/hepcedar/rivetbootstrap/raw/3.1.4/rivet-bootstrap
+#we set the Rivet installation directory
+RUN sed -i "6s/\$PWD\/local/\/SMASH\/Rivet_3_1_4_install/" rivet-bootstrap
+#we set the number of concurrent compilation processes
+RUN sed -i "7s/j$NUMBER_OF_PROCS_FOR_COMPILATION/j3/" rivet-bootstrap
+#we disable the installation of hepmc3, already installed
+RUN sed -i "9s/1/0/" rivet-bootstrap
+#we update the hepmc3 version
+RUN sed -i "18s/2.06.11/3.2.3/" rivet-bootstrap
+#we provide the hepm3 installation path
+RUN sed -i "50s/usr/\SMASH\/hepmc3-install/" rivet-bootstrap
+
+#now we really compile and install Rivet
+
+RUN chmod +x rivet-bootstrap && \
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/SMASH/hepmc3-install/lib && \
+./rivet-bootstrap
+
+# eventually, we download and compile SMASH
+
 RUN cd /SMASH && \
 git clone https://github.com/smash-transport/smash.git && \
 mkdir -p smash_bin && \
 cd smash_bin && \
 cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_8_303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" && \
-make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
+make -j$NUMBER_OF_PROCS_FOR_COMPILATION
 
 #we remove most of the sources
-cd /SMASH && \
-rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.06.source.tar.gz root_build root_src /var/cache/apt/archives/*.deb
+
+RUN cd /SMASH && \
+rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.08.source.tar.gz root_build root_src Rivet-3.1.4 rivet-bootstrap /var/cache/apt/archives/*.deb
 
 #we set up the shell prompt during the container execution
+
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
@@ -1383,7 +1411,7 @@ ENV PATH $PYTHIA8/bin:$PATH
 
 ENV PATH $PATH:/SMASH/smash_bin:/SMASH/auxiliary_progs
 
-ENV ROOTSYS /SMASH/root_6_22_06
+ENV ROOTSYS /SMASH/root_6_22_08
 ENV PATH $ROOTSYS/bin:$PATH
 ENV LD_LIBRARY_PATH $ROOTSYS/lib:$LD_LIBRARY_PATH
 ENV SHLIB_PATH $ROOTSYS/lib
@@ -1394,3 +1422,14 @@ ENV CMAKE_PREFIX_PATH $ROOTSYS:$CMAKE_PREFIX_PATH
 ENV JUPYTER_PATH $ROOTSYS/etc/notebook:$JUPYTER_PATH
 ENV JUPYTER_CONFIG_DIR $ROOTSYS/etc/notebook:$JUPYTER_CONFIG_DIR
 ENV CLING_STANDARD_PCH none
+
+#environment variables for Rivet
+
+ENV PATH /SMASH/Rivet_3_1_4_install/bin:$PATH
+ENV LD_LIBRARY_PATH "/SMASH/Rivet_3_1_4_install/lib:/SMASH/Rivet_3_1_4_install/lib64:/SMASH/hepmc3-install/lib:$LD_LIBRARY_PATH"
+ENV PYTHONPATH "/SMASH/Rivet_3_1_4_install/lib/python2.7/site-packages:$PYTHONPATH"
+ENV TEXMFHOME "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf:$TEXMFHOME"
+ENV HOMETEXMF "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf:$HOMETEXMF"
+ENV TEXMFCNF "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf/cnf:$TEXMFCNF"
+ENV TEXINPUTS "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf/tex//:$TEXINPUTS"
+ENV LATEXINPUTS "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf/tex//:$LATEXINPUTS"
