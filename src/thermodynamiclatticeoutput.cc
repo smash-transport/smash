@@ -8,7 +8,6 @@
  */
 
 #include "smash/thermodynamiclatticeoutput.h"
-#include "smash/thermodynamicoutput.h"
 
 #include <fstream>
 #include <memory>
@@ -20,6 +19,7 @@
 #include "smash/density.h"
 #include "smash/energymomentumtensor.h"
 #include "smash/experimentparameters.h"
+#include "smash/thermodynamicoutput.h"
 #include "smash/vtkoutput.h"
 
 namespace smash {
@@ -41,209 +41,326 @@ namespace smash {
  *
  * The format of the file is the following: \n
  *
- * - variable id (int) : see the correspondence list below
- * - id of the density type (int ) : see the correspondence list below 
+ * - string containing the version of the output
  * - nx, ny, nz (int) :  cells of the lattice along x, y, z, respectively (set in: Lattice->Cell_Number)
- * - 0, 0, 0 (int) : three zeroes for padding purposes and free slot for future uses
- * - t (double) : time 
+ * - 0, 0, 0 (int) : three zeroes for padding purposes and free slots for future uses
  * - x0, y0, z0 (double) : coordinates of the origin of the lattice (set in Lattice->Origin)
  * - dx, dy, dz (double) : size of the lattice (set in Lattice->Sizes)
- * - smash version number (double)
  * - the data payload
  *
- * The data payload consists in the values of the quantity in the following order:
+ * In the case of the energy-momentum tensor, the data payload consists
+ * in the values of the quantity in the following order:
+ *
  * <\code>
  * for (h=0;h<{number of timesteps};h++) {
- *   for (i=0;i<nx;i++) {
+ *   output time
+ *   for (l=0;l<{number of quantity components};l++) {
+ *    for (k=0;k<nz;k++) {
  *     for (j=0;j<ny;j++) {
- *       for (k=0;k<nz;k++) {
- *         for (l=0;l<{number of quantity components};l++) {
- *           quantity (double)
+ *      for (i=0;i<nx;i++) {
+ *           quantity value
+ *      }
+ *      \newline
+ *     }
+ *    }
+ *   }
+ * }           
  * <\endcode>          
  *
- * Here is the list of ids of the quantities and their number of components
- * 
- * \li \key density: The density specified in the configuration file - variable id: 0, components: 1
- * \li \key Tmunu_Lab: Energy-momentum tensor in the lab frame - variable id: 1, components: 10
- * \li \key Tmunu_Landau: Energy-momentum tensor in the Landau frame - variable id: 2, components: 10
- * \li \key v_Landau: The velocity in Landau frame - variable id: 3, components: 3
- * \li \key el_current: The electric current in the lab frame - variable id: 4, components: 4
- * \li \key bar_current: The baryonic current in the lab frame - variable id: 5, components: 4
- * \li \key str_current: The strange current in the lab frame - variable id: 6, components: 4
+ * In the case of densities, the data payload consists
+ * in the values of the quantity in the following order:
  *
- * The id of the density types are:
+ * <\code>
+ * for (h=0;h<{number of timesteps};h++) {
+ *   output time
+ *   for (k=0;k<nz;k++) {
+ *    for (j=0;j<ny;j++) {
+ *     for (i=0;i<nx;i++) {
+ *         quantity value
+ *     }
+ *     \newline
+ *    }
+ *   }
+ * }
+ * <\endcode>   
  *
- * \li "baryon": 0
- * \li "hadron": 1
- * \li "baryonic isospin": 2
- * \li "pion": 3
- * \li "total isospin": 4
- * \li "none": 5
+ * In the case of Landau velocity the data payload
+ * consists in the values of the components
+ * Vx, Vy, Vz in the following order:
+ *
+ * <\code>
+ * for (h=0;h<{number of timesteps};h++) {
+ *   output time
+ *   for (k=0;k<nz;k++) {
+ *    for (j=0;j<ny;j++) {
+ *     for (i=0;i<nx;i++) {
+ *         Vx  Vy  Vz \newline
+ *     }
+ *    }
+ *   }
+ * }
+ * <\endcode>   
  */
+
+
+/* initialization of the static member version */
+const char* ThermodynamicLatticeOutput::version="v0.5-ASCII";
 
 ThermodynamicLatticeOutput::ThermodynamicLatticeOutput(const bf::path &path,
                                          const std::string &name,
                                          const OutputParameters &out_par)
     : OutputInterface(name),
-      file_{path / "thermodynamics.dat", "w"},
+      base_path_(std::move(path)),
       out_par_(out_par) {
-  std::fprintf(file_.get(), "# %s thermodynamics output\n", VERSION_MAJOR);
-  const ThreeVector r = out_par.td_position;
-  if (out_par_.td_smearing) {
-    std::fprintf(file_.get(), "# @ point (%6.2f, %6.2f, %6.2f) [fm]\n", r.x1(),
-                 r.x2(), r.x3());
-  } else {
-    std::fprintf(file_.get(), "# averaged over the entire volume\n");
-  }
-  std::fprintf(file_.get(), "# %s\n", to_string(out_par.td_dens_type));
-  std::fprintf(file_.get(), "# time [fm/c], ");
-  if (out_par_.td_rho_eckart) {
-    std::fprintf(file_.get(), "%s [fm^-3], ",
-                 to_string(ThermodynamicQuantity::EckartDensity));
-  }
-  if (out_par_.td_tmn) {
-    if (out_par_.td_smearing) {
-      std::fprintf(file_.get(), "%s [GeV/fm^3] 00 01 02 03 11 12 13 22 23 33, ",
-                   to_string(ThermodynamicQuantity::Tmn));
-    } else {
-      std::fprintf(file_.get(), "%s [GeV] 00 01 02 03 11 12 13 22 23 33, ",
-                   to_string(ThermodynamicQuantity::Tmn));
-    }
-  }
-  if (out_par_.td_tmn_landau) {
-    if (out_par_.td_smearing) {
-      std::fprintf(file_.get(), "%s [GeV/fm^3] 00 01 02 03 11 12 13 22 23 33, ",
-                   to_string(ThermodynamicQuantity::TmnLandau));
-    } else {
-      std::fprintf(file_.get(), "%s [GeV] 00 01 02 03 11 12 13 22 23 33, ",
-                   to_string(ThermodynamicQuantity::TmnLandau));
-    }
-  }
-  if (out_par_.td_v_landau) {
-    std::fprintf(file_.get(), "%s x y z, ",
-                 to_string(ThermodynamicQuantity::LandauVelocity));
-  }
-  if (out_par_.td_jQBS) {
-    if (out_par_.td_smearing) {
-      std::fprintf(file_.get(), "j_QBS [(Q,B,S)/fm^3] (0 1 2 3)x3");
-    } else {
-      std::fprintf(file_.get(), "j_QBS [(Q,B,S)] (0 1 2 3)x3");
-    }
-  }
-  std::fprintf(file_.get(), "\n");
-}
+          if (out_par_.td_rho_eckart) {
+           output_files_[ThermodynamicQuantity::EckartDensity]=
+           std::make_shared<std::ofstream>(nullptr);
+      }
+          if (out_par_.td_tmn_landau) {
+           output_files_[ThermodynamicQuantity::TmnLandau]=
+           std::make_shared<std::ofstream>(nullptr);
+      }
+          if (out_par_.td_tmn) {
+           output_files_[ThermodynamicQuantity::Tmn]=
+           std::make_shared<std::ofstream>(nullptr);
+      }
+          if (out_par_.td_v_landau) {
+           output_files_[ThermodynamicQuantity::LandauVelocity]=
+           std::make_shared<std::ofstream>(nullptr);
+      }
+          if (out_par_.td_jQBS) {
+           std::cout << "Sorry, the Thermodynamic Lattice Output for j_{Q,B,S}"
+          << " is not yet implemented.\n";
+      }
+      }
+
 
 ThermodynamicLatticeOutput::~ThermodynamicLatticeOutput() {}
 
+
 void ThermodynamicLatticeOutput::at_eventstart(
-    const std::vector<Particles> & /*particles*/, const int event_number) {
-  std::fprintf(file_.get(), "# event %i\n", event_number);
-}
-
-void ThermodynamicLatticeOutput::at_eventend(
-    const std::vector<Particles> & /*particles*/, const int /*event_number*/) {
-  std::fflush(file_.get());
-}
-
-void ThermodynamicLatticeOutput::at_intermediate_time(
-    const std::vector<Particles> &ensembles,
-    const std::unique_ptr<Clock> &clock, const DensityParameters &dens_param) {
-  const double n_ensembles = ensembles.size();
-  std::fprintf(file_.get(), "%6.2f ", clock->current_time());
-  constexpr bool compute_gradient = false;
-  if (out_par_.td_rho_eckart) {
-    FourVector jmu = FourVector();
-    for (const Particles &particles : ensembles) {
-      jmu += std::get<1>(current_eckart(
-          out_par_.td_position, particles, dens_param, out_par_.td_dens_type,
-          compute_gradient, out_par_.td_smearing));
-    }
-    std::fprintf(file_.get(), "%7.4f ", jmu.abs() / n_ensembles);
-  }
-  if (out_par_.td_tmn || out_par_.td_tmn_landau || out_par_.td_v_landau) {
-    EnergyMomentumTensor Tmn;
-    for (const Particles &particles : ensembles) {
-      for (const auto &p : particles) {
-        const double dens_factor =
-            density_factor(p.type(), out_par_.td_dens_type) / n_ensembles;
-        if (std::abs(dens_factor) < really_small) {
-          continue;
+    const int event_number, const ThermodynamicQuantity tq,
+    const DensityType dens_type,
+    RectangularLattice<DensityOnLattice> lattice) {
+    // at the next refactoring of the code,
+    // this piece should go in the constructor
+    const auto dim = lattice.dimensions();
+    const auto cs = lattice.cell_sizes();
+    const auto orig = lattice.origin();
+    nx_ = dim[0];
+    ny_ = dim[1];
+    nz_ = dim[2];
+    dx_ = cs[0];
+    dy_ = cs[1];
+    dz_ = cs[2];
+    x0_ = orig[0];
+    y0_ = orig[1];
+    z0_ = orig[2];
+    std::shared_ptr<std::ofstream> fp(nullptr);
+    std::string varname;
+    std::string filename;
+    varname = make_varname(tq, dens_type);
+    filename = make_filename(varname, event_number);
+    if (tq==ThermodynamicQuantity::EckartDensity) {
+        try {
+            output_files_[ThermodynamicQuantity::EckartDensity]->
+            open(filename, std::ios::out);
+            }
+        catch (std::ofstream::failure &e) {
+            std::cout << "Error in opening " << filename << std::endl;
+        exit(1);
         }
-        if (out_par_.td_smearing) {
-          const auto sf =
-              unnormalized_smearing_factor(
-                  p.position().threevec() - out_par_.td_position, p.momentum(),
-                  1.0 / p.momentum().abs(), dens_param, compute_gradient)
-                  .first;
-          if (sf < really_small) {
-            continue;
-          }
-          Tmn.add_particle(p, dens_factor * sf * dens_param.norm_factor_sf());
-        } else {
-          Tmn.add_particle(p, dens_factor);
+        fp=output_files_[ThermodynamicQuantity::EckartDensity];
+    } else {
+        std::cout << "There is a problem in the implementation " <<
+          "of ThermodynamicLatticeOutput::at_eventstart :\n";
+        std::cout << "this specialization expects only " <<
+          "tq==ThermodynamicQuantity::EckartDensity, while\n";
+        std::cout << "it got " << std::string(to_string(tq)) << " .\n";
+        exit(1);
+    }
+        write_therm_lattice_header(fp, tq);
+}
+
+void ThermodynamicLatticeOutput::at_eventstart(
+    const int event_number, const ThermodynamicQuantity tq,
+    const DensityType dens_type,
+    RectangularLattice<EnergyMomentumTensor> lattice ) {
+    const auto dim = lattice.dimensions();
+    const auto cs = lattice.cell_sizes();
+    const auto orig = lattice.origin();
+    nx_ = dim[0];
+    ny_ = dim[1];
+    nz_ = dim[2];
+    dx_ = cs[0];
+    dy_ = cs[1];
+    dz_ = cs[2];
+    x0_ = orig[0];
+    y0_ = orig[1];
+    z0_ = orig[2];
+
+    std::shared_ptr<std::ofstream> fp(nullptr);
+    std::string varname;
+    std::string filename;
+    varname = make_varname(tq, dens_type);
+    filename = make_filename(varname, event_number);
+    if (tq==ThermodynamicQuantity::TmnLandau) {
+        try {
+            output_files_[ThermodynamicQuantity::TmnLandau]->
+            open(filename, std::ios::out);
         }
-      }
+        catch (std::ofstream::failure &e) {
+            std::cout << "Error in opening " << filename << std::endl;
+            exit(1);
+        }
+
+        fp=output_files_[ThermodynamicQuantity::TmnLandau];
+    } else if (tq==ThermodynamicQuantity::Tmn) {
+        try {
+            output_files_[ThermodynamicQuantity::Tmn]->
+            open(filename, std::ios::out);
+        }
+        catch (std::ofstream::failure &e) {
+            std::cout << "Error in opening " << filename << std::endl;
+            exit(1);
+        }
+        fp=output_files_[ThermodynamicQuantity::Tmn];
+    } else {
+        try {
+            output_files_[ThermodynamicQuantity::LandauVelocity]->
+            open(filename, std::ios::out);
+        }
+        catch (std::ofstream::failure &e) {
+            std::cout << "Error in opening " << filename << std::endl;
+            exit(1);
+        }
+        fp=output_files_[ThermodynamicQuantity::LandauVelocity];
     }
-    const FourVector u = Tmn.landau_frame_4velocity();
-    const EnergyMomentumTensor Tmn_L = Tmn.boosted(u);
-    if (out_par_.td_tmn) {
-      for (int i = 0; i < 10; i++) {
-        std::fprintf(file_.get(), "%15.12f ", Tmn[i]);
-      }
-    }
-    if (out_par_.td_tmn_landau) {
-      for (int i = 0; i < 10; i++) {
-        std::fprintf(file_.get(), "%7.4f ", Tmn_L[i]);
-      }
-    }
-    if (out_par_.td_v_landau) {
-      std::fprintf(file_.get(), "%7.4f %7.4f %7.4f ", -u[1] / u[0],
-                   -u[2] / u[0], -u[3] / u[0]);
-    }
-  }
-  if (out_par_.td_jQBS) {
-    FourVector jQ = FourVector(), jB = FourVector(), jS = FourVector();
-    for (const Particles &particles : ensembles) {
-      jQ += std::get<1>(current_eckart(out_par_.td_position, particles,
-                                       dens_param, DensityType::Charge,
-                                       compute_gradient, out_par_.td_smearing));
-      jB += std::get<1>(current_eckart(out_par_.td_position, particles,
-                                       dens_param, DensityType::Baryon,
-                                       compute_gradient, out_par_.td_smearing));
-      jS += std::get<1>(current_eckart(out_par_.td_position, particles,
-                                       dens_param, DensityType::Strangeness,
-                                       compute_gradient, out_par_.td_smearing));
-    }
-    jQ /= n_ensembles;
-    jS /= n_ensembles;
-    jB /= n_ensembles;
-    std::fprintf(file_.get(), "%15.12f %15.12f %15.12f %15.12f ", jQ[0], jQ[1],
-                 jQ[2], jQ[3]);
-    std::fprintf(file_.get(), "%15.12f %15.12f %15.12f %15.12f ", jB[0], jB[1],
-                 jB[2], jB[3]);
-    std::fprintf(file_.get(), "%15.12f %15.12f %15.12f %15.12f ", jS[0], jS[1],
-                 jS[2], jS[3]);
-  }
-  std::fprintf(file_.get(), "\n");
+        write_therm_lattice_header(fp, tq);
 }
 
-void ThermodynamicLatticeOutput::density_along_line(
-    const char *file_name, const ParticleList &plist,
-    const DensityParameters &param, DensityType dens_type,
-    const ThreeVector &line_start, const ThreeVector &line_end, int n_points) {
-  ThreeVector r;
-  std::ofstream a_file;
-  a_file.open(file_name, std::ios::out);
-  const bool compute_gradient = false;
-  const bool smearing = true;
-
-  for (int i = 0; i <= n_points; i++) {
-    r = line_start + (line_end - line_start) * (1.0 * i / n_points);
-    double rho_eck = std::get<0>(
-        current_eckart(r, plist, param, dens_type, compute_gradient, smearing));
-    a_file << r.x1() << " " << r.x2() << " " << r.x3() << " " << rho_eck
-           << "\n";
-  }
+void ThermodynamicLatticeOutput::at_eventend(const ThermodynamicQuantity tq) {
+    if (tq==ThermodynamicQuantity::EckartDensity) {
+        output_files_[ThermodynamicQuantity::EckartDensity]->close();
+        return;
+    }
+    if (tq==ThermodynamicQuantity::TmnLandau) {
+        output_files_[ThermodynamicQuantity::TmnLandau]->close();
+        return;
+    }
+    if (tq==ThermodynamicQuantity::Tmn) {
+        output_files_[ThermodynamicQuantity::Tmn]->close();
+        return;
+    }
+    if (tq==ThermodynamicQuantity::LandauVelocity) {
+        output_files_[ThermodynamicQuantity::LandauVelocity]->close();
+        return;
+    }
 }
 
+void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
+    RectangularLattice<DensityOnLattice> &lattice, const double ctime) {
+    const auto dim = lattice.dimensions();
+    std::shared_ptr<std::ofstream> fp(nullptr);
+    fp=output_files_[ThermodynamicQuantity::EckartDensity];
+    *fp << std::setprecision(14);
+    *fp << std::scientific;
+    *fp << ctime << std::endl;
+    lattice.iterate_sublattice({0, 0, 0}, dim,
+    [&](DensityOnLattice &node, int ix, int, int) {
+        *fp << node.density() << " ";
+        if (ix == dim[0] - 1) {
+            *fp << "\n";
+        }
+    });
+}
+
+void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
+    const ThermodynamicQuantity tq,
+    RectangularLattice<EnergyMomentumTensor> &lattice, const double ctime) {
+    const auto dim = lattice.dimensions();
+    std::shared_ptr<std::ofstream> fp(nullptr);
+    switch (tq) {
+        case ThermodynamicQuantity::Tmn:
+            fp=output_files_[ThermodynamicQuantity::Tmn];
+            break;
+        case ThermodynamicQuantity::TmnLandau:
+            fp=output_files_[ThermodynamicQuantity::TmnLandau];
+            break;
+        case ThermodynamicQuantity::LandauVelocity:
+            fp=output_files_[ThermodynamicQuantity::LandauVelocity];
+            break;
+        default:
+            return;
+    }
+    *fp << std::setprecision(14);
+    *fp << std::scientific;
+    *fp << ctime << std::endl;
+    switch (tq) {
+         case ThermodynamicQuantity::Tmn:
+             for (int i = 0; i < 4; i++) {
+               for (int j = i; j < 4; j++) {
+                 lattice.iterate_sublattice({0, 0, 0}, dim,
+                 [&](EnergyMomentumTensor &node, int ix, int, int) {
+                   *fp << node[EnergyMomentumTensor::tmn_index(i, j)] << " ";
+                   if (ix == dim[0] - 1) {
+                     *fp << "\n";
+                   }
+                 });
+               }
+             }
+             break;
+         case ThermodynamicQuantity::TmnLandau:
+             for (int i = 0; i < 4; i++) {
+               for (int j = i; j < 4; j++) {
+                 lattice.iterate_sublattice({0, 0, 0}, dim,
+                 [&](EnergyMomentumTensor &node, int ix, int, int) {
+                   const FourVector u = node.landau_frame_4velocity();
+                   const EnergyMomentumTensor Tmn_L = node.boosted(u);
+                   *fp << Tmn_L[EnergyMomentumTensor::tmn_index(i, j)] << " ";
+                   if (ix == dim[0] - 1) {
+                     *fp << "\n";
+                   }
+                 });
+               }
+             }
+             break;
+         case ThermodynamicQuantity::LandauVelocity:
+             lattice.iterate_sublattice({0, 0, 0}, dim,
+             [&](EnergyMomentumTensor &node, int, int, int) {
+               const FourVector u = node.landau_frame_4velocity();
+               const ThreeVector v = -u.velocity();
+               *fp << v.x1() << " " << v.x2() << " " << v.x3() << "\n";
+                });
+             break;
+         default:
+             return;
+    }
+}
+
+std::string ThermodynamicLatticeOutput::make_filename(const std::string &descr,
+    const int event_number) {
+    char suffix[13];
+    snprintf(suffix, sizeof(suffix), "_%07i.dat", event_number);
+    return base_path_.string() + std::string("/") + descr + std::string(suffix);
+}
+
+std::string ThermodynamicLatticeOutput::make_varname(const ThermodynamicQuantity
+  tq, const DensityType dens_type) {
+    return std::string(to_string(dens_type)) + std::string("_") +
+    std::string(to_string(tq));
+}
+
+void ThermodynamicLatticeOutput::write_therm_lattice_header
+  (std::shared_ptr<std::ofstream> fp, const ThermodynamicQuantity &tq) {
+    *fp << std::setprecision(5);
+    *fp << std::fixed;
+    *fp << "#Thermodynamic Lattice Output version: " <<
+      ThermodynamicLatticeOutput::version << std::endl;
+    *fp << "#Quantity:" << std::string(to_string(tq)) << std::endl;
+    *fp << "#Grid information:" << std::endl;
+    *fp << "#Dimensions: " << nx_ << " " << ny_ << " " << nz_ << std::endl;
+    *fp << "#Spacing: " << dx_ << " " << dy_ << " " << dz_ << std::endl;
+    *fp << "#Origin: " << x0_ << " " << y0_ << " " << z0_ << std::endl;
+}
 }  // namespace smash
