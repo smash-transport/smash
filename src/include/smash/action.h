@@ -308,7 +308,12 @@ class Action {
    * eq. (5).
    */
   static double lambda_tilde(double a, double b, double c) {
-    return (a - b - c) * (a - b - c) - 4. * b * c;
+    const double res = (a - b - c) * (a - b - c) - 4. * b * c;
+    if (res < 0.0) {
+      // floating point recision problem
+      return 0.0;
+    }
+    return res;
   }
 
   /**
