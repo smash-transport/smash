@@ -30,31 +30,6 @@ matrix:
           - graphviz
     env:
       - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-  # most recent gcc version
-  - os: linux
-    dist: bionic
-    addons:
-      apt:
-        sources:
-          - sourceline: 'ppa:ubuntu-toolchain-r/test'
-        packages:
-          - libboost-all-dev
-          - g++-9
-    env:
-      - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
-  # most recent clang version on linux
-  - os: linux
-    dist: bionic
-    addons:
-      apt:
-        sources:
-          - sourceline: 'deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main'
-            key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
-        packages:
-          - libboost-all-dev
-          - clang-9
-    env:
-      - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
   # most recent xcode (changes also clang version)
   - os: osx
     osx_image: xcode11
