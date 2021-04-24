@@ -88,9 +88,9 @@ GridBase::find_min_and_length(const Particles &particles) {
     max_position[1] = std::max(max_position[1], pos[2]);
     max_position[2] = std::max(max_position[2], pos[3]);
   }
-  length[0] = max_position[0] - min_position[0];
-  length[1] = max_position[1] - min_position[1];
-  length[2] = max_position[2] - min_position[2];
+  length[0] = std::max(max_position[0] - min_position[0], really_small);
+  length[1] = std::max(max_position[1] - min_position[1], really_small);
+  length[2] = std::max(max_position[2] - min_position[2], really_small);
   return r;
 }
 

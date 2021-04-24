@@ -111,29 +111,31 @@ class OutputInterface {
    * \param[in] lattice Lattice of tabulated values.
    */
   virtual void at_eventstart(const int event_number,
-    const ThermodynamicQuantity tq, const DensityType dens_type,
-    RectangularLattice<DensityOnLattice> lattice) {
-        SMASH_UNUSED(event_number);
-        SMASH_UNUSED(tq);
-        SMASH_UNUSED(dens_type);
-        SMASH_UNUSED(lattice);
+                             const ThermodynamicQuantity tq,
+                             const DensityType dens_type,
+                             RectangularLattice<DensityOnLattice> lattice) {
+    SMASH_UNUSED(event_number);
+    SMASH_UNUSED(tq);
+    SMASH_UNUSED(dens_type);
+    SMASH_UNUSED(lattice);
   }
 
   /**
-   * Output launched at event end. Event end is determined by maximal timestep
-   * option.
+   * Output launched atevent start after initialization, when particles are
+   * generated but not yet propagated.
    * \param[in] event_number Number of the current event.
    * \param[in] tq Thermodynamic quantity to deal with.
    * \param[in] dens_type Density type for the reference frame.
    * \param[in] lattice Lattice of tabulated values.
    */
   virtual void at_eventstart(const int event_number,
-    const ThermodynamicQuantity tq, const DensityType dens_type,
-    RectangularLattice<EnergyMomentumTensor> lattice) {
-        SMASH_UNUSED(event_number);
-        SMASH_UNUSED(tq);
-        SMASH_UNUSED(dens_type);
-        SMASH_UNUSED(lattice);
+                             const ThermodynamicQuantity tq,
+                             const DensityType dens_type,
+                             RectangularLattice<EnergyMomentumTensor> lattice) {
+    SMASH_UNUSED(event_number);
+    SMASH_UNUSED(tq);
+    SMASH_UNUSED(dens_type);
+    SMASH_UNUSED(lattice);
   }
 
   /**
@@ -145,10 +147,11 @@ class OutputInterface {
    *                      quantities
    */
   virtual void at_eventend(const int event_number,
-    const ThermodynamicQuantity tq, const DensityType dens_type) {
-        SMASH_UNUSED(event_number);
-        SMASH_UNUSED(tq);
-        SMASH_UNUSED(dens_type);
+                           const ThermodynamicQuantity tq,
+                           const DensityType dens_type) {
+    SMASH_UNUSED(event_number);
+    SMASH_UNUSED(tq);
+    SMASH_UNUSED(dens_type);
   }
 
   /**
@@ -156,9 +159,7 @@ class OutputInterface {
    * option.
    * \param[in] tq Thermodynamic quantity to deal with.
    */
-  virtual void at_eventend(const ThermodynamicQuantity tq) {
-        SMASH_UNUSED(tq);
-  }
+  virtual void at_eventend(const ThermodynamicQuantity tq) { SMASH_UNUSED(tq); }
 
   /**
    * Output launched at event end. Event end is determined by maximal timestep
@@ -233,7 +234,7 @@ class OutputInterface {
    * \param dt Type of density, i.e. which particles to take into account.
    * \param lattice Lattice of tabulated values.
    *
-   * Used for vtk output. 
+   * Used for vtk output.
    */
   virtual void thermodynamics_output(
       const ThermodynamicQuantity tq, const DensityType dt,
@@ -250,7 +251,7 @@ class OutputInterface {
    * \param dt Type of density, i.e. which particles to take into account.
    * \param lattice Lattice of tabulated values.
    *
-   * Used for vtk output. 
+   * Used for vtk output.
    */
   virtual void thermodynamics_output(
       const ThermodynamicQuantity tq, const DensityType dt,
@@ -265,7 +266,7 @@ class OutputInterface {
    * \param[in] lattice Lattice type DensityOnLattice of tabulated values.
    * \param[in] current_time Time of the simulation in the computational frame.
    *
-   * Used for thermodynamic lattice output. 
+   * Used for thermodynamic lattice output.
    */
   virtual void thermodynamics_lattice_output(
       RectangularLattice<DensityOnLattice> &lattice,
@@ -275,13 +276,35 @@ class OutputInterface {
   }
 
   /**
+   * Output to write thermodynamics from the lattice.
+   * \param[in] lattice Lattice type FourVector of tabulated values.
+   * \param[in] current_time Time of the simulation in the computational frame.
+   * \param[in] ensembles Particles, from which the 4-currents j_{Q,B,S} are
+   *            computed
+   * * \param[in] dens_param set of parameters, defining smearing.
+   *            For more info about
+   *            smearing see \ref thermodyn_output_user_guide_.
+   *
+   * Used for thermodynamic lattice output.
+   */
+  virtual void thermodynamics_lattice_output(
+      RectangularLattice<DensityOnLattice> &lattice, const double current_time,
+      const std::vector<Particles> &ensembles,
+      const DensityParameters &dens_param) {
+    SMASH_UNUSED(lattice);
+    SMASH_UNUSED(current_time);
+    SMASH_UNUSED(ensembles);
+    SMASH_UNUSED(dens_param);
+  }
+
+  /**
    * Output to write energy-momentum tensor and related quantities from the
    * lattice.
    * \param[in] tq Thermodynamic quantity to be written, used for file name etc.
    * \param[in] lattice Lattice type EnergyMomentumTensor of tabulated values.
    * \param[in] current_time Time of the simulation in the computational frame.
    *
-   * Used for thermodynamic lattice output. 
+   * Used for thermodynamic lattice output.
    */
   virtual void thermodynamics_lattice_output(
       const ThermodynamicQuantity tq,

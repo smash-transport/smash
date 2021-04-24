@@ -10,7 +10,6 @@ set(files_with_input
  ${PROJECT_SOURCE_DIR}/src/binaryoutput.cc
  ${PROJECT_SOURCE_DIR}/src/thermodynamiclatticeoutput.cc
  ${PROJECT_SOURCE_DIR}/src/thermodynamicoutput.cc
- pippo
  ${PROJECT_SOURCE_DIR}/src/icoutput.cc
  ${PROJECT_SOURCE_DIR}/src/smash.cc
  ${PROJECT_SOURCE_DIR}/src/pauliblocking.cc
