@@ -67,7 +67,7 @@ static constexpr int LSphere = LogArea::Sphere::id;
  * \key Strange_Chemical_Potential (double, optional, default = 0.0): \n
  * Strangeness chemical potential \f$ \mu_S \f$ only used if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
- * 
+ *
  * \key Charge_Chemical_Potential (double, optional, default = 0.0): \n
  * Charge chemical potential \f$ \mu_Q \f$ only used if
  * Use_Thermal_Multiplicities is true to compute thermal densities \f$ n_i \f$.
@@ -195,8 +195,8 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   out << "-- Sphere Modus:\nRadius of the sphere: " << m.radius_ << " fm\n";
   if (m.use_thermal_) {
     out << "Thermal multiplicities (T = " << m.sphere_temperature_
-        << " GeV, muB = " << m.mub_ << " GeV, muS = " << m.mus_ <<
-        " GeV, muQ = " << m.muq_ << " GeV)\n";
+        << " GeV, muB = " << m.mub_ << " GeV, muS = " << m.mus_
+        << " GeV, muQ = " << m.muq_ << " GeV)\n";
   } else {
     for (const auto &p : m.init_multipl_) {
       ParticleTypePtr ptype = &ParticleType::find(p.first);
