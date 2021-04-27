@@ -58,7 +58,7 @@ namespace smash {
    event, even if the end time of the simulation is a multiple of
    Output_Interval (if this final output is important, just increase a little
    the parameter End_Time).
- * 
+ *
  * **Output files**
  * Each file has a header and a payload. The content is the same both in
  * Lattice_ASCII and Lattice_Binary formats, but, of course, the details are a

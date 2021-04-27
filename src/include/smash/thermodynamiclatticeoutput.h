@@ -97,21 +97,21 @@ class ThermodynamicLatticeOutput : public OutputInterface {
   void thermodynamics_lattice_output(
       RectangularLattice<DensityOnLattice> &lattice, double current_time);
 
-      /**
-       * Prints the density lattice on a grid.
-       *
-       * \param[in] lattice DensityOnLattice lattice to use.
-       * \param[in] current_time The output time in the computational frame
-       * \param[in] ensembles Particles, from which the 4-currents j_{Q,B,S} are
-       *            computed
-       * * \param[in] dens_param set of parameters, defining smearing.
-       *            For more info about
-       *            smearing see \ref thermodyn_output_user_guide_.
-       */
-      void thermodynamics_lattice_output(
-          RectangularLattice<DensityOnLattice> &lattice,
-          const double current_time, const std::vector<Particles> &ensembles,
-          const DensityParameters &dens_param);
+  /**
+   * Prints the density lattice on a grid.
+   *
+   * \param[in] lattice DensityOnLattice lattice to use.
+   * \param[in] current_time The output time in the computational frame
+   * \param[in] ensembles Particles, from which the 4-currents j_{Q,B,S} are
+   *            computed
+   * * \param[in] dens_param set of parameters, defining smearing.
+   *            For more info about
+   *            smearing see \ref thermodyn_output_user_guide_.
+   */
+  void thermodynamics_lattice_output(
+      RectangularLattice<DensityOnLattice> &lattice, const double current_time,
+      const std::vector<Particles> &ensembles,
+      const DensityParameters &dens_param);
 
   /**
    * Prints the energy-momentum-tensor lattice on a grid.
