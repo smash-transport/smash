@@ -234,6 +234,7 @@ typedef std::bitset<10> ReactionsBitSet;
 enum IncludedMultiParticleReactions {
   Meson_3to1 = 0,
   Deuteron_3to2 = 1,
+  NNbar_5to2 = 2,
 };
 
 /// Container for the 2 to 2 reactions in the code

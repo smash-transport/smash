@@ -343,6 +343,8 @@ ScatterActionsFinder::ScatterActionsFinder(
         "Change your config accordingly.");
   }
 
+  // TODO(stdnmr) Check that NNbar_5to2 is only set in sensible ways
+
   if (nnbar_treatment_ == NNbarTreatment::Resonances &&
       incl_set_[IncludedReactions::NNbar] != 1) {
     throw std::invalid_argument(
@@ -669,20 +671,26 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
       if (incl_multi_set_.any()) {
         // Also, check for 3 particle scatterings with stochastic criterion
         for (const ParticleData& p3 : search_list) {
-          if (p1.id() < p2.id() && p2.id() < p3.id()) {
-            ActionPtr act =
-                check_collision_multi_part({p1, p2, p3}, dt, gcell_vol);
-            if (act) {
-              actions.push_back(std::move(act));
+          if (incl_multi_set_[IncludedMultiParticleReactions::Deuteron_3to2] == 1 ||
+              incl_multi_set_[IncludedMultiParticleReactions::Meson_3to1] == 1) {
+            if (p1.id() < p2.id() && p2.id() < p3.id())) {
+              ActionPtr act =
+                  check_collision_multi_part({p1, p2, p3}, dt, gcell_vol);
+              if (act) {
+                actions.push_back(std::move(act));
+              }
             }
           }
           // TODO(stdnmr) Introduce config option here
-          if (true) {
+          if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] == 1 &&
+              search_list.size() >= 5) {
             for (const ParticleData& p4 : search_list) {
               for (const ParticleData& p5 : search_list) {
-                if (p1.id() < p2.id() && p2.id() < p3.id() &&
-                    p3.id() < p4.id() && p4.id() < p5.id()) {
-                  // TODO(stdnmr) Verify that the above check is sufficent
+                if ((p1.id() < p2.id() && p2.id() < p3.id() &&
+                     p3.id() < p4.id() && p4.id() < p5.id()) &&
+                    (p1.is_pion() && p2.is_pion() && p3.is_pion() &&
+                     p4.is_pion() && p5.is_pion())) {
+                  // at the moment only pure pion 5-body reactions
                   ActionPtr act = check_collision_multi_part(
                       {p1, p2, p3, p4, p5}, dt, gcell_vol);
                   if (act) {

@@ -166,6 +166,7 @@ CollisionBranchList CrossSections::generate_collision_list(
       append_list(process_list, two_to_three(), (1. - p_pythia) * scale_xs);
     }
   }
+  // TODO(stdnmr) Introduce 2-to-5 config flag here
   if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
     // NNbar directly to 5 pions (2-to-5) // TODO(stdnmr) config option
     process_list.emplace_back(NNbar_to_5pi(sum_xs_of(process_list), scale_xs));
@@ -174,8 +175,7 @@ CollisionBranchList CrossSections::generate_collision_list(
   /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
    * ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
    * Only use in cases when detailed balance MUST happen, i.e. in a box! */
-  // if (nnbar_treatment == NNbarTreatment::Resonances) {
-  if (false) {
+  if (nnbar_treatment == NNbarTreatment::Resonances) {
     if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
       /* Has to be called after the other processes are already determined,
        * so that the sum of the cross sections includes all other processes. */

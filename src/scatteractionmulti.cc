@@ -240,8 +240,7 @@ void ScatterActionMulti::add_possible_reactions(
   }
   // 5 -> 2
   if (incoming_particles_.size() == 5) {
-    // TODO(stdnmr) Introduce config flag for 5-to-2 here
-    if (true) {
+    if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] == 1) {
       // TODO(stdnmr) finalize the inc. pion if statement
       if (all_incoming_particles_are_pions_and_have_charge_zero_together(
               incoming_particles_[0], incoming_particles_[1],
