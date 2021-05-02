@@ -68,7 +68,7 @@ namespace smash {
  * **Header of the output files**
  *
  * - version of the output (ASCII: fixed 2 digits float, Binary: double)
- * - thermodynamic quantity (ASCII: int + string, Binary: int)
+ * - thermodynamic quantity (ASCII: string, Binary: int)
  * - nx, ny, nz:  cells of the lattice along x, y, z, respectively
  *   (set in: Lattice->Cell_Number, see \ref input_lattice_) (3 ints)
  * - x0, y0, z0: coordinates of the origin of the lattice
@@ -83,7 +83,7 @@ namespace smash {
  * The numbers corresponding to the various thermodynamic quantities (see \ref
    ThermodynamicQuantity) are:
  * -0 EckartDensity
- * -1 Tmn (energy momentum tensor in Eckart's frame)
+ * -1 Tmn (energy momentum tensor in the lab frame)
  * -2 TmnLandau (energy momentum tensor in Landau's frame)
  * -3 LandauVelocity
  * -4 j_QBS (electric charge, baryon and strangeness four currents)
