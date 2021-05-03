@@ -241,11 +241,7 @@ void ScatterActionMulti::add_possible_reactions(
   // 5 -> 2
   if (incoming_particles_.size() == 5) {
     if (incl_multi[IncludedMultiParticleReactions::NNbar_5to2] == 1) {
-      // TODO(stdnmr) finalize the inc. pion if statement
-      if (all_incoming_particles_are_pions_and_have_charge_zero_together(
-              incoming_particles_[0], incoming_particles_[1],
-              incoming_particles_[2], incoming_particles_[3],
-              incoming_particles_[4])) {
+      if (all_incoming_particles_are_pions_have_zero_charge_only_one_piz()) {
 
         const int spin_factor_inc =
             incoming_particles_[0].pdgcode().spin_degeneracy() *
@@ -496,26 +492,16 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
 }
 
 bool ScatterActionMulti::
-    all_incoming_particles_are_pions_and_have_charge_zero_together(
-        const ParticleData& data_a, const ParticleData& data_b,
-        const ParticleData& data_c, const ParticleData& data_d,
-        const ParticleData& data_e) const {
-          // TODO(stdnmr) Make this prettier/shorter
-          // We want to have pi+ pi- pi+ pi- pi0 incoming (so only 1 pi0)
-  const PdgCode pdg_a = data_a.pdgcode();
-  const PdgCode pdg_b = data_b.pdgcode();
-  const PdgCode pdg_c = data_c.pdgcode();
-  const PdgCode pdg_d = data_d.pdgcode();
-  const PdgCode pdg_e = data_e.pdgcode();
-  return (pdg_a.is_pion() && pdg_b.is_pion() && pdg_c.is_pion() && pdg_d.is_pion() && pdg_e.is_pion()) &&
-         ((pdg_a.charge() + pdg_b.charge() + pdg_c.charge() + pdg_d.charge() + pdg_e.charge()) == 0) &&
-         (
-           (pdg_a == pdg::pi_z && pdg_b != pdg::pi_z && pdg_c != pdg::pi_z && pdg_d != pdg::pi_z && pdg_e != pdg::pi_z) ||
-           (pdg_a != pdg::pi_z && pdg_b == pdg::pi_z && pdg_c != pdg::pi_z && pdg_d != pdg::pi_z && pdg_e != pdg::pi_z) ||
-           (pdg_a != pdg::pi_z && pdg_b != pdg::pi_z && pdg_c == pdg::pi_z && pdg_d != pdg::pi_z && pdg_e != pdg::pi_z) ||
-           (pdg_a != pdg::pi_z && pdg_b != pdg::pi_z && pdg_c != pdg::pi_z && pdg_d == pdg::pi_z && pdg_e != pdg::pi_z) ||
-           (pdg_a != pdg::pi_z && pdg_b != pdg::pi_z && pdg_c != pdg::pi_z && pdg_d != pdg::pi_z && pdg_e == pdg::pi_z)
-         );
+    all_incoming_particles_are_pions_have_zero_charge_only_one_piz() const {
+
+  const bool all_inc_pi = all_of(incoming_particles_.begin(), incoming_particles_.end(), [](const ParticleData& data) { return data.is_pion(); });
+  const int no_of_piz = std::count_if(incoming_particles_.begin(), incoming_particles_.end(), [](const ParticleData& data){return data.pdgcode() == pdg::pi_z;});;
+  int total_state_charge = 0;
+  for (const ParticleData& part : incoming_particles_) {
+    total_state_charge += part.pdgcode().charge();
+  }
+
+  return (all_inc_pi && total_state_charge == 0 && no_of_piz == 1);
 }
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
