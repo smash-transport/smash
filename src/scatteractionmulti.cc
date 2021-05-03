@@ -496,7 +496,7 @@ bool ScatterActionMulti::
   const int no_of_piz = std::count_if(
       incoming_particles_.begin(), incoming_particles_.end(),
       [](const ParticleData& data) { return data.pdgcode() == pdg::pi_z; });
-  ;
+
   int total_state_charge = 0;
   for (const ParticleData& part : incoming_particles_) {
     total_state_charge += part.pdgcode().charge();
