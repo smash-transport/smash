@@ -246,64 +246,6 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
   }
 
   logg[LGrid].debug(cells_);
-
-  // Nice grid info for afterburner checks
-  logg[LGrid].info("grid lengths:    ", length_);
-  logg[LGrid].info("number of cells: ", number_of_cells_);
-  logg[LGrid].info("cell lengths:    { ", 1. / index_factor[0], " ",
-                   1. / index_factor[1], " ", 1. / index_factor[2], " }");
-  logg[LGrid].info("min_cell_length: ", max_interaction_length);
-
-  // Nice cell printout (I think x-z planes in y-direction)
-  int cell_no = 0;
-  int empty_cell_no = 0;
-  int total_cell_fill_filled = 0;
-
-  int filled_cell_no = 0;
-  int fill_threshold = 10;
-
-  int cell_fill = 0;
-  std::cout << "Grid cell fillings:"
-            << "\n";
-  for (const auto &cell : cells_) {
-    if (cell_no % number_of_cells_[0] == 0) {
-      std::cout << "[";
-    }
-    cell_fill = cell.size();
-    if (cell_fill > 0) {
-      std::cout << std::setw(3) << cell_fill << " ";
-      if (cell_fill >= fill_threshold) {
-        filled_cell_no++;
-        total_cell_fill_filled += cell_fill;
-      }
-    } else {
-      empty_cell_no++;
-    }
-    cell_no++;
-
-    if (cell_no % number_of_cells_[0] == 0) {
-      std::cout << "] ";
-    }
-    if (cell_no % (number_of_cells_[0] * number_of_cells_[1]) == 0) {
-      std::cout << "\n";
-    }
-  }
-  std::cout << "# cell_no        = " << cell_no << '\n';
-  std::cout << "# empty_cell_no  = " << empty_cell_no << "     ("
-            << 100 * static_cast<float>(empty_cell_no) / cell_no
-            << " % of all cells)" << '\n';
-  std::cout << "# filled_cell_no = " << filled_cell_no << "    ("
-            << 100 * static_cast<float>(filled_cell_no) / cell_no
-            << " % of all cells, filled means N/cell >= " << fill_threshold
-            << ")" << '\n';
-  std::cout << "# Average cell filling            = "
-            << static_cast<float>(particle_count) / (cell_no) << '\n';
-  std::cout << "# Average non-empty cells filling = "
-            << static_cast<float>(particle_count) / (cell_no - empty_cell_no)
-            << '\n';
-  std::cout << "# Average filled cells filling    = "
-            << static_cast<float>(total_cell_fill_filled) / (filled_cell_no)
-            << '\n';
 }
 
 template <GridOptions Options>
