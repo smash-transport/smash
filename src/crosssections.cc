@@ -107,9 +107,10 @@ CrossSections::CrossSections(const ParticleList& incoming_particles,
                      incoming_particles_[1].type().is_baryon() &&
                      incoming_particles_[0].type().antiparticle_sign() ==
                          -incoming_particles_[1].type().antiparticle_sign()),
-      is_NNbar_pair_(incoming_particles_[0].type().is_nucleon() &&
-                     incoming_particles_[1].pdgcode() ==
-                     incoming_particles_[0].type().get_antiparticle()->pdgcode()) {}
+      is_NNbar_pair_(
+          incoming_particles_[0].type().is_nucleon() &&
+          incoming_particles_[1].pdgcode() ==
+              incoming_particles_[0].type().get_antiparticle()->pdgcode()) {}
 
 CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
@@ -2435,8 +2436,9 @@ CollisionBranchPtr CrossSections::NNbar_to_5pi(const double current_xs,
                                                const double scale_xs) const {
   const double s = sqrt_s_ * sqrt_s_;
   const double nnbar_xsec = xs_ppbar_annihilation(s);
-  logg[LCrossSections].debug("NNbar cross section for 2-to-5 is (directly parametrized value): ",
-                             nnbar_xsec);
+  logg[LCrossSections].debug(
+      "NNbar cross section for 2-to-5 is (directly parametrized value): ",
+      nnbar_xsec);
 
   /* Make collision channel NNbar -> 5π (with same final state as resonance
    * approach). */

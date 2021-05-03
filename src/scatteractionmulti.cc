@@ -242,7 +242,6 @@ void ScatterActionMulti::add_possible_reactions(
   if (incoming_particles_.size() == 5) {
     if (incl_multi[IncludedMultiParticleReactions::NNbar_5to2] == 1) {
       if (all_incoming_particles_are_pions_have_zero_charge_only_one_piz()) {
-
         const int spin_factor_inc =
             incoming_particles_[0].pdgcode().spin_degeneracy() *
             incoming_particles_[1].pdgcode().spin_degeneracy() *
@@ -278,7 +277,7 @@ void ScatterActionMulti::add_possible_reactions(
 
 void ScatterActionMulti::generate_final_state() {
   logg[LScatterActionMulti].debug("Incoming particles for ScatterActionMulti: ",
-                                 incoming_particles_);
+                                  incoming_particles_);
 
   /* Decide for a particular final state. */
   const CollisionBranch* proc =
@@ -489,9 +488,13 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
 
 bool ScatterActionMulti::
     all_incoming_particles_are_pions_have_zero_charge_only_one_piz() const {
-
-  const bool all_inc_pi = all_of(incoming_particles_.begin(), incoming_particles_.end(), [](const ParticleData& data) { return data.is_pion(); });
-  const int no_of_piz = std::count_if(incoming_particles_.begin(), incoming_particles_.end(), [](const ParticleData& data){return data.pdgcode() == pdg::pi_z;});;
+  const bool all_inc_pi =
+      all_of(incoming_particles_.begin(), incoming_particles_.end(),
+             [](const ParticleData& data) { return data.is_pion(); });
+  const int no_of_piz = std::count_if(
+      incoming_particles_.begin(), incoming_particles_.end(),
+      [](const ParticleData& data) { return data.pdgcode() == pdg::pi_z; });
+  ;
   int total_state_charge = 0;
   for (const ParticleData& part : incoming_particles_) {
     total_state_charge += part.pdgcode().charge();

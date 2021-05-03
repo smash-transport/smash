@@ -679,8 +679,10 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
       if (incl_multi_set_.any()) {
         // Also, check for 3 particle scatterings with stochastic criterion
         for (const ParticleData& p3 : search_list) {
-          if (incl_multi_set_[IncludedMultiParticleReactions::Deuteron_3to2] == 1 ||
-              incl_multi_set_[IncludedMultiParticleReactions::Meson_3to1] == 1) {
+          if (incl_multi_set_[IncludedMultiParticleReactions::Deuteron_3to2] ==
+                  1 ||
+              incl_multi_set_[IncludedMultiParticleReactions::Meson_3to1] ==
+                  1) {
             if (p1.id() < p2.id() && p2.id() < p3.id()) {
               ActionPtr act =
                   check_collision_multi_part({p1, p2, p3}, dt, gcell_vol);
@@ -689,7 +691,8 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
               }
             }
           }
-          if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] == 1 &&
+          if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] ==
+                  1 &&
               search_list.size() >= 5) {
             for (const ParticleData& p4 : search_list) {
               for (const ParticleData& p5 : search_list) {

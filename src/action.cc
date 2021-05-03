@@ -361,8 +361,9 @@ void Action::sample_5body_phasespace() {
   const double sqrts = sqrt_s();
 
   // Sample 2-body PS for 1+2+3 and 4+5
-  const double mde = random::uniform(m_d + m_e, sqrts - m_a - m_b - m_c);  // invariant mass of 4+5 pair
-  const double mabc = sqrts - mde; // invariant mass of 1+2+3 pair
+  const double mde = random::uniform(
+      m_d + m_e, sqrts - m_a - m_b - m_c);  // invariant mass of 4+5 pair
+  const double mabc = sqrts - mde;          // invariant mass of 1+2+3 pair
 
   const double pcm = pCM(sqrts, mabc, mde);
 
@@ -408,7 +409,6 @@ void Action::sample_5body_phasespace() {
   outgoing_particles_[1].boost_momentum(-beta_cm123);
   outgoing_particles_[2].boost_momentum(-beta_cm123);
 }
-
 
 void Action::check_conservation(const uint32_t id_process) const {
   QuantumNumbers before(incoming_particles_);

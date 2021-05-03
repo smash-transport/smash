@@ -692,7 +692,8 @@ class Configuration {
           throw IncorrectTypeInAssignment(
               "The value for key \"" + std::string(key_) +
               "\" should be \"All\", \"Meson_3to1\", "
-              "\"Deuteron_3to2\" or \"NNbar_5to2\", or any combination of these.");
+              "\"Deuteron_3to2\" or \"NNbar_5to2\", or any combination of "
+              "these.");
         }
       }
       return s;
@@ -921,7 +922,7 @@ class Configuration {
      * \throw IncorrectTypeInAssignment in case an N-Nbar treatment that is
      * not available is provided as a configuration value.
      */
-     // TODO(stdnmr) Mention in docu 5-to-2 config option(s)
+    // TODO(stdnmr) Mention in docu 5-to-2 config option(s)
     operator NNbarTreatment() const {
       const std::string s = operator std::string();
       if (s == "no annihilation") {

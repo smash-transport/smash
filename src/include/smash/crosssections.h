@@ -259,8 +259,7 @@ class CrossSections {
 
   // TODO(stdnmr) Write documentation
   CollisionBranchPtr NNbar_to_5pi(const double current_xs,
-                                        const double scale_xs) const;
-
+                                  const double scale_xs) const;
 
   /**
    * Determine 2->3 cross section for the scattering of the given particle
