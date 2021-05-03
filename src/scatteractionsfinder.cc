@@ -490,29 +490,6 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
       return nullptr;
     }
 
-    ////////////////////////////////////////////////////////////////////////////
-
-    // BLOCKING ALL 2-BODY BACKREACTIONS //
-
-    // if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
-    //   logg[LFindScatter].warn("# Accepted 2-body scattering originating from same process ( type: ",static_cast<int>(data_a.get_history().process_type),", id: ", data_a.id_process()," ). This should not happen often.");
-    //   std::cout << data_a << '\n';
-    //   std::cout << data_b << '\n';
-    //   // std::cout << ". Blocking..." << '\n';
-    //   // return nullptr;
-    // }
-
-    // BLOCKING ONLY 2-TO-5 BACKREACTIONS //
-
-    if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
-      if (data_a.get_history().process_type == ProcessType::MultiParticleFiveToTwo) {
-        logg[LFindScatter].warn("# Blocking accepted 2-body scattering coming from same 5-to-2 process.");
-        return nullptr;
-      }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
-
   } else if (coll_crit_ == CollisionCriterion::Geometric ||
              coll_crit_ == CollisionCriterion::Covariant) {
     // just collided with this particle
@@ -611,54 +588,6 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
     return nullptr;
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-
-
-  // BLOCKING 5-BODY BACKREACTION WHEN ALL PARTICLES FROM SAME REACTION (INEFFECTIVE)  //
-
-  bool all_5_particles_from_parent = false;
-  if (same_parent_2to5_process && std::all_of(std::next(plist.begin()), plist.end(),
-          [&](const ParticleData& data) { return plist[0].id_process() == data.id_process(); })) {
-    all_5_particles_from_parent = true;
-  }
-
-  // if (all_5_particles_from_parent) {
-  //   logg[LFindScatter].warn("# Accepted ", plist.size() ,"-body scattering originating from same process: ", plist[0].id_process(), ".");
-  //   std::cout << ". Blocking..." << '\n';
-  //   return nullptr;
-  // }
-
-
-  // BLOCKING 5-TO-2 BACKREACTION WHEN ANY PARTICLES FROM SAME REACTION (MORE EFFECTIVE)  //
-
-  bool same_parent_2to5_process = false;
-  for (int i = 0; i<plist.size(); i++) {
-    for (int j = i+1; j<plist.size(); j++) {
-      if (plist[i].id_process() == plist[j].id_process()) {
-        // count_same_origin++;
-        if (plist[i].get_history().process_type == ProcessType::TwoToFive) {
-          same_parent_2to5_process = true;
-          break;
-        }
-      }
-    }
-  }
-
-  if (same_parent_2to5_process) {
-    logg[LFindScatter].warn("# Blocking accepted 5-body process with particles coming from same 2-to-5 process.");
-    if (all_5_particles_from_parent) {
-      std::cout << "All from same parent." << '\n';
-    }
-    std::cout << "Parent ids: ";
-    for (int i = 0; i<plist.size(); i++) {
-      std::cout << plist[i].id_process() << " (type: " << static_cast<int>(plist[i].get_history().process_type) << ") ";
-    }
-    std::cout << '\n';
-    return nullptr;
-  }
-
-  
-  ////////////////////////////////////////////////////////////////////////////
   return std::move(act);
 }
 
