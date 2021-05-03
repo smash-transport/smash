@@ -2737,10 +2737,10 @@ double CrossSections::string_probability(bool strings_switch,
   const bool is_NN_scattering =
       t1.is_nucleon() && t2.is_nucleon() &&
       t1.antiparticle_sign() == t2.antiparticle_sign();
-  const bool is_NNbar_scattering = t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode();
   const bool is_BBbar_scattering =
       (treat_BBbar_with_strings && is_BBbar_pair_ && use_AQM) ||
-      (is_NNbar_scattering);
+      (t1.is_nucleon() && t2.is_nucleon() &&
+       t1.antiparticle_sign() != t2.antiparticle_sign());
   const bool is_Npi_scattering = (t1.pdgcode().is_pion() && t2.is_nucleon()) ||
                                  (t1.is_nucleon() && t2.pdgcode().is_pion());
   /* True for baryon-baryon, anti-baryon-anti-baryon, baryon-meson,
@@ -2757,7 +2757,7 @@ double CrossSections::string_probability(bool strings_switch,
   if (!is_NN_scattering && !is_BBbar_scattering && !is_Npi_scattering &&
       !is_AQM_scattering) {
     return 0.;
-  } else if (is_NNbar_scattering && !treat_BBbar_with_strings) {
+  } else if (is_NNbar_pair_ && !treat_BBbar_with_strings) {
     return 0.;
   } else if (is_BBbar_scattering) {
     // BBbar only goes through strings, so there are no "window" considerations
