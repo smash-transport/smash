@@ -172,7 +172,7 @@ CollisionBranchList CrossSections::generate_collision_list(
   }
   if (nnbar_treatment == NNbarTreatment::TwoToFive && is_NNbar_pair_) {
     // NNbar directly to 5 pions (2-to-5)
-    process_list.emplace_back(NNbar_to_5pi(sum_xs_of(process_list), scale_xs));
+    process_list.emplace_back(NNbar_to_5pi(scale_xs));
   }
 
   /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
@@ -2432,8 +2432,7 @@ double CrossSections::string_hard_cross_section() const {
   return cross_sec;
 }
 
-CollisionBranchPtr CrossSections::NNbar_to_5pi(const double current_xs,
-                                               const double scale_xs) const {
+CollisionBranchPtr CrossSections::NNbar_to_5pi(const double scale_xs) const {
   const double s = sqrt_s_ * sqrt_s_;
   const double nnbar_xsec = xs_ppbar_annihilation(s);
   logg[LCrossSections].debug(
@@ -2446,7 +2445,7 @@ CollisionBranchPtr CrossSections::NNbar_to_5pi(const double current_xs,
   const auto& type_pip = ParticleType::find(pdg::pi_p);
   const auto& type_pim = ParticleType::find(pdg::pi_m);
   return make_unique<CollisionBranch>(type_pip, type_pim, type_pip, type_pim,
-                                      type_piz, nnbar_xsec,
+                                      type_piz, nnbar_xsec * scale_xs,
                                       ProcessType::TwoToFive);
 }
 

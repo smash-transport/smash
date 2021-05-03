@@ -922,7 +922,6 @@ class Configuration {
      * \throw IncorrectTypeInAssignment in case an N-Nbar treatment that is
      * not available is provided as a configuration value.
      */
-    // TODO(stdnmr) Mention in docu 5-to-2 config option(s)
     operator NNbarTreatment() const {
       const std::string s = operator std::string();
       if (s == "no annihilation") {

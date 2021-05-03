@@ -257,9 +257,16 @@ class CrossSections {
    */
   CollisionBranchList NNbar_creation() const;
 
-  // TODO(stdnmr) Write documentation
-  CollisionBranchPtr NNbar_to_5pi(const double current_xs,
-                                  const double scale_xs) const;
+  /**
+   * Create collision branch for NNbar annihilation going directly into 5 pions.
+   * The cross section is given by the parametrized ppbar cross section, which
+   * is also used for the reverse 5-to-2 process.
+   *
+   * \param[in] scale_xs Factor by which all (partial) cross sections are scaled
+   * \return Collision Branch with NNbar annihilation process
+   *
+   */
+  CollisionBranchPtr NNbar_to_5pi(const double scale_xs) const;
 
   /**
    * Determine 2->3 cross section for the scattering of the given particle

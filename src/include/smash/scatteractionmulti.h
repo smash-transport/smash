@@ -148,8 +148,8 @@ class ScatterActionMulti : public Action {
    * Calculate the probability for a 3-to-2 reaction according to the
    * stochastic collision criterion (similar to \iref{Cassing:2001ds}).
    *
-   * \f[ P_{3 \rightarrow 2} = \frac{1}{4E_1E_2E_3} \frac{\Delta t}{\Delta^3 x}
-   * \frac{\tilde{\lambda}}{\Phi_38\pi s}\sigma_{2 \rightarrow 3},\f]
+   * \f[ P_{3 \rightarrow 2} = \frac{1}{4E_1E_2E_3} \frac{\Delta t}{(\Delta^3
+   * x)^2} \frac{\tilde{\lambda}}{\Phi_38\pi s}\sigma_{2 \rightarrow 3},\f]
    *
    * where \f$\Phi_3\f$ represents the 3-body phase space:
    * \f[\Phi_3 = \frac{1}{(2\pi)^3)}\frac{1}{16M^2}I_3.\f]
@@ -171,10 +171,43 @@ class ScatterActionMulti : public Action {
                                   const double gcell_vol,
                                   const double degen_factor = 1.0) const;
 
-  // TODO(stdnmr) Docu incl. mention of phase space parametrization
-  double probability_five_to_two(const ParticleType& type_out, double dt,
+  /**
+   * Calculate the probability for a 5-to-2 reaction according to the
+   * stochastic collision criterion (similar to \iref{Cassing:2001ds}).
+   *
+   * \f[ P_{5 \rightarrow 2} = \frac{1}{32E_1E_2E_3E_4E_5} \frac{\Delta
+   * t}{(\Delta^3 x)^4} \frac{\tilde{\lambda}}{\Phi_54\pi s}\sigma_{2
+   * \rightarrow 5},\f]
+   *
+   * where the defintion is given without the necessary symmetry and spin
+   * degeneracy factors, which are input to the function and \f$\Phi_5\f$
+   * represents the 5-body phase space, which is paramaterized for the relevent
+   * 5 pion state here, see documentation of parametrizaton_phi5_pions().
+   *
+   *
+   * \param[in] m_out mass of outgoing particle types (assumes equal masses)
+   * \param[in] dt timestep size
+   * \param[in] gcell_vol grid cell volume
+   * \param[in] degen_factor degeneracy factor for reaction (including symmetry
+   *                                                         factors)
+   * \return probabilty for 5-to-2 reaction
+   */
+  double probability_five_to_two(const double m_out, double dt,
                                  const double gcell_vol,
                                  const double degen_factor = 1.0) const;
+
+  /**
+   * Calculate the parametrized 5-pion phase space. The
+   * defintion for the paramterization is given by
+   * \f[\Phi_5^{param.} = A(s-s_0)^5(1+\frac{s}{s_0})^{-\alpha}\f]
+   * with \f$s_0 = 25 m_{\pi}^2\f$. \f$A\f$ and \f$\alpha\f$ are fitted to
+   * reproduce the phase space distribution.
+   *
+   *
+   * \param[in] man_s mandelstam s of reaction
+   * \return phase space value for 5 pions
+   */
+  double parametrizaton_phi5_pions(const double man_s) const;
 
   /**
    * Calculate the integration necessary for the three-body phase space. The

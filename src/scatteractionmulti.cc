@@ -261,7 +261,7 @@ void ScatterActionMulti::add_possible_reactions(
 
         if (type_p && type_n) {
           const double prob = probability_five_to_two(
-              *type_p, dt, gcell_vol,
+              type_p->mass(), dt, gcell_vol,
               symmetry_factor * spin_degn);  // same for ppbar and nnbar
           add_reaction(make_unique<CollisionBranch>(
               *type_p, *type_anti_p, prob,
@@ -394,30 +394,32 @@ double ScatterActionMulti::probability_three_to_two(
 }
 
 double ScatterActionMulti::probability_five_to_two(
-    const ParticleType& type_out, double dt, const double gcell_vol,
+    const double mout, double dt, const double gcell_vol,
     const double degen_factor) const {
   const double e1 = incoming_particles_[0].momentum().x0();
   const double e2 = incoming_particles_[1].momentum().x0();
   const double e3 = incoming_particles_[2].momentum().x0();
   const double e4 = incoming_particles_[3].momentum().x0();
   const double e5 = incoming_particles_[4].momentum().x0();
-  const double mout = type_out.mass();
 
   const double man_s = sqrt_s() * sqrt_s();
   const double lamb = lambda_tilde(man_s, mout * mout, mout * mout);
-
-  // Parametrization for Phi5
-  const double s_zero = 25 * pion_mass * pion_mass;
-  const double fit_a = 2.1018e-10;
-  const double fit_alpha = 1.982;
-  const double ph_sp_5 = fit_a * std::pow(man_s - s_zero, 5.0) *
-                         std::pow(1 + man_s / s_zero, -fit_alpha);
+  const double ph_sp_5 = parametrizaton_phi5_pions(man_s);
 
   const double xs = xs_ppbar_annihilation(man_s) / gev2_mb;
 
   return dt / std::pow(gcell_vol, 4.0) * 1. / (32. * e1 * e2 * e3 * e4 * e5) *
          xs / (4. * M_PI * man_s) * lamb / ph_sp_5 * std::pow(hbarc, 11.0) *
          degen_factor;
+}
+
+double ScatterActionMulti::parametrizaton_phi5_pions(const double man_s) const {
+  // see function documentation for parameter naming
+  const double s_zero = 25 * pion_mass * pion_mass;
+  const double fit_a = 2.1018e-10;
+  const double fit_alpha = 1.982;
+  return fit_a * std::pow(man_s - s_zero, 5.0) *
+         std::pow(1 + man_s / s_zero, -fit_alpha);
 }
 
 void ScatterActionMulti::annihilation() {
