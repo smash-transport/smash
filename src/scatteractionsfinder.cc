@@ -681,7 +681,6 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
               }
             }
           }
-          // TODO(stdnmr) Introduce config option here
           if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] == 1 &&
               search_list.size() >= 5) {
             for (const ParticleData& p4 : search_list) {

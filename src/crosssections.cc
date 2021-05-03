@@ -2432,12 +2432,11 @@ CollisionBranchPtr CrossSections::NNbar_to_5pi(const double current_xs,
                                                const double scale_xs) const {
   const double s = sqrt_s_ * sqrt_s_;
   const double nnbar_xsec = xs_ppbar_annihilation(s);
-  logg[LCrossSections].debug("Now using directly parametrized value is: ",
+  logg[LCrossSections].debug("NNbar cross section for 2-to-5 is (directly parametrized value): ",
                              nnbar_xsec);
 
-  // Make collision channel NNbar -> 5π
-  // TODO(stdnmr) Is this really the only possible pion outcome? Yes, at least
-  // to replicate rho h1 resonance approach.
+  /* Make collision channel NNbar -> 5π (with same final state as resonance
+   * approach). */
   const auto& type_piz = ParticleType::find(pdg::pi_z);
   const auto& type_pip = ParticleType::find(pdg::pi_p);
   const auto& type_pim = ParticleType::find(pdg::pi_m);
