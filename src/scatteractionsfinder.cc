@@ -337,13 +337,21 @@ ScatterActionsFinder::ScatterActionsFinder(
     throw std::invalid_argument(
         "To prevent double counting it is not possible to enable deuteron 3->2 "
         "reactions\nand reactions involving the d' at the same time\ni.e. to "
-        "include `Deuteron_3to2` in `Multi_Particle_Reactions` and\n "
+        "include \"Deuteron_3to2\" in `Multi_Particle_Reactions` and\n "
         "\"PiDeuteron_to_pidprime\" "
         "or \"NDeuteron_to_Ndprime\" in `Included_2to2` at the same time.\n"
         "Change your config accordingly.");
   }
 
-  // TODO(stdnmr) Check that NNbar_5to2 is only set in sensible ways
+  if ((nnbar_treatment_ == NNbarTreatment::TwoToFive &&
+       incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] != 1) ||
+      (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] == 1 &&
+       nnbar_treatment_ != NNbarTreatment::TwoToFive)) {
+    throw std::invalid_argument(
+        "In order to conserve detailed balance, when \"NNbar_5to2\" is "
+        "included in\n`Multi_Particle_Reactions`, the `NNbarTreatment` has to "
+        "be set to \"two to five\" and vice versa.");
+  }
 
   if (nnbar_treatment_ == NNbarTreatment::Resonances &&
       incl_set_[IncludedReactions::NNbar] != 1) {

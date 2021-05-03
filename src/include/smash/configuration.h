@@ -930,7 +930,7 @@ class Configuration {
       if (s == "resonances") {
         return NNbarTreatment::Resonances;
       }
-      if (s == "TwoToFive") {
+      if (s == "two to five") {
         return NNbarTreatment::TwoToFive;
       }
       if (s == "strings") {
@@ -938,7 +938,8 @@ class Configuration {
       }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) + "\" should be " +
-          "\"no annihilation\", \"detailed balance\", or \"strings\".");
+          "\"no annihilation\", \"resonances\", \"two to five\" or " +
+          " \"strings\".");
     }
 
     /**
