@@ -240,20 +240,19 @@ void ScatterActionMulti::add_possible_reactions(
   }
   // 5 -> 2
   if (incoming_particles_.size() == 5) {
-    if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] == 1) {
+    if (incl_multi[IncludedMultiParticleReactions::NNbar_5to2] == 1) {
       // TODO(stdnmr) finalize the inc. pion if statement
       if (all_incoming_particles_are_pions_and_have_charge_zero_together(
               incoming_particles_[0], incoming_particles_[1],
               incoming_particles_[2], incoming_particles_[3],
               incoming_particles_[4])) {
-        // TODO(stdnmr) Check if symmetry and spin factors are correct
+
         const int spin_factor_inc =
             incoming_particles_[0].pdgcode().spin_degeneracy() *
             incoming_particles_[1].pdgcode().spin_degeneracy() *
             incoming_particles_[2].pdgcode().spin_degeneracy() *
             incoming_particles_[3].pdgcode().spin_degeneracy() *
             incoming_particles_[4].pdgcode().spin_degeneracy();
-
         const double symmetry_factor = 4.0;  // 2! * 2!
 
         const ParticleTypePtr type_p = ParticleType::try_find(pdg::p);
@@ -460,7 +459,7 @@ void ScatterActionMulti::five_to_two() {
   sample_2body_phasespace();
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
-  logg[LScatterActionMulti].debug("5->2 scattering:", incoming_particles_,
+  logg[LScatterActionMulti].info("5->2 scattering:", incoming_particles_,
                                  " -> ", outgoing_particles_);
 }
 

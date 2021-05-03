@@ -237,8 +237,8 @@ enum IncludedMultiParticleReactions {
   NNbar_5to2 = 2,
 };
 
-/// Container for the 2 to 2 reactions in the code
-typedef std::bitset<2> MultiParticleReactionsBitSet;
+/// Container for the n to m reactions in the code
+typedef std::bitset<3> MultiParticleReactionsBitSet;
 
 /**
  * Defines the algorithm used for the forced thermalization.
