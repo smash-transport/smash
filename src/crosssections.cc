@@ -106,7 +106,10 @@ CrossSections::CrossSections(const ParticleList& incoming_particles,
       is_BBbar_pair_(incoming_particles_[0].type().is_baryon() &&
                      incoming_particles_[1].type().is_baryon() &&
                      incoming_particles_[0].type().antiparticle_sign() ==
-                         -incoming_particles_[1].type().antiparticle_sign()) {}
+                         -incoming_particles_[1].type().antiparticle_sign()),
+      is_NNbar_pair_(incoming_particles_[0].type().is_nucleon() &&
+                     incoming_particles_[1].pdgcode() ==
+                     incoming_particles_[0].type().get_antiparticle()->pdgcode()) {}
 
 CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
@@ -166,9 +169,8 @@ CollisionBranchList CrossSections::generate_collision_list(
       append_list(process_list, two_to_three(), (1. - p_pythia) * scale_xs);
     }
   }
-  // TODO(stdnmr) Introduce 2-to-5 config flag here
-  if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
-    // NNbar directly to 5 pions (2-to-5) // TODO(stdnmr) config option
+  if (nnbar_treatment == NNbarTreatment::TwoToFive && is_NNbar_pair_) {
+    // NNbar directly to 5 pions (2-to-5)
     process_list.emplace_back(NNbar_to_5pi(sum_xs_of(process_list), scale_xs));
   }
 
@@ -176,13 +178,14 @@ CollisionBranchList CrossSections::generate_collision_list(
    * ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
    * Only use in cases when detailed balance MUST happen, i.e. in a box! */
   if (nnbar_treatment == NNbarTreatment::Resonances) {
-    if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
+    if (is_NNbar_pair_) {
       /* Has to be called after the other processes are already determined,
        * so that the sum of the cross sections includes all other processes. */
       process_list.emplace_back(
           NNbar_annihilation(sum_xs_of(process_list), scale_xs));
+    } else {
+      append_list(process_list, NNbar_creation(), scale_xs);
     }
-    append_list(process_list, NNbar_creation(), scale_xs);
   }
   return process_list;
 }

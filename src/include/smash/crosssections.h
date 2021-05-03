@@ -567,8 +567,14 @@ class CrossSections {
    */
   const std::pair<FourVector, FourVector> potentials_;
 
-  /// Whether incoming particles are a baryon-antibaryon pair
+  /**
+   * Whether incoming particles are a pair of a baryon and an antibaryon
+   * (could be different baryon types)
+   */
   const bool is_BBbar_pair_;
+
+  /// Whether incoming particles are a nulecon-antinucleon pair (same isospin)
+  const bool is_NNbar_pair_;
 
   /**
    * Helper function:

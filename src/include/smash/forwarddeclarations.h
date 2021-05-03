@@ -178,6 +178,8 @@ enum class NNbarTreatment {
   NoAnnihilation,
   /// Use intermediate Resonances
   Resonances,
+  /// Directly create 5 pions, use with multi-particle reactions
+  TwoToFive,
   /// Use string fragmentation
   Strings,
 };
