@@ -2434,10 +2434,10 @@ double CrossSections::string_hard_cross_section() const {
 
 CollisionBranchPtr CrossSections::NNbar_to_5pi(const double scale_xs) const {
   const double s = sqrt_s_ * sqrt_s_;
-  const double nnbar_xsec = xs_ppbar_annihilation(s);
-  logg[LCrossSections].debug(
-      "NNbar cross section for 2-to-5 is (directly parametrized value): ",
-      nnbar_xsec);
+  /* Use difference between total and elastic in order to conserve detailed
+   * balance for all inelastoc NNbar processes. */
+  const double nnbar_xsec = std::max(0., ppbar_total(s) - ppbar_elastic(s));
+  logg[LCrossSections].debug("NNbar cross section for 2-to-5 is: ", nnbar_xsec);
 
   /* Make collision channel NNbar -> 5π (with same final state as resonance
    * approach). */

@@ -406,7 +406,9 @@ double ScatterActionMulti::probability_five_to_two(
   const double lamb = lambda_tilde(man_s, mout * mout, mout * mout);
   const double ph_sp_5 = parametrizaton_phi5_pions(man_s);
 
-  const double xs = xs_ppbar_annihilation(man_s) / gev2_mb;
+  // Matching the NNbar anihilation cross section defintion for 2-to-5
+  const double xs =
+      std::max(0., ppbar_total(man_s) - ppbar_elastic(man_s)) / gev2_mb;
 
   return dt / std::pow(gcell_vol, 4.0) * 1. / (32. * e1 * e2 * e3 * e4 * e5) *
          xs / (4. * M_PI * man_s) * lamb / ph_sp_5 * std::pow(hbarc, 11.0) *
