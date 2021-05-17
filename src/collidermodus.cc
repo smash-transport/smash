@@ -72,6 +72,14 @@ static constexpr int LCollider = LogArea::Collider::id;
  * \li \key true - First collisions within the same nucleus allowed
  * \li \key false - First collisions within the same nucleus forbidden
  *
+ * \key Initial_Distance (double, optional, default = 2.0): \n
+ * The initial distance of the two nuclei in fm. That
+ * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.\n
+ *
+ * Note that this distance is applied before the Lorentz boost
+ * to the chosen calculation frame, and thus the actual distance may be
+ * different.
+ *
  * To further configure the projectile, target and the impact parameter, see \n
  * \li \subpage projectile_and_target
  * \li \subpage input_impact_parameter_
@@ -170,13 +178,6 @@ static constexpr int LCollider = LogArea::Collider::id;
  * x-component of \f$\vec b\f$. The result will be that the projectile
  * and target will have switched position in x.
  *
- * \key Initial_Distance (double, optional, default = 2.0): \n
- * The initial distance of the two nuclei in fm. That
- * means \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.\n
- *
- * Note that this distance is applied before the Lorentz boost
- * to chosen calculation frame, and thus the actual distance may be different.
- *
  * \n
  * Examples: Configuring the Impact Parameter
  * --------------
@@ -191,7 +192,6 @@ static constexpr int LCollider = LogArea::Collider::id;
      Collider:
          Impact:
              Value: 0.1
-             Initial_Distance: 3.0
  \endverbatim
  *
  * The impact parameter may further be sampled within a certain impact parameter
