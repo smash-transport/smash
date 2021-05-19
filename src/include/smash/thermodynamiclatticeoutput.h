@@ -22,6 +22,7 @@
 #include "experimentparameters.h"
 #include "file.h"
 #include "forwarddeclarations.h"
+#include "logging.h"
 #include "outputinterface.h"
 #include "outputparameters.h"
 #include "threevector.h"
@@ -188,21 +189,24 @@ class ThermodynamicLatticeOutput : public OutputInterface {
       output_binary_files_;
 
   /// number of nodes in the lattice along the three axes
-  int nodes_[3];
+  std::array<int, 3> nodes_;
 
   /// lattice resolution along the three axes
-  double sizes_[3];
+  std::array<double, 3> sizes_;
 
   /// lattice origin
   /// orientation: if 0,0,0 is the origin of a cube with face widths 10,
   /// the center is at 5,5,5
-  double origin_[3];
+  std::array<double, 3> origin_;
 
   /// enable output type ASCII
   bool enable_ascii_;
 
   /// enable output type Binary
   bool enable_binary_;
+
+  /// enable output, of any kind (if False, the object does nothing)
+  bool enable_output_;
 };
 
 }  // namespace smash

@@ -19,11 +19,11 @@ fail() {
 
 type clang-format >/dev/null 2>&1 || fail "Clang-format not found"
 
-ver_num=$(clang-format -version)
-ver_req='6.0.0'
-if [[ "${ver_num:21:5}" != "${ver_req}" ]]; then
-    fail "Wrong clang-format version found: ${ver_num:21:5} (${ver_req} is required)"
-fi
+#ver_num=$(clang-format -version)
+#ver_req='6.0.0'
+#if [[ "${ver_num:21:5}" != "${ver_req}" ]]; then
+#    fail "Wrong clang-format version found: ${ver_num:21:5} (${ver_req} is required)"
+#fi
 
 base_dir=$(dirname $BASH_SOURCE)
 FILES_TO_FORMAT="${base_dir}/../src/*.cc ${base_dir}/../src/include/smash/*.h ${base_dir}/../src/tests/*.cc ${base_dir}/../src/tests/*.h"

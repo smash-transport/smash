@@ -437,6 +437,10 @@ class Experiment : public ExperimentBase {
   /// point by point, in Binary format
   bool printout_full_lattice_binary_td_ = false;
 
+  /// Whether to print the thermodynamics quantities evaluated on the lattices,
+  /// point by point, in any format
+  bool printout_full_lattice_any_td_ = false;
+
   /// Instance of class used for forced thermalization
   std::unique_ptr<GrandCanThermalizer> thermalizer_;
 
@@ -637,6 +641,7 @@ void Experiment<Modus>::create_output(const std::string &format,
         make_unique<ThermodynamicOutput>(output_path, content, out_par));
   } else if (content == "Thermodynamics" && (format == "Lattice_ASCII") ||
              (format == "Lattice_Binary")) {
+    printout_full_lattice_any_td_ = true;
     if (format == "Lattice_ASCII") {
       printout_full_lattice_ascii_td_ = true;
     }
@@ -1328,8 +1333,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     const std::array<double, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
 
-    if (printout_lattice_td_ || printout_full_lattice_ascii_td_ ||
-        printout_full_lattice_binary_td_) {
+    if (printout_lattice_td_ || printout_full_lattice_any_td_) {
       dens_type_lattice_printout_ = output_parameters.td_dens_type;
       printout_tmn_ = output_parameters.td_tmn;
       printout_tmn_landau_ = output_parameters.td_tmn_landau;
@@ -1382,8 +1386,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       jmu_custom_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                     LatticeUpdate::AtOutput);
     }
-  } else if (printout_lattice_td_ || printout_full_lattice_ascii_td_ ||
-             printout_full_lattice_binary_td_) {
+  } else if (printout_lattice_td_ || printout_full_lattice_any_td_) {
     logg[LExperiment].error(
         "If you want Therm. VTK or Lattice output, configure a lattice for "
         "it.");
@@ -1607,7 +1610,7 @@ void Experiment<Modus>::initialize_new_event() {
     // For thermodynamic output
     output->at_eventstart(ensembles_, event_);
     // For thermodynamic lattice output
-    if (printout_full_lattice_ascii_td_ || printout_full_lattice_binary_td_) {
+    if (printout_full_lattice_any_td_) {
       switch (dens_type_lattice_printout_) {
         case DensityType::Baryon:
           output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
@@ -2108,11 +2111,8 @@ void Experiment<Modus>::intermediate_output() {
                          density_param_, ensembles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::Baryon, *jmu_B_lat_);
-          if (printout_full_lattice_ascii_td_ ||
-              printout_full_lattice_binary_td_) {
-            output->thermodynamics_lattice_output(*jmu_B_lat_,
-                                                  computational_frame_time);
-          }
+          output->thermodynamics_lattice_output(*jmu_B_lat_,
+                                                computational_frame_time);
           break;
         case DensityType::BaryonicIsospin:
           update_lattice(jmu_I3_lat_.get(), lat_upd,
@@ -2121,11 +2121,8 @@ void Experiment<Modus>::intermediate_output() {
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::BaryonicIsospin,
                                         *jmu_I3_lat_);
-          if (printout_full_lattice_ascii_td_ ||
-              printout_full_lattice_binary_td_) {
-            output->thermodynamics_lattice_output(*jmu_I3_lat_,
-                                                  computational_frame_time);
-          }
+          output->thermodynamics_lattice_output(*jmu_I3_lat_,
+                                                computational_frame_time);
           break;
         case DensityType::None:
           break;
@@ -2136,11 +2133,8 @@ void Experiment<Modus>::intermediate_output() {
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         dens_type_lattice_printout_,
                                         *jmu_custom_lat_);
-          if (printout_full_lattice_ascii_td_ ||
-              printout_full_lattice_binary_td_) {
-            output->thermodynamics_lattice_output(*jmu_custom_lat_,
-                                                  computational_frame_time);
-          }
+          output->thermodynamics_lattice_output(*jmu_custom_lat_,
+                                                computational_frame_time);
       }
       if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
         update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
@@ -2148,31 +2142,22 @@ void Experiment<Modus>::intermediate_output() {
         if (printout_tmn_) {
           output->thermodynamics_output(ThermodynamicQuantity::Tmn,
                                         dens_type_lattice_printout_, *Tmn_);
-          if (printout_full_lattice_ascii_td_ ||
-              printout_full_lattice_binary_td_) {
-            output->thermodynamics_lattice_output(
-                ThermodynamicQuantity::Tmn, *Tmn_, computational_frame_time);
-          }
+          output->thermodynamics_lattice_output(
+              ThermodynamicQuantity::Tmn, *Tmn_, computational_frame_time);
         }
         if (printout_tmn_landau_) {
           output->thermodynamics_output(ThermodynamicQuantity::TmnLandau,
                                         dens_type_lattice_printout_, *Tmn_);
-          if (printout_full_lattice_ascii_td_ ||
-              printout_full_lattice_binary_td_) {
-            output->thermodynamics_lattice_output(
-                ThermodynamicQuantity::TmnLandau, *Tmn_,
-                computational_frame_time);
-          }
+          output->thermodynamics_lattice_output(
+              ThermodynamicQuantity::TmnLandau, *Tmn_,
+              computational_frame_time);
         }
         if (printout_v_landau_) {
           output->thermodynamics_output(ThermodynamicQuantity::LandauVelocity,
                                         dens_type_lattice_printout_, *Tmn_);
-          if (printout_full_lattice_ascii_td_ ||
-              printout_full_lattice_binary_td_) {
-            output->thermodynamics_lattice_output(
-                ThermodynamicQuantity::LandauVelocity, *Tmn_,
-                computational_frame_time);
-          }
+          output->thermodynamics_lattice_output(
+              ThermodynamicQuantity::LandauVelocity, *Tmn_,
+              computational_frame_time);
         }
       }
       if (printout_j_QBS_) {

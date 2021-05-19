@@ -189,6 +189,11 @@ ThermodynamicLatticeOutput::ThermodynamicLatticeOutput(
       out_par_(out_par),
       enable_ascii_(enable_ascii),
       enable_binary_(enable_binary) {
+  if (enable_ascii_ || enable_binary_) {
+    enable_output_ = true;
+  } else {
+    enable_output_ = false;
+  }
   if (enable_ascii_) {
     if (out_par_.td_rho_eckart) {
       output_ascii_files_[ThermodynamicQuantity::EckartDensity] =
@@ -240,6 +245,9 @@ ThermodynamicLatticeOutput::~ThermodynamicLatticeOutput() {}
 void ThermodynamicLatticeOutput::at_eventstart(
     const int event_number, const ThermodynamicQuantity tq,
     const DensityType dens_type, RectangularLattice<DensityOnLattice> lattice) {
+  if (!enable_output_) {
+    return;
+  }
   assert((tq == ThermodynamicQuantity::EckartDensity) ||
          (tq == ThermodynamicQuantity::j_QBS));
   // at the next refactoring of the code,
@@ -263,8 +271,11 @@ void ThermodynamicLatticeOutput::at_eventstart(
         output_ascii_files_[ThermodynamicQuantity::EckartDensity]->open(
             filename, std::ios::out);
       } catch (std::ofstream::failure &e) {
-        std::cout << "Error in opening " << filename << std::endl;
-        exit(1);
+        logg[LogArea::Main::id].fatal()
+            << "Error in opening " << filename << std::endl;
+        throw std::runtime_error(
+            "Not possible to write thermodynamic "
+            "lattice output to file.");
       }
       fp = output_ascii_files_[ThermodynamicQuantity::EckartDensity];
       write_therm_lattice_ascii_header(fp, tq);
@@ -275,8 +286,11 @@ void ThermodynamicLatticeOutput::at_eventstart(
         output_binary_files_[ThermodynamicQuantity::EckartDensity]->open(
             filename, std::ios::out | std::ios::binary);
       } catch (std::ofstream::failure &e) {
-        std::cout << "Error in opening " << filename << std::endl;
-        exit(1);
+        logg[LogArea::Main::id].fatal()
+            << "Error in opening " << filename << std::endl;
+        throw std::runtime_error(
+            "Not possible to write thermodynamic "
+            "lattice output to file.");
       }
       fp = output_binary_files_[ThermodynamicQuantity::EckartDensity];
       write_therm_lattice_binary_header(fp, tq);
@@ -288,8 +302,11 @@ void ThermodynamicLatticeOutput::at_eventstart(
         output_ascii_files_[ThermodynamicQuantity::j_QBS]->open(filename,
                                                                 std::ios::out);
       } catch (std::ofstream::failure &e) {
-        std::cout << "Error in opening " << filename << std::endl;
-        exit(1);
+        logg[LogArea::Main::id].fatal()
+            << "Error in opening " << filename << std::endl;
+        throw std::runtime_error(
+            "Not possible to write thermodynamic "
+            "lattice output to file.");
       }
       fp = output_ascii_files_[ThermodynamicQuantity::j_QBS];
       write_therm_lattice_ascii_header(fp, tq);
@@ -300,8 +317,11 @@ void ThermodynamicLatticeOutput::at_eventstart(
         output_binary_files_[ThermodynamicQuantity::j_QBS]->open(
             filename, std::ios::out | std::ios::binary);
       } catch (std::ofstream::failure &e) {
-        std::cout << "Error in opening " << filename << std::endl;
-        exit(1);
+        logg[LogArea::Main::id].fatal()
+            << "Error in opening " << filename << std::endl;
+        throw std::runtime_error(
+            "Not possible to write thermodynamic "
+            "lattice output to file.");
       }
       fp = output_binary_files_[ThermodynamicQuantity::j_QBS];
       write_therm_lattice_binary_header(fp, tq);
@@ -313,6 +333,9 @@ void ThermodynamicLatticeOutput::at_eventstart(
     const int event_number, const ThermodynamicQuantity tq,
     const DensityType dens_type,
     RectangularLattice<EnergyMomentumTensor> lattice) {
+  if (!enable_output_) {
+    return;
+  }
   const auto dim = lattice.dimensions();
   const auto cs = lattice.cell_sizes();
   const auto orig = lattice.origin();
@@ -332,8 +355,11 @@ void ThermodynamicLatticeOutput::at_eventstart(
         output_ascii_files_[ThermodynamicQuantity::TmnLandau]->open(
             filename, std::ios::out);
       } catch (std::ofstream::failure &e) {
-        std::cout << "Error in opening " << filename << std::endl;
-        exit(1);
+        logg[LogArea::Main::id].fatal()
+            << "Error in opening " << filename << std::endl;
+        throw std::runtime_error(
+            "Not possible to write thermodynamic "
+            "lattice output to file.");
       }
       fp = output_ascii_files_[ThermodynamicQuantity::TmnLandau];
     } else if (tq == ThermodynamicQuantity::Tmn) {
@@ -341,8 +367,11 @@ void ThermodynamicLatticeOutput::at_eventstart(
         output_ascii_files_[ThermodynamicQuantity::Tmn]->open(filename,
                                                               std::ios::out);
       } catch (std::ofstream::failure &e) {
-        std::cout << "Error in opening " << filename << std::endl;
-        exit(1);
+        logg[LogArea::Main::id].fatal()
+            << "Error in opening " << filename << std::endl;
+        throw std::runtime_error(
+            "Not possible to write thermodynamic "
+            "lattice output to file.");
       }
       fp = output_ascii_files_[ThermodynamicQuantity::Tmn];
     } else if (tq == ThermodynamicQuantity::LandauVelocity) {
@@ -350,8 +379,11 @@ void ThermodynamicLatticeOutput::at_eventstart(
         output_ascii_files_[ThermodynamicQuantity::LandauVelocity]->open(
             filename, std::ios::out);
       } catch (std::ofstream::failure &e) {
-        std::cout << "Error in opening " << filename << std::endl;
-        exit(1);
+        logg[LogArea::Main::id].fatal()
+            << "Error in opening " << filename << std::endl;
+        throw std::runtime_error(
+            "Not possible to write thermodynamic "
+            "lattice output to file.");
       }
       fp = output_ascii_files_[ThermodynamicQuantity::LandauVelocity];
     } else {
@@ -359,8 +391,11 @@ void ThermodynamicLatticeOutput::at_eventstart(
         output_ascii_files_[ThermodynamicQuantity::j_QBS]->open(filename,
                                                                 std::ios::out);
       } catch (std::ofstream::failure &e) {
-        std::cout << "Error in opening " << filename << std::endl;
-        exit(1);
+        logg[LogArea::Main::id].fatal()
+            << "Error in opening " << filename << std::endl;
+        throw std::runtime_error(
+            "Not possible to write thermodynamic "
+            "lattice output to file.");
       }
     }
     write_therm_lattice_ascii_header(fp, tq);
@@ -372,8 +407,11 @@ void ThermodynamicLatticeOutput::at_eventstart(
         output_binary_files_[ThermodynamicQuantity::TmnLandau]->open(
             filename, std::ios::out | std::ios::binary);
       } catch (std::ofstream::failure &e) {
-        std::cout << "Error in opening " << filename << std::endl;
-        exit(1);
+        logg[LogArea::Main::id].fatal()
+            << "Error in opening " << filename << std::endl;
+        throw std::runtime_error(
+            "Not possible to write thermodynamic "
+            "lattice output to file.");
       }
       fp = output_binary_files_[ThermodynamicQuantity::TmnLandau];
     } else if (tq == ThermodynamicQuantity::Tmn) {
@@ -381,8 +419,11 @@ void ThermodynamicLatticeOutput::at_eventstart(
         output_binary_files_[ThermodynamicQuantity::Tmn]->open(
             filename, std::ios::out | std::ios::binary);
       } catch (std::ofstream::failure &e) {
-        std::cout << "Error in opening " << filename << std::endl;
-        exit(1);
+        logg[LogArea::Main::id].fatal()
+            << "Error in opening " << filename << std::endl;
+        throw std::runtime_error(
+            "Not possible to write thermodynamic "
+            "lattice output to file.");
       }
       fp = output_binary_files_[ThermodynamicQuantity::Tmn];
     } else if (tq == ThermodynamicQuantity::LandauVelocity) {
@@ -390,8 +431,11 @@ void ThermodynamicLatticeOutput::at_eventstart(
         output_binary_files_[ThermodynamicQuantity::LandauVelocity]->open(
             filename, std::ios::out | std::ios::binary);
       } catch (std::ofstream::failure &e) {
-        std::cout << "Error in opening " << filename << std::endl;
-        exit(1);
+        logg[LogArea::Main::id].fatal()
+            << "Error in opening " << filename << std::endl;
+        throw std::runtime_error(
+            "Not possible to write thermodynamic "
+            "lattice output to file.");
       }
       fp = output_binary_files_[ThermodynamicQuantity::LandauVelocity];
     } else {
@@ -399,8 +443,11 @@ void ThermodynamicLatticeOutput::at_eventstart(
         output_binary_files_[ThermodynamicQuantity::j_QBS]->open(filename,
                                                                  std::ios::out);
       } catch (std::ofstream::failure &e) {
-        std::cout << "Error in opening " << filename << std::endl;
-        exit(1);
+        logg[LogArea::Main::id].fatal()
+            << "Error in opening " << filename << std::endl;
+        throw std::runtime_error(
+            "Not possible to write thermodynamic "
+            "lattice output to file.");
       }
     }
     write_therm_lattice_binary_header(fp, tq);
@@ -408,6 +455,9 @@ void ThermodynamicLatticeOutput::at_eventstart(
 }
 
 void ThermodynamicLatticeOutput::at_eventend(const ThermodynamicQuantity tq) {
+  if (!enable_output_) {
+    return;
+  }
   if (tq == ThermodynamicQuantity::EckartDensity) {
     if (enable_ascii_) {
       output_ascii_files_[ThermodynamicQuantity::EckartDensity]->close();
@@ -465,30 +515,34 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     *fp << std::setprecision(14);
     *fp << std::scientific;
     *fp << ctime << std::endl;
-    lattice.iterate_sublattice({0, 0, 0}, dim,
-                               [&](DensityOnLattice &node, int ix, int, int) {
-                                 *fp << node.density() << " ";
-                                 if (ix == dim[0] - 1) {
-                                   *fp << "\n";
-                                 }
-                               });
   }
   if (enable_binary_) {
     fp = output_binary_files_[ThermodynamicQuantity::EckartDensity];
     assert(sizeof(ctime) == sizeof(double));
     fp->write(reinterpret_cast<char *>(&ctime), sizeof(ctime));
-    lattice.iterate_sublattice(
-        {0, 0, 0}, dim, [&](DensityOnLattice &node, int, int, int) {
+  }
+  lattice.iterate_sublattice(
+      {0, 0, 0}, dim, [&](DensityOnLattice &node, int ix, int, int) {
+        if (enable_ascii_) {
+          *fp << node.density() << " ";
+          if (ix == dim[0] - 1) {
+            *fp << "\n";
+          }
+        }
+        if (enable_binary_) {
           result = node.density();
           fp->write(reinterpret_cast<char *>(&result), sizeof(double));
-        });
-  }
+        }
+      });
 }
 
 void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     RectangularLattice<DensityOnLattice> &lattice, double ctime,
     const std::vector<Particles> &ensembles,
     const DensityParameters &dens_param) {
+  if (!enable_output_) {
+    return;
+  }
   double result;
   const auto dim = lattice.dimensions();
   std::shared_ptr<std::ofstream> fp(nullptr);
@@ -500,26 +554,33 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     *fp << std::setprecision(14);
     *fp << std::scientific;
     *fp << ctime << std::endl;
-    lattice.iterate_sublattice(
-        {0, 0, 0}, dim, [&](DensityOnLattice &node, int ix, int iy, int iz) {
-          const ThreeVector position = lattice.cell_center(ix, iy, iz);
-          jQ.reset();
-          jB.reset();
-          jS.reset();
-          for (const Particles &particles : ensembles) {
-            jQ += std::get<1>(current_eckart(
-                position, particles, dens_param, DensityType::Charge,
-                compute_gradient, out_par_.td_smearing));
-            jB += std::get<1>(current_eckart(
-                position, particles, dens_param, DensityType::Baryon,
-                compute_gradient, out_par_.td_smearing));
-            jS += std::get<1>(current_eckart(
-                position, particles, dens_param, DensityType::Strangeness,
-                compute_gradient, out_par_.td_smearing));
-          }
-          jQ /= n_ensembles;
-          jB /= n_ensembles;
-          jS /= n_ensembles;
+  }
+  if (enable_binary_) {
+    fp = output_binary_files_[ThermodynamicQuantity::j_QBS];
+    assert(sizeof(ctime) == sizeof(double));
+    fp->write(reinterpret_cast<char *>(&ctime), sizeof(ctime));
+  }
+  lattice.iterate_sublattice(
+      {0, 0, 0}, dim, [&](DensityOnLattice &node, int ix, int iy, int iz) {
+        const ThreeVector position = lattice.cell_center(ix, iy, iz);
+        jQ.reset();
+        jB.reset();
+        jS.reset();
+        for (const Particles &particles : ensembles) {
+          jQ += std::get<1>(current_eckart(
+              position, particles, dens_param, DensityType::Charge,
+              compute_gradient, out_par_.td_smearing));
+          jB += std::get<1>(current_eckart(
+              position, particles, dens_param, DensityType::Baryon,
+              compute_gradient, out_par_.td_smearing));
+          jS += std::get<1>(current_eckart(
+              position, particles, dens_param, DensityType::Strangeness,
+              compute_gradient, out_par_.td_smearing));
+        }
+        jQ /= n_ensembles;
+        jB /= n_ensembles;
+        jS /= n_ensembles;
+        if (enable_ascii_) {
           *fp << jQ[0];
           for (int l = 1; l < 4; l++) {
             *fp << " " << jQ[l];
@@ -531,32 +592,8 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
             *fp << " " << jS[l];
           }
           *fp << "\n";
-        });
-  }
-  if (enable_binary_) {
-    fp = output_binary_files_[ThermodynamicQuantity::j_QBS];
-    assert(sizeof(ctime) == sizeof(double));
-    fp->write(reinterpret_cast<char *>(&ctime), sizeof(ctime));
-    lattice.iterate_sublattice(
-        {0, 0, 0}, dim, [&](DensityOnLattice &node, int ix, int iy, int iz) {
-          const ThreeVector position = lattice.cell_center(ix, iy, iz);
-          jQ.reset();
-          jB.reset();
-          jS.reset();
-          for (const Particles &particles : ensembles) {
-            jQ += std::get<1>(current_eckart(
-                position, particles, dens_param, DensityType::Charge,
-                compute_gradient, out_par_.td_smearing));
-            jB += std::get<1>(current_eckart(
-                position, particles, dens_param, DensityType::Baryon,
-                compute_gradient, out_par_.td_smearing));
-            jS += std::get<1>(current_eckart(
-                position, particles, dens_param, DensityType::Strangeness,
-                compute_gradient, out_par_.td_smearing));
-          }
-          jQ /= n_ensembles;
-          jB /= n_ensembles;
-          jS /= n_ensembles;
+        }
+        if (enable_binary_) {
           for (int l = 0; l < 4; l++) {
             result = jQ[l];
             fp->write(reinterpret_cast<char *>(&result), sizeof(double));
@@ -569,13 +606,16 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
             result = jS[l];
             fp->write(reinterpret_cast<char *>(&result), sizeof(double));
           }
-        });
-  }
+        }
+      });
 }
 
 void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     const ThermodynamicQuantity tq,
     RectangularLattice<EnergyMomentumTensor> &lattice, double ctime) {
+  if (!enable_output_) {
+    return;
+  }
   double result;
   const auto dim = lattice.dimensions();
   std::shared_ptr<std::ofstream> fp(nullptr);
@@ -596,48 +636,6 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     *fp << std::setprecision(14);
     *fp << std::scientific;
     *fp << ctime << std::endl;
-    switch (tq) {
-      case ThermodynamicQuantity::Tmn:
-        for (int i = 0; i < 4; i++) {
-          for (int j = i; j < 4; j++) {
-            lattice.iterate_sublattice(
-                {0, 0, 0}, dim,
-                [&](EnergyMomentumTensor &node, int ix, int, int) {
-                  *fp << node[EnergyMomentumTensor::tmn_index(i, j)] << " ";
-                  if (ix == dim[0] - 1) {
-                    *fp << "\n";
-                  }
-                });
-          }
-        }
-        break;
-      case ThermodynamicQuantity::TmnLandau:
-        for (int i = 0; i < 4; i++) {
-          for (int j = i; j < 4; j++) {
-            lattice.iterate_sublattice(
-                {0, 0, 0}, dim,
-                [&](EnergyMomentumTensor &node, int ix, int, int) {
-                  const FourVector u = node.landau_frame_4velocity();
-                  const EnergyMomentumTensor Tmn_L = node.boosted(u);
-                  *fp << Tmn_L[EnergyMomentumTensor::tmn_index(i, j)] << " ";
-                  if (ix == dim[0] - 1) {
-                    *fp << "\n";
-                  }
-                });
-          }
-        }
-        break;
-      case ThermodynamicQuantity::LandauVelocity:
-        lattice.iterate_sublattice(
-            {0, 0, 0}, dim, [&](EnergyMomentumTensor &node, int, int, int) {
-              const FourVector u = node.landau_frame_4velocity();
-              const ThreeVector v = -u.velocity();
-              *fp << v.x1() << " " << v.x2() << " " << v.x3() << "\n";
-            });
-        break;
-      default:
-        return;
-    }
   }
   if (enable_binary_) {
     switch (tq) {
@@ -655,42 +653,69 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     }
     assert(sizeof(ctime) == sizeof(double));
     fp->write(reinterpret_cast<char *>(&ctime), sizeof(double));
-    switch (tq) {
-      case ThermodynamicQuantity::Tmn:
-        for (int i = 0; i < 4; i++) {
-          for (int j = i; j < 4; j++) {
-            lattice.iterate_sublattice(
-                {0, 0, 0}, dim, [&](EnergyMomentumTensor &node, int, int, int) {
+  }
+  switch (tq) {
+    case ThermodynamicQuantity::Tmn:
+      for (int i = 0; i < 4; i++) {
+        for (int j = i; j < 4; j++) {
+          lattice.iterate_sublattice(
+              {0, 0, 0}, dim,
+              [&](EnergyMomentumTensor &node, int ix, int, int) {
+                if (enable_ascii_) {
+                  *fp << node[EnergyMomentumTensor::tmn_index(i, j)] << " ";
+                  if (ix == dim[0] - 1) {
+                    *fp << "\n";
+                  }
+                }
+                if (enable_binary_) {
                   result = node[EnergyMomentumTensor::tmn_index(i, j)];
                   fp->write(reinterpret_cast<char *>(&result), sizeof(double));
-                });
-          }
+                }
+              });
         }
-        break;
-      case ThermodynamicQuantity::TmnLandau:
-        for (int i = 0; i < 4; i++) {
-          for (int j = i; j < 4; j++) {
-            lattice.iterate_sublattice(
-                {0, 0, 0}, dim, [&](EnergyMomentumTensor &node, int, int, int) {
+      }
+      break;
+    case ThermodynamicQuantity::TmnLandau:
+      for (int i = 0; i < 4; i++) {
+        for (int j = i; j < 4; j++) {
+          lattice.iterate_sublattice(
+              {0, 0, 0}, dim,
+              [&](EnergyMomentumTensor &node, int ix, int, int) {
+                if (enable_ascii_) {
+                  const FourVector u = node.landau_frame_4velocity();
+                  const EnergyMomentumTensor Tmn_L = node.boosted(u);
+                  *fp << Tmn_L[EnergyMomentumTensor::tmn_index(i, j)] << " ";
+                  if (ix == dim[0] - 1) {
+                    *fp << "\n";
+                  }
+                }
+                if (enable_binary_) {
                   const FourVector u = node.landau_frame_4velocity();
                   const EnergyMomentumTensor Tmn_L = node.boosted(u);
                   result = Tmn_L[EnergyMomentumTensor::tmn_index(i, j)];
                   fp->write(reinterpret_cast<char *>(&result), sizeof(double));
-                });
-          }
+                }
+              });
         }
-        break;
-      case ThermodynamicQuantity::LandauVelocity:
-        lattice.iterate_sublattice(
-            {0, 0, 0}, dim, [&](EnergyMomentumTensor &node, int, int, int) {
+      }
+      break;
+    case ThermodynamicQuantity::LandauVelocity:
+      lattice.iterate_sublattice(
+          {0, 0, 0}, dim, [&](EnergyMomentumTensor &node, int, int, int) {
+            if (enable_ascii_) {
+              const FourVector u = node.landau_frame_4velocity();
+              const ThreeVector v = -u.velocity();
+              *fp << v.x1() << " " << v.x2() << " " << v.x3() << "\n";
+            }
+            if (enable_binary_) {
               const FourVector u = node.landau_frame_4velocity();
               ThreeVector v = -u.velocity();
               fp->write(reinterpret_cast<char *>(&v), 3 * sizeof(double));
-            });
-        break;
-      default:
-        return;
-    }
+            }
+          });
+      break;
+    default:
+      return;
   }
 }
 
@@ -707,7 +732,9 @@ int ThermodynamicLatticeOutput::to_int(const ThermodynamicQuantity &tq) {
     case ThermodynamicQuantity::j_QBS:
       return 4;
     default:
-      return 99;
+      throw std::runtime_error(
+          "Error when converting a thermodynamic quantity "
+          "to an int, unknown quantity.");
   }
 }
 
