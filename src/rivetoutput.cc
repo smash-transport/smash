@@ -80,7 +80,7 @@ namespace smash {
  *     to generate Rivet instance for. Can be one of
  *
  *     - \key YODA Only initial (beam) and final state particles
- *       are available in the eents.
+ *       are available in the events.
  *
  *     - \key YODA-full Full event structure present to analyse
  *
@@ -100,7 +100,7 @@ namespace smash {
  *     analyses.  Each entry is a log name followed by a log level
  *     (one of TRACE,DEBUG,INFO,WARN,ERROR, and FATAL)
  *
- *   - \key Ignore_Beams (bool, default false) Ask Rivet to not
+ *   - \key Ignore_Beams (bool, default true) Ask Rivet to not
  *     validate beams before running analyses.  This is needed if
  *     you use the option \key Fermi_Motion (\ref
  *     input_modi_collider_) that disrupts the collision energy
@@ -142,7 +142,7 @@ RivetOutput::RivetOutput(const bf::path& path, std::string name,
       need_init_(true),
       rivet_confs_(out_par.subcon_for_rivet) {
   handler_ = std::make_shared<Rivet::AnalysisHandler>();
-     setup()
+  setup();
 }
 
 RivetOutput::~RivetOutput() {
@@ -243,9 +243,12 @@ void RivetOutput::setup() {
   // Whether Rivet should ignore beams
   if (rivet_confs_.has_value({"Ignore_Beams"})) {
     set_ignore_beams(rivet_confs_.take({"Ignore_Beams"}));
+  } else {
+    // we must explicity tell Rivet, through the handler, to ignore beam checks
+    set_ignore_beams(true);
   }
 
-  // Whether Rivet should ignore beams
+  // Cross sections
   if (rivet_confs_.has_value({"Cross_Section"})) {
     std::array<double, 2> xs = rivet_confs_.take({"Cross_Section"});
     set_cross_section(xs[0], xs[1]);

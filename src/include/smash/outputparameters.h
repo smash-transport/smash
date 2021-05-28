@@ -40,7 +40,7 @@ struct OutputParameters {
         dil_extended(false),
         photons_extended(false),
         ic_extended(false),
-        subcon_for_rivet() {}
+        subcon_for_rivet(0) {}
 
   /// Constructor from configuration
   explicit OutputParameters(Configuration&& conf) : OutputParameters() {
@@ -164,7 +164,7 @@ struct OutputParameters {
   /// Extended initial conditions output
   bool ic_extended;
 
-  // Rivet specfic setup configurations
+  /// Rivet specfic setup configurations
   Configuration subcon_for_rivet;
 };
 

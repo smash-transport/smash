@@ -15,13 +15,14 @@
 #include <utility>
 #include <valarray>
 
-#include "action.h"
-#include "forwarddeclarations.h"
 #include "HepMC3/GenCrossSection.h"
 #include "HepMC3/GenEvent.h"
 #include "HepMC3/GenHeavyIon.h"
 #include "HepMC3/GenParticle.h"
 #include "HepMC3/GenVertex.h"
+
+#include "action.h"
+#include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"
 namespace smash {
@@ -79,6 +80,7 @@ namespace smash {
  */
 class HepMcInterface : public OutputInterface {
  public:
+  /** Pair of Atomic weight and number **/
   using AZ = std::pair<int, int>;
   /**
    * Create HepMC particle event in memory.
@@ -193,15 +195,23 @@ class HepMcInterface : public OutputInterface {
   /** Mapping from ID to particle */
   IdMap map_;
   /**
-   * Collision counter.  For each incoming particle we keep track of
-   * how many colisions that particle partook in \f$ c_i\f$.  In the
-   * end,
+   * Collision counter.  For each \f$i_{th}\f$ incoming nucleon we keep track of
+   * how many collisions that particle took in \f$ c_i\f$, classifying it as a
+   * participant if it had at least one collision. So, the total number of
+   * participants is:
    *
-   * \f{eqnarray}{
-   N_{\mathrm{part}} &=& \sum_i \begin{cases} 1 & c_i>0\\ 0 &c_i=0\end{cases}\\
-   N_{\mathrm{coll}} &=& \sum_i^{N_{\mathrm{pro}}} c_i\\
-   \f}
-   * TODO(stdnmr) What is Npro?
+   * \f[
+   N_{\mathrm{part}} = \sum_i \begin{cases} 1 & c_i>0\\ 0 &c_i=0\end{cases}
+    \f]
+   *
+   * The total number of collisions is given by the sum of the collisions of the
+   * nucleons of the incoming ion, the so called "projectile". Since we are
+   * considering the collisions between the nucleons of both ions, those of
+   * the "target" are already included in the sum.
+   *
+   * \f[
+   N_{\mathrm{coll}} = \sum_i^{N_{\mathrm{projectile}}} c_i\\
+   \f]
    *
    */
   CollCounter coll_;

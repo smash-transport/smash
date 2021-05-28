@@ -43,9 +43,8 @@ class HepMcOutput : public HepMcInterface {
    * \param[in] total_N Total number of particles in both nuclei.
    * \param[in] proj_N  Number of particles in projectile.
    */
-  HepMcOutput(const bf::path &path, std::string name,
-              const bool full_event, const int total_N,
-              const int proj_N);
+  HepMcOutput(const bf::path &path, std::string name, const bool full_event,
+              const int total_N, const int proj_N);
 
   /// Destructor renames file
   ~HepMcOutput();

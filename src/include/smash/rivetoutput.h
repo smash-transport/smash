@@ -44,10 +44,11 @@ class RivetOutput : public HepMcInterface {
                            are printed in the output
    * \param[in] total_N Total number of particles in both nuclei.
    * \param[in] proj_N  Number of particles in projectile.
+   * \param[in] out_par Configuration parameters of SMASH
    */
-  RivetOutput(const bf::path& path, std::string name,
-              const bool full_event, const int total_N,
-              const int proj_N, const OutputParameters& out_par);
+  RivetOutput(const bf::path& path, std::string name, const bool full_event,
+              const int total_N, const int proj_N,
+              const OutputParameters& out_par);
   /**
    * Destructor. Finalises the analzyses and writes out results to file
    */
@@ -125,7 +126,7 @@ class RivetOutput : public HepMcInterface {
   /** Whether we need initialisation */
   bool need_init_;
   /** Configutations for rivet */
-  Configuration rivet_confs_
+  Configuration rivet_confs_;
 };
 
 }  // namespace smash

@@ -666,8 +666,10 @@ void Experiment<Modus>::create_output(const std::string &format,
           output_path, "SMASH_HepMC_collisions", true, modus_.total_N_number(),
           modus_.proj_N_number()));
     } else {
-      logg[LExperiment].error("HepMC only available for Particles and "
-                        "Collisions content. Requested for " + content + ".");
+      logg[LExperiment].error(
+          "HepMC only available for Particles and "
+          "Collisions content. Requested for " +
+          content + ".");
     }
 #else
     logg[LExperiment].error(
@@ -1055,7 +1057,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b Particles  List of particles at regular time intervals in the
    *                 computational frame or (optionally) only at the event end.
    *   - Available formats: \ref format_oscar_particlelist,
-   *      \ref format_binary_, \ref format_root, \ref format_vtk, \ref hepmc_output_user_guide_
+   *      \ref format_binary_, \ref format_root, \ref format_vtk, \ref
+   * hepmc_output_user_guide_
    * - \b Collisions List of interactions: collisions, decays, box wall
    *                 crossings and forced thermalizations. Information about
    *                 incoming, outgoing particles and the interaction itself
@@ -1111,7 +1114,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *   - Used for "Thermodynamics", "Initial_Conditions" and "HepMC", see
    * \subpage thermodyn_output_user_guide_
    * \subpage IC_output_user_guide_
-   * - \b "HepMC" - human-readble asciiv3 format see \subpage hepmc_output_user_guide_ for details
+   * - \b "HepMC" - human-readble asciiv3 format see \subpage
+   * hepmc_output_user_guide_ for details
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:

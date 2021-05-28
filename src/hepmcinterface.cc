@@ -15,8 +15,7 @@
 
 namespace smash {
 
-HepMcInterface::HepMcInterface(const std::string& name,
-                               const bool full_event,
+HepMcInterface::HepMcInterface(const std::string& name, const bool full_event,
                                const int total_N, const int proj_N)
     : OutputInterface(name),
       event_(HepMC3::Units::GEV, HepMC3::Units::MM),
@@ -178,7 +177,8 @@ void HepMcInterface::at_eventend(const Particles& particles,
   CollCounter targ_coll = coll_[std::slice(proj_N_, total_N_ - proj_N_, 1)];
   ion_->Ncoll_hard = ncoll_hard_;
   ion_->Ncoll = ncoll_;
-  // TODO(stdnmr) What Npart defintion is this? Do we leave this in? Probably no.
+  // TODO(stdnmr) What Npart definition is this? Do we leave this in?
+  // Probably no.
   ion_->Npart_proj = CollCounter(part_coll[part_coll > 0]).sum();
   ion_->Npart_targ = CollCounter(targ_coll[targ_coll > 0]).sum();
 
@@ -233,19 +233,13 @@ HepMC3::GenParticlePtr HepMcInterface::make_register(const ParticleData& p,
   return h;
 }
 
-
 HepMC3::GenParticlePtr HepMcInterface::find_or_make(const ParticleData& p,
                                                     int status,
                                                     bool force_new) {
   int id = p.id();
-  if (! force_new) {
+  if (!force_new) {
     auto it = map_.find(id);
     if (it != map_.end()) {
-      // TODO(stdnmr) What is this? Why is it commented out?
-      // if (it->second.expired()) {
-      //   throw std::runtime_error("Weak reference has expired!");
-      // }
-      // return it->second.lock();  // Found it!
       return it->second;
     }
   }
