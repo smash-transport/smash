@@ -17,6 +17,12 @@ The major categories to group changes in this log are:
 
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
+## [Unreleased](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...HEAD)
+
+### Added
+* 5-to-2 reactions for NNbar annihilations via the stochastic collision criterion
+* 2-to-5 reactions for NNbar annihilations to 5 pions
+
 
 ## [SMASH-2.0.1](https://github.com/smash-transport/smash/compare/SMASH-2.0...2.0.1)
 

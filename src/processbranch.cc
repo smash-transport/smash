@@ -66,8 +66,12 @@ std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch) {
   } else if (ptype == ProcessType::StringHard) {
     os << "hard";
   } else if (ptype == ProcessType::TwoToOne || ptype == ProcessType::TwoToTwo ||
-             ptype == ProcessType::Elastic || ptype == ProcessType::Decay ||
-             ptype == ProcessType::MultiParticleThreeMesonsToOne) {
+             ptype == ProcessType::TwoToThree ||
+             ptype == ProcessType::TwoToFive || ptype == ProcessType::Elastic ||
+             ptype == ProcessType::Decay ||
+             ptype == ProcessType::MultiParticleThreeMesonsToOne ||
+             ptype == ProcessType::MultiParticleThreeToTwo ||
+             ptype == ProcessType::MultiParticleFiveToTwo) {
     ParticleTypePtrList ptype_list = cbranch.particle_types();
     /* Sorting ensures unique name for every channel
      * It avoids duplicates, such as Δ⁰Δ⁺⁺ and Δ⁺⁺Δ⁰,
@@ -97,6 +101,12 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
     case ProcessType::TwoToTwo:
       os << "TwoToTwo";
       break;
+    case ProcessType::TwoToThree:
+      os << "TwoToThree";
+      break;
+    case ProcessType::TwoToFive:
+      os << "TwoToFive";
+      break;
     case ProcessType::StringSoftSingleDiffractiveAX:
     case ProcessType::StringSoftSingleDiffractiveXB:
     case ProcessType::StringSoftDoubleDiffractive:
@@ -113,11 +123,20 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
     case ProcessType::Wall:
       os << "Wall";
       break;
+    case ProcessType::Thermalization:
+      os << "Thermalization";
+      break;
     case ProcessType::HyperSurfaceCrossing:
       os << "Hypersurface crossing";
       break;
     case ProcessType::MultiParticleThreeMesonsToOne:
-      os << "3MesonsToOne";
+      os << "ThreeMesonsToOne";
+      break;
+    case ProcessType::MultiParticleThreeToTwo:
+      os << "ThreeToTwo";
+      break;
+    case ProcessType::MultiParticleFiveToTwo:
+      os << "FiveToTwo";
       break;
     default:
       os.setstate(std::ios_base::failbit);

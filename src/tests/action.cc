@@ -18,7 +18,7 @@ using namespace smash;
 using smash::Test::Momentum;
 using smash::Test::Position;
 
-TEST(init_particle_types) { Test::create_smashon_particletypes(); }
+TEST(init_particle_types) { Test::create_stable_smashon_particletypes(); }
 
 // test collision_time:
 // parallel momenta => impossible collision
@@ -57,4 +57,47 @@ TEST(finite_momenta) {
                                Momentum{0.1, -10.0, -90.0, -80.0});
   ScatterAction act(a, b, 0.);
   VERIFY(act.transverse_distance_sqr() >= 0.);
+}
+
+TEST(phasespace_five_body) {
+  // Sample 5-body phase space repeatly and check if the average angles of one
+  // of the outgoing particles matches an isotropic distribution
+  const auto a =
+      Test::smashon(Position{1., 1., 1., 1.}, Momentum{0.5, 0.0, 0., 0.});
+  const auto b =
+      Test::smashon(Position{2., 2., 2., 2.}, Momentum{0.5, 0.0, 0., 0.});
+  const ParticleType &type_so = ParticleType::find(0x661);
+
+  ScatterAction act(a, b, 0.);
+
+  // Add CollisionBranch with 5 outgoing particles
+  CollisionBranchPtr coll_b =
+      make_unique<CollisionBranch>(type_so, type_so, type_so, type_so, type_so,
+                                   10.0, ProcessType::TwoToFive);
+  act.add_collision(std::move(coll_b));
+
+  const int N_samples = 10000;
+  double sum_theta1 = 0;
+  double sum_phi1 = 0;
+  double theta1, phi1;
+  for (int i = 0; i < N_samples; i++) {
+    // Sample the 5-body phase space of the outgoing particles
+    act.generate_final_state();
+
+    theta1 = act.outgoing_particles()[4].momentum().threevec().get_theta();
+    sum_theta1 += theta1;
+
+    phi1 = act.outgoing_particles()[4].momentum().threevec().get_phi();
+    sum_phi1 += phi1;
+
+    // Comment out, if you want a print-out e.g. for a angle histogram
+    // std::cout << "phi1 = " <<
+    // act.outgoing_particles()[0].momentum().threevec().get_phi() << '\n';
+    // std::cout << "theta1 = " << theta1 << '\n';
+  }
+
+  // Check if outgoing particle's phi and theta average match an uniform
+  // distribution
+  COMPARE_ABSOLUTE_ERROR(sum_theta1 / N_samples, M_PI / 2.0, 0.1);
+  COMPARE_ABSOLUTE_ERROR(sum_phi1 / N_samples, 0.0, 0.1);
 }

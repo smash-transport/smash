@@ -308,7 +308,12 @@ class Action {
    * eq. (5).
    */
   static double lambda_tilde(double a, double b, double c) {
-    return (a - b - c) * (a - b - c) - 4. * b * c;
+    const double res = (a - b - c) * (a - b - c) - 4. * b * c;
+    if (res < 0.0) {
+      // floating point precision problem
+      return 0.0;
+    }
+    return res;
   }
 
   /**
@@ -435,6 +440,12 @@ class Action {
    * \throw std::invalid_argument if one outgoing particle is a resonance
    */
   virtual void sample_3body_phasespace();
+
+  /**
+   * Sample the full 5-body phase-space (masses, momenta, angles)
+   * in the center-of-mass frame for the final state particles.
+   */
+  virtual void sample_5body_phasespace();
 
   /**
    * Assign the formation time to the outgoing particles.

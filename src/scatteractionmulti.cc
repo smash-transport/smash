@@ -12,6 +12,7 @@
 #include "smash/crosssections.h"
 #include "smash/integrate.h"
 #include "smash/logging.h"
+#include "smash/parametrizations.h"
 
 namespace smash {
 static constexpr int LScatterActionMulti = LogArea::ScatterActionMulti::id;
@@ -237,10 +238,46 @@ void ScatterActionMulti::add_possible_reactions(
       }
     }
   }
+  // 5 -> 2
+  if (incoming_particles_.size() == 5) {
+    if (incl_multi[IncludedMultiParticleReactions::NNbar_5to2] == 1) {
+      if (all_incoming_particles_are_pions_have_zero_charge_only_one_piz()) {
+        const int spin_factor_inc =
+            incoming_particles_[0].pdgcode().spin_degeneracy() *
+            incoming_particles_[1].pdgcode().spin_degeneracy() *
+            incoming_particles_[2].pdgcode().spin_degeneracy() *
+            incoming_particles_[3].pdgcode().spin_degeneracy() *
+            incoming_particles_[4].pdgcode().spin_degeneracy();
+        const double symmetry_factor = 4.0;  // 2! * 2!
+
+        const ParticleTypePtr type_p = ParticleType::try_find(pdg::p);
+        const ParticleTypePtr type_anti_p = ParticleType::try_find(-pdg::p);
+        const ParticleTypePtr type_n = ParticleType::try_find(pdg::n);
+        const ParticleTypePtr type_anti_n = ParticleType::try_find(-pdg::n);
+
+        const double spin_degn =
+            react_degen_factor(spin_factor_inc, type_p->spin_degeneracy(),
+                               type_anti_p->spin_degeneracy());
+
+        if (type_p && type_n) {
+          const double prob = probability_five_to_two(
+              type_p->mass(), dt, gcell_vol,
+              symmetry_factor * spin_degn);  // same for ppbar and nnbar
+          add_reaction(make_unique<CollisionBranch>(
+              *type_p, *type_anti_p, prob,
+              ProcessType::MultiParticleFiveToTwo));
+          add_reaction(make_unique<CollisionBranch>(
+              *type_n, *type_anti_n, prob,
+              ProcessType::MultiParticleFiveToTwo));
+        }
+      }
+    }
+  }
 }
 
 void ScatterActionMulti::generate_final_state() {
-  logg[LScatterActionMulti].debug("Incoming particles: ", incoming_particles_);
+  logg[LScatterActionMulti].debug("Incoming particles for ScatterActionMulti: ",
+                                  incoming_particles_);
 
   /* Decide for a particular final state. */
   const CollisionBranch* proc =
@@ -260,6 +297,10 @@ void ScatterActionMulti::generate_final_state() {
     case ProcessType::MultiParticleThreeToTwo:
       /* 3->2 scattering */
       three_to_two();
+      break;
+    case ProcessType::MultiParticleFiveToTwo:
+      /* 5->2 scattering */
+      five_to_two();
       break;
     default:
       throw InvalidScatterActionMulti(
@@ -352,6 +393,37 @@ double ScatterActionMulti::probability_three_to_two(
          degen_factor;
 }
 
+double ScatterActionMulti::probability_five_to_two(
+    const double mout, double dt, const double gcell_vol,
+    const double degen_factor) const {
+  const double e1 = incoming_particles_[0].momentum().x0();
+  const double e2 = incoming_particles_[1].momentum().x0();
+  const double e3 = incoming_particles_[2].momentum().x0();
+  const double e4 = incoming_particles_[3].momentum().x0();
+  const double e5 = incoming_particles_[4].momentum().x0();
+
+  const double man_s = sqrt_s() * sqrt_s();
+  const double lamb = lambda_tilde(man_s, mout * mout, mout * mout);
+  const double ph_sp_5 = parametrizaton_phi5_pions(man_s);
+
+  // Matching the NNbar anihilation cross section defintion for 2-to-5
+  const double xs =
+      std::max(0., ppbar_total(man_s) - ppbar_elastic(man_s)) / gev2_mb;
+
+  return dt / std::pow(gcell_vol, 4.0) * 1. / (32. * e1 * e2 * e3 * e4 * e5) *
+         xs / (4. * M_PI * man_s) * lamb / ph_sp_5 * std::pow(hbarc, 11.0) *
+         degen_factor;
+}
+
+double ScatterActionMulti::parametrizaton_phi5_pions(const double man_s) const {
+  // see function documentation for parameter naming
+  const double s_zero = 25 * pion_mass * pion_mass;
+  const double fit_a = 2.1018e-10;
+  const double fit_alpha = 1.982;
+  return fit_a * std::pow(man_s - s_zero, 5.0) *
+         std::pow(1 + man_s / s_zero, -fit_alpha);
+}
+
 void ScatterActionMulti::annihilation() {
   if (outgoing_particles_.size() != 1) {
     std::string s =
@@ -376,6 +448,14 @@ void ScatterActionMulti::three_to_two() {
   assign_formation_time_to_outgoing_particles();
   logg[LScatterActionMulti].debug("3->2 scattering:", incoming_particles_,
                                   " -> ", outgoing_particles_);
+}
+
+void ScatterActionMulti::five_to_two() {
+  sample_2body_phasespace();
+  // Make sure to assign formation times before boost to the computational frame
+  assign_formation_time_to_outgoing_particles();
+  logg[LScatterActionMulti].debug("5->2 scattering:", incoming_particles_,
+                                 " -> ", outgoing_particles_);
 }
 
 bool ScatterActionMulti::three_different_pions(
@@ -408,6 +488,23 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
          (pdg_a == pdg::pi_m && pdg_b == pdg::eta && pdg_c == pdg::pi_p) ||
          (pdg_a == pdg::pi_p && pdg_b == pdg::pi_m && pdg_c == pdg::eta) ||
          (pdg_a == pdg::pi_p && pdg_b == pdg::eta && pdg_c == pdg::pi_m);
+}
+
+bool ScatterActionMulti::
+    all_incoming_particles_are_pions_have_zero_charge_only_one_piz() const {
+  const bool all_inc_pi =
+      all_of(incoming_particles_.begin(), incoming_particles_.end(),
+             [](const ParticleData& data) { return data.is_pion(); });
+  const int no_of_piz = std::count_if(
+      incoming_particles_.begin(), incoming_particles_.end(),
+      [](const ParticleData& data) { return data.pdgcode() == pdg::pi_z; });
+
+  int total_state_charge = 0;
+  for (const ParticleData& part : incoming_particles_) {
+    total_state_charge += part.pdgcode().charge();
+  }
+
+  return (all_inc_pi && total_state_charge == 0 && no_of_piz == 1);
 }
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {

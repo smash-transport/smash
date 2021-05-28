@@ -742,6 +742,9 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * \key Included_2to2), since they effectively yield the same reaction.
  * (The same cross section is used as for the d' reactions, therefore the d' in
  * particles.txt and its decay in decaymodest.txt also need to be uncommented.)
+ * \li \key "NNbar_5to2" - 5-to-2 backreaction for NNbar  annihilation:
+ * \f$ \pi^0\pi^+\pi^-\pi^+\pi^- \rightarrow N\bar{N}\f$. Since detailed balance
+ * is enforced, NNbar_Treatment has to be set to "two to five" for this option.
  *
  * \key Force_Decays_At_End (bool, optional, default = \key true): \n
  * \li \key true - Force all resonances to decay after last timestep \n
@@ -758,6 +761,9 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * \li \key "resonances" - Annhilation through NNbar → ρh₁(1170); combined with
  *  ρ → ππ and h₁(1170) → πρ, which gives 5 pions on average. This option
  *  requires "NNbar" to be enabled in Included_2to2.
+ * \li \key "two to five" - Direct Annhilation of NNbar to 5π, matching the
+ *  resonance treatment: \f$ N\bar{N}\rightarrow\pi^0\pi^+\pi^-\pi^+\pi^-\f$ .
+ *  This option requires "NNbar_5to2" to be enabled in Multi_Particle_Reactions.
  * \li \key "strings" - Annihilation through string fragmentation.
  *
  * \key Use_AQM (bool, optional, default = \key true) \n

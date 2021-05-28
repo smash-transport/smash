@@ -342,6 +342,74 @@ void Action::sample_3body_phasespace() {
   outgoing_particles_[1].boost_momentum(beta_cm);
 }
 
+void Action::sample_5body_phasespace() {
+  assert(outgoing_particles_.size() == 5);
+  if (!outgoing_particles_[0].type().is_stable() ||
+      !outgoing_particles_[1].type().is_stable() ||
+      !outgoing_particles_[2].type().is_stable() ||
+      !outgoing_particles_[3].type().is_stable() ||
+      !outgoing_particles_[4].type().is_stable()) {
+    throw std::invalid_argument(
+        "sample_5body_phasespace: Found resonance in to be sampled outgoing "
+        "particles, but assumes stable particles.");
+  }
+  const double m_a = outgoing_particles_[0].type().mass(),
+               m_b = outgoing_particles_[1].type().mass(),
+               m_c = outgoing_particles_[2].type().mass(),
+               m_d = outgoing_particles_[3].type().mass(),
+               m_e = outgoing_particles_[4].type().mass();
+  const double sqrts = sqrt_s();
+
+  // Sample 2-body PS for 1+2+3 and 4+5
+  const double mde = random::uniform(
+      m_d + m_e, sqrts - m_a - m_b - m_c);  // invariant mass of 4+5 pair
+  const double mabc = sqrts - mde;          // invariant mass of 1+2+3 pair
+
+  const double pcm = pCM(sqrts, mabc, mde);
+
+  Angles phitheta;
+  phitheta.distribute_isotropically();
+  const ThreeVector beta_cm123 =
+      pcm * phitheta.threevec() / std::sqrt(pcm * pcm + mabc * mabc);
+  const ThreeVector beta_cm45 =
+      pcm * phitheta.threevec() / std::sqrt(pcm * pcm + mde * mde);
+
+  // Sample 3-body PS for 1,2 and 3
+  double mab, r, probability, pcm_ab, pcm_abc;
+  do {
+    mab = random::uniform(m_a + m_b, mabc - m_c);
+    r = random::canonical();
+    pcm_abc = pCM(mabc, mab, m_c);
+    pcm_ab = pCM(mab, m_a, m_b);
+    probability = pcm_abc * pcm_ab * 4 / (mabc * mabc);
+  } while (r > probability);
+  phitheta.distribute_isotropically();
+  outgoing_particles_[2].set_4momentum(m_c, pcm_abc * phitheta.threevec());
+  const ThreeVector beta_cm =
+      pcm_abc * phitheta.threevec() / std::sqrt(pcm_abc * pcm_abc + mab * mab);
+
+  phitheta.distribute_isotropically();
+  outgoing_particles_[0].set_4momentum(m_a, pcm_ab * phitheta.threevec());
+  outgoing_particles_[1].set_4momentum(m_b, -pcm_ab * phitheta.threevec());
+  outgoing_particles_[0].boost_momentum(beta_cm);
+  outgoing_particles_[1].boost_momentum(beta_cm);
+
+  // Sample 2-body PS for 4 and 5
+  const double pcm_de = pCM(mde, m_d, m_e);
+
+  phitheta.distribute_isotropically();
+  outgoing_particles_[3].set_4momentum(m_d, pcm_de * phitheta.threevec());
+  outgoing_particles_[4].set_4momentum(m_e, -pcm_de * phitheta.threevec());
+
+  // Boost according to intial 1+2+3 and 4+5 sampling
+  outgoing_particles_[3].boost_momentum(beta_cm45);
+  outgoing_particles_[4].boost_momentum(beta_cm45);
+
+  outgoing_particles_[0].boost_momentum(-beta_cm123);
+  outgoing_particles_[1].boost_momentum(-beta_cm123);
+  outgoing_particles_[2].boost_momentum(-beta_cm123);
+}
+
 void Action::check_conservation(const uint32_t id_process) const {
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);

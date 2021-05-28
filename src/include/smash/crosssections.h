@@ -258,6 +258,17 @@ class CrossSections {
   CollisionBranchList NNbar_creation() const;
 
   /**
+   * Create collision branch for NNbar annihilation going directly into 5 pions.
+   * The cross section is given by the parametrized ppbar cross section, which
+   * is also used for the reverse 5-to-2 process.
+   *
+   * \param[in] scale_xs Factor by which all (partial) cross sections are scaled
+   * \return Collision Branch with NNbar annihilation process
+   *
+   */
+  CollisionBranchPtr NNbar_to_5pi(const double scale_xs) const;
+
+  /**
    * Determine 2->3 cross section for the scattering of the given particle
    * types.
    *
@@ -562,8 +573,14 @@ class CrossSections {
    */
   const std::pair<FourVector, FourVector> potentials_;
 
-  /// Whether incoming particles are a baryon-antibaryon pair
+  /**
+   * Whether incoming particles are a pair of a baryon and an antibaryon
+   * (could be different baryon types)
+   */
   const bool is_BBbar_pair_;
+
+  /// Whether incoming particles are a nulecon-antinucleon pair (same isospin)
+  const bool is_NNbar_pair_;
 
   /**
    * Helper function:
