@@ -210,6 +210,7 @@ gpg-wks-server  \
 gpgconf  \
 gpgsm  \
 gpgv  \
+graphviz \
 grep  \
 groff-base  \
 gsettings-desktop-schemas  \
@@ -1256,6 +1257,7 @@ x11proto-xinerama-dev  \
 xauth  \
 xdg-dbus-proxy  \
 xdg-user-dirs  \
+xdot \
 xfonts-base  \
 xfonts-encodings  \
 xfonts-utils  \
@@ -1396,6 +1398,9 @@ make -j$NUMBER_OF_PROCS_FOR_COMPILATION
 
 RUN cd /SMASH && \
 rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.08.source.tar.gz root_build root_src Rivet-3.1.4 rivet-bootstrap /var/cache/apt/archives/*.deb
+
+#we allow Imagemagick to process PS, EPS and PDF files
+RUN sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" -e "/EPS/d" -e "/PDF/d" -e "/XPS/d" /etc/ImageMagick-6/policy.xml
 
 #we set up the shell prompt during the container execution
 
