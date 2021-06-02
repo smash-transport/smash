@@ -211,6 +211,7 @@ gpg-wks-server  \
 gpgconf  \
 gpgsm  \
 gpgv  \
+graphviz \
 grep  \
 groff-base  \
 gsettings-desktop-schemas  \
@@ -232,6 +233,7 @@ ibus-gtk:amd64  \
 ibus-gtk3:amd64  \
 icu-devtools  \
 iio-sensor-proxy  \
+imagemagick \
 im-config  \
 init-system-helpers  \
 ippusbxd  \
@@ -1214,6 +1216,8 @@ systemd-sysv  \
 systemd-timesyncd  \
 sysvinit-utils  \
 tar  \
+texlive-latex-base \
+texlive-pstricks \
 tk8.6-blt2.5  \
 ttf-bitstream-vera  \
 tzdata  \
@@ -1254,6 +1258,7 @@ x11proto-xinerama-dev  \
 xauth  \
 xdg-dbus-proxy  \
 xdg-user-dirs  \
+xdot \
 xfonts-base  \
 xfonts-encodings  \
 xfonts-utils  \
@@ -1298,7 +1303,7 @@ NUMBER_OF_PROCS_FOR_COMPILATION=2
 #we use pip to install a few python2 libraries (seaborn and, automatically as dependencies, matplotlib, scipy, pandas, yaml and numpy)    
 
 cd /tmp
-wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
+wget -O get-pip.py https://bootstrap.pypa.io/pip/2.7/get-pip.py
 python2 get-pip.py
 pip install seaborn
 rm get-pip.py
@@ -1328,15 +1333,15 @@ make -j$NUMBER_OF_PROCS_FOR_COMPILATION
 make install
 
 cd /SMASH
-wget https://root.cern/download/root_v6.22.06.source.tar.gz
-tar xf root_v6.22.06.source.tar.gz
-mv root-6.22.06 root_src
-mkdir -p root_6_22_06
+wget https://root.cern/download/root_v6.22.08.source.tar.gz
+tar xf root_v6.22.08.source.tar.gz
+mv root-6.22.08 root_src
+mkdir -p root_6_22_08
 mkdir -p root_build
 cd root_build
-cmake -DCMAKE_INSTALL_PREFIX=../root_6_22_06 ../root_src  -DCMAKE_C_FLAGS="-O2 -mfpmath=sse  -march=x86-64" -DCMAKE_CXX_FLAGS="-O2 -mfpmath=sse -march=x86-64"
+cmake -DCMAKE_INSTALL_PREFIX=../root_6_22_08 ../root_src  -DCMAKE_C_FLAGS="-O2 -mfpmath=sse  -march=x86-64" -DCMAKE_CXX_FLAGS="-O2 -mfpmath=sse -march=x86-64"
 cmake --build . --target install -j$NUMBER_OF_PROCS_FOR_COMPILATION
-ROOTSYS=/SMASH/root_6_22_06
+ROOTSYS=/SMASH/root_6_22_08_
 export PATH=$ROOTSYS/bin:$PATH
 export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
 export SHLIB_PATH=$ROOTSYS/lib
@@ -1361,6 +1366,25 @@ mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck cpplint.py /SMASH/auxiliary_prog
 chmod +x /SMASH/auxiliary_progs/*
 PATH=$PATH:/SMASH/auxiliary_progs
 
+#now we install Rivet, first fixing a few details in the bootstrap script
+wget https://gitlab.com/hepcedar/rivetbootstrap/raw/3.1.4/rivet-bootstrap
+#we set the Rivet installation directory
+sed -i "6s/\$PWD\/local/\/SMASH\/Rivet_3_1_4_install/" rivet-bootstrap
+#we set the number of concurrent compilation processes
+sed -i "7s/j$NUMBER_OF_PROCS_FOR_COMPILATION/j3/" rivet-bootstrap
+#we disable the installation of hepmc3, already installed
+sed -i "9s/1/0/" rivet-bootstrap
+#we update the hepmc3 version
+sed -i "18s/2.06.11/3.2.3/" rivet-bootstrap
+#we provide the hepm3 installation path
+sed -i "50s/usr/\SMASH\/hepmc3-install/" rivet-bootstrap
+
+#now we really compile and install Rivet
+
+chmod +x rivet-bootstrap
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/SMASH/hepmc3-install/lib
+./rivet-bootstrap
+
 cd /SMASH
 git clone https://github.com/smash-transport/smash.git
 mkdir -p smash_bin
@@ -1370,7 +1394,10 @@ make -j$NUMBER_OF_PROCS_FOR_COMPILATION
 
 #we remove most of the sources
 cd /SMASH
-rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.06.source.tar.gz root_build root_src /var/cache/apt/archives/*.deb
+rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.08.source.tar.gz root_build root_src Rivet-3.1.4 rivet-bootstrap /var/cache/apt/archives/*.deb
+
+#we allow Imagemagick to process PS, EPS and PDF files
+sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" -e "/EPS/d" -e "/PDF/d" -e "/XPS/d" /etc/ImageMagick-6/policy.xml
 
 #we set up the shell prompt during the container execution
 #!/bin/bash
@@ -1386,8 +1413,6 @@ echo "LC_ALL=en_US.UTF-8" > /etc/default/locale
 echo "LANG=en_US.UTF-8" >> /etc/default/locale
 echo "LANGUAGE=en_US.UTF-8" >> /etc/default/locale
 
-
-
 #Singularity will set up these environment when it starts the container
 
 %environment
@@ -1401,7 +1426,7 @@ export PATH=$PYTHIA8/bin:$PATH
 export PATH=$PATH:/SMASH/auxiliary_progs
 export PATH=$PATH:/SMASH/smash_bin
 
-ROOTSYS=/SMASH/root_6_22_06
+ROOTSYS=/SMASH/root_6_22_08
 export PATH=$ROOTSYS/bin:$PATH
 export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
 export SHLIB_PATH=$ROOTSYS/lib
@@ -1413,13 +1438,25 @@ export JUPYTER_PATH=$ROOTSYS/etc/notebook:$JUPYTER_PATH
 export JUPYTER_CONFIG_DIR=$ROOTSYS/etc/notebook:$JUPYTER_CONFIG_DIR
 export CLING_STANDARD_PCH=none
 
+#environment variables for Rivet
+prefix=/SMASH/Rivet_3_1_4_install
+exec_prefix=${prefix}
+datarootdir=${prefix}/share
+
+export PATH=$exec_prefix/bin:$PATH
+export LD_LIBRARY_PATH="${exec_prefix}/lib:/SMASH/Rivet_3_1_4_install/lib64:/SMASH/hepmc3-install/lib:$LD_LIBRARY_PATH"
+export PYTHONPATH="/SMASH/Rivet_3_1_4_install/lib/python2.7/site-packages:$PYTHONPATH"
+export TEXMFHOME="${datarootdir}/Rivet/texmf:$TEXMFHOME"
+export HOMETEXMF="${datarootdir}/Rivet/texmf:$HOMETEXMF"
+export TEXMFCNF="${datarootdir}/Rivet/texmf/cnf:$TEXMFCNF"
+export TEXINPUTS="${datarootdir}/Rivet/texmf/tex//:$TEXINPUTS"
+export LATEXINPUTS="${datarootdir}/Rivet/texmf/tex//:$LATEXINPUTS"
 
 
 %labels
 Author Gabriele Inghirami
-Version v_08_03_21_ubuntu2004
+Version v_30_05_21_ubuntu2004
 
 
 %help
 Container based on Ubuntu 20.04 x86-64 providing a complete SMASH master development environment.
-
