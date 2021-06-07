@@ -161,18 +161,19 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
     } else if (number_of_cells_[i] > max_cells) {
       number_of_cells_[i] = max_cells;
     }
-    // std::nextafter implements a safety margin so that no valid position
-    // inside the grid can reference an out-of-bounds cell
-    index_factor[i] = number_of_cells_[i] / length_[i];
-    while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
-      index_factor[i] = std::nextafter(index_factor[i], 0.);
+    // Only bother rescaling the index_factor if the grid length is large enough
+    // for 1 full min. cell length, since all particles are anyway placed in the
+    // first cell along the i-th axis
+    if (length_[i] >= max_interaction_length) {
+      index_factor[i] = number_of_cells_[i] / length_[i];
+      // std::nextafter implements a safety margin so that no valid position
+      // inside the grid can reference an out-of-bounds cell
+      while (index_factor[i] * length_[i] >= number_of_cells_[i]) {
+        index_factor[i] = std::nextafter(index_factor[i], 0.);
+      }
+      assert(index_factor[i] * length_[i] < number_of_cells_[i]);
     }
-    assert(index_factor[i] * length_[i] < number_of_cells_[i]);
   }
-
-  cell_volume_ = (length_[0] / number_of_cells_[0]) *
-                 (length_[1] / number_of_cells_[1]) *
-                 (length_[2] / number_of_cells_[2]);
 
   if (O == GridOptions::Normal &&
       all_of(number_of_cells_, [](SizeType n) { return n <= 2; })) {
@@ -197,6 +198,11 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                  });  // filter out the particles that can not interact
   } else {
     // construct a normal grid
+
+    cell_volume_ = (length_[0] / number_of_cells_[0]) *
+                   (length_[1] / number_of_cells_[1]) *
+                   (length_[2] / number_of_cells_[2]);
+
     logg[LGrid].debug("min: ", min_position, "\nlength: ", length_,
                       "\ncell_volume: ", cell_volume_,
                       "\ncells: ", number_of_cells_,

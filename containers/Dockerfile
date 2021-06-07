@@ -11,16 +11,16 @@ LABEL maintainer.email="g.inghirami@gsi.de"
 
 RUN echo "deb http://ftp.uni-mainz.de/ubuntu/ focal restricted multiverse main universe" > /etc/apt/sources.list \
 && echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-updates restricted multiverse main universe" >> /etc/apt/sources.list \
-&& echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-security restricted multiverse main universe" >> /etc/apt/sources.list \
+&& echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-security restricted multiverse main universe" >> /etc/apt/sources.list 
 
-#we want to install the packages non interactively    
+#we want to install the packages non interactively
 
-&& echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections 
 
 
-#we update the distribution and we install several additional packages 
+#we update the distribution and we install several additional packages
 
-&& apt-get update && \
+RUN apt-get update && \
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime && \
 apt-get -y upgrade && \
 apt-get -y install \
@@ -210,6 +210,7 @@ gpg-wks-server  \
 gpgconf  \
 gpgsm  \
 gpgv  \
+graphviz \
 grep  \
 groff-base  \
 gsettings-desktop-schemas  \
@@ -231,6 +232,7 @@ ibus-gtk:amd64  \
 ibus-gtk3:amd64  \
 icu-devtools  \
 iio-sensor-proxy  \
+imagemagick \
 im-config  \
 init-system-helpers  \
 ippusbxd  \
@@ -1213,6 +1215,8 @@ systemd-sysv  \
 systemd-timesyncd  \
 sysvinit-utils  \
 tar  \
+texlive-latex-base \
+texlive-pstricks \
 tk8.6-blt2.5  \
 ttf-bitstream-vera  \
 tzdata  \
@@ -1253,6 +1257,7 @@ x11proto-xinerama-dev  \
 xauth  \
 xdg-dbus-proxy  \
 xdg-user-dirs  \
+xdot \
 xfonts-base  \
 xfonts-encodings  \
 xfonts-utils  \
@@ -1288,7 +1293,7 @@ zenity  \
 zenity-common  \
 zip  \
 zlib1g:amd64  \
-zlib1g-dev:amd64  
+zlib1g-dev:amd64
 
 
 #we set the number of concurrent processes used by Docker to build the container image when executing make/cmake
@@ -1297,14 +1302,15 @@ ARG NUMBER_OF_PROCS_FOR_COMPILATION=2
 
 #we create the /SMASH directory
 
-WORKDIR /SMASH 
+WORKDIR /SMASH
 
-#we use pip to install a few python2 libraries (seaborn and, automatically as dependencies, matplotlib, scipy, pandas, yaml and numpy)    
+#we use pip to install a few python2 libraries (seaborn and, automatically as dependencies, matplotlib, scipy, pandas, yaml and numpy)
+#we use the -O option to overwrite a possible pre-exhisting older local version of get-pip.py
 
-RUN https://bootstrap.pypa.io/pip/2.7/get-pip.py
-RUN python2 get-pip.py 
+RUN wget -O get-pip.py https://bootstrap.pypa.io/pip/2.7/get-pip.py
+RUN python2 get-pip.py
 RUN pip install seaborn && \
-rm get-pip.py 
+rm get-pip.py
 
 #here we download and install several libraries/programs used by SMASH
 
@@ -1314,27 +1320,27 @@ cd pythia8303 && \
 ./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC -march=x86-64' --prefix=/SMASH/pythia_8_303 && \
 make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 make install && \
-echo /SMASH/pythia_8_303/lib >> /etc/ld.so.conf && ldconfig && \
-  
-cd /SMASH && \
+echo /SMASH/pythia_8_303/lib >> /etc/ld.so.conf && ldconfig
+
+RUN cd /SMASH && \
 wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-3.2.3.tar.gz && \
 tar xf HepMC3-3.2.3.tar.gz && \
 mkdir -p HepMC3_build && \
 cd HepMC3_build && \
 cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=OFF -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" ../HepMC3-3.2.3 && \
 make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
-make install && \
-  
-cd /SMASH && \
-wget https://root.cern/download/root_v6.22.06.source.tar.gz && \
-tar xf root_v6.22.06.source.tar.gz && \
-mv root-6.22.06 root_src && \
-mkdir -p root_6_22_06 && \
+make install
+
+RUN cd /SMASH && \
+wget https://root.cern/download/root_v6.22.08.source.tar.gz && \
+tar xf root_v6.22.08.source.tar.gz && \
+mv root-6.22.08 root_src && \
+mkdir -p root_6_22_08 && \
 mkdir -p root_build && \
 cd root_build && \
-cmake -DCMAKE_INSTALL_PREFIX=../root_6_22_06 ../root_src  -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64"&& \
+cmake -DCMAKE_INSTALL_PREFIX=../root_6_22_08 ../root_src  -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64"&& \
 cmake --build . --target install -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
-ROOTSYS=/SMASH/root_6_22_06 &&  \
+ROOTSYS=/SMASH/root_6_22_08 &&  \
 export PATH=$ROOTSYS/bin:$PATH && \
 export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH && \
 export SHLIB_PATH=$ROOTSYS/lib && \
@@ -1342,9 +1348,9 @@ export LIBPATH=$ROOTSYS/lib && \
 export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH && \
 export MANPATH=$ROOTSYS/man:$MANPATH && \
 export CMAKE_PREFIX_PATH=$ROOTSYS:$CMAKE_PREFIX_PATH && \
-echo /SMASH/root/lib >> /etc/ld.so.conf && ldconfig && \
+echo /SMASH/root/lib >> /etc/ld.so.conf && ldconfig
 
-cd /SMASH && \
+RUN cd /SMASH && \
 git clone git://github.com/hoxu/gitstats.git && \
 cd gitstats && \
 make install && \
@@ -1357,20 +1363,47 @@ g++ -o cppcheck -std=c++11 -Iexternals -Iexternals/simplecpp -Iexternals/tinyxml
 wget https://raw.githubusercontent.com/cpplint/cpplint/develop/cpplint.py && \
 mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck cpplint.py /SMASH/auxiliary_progs/  && \
 chmod +x /SMASH/auxiliary_progs/* && \
-PATH=$PATH:/SMASH/auxiliary_progs && \
+PATH=$PATH:/SMASH/auxiliary_progs
 
-cd /SMASH && \
+#now we install Rivet, first fixing a few details in the bootstrap script
+
+RUN wget https://gitlab.com/hepcedar/rivetbootstrap/raw/3.1.4/rivet-bootstrap
+#we set the Rivet installation directory
+RUN sed -i "6s/\$PWD\/local/\/SMASH\/Rivet_3_1_4_install/" rivet-bootstrap
+#we set the number of concurrent compilation processes
+RUN sed -i "7s/j$NUMBER_OF_PROCS_FOR_COMPILATION/j3/" rivet-bootstrap
+#we disable the installation of hepmc3, already installed
+RUN sed -i "9s/1/0/" rivet-bootstrap
+#we update the hepmc3 version
+RUN sed -i "18s/2.06.11/3.2.3/" rivet-bootstrap
+#we provide the hepm3 installation path
+RUN sed -i "50s/usr/\SMASH\/hepmc3-install/" rivet-bootstrap
+
+#now we really compile and install Rivet
+
+RUN chmod +x rivet-bootstrap && \
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/SMASH/hepmc3-install/lib && \
+./rivet-bootstrap
+
+# eventually, we download and compile SMASH
+
+RUN cd /SMASH && \
 git clone https://github.com/smash-transport/smash.git && \
 mkdir -p smash_bin && \
 cd smash_bin && \
 cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_8_303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" && \
-make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
+make -j$NUMBER_OF_PROCS_FOR_COMPILATION
 
 #we remove most of the sources
-cd /SMASH && \
-rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.06.source.tar.gz root_build root_src /var/cache/apt/archives/*.deb 
+
+RUN cd /SMASH && \
+rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.08.source.tar.gz root_build root_src Rivet-3.1.4 rivet-bootstrap /var/cache/apt/archives/*.deb
+
+#we allow Imagemagick to process PS, EPS and PDF files
+RUN sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" -e "/EPS/d" -e "/PDF/d" -e "/XPS/d" /etc/ImageMagick-6/policy.xml
 
 #we set up the shell prompt during the container execution
+
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
@@ -1383,7 +1416,7 @@ ENV PATH $PYTHIA8/bin:$PATH
 
 ENV PATH $PATH:/SMASH/smash_bin:/SMASH/auxiliary_progs
 
-ENV ROOTSYS /SMASH/root_6_22_06
+ENV ROOTSYS /SMASH/root_6_22_08
 ENV PATH $ROOTSYS/bin:$PATH
 ENV LD_LIBRARY_PATH $ROOTSYS/lib:$LD_LIBRARY_PATH
 ENV SHLIB_PATH $ROOTSYS/lib
@@ -1395,3 +1428,13 @@ ENV JUPYTER_PATH $ROOTSYS/etc/notebook:$JUPYTER_PATH
 ENV JUPYTER_CONFIG_DIR $ROOTSYS/etc/notebook:$JUPYTER_CONFIG_DIR
 ENV CLING_STANDARD_PCH none
 
+#environment variables for Rivet
+
+ENV PATH /SMASH/Rivet_3_1_4_install/bin:$PATH
+ENV LD_LIBRARY_PATH "/SMASH/Rivet_3_1_4_install/lib:/SMASH/Rivet_3_1_4_install/lib64:/SMASH/hepmc3-install/lib:$LD_LIBRARY_PATH"
+ENV PYTHONPATH "/SMASH/Rivet_3_1_4_install/lib/python2.7/site-packages:$PYTHONPATH"
+ENV TEXMFHOME "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf:$TEXMFHOME"
+ENV HOMETEXMF "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf:$HOMETEXMF"
+ENV TEXMFCNF "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf/cnf:$TEXMFCNF"
+ENV TEXINPUTS "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf/tex//:$TEXINPUTS"
+ENV LATEXINPUTS "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf/tex//:$LATEXINPUTS"

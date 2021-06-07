@@ -106,7 +106,11 @@ CrossSections::CrossSections(const ParticleList& incoming_particles,
       is_BBbar_pair_(incoming_particles_[0].type().is_baryon() &&
                      incoming_particles_[1].type().is_baryon() &&
                      incoming_particles_[0].type().antiparticle_sign() ==
-                         -incoming_particles_[1].type().antiparticle_sign()) {}
+                         -incoming_particles_[1].type().antiparticle_sign()),
+      is_NNbar_pair_(
+          incoming_particles_[0].type().is_nucleon() &&
+          incoming_particles_[1].pdgcode() ==
+              incoming_particles_[0].type().get_antiparticle()->pdgcode()) {}
 
 CollisionBranchList CrossSections::generate_collision_list(
     double elastic_parameter, bool two_to_one_switch,
@@ -166,23 +170,21 @@ CollisionBranchList CrossSections::generate_collision_list(
       append_list(process_list, two_to_three(), (1. - p_pythia) * scale_xs);
     }
   }
+  if (nnbar_treatment == NNbarTreatment::TwoToFive && is_NNbar_pair_) {
+    // NNbar directly to 5 pions (2-to-5)
+    process_list.emplace_back(NNbar_to_5pi(scale_xs));
+  }
+
   /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
    * ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
    * Only use in cases when detailed balance MUST happen, i.e. in a box! */
   if (nnbar_treatment == NNbarTreatment::Resonances) {
-    if (included_2to2[IncludedReactions::NNbar] != 1) {
-      throw std::runtime_error(
-          "'NNbar' has to be in the list of allowed 2 to 2 processes "
-          "to enable annihilation to go through resonances");
-    }
-    if (t1.is_nucleon() && t2.pdgcode() == t1.get_antiparticle()->pdgcode()) {
+    if (is_NNbar_pair_) {
       /* Has to be called after the other processes are already determined,
        * so that the sum of the cross sections includes all other processes. */
       process_list.emplace_back(
           NNbar_annihilation(sum_xs_of(process_list), scale_xs));
-    }
-    if ((t1.pdgcode() == pdg::rho_z && t2.pdgcode() == pdg::h1) ||
-        (t1.pdgcode() == pdg::h1 && t2.pdgcode() == pdg::rho_z)) {
+    } else {
       append_list(process_list, NNbar_creation(), scale_xs);
     }
   }
@@ -2430,6 +2432,23 @@ double CrossSections::string_hard_cross_section() const {
   return cross_sec;
 }
 
+CollisionBranchPtr CrossSections::NNbar_to_5pi(const double scale_xs) const {
+  const double s = sqrt_s_ * sqrt_s_;
+  /* Use difference between total and elastic in order to conserve detailed
+   * balance for all inelastoc NNbar processes. */
+  const double nnbar_xsec = std::max(0., ppbar_total(s) - ppbar_elastic(s));
+  logg[LCrossSections].debug("NNbar cross section for 2-to-5 is: ", nnbar_xsec);
+
+  /* Make collision channel NNbar -> 5π (with same final state as resonance
+   * approach). */
+  const auto& type_piz = ParticleType::find(pdg::pi_z);
+  const auto& type_pip = ParticleType::find(pdg::pi_p);
+  const auto& type_pim = ParticleType::find(pdg::pi_m);
+  return make_unique<CollisionBranch>(type_pip, type_pim, type_pip, type_pim,
+                                      type_piz, nnbar_xsec * scale_xs,
+                                      ProcessType::TwoToFive);
+}
+
 CollisionBranchPtr CrossSections::NNbar_annihilation(
     const double current_xs, const double scale_xs) const {
   /* Calculate NNbar cross section:
@@ -2445,29 +2464,33 @@ CollisionBranchPtr CrossSections::NNbar_annihilation(
 
 CollisionBranchList CrossSections::NNbar_creation() const {
   CollisionBranchList channel_list;
-  /* Calculate NNbar reverse cross section:
-   * from reverse reaction (see NNbar_annihilation_cross_section).*/
-  const double s = sqrt_s_ * sqrt_s_;
-  const double pcm = cm_momentum();
+  const ParticleType& type_a = incoming_particles_[0].type();
+  const ParticleType& type_b = incoming_particles_[1].type();
+  if ((type_a.pdgcode() == pdg::rho_z && type_b.pdgcode() == pdg::h1) ||
+      (type_a.pdgcode() == pdg::h1 && type_b.pdgcode() == pdg::rho_z)) {
+    /* Calculate NNbar reverse cross section:
+     * from reverse reaction (see NNbar_annihilation_cross_section).*/
+    const double s = sqrt_s_ * sqrt_s_;
+    const double pcm = cm_momentum();
 
-  const auto& type_N = ParticleType::find(pdg::p);
-  const auto& type_Nbar = ParticleType::find(-pdg::p);
+    const auto& type_N = ParticleType::find(pdg::p);
+    const auto& type_Nbar = ParticleType::find(-pdg::p);
 
-  // Check available energy
-  if (sqrt_s_ - 2 * type_N.mass() < 0) {
-    return channel_list;
+    // Check available energy
+    if (sqrt_s_ - 2 * type_N.mass() < 0) {
+      return channel_list;
+    }
+
+    double xsection = detailed_balance_factor_RR(sqrt_s_, pcm, type_a, type_b,
+                                                 type_N, type_Nbar) *
+                      std::max(0., ppbar_total(s) - ppbar_elastic(s));
+    logg[LCrossSections].debug("NNbar reverse cross section is: ", xsection);
+    channel_list.push_back(make_unique<CollisionBranch>(
+        type_N, type_Nbar, xsection, ProcessType::TwoToTwo));
+    channel_list.push_back(make_unique<CollisionBranch>(
+        ParticleType::find(pdg::n), ParticleType::find(-pdg::n), xsection,
+        ProcessType::TwoToTwo));
   }
-
-  double xsection = detailed_balance_factor_RR(
-                        sqrt_s_, pcm, incoming_particles_[0].type(),
-                        incoming_particles_[1].type(), type_N, type_Nbar) *
-                    std::max(0., ppbar_total(s) - ppbar_elastic(s));
-  logg[LCrossSections].debug("NNbar reverse cross section is: ", xsection);
-  channel_list.push_back(make_unique<CollisionBranch>(
-      type_N, type_Nbar, xsection, ProcessType::TwoToTwo));
-  channel_list.push_back(make_unique<CollisionBranch>(
-      ParticleType::find(pdg::n), ParticleType::find(-pdg::n), xsection,
-      ProcessType::TwoToTwo));
   return channel_list;
 }
 
@@ -2734,6 +2757,8 @@ double CrossSections::string_probability(bool strings_switch,
 
   if (!is_NN_scattering && !is_BBbar_scattering && !is_Npi_scattering &&
       !is_AQM_scattering) {
+    return 0.;
+  } else if (is_NNbar_pair_ && !treat_BBbar_with_strings) {
     return 0.;
   } else if (is_BBbar_scattering) {
     // BBbar only goes through strings, so there are no "window" considerations

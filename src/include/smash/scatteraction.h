@@ -237,6 +237,9 @@ class ScatterAction : public Action {
   /// Perform a two-to-three-body scattering
   void two_to_three_scattering();
 
+  /// Perform a two-to-five-body scattering
+  void two_to_five_scattering();
+
   /**
    * Todo(ryu): document better - it is not really UrQMD-based, isn't it?
    * Perform the UrQMD-based string excitation and decay

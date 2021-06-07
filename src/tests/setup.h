@@ -71,6 +71,17 @@ inline void create_smashon_particletypes() {
       " + 661\n");
 }
 
+/**
+ * Creates a ParticleType list containing only the smashon test particle with
+ * width 0 (stable).
+ */
+inline void create_stable_smashon_particletypes() {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "σ " +
+      std::to_string(smashon_mass) + " 0.0 + 661\n");
+}
+
 /// A FourVector that is marked as a position vector.
 struct Position : public FourVector {
   using FourVector::FourVector;

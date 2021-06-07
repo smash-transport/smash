@@ -337,10 +337,27 @@ ScatterActionsFinder::ScatterActionsFinder(
     throw std::invalid_argument(
         "To prevent double counting it is not possible to enable deuteron 3->2 "
         "reactions\nand reactions involving the d' at the same time\ni.e. to "
-        "include `Deuteron_3to2` in `Multi_Particle_Reactions` and\n "
+        "include \"Deuteron_3to2\" in `Multi_Particle_Reactions` and\n "
         "\"PiDeuteron_to_pidprime\" "
         "or \"NDeuteron_to_Ndprime\" in `Included_2to2` at the same time.\n"
         "Change your config accordingly.");
+  }
+
+  if ((nnbar_treatment_ == NNbarTreatment::TwoToFive &&
+       incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] != 1) ||
+      (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] == 1 &&
+       nnbar_treatment_ != NNbarTreatment::TwoToFive)) {
+    throw std::invalid_argument(
+        "In order to conserve detailed balance, when \"NNbar_5to2\" is "
+        "included in\n`Multi_Particle_Reactions`, the `NNbarTreatment` has to "
+        "be set to \"two to five\" and vice versa.");
+  }
+
+  if (nnbar_treatment_ == NNbarTreatment::Resonances &&
+      incl_set_[IncludedReactions::NNbar] != 1) {
+    throw std::invalid_argument(
+        "'NNbar' has to be in the list of allowed 2 to 2 processes "
+        "to enable annihilation to go through resonances");
   }
 
   if (strings_switch_) {
@@ -549,7 +566,7 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
 
   /* 4. Return total collision probability
    *    Scales with 1 over the number of testpartciles to the power of the
-   *    number of incoming particles - 1) */
+   *    number of incoming particles - 1 */
   const double prob =
       act->get_total_weight() / std::pow(testparticles_, plist.size() - 1);
 
@@ -591,18 +608,41 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
       if (incl_multi_set_.any()) {
         // Also, check for 3 particle scatterings with stochastic criterion
         for (const ParticleData& p3 : search_list) {
-          if (p1.id() < p2.id() && p2.id() < p3.id()) {
-            ActionPtr act =
-                check_collision_multi_part({p1, p2, p3}, dt, gcell_vol);
-            if (act) {
-              actions.push_back(std::move(act));
+          if (incl_multi_set_[IncludedMultiParticleReactions::Deuteron_3to2] ==
+                  1 ||
+              incl_multi_set_[IncludedMultiParticleReactions::Meson_3to1] ==
+                  1) {
+            if (p1.id() < p2.id() && p2.id() < p3.id()) {
+              ActionPtr act =
+                  check_collision_multi_part({p1, p2, p3}, dt, gcell_vol);
+              if (act) {
+                actions.push_back(std::move(act));
+              }
+            }
+          }
+          if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] ==
+                  1 &&
+              search_list.size() >= 5) {
+            for (const ParticleData& p4 : search_list) {
+              for (const ParticleData& p5 : search_list) {
+                if ((p1.id() < p2.id() && p2.id() < p3.id() &&
+                     p3.id() < p4.id() && p4.id() < p5.id()) &&
+                    (p1.is_pion() && p2.is_pion() && p3.is_pion() &&
+                     p4.is_pion() && p5.is_pion())) {
+                  // at the moment only pure pion 5-body reactions
+                  ActionPtr act = check_collision_multi_part(
+                      {p1, p2, p3, p4, p5}, dt, gcell_vol);
+                  if (act) {
+                    actions.push_back(std::move(act));
+                  }
+                }
+              }
             }
           }
         }
       }
     }
   }
-
   return actions;
 }
 
@@ -763,10 +803,10 @@ namespace decaytree {
 /**
  * Node of a decay tree, representing a possible action (2-to-2 or 1-to-2).
  *
- * This data structure can be used to build a tree going from the initial state
- * (a collision of two particles) to all possible final states by recursively
- * performing all possible decays. The tree can be used to calculate the final
- * state cross sections.
+ * This data structure can be used to build a tree going from the initial
+ * state (a collision of two particles) to all possible final states by
+ * recursively performing all possible decays. The tree can be used to
+ * calculate the final state cross sections.
  *
  * The initial actions are 2-to-2 or 2-to-1 scatterings, all other actions are
  * 1-to-2 decays.
@@ -865,8 +905,8 @@ struct Node {
 
  private:
   /**
-   * Internal helper function for `print`, to be called recursively to print all
-   * nodes.
+   * Internal helper function for `print`, to be called recursively to print
+   * all nodes.
    *
    * \param depth Recursive call depth.
    */
@@ -971,8 +1011,8 @@ static void add_decays(Node& node, double sqrts) {
   // gives the number of reorderings.
   //
   // Ideally, the redundant paths should never be added to the decay tree, but
-  // we never have more than two redundant paths, so it probably does not matter
-  // much.
+  // we never have more than two redundant paths, so it probably does not
+  // matter much.
   uint32_t n_unstable = 0;
   double sqrts_minus_masses = sqrts;
   for (const ParticleTypePtr ptype : node.state_) {
