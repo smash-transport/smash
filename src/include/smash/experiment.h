@@ -42,6 +42,7 @@
 #endif
 #include "icoutput.h"
 #include "oscaroutput.h"
+#include "thermodynamiclatticeoutput.h"
 #include "thermodynamicoutput.h"
 #ifdef SMASH_USE_ROOT
 #include "rootoutput.h"
@@ -369,6 +370,9 @@ class Experiment : public ExperimentBase {
   /// Number of fractional photons produced per single reaction
   int n_fractional_photons_;
 
+  /// 4-current for j_QBS lattice output
+  std::unique_ptr<DensityLattice> j_QBS_lat_;
+
   /// Baryon density on the lattices
   std::unique_ptr<DensityLattice> jmu_B_lat_;
 
@@ -416,11 +420,26 @@ class Experiment : public ExperimentBase {
   /// Whether to print the energy-momentum tensor in Landau frame
   bool printout_tmn_landau_ = false;
 
-  /// Whether to print the 4-velocity in Landau fram
+  /// Whether to print the 4-velocity in Landau frame
   bool printout_v_landau_ = false;
+
+  /// Whether to print the Q, B, S 4-currents
+  bool printout_j_QBS_ = false;
 
   /// Whether to print the thermodynamics quantities evaluated on the lattices
   bool printout_lattice_td_ = false;
+
+  /// Whether to print the thermodynamics quantities evaluated on the lattices,
+  /// point by point, in ASCII format
+  bool printout_full_lattice_ascii_td_ = false;
+
+  /// Whether to print the thermodynamics quantities evaluated on the lattices,
+  /// point by point, in Binary format
+  bool printout_full_lattice_binary_td_ = false;
+
+  /// Whether to print the thermodynamics quantities evaluated on the lattices,
+  /// point by point, in any format
+  bool printout_full_lattice_any_td_ = false;
 
   /// Instance of class used for forced thermalization
   std::unique_ptr<GrandCanThermalizer> thermalizer_;
@@ -620,6 +639,18 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Thermodynamics" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ThermodynamicOutput>(output_path, content, out_par));
+  } else if (content == "Thermodynamics" && (format == "Lattice_ASCII") ||
+             (format == "Lattice_Binary")) {
+    printout_full_lattice_any_td_ = true;
+    if (format == "Lattice_ASCII") {
+      printout_full_lattice_ascii_td_ = true;
+    }
+    if (format == "Lattice_Binary") {
+      printout_full_lattice_binary_td_ = true;
+    }
+    outputs_.emplace_back(make_unique<ThermodynamicLatticeOutput>(
+        output_path, content, out_par, printout_full_lattice_ascii_td_,
+        printout_full_lattice_binary_td_));
   } else if (content == "Thermodynamics" && format == "VTK") {
     printout_lattice_td_ = true;
     outputs_.emplace_back(
@@ -1023,6 +1054,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b Thermodynamics   This output allows to print out thermodynamic
    *          quantities, see \ref Thermodynamics.
    *    - Available formats: \ref thermodyn_output_user_guide_,
+   *      \ref thermodyn_lattice_output_,
    *      \ref output_vtk_lattice_
    * - \b Initial_Conditions  Special initial conditions output, see
    *                          \subpage input_ic for details
@@ -1061,6 +1093,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b "ASCII" - a human-readable text-format table of values
    *   - Used for "Thermodynamics", "Initial_Conditions" and "HepMC", see
    * \subpage thermodyn_output_user_guide_
+   * \subpage thermodyn_lattice_output_
    * \subpage IC_output_user_guide_
    * \ref hepmc_output_user_guide_
    *
@@ -1249,7 +1282,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * of the lattice. Intermediate values are interpolated. \n
    * The configuration of a lattice is usually not necessary, it is however
    * required if the Thermodynamic VTK Output (see
-   * \ref output_vtk_lattice_) or the \key Potentials_Affect_Thresholds option
+   * \ref output_vtk_lattice_), the Thermodynamic Lattice Output (see
+   * \ref thermodyn_lattice_output_ ) or the \key Potentials_Affect_Thresholds
+   option
    * is enabled. \n
    * The following parameters are only required, if the \key Lattice section is
    * used in the configuration file. Otherwise, no lattice will be used at all.
@@ -1273,7 +1308,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * energies of the actions.
    *
    * For information on the format of the lattice output see
-   * \ref output_vtk_lattice_. To configure the
+   * \ref output_vtk_lattice_ or \ref thermodyn_lattice_output_. To configure
+   the
    * thermodynamic output, see \ref input_output_options_.
    *
    * \n
@@ -1303,15 +1339,20 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     const std::array<double, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
 
-    if (printout_lattice_td_) {
+    if (printout_lattice_td_ || printout_full_lattice_any_td_) {
       dens_type_lattice_printout_ = output_parameters.td_dens_type;
       printout_tmn_ = output_parameters.td_tmn;
       printout_tmn_landau_ = output_parameters.td_tmn_landau;
       printout_v_landau_ = output_parameters.td_v_landau;
+      printout_j_QBS_ = output_parameters.td_jQBS;
     }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
       Tmn_ = make_unique<RectangularLattice<EnergyMomentumTensor>>(
           l, n, origin, periodic, LatticeUpdate::AtOutput);
+    }
+    if (printout_j_QBS_) {
+      j_QBS_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
+                                               LatticeUpdate::AtOutput);
     }
     /* Create baryon and isospin density lattices regardless of config
        if potentials are on. This is because they allow to compute
@@ -1351,9 +1392,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       jmu_custom_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                     LatticeUpdate::AtOutput);
     }
-  } else if (printout_lattice_td_) {
+  } else if (printout_lattice_td_ || printout_full_lattice_any_td_) {
     logg[LExperiment].error(
-        "If you want Thermodynamic VTK output, configure a lattice for it.");
+        "If you want Therm. VTK or Lattice output, configure a lattice for "
+        "it.");
   }
   // Warning for the mean field calculation if lattice is not on.
   if ((potentials_ != nullptr) && (jmu_B_lat_ == nullptr)) {
@@ -1573,6 +1615,40 @@ void Experiment<Modus>::initialize_new_event() {
     }
     // For thermodynamic output
     output->at_eventstart(ensembles_, event_);
+    // For thermodynamic lattice output
+    if (printout_full_lattice_any_td_) {
+      switch (dens_type_lattice_printout_) {
+        case DensityType::Baryon:
+          output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
+                                DensityType::Baryon, *jmu_B_lat_);
+          break;
+        case DensityType::BaryonicIsospin:
+          output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
+                                DensityType::BaryonicIsospin, *jmu_I3_lat_);
+          break;
+        case DensityType::None:
+          break;
+        default:
+          output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
+                                DensityType::BaryonicIsospin, *jmu_custom_lat_);
+      }
+      if (printout_tmn_) {
+        output->at_eventstart(event_, ThermodynamicQuantity::Tmn,
+                              dens_type_lattice_printout_, *Tmn_);
+      }
+      if (printout_tmn_landau_) {
+        output->at_eventstart(event_, ThermodynamicQuantity::TmnLandau,
+                              dens_type_lattice_printout_, *Tmn_);
+      }
+      if (printout_v_landau_) {
+        output->at_eventstart(event_, ThermodynamicQuantity::LandauVelocity,
+                              dens_type_lattice_printout_, *Tmn_);
+      }
+      if (printout_j_QBS_) {
+        output->at_eventstart(event_, ThermodynamicQuantity::j_QBS,
+                              dens_type_lattice_printout_, *j_QBS_lat_);
+      }
+    }
   }
 
   /* In the ColliderModus, if Fermi motion is frozen, assign the beam momenta
@@ -1969,6 +2045,9 @@ void Experiment<Modus>::intermediate_output() {
                                               wall_actions_this_interval;
   previous_interactions_total_ = interactions_total_;
   double E_mean_field = 0.0;
+  /// Auxiliary variable to communicate the time in the computational frame
+  /// at the functions printing the thermodynamics lattice output
+  double computational_frame_time = 0.0;
   if (potentials_) {
     // using the lattice is necessary
     if ((jmu_B_lat_ != nullptr)) {
@@ -2025,6 +2104,7 @@ void Experiment<Modus>::intermediate_output() {
 
         output->at_intermediate_time(ensembles_[i_ens], parameters_.outputclock,
                                      density_param_, event_info);
+        computational_frame_time = event_info.current_time;
       }
       // For thermodynamic output
       output->at_intermediate_time(ensembles_, parameters_.outputclock,
@@ -2037,6 +2117,8 @@ void Experiment<Modus>::intermediate_output() {
                          density_param_, ensembles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::Baryon, *jmu_B_lat_);
+          output->thermodynamics_lattice_output(*jmu_B_lat_,
+                                                computational_frame_time);
           break;
         case DensityType::BaryonicIsospin:
           update_lattice(jmu_I3_lat_.get(), lat_upd,
@@ -2045,6 +2127,8 @@ void Experiment<Modus>::intermediate_output() {
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::BaryonicIsospin,
                                         *jmu_I3_lat_);
+          output->thermodynamics_lattice_output(*jmu_I3_lat_,
+                                                computational_frame_time);
           break;
         case DensityType::None:
           break;
@@ -2055,6 +2139,8 @@ void Experiment<Modus>::intermediate_output() {
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         dens_type_lattice_printout_,
                                         *jmu_custom_lat_);
+          output->thermodynamics_lattice_output(*jmu_custom_lat_,
+                                                computational_frame_time);
       }
       if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
         update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
@@ -2062,15 +2148,27 @@ void Experiment<Modus>::intermediate_output() {
         if (printout_tmn_) {
           output->thermodynamics_output(ThermodynamicQuantity::Tmn,
                                         dens_type_lattice_printout_, *Tmn_);
+          output->thermodynamics_lattice_output(
+              ThermodynamicQuantity::Tmn, *Tmn_, computational_frame_time);
         }
         if (printout_tmn_landau_) {
           output->thermodynamics_output(ThermodynamicQuantity::TmnLandau,
                                         dens_type_lattice_printout_, *Tmn_);
+          output->thermodynamics_lattice_output(
+              ThermodynamicQuantity::TmnLandau, *Tmn_,
+              computational_frame_time);
         }
         if (printout_v_landau_) {
           output->thermodynamics_output(ThermodynamicQuantity::LandauVelocity,
                                         dens_type_lattice_printout_, *Tmn_);
+          output->thermodynamics_lattice_output(
+              ThermodynamicQuantity::LandauVelocity, *Tmn_,
+              computational_frame_time);
         }
+      }
+      if (printout_j_QBS_) {
+        output->thermodynamics_lattice_output(
+            *j_QBS_lat_, computational_frame_time, ensembles_, density_param_);
       }
 
       if (thermalizer_) {
@@ -2273,6 +2371,31 @@ void Experiment<Modus>::final_output() {
     }
     // For thermodynamic output
     output->at_eventend(ensembles_, event_);
+
+    // For thermodynamic lattice output
+    if (dens_type_lattice_printout_ != DensityType::None) {
+      output->at_eventend(event_, ThermodynamicQuantity::EckartDensity,
+                          dens_type_lattice_printout_);
+      output->at_eventend(ThermodynamicQuantity::EckartDensity);
+    }
+    if (printout_tmn_) {
+      output->at_eventend(event_, ThermodynamicQuantity::Tmn,
+                          dens_type_lattice_printout_);
+      output->at_eventend(ThermodynamicQuantity::Tmn);
+    }
+    if (printout_tmn_landau_) {
+      output->at_eventend(event_, ThermodynamicQuantity::TmnLandau,
+                          dens_type_lattice_printout_);
+      output->at_eventend(ThermodynamicQuantity::TmnLandau);
+    }
+    if (printout_v_landau_) {
+      output->at_eventend(event_, ThermodynamicQuantity::LandauVelocity,
+                          dens_type_lattice_printout_);
+      output->at_eventend(ThermodynamicQuantity::LandauVelocity);
+    }
+    if (printout_j_QBS_) {
+      output->at_eventend(ThermodynamicQuantity::j_QBS);
+    }
   }
 }
 

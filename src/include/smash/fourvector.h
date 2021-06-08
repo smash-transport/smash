@@ -86,6 +86,11 @@ class FourVector {
   ThreeVector inline threevec() const;
 
   /**
+   * Set all the 4-vector components to 0
+   */
+  void inline reset();
+
+  /**
    * Get the velocity (3-vector divided by zero component).
    * Should only be used with momentum 4-vectors (not with space-time ones).
    *
@@ -471,6 +476,13 @@ double inline FourVector::tau() const {
 
 double inline FourVector::eta() const {
   return std::atanh(this->x3() / this->x0());
+}
+
+void inline FourVector::reset() {
+  this->x_[0] = 0.;
+  this->x_[1] = 0.;
+  this->x_[2] = 0.;
+  this->x_[3] = 0.;
 }
 
 /**\ingroup logging
