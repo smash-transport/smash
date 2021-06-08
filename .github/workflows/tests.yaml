@@ -67,7 +67,7 @@ jobs:
             sudo apt-get install ${{ matrix.packages_to_add }} -y
         fi
         # we download and install Pythia
-        wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8303.tgz && tar xf pythia8303.tgz && rm pythia8303.tgz && cd pythia8303
+        wget https://pythia.org/download/pythia83/pythia8303.tgz && tar xf pythia8303.tgz && rm pythia8303.tgz && cd pythia8303
         ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC' && make -j$(nproc) && cd ..
         # we download and unpack clang
         if [ $OS_NAME == "macos-latest" ]; then curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
