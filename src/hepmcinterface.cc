@@ -173,15 +173,19 @@ void HepMcInterface::at_eventend(const Particles& particles,
     clear();
     return;
   }
-  CollCounter part_coll = coll_[std::slice(0, proj_N_, 1)];
-  CollCounter targ_coll = coll_[std::slice(proj_N_, total_N_ - proj_N_, 1)];
-  ion_->Ncoll_hard = ncoll_hard_;
-  ion_->Ncoll = ncoll_;
-  // TODO(stdnmr) What Npart definition is this? Do we leave this in?
-  // Probably no.
-  ion_->Npart_proj = CollCounter(part_coll[part_coll > 0]).sum();
-  ion_->Npart_targ = CollCounter(targ_coll[targ_coll > 0]).sum();
-
+  /* since the number of collisions is not an experimental obervable, we set it
+   * to -1.
+   */
+  ion_->Ncoll_hard = -1;
+  ion_->Ncoll = -1;
+  /* This should be the number of participants in the projectile nucleus.
+   * However, to avoid confusion with the Glauber model, we prefer to set it -1.
+   */
+  ion_->Npart_proj = -1;
+  /* his should be the number of participants in the target nucleus.
+   * However, to avoid confusion with the Glauber model, we prefer to set it -1.
+   */
+  ion_->Npart_targ = -1;
   // If we only do final state events, then take particle
   // Note, we should already have the particles if not only final
   // state
