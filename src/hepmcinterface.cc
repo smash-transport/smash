@@ -121,43 +121,17 @@ void HepMcInterface::at_interaction(const Action& action,
     event_.add_vertex(vp);
   }
 
-  bool has_proj = false;
-  bool has_targ = false;
-  // Check if we have initial particles on _both_ sides
-  for (auto& i : action.incoming_particles()) {
-    if (type != ProcessType::Elastic) {
-      if (i.id() < proj_N_) {
-        has_proj = true;
-      } else if (i.id() < total_N_) {
-        has_targ = true;
-      }
-    }
-  }
-  // Check if this a collision and count it
-  bool is_coll = has_proj && has_targ;
-  if (is_coll) {
-    ncoll_++;
-    if (type == ProcessType::StringHard) {
-      ncoll_hard_++;
-    }
-  }
-
   // Now mark participants
-  for (auto& i : action.incoming_particles()) {
-    if (is_coll) {
-      coll_[i.id()]++;
+  if (full_event_) {
+    for (auto& i : action.incoming_particles()) {
+      // Create tree
+      HepMC3::GenParticlePtr ip = find_or_make(i, status);
+      ip->set_status(status);
+      vp->add_particle_in(ip);
     }
-
-    if (!full_event_)
-      continue;
-
-    // Create tree
-    HepMC3::GenParticlePtr ip = find_or_make(i, status);
-    ip->set_status(status);
-    vp->add_particle_in(ip);
-  }
-  if (!full_event_)
+  } else {
     return;
+  }
 
   // Add outgoing particles
   for (auto& o : action.outgoing_particles()) {
