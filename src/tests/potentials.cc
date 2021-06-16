@@ -264,8 +264,8 @@ TEST(propagation_in_test_potential) {
 /*
  * The idea is to compute potentials from the same set of particles,
  * but in one case they are testparticles in one ensemble, while in the
- * other case they are particles in many ensembles. The density from both calculations
- * should be the same, so the potentials should be identical too.
+ * other case they are particles in many ensembles. The density from both
+ * calculations should be the same, so the potentials should be identical too.
  *
  */
 TEST(ensembles_vs_testparticles) {
@@ -283,23 +283,24 @@ TEST(ensembles_vs_testparticles) {
     plist.push_back(p);
   }
 
-
   std::string conf_pot =
-    "Potentials:\n"
-    "    Skyrme:\n"
-    "        Skyrme_A: -209.2\n"
-    "        Skyrme_B: 156.4\n"
-    "        Skyrme_Tau: 1.35\n"
-    "    Symmetry:\n"
-    "        S_Pot: 18.0\n";
-  Configuration conf1 = Test::configuration(conf_pot), conf2 = Test::configuration(conf_pot);
+      "Potentials:\n"
+      "    Skyrme:\n"
+      "        Skyrme_A: -209.2\n"
+      "        Skyrme_B: 156.4\n"
+      "        Skyrme_Tau: 1.35\n"
+      "    Symmetry:\n"
+      "        S_Pot: 18.0\n";
+  Configuration conf1 = Test::configuration(conf_pot),
+                conf2 = Test::configuration(conf_pot);
   ExperimentParameters param1 = smash::Test::default_parameters(),
                        param2 = smash::Test::default_parameters();
   param1.testparticles = Ntest;
   param1.n_ensembles = 1;
   param2.testparticles = 1;
   param2.n_ensembles = Ntest;
-  Potentials pot1(conf1["Potentials"], param1), pot2(conf2["Potentials"], param2);
+  Potentials pot1(conf1["Potentials"], param1),
+      pot2(conf2["Potentials"], param2);
 
   const ThreeVector r = ThreeVector(0., 0., 0.);
   const auto forces1 = pot1.all_forces(r, plist),
