@@ -434,10 +434,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
             const ThreeVector r = lat->cell_center(ix, iy, iz);
             const auto sf = unnormalized_smearing_factor(pos - r, p, m_inv, par,
                                                          compute_gradient);
-            if (sf.first * norm_factor >
-                really_small / (par.ntest() * par.nensembles())) {
-              node.add_particle(part, sf.first * norm_factor * dens_factor);
-            }
+            node.add_particle(part, sf.first * norm_factor * dens_factor);
             if (compute_gradient) {
               node.add_particle_for_derivatives(part, dens_factor,
                                                 sf.second * norm_factor);
