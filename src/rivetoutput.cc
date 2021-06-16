@@ -45,6 +45,16 @@ namespace smash {
  *   interaction point. This allows tracking of the individual
  *   nucleons.
  *
+ * Only one format can be chosen. SMASH will use the first format recognized as
+ * valid, ignoring the rest.
+ * Please, note that choosing YODA or YODA-full determines the kind of
+ * information available to the analysis, but the content of the final YODA
+ * files depends on the analysis itself.
+ * Depending on what it does, the analysis might work fine with both formats,
+ * nevertheless, if it is not necessary to know the structure of the whole
+ * event, it is recommended to choose the lighter YODA format, thus saving
+ * computational time and resources (especially the RAM).
+ *
  * \section rivet_output_user_guide_config_ Configuration
  *
  * The Rivet process can be configured in the main configuration

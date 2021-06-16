@@ -677,14 +677,25 @@ void Experiment<Modus>::create_output(const std::string &format,
 #endif
   } else if (content == "Rivet") {
 #ifdef SMASH_USE_RIVET
+    // flag to ensure that the Rivet format has not been already assigned
+    static bool rivet_format_already_selected = false;
+    // if the next check is true, then we are trying to assign the format twice
+    if (rivet_format_already_selected) {
+      logg[LExperiment].warn(
+          "Rivet output format can only be one, either YODA or YODA-full. "
+          "Only your first valid choice will be used.");
+      return;
+    }
     if (format == "YODA") {
       outputs_.emplace_back(make_unique<RivetOutput>(
           output_path, "SMASH_Rivet", false, modus_.total_N_number(),
           modus_.proj_N_number(), out_par));
+      rivet_format_already_selected = true;
     } else if (format == "YODA-full") {
       outputs_.emplace_back(make_unique<RivetOutput>(
           output_path, "SMASH_Rivet_full", true, modus_.total_N_number(),
           modus_.proj_N_number(), out_par));
+      rivet_format_already_selected = true;
     } else {
       logg[LExperiment].error("Rivet format " + format +
                               "not one of YODA or YODA-full");
