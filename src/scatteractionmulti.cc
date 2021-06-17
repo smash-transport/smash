@@ -455,7 +455,7 @@ void ScatterActionMulti::five_to_two() {
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
   logg[LScatterActionMulti].debug("5->2 scattering:", incoming_particles_,
-                                 " -> ", outgoing_particles_);
+                                  " -> ", outgoing_particles_);
 }
 
 bool ScatterActionMulti::three_different_pions(
