@@ -35,28 +35,6 @@ double HeavisideTheta(double x) {
   }
 }
 
-/** Cross section after cut off.
- *
- * Photon cross sections diverge tremendously at the threshold which
- * becomes particularly problematic when running with broad rho
- * mesons. Then the actual photon cross section is used for the
- * weight: W = Sigma_photon/Sigma_hadron.  If the photon cross
- * section diverges, the weight becomes huge and we significantly
- * overestimate photon production. This cutoff fixes the problem.
- *
- * Either the cross section is returned or, if the cross section i
- * larger than the cut off, the cut off value is returned.
- *
- * \param[in] sigma_mb cross section before cut off [mb]
- * \return Cross section after cut off [mb]
- */
-double cut_off(const double sigma_mb) {
-  constexpr double maximum_cross_section_photon = 200.0;  // [mb]
-  return (sigma_mb > maximum_cross_section_photon)
-             ? maximum_cross_section_photon
-             : sigma_mb;
-}
-
 }  // anonymous namespace
 
 /*
@@ -71,8 +49,13 @@ double cut_off(const double sigma_mb) {
 */
 
 namespace smash {
-// template class CrosssectionsPhoton<ComputationMethod::Analytic>; (really
-// remove this?)
+
+double cut_off(const double sigma_mb) {
+  constexpr double maximum_cross_section_photon = 200.0;  // [mb]
+  return (sigma_mb > maximum_cross_section_photon)
+             ? maximum_cross_section_photon
+             : sigma_mb;
+}
 
 /*----------------------------------------------------------------------------*/
 /*                               Pi + Rho -> Pi + Photon channels mediated by */
