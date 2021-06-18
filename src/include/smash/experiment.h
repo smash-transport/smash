@@ -1908,10 +1908,8 @@ void Experiment<Modus>::run_time_evolution() {
      *     compute new momenta according to equations of motion */
     if (potentials_) {
       update_potentials();
-      for (Particles &particles : ensembles_) {
-        update_momenta(&particles, parameters_.labclock->timestep_duration(),
-                       *potentials_, FB_lat_.get(), FI3_lat_.get());
-      }
+      update_momenta(ensembles_, parameters_.labclock->timestep_duration(),
+                     *potentials_, FB_lat_.get(), FI3_lat_.get());
     }
 
     /* (4) Expand universe if non-minkowskian metric; updates
