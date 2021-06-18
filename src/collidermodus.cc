@@ -450,10 +450,10 @@ ColliderModus::ColliderModus(Configuration modus_config,
     energy_input++;
   }
   // Option 5: Total energy per nucleon of _each_ beam
-  if (proj_cfg.has_value({"E_Tot"}) and targ_cfg.has_value({"E_Tot"})) {
+  if (proj_cfg.has_value({"E_Tot"}) && targ_cfg.has_value({"E_Tot"})) {
     const double e_tot_p = proj_cfg.take({"E_Tot"});
     const double e_tot_t = targ_cfg.take({"E_tot"});
-    if (e_tot_p < 0 or e_tot_t < 0) {
+    if (e_tot_p < 0 || e_tot_t < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
           "E_Tot must be nonnegative.");
@@ -465,10 +465,10 @@ ColliderModus::ColliderModus(Configuration modus_config,
     energy_input++;
   }
   // Option 6: Kinetic energy per nucleon of _each_ beam
-  if (proj_cfg.has_value({"E_Kin"}) and targ_cfg.has_value({"E_Kin"})) {
+  if (proj_cfg.has_value({"E_Kin"}) && targ_cfg.has_value({"E_Kin"})) {
     const double e_kin_p = proj_cfg.take({"E_Kin"});
     const double e_kin_t = targ_cfg.take({"E_Kin"});
-    if (e_kin_p < 0 or e_kin_t < 0) {
+    if (e_kin_p < 0 || e_kin_t < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
           "E_Kin must be nonnegative.");
@@ -480,10 +480,10 @@ ColliderModus::ColliderModus(Configuration modus_config,
     energy_input++;
   }
   // Option 7: Momentum per nucleon of _each_ beam
-  if (proj_cfg.has_value({"P_Lab"}) and targ_cfg.has_value({"P_Lab"})) {
+  if (proj_cfg.has_value({"P_Lab"}) && targ_cfg.has_value({"P_Lab"})) {
     const double p_lab_p = proj_cfg.take({"P_Lab"});
     const double p_lab_t = targ_cfg.take({"P_Lab"});
-    if (p_lab_p < 0 or p_lab_t < 0) {
+    if (p_lab_p < 0 || p_lab_t < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
           "P_Lab must be nonnegative.");
