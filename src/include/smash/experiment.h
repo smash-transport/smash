@@ -1036,8 +1036,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   /*!\Userguide
    * \page output_general_ Output
    *
-   * Output directory
-   * ----------------
+   * \section output_directory_ Output directory
+   *
    *
    * Per default, the selected output files
    * will be saved in the directory ./data/\<run_id\>, where \<run_id\> is an
@@ -1051,9 +1051,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * desired:
    * \code smash -o <user_output_dir> \endcode
    *
-   * Output content
-   * --------------
-   * \anchor output_contents_
+   * \section output_contents_ Output content
+   *
    * Output in SMASH is distinguished by _content_ and _format_, where content
    * means the physical information contained in the output (e.g. list of
    * particles, list of interactions, thermodynamics, etc) and format (e.g.
@@ -1069,13 +1068,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *                 computational frame or (optionally) only at the event end.
    *   - Available formats: \ref format_oscar_particlelist,
    *      \ref format_binary_, \ref format_root, \ref format_vtk, \ref
-   * hepmc_output_user_guide_
+   * output_hepmc_
    * - \b Collisions List of interactions: collisions, decays, box wall
    *                 crossings and forced thermalizations. Information about
    *                 incoming, outgoing particles and the interaction itself
    *                 is printed out.
    *   - Available formats: \ref format_oscar_collisions, \ref format_binary_,
-   *                 \ref format_root, \ref hepmc_output_user_guide_
+   *                 \ref format_root, \subpage output_hepmc_
    * - \b Dileptons  Special dilepton output, see \subpage output_dileptons.
    *   - Available formats: \ref format_oscar_collisions,
    *                   \ref format_binary_ and \ref format_root
@@ -1096,9 +1095,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *
    *
    * \n
-   * \anchor list_of_output_formats
-   * Output formats
-   * --------------
+   *
+   * \section list_of_output_formats Output formats
    *
    * For choosing output formats see
    * \ref configuring_output_.
@@ -1125,8 +1123,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *   - Used for "Thermodynamics", "Initial_Conditions" and "HepMC", see
    * \subpage thermodyn_output_user_guide_
    * \subpage IC_output_user_guide_
-   * - \b "HepMC" - human-readble asciiv3 format see \subpage
-   * hepmc_output_user_guide_ for details
+   * - \b "HepMC" - human-readble asciiv3 format see \ref
+   * output_hepmc_ for details
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:

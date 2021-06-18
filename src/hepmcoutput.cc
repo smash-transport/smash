@@ -14,16 +14,17 @@
 namespace smash {
 
 /*!\Userguide
- * \page hepmc_output_user_guide_ HepMC Output
+ * \page output_hepmc_ HepMC Output
+ *
  * SMASH HepMC output is an implementation of the HepMC3 Event Record Library.
  * The aim is to provide a format compatible with other frameworks like Rivet
  * (https://rivet.hepforge.org). For resources regarding HepMC, see
  * http://hepmc.web.cern.ch/hepmc/ and https://arxiv.org/abs/1912.08005.
  *
  * Producing HepMC output requires HepMC3 to be installed. Download the tarball
- * from http://hepmc.web.cern.ch/hepmc/.
+ * from http://hepmc.web.cern.ch/hepmc/ and follow the instructions.
  *
- * \section hepmc_output_user_guide_format_ ASCII HepMC Format
+ * \section output_hepmc_asciiv3_ ASCII HepMC Format
  *
  * HepMC generally structures each event into particles and vertices
  * connecting them, basically storing a graph of the event.
@@ -48,15 +49,24 @@ namespace smash {
  * collisions between incident nucleons as well as keep track of
  * participating incident nucleons.
  *
+ * You can find a snippet of the configuration for this output in \ref
+ * configuring_output_.
+ *
  * The output is written in Asciiv3, the HepMC3 native plain text format. See
  * https://arxiv.org/abs/1912.08005 for documentation of the format.
  *
- * \note Since some HepMC readers (e.g. Rivet) need a value for the
+ * \note
+ * - Since some HepMC readers (e.g. Rivet) need a value for the
  * nuclei-nuclei cross section, a dummy cross section of 1.0 is written to the
- * output. Furthermore, if you use Fermi motion and want to read in the HepMC
+ * output.
+ * - To avoid confusion with the definition of these quantities within the
+ * Glauber model, in the header of an event we set the numbers of participants
+ * and of collisions to -1.
+ * - If you use Fermi motion and want to read in the HepMC
  * ouput into Rivet, you need to disable the check for the beam particle
- * energies with the \key --ignore-beams option.
- */
+ * energies with the \key --ignore-beams option. When using the Rivet output
+ * this check is disabled by default.
+ **/
 HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
                          const bool full_event, const int total_N,
                          const int proj_N)
