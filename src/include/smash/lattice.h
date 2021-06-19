@@ -218,15 +218,12 @@ class RectangularLattice {
    * respect to the current cell
    */
   int index_left(int ix, int iy, int iz){
-    assert(ix < n_cells_[0]);
-    assert(iy < n_cells_[1]);
-    assert(iz < n_cells_[2]);
     int index_left = 0;
     if ( unlikely( ix == 0 ) ){
-      index_left = periodic_ ? (n_cells_[0] - 1) + n_cells_[0] * ( iy + iz * n_cells_[1] ) : index(ix, iy, iz);
+      index_left = periodic_ ? index(n_cells_[0] - 1, iy, iz) : index(ix, iy, iz);
     }
     else{
-      index_left = (ix - 1) + n_cells_[0] * ( iy + iz * n_cells_[1] );
+      index_left = index(ix - 1, iy, iz);
     }
     return index_left;
   }
@@ -241,15 +238,12 @@ class RectangularLattice {
    * respect to the current cell
    */
   int index_right(int ix, int iy, int iz){
-    assert(ix < n_cells_[0]);
-    assert(iy < n_cells_[1]);
-    assert(iz < n_cells_[2]);
     int index_right = 0;
     if ( unlikely( ix == (n_cells_[0] - 1) ) ){
-      index_right = periodic_ ? 0 + n_cells_[0] * ( iy + iz * n_cells_[1] ) : index(ix, iy, iz);
+      index_right = periodic_ ? index(0, iy, iz) : index(ix, iy, iz);
     }
     else{
-      index_right = (ix + 1) + n_cells_[0] * ( iy + iz * n_cells_[1] );
+      index_right = index(ix + 1, iy, iz);
     }
     return index_right;
   }
@@ -264,15 +258,12 @@ class RectangularLattice {
    * respect to the current cell
    */
   int index_down(int ix, int iy, int iz){
-    assert(ix < n_cells_[0]);
-    assert(iy < n_cells_[1]);
-    assert(iz < n_cells_[2]);
     int index_down = 0;
     if ( unlikely( iy == 0 ) ){
-      index_down = periodic_ ? ix + n_cells_[0] * ( (n_cells_[1] - 1) + iz * n_cells_[1] ) : index(ix, iy, iz);
+      index_down = periodic_ ? index(ix, n_cells_[1] - 1, iz) : index(ix, iy, iz);
     }
     else {
-      index_down = ix + n_cells_[0] * ( (iy - 1) + iz * n_cells_[1] );
+      index_down = index(ix, iy - 1, iz);
     }
     return index_down;
   }
@@ -287,15 +278,12 @@ class RectangularLattice {
    * respect to the current cell
    */
   int index_up(int ix, int iy, int iz){
-    assert(ix < n_cells_[0]);
-    assert(iy < n_cells_[1]);
-    assert(iz < n_cells_[2]);
     int index_up = 0;
     if ( unlikely( iy == (n_cells_[1] - 1) ) ){
-      index_up = periodic_ ? ix + n_cells_[0] * ( 0 + iz * n_cells_[1] ) : index(ix, iy, iz);
+      index_up = periodic_ ? index(ix, 0, iz) : index(ix, iy, iz);
     }
     else {
-      index_up = ix + n_cells_[0] * ( (iy + 1) + iz * n_cells_[1] );
+      index_up = index(ix, iy + 1, iz);
     }
     return index_up;
   }
@@ -310,15 +298,12 @@ class RectangularLattice {
    * respect to the current cell
    */
   int index_near(int ix, int iy, int iz){
-    assert(ix < n_cells_[0]);
-    assert(iy < n_cells_[1]);
-    assert(iz < n_cells_[2]);
     int index_near = 0;
     if ( unlikely( iz == 0 ) ){
-      index_near = periodic_ ? ix + n_cells_[0] * ( iy + (n_cells_[2] - 1) * n_cells_[1] ) : index(ix, iy, iz);
+      index_near = periodic_ ? index(ix, iy, n_cells_[2] - 1) : index(ix, iy, iz);
     }
     else {
-      index_near = ix + n_cells_[0] * ( iy + (iz - 1) * n_cells_[1] );
+      index_near = index(ix, iy, iz - 1);
     }
     return index_near;
   }
@@ -333,15 +318,12 @@ class RectangularLattice {
    * respect to the current cell
    */
   int index_far(int ix, int iy, int iz){
-    assert(ix < n_cells_[0]);
-    assert(iy < n_cells_[1]);
-    assert(iz < n_cells_[2]);
     int index_far = 0;
     if ( unlikely( iz == (n_cells_[2] - 1) ) ){
-      index_far = periodic_ ? ix + n_cells_[0] * ( iy + 0 * n_cells_[1] ) : index(ix, iy, iz);
+      index_far = periodic_ ? index(ix, iy, 0) : index(ix, iy, iz);
     }
     else {
-      index_far = ix + n_cells_[0] * ( iy + (iz + 1) * n_cells_[1] );
+      index_far = index(ix, iy, iz + 1);
     }
     return index_far;
   }
