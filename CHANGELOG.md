@@ -17,6 +17,16 @@ The major categories to group changes in this log are:
 
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
+## [SMASH-2.0.2](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...2.0.2)
+
+### Input / Output
+* Added interface with Rivet (the particle-physics MC analysis toolkit) that can process the data of the simulations at runtime and produce in output YODA files with the results of the analysis (tested with Rivet version 3.1.4)
+* Refactoring of the HempMC3 output, in asciiv3 format, both for final particles and for the collision history (tested with HepMC3 version 3.2.3)
+
+### Changed
+* Enabling the Rivet output requires a compiler supporting c++14 
+* c++ standard version flags removed from CMakeLists.txt, they can (or must) be supplied to cmake as command line arguments
+* Minimum supported cmake version: 3.1
 
 ## [SMASH-2.0.1](https://github.com/smash-transport/smash/compare/SMASH-2.0...2.0.1)
 
@@ -85,8 +95,6 @@ Date: 2020-08-13
 
 ### Changed
 * Improve version determination for Pythia.
-
-
 
 ## [SMASH-1.8](https://github.com/smash-transport/smash/compare/SMASH-1.7...SMASH-1.8)
 Date: 2020-04-07
