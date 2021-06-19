@@ -869,9 +869,9 @@ class Configuration {
         return SmearingMode::Triangular;
       }
       throw IncorrectTypeInAssignment(
-         "The value for key \"" + std::string(key_) +
+          "The value for key \"" + std::string(key_) +
           "\" should be \"Covariant Gaussian\", \"Discrete\"," +
-	  " or \"Triangular\".");
+          " or \"Triangular\".");
     }
 
     /**

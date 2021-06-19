@@ -120,10 +120,10 @@ class DensityParameters {
         r_cut_(par.gauss_cutoff_in_sigma * par.gaussian_sigma),
         ntest_(par.testparticles),
         nensembles_(par.n_ensembles),
-	derivatives_(par.derivatives_mode),
-	smearing_(par.smearing_mode),
-	central_weight_(par.discrete_weight),
-	triangular_range_(par.triangular_range) {
+        derivatives_(par.derivatives_mode),
+        smearing_(par.smearing_mode),
+        central_weight_(par.discrete_weight),
+        triangular_range_(par.triangular_range) {
     r_cut_sqr_ = r_cut_ * r_cut_;
     const double two_sig_sqr = 2 * sig_ * sig_;
     two_sig_sqr_inv_ = 1. / two_sig_sqr;
@@ -322,7 +322,7 @@ class DensityOnLattice {
    *            density, proton - with factor 1) times the smearing factor.
    */
   void add_particle(FourVector weighted_contribution) {
-    if (weighted_contribution.x0() > 0.0) {      
+    if (weighted_contribution.x0() > 0.0) {
       jmu_pos_ += weighted_contribution;
     } else {
       jmu_neg_ += weighted_contribution;
@@ -423,42 +423,39 @@ class DensityOnLattice {
    * Add to the positive density current.
    * \param[in] additional_jmu_B Value of positive density current to be added
    */
-  void add_to_jmu_pos(FourVector additional_jmu_B){
+  void add_to_jmu_pos(FourVector additional_jmu_B) {
     jmu_pos_ += additional_jmu_B;
   }
 
   /**
    * Add to the negative density current.
-* \param[in] additional_jmu_B Value of negative density current to be added
+   * \param[in] additional_jmu_B Value of negative density current to be added
    */
-  void add_to_jmu_neg(FourVector additional_jmu_B){
+  void add_to_jmu_neg(FourVector additional_jmu_B) {
     jmu_neg_ += additional_jmu_B;
   }
 
   /**
    * Overwrite the time derivative of the current to zero.
    */
-  void overwrite_djmu_dt_to_zero (){
+  void overwrite_djmu_dt_to_zero() {
     djmu_dxmu_[0] = FourVector(0.0, 0.0, 0.0, 0.0);
   }
 
   /**
    * Overwrite all density current derivatives to provided values.
-   * \param[in] djmu_dt time derivative of the current FourVector jmu 
-   * \param[in] djmu_dx x derivative of the current FourVector jmu 
-   * \param[in] djmu_dy y derivative of the current FourVector jmu 
-   * \param[in] djmu_dz z derivative of the current FourVector jmu 
+   * \param[in] djmu_dt time derivative of the current FourVector jmu
+   * \param[in] djmu_dx x derivative of the current FourVector jmu
+   * \param[in] djmu_dy y derivative of the current FourVector jmu
+   * \param[in] djmu_dz z derivative of the current FourVector jmu
    */
-  void overwrite_djmu_dxmu (FourVector djmu_dt,
-			    FourVector djmu_dx,
-			    FourVector djmu_dy,
-			    FourVector djmu_dz){
+  void overwrite_djmu_dxmu(FourVector djmu_dt, FourVector djmu_dx,
+                           FourVector djmu_dy, FourVector djmu_dz) {
     djmu_dxmu_[0] = djmu_dt;
     djmu_dxmu_[1] = djmu_dx;
     djmu_dxmu_[2] = djmu_dy;
     djmu_dxmu_[3] = djmu_dz;
   }
-
 
  private:
   /// Four-current density of the positively charged particle.
@@ -489,10 +486,9 @@ template <typename T>
 void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
                     const DensityType dens_type, const DensityParameters &par,
                     const std::vector<Particles> &ensembles,
-		    // time_step is only needed for the template specialization
-		    // (see below)
-		    const double time_step,
-                    const bool compute_gradient) {
+                    // time_step is only needed for the template specialization
+                    // (see below)
+                    const double time_step, const bool compute_gradient) {
   // the time_step variable is not used here
   SMASH_UNUSED(time_step);
 
@@ -535,14 +531,14 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
 /* Template specialization for calculating density currents on lattice;
  * needs to be inlined explicitly to stop producing duplicate errors.
  */
-template <> 
+template <>
 inline void update_lattice(RectangularLattice<DensityOnLattice> *lat,
-			   const LatticeUpdate update,
-			   const DensityType dens_type,
-			   const DensityParameters &par,
-			   const std::vector<Particles> &ensembles,
-			   const double time_step,
-			   const bool compute_gradient) {
+                           const LatticeUpdate update,
+                           const DensityType dens_type,
+                           const DensityParameters &par,
+                           const std::vector<Particles> &ensembles,
+                           const double time_step,
+                           const bool compute_gradient) {
   // Do not proceed if lattice does not exists/update not required
   if (lat == nullptr || lat->when_update() != update) {
     return;
@@ -555,23 +551,23 @@ inline void update_lattice(RectangularLattice<DensityOnLattice> *lat,
   const bool periodic = lat->periodic();
   LatticeUpdate when_update = lat->when_update();
   // get the number of nodes
-  const int number_of_nodes = lattice_n_cells[0] *
-    lattice_n_cells[1] * lattice_n_cells[2];
+  const int number_of_nodes =
+      lattice_n_cells[0] * lattice_n_cells[1] * lattice_n_cells[2];
 
-  /* 
+  /*
    * Take the provided DensityOnLattice lattice and use the information about
    * the current to create a lattice of current FourVectors. Because the lattice
    * hasn't been updated at this point yet, it provides the t_0 time step
    * information on the currents.
    */
   // initialize an auxiliary lattice that will store the t_0 values of jmu
-  RectangularLattice<FourVector> old_jmu
-    (lattice_sizes, lattice_n_cells, origin, periodic, when_update);
+  RectangularLattice<FourVector> old_jmu(lattice_sizes, lattice_n_cells, origin,
+                                         periodic, when_update);
   // copy values of jmu at t_0 onto that lattice;
   // proceed only if finite difference gradients are calculated
-  if ( par.derivatives() == DerivativesMode::FiniteDifference ){
-    for (int i = 0; i < number_of_nodes; i++){
-      old_jmu.assign_value(i, ( (*lat)[i] ).jmu_net());
+  if (par.derivatives() == DerivativesMode::FiniteDifference) {
+    for (int i = 0; i < number_of_nodes; i++) {
+      old_jmu.assign_value(i, ((*lat)[i]).jmu_net());
     }
   }
 
@@ -579,125 +575,131 @@ inline void update_lattice(RectangularLattice<DensityOnLattice> *lat,
   // get the normalization factor for the covariant Gaussian smearing
   const double norm_factor = par.norm_factor_sf();
   // get the volume of the cell and weights for discrete smearing
-  const double V_cell = (lat->cell_sizes())[0] * (lat->cell_sizes())[1] *
-    (lat->cell_sizes())[2];
+  const double V_cell =
+      (lat->cell_sizes())[0] * (lat->cell_sizes())[1] * (lat->cell_sizes())[2];
   // weights for coarse smearing
   const double big = par.central_weight();
-  const double small = (1.0 - big)/6.0;
+  const double small = (1.0 - big) / 6.0;
   // get the radii for triangular smearing
-  const std::array<double, 3> triangular_radius =
-    {par.triangular_range() * ( lat->cell_sizes() )[0],
-     par.triangular_range() * ( lat->cell_sizes() )[1],
-     par.triangular_range() * ( lat->cell_sizes() )[2]};
- 
+  const std::array<double, 3> triangular_radius = {
+      par.triangular_range() * (lat->cell_sizes())[0],
+      par.triangular_range() * (lat->cell_sizes())[1],
+      par.triangular_range() * (lat->cell_sizes())[2]};
+
   // iterate over all particles
   for (const Particles &particles : ensembles) {
     for (const ParticleData &part : particles) {
       const double dens_factor = density_factor(part.type(), dens_type);
       if (std::abs(dens_factor) < really_small) {
-	continue;
+        continue;
       }
       const FourVector p_mu = part.momentum();
       const double m = p_mu.abs();
       if (unlikely(m < really_small)) {
-	logg[LDensity].warn("Gaussian smearing is undefined for momentum ", p_mu);
-	continue;
+        logg[LDensity].warn("Gaussian smearing is undefined for momentum ",
+                            p_mu);
+        continue;
       }
       const double m_inv = 1.0 / m;
       const ThreeVector pos = part.position().threevec();
 
       // act accordingly to which smearing is used
-      if (par.smearing() == SmearingMode::CovariantGaussian){
-	// unweighted contribution to density
-	const FourVector unweighted_contribution = dens_factor * norm_factor * ( p_mu / p_mu.x0() );
-	lat->iterate_in_cube(
-          pos, par.r_cut(), [&](DensityOnLattice &node, int ix, int iy, int iz) {	  
-	  // find the weight for smearing
-          const ThreeVector r = lat->cell_center(ix, iy, iz);
-          const auto sf = unnormalized_smearing_factor(pos - r, p_mu, m_inv, par,
-                                                       compute_gradient);
-	  node.add_particle(sf.first * unweighted_contribution);
-          if (par.derivatives() == DerivativesMode::CovariantGaussian) {
-            node.add_particle_for_derivatives(part, dens_factor,
-                                              sf.second * norm_factor);
-          }
-              });
-      } else if ( par.smearing() == SmearingMode::Discrete ){
-	// unweighted contribution to density
-	const FourVector unweighted_contribution =
-	  dens_factor * ( p_mu / p_mu.x0() ) / ( par.ntest() * par.nensembles() * V_cell);
-	lat->iterate_nearest_neighbors(
-	  pos, [&](DensityOnLattice &node, int iterated_index, int center_index) {
-	  // the contribution to density is weighted depending on what node it is added to
-          FourVector weighted_contribution;
-	  if ( iterated_index == center_index ){
-	    weighted_contribution = big * unweighted_contribution;
-	  } else {
-	    weighted_contribution = small * unweighted_contribution;
-	  }
-          node.add_particle(weighted_contribution);
-	      });      
-      } else if ( par.smearing() == SmearingMode::Triangular ){
-	// unweighted contribution to density
-	const double prefactor = 1.0/( par.ntest() * par.nensembles() *
-				       std::pow(triangular_radius[0], 2.0) *
-				       std::pow(triangular_radius[1], 2.0) *
-				       std::pow(triangular_radius[2], 2.0) );
-	const FourVector unweighted_contribution = dens_factor * prefactor * ( p_mu / p_mu.x0() );
-	lat->iterate_in_rectangle(
-	  pos, triangular_radius, [&](DensityOnLattice &node, int ix, int iy, int iz) {
-	  // compute the position of the node
-	  const ThreeVector cell_center = lat->cell_center(ix, iy, iz);
-	  //
-	  // compute smearing weight
-	  const double weight_x = triangular_radius[0] - abs( cell_center[0] - pos[0] );
-	  const double weight_y = triangular_radius[1] - abs( cell_center[1] - pos[1] );
-	  const double weight_z = triangular_radius[2] - abs( cell_center[2] - pos[2] );
-	  // add the contribution to the node
-          node.add_particle(unweighted_contribution * weight_x * weight_y * weight_z);
-              });
+      if (par.smearing() == SmearingMode::CovariantGaussian) {
+        // unweighted contribution to density
+        const FourVector unweighted_contribution =
+            dens_factor * norm_factor * (p_mu / p_mu.x0());
+        lat->iterate_in_cube(
+            pos, par.r_cut(),
+            [&](DensityOnLattice &node, int ix, int iy, int iz) {
+              // find the weight for smearing
+              const ThreeVector r = lat->cell_center(ix, iy, iz);
+              const auto sf = unnormalized_smearing_factor(
+                  pos - r, p_mu, m_inv, par, compute_gradient);
+              node.add_particle(sf.first * unweighted_contribution);
+              if (par.derivatives() == DerivativesMode::CovariantGaussian) {
+                node.add_particle_for_derivatives(part, dens_factor,
+                                                  sf.second * norm_factor);
+              }
+            });
+      } else if (par.smearing() == SmearingMode::Discrete) {
+        // unweighted contribution to density
+        const FourVector unweighted_contribution =
+            dens_factor * (p_mu / p_mu.x0()) /
+            (par.ntest() * par.nensembles() * V_cell);
+        lat->iterate_nearest_neighbors(
+            pos,
+            [&](DensityOnLattice &node, int iterated_index, int center_index) {
+              // the contribution to density is weighted depending on what node
+              // it is added to
+              FourVector weighted_contribution;
+              if (iterated_index == center_index) {
+                weighted_contribution = big * unweighted_contribution;
+              } else {
+                weighted_contribution = small * unweighted_contribution;
+              }
+              node.add_particle(weighted_contribution);
+            });
+      } else if (par.smearing() == SmearingMode::Triangular) {
+        // unweighted contribution to density
+        const double prefactor = 1.0 / (par.ntest() * par.nensembles() *
+                                        std::pow(triangular_radius[0], 2.0) *
+                                        std::pow(triangular_radius[1], 2.0) *
+                                        std::pow(triangular_radius[2], 2.0));
+        const FourVector unweighted_contribution =
+            dens_factor * prefactor * (p_mu / p_mu.x0());
+        lat->iterate_in_rectangle(
+            pos, triangular_radius,
+            [&](DensityOnLattice &node, int ix, int iy, int iz) {
+              // compute the position of the node
+              const ThreeVector cell_center = lat->cell_center(ix, iy, iz);
+              //
+              // compute smearing weight
+              const double weight_x =
+                  triangular_radius[0] - abs(cell_center[0] - pos[0]);
+              const double weight_y =
+                  triangular_radius[1] - abs(cell_center[1] - pos[1]);
+              const double weight_z =
+                  triangular_radius[2] - abs(cell_center[2] - pos[2]);
+              // add the contribution to the node
+              node.add_particle(unweighted_contribution * weight_x * weight_y *
+                                weight_z);
+            });
       }
-    } // end of for (const ParticleData &part : particles) {
-  } // end of for (const Particles &particles : ensembles) {
+    }  // end of for (const ParticleData &part : particles) {
+  }    // end of for (const Particles &particles : ensembles) {
 
   // calculate the gradients for finite difference derivatives
-  if ( par.derivatives() == DerivativesMode::FiniteDifference ){
-
+  if (par.derivatives() == DerivativesMode::FiniteDifference) {
     // initialize an auxiliary lattice that will store the (t_0 + time_step)
     // values of jmu
-    RectangularLattice<FourVector> new_jmu
-      (lattice_sizes, lattice_n_cells, origin, periodic, when_update);
+    RectangularLattice<FourVector> new_jmu(lattice_sizes, lattice_n_cells,
+                                           origin, periodic, when_update);
     // copy values of jmu FourVectors at t_0 + time_step  onto that lattice
-    for (int i = 0; i < number_of_nodes; i++){
+    for (int i = 0; i < number_of_nodes; i++) {
       // read off
-      //FourVector fourvector_at_i = ( (*lat)[i] ).jmu_net();
+      // FourVector fourvector_at_i = ( (*lat)[i] ).jmu_net();
       // fill
-      new_jmu.assign_value(i, ( (*lat)[i] ).jmu_net());
+      new_jmu.assign_value(i, ((*lat)[i]).jmu_net());
     }
 
     // initialize a lattice of fourgradients
-    RectangularLattice< std::array<FourVector,4> > four_grad_lattice
-      (lattice_sizes, lattice_n_cells, origin, periodic, when_update);
+    RectangularLattice<std::array<FourVector, 4>> four_grad_lattice(
+        lattice_sizes, lattice_n_cells, origin, periodic, when_update);
     // compute time derivatives and gradients of all components of jmu
-    new_jmu.compute_four_gradient_lattice(old_jmu, time_step, four_grad_lattice);
-    
+    new_jmu.compute_four_gradient_lattice(old_jmu, time_step,
+                                          four_grad_lattice);
+
     // substitute new derivatives
     int node_number = 0;
-    for (auto &node : *lat){	
-      node.overwrite_djmu_dxmu (four_grad_lattice[node_number][0],
-				four_grad_lattice[node_number][1],
-				four_grad_lattice[node_number][2],
-				four_grad_lattice[node_number][3]);
+    for (auto &node : *lat) {
+      node.overwrite_djmu_dxmu(
+          four_grad_lattice[node_number][0], four_grad_lattice[node_number][1],
+          four_grad_lattice[node_number][2], four_grad_lattice[node_number][3]);
       node_number++;
     }
-    
-  } // if ( par.derivatives() == DerivativesMode::FiniteDifference )
-  
+
+  }  // if ( par.derivatives() == DerivativesMode::FiniteDifference )
 }
-
-
-
-  
 
 }  // namespace smash
 

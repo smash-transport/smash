@@ -880,14 +880,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       parameters_.smearing_mode != SmearingMode::CovariantGaussian) {
     throw std::invalid_argument(
         "Covariant Gaussian derivatives only make sense for Covariant Gaussian "
-	"smearing!");
+        "smearing!");
   }
 
   // for triangular smearing:
   // the weight needs to be larger than 1./7. for the center cell to contribute
   // more than the surrounding cells
   if (parameters_.smearing_mode == SmearingMode::Discrete &&
-      parameters_.discrete_weight < (1./7.)) {
+      parameters_.discrete_weight < (1. / 7.)) {
     throw std::invalid_argument(
         "The central weight for discrete smearing should be >= 1./7.");
   }
@@ -1288,26 +1288,26 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                              << parameters_.labclock->timestep_duration();
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
-    switch (parameters_.derivatives_mode){
-    case DerivativesMode::CovariantGaussian:
-      logg[LExperiment].info() << "Covariant Gaussian derivatives are ON";
-      break;
-    case DerivativesMode::FiniteDifference:
-      logg[LExperiment].info() << "Finite difference derivatives are ON";
-      break;
+    switch (parameters_.derivatives_mode) {
+      case DerivativesMode::CovariantGaussian:
+        logg[LExperiment].info() << "Covariant Gaussian derivatives are ON";
+        break;
+      case DerivativesMode::FiniteDifference:
+        logg[LExperiment].info() << "Finite difference derivatives are ON";
+        break;
     }
-    switch (parameters_.smearing_mode){
-    case SmearingMode::CovariantGaussian:
-      logg[LExperiment].info() << "Smearing type: Covariant Gaussian";
-      break;
-    case SmearingMode::Discrete:
-      logg[LExperiment].info() << "Smearing type: Discrete with weight = "
-			       << parameters_.discrete_weight;
-      break;
-    case SmearingMode::Triangular:
-      logg[LExperiment].info() << "Smearing type: Triangular with range = "
-			       << parameters_.triangular_range;
-      break;
+    switch (parameters_.smearing_mode) {
+      case SmearingMode::CovariantGaussian:
+        logg[LExperiment].info() << "Smearing type: Covariant Gaussian";
+        break;
+      case SmearingMode::Discrete:
+        logg[LExperiment].info() << "Smearing type: Discrete with weight = "
+                                 << parameters_.discrete_weight;
+        break;
+      case SmearingMode::Triangular:
+        logg[LExperiment].info() << "Smearing type: Triangular with range = "
+                                 << parameters_.triangular_range;
+        break;
     }
   }
 
@@ -1377,10 +1377,11 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     const std::array<double, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
 
-    logg[LExperiment].info() << "Lattice is ON. Origin = (" << origin[0]
-			     << "," << origin[1] << "," << origin[2] << "), sizes = ("
-			     << l[0] << "," << l[1] << "," << l[2] << "), number of cells = ("
-			     << n[0] << "," << n[1] << "," << n[2] << ")";
+    logg[LExperiment].info()
+        << "Lattice is ON. Origin = (" << origin[0] << "," << origin[1] << ","
+        << origin[2] << "), sizes = (" << l[0] << "," << l[1] << "," << l[2]
+        << "), number of cells = (" << n[0] << "," << n[1] << "," << n[2]
+        << ")";
 
     if (printout_lattice_td_ || printout_full_lattice_any_td_) {
       dens_type_lattice_printout_ = output_parameters.td_dens_type;
@@ -1440,7 +1441,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         "If you want Therm. VTK or Lattice output, configure a lattice for "
         "it.");
   }
-  
+
   // Warning for the mean field calculation if lattice is not on.
   if ((potentials_ != nullptr) && (jmu_B_lat_ == nullptr)) {
     logg[LExperiment].warn() << "Lattice is NOT used. Mean fields are "
@@ -1455,7 +1456,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
 
   // Throw fatal if DerivativesMode = FiniteDifference and lattice is not on.
-  if ((parameters_.derivatives_mode == DerivativesMode::FiniteDifference) && (jmu_B_lat_ == nullptr)) {
+  if ((parameters_.derivatives_mode == DerivativesMode::FiniteDifference) &&
+      (jmu_B_lat_ == nullptr)) {
     throw std::runtime_error(
         "Lattice is necessary to calculate finite difference gradients.");
   }
@@ -1645,8 +1647,8 @@ void Experiment<Modus>::initialize_new_event() {
       // Because there was no lattice at t=-1, the time derivative dj^mu/dt
       // at t=0 is huge, while it shouldn't be calculated at all;
       // we overwrite the time derivative to zero by hand.
-      for (auto &node : *jmu_B_lat_){ 
-	node.overwrite_djmu_dt_to_zero();
+      for (auto &node : *jmu_B_lat_) {
+        node.overwrite_djmu_dt_to_zero();
       }
       E_mean_field =
           calculate_mean_field_energy(*potentials_, *jmu_B_lat_, parameters_);
@@ -2167,21 +2169,22 @@ void Experiment<Modus>::intermediate_output() {
       // Thermodynamic output on the lattice versus time
       switch (dens_type_lattice_printout_) {
         case DensityType::Baryon:
-          update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
-                         density_param_, ensembles_,
-			 0.0,// time_step not needed for compute_gradient=false
-			 false);
+          update_lattice(
+              jmu_B_lat_.get(), lat_upd, DensityType::Baryon, density_param_,
+              ensembles_,
+              0.0,  // time_step not needed for compute_gradient=false
+              false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::Baryon, *jmu_B_lat_);
           output->thermodynamics_lattice_output(*jmu_B_lat_,
                                                 computational_frame_time);
           break;
         case DensityType::BaryonicIsospin:
-          update_lattice(jmu_I3_lat_.get(), lat_upd,
-                         DensityType::BaryonicIsospin, density_param_,
-                         ensembles_,
-			 0.0,// time_step not needed for compute_gradient=false
-			 false);
+          update_lattice(
+              jmu_I3_lat_.get(), lat_upd, DensityType::BaryonicIsospin,
+              density_param_, ensembles_,
+              0.0,  // time_step not needed for compute_gradient=false
+              false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::BaryonicIsospin,
                                         *jmu_I3_lat_);
@@ -2191,11 +2194,11 @@ void Experiment<Modus>::intermediate_output() {
         case DensityType::None:
           break;
         default:
-          update_lattice(jmu_custom_lat_.get(), lat_upd,
-                         dens_type_lattice_printout_, density_param_,
-                         ensembles_,
-			 0.0,// time_step not needed for compute_gradient=false
-			 false);
+          update_lattice(
+              jmu_custom_lat_.get(), lat_upd, dens_type_lattice_printout_,
+              density_param_, ensembles_,
+              0.0,  // time_step not needed for compute_gradient=false
+              false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         dens_type_lattice_printout_,
                                         *jmu_custom_lat_);
@@ -2205,8 +2208,8 @@ void Experiment<Modus>::intermediate_output() {
       if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
         update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
                        density_param_, ensembles_,
-		       0.0,// time_step not needed for compute_gradient=false
-		       false);
+                       0.0,  // time_step not needed for compute_gradient=false
+                       false);
         if (printout_tmn_) {
           output->thermodynamics_output(ThermodynamicQuantity::Tmn,
                                         dens_type_lattice_printout_, *Tmn_);
@@ -2246,15 +2249,13 @@ void Experiment<Modus>::update_potentials() {
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
       update_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
                      DensityType::BaryonicIsospin, density_param_, ensembles_,
-		     parameters_.labclock->timestep_duration(),
-                     true);
+                     parameters_.labclock->timestep_duration(), true);
     }
     if ((potentials_->use_skyrme() || potentials_->use_symmetry()) &&
         jmu_B_lat_ != nullptr) {
       update_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
                      DensityType::Baryon, density_param_, ensembles_,
-		     parameters_.labclock->timestep_duration(),
-		     true);
+                     parameters_.labclock->timestep_duration(), true);
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {
         auto jB = (*jmu_B_lat_)[i];

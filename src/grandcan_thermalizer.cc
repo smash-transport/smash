@@ -133,7 +133,7 @@ void GrandCanThermalizer::update_thermalizer_lattice(
   const DensityType dens_type = DensityType::Hadron;
   const LatticeUpdate update = LatticeUpdate::EveryFixedInterval;
   update_lattice(lat_.get(), update, dens_type, dens_par, ensembles, 0.0,
-		 false);
+                 false);
   for (auto &node : *lat_) {
     /* If energy density is definitely below e_crit -
        no need to find T, mu, etc. So if e = T00 - T0i*vi <=
