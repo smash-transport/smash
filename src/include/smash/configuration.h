@@ -839,6 +839,22 @@ class Configuration {
     }
 
     /**
+     * Set DerivativesMode.
+     */
+    operator DerivativesMode() const {
+      const std::string s = operator std::string();
+      if (s == "Covariant Gaussian") {
+        return DerivativesMode::CovariantGaussian;
+      }
+      if (s == "Finite difference") {
+        return DerivativesMode::FiniteDifference;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"Covariant Gaussian\" or \"Finite difference\".");
+    }
+
+    /**
      * Set time step mode from configuration values.
      *
      * \return time step mode.

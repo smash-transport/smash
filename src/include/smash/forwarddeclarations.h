@@ -110,6 +110,12 @@ enum class Sampling {
   Custom,
 };
 
+/// Modes of calculating the gradients
+enum class DerivativesMode {
+  CovariantGaussian,
+  FiniteDifference,
+};
+
 /// The time step mode.
 enum class TimeStepMode : char {
   /// Don't use time steps; propagate from action to action.

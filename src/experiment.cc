@@ -512,6 +512,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       std::move(output_clock),
       config.take({"General", "Ensembles"}, 1),
       ntest,
+      config.take({"General","Derivatives_Mode"}, DerivativesMode::CovariantGaussian),
       config.take({"General", "Gaussian_Sigma"}, 1.),
       config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
       config_coll.take({"Collision_Criterion"}, CollisionCriterion::Covariant),

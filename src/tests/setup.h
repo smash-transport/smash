@@ -264,6 +264,7 @@ inline ExperimentParameters default_parameters(
       make_unique<UniformClock>(0., 1.),  // outputclock
       1,                                  // ensembles
       testparticles,                      // testparticles
+      DerivativesMode::CovariantGaussian, // derivatives mode
       1.0,                                // Gaussian smearing width
       4.0,                                // Gaussian smearing cut-off
       crit,

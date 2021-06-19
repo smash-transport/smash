@@ -119,7 +119,8 @@ class DensityParameters {
       : sig_(par.gaussian_sigma),
         r_cut_(par.gauss_cutoff_in_sigma * par.gaussian_sigma),
         ntest_(par.testparticles),
-        nensembles_(par.n_ensembles) {
+        nensembles_(par.n_ensembles),
+	derivatives_(par.derivatives_mode) {
     r_cut_sqr_ = r_cut_ * r_cut_;
     const double two_sig_sqr = 2 * sig_ * sig_;
     two_sig_sqr_inv_ = 1. / two_sig_sqr;
@@ -132,6 +133,8 @@ class DensityParameters {
   int ntest() const { return ntest_; }
   /// \return Number of ensembles
   int nensembles() const { return nensembles_; }
+  /// \return Mode of gradient calculation
+  DerivativesMode derivatives() const { return derivatives_; };
   /// \return Cut-off radius [fm]
   double r_cut() const { return r_cut_; }
   /// \return Squared cut-off radius [fm\f$^2\f$]
@@ -160,6 +163,8 @@ class DensityParameters {
   const int ntest_;
   /// Number of ensembles
   const int nensembles_;
+  /// Mode of calculating the gradients
+  const DerivativesMode derivatives_;
 };
 
 /**
@@ -253,7 +258,7 @@ current_eckart(const ThreeVector &r, const Particles &plist,
  * Intended usage of the class:
  * -# Add particles from some list using add_particle(...). and
  *    add_particle_for_derivatives(...) The former sets
- *    jmu_pos and jmu_neg, the next sets djmu_dx.
+ *    jmu_pos and jmu_neg, the next sets djmu_dxmu.
  * -# Get jmus and density whenever necessary via density(),
  *    jmu_pos(), jmu_neg()
  * -# Get \f$\nabla \cdot \rho\f$ via grad_rho()
@@ -266,7 +271,7 @@ class DensityOnLattice {
   DensityOnLattice()
       : jmu_pos_(FourVector()),
         jmu_neg_(FourVector()),
-        djmu_dx_({FourVector(), FourVector(), FourVector(), FourVector()}) {}
+        djmu_dxmu_({FourVector(), FourVector(), FourVector(), FourVector()}) {}
 
   /**
    * Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 \cdot factor \f$.
@@ -290,8 +295,28 @@ class DensityOnLattice {
   }
 
   /**
+   * Convenience overload of the above for DensityOnLattice calculations.
+   * Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 \cdot factor \f$,
+   * where factor depends on the smearing scheme used.
+   * Two private class members jmu_pos_ and jmu_neg_ indicating the 4-current
+   * of the positively and negatively charged particles are updated by this
+   * function.
+   *
+   * \param[in] weighted_contribution particle contribution to given density
+   *            type (e.g. anti-proton contributes with factor -1 to baryon
+   *            density, proton - with factor 1) times the smearing factor.
+   */
+  void add_particle(FourVector weighted_contribution) {
+    if (weighted_contribution.x0() > 0.0) {      
+      jmu_pos_ += weighted_contribution;
+    } else {
+      jmu_neg_ += weighted_contribution;
+    }
+  }
+
+  /**
    * Adds particle to the time and spatial derivatives of the 4-current.
-   * An array of four private 4-vectors djmu_dx_ indicating the derivatives
+   * An array of four private 4-vectors djmu_dxmu_ indicating the derivatives
    * of the compound current are updated by this function.
    *
    * \param[in] part Particle would be added to the current density
@@ -305,8 +330,8 @@ class DensityOnLattice {
                                     ThreeVector sf_grad) {
     const FourVector PartFourVelocity = FourVector(1.0, part.velocity());
     for (int k = 1; k <= 3; k++) {
-      djmu_dx_[k] += factor * PartFourVelocity * sf_grad[k - 1];
-      djmu_dx_[0] -=
+      djmu_dxmu_[k] += factor * PartFourVelocity * sf_grad[k - 1];
+      djmu_dxmu_[0] -=
           factor * PartFourVelocity * sf_grad[k - 1] * part.velocity()[k - 1];
     }
   }
@@ -340,9 +365,9 @@ class DensityOnLattice {
    */
   ThreeVector rot_j(const double norm_factor = 1.0) {
     ThreeVector j_rot = ThreeVector();
-    j_rot.set_x1(djmu_dx_[2].x3() - djmu_dx_[3].x2());
-    j_rot.set_x2(djmu_dx_[3].x1() - djmu_dx_[1].x3());
-    j_rot.set_x3(djmu_dx_[1].x2() - djmu_dx_[2].x1());
+    j_rot.set_x1(djmu_dxmu_[2].x3() - djmu_dxmu_[3].x2());
+    j_rot.set_x2(djmu_dxmu_[3].x1() - djmu_dxmu_[1].x3());
+    j_rot.set_x3(djmu_dxmu_[1].x2() - djmu_dxmu_[2].x1());
     j_rot *= norm_factor;
     return j_rot;
   }
@@ -356,7 +381,7 @@ class DensityOnLattice {
   ThreeVector grad_rho(const double norm_factor = 1.0) {
     ThreeVector rho_grad = ThreeVector();
     for (int i = 1; i < 4; i++) {
-      rho_grad[i - 1] = djmu_dx_[i].x0() * norm_factor;
+      rho_grad[i - 1] = djmu_dxmu_[i].x0() * norm_factor;
     }
     return rho_grad;
   }
@@ -368,7 +393,7 @@ class DensityOnLattice {
    * \return \f$\partial_t \vec j\f$ [fm \f$^{-4}\f$]
    */
   ThreeVector dj_dt(const double norm_factor = 1.0) {
-    return djmu_dx_[0].threevec() * norm_factor;
+    return djmu_dxmu_[0].threevec() * norm_factor;
   }
 
   /**
@@ -379,13 +404,54 @@ class DensityOnLattice {
    */
   FourVector jmu_net() const { return jmu_pos_ + jmu_neg_; }
 
+  /**
+   * Add to the positive density current.
+   * \param[in] additional_jmu_B Value of positive density current to be added
+   */
+  void add_to_jmu_pos(FourVector additional_jmu_B){
+    jmu_pos_ += additional_jmu_B;
+  }
+
+  /**
+   * Add to the negative density current.
+* \param[in] additional_jmu_B Value of negative density current to be added
+   */
+  void add_to_jmu_neg(FourVector additional_jmu_B){
+    jmu_neg_ += additional_jmu_B;
+  }
+
+  /**
+   * Overwrite the time derivative of the current to zero.
+   */
+  void overwrite_djmu_dt_to_zero (){
+    djmu_dxmu_[0] = FourVector(0.0, 0.0, 0.0, 0.0);
+  }
+
+  /**
+   * Overwrite all density current derivatives to provided values.
+   * \param[in] djmu_dt time derivative of the current FourVector jmu 
+   * \param[in] djmu_dx x derivative of the current FourVector jmu 
+   * \param[in] djmu_dy y derivative of the current FourVector jmu 
+   * \param[in] djmu_dz z derivative of the current FourVector jmu 
+   */
+  void overwrite_djmu_dxmu (FourVector djmu_dt,
+			    FourVector djmu_dx,
+			    FourVector djmu_dy,
+			    FourVector djmu_dz){
+    djmu_dxmu_[0] = djmu_dt;
+    djmu_dxmu_[1] = djmu_dx;
+    djmu_dxmu_[2] = djmu_dy;
+    djmu_dxmu_[3] = djmu_dz;
+  }
+
+
  private:
   /// Four-current density of the positively charged particle.
   FourVector jmu_pos_;
   /// Four-current density of the negatively charged particle.
   FourVector jmu_neg_;
   /// \f$\partial_\nu j^\mu \f$
-  std::array<FourVector, 4> djmu_dx_;
+  std::array<FourVector, 4> djmu_dxmu_;
 };
 
 /// Conveniency typedef for lattice of density
@@ -400,6 +466,7 @@ typedef RectangularLattice<DensityOnLattice> DensityLattice;
  * \param[in] par a structure containing testparticles number and gaussian
  *            smearing parameters.
  * \param[in] ensembles the particles vector for each ensemble
+ * \param[in] time_step time step, needed for the template specialization below
  * \param[in] compute_gradient Whether to compute the gradients
  * \tparam T LatticeType
  */
@@ -407,7 +474,13 @@ template <typename T>
 void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
                     const DensityType dens_type, const DensityParameters &par,
                     const std::vector<Particles> &ensembles,
-                    const bool compute_gradient = false) {
+		    // time_step is only needed for the template specialization
+		    // (see below)
+		    const double time_step,
+                    const bool compute_gradient) {
+  // the time_step variable is not used here
+  SMASH_UNUSED(time_step);
+
   // Do not proceed if lattice does not exists/update not required
   if (lat == nullptr || lat->when_update() != update) {
     return;
@@ -443,6 +516,128 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
     }
   }
 }
+
+/* Template specialization for calculating density currents on lattice;
+ * needs to be inlined explicitly to stop producing duplicate errors.
+ */
+template <> 
+inline void update_lattice(RectangularLattice<DensityOnLattice> *lat,
+			   const LatticeUpdate update,
+			   const DensityType dens_type,
+			   const DensityParameters &par,
+			   const std::vector<Particles> &ensembles,
+			   const double time_step,
+			   const bool compute_gradient) {
+  // Do not proceed if lattice does not exists/update not required
+  if (lat == nullptr || lat->when_update() != update) {
+    return;
+  }
+
+  // read off the properties of lat
+  const std::array<double, 3> lattice_sizes = lat->lattice_sizes();
+  const std::array<int, 3> lattice_n_cells = lat->n_cells();
+  const std::array<double, 3> origin = lat->origin();
+  const bool periodic = lat->periodic();
+  LatticeUpdate when_update = lat->when_update();
+  // get the number of nodes
+  const int number_of_nodes = lattice_n_cells[0] *
+    lattice_n_cells[1] * lattice_n_cells[2];
+
+  /* 
+   * Take the provided DensityOnLattice lattice and use the information about
+   * the current to create a lattice of current FourVectors. Because the lattice
+   * hasn't been updated at this point yet, it provides the t_0 time step
+   * information on the currents.
+   */
+  // initialize an auxiliary lattice that will store the t_0 values of jmu
+  RectangularLattice<FourVector> old_jmu
+    (lattice_sizes, lattice_n_cells, origin, periodic, when_update);
+  // copy values of jmu at t_0 onto that lattice;
+  // proceed only if finite difference gradients are calculated
+  if ( par.derivatives() == DerivativesMode::FiniteDifference ){
+    for (int i = 0; i < number_of_nodes; i++){
+      // read off
+      //FourVector fourvector_at_i = ( (*lat)[i] ).jmu_net();
+      // fill
+      old_jmu.assign_value(i, ( (*lat)[i] ).jmu_net());
+    }
+  }
+
+  lat->reset();
+  // get the normalization factor for the covariant Gaussian smearing
+  const double norm_factor = par.norm_factor_sf();  
+  // iterate over all particles
+  for (const Particles &particles : ensembles) {
+    for (const ParticleData &part : particles) {
+      const double dens_factor = density_factor(part.type(), dens_type);
+      if (std::abs(dens_factor) < really_small) {
+	continue;
+      }
+      const FourVector p_mu = part.momentum();
+      const double m = p_mu.abs();
+      if (unlikely(m < really_small)) {
+	logg[LDensity].warn("Gaussian smearing is undefined for momentum ", p_mu);
+	continue;
+      }
+      const double m_inv = 1.0 / m;
+      const ThreeVector pos = part.position().threevec();
+
+      // unweighted contribution to density
+      const FourVector unweighted_contribution = dens_factor * norm_factor * ( p_mu / p_mu.x0() );
+      lat->iterate_in_cube(
+        pos, par.r_cut(), [&](DensityOnLattice &node, int ix, int iy, int iz) {	  
+	  // find the weight for smearing
+          const ThreeVector r = lat->cell_center(ix, iy, iz);
+          const auto sf = unnormalized_smearing_factor(pos - r, p_mu, m_inv, par,
+                                                       compute_gradient);
+	  node.add_particle(sf.first * unweighted_contribution);
+          if (par.derivatives() == DerivativesMode::CovariantGaussian) {
+            node.add_particle_for_derivatives(part, dens_factor,
+                                              sf.second * norm_factor);
+          }
+			  });
+
+    } // end of for (const ParticleData &part : particles) {
+  } // end of for (const Particles &particles : ensembles) {
+
+  // calculate the gradients for finite difference derivatives
+  if ( par.derivatives() == DerivativesMode::FiniteDifference ){
+
+    // initialize an auxiliary lattice that will store the (t_0 + time_step)
+    // values of jmu
+    RectangularLattice<FourVector> new_jmu
+      (lattice_sizes, lattice_n_cells, origin, periodic, when_update);
+    // copy values of jmu FourVectors at t_0 + time_step  onto that lattice
+    for (int i = 0; i < number_of_nodes; i++){
+      // read off
+      //FourVector fourvector_at_i = ( (*lat)[i] ).jmu_net();
+      // fill
+      new_jmu.assign_value(i, ( (*lat)[i] ).jmu_net());
+    }
+
+    // initialize a lattice of fourgradients
+    RectangularLattice< std::array<FourVector,4> > four_grad_lattice
+      (lattice_sizes, lattice_n_cells, origin, periodic, when_update);
+    // compute time derivatives and gradients of all components of jmu
+    new_jmu.compute_four_gradient_lattice(old_jmu, time_step, four_grad_lattice);
+    
+    // substitute new derivatives
+    int node_number = 0;
+    for (auto &node : *lat){	
+      node.overwrite_djmu_dxmu (four_grad_lattice[node_number][0],
+				four_grad_lattice[node_number][1],
+				four_grad_lattice[node_number][2],
+				four_grad_lattice[node_number][3]);
+      node_number++;
+    }
+    
+  } // if ( par.derivatives() == DerivativesMode::FiniteDifference )
+  
+}
+
+
+
+  
 
 }  // namespace smash
 

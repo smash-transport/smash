@@ -34,6 +34,9 @@ struct ExperimentParameters {
   /// Number of test-particles
   int testparticles;
 
+  // mode of calculating gradients
+  const DerivativesMode derivatives_mode;
+
   /// Width of gaussian Wigner density of particles
   double gaussian_sigma;
 
