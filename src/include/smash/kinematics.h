@@ -11,6 +11,7 @@
 #include <array>
 #include <cassert>
 #include <sstream>
+#include <iostream>
 
 #include "constants.h"
 
@@ -161,6 +162,10 @@ inline double plab_from_s(double mandelstam_s, double mass) {
   check_energy(mandelstam_s, m_sum);
   check_radicand(mandelstam_s, radicand);
 #endif
+  if (radicand < 0.0) {
+    std::cout << "Problem with radicand in plab_from_s: " << radicand << '\n';
+    return 0.0;
+  }
   return std::sqrt(radicand) / (2 * mass);
 }
 
@@ -196,6 +201,10 @@ inline double plab_from_s(double mandelstam_s, double m_projectile,
   check_energy(mandelstam_s, m_sum);
   check_radicand(mandelstam_s, radicand);
 #endif
+  if (radicand < 0.0) {
+    std::cout << "Problem with radicand in plab_from_s(s,m,m): " << radicand << '\n';
+    return 0.0;
+  }
   return std::sqrt(radicand) / (2 * m_target);
 }
 

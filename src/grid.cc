@@ -158,8 +158,8 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
           "A larger box or the use of testparticles also helps.\n"
           "Please take a look at your config.";
       throw std::runtime_error(error_box_too_small);
-    } else if (number_of_cells_[i] > max_cells) {
-      number_of_cells_[i] = max_cells;
+//    } else if (number_of_cells_[i] > max_cells) {
+//      number_of_cells_[i] = max_cells;
     }
     // Only bother rescaling the index_factor if the grid length is large enough
     // for 1 full min. cell length, since all particles are anyway placed in the

@@ -454,9 +454,9 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
                            incl_multi_set_, low_snn_cut_, strings_switch_,
                            use_AQM_, strings_with_probability_,
                            nnbar_treatment_, scale_xs_, additional_el_xs_);
-
-  double xs =
-      act->cross_section() * fm2_mb / static_cast<double>(testparticles_);
+  // Cut exploding xs explicitly
+  const double xs_value = std::min(act->cross_section(), 1000.);
+  double xs = xs_value * fm2_mb / static_cast<double>(testparticles_);
 
   // Take cross section scaling factors into account
   xs *= data_a.xsec_scaling_factor(time_until_collision);
@@ -476,7 +476,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     if (prob > 1.) {
       std::stringstream err;
       err << "Probability larger than 1 for stochastic rates. ( P_22 = " << prob
-          << " )\nConsider using smaller timesteps.";
+          << "for " << act->incoming_particles() << " )";
       if (only_warn_for_high_prob_) {
         logg[LFindScatter].warn(err.str());
       } else {
@@ -574,7 +574,7 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
   if (prob > 1.) {
     std::stringstream err;
     err << "Probability larger than 1 for stochastic rates. ( P_nm = " << prob
-        << " )\nConsider using smaller timesteps.";
+          << "for " << act->incoming_particles() << " )";
     if (only_warn_for_high_prob_) {
       logg[LFindScatter].warn(err.str());
     } else {

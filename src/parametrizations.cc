@@ -385,6 +385,10 @@ double np_total(double mandelstam_s) {
 }
 
 double ppbar_elastic(double mandelstam_s) {
+  if (std::sqrt(mandelstam_s) < 2 * nucleon_mass) {
+    // Needed, since called directly from p_52
+    return 0.0;
+  }
   const double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.3) {
     return 78.6;
@@ -398,6 +402,10 @@ double ppbar_elastic(double mandelstam_s) {
 }
 
 double ppbar_total(double mandelstam_s) {
+  if (std::sqrt(mandelstam_s) < 2 * nucleon_mass) {
+    // Needed, since called directly from p_52
+    return 0.0;
+  }
   const double p_lab = plab_from_s(mandelstam_s);
   if (p_lab < 0.3) {
     return 271.6 * std::exp(-1.1 * p_lab * p_lab);
