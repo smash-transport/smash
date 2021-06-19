@@ -200,7 +200,7 @@ class RectangularLattice {
    * \param[in] iz index of a cell in the z-direction
    * \return index of cell
    */
-  int index(int ix, int iy, int iz) {
+  int index1d(int ix, int iy, int iz) {
     assert(ix < n_cells_[0]);
     assert(iy < n_cells_[1]);
     assert(iz < n_cells_[2]);
@@ -217,14 +217,11 @@ class RectangularLattice {
    * respect to the current cell
    */
   int index_left(int ix, int iy, int iz) {
-    int index_left = 0;
     if (unlikely(ix == 0)) {
-      index_left =
-          periodic_ ? index(n_cells_[0] - 1, iy, iz) : index(ix, iy, iz);
+      return periodic_ ? index1d(n_cells_[0] - 1, iy, iz) : index1d(ix, iy, iz);
     } else {
-      index_left = index(ix - 1, iy, iz);
+      return index1d(ix - 1, iy, iz);
     }
-    return index_left;
   }
   /**
    * Given the indeces of a cell in the x, y, and z directions, return index of
@@ -237,13 +234,11 @@ class RectangularLattice {
    * respect to the current cell
    */
   int index_right(int ix, int iy, int iz) {
-    int index_right = 0;
     if (unlikely(ix == (n_cells_[0] - 1))) {
-      index_right = periodic_ ? index(0, iy, iz) : index(ix, iy, iz);
+      return periodic_ ? index1d(0, iy, iz) : index1d(ix, iy, iz);
     } else {
-      index_right = index(ix + 1, iy, iz);
+      return index1d(ix + 1, iy, iz);
     }
-    return index_right;
   }
   /**
    * Given the indeces of a cell in the x, y, and z directions, return index of
@@ -256,14 +251,11 @@ class RectangularLattice {
    * respect to the current cell
    */
   int index_down(int ix, int iy, int iz) {
-    int index_down = 0;
     if (unlikely(iy == 0)) {
-      index_down =
-          periodic_ ? index(ix, n_cells_[1] - 1, iz) : index(ix, iy, iz);
+      return periodic_ ? index1d(ix, n_cells_[1] - 1, iz) : index1d(ix, iy, iz);
     } else {
-      index_down = index(ix, iy - 1, iz);
+      return index1d(ix, iy - 1, iz);
     }
-    return index_down;
   }
   /**
    * Given the indeces of a cell in the x, y, and z directions, return index of
@@ -276,13 +268,11 @@ class RectangularLattice {
    * respect to the current cell
    */
   int index_up(int ix, int iy, int iz) {
-    int index_up = 0;
     if (unlikely(iy == (n_cells_[1] - 1))) {
-      index_up = periodic_ ? index(ix, 0, iz) : index(ix, iy, iz);
+      return periodic_ ? index1d(ix, 0, iz) : index1d(ix, iy, iz);
     } else {
-      index_up = index(ix, iy + 1, iz);
+      return index1d(ix, iy + 1, iz);
     }
-    return index_up;
   }
   /**
    * Given the indeces of a cell in the x, y, and z directions, return index of
@@ -295,14 +285,11 @@ class RectangularLattice {
    * respect to the current cell
    */
   int index_near(int ix, int iy, int iz) {
-    int index_near = 0;
     if (unlikely(iz == 0)) {
-      index_near =
-          periodic_ ? index(ix, iy, n_cells_[2] - 1) : index(ix, iy, iz);
+      return periodic_ ? index1d(ix, iy, n_cells_[2] - 1) : index1d(ix, iy, iz);
     } else {
-      index_near = index(ix, iy, iz - 1);
+      return index1d(ix, iy, iz - 1);
     }
-    return index_near;
   }
   /**
    * Given the indeces of a cell in the x, y, and z directions, return index of
@@ -315,13 +302,11 @@ class RectangularLattice {
    * respect to the current cell
    */
   int index_far(int ix, int iy, int iz) {
-    int index_far = 0;
     if (unlikely(iz == (n_cells_[2] - 1))) {
-      index_far = periodic_ ? index(ix, iy, 0) : index(ix, iy, iz);
+      return periodic_ ? index1d(ix, iy, 0) : index1d(ix, iy, iz);
     } else {
-      index_far = index(ix, iy, iz + 1);
+      return index1d(ix, iy, iz + 1);
     }
-    return index_far;
   }
 
   /**
@@ -727,27 +712,27 @@ class RectangularLattice {
         ", iy = ", iy, ", iz = ", iz);
 
     // determine the 1D index of the center cell
-    const int index = this->index(ix, iy, iz);
-    func(lattice_[index], index, index);
+    const int i = index1d(ix, iy, iz);
+    func(lattice_[i], i, i);
 
     // determine the indeces of nearby cells, perform function on them
-    int index_left = this->index_left(ix, iy, iz);
-    func(lattice_[index_left], index_left, index);
+    int ileft = index_left(ix, iy, iz);
+    func(lattice_[ileft], ileft, i);
 
-    int index_right = this->index_right(ix, iy, iz);
-    func(lattice_[index_right], index_right, index);
+    int iright = index_right(ix, iy, iz);
+    func(lattice_[iright], iright, i);
 
-    int index_down = this->index_down(ix, iy, iz);
-    func(lattice_[index_down], index_down, index);
+    int idown = index_down(ix, iy, iz);
+    func(lattice_[idown], idown, i);
 
-    int index_up = this->index_up(ix, iy, iz);
-    func(lattice_[index_up], index_up, index);
+    int iup = index_up(ix, iy, iz);
+    func(lattice_[iup], iup, i);
 
-    int index_near = this->index_near(ix, iy, iz);
-    func(lattice_[index_near], index_near, index);
+    int inear = index_near(ix, iy, iz);
+    func(lattice_[inear], inear, i);
 
-    int index_far = this->index_far(ix, iy, iz);
-    func(lattice_[index_far], index_far, index);
+    int ifar = index_far(ix, iy, iz);
+    func(lattice_[ifar], ifar, i);
   }
 
   /**

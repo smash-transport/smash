@@ -914,7 +914,7 @@ TEST(iterate_nearest_neighbors) {
   int ix_0 = std::floor((r0.x1() - origin[0]) / cell_sizes[0]);
   int iy_0 = std::floor((r0.x2() - origin[1]) / cell_sizes[1]);
   int iz_0 = std::floor((r0.x3() - origin[2]) / cell_sizes[2]);
-  int center_index = lattice->index(ix_0, iy_0, iz_0);
+  int center_index = lattice->index1d(ix_0, iy_0, iz_0);
   int left_index = lattice->index_left(ix_0, iy_0, iz_0);
   int right_index = lattice->index_right(ix_0, iy_0, iz_0);
   int down_index = lattice->index_down(ix_0, iy_0, iz_0);
@@ -928,7 +928,7 @@ TEST(iterate_nearest_neighbors) {
   lattice->iterate_sublattice(
       {0, 0, 0}, lattice->n_cells(),
       [&](FourVector &node, int ix, int iy, int iz) {
-        current_index = lattice->index(ix, iy, iz);
+        current_index = lattice->index1d(ix, iy, iz);
         if (current_index == center_index) {
           COMPARE(node, mark) << ix << " " << iy << " " << iz;
         } else if (current_index == left_index) {
@@ -963,7 +963,7 @@ TEST(iterate_nearest_neighbors) {
   ix_0 = std::floor((r0.x1() - origin[0]) / cell_sizes[0]);
   iy_0 = std::floor((r0.x2() - origin[1]) / cell_sizes[1]);
   iz_0 = std::floor((r0.x3() - origin[2]) / cell_sizes[2]);
-  center_index = lattice->index(ix_0, iy_0, iz_0);
+  center_index = lattice->index1d(ix_0, iy_0, iz_0);
   left_index = lattice->index_left(ix_0, iy_0, iz_0);
   right_index = lattice->index_right(ix_0, iy_0, iz_0);
   down_index = lattice->index_down(ix_0, iy_0, iz_0);
@@ -976,7 +976,7 @@ TEST(iterate_nearest_neighbors) {
   lattice->iterate_sublattice(
       {0, 0, 0}, lattice->n_cells(),
       [&](FourVector &node, int ix, int iy, int iz) {
-        current_index = lattice->index(ix, iy, iz);
+        current_index = lattice->index1d(ix, iy, iz);
         if (current_index == center_index) {
           COMPARE(node, mark) << ix << " " << iy << " " << iz;
         } else if (current_index == left_index) {
