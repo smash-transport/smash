@@ -34,10 +34,10 @@ struct ExperimentParameters {
   /// Number of test-particles
   int testparticles;
 
-  // mode of calculating gradients for density calculation
+  /// mode of calculating gradients for density calculation
   const DerivativesMode derivatives_mode;
 
-  // mode of smearing for density calculation
+  /// mode of smearing for density calculation
   const SmearingMode smearing_mode;
 
   /// Width of gaussian Wigner density of particles
