@@ -662,7 +662,6 @@ class RectangularLattice {
 
     /* Array holds value at the cell center: r_center = r_0 + (i+0.5)cell_size,
      * where i is index in any direction. Therefore we want cells with condition
-     * AGNIESZKA
      * (r[i]-rectangle[i])*csize - 0.5 < i < (r[i]+rectangle[i])*csize - 0.5,
      * r[i] = r_center[i] - r_0[i]
      */
