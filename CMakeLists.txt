@@ -18,10 +18,6 @@ endif()
 # Minimum cmake version this is tested on
 cmake_minimum_required(VERSION 3.1)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 # Tell cmake where to find our modules
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -54,7 +50,7 @@ endif()
 add_subdirectory(3rdparty)
 
 # Set compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -mfpmath=sse")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 # Disable DEBUG and TRACE output in Release builds
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG" CACHE
@@ -91,10 +87,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 # check that C++11 code compiles
-# in order for this to work the policy on respecting the CXX_STANDARD for
-# try_compile has to be changed first
-# see https://cmake.org/cmake/help/v3.8/policy/CMP0067.html
-cmake_policy(SET CMP0067 NEW)
 include(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("
 #include <initializer_list>
