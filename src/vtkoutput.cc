@@ -177,7 +177,7 @@ template <typename T>
 void VtkOutput::write_vtk_header(std::ofstream &file,
                                  RectangularLattice<T> &lattice,
                                  const std::string &description) {
-  const auto dim = lattice.dimensions();
+  const auto dim = lattice.n_cells();
   const auto cs = lattice.cell_sizes();
   const auto orig = lattice.origin();
   file << "# vtk DataFile Version 2.0\n"
@@ -198,7 +198,7 @@ void VtkOutput::write_vtk_scalar(std::ofstream &file,
        << "LOOKUP_TABLE default\n";
   file << std::setprecision(3);
   file << std::fixed;
-  const auto dim = lattice.dimensions();
+  const auto dim = lattice.n_cells();
   lattice.iterate_sublattice({0, 0, 0}, dim, [&](T &node, int ix, int, int) {
     const double f_from_node = get_quantity(node);
     file << f_from_node << " ";
@@ -215,7 +215,7 @@ void VtkOutput::write_vtk_vector(std::ofstream &file,
   file << "VECTORS " << varname << " double\n";
   file << std::setprecision(3);
   file << std::fixed;
-  const auto dim = lattice.dimensions();
+  const auto dim = lattice.n_cells();
   lattice.iterate_sublattice({0, 0, 0}, dim, [&](T &node, int, int, int) {
     const ThreeVector v = get_quantity(node);
     file << v.x1() << " " << v.x2() << " " << v.x3() << "\n";

@@ -429,7 +429,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
       const double m_inv = 1.0 / m;
 
       const ThreeVector pos = part.position().threevec();
-      lat->iterate_in_radius(
+      lat->iterate_in_cube(
           pos, par.r_cut(), [&](T &node, int ix, int iy, int iz) {
             const ThreeVector r = lat->cell_center(ix, iy, iz);
             const auto sf = unnormalized_smearing_factor(pos - r, p, m_inv, par,
