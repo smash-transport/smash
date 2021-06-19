@@ -116,6 +116,13 @@ enum class DerivativesMode {
   FiniteDifference,
 };
 
+/// Modes of smearing
+enum class SmearingMode {
+  CovariantGaussian,
+  Discrete,
+  Triangular,
+};
+
 /// The time step mode.
 enum class TimeStepMode : char {
   /// Don't use time steps; propagate from action to action.

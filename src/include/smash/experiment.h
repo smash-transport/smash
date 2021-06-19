@@ -875,6 +875,23 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   logg[LExperiment].info() << *this;
 
+  // covariant derivatives can only be done with covariant smearing
+  if (parameters_.derivatives_mode == DerivativesMode::CovariantGaussian &&
+      parameters_.smearing_mode != SmearingMode::CovariantGaussian) {
+    throw std::invalid_argument(
+        "Covariant Gaussian derivatives only make sense for Covariant Gaussian "
+	"smearing!");
+  }
+
+  // for triangular smearing:
+  // the weight needs to be larger than 1./7. for the center cell to contribute
+  // more than the surrounding cells
+  if (parameters_.smearing_mode == SmearingMode::Discrete &&
+      parameters_.discrete_weight < (1./7.)) {
+    throw std::invalid_argument(
+        "The central weight for discrete smearing should be >= 1./7.");
+  }
+
   if (parameters_.coll_crit == CollisionCriterion::Stochastic &&
       time_step_mode_ != TimeStepMode::Fixed) {
     throw std::invalid_argument(
@@ -1277,6 +1294,19 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       break;
     case DerivativesMode::FiniteDifference:
       logg[LExperiment].info() << "Finite difference derivatives are ON";
+      break;
+    }
+    switch (parameters_.smearing_mode){
+    case SmearingMode::CovariantGaussian:
+      logg[LExperiment].info() << "Smearing type: Covariant Gaussian";
+      break;
+    case SmearingMode::Discrete:
+      logg[LExperiment].info() << "Smearing type: Discrete with weight = "
+			       << parameters_.discrete_weight;
+      break;
+    case SmearingMode::Triangular:
+      logg[LExperiment].info() << "Smearing type: Triangular with range = "
+			       << parameters_.triangular_range;
       break;
     }
   }

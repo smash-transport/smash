@@ -855,6 +855,26 @@ class Configuration {
     }
 
     /**
+     * Set SmearingMode.
+     */
+    operator SmearingMode() const {
+      const std::string s = operator std::string();
+      if (s == "Covariant Gaussian") {
+        return SmearingMode::CovariantGaussian;
+      }
+      if (s == "Discrete") {
+        return SmearingMode::Discrete;
+      }
+      if (s == "Triangular") {
+        return SmearingMode::Triangular;
+      }
+      throw IncorrectTypeInAssignment(
+         "The value for key \"" + std::string(key_) +
+          "\" should be \"Covariant Gaussian\", \"Discrete\"," +
+	  " or \"Triangular\".");
+    }
+
+    /**
      * Set time step mode from configuration values.
      *
      * \return time step mode.

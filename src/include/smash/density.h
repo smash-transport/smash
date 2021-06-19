@@ -120,7 +120,10 @@ class DensityParameters {
         r_cut_(par.gauss_cutoff_in_sigma * par.gaussian_sigma),
         ntest_(par.testparticles),
         nensembles_(par.n_ensembles),
-	derivatives_(par.derivatives_mode) {
+	derivatives_(par.derivatives_mode),
+	smearing_(par.smearing_mode),
+	central_weight_(par.discrete_weight),
+	triangular_range_(par.triangular_range) {
     r_cut_sqr_ = r_cut_ * r_cut_;
     const double two_sig_sqr = 2 * sig_ * sig_;
     two_sig_sqr_inv_ = 1. / two_sig_sqr;
@@ -135,6 +138,12 @@ class DensityParameters {
   int nensembles() const { return nensembles_; }
   /// \return Mode of gradient calculation
   DerivativesMode derivatives() const { return derivatives_; };
+  /// \return Smearing mode
+  SmearingMode smearing() const { return smearing_; };
+  /// \return Weight of the central cell in the discrete smearing
+  double central_weight() const { return central_weight_; }
+  /// \return Range of the triangular smearing
+  double triangular_range() const { return triangular_range_; }
   /// \return Cut-off radius [fm]
   double r_cut() const { return r_cut_; }
   /// \return Squared cut-off radius [fm\f$^2\f$]
@@ -157,7 +166,7 @@ class DensityParameters {
   double r_cut_sqr_;
   /// \f$ (2 \sigma^2)^{-1} \f$ [fm\f$^{-2}\f$]
   double two_sig_sqr_inv_;
-  /// Normalization for smearing factor
+  /// Normalization for Gaussian smearing factor
   double norm_factor_sf_;
   /// Testparticle number
   const int ntest_;
@@ -165,6 +174,12 @@ class DensityParameters {
   const int nensembles_;
   /// Mode of calculating the gradients
   const DerivativesMode derivatives_;
+  /// Mode of smearing
+  const SmearingMode smearing_;
+  /// Weight of the central cell in the discrete smearing
+  const double central_weight_;
+  /// Range of the triangular smearing
+  const double triangular_range_;
 };
 
 /**
@@ -556,16 +571,25 @@ inline void update_lattice(RectangularLattice<DensityOnLattice> *lat,
   // proceed only if finite difference gradients are calculated
   if ( par.derivatives() == DerivativesMode::FiniteDifference ){
     for (int i = 0; i < number_of_nodes; i++){
-      // read off
-      //FourVector fourvector_at_i = ( (*lat)[i] ).jmu_net();
-      // fill
       old_jmu.assign_value(i, ( (*lat)[i] ).jmu_net());
     }
   }
 
   lat->reset();
   // get the normalization factor for the covariant Gaussian smearing
-  const double norm_factor = par.norm_factor_sf();  
+  const double norm_factor = par.norm_factor_sf();
+  // get the volume of the cell and weights for discrete smearing
+  const double V_cell = (lat->cell_sizes())[0] * (lat->cell_sizes())[1] *
+    (lat->cell_sizes())[2];
+  // weights for coarse smearing
+  const double big = par.central_weight();
+  const double small = (1.0 - big)/6.0;
+  // get the radii for triangular smearing
+  const std::array<double, 3> triangular_radius =
+    {par.triangular_range() * ( lat->cell_sizes() )[0],
+     par.triangular_range() * ( lat->cell_sizes() )[1],
+     par.triangular_range() * ( lat->cell_sizes() )[2]};
+ 
   // iterate over all particles
   for (const Particles &particles : ensembles) {
     for (const ParticleData &part : particles) {
@@ -582,10 +606,12 @@ inline void update_lattice(RectangularLattice<DensityOnLattice> *lat,
       const double m_inv = 1.0 / m;
       const ThreeVector pos = part.position().threevec();
 
-      // unweighted contribution to density
-      const FourVector unweighted_contribution = dens_factor * norm_factor * ( p_mu / p_mu.x0() );
-      lat->iterate_in_cube(
-        pos, par.r_cut(), [&](DensityOnLattice &node, int ix, int iy, int iz) {	  
+      // act accordingly to which smearing is used
+      if (par.smearing() == SmearingMode::CovariantGaussian){
+	// unweighted contribution to density
+	const FourVector unweighted_contribution = dens_factor * norm_factor * ( p_mu / p_mu.x0() );
+	lat->iterate_in_cube(
+          pos, par.r_cut(), [&](DensityOnLattice &node, int ix, int iy, int iz) {	  
 	  // find the weight for smearing
           const ThreeVector r = lat->cell_center(ix, iy, iz);
           const auto sf = unnormalized_smearing_factor(pos - r, p_mu, m_inv, par,
@@ -595,8 +621,42 @@ inline void update_lattice(RectangularLattice<DensityOnLattice> *lat,
             node.add_particle_for_derivatives(part, dens_factor,
                                               sf.second * norm_factor);
           }
-			  });
-
+              });
+      } else if ( par.smearing() == SmearingMode::Discrete ){
+	// unweighted contribution to density
+	const FourVector unweighted_contribution =
+	  dens_factor * ( p_mu / p_mu.x0() ) / ( par.ntest() * par.nensembles() * V_cell);
+	lat->iterate_nearest_neighbors(
+	  pos, [&](DensityOnLattice &node, int iterated_index, int center_index) {
+	  // the contribution to density is weighted depending on what node it is added to
+          FourVector weighted_contribution;
+	  if ( iterated_index == center_index ){
+	    weighted_contribution = big * unweighted_contribution;
+	  } else {
+	    weighted_contribution = small * unweighted_contribution;
+	  }
+          node.add_particle(weighted_contribution);
+	      });      
+      } else if ( par.smearing() == SmearingMode::Triangular ){
+	// unweighted contribution to density
+	const double prefactor = 1.0/( par.ntest() * par.nensembles() *
+				       std::pow(triangular_radius[0], 2.0) *
+				       std::pow(triangular_radius[1], 2.0) *
+				       std::pow(triangular_radius[2], 2.0) );
+	const FourVector unweighted_contribution = dens_factor * prefactor * ( p_mu / p_mu.x0() );
+	lat->iterate_in_rectangle(
+	  pos, triangular_radius, [&](DensityOnLattice &node, int ix, int iy, int iz) {
+	  // compute the position of the node
+	  const ThreeVector cell_center = lat->cell_center(ix, iy, iz);
+	  //
+	  // compute smearing weight
+	  const double weight_x = triangular_radius[0] - abs( cell_center[0] - pos[0] );
+	  const double weight_y = triangular_radius[1] - abs( cell_center[1] - pos[1] );
+	  const double weight_z = triangular_radius[2] - abs( cell_center[2] - pos[2] );
+	  // add the contribution to the node
+          node.add_particle(unweighted_contribution * weight_x * weight_y * weight_z);
+              });
+      }
     } // end of for (const ParticleData &part : particles) {
   } // end of for (const Particles &particles : ensembles) {
 

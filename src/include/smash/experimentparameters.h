@@ -34,14 +34,24 @@ struct ExperimentParameters {
   /// Number of test-particles
   int testparticles;
 
-  // mode of calculating gradients
+  // mode of calculating gradients for density calculation
   const DerivativesMode derivatives_mode;
+
+  // mode of smearing for density calculation
+  const SmearingMode smearing_mode;
 
   /// Width of gaussian Wigner density of particles
   double gaussian_sigma;
 
   /// Distance at which gaussian is cut, i.e. set to zero, IN SIGMA (not fm)
   double gauss_cutoff_in_sigma;
+
+  /// Weight applied to the center cell in the discrete smearing
+  double discrete_weight;
+
+  /// Range of lattice nodes, in units of lattice spacing, that the
+  /// triangular smearing uses
+  double triangular_range;
 
   /// Employed collision criterion
   const CollisionCriterion coll_crit;
