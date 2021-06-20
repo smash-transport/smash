@@ -137,9 +137,9 @@ class DensityParameters {
   /// \return Number of ensembles
   int nensembles() const { return nensembles_; }
   /// \return Mode of gradient calculation
-  DerivativesMode derivatives() const { return derivatives_; };
+  DerivativesMode derivatives() const { return derivatives_; }
   /// \return Smearing mode
-  SmearingMode smearing() const { return smearing_; };
+  SmearingMode smearing() const { return smearing_; }
   /// \return Weight of the central cell in the discrete smearing
   double central_weight() const { return central_weight_; }
   /// \return Range of the triangular smearing
@@ -697,7 +697,6 @@ inline void update_lattice(RectangularLattice<DensityOnLattice> *lat,
           four_grad_lattice[node_number][2], four_grad_lattice[node_number][3]);
       node_number++;
     }
-
   }  // if ( par.derivatives() == DerivativesMode::FiniteDifference )
 }
 
