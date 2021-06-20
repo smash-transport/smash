@@ -410,8 +410,8 @@ class RectangularLattice {
    *
    * \param[in] old_lat the lattice of FourVectors jmu at a previous time step
    * \param[in] time_step the used time step, needed for the time derivative
-   * \return a lattice of 4-arrays of 4-vectors with the following structure:
-   * [djmu_dt, djmu_dx, djmu_dy, djmu_dz]
+   * \param[out] grad_lat a lattice of 4-arrays of 4-vectors with the following
+   * structure: [djmu_dt, djmu_dx, djmu_dy, djmu_dz]
    */
   void compute_four_gradient_lattice(
       RectangularLattice<FourVector>& old_lat, double time_step,
