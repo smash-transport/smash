@@ -341,6 +341,6 @@ endif()
 install(TARGETS smash_shared LIBRARY DESTINATION lib)
 install(TARGETS smash RUNTIME DESTINATION bin)
 
-install(DIRECTORY include/smash TYPE INCLUDE DESTINATION include)
+install(DIRECTORY include/smash DESTINATION include)
 install(FILES ${generated_headers} DESTINATION include/smash)
-install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" TYPE INCLUDE DESTINATION include)
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" DESTINATION include)
