@@ -18,10 +18,22 @@ The major categories to group changes in this log are:
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 
+## [SMASH-2.0.2](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...2.0.2)
+
+### Input / Output
+* Added interface with Rivet (the particle-physics MC analysis toolkit) that can process the data of the simulations at runtime and produce YODA output files with the analysis results
+* Refactoring of the HempMC3 output now available for final particles and for the collision history in asciiv3 format
+
+### Changed
+* Minimum supported cmake version is now version 3.1
+* Continuous integration now uses Github Actions
+
+
 ## [SMASH-2.0.1](https://github.com/smash-transport/smash/compare/SMASH-2.0...2.0.1)
 
 ### Input / Output
 * Fixed event number counting for intermediate OSCAR output
+
 
 ## [SMASH-2.0](https://github.com/smash-transport/smash/compare/SMASH-1.8...2.0)
 
