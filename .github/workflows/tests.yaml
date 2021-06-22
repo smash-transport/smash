@@ -80,6 +80,7 @@ jobs:
             curl https://deac-fra.dl.sourceforge.net/project/boost/boost/1.75.0/boost_1_75_0.tar.gz -o boost_1_75_0.tar.gz --silent && tar -xf boost_1_75_0.tar.gz
             cd boost_1_75_0 && ./bootstrap.sh --with-libraries=filesystem,system && ./b2 toolset=gcc-4.8 && export BOOST_DIR=$PWD && cd ..
         fi
+
         # we get eigen
         wget http://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz && tar -xf eigen-3.3.9.tar.gz -C $HOME
         # we get cpplint
@@ -90,6 +91,7 @@ jobs:
         # if we use gcc-4.8 we use our self built boost
         if [ $CXX == "g++-4.8" ]; then
             cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DBOOST_ROOT=$BOOST_DIR -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.9/
+
         else
             cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.9/
         fi
