@@ -42,8 +42,8 @@ It requires the following tools & libraries:
 - boost filesystem >= 1.49
 - Pythia = 8.303
 
-Support for ROOT and HepMC3 output is automatically enabled if a suitable version
- (ROOT >= 5.34, HepMC3 >= 3.1.2) is found on the system.
+Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version (ROOT >= 5.34, HepMC3 >= 3.2.3, Rivet >= 3.1.4) is found on the system.
+Please, note that enabling Rivet output requires a compiler supporting C++14 features (e.g. gcc >= 5).
 
 ### Building Pythia
 
@@ -201,6 +201,35 @@ install destination (`$HEPMC_INS`) with
 
 Note that if multiple CMAKE_PREFIX_PATHs are necessary, a semicolon-separated
 list of directories can be specified.
+
+
+### Enabling Rivet support
+
+The Rivet website is: https://rivet.hepforge.org/
+
+The interface with SMASH has been tested with version 3.1.4.
+
+The installation script, downloadable with:
+
+    wget https://gitlab.com/hepcedar/rivetbootstrap/raw/3.1.4/rivet-bootstrap
+
+provides a convenient way to install Rivet and its dependencies
+(HepMC3 is among those, but, if you have already installed it, you can edit the
+script so that Rivet uses your installation).
+More infomation about Rivet, its installation and basic usage can be found in
+the tutorials in the Rivet website.
+Please, note that the compiler must support standard c++14 (e.g. gcc version > 5).
+Please, also note that, every time Rivet is used, some environment variables
+must be set in advance. The script rivetenv.sh, in the Rivet installation directory,
+takes care of this step:
+
+    source [...]/rivetenv.sh
+
+where `[...]` is not a command, but a shortand for the path of the directory in
+which Rivet is installed.
+
+If Rivet (with all its dependencies) is installed and the environment variables
+are set, it will be automatically detected by cmake.
 
 
 ### Using a Custom GSL Build
