@@ -1595,7 +1595,10 @@ void Experiment<Modus>::initialize_new_event() {
     process_string_ptr_->init_pythia_hadron_rndm();
   }
 
-  particles_.reset();
+  for (Particles &particles : ensembles_) {
+    particles.reset();
+  }
+
   // make sure this is initialized
   if (modus_.is_collider()) {
     nucleon_has_interacted_.assign(modus_.total_N_number(), false);
