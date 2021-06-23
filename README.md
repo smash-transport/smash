@@ -219,6 +219,11 @@ script so that Rivet uses your installation).
 More infomation about Rivet, its installation and basic usage can be found in
 the tutorials in the Rivet website.
 Please, note that the compiler must support standard c++14 (e.g. gcc version > 5).
+This also means that the c++14 standard has to be set for the SMASH build (ideally
+from a clean build directory) by adding the following to the `cmake` command:
+
+    cmake .. -DCMAKE_CXX_STANDARD=14
+
 Please, also note that, every time Rivet is used, some environment variables
 must be set in advance. The script rivetenv.sh, in the Rivet installation directory,
 takes care of this step:
