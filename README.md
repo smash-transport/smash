@@ -36,14 +36,14 @@ required C++11 features):
 - clang >= 3.2
 
 It requires the following tools & libraries:
-- cmake >= 2.8.11
+- cmake >= 3.1
 - the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
 - Pythia = 8.303
 
-Support for ROOT and HepMC3 output is automatically enabled if a suitable version
- (ROOT >= 5.34, HepMC3 >= 3.1.2) is found on the system.
+Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version (ROOT >= 5.34, HepMC3 >= 3.2.3, Rivet >= 3.1.4) is found on the system.
+Please, note that enabling Rivet output requires a compiler supporting C++14 features (e.g. gcc >= 5).
 
 ### Building Pythia
 
@@ -67,13 +67,13 @@ Note that although Pythia is statically linked into SMASH, access to
 
 Let's assume Eigen headers will be unpacked in `$HOME`.
 
-1. Download latest package from http://eigen.tuxfamily.org
+1. download latest the package from http://eigen.tuxfamily.org
 
        [latest-eigen].tar.gz
        tar -xf [latest-eigen].tar.gz -C $HOME`
 
-2. in `smash/build/`, create build files with `cmake -DCMAKE_INSTALL_PREFIX=$HOME/[latest-eigen]/ ..`
-
+2. in `smash/build/`, create build files with
+`cmake -DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/ ..`
 
 ### Building SMASH
 
@@ -93,6 +93,25 @@ To run it with specific settings:
     vi config.yaml
     ./smash
 
+### Installation
+
+To install SMASH do
+
+    make install
+
+This will install into `/usr/local`.  If you want to change the installation directory,
+define [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html)
+when configuring the source tree.  For example, if you want to install in `~/.local`, do
+
+    cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
+    make install
+
+With `CMAKE_INSTALL_PREFIX`=_prefix_ the installation will be
+
+- _prefix_`/bin` will contain programs - e.g., `smash`,
+- _prefix_`/lib` will contain libraries - e.g., `libsmash.so`,
+- _prefix_/`include/smash` will contain headers, and
+- _prefix_/`share/smash` will contain data files
 
 ### Troubleshooting
 
@@ -179,6 +198,43 @@ installation. If the HepMC installation is not found, provide the
 install destination (`$HEPMC_INS`) with
 
    cmake -DCMAKE_PREFIX_PATH=$HEPMC_INS ..
+
+Note that if multiple CMAKE_PREFIX_PATHs are necessary, a semicolon-separated
+list of directories can be specified.
+
+
+### Enabling Rivet support
+
+The Rivet website is: https://rivet.hepforge.org/
+
+The interface with SMASH has been tested with version 3.1.4.
+
+The installation script, downloadable with:
+
+    wget https://gitlab.com/hepcedar/rivetbootstrap/raw/3.1.4/rivet-bootstrap
+
+provides a convenient way to install Rivet and its dependencies
+(HepMC3 is among those, but, if you have already installed it, you can edit the
+script so that Rivet uses your installation).
+More infomation about Rivet, its installation and basic usage can be found in
+the tutorials in the Rivet website.
+Please, note that the compiler must support standard c++14 (e.g. gcc version > 5).
+This also means that the c++14 standard has to be set for the SMASH build (ideally
+from a clean build directory) by adding the following to the `cmake` command:
+
+    cmake .. -DCMAKE_CXX_STANDARD=14
+
+Please, also note that, every time Rivet is used, some environment variables
+must be set in advance. The script rivetenv.sh, in the Rivet installation directory,
+takes care of this step:
+
+    source [...]/rivetenv.sh
+
+where `[...]` is not a command, but a shortand for the path of the directory in
+which Rivet is installed.
+
+If Rivet (with all its dependencies) is installed and the environment variables
+are set, it will be automatically detected by cmake.
 
 
 ### Using a Custom GSL Build

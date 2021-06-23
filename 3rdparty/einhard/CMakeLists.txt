@@ -5,3 +5,6 @@ project(Einhard)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -march=native -mfpmath=sse -fPIC")
 
 add_library(einhard STATIC einhard.cpp)
+
+install(FILES einhard.hpp DESTINATION include)
+install(FILES stacktrace.h DESTINATION include)
