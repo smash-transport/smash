@@ -177,9 +177,12 @@ void update_momenta(
   constexpr double safety_factor = 0.1;
   if (dt > safety_factor * min_time_scale) {
     logg[LPropagation].warn()
-        << "The time step size is too large for an accurate propagation "
+        << "In case of covariant Gaussian smearing\n"
+        << "   The time step size is too large for an accurate propagation "
         << "with potentials. Maximum safe value: "
-        << safety_factor * min_time_scale << " fm/c.";
+        << safety_factor * min_time_scale << " fm/c.\n"
+        << "In case of non-covariant smearing "
+        << "increase the number of ensembles or testparticles.";
   }
 }
 
