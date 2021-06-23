@@ -98,5 +98,5 @@ IF (NOT Pythia_VERSION_OK)
 ENDIF ()
 
 # the variables will only show up in the GUI in the "advanced" view
-MARK_AS_ADVANCED(Pythia_INCLUDE_DIR Pythia_LIBRARY Pythia_LHAPDFDummy_LIBRARY Pythia_xmldoc_PATH)
+MARK_AS_ADVANCED(Pythia_INCLUDE_DIR Pythia_LIBDIR Pythia_LIBRARY Pythia_LHAPDFDummy_LIBRARY Pythia_xmldoc_PATH)
 MARK_AS_ADVANCED(Pythia_CONFIG_EXECUTABLE)

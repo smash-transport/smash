@@ -22,7 +22,7 @@ namespace smash {
 /* ExperimentBase carries everything that is needed for the evolution */
 ExperimentPtr ExperimentBase::create(Configuration config,
                                      const bf::path &output_path) {
-  logg[LExperiment].trace() << source_location;
+  logg[LExperiment].trace() << SMASH_SOURCE_LOCATION;
   /*!\Userguide
    * \page input_general_ General
    * \key Modus (string, required): \n
@@ -183,12 +183,12 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *
  * - \b Particles \n
  *   \key Extended (bool, optional, default = false, incompatible with
- *                  Oscar1999, VTK and Root formats): \n
+ *                  Oscar1999, VTK, HepMC and Root formats): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
  *   \key Only_Final (string, optional, default = Yes, incompatible with
-                      VTK format): \n
+                      VTK and HepMC format): \n
  *   \li \key Yes - Print only final particle list \n
  *   \li \key IfNotEmpty - Print only final particle list, but only if event
  *                         is not empty (i.e. any collisions happened between
@@ -197,12 +197,12 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * \n
  * - \b Collisions (VTK not available) \n
  *   \key Extended (bool, optional, default = false, incompatible with
- *                  Oscar1999 and Root formats): \n
+ *                  Oscar1999, HepMC and Root formats): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
  *   \key Print_Start_End (bool, optional, default = false, incompatible with
- *                  Root format): \n
+ *                  Root and HepMC format): \n
  *   \li \key true - Initial and final particle list is printed out \n
  *   \li \key false - Initial and final particle list is not printed out \n
  * \n
@@ -230,8 +230,8 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key true - Print extended information for each particle
  *   \li \key false - Regular output for each particle \n
  * \n
- * - \b HepMC (Only ASCII format)\n
- *   No content-specific output options \n
+ * - \b Rivet (Only YODA format)\n
+ *   See \ref rivet_output_user_guide_ for more information
  * \n
  * \anchor Thermodynamics
  * - \b Thermodynamics \n
@@ -365,16 +365,19 @@ ExperimentPtr ExperimentBase::create(Configuration config,
          Extended: False
          Proper_Time: 1.5
  \endverbatim
- * SMASH can also output a form of HepMC event record in the HepMC ASCII format.
- * The HepMC output is enabled as follows:
+ * The HepMC ASCII ouput is enabled by specifying the HepmC output under
+ * Particles or Collisions depdening on the content wanted.
  *\verbatim
-     HepMC:
-         Format:   ["ASCII"]
+ Output:
+     Particles:
+         Format:          ["HepMC"]
+     Collisions:
+         Format:          ["HepMC"]
  \endverbatim
  */
 
 ExperimentParameters create_experiment_parameters(Configuration config) {
-  logg[LExperiment].trace() << source_location;
+  logg[LExperiment].trace() << SMASH_SOURCE_LOCATION;
 
   const int ntest = config.take({"General", "Testparticles"}, 1);
   if (ntest <= 0) {

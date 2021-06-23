@@ -16,7 +16,13 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 endif()
 
 # Minimum cmake version this is tested on
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.1)
+
+if(NOT "${CMAKE_CXX_STANDARD}")
+  set(CMAKE_CXX_STANDARD 11)
+endif()
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Tell cmake where to find our modules
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -37,11 +43,20 @@ endif(NOT CMAKE_BUILD_TYPE)
 # add 3rd-party libraries (before setting compiler flags etc)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.6.2/include")
+
+find_package(yaml-cpp 0.6 QUIET NO_MODULE)
+if (yaml-cpp_FOUND)
+  # target doesn't set include directory for some reason
+  get_filename_component(yaml_cpp_include_dir ${YAML_CPP_INCLUDE_DIR} ABSOLUTE)
+  include_directories(SYSTEM ${yaml_cpp_include_dir})
+else()
+  include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.6.2/include")
+endif()
+
 add_subdirectory(3rdparty)
 
 # Set compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -mfpmath=sse")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpmath=sse")
 
 # Disable DEBUG and TRACE output in Release builds
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG" CACHE
@@ -78,6 +93,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 # check that C++11 code compiles
+# in order for this to work the policy on respecting the CXX_STANDARD for
+# try_compile has to be changed first
+# see https://cmake.org/cmake/help/v3.8/policy/CMP0067.html
+cmake_policy(SET CMP0067 NEW)
+set(CMAKE_REQUIRED_FLAGS "-std=c++11")
 include(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("
 #include <initializer_list>
@@ -105,3 +125,5 @@ include(CTest)
 # subdirectories where the code is
 add_subdirectory(src)
 add_subdirectory(doc)
+
+install(DIRECTORY input/ DESTINATION share/smash)
