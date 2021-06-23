@@ -69,8 +69,7 @@ namespace smash {
  **/
 HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
                          const bool full_event)
-    : HepMcInterface(name, full_event),
-      filename_(path / (name + ".asciiv3")) {
+    : HepMcInterface(name, full_event), filename_(path / (name + ".asciiv3")) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += +".unfinished";
   output_file_ =

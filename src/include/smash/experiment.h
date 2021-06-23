@@ -642,8 +642,8 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Thermodynamics" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ThermodynamicOutput>(output_path, content, out_par));
-  } else if (content == "Thermodynamics" && (format == "Lattice_ASCII" ||
-             format == "Lattice_Binary")) {
+  } else if (content == "Thermodynamics" &&
+             (format == "Lattice_ASCII" || format == "Lattice_Binary")) {
     printout_full_lattice_any_td_ = true;
     if (format == "Lattice_ASCII") {
       printout_full_lattice_ascii_td_ = true;
@@ -691,8 +691,8 @@ void Experiment<Modus>::create_output(const std::string &format,
       return;
     }
     if (format == "YODA") {
-      outputs_.emplace_back(make_unique<RivetOutput>(
-          output_path, "SMASH_Rivet", false, out_par));
+      outputs_.emplace_back(
+          make_unique<RivetOutput>(output_path, "SMASH_Rivet", false, out_par));
       rivet_format_already_selected = true;
     } else if (format == "YODA-full") {
       outputs_.emplace_back(make_unique<RivetOutput>(
