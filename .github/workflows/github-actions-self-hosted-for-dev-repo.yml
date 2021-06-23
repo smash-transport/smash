@@ -64,7 +64,7 @@ jobs:
           # this directory contains pythia, clang and eigen, which are needed later
           # here we do not use $HOME because the runner is hosted in shared common group directory
           export TOOLS_DIR=/home/hyihp-repos/smash-devel_runners/smash_stuff
-          export PATH=$TOOLS_DIR/bin:$TOOLS_DIR/clang6_0_0/bin/:$PATH
+          export PATH=$TOOLS_DIR/bin:$TOOLS_DIR/clang6_0_0/bin/:$TOOLS_DIR/cmake-3.20.5/bin:$PATH
           # now we configure and build smash
           cd $SMASH_ROOT/build
           cmake .. -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$TOOLS_DIR/eigen-3.3.9/ \
