@@ -489,7 +489,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
                     // time_step is only needed for the template specialization
                     // (see below)
                     const double time_step, const bool compute_gradient) {
- // the time_step variable is not used here
+  // the time_step variable is not used here
   SMASH_UNUSED(time_step);
 
   // Do not proceed if lattice does not exists/update not required
@@ -528,16 +528,14 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
   }
 }
 
-void update_lattice(RectangularLattice<DensityOnLattice> *lat,
-                           RectangularLattice<FourVector> *old_jmu,
-                           RectangularLattice<FourVector> *new_jmu,
-                           RectangularLattice<std::array<FourVector, 4>> *four_grad_lattice,
-                           const LatticeUpdate update,
-                           const DensityType dens_type,
-                           const DensityParameters &par,
-                           const std::vector<Particles> &ensembles,
-                           const double time_step,
-                           const bool compute_gradient);
+void update_lattice(
+    RectangularLattice<DensityOnLattice> *lat,
+    RectangularLattice<FourVector> *old_jmu,
+    RectangularLattice<FourVector> *new_jmu,
+    RectangularLattice<std::array<FourVector, 4>> *four_grad_lattice,
+    const LatticeUpdate update, const DensityType dens_type,
+    const DensityParameters &par, const std::vector<Particles> &ensembles,
+    const double time_step, const bool compute_gradient);
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_DENSITY_H_

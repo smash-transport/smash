@@ -415,8 +415,10 @@ class Experiment : public ExperimentBase {
   std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> Tmn_;
 
   /// Auxiliary lattices
-  std::unique_ptr<RectangularLattice<FourVector>> old_jmu_auxiliary_, new_jmu_auxiliary_;
-  std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>> four_gradient_auxiliary_;
+  std::unique_ptr<RectangularLattice<FourVector>> old_jmu_auxiliary_,
+      new_jmu_auxiliary_;
+  std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>>
+      four_gradient_auxiliary_;
 
   /// Whether to print the energy-momentum tensor
   bool printout_tmn_ = false;
@@ -643,8 +645,8 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Thermodynamics" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ThermodynamicOutput>(output_path, content, out_par));
-  } else if (content == "Thermodynamics" && (format == "Lattice_ASCII" ||
-             format == "Lattice_Binary")) {
+  } else if (content == "Thermodynamics" &&
+             (format == "Lattice_ASCII" || format == "Lattice_Binary")) {
     printout_full_lattice_any_td_ = true;
     if (format == "Lattice_ASCII") {
       printout_full_lattice_ascii_td_ = true;
@@ -1407,9 +1409,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
        potentials faster */
     if (potentials_) {
       // Create auxiliary lattices
-      old_jmu_auxiliary_ = make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic, LatticeUpdate::EveryTimestep);
-      new_jmu_auxiliary_ = make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic, LatticeUpdate::EveryTimestep); 
-      four_gradient_auxiliary_ = make_unique<RectangularLattice<std::array<FourVector, 4>>>(l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      old_jmu_auxiliary_ = make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      new_jmu_auxiliary_ = make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      four_gradient_auxiliary_ =
+          make_unique<RectangularLattice<std::array<FourVector, 4>>>(
+              l, n, origin, periodic, LatticeUpdate::EveryTimestep);
 
       if (potentials_->use_skyrme()) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
@@ -2256,18 +2262,18 @@ template <typename Modus>
 void Experiment<Modus>::update_potentials() {
   if (potentials_) {
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
-      update_lattice(jmu_I3_lat_.get(),
-                     old_jmu_auxiliary_.get(), new_jmu_auxiliary_.get(),
-                     four_gradient_auxiliary_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::BaryonicIsospin, density_param_, ensembles_,
+      update_lattice(jmu_I3_lat_.get(), old_jmu_auxiliary_.get(),
+                     new_jmu_auxiliary_.get(), four_gradient_auxiliary_.get(),
+                     LatticeUpdate::EveryTimestep, DensityType::BaryonicIsospin,
+                     density_param_, ensembles_,
                      parameters_.labclock->timestep_duration(), true);
     }
     if ((potentials_->use_skyrme() || potentials_->use_symmetry()) &&
         jmu_B_lat_ != nullptr) {
-      update_lattice(jmu_B_lat_.get(),
-                     old_jmu_auxiliary_.get(), new_jmu_auxiliary_.get(),
-                     four_gradient_auxiliary_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::Baryon, density_param_, ensembles_,
+      update_lattice(jmu_B_lat_.get(), old_jmu_auxiliary_.get(),
+                     new_jmu_auxiliary_.get(), four_gradient_auxiliary_.get(),
+                     LatticeUpdate::EveryTimestep, DensityType::Baryon,
+                     density_param_, ensembles_,
                      parameters_.labclock->timestep_duration(), true);
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {

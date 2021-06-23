@@ -156,16 +156,14 @@ current_eckart(const ThreeVector &r, const Particles &plist,
                              smearing);
 }
 
-void update_lattice(RectangularLattice<DensityOnLattice> *lat,
-                           RectangularLattice<FourVector> *old_jmu,
-                           RectangularLattice<FourVector> *new_jmu,
-                           RectangularLattice<std::array<FourVector, 4>> *four_grad_lattice,
-                           const LatticeUpdate update,
-                           const DensityType dens_type,
-                           const DensityParameters &par,
-                           const std::vector<Particles> &ensembles,
-                           const double time_step,
-                           const bool compute_gradient) {
+void update_lattice(
+    RectangularLattice<DensityOnLattice> *lat,
+    RectangularLattice<FourVector> *old_jmu,
+    RectangularLattice<FourVector> *new_jmu,
+    RectangularLattice<std::array<FourVector, 4>> *four_grad_lattice,
+    const LatticeUpdate update, const DensityType dens_type,
+    const DensityParameters &par, const std::vector<Particles> &ensembles,
+    const double time_step, const bool compute_gradient) {
   // Do not proceed if lattice does not exists/update not required
   if (lat == nullptr || lat->when_update() != update) {
     return;
@@ -173,7 +171,7 @@ void update_lattice(RectangularLattice<DensityOnLattice> *lat,
   const std::array<int, 3> lattice_n_cells = lat->n_cells();
   const int number_of_nodes =
       lattice_n_cells[0] * lattice_n_cells[1] * lattice_n_cells[2];
- 
+
   /*
    * Take the provided DensityOnLattice lattice and use the information about
    * the current to create a lattice of current FourVectors. Because the lattice
@@ -223,7 +221,7 @@ void update_lattice(RectangularLattice<DensityOnLattice> *lat,
           continue;
         }
         const double m_inv = 1.0 / m;
- 
+
         // unweighted contribution to density
         const FourVector unweighted_contribution =
             dens_factor * norm_factor * (p_mu / p_mu.x0());
@@ -302,18 +300,17 @@ void update_lattice(RectangularLattice<DensityOnLattice> *lat,
     // initialize a lattice of fourgradients
     // compute time derivatives and gradients of all components of jmu
     new_jmu->compute_four_gradient_lattice(*old_jmu, time_step,
-                                          *four_grad_lattice);
+                                           *four_grad_lattice);
 
     // substitute new derivatives
     int node_number = 0;
     for (auto &node : *lat) {
-      auto tmp =  (*four_grad_lattice)[node_number];
+      auto tmp = (*four_grad_lattice)[node_number];
       node.overwrite_djmu_dxmu(tmp[0], tmp[1], tmp[2], tmp[3]);
       node_number++;
     }
   }  // if ( par.derivatives() == DerivativesMode::FiniteDifference )
 }
-
 
 std::ostream &operator<<(std::ostream &os, DensityType dens_type) {
   switch (dens_type) {
