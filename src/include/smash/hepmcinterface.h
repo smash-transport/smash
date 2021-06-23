@@ -88,11 +88,8 @@ class HepMcInterface : public OutputInterface {
    * \param[in] name    Name of output
    * \param[in] full_event Whether the full event or only final-state particles
                            are printed in the output
-   * \param[in] total_N Total number of particles in both nuclei.
-   * \param[in] proj_N  Number of particles in projectile.
    */
-  HepMcInterface(const std::string& name, const bool full_event,
-                 const int total_N, const int proj_N);
+  HepMcInterface(const std::string& name, const bool full_event);
   /**
    * Add the initial particles information of an event to the
    * central vertex.  Construct projectile and target particles with
@@ -221,16 +218,6 @@ class HepMcInterface : public OutputInterface {
   /** counter of hard binary collisions (e.g., where both incoming
       particles are from the beams. */
   int ncoll_hard_;
-  /**
-   * Total number of nucleons in projectile and target,
-   * needed for converting nuclei to single particles.
-   */
-  const int total_N_;
-  /**
-   * Total number of nucleons in projectile,
-   * needed for converting nuclei to single particles.
-   */
-  const int proj_N_;
   /** Whether the full event or only final-state particles are in the output */
   bool full_event_;
 };

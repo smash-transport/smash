@@ -15,15 +15,12 @@
 
 namespace smash {
 
-HepMcInterface::HepMcInterface(const std::string& name, const bool full_event,
-                               const int total_N, const int proj_N)
+HepMcInterface::HepMcInterface(const std::string& name, const bool full_event)
     : OutputInterface(name),
       event_(HepMC3::Units::GEV, HepMC3::Units::MM),
       ion_(),
       xs_(),
       ip_(),
-      total_N_(total_N),
-      proj_N_(proj_N),
       full_event_(full_event) {
   logg[LOutput].debug() << "Name of output: " << name << " "
                         << (full_event_ ? "full event" : "final state only")
@@ -46,7 +43,6 @@ void HepMcInterface::at_eventstart(const Particles& particles,
   xs_->set_cross_section(1, 1);  // Dummy values
   event_.set_event_number(event_number);
   event_.set_heavy_ion(ion_);
-  coll_.resize(total_N_);
 
   // Create IP only if final state
   ip_ = std::make_shared<HepMC3::GenVertex>();
@@ -55,9 +51,9 @@ void HepMcInterface::at_eventstart(const Particles& particles,
   // Count up projectile and target
   smash::FourVector p_proj;
   smash::FourVector p_targ;
-  AZ az_proj;
-  AZ az_targ;
-  bool is_coll = proj_N_ > 0 && total_N_ > 0;
+  AZ az_proj{0, 0};
+  AZ az_targ{0, 0};
+  bool is_coll = (event.impact_parameter >= 0.0);
 
   for (auto& data : particles) {
     if (is_coll) {
@@ -67,12 +63,15 @@ void HepMcInterface::at_eventstart(const Particles& particles,
             " is not a valid HepMC beam particle!");
       }
 
-      bool isproj = data.id() < proj_N_;
-      smash::FourVector& p = (isproj ? p_proj : p_targ);
-      AZ& az = (isproj ? az_proj : az_targ);
-      p += data.momentum();
-      az.second += data.is_proton();
-      az.first++;
+      if (data.belongs_to() == BelongsTo::Projectile) {
+        p_proj += data.momentum();
+        az_proj.first++;
+        az_proj.second += data.type().charge();
+      } else if (data.belongs_to() == BelongsTo::Target) {
+        p_targ += data.momentum();
+        az_targ.first++;
+        az_targ.second += data.type().charge();
+      }
     }
 
     if (!full_event_ && is_coll) {
@@ -92,6 +91,8 @@ void HepMcInterface::at_eventstart(const Particles& particles,
       ip_->add_particle_in(op);
     }
   }
+
+  coll_.resize(az_proj.first + az_targ.first);
   // Make beam particles
   if (is_coll) {
     auto proj = make_gen(ion_pdg(az_proj), Status::beam, p_proj);
@@ -231,6 +232,6 @@ int HepMcInterface::ion_pdg(const AZ& az) const {
   if (az.second == 1 && az.first == 0)
     return 2112;  // Neutron
 
-  return 1'000'000'000 + az.second * 10'000 + az.first * 10;
+  return 1000 * 1000 * 1000 + az.second * 10 * 1000 + az.first * 10;
 }
 }  // namespace smash

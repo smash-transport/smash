@@ -237,43 +237,6 @@ class Experiment : public ExperimentBase {
    */
   Modus *modus() { return &modus_; }
 
-  /** Number of projectile participants
-   *
-   * This includes all particles of the projectile that did not take part in
-   * any scattering. Note that this definition might not be accurate because
-   * there can be many secondary interactions with low momentum transfer within
-   * the projectile nucleus.
-   *
-   * \return Number of projectile participants
-   * */
-  int npart_projectile() const {
-    int np = 0;
-    for (size_t i = 0; i < this->modus_.proj_N_number(); i++)
-      np += nucleon_has_interacted_[i] ? 1 : 0;
-    return np;
-  }
-
-  /** Number of target participants
-   *
-   * This includes all particles of the target that did not take part in
-   * any scattering. Note that this definition might not be accurate because
-   * there can be many secondary interactions with low momentum transfer within
-   * the target nucleus.
-   *
-   * \return Number of target participants
-   * */
-  int npart_target() const {
-    int nt = 0;
-    for (size_t i = this->modus_.proj_N_number();
-         i < this->modus_.total_N_number(); i++)
-      nt += nucleon_has_interacted_[i] ? 1 : 0;
-    return nt;
-  }
-  /** Return true if any two beam particles interacted */
-  bool projectile_target_have_interacted() const {
-    return projectile_target_interact_;
-  }
-
  private:
   /**
    * Perform the given action.
@@ -679,8 +642,8 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Thermodynamics" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ThermodynamicOutput>(output_path, content, out_par));
-  } else if (content == "Thermodynamics" && (format == "Lattice_ASCII") ||
-             (format == "Lattice_Binary")) {
+  } else if (content == "Thermodynamics" && (format == "Lattice_ASCII" ||
+             format == "Lattice_Binary")) {
     printout_full_lattice_any_td_ = true;
     if (format == "Lattice_ASCII") {
       printout_full_lattice_ascii_td_ = true;
@@ -702,12 +665,10 @@ void Experiment<Modus>::create_output(const std::string &format,
 #ifdef SMASH_USE_HEPMC
     if (content == "Particles") {
       outputs_.emplace_back(make_unique<HepMcOutput>(
-          output_path, "SMASH_HepMC_particles", false, modus_.total_N_number(),
-          modus_.proj_N_number()));
+          output_path, "SMASH_HepMC_particles", false));
     } else if (content == "Collisions") {
       outputs_.emplace_back(make_unique<HepMcOutput>(
-          output_path, "SMASH_HepMC_collisions", true, modus_.total_N_number(),
-          modus_.proj_N_number()));
+          output_path, "SMASH_HepMC_collisions", true));
     } else {
       logg[LExperiment].error(
           "HepMC only available for Particles and "
@@ -731,13 +692,11 @@ void Experiment<Modus>::create_output(const std::string &format,
     }
     if (format == "YODA") {
       outputs_.emplace_back(make_unique<RivetOutput>(
-          output_path, "SMASH_Rivet", false, modus_.total_N_number(),
-          modus_.proj_N_number(), out_par));
+          output_path, "SMASH_Rivet", false, out_par));
       rivet_format_already_selected = true;
     } else if (format == "YODA-full") {
       outputs_.emplace_back(make_unique<RivetOutput>(
-          output_path, "SMASH_Rivet_full", true, modus_.total_N_number(),
-          modus_.proj_N_number(), out_par));
+          output_path, "SMASH_Rivet_full", true, out_par));
       rivet_format_already_selected = true;
     } else {
       logg[LExperiment].error("Rivet format " + format +
@@ -1597,11 +1556,6 @@ void Experiment<Modus>::initialize_new_event() {
 
   for (Particles &particles : ensembles_) {
     particles.reset();
-  }
-
-  // make sure this is initialized
-  if (modus_.is_collider()) {
-    nucleon_has_interacted_.assign(modus_.total_N_number(), false);
   }
 
   // Sample particles according to the initial conditions
