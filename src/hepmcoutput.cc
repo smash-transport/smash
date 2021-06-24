@@ -68,10 +68,8 @@ namespace smash {
  * this check is disabled by default.
  **/
 HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
-                         const bool full_event, const int total_N,
-                         const int proj_N)
-    : HepMcInterface(name, full_event, total_N, proj_N),
-      filename_(path / (name + ".asciiv3")) {
+                         const bool full_event)
+    : HepMcInterface(name, full_event), filename_(path / (name + ".asciiv3")) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += +".unfinished";
   output_file_ =
