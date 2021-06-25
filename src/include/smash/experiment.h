@@ -417,9 +417,11 @@ class Experiment : public ExperimentBase {
   /// Lattices of energy-momentum tensors for printout
   std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> Tmn_;
 
-  /// Auxiliary lattices
-  std::unique_ptr<RectangularLattice<FourVector>> old_jmu_auxiliary_,
-      new_jmu_auxiliary_;
+  /// Auxiliary lattice for values of jmu at a time step t0
+  std::unique_ptr<RectangularLattice<FourVector>> old_jmu_auxiliary_;
+  /// Auxiliary lattice for values of jmu at a time step t0 + dt
+  std::unique_ptr<RectangularLattice<FourVector>> new_jmu_auxiliary_;
+  /// Auxiliary lattice for calculating the four-gradient of jmu
   std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>>
       four_gradient_auxiliary_;
 
