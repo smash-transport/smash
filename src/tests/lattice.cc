@@ -182,9 +182,9 @@ TEST(neighbor_indeces) {
   COMPARE(l.cell_center(ix1, iy1_u, iz1),
           l.cell_center(l.index_up(ix1, iy1, iz1)));
   COMPARE(l.cell_center(ix1, iy1, iz1_n),
-          l.cell_center(l.index_near(ix1, iy1, iz1)));
+          l.cell_center(l.index_backward(ix1, iy1, iz1)));
   COMPARE(l.cell_center(ix1, iy1, iz1_f),
-          l.cell_center(l.index_far(ix1, iy1, iz1)));
+          l.cell_center(l.index_forward(ix1, iy1, iz1)));
 
   // 2) position vector such that some of the shifts according to dx, dy, dz
   // will be beyond the bounds of the lattice; when that happens, the index
@@ -223,9 +223,9 @@ TEST(neighbor_indeces) {
   COMPARE(l.cell_center(ix2, iy_u, iz2),
           l.cell_center(l.index_up(ix2, iy2, iz2)));
   COMPARE(l.cell_center(ix2, iy2, iz_n),
-          l.cell_center(l.index_near(ix2, iy2, iz2)));
+          l.cell_center(l.index_backward(ix2, iy2, iz2)));
   COMPARE(l.cell_center(ix2, iy2, iz_f),
-          l.cell_center(l.index_far(ix2, iy2, iz2)));
+          l.cell_center(l.index_forward(ix2, iy2, iz2)));
 }
 
 /*
@@ -272,12 +272,11 @@ TEST(neighbor_indeces_periodic) {
                     : (iz + 1);
 
   COMPARE(l.cell_center(ix_l, iy, iz), l.cell_center(l.index_left(ix, iy, iz)));
-  COMPARE(l.cell_center(ix_r, iy, iz),
-          l.cell_center(l.index_right(ix, iy, iz)));
+  COMPARE(l.cell_center(ix_r, iy, iz), l.cell_center(l.index_right(ix, iy, iz)));
   COMPARE(l.cell_center(ix, iy_d, iz), l.cell_center(l.index_down(ix, iy, iz)));
   COMPARE(l.cell_center(ix, iy_u, iz), l.cell_center(l.index_up(ix, iy, iz)));
-  COMPARE(l.cell_center(ix, iy, iz_n), l.cell_center(l.index_near(ix, iy, iz)));
-  COMPARE(l.cell_center(ix, iy, iz_f), l.cell_center(l.index_far(ix, iy, iz)));
+  COMPARE(l.cell_center(ix, iy, iz_n), l.cell_center(l.index_backward(ix, iy, iz)));
+  COMPARE(l.cell_center(ix, iy, iz_f), l.cell_center(l.index_forward(ix, iy, iz)));
 }
 
 /*
@@ -919,8 +918,8 @@ TEST(iterate_nearest_neighbors) {
   int right_index = lattice->index_right(ix_0, iy_0, iz_0);
   int down_index = lattice->index_down(ix_0, iy_0, iz_0);
   int up_index = lattice->index_up(ix_0, iy_0, iz_0);
-  int near_index = lattice->index_near(ix_0, iy_0, iz_0);
-  int far_index = lattice->index_far(ix_0, iy_0, iz_0);
+  int backward_index = lattice->index_backward(ix_0, iy_0, iz_0);
+  int forward_index = lattice->index_forward(ix_0, iy_0, iz_0);
 
   int current_index = 0;
   // Iterate all the lattice and check that the center node and the neighboring
@@ -939,9 +938,9 @@ TEST(iterate_nearest_neighbors) {
           COMPARE(node, mark) << ix << " " << iy << " " << iz;
         } else if (current_index == up_index) {
           COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == near_index) {
+        } else if (current_index == backward_index) {
           COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == far_index) {
+        } else if (current_index == forward_index) {
           COMPARE(node, mark) << ix << " " << iy << " " << iz;
         } else {
           COMPARE(node, FourVector()) << ix << " " << iy << " " << iz;
@@ -968,8 +967,8 @@ TEST(iterate_nearest_neighbors) {
   right_index = lattice->index_right(ix_0, iy_0, iz_0);
   down_index = lattice->index_down(ix_0, iy_0, iz_0);
   up_index = lattice->index_up(ix_0, iy_0, iz_0);
-  near_index = lattice->index_near(ix_0, iy_0, iz_0);
-  far_index = lattice->index_far(ix_0, iy_0, iz_0);
+  backward_index = lattice->index_backward(ix_0, iy_0, iz_0);
+  forward_index = lattice->index_forward(ix_0, iy_0, iz_0);
 
   // Iterate all the lattice and check that the center node and the neighboring
   // nodes are marked
@@ -987,9 +986,9 @@ TEST(iterate_nearest_neighbors) {
           COMPARE(node, mark) << ix << " " << iy << " " << iz;
         } else if (current_index == up_index) {
           COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == near_index) {
+        } else if (current_index == backward_index) {
           COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == far_index) {
+        } else if (current_index == forward_index) {
           COMPARE(node, mark) << ix << " " << iy << " " << iz;
         } else {
           COMPARE(node, FourVector()) << ix << " " << iy << " " << iz;

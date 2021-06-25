@@ -306,7 +306,7 @@ void update_lattice(
     int node_number = 0;
     for (auto &node : *lat) {
       auto tmp = (*four_grad_lattice)[node_number];
-      node.overwrite_djmu_dxmu(tmp[0], tmp[1], tmp[2], tmp[3]);
+      node.overwrite_djmu_dxnu(tmp[0], tmp[1], tmp[2], tmp[3]);
       node_number++;
     }
   }  // if ( par.derivatives() == DerivativesMode::FiniteDifference )

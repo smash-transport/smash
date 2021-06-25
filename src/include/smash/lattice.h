@@ -207,7 +207,7 @@ class RectangularLattice {
     return (ix + n_cells_[0] * (iy + iz * n_cells_[1]));
   }
   /**
-   * Given the indeces of a cell in the x, y, and z directions, return index of
+   * Given the indices of a cell in the x, y, and z directions, return index of
    * the nearest cell in the -x direction ("left").
    *
    * \param[in] ix index of a cell in the x-direction
@@ -224,7 +224,7 @@ class RectangularLattice {
     }
   }
   /**
-   * Given the indeces of a cell in the x, y, and z directions, return index of
+   * Given the indices of a cell in the x, y, and z directions, return index of
    * the nearest cell in the +x direction ("right").
    *
    * \param[in] ix index of a cell in the x-direction
@@ -241,7 +241,7 @@ class RectangularLattice {
     }
   }
   /**
-   * Given the indeces of a cell in the x, y, and z directions, return index of
+   * Given the indices of a cell in the x, y, and z directions, return index of
    * the nearest cell in the -y direction ("down").
    *
    * \param[in] ix index of a cell in the x-direction
@@ -258,7 +258,7 @@ class RectangularLattice {
     }
   }
   /**
-   * Given the indeces of a cell in the x, y, and z directions, return index of
+   * Given the indices of a cell in the x, y, and z directions, return index of
    * the nearest cell in the +y direction ("up").
    *
    * \param[in] ix index of a cell in the x-direction
@@ -275,16 +275,16 @@ class RectangularLattice {
     }
   }
   /**
-   * Given the indeces of a cell in the x, y, and z directions, return index of
-   * the nearest cell in the -z direction ("near").
+   * Given the indices of a cell in the x, y, and z directions, return index of
+   * the nearest cell in the -z direction ("backward").
    *
    * \param[in] ix index of a cell in the x-direction
    * \param[in] iy index of a cell in the y-direction
    * \param[in] iz index of a cell in the z-direction
-   * \return index of the nearest cell in the "near" direction (iz-1) with
+   * \return index of the nearest cell in the "backward" direction (iz-1) with
    * respect to the current cell
    */
-  int index_near(int ix, int iy, int iz) {
+  int index_backward(int ix, int iy, int iz) {
     if (unlikely(iz == 0)) {
       return periodic_ ? index1d(ix, iy, n_cells_[2] - 1) : index1d(ix, iy, iz);
     } else {
@@ -292,16 +292,16 @@ class RectangularLattice {
     }
   }
   /**
-   * Given the indeces of a cell in the x, y, and z directions, return index of
-   * the nearest cell in the +z direction ("far").
+   * Given the indices of a cell in the x, y, and z directions, return index of
+   * the nearest cell in the +z direction ("forward").
    *
    * \param[in] ix index of a cell in the x-direction
    * \param[in] iy index of a cell in the y-direction
    * \param[in] iz index of a cell in the z-direction
-   * \return index of the nearest cell in the "far" direction (iz+1) with
+   * \return index of the nearest cell in the "forward" direction (iz+1) with
    * respect to the current cell
    */
-  int index_far(int ix, int iy, int iz) {
+  int index_forward(int ix, int iy, int iz) {
     if (unlikely(iz == (n_cells_[2] - 1))) {
       return periodic_ ? index1d(ix, iy, 0) : index1d(ix, iy, iz);
     } else {
@@ -617,7 +617,7 @@ class RectangularLattice {
 
     /* Array holds value at the cell center: r_center = r_0 + (i+0.5)cell_size,
      * where i is index in any direction. Therefore we want cells with condition
-     * (r-r_cut)*csize - 0.5 < i < (r+r_cut)*csize - 0.5, r = r_center - r_0 */
+     * (r-r_cut)/csize - 0.5 < i < (r+r_cut)/csize - 0.5, r = r_center - r_0 */
     for (int i = 0; i < 3; i++) {
       l_bounds[i] =
           std::ceil((point[i] - origin_[i] - r_cut) / cell_sizes_[i] - 0.5);
@@ -662,7 +662,7 @@ class RectangularLattice {
 
     /* Array holds value at the cell center: r_center = r_0 + (i+0.5)cell_size,
      * where i is index in any direction. Therefore we want cells with condition
-     * (r[i]-rectangle[i])*csize - 0.5 < i < (r[i]+rectangle[i])*csize - 0.5,
+     * (r[i]-rectangle[i])/csize - 0.5 < i < (r[i]+rectangle[i])/csize - 0.5,
      * r[i] = r_center[i] - r_0[i]
      */
     for (int i = 0; i < 3; i++) {
@@ -727,11 +727,11 @@ class RectangularLattice {
     int iup = index_up(ix, iy, iz);
     func(lattice_[iup], iup, i);
 
-    int inear = index_near(ix, iy, iz);
-    func(lattice_[inear], inear, i);
+    int ibackward = index_backward(ix, iy, iz);
+    func(lattice_[ibackward], ibackward, i);
 
-    int ifar = index_far(ix, iy, iz);
-    func(lattice_[ifar], ifar, i);
+    int iforward = index_forward(ix, iy, iz);
+    func(lattice_[iforward], iforward, i);
   }
 
   /**
