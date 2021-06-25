@@ -22,6 +22,7 @@
 #include "macros.h"
 
 namespace smash {
+static constexpr int LOutput = LogArea::Output::id;
 
 /**
  * \ingroup output

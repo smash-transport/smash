@@ -423,8 +423,8 @@ TEST(update_incoming) {
   COMPARE(act.incoming_particles()[0].position(), new_position);
 }
 
-bool collisionbranches_equal(const CollisionBranchPtr& b1,
-                             const CollisionBranchPtr& b2) {
+static bool collisionbranches_equal(const CollisionBranchPtr& b1,
+                                    const CollisionBranchPtr& b2) {
   bool same_particle_number = b1->particle_number() == b2->particle_number();
   bool same_weight = b1->weight() == b2->weight();
   if (b1->get_type() == ProcessType::StringSoftSingleDiffractiveAX) {

@@ -40,6 +40,9 @@
 #ifdef SMASH_USE_HEPMC
 #include "hepmcoutput.h"
 #endif
+#ifdef SMASH_USE_RIVET
+#include "rivetoutput.h"
+#endif
 #include "icoutput.h"
 #include "oscaroutput.h"
 #include "thermodynamiclatticeoutput.h"
@@ -664,13 +667,50 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Initial_Conditions" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
-  } else if (content == "HepMC" && format == "ASCII") {
+  } else if (format == "HepMC") {
 #ifdef SMASH_USE_HEPMC
-    outputs_.emplace_back(
-        make_unique<HepMcOutput>(output_path, "SMASH_HepMC", out_par));
+    if (content == "Particles") {
+      outputs_.emplace_back(make_unique<HepMcOutput>(
+          output_path, "SMASH_HepMC_particles", false));
+    } else if (content == "Collisions") {
+      outputs_.emplace_back(make_unique<HepMcOutput>(
+          output_path, "SMASH_HepMC_collisions", true));
+    } else {
+      logg[LExperiment].error(
+          "HepMC only available for Particles and "
+          "Collisions content. Requested for " +
+          content + ".");
+    }
 #else
     logg[LExperiment].error(
         "HepMC output requested, but HepMC support not compiled in");
+#endif
+  } else if (content == "Rivet") {
+#ifdef SMASH_USE_RIVET
+    // flag to ensure that the Rivet format has not been already assigned
+    static bool rivet_format_already_selected = false;
+    // if the next check is true, then we are trying to assign the format twice
+    if (rivet_format_already_selected) {
+      logg[LExperiment].warn(
+          "Rivet output format can only be one, either YODA or YODA-full. "
+          "Only your first valid choice will be used.");
+      return;
+    }
+    if (format == "YODA") {
+      outputs_.emplace_back(
+          make_unique<RivetOutput>(output_path, "SMASH_Rivet", false, out_par));
+      rivet_format_already_selected = true;
+    } else if (format == "YODA-full") {
+      outputs_.emplace_back(make_unique<RivetOutput>(
+          output_path, "SMASH_Rivet_full", true, out_par));
+      rivet_format_already_selected = true;
+    } else {
+      logg[LExperiment].error("Rivet format " + format +
+                              "not one of YODA or YODA-full");
+    }
+#else
+    logg[LExperiment].error(
+        "Rivet output requested, but Rivet support not compiled in");
 #endif
   } else {
     logg[LExperiment].error()
@@ -1023,14 +1063,15 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    **/
 
   // create outputs
-  logg[LExperiment].trace(source_location, " create OutputInterface objects");
+  logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
+                          " create OutputInterface objects");
 
   auto output_conf = config["Output"];
   /*!\Userguide
    * \page output_general_ Output
    *
-   * Output directory
-   * ----------------
+   * \section output_directory_ Output directory
+   *
    *
    * Per default, the selected output files
    * will be saved in the directory ./data/\<run_id\>, where \<run_id\> is an
@@ -1044,9 +1085,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * desired:
    * \code smash -o <user_output_dir> \endcode
    *
-   * Output content
-   * --------------
-   * \anchor output_contents_
+   * \section output_contents_ Output content
+   *
    * Output in SMASH is distinguished by _content_ and _format_, where content
    * means the physical information contained in the output (e.g. list of
    * particles, list of interactions, thermodynamics, etc) and format (e.g.
@@ -1061,13 +1101,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * - \b Particles  List of particles at regular time intervals in the
    *                 computational frame or (optionally) only at the event end.
    *   - Available formats: \ref format_oscar_particlelist,
-   *      \ref format_binary_, \ref format_root, \ref format_vtk
+   *      \ref format_binary_, \ref format_root, \ref format_vtk, \ref
+   * output_hepmc_
    * - \b Collisions List of interactions: collisions, decays, box wall
    *                 crossings and forced thermalizations. Information about
    *                 incoming, outgoing particles and the interaction itself
    *                 is printed out.
    *   - Available formats: \ref format_oscar_collisions, \ref format_binary_,
-   *                 \ref format_root
+   *                 \ref format_root, \subpage output_hepmc_
    * - \b Dileptons  Special dilepton output, see \subpage output_dileptons.
    *   - Available formats: \ref format_oscar_collisions,
    *                   \ref format_binary_ and \ref format_root
@@ -1083,14 +1124,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *                          \subpage input_ic for details
    *   - Available formats: \ref format_oscar_particlelist, \ref
    * IC_output_user_guide_
-   * - \b HepMC  List of intial and final particles in HepMC3 event record, see
-   *                          \subpage hepmc_output_user_guide_ for details
-   *   - Available formats: \ref hepmc_output_user_guide_format_
+   * - \b Rivet Run Rivet analysis on generated events and output
+   *    results, see \subpage rivet_output_user_guide_ for details.
+   *    - Available formats: \ref rivet_output_user_guide_
+   *
    *
    * \n
-   * \anchor list_of_output_formats
-   * Output formats
-   * --------------
+   *
+   * \section list_of_output_formats Output formats
    *
    * For choosing output formats see
    * \ref configuring_output_.
@@ -1118,7 +1159,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \subpage thermodyn_output_user_guide_
    * \subpage thermodyn_lattice_output_
    * \subpage IC_output_user_guide_
-   * \ref hepmc_output_user_guide_
+   * - \b "HepMC" - human-readble asciiv3 format see \ref
+   * output_hepmc_ for details
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
@@ -1584,7 +1626,7 @@ void Experiment<Modus>::initialize_new_event() {
   }
 
   // Sample particles according to the initial conditions
-  double start_time;
+  double start_time = -1.0;
 
   // Sample impact parameter only once per all ensembles
   // It should be the same for all ensembles

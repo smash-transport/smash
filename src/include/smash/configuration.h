@@ -1072,6 +1072,11 @@ class Configuration {
   };
 
   /**
+   * Flag to mark initialization with a YAML formatted string.
+   */
+  static const char InitializeFromYAMLString = 'S';
+
+  /**
    * Reads config.yaml from the specified path.
    *
    * \param[in] path The directory where the SMASH config files are located.
@@ -1086,6 +1091,36 @@ class Configuration {
    *                 case you don't want the default "config.yaml".
    */
   explicit Configuration(const bf::path &path, const bf::path &filename);
+
+  /**
+   * Initialize configuration with a YAML formatted string.  This is
+   * useful in 3-rd party application where we may not be able or
+   * willing to read in external files.
+   *
+   * \param[in] yaml YAML formatted configuration data.
+   * \param[in] sflag control flag InitializeFromYAMLString.
+   */
+  explicit Configuration(const char *yaml, const char sflag) {
+    if (sflag == InitializeFromYAMLString) {
+      merge_yaml(yaml);
+    } else {
+      throw std::runtime_error(
+          "Unknown control flag in Configuration constructor"
+          " with a YAML formatted string. Please, use"
+          " Configuration::InitializeFromYAMLString.");
+    }
+  }
+
+  /**
+   * Trivial constructor for testing purposes
+   *
+   * \param[in] invalue Integer passed by value, currently it does nothing
+   */
+  explicit Configuration(int invalue) {
+    if (invalue == 0) {
+      invalue = 1;
+    }
+  }
 
 #ifdef BUILD_TESTS
   /**

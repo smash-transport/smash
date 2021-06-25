@@ -47,10 +47,19 @@ case $1 in
       ;;
     -t | --test )
       echo "Testing that clang-format does not change the source code in the working directory ..."
-      if diff <(cat $FILES_TO_FORMAT) <(clang-format $FILES_TO_FORMAT) > /dev/null; then
-          echo "PASS: No changes to source code by clang-format."
-      else
+      check_flag=0
+      for file_under_examination in $FILES_TO_FORMAT; do
+	  diff <(cat $file_under_examination) <(clang-format $file_under_examination) > /dev/null;
+          if [ $? -ne 0 ]; then
+              echo "File $file_under_examination not properly formatted. Comparison with a properly formatted file:";
+	      diff <(cat $file_under_examination) <(clang-format $file_under_examination);
+	      check_flag=1;
+	  fi
+      done
+      if [ $check_flag -eq 1 ]; then
           fail "Clang-format was not properly run on latest commit."
+      else
+          echo "PASS: No changes to source code by clang-format."
       fi
       ;;
     * )

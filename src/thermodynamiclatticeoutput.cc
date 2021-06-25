@@ -185,8 +185,8 @@ ThermodynamicLatticeOutput::ThermodynamicLatticeOutput(
     const OutputParameters &out_par, const bool enable_ascii,
     const bool enable_binary)
     : OutputInterface(name),
-      base_path_(std::move(path)),
       out_par_(out_par),
+      base_path_(std::move(path)),
       enable_ascii_(enable_ascii),
       enable_binary_(enable_binary) {
   if (enable_ascii_ || enable_binary_) {
@@ -561,7 +561,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     fp->write(reinterpret_cast<char *>(&ctime), sizeof(ctime));
   }
   lattice.iterate_sublattice(
-      {0, 0, 0}, dim, [&](DensityOnLattice &node, int ix, int iy, int iz) {
+      {0, 0, 0}, dim, [&](DensityOnLattice &, int ix, int iy, int iz) {
         const ThreeVector position = lattice.cell_center(ix, iy, iz);
         jQ.reset();
         jB.reset();

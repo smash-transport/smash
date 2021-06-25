@@ -39,11 +39,12 @@ struct OutputParameters {
         coll_printstartend(false),
         dil_extended(false),
         photons_extended(false),
-        ic_extended(false) {}
+        ic_extended(false),
+        subcon_for_rivet(0) {}
 
   /// Constructor from configuration
   explicit OutputParameters(Configuration&& conf) : OutputParameters() {
-    logg[LExperiment].trace(source_location);
+    logg[LExperiment].trace(SMASH_SOURCE_LOCATION);
 
     if (conf.has_value({"Thermodynamics"})) {
       auto subcon = conf["Thermodynamics"];
@@ -88,6 +89,10 @@ struct OutputParameters {
 
     if (conf.has_value({"Initial_Conditions"})) {
       ic_extended = conf.take({"Initial_Conditions", "Extended"}, false);
+    }
+
+    if (conf.has_value({"Rivet"})) {
+      subcon_for_rivet = conf["Rivet"];
     }
   }
 
@@ -158,6 +163,9 @@ struct OutputParameters {
 
   /// Extended initial conditions output
   bool ic_extended;
+
+  /// Rivet specfic setup configurations
+  Configuration subcon_for_rivet;
 };
 
 }  // namespace smash
