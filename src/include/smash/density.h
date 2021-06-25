@@ -111,7 +111,7 @@ class DensityParameters {
    * Constructor of DensityParameters.
    *
    * \param[in] par Struct containing the Gaussian smearing width \f$\sigma\f$,
-   *            the cutoff factor \f$a\f$ where the cutoff radius 
+   *            the cutoff factor \f$a\f$ where the cutoff radius
    *            \f$r_{\rm cut}=a\sigma\f$, the test-particle number, the number
    *            of ensembles, the mode of calculating the derivatives, the
    *            smearing mode, the central weight for Discrete smearing, and the
@@ -531,7 +531,6 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
   }
 }
 
-
 /**
  * Updates the contents on the lattice of <DensityOnLattice> type.
  *
@@ -541,7 +540,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
  *            needed for calculating time derivatives
  * \param[in] new_jmu Auxiliary lattice,filled with current values at t0 + dt,
  *            needed for calculating time derivatives
- * \param[in] four_grad_lattice Auxiliary lattice for calculating the 
+ * \param[in] four_grad_lattice Auxiliary lattice for calculating the
  *            fourgradient of the current
  * \param[in] update Tells if called for update at printout or at timestep
  * \param[in] dens_type Density type to be computed on the lattice

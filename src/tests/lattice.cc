@@ -272,11 +272,14 @@ TEST(neighbor_indeces_periodic) {
                     : (iz + 1);
 
   COMPARE(l.cell_center(ix_l, iy, iz), l.cell_center(l.index_left(ix, iy, iz)));
-  COMPARE(l.cell_center(ix_r, iy, iz), l.cell_center(l.index_right(ix, iy, iz)));
+  COMPARE(l.cell_center(ix_r, iy, iz),
+          l.cell_center(l.index_right(ix, iy, iz)));
   COMPARE(l.cell_center(ix, iy_d, iz), l.cell_center(l.index_down(ix, iy, iz)));
   COMPARE(l.cell_center(ix, iy_u, iz), l.cell_center(l.index_up(ix, iy, iz)));
-  COMPARE(l.cell_center(ix, iy, iz_n), l.cell_center(l.index_backward(ix, iy, iz)));
-  COMPARE(l.cell_center(ix, iy, iz_f), l.cell_center(l.index_forward(ix, iy, iz)));
+  COMPARE(l.cell_center(ix, iy, iz_n),
+          l.cell_center(l.index_backward(ix, iy, iz)));
+  COMPARE(l.cell_center(ix, iy, iz_f),
+          l.cell_center(l.index_forward(ix, iy, iz)));
 }
 
 /*

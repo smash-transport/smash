@@ -123,14 +123,14 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * The mode of calculating the gradients, for example gradients of baryon
  * current. Currently SMASH supports two derivatives modes: "Covariant Gaussian"
  * and "Finite difference". Covariant Gaussian derivatives can be used when
- * Covariant Gaussian smearing is used; they are Lorentz covariant, but they do 
- * not calculate the time derivative of the current properly. The "Finite 
+ * Covariant Gaussian smearing is used; they are Lorentz covariant, but they do
+ * not calculate the time derivative of the current properly. The "Finite
  * difference" mode requires using the lattice, and the derivatives are
  * calculated based on finite differences of a given quantity at adjacent
  * lattice nodes; this mode is more numerically efficient.
  *
  * \key Smearing_Mode (string, optional, default = "Covariant Gaussian"): \n
- * The mode of smearing for density calculation. 
+ * The mode of smearing for density calculation.
  *
  * Smearing is necessary to ensure a smooth gradient calculation, and it can be
  * thought of as smoothing out charge density fluctuations due to the finite
@@ -142,16 +142,16 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * over the entire space yields the charge of the particle. In result, the
  * particle's charge is "smeared" over the space around it. Note that the case
  * with no smearing is recovered when the charge contribution from each particle
- * is taken to be a Dirac delta function centered at the position of the 
+ * is taken to be a Dirac delta function centered at the position of the
  * particle.
  *
- * Currently, SMASH supports three smearing modes: 
+ * Currently, SMASH supports three smearing modes:
  * 1) "Covariant Gaussian": This smearing represents the charge density of a
  * particle as a Gaussian centered at the position of a particle; the user can
  * specify the width and the cutoff of the Gaussian (the employed Gaussians, in
  * principle non-zero over the entire available space, are "cut off" at some
  * distance r_cut from the particle to improve calculation time). This smearing
- * is Lorentz covariant which results in correct density profiles of 
+ * is Lorentz covariant which results in correct density profiles of
  * relativistic systems. The downside of the smearing is its long computation
  * time, as well as the fact that when the density is added to lattice nodes, it
  * is done so by Euler approximation (using the density value at the lattice
@@ -162,7 +162,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * user specifies the range of the smearing in units of lattice spacings. This
  * smearing is relatively fast, and it does conserve the number of particles on
  * the lattice (due to the fact that the Euler integration is exact for a linear
- * function). 
+ * function).
  * 3) "Discrete": This smearing requires lattice; the easiest of all smearing
  * modes, it adds a specified portion of the particle's charge density to a node
  * closest to the particle's position, and distributes the remainder evenly
@@ -171,7 +171,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * nearest neighbor nodes gets 1/9 of the particle's charge. This smearing is
  * extremely fast, but is also rather coarse and requires using a large number
  * of test-particles to produce smooth gradients.
- * 
+ *
  *
  * \key Gaussian_Sigma (double, optional, default = 1.0): \n
  * Parameter for Covariant Gaussian smearing: Width of gaussians that represent
