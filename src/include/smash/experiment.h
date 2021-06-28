@@ -2294,7 +2294,6 @@ void Experiment<Modus>::intermediate_output() {
           update_lattice(
               jmu_B_lat_.get(), lat_upd, DensityType::Baryon, density_param_,
               ensembles_,
-              0.0,  // time_step not needed for compute_gradient=false
               false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::Baryon, *jmu_B_lat_);
@@ -2305,7 +2304,6 @@ void Experiment<Modus>::intermediate_output() {
           update_lattice(
               jmu_I3_lat_.get(), lat_upd, DensityType::BaryonicIsospin,
               density_param_, ensembles_,
-              0.0,  // time_step not needed for compute_gradient=false
               false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::BaryonicIsospin,
@@ -2319,7 +2317,6 @@ void Experiment<Modus>::intermediate_output() {
           update_lattice(
               jmu_custom_lat_.get(), lat_upd, dens_type_lattice_printout_,
               density_param_, ensembles_,
-              0.0,  // time_step not needed for compute_gradient=false
               false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         dens_type_lattice_printout_,
@@ -2330,7 +2327,6 @@ void Experiment<Modus>::intermediate_output() {
       if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
         update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
                        density_param_, ensembles_,
-                       0.0,  // time_step not needed for compute_gradient=false
                        false);
         if (printout_tmn_) {
           output->thermodynamics_output(ThermodynamicQuantity::Tmn,
