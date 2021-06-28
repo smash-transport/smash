@@ -84,7 +84,7 @@ class RectangularLattice {
         lattice_sizes_[2] < 0.0) {
       throw std::invalid_argument(
           "Lattice sizes should be positive, "
-          "lattice dimensions should be > 0.");
+          "number of lattice cells should be > 0.");
     }
   }
 
@@ -152,7 +152,7 @@ class RectangularLattice {
   const std::array<double, 3>& lattice_sizes() const { return lattice_sizes_; }
 
   /// \return Number of cells in x, y, z directions.
-  const std::array<int, 3>& dimensions() const { return n_cells_; }
+  const std::array<int, 3>& n_cells() const { return n_cells_; }
 
   /// \return Lengths of one cell in x, y, z directions.
   const std::array<double, 3>& cell_sizes() const { return cell_sizes_; }
@@ -184,6 +184,332 @@ class RectangularLattice {
   const T& operator[](std::size_t i) const { return lattice_[i]; }
   /// \return Size of lattice.
   std::size_t size() const { return lattice_.size(); }
+
+  /**
+   * Overwrite with a template value T at a given node
+   */
+  void assign_value(int lattice_index, T value) {
+    lattice_[lattice_index] = value;
+  }
+
+  /**
+   * Return the index of a given cell.
+   *
+   * \param[in] ix index of a cell in the x-direction
+   * \param[in] iy index of a cell in the y-direction
+   * \param[in] iz index of a cell in the z-direction
+   * \return index of cell
+   */
+  int index1d(int ix, int iy, int iz) {
+    assert(ix < n_cells_[0]);
+    assert(iy < n_cells_[1]);
+    assert(iz < n_cells_[2]);
+    return (ix + n_cells_[0] * (iy + iz * n_cells_[1]));
+  }
+  /**
+   * Given the indices of a cell in the x, y, and z directions, return index of
+   * the nearest cell in the -x direction ("left").
+   *
+   * \param[in] ix index of a cell in the x-direction
+   * \param[in] iy index of a cell in the y-direction
+   * \param[in] iz index of a cell in the z-direction
+   * \return index of the nearest cell in the "left" direction (ix-1) with
+   * respect to the current cell
+   */
+  int index_left(int ix, int iy, int iz) {
+    if (unlikely(ix == 0)) {
+      return periodic_ ? index1d(n_cells_[0] - 1, iy, iz) : index1d(ix, iy, iz);
+    } else {
+      return index1d(ix - 1, iy, iz);
+    }
+  }
+  /**
+   * Given the indices of a cell in the x, y, and z directions, return index of
+   * the nearest cell in the +x direction ("right").
+   *
+   * \param[in] ix index of a cell in the x-direction
+   * \param[in] iy index of a cell in the y-direction
+   * \param[in] iz index of a cell in the z-direction
+   * \return index of the nearest cell in the "right" direction (ix+1) with
+   * respect to the current cell
+   */
+  int index_right(int ix, int iy, int iz) {
+    if (unlikely(ix == (n_cells_[0] - 1))) {
+      return periodic_ ? index1d(0, iy, iz) : index1d(ix, iy, iz);
+    } else {
+      return index1d(ix + 1, iy, iz);
+    }
+  }
+  /**
+   * Given the indices of a cell in the x, y, and z directions, return index of
+   * the nearest cell in the -y direction ("down").
+   *
+   * \param[in] ix index of a cell in the x-direction
+   * \param[in] iy index of a cell in the y-direction
+   * \param[in] iz index of a cell in the z-direction
+   * \return index of the nearest cell in the "down" direction (iy-1) with
+   * respect to the current cell
+   */
+  int index_down(int ix, int iy, int iz) {
+    if (unlikely(iy == 0)) {
+      return periodic_ ? index1d(ix, n_cells_[1] - 1, iz) : index1d(ix, iy, iz);
+    } else {
+      return index1d(ix, iy - 1, iz);
+    }
+  }
+  /**
+   * Given the indices of a cell in the x, y, and z directions, return index of
+   * the nearest cell in the +y direction ("up").
+   *
+   * \param[in] ix index of a cell in the x-direction
+   * \param[in] iy index of a cell in the y-direction
+   * \param[in] iz index of a cell in the z-direction
+   * \return index of the nearest cell in the "up" direction (iy+1) with
+   * respect to the current cell
+   */
+  int index_up(int ix, int iy, int iz) {
+    if (unlikely(iy == (n_cells_[1] - 1))) {
+      return periodic_ ? index1d(ix, 0, iz) : index1d(ix, iy, iz);
+    } else {
+      return index1d(ix, iy + 1, iz);
+    }
+  }
+  /**
+   * Given the indices of a cell in the x, y, and z directions, return index of
+   * the nearest cell in the -z direction ("backward").
+   *
+   * \param[in] ix index of a cell in the x-direction
+   * \param[in] iy index of a cell in the y-direction
+   * \param[in] iz index of a cell in the z-direction
+   * \return index of the nearest cell in the "backward" direction (iz-1) with
+   * respect to the current cell
+   */
+  int index_backward(int ix, int iy, int iz) {
+    if (unlikely(iz == 0)) {
+      return periodic_ ? index1d(ix, iy, n_cells_[2] - 1) : index1d(ix, iy, iz);
+    } else {
+      return index1d(ix, iy, iz - 1);
+    }
+  }
+  /**
+   * Given the indices of a cell in the x, y, and z directions, return index of
+   * the nearest cell in the +z direction ("forward").
+   *
+   * \param[in] ix index of a cell in the x-direction
+   * \param[in] iy index of a cell in the y-direction
+   * \param[in] iz index of a cell in the z-direction
+   * \return index of the nearest cell in the "forward" direction (iz+1) with
+   * respect to the current cell
+   */
+  int index_forward(int ix, int iy, int iz) {
+    if (unlikely(iz == (n_cells_[2] - 1))) {
+      return periodic_ ? index1d(ix, iy, 0) : index1d(ix, iy, iz);
+    } else {
+      return index1d(ix, iy, iz + 1);
+    }
+  }
+
+  /**
+   * Compute a gradient on a lattice of doubles via the finite difference method
+   *
+   * return a lattice of ThreeVectors which are gradients of the values on the
+   * original lattice
+   */
+  void compute_gradient_lattice(
+      RectangularLattice<ThreeVector>& grad_lat) const {
+    if (n_cells_[0] < 2 || n_cells_[1] < 2 || n_cells_[2] < 2) {
+      // Gradient calculation is impossible
+      throw std::runtime_error(
+          "Lattice is too small for gradient calculation"
+          " (should be at least 2x2x2)");
+    }
+    if (!identical_to_lattice(&grad_lat)) {
+      // Lattice for gradient should have identical origin/dims/periodicity
+      throw std::invalid_argument(
+          "Lattice for gradient should have the"
+          " same origin/dims/periodicity as the original one.");
+    }
+    const double inv_2dx = 0.5 / cell_sizes_[0];
+    const double inv_2dy = 0.5 / cell_sizes_[1];
+    const double inv_2dz = 0.5 / cell_sizes_[2];
+    const int dix = 1;
+    const int diy = n_cells_[0];
+    const int diz = n_cells_[0] * n_cells_[1];
+    const int d = diz * n_cells_[2];
+
+    for (int iz = 0; iz < n_cells_[2]; iz++) {
+      const int z_offset = diz * iz;
+      for (int iy = 0; iy < n_cells_[1]; iy++) {
+        const int y_offset = diy * iy + z_offset;
+        for (int ix = 0; ix < n_cells_[0]; ix++) {
+          const int index = ix + y_offset;
+          if (unlikely(ix == 0)) {
+            (grad_lat)[index].set_x1(
+                periodic_
+                    ? (lattice_[index + dix] - lattice_[index + diy - dix]) *
+                          inv_2dx
+                    : (lattice_[index + dix] - lattice_[index]) * 2.0 *
+                          inv_2dx);
+          } else if (unlikely(ix == n_cells_[0] - 1)) {
+            (grad_lat)[index].set_x1(
+                periodic_
+                    ? (lattice_[index - diy + dix] - lattice_[index - dix]) *
+                          inv_2dx
+                    : (lattice_[index] - lattice_[index - dix]) * 2.0 *
+                          inv_2dx);
+          } else {
+            (grad_lat)[index].set_x1(
+                (lattice_[index + dix] - lattice_[index - dix]) * inv_2dx);
+          }
+
+          if (unlikely(iy == 0)) {
+            (grad_lat)[index].set_x2(
+                periodic_
+                    ? (lattice_[index + diy] - lattice_[index + diz - diy]) *
+                          inv_2dy
+                    : (lattice_[index + diy] - lattice_[index]) * 2.0 *
+                          inv_2dy);
+          } else if (unlikely(iy == n_cells_[1] - 1)) {
+            (grad_lat)[index].set_x2(
+                periodic_
+                    ? (lattice_[index - diz + diy] - lattice_[index - diy]) *
+                          inv_2dy
+                    : (lattice_[index] - lattice_[index - diy]) * 2.0 *
+                          inv_2dy);
+          } else {
+            (grad_lat)[index].set_x2(
+                (lattice_[index + diy] - lattice_[index - diy]) * inv_2dy);
+          }
+
+          if (unlikely(iz == 0)) {
+            (grad_lat)[index].set_x3(
+                periodic_
+                    ? (lattice_[index + diz] - lattice_[index + d - diz]) *
+                          inv_2dz
+                    : (lattice_[index + diz] - lattice_[index]) * 2.0 *
+                          inv_2dz);
+          } else if (unlikely(iz == n_cells_[2] - 1)) {
+            (grad_lat)[index].set_x3(
+                periodic_
+                    ? (lattice_[index - d + diz] - lattice_[index - diz]) *
+                          inv_2dz
+                    : (lattice_[index] - lattice_[index - diz]) * 2.0 *
+                          inv_2dz);
+          } else {
+            (grad_lat)[index].set_x3(
+                (lattice_[index + diz] - lattice_[index - diz]) * inv_2dz);
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Compute a fourgradient on a lattice of FourVectors jmu via the finite
+   * difference method.
+   *
+   * \param[in] old_lat the lattice of FourVectors jmu at a previous time step
+   * \param[in] time_step the used time step, needed for the time derivative
+   * \param[out] grad_lat a lattice of 4-arrays of 4-vectors with the following
+   * structure: [djmu_dt, djmu_dx, djmu_dy, djmu_dz]
+   */
+  void compute_four_gradient_lattice(
+      RectangularLattice<FourVector>& old_lat, double time_step,
+      RectangularLattice<std::array<FourVector, 4>>& grad_lat) const {
+    if (n_cells_[0] < 2 || n_cells_[1] < 2 || n_cells_[2] < 2) {
+      // Gradient calculation is impossible
+      throw std::runtime_error(
+          "Lattice is too small for gradient calculation"
+          " (should be at least 2x2x2)");
+    }
+    if (!identical_to_lattice(&grad_lat)) {
+      // Lattice for gradient should have identical origin/dims/periodicity
+      throw std::invalid_argument(
+          "Lattice for gradient should have the"
+          " same origin/dims/periodicity as the original one.");
+    }
+    const double inv_2dx = 0.5 / cell_sizes_[0];
+    const double inv_2dy = 0.5 / cell_sizes_[1];
+    const double inv_2dz = 0.5 / cell_sizes_[2];
+    const int dix = 1;
+    const int diy = n_cells_[0];
+    const int diz = n_cells_[0] * n_cells_[1];
+    const int d = diz * n_cells_[2];
+
+    for (int iz = 0; iz < n_cells_[2]; iz++) {
+      const int z_offset = diz * iz;
+      for (int iy = 0; iy < n_cells_[1]; iy++) {
+        const int y_offset = diy * iy + z_offset;
+        for (int ix = 0; ix < n_cells_[0]; ix++) {
+          const int index = ix + y_offset;
+
+          // auxiliary vectors used for the calculation of gradients
+          FourVector grad_t_jmu(0.0, 0.0, 0.0, 0.0);
+          FourVector grad_x_jmu(0.0, 0.0, 0.0, 0.0);
+          FourVector grad_y_jmu(0.0, 0.0, 0.0, 0.0);
+          FourVector grad_z_jmu(0.0, 0.0, 0.0, 0.0);
+          // t direction
+          grad_t_jmu = (lattice_[index] - (old_lat)[index]) * (1.0 / time_step);
+          // x direction
+          if (unlikely(ix == 0)) {
+            grad_x_jmu =
+                periodic_
+                    ? (lattice_[index + dix] - lattice_[index + diy - dix]) *
+                          inv_2dx
+                    : (lattice_[index + dix] - lattice_[index]) * 2.0 * inv_2dx;
+          } else if (unlikely(ix == n_cells_[0] - 1)) {
+            grad_x_jmu =
+                periodic_
+                    ? (lattice_[index - diy + dix] - lattice_[index - dix]) *
+                          inv_2dx
+                    : (lattice_[index] - lattice_[index - dix]) * 2.0 * inv_2dx;
+          } else {
+            grad_x_jmu =
+                (lattice_[index + dix] - lattice_[index - dix]) * inv_2dx;
+          }
+          // y direction
+          if (unlikely(iy == 0)) {
+            grad_y_jmu =
+                periodic_
+                    ? (lattice_[index + diy] - lattice_[index + diz - diy]) *
+                          inv_2dy
+                    : (lattice_[index + diy] - lattice_[index]) * 2.0 * inv_2dy;
+          } else if (unlikely(iy == n_cells_[1] - 1)) {
+            grad_y_jmu =
+                periodic_
+                    ? (lattice_[index - diz + diy] - lattice_[index - diy]) *
+                          inv_2dy
+                    : (lattice_[index] - lattice_[index - diy]) * 2.0 * inv_2dy;
+          } else {
+            grad_y_jmu =
+                (lattice_[index + diy] - lattice_[index - diy]) * inv_2dy;
+          }
+          // z direction
+          if (unlikely(iz == 0)) {
+            grad_z_jmu =
+                periodic_
+                    ? (lattice_[index + diz] - lattice_[index + d - diz]) *
+                          inv_2dz
+                    : (lattice_[index + diz] - lattice_[index]) * 2.0 * inv_2dz;
+          } else if (unlikely(iz == n_cells_[2] - 1)) {
+            grad_z_jmu =
+                periodic_
+                    ? (lattice_[index - d + diz] - lattice_[index - diz]) *
+                          inv_2dz
+                    : (lattice_[index] - lattice_[index - diz]) * 2.0 * inv_2dz;
+          } else {
+            grad_z_jmu =
+                (lattice_[index + diz] - lattice_[index - diz]) * inv_2dz;
+          }
+          // fill
+          (grad_lat)[index][0] = grad_t_jmu;
+          (grad_lat)[index][1] = grad_x_jmu;
+          (grad_lat)[index][2] = grad_y_jmu;
+          (grad_lat)[index][3] = grad_z_jmu;
+        }
+      }
+    }
+  }
 
   /**
    * Take the value of a cell given its 3-D indices.
@@ -273,8 +599,9 @@ class RectangularLattice {
   }
 
   /**
-   * Iterates only nodes, whose cell centers lie not further than r_cut in x, y,
-   * z directions from the given point and applies a function to each node.
+   * Iterates only nodes whose cell centers lie not further than r_cut in x, y,
+   * z directions from the given point, that is iterates within a cube of side
+   * length 2*r_cut, and applies a function to each node.
    * Useful for adding quantities from one particle to the lattice.
    *
    * \tparam F Type of the function. Arguments are the current node and the 3
@@ -285,13 +612,12 @@ class RectangularLattice {
    * \param[in] func Function acting on the cells (such as taking value).
    */
   template <typename F>
-  void iterate_in_radius(const ThreeVector& point, const double r_cut,
-                         F&& func) {
+  void iterate_in_cube(const ThreeVector& point, const double r_cut, F&& func) {
     std::array<int, 3> l_bounds, u_bounds;
 
     /* Array holds value at the cell center: r_center = r_0 + (i+0.5)cell_size,
      * where i is index in any direction. Therefore we want cells with condition
-     * (r-r_cut)*csize - 0.5 < i < (r+r_cut)*csize - 0.5, r = r_center - r_0 */
+     * (r-r_cut)/csize - 0.5 < i < (r+r_cut)/csize - 0.5, r = r_center - r_0 */
     for (int i = 0; i < 3; i++) {
       l_bounds[i] =
           std::ceil((point[i] - origin_[i] - r_cut) / cell_sizes_[i] - 0.5);
@@ -316,6 +642,99 @@ class RectangularLattice {
   }
 
   /**
+   * Iterates only nodes whose cell centers lie not further than d_x in x-,
+   * d_y in y-, and d_z in z-direction from the given point, that is iterates
+   * within a rectangle of side lengths (2*dx, 2*dy, 2*dz), and applies a
+   * function to each node.
+   * Useful for adding quantities from one particle to the lattice.
+   *
+   * \tparam F Type of the function. Arguments are the current node and the 3
+   * integer indices of the cell.
+   * \param[in] point Position, usually the position of particle [fm].
+   * \param[in] rectangle Maximum distances in the x-, y-, and z-directions
+   * from the cell center to the given position. [fm]
+   * \param[in] func Function acting on the cells (such as taking value).
+   */
+  template <typename F>
+  void iterate_in_rectangle(const ThreeVector& point,
+                            const std::array<double, 3>& rectangle, F&& func) {
+    std::array<int, 3> l_bounds, u_bounds;
+
+    /* Array holds value at the cell center: r_center = r_0 + (i+0.5)cell_size,
+     * where i is index in any direction. Therefore we want cells with condition
+     * (r[i]-rectangle[i])/csize - 0.5 < i < (r[i]+rectangle[i])/csize - 0.5,
+     * r[i] = r_center[i] - r_0[i]
+     */
+    for (int i = 0; i < 3; i++) {
+      l_bounds[i] = std::ceil(
+          (point[i] - origin_[i] - rectangle[i]) / cell_sizes_[i] - 0.5);
+      u_bounds[i] = std::ceil(
+          (point[i] - origin_[i] + rectangle[i]) / cell_sizes_[i] - 0.5);
+    }
+
+    if (!periodic_) {
+      for (int i = 0; i < 3; i++) {
+        if (l_bounds[i] < 0) {
+          l_bounds[i] = 0;
+        }
+        if (u_bounds[i] > n_cells_[i]) {
+          u_bounds[i] = n_cells_[i];
+        }
+        if (l_bounds[i] > n_cells_[i] || u_bounds[i] < 0) {
+          return;
+        }
+      }
+    }
+    iterate_sublattice(l_bounds, u_bounds, std::forward<F>(func));
+  }
+
+  /**
+   * Iterates only over nodes corresponding to the center cell (the cell
+   * containing the given point) and its nearest neighbors in the -x, +x, -y,
+   * +y, -z, +z directions, and applies a function to each node.
+   * Useful for adding quantities from one particle to the lattice.
+   *
+   * \tparam F Type of the function. Arguments are the current node and the 3
+   * integer indices of the cell.
+   * \param[in] point Position, usually the position of particle [fm].
+   * \param[in] func Function acting on the cells (such as taking value).
+   */
+  template <typename F>
+  void iterate_nearest_neighbors(const ThreeVector& point, F&& func) {
+    // get the 3D indeces of the cell containing the given point
+    const int ix = std::floor((point.x1() - origin_[0]) / cell_sizes_[0]);
+    const int iy = std::floor((point.x2() - origin_[1]) / cell_sizes_[1]);
+    const int iz = std::floor((point.x3() - origin_[2]) / cell_sizes_[2]);
+
+    logg[LLattice].debug(
+        "Iterating over nearest neighbors of the cell at ix = ", ix,
+        ", iy = ", iy, ", iz = ", iz);
+
+    // determine the 1D index of the center cell
+    const int i = index1d(ix, iy, iz);
+    func(lattice_[i], i, i);
+
+    // determine the indeces of nearby cells, perform function on them
+    int ileft = index_left(ix, iy, iz);
+    func(lattice_[ileft], ileft, i);
+
+    int iright = index_right(ix, iy, iz);
+    func(lattice_[iright], iright, i);
+
+    int idown = index_down(ix, iy, iz);
+    func(lattice_[idown], idown, i);
+
+    int iup = index_up(ix, iy, iz);
+    func(lattice_[iup], iup, i);
+
+    int ibackward = index_backward(ix, iy, iz);
+    func(lattice_[ibackward], ibackward, i);
+
+    int iforward = index_forward(ix, iy, iz);
+    func(lattice_[iforward], iforward, i);
+  }
+
+  /**
    * Checks if lattices of possibly different types have identical structure.
    *
    * \tparam L Type of the other lattice.
@@ -325,9 +744,9 @@ class RectangularLattice {
    */
   template <typename L>
   bool identical_to_lattice(const L* lat) const {
-    return n_cells_[0] == lat->dimensions()[0] &&
-           n_cells_[1] == lat->dimensions()[1] &&
-           n_cells_[2] == lat->dimensions()[2] &&
+    return n_cells_[0] == lat->n_cells()[0] &&
+           n_cells_[1] == lat->n_cells()[1] &&
+           n_cells_[2] == lat->n_cells()[2] &&
            std::abs(lattice_sizes_[0] - lat->lattice_sizes()[0]) <
                really_small &&
            std::abs(lattice_sizes_[1] - lat->lattice_sizes()[1]) <

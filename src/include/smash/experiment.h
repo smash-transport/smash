@@ -417,6 +417,14 @@ class Experiment : public ExperimentBase {
   /// Lattices of energy-momentum tensors for printout
   std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> Tmn_;
 
+  /// Auxiliary lattice for values of jmu at a time step t0
+  std::unique_ptr<RectangularLattice<FourVector>> old_jmu_auxiliary_;
+  /// Auxiliary lattice for values of jmu at a time step t0 + dt
+  std::unique_ptr<RectangularLattice<FourVector>> new_jmu_auxiliary_;
+  /// Auxiliary lattice for calculating the four-gradient of jmu
+  std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>>
+      four_gradient_auxiliary_;
+
   /// Whether to print the energy-momentum tensor
   bool printout_tmn_ = false;
 
@@ -915,6 +923,23 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   logg[LExperiment].info() << *this;
 
+  // covariant derivatives can only be done with covariant smearing
+  if (parameters_.derivatives_mode == DerivativesMode::CovariantGaussian &&
+      parameters_.smearing_mode != SmearingMode::CovariantGaussian) {
+    throw std::invalid_argument(
+        "Covariant Gaussian derivatives only make sense for Covariant Gaussian "
+        "smearing!");
+  }
+
+  // for triangular smearing:
+  // the weight needs to be larger than 1./7. for the center cell to contribute
+  // more than the surrounding cells
+  if (parameters_.smearing_mode == SmearingMode::Discrete &&
+      parameters_.discrete_weight < (1. / 7.)) {
+    throw std::invalid_argument(
+        "The central weight for discrete smearing should be >= 1./7.");
+  }
+
   if (parameters_.coll_crit == CollisionCriterion::Stochastic &&
       time_step_mode_ != TimeStepMode::Fixed) {
     throw std::invalid_argument(
@@ -1313,6 +1338,27 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
                              << parameters_.labclock->timestep_duration();
     // potentials need testparticles and gaussian sigma from parameters_
     potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
+    switch (parameters_.derivatives_mode) {
+      case DerivativesMode::CovariantGaussian:
+        logg[LExperiment].info() << "Covariant Gaussian derivatives are ON";
+        break;
+      case DerivativesMode::FiniteDifference:
+        logg[LExperiment].info() << "Finite difference derivatives are ON";
+        break;
+    }
+    switch (parameters_.smearing_mode) {
+      case SmearingMode::CovariantGaussian:
+        logg[LExperiment].info() << "Smearing type: Covariant Gaussian";
+        break;
+      case SmearingMode::Discrete:
+        logg[LExperiment].info() << "Smearing type: Discrete with weight = "
+                                 << parameters_.discrete_weight;
+        break;
+      case SmearingMode::Triangular:
+        logg[LExperiment].info() << "Smearing type: Triangular with range = "
+                                 << parameters_.triangular_range;
+        break;
+    }
   }
 
   /*!\Userguide
@@ -1381,6 +1427,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     const std::array<double, 3> origin = config.take({"Lattice", "Origin"});
     const bool periodic = config.take({"Lattice", "Periodic"});
 
+    logg[LExperiment].info()
+        << "Lattice is ON. Origin = (" << origin[0] << "," << origin[1] << ","
+        << origin[2] << "), sizes = (" << l[0] << "," << l[1] << "," << l[2]
+        << "), number of cells = (" << n[0] << "," << n[1] << "," << n[2]
+        << ")";
+
     if (printout_lattice_td_ || printout_full_lattice_any_td_) {
       dens_type_lattice_printout_ = output_parameters.td_dens_type;
       printout_tmn_ = output_parameters.td_tmn;
@@ -1400,6 +1452,15 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
        if potentials are on. This is because they allow to compute
        potentials faster */
     if (potentials_) {
+      // Create auxiliary lattices
+      old_jmu_auxiliary_ = make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      new_jmu_auxiliary_ = make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      four_gradient_auxiliary_ =
+          make_unique<RectangularLattice<std::array<FourVector, 4>>>(
+              l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+
       if (potentials_->use_skyrme()) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                  LatticeUpdate::EveryTimestep);
@@ -1439,6 +1500,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         "If you want Therm. VTK or Lattice output, configure a lattice for "
         "it.");
   }
+
   // Warning for the mean field calculation if lattice is not on.
   if ((potentials_ != nullptr) && (jmu_B_lat_ == nullptr)) {
     logg[LExperiment].warn() << "Lattice is NOT used. Mean fields are "
@@ -1450,6 +1512,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     UB_lat_pointer = UB_lat_.get();
     UI3_lat_pointer = UI3_lat_.get();
     pot_pointer = potentials_.get();
+  }
+
+  // Throw fatal if DerivativesMode = FiniteDifference and lattice is not on.
+  if ((parameters_.derivatives_mode == DerivativesMode::FiniteDifference) &&
+      (jmu_B_lat_ == nullptr)) {
+    throw std::runtime_error(
+        "Lattice is necessary to calculate finite difference gradients.");
   }
 
   // Create forced thermalizer
@@ -1634,6 +1703,12 @@ void Experiment<Modus>::initialize_new_event() {
     update_potentials();
     // using the lattice is necessary
     if ((jmu_B_lat_ != nullptr)) {
+      // Because there was no lattice at t=-1, the time derivative dj^mu/dt
+      // at t=0 is huge, while it shouldn't be calculated at all;
+      // we overwrite the time derivative to zero by hand.
+      for (auto &node : *jmu_B_lat_) {
+        node.overwrite_djmu_dt_to_zero();
+      }
       E_mean_field =
           calculate_mean_field_energy(*potentials_, *jmu_B_lat_, parameters_);
     }
@@ -2153,17 +2228,22 @@ void Experiment<Modus>::intermediate_output() {
       // Thermodynamic output on the lattice versus time
       switch (dens_type_lattice_printout_) {
         case DensityType::Baryon:
-          update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
-                         density_param_, ensembles_, false);
+          update_lattice(
+              jmu_B_lat_.get(), lat_upd, DensityType::Baryon, density_param_,
+              ensembles_,
+              0.0,  // time_step not needed for compute_gradient=false
+              false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::Baryon, *jmu_B_lat_);
           output->thermodynamics_lattice_output(*jmu_B_lat_,
                                                 computational_frame_time);
           break;
         case DensityType::BaryonicIsospin:
-          update_lattice(jmu_I3_lat_.get(), lat_upd,
-                         DensityType::BaryonicIsospin, density_param_,
-                         ensembles_, false);
+          update_lattice(
+              jmu_I3_lat_.get(), lat_upd, DensityType::BaryonicIsospin,
+              density_param_, ensembles_,
+              0.0,  // time_step not needed for compute_gradient=false
+              false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::BaryonicIsospin,
                                         *jmu_I3_lat_);
@@ -2173,9 +2253,11 @@ void Experiment<Modus>::intermediate_output() {
         case DensityType::None:
           break;
         default:
-          update_lattice(jmu_custom_lat_.get(), lat_upd,
-                         dens_type_lattice_printout_, density_param_,
-                         ensembles_, false);
+          update_lattice(
+              jmu_custom_lat_.get(), lat_upd, dens_type_lattice_printout_,
+              density_param_, ensembles_,
+              0.0,  // time_step not needed for compute_gradient=false
+              false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         dens_type_lattice_printout_,
                                         *jmu_custom_lat_);
@@ -2184,7 +2266,9 @@ void Experiment<Modus>::intermediate_output() {
       }
       if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
         update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
-                       density_param_, ensembles_);
+                       density_param_, ensembles_,
+                       0.0,  // time_step not needed for compute_gradient=false
+                       false);
         if (printout_tmn_) {
           output->thermodynamics_output(ThermodynamicQuantity::Tmn,
                                         dens_type_lattice_printout_, *Tmn_);
@@ -2222,14 +2306,19 @@ template <typename Modus>
 void Experiment<Modus>::update_potentials() {
   if (potentials_) {
     if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
-      update_lattice(jmu_I3_lat_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::BaryonicIsospin, density_param_, ensembles_,
-                     true);
+      update_lattice(jmu_I3_lat_.get(), old_jmu_auxiliary_.get(),
+                     new_jmu_auxiliary_.get(), four_gradient_auxiliary_.get(),
+                     LatticeUpdate::EveryTimestep, DensityType::BaryonicIsospin,
+                     density_param_, ensembles_,
+                     parameters_.labclock->timestep_duration(), true);
     }
     if ((potentials_->use_skyrme() || potentials_->use_symmetry()) &&
         jmu_B_lat_ != nullptr) {
-      update_lattice(jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::Baryon, density_param_, ensembles_, true);
+      update_lattice(jmu_B_lat_.get(), old_jmu_auxiliary_.get(),
+                     new_jmu_auxiliary_.get(), four_gradient_auxiliary_.get(),
+                     LatticeUpdate::EveryTimestep, DensityType::Baryon,
+                     density_param_, ensembles_,
+                     parameters_.labclock->timestep_duration(), true);
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {
         auto jB = (*jmu_B_lat_)[i];

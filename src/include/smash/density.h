@@ -110,16 +110,22 @@ class DensityParameters {
   /**
    * Constructor of DensityParameters.
    *
-   * \param[in] par Struct containing the Gaussian smearing width
-   *             \f$\sigma\f$, the cutoff factor \f$a\f$ where the
-   *             cutoff radius \f$r_{\rm cut}=a\sigma\f$, and the
-   *             test-particle number.
+   * \param[in] par Struct containing the Gaussian smearing width \f$\sigma\f$,
+   *            the cutoff factor \f$a\f$ where the cutoff radius
+   *            \f$r_{\rm cut}=a\sigma\f$, the test-particle number, the number
+   *            of ensembles, the mode of calculating the derivatives, the
+   *            smearing mode, the central weight for Discrete smearing, and the
+   *            range (in units of lattice spacing) for Triangular smearing.
    */
   DensityParameters(const ExperimentParameters &par)  // NOLINT
       : sig_(par.gaussian_sigma),
         r_cut_(par.gauss_cutoff_in_sigma * par.gaussian_sigma),
         ntest_(par.testparticles),
-        nensembles_(par.n_ensembles) {
+        nensembles_(par.n_ensembles),
+        derivatives_(par.derivatives_mode),
+        smearing_(par.smearing_mode),
+        central_weight_(par.discrete_weight),
+        triangular_range_(par.triangular_range) {
     r_cut_sqr_ = r_cut_ * r_cut_;
     const double two_sig_sqr = 2 * sig_ * sig_;
     two_sig_sqr_inv_ = 1. / two_sig_sqr;
@@ -132,6 +138,14 @@ class DensityParameters {
   int ntest() const { return ntest_; }
   /// \return Number of ensembles
   int nensembles() const { return nensembles_; }
+  /// \return Mode of gradient calculation
+  DerivativesMode derivatives() const { return derivatives_; }
+  /// \return Smearing mode
+  SmearingMode smearing() const { return smearing_; }
+  /// \return Weight of the central cell in the discrete smearing
+  double central_weight() const { return central_weight_; }
+  /// \return Range of the triangular smearing, in units of lattice spacing
+  double triangular_range() const { return triangular_range_; }
   /// \return Cut-off radius [fm]
   double r_cut() const { return r_cut_; }
   /// \return Squared cut-off radius [fm\f$^2\f$]
@@ -154,12 +168,20 @@ class DensityParameters {
   double r_cut_sqr_;
   /// \f$ (2 \sigma^2)^{-1} \f$ [fm\f$^{-2}\f$]
   double two_sig_sqr_inv_;
-  /// Normalization for smearing factor
+  /// Normalization for Gaussian smearing factor
   double norm_factor_sf_;
   /// Testparticle number
   const int ntest_;
   /// Number of ensembles
   const int nensembles_;
+  /// Mode of calculating the gradients
+  const DerivativesMode derivatives_;
+  /// Mode of smearing
+  const SmearingMode smearing_;
+  /// Weight of the central cell in the discrete smearing
+  const double central_weight_;
+  /// Range of the triangular smearing
+  const double triangular_range_;
 };
 
 /**
@@ -253,7 +275,7 @@ current_eckart(const ThreeVector &r, const Particles &plist,
  * Intended usage of the class:
  * -# Add particles from some list using add_particle(...). and
  *    add_particle_for_derivatives(...) The former sets
- *    jmu_pos and jmu_neg, the next sets djmu_dx.
+ *    jmu_pos and jmu_neg, the next sets djmu_dxnu.
  * -# Get jmus and density whenever necessary via density(),
  *    jmu_pos(), jmu_neg()
  * -# Get \f$\nabla \cdot \rho\f$ via grad_rho()
@@ -266,7 +288,7 @@ class DensityOnLattice {
   DensityOnLattice()
       : jmu_pos_(FourVector()),
         jmu_neg_(FourVector()),
-        djmu_dx_({FourVector(), FourVector(), FourVector(), FourVector()}) {}
+        djmu_dxnu_({FourVector(), FourVector(), FourVector(), FourVector()}) {}
 
   /**
    * Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 \cdot factor \f$.
@@ -290,8 +312,28 @@ class DensityOnLattice {
   }
 
   /**
+   * Convenience overload of the above for DensityOnLattice calculations.
+   * Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 \cdot factor \f$,
+   * where factor depends on the smearing scheme used.
+   * Two private class members jmu_pos_ and jmu_neg_ indicating the 4-current
+   * of the positively and negatively charged particles are updated by this
+   * function.
+   *
+   * \param[in] weighted_contribution particle contribution to given density
+   *            type (e.g. anti-proton contributes with factor -1 to baryon
+   *            density, proton - with factor 1) times the smearing factor.
+   */
+  void add_particle(FourVector weighted_contribution) {
+    if (weighted_contribution.x0() > 0.0) {
+      jmu_pos_ += weighted_contribution;
+    } else {
+      jmu_neg_ += weighted_contribution;
+    }
+  }
+
+  /**
    * Adds particle to the time and spatial derivatives of the 4-current.
-   * An array of four private 4-vectors djmu_dx_ indicating the derivatives
+   * An array of four private 4-vectors djmu_dxnu_ indicating the derivatives
    * of the compound current are updated by this function.
    *
    * \param[in] part Particle would be added to the current density
@@ -305,8 +347,8 @@ class DensityOnLattice {
                                     ThreeVector sf_grad) {
     const FourVector PartFourVelocity = FourVector(1.0, part.velocity());
     for (int k = 1; k <= 3; k++) {
-      djmu_dx_[k] += factor * PartFourVelocity * sf_grad[k - 1];
-      djmu_dx_[0] -=
+      djmu_dxnu_[k] += factor * PartFourVelocity * sf_grad[k - 1];
+      djmu_dxnu_[0] -=
           factor * PartFourVelocity * sf_grad[k - 1] * part.velocity()[k - 1];
     }
   }
@@ -340,9 +382,9 @@ class DensityOnLattice {
    */
   ThreeVector rot_j(const double norm_factor = 1.0) {
     ThreeVector j_rot = ThreeVector();
-    j_rot.set_x1(djmu_dx_[2].x3() - djmu_dx_[3].x2());
-    j_rot.set_x2(djmu_dx_[3].x1() - djmu_dx_[1].x3());
-    j_rot.set_x3(djmu_dx_[1].x2() - djmu_dx_[2].x1());
+    j_rot.set_x1(djmu_dxnu_[2].x3() - djmu_dxnu_[3].x2());
+    j_rot.set_x2(djmu_dxnu_[3].x1() - djmu_dxnu_[1].x3());
+    j_rot.set_x3(djmu_dxnu_[1].x2() - djmu_dxnu_[2].x1());
     j_rot *= norm_factor;
     return j_rot;
   }
@@ -356,7 +398,7 @@ class DensityOnLattice {
   ThreeVector grad_rho(const double norm_factor = 1.0) {
     ThreeVector rho_grad = ThreeVector();
     for (int i = 1; i < 4; i++) {
-      rho_grad[i - 1] = djmu_dx_[i].x0() * norm_factor;
+      rho_grad[i - 1] = djmu_dxnu_[i].x0() * norm_factor;
     }
     return rho_grad;
   }
@@ -368,7 +410,7 @@ class DensityOnLattice {
    * \return \f$\partial_t \vec j\f$ [fm \f$^{-4}\f$]
    */
   ThreeVector dj_dt(const double norm_factor = 1.0) {
-    return djmu_dx_[0].threevec() * norm_factor;
+    return djmu_dxnu_[0].threevec() * norm_factor;
   }
 
   /**
@@ -379,13 +421,51 @@ class DensityOnLattice {
    */
   FourVector jmu_net() const { return jmu_pos_ + jmu_neg_; }
 
+  /**
+   * Add to the positive density current.
+   * \param[in] additional_jmu_B Value of positive density current to be added
+   */
+  void add_to_jmu_pos(FourVector additional_jmu_B) {
+    jmu_pos_ += additional_jmu_B;
+  }
+
+  /**
+   * Add to the negative density current.
+   * \param[in] additional_jmu_B Value of negative density current to be added
+   */
+  void add_to_jmu_neg(FourVector additional_jmu_B) {
+    jmu_neg_ += additional_jmu_B;
+  }
+
+  /**
+   * Overwrite the time derivative of the current to zero.
+   */
+  void overwrite_djmu_dt_to_zero() {
+    djmu_dxnu_[0] = FourVector(0.0, 0.0, 0.0, 0.0);
+  }
+
+  /**
+   * Overwrite all density current derivatives to provided values.
+   * \param[in] djmu_dt time derivative of the current FourVector jmu
+   * \param[in] djmu_dx x derivative of the current FourVector jmu
+   * \param[in] djmu_dy y derivative of the current FourVector jmu
+   * \param[in] djmu_dz z derivative of the current FourVector jmu
+   */
+  void overwrite_djmu_dxnu(FourVector djmu_dt, FourVector djmu_dx,
+                           FourVector djmu_dy, FourVector djmu_dz) {
+    djmu_dxnu_[0] = djmu_dt;
+    djmu_dxnu_[1] = djmu_dx;
+    djmu_dxnu_[2] = djmu_dy;
+    djmu_dxnu_[3] = djmu_dz;
+  }
+
  private:
   /// Four-current density of the positively charged particle.
   FourVector jmu_pos_;
   /// Four-current density of the negatively charged particle.
   FourVector jmu_neg_;
   /// \f$\partial_\nu j^\mu \f$
-  std::array<FourVector, 4> djmu_dx_;
+  std::array<FourVector, 4> djmu_dxnu_;
 };
 
 /// Conveniency typedef for lattice of density
@@ -400,6 +480,8 @@ typedef RectangularLattice<DensityOnLattice> DensityLattice;
  * \param[in] par a structure containing testparticles number and gaussian
  *            smearing parameters.
  * \param[in] ensembles the particles vector for each ensemble
+ * \param[in] time_step time steo used in the simulation, required to avoid
+ *            bugs when switching to/from the function overload below
  * \param[in] compute_gradient Whether to compute the gradients
  * \tparam T LatticeType
  */
@@ -407,7 +489,12 @@ template <typename T>
 void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
                     const DensityType dens_type, const DensityParameters &par,
                     const std::vector<Particles> &ensembles,
-                    const bool compute_gradient = false) {
+                    // time_step is only needed for the template specialization
+                    // (see below)
+                    const double time_step, const bool compute_gradient) {
+  // the time_step variable is not used here
+  SMASH_UNUSED(time_step);
+
   // Do not proceed if lattice does not exists/update not required
   if (lat == nullptr || lat->when_update() != update) {
     return;
@@ -429,7 +516,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
       const double m_inv = 1.0 / m;
 
       const ThreeVector pos = part.position().threevec();
-      lat->iterate_in_radius(
+      lat->iterate_in_cube(
           pos, par.r_cut(), [&](T &node, int ix, int iy, int iz) {
             const ThreeVector r = lat->cell_center(ix, iy, iz);
             const auto sf = unnormalized_smearing_factor(pos - r, p, m_inv, par,
@@ -444,6 +531,33 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
   }
 }
 
+/**
+ * Updates the contents on the lattice of <DensityOnLattice> type.
+ *
+ * \param[out] lat The lattice of DensityOnLattice type on which the content
+ *             will be updated
+ * \param[in] old_jmu Auxiliary lattice, filled with current values at t0,
+ *            needed for calculating time derivatives
+ * \param[in] new_jmu Auxiliary lattice,filled with current values at t0 + dt,
+ *            needed for calculating time derivatives
+ * \param[in] four_grad_lattice Auxiliary lattice for calculating the
+ *            fourgradient of the current
+ * \param[in] update Tells if called for update at printout or at timestep
+ * \param[in] dens_type Density type to be computed on the lattice
+ * \param[in] par a structure containing testparticles number and gaussian
+ *            smearing parameters.
+ * \param[in] ensembles The particles vector for each ensemble
+ * \param[in] time_step Time step used in the simulation
+ * \param[in] compute_gradient Whether to compute the gradients
+ */
+void update_lattice(
+    RectangularLattice<DensityOnLattice> *lat,
+    RectangularLattice<FourVector> *old_jmu,
+    RectangularLattice<FourVector> *new_jmu,
+    RectangularLattice<std::array<FourVector, 4>> *four_grad_lattice,
+    const LatticeUpdate update, const DensityType dens_type,
+    const DensityParameters &par, const std::vector<Particles> &ensembles,
+    const double time_step, const bool compute_gradient);
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_DENSITY_H_

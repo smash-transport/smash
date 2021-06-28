@@ -252,7 +252,7 @@ void ThermodynamicLatticeOutput::at_eventstart(
          (tq == ThermodynamicQuantity::j_QBS));
   // at the next refactoring of the code,
   // this piece should go in the constructor
-  const auto dim = lattice.dimensions();
+  const auto dim = lattice.n_cells();
   const auto cs = lattice.cell_sizes();
   const auto orig = lattice.origin();
   for (int l = 0; l < 3; l++) {
@@ -336,7 +336,7 @@ void ThermodynamicLatticeOutput::at_eventstart(
   if (!enable_output_) {
     return;
   }
-  const auto dim = lattice.dimensions();
+  const auto dim = lattice.n_cells();
   const auto cs = lattice.cell_sizes();
   const auto orig = lattice.origin();
   for (int l = 0; l < 3; l++) {
@@ -508,7 +508,7 @@ void ThermodynamicLatticeOutput::at_eventend(const ThermodynamicQuantity tq) {
 void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     RectangularLattice<DensityOnLattice> &lattice, double ctime) {
   double result;
-  const auto dim = lattice.dimensions();
+  const auto dim = lattice.n_cells();
   std::shared_ptr<std::ofstream> fp(nullptr);
   if (enable_ascii_) {
     fp = output_ascii_files_[ThermodynamicQuantity::EckartDensity];
@@ -544,7 +544,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     return;
   }
   double result;
-  const auto dim = lattice.dimensions();
+  const auto dim = lattice.n_cells();
   std::shared_ptr<std::ofstream> fp(nullptr);
   const double n_ensembles = ensembles.size();
   FourVector jQ = FourVector(), jB = FourVector(), jS = FourVector();
@@ -617,7 +617,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     return;
   }
   double result;
-  const auto dim = lattice.dimensions();
+  const auto dim = lattice.n_cells();
   std::shared_ptr<std::ofstream> fp(nullptr);
   if (enable_ascii_) {
     switch (tq) {
