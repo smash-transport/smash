@@ -1426,8 +1426,9 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *\verbatim
    Lattice:
    \endverbatim
-   * sets up a lattice that covers possible particle positions until the end
-   * time of the simulation (see input_general_ for choosing end time).
+   * sets up a lattice that (heuristically) covers causally allowed particle
+   * positions until the end time of the simulation
+   * (see input_general_ for choosing end time).
    * The lattice may also be automatically contracted in z direction depending
    * on the chosen way of density calculation.
    *
@@ -1450,7 +1451,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       const double v = modus_.velocity_projectile();
       const double gam = 1.0 / std::sqrt(1.0 - v * v);
       const double max_z = 5.0 / gam + end_time_;
-      const double max_xy = 5.0 + 0.7 * end_time_;
+      const double estimated_max_transverse_velocity = 0.7;
+      const double max_xy = 5.0 + estimated_max_transverse_velocity * end_time_;
       origin_default = {-max_xy, -max_xy, -max_z};
       l_default = {2 * max_xy, 2 * max_xy, 2 * max_z};
       // Go for approximately 0.8 fm cell size and contract
@@ -1472,7 +1474,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       const int n_xyz = std::ceil(bl / 0.5);
       n_default = {n_xyz, n_xyz, n_xyz};
     } else if (modus_.is_sphere()) {
-      // Maximal distance from (0, 0, 0) on which a particle may fly
+      // Maximal distance from (0, 0, 0) at which a particle
+      // may be found at the end of the simulation
       const double max_d = modus_.radius() + end_time_;
       origin_default = {-max_d, -max_d, -max_d};
       l_default = {2 * max_d, 2 * max_d, 2 * max_d};
