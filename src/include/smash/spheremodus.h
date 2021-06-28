@@ -77,6 +77,7 @@ class SphereModus : public ModusDefault {
   bool is_sphere() const { return true; }
   /// \return radius
   double radius() const { return radius_; }
+
  private:
   /// Sphere radius (in fm/c)
   double radius_;

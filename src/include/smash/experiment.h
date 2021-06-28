@@ -1381,13 +1381,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \key Sizes (array<double,3>, optional, default depends on modus): \n
    *      Sizes of lattice in x, y, z directions in fm.
    *
-   * \key Cell_Number (array<int,3>, required, default depends on modus): \n
+   * \key Cell_Number (array<int,3>, optional, default depends on modus): \n
    *      Number of cells in x, y, z directions.
    *
-   * \key Origin (array<double,3>, required, default depends on modus): \n
+   * \key Origin (array<double,3>, optional, default depends on modus): \n
    *      Coordinates of the left, down, near corner of the lattice in fm.
    *
-   * \key Periodic (bool, required, default true for Box modus false otherwise): \n
+   * \key Periodic (bool, optional, default true for Box modus,
+   *                                        false for other modi): \n
    *      Use periodic continuation or not. With periodic continuation
    *      x + i * lx is equivalent to x, same for y, z.
    *
@@ -1397,8 +1398,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *
    * For information on the format of the lattice output see
    * \ref output_vtk_lattice_ or \ref thermodyn_lattice_output_. To configure
-   the
-   * thermodynamic output, see \ref input_output_options_.
+   * the thermodynamic output, see \ref input_output_options_.
    *
    * \n
    * Examples: Configuring the Lattice
@@ -1418,17 +1418,18 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
        Potentials_Affect_Thresholds: True
    \endverbatim
    *\n
-   * In case of Collider, Box, and Sphere modus (see input_general_ for choosing modus)
+   * In case of Collider, Box, and Sphere modus
+   * (see input_general_ for choosing modus)
    * there is also an option to set up lattice automatically.
    * For example, for Collider modus
    *
    *\verbatim
    Lattice:
    \endverbatim
-   * sets up a lattice that covers possible particle positions until the end time of
-   * the simulation (see input_general_ for choosing end time). The lattice may also
-   * be automatically contracted in z direction depending on the chosen way of density
-   * calculation.
+   * sets up a lattice that covers possible particle positions until the end
+   * time of the simulation (see input_general_ for choosing end time).
+   * The lattice may also be automatically contracted in z direction depending
+   * on the chosen way of density calculation.
    *
    * Another example for Box modus:
    *\verbatim
@@ -1464,7 +1465,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       }
       n_default = {n_xy, n_xy, nz};
     } else if (modus_.is_box()) {
-      periodic_default =  true;
+      periodic_default = true;
       origin_default = {0., 0., 0.};
       const double bl = modus_.length();
       l_default = {bl, bl, bl};
@@ -1480,10 +1481,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       n_default = {n_xyz, n_xyz, n_xyz};
     }
     // Take lattice properties from config to assign them to all lattices
-    const std::array<double, 3> l = config.take({"Lattice", "Sizes"}, l_default);
-    const std::array<int, 3> n = config.take({"Lattice", "Cell_Number"}, n_default);
-    const std::array<double, 3> origin = config.take({"Lattice", "Origin"}, origin_default);
-    const bool periodic = config.take({"Lattice", "Periodic"}, periodic_default);
+    const std::array<double, 3> l =
+        config.take({"Lattice", "Sizes"}, l_default);
+    const std::array<int, 3> n =
+        config.take({"Lattice", "Cell_Number"}, n_default);
+    const std::array<double, 3> origin =
+        config.take({"Lattice", "Origin"}, origin_default);
+    const bool periodic =
+        config.take({"Lattice", "Periodic"}, periodic_default);
 
     logg[LExperiment].info()
         << "Lattice is ON. Origin = (" << origin[0] << "," << origin[1] << ","
