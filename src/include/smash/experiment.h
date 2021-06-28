@@ -2294,20 +2294,17 @@ void Experiment<Modus>::intermediate_output() {
       // Thermodynamic output on the lattice versus time
       switch (dens_type_lattice_printout_) {
         case DensityType::Baryon:
-          update_lattice(
-              jmu_B_lat_.get(), lat_upd, DensityType::Baryon, density_param_,
-              ensembles_,
-              false);
+          update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
+                         density_param_, ensembles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::Baryon, *jmu_B_lat_);
           output->thermodynamics_lattice_output(*jmu_B_lat_,
                                                 computational_frame_time);
           break;
         case DensityType::BaryonicIsospin:
-          update_lattice(
-              jmu_I3_lat_.get(), lat_upd, DensityType::BaryonicIsospin,
-              density_param_, ensembles_,
-              false);
+          update_lattice(jmu_I3_lat_.get(), lat_upd,
+                         DensityType::BaryonicIsospin, density_param_,
+                         ensembles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::BaryonicIsospin,
                                         *jmu_I3_lat_);
@@ -2317,10 +2314,9 @@ void Experiment<Modus>::intermediate_output() {
         case DensityType::None:
           break;
         default:
-          update_lattice(
-              jmu_custom_lat_.get(), lat_upd, dens_type_lattice_printout_,
-              density_param_, ensembles_,
-              false);
+          update_lattice(jmu_custom_lat_.get(), lat_upd,
+                         dens_type_lattice_printout_, density_param_,
+                         ensembles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         dens_type_lattice_printout_,
                                         *jmu_custom_lat_);
@@ -2329,8 +2325,7 @@ void Experiment<Modus>::intermediate_output() {
       }
       if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
         update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
-                       density_param_, ensembles_,
-                       false);
+                       density_param_, ensembles_, false);
         if (printout_tmn_) {
           output->thermodynamics_output(ThermodynamicQuantity::Tmn,
                                         dens_type_lattice_printout_, *Tmn_);

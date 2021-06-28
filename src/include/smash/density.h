@@ -487,11 +487,12 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
       par.triangular_range() * (lat->cell_sizes())[0],
       par.triangular_range() * (lat->cell_sizes())[1],
       par.triangular_range() * (lat->cell_sizes())[2]};
-  const double prefactor_triangular = 1.0 / (par.ntest() * par.nensembles() *
-                            triangular_radius[0] * triangular_radius[0] *
-                            triangular_radius[1] * triangular_radius[1] *
-                            triangular_radius[2] * triangular_radius[2]);
- 
+  const double prefactor_triangular =
+      1.0 /
+      (par.ntest() * par.nensembles() * triangular_radius[0] *
+       triangular_radius[0] * triangular_radius[1] * triangular_radius[1] *
+       triangular_radius[2] * triangular_radius[2]);
+
   for (const Particles &particles : ensembles) {
     for (const ParticleData &part : particles) {
       const double dens_factor = density_factor(part.type(), dens_type);
@@ -514,8 +515,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
         // unweighted contribution to density
         const double common_weight = dens_factor * norm_factor_gaus;
         lat->iterate_in_cube(
-            pos, par.r_cut(),
-            [&](T &node, int ix, int iy, int iz) {
+            pos, par.r_cut(), [&](T &node, int ix, int iy, int iz) {
               // find the weight for smearing
               const ThreeVector r = lat->cell_center(ix, iy, iz);
               const auto sf = unnormalized_smearing_factor(
@@ -523,7 +523,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
               node.add_particle(part, sf.first * common_weight);
               if (par.derivatives() == DerivativesMode::CovariantGaussian) {
                 node.add_particle_for_derivatives(part, dens_factor,
-                                                 sf.second * norm_factor_gaus);
+                                                  sf.second * norm_factor_gaus);
               }
             });
       } else if (par.smearing() == SmearingMode::Discrete) {
@@ -531,19 +531,18 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
         const double common_weight =
             dens_factor / (par.ntest() * par.nensembles() * V_cell);
         lat->iterate_nearest_neighbors(
-            pos,
-            [&](T &node, int iterated_index, int center_index) {
-             node.add_particle(part, common_weight *
-              // the contribution to density is weighted depending on what node
-              // it is added to
-                                (iterated_index == center_index ? big : small));
+            pos, [&](T &node, int iterated_index, int center_index) {
+              node.add_particle(
+                  part, common_weight *
+                            // the contribution to density is weighted depending
+                            // on what node it is added to
+                            (iterated_index == center_index ? big : small));
             });
       } else if (par.smearing() == SmearingMode::Triangular) {
         // unweighted contribution to density
-       const double common_weight = dens_factor * prefactor_triangular;
+        const double common_weight = dens_factor * prefactor_triangular;
         lat->iterate_in_rectangle(
-            pos, triangular_radius,
-            [&](T &node, int ix, int iy, int iz) {
+            pos, triangular_radius, [&](T &node, int ix, int iy, int iz) {
               // compute the position of the node
               const ThreeVector cell_center = lat->cell_center(ix, iy, iz);
               // compute smearing weight
@@ -554,8 +553,8 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
               const double weight_z =
                   triangular_radius[2] - abs(cell_center[2] - pos[2]);
               // add the contribution to the node
-              node.add_particle(part, common_weight * weight_x * weight_y *
-                                weight_z);
+              node.add_particle(part,
+                                common_weight * weight_x * weight_y * weight_z);
             });
       }
     }  // end of for (const ParticleData &part : particles)
