@@ -73,6 +73,10 @@ class SphereModus : public ModusDefault {
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
 
+  /// \return If the modus is sphere modus, which is always true
+  bool is_sphere() const { return true; }
+  /// \return radius
+  double radius() const { return radius_; }
  private:
   /// Sphere radius (in fm/c)
   double radius_;
