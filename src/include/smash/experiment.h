@@ -1448,8 +1448,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     bool periodic_default = false;
     if (modus_.is_collider()) {
       // Estimates on how far particles could get in x, y, z
-      const double v = modus_.velocity_projectile();
-      const double gam = 1.0 / std::sqrt(1.0 - v * v);
+      const double gam = modus_.sqrt_s_NN() / 2.0 / nucleon_mass;
       const double max_z = 5.0 / gam + end_time_;
       const double estimated_max_transverse_velocity = 0.7;
       const double max_xy = 5.0 + estimated_max_transverse_velocity * end_time_;
@@ -1463,7 +1462,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       // smearing length is bound to the lattice cell length
       if (parameters_.smearing_mode == SmearingMode::Discrete ||
           parameters_.smearing_mode == SmearingMode::Triangular) {
-        nz = static_cast<int>(std::ceil(2 * max_z * gam));
+        nz = static_cast<int>(std::ceil(2 * max_z / 0.8 * gam));
       }
       n_default = {n_xy, n_xy, nz};
     } else if (modus_.is_box()) {
