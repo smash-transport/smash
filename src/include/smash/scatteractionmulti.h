@@ -271,7 +271,7 @@ class ScatterActionMulti : public Action {
                      const ParticleData& data_c) const;
 
   /**
-   * Check if 5 incomign psrticles match intial pion state for 5-to-2, which is
+   * Check if 5 incoming particles match intial pion state for 5-to-2, which is
    * pi+ pi- pi+ pi- pi0 in order to match the NNbar resonance treatment.
    */
   bool all_incoming_particles_are_pions_have_zero_charge_only_one_piz() const;
