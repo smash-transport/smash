@@ -8,7 +8,7 @@ General:
     Delta_Time:    0.1
     End_Time:      50.0
     Randomseed:    -1
-    Nevents:       10
+    Nevents:       1
 
 Output:
     Output_Interval: 10.0
@@ -23,5 +23,5 @@ Modi:
         # with the "-c" command:
         # ./smash -i <path to config file> -c 'Modi: { List: { File_Directory: <path to file that is read in> } }
         File_Directory: "../input/list"
-        File_Prefix: "example_list"
+        File_Prefix: "box_list"
         Shift_Id: 0
