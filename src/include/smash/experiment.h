@@ -1448,7 +1448,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     bool periodic_default = false;
     if (modus_.is_collider()) {
       // Estimates on how far particles could get in x, y, z
-      const double gam = modus_.sqrt_s_NN() / 2.0 / nucleon_mass;
+      const double gam = modus_.sqrt_s_NN() / (2.0 * nucleon_mass);
       const double max_z = 5.0 / gam + end_time_;
       const double estimated_max_transverse_velocity = 0.7;
       const double max_xy = 5.0 + estimated_max_transverse_velocity * end_time_;
