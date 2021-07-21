@@ -169,9 +169,7 @@ TEST(smearing_factor_normalization) {
   b->initial_conditions(&ensembles[0], par);
   // Fill lattice from particles
   update_lattice(lat.get(), LatticeUpdate::EveryTimestep, DensityType::Baryon,
-                 dens_par, ensembles,
-                 0.0,  // time_step not needed for compute_gradient=false
-                 false);
+                 dens_par, ensembles, false);
   // Compute integral rho(r) d^r. Should be equal to N.
   double int_rho_r_d3r = 0.0;
   for (auto &node : *lat) {

@@ -67,6 +67,8 @@ class ModusDefault {
   bool is_box() const { return false; }
   /// \return Checks if modus is list modus; overwritten in ListModus
   bool is_list() const { return false; }
+  /// \return Checks if modus is sphere modus; overwritten in SphereModus
+  bool is_sphere() const { return false; }
   /// \return Center of mass energy per nucleon pair in ColliderModus
   double sqrt_s_NN() const { return 0.; }
   /// \return The impact parameter; overwritten in ColliderModus
@@ -86,7 +88,10 @@ class ModusDefault {
   double max_timestep(double) const { return -1.; }
   /// \return equilibration time of the box; overwritten in BoxModus
   double equilibration_time() const { return -1.; }
-
+  /// \return length of the box; overwritten in BoxModus
+  double length() const { return -1.; }
+  /// \return radius of the sphere; overwritten in SphereModus
+  double radius() const { return -1.; }
   /**
    * Get the passing time of the two nuclei in a collision. This time
    * corresponds to the moment when the nuclei have just passed entirely

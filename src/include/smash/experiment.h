@@ -1378,16 +1378,17 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * used in the configuration file. Otherwise, no lattice will be used at all.
    *
    *
-   * \key Sizes (array<double,3>, required, no default): \n
+   * \key Sizes (array<double,3>, optional, default depends on modus): \n
    *      Sizes of lattice in x, y, z directions in fm.
    *
-   * \key Cell_Number (array<int,3>, required, no default): \n
+   * \key Cell_Number (array<int,3>, optional, default depends on modus): \n
    *      Number of cells in x, y, z directions.
    *
-   * \key Origin (array<double,3>, required, no default): \n
+   * \key Origin (array<double,3>, optional, default depends on modus): \n
    *      Coordinates of the left, down, near corner of the lattice in fm.
    *
-   * \key Periodic (bool, required, no default): \n
+   * \key Periodic (bool, optional, default true for Box modus,
+   *                                        false for other modi): \n
    *      Use periodic continuation or not. With periodic continuation
    *      x + i * lx is equivalent to x, same for y, z.
    *
@@ -1397,8 +1398,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *
    * For information on the format of the lattice output see
    * \ref output_vtk_lattice_ or \ref thermodyn_lattice_output_. To configure
-   the
-   * thermodynamic output, see \ref input_output_options_.
+   * the thermodynamic output, see \ref input_output_options_.
    *
    * \n
    * Examples: Configuring the Lattice
@@ -1417,15 +1417,80 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
        Periodic: True
        Potentials_Affect_Thresholds: True
    \endverbatim
+   *\n
+   * In case of Collider, Box, and Sphere modus
+   * (see input_general_ for choosing modus)
+   * there is also an option to set up lattice automatically.
+   * For example, for Collider modus
+   *
+   *\verbatim
+   Lattice:
+   \endverbatim
+   * sets up a lattice that (heuristically) covers causally allowed particle
+   * positions until the end time of the simulation
+   * (see input_general_ for choosing end time).
+   * The lattice may also be automatically contracted in z direction depending
+   * on the chosen way of density calculation.
+   *
+   * Another example for Box modus:
+   *\verbatim
+   Lattice:
+       Cell_Number:    [20, 20, 20]
+   \endverbatim
+   * sets up a periodic lattice that matches box sizes.
    */
 
   // Create lattices
   if (config.has_value({"Lattice"})) {
+    std::array<double, 3> l_default{20., 20., 20.};
+    std::array<int, 3> n_default{10, 10, 10};
+    std::array<double, 3> origin_default{-20., -20., -20.};
+    bool periodic_default = false;
+    if (modus_.is_collider()) {
+      // Estimates on how far particles could get in x, y, z
+      const double gam = modus_.sqrt_s_NN() / (2.0 * nucleon_mass);
+      const double max_z = 5.0 / gam + end_time_;
+      const double estimated_max_transverse_velocity = 0.7;
+      const double max_xy = 5.0 + estimated_max_transverse_velocity * end_time_;
+      origin_default = {-max_xy, -max_xy, -max_z};
+      l_default = {2 * max_xy, 2 * max_xy, 2 * max_z};
+      // Go for approximately 0.8 fm cell size and contract
+      // lattice in z by gamma factor
+      const int n_xy = std::ceil(2 * max_xy / 0.8);
+      int nz = std::ceil(2 * max_z / 0.8);
+      // Contract lattice by gamma factor in case of smearing where
+      // smearing length is bound to the lattice cell length
+      if (parameters_.smearing_mode == SmearingMode::Discrete ||
+          parameters_.smearing_mode == SmearingMode::Triangular) {
+        nz = static_cast<int>(std::ceil(2 * max_z / 0.8 * gam));
+      }
+      n_default = {n_xy, n_xy, nz};
+    } else if (modus_.is_box()) {
+      periodic_default = true;
+      origin_default = {0., 0., 0.};
+      const double bl = modus_.length();
+      l_default = {bl, bl, bl};
+      const int n_xyz = std::ceil(bl / 0.5);
+      n_default = {n_xyz, n_xyz, n_xyz};
+    } else if (modus_.is_sphere()) {
+      // Maximal distance from (0, 0, 0) at which a particle
+      // may be found at the end of the simulation
+      const double max_d = modus_.radius() + end_time_;
+      origin_default = {-max_d, -max_d, -max_d};
+      l_default = {2 * max_d, 2 * max_d, 2 * max_d};
+      // Go for approximately 0.8 fm cell size
+      const int n_xyz = std::ceil(2 * max_d / 0.8);
+      n_default = {n_xyz, n_xyz, n_xyz};
+    }
     // Take lattice properties from config to assign them to all lattices
-    const std::array<double, 3> l = config.take({"Lattice", "Sizes"});
-    const std::array<int, 3> n = config.take({"Lattice", "Cell_Number"});
-    const std::array<double, 3> origin = config.take({"Lattice", "Origin"});
-    const bool periodic = config.take({"Lattice", "Periodic"});
+    const std::array<double, 3> l =
+        config.take({"Lattice", "Sizes"}, l_default);
+    const std::array<int, 3> n =
+        config.take({"Lattice", "Cell_Number"}, n_default);
+    const std::array<double, 3> origin =
+        config.take({"Lattice", "Origin"}, origin_default);
+    const bool periodic =
+        config.take({"Lattice", "Periodic"}, periodic_default);
 
     logg[LExperiment].info()
         << "Lattice is ON. Origin = (" << origin[0] << "," << origin[1] << ","
@@ -2228,22 +2293,17 @@ void Experiment<Modus>::intermediate_output() {
       // Thermodynamic output on the lattice versus time
       switch (dens_type_lattice_printout_) {
         case DensityType::Baryon:
-          update_lattice(
-              jmu_B_lat_.get(), lat_upd, DensityType::Baryon, density_param_,
-              ensembles_,
-              0.0,  // time_step not needed for compute_gradient=false
-              false);
+          update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
+                         density_param_, ensembles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::Baryon, *jmu_B_lat_);
           output->thermodynamics_lattice_output(*jmu_B_lat_,
                                                 computational_frame_time);
           break;
         case DensityType::BaryonicIsospin:
-          update_lattice(
-              jmu_I3_lat_.get(), lat_upd, DensityType::BaryonicIsospin,
-              density_param_, ensembles_,
-              0.0,  // time_step not needed for compute_gradient=false
-              false);
+          update_lattice(jmu_I3_lat_.get(), lat_upd,
+                         DensityType::BaryonicIsospin, density_param_,
+                         ensembles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         DensityType::BaryonicIsospin,
                                         *jmu_I3_lat_);
@@ -2253,11 +2313,9 @@ void Experiment<Modus>::intermediate_output() {
         case DensityType::None:
           break;
         default:
-          update_lattice(
-              jmu_custom_lat_.get(), lat_upd, dens_type_lattice_printout_,
-              density_param_, ensembles_,
-              0.0,  // time_step not needed for compute_gradient=false
-              false);
+          update_lattice(jmu_custom_lat_.get(), lat_upd,
+                         dens_type_lattice_printout_, density_param_,
+                         ensembles_, false);
           output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                         dens_type_lattice_printout_,
                                         *jmu_custom_lat_);
@@ -2266,9 +2324,7 @@ void Experiment<Modus>::intermediate_output() {
       }
       if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
         update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
-                       density_param_, ensembles_,
-                       0.0,  // time_step not needed for compute_gradient=false
-                       false);
+                       density_param_, ensembles_, false);
         if (printout_tmn_) {
           output->thermodynamics_output(ThermodynamicQuantity::Tmn,
                                         dens_type_lattice_printout_, *Tmn_);

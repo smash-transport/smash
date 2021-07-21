@@ -126,6 +126,8 @@ class BoxModus : public ModusDefault {
   double equilibration_time() const { return equilibration_time_; }
   /// \return whether the modus is box (also, trivially true)
   bool is_box() const { return true; }
+  /// \return length of the box
+  double length() const { return length_; }
 
  private:
   /// Initial momenta distribution: thermal or peaked momenta
