@@ -229,7 +229,8 @@ inline void cache_integral(
     const IsoParticleType &res, const IsoParticleType *antires, bool unstable) {
   constexpr double spacing = 2.0;
   constexpr double spacing2d = 3.0;
-  const auto path = generate_tabulation_path(dir, part.name(), res.name());
+  const auto path = generate_tabulation_path(dir, part.name_filtered_prime(),
+                                             res.name_filtered_prime());
   Tabulation integral;
   if (!dir.empty() && bf::exists(path)) {
     std::ifstream file(path.string());

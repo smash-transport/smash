@@ -65,6 +65,16 @@ class IsoParticleType {
   /// Returns the name of the multiplet.
   const std::string &name() const { return name_; }
 
+  /// Returns the name of the multiplet, after converting ' in ¹
+  const std::string name_filtered_prime() const {
+    std::string tmp_s = name_;
+    std::size_t found_position = tmp_s.find("'");
+    if (found_position != std::string::npos) {
+      tmp_s.replace(found_position, 1, "¹");
+    }
+    return tmp_s;
+  }
+
   /// Returns the (average) multiplet mass.
   double mass() const { return mass_; }
 
