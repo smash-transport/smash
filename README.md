@@ -51,7 +51,7 @@ SMASH is tightly coupled to Pythia and thus requires a specific version. Using
 a different version than specified above may or may not work. It is recommended
 to build Pythia with similar flags as used for SMASH:
 
-    wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8303.tgz
+    wget https://pythia.org/download/pythia83/pythia8303.tgz
     tar xf pythia8303.tgz && rm pythia8303.tgz
     cd pythia8303
     ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC'
