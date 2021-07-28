@@ -65,7 +65,16 @@ class IsoParticleType {
   /// Returns the name of the multiplet.
   const std::string &name() const { return name_; }
 
-  /// Returns the name of the multiplet, after replacing "'" with "_prime"
+  /**
+   * Returns the name of the multiplet, after replacing "'" with "_prime"
+   *
+   * This function is meant to be used when creating file names. The motivation
+   * of this replacement is that handling files whose names
+   * contain an apostrophe "'" can be problematic, especially for administrators
+   * of computer clusters that rely on a set of well tested scripts to copy or
+   * move large amount of data between different storage devices.
+   *
+   */
   const std::string name_filtered_prime() const {
     std::string tmp_s = name_;
     std::size_t found_position = tmp_s.find("'");
