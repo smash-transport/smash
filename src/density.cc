@@ -213,8 +213,52 @@ void update_lattice(
       node.overwrite_djmu_dxnu(tmp[0], tmp[1], tmp[2], tmp[3]);
       node_number++;
     }
-  }  // if ( par.derivatives() == DerivativesMode::FiniteDifference )
-}
+  } // if ( par.derivatives() == DerivativesMode::FiniteDifference )
+
+  // calculate gradients of rest frame density
+  if (par.nB_derivatives() == RestFrameDensityDerivativesMode::On){
+
+    for (auto &node : *lat) {
+      // the rest frame density
+      const double nB = node.density();
+      // the computational frame jmuB
+      const FourVector jmuB = node.jmu_net();
+      // computational frame array of derivatives of jmuB
+      const std::array<FourVector, 4> djmu_dxnu = node.djmu_dxnu();
+
+      const double dnB_dt = (1/nB) *
+	( jmuB.x0() * djmu_dxnu[0].x0() -
+	  jmuB.x1() * djmu_dxnu[0].x1() -
+	  jmuB.x2() * djmu_dxnu[0].x2() -
+	  jmuB.x3() * djmu_dxnu[0].x3() );
+
+      const double dnB_dx1 = (1/nB) *
+	( jmuB.x0() * djmu_dxnu[1].x0() -
+	  jmuB.x1() * djmu_dxnu[1].x1() -
+	  jmuB.x2() * djmu_dxnu[1].x2() -
+	  jmuB.x3() * djmu_dxnu[1].x3() );
+
+      const double dnB_dx2 = (1/nB) *
+	( jmuB.x0() * djmu_dxnu[2].x0() -
+	  jmuB.x1() * djmu_dxnu[2].x1() -
+	  jmuB.x2() * djmu_dxnu[2].x2() -
+	  jmuB.x3() * djmu_dxnu[2].x3() );
+
+      const double dnB_dx3 = (1/nB) *
+	( jmuB.x0() * djmu_dxnu[3].x0() -
+	  jmuB.x1() * djmu_dxnu[3].x1() -
+	  jmuB.x2() * djmu_dxnu[3].x2() -
+	  jmuB.x3() * djmu_dxnu[3].x3() );
+
+      const FourVector dnB_dxnu = { dnB_dt, dnB_dx1, dnB_dx2, dnB_dx3 };
+
+      node.overwrite_dnB_dxnu (dnB_dxnu);
+    }
+
+  } // if (par.nB_derivatives() == RestFrameDensityDerivatives::On){
+
+  
+} // void update_lattice()
 
 std::ostream &operator<<(std::ostream &os, DensityType dens_type) {
   switch (dens_type) {

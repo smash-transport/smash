@@ -123,6 +123,7 @@ class DensityParameters {
         ntest_(par.testparticles),
         nensembles_(par.n_ensembles),
         derivatives_(par.derivatives_mode),
+        nB_derivatives_(par.nB_derivatives_mode),
         smearing_(par.smearing_mode),
         central_weight_(par.discrete_weight),
         triangular_range_(par.triangular_range) {
@@ -140,6 +141,8 @@ class DensityParameters {
   int nensembles() const { return nensembles_; }
   /// \return Mode of gradient calculation
   DerivativesMode derivatives() const { return derivatives_; }
+  /// \return Mode of rest frame density derivatives (on or off)
+  RestFrameDensityDerivativesMode nB_derivatives() const { return nB_derivatives_; }
   /// \return Smearing mode
   SmearingMode smearing() const { return smearing_; }
   /// \return Weight of the central cell in the discrete smearing
@@ -176,6 +179,11 @@ class DensityParameters {
   const int nensembles_;
   /// Mode of calculating the gradients
   const DerivativesMode derivatives_;
+  /*
+   * Whether to calculate the rest frame density derivatives
+   * (needed for full VDF potentials but not for Skyrme potentials)
+   */
+  const RestFrameDensityDerivativesMode nB_derivatives_;
   /// Mode of smearing
   const SmearingMode smearing_;
   /// Weight of the central cell in the discrete smearing
@@ -288,7 +296,8 @@ class DensityOnLattice {
   DensityOnLattice()
       : jmu_pos_(FourVector()),
         jmu_neg_(FourVector()),
-        djmu_dxnu_({FourVector(), FourVector(), FourVector(), FourVector()}) {}
+        djmu_dxnu_({FourVector(), FourVector(), FourVector(), FourVector()}),
+        dnB_dxnu_(FourVector()){}
 
   /**
    * Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 \cdot factor \f$.
@@ -418,10 +427,40 @@ class DensityOnLattice {
   }
 
   /**
+   * \return the FourGradient of nB
+   */
+  FourVector dnB_dxnu() const { return dnB_dxnu_; }
+
+  /**
+   * \return the array of FourGradients of jmu
+   */
+  std::array<FourVector, 4> djmu_dxnu() const { return djmu_dxnu_; }
+
+  /**
+   * \return the cross product of grad nB and j
+   */
+  ThreeVector grad_nB_cross_j() const {
+    const ThreeVector grad_nB = dnB_dxnu_.threevec();
+    const ThreeVector jB = jmu_net().threevec();
+    const ThreeVector DnB_cross_j = grad_nB.cross_product(jB);
+    
+    return DnB_cross_j;
+  }
+
+  /**
    * Overwrite the time derivative of the current to zero.
    */
   void overwrite_djmu_dt_to_zero() {
     djmu_dxnu_[0] = FourVector(0.0, 0.0, 0.0, 0.0);
+  }
+
+  /**
+   * Overwrite the rest frame density derivatives to provided values.
+   * \param[in] computed_dnB_dx a FourGradient of nB
+   */
+  void overwrite_dnB_dxnu (FourVector computed_dnB_dxnu)
+  {
+    dnB_dxnu_ = computed_dnB_dxnu;
   }
 
   /**
@@ -444,8 +483,10 @@ class DensityOnLattice {
   FourVector jmu_pos_;
   /// Four-current density of the negatively charged particle.
   FourVector jmu_neg_;
-  /// \f$\partial_\nu j^\mu \f$
+  /// Four-gradient of the four-current density, \f$\partial_\nu j^\mu \f$
   std::array<FourVector, 4> djmu_dxnu_;
+  /// Four-gradient of the rest frame density, \f$\partial_\nu nB \f$
+  FourVector dnB_dxnu_;
 };
 
 /// Conveniency typedef for lattice of density

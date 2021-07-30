@@ -128,6 +128,12 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * difference" mode requires using the lattice, and the derivatives are
  * calculated based on finite differences of a given quantity at adjacent
  * lattice nodes; this mode is more numerically efficient.
+
+ * \key Rest_Frame_Density_Derivatives_Mode (string, optional, default = "Off"):
+ * \n
+ * The mode of calculating the gradients of currents, decides whether the rest
+ * frame density derivatives are copmuted (these derivatives are needed for the
+ * VDF potentials, but not for the Skyrme potentials).
  *
  * \key Smearing_Mode (string, optional, default = "Covariant Gaussian"): \n
  * The mode of smearing for density calculation.
@@ -583,6 +589,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       ntest,
       config.take({"General", "Derivatives_Mode"},
                   DerivativesMode::CovariantGaussian),
+      config.take({"General", "Rest_Frame_Density_Derivatives_Mode"},
+                  RestFrameDensityDerivativesMode::Off),
       config.take({"General", "Smearing_Mode"},
                   SmearingMode::CovariantGaussian),
       config.take({"General", "Gaussian_Sigma"}, 1.),

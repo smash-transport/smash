@@ -116,6 +116,15 @@ enum class DerivativesMode {
   FiniteDifference,
 };
 
+/*
+ * Modes of calculating the gradients: whether to calculate the rest frame
+ * density derivatives.
+ */
+enum class RestFrameDensityDerivativesMode {
+  On,
+  Off,
+};
+
 /// Modes of smearing
 enum class SmearingMode {
   CovariantGaussian,
