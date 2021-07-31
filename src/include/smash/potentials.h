@@ -81,6 +81,18 @@ class Potentials {
   double symmetry_S(const double baryon_density) const;
 
   /**
+   * Evaluates potential for the VDF model given the rest frame and the
+   * computational frame baryon current.
+   *
+   * \param[in] nB rest frame baryon density, in fm\f$^{-3}\f$
+   * \param[in] jmu_B_net net baryon current in the computational frame, in fm\f$^{-3}\f$
+   * // Agnieszka correct
+   * \return VDF potential \f[U_B=10^{-3}\times\frac{\rho}{|\rho|}
+   *         (sum_i C_i (\frac{\rho}{\rho_0})^{b_i - 1})\f] in GeV
+   */
+  FourVector vdf_pot(double nB, const FourVector jmu_B_net) const;
+
+  /**
    * Evaluates potential at point r. Potential is always taken in the local
    * Eckart rest frame, but point r is in the computational frame.
    *
@@ -119,15 +131,15 @@ class Potentials {
   static std::pair<double, int> force_scale(const ParticleType &data);
 
   /**
-   * Evaluates the electrical and magnetic components of the skyrme force.
+   * Evaluates the electric and magnetic components of the skyrme force.
    *
    * \param[in] density Eckart baryon density [fm\f$^{-3}\f$].
    * \param[in] grad_rho Gradient of baryon density [fm\f$^{-4}\f$]. This
-   * density is evaluated in the computational frame. \param[in] dj_dt Time
-   * derivative of the baryon current density [fm\f$^{-4}\f$ \param[in] rot_j
-   * Curl of the baryon current density [fm\f$^{-4}\f$ \return (\f$E_B, B_B\f$),
-   * where \f[E_B = -V_B^\prime(\rho^\ast)(\nabla\rho_B
-   *                   + \partial_t \vec j_B)\f]
+   * density is evaluated in the computational frame.
+   * \param[in] dj_dt Time derivative of the baryon current density [fm\f$^{-4}\f$
+   * \param[in] rot_j Curl of the baryon current density [fm\f$^{-4}\f$
+   * \return (\f$E_B, B_B\f$), where \f[E_B = -V_B^\prime(\rho^\ast)(\nabla\rho_B
+   *                                          + \partial_t \vec j_B)\f]
    *         is the electro component of Skyrme force and
    *         \f[B_B = V_B^\prime(\rho^\ast) \nabla\times\vec j_B\f]
    *         is the magnetic component of the Skyrme force
@@ -138,7 +150,7 @@ class Potentials {
       const ThreeVector rot_j) const;
 
   /**
-   * Evaluates the electrical and magnetic components of the symmetry force.
+   * Evaluates the electric and magnetic components of the symmetry force.
    *
    * \param[in] rhoI3 Relative isospin 3 density.
    * \param[in] grad_rhoI3 Gradient of I3/I density [fm\f$^{-4}\f$]. This
@@ -149,7 +161,8 @@ class Potentials {
    * \param[in] rhoB Net-baryon density
    * \param[in] grad_rhoB Gradient of the net-baryon density
    * \param[in] djB_dt Time derivative of the net-baryon current density
-   * \param[in] rot_jB Curl of the net-baryon current density \return (\f$E_I3,
+   * \param[in] rot_jB Curl of the net-baryon current density
+   * \return (\f$E_I3,
    *         B_I3\f$) [GeV/fm],
    *         where \f[\vec{E} = - \frac{\partial
    *         V^\ast}{\partial\rho_{I_3}^\ast}
@@ -169,8 +182,30 @@ class Potentials {
       const ThreeVector djI3_dt, const ThreeVector rot_jI3, const double rhoB,
       const ThreeVector grad_rhoB, const ThreeVector djB_dt,
       const ThreeVector rot_jB) const;
+
   /**
-   * Evaluates the electrical and magnetic components of the forces at point r.
+   * Evaluates the electric and magnetic components of the VDF force,
+   * based on the VDF equations of motion.
+   *
+   * \param[in] nB rest frame baryon density in fm\f$^{-3}\f$
+   * \param[in] dnB_dt time derivative of the rest frame density
+   * \param[in] grad_nB gradient of the rest frame density
+   * \param[in] gradnB_cross_jB cross product of gradnB and vec{j}
+   * \param[in] j0 computational frame baryon density in fm\f$^{-3}\f$
+   * \param[in] grad_j0 gradient of the computational frame current density
+   * \param[in] vec_j baryon current
+   * \param[in] dj_dt time derivative of the computational frema current density
+   * \param[in] rot_j curl of the current density [fm\f$^{-4}\f$
+   * \return [comment more on what it returns Agnieszka]
+   */
+  std::pair<ThreeVector, ThreeVector> vdf_force(
+   double nB, const double dnB_dt,
+   const ThreeVector grad_nB, const ThreeVector gradnB_cross_jB,
+   const double j0, const ThreeVector grad_j0,
+   const ThreeVector vec_j, const ThreeVector dj_dt, const ThreeVector rot_j) const;
+
+  /**
+   * Evaluates the electric and magnetic components of the forces at point r.
    * Point r is in the computational frame.
    *
    * \param[in] r Arbitrary space point where potential gradient is calculated
@@ -198,6 +233,23 @@ class Potentials {
   double skyrme_b() const { return skyrme_b_; }
   /// \return Skyrme parameter skyrme_tau
   double skyrme_tau() const { return skyrme_tau_; }
+  /// \return Skyrme parameter S_pot, in MeV
+  double symmetry_S_pot() const { return symmetry_S_Pot_; }
+
+
+  /// \return Is VDF potential on?
+  virtual bool use_vdf() const { return use_vdf_; }
+  /// \return value of the saturation density used in the VDF potential
+  virtual double saturation_density() const { return saturation_density_; }
+  /// \return values of coefficients and powers in the VDF potential
+  virtual double coeff_1() const { return coeff_1_; }
+  virtual double coeff_2() const { return coeff_2_; }
+  virtual double coeff_3() const { return coeff_3_; }
+  virtual double coeff_4() const { return coeff_4_; }
+  virtual double power_1() const { return power_1_; }
+  virtual double power_2() const { return power_2_; }
+  virtual double power_3() const { return power_3_; }
+  virtual double power_4() const { return power_4_; }
 
  private:
   /**
@@ -213,23 +265,26 @@ class Potentials {
   /// Symmetry potential on/off
   bool use_symmetry_;
 
+  /// VDF potential on/off
+  bool use_vdf_;
+
   /**
    * Parameter of skyrme potentials:
    * the coefficient in front of \f$\frac{\rho}{\rho_0}\f$ in GeV
    */
-  double skyrme_a_;
+  double skyrme_a_ = 0;
 
   /**
    * Parameters of skyrme potentials:
    * the coefficient in front of \f$(\frac{\rho}{\rho_0})^\tau\f$ in GeV
    */
-  double skyrme_b_;
+  double skyrme_b_ = 0;
 
   /**
    * Parameters of skyrme potentials:
    * the power index.
    */
-  double skyrme_tau_;
+  double skyrme_tau_ = 0;
 
   /// Parameter S_Pot in the symmetry potential in MeV
   double symmetry_S_Pot_;
@@ -246,6 +301,27 @@ class Potentials {
    * \left(\frac{\rho}{\rho_0}\right)^\gamma \f]
    */
   double symmetry_gamma_;
+
+
+
+  /**
+   * Saturation density of nuclear matter used in the VDF potential; it may
+   * vary between different parameterizations.
+   */
+  double saturation_density_ = 0.0;
+  /**
+   * Parameters of VDF potential: the coefficients C_i and corresponding
+   * powers of number density b_i. Default inclusion of 4 interaction terms.
+   * Terms may be suppressed by putting C_i = 0, b_i = 0.
+   */
+  double coeff_1_ = 0.0;
+  double coeff_2_ = 0.0;
+  double coeff_3_ = 0.0;
+  double coeff_4_ = 0.0;
+  double power_1_ = 0.0;
+  double power_2_ = 0.0;
+  double power_3_ = 0.0;
+  double power_4_ = 0.0;
 
   /**
    * Calculate the derivative of the symmetry potential with respect to

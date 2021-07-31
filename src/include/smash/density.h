@@ -253,7 +253,7 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  *            current, and that as such it will not be normalized wrt volume.
  *            This should be true for any internal calculation of any quantity
  *            and only makes sense to turn off for output purposes in a box.
- * \return (density in the local Eckart frame [fm\$f^{-3}\$f],
+ * \return (rest frame density in the local Eckart frame [fm\$f^{-3}\$f],
  *          \f$ j_mu \f$ as a 4-vector,
  *          \f$ \nabla\cdots\rho \f$ or a 0 3-vector,
  *          \f$ \partial_t \vec j\f$ or a 0 3-vector,
@@ -452,6 +452,13 @@ class DensityOnLattice {
    */
   void overwrite_djmu_dt_to_zero() {
     djmu_dxnu_[0] = FourVector(0.0, 0.0, 0.0, 0.0);
+  }
+
+  /**
+   * Overwrite the time derivative of the rest frame density to zero.
+   */
+  void overwrite_dnB_dt_to_zero() {
+    dnB_dxnu_[0] = 0.0;
   }
 
   /**

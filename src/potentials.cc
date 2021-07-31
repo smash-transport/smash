@@ -17,7 +17,8 @@ namespace smash {
 Potentials::Potentials(Configuration conf, const DensityParameters &param)
     : param_(param),
       use_skyrme_(conf.has_value({"Skyrme"})),
-      use_symmetry_(conf.has_value({"Symmetry"})) {
+      use_symmetry_(conf.has_value({"Symmetry"})),
+      use_vdf_(conf.has_value({"VDF"})){
   /*!\Userguide
    * \page input_potentials_ Potentials
    * Skyrme and/or Symmetry potentials can be accounted for within a SMASH
@@ -102,6 +103,17 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
       symmetry_is_rhoB_dependent_ = true;
     }
   }
+  if (use_vdf_) {
+    saturation_density_ = conf.take({"VDF", "Sat_nB"});
+    coeff_1_ = conf.take({"VDF", "Coeff_1"});
+    coeff_2_ = conf.take({"VDF", "Coeff_2"});
+    coeff_3_ = conf.take({"VDF", "Coeff_3"});
+    coeff_4_ = conf.take({"VDF", "Coeff_4"});
+    power_1_ = conf.take({"VDF", "Power_1"});
+    power_2_ = conf.take({"VDF", "Power_2"});
+    power_3_ = conf.take({"VDF", "Power_3"});
+    power_4_ = conf.take({"VDF", "Power_4"});
+  }
 }
 
 Potentials::~Potentials() {}
@@ -135,6 +147,36 @@ double Potentials::symmetry_pot(const double baryon_isospin_density,
   return pot;
 }
 
+FourVector Potentials::vdf_pot(double nB, const FourVector jmu_B_net) const {
+  const double MeV_to_GeV = 1.0e-3;
+  // this needs to be used in order to prevent trying to calculate something like
+  // (-nB)^{3.4}
+  const int sgn = nB > 0 ? 1 : -1;
+  // to prevent NAN expressions
+  if (std::abs(nB) < 1e-15) {
+    nB = 1e-15;
+  }
+  // F_2 is a multiplicative factor in front of the baryon current
+  // in the VDF potential
+  const double F_2 =
+    MeV_to_GeV * sgn *
+    ( coeff_1_
+      * std::pow( std::abs(nB), power_1_ - 2.0 )
+      / std::pow( saturation_density_, power_1_ - 1.0) +
+      coeff_2_
+      * std::pow( std::abs(nB), power_2_ - 2.0 )
+      / std::pow( saturation_density_, power_2_ - 1.0) +
+      coeff_3_
+      * std::pow( std::abs(nB), power_3_ - 2.0 )
+      / std::pow( saturation_density_, power_3_ - 1.0) +
+      coeff_4_
+      * std::pow( std::abs(nB), power_4_ - 2.0 )
+      / std::pow( saturation_density_, power_4_ - 1.0) );
+
+  // Return in GeV
+  return MeV_to_GeV * F_2 * jmu_B_net;
+}
+
 double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
                              const ParticleType &acts_on) const {
   double total_potential = 0.0;
@@ -158,6 +200,14 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
         symmetry_pot(rho_iso, rho_B) * acts_on.isospin3_rel();
     total_potential += scale.second * sym_pot;
   }
+
+  // TO DO: update current_eckart() so that it provides rest frame density
+  // derivatives necessary for the VDF potentials
+  if (use_vdf_) {
+    throw std::runtime_error
+      ("Cannot run VDF potentials without lattice.\n\n");
+  }
+
   return total_potential;
 }
 
@@ -198,6 +248,62 @@ std::pair<ThreeVector, ThreeVector> Potentials::symmetry_force(
                    dVsym_drhoB(rhoB, rhoI3) * (grad_rhoB + djB_dt);
     B_component +=
         dVsym_drhoI3(rhoB, rhoI3) * rot_jI3 + dVsym_drhoB(rhoB, rhoI3) * rot_jB;
+  }
+  return std::make_pair(E_component, B_component);
+}
+
+std::pair<ThreeVector, ThreeVector> Potentials::vdf_force(
+   double nB, const double dnB_dt,
+   const ThreeVector grad_nB, const ThreeVector gradnB_cross_jB,
+   const double j0, const ThreeVector grad_j0,
+   const ThreeVector vec_j, const ThreeVector dj_dt, const ThreeVector rot_j)
+  const {
+  const double MeV_to_GeV = 1.0e-3;
+  // this needs to be used to prevent trying to calculate something like
+  // (-nB)^{3.4}
+  const int sgn = nB > 0 ? 1 : -1;
+  ThreeVector E_component(0.0, 0.0, 0.0), B_component(0.0, 0.0, 0.0);
+  // to prevent NAN expressions
+  if (std::abs(nB) < 1e-15) {
+    nB = 1e-15;
+  }
+  if (use_vdf_) {
+    // F_1 and F_2 are multiplicative factors in front of the baryon current
+    // in the VDF potential
+    const double F_1 =
+      MeV_to_GeV * sgn *
+      ( coeff_1_ * ( power_1_ - 2.0 )
+	* std::pow( std::abs(nB), power_1_ - 3.0 )
+	/ std::pow( saturation_density_, power_1_ - 1.0) +
+        coeff_2_ * ( power_2_ - 2.0 )
+	* std::pow( std::abs(nB), power_2_ - 3.0 )
+	/ std::pow( saturation_density_, power_2_ - 1.0) +
+        coeff_3_ * ( power_3_ - 2.0 )
+	* std::pow( std::abs(nB), power_3_ - 3.0 )
+	/ std::pow( saturation_density_, power_3_ - 1.0) +
+        coeff_4_ * ( power_4_ - 2.0 )
+	* std::pow( std::abs(nB), power_4_ - 3.0 )
+	/ std::pow( saturation_density_, power_4_ - 1.0) );
+
+    const double F_2 =
+      MeV_to_GeV * sgn *
+      ( coeff_1_
+	* std::pow( std::abs(nB), power_1_ - 2.0 )
+	/ std::pow( saturation_density_, power_1_ - 1.0) +
+        coeff_2_
+	* std::pow( std::abs(nB), power_2_ - 2.0 )
+	/ std::pow( saturation_density_, power_2_ - 1.0) +
+        coeff_3_
+	* std::pow( std::abs(nB), power_3_ - 2.0 )
+	/ std::pow( saturation_density_, power_3_ - 1.0) +
+        coeff_4_
+	* std::pow( std::abs(nB), power_4_ - 2.0 )
+	/ std::pow( saturation_density_, power_4_ - 1.0) );
+
+    E_component -= ( F_1 * ( grad_nB * j0 + dnB_dt * vec_j )
+		     + F_2 * ( grad_j0 + dj_dt ) );
+    B_component += F_1 * gradnB_cross_jB + F_2 * rot_j;
+
   }
   return std::make_pair(E_component, B_component);
 }
@@ -254,6 +360,13 @@ Potentials::all_forces(const ThreeVector &r, const ParticleList &plist) const {
     const ThreeVector rot_jI3 = std::get<4>(density_and_gradient);
     F_symmetry = symmetry_force(rhoI3, grad_rhoI3, djI3_dt, rot_jI3, rhoB,
                                 grad_rhoB, djB_dt, rot_jB);
+  }
+
+  // TO DO: update current_eckart() so that it provides rest frame density
+  // derivatives necessary for the VDF potentials
+  if (use_vdf_) {
+    throw std::runtime_error
+      ("Cannot run VDF potenials without lattice.\n\n");
   }
 
   return std::make_tuple(F_skyrme.first, F_skyrme.second, F_symmetry.first,

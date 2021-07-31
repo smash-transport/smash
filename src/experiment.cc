@@ -589,8 +589,9 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       ntest,
       config.take({"General", "Derivatives_Mode"},
                   DerivativesMode::CovariantGaussian),
-      config.take({"General", "Rest_Frame_Density_Derivatives_Mode"},
-                  RestFrameDensityDerivativesMode::Off),
+      config.has_value({"Potentials", "VDF"}) ?
+         RestFrameDensityDerivativesMode::On
+         : RestFrameDensityDerivativesMode::Off,
       config.take({"General", "Smearing_Mode"},
                   SmearingMode::CovariantGaussian),
       config.take({"General", "Gaussian_Sigma"}, 1.),
@@ -767,14 +768,130 @@ double calculate_mean_field_energy(
                parameters.n_ensembles
         << "\n";
 
+    E_mean_field = lattice_mean_field_total;
+  } // if (potentials.use_skyrme())
+
+  if (potentials.use_vdf()) {
     /*
-     * E_mean_field is multiplied by the number of testparticles because the
-     * total kinetic energy tracked is that of all particles, including
-     * testparticles, and so this is more consistent with the general paradigm.
+     * Safety check:
+     * Calculating the symmetry energy contribution to the total mean field
+     * energy in the system is not implemented at this time.
      */
-    E_mean_field = lattice_mean_field_total * parameters.testparticles *
+    if (potentials.use_symmetry() &&
+        parameters.outputclock->current_time() == 0.0) {
+      logg[LExperiment].error()
+	<< "\nSymmetry energy is not included in the VDF mean-field calculation"
+	<< "\nas VDF potentials haven't been fitted with symmetry energy."
+	<< "\n\n";
+    }
+
+    /*
+     * VDF potential parameters:
+     * C1GeV are the VDF coefficients converted to GeV,
+     * b1 are the powers of the baryon number density entering the expression
+     * for the energy density of the system. The formula for a total mean-field
+     * energy due to a VDF potential is
+     * E_MF = \sum_i C_i n_B^(b_i - 2) *
+     *                 * [j_0^2 -  n_B^2 * (b_i - 1)/b_i] / n_0^(b_i - 1)
+     * where j_0 is the local computational frame baryon density, nB is the
+     * local rest frame baryon density, and n_0 is the saturation density.
+     */
+    double C1GeV = (potentials.coeff_1()) / 1000.0;
+    double C2GeV = (potentials.coeff_2()) / 1000.0;
+    double C3GeV = (potentials.coeff_3()) / 1000.0;
+    double C4GeV = (potentials.coeff_4()) / 1000.0;
+    double b1 = potentials.power_1();
+    double b2 = potentials.power_2();
+    double b3 = potentials.power_3();
+    double b4 = potentials.power_4();
+    // saturation density of nuclear matter specified in the VDF parameters
+    double n_0 = potentials.saturation_density();
+
+    // to avoid nan's in expressions below
+    // (then expressions with bi~=0 will be surely killed by Ci=0)
+    if ( b1 == 0 ) { b1 = 0.00000001; }
+    if ( b2 == 0 ) { b2 = 0.00000001; }
+    if ( b3 == 0 ) { b3 = 0.00000001; }
+    if ( b4 == 0 ) { b4 = 0.00000001; }
+
+    /*
+     * Note: calculating the mean field only works if lattice is used.
+     * We iterate over the nodes of the baryon density lattice to sum their
+     * contributions to the total mean field.
+     */
+    int number_of_nodes = 0;
+    double lattice_mean_field_total = 0.0;
+
+    for (auto &node : jmu_B_lat) {
+      number_of_nodes++;
+      // the rest frame density
+      double nB = node.density();
+      // the computational frame density
+      const double j0 = node.jmu_net().x0();
+      const double abs_nB = std::abs(nB);
+      density_mean += j0;
+      density_variance += j0 * j0;
+
+      /*
+       * The mean-field energy for the VDF potential. This expression is correct
+       * in any frame, and in the rest frame conforms to the Skyrme mean-field
+       * energy (if same coefficients and powers are used).
+       */
+      // in order to prevent dividing by zero in case any b_i < 2.0
+      if ( abs_nB < 1e-15 ) {
+        continue;
+      }
+      double mean_field_contribution_1 =
+	C1GeV * std::pow(abs_nB, b1 - 2.0) *
+	(j0 * j0 - ((b1 - 1.0) / b1) * abs_nB * abs_nB) /
+	std::pow(n_0, b1 - 1);
+      double mean_field_contribution_2 =
+	C2GeV * std::pow(abs_nB, b2 - 2.0) *
+	(j0 * j0 - ((b2 - 1.0) / b2) * abs_nB * abs_nB) /
+	std::pow(n_0, b2 - 1);
+      double mean_field_contribution_3 =
+	C3GeV * std::pow(abs_nB, b3 - 2.0) *
+	(j0 * j0 - ((b3 - 1.0) / b3) * abs_nB * abs_nB) /
+	std::pow(n_0, b3 - 1);
+      double mean_field_contribution_4 =
+	C4GeV * std::pow(abs_nB, b4 - 2.0) *
+	(j0 * j0 - ((b4 - 1.0) / b4) * abs_nB * abs_nB) /
+	std::pow(n_0, b4 - 1);
+
+      lattice_mean_field_total +=
+	V_cell * (mean_field_contribution_1 + mean_field_contribution_2
+		  + mean_field_contribution_3 + mean_field_contribution_4);
+    }
+
+    // logging statistical properties of the density calculation
+    density_mean = density_mean / number_of_nodes;
+    density_variance = density_variance / number_of_nodes;
+    double density_scaled_variance =
+        std::sqrt(density_variance - density_mean * density_mean) /
+        density_mean;
+    logg[LExperiment].debug() << "\t\t\t\t\t";
+    logg[LExperiment].debug()
+        << "\n\t\t\t\t\t            density mean = " << density_mean;
+    logg[LExperiment].debug()
+        << "\n\t\t\t\t\t density scaled variance = " << density_scaled_variance;
+    logg[LExperiment].debug()
+        << "\n\t\t\t\t\t        total mean_field = "
+        << lattice_mean_field_total * parameters.testparticles *
+               parameters.n_ensembles
+        << "\n";
+
+     E_mean_field = lattice_mean_field_total;
+  } // if (potentials.use_vdf())
+
+
+  /*
+   * E_mean_field is multiplied by the number of testparticles per particle and
+   * the number of parallel ensembles because the total kinetic energy tracked
+   * is that of all particles in the simulation, including test-particles and/or
+   * ensembles, and so this way is more consistent.
+   */
+  E_mean_field = E_mean_field * parameters.testparticles *
                    parameters.n_ensembles;
-  }
 
   return E_mean_field;
 }

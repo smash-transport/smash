@@ -220,7 +220,11 @@ void update_lattice(
 
     for (auto &node : *lat) {
       // the rest frame density
-      const double nB = node.density();
+      double nB = node.density();
+      if ( std::abs(nB) < 1e-15 ) {
+        nB = 1e-15;
+      }
+
       // the computational frame jmuB
       const FourVector jmuB = node.jmu_net();
       // computational frame array of derivatives of jmuB
@@ -257,7 +261,6 @@ void update_lattice(
 
   } // if (par.nB_derivatives() == RestFrameDensityDerivatives::On){
 
-  
 } // void update_lattice()
 
 std::ostream &operator<<(std::ostream &os, DensityType dens_type) {
