@@ -377,11 +377,14 @@ class Experiment : public ExperimentBase {
   /// 4-current for j_QBS lattice output
   std::unique_ptr<DensityLattice> j_QBS_lat_;
 
-  /// Baryon density on the lattices
+  /// Baryon density on the lattice
   std::unique_ptr<DensityLattice> jmu_B_lat_;
 
-  /// Isospin projection density on the lattices
+  /// Isospin projection density on the lattice
   std::unique_ptr<DensityLattice> jmu_I3_lat_;
+
+  /// Mean-field A^mu on the lattice
+  std::unique_ptr<FieldsLattice> fields_lat_;
 
   /**
    * Custom density on the lattices.
@@ -425,6 +428,14 @@ class Experiment : public ExperimentBase {
   /// Auxiliary lattice for calculating the four-gradient of jmu
   std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>>
       four_gradient_auxiliary_;
+
+  /// Auxiliary lattice for values of Amu at a time step t0
+  std::unique_ptr<RectangularLattice<FourVector>> old_fields_auxiliary_;
+  /// Auxiliary lattice for values of Amu at a time step t0 + dt
+  std::unique_ptr<RectangularLattice<FourVector>> new_fields_auxiliary_;
+  /// Auxiliary lattice for calculating the four-gradient of Amu
+  std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>>
+      fields_four_gradient_auxiliary_;
 
   /// Whether to print the energy-momentum tensor
   bool printout_tmn_ = false;
@@ -1383,19 +1394,6 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         logg[LExperiment].info() << "Finite difference derivatives are ON";
         break;
     }
-    switch (parameters_.smearing_mode) {
-      case SmearingMode::CovariantGaussian:
-        logg[LExperiment].info() << "Smearing type: Covariant Gaussian";
-        break;
-      case SmearingMode::Discrete:
-        logg[LExperiment].info() << "Smearing type: Discrete with weight = "
-                                 << parameters_.discrete_weight;
-        break;
-      case SmearingMode::Triangular:
-        logg[LExperiment].info() << "Smearing type: Triangular with range = "
-                                 << parameters_.triangular_range;
-        break;
-    }
     switch (parameters_.nB_derivatives_mode) {
       case RestFrameDensityDerivativesMode::On:
         logg[LExperiment].info() << "Rest frame density derivatives are ON";
@@ -1404,10 +1402,34 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         logg[LExperiment].info() << "Rest frame density derivatives are OFF";
         break;
     }
+    switch (parameters_.field_derivatives_mode) {
+      case FieldDerivativesMode::ChainRule:
+        logg[LExperiment].info() << "Chain rule field derivatives are ON";
+        break;
+      case FieldDerivativesMode::Direct:
+        logg[LExperiment].info() << "Direct field derivatives are ON";
+        break;
+    }
+    switch (parameters_.smearing_mode) {
+    case SmearingMode::CovariantGaussian:
+      logg[LExperiment].info() << "Smearing type: Covariant Gaussian";
+      break;
+    case SmearingMode::Discrete:
+      logg[LExperiment].info() << "Smearing type: Discrete with weight = "
+			       << parameters_.discrete_weight;
+      break;
+    case SmearingMode::Triangular:
+      logg[LExperiment].info() << "Smearing type: Triangular with range = "
+			       << parameters_.triangular_range;
+      break;
+    }
     // a necessary safety check
-    if (potentials_->use_vdf() && parameters_.nB_derivatives_mode == RestFrameDensityDerivativesMode::Off){
+    if (potentials_->use_vdf() &&
+	(parameters_.nB_derivatives_mode == RestFrameDensityDerivativesMode::Off
+	 && parameters_.field_derivatives_mode == FieldDerivativesMode::ChainRule) ){
       throw std::runtime_error
-	("Can't use VDF potentials without rest frame density derivatives!");
+	("Can't use VDF potentials without rest frame density derivatives or "
+	 "direct field derivatives!");
     }
   }
 
@@ -1567,7 +1589,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
        if potentials are on. This is because they allow to compute
        potentials faster */
     if (potentials_) {
-      // Create auxiliary lattices
+      // Create auxiliary lattices for baryon four-current calculation
       old_jmu_auxiliary_ = make_unique<RectangularLattice<FourVector>>(
           l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       new_jmu_auxiliary_ = make_unique<RectangularLattice<FourVector>>(
@@ -1602,6 +1624,20 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         FB_lat_ = make_unique<
 	   RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      }
+      if (parameters_.field_derivatives_mode == FieldDerivativesMode::Direct){
+	// Create auxiliary lattices for field calculation
+	old_fields_auxiliary_ = make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+	new_fields_auxiliary_ = make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+	fields_four_gradient_auxiliary_ =
+          make_unique<RectangularLattice<std::array<FourVector, 4>>>(
+              l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+
+	// Create the fields lattice
+	fields_lat_ = make_unique<FieldsLattice>(l, n, origin, periodic,
+                                                 LatticeUpdate::EveryTimestep);
       }
     } else {
       if (dens_type_lattice_printout_ == DensityType::Baryon) {
@@ -2478,12 +2514,22 @@ void Experiment<Modus>::update_potentials() {
                      LatticeUpdate::EveryTimestep, DensityType::Baryon,
                      density_param_, ensembles_,
                      parameters_.labclock->timestep_duration(), true);
+      if ( parameters_.field_derivatives_mode == FieldDerivativesMode::Direct ){
+	update_fields_lattice (fields_lat_.get(), old_fields_auxiliary_.get(),
+			       new_fields_auxiliary_.get(),
+			       fields_four_gradient_auxiliary_.get(),
+			       jmu_B_lat_.get(), LatticeUpdate::EveryTimestep,
+			       *potentials_,
+			       parameters_.labclock->timestep_duration());
+      }
       const size_t UBlattice_size = UB_lat_->size();
       for (size_t i = 0; i < UBlattice_size; i++) {
         auto jB = (*jmu_B_lat_)[i];
         (*UB_lat_)[i] =
 	  potentials_->vdf_pot (jB.density(), jB.jmu_net());
-	(*FB_lat_)[i] =
+	switch(parameters_.field_derivatives_mode){
+	case FieldDerivativesMode::ChainRule:
+	  (*FB_lat_)[i] =
 	  potentials_->vdf_force (jB.density(),
 				  jB.dnB_dxnu().x0(),
 				  jB.dnB_dxnu().threevec(),
@@ -2493,7 +2539,14 @@ void Experiment<Modus>::update_potentials() {
 				  jB.jmu_net().threevec(),
 				  jB.dj_dt(),
 				  jB.rot_j() );
-      }
+	case FieldDerivativesMode::Direct:
+	  auto Amu = (*fields_lat_)[i];
+	  (*FB_lat_)[i] =
+	    potentials_->v_df_force ( Amu.grad_A_0(),
+				      Amu.dvecA_dt(),
+				      Amu.curl_vec_A() );
+	}
+      } // for (size_t i = 0; i < UBlattice_size; i++) 
     } // if potentials_->use_vdf()
   }
 }

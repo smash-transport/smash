@@ -145,15 +145,18 @@ typedef RectangularLattice<FieldsOnLattice> FieldsLattice;
  *            needed for calculating time derivatives
  * \param[in] fields_four_grad_lattice Auxiliary lattice for calculating the
  *            fourgradient of the fields
+ * \param[in] jmu_B_lat Lattice of baryon four-current
  * \param[in] fields_lat_update Tells if called for update at printout or at
  *            timestep
  * \param[in] time_step Time step used in the simulation
  */
-void update_lattice(
+ 
+void update_fields_lattice(
     RectangularLattice<FieldsOnLattice> *fields_lat,
     RectangularLattice<FourVector> *old_fields,
     RectangularLattice<FourVector> *new_fields,
     RectangularLattice<std::array<FourVector, 4>> *fields_four_grad_lattice,
+    DensityLattice *jmu_B_lat,
     const LatticeUpdate fields_lat_update, const Potentials &potentials,
     const double time_step);
 }  // namespace smash

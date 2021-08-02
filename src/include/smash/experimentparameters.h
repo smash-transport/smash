@@ -38,6 +38,8 @@ struct ExperimentParameters {
   const DerivativesMode derivatives_mode;
   /// mode of calculating rest frame density gradients (on or off)
   const RestFrameDensityDerivativesMode nB_derivatives_mode;
+  /// mode of calculating field derivatives
+  const FieldDerivativesMode field_derivatives_mode;
 
   /// mode of smearing for density calculation
   const SmearingMode smearing_mode;

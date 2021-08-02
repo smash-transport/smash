@@ -125,6 +125,14 @@ enum class RestFrameDensityDerivativesMode {
   Off,
 };
 
+/*
+ * Modes of calculating the field gradients: chain rule or direct.
+ */
+enum class FieldDerivativesMode {
+  ChainRule,
+  Direct,
+};
+
 /// Modes of smearing
 enum class SmearingMode {
   CovariantGaussian,

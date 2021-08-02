@@ -308,6 +308,19 @@ std::pair<ThreeVector, ThreeVector> Potentials::vdf_force(
   return std::make_pair(E_component, B_component);
 }
 
+// overload of the above
+std::pair<ThreeVector, ThreeVector> Potentials::v_df_force(
+   const ThreeVector grad_A_0,
+   const ThreeVector dA_dt,
+   const ThreeVector curl_A) const {
+  ThreeVector E_component(0.0, 0.0, 0.0), B_component(0.0, 0.0, 0.0);
+  if (use_vdf_) {
+    E_component -= ( grad_A_0 + dA_dt );
+    B_component += curl_A;
+  }
+  return std::make_pair(E_component, B_component);
+}
+
 double Potentials::dVsym_drhoI3(const double rhoB, const double rhoI3) const {
   double term1 = 2. * symmetry_S_Pot_ / nuclear_density;
   if (symmetry_is_rhoB_dependent_) {

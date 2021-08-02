@@ -873,6 +873,23 @@ class Configuration {
 
 
     /**
+     * Set FieldDerivatives mode.
+     */
+    operator FieldDerivativesMode() const {
+      const std::string s = operator std::string();
+      if (s == "Chain Rule") {
+        return FieldDerivativesMode::ChainRule;
+      }
+      if (s == "Direct") {
+        return FieldDerivativesMode::Direct;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"Chain Rule\" or \"Direct\".");
+    }
+
+
+    /**
      * Set SmearingMode.
      */
     operator SmearingMode() const {

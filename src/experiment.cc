@@ -592,6 +592,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       config.has_value({"Potentials", "VDF"}) ?
          RestFrameDensityDerivativesMode::On
          : RestFrameDensityDerivativesMode::Off,
+      config.take({"General", "Field_Derivatives_Mode"},
+                  FieldDerivativesMode::ChainRule),
       config.take({"General", "Smearing_Mode"},
                   SmearingMode::CovariantGaussian),
       config.take({"General", "Gaussian_Sigma"}, 1.),

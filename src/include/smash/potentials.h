@@ -197,12 +197,34 @@ class Potentials {
    * \param[in] dj_dt time derivative of the computational frema current density
    * \param[in] rot_j curl of the current density [fm\f$^{-4}\f$
    * \return [comment more on what it returns Agnieszka]
+   *
+   *
+   * COMMENT
    */
   std::pair<ThreeVector, ThreeVector> vdf_force(
    double nB, const double dnB_dt,
    const ThreeVector grad_nB, const ThreeVector gradnB_cross_jB,
    const double j0, const ThreeVector grad_j0,
    const ThreeVector vec_j, const ThreeVector dj_dt, const ThreeVector rot_j) const;
+
+  /**
+   * Convenience overload of the above, using derivatives of the VDF mean-field
+   * A^mu.
+   * Evaluates the electric and magnetic components of the VDF force,
+   * based on the VDF equations of motion.
+   *
+   * \param[in] grad_A_0 gradient of zeroth component of the field A^mu
+   * \param[in] dA_dt time derivative of the field A^mu
+   * \param[in] curl_vecA curl of the vector component of the field A^mu
+   * \return [comment more on what it returns Agnieszka]
+   *
+   *
+   * COMMENT
+   */
+ std::pair<ThreeVector, ThreeVector> v_df_force(
+  const ThreeVector grad_A_0,
+  const ThreeVector dA_dt,
+  const ThreeVector curl_vecA) const;
 
   /**
    * Evaluates the electric and magnetic components of the forces at point r.
