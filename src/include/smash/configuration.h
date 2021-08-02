@@ -849,9 +849,13 @@ class Configuration {
       if (s == "Finite difference") {
         return DerivativesMode::FiniteDifference;
       }
+      if (s == "Off") {
+        return DerivativesMode::Off;
+      }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
-          "\" should be \"Covariant Gaussian\" or \"Finite difference\".");
+          "\" should be \"Covariant Gaussian\", \"Finite difference\"," +
+	  " or \"Off\".");
     }
 
 

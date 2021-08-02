@@ -114,6 +114,7 @@ enum class Sampling {
 enum class DerivativesMode {
   CovariantGaussian,
   FiniteDifference,
+  Off,
 };
 
 /*

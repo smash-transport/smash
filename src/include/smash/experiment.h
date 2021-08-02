@@ -1386,12 +1386,21 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 			       << "\t    Power_4 = " << potentials_->power_4()
 			       << "\n";
     }
+    // for computational efficiency, we want to turn off the derivatives of jmu
+    // and the rest frame density derivatives
+    if (parameters_.field_derivatives_mode == FieldDerivativesMode::Direct){
+      parameters_.derivatives_mode = DerivativesMode::Off;
+      parameters_.nB_derivatives_mode = RestFrameDensityDerivativesMode::Off;
+    }
     switch (parameters_.derivatives_mode) {
       case DerivativesMode::CovariantGaussian:
         logg[LExperiment].info() << "Covariant Gaussian derivatives are ON";
         break;
       case DerivativesMode::FiniteDifference:
         logg[LExperiment].info() << "Finite difference derivatives are ON";
+        break;
+      case DerivativesMode::Off:
+        logg[LExperiment].info() << "Gradients of baryon current are OFF";
         break;
     }
     switch (parameters_.nB_derivatives_mode) {
@@ -1423,13 +1432,23 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 			       << parameters_.triangular_range;
       break;
     }
-    // a necessary safety check
+    /*
+     * Necessary safety checks
+     */
+    // VDF potentials need derivatives of rest frame density or fields
     if (potentials_->use_vdf() &&
 	(parameters_.nB_derivatives_mode == RestFrameDensityDerivativesMode::Off
 	 && parameters_.field_derivatives_mode == FieldDerivativesMode::ChainRule) ){
       throw std::runtime_error
 	("Can't use VDF potentials without rest frame density derivatives or "
 	 "direct field derivatives!");
+    }
+    // potentials require using gradients
+    if ( parameters_.derivatives_mode == DerivativesMode::Off
+	 && parameters_.field_derivatives_mode == FieldDerivativesMode::ChainRule ){
+      throw std::runtime_error
+	("Can't use potentials without gradients of baryon current (Skyrme, VDF)"
+	 " or direct field derivatives (VDF)!");
     }
   }
 
@@ -2539,14 +2558,16 @@ void Experiment<Modus>::update_potentials() {
 				  jB.jmu_net().threevec(),
 				  jB.dj_dt(),
 				  jB.rot_j() );
+	  break;
 	case FieldDerivativesMode::Direct:
 	  auto Amu = (*fields_lat_)[i];
 	  (*FB_lat_)[i] =
 	    potentials_->v_df_force ( Amu.grad_A_0(),
 				      Amu.dvecA_dt(),
 				      Amu.curl_vec_A() );
+	  break;
 	}
-      } // for (size_t i = 0; i < UBlattice_size; i++) 
+      } // for (size_t i = 0; i < UBlattice_size; i++)
     } // if potentials_->use_vdf()
   }
 }
