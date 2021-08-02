@@ -21,6 +21,7 @@
 #include "decayactionsfinder.h"
 #include "decayactionsfinderdilepton.h"
 #include "energymomentumtensor.h"
+#include "fields.h"
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
 #include "grid.h"
