@@ -37,7 +37,7 @@ struct ExperimentParameters {
   /// mode of calculating gradients for density calculation
   DerivativesMode derivatives_mode;
   /// mode of calculating rest frame density gradients (on or off)
-  RestFrameDensityDerivativesMode nB_derivatives_mode;
+  RestFrameDensityDerivativesMode rho_derivatives_mode;
   /// mode of calculating field derivatives
   FieldDerivativesMode field_derivatives_mode;
 

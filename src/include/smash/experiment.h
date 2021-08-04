@@ -1390,7 +1390,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     // and the rest frame density derivatives
     if (parameters_.field_derivatives_mode == FieldDerivativesMode::Direct){
       parameters_.derivatives_mode = DerivativesMode::Off;
-      parameters_.nB_derivatives_mode = RestFrameDensityDerivativesMode::Off;
+      parameters_.rho_derivatives_mode = RestFrameDensityDerivativesMode::Off;
     }
     switch (parameters_.derivatives_mode) {
       case DerivativesMode::CovariantGaussian:
@@ -1403,7 +1403,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         logg[LExperiment].info() << "Gradients of baryon current are OFF";
         break;
     }
-    switch (parameters_.nB_derivatives_mode) {
+    switch (parameters_.rho_derivatives_mode) {
       case RestFrameDensityDerivativesMode::On:
         logg[LExperiment].info() << "Rest frame density derivatives are ON";
         break;
@@ -1437,7 +1437,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
      */
     // VDF potentials need derivatives of rest frame density or fields
     if (potentials_->use_vdf() &&
-	(parameters_.nB_derivatives_mode == RestFrameDensityDerivativesMode::Off
+	(parameters_.rho_derivatives_mode == RestFrameDensityDerivativesMode::Off
 	 && parameters_.field_derivatives_mode == FieldDerivativesMode::ChainRule) ){
       throw std::runtime_error
 	("Can't use VDF potentials without rest frame density derivatives or "
@@ -1888,11 +1888,11 @@ void Experiment<Modus>::initialize_new_event() {
                      LatticeUpdate::EveryTimestep, DensityType::Baryon,
                      density_param_, ensembles_,
                      parameters_.labclock->timestep_duration(), true);
-      // Because there was no lattice at t=-Delta_t, the time derivatives dnB_dt
+      // Because there was no lattice at t=-Delta_t, the time derivatives drho_dt
       // and dj^mu/dt at t=0 are huge, while they shouldn't be;
       // we overwrite the time derivative to zero by hand.
       for (auto &node : *jmu_B_lat_) {
-	node.overwrite_dnB_dt_to_zero();
+	node.overwrite_drho_dt_to_zero();
         node.overwrite_djmu_dt_to_zero();
       }
       E_mean_field =
@@ -2500,30 +2500,30 @@ void Experiment<Modus>::update_potentials() {
       for (size_t i = 0; i < UBlattice_size; i++) {
         auto jB = (*jmu_B_lat_)[i];
         const FourVector flow_four_velocity_B =
-            std::abs(jB.density()) > really_small ? jB.jmu_net() / jB.density()
+            std::abs(jB.rho()) > really_small ? jB.jmu_net() / jB.rho()
                                                   : FourVector();
-        double baryon_density = jB.density();
-        ThreeVector baryon_grad_rho = jB.grad_rho();
-        ThreeVector baryon_dj_dt = jB.dj_dt();
-        ThreeVector baryon_rot_j = jB.rot_j();
+        double baryon_density = jB.rho();
+        ThreeVector baryon_grad_j0 = jB.grad_j0();
+        ThreeVector baryon_dvecj_dt = jB.dvecj_dt();
+        ThreeVector baryon_curl_vecj = jB.curl_vecj();
         if (potentials_->use_skyrme()) {
           (*UB_lat_)[i] =
               flow_four_velocity_B * potentials_->skyrme_pot(baryon_density);
           (*FB_lat_)[i] = potentials_->skyrme_force(
-              baryon_density, baryon_grad_rho, baryon_dj_dt, baryon_rot_j);
+              baryon_density, baryon_grad_j0, baryon_dvecj_dt, baryon_curl_vecj);
         }
         if (potentials_->use_symmetry() && jmu_I3_lat_ != nullptr) {
           auto jI3 = (*jmu_I3_lat_)[i];
           const FourVector flow_four_velocity_I3 =
-              std::abs(jI3.density()) > really_small
-                  ? jI3.jmu_net() / jI3.density()
+              std::abs(jI3.rho()) > really_small
+                  ? jI3.jmu_net() / jI3.rho()
                   : FourVector();
           (*UI3_lat_)[i] =
               flow_four_velocity_I3 *
-              potentials_->symmetry_pot(jI3.density(), baryon_density);
+              potentials_->symmetry_pot(jI3.rho(), baryon_density);
           (*FI3_lat_)[i] = potentials_->symmetry_force(
-              jI3.density(), jI3.grad_rho(), jI3.dj_dt(), jI3.rot_j(),
-              baryon_density, baryon_grad_rho, baryon_dj_dt, baryon_rot_j);
+              jI3.rho(), jI3.grad_j0(), jI3.dvecj_dt(), jI3.curl_vecj(),
+              baryon_density, baryon_grad_j0, baryon_dvecj_dt, baryon_curl_vecj);
         }
       }
     } // if ((potentials_->use_skyrme() || ...
@@ -2545,26 +2545,26 @@ void Experiment<Modus>::update_potentials() {
       for (size_t i = 0; i < UBlattice_size; i++) {
         auto jB = (*jmu_B_lat_)[i];
         (*UB_lat_)[i] =
-	  potentials_->vdf_pot (jB.density(), jB.jmu_net());
+	  potentials_->vdf_pot (jB.rho(), jB.jmu_net());
 	switch(parameters_.field_derivatives_mode){
 	case FieldDerivativesMode::ChainRule:
 	  (*FB_lat_)[i] =
-	  potentials_->vdf_force (jB.density(),
-				  jB.dnB_dxnu().x0(),
-				  jB.dnB_dxnu().threevec(),
-				  jB.grad_nB_cross_j(),
+	  potentials_->vdf_force (jB.rho(),
+				  jB.drho_dxnu().x0(),
+				  jB.drho_dxnu().threevec(),
+				  jB.grad_rho_cross_vecj(),
 				  jB.jmu_net().x0(),
-				  jB.grad_rho(),
+				  jB.grad_j0(),
 				  jB.jmu_net().threevec(),
-				  jB.dj_dt(),
-				  jB.rot_j() );
+				  jB.dvecj_dt(),
+				  jB.curl_vecj() );
 	  break;
 	case FieldDerivativesMode::Direct:
 	  auto Amu = (*fields_lat_)[i];
 	  (*FB_lat_)[i] =
-	    potentials_->v_df_force ( Amu.grad_A_0(),
+	    potentials_->v_df_force ( Amu.grad_A0(),
 				      Amu.dvecA_dt(),
-				      Amu.curl_vec_A() );
+				      Amu.curl_vecA() );
 	  break;
 	}
       } // for (size_t i = 0; i < UBlattice_size; i++)

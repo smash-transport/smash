@@ -84,13 +84,13 @@ class Potentials {
    * Evaluates potential for the VDF model given the rest frame and the
    * computational frame baryon current.
    *
-   * \param[in] nB rest frame baryon density, in fm\f$^{-3}\f$
-   * \param[in] jmu_B_net net baryon current in the computational frame, in fm\f$^{-3}\f$
+   * \param[in] rhoB rest frame baryon density, in fm\f$^{-3}\f$
+   * \param[in] jmuB_net net baryon current in the computational frame, in fm\f$^{-3}\f$
    * // Agnieszka correct
    * \return VDF potential \f[U_B=10^{-3}\times\frac{\rho}{|\rho|}
    *         (sum_i C_i (\frac{\rho}{\rho_0})^{b_i - 1})\f] in GeV
    */
-  FourVector vdf_pot(double nB, const FourVector jmu_B_net) const;
+  FourVector vdf_pot(double rhoB, const FourVector jmuB_net) const;
 
   /**
    * Evaluates potential at point r. Potential is always taken in the local
@@ -133,11 +133,11 @@ class Potentials {
   /**
    * Evaluates the electric and magnetic components of the skyrme force.
    *
-   * \param[in] density Eckart baryon density [fm\f$^{-3}\f$].
-   * \param[in] grad_rho Gradient of baryon density [fm\f$^{-4}\f$]. This
+   * \param[in] rhoB Eckart baryon density [fm\f$^{-3}\f$].
+   * \param[in] grad_j0B Gradient of baryon density [fm\f$^{-4}\f$]. This
    * density is evaluated in the computational frame.
-   * \param[in] dj_dt Time derivative of the baryon current density [fm\f$^{-4}\f$
-   * \param[in] rot_j Curl of the baryon current density [fm\f$^{-4}\f$
+   * \param[in] djvec_Bdt Time derivative of the vector baryon current density [fm\f$^{-4}\f$
+   * \param[in] curl_vecjB Curl of the baryon vector current density [fm\f$^{-4}\f$
    * \return (\f$E_B, B_B\f$), where \f[E_B = -V_B^\prime(\rho^\ast)(\nabla\rho_B
    *                                          + \partial_t \vec j_B)\f]
    *         is the electro component of Skyrme force and
@@ -146,22 +146,22 @@ class Potentials {
    *         with \f$\rho^\ast\f$ being the Eckart baryon density.
    */
   std::pair<ThreeVector, ThreeVector> skyrme_force(
-      const double density, const ThreeVector grad_rho, const ThreeVector dj_dt,
-      const ThreeVector rot_j) const;
+      const double rhoB, const ThreeVector grad_j0B, const ThreeVector dvecjB_dt,
+      const ThreeVector curl_vecjB) const;
 
   /**
    * Evaluates the electric and magnetic components of the symmetry force.
    *
    * \param[in] rhoI3 Relative isospin 3 density.
-   * \param[in] grad_rhoI3 Gradient of I3/I density [fm\f$^{-4}\f$]. This
+   * \param[in] grad_j0I3 Gradient of I3/I density [fm\f$^{-4}\f$]. This
    *            density is evaluated in the computational frame.
-   * \param[in] djI3_dt Time derivative of the I3/I current density
+   * \param[in] dvecjI3_dt Time derivative of the I3/I vector current density
    *            [fm\f$^{-4}\f$]
-   * \param[in] rot_jI3 Curl of the I3/I current density [fm\f$^{-4}\f$]
+   * \param[in] curl_vecjI3 Curl of the I3/I vector current density [fm\f$^{-4}\f$]
    * \param[in] rhoB Net-baryon density
    * \param[in] grad_rhoB Gradient of the net-baryon density
-   * \param[in] djB_dt Time derivative of the net-baryon current density
-   * \param[in] rot_jB Curl of the net-baryon current density
+   * \param[in] dvecjB_dt Time derivative of the net-baryon vector current density
+   * \param[in] curl_vecjB Curl of the net-baryon vector current density
    * \return (\f$E_I3,
    *         B_I3\f$) [GeV/fm],
    *         where \f[\vec{E} = - \frac{\partial
@@ -178,34 +178,35 @@ class Potentials {
    *         with \f$\rho^\ast\f$ being the respective Eckart density.
    */
   std::pair<ThreeVector, ThreeVector> symmetry_force(
-      const double rhoI3, const ThreeVector grad_rhoI3,
-      const ThreeVector djI3_dt, const ThreeVector rot_jI3, const double rhoB,
-      const ThreeVector grad_rhoB, const ThreeVector djB_dt,
-      const ThreeVector rot_jB) const;
+      const double rhoI3, const ThreeVector grad_j0I3,
+      const ThreeVector dvecjI3_dt, const ThreeVector curl_vecjI3, const double rhoB,
+      const ThreeVector grad_j0B, const ThreeVector dvecjB_dt,
+      const ThreeVector curl_vecjB) const;
 
   /**
    * Evaluates the electric and magnetic components of the VDF force,
    * based on the VDF equations of motion.
    *
-   * \param[in] nB rest frame baryon density in fm\f$^{-3}\f$
-   * \param[in] dnB_dt time derivative of the rest frame density
-   * \param[in] grad_nB gradient of the rest frame density
-   * \param[in] gradnB_cross_jB cross product of gradnB and vec{j}
-   * \param[in] j0 computational frame baryon density in fm\f$^{-3}\f$
-   * \param[in] grad_j0 gradient of the computational frame current density
-   * \param[in] vec_j baryon current
-   * \param[in] dj_dt time derivative of the computational frema current density
-   * \param[in] rot_j curl of the current density [fm\f$^{-4}\f$
+   * \param[in] rhoB rest frame baryon density in fm\f$^{-3}\f$
+   * \param[in] drhoB_dt time derivative of the rest frame density
+   * \param[in] grad_rhoB gradient of the rest frame density
+   * \param[in] gradrhoB_cross_vecjB cross product of grad rhoB and vec{j}
+   * \param[in] j0B computational frame baryon density in fm\f$^{-3}\f$
+   * \param[in] grad_j0B gradient of the computational frame current density
+   * \param[in] vecjB baryon current
+   * \param[in] dvecjB_dt time derivative of the computational frema current density
+   * \param[in] curl_vecjB curl of the current density [fm\f$^{-4}\f$
    * \return [comment more on what it returns Agnieszka]
    *
    *
    * COMMENT
    */
   std::pair<ThreeVector, ThreeVector> vdf_force(
-   double nB, const double dnB_dt,
-   const ThreeVector grad_nB, const ThreeVector gradnB_cross_jB,
-   const double j0, const ThreeVector grad_j0,
-   const ThreeVector vec_j, const ThreeVector dj_dt, const ThreeVector rot_j) const;
+   double rhoB, const double drhoB_dt,
+   const ThreeVector grad_rhoB, const ThreeVector gradrhoB_cross_vecjB,
+   const double j0B, const ThreeVector grad_j0B,
+   const ThreeVector vecjB, const ThreeVector dvecjB_dt,
+   const ThreeVector curl_vecjB) const;
 
   /**
    * Convenience overload of the above, using derivatives of the VDF mean-field

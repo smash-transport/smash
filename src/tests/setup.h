@@ -265,6 +265,8 @@ inline ExperimentParameters default_parameters(
       1,                                   // ensembles
       testparticles,                       // testparticles
       DerivativesMode::CovariantGaussian,  // derivatives mode
+      RestFrameDensityDerivativesMode::Off,     // rest frame derivatives mode
+      FieldDerivativesMode::ChainRule,     // field derivatives mode
       SmearingMode::CovariantGaussian,     // smearing mode
       1.0,                                 // Gaussian smearing width
       4.0,                                 // Gaussian smearing cut-off

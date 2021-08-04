@@ -36,6 +36,10 @@ constexpr double mev_to_gev = 1.e-3;
 /// Numerical error tolerance.
 constexpr double really_small = 1.0e-6;
 
+
+/// A very small double, used to avoid division by zero
+constexpr double very_small_double = 1.0e-15;
+
 /**
  * \f$ 2\pi \f$.
  */

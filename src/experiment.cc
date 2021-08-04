@@ -669,12 +669,12 @@ std::string format_measurements(const std::vector<Particles> &ensembles,
 
 double calculate_mean_field_energy(
     const Potentials &potentials,
-    RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
+    RectangularLattice<smash::DensityOnLattice> &jmuB_lat,
     const ExperimentParameters &parameters) {
   // basic parameters and variables
-  const double V_cell = (jmu_B_lat.cell_sizes())[0] *
-                        (jmu_B_lat.cell_sizes())[1] *
-                        (jmu_B_lat.cell_sizes())[2];
+  const double V_cell = (jmuB_lat.cell_sizes())[0] *
+                        (jmuB_lat.cell_sizes())[1] *
+                        (jmuB_lat.cell_sizes())[2];
 
   double E_mean_field = 0.0;
   double density_mean = 0.0;
@@ -722,19 +722,19 @@ double calculate_mean_field_energy(
     int number_of_nodes = 0;
     double lattice_mean_field_total = 0.0;
 
-    for (auto &node : jmu_B_lat) {
+    for (auto &node : jmuB_lat) {
       number_of_nodes++;
       // the rest frame density
-      double nB = node.density();
+      double rhoB = node.rho();
       // the computational frame density
-      const double j0 = node.jmu_net().x0();
+      const double j0B = node.jmu_net().x0();
 
-      const double abs_nB = std::abs(nB);
-      if ((abs_nB < really_small) || (std::abs(j0) < really_small)) {
+      const double abs_rhoB = std::abs(rhoB);
+      if ((abs_rhoB < really_small) || (std::abs(j0B) < really_small)) {
         continue;
       }
-      density_mean += j0;
-      density_variance += j0 * j0;
+      density_mean += j0B;
+      density_variance += j0B * j0B;
 
       /*
        * The mean-field energy for the Skyrme potential. Note: this expression
@@ -744,9 +744,9 @@ double calculate_mean_field_energy(
        *
        * TODO: Add symmetry energy.
        */
-      double mean_field_contribution_1 = (C1GeV / b1) * std::pow(abs_nB, b1) /
+      double mean_field_contribution_1 = (C1GeV / b1) * std::pow(abs_rhoB, b1) /
                                          std::pow(nuclear_density, b1 - 1);
-      double mean_field_contribution_2 = (C2GeV / b2) * std::pow(abs_nB, b2) /
+      double mean_field_contribution_2 = (C2GeV / b2) * std::pow(abs_rhoB, b2) /
                                          std::pow(nuclear_density, b2 - 1);
 
       lattice_mean_field_total +=
@@ -807,7 +807,7 @@ double calculate_mean_field_energy(
     double b3 = potentials.power_3();
     double b4 = potentials.power_4();
     // saturation density of nuclear matter specified in the VDF parameters
-    double n_0 = potentials.saturation_density();
+    double rhoB_0 = potentials.saturation_density();
 
     // to avoid nan's in expressions below
     // (then expressions with bi~=0 will be surely killed by Ci=0)
@@ -824,15 +824,15 @@ double calculate_mean_field_energy(
     int number_of_nodes = 0;
     double lattice_mean_field_total = 0.0;
 
-    for (auto &node : jmu_B_lat) {
+    for (auto &node : jmuB_lat) {
       number_of_nodes++;
       // the rest frame density
-      double nB = node.density();
+      double rhoB = node.rho();
       // the computational frame density
-      const double j0 = node.jmu_net().x0();
-      const double abs_nB = std::abs(nB);
-      density_mean += j0;
-      density_variance += j0 * j0;
+      const double j0B = node.jmu_net().x0();
+      double abs_rhoB = std::abs(rhoB);
+      density_mean += j0B;
+      density_variance += j0B * j0B;
 
       /*
        * The mean-field energy for the VDF potential. This expression is correct
@@ -840,25 +840,25 @@ double calculate_mean_field_energy(
        * energy (if same coefficients and powers are used).
        */
       // in order to prevent dividing by zero in case any b_i < 2.0
-      if ( abs_nB < 1e-15 ) {
-        continue;
+      if ( abs_rhoB < very_small_double ) {
+        abs_rhoB = very_small_double;
       }
       double mean_field_contribution_1 =
-	C1GeV * std::pow(abs_nB, b1 - 2.0) *
-	(j0 * j0 - ((b1 - 1.0) / b1) * abs_nB * abs_nB) /
-	std::pow(n_0, b1 - 1);
+	C1GeV * std::pow(abs_rhoB, b1 - 2.0) *
+	(j0B * j0B - ((b1 - 1.0) / b1) * abs_rhoB * abs_rhoB) /
+	std::pow(rhoB_0, b1 - 1);
       double mean_field_contribution_2 =
-	C2GeV * std::pow(abs_nB, b2 - 2.0) *
-	(j0 * j0 - ((b2 - 1.0) / b2) * abs_nB * abs_nB) /
-	std::pow(n_0, b2 - 1);
+	C2GeV * std::pow(abs_rhoB, b2 - 2.0) *
+	(j0B * j0B - ((b2 - 1.0) / b2) * abs_rhoB * abs_rhoB) /
+	std::pow(rhoB_0, b2 - 1);
       double mean_field_contribution_3 =
-	C3GeV * std::pow(abs_nB, b3 - 2.0) *
-	(j0 * j0 - ((b3 - 1.0) / b3) * abs_nB * abs_nB) /
-	std::pow(n_0, b3 - 1);
+	C3GeV * std::pow(abs_rhoB, b3 - 2.0) *
+	(j0B * j0B - ((b3 - 1.0) / b3) * abs_rhoB * abs_rhoB) /
+	std::pow(rhoB_0, b3 - 1);
       double mean_field_contribution_4 =
-	C4GeV * std::pow(abs_nB, b4 - 2.0) *
-	(j0 * j0 - ((b4 - 1.0) / b4) * abs_nB * abs_nB) /
-	std::pow(n_0, b4 - 1);
+	C4GeV * std::pow(abs_rhoB, b4 - 2.0) *
+	(j0B * j0B - ((b4 - 1.0) / b4) * abs_rhoB * abs_rhoB) /
+	std::pow(rhoB_0, b4 - 1);
 
       lattice_mean_field_total +=
 	V_cell * (mean_field_contribution_1 + mean_field_contribution_2

@@ -11,17 +11,12 @@
 
 namespace smash {
 
-
-
-
-
-
 void update_fields_lattice(
     RectangularLattice<FieldsOnLattice> *fields_lat,
     RectangularLattice<FourVector> *old_fields,
     RectangularLattice<FourVector> *new_fields,
     RectangularLattice<std::array<FourVector, 4>> *fields_four_grad_lattice,
-    DensityLattice *jmu_B_lat,
+    DensityLattice *jmuB_lat,
     const LatticeUpdate fields_lat_update, const Potentials &potentials,
     const double time_step) {
   // Do not proceed if lattice does not exists/update not required
@@ -49,7 +44,7 @@ void update_fields_lattice(
   fields_lat->reset();
 
   // Get the potential parameters
-  const double n_0 = potentials.saturation_density();
+  const double rhoB_0 = potentials.saturation_density();
   const double C1_GeV = (potentials.coeff_1()) / 1000.0;
   const double C2_GeV = (potentials.coeff_2()) / 1000.0;
   const double C3_GeV = (potentials.coeff_3()) / 1000.0;
@@ -63,33 +58,34 @@ void update_fields_lattice(
 
   // update the fields lattice
   for (int i = 0; i < number_of_nodes; i++){
-    // read values off the j_mu_B lattice (which holds values at t0 + Delta t)
-    double nB_at_i = ( (*jmu_B_lat)[i] ).density();
-    FourVector jmu_B_at_i = ( (*jmu_B_lat)[i] ).jmu_net();
+    // read values off the jmu_B lattice (which holds values at t0 + Delta t)
+    double rhoB_at_i = ( (*jmuB_lat)[i] ).rho();
+    FourVector jmuB_at_i = ( (*jmuB_lat)[i] ).jmu_net();
 
+    double abs_rhoB_at_i = std::abs(rhoB_at_i);
     // this is to prevent nan expressions
-    if ( std::abs(nB_at_i) < 1e-15 ){
-      nB_at_i = 1e-15;
+    if ( abs_rhoB_at_i < very_small_double ){
+      abs_rhoB_at_i = very_small_double;
     }
 
     // this needs to be used in order to prevent trying to calculate something
-    // an expression like (-nB)^{3.4}
-    const int sgn = nB_at_i > 0 ? 1 : -1;
+    // an expression like (-rhoB)^{3.4}
+    const int sgn = rhoB_at_i > 0 ? 1 : -1;
 
     // field contributions as obtained in the VDF model
     double field_contribution_1 =
-      sgn * ( C1_GeV * std::pow( (std::abs(nB_at_i))/n_0, b1 - 2.0  ) / n_0 );
+      sgn * ( C1_GeV * std::pow( abs_rhoB_at_i/rhoB_0, b1 - 2.0  ) / rhoB_0 );
     double field_contribution_2 =
-      sgn * ( C2_GeV * std::pow( (std::abs(nB_at_i))/n_0, b2 - 2.0  ) / n_0 );
+      sgn * ( C2_GeV * std::pow( abs_rhoB_at_i/rhoB_0, b2 - 2.0  ) / rhoB_0 );
     double field_contribution_3 =
-      sgn * ( C3_GeV * std::pow( (std::abs(nB_at_i))/n_0, b3 - 2.0  ) / n_0 );
+      sgn * ( C3_GeV * std::pow( abs_rhoB_at_i/rhoB_0, b3 - 2.0  ) / rhoB_0 );
     double field_contribution_4 =
-      sgn * ( C4_GeV * std::pow( (std::abs(nB_at_i))/n_0, b4 - 2.0  ) / n_0 );
+      sgn * ( C4_GeV * std::pow( abs_rhoB_at_i/rhoB_0, b4 - 2.0  ) / rhoB_0 );
 
     FourVector field_at_i = ( field_contribution_1 +
 			      field_contribution_2 +
 			      field_contribution_3 +
-			      field_contribution_4 ) * jmu_B_at_i;
+			      field_contribution_4 ) * jmuB_at_i;
 
     // fill the A_mu lattice
     ( (*fields_lat)[i] ).overwrite_A_mu (field_at_i);

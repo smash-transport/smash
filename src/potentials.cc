@@ -104,7 +104,7 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
     }
   }
   if (use_vdf_) {
-    saturation_density_ = conf.take({"VDF", "Sat_nB"});
+    saturation_density_ = conf.take({"VDF", "Sat_rhoB"});
     coeff_1_ = conf.take({"VDF", "Coeff_1"});
     coeff_2_ = conf.take({"VDF", "Coeff_2"});
     coeff_3_ = conf.take({"VDF", "Coeff_3"});
@@ -147,34 +147,35 @@ double Potentials::symmetry_pot(const double baryon_isospin_density,
   return pot;
 }
 
-FourVector Potentials::vdf_pot(double nB, const FourVector jmu_B_net) const {
+FourVector Potentials::vdf_pot(double rhoB, const FourVector jmuB_net) const {
   const double MeV_to_GeV = 1.0e-3;
   // this needs to be used in order to prevent trying to calculate something like
-  // (-nB)^{3.4}
-  const int sgn = nB > 0 ? 1 : -1;
+  // (-rho_B)^{3.4}
+  const int sgn = rhoB > 0 ? 1 : -1;
+  double abs_rhoB = std::abs(rhoB);
   // to prevent NAN expressions
-  if (std::abs(nB) < 1e-15) {
-    nB = 1e-15;
+  if (abs_rhoB < very_small_double) {
+    abs_rhoB = very_small_double;
   }
   // F_2 is a multiplicative factor in front of the baryon current
   // in the VDF potential
   const double F_2 =
     MeV_to_GeV * sgn *
     ( coeff_1_
-      * std::pow( std::abs(nB), power_1_ - 2.0 )
+      * std::pow( abs_rhoB, power_1_ - 2.0 )
       / std::pow( saturation_density_, power_1_ - 1.0) +
       coeff_2_
-      * std::pow( std::abs(nB), power_2_ - 2.0 )
+      * std::pow( abs_rhoB, power_2_ - 2.0 )
       / std::pow( saturation_density_, power_2_ - 1.0) +
       coeff_3_
-      * std::pow( std::abs(nB), power_3_ - 2.0 )
+      * std::pow( abs_rhoB, power_3_ - 2.0 )
       / std::pow( saturation_density_, power_3_ - 1.0) +
       coeff_4_
-      * std::pow( std::abs(nB), power_4_ - 2.0 )
+      * std::pow( abs_rhoB, power_4_ - 2.0 )
       / std::pow( saturation_density_, power_4_ - 1.0) );
 
   // Return in GeV
-  return MeV_to_GeV * F_2 * jmu_B_net;
+  return MeV_to_GeV * F_2 * jmuB_net;
 }
 
 double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
@@ -187,17 +188,17 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
   if (!(acts_on.is_baryon() || acts_on.is_nucleus())) {
     return total_potential;
   }
-  const double rho_B = std::get<0>(current_eckart(
+  const double rhoB = std::get<0>(current_eckart(
       r, plist, param_, DensityType::Baryon, compute_gradient, smearing));
   if (use_skyrme_) {
-    total_potential += scale.first * skyrme_pot(rho_B);
+    total_potential += scale.first * skyrme_pot(rhoB);
   }
   if (use_symmetry_) {
     const double rho_iso = std::get<0>(
         current_eckart(r, plist, param_, DensityType::BaryonicIsospin,
                        compute_gradient, smearing));
     const double sym_pot =
-        symmetry_pot(rho_iso, rho_B) * acts_on.isospin3_rel();
+        symmetry_pot(rho_iso, rhoB) * acts_on.isospin3_rel();
     total_potential += scale.second * sym_pot;
   }
 
@@ -220,52 +221,53 @@ std::pair<double, int> Potentials::force_scale(const ParticleType &data) {
 }
 
 std::pair<ThreeVector, ThreeVector> Potentials::skyrme_force(
-    const double density, const ThreeVector grad_rho, const ThreeVector dj_dt,
-    const ThreeVector rot_j) const {
+    const double rhoB, const ThreeVector grad_j0B, const ThreeVector dvecjB_dt,
+    const ThreeVector curl_vecjB) const {
   ThreeVector E_component(0.0, 0.0, 0.0), B_component(0.0, 0.0, 0.0);
   if (use_skyrme_) {
-    const int sgn = density > 0 ? 1 : -1;
-    const double abs_density = std::abs(density);
+    const int sgn = rhoB > 0 ? 1 : -1;
+    const double abs_rhoB = std::abs(rhoB);
     const double dV_drho =
         sgn *
         (skyrme_a_ +
          skyrme_b_ * skyrme_tau_ *
-             std::pow(abs_density / nuclear_density, skyrme_tau_ - 1)) *
+             std::pow(abs_rhoB / nuclear_density, skyrme_tau_ - 1)) *
         mev_to_gev / nuclear_density;
-    E_component -= dV_drho * (grad_rho + dj_dt);
-    B_component += dV_drho * rot_j;
+    E_component -= dV_drho * (grad_j0B + dvecjB_dt);
+    B_component += dV_drho * curl_vecjB;
   }
   return std::make_pair(E_component, B_component);
 }
 
 std::pair<ThreeVector, ThreeVector> Potentials::symmetry_force(
-    const double rhoI3, const ThreeVector grad_rhoI3, const ThreeVector djI3_dt,
-    const ThreeVector rot_jI3, const double rhoB, const ThreeVector grad_rhoB,
-    const ThreeVector djB_dt, const ThreeVector rot_jB) const {
+    const double rhoI3, const ThreeVector grad_j0I3, const ThreeVector dvecjI3_dt,
+    const ThreeVector curl_vecjI3, const double rhoB, const ThreeVector grad_j0B,
+    const ThreeVector dvecjB_dt, const ThreeVector curl_vecjB) const {
   ThreeVector E_component(0.0, 0.0, 0.0), B_component(0.0, 0.0, 0.0);
   if (use_symmetry_) {
-    E_component -= dVsym_drhoI3(rhoB, rhoI3) * (grad_rhoI3 + djI3_dt) +
-                   dVsym_drhoB(rhoB, rhoI3) * (grad_rhoB + djB_dt);
+    E_component -= dVsym_drhoI3(rhoB, rhoI3) * (grad_j0I3 + dvecjI3_dt) +
+                   dVsym_drhoB(rhoB, rhoI3) * (grad_j0B + dvecjB_dt);
     B_component +=
-        dVsym_drhoI3(rhoB, rhoI3) * rot_jI3 + dVsym_drhoB(rhoB, rhoI3) * rot_jB;
+        dVsym_drhoI3(rhoB, rhoI3) * curl_vecjI3 + dVsym_drhoB(rhoB, rhoI3) * curl_vecjB;
   }
   return std::make_pair(E_component, B_component);
 }
 
 std::pair<ThreeVector, ThreeVector> Potentials::vdf_force(
-   double nB, const double dnB_dt,
-   const ThreeVector grad_nB, const ThreeVector gradnB_cross_jB,
-   const double j0, const ThreeVector grad_j0,
-   const ThreeVector vec_j, const ThreeVector dj_dt, const ThreeVector rot_j)
+   double rhoB, const double drhoB_dt,
+   const ThreeVector grad_rhoB, const ThreeVector gradrhoB_cross_vecjB,
+   const double j0B, const ThreeVector grad_j0B,
+   const ThreeVector vecjB, const ThreeVector dvecjB_dt, const ThreeVector curl_vecjB)
   const {
   const double MeV_to_GeV = 1.0e-3;
   // this needs to be used to prevent trying to calculate something like
-  // (-nB)^{3.4}
-  const int sgn = nB > 0 ? 1 : -1;
+  // (-rhoB)^{3.4}
+  const int sgn = rhoB > 0 ? 1 : -1;
   ThreeVector E_component(0.0, 0.0, 0.0), B_component(0.0, 0.0, 0.0);
   // to prevent NAN expressions
-  if (std::abs(nB) < 1e-15) {
-    nB = 1e-15;
+  double abs_rhoB = std::abs(rhoB);
+  if (abs_rhoB < very_small_double) {
+    abs_rhoB = very_small_double;
   }
   if (use_vdf_) {
     // F_1 and F_2 are multiplicative factors in front of the baryon current
@@ -273,36 +275,36 @@ std::pair<ThreeVector, ThreeVector> Potentials::vdf_force(
     const double F_1 =
       MeV_to_GeV * sgn *
       ( coeff_1_ * ( power_1_ - 2.0 )
-	* std::pow( std::abs(nB), power_1_ - 3.0 )
+	* std::pow( abs_rhoB, power_1_ - 3.0 )
 	/ std::pow( saturation_density_, power_1_ - 1.0) +
         coeff_2_ * ( power_2_ - 2.0 )
-	* std::pow( std::abs(nB), power_2_ - 3.0 )
+	* std::pow( abs_rhoB, power_2_ - 3.0 )
 	/ std::pow( saturation_density_, power_2_ - 1.0) +
         coeff_3_ * ( power_3_ - 2.0 )
-	* std::pow( std::abs(nB), power_3_ - 3.0 )
+	* std::pow( abs_rhoB, power_3_ - 3.0 )
 	/ std::pow( saturation_density_, power_3_ - 1.0) +
         coeff_4_ * ( power_4_ - 2.0 )
-	* std::pow( std::abs(nB), power_4_ - 3.0 )
+	* std::pow( abs_rhoB, power_4_ - 3.0 )
 	/ std::pow( saturation_density_, power_4_ - 1.0) );
 
     const double F_2 =
       MeV_to_GeV * sgn *
       ( coeff_1_
-	* std::pow( std::abs(nB), power_1_ - 2.0 )
+	* std::pow( abs_rhoB, power_1_ - 2.0 )
 	/ std::pow( saturation_density_, power_1_ - 1.0) +
         coeff_2_
-	* std::pow( std::abs(nB), power_2_ - 2.0 )
+	* std::pow( abs_rhoB, power_2_ - 2.0 )
 	/ std::pow( saturation_density_, power_2_ - 1.0) +
         coeff_3_
-	* std::pow( std::abs(nB), power_3_ - 2.0 )
+	* std::pow( abs_rhoB, power_3_ - 2.0 )
 	/ std::pow( saturation_density_, power_3_ - 1.0) +
         coeff_4_
-	* std::pow( std::abs(nB), power_4_ - 2.0 )
+	* std::pow( abs_rhoB, power_4_ - 2.0 )
 	/ std::pow( saturation_density_, power_4_ - 1.0) );
 
-    E_component -= ( F_1 * ( grad_nB * j0 + dnB_dt * vec_j )
-		     + F_2 * ( grad_j0 + dj_dt ) );
-    B_component += F_1 * gradnB_cross_jB + F_2 * rot_j;
+    E_component -= ( F_1 * ( grad_rhoB * j0B + drhoB_dt * vecjB )
+		     + F_2 * ( grad_j0B + dvecjB_dt ) );
+    B_component += F_1 * gradrhoB_cross_vecjB + F_2 * curl_vecjB;
 
   }
   return std::make_pair(E_component, B_component);
@@ -356,11 +358,11 @@ Potentials::all_forces(const ThreeVector &r, const ParticleList &plist) const {
   const auto baryon_density_and_gradient = current_eckart(
       r, plist, param_, DensityType::Baryon, compute_gradient, smearing);
   const double rhoB = std::get<0>(baryon_density_and_gradient);
-  const ThreeVector grad_rhoB = std::get<2>(baryon_density_and_gradient);
-  const ThreeVector djB_dt = std::get<3>(baryon_density_and_gradient);
-  const ThreeVector rot_jB = std::get<4>(baryon_density_and_gradient);
+  const ThreeVector grad_j0B = std::get<2>(baryon_density_and_gradient);
+  const ThreeVector curl_vecjB = std::get<3>(baryon_density_and_gradient);
+  const FourVector djmuB_dt = std::get<4>(baryon_density_and_gradient);
   if (use_skyrme_) {
-    F_skyrme = skyrme_force(rhoB, grad_rhoB, djB_dt, rot_jB);
+    F_skyrme = skyrme_force(rhoB, grad_j0B, djmuB_dt.threevec(), curl_vecjB);
   }
 
   if (use_symmetry_) {
@@ -368,11 +370,12 @@ Potentials::all_forces(const ThreeVector &r, const ParticleList &plist) const {
         current_eckart(r, plist, param_, DensityType::BaryonicIsospin,
                        compute_gradient, smearing);
     const double rhoI3 = std::get<0>(density_and_gradient);
-    const ThreeVector grad_rhoI3 = std::get<2>(density_and_gradient);
-    const ThreeVector djI3_dt = std::get<3>(density_and_gradient);
-    const ThreeVector rot_jI3 = std::get<4>(density_and_gradient);
-    F_symmetry = symmetry_force(rhoI3, grad_rhoI3, djI3_dt, rot_jI3, rhoB,
-                                grad_rhoB, djB_dt, rot_jB);
+    const ThreeVector grad_j0I3 = std::get<2>(density_and_gradient);
+    const ThreeVector curl_vecjI3 = std::get<3>(density_and_gradient);
+    const FourVector dvecjI3_dt = std::get<4>(density_and_gradient);
+    F_symmetry = symmetry_force(rhoI3, grad_j0I3, dvecjI3_dt.threevec(),
+				curl_vecjI3, rhoB, grad_j0B,
+				djmuB_dt.threevec(), curl_vecjB);
   }
 
   // TO DO: update current_eckart() so that it provides rest frame density

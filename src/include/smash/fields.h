@@ -59,7 +59,7 @@ class FieldsOnLattice {
    *
    * \return \f$\nabla A^0\f$
    */
-  ThreeVector grad_A_0() {
+  ThreeVector grad_A0() {
     ThreeVector A_0_grad = ThreeVector();
     for (int i = 1; i < 4; i++) {
       A_0_grad[i - 1] = dAmu_dxnu_[i].x0();
@@ -72,12 +72,12 @@ class FieldsOnLattice {
    *
    * \return \f$\nabla\times\vec{A}\f$
    */
-  ThreeVector curl_vec_A() {
-    ThreeVector curl_vecA = ThreeVector();
-    curl_vecA.set_x1(dAmu_dxnu_[2].x3() - dAmu_dxnu_[3].x2());
-    curl_vecA.set_x2(dAmu_dxnu_[3].x1() - dAmu_dxnu_[1].x3());
-    curl_vecA.set_x3(dAmu_dxnu_[1].x2() - dAmu_dxnu_[2].x1());
-    return curl_vecA;
+  ThreeVector curl_vecA() {
+    ThreeVector curl_vec_A = ThreeVector();
+    curl_vec_A.set_x1(dAmu_dxnu_[2].x3() - dAmu_dxnu_[3].x2());
+    curl_vec_A.set_x2(dAmu_dxnu_[3].x1() - dAmu_dxnu_[1].x3());
+    curl_vec_A.set_x3(dAmu_dxnu_[1].x2() - dAmu_dxnu_[2].x1());
+    return curl_vec_A;
   }
 
   /**

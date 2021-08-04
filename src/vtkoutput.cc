@@ -245,7 +245,7 @@ void VtkOutput::thermodynamics_output(
   file.open(make_filename(varname, vtk_density_output_counter_), std::ios::out);
   write_vtk_header(file, lattice, varname);
   write_vtk_scalar(file, lattice, varname,
-                   [&](DensityOnLattice &node) { return node.density(); });
+                   [&](DensityOnLattice &node) { return node.rho(); });
   vtk_density_output_counter_++;
 }
 
