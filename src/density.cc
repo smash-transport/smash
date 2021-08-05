@@ -233,8 +233,9 @@ void update_lattice(
     for (auto &node : *lat) {
       // the rest frame density
       double rho = node.rho();
+      const int sgn = rho > 0 ? 1 : -1;
       if ( std::abs(rho) < very_small_double ) {
-        rho = very_small_double;
+        rho = sgn * very_small_double;
       }
 
       // the computational frame j^mu
@@ -248,25 +249,25 @@ void update_lattice(
 	  jmu.x2() * djmu_dxnu[0].x2() -
 	  jmu.x3() * djmu_dxnu[0].x3() );
 
-      const double drho_dx1 = (1/rho) *
+      const double drho_dx = (1/rho) *
 	( jmu.x0() * djmu_dxnu[1].x0() -
 	  jmu.x1() * djmu_dxnu[1].x1() -
 	  jmu.x2() * djmu_dxnu[1].x2() -
 	  jmu.x3() * djmu_dxnu[1].x3() );
 
-      const double drho_dx2 = (1/rho) *
+      const double drho_dy = (1/rho) *
 	( jmu.x0() * djmu_dxnu[2].x0() -
 	  jmu.x1() * djmu_dxnu[2].x1() -
 	  jmu.x2() * djmu_dxnu[2].x2() -
 	  jmu.x3() * djmu_dxnu[2].x3() );
 
-      const double drho_dx3 = (1/rho) *
+      const double drho_dz = (1/rho) *
 	( jmu.x0() * djmu_dxnu[3].x0() -
 	  jmu.x1() * djmu_dxnu[3].x1() -
 	  jmu.x2() * djmu_dxnu[3].x2() -
 	  jmu.x3() * djmu_dxnu[3].x3() );
 
-      const FourVector drho_dxnu = { drho_dt, drho_dx1, drho_dx2, drho_dx3 };
+      const FourVector drho_dxnu = { drho_dt, drho_dx, drho_dy, drho_dz };
 
       node.overwrite_drho_dxnu (drho_dxnu);
     }

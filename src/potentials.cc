@@ -188,8 +188,9 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
   if (!(acts_on.is_baryon() || acts_on.is_nucleus())) {
     return total_potential;
   }
-  const double rhoB = std::get<0>(current_eckart(
-      r, plist, param_, DensityType::Baryon, compute_gradient, smearing));
+  const auto baryon_density_and_gradient = current_eckart(
+      r, plist, param_, DensityType::Baryon, compute_gradient, smearing);
+  const double rhoB = std::get<0>(baryon_density_and_gradient);
   if (use_skyrme_) {
     total_potential += scale.first * skyrme_pot(rhoB);
   }
@@ -202,11 +203,10 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
     total_potential += scale.second * sym_pot;
   }
 
-  // TO DO: update current_eckart() so that it provides rest frame density
-  // derivatives necessary for the VDF potentials
   if (use_vdf_) {
-    throw std::runtime_error
-      ("Cannot run VDF potentials without lattice.\n\n");
+    const FourVector jmuB = std::get<1>(baryon_density_and_gradient);
+    const FourVector VDF_potential = vdf_pot(rhoB, jmuB);
+    total_potential += scale.first * VDF_potential.x0();
   }
 
   return total_potential;
@@ -350,19 +350,19 @@ std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector>
 Potentials::all_forces(const ThreeVector &r, const ParticleList &plist) const {
   const bool compute_gradient = true;
   const bool smearing = true;
-  auto F_skyrme =
+  auto F_skyrme_or_VDF =
       std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
   auto F_symmetry =
       std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
 
   const auto baryon_density_and_gradient = current_eckart(
       r, plist, param_, DensityType::Baryon, compute_gradient, smearing);
-  const double rhoB = std::get<0>(baryon_density_and_gradient);
+  double rhoB = std::get<0>(baryon_density_and_gradient);
   const ThreeVector grad_j0B = std::get<2>(baryon_density_and_gradient);
   const ThreeVector curl_vecjB = std::get<3>(baryon_density_and_gradient);
   const FourVector djmuB_dt = std::get<4>(baryon_density_and_gradient);
   if (use_skyrme_) {
-    F_skyrme = skyrme_force(rhoB, grad_j0B, djmuB_dt.threevec(), curl_vecjB);
+    F_skyrme_or_VDF = skyrme_force(rhoB, grad_j0B, djmuB_dt.threevec(), curl_vecjB);
   }
 
   if (use_symmetry_) {
@@ -378,15 +378,56 @@ Potentials::all_forces(const ThreeVector &r, const ParticleList &plist) const {
 				djmuB_dt.threevec(), curl_vecjB);
   }
 
-  // TO DO: update current_eckart() so that it provides rest frame density
-  // derivatives necessary for the VDF potentials
   if (use_vdf_) {
-    throw std::runtime_error
-      ("Cannot run VDF potenials without lattice.\n\n");
+
+    const FourVector jmuB = std::get<1>(baryon_density_and_gradient);
+    const FourVector djmuB_dx = std::get<5>(baryon_density_and_gradient);
+    const FourVector djmuB_dy = std::get<6>(baryon_density_and_gradient);
+    const FourVector djmuB_dz = std::get<7>(baryon_density_and_gradient);
+
+    // safety check to not divide by zero
+    const int sgn = rhoB > 0 ? 1 : -1;
+    if ( std::abs(rhoB) < very_small_double ) {
+      rhoB = sgn * very_small_double;
+    }
+
+    const double drhoB_dt = (1/rhoB) *
+      ( jmuB.x0() * djmuB_dt.x0() -
+	jmuB.x1() * djmuB_dt.x1() -
+	jmuB.x2() * djmuB_dt.x2() -
+	jmuB.x3() * djmuB_dt.x3() );
+
+    const double drhoB_dx = (1/rhoB) *
+      ( jmuB.x0() * djmuB_dx.x0() -
+	jmuB.x1() * djmuB_dx.x1() -
+	jmuB.x2() * djmuB_dx.x2() -
+	jmuB.x3() * djmuB_dx.x3() );
+
+    const double drhoB_dy = (1/rhoB) *
+      ( jmuB.x0() * djmuB_dy.x0() -
+	jmuB.x1() * djmuB_dy.x1() -
+	jmuB.x2() * djmuB_dy.x2() -
+	jmuB.x3() * djmuB_dy.x3() );
+
+    const double drhoB_dz = (1/rhoB) *
+      ( jmuB.x0() * djmuB_dz.x0() -
+	jmuB.x1() * djmuB_dz.x1() -
+	jmuB.x2() * djmuB_dz.x2() -
+	jmuB.x3() * djmuB_dz.x3() );
+
+    const FourVector drhoB_dxnu = { drhoB_dt, drhoB_dx, drhoB_dy, drhoB_dz };
+
+    const ThreeVector grad_rhoB = drhoB_dxnu.threevec();
+    const ThreeVector vecjB = jmuB.threevec();
+    const ThreeVector Drho_cross_vecj = grad_rhoB.cross_product(vecjB);
+
+    F_skyrme_or_VDF = vdf_force(rhoB, drhoB_dt, drhoB_dxnu.threevec(), Drho_cross_vecj,
+			        jmuB.x0(), grad_j0B, jmuB.threevec(),
+				djmuB_dt.threevec(), curl_vecjB);
   }
 
-  return std::make_tuple(F_skyrme.first, F_skyrme.second, F_symmetry.first,
-                         F_symmetry.second);
+  return std::make_tuple(F_skyrme_or_VDF.first, F_skyrme_or_VDF.second,
+			 F_symmetry.first, F_symmetry.second);
 }
 
 }  // namespace smash
