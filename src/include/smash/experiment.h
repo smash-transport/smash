@@ -1990,7 +1990,7 @@ void Experiment<Modus>::initialize_new_event() {
       if (particle.belongs_to() == BelongsTo::Projectile) {
         v_beam = modus_.velocity_projectile();
       } else if (particle.belongs_to() == BelongsTo::Target) {
-        modus_.velocity_target();
+        v_beam = modus_.velocity_target();
       }
       const double gamma = 1.0 / std::sqrt(1.0 - v_beam * v_beam);
       beam_momentum_.emplace_back(
