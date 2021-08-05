@@ -27,7 +27,7 @@ namespace smash {
 /**
  * A class for calculating the fields A^mu associated with the VDF potentials.
  * The structure of the class is heavily based on the DensityOnLattice class.
- * 
+ *
  * It holds the values of the A^mu FourVector as well as fourgradients of its
  * components.
  */
@@ -37,7 +37,6 @@ class FieldsOnLattice {
   FieldsOnLattice()
       : A_mu_(FourVector()),
         dAmu_dxnu_({FourVector(), FourVector(), FourVector(), FourVector()}) {}
-
 
   /**
    * \return The field four-vector A^mu
@@ -85,18 +84,13 @@ class FieldsOnLattice {
    *
    * \param[in] new_A_mu new value of the field
    */
-  void overwrite_A_mu (FourVector new_A_mu)
-  {
-    A_mu_ = new_A_mu;
-  }
+  void overwrite_A_mu(FourVector new_A_mu) { A_mu_ = new_A_mu; }
 
-  
   /**
    * Overwrite the time derivative of A^mu to zero
    */
-  void overwrite_dAmu_dt_to_zero ()
-  {
-    FourVector tmp0 (0.0, 0.0, 0.0, 0.0);
+  void overwrite_dAmu_dt_to_zero() {
+    FourVector tmp0(0.0, 0.0, 0.0, 0.0);
 
     dAmu_dxnu_[0] = tmp0;
   }
@@ -110,8 +104,8 @@ class FieldsOnLattice {
    * \param[in] dAmu_dy new value of the y-derivative of A^mu
    * \param[in] dAmu_dz new value of the z-derivative of A^mu
    */
-  void overwrite_dAmu_dxnu (FourVector dAmu_dt,FourVector dAmu_dx,
-			    FourVector dAmu_dy, FourVector dAmu_dz) {
+  void overwrite_dAmu_dxnu(FourVector dAmu_dt, FourVector dAmu_dx,
+                           FourVector dAmu_dy, FourVector dAmu_dz) {
     dAmu_dxnu_[0] = dAmu_dt;
     dAmu_dxnu_[1] = dAmu_dx;
     dAmu_dxnu_[2] = dAmu_dy;
@@ -119,8 +113,7 @@ class FieldsOnLattice {
   }
 
   // TO DO: consider calculating the mean-field energy here
-  //double calculate_mean_field_from_fields ();
-
+  // double calculate_mean_field_from_fields ();
 
  private:
   /// Four-vector density of the field
@@ -131,8 +124,6 @@ class FieldsOnLattice {
 
 /// Conveniency typedef for lattice of fields
 typedef RectangularLattice<FieldsOnLattice> FieldsLattice;
-
-
 
 /**
  * Updates the contents on the lattice of <FieldsOnLattice> type.
@@ -150,15 +141,14 @@ typedef RectangularLattice<FieldsOnLattice> FieldsLattice;
  *            timestep
  * \param[in] time_step Time step used in the simulation
  */
- 
+
 void update_fields_lattice(
     RectangularLattice<FieldsOnLattice> *fields_lat,
     RectangularLattice<FourVector> *old_fields,
     RectangularLattice<FourVector> *new_fields,
     RectangularLattice<std::array<FourVector, 4>> *fields_four_grad_lattice,
-    DensityLattice *jmu_B_lat,
-    const LatticeUpdate fields_lat_update, const Potentials &potentials,
-    const double time_step);
+    DensityLattice *jmu_B_lat, const LatticeUpdate fields_lat_update,
+    const Potentials &potentials, const double time_step);
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_DENSITY_H_

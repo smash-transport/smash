@@ -81,14 +81,14 @@ class Potentials {
   double symmetry_S(const double baryon_density) const;
 
   /**
-   * Evaluates potential for the VDF model given the rest frame and the
-   * computational frame baryon current.
+   * Evaluates the FourVector potential in the VDF model given the rest frame
+   * density and the computational frame baryon current.
    *
    * \param[in] rhoB rest frame baryon density, in fm\f$^{-3}\f$
-   * \param[in] jmuB_net net baryon current in the computational frame, in fm\f$^{-3}\f$
-   * // Agnieszka correct
-   * \return VDF potential \f[U_B=10^{-3}\times\frac{\rho}{|\rho|}
-   *         (sum_i C_i (\frac{\rho}{\rho_0})^{b_i - 1})\f] in GeV
+   * \param[in] jmuB_net net baryon current in the computational frame, in
+   *            fm\f$^{-3}\f$
+   * \return VDF potential \f[A^{\mu} = 10^{-3}\times
+   *         sum_i C_i (\frac{\rho}{\rho_0})^{b_i - 1} j^{\mu}/\rho_0\f] in GeV
    */
   FourVector vdf_pot(double rhoB, const FourVector jmuB_net) const;
 
@@ -136,9 +136,10 @@ class Potentials {
    * \param[in] rhoB Eckart baryon density [fm\f$^{-3}\f$].
    * \param[in] grad_j0B Gradient of baryon density [fm\f$^{-4}\f$]. This
    * density is evaluated in the computational frame.
-   * \param[in] djvec_Bdt Time derivative of the vector baryon current density [fm\f$^{-4}\f$
-   * \param[in] curl_vecjB Curl of the baryon vector current density [fm\f$^{-4}\f$
-   * \return (\f$E_B, B_B\f$), where \f[E_B = -V_B^\prime(\rho^\ast)(\nabla\rho_B
+   * \param[in] djvec_Bdt Time derivative of the vector baryon current density
+   * [fm\f$^{-4}\f$ \param[in] curl_vecjB Curl of the baryon vector current
+   * density [fm\f$^{-4}\f$ \return (\f$E_B, B_B\f$), where \f[E_B =
+   * -V_B^\prime(\rho^\ast)(\nabla\rho_B
    *                                          + \partial_t \vec j_B)\f]
    *         is the electro component of Skyrme force and
    *         \f[B_B = V_B^\prime(\rho^\ast) \nabla\times\vec j_B\f]
@@ -146,8 +147,8 @@ class Potentials {
    *         with \f$\rho^\ast\f$ being the Eckart baryon density.
    */
   std::pair<ThreeVector, ThreeVector> skyrme_force(
-      const double rhoB, const ThreeVector grad_j0B, const ThreeVector dvecjB_dt,
-      const ThreeVector curl_vecjB) const;
+      const double rhoB, const ThreeVector grad_j0B,
+      const ThreeVector dvecjB_dt, const ThreeVector curl_vecjB) const;
 
   /**
    * Evaluates the electric and magnetic components of the symmetry force.
@@ -157,13 +158,11 @@ class Potentials {
    *            density is evaluated in the computational frame.
    * \param[in] dvecjI3_dt Time derivative of the I3/I vector current density
    *            [fm\f$^{-4}\f$]
-   * \param[in] curl_vecjI3 Curl of the I3/I vector current density [fm\f$^{-4}\f$]
-   * \param[in] rhoB Net-baryon density
-   * \param[in] grad_rhoB Gradient of the net-baryon density
-   * \param[in] dvecjB_dt Time derivative of the net-baryon vector current density
-   * \param[in] curl_vecjB Curl of the net-baryon vector current density
-   * \return (\f$E_I3,
-   *         B_I3\f$) [GeV/fm],
+   * \param[in] curl_vecjI3 Curl of the I3/I vector current density
+   * [fm\f$^{-4}\f$] \param[in] rhoB Net-baryon density \param[in] grad_rhoB
+   * Gradient of the net-baryon density \param[in] dvecjB_dt Time derivative of
+   * the net-baryon vector current density \param[in] curl_vecjB Curl of the
+   * net-baryon vector current density \return (\f$E_I3, B_I3\f$) [GeV/fm],
    *         where \f[\vec{E} = - \frac{\partial
    *         V^\ast}{\partial\rho_{I_3}^\ast}
    *         (\nabla\rho_{I_3} + \partial_t \vec j_{I_3})
@@ -179,53 +178,60 @@ class Potentials {
    */
   std::pair<ThreeVector, ThreeVector> symmetry_force(
       const double rhoI3, const ThreeVector grad_j0I3,
-      const ThreeVector dvecjI3_dt, const ThreeVector curl_vecjI3, const double rhoB,
-      const ThreeVector grad_j0B, const ThreeVector dvecjB_dt,
-      const ThreeVector curl_vecjB) const;
+      const ThreeVector dvecjI3_dt, const ThreeVector curl_vecjI3,
+      const double rhoB, const ThreeVector grad_j0B,
+      const ThreeVector dvecjB_dt, const ThreeVector curl_vecjB) const;
 
   /**
-   * Evaluates the electric and magnetic components of the VDF force,
-   * based on the VDF equations of motion.
+   * Evaluates the electric and magnetic components of force in the VDF model
+   * given the derivatives of the baryon current \f[j^{\mu}\f].
    *
    * \param[in] rhoB rest frame baryon density in fm\f$^{-3}\f$
    * \param[in] drhoB_dt time derivative of the rest frame density
    * \param[in] grad_rhoB gradient of the rest frame density
-   * \param[in] gradrhoB_cross_vecjB cross product of grad rhoB and vec{j}
+   * \param[in] gradrhoB_cross_vecjB cross product of the gradient of the rest
+   *            frame density and the 3-vector baryon current density
    * \param[in] j0B computational frame baryon density in fm\f$^{-3}\f$
-   * \param[in] grad_j0B gradient of the computational frame current density
-   * \param[in] vecjB baryon current
-   * \param[in] dvecjB_dt time derivative of the computational frema current density
-   * \param[in] curl_vecjB curl of the current density [fm\f$^{-4}\f$
-   * \return [comment more on what it returns Agnieszka]
-   *
-   *
-   * COMMENT
+   * \param[in] grad_j0B gradient of the computational frame baryon density
+   * \param[in] vecjB 3-vector baryon current
+   * \param[in] dvecjB_dt time derivative of the computational frame 3-vector
+   *            baryon current
+   * \param[in] curl_vecjB curl of the 3-vector baryon current
+   * \return (\f$E_{VDF},
+   *         B_{VDF}\f$) [GeV/fm],
+   *         where \f[\vec{E}_{VDF} = - F_1 * ((\nabla \rho) j^0 +
+   *         (\partial_t \rho) \vec{j}) - F_2 * (\nabla j^0 + \partial_t\vec{j})
+   *         is the electrical component of VDF force and
+   *         \f[\vec{B}_{VDF} = F_1 * (\nabla \rho) \times \vec{j} + F_2 *
+   *         \nabla \times \vec{j}\f]
+   *         is the magnetic component of the VDF force, with
+   *         \f[F_1 = \sum_i C_i (b_i - 2) \rho^{b_i - 3}/\rho_0^{b_i - 1} \f],
+   *         \f[F_2 = \sum_i C_i \rho^{b_i - 2}/\rho_0^{b_i - 1} \f], where
+   *         \rho_0 is the saturation density.
    */
   std::pair<ThreeVector, ThreeVector> vdf_force(
-   double rhoB, const double drhoB_dt,
-   const ThreeVector grad_rhoB, const ThreeVector gradrhoB_cross_vecjB,
-   const double j0B, const ThreeVector grad_j0B,
-   const ThreeVector vecjB, const ThreeVector dvecjB_dt,
-   const ThreeVector curl_vecjB) const;
+      double rhoB, const double drhoB_dt, const ThreeVector grad_rhoB,
+      const ThreeVector gradrhoB_cross_vecjB, const double j0B,
+      const ThreeVector grad_j0B, const ThreeVector vecjB,
+      const ThreeVector dvecjB_dt, const ThreeVector curl_vecjB) const;
 
   /**
-   * Convenience overload of the above, using derivatives of the VDF mean-field
-   * A^mu.
-   * Evaluates the electric and magnetic components of the VDF force,
-   * based on the VDF equations of motion.
+   * Evaluates the electric and magnetic components of force in the VDF force
+   * given the derivatives of the VDF mean-field \f[A^mu\f].
    *
-   * \param[in] grad_A_0 gradient of zeroth component of the field A^mu
+   * \param[in] grad_A_0 gradient of the zeroth component of the field A^mu
    * \param[in] dA_dt time derivative of the field A^mu
    * \param[in] curl_vecA curl of the vector component of the field A^mu
-   * \return [comment more on what it returns Agnieszka]
-   *
-   *
-   * COMMENT
+   * \return (\f$E_{VDF},
+   *         B_{VDF}\f$) [GeV/fm],
+   *         where \f[\vec{E}_{VDF} = - \nabla A^0 - \partial_t\vec{A}\f]
+   *         is the electrical component of VDF force and
+   *         \f[\nabla \times \vec{A}\f]
+   *         is the magnetic component of the VDF force.
    */
- std::pair<ThreeVector, ThreeVector> v_df_force(
-  const ThreeVector grad_A_0,
-  const ThreeVector dA_dt,
-  const ThreeVector curl_vecA) const;
+  std::pair<ThreeVector, ThreeVector> v_df_force(
+      const ThreeVector grad_A_0, const ThreeVector dA_dt,
+      const ThreeVector curl_vecA) const;
 
   /**
    * Evaluates the electric and magnetic components of the forces at point r.
@@ -258,7 +264,6 @@ class Potentials {
   double skyrme_tau() const { return skyrme_tau_; }
   /// \return Skyrme parameter S_pot, in MeV
   double symmetry_S_pot() const { return symmetry_S_Pot_; }
-
 
   /// \return Is VDF potential on?
   virtual bool use_vdf() const { return use_vdf_; }
@@ -295,19 +300,19 @@ class Potentials {
    * Parameter of skyrme potentials:
    * the coefficient in front of \f$\frac{\rho}{\rho_0}\f$ in GeV
    */
-  double skyrme_a_ = 0;
+  double skyrme_a_;
 
   /**
    * Parameters of skyrme potentials:
    * the coefficient in front of \f$(\frac{\rho}{\rho_0})^\tau\f$ in GeV
    */
-  double skyrme_b_ = 0;
+  double skyrme_b_;
 
   /**
    * Parameters of skyrme potentials:
    * the power index.
    */
-  double skyrme_tau_ = 0;
+  double skyrme_tau_;
 
   /// Parameter S_Pot in the symmetry potential in MeV
   double symmetry_S_Pot_;
@@ -325,13 +330,11 @@ class Potentials {
    */
   double symmetry_gamma_;
 
-
-
   /**
    * Saturation density of nuclear matter used in the VDF potential; it may
    * vary between different parameterizations.
    */
-  double saturation_density_ = 0.0;
+  double saturation_density_;
   /**
    * Parameters of VDF potential: the coefficients C_i and corresponding
    * powers of number density b_i. Default inclusion of 4 interaction terms.

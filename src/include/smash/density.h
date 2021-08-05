@@ -142,7 +142,9 @@ class DensityParameters {
   /// \return Mode of gradient calculation
   DerivativesMode derivatives() const { return derivatives_; }
   /// \return Mode of rest frame density derivatives (on or off)
-  RestFrameDensityDerivativesMode rho_derivatives() const { return rho_derivatives_; }
+  RestFrameDensityDerivativesMode rho_derivatives() const {
+    return rho_derivatives_;
+  }
   /// \return Smearing mode
   SmearingMode smearing() const { return smearing_; }
   /// \return Weight of the central cell in the discrete smearing
@@ -262,14 +264,14 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  *          \f$ \partial_y j^mu \f$ or a 0 4-vector,
  *          \f$ \partial_z j^mu \f$ or a 0 4-vector).
  */
-std::tuple<double, FourVector, ThreeVector, ThreeVector,
-	   FourVector, FourVector, FourVector, FourVector>
+std::tuple<double, FourVector, ThreeVector, ThreeVector, FourVector, FourVector,
+           FourVector, FourVector>
 current_eckart(const ThreeVector &r, const ParticleList &plist,
                const DensityParameters &par, DensityType dens_type,
                bool compute_gradient, bool smearing);
 /// convenience overload of the above (ParticleList -> Particles)
-std::tuple<double, FourVector, ThreeVector, ThreeVector,
-	   FourVector, FourVector, FourVector, FourVector>
+std::tuple<double, FourVector, ThreeVector, ThreeVector, FourVector, FourVector,
+           FourVector, FourVector>
 current_eckart(const ThreeVector &r, const Particles &plist,
                const DensityParameters &par, DensityType dens_type,
                bool compute_gradient, bool smearing);
@@ -302,7 +304,7 @@ class DensityOnLattice {
       : jmu_pos_(FourVector()),
         jmu_neg_(FourVector()),
         djmu_dxnu_({FourVector(), FourVector(), FourVector(), FourVector()}),
-        drho_dxnu_(FourVector()){}
+        drho_dxnu_(FourVector()) {}
 
   /**
    * Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 \cdot factor \f$.
@@ -384,7 +386,7 @@ class DensityOnLattice {
   }
 
   /**
-   * Compute gradient of the the zeroth component of the four-current j^mu 
+   * Compute gradient of the the zeroth component of the four-current j^mu
    * (that is of the computational frame density) on the local lattice
    *
    * \param[in] norm_factor Normalization factor
@@ -449,7 +451,7 @@ class DensityOnLattice {
     const ThreeVector grad_rho = drho_dxnu_.threevec();
     const ThreeVector vecj = jmu_net().threevec();
     const ThreeVector Drho_cross_vecj = grad_rho.cross_product(vecj);
-    
+
     return Drho_cross_vecj;
   }
 
@@ -463,16 +465,13 @@ class DensityOnLattice {
   /**
    * Overwrite the time derivative of the rest frame density to zero.
    */
-  void overwrite_drho_dt_to_zero() {
-    drho_dxnu_[0] = 0.0;
-  }
+  void overwrite_drho_dt_to_zero() { drho_dxnu_[0] = 0.0; }
 
   /**
    * Overwrite the rest frame density derivatives to provided values.
    * \param[in] computed_drho_dx a FourGradient of rho
    */
-  void overwrite_drho_dxnu (FourVector computed_drho_dxnu)
-  {
+  void overwrite_drho_dxnu(FourVector computed_drho_dxnu) {
     drho_dxnu_ = computed_drho_dxnu;
   }
 

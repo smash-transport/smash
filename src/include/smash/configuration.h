@@ -855,9 +855,8 @@ class Configuration {
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
           "\" should be \"Covariant Gaussian\", \"Finite difference\"," +
-	  " or \"Off\".");
+          " or \"Off\".");
     }
-
 
     /**
      * Set RestFrameDensityDerivatives mode.
@@ -870,11 +869,10 @@ class Configuration {
       if (s == "Off") {
         return RestFrameDensityDerivativesMode::Off;
       }
-      throw IncorrectTypeInAssignment(
-          "The value for key \"" + std::string(key_) +
-          "\" should be \"On\" or \"Off\".");
+      throw IncorrectTypeInAssignment("The value for key \"" +
+                                      std::string(key_) +
+                                      "\" should be \"On\" or \"Off\".");
     }
-
 
     /**
      * Set FieldDerivatives mode.
@@ -891,7 +889,6 @@ class Configuration {
           "The value for key \"" + std::string(key_) +
           "\" should be \"Chain Rule\" or \"Direct\".");
     }
-
 
     /**
      * Set SmearingMode.
@@ -912,7 +909,6 @@ class Configuration {
           "\" should be \"Covariant Gaussian\", \"Discrete\"," +
           " or \"Triangular\".");
     }
-
 
     /**
      * Set time step mode from configuration values.

@@ -589,9 +589,9 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       ntest,
       config.take({"General", "Derivatives_Mode"},
                   DerivativesMode::CovariantGaussian),
-      config.has_value({"Potentials", "VDF"}) ?
-         RestFrameDensityDerivativesMode::On
-         : RestFrameDensityDerivativesMode::Off,
+      config.has_value({"Potentials", "VDF"})
+          ? RestFrameDensityDerivativesMode::On
+          : RestFrameDensityDerivativesMode::Off,
       config.take({"General", "Field_Derivatives_Mode"},
                   FieldDerivativesMode::ChainRule),
       config.take({"General", "Smearing_Mode"},
@@ -673,8 +673,7 @@ double calculate_mean_field_energy(
     const ExperimentParameters &parameters) {
   // basic parameters and variables
   const double V_cell = (jmuB_lat.cell_sizes())[0] *
-                        (jmuB_lat.cell_sizes())[1] *
-                        (jmuB_lat.cell_sizes())[2];
+                        (jmuB_lat.cell_sizes())[1] * (jmuB_lat.cell_sizes())[2];
 
   double E_mean_field = 0.0;
   double density_mean = 0.0;
@@ -730,7 +729,7 @@ double calculate_mean_field_energy(
       const double j0B = node.jmu_net().x0();
 
       const double abs_rhoB = std::abs(rhoB);
-      if ((abs_rhoB < really_small) || (std::abs(j0B) < really_small)) {
+      if (abs_rhoB < very_small_double) {
         continue;
       }
       density_mean += j0B;
@@ -771,7 +770,7 @@ double calculate_mean_field_energy(
         << "\n";
 
     E_mean_field = lattice_mean_field_total;
-  } // if (potentials.use_skyrme())
+  }  // if (potentials.use_skyrme())
 
   if (potentials.use_vdf()) {
     /*
@@ -782,9 +781,10 @@ double calculate_mean_field_energy(
     if (potentials.use_symmetry() &&
         parameters.outputclock->current_time() == 0.0) {
       logg[LExperiment].error()
-	<< "\nSymmetry energy is not included in the VDF mean-field calculation"
-	<< "\nas VDF potentials haven't been fitted with symmetry energy."
-	<< "\n\n";
+          << "\nSymmetry energy is not included in the VDF mean-field "
+             "calculation"
+          << "\nas VDF potentials haven't been fitted with symmetry energy."
+          << "\n\n";
     }
 
     /*
@@ -811,10 +811,18 @@ double calculate_mean_field_energy(
 
     // to avoid nan's in expressions below
     // (then expressions with bi~=0 will be surely killed by Ci=0)
-    if ( b1 == 0 ) { b1 = 0.00000001; }
-    if ( b2 == 0 ) { b2 = 0.00000001; }
-    if ( b3 == 0 ) { b3 = 0.00000001; }
-    if ( b4 == 0 ) { b4 = 0.00000001; }
+    if (b1 == 0) {
+      b1 = 0.00000001;
+    }
+    if (b2 == 0) {
+      b2 = 0.00000001;
+    }
+    if (b3 == 0) {
+      b3 = 0.00000001;
+    }
+    if (b4 == 0) {
+      b4 = 0.00000001;
+    }
 
     /*
      * Note: calculating the mean field only works if lattice is used.
@@ -840,29 +848,29 @@ double calculate_mean_field_energy(
        * energy (if same coefficients and powers are used).
        */
       // in order to prevent dividing by zero in case any b_i < 2.0
-      if ( abs_rhoB < very_small_double ) {
+      if (abs_rhoB < very_small_double) {
         abs_rhoB = very_small_double;
       }
       double mean_field_contribution_1 =
-	C1GeV * std::pow(abs_rhoB, b1 - 2.0) *
-	(j0B * j0B - ((b1 - 1.0) / b1) * abs_rhoB * abs_rhoB) /
-	std::pow(rhoB_0, b1 - 1);
+          C1GeV * std::pow(abs_rhoB, b1 - 2.0) *
+          (j0B * j0B - ((b1 - 1.0) / b1) * abs_rhoB * abs_rhoB) /
+          std::pow(rhoB_0, b1 - 1);
       double mean_field_contribution_2 =
-	C2GeV * std::pow(abs_rhoB, b2 - 2.0) *
-	(j0B * j0B - ((b2 - 1.0) / b2) * abs_rhoB * abs_rhoB) /
-	std::pow(rhoB_0, b2 - 1);
+          C2GeV * std::pow(abs_rhoB, b2 - 2.0) *
+          (j0B * j0B - ((b2 - 1.0) / b2) * abs_rhoB * abs_rhoB) /
+          std::pow(rhoB_0, b2 - 1);
       double mean_field_contribution_3 =
-	C3GeV * std::pow(abs_rhoB, b3 - 2.0) *
-	(j0B * j0B - ((b3 - 1.0) / b3) * abs_rhoB * abs_rhoB) /
-	std::pow(rhoB_0, b3 - 1);
+          C3GeV * std::pow(abs_rhoB, b3 - 2.0) *
+          (j0B * j0B - ((b3 - 1.0) / b3) * abs_rhoB * abs_rhoB) /
+          std::pow(rhoB_0, b3 - 1);
       double mean_field_contribution_4 =
-	C4GeV * std::pow(abs_rhoB, b4 - 2.0) *
-	(j0B * j0B - ((b4 - 1.0) / b4) * abs_rhoB * abs_rhoB) /
-	std::pow(rhoB_0, b4 - 1);
+          C4GeV * std::pow(abs_rhoB, b4 - 2.0) *
+          (j0B * j0B - ((b4 - 1.0) / b4) * abs_rhoB * abs_rhoB) /
+          std::pow(rhoB_0, b4 - 1);
 
       lattice_mean_field_total +=
-	V_cell * (mean_field_contribution_1 + mean_field_contribution_2
-		  + mean_field_contribution_3 + mean_field_contribution_4);
+          V_cell * (mean_field_contribution_1 + mean_field_contribution_2 +
+                    mean_field_contribution_3 + mean_field_contribution_4);
     }
 
     // logging statistical properties of the density calculation
@@ -882,9 +890,8 @@ double calculate_mean_field_energy(
                parameters.n_ensembles
         << "\n";
 
-     E_mean_field = lattice_mean_field_total;
-  } // if (potentials.use_vdf())
-
+    E_mean_field = lattice_mean_field_total;
+  }  // if (potentials.use_vdf())
 
   /*
    * E_mean_field is multiplied by the number of testparticles per particle and
@@ -892,8 +899,8 @@ double calculate_mean_field_energy(
    * is that of all particles in the simulation, including test-particles and/or
    * ensembles, and so this way is more consistent.
    */
-  E_mean_field = E_mean_field * parameters.testparticles *
-                   parameters.n_ensembles;
+  E_mean_field =
+      E_mean_field * parameters.testparticles * parameters.n_ensembles;
 
   return E_mean_field;
 }
