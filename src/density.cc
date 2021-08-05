@@ -138,7 +138,8 @@ current_eckart_impl(const ThreeVector &r, const T &plist,
       rho_grad[i - 1] += djmu_dx[i].x0() * par.norm_factor_sf();
     }
   }
-  return std::make_tuple(rho_eck, jmu_pos + jmu_neg, rho_grad, dj_dt, j_rot);
+  return std::make_tuple(rho_eck, (jmu_pos + jmu_neg) * par.norm_factor_sf(),
+                         rho_grad, dj_dt, j_rot);
 }
 
 std::tuple<double, FourVector, ThreeVector, ThreeVector, ThreeVector>

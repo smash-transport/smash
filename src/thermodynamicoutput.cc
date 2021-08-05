@@ -188,14 +188,14 @@ void ThermodynamicOutput::at_intermediate_time(
           out_par_.td_position, particles, dens_param, out_par_.td_dens_type,
           compute_gradient, out_par_.td_smearing));
     }
-    std::fprintf(file_.get(), "%7.4f ", jmu.abs() / n_ensembles);
+    std::fprintf(file_.get(), "%7.4f ", jmu.abs());
   }
   if (out_par_.td_tmn || out_par_.td_tmn_landau || out_par_.td_v_landau) {
     EnergyMomentumTensor Tmn;
     for (const Particles &particles : ensembles) {
       for (const auto &p : particles) {
         const double dens_factor =
-            density_factor(p.type(), out_par_.td_dens_type) / n_ensembles;
+            density_factor(p.type(), out_par_.td_dens_type);
         if (std::abs(dens_factor) < really_small) {
           continue;
         }
@@ -244,9 +244,6 @@ void ThermodynamicOutput::at_intermediate_time(
                                        dens_param, DensityType::Strangeness,
                                        compute_gradient, out_par_.td_smearing));
     }
-    jQ /= n_ensembles;
-    jS /= n_ensembles;
-    jB /= n_ensembles;
     std::fprintf(file_.get(), "%15.12f %15.12f %15.12f %15.12f ", jQ[0], jQ[1],
                  jQ[2], jQ[3]);
     std::fprintf(file_.get(), "%15.12f %15.12f %15.12f %15.12f ", jB[0], jB[1],
