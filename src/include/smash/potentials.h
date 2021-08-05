@@ -135,12 +135,14 @@ class Potentials {
    *
    * \param[in] rhoB Eckart baryon density [fm\f$^{-3}\f$].
    * \param[in] grad_j0B Gradient of baryon density [fm\f$^{-4}\f$]. This
-   * density is evaluated in the computational frame.
-   * \param[in] djvecB_dt Time derivative of the vector baryon current density
-   * [fm\f$^{-4}\f$ \param[in] curl_vecjB Curl of the baryon vector current
-   * density [fm\f$^{-4}\f$ \return (\f$E_B, B_B\f$), where \f[E_B =
-   * -V_B^\prime(\rho^\ast)(\nabla\rho_B
-   *                                          + \partial_t \vec j_B)\f]
+   *            density is evaluated in the computational frame.
+   * \param[in] dvecjB_dt Time derivative of the vector baryon current density
+   *            [fm\f$^{-4}\f$
+   * \param[in] curl_vecjB Curl of the baryon vector current
+   *            density [fm\f$^{-4}\f$
+   * \return (\f$E_B, B_B\f$), where \f[E_B =
+   *         -V_B^\prime(\rho^\ast)(\nabla\rho_B
+   *         + \partial_t \vec j_B)\f]
    *         is the electro component of Skyrme force and
    *         \f[B_B = V_B^\prime(\rho^\ast) \nabla\times\vec j_B\f]
    *         is the magnetic component of the Skyrme force

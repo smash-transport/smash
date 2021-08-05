@@ -127,7 +127,7 @@ class FieldsOnLattice {
 typedef RectangularLattice<FieldsOnLattice> FieldsLattice;
 
 /**
- * Updates the contents on the lattice of <FieldsOnLattice> type.
+ * Updates the contents on the lattice of FieldsOnLattice type.
  *
  * \param[out] fields_lat The lattice of FieldsOnLattice type on which the
  *             content will be updated

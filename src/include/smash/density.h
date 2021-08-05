@@ -612,7 +612,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
 }
 
 /**
- * Updates the contents on the lattice of <DensityOnLattice> type.
+ * Updates the contents on the lattice of DensityOnLattice type.
  *
  * \param[out] lat The lattice of DensityOnLattice type on which the content
  *             will be updated
