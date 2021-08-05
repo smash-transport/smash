@@ -49,7 +49,8 @@ class FieldsOnLattice {
   std::array<FourVector, 4> dAmu_dxnu() const { return dAmu_dxnu_; }
 
   /**
-   * \return The time derivative of \vec{A} on the local lattice
+   * \return The time derivative of the 3-vector part of A^mu on the local
+   * lattice
    */
   ThreeVector dvecA_dt() { return dAmu_dxnu_[0].threevec(); }
 
@@ -139,6 +140,7 @@ typedef RectangularLattice<FieldsOnLattice> FieldsLattice;
  * \param[in] jmu_B_lat Lattice of baryon four-current
  * \param[in] fields_lat_update Tells if called for update at printout or at
  *            timestep
+ * \param[in] potentials mean-field potentials used in the simulation
  * \param[in] time_step Time step used in the simulation
  */
 

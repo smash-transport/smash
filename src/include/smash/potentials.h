@@ -136,7 +136,7 @@ class Potentials {
    * \param[in] rhoB Eckart baryon density [fm\f$^{-3}\f$].
    * \param[in] grad_j0B Gradient of baryon density [fm\f$^{-4}\f$]. This
    * density is evaluated in the computational frame.
-   * \param[in] djvec_Bdt Time derivative of the vector baryon current density
+   * \param[in] djvecB_dt Time derivative of the vector baryon current density
    * [fm\f$^{-4}\f$ \param[in] curl_vecjB Curl of the baryon vector current
    * density [fm\f$^{-4}\f$ \return (\f$E_B, B_B\f$), where \f[E_B =
    * -V_B^\prime(\rho^\ast)(\nabla\rho_B
@@ -159,10 +159,13 @@ class Potentials {
    * \param[in] dvecjI3_dt Time derivative of the I3/I vector current density
    *            [fm\f$^{-4}\f$]
    * \param[in] curl_vecjI3 Curl of the I3/I vector current density
-   * [fm\f$^{-4}\f$] \param[in] rhoB Net-baryon density \param[in] grad_rhoB
-   * Gradient of the net-baryon density \param[in] dvecjB_dt Time derivative of
-   * the net-baryon vector current density \param[in] curl_vecjB Curl of the
-   * net-baryon vector current density \return (\f$E_I3, B_I3\f$) [GeV/fm],
+   *            [fm\f$^{-4}\f$]
+   * \param[in] rhoB Net-baryon density in the rest frame
+   * \param[in] grad_j0B  Gradient of the net-baryon density in the
+   *            computational frame
+   * \param[in] dvecjB_dt Time derivative of the net-baryon vector current
+   * density \param[in] curl_vecjB Curl of the net-baryon vector current density
+   * \return (\f$E_I3, B_I3\f$) [GeV/fm],
    *         where \f[\vec{E} = - \frac{\partial
    *         V^\ast}{\partial\rho_{I_3}^\ast}
    *         (\nabla\rho_{I_3} + \partial_t \vec j_{I_3})
@@ -207,7 +210,7 @@ class Potentials {
    *         is the magnetic component of the VDF force, with
    *         \f[F_1 = \sum_i C_i (b_i - 2) \rho^{b_i - 3}/\rho_0^{b_i - 1} \f],
    *         \f[F_2 = \sum_i C_i \rho^{b_i - 2}/\rho_0^{b_i - 1} \f], where
-   *         \rho_0 is the saturation density.
+   *         \f[\rho_0\f] is the saturation density.
    */
   std::pair<ThreeVector, ThreeVector> vdf_force(
       double rhoB, const double drhoB_dt, const ThreeVector grad_rhoB,
@@ -269,14 +272,21 @@ class Potentials {
   virtual bool use_vdf() const { return use_vdf_; }
   /// \return value of the saturation density used in the VDF potential
   virtual double saturation_density() const { return saturation_density_; }
-  /// \return values of coefficients and powers in the VDF potential
+  /// \return value of the VDF coefficient C_1
   virtual double coeff_1() const { return coeff_1_; }
+  /// \return value of the VDF coefficient C_2
   virtual double coeff_2() const { return coeff_2_; }
+  /// \return value of the VDF coefficient C_3
   virtual double coeff_3() const { return coeff_3_; }
+  /// \return value of the VDF coefficient C_4
   virtual double coeff_4() const { return coeff_4_; }
+  /// \return value of the VDF exponent b_1
   virtual double power_1() const { return power_1_; }
+  /// \return value of the VDF exponent b_2
   virtual double power_2() const { return power_2_; }
+  /// \return value of the VDF exponent b_3
   virtual double power_3() const { return power_3_; }
+  /// \return value of the VDF exponent b_4
   virtual double power_4() const { return power_4_; }
 
  private:

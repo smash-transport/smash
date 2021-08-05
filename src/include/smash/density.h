@@ -181,10 +181,7 @@ class DensityParameters {
   const int nensembles_;
   /// Mode of calculating the gradients
   const DerivativesMode derivatives_;
-  /*
-   * Whether to calculate the rest frame density derivatives
-   * (needed for full VDF potentials but not for Skyrme potentials)
-   */
+  /// Whether to calculate the rest frame density derivatives
   const RestFrameDensityDerivativesMode rho_derivatives_;
   /// Mode of smearing
   const SmearingMode smearing_;
@@ -445,7 +442,7 @@ class DensityOnLattice {
   std::array<FourVector, 4> djmu_dxnu() const { return djmu_dxnu_; }
 
   /**
-   * \return the cross product of grad rho and \vec{j}
+   * \return the cross product of grad rho and the 3-vector part of jmu
    */
   ThreeVector grad_rho_cross_vecj() const {
     const ThreeVector grad_rho = drho_dxnu_.threevec();
@@ -469,7 +466,7 @@ class DensityOnLattice {
 
   /**
    * Overwrite the rest frame density derivatives to provided values.
-   * \param[in] computed_drho_dx a FourGradient of rho
+   * \param[in] computed_drho_dxnu a FourGradient of the rest frame density rho
    */
   void overwrite_drho_dxnu(FourVector computed_drho_dxnu) {
     drho_dxnu_ = computed_drho_dxnu;
