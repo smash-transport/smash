@@ -88,12 +88,14 @@ class Potentials {
    * \param[in] jmuB_net net baryon current in the computational frame, in
    *            fm\f$^{-3}\f$
    * \return VDF potential \f[A^{\mu} = 10^{-3}\times
-   *         sum_i C_i (\frac{\rho}{\rho_0})^{b_i - 1} j^{\mu}/\rho_0\f] in GeV
+   *         \sum_i C_i \left(\frac{\rho}{\rho_0}\right)^{b_i - 2}
+   * \frac{j^{\mu}}{\rho_0}\f] in GeV
    */
   FourVector vdf_pot(double rhoB, const FourVector jmuB_net) const;
 
   /**
-   * Evaluates potential at point r. Potential is always taken in the local
+   * Evaluates potential (Skyrme with optional Symmetry or VDF) at point r.
+   * For Skyrme and Symmetry options, potential is always taken in the local
    * Eckart rest frame, but point r is in the computational frame.
    *
    * \param[in] r Arbitrary space point where potential is calculated
@@ -104,10 +106,12 @@ class Potentials {
    * \param[in] acts_on Type of particle on which potential is going to act.
    *            It gives the charges (or more precisely, the scaling factors)
    *		of the particle moving in the potential field.
-   * \return Total potential energy acting on the particle: \f[U_{\rm tot}
-   *         =Q_BU_B+2I_3U_I\f] in GeV, where \f$Q_B\f$ is the baryon charge
-   *	     scaled by the ratio of the light (u, d) quark to the total quark
-   *         number and \f$I_3\f$ is the third compnent of the isospin.
+   * \return Total potential energy acting on the particle: for Skyrme and
+   *         Symmetry potentials, \f[U_{\rm tot} =Q_BU_B+2I_3U_I\f] in GeV,
+   *         while for the VDF potential \f[U_{\rm tot} =Q_B A^0\f] in GeV,
+   *         where \f$Q_B\f$ is the baryon charge scaled by the ratio of the
+   *         light (u, d) quark to the total quark number and \f$I_3\f$ is the
+   *         third compnent of the isospin.
    */
   double potential(const ThreeVector &r, const ParticleList &plist,
                    const ParticleType &acts_on) const;
@@ -189,7 +193,7 @@ class Potentials {
 
   /**
    * Evaluates the electric and magnetic components of force in the VDF model
-   * given the derivatives of the baryon current \f[j^{\mu}\f].
+   * given the derivatives of the baryon current \f$j^{\mu}\f$.
    *
    * \param[in] rhoB rest frame baryon density in fm\f$^{-3}\f$
    * \param[in] drhoB_dt time derivative of the rest frame density
@@ -204,15 +208,17 @@ class Potentials {
    * \param[in] curl_vecjB curl of the 3-vector baryon current
    * \return (\f$E_{VDF},
    *         B_{VDF}\f$) [GeV/fm],
-   *         where \f[\vec{E}_{VDF} = - F_1 * ((\nabla \rho) j^0 +
-   *         (\partial_t \rho) \vec{j}) - F_2 * (\nabla j^0 + \partial_t\vec{j})
+   *         where \f[\vec{E}_{VDF} = - F_1  \big((\vec{\nabla} \rho) j^0 +
+   *         (\partial_t \rho) \vec{j}\big) - F_2  (\vec{\nabla} j^0 +
+   *         \partial_t\vec{j})\f]
    *         is the electrical component of VDF force and
-   *         \f[\vec{B}_{VDF} = F_1 * (\nabla \rho) \times \vec{j} + F_2 *
-   *         \nabla \times \vec{j}\f]
+   *         \f[\vec{B}_{VDF} = F_1  (\vec{\nabla} \rho) \times \vec{j} + F_2
+   *         \vec{\nabla} \times \vec{j}\f]
    *         is the magnetic component of the VDF force, with
-   *         \f[F_1 = \sum_i C_i (b_i - 2) \rho^{b_i - 3}/\rho_0^{b_i - 1} \f],
-   *         \f[F_2 = \sum_i C_i \rho^{b_i - 2}/\rho_0^{b_i - 1} \f], where
-   *         \f[\rho_0\f] is the saturation density.
+   *         \f[F_1 = \sum_i C_i (b_i - 2)
+   *         \frac{\rho^{b_i - 3}}{\rho_0^{b_i - 1}} \,, \f]
+   *         \f[F_2 = \sum_i C_i \frac{\rho^{b_i - 2}}{\rho_0^{b_i - 1}} \,, \f]
+   *         where \f$\rho_0\f$ is the saturation density.
    */
   std::pair<ThreeVector, ThreeVector> vdf_force(
       double rhoB, const double drhoB_dt, const ThreeVector grad_rhoB,
@@ -222,19 +228,19 @@ class Potentials {
 
   /**
    * Evaluates the electric and magnetic components of force in the VDF force
-   * given the derivatives of the VDF mean-field \f[A^mu\f].
+   * given the derivatives of the VDF mean-field \f$A^\mu\f$.
    *
    * \param[in] grad_A_0 gradient of the zeroth component of the field A^mu
    * \param[in] dA_dt time derivative of the field A^mu
    * \param[in] curl_vecA curl of the vector component of the field A^mu
    * \return (\f$E_{VDF},
    *         B_{VDF}\f$) [GeV/fm],
-   *         where \f[\vec{E}_{VDF} = - \nabla A^0 - \partial_t\vec{A}\f]
+   *         where \f[\vec{E}_{VDF} = - \vec{\nabla} A^0 - \partial_t\vec{A}\f]
    *         is the electrical component of VDF force and
-   *         \f[\nabla \times \vec{A}\f]
+   *         \f[\vec{B}_{VDF} = \vec{\nabla} \times \vec{A}\f]
    *         is the magnetic component of the VDF force.
    */
-  std::pair<ThreeVector, ThreeVector> v_df_force(
+  std::pair<ThreeVector, ThreeVector> vdf_force(
       const ThreeVector grad_A_0, const ThreeVector dA_dt,
       const ThreeVector curl_vecA) const;
 
@@ -248,9 +254,9 @@ class Potentials {
    *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
    * \return (\f$E_B, B_B, E_{I3}, B_{I3}\f$) [GeV/fm], where
-   *          \f$E_B\f$: the electric component of the Skyrme force
-   *          \f$B_B\f$: the magnetic component of the Skyrme force
-   *          \f$E_{I3}\f$: the electric component of the symmetry force
+   *          \f$E_B\f$: the electric component of the Skyrme or VDF force,
+   *          \f$B_B\f$: the magnetic component of the Skyrme or VDF force,
+   *          \f$E_{I3}\f$: the electric component of the symmetry force,
    *          \f$B_{I3}\f$: the magnetic component of the symmetry force
    */
   virtual std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector>
@@ -272,23 +278,23 @@ class Potentials {
 
   /// \return Is VDF potential on?
   virtual bool use_vdf() const { return use_vdf_; }
-  /// \return value of the saturation density used in the VDF potential
+  /// \return Value of the saturation density used in the VDF potential
   virtual double saturation_density() const { return saturation_density_; }
-  /// \return value of the VDF coefficient C_1
+  /// \return Value of the VDF coefficient \f$C_1\f$, coeff_1_
   virtual double coeff_1() const { return coeff_1_; }
-  /// \return value of the VDF coefficient C_2
+  /// \return Value of the VDF coefficient \f$C_2\f$, coeff_2_
   virtual double coeff_2() const { return coeff_2_; }
-  /// \return value of the VDF coefficient C_3
+  /// \return Value of the VDF coefficient \f$C_3\f$, coeff_3_
   virtual double coeff_3() const { return coeff_3_; }
-  /// \return value of the VDF coefficient C_4
+  /// \return Value of the VDF coefficient \f$C_4\f$, coeff_4_
   virtual double coeff_4() const { return coeff_4_; }
-  /// \return value of the VDF exponent b_1
+  /// \return Value of the VDF exponent \f$b_1\f$, power_1_
   virtual double power_1() const { return power_1_; }
-  /// \return value of the VDF exponent b_2
+  /// \return Value of the VDF exponent \f$b_2\f$, power_2_
   virtual double power_2() const { return power_2_; }
-  /// \return value of the VDF exponent b_3
+  /// \return Value of the VDF exponent \f$b_3\f$, power_3_
   virtual double power_3() const { return power_3_; }
-  /// \return value of the VDF exponent b_4
+  /// \return Value of the VDF exponent \f$b_4\f$, power_4_
   virtual double power_4() const { return power_4_; }
 
  private:
@@ -347,18 +353,21 @@ class Potentials {
    * vary between different parameterizations.
    */
   double saturation_density_;
-  /**
-   * Parameters of VDF potential: the coefficients C_i and corresponding
-   * powers of number density b_i. Default inclusion of 4 interaction terms.
-   * Terms may be suppressed by putting C_i = 0, b_i = 0.
-   */
+  /// Parameter of the VDF potential: coefficient \f$C_1\f$
   double coeff_1_ = 0.0;
+  /// Parameter of the VDF potential: coefficient \f$C_2\f$
   double coeff_2_ = 0.0;
+  /// Parameter of the VDF potential: coefficient \f$C_3\f$
   double coeff_3_ = 0.0;
+  /// Parameter of the VDF potential: coefficient \f$C_4\f$
   double coeff_4_ = 0.0;
+  /// Parameter of the VDF potential: exponent \f$b_1\f$
   double power_1_ = 0.0;
+  /// Parameter of the VDF potential: exponent \f$b_2\f$
   double power_2_ = 0.0;
+  /// Parameter of the VDF potential: exponent \f$b_3\f$
   double power_3_ = 0.0;
+  /// Parameter of the VDF potential: exponent \f$b_4\f$
   double power_4_ = 0.0;
 
   /**

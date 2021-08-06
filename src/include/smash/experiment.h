@@ -399,8 +399,8 @@ class Experiment : public ExperimentBase {
   DensityType dens_type_lattice_printout_ = DensityType::None;
 
   /**
-   * Lattices for Skyrme potentials (evaluated in the local rest frame) times
-   * the baryon flow 4-velocity
+   * Lattices for Skyrme or VDF potentials (evaluated in the local rest frame)
+   * times the baryon flow 4-velocity
    */
   std::unique_ptr<RectangularLattice<FourVector>> UB_lat_ = nullptr;
 
@@ -410,7 +410,10 @@ class Experiment : public ExperimentBase {
    */
   std::unique_ptr<RectangularLattice<FourVector>> UI3_lat_ = nullptr;
 
-  /// Lattices for the electric and magnetic components of the Skyrme force
+  /**
+   * Lattices for the electric and magnetic components of the Skyrme or VDF
+   * force
+   */
   std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
       FB_lat_;
 
@@ -2578,7 +2581,7 @@ void Experiment<Modus>::update_potentials() {
             break;
           case FieldDerivativesMode::Direct:
             auto Amu = (*fields_lat_)[i];
-            (*FB_lat_)[i] = potentials_->v_df_force(
+            (*FB_lat_)[i] = potentials_->vdf_force(
                 Amu.grad_A0(), Amu.dvecA_dt(), Amu.curl_vecA());
             break;
         }

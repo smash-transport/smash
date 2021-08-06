@@ -21,9 +21,16 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
       use_vdf_(conf.has_value({"VDF"})) {
   /*!\Userguide
    * \page input_potentials_ Potentials
-   * SMASH simulation supports two sets of potentials:
-   * 1) Skyrme and/or Symmetry potentials
-   * 2) VDF model potentials, https://arxiv.org/pdf/2011.06635.pdf
+   * SMASH simulation supports two sets of potentials:\n
+   * 1) Skyrme and/or Symmetry potentials\n
+   * 2) VDF (vector density functional) model potentials,
+   * https://arxiv.org/pdf/2011.06635.pdf \n
+   *
+   * Skyrme and VDF potentials both describe the behavior of symmetric nuclear
+   * matter. The symmetry potential can adjust the Skyrme potential (but not the
+   * VDF potential) to include effects due to isospin. The Skyrme and Symmetry
+   * potentials are semi-relativistic, while the VDF potential is fully
+   * relativistic.
    *
    * Currently, potentials are just added without re-adjusting the energy
    * and momenta of the colliding nucleons. This can be done, because the
@@ -109,42 +116,43 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * \page potentials_VDF_ VDF
    *
    * The VDF potential is a four-vector of the form
-   * \f[A^{\mu} = sum_{i=1}^4 C_i (\frac{\rho}{\rho_0})^{b_i - 1}
-   * j^{\mu}/\rho_0 \,\f] where \f[j^{\mu}\f] is baryon 4-current and \f$\rho\f$
-   * is baryon density in the local Eckart rest frame. The parameters \f[C_i\f]
-   * and \f[b_i\f] are fitted to reproduce a chosen set of properties of dense
-   * nuclear matter, and in particular these may include describinhg two first
+   * \f[A^{\mu} = \sum_{i=1}^4 C_i \left(\frac{\rho}{\rho_0}\right)^{b_i - 2}
+   * \frac{j^{\mu}}{\rho_0} \,,\f] where \f$j^{\mu}\f$ is baryon 4-current,
+   * \f$\rho\f$ is baryon density in the local Eckart rest frame, and
+   * \f$\rho_0\f$ is the saturation density. The parameters \f$C_i\f$
+   * and \f$b_i\f$ are fitted to reproduce a chosen set of properties of dense
+   * nuclear matter, and in particular these may include describing two first
    * order phase transitions: the well-known phase transition in ordinary
    * nuclear matter, and a transiton at high baryon densities meant to model a
    * possible QCD phase transition (a "QGP-like" phase transition); see
    * https://arxiv.org/pdf/2011.06635.pdf for details or example parameter sets.
    *
    * \key Sat_rhoB (double, required, default 0.160): \n
-   *      The saturation density of nuclear matter, in fm\f[^{-3}\f]
+   *      The saturation density of nuclear matter, in fm\f$^{-3}\f$
    *
    * \key Coeff_1 (double, required, default 0.0): \n
-   *      Parameter \f[C_1\f] of the VDF potential in MeV
+   *      Parameter \f$C_1\f$ of the VDF potential in MeV
    *
    * \key Coeff_2 (double, required, default 0.0): \n
-   *      Parameter \f[C_2\f] of the VDF potential in MeV
+   *      Parameter \f$C_2\f$ of the VDF potential in MeV
    *
    * \key Coeff_3 (double, required, default 0.0): \n
-   *      Parameter \f[C_3\f] of the VDF potential in MeV
+   *      Parameter \f$C_3\f$ of the VDF potential in MeV
    *
    * \key Coeff_4 (double, required, default 0.0): \n
-   *      Parameter \f[C_4\f] of the VDF potential in MeV
+   *      Parameter \f$C_4\f$ of the VDF potential in MeV
    *
    * \key Power_1 (double, required, default 0.0): \n
-   *      Parameter \f[b_1\f] of the VDF potential
+   *      Parameter \f$b_1\f$ of the VDF potential
    *
    * \key Power_2 (double, required, default 0.0): \n
-   *      Parameter \f[b_2\f] of the VDF potential
+   *      Parameter \f$b_2\f$ of the VDF potential
    *
    * \key Power_3 (double, required, default 0.0): \n
-   *      Parameter \f[b_3\f] of the VDF potential
+   *      Parameter \f$b_3\f$ of the VDF potential
    *
    * \key Power_4 (double, required, default 0.0): \n
-   *      Parameter \f[b_4\f] of the VDF potential
+   *      Parameter \f$b_4\f$ of the VDF potential
    *
    * \page input_potentials_ Potentials
    * \n
@@ -153,7 +161,8 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * The following extracts from the configuration file configure SMASH such
    * that the VDF potential is activated for the simulation. In the first
    * example, VDF potentials are configured to reproduce the default SMASH
-   * Skyrme potentials:
+   * Skyrme potentials (without the symmetry potential, as it is not described
+   * within the VDF model):
    * \n
    *\verbatim
    Potentials:
@@ -170,14 +179,14 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    \endverbatim
    *
    * In the second example, VDF potentials are configured to describe nuclear
-   * matter with saturation density of 0.160 fm\f[^{-3}\f], binding energy of
-   * -16.3 MeV, the critical point of the ordinary nuclear liquid-gas phase
-   * transition at \f[T_c^{(N)} = 18\f] MeV and \f[\rho_c^{(N)} = 0.375
-   * \rho_0\f], the critical point of the conjectured "QGP-like" phase
-   * transition at \f[T_c^{(Q)} = 100\f] MeV and \f[\rho_c^{(Q)} = 3.0
-   * \rho_0\f], and the bondaries of the spinodal region of the "QGP-like"
-   * phase transition at \f[\eta_L = 2.50 \rho_0\f] and \f[\eta_R = 3.315
-   * \rho_0\f]:
+   * matter with saturation density of \f$\rho_0 = \f$0.160 fm\f$^{-3}\f$,
+   * binding energy of \f$B_0 = -16.3\f$ MeV, the critical point of the ordinary
+   * nuclear liquid-gas phase transition at \f$T_c^{(N)} = 18\f$ MeV and
+   * \f$\rho_c^{(N)} = 0.375 \rho_0\f$, the critical point of the conjectured
+   * "QGP-like" phase transition at \f$T_c^{(Q)} = 100\f$ MeV and
+   * \f$\rho_c^{(Q)} = 3.0\rho_0\f$, and the boundaries of the spinodal region
+   * of the "QGP-like" phase transition at \f$\eta_L = 2.50 \rho_0\f$ and
+   * \f$\eta_R = 3.315 \rho_0\f$:
    * \n
    *\verbatim
    Potentials:
@@ -300,10 +309,10 @@ double Potentials::potential(const ThreeVector &r, const ParticleList &plist,
 
 std::pair<double, int> Potentials::force_scale(const ParticleType &data) {
   const auto &pdg = data.pdgcode();
-  const double skyrme_scale =
+  const double skyrme_or_VDF_scale =
       (3 - std::abs(pdg.strangeness())) / 3. * pdg.baryon_number();
   const int symmetry_scale = pdg.baryon_number();
-  return std::make_pair(skyrme_scale, symmetry_scale);
+  return std::make_pair(skyrme_or_VDF_scale, symmetry_scale);
 }
 
 std::pair<ThreeVector, ThreeVector> Potentials::skyrme_force(
@@ -386,7 +395,7 @@ std::pair<ThreeVector, ThreeVector> Potentials::vdf_force(
 }
 
 // overload of the above
-std::pair<ThreeVector, ThreeVector> Potentials::v_df_force(
+std::pair<ThreeVector, ThreeVector> Potentials::vdf_force(
     const ThreeVector grad_A_0, const ThreeVector dA_dt,
     const ThreeVector curl_A) const {
   ThreeVector E_component(0.0, 0.0, 0.0), B_component(0.0, 0.0, 0.0);
