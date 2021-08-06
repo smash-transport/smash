@@ -99,7 +99,7 @@ TEST(take_removes_entry) {
 namespace std {
 static ostream &operator<<(ostream &s, const vector<string> &v) {
   s << '{';
-  for (const auto x : v) {
+  for (const auto &x : v) {
     s << x << ", ";  // I'm too lazy to get the commas right
   }
   return s << '}';
