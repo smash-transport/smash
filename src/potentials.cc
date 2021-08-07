@@ -201,7 +201,7 @@ double Potentials::skyrme_pot(const double baryon_density) const {
    * under a charge reversal transformation. */
   const int sgn = tmp > 0 ? 1 : -1;
   // Return in GeV
-  return 1.0e-3 * sgn *
+  return mev_to_gev * sgn *
          (skyrme_a_ * std::abs(tmp) +
           skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
 }
@@ -216,9 +216,9 @@ double Potentials::symmetry_S(const double baryon_density) const {
 double Potentials::symmetry_pot(const double baryon_isospin_density,
                                 const double baryon_density) const {
   double pot =
-      1.0e-3 * 2. * symmetry_S_Pot_ * baryon_isospin_density / nuclear_density;
+      mev_to_gev * 2. * symmetry_S_Pot_ * baryon_isospin_density / nuclear_density;
   if (symmetry_is_rhoB_dependent_) {
-    pot += 1.0e-3 * symmetry_S(baryon_density) * baryon_isospin_density *
+    pot += mev_to_gev * symmetry_S(baryon_density) * baryon_isospin_density *
            baryon_isospin_density / (baryon_density * baryon_density);
   }
   return pot;
