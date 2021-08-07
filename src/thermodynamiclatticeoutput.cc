@@ -546,7 +546,6 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
   double result;
   const auto dim = lattice.n_cells();
   std::shared_ptr<std::ofstream> fp(nullptr);
-  const double n_ensembles = ensembles.size();
   FourVector jQ = FourVector(), jB = FourVector(), jS = FourVector();
   constexpr bool compute_gradient = false;
   if (enable_ascii_) {
@@ -577,9 +576,6 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
               position, particles, dens_param, DensityType::Strangeness,
               compute_gradient, out_par_.td_smearing));
         }
-        jQ /= n_ensembles;
-        jB /= n_ensembles;
-        jS /= n_ensembles;
         if (enable_ascii_) {
           *fp << jQ[0];
           for (int l = 1; l < 4; l++) {
