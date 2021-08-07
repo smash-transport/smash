@@ -826,13 +826,14 @@ double calculate_mean_field_energy(
         abs_rhoB = very_small_double;
       }
       double mean_field_contribution = 0.0;
-      for (int i = 0; i < potentials.number_of_terms(); i++){
-	mean_field_contribution +=
-	  potentials.coeffs()[i] *
-	  std::pow(abs_rhoB, potentials.powers()[i] - 2.0) *
-          (j0B * j0B - ( (potentials.powers()[i] - 1.0) / potentials.powers()[i] ) *
-	   abs_rhoB * abs_rhoB ) /
-	  std::pow(rhoB_0, potentials.powers()[i] - 1.0);
+      for (int i = 0; i < potentials.number_of_terms(); i++) {
+        mean_field_contribution +=
+            potentials.coeffs()[i] *
+            std::pow(abs_rhoB, potentials.powers()[i] - 2.0) *
+            (j0B * j0B -
+             ((potentials.powers()[i] - 1.0) / potentials.powers()[i]) *
+                 abs_rhoB * abs_rhoB) /
+            std::pow(rhoB_0, potentials.powers()[i] - 1.0);
       }
       lattice_mean_field_total += V_cell * mean_field_contribution;
     }

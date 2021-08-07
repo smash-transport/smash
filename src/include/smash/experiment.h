@@ -1365,9 +1365,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     }
     if (potentials_->use_skyrme()) {
       logg[LExperiment].info() << "Skyrme potentials are:\n";
-      logg[LExperiment].info() << "\t\tSkyrme_A [MeV] = " << potentials_->skyrme_a() << "\n";
-      logg[LExperiment].info() << "\t\tSkyrme_B [MeV] = " << potentials_->skyrme_b() << "\n";
-      logg[LExperiment].info() << "\t\t    Skyrme_tau = " << potentials_->skyrme_tau() << "\n";
+      logg[LExperiment].info()
+          << "\t\tSkyrme_A [MeV] = " << potentials_->skyrme_a() << "\n";
+      logg[LExperiment].info()
+          << "\t\tSkyrme_B [MeV] = " << potentials_->skyrme_b() << "\n";
+      logg[LExperiment].info()
+          << "\t\t    Skyrme_tau = " << potentials_->skyrme_tau() << "\n";
     }
     if (potentials_->use_symmetry()) {
       logg[LExperiment].info()
@@ -1377,12 +1380,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     if (potentials_->use_vdf()) {
       logg[LExperiment].info() << "VDF potential parameters are:\n";
       logg[LExperiment].info() << "\t\tsaturation density [fm^-3] = "
-			       << potentials_->saturation_density() << "\n";
-      for (int i = 0; i < potentials_->number_of_terms(); i++){
-	logg[LExperiment].info() << "\t\tCoefficient_" << i+1 << " = "
-				 << 1000.0 * (potentials_->coeffs())[i]
-				 << " [MeV]   \t Power_" << i+1 << " = "
-				 << (potentials_->powers())[i] << "\n";
+                               << potentials_->saturation_density() << "\n";
+      for (int i = 0; i < potentials_->number_of_terms(); i++) {
+        logg[LExperiment].info()
+            << "\t\tCoefficient_" << i + 1 << " = "
+            << 1000.0 * (potentials_->coeffs())[i] << " [MeV]   \t Power_"
+            << i + 1 << " = " << (potentials_->powers())[i] << "\n";
       }
     }
     // if potentials are on, derivatives need to be calculated

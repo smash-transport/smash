@@ -176,15 +176,14 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
     saturation_density_ = conf.take({"VDF", "Sat_rhoB"});
     std::vector<double> aux_coeffs = conf.take({"VDF", "Coeffs"});
     std::vector<double> aux_powers = conf.take({"VDF", "Powers"});
-    if (aux_coeffs.size() != aux_powers.size()){
+    if (aux_coeffs.size() != aux_powers.size()) {
       throw std::invalid_argument(
-        "The number of coefficients should equal the number of powers.");
+          "The number of coefficients should equal the number of powers.");
     }
     number_of_terms_ = aux_powers.size();
-    for (int i = 0; i < number_of_terms_; i++){
-      if (aux_powers[i] < 0.0){
-	throw std::invalid_argument(
-          "Powers need to be positive real numbers.");
+    for (int i = 0; i < number_of_terms_; i++) {
+      if (aux_powers[i] < 0.0) {
+        throw std::invalid_argument("Powers need to be positive real numbers.");
       }
       // coefficients are provided in MeV, but the code uses GeV
       coeffs_.push_back(aux_coeffs[i] * mev_to_gev);
@@ -215,8 +214,8 @@ double Potentials::symmetry_S(const double baryon_density) const {
 }
 double Potentials::symmetry_pot(const double baryon_isospin_density,
                                 const double baryon_density) const {
-  double pot =
-      mev_to_gev * 2. * symmetry_S_Pot_ * baryon_isospin_density / nuclear_density;
+  double pot = mev_to_gev * 2. * symmetry_S_Pot_ * baryon_isospin_density /
+               nuclear_density;
   if (symmetry_is_rhoB_dependent_) {
     pot += mev_to_gev * symmetry_S(baryon_density) * baryon_isospin_density *
            baryon_isospin_density / (baryon_density * baryon_density);
@@ -237,9 +236,9 @@ FourVector Potentials::vdf_pot(double rhoB, const FourVector jmuB_net) const {
   // F_2 is a multiplicative factor in front of the baryon current
   // in the VDF potential
   double F_2 = 0.0;
-  for (int i = 0; i < number_of_terms_; i++){
+  for (int i = 0; i < number_of_terms_; i++) {
     F_2 += coeffs_[i] * std::pow(abs_rhoB, powers_[i] - 2.0) /
-      std::pow(saturation_density_, powers_[i] - 1.0);
+           std::pow(saturation_density_, powers_[i] - 1.0);
   }
   F_2 = F_2 * sgn;
   // Return in GeV
@@ -338,17 +337,17 @@ std::pair<ThreeVector, ThreeVector> Potentials::vdf_force(
     // F_1 and F_2 are multiplicative factors in front of the baryon current
     // in the VDF potential
     double F_1 = 0.0;
-    for (int i = 0; i < number_of_terms_; i++){
+    for (int i = 0; i < number_of_terms_; i++) {
       F_1 += coeffs_[i] * (powers_[i] - 2.0) *
-	std::pow(abs_rhoB, powers_[i] - 3.0) /
-	std::pow(saturation_density_, powers_[i] - 1.0);
+             std::pow(abs_rhoB, powers_[i] - 3.0) /
+             std::pow(saturation_density_, powers_[i] - 1.0);
     }
     F_1 = F_1 * sgn;
 
     double F_2 = 0.0;
-    for (int i = 0; i < number_of_terms_; i++){
+    for (int i = 0; i < number_of_terms_; i++) {
       F_2 += coeffs_[i] * std::pow(abs_rhoB, powers_[i] - 2.0) /
-	std::pow(saturation_density_, powers_[i] - 1.0);
+             std::pow(saturation_density_, powers_[i] - 1.0);
     }
     F_2 = F_2 * sgn;
 

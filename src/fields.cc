@@ -62,9 +62,11 @@ void update_fields_lattice(
 
     // field contributions as obtained in the VDF model
     double field_contribution = 0.0;
-    for (int j = 0; j < potentials.number_of_terms(); j++){
-      field_contribution += sgn * potentials.coeffs()[j] *
-	std::pow(abs_rhoB_at_i / rhoB_0, potentials.powers()[j] - 2.0) / rhoB_0;
+    for (int j = 0; j < potentials.number_of_terms(); j++) {
+      field_contribution +=
+          sgn * potentials.coeffs()[j] *
+          std::pow(abs_rhoB_at_i / rhoB_0, potentials.powers()[j] - 2.0) /
+          rhoB_0;
     }
     FourVector field_at_i = field_contribution * jmuB_at_i;
 
