@@ -546,7 +546,6 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
   double result;
   const auto dim = lattice.n_cells();
   std::shared_ptr<std::ofstream> fp(nullptr);
-  const double n_ensembles = ensembles.size();
   FourVector jQ = FourVector(), jB = FourVector(), jS = FourVector();
   constexpr bool compute_gradient = false;
   if (enable_ascii_) {
