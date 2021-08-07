@@ -264,9 +264,7 @@ void update_lattice(
 
       node.overwrite_drho_dxnu(drho_dxnu);
     }
-
   }  // if (par.rho_derivatives() == RestFrameDensityDerivatives::On){
-
 }  // void update_lattice()
 
 std::ostream &operator<<(std::ostream &os, DensityType dens_type) {

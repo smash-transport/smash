@@ -93,7 +93,6 @@ void update_fields_lattice(
     auto tmp = (*fields_four_grad_lattice)[i];
     ((*fields_lat)[i]).overwrite_dAmu_dxnu(tmp[0], tmp[1], tmp[2], tmp[3]);
   }
-
 }  // void update_fields_lattice()
 
 }  // namespace smash
