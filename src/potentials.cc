@@ -32,13 +32,6 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * potentials are semi-relativistic, while the VDF potential is fully
    * relativistic.
    *
-   * Currently, potentials are just added without re-adjusting the energy
-   * and momenta of the colliding nucleons. This can be done, because the
-   * binding energy of nucleons is between 0 and 8 MeV per nucleon while the
-   * kinetic energies, at which SMASH operates, are at least 400 MeV per
-   * nucleon. The binding energy can thus be neglected compared to the
-   * kinetic energy.
-   *
    * \li \subpage potentials_skyrme_
    * \li \subpage potentials_sym_
    * \li \subpage potentials_VDF_
@@ -64,7 +57,7 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    *
    * The following extract from the configuration file configures SMASH such
    * that the Skyrme as well as the Symmetry potential are activated for the
-   * simulation. There is however no necessity to include both simultaneously.
+   * simulation. There is however no requirement to include both simultaneously.
    They
    * can be switched on and off individually.
    * \n
@@ -116,43 +109,32 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * \page potentials_VDF_ VDF
    *
    * The VDF potential is a four-vector of the form
-   * \f[A^{\mu} = \sum_{i=1}^4 C_i \left(\frac{\rho}{\rho_0}\right)^{b_i - 2}
+   * \f[A^{\mu} = \sum_{i=1}^N C_i \left(\frac{\rho}{\rho_0}\right)^{b_i - 2}
    * \frac{j^{\mu}}{\rho_0} \,,\f] where \f$j^{\mu}\f$ is baryon 4-current,
    * \f$\rho\f$ is baryon density in the local Eckart rest frame, and
-   * \f$\rho_0\f$ is the saturation density. The parameters \f$C_i\f$
-   * and \f$b_i\f$ are fitted to reproduce a chosen set of properties of dense
-   * nuclear matter, and in particular these may include describing two first
-   * order phase transitions: the well-known phase transition in ordinary
-   * nuclear matter, and a transiton at high baryon densities meant to model a
-   * possible QCD phase transition (a "QGP-like" phase transition); see
-   * https://arxiv.org/pdf/2011.06635.pdf for details or example parameter sets.
+   * \f$\rho_0\f$ is the saturation density. The parameters of the potential,
+   * the coefficients \f$C_i\f$ and the powers \f$b_i\f$, are fitted to
+   * reproduce a chosen set of properties of dense nuclear matter, and in
+   * particular these may include describing two first order phase transitions:
+   * the well-known phase transition in ordinary nuclear matter, and a transiton
+   * at high baryon densities meant to model a possible QCD phase transition (a
+   * "QGP-like" phase transition); see https://arxiv.org/pdf/2011.06635.pdf for
+   * details and example parameter sets for the case \f$N=4\f$.
+   * \n
+   * The user can decide how many terms \f$N\f$ should enter the potential by
+   * populating the coefficients and powers vectors in the config file with a
+   * chosen number of entries. The number of coefficients must match the number
+   * of powers.
    *
    * \key Sat_rhoB (double, required, default 0.160): \n
    *      The saturation density of nuclear matter, in fm\f$^{-3}\f$
    *
-   * \key Coeff_1 (double, required, default 0.0): \n
-   *      Parameter \f$C_1\f$ of the VDF potential in MeV
+   * \key Coeffs (array<double, N>, required, no default): \n
+   *      Parameters \f$C_i\f$ of the VDF potential in MeV (note: the code
+   *      automatically converts these to GeV)
    *
-   * \key Coeff_2 (double, required, default 0.0): \n
-   *      Parameter \f$C_2\f$ of the VDF potential in MeV
-   *
-   * \key Coeff_3 (double, required, default 0.0): \n
-   *      Parameter \f$C_3\f$ of the VDF potential in MeV
-   *
-   * \key Coeff_4 (double, required, default 0.0): \n
-   *      Parameter \f$C_4\f$ of the VDF potential in MeV
-   *
-   * \key Power_1 (double, required, default 0.0): \n
-   *      Parameter \f$b_1\f$ of the VDF potential
-   *
-   * \key Power_2 (double, required, default 0.0): \n
-   *      Parameter \f$b_2\f$ of the VDF potential
-   *
-   * \key Power_3 (double, required, default 0.0): \n
-   *      Parameter \f$b_3\f$ of the VDF potential
-   *
-   * \key Power_4 (double, required, default 0.0): \n
-   *      Parameter \f$b_4\f$ of the VDF potential
+   * \key Powers (array<double, N>, required, no default): \n
+   *      Parameters \f$b_i\f$ of the VDF potential
    *
    * \page input_potentials_ Potentials
    * \n
@@ -168,18 +150,12 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    Potentials:
        VDF:
            Sat_rhoB: 0.168
-           Power_1: 2.0
-           Power_2: 2.35
-           Power_3: 0.0
-           Power_4: 0.0
-           Coeff_1: -209.2
-           Coeff_2: 156.5
-           Coeff_3: 0.0
-           Coeff_4: 0.0
+           Powers: [2.0, 2.35]
+           Coeffs: [-209.2, 156.5]
    \endverbatim
    *
    * In the second example, VDF potentials are configured to describe nuclear
-   * matter with saturation density of \f$\rho_0 = \f$0.160 fm\f$^{-3}\f$,
+   * matter with saturation density of \f$\rho_0 =\f$ 0.160 fm\f$^{-3}\f$,
    * binding energy of \f$B_0 = -16.3\f$ MeV, the critical point of the ordinary
    * nuclear liquid-gas phase transition at \f$T_c^{(N)} = 18\f$ MeV and
    * \f$\rho_c^{(N)} = 0.375 \rho_0\f$, the critical point of the conjectured
@@ -192,27 +168,28 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    Potentials:
        VDF:
            Sat_rhoB: 0.160
-           Power_1: 1.7681391
-           Power_2: 3.5293515
-           Power_3: 5.4352788
-           Power_4: 6.3809822
-           Coeff_1: -8.450948e+01
-           Coeff_2: 3.843139e+01
-           Coeff_3: -7.958557e+00
-           Coeff_4: 1.552594e+00
+           Powers: [1.7681391, 3.5293515, 5.4352788, 6.3809822]
+           Coeffs: [-8.450948e+01, 3.843139e+01, -7.958557e+00, 1.552594e+00]
    \endverbatim
-
    */
   if (use_vdf_) {
     saturation_density_ = conf.take({"VDF", "Sat_rhoB"});
-    coeff_1_ = conf.take({"VDF", "Coeff_1"});
-    coeff_2_ = conf.take({"VDF", "Coeff_2"});
-    coeff_3_ = conf.take({"VDF", "Coeff_3"});
-    coeff_4_ = conf.take({"VDF", "Coeff_4"});
-    power_1_ = conf.take({"VDF", "Power_1"});
-    power_2_ = conf.take({"VDF", "Power_2"});
-    power_3_ = conf.take({"VDF", "Power_3"});
-    power_4_ = conf.take({"VDF", "Power_4"});
+    std::vector<double> aux_coeffs = conf.take({"VDF", "Coeffs"});
+    std::vector<double> aux_powers = conf.take({"VDF", "Powers"});
+    if (aux_coeffs.size() != aux_powers.size()){
+      throw std::invalid_argument(
+        "The number of coefficients should equal the number of powers.");
+    }
+    number_of_terms_ = aux_powers.size();
+    for (int i = 0; i < number_of_terms_; i++){
+      if (aux_powers[i] < 0.0){
+	throw std::invalid_argument(
+          "Powers need to be positive real numbers.");
+      }
+      // coefficients are provided in MeV, but the code uses GeV
+      coeffs_.push_back(aux_coeffs[i] * mev_to_gev);
+      powers_.push_back(aux_powers[i]);
+    }
   }
 }
 
@@ -248,7 +225,6 @@ double Potentials::symmetry_pot(const double baryon_isospin_density,
 }
 
 FourVector Potentials::vdf_pot(double rhoB, const FourVector jmuB_net) const {
-  const double MeV_to_GeV = 1.0e-3;
   // this needs to be used in order to prevent trying to calculate something
   // like
   // (-rho_B)^{3.4}
@@ -260,16 +236,12 @@ FourVector Potentials::vdf_pot(double rhoB, const FourVector jmuB_net) const {
   }
   // F_2 is a multiplicative factor in front of the baryon current
   // in the VDF potential
-  const double F_2 = MeV_to_GeV * sgn *
-                     (coeff_1_ * std::pow(abs_rhoB, power_1_ - 2.0) /
-                          std::pow(saturation_density_, power_1_ - 1.0) +
-                      coeff_2_ * std::pow(abs_rhoB, power_2_ - 2.0) /
-                          std::pow(saturation_density_, power_2_ - 1.0) +
-                      coeff_3_ * std::pow(abs_rhoB, power_3_ - 2.0) /
-                          std::pow(saturation_density_, power_3_ - 1.0) +
-                      coeff_4_ * std::pow(abs_rhoB, power_4_ - 2.0) /
-                          std::pow(saturation_density_, power_4_ - 1.0));
-
+  double F_2 = 0.0;
+  for (int i = 0; i < number_of_terms_; i++){
+    F_2 += coeffs_[i] * std::pow(abs_rhoB, powers_[i] - 2.0) /
+      std::pow(saturation_density_, powers_[i] - 1.0);
+  }
+  F_2 = F_2 * sgn;
   // Return in GeV
   return F_2 * jmuB_net;
 }
@@ -353,7 +325,6 @@ std::pair<ThreeVector, ThreeVector> Potentials::vdf_force(
     const ThreeVector gradrhoB_cross_vecjB, const double j0B,
     const ThreeVector grad_j0B, const ThreeVector vecjB,
     const ThreeVector dvecjB_dt, const ThreeVector curl_vecjB) const {
-  const double MeV_to_GeV = 1.0e-3;
   // this needs to be used to prevent trying to calculate something like
   // (-rhoB)^{3.4}
   const int sgn = rhoB > 0 ? 1 : -1;
@@ -366,26 +337,20 @@ std::pair<ThreeVector, ThreeVector> Potentials::vdf_force(
   if (use_vdf_) {
     // F_1 and F_2 are multiplicative factors in front of the baryon current
     // in the VDF potential
-    const double F_1 =
-        MeV_to_GeV * sgn *
-        (coeff_1_ * (power_1_ - 2.0) * std::pow(abs_rhoB, power_1_ - 3.0) /
-             std::pow(saturation_density_, power_1_ - 1.0) +
-         coeff_2_ * (power_2_ - 2.0) * std::pow(abs_rhoB, power_2_ - 3.0) /
-             std::pow(saturation_density_, power_2_ - 1.0) +
-         coeff_3_ * (power_3_ - 2.0) * std::pow(abs_rhoB, power_3_ - 3.0) /
-             std::pow(saturation_density_, power_3_ - 1.0) +
-         coeff_4_ * (power_4_ - 2.0) * std::pow(abs_rhoB, power_4_ - 3.0) /
-             std::pow(saturation_density_, power_4_ - 1.0));
+    double F_1 = 0.0;
+    for (int i = 0; i < number_of_terms_; i++){
+      F_1 += coeffs_[i] * (powers_[i] - 2.0) *
+	std::pow(abs_rhoB, powers_[i] - 3.0) /
+	std::pow(saturation_density_, powers_[i] - 1.0);
+    }
+    F_1 = F_1 * sgn;
 
-    const double F_2 = MeV_to_GeV * sgn *
-                       (coeff_1_ * std::pow(abs_rhoB, power_1_ - 2.0) /
-                            std::pow(saturation_density_, power_1_ - 1.0) +
-                        coeff_2_ * std::pow(abs_rhoB, power_2_ - 2.0) /
-                            std::pow(saturation_density_, power_2_ - 1.0) +
-                        coeff_3_ * std::pow(abs_rhoB, power_3_ - 2.0) /
-                            std::pow(saturation_density_, power_3_ - 1.0) +
-                        coeff_4_ * std::pow(abs_rhoB, power_4_ - 2.0) /
-                            std::pow(saturation_density_, power_4_ - 1.0));
+    double F_2 = 0.0;
+    for (int i = 0; i < number_of_terms_; i++){
+      F_2 += coeffs_[i] * std::pow(abs_rhoB, powers_[i] - 2.0) /
+	std::pow(saturation_density_, powers_[i] - 1.0);
+    }
+    F_2 = F_2 * sgn;
 
     E_component -= (F_1 * (grad_rhoB * j0B + drhoB_dt * vecjB) +
                     F_2 * (grad_j0B + dvecjB_dt));

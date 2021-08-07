@@ -117,7 +117,7 @@ enum class DerivativesMode {
   Off,
 };
 
-/*
+/**
  * Modes of calculating the gradients: whether to calculate the rest frame
  * density derivatives.
  */
@@ -126,8 +126,9 @@ enum class RestFrameDensityDerivativesMode {
   Off,
 };
 
-/*
- * Modes of calculating the field gradients: chain rule or direct.
+/**
+ * Modes of calculating the field gradients: chain rule or direct. The modes
+ * only make sense for the VDF potentials.
  */
 enum class FieldDerivativesMode {
   ChainRule,

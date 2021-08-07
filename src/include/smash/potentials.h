@@ -280,22 +280,12 @@ class Potentials {
   virtual bool use_vdf() const { return use_vdf_; }
   /// \return Value of the saturation density used in the VDF potential
   virtual double saturation_density() const { return saturation_density_; }
-  /// \return Value of the VDF coefficient \f$C_1\f$, coeff_1_
-  virtual double coeff_1() const { return coeff_1_; }
-  /// \return Value of the VDF coefficient \f$C_2\f$, coeff_2_
-  virtual double coeff_2() const { return coeff_2_; }
-  /// \return Value of the VDF coefficient \f$C_3\f$, coeff_3_
-  virtual double coeff_3() const { return coeff_3_; }
-  /// \return Value of the VDF coefficient \f$C_4\f$, coeff_4_
-  virtual double coeff_4() const { return coeff_4_; }
-  /// \return Value of the VDF exponent \f$b_1\f$, power_1_
-  virtual double power_1() const { return power_1_; }
-  /// \return Value of the VDF exponent \f$b_2\f$, power_2_
-  virtual double power_2() const { return power_2_; }
-  /// \return Value of the VDF exponent \f$b_3\f$, power_3_
-  virtual double power_3() const { return power_3_; }
-  /// \return Value of the VDF exponent \f$b_4\f$, power_4_
-  virtual double power_4() const { return power_4_; }
+  /// \return Vector of the VDF coefficients \f$C_i\f$, coefficients_
+  virtual std::vector<double> coeffs() const { return coeffs_; }
+  /// \return Vector of the VDF exponents \f$b_i\f$, powers_
+  virtual std::vector<double> powers() const { return powers_; }
+  /// \return Number of terms in the VDF potential
+  virtual int number_of_terms() const { return number_of_terms_; }
 
  private:
   /**
@@ -353,22 +343,12 @@ class Potentials {
    * vary between different parameterizations.
    */
   double saturation_density_;
-  /// Parameter of the VDF potential: coefficient \f$C_1\f$
-  double coeff_1_ = 0.0;
-  /// Parameter of the VDF potential: coefficient \f$C_2\f$
-  double coeff_2_ = 0.0;
-  /// Parameter of the VDF potential: coefficient \f$C_3\f$
-  double coeff_3_ = 0.0;
-  /// Parameter of the VDF potential: coefficient \f$C_4\f$
-  double coeff_4_ = 0.0;
-  /// Parameter of the VDF potential: exponent \f$b_1\f$
-  double power_1_ = 0.0;
-  /// Parameter of the VDF potential: exponent \f$b_2\f$
-  double power_2_ = 0.0;
-  /// Parameter of the VDF potential: exponent \f$b_3\f$
-  double power_3_ = 0.0;
-  /// Parameter of the VDF potential: exponent \f$b_4\f$
-  double power_4_ = 0.0;
+  /// Parameters of the VDF potential: coefficients \f$C_i\f$, in GeV
+  std::vector<double> coeffs_;
+  /// Parameters of the VDF potential: exponents \f$b_i\f$
+  std::vector<double> powers_;
+  /// Number of terms in the VDF potential
+  int number_of_terms_ = 0.0;
 
   /**
    * Calculate the derivative of the symmetry potential with respect to

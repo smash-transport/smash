@@ -1364,11 +1364,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           "Can't use symmetry and VDF potentials at the same time!");
     }
     if (potentials_->use_skyrme()) {
-      logg[LExperiment].info()
-          << "Skyrme potentials are:"
-          << "\nSkyrme_A [MeV] = " << potentials_->skyrme_a()
-          << "\nSkyrme_B [MeV] = " << potentials_->skyrme_b()
-          << "\n    Skyrme_tau = " << potentials_->skyrme_tau() << "\n";
+      logg[LExperiment].info() << "Skyrme potentials are:\n";
+      logg[LExperiment].info() << "\t\tSkyrme_A [MeV] = " << potentials_->skyrme_a() << "\n";
+      logg[LExperiment].info() << "\t\tSkyrme_B [MeV] = " << potentials_->skyrme_b() << "\n";
+      logg[LExperiment].info() << "\t\t    Skyrme_tau = " << potentials_->skyrme_tau() << "\n";
     }
     if (potentials_->use_symmetry()) {
       logg[LExperiment].info()
@@ -1376,18 +1375,15 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           << "\n   S_pot [MeV] = " << potentials_->symmetry_S_pot() << "\n";
     }
     if (potentials_->use_vdf()) {
-      logg[LExperiment].info()
-          << "VDF potentials are:"
-          << "\nsaturation density [fm^-3] = "
-          << potentials_->saturation_density()
-          << "\n Coeff_1 [MeV] = " << potentials_->coeff_1()
-          << "\t    Power_1 = " << potentials_->power_1()
-          << "\n Coeff_2 [MeV] = " << potentials_->coeff_2()
-          << "\t    Power_2 = " << potentials_->power_2()
-          << "\n Coeff_3 [MeV] = " << potentials_->coeff_3()
-          << "\t    Power_3 = " << potentials_->power_3()
-          << "\n Coeff_4 [MeV] = " << potentials_->coeff_4()
-          << "\t    Power_4 = " << potentials_->power_4() << "\n";
+      logg[LExperiment].info() << "VDF potential parameters are:\n";
+      logg[LExperiment].info() << "\t\tsaturation density [fm^-3] = "
+			       << potentials_->saturation_density() << "\n";
+      for (int i = 0; i < potentials_->number_of_terms(); i++){
+	logg[LExperiment].info() << "\t\tCoefficient_" << i+1 << " = "
+				 << 1000.0 * (potentials_->coeffs())[i]
+				 << " [MeV]   \t Power_" << i+1 << " = "
+				 << (potentials_->powers())[i] << "\n";
+      }
     }
     // if potentials are on, derivatives need to be calculated
     if (parameters_.derivatives_mode == DerivativesMode::Off &&

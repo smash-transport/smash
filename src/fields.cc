@@ -43,20 +43,6 @@ void update_fields_lattice(
 
   // Get the potential parameters
   const double rhoB_0 = potentials.saturation_density();
-  const double C1_GeV = (potentials.coeff_1()) / 1000.0;
-  const double C2_GeV = (potentials.coeff_2()) / 1000.0;
-  const double C3_GeV = (potentials.coeff_3()) / 1000.0;
-  const double C4_GeV = (potentials.coeff_4()) / 1000.0;
-  // to avoid nan's in expressions below
-  // (then expressions with bi~=0 will be surely killed by Ci=0)
-  const double b1 =
-      (potentials.power_1() > 0.0) ? potentials.power_1() : 0.00000001;
-  const double b2 =
-      (potentials.power_2() > 0.0) ? potentials.power_2() : 0.00000001;
-  const double b3 =
-      (potentials.power_3() > 0.0) ? potentials.power_3() : 0.00000001;
-  const double b4 =
-      (potentials.power_4() > 0.0) ? potentials.power_4() : 0.00000001;
 
   // update the fields lattice
   for (int i = 0; i < number_of_nodes; i++) {
@@ -75,18 +61,12 @@ void update_fields_lattice(
     const int sgn = rhoB_at_i > 0 ? 1 : -1;
 
     // field contributions as obtained in the VDF model
-    double field_contribution_1 =
-        sgn * (C1_GeV * std::pow(abs_rhoB_at_i / rhoB_0, b1 - 2.0) / rhoB_0);
-    double field_contribution_2 =
-        sgn * (C2_GeV * std::pow(abs_rhoB_at_i / rhoB_0, b2 - 2.0) / rhoB_0);
-    double field_contribution_3 =
-        sgn * (C3_GeV * std::pow(abs_rhoB_at_i / rhoB_0, b3 - 2.0) / rhoB_0);
-    double field_contribution_4 =
-        sgn * (C4_GeV * std::pow(abs_rhoB_at_i / rhoB_0, b4 - 2.0) / rhoB_0);
-
-    FourVector field_at_i = (field_contribution_1 + field_contribution_2 +
-                             field_contribution_3 + field_contribution_4) *
-                            jmuB_at_i;
+    double field_contribution = 0.0;
+    for (int j = 0; j < potentials.number_of_terms(); j++){
+      field_contribution += sgn * potentials.coeffs()[j] *
+	std::pow(abs_rhoB_at_i / rhoB_0, potentials.powers()[j] - 2.0) / rhoB_0;
+    }
+    FourVector field_at_i = field_contribution * jmuB_at_i;
 
     // fill the A_mu lattice
     ((*fields_lat)[i]).overwrite_A_mu(field_at_i);

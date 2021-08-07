@@ -788,41 +788,15 @@ double calculate_mean_field_energy(
     }
 
     /*
-     * VDF potential parameters:
-     * C1GeV are the VDF coefficients converted to GeV,
-     * b1 are the powers of the baryon number density entering the expression
-     * for the energy density of the system. The formula for a total mean-field
-     * energy due to a VDF potential is
-     * E_MF = \sum_i C_i n_B^(b_i - 2) *
-     *                 * [j_0^2 -  n_B^2 * (b_i - 1)/b_i] / n_0^(b_i - 1)
-     * where j_0 is the local computational frame baryon density, nB is the
-     * local rest frame baryon density, and n_0 is the saturation density.
+     * The total mean-field energy density due to a VDF potential is
+     * E_MF = \sum_i C_i rho^(b_i - 2) *
+     *                 * [j_0^2 -  rho^2 * (b_i - 1)/b_i] / rho_0^(b_i - 1)
+     * where j_0 is the local computational frame baryon density, rho is the
+     * local rest frame baryon density, and rho_0 is the saturation density.
      */
-    double C1GeV = (potentials.coeff_1()) / 1000.0;
-    double C2GeV = (potentials.coeff_2()) / 1000.0;
-    double C3GeV = (potentials.coeff_3()) / 1000.0;
-    double C4GeV = (potentials.coeff_4()) / 1000.0;
-    double b1 = potentials.power_1();
-    double b2 = potentials.power_2();
-    double b3 = potentials.power_3();
-    double b4 = potentials.power_4();
+
     // saturation density of nuclear matter specified in the VDF parameters
     double rhoB_0 = potentials.saturation_density();
-
-    // to avoid nan's in expressions below
-    // (then expressions with bi~=0 will be surely killed by Ci=0)
-    if (b1 == 0) {
-      b1 = 0.00000001;
-    }
-    if (b2 == 0) {
-      b2 = 0.00000001;
-    }
-    if (b3 == 0) {
-      b3 = 0.00000001;
-    }
-    if (b4 == 0) {
-      b4 = 0.00000001;
-    }
 
     /*
      * Note: calculating the mean field only works if lattice is used.
@@ -851,26 +825,16 @@ double calculate_mean_field_energy(
       if (abs_rhoB < very_small_double) {
         abs_rhoB = very_small_double;
       }
-      double mean_field_contribution_1 =
-          C1GeV * std::pow(abs_rhoB, b1 - 2.0) *
-          (j0B * j0B - ((b1 - 1.0) / b1) * abs_rhoB * abs_rhoB) /
-          std::pow(rhoB_0, b1 - 1);
-      double mean_field_contribution_2 =
-          C2GeV * std::pow(abs_rhoB, b2 - 2.0) *
-          (j0B * j0B - ((b2 - 1.0) / b2) * abs_rhoB * abs_rhoB) /
-          std::pow(rhoB_0, b2 - 1);
-      double mean_field_contribution_3 =
-          C3GeV * std::pow(abs_rhoB, b3 - 2.0) *
-          (j0B * j0B - ((b3 - 1.0) / b3) * abs_rhoB * abs_rhoB) /
-          std::pow(rhoB_0, b3 - 1);
-      double mean_field_contribution_4 =
-          C4GeV * std::pow(abs_rhoB, b4 - 2.0) *
-          (j0B * j0B - ((b4 - 1.0) / b4) * abs_rhoB * abs_rhoB) /
-          std::pow(rhoB_0, b4 - 1);
-
-      lattice_mean_field_total +=
-          V_cell * (mean_field_contribution_1 + mean_field_contribution_2 +
-                    mean_field_contribution_3 + mean_field_contribution_4);
+      double mean_field_contribution = 0.0;
+      for (int i = 0; i < potentials.number_of_terms(); i++){
+	mean_field_contribution +=
+	  potentials.coeffs()[i] *
+	  std::pow(abs_rhoB, potentials.powers()[i] - 2.0) *
+          (j0B * j0B - ( (potentials.powers()[i] - 1.0) / potentials.powers()[i] ) *
+	   abs_rhoB * abs_rhoB ) /
+	  std::pow(rhoB_0, potentials.powers()[i] - 1.0);
+      }
+      lattice_mean_field_total += V_cell * mean_field_contribution;
     }
 
     // logging statistical properties of the density calculation
