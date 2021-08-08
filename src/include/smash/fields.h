@@ -16,9 +16,7 @@
 
 #include "density.h"
 #include "experimentparameters.h"
-//#include "forwarddeclarations.h"
 #include "fourvector.h"
-//#include "lattice.h"
 #include "potentials.h"
 #include "threevector.h"
 
@@ -153,4 +151,4 @@ void update_fields_lattice(
     const Potentials &potentials, const double time_step);
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SMASH_DENSITY_H_
+#endif  // SRC_INCLUDE_SMASH_FIELDS_H_
