@@ -96,7 +96,8 @@ class ThermodynamicLatticeOutput : public OutputInterface {
    * \param[in] current_time The output time in the computational frame
    */
   void thermodynamics_lattice_output(
-      RectangularLattice<DensityOnLattice> &lattice, double current_time);
+      RectangularLattice<DensityOnLattice> &lattice,
+      double current_time) override;
 
   /**
    * Prints the density lattice on a grid.
@@ -112,7 +113,7 @@ class ThermodynamicLatticeOutput : public OutputInterface {
   void thermodynamics_lattice_output(
       RectangularLattice<DensityOnLattice> &lattice, const double current_time,
       const std::vector<Particles> &ensembles,
-      const DensityParameters &dens_param);
+      const DensityParameters &dens_param) override;
 
   /**
    * Prints the energy-momentum-tensor lattice on a grid.
@@ -125,7 +126,8 @@ class ThermodynamicLatticeOutput : public OutputInterface {
    */
   void thermodynamics_lattice_output(
       const ThermodynamicQuantity tq,
-      RectangularLattice<EnergyMomentumTensor> &lattice, double current_time);
+      RectangularLattice<EnergyMomentumTensor> &lattice,
+      double current_time) override;
 
  private:
   /// Structure that holds all the information about what to printout
