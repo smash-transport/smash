@@ -152,7 +152,9 @@ void EnergyMomentumTensor::add_particle(const FourVector &mom) {
 }
 
 void EnergyMomentumTensor::add_particle(const ParticleData &p, double factor) {
-  add_particle(p.momentum() * factor);
+  if (factor != 0) {
+    add_particle(p.momentum() * factor);
+  }
 }
 
 std::ostream &operator<<(std::ostream &out, const EnergyMomentumTensor &Tmn) {
