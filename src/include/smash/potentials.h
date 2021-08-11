@@ -279,13 +279,13 @@ class Potentials {
   /// \return Is VDF potential on?
   virtual bool use_vdf() const { return use_vdf_; }
   /// \return Value of the saturation density used in the VDF potential
-  virtual double saturation_density() const { return saturation_density_; }
+  double saturation_density() const { return saturation_density_; }
   /// \return Vector of the VDF coefficients \f$C_i\f$, coefficients_
   const std::vector<double> &coeffs() const { return coeffs_; }
   /// \return Vector of the VDF exponents \f$b_i\f$, powers_
   const std::vector<double> &powers() const { return powers_; }
   /// \return Number of terms in the VDF potential
-  virtual int number_of_terms() const { return powers_.size(); }
+  int number_of_terms() const { return powers_.size(); }
 
  private:
   /**
