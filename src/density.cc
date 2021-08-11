@@ -118,7 +118,7 @@ current_eckart_impl(const ThreeVector &r, const T &plist,
     }
   }
 
-  // Eckart density
+  // Eckart density (rest frame density)
   const double rho_eck = (jmu_pos.abs() - jmu_neg.abs()) * par.norm_factor_sf();
 
   // $\partial_t j^{\mu}$
@@ -138,9 +138,9 @@ current_eckart_impl(const ThreeVector &r, const T &plist,
                                  ? djmu_dxnu[3] * par.norm_factor_sf()
                                  : FourVector(0.0, 0.0, 0.0, 0.0);
 
-  // Gradient of density
+  // Gradient of j0
   ThreeVector grad_j0 = ThreeVector(0.0, 0.0, 0.0);
-  // Curl of current density
+  // Curl of the 3-current density
   ThreeVector curl_vecj = ThreeVector(0.0, 0.0, 0.0);
   if (compute_gradient) {
     curl_vecj.set_x1(djmu_dxnu[2].x3() - djmu_dxnu[3].x2());

@@ -377,7 +377,7 @@ class DensityOnLattice {
    * Compute curl of the current on the local lattice
    *
    * \param[in] norm_factor Normalization factor
-   * \return \f$\nabla\times\vec{j}\f$ [fm \f$^{-4}\f$]
+   * \return \f$\vec{\nabla}\times\vec{j}\f$ [fm \f$^{-4}\f$]
    */
   ThreeVector curl_vecj(const double norm_factor = 1.0) {
     ThreeVector curl_vec_j = ThreeVector();

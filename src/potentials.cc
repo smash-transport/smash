@@ -180,8 +180,8 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
       throw std::invalid_argument(
           "The number of coefficients should equal the number of powers.");
     }
-    number_of_terms_ = aux_powers.size();
-    for (int i = 0; i < number_of_terms_; i++) {
+    const int number_of_terms = aux_powers.size();
+    for (int i = 0; i < number_of_terms; i++) {
       if (aux_powers[i] < 0.0) {
         throw std::invalid_argument("Powers need to be positive real numbers.");
       }
@@ -236,7 +236,7 @@ FourVector Potentials::vdf_pot(double rhoB, const FourVector jmuB_net) const {
   // F_2 is a multiplicative factor in front of the baryon current
   // in the VDF potential
   double F_2 = 0.0;
-  for (int i = 0; i < number_of_terms_; i++) {
+  for (int i = 0; i < number_of_terms(); i++) {
     F_2 += coeffs_[i] * std::pow(abs_rhoB, powers_[i] - 2.0) /
            std::pow(saturation_density_, powers_[i] - 1.0);
   }
@@ -337,7 +337,7 @@ std::pair<ThreeVector, ThreeVector> Potentials::vdf_force(
     // F_1 and F_2 are multiplicative factors in front of the baryon current
     // in the VDF potential
     double F_1 = 0.0;
-    for (int i = 0; i < number_of_terms_; i++) {
+    for (int i = 0; i < number_of_terms(); i++) {
       F_1 += coeffs_[i] * (powers_[i] - 2.0) *
              std::pow(abs_rhoB, powers_[i] - 3.0) /
              std::pow(saturation_density_, powers_[i] - 1.0);
@@ -345,7 +345,7 @@ std::pair<ThreeVector, ThreeVector> Potentials::vdf_force(
     F_1 = F_1 * sgn;
 
     double F_2 = 0.0;
-    for (int i = 0; i < number_of_terms_; i++) {
+    for (int i = 0; i < number_of_terms(); i++) {
       F_2 += coeffs_[i] * std::pow(abs_rhoB, powers_[i] - 2.0) /
              std::pow(saturation_density_, powers_[i] - 1.0);
     }

@@ -111,9 +111,6 @@ class FieldsOnLattice {
     dAmu_dxnu_[3] = dAmu_dz;
   }
 
-  // TO DO: consider calculating the mean-field energy here
-  // double calculate_mean_field_from_fields ();
-
  private:
   /// Four-vector density of the field
   FourVector A_mu_;

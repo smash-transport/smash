@@ -281,11 +281,11 @@ class Potentials {
   /// \return Value of the saturation density used in the VDF potential
   virtual double saturation_density() const { return saturation_density_; }
   /// \return Vector of the VDF coefficients \f$C_i\f$, coefficients_
-  virtual std::vector<double> coeffs() const { return coeffs_; }
+  const std::vector<double> &coeffs() const { return coeffs_; }
   /// \return Vector of the VDF exponents \f$b_i\f$, powers_
-  virtual std::vector<double> powers() const { return powers_; }
+  const std::vector<double> &powers() const { return powers_; }
   /// \return Number of terms in the VDF potential
-  virtual int number_of_terms() const { return number_of_terms_; }
+  virtual int number_of_terms() const { return powers_.size(); }
 
  private:
   /**
@@ -347,8 +347,6 @@ class Potentials {
   std::vector<double> coeffs_;
   /// Parameters of the VDF potential: exponents \f$b_i\f$
   std::vector<double> powers_;
-  /// Number of terms in the VDF potential
-  int number_of_terms_ = 0.0;
 
   /**
    * Calculate the derivative of the symmetry potential with respect to
