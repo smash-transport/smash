@@ -180,8 +180,8 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
       throw std::invalid_argument(
           "The number of coefficients should equal the number of powers.");
     }
-    const int number_of_terms = aux_powers.size();
-    for (int i = 0; i < number_of_terms; i++) {
+    const int n_terms = aux_powers.size();
+    for (int i = 0; i < n_terms; i++) {
       if (aux_powers[i] < 0.0) {
         throw std::invalid_argument("Powers need to be positive real numbers.");
       }

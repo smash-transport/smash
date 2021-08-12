@@ -96,7 +96,7 @@ endif()
 # in order for this to work the policy on respecting the CXX_STANDARD for
 # try_compile has to be changed first
 # see https://cmake.org/cmake/help/v3.8/policy/CMP0067.html
-cmake_policy(SET CMP0067 NEW)
+#cmake_policy(SET CMP0067 NEW)
 set(CMAKE_REQUIRED_FLAGS "-std=c++11")
 include(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("
