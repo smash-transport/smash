@@ -260,16 +260,18 @@ inline ExperimentParameters default_parameters(
     int testparticles = 1, double dt = 0.1,
     CollisionCriterion crit = CollisionCriterion::Geometric) {
   return ExperimentParameters{
-      make_unique<UniformClock>(0., dt),   // labclock
-      make_unique<UniformClock>(0., 1.),   // outputclock
-      1,                                   // ensembles
-      testparticles,                       // testparticles
-      DerivativesMode::CovariantGaussian,  // derivatives mode
-      SmearingMode::CovariantGaussian,     // smearing mode
-      1.0,                                 // Gaussian smearing width
-      4.0,                                 // Gaussian smearing cut-off
-      0.333333,                            // discrete smearing weight
-      2.0,                                 // triangular smearing range
+      make_unique<UniformClock>(0., dt),     // labclock
+      make_unique<UniformClock>(0., 1.),     // outputclock
+      1,                                     // ensembles
+      testparticles,                         // testparticles
+      DerivativesMode::CovariantGaussian,    // derivatives mode
+      RestFrameDensityDerivativesMode::Off,  // rest frame derivatives mode
+      FieldDerivativesMode::ChainRule,       // field derivatives mode
+      SmearingMode::CovariantGaussian,       // smearing mode
+      1.0,                                   // Gaussian smearing width
+      4.0,                                   // Gaussian smearing cut-off
+      0.333333,                              // discrete smearing weight
+      2.0,                                   // triangular smearing range
       crit,
       true,  // two_to_one
       all_reactions_included(),

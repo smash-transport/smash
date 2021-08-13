@@ -62,7 +62,8 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
 
 /// \copydoc smash::current_eckart
 template <typename /*ParticlesContainer*/ T>
-std::tuple<double, FourVector, ThreeVector, ThreeVector, ThreeVector>
+std::tuple<double, FourVector, ThreeVector, ThreeVector, FourVector, FourVector,
+           FourVector, FourVector>
 current_eckart_impl(const ThreeVector &r, const T &plist,
                     const DensityParameters &par, DensityType dens_type,
                     bool compute_gradient, bool smearing) {
@@ -79,7 +80,7 @@ current_eckart_impl(const ThreeVector &r, const T &plist,
   /* The array of the derivatives of the current density.
    * The zeroth component is the time derivative,
    * while the next 3 ones are spacial derivatives. */
-  std::array<FourVector, 4> djmu_dx;
+  std::array<FourVector, 4> djmu_dxnu;
 
   for (const auto &p : plist) {
     const double dens_factor = density_factor(p.type(), dens_type);
@@ -110,46 +111,61 @@ current_eckart_impl(const ThreeVector &r, const T &plist,
     }
     if (compute_gradient) {
       for (int k = 1; k <= 3; k++) {
-        djmu_dx[k] += tmp * sf_and_grad.second[k - 1];
-        djmu_dx[0] -= tmp * sf_and_grad.second[k - 1] * tmp.threevec()[k - 1] /
-                      dens_factor;
+        djmu_dxnu[k] += tmp * sf_and_grad.second[k - 1];
+        djmu_dxnu[0] -= tmp * sf_and_grad.second[k - 1] *
+                        tmp.threevec()[k - 1] / dens_factor;
       }
     }
   }
 
-  // Eckart density
+  // Eckart density (rest frame density)
   const double rho_eck = (jmu_pos.abs() - jmu_neg.abs()) * par.norm_factor_sf();
 
-  // $\partial_t \vec j$
-  const ThreeVector dj_dt = compute_gradient
-                                ? djmu_dx[0].threevec() * par.norm_factor_sf()
-                                : ThreeVector(0.0, 0.0, 0.0);
+  // $\partial_t j^{\mu}$
+  const FourVector djmu_dt = compute_gradient
+                                 ? djmu_dxnu[0] * par.norm_factor_sf()
+                                 : FourVector(0.0, 0.0, 0.0, 0.0);
+  // $\partial_x j^{\mu}$
+  const FourVector djmu_dx = compute_gradient
+                                 ? djmu_dxnu[1] * par.norm_factor_sf()
+                                 : FourVector(0.0, 0.0, 0.0, 0.0);
+  // $\partial_y j^{\mu}$
+  const FourVector djmu_dy = compute_gradient
+                                 ? djmu_dxnu[2] * par.norm_factor_sf()
+                                 : FourVector(0.0, 0.0, 0.0, 0.0);
+  // $\partial_z j^{\mu}$
+  const FourVector djmu_dz = compute_gradient
+                                 ? djmu_dxnu[3] * par.norm_factor_sf()
+                                 : FourVector(0.0, 0.0, 0.0, 0.0);
 
-  // Gradient of density
-  ThreeVector rho_grad;
-  // Curl of current density
-  ThreeVector j_rot;
+  // Gradient of j0
+  ThreeVector grad_j0 = ThreeVector(0.0, 0.0, 0.0);
+  // Curl of the 3-current density
+  ThreeVector curl_vecj = ThreeVector(0.0, 0.0, 0.0);
   if (compute_gradient) {
-    j_rot.set_x1(djmu_dx[2].x3() - djmu_dx[3].x2());
-    j_rot.set_x2(djmu_dx[3].x1() - djmu_dx[1].x3());
-    j_rot.set_x3(djmu_dx[1].x2() - djmu_dx[2].x1());
-    j_rot *= par.norm_factor_sf();
+    curl_vecj.set_x1(djmu_dxnu[2].x3() - djmu_dxnu[3].x2());
+    curl_vecj.set_x2(djmu_dxnu[3].x1() - djmu_dxnu[1].x3());
+    curl_vecj.set_x3(djmu_dxnu[1].x2() - djmu_dxnu[2].x1());
+    curl_vecj *= par.norm_factor_sf();
     for (int i = 1; i < 4; i++) {
-      rho_grad[i - 1] += djmu_dx[i].x0() * par.norm_factor_sf();
+      grad_j0[i - 1] += djmu_dxnu[i].x0() * par.norm_factor_sf();
     }
   }
   return std::make_tuple(rho_eck, (jmu_pos + jmu_neg) * par.norm_factor_sf(),
-                         rho_grad, dj_dt, j_rot);
+                         grad_j0, curl_vecj, djmu_dt, djmu_dx, djmu_dy,
+                         djmu_dz);
 }
 
-std::tuple<double, FourVector, ThreeVector, ThreeVector, ThreeVector>
+std::tuple<double, FourVector, ThreeVector, ThreeVector, FourVector, FourVector,
+           FourVector, FourVector>
 current_eckart(const ThreeVector &r, const ParticleList &plist,
                const DensityParameters &par, DensityType dens_type,
                bool compute_gradient, bool smearing) {
   return current_eckart_impl(r, plist, par, dens_type, compute_gradient,
                              smearing);
 }
-std::tuple<double, FourVector, ThreeVector, ThreeVector, ThreeVector>
+std::tuple<double, FourVector, ThreeVector, ThreeVector, FourVector, FourVector,
+           FourVector, FourVector>
 current_eckart(const ThreeVector &r, const Particles &plist,
                const DensityParameters &par, DensityType dens_type,
                bool compute_gradient, bool smearing) {
@@ -179,8 +195,7 @@ void update_lattice(
    * hasn't been updated at this point yet, it provides the t_0 time step
    * information on the currents.
    */
-  // initialize an auxiliary lattice that will store the t_0 values of jmu
-  // copy values of jmu at t_0 onto that lattice;
+  // copy values of jmu at t_0 onto old_jmu;
   // proceed only if finite difference gradients are calculated
   if (par.derivatives() == DerivativesMode::FiniteDifference) {
     for (int i = 0; i < number_of_nodes; i++) {
@@ -192,17 +207,11 @@ void update_lattice(
 
   // calculate the gradients for finite difference derivatives
   if (par.derivatives() == DerivativesMode::FiniteDifference) {
-    // initialize an auxiliary lattice that will store the (t_0 + time_step)
-    // values of jmu
-    // copy values of jmu FourVectors at t_0 + time_step  onto that lattice
+    // copy values of jmu FourVectors at t_0 + time_step onto new_jmu
     for (int i = 0; i < number_of_nodes; i++) {
-      // read off
-      // FourVector fourvector_at_i = ( (*lat)[i] ).jmu_net();
-      // fill
       new_jmu->assign_value(i, ((*lat)[i]).jmu_net());
     }
 
-    // initialize a lattice of fourgradients
     // compute time derivatives and gradients of all components of jmu
     new_jmu->compute_four_gradient_lattice(*old_jmu, time_step,
                                            *four_grad_lattice);
@@ -214,8 +223,49 @@ void update_lattice(
       node.overwrite_djmu_dxnu(tmp[0], tmp[1], tmp[2], tmp[3]);
       node_number++;
     }
-  }  // if ( par.derivatives() == DerivativesMode::FiniteDifference )
-}
+  }  // if (par.derivatives() == DerivativesMode::FiniteDifference)
+
+  // calculate gradients of rest frame density
+  if (par.rho_derivatives() == RestFrameDensityDerivativesMode::On) {
+    for (auto &node : *lat) {
+      // the rest frame density
+      double rho = node.rho();
+      const int sgn = rho > 0 ? 1 : -1;
+      if (std::abs(rho) < very_small_double) {
+        rho = sgn * very_small_double;
+      }
+
+      // the computational frame j^mu
+      const FourVector jmu = node.jmu_net();
+      // computational frame array of derivatives of j^mu
+      const std::array<FourVector, 4> djmu_dxnu = node.djmu_dxnu();
+
+      const double drho_dt =
+          (1 / rho) *
+          (jmu.x0() * djmu_dxnu[0].x0() - jmu.x1() * djmu_dxnu[0].x1() -
+           jmu.x2() * djmu_dxnu[0].x2() - jmu.x3() * djmu_dxnu[0].x3());
+
+      const double drho_dx =
+          (1 / rho) *
+          (jmu.x0() * djmu_dxnu[1].x0() - jmu.x1() * djmu_dxnu[1].x1() -
+           jmu.x2() * djmu_dxnu[1].x2() - jmu.x3() * djmu_dxnu[1].x3());
+
+      const double drho_dy =
+          (1 / rho) *
+          (jmu.x0() * djmu_dxnu[2].x0() - jmu.x1() * djmu_dxnu[2].x1() -
+           jmu.x2() * djmu_dxnu[2].x2() - jmu.x3() * djmu_dxnu[2].x3());
+
+      const double drho_dz =
+          (1 / rho) *
+          (jmu.x0() * djmu_dxnu[3].x0() - jmu.x1() * djmu_dxnu[3].x1() -
+           jmu.x2() * djmu_dxnu[3].x2() - jmu.x3() * djmu_dxnu[3].x3());
+
+      const FourVector drho_dxnu = {drho_dt, drho_dx, drho_dy, drho_dz};
+
+      node.overwrite_drho_dxnu(drho_dxnu);
+    }
+  }  // if (par.rho_derivatives() == RestFrameDensityDerivatives::On){
+}  // void update_lattice()
 
 std::ostream &operator<<(std::ostream &os, DensityType dens_type) {
   switch (dens_type) {

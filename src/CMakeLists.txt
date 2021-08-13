@@ -171,6 +171,7 @@ set(smash_src
         distributions.cc
         energymomentumtensor.cc
         experiment.cc
+        fields.cc
         file.cc
         filelock.cc
         fourvector.cc

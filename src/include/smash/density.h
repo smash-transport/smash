@@ -123,6 +123,7 @@ class DensityParameters {
         ntest_(par.testparticles),
         nensembles_(par.n_ensembles),
         derivatives_(par.derivatives_mode),
+        rho_derivatives_(par.rho_derivatives_mode),
         smearing_(par.smearing_mode),
         central_weight_(par.discrete_weight),
         triangular_range_(par.triangular_range) {
@@ -140,6 +141,10 @@ class DensityParameters {
   int nensembles() const { return nensembles_; }
   /// \return Mode of gradient calculation
   DerivativesMode derivatives() const { return derivatives_; }
+  /// \return Mode of rest frame density derivatives (on or off)
+  RestFrameDensityDerivativesMode rho_derivatives() const {
+    return rho_derivatives_;
+  }
   /// \return Smearing mode
   SmearingMode smearing() const { return smearing_; }
   /// \return Weight of the central cell in the discrete smearing
@@ -176,6 +181,8 @@ class DensityParameters {
   const int nensembles_;
   /// Mode of calculating the gradients
   const DerivativesMode derivatives_;
+  /// Whether to calculate the rest frame density derivatives
+  const RestFrameDensityDerivativesMode rho_derivatives_;
   /// Mode of smearing
   const SmearingMode smearing_;
   /// Weight of the central cell in the discrete smearing
@@ -206,10 +213,10 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
     const DensityParameters &dens_par, const bool compute_gradient = false);
 
 /**\anchor current_eckart
- * Calculates Eckart rest frame density and 4-current
- * of a given density type and optionally
- * the gradient of the density in an arbitary frame, the curl of the 3-current
- * and the time derivative of the 3-current.
+ * Calculates Eckart rest frame density and 4-current of a given density type
+ * and optionally the gradient of the density in an arbitary frame (grad j0),
+ * the curl of the 3-current, and the time, x, y, and z derivatives of the
+ * 4-current.
  * \f[j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N C_i u^{\mu}_i
  * exp \left(- \frac{(\vec r -\vec r_i + \frac{\gamma_i^2}{1 + \gamma_i}
  * \vec \beta_i (\vec \beta_i, \vec r - \vec r_i))^2}{2\sigma^2} \right)\f]
@@ -245,18 +252,23 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  *            current, and that as such it will not be normalized wrt volume.
  *            This should be true for any internal calculation of any quantity
  *            and only makes sense to turn off for output purposes in a box.
- * \return (density in the local Eckart frame [fm\$f^{-3}\$f],
- *          \f$ j_mu \f$ as a 4-vector,
- *          \f$ \nabla\cdots\rho \f$ or a 0 3-vector,
- *          \f$ \partial_t \vec j\f$ or a 0 3-vector,
- *          \f$ \nabla \times \vec j \f$ or a 0 3-vector).
+ * \return (rest frame density in the local Eckart frame [fm\f$^{-3}\f$],
+ *          \f$ j^\mu \f$ as a 4-vector,
+ *          \f$ \vec{\nabla}\cdot j^0 \f$ or a 0 3-vector,
+ *          \f$ \vec{\nabla} \times \vec{j} \f$ or a 0 3-vector,
+ *          \f$ \partial_t j^\mu \f$ or a 0 4-vector,
+ *          \f$ \partial_x j^\mu \f$ or a 0 4-vector,
+ *          \f$ \partial_y j^\mu \f$ or a 0 4-vector,
+ *          \f$ \partial_z j^\mu \f$ or a 0 4-vector).
  */
-std::tuple<double, FourVector, ThreeVector, ThreeVector, ThreeVector>
+std::tuple<double, FourVector, ThreeVector, ThreeVector, FourVector, FourVector,
+           FourVector, FourVector>
 current_eckart(const ThreeVector &r, const ParticleList &plist,
                const DensityParameters &par, DensityType dens_type,
                bool compute_gradient, bool smearing);
 /// convenience overload of the above (ParticleList -> Particles)
-std::tuple<double, FourVector, ThreeVector, ThreeVector, ThreeVector>
+std::tuple<double, FourVector, ThreeVector, ThreeVector, FourVector, FourVector,
+           FourVector, FourVector>
 current_eckart(const ThreeVector &r, const Particles &plist,
                const DensityParameters &par, DensityType dens_type,
                bool compute_gradient, bool smearing);
@@ -265,22 +277,28 @@ current_eckart(const ThreeVector &r, const Particles &plist,
  * A class for time-efficient (time-memory trade-off) calculation of density
  * on the lattice. It holds six FourVectors - positive and negative
  * summands of 4-current, and the time and spatial derivatives of the compound
- * current. These Four-vectors are  additive by particles.
- * It is efficient to calculate additive jmu and \f$ \partial_\nu jmu \f$ in
- * one loop over particles and then calculate the Eckart density, the gradient
- * of the density, the curl and the time derivative of the current accordingly.
- * Splitting into  positive and negative parts of jmu is necessary to avoid
- * problems with the definition of Eckart rest frame.
+ * current. These four-vectors are  additive by particles. It is efficient to
+ * calculate additive \f$j^\mu\f$ and \f$\partial_\nu j^\mu \f$ in one loop over
+ * particles and then calculate the Eckart density, the gradient of the density,
+ * the curl, the time derivative of the current, and derivatives of the rest
+ * frame density accordingly.
+ * Splitting into  positive and negative parts of \f$j^\mu\f$ is necessary to
+ * avoid problems with the definition of Eckart rest frame.
  *
  * Intended usage of the class:
- * -# Add particles from some list using add_particle(...). and
- *    add_particle_for_derivatives(...) The former sets
- *    jmu_pos and jmu_neg, the next sets djmu_dxnu.
- * -# Get jmus and density whenever necessary via density(),
- *    jmu_pos(), jmu_neg()
- * -# Get \f$\nabla \cdot \rho\f$ via grad_rho()
- * -# Get \f$\nabla \times \vec j\f$ via rot_j()
- * -# Get \f$\partial_t \vec j\f$ via dj_dt()
+ * -# Add particles from some list using add_particle(), setting jmu_pos and
+ *    jmu_neg. Calculate derivatives using either add_particle_for_derivatives()
+ *    (in case of Gaussian derivatives) or calculating finite difference
+ *    derivatives; this sets djmu_dxnu. If needed, calculate rest frame density
+ *    derivatives, setting drho_dxnu.
+ * -# Get the net current via jmu_net().
+ * -# Get the net rest frame density via rho().
+ * -# Get the derivatives of the net current via djmu_dxnu()
+ * -# Get the derivatives of the net rest frame baryon density via drho_dxnu()
+ * -# Get \f$\vec{\nabla} j^0\f$ via grad_j0()
+ * -# Get \f$\vec{\nabla} \times \vec{j}\f$ via curl_vecj()
+ * -# Get \f$\partial_t \vec{j}\f$ via dvecj_dt()
+ * -# Get \f$(\vec{\nabla} \rho) \times \vec{j}\f$ via grad_rho_cross_vecj()
  */
 class DensityOnLattice {
  public:
@@ -288,7 +306,8 @@ class DensityOnLattice {
   DensityOnLattice()
       : jmu_pos_(FourVector()),
         jmu_neg_(FourVector()),
-        djmu_dxnu_({FourVector(), FourVector(), FourVector(), FourVector()}) {}
+        djmu_dxnu_({FourVector(), FourVector(), FourVector(), FourVector()}),
+        drho_dxnu_(FourVector()) {}
 
   /**
    * Adds particle to 4-current: \f$j^{\mu} += p^{\mu}/p^0 \cdot factor \f$.
@@ -348,9 +367,9 @@ class DensityOnLattice {
    * future, the net Eckart density can be calculated in a smarter way.
    *
    * \param[in] norm_factor Normalization factor
-   * \return Net Eckart density on the local lattice [fm\f$^{-3}\f$]
+   * \return Net Eckart density on the local lattice \f$\rho\f$ [fm\f$^{-3}\f$]
    */
-  double density(const double norm_factor = 1.0) {
+  double rho(const double norm_factor = 1.0) {
     return (jmu_pos_.abs() - jmu_neg_.abs()) * norm_factor;
   }
 
@@ -358,29 +377,30 @@ class DensityOnLattice {
    * Compute curl of the current on the local lattice
    *
    * \param[in] norm_factor Normalization factor
-   * \return \f$\nabla\times\j\f$ [fm \f$^{-4}\f$]
+   * \return \f$\vec{\nabla}\times\vec{j}\f$ [fm \f$^{-4}\f$]
    */
-  ThreeVector rot_j(const double norm_factor = 1.0) {
-    ThreeVector j_rot = ThreeVector();
-    j_rot.set_x1(djmu_dxnu_[2].x3() - djmu_dxnu_[3].x2());
-    j_rot.set_x2(djmu_dxnu_[3].x1() - djmu_dxnu_[1].x3());
-    j_rot.set_x3(djmu_dxnu_[1].x2() - djmu_dxnu_[2].x1());
-    j_rot *= norm_factor;
-    return j_rot;
+  ThreeVector curl_vecj(const double norm_factor = 1.0) {
+    ThreeVector curl_vec_j = ThreeVector();
+    curl_vec_j.set_x1(djmu_dxnu_[2].x3() - djmu_dxnu_[3].x2());
+    curl_vec_j.set_x2(djmu_dxnu_[3].x1() - djmu_dxnu_[1].x3());
+    curl_vec_j.set_x3(djmu_dxnu_[1].x2() - djmu_dxnu_[2].x1());
+    curl_vec_j *= norm_factor;
+    return curl_vec_j;
   }
 
   /**
-   * Compute gradient of the density on the local lattice
+   * Compute gradient of the the zeroth component of the four-current j^mu
+   * (that is of the computational frame density) on the local lattice
    *
    * \param[in] norm_factor Normalization factor
-   * \return \f$\nabla\rho\f$ [fm \f$^{-4}\f$]
+   * \return \f$\vec{\nabla} j^0\f$ [fm \f$^{-4}\f$]
    */
-  ThreeVector grad_rho(const double norm_factor = 1.0) {
-    ThreeVector rho_grad = ThreeVector();
+  ThreeVector grad_j0(const double norm_factor = 1.0) {
+    ThreeVector j0_grad = ThreeVector();
     for (int i = 1; i < 4; i++) {
-      rho_grad[i - 1] = djmu_dxnu_[i].x0() * norm_factor;
+      j0_grad[i - 1] = djmu_dxnu_[i].x0() * norm_factor;
     }
-    return rho_grad;
+    return j0_grad;
   }
 
   /**
@@ -389,7 +409,7 @@ class DensityOnLattice {
    * \param[in] norm_factor Normalization factor
    * \return \f$\partial_t \vec j\f$ [fm \f$^{-4}\f$]
    */
-  ThreeVector dj_dt(const double norm_factor = 1.0) {
+  ThreeVector dvecj_dt(const double norm_factor = 1.0) {
     return djmu_dxnu_[0].threevec() * norm_factor;
   }
 
@@ -418,10 +438,50 @@ class DensityOnLattice {
   }
 
   /**
+   * Return the FourGradient of the rest frame density
+   * \f$\partial_{\nu}\rho\f$
+   * \return the FourGradient of the rest frame density
+   *         \f$\partial_{\nu}\rho\f$
+   */
+  FourVector drho_dxnu() const { return drho_dxnu_; }
+
+  /**
+   * Return the FourGradient of the net baryon current
+   * \f$\partial_{\nu} j^\mu\f$
+   * \return the array of FourGradients of \f$\partial_{\nu} j^\mu\f$
+   */
+  std::array<FourVector, 4> djmu_dxnu() const { return djmu_dxnu_; }
+
+  /**
+   * Compute the  cross product of \f$\vec{\nabla}\rho\f$ and \f$j^\mu\f$
+   * \return the cross product of \f$\vec{\nabla} \rho\f$ and \f$\vec{j}\f$
+   */
+  ThreeVector grad_rho_cross_vecj() const {
+    const ThreeVector grad_rho = drho_dxnu_.threevec();
+    const ThreeVector vecj = jmu_net().threevec();
+    const ThreeVector Drho_cross_vecj = grad_rho.cross_product(vecj);
+
+    return Drho_cross_vecj;
+  }
+
+  /**
    * Overwrite the time derivative of the current to zero.
    */
   void overwrite_djmu_dt_to_zero() {
     djmu_dxnu_[0] = FourVector(0.0, 0.0, 0.0, 0.0);
+  }
+
+  /**
+   * Overwrite the time derivative of the rest frame density to zero.
+   */
+  void overwrite_drho_dt_to_zero() { drho_dxnu_[0] = 0.0; }
+
+  /**
+   * Overwrite the rest frame density derivatives to provided values.
+   * \param[in] computed_drho_dxnu a FourGradient of the rest frame density rho
+   */
+  void overwrite_drho_dxnu(FourVector computed_drho_dxnu) {
+    drho_dxnu_ = computed_drho_dxnu;
   }
 
   /**
@@ -444,8 +504,10 @@ class DensityOnLattice {
   FourVector jmu_pos_;
   /// Four-current density of the negatively charged particle.
   FourVector jmu_neg_;
-  /// \f$\partial_\nu j^\mu \f$
+  /// Four-gradient of the four-current density, \f$\partial_\nu j^\mu \f$
   std::array<FourVector, 4> djmu_dxnu_;
+  /// Four-gradient of the rest frame density, \f$\partial_\nu \rho \f$
+  FourVector drho_dxnu_;
 };
 
 /// Conveniency typedef for lattice of density
@@ -562,7 +624,7 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
 }
 
 /**
- * Updates the contents on the lattice of <DensityOnLattice> type.
+ * Updates the contents on the lattice of DensityOnLattice type.
  *
  * \param[out] lat The lattice of DensityOnLattice type on which the content
  *             will be updated

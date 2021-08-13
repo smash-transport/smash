@@ -524,13 +524,13 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
   lattice.iterate_sublattice(
       {0, 0, 0}, dim, [&](DensityOnLattice &node, int ix, int, int) {
         if (enable_ascii_) {
-          *fp << node.density() << " ";
+          *fp << node.rho() << " ";
           if (ix == dim[0] - 1) {
             *fp << "\n";
           }
         }
         if (enable_binary_) {
-          result = node.density();
+          result = node.rho();
           fp->write(reinterpret_cast<char *>(&result), sizeof(double));
         }
       });
