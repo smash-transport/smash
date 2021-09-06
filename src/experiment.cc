@@ -131,6 +131,12 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * difference" mode requires using the lattice, and the derivatives are
  * calculated based on finite differences of a given quantity at adjacent
  * lattice nodes; this mode is more numerically efficient.
+
+ * \key Rest_Frame_Density_Derivatives_Mode (string, optional, default = "Off"):
+ * \n
+ * The mode of calculating the gradients of currents, decides whether the rest
+ * frame density derivatives are copmuted (these derivatives are needed for the
+ * VDF potentials, but not for the Skyrme potentials).
  *
  * \key Smearing_Mode (string, optional, default = "Covariant Gaussian"): \n
  * The mode of smearing for density calculation.
@@ -590,6 +596,11 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       ntest,
       config.take({"General", "Derivatives_Mode"},
                   DerivativesMode::CovariantGaussian),
+      config.has_value({"Potentials", "VDF"})
+          ? RestFrameDensityDerivativesMode::On
+          : RestFrameDensityDerivativesMode::Off,
+      config.take({"General", "Field_Derivatives_Mode"},
+                  FieldDerivativesMode::ChainRule),
       config.take({"General", "Smearing_Mode"},
                   SmearingMode::CovariantGaussian),
       config.take({"General", "Gaussian_Sigma"}, 1.),
@@ -665,12 +676,11 @@ std::string format_measurements(const std::vector<Particles> &ensembles,
 
 double calculate_mean_field_energy(
     const Potentials &potentials,
-    RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
+    RectangularLattice<smash::DensityOnLattice> &jmuB_lat,
     const ExperimentParameters &parameters) {
   // basic parameters and variables
-  const double V_cell = (jmu_B_lat.cell_sizes())[0] *
-                        (jmu_B_lat.cell_sizes())[1] *
-                        (jmu_B_lat.cell_sizes())[2];
+  const double V_cell = (jmuB_lat.cell_sizes())[0] *
+                        (jmuB_lat.cell_sizes())[1] * (jmuB_lat.cell_sizes())[2];
 
   double E_mean_field = 0.0;
   double density_mean = 0.0;
@@ -718,19 +728,19 @@ double calculate_mean_field_energy(
     int number_of_nodes = 0;
     double lattice_mean_field_total = 0.0;
 
-    for (auto &node : jmu_B_lat) {
+    for (auto &node : jmuB_lat) {
       number_of_nodes++;
       // the rest frame density
-      double nB = node.density();
+      double rhoB = node.rho();
       // the computational frame density
-      const double j0 = node.jmu_net().x0();
+      const double j0B = node.jmu_net().x0();
 
-      const double abs_nB = std::abs(nB);
-      if ((abs_nB < really_small) || (std::abs(j0) < really_small)) {
+      const double abs_rhoB = std::abs(rhoB);
+      if (abs_rhoB < very_small_double) {
         continue;
       }
-      density_mean += j0;
-      density_variance += j0 * j0;
+      density_mean += j0B;
+      density_variance += j0B * j0B;
 
       /*
        * The mean-field energy for the Skyrme potential. Note: this expression
@@ -740,9 +750,9 @@ double calculate_mean_field_energy(
        *
        * TODO: Add symmetry energy.
        */
-      double mean_field_contribution_1 = (C1GeV / b1) * std::pow(abs_nB, b1) /
+      double mean_field_contribution_1 = (C1GeV / b1) * std::pow(abs_rhoB, b1) /
                                          std::pow(nuclear_density, b1 - 1);
-      double mean_field_contribution_2 = (C2GeV / b2) * std::pow(abs_nB, b2) /
+      double mean_field_contribution_2 = (C2GeV / b2) * std::pow(abs_rhoB, b2) /
                                          std::pow(nuclear_density, b2 - 1);
 
       lattice_mean_field_total +=
@@ -766,14 +776,103 @@ double calculate_mean_field_energy(
                parameters.n_ensembles
         << "\n";
 
+    E_mean_field = lattice_mean_field_total;
+  }  // if (potentials.use_skyrme())
+
+  if (potentials.use_vdf()) {
     /*
-     * E_mean_field is multiplied by the number of testparticles because the
-     * total kinetic energy tracked is that of all particles, including
-     * testparticles, and so this is more consistent with the general paradigm.
+     * Safety check:
+     * Calculating the symmetry energy contribution to the total mean field
+     * energy in the system is not implemented at this time.
      */
-    E_mean_field = lattice_mean_field_total * parameters.testparticles *
-                   parameters.n_ensembles;
-  }
+    if (potentials.use_symmetry() &&
+        parameters.outputclock->current_time() == 0.0) {
+      logg[LExperiment].error()
+          << "\nSymmetry energy is not included in the VDF mean-field "
+             "calculation"
+          << "\nas VDF potentials haven't been fitted with symmetry energy."
+          << "\n\n";
+    }
+
+    /*
+     * The total mean-field energy density due to a VDF potential is
+     * E_MF = \sum_i C_i rho^(b_i - 2) *
+     *                 * [j_0^2 -  rho^2 * (b_i - 1)/b_i] / rho_0^(b_i - 1)
+     * where j_0 is the local computational frame baryon density, rho is the
+     * local rest frame baryon density, and rho_0 is the saturation density.
+     */
+
+    // saturation density of nuclear matter specified in the VDF parameters
+    double rhoB_0 = potentials.saturation_density();
+
+    /*
+     * Note: calculating the mean field only works if lattice is used.
+     * We iterate over the nodes of the baryon density lattice to sum their
+     * contributions to the total mean field.
+     */
+    int number_of_nodes = 0;
+    double lattice_mean_field_total = 0.0;
+
+    for (auto &node : jmuB_lat) {
+      number_of_nodes++;
+      // the rest frame density
+      double rhoB = node.rho();
+      // the computational frame density
+      const double j0B = node.jmu_net().x0();
+      double abs_rhoB = std::abs(rhoB);
+      density_mean += j0B;
+      density_variance += j0B * j0B;
+
+      /*
+       * The mean-field energy for the VDF potential. This expression is correct
+       * in any frame, and in the rest frame conforms to the Skyrme mean-field
+       * energy (if same coefficients and powers are used).
+       */
+      // in order to prevent dividing by zero in case any b_i < 2.0
+      if (abs_rhoB < very_small_double) {
+        abs_rhoB = very_small_double;
+      }
+      double mean_field_contribution = 0.0;
+      for (int i = 0; i < potentials.number_of_terms(); i++) {
+        mean_field_contribution +=
+            potentials.coeffs()[i] *
+            std::pow(abs_rhoB, potentials.powers()[i] - 2.0) *
+            (j0B * j0B -
+             ((potentials.powers()[i] - 1.0) / potentials.powers()[i]) *
+                 abs_rhoB * abs_rhoB) /
+            std::pow(rhoB_0, potentials.powers()[i] - 1.0);
+      }
+      lattice_mean_field_total += V_cell * mean_field_contribution;
+    }
+
+    // logging statistical properties of the density calculation
+    density_mean = density_mean / number_of_nodes;
+    density_variance = density_variance / number_of_nodes;
+    double density_scaled_variance =
+        std::sqrt(density_variance - density_mean * density_mean) /
+        density_mean;
+    logg[LExperiment].debug() << "\t\t\t\t\t";
+    logg[LExperiment].debug()
+        << "\n\t\t\t\t\t            density mean = " << density_mean;
+    logg[LExperiment].debug()
+        << "\n\t\t\t\t\t density scaled variance = " << density_scaled_variance;
+    logg[LExperiment].debug()
+        << "\n\t\t\t\t\t        total mean_field = "
+        << lattice_mean_field_total * parameters.testparticles *
+               parameters.n_ensembles
+        << "\n";
+
+    E_mean_field = lattice_mean_field_total;
+  }  // if (potentials.use_vdf())
+
+  /*
+   * E_mean_field is multiplied by the number of testparticles per particle and
+   * the number of parallel ensembles because the total kinetic energy tracked
+   * is that of all particles in the simulation, including test-particles and/or
+   * ensembles, and so this way is more consistent.
+   */
+  E_mean_field =
+      E_mean_field * parameters.testparticles * parameters.n_ensembles;
 
   return E_mean_field;
 }

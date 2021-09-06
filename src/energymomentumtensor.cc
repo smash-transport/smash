@@ -49,33 +49,47 @@ FourVector EnergyMomentumTensor::landau_frame_4velocity() const {
   logg[LTmn].debug("Looking for Landau frame for T_{mu}^{nu} ", A);
   Eigen::EigenSolver<Matrix4d> es(A);
 
-// Eigen values should be strictly real and non-negative.
-
-/* Here and further I assume that eigenvalues are given in
- * descending order.
- *
- * \todo(oliiny): check Eigen documentation
- * to make sure this is always true.*/
-#ifndef NDEBUG
   Vector4d eig_im = es.eigenvalues().imag();
   Vector4d eig_re = es.eigenvalues().real();
+  size_t i_maxeigenvalue = 0;
   for (size_t i = 0; i < 4; i++) {
-    assert(std::abs(eig_im(i)) < really_small);
-    if (i == 0) {
-      assert(eig_re(i) > -really_small);
-    } else {
-      assert(eig_re(i) < really_small);
+    if (eig_re(i_maxeigenvalue) < eig_re(i)) {
+      i_maxeigenvalue = i;
     }
   }
-  // Make sure that 0th eigenvalue is really the largest one
-  assert(eig_re(0) >= eig_re(1));
-  assert(eig_re(0) >= eig_re(2));
-  assert(eig_re(0) >= eig_re(3));
-  logg[LTmn].debug("eigenvalues: ", eig_re);
-#endif
 
-  Vector4d tmp = es.eigenvectors().col(0).real();
-  // Choose sign so that zeroth component is positive
+  // Sanity checks
+  // Eigen values of A should be strictly real, the largest one corresponding
+  // to energy density should be non-negative, the other ones
+  // corresponding to pressure should be non-positive, because of the
+  // metric tensor gmunu = (1, -1, -1, -1) convention.
+  if (i_maxeigenvalue != 0) {
+    logg[LTmn].warn(
+        "The Tmn diagonalization code previously relied on assumption that"
+        " 0th eigenvalue is the largest one. It seems to be always fulfilled "
+        "in practice, but not guaranteed by Eigen. Here is Tmn * gmn, ",
+        A, " for which it is not fulfilled. Please let Dima(oliiny) know.");
+  }
+  for (size_t i = 0; i < 4; i++) {
+    if (std::abs(eig_im(i)) > really_small) {
+      logg[LTmn].error("Tmn*gmn\n ", A, "\n has a complex eigenvalue ",
+                       eig_re(i), " + i * ", eig_im(i));
+    }
+    if (i == i_maxeigenvalue && eig_re(i) < -really_small) {
+      logg[LTmn].error("Tmn*gmn\n", A,
+                       "\nenergy density eigenvalue is not positive ",
+                       eig_re(i), " + i * ", eig_im(i));
+      logg[LTmn].error("i_max = ", i_maxeigenvalue);
+    }
+    if (i != i_maxeigenvalue && eig_re(i) > really_small) {
+      logg[LTmn].error("Tmn*gmn\n", A, "\npressure eigenvalue is not negative ",
+                       eig_re(i), " + i * ", eig_im(i));
+    }
+  }
+
+  Vector4d tmp = es.eigenvectors().col(i_maxeigenvalue).real();
+  // Choose sign so that zeroth component is positive because we want
+  // 4-velocity to have 0-component positive
   if (tmp(0) < 0.0) {
     tmp = -tmp;
   }
@@ -138,7 +152,9 @@ void EnergyMomentumTensor::add_particle(const FourVector &mom) {
 }
 
 void EnergyMomentumTensor::add_particle(const ParticleData &p, double factor) {
-  add_particle(p.momentum() * factor);
+  if (factor != 0) {
+    add_particle(p.momentum() * factor);
+  }
 }
 
 std::ostream &operator<<(std::ostream &out, const EnergyMomentumTensor &Tmn) {

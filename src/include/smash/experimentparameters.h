@@ -35,7 +35,11 @@ struct ExperimentParameters {
   int testparticles;
 
   /// mode of calculating gradients for density calculation
-  const DerivativesMode derivatives_mode;
+  DerivativesMode derivatives_mode;
+  /// mode of calculating rest frame density gradients (on or off)
+  RestFrameDensityDerivativesMode rho_derivatives_mode;
+  /// mode of calculating field derivatives
+  FieldDerivativesMode field_derivatives_mode;
 
   /// mode of smearing for density calculation
   const SmearingMode smearing_mode;

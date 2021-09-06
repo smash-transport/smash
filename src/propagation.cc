@@ -122,6 +122,7 @@ void update_momenta(
 
   bool possibly_use_lattice =
       (pot.use_skyrme() ? (FB_lat != nullptr) : true) &&
+      (pot.use_vdf() ? (FB_lat != nullptr) : true) &&
       (pot.use_symmetry() ? (FI3_lat != nullptr) : true);
   std::pair<ThreeVector, ThreeVector> FB, FI3;
   double min_time_scale = std::numeric_limits<double>::infinity();
@@ -140,8 +141,9 @@ void update_momenta(
       const bool use_lattice =
           possibly_use_lattice &&
           (pot.use_skyrme() ? FB_lat->value_at(r, FB) : true) &&
+          (pot.use_vdf() ? FB_lat->value_at(r, FB) : true) &&
           (pot.use_symmetry() ? FI3_lat->value_at(r, FI3) : true);
-      if (!pot.use_skyrme()) {
+      if (!pot.use_skyrme() && !pot.use_vdf()) {
         FB = std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
       }
       if (!pot.use_symmetry()) {

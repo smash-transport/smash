@@ -169,13 +169,11 @@ TEST(smearing_factor_normalization) {
   b->initial_conditions(&ensembles[0], par);
   // Fill lattice from particles
   update_lattice(lat.get(), LatticeUpdate::EveryTimestep, DensityType::Baryon,
-                 dens_par, ensembles,
-                 0.0,  // time_step not needed for compute_gradient=false
-                 false);
+                 dens_par, ensembles, false);
   // Compute integral rho(r) d^r. Should be equal to N.
   double int_rho_r_d3r = 0.0;
   for (auto &node : *lat) {
-    int_rho_r_d3r += node.density();
+    int_rho_r_d3r += node.rho();
   }
   int_rho_r_d3r *= L * L * L / n[0] / n[1] / n[2] / N;
   COMPARE_RELATIVE_ERROR(int_rho_r_d3r, 1.0, 3.e-6);
@@ -314,7 +312,7 @@ TEST(current_curl_in_rotating_box) {
   const ThreeVector r0 = ThreeVector(x0, y0, z0);
   // calculate the curl
   const auto rho_and_grad = current_eckart(r0, P, par, dtype, true, true);
-  const auto rot_j = std::get<4>(rho_and_grad);
+  const auto rot_j = std::get<3>(rho_and_grad);
   /* Theoretically, the curl should be (0., 0., 2. * density * omega) at any
    * point inside the box, Compare the z-component of the curl with the
    * theoretical value. */

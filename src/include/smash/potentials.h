@@ -81,7 +81,21 @@ class Potentials {
   double symmetry_S(const double baryon_density) const;
 
   /**
-   * Evaluates potential at point r. Potential is always taken in the local
+   * Evaluates the FourVector potential in the VDF model given the rest frame
+   * density and the computational frame baryon current.
+   *
+   * \param[in] rhoB rest frame baryon density, in fm\f$^{-3}\f$
+   * \param[in] jmuB_net net baryon current in the computational frame, in
+   *            fm\f$^{-3}\f$
+   * \return VDF potential \f[A^{\mu} = 10^{-3}\times
+   *         \sum_i C_i \left(\frac{\rho}{\rho_0}\right)^{b_i - 2}
+   * \frac{j^{\mu}}{\rho_0}\f] in GeV
+   */
+  FourVector vdf_pot(double rhoB, const FourVector jmuB_net) const;
+
+  /**
+   * Evaluates potential (Skyrme with optional Symmetry or VDF) at point r.
+   * For Skyrme and Symmetry options, potential is always taken in the local
    * Eckart rest frame, but point r is in the computational frame.
    *
    * \param[in] r Arbitrary space point where potential is calculated
@@ -92,10 +106,12 @@ class Potentials {
    * \param[in] acts_on Type of particle on which potential is going to act.
    *            It gives the charges (or more precisely, the scaling factors)
    *		of the particle moving in the potential field.
-   * \return Total potential energy acting on the particle: \f[U_{\rm tot}
-   *         =Q_BU_B+2I_3U_I\f] in GeV, where \f$Q_B\f$ is the baryon charge
-   *	     scaled by the ratio of the light (u, d) quark to the total quark
-   *         number and \f$I_3\f$ is the third compnent of the isospin.
+   * \return Total potential energy acting on the particle: for Skyrme and
+   *         Symmetry potentials, \f[U_{\rm tot} =Q_BU_B+2I_3U_I\f] in GeV,
+   *         while for the VDF potential \f[U_{\rm tot} =Q_B A^0\f] in GeV,
+   *         where \f$Q_B\f$ is the baryon charge scaled by the ratio of the
+   *         light (u, d) quark to the total quark number and \f$I_3\f$ is the
+   *         third compnent of the isospin.
    */
   double potential(const ThreeVector &r, const ParticleList &plist,
                    const ParticleType &acts_on) const;
@@ -119,38 +135,43 @@ class Potentials {
   static std::pair<double, int> force_scale(const ParticleType &data);
 
   /**
-   * Evaluates the electrical and magnetic components of the skyrme force.
+   * Evaluates the electric and magnetic components of the skyrme force.
    *
-   * \param[in] density Eckart baryon density [fm\f$^{-3}\f$].
-   * \param[in] grad_rho Gradient of baryon density [fm\f$^{-4}\f$]. This
-   * density is evaluated in the computational frame. \param[in] dj_dt Time
-   * derivative of the baryon current density [fm\f$^{-4}\f$ \param[in] rot_j
-   * Curl of the baryon current density [fm\f$^{-4}\f$ \return (\f$E_B, B_B\f$),
-   * where \f[E_B = -V_B^\prime(\rho^\ast)(\nabla\rho_B
-   *                   + \partial_t \vec j_B)\f]
+   * \param[in] rhoB Eckart baryon density [fm\f$^{-3}\f$].
+   * \param[in] grad_j0B Gradient of baryon density [fm\f$^{-4}\f$]. This
+   *            density is evaluated in the computational frame.
+   * \param[in] dvecjB_dt Time derivative of the vector baryon current density
+   *            [fm\f$^{-4}\f$
+   * \param[in] curl_vecjB Curl of the baryon vector current
+   *            density [fm\f$^{-4}\f$
+   * \return (\f$E_B, B_B\f$), where \f[E_B =
+   *         -V_B^\prime(\rho^\ast)(\nabla\rho_B
+   *         + \partial_t \vec j_B)\f]
    *         is the electro component of Skyrme force and
    *         \f[B_B = V_B^\prime(\rho^\ast) \nabla\times\vec j_B\f]
    *         is the magnetic component of the Skyrme force
    *         with \f$\rho^\ast\f$ being the Eckart baryon density.
    */
   std::pair<ThreeVector, ThreeVector> skyrme_force(
-      const double density, const ThreeVector grad_rho, const ThreeVector dj_dt,
-      const ThreeVector rot_j) const;
+      const double rhoB, const ThreeVector grad_j0B,
+      const ThreeVector dvecjB_dt, const ThreeVector curl_vecjB) const;
 
   /**
-   * Evaluates the electrical and magnetic components of the symmetry force.
+   * Evaluates the electric and magnetic components of the symmetry force.
    *
    * \param[in] rhoI3 Relative isospin 3 density.
-   * \param[in] grad_rhoI3 Gradient of I3/I density [fm\f$^{-4}\f$]. This
+   * \param[in] grad_j0I3 Gradient of I3/I density [fm\f$^{-4}\f$]. This
    *            density is evaluated in the computational frame.
-   * \param[in] djI3_dt Time derivative of the I3/I current density
+   * \param[in] dvecjI3_dt Time derivative of the I3/I vector current density
    *            [fm\f$^{-4}\f$]
-   * \param[in] rot_jI3 Curl of the I3/I current density [fm\f$^{-4}\f$]
-   * \param[in] rhoB Net-baryon density
-   * \param[in] grad_rhoB Gradient of the net-baryon density
-   * \param[in] djB_dt Time derivative of the net-baryon current density
-   * \param[in] rot_jB Curl of the net-baryon current density \return (\f$E_I3,
-   *         B_I3\f$) [GeV/fm],
+   * \param[in] curl_vecjI3 Curl of the I3/I vector current density
+   *            [fm\f$^{-4}\f$]
+   * \param[in] rhoB Net-baryon density in the rest frame
+   * \param[in] grad_j0B  Gradient of the net-baryon density in the
+   *            computational frame
+   * \param[in] dvecjB_dt Time derivative of the net-baryon vector current
+   * density \param[in] curl_vecjB Curl of the net-baryon vector current density
+   * \return (\f$E_I3, B_I3\f$) [GeV/fm],
    *         where \f[\vec{E} = - \frac{\partial
    *         V^\ast}{\partial\rho_{I_3}^\ast}
    *         (\nabla\rho_{I_3} + \partial_t \vec j_{I_3})
@@ -165,12 +186,66 @@ class Potentials {
    *         with \f$\rho^\ast\f$ being the respective Eckart density.
    */
   std::pair<ThreeVector, ThreeVector> symmetry_force(
-      const double rhoI3, const ThreeVector grad_rhoI3,
-      const ThreeVector djI3_dt, const ThreeVector rot_jI3, const double rhoB,
-      const ThreeVector grad_rhoB, const ThreeVector djB_dt,
-      const ThreeVector rot_jB) const;
+      const double rhoI3, const ThreeVector grad_j0I3,
+      const ThreeVector dvecjI3_dt, const ThreeVector curl_vecjI3,
+      const double rhoB, const ThreeVector grad_j0B,
+      const ThreeVector dvecjB_dt, const ThreeVector curl_vecjB) const;
+
   /**
-   * Evaluates the electrical and magnetic components of the forces at point r.
+   * Evaluates the electric and magnetic components of force in the VDF model
+   * given the derivatives of the baryon current \f$j^{\mu}\f$.
+   *
+   * \param[in] rhoB rest frame baryon density in fm\f$^{-3}\f$
+   * \param[in] drhoB_dt time derivative of the rest frame density
+   * \param[in] grad_rhoB gradient of the rest frame density
+   * \param[in] gradrhoB_cross_vecjB cross product of the gradient of the rest
+   *            frame density and the 3-vector baryon current density
+   * \param[in] j0B computational frame baryon density in fm\f$^{-3}\f$
+   * \param[in] grad_j0B gradient of the computational frame baryon density
+   * \param[in] vecjB 3-vector baryon current
+   * \param[in] dvecjB_dt time derivative of the computational frame 3-vector
+   *            baryon current
+   * \param[in] curl_vecjB curl of the 3-vector baryon current
+   * \return (\f$E_{VDF},
+   *         B_{VDF}\f$) [GeV/fm],
+   *         where \f[\vec{E}_{VDF} = - F_1  \big((\vec{\nabla} \rho) j^0 +
+   *         (\partial_t \rho) \vec{j}\big) - F_2  (\vec{\nabla} j^0 +
+   *         \partial_t\vec{j})\f]
+   *         is the electrical component of VDF force and
+   *         \f[\vec{B}_{VDF} = F_1  (\vec{\nabla} \rho) \times \vec{j} + F_2
+   *         \vec{\nabla} \times \vec{j}\f]
+   *         is the magnetic component of the VDF force, with
+   *         \f[F_1 = \sum_i C_i (b_i - 2)
+   *         \frac{\rho^{b_i - 3}}{\rho_0^{b_i - 1}} \,, \f]
+   *         \f[F_2 = \sum_i C_i \frac{\rho^{b_i - 2}}{\rho_0^{b_i - 1}} \,, \f]
+   *         where \f$\rho_0\f$ is the saturation density.
+   */
+  std::pair<ThreeVector, ThreeVector> vdf_force(
+      double rhoB, const double drhoB_dt, const ThreeVector grad_rhoB,
+      const ThreeVector gradrhoB_cross_vecjB, const double j0B,
+      const ThreeVector grad_j0B, const ThreeVector vecjB,
+      const ThreeVector dvecjB_dt, const ThreeVector curl_vecjB) const;
+
+  /**
+   * Evaluates the electric and magnetic components of force in the VDF force
+   * given the derivatives of the VDF mean-field \f$A^\mu\f$.
+   *
+   * \param[in] grad_A_0 gradient of the zeroth component of the field A^mu
+   * \param[in] dA_dt time derivative of the field A^mu
+   * \param[in] curl_vecA curl of the vector component of the field A^mu
+   * \return (\f$E_{VDF},
+   *         B_{VDF}\f$) [GeV/fm],
+   *         where \f[\vec{E}_{VDF} = - \vec{\nabla} A^0 - \partial_t\vec{A}\f]
+   *         is the electrical component of VDF force and
+   *         \f[\vec{B}_{VDF} = \vec{\nabla} \times \vec{A}\f]
+   *         is the magnetic component of the VDF force.
+   */
+  std::pair<ThreeVector, ThreeVector> vdf_force(
+      const ThreeVector grad_A_0, const ThreeVector dA_dt,
+      const ThreeVector curl_vecA) const;
+
+  /**
+   * Evaluates the electric and magnetic components of the forces at point r.
    * Point r is in the computational frame.
    *
    * \param[in] r Arbitrary space point where potential gradient is calculated
@@ -179,9 +254,9 @@ class Potentials {
    *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
    * \return (\f$E_B, B_B, E_{I3}, B_{I3}\f$) [GeV/fm], where
-   *          \f$E_B\f$: the electric component of the Skyrme force
-   *          \f$B_B\f$: the magnetic component of the Skyrme force
-   *          \f$E_{I3}\f$: the electric component of the symmetry force
+   *          \f$E_B\f$: the electric component of the Skyrme or VDF force,
+   *          \f$B_B\f$: the magnetic component of the Skyrme or VDF force,
+   *          \f$E_{I3}\f$: the electric component of the symmetry force,
    *          \f$B_{I3}\f$: the magnetic component of the symmetry force
    */
   virtual std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector>
@@ -198,6 +273,19 @@ class Potentials {
   double skyrme_b() const { return skyrme_b_; }
   /// \return Skyrme parameter skyrme_tau
   double skyrme_tau() const { return skyrme_tau_; }
+  /// \return Skyrme parameter S_pot, in MeV
+  double symmetry_S_pot() const { return symmetry_S_Pot_; }
+
+  /// \return Is VDF potential on?
+  virtual bool use_vdf() const { return use_vdf_; }
+  /// \return Value of the saturation density used in the VDF potential
+  double saturation_density() const { return saturation_density_; }
+  /// \return Vector of the VDF coefficients \f$C_i\f$, coefficients_
+  const std::vector<double> &coeffs() const { return coeffs_; }
+  /// \return Vector of the VDF exponents \f$b_i\f$, powers_
+  const std::vector<double> &powers() const { return powers_; }
+  /// \return Number of terms in the VDF potential
+  int number_of_terms() const { return powers_.size(); }
 
  private:
   /**
@@ -212,6 +300,9 @@ class Potentials {
 
   /// Symmetry potential on/off
   bool use_symmetry_;
+
+  /// VDF potential on/off
+  bool use_vdf_;
 
   /**
    * Parameter of skyrme potentials:
@@ -246,6 +337,16 @@ class Potentials {
    * \left(\frac{\rho}{\rho_0}\right)^\gamma \f]
    */
   double symmetry_gamma_;
+
+  /**
+   * Saturation density of nuclear matter used in the VDF potential; it may
+   * vary between different parameterizations.
+   */
+  double saturation_density_;
+  /// Parameters of the VDF potential: coefficients \f$C_i\f$, in GeV
+  std::vector<double> coeffs_;
+  /// Parameters of the VDF potential: exponents \f$b_i\f$
+  std::vector<double> powers_;
 
   /**
    * Calculate the derivative of the symmetry potential with respect to
