@@ -609,11 +609,11 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
               const ThreeVector cell_center = lat->cell_center(ix, iy, iz);
               // compute smearing weight
               const double weight_x =
-                  triangular_radius[0] - abs(cell_center[0] - pos[0]);
+                  triangular_radius[0] - std::abs(cell_center[0] - pos[0]);
               const double weight_y =
-                  triangular_radius[1] - abs(cell_center[1] - pos[1]);
+                  triangular_radius[1] - std::abs(cell_center[1] - pos[1]);
               const double weight_z =
-                  triangular_radius[2] - abs(cell_center[2] - pos[2]);
+                  triangular_radius[2] - std::abs(cell_center[2] - pos[2]);
               // add the contribution to the node
               node.add_particle(part,
                                 common_weight * weight_x * weight_y * weight_z);
