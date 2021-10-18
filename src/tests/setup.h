@@ -287,7 +287,8 @@ inline ExperimentParameters default_parameters(
       200.0,  // max. cross section
       false,  // allow collisions within nucleus
       1.0,    // cross section scaling
-      0.0     // additional elastic cross section
+      0.0,    // additional elastic cross section
+      false   // in thermodynamics outputs spectators are included
   };
 }
 
