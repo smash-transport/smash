@@ -362,8 +362,11 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \anchor onlypart
  *   \key Only_Participants (bool, optional, default = false): \n
  *   If set to true, only participants are included in the computation of the
- *   energy momentum tensor and of the eckart currents. In this context,
+ *   energy momentum tensor and of the Eckart currents. In this context,
  *   a hadron is considered as a participant if it had at least one collision.
+ *   When using Potentials this option must be either left unset or set to
+ *   false. The reason behing this limitation is that in this case hadrons
+ *   can influence the evolution of the system even without collisions.
  *
  *   The contribution to the energy-momentum tensor and current (be it electric,
  *   baryonic or strange) from a single particle in its rest frame is:
@@ -465,6 +468,13 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   // sets whether to consider only participants in thermodynamic outputs or not
   const bool only_participants =
       config.take({"Output", "Thermodynamics", "Only_Participants"}, false);
+
+  if (only_participants && config.has_value({"Potentials"})) {
+    throw std::invalid_argument(
+        "Only_Participants option cannot be "
+        "set to True when using Potentials.");
+  }
+
 
   const std::string modus_chooser = config.take({"General", "Modus"});
   // remove config maps of unused Modi
