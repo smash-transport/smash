@@ -475,7 +475,6 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
         "set to True when using Potentials.");
   }
 
-
   const std::string modus_chooser = config.take({"General", "Modus"});
   // remove config maps of unused Modi
   config["Modi"].remove_all_but(modus_chooser);
