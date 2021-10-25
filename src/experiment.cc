@@ -359,6 +359,15 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key true - smearing applied
  *   \li \key false - smearing not applied
  *
+ *   \anchor onlypart
+ *   \key Only_Participants (bool, optional, default = false): \n
+ *   If set to true, only participants are included in the computation of the
+ *   energy momentum tensor and of the Eckart currents. In this context,
+ *   a hadron is considered as a participant if it had at least one collision.
+ *   When using Potentials this option must be either left unset or set to
+ *   false. The reason behing this limitation is that in this case hadrons
+ *   can influence the evolution of the system even without collisions.
+ *
  *   The contribution to the energy-momentum tensor and current (be it electric,
  *   baryonic or strange) from a single particle in its rest frame is:
  *   \f[\begin{eqnarray} j^{\mu} = B \frac{p_0^{\mu}}{p_0^0} W \\
@@ -454,6 +463,16 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const int ntest = config.take({"General", "Testparticles"}, 1);
   if (ntest <= 0) {
     throw std::invalid_argument("Testparticle number should be positive!");
+  }
+
+  // sets whether to consider only participants in thermodynamic outputs or not
+  const bool only_participants =
+      config.take({"Output", "Thermodynamics", "Only_Participants"}, false);
+
+  if (only_participants && config.has_value({"Potentials"})) {
+    throw std::invalid_argument(
+        "Only_Participants option cannot be "
+        "set to True when using Potentials.");
   }
 
   const std::string modus_chooser = config.take({"General", "Modus"});
@@ -616,7 +635,8 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
       maximum_cross_section,
       cll_in_nucleus,
       scale_xs,
-      config_coll.take({"Additional_Elastic_Cross_Section"}, 0.0)};
+      config_coll.take({"Additional_Elastic_Cross_Section"}, 0.0),
+      only_participants};
 }
 
 std::string format_measurements(const std::vector<Particles> &ensembles,

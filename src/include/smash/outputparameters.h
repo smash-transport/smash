@@ -33,6 +33,7 @@ struct OutputParameters {
         td_v_landau(false),
         td_jQBS(false),
         td_smearing(true),
+        td_only_participants(false),
         part_extended(false),
         part_only_final(OutputOnlyFinal::Yes),
         coll_extended(false),
@@ -66,6 +67,7 @@ struct OutputParameters {
             "Change the density type to avoid output being dropped.");
       }
       td_smearing = subcon.take({"Smearing"}, true);
+      td_only_participants = subcon.take({"Only_Participants"}, false);
     }
 
     if (conf.has_value({"Particles"})) {
@@ -142,6 +144,12 @@ struct OutputParameters {
    * then final result is in GeV instead of GeV/fm3
    */
   bool td_smearing;
+
+  /**
+   * Flag reporting whether only participants are considered (true) or also
+   * spectators (false)
+   */
+  bool td_only_participants;
 
   /// Extended format for particles output
   bool part_extended;
