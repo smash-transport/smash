@@ -20,88 +20,76 @@ namespace smash {
 
 /*!\Userguide
  * \page projectile_and_target Projectile and Target
- *
+ * \n
+ * - \key Deformed: \n
+ *   - \key Automatic (bool, required if \key Deformed exists, no default):
+ \n
+ *     - \key true - Set parameters of spherical deformation based on mass
+ number of the
+ * nucleus. Currently the following deformed nuclei are implemented: Cu, Zr, Ru,
+ Au, Pb, U. \n
+ *     - \key false - Manually set parameters of spherical deformation. This
+ requires the
+ * additional specification of \key Beta_2, \key Beta_4, \key Theta and
+ * \key Phi, which follow \iref{Moller:1993ed} and \iref{Schenke:2019ruo}. \n
  * \li \key Beta_2 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_2_0 in the
  * beta decomposition of the nuclear radius in the deformed woods-saxon
  * distribution. \n
- *
  * \li \key Beta_4 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_4_0. \n
- *
- * \li \key Orientation
- * \n
+ * \li \key Orientation \n
  * Determines the orientation of the nucleus by rotations
  * which are performed about the axes of a coordinate system
  * that is fixed with respect to the nucleus and whose axes
  * are parallel to those of the computational frame before the first rotation.
  * Note that the nucleus is first rotated by phi and then by theta.
- *    - \key Phi (double, optional, default = 0):\n
+ *         - \key Phi (double, optional, default = 0):\n
  * The angle by which to rotate the nucleus about the z-axis.
- *    - \key Theta (double, optional, default = pi/2): \n
+ *         - \key Theta (double, optional, default = pi/2): \n
  * The angle by which to rotate the nucleus about the rotated x-axis.
- *    - \key Random_Rotation (bool, optional, default = false):\n
+ *         - \key Random_Rotation (bool, optional, default = false):\n
  * Determines whether the created nucleus object should be randomly rotated in
  * space. \n
+ * .
+ *    **Example: Configuring a deformed nucleus**\n
+ * To configure a fixed target heavy-ion collision with deformed nuclei, whose
+ * spherical deformation is explicitly declared, it can be done according to the
+ * following example. For explanatory (and not physics) reasons,
+ * the projectile's Woods Saxon distribution is initialized automatically and
+ * its spherical deformation manually, while the target nucleus is configured
+ * just the opposite.
+ *\verbatim
+ Modi:
+     Collider:
+         Projectile:
+             Particles:    {2212: 29, 2112: 34}
+             Deformed:
+                 # Manually set deformation parameters
+                 Automatic: False
+                 Beta_2: 0.1
+                 Beta_4: 0.3
+                 Orientation:
+                     Theta: 0.8
+                     Phi: 0.02
+         Target:
+             Particles:    {2212: 29, 2112: 34}
+             # manually set woods saxon parameters
+             Saturation_Density: 0.1968
+             Diffusiveness: 0.8
+             Radius: 2.0
+             Deformed:
+                 # Automatically set deformation parameters
+                 Automatic: True
+                 Orientation:
+                     # Randomly rotate nucleus
+                     Random_Rotation: True
+         E_kin: 1.2
+         Calculation_Frame: "fixed target"
+ \endverbatim
  * \n
  */
 
-// For readability and layout issues parts of the customnucleus userguide
-// needs to be located here. The example configuration can however be found in
-// customnucleus.cc
-
-/*!\Userguide
- * \page projectile_and_target Projectile and Target
- *
- *   - \key Custom: \n
- * \li \key File_Directory (path, required if \key Custom exists): \n
- *
- * The directory where the external list with the nucleon configurations
- * is located. Make sure to use an absolute path.\n
- *
- * \li \key File_Name (string, required if \key Custom exists): \n
- * The file name of the external list with the nucleon configurations.
- *
- */
-
-/*!\Userguide
-* \n
-* **Example: Configuring a deformed nucleus**\n
-* To configure a fixed target heavy-ion collision with deformed nuclei, whose
-* spherical deformation is explicitly declared, it can be done according to the
-* following example. For explanatory (and not physics) reasons,
-* the projectile's Woods Saxon distribution is initialized automatically and
-* its spherical deformation manually, while the target nucleus is configured
-* just the opposite.
-*\verbatim
-Modi:
-    Collider:
-        Projectile:
-            Particles:    {2212: 29, 2112: 34}
-            Deformed:
-                # Manually set deformation parameters
-                Automatic: False
-                Beta_2: 0.1
-                Beta_4: 0.3
-                Orientation:
-                    Theta: 0.8
-                    Phi: 0.02
-        Target:
-            Particles:    {2212: 29, 2112: 34}
-            # manually set woods saxon parameters
-            Saturation_Density: 0.1968
-            Diffusiveness: 0.8
-            Radius: 2.0
-            Deformed:
-                # Automatically set deformation parameters
-                Automatic: True
-                Orientation:
-                    # Randomly rotate nucleus
-                    Random_Rotation: True
-        E_kin: 1.2
-        Calculation_Frame: "fixed target"
-\endverbatim
-*/
 
 DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int> &particle_list,
                                  int nTest)
