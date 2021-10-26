@@ -28,7 +28,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * computation of thermodynamic quantities optionally restriced to participants only
 
 
-## [SMASH-2.0.2](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...2.0.2)
+## [SMASH-2.0.2](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...SMASH-2.0.2)
+Date: 2021-06-23
 
 ### Input / Output
 * Added interface with Rivet (the particle-physics MC analysis toolkit) that can process the data of the simulations at runtime and produce YODA output files with the analysis results
@@ -39,13 +40,15 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Continuous integration now uses Github Actions
 
 
-## [SMASH-2.0.1](https://github.com/smash-transport/smash/compare/SMASH-2.0...2.0.1)
+## [SMASH-2.0.1](https://github.com/smash-transport/smash/compare/SMASH-2.0...SMASH-2.0.1)
+Date: 2020-12-21
 
 ### Input / Output
 * Fixed event number counting for intermediate OSCAR output
 
 
-## [SMASH-2.0](https://github.com/smash-transport/smash/compare/SMASH-1.8...2.0)
+## [SMASH-2.0](https://github.com/smash-transport/smash/compare/SMASH-1.8...SMASH-2.0)
+Date: 2020-12-17
 
 **New major version of SMASH**
 
