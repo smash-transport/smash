@@ -14,6 +14,7 @@
 #include <fstream>
 #include <map>
 
+#include "../include/smash/algorithms.h"
 #include "../include/smash/collidermodus.h"
 #include "../include/smash/configuration.h"
 #include "../include/smash/constants.h"
@@ -23,11 +24,18 @@
 #include "../include/smash/nucleus.h"
 #include "../include/smash/potentials.h"
 #include "../include/smash/propagation.h"
+#include "../include/smash/quantumsampling.h"
 #include "../include/smash/spheremodus.h"
 
 #include <boost/filesystem.hpp>
 
 using namespace smash;
+
+TEST(set_random_seed) {
+  std::random_device rd;
+  int64_t seed = rd();
+  random::set_seed(seed);
+}
 
 TEST(init_particle_types) {
   ParticleType::create_type_list(
@@ -308,18 +316,645 @@ TEST(ensembles_vs_testparticles) {
   ThreeVector a, b;
   a = std::get<0>(forces1);
   b = std::get<0>(forces2);
-  std::cout << a << " " << b << std::endl;
   VERIFY(a == b) << a << " " << b;
   a = std::get<1>(forces1);
   b = std::get<1>(forces2);
-  std::cout << a << " " << b << std::endl;
   VERIFY(a == b) << a << " " << b;
   a = std::get<2>(forces1);
   b = std::get<2>(forces2);
-  std::cout << a << " " << b << std::endl;
   VERIFY(a == b) << a << " " << b;
   a = std::get<3>(forces1);
   b = std::get<3>(forces2);
-  std::cout << a << " " << b << std::endl;
   VERIFY(a == b) << a << " " << b;
+}
+
+// create experiment parameters for tests with VDF
+static ExperimentParameters default_parameters_vdf(
+    int testparticles = 1, double dt = 0.1,
+    double triangular_smearing_range = 2.0) {
+  return ExperimentParameters{
+      make_unique<UniformClock>(0., dt),  // labclock
+      make_unique<UniformClock>(0., 1.),  // outputclock
+      1,                                  // ensembles
+      testparticles,                      // testparticles
+      DerivativesMode::FiniteDifference,  // derivatives mode
+      // both the rest frame and the direct derivatives need to be on for the
+      // test of forces calculated using chain rule and direct derivatives
+      RestFrameDensityDerivativesMode::On,  // rest frame derivatives mode
+      FieldDerivativesMode::Direct,         // field derivatives mode
+      SmearingMode::Triangular,             // smearing modeing mode
+      1.0,                                  // Gaussian smearing width
+      4.0,                                  // Gaussian smearing cut-off
+      0.333333,                             // discrete smearing weight
+      triangular_smearing_range,            // triangular smearing range
+      CollisionCriterion::Geometric,
+      false,  // two_to_one
+      false, Test::no_multiparticle_reactions(),
+      false,  // strings switch
+      false,  // use_AQM
+      1.0,
+      false,  // string_with_probability
+      NNbarTreatment::NoAnnihilation,
+      0.,     // low energy sigma_NN cut-off
+      false,  // potential_affect_threshold
+      -1.0,   // box_length
+      200.0,  // max. cross section
+      false,  // allow collisions within nucleus
+      1.0,    // cross section scaling
+      0.0     // additional elastic cross section
+  };
+}
+
+/*
+ * Testing the values of the vdf forces for two ways of calculating gradients of
+ * the vector field: with chain rule derivatives and with field derivatives. The
+ * test initializes matter in a cubic space of size L, with density distributed
+ * uniformly in the x- and y-directions, and distributed linearly in the
+ * z-direction. This results in a constant density gradient in the z-direction
+ * (up to corrections due to fluctuations). For simplicity, we initialize the
+ * matter at zero temperature (sampling the momenta from the Fermi sphere). The
+ * initialization resembles an initialization of a Box Modus generalized to a
+ * case where there is a constant gradient of density, however, there are no
+ * boundary conditions applied. For this reason the calculation of density on
+ * the edge of the space will be faulty, and it is the safest to check the
+ * values of the forces in the middle of the cubic space.
+ */
+TEST(vdf_chain_rule_derivatives_vs_vdf_direct_derivatives) {
+  // a large Ntest is necessary for high precision
+  const int Ntest = 1000;
+  // initialize the experiment parameters and potentials
+  std::string conf_pot =
+      "Potentials:\n"
+      "    VDF:\n"
+      "      Sat_rhoB: 0.168\n"
+      "      Powers: [2.0, 2.35]\n"
+      "      Coeffs: [-209.2, 156.5]\n";
+  Configuration conf = Test::configuration(conf_pot);
+  ExperimentParameters param = default_parameters_vdf(Ntest);
+  Potentials pot(conf["Potentials"], param);
+
+  // the side length of the cubic space
+  const double length = 10.0;
+
+  // the gradient in density rises linearly from some minimal to some maximal
+  // value; here given in units of the saturation density
+  const double rho_min = 0.25;
+  const double rho_max = 0.75;
+  const double rho_0 = pot.saturation_density();
+  // the average density in the cubic space, in fm^{-3}
+  const double rho_avg = rho_0 * (rho_max + rho_min) / 2.0;
+
+  // calculate how many particles of one type are needed in a cubic space of
+  // given length to reproduce this density profile
+  const int N = rho_avg * length * length * length;
+
+  // generate numbers uniformly on the intervals (0,1) and (0, length)
+  auto uniform_one = random::make_uniform_distribution(0.0, 1.0);
+  auto uniform_length = random::make_uniform_distribution(0.0, length);
+
+  ParticleList plist;
+  std::vector<Particles> P(1);
+  // orientation of the momentum vector
+  Angles phitheta;
+  for (int id = 0; id < N * Ntest; id++) {
+    ParticleData p{ParticleType::find(0x2212), id};
+
+    // the density distribution is uniform in the x- and y-directions, but in
+    // the z-direction we want the density to start at n_min for z=0 and rise
+    // linearly to n_max for z=length; we use rejection sampling to sample the
+    // z-position
+    double sampled_z = 0.0;
+    bool success = false;
+    while (!success) {
+      sampled_z = uniform_length();
+      const double distribution_at_sampled_z =
+          rho_min + (rho_max - rho_min) * sampled_z / length;
+      const double sampled_ratio = distribution_at_sampled_z / rho_max;
+      const double accept_or_reject = uniform_one();
+      if (sampled_ratio > accept_or_reject) {
+        success = true;
+      }
+    }
+    const ThreeVector pos{uniform_length(), uniform_length(), sampled_z};
+    p.set_4position({0, pos});
+
+    // particle's momentum needs to be sampled from the Fermi sphere, whose
+    // radius pF varies with the z-position of the particle; the density needs
+    // to be expressed in GeV to yield a momentum in GeV
+    double density_at_z = rho_min + (rho_max - rho_min) * sampled_z / length;
+    density_at_z = rho_0 * density_at_z * hbarc * hbarc * hbarc;
+    // spin degeneracy: we treat the protons that we initialized (2212) as
+    // standing in for nucleons (protons and neutrons); this is so that the
+    // behavior of the initialized system can be easily compared to that of
+    // uniform nuclear matter at the given density
+    const double spin_degeneracy = 4.0;
+    const double pF = cbrt(6.0 * M_PI * M_PI * density_at_z / spin_degeneracy);
+
+    double sample = uniform_one();
+    double radial_momentum = cbrt(sample) * pF;
+    double mass = p.type().mass();
+    phitheta.distribute_isotropically();
+    p.set_4momentum(mass, phitheta.threevec() * radial_momentum);
+
+    plist.push_back(p);
+    P[0].insert(p);
+  }
+
+  // parameters of the lattices; 1 lattice point per 1 fm^3
+  const std::array<double, 3> l = {10, 10, 10};
+  const std::array<int, 3> n = {10, 10, 10};
+  const std::array<double, 3> origin = {0.0, 0.0, 0.0};
+  const bool periodic = false;
+  const DensityParameters par(param);
+
+  // lattices for calculation of the VDF force using the chain rule derivatives
+  std::unique_ptr<RectangularLattice<FourVector>> old_jmu_aux =
+      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
+                                                  LatticeUpdate::EveryTimestep);
+  std::unique_ptr<RectangularLattice<FourVector>> new_jmu_aux =
+      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
+                                                  LatticeUpdate::EveryTimestep);
+  std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>>
+      four_gradient_aux =
+          make_unique<RectangularLattice<std::array<FourVector, 4>>>(
+              l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+
+  std::unique_ptr<DensityLattice> jmu_B_lattice = make_unique<DensityLattice>(
+      l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+
+  std::unique_ptr<RectangularLattice<FourVector>> UB_lattice_density =
+      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
+                                                  LatticeUpdate::EveryTimestep);
+  std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
+      FB_lattice_density =
+          make_unique<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
+              l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+
+  // lattices for calculation of the VDF force using the direct field
+  // derivatives
+  std::unique_ptr<RectangularLattice<FourVector>> old_fields_aux =
+      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
+                                                  LatticeUpdate::EveryTimestep);
+  std::unique_ptr<RectangularLattice<FourVector>> new_fields_aux =
+      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
+                                                  LatticeUpdate::EveryTimestep);
+  std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>>
+      fields_four_gradient_aux =
+          make_unique<RectangularLattice<std::array<FourVector, 4>>>(
+              l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+  std::unique_ptr<FieldsLattice> fields_lattice = make_unique<FieldsLattice>(
+      l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+
+  std::unique_ptr<RectangularLattice<FourVector>> UB_lattice_field =
+      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
+                                                  LatticeUpdate::EveryTimestep);
+  std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
+      FB_lattice_field =
+          make_unique<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
+              l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+
+  update_lattice(jmu_B_lattice.get(), old_jmu_aux.get(), new_jmu_aux.get(),
+                 four_gradient_aux.get(), LatticeUpdate::EveryTimestep,
+                 DensityType::Baryon, par, P,
+                 param.labclock->timestep_duration(), true);
+
+  update_fields_lattice(fields_lattice.get(), old_fields_aux.get(),
+                        new_fields_aux.get(), fields_four_gradient_aux.get(),
+                        jmu_B_lattice.get(), LatticeUpdate::EveryTimestep, pot,
+                        param.labclock->timestep_duration());
+
+  const size_t lattice_size = UB_lattice_density->size();
+
+  for (auto& node : *jmu_B_lattice) {
+    node.overwrite_drho_dt_to_zero();
+    node.overwrite_djmu_dt_to_zero();
+  }
+
+  for (auto& node : *fields_lattice) {
+    node.overwrite_dAmu_dt_to_zero();
+  }
+
+  // we will calculate the average of the relative difference between the two
+  // ways of calculating the forces over a number of nodes (samples)
+  double relative_diff = 0.0;
+  int samples = 0;
+
+  for (size_t i = 0; i < lattice_size; i++) {
+    auto jB = (*jmu_B_lattice)[i];
+    auto Amu = (*fields_lattice)[i];
+    ThreeVector cell_center = (*FB_lattice_density).cell_center(i);
+
+    // get force using chain rule derivatives
+    (*FB_lattice_density)[i] =
+        pot.vdf_force(jB.rho(), jB.drho_dxnu().x0(), jB.drho_dxnu().threevec(),
+                      jB.grad_rho_cross_vecj(), jB.jmu_net().x0(), jB.grad_j0(),
+                      jB.jmu_net().threevec(), jB.dvecj_dt(), jB.curl_vecj());
+
+    // get force using direct derivatives
+    (*FB_lattice_field)[i] =
+        pot.vdf_force(Amu.grad_A0(), Amu.dvecA_dt(), Amu.curl_vecA());
+
+    // calculate average relative difference error over all cells in the
+    // relative middle of the cubic space
+    if ((cell_center.x1() > 3.0) && (cell_center.x1() < 7.0)) {
+      if ((cell_center.x2() > 3.0) && (cell_center.x1() < 7.0)) {
+        if ((cell_center.x3() > 3.0) && (cell_center.x3() < 7.0)) {
+          double aux = std::abs((*FB_lattice_density)[i].first.x3() -
+                                (*FB_lattice_field)[i].first.x3());
+          aux = aux / (std::abs((*FB_lattice_density)[i].first.x3() +
+                                (*FB_lattice_field)[i].first.x3()) /
+                       2.0);
+
+          relative_diff += aux;
+          samples++;
+        }
+      }
+    }
+  }
+
+  relative_diff = relative_diff / samples;
+
+  VERIFY(relative_diff < 0.025)
+      << "The relative difference between forces calculated with chain rule "
+         "derivatives and with direct derivatives is too large. \nThe "
+         "expectation is for the two forces to be comparable.";
+}
+
+/*
+ * Comparing the computation of Skyrme and VDF potentials in the case where
+ * latice is not used; both should give the same force for the VDF potential
+ * defined to reproduce the Skyrme potential. Details of the initialization
+ * mirror those used in the vdf_chain_rule_derivatives_vs_vdf_direct_derivatives
+ * test.
+ */
+TEST(skyrme_vs_vdf_wo_lattice) {
+  // a large Ntest is necessary for high precision
+  const int Ntest = 1000;
+  // initialize the experiment parameters and potentials
+  std::string conf_pot1 =
+      "Potentials:\n"
+      "    Skyrme:\n"
+      "        Skyrme_A: -209.2\n"
+      "        Skyrme_B: 156.4\n"
+      "        Skyrme_Tau: 1.35\n";
+
+  std::string conf_pot2 =
+      "Potentials:\n"
+      "    VDF:\n"
+      "      Sat_rhoB: 0.168\n"
+      "      Powers: [2.0, 2.35]\n"
+      "      Coeffs: [-209.2, 156.5]\n";
+  Configuration conf1 = Test::configuration(conf_pot1),
+                conf2 = Test::configuration(conf_pot2);
+  ExperimentParameters param = default_parameters_vdf(Ntest);
+  Potentials pot1(conf1["Potentials"], param), pot2(conf2["Potentials"], param);
+
+  // the side length of the cubic space
+  const double length = 10.0;
+
+  // the gradient in density rises linearly from some minimal to some maximal
+  // value; here given in units of the saturation density
+  const double rho_min = 0.25;
+  const double rho_max = 0.75;
+  const double rho_0 = pot2.saturation_density();
+  // the average density in the cubic space, in fm^{-3}
+  const double rho_avg = rho_0 * (rho_max + rho_min) / 2.0;
+
+  // calculate how many particles of one type are needed in a cubic space of
+  // given length to reproduce this density profile
+  const int N = rho_avg * length * length * length;
+
+  // generate numbers uniformly on the intervals (0,1) and (0, length)
+  auto uniform_one = random::make_uniform_distribution(0.0, 1.0);
+  auto uniform_length = random::make_uniform_distribution(0.0, length);
+
+  ParticleList plist;
+  std::vector<Particles> P(1);
+  // orientation of the momentum vector
+  Angles phitheta;
+  for (int id = 0; id < N * Ntest; id++) {
+    ParticleData p{ParticleType::find(0x2212), id};
+
+    // the density distribution is uniform in the x- and y-directions, but in
+    // the z-direction we want the density to start at n_min for z=0 and rise
+    // linearly to n_max for z=length; we use rejection sampling to sample the
+    // z-position
+    double sampled_z = 0.0;
+    bool success = false;
+    while (!success) {
+      sampled_z = uniform_length();
+      const double distribution_at_sampled_z =
+          rho_min + (rho_max - rho_min) * sampled_z / length;
+      const double sampled_ratio = distribution_at_sampled_z / rho_max;
+      const double accept_or_reject = uniform_one();
+      if (sampled_ratio > accept_or_reject) {
+        success = true;
+      }
+    }
+    const ThreeVector pos{uniform_length(), uniform_length(), sampled_z};
+    p.set_4position({0, pos});
+
+    // particle's momentum needs to be sampled from the Fermi sphere, whose
+    // radius pF varies with the z-position of the particle; the density needs
+    // to be expressed in GeV to yield a momentum in GeV
+    double density_at_z = rho_min + (rho_max - rho_min) * sampled_z / length;
+    density_at_z = rho_0 * density_at_z * hbarc * hbarc * hbarc;
+    // spin degeneracy: we treat the protons that we initialized (2212) as
+    // standing in for nucleons (protons and neutrons); this is so that the
+    // behavior of the initialized system can be easily compared to that of
+    // uniform nuclear matter at the given density
+    const double spin_degeneracy = 4.0;
+    const double pF = cbrt(6.0 * M_PI * M_PI * density_at_z / spin_degeneracy);
+
+    double sample = uniform_one();
+    double radial_momentum = cbrt(sample) * pF;
+    double mass = p.type().mass();
+    phitheta.distribute_isotropically();
+    p.set_4momentum(mass, phitheta.threevec() * radial_momentum);
+
+    plist.push_back(p);
+    P[0].insert(p);
+  }
+
+  // calculate the average of the relative difference between the forces
+  // calculated from the two potentials over a number of nodes (samples)
+  double relative_diff = 0;
+  int samples = 0;
+  for (int x = 4; x < 7; x++) {
+    for (int y = 4; y < 7; y++) {
+      for (int z = 4; z < 7; z++) {
+        const ThreeVector r = ThreeVector(x, y, z);
+        const auto forces1 = pot1.all_forces(r, plist),
+                   forces2 = pot2.all_forces(r, plist);
+        double aux =
+            std::abs(std::get<0>(forces1).x3() - std::get<0>(forces2).x3());
+        aux =
+            aux /
+            ((std::abs(std::get<0>(forces1).x3() + std::get<0>(forces2).x3())) /
+             2.0);
+
+        relative_diff += aux;
+        samples++;
+      }
+    }
+  }
+
+  relative_diff = relative_diff / samples;
+
+  VERIFY(relative_diff < 0.025)
+      << "The relative difference between forces calculated with the Skyrme "
+         "and with the VDF potential is too large. \nThe expectation is for "
+         "the Skyrme and VDF forces to be comparable for this initialization.";
+}
+
+/*
+ * Creates a histogram of densities in cells of a (cubic) box, and checks
+ * whether the expected relation between histogram densities was found:
+ * returns true if a) there are more cells with density test_left than cells
+ * with density mean_density; b) there is at least one cell with density
+ * test_right. Such relations are expected when spinodal decomposition occurs.
+ */
+static bool density_hist(Particles* P, int box_length, int cell_length,
+                         int test_p, double mean_density, double test_left,
+                         double test_right, double step,
+                         double saturation_density) {
+  // we split the box into cubic cells; for each of the cells, the local density
+  // (scaled by the saturation density) is computed
+  VERIFY(box_length % cell_length == 0)
+      << "We expect the cell length of the density histogram to be a divisor "
+         "of the box length. Instead we got "
+      << box_length << " " << cell_length;
+  static const int num_cell = int(box_length * box_length * box_length /
+                                  (cell_length * cell_length * cell_length));
+  // number of cells per a side of the box
+  const double factor = box_length / cell_length;
+
+  double cells[num_cell];
+  memset(cells, 0, num_cell * sizeof(double));
+
+  int count = 0;
+  // go through the particle list
+  for (Particles::iterator it = P->begin(); it != P->end(); ++it) {
+    count = count + 1;
+    // find the cell in which a given particle resides
+    double x1 = it->position().x1();
+    double x2 = it->position().x2();
+    double x3 = it->position().x3();
+    const int index = int(floor(x1 / cell_length)) +
+                      int(floor(x2 / cell_length)) * factor +
+                      int(floor(x3 / cell_length)) * factor * factor;
+    // increase the local density of this cell
+    cells[index] = cells[index] + 1 / (cell_length * cell_length * cell_length *
+                                       saturation_density * test_p);
+  }
+  double min_bound = DBL_MAX;
+  double max_bound = 0;
+
+  // construct a histogram over densities, counting how many cells have density
+  // that falls within density range for a given histogram bin
+  for (int i = 0; i < num_cell; i++) {
+    if (cells[i] < min_bound) {
+      min_bound = cells[i];
+    }
+    if (cells[i] > max_bound) {
+      max_bound = cells[i];
+    }
+  }
+
+  unsigned int hist_bin = ceil((max_bound - min_bound) / step);
+  min_bound = min_bound / step;
+  max_bound = max_bound / step;
+  unsigned int histogram[hist_bin + 1];
+  memset(histogram, 0, (hist_bin + 1) * sizeof(unsigned int));
+
+  for (int i = 0; i < num_cell; i++) {
+    // increase the histogram counter for the density of the cell
+    double position = std::max(0.0, (cells[i] / step - min_bound));
+    position = std::min(max_bound - min_bound, position);
+    histogram[int(round(position))]++;
+  }
+  // get the number of cells which have the two test densities and the mean
+  // density
+  double position_a = std::max(0.0, (test_left / step - min_bound));
+  position_a = std::min(max_bound - min_bound, position_a);
+  double position_b = std::max(0.0, (mean_density / step - min_bound));
+  position_b = std::min(max_bound - min_bound, position_b);
+  double position_c = std::max(0.0, (test_right / step - min_bound));
+  position_c = std::min(max_bound - min_bound, position_c);
+  bool peak_test = false;
+  // we expect a change of the initial distribution in the box for spinodal
+  // decomposition: in a box in which the average density is mean_density, many
+  // cells are expected to have a lower density test_left, and we ecpect to have
+  // at least one cell with a higher density test_right
+  if (histogram[int(round(position_b))] <= histogram[int(round(position_a))] and
+      histogram[int(round(position_c))] > 0) {
+    peak_test = true;
+  } else {
+    std::cout << " Density histogram " << std::endl;
+    for (unsigned int i = 0; i < hist_bin; i++) {
+      std::cout << i * step - min_bound << "\t " << histogram[i] << std::endl;
+    }
+  }
+  return peak_test;
+}
+
+/*
+ * Test for the occurence of a spinodal decomposition in the spinodal region
+ * of the liquid/gas phase transition at zero temperature in a cubic box with
+ * periodic boundary conditions. There are two parts to the test: The first
+ * checks, using a histogram of densities in the box, whether the expected
+ * separation of densities has occurred. The second checks whether an
+ * expected change in the value of the mean-field energy has taken place.
+ */
+TEST(spinodal_dilute) {
+  // initialise the system with a mean density of 0.25 saturation density;
+  // distribute the particles using a Fermi distribution;
+  // we use isospin symmetric matter with 21 protons and 21 neutrons which
+  // gives 0.25*0.168 density in the 10 fm box
+  const int Ntest = 400, N_p = 21, box_length = 10.0, cell_length = 2;
+  std::vector<Particles> P(1);
+
+  // The baryon density includes both protons and neutrons, of which we
+  // initialise N_p each.
+  double density = 2.0 * N_p / (box_length * box_length * box_length);
+  // degeneracy of isospin symmetric nuclear matter
+  const double nucl_deg = 4.0;
+  // calculate Fermi momentum
+  const double pF =
+      cbrt(6.0 * M_PI * M_PI * density * hbarc * hbarc * hbarc / nucl_deg);
+
+  auto uniform_length =
+      random::make_uniform_distribution(0.0, static_cast<double>(box_length));
+  double momentum_radial = 0.0, start_time_ = 0, mass = smash::nucleon_mass;
+  Angles phitheta;
+  double time_to = start_time_;
+
+  auto uniform_one = random::make_uniform_distribution(0.0, 1.0);
+  // sample protons
+  for (int id = 0; id < N_p * Ntest; id++) {
+    ParticleData p{ParticleType::find(0x2212), id};
+    momentum_radial = (cbrt(uniform_one()) * pF);
+    phitheta.distribute_isotropically();
+    p.set_4momentum(mass, phitheta.threevec() * momentum_radial);
+    ThreeVector pos{uniform_length(), uniform_length(), uniform_length()};
+    p.set_4position(FourVector(start_time_, pos));
+    /// Initialize formation time
+    p.set_formation_time(start_time_);
+    P[0].insert(p);
+  }
+
+  // sample neutrons
+  for (int id = 0; id < N_p * Ntest; id++) {
+    ParticleData p{ParticleType::find(0x2112), id};
+    momentum_radial = (cbrt(uniform_one()) * pF);
+    phitheta.distribute_isotropically();
+    p.set_4momentum(mass, phitheta.threevec() * momentum_radial);
+    ThreeVector pos{uniform_length(), uniform_length(), uniform_length()};
+    p.set_4position(FourVector(start_time_, pos));
+    /// Initialize formation time
+    p.set_formation_time(start_time_);
+    P[0].insert(p);
+  }
+
+  // initialize potential
+  std::string conf_pot =
+      "Potentials:\n"
+      "    VDF:\n"
+      "      Sat_rhoB: 0.168\n"
+      "      Powers: [2.0, 2.35]\n"
+      "      Coeffs: [-209.2, 156.5]\n";
+
+  Configuration conf = Test::configuration(conf_pot);
+  ExperimentParameters param = default_parameters_vdf(Ntest, 0.1, 2.0);
+
+  Potentials pot(conf["Potentials"], param);
+  const std::array<double, 3> l = {10, 10, 10};
+  const std::array<int, 3> n = {10, 10, 10};
+  const std::array<double, 3> origin = {0, 0, 0};
+  const bool periodic = true;
+  const DensityParameters par(param);
+
+  std::unique_ptr<RectangularLattice<FourVector>> old_jmu_auxiliary_df =
+      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
+                                                  LatticeUpdate::EveryTimestep);
+  std::unique_ptr<RectangularLattice<FourVector>> new_jmu_auxiliary_df =
+      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
+                                                  LatticeUpdate::EveryTimestep);
+  std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>>
+      four_gradient_auxiliary_df =
+          make_unique<RectangularLattice<std::array<FourVector, 4>>>(
+              l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+
+  std::unique_ptr<DensityLattice> jmu_B_lat_df = make_unique<DensityLattice>(
+      l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+  std::unique_ptr<RectangularLattice<FourVector>> UB_lat_df =
+      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
+                                                  LatticeUpdate::EveryTimestep);
+  std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
+      FB_lat_df =
+          make_unique<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
+              l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+
+  // the mean field energy at the beginning and end of the evolution
+  double E_init, E_final;
+  // time evolution of the system
+  for (int i = 0; i < 2000; i++) {
+    time_to = time_to + 0.1;
+
+    const double dt = propagate_straight_line(&P[0], time_to, {});
+    for (ParticleData& data : P[0]) {
+      FourVector position = data.position();
+      bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
+                                                  position.end(), box_length);
+      if (wall_hit) {
+        const ParticleData incoming_particle(data);
+        data.set_4position(position);
+      }
+    }
+
+    update_lattice(jmu_B_lat_df.get(), old_jmu_auxiliary_df.get(),
+                   new_jmu_auxiliary_df.get(), four_gradient_auxiliary_df.get(),
+                   LatticeUpdate::EveryTimestep, DensityType::Baryon, par, P,
+                   dt, true);
+    if (i == 0) {
+      for (auto& node : *jmu_B_lat_df) {
+        node.overwrite_drho_dt_to_zero();
+        node.overwrite_djmu_dt_to_zero();
+      }
+      // initial mean field energy
+      E_init = calculate_mean_field_energy(pot, *jmu_B_lat_df, param);
+    }
+
+    const size_t UBlattice_size_df = UB_lat_df->size();
+    for (size_t j = 0; j < UBlattice_size_df; j++) {
+      auto jB_df = (*jmu_B_lat_df)[j];
+      (*UB_lat_df)[j] = pot.vdf_pot(jB_df.rho(), jB_df.jmu_net());
+      (*FB_lat_df)[j] = pot.vdf_force(
+          jB_df.rho(), jB_df.drho_dxnu().x0(), jB_df.drho_dxnu().threevec(),
+          jB_df.grad_rho_cross_vecj(), jB_df.jmu_net().x0(), jB_df.grad_j0(),
+          jB_df.jmu_net().threevec(), jB_df.dvecj_dt(), jB_df.curl_vecj());
+    }
+    update_momenta(P, dt, pot, FB_lat_df.get(), nullptr);
+  }
+  // final mean field energy
+  E_final = calculate_mean_field_energy(pot, *jmu_B_lat_df, param);
+  /*
+   * We compare the density histogram at 0.1*saturation density,0.5*saturation
+   * density and 0.25*saturation density, which is the mean density used for
+   * initialisation. Due to spinodal decomposition, the system should have moved
+   * out of equilibrium and we expect to observe cells with around
+   * 0.5*saturation density which were not present before as well as more cells
+   * at 0.1*saturation density than at 0.25*saturation density
+   */
+  bool final_state = density_hist(&P[0], box_length, cell_length, Ntest,
+                                  density / pot.saturation_density(), 0.1, 0.5,
+                                  0.1, pot.saturation_density());
+
+  VERIFY(final_state) << "The expected peak structure was not found. Spinodal "
+                         "decomposition has probably not happened.";
+  // for spinodal decomposition, we expect the absolute value of the mean-field
+  // energy to increase substantially
+  VERIFY(E_final / E_init > 1.3)
+      << "Mean-field energy did not increase enough. This means that spinodal "
+         "decomposition has probably not happened";
 }
