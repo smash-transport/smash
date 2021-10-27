@@ -298,6 +298,9 @@ class Experiment : public ExperimentBase {
    * \return The minimal required size of cells
    */
   double compute_min_cell_length(double dt) const {
+    if (parameters_.coll_crit == CollisionCriterion::Stochastic) {
+      return parameters_.fixed_min_cell_length;
+    }
     return std::sqrt(4 * dt * dt + max_transverse_distance_sqr_);
   }
 
@@ -532,7 +535,10 @@ class Experiment : public ExperimentBase {
   /// This indicates whether to use time steps.
   const TimeStepMode time_step_mode_;
 
-  /// Maximal distance at which particles can interact, squared
+  /**
+   * Maximal distance at which particles can interact in case of the geometric
+   * criterion, squared
+   */
   double max_transverse_distance_sqr_ = std::numeric_limits<double>::max();
 
   /**
@@ -956,10 +962,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
 
   if (parameters_.coll_crit == CollisionCriterion::Stochastic &&
-      time_step_mode_ != TimeStepMode::Fixed) {
+      (time_step_mode_ != TimeStepMode::Fixed || !use_grid_)) {
     throw std::invalid_argument(
         "The stochastic criterion can only be employed for fixed time step "
-        "mode!");
+        "mode and with a grid!");
   }
 
   logg[LExperiment].info("Using ", parameters_.testparticles,
@@ -2184,7 +2190,7 @@ void Experiment<Modus>::run_time_evolution() {
       actions[i_ens].clear();
       if (ensembles_[i_ens].size() > 0 && action_finders_.size() > 0) {
         /* (1.a) Create grid. */
-        double min_cell_length = compute_min_cell_length(dt);
+        const double min_cell_length = compute_min_cell_length(dt);
         logg[LExperiment].debug("Creating grid with minimal cell length ",
                                 min_cell_length);
         const auto &grid =

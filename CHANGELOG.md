@@ -19,6 +19,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## [Unreleased](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...HEAD)
 
+### Input / Output
+* Added option to specify a `Fixed_Min_Cell_Length` to control the grid size for the stochastic criterion.
+
 ### Added
 * 5-to-2 reactions for NNbar annihilations via the stochastic collision criterion
 * 2-to-5 reactions for NNbar annihilations to 5 pions

@@ -215,14 +215,16 @@ class ScatterActionsFinder : public ActionFinderInterface {
   }
 
   /**
-   * The maximal distance over which particles can interact, related to the
-   * number of test particles and the maximal cross section.
+   * The maximal distance over which particles can interact in case of the
+   * geometric criterion, related to the number of test particles and the
+   * maximal cross section.
    *
    * \param[in] testparticles Number of test particles.
    *
    * \return Maximal transverse distance squared. [fm\f$^{2}\f$]
    *         Particle pairs whose transverse distance is larger than this
-   *         are not checked for collisions.
+   *         are not checked for collisions in case of the default geometric
+   *         collision criterion.
    */
   double max_transverse_distance_sqr(int testparticles) const {
     return (is_constant_elastic_isotropic() ? elastic_parameter_
