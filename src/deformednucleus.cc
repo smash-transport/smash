@@ -90,7 +90,6 @@ namespace smash {
  * \n
  */
 
-
 DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int> &particle_list,
                                  int nTest)
     : Nucleus(particle_list, nTest) {}
