@@ -117,7 +117,7 @@ class ScatterActionMulti : public Action {
 
   /**
    * Calculate the probability for a 3m-to-1 reaction according to the
-   * stochastic collision criterion (e.g. \iref{Xu:2004mz} (Sec.IIB)).
+   * stochastic collision criterion as given in \iref{Staudenmaier:2021lrg}.
    *
    * The formula for the probablilty is not taken from a reference, but derived
    * following the same idea as specified e.g. in the paper above.
@@ -146,7 +146,7 @@ class ScatterActionMulti : public Action {
 
   /**
    * Calculate the probability for a 3-to-2 reaction according to the
-   * stochastic collision criterion (similar to \iref{Cassing:2001ds}).
+   * stochastic collision criterion as given in \iref{Staudenmaier:2021lrg}.
    *
    * \f[ P_{3 \rightarrow 2} = \frac{1}{4E_1E_2E_3} \frac{\Delta t}{(\Delta^3
    * x)^2} \frac{\tilde{\lambda}}{\Phi_38\pi s}\sigma_{2 \rightarrow 3},\f]
@@ -173,7 +173,7 @@ class ScatterActionMulti : public Action {
 
   /**
    * Calculate the probability for a 5-to-2 reaction according to the
-   * stochastic collision criterion (similar to \iref{Cassing:2001ds}).
+   * stochastic collision criterion as given in \iref{Garcia-Montero:2021haa}.
    *
    * \f[ P_{5 \rightarrow 2} = \frac{1}{32E_1E_2E_3E_4E_5} \frac{\Delta
    * t}{(\Delta^3 x)^4} \frac{\tilde{\lambda}}{\Phi_54\pi s}\sigma_{2
