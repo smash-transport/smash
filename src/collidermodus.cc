@@ -148,17 +148,18 @@ static constexpr int LCollider = LogArea::Collider::id;
  * GeV/c) per particle of the beam.  This key, if used, must be
  * present for both \key Projectile and \key Target, and must be
  * _positive_ for both beams.
+ * .
  *
- *   \note If the beam specific kinetic energy or momentum is set using
+ * \note If the beam specific kinetic energy or momentum is set using
  * either of these keys, then it must be specified in the same way
  * (not necessarily same value) for both beams. This is for example useful to
  simulate for p-Pb collisions at the LHC,
  * where the centre-of-mass system does not correspond to the
  * laboratory system (see example below).
  *
- *   **Example: p-Pb collisions at the LHC**\n
+ * **Example: p-Pb collisions at the LHC**\n
  *
- *   Note that SMASH performs it's calculation in the centre-of-velocity
+ * Note that SMASH performs it's calculation in the centre-of-velocity
  * and the particles are returned in the centre-of-mass frame.  The
  * particles therefore need to be boosted by the rapidity of the
  * centre-of-mass (-0.465 for p-Pb at 5.02TeV).
@@ -181,18 +182,6 @@ static constexpr int LCollider = LogArea::Collider::id;
          2112: 0
   \endverbatim
  *
- * - \key Deformed: \n
- *   - \key Automatic (bool, required if \key Deformed exists, no default):
- \n
- *     - \key true - Set parameters of spherical deformation based on mass
- number of the
- * nucleus. Currently the following deformed nuclei are implemented: Cu, Zr, Ru,
- Au, Pb, U. \n
- *     - \key false - Manually set parameters of spherical deformation. This
- requires the
- * additional specification of \key Beta_2, \key Beta_4, \key Theta and
- * \key Phi, which follow \iref{Moller:1993ed} and \iref{Schenke:2019ruo}. \n
- *     .
  *
  * \page input_impact_parameter_ Impact Parameter
  * \key Impact: \n
