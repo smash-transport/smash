@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2020
+ *    Copyright (c) 2013-2021
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -114,8 +114,9 @@ class DensityParameters {
    *            the cutoff factor \f$a\f$ where the cutoff radius
    *            \f$r_{\rm cut}=a\sigma\f$, the test-particle number, the number
    *            of ensembles, the mode of calculating the derivatives, the
-   *            smearing mode, the central weight for Discrete smearing, and the
-   *            range (in units of lattice spacing) for Triangular smearing.
+   *            smearing mode, the central weight for Discrete smearing, the
+   *            range (in units of lattice spacing) for Triangular smearing
+   *            and the flag about using only participants or also spectators
    */
   DensityParameters(const ExperimentParameters &par)  // NOLINT
       : sig_(par.gaussian_sigma),
@@ -126,7 +127,8 @@ class DensityParameters {
         rho_derivatives_(par.rho_derivatives_mode),
         smearing_(par.smearing_mode),
         central_weight_(par.discrete_weight),
-        triangular_range_(par.triangular_range) {
+        triangular_range_(par.triangular_range),
+        only_participants_(par.only_participants) {
     r_cut_sqr_ = r_cut_ * r_cut_;
     const double two_sig_sqr = 2 * sig_ * sig_;
     two_sig_sqr_inv_ = 1. / two_sig_sqr;
@@ -163,6 +165,8 @@ class DensityParameters {
    *         \f$ \int d^3r \, sf(\vec{r}) = 1 \f$.
    */
   double norm_factor_sf() const { return norm_factor_sf_; }
+  /// \return counting only participants (true) or also spectators (false)
+  bool only_participants() const { return only_participants_; }
 
  private:
   /// Gaussian smearing width [fm]
@@ -189,6 +193,8 @@ class DensityParameters {
   const double central_weight_;
   /// Range of the triangular smearing
   const double triangular_range_;
+  /// Flag to take into account only participants
+  bool only_participants_;
 };
 
 /**
@@ -557,6 +563,12 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
 
   for (const Particles &particles : ensembles) {
     for (const ParticleData &part : particles) {
+      if (par.only_participants()) {
+        // if this conditions holds, the hadron is a spectator
+        if (part.get_history().collisions_per_particle == 0) {
+          continue;
+        }
+      }
       const double dens_factor = density_factor(part.type(), dens_type);
       if (std::abs(dens_factor) < really_small) {
         continue;
@@ -609,11 +621,11 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
               const ThreeVector cell_center = lat->cell_center(ix, iy, iz);
               // compute smearing weight
               const double weight_x =
-                  triangular_radius[0] - abs(cell_center[0] - pos[0]);
+                  triangular_radius[0] - std::abs(cell_center[0] - pos[0]);
               const double weight_y =
-                  triangular_radius[1] - abs(cell_center[1] - pos[1]);
+                  triangular_radius[1] - std::abs(cell_center[1] - pos[1]);
               const double weight_z =
-                  triangular_radius[2] - abs(cell_center[2] - pos[2]);
+                  triangular_radius[2] - std::abs(cell_center[2] - pos[2]);
               // add the contribution to the node
               node.add_particle(part,
                                 common_weight * weight_x * weight_y * weight_z);

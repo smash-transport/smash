@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2020
+ *    Copyright (c) 2013-2021
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -83,6 +83,12 @@ current_eckart_impl(const ThreeVector &r, const T &plist,
   std::array<FourVector, 4> djmu_dxnu;
 
   for (const auto &p : plist) {
+    if (par.only_participants()) {
+      // if this conditions holds, the hadron is a spectator
+      if (p.get_history().collisions_per_particle == 0) {
+        continue;
+      }
+    }
     const double dens_factor = density_factor(p.type(), dens_type);
     if (std::fabs(dens_factor) < really_small) {
       continue;

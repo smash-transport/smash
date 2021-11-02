@@ -43,7 +43,7 @@ It requires the following tools & libraries:
 - Pythia = 8.303
 
 Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version (ROOT >= 5.34, HepMC3 >= 3.2.3, Rivet >= 3.1.4) is found on the system.
-Please, note that enabling Rivet output requires a compiler supporting C++14 features (e.g. gcc >= 5).
+Please, note that enabling Rivet output or using ROOT >= 6.24.00 requires a compiler supporting C++14 features.
 
 ### Building Pythia
 
@@ -202,6 +202,11 @@ install destination (`$HEPMC_INS`) with
 Note that if multiple CMAKE_PREFIX_PATHs are necessary, a semicolon-separated
 list of directories can be specified.
 
+### ROOT versions >= 6.24.00
+
+When compiling SMASH with ROOT >= 6.24.00 it is necessary to use a compiler supporting the C++ standard 14 and add the following argument to the `cmake` command:
+
+    cmake .. -DCMAKE_CXX_STANDARD=14
 
 ### Enabling Rivet support
 

@@ -463,15 +463,15 @@ double ScatterActionPhoton::total_cross_section_w_ff(const double E_photon) {
         std::pair<double, double> xs = total_cross_section_pair();
         const double xs_ff =
             pow_int(FF.first, 4) * xs.first + pow_int(FF.second, 4) * xs.second;
-        return xs_ff;
+        return cut_off(xs_ff);
       } else if (default_mediator_ == MediatorType::PION) {
         const double FF = form_factor_pion(E_photon);
         const double xs = total_cross_section();
-        return pow_int(FF, 4) * xs;
+        return cut_off(pow_int(FF, 4) * xs);
       } else if (default_mediator_ == MediatorType::OMEGA) {
         const double FF = form_factor_omega(E_photon);
         const double xs = total_cross_section();
-        return pow_int(FF, 4) * xs;
+        return cut_off(pow_int(FF, 4) * xs);
       }
       break;
     }
@@ -483,14 +483,14 @@ double ScatterActionPhoton::total_cross_section_w_ff(const double E_photon) {
       const double FF = form_factor_pion(E_photon);
       const double xs = total_cross_section();
       const double xs_ff = pow_int(FF, 4) * xs;
-      return xs_ff;
+      return cut_off(xs_ff);
     }
 
     case ReactionType::pi_z_rho_z_pi_z: {
       const double FF = form_factor_omega(E_photon);
       const double xs = total_cross_section();
       const double xs_ff = pow_int(FF, 4) * xs;
-      return xs_ff;
+      return cut_off(xs_ff);
     }
 
     case ReactionType::no_reaction:
@@ -558,6 +558,14 @@ double ScatterActionPhoton::diff_cross_section(const double t,
       // never reached
       break;
   }
+
+  // Rarely, it can happen that the computed differential cross sections slip
+  // slightly below zero for numerical reasons. This is unphysical. We
+  // approximate them with dSigma/dt = 0.01 mb/GeV^2, which is a reasonable
+  // value in the kinetic regime where this occurs.
+  if (diff_xsection < 0) {
+    diff_xsection = 0.01;
+  }
   return diff_xsection;
 }
 
@@ -589,15 +597,15 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
         std::pair<double, double> diff_xs = diff_cross_section_pair(t, m_rho);
         const double xs_ff = pow_int(FF.first, 4) * diff_xs.first +
                              pow_int(FF.second, 4) * diff_xs.second;
-        return xs_ff;
+        return cut_off(xs_ff);
       } else if (default_mediator_ == MediatorType::PION) {
         const double FF = form_factor_pion(E_photon);
         const double diff_xs = diff_cross_section(t, m_rho);
-        return pow_int(FF, 4) * diff_xs;
+        return cut_off(pow_int(FF, 4) * diff_xs);
       } else if (default_mediator_ == MediatorType::OMEGA) {
         const double FF = form_factor_omega(E_photon);
         const double diff_xs = diff_cross_section(t, m_rho);
-        return pow_int(FF, 4) * diff_xs;
+        return cut_off(pow_int(FF, 4) * diff_xs);
       }
       break;
     }
@@ -609,14 +617,14 @@ double ScatterActionPhoton::diff_cross_section_w_ff(const double t,
       const double FF = form_factor_pion(E_photon);
       const double xs = diff_cross_section(t, m_rho);
       const double xs_ff = pow_int(FF, 4) * xs;
-      return xs_ff;
+      return cut_off(xs_ff);
     }
 
     case ReactionType::pi_z_rho_z_pi_z: {
       const double FF = form_factor_omega(E_photon);
       const double xs = diff_cross_section(t, m_rho);
       const double xs_ff = pow_int(FF, 4) * xs;
-      return xs_ff;
+      return cut_off(xs_ff);
     }
 
     case ReactionType::no_reaction:

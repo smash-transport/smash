@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020
+ *    Copyright (c) 2014-2021
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -188,8 +188,8 @@ void Action::assign_formation_time_to_outgoing_particles() {
   bool all_incoming_same_formation_time =
       std::all_of(incoming_particles_.begin() + 1, incoming_particles_.end(),
                   [&](const ParticleData &data_comp) {
-                    return abs(incoming_particles_[0].formation_time() -
-                               data_comp.formation_time()) < really_small;
+                    return std::abs(incoming_particles_[0].formation_time() -
+                                    data_comp.formation_time()) < really_small;
                   });
   if (all_incoming_same_formation_time) {
     last_formed_in_part =

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2020
+ *    Copyright (c) 2013-2021
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -145,6 +145,11 @@ struct ExperimentParameters {
    * sections that are constrained with data.
    */
   double additional_el_xs;  // mb
+
+  /** In thermodynamics outputs, it decides whether to use only participants
+   * (true) or also spectators (false, default value).
+   */
+  bool only_participants;
 };
 
 }  // namespace smash

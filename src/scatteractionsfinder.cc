@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020
+ *    Copyright (c) 2014-2021
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -226,7 +226,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * directly from the scattering rate given by the Boltzmann equation. The
  * stochastic criterion is the only criterion that allows to treat
  * multi-particle reactions.\n
- * For more details, see e.g. Lang et al. (1993) \cite Lang1993.
+ * For more details, see \iref{Staudenmaier:2021lrg}.
  *
  * \note The stochastic criterion is only applicable within limits. For example,
  * it might not lead to reasonable results for very dilute systems like pp
@@ -464,8 +464,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
 
   if (coll_crit_ == CollisionCriterion::Stochastic) {
     const double v_rel = act->relative_velocity();
-    /* Collision probability for 2-particle scattering, see e.g.
-     * \iref{Xu:2004mz}, eq. (11) */
+    /* Collision probability for 2-particle scattering, see
+     * \iref{Staudenmaier:2021lrg}. */
     const double prob = xs * v_rel * dt / gcell_vol;
 
     logg[LFindScatter].debug(

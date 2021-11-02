@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020
+ *    Copyright (c) 2014-2021
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -43,7 +43,9 @@ namespace smash {
  * \n
  * Which of these quantities are outputted needs to be specified in the config
  * file. They will be calculated using **one** of the following density types:
- * hadron, baryon, baryonic isospin, pion, or none.
+ * hadron, baryon, baryonic isospin, pion, or none.\n
+ * The output file does contain any information about whether all hadrons are
+ * included or \ref onlypart "only participants".
  *
  * The format of the file is the following: \n
  *
@@ -119,6 +121,9 @@ ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
       out_par_(out_par) {
   std::fprintf(file_.get(), "# %s thermodynamics output\n", VERSION_MAJOR);
   const ThreeVector r = out_par.td_position;
+  if (out_par_.td_only_participants) {
+    std::fprintf(file_.get(), "# only participants are taken into account\n");
+  }
   if (out_par_.td_smearing) {
     std::fprintf(file_.get(), "# @ point (%6.2f, %6.2f, %6.2f) [fm]\n", r.x1(),
                  r.x2(), r.x3());
@@ -187,12 +192,18 @@ void ThermodynamicOutput::at_intermediate_time(
           out_par_.td_position, particles, dens_param, out_par_.td_dens_type,
           compute_gradient, out_par_.td_smearing));
     }
-    std::fprintf(file_.get(), "%7.4f ", jmu.abs());
+    std::fprintf(file_.get(), "%15.12f ", jmu.abs());
   }
   if (out_par_.td_tmn || out_par_.td_tmn_landau || out_par_.td_v_landau) {
     EnergyMomentumTensor Tmn;
     for (const Particles &particles : ensembles) {
       for (const auto &p : particles) {
+        if (dens_param.only_participants()) {
+          // if this condition holds, the hadron is a spectator and we skip it
+          if (p.get_history().collisions_per_particle == 0) {
+            continue;
+          }
+        }
         const double dens_factor =
             density_factor(p.type(), out_par_.td_dens_type);
         if (std::abs(dens_factor) < really_small) {
@@ -222,11 +233,11 @@ void ThermodynamicOutput::at_intermediate_time(
     }
     if (out_par_.td_tmn_landau) {
       for (int i = 0; i < 10; i++) {
-        std::fprintf(file_.get(), "%7.4f ", Tmn_L[i]);
+        std::fprintf(file_.get(), "%15.12f ", Tmn_L[i]);
       }
     }
     if (out_par_.td_v_landau) {
-      std::fprintf(file_.get(), "%7.4f %7.4f %7.4f ", -u[1] / u[0],
+      std::fprintf(file_.get(), "%15.12f %15.12f %15.12f ", -u[1] / u[0],
                    -u[2] / u[0], -u[3] / u[0]);
     }
   }

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020
+ *    Copyright (c) 2014-2021
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -50,7 +50,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * Determine the collision time of the two particles.
    * Time of the closest approach is taken as collision time, if the geometric
    * collision criterion is used. For stochastic criterion the time is
-   * distributed uniformly within the timestep as in \iref{Xu:2004mz}.
+   * distributed uniformly within the timestep.
    *
    * \param[in] p1 First incoming particle
    * \param[in] p2 Second incoming particle
@@ -273,13 +273,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *
    * Two criteria for the collision decision are supported: 1. The default
    * geometric criterion from UrQMD \iref{Bass:1998ca} (3.27). 2. A stochastic
-   * collision criterion e.g. employed by BAMPS \iref{Xu:2004mz} (Sec.IIB).
-   *
-   * More details on the stochastic collision criterion can be found here:
-   * - P. Danielewicz and G. F. Bertsch, Nucl. Phys. A533, 712 (1991).
-   * - A. Lang, H. Babovsky, W. Cassing, U. Mosel, H. G. Reusch, and K. Weber,
-   *   J. Comp. Phys. 106, 391 (1993).
-   * - W. Cassing, Nucl. Phys. A700, 618 (2002).
+   * collision criterion as introduced in \iref{Staudenmaier:2021lrg}.
    *
    * \param[in] data_a First incoming particle
    * \param[in] data_b Second incoming particle
@@ -303,10 +297,10 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * Check for multiple i.e. more than 2 particles if a collision will happen in
    * the next timestep and create a corresponding Action object in that case.
    *
-   * This is only possible for the stochastic collision criterion e.g. employed
-   * by BAMPS \iref{Xu:2004mz} (Sec.IIB). Following the same general idea as for
-   * the 2-particle scatterings, probabilities for multi-particle scatterings
-   * can be derived.
+   * This is only possible for the stochastic collision criterion, which is
+   * introduced in \iref{Staudenmaier:2021lrg}. Following the same general idea
+   * as for the 2-particle scatterings, probabilities for multi-particle
+   * scatterings can be derived.
    *
    * \param[in] plist List of incoming particles
    * \param[in] dt Maximum time interval within which a collision can happen

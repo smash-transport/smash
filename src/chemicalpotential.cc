@@ -235,7 +235,7 @@ double ChemicalPotentialSolver::effective_chemical_potential(
       density_one_species(degeneracy, mass, temperature, chemical_potential[0],
                           statistics, &integrator_);
 
-  if (abs((number_density - nDensityCheck) / conversion_factor) >
+  if (std::abs((number_density - nDensityCheck) / conversion_factor) >
       precision_fm) {
     logg[LogArea::Main::id].warn(
         "\n\nThe calculated chemical potential = ", chemical_potential[0],
