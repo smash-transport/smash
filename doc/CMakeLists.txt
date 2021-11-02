@@ -51,7 +51,6 @@ if(DOXYGEN)
       add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
          COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/generateuserdocs.sh ${SED}
          ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox 
-         #${GIT} ${PROJECT_SOURCE_DIR}
          ${files_with_input}
          DEPENDS ${files_with_input}
          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
