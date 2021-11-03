@@ -2188,10 +2188,11 @@ void Experiment<Modus>::run_time_evolution() {
         logg[LExperiment].debug("Creating grid with minimal cell length ",
                                 min_cell_length);
         const auto &grid =
-            use_grid_
-                ? modus_.create_grid(ensembles_[i_ens], min_cell_length, dt)
-                : modus_.create_grid(ensembles_[i_ens], min_cell_length, dt,
-                                     CellSizeStrategy::Largest);
+            use_grid_ ? modus_.create_grid(ensembles_[i_ens], min_cell_length,
+                                           dt, parameters_.coll_crit)
+                      : modus_.create_grid(ensembles_[i_ens], min_cell_length,
+                                           dt, parameters_.coll_crit,
+                                           CellSizeStrategy::Largest);
 
         const double gcell_vol = grid.cell_volume();
         /* (1.b) Iterate over cells and find actions. */
