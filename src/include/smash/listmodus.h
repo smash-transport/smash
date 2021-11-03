@@ -229,15 +229,60 @@ class ListModus : public ModusDefault {
   friend std::ostream &operator<<(std::ostream &, const ListModus &);
 };
 
+/**
+ * \ingroup modus
+ * ListBoxModus: Provides a modus for running the SMASH Box with an external particle list,
+ *
+ * To use this modus, choose
+    Modus:         ListBox
+ * \code
+ * General:
+ *      Modus: ListBox
+ * \endcode
+ * in the configuration file.
+ *
+ * Options for ListModus go in the "Modi"→"List" section of the
+ * configuration:
+ *
+ * \code
+ * Modi:
+ *      ListBox:
+ *              # options here
+ * \endcode
+
+ * The ListBoxModus inherits all functionality from the ListModus.
+ * For more detailed configuring see \ref input_modi_list_.
+ *
+ *
+ * Since SMASH is searching for collisions in computational frame time 't',
+ * all particles need to be at the same time. If this is not the case in
+ * the list provided, the particles will be propagated backwards on
+ * straight lines ("anti-freestreaming"). To avoid unphysical interactions
+ * of these particles, the back-propagated particles receive a
+ * formation_time and zero cross_section_scaling_factor. The cross-sections
+ * are set to zero during the time, where the particle will just propagate
+ * on a straight line again to appear at the formation_time into the system.
+ *
+ */
 class ListBoxModus : public ListModus {
   public:
-
+    /**
+     * Constructor (This is the same as for the ListModus)
+     *
+     * Gathers all configuration variables for the List.
+     *
+     * \param[in] modus_config The configuration object that sets all
+     *                         initial conditions of the experiment.
+     * \param[in] parameters Unused, but necessary because of templated
+     *                       initialization
+     */
     explicit ListBoxModus(Configuration modus_config,
                      const ExperimentParameters &parameters);
 
-    /// in the case of the ListBoxModus this is_box is true
+    /// in the case of the ListBoxModus is_box has to be true
     bool is_box() const { return true; }
 
+    /// \copydoc smash::BoxModus::impose_boundary_conditions
     int impose_boundary_conditions(Particles *particles,
                                   const OutputsList &output_list = {});
  
