@@ -585,6 +585,25 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   const bool potential_affect_threshold =
       config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);
   const double scale_xs = config_coll.take({"Cross_Section_Scaling"}, 1.0);
+
+  const auto criterion =
+      config_coll.take({"Collision_Criterion"}, CollisionCriterion::Covariant);
+
+  if (config_coll.has_value({"Fixed_Min_Cell_Length"}) &&
+      criterion != CollisionCriterion::Stochastic) {
+    throw std::invalid_argument(
+        "Only use a fixed minimal cell length with the stochastic collision "
+        "criterion.");
+  }
+  if (config_coll.has_value({"Maximum_Cross_Section"}) &&
+      criterion == CollisionCriterion::Stochastic) {
+    throw std::invalid_argument(
+        "Only use maximum cross section with the "
+        "geometric collision criterion. Use Fixed_Min_Cell_Length to change "
+        "the grid "
+        "size for the stochastic criterion.");
+  }
+
   /**
    * The maximum around 200 mb occurs in the Delta peak of the pi+p
    * cross section. Many SMASH cross sections diverge at the threshold,
@@ -601,42 +620,42 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   double maximum_cross_section = config_coll.take(
       {"Maximum_Cross_Section"}, maximum_cross_section_default);
   maximum_cross_section *= scale_xs;
-  return {
-      make_unique<UniformClock>(0.0, dt),
-      std::move(output_clock),
-      config.take({"General", "Ensembles"}, 1),
-      ntest,
-      config.take({"General", "Derivatives_Mode"},
-                  DerivativesMode::CovariantGaussian),
-      config.has_value({"Potentials", "VDF"})
-          ? RestFrameDensityDerivativesMode::On
-          : RestFrameDensityDerivativesMode::Off,
-      config.take({"General", "Field_Derivatives_Mode"},
-                  FieldDerivativesMode::ChainRule),
-      config.take({"General", "Smearing_Mode"},
-                  SmearingMode::CovariantGaussian),
-      config.take({"General", "Gaussian_Sigma"}, 1.),
-      config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
-      config.take({"General", "Discrete_Weight"}, 1. / 3.0),
-      config.take({"General", "Triangular_Range"}, 2.0),
-      config_coll.take({"Collision_Criterion"}, CollisionCriterion::Covariant),
-      config_coll.take({"Two_to_One"}, true),
-      config_coll.take({"Included_2to2"}, ReactionsBitSet().set()),
-      config_coll.take({"Multi_Particle_Reactions"},
-                       MultiParticleReactionsBitSet().reset()),
-      config_coll.take({"Strings"}, modus_chooser != "Box"),
-      config_coll.take({"Use_AQM"}, true),
-      config_coll.take({"Resonance_Lifetime_Modifier"}, 1.),
-      config_coll.take({"Strings_with_Probability"}, true),
-      config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
-      low_snn_cut,
-      potential_affect_threshold,
-      box_length,
-      maximum_cross_section,
-      cll_in_nucleus,
-      scale_xs,
-      config_coll.take({"Additional_Elastic_Cross_Section"}, 0.0),
-      only_participants};
+  return {make_unique<UniformClock>(0.0, dt),
+          std::move(output_clock),
+          config.take({"General", "Ensembles"}, 1),
+          ntest,
+          config.take({"General", "Derivatives_Mode"},
+                      DerivativesMode::CovariantGaussian),
+          config.has_value({"Potentials", "VDF"})
+              ? RestFrameDensityDerivativesMode::On
+              : RestFrameDensityDerivativesMode::Off,
+          config.take({"General", "Field_Derivatives_Mode"},
+                      FieldDerivativesMode::ChainRule),
+          config.take({"General", "Smearing_Mode"},
+                      SmearingMode::CovariantGaussian),
+          config.take({"General", "Gaussian_Sigma"}, 1.),
+          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
+          config.take({"General", "Discrete_Weight"}, 1. / 3.0),
+          config.take({"General", "Triangular_Range"}, 2.0),
+          criterion,
+          config_coll.take({"Two_to_One"}, true),
+          config_coll.take({"Included_2to2"}, ReactionsBitSet().set()),
+          config_coll.take({"Multi_Particle_Reactions"},
+                           MultiParticleReactionsBitSet().reset()),
+          config_coll.take({"Strings"}, modus_chooser != "Box"),
+          config_coll.take({"Use_AQM"}, true),
+          config_coll.take({"Resonance_Lifetime_Modifier"}, 1.),
+          config_coll.take({"Strings_with_Probability"}, true),
+          config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
+          low_snn_cut,
+          potential_affect_threshold,
+          box_length,
+          maximum_cross_section,
+          config_coll.take({"Fixed_Min_Cell_Length"}, 2.5),
+          cll_in_nucleus,
+          scale_xs,
+          config_coll.take({"Additional_Elastic_Cross_Section"}, 0.0),
+          only_participants};
 }
 
 std::string format_measurements(const std::vector<Particles> &ensembles,

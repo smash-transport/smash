@@ -36,7 +36,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * Do all collisions isotropically.
  *
  * \key Maximum_Cross_Section (double, optional, default = 200 mb or 2000 mb
- *                             in case d' is present) \n
+ * in case d' is present, only used for the geometric criteria) \n
  * The maximal cross section for which it is guaranteed that all
  * collisions with this cross section will be found.
  * This means that all particle pairs, where the transverse distance
@@ -48,6 +48,13 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * via d' is considered, then the default should be increased to 2000 mb
  * to function correctly (see \iref{Oliinychenko:2018ugs}). The maximal cross
  * section is scaled with \key Cross_Section_Scaling factor.
+ *
+ * \key Fixed_Min_Cell_Length (double, optional, default = 2.5 fm, only used for
+ * the stochastic criterion) \n
+ * The (minimal) length used for the grid cells of the stochastic criterion.
+ * Collisions are searched within grid cells only. Cell lengths are scaled up so
+ * that grid contains all particles if fraction of a cell length would remain at
+ * end of the grid.
  *
  * \key Cross_Section_Scaling (double, optional, default = 1.0) \n
  * Scale all cross sections by a global factor. WARNING: Most cross sections are
