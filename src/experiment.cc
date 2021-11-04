@@ -36,7 +36,6 @@ ExperimentPtr ExperimentBase::create(Configuration config,
    * calculation in a rectangular box. See \ref \BoxModus \li \key List - For
    * given external particle list. See \ref \ListModus
    * \li \key ListBox - For given external particle list in the Box.
-   * See \ref \ListBox
    */
 
   /*!\Userguide

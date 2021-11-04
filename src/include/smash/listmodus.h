@@ -142,19 +142,22 @@ class ListModus : public ModusDefault {
   /// \return whether the modus is list modus (which is, yes, trivially true)
   bool is_list() const { return true; }
 
-  /// set specific values in case of ListBoxModus
+  /// set the file id when ListBoxModus is used
   void set_file_id(const double file_id_inh){
     file_id_ = file_id_inh;
     }
 
+  /// set the particle_list_directory when ListBoxModus is used
   void set_particle_list_file_directory(std::string particle_list_file_directory_inh){
     particle_list_file_directory_ = particle_list_file_directory_inh;
     }
 
+  /// set the particle_list_prefix when ListBoxModus is used
   void set_particle_list_file_prefix(std::string particle_list_file_prefix_inh) {
     particle_list_file_prefix_ = particle_list_file_prefix_inh;
     }
 
+  /// set the event_id when ListBoxModus is used
   void set_event_id(int event_id_inh) {
     event_id_ = event_id_inh;
     }
@@ -231,7 +234,7 @@ class ListModus : public ModusDefault {
 
 /**
  * \ingroup modus
- * ListBoxModus: Provides a modus for running the SMASH Box with an external particle list,
+ * ListBox: Provides a modus for running the SMASH Box with an external particle list,
  *
  * To use this modus, choose
     Modus:         ListBox
@@ -241,7 +244,7 @@ class ListModus : public ModusDefault {
  * \endcode
  * in the configuration file.
  *
- * Options for ListModus go in the "Modi"→"List" section of the
+ * Options for ListBox go in the "Modi"→"ListBox" section of the
  * configuration:
  *
  * \code

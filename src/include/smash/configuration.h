@@ -110,6 +110,7 @@ namespace smash {
  * \li \ref BoxModus
  * \li \ref SphereModus
  * \li \ref ListModus
+ * \li \ref ListBoxModus
  * \endif
  */
 
