@@ -45,14 +45,17 @@ static inline ostream &operator<<(ostream &s, const unordered_set<T> &data) {
 
 static inline double minimal_cell_length(int testparticles) {
   // In SMASH itself the minimal cell length is calculated by the function
-  // ScatterActionsFinder::min_cell_length(). It uses the maximum cross section
-  // of 200mb and the time step size to calculate the cell length. This test was
-  // written before the maximum cross section was introduced and does not
-  // accommodate for time step sizes. It assumes a minimal cell length based on
-  // a maximal interaction length of 2.5fm.
+  // ScatterActionsFinder::compute_min_cell_length(). It uses the maximum cross
+  // section of 200mb and the time step size to calculate the cell length in
+  // case of the geometric criterion. For the stochastic criterion, a fixed
+  // minimal cell length is used, which is by default 2.5 fm. This
+  // test was written before the maximum cross section or fixed cell length
+  // option was introduced and does not accommodate for time step sizes. It
+  // assumes a minimal cell length based on a maximal interaction length of
+  // 2.5fm.
   //
-  // To make the test work with ScatterActionsFinder::min_cell_length() the
-  // placements of the particles would need to be adapted to the different
+  // To make the test work with ScatterActionsFinder::compute_min_cell_length()
+  // the placements of the particles would need to be adapted to the different
   // minimal cell size.
   return 2.5 / std::sqrt(static_cast<double>(testparticles));
 }
@@ -150,7 +153,7 @@ TEST(grid_construction) {
         p.set_4position(1.5 * min_cell_length * p.position());
         list.insert(p);
       }
-      Grid<GridOptions::Normal> grid(list, min_cell_length, timestep);
+      Grid<GridOptions::Normal> grid(list, min_cell_length, timestep, CellNumberLimitation::None);
       auto idsIt = param.ids.begin();
       auto neighbors = param.neighbors;
       grid.iterate_cells(
@@ -213,7 +216,7 @@ TEST(periodic_grid) {
       Grid<GridOptions::PeriodicBoundaries> grid(
           make_pair(std::array<double, 3>{0, 0, 0},
                     std::array<double, 3>{length, length, length}),
-          list, min_cell_length, timestep);
+          list, min_cell_length, timestep, CellNumberLimitation::None);
 
       // stores the neighbor pairs found via the grid:
       std::vector<std::pair<ParticleData, ParticleData>> neighbor_pairs;
@@ -444,7 +447,7 @@ TEST(max_positions_periodic_grid) {
   // the total length. Thus it would create a 2x2x2 grid and the last particle
   // might result in an out-of-bounds cell index. This constructor call ensures
   // that no assertion/exception in the construction code is hit.
-  Grid<GridOptions::PeriodicBoundaries> grid(list, min_cell_length, timestep);
+  Grid<GridOptions::PeriodicBoundaries> grid(list, min_cell_length, timestep, CellNumberLimitation::None);
 }
 
 TEST(max_positions_normal_grid) {
@@ -461,5 +464,5 @@ TEST(max_positions_normal_grid) {
   // This grid construction uses fragile numbers in the z min/max coordinates,
   // which lead to an index_factor_ that even after one std::nextafter call
   // still generates an out-of-bounds cell index.
-  Grid<GridOptions::Normal> grid2(list, testparticles, 1.0);
+  Grid<GridOptions::Normal> grid2(list, testparticles, 1.0, CellNumberLimitation::None) ;
 }
