@@ -25,7 +25,12 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Added
 * 5-to-2 reactions for NNbar annihilations via the stochastic collision criterion
 * 2-to-5 reactions for NNbar annihilations to 5 pions
-* thermodynamic lattice output
+* Thermodynamic lattice output
+* Parallel ensembles
+* VDF potentials
+* New smearing modes: discrete + triangular
+* New option: finite difference derivatives for calculation of density gradients on lattice
+* New option: sample particles according to quantum statistics
 
 ### Changed
 * computation of thermodynamic quantities optionally restriced to participants only
