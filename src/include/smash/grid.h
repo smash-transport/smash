@@ -44,11 +44,11 @@ enum class CellSizeStrategy : char {
 };
 
 /**
- * Identifies wether the number of cells should be limited. For the geometric
+ * Identifies whether the number of cells should be limited. For the geometric
  * criterion it makes sense to not have less than 1 particle in each cell, since
  * the grid cell search is an optimization and the cells can be always made
  * larger. For the stochastic collision criterion, the cell size is an
- * important calculation parameter, which cell size should be kept constant.
+ * important calculation parameter, which should be kept constant.
  * The number of cells therefore cannot be limited as the medium grows even
  * though this might be inefficient for large systems.
  */

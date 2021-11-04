@@ -153,7 +153,8 @@ TEST(grid_construction) {
         p.set_4position(1.5 * min_cell_length * p.position());
         list.insert(p);
       }
-      Grid<GridOptions::Normal> grid(list, min_cell_length, timestep, CellNumberLimitation::None);
+      Grid<GridOptions::Normal> grid(list, min_cell_length, timestep,
+                                     CellNumberLimitation::None);
       auto idsIt = param.ids.begin();
       auto neighbors = param.neighbors;
       grid.iterate_cells(
@@ -447,7 +448,8 @@ TEST(max_positions_periodic_grid) {
   // the total length. Thus it would create a 2x2x2 grid and the last particle
   // might result in an out-of-bounds cell index. This constructor call ensures
   // that no assertion/exception in the construction code is hit.
-  Grid<GridOptions::PeriodicBoundaries> grid(list, min_cell_length, timestep, CellNumberLimitation::None);
+  Grid<GridOptions::PeriodicBoundaries> grid(list, min_cell_length, timestep,
+                                             CellNumberLimitation::None);
 }
 
 TEST(max_positions_normal_grid) {
@@ -464,5 +466,6 @@ TEST(max_positions_normal_grid) {
   // This grid construction uses fragile numbers in the z min/max coordinates,
   // which lead to an index_factor_ that even after one std::nextafter call
   // still generates an out-of-bounds cell index.
-  Grid<GridOptions::Normal> grid2(list, testparticles, 1.0, CellNumberLimitation::None) ;
+  Grid<GridOptions::Normal> grid2(list, testparticles, 1.0,
+                                  CellNumberLimitation::None);
 }
