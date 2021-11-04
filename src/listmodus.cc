@@ -116,6 +116,25 @@ static constexpr int LList = LogArea::List::id;
  * folder).
  */
 
+/*!\Userguide
+ * \page input_modi_listbox_ ListBox
+ *
+ * The ListBox modus provides an option to initialize a box with a given set of
+ * particles. This modus uses all functionality from the List modus itself.
+ * The only difference is that one has to specify the length of the box.
+ * \verbatim
+ Modi:
+     ListBox:
+         File_Directory: "particle_lists_in"
+         File_Prefix: "event"
+         Shift_Id: 0
+         Length: 10.0
+  
+ \endverbatim
+ * Apart from that the usage should be equivalent to the List modus. So for more
+ * details please check the List userpage.
+ */
+
 ListModus::ListModus(Configuration modus_config,
                      const ExperimentParameters &param)
     : shift_id_(modus_config.take({"List", "Shift_Id"})) {
