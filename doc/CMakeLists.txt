@@ -39,17 +39,31 @@ if(DOXYGEN)
       message(WARNING "GNU sed is required to build the user guide")
    endif()
    find_program(GREP grep)
+   if(NOT GREP)
+      message(WARNING "grep not found, docs might be incomplete/faulty")
+   endif()
+   find_program(BASH bash)
+   if(NOT BASH)
+      message(WARNING "bash not found, docs might be incomplete/faulty")
+   endif()
    if(SED)
       include(UserInputFiles.txt)
       add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
          COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/generateuserdocs.sh ${SED}
-         ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox ${files_with_input}
+         ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox 
+         ${files_with_input}
          DEPENDS ${files_with_input}
          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
          COMMENT "Generating User Guide input file"
          VERBATIM
          )
-      add_custom_target(user ${DOXYGEN} ${CMAKE_CURRENT_BINARY_DIR}/DoxyUser
+      add_custom_target(user ${DOXYGEN}
+         ${CMAKE_CURRENT_BINARY_DIR}/DoxyUser
+         COMMAND
+           ${CMAKE_COMMAND} -E env
+           source_dir=${PROJECT_SOURCE_DIR}
+           binary_dir=${CMAKE_CURRENT_BINARY_DIR}
+           bash ${CMAKE_CURRENT_SOURCE_DIR}/set_smash_version.sh
          DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
          COMMENT "Building User Guide"

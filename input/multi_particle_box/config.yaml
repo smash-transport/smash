@@ -23,7 +23,7 @@ Output:
 Collision_Term:
     Collision_Criterion:      Stochastic
     # Value below choosen to optimze tests runtime, remove for production runs with deuterons
-    Maximum_Cross_Section:    200
+    Fixed_Min_Cell_Length:    2.5
     Included_2to2:            ["Elastic"]
     Multi_Particle_Reactions: ["Meson_3to1", "Deuteron_3to2"]
     Force_Decays_At_End:      False

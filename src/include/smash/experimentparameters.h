@@ -128,6 +128,20 @@ struct ExperimentParameters {
    */
   double maximum_cross_section;  // mb
 
+  /**
+   * Fixed minimal grid cell length (in fm). Only used and useful in case of the
+   * stochastic criterion, where the grid cell size is calculation parameter.
+   * Only particles within the cells are checked for collisions. The cell
+   * length is not scaled by the number of test-particles.
+   *
+   * Default of 2.5 fm produces (without test-particles) equivalent-sized grid
+   * as the maximum cross section default of 200 fm.
+   *
+   * In case of the geometric criteria, the cell size is determined by the
+   * maximum cross section.
+   */
+  double fixed_min_cell_length;  // fm
+
   /// Allow or forbid the first collisions within the same nucleus
   bool allow_collisions_within_nucleus;
   /**

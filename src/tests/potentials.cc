@@ -359,9 +359,11 @@ static ExperimentParameters default_parameters_vdf(
       false,  // potential_affect_threshold
       -1.0,   // box_length
       200.0,  // max. cross section
+      2.5,    // fixed min. cell length
       false,  // allow collisions within nucleus
       1.0,    // cross section scaling
-      0.0     // additional elastic cross section
+      0.0,    // additional elastic cross section
+      false   // in thermodynamics outputs spectators are included
   };
 }
 
