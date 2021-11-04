@@ -23,6 +23,7 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include "smash/algorithms.h"
+#include "smash/boxmodus.h"
 #include "smash/configuration.h"
 #include "smash/constants.h"
 #include "smash/experimentparameters.h"
@@ -30,7 +31,6 @@
 #include "smash/inputfunctions.h"
 #include "smash/logging.h"
 #include "smash/threevector.h"
-#include "smash/boxmodus.h"
 #include "smash/wallcrossingaction.h"
 
 namespace smash {
@@ -129,7 +129,7 @@ static constexpr int LList = LogArea::List::id;
          File_Prefix: "event"
          Shift_Id: 0
          Length: 10.0
-  
+
  \endverbatim
  * Apart from that the usage should be equivalent to the List modus. So for more
  * details please check the List userpage.
@@ -387,7 +387,7 @@ bool ListModus::file_has_events_(bf::path filepath,
 }
 
 ListBoxModus::ListBoxModus(Configuration modus_config,
-                     const ExperimentParameters &param)
+                           const ExperimentParameters &param)
     : shift_id_(modus_config.take({"ListBox", "Shift_Id"})),
       length_(modus_config.take({"ListBox", "Length"})) {
   std::string fd = modus_config.take({"ListBox", "File_Directory"});
@@ -398,7 +398,7 @@ ListBoxModus::ListBoxModus(Configuration modus_config,
 
   event_id_ = 0;
   file_id_ = shift_id_;
-  
+
   // Set specific values in the ListModus class
   ListModus::set_file_id(file_id_);
   ListModus::set_particle_list_file_directory(particle_list_file_directory_);
@@ -411,7 +411,7 @@ ListBoxModus::ListBoxModus(Configuration modus_config,
 }
 
 int ListBoxModus::impose_boundary_conditions(Particles *particles,
-                                         const OutputsList &output_list) {
+                                             const OutputsList &output_list) {
   int wraps = 0;
   for (ParticleData &data : *particles) {
     FourVector position = data.position();
@@ -430,7 +430,7 @@ int ListBoxModus::impose_boundary_conditions(Particles *particles,
       }
     }
   }
-  
+
   logg[LList].debug("Moved ", wraps, " particles back into the box.");
   return wraps;
 }
