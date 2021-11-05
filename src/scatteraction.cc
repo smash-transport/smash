@@ -521,12 +521,9 @@ void ScatterAction::string_excitation() {
     }
     if (ntry == ntry_max) {
         /* If pythia fails to form a string, it is usually because the energy
-         * is not large enough. In this case, an elastic scattering happens.
-         *
-         * Since particles are normally added after process selection for
-         * strings, outgoing_particles is still uninitialized, and memory
-         * needs to be allocated. We also shift the process_type_ to elastic
-         * so that sample_angles does a proper treatment. */
+         * is not large enough. In this case, annihilation is then enforced. If this
+         * process still does not not produce any results, it defaults to
+         * an elastic collision. */
           bool success_newtry=false;
           if(process_type_ == ProcessType::StringSoftNonDiffractive){
               process_type_ = ProcessType::StringSoftAnnihilation;
@@ -549,6 +546,11 @@ void ScatterAction::string_excitation() {
           }
 
           if(!success_newtry){
+              /* If annihilation fails:
+               * Particles are normally added after process selection for
+               * strings, outgoing_particles is still uninitialized, and memory
+               * needs to be allocated. We also shift the process_type_ to elastic
+               * so that sample_angles does a proper treatment. */
               outgoing_particles_.reserve(2);
               outgoing_particles_.push_back(ParticleData{incoming_particles_[0]});
               outgoing_particles_.push_back(ParticleData{incoming_particles_[1]});
