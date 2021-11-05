@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include <boost/filesystem.hpp>
 
@@ -107,6 +108,11 @@ class VtkOutput : public OutputInterface {
    */
   void thermodynamics_output(const GrandCanThermalizer &gct) override;
 
+  /// \copydoc OutputInterface::fields_output
+  void fields_output(
+      const std::string name1, const std::string name2,
+      RectangularLattice<std::pair<ThreeVector, ThreeVector>> &lat) override;
+
  private:
   /**
    * Write the given particles to the output.
@@ -185,8 +191,12 @@ class VtkOutput : public OutputInterface {
   int vtk_v_landau_output_counter_ = 0;
   /// Number of fluidization output
   int vtk_fluidization_counter_ = 0;
+  /// Number of fields output in current event
+  int vtk_fields_output_counter_ = 0;
   /// Is the VTK output a thermodynamics output
   bool is_thermodynamics_output_;
+  /// Is the VTK output an output for fields
+  bool is_fields_output_;
 };
 
 }  // namespace smash

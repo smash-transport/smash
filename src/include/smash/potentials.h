@@ -192,6 +192,45 @@ class Potentials {
       const ThreeVector dvecjB_dt, const ThreeVector curl_vecjB) const;
 
   /**
+   * Integrand for calculating the electric field.
+   *
+   * The field is calculaed via \f[\vec{E}(\vec{r})=
+   * \int\frac{(\vec{r}-\vec{r}')\rho(\vec{r}')}{|\vec{r}-\vec{r}'|^3}d^3r' \f]
+   *
+   * \param[in] pos position vector to be integrated over
+   * \param[in] charge_density electric charge density at position pos
+   * \param[in] point position where to calculate the field
+   */
+  static ThreeVector E_field_integrand(ThreeVector pos,
+                                       DensityOnLattice &charge_density,
+                                       ThreeVector point) {
+    ThreeVector dr = point - pos;
+    if (dr.abs() < really_small) {
+      return {0., 0., 0.};
+    }
+    return elementary_charge * charge_density.rho() * dr /
+           std::pow(dr.abs(), 3);
+  }
+
+  /**
+   * Integrand for calculating the magnetic field using the Biot-Savart formula.
+   *
+   * \param[in] pos position vector to be integrated over
+   * \param[in] charge_density electric charge density and current
+   * \param[in] point position where the magnetic field will be calculated
+   */
+  static ThreeVector B_field_integrand(ThreeVector pos,
+                                       DensityOnLattice &charge_density,
+                                       ThreeVector point) {
+    ThreeVector dr = point - pos;
+    if (dr.abs() < really_small) {
+      return {0., 0., 0.};
+    }
+    return elementary_charge *
+           charge_density.jmu_net().threevec().cross_product(dr) /
+           std::pow(dr.abs(), 3);
+  }
+  /**
    * Evaluates the electric and magnetic components of force in the VDF model
    * given the derivatives of the baryon current \f$j^{\mu}\f$.
    *
@@ -266,6 +305,8 @@ class Potentials {
   virtual bool use_skyrme() const { return use_skyrme_; }
   /// \return Is symmetry potential on?
   virtual bool use_symmetry() const { return use_symmetry_; }
+  /// \return Is Coulomb potential on?
+  virtual bool use_coulomb() const { return use_coulomb_; }
 
   /// \return Skyrme parameter skyrme_a, in MeV
   double skyrme_a() const { return skyrme_a_; }
@@ -287,6 +328,9 @@ class Potentials {
   /// \return Number of terms in the VDF potential
   int number_of_terms() const { return powers_.size(); }
 
+  /// \return cutoff radius in ntegration for coulomb potential in fm
+  double coulomb_r_cut() const { return coulomb_r_cut_; }
+
  private:
   /**
    * Struct that contains the gaussian smearing width \f$\sigma\f$,
@@ -300,6 +344,9 @@ class Potentials {
 
   /// Symmetry potential on/off
   bool use_symmetry_;
+
+  /// Coulomb potential on/Off
+  bool use_coulomb_;
 
   /// VDF potential on/off
   bool use_vdf_;
@@ -337,6 +384,9 @@ class Potentials {
    * \left(\frac{\rho}{\rho_0}\right)^\gamma \f]
    */
   double symmetry_gamma_;
+
+  /// Cutoff in integration for coulomb potential
+  double coulomb_r_cut_;
 
   /**
    * Saturation density of nuclear matter used in the VDF potential; it may

@@ -31,6 +31,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * New smearing modes: discrete + triangular
 * New option: finite difference derivatives for calculation of density gradients on lattice
 * New option: sample particles according to quantum statistics
+* Electromagnetic potentials in a simple form
 * New option: start a box with an external particle list
 
 ### Changed

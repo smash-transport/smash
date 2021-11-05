@@ -1021,3 +1021,32 @@ TEST(copy_constructor) {
                                COMPARE(node, lattice2.node(ix, iy, iz));
                              });
 }
+
+double integrand(ThreeVector pos, double &value, ThreeVector point) {
+  return value / ((pos - point).abs());
+}
+
+TEST(integrate_volume) {
+  int ncells = 20;
+  const std::array<double, 3> l = {20., 20., 20.};
+  const std::array<int, 3> n = {ncells, ncells, ncells};
+  const std::array<double, 3> origin = {-10, -10, -10};
+  RectangularLattice<double> lattice(l, n, origin, false,
+                                     LatticeUpdate::EveryTimestep);
+  const double radius = 8.;
+  const double density = 2.0;
+  const ThreeVector r0 = {1., 1., -1.};
+  for (int i = 0; i < ncells * ncells * ncells; i++) {
+    ThreeVector r = lattice.cell_center(i);
+    if ((r - r0).abs() <= radius) {
+      lattice[i] = density * ((r - r0).sqr());
+    } else {
+      lattice[i] = 0.;
+    }
+  }
+  // The field is 2*|r-r0|^2. The integral of |r-r0|^2/|r-r0| over a
+  // circle around r0 should be 2*pi*R^4
+  double integral = 0;
+  lattice.integrate_volume(integral, integrand, radius, r0);
+  COMPARE_RELATIVE_ERROR(integral, 2 * M_PI * std::pow(radius, 4), 0.03);
+}

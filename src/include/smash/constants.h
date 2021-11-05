@@ -100,6 +100,9 @@ constexpr double deuteron_mass = 1.8756;
 /// Fine-struture constant, approximately 1/137.
 constexpr double fine_structure = 7.2973525698e-3;
 
+/// Elementary electric charge in natural units, approximately 0.3
+const double elementary_charge = std::sqrt(fine_structure * 4 * M_PI);
+
 /**
  * The maximum value of the random seed used in PYTHIA.
  */

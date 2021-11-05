@@ -309,6 +309,9 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * - \b Rivet (Only YODA format)\n
  *   See \ref rivet_output_user_guide_ for more information
  * \n
+ * - \b Coulomb (Only VTK format)\n
+ *   No content-specific output options \n
+ * \n
  * \anchor Thermodynamics
  * - \b Thermodynamics \n
  *   The user can print thermodynamical quantities:
@@ -458,6 +461,13 @@ ExperimentPtr ExperimentBase::create(Configuration config,
          Format:          ["HepMC"]
      Collisions:
          Format:          ["HepMC"]
+ \endverbatim
+ * If a lattice is configured and coulomb potentials are enabled, a VTK output
+ * for the electric and magnetic fields is available. It can be obtained by
+ * adding the following to the output section of the configuration:
+ *\verbatim
+     Coulomb:
+         Format:   ["VTK"]
  \endverbatim
  */
 
@@ -717,6 +727,7 @@ std::string format_measurements(const std::vector<Particles> &ensembles,
 double calculate_mean_field_energy(
     const Potentials &potentials,
     RectangularLattice<smash::DensityOnLattice> &jmuB_lat,
+    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *em_lattice,
     const ExperimentParameters &parameters) {
   // basic parameters and variables
   const double V_cell = (jmuB_lat.cell_sizes())[0] *
@@ -903,8 +914,24 @@ double calculate_mean_field_energy(
         << "\n";
 
     E_mean_field = lattice_mean_field_total;
-  }  // if (potentials.use_vdf())
+  }
 
+  double electromagnetic_potential = 0.0;
+  if (potentials.use_coulomb() && em_lattice) {
+    // Use cell volume of electromagnetic fields lattice even though it should
+    // be the same as for net-baryon density
+    double V_cell_em = em_lattice->cell_sizes()[0] *
+                       em_lattice->cell_sizes()[1] *
+                       em_lattice->cell_sizes()[2];
+    for (auto &fields : *em_lattice) {
+      // Energy is 0.5 * int E^2 + B^2 dV
+      electromagnetic_potential +=
+          hbarc * 0.5 * V_cell_em * (fields.first.sqr() + fields.second.sqr());
+    }
+  }
+  logg[LExperiment].debug() << "Total energy in electromagnetic field  = "
+                            << electromagnetic_potential;
+  E_mean_field += electromagnetic_potential;
   /*
    * E_mean_field is multiplied by the number of testparticles per particle and
    * the number of parallel ensembles because the total kinetic energy tracked

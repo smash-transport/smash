@@ -386,6 +386,9 @@ class Experiment : public ExperimentBase {
   /// Isospin projection density on the lattice
   std::unique_ptr<DensityLattice> jmu_I3_lat_;
 
+  /// Electric charge density on the lattice
+  std::unique_ptr<DensityLattice> jmu_el_lat_;
+
   /// Mean-field A^mu on the lattice
   std::unique_ptr<FieldsLattice> fields_lat_;
 
@@ -423,6 +426,10 @@ class Experiment : public ExperimentBase {
   /// Lattices for the electric and magnetic component of the symmetry force
   std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
       FI3_lat_;
+
+  /// Lattices for electric and magnetic field in fm^-2
+  std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
+      EM_lat_;
 
   /// Lattices of energy-momentum tensors for printout
   std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> Tmn_;
@@ -708,6 +715,9 @@ void Experiment<Modus>::create_output(const std::string &format,
     logg[LExperiment].error(
         "HepMC output requested, but HepMC support not compiled in");
 #endif
+  } else if (content == "Coulomb" && format == "VTK") {
+    outputs_.emplace_back(
+        make_unique<VtkOutput>(output_path, "Fields", out_par));
   } else if (content == "Rivet") {
 #ifdef SMASH_USE_RIVET
     // flag to ensure that the Rivet format has not been already assigned
@@ -1667,6 +1677,13 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
             RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       }
+      if (potentials_->use_coulomb()) {
+        jmu_el_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
+                                                  LatticeUpdate::EveryTimestep);
+        EM_lat_ = make_unique<
+            RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      }
       if (potentials_->use_vdf()) {
         jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
                                                  LatticeUpdate::EveryTimestep);
@@ -1710,6 +1727,10 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     logg[LExperiment].error(
         "If you want Therm. VTK or Lattice output, configure a lattice for "
         "it.");
+  } else if (potentials_ && potentials_->use_coulomb()) {
+    logg[LExperiment].error(
+        "Coulomb potential requires a lattice. Please add one to the "
+        "configuration");
   }
 
   // Warning for the mean field calculation if lattice is not on.
@@ -1784,13 +1805,15 @@ std::string format_measurements(const std::vector<Particles> &ensembles,
  * \param[in] potentials Parameters of the potentials used in the simulation.
  * \param[in] jmu_B_lat Lattice of baryon density and baryon current values as
  *            well as their gradients at each lattice node.
- * \param[in] parameters Parameters of the experiment, needed for the access to
- *            the number of testparticles.
- * \return Total mean field energy in the Box.
+ * \param[in] em_lattice Lattice containing the electric and magnetic field in
+ * fm^-2 \param[in] parameters Parameters of the experiment, needed for the
+ * access to the number of testparticles. \return Total mean field energy in the
+ * Box.
  */
 double calculate_mean_field_energy(
     const Potentials &potentials,
     RectangularLattice<smash::DensityOnLattice> &jmu_B_lat,
+    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *em_lattice,
     const ExperimentParameters &parameters);
 
 /**
@@ -1927,8 +1950,8 @@ void Experiment<Modus>::initialize_new_event() {
         node.overwrite_drho_dt_to_zero();
         node.overwrite_djmu_dt_to_zero();
       }
-      E_mean_field =
-          calculate_mean_field_energy(*potentials_, *jmu_B_lat_, parameters_);
+      E_mean_field = calculate_mean_field_energy(*potentials_, *jmu_B_lat_,
+                                                 EM_lat_.get(), parameters_);
     }
   }
   initial_mean_field_energy_ = E_mean_field;
@@ -2245,7 +2268,8 @@ void Experiment<Modus>::run_time_evolution() {
     if (potentials_) {
       update_potentials();
       update_momenta(ensembles_, parameters_.labclock->timestep_duration(),
-                     *potentials_, FB_lat_.get(), FI3_lat_.get());
+                     *potentials_, FB_lat_.get(), FI3_lat_.get(),
+                     EM_lat_.get());
     }
 
     /* (4) Expand universe if non-minkowskian metric; updates
@@ -2385,8 +2409,8 @@ void Experiment<Modus>::intermediate_output() {
   if (potentials_) {
     // using the lattice is necessary
     if ((jmu_B_lat_ != nullptr)) {
-      E_mean_field =
-          calculate_mean_field_energy(*potentials_, *jmu_B_lat_, parameters_);
+      E_mean_field = calculate_mean_field_energy(*potentials_, *jmu_B_lat_,
+                                                 EM_lat_.get(), parameters_);
       /*
        * Mean field calculated in a box should remain approximately constant if
        * the system is in equilibrium, and so deviations from its original value
@@ -2500,6 +2524,9 @@ void Experiment<Modus>::intermediate_output() {
               computational_frame_time);
         }
       }
+      if (EM_lat_) {
+        output->fields_output("Efield", "Bfield", *EM_lat_);
+      }
       if (printout_j_QBS_) {
         output->thermodynamics_lattice_output(
             *j_QBS_lat_, computational_frame_time, ensembles_, density_param_);
@@ -2559,6 +2586,22 @@ void Experiment<Modus>::update_potentials() {
               baryon_density, baryon_grad_j0, baryon_dvecj_dt,
               baryon_curl_vecj);
         }
+      }
+    }
+    if (potentials_->use_coulomb()) {
+      update_lattice(jmu_el_lat_.get(), LatticeUpdate::EveryTimestep,
+                     DensityType::Charge, density_param_, ensembles_, true);
+      for (size_t i = 0; i < EM_lat_->size(); i++) {
+        ThreeVector electric_field = {0., 0., 0.};
+        ThreeVector position = jmu_el_lat_->cell_center(i);
+        jmu_el_lat_->integrate_volume(electric_field,
+                                      Potentials::E_field_integrand,
+                                      potentials_->coulomb_r_cut(), position);
+        ThreeVector magnetic_field = {0., 0., 0.};
+        jmu_el_lat_->integrate_volume(magnetic_field,
+                                      Potentials::B_field_integrand,
+                                      potentials_->coulomb_r_cut(), position);
+        (*EM_lat_)[i] = std::make_pair(electric_field, magnetic_field);
       }
     }  // if ((potentials_->use_skyrme() || ...
     if (potentials_->use_vdf() && jmu_B_lat_ != nullptr) {
@@ -2650,8 +2693,8 @@ void Experiment<Modus>::final_output() {
     if (potentials_) {
       // using the lattice is necessary
       if ((jmu_B_lat_ != nullptr)) {
-        E_mean_field =
-            calculate_mean_field_energy(*potentials_, *jmu_B_lat_, parameters_);
+        E_mean_field = calculate_mean_field_energy(*potentials_, *jmu_B_lat_,
+                                                   EM_lat_.get(), parameters_);
       }
     }
     logg[LExperiment].info() << format_measurements(

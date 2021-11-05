@@ -99,11 +99,13 @@ void expand_space_time(Particles *particles,
  *            components of the Skyrme force
  * \param[in] FI3_lat Lattice for the electric and magnetic
  *            components of the symmetry force
+ * \param[in] EM_lat Lattice for the electric and magnetic field
  */
 void update_momenta(
     std::vector<Particles> &particles, double dt, const Potentials &pot,
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FB_lat,
-    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat);
+    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat,
+    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *EM_lat);
 
 }  // namespace smash
 #endif  // SRC_INCLUDE_SMASH_PROPAGATION_H_

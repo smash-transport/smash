@@ -146,7 +146,7 @@ TEST(nucleus_potential_profile) {
     for (auto i = 0; i < 50; i++) {
       const double time_to = 5.0 * it + i * timestep;
       const double dt = propagate_straight_line(&(P[0]), time_to, {});
-      update_momenta(P, dt, pot, nullptr, nullptr);
+      update_momenta(P, dt, pot, nullptr, nullptr, nullptr);
     }
   }
 }
@@ -225,7 +225,7 @@ TEST(propagation_in_test_potential) {
   while (P1[0].front().position().x1() < 20 * d) {
     time_to += timestep;
     const double dt1 = propagate_straight_line(&(P1[0]), time_to, {});
-    update_momenta(P1, dt1, *pot1, nullptr, nullptr);
+    update_momenta(P1, dt1, *pot1, nullptr, nullptr, nullptr);
   }
 
   // Propagate the second particle for one period.
@@ -234,7 +234,7 @@ TEST(propagation_in_test_potential) {
   while (P2[0].front().position().x0() < period) {
     time_to += timestep;
     const double dt2 = propagate_straight_line(&(P2[0]), time_to, {});
-    update_momenta(P2, dt2, *pot2, nullptr, nullptr);
+    update_momenta(P2, dt2, *pot2, nullptr, nullptr, nullptr);
   }
 
   // Calculate 4-momentum, expected from conservation laws
@@ -924,7 +924,7 @@ TEST(spinodal_dilute) {
         node.overwrite_djmu_dt_to_zero();
       }
       // initial mean field energy
-      E_init = calculate_mean_field_energy(pot, *jmu_B_lat_df, param);
+      E_init = calculate_mean_field_energy(pot, *jmu_B_lat_df, nullptr, param);
     }
 
     const size_t UBlattice_size_df = UB_lat_df->size();
@@ -936,10 +936,10 @@ TEST(spinodal_dilute) {
           jB_df.grad_rho_cross_vecj(), jB_df.jmu_net().x0(), jB_df.grad_j0(),
           jB_df.jmu_net().threevec(), jB_df.dvecj_dt(), jB_df.curl_vecj());
     }
-    update_momenta(P, dt, pot, FB_lat_df.get(), nullptr);
+    update_momenta(P, dt, pot, FB_lat_df.get(), nullptr, nullptr);
   }
   // final mean field energy
-  E_final = calculate_mean_field_energy(pot, *jmu_B_lat_df, param);
+  E_final = calculate_mean_field_energy(pot, *jmu_B_lat_df, nullptr, param);
   /*
    * We compare the density histogram at 0.1*saturation density,0.5*saturation
    * density and 0.25*saturation density, which is the mean density used for

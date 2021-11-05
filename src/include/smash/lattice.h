@@ -70,6 +70,7 @@ class RectangularLattice {
       : lattice_sizes_(l),
         n_cells_(n),
         cell_sizes_{l[0] / n[0], l[1] / n[1], l[2] / n[2]},
+        cell_volume_{cell_sizes_[0] * cell_sizes_[1] * cell_sizes_[2]},
         origin_(orig),
         periodic_(per),
         when_update_(upd) {
@@ -94,6 +95,7 @@ class RectangularLattice {
         lattice_sizes_(rl.lattice_sizes_),
         n_cells_(rl.n_cells_),
         cell_sizes_(rl.cell_sizes_),
+        cell_volume_(rl.cell_volume_),
         origin_(rl.origin_),
         periodic_(rl.periodic_),
         when_update_(rl.when_update_) {}
@@ -642,6 +644,28 @@ class RectangularLattice {
   }
 
   /**
+   * Calculate a volume integral with given integrand
+   *
+   * \tparam F return type of the integrand
+   * \param[out] integral variable to store rsult in.
+   *             Input should be 0.
+   * \param[in] integrand Function to be integrated
+   * \param[in] rcut size of the integration volume. In total the intgration
+   *                 volume will be a cube with edge length 2*rcut
+   * \param[in] point center of the integration volume
+   **/
+  template <typename F>
+  void integrate_volume(F& integral,
+                        F (*integrand)(ThreeVector, T&, ThreeVector),
+                        const double rcut, const ThreeVector& point) {
+    iterate_in_rectangle(
+        point, {rcut, rcut, rcut},
+        [&point, &integral, &integrand, this](T value, int ix, int iy, int iz) {
+          ThreeVector pos = this->cell_center(ix, iy, iz);
+          integral += integrand(pos, value, point) * this->cell_volume_;
+        });
+  }
+  /**
    * Iterates only nodes whose cell centers lie not further than d_x in x-,
    * d_y in y-, and d_z in z-direction from the given point, that is iterates
    * within a rectangle of side lengths (2*dx, 2*dy, 2*dz), and applies a
@@ -768,6 +792,8 @@ class RectangularLattice {
   const std::array<int, 3> n_cells_;
   /// Cell sizes in x, y, z directions.
   const std::array<double, 3> cell_sizes_;
+  /// Volume of a cell.
+  const double cell_volume_;
   /// Coordinates of the left down nearer corner.
   const std::array<double, 3> origin_;
   /// Whether the lattice is periodic.

@@ -111,7 +111,8 @@ void expand_space_time(Particles *particles,
 void update_momenta(
     std::vector<Particles> &ensembles, double dt, const Potentials &pot,
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FB_lat,
-    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat) {
+    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat,
+    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *EM_lat) {
   // Copy particles from ALL ensembles to a single list before propagation
   // and calculate potentials from this list
   ParticleList plist;
@@ -124,7 +125,7 @@ void update_momenta(
       (pot.use_skyrme() ? (FB_lat != nullptr) : true) &&
       (pot.use_vdf() ? (FB_lat != nullptr) : true) &&
       (pot.use_symmetry() ? (FI3_lat != nullptr) : true);
-  std::pair<ThreeVector, ThreeVector> FB, FI3;
+  std::pair<ThreeVector, ThreeVector> FB, FI3, EM_fields;
   double min_time_scale = std::numeric_limits<double>::infinity();
 
   for (Particles &particles : ensembles) {
@@ -154,12 +155,19 @@ void update_momenta(
         FB = std::make_pair(std::get<0>(tmp), std::get<1>(tmp));
         FI3 = std::make_pair(std::get<2>(tmp), std::get<3>(tmp));
       }
-      const ThreeVector Force =
+      ThreeVector Force =
           scale.first *
               (FB.first + data.momentum().velocity().cross_product(FB.second)) +
           scale.second * data.type().isospin3_rel() *
               (FI3.first +
                data.momentum().velocity().cross_product(FI3.second));
+      // Potentially add Lorentz force
+      if (pot.use_coulomb() && EM_lat->value_at(r, EM_fields)) {
+        // factor hbar*c to convert fields from 1/fm^2 to GeV/fm
+        Force += hbarc * data.type().charge() * elementary_charge *
+                 (EM_fields.first +
+                  data.momentum().velocity().cross_product(EM_fields.second));
+      }
       logg[LPropagation].debug("Update momenta: F [GeV/fm] = ", Force);
       data.set_4momentum(data.effective_mass(),
                          data.momentum().threevec() + Force * dt);

@@ -9,6 +9,7 @@
 
 #include <fstream>
 #include <memory>
+#include <utility>
 
 #include "smash/clock.h"
 #include "smash/config.h"
@@ -23,7 +24,8 @@ VtkOutput::VtkOutput(const bf::path &path, const std::string &name,
                      const OutputParameters &out_par)
     : OutputInterface(name),
       base_path_(std::move(path)),
-      is_thermodynamics_output_(name == "Thermodynamics") {
+      is_thermodynamics_output_(name == "Thermodynamics"),
+      is_fields_output_(name == "Fields") {
   if (out_par.part_extended) {
     logg[LOutput].warn()
         << "Creating VTK output: There is no extended VTK format.";
@@ -66,7 +68,7 @@ void VtkOutput::at_eventstart(const Particles &particles,
   vtk_fluidization_counter_ = 0;
 
   current_event_ = event_number;
-  if (!is_thermodynamics_output_) {
+  if (!is_thermodynamics_output_ && !is_fields_output_) {
     write(particles);
     vtk_output_counter_++;
   }
@@ -79,7 +81,7 @@ void VtkOutput::at_intermediate_time(const Particles &particles,
                                      const std::unique_ptr<Clock> &,
                                      const DensityParameters &,
                                      const EventInfo &) {
-  if (!is_thermodynamics_output_) {
+  if (!is_thermodynamics_output_ && !is_fields_output_) {
     write(particles);
     vtk_output_counter_++;
   }
@@ -311,6 +313,27 @@ void VtkOutput::thermodynamics_output(
                        return -u.velocity();
                      });
   }
+}
+
+void VtkOutput::fields_output(
+    const std::string name1, const std::string name2,
+    RectangularLattice<std::pair<ThreeVector, ThreeVector>> &lat) {
+  if (!is_fields_output_) {
+    return;
+  }
+  std::ofstream file1;
+  file1.open(make_filename(name1, vtk_fields_output_counter_), std::ios::out);
+  write_vtk_header(file1, lat, name1);
+  write_vtk_vector(
+      file1, lat, name1,
+      [&](std::pair<ThreeVector, ThreeVector> &node) { return node.first; });
+  std::ofstream file2;
+  file2.open(make_filename(name2, vtk_fields_output_counter_), std::ios::out);
+  write_vtk_header(file2, lat, name2);
+  write_vtk_vector(
+      file2, lat, name2,
+      [&](std::pair<ThreeVector, ThreeVector> &node) { return node.second; });
+  vtk_fields_output_counter_++;
 }
 
 void VtkOutput::thermodynamics_output(const GrandCanThermalizer &gct) {

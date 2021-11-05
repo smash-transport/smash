@@ -18,6 +18,7 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
     : param_(param),
       use_skyrme_(conf.has_value({"Skyrme"})),
       use_symmetry_(conf.has_value({"Symmetry"})),
+      use_coulomb_(conf.has_value({"Coulomb"})),
       use_vdf_(conf.has_value({"VDF"})) {
   /*!\Userguide
    * \page input_potentials_ Potentials
@@ -25,6 +26,7 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * 1) Skyrme and/or Symmetry potentials\n
    * 2) VDF (vector density functional) model potentials,
    * https://arxiv.org/pdf/2011.06635.pdf \n
+   * Coulomb potentials can be enabled additionally.
    *
    * Skyrme and VDF potentials both describe the behavior of symmetric nuclear
    * matter. The symmetry potential can adjust the Skyrme potential (but not the
@@ -35,6 +37,7 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
    * \li \subpage potentials_skyrme_
    * \li \subpage potentials_sym_
    * \li \subpage potentials_VDF_
+   * \li \subpage potentials_coulomb_
    *
    * \page potentials_skyrme_ Skyrme
    *
@@ -69,7 +72,11 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
            Skyrme_Tau: 1.35
        Symmetry:
            S_Pot: 18.0
+       Coulomb:
+           R_Cut: 5.0
    \endverbatim
+   * Note that the Coulomb potential requires a lattice while for the other
+   * potentials it can be used as an optimisation.
    */
   if (use_skyrme_) {
     skyrme_a_ = conf.take({"Skyrme", "Skyrme_A"});
@@ -106,72 +113,102 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
     }
   }
   /*!\Userguide
-   * \page potentials_VDF_ VDF
+   * \page potentials_coulomb_ Coulomb
    *
-   * The VDF potential is a four-vector of the form
-   * \f[A^{\mu} = \sum_{i=1}^N C_i \left(\frac{\rho}{\rho_0}\right)^{b_i - 2}
-   * \frac{j^{\mu}}{\rho_0} \,,\f] where \f$j^{\mu}\f$ is baryon 4-current,
-   * \f$\rho\f$ is baryon density in the local Eckart rest frame, and
-   * \f$\rho_0\f$ is the saturation density. The parameters of the potential,
-   * the coefficients \f$C_i\f$ and the powers \f$b_i\f$, are fitted to
-   * reproduce a chosen set of properties of dense nuclear matter, and in
-   * particular these may include describing two first order phase transitions:
-   * the well-known phase transition in ordinary nuclear matter, and a transiton
-   * at high baryon densities meant to model a possible QCD phase transition (a
-   * "QGP-like" phase transition); see https://arxiv.org/pdf/2011.06635.pdf for
-   * details and example parameter sets for the case \f$N=4\f$.
-   * \n
-   * The user can decide how many terms \f$N\f$ should enter the potential by
-   * populating the coefficients and powers vectors in the config file with a
-   * chosen number of entries. The number of coefficients must match the number
-   * of powers.
-   *
-   * \key Sat_rhoB (double, required, default 0.160): \n
-   *      The saturation density of nuclear matter, in fm\f$^{-3}\f$
-   *
-   * \key Coeffs (array<double, N>, required, no default): \n
-   *      Parameters \f$C_i\f$ of the VDF potential in MeV (note: the code
-   *      automatically converts these to GeV)
-   *
-   * \key Powers (array<double, N>, required, no default): \n
-   *      Parameters \f$b_i\f$ of the VDF potential
-   *
-   * \page input_potentials_ Potentials
-   * \n
-   * **Example: Configuring VDF Potentials**\n
-   *
-   * The following extracts from the configuration file configure SMASH such
-   * that the VDF potential is activated for the simulation. In the first
-   * example, VDF potentials are configured to reproduce the default SMASH
-   * Skyrme potentials (without the symmetry potential, as it is not described
-   * within the VDF model):
-   * \n
-   *\verbatim
-   Potentials:
-       VDF:
-           Sat_rhoB: 0.168
-           Powers: [2.0, 2.35]
-           Coeffs: [-209.2, 156.5]
-   \endverbatim
-   *
-   * In the second example, VDF potentials are configured to describe nuclear
-   * matter with saturation density of \f$\rho_0 =\f$ 0.160 fm\f$^{-3}\f$,
-   * binding energy of \f$B_0 = -16.3\f$ MeV, the critical point of the ordinary
-   * nuclear liquid-gas phase transition at \f$T_c^{(N)} = 18\f$ MeV and
-   * \f$\rho_c^{(N)} = 0.375 \rho_0\f$, the critical point of the conjectured
-   * "QGP-like" phase transition at \f$T_c^{(Q)} = 100\f$ MeV and
-   * \f$\rho_c^{(Q)} = 3.0\rho_0\f$, and the boundaries of the spinodal region
-   * of the "QGP-like" phase transition at \f$\eta_L = 2.50 \rho_0\f$ and
-   * \f$\eta_R = 3.315 \rho_0\f$:
-   * \n
-   *\verbatim
-   Potentials:
-       VDF:
-           Sat_rhoB: 0.160
-           Powers: [1.7681391, 3.5293515, 5.4352788, 6.3809822]
-           Coeffs: [-8.450948e+01, 3.843139e+01, -7.958557e+00, 1.552594e+00]
-   \endverbatim
+   * The Coulomb potential in SMASH includes the electric and magnetic field.
+   * For simplicity we assume magnetostatics such that the fields can be
+   * directly calculated as \f[ \vec{E}(\vec{r})=-\vec{\nabla} \phi(\vec{r}) =
+   * -\vec{\nabla}\int\frac{\rho(\vec{r}')}{|\vec{r}-\vec{r}'|} dV'
+   * =\int\frac{\rho(\vec{r}')(\vec{r}-\vec{r}')}{|\vec{r}-\vec{r}'|^3}dV' \f]
+   * and
+   * \f[ \vec{B}(\vec{r}) = \vec{\nabla}\times\vec{A}(\vec{r})
+   * = \vec{\nabla}\times\int \frac{\vec{j}(\vec{r}')}{|\vec{r}-\vec{r}'|}dV'
+   * =
+   * \int\vec{j}(\vec{r}')\times\frac{\vec{r}-\vec{r}'}{|\vec{r}-\vec{r}'|^3}dV'.
+   * \f] These integrals are solved numerically on the SMASH lattice, where the
+   * discretised equations read
+   * \f[ \vec{E}(\vec{r}_j) = \sum_{i\neq j}
+   * \frac{\rho(\vec{r}_i)(\vec{r}_j-\vec{r}_i)}{|\vec{r}_j-\vec{r}_i|^3}\Delta
+   * V \f] and \f[ \vec{B}(\vec{r}_j)=\sum_{i\neq j} \vec{j}(\vec{r}_i)\times
+   * \frac{\vec{r}_j-\vec{r}_i}{|\vec{r}_j-\vec{r}_i|^3} \Delta V \f]
+   * with the lattice cell volume \f$ \Delta V \f$. For efficiency the
+   * integration volume is cut at \f$ R_\mathrm{cut} \f$, which is taken from
+   * the configuration. Note that in the final eqations the summand for \f$ i=j
+   * \f$ drops out because the contribution from that cell to the integral
+   * vanishes if one assumes the current and density to be constant in the cell.
    */
+  if (use_coulomb_) {
+    coulomb_r_cut_ = conf.take({"Coulomb", "R_Cut"});
+  }
+  /*!\Userguide
+    * \page potentials_VDF_ VDF
+    *
+    * The VDF potential is a four-vector of the form
+    * \f[A^{\mu} = \sum_{i=1}^N C_i \left(\frac{\rho}{\rho_0}\right)^{b_i - 2}
+    * \frac{j^{\mu}}{\rho_0} \,,\f] where \f$j^{\mu}\f$ is baryon 4-current,
+    * \f$\rho\f$ is baryon density in the local Eckart rest frame, and
+    * \f$\rho_0\f$ is the saturation density. The parameters of the potential,
+    * the coefficients \f$C_i\f$ and the powers \f$b_i\f$, are fitted to
+    * reproduce a chosen set of properties of dense nuclear matter, and in
+    * particular these may include describing two first order phase transitions:
+    * the well-known phase transition in ordinary nuclear matter, and a
+    transiton
+    * at high baryon densities meant to model a possible QCD phase transition (a
+    * "QGP-like" phase transition); see https://arxiv.org/pdf/2011.06635.pdf for
+    * details and example parameter sets for the case \f$N=4\f$.
+    * \n
+    * The user can decide how many terms \f$N\f$ should enter the potential by
+    * populating the coefficients and powers vectors in the config file with a
+    * chosen number of entries. The number of coefficients must match the number
+    * of powers.
+    *
+    * \key Sat_rhoB (double, required, default 0.160): \n
+    *      The saturation density of nuclear matter, in fm\f$^{-3}\f$
+    *
+    * \key Coeffs (array<double, N>, required, no default): \n
+    *      Parameters \f$C_i\f$ of the VDF potential in MeV (note: the code
+    *      automatically converts these to GeV)
+    *
+    * \key Powers (array<double, N>, required, no default): \n
+    *      Parameters \f$b_i\f$ of the VDF potential
+    *
+    * \page input_potentials_ Potentials
+    * \n
+    * **Example: Configuring VDF Potentials**\n
+    *
+    * The following extracts from the configuration file configure SMASH such
+    * that the VDF potential is activated for the simulation. In the first
+    * example, VDF potentials are configured to reproduce the default SMASH
+    * Skyrme potentials (without the symmetry potential, as it is not described
+    * within the VDF model):
+    * \n
+    *\verbatim
+    Potentials:
+        VDF:
+            Sat_rhoB: 0.168
+            Powers: [2.0, 2.35]
+            Coeffs: [-209.2, 156.5]
+    \endverbatim
+    *
+    * In the second example, VDF potentials are configured to describe nuclear
+    * matter with saturation density of \f$\rho_0 =\f$ 0.160 fm\f$^{-3}\f$,
+    * binding energy of \f$B_0 = -16.3\f$ MeV, the critical point of the
+    ordinary
+    * nuclear liquid-gas phase transition at \f$T_c^{(N)} = 18\f$ MeV and
+    * \f$\rho_c^{(N)} = 0.375 \rho_0\f$, the critical point of the conjectured
+    * "QGP-like" phase transition at \f$T_c^{(Q)} = 100\f$ MeV and
+    * \f$\rho_c^{(Q)} = 3.0\rho_0\f$, and the boundaries of the spinodal region
+    * of the "QGP-like" phase transition at \f$\eta_L = 2.50 \rho_0\f$ and
+    * \f$\eta_R = 3.315 \rho_0\f$:
+    * \n
+    *\verbatim
+    Potentials:
+        VDF:
+            Sat_rhoB: 0.160
+            Powers: [1.7681391, 3.5293515, 5.4352788, 6.3809822]
+            Coeffs: [-8.450948e+01, 3.843139e+01, -7.958557e+00, 1.552594e+00]
+    \endverbatim
+    */
   if (use_vdf_) {
     saturation_density_ = conf.take({"VDF", "Sat_rhoB"});
     std::vector<double> aux_coeffs = conf.take({"VDF", "Coeffs"});

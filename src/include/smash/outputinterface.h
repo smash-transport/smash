@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "density.h"
@@ -325,6 +326,23 @@ class OutputInterface {
    */
   virtual void thermodynamics_output(const GrandCanThermalizer &gct) {
     SMASH_UNUSED(gct);
+  }
+
+  /**
+   * Write fields in vtk output
+   *
+   * Fields are a pair of threevectors for example electric and magnetic field
+   *
+   * \param[in] name1 Name of the first field
+   * \param[in] name2 Name of the second field
+   * \param[in] lat Lattice storing both fields
+   */
+  virtual void fields_output(
+      const std::string name1, const std::string name2,
+      RectangularLattice<std::pair<ThreeVector, ThreeVector>> &lat) {
+    SMASH_UNUSED(name1);
+    SMASH_UNUSED(name2);
+    SMASH_UNUSED(lat);
   }
 
   /// Get, whether this is the dilepton output?
