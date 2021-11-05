@@ -142,11 +142,59 @@ class ListModus : public ModusDefault {
   /// \return whether the modus is list modus (which is, yes, trivially true)
   bool is_list() const { return true; }
 
+  /// set the file id when ListBoxModus is used
+  void set_file_id(const double file_id_inh) { file_id_ = file_id_inh; }
+
+  /// set the particle_list_directory when ListBoxModus is used
+  void set_particle_list_file_directory(
+      std::string particle_list_file_directory_inh) {
+    particle_list_file_directory_ = particle_list_file_directory_inh;
+  }
+
+  /// set the particle_list_prefix when ListBoxModus is used
+  void set_particle_list_file_prefix(
+      std::string particle_list_file_prefix_inh) {
+    particle_list_file_prefix_ = particle_list_file_prefix_inh;
+  }
+
+  /// set the event_id when ListBoxModus is used
+  void set_event_id(int event_id_inh) { event_id_ = event_id_inh; }
+
  protected:
   /// Starting time for the List; changed to the earliest formation time
   double start_time_ = 0.;
 
  private:
+  /** Check if the file given by filepath has events left after streampos
+   * last_position
+   *
+   * \param[in] filepath Path to file to be checked.
+   * \param[in] last_position Streamposition in file after which check is
+   * performed
+   * \return True if there is at least one event left, false otherwise
+   * \throws runtime_error If file could not be read for whatever reason.
+   */
+  bool file_has_events_(bf::path filepath, std::streampos last_position);
+
+  /** Return the absolute file path based on given integer. The filename
+   * is assumed to have the form (particle_list_prefix)_(file_id)
+   *
+   * \param[in] file_id integer of wanted file
+   * \return Absolute file path to file
+   * \throws
+   * runtime_error if file does not exist.
+   */
+  bf::path file_path_(const int file_id);
+
+  /**  Read the next event. Either from the current file if it has more events
+   * or from the next file (with file_id += 1)
+   *
+   * \returns
+   *  One event as string.
+   *  \throws runtime_error If file could not be read for whatever reason.
+   */
+  std::string next_event_();
+
   /// File directory of the particle list
   std::string particle_list_file_directory_;
 
@@ -170,38 +218,8 @@ class ListModus : public ModusDefault {
   /// Counter for energy-momentum conservation warnings to avoid spamming
   int n_warns_mass_consistency_ = 0;
 
-  /** Check if the file given by filepath has events left after streampos
-   * last_position
-   *
-   * \param[in] filepath Path to file to be checked.
-   * \param[in] last_position Streamposition in file after which check is
-   * performed
-   * \return True if there is at least one event left, false otherwise
-   * \throws runtime_error If file could not be read for whatever reason.
-   */
-  bool file_has_events_(bf::path filepath, std::streampos last_position);
-
   /// last read position in current file
   std::streampos last_read_position_;
-
-  /** Return the absolute file path based on given integer. The filename
-   * is assumed to have the form (particle_list_prefix)_(file_id)
-   *
-   * \param[in] file_id integer of wanted file
-   * \return Absolute file path to file
-   * \throws
-   * runtime_error if file does not exist.
-   */
-  bf::path file_path_(const int file_id);
-
-  /**  Read the next event. Either from the current file if it has more events
-   * or from the next file (with file_id += 1)
-   *
-   * \returns
-   *  One event as string.
-   *  \throws runtime_error If file could not be read for whatever reason.
-   */
-  std::string next_event_();
 
   /**\ingroup logging
    * Writes the initial state for the List to the output stream.
@@ -210,6 +228,96 @@ class ListModus : public ModusDefault {
    * \param[in] m The ListModus object to write into out
    */
   friend std::ostream &operator<<(std::ostream &, const ListModus &);
+};
+
+/**
+ * \ingroup modus
+ * ListBox: Provides a modus for running the SMASH Box with an external particle
+ list,
+ *
+ * To use this modus, choose
+    Modus:         ListBox
+ * \code
+ * General:
+ *      Modus: ListBox
+ * \endcode
+ * in the configuration file.
+ *
+ * Options for ListBox go in the "Modi"→"ListBox" section of the
+ * configuration:
+ *
+ * \code
+ * Modi:
+ *      ListBox:
+ *              # options here
+ * \endcode
+
+ * The ListBoxModus inherits all functionality from the ListModus.
+ * For more detailed configuring see \ref input_modi_list_.
+ *
+ *
+ * Since SMASH is searching for collisions in computational frame time 't',
+ * all particles need to be at the same time. If this is not the case in
+ * the list provided, the particles will be propagated backwards on
+ * straight lines ("anti-freestreaming"). To avoid unphysical interactions
+ * of these particles, the back-propagated particles receive a
+ * formation_time and zero cross_section_scaling_factor. The cross-sections
+ * are set to zero during the time, where the particle will just propagate
+ * on a straight line again to appear at the formation_time into the system.
+ *
+ */
+class ListBoxModus : public ListModus {
+ public:
+  /**
+   * Constructor (This is the same as for the ListModus)
+   *
+   * Gathers all configuration variables for the List.
+   *
+   * \param[in] modus_config The configuration object that sets all
+   *                         initial conditions of the experiment.
+   * \param[in] parameters Unused, but necessary because of templated
+   *                       initialization
+   */
+  explicit ListBoxModus(Configuration modus_config,
+                        const ExperimentParameters &parameters);
+
+  /// in the case of the ListBoxModus is_box has to be true
+  bool is_box() const { return true; }
+
+  /// \copydoc smash::BoxModus::impose_boundary_conditions
+  int impose_boundary_conditions(Particles *particles,
+                                 const OutputsList &output_list = {});
+
+  /// \copydoc smash::ModusDefault::create_grid
+  Grid<GridOptions::PeriodicBoundaries> create_grid(
+      const Particles &particles, double min_cell_length,
+      double timestep_duration,
+      CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
+    return {{{0, 0, 0}, {length_, length_, length_}},
+            particles,
+            min_cell_length,
+            timestep_duration,
+            strategy};
+  }
+
+ private:
+  /// shift_id is the start number of file_id_
+  const int shift_id_;
+
+  /// Length of the cube's edge in fm/c
+  const double length_;
+
+  /// file_id_ is the id of the current file
+  int file_id_;
+
+  /// event_id_ = the unique id of the current event
+  int event_id_;
+
+  /// File directory of the particle list
+  std::string particle_list_file_directory_;
+
+  /// File prefix of the particle list
+  std::string particle_list_file_prefix_;
 };
 
 }  // namespace smash

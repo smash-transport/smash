@@ -35,6 +35,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
    * sphere. See \ref \SphereModus \li \key Box - For infinite matter
    * calculation in a rectangular box. See \ref \BoxModus \li \key List - For
    * given external particle list. See \ref \ListModus
+   * \li \key ListBox - For given external particle list in the Box.
    */
 
   /*!\Userguide
@@ -43,6 +44,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
    * \li \subpage input_modi_sphere_
    * \li \subpage input_modi_box_
    * \li \subpage input_modi_list_
+   * \li \subpage input_modi_listbox_
    */
   const std::string modus_chooser = config.read({"General", "Modus"});
   logg[LExperiment].debug() << "Modus for this calculation: " << modus_chooser;
@@ -51,6 +53,8 @@ ExperimentPtr ExperimentBase::create(Configuration config,
     return make_unique<Experiment<BoxModus>>(config, output_path);
   } else if (modus_chooser == "List") {
     return make_unique<Experiment<ListModus>>(config, output_path);
+  } else if (modus_chooser == "ListBox") {
+    return make_unique<Experiment<ListBoxModus>>(config, output_path);
   } else if (modus_chooser == "Collider") {
     return make_unique<Experiment<ColliderModus>>(config, output_path);
   } else if (modus_chooser == "Sphere") {
@@ -482,6 +486,10 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   double box_length = -1.0;
   if (config.has_value({"Modi", "Box", "Length"})) {
     box_length = config.read({"Modi", "Box", "Length"});
+  }
+
+  if (config.has_value({"Modi", "ListBox", "Length"})) {
+    box_length = config.read({"Modi", "ListBox", "Length"});
   }
 
   /* If this Delta_Time option is absent (this can be for timestepless mode)

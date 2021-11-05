@@ -22,6 +22,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
+#include "smash/algorithms.h"
+#include "smash/boxmodus.h"
 #include "smash/configuration.h"
 #include "smash/constants.h"
 #include "smash/experimentparameters.h"
@@ -29,6 +31,7 @@
 #include "smash/inputfunctions.h"
 #include "smash/logging.h"
 #include "smash/threevector.h"
+#include "smash/wallcrossingaction.h"
 
 namespace smash {
 static constexpr int LList = LogArea::List::id;
@@ -111,6 +114,25 @@ static constexpr int LList = LogArea::List::id;
  * Where 'INPUT_DIR' needs to be replaced by the path to the input directory
  * ('../input', if the build directory is located in the smash
  * folder).
+ */
+
+/*!\Userguide
+ * \page input_modi_listbox_ ListBox
+ *
+ * The ListBox modus provides an option to initialize a box with a given set of
+ * particles. This modus uses all functionality from the List modus itself.
+ * The only difference is that one has to specify the length of the box.
+ * \verbatim
+ Modi:
+     ListBox:
+         File_Directory: "particle_lists_in"
+         File_Prefix: "event"
+         Shift_Id: 0
+         Length: 10.0
+
+ \endverbatim
+ * Apart from that the usage should be equivalent to the List modus. So for more
+ * details please check the List userpage.
  */
 
 ListModus::ListModus(Configuration modus_config,
@@ -232,7 +254,6 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
 double ListModus::initial_conditions(Particles *particles,
                                      const ExperimentParameters &) {
   std::string particle_list = next_event_();
-
   for (const Line &line : line_parser(particle_list)) {
     std::istringstream lineinput(line.text);
     double t, x, y, z, mass, E, px, py, pz;
@@ -363,6 +384,55 @@ bool ListModus::file_has_events_(bf::path filepath,
 
   ifs.close();
   return true;
+}
+
+ListBoxModus::ListBoxModus(Configuration modus_config,
+                           const ExperimentParameters &param)
+    : shift_id_(modus_config.take({"ListBox", "Shift_Id"})),
+      length_(modus_config.take({"ListBox", "Length"})) {
+  std::string fd = modus_config.take({"ListBox", "File_Directory"});
+  particle_list_file_directory_ = fd;
+
+  std::string fp = modus_config.take({"ListBox", "File_Prefix"});
+  particle_list_file_prefix_ = fp;
+
+  event_id_ = 0;
+  file_id_ = shift_id_;
+
+  // Set specific values in the ListModus class
+  ListModus::set_file_id(file_id_);
+  ListModus::set_particle_list_file_directory(particle_list_file_directory_);
+  ListModus::set_particle_list_file_prefix(particle_list_file_prefix_);
+  ListModus::set_event_id(event_id_);
+
+  if (param.n_ensembles > 1) {
+    throw std::runtime_error("ListModus only makes sense with one ensemble");
+  }
+}
+
+int ListBoxModus::impose_boundary_conditions(Particles *particles,
+                                             const OutputsList &output_list) {
+  int wraps = 0;
+  for (ParticleData &data : *particles) {
+    FourVector position = data.position();
+    bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
+                                                position.end(), length_);
+    if (wall_hit) {
+      const ParticleData incoming_particle(data);
+      data.set_4position(position);
+      ++wraps;
+      ActionPtr action =
+          make_unique<WallcrossingAction>(incoming_particle, data);
+      for (const auto &output : output_list) {
+        if (!output->is_dilepton_output() && !output->is_photon_output()) {
+          output->at_interaction(*action, 0.);
+        }
+      }
+    }
+  }
+
+  logg[LList].debug("Moved ", wraps, " particles back into the box.");
+  return wraps;
 }
 
 }  // namespace smash
