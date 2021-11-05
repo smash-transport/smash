@@ -525,7 +525,7 @@ void ScatterAction::string_excitation() {
          * process still does not not produce any results, it defaults to
          * an elastic collision. */
           bool success_newtry=false;
-          PdgCode baryon = incoming_particles_[0].pdgcode(), antibaryon = incoming_particles_[0].pdgcode();
+          PdgCode baryon = incoming_particles_[0].pdgcode(), antibaryon = incoming_particles_[1].pdgcode();
           if(baryon.baryon_number() == -antibaryon.baryon_number()){
               process_type_ = ProcessType::StringSoftAnnihilation;
               int ntry_new = 0;
