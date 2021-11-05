@@ -101,7 +101,8 @@ template <GridOptions O>
 Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                   &min_and_length,
               const Particles &particles, double max_interaction_length,
-              double timestep_duration, CellSizeStrategy strategy)
+              double timestep_duration, CellNumberLimitation limit,
+              CellSizeStrategy strategy)
     : length_(min_and_length.second) {
   const auto min_position = min_and_length.first;
   const SizeType particle_count = particles.size();
@@ -121,7 +122,8 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
   // the length of a cell).
   // But don't let the number of cells exceed the actual number of particles.
   // That would be overkill. Let max_cells³ ≤ particle_count (conversion to
-  // int truncates).
+  // int truncates). Limit only applied for geometric criteiron, where grid
+  // is an optimisation and cells can be made larger.
   const int max_cells =
       (O == GridOptions::Normal)
           ? std::cbrt(particle_count)
@@ -158,7 +160,8 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
           "A larger box or the use of testparticles also helps.\n"
           "Please take a look at your config.";
       throw std::runtime_error(error_box_too_small);
-    } else if (number_of_cells_[i] > max_cells) {
+    } else if (limit == CellNumberLimitation::ParticleNumber &&
+               number_of_cells_[i] > max_cells) {
       number_of_cells_[i] = max_cells;
     }
     // Only bother rescaling the index_factor if the grid length is large enough
@@ -455,10 +458,12 @@ template Grid<GridOptions::Normal>::Grid(
     const std::pair<std::array<double, 3>, std::array<double, 3>>
         &min_and_length,
     const Particles &particles, double max_interaction_length,
-    double timestep_duration, CellSizeStrategy strategy);
+    double timestep_duration, CellNumberLimitation limit,
+    CellSizeStrategy strategy);
 template Grid<GridOptions::PeriodicBoundaries>::Grid(
     const std::pair<std::array<double, 3>, std::array<double, 3>>
         &min_and_length,
     const Particles &particles, double max_interaction_length,
-    double timestep_duration, CellSizeStrategy strategy);
+    double timestep_duration, CellNumberLimitation limit,
+    CellSizeStrategy strategy);
 }  // namespace smash

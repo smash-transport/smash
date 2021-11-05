@@ -44,6 +44,23 @@ enum class CellSizeStrategy : char {
 };
 
 /**
+ * Identifies whether the number of cells should be limited. For the geometric
+ * criterion it makes sense to not have less than 1 particle in each cell, since
+ * the grid cell search is an optimization and the cells can be always made
+ * larger. For the stochastic collision criterion, the cell size is an
+ * important calculation parameter, which should be kept constant.
+ * The number of cells therefore cannot be limited as the medium grows even
+ * though this might be inefficient for large systems.
+ */
+enum class CellNumberLimitation : char {
+  /// No cell number limitation.
+  None,
+
+  /// Limit the number of cells to the number of particles
+  ParticleNumber
+};
+
+/**
  * Base class for Grid to host common functions that do not depend on the
  * GridOptions parameter.
  */
@@ -87,14 +104,19 @@ class Grid : public GridBase {
    * \param[in] min_cell_length The minimal length a cell must have.
    * \param[in] timestep_duration Duration of the timestep. It is necessary for
    * formation times treatment: if particle is fully or partially formed before
-   * the end of the timestep, it has to be on the grid. \param[in] strategy The
-   * strategy for determining the cell size
+   * the end of the timestep, it has to be on the grid.
+   * \param[in] limit Limitation of cell number
+   * \param[in] strategy The strategy for determining the cell size
    */
   Grid(const Particles &particles, double min_cell_length,
-       double timestep_duration,
+       double timestep_duration, CellNumberLimitation limit,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal)
-      : Grid{find_min_and_length(particles), std::move(particles),
-             min_cell_length, timestep_duration, strategy} {}
+      : Grid{find_min_and_length(particles),
+             std::move(particles),
+             min_cell_length,
+             timestep_duration,
+             limit,
+             strategy} {}
 
   /**
    * Constructs a grid with the given minimum grid coordinates and grid length.
@@ -106,13 +128,14 @@ class Grid : public GridBase {
    * \param[in] particles The particles to place onto the grid.
    * \param[in] min_cell_length The minimal length a cell must have.
    * \param[in] timestep_duration duration of the timestep in fm/c
+   * \param[in] limit Limitation of cell number
    * \param[in] strategy The strategy for determining the cell size
    * \throws runtime_error if your box length is smaller than the grid length.
    */
   Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
            &min_and_length,
        const Particles &particles, double min_cell_length,
-       double timestep_duration,
+       double timestep_duration, CellNumberLimitation limit,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal);
 
   /**

@@ -111,16 +111,22 @@ class ModusDefault {
    * \param[in] min_cell_length The minimal length of the grid cells.
    * \param[in] timestep_duration Duration of the timestep. It is necessary for
    * formation times treatment: if particle is fully or partially formed before
-   * the end of the timestep, it has to be on the grid. \param[in] strategy The
-   * strategy to determine the cell size \return the Grid object
+   * the end of the timestep, it has to be on the grid.
+   * \param[in] crit Collision criterion (decides if cell number can be limited)
+   * \param[in] strategy The strategy to determine the cell size \return the
+   * Grid object
    *
    * \see Grid::Grid
    */
   Grid<GridOptions::Normal> create_grid(
       const Particles& particles, double min_cell_length,
-      double timestep_duration,
+      double timestep_duration, CollisionCriterion crit,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
-    return {particles, min_cell_length, timestep_duration, strategy};
+    CellNumberLimitation limit = CellNumberLimitation::ParticleNumber;
+    if (crit == CollisionCriterion::Stochastic) {
+      limit = CellNumberLimitation::None;
+    }
+    return {particles, min_cell_length, timestep_duration, limit, strategy};
   }
 
   /**

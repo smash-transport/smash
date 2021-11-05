@@ -93,12 +93,17 @@ class BoxModus : public ModusDefault {
   /// \copydoc smash::ModusDefault::create_grid
   Grid<GridOptions::PeriodicBoundaries> create_grid(
       const Particles &particles, double min_cell_length,
-      double timestep_duration,
+      double timestep_duration, CollisionCriterion crit,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
+    CellNumberLimitation limit = CellNumberLimitation::ParticleNumber;
+    if (crit == CollisionCriterion::Stochastic) {
+      limit = CellNumberLimitation::None;
+    }
     return {{{0, 0, 0}, {length_, length_, length_}},
             particles,
             min_cell_length,
             timestep_duration,
+            limit,
             strategy};
   }
 
