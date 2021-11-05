@@ -37,7 +37,6 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Changed
 * computation of thermodynamic quantities optionally restriced to participants only
 
-
 ## [SMASH-2.0.2](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...SMASH-2.0.2)
 Date: 2021-06-23
 
