@@ -21,6 +21,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Input / Output
 * Added option to specify a `Fixed_Min_Cell_Length` to control the grid size for the stochastic criterion.
+* Computation of thermodynamic quantities optionally restricted to participants only using the option `Only_Participants`
 
 ### Added
 * 5-to-2 reactions for NNbar annihilations via the stochastic collision criterion
@@ -31,11 +32,11 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * New smearing modes: discrete + triangular
 * New option: finite difference derivatives for calculation of density gradients on lattice
 * New option: sample particles according to quantum statistics
-* Electromagnetic potentials in a simple form
+* Non-relativistic electromagnetic potentials in a simple form meant for low collision energies
 * New option: start a box with an external particle list
 
 ### Changed
-* computation of thermodynamic quantities optionally restriced to participants only
+* Evaluation of failed string processes. BBbar pairs are now forced to annihilate
 
 ## [SMASH-2.0.2](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...SMASH-2.0.2)
 Date: 2021-06-23
