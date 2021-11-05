@@ -520,44 +520,45 @@ void ScatterAction::string_excitation() {
       }
     }
     if (ntry == ntry_max) {
-        /* If pythia fails to form a string, it is usually because the energy
-         * is not large enough. In this case, annihilation is then enforced. If this
-         * process still does not not produce any results, it defaults to
-         * an elastic collision. */
-          bool success_newtry=false;
-          PdgCode baryon = incoming_particles_[0].pdgcode(), antibaryon = incoming_particles_[0].pdgcode();
-          if(baryon.baryon_number() == -antibaryon.baryon_number()){
-              process_type_ = ProcessType::StringSoftAnnihilation;
-              int ntry_new = 0;
-              while (!success_newtry && ntry_new < ntry_max) {
-                  ntry_new++;
-                  success_newtry=string_process_->next_BBbarAnn();
-              }
-              if(success_newtry){
-                  outgoing_particles_ = string_process_->get_final_state();
-                  assign_formation_time_to_outgoing_particles();
-                  /* Check momentum difference for debugging */
-                  FourVector out_mom;
-                  for (ParticleData data : outgoing_particles_) {
-                    out_mom += data.momentum();
-                  }
-                  logg[LPythia].debug("Incoming momenta string:", total_momentum());
-                  logg[LPythia].debug("Outgoing momenta string:", out_mom);
-              }
+      /* If pythia fails to form a string, it is usually because the energy
+       * is not large enough. In this case, annihilation is then enforced. If
+       * this process still does not not produce any results, it defaults to
+       * an elastic collision. */
+      bool success_newtry = false;
+      PdgCode baryon = incoming_particles_[0].pdgcode(),
+              antibaryon = incoming_particles_[0].pdgcode();
+      if (baryon.baryon_number() == -antibaryon.baryon_number()) {
+        process_type_ = ProcessType::StringSoftAnnihilation;
+        int ntry_new = 0;
+        while (!success_newtry && ntry_new < ntry_max) {
+          ntry_new++;
+          success_newtry = string_process_->next_BBbarAnn();
+        }
+        if (success_newtry) {
+          outgoing_particles_ = string_process_->get_final_state();
+          assign_formation_time_to_outgoing_particles();
+          /* Check momentum difference for debugging */
+          FourVector out_mom;
+          for (ParticleData data : outgoing_particles_) {
+            out_mom += data.momentum();
           }
+          logg[LPythia].debug("Incoming momenta string:", total_momentum());
+          logg[LPythia].debug("Outgoing momenta string:", out_mom);
+        }
+      }
 
-          if(!success_newtry){
-              /* If annihilation fails:
-               * Particles are normally added after process selection for
-               * strings, outgoing_particles is still uninitialized, and memory
-               * needs to be allocated. We also shift the process_type_ to elastic
-               * so that sample_angles does a proper treatment. */
-              outgoing_particles_.reserve(2);
-              outgoing_particles_.push_back(ParticleData{incoming_particles_[0]});
-              outgoing_particles_.push_back(ParticleData{incoming_particles_[1]});
-              process_type_ = ProcessType::FailedString;
-              elastic_scattering();
-          }
+      if (!success_newtry) {
+        /* If annihilation fails:
+         * Particles are normally added after process selection for
+         * strings, outgoing_particles is still uninitialized, and memory
+         * needs to be allocated. We also shift the process_type_ to elastic
+         * so that sample_angles does a proper treatment. */
+        outgoing_particles_.reserve(2);
+        outgoing_particles_.push_back(ParticleData{incoming_particles_[0]});
+        outgoing_particles_.push_back(ParticleData{incoming_particles_[1]});
+        process_type_ = ProcessType::FailedString;
+        elastic_scattering();
+      }
     } else {
       outgoing_particles_ = string_process_->get_final_state();
       assign_formation_time_to_outgoing_particles();
