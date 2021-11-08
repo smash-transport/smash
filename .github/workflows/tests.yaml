@@ -97,7 +97,7 @@ jobs:
         fi
         make -j$(nproc)
         # we check the building of the documentation for a specific case
-        if [ $OS_NAME == ubuntu-18.04 ]; then make undocumented && make undocumented_test; fi
+        if [ $OS_NAME == ubuntu-18.04 ]; then make undocumented_test && make user; fi
         # we check the correct formatting of the code with clang
         PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/clang-format-helper.bash -t
         # we run the tests
