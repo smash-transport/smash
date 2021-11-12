@@ -1294,7 +1294,7 @@ zenity  \
 zenity-common  \
 zip  \
 zlib1g:amd64  \
-zlib1g-dev:amd64  \
+zlib1g-dev:amd64  
 
 #we set the number of concurrent processes to build the container image when executing make/cmake
 
@@ -1315,33 +1315,37 @@ mkdir -p /SMASH
 #here we download and install several libraries/programs used by SMASH
 
 cd /SMASH
-wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8303.tgz
-tar xf pythia8303.tgz && rm pythia8303.tgz
-cd pythia8303
-./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC -march=x86-64' --prefix=/SMASH/pythia_8_303
+pythia_version="8303"
+wget https://pythia.org/download/pythia83/pythia${pythia_version}.tgz
+tar xf pythia${pythia_version}.tgz && rm pythia${pythia_version}.tgz
+cd pythia${pythia_version}
+./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC -march=x86-64' --prefix=/SMASH/pythia_install
 make -j$NUMBER_OF_PROCS_FOR_COMPILATION
 make install
-echo /SMASH/pythia_8_303/lib >> /etc/ld.so.conf && ldconfig
+echo /SMASH/pythia_install/lib >> /etc/ld.so.conf && ldconfig
 
 cd /SMASH
-wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-3.2.3.tar.gz
-tar xf HepMC3-3.2.3.tar.gz 
+hepmc3_version="3.2.4"
+wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${hepmc3_version}.tar.gz
+tar xf HepMC3-${hepmc3_version}.tar.gz 
 mkdir -p HepMC3_build
 cd HepMC3_build
-cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=OFF -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" ../HepMC3-3.2.3
+cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=OFF -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" ../HepMC3-${hepmc3_version}
 make -j$NUMBER_OF_PROCS_FOR_COMPILATION
 make install
+echo /SMASH/hepmc3_install/lib >> /etc/ld.so.conf && ldconfig
 
 cd /SMASH
-wget https://root.cern/download/root_v6.22.08.source.tar.gz
-tar xf root_v6.22.08.source.tar.gz
-mv root-6.22.08 root_src
-mkdir -p root_6_22_08
+root_version="6.24.06"
+wget https://root.cern/download/root_v${root_version}.source.tar.gz
+tar xf root_v${root_version}.source.tar.gz
+mv root-${root_version} root_src
+mkdir -p root_install
 mkdir -p root_build
 cd root_build
-cmake -DCMAKE_INSTALL_PREFIX=../root_6_22_08 ../root_src  -DCMAKE_C_FLAGS="-O2 -mfpmath=sse  -march=x86-64" -DCMAKE_CXX_FLAGS="-O2 -mfpmath=sse -march=x86-64"
+cmake -DCMAKE_INSTALL_PREFIX=../root_install ../root_src  -DCMAKE_C_FLAGS="-O2 -mfpmath=sse  -march=x86-64" -DCMAKE_CXX_FLAGS="-O2 -mfpmath=sse -march=x86-64"
 cmake --build . --target install -j$NUMBER_OF_PROCS_FOR_COMPILATION
-ROOTSYS=/SMASH/root_6_22_08_
+ROOTSYS=/SMASH/root_install
 export PATH=$ROOTSYS/bin:$PATH
 export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
 export SHLIB_PATH=$ROOTSYS/lib
@@ -1349,7 +1353,7 @@ export LIBPATH=$ROOTSYS/lib
 export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH
 export MANPATH=$ROOTSYS/man:$MANPATH
 export CMAKE_PREFIX_PATH=$ROOTSYS:$CMAKE_PREFIX_PATH
-echo /SMASH/root/lib >> /etc/ld.so.conf && ldconfig
+echo /SMASH/root_install/lib >> /etc/ld.so.conf && ldconfig
 
 cd /SMASH
 git clone git://github.com/hoxu/gitstats.git
@@ -1367,34 +1371,51 @@ chmod +x /SMASH/auxiliary_progs/*
 PATH=$PATH:/SMASH/auxiliary_progs
 
 #now we install Rivet, first fixing a few details in the bootstrap script
-wget https://gitlab.com/hepcedar/rivetbootstrap/raw/3.1.4/rivet-bootstrap
+cd /SMASH
+mkdir -p rivet_build && cd rivet_build
+rivet_version="3.1.4"
+wget https://gitlab.com/hepcedar/rivetbootstrap/raw/${rivet_version}/rivet-bootstrap
 #we set the Rivet installation directory
-sed -i "6s/\$PWD\/local/\/SMASH\/Rivet_3_1_4_install/" rivet-bootstrap
+sed -i "6s/\$PWD\/local/\/SMASH\/Rivet_install/" rivet-bootstrap
 #we set the number of concurrent compilation processes
 sed -i "7s/j$NUMBER_OF_PROCS_FOR_COMPILATION/j3/" rivet-bootstrap
 #we disable the installation of hepmc3, already installed
 sed -i "9s/1/0/" rivet-bootstrap
-#we update the hepmc3 version
-sed -i "18s/2.06.11/3.2.3/" rivet-bootstrap
+#we update the hepmc3 version 
+sed -i "18s/2.06.11/${hepmc3_version}/" rivet-bootstrap
 #we provide the hepm3 installation path
-sed -i "50s/usr/\SMASH\/hepmc3-install/" rivet-bootstrap
+sed -i "50s/usr/\SMASH\/hepmc3_install/" rivet-bootstrap
 
 #now we really compile and install Rivet
 
 chmod +x rivet-bootstrap
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/SMASH/hepmc3-install/lib
 ./rivet-bootstrap
+echo /SMASH/Rivet_install/lib >> /etc/ld.so.conf 
+echo /SMASH/Rivet_install/lib64 >> /etc/ld.so.conf 
+ldconfig
+export PATH=/SMASH/Rivet_install/bin:$PATH
+
+#now we really build SMASH
 
 cd /SMASH
 git clone https://github.com/smash-transport/smash.git
+#we use generic optimization flags to make the container more portable
+sed -i "78s/native/x86-64/" smash/CMakeLists.txt
+sed -i "5s/native/x86-64/" smash/3rdparty/einhard/CMakeLists.txt
+sed -i "7s/native/x86-64/" smash/3rdparty/Cuba-4.2/CMakeLists.txt
+
 mkdir -p smash_bin
 cd smash_bin
-cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_8_303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64"
+cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install -DCMAKE_CXX_STANDARD=14
 make -j$NUMBER_OF_PROCS_FOR_COMPILATION
 
 #we remove most of the sources
 cd /SMASH
-rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.08.source.tar.gz root_build root_src Rivet-3.1.4 rivet-bootstrap /var/cache/apt/archives/*.deb
+echo "before"
+ls
+rm -rf HepMC3-${hepmc3_version} HepMC3-${hepmc3_version}.tar.gz HepMC3_build pythia${pythia_version} gitstats cppcheck-2.2 2.2.tar.gz root_v${root_version}.source.tar.gz root_build root_src rivet_build /var/cache/apt/archives/*.deb
+echo "after"
+ls
 
 #we allow Imagemagick to process PS, EPS and PDF files
 sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" -e "/EPS/d" -e "/PDF/d" -e "/XPS/d" /etc/ImageMagick-6/policy.xml
@@ -1414,19 +1435,19 @@ echo "LANG=en_US.UTF-8" >> /etc/default/locale
 echo "LANGUAGE=en_US.UTF-8" >> /etc/default/locale
 
 #Singularity will set up these environment when it starts the container
+#We avoid curly brackets in variable names as we had issues with them (probably just a temporary unclear bug)
 
 %environment
-export PYTHIA8="/SMASH/pythia_8_303/"
+export PYTHIA8=/SMASH/pythia_install
 export PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
 export PYTHIA_LIBRARY=$PYTHIA8/lib
 export PYTHIA_INCLUDE=$PYTHIA8/include
 export LD_LIBRARY_PATH=$PYTHIA_LIBRARY:$LD_LIBRARY_PATH
 export PATH=$PYTHIA8/bin:$PATH
 
-export PATH=$PATH:/SMASH/auxiliary_progs
-export PATH=$PATH:/SMASH/smash_bin
+export PATH=$PATH:/SMASH/auxiliary_progs:/SMASH/smash_bin
 
-ROOTSYS=/SMASH/root_6_22_08
+ROOTSYS=/SMASH/root_install
 export PATH=$ROOTSYS/bin:$PATH
 export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
 export SHLIB_PATH=$ROOTSYS/lib
@@ -1439,23 +1460,23 @@ export JUPYTER_CONFIG_DIR=$ROOTSYS/etc/notebook:$JUPYTER_CONFIG_DIR
 export CLING_STANDARD_PCH=none
 
 #environment variables for Rivet
-prefix=/SMASH/Rivet_3_1_4_install
-exec_prefix=${prefix}
-datarootdir=${prefix}/share
+prefix=/SMASH/Rivet_install
+exec_prefix=$prefix
+datarootdir=$prefix/share
 
 export PATH=$exec_prefix/bin:$PATH
-export LD_LIBRARY_PATH="${exec_prefix}/lib:/SMASH/Rivet_3_1_4_install/lib64:/SMASH/hepmc3-install/lib:$LD_LIBRARY_PATH"
-export PYTHONPATH="/SMASH/Rivet_3_1_4_install/lib/python2.7/site-packages:$PYTHONPATH"
-export TEXMFHOME="${datarootdir}/Rivet/texmf:$TEXMFHOME"
-export HOMETEXMF="${datarootdir}/Rivet/texmf:$HOMETEXMF"
-export TEXMFCNF="${datarootdir}/Rivet/texmf/cnf:$TEXMFCNF"
-export TEXINPUTS="${datarootdir}/Rivet/texmf/tex//:$TEXINPUTS"
-export LATEXINPUTS="${datarootdir}/Rivet/texmf/tex//:$LATEXINPUTS"
+export LD_LIBRARY_PATH="$exec_prefix/lib:$exec_prefix/lib64:/SMASH/hepmc3_install/lib:$LD_LIBRARY_PATH"
+export PYTHONPATH="/SMASH/Rivet_install/lib/python2.7/site-packages:$PYTHONPATH"
+export TEXMFHOME="$datarootdir/Rivet/texmf:$TEXMFHOME"
+export HOMETEXMF="$datarootdir/Rivet/texmf:$HOMETEXMF"
+export TEXMFCNF="$datarootdir/Rivet/texmf/cnf:$TEXMFCNF"
+export TEXINPUTS="$datarootdir/Rivet/texmf/tex//:$TEXINPUTS"
+export LATEXINPUTS="$datarootdir/Rivet/texmf/tex//:$LATEXINPUTS"
 
 
 %labels
 Author Gabriele Inghirami
-Version v_30_05_21_ubuntu2004
+Version v_12_11_21_ubuntu2004
 
 
 %help

@@ -6,6 +6,7 @@
 - More extended build instructions and explanations
 
 If you are searching information about how to build a container with Docker, please, give a look at [README_Docker.md](README_Docker.md).
+If you are searching information about how to convert a Docker container into a Singularity container, please, give a look at [README_from_Docker_to_Singularity.md](README_from_Docker_to_Singularity.md ).
 
 ## Quick build instructions
 
@@ -16,9 +17,9 @@ First of all, we assume that you:
 - you have _root_ or _sudo_ user access on the machine used to build the container
 - are connected to internet to download additional software/packages
 
-In the source directory containing the files: _smash_v2_0__ubuntu_20_04.def_ and _list_of_packages_for_ubuntu20_04.txt_ issue the command:
+In the source directory containing the files: _smash_v2_1__ubuntu_20_04.def_ and _list_of_packages_for_ubuntu20_04.txt_ issue the command:
 
-`sudo singularity build smash_v2_0__ubuntu_20_04.sif smash_v2_0__ubuntu_20_04.def`
+`sudo singularity build smash_v2_1__ubuntu_20_04.sif smash_v2_1__ubuntu_20_04.def`
 
 If everything goes well, after some time (more than one hour on an i7-2670QM with a 16Mb/s internet connection) you will get _smash_v2_0__ubuntu_20_04.sif_.
 
