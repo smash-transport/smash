@@ -121,6 +121,11 @@ class HepMcInterface : public OutputInterface {
    */
   void at_eventend(const Particles& particles, const int32_t event_number,
                    const EventInfo& event) override;
+  /**
+   * Stores run-related information, in particular the weights for
+   * HEP compatibility and the SMASH version
+   * */
+  std::shared_ptr<HepMC3::GenRunInfo> run_info;
 
  protected:
   /** HepMC status codes */
@@ -173,6 +178,7 @@ class HepMcInterface : public OutputInterface {
   HepMC3::GenParticlePtr find_or_make(const ParticleData& p,
                                       int status = Status::fnal,
                                       bool force_new = false);
+                                      
   /**
    * Encode ion PDG
    *
@@ -190,6 +196,7 @@ class HepMcInterface : public OutputInterface {
   /** The interaction point */
   HepMC3::GenVertexPtr ip_;
   /** Mapping from ID to particle */
+  
   IdMap map_;
   /**
    * Collision counter.  For each \f$i_{th}\f$ incoming nucleon we keep track of

@@ -89,6 +89,7 @@ void HepMcOutput::at_eventend(const Particles &particles,
                         << event_.particles().size() << " particles and "
                         << event_.vertices().size() << " vertices to output "
                         << std::endl;
+  output_file_->set_run_info(event_.run_info());
   output_file_->write_event(event_);
 }
 
