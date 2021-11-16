@@ -178,7 +178,6 @@ class HepMcInterface : public OutputInterface {
   HepMC3::GenParticlePtr find_or_make(const ParticleData& p,
                                       int status = Status::fnal,
                                       bool force_new = false);
-                                      
   /**
    * Encode ion PDG
    *
@@ -196,7 +195,6 @@ class HepMcInterface : public OutputInterface {
   /** The interaction point */
   HepMC3::GenVertexPtr ip_;
   /** Mapping from ID to particle */
-  
   IdMap map_;
   /**
    * Collision counter.  For each \f$i_{th}\f$ incoming nucleon we keep track of

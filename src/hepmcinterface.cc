@@ -6,9 +6,9 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
- 
-#include "smash/config.h"
+
 #include "smash/hepmcinterface.h"
+#include "smash/config.h"
 
 #include "HepMC3/GenRunInfo.h"
 #include "HepMC3/Print.h"
@@ -28,8 +28,8 @@ HepMcInterface::HepMcInterface(const std::string& name, const bool full_event)
                         << (full_event_ ? "full event" : "final state only")
                         << " output" << std::endl;
   ion_ = std::make_shared<HepMC3::GenHeavyIon>();
-  ion_ ->set(-1, -1, -1, -1, -1, -1, -1, -1, -1,
-                            -1.0, -1.0, -1.0, -1.0, -1.0, -1.0);
+  ion_->set(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1.0, -1.0, -1.0, -1.0, -1.0,
+            -1.0);
 
   xs_ = std::make_shared<HepMC3::GenCrossSection>();
   run_info = std::make_shared<HepMC3::GenRunInfo>();
@@ -61,7 +61,7 @@ void HepMcInterface::at_eventstart(const Particles& particles,
   // Create IP only if final state
   ip_ = std::make_shared<HepMC3::GenVertex>();
   event_.add_vertex(ip_);
-  
+
   // Count up projectile and target
   smash::FourVector p_proj;
   smash::FourVector p_targ;
@@ -163,7 +163,7 @@ void HepMcInterface::at_eventend(const Particles& particles,
     return;
   }
   // Set the weights
-  event_.weights() = std::vector<double>(1,1);
+  event_.weights() = std::vector<double>(1, 1);
   /* since the number of collisions is not an experimental obervable, we set it
    * to -1.
    */
