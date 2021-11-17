@@ -72,8 +72,8 @@ HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
     : HepMcInterface(name, full_event), filename_(path / (name + ".asciiv3")) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += +".unfinished";
-  output_file_ =
-      make_unique<HepMC3::WriterAscii>(filename_unfinished_.string());
+  output_file_ = make_unique<HepMC3::WriterAscii>(filename_unfinished_.string(),
+                                                  event_.run_info());
 }
 HepMcOutput::~HepMcOutput() {
   logg[LOutput].debug() << "Renaming file " << filename_unfinished_ << " to "
@@ -89,7 +89,6 @@ void HepMcOutput::at_eventend(const Particles &particles,
                         << event_.particles().size() << " particles and "
                         << event_.vertices().size() << " vertices to output "
                         << std::endl;
-  output_file_->set_run_info(event_.run_info());
   output_file_->write_event(event_);
 }
 

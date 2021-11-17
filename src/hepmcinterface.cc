@@ -32,7 +32,9 @@ HepMcInterface::HepMcInterface(const std::string& name, const bool full_event)
             -1.0);
 
   xs_ = std::make_shared<HepMC3::GenCrossSection>();
-  run_info = std::make_shared<HepMC3::GenRunInfo>();
+  // GenRunInfo: HepMC3 class to store run-related information
+  std::shared_ptr<HepMC3::GenRunInfo> run_info =
+      std::make_shared<HepMC3::GenRunInfo>();
   std::vector<std::string> weightnames;
   weightnames.push_back("Default");
   run_info->set_weight_names(weightnames);
@@ -42,6 +44,7 @@ HepMcInterface::HepMcInterface(const std::string& name, const bool full_event)
   tool.version = tool.version + GIT_BRANCH;
   tool.description = "";
   run_info->tools().push_back(tool);
+  event_.set_run_info(run_info);
   HepMC3::Setup::set_debug_level(logg[LOutput].isEnabled<einhard::DEBUG>() ? 5
                                                                            : 0);
 }

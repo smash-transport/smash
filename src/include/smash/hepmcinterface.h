@@ -121,11 +121,6 @@ class HepMcInterface : public OutputInterface {
    */
   void at_eventend(const Particles& particles, const int32_t event_number,
                    const EventInfo& event) override;
-  /**
-   * Stores run-related information, in particular the weights for
-   * HEP compatibility and the SMASH version
-   * */
-  std::shared_ptr<HepMC3::GenRunInfo> run_info;
 
  protected:
   /** HepMC status codes */
