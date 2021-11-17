@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-# Install requirements
+# Install minimal set of requirements
 RUN apt-get update && \
 apt-get -y upgrade && \
 DEBIAN_FRONTEND=noninteractive apt-get -y install \
@@ -19,17 +19,18 @@ vim
 WORKDIR /SMASH
 
 # Install pythia
-RUN wget https://pythia.org/download/pythia83/pythia8303.tgz && \
-tar xf pythia8303.tgz && rm pythia8303.tgz && \
-cd pythia8303 && \
+ARG pythiaV="8303"
+RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
+tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
+cd pythia${pythiaV} && \
 ./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC -march=x86-64' && \
 make -j$(nproc) && \
 make install && \
-echo /SMASH/pythia8303/lib >> /etc/ld.so.conf && ldconfig
+echo /SMASH/pythia${pythiaV}/lib >> /etc/ld.so.conf && ldconfig
 
 # Get and build public SMASH
 RUN git clone https://github.com/smash-transport/smash.git smash_src && \
 mkdir -p smash_prebuild && \
 cd smash_prebuild && \
-cmake ../smash_src -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia8303/bin/pythia8-config && \
+cmake ../smash_src -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${pythiaV}/bin/pythia8-config && \
 make smash -j$(nproc)
