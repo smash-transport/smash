@@ -70,7 +70,7 @@ endif()
 
 option(USE_HEPMC "Turn this off to disable HepMC output support in SMASH." ON)
 if(USE_HEPMC OR USE_RIVET)
-  find_package(HepMC3)
+  find_package(HepMC3 QUIET)
   if(HepMC3_FOUND)
     message(STATUS "Found HepMC ${HepMC3_VERSION} at ${HEPMC3_LIB}.")
     include_directories(SYSTEM "${HEPMC3_INCLUDE_DIR}")
