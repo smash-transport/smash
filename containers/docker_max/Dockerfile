@@ -1297,10 +1297,6 @@ zlib1g:amd64  \
 zlib1g-dev:amd64
 
 
-#we set the number of concurrent processes used by Docker to build the container image when executing make/cmake
-
-ARG NUMBER_OF_PROCS_FOR_COMPILATION=2
-
 #we create the /SMASH directory
 
 WORKDIR /SMASH
@@ -1321,7 +1317,7 @@ RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
 cd pythia${pythiaV} && \
 ./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC -march=x86-64' --prefix=/SMASH/pythia_install&& \
-make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
+make -j${nproc) && \
 make install && \
 echo /SMASH/pythia_install/lib >> /etc/ld.so.conf && ldconfig
 ENV PYTHIA8=/SMASH/pythia_install/
@@ -1339,7 +1335,7 @@ tar xf HepMC3-${hepmcV}.tar.gz && \
 mkdir -p HepMC3_build && \
 cd HepMC3_build && \
 cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=OFF -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" ../HepMC3-${hepmcV} && \
-make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
+make -j${nproc) && \
 make install
 ENV LD_LIBRARY_PATH="/SMASH/hepmc3_install/lib:$LD_LIBRARY_PATH"
 
@@ -1353,7 +1349,7 @@ mkdir -p root_install && \
 mkdir -p root_build && \
 cd root_build && \
 cmake -DCMAKE_INSTALL_PREFIX=../root_install ../root_src  -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64"&& \
-cmake --build . --target install -j$NUMBER_OF_PROCS_FOR_COMPILATION
+cmake --build . --target install -j${nproc)
 ENV ROOTSYS=/SMASH/root_install
 ENV PATH=$ROOTSYS/bin:$PATH
 ENV LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
@@ -1392,7 +1388,7 @@ RUN wget https://gitlab.com/hepcedar/rivetbootstrap/raw/${rivetV}/rivet-bootstra
 #we set the Rivet installation directory
 RUN sed -i "6s/\$PWD\/local/\/SMASH\/Rivet_install/" rivet-bootstrap
 #we set the number of concurrent compilation processes
-RUN sed -i "7s/j$NUMBER_OF_PROCS_FOR_COMPILATION/j3/" rivet-bootstrap
+RUN sed -i "7s/j${nproc)/j3/" rivet-bootstrap
 #we disable the installation of hepmc3, already installed
 RUN sed -i "9s/1/0/" rivet-bootstrap
 #we update the hepmc3 version
@@ -1424,7 +1420,7 @@ RUN git clone https://github.com/smash-transport/smash.git && \
 mkdir -p smash_prebuild && \
 cd smash_prebuild && \
 cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" \
--DCMAKE_CXX_STANDARD=14 && make -j$NUMBER_OF_PROCS_FOR_COMPILATION
+-DCMAKE_CXX_STANDARD=14 && make -j${nproc)
 ENV PATH=$PATH:/SMASH/smash_prebuild
 
 #we remove most of the sources
