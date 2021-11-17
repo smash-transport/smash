@@ -263,6 +263,28 @@ SMASH, run `cmake` with
 
 Note: In case of problems, make sure to start with a clean build folder.
 
+
+## Using the Docker containers
+
+Alternatively to building SMASH, a Docker image of the latest or recently
+tagged version can be pulled from the Github container registry. Get the newest
+version with
+
+    docker pull ghcr.io/smash-transport/smash:newest
+
+Start the container with
+
+    docker run -it ghcr.io/smash-transport/smash:newest
+
+A build version of smash is found in the `smash_prebuild` directory. Run as
+explained below.
+
+Two container versions of SMASH are offered: a small version
+(`ghcr.io/smash-transport/smash`) with a minimal set of dependencies
+pre-installed and a maximum version with all possible external dependencies,
+e.g. ROOT, HepMC and Rivet, already included 
+(`ghcr.io/smash-transport/smash-max`).
+
 ## Running SMASH with Example Input Files
 
 SMASH ships with example configuration files for the collider, box, sphere, and
