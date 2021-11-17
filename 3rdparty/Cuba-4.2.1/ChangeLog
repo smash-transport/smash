@@ -1,3 +1,9 @@
+21 Sep 18:
+
+- Fixed problems with MathLink compile for recent Mathematica versions
+  on Cygwin.
+
+
 25 Sep 15:
 
 - Fixed bug in Suave.tm (oversight of 'nmin' argument).

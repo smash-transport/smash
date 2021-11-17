@@ -3,7 +3,7 @@
 		fork the cores for parallel sampling
 		(C version only)
 		by Thomas Hahn
-		last modified 23 Apr 15 th
+		last modified 30 Oct 20 th
 */
 
 
@@ -16,7 +16,7 @@
 
 #define MINCORES 1
 
-coreinit cubafun_;
+extern coreinit cubafun_;
 extern int cubaverb_;
 extern corespec cubaworkers_;
 

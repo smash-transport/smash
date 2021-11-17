@@ -5,7 +5,7 @@
 		then do a main integration over all regions
 		this file is part of Divonne
 		checkpointing by B. Chokoufe
-		last modified 13 Mar 15 th
+		last modified 25 Nov 20 th
 */
 
 
@@ -369,7 +369,7 @@ refine:
       if( VERBOSE > 2 ) {
         cchar *msg = "\nRegion (" REALF ") - (" REALF ")";
         for( B = (b = region->bounds) + t->ndim; b < B; ++b ) {
-          oe += sprintf(oe, msg, b->lower, b->upper);
+          oe += sprintf(oe, msg, SHOW(b->lower), SHOW(b->upper));
           msg = "\n       (" REALF ") - (" REALF ")";
         }
       }

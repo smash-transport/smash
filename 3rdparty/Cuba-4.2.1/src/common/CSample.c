@@ -3,11 +3,11 @@
 		the serial sampling routine
 		for the C versions of the Cuba routines
 		by Thomas Hahn
-		last modified 9 Oct 14 th
+		last modified 30 Oct 20 th
 */
 
 
-coreinit cubafun_;
+extern coreinit cubafun_;
 extern int cubaverb_;
 extern corespec cubaworkers_;
 

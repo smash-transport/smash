@@ -2,14 +2,14 @@
 	Global.c
 		set global vars
 		by Thomas Hahn
-		last modified 21 Jul 14 th
+		last modified 30 Oct 20 th
 */
 
 
 #include "stddecl.h"
 
 
-coreinit cubafun_;
+extern coreinit cubafun_;
 extern int cubaverb_;
 
 #ifdef HAVE_FORK
@@ -17,26 +17,26 @@ extern corespec cubaworkers_;
 #endif
 
 
-Extern void SUFFIX(cubaverbose)(cint verb)
+Extern void SUFFIX(cubaverbose)(cint *verb)
 {
-  cubaverb_ = verb;
+  cubaverb_ = *verb;
 }
 
 /*********************************************************************/
 
-Extern void SUFFIX(cubacores)(cint n, cint p)
+Extern void SUFFIX(cubacores)(cint *n, cint *p)
 {
 #ifdef HAVE_FORK
-  cubaworkers_.ncores = n;
-  cubaworkers_.pcores = p;
+  cubaworkers_.ncores = *n;
+  cubaworkers_.pcores = *p;
 #endif
 }
 
-Extern void SUFFIX(cubaaccel)(cint n, cint p)
+Extern void SUFFIX(cubaaccel)(cint *n, cint *p)
 {
 #ifdef HAVE_FORK
-  cubaworkers_.naccel = n;
-  cubaworkers_.paccel = p;
+  cubaworkers_.naccel = *n;
+  cubaworkers_.paccel = *p;
 #endif
 }
 

@@ -1,0 +1,113 @@
+#! /bin/sh
+# this script jumps in if there is no working mcc on the path:
+# - on Mac OS it (hopefully) figures out the location of mcc,
+# - on Cygwin it substitutes mcc completely
+# last modified 16 Apr 18 th
+
+
+sdkpath() {
+  mathcmd="$1"
+  shift
+  mathcmd=`IFS=:
+    PATH="$PATH:$*" which $mathcmd`
+  
+  eval `"$mathcmd" -run '
+    Print["sysid=\"", $SystemID, "\""];
+    Print["topdir=\"", $TopDirectory, "\""];
+    Exit[]' < /dev/null | tr '\r' ' ' | tail -2`
+
+	# check whether Cygwin's dlltool can handle 64-bit DLLs
+  test "$sysid" = Windows-x86-64 && {
+    ${DLLTOOL:-dlltool} --help | grep x86-64 > /dev/null || sysid=Windows
+  }
+
+  topdir=`cd "$topdir" ; echo $PWD`
+
+  for sdk in \
+    "$topdir/SystemFiles/Links/MathLink/DeveloperKit/$sysid/CompilerAdditions" \
+    "$topdir/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions" \
+    "$topdir/AddOns/MathLink/DeveloperKit/$sysid/CompilerAdditions" ; do
+    test -d "$sdk" && return
+  done
+
+  echo "MathLink SDK not found" 1>&2
+  exit 1
+}
+
+
+cygmcc() {
+  w64="`cygpath -u "${ProgramW6432:-/cygdrive/c/Program Files}"`"
+  w32="`cygpath -u "${PROGRAMFILES:-/cygdrive/c/Program Files (x86)}"`"
+  eval sdkpath math `ls -tdQ {"$w64","$w32"}/"Wolfram Research"/Mathematica/*`
+
+  cache=MLcyg-cache
+  test -d $cache || mkdir $cache
+
+  mprep="`find "$sdk"/m* -name mprep.exe`"
+  mathlink_h="`find "$sdk"/m* -name mathlink.h`"
+  libname="`find "$sdk"/m* -name ml\*m.lib | sort -r | head -1`"
+  dllname="`basename "$libname" m.lib`"
+  OSbits=32
+  case "$dllname" in
+  *64*) OSbits=64 ;;
+  esac
+
+  lib="$cache/${dllname}m"
+  test -f "$lib.a" || {
+    ( echo "EXPORTS"
+      ${NM:-nm} -C --defined-only "$libname" | awk '/ T [^.]/ { print $3 }'
+    ) > "$lib.def"
+    ${DLLTOOL:-dlltool} -k --dllname "$dllname.dll" \
+      --def "$lib.def" --output-lib "$lib.a"
+  }
+
+  tmp=
+  args="-DWIN$OSbits -I'${mathlink_h%/*}'"
+  for arg in "$@" ; do
+    case "$arg" in
+    *.tm)
+	cp "$arg" "$arg.tm"
+	"$mprep" -lines -o "$arg.c" "$arg.tm"
+	tmp="$tmp '$arg.c' '$arg.tm'"
+	args="$args '$arg.c'" ;;
+    *)
+	args="$args '$arg'" ;;
+    esac
+  done
+
+  trap "rm -f $tmp" 0 1 2 3 15
+  eval "set -x ; ${CC:-gcc} $args $lib.a -mwindows"
+}
+
+
+macmcc() {
+  sdkpath MathKernel \
+    /Applications/Mathematica*/Contents/MacOS \
+    $HOME/Desktop/Mathematica*/Contents/MacOS
+  trap "rm -f /tmp/mcc.$$" 0 1 2 3 15
+  ln -s "$sdk" /tmp/mcc.$$
+  exec /tmp/mcc.$$/mcc "$@"
+}
+
+
+defaultmcc() {
+  sdkpath math \
+    /usr/local/bin \
+    /usr/local/Wolfram/bin \
+    /usr/local/Wolfram/Mathematica/*/Executables \
+    /opt/Wolfram/bin \
+    /opt/Wolfram/Mathematica/*/Executables
+  trap "rm -f /tmp/mcc.$$" 0 1 2 3 15
+  ln -s "$sdk" /tmp/mcc.$$
+  exec /tmp/mcc.$$/mcc "$@"
+}
+
+
+shopt -s nullglob 2> /dev/null
+
+case `uname -s` in
+Darwin) macmcc "$@" ;;
+CYG*)   cygmcc "$@" ;;
+*)      defaultmcc "$@" ;;
+esac
+
