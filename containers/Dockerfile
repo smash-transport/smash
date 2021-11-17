@@ -37,6 +37,7 @@ apport-symptoms  \
 apt  \
 aptdaemon  \
 aptdaemon-data  \
+apt-utils \
 aspell  \
 aspell-en  \
 at-spi2-core  \
@@ -1314,127 +1315,141 @@ rm get-pip.py
 
 #here we download and install several libraries/programs used by SMASH
 
-RUN wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8303.tgz && \
-tar xf pythia8303.tgz && rm pythia8303.tgz && \
-cd pythia8303 && \
-./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC -march=x86-64' --prefix=/SMASH/pythia_8_303 && \
+ARG pythiaV="8303"
+
+RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
+tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
+cd pythia${pythiaV} && \
+./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC -march=x86-64' --prefix=/SMASH/pythia_install&& \
 make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 make install && \
-echo /SMASH/pythia_8_303/lib >> /etc/ld.so.conf && ldconfig
+echo /SMASH/pythia_install/lib >> /etc/ld.so.conf && ldconfig
+ENV PYTHIA8=/SMASH/pythia_install/
+ENV PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
+ENV PYTHIA_LIBRARY=$PYTHIA8/lib
+ENV PYTHIA_INCLUDE=$PYTHIA8/include
+ENV LD_LIBRARY_PATH=$PYTHIA_LIBRARY:$LD_LIBRARY_PATH
+ENV PATH=$PYTHIA8/bin:$PATH
+
+ARG hepmcV="3.2.4"
 
 RUN cd /SMASH && \
-wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-3.2.3.tar.gz && \
-tar xf HepMC3-3.2.3.tar.gz && \
+wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${hepmcV}.tar.gz && \
+tar xf HepMC3-${hepmcV}.tar.gz && \
 mkdir -p HepMC3_build && \
 cd HepMC3_build && \
-cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=OFF -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" ../HepMC3-3.2.3 && \
+cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=OFF -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" ../HepMC3-${hepmcV} && \
 make -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
 make install
+ENV LD_LIBRARY_PATH="/SMASH/hepmc3_install/lib:$LD_LIBRARY_PATH"
+
+ARG rootV="6.24.06"
 
 RUN cd /SMASH && \
-wget https://root.cern/download/root_v6.22.08.source.tar.gz && \
-tar xf root_v6.22.08.source.tar.gz && \
-mv root-6.22.08 root_src && \
-mkdir -p root_6_22_08 && \
+wget https://root.cern/download/root_v${rootV}.source.tar.gz && \
+tar xf root_v${rootV}.source.tar.gz && \
+mv root-${rootV} root_src && \
+mkdir -p root_install && \
 mkdir -p root_build && \
 cd root_build && \
-cmake -DCMAKE_INSTALL_PREFIX=../root_6_22_08 ../root_src  -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64"&& \
-cmake --build . --target install -j$NUMBER_OF_PROCS_FOR_COMPILATION && \
-ROOTSYS=/SMASH/root_6_22_08 &&  \
-export PATH=$ROOTSYS/bin:$PATH && \
-export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH && \
-export SHLIB_PATH=$ROOTSYS/lib && \
-export LIBPATH=$ROOTSYS/lib && \
-export PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH && \
-export MANPATH=$ROOTSYS/man:$MANPATH && \
-export CMAKE_PREFIX_PATH=$ROOTSYS:$CMAKE_PREFIX_PATH && \
-echo /SMASH/root/lib >> /etc/ld.so.conf && ldconfig
+cmake -DCMAKE_INSTALL_PREFIX=../root_install ../root_src  -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64"&& \
+cmake --build . --target install -j$NUMBER_OF_PROCS_FOR_COMPILATION
+ENV ROOTSYS=/SMASH/root_install
+ENV PATH=$ROOTSYS/bin:$PATH
+ENV LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
+ENV SHLIB_PATH=$ROOTSYS/lib
+ENV LIBPATH=$ROOTSYS/lib
+ENV PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH
+ENV MANPATH=$ROOTSYS/man:$MANPATH
+ENV CMAKE_PREFIX_PATH=$ROOTSYS:$CMAKE_PREFIX_PATH
+ENV JUPYTER_PATH=$ROOTSYS/etc/notebook:$JUPYTER_PATH
+ENV JUPYTER_CONFIG_DIR=$ROOTSYS/etc/notebook:$JUPYTER_CONFIG_DIR
+ENV CLING_STANDARD_PCH=none
+RUN echo /SMASH/root_install/lib >> /etc/ld.so.conf && ldconfig && \
+echo /SMASH/hepmc3_install/lib >> /etc/ld.so.conf && ldconfig
 
 RUN cd /SMASH && \
 git clone git://github.com/hoxu/gitstats.git && \
 cd gitstats && \
-make install && \
+make install 
 
-cd /SMASH && \
+RUN cd /SMASH && \
 wget https://github.com/danmar/cppcheck/archive/2.2.tar.gz && \
 tar xf 2.2.tar.gz && \
 cd cppcheck-2.2 && \
 g++ -o cppcheck -std=c++11 -Iexternals -Iexternals/simplecpp -Iexternals/tinyxml -Ilib cli/*.cpp lib/*.cpp externals/simplecpp/simplecpp.cpp externals/tinyxml/*.cpp && \
 wget https://raw.githubusercontent.com/cpplint/cpplint/develop/cpplint.py && \
 mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck cpplint.py /SMASH/auxiliary_progs/  && \
-chmod +x /SMASH/auxiliary_progs/* && \
-PATH=$PATH:/SMASH/auxiliary_progs
+chmod +x /SMASH/auxiliary_progs/*
+ENV PATH=$PATH:/SMASH/auxiliary_progs
 
 #now we install Rivet, first fixing a few details in the bootstrap script
 
-RUN wget https://gitlab.com/hepcedar/rivetbootstrap/raw/3.1.4/rivet-bootstrap
+ARG rivetV="3.1.4"
+
+RUN mkdir -p rivet_build && cd rivet_build 
+RUN wget https://gitlab.com/hepcedar/rivetbootstrap/raw/${rivetV}/rivet-bootstrap
 #we set the Rivet installation directory
-RUN sed -i "6s/\$PWD\/local/\/SMASH\/Rivet_3_1_4_install/" rivet-bootstrap
+RUN sed -i "6s/\$PWD\/local/\/SMASH\/Rivet_install/" rivet-bootstrap
 #we set the number of concurrent compilation processes
 RUN sed -i "7s/j$NUMBER_OF_PROCS_FOR_COMPILATION/j3/" rivet-bootstrap
 #we disable the installation of hepmc3, already installed
 RUN sed -i "9s/1/0/" rivet-bootstrap
 #we update the hepmc3 version
-RUN sed -i "18s/2.06.11/3.2.3/" rivet-bootstrap
+RUN sed -i "18s/2.06.11/${hepmcV}/" rivet-bootstrap
 #we provide the hepm3 installation path
-RUN sed -i "50s/usr/\SMASH\/hepmc3-install/" rivet-bootstrap
+RUN sed -i "50s/usr/\SMASH\/hepmc3_install/" rivet-bootstrap
 
 #now we really compile and install Rivet
 
 RUN chmod +x rivet-bootstrap && \
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/SMASH/hepmc3-install/lib && \
-./rivet-bootstrap
+./rivet-bootstrap && \
+echo /SMASH/Rivet_install/lib >> /etc/ld.so.conf && \
+echo /SMASH/Rivet_install/lib64 >> /etc/ld.so.conf && \
+ldconfig 
+
+ENV PATH=/SMASH/Rivet_install/bin:$PATH
+ENV LD_LIBRARY_PATH="/SMASH/Rivet_install/lib:/SMASH/Rivet_install/lib64:$LD_LIBRARY_PATH"
+ENV PYTHONPATH="/SMASH/Rivet_install/lib/python2.7/site-packages:$PYTHONPATH"
+ENV TEXMFHOME="/SMASH/Rivet_install/share/Rivet/texmf:$TEXMFHOME"
+ENV HOMETEXMF="/SMASH/Rivet_install/share/Rivet/texmf:$HOMETEXMF"
+ENV TEXMFCNF="/SMASH/Rivet_install/share/Rivet/texmf/cnf:$TEXMFCNF"
+ENV TEXINPUTS="/SMASH/Rivet_install/share/Rivet/texmf/tex//:$TEXINPUTS"
+ENV LATEXINPUTS="/SMASH/Rivet_install/share/Rivet/texmf/tex//:$LATEXINPUTS"
 
 # eventually, we download and compile SMASH
 
-RUN cd /SMASH && \
-git clone https://github.com/smash-transport/smash.git && \
+RUN cd /SMASH 
+RUN git clone https://github.com/smash-transport/smash.git && \
 mkdir -p smash_bin && \
 cd smash_bin && \
-cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_8_303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" && \
-make -j$NUMBER_OF_PROCS_FOR_COMPILATION
+cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" \
+-DCMAKE_CXX_STANDARD=14 && make -j$NUMBER_OF_PROCS_FOR_COMPILATION
+ENV PATH=$PATH:/SMASH/smash_bin
 
 #we remove most of the sources
 
 RUN cd /SMASH && \
-rm -rf HepMC3-3.2.3 HepMC3-3.2.3.tar.gz HepMC3_build pythia8303 gitstats cppcheck-2.2 2.2.tar.gz root_v6.22.08.source.tar.gz root_build root_src Rivet-3.1.4 rivet-bootstrap /var/cache/apt/archives/*.deb
+rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build pythia${pythiaV} gitstats cppcheck-2.2 2.2.tar.gz root_v${rootV}.source.tar.gz root_build root_src rivet_build /var/cache/apt/archives/*.deb
 
 #we allow Imagemagick to process PS, EPS and PDF files
 RUN sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" -e "/EPS/d" -e "/PDF/d" -e "/XPS/d" /etc/ImageMagick-6/policy.xml
 
-#we set up the shell prompt during the container execution
+#we set a few other environment variables
 
-ENV LC_ALL en_US.UTF-8
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US.UTF-8
-ENV PYTHIA8 /SMASH/pythia_8_303/
-ENV PYTHIA8DATA $PYTHIA8/share/Pythia8/xmldoc
-ENV PYTHIA_LIBRARY $PYTHIA8/lib
-ENV PYTHIA_INCLUDE $PYTHIA8/include
-ENV LD_LIBRARY_PATH $PYTHIA_LIBRARY:$LD_LIBRARY_PATH
-ENV PATH $PYTHIA8/bin:$PATH
+ENV LC_ALL=en_US.UTF-8
+ENV LANG en=US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
 
-ENV PATH $PATH:/SMASH/smash_bin:/SMASH/auxiliary_progs
 
-ENV ROOTSYS /SMASH/root_6_22_08
-ENV PATH $ROOTSYS/bin:$PATH
-ENV LD_LIBRARY_PATH $ROOTSYS/lib:$LD_LIBRARY_PATH
-ENV SHLIB_PATH $ROOTSYS/lib
-ENV LIBPATH $ROOTSYS/lib
-ENV PYTHONPATH $ROOTSYS/lib:$PYTHONPATH
-ENV MANPATH $ROOTSYS/man:$MANPATH
-ENV CMAKE_PREFIX_PATH $ROOTSYS:$CMAKE_PREFIX_PATH
-ENV JUPYTER_PATH $ROOTSYS/etc/notebook:$JUPYTER_PATH
-ENV JUPYTER_CONFIG_DIR $ROOTSYS/etc/notebook:$JUPYTER_CONFIG_DIR
-ENV CLING_STANDARD_PCH none
+#shell prompt
 
-#environment variables for Rivet
+ENV PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "
 
-ENV PATH /SMASH/Rivet_3_1_4_install/bin:$PATH
-ENV LD_LIBRARY_PATH "/SMASH/Rivet_3_1_4_install/lib:/SMASH/Rivet_3_1_4_install/lib64:/SMASH/hepmc3-install/lib:$LD_LIBRARY_PATH"
-ENV PYTHONPATH "/SMASH/Rivet_3_1_4_install/lib/python2.7/site-packages:$PYTHONPATH"
-ENV TEXMFHOME "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf:$TEXMFHOME"
-ENV HOMETEXMF "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf:$HOMETEXMF"
-ENV TEXMFCNF "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf/cnf:$TEXMFCNF"
-ENV TEXINPUTS "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf/tex//:$TEXINPUTS"
-ENV LATEXINPUTS "/SMASH/Rivet_3_1_4_install/share/Rivet/texmf/tex//:$LATEXINPUTS"
+#we set up the shell prompt during the container execution, this works when we convert the Docker into a Singularity container
+
+RUN mkdir -p /.singularity.d/env/ && \
+CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh && \
+echo '#!/bin/bash' > $CUSTOM_ENV && \
+echo 'PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "' >> $CUSTOM_ENV && \
+chmod 755 $CUSTOM_ENV
