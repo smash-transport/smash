@@ -1,0 +1,73 @@
+#! /bin/sh
+# script to compile C programs that are linked 
+# against Fortran libraries
+# last modified 31 Jan 18 th
+
+args=
+compileonly=
+objs=
+ldflags=
+fldflags=-lpthread
+
+cc="${REALCC:-cc}"
+cxx="${REALCXX:-c++}"
+test `basename $0 .in` = f++ && cc="$cxx"
+case `$cxx --version 2>&1` in
+*clang*) cxx="$cxx -stdlib=libstdc++" ;;
+esac
+
+while test $# -gt 0 ; do
+  case "$1" in
+  -st | -b32 | -b64)
+	;; # ignore mcc-specific flags
+  -arch)
+	shift
+	;;
+  -lstdc++)
+	cc="$cxx"
+	;; # or else -static-libstdc++ has no effect
+  -Wno-long-double)
+	;; # mcc adds this on Macs & gcc 4 doesn't like it
+  -L*CompilerAdditions*)
+	ldflags="$ldflags '$1'"
+	mldir=`echo "$1" | sed '
+	  s/^-L//
+	  s/Links.MathLink.DeveloperKit/Libraries/
+	  s/CompilerAdditions.*$//'`
+	case "$cc" in
+	*-m32*) mldir=`echo "$mldir" | sed 's/-x86-64//g'` ;;
+	esac
+	test -f "$mldir/libuuid.a" && {
+	  ldflags="$ldflags '-L$mldir'"
+	  fldflags="$fldflags -luuid"
+	}
+	;;
+  -[Ll]* | -Wl*)
+	ldflags="$ldflags '$1'"
+	;;
+  *.tm.o)
+	objs="'$1' $objs"
+	;;
+  *.a | *.o | *.so)
+	objs="$objs '$1'"
+	;;
+  *.cc)
+	args="$args '$1'"
+	cc="$cxx"
+	;;
+  -c)
+	compileonly="-c"
+	;;
+  -o)
+	args="$args -o '$2'"
+	shift
+	;;
+  *)
+	args="$args '$1'"
+	;;
+  esac
+  shift
+done
+
+eval "set -x ; exec $cc $args ${compileonly:-$objs $ldflags $fldflags}"
+

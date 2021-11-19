@@ -1,0 +1,2433 @@
+\documentclass[12pt]{article}
+\usepackage{a4wide,amsmath,amssymb,alltt}
+\usepackage{colordvi}
+
+\parskip=2pt
+\raggedbottom
+\sloppy
+
+\newcommand\cuba{\textsc{Cuba}}
+\newcommand\ie{i.e.\ }
+\newcommand\eg{e.g.\ }
+\newcommand\rd{\mathrm{d}}
+\newcommand\order{\mathcal{O}}
+\newcommand\epsabs{\varepsilon_{\text{abs}}}
+\newcommand\epsrel{\varepsilon_{\text{rel}}}
+\newcommand\nnew{n_s^{\text{new}}}
+\newcommand\nmin{n_s^{\text{min}}}
+\newcommand\nmax{n_s^{\text{max}}}
+\newcommand\nneed{n_{\text{need}}}
+\newcommand\tot{_{\text{tot}}}
+\newcommand\ctot{_{c,\text{tot}}}
+\newcommand\cvec[1]{\vec #1}
+\newcommand\dvec[1]{\mathbf{#1}}
+\newcommand\norm[1]{\|#1\|_1}
+\newcommand\lbrac{\symbol{123}}
+\newcommand\rbrac{\symbol{125}}
+\newcommand\uscore{\symbol{95}}
+\newcommand\accel{_{\mathrm{accel}}}
+\newcommand\cores{_{\mathrm{cores}}}
+\newcommand\Code[1]{\ensuremath{\texttt{#1}}}
+\newcommand\Var[1]{\ensuremath{\mathit{#1}}}
+\newcommand\VarIn[1]{\item\Code{#1} \textit{$\langle$in\/$\rangle$},}
+\newcommand\VarOut[1]{\item\Code{#1} \textit{$\langle$out\,$\rangle$},}
+\newcommand\Option[2]{\item\Code{#1 -> #2},}
+\newcommand\ul[1]{\underline{\vphantom{g}#1}}
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\makeatletter
+\def\reportno#1{\gdef\@reportno{#1}}
+\def\@maketitle{%
+  \hfill{\small\begin{tabular}[t]{r}%
+    \@reportno
+  \end{tabular}\par}%
+  \vskip 2em%
+  \begin{center}%
+    \let \footnote \thanks
+    {\large \@title \par}%
+    \vskip 1.5em%
+    {%\large
+      \lineskip .5em%
+      \begin{tabular}[t]{c}%
+        \@author  
+      \end{tabular}\par}%
+    \vskip 1em%
+    {%\large
+     \@date}%
+  \end{center}%
+  \par
+  \vskip 1.5em}
+\makeatother
+
+
+\begin{document}
+
+\reportno{MPP--2004--40\\hep--ph/0404043}
+
+\title{\cuba\ -- a library for multidimensional numerical integration}
+
+\author{T. Hahn \\
+Max-Planck-Institut f\"ur Physik \\
+F\"ohringer Ring 6, D--80805 Munich, Germany}
+
+\date{Mar 27, 2015}
+
+\maketitle
+
+\begin{abstract}
+The \cuba\ library provides new implementations of four general-purpose
+multidimensional integration algorithms: Vegas, Suave, Divonne, and
+Cuhre.  Suave is a new algorithm, Divonne is a known algorithm to which
+important details have been added, and Vegas and Cuhre are new
+implementations of existing algorithms with only few improvements over
+the original versions.  All four algorithms can integrate vector
+integrands and have very similar Fortran, C/C++, and Mathematica
+interfaces.
+\end{abstract}
+
+%========================================================================
+
+\section{Introduction}
+
+Many problems in physics (and elsewhere) involve computing an integral,
+and often enough this has to be done numerically, as the analytical
+result is known only in a limited number of cases.  In one dimension,
+the situation is quite satisfactory: standard packages, such as
+\textsc{Quadpack} \cite{quadpack}, reliably integrate a broad class of
+functions in modest CPU time.  The same is unfortunately not true for
+multidimensional integrals.
+
+This paper presents the \cuba\ library with new implementations of four
+algorithms for multidimensional numerical integration: Vegas, Suave,
+Divonne, and Cuhre.  They have a C/C++, Fortran, and Mathematica
+interface each and are invoked in a very similar way, thus making them
+easily interchangeable, \eg for comparison purposes.  All four can
+integrate vector integrands.  Cuhre is a deterministic algorithm, the
+others use Monte Carlo methods.
+
+Vegas is the simplest of the four.  It uses importance sampling for
+variance reduction, but is only in some cases competitive in terms of
+the number of samples needed to reach a prescribed accuracy. 
+Nevertheless, it has a few improvements over the original algorithm
+\cite{Vegas1,Vegas2} and comes in handy for cross-checking the results
+of other methods.
+
+Suave is a new algorithm which combines the advantages of two popular
+methods: importance sampling as done by Vegas and subregion sampling in
+a manner similar to Miser \cite{Miser}.  By dividing into subregions,
+Suave manages to a certain extent to get around Vegas' difficulty to
+adapt its weight function to structures not aligned with the coordinate
+axes.
+
+Divonne is a further development of the CERNLIB routine D151
+\cite{Divonne}.  Divonne works by stratified sampling, where the
+partitioning of the integration region is aided by methods from
+numerical optimization.  A number of improvements have been added to
+this algorithm, the most significant being the possibility to supply
+knowledge about the integrand.  Narrow peaks in particular are difficult
+to find without sampling very many points, especially in high
+dimensions.  Often the exact or approximate location of such peaks is
+known from analytic considerations, however, and with such hints the
+desired accuracy can be reached with far fewer points.
+
+Cuhre\footnote{%
+	The D from the original name was dropped since the \cuba\ 
+	library uses double precision throughout.}
+employs a cubature rule for subregion estimation in a globally adaptive
+subdivision scheme \cite{dcuhre}.  It is hence a deterministic, not a
+Monte Carlo method.  In each iteration, the subregion with the largest
+error is halved along the axis where the integrand has the largest
+fourth difference.  Cuhre is quite powerful in moderate dimensions, and
+is usually the only viable method to obtain high precision, say relative
+accuracies much below $10^{-3}$.
+
+The new algorithms were coded from scratch in C, which is a compromise
+of sorts between C++ and Fortran 77, combining ease of linking to
+Fortran code with the availability of reasonable memory management.  The
+declarations have been chosen such that the routines can be called from
+Fortran directly.  The Mathematica versions are based on the same C code
+and use the MathLink API to communicate with Mathematica.
+
+%========================================================================
+
+\section{Vegas}
+
+Vegas is a Monte Carlo algorithm that uses importance sampling as a
+variance-reduction technique.  Vegas iteratively builds up a
+piecewise constant weight function, represented on a rectangular grid. 
+Each iteration consists of a sampling step followed by a refinement of
+the grid.  The exact details of the algorithm can be found in
+\cite{Vegas1,Vegas2} and shall not be reproduced here.
+
+Changes with respect to the original version are:
+\begin{itemize}
+\item
+Sobol quasi-random numbers \cite{Sobol} rather than pseudo-random
+numbers are used by default.  Empirically, this seems to accelerate
+convergence quite a bit, most noticeably in the early stages of the
+integration.
+
+From theoretical considerations it is of course known (see \eg
+\cite{Niederreiter}) that quasi-random sequences yield a convergence
+rate of $\order(\log^{n_d} n_s/n_s)$, where $n_d$ is the number of
+dimensions and $n_s$ the number of samples, which is much better than
+the usual $\order(1/\sqrt{n_s})$ for ordinary Monte Carlo.  But these
+convergence rates are meaningful only for large $n_s$ and so it came as
+a pleasant surprise that the gains are considerable already at the
+beginning of the sampling process.  It shows that quasi-Monte Carlo
+methods blend well with variance-reduction techniques such as importance
+sampling.
+
+Similarly, it was not clear from the outset whether the statistical
+standard error would furnish a suitable error estimate since
+quasi-random numbers are decidedly non-random in a number of respects. 
+Yet also here empirical evidence suggests that the standard error works
+just as well as for pseudo-random numbers.
+
+\item
+The present implementation allows the number of samples to be increased
+in each iteration.  With this one can mimic the strategy of calling
+Vegas with a small number of samples first to `get the grid right' and
+then using an alternate entry point to perform the `full job' on the
+same grid with a larger number of samples.
+
+\item
+The option to add simple stratified sampling on top of the importance
+sampling, as proposed in the appendix of \cite{Vegas1}, has not been
+implemented in the present version.  Tests with the Vegas version from
+\cite{NumRecipes}, which contains this feature, showed that convergence
+was accelerated only when the original pseudo-random numbers were used
+and that with quasi-random numbers convergence was in fact even slower 
+in some cases.
+\end{itemize}
+Vegas' major weakness is that it uses a separable (product) weight
+function.  As a consequence, Vegas can offer significant improvements
+only as far as the integrand's characteristic regions are aligned with
+the coordinate axes.
+
+%========================================================================
+
+\section{Suave}
+
+Suave (short for \textsc{su}bregion-\textsc{a}daptive \textsc{ve}gas)
+uses Vegas-like importance sampling combined with a globally adaptive
+subdivision strategy: Until the requested accuracy is reached, the
+region with the largest error at the time is bisected in the dimension
+in which the fluctuations of the integrand are reduced most.  The number
+of new samples in each half is prorated for the fluctuation in that
+half.
+
+A similar method, known as recursive stratified sampling, is implemented
+in Miser \cite{Miser}.  Miser always samples a fixed number of points,
+however, which is somewhat undesirable since it does not stop once the
+prescribed accuracy is reached.
+
+Suave first samples the integration region in a Vegas-like step, \ie
+using importance sampling with a separable weight function.  It then
+slices the integration region in two, as Miser would do.  Suave does not
+immediately recurse on those subregions, however, but maintains a list
+of all subregions and selects the region with the largest absolute error
+for the next cycle of sampling and subdivision.  That is, Suave uses
+global error estimation and terminates when the requested relative or
+absolute accuracy is attained.
+
+The information on the weight function collected in one Vegas step is
+not lost.  Rather, the grid from which the weight function is computed
+is stretched and re-used on the subregions.  A region which is the
+result of $m - 1$ subdivisions thus has had $m$ Vegas iterations
+performed on it.
+
+The improvements over Vegas and Miser come at a price, which is the
+amount of memory required to hold all the samples.  Memory consumption
+is not really severe on modern hardware, however.  The component that
+scales worst is the one proportional to the number of samples, which is
+$$
+8 (n_d + n_c + 1) n_s\text{ bytes}\,,
+$$
+where $n_d$ is the number of dimensions of the integral, $n_c$ the
+number of components of the integrand, and $n_s$ the number of samples. 
+For a million samples on a scalar integrand of 10 variables, this works
+out to 96 megabytes -- not all that enormous these days. 
+
+
+\subsection{Description of the algorithm}
+
+As Suave is a new algorithm, the following description will be fairly
+detailed.  For greater notational clarity, $n_c$-dimensional vectors are
+denoted with a vector arrow ($\cvec f$\,) and $n_d$-dimensional vectors
+with boldface letters ($\dvec x$) in the following, where $n_d$ is the
+dimension of the integral and $n_c$ the number of components of the
+integrand.
+
+The essential inputs are $\epsrel$ and $\epsabs$, the relative and
+absolute accuracies, $\nnew$, the number of samples added in each
+iteration, $\nmax$, the maximum number of samples allowed, and $p$, a
+flatness parameter described below.
+
+Suave has a main loop which calls a Vegas-like sampling step.  The main
+loop is responsible for subdividing the subregions and maintaining the
+totals.  The sampling step does the actual sampling on the subregions
+and computes the region results.
+
+
+\subsubsection{Main loop}
+\label{sect:suavemain}
+
+\begin{enumerate}
+\item
+Initialize the random-number generator and allocate a data structure for
+the entire integration region.  Initialize its Vegas grid with
+equidistant bins.
+
+\item
+Sample the entire integration region with $\nnew$ points. This gives an
+initial estimate of the integral $\cvec I\tot$, the variance 
+$\cvec\sigma\tot^{\,2}$, and $\cvec\chi\tot^{\,2}$.
+
+\item
+Find the component $c$ for which $r_c = \sigma\ctot/
+\max(\epsabs, \epsrel |I\ctot|)$ is maximal.
+
+If none of the $r_c$'s exceeds unity, indicate success and return.
+
+\item
+If the number of samples spent so far equals or exceeds $\nmax$,
+indicate failure and return.
+
+\item
+Find the region $r$ with the largest $\sigma_c^2$.
+
+\item
+Find the dimension $d$ which minimizes $F_c(r_L^d) + F_c(r_R^d)$, where
+$r_{L,R}^d$ are the left and right halves of $r$ with respect to $d$. 
+$F_c(r_{L,R}^d)$ is the fluctuation of the samples that fall into
+$r_{L,R}^d$ and is computed as
+\begin{equation}
+\label{eq:fluct}
+F_c(r_{L,R}^d)
+= \biggl[\left\|
+    1 + \tilde F_c(\dvec x_i\in r_{L,R}^d)
+  \right\|_p\biggr]^{2/3}
+= \biggl[\sum\left|
+    1 + \tilde F_c(\dvec x_i\in r_{L,R}^d)
+  \right|^p\,\biggr]^{2/(3p)},
+\end{equation}
+where all samples $\dvec x_i$ that fall into the respective half are 
+used in the norm/sum and the single-sample fluctuation $\tilde F_c$ is 
+defined as
+$$
+\tilde F_c(\dvec x) =
+  w(\dvec x) \, \left|\frac{f_c(\dvec x) - I_c(r)}{I_c(r)}\right|
+             \, \frac{|f_c(\dvec x) - I_c(r)|}{\sigma_c(r)}\,.
+$$
+This empirical recipe combines the relative deviation from the region
+mean, $(f - I)/I$, with the $\chi$ value, $|f - I|/\sigma$, weighted by 
+the Vegas weight $w$ corresponding to sample $\dvec x$.  Note that the 
+$I_c$ and $\sigma_c$ values of the entire region $r$ are used.
+
+Samples strongly contribute to $F$ the more they lie away from the
+predicted mean \emph{and} the more they lie out of the predicted error
+band.  Tests have shown that large values of $p$ are beneficial for
+`flat' integrands, whereas small values are preferred if the integrand
+is `volatile' and has high peaks.  $p$ has thus been dubbed a flatness
+parameter.  The effect comes from the fact that with increasing $p$, $F$
+becomes more and more dominated by `outliers,' \ie points with a large 
+$\tilde F$.
+
+The power 2/3 in Eq.~(\ref{eq:fluct}) is also used in Miser, where it is
+motivated as the exponent that gives the best variance reduction
+(\cite{NumRecipes}, p.~315).
+
+\item
+Refine the grid associated with $r$, \ie incorporate the information
+gathered on the integrand in the most recent sample over $r$ into the
+weight function.  This is done precisely as in Vegas (see
+\cite{Vegas1}), with the extension that if the integrand has more than
+one component, the marginal densities are computed not from $f^2$ but
+from the weighted sum\footnote{%
+	It is fairly obvious that scale-invariant quantities must be 
+	used in the sum, otherwise the component with the largest 
+	absolute scale would dominate.  It is less clear whether $\eta_0 
+	= (\int f_c\,\rd\dvec x)^2 = I\ctot^2$, $\eta_1 = (\int 
+	|f_c|\,\rd\dvec x)^2$, or $\eta_2 = \int f_c^2\,\rd\dvec x$ (or 
+	any other) make the best weights.  Empirically, $\eta_0$ turns 
+	out to be both slightly superior in convergence and easier to 
+	compute than $\eta_1$ and $\eta_2$ and has thus been chosen in 
+	Suave.
+
+	A possible explanation for this is that in cases where there 
+	are large compensations within the integral, \ie when $\int 
+	f_c\,\rd\dvec x\ll\int |f_c|\,\rd\dvec x$, it is particularly 
+	necessary for the overall accuracy that component $c$ be sampled 
+	accurately, and thus be given more weight in $\overline{f^2}$, 
+	and this is better accomplished by dividing $f_c^2$ by the 
+	``small'' number  $\eta_0$ than by the ``large'' number $\eta_1$ 
+	or $\eta_2$.}
+$$
+\overline{f^2} = \sum_{c = 1}^{n_c} \frac{f_c^2}{I\ctot^2}\,.
+$$
+
+\item
+Bisect $r$ in dimension $d$:
+
+Allocate a new region, $r_L$, and copy to $r_L$ those of $r$'s samples
+falling into the left half.  Compute the Vegas grid for $r_L$ by
+appropriately ``stretching'' $r$'s grid, \ie by interpolating all grid
+points of $r$ with values less than 1/2.
+
+Set up $r_R$ for the right half analogously.
+
+\item
+Sample $r_L$ with $n_L = \max\Bigl(\frac{F_c(r_L)}{F_c(r_L) + F_c(r_R)}
+\nnew, \nmin\Bigr)$ and $r_R$ with $n_R = \max(\nnew - n_L, \nmin)$ 
+points, where $\nmin = 10$.
+
+\item
+To safeguard against underestimated errors, supplement the variances 
+by the difference of the integral values in the following way:
+$$
+\sigma_{c,\text{new}}^2(r_{R,L}) = \sigma_c^2(r_{R,L})
+  \left(1 + \frac{\Delta_c}
+                 {\sqrt{\sigma_c^2(r_L) + \sigma_c^2(r_R)}}\right)^2 +   
+  \Delta_c^2
+$$
+for each component $c$, where $\cvec\Delta = \frac 14 |\cvec I(r_L) + 
+\cvec I(r_R) - \cvec I(r)|$.
+
+This acts as a penalty for regions whose integral value changes
+significantly by the subdivision and effectively moves them up in the
+order of regions to be subdivided next.
+
+\item
+Update the totals: Subtract $r$'s integral, variance, and $\chi^2$-value
+from the totals and add those of $r_L$ and $r_R$.
+
+\item
+Discard $r$, put $r_L$ and $r_R$ in the list of regions.
+
+\item
+Go to Step 3.
+\end{enumerate}
+
+
+\subsubsection{Sampling step}
+
+The function which does the actual sampling is a modified Vegas
+iteration.  It is invoked with two arguments: $r$, the region to be
+sampled and $n_m$, the number of new samples.
+
+\begin{enumerate}
+\item
+Sample a set of $n_m$ new points using the weight function given by the
+grid associated with $r$.  For a region which is the result of $m - 1$
+subdivisions, the list of samples now consists of $m$ sets of samples.
+
+\item
+For each set of samples, compute the mean $\cvec I_i$ and variance
+$\cvec\sigma_i^{\,2}$.
+
+\item
+Compute the results for the region as
+$$
+I_c = \frac{\sum_{i = 1}^m w_{i,c} I_{i,c}}{\sum_{i = 1}^m w_{i,c}},
+\quad
+\sigma_c^2 = \frac 1{\sum_{i = 1}^m w_{i,c}},
+\quad
+\chi_c^2 = \frac 1{\sigma_c^2}\left[
+  \frac{\sum_{i = 1}^m w_{i,c} I_{i,c}^2}{\sum_{i = 1}^m w_{i,c}} -
+  I_c^2\right],
+$$
+where the inverse of the set variances are used as weights, $w_{i,c} =
+1/\sigma_{i,c}^2$.  This is simply Gaussian error propagation.
+
+For greater numerical stability, $\chi_c^2$ is actually computed as
+$$
+\chi_c^2
+= \sum_{i = 1}^m w_{i,c} I_{i,c}^2 -
+  I_c \sum_{i = 1}^m w_{i,c} I_{i,c}
+= \sum_{i = 2}^m w_{i,c} I_{i,c} (I_{i,c} - I_{1,c}) -
+  I_c \sum_{i = 2}^m w_{i,c} (I_{i,c} - I_{1,c})\,.
+$$
+\end{enumerate}
+
+%========================================================================
+
+\section{Divonne}
+
+Divonne uses stratified sampling for variance reduction, that is, it 
+partitions the integration region such that all subregions have an 
+approximately equal value of a quantity called the spread $\cvec s$,
+defined as
+\begin{equation}
+\cvec s(r) = \frac 12 V(r)
+  \Bigl(\max_{\dvec x\in r} \cvec f(\dvec x) - 
+        \min_{\dvec x\in r} \cvec f(\dvec x)\Bigr)\,,
+\end{equation}
+where $V(r)$ is the volume of region $r$.  What sets Divonne apart from
+Suave is that the minimum and maximum of the integrand are sought using
+methods from numerical optimization.  Particularly in high dimensions, 
+the chance that one of the previously sampled points lies in or even 
+close to the true extremum is fairly small.
+
+On the other hand, the numerical minimization is beset with the usual
+pitfalls, \ie starting from the lowest of a (relatively small) number of
+sampled points, Divonne will move directly into the local minimum
+closest to the starting point, which may or may not be close to the
+absolute minimum.
+
+Divonne is a lot more complex than Suave and Vegas but also
+significantly faster for many integrands.  For details on the methods
+used in Divonne please consult the original references \cite{Divonne}. 
+New features with respect to the CERNLIB version (Divonne 4) are:
+\begin{itemize}
+\item
+Integration is possible in dimensions 2 through 33 (not 9 as before).  
+Going to higher dimensions is a matter of extending internal tables 
+only.
+
+\item
+The possibility has been added to specify the location of possible
+peaks, if such are known from analytical considerations.  The idea here
+is to help the integrator find the extrema of the integrand, and narrow
+peaks in particular are a challenge for the algorithm.  Even if only the
+approximate location is known, this feature of hinting the integrator
+can easily cut an order of magnitude out of the number of samples needed
+to reach the required accuracy for complicated integrands.  The points
+can be specified either statically, by passing a list of points at the
+invocation, or dynamically, through a subroutine called for each
+subregion.
+
+\item
+Often the integrand function cannot sample points lying on or very
+close to the integration border.  This can be a problem with Divonne
+which actively searches for the extrema of the integrand and homes in on
+peaks regardless of whether they lie on the border.  The user may 
+however specify a border region in which integrand values are not 
+obtained directly, but extrapolated from two points inside the `safe' 
+interior.
+
+\item
+The present algorithm works in three phases, not two as before.  Phase 1
+performs the partitioning as outlined above.  From the preliminary
+results obtained in this phase, Divonne estimates the number of samples
+necessary to reach the desired accuracy in phase 2, the final
+integration phase.  Once the phase-2 sample for a particular subregion
+is in, a $\chi^2$ test is used to assess whether the two sample averages
+are consistent with each other within their error bounds.  Subregions
+which fail this test move on to phase 3, the refinement phase, where
+they can be subdivided again or sampled a third time with more points,
+depending on the parameters set by the user.
+
+\item
+For all three phases the user has a selection of methods to obtain the
+integral estimate: a Korobov \cite{Korobov} or Sobol \cite{Sobol}
+quasi-random sample of given size, a Mersenne Twister
+\cite{MersenneTwister} or Ranlux \cite{Ranlux} pseudo-random sample of
+given size, and the cubature rules of Genz and Malik \cite{GenzMalik}
+of degree 7, 9, 11, and 13 that are also used in Cuhre.  The latter are
+embedded rules and hence provide an intrinsic error estimate (that is,
+an error estimate not based on the spread).  When this independent
+error estimate is available, it supersedes the spread-based error when
+computing the total error.  Also, regions whose spread-based error
+exceeds the intrinsic error are selected for refinement, too.
+
+In spite of these novel options, the cubature rules of the original 
+Divonne algorithm were not implemented.
+\end{itemize}
+
+Due to its complexity, the new Divonne implementation was painstakingly
+tested against the CERNLIB routine to make sure it produces the same
+results before adding the new features.
+
+%========================================================================
+
+\section{Cuhre}
+
+Cuhre is a deterministic algorithm which uses one of several cubature
+rules of polynomial degree in a globally adaptive subdivision scheme.
+The subdivision algorithm is similar to Suave's (see Sect.\
+\ref{sect:suavemain}) and works as follows:
+
+While the total estimated error exceeds the requested bounds:
+
+1) choose the region with the largest estimated error,
+
+2) bisect this region along the axis with the largest fourth 
+   difference,
+
+3) apply the cubature rule to the two subregions,
+
+4) merge the subregions into the list of regions and update the 
+   totals.
+
+Details on the algorithm and on the cubature rules employed in Cuhre can
+be found in the original references \cite{dcuhre}.  The present
+implementation offers only superficial improvements, such as an
+interface consistent with the other \cuba\ routines and a slightly
+simpler invocation, \eg one does not have to allocate a workspace.
+
+In moderate dimensions Cuhre is very competitive, particularly if the 
+integrand is well approximated by polynomials.  As the dimension 
+increases, the number of points sampled by the cubature rules rises 
+considerably, however, and by the same token the usefulness declines.
+For the lower dimensions, the actual number of points that are spent per 
+invocation of the basic integration rule are listed in the following 
+table.
+\begin{center}
+\begin{tabular}{l|ccccccccc}
+number of dimensions &
+	4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 \\ \hline
+points in degree-7 rule &
+	65 & 103 & 161 & 255 & 417 & 711 & 1265 & 2335 & 4433 \\
+points in degree-9 rule &
+	153 & 273 & 453 & 717 & 1105 & 1689 & 2605 & 4117 & 6745
+\end{tabular}
+\end{center}
+
+%========================================================================
+
+\section{Download and Compilation}
+
+The \cuba\ package can be downloaded from
+\Code{http://feynarts.de/cuba}.  The gzipped tar file unpacks into
+a directory \Code{Cuba-$m$.$n$}.  Change into this directory and type
+\begin{verbatim}
+   ./configure
+   make
+\end{verbatim}
+This should create
+\begin{tabbing}
+\verb=   =\Code{libcuba.a} \hspace{10em}
+\= --- the \cuba\ library, \\
+\verb=   =\Code{Vegas}, \Code{Suave}, \Code{Divonne}, \Code{Cuhre}
+\> --- the MathLink executables, \\
+\verb=   =\Code{demo-c}, \Code{demo-fortran}
+\> --- the demonstration programs, \\
+\verb=   =\Code{partview}
+\> --- the partition viewer.
+\end{tabbing}
+\cuba\ can also be built in parts: ``make lib'' builds only the \cuba\
+library, ``make math'' builds only the MathLink executables, ``make
+demos'' builds only the demo programs, and ``make tools'' builds only 
+the partition viewer.
+
+The MathLink executables require mcc, the MathLink compiler, and the
+partition viewer needs Qt.  Compilation of the corresponding parts will
+be switched off by default if configure does not find these tools.
+
+Besides the usual autoconf options, configure understands
+\begin{itemize}
+\item
+\Code{--with-maxdim=\Var{n_d^{\text{max}}}} sets an upper limit on the
+number of dimensions.
+
+\item
+\Code{--with-maxcomp=\Var{n_c^{\text{max}}}} sets an upper limit on the
+number of components.
+
+\item
+\Code{--with-real=10} uses \Code{long double} instead of \Code{double} 
+for all real variables.  On x86 hardware this typically corresponds to
+80-bit extended precision (\Code{REAL*10}).  Resulting files are
+suffixed with `$\ell$' (\Code{libcubal.a}, \Code{cubal.h}, 
+\Code{Vegasl}, etc.).
+
+\item
+\Code{--with-real=16} uses \Code{\uscore\uscore float128} (128-bit 
+quadruple precision, \Code{REAL*16}) for all real variables.  This 
+requires gcc version 4.6 or higher. No MathLink executables are built 
+in this case as no MathLink functions are available for this type.  
+Resulting files are suffixed with `q' (\Code{libcubaq.a}, 
+\Code{cubaq.h}).
+\end{itemize}
+
+Linking Fortran or C/C++ code that uses one of the algorithms is
+straightforward, just add \Code{-lcuba} (for the \cuba\ library) and
+\Code{-lm} (for the math library) to the compiler command line, as in
+\begin{verbatim}
+   f77 -o myexecutable mysource.f -lcuba -lm
+   cc -o myexecutable mysource.c -lcuba -lm
+\end{verbatim}
+The \Code{demo} subdirectory contains the source for the demonstration
+programs in Fortran 77, C, and Mathematica, as well as the test suite
+used in Sect.~\ref{sect:tests}, which is also written in Mathematica.
+
+%========================================================================
+
+\section{User Manual}
+
+\subsection{Usage in Fortran}
+
+Although written in C, the declarations have been chosen such that the
+routines are directly accessible from Fortran, \ie no wrapper code is
+needed.  In fact, Vegas, Suave, Divonne, and Cuhre can be called as if 
+they were Fortran subroutines respectively declared as
+\begin{verbatim}
+        subroutine vegas(ndim, ncomp, integrand, userdata, nvec,
+     &    epsrel, epsabs, flags, seed, mineval, maxeval,
+     &    nstart, nincrease, nbatch, gridno, statefile, spin,
+     &    neval, fail, integral, error, prob)
+\end{verbatim}
+\begin{verbatim}
+        subroutine suave(ndim, ncomp, integrand, userdata, nvec,
+     &    epsrel, epsabs, flags, seed, mineval, maxeval,
+     &    nnew, nmin, flatness, statefile, spin,
+     &    nregions, neval, fail, integral, error, prob)
+\end{verbatim}
+\begin{verbatim}
+        subroutine divonne(ndim, ncomp, integrand, userdata, nvec,
+     &    epsrel, epsabs, flags, seed, mineval, maxeval,
+     &    key1, key2, key3, maxpass,
+     &    border, maxchisq, mindeviation,
+     &    ngiven, ldxgiven, xgiven, nextra, peakfinder,
+     &    statefile, spin,
+     &    nregions, neval, fail, integral, error, prob)
+\end{verbatim}
+\begin{verbatim}
+        subroutine cuhre(ndim, ncomp, integrand, userdata, nvec,
+     &    epsrel, epsabs, flags, mineval, maxeval,
+     &    key, statefile, spin,
+     &    nregions, neval, fail, integral, error, prob)
+\end{verbatim}
+
+
+\subsubsection{Common Arguments}
+\label{sect:commonargs}
+
+\begin{itemize}
+\VarIn{integer ndim}
+the number of dimensions of the integral.
+
+\VarIn{integer ncomp}
+the number of components of the integrand.
+
+\VarIn{integer integrand}
+the integrand.  The external function which computes the 
+integrand is expected to be declared as
+\begin{verbatim}
+  integer function integrand(ndim, x, ncomp, f, userdata, nvec, core)
+  integer ndim, ncomp, nvec, core
+  double precision x(ndim,nvec), f(ncomp,nvec)
+\end{verbatim}
+The integrand receives \Code{nvec} samples in \Code{x} and is supposed 
+to fill the array \Code{f} with the corresponding integrand values.  
+Note that \Code{nvec} indicates the actual number of points passed to 
+the integrand here and may be smaller than the \Code{nvec} given to the 
+integrator.
+
+The return value is irrelevant unless it is $-999$, in the case of which 
+the integration will be aborted immediately.  This might happen if a 
+parameterized integrand turns out not to yield sensible values for a 
+particular parameter set (passed \eg through \Code{userdata}).
+
+The worker process the integrand is running on is indicated in 
+\Code{core}, where $\Code{core} < 0$ indicates an Accelerator, 
+$\Code{core}\geqslant 0$ a regular (CPU) core, and \Code{32768} the 
+master itself (more details in Sect.~\ref{sect:cores}).
+
+The latter three arguments, \Code{userdata}, \Code{nvec}, and 
+\Code{core} are optional and may be omitted if unused, \ie the integrand 
+is minimally declared (for $\Code{nvec} = 1$) as
+\begin{verbatim}
+  integer function integrand(ndim, x, ncomp, f)
+  integer ndim, ncomp
+  double precision x(ndim), f(ncomp)
+\end{verbatim}
+
+\VarIn{(arbitrary type) userdata}
+user data passed to the integrand.  Unlike its counterpart in the
+integrand definition, this argument must be present though it may
+contain a dummy value, \eg \Code{0}.
+
+\VarIn{integer nvec}
+The maximum number of points to be given to the integrand
+routine in each invocation.  Usually this is 1 but if the integrand
+can profit from \eg SIMD vectorization, a larger value can be chosen.
+
+\VarIn{double precision epsrel, epsabs}
+the requested relative and absolute accuracies.
+The integrator tries to find an estimate $\hat I$ for the integral $I$
+which for every component $c$ fulfills $|\hat I_c - I_c|\leqslant
+\max(\epsabs, \epsrel |I_c|)$.
+
+\VarIn{integer flags}
+flags governing the integration:
+\begin{itemize}
+\item Bits 0 and 1 are taken as the verbosity level, \ie 0 to 3, 
+unless the \Code{CUBAVERBOSE} environment variable contains an even
+higher value (used for debugging).
+
+Level 0 does not print any output, level 1 prints `reasonable'
+information on the progress of the integration, level 2 also echoes the
+input parameters, and level 3 further prints the subregion results (if
+applicable).
+
+\item Bit 2 = 0,
+all sets of samples collected on a subregion during the various 
+iterations or phases contribute to the final result.
+
+Bit 2 = 1,
+only the last (largest) set of samples is used in the final result.
+
+\item (Vegas and Suave only)
+
+Bit 3 = 0,
+apply additional smoothing to the importance function, this moderately
+improves convergence for many integrands,
+
+Bit 3 = 1,
+use the importance function without smoothing, this should be chosen if 
+the integrand has sharp edges.
+
+\item Bit 4 = 0,
+delete the state file (if one is chosen) when the integration terminates 
+successfully,
+
+Bit 4 = 1,
+retain the state file.
+
+\item 
+(Vegas only)
+
+Bit 5 = 0,
+take the integrator's state from the state file, if one is present.
+
+Bit 5 = 1,
+reset the integrator's state even if a state file is present, \ie 
+keep only the grid.  Together with Bit 4 this allows a grid adapted by 
+one integration to be used for another integrand.
+
+\item Bits 8--31 =: \Code{level} determines the random-number generator
+(see below).
+\end{itemize}
+
+To select \eg last samples only and verbosity level 2, pass 6 = 4 + 2
+for the flags.
+
+\VarIn{integer seed}
+the seed for the pseudo-random-number generator.
+
+The random-number generator is chosen as follows:
+\begin{center}
+\begin{tabular}{l|l|l}
+\Code{seed} & \Code{level} & Generator \\
+& {\small (bits 8--31 of \Code{flags})} & \\ \hline
+zero & N/A & Sobol (quasi-random), \\
+non-zero & zero & Mersenne Twister (pseudo-random), \\
+non-zero & non-zero & Ranlux (pseudo-random).
+\end{tabular}
+\end{center}
+
+Ranlux implements Marsaglia and Zaman's 24-bit RCARRY algorithm with
+generation period $p$, \ie for every 24 generated numbers used, another
+$p - 24$ are skipped.  The luxury level is encoded in \Code{level} as
+follows:
+\begin{itemize}
+\item Level 1 ($p = 48$):
+	very long period, passes the gap test but fails spectral test.
+\item Level 2 ($p = 97$):
+	passes all known tests, but theoretically still defective.
+\item Level 3 ($p = 223$):
+	any theoretically possible correlations have very small 
+	chance of being observed.
+\item Level 4 ($p = 389$):
+	highest possible luxury, all 24 bits chaotic.
+\end{itemize}
+Levels 5--23 default to 3, values above 24 directly specify the period
+$p$.  Note that Ranlux's original level 0, (mis)used for selecting
+Mersenne Twister in \cuba, is equivalent to \Code{level = 24}.
+
+\VarIn{integer mineval}
+the minimum number of integrand evaluations required.
+
+\VarIn{integer maxeval}
+the (approximate) maximum number of integrand evaluations allowed.
+
+\VarIn{character*(*) statefile}
+a filename for storing the internal state.  To not store the internal 
+state, put \Code{""} (empty string) or \Code{\%VAL(0)} (null pointer).
+
+\cuba\ can store its entire internal state (\ie all the information to 
+resume an interrupted integration) in an external file.  The state file 
+is updated after every iteration.  If, on a subsequent invocation, a
+\cuba\ routine finds a file of the specified name, it loads the internal
+state and continues from the point it left off.  Needless to say, using
+an existing state file with a different integrand generally leads to
+wrong results.
+
+This feature is useful mainly to define `check-points' in long-running 
+integrations from which the calculation can be restarted.
+
+Once the integration reaches the prescribed accuracy, the state file
+is removed, unless bit 4 of \Code{flags} (see above) explicitly requests 
+that it be kept.
+
+\VarIn{integer*8 spin}
+the `spinning cores' pointer, which has three options:
+\begin{itemize}
+\item A value of \Code{-1} or \Code{\%VAL(0)} (null pointer) means that 
+the integrator completely takes care of starting and terminating child 
+processes for the integration (if available/enabled), \ie after the 
+integrator returns there are no child processes running any longer.  
+Note that a `naive' \Code{-1} (which is an \Code{integer}, not an 
+\Code{integer*8}) is explicitly allowed.
+
+\item A zero-initialized variable \Code{spin} instructs the integrator 
+to start child processes for the integration but keep them running and 
+store the `spinning cores' pointer in \Code{spin} on exit.  Take care 
+that in this case you have to explicitly terminate the child processes 
+using \Code{cubawait} later on (see Sect.~\ref{sect:spinning}).
+
+\item A non-zero variable \Code{spin} means that the cores are already 
+running as the result of some prior integration or an explicit 
+\Code{cubafork} call (see Sect.~\ref{sect:spinning}).
+\end{itemize}
+The actual type of \Code{spin} is irrelevant, the variable must merely
+be wide enough to store a C \Code{void *}.
+
+\VarOut{integer nregions}
+the actual number of subregions needed (not present in Vegas).
+
+\VarOut{integer neval}
+the actual number of integrand evaluations needed.
+
+\VarOut{integer fail}
+an error flag:
+\begin{itemize}
+\item
+$\Code{fail} = 0$, the desired accuracy was reached,
+\item
+$\Code{fail} = -1$, dimension out of range,
+\item
+$\Code{fail} > 0$, the accuracy goal was not met within the allowed
+maximum number of integrand evaluations.  While Vegas, Suave, and Cuhre
+simply return 1, Divonne can estimate the number of points by which
+\Code{maxeval} needs to be increased to reach the desired accuracy and
+returns this value.
+\end{itemize}
+
+\VarOut{double precision integral(ncomp)}
+the integral of \Code{integrand} over the unit hypercube.
+
+\VarOut{double precision error(ncomp)}
+the presumed absolute error of \Code{integral}.
+
+\VarOut{double precision prob(ncomp)}
+the $\chi^2$-probability (not the $\chi^2$-value itself!) that
+\Code{error} is not a reliable estimate of the true integration 
+error\footnote{%
+	To judge the reliability of the result expressed through
+	\Code{prob}, remember that it is the null hypothesis that is 
+	tested by the $\chi^2$ test, which is that \Code{error} 
+	\emph{is} a reliable estimate.  In statistics, the null 
+	hypothesis may be rejected only if \Code{prob} is fairly close 
+	to unity, say $\Code{prob} > .95$.}.
+\end{itemize}
+
+
+\subsubsection{Vegas-specific Arguments}
+\label{sect:vegasargs}
+
+\begin{itemize}
+\VarIn{integer nstart}
+the number of integrand evaluations per iteration to start with.
+
+\VarIn{integer nincrease}
+the increase in the number of integrand evaluations per iteration.
+
+\VarIn{integer nbatch}
+the batch size for sampling.
+
+Vegas samples points not all at once, but in batches of size
+\Code{nbatch}, to avoid excessive memory consumption.  1000 is a
+reasonable value, though it should not affect performance too much.
+
+\VarIn{integer gridno}
+the slot in the internal grid table.
+
+It may accelerate convergence to keep the grid accumulated during one
+integration for the next one, if the integrands are reasonably similar 
+to each other.  Vegas maintains an internal table with space for ten
+grids for this purpose.  The slot in this grid is specified by
+\Code{gridno}.
+
+If a grid number between 1 and 10 is selected, the grid is not discarded
+at the end of the integration, but stored in the respective slot of the 
+table for a future invocation.  The grid is only re-used if the 
+dimension of the subsequent integration is the same as the one it 
+originates from.
+
+In repeated invocations it may become necessary to flush a slot in
+memory, in which case the negative of the grid number should be set.
+\end{itemize}
+
+Vegas actually passes the integrand two more arguments, \ie the 
+integrand function is really declared as
+\begin{verbatim}
+  integer function integrand(ndim, x, ncomp, f, userdata, nvec, core,
+    weight, iter)
+  integer ndim, ncomp, nvec, core, iter
+  double precision x(ndim,nvec), f(ncomp,nvec), weight(nvec)
+\end{verbatim}
+where \Code{weight} contains the weight of the point being sampled and
+\Code{iter} the current iteration number.  These extra arguments may
+safely be ignored, however.
+
+
+\subsubsection{Suave-specific Arguments}
+
+\begin{itemize}
+\VarIn{integer nnew}
+the number of new integrand evaluations in each subdivision.
+
+\VarIn{integer nmin}
+the minimum number of samples a former pass must contribute to a 
+subregion to be considered in that region's compound integral value.
+Increasing \Code{nmin} may reduce jumps in the $\chi^2$ value.
+
+\VarIn{double precision flatness}
+the parameter $p$ in Eq.~(\ref{eq:fluct}), \ie the type of norm used to
+compute the fluctuation of a sample.  This determines how prominently
+`outliers,' \ie individual samples with a large fluctuation, figure in
+the total fluctuation, which in turn determines how a region is split
+up.  As suggested by its name, \Code{flatness} should be chosen large
+for `flat' integrands and small for `volatile' integrands with high
+peaks.  Note that since \Code{flatness} appears in the exponent, one
+should not use too large values (say, no more than a few hundred) lest
+terms be truncated internally to prevent overflow.
+\end{itemize}
+
+Like Vegas, Suave also passes the two optional arguments \Code{weight}
+and \Code{iter} to the integrand (see Sect.~\ref{sect:vegasargs}).
+
+
+\subsubsection{Divonne-specific Arguments}
+\label{sect:divonneargs}
+
+\begin{itemize}
+\VarIn{integer key1}
+determines sampling in the partitioning phase:
+
+$\Code{key1} = 7, 9, 11, 13$ selects the cubature rule of degree 
+\Code{key1}.  Note that the degree-11 rule is available only in 3
+dimensions, the degree-13 rule only in 2 dimensions.
+
+For other values of \Code{key1}, a quasi-random sample of
+$n_1 = |\Code{key1}|$ points is used, where the sign of \Code{key1}
+determines the type of sample,
+\begin{itemize}
+\item
+$\Code{key1} > 0$, use a Korobov quasi-random sample,
+\item
+$\Code{key1} < 0$, use a ``standard'' sample
+(a Sobol quasi-random sample if \Code{seed} = 0, otherwise a
+pseudo-random sample).
+\end{itemize}
+
+\VarIn{integer key2}
+determines sampling in the final integration phase:
+
+$\Code{key2} = 7, 9, 11, 13$ selects the cubature rule of degree 
+\Code{key2}.  Note that the degree-11 rule is available only in 3
+dimensions, the degree-13 rule only in 2 dimensions.
+
+For other values of \Code{key2}, a quasi-random sample is used, where 
+the sign of \Code{key2} determines the type of sample,
+\begin{itemize}
+\item
+$\Code{key2} > 0$, use a Korobov quasi-random sample,
+\item
+$\Code{key2} < 0$, use a ``standard'' sample (see description of 
+\Code{key1} above),
+\end{itemize}
+and $n_2 = |\Code{key2}|$ determines the number of points,
+\begin{itemize}
+\item
+$n_2\geqslant 40$, sample $n_2$ points,
+\item
+$n_2 < 40$, sample $n_2\,\nneed$ points, where $\nneed$ is the number of
+points needed to reach the prescribed accuracy, as estimated by Divonne 
+from the results of the partitioning phase.
+\end{itemize}
+
+\VarIn{integer key3}
+sets the strategy for the refinement phase:
+
+$\Code{key3} = 0$, do not treat the subregion any further.
+
+$\Code{key3} = 1$, split the subregion up once more.
+
+Otherwise, the subregion is sampled a third time with \Code{key3}
+specifying the sampling parameters exactly as \Code{key2} above.
+
+\VarIn{integer maxpass}
+controls the thoroughness of the partitioning phase:
+The partitioning phase terminates when the estimated total number of 
+integrand evaluations (partitioning plus final integration) does not 
+decrease for \Code{maxpass} successive iterations.
+
+A decrease in points generally indicates that Divonne discovered new
+structures of the integrand and was able to find a more effective
+partitioning.  \Code{maxpass} can be understood as the number of
+`safety' iterations that are performed before the partition is accepted
+as final and counting consequently restarts at zero whenever new
+structures are found.
+
+\VarIn{double precision border}
+the width of the border of the integration region.  Points falling into
+this border region will not be sampled directly, but will be
+extrapolated from two samples from the interior.  Use a non-zero 
+\Code{border} if the integrand function cannot produce values
+directly on the integration boundary.
+
+\VarIn{double precision maxchisq}
+the maximum $\chi^2$ value a single subregion is allowed to have in the
+final integration phase.  Regions which fail this $\chi^2$ test and
+whose sample averages differ by more than \Code{mindeviation} move on
+to the refinement phase.
+
+\VarIn{double precision mindeviation}
+a bound, given as the fraction of the requested error of the entire
+integral, which determines whether it is worthwhile further examining a
+region that failed the $\chi^2$ test.  Only if the two sampling averages
+obtained for the region differ by more than this bound is the region
+further treated.
+
+\VarIn{integer ngiven}
+the number of points in the \Code{xgiven} array.
+
+\VarIn{integer ldxgiven}
+the leading dimension of \Code{xgiven}, \ie the offset between one 
+point and the next in memory.
+
+\VarIn{double precision xgiven(ldxgiven,ngiven)}
+a list of points where the integrand might have peaks.  Divonne will
+consider these points when partitioning the integration region.  The
+idea here is to help the integrator find the extrema of the integrand in
+the presence of very narrow peaks.  Even if only the approximate
+location of such peaks is known, this can considerably speed up
+convergence.
+
+\VarIn{integer nextra}
+the maximum number of extra points the peak-finder subroutine will
+return.  If \Code{nextra} is zero, \Code{peakfinder} is not called
+and an arbitrary object may be passed in its place, \eg just 0.
+
+\VarIn{external peakfinder}
+the peak-finder subroutine.  This subroutine is called whenever a region 
+is up for subdivision and is supposed to point out possible peaks lying 
+in the region, thus acting as the dynamic counterpart of the static list 
+of points supplied in \Code{xgiven}.  It is expected to be declared as
+\begin{verbatim}
+  subroutine peakfinder(ndim, b, n, x, userdata)
+  integer ndim, n
+  double precision b(2,ndim)
+  double precision x(ldxgiven,n)
+\end{verbatim}
+The bounds of the subregion are passed in the array \Code{b}, where 
+\Code{b(1,\Var{d})} is the lower and \Code{b(2,\Var{d})} the upper 
+bound in dimension \Var{d}.  On entry, \Code{n} specifies the maximum 
+number of points that may be written to \Code{x}.  On exit, \Code{n} 
+must contain the actual number of points in \Code{x}.
+\end{itemize}
+Divonne actually passes the integrand one more argument, \ie the 
+integrand function is really declared as
+\begin{verbatim}
+  integer function integrand(ndim, x, ncomp, f, userdata, nvec, core, phase)
+  integer ndim, ncomp, nvec, core, phase
+  double precision x(ndim,nvec), f(ncomp,nvec)
+\end{verbatim}
+The last argument, \Code{phase}, indicates the integration phase:
+\begin{itemize}
+\item 0, sampling of the points in \Code{xgiven},
+\item 1, partitioning phase,
+\item 2, final integration phase,
+\item 3, refinement phase.
+\end{itemize}
+This information might be useful if the integrand takes long to compute
+and a sufficiently accurate approximation of the integrand is available. 
+The actual value of the integral is only of minor importance in the
+partitioning phase, which is instead much more dependent on the peak
+structure of the integrand to find an appropriate tessellation.  An
+approximation which reproduces the peak structure while leaving out the
+fine details might hence be a perfectly viable and much faster
+substitute when $\Code{phase} < 2$.
+
+In all other instances, \Code{phase} can be ignored and it is
+entirely admissible to define the integrand without it.
+
+
+\subsubsection{Cuhre-specific Arguments}
+
+\begin{itemize}
+\VarIn{integer key}
+chooses the basic integration rule:
+
+$\Code{key} = 7, 9, 11, 13$ selects the cubature rule of degree 
+\Code{key}.  Note that the degree-11 rule is available only in 3
+dimensions, the degree-13 rule only in 2 dimensions.
+
+For other values, the default rule is taken, which is the degree-13 rule 
+in 2 dimensions, the degree-11 rule in 3 dimensions, and the degree-9 
+rule otherwise.
+\end{itemize}
+
+
+\subsubsection{Visualizing the Tessellation}
+
+Suave, Divonne, and Cuhre work by dividing the integration region into 
+subregions for integration.  When verbosity level 3 is selected in the 
+flags, the actual tessellation is written out on screen and can be 
+visualized with the partview tool.  To this end, the output of the 
+program invoking \cuba\ is piped through partview, \eg
+\begin{verbatim}
+   mycubaprogram | partview 1 2 1 3
+\end{verbatim}
+opens a window with two tabs showing the 1--2 and 1--3 plane of the 
+tessellation.  The saturation of the colours corresponds to the area of
+the region, \ie smaller regions are displayed in a darker shade.
+
+
+\subsection{Usage in C/C++}
+
+Being written in C, the algorithms can of course be used in C/C++ 
+directly.  The declarations are as follows:
+\begin{verbatim}
+typedef int (*integrand_t)(const int *ndim, const double x[],
+  const int *ncomp, double f[], void *userdata);
+
+typedef void (*peakfinder_t)(const int *ndim, const double b[],
+  int *n, double x[], void *userdata);
+\end{verbatim}
+\begin{verbatim}
+void Vegas(const int ndim, const int ncomp,
+  integrand_t integrand, void *userdata, const int nvec,
+  const double epsrel, const double epsabs,
+  const int flags, const int seed,
+  const int mineval, const int maxeval,
+  const int nstart, const int nincrease, const int nbatch,
+  const int gridno, const char *statefile, void *spin,
+  int *neval, int *fail,
+  double integral[], double error[], double prob[])
+\end{verbatim}
+\begin{verbatim}
+void Suave(const int ndim, const int ncomp,
+  integrand_t integrand, void *userdata, const int nvec,
+  const double epsrel, const double epsabs,
+  const int flags, const int seed,
+  const int mineval, const int maxeval,
+  const int nnew, const int nmin,
+  const double flatness, const char *statefile, void *spin,
+  int *nregions, int *neval, int *fail,
+  double integral[], double error[], double prob[])
+\end{verbatim}
+\begin{verbatim}
+void Divonne(const int ndim, const int ncomp,
+  integrand_t integrand, void *userdata, const int nvec,
+  const double epsrel, const double epsabs,
+  const int flags, const int seed,
+  const int mineval, const int maxeval,
+  const int key1, const int key2, const int key3,
+  const int maxpass, const double border,
+  const double maxchisq, const double mindeviation,
+  const int ngiven, const int ldxgiven, double xgiven[],
+  const int nextra, peakfinder_t peakfinder,
+  const char *statefile, void *spin,
+  int *nregions, int *neval, int *fail,
+  double integral[], double error[], double prob[])
+\end{verbatim}
+\begin{verbatim}
+void Cuhre(const int ndim, const int ncomp,
+  integrand_t integrand, void *userdata, const int nvec,
+  const double epsrel, const double epsabs,
+  const int flags,
+  const int mineval, const int maxeval,
+  const int key, const char *statefile, void *spin,
+  int *nregions, int *neval, int *fail,
+  double integral[], double error[], double prob[])
+\end{verbatim}
+These prototypes are contained in \Code{cuba.h} which should (in C) or
+must (in C++) be included when using the \cuba\ routines.  The arguments
+are as in the Fortran case, with the obvious translations, \eg
+\Code{double precision} = \Code{double}.  Note, however, the
+declarations of the integrand and peak-finder functions, which expect
+pointers to integers rather than integers.  This is required for
+compatibility with Fortran.
+
+The \verb=integrand_t= type glosses over the fact that the extra 
+\Code{nvec} argument is routinely passed to the integrand and neither 
+does it mention the extra arguments passed by \Code{Vegas}, 
+\Code{Suave}, and \Code{Divonne} (see Sects.\ \ref{sect:vegasargs} and 
+\ref{sect:divonneargs}).  This is usually just what is needed for 
+`simple' invocations, \ie with the `correct' prototypes the compiler 
+would only generate unnecessary warnings (in C) or errors (in C++).  In 
+the rare cases where the integrand actually has more arguments, an 
+explicit typecast to \verb=integrand_t= must be used in the invocation. 
+In the presence of an \Code{nvec} argument, the \Code{x} and \Code{f} 
+arguments are actually two-dimensional arrays, \Code{x[*nvec][*ndim]} 
+and \Code{f[*nvec][*ncomp]}.
+
+
+\subsection{Usage in Mathematica}
+
+The Mathematica versions are based on essentially the same C code and
+communicate with Mathematica via the MathLink API.  When building the
+package, the executables \Code{Vegas}, \Code{Suave},
+\Code{Divonne}, and \Code{Cuhre} are compiled for use in
+Mathematica.  In Mathematica one first needs to load them with the 
+\Code{Install} function, as in
+\begin{verbatim}
+   Install["Divonne"]
+\end{verbatim}
+which makes a Mathematica function of the same name available.  These 
+functions are used almost like \Code{NIntegrate}, only some options 
+are different.  For example,
+\begin{verbatim}
+   Vegas[x^2/(Cos[x + y + 1] + 5), {x,0,5}, {y,0,5}]
+\end{verbatim}
+integrates a scalar function, or
+\begin{verbatim}
+   Suave[{Sin[z] Exp[-x^2 - y^2],
+          Cos[z] Exp[-x^2 - y^2]}, {x,-1,1}, {y,-1,3}, {z,0,1}]
+\end{verbatim}
+integrates a vector.  As is evident, the integration region can be 
+chosen different from the unit hypercube.  Innermore boundaries may 
+depend on outermore integration variables, \eg
+\verb=Cuhre[1, {x,0,1}, {y,0,x}]= gives the area of the unit triangle.
+
+The sampling function uses \Code{MapSample} to map the integrand over 
+the data points.  This is by default set to \Code{Map}, but can be 
+changed (after \Code{Install}) \eg to \Code{ParallelMap} to take 
+advantage of parallelization (see Sect.~\ref{sect:parallel} for more 
+details).
+
+The functions return a list which contains the results for each
+component of the integrand in a sublist \{integral estimate, estimated 
+absolute error, $\chi^2$ probability\}.  For the Suave example above 
+this would be
+\begin{verbatim}
+   {{1.1216, 0.000991577, 0.0000104605}, 
+    {2.05246, 0.00146661, 0.00920716}}
+\end{verbatim}
+The other parameters are specified via the following options.  Default 
+values are given on the right-hand sides of the rules.
+
+
+\subsubsection{Common Options}
+
+\begin{itemize}
+\Option{PrecisionGoal}{3}
+the number of digits of relative accuracy to seek, that is, $\epsrel =
+10^{-\Code{PrecisionGoal}}$.
+
+\Option{AccuracyGoal}{12}
+the number of digits of absolute accuracy to seek, that is, $\epsabs =
+10^{-\Code{AccuracyGoal}}$.  The integrator tries to find an estimate
+$\hat I$ for the integral $I$ which for every component $c$ fulfills
+$|\hat I_c - I_c|\leqslant \max(\epsabs, \epsrel I_c)$.
+
+\Option{MinPoints}{0}
+the minimum number of integrand evaluations required.
+
+\Option{MaxPoints}{50000}
+the (approximate) maximum number of integrand evaluations allowed.
+
+\Option{Verbose}{1}
+how much information to print on intermediate results, can take values
+from 0 to 3.
+
+Level 0 does not print any output, level 1 prints `reasonable'
+information on the progress of the integration, level 2 also echoes the
+input parameters, and level 3 further prints the subregion results (if
+applicable).  Note that the subregion boundaries in the level-3 printout
+refer to the unit hypercube, \ie are possibly scaled with respect to the
+integration limits passed to Mathematica.  This is because the
+underlying C code, which emits the output, is unaware of any scaling of
+the integration region, which is done entirely in Mathematica.
+
+\Option{Final}{All \Var{or} Last}
+whether only the last (largest) or all sets of samples collected on a
+subregion during the various iterations or phases contribute to the
+final result.
+
+\Option{PseudoRandom}{False}
+whether pseudo-random numbers are used for sampling instead of Sobol
+quasi-random numbers.  Values \Code{True} and \Code{0} select the
+Mersenne Twister algorithm, any other integer $n$ chooses Ranlux with
+luxury level $n$ (see Sect.~\ref{sect:commonargs}).
+
+\Option{PseudoRandomSeed}{Automatic}
+the seed for the pseudo-random-number generator.
+
+\Option{Regions}{False}
+whether to return the tessellation of the integration region (thus not
+present in Vegas, which does not partition the integration region).
+
+If \Code{Regions -> True} is chosen, a two-component list is returned,
+where the first element is the list of regions, and the second element
+is the integration result as described above.  Each region is specified
+in the form \Code{Region[\Var{x_{\mathrm{ll}}},\,\Var{x_{\mathrm{ur}}},%
+\,\Var{res},\,\Var{df}]}, where \Var{x_{\text{ll}}} and
+\Var{x_{\text{ur}}} are the multidimensional equivalents of the lower
+left and upper right corner, \Var{res} is the integration result for the
+subregion, given in the same form as the total result but with the
+$\chi^2$ value instead of the $\chi^2$ probability, and \Var{df} are the
+degrees of freedom corresponding to the $\chi^2$ values. 
+
+Cuhre cannot state a $\chi^2$ value separately for each region, hence
+the $\chi^2$ values and degrees of freedom are omitted from the
+\Code{Region} information.
+
+\Option{StateFile}{""}
+the file name for storing the internal state.  If a non-empty string is
+given here, Vegas will store its entire internal state (\ie all the
+information to resume an interrupted integration) in this file after
+every iteration.  If, on a subsequent invocation, Vegas finds a file of
+the specified name, it loads the internal state and continues from the
+point it left off.  Needless to say, using an existing state file with a
+different integrand generally leads to wrong results.
+
+This feature is useful mainly to define `check-points' in long-running
+integrations from which the calculation can be restarted.
+
+\Option{RetainStateFile}{False}
+whether the state file shall be kept even if the integration terminates 
+normally, \ie reaches either the prescribed accuracy or the maximum 
+number of points.
+
+\Option{Compiled}{True}
+whether to compile the integrand function before use.  Note two caveats:
+\begin{itemize}
+\item
+The function values still have to pass through the MathLink interface,
+and in the course of this are truncated to machine precision.  Not
+compiling the integrand will thus in general not deliver more accurate
+results.
+\item
+Compilation should be switched off if the compiled integrand shows
+unexpected behaviour.  As the Mathematica online help points out, ``the
+number of times and the order in which objects are evaluated by
+\Code{Compile} may be different from ordinary Mathematica code.''
+\end{itemize}
+\end{itemize}
+
+
+\subsubsection{Vegas-specific Options}
+
+\begin{itemize}
+\Option{NStart}{1000}
+the number of integrand evaluations per iteration to start with.
+
+\Option{NIncrease}{500}
+the increase in the number of integrand evaluations per iteration.
+
+\Option{NBatch}{1000}
+the number of points sent in one MathLink packet to be sampled by
+Mathematica.  This setting will at most affect performance and should 
+not normally need to be changed.
+
+\Option{GridNo}{0}
+the slot in the internal grid table.
+
+It may accelerate convergence to keep the grid accumulated during one
+integration for the next one, if the integrands are reasonably similar
+to each other.  Vegas maintains an internal table with space for ten
+grids for this purpose.  If a \Code{GridNo} between 1 and 10 is chosen,
+the grid is not discarded at the end of the integration, but stored for
+a future invocation.  The grid is only re-used if the dimension of the
+subsequent integration is the same as the one it originates from.  
+A negative grid number initializes the indicated slot before the
+integration (for details see Sect.~\ref{sect:vegasargs}).
+
+\Option{ResetState}{False}
+whether the integrator's state should be reset even if a state file is
+present, \ie only the grid be kept.  Together with the
+\Code{RetainStateFile} option this allows a grid adapted by one 
+integration to be used for another integrand.
+
+\item
+During the evaluation of the integrand, the global variable
+\Code{\$Weight} is set to the weight of the point being sampled and
+\Code{\$Iteration} to the current iteration number.
+\end{itemize}
+
+
+\subsubsection{Suave-specific Options}
+
+\begin{itemize}
+\Option{NNew}{1000}
+the number of new integrand evaluations in each subdivision.
+
+\Option{NMin}{2}
+the minimum number of samples a former pass must contribute to a 
+subregion to be considered in that region's compound integral value.
+Increasing \Code{NMin} may reduce jumps in the $\chi^2$ value.
+
+\Option{Flatness}{50}
+the parameter $p$ in Eq.~(\ref{eq:fluct}), \ie the type of norm used to
+compute the fluctuation of a sample.  This determines how prominently
+`outliers,' \ie individual samples with a large fluctuation, figure in
+the total fluctuation, which in turn determines how a region is split
+up.  As suggested by its name, \Code{Flatness} should be chosen large
+for `flat' integrands and small for `volatile' integrands with high
+peaks.  Note that since \Code{Flatness} appears in the exponent, one
+should not use too large values (say, no more than a few hundred) lest
+terms be truncated internally to prevent overflow.
+
+\item
+During the evaluation of the integrand, the global variable
+\Code{\$Weight} is set to the weight of the point being sampled and
+\Code{\$Iteration} to the current iteration number.
+\end{itemize}
+
+
+\subsubsection{Divonne-specific Options}
+
+\begin{itemize}
+\Option{Key1}{47}
+an integer which governs sampling in the partitioning phase:
+
+$\Code{Key1} = 7, 9, 11, 13$ selects the cubature rule of degree 
+\Code{Key1}.  Note that the degree-11 rule is available only in 3
+dimensions, the degree-13 rule only in 2 dimensions.
+
+For other values of \Code{Key1}, a quasi-random sample of
+$n_1 = |\Code{Key1}|$ points is used, where the sign of \Code{Key1}
+determines the type of sample,
+\begin{itemize}
+\item
+$\Code{Key1} > 0$, use a Korobov quasi-random sample,
+\item
+$\Code{Key1} < 0$, use a ``standard'' sample
+(a Sobol quasi-random sample in the case \Code{PseudoRandom -> False},
+otherwise a pseudo-random sample).
+\end{itemize}
+
+\Option{Key2}{1}
+an integer which governs sampling in the final integration phase:
+
+$\Code{Key2} = 7, 9, 11, 13$ selects the cubature rule of degree 
+\Code{Key2}.  Note that the degree-11 rule is available only in 3
+dimensions, the degree-13 rule only in 2 dimensions.
+
+For other values of \Code{Key2}, a quasi-random sample is used, where 
+the sign of \Code{Key2} determines the type of sample,
+\begin{itemize}
+\item
+$\Code{Key2} > 0$, use a Korobov quasi-random sample,
+\item
+$\Code{Key2} < 0$, use a ``standard'' sample
+(see description of \Code{Key1} above),
+\end{itemize}
+and $n_2 = |\Code{Key2}|$ determines the number of points,
+\begin{itemize}
+\item
+$n_2\geqslant 40$, sample $n_2$ points,
+\item
+$n_2 < 40$, sample $n_2\,\nneed$ points, where $\nneed$ is the number of
+points needed to reach the prescribed accuracy, as estimated by Divonne 
+from the results of the partitioning phase.
+\end{itemize}
+
+\Option{Key3}{1}
+an integer which sets the strategy for the refinement phase:
+
+$\Code{Key3} = 0$, do not treat the subregion any further.
+
+$\Code{Key3} = 1$, split the subregion up once more.
+
+Otherwise, the subregion is sampled a third time with \Code{Key3}
+specifying the sampling parameters exactly as \Code{Key2} above.
+
+\Option{MaxPass}{5}
+the number of passes after which the partitioning phase terminates.
+The partitioning phase terminates when the estimated total number of 
+integrand evaluations (partitioning plus final integration) does not 
+decrease for \Code{MaxPass} successive iterations.
+
+A decrease in points generally indicates that Divonne discovered new
+structures of the integrand and was able to find a more effective
+partitioning.  \Code{MaxPass} can be understood as the number of
+`safety' iterations that are performed before the partition is accepted
+as final and counting consequently restarts at zero whenever new
+structures are found.
+
+\Option{Border}{0}
+the width of the border of the integration region.  Points falling into
+this border region are not sampled directly, but are extrapolated from
+two samples from the interior.  Use a non-zero \Code{Border} if the
+integrand function cannot produce values directly on the integration
+boundary.
+
+The border width always refers to the unit hypercube, \ie it is not
+rescaled if the integration region is not the unit hypercube.
+
+\Option{MaxChisq}{10}
+the maximum $\chi^2$ value a single subregion is allowed to have in the
+final integration phase.  Regions which fail this $\chi^2$ test and
+whose sample averages differ by more than \Code{MinDeviation} move on
+to the refinement phase.
+
+\Option{MinDeviation}{.25}
+a bound, given as the fraction of the requested error of the entire
+integral, which determines whether it is worthwhile further examining a
+region that failed the $\chi^2$ test.  Only if the two sampling averages
+obtained for the region differ by more than this bound is the region
+further treated.
+
+\Option{Given}{\lbrac\rbrac}
+a list of points where the integrand might have peaks.  A point is a
+list of $n_d$ real numbers, where $n_d$ is the dimension of the
+integral.
+
+Divonne will consider these points when partitioning the integration
+region.  The idea here is to help the integrator find the extrema of the
+integrand in the presence of very narrow peaks.  Even if only the
+approximate location of such peaks is known, this can considerably speed
+up convergence.
+
+\Option{NExtra}{0}
+the maximum number of points that will be considered in the output of 
+the \Code{PeakFinder} function.
+
+\Option{PeakFinder}{(\lbrac\rbrac\&)}
+the peak-finder function.  This function is called whenever a region is
+up for subdivision and is supposed to point out possible peaks lying in
+the region, thus acting as the dynamic counterpart of the static list of
+points supplied with \Code{Given}.  It is invoked with two arguments,
+the multidimensional equivalents of the lower left and upper right
+corners of the region being investigated, and must return a (possibly
+empty) list of points.  A point is a list of $n_d$ real numbers, where 
+$n_d$ is the dimension of the integral.
+\end{itemize}
+
+
+\subsubsection{Cuhre-specific Options}
+
+\begin{itemize}
+\Option{Key}{0}
+chooses the basic integration rule:
+
+$\Code{Key} = 7, 9, 11, 13$ selects the cubature rule of degree 
+\Code{Key}.  Note that the degree-11 rule is available only in 3
+dimensions, the degree-13 rule only in 2 dimensions.
+
+For other values, the default rule is taken, which is the degree-13 rule 
+in 2 dimensions, the degree-11 rule in 3 dimensions, and the degree-9 
+rule otherwise.
+\end{itemize}
+
+
+\subsubsection{Visualizing the Tessellation}
+
+Suave, Divonne, and Cuhre work by dividing the integration region into 
+subregions for integration.  The tessellation is returned together with 
+the integration results when the option \Code{Regions -> True} is
+set.  Such output can be visualized using the Mathematica program 
+\Code{partview.m} that comes with \cuba.  The invocation is \eg
+\begin{verbatim}
+  result = Divonne[..., Regions -> True]
+  << tools/partview.m
+  PartView[result, 1, 2]
+\end{verbatim}
+which displays the 1--2 plane of the tessellation.  The saturation of 
+the colours corresponds to the area of the region, \ie smaller regions
+are displayed in a darker shade.
+
+
+\subsection{Long-integer Versions}
+
+For both Fortran and C/C++ there exist versions of the integration 
+routines that take 64-bit integers for all number-of-points-type 
+quantities.  These should be used in cases where convergence is not 
+reached within the ordinary 32-bit integer range ($2^{31} - 1$).
+
+The long-integer versions are distinguished by the ``\Code{ll}''
+prefix.  Their specific invocations are, in Fortran,
+\begin{alltt}
+        subroutine llvegas(ndim, ncomp, integrand, userdata, \ul{nvec},
+     &    epsrel, epsabs, flags, seed, \ul{mineval}, \ul{maxeval},
+     &    \ul{nstart}, \ul{nincrease}, \ul{nbatch}, gridno, statefile, spin,
+     &    \ul{neval}, fail, integral, error, prob)
+\end{alltt}
+\begin{alltt}
+        subroutine llsuave(ndim, ncomp, integrand, userdata, \ul{nvec},
+     &    epsrel, epsabs, flags, seed, \ul{mineval}, \ul{maxeval},
+     &    \ul{nnew}, \ul{nmin}, flatness, statefile, spin,
+     &    nregions, \ul{neval}, fail, integral, error, prob)
+\end{alltt}
+\begin{alltt}
+        subroutine lldivonne(ndim, ncomp, integrand, userdata, \ul{nvec},
+     &    epsrel, epsabs, flags, seed, \ul{mineval}, \ul{maxeval},
+     &    key1, key2, key3, maxpass,
+     &    border, maxchisq, mindeviation,
+     &    \ul{ngiven}, ldxgiven, xgiven, \ul{nextra}, peakfinder,
+     &    statefile, spin,
+     &    nregions, \ul{neval}, fail, integral, error, prob)
+\end{alltt}
+\begin{alltt}
+        subroutine llcuhre(ndim, ncomp, integrand, userdata, \ul{nvec},
+     &    epsrel, epsabs, flags, seed, \ul{mineval}, \ul{maxeval},
+     &    key, statefile, spin,
+     &    nregions, \ul{neval}, fail, integral, error, prob)
+\end{alltt}
+The correspondences for C/C++ are obvious and are given explicitly in
+the include file \Code{cuba.h}.  The arguments are as for the normal
+versions except that all underlined variables are of type
+\Code{integer*8} in Fortran and \Code{long long int} in C/C++.
+
+%========================================================================
+
+\section{Parallelization}
+\label{sect:parallel}
+
+Numerical integration is perfectly suited for parallel execution, which 
+can significantly speed up the computation as it generally incurs only a 
+very small overhead.  The parallelization procedure is rather different 
+in Fortran/C/C++ and in Mathematica.  We shall deal with the latter 
+first because it needs only a short explanation.  The remainder of this 
+chapter is then devoted to the Fortran/C/C++ case.
+
+%------------------------------------------------------------------------
+
+\subsection{Parallelization in Mathematica}
+
+The Mathematica version of \cuba\ performs its sampling through a 
+function \Code{MapSample}.  By default this is identical to \Code{Map}, 
+\ie the serial version, so to parallelize one merely needs to redefine 
+\Code{MapSample = ParallelMap} (after loading \cuba).
+
+If the integrand depends on user-defined symbols or functions, their 
+definitions must be distributed to the workers beforehand using 
+\Code{DistributeDefinitions} and likewise required packages must be 
+loaded with \Code{ParallelNeeds} instead of \Code{Needs}; this is 
+explained in detail in the Mathematica manual.
+
+%------------------------------------------------------------------------
+
+\subsection{Parallelization in Fortran and C/C++}
+
+In Fortran and C/C++ the \cuba\ library can (and usually does) 
+automatically parallelize the sampling of the integrand.  It 
+parallelizes through \Code{fork} and \Code{wait} which, though slightly 
+less performant than pthreads, do not require reentrant code.  
+(Reentrancy may not even be under full control of the programmer, for 
+example Fortran's I/O is usually non-reentrant.)  Worker processes are 
+started and shut down only as few times as possible, however, so the 
+performance penalty is really quite minor even for non-native fork 
+implementations such as Cygwin's.  Parallelization is not available on 
+native Windows for lack of the \Code{fork} function.
+
+The communication of samples to and from the workers happens through IPC 
+shared memory (\Code{shmget} and colleagues), or if that is not 
+available, through a \Code{socketpair} (two-way pipe).  Remarkably, the 
+former's anticipated performance advantage turned out to be hardly 
+perceptible.  Possibly there are cache-coherence issues introduced by 
+several workers writing simultaneously to the same shared-memory area.
+
+%------------------------------------------------------------------------
+
+\subsubsection{Starting and stopping the workers}
+\label{sect:spinning}
+
+The workers are usually started and stopped automatically by \cuba's 
+integration routines, but the user may choose to start them manually or 
+keep them running after one integration and shut them down later, \eg at 
+the end of the program, which can be slightly more efficient.  The 
+latter mode is referred to as `Spinning Cores' and must be employed with 
+certain care, for running workers will not `see' subsequent changes in 
+the main program's data (\eg global variables, common blocks) or code 
+(\eg via \Code{dlsym}) unless special arrangements are made (\eg shared 
+memory).
+
+The spinning cores are controlled through the `\Code{spin}' argument of 
+the \cuba\ integration routines (Sect.~\ref{sect:commonargs}):
+\begin{itemize}
+\item A value of \Code{-1} or \Code{\%VAL(0)} (in Fortran) or 
+\Code{NULL} (in C/C++) tells the integrator to start and shut down the 
+workers autonomously.  This is the usual case.  No workers will still be 
+running after the integrator returns.  No special precautions need to be 
+taken to communicate \eg global data to the workers.  Note that it is 
+expressly allowed to pass a `naive' \Code{-1} (which is an 
+\Code{integer}, not an \Code{integer*8}) in Fortran.
+
+\item Passing a zero-initialized variable for \Code{spin} instructs the 
+integrator to start the workers but keep them running on return and 
+store the `spinning cores' pointer in \Code{spin} for future use.  The 
+spinning cores must later be terminated explicitly by \Code{cubawait}, 
+thus invocation would schematically look like this:
+
+\hfill\begin{minipage}{.4\hsize}
+\begin{verbatim}
+integer*8 spin
+spin = 0
+call vegas(..., spin, ...)
+...
+call cubawait(spin)
+\end{verbatim}
+\end{minipage}\hfill\begin{minipage}{.4\hsize}
+\begin{verbatim}
+void *spin = NULL;
+
+Vegas(..., &spin, ...);
+...
+cubawait(&spin);
+\end{verbatim}
+\end{minipage}\hfill
+
+\item A non-zero \Code{spin} variable is assumed to contain a valid 
+`spinning cores' pointer either from a former integration or an explicit 
+invocation of \Code{cubafork}, as in:
+
+\hfill\begin{minipage}{.4\hsize}
+\begin{verbatim}
+integer*8 spin
+call cubafork(spin)
+call vegas(..., spin, ...)
+...
+call cubawait(spin)
+\end{verbatim}
+\end{minipage}\hfill\begin{minipage}{.4\hsize}
+\begin{verbatim}
+void *spin;
+cubafork(&spin);
+Vegas(..., &spin, ...);
+...
+cubawait(&spin);
+\end{verbatim}
+\end{minipage}\hfill
+\end{itemize}
+
+%------------------------------------------------------------------------
+
+\subsubsection{Accelerators and Cores}
+\label{sect:cores}
+
+Based on the strategy used to distribute samples, \cuba\ distinguishes 
+two kinds of workers.
+
+Workers of the first kind are referred to as `Accelerators' even though 
+\cuba\ does not actually send anything to a GPU or Accelerator in the 
+system by itself -- this can only be done by the integrand routine.  The 
+assumption behind this strategy is that the integrand evaluation is 
+running on a device so highly parallel that the sampling time is more or 
+less independent of the number of points, up to the number of threads 
+$p\accel$ available in hardware.  \cuba\ tries to send exactly $p\accel$ 
+points to each core -- never more, less only for the last batch.  To 
+sample \eg 2400 points on three accelerators with $p\accel = 1000$, 
+\cuba\ sends batches of 1000/1000/400 and not, for example, 800/800/800 
+or 1200/1200.  The number of accelerators $n\accel$ and their value of 
+$p\accel$ can be set through the environment variables
+\begin{tabbing}
+\verb|   CUBAACCEL=|$n\accel$ \hspace{10em}\= (default: 0) \\
+\verb|   CUBAACCELMAX=|$p\accel$    \> (default: 1000)
+\end{tabbing}
+or, superseding the environment, an explicit
+\begin{alltt}
+   call cubaaccel(\(n\accel\), \(p\accel\))
+\end{alltt}
+
+CPU-bound workers are just called `Cores'.  Their distribution strategy 
+is different in that all available cores are used and points are 
+distributed evenly.  In the example above, the batches would be 
+800/800/800 thus.  Each core receives at least 10 points, or else fewer 
+cores are used.  If no more than 10 points are requested in total, 
+\cuba\ uses no workers at all but lets the master sample those few 
+points.  This happens during the partitioning phase of Divonne for 
+instance, where only single points are evaluated in the minimum/maximum 
+search. Conversely, if the division of points by cores does not come out 
+even, the remaining few points ($< n\cores$) are simply added to the 
+existing batches, to avoid an extra batch because of rounding.  Sampling 
+2001 points on two cores with $p\cores = 1000$ will hence give two 
+batches 1001/1000 and not three batches 1000/1000/1.
+
+Although there is typically no hardware limit, a maximum number of 
+points per core, $p\cores$, can be prescribed for Cores, too.  Unless 
+the integrand is known to evaluate equally fast at all points, a 
+moderate number for $p\cores$ (10000, say) may actually increase 
+performance because it effectively load-levels the sampling.  For, a 
+batch always goes to the next free core so it doesn't matter much 
+if one core is tied up with a batch that takes longer.
+
+The number of cores $n\cores$ and the value of $p\cores$ can be set 
+analogously through the environment variables
+\begin{tabbing}
+\verb|   CUBACORES=|$n\cores$ \hspace{10em}\= (default: no.\ of idle cores) \\
+\verb|   CUBACORESMAX=|$p\cores$ \> (default: 10000)
+\end{tabbing}
+If \Code{CUBACORES} is unset, the idle cores on the present system are 
+taken (total cores minus load average), which means that a program 
+calling a \cuba\ routine will by default automatically parallelize on 
+the available cores.  Again, the environment can be overruled with an 
+explicit
+\begin{alltt}
+   call cubacores(\(n\cores\), \(p\cores\))   
+\end{alltt}
+Using the environment has the advantage, though, that changing the 
+number of cores to use does not require a re-compile, which is 
+particularly useful if one wants to run the program on several computers 
+(with potentially different numbers of cores) simultaneously, say in a 
+batch queue.
+
+The integrand function may use the `\Code{core}' argument 
+(Sect.~\ref{sect:commonargs}) to distinguish Accelerators ($\Code{core} 
+< 0$) and Cores ($\Code{core}\geqslant 0$).  The special value 
+$\Code{core} = 32768$ ($2^{15}$) indicates that the master itself is 
+doing the sampling.
+
+%------------------------------------------------------------------------
+
+\subsubsection{Worker initialization}
+
+User subroutines for (de)initialization may be registered with
+\begin{alltt}
+   call cubainit(initfun, initarg)           \textrm{Fortran}
+   call cubaexit(exitfun, exitarg)
+\end{alltt}
+\begin{alltt}
+   cubainit(initfun, initarg);               \textrm{C/C++}
+   cubaexit(exitfun, exitarg);
+\end{alltt}
+and will be executed in every process before and after sampling.
+Passing a null pointer (\Code{\%VAL(0)} in Fortran, \Code{NULL} in
+C/C++) as the first argument unregisters either subroutine.
+
+The init/exit functions are actually called as
+\begin{alltt}
+   call initfun(initarg, core)               \textrm{Fortran}
+   call exitfun(exitarg, core)
+\end{alltt}
+\begin{alltt}
+   initfun(initarg, &core);                  \textrm{C/C++}
+   exitfun(exitarg, &core);
+\end{alltt}
+where \Code{initarg} and \Code{exitarg} are the user arguments given 
+with the registration (arbitrary in Fortran, \Code{void *} in C/C++) 
+and \Code{core} indicates the core the function is being executed on, 
+with (as before) $\Code{core} < 0$ for Accelerators, 
+$\Code{core}\geqslant 0$ for Cores, and $\Code{core} = 32768$ for the 
+master.
+
+On worker processes, the functions are respectively executed after 
+\Code{fork} and before \Code{wait}, independently of whether the worker 
+actually receives any samples.  The master executes them only when 
+actual sampling is done.
+For Accelerators, the init and exit functions are typically used to set 
+up the device for the integrand evaluations, which for many devices must 
+be done per process, \ie after the \Code{fork}.
+
+%------------------------------------------------------------------------
+
+\subsubsection{Concurrency issues}
+
+By creating a new process image, \Code{fork} circumvents all memory 
+concurrency, to wit: each worker modifies only its own copy of the 
+parent's memory and never overwrites any other's data.  The programmer 
+should be aware of a few potential problems nevertheless:
+\begin{itemize}
+\item Communicating back results other than the intended output from the 
+integrand to the main program is not straightforward because, by the 
+same token, a worker cannot overwrite any common data of the master, it 
+will only modify its own copy.
+
+Data exchange between workers is likewise not directly possible.  For 
+example, if one worker stores an intermediate result in a common block, 
+this will not be seen by the other workers.
+
+Possible solutions include using shared memory (\Code{shmget} etc., see 
+App.~\ref{app:shm}) and writing the output to file (but see next item 
+below).
+
+\item \Code{fork} does not guard against competing use of other common 
+resources.  For example, if the integrand function writes to a file 
+(debug output, say), there is no telling in which order the lines will 
+end up in the file, or even if they will end up as complete lines at 
+all.  Buffered output should be avoided at the very least; better still, 
+every worker should write the output to its own file, \eg with a 
+filename that includes the process id, as in:
+\begin{verbatim}
+   character*32 filename
+   integer pid
+   data pid /0/
+   if( pid .eq. 0 ) then  
+     pid = getpid()
+     write(filename,'("output.",I5.5)') pid
+     open(unit=4711, file=filename)
+   endif
+\end{verbatim}
+
+\item Fortran users are advised to flush (or close) any open files 
+before calling \cuba, \ie \Code{call flush(\Var{unit})}.  The reason is 
+that the child processes inherit all file buffers, and \emph{each} of 
+them will write out the buffer content at exit.  \cuba\ preemptively 
+flushes the system buffers already (\Code{fflush(NULL)}) but has no 
+control over Fortran's buffers.
+\end{itemize}
+For debugging, or if a malfunction due to concurrency issues is 
+suspected, a program should be tested in serial mode first, \eg by 
+setting $\Code{CUBACORES} = 0$ (Sect.~\ref{sect:cores}).
+
+%------------------------------------------------------------------------
+
+\subsubsection{Vectorization}
+
+Vectorization means evaluating the integrand function for several points 
+at once.  This is also known as Single Instruction Multiple Data (SIMD) 
+paradigm and is different from ordinary parallelization where 
+independent threads are executed concurrently.  It is usually possible 
+to employ vectorization on top of parallelization.
+
+Vector instructions are commonly available in hardware, \eg on x86 
+platforms under acronyms such as SSE or AVX.  Language support varies: 
+Fortran 90's syntax naturally embeds vector operations.  Many C/C++ 
+compilers offer auto-vectorization options, some have extensions for 
+vector data types (usually for a limited set of mathematical functions), 
+and even hardware-specific access to the CPU's vector instructions.  And 
+then there are vectorized libraries of numerical functions available.
+
+\cuba\ cannot automatically vectorize the integrand function, of course, 
+but it does pass (up to) \Code{nvec} points per integrand call 
+(Sect.~\ref{sect:commonargs}).  This value need not correspond to the 
+hardware vector length -- computing several points in one call can also 
+make sense \eg if the computations have significant intermediate results 
+in common.  The actual number of points passed is indicated through the 
+corresponding \Code{nvec} argument of the integrand.
+
+\medskip
+
+A note for disambiguation: The \Code{nbatch} argument of Vegas is 
+related in purpose but not identical to \Code{nvec}.  It internally 
+partitions the sampling done by Vegas but has no bearing on the number 
+of points given to the integrand.  On the other hand, it it pointless to 
+choose $\Code{nvec} > \Code{nbatch}$ for Vegas.
+
+%========================================================================
+
+\section{Tests and Comparisons}
+\label{sect:tests}
+
+Four integration routines may seem three too many, but as the following 
+tests show, all have their strengths and weaknesses.  Fine-tuning the 
+algorithm parameters can also significantly affect performance.
+
+In the following, the test suite of Genz \cite{Genz} is used.  Rather
+than testing individual integrands, Genz proposes the following six
+families of integrands:
+\begin{equation}
+\label{eq:families}
+\begin{array}{ll}
+\text{1. Oscillatory:} &
+  f_1(\dvec x) = \cos(\dvec c\cdot\dvec x + 2\pi w_1)\,, \\[2ex]
+\text{2. Product peak:} &
+  f_2(\dvec x) = \prod\limits_{i = 1}^{n_d}
+    \dfrac 1{(x_i - w_i)^2 + c_i^{-2}}\,, \\[3ex]
+\text{3. Corner peak:} &
+  f_3(\dvec x) = \dfrac 1{(1 + \dvec c\cdot\dvec x)^{n_d + 1}}\,, \\[3ex]
+\text{4. Gaussian:} &
+  f_4(\dvec x) = \exp(-\dvec c^2 (\dvec x - \dvec w)^2)\,, \\[2ex]
+\text{5. $C^0$-continuous:}\quad &
+  f_5(\dvec x) = \exp(-\dvec c\cdot |\dvec x - \dvec w|)\,, \\[2ex]
+\text{6. Discontinuous:} &
+  f_6(\dvec x) = \begin{cases}
+    0 & \text{for }x_1 > w_1 \vee x_2 > w_2\,, \\
+    \exp(\dvec c\cdot\dvec x) & \text{otherwise}.
+  \end{cases}
+\end{array}
+\end{equation}
+Parameters designated by $w$ are non-affective, they vary \eg the 
+location of peaks, but should in principle not affect the difficulty of 
+the integral.  Parameters designated by $c$ are affective and in a sense
+``define'' the difficulty of the integral, \eg the width of peaks are of
+this kind.  The $c_i$ are positive and the difficulty increases with
+$\norm{\dvec c} = \sum_{i = 1}^{n_d} c_i$.
+
+The testing procedure is thus: Choose uniform random numbers from
+$[0,1)$ for the $c_i$ and $w_i$.  Renormalize $\dvec c$ for a given
+difficulty.  Run the algorithms with the integrands thus determined. 
+Repeat this procedure 20 times and take the average.
+
+For comparison, Mathematica's \Code{NIntegrate} function was included
+in the test.  Unfortunately, when a maximum number of samples is
+prescribed, \Code{NIntegrate} invariably uses non-adaptive methods, by
+default the Halton--Hammersley--Wozniakowski quasi-Monte Carlo
+algorithm.  The comparison may thus seem not quite balanced, but this is
+not entirely true: Lacking an upper bound on the number of integrand
+evaluations, \Code{NIntegrate}'s adaptive method in some cases `locks
+up' (spends an inordinate amount of time and samples) and the user can
+at most abort a running calculation, but not extract a preliminary
+result.  The adaptive method could reasonably be used only for some of
+the integrand families in the test, and it was felt that such a
+selection should not be done, as the comparisons should in the first
+place give an idea about the \emph{average} performance of the
+integration methods, without any fine-tuning.
+
+Table \ref{tab:comp} gives the results of the tests as described above. 
+This comparison chart should be interpreted with care, however, and
+serves only as a rough measure of the performance of the integration
+methods.  Many integrands appearing in actual calculations bear few or
+no similarities with the integrand families tested here, and neither
+have the integration parameters been tuned to `get the most' out of each
+method.
+
+The Mathematica code of the test suite is included in the downloadable 
+\cuba\ package.
+
+\begin{table}
+$$
+\begin{array}{|c|r@{\,\pm\,}r|r@{\,\pm\,}r|r@{\,\pm\,}r
+                |r@{\,\pm\,}r|r@{\,\pm\,}r|}
+\multicolumn{11}{c}{n_d = 5} \\ \hline
+j &
+\multicolumn{2}{|c|}{\text{Vegas}} &
+\multicolumn{2}{|c|}{\text{Suave}} &
+\multicolumn{2}{|c|}{\text{Divonne}} &
+\multicolumn{2}{|c|}{\text{Cuhre}} &
+\multicolumn{2}{|c|}{\text{NIntegrate}} \\ \hline
+1 & 162000 &     0 &
+    127300 & 32371 &
+     21313 & 11039 &
+       819 &     0 &
+    218281 &     0 \\
+2 &  11750 &  1795 &
+     13500 &  1539 &
+     17353 &  3743 &
+     56238 & 40917 &
+    218281 &     0 \\
+3 &  16125 &  2411 &
+     11500 &  1000 &
+     17208 &  2517 &
+      1174 &   444 &
+    218281 &     0 \\
+4 &  56975 & 11372 &
+     20100 &  4745 &
+     19636 &  6159 &
+     22577 & 31424 &
+    218281 &     0 \\
+5 &  14600 &  3085 &
+     15250 &  2337 &
+     21675 &  4697 &
+    150423 &     0 &
+    218281 &     0 \\
+6 &  19750 &  4999 &
+     23850 &  2700 &
+     39694 & 14001 &
+      1884 &   215 &
+    218281 &     0 \\ \hline
+\multicolumn{11}{c}{} \\
+\multicolumn{11}{c}{n_d = 8} \\ \hline
+j &
+\multicolumn{2}{|c|}{\text{Vegas}} &
+\multicolumn{2}{|c|}{\text{Suave}} &
+\multicolumn{2}{|c|}{\text{Divonne}} &
+\multicolumn{2}{|c|}{\text{Cuhre}} &
+\multicolumn{2}{|c|}{\text{NIntegrate}} \\ \hline
+1 & 153325 & 20274 &
+    124350 & 35467 &
+     28463 & 31646 &
+      3315 &     0 &
+    212939 & 13557 \\
+2 &  12650 &  1987 &
+     21050 &  4594 &
+     22030 &  3041 &
+     91826 & 58513 &
+    218281 &     0 \\
+3 &  24325 &  3753 &
+     29350 &  3588 & 
+     67104 & 16906 & 
+     18785 & 22354 &
+    218281 &     0 \\
+4 &  38575 & 16169 & 
+     29250 &  8873 &
+     24849 &  5015 &
+     62322 & 44328 &
+    218281 &     0 \\
+5 &  15150 &  2616 &
+     25500 &  6444 &
+     32885 &  5945 &
+    151385 &     0 &
+    218281 &     0 \\
+6 &  18875 &  2512 &
+     40900 &  7196 &
+    116744 & 32533 &    
+      9724 &  9151 &
+    218281 &     0 \\ \hline
+\multicolumn{11}{c}{} \\
+\multicolumn{11}{c}{n_d = 10} \\ \hline
+j &
+\multicolumn{2}{|c|}{\text{Vegas}} &
+\multicolumn{2}{|c|}{\text{Suave}} &
+\multicolumn{2}{|c|}{\text{Divonne}} &
+\multicolumn{2}{|c|}{\text{Cuhre}} &
+\multicolumn{2}{|c|}{\text{NIntegrate}} \\ \hline
+1 & 156050 & 21549 & 
+    129800 & 30595 & 
+     32176 & 30424 & 
+      7815 &     0 &
+    214596 & 16481 \\
+2 &  14175 &  2672 &
+     24800 &  5464 &
+     25684 &  7582 &
+    144056 & 25983 &
+    218281 &     0 \\
+3 &  30275 &  6296 &
+     51150 & 15608 & 
+    139737 & 18505 & 
+    109150 & 58224 &
+    218281 &     0 \\
+4 &  29475 & 10277 &
+     34050 & 10200 & 
+     27385 &  8498 &
+    105763 & 49789 & 
+    218281 &     0 \\
+5 &  16150 &  2791 &
+     31400 &  7715 &
+     44393 & 18654 & 
+    153695 &     0 & 
+    218281 &     0 \\
+6 &  22100 &  3085 &
+     74900 & 32203 &
+    136508 & 17067 & 
+     73200 & 64621 &
+    218281 &     0 \\ \hline
+\end{array}
+$$
+Test parameters:
+\begin{itemize}
+\item number of dimensions: $n_d = 5, 8, 10$,
+\item requested relative accuracy: $\epsrel = 10^{-3}$,
+\item maximum number of samples: $\nmax = 150000$,
+\item integrand difficulties:
+$
+\begin{array}{r||c|c|c|c|c|c}
+\text{Integrand family }j &  1  &  2   &  3  &  4   &  5   &  6  \\ 
+\hline
+\norm{\dvec c_j}          & 6.0 & 18.0 & 2.2 & 15.2 & 16.1 & 16.4
+\end{array}
+$
+\end{itemize}
+
+\caption{\label{tab:comp}The number of samples used, averaged from 20
+randomly chosen integrands from each integrand family $j$ defined in
+Eq.~(\ref{eq:families}).  Values in the vicinity of $\nmax$ generally
+indicate failure to converge. \Code{NIntegrate} seems not to be able
+to stop at around the limit of \Code{MaxPoints -> $\nmax$}, but always
+samples considerably more points.}
+\end{table}
+
+%========================================================================
+
+\section{Summary}
+
+The \cuba\ library offers a choice of four independent routines for
+multidimensional numerical integration: Vegas, Suave, Divonne, and
+Cuhre.  They work by very different methods, summarized in the following
+table:
+\begin{center}
+\begin{small}
+\begin{tabular}{llll}
+Routine  &
+	Basic integration method &
+	Algorithm type &
+	Variance reduction \\ \hline \\[-1.5ex]
+Vegas &
+	Sobol quasi-random sample &
+	Monte Carlo &
+	importance sampling \\
+&
+	\textit{or} pseudo-random sample &
+	Monte Carlo \\[1.5ex]
+Suave &
+	Sobol quasi-random sample &
+	Monte Carlo &
+	globally adaptive subdivision \\
+&
+	\textit{or} pseudo-random sample &
+	Monte Carlo \\[1.5ex]
+Divonne &
+	Korobov quasi-random sample &
+	Monte Carlo &
+	stratified sampling, \\
+&
+	\textit{or} Sobol quasi-random sample &
+	Monte Carlo &
+	\quad aided by methods from \\
+&
+	\textit{or} pseudo-random sample &
+	Monte Carlo &
+	\quad numerical optimization \\
+&
+	\textit{or} cubature rules &
+	deterministic \\[1.5ex]
+Cuhre &
+	cubature rules &
+	deterministic &
+	globally adaptive subdivision
+\end{tabular}
+\end{small}
+\end{center}
+
+All four have a C/C++, Fortran, and Mathematica interface and can
+integrate vector integrands.  Their invocation is very similar, so it is
+easy to substitute one method by another for cross-checking.  For
+further safeguarding, the output is supplemented by a $\chi^2$
+probability which quantifies the reliability of the error estimate.
+
+The source code is available from \Code{http://feynarts.de/cuba}
+and compiles with gcc, the GNU C compiler.  The C functions can be
+called from Fortran directly, so there is no need for adapter code. 
+Similarly, linking Fortran code with the library is straightforward
+and requires no extra tools.
+
+The routines in the \cuba\ library have all been carefully tested, but
+it would of course be folly to believe they are completely error-free. 
+The author welcomes any kind of feedback, in particular bug and 
+performance reports, at hahn@feynarts.de.
+
+%========================================================================
+
+\section*{Acknowledgements}
+
+I thank A.~Hoang for involving me in a discussion out of which the 
+concept of the Mathematica interface was born and T.~Fritzsche, 
+M.~Rauch, and A.M.~de~la~Ossa for testing.  B.~Chokoufe implemented
+check-pointing (state file) for Suave, Divonne, and Cuhre.
+
+%========================================================================
+
+\begin{appendix}
+
+\section{Shared Memory in Fortran}
+\label{app:shm}
+
+IPC shared memory is not natively available in Fortran, but it is not 
+difficult to make it available using two small C functions 
+\Code{shmalloc} and \Code{shmfree}:
+\begin{verbatim}
+#include <sys/shm.h>
+#include <assert.h>
+
+typedef long long int memindex;
+typedef struct { void *addr; int id; } shminfo;
+
+void shmalloc_(shminfo *base, memindex *i, const int *n, const int *size) {
+  base->id = shmget(IPC_PRIVATE, *size*(*n + 1) - 1, IPC_CREAT | 0600);
+  assert(base->id != -1);
+  base->addr = shmat(base->id, NULL, 0);
+  assert(base->addr != (void *)-1);
+  *i = ((char *)(base->addr + *size - 1) - (char *)base)/(long)*size;
+}
+
+void shmfree_(shminfo *base) {
+  shmdt(base->addr);
+  shmctl(base->id, IPC_RMID, NULL);
+}
+\end{verbatim}
+The function \Code{shmalloc} allocates (suitably aligned) \Code{n} 
+elements of size \Code{size} and returns a mock index into \Code{base}, 
+through which the memory is addressed in Fortran.  The array \Code{base} 
+must be of the desired type and large enough to store the struct 
+\Code{shminfo}, \eg two doubles wide.  Be careful to invoke 
+\Code{shmfree} after use, for the memory will not automatically be freed 
+upon exit but stay allocated until the next reboot (or explicit removal 
+with \Code{ipcs}).
+
+The following test program demonstrates how to use \Code{shmalloc} and 
+\Code{shmfree}:
+\begin{verbatim}
+     program test
+     implicit none
+     integer*8 i
+     double precision base(2)
+
+     call shmalloc(base, i, 100, 8)     ! allocate 100 doubles
+
+     base(i) = 1                        ! now use the memory
+     ...
+     base(i+99) = 100
+
+     call shmfree(base)                 ! don't forget to free it
+     end
+\end{verbatim}
+
+\end{appendix}
+
+%========================================================================
+
+\begin{thebibliography}{99}
+
+\newcommand{\volyearpage}[3]{\textbf{#1} (#2) #3}
+\newcommand{\cpc}{\textsl{Comp.\ Phys.\ Commun.} \volyearpage}
+\newcommand{\jpc}{\textsl{J.\ Comp.\ Phys.} \volyearpage}
+\newcommand{\cip}{\textsl{Comp.\ in Phys.} \volyearpage}
+\newcommand{\toms}{\textsl{ACM Trans.\ Math.\ Software} \volyearpage}
+\newcommand{\tomacs}{\textsl{ACM Trans.\ Modeling Comp.\ Simulation} \volyearpage}
+\newcommand{\siam}{\textsl{SIAM J.\ Numer.\ Anal.} \volyearpage}
+\newcommand{\numa}{\textsl{Numer.\ Math.} \volyearpage}
+
+\bibitem{quadpack}
+R.~Piessens, E.~de~Doncker, C.~\"Uberhuber, D.~Kahaner,
+\textsc{Quadpack} -- a subroutine package for automatic integration,
+Springer-Verlag, 1983.
+
+\bibitem{Vegas1}
+G.P.~Lepage, \jpc{27}{1978}{192}.
+
+\bibitem{Vegas2}
+G.P.~Lepage, Report CLNS-80/447, Cornell Univ., Ithaca, N.Y., 1980.
+
+\bibitem{Miser}
+W.H.~Press, G.R.~Farrar, \cip{4}{1990}{190}.
+
+\bibitem{Divonne}
+J.H.~Friedman, M.H.~Wright, \toms{7}{1981}{76}; \\
+J.H.~Friedman, M.H.~Wright, SLAC Report CGTM-193-REV, CGTM-193, 1981.
+
+\bibitem{dcuhre}
+J.~Berntsen, T.~Espelid, A.~Genz, \toms{17}{1991}{437}; \\
+J.~Berntsen, T.~Espelid, A.~Genz, \toms{17}{1991}{452}; \\
+TOMS algorithm 698.
+
+\bibitem{Sobol}
+P.~Bratley, B.L.~Fox, \toms{14}{1988}{88}; \\
+TOMS algorithm 659.
+
+\bibitem{Niederreiter}
+H.~Niederreiter, Random number generation and quasi-Monte Carlo methods,
+SIAM, 1992.
+
+\bibitem{NumRecipes}
+W.H.~Press, S.A.~Teukolsky, W.T.~Vetterling, B.P.~Flannery, Numerical 
+recipes in Fortran, 2$^{\text{nd}}$ edition, Cambridge University Press, 
+1992.
+
+\bibitem{Korobov}
+N.M.~Korobov, Number theoretic methods in approximate analysis
+(in Russian), Fizmatgiz, Moscow, 1963.
+
+A comprehensive English reference on the topic of good lattice points
+(of which the Korobov points are a special case) is H.L.~Keng, W.~Yuan,
+Applications of number theory to numerical analysis, Springer-Verlag,
+1981.
+
+\bibitem{MersenneTwister}
+M.~Matsumoto, T.~Nishimura, \tomacs{8}{1998}{3}. \\
+See also 
+\Code{http://www.math.sci.hiroshima-u.ac.jp/$\sim$m-mat/MT/emt.html}.
+
+\bibitem{Ranlux}
+M.~L\"uscher, \cpc{79}{1994}{100}; \\
+F.~James, \cpc{79}{1994}{111}.
+
+\bibitem{GenzMalik}
+A.~Genz, A.~Malik, \siam{20}{1983}{580}.
+
+\bibitem{Genz}
+A.~Genz, A package for testing multiple integration subroutines, in: 
+P.~Keast, G.~Fairweather (eds.), Numerical Integration, Kluwer,
+Dordrecht, 1986.
+
+\end{thebibliography}
+
+\end{document}
+

@@ -2,7 +2,7 @@
 	Sample.c
 		most of what is related to sampling
 		this file is part of Divonne
-		last modified 12 Mar 15 th
+		last modified 15 Mar 15 th
 */
 
 
@@ -86,7 +86,7 @@ static void SampleKorobov(This *t, ccount iregion)
   for( i = 1; i < n; ++i ) {
     number c = i;
     for( dim = 0; dim < t->ndim; ++dim ) {
-      creal dx = abs(2*c - neff)/(real)neff;
+      creal dx = PREFIX(abs)(2*c - neff)/(real)neff;
       *xlast++ = b[dim].lower + dx*(b[dim].upper - b[dim].lower);
       c = c*samples->coeff % neff;
     }

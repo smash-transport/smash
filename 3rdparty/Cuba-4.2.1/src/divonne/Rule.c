@@ -4,7 +4,7 @@
 		code lifted with minor modifications from DCUHRE
 		by J. Berntsen, T. Espelid, and A. Genz
 		this file is part of Divonne
-		last modified 7 May 15 th
+		last modified 30 Oct 20 th
 */
 
 
@@ -590,11 +590,11 @@ static inline void RuleAlloc(This *t)
     t->rule11.first = NULL;
   else Rule11Alloc(t);
 
-  if( (t->key1 - 9)*(t->key2 - 9)*(t->key3 - 9) )
+  if( (t->key1 - 9)*(t->key2 - 9)*(t->key3 - 9) != 0 )
     t->rule9.first = NULL;
   else Rule9Alloc(t);
 
-  if( (t->key1 - 7)*(t->key2 - 7)*(t->key3 - 7) )
+  if( (t->key1 - 7)*(t->key2 - 7)*(t->key3 - 7) != 0 )
     t->rule7.first = NULL;
   else Rule7Alloc(t);
 }

@@ -41,7 +41,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 
 # add 3rd-party libraries (before setting compiler flags etc)
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2")
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2.1")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
 
 find_package(yaml-cpp 0.6 QUIET NO_MODULE)
