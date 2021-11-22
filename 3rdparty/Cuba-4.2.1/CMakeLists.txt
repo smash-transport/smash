@@ -4,7 +4,21 @@ project(Cuba)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer -Wall -DNOUNDERSCORE -DREALSIZE=8 -march=native -mfpmath=sse -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer -Wall -DNOUNDERSCORE -DREALSIZE=8 -fPIC")
+# The '-march=native' flag is not supported e.g. on Apple M1 machines
+#  -> check if the C compiler supports it
+set(CMAKE_REQUIRED_FLAGS "-march=native")
+include(CheckCSourceCompiles)
+CHECK_C_SOURCE_COMPILES("int main(void) {return 0;}" C_MARCH_NATIVE_SUPPORTED)
+if(C_MARCH_NATIVE_SUPPORTED)
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
+else()
+   message(STATUS "Your C compiler does not support the '-march=native' flag. This will not be used.")
+endif()
+# It is crucial to unset the tested flag in order to avoid
+# affecting the following calls to 'check_function_exists'
+# and 'check_include_file' functions
+unset(CMAKE_REQUIRED_FLAGS)
 
 set(CMAKE_REQUIRED_INCLUDES "unistd.h" "sys/ipc.h" "sys/shm.h" "math.h" "stdlib.h")
 

@@ -65,8 +65,12 @@ endif()
 
 add_subdirectory(3rdparty)
 
-# Set compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpmath=sse")
+# Set the relevant generic compiler flags (optimisations)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
+# Tell the compiler to ignore errno setting of math functions. This can help the compiler
+# considerably in optimizing mathematical expressions.
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno")
 
 # Disable DEBUG and TRACE output in Release builds
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG" CACHE
@@ -84,13 +88,6 @@ set(CMAKE_C_FLAGS_PROFILING "-O3 -DNDEBUG -pg" CACHE STRING "Flags used by the c
 set(CMAKE_EXE_LINKER_FLAGS_PROFILING "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -pg" CACHE STRING "Flags used by the compiler during profile builds." FORCE)
 mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LINKER_FLAGS_RELEASE)
 
-# Set the relevant generic compiler flags (optimisations)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -fPIC")
-
-# Tell the compiler to ignore errno setting of math functions. This can help the compiler
-# considerably in optimizing mathematical expressions.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno")
-
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
    option(CLANG_USE_LIBC++ "If turned on clang will explicitly be asked to use libc++ (otherwise it uses the system default)" OFF)
    if(CLANG_USE_LIBC++)
@@ -102,13 +99,23 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
    endif()
 endif()
 
+# The '-march=native' flag is not supported e.g. on Apple M1 machines
+#  -> check if the C++ compiler supports it
+set(CMAKE_REQUIRED_FLAGS "-march=native")
+include(CheckCXXSourceCompiles)
+CHECK_CXX_SOURCE_COMPILES("int main() {return 0;}" CXX_MARCH_NATIVE_SUPPORTED)
+if(CXX_MARCH_NATIVE_SUPPORTED)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+else()
+   message(STATUS "Your C++ compiler does not support the '-march=native' flag. This will not be used.")
+endif()
+
 # check that C++11 code compiles
 # in order for this to work the policy on respecting the CXX_STANDARD for
 # try_compile has to be changed first
 # see https://cmake.org/cmake/help/v3.8/policy/CMP0067.html
 cmake_policy(SET CMP0067 NEW)
 set(CMAKE_REQUIRED_FLAGS "-std=c++11")
-include(CheckCXXSourceCompiles)
 CHECK_CXX_SOURCE_COMPILES("
 #include <initializer_list>
 struct A {};
@@ -122,6 +129,7 @@ int main() {
 if(NOT CXX11_COMPILES)
    message(FATAL_ERROR "Your compiler did not manage to compile a simple C++11 program. Please get a newer C++ compiler.")
 endif()
+
 
 # have binary in the build directory
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
