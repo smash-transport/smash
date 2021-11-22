@@ -108,7 +108,7 @@ if(CPPLINT)
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      COMMENT "Executing test cpplint_full")
 else()
-   message(WARNING "cpplint.py was not found. The cpplint test will be disabled.\nDownload from: http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py")
+   message(WARNING "cpplint.py was not found. The cpplint test will be disabled.")
 endif()
 
 # static code analysis with cppcheck
