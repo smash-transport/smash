@@ -39,6 +39,16 @@ if(NOT CMAKE_BUILD_TYPE)
       FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
+# Retrieve architecture information about endianness
+include(TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+if(IS_BIG_ENDIAN)
+    message(STATUS "Big endian architecture detected.")
+    add_definitions("-DBIG_ENDIAN_ARCHITECTURE")
+else()
+    message(STATUS "Little endian architecture detected.")
+    add_definitions("-DLITTLE_ENDIAN_ARCHITECTURE")
+endif()
 
 # add 3rd-party libraries (before setting compiler flags etc)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2.1")

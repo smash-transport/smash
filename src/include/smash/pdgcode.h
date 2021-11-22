@@ -705,20 +705,6 @@ class PdgCode {
   int net_quark_number(const int quark) const;
 
  private:
-/* amend this line with something that identifies your compiler if its
- * bit field order is like in the gnu c compiler for 64 bit
- * architectures (if you are unsure, try one and check the pdgcode
- * test). */
-#if defined(__GNUC__) && (defined(__x86_64__) || defined(__i386__)) || \
-    defined(DOXYGEN)
-#define SMASH_BITFIELD_ORDER_ 1
-/* put your compiler here if the bit field order is reversed w.r.t. gnu
- * c compiler for 64 bit. */
-#elif defined(__OTHER_COMPILER__)
-#define SMASH_BITFIELD_ORDER_ 2
-#else
-#error "Please determine the correct bit-field order for your target/compiler"
-#endif
   /**
    * The union holds the data; either as a single integer dump_, as a
    * single-digit bitfield digits_ or as a multiple-digits bitfield
@@ -730,7 +716,7 @@ class PdgCode {
      * digits is directly accessible.
      */
     struct {
-#if SMASH_BITFIELD_ORDER_ == 1
+#if defined(LITTLE_ENDIAN_ARCHITECTURE) || defined(DOXYGEN)
       /// spin quantum number \f$n_J = 2 J + 1\f$.
       std::uint32_t n_J_ : 4;
       /// third quark field
@@ -771,7 +757,7 @@ class PdgCode {
      * \f$n_{q_1}n_{q_2}n_{q_3}\f$ are directly accessible.
      */
     struct {
-#if SMASH_BITFIELD_ORDER_ == 1
+#if defined(LITTLE_ENDIAN_ARCHITECTURE) || defined(DOXYGEN)
       std::uint32_t : 4;
       /// The quark digits n_q{1,2,3}_
       std::uint32_t quarks_ : 12;
@@ -784,7 +770,7 @@ class PdgCode {
     } chunks_;
     /// Structure for the nuclei
     struct {
-#if SMASH_BITFIELD_ORDER_ == 1
+#if defined(LITTLE_ENDIAN_ARCHITECTURE) || defined(DOXYGEN)
       std::uint32_t n_Lambda_ : 6;
       std::uint32_t Z_ : 10;
       std::uint32_t A_ : 10;
