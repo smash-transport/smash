@@ -215,7 +215,7 @@ See http://hepmc.web.cern.ch/hepmc/ for download and the projects' README for
 installation. If the HepMC installation is not found, provide the
 install destination (`$HEPMC_INS`) with
 
-   cmake -DCMAKE_PREFIX_PATH=$HEPMC_INS ..
+    cmake -DCMAKE_PREFIX_PATH=$HEPMC_INS ..
 
 Note that if multiple CMAKE_PREFIX_PATHs are necessary, a semicolon-separated
 list of directories can be specified.
