@@ -21,6 +21,10 @@
 #ifndef SRC_INCLUDE_SMASH_TSC_H_
 #define SRC_INCLUDE_SMASH_TSC_H_
 
+#ifndef USE_NANOBENCHMARKING_CODE
+#error "Nanobenchmark code tried to be used without enabling it via CMake."
+#else
+
 #include <cstdint>
 #include <iosfwd>
 
@@ -92,4 +96,5 @@ std::ostream &operator<<(std::ostream &out, const TimeStampCounter &tsc);
 
 }  // namespace smash
 
+#endif  // USE_NANOBENCHMARKING_CODE
 #endif  // SRC_INCLUDE_SMASH_TSC_H_
