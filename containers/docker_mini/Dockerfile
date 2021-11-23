@@ -29,8 +29,12 @@ make install && \
 echo /SMASH/pythia${pythiaV}/lib >> /etc/ld.so.conf && ldconfig
 
 # Get and build public SMASH
-RUN git clone https://github.com/smash-transport/smash.git smash_src && \
-mkdir -p smash_prebuild && \
-cd smash_prebuild && \
-cmake ../smash_src -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${pythiaV}/bin/pythia8-config && \
-make smash -j$(nproc)
+RUN git clone https://github.com/smash-transport/smash.git && \
+mkdir -p smash/build && \
+mkdir -p smash_bin && \
+cd smash/build && \
+cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${pythiaV}/bin/pythia8-config && \
+make smash -j$(nproc) && \
+cp smash  /SMASH/smash_bin/ && \
+cp config.yaml /SMASH/smash_bin/ && \
+rm -r /SMASH/smash/build

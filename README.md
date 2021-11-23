@@ -276,14 +276,14 @@ Start the container with
 
     docker run -it ghcr.io/smash-transport/smash:newest
 
-A build version of smash is found in the `smash_prebuild` directory. Run as
-explained below.
+A ready-to-use exectuable of smash is found in the `smash_bin` directory. Run as
+explained below. SMASH can also be build inside the container as explained at the beginning of the README (the SMASH source and Pythia are also found in the `/SMASH` directory).
 
 Two container versions of SMASH are offered: a small version
 (`ghcr.io/smash-transport/smash`) with a minimal set of dependencies
 pre-installed and a maximum version with all possible external dependencies,
-e.g. ROOT, HepMC and Rivet, already included 
-(`ghcr.io/smash-transport/smash-max`).
+e.g. ROOT, HepMC and Rivet, already included
+(`ghcr.io/smash-transport/smash-max`). Running SMASH inside of a Docker container might negatively affect performance.
 
 ## Running SMASH with Example Input Files
 

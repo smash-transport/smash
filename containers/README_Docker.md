@@ -18,6 +18,7 @@ Once the tar archive of the Docker container is in the cluster, one can transfor
 
 We recall that, to change the default prompt of the bash shell, the user can set up the environment variable _PS1_ (see [https://www.gnu.org/software/bash/manual/bash.html#Controlling-the-Prompt](https://www.gnu.org/software/bash/manual/bash.html#Controlling-the-Prompt) for more information).
 
+Note that default resources allocated for the Docker deamon might not be enough. In particular, the virtual memory might be insufficent and lead to crashes. Try increasing the resoruces, if the build process gets terminated.
 
 ### Using a Docker container for development
 
