@@ -8,7 +8,9 @@
  */
 
 #include "smash/hepmcinterface.h"
+#include "smash/config.h"
 
+#include "HepMC3/GenRunInfo.h"
 #include "HepMC3/Print.h"
 #include "HepMC3/Setup.h"
 #include "smash/logging.h"
@@ -26,8 +28,23 @@ HepMcInterface::HepMcInterface(const std::string& name, const bool full_event)
                         << (full_event_ ? "full event" : "final state only")
                         << " output" << std::endl;
   ion_ = std::make_shared<HepMC3::GenHeavyIon>();
-  xs_ = std::make_shared<HepMC3::GenCrossSection>();
+  ion_->set(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1.0, -1.0, -1.0, -1.0, -1.0,
+            -1.0);
 
+  xs_ = std::make_shared<HepMC3::GenCrossSection>();
+  // GenRunInfo: HepMC3 class to store run-related information
+  std::shared_ptr<HepMC3::GenRunInfo> run_info =
+      std::make_shared<HepMC3::GenRunInfo>();
+  std::vector<std::string> weightnames;
+  weightnames.push_back("Default");
+  run_info->set_weight_names(weightnames);
+  HepMC3::GenRunInfo::ToolInfo tool;
+  tool.name = "SMASH";
+  tool.version = VERSION_MAJOR;
+  tool.version = tool.version + GIT_BRANCH;
+  tool.description = "";
+  run_info->tools().push_back(tool);
+  event_.set_run_info(run_info);
   HepMC3::Setup::set_debug_level(logg[LOutput].isEnabled<einhard::DEBUG>() ? 5
                                                                            : 0);
 }
@@ -114,12 +131,12 @@ void HepMcInterface::at_interaction(const Action& action,
     FourVector v = action.get_interaction_point();
     vp = std::make_shared<HepMC3::GenVertex>(
         HepMC3::FourVector(v.x1(), v.x2(), v.x3(), v.x0()));
+    event_.add_vertex(vp);
     vp->add_attribute("weight", std::make_shared<HepMC3::FloatAttribute>(
                                     action.get_total_weight()));
     vp->add_attribute(
         "partial_weight",
         std::make_shared<HepMC3::FloatAttribute>(action.get_partial_weight()));
-    event_.add_vertex(vp);
   }
 
   // Now mark participants
@@ -148,6 +165,8 @@ void HepMcInterface::at_eventend(const Particles& particles,
     clear();
     return;
   }
+  // Set the weights
+  event_.weights() = std::vector<double>(1, 1);
   /* since the number of collisions is not an experimental obervable, we set it
    * to -1.
    */
@@ -157,7 +176,7 @@ void HepMcInterface::at_eventend(const Particles& particles,
    * However, to avoid confusion with the Glauber model, we prefer to set it -1.
    */
   ion_->Npart_proj = -1;
-  /* his should be the number of participants in the target nucleus.
+  /* This should be the number of participants in the target nucleus.
    * However, to avoid confusion with the Glauber model, we prefer to set it -1.
    */
   ion_->Npart_targ = -1;
