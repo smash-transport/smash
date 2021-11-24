@@ -1417,11 +1417,11 @@ ENV LATEXINPUTS="/SMASH/Rivet_install/share/Rivet/texmf/tex//:$LATEXINPUTS"
 
 RUN cd /SMASH 
 RUN git clone https://github.com/smash-transport/smash.git && \
-mkdir -p smash_prebuild && \
-cd smash_prebuild && \
+mkdir -p smash_bin && \
+cd smash_bin && \
 cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" \
 -DCMAKE_CXX_STANDARD=14 && make -j$(nproc)
-ENV PATH=$PATH:/SMASH/smash_prebuild
+ENV PATH=$PATH:/SMASH/smash_bin
 
 #we remove most of the sources
 
