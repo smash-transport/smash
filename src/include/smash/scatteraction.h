@@ -240,6 +240,8 @@ class ScatterAction : public Action {
   /// Perform a two-to-five-body scattering
   void two_to_five_scattering();
 
+  /// Creates the final states for string-processes after they are performed
+  void create_string_final_state();
   /**
    * Todo(ryu): document better - it is not really UrQMD-based, isn't it?
    * Perform the UrQMD-based string excitation and decay

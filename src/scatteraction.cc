@@ -474,9 +474,25 @@ void ScatterAction::resonance_formation() {
                              outgoing_particles_[0].momentum());
 }
 
+/* This function generates the outgoing state when
+ * ScatterAction::string_excitation() is used */
+
+void ScatterAction::create_string_final_state() {
+  outgoing_particles_ = string_process_->get_final_state();
+  assign_formation_time_to_outgoing_particles();
+  /* Check momentum difference for debugging */
+  FourVector out_mom;
+  for (ParticleData data : outgoing_particles_) {
+    out_mom += data.momentum();
+  }
+  logg[LPythia].debug("Incoming momenta string:", total_momentum());
+  logg[LPythia].debug("Outgoing momenta string:", out_mom);
+}
+
 /* This function will generate outgoing particles in computational frame
  * from a hard process.
  * The way to excite soft strings is based on the UrQMD model */
+
 void ScatterAction::string_excitation() {
   assert(incoming_particles_.size() == 2);
   // Disable floating point exception trap for Pythia
@@ -525,26 +541,32 @@ void ScatterAction::string_excitation() {
        * this process still does not not produce any results, it defaults to
        * an elastic collision. */
       bool success_newtry = false;
-      PdgCode baryon = incoming_particles_[0].pdgcode(),
-              antibaryon = incoming_particles_[1].pdgcode();
-      if (baryon.baryon_number() == -antibaryon.baryon_number()) {
+
+      /* Check if the initial state is a baryon-antibaryon state.*/
+      PdgCode part1 = incoming_particles_[0].pdgcode(),
+              part2 = incoming_particles_[1].pdgcode();
+      bool is_BBbar_Pair = (part1.baryon_number() != 0) &&
+                           (part1.baryon_number() == -part2.baryon_number());
+
+      /* Decide on the new process .*/
+      if (is_BBbar_Pair) {
         process_type_ = ProcessType::StringSoftAnnihilation;
-        int ntry_new = 0;
-        while (!success_newtry && ntry_new < ntry_max) {
-          ntry_new++;
+      } else {
+        process_type_ = ProcessType::StringSoftDoubleDiffractive;
+      }
+      /* Perform the new process*/
+      int ntry_new = 0;
+      while (!success_newtry && ntry_new < ntry_max) {
+        ntry_new++;
+        if (is_BBbar_Pair) {
           success_newtry = string_process_->next_BBbarAnn();
+        } else {
+          success_newtry = string_process_->next_DDiff();
         }
-        if (success_newtry) {
-          outgoing_particles_ = string_process_->get_final_state();
-          assign_formation_time_to_outgoing_particles();
-          /* Check momentum difference for debugging */
-          FourVector out_mom;
-          for (ParticleData data : outgoing_particles_) {
-            out_mom += data.momentum();
-          }
-          logg[LPythia].debug("Incoming momenta string:", total_momentum());
-          logg[LPythia].debug("Outgoing momenta string:", out_mom);
-        }
+      }
+
+      if (success_newtry) {
+        create_string_final_state();
       }
 
       if (!success_newtry) {
@@ -560,15 +582,7 @@ void ScatterAction::string_excitation() {
         elastic_scattering();
       }
     } else {
-      outgoing_particles_ = string_process_->get_final_state();
-      assign_formation_time_to_outgoing_particles();
-      /* Check momentum difference for debugging */
-      FourVector out_mom;
-      for (ParticleData data : outgoing_particles_) {
-        out_mom += data.momentum();
-      }
-      logg[LPythia].debug("Incoming momenta string:", total_momentum());
-      logg[LPythia].debug("Outgoing momenta string:", out_mom);
+      create_string_final_state();
     }
   }
 }
