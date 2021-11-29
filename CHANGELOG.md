@@ -34,7 +34,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * New option: sample particles according to quantum statistics
 * Non-relativistic electromagnetic potentials in a simple form meant for low collision energies
 * New option: start a box with an external particle list
-* Support of ARM processors, e.g. recent Apple machines with M1 chips
+* Support of Apple silicon M1 chips
 
 ### Changed
 * Evaluation of failed string processes. BBbar pairs are now forced to annihilate

@@ -130,7 +130,6 @@ if(NOT CXX11_COMPILES)
    message(FATAL_ERROR "Your compiler did not manage to compile a simple C++11 program. Please get a newer C++ compiler.")
 endif()
 
-
 # have binary in the build directory
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
