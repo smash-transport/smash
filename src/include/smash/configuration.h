@@ -412,9 +412,16 @@ namespace smash {
  * line option. Without this decay modes modification the dilepton output will
  * be empty.\n
  * Dilepton decays are commented out by default. You therefore need to
- * uncomment them. Note, that for dilepton decays, new decay channels can
- * \b not simply be added to the decaymodes.txt file. You also have to modify
- * the decay width formulas \key TwoBodyDecayDilepton::width and
+ * uncomment them. For the N(1520) Dalitz decay, two treatments are available:
+ * Either by proxy of the \f$\rho N\f$ decay, which is enabled by default
+ * (and leads to a dilepton Dalitz decay, if \f$\rho \rightarrow e^+e^-\f$ is
+ * also enabled) or as a direct Dalitz
+ * decay to \f$e^+e^- N\f$. If using the latter comment-out the \f$\rho N\f$
+ * decay to avoid double counting. The form factor in the direct case, is
+ * constant and fixed at the real photon point. Furthermore note, that for
+ * dilepton decays, new decay channels can \b not simply be added to the
+ * decaymodes.txt file. You also have to modify the decay width formulas
+ * \key TwoBodyDecayDilepton::width and
  * \key ThreeBodyDecayDilepton::diff_width in
  * '$SMASH_SRC_DIRECTORY/src/decaytype.cc'.
  *
