@@ -216,7 +216,6 @@ set(smash_src
         thermodynamiclatticeoutput.cc
         thermodynamicoutput.cc
         threevector.cc
-        tsc.cc
         vtkoutput.cc
         wallcrossingaction.cc
         )
@@ -229,6 +228,16 @@ if(USE_HEPMC AND HepMC3_FOUND)
   set(smash_src ${smash_src} hepmcoutput.cc hepmcinterface.cc)
   if(USE_RIVET AND Rivet_FOUND)
     set(smash_src ${smash_src} rivetoutput.cc)
+  endif()
+endif()
+
+option(ENABLE_NANOBENCHMARKING "Turn this on to enable code to perform nanobenchmarking in SMASH." OFF)
+if(ENABLE_NANOBENCHMARKING)
+  if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^arm")
+    message(WARNING "Nanobenchmarking is not supported on ARM processors and it was disabled.")
+  else()
+    set(smash_src ${smash_src} tsc.cc)
+    add_definitions(-DUSE_NANOBENCHMARKING_CODE)
   endif()
 endif()
 

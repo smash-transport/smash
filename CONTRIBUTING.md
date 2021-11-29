@@ -533,6 +533,16 @@ It runs different common setups of SMASH and measures them with `perf` (see
 below). Usage instructions can be found in the corresponding
 [README](bin/benchmarks/README.md).
 
+### Nanobenchmarking
+
+In the codebase some nanobenchmarking code has been written in order to let the
+developer inspect critical parts of the code, e.g. counting CPU cycles.
+This is in general unused and it is by default excluded from compilation.
+In order to get access to it and be able to use it, you need to toggle the
+correspondent CMake option passing `-DENABLE_NANOBENCHMARKING=ON` command line
+option to `cmake`. Please note that nanobenchmarking is not supported on ARM
+architectures like Apple machines with M1 chips.
+
 ### GPROF
 
 You can tell cmake to create a build for profiling with the `Profiling` build

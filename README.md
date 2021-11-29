@@ -54,7 +54,7 @@ to build Pythia with similar flags as used for SMASH:
     wget https://pythia.org/download/pythia83/pythia8303.tgz
     tar xf pythia8303.tgz && rm pythia8303.tgz
     cd pythia8303
-    ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC'
+    ./configure --cxx-common='-std=c++11 -march=native -O3 -fPIC'
     make
 
 To tell cmake where to find Pythia, pass the path to the pythia8-config
@@ -62,6 +62,24 @@ executable as shown in the next section.
 
 Note that although Pythia is statically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
+
+#### Remarks for Apple users
+
+1. The `wget` command is not directly available on OSX.
+   Although this can be easily installed e.g. via `brew install wget`,
+   to download Pythia it is enough to use the `curl` command (see example below).
+
+2. On recent Apple machines provided with M1 (ARM) processors, no `gcc`
+   compiler is available and `clang` is to be used. The compiler flag
+   `-march=native` is not defined and has to be dropped.
+
+The commands above to build Pythia on a M1 Apple machine become:
+
+    curl https://pythia.org/download/pythia83/pythia8303.tgz -o pythia8303.tgz
+    tar xf pythia8303.tgz && rm pythia8303.tgz
+    cd pythia8303
+    ./configure --cxx-common='-std=c++11 -O3 -fPIC'
+    make
 
 ### Including Eigen Header Files from Custom Location
 
@@ -197,7 +215,7 @@ See http://hepmc.web.cern.ch/hepmc/ for download and the projects' README for
 installation. If the HepMC installation is not found, provide the
 install destination (`$HEPMC_INS`) with
 
-   cmake -DCMAKE_PREFIX_PATH=$HEPMC_INS ..
+    cmake -DCMAKE_PREFIX_PATH=$HEPMC_INS ..
 
 Note that if multiple CMAKE_PREFIX_PATHs are necessary, a semicolon-separated
 list of directories can be specified.
