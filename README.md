@@ -64,13 +64,7 @@ Note that although Pythia is statically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
 
 The compilation of Pythia 8.303 fails with gcc > 10.x and clang > 12.x (under GNU/Linux,
-unless clang's `-stdlib=libc++` is used). Either use a previous version or fix
-the problem by adding
-```
-#include <limits>
-using std::numeric_limits;
-```
-in _include/Pythia8/PythiaStdlib.h_ (in your **`pythia8303`** folder).
+unless clang's `-stdlib=libc++` is used).
 
 #### Remarks for Apple users
 
