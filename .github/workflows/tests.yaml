@@ -39,7 +39,7 @@ jobs:
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
         # 4th matrix element, osx 10.15 with clang
-        - os: macos-latest
+        - os: macos-10.15
           site: "mac"
           packages_to_add: "boost gsl"
           c_compiler_to_use: "clang"
@@ -78,7 +78,7 @@ jobs:
         wget https://pythia.org/download/pythia83/pythia8303.tgz && tar xf pythia8303.tgz && rm pythia8303.tgz && cd pythia8303
         ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC' && make -j$(nproc) && cd ..
         # we download and unpack clang
-        if [ $OS_NAME == "macos-latest" ]; then curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
+        if [ $SITE == "mac" ]; then curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
         else curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz; fi &&
         mkdir clang6_0_0 && tar -xf clang6_0_0.tar.xz -C clang6_0_0 --strip-components=1
         # if we use gcc-4.8 we download and build also boost
