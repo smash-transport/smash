@@ -38,8 +38,8 @@ jobs:
           packages_to_add: "libboost-all-dev libgsl-dev"
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
-        # 4th matrix element, osx 10.15 with clang
-        - os: macos-10.15
+        # 4th matrix element, osx 11 with clang
+        - os: macos-11
           site: "mac"
           packages_to_add: "boost gsl"
           c_compiler_to_use: "clang"
