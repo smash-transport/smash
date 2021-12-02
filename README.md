@@ -63,6 +63,9 @@ executable as shown in the next section.
 Note that although Pythia is statically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
 
+The compilation of Pythia 8.303 fails with gcc > 10.x and clang > 12.x (under GNU/Linux,
+unless clang's `-stdlib=libc++` is used).
+
 #### Remarks for Apple users
 
 1. The `wget` command is not directly available on OSX.
