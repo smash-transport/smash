@@ -278,7 +278,8 @@ class Experiment : public ExperimentBase {
    *                 They provide the ending times of the propagations and
    *                 are updated during the time interval.
    * \param[in]      i_ensemble index of ensemble to be evolved
-   * \param[in]      end_time_propagation time until propagation should be performed
+   * \param[in]      end_time_propagation time until propagation should be
+   *                 performed
    */
   void run_time_evolution_timestepless(Actions &actions, int i_ensemble,
                                        double end_time_propagation);
@@ -2332,12 +2333,12 @@ inline void check_interactions_total(uint64_t interactions_total) {
 }
 
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions,
-                                                        int i_ensemble,
-                                                        double end_time_propagation) {
+void Experiment<Modus>::run_time_evolution_timestepless(
+    Actions &actions, int i_ensemble, double end_time_propagation) {
   Particles &particles = ensembles_[i_ensemble];
-  logg[LExperiment].debug("Timestepless propagation: ", "Actions size = ",
-                          actions.size(), ", end time = ", end_time_propagation);
+  logg[LExperiment].debug(
+      "Timestepless propagation: ", "Actions size = ", actions.size(),
+      ", end time = ", end_time_propagation);
 
   // iterate over all actions
   while (!actions.is_empty()) {
@@ -2375,7 +2376,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions,
     /* (3) Update actions for newly-produced particles. */
 
     const double end_time_timestep =
-          std::min(parameters_.labclock->next_time(), end_time_);
+        std::min(parameters_.labclock->next_time(), end_time_);
     // New actions are always search until the end of the current timestep
     const double time_left = end_time_timestep - act->time_of_execution();
     const ParticleList &outgoing_particles = act->outgoing_particles();
