@@ -35,6 +35,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Non-relativistic electromagnetic potentials in a simple form meant for low collision energies
 * New option: start a box with an external particle list
 * Support of Apple silicon M1 chips
+* Optional N(1520) Dalitz decay with constant form factor
 
 ### Changed
 * Evaluation of failed string processes. BBbar pairs are now forced to annihilate
