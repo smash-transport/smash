@@ -278,10 +278,10 @@ class Experiment : public ExperimentBase {
    *                 They provide the ending times of the propagations and
    *                 are updated during the time interval.
    * \param[in]      i_ensemble index of ensemble to be evolved
-   * \param[in]      end_time time until evolution should be performed
+   * \param[in]      end_time_propagation time until propagation should be performed
    */
   void run_time_evolution_timestepless(Actions &actions, int i_ensemble,
-                                       double end_time);
+                                       double end_time_propagation);
 
   /// Intermediate output during an event
   void intermediate_output();
@@ -2334,14 +2334,14 @@ inline void check_interactions_total(uint64_t interactions_total) {
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions,
                                                         int i_ensemble,
-                                                        double end_time) {
+                                                        double end_time_propagation) {
   Particles &particles = ensembles_[i_ensemble];
   logg[LExperiment].debug("Timestepless propagation: ", "Actions size = ",
-                          actions.size(), ", end time = ", end_time);
+                          actions.size(), ", end time = ", end_time_propagation);
 
   // iterate over all actions
   while (!actions.is_empty()) {
-    if (actions.earliest_time() > end_time) {
+    if (actions.earliest_time() > end_time_propagation) {
       break;
     }
     // get next action
@@ -2374,7 +2374,10 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions,
 
     /* (3) Update actions for newly-produced particles. */
 
-    const double time_left = end_time - act->time_of_execution();
+    const double end_time_timestep =
+          std::min(parameters_.labclock->next_time(), end_time_);
+    // New actions are always search until the end of the current timestep
+    const double time_left = end_time_timestep - act->time_of_execution();
     const ParticleList &outgoing_particles = act->outgoing_particles();
     // Grid cell volume set to zero, since there is no grid
     const double gcell_vol = 0.0;
@@ -2390,7 +2393,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(Actions &actions,
     check_interactions_total(interactions_total_);
   }
 
-  propagate_and_shine(end_time, particles);
+  propagate_and_shine(end_time_propagation, particles);
 }
 
 template <typename Modus>
