@@ -22,27 +22,32 @@ jobs:
         #the entries in each matrix element are just variables, not keywords, with (hopefully) self-explaining names
         # 1st matrix element, default compiler at FIAS
         - os: ubuntu-18.04
+          site: "fias"
           packages_to_add: "libboost-all-dev g++-5 doxygen-latex graphviz libgsl-dev"
           c_compiler_to_use: "gcc-5"
           cxx_compiler_to_use: "g++-5"
         # 2nd matrix element, recent LTS Ubuntu distribution with gcc
         - os: ubuntu-20.04
+          site: "linux-default-gcc"
           packages_to_add: "libboost-all-dev doxygen-latex graphviz libgsl-dev"
           c_compiler_to_use: "gcc"
           cxx_compiler_to_use: "g++"
         # 3rd matrix element, recent LTS Ubuntu distribution with clang
         - os: ubuntu-20.04
+          site: "linux-default-clang"
           packages_to_add: "libboost-all-dev libgsl-dev"
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
-        # 4th matrix element, osx 10.15 with clang
-        - os: macos-latest
+        # 4th matrix element, osx 11 with clang
+        - os: macos-11
+          site: "mac"
           packages_to_add: "boost gsl"
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
         # 5th matrix element, default compiler in Goethe cluster
-        - os: ubuntu-16.04
+        - os: ubuntu-18.04
           # this time we do not include boost, we compile it later by ourselves
+          site: "goethe"
           packages_to_add: "g++-4.8 libgsl-dev"
           c_compiler_to_use: "gcc-4.8"
           cxx_compiler_to_use: "g++-4.8"
@@ -56,6 +61,7 @@ jobs:
         CC: ${{ matrix.c_compiler_to_use }}
         CXX: ${{ matrix.cxx_compiler_to_use }}
         OS_NAME: ${{ matrix.os }}
+        SITE: ${{ matrix.site }}
       # we run the step. We recall that in YAML the pipe symbol "|" means that the follwing lines, including newlines, are interpreted literally
       run: |
         # which version of cmake is used
@@ -63,7 +69,7 @@ jobs:
         # we set the smash root directory
         export SMASH_ROOT=$PWD
         # we install the missing packages
-        if [ $OS_NAME == "macos-latest" ]; then
+        if [ $SITE == "mac" ]; then
             brew install ${{ matrix.packages_to_add }}
         else
             sudo apt-get install ${{ matrix.packages_to_add }} -y
@@ -72,17 +78,16 @@ jobs:
         wget https://pythia.org/download/pythia83/pythia8303.tgz && tar xf pythia8303.tgz && rm pythia8303.tgz && cd pythia8303
         ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC' && make -j$(nproc) && cd ..
         # we download and unpack clang
-        if [ $OS_NAME == "macos-latest" ]; then curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
-        else curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz; fi &&
+        if [ $SITE == "mac" ]; then curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
+        else curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz; fi &&
         mkdir clang6_0_0 && tar -xf clang6_0_0.tar.xz -C clang6_0_0 --strip-components=1
         # if we use gcc-4.8 we download and build also boost
         if [ $CXX == "g++-4.8" ]; then
             curl https://deac-fra.dl.sourceforge.net/project/boost/boost/1.75.0/boost_1_75_0.tar.gz -o boost_1_75_0.tar.gz --silent && tar -xf boost_1_75_0.tar.gz
             cd boost_1_75_0 && ./bootstrap.sh --with-libraries=filesystem,system && ./b2 toolset=gcc-4.8 && export BOOST_DIR=$PWD && cd ..
         fi
-
         # we get eigen
-        wget http://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz && tar -xf eigen-3.3.9.tar.gz -C $HOME
+        wget http://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && tar -xf eigen-3.4.0.tar.gz -C $HOME
         # we get cpplint
         wget https://raw.githubusercontent.com/cpplint/cpplint/develop/cpplint.py && chmod +x cpplint.py && mkdir -p $HOME/bin && mv cpplint.py $HOME/bin
         export PATH=$HOME/bin:$PATH
@@ -90,14 +95,13 @@ jobs:
         cd $SMASH_ROOT && mkdir build && cd build
         # if we use gcc-4.8 we use our self built boost
         if [ $CXX == "g++-4.8" ]; then
-            cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DBOOST_ROOT=$BOOST_DIR -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.9/
-
+            cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DBOOST_ROOT=$BOOST_DIR -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.4.0/
         else
-            cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.3.9/
+            cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.4.0/
         fi
         make -j$(nproc)
         # we check the building of the documentation for a specific case
-        if [ $OS_NAME == ubuntu-18.04 ]; then make undocumented_test && make user; fi
+        if [ $SITE == "fias" ]; then make undocumented_test && make user; fi
         # we check the correct formatting of the code with clang
         PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/clang-format-helper.bash -t
         # we run the tests
