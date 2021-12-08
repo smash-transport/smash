@@ -36,9 +36,11 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * New option: start a box with an external particle list
 * Support of Apple silicon M1 chips
 * Optional N(1520) Dalitz decay with constant form factor
+* Pre-built docker container on Github
 
 ### Changed
 * Evaluation of failed string processes. BBbar pairs are now forced to annihilate
+* Updated Dockerfile and Singularity definition file (matching pre-built container on Github)
 
 ## [SMASH-2.0.2](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...SMASH-2.0.2)
 Date: 2021-06-23
