@@ -84,7 +84,13 @@ The commands above to build Pythia on a M1 Apple machine become:
     ./configure --cxx-common='-std=c++11 -O3 -fPIC'
     make
 
-### Getting Eigen header files into a custom location
+### Installing Eigen
+
+Usually it is possible to install Eigen with a package manager (it requires admin privileges) and in this case CMake should be able to find the header files without the need of any additional option. For example, on an Apple machine you have the possibility to install Eigen via `brew install eigen`, while, under GNU/Linux Ubuntu, via `sudo apt-get install libeigen3-dev`.
+
+If for some reason this is not a viable approach, then you can still proceed to a manual installation as described in the following.
+
+#### Getting Eigen header files into a custom location
 
 Let's assume Eigen headers will be unpacked in `$HOME`.
 Download the latest stable release of `Eigen` from http://eigen.tuxfamily.org and unpack it via
@@ -93,8 +99,6 @@ Download the latest stable release of `Eigen` from http://eigen.tuxfamily.org an
 
 To tell `cmake` where to find Eigen header files while bilding SMASH, pass the path to them adding the option
 `-DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/` to the `cmake` command in the following section.
-
-If you are on an Apple machine, you have the possibility to install Eigen via `brew install eigen` and in this case CMake should be able to find the headers without the need of any additional option.
 
 ### Building SMASH
 
