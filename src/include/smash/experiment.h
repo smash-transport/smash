@@ -2377,6 +2377,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(
 
     const double end_time_timestep =
         std::min(parameters_.labclock->next_time(), end_time_);
+    assert(!(end_time_propagation > end_time_timestep));
     // New actions are always search until the end of the current timestep
     const double time_left = end_time_timestep - act->time_of_execution();
     const ParticleList &outgoing_particles = act->outgoing_particles();
