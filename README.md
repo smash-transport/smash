@@ -57,8 +57,8 @@ to build Pythia with similar flags as used for SMASH:
     ./configure --cxx-common='-std=c++11 -march=native -O3 -fPIC'
     make
 
-To tell cmake where to find Pythia, pass the path to the pythia8-config
-executable as shown in the next section.
+To tell `cmake` where to find Pythia while bilding SMASH, pass the path to the `pythia8-config`
+executable as shown in the **Building SMASH** section.
 
 Note that although Pythia is statically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
@@ -84,17 +84,17 @@ The commands above to build Pythia on a M1 Apple machine become:
     ./configure --cxx-common='-std=c++11 -O3 -fPIC'
     make
 
-### Including Eigen Header Files from Custom Location
+### Getting Eigen header files into a custom location
 
 Let's assume Eigen headers will be unpacked in `$HOME`.
+Download the latest stable release of `Eigen` from http://eigen.tuxfamily.org and unpack it via
 
-1. download latest the package from http://eigen.tuxfamily.org
+       tar -xf [latest-eigen].tar.gz -C $HOME
 
-       [latest-eigen].tar.gz
-       tar -xf [latest-eigen].tar.gz -C $HOME`
+To tell `cmake` where to find Eigen header files while bilding SMASH, pass the path to them adding the option
+`-DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/` to the `cmake` command in the following section.
 
-2. in `smash/build/`, create build files with
-`cmake -DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/ ..`
+If you are on an Apple machine, you have the possibility to install Eigen via `brew install eigen` and in this case CMake should be able to find the headers without the need of any additional option.
 
 ### Building SMASH
 
