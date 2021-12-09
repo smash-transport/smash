@@ -305,6 +305,154 @@ void Action::sample_2body_phasespace() {
   sample_angles(masses, cm_kin_energy);
 }
 
+void Action::sample_manybody_phasespace_impl(
+    double sqrts, const std::vector<double> &m,
+    std::vector<FourVector> &sampled_momenta) {
+  /**
+   *  Using the M-method from CERN-68-15 report, paragraph 9.6
+   *  1) Generate invariant masses M12, M123, M1234, etc from
+   *      distribution dM12 x dM123 x dM1234 x ...
+   *      This is not trivial because of the integration limits.
+   *      Here the idea is to change variables to T12 = M12 - (m1 + m2),
+   *      T123 = M123 - (m1 + m2 + m3), etc. Then we need to generate
+   *      uniform T such that 0 <= T12 <= T123 <= T1234 <= ... <= sqrts - sum
+   * (m_i). For the latter there is a trick: generate values uniformly in [0,
+   * sqrts - sum (m_i)] and then sort the values. 2) accept or reject this
+   * combination of invariant masses with weight proportional to R2(sqrt,
+   * M_{n-1}, m_n) x R2(M_{n-1}, M_{n-2}, m_{n-1}) x
+   *     ... x R2(M2, m1, m2) x (prod M_i). Maximum weight is estmated
+   * heuristically, here I'm using an idea by Scott Pratt that maximum is close
+   * to T12 = T123 = T1234 = ... = (sqrts - sum (m_i)) / (n - 1)
+   */
+  const size_t n = m.size();
+  assert(n > 1);
+  sampled_momenta.resize(n);
+
+  // Arrange a convenient vector of m1, m1 + m2, m1 + m2 + m3, ...
+  std::vector<double> msum(n);
+  msum[0] = m[0];
+  for (size_t i = 1; i < n; i++) {
+    msum[i] = msum[i - 1] + m[i];
+  }
+  const double msum_all = msum[n - 1];
+  int rejection_counter = -1;
+
+  double w, r01;
+  std::vector<double> Minv(n);
+
+  double weight_sqr_max = 1;
+  const double Ekin_share = (sqrts - msum_all) / (n - 1);
+  for (size_t i = 1; i < n; i++) {
+    // This maximum estimate idea is due Scott Pratt: maximum should be
+    // roughly at equal kinetic energies
+    weight_sqr_max *= pCM_sqr(i * Ekin_share + msum[i],
+                              (i - 1) * Ekin_share + msum[i - 1], m[i]);
+  }
+  // Maximum estimate is rough and can be wrong. We multiply it by additional
+  // factor to be on the safer side.
+  const double safety_factor = 1.1 + (n - 2) * 0.2;
+  weight_sqr_max *= (safety_factor * safety_factor);
+
+  do {
+    // Generate invariant masses of 1, 12, 123, 1243, etc.
+    // Minv = {m1, M12, M123, ..., M123n-1, sqrts}
+    Minv[0] = 0.0;
+    Minv[n - 1] = sqrts - msum_all;
+    for (size_t i = 1; i < n - 1; i++) {
+      Minv[i] = random::uniform(0.0, sqrts - msum_all);
+    }
+    std::sort(Minv.begin(), Minv.end());
+    for (size_t i = 0; i < n; i++) {
+      Minv[i] += msum[i];
+    }
+
+    double weight_sqr = 1;
+    for (size_t i = 1; i < n; i++) {
+      weight_sqr *= pCM_sqr(Minv[i], Minv[i - 1], m[i]);
+    }
+
+    rejection_counter++;
+    r01 = random::canonical();
+    w = weight_sqr / weight_sqr_max;
+    if (w > 1.0) {
+      logg[LAction].warn()
+          << "sample_manybody_phasespace_impl: alarm, weight > 1, w^2 = " << w
+          << ". Increase safety factor." << std::endl;
+    }
+  } while (w < r01 * r01);
+
+  // Boost particles to the right frame
+  std::vector<ThreeVector> beta(n);
+  for (size_t i = n - 1; i > 0; i--) {
+    const double pcm = pCM(Minv[i], Minv[i - 1], m[i]);
+    Angles phitheta;
+    phitheta.distribute_isotropically();
+    const ThreeVector isotropic_unitvector = phitheta.threevec();
+    sampled_momenta[i] = FourVector(std::sqrt(m[i] * m[i] + pcm * pcm),
+                                    pcm * isotropic_unitvector);
+    if (i >= 2) {
+      beta[i - 2] = pcm * isotropic_unitvector /
+                    std::sqrt(pcm * pcm + Minv[i - 1] * Minv[i - 1]);
+    }
+    if (i == 1) {
+      sampled_momenta[0] = FourVector(std::sqrt(m[0] * m[0] + pcm * pcm),
+                                      -pcm * isotropic_unitvector);
+    }
+  }
+
+  for (size_t i = 0; i < n - 2; i++) {
+    // After each boost except the last one the sum of 3-momenta should be 0
+    FourVector ptot = FourVector(0.0, 0.0, 0.0, 0.0);
+    for (size_t j = 0; j <= i + 1; j++) {
+      ptot += sampled_momenta[j];
+    }
+    logg[LAction].debug() << "Total momentum of 0.." << i + 1 << " = "
+                          << ptot.threevec() << " and should be (0, 0, 0). "
+                          << std::endl;
+
+    // Boost the first i+1 particles to the next CM frame
+    for (size_t j = 0; j <= i + 1; j++) {
+      sampled_momenta[j] = sampled_momenta[j].lorentz_boost(beta[i]);
+    }
+  }
+
+  FourVector ptot_all = FourVector(0.0, 0.0, 0.0, 0.0);
+  for (size_t j = 0; j < n; j++) {
+    ptot_all += sampled_momenta[j];
+  }
+  logg[LAction].debug() << "Total 4-momentum = " << ptot_all << ", should be ("
+                        << sqrts << ", 0, 0, 0)" << std::endl;
+}
+
+void Action::sample_manybody_phasespace() {
+  const size_t n = outgoing_particles_.size();
+  if (n < 3) {
+    throw std::invalid_argument(
+        "sample_manybody_phasespace: number of outgoing particles should be 3 "
+        "or more");
+  }
+  bool all_stable = true;
+  for (size_t i = 0; i < n; i++) {
+    all_stable = all_stable && outgoing_particles_[i].type().is_stable();
+  }
+  if (!all_stable) {
+    throw std::invalid_argument(
+        "sample_manybody_phasespace: Found resonance in to be sampled outgoing "
+        "particles, but assumes stable particles.");
+  }
+
+  std::vector<double> m(n);
+  for (size_t i = 0; i < n; i++) {
+    m[i] = outgoing_particles_[i].type().mass();
+  }
+  std::vector<FourVector> p(n);
+
+  sample_manybody_phasespace_impl(sqrt_s(), m, p);
+  for (size_t i = 0; i < n; i++) {
+    outgoing_particles_[i].set_4momentum(p[i]);
+  }
+}
+
 void Action::sample_3body_phasespace() {
   assert(outgoing_particles_.size() == 3);
   if (!outgoing_particles_[0].type().is_stable() ||

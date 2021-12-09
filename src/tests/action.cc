@@ -101,3 +101,17 @@ TEST(phasespace_five_body) {
   COMPARE_ABSOLUTE_ERROR(sum_theta1 / N_samples, M_PI / 2.0, 0.1);
   COMPARE_ABSOLUTE_ERROR(sum_phi1 / N_samples, 0.0, 0.1);
 }
+
+TEST(phasespace_manybody) {
+  double sqrts = 3.0;
+  std::vector<double> m{0.4, 0.3, 0.55, 0.12, 0.17};
+  std::vector<FourVector> momenta(m.size());
+  for (size_t i = 0; i < 1000; i++) {
+    Action::sample_manybody_phasespace_impl(sqrts, m, momenta);
+    for (size_t j = 0; j < m.size(); j++) {
+      // Uncomment for printout
+      // for (size_t k = 0; k < 4; k++) std::cout << momenta[j][k] << " ";
+    }
+    std::cout << std::endl;
+  }
+}
