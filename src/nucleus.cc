@@ -310,9 +310,11 @@ void Nucleus::set_parameters_automatic() {
     case 197:  // Gold
       // Default values.
       if (Z == 79) {
+        std::cout << "test" << std::endl;
         set_diffusiveness(0.535);
         set_nuclear_radius(6.38);
         set_saturation_density(0.1695);
+        std::cout << calculate_saturation_density() << std::endl;
       }
       break;
     case 63:  // Copper
@@ -504,6 +506,10 @@ void Nucleus::random_euler_angles() {
 double Nucleus::nucleon_density(double r, double) const {
   return nuclear_density /
          (std::exp((r - nuclear_radius_) / diffusiveness_) + 1.);
+}
+
+double Nucleus::nucleon_density_unnormalized(double r, double) const {
+  return 1.0 / (std::exp((r - nuclear_radius_) / diffusiveness_) + 1.);
 }
 
 std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
