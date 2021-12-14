@@ -122,6 +122,10 @@ echo "   Started benchmark for potentials ..."
 potentials_perf=$(benchmark_run potentials $DECAYM_DEF $PART_DEF)
 echo "$potentials_perf" | grep -E "time elapsed"
 
+echo "   Started benchmark for high-energy collisions ..."
+high_energy_perf=$(benchmark_run high_energy $DECAYM_DEF $PART_DEF)
+echo "$high_energy_perf" | grep -E "time elapsed"
+
 
 OUTPUT_FILE=${SCRIPTPATH}/bm-results-${SMASH_VER_NUM}.md
 
@@ -193,6 +197,11 @@ $testp_perf
 Same setup as with Testparticles, but also with potentials.
 \`\`\`
 $potentials_perf
+\`\`\`
+
+### High-energy collision Run
+\`\`\`
+$high_energy_perf
 \`\`\`
 EOF
 echo "Results are written to $OUTPUT_FILE"
