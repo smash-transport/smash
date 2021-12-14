@@ -105,7 +105,7 @@ class DeformedNucleus : public Nucleus {
 
   double nucleon_density_unnormalized(double r, double cosx) const override;
 
-  double calculate_saturation_density() {
+  double calculate_saturation_density() override {
     Integrator2d integrate;
     // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
     const auto result = integrate(0, 1, -1, 1, [&](double t, double cosx) {

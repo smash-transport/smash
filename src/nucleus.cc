@@ -310,11 +310,9 @@ void Nucleus::set_parameters_automatic() {
     case 197:  // Gold
       // Default values.
       if (Z == 79) {
-        std::cout << "test" << std::endl;
         set_diffusiveness(0.535);
         set_nuclear_radius(6.38);
         set_saturation_density(0.1695);
-        std::cout << calculate_saturation_density() << std::endl;
       }
       break;
     case 63:  // Copper

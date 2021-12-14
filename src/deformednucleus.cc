@@ -160,10 +160,8 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
       break;
     case 197:  // Gold
       if (Z == 79) {
-        std::cout << "test" << std::endl;
         set_beta_2(-0.131);
         set_beta_4(-0.031);
-        std::cout << calculate_saturation_density() << std::endl;
       } else {
         listed = true;
       }
