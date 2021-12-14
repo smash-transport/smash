@@ -25,6 +25,8 @@ static constexpr int LNucleus = LogArea::Nucleus::id;
 Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
   fill_from_list(particle_list, nTest);
   set_parameters_automatic();
+  // calculate the saturation density
+  set_saturation_density(calculate_saturation_density());
 }
 
 Nucleus::Nucleus(Configuration &config, int nTest) {
@@ -39,6 +41,8 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
              !config.has_value({"Radius"}) &&
              !config.has_value({"Saturation_Density"})) {
     set_parameters_automatic();
+    // calculate the saturation density
+    set_saturation_density(calculate_saturation_density());
   } else {
     throw std::invalid_argument(
         "Diffussiveness, Radius and Saturation_Density "
@@ -296,7 +300,6 @@ void Nucleus::set_parameters_automatic() {
       if (Z == 92) {
         set_diffusiveness(0.556);
         set_nuclear_radius(6.86);
-        set_saturation_density(0.166);
       }
       break;
     case 208:  // Lead
@@ -304,7 +307,6 @@ void Nucleus::set_parameters_automatic() {
       if (Z == 82) {
         set_diffusiveness(0.54);
         set_nuclear_radius(6.67);
-        set_saturation_density(0.161);
       }
       break;
     case 197:  // Gold
@@ -312,7 +314,6 @@ void Nucleus::set_parameters_automatic() {
       if (Z == 79) {
         set_diffusiveness(0.535);
         set_nuclear_radius(6.38);
-        set_saturation_density(0.1695);
       }
       break;
     case 63:  // Copper
@@ -320,7 +321,6 @@ void Nucleus::set_parameters_automatic() {
       if (Z == 29) {
         set_diffusiveness(0.5977);
         set_nuclear_radius(4.20641);
-        set_saturation_density(0.1686);
       }
       break;
     case 96:
@@ -328,12 +328,10 @@ void Nucleus::set_parameters_automatic() {
         // Default values.
         set_diffusiveness(0.46);
         set_nuclear_radius(5.02);
-        set_saturation_density(0.1673);
       } else if (Z == 44) {  // Ruthenium
         // Default values.
         set_diffusiveness(0.46);
         set_nuclear_radius(5.085);
-        set_saturation_density(0.1604);
       } else {
         // radius and diffusiveness taken from \iref{Rybczynski:2013yba}
         set_diffusiveness(0.54);
@@ -352,6 +350,8 @@ void Nucleus::set_parameters_automatic() {
         set_diffusiveness(0.54);
       }
   }
+  // calculate the saturation density
+  set_saturation_density(calculate_saturation_density());
 }
 
 void Nucleus::set_parameters_from_config(Configuration &config) {
@@ -502,7 +502,7 @@ void Nucleus::random_euler_angles() {
 }
 
 double Nucleus::nucleon_density(double r, double) const {
-  return nuclear_density /
+  return get_saturation_density() /
          (std::exp((r - nuclear_radius_) / diffusiveness_) + 1.);
 }
 

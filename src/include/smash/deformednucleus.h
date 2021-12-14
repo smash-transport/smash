@@ -94,6 +94,13 @@ class DeformedNucleus : public Nucleus {
   void rotate() override;
 
   /**
+   * Sets the saturation density of the nucleus
+   * \see saturation_density_
+   */
+  void set_saturation_density(double density) override{
+    saturation_density_ = density;
+  }
+  /**
    * Return the deformed Woods-Saxon probability density for the given position.
    * This corresponds to the nuclear density at the very same position.
    *
@@ -149,6 +156,8 @@ class DeformedNucleus : public Nucleus {
   inline double get_beta4() { return beta4_; }
 
  private:
+  /// Saturation density of this nucleus.
+  double saturation_density_;
   /// Deformation parameter for angular momentum l=2.
   double beta2_ = 0.0;
   /// Deformation parameter for angular momentum l=4.

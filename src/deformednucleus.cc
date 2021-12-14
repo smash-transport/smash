@@ -102,6 +102,8 @@ DeformedNucleus::DeformedNucleus(Configuration &config, int nTest,
   } else {
     set_deformation_parameters_from_config(config);
   }
+  // calculate the saturation density
+  set_saturation_density(calculate_saturation_density());
 
   if (config.has_value({"Deformed", "Orientation"})) {
     Configuration subconfig = config["Deformed"]["Orientation"];
