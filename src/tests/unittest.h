@@ -159,7 +159,7 @@
  * }
  * \endcode
  * This creates one test function (called "test_name"). This function is called
- * without any further code and executes to checks. If, for some reason, the
+ * without any further code and executes two checks. If, for some reason, the
  * compiler would determine that test needs to have the value 3, then the output
  * would be:
    \verbatim
