@@ -8,7 +8,7 @@ General:
     Delta_Time:    0.1
     End_Time:      200.0
     Randomseed:    -1
-    Nevents:        10
+    Nevents:       5
 
 Output:
     Particles:
@@ -17,9 +17,10 @@ Output:
 Modi:
     Collider:
         Projectile:
-            Particles: {2212: 79, 2112: 118} #Gold197
+            Particles: {2212: 29, 2112: 35} #Cu64
         Target:
-            Particles: {2212: 79, 2112: 118} #Gold197
+            Particles: {2212: 29, 2112: 35} #Cu64
+
 
         Sqrtsnn: 200.0
         Fermi_Motion: "frozen"
