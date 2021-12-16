@@ -18,6 +18,11 @@
 #include "smash/threevector.h"
 
 namespace std {
+/**
+ * Convenient printout function for a vector
+ * \param[in] out output stream
+ * \param[in] v vector to print out
+ */
 template <typename T>
 static std::ostream &operator<<(std::ostream &out, const std::vector<T> &v) {
   auto column = out.tellp();
@@ -32,6 +37,11 @@ static std::ostream &operator<<(std::ostream &out, const std::vector<T> &v) {
   return out << '}';
 }
 
+/**
+ * Convenient printout function for an initializer list
+ * \param[in] out output stream
+ * \param[in] v initializer list to print out
+ */
 template <typename T>
 static std::ostream &operator<<(std::ostream &out,
                                 const std::initializer_list<T> &v) {
@@ -47,6 +57,11 @@ static std::ostream &operator<<(std::ostream &out,
   return out << '}';
 }
 
+/**
+ * Convenient printout function for an array
+ * \param[in] out output stream
+ * \param[in] a array to print out
+ */
 template <typename T, std::size_t N>
 static std::ostream &operator<<(std::ostream &out, const std::array<T, N> &a) {
   auto column = out.tellp();

@@ -42,6 +42,9 @@ class DecayActionDilepton : public DecayAction {
     return shining_weight_ * branching_;
   }
 
+  /**
+   * Generates momenta of outgoing dileptons.
+   */
   void sample_3body_phasespace();
 
  private:

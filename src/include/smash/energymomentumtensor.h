@@ -150,7 +150,7 @@ class EnergyMomentumTensor {
  * \param[in] out Location of output
  * \param[in] Tmn Energy-momentum tensor
  */
-std::ostream &operator<<(std::ostream &, const EnergyMomentumTensor &);
+std::ostream &operator<<(std::ostream &out, const EnergyMomentumTensor &Tmn);
 
 EnergyMomentumTensor inline EnergyMomentumTensor::operator+=(
     const EnergyMomentumTensor &Tmn0) {
