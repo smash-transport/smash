@@ -451,20 +451,6 @@ class Action {
   void sample_manybody_phasespace();
 
   /**
-   * Sample the full 3-body phase-space (masses, momenta, angles)
-   * in the center-of-mass frame for the final state particles.
-   *
-   * \throw std::invalid_argument if one outgoing particle is a resonance
-   */
-  virtual void sample_3body_phasespace();
-
-  /**
-   * Sample the full 5-body phase-space (masses, momenta, angles)
-   * in the center-of-mass frame for the final state particles.
-   */
-  virtual void sample_5body_phasespace();
-
-  /**
    * Assign the formation time to the outgoing particles.
    *
    * The formation time is set to the largest formation time of the incoming

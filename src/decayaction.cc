@@ -33,7 +33,7 @@ void DecayAction::generate_final_state() {
    *
    * randomly select one of the decay modes of the particle
    * according to their relative weights. Then decay the particle
-   * by calling function sample_2body_phasespace or sample_3body_phasespace.
+   * by calling function sample_2body_phasespace or sample_manybody_phasespace.
    */
   const DecayBranch *proc =
       choose_channel<DecayBranch>(decay_channels_, total_width_);
@@ -51,7 +51,7 @@ void DecayAction::generate_final_state() {
       sample_2body_phasespace();
       break;
     case 3:
-      sample_3body_phasespace();
+      sample_manybody_phasespace();
       break;
     default:
       throw InvalidDecay(
