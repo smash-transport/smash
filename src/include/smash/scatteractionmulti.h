@@ -109,11 +109,8 @@ class ScatterActionMulti : public Action {
    */
   void annihilation();
 
-  /// Perform a 3->2 process.
-  void three_to_two();
-
-  /// Perform a 5->2 process.
-  void five_to_two();
+  /// Perform a n->2 process.
+  void n_to_two();
 
   /**
    * Calculate the probability for a 3m-to-1 reaction according to the

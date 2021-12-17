@@ -295,12 +295,10 @@ void ScatterActionMulti::generate_final_state() {
       annihilation();
       break;
     case ProcessType::MultiParticleThreeToTwo:
-      /* 3->2 scattering */
-      three_to_two();
-      break;
+    case ProcessType::MultiParticleFourToTwo:
     case ProcessType::MultiParticleFiveToTwo:
-      /* 5->2 scattering */
-      five_to_two();
+      /* n->2 scattering */
+      n_to_two();
       break;
     default:
       throw InvalidScatterActionMulti(
@@ -442,19 +440,11 @@ void ScatterActionMulti::annihilation() {
                                   outgoing_particles_[0].momentum());
 }
 
-void ScatterActionMulti::three_to_two() {
+void ScatterActionMulti::n_to_two() {
   sample_2body_phasespace();
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
-  logg[LScatterActionMulti].debug("3->2 scattering:", incoming_particles_,
-                                  " -> ", outgoing_particles_);
-}
-
-void ScatterActionMulti::five_to_two() {
-  sample_2body_phasespace();
-  // Make sure to assign formation times before boost to the computational frame
-  assign_formation_time_to_outgoing_particles();
-  logg[LScatterActionMulti].debug("5->2 scattering:", incoming_particles_,
+  logg[LScatterActionMulti].debug("n->2 scattering:", incoming_particles_,
                                   " -> ", outgoing_particles_);
 }
 
