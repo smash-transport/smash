@@ -33,6 +33,8 @@ enum class ProcessType {
   TwoToTwo = 3,
   /// 2->3 scattering
   TwoToThree = 4,
+  /// 2->4 scattering
+  TwoToFour = 15,
   /// 2->5 scattering
   TwoToFive = 13,
   /// resonance decay
@@ -54,6 +56,7 @@ enum class ProcessType {
   /// multi particle scattering
   MultiParticleThreeMesonsToOne = 10,
   MultiParticleThreeToTwo = 11,
+  MultiParticleFourToTwo = 14,
   MultiParticleFiveToTwo = 12,
 
   /**
