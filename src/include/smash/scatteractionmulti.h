@@ -167,7 +167,14 @@ class ScatterActionMulti : public Action {
                                   const ParticleType& type_out2, double dt,
                                   const double gcell_vol,
                                   const double degen_factor = 1.0) const;
-
+  /**
+   * Calculate the probability for a 4-to-2 reaction according to the
+   * stochastic collision criterion as given in \iref{Staudenmaier:2021lrg}.
+   */
+  double probability_four_to_two(const ParticleType& type_out1,
+                                 const ParticleType& type_out2, double dt,
+                                 const double gcell_vol,
+                                 const double degen_factor = 1.0) const;
   /**
    * Calculate the probability for a 5-to-2 reaction according to the
    * stochastic collision criterion as given in \iref{Garcia-Montero:2021haa}.

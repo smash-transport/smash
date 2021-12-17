@@ -391,6 +391,13 @@ double ScatterActionMulti::probability_three_to_two(
          degen_factor;
 }
 
+double ScatterActionMulti::probability_four_to_two(const ParticleType& type_out1,
+                               const ParticleType& type_out2, double dt,
+                               const double gcell_vol,
+                               const double degen_factor) const {
+   return 0.0;  // TODO(stdnmr)
+}
+
 double ScatterActionMulti::probability_five_to_two(
     const double mout, double dt, const double gcell_vol,
     const double degen_factor) const {
