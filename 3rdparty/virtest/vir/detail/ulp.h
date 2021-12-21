@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <cmath>
 #include <limits>
+#include <cfenv>
 
 namespace vir
 {
@@ -63,6 +64,7 @@ template <
     class = typename std::enable_if<std::is_floating_point<value_type_t<T>>::value>::type>
 inline T ulpDiffToReference(const T &val_, const T &ref_)
 {
+  const int fp_exceptions = std::fetestexcept(FE_ALL_EXCEPT);
   T val = val_;
   T ref = ref_;
 
@@ -94,6 +96,7 @@ inline T ulpDiffToReference(const T &val_, const T &ref_)
   exp = max(exp, I(limits::min_exponent));
   diff += ldexp(abs(ref - val), limits::digits - exp);
   where(val_ == ref_ || (isnan(val_) && isnan(ref_)), diff) = T();
+  std::feclearexcept(FE_ALL_EXCEPT ^ fp_exceptions);
   return diff;
 }
 
