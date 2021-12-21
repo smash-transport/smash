@@ -17,7 +17,7 @@ The major categories to group changes in this log are:
 
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
-## [Unreleased](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...HEAD)
+## [SMASH-2.1](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...SMASH-2.1)
 
 ### Input / Output
 * Added option to specify a `Fixed_Min_Cell_Length` to control the grid size for the stochastic criterion.
