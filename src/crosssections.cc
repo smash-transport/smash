@@ -169,6 +169,10 @@ CollisionBranchList CrossSections::generate_collision_list(
       // 2->3 (deuterons only 2-to-3 reaction at the moment)
       append_list(process_list, two_to_three(), (1. - p_pythia) * scale_xs);
     }
+    if (true) { // TODO(stdnmr) config option for 2-to-4
+      // 2->4
+      append_list(process_list, two_to_four(), (1. - p_pythia) * scale_xs);
+    }
   }
   if (nnbar_treatment == NNbarTreatment::TwoToFive && is_NNbar_pair_) {
     // NNbar directly to 5 pions (2-to-5)
@@ -895,6 +899,40 @@ CollisionBranchList CrossSections::two_to_three() const {
   return process_list;
 }
 
+CollisionBranchList CrossSections::two_to_four() const {
+  CollisionBranchList process_list;
+  const ParticleType& type_a = incoming_particles_[0].type();
+  const ParticleType& type_b = incoming_particles_[1].type();
+
+  // TODO(stdnmr) also take care of He3
+
+  if ((type_a.is_triton() && type_a.is_pion()) ||
+      (type_b.is_triton() && type_b.is_pion())) {
+    // Pion Triton Scattering
+    const ParticleType& type_pi = type_a.pdgcode().is_pion() ? type_a : type_b;
+    const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
+
+    if (type_nucleus.baryon_number() > 0) {
+      // πt → πpnn
+      const auto& type_p = ParticleType::find(pdg::p);
+      const auto& type_n = ParticleType::find(pdg::n);
+
+      process_list.push_back(make_unique<CollisionBranch>(
+          type_pi, type_p, type_n, type_n, two_to_four_xs(type_a, type_b, sqrt_s_),
+            ProcessType::TwoToFour));
+    } else {
+      // πt̅ → πp̅n̅n̅
+      const auto& type_anti_p = ParticleType::find(-pdg::p);
+      const auto& type_anti_n = ParticleType::find(-pdg::n);
+
+      process_list.push_back(make_unique<CollisionBranch>(
+          type_pi, type_anti_p, type_anti_n, type_anti_n, two_to_four_xs(type_a, type_b, sqrt_s_),
+            ProcessType::TwoToFour));
+    }
+  }
+  return process_list;
+}
+
 double CrossSections::two_to_three_xs(const ParticleType& type_a,
                                       const ParticleType& type_b,
                                       double sqrts) {
@@ -931,6 +969,14 @@ double CrossSections::two_to_three_xs(const ParticleType& type_a,
                                type_dprime, type_nucleus, type_N);
     }
   }
+  return xsection;
+}
+
+double CrossSections::two_to_four_xs(const ParticleType& type_a,
+                                     const ParticleType& type_b,
+                                     double sqrts) {
+  // We use a constant cross section for testing
+  const double xsection = 30.0;
   return xsection;
 }
 

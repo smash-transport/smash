@@ -214,6 +214,9 @@ class ParticleType {
   /// \copydoc PdgCode::is_nucleon
   bool is_nucleon() const { return pdgcode_.is_nucleon(); }
 
+  /// \copydoc PdgCode::is_pion
+  bool is_pion() const { return pdgcode_.is_pion(); }
+
   /// \copydoc PdgCode::is_Delta
   bool is_Delta() const { return pdgcode_.is_Delta(); }
 
@@ -243,6 +246,9 @@ class ParticleType {
 
   /// \return whether the particle is an (anti-)deuteron
   inline bool is_deuteron() const { return pdgcode_.is_deuteron(); }
+
+  /// \return whether the particle is an (anti-)triton
+  inline bool is_triton() const { return pdgcode_.is_triton(); }
 
   /// \return whether the particle is an artificial d' resonance
   inline bool is_dprime() const {

@@ -265,6 +265,13 @@ void ScatterActionMulti::add_possible_reactions(
         // something like one_pion_three_nucleons() (block for now)
         if (false) {
 
+          // Get type of incoming π
+          ParticleList::iterator it = std::find_if(
+              incoming_particles_.begin(), incoming_particles_.end(),
+              [](ParticleData x) { return x.is_pion(); });
+          const ParticleType& type_pi = it->type();
+
+
           const double spin_degn = 1.0; // TODO(stdnmr)
 
           add_reaction(make_unique<CollisionBranch>(
@@ -491,7 +498,7 @@ void ScatterActionMulti::n_to_two() {
   sample_2body_phasespace();
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
-  logg[LScatterActionMulti].debug("n->2 scattering:", incoming_particles_,
+  logg[LScatterActionMulti].debug(incoming_particles_.size(), "->2 scattering:", incoming_particles_,
                                   " -> ", outgoing_particles_);
 }
 

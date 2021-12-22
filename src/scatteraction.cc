@@ -77,12 +77,10 @@ void ScatterAction::generate_final_state() {
       inelastic_scattering();
       break;
     case ProcessType::TwoToThree:
-      /* 2->3 scattering */
-      two_to_three_scattering();
-      break;
+    case ProcessType::TwoToFour:
     case ProcessType::TwoToFive:
-      /* 2->5 scattering */
-      two_to_five_scattering();
+      /* 2->m scattering */
+      two_to_many_scattering();
       break;
     case ProcessType::StringSoftSingleDiffractiveAX:
     case ProcessType::StringSoftSingleDiffractiveXB:
@@ -441,17 +439,10 @@ void ScatterAction::inelastic_scattering() {
   assign_formation_time_to_outgoing_particles();
 }
 
-void ScatterAction::two_to_three_scattering() {
+void ScatterAction::two_to_many_scattering() {
   sample_manybody_phasespace();
   assign_formation_time_to_outgoing_particles();
-  logg[LScatterAction].debug("2->3 scattering:", incoming_particles_, " -> ",
-                             outgoing_particles_);
-}
-
-void ScatterAction::two_to_five_scattering() {
-  sample_manybody_phasespace();
-  assign_formation_time_to_outgoing_particles();
-  logg[LScatterAction].debug("2->5 scattering:", incoming_particles_, " -> ",
+  logg[LScatterAction].debug("2->", outgoing_particles_.size(), " scattering:", incoming_particles_, " -> ",
                              outgoing_particles_);
 }
 

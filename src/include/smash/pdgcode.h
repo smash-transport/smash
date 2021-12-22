@@ -398,6 +398,12 @@ class PdgCode {
     return is_nucleus() && (dec == pdg::decimal_d || dec == pdg::decimal_antid);
   }
 
+  /// \return whether this is (anti-)triton
+  inline bool is_triton() const {
+    const int dec = get_decimal();
+    return is_nucleus() && (dec == pdg::decimal_triton || dec == pdg::decimal_antitriton);
+  }
+
   /**
    * \return whether a particle has a distinct antiparticle
    * (or whether it is its own antiparticle).

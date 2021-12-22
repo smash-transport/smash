@@ -208,6 +208,16 @@ class CrossSections {
   CollisionBranchList two_to_three() const;
 
   /**
+   * Find all 2->4 processes for the given scattering.
+   *
+   * This function calls the different, more specific functions for
+   * the different scatterings.
+   *
+   * \return List of all possibe 2->4 processes.
+   */
+  CollisionBranchList two_to_four() const;
+
+  /**
    * Determine the cross section for string excitations, which is given by the
    * difference between the parametrized total cross section and all the
    * explicitly implemented channels at low energy (elastic, resonance
@@ -286,6 +296,20 @@ class CrossSections {
    */
   static double two_to_three_xs(const ParticleType& type_in1,
                                 const ParticleType& type_in2, double sqrts);
+
+  /**
+   * Determine 2->4 cross section for the scattering of the given particle
+   * types.
+   *
+   * Same assumptions as for 2->3 cross section, see respective documentation.
+   *
+   * \param[in] type_in1 first scatterning particle type
+   * \param[in] type_in2 second scatterning particle type
+   * \param[in] sqrts center-of-mass energy of scattering
+   * \return cross section for 2->4 process
+   */
+  static double two_to_four_xs(const ParticleType& type_in1,
+                               const ParticleType& type_in2, double sqrts);
 
   /**
    * Determine the parametrized total cross section at high energies
