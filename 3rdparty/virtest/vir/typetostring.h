@@ -28,15 +28,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef VIR_TYPETOSTRING_H_
 #define VIR_TYPETOSTRING_H_
 
-#ifdef __has_include
-#  if __has_include(<Vc/bits/simd_detail.h>)
-#    include <Vc/bits/simd_detail.h>
-#  elif __has_include(<Vc/fwddecl.h>)
-#    include <Vc/fwddecl.h>
-#  endif
-#elif defined COMPILE_FOR_UNIT_TESTS
-#  include <Vc/fwddecl.h>
-#endif
 #include <array>
 #include <sstream>
 #include <string>
@@ -226,28 +217,13 @@ VIR_AUTO_OR_STRING typeToString_impl(Typelist<T0, Ts...> *)
 VIR_CONSTEXPR_STRING_RET(2) typeToString_impl(Typelist<> *) { return "{}"; }
 
 // Vc::simd to string {{{1
-#ifdef VC_FWDDECL_H_
+#if defined VC_FWDDECL_H_ && defined Vc_VERSION_CHECK
+#if Vc_VERSION_NUMBER >= Vc_VERSION_CHECK(1, 4, 0)
 template <int N> VIR_AUTO_OR_STRING typeToString_impl(Vc::simd_abi::fixed_size<N> *)
 {
   return number_to_string(std::integral_constant<int, N>());
 }
 VIR_CONSTEXPR_STRING_RET(6) typeToString_impl(Vc::simd_abi::scalar *) { return "scalar"; }
-template <int Bytes> VIR_AUTO_OR_STRING typeToString_impl(Vc::simd_abi::__sse_abi<Bytes> *)
-{
-  return cs("SSE:") + number_to_string(std::integral_constant<int, Bytes>());
-}
-template <int Bytes> VIR_AUTO_OR_STRING typeToString_impl(Vc::simd_abi::__avx_abi<Bytes> *)
-{
-  return cs("AVX:") + number_to_string(std::integral_constant<int, Bytes>());
-}
-template <int Bytes> VIR_AUTO_OR_STRING typeToString_impl(Vc::simd_abi::__avx512_abi<Bytes> *)
-{
-  return cs("AVX512:") + number_to_string(std::integral_constant<int, Bytes>());
-}
-template <int Bytes> VIR_AUTO_OR_STRING typeToString_impl(Vc::simd_abi::__neon_abi<Bytes> *)
-{
-  return cs("NEON:") + number_to_string(std::integral_constant<int, Bytes>());
-}
 VIR_CONSTEXPR_STRING_RET(3) typeToString_impl(Vc::simd_abi::__sse *) { return "SSE"; }
 VIR_CONSTEXPR_STRING_RET(3) typeToString_impl(Vc::simd_abi::__avx *) { return "AVX"; }
 VIR_CONSTEXPR_STRING_RET(6) typeToString_impl(Vc::simd_abi::__avx512 *) { return "AVX512"; }
@@ -262,6 +238,7 @@ template <class T, class A> VIR_AUTO_OR_STRING typeToString_impl(Vc::simd_mask<T
   return cs("simd_mask<") + typeToStringRecurse<T>() + cs(", ") + typeToStringRecurse<A>() +
          cs('>');
 }
+#endif  // Vc >= 1.4.0
 #endif  // VC_FWDDECL_H_
 
 // generic fallback (typeid::name) {{{1

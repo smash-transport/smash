@@ -15,6 +15,9 @@ build*
 *.rej
 .DS_Store
 .vscode
+.cproject
+.project
+.settings/
 
 # Convenience directory for your own files that should not be tracked
 tmp
