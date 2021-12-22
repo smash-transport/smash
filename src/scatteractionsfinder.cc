@@ -627,10 +627,17 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
               }
             }
           }
-          if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] ==
-                  1 &&
-              search_list.size() >= 5) {
-            for (const ParticleData& p4 : search_list) {
+          for (const ParticleData& p4 : search_list) {
+            if (true) { // TODO(stdnmr) add config option for 4-body reactions
+              if (p1.id() < p2.id() && p2.id() < p3.id() && p3.id() < p4.id()) {
+                ActionPtr act = check_collision_multi_part({p1, p2, p3, p4}, dt, gcell_vol);
+                if (act) {
+                  actions.push_back(std::move(act));
+                }
+              }
+            }
+            if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] ==
+                      1 && search_list.size() >= 5) {
               for (const ParticleData& p5 : search_list) {
                 if ((p1.id() < p2.id() && p2.id() < p3.id() &&
                      p3.id() < p4.id() && p4.id() < p5.id()) &&
