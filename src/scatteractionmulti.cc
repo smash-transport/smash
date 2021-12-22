@@ -238,6 +238,46 @@ void ScatterActionMulti::add_possible_reactions(
       }
     }
   }
+  // 4 -> 2
+  if (incoming_particles_.size() == 4) {
+    // TODO(stdnmr) config option for 4-to-2
+    if (true) {
+      const PdgCode pdg_a = incoming_particles_[0].pdgcode();
+      const PdgCode pdg_b = incoming_particles_[1].pdgcode();
+      const PdgCode pdg_c = incoming_particles_[2].pdgcode();
+      const PdgCode pdg_d = incoming_particles_[3].pdgcode();
+
+      const int spin_factor_inc = pdg_a.spin_degeneracy() *
+                                  pdg_b.spin_degeneracy() *
+                                  pdg_c.spin_degeneracy() *
+                                  pdg_d.spin_degeneracy();
+
+      const ParticleTypePtr type_triton =
+          ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_triton));
+      const ParticleTypePtr type_anti_triton =
+          ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_antitriton));
+
+      // TODO(stdnmr) Add He3 particles
+
+      if (type_triton && type_anti_triton) {
+
+        // TODO(stdnmr) check if 4 incoming particle can form t or He3
+        // something like one_pion_three_nucleons() (block for now)
+        if (false) {
+
+          const double spin_degn = 1.0; // TODO(stdnmr)
+
+          add_reaction(make_unique<CollisionBranch>(
+              type_pi, *type_triton,
+              probability_four_to_two(type_pi, *type_triton, dt, gcell_vol,
+                                       spin_degn),
+              ProcessType::MultiParticleFourToTwo));
+
+        }
+        // TODO(stdnmr) Also have anti-triton production
+      }
+    }
+  }
   // 5 -> 2
   if (incoming_particles_.size() == 5) {
     if (incl_multi[IncludedMultiParticleReactions::NNbar_5to2] == 1) {
