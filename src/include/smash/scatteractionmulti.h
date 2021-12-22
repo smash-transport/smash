@@ -133,13 +133,13 @@ class ScatterActionMulti : public Action {
    * \param[in] type_out type of outgoing particle
    * \param[in] dt timestep size
    * \param[in] gcell_vol grid cell volume
-   * \param[in] degen_factor degeneracy factor for reaction (including symmetry
-   *                                                         factors)
+   * \param[in] degen_sym_factor degeneracy factor for reaction
+   *                             (including symmetry factors)
    * \return probabilty for 3-to-1 reaction
    */
   double probability_three_to_one(const ParticleType& type_out, double dt,
                                   const double gcell_vol,
-                                  const int degen_factor = 1) const;
+                                  const int degen_sym_factor = 1) const;
 
   /**
    * Calculate the probability for a 3-to-2 reaction according to the
@@ -159,22 +159,37 @@ class ScatterActionMulti : public Action {
    * \param[in] type_out2 type of outgoing particle 1
    * \param[in] dt timestep size
    * \param[in] gcell_vol grid cell volume
-   * \param[in] degen_factor degeneracy factor for reaction (including symmetry
-   *                                                         factors)
+   * \param[in] degen_sym_factor degeneracy factor for reaction
+   *                             (including symmetry factors)
    * \return probabilty for 3-to-2 reaction
    */
   double probability_three_to_two(const ParticleType& type_out1,
                                   const ParticleType& type_out2, double dt,
                                   const double gcell_vol,
-                                  const double degen_factor = 1.0) const;
+                                  const double degen_sym_factor = 1.0) const;
   /**
    * Calculate the probability for a 4-to-2 reaction according to the
    * stochastic collision criterion as given in \iref{Staudenmaier:2021lrg}.
+   *
+   * \f[ P_{4 \rightarrow 2} = \frac{1}{16E_1E_2E_3} \frac{\Delta t}{(\Delta^3
+   * x)^3} \frac{\tilde{\lambda}}{\Phi_44\pi s}\sigma_{2 \rightarrow 4},\f]
+   *
+   * where \f$\Phi_4\f$ represents the 4-body phase space. Degeneracy and
+   * symmetry factors are neglected in the formula, since they are treated as
+   * input for the function.
+   *
+   * \param[in] type_out1 type of outgoing particle 1
+   * \param[in] type_out2 type of outgoing particle 1
+   * \param[in] dt timestep size
+   * \param[in] gcell_vol grid cell volume
+   * \param[in] degen_sym_factor degeneracy factor for reaction
+   *                             (including symmetry factors)
+   * \return probabilty for 4-to-2 reaction
    */
   double probability_four_to_two(const ParticleType& type_out1,
                                  const ParticleType& type_out2, double dt,
                                  const double gcell_vol,
-                                 const double degen_factor = 1.0) const;
+                                 const double degen_sym_factor = 1.0) const;
   /**
    * Calculate the probability for a 5-to-2 reaction according to the
    * stochastic collision criterion as given in \iref{Garcia-Montero:2021haa}.
@@ -192,13 +207,13 @@ class ScatterActionMulti : public Action {
    * \param[in] m_out mass of outgoing particle types (assumes equal masses)
    * \param[in] dt timestep size
    * \param[in] gcell_vol grid cell volume
-   * \param[in] degen_factor degeneracy factor for reaction (including symmetry
-   *                                                         factors)
+   * \param[in] degen_sym_factor degeneracy factor for reaction
+   *                             (including symmetry factors)
    * \return probabilty for 5-to-2 reaction
    */
   double probability_five_to_two(const double m_out, double dt,
                                  const double gcell_vol,
-                                 const double degen_factor = 1.0) const;
+                                 const double degen_sym_factor = 1.0) const;
 
   /**
    * Calculate the parametrized 5-pion phase space. The
@@ -230,11 +245,11 @@ class ScatterActionMulti : public Action {
   double calculate_I3(const double sqrts) const;
 
   /**
-   * Determine the spin degeneracy factor (\f$D_{spin}\f$) for the 3->2
+   * Determine the spin degeneracy factor (\f$D_{spin}\f$) for the N->2
    * reaction.
    *
    * \f[D_{spin} = \frac{(2J_{out1}+1)(2J_{out2}+1)}
-   * {(2J_{in1}+1)(2J_{in2}+1)(2J_{in3}+1)}\f]
+   * {(2J_{in1}+1)(2J_{in2}+1)(2J_{in3}+1)...(2J_{inN}+1)}\f]
    *
    * \param[in] spin_factor_inc product of incoming spin degeneracy
    *                            (denominator in above expression)

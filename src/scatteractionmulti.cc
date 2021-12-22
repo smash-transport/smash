@@ -271,13 +271,16 @@ void ScatterActionMulti::add_possible_reactions(
               [](ParticleData x) { return x.is_pion(); });
           const ParticleType& type_pi = it->type();
 
+          const double spin_degn = react_degen_factor(spin_factor_inc,
+                                                      type_pi.spin_degeneracy()
+                                                      type_triton->spin_degeneracy());
+          const double symmetry_factor = 1.0;  // TODO(stdnmr)
 
-          const double spin_degn = 1.0; // TODO(stdnmr)
 
           add_reaction(make_unique<CollisionBranch>(
               type_pi, *type_triton,
               probability_four_to_two(type_pi, *type_triton, dt, gcell_vol,
-                                       spin_degn),
+                                       symmetry_factor * spin_degn),
               ProcessType::MultiParticleFourToTwo));
 
         }
@@ -394,7 +397,7 @@ double ScatterActionMulti::calculate_I3(const double sqrts) const {
 
 double ScatterActionMulti::probability_three_to_one(
     const ParticleType& type_out, double dt, const double gcell_vol,
-    const int degen_factor) const {
+    const int degen_sym_factor) const {
   const double e1 = incoming_particles_[0].momentum().x0();
   const double e2 = incoming_particles_[1].momentum().x0();
   const double e3 = incoming_particles_[2].momentum().x0();
@@ -412,12 +415,12 @@ double ScatterActionMulti::probability_three_to_one(
 
   return dt / (gcell_vol * gcell_vol) * M_PI / (4. * e1 * e2 * e3) *
          gamma_decay / ph_sp_3 * spec_f_val * std::pow(hbarc, 5.0) *
-         degen_factor;
+         degen_sym_factor;
 }
 
 double ScatterActionMulti::probability_three_to_two(
     const ParticleType& type_out1, const ParticleType& type_out2, double dt,
-    const double gcell_vol, const double degen_factor) const {
+    const double gcell_vol, const double degen_sym_factor) const {
   const double e1 = incoming_particles_[0].momentum().x0();
   const double e2 = incoming_particles_[1].momentum().x0();
   const double e3 = incoming_particles_[2].momentum().x0();
@@ -435,19 +438,33 @@ double ScatterActionMulti::probability_three_to_two(
 
   return dt / (gcell_vol * gcell_vol) * 1. / (4. * e1 * e2 * e3) * lamb /
          (ph_sp_3 * 8 * M_PI * sqrts * sqrts) * xs * std::pow(hbarc, 5.0) *
-         degen_factor;
+         degen_sym_factor;
 }
 
 double ScatterActionMulti::probability_four_to_two(const ParticleType& type_out1,
                                const ParticleType& type_out2, double dt,
                                const double gcell_vol,
-                               const double degen_factor) const {
-   return 0.0;  // TODO(stdnmr)
+                               const double degen_sym_factor) const {
+   const double e1 = incoming_particles_[0].momentum().x0();
+   const double e2 = incoming_particles_[1].momentum().x0();
+   const double e3 = incoming_particles_[2].momentum().x0();
+   const double e4 = incoming_particles_[3].momentum().x0();
+   const double m5 = type_out1.mass();
+   const double m6 = type_out2.mass();
+
+   const double man_s = sqrt_s() * sqrt_s();
+   const double xs = CrossSections::two_to_four_xs(type_out1, type_out2, sqrts) / gev2_mb;
+   const double lamb = lambda_tilde(man_s, m5 * m5, m6 * m6);
+   const double ph_sp_4 = 1.0; // TODO(stdnmr)
+
+   return dt / std::pow(gcell_vol, 3.0) * 1. / (16. * e1 * e2 * e3 * e4) *
+          xs / (4. * M_PI * man_s) * lamb / ph_sp_4 * std::pow(hbarc, 8.0) *
+          degen_sym_factor;
 }
 
 double ScatterActionMulti::probability_five_to_two(
     const double mout, double dt, const double gcell_vol,
-    const double degen_factor) const {
+    const double degen_sym_factor) const {
   const double e1 = incoming_particles_[0].momentum().x0();
   const double e2 = incoming_particles_[1].momentum().x0();
   const double e3 = incoming_particles_[2].momentum().x0();
@@ -464,7 +481,7 @@ double ScatterActionMulti::probability_five_to_two(
 
   return dt / std::pow(gcell_vol, 4.0) * 1. / (32. * e1 * e2 * e3 * e4 * e5) *
          xs / (4. * M_PI * man_s) * lamb / ph_sp_5 * std::pow(hbarc, 11.0) *
-         degen_factor;
+         degen_sym_factor;
 }
 
 double ScatterActionMulti::parametrizaton_phi5_pions(const double man_s) const {
