@@ -99,6 +99,11 @@ constexpr int decimal_d = 1000010020;
 /// Anti-deuteron in decimal digits.
 constexpr int decimal_antid = -1000010020;
 
+/// Triton in decimal digits.
+constexpr int decimal_triton = 1000010030;  // TODO(stdnmr) Pseudo-pdg placeholders
+/// Anti-triton in decimal digits.
+constexpr int decimal_antitriton = -1000010030;
+
 }  // namespace pdg
 
 /**
