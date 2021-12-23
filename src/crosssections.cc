@@ -906,13 +906,13 @@ CollisionBranchList CrossSections::two_to_four() const {
 
   // TODO(stdnmr) also take care of He3
 
-  if ((type_a.is_triton() && type_a.is_pion()) ||
-      (type_b.is_triton() && type_b.is_pion())) {
+  if ((type_a.is_triton() && type_b.is_pion()) ||
+      (type_b.is_triton() && type_a.is_pion())) {
     // Pion Triton Scattering
     const ParticleType& type_pi = type_a.pdgcode().is_pion() ? type_a : type_b;
-    const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
+    const ParticleType& type_triton = type_a.is_triton() ? type_a : type_b;
 
-    if (type_nucleus.baryon_number() > 0) {
+    if (type_triton.baryon_number() > 0) {
       // πt → πpnn
       const auto& type_p = ParticleType::find(pdg::p);
       const auto& type_n = ParticleType::find(pdg::n);

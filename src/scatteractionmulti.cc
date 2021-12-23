@@ -268,7 +268,7 @@ void ScatterActionMulti::add_possible_reactions(
           const ParticleType& type_pi = it->type();
 
           const double spin_degn = react_degen_factor(spin_factor_inc,
-                                                      type_pi.spin_degeneracy()
+                                                      type_pi.spin_degeneracy(),
                                                       type_triton->spin_degeneracy());
           const double symmetry_factor = 2.0;  // 2!
 
@@ -287,7 +287,7 @@ void ScatterActionMulti::add_possible_reactions(
           const ParticleType& type_pi = it->type();
 
           const double spin_degn = react_degen_factor(spin_factor_inc,
-                                                      type_pi.spin_degeneracy()
+                                                      type_pi.spin_degeneracy(),
                                                       type_anti_triton->spin_degeneracy());
           const double symmetry_factor = 2.0;  // 2!
 
@@ -465,7 +465,7 @@ double ScatterActionMulti::probability_four_to_two(const ParticleType& type_out1
    const double m6 = type_out2.mass();
 
    const double man_s = sqrt_s() * sqrt_s();
-   const double xs = CrossSections::two_to_four_xs(type_out1, type_out2, sqrts) / gev2_mb;
+   const double xs = CrossSections::two_to_four_xs(type_out1, type_out2, sqrt_s()) / gev2_mb;
    const double lamb = lambda_tilde(man_s, m5 * m5, m6 * m6);
    const double ph_sp_4 = parametrizaton_phi4(man_s);
 
@@ -590,10 +590,10 @@ bool ScatterActionMulti::incoming_particles_can_form_triton_and_pi() const {
   // TODO(stdnmr) Find a nicer way to check this
   const int no_of_p = std::count_if(
       incoming_particles_.begin(), incoming_particles_.end(),
-      [](const ParticleData& data) { return data.is_proton(); });
+      [](const ParticleData& data) { return data.pdgcode() == pdg::p; });
   const int no_of_n = std::count_if(
       incoming_particles_.begin(), incoming_particles_.end(),
-      [](const ParticleData& data) { return data.is_neutron(); });
+      [](const ParticleData& data) { return data.pdgcode() == pdg::n;; });
   const int no_of_pi = std::count_if(
       incoming_particles_.begin(), incoming_particles_.end(),
       [](const ParticleData& data) { return data.is_pion(); });
