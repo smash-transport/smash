@@ -260,11 +260,7 @@ void ScatterActionMulti::add_possible_reactions(
       // TODO(stdnmr) Add He3 particles
 
       if (type_triton && type_anti_triton) {
-
-        // TODO(stdnmr) check if 4 incoming particle can form t or He3
-        // something like one_pion_three_nucleons() (block for now)
-        if (false) {
-
+        if (incoming_particles_can_form_triton_and_pi()) {
           // Get type of incoming π
           ParticleList::iterator it = std::find_if(
               incoming_particles_.begin(), incoming_particles_.end(),
@@ -274,17 +270,33 @@ void ScatterActionMulti::add_possible_reactions(
           const double spin_degn = react_degen_factor(spin_factor_inc,
                                                       type_pi.spin_degeneracy()
                                                       type_triton->spin_degeneracy());
-          const double symmetry_factor = 1.0;  // TODO(stdnmr)
-
+          const double symmetry_factor = 2.0;  // 2!
 
           add_reaction(make_unique<CollisionBranch>(
               type_pi, *type_triton,
               probability_four_to_two(type_pi, *type_triton, dt, gcell_vol,
                                        symmetry_factor * spin_degn),
               ProcessType::MultiParticleFourToTwo));
-
         }
-        // TODO(stdnmr) Also have anti-triton production
+
+        if (incoming_particles_can_form_antitriton_and_pi()) {
+          // Get type of incoming π
+          ParticleList::iterator it = std::find_if(
+              incoming_particles_.begin(), incoming_particles_.end(),
+              [](ParticleData x) { return x.is_pion(); });
+          const ParticleType& type_pi = it->type();
+
+          const double spin_degn = react_degen_factor(spin_factor_inc,
+                                                      type_pi.spin_degeneracy()
+                                                      type_anti_triton->spin_degeneracy());
+          const double symmetry_factor = 2.0;  // 2!
+
+          add_reaction(make_unique<CollisionBranch>(
+              type_pi, *type_anti_triton,
+              probability_four_to_two(type_pi, *type_anti_triton, dt, gcell_vol,
+                                       symmetry_factor * spin_degn),
+              ProcessType::MultiParticleFourToTwo));
+        }
       }
     }
   }
@@ -455,12 +467,17 @@ double ScatterActionMulti::probability_four_to_two(const ParticleType& type_out1
    const double man_s = sqrt_s() * sqrt_s();
    const double xs = CrossSections::two_to_four_xs(type_out1, type_out2, sqrts) / gev2_mb;
    const double lamb = lambda_tilde(man_s, m5 * m5, m6 * m6);
-   const double ph_sp_4 = 1.0; // TODO(stdnmr)
+   const double ph_sp_4 = parametrizaton_phi4(man_s);
 
    return dt / std::pow(gcell_vol, 3.0) * 1. / (16. * e1 * e2 * e3 * e4) *
           xs / (4. * M_PI * man_s) * lamb / ph_sp_4 * std::pow(hbarc, 8.0) *
           degen_sym_factor;
 }
+
+double ScatterActionMulti::parametrizaton_phi4(const double man_s) const {
+  return 10e-6; // TODO(stdnmr) Implement Dimas paramterization
+}
+
 
 double ScatterActionMulti::probability_five_to_two(
     const double mout, double dt, const double gcell_vol,
@@ -492,6 +509,8 @@ double ScatterActionMulti::parametrizaton_phi5_pions(const double man_s) const {
   return fit_a * std::pow(man_s - s_zero, 5.0) *
          std::pow(1 + man_s / s_zero, -fit_alpha);
 }
+
+
 
 void ScatterActionMulti::annihilation() {
   if (outgoing_particles_.size() != 1) {
@@ -551,8 +570,7 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
          (pdg_a == pdg::pi_p && pdg_b == pdg::eta && pdg_c == pdg::pi_m);
 }
 
-bool ScatterActionMulti::
-    all_incoming_particles_are_pions_have_zero_charge_only_one_piz() const {
+bool ScatterActionMulti::all_incoming_particles_are_pions_have_zero_charge_only_one_piz() const {
   const bool all_inc_pi =
       all_of(incoming_particles_.begin(), incoming_particles_.end(),
              [](const ParticleData& data) { return data.is_pion(); });
@@ -567,6 +585,37 @@ bool ScatterActionMulti::
 
   return (all_inc_pi && total_state_charge == 0 && no_of_piz == 1);
 }
+
+bool ScatterActionMulti::incoming_particles_can_form_triton_and_pi() const {
+  // TODO(stdnmr) Find a nicer way to check this
+  const int no_of_p = std::count_if(
+      incoming_particles_.begin(), incoming_particles_.end(),
+      [](const ParticleData& data) { return data.is_proton(); });
+  const int no_of_n = std::count_if(
+      incoming_particles_.begin(), incoming_particles_.end(),
+      [](const ParticleData& data) { return data.is_neutron(); });
+  const int no_of_pi = std::count_if(
+      incoming_particles_.begin(), incoming_particles_.end(),
+      [](const ParticleData& data) { return data.is_pion(); });
+
+  return (no_of_p == 1 && no_of_n == 2 && no_of_pi == 1);
+}
+
+bool ScatterActionMulti::incoming_particles_can_form_antitriton_and_pi() const {
+  // TODO(stdnmr) Find a nicer way to check this
+  const int no_of_antip = std::count_if(
+      incoming_particles_.begin(), incoming_particles_.end(),
+      [](const ParticleData& data) { return data.pdgcode() == -pdg::p; });
+  const int no_of_antin = std::count_if(
+      incoming_particles_.begin(), incoming_particles_.end(),
+      [](const ParticleData& data) { return data.pdgcode() == -pdg::n; });
+  const int no_of_pi = std::count_if(
+      incoming_particles_.begin(), incoming_particles_.end(),
+      [](const ParticleData& data) { return data.is_pion(); });
+
+  return (no_of_antip == 1 && no_of_antin == 2 && no_of_pi == 1);
+}
+
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
   out << "MultiParticleScatter of " << incoming_particles_;
