@@ -475,7 +475,18 @@ double ScatterActionMulti::probability_four_to_two(const ParticleType& type_out1
 }
 
 double ScatterActionMulti::parametrizaton_phi4(const double man_s) const {
-  return 10e-6; // TODO(stdnmr) Implement Dimas paramterization
+  // TODO(stdnmr) Crude first implementation only valid for pi 3N of Dimas
+  // paramterization
+  const double mass_n = 0.938;
+  const double mass_pi = 0.138;
+  const double sum_m = 3.0 * mass_n + mass_pi;
+  const double prod_m = mass_n * mass_n * mass_n * mass_pi;
+  const double x = 1.0 - sum_m / std::sqrt(man_s);
+  const double g = (1.0 + 0.862432 * x - 3.4853 * x * x + 1.70259 * x * x * x) /
+                   (1.0 + 0.387376 * x - 1.34128 * x * x + 0.154489 * x * x * x);
+
+  return (std::sqrt(prod_m) * sum_m * sum_m * std::pow(x, 3.5) * g) /
+         (840. * std::sqrt(2) * std::pow(M_PI, 4.0) * std::pow(1-x, 4.0));
 }
 
 

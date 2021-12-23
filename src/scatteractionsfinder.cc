@@ -612,7 +612,8 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
           actions.push_back(std::move(act));
         }
       }
-      if (incl_multi_set_.any()) {
+      if (true) {
+      // if (incl_multi_set_.any()) {  // TODO(stdnmr) Change until triton config option is available
         // Also, check for 3 particle scatterings with stochastic criterion
         for (const ParticleData& p3 : search_list) {
           if (incl_multi_set_[IncludedMultiParticleReactions::Deuteron_3to2] ==
