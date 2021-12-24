@@ -612,8 +612,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
           actions.push_back(std::move(act));
         }
       }
-      if (true) {
-      // if (incl_multi_set_.any()) {  // TODO(stdnmr) Change until triton config option is available
+      if (incl_multi_set_.any()) {
         // Also, check for 3 particle scatterings with stochastic criterion
         for (const ParticleData& p3 : search_list) {
           if (incl_multi_set_[IncludedMultiParticleReactions::Deuteron_3to2] ==
@@ -629,7 +628,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
             }
           }
           for (const ParticleData& p4 : search_list) {
-            if (true) { // TODO(stdnmr) add config option for 4-body reactions
+            if (IncludedMultiParticleReactions::A3_Nuclei_4to2) {
               if (p1.id() < p2.id() && p2.id() < p3.id() && p3.id() < p4.id()) {
                 ActionPtr act = check_collision_multi_part({p1, p2, p3, p4}, dt, gcell_vol);
                 if (act) {

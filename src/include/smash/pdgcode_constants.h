@@ -103,6 +103,14 @@ constexpr int decimal_antid = -1000010020;
 constexpr int decimal_triton = 1000010030;  // TODO(stdnmr) Pseudo-pdg placeholders
 /// Anti-triton in decimal digits.
 constexpr int decimal_antitriton = -1000010030;
+/// He-3 in decimal digits
+constexpr int decimal_he3 = 1000020030;
+/// Anti-He-3 in decimal digits
+constexpr int decimal_antihe3 = -1000020030;
+/// Hypertriton in decimal digits
+constexpr int decimal_hypertriton = 1010010030;
+/// Anti-Hypertriton in decimal digits
+constexpr int decimal_antihypertriton = -1010010030;
 
 }  // namespace pdg
 

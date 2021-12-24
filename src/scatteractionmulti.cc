@@ -9,6 +9,8 @@
 
 #include "smash/scatteractionmulti.h"
 
+#include <map>
+
 #include "smash/crosssections.h"
 #include "smash/integrate.h"
 #include "smash/logging.h"
@@ -239,65 +241,81 @@ void ScatterActionMulti::add_possible_reactions(
     }
   }
   // 4 -> 2
-  if (incoming_particles_.size() == 4) {
-    // TODO(stdnmr) config option for 4-to-2
-    if (true) {
-      const PdgCode pdg_a = incoming_particles_[0].pdgcode();
-      const PdgCode pdg_b = incoming_particles_[1].pdgcode();
-      const PdgCode pdg_c = incoming_particles_[2].pdgcode();
-      const PdgCode pdg_d = incoming_particles_[3].pdgcode();
+  if (incoming_particles_.size() == 4 &&
+      incl_multi[IncludedMultiParticleReactions::A3_Nuclei_4to2] == 1) {
+    std::map<PdgCode, int> c;  // counts incoming PdgCodes
+    int spin_factor_inc = 1;
+    for (const ParticleData& data : incoming_particles_) {
+      c[data.pdgcode()]++;
+      spin_factor_inc *= data.pdgcode().spin_degeneracy();
+    }
+    // Nucleons, antinucleons, and pions can catalyze
+    const int n_possible_catalysts_incoming =
+       c[pdg::n] + c[pdg::p] + c[-pdg::p] + c[-pdg::n] +
+       c[pdg::pi_p] + c[pdg::pi_z] + c[pdg::pi_m];
 
-      const int spin_factor_inc = pdg_a.spin_degeneracy() *
-                                  pdg_b.spin_degeneracy() *
-                                  pdg_c.spin_degeneracy() *
-                                  pdg_d.spin_degeneracy();
+    for (int pdg_decimal_A3_nucleus : {pdg::decimal_triton, pdg::decimal_antitriton,
+                                       pdg::decimal_he3, pdg::decimal_antihe3,
+                                       pdg::decimal_hypertriton, pdg::decimal_antihypertriton}) {
+      const PdgCode pdg_nucleus = PdgCode::from_decimal(pdg_decimal_A3_nucleus);
+      const ParticleTypePtr type_nucleus = ParticleType::try_find(pdg_nucleus);
+      // Nucleus can be formed if and only if:
+      // 1) Incoming particles contain enough components (like p, n, Lambda)
+      // 2) In (incoming particles - components) there is still a catalyst
+      // This is including the situation like nnpp. Can be that t(nnp) is formed and p is catalyst,
+      // can be that he-3(ppn) is formed and n is catalyst. Both reactions should be added.
+      const int n_nucleus_components_that_can_be_catalysts =
+        pdg_nucleus.nucleus_p() + pdg_nucleus.nucleus_ap() +
+        pdg_nucleus.nucleus_n() + pdg_nucleus.nucleus_an();
+      const bool incoming_contain_nucleus_components =
+        c[pdg::p] >= pdg_nucleus.nucleus_p() && c[-pdg::p] >= pdg_nucleus.nucleus_ap() &&
+        c[pdg::n] >= pdg_nucleus.nucleus_n() && c[-pdg::n] >= pdg_nucleus.nucleus_an() &&
+        c[pdg::Lambda] >= pdg_nucleus.nucleus_La() && c[-pdg::Lambda] >= pdg_nucleus.nucleus_aLa();
+      const bool can_form_nucleus = type_nucleus && incoming_contain_nucleus_components &&
+        n_possible_catalysts_incoming - n_nucleus_components_that_can_be_catalysts == 1;
 
-      const ParticleTypePtr type_triton =
-          ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_triton));
-      const ParticleTypePtr type_anti_triton =
-          ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_antitriton));
-
-      // TODO(stdnmr) Add He3 particles
-
-      if (type_triton && type_anti_triton) {
-        if (incoming_particles_can_form_triton_and_pi()) {
-          // Get type of incoming π
-          ParticleList::iterator it = std::find_if(
-              incoming_particles_.begin(), incoming_particles_.end(),
-              [](ParticleData x) { return x.is_pion(); });
-          const ParticleType& type_pi = it->type();
-
-          const double spin_degn = react_degen_factor(spin_factor_inc,
-                                                      type_pi.spin_degeneracy(),
-                                                      type_triton->spin_degeneracy());
-          const double symmetry_factor = 2.0;  // 2!
-
-          add_reaction(make_unique<CollisionBranch>(
-              type_pi, *type_triton,
-              probability_four_to_two(type_pi, *type_triton, dt, gcell_vol,
-                                       symmetry_factor * spin_degn),
-              ProcessType::MultiParticleFourToTwo));
-        }
-
-        if (incoming_particles_can_form_antitriton_and_pi()) {
-          // Get type of incoming π
-          ParticleList::iterator it = std::find_if(
-              incoming_particles_.begin(), incoming_particles_.end(),
-              [](ParticleData x) { return x.is_pion(); });
-          const ParticleType& type_pi = it->type();
-
-          const double spin_degn = react_degen_factor(spin_factor_inc,
-                                                      type_pi.spin_degeneracy(),
-                                                      type_anti_triton->spin_degeneracy());
-          const double symmetry_factor = 2.0;  // 2!
-
-          add_reaction(make_unique<CollisionBranch>(
-              type_pi, *type_anti_triton,
-              probability_four_to_two(type_pi, *type_anti_triton, dt, gcell_vol,
-                                       symmetry_factor * spin_degn),
-              ProcessType::MultiParticleFourToTwo));
+      if (!can_form_nucleus) {
+        continue;
+      }
+      // Find the catalyst
+      std::map<PdgCode, int> catalyst_count = c;
+      catalyst_count[pdg::p]       -= pdg_nucleus.nucleus_p();
+      catalyst_count[-pdg::p]      -= pdg_nucleus.nucleus_ap();
+      catalyst_count[pdg::n]       -= pdg_nucleus.nucleus_n();
+      catalyst_count[-pdg::n]      -= pdg_nucleus.nucleus_an();
+      catalyst_count[pdg::Lambda]  -= pdg_nucleus.nucleus_La();
+      catalyst_count[-pdg::Lambda] -= pdg_nucleus.nucleus_aLa();
+      PdgCode pdg_catalyst = PdgCode::invalid();
+      for (const auto i : catalyst_count) {
+        if (i.second == 1) {
+          pdg_catalyst = i.first;
+          break;
         }
       }
+      if (pdg_catalyst == PdgCode::invalid()) {
+        logg[LScatterActionMulti].error("Something went wrong while forming",
+                                        pdg_nucleus, " from ", incoming_particles_);
+      }
+      const ParticleTypePtr type_catalyst = ParticleType::try_find(pdg_catalyst);
+      const double spin_degn = react_degen_factor(spin_factor_inc,
+                                                  type_catalyst->spin_degeneracy(),
+                                                  type_nucleus->spin_degeneracy());
+       double symmetry_factor = 1.0;
+       for (const auto i : c) {
+         symmetry_factor *= (i.second == 3) ? 6.0   // 3!
+                             : (i.second == 2) ? 2.0  // 2!
+                               : 1.0;
+         if (i.second > 3 || i.second < 0) {
+           logg[LScatterActionMulti].error("4<->2 error, incoming particles ",
+               incoming_particles_);
+         }
+       }
+
+       add_reaction(make_unique<CollisionBranch>(*type_catalyst, *type_nucleus,
+            probability_four_to_two(*type_catalyst, *type_nucleus, dt, gcell_vol,
+                                     symmetry_factor * spin_degn),
+            ProcessType::MultiParticleFourToTwo));
+
     }
   }
   // 5 -> 2
@@ -475,18 +493,36 @@ double ScatterActionMulti::probability_four_to_two(const ParticleType& type_out1
 }
 
 double ScatterActionMulti::parametrizaton_phi4(const double man_s) const {
-  // TODO(stdnmr) Crude first implementation only valid for pi 3N of Dimas
-  // paramterization
-  const double mass_n = 0.938;
-  const double mass_pi = 0.138;
-  const double sum_m = 3.0 * mass_n + mass_pi;
-  const double prod_m = mass_n * mass_n * mass_n * mass_pi;
-  const double x = 1.0 - sum_m / std::sqrt(man_s);
-  const double g = (1.0 + 0.862432 * x - 3.4853 * x * x + 1.70259 * x * x * x) /
-                   (1.0 + 0.387376 * x - 1.34128 * x * x + 0.154489 * x * x * x);
+  int n_nucleons = 0, n_pions = 0, n_lambdas = 0;
+  for (const ParticleData& data : incoming_particles_) {
+    const PdgCode pdg = data.type().pdgcode();
+    n_nucleons += pdg.is_nucleon();
+    n_pions += pdg.is_pion();
+    n_lambdas += pdg.is_Lambda();
+  }
 
-  return (std::sqrt(prod_m) * sum_m * sum_m * std::pow(x, 3.5) * g) /
-         (840. * std::sqrt(2) * std::pow(M_PI, 4.0) * std::pow(1-x, 4.0));
+  if (n_nucleons == 3 && n_pions == 1) {
+    // TODO(stdnmr) Crude first implementation only valid for pi 3N of Dimas
+    // paramterization
+    const double mass_n = 0.938;
+    const double mass_pi = 0.138;
+    const double sum_m = 3.0 * mass_n + mass_pi;
+    const double prod_m = mass_n * mass_n * mass_n * mass_pi;
+    const double x = 1.0 - sum_m / std::sqrt(man_s);
+    const double g = (1.0 + 0.862432 * x - 3.4853 * x * x + 1.70259 * x * x * x) /
+                     (1.0 + 0.387376 * x - 1.34128 * x * x + 0.154489 * x * x * x);
+    return (std::sqrt(prod_m) * sum_m * sum_m * std::pow(x, 3.5) * g) /
+           (840. * std::sqrt(2) * std::pow(M_PI, 4.0) * std::pow(1-x, 4.0));
+  } else if (n_nucleons == 4) {
+    return 1.0; // todo(oliiny): implement
+  } else if (n_nucleons == 2 && n_lambdas == 1 && n_pions == 1) {
+    return 1.0;
+  } else if (n_nucleons == 3 && n_lambdas == 1) {
+    return 1.0;
+  }
+  logg[LScatterActionMulti].error("parametrizaton_phi4: should never get here. ",
+                                  "Incoming particles are ", incoming_particles_);
+  return 0.0;
 }
 
 
@@ -596,37 +632,6 @@ bool ScatterActionMulti::all_incoming_particles_are_pions_have_zero_charge_only_
 
   return (all_inc_pi && total_state_charge == 0 && no_of_piz == 1);
 }
-
-bool ScatterActionMulti::incoming_particles_can_form_triton_and_pi() const {
-  // TODO(stdnmr) Find a nicer way to check this
-  const int no_of_p = std::count_if(
-      incoming_particles_.begin(), incoming_particles_.end(),
-      [](const ParticleData& data) { return data.pdgcode() == pdg::p; });
-  const int no_of_n = std::count_if(
-      incoming_particles_.begin(), incoming_particles_.end(),
-      [](const ParticleData& data) { return data.pdgcode() == pdg::n;; });
-  const int no_of_pi = std::count_if(
-      incoming_particles_.begin(), incoming_particles_.end(),
-      [](const ParticleData& data) { return data.is_pion(); });
-
-  return (no_of_p == 1 && no_of_n == 2 && no_of_pi == 1);
-}
-
-bool ScatterActionMulti::incoming_particles_can_form_antitriton_and_pi() const {
-  // TODO(stdnmr) Find a nicer way to check this
-  const int no_of_antip = std::count_if(
-      incoming_particles_.begin(), incoming_particles_.end(),
-      [](const ParticleData& data) { return data.pdgcode() == -pdg::p; });
-  const int no_of_antin = std::count_if(
-      incoming_particles_.begin(), incoming_particles_.end(),
-      [](const ParticleData& data) { return data.pdgcode() == -pdg::n; });
-  const int no_of_pi = std::count_if(
-      incoming_particles_.begin(), incoming_particles_.end(),
-      [](const ParticleData& data) { return data.is_pion(); });
-
-  return (no_of_antip == 1 && no_of_antin == 2 && no_of_pi == 1);
-}
-
 
 void ScatterActionMulti::format_debug_output(std::ostream& out) const {
   out << "MultiParticleScatter of " << incoming_particles_;

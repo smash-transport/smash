@@ -272,6 +272,7 @@ enum IncludedMultiParticleReactions {
   Meson_3to1 = 0,
   Deuteron_3to2 = 1,
   NNbar_5to2 = 2,
+  A3_Nuclei_4to2 = 3,
 };
 
 /// Container for the n to m reactions in the code

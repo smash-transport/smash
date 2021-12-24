@@ -169,7 +169,7 @@ CollisionBranchList CrossSections::generate_collision_list(
       // 2->3 (deuterons only 2-to-3 reaction at the moment)
       append_list(process_list, two_to_three(), (1. - p_pythia) * scale_xs);
     }
-    if (true) { // TODO(stdnmr) config option for 2-to-4
+    if (included_multi[IncludedMultiParticleReactions::A3_Nuclei_4to2] == 1) {
       // 2->4
       append_list(process_list, two_to_four(), (1. - p_pythia) * scale_xs);
     }
@@ -901,34 +901,37 @@ CollisionBranchList CrossSections::two_to_three() const {
 
 CollisionBranchList CrossSections::two_to_four() const {
   CollisionBranchList process_list;
-  const ParticleType& type_a = incoming_particles_[0].type();
-  const ParticleType& type_b = incoming_particles_[1].type();
+  ParticleTypePtr type_nucleus   = &(incoming_particles_[0].type());
+  ParticleTypePtr type_catalyzer = &(incoming_particles_[1].type());
+  if (!type_nucleus->is_nucleus()) {
+    type_nucleus   = &(incoming_particles_[1].type());
+    type_catalyzer = &(incoming_particles_[0].type());
+  }
 
-  // TODO(stdnmr) also take care of He3
+  if (type_nucleus->is_nucleus() && std::abs(type_nucleus->baryon_number()) == 3 &&
+      (type_catalyzer->is_pion() || type_catalyzer->is_nucleon())) {
 
-  if ((type_a.is_triton() && type_b.is_pion()) ||
-      (type_b.is_triton() && type_a.is_pion())) {
-    // Pion Triton Scattering
-    const ParticleType& type_pi = type_a.pdgcode().is_pion() ? type_a : type_b;
-    const ParticleType& type_triton = type_a.is_triton() ? type_a : type_b;
+      const ParticleTypePtr type_p = ParticleType::try_find(pdg::p);
+      const ParticleTypePtr type_n = ParticleType::try_find(pdg::n);
+      const ParticleTypePtr type_anti_p = ParticleType::try_find(-pdg::p);
+      const ParticleTypePtr type_anti_n = ParticleType::try_find(-pdg::n);
+      const ParticleTypePtr type_la = ParticleType::try_find(pdg::Lambda);
+      const ParticleTypePtr type_anti_la = ParticleType::try_find(-pdg::Lambda);
 
-    if (type_triton.baryon_number() > 0) {
-      // πt → πpnn
-      const auto& type_p = ParticleType::find(pdg::p);
-      const auto& type_n = ParticleType::find(pdg::n);
+      // Find nucleus components
+      ParticleTypePtrList components(3);
+      const PdgCode nucleus_pdg = type_nucleus->pdgcode();
+      for (int i = 0; i < nucleus_pdg.nucleus_p(); i++) { components.push_back(type_p); }
+      for (int i = 0; i < nucleus_pdg.nucleus_n(); i++) { components.push_back(type_n); }
+      for (int i = 0; i < nucleus_pdg.nucleus_ap(); i++) { components.push_back(type_anti_p); }
+      for (int i = 0; i < nucleus_pdg.nucleus_an(); i++) { components.push_back(type_anti_n); }
+      for (int i = 0; i < nucleus_pdg.nucleus_La(); i++) { components.push_back(type_la); }
+      for (int i = 0; i < nucleus_pdg.nucleus_aLa(); i++) { components.push_back(type_anti_la); }
 
       process_list.push_back(make_unique<CollisionBranch>(
-          type_pi, type_p, type_n, type_n, two_to_four_xs(type_a, type_b, sqrt_s_),
-            ProcessType::TwoToFour));
-    } else {
-      // πt̅ → πp̅n̅n̅
-      const auto& type_anti_p = ParticleType::find(-pdg::p);
-      const auto& type_anti_n = ParticleType::find(-pdg::n);
-
-      process_list.push_back(make_unique<CollisionBranch>(
-          type_pi, type_anti_p, type_anti_n, type_anti_n, two_to_four_xs(type_a, type_b, sqrt_s_),
-            ProcessType::TwoToFour));
-    }
+          *type_catalyzer, *(components[0]), *(components[1]), *(components[2]),
+          two_to_four_xs(*type_nucleus, *type_catalyzer, sqrt_s_),
+           ProcessType::TwoToFour));
   }
   return process_list;
 }
@@ -972,9 +975,9 @@ double CrossSections::two_to_three_xs(const ParticleType& type_a,
   return xsection;
 }
 
-double CrossSections::two_to_four_xs(const ParticleType& type_a,
-                                     const ParticleType& type_b,
-                                     double sqrts) {
+double CrossSections::two_to_four_xs(const ParticleType& /*type_a*/,
+                                     const ParticleType& /*type_b*/,
+                                     double /*sqrts*/) {
   // We use a constant cross section for testing
   const double xsection = 30.0;
   return xsection;

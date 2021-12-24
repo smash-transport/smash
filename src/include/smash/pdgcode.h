@@ -723,6 +723,28 @@ class PdgCode {
    */
   int net_quark_number(const int quark) const;
 
+  int nucleus_p() const {
+    return (is_nucleus() && !nucleus_.antiparticle_) ? nucleus_.Z_ : 0;
+  };
+  int nucleus_n() const {
+    return (is_nucleus() && !nucleus_.antiparticle_) ?
+             nucleus_.A_ - nucleus_.Z_ - nucleus_.n_Lambda_ : 0;
+  };
+  int nucleus_La() const {
+    return (is_nucleus() && !nucleus_.antiparticle_) ? nucleus_.n_Lambda_ : 0;
+  };
+  int nucleus_ap() const {
+    return (is_nucleus() && nucleus_.antiparticle_) ? nucleus_.Z_ : 0;
+  };
+  int nucleus_an() const {
+    return (is_nucleus() && nucleus_.antiparticle_) ?
+             nucleus_.A_ - nucleus_.Z_ - nucleus_.n_Lambda_ : 0;
+  };
+  int nucleus_aLa() const {
+    return (is_nucleus() && nucleus_.antiparticle_) ? nucleus_.n_Lambda_ : 0;
+  };
+
+
  private:
   /**
    * The union holds the data; either as a single integer dump_, as a
