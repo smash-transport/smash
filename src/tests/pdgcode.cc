@@ -54,6 +54,7 @@ PdgCode omega_bc(0x5432);
 PdgCode deutron("1000010020");
 PdgCode antideutron("-1000010020");
 PdgCode He4("1000020040");
+PdgCode H3L("1010010030");
 // non-hadrons:
 // leptons
 PdgCode electron(0x11);
@@ -158,6 +159,7 @@ TEST(pdg_string) {
   COMPARE(deutron.string(), "1000010020");
   COMPARE(antideutron.string(), "-1000010020");
   COMPARE(He4.string(), "1000020040");
+  COMPARE(H3L.string(), "1010010030");
 }
 TEST(decimal) {
   COMPARE(electron.get_decimal(), 11);
@@ -172,6 +174,7 @@ TEST(decimal) {
   COMPARE(deutron.get_decimal(), 1000010020);
   COMPARE(antideutron.get_decimal(), -1000010020);
   COMPARE(He4.get_decimal(), 1000020040);
+  COMPARE(H3L.get_decimal(), 1010010030);
 }
 TEST(hexadecimal) {
   const PdgCode lambda_2350(0x990312a);
@@ -198,6 +201,7 @@ TEST(nucleus) {
   VERIFY(deutron.is_nucleus());
   VERIFY(antideutron.is_nucleus());
   VERIFY(He4.is_nucleus());
+  VERIFY(H3L.is_nucleus());
 }
 
 TEST(lepton) {
@@ -266,6 +270,7 @@ TEST(baryon_number) {
   COMPARE(deutron.baryon_number(), 2);
   COMPARE(antideutron.baryon_number(), -2);
   COMPARE(He4.baryon_number(), 4);
+  COMPARE(H3L.baryon_number(), 3);
 }
 TEST(isospin3) {
   COMPARE(electron.isospin3(), 0);
@@ -320,6 +325,7 @@ TEST(strangeness) {
   COMPARE(omega_bc.strangeness(), -1);
   COMPARE(deutron.strangeness(), 0);
   COMPARE(antideutron.strangeness(), 0);
+  COMPARE(H3L.strangeness(), -1);
 }
 TEST(charmness) {
   COMPARE(electron.charmness(), 0);
@@ -402,6 +408,7 @@ TEST(charge) {
   COMPARE(deutron.charge(), 1);
   COMPARE(antideutron.charge(), -1);
   COMPARE(He4.charge(), 2);
+  COMPARE(H3L.charge(), 1);
 }
 TEST(quarks) {
   COMPARE(electron.quarks(), 0x000);
@@ -456,6 +463,10 @@ TEST(spin) {
   COMPARE(omega_c_bar.spin(), 1u);
   COMPARE(xi_cc_bar.spin(), 1u);
   COMPARE(omega_bc.spin(), 1u);
+  COMPARE(deutron.spin(), 2u);
+  COMPARE(antideutron.spin(), 2u);
+  COMPARE(He4.spin(), 0u);
+  COMPARE(H3L.spin(), 1u);
 }
 TEST(spin_higgs) {
   vir::test::expect_failure();
@@ -487,6 +498,7 @@ TEST(spin_degeneracy) {
   COMPARE(omega_c_bar.spin_degeneracy(), 2u);
   COMPARE(xi_cc_bar.spin_degeneracy(), 2u);
   COMPARE(omega_bc.spin_degeneracy(), 2u);
+  COMPARE(H3L.spin_degeneracy(), 2u);
 }
 TEST(spin_degeneracy_higgs) {
   vir::test::expect_failure();
@@ -654,6 +666,7 @@ TEST(antiparticles) {
   COMPARE(deutron.has_antiparticle(), true);
   COMPARE(antideutron.has_antiparticle(), true);
   COMPARE(He4.has_antiparticle(), true);
+  COMPARE(H3L.has_antiparticle(), true);
 }
 
 TEST(pack_int) {

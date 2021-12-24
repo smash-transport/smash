@@ -518,7 +518,6 @@ class PdgCode {
   }
 
   /**
-   * \todo (oliiny): take care of spin for nuclei
    * \return twice the spin of a particle.
    *
    * The code is good for hadrons, leptons and spin-1-bosons. It returns
@@ -526,9 +525,23 @@ class PdgCode {
    */
   inline unsigned int spin() const {
     if (is_nucleus()) {
-      /* Currently the only nucleus I care about is deutron,
-       * which has spin one. */
-      return 2;
+      // Generally spin of a nucleus cannot be simply guessed, it should be
+      // provided from some table. However, here we only care about a
+      // limited set of light nuclei with A <= 4.
+      if (nucleus_.A_ == 2) {
+        // Deuteron spin is 1
+        return 2;
+      } else if (nucleus_.A_ == 3) {
+        // Tritium and He-3 spin are 1/2
+        // Hypertriton spin is not firmly determined, but decay branching ratios
+        // indicate spin 1/2
+        return 1;
+      } else if (nucleus_.A_ == 4) {
+        // He-4 spin is 0
+        return 0;
+      }
+      // Guess 1/2 for fermions and 0 for bosons
+      return 2 * (nucleus_.A_ % 2);
     }
 
     if (is_hadron()) {
