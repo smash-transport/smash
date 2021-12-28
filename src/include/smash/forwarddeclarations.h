@@ -276,7 +276,7 @@ enum IncludedMultiParticleReactions {
 };
 
 /// Container for the n to m reactions in the code
-typedef std::bitset<3> MultiParticleReactionsBitSet;
+typedef std::bitset<4> MultiParticleReactionsBitSet;
 
 /**
  * Defines the algorithm used for the forced thermalization.

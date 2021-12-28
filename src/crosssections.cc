@@ -919,7 +919,8 @@ CollisionBranchList CrossSections::two_to_four() const {
       const ParticleTypePtr type_anti_la = ParticleType::try_find(-pdg::Lambda);
 
       // Find nucleus components
-      ParticleTypePtrList components(3);
+      ParticleTypePtrList components;
+      components.reserve(3);
       const PdgCode nucleus_pdg = type_nucleus->pdgcode();
       for (int i = 0; i < nucleus_pdg.nucleus_p(); i++) { components.push_back(type_p); }
       for (int i = 0; i < nucleus_pdg.nucleus_n(); i++) { components.push_back(type_n); }
@@ -979,7 +980,7 @@ double CrossSections::two_to_four_xs(const ParticleType& /*type_a*/,
                                      const ParticleType& /*type_b*/,
                                      double /*sqrts*/) {
   // We use a constant cross section for testing
-  const double xsection = 30.0;
+  const double xsection = 90.0;
   return xsection;
 }
 
