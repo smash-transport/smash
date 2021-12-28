@@ -5,6 +5,9 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
+// Need to test private functions
+#define private public
+
 #include <vir/test.h>  // This include has to be first
 
 #include "setup.h"
@@ -27,6 +30,7 @@ TEST(init_particle_types) {
       "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
       "π  0.138   7.7e-9    -      111      211\n"
       "N  0.938   0         +      2112     2212\n"
+      "Λ  1.116   0         +      3122\n"
       "η  0.548   1.31e-6   -      221\n"
       "η' 0.958   1.96e-4   -      331\n"
       "φ  1.019   4.25e-3   -      333\n"
@@ -138,4 +142,34 @@ TEST(deuteron_three_to_two) {
          ProcessType::MultiParticleThreeToTwo);
   VERIFY(act2->reaction_channels()[0]->get_type() ==
          ProcessType::MultiParticleThreeToTwo);
+}
+
+TEST(phi4_parametrization) {
+  ParticleData N{ParticleType::find(0x2212)};  // p
+  ParticleData pi{ParticleType::find(0x211)};  // pi+
+  ParticleData La{ParticleType::find(0x3122)};  // Lambda
+
+  const ParticleList& incoming_piNNN = {pi, N, N, N};
+  const ParticleList& incoming_NNNN = {N, N, N, N};
+  const ParticleList& incoming_piNNLa = {pi, N, N, La};
+  const ParticleList& incoming_NNNLa = {N, N, N, La};
+
+  ScatterActionMultiPtr act_piNNN  = make_unique<ScatterActionMulti>(incoming_piNNN,  0.05);
+  ScatterActionMultiPtr act_NNNN   = make_unique<ScatterActionMulti>(incoming_NNNN,   0.05);
+  ScatterActionMultiPtr act_piNNLa = make_unique<ScatterActionMulti>(incoming_piNNLa, 0.05);
+  ScatterActionMultiPtr act_NNNLa  = make_unique<ScatterActionMulti>(incoming_NNNLa,  0.05);
+
+  const double srts = 4.5;  // GeV
+  const double s = srts * srts;
+  const double piNNN = act_piNNN->parametrizaton_phi4(s);
+  const double NNNN = act_NNNN->parametrizaton_phi4(s);
+  const double piNNLa = act_piNNLa->parametrizaton_phi4(s);
+  const double NNNLa = act_NNNLa->parametrizaton_phi4(s);
+  // Expectations are computed by numerical integration in Mathematica
+  // Declared relatice precision of parametrizations is 10^-3
+  COMPARE_RELATIVE_ERROR(piNNN, 3.18511e-6, 1e-3) << piNNN;
+  COMPARE_RELATIVE_ERROR(NNNN, 3.62849e-7 , 1e-3) << NNNN;
+  COMPARE_RELATIVE_ERROR(piNNLa, 2.08782e-6, 1e-3) << piNNLa;
+  COMPARE_RELATIVE_ERROR(NNNLa, 1.4423e-7, 1e-3) << NNNLa;
+
 }

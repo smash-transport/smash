@@ -494,35 +494,42 @@ double ScatterActionMulti::probability_four_to_two(const ParticleType& type_out1
 
 double ScatterActionMulti::parametrizaton_phi4(const double man_s) const {
   int n_nucleons = 0, n_pions = 0, n_lambdas = 0;
+  double sum_m = 0.0, prod_m = 1.0;
   for (const ParticleData& data : incoming_particles_) {
     const PdgCode pdg = data.type().pdgcode();
-    n_nucleons += pdg.is_nucleon();
+    n_nucleons += pdg.is_nucleon();  // including anti-nucleons
     n_pions += pdg.is_pion();
-    n_lambdas += pdg.is_Lambda();
+    n_lambdas += pdg.is_Lambda();    // including anti-Lambda
+    sum_m += data.type().mass();
+    prod_m *= data.type().mass();
+  }
+  const double x = 1.0 - sum_m / std::sqrt(man_s);
+  const double x2 = x * x;
+  const double x3 = x2 * x;
+  double g = -1.0;
+
+  if (n_nucleons == 3 && n_pions == 1) {  // NNNpi
+    g = (1.0 + 0.862432 * x - 3.4853 * x2 + 1.70259 * x3) /
+        (1.0 + 0.387376 * x - 1.34128 * x2 + 0.154489 * x3);
+  } else if (n_nucleons == 4) {  // NNNN
+    g = (1.0 - 1.72285 * x + 0.728331 * x2) /
+        (1.0 - 0.967146 * x - 0.0103633 * x2);
+  } else if (n_nucleons == 2 && n_lambdas == 1 && n_pions == 1) {  // LaNNpi
+    g = (1.0 + 0.937064 * x - 3.56864 * x2 + 1.721 * x3) /
+        (1.0 + 0.365202 * x - 1.2854 * x2 + 0.138444 * x3);
+  } else if (n_nucleons == 3 && n_lambdas == 1) {  // LaNNN
+    g = (1.0 + 0.882401 * x - 3.4074 * x2 + 1.62454 * x3) /
+        (1.0 + 1.61741 * x - 2.12543 * x2 - 0.0902067 * x3);
   }
 
-  if (n_nucleons == 3 && n_pions == 1) {
-    // TODO(stdnmr) Crude first implementation only valid for pi 3N of Dimas
-    // paramterization
-    const double mass_n = 0.938;
-    const double mass_pi = 0.138;
-    const double sum_m = 3.0 * mass_n + mass_pi;
-    const double prod_m = mass_n * mass_n * mass_n * mass_pi;
-    const double x = 1.0 - sum_m / std::sqrt(man_s);
-    const double g = (1.0 + 0.862432 * x - 3.4853 * x * x + 1.70259 * x * x * x) /
-                     (1.0 + 0.387376 * x - 1.34128 * x * x + 0.154489 * x * x * x);
+  if (g > 0.0) {
     return (std::sqrt(prod_m) * sum_m * sum_m * std::pow(x, 3.5) * g) /
-           (840. * std::sqrt(2) * std::pow(M_PI, 4.0) * std::pow(1-x, 4.0));
-  } else if (n_nucleons == 4) {
-    return 1.0; // todo(oliiny): implement
-  } else if (n_nucleons == 2 && n_lambdas == 1 && n_pions == 1) {
-    return 1.0;
-  } else if (n_nucleons == 3 && n_lambdas == 1) {
-    return 1.0;
+          (840. * std::sqrt(2) * std::pow(M_PI, 4.0) * std::pow(1-x, 4.0));
+  } else {
+    logg[LScatterActionMulti].error("parametrizaton_phi4: no parametrization ",
+                                    "available for ", incoming_particles_);
+    return 0.0;
   }
-  logg[LScatterActionMulti].error("parametrizaton_phi4: should never get here. ",
-                                  "Incoming particles are ", incoming_particles_);
-  return 0.0;
 }
 
 
