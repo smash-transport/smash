@@ -628,7 +628,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
             }
           }
           for (const ParticleData& p4 : search_list) {
-            if (IncludedMultiParticleReactions::A3_Nuclei_4to2) {
+            if (incl_multi_set_[IncludedMultiParticleReactions::A3_Nuclei_4to2]) {
               if (p1.id() < p2.id() && p2.id() < p3.id() && p3.id() < p4.id()) {
                 ActionPtr act = check_collision_multi_part({p1, p2, p3, p4}, dt, gcell_vol);
                 if (act) {
