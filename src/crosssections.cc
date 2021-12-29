@@ -900,40 +900,52 @@ CollisionBranchList CrossSections::two_to_three() const {
 
 CollisionBranchList CrossSections::two_to_four() const {
   CollisionBranchList process_list;
-  ParticleTypePtr type_nucleus   = &(incoming_particles_[0].type());
+  ParticleTypePtr type_nucleus = &(incoming_particles_[0].type());
   ParticleTypePtr type_catalyzer = &(incoming_particles_[1].type());
   if (!type_nucleus->is_nucleus()) {
-    type_nucleus   = &(incoming_particles_[1].type());
+    type_nucleus = &(incoming_particles_[1].type());
     type_catalyzer = &(incoming_particles_[0].type());
   }
 
-  if (type_nucleus->is_nucleus() && std::abs(type_nucleus->baryon_number()) == 3 &&
+  if (type_nucleus->is_nucleus() &&
+      std::abs(type_nucleus->baryon_number()) == 3 &&
       (type_catalyzer->is_pion() || type_catalyzer->is_nucleon())) {
+    const ParticleTypePtr type_p = ParticleType::try_find(pdg::p);
+    const ParticleTypePtr type_n = ParticleType::try_find(pdg::n);
+    const ParticleTypePtr type_anti_p = ParticleType::try_find(-pdg::p);
+    const ParticleTypePtr type_anti_n = ParticleType::try_find(-pdg::n);
+    const ParticleTypePtr type_la = ParticleType::try_find(pdg::Lambda);
+    const ParticleTypePtr type_anti_la = ParticleType::try_find(-pdg::Lambda);
 
-      const ParticleTypePtr type_p = ParticleType::try_find(pdg::p);
-      const ParticleTypePtr type_n = ParticleType::try_find(pdg::n);
-      const ParticleTypePtr type_anti_p = ParticleType::try_find(-pdg::p);
-      const ParticleTypePtr type_anti_n = ParticleType::try_find(-pdg::n);
-      const ParticleTypePtr type_la = ParticleType::try_find(pdg::Lambda);
-      const ParticleTypePtr type_anti_la = ParticleType::try_find(-pdg::Lambda);
-
-      // Find nucleus components
-      ParticleTypePtrList components;
-      components.reserve(3);
-      const PdgCode nucleus_pdg = type_nucleus->pdgcode();
-      for (int i = 0; i < nucleus_pdg.nucleus_p(); i++) { components.push_back(type_p); }
-      for (int i = 0; i < nucleus_pdg.nucleus_n(); i++) { components.push_back(type_n); }
-      for (int i = 0; i < nucleus_pdg.nucleus_ap(); i++) { components.push_back(type_anti_p); }
-      for (int i = 0; i < nucleus_pdg.nucleus_an(); i++) { components.push_back(type_anti_n); }
-      for (int i = 0; i < nucleus_pdg.nucleus_La(); i++) { components.push_back(type_la); }
-      for (int i = 0; i < nucleus_pdg.nucleus_aLa(); i++) { components.push_back(type_anti_la); }
-      if (sqrt_s_ > type_catalyzer->mass() + components[0]->mass() +
-                    components[1]->mass() + components[2]->mass()) {
-        process_list.push_back(make_unique<CollisionBranch>(
-            *type_catalyzer, *(components[0]), *(components[1]), *(components[2]),
-            two_to_four_xs(*type_nucleus, *type_catalyzer, sqrt_s_),
-            ProcessType::TwoToFour));
-      }
+    // Find nucleus components
+    ParticleTypePtrList components;
+    components.reserve(3);
+    const PdgCode nucleus_pdg = type_nucleus->pdgcode();
+    for (int i = 0; i < nucleus_pdg.nucleus_p(); i++) {
+      components.push_back(type_p);
+    }
+    for (int i = 0; i < nucleus_pdg.nucleus_n(); i++) {
+      components.push_back(type_n);
+    }
+    for (int i = 0; i < nucleus_pdg.nucleus_ap(); i++) {
+      components.push_back(type_anti_p);
+    }
+    for (int i = 0; i < nucleus_pdg.nucleus_an(); i++) {
+      components.push_back(type_anti_n);
+    }
+    for (int i = 0; i < nucleus_pdg.nucleus_La(); i++) {
+      components.push_back(type_la);
+    }
+    for (int i = 0; i < nucleus_pdg.nucleus_aLa(); i++) {
+      components.push_back(type_anti_la);
+    }
+    if (sqrt_s_ > type_catalyzer->mass() + components[0]->mass() +
+                      components[1]->mass() + components[2]->mass()) {
+      process_list.push_back(make_unique<CollisionBranch>(
+          *type_catalyzer, *(components[0]), *(components[1]), *(components[2]),
+          two_to_four_xs(*type_nucleus, *type_catalyzer, sqrt_s_),
+          ProcessType::TwoToFour));
+    }
   }
   return process_list;
 }

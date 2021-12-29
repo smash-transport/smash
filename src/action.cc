@@ -338,7 +338,8 @@ void Action::sample_manybody_phasespace_impl(
   int rejection_counter = -1;
   if (sqrts <= msum_all) {
     logg[LAction].error() << "sample_manybody_phasespace_impl: "
-        << "Can't sample when sqrts = " << sqrts << " < msum = " << msum_all;
+                          << "Can't sample when sqrts = " << sqrts
+                          << " < msum = " << msum_all;
   }
 
   double w, r01;
@@ -386,8 +387,9 @@ void Action::sample_manybody_phasespace_impl(
     }
     if (rejection_counter > 20 && first_warning) {
       logg[LAction].warn() << "sample_manybody_phasespace_impl: "
-        << "likely hanging, way too many rejections," 
-        << " n = " << n << ", sqrts = " << sqrts << ", msum = " << msum_all;
+                           << "likely hanging, way too many rejections,"
+                           << " n = " << n << ", sqrts = " << sqrts
+                           << ", msum = " << msum_all;
       first_warning = false;
     }
   } while (w < r01 * r01);

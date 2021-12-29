@@ -442,7 +442,8 @@ void ScatterAction::inelastic_scattering() {
 void ScatterAction::two_to_many_scattering() {
   sample_manybody_phasespace();
   assign_formation_time_to_outgoing_particles();
-  logg[LScatterAction].debug("2->", outgoing_particles_.size(), " scattering:", incoming_particles_, " -> ",
+  logg[LScatterAction].debug("2->", outgoing_particles_.size(),
+                             " scattering:", incoming_particles_, " -> ",
                              outgoing_particles_);
 }
 

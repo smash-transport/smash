@@ -727,8 +727,9 @@ class PdgCode {
     return (is_nucleus() && !nucleus_.antiparticle_) ? nucleus_.Z_ : 0;
   };
   int nucleus_n() const {
-    return (is_nucleus() && !nucleus_.antiparticle_) ?
-             nucleus_.A_ - nucleus_.Z_ - nucleus_.n_Lambda_ : 0;
+    return (is_nucleus() && !nucleus_.antiparticle_)
+               ? nucleus_.A_ - nucleus_.Z_ - nucleus_.n_Lambda_
+               : 0;
   };
   int nucleus_La() const {
     return (is_nucleus() && !nucleus_.antiparticle_) ? nucleus_.n_Lambda_ : 0;
@@ -737,13 +738,13 @@ class PdgCode {
     return (is_nucleus() && nucleus_.antiparticle_) ? nucleus_.Z_ : 0;
   };
   int nucleus_an() const {
-    return (is_nucleus() && nucleus_.antiparticle_) ?
-             nucleus_.A_ - nucleus_.Z_ - nucleus_.n_Lambda_ : 0;
+    return (is_nucleus() && nucleus_.antiparticle_)
+               ? nucleus_.A_ - nucleus_.Z_ - nucleus_.n_Lambda_
+               : 0;
   };
   int nucleus_aLa() const {
     return (is_nucleus() && nucleus_.antiparticle_) ? nucleus_.n_Lambda_ : 0;
   };
-
 
  private:
   /**

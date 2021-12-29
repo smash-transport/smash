@@ -318,7 +318,6 @@ class ScatterActionMulti : public Action {
    */
   bool incoming_particles_can_form_antitriton_and_pi() const;
 
-
   /// Total probability of reaction
   double total_probability_;
 

@@ -155,20 +155,22 @@ TEST(threebody_integral_I3) {
   pip.set_4momentum(pip.type().mass(), ThreeVector(0.1, 0.2, 0.3));
 
   const ParticleList& incoming_piNN{pip, p, n};
-  ScatterActionMultiPtr act_piNN  = make_unique<ScatterActionMulti>(incoming_piNN,  0.0);
+  ScatterActionMultiPtr act_piNN =
+      make_unique<ScatterActionMulti>(incoming_piNN, 0.0);
 
   std::vector<double> srts{2.5, 3.0, 4.0, 5.0, 6.0};
   // Answers from Mathematica
   std::vector<double> correct_I3{1.21877, 7.21727, 49.8706, 168.18, 414.645};
   VERIFY(srts.size() == correct_I3.size());
   for (size_t i = 0; i < srts.size(); i++) {
-    COMPARE_RELATIVE_ERROR(act_piNN->calculate_I3(srts[i]), correct_I3[i], 1e-4);
+    COMPARE_RELATIVE_ERROR(act_piNN->calculate_I3(srts[i]), correct_I3[i],
+                           1e-4);
   }
 }
 
 TEST(phi4_parametrization) {
-  ParticleData N{ParticleType::find(0x2212)};  // p
-  ParticleData pi{ParticleType::find(0x211)};  // pi+
+  ParticleData N{ParticleType::find(0x2212)};   // p
+  ParticleData pi{ParticleType::find(0x211)};   // pi+
   ParticleData La{ParticleType::find(0x3122)};  // Lambda
 
   const ParticleList& incoming_piNNN = {pi, N, N, N};
@@ -176,10 +178,14 @@ TEST(phi4_parametrization) {
   const ParticleList& incoming_piNNLa = {pi, N, N, La};
   const ParticleList& incoming_NNNLa = {N, N, N, La};
 
-  ScatterActionMultiPtr act_piNNN  = make_unique<ScatterActionMulti>(incoming_piNNN,  0.05);
-  ScatterActionMultiPtr act_NNNN   = make_unique<ScatterActionMulti>(incoming_NNNN,   0.05);
-  ScatterActionMultiPtr act_piNNLa = make_unique<ScatterActionMulti>(incoming_piNNLa, 0.05);
-  ScatterActionMultiPtr act_NNNLa  = make_unique<ScatterActionMulti>(incoming_NNNLa,  0.05);
+  ScatterActionMultiPtr act_piNNN =
+      make_unique<ScatterActionMulti>(incoming_piNNN, 0.05);
+  ScatterActionMultiPtr act_NNNN =
+      make_unique<ScatterActionMulti>(incoming_NNNN, 0.05);
+  ScatterActionMultiPtr act_piNNLa =
+      make_unique<ScatterActionMulti>(incoming_piNNLa, 0.05);
+  ScatterActionMultiPtr act_NNNLa =
+      make_unique<ScatterActionMulti>(incoming_NNNLa, 0.05);
 
   const double srts = 4.5;  // GeV
   const double s = srts * srts;
@@ -190,8 +196,7 @@ TEST(phi4_parametrization) {
   // Expectations are computed by numerical integration in Mathematica
   // Declared relatice precision of parametrizations is 10^-3
   COMPARE_RELATIVE_ERROR(piNNN, 3.18511e-6, 1e-3) << piNNN;
-  COMPARE_RELATIVE_ERROR(NNNN, 3.62849e-7 , 1e-3) << NNNN;
+  COMPARE_RELATIVE_ERROR(NNNN, 3.62849e-7, 1e-3) << NNNN;
   COMPARE_RELATIVE_ERROR(piNNLa, 2.08782e-6, 1e-3) << piNNLa;
   COMPARE_RELATIVE_ERROR(NNNLa, 1.4423e-7, 1e-3) << NNNLa;
-
 }

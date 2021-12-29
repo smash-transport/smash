@@ -628,16 +628,19 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
             }
           }
           for (const ParticleData& p4 : search_list) {
-            if (incl_multi_set_[IncludedMultiParticleReactions::A3_Nuclei_4to2]) {
+            if (incl_multi_set_
+                    [IncludedMultiParticleReactions::A3_Nuclei_4to2]) {
               if (p1.id() < p2.id() && p2.id() < p3.id() && p3.id() < p4.id()) {
-                ActionPtr act = check_collision_multi_part({p1, p2, p3, p4}, dt, gcell_vol);
+                ActionPtr act =
+                    check_collision_multi_part({p1, p2, p3, p4}, dt, gcell_vol);
                 if (act) {
                   actions.push_back(std::move(act));
                 }
               }
             }
             if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] ==
-                      1 && search_list.size() >= 5) {
+                    1 &&
+                search_list.size() >= 5) {
               for (const ParticleData& p5 : search_list) {
                 if ((p1.id() < p2.id() && p2.id() < p3.id() &&
                      p3.id() < p4.id() && p4.id() < p5.id()) &&

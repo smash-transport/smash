@@ -253,38 +253,45 @@ void ScatterActionMulti::add_possible_reactions(
     }
     // Nucleons, antinucleons, and pions can catalyze
     const int n_possible_catalysts_incoming =
-       c[pdg::n] + c[pdg::p] + c[-pdg::p] + c[-pdg::n] +
-       c[pdg::pi_p] + c[pdg::pi_z] + c[pdg::pi_m];
+        c[pdg::n] + c[pdg::p] + c[-pdg::p] + c[-pdg::n] + c[pdg::pi_p] +
+        c[pdg::pi_z] + c[pdg::pi_m];
 
-    for (PdgCode pdg_nucleus : {pdg::triton, pdg::antitriton,
-                                pdg::he3, pdg::antihe3,
-                                pdg::hypertriton, pdg::antihypertriton}) {
+    for (PdgCode pdg_nucleus :
+         {pdg::triton, pdg::antitriton, pdg::he3, pdg::antihe3,
+          pdg::hypertriton, pdg::antihypertriton}) {
       const ParticleTypePtr type_nucleus = ParticleType::try_find(pdg_nucleus);
       // Nucleus can be formed if and only if:
       // 1) Incoming particles contain enough components (like p, n, Lambda)
       // 2) In (incoming particles - components) there is still a catalyst
-      // This is including the situation like nnpp. Can be that t(nnp) is formed and p is catalyst,
-      // can be that he-3(ppn) is formed and n is catalyst. Both reactions should be added.
+      // This is including the situation like nnpp. Can be that t(nnp) is formed
+      // and p is catalyst, can be that he-3(ppn) is formed and n is catalyst.
+      // Both reactions should be added.
       const int n_nucleus_components_that_can_be_catalysts =
-        pdg_nucleus.nucleus_p() + pdg_nucleus.nucleus_ap() +
-        pdg_nucleus.nucleus_n() + pdg_nucleus.nucleus_an();
+          pdg_nucleus.nucleus_p() + pdg_nucleus.nucleus_ap() +
+          pdg_nucleus.nucleus_n() + pdg_nucleus.nucleus_an();
       const bool incoming_contain_nucleus_components =
-        c[pdg::p] >= pdg_nucleus.nucleus_p() && c[-pdg::p] >= pdg_nucleus.nucleus_ap() &&
-        c[pdg::n] >= pdg_nucleus.nucleus_n() && c[-pdg::n] >= pdg_nucleus.nucleus_an() &&
-        c[pdg::Lambda] >= pdg_nucleus.nucleus_La() && c[-pdg::Lambda] >= pdg_nucleus.nucleus_aLa();
-      const bool can_form_nucleus = type_nucleus && incoming_contain_nucleus_components &&
-        n_possible_catalysts_incoming - n_nucleus_components_that_can_be_catalysts == 1;
+          c[pdg::p] >= pdg_nucleus.nucleus_p() &&
+          c[-pdg::p] >= pdg_nucleus.nucleus_ap() &&
+          c[pdg::n] >= pdg_nucleus.nucleus_n() &&
+          c[-pdg::n] >= pdg_nucleus.nucleus_an() &&
+          c[pdg::Lambda] >= pdg_nucleus.nucleus_La() &&
+          c[-pdg::Lambda] >= pdg_nucleus.nucleus_aLa();
+      const bool can_form_nucleus =
+          type_nucleus && incoming_contain_nucleus_components &&
+          n_possible_catalysts_incoming -
+                  n_nucleus_components_that_can_be_catalysts ==
+              1;
 
       if (!can_form_nucleus) {
         continue;
       }
       // Find the catalyst
       std::map<PdgCode, int> catalyst_count = c;
-      catalyst_count[pdg::p]       -= pdg_nucleus.nucleus_p();
-      catalyst_count[-pdg::p]      -= pdg_nucleus.nucleus_ap();
-      catalyst_count[pdg::n]       -= pdg_nucleus.nucleus_n();
-      catalyst_count[-pdg::n]      -= pdg_nucleus.nucleus_an();
-      catalyst_count[pdg::Lambda]  -= pdg_nucleus.nucleus_La();
+      catalyst_count[pdg::p] -= pdg_nucleus.nucleus_p();
+      catalyst_count[-pdg::p] -= pdg_nucleus.nucleus_ap();
+      catalyst_count[pdg::n] -= pdg_nucleus.nucleus_n();
+      catalyst_count[-pdg::n] -= pdg_nucleus.nucleus_an();
+      catalyst_count[pdg::Lambda] -= pdg_nucleus.nucleus_La();
       catalyst_count[-pdg::Lambda] -= pdg_nucleus.nucleus_aLa();
       PdgCode pdg_catalyst = PdgCode::invalid();
       for (const auto i : catalyst_count) {
@@ -295,28 +302,30 @@ void ScatterActionMulti::add_possible_reactions(
       }
       if (pdg_catalyst == PdgCode::invalid()) {
         logg[LScatterActionMulti].error("Something went wrong while forming",
-                                        pdg_nucleus, " from ", incoming_particles_);
+                                        pdg_nucleus, " from ",
+                                        incoming_particles_);
       }
-      const ParticleTypePtr type_catalyst = ParticleType::try_find(pdg_catalyst);
-      const double spin_degn = react_degen_factor(spin_factor_inc,
-                                                  type_catalyst->spin_degeneracy(),
-                                                  type_nucleus->spin_degeneracy());
-       double symmetry_factor = 1.0;
-       for (const auto i : c) {
-         symmetry_factor *= (i.second == 3) ? 6.0   // 3!
-                             : (i.second == 2) ? 2.0  // 2!
-                               : 1.0;
-         if (i.second > 3 || i.second < 0) {
-           logg[LScatterActionMulti].error("4<->2 error, incoming particles ",
-               incoming_particles_);
-         }
-       }
+      const ParticleTypePtr type_catalyst =
+          ParticleType::try_find(pdg_catalyst);
+      const double spin_degn =
+          react_degen_factor(spin_factor_inc, type_catalyst->spin_degeneracy(),
+                             type_nucleus->spin_degeneracy());
+      double symmetry_factor = 1.0;
+      for (const auto i : c) {
+        symmetry_factor *= (i.second == 3) ? 6.0                    // 3!
+                                           : (i.second == 2) ? 2.0  // 2!
+                                                             : 1.0;
+        if (i.second > 3 || i.second < 0) {
+          logg[LScatterActionMulti].error("4<->2 error, incoming particles ",
+                                          incoming_particles_);
+        }
+      }
 
-       add_reaction(make_unique<CollisionBranch>(*type_catalyst, *type_nucleus,
-            probability_four_to_two(*type_catalyst, *type_nucleus, dt, gcell_vol,
-                                     symmetry_factor * spin_degn),
-            ProcessType::MultiParticleFourToTwo));
-
+      add_reaction(make_unique<CollisionBranch>(
+          *type_catalyst, *type_nucleus,
+          probability_four_to_two(*type_catalyst, *type_nucleus, dt, gcell_vol,
+                                  symmetry_factor * spin_degn),
+          ProcessType::MultiParticleFourToTwo));
     }
   }
   // 5 -> 2
@@ -407,14 +416,10 @@ double ScatterActionMulti::calculate_I3(const double sqrts) const {
   if (sqrts < m1 + m2 + m3) {
     return 0.0;
   }
-  const double x1 = (m1 - m2) * (m1 - m2),
-               x2 = (m1 + m2) * (m1 + m2),
+  const double x1 = (m1 - m2) * (m1 - m2), x2 = (m1 + m2) * (m1 + m2),
                x3 = (sqrts - m3) * (sqrts - m3),
                x4 = (sqrts + m3) * (sqrts + m3);
-  const double qmm = x3 - x1,
-               qmp = x3 - x2,
-               qpm = x4 - x1,
-               qpp = x4 - x2;
+  const double qmm = x3 - x1, qmp = x3 - x2, qpm = x4 - x1, qpp = x4 - x2;
   const double kappa = std::sqrt(qpm * qmp / (qpp * qmm));
   const double tmp = std::sqrt(qmm * qpp);
   const double c1 =
@@ -480,25 +485,25 @@ double ScatterActionMulti::probability_three_to_two(
          degen_sym_factor;
 }
 
-double ScatterActionMulti::probability_four_to_two(const ParticleType& type_out1,
-                               const ParticleType& type_out2, double dt,
-                               const double gcell_vol,
-                               const double degen_sym_factor) const {
-   const double e1 = incoming_particles_[0].momentum().x0();
-   const double e2 = incoming_particles_[1].momentum().x0();
-   const double e3 = incoming_particles_[2].momentum().x0();
-   const double e4 = incoming_particles_[3].momentum().x0();
-   const double m5 = type_out1.mass();
-   const double m6 = type_out2.mass();
+double ScatterActionMulti::probability_four_to_two(
+    const ParticleType& type_out1, const ParticleType& type_out2, double dt,
+    const double gcell_vol, const double degen_sym_factor) const {
+  const double e1 = incoming_particles_[0].momentum().x0();
+  const double e2 = incoming_particles_[1].momentum().x0();
+  const double e3 = incoming_particles_[2].momentum().x0();
+  const double e4 = incoming_particles_[3].momentum().x0();
+  const double m5 = type_out1.mass();
+  const double m6 = type_out2.mass();
 
-   const double man_s = sqrt_s() * sqrt_s();
-   const double xs = CrossSections::two_to_four_xs(type_out1, type_out2, sqrt_s()) / gev2_mb;
-   const double lamb = lambda_tilde(man_s, m5 * m5, m6 * m6);
-   const double ph_sp_4 = parametrizaton_phi4(man_s);
+  const double man_s = sqrt_s() * sqrt_s();
+  const double xs =
+      CrossSections::two_to_four_xs(type_out1, type_out2, sqrt_s()) / gev2_mb;
+  const double lamb = lambda_tilde(man_s, m5 * m5, m6 * m6);
+  const double ph_sp_4 = parametrizaton_phi4(man_s);
 
-   return dt / std::pow(gcell_vol, 3.0) * 1. / (16. * e1 * e2 * e3 * e4) *
-          xs / (4. * M_PI * man_s) * lamb / ph_sp_4 * std::pow(hbarc, 8.0) *
-          degen_sym_factor;
+  return dt / std::pow(gcell_vol, 3.0) * 1. / (16. * e1 * e2 * e3 * e4) * xs /
+         (4. * M_PI * man_s) * lamb / ph_sp_4 * std::pow(hbarc, 8.0) *
+         degen_sym_factor;
 }
 
 double ScatterActionMulti::parametrizaton_phi4(const double man_s) const {
@@ -508,7 +513,7 @@ double ScatterActionMulti::parametrizaton_phi4(const double man_s) const {
     const PdgCode pdg = data.type().pdgcode();
     n_nucleons += pdg.is_nucleon();  // including anti-nucleons
     n_pions += pdg.is_pion();
-    n_lambdas += pdg.is_Lambda();    // including anti-Lambda
+    n_lambdas += pdg.is_Lambda();  // including anti-Lambda
     sum_m += data.type().mass();
     prod_m *= data.type().mass();
   }
@@ -533,14 +538,13 @@ double ScatterActionMulti::parametrizaton_phi4(const double man_s) const {
 
   if (g > 0.0) {
     return (std::sqrt(prod_m) * sum_m * sum_m * std::pow(x, 3.5) * g) /
-          (840. * std::sqrt(2) * std::pow(M_PI, 4.0) * std::pow(1-x, 4.0));
+           (840. * std::sqrt(2) * std::pow(M_PI, 4.0) * std::pow(1 - x, 4.0));
   } else {
     logg[LScatterActionMulti].error("parametrizaton_phi4: no parametrization ",
                                     "available for ", incoming_particles_);
     return 0.0;
   }
 }
-
 
 double ScatterActionMulti::probability_five_to_two(
     const double mout, double dt, const double gcell_vol,
@@ -573,8 +577,6 @@ double ScatterActionMulti::parametrizaton_phi5_pions(const double man_s) const {
          std::pow(1 + man_s / s_zero, -fit_alpha);
 }
 
-
-
 void ScatterActionMulti::annihilation() {
   if (outgoing_particles_.size() != 1) {
     std::string s =
@@ -597,7 +599,8 @@ void ScatterActionMulti::n_to_two() {
   sample_2body_phasespace();
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
-  logg[LScatterActionMulti].debug(incoming_particles_.size(), "->2 scattering:", incoming_particles_,
+  logg[LScatterActionMulti].debug(incoming_particles_.size(),
+                                  "->2 scattering:", incoming_particles_,
                                   " -> ", outgoing_particles_);
 }
 
@@ -633,7 +636,8 @@ bool ScatterActionMulti::two_pions_eta(const ParticleData& data_a,
          (pdg_a == pdg::pi_p && pdg_b == pdg::eta && pdg_c == pdg::pi_m);
 }
 
-bool ScatterActionMulti::all_incoming_particles_are_pions_have_zero_charge_only_one_piz() const {
+bool ScatterActionMulti::
+    all_incoming_particles_are_pions_have_zero_charge_only_one_piz() const {
   const bool all_inc_pi =
       all_of(incoming_particles_.begin(), incoming_particles_.end(),
              [](const ParticleData& data) { return data.is_pion(); });
