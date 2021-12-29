@@ -53,8 +53,13 @@ PdgCode xi_cc_bar(-0x4422);
 PdgCode omega_bc(0x5432);
 PdgCode deutron("1000010020");
 PdgCode antideutron("-1000010020");
+PdgCode triton("1000010030");
+PdgCode antitriton("-1000010030");
+PdgCode he3("1000020030");
+PdgCode antihe3("-1000020030");
 PdgCode He4("1000020040");
 PdgCode H3L("1010010030");
+PdgCode antiH3L("-1010010030");
 // non-hadrons:
 // leptons
 PdgCode electron(0x11);
@@ -269,6 +274,8 @@ TEST(baryon_number) {
   COMPARE(omega_bc.baryon_number(), 1);
   COMPARE(deutron.baryon_number(), 2);
   COMPARE(antideutron.baryon_number(), -2);
+  COMPARE(antitriton.baryon_number(), -3);
+  COMPARE(he3.baryon_number(), 3);
   COMPARE(He4.baryon_number(), 4);
   COMPARE(H3L.baryon_number(), 3);
 }
@@ -298,6 +305,12 @@ TEST(isospin3) {
   COMPARE(omega_bc.isospin3(), 0);
   COMPARE(deutron.isospin3(), 0);
   COMPARE(antideutron.isospin3(), 0);
+  COMPARE(triton.isospin3(), -1);
+  COMPARE(antitriton.isospin3(), 1);
+  COMPARE(he3.isospin3(), 1);
+  COMPARE(antihe3.isospin3(), -1);
+  COMPARE(H3L.isospin3(), 0);
+  COMPARE(antiH3L.isospin3(), 0);
 }
 TEST(strangeness) {
   COMPARE(electron.strangeness(), 0);
@@ -793,4 +806,13 @@ TEST(valence_quarks) {
   PdgCode pim(-0x211);
   VERIFY(!(pim.contains_enough_valence_quarks(2)));
   VERIFY(!(pim.contains_enough_valence_quarks(-2)));
+}
+
+TEST(nucleus_components) {
+  VERIFY(H3L.nucleus_p() == 1);
+  VERIFY(H3L.nucleus_n() == 1);
+  VERIFY(H3L.nucleus_La() == 1);
+  VERIFY(H3L.nucleus_ap() == 0);
+  VERIFY(H3L.nucleus_an() == 0);
+  VERIFY(H3L.nucleus_aLa() == 0);
 }
