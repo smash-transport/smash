@@ -928,11 +928,13 @@ CollisionBranchList CrossSections::two_to_four() const {
       for (int i = 0; i < nucleus_pdg.nucleus_an(); i++) { components.push_back(type_anti_n); }
       for (int i = 0; i < nucleus_pdg.nucleus_La(); i++) { components.push_back(type_la); }
       for (int i = 0; i < nucleus_pdg.nucleus_aLa(); i++) { components.push_back(type_anti_la); }
-
-      process_list.push_back(make_unique<CollisionBranch>(
-          *type_catalyzer, *(components[0]), *(components[1]), *(components[2]),
-          two_to_four_xs(*type_nucleus, *type_catalyzer, sqrt_s_),
-           ProcessType::TwoToFour));
+      if (sqrt_s_ > type_catalyzer->mass() + components[0]->mass() +
+                    components[1]->mass() + components[2]->mass()) {
+        process_list.push_back(make_unique<CollisionBranch>(
+            *type_catalyzer, *(components[0]), *(components[1]), *(components[2]),
+            two_to_four_xs(*type_nucleus, *type_catalyzer, sqrt_s_),
+            ProcessType::TwoToFour));
+      }
   }
   return process_list;
 }
