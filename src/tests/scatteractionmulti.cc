@@ -144,6 +144,28 @@ TEST(deuteron_three_to_two) {
          ProcessType::MultiParticleThreeToTwo);
 }
 
+TEST(threebody_integral_I3) {
+  // Make sure incoming particles got their masses set
+  // calculate_I3 uses effective mass , not type mass
+  ParticleData p{ParticleType::find(0x2212)};  // p
+  p.set_4momentum(p.type().mass(), ThreeVector(0.1, 0.2, 0.3));
+  ParticleData n{ParticleType::find(0x2112)};  // n
+  n.set_4momentum(n.type().mass(), ThreeVector(0.1, 0.2, 0.3));
+  ParticleData pip{ParticleType::find(0x211)};  // pi+
+  pip.set_4momentum(pip.type().mass(), ThreeVector(0.1, 0.2, 0.3));
+
+  const ParticleList& incoming_piNN{pip, p, n};
+  ScatterActionMultiPtr act_piNN  = make_unique<ScatterActionMulti>(incoming_piNN,  0.0);
+
+  std::vector<double> srts{2.5, 3.0, 4.0, 5.0, 6.0};
+  // Answers from Mathematica
+  std::vector<double> correct_I3{1.21877, 7.21727, 49.8706, 168.18, 414.645};
+  VERIFY(srts.size() == correct_I3.size());
+  for (size_t i = 0; i < srts.size(); i++) {
+    COMPARE_RELATIVE_ERROR(act_piNN->calculate_I3(srts[i]), correct_I3[i], 1e-4);
+  }
+}
+
 TEST(phi4_parametrization) {
   ParticleData N{ParticleType::find(0x2212)};  // p
   ParticleData pi{ParticleType::find(0x211)};  // pi+
