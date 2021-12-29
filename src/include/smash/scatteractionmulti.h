@@ -81,6 +81,22 @@ class ScatterActionMulti : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
+  /**
+   * Calculate the integration necessary for the three-body phase space. The
+   * defintion for the integral is given by
+   * \f[I_3 = \int dm^2_{23}dm^2_{12} =
+   * \int^{(M-m_3)^2}_{(m_1+m_2)^2}[m^2_{23, max}- m^2_{23, min}]dm^2_{12}\f]
+   * see PDG book (chapter Kinematics) for defintions of variables. The numbered
+   * masses reference the incoming particles and \f$M\f$ the mass of the
+   * outgoing particles in this case, since we are looking at the backreaction
+   * to the 1-to-3 decay.
+   *
+   * \param[in] sqrts center of mass energy of incoming particles
+   *                  (= mass of outgoing particle)
+   * \return result of integral
+   */
+  double calculate_I3(const double sqrts) const;
+
  protected:
   /*
    * \ingroup logging
@@ -238,22 +254,6 @@ class ScatterActionMulti : public Action {
    * \return phase space value for 5 pions
    */
   double parametrizaton_phi5_pions(const double man_s) const;
-
-  /**
-   * Calculate the integration necessary for the three-body phase space. The
-   * defintion for the integral is given by
-   * \f[I_3 = \int dm^2_{23}dm^2_{12} =
-   * \int^{(M-m_3)^2}_{(m_1+m_2)^2}[m^2_{23, max}- m^2_{23, min}]dm^2_{12}\f]
-   * see PDG book (chapter Kinematics) for defintions of variables. The numbered
-   * masses reference the incoming particles and \f$M\f$ the mass of the
-   * outgoing particles in this case, since we are looking at the backreaction
-   * to the 1-to-3 decay.
-   *
-   * \param[in] sqrts center of mass energy of incoming particles
-   *                  (= mass of outgoing particle)
-   * \return result of integral
-   */
-  double calculate_I3(const double sqrts) const;
 
   /**
    * Determine the spin degeneracy factor (\f$D_{spin}\f$) for the N->2

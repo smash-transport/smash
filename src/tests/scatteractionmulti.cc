@@ -5,9 +5,6 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-// Need to test private functions
-#define private public
-
 #include <vir/test.h>  // This include has to be first
 
 #include "setup.h"
