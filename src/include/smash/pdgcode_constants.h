@@ -93,25 +93,6 @@ constexpr int rho_m = -0x213;
 
 /// h₁(1170).
 constexpr int h1 = 0x10223;
-
-/// Deuteron in decimal digits.
-constexpr int decimal_d = 1000010020;
-/// Anti-deuteron in decimal digits.
-constexpr int decimal_antid = -1000010020;
-
-/// Triton in decimal digits.
-constexpr int decimal_triton = 1000010030;  // TODO(stdnmr) Pseudo-pdg placeholders
-/// Anti-triton in decimal digits.
-constexpr int decimal_antitriton = -1000010030;
-/// He-3 in decimal digits
-constexpr int decimal_he3 = 1000020030;
-/// Anti-He-3 in decimal digits
-constexpr int decimal_antihe3 = -1000020030;
-/// Hypertriton in decimal digits
-constexpr int decimal_hypertriton = 1010010030;
-/// Anti-Hypertriton in decimal digits
-constexpr int decimal_antihypertriton = -1010010030;
-
 }  // namespace pdg
 
 /**

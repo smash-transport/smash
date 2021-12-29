@@ -394,14 +394,14 @@ class PdgCode {
 
   /// \return whether this is (anti-)deuteron
   inline bool is_deuteron() const {
-    const int dec = get_decimal();
-    return is_nucleus() && (dec == pdg::decimal_d || dec == pdg::decimal_antid);
+    return is_nucleus() && nucleus_.A_ == 2 && nucleus_.Z_ == 1 &&
+           nucleus_.n_Lambda_ == 0 && nucleus_.I_ == 0;
   }
 
   /// \return whether this is (anti-)triton
   inline bool is_triton() const {
-    const int dec = get_decimal();
-    return is_nucleus() && (dec == pdg::decimal_triton || dec == pdg::decimal_antitriton);
+    return is_nucleus() && nucleus_.A_ == 3 && nucleus_.Z_ == 1 &&
+           nucleus_.n_Lambda_ == 0 && nucleus_.I_ == 0;
   }
 
   /**
@@ -1033,6 +1033,29 @@ inline bool has_lepton_pair(const PdgCode pdg1, const PdgCode pdg2,
   return is_dilepton(pdg1, pdg2) || is_dilepton(pdg1, pdg3) ||
          is_dilepton(pdg2, pdg3);
 }
+
+/**
+ * Constants representing PDG codes of nuclei.
+ */
+namespace pdg {
+/// Deuteron.
+const PdgCode d(PdgCode::from_decimal(1000010020));
+/// Anti-deuteron in decimal digits.
+const PdgCode antid(PdgCode::from_decimal(-1000010020));
+/// Triton.
+const PdgCode triton(PdgCode::from_decimal(1000010030));
+/// Anti-triton.
+const PdgCode antitriton(PdgCode::from_decimal(-1000010030));
+/// He-3
+const PdgCode he3(PdgCode::from_decimal(1000020030));
+/// Anti-He-3
+const PdgCode antihe3(PdgCode::from_decimal(-1000020030));
+/// Hypertriton
+const PdgCode hypertriton(PdgCode::from_decimal(1010010030));
+/// Anti-Hypertriton
+const PdgCode antihypertriton(PdgCode::from_decimal(-1010010030));
+
+}  // namespace pdg
 
 }  // namespace smash
 

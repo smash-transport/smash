@@ -250,8 +250,7 @@ double CrossSections::elastic_parametrization(bool use_AQM) const {
   } else if (pdg_a.is_nucleus() || pdg_b.is_nucleus()) {
     const PdgCode& pdg_nucleus = pdg_a.is_nucleus() ? pdg_a : pdg_b;
     const PdgCode& pdg_other = pdg_a.is_nucleus() ? pdg_b : pdg_a;
-    const bool is_deuteron =
-        std::abs(pdg_nucleus.get_decimal()) == pdg::decimal_d;
+    const bool is_deuteron = pdg_nucleus.is_deuteron();  // d or anti-d
     if (is_deuteron && pdg_other.is_pion()) {
       // Elastic (Anti-)deuteron Pion Scattering
       elastic_xs = deuteron_pion_elastic(sqrt_s_ * sqrt_s_);
@@ -1058,10 +1057,8 @@ CollisionBranchList CrossSections::nn_xx(ReactionsBitSet included_2to2) const {
   }
 
   // Find N N → dπ and N̅ N̅→ d̅π channels.
-  ParticleTypePtr deutron =
-      ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_d));
-  ParticleTypePtr antideutron =
-      ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_antid));
+  ParticleTypePtr deutron = ParticleType::try_find(pdg::d);
+  ParticleTypePtr antideutron = ParticleType::try_find(pdg::antid);
   ParticleTypePtr pim = ParticleType::try_find(pdg::pi_m);
   ParticleTypePtr pi0 = ParticleType::try_find(pdg::pi_z);
   ParticleTypePtr pip = ParticleType::try_find(pdg::pi_p);

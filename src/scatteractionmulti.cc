@@ -105,10 +105,9 @@ void ScatterActionMulti::add_possible_reactions(
       const PdgCode pdg_a = incoming_particles_[0].pdgcode();
       const PdgCode pdg_b = incoming_particles_[1].pdgcode();
       const PdgCode pdg_c = incoming_particles_[2].pdgcode();
-      const ParticleTypePtr type_deuteron =
-          ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_d));
+      const ParticleTypePtr type_deuteron = ParticleType::try_find(pdg::d);
       const ParticleTypePtr type_anti_deuteron =
-          ParticleType::try_find(PdgCode::from_decimal(pdg::decimal_antid));
+          ParticleType::try_find(pdg::antid);
 
       const int spin_factor_inc = pdg_a.spin_degeneracy() *
                                   pdg_b.spin_degeneracy() *
@@ -257,10 +256,9 @@ void ScatterActionMulti::add_possible_reactions(
        c[pdg::n] + c[pdg::p] + c[-pdg::p] + c[-pdg::n] +
        c[pdg::pi_p] + c[pdg::pi_z] + c[pdg::pi_m];
 
-    for (int pdg_decimal_A3_nucleus : {pdg::decimal_triton, pdg::decimal_antitriton,
-                                       pdg::decimal_he3, pdg::decimal_antihe3,
-                                       pdg::decimal_hypertriton, pdg::decimal_antihypertriton}) {
-      const PdgCode pdg_nucleus = PdgCode::from_decimal(pdg_decimal_A3_nucleus);
+    for (PdgCode pdg_nucleus : {pdg::triton, pdg::antitriton,
+                                pdg::he3, pdg::antihe3,
+                                pdg::hypertriton, pdg::antihypertriton}) {
       const ParticleTypePtr type_nucleus = ParticleType::try_find(pdg_nucleus);
       // Nucleus can be formed if and only if:
       // 1) Incoming particles contain enough components (like p, n, Lambda)
