@@ -97,6 +97,17 @@ class ScatterActionMulti : public Action {
    */
   double calculate_I3(const double sqrts) const;
 
+  /**
+   * Calculate the parametrized 4-body phase space.
+   *
+   * // TODO(stdnmr) Add defintion
+   *
+   *
+   * \param[in] man_s mandelstam s of reaction
+   * \return phase space value for 4 bodies
+   */
+  double parametrizaton_phi4(const double man_s) const;
+
  protected:
   /*
    * \ingroup logging
@@ -231,16 +242,6 @@ class ScatterActionMulti : public Action {
                                  const double gcell_vol,
                                  const double degen_sym_factor = 1.0) const;
 
-  /**
-   * Calculate the parametrized 4-body phase space.
-   *
-   * // TODO(stdnmr) Add defintion
-   *
-   *
-   * \param[in] man_s mandelstam s of reaction
-   * \return phase space value for 4 bodies
-   */
-  double parametrizaton_phi4(const double man_s) const;
 
   /**
    * Calculate the parametrized 5-pion phase space. The
