@@ -11,10 +11,13 @@
 
 #include <map>
 
+#include <gsl/gsl_sf_ellint.h>
+
 #include "smash/crosssections.h"
 #include "smash/integrate.h"
 #include "smash/logging.h"
 #include "smash/parametrizations.h"
+#include "smash/pow.h"
 
 namespace smash {
 static constexpr int LScatterActionMulti = LogArea::ScatterActionMulti::id;
@@ -399,30 +402,38 @@ void ScatterActionMulti::generate_final_state() {
 }
 
 double ScatterActionMulti::calculate_I3(const double sqrts) const {
-  static Integrator integrate;
-  const double m1 = incoming_particles_[0].effective_mass();
-  const double m2 = incoming_particles_[1].effective_mass();
-  const double m3 = incoming_particles_[2].effective_mass();
-  const double lower_bound = (m1 + m2) * (m1 + m2);
-  const double upper_bound = (sqrts - m3) * (sqrts - m3);
-  const auto result = integrate(lower_bound, upper_bound, [&](double m12_sqr) {
-    const double m12 = std::sqrt(m12_sqr);
-    const double e2_star = (m12_sqr - m1 * m1 + m2 * m2) / (2 * m12);
-    const double e3_star = (sqrts * sqrts - m12_sqr - m3 * m3) / (2 * m12);
-    const double m23_sqr_min =
-        (e2_star + e3_star) * (e2_star + e3_star) -
-        std::pow(std::sqrt(e2_star * e2_star - m2 * m2) +
-                     std::sqrt(e3_star * e3_star - m3 * m3),
-                 2.0);
-    const double m23_sqr_max =
-        (e2_star + e3_star) * (e2_star + e3_star) -
-        std::pow(std::sqrt(e2_star * e2_star - m2 * m2) -
-                     std::sqrt(e3_star * e3_star - m3 * m3),
-                 2.0);
-    return m23_sqr_max - m23_sqr_min;
-  });
+  const double m1 = incoming_particles_[0].type().mass();
+  const double m2 = incoming_particles_[1].type().mass();
+  const double m3 = incoming_particles_[2].type().mass();
 
-  return result;
+  if (sqrts < m1 + m2 + m3) {
+    return 0.0;
+  }
+  const double x1 = (m1 - m2) * (m1 - m2),
+               x2 = (m1 + m2) * (m1 + m2),
+               x3 = (sqrts - m3) * (sqrts - m3),
+               x4 = (sqrts + m3) * (sqrts + m3);
+  const double qmm = x3 - x1,
+               qmp = x3 - x2,
+               qpm = x4 - x1,
+               qpp = x4 - x2;
+  const double kappa = std::sqrt(qpm * qmp / (qpp * qmm));
+  const double tmp = std::sqrt(qmm * qpp);
+  const double c1 =
+      4.0 * m1 * m2 * std::sqrt(qmm / qpp) * (x4 - m3 * sqrts + m1 * m2);
+  const double c2 = 0.5 * (m1 * m1 + m2 * m2 + m3 * m3 + sqrts * sqrts) * tmp;
+  const double c3 = 8 * m1 * m2 / tmp *
+                    ((m1 * m1 + m2 * m2) * (m3 * m3 + sqrts * sqrts) -
+                     2 * m1 * m1 * m2 * m2 - 2 * m3 * m3 * sqrts * sqrts);
+  const double c4 =
+      -8 * m1 * m2 / tmp * smash::pow_int(sqrts * sqrts - m3 * m3, 2);
+  const double precision = 1.e-6;
+  const double res =
+      c1 * gsl_sf_ellint_Kcomp(kappa, precision) +
+      c2 * gsl_sf_ellint_Ecomp(kappa, precision) +
+      c3 * gsl_sf_ellint_Pcomp(kappa, -qmp / qmm, precision) +
+      c4 * gsl_sf_ellint_Pcomp(kappa, -x1 * qmp / (x2 * qmm), precision);
+  return res;
 }
 
 double ScatterActionMulti::probability_three_to_one(
