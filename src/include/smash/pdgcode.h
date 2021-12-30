@@ -723,28 +723,34 @@ class PdgCode {
    */
   int net_quark_number(const int quark) const;
 
+  /// Number of protons in nucleus
   int nucleus_p() const {
     return (is_nucleus() && !nucleus_.antiparticle_) ? nucleus_.Z_ : 0;
-  };
+  }
+  /// Number of neutrons in nucleus
   int nucleus_n() const {
     return (is_nucleus() && !nucleus_.antiparticle_)
                ? nucleus_.A_ - nucleus_.Z_ - nucleus_.n_Lambda_
                : 0;
-  };
+  }
+  /// Number of Lambdas in nucleus
   int nucleus_La() const {
     return (is_nucleus() && !nucleus_.antiparticle_) ? nucleus_.n_Lambda_ : 0;
-  };
+  }
+  /// Number of antiprotons in nucleus
   int nucleus_ap() const {
     return (is_nucleus() && nucleus_.antiparticle_) ? nucleus_.Z_ : 0;
-  };
+  }
+  /// Number of antineutrons in nucleus
   int nucleus_an() const {
     return (is_nucleus() && nucleus_.antiparticle_)
                ? nucleus_.A_ - nucleus_.Z_ - nucleus_.n_Lambda_
                : 0;
-  };
+  }
+  /// Number of anti-Lambdas in nucleus
   int nucleus_aLa() const {
     return (is_nucleus() && nucleus_.antiparticle_) ? nucleus_.n_Lambda_ : 0;
-  };
+  }
 
  private:
   /**

@@ -242,7 +242,6 @@ class ScatterActionMulti : public Action {
                                  const double gcell_vol,
                                  const double degen_sym_factor = 1.0) const;
 
-
   /**
    * Calculate the parametrized 5-pion phase space. The
    * defintion for the paramterization is given by
