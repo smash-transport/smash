@@ -65,8 +65,19 @@ static double thermal_average_sigmavrel(const ParticleTypePtr A_type,
 }
 
 TEST(create_particles_table) {
-  Test::create_actual_particletypes();
-  Test::create_actual_decaymodes();
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "π    0.138   7.7e-9  -  111         211\n"
+      "N    0.938   0       +  2112        2212\n"
+      "Λ    1.116   0       +  3122\n"
+      "d    1.8756  0       +  1000010020\n"
+      "d'   1.8856  0.1     -  1000010021\n"
+      "t    2.8089  0       +  1000010030\n"
+      "he3  2.8084  0       +  1000020030\n"
+      "H3L  2.9934  0       +  1010010030\n");
+  DecayModes::load_decaymodes(
+      "d'\n"
+      "1.  1   N N");
   sha256::Context hash_context;
   const auto hash = hash_context.finalize();
   IsoParticleType::tabulate_integrals(hash, bf::path("."));
