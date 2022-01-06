@@ -11,7 +11,7 @@
 #ifndef SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 #define SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 
-#include <HepMC3/WriterAscii.h>
+#include <HepMC3/WriterRootTree.h>
 #include <memory>
 #include <string>
 
@@ -62,7 +62,7 @@ class HepMcOutput : public HepMcInterface {
   /// Filename of output as long as simulation is still running.
   bf::path filename_unfinished_;
   /// Pointer to Ascii HepMC3 output file
-  std::unique_ptr<HepMC3::WriterAscii> output_file_;
+  std::unique_ptr<HepMC3::WriterRootTree> output_file_;
 };
 
 }  // namespace smash

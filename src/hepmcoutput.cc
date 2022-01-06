@@ -10,6 +10,7 @@
 #include "smash/hepmcoutput.h"
 
 #include "HepMC3/Print.h"
+#include "HepMC3/WriterRootTree.h"
 
 namespace smash {
 
@@ -72,7 +73,7 @@ HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
     : HepMcInterface(name, full_event), filename_(path / (name + ".asciiv3")) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += +".unfinished";
-  output_file_ = make_unique<HepMC3::WriterAscii>(filename_unfinished_.string(),
+  output_file_ = make_unique<HepMC3::WriterRootTree>(filename_unfinished_.string(),
                                                   event_.run_info());
 }
 HepMcOutput::~HepMcOutput() {
