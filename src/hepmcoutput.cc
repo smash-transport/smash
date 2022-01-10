@@ -79,6 +79,7 @@ HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
 HepMcOutput::~HepMcOutput() {
   logg[LOutput].debug() << "Renaming file " << filename_unfinished_ << " to "
                         << filename_ << std::endl;
+  output_file_->close();
   bf::rename(filename_unfinished_, filename_);
 }
 
