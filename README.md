@@ -36,7 +36,7 @@ required C++11 features):
 - clang >= 3.2
 
 It requires the following tools & libraries:
-- cmake >= 3.1
+- cmake >= 3.9
 - the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
