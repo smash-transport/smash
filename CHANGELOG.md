@@ -17,6 +17,11 @@ The major categories to group changes in this log are:
 
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
+## Unreleased
+
+### Changed
+* Minimum supported CMake version is now version 3.9
+
 
 ## SMASH-2.1
 Date: 2021-12-21
