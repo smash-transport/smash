@@ -11,6 +11,7 @@
 #ifndef SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 #define SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 
+#include <HepMC3/WriterAscii.h>
 #include <HepMC3/WriterRootTree.h>
 #include <memory>
 #include <string>
@@ -27,7 +28,8 @@ namespace smash {
  * This class writes a vertex connecting all intial particles with all final
  * particles into a HepMC outputfile. In collider mode, projectile and target
  * are combined into single intial particles with a nuclear pdg code. The output
- * file is a human-readable ASCII file. HepMC version 3 is used.
+ * file can be a human-readable ASCII file or a ROOT Tree binary file.
+ * HepMC version 3 is used.
  *
  * More details of the output format can be found in the User Guide.
  */
@@ -40,8 +42,10 @@ class HepMcOutput : public HepMcInterface {
    * \param[in] name Name of the output.
    * \param[in] full_event Whether the full event or only final-state particles
                            are printed in the output
+   * \param[in] output type: "root" or "asciiv3"
    */
-  HepMcOutput(const bf::path &path, std::string name, const bool full_event);
+  HepMcOutput(const bf::path &path, std::string name, const bool full_event,
+              std::string HepMC3_output_type);
 
   /// Destructor renames file
   ~HepMcOutput();
@@ -62,7 +66,11 @@ class HepMcOutput : public HepMcInterface {
   /// Filename of output as long as simulation is still running.
   bf::path filename_unfinished_;
   /// Pointer to Ascii HepMC3 output file
-  std::unique_ptr<HepMC3::WriterRootTree> output_file_;
+  std::unique_ptr<HepMC3::WriterAscii> asciiv3_output_file_;
+  /// Pointer to ROOT HepMC3 output file
+  std::unique_ptr<HepMC3::WriterRootTree> root_output_file_;
+  /// Output type
+  enum type_of_HepMC3_output { asciiv3, root } output_type;
 };
 
 }  // namespace smash

@@ -698,14 +698,24 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Initial_Conditions" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
-  } else if (format == "HepMC") {
+  } else if ((format == "HepMC3_ascii") || (format == "HepMC3_root")) {
 #ifdef SMASH_USE_HEPMC
     if (content == "Particles") {
-      outputs_.emplace_back(make_unique<HepMcOutput>(
-          output_path, "SMASH_HepMC_particles", false));
+      if (format == "HepMC3_ascii") {
+        outputs_.emplace_back(make_unique<HepMcOutput>(
+            output_path, "SMASH_HepMC_particles", false, "asciiv3"));
+      } else if (format == "HepMC3_root") {
+        outputs_.emplace_back(make_unique<HepMcOutput>(
+            output_path, "SMASH_HepMC_particles", false, "root"));
+      }
     } else if (content == "Collisions") {
-      outputs_.emplace_back(make_unique<HepMcOutput>(
-          output_path, "SMASH_HepMC_collisions", true));
+      if (format == "HepMC3_ascii") {
+        outputs_.emplace_back(make_unique<HepMcOutput>(
+            output_path, "SMASH_HepMC_collisions", true, "asciiv3"));
+      } else if (format == "HepMC3_root") {
+        outputs_.emplace_back(make_unique<HepMcOutput>(
+            output_path, "SMASH_HepMC_collisions", true, "root"));
+      }
     } else {
       logg[LExperiment].error(
           "HepMC only available for Particles and "

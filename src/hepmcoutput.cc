@@ -9,6 +9,7 @@
 
 #include "smash/hepmcoutput.h"
 
+#include <HepMC3/WriterAscii.h>
 #include "HepMC3/Print.h"
 #include "HepMC3/WriterRootTree.h"
 
@@ -22,8 +23,17 @@ namespace smash {
  * (https://rivet.hepforge.org). For resources regarding HepMC, see
  * http://hepmc.web.cern.ch/hepmc/ and https://arxiv.org/abs/1912.08005.
  *
- * Producing HepMC output requires HepMC3 to be installed. Download the tarball
- * from http://hepmc.web.cern.ch/hepmc/ and follow the instructions.
+ * The SMASH HepMC output can be:
+ * - _HepMC_asciiv3_ plain human readable ASCII format
+ * - _HepMc_root_ ROOT Tree binary format, readable by ROOT
+ *
+ * Producing HepMC output in asciiv3 format requires HepMC3 to be installed.
+ * Download the tarball from http://hepmc.web.cern.ch/hepmc/
+ * and follow the instructions or use the pre-compiled packages for your
+ * OS distribution.
+ * If the user wants to produce HepMC output in ROOT Tree format,
+ * ROOT must be installed (https://root.cern.ch/), as well, and HepMC should
+ * be compiled with ROOT IO support.
  *
  * \section output_hepmc_asciiv3_ ASCII HepMC Format
  *
@@ -53,9 +63,6 @@ namespace smash {
  * You can find a snippet of the configuration for this output in \ref
  * configuring_output_.
  *
- * The output is written in Asciiv3, the HepMC3 native plain text format. See
- * https://arxiv.org/abs/1912.08005 for documentation of the format.
- *
  * \note
  * - Since some HepMC readers (e.g. Rivet) need a value for the
  * nuclei-nuclei cross section, a dummy cross section of 1.0 is written to the
@@ -67,19 +74,36 @@ namespace smash {
  * ouput into Rivet, you need to disable the check for the beam particle
  * energies with the \key --ignore-beams option. When using the Rivet output
  * this check is disabled by default.
+ *
+ * \section output_hepmc_root_ ROOT HepMC Format
+ *
+ * In this case the information about each event is inserted into a ROOT
+ * Tree structure and saved in binary file that can be read by ROOT.
  **/
 HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
-                         const bool full_event)
-    : HepMcInterface(name, full_event), filename_(path / (name + ".asciiv3")) {
+                         const bool full_event, std::string HepMC3_output_type)
+    : HepMcInterface(name, full_event),
+      filename_(path / (name + "." + HepMC3_output_type)) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += +".unfinished";
-  output_file_ = make_unique<HepMC3::WriterRootTree>(filename_unfinished_.string(),
-                                                  event_.run_info());
+  if (HepMC3_output_type == "asciiv3") {
+    asciiv3_output_file_ = make_unique<HepMC3::WriterAscii>(
+        filename_unfinished_.string(), event_.run_info());
+    output_type = asciiv3;
+  } else {
+    root_output_file_ = make_unique<HepMC3::WriterRootTree>(
+        filename_unfinished_.string(), event_.run_info());
+    output_type = root;
+  }
 }
 HepMcOutput::~HepMcOutput() {
   logg[LOutput].debug() << "Renaming file " << filename_unfinished_ << " to "
                         << filename_ << std::endl;
-  output_file_->close();
+  if (output_type == asciiv3) {
+    asciiv3_output_file_->close();
+  } else {
+    root_output_file_->close();
+  }
   bf::rename(filename_unfinished_, filename_);
 }
 
@@ -91,7 +115,11 @@ void HepMcOutput::at_eventend(const Particles &particles,
                         << event_.particles().size() << " particles and "
                         << event_.vertices().size() << " vertices to output "
                         << std::endl;
-  output_file_->write_event(event_);
+  if (output_type == asciiv3) {
+    asciiv3_output_file_->write_event(event_);
+  } else {
+    root_output_file_->write_event(event_);
+  }
 }
 
 }  // namespace smash
