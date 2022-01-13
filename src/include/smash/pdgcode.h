@@ -751,6 +751,8 @@ class PdgCode {
   int nucleus_aLa() const {
     return (is_nucleus() && nucleus_.antiparticle_) ? nucleus_.n_Lambda_ : 0;
   }
+  /// Nucleus mass number
+  int nucleus_A() const { return is_nucleus() ? nucleus_.A_ : 0; }
 
  private:
   /**

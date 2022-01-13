@@ -950,51 +950,76 @@ CollisionBranchList CrossSections::two_to_four() const {
   return process_list;
 }
 
+double CrossSections::d_pi_inelastic_xs(double pion_kinetic_energy) {
+  const double x = pion_kinetic_energy;
+  return x * (4.3 + 10.0 * x) / ((x - 0.16) * (x - 0.16) + 0.007);
+}
+
+double CrossSections::d_N_inelastic_xs(double N_kinetic_energy) {
+  const double x = N_kinetic_energy;
+  return x * (1.0 + 50 * x) / (x * x + 0.01) +
+         4 * x / ((x - 0.008) * (x - 0.008) + 0.0004);
+}
+
+double CrossSections::d_aN_inelastic_xs(double aN_kinetic_energy) {
+  return 55.0 / (aN_kinetic_energy + 0.17);
+}
+
 double CrossSections::two_to_three_xs(const ParticleType& type_a,
                                       const ParticleType& type_b,
                                       double sqrts) {
-  double xsection = 0.0;
-  bool is_dpi = (type_a.is_deuteron() && type_b.pdgcode().is_pion()) ||
-                (type_b.is_deuteron() && type_a.pdgcode().is_pion());
-  bool is_dn = (type_a.is_nucleon() && type_b.is_nucleus()) ||
-               (type_b.is_nucleon() && type_a.is_nucleus());
+  double xs = 0.0;
+  ParticleTypePtr type_nucleus = &type_a, type_catalyzer = &type_b;
+  if (!type_nucleus->is_nucleus()) {
+    type_nucleus = &type_b;
+    type_catalyzer = &type_a;
+  }
 
-  if (is_dpi || is_dn) {
-    /* The cross section is parametrized using the d' resonance pole mass and
-     * width. To be consitent with the two-step treatment employing the d',
-     * the same parametrization is used for 2-to-3 case. */
-    const ParticleTypePtr type_dprime =
-        ParticleType::try_find(PdgCode::from_decimal(1000010021));
-    if (!type_dprime) {
-      throw std::invalid_argument(
-          "d' (pdg: 1000010021) resonance not found in particles.txt.\nThe "
-          "resonance is required for the cross section calculation of 2->3 "
-          "scatterings involing deuterons.");
-    }
+  const double md = type_nucleus->mass(), mcat = type_catalyzer->mass();
+  const double Tkin = (sqrts * sqrts - (md + mcat) * (md + mcat)) / (2.0 * md);
 
-    if (is_dpi) {
-      const ParticleType& type_pi =
-          type_a.pdgcode().is_pion() ? type_a : type_b;
-      xsection =
-          xs_dpi_dprimepi(sqrts, pCM(sqrts, type_a.mass(), type_b.mass()),
-                          type_dprime, type_pi);
-    }
-    if (is_dn) {
-      const ParticleType& type_N = type_a.is_nucleon() ? type_a : type_b;
-      const ParticleType& type_nucleus = type_a.is_nucleus() ? type_a : type_b;
-      xsection = xs_dn_dprimen(sqrts, pCM(sqrts, type_a.mass(), type_b.mass()),
-                               type_dprime, type_nucleus, type_N);
+  if (type_catalyzer->is_pion()) {
+    xs = d_pi_inelastic_xs(Tkin);
+  } else if (type_catalyzer->is_nucleon()) {
+    if (type_nucleus->pdgcode().antiparticle_sign() ==
+        type_catalyzer->pdgcode().antiparticle_sign()) {
+      // Nd and N̅d̅
+      xs = d_N_inelastic_xs(Tkin);
+    } else {
+      // N̅d and Nd̅
+      xs = d_aN_inelastic_xs(Tkin);
     }
   }
-  return xsection;
+  return xs;
 }
 
-double CrossSections::two_to_four_xs(const ParticleType& /*type_a*/,
-                                     const ParticleType& /*type_b*/,
-                                     double /*sqrts*/) {
-  // We use a constant cross section for testing
-  const double xsection = 90.0;
-  return xsection;
+double CrossSections::two_to_four_xs(const ParticleType& type_a,
+                                     const ParticleType& type_b, double sqrts) {
+  double xs = 0.0;
+  ParticleTypePtr type_nucleus = &type_a, type_catalyzer = &type_b;
+  if (!type_nucleus->is_nucleus()) {
+    type_nucleus = &type_b;
+    type_catalyzer = &type_a;
+  }
+
+  const double mA = type_nucleus->mass(), mcat = type_catalyzer->mass();
+  const double Tkin = (sqrts * sqrts - (mA + mcat) * (mA + mcat)) / (2.0 * mA);
+  const int A = type_nucleus->pdgcode().nucleus_A();
+  assert(A == 3);
+
+  if (type_catalyzer->is_pion()) {
+    xs = A / 2. * d_pi_inelastic_xs(Tkin);
+  } else if (type_catalyzer->is_nucleon()) {
+    if (type_nucleus->pdgcode().antiparticle_sign() ==
+        type_catalyzer->pdgcode().antiparticle_sign()) {
+      // N + A, anti-N + anti-A
+      xs = A / 2. * d_N_inelastic_xs(Tkin);
+    } else {
+      // N̅ + A and N + anti-A
+      xs = A / 2. * d_aN_inelastic_xs(Tkin);
+    }
+  }
+  return xs;
 }
 
 CollisionBranchList CrossSections::bb_xx_except_nn(
