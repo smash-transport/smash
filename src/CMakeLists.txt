@@ -73,32 +73,15 @@ endif()
 
 option(TRY_USE_HEPMC "Turn this off to disable HepMC output support in SMASH." ON)
 if(TRY_USE_HEPMC OR TRY_USE_RIVET)
-  find_program(HEPMC3_CONFIG HepMC3-config
-    DOC "Path to the HepMC3 configuration script")
-  if(HEPMC3_CONFIG)
-    execute_process(COMMAND ${HEPMC3_CONFIG} --version
-      OUTPUT_VARIABLE HEPMC3_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND ${HEPMC3_CONFIG} --includedir
-      OUTPUT_VARIABLE HEPMC3_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND ${HEPMC3_CONFIG} --libs
-      OUTPUT_VARIABLE HEPMC3_LIB OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "Found HepMC3 ${HepMC3_VERSION} at ${HEPMC3_INCLUDE_DIR} ${HEPMC3_LIB}.")
+  find_package(HepMC3 QUIET)
+  if(HepMC3_FOUND)
+    message(STATUS "Found HepMC ${HepMC3_VERSION} at ${HEPMC3_LIBRARIES}.")
     include_directories(SYSTEM "${HEPMC3_INCLUDE_DIR}")
     set(SMASH_LIBRARIES
         ${SMASH_LIBRARIES}
-        ${HEPMC3_LIB}
+        ${HEPMC3_LIBRARIES}
     )
-    if(ROOT_FOUND)
-      execute_process(COMMAND ${HEPMC3_CONFIG} --rootIO
-          OUTPUT_VARIABLE HEPMC3_ROOTIO_LIB OUTPUT_STRIP_TRAILING_WHITESPACE)
-      message(STATUS "Setting library linking flags for ROOT output support via HepMC3 ${HEPMC3_ROOTIO_LIB}.")
-      set(SMASH_LIBRARIES
-          ${SMASH_LIBRARIES}
-          ${HEPMC3_ROOTIO_LIB}
-      )
-    endif()
     add_definitions(-DSMASH_USE_HEPMC)
-    set(HepMC3_FOUND TRUE)
   else()
     message(STATUS "HepMC not found. Support disabled. See README for more information.")
   endif()
