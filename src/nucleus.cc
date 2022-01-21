@@ -315,6 +315,14 @@ void Nucleus::set_parameters_automatic() {
         set_saturation_density(0.1695);
       }
       break;
+    case 129:  // Xenon
+      // Default values.
+      if (Z == 54) {
+        set_diffusiveness(0.59);
+        set_nuclear_radius(5.36);
+        set_saturation_density(0.1786);
+      }
+      break;
     case 63:  // Copper
       // Default values.
       if (Z == 29) {
