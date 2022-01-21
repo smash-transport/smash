@@ -305,6 +305,11 @@ template <typename A, typename B> struct expand_one_impl;
 template <typename A> struct expand_one_impl<A, Typelist<>> {
   using type = Typelist<>;
 };
+template <typename A, typename... B0, typename... Bs>
+struct expand_one_impl<A, Typelist<Typelist<B0...>, Bs...>> {
+  using type = concat<typename A::template type<B0...>,
+                      typename expand_one_impl<A, Typelist<Bs...>>::type>;
+};
 template <typename A, typename B0, typename... Bs>
 struct expand_one_impl<A, Typelist<B0, Bs...>> {
   using type = concat<typename A::template type<B0>,

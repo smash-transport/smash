@@ -36,7 +36,7 @@ required C++11 features):
 - clang >= 3.2
 
 It requires the following tools & libraries:
-- cmake >= 3.1
+- cmake >= 3.9
 - the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
@@ -210,12 +210,12 @@ Producing ROOT output requires ROOT installed (see http://root.cern.ch).
 If ROOT is found, the support for ROOT output is automatically enabled.
 In order to disable it, one can do the following:
 
-    cmake -DUSE_ROOT=OFF <source_dir>
+    cmake -DTRY_USE_ROOT=OFF <source_dir>
     make
 
 The same rules apply to the HepMC output.
 
-    cmake -DUSE_HEPMC=OFF <source_dir>
+    cmake -DTRY_USE_HEPMC=OFF <source_dir>
     make
 
 See http://hepmc.web.cern.ch/hepmc/ for download and the projects' README for

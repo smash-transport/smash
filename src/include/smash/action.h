@@ -326,6 +326,15 @@ class Action {
     using std::invalid_argument::invalid_argument;
   };
 
+  /**
+   * Implementation of the full n-body phase-space sampling
+   * (masses, momenta, angles) in the center-of-mass frame for
+   * the final state particles. Function is static for convenient testing.
+   */
+  static void sample_manybody_phasespace_impl(
+      double sqrts, const std::vector<double> &m,
+      std::vector<FourVector> &sampled_momenta);
+
  protected:
   /// List with data of incoming particles.
   ParticleList incoming_particles_;
@@ -434,18 +443,12 @@ class Action {
   void sample_2body_phasespace();
 
   /**
-   * Sample the full 3-body phase-space (masses, momenta, angles)
+   * Sample the full n-body phase-space (masses, momenta, angles)
    * in the center-of-mass frame for the final state particles.
    *
    * \throw std::invalid_argument if one outgoing particle is a resonance
    */
-  virtual void sample_3body_phasespace();
-
-  /**
-   * Sample the full 5-body phase-space (masses, momenta, angles)
-   * in the center-of-mass frame for the final state particles.
-   */
-  virtual void sample_5body_phasespace();
+  void sample_manybody_phasespace();
 
   /**
    * Assign the formation time to the outgoing particles.

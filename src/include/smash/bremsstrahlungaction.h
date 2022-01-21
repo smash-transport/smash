@@ -58,7 +58,7 @@ class BremsstrahlungAction : public ScatterAction {
    * Sample the final state anisotropically, considering the differential
    * cross sections with respect to theta and k.
    */
-  void sample_3body_phasespace() override;
+  void sample_3body_phasespace();
 
   /**
    * Return the weight of the last created photon.

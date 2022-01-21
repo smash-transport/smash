@@ -247,8 +247,7 @@ public:
 
   template <class T> T &fuzzyness()
   {
-    static_assert(std::is_floating_point<T>::value, "");
-    static T value = 1;
+    static T value = std::is_floating_point<T>::value ? 1 : 0;
     return value;
   }
 
@@ -411,6 +410,7 @@ class Compare  //{{{1
 public:
   // tag types {{{2
   struct Fuzzy {};
+  struct Fuzzy2 {};
   struct AbsoluteError {};
   struct RelativeError {};
   struct Mem {};
@@ -510,11 +510,21 @@ public:
   }
 
   // Fuzzy Compare ctor {{{2
+  template <class T1, class T2, class Traits = compare_traits<T1, T2>, class... Ts>
+  VIR_ALWAYS_INLINE Compare(const T1 &a, const T2 &b, const char *_a, const char *_b,
+                            const char *_file, int _line, Fuzzy, Ts &&... _more)
+      : Compare(a, b, _a, _b, _file, _line, Fuzzy2{},
+                global_unit_test_object_.fuzzyness<typename Traits::value_type>(),
+                static_cast<Ts &&>(_more)...)
+  {
+  }
+
   // forward non-floating-point calls to the standard Compare
   template <class T1, class T2, class Traits = compare_traits<T1, T2>, class... Ts,
             class = typename std::enable_if<!Traits::is_fuzzy_comparable>::type>
   VIR_ALWAYS_INLINE Compare(const T1 &a, const T2 &b, const char *_a, const char *_b,
-                            const char *_file, int _line, Fuzzy, Ts &&...)
+                            const char *_file, int _line, Fuzzy2,
+                            typename Traits::value_type, Ts &&...)
       : Compare(a, b, _a, _b, _file, _line)
   {
   }
@@ -537,38 +547,42 @@ public:
             class = typename std::enable_if<Traits::is_fuzzy_comparable>::type,
             class = T1>
   VIR_ALWAYS_INLINE Compare(const T1 &a, const T2 &b, const char *_a, const char *_b,
-                            const char *_file, int _line, Fuzzy, Ts &&... extra_data)
+                            const char *_file, int _line, Fuzzy2,
+                            typename Traits::value_type allowed_distance,
+                            Ts &&... extra_data)
       : m_ip(getIp())
-      , m_failed(!Traits::ulp_compare_and_log(
-            Traits::ulp_distance(a, b),
-            global_unit_test_object_.fuzzyness<typename Traits::value_type>()))
+      , m_failed(
+            !Traits::ulp_compare_and_log(Traits::ulp_distance(a, b), allowed_distance))
   {
-    using T = typename Traits::value_type;
     if (VIR_IS_UNLIKELY(m_failed)) {
-      printFirst();
-      printPosition(_file, _line);
-      print(_a);
-      print(" (");
-      print(std::setprecision(10));
-      print(a);
-      print(") ≈ ");
-      print(_b);
-      print(" (");
-      print(std::setprecision(10));
-      print(b);
-      print(std::setprecision(6));
-      print(") -> ");
-      print(a == b);
-      print("\ndistance: ");
-      print(Traits::ulp_distance_signed(a, b));
-      print(" ulp, allowed distance: ±");
-      print(global_unit_test_object_.fuzzyness<T>());
-      print(" ulp");
-      print(' ');
+      noinline([&]() {
+        printFirst();
+        printPosition(_file, _line);
+        print(_a);
+        print(" (");
+        print(std::setprecision(10));
+        print(a);
+        print(") ≈ ");
+        print(_b);
+        print(" (");
+        print(std::setprecision(10));
+        print(b);
+        print(std::setprecision(6));
+        print(") -> ");
+        print(a == b);
+        print("\ndistance: ");
+        print(Traits::ulp_distance_signed(a, b));
+        print(" ulp, allowed distance: ±");
+        print(allowed_distance);
+        print(" ulp");
+        print(' ');
+      });
     }
     if (global_unit_test_object_.plotFile.is_open()) {
-      global_unit_test_object_.plotFile << Traits::to_datafile_string(
-          b, Traits::ulp_distance_signed(a, b), static_cast<Ts&&>(extra_data)...);
+      noinline([&]() {
+        global_unit_test_object_.plotFile << Traits::to_datafile_string(
+            b, Traits::ulp_distance_signed(a, b), static_cast<Ts &&>(extra_data)...);
+      });
     }
   }
 
@@ -579,34 +593,36 @@ public:
       : m_ip(getIp()), m_failed(absoluteErrorTest(a, b, error))
   {
     if (VIR_IS_UNLIKELY(m_failed)) {
-      printFirst();
-      printPosition(_file, _line);
-      print(_a);
-      print(" (");
-      print(std::setprecision(10));
-      print(a);
-      print(") ≈ ");
-      print(_b);
-      print(" (");
-      print(std::setprecision(10));
-      print(b);
-      print(std::setprecision(6));
-      print(") -> ");
-      print(a == b);
-      print("\ndifference: ");
-      if (a > b) {
-        print(a - b);
-      } else {
-        print('-');
-        print(b - a);
-      }
-      print(", allowed difference: ±");
-      print(error);
-      print("\ndistance: ");
-      using vir::detail::ulpDiffToReferenceSigned;
-      print(ulpDiffToReferenceSigned(a, b));
-      print(" ulp");
-      print(' ');
+      noinline([&]() {
+        printFirst();
+        printPosition(_file, _line);
+        print(_a);
+        print(" (");
+        print(std::setprecision(10));
+        print(a);
+        print(") ≈ ");
+        print(_b);
+        print(" (");
+        print(std::setprecision(10));
+        print(b);
+        print(std::setprecision(6));
+        print(") -> ");
+        print(a == b);
+        print("\ndifference: ");
+        if (a > b) {
+          print(a - b);
+        } else {
+          print('-');
+          print(b - a);
+        }
+        print(", allowed difference: ±");
+        print(error);
+        print("\ndistance: ");
+        using vir::detail::ulpDiffToReferenceSigned;
+        print(ulpDiffToReferenceSigned(a, b));
+        print(" ulp");
+        print(' ');
+      });
     }
   }
 
@@ -617,43 +633,45 @@ public:
       : m_ip(getIp()), m_failed(relativeErrorTest(a, b, error))
   {
     if (VIR_IS_UNLIKELY(m_failed)) {
-      printFirst();
-      printPosition(_file, _line);
-      print(_a);
-      print(" (");
-      print(std::setprecision(10));
-      print(a);
-      print(") ≈ ");
-      print(_b);
-      print(" (");
-      print(std::setprecision(10));
-      print(b);
-      print(std::setprecision(6));
-      print(") -> ");
-      print(a == b);
-      print("\nrelative difference: ");
-      if (a > b) {
-        print((a - b) / (b > 0 ? b : -b));
-      } else {
-        print('-');
-        print((b - a) / (b > 0 ? b : -b));
-      }
-      print(", allowed: ±");
-      print(error);
-      print("\nabsolute difference: ");
-      if (a > b) {
-        print(a - b);
-      } else {
-        print('-');
-        print(b - a);
-      }
-      print(", allowed: ±");
-      print(error * (b > 0 ? b : -b));
-      print("\ndistance: ");
-      using vir::detail::ulpDiffToReferenceSigned;
-      print(ulpDiffToReferenceSigned(a, b));
-      print(" ulp");
-      print(' ');
+      noinline([&]() {
+        printFirst();
+        printPosition(_file, _line);
+        print(_a);
+        print(" (");
+        print(std::setprecision(10));
+        print(a);
+        print(") ≈ ");
+        print(_b);
+        print(" (");
+        print(std::setprecision(10));
+        print(b);
+        print(std::setprecision(6));
+        print(") -> ");
+        print(a == b);
+        print("\nrelative difference: ");
+        if (a > b) {
+          print((a - b) / (b > 0 ? b : -b));
+        } else {
+          print('-');
+          print((b - a) / (b > 0 ? b : -b));
+        }
+        print(", allowed: ±");
+        print(error);
+        print("\nabsolute difference: ");
+        if (a > b) {
+          print(a - b);
+        } else {
+          print('-');
+          print(b - a);
+        }
+        print(", allowed: ±");
+        print(error * (b > 0 ? b : -b));
+        print("\ndistance: ");
+        using vir::detail::ulpDiffToReferenceSigned;
+        print(ulpDiffToReferenceSigned(a, b));
+        print(" ulp");
+        print(' ');
+      });
     }
   }
 
@@ -662,15 +680,17 @@ public:
       : m_ip(getIp()), m_failed(!good)
   {
     if (VIR_IS_UNLIKELY(m_failed)) {
-      printFirst();
-      printPosition(_file, _line);
-      print(cond);
-      print(' ');
+      noinline([&]() {
+        printFirst();
+        printPosition(_file, _line);
+        print(cond);
+        print(' ');
+      });
     }
   }
 
   // FAIL ctor {{{2
-  VIR_ALWAYS_INLINE Compare(const char *_file, int _line) : m_ip(getIp()), m_failed(true)
+  VIR_NEVER_INLINE Compare(const char *_file, int _line) : m_ip(getIp()), m_failed(true)
   {
     printFirst();
     printPosition(_file, _line);
@@ -681,7 +701,7 @@ public:
   template <typename... Ts> VIR_ALWAYS_INLINE const Compare& on_failure(const Ts&... xs) const
   {
     if (VIR_IS_UNLIKELY(m_failed)) {
-      [](const std::initializer_list<int> &) {}({(print(xs), 0)...});
+      noinline([&]() { [[maybe_unused]] int tmp[] = {(print(xs), 0)...}; });
     }
     return *this;
   }
@@ -1016,6 +1036,11 @@ inline void setFuzzyness(T fuzz)
 
 // asBytes{{{1
 template <typename T> detail::PrintMemDecorator<T> asBytes(const T &x) { return {x}; }
+
+// ULP_COMPARE {{{1
+#define ULP_COMPARE(a, b, allowed_distance)                                              \
+  vir::test::detail::Compare(a, b, #a, #b, __FILE__, __LINE__,                           \
+                             vir::test::detail::Compare::Fuzzy2(), allowed_distance)
 
 // FUZZY_COMPARE {{{1
 #define FUZZY_COMPARE(a, b)                                                              \
