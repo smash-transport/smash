@@ -351,7 +351,7 @@ void Nucleus::set_parameters_automatic() {
       }
   }
   // calculate the saturation density
-  set_saturation_density(calculate_saturation_density());
+  // set_saturation_density(calculate_saturation_density());
 }
 
 void Nucleus::set_parameters_from_config(Configuration &config) {
