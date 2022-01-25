@@ -183,7 +183,7 @@ class ScatterActionMulti : public Action {
    * formula, since they are treated as input for the function.
    *
    * \param[in] type_out1 type of outgoing particle 1
-   * \param[in] type_out2 type of outgoing particle 1
+   * \param[in] type_out2 type of outgoing particle 2
    * \param[in] dt timestep size
    * \param[in] gcell_vol grid cell volume
    * \param[in] degen_sym_factor degeneracy factor for reaction
@@ -206,7 +206,7 @@ class ScatterActionMulti : public Action {
    * input for the function.
    *
    * \param[in] type_out1 type of outgoing particle 1
-   * \param[in] type_out2 type of outgoing particle 1
+   * \param[in] type_out2 type of outgoing particle 2
    * \param[in] dt timestep size
    * \param[in] gcell_vol grid cell volume
    * \param[in] degen_sym_factor degeneracy factor for reaction

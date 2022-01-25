@@ -155,9 +155,7 @@ CollisionBranchList CrossSections::generate_collision_list(
   if (p_pythia < 1.) {
     if (two_to_one_switch) {
       // resonance formation (2->1)
-      const bool prevent_dprime_form =
-          included_multi[IncludedMultiParticleReactions::Deuteron_3to2];
-      append_list(process_list, two_to_one(prevent_dprime_form),
+      append_list(process_list, two_to_one(),
                   (1. - p_pythia) * scale_xs);
     }
     if (included_2to2.any()) {
@@ -710,8 +708,7 @@ double CrossSections::nk_el() const {
   }
 }
 
-CollisionBranchList CrossSections::two_to_one(
-    const bool prevent_dprime_form) const {
+CollisionBranchList CrossSections::two_to_one() const {
   CollisionBranchList resonance_process_list;
   const ParticleType& type_particle_a = incoming_particles_[0].type();
   const ParticleType& type_particle_b = incoming_particles_[1].type();
@@ -726,12 +723,6 @@ CollisionBranchList CrossSections::two_to_one(
     if (type_resonance.is_stable()) {
       continue;
     }
-
-    // Skip d' froming, when doing 2-to-3 deuteron reactions directly (w/o d')
-    if (prevent_dprime_form && type_resonance.is_dprime()) {
-      continue;
-    }
-
     // Same resonance as in the beginning, ignore
     if ((!type_particle_a.is_stable() &&
          type_resonance.pdgcode() == type_particle_a.pdgcode()) ||
