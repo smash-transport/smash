@@ -346,6 +346,16 @@ ScatterActionsFinder::ScatterActionsFinder(
         "Change your config accordingly.");
   }
 
+  if (incl_multi_set_[IncludedMultiParticleReactions::Deuteron_3to2] == 1 &&
+      ParticleType::try_find(pdg::dprime)) {
+    throw std::invalid_argument(
+        "Do not use the d' resonance and enable \"Deuteron_3to2\" "
+        "`Multi_Particle_Reactions` at the same time. Either use the direct "
+        "3-to-2 rections or the d' together with \"PiDeuteron_to_pidprime\" "
+        "and \"NDeuteron_to_Ndprime\" in `Included_2to2`. Otherwise the "
+        "deuteron 3-to-2 reactions would be double counted.");
+  }
+
   if ((nnbar_treatment_ == NNbarTreatment::TwoToFive &&
        incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] != 1) ||
       (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] == 1 &&

@@ -1051,6 +1051,8 @@ namespace pdg {
 const PdgCode d(PdgCode::from_decimal(1000010020));
 /// Anti-deuteron in decimal digits.
 const PdgCode antid(PdgCode::from_decimal(-1000010020));
+/// Deuteron-prime resonance.
+const PdgCode dprime(PdgCode::from_decimal(1000010021));
 /// Triton.
 const PdgCode triton(PdgCode::from_decimal(1000010030));
 /// Anti-triton.

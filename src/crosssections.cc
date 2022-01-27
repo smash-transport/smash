@@ -155,8 +155,7 @@ CollisionBranchList CrossSections::generate_collision_list(
   if (p_pythia < 1.) {
     if (two_to_one_switch) {
       // resonance formation (2->1)
-      append_list(process_list, two_to_one(),
-                  (1. - p_pythia) * scale_xs);
+      append_list(process_list, two_to_one(), (1. - p_pythia) * scale_xs);
     }
     if (included_2to2.any()) {
       // 2->2 (inelastic)
