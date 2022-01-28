@@ -737,7 +737,7 @@ class PdgCode {
       bool antiparticle_ : 1;
 #else  // reverse ordering
       bool antiparticle_ : 1;
-      bool is_nucleus : 1, : 2;
+      bool is_nucleus_ : 1, : 2;
       std::uint32_t n_ : 4;
       std::uint32_t n_R_ : 4;
       std::uint32_t n_L_ : 4;
