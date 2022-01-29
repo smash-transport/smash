@@ -698,33 +698,33 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Initial_Conditions" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
-  } else if ((format == "HepMC3_ascii") || (format == "HepMC3_root")) {
+  } else if ((format == "HepMC3_asciiv3") || (format == "HepMC3_treeroot")) {
 #ifdef SMASH_USE_HEPMC
     if (content == "Particles") {
-      if (format == "HepMC3_ascii") {
+      if (format == "HepMC3_asciiv3") {
         outputs_.emplace_back(make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_particles", false, "asciiv3"));
-      } else if (format == "HepMC3_root") {
+      } else if (format == "HepMC3_treeroot") {
         outputs_.emplace_back(make_unique<HepMcOutput>(
-            output_path, "SMASH_HepMC_particles", false, "root"));
+            output_path, "SMASH_HepMC_particles", false, "treeroot"));
       }
     } else if (content == "Collisions") {
-      if (format == "HepMC3_ascii") {
+      if (format == "HepMC3_asciiv3") {
         outputs_.emplace_back(make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_collisions", true, "asciiv3"));
-      } else if (format == "HepMC3_root") {
+      } else if (format == "HepMC3_treeroot") {
         outputs_.emplace_back(make_unique<HepMcOutput>(
-            output_path, "SMASH_HepMC_collisions", true, "root"));
+            output_path, "SMASH_HepMC_collisions", true, "treeroot"));
       }
     } else {
       logg[LExperiment].error(
-          "HepMC only available for Particles and "
+          "HepMC3 only available for Particles and "
           "Collisions content. Requested for " +
           content + ".");
     }
 #else
     logg[LExperiment].error(
-        "HepMC output requested, but HepMC support not compiled in");
+        "HepMC3 output requested, but HepMC3 support not compiled in");
 #endif
   } else if (content == "Coulomb" && format == "VTK") {
     outputs_.emplace_back(
