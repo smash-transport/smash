@@ -17,6 +17,14 @@ The major categories to group changes in this log are:
 
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
+## [Unreleased](https://github.com/smash-transport/smash/compare/SMASH-2.1...HEAD)
+
+### Input / Output
+* Added `HepMC3_treeroot` output
+
+### Changed
+* `HepMC` output in asciiv3 native format renamed `HepMC3_asciiv3`
+
 ## [SMASH-2.1](https://github.com/smash-transport/smash/compare/SMASH-2.0.2...SMASH-2.1)
 Date: 2021-12-21
 
