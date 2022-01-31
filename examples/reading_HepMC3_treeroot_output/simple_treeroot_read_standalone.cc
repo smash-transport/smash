@@ -124,7 +124,7 @@ int main(int argc, char** argv)
             std::cout << "Fields: particle id, particle PDG id, px, py, pz, E" << std::endl;
             for (int np=0; np<A->particles_; np++)
                 {
-                    std::cout << np << "   " << A->particles_pid[np];
+                    std::cout << np << "   " << A->particles_pid[np] << "   ";
                     std::cout << A->particles_momentum_m_v1[np] << "   ";
                     std::cout << A->particles_momentum_m_v2[np] << "   ";
                     std::cout << A->particles_momentum_m_v3[np] << "   ";

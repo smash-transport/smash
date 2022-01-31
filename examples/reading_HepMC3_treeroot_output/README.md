@@ -15,7 +15,7 @@ within the same shell instance that will be later used to try the example does u
 
 ## Compilation:
 
-`g++ -o simple_treeroot_read_standalone.cc.{exe,cxx} $(root-config --cflags --glibs)`
+`g++ -o simple_treeroot_read_standalone.{exe,cc} $(root-config --cflags --glibs)`
 
 ## Execution:
 
