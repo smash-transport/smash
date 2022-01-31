@@ -42,7 +42,7 @@ class HepMcOutput : public HepMcInterface {
    * \param[in] name Name of the output.
    * \param[in] full_event Whether the full event or only final-state particles
                            are printed in the output
-   * \param[in] output type: "root" or "asciiv3"
+   * \param[in] HepMC3_output_type: "root" or "asciiv3"
    */
   HepMcOutput(const bf::path &path, std::string name, const bool full_event,
               std::string HepMC3_output_type);
@@ -68,9 +68,11 @@ class HepMcOutput : public HepMcInterface {
   /// Pointer to Ascii HepMC3 output file
   std::unique_ptr<HepMC3::WriterAscii> asciiv3_output_file_;
   /// Pointer to ROOT HepMC3 output file
-  std::unique_ptr<HepMC3::WriterRootTree> root_output_file_;
-  /// Output type
-  enum type_of_HepMC3_output { asciiv3, root } output_type;
+  std::unique_ptr<HepMC3::WriterRootTree> treeroot_output_file_;
+  /// enum to identify the HepMC3 output type
+  typedef enum enum_output { asciiv3, treeroot } type_of_HepMC3_output;
+  /// HepMC3 output type
+  type_of_HepMC3_output output_type_;
 };
 
 }  // namespace smash

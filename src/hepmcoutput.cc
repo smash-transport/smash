@@ -25,7 +25,7 @@ namespace smash {
  *
  * The SMASH HepMC output can be:
  * - _HepMC_asciiv3_ plain human readable ASCII format
- * - _HepMc_root_ ROOT Tree binary format, readable by ROOT
+ * - _HepMc_treeroot_ ROOT Tree binary format, readable by ROOT
  *
  * Producing HepMC output in asciiv3 format requires HepMC3 to be installed.
  * Download the tarball from http://hepmc.web.cern.ch/hepmc/
@@ -33,7 +33,9 @@ namespace smash {
  * OS distribution.
  * If the user wants to produce HepMC output in ROOT Tree format,
  * ROOT must be installed (https://root.cern.ch/), as well, and HepMC should
- * be compiled with ROOT IO support.
+ * be compiled with ROOT IO support (`-DHEPMC3_ENABLE_ROOTIO:BOOL=OFF`) or,
+ * when using a binary precompiled distribution, the appropriate rootIO
+ * package must be installed.
  *
  * \section output_hepmc_asciiv3_ ASCII HepMC Format
  *
@@ -79,6 +81,68 @@ namespace smash {
  *
  * In this case the information about each event is inserted into a ROOT
  * Tree structure and saved in binary file that can be read by ROOT.
+ *
+ * Here is an example of a basic ROOT macro that displays the structure of
+ * the tree, assuming that the output file is in the same directory as the
+ * macro:
+ * \code
+ * // file name: read_treeroot.C
+ * #include <TFile.h>
+ * #include <TTree.h>
+ *
+ * int read_hempc3_treeroot() {
+ * // Opens a SMASH HepMC3 treeroot output file to be read in
+ * TFile *input_file = TFile::Open("SMASH_HepMC_particles.treeroot","read");
+ * if (input_file->IsOpen()) {
+ *   printf("Successfully opened file %s\n", input_file->GetName());
+ * } else {
+ *   printf("Error at opening file %s\n", input_file->GetName());
+ * }
+ *
+ * // Shows the top level contents of the file
+ * input_file->ls();
+ *
+ * // Gets a tree from file
+ * TTree *tree = static_cast<TTree*>(input_file->Get("hepmc3_tree"));
+ *
+ * // Gets the number of entries (i.e. events) stored in the tree
+ * Int_t nentries = tree->GetEntries();
+ * std::cout << "\The number of entries in the tree is " << nentries <<
+ std::endl;
+ *
+ * // Prints the branches of the tree
+ * std::cout << "\n\nA bit more info:" << std::endl;
+ *
+ * tree->Print();
+ *
+ * // Extracts a bit more information
+ * std::cout << "\n\nInfo about the branch hepmc3_event:" << std::endl;
+ *
+ * TBranch *b = tree->GetBranch("hepmc3_event");
+ *
+ * tree->Show(0);
+ *
+ * input_file->Close();
+ *
+ * return 0;
+ * }
+ * \endcode
+ *
+ * To load and execute the macro with ROOT:
+ * \code
+ * root
+ * .L read_treeroot.C
+ * read_hempc3_treeroot()
+ * \endcode
+ *
+ * In the subdirectory `examples/reading_HepMC3_treeroot_output` under the
+ * SMASH source code main directory there is a basic example of a C++ code
+ * that reads the output without requiring HepMC3, but only ROOT.
+ *
+ * Among the examples of the HepMC3 library source code there is a converter
+ * between different formats. The converter allows to transform the SMASH
+ * HepMC3 output of a subtype (asciiv3 or treeroot) into the other.
+ *
  **/
 HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
                          const bool full_event, std::string HepMC3_output_type)
@@ -89,20 +153,20 @@ HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
   if (HepMC3_output_type == "asciiv3") {
     asciiv3_output_file_ = make_unique<HepMC3::WriterAscii>(
         filename_unfinished_.string(), event_.run_info());
-    output_type = asciiv3;
+    output_type_ = asciiv3;
   } else {
-    root_output_file_ = make_unique<HepMC3::WriterRootTree>(
+    treeroot_output_file_ = make_unique<HepMC3::WriterRootTree>(
         filename_unfinished_.string(), event_.run_info());
-    output_type = root;
+    output_type_ = treeroot;
   }
 }
 HepMcOutput::~HepMcOutput() {
   logg[LOutput].debug() << "Renaming file " << filename_unfinished_ << " to "
                         << filename_ << std::endl;
-  if (output_type == asciiv3) {
+  if (output_type_ == asciiv3) {
     asciiv3_output_file_->close();
   } else {
-    root_output_file_->close();
+    treeroot_output_file_->close();
   }
   bf::rename(filename_unfinished_, filename_);
 }
@@ -115,10 +179,10 @@ void HepMcOutput::at_eventend(const Particles &particles,
                         << event_.particles().size() << " particles and "
                         << event_.vertices().size() << " vertices to output "
                         << std::endl;
-  if (output_type == asciiv3) {
+  if (output_type_ == asciiv3) {
     asciiv3_output_file_->write_event(event_);
   } else {
-    root_output_file_->write_event(event_);
+    treeroot_output_file_->write_event(event_);
   }
 }
 
