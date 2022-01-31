@@ -17,15 +17,19 @@ The major categories to group changes in this log are:
 
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
-## [Unreleased](https://github.com/smash-transport/smash/compare/SMASH-2.1...HEAD)
+
+## Unreleased
 
 ### Input / Output
 * Added `HepMC3_treeroot` output
 
 ### Changed
 * `HepMC` output in asciiv3 native format renamed `HepMC3_asciiv3`
+* Minimum supported CMake version is now version 3.9
+* Renamed `USE_ROOT`, `USE_HEPMC` and `USE_RIVET` CMake options to `TRY_USE_ROOT`, `TRY_USE_HEPMC` and `TRY_USE_RIVET`, respectively
 
-## [SMASH-2.1](https://github.com/smash-transport/smash/compare/SMASH-2.0.2...SMASH-2.1)
+
+## SMASH-2.1
 Date: 2021-12-21
 
 ### Input / Output
@@ -51,7 +55,10 @@ Date: 2021-12-21
 * Evaluation of failed string processes. BBbar pairs are now forced to annihilate
 * Updated Dockerfile and Singularity definition file (matching pre-built container on Github)
 
-## [SMASH-2.0.2](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...SMASH-2.0.2)
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.0.2...SMASH-2.1)
+
+
+## SMASH-2.0.2
 Date: 2021-06-23
 
 ### Input / Output
@@ -62,15 +69,19 @@ Date: 2021-06-23
 * Minimum supported cmake version is now version 3.1
 * Continuous integration now uses Github Actions
 
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.0.1...SMASH-2.0.2)
 
-## [SMASH-2.0.1](https://github.com/smash-transport/smash/compare/SMASH-2.0...SMASH-2.0.1)
+
+## SMASH-2.0.1
 Date: 2020-12-21
 
 ### Input / Output
 * Fixed event number counting for intermediate OSCAR output
 
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.0...SMASH-2.0.1)
 
-## [SMASH-2.0](https://github.com/smash-transport/smash/compare/SMASH-1.8...SMASH-2.0)
+
+## SMASH-2.0
 Date: 2020-12-17
 
 **New major version of SMASH**
@@ -127,17 +138,19 @@ Major changes:
 * Integrator1dMonte as it was not used anymore.
 * Integrator2d with the GSL Monte-Carlo integration functions. Replaced by the Integrator2dCuhre which performs 2D integrations according to the Cuhre algorithm. The latter was now renamed to Integrator2d.
 
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-1.8...SMASH-2.0)
 
 
-## [SMASH-1.8.1](https://github.com/smash-transport/smash/compare/SMASH-1.8...SMASH-1.8.1)
+## SMASH-1.8.1
 Date: 2020-08-13
 
 ### Changed
 * Improve version determination for Pythia.
 
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-1.8...SMASH-1.8.1)
 
 
-## [SMASH-1.8](https://github.com/smash-transport/smash/compare/SMASH-1.7...SMASH-1.8)
+## SMASH-1.8
 Date: 2020-04-07
 
 ### Input / Output
@@ -174,9 +187,10 @@ Date: 2020-04-07
 * Fix floating point exceptions that were raised if initial conditions output is enabled
 * Fix light nuclei not being affected by potentials
 
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-1.7...SMASH-1.8)
 
 
-## [SMASH-1.7](https://github.com/smash-transport/smash/compare/SMASH-1.6...SMASH-1.7)
+## SMASH-1.7
 Date: 2019-10-14
 
 ### Input / Output
@@ -207,9 +221,10 @@ Date: 2019-10-14
 - Collision finding with frozen Fermi motion: Use beam momentum for collision finding if nuclei have not interacted
 - Fix output time for output at the event end on the command line to always be correct.
 
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-1.6...SMASH-1.7)
 
 
-## [SMASH-1.6](https://github.com/smash-transport/smash/compare/SMASH-1.5.2...SMASH-1.6)
+## SMASH-1.6
 Date: 2019-05-24
 
 ### In- and Output
@@ -230,9 +245,10 @@ Date: 2019-05-24
 - Documentation of formation time
 - Correct declaration of Woods-Saxon distribution for deformed nuclei
 
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-1.5.2...SMASH-1.6)
 
 
-## [SMASH-1.5.2](https://github.com/smash-transport/smash/compare/SMASH-1.5.1...SMASH-1.5.2)
+## SMASH-1.5.2
 Date: 2019-03-07
 
 **Version for JETSCAPE run**
@@ -254,9 +270,10 @@ Date: 2019-03-07
     - Adjust resonance decay times
     - Add unformed particles to grid for collision finding, if they form during the time step
 
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-1.5.1...SMASH-1.5.2)
 
 
-## [SMASH-1.5.1](https://github.com/smash-transport/smash/compare/SMASH-1.5...SMASH-1.5.1)
+## SMASH-1.5.1
 Date: 2018-12-04
 
 ### Changed
@@ -267,12 +284,13 @@ fragmentation processes
 ### Fixed
 - Correct generic radius for nuclei with A > 16, except for Au, Pb, U, Cu as they are/were exactly specified
 
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-1.5...SMASH-1.5.1)
 
 
-## [SMASH-1.5](https://github.com/smash-transport/smash/releases/tag/SMASH-1.5)
+## SMASH-1.5
 Date: 2018-11-27
 
-**First public version of SMASH**
+**[First public version of SMASH](https://github.com/smash-transport/smash/releases/tag/SMASH-1.5)**
 
 Known issues:
 
