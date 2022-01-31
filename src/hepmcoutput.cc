@@ -37,6 +37,19 @@ namespace smash {
  * when using a binary precompiled distribution, the appropriate rootIO
  * package must be installed.
  *
+ * \note
+ * - Since some HepMC readers (e.g. Rivet) need a value for the
+ * nuclei-nuclei cross section, a dummy cross section of 1.0 is written to the
+ * output.
+ * - To avoid confusion with the definition of these quantities within the
+ * Glauber model, in the header of an event we set the numbers of participants
+ * and of collisions to -1.
+ * - If you use Fermi motion and want to read in the HepMC
+ * ouput into Rivet, you need to disable the check for the beam particle
+ * energies with the \key --ignore-beams option. When using the Rivet output
+ * this check is disabled by default.
+ * - The two initial ions are included in the particle list, as well.
+ *
  * \section output_hepmc_asciiv3_ ASCII HepMC Format
  *
  * HepMC generally structures each event into particles and vertices
@@ -64,18 +77,6 @@ namespace smash {
  *
  * You can find a snippet of the configuration for this output in \ref
  * configuring_output_.
- *
- * \note
- * - Since some HepMC readers (e.g. Rivet) need a value for the
- * nuclei-nuclei cross section, a dummy cross section of 1.0 is written to the
- * output.
- * - To avoid confusion with the definition of these quantities within the
- * Glauber model, in the header of an event we set the numbers of participants
- * and of collisions to -1.
- * - If you use Fermi motion and want to read in the HepMC
- * ouput into Rivet, you need to disable the check for the beam particle
- * energies with the \key --ignore-beams option. When using the Rivet output
- * this check is disabled by default.
  *
  * \section output_hepmc_root_ ROOT HepMC Format
  *
