@@ -107,7 +107,7 @@ namespace smash {
  *
  * // Gets the number of entries (i.e. events) stored in the tree
  * Int_t nentries = tree->GetEntries();
- * std::cout << "\The number of entries in the tree is " << nentries <<
+ * std::cout << "\nThe number of entries in the tree is " << nentries <<
  std::endl;
  *
  * // Prints the branches of the tree
