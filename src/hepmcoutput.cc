@@ -80,7 +80,7 @@ namespace smash {
  * \section output_hepmc_root_ ROOT HepMC Format
  *
  * In this case the information about each event is inserted into a ROOT
- * Tree structure and saved in binary file that can be read by ROOT.
+ * Tree structure and saved in a binary file that can be read by ROOT.
  *
  * Here is an example of a basic ROOT macro that displays the structure of
  * the tree, assuming that the output file is in the same directory as the
