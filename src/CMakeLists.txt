@@ -82,7 +82,7 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
         ${HEPMC3_LIBRARIES}
     )
     add_definitions(-DSMASH_USE_HEPMC)
-    if((NOT DEFINED HEPMC3_ROOTIO_LIB) OR (NOT ROOT_FOUND))
+    if((NOT HEPMC3_ROOTIO_LIB) OR (NOT ROOT_FOUND))
         message(STATUS "HepMC ROOT IO support disabled")
     else()
         message(STATUS "HepMC ROOT IO support enabled")
