@@ -705,28 +705,28 @@ void Experiment<Modus>::create_output(const std::string &format,
         outputs_.emplace_back(make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_particles", false, "asciiv3"));
       } else if (format == "HepMC3_treeroot") {
-        #ifdef SMASH_USE_HEPMC_ROOTIO
+#ifdef SMASH_USE_HEPMC_ROOTIO
         outputs_.emplace_back(make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_particles", false, "treeroot"));
-        #else
+#else
         logg[LExperiment].error(
-          "Requested HepMC3_treeroot output not available, "
-          "ROOT or HepMC3 ROOTIO missing or not found by cmake.");
-        #endif
+            "Requested HepMC3_treeroot output not available, "
+            "ROOT or HepMC3 ROOTIO missing or not found by cmake.");
+#endif
       }
     } else if (content == "Collisions") {
       if (format == "HepMC3_asciiv3") {
         outputs_.emplace_back(make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_collisions", true, "asciiv3"));
       } else if (format == "HepMC3_treeroot") {
-        #ifdef SMASH_USE_HEPMC_ROOTIO
+#ifdef SMASH_USE_HEPMC_ROOTIO
         outputs_.emplace_back(make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_collisions", true, "treeroot"));
-        #else
+#else
         logg[LExperiment].error(
-          "Requested HepMC3_treeroot output not available, "
-          "ROOT or HepMC3 ROOTIO missing or not found by cmake.");
-        #endif
+            "Requested HepMC3_treeroot output not available, "
+            "ROOT or HepMC3 ROOTIO missing or not found by cmake.");
+#endif
       }
     } else {
       logg[LExperiment].error(

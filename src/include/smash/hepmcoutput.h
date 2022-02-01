@@ -71,10 +71,10 @@ class HepMcOutput : public HepMcInterface {
   bf::path filename_unfinished_;
   /// Pointer to Ascii HepMC3 output file
   std::unique_ptr<HepMC3::WriterAscii> asciiv3_output_file_;
-  /// Pointer to ROOT HepMC3 output file
-  #ifdef SMASH_USE_HEPMC_ROOTIO
+/// Pointer to ROOT HepMC3 output file
+#ifdef SMASH_USE_HEPMC_ROOTIO
   std::unique_ptr<HepMC3::WriterRootTree> treeroot_output_file_;
-  #endif
+#endif
   /// enum to identify the HepMC3 output type
   typedef enum enum_output { asciiv3, treeroot } type_of_HepMC3_output;
   /// HepMC3 output type
