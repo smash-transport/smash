@@ -24,6 +24,15 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Renamed `USE_ROOT`, `USE_HEPMC` and `USE_RIVET` CMake options to `TRY_USE_ROOT`, `TRY_USE_HEPMC` and `TRY_USE_RIVET`, respectively
 
 
+## SMASH-2.1.1
+Date: 2022-01-31
+
+### Changed
+* Fixed typo in PgdCode class
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.1...SMASH-2.1.1)
+
+
 ## SMASH-2.1
 Date: 2021-12-21
 
