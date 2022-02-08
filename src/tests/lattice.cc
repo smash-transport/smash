@@ -1022,7 +1022,7 @@ TEST(copy_constructor) {
                              });
 }
 
-double integrand(ThreeVector pos, double &value, ThreeVector point) {
+static double integrand(ThreeVector pos, double &value, ThreeVector point) {
   return value / ((pos - point).abs());
 }
 
