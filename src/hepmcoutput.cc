@@ -27,8 +27,8 @@ namespace smash {
  * http://hepmc.web.cern.ch/hepmc/ and https://arxiv.org/abs/1912.08005.
  *
  * The SMASH HepMC output can be:
- * - _HepMC_asciiv3_ plain human readable ASCII format
- * - _HepMc_treeroot_ ROOT Tree binary format, readable by ROOT
+ * - _HepMC3_asciiv3_ plain human readable ASCII format
+ * - _HepMC3_treeroot_ ROOT Tree binary format, readable by ROOT
  *
  * Producing HepMC output in asciiv3 format requires HepMC3 to be installed.
  * Download the tarball from http://hepmc.web.cern.ch/hepmc/
@@ -36,7 +36,7 @@ namespace smash {
  * OS distribution.
  * If the user wants to produce HepMC output in ROOT Tree format,
  * ROOT must be installed (https://root.cern.ch/), as well, and HepMC should
- * be compiled with ROOT IO support (`-DHEPMC3_ENABLE_ROOTIO:BOOL=OFF`) or,
+ * be compiled with ROOT IO support (`-DHEPMC3_ENABLE_ROOTIO:BOOL=ON`) or,
  * when using a binary precompiled distribution, the appropriate rootIO
  * package must be installed.
  *
