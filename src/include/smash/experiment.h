@@ -699,6 +699,11 @@ void Experiment<Modus>::create_output(const std::string &format,
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
   } else if ((format == "HepMC3_asciiv3") || (format == "HepMC3_treeroot")) {
+    if (!modus_.is_collider()) {
+      logg[LExperiment].error(
+        "HepMC3 output supported only in collider modus");
+      return;
+    }
 #ifdef SMASH_USE_HEPMC
     if (content == "Particles") {
       if (format == "HepMC3_asciiv3") {
