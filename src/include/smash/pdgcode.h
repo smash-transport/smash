@@ -522,6 +522,9 @@ class PdgCode {
    *
    * The code is good for hadrons, leptons and spin-1-bosons. It returns
    * 2 (meaning spin=1) for the Higgs, though.
+   *
+   * \throw runtime_error if a spin of a nucleus is not coded in
+   *        and has to be guessed
    */
   inline unsigned int spin() const {
     if (is_nucleus()) {
@@ -540,7 +543,8 @@ class PdgCode {
         // He-4 spin is 0
         return 0;
       }
-      // Guess 1/2 for fermions and 0 for bosons
+      throw std::runtime_error("Unknown spin of nucleus.");
+      // Alternative possibility is to guess 1/2 for fermions and 0 for bosons
       return 2 * (nucleus_.A_ % 2);
     }
 
