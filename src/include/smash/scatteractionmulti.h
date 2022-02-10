@@ -318,18 +318,6 @@ class ScatterActionMulti : public Action {
    */
   bool all_incoming_particles_are_pions_have_zero_charge_only_one_piz() const;
 
-  /**
-   * Check if 4 incoming particles can form a triton and pion final
-   * state intial state in a 4-to-2 reaction.
-   */
-  bool incoming_particles_can_form_triton_and_pi() const;
-
-  /**
-   * Check if 4 incoming particles can form a anti-triton and pion final
-   * state intial state in a 4-to-2 reaction.
-   */
-  bool incoming_particles_can_form_antitriton_and_pi() const;
-
   /// Total probability of reaction
   double total_probability_;
 
