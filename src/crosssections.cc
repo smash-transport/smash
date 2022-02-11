@@ -965,8 +965,19 @@ double CrossSections::two_to_three_xs(const ParticleType& type_a,
     type_catalyzer = &type_a;
   }
 
+  bool nonzero_xs = type_nucleus->is_nucleus() &&
+                    (type_catalyzer->is_pion() || type_catalyzer->is_nucleon());
+  if (!nonzero_xs) {
+    return 0.0;
+  }
+
   const double md = type_nucleus->mass(), mcat = type_catalyzer->mass();
   const double Tkin = (sqrts * sqrts - (md + mcat) * (md + mcat)) / (2.0 * md);
+
+  // Should normally never happen, but may be a useful safeguard
+  if (Tkin <= 0.0) {
+    return 0.0;
+  }
 
   if (type_catalyzer->is_pion()) {
     xs = d_pi_inelastic_xs(Tkin);
@@ -991,11 +1002,19 @@ double CrossSections::two_to_four_xs(const ParticleType& type_a,
     type_nucleus = &type_b;
     type_catalyzer = &type_a;
   }
+  bool nonzero_xs = type_nucleus->is_nucleus() &&
+                    (type_catalyzer->is_pion() || type_catalyzer->is_nucleon());
+  if (!nonzero_xs) {
+    return 0.0;
+  }
 
   const double mA = type_nucleus->mass(), mcat = type_catalyzer->mass();
   const double Tkin = (sqrts * sqrts - (mA + mcat) * (mA + mcat)) / (2.0 * mA);
   const int A = type_nucleus->pdgcode().nucleus_A();
-  assert(A == 3);
+  // Should normally never happen, but may be a useful safeguard
+  if (A!=3 || Tkin <= 0.0) {
+    return 0.0;
+  }
 
   if (type_catalyzer->is_pion()) {
     xs = A / 2. * d_pi_inelastic_xs(Tkin);
