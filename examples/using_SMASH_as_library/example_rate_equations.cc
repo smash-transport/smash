@@ -1,18 +1,15 @@
-#include <vir/test.h>  // This include has to be first
-
+#include <boost/filesystem/path.hpp>
 #include <gsl/gsl_sf_bessel.h>
 
-#include "histogram.h"
-#include "setup.h"
-
-#include "../include/smash/forwarddeclarations.h"
-#include "../include/smash/hadgas_eos.h"
-#include "../include/smash/integrate.h"
-#include "../include/smash/isoparticletype.h"
-#include "../include/smash/kinematics.h"
-#include "../include/smash/particledata.h"
-#include "../include/smash/scatteraction.h"
-#include "../include/smash/sha256.h"
+#include "smash/decaymodes.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/hadgas_eos.h"
+#include "smash/integrate.h"
+#include "smash/isoparticletype.h"
+#include "smash/kinematics.h"
+#include "smash/particledata.h"
+#include "smash/scatteraction.h"
+#include "smash/sha256.h"
 
 using namespace smash;
 
@@ -35,7 +32,7 @@ static double thermal_average_sigmavrel(const ParticleTypePtr A_type,
   MultiParticleReactionsBitSet incl_multi_set =
       MultiParticleReactionsBitSet().reset();
   incl_multi_set.set(IncludedMultiParticleReactions::Deuteron_3to2);
-  // incl_multi_set.set(IncludedMultiParticleReactions::A3_Nuclei_4to2);
+  incl_multi_set.set(IncludedMultiParticleReactions::A3_Nuclei_4to2);
   double low_snn_cut = 0.0;
   bool strings_switch = false, use_AQM = true, strings_with_probability = true;
   const double norm =
@@ -64,26 +61,21 @@ static double thermal_average_sigmavrel(const ParticleTypePtr A_type,
   return integral * norm;
 }
 
-TEST(create_particles_table) {
+int main() {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
       "π    0.138   7.7e-9  -  111         211\n"
       "N    0.938   0       +  2112        2212\n"
       "Λ    1.116   0       +  3122\n"
       "d    1.8756  0       +  1000010020\n"
-      "d'   1.8856  0.1     -  1000010021\n"
       "t    2.8089  0       +  1000010030\n"
       "he3  2.8084  0       +  1000020030\n"
       "H3L  2.9934  0       +  1010010030\n");
-  DecayModes::load_decaymodes(
-      "d'\n"
-      "1.  1   N N");
+  DecayModes::load_decaymodes("");
   sha256::Context hash_context;
   const auto hash = hash_context.finalize();
-  IsoParticleType::tabulate_integrals(hash, bf::path("."));
-}
+  IsoParticleType::tabulate_integrals(hash, boost::filesystem::path("."));
 
-TEST(rate_equation_solver) {
   // 1) Prepare particle types
   const ParticleTypePtr pip = ParticleType::try_find(pdg::pi_p);
   const ParticleTypePtr pim = ParticleType::try_find(pdg::pi_m);
@@ -96,11 +88,20 @@ TEST(rate_equation_solver) {
   const ParticleTypePtr he3 = ParticleType::try_find(pdg::he3);
   const ParticleTypePtr H3L = ParticleType::try_find(pdg::hypertriton);
   // Make sure that necessary particles are in the table
-  VERIFY(pip && pim && pi0);
-  VERIFY(p && n && La);
-  VERIFY(d);
-  VERIFY(t && he3);
-  VERIFY(H3L);
+  if (!(pip && pim && pi0)) {
+    std::cout << "Pion missing in the particle table" << std::endl;
+  }
+  if (!(p && n && La)) {
+    std::cout << "Nucleon or Lambda missing in the particle table" << std::endl;
+  }
+  if (!d) {
+    std::cout << "Deuteron missing in the particle table" << std::endl;
+  }
+  if (!(t && he3 && H3L)) {
+    std::cout << "Triton, He-3, or hypertriton H3L missing"
+              << " in the particle table" << std::endl;
+  }
+  assert(pip && pim && pi0 && p && n && La && d && t && he3 && H3L);
 
   // 2) Prepare initial condition
   // Assuming that T(time) = const.
@@ -125,7 +126,7 @@ TEST(rate_equation_solver) {
   const double sig_pid = thermal_average_sigmavrel(pip, d, T);
   const double sig_nd = thermal_average_sigmavrel(n, d, T);
   const double sig_pd = thermal_average_sigmavrel(p, d, T);
-  VERIFY(std::abs(sig_nd - sig_pd) < 1e-9);
+  assert(std::abs(sig_nd - sig_pd) < 1e-9);
   std::cout << "<sigma vrel> [mb] for pi+d, n+d, p+d: " << sig_pid << " "
             << sig_nd << " " << sig_pd << std::endl;
 
