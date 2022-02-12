@@ -351,7 +351,7 @@ ScatterActionsFinder::ScatterActionsFinder(
     throw std::invalid_argument(
         "Do not use the d' resonance and enable \"Deuteron_3to2\" "
         "`Multi_Particle_Reactions` at the same time. Either use the direct "
-        "3-to-2 rections or the d' together with \"PiDeuteron_to_pidprime\" "
+        "3-to-2 reactions or the d' together with \"PiDeuteron_to_pidprime\" "
         "and \"NDeuteron_to_Ndprime\" in `Included_2to2`. Otherwise the "
         "deuteron 3-to-2 reactions would be double counted.");
   }

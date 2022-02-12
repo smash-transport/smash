@@ -104,16 +104,17 @@ class ScatterActionMulti : public Action {
    * \f[d\Phi_n = (2\pi)^4 \prod_{i=1}^n \frac{d^3p_i}{2E_i (2\pi)^3}
    *    \times \delta(E_{tot} -  \sum E_i) \delta^{(3)}(p_{tot} - \sum p_i)\f].
    * This is a Lorentz-invariant quantity, so the result of the integration
-   * depends only on \f[ s = E_{tot}^2 - p_{tot}^2\f] and masses of the particles
-   * \f[ m_i^2 = E_i^2 - p_i^2 \f]. The dimension in general case
-   * is \f[\mathrm{GeV}^{2n-4}\f]. The \f[\hbar = c = 1 \f] convention is used here,
-   * so when this integral is used in the acceptance probability for collision,
-   * one has to restore \f[\hbar\f] to obtain correct dimensionless probability.
-   * More on phase space integrals can be found, for example, in CERN-68-15 report.
-   * For developers, I (oliiny) have compiled a document with properties and
-   * parametrizations of many-body phase space integrals here:
+   * depends only on \f[ s = E_{tot}^2 - p_{tot}^2\f] and masses of the
+   * particles \f[ m_i^2 = E_i^2 - p_i^2 \f]. The dimension in general case is
+   * \f[\mathrm{GeV}^{2n-4}\f]. The \f[\hbar = c = 1 \f] convention is used
+   * here, so when this integral is used in the acceptance probability for
+   * collision, one has to restore \f[\hbar\f] to obtain correct dimensionless
+   * probability. More on phase space integrals can be found, for example, in
+   * CERN-68-15 report. For developers, I (oliiny) have compiled a document with
+   * properties and parametrizations of many-body phase space integrals here:
    * github.com/smash-transport/smash-devel/files/7791360/n_body_relativistic_phase_space.pdf
-   * TODO: maybe find a better place to keep this kind of technical documentation.
+   * TODO: maybe find a better place to keep this kind of technical
+   * documentation.
    *
    * \param[in] man_s mandelstam s of reaction
    * \return phase space integral value for 4 bodies [GeV^4]

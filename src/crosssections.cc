@@ -1012,7 +1012,7 @@ double CrossSections::two_to_four_xs(const ParticleType& type_a,
   const double Tkin = (sqrts * sqrts - (mA + mcat) * (mA + mcat)) / (2.0 * mA);
   const int A = type_nucleus->pdgcode().nucleus_A();
   // Should normally never happen, but may be a useful safeguard
-  if (A!=3 || Tkin <= 0.0) {
+  if (A != 3 || Tkin <= 0.0) {
     return 0.0;
   }
 

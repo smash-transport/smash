@@ -66,7 +66,8 @@ std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch) {
   } else if (ptype == ProcessType::StringHard) {
     os << "hard";
   } else if (ptype == ProcessType::TwoToOne || ptype == ProcessType::TwoToTwo ||
-             ptype == ProcessType::TwoToThree || ptype == ProcessType::TwoToFour ||
+             ptype == ProcessType::TwoToThree ||
+             ptype == ProcessType::TwoToFour ||
              ptype == ProcessType::TwoToFive || ptype == ProcessType::Elastic ||
              ptype == ProcessType::Decay ||
              ptype == ProcessType::MultiParticleThreeMesonsToOne ||
