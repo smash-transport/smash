@@ -711,7 +711,7 @@ void Experiment<Modus>::create_output(const std::string &format,
       } else if (format == "HepMC3_treeroot") {
 #ifdef SMASH_USE_HEPMC_ROOTIO
         outputs_.emplace_back(make_unique<HepMcOutput>(
-            output_path, "SMASH_HepMC_particles", false, "treeroot"));
+            output_path, "SMASH_HepMC_particles", false, "root"));
 #else
         logg[LExperiment].error(
             "Requested HepMC3_treeroot output not available, "
@@ -725,7 +725,7 @@ void Experiment<Modus>::create_output(const std::string &format,
       } else if (format == "HepMC3_treeroot") {
 #ifdef SMASH_USE_HEPMC_ROOTIO
         outputs_.emplace_back(make_unique<HepMcOutput>(
-            output_path, "SMASH_HepMC_collisions", true, "treeroot"));
+            output_path, "SMASH_HepMC_collisions", true, "root"));
 #else
         logg[LExperiment].error(
             "Requested HepMC3_treeroot output not available, "

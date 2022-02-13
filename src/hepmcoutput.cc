@@ -53,6 +53,9 @@ namespace smash {
  * this check is disabled by default.
  * - The two initial ions are included in the particle list, as well.
  * - The HepMC output can be enabled _only_ for \ref input_modi_collider_ modus.
+ * - The extension of the HepMC treeroot output is simply .root because the
+ *   ROOT browser tool does not recognize the .treeroot extension. On the other
+ *   hand, in HepMC root and treeroot outputs are distinct.
  *
  * \section output_hepmc_asciiv3_ ASCII HepMC Format
  *
@@ -97,7 +100,7 @@ namespace smash {
  *
  * int read_hempc3_treeroot() {
  * // Opens a SMASH HepMC3 treeroot output file to be read in
- * TFile *input_file = TFile::Open("SMASH_HepMC_particles.treeroot","read");
+ * TFile *input_file = TFile::Open("SMASH_HepMC_particles.root","read");
  * if (input_file->IsOpen()) {
  *   printf("Successfully opened file %s\n", input_file->GetName());
  * } else {
