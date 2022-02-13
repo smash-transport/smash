@@ -52,6 +52,7 @@ namespace smash {
  * energies with the \key --ignore-beams option. When using the Rivet output
  * this check is disabled by default.
  * - The two initial ions are included in the particle list, as well.
+ * - The HepMC output can be enabled _only_ for \ref input_modi_collider_ modus.
  *
  * \section output_hepmc_asciiv3_ ASCII HepMC Format
  *
