@@ -25,7 +25,6 @@ static constexpr int LNucleus = LogArea::Nucleus::id;
 Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
   fill_from_list(particle_list, nTest);
   set_parameters_automatic();
-  // calculate the saturation density
   set_saturation_density(calculate_saturation_density());
 }
 
@@ -41,7 +40,6 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
              !config.has_value({"Radius"}) &&
              !config.has_value({"Saturation_Density"})) {
     set_parameters_automatic();
-    // calculate the saturation density
     set_saturation_density(calculate_saturation_density());
   } else {
     throw std::invalid_argument(
@@ -350,8 +348,6 @@ void Nucleus::set_parameters_automatic() {
         set_diffusiveness(0.54);
       }
   }
-  // calculate the saturation density
-  // set_saturation_density(calculate_saturation_density());
 }
 
 void Nucleus::set_parameters_from_config(Configuration &config) {
@@ -387,7 +383,6 @@ void Nucleus::generate_fermi_momenta() {
     }
     const double r = (i->position() - nucleus_center).abs3();
     const double theta = (i->position().threevec().get_theta());
-    std::cout << "generate fermi momenta with rho0 =" << get_saturation_density() << std::endl;
     double rho = nucleon_density(r, std::cos(theta));
 
     if (i->pdgcode() == pdg::p) {
