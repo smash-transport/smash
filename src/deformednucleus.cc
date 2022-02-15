@@ -137,9 +137,9 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
   // reference for Xe: \iref{Moller:2015fba}
   bool listed = 0;
   const std::map<int, std::string> A_map = {
-      {238, "Uranium"}, {208, "Lead"}, {197, "Gold"}, {63, "Copper"}};
+      {238, "Uranium"}, {208, "Lead"}, {197, "Gold"}, {63, "Copper"}, {129, "Xenon"}};
   const std::map<std::string, std::string> Z_map = {
-      {"Uranium", "92"}, {"Lead", "82"}, {"Gold", "79"}, {"Copper", "29"}};
+      {"Uranium", "92"}, {"Lead", "82"}, {"Gold", "79"}, {"Copper", "29"}, {"Xenon", "54"}};
   int A = Nucleus::number_of_particles();
   int Z = Nucleus::number_of_protons();
   switch (A) {
