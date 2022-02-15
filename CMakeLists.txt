@@ -53,16 +53,7 @@ endif()
 # add 3rd-party libraries (before setting compiler flags etc)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2.1")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
-
-find_package(yaml-cpp 0.6 QUIET NO_MODULE)
-if (yaml-cpp_FOUND)
-  # target doesn't set include directory for some reason
-  get_filename_component(yaml_cpp_include_dir ${YAML_CPP_INCLUDE_DIR} ABSOLUTE)
-  include_directories(SYSTEM ${yaml_cpp_include_dir})
-else()
-  include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.6.2/include")
-endif()
-
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.6.2/include")
 add_subdirectory(3rdparty)
 
 # Set the relevant generic compiler flags (optimisations)
