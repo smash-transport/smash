@@ -545,7 +545,7 @@ class PdgCode {
       }
       throw std::runtime_error("Unknown spin of nucleus.");
       // Alternative possibility is to guess 1/2 for fermions and 0 for bosons
-      return 2 * (nucleus_.A_ % 2);
+      // as 2 * (nucleus_.A_ % 2).
     }
 
     if (is_hadron()) {
