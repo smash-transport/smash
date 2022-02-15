@@ -81,9 +81,9 @@ class Nucleus {
   /**
    * Sets the deformation parameters of the Woods-Saxon distribution
    * according to the current mass number.
-   * The values are taken from \iref{DeJager:1987qc}. They are in
-   * agreement with MC-Glauber models such as GLISSANDO (see
-   * \iref{Rybczynski:2013yba}) and TGlauber MC (see \iref{Loizides:2017ack})
+   * The values are taken from \iref{DeJager:1987qc} and \iref{Loizides:2014vua}.
+   * They are in agreement with MC-Glauber models such as GLISSANDO (see
+   * \iref{Rybczynski:2013yba}) and TGlauber MC (see \iref{Loizides:2017ack}).
    */
   virtual void set_parameters_automatic();
 
