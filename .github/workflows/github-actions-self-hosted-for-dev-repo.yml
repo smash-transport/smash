@@ -58,7 +58,7 @@ jobs:
       - name: building_and_testing_SMASH
         run: |
           # we count the number of available cpu cores          
-          export nproc=$(cat /proc/cpuinfo | grep processor | wc -l)
+          export nproc=$(cat /home/hyihp-repos/smash-devel_runners/num_of_cpus_for_actions.dat)
           # we set up the variables with the SMASH source and build directories
           export SMASH_ROOT=$GITHUB_WORKSPACE && mkdir -p $SMASH_ROOT/build
           # this directory contains pythia, clang and eigen, which are needed later
