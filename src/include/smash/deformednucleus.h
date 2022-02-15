@@ -94,14 +94,6 @@ class DeformedNucleus : public Nucleus {
   void rotate() override;
 
   /**
-   * Sets the saturation density of the nucleus
-   * \see saturation_density_
-   */
-  void set_saturation_density(double density) override{
-    saturation_density_ = density;
-  }
-
-  /**
    * \return the saturation density of the deformed_nucleus
    * \see saturation_density_
    */
@@ -127,7 +119,7 @@ class DeformedNucleus : public Nucleus {
     });
     const auto rho0 = number_of_particles() / result.value();
     return rho0;
-  } 
+  }
   /**
    * Set deformation coefficient for Y_2_0.
    * \param[in] b2 deformation coefficient for l=2
@@ -162,8 +154,6 @@ class DeformedNucleus : public Nucleus {
   inline double get_beta4() { return beta4_; }
 
  private:
-  // /// Saturation density of this nucleus.
-  double saturation_density_;
   /// Deformation parameter for angular momentum l=2.
   double beta2_ = 0.0;
   /// Deformation parameter for angular momentum l=4.

@@ -256,11 +256,15 @@ class Nucleus {
   virtual void set_saturation_density(double density) {
     saturation_density_ = density;
   }
-  
+
   /// \ingroup exception
   struct TestparticleConfusion : public std::length_error {
     using std::length_error::length_error;
   };
+
+  /// Saturation density of this nucleus.
+  // Needed as public member for inheritance to deforormed nuclei
+  double saturation_density_ = nuclear_density;
 
  private:
   /**
@@ -268,8 +272,6 @@ class Nucleus {
    * (for diffusiveness_ == 0, we obtain a hard sphere).
    */
   double diffusiveness_;
-  /// Saturation density of this nucleus.
-  double saturation_density_ = nuclear_density;
   /// Nuclear radius of this nucleus
   double nuclear_radius_;
   /**
