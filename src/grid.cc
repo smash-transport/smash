@@ -102,7 +102,7 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                   &min_and_length,
               const Particles &particles, double max_interaction_length,
               double timestep_duration, CellNumberLimitation limit,
-              CellSizeStrategy strategy)
+              const bool include_unformed_particles, CellSizeStrategy strategy)
     : length_(min_and_length.second) {
   const auto min_position = min_and_length.first;
   const SizeType particle_count = particles.size();
@@ -192,13 +192,20 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
         "particle list.");
     number_of_cells_ = {1, 1, 1};
     cell_volume_ = length_[0] * length_[1] * length_[2];
-    cells_.resize(1);
-    cells_.front().reserve(particles.size());
-    std::copy_if(particles.begin(), particles.end(),
-                 std::back_inserter(cells_.front()),
-                 [&](const ParticleData &p) {
-                   return p.xsec_scaling_factor(timestep_duration) > 0.0;
-                 });  // filter out the particles that can not interact
+    if (include_unformed_particles) {
+      cells_.clear();
+      cells_.reserve(1);
+      cells_.emplace_back(particles.copy_to_vector());
+    } else {
+      // filter out the particles that can not interact
+      cells_.resize(1);
+      cells_.front().reserve(particles.size());
+      std::copy_if(particles.begin(), particles.end(),
+                   std::back_inserter(cells_.front()),
+                   [&](const ParticleData &p) {
+                     return p.xsec_scaling_factor(timestep_duration) > 0.0;
+                   });
+    }
   } else {
     // construct a normal grid
 
@@ -226,25 +233,27 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
           std::floor((p.position()[2] - min_position[1]) * index_factor[1]),
           std::floor((p.position()[3] - min_position[2]) * index_factor[2]));
     };
-
     for (const auto &p : particles) {
-      if (p.xsec_scaling_factor(timestep_duration) > 0.0) {
-        const auto idx = cell_index_for(p);
-#ifndef NDEBUG
-        if (idx >= SizeType(cells_.size())) {
-          logg[LGrid].fatal(
-              SMASH_SOURCE_LOCATION,
-              "\nan out-of-bounds access would be necessary for the "
-              "particle ",
-              p, "\nfor a grid with the following parameters:\nmin: ",
-              min_position, "\nlength: ", length_,
-              "\ncells: ", number_of_cells_, "\nindex_factor: ", index_factor,
-              "\ncells_.size: ", cells_.size(), "\nrequested index: ", idx);
-          throw std::runtime_error("out-of-bounds grid access on construction");
-        }
-#endif
-        cells_[idx].push_back(p);
+      if (!include_unformed_particles &&
+          (p.xsec_scaling_factor(timestep_duration) <= 0.0)) {
+        continue;
       }
+      const auto idx = cell_index_for(p);
+#ifndef NDEBUG
+      if (idx >= SizeType(cells_.size())) {
+        logg[LGrid].fatal(
+            SMASH_SOURCE_LOCATION,
+            "\nan out-of-bounds access would be necessary for the "
+            "particle ",
+            p,
+            "\nfor a grid with the following parameters:\nmin: ", min_position,
+            "\nlength: ", length_, "\ncells: ", number_of_cells_,
+            "\nindex_factor: ", index_factor, "\ncells_.size: ", cells_.size(),
+            "\nrequested index: ", idx);
+        throw std::runtime_error("out-of-bounds grid access on construction");
+      }
+#endif
+      cells_[idx].push_back(p);
     }
   }
 
@@ -459,11 +468,11 @@ template Grid<GridOptions::Normal>::Grid(
         &min_and_length,
     const Particles &particles, double max_interaction_length,
     double timestep_duration, CellNumberLimitation limit,
-    CellSizeStrategy strategy);
+    const bool include_unformed_particles, CellSizeStrategy strategy);
 template Grid<GridOptions::PeriodicBoundaries>::Grid(
     const std::pair<std::array<double, 3>, std::array<double, 3>>
         &min_and_length,
     const Particles &particles, double max_interaction_length,
     double timestep_duration, CellNumberLimitation limit,
-    CellSizeStrategy strategy);
+    const bool include_unformed_particles, CellSizeStrategy strategy);
 }  // namespace smash

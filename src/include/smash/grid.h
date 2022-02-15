@@ -106,16 +106,20 @@ class Grid : public GridBase {
    * formation times treatment: if particle is fully or partially formed before
    * the end of the timestep, it has to be on the grid.
    * \param[in] limit Limitation of cell number
+   * \param[in] include_unformed_particles include unformed particles from
+                                              the grid (worsens runtime)
    * \param[in] strategy The strategy for determining the cell size
    */
   Grid(const Particles &particles, double min_cell_length,
        double timestep_duration, CellNumberLimitation limit,
+       const bool include_unformed_particles = false,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal)
       : Grid{find_min_and_length(particles),
              std::move(particles),
              min_cell_length,
              timestep_duration,
              limit,
+             include_unformed_particles,
              strategy} {}
 
   /**
@@ -129,6 +133,8 @@ class Grid : public GridBase {
    * \param[in] min_cell_length The minimal length a cell must have.
    * \param[in] timestep_duration duration of the timestep in fm/c
    * \param[in] limit Limitation of cell number
+   * \param[in] include_unformed_particles include unformed particles from
+                                              the grid (worsens runtime)
    * \param[in] strategy The strategy for determining the cell size
    * \throws runtime_error if your box length is smaller than the grid length.
    */
@@ -136,6 +142,7 @@ class Grid : public GridBase {
            &min_and_length,
        const Particles &particles, double min_cell_length,
        double timestep_duration, CellNumberLimitation limit,
+       const bool include_unformed_particles = false,
        CellSizeStrategy strategy = CellSizeStrategy::Optimal);
 
   /**
