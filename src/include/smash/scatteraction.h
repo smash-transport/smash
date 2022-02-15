@@ -234,11 +234,8 @@ class ScatterAction : public Action {
   /// Perform an inelastic two-body scattering, i.e. new particles are formed
   void inelastic_scattering();
 
-  /// Perform a two-to-three-body scattering
-  void two_to_three_scattering();
-
-  /// Perform a two-to-five-body scattering
-  void two_to_five_scattering();
+  /// Perform an inelastic two-to-many-body scattering (more than 2)
+  void two_to_many_scattering();
 
   /// Creates the final states for string-processes after they are performed
   void create_string_final_state();

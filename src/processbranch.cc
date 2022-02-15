@@ -67,10 +67,12 @@ std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch) {
     os << "hard";
   } else if (ptype == ProcessType::TwoToOne || ptype == ProcessType::TwoToTwo ||
              ptype == ProcessType::TwoToThree ||
+             ptype == ProcessType::TwoToFour ||
              ptype == ProcessType::TwoToFive || ptype == ProcessType::Elastic ||
              ptype == ProcessType::Decay ||
              ptype == ProcessType::MultiParticleThreeMesonsToOne ||
              ptype == ProcessType::MultiParticleThreeToTwo ||
+             ptype == ProcessType::MultiParticleFourToTwo ||
              ptype == ProcessType::MultiParticleFiveToTwo) {
     ParticleTypePtrList ptype_list = cbranch.particle_types();
     /* Sorting ensures unique name for every channel
@@ -104,6 +106,9 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
     case ProcessType::TwoToThree:
       os << "TwoToThree";
       break;
+    case ProcessType::TwoToFour:
+      os << "TwoToFour";
+      break;
     case ProcessType::TwoToFive:
       os << "TwoToFive";
       break;
@@ -134,6 +139,9 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
       break;
     case ProcessType::MultiParticleThreeToTwo:
       os << "ThreeToTwo";
+      break;
+    case ProcessType::MultiParticleFourToTwo:
+      os << "FourToTwo";
       break;
     case ProcessType::MultiParticleFiveToTwo:
       os << "FiveToTwo";

@@ -336,6 +336,11 @@ void Action::sample_manybody_phasespace_impl(
   }
   const double msum_all = msum[n - 1];
   int rejection_counter = -1;
+  if (sqrts <= msum_all) {
+    logg[LAction].error() << "sample_manybody_phasespace_impl: "
+                          << "Can't sample when sqrts = " << sqrts
+                          << " < msum = " << msum_all;
+  }
 
   double w, r01;
   std::vector<double> Minv(n);
@@ -352,6 +357,7 @@ void Action::sample_manybody_phasespace_impl(
   // factor to be on the safer side.
   const double safety_factor = 1.1 + (n - 2) * 0.2;
   weight_sqr_max *= (safety_factor * safety_factor);
+  bool first_warning = true;
 
   do {
     // Generate invariant masses of 1, 12, 123, 1243, etc.
@@ -378,6 +384,13 @@ void Action::sample_manybody_phasespace_impl(
       logg[LAction].warn()
           << "sample_manybody_phasespace_impl: alarm, weight > 1, w^2 = " << w
           << ". Increase safety factor." << std::endl;
+    }
+    if (rejection_counter > 20 && first_warning) {
+      logg[LAction].warn() << "sample_manybody_phasespace_impl: "
+                           << "likely hanging, way too many rejections,"
+                           << " n = " << n << ", sqrts = " << sqrts
+                           << ", msum = " << msum_all;
+      first_warning = false;
     }
   } while (w < r01 * r01);
 

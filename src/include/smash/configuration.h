@@ -696,11 +696,14 @@ class Configuration {
           s.set(IncludedMultiParticleReactions::Deuteron_3to2);
         } else if (x == "NNbar_5to2") {
           s.set(IncludedMultiParticleReactions::NNbar_5to2);
+        } else if (x == "A3_Nuclei_4to2") {
+          s.set(IncludedMultiParticleReactions::A3_Nuclei_4to2);
         } else {
           throw IncorrectTypeInAssignment(
               "The value for key \"" + std::string(key_) +
               "\" should be \"All\", \"Meson_3to1\", "
-              "\"Deuteron_3to2\" or \"NNbar_5to2\", or any combination of "
+              "\"Deuteron_3to2\" or \"NNbar_5to2\", "
+              "\"A3_Nuclei_4to2\", or any combination of "
               "these.");
         }
       }

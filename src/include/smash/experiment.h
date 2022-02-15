@@ -848,11 +848,14 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * \li \key "Deuteron_3to2" - Deuteron 3-to-2 reactions:
  * \f$\pi pn\leftrightarrow\pi d\f$, \f$Npn\leftrightarrow Nd\f$ and
  * \f$\bar{N}pn\leftrightarrow \bar{N}d\f$. The deuteron has to be uncommented
- * in particles.txt, too. 2-body reactions involving the d' have to be exluded
- * (no \key "PiDeuteron_to_pidprime" and \key "NDeuteron_to_Ndprime" in
- * \key Included_2to2), since they effectively yield the same reaction.
- * (The same cross section is used as for the d' reactions, therefore the d' in
- * particles.txt and its decay in decaymodest.txt also need to be uncommented.)
+ * in particles.txt as well. Do not uncomment d' or make sure to exclude 2-body
+ * reactions involving the d' (i.e. no \key "PiDeuteron_to_pidprime" and
+ * \key "NDeuteron_to_Ndprime" in \key Included_2to2). Otherwise, the deuteron
+ * reactions are implicitly double-counted.
+ * \li \key "A3_Nuclei_4to2" - Create or destroy
+ * A = 3 nuclei (triton, He-3, hypertriton) by \f$4 \leftrightarrow 2\f$
+ * catalysis reactions such as \f$ X NNN \leftrightarrow X t \f$, where
+ * X can be a pion, nucleon, or antinucleon.
  * \li \key "NNbar_5to2" - 5-to-2 backreaction for NNbar  annihilation:
  * \f$ \pi^0\pi^+\pi^-\pi^+\pi^- \rightarrow N\bar{N}\f$. Since detailed balance
  * is enforced, NNbar_Treatment has to be set to "two to five" for this option.
