@@ -47,9 +47,8 @@ Please, note that enabling Rivet output or using ROOT >= 6.24.00 requires a comp
 
 ### Building Pythia
 
-SMASH is tightly coupled to Pythia and thus requires a specific version. Using
-a different version than specified above may or may not work. It is recommended
-to build Pythia with similar flags as used for SMASH:
+SMASH is tightly coupled to Pythia and thus requires a specific version, which is currently 8.307.
+Using a different version than specified above may or may not work. If the required version is not already installed or if there are issues, it is recommended to build Pythia with similar flags as used for SMASH:
 
     wget https://pythia.org/download/pythia83/pythia8307.tgz
     tar xf pythia8307.tgz && rm pythia8307.tgz
@@ -57,14 +56,10 @@ to build Pythia with similar flags as used for SMASH:
     ./configure --cxx-common='-std=c++11 -march=native -O3 -fPIC'
     make
 
-To tell `cmake` where to find Pythia while bilding SMASH, pass the path to the `pythia8-config`
-executable as shown in the **Building SMASH** section.
+To tell `cmake` where to find Pythia while building SMASH see the **Building SMASH** section.
 
 Note that although Pythia is statically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
-
-The compilation of Pythia 8.307 fails with gcc > 10.x and clang > 12.x (under GNU/Linux,
-unless clang's `-stdlib=libc++` is used).
 
 #### Remarks for Apple users
 
@@ -117,6 +112,18 @@ To run it with specific settings:
 
     vi config.yaml
     ./smash
+
+#### Alternatives to specify the installation directory of Pythia
+
+A few GNU/Linux distributions provide pre-built Pythia binaries without pythia8-config. In this case, using the `-DPythia_CONFIG_EXECUTABLE` option as shown above is not possible and the top installation directory of Pythia containing `lib` has to be specified in either of the following ways:
+
+-  Either set the bash environment variables `PYTHIA8` or `PYTHIA_ROOT_DIR` (e.g. `export PYTHIA_ROOT_DIR=/opt/pythia8307`) or
+-  use the CMake `-DPYTHIA_ROOT_DIR` option (e.g. `cmake .. -DPYTHIA_ROOT_DIR=/opt/pythia8307`).
+
+If no variables are set and no options are passed, CMake searches for Pythia under the default path `/usr`.
+We recall that it is possible to check which environment variables related to PYTHIA are currently set with:
+
+    printenv | grep PYTHIA
 
 ### Installation
 
@@ -232,6 +239,10 @@ list of directories can be specified.
 When compiling SMASH with ROOT >= 6.24.00 it is necessary to use a compiler supporting the C++ standard 14 and add the following argument to the `cmake` command:
 
     cmake .. -DCMAKE_CXX_STANDARD=14
+
+When using pre-compiled ROOT binaries it might be necessary to use:
+
+    cmake .. -DCMAKE_CXX_STANDARD=17
 
 ### Enabling Rivet support
 

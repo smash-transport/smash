@@ -115,7 +115,7 @@ endif()
 # find Pythia
 find_package(Pythia 8.307 EXACT REQUIRED)
 if(Pythia_FOUND)
-  include_directories(SYSTEM
+  include_directories(BEFORE SYSTEM
      "${Pythia_INCLUDE_DIRS}"
      )
   link_directories("${Pythia_LIBDIR}")
