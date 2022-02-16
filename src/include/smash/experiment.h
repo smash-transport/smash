@@ -698,32 +698,32 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Initial_Conditions" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
-  } else if ((format == "HepMC3_asciiv3") || (format == "HepMC3_treeroot")) {
+  } else if ((format == "HepMC") || (format == "HepMC_treeroot")) {
     if (!modus_.is_collider()) {
       logg[LExperiment].error(
-        "HepMC3 output supported only in collider modus");
+        "HepMC output supported only in collider modus");
       return;
     }
 #ifdef SMASH_USE_HEPMC
     if (content == "Particles") {
-      if (format == "HepMC3_asciiv3") {
+      if (format == "HepMC") {
         outputs_.emplace_back(make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_particles", false, "asciiv3"));
-      } else if (format == "HepMC3_treeroot") {
+      } else if (format == "HepMC_treeroot") {
 #ifdef SMASH_USE_HEPMC_ROOTIO
         outputs_.emplace_back(make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_particles", false, "root"));
 #else
         logg[LExperiment].error(
-            "Requested HepMC3_treeroot output not available, "
+            "Requested HepMC_treeroot output not available, "
             "ROOT or HepMC3 ROOTIO missing or not found by cmake.");
 #endif
       }
     } else if (content == "Collisions") {
-      if (format == "HepMC3_asciiv3") {
+      if (format == "HepMC") {
         outputs_.emplace_back(make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_collisions", true, "asciiv3"));
-      } else if (format == "HepMC3_treeroot") {
+      } else if (format == "HepMC_treeroot") {
 #ifdef SMASH_USE_HEPMC_ROOTIO
         outputs_.emplace_back(make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_collisions", true, "root"));
@@ -735,13 +735,13 @@ void Experiment<Modus>::create_output(const std::string &format,
       }
     } else {
       logg[LExperiment].error(
-          "HepMC3 only available for Particles and "
+          "HepMC only available for Particles and "
           "Collisions content. Requested for " +
           content + ".");
     }
 #else
     logg[LExperiment].error(
-        "HepMC3 output requested, but HepMC3 support not compiled in");
+        "HepMC output requested, but HepMC support not compiled in");
 #endif
   } else if (content == "Coulomb" && format == "VTK") {
     outputs_.emplace_back(
@@ -1216,12 +1216,12 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    *   - For "Particles" content \subpage format_vtk
    *   - For "Thermodynamics" content \subpage output_vtk_lattice_
    * - \b "ASCII" - a human-readable text-format table of values
-   *   - Used for "Thermodynamics", "Initial_Conditions" and "HepMC", see
+   *   - Used for "Thermodynamics" and "Initial_Conditions", see
    * \subpage thermodyn_output_user_guide_
    * \subpage thermodyn_lattice_output_
    * \subpage IC_output_user_guide_
-   * - \b "HepMC" - human-readble asciiv3 format see \ref
-   * output_hepmc_ for details
+   * - \b "HepMC", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
+   *   Tree ROOT format see \ref output_hepmc_ for details
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
