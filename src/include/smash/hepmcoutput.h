@@ -11,11 +11,14 @@
 #ifndef SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 #define SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 
-#include <HepMC3/Writer.h>
+#include <HepMC3/WriterAscii.h>
+
+#ifdef SMASH_USE_HEPMC_ROOTIO
+#include <HepMC3/WriterRootTree.h>
+#endif
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include <boost/filesystem.hpp>
 #include "hepmcinterface.h"
@@ -66,8 +69,12 @@ class HepMcOutput : public HepMcInterface {
   const bf::path filename_;
   /// Filename of output as long as simulation is still running.
   bf::path filename_unfinished_;
-  /// Vector of pointers to the HepMC3 output files
-  std::vector<std::unique_ptr<HepMC3::Writer>> output_file_;
+  /// Pointer to Ascii HepMC3 output file
+  std::unique_ptr<HepMC3::WriterAscii> asciiv3_output_file_;
+/// Pointer to ROOT HepMC3 output file
+#ifdef SMASH_USE_HEPMC_ROOTIO
+  std::unique_ptr<HepMC3::WriterRootTree> treeroot_output_file_;
+#endif
   /// enum to identify the HepMC3 output type
   typedef enum enum_output { asciiv3, treeroot } type_of_HepMC3_output;
   /// HepMC3 output type
