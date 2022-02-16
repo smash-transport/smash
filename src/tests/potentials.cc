@@ -909,7 +909,6 @@ TEST(spinodal_dilute) {
       bool wall_hit = enforce_periodic_boundaries(position.begin() + 1,
                                                   position.end(), box_length);
       if (wall_hit) {
-        const ParticleData incoming_particle(data);
         data.set_4position(position);
       }
     }

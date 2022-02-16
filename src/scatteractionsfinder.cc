@@ -281,23 +281,19 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * in the configuration file. \n\n
  *
  * **Examples: Configuring deuteron multi-particle reactions**\n
- * The following example configures SMASH to includes deuteron multi-particle
- * reactions scatterings. Note, that all 2-to-2 reactions, in particular \key
- * "PiDeuteron_to_NN", are included except the d' reactions, since they
- * effectively yield the same reaction. Before using the example, if important,
- * check for completeness of all 2-to-2 reactions. The list of 2-to-2 reactions
- * might have grown and the example is therefore potentially out of date.
+ * The following example configures SMASH to include deuteron multi-particle
+ * reactions scatterings.
  *
  *\verbatim
  Collision_Term:
      Collision_Criterion: Stochastic
-     # All (check for completeness, if important) 2-to-2 reactions except d'
-     Included_2to2: ["Elastic","NN_to_NR", "NN_to_DR", "KN_to_KN",
-                     "Strangeness_exchange", "NNbar", "PiDeuteron_to_NN"]
      Multi_Particle_Reactions: ["Deuteron_3to2"]
  \endverbatim
+ * Note, that the d' should not be included in particels.txt, otherwise
+ * \key "PiDeuteron_to_pidprime" and \key "NDeuteron_to_Ndprime" have to be
+ * excluded from \key Included_2to2 by listing all 2-to-2 reactions except those
+ * two.
  *
-
  */
 
 ScatterActionsFinder::ScatterActionsFinder(
@@ -348,6 +344,16 @@ ScatterActionsFinder::ScatterActionsFinder(
         "\"PiDeuteron_to_pidprime\" "
         "or \"NDeuteron_to_Ndprime\" in `Included_2to2` at the same time.\n"
         "Change your config accordingly.");
+  }
+
+  if (incl_multi_set_[IncludedMultiParticleReactions::Deuteron_3to2] == 1 &&
+      ParticleType::try_find(pdg::dprime)) {
+    throw std::invalid_argument(
+        "Do not use the d' resonance and enable \"Deuteron_3to2\" "
+        "`Multi_Particle_Reactions` at the same time. Either use the direct "
+        "3-to-2 reactions or the d' together with \"PiDeuteron_to_pidprime\" "
+        "and \"NDeuteron_to_Ndprime\" in `Included_2to2`. Otherwise the "
+        "deuteron 3-to-2 reactions would be double counted.");
   }
 
   if ((nnbar_treatment_ == NNbarTreatment::TwoToFive &&
@@ -627,10 +633,20 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
               }
             }
           }
-          if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] ==
-                  1 &&
-              search_list.size() >= 5) {
-            for (const ParticleData& p4 : search_list) {
+          for (const ParticleData& p4 : search_list) {
+            if (incl_multi_set_
+                    [IncludedMultiParticleReactions::A3_Nuclei_4to2]) {
+              if (p1.id() < p2.id() && p2.id() < p3.id() && p3.id() < p4.id()) {
+                ActionPtr act =
+                    check_collision_multi_part({p1, p2, p3, p4}, dt, gcell_vol);
+                if (act) {
+                  actions.push_back(std::move(act));
+                }
+              }
+            }
+            if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] ==
+                    1 &&
+                search_list.size() >= 5) {
               for (const ParticleData& p5 : search_list) {
                 if ((p1.id() < p2.id() && p2.id() < p3.id() &&
                      p3.id() < p4.id() && p4.id() < p5.id()) &&

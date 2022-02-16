@@ -93,12 +93,6 @@ constexpr int rho_m = -0x213;
 
 /// h₁(1170).
 constexpr int h1 = 0x10223;
-
-/// Deuteron in decimal digits.
-constexpr int decimal_d = 1000010020;
-/// Anti-deuteron in decimal digits.
-constexpr int decimal_antid = -1000010020;
-
 }  // namespace pdg
 
 /**

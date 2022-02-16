@@ -394,8 +394,14 @@ class PdgCode {
 
   /// \return whether this is (anti-)deuteron
   inline bool is_deuteron() const {
-    const int dec = get_decimal();
-    return is_nucleus() && (dec == pdg::decimal_d || dec == pdg::decimal_antid);
+    return is_nucleus() && nucleus_.A_ == 2 && nucleus_.Z_ == 1 &&
+           nucleus_.n_Lambda_ == 0 && nucleus_.I_ == 0;
+  }
+
+  /// \return whether this is (anti-)triton
+  inline bool is_triton() const {
+    return is_nucleus() && nucleus_.A_ == 3 && nucleus_.Z_ == 1 &&
+           nucleus_.n_Lambda_ == 0 && nucleus_.I_ == 0;
   }
 
   /**
@@ -512,17 +518,34 @@ class PdgCode {
   }
 
   /**
-   * \todo (oliiny): take care of spin for nuclei
    * \return twice the spin of a particle.
    *
    * The code is good for hadrons, leptons and spin-1-bosons. It returns
    * 2 (meaning spin=1) for the Higgs, though.
+   *
+   * \throw runtime_error if a spin of a nucleus is not coded in
+   *        and has to be guessed
    */
   inline unsigned int spin() const {
     if (is_nucleus()) {
-      /* Currently the only nucleus I care about is deutron,
-       * which has spin one. */
-      return 2;
+      // Generally spin of a nucleus cannot be simply guessed, it should be
+      // provided from some table. However, here we only care about a
+      // limited set of light nuclei with A <= 4.
+      if (nucleus_.A_ == 2) {
+        // Deuteron spin is 1
+        return 2;
+      } else if (nucleus_.A_ == 3) {
+        // Tritium and He-3 spin are 1/2
+        // Hypertriton spin is not firmly determined, but decay branching ratios
+        // indicate spin 1/2
+        return 1;
+      } else if (nucleus_.A_ == 4) {
+        // He-4 spin is 0
+        return 0;
+      }
+      throw std::runtime_error("Unknown spin of nucleus.");
+      // Alternative possibility is to guess 1/2 for fermions and 0 for bosons
+      // as 2 * (nucleus_.A_ % 2).
     }
 
     if (is_hadron()) {
@@ -704,6 +727,37 @@ class PdgCode {
    */
   int net_quark_number(const int quark) const;
 
+  /// Number of protons in nucleus
+  int nucleus_p() const {
+    return (is_nucleus() && !nucleus_.antiparticle_) ? nucleus_.Z_ : 0;
+  }
+  /// Number of neutrons in nucleus
+  int nucleus_n() const {
+    return (is_nucleus() && !nucleus_.antiparticle_)
+               ? nucleus_.A_ - nucleus_.Z_ - nucleus_.n_Lambda_
+               : 0;
+  }
+  /// Number of Lambdas in nucleus
+  int nucleus_La() const {
+    return (is_nucleus() && !nucleus_.antiparticle_) ? nucleus_.n_Lambda_ : 0;
+  }
+  /// Number of antiprotons in nucleus
+  int nucleus_ap() const {
+    return (is_nucleus() && nucleus_.antiparticle_) ? nucleus_.Z_ : 0;
+  }
+  /// Number of antineutrons in nucleus
+  int nucleus_an() const {
+    return (is_nucleus() && nucleus_.antiparticle_)
+               ? nucleus_.A_ - nucleus_.Z_ - nucleus_.n_Lambda_
+               : 0;
+  }
+  /// Number of anti-Lambdas in nucleus
+  int nucleus_aLa() const {
+    return (is_nucleus() && nucleus_.antiparticle_) ? nucleus_.n_Lambda_ : 0;
+  }
+  /// Nucleus mass number
+  int nucleus_A() const { return is_nucleus() ? nucleus_.A_ : 0; }
+
  private:
   /**
    * The union holds the data; either as a single integer dump_, as a
@@ -737,7 +791,7 @@ class PdgCode {
       bool antiparticle_ : 1;
 #else  // reverse ordering
       bool antiparticle_ : 1;
-      bool is_nucleus : 1, : 2;
+      bool is_nucleus_ : 1, : 2;
       std::uint32_t n_ : 4;
       std::uint32_t n_R_ : 4;
       std::uint32_t n_L_ : 4;
@@ -992,6 +1046,31 @@ inline bool has_lepton_pair(const PdgCode pdg1, const PdgCode pdg2,
   return is_dilepton(pdg1, pdg2) || is_dilepton(pdg1, pdg3) ||
          is_dilepton(pdg2, pdg3);
 }
+
+/**
+ * Constants representing PDG codes of nuclei.
+ */
+namespace pdg {
+/// Deuteron.
+const PdgCode d(PdgCode::from_decimal(1000010020));
+/// Anti-deuteron in decimal digits.
+const PdgCode antid(PdgCode::from_decimal(-1000010020));
+/// Deuteron-prime resonance.
+const PdgCode dprime(PdgCode::from_decimal(1000010021));
+/// Triton.
+const PdgCode triton(PdgCode::from_decimal(1000010030));
+/// Anti-triton.
+const PdgCode antitriton(PdgCode::from_decimal(-1000010030));
+/// He-3
+const PdgCode he3(PdgCode::from_decimal(1000020030));
+/// Anti-He-3
+const PdgCode antihe3(PdgCode::from_decimal(-1000020030));
+/// Hypertriton
+const PdgCode hypertriton(PdgCode::from_decimal(1010010030));
+/// Anti-Hypertriton
+const PdgCode antihypertriton(PdgCode::from_decimal(-1010010030));
+
+}  // namespace pdg
 
 }  // namespace smash
 

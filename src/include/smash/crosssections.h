@@ -150,14 +150,11 @@ class CrossSections {
    * create a list of possible resonance production processes
    * and their cross sections.
    *
-   * \param[in] prevent_dprime_form In the case of using direct 3-to-2 deuteron
-   * reactions, prevent the d' from forming via the decay back reaction.
-   *
    * \return A list of processes with resonance in the final state.
    * Each element in the list contains the type of the final-state particle
    * and the cross section for that particular process.
    */
-  CollisionBranchList two_to_one(const bool prevent_dprime_form) const;
+  CollisionBranchList two_to_one() const;
 
   /**
    * Return the 2-to-1 resonance production cross section for a given resonance.
@@ -206,6 +203,16 @@ class CrossSections {
    * \return List of all possibe 2->3 processes.
    */
   CollisionBranchList two_to_three() const;
+
+  /**
+   * Find all 2->4 processes for the given scattering.
+   *
+   * This function calls the different, more specific functions for
+   * the different scatterings.
+   *
+   * \return List of all possibe 2->4 processes.
+   */
+  CollisionBranchList two_to_four() const;
 
   /**
    * Determine the cross section for string excitations, which is given by the
@@ -269,6 +276,33 @@ class CrossSections {
   CollisionBranchPtr NNbar_to_5pi(const double scale_xs) const;
 
   /**
+   * Parametrization of deuteron-pion inelastic cross section
+   *
+   * \param[in] pion_kinetic_energy pion kinetic energy [GeV]
+   *             in the deuteron rest frame
+   * \return cross section [mb]
+   */
+  static double d_pi_inelastic_xs(double pion_kinetic_energy);
+
+  /**
+   * Parametrization of deuteron-nucleon inelastic cross section
+   *
+   * \param[in] N_kinetic_energy Nucleon kinetic energy [GeV]
+   *            in the deuteron rest frame
+   * \return cross section [mb]
+   */
+  static double d_N_inelastic_xs(double N_kinetic_energy);
+
+  /**
+   * Parametrization of deuteron-antinucleon inelastic cross section
+   *
+   * \param[in] aN_kinetic_energy [GeV] Anti-nucleon kinetic energy
+   *             in the deuteron rest frame
+   * \return cross section [mb]
+   */
+  static double d_aN_inelastic_xs(double aN_kinetic_energy);
+
+  /**
    * Determine 2->3 cross section for the scattering of the given particle
    * types.
    *
@@ -286,6 +320,20 @@ class CrossSections {
    */
   static double two_to_three_xs(const ParticleType& type_in1,
                                 const ParticleType& type_in2, double sqrts);
+
+  /**
+   * Determine 2->4 cross section for the scattering of the given particle
+   * types.
+   *
+   * Same assumptions as for 2->3 cross section, see respective documentation.
+   *
+   * \param[in] type_in1 first scatterning particle type
+   * \param[in] type_in2 second scatterning particle type
+   * \param[in] sqrts center-of-mass energy of scattering
+   * \return cross section for 2->4 process
+   */
+  static double two_to_four_xs(const ParticleType& type_in1,
+                               const ParticleType& type_in2, double sqrts);
 
   /**
    * Determine the parametrized total cross section at high energies

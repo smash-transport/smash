@@ -162,9 +162,12 @@ e⁻ 0.000511 0 + 11
 # These are normally represented by neutrons and protons
 # and should be uncommented only for specific studies
 d  1.8756 0     +  1000010020
+t   2.8089   0   +  1000010030
+He3 2.8084   0   +  1000020030
+H3L 2.9934   0   +  1010010030
 # Fake dibaryon resonance
 # introduced to describe Xd <-> Xnp reactions via Xd <-> Xd' <->Xnp
-d' 1.8856 0.100 -  1000010021
+#d' 1.8856 0.100 -  1000010021
 
 ########## hadrons needed for Pythia #########################
 ########## (no cross sections and decay widths yet) ##########

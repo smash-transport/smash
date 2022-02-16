@@ -38,7 +38,7 @@ int PdgCode::net_quark_number(const int quark) const {
   }
   if (is_nucleus()) {
     const int Np = nucleus_.Z_;
-    const int Nn = nucleus_.A_ - nucleus_.Z_;
+    const int Nn = nucleus_.A_ - nucleus_.Z_ - nucleus_.n_Lambda_;
     const int NL = nucleus_.n_Lambda_;
     switch (quark) {
       case 1:
