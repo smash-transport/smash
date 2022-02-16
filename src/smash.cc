@@ -368,23 +368,81 @@ void ignore_simulation_config_values(Configuration &configuration) {
   }
 }
 
-/// Initialize the particles and decays from the configuration.
-void initialize_particles_and_decays(Configuration &configuration) {
+/// Set up configuration and logging from input files and extra config
+Configuration configure(const bf::path &config_file,
+                        const char *particles_file = nullptr,
+                        const char *decaymodes_file = nullptr,
+                        std::vector<std::string> &extra_config = {}) {
+
+    // Read in config file
+    Configuration configuration(input_path.parent_path(),
+                                input_path.filename());
+
+    // Merge config passed via command line
+    for (const auto &config : extra_config) {
+      configuration.merge_yaml(config);
+    }
+
+    // Set up logging
+    set_default_loglevel(
+        configuration.take({"Logging", "default"}, einhard::ALL));
+    create_all_loggers(configuration["Logging"]);
+
+    // check if version matches before doing anything else
+    check_config_version_is_compatible(configuration);
+
+    logg[LMain].trace(SMASH_SOURCE_LOCATION,
+                      " load ParticleType and DecayModes");
+
+    auto particles_and_decays =
+        load_particles_and_decaymodes(particles, decaymodes);
+    /* For particles and decaymodes: external file is superior to config.
+     * Hovever, warn in case of conflict.
+     */
+    if (configuration.has_value({"particles"}) && particles) {
+      logg[LMain].warn(
+          "Ambiguity: particles from external file ", particles,
+          " requested, but there is also particle list in the config."
+          " Using particles from ",
+          particles);
+    }
+    if (!configuration.has_value({"particles"}) || particles) {
+      configuration["particles"] = particles_and_decays.first;
+    }
+
+    if (configuration.has_value({"decaymodes"}) && decaymodes) {
+      logg[LMain].warn(
+          "Ambiguity: decaymodes from external file ", decaymodes,
+          " requested, but there is also decaymodes list in the config."
+          " Using decaymodes from",
+          decaymodes);
+    }
+    if (!configuration.has_value({"decaymodes"}) || decaymodes) {
+      configuration["decaymodes"] = particles_and_decays.second;
+    }
+}
+
+void initalize(Configuration &configuration,
+               std::string version,
+               bf::path tabulations_path) {
+  logg[LMain].trace(SMASH_SOURCE_LOCATION,
+                      " create ParticleType and DecayModes");
   ParticleType::create_type_list(configuration.take({"particles"}));
   DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
   ParticleType::check_consistency();
-}
 
-/** Initialize the particles and decays from the configuration,
- *  the hash and the path to the cashed resonance integrals.
- */
-void initialize_particles_and_decays(Configuration &configuration,
-                                     sha256::Hash hash,
-                                     bf::path tabulations_path) {
-  initialize_particles_and_decays(configuration);
   logg[LMain].info("Tabulating cross section integrals...");
+  // Calculate a hash of the SMASH version, the particles and decaymodes.
+  const std::string particle_string = configuration["particles"].to_string();
+  const std::string decay_string = configuration["decaymodes"].to_string();
+  sha256::Context hash_context;
+  hash_context.update(version);
+  hash_context.update(particle_string);
+  hash_context.update(decay_string);
+  const auto hash = hash_context.finalize();
+  logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash);
   IsoParticleType::tabulate_integrals(hash, tabulations_path);
-}
+
 
 }  // unnamed namespace
 
@@ -438,10 +496,10 @@ int main(int argc, char *argv[]) {
     bool final_state_cross_sections = false;
     bool particles_dump_iSS_format = false;
     bool cache_integrals = true;
+    bool suppress_disclaimer = false;
 
     // parse command-line arguments
     int opt;
-    bool suppress_disclaimer = false;
     while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xvnq",
                               longopts, nullptr)) != -1) {
       switch (opt) {
@@ -523,65 +581,12 @@ int main(int argc, char *argv[]) {
       print_disclaimer();
     }
 
-    // Read in config file
-    Configuration configuration(input_path.parent_path(),
-                                input_path.filename());
-    // Merge config passed via command line
-    for (const auto &config : extra_config) {
-      configuration.merge_yaml(config);
-    }
-
-    // Set up logging
-    set_default_loglevel(
-        configuration.take({"Logging", "default"}, einhard::ALL));
-    create_all_loggers(configuration["Logging"]);
+    configuration = configure(input_path, particles, decaymodes, extra_config); // !
 
     setup_default_float_traps();
 
-    // check if version matches before doing anything else
-    check_config_version_is_compatible(configuration);
-
-    logg[LMain].trace(SMASH_SOURCE_LOCATION,
-                      " create ParticleType and DecayModes");
-
-    auto particles_and_decays =
-        load_particles_and_decaymodes(particles, decaymodes);
-    /* For particles and decaymodes: external file is superior to config.
-     * Hovever, warn in case of conflict.
-     */
-    if (configuration.has_value({"particles"}) && particles) {
-      logg[LMain].warn(
-          "Ambiguity: particles from external file ", particles,
-          " requested, but there is also particle list in the config."
-          " Using particles from ",
-          particles);
-    }
-    if (!configuration.has_value({"particles"}) || particles) {
-      configuration["particles"] = particles_and_decays.first;
-    }
-
-    if (configuration.has_value({"decaymodes"}) && decaymodes) {
-      logg[LMain].warn(
-          "Ambiguity: decaymodes from external file ", decaymodes,
-          " requested, but there is also decaymodes list in the config."
-          " Using decaymodes from",
-          decaymodes);
-    }
-    if (!configuration.has_value({"decaymodes"}) || decaymodes) {
-      configuration["decaymodes"] = particles_and_decays.second;
-    }
-
-    // Calculate a hash of the SMASH version, the particles and decaymodes.
-    const std::string version(VERSION_MAJOR);
-    const std::string particle_string = configuration["particles"].to_string();
-    const std::string decay_string = configuration["decaymodes"].to_string();
-    sha256::Context hash_context;
-    hash_context.update(version);
-    hash_context.update(particle_string);
-    hash_context.update(decay_string);
-    const auto hash = hash_context.finalize();
-    logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash);
-
+    // Check output path
+    ensure_path_is_valid(output_path);
     bf::path tabulations_path;
     if (cache_integrals) {
       tabulations_path = output_path.parent_path() / "tabulations";
@@ -590,12 +595,14 @@ int main(int argc, char *argv[]) {
     } else {
       tabulations_path = "";
     }
+    const std::string version(VERSION_MAJOR);
+
     if (list2n_activated) {
       /* Print only 2->n, n > 1. Do not dump decays, which can be found in
        * decaymodes.txt anyway */
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
       logg[LMain].info() << "Tabulations path: " << tabulations_path;
-      initialize_particles_and_decays(configuration, hash, tabulations_path);
+      initalize(configuration, version, tabulations_path);
       auto scat_finder = actions_finder_for_dump(configuration);
 
       ignore_simulation_config_values(configuration);
@@ -605,7 +612,7 @@ int main(int argc, char *argv[]) {
       std::exit(EXIT_SUCCESS);
     }
     if (particles_dump_iSS_format) {
-      initialize_particles_and_decays(configuration);
+      initalize(configuration, version, tabulations_path);
       ParticleTypePtrList list;
       list.clear();
       for (const auto &ptype : ParticleType::list_all()) {
@@ -648,7 +655,7 @@ int main(int argc, char *argv[]) {
     }
     if (resonance_dump_activated) {
       // Ignore config values that don't make sense.
-      initialize_particles_and_decays(configuration, hash, tabulations_path);
+      initalize(configuration, version, tabulations_path);
       const auto _dummy = ExperimentBase::create(configuration, "");
       ignore_simulation_config_values(configuration);
       check_for_unused_config_values(configuration);
@@ -659,7 +666,7 @@ int main(int argc, char *argv[]) {
       std::exit(EXIT_SUCCESS);
     }
     if (cross_section_dump_activated) {
-      initialize_particles_and_decays(configuration, hash, tabulations_path);
+      initalize(configuration, version, tabulations_path);
       std::string arg_string(cs_string);
       std::vector<std::string> args = split(arg_string, ',');
       const unsigned int n_arg = args.size();
@@ -713,8 +720,7 @@ int main(int argc, char *argv[]) {
       configuration["General"]["Randomseed"] = random::generate_63bit_seed();
     }
 
-    // Check output path
-    ensure_path_is_valid(output_path);
+    // Avoid overwriting SMASH output
     const bf::path lock_path = output_path / "smash.lock";
     FileLock lock(lock_path);
     if (!lock.acquire()) {
@@ -741,9 +747,8 @@ int main(int argc, char *argv[]) {
         << "# Build    : " << CMAKE_BUILD_TYPE << '\n'
         << "# Date     : " << BUILD_DATE << '\n'
         << configuration.to_string() << '\n';
-    logg[LMain].trace(SMASH_SOURCE_LOCATION,
-                      " create ParticleType and DecayModes");
-    initialize_particles_and_decays(configuration, hash, tabulations_path);
+
+    initalize(configuration, version, tabulations_path);
 
     // Create an experiment
     logg[LMain].trace(SMASH_SOURCE_LOCATION, " create Experiment");
