@@ -372,9 +372,9 @@ void ignore_simulation_config_values(Configuration &configuration) {
 Configuration configure(const bf::path &config_file,
                         const char *particles_file = nullptr,
                         const char *decaymodes_file = nullptr,
-                        std::vector<std::string> &extra_config = {}) {
+                        const std::vector<std::string> &extra_config = {}) {
   // Read in config file
-  Configuration configuration(input_path.parent_path(), input_path.filename());
+  Configuration configuration(config_file.parent_path(), config_file.filename());
 
   // Merge config passed via command line
   for (const auto &config : extra_config) {
@@ -392,31 +392,33 @@ Configuration configure(const bf::path &config_file,
   logg[LMain].trace(SMASH_SOURCE_LOCATION, " load ParticleType and DecayModes");
 
   auto particles_and_decays =
-      load_particles_and_decaymodes(particles, decaymodes);
+      load_particles_and_decaymodes(particles_file, decaymodes_file);
   /* For particles and decaymodes: external file is superior to config.
    * Hovever, warn in case of conflict.
    */
-  if (configuration.has_value({"particles"}) && particles) {
+  if (configuration.has_value({"particles"}) && particles_file) {
     logg[LMain].warn(
-        "Ambiguity: particles from external file ", particles,
+        "Ambiguity: particles from external file ", particles_file,
         " requested, but there is also particle list in the config."
         " Using particles from ",
-        particles);
+        particles_file);
   }
-  if (!configuration.has_value({"particles"}) || particles) {
+  if (!configuration.has_value({"particles"}) || particles_file) {
     configuration["particles"] = particles_and_decays.first;
   }
 
-  if (configuration.has_value({"decaymodes"}) && decaymodes) {
+  if (configuration.has_value({"decaymodes"}) && decaymodes_file) {
     logg[LMain].warn(
-        "Ambiguity: decaymodes from external file ", decaymodes,
+        "Ambiguity: decaymodes from external file ", decaymodes_file,
         " requested, but there is also decaymodes list in the config."
         " Using decaymodes from",
-        decaymodes);
+        decaymodes_file);
   }
-  if (!configuration.has_value({"decaymodes"}) || decaymodes) {
+  if (!configuration.has_value({"decaymodes"}) || decaymodes_file) {
     configuration["decaymodes"] = particles_and_decays.second;
   }
+
+  return configuration;
 }
 
 /**
@@ -442,6 +444,7 @@ void initalize(Configuration &configuration, std::string version,
   const auto hash = hash_context.finalize();
   logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash);
   IsoParticleType::tabulate_integrals(hash, tabulations_path);
+}
 
 }  // unnamed namespace
 
@@ -580,7 +583,7 @@ int main(int argc, char *argv[]) {
       print_disclaimer();
     }
 
-    configuration =
+    auto configuration =
         configure(input_path, particles, decaymodes, extra_config);  // !
 
     setup_default_float_traps();
