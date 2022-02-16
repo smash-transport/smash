@@ -21,11 +21,10 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## Unreleased
 
 ### Input / Output
-* Minimum SMASH Version supported in .yaml configuration files is now 2.2
 * Added `HepMC3_treeroot` output
-* `HepMC` output in asciiv3 native format renamed `HepMC3_asciiv3`
 
 ### Changed
+* `HepMC` output in asciiv3 native format renamed `HepMC3_asciiv3`
 * Minimum supported CMake version is now version 3.9
 * Renamed `USE_ROOT`, `USE_HEPMC` and `USE_RIVET` CMake options to `TRY_USE_ROOT`, `TRY_USE_HEPMC` and `TRY_USE_RIVET`, respectively
 

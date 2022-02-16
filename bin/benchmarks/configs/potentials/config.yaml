@@ -1,4 +1,4 @@
-Version: 2.2
+Version: 1.8
 # change together with testparticles config
 Logging:
     default: OFF
