@@ -374,7 +374,8 @@ Configuration configure(const bf::path &config_file,
                         const char *decaymodes_file = nullptr,
                         const std::vector<std::string> &extra_config = {}) {
   // Read in config file
-  Configuration configuration(config_file.parent_path(), config_file.filename());
+  Configuration configuration(config_file.parent_path(),
+                              config_file.filename());
 
   // Merge config passed via command line
   for (const auto &config : extra_config) {
@@ -418,6 +419,9 @@ Configuration configure(const bf::path &config_file,
     configuration["decaymodes"] = particles_and_decays.second;
   }
 
+  // // TODO(stdnmr) Something fishy might go on here, need to investigate
+  // santizer tests say: smash-devel/src/smash.cc:372:15: runtime error: execution reached the end of a value-returning function without returning a value
+  // SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /Users/stdnmr/smash-devel/src/smash.cc:372:15 in 
   return configuration;
 }
 
@@ -448,7 +452,7 @@ void initalize(Configuration &configuration, std::string version,
 
 }  // unnamed namespace
 
-}  // namespace
+}  // namespace smash
 
 /**
  * Main program
