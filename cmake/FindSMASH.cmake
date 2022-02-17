@@ -9,6 +9,17 @@
 # The environment variable SMASH_DIR must be set properly to succeed, e. g.:
 # export SMASH_DIR=~/Work/SMASH/smash
 
+# At the moment a macro about the system endianness is needed from within SMASH
+include(TestBigEndian)
+TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+if(IS_BIG_ENDIAN)
+   message(STATUS "Big endian architecture detected.")
+   add_definitions("-DBIG_ENDIAN_ARCHITECTURE")
+else()
+   message(STATUS "Little endian architecture detected.")
+   add_definitions("-DLITTLE_ENDIAN_ARCHITECTURE")
+endif()
+
 message(STATUS "Looking for SMASH ...")
 
 find_package(GSL 2.0 REQUIRED)
