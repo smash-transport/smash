@@ -22,6 +22,7 @@ Date: 2022-02-15
 
 ### Changed
 * Include unformed particles in initial conditions output
+* Add definition of endianness macro to FindSMASH.cmake module
 
 
 ## [SMASH-2.1.2](https://github.com/smash-transport/smash/compare/SMASH-2.1.1...SMASH-2.1.2)
