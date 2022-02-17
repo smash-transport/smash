@@ -17,6 +17,13 @@ The major categories to group changes in this log are:
 
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
+##[SMASH-2.1.3](https://github.com/smash-transport/smash/compare/SMASH-2.1.2...SMASH-2.1.3)
+Date: 2022-02-15
+
+### Changed
+* Include unformed particles in initial conditions output
+
+
 ## [SMASH-2.1.2](https://github.com/smash-transport/smash/compare/SMASH-2.1.1...SMASH-2.1.2)
 Date: 2022-02-04
 

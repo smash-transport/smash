@@ -2217,11 +2217,16 @@ void Experiment<Modus>::run_time_evolution() {
         const double min_cell_length = compute_min_cell_length(dt);
         logg[LExperiment].debug("Creating grid with minimal cell length ",
                                 min_cell_length);
+        /* For the hyper-surface-crossing actions also unformed particles are
+         * searched and therefore needed on the grid. */
+        const bool include_unformed_particles = IC_output_switch_;
         const auto &grid =
             use_grid_ ? modus_.create_grid(ensembles_[i_ens], min_cell_length,
-                                           dt, parameters_.coll_crit)
+                                           dt, parameters_.coll_crit,
+                                           include_unformed_particles)
                       : modus_.create_grid(ensembles_[i_ens], min_cell_length,
                                            dt, parameters_.coll_crit,
+                                           include_unformed_particles,
                                            CellSizeStrategy::Largest);
 
         const double gcell_vol = grid.cell_volume();
