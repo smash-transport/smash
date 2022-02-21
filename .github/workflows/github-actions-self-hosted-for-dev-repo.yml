@@ -24,7 +24,8 @@ jobs:
           # we count the number of available cpu cores          
           export nproc=$(cat /proc/cpuinfo | grep processor | wc -l)
           # we set up the variables with the SMASH source and build directories
-          export SMASH_ROOT=$GITHUB_WORKSPACE && mkdir -p $SMASH_ROOT/build
+          export SMASH_ROOT=$GITHUB_WORKSPACE
+          mkdir -p $SMASH_ROOT/build
           # variables dealing with the Singularity container
           # here we assume that $HOME points to the home directoy of the user "smash"
           export TOOLS_DIR=$HOME/actions-runner/smash_stuff_github_actions
@@ -60,7 +61,8 @@ jobs:
           # we count the number of available cpu cores          
           export nproc=$(cat /home/hyihp-repos/smash-devel_runners/num_of_cpus_for_actions.dat)
           # we set up the variables with the SMASH source and build directories
-          export SMASH_ROOT=$GITHUB_WORKSPACE && mkdir -p $SMASH_ROOT/build
+          export SMASH_ROOT=$GITHUB_WORKSPACE
+          mkdir -p $SMASH_ROOT/build
           # this directory contains pythia, clang and eigen, which are needed later
           # here we do not use $HOME because the runner is hosted in shared common group directory
           export TOOLS_DIR=/home/hyihp-repos/smash-devel_runners/smash_stuff
@@ -71,7 +73,8 @@ jobs:
           -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=native" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=native"
           make -j $nproc
           # now we build the documentation
-          make undocumented_test && make user
+          make undocumented_test
+          make user
           # now we run the tests
           CTEST_OUTPUT_ON_FAILURE=1 ctest -j$nproc
           # finally, we check if the code is well formatted
