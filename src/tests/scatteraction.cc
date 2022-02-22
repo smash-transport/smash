@@ -35,7 +35,7 @@ TEST(init_particle_types) {
 constexpr double r_x = 0.1;
 const FourVector pos_a = Position{0., -r_x, 0., 0.};
 const FourVector pos_b = Position{0., r_x, 0., 0.};
-const FourVector middle = (pos_a + pos_b) / 2.;
+const ThreeVector middle = ((pos_a + pos_b) / 2.).threevec();
 
 TEST(sorting) {
   ParticleData a{ParticleType::find(0x111)};  // pi0
@@ -44,11 +44,11 @@ TEST(sorting) {
 
   ParticleData b{ParticleType::find(0x111)};  // pi0
   b.set_4position(pos_b);
-  a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
+  b.set_4momentum(Momentum{1.1, -1.0, 0., 0.});
 
   constexpr double time1 = 1.;
   ScatterAction act1(a, b, time1);
-  COMPARE(act1.get_interaction_point(), middle);
+  COMPARE(act1.get_interaction_point(), FourVector(time1, middle));
 
   constexpr double time2 = 1.1;
   ScatterAction act2(a, b, time2);
@@ -180,7 +180,10 @@ TEST(outgoing_valid) {
   VERIFY(outgoing_particles[0].id() > p1_copy.id());
   VERIFY(outgoing_particles[0].id() > p2_copy.id());
   // verify that particle is placed in the middle between the incoming ones
-  COMPARE(outgoing_particles[0].position(), middle);
+  // at the time of the collision
+  ThreeVector interaction_point =
+      middle + 0.2 * (p1.velocity() + p2.velocity()) / 2.0;
+  COMPARE(outgoing_particles[0].position(), FourVector(0.2, interaction_point));
 }
 
 TEST(cross_sections_symmetric) {
