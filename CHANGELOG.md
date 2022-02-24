@@ -17,7 +17,14 @@ The major categories to group changes in this log are:
 
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
-##[SMASH-2.1.3](https://github.com/smash-transport/smash/compare/SMASH-2.1.2...SMASH-2.1.3)
+## [SMASH-2.1.4](https://github.com/smash-transport/smash/compare/SMASH-2.1.3...SMASH-2.1.4)
+Date: 2022-02-24
+
+### Fixed
+* Properly reset for each event whether projectile and target interacted
+
+
+## [SMASH-2.1.3](https://github.com/smash-transport/smash/compare/SMASH-2.1.2...SMASH-2.1.3)
 Date: 2022-02-15
 
 ### Changed
