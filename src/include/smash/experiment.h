@@ -1927,7 +1927,7 @@ void Experiment<Modus>::initialize_new_event() {
   previous_interactions_total_ = 0;
   discarded_interactions_total_ = 0;
   total_pauli_blocked_ = 0;
-  projectile_target_interact_.resize(parameters_.n_ensembles, false);
+  projectile_target_interact_.assign(parameters_.n_ensembles, false);
   total_hypersurface_crossing_actions_ = 0;
   total_energy_removed_ = 0.0;
   // Print output headers
