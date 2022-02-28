@@ -33,7 +33,7 @@ jobs:
           export container_file=$TOOLS_DIR/singularity_container.sif
           # we configure and build smash using the environment provided by a Singularity container
           cd $SMASH_ROOT/build
-          singularity exec $container_file cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_8_303/bin/pythia8-config \
+          singularity exec $container_file cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_8_307/bin/pythia8-config \
           -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=native" \
           -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=native" -DCMAKE_CXX_STANDARD=14
           singularity exec $container_file make -j $nproc
@@ -69,7 +69,7 @@ jobs:
           export PATH=$TOOLS_DIR/bin:$TOOLS_DIR/clang6_0_0/bin/:$TOOLS_DIR/cmake-3.20.5/bin:$PATH
           # now we configure and build smash
           cd $SMASH_ROOT/build
-          cmake .. -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$TOOLS_DIR/eigen-3.3.9/ \
+          cmake .. -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8307/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$TOOLS_DIR/eigen-3.3.9/ \
           -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=native" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=native"
           make -j $nproc
           # now we build the documentation
