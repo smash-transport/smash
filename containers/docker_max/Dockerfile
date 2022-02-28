@@ -1311,7 +1311,7 @@ rm get-pip.py
 
 #here we download and install several libraries/programs used by SMASH
 
-ARG pythiaV="8303"
+ARG pythiaV="8307"
 
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
