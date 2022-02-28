@@ -286,7 +286,7 @@ TEST(replace_const) {
   // Create Pythia Particle, an electron in this case
   Pythia8::Particle part1(11);
   // Set Data Entry Pointer to the corresponding entry
-  part1.setPDEPtr(&entry1);
+  part1.setPDEPtr(std::make_shared<Pythia8::ParticleDataEntry>(entry1));
 
   // Initialize array with excess constituents
   // Initialize array to check correct function behavior
@@ -314,7 +314,7 @@ TEST(replace_const) {
   // Case 3: Particle is a quark, excess reaches 0
   Pythia8::ParticleDataEntry entry3(1, "d", "dbar");
   Pythia8::Particle part3(1);
-  part3.setPDEPtr(&entry3);
+  part3.setPDEPtr(std::make_shared<Pythia8::ParticleDataEntry>(entry3));
   exc_const = {-1, 0, 0, 1, 0};
   // Outcome is expected to be 0 as the charm converts to down
   test_const = {0, 0, 0, 0, 0};
@@ -325,7 +325,7 @@ TEST(replace_const) {
   // Case 4: Particle is a diquark, excess reaches 0
   Pythia8::ParticleDataEntry entry4(2101, "ud", "udbar");
   Pythia8::Particle part4(2101);
-  part4.setPDEPtr(&entry4);
+  part4.setPDEPtr(std::make_shared<Pythia8::ParticleDataEntry>(entry4));
   exc_const = {-1, -1, 0, 1, 1};
   // Outcome is expected to be 0 again
   test_const = {0, 0, 0, 0, 0};
