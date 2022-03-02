@@ -429,7 +429,7 @@ TEST(update_incoming) {
 static bool collisionbranches_equal(const CollisionBranchPtr& b1,
                                     const CollisionBranchPtr& b2) {
   bool same_particle_number = b1->particle_number() == b2->particle_number();
-  bool same_weight = b1->weight() == b2->weight();
+  bool same_weight = (std::abs(b1->weight() - b2->weight()) < really_small);
   if (b1->get_type() == ProcessType::StringSoftSingleDiffractiveAX) {
     return same_weight && same_particle_number &&
            b2->get_type() == ProcessType::StringSoftSingleDiffractiveXB;
