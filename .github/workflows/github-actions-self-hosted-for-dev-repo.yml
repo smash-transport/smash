@@ -33,7 +33,7 @@ jobs:
           export container_file=$TOOLS_DIR/singularity_container.sif
           # we configure and build smash using the environment provided by a Singularity container
           cd $SMASH_ROOT/build
-          singularity exec $container_file cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_8_307/bin/pythia8-config \
+          singularity exec $container_file cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config \
           -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=native" \
           -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=native" -DCMAKE_CXX_STANDARD=14
           singularity exec $container_file make -j $nproc
