@@ -26,6 +26,7 @@
 namespace smash {
 
 /// Set up configuration and logging from input files and extra config
+// TODO(stdnmr) Maybe only use bf_paths for all files
 Configuration configure(const bf::path &config_file,
                         const char *particles_file = nullptr,
                         const char *decaymodes_file = nullptr,
