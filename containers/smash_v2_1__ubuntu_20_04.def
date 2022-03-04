@@ -1315,7 +1315,7 @@ mkdir -p /SMASH
 #here we download and install several libraries/programs used by SMASH
 
 cd /SMASH
-pythia_version="8303"
+pythia_version="8307"
 wget https://pythia.org/download/pythia83/pythia${pythia_version}.tgz
 tar xf pythia${pythia_version}.tgz && rm pythia${pythia_version}.tgz
 cd pythia${pythia_version}
@@ -1476,7 +1476,7 @@ export LATEXINPUTS="$datarootdir/Rivet/texmf/tex//:$LATEXINPUTS"
 
 %labels
 Author Gabriele Inghirami
-Version v_12_11_21_ubuntu2004
+Version v_28_02_22_ubuntu2004
 
 
 %help
