@@ -119,7 +119,8 @@ ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
     : OutputInterface(name),
       file_{path / "thermodynamics.dat", "w"},
       out_par_(out_par) {
-  std::fprintf(file_.get(), "# %s thermodynamics output\n", VERSION_MAJOR);
+  std::fprintf(file_.get(), "# %s thermodynamics output\n",
+               SMASH_VERSION_VERBOSE);
   const ThreeVector r = out_par.td_position;
   if (out_par_.td_only_participants) {
     std::fprintf(file_.get(), "# only participants are taken into account\n");
