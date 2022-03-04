@@ -140,7 +140,7 @@ BinaryOutputBase::BinaryOutputBase(const bf::path &path,
   write(format_version_);                  // file format version number
   std::uint16_t format_variant = static_cast<uint16_t>(extended_);
   write(format_variant);
-  write(SMASH_VERSION_VERBOSE);  // SMASH version
+  write(SMASH_VERSION_VERBOSE);
 }
 
 // write functions:
