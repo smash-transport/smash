@@ -44,9 +44,11 @@ class HepMcOutput : public HepMcInterface {
    * \param[in] full_event Whether the full event or only final-state particles
                            are printed in the output
    * \param[in] HepMC3_output_type: "root" or "asciiv3"
+   * \param[in] is_a_ion_collision Whether we are dealing with a heavy ion
+   *                       collision or with another kind of simulation
    */
   HepMcOutput(const bf::path &path, std::string name, const bool full_event,
-              std::string HepMC3_output_type);
+              std::string HepMC3_output_type, const bool is_a_ion_collision);
 
   /// Destructor renames file
   ~HepMcOutput();

@@ -699,19 +699,17 @@ void Experiment<Modus>::create_output(const std::string &format,
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
   } else if ((format == "HepMC") || (format == "HepMC_treeroot")) {
-    if (!modus_.is_collider()) {
-      logg[LExperiment].error("HepMC output supported only in collider modus");
-      return;
-    }
 #ifdef SMASH_USE_HEPMC
     if (content == "Particles") {
       if (format == "HepMC") {
-        outputs_.emplace_back(make_unique<HepMcOutput>(
-            output_path, "SMASH_HepMC_particles", false, "asciiv3"));
+        outputs_.emplace_back(
+            make_unique<HepMcOutput>(output_path, "SMASH_HepMC_particles",
+                                     false, "asciiv3", modus_.is_collider()));
       } else if (format == "HepMC_treeroot") {
 #ifdef SMASH_USE_HEPMC_ROOTIO
-        outputs_.emplace_back(make_unique<HepMcOutput>(
-            output_path, "SMASH_HepMC_particles", false, "root"));
+        outputs_.emplace_back(
+            make_unique<HepMcOutput>(output_path, "SMASH_HepMC_particles",
+                                     false, "root", modus_.is_collider()));
 #else
         logg[LExperiment].error(
             "Requested HepMC_treeroot output not available, "
@@ -720,12 +718,14 @@ void Experiment<Modus>::create_output(const std::string &format,
       }
     } else if (content == "Collisions") {
       if (format == "HepMC") {
-        outputs_.emplace_back(make_unique<HepMcOutput>(
-            output_path, "SMASH_HepMC_collisions", true, "asciiv3"));
+        outputs_.emplace_back(
+            make_unique<HepMcOutput>(output_path, "SMASH_HepMC_collisions",
+                                     true, "asciiv3", modus_.is_collider()));
       } else if (format == "HepMC_treeroot") {
 #ifdef SMASH_USE_HEPMC_ROOTIO
-        outputs_.emplace_back(make_unique<HepMcOutput>(
-            output_path, "SMASH_HepMC_collisions", true, "root"));
+        outputs_.emplace_back(
+            make_unique<HepMcOutput>(output_path, "SMASH_HepMC_collisions",
+                                     true, "root", modus_.is_collider()));
 #else
         logg[LExperiment].error(
             "Requested HepMC3_treeroot output not available, "
@@ -757,12 +757,13 @@ void Experiment<Modus>::create_output(const std::string &format,
       return;
     }
     if (format == "YODA") {
-      outputs_.emplace_back(
-          make_unique<RivetOutput>(output_path, "SMASH_Rivet", false, out_par));
+      outputs_.emplace_back(make_unique<RivetOutput>(
+          output_path, "SMASH_Rivet", false, modus_.is_collider(), out_par));
       rivet_format_already_selected = true;
     } else if (format == "YODA-full") {
-      outputs_.emplace_back(make_unique<RivetOutput>(
-          output_path, "SMASH_Rivet_full", true, out_par));
+      outputs_.emplace_back(
+          make_unique<RivetOutput>(output_path, "SMASH_Rivet_full", true,
+                                   modus_.is_collider(), out_par));
       rivet_format_already_selected = true;
     } else {
       logg[LExperiment].error("Rivet format " + format +

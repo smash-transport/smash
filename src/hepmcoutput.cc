@@ -52,7 +52,8 @@ namespace smash {
  * energies with the \key --ignore-beams option. When using the Rivet output
  * this check is disabled by default.
  * - The two initial ions are included in the particle list, as well.
- * - The HepMC output can be enabled _only_ for \ref input_modi_collider_ modus.
+ * - The HepMC output is best suited to \ref input_modi_collider_ modus, but
+ *   it can be used in all kind of simulations
  * - The extension of the HepMC treeroot output is simply .root because the
  *   ROOT browser tool does not recognize the .treeroot extension. On the other
  *   hand, in HepMC root and treeroot outputs are distinct.
@@ -153,8 +154,9 @@ namespace smash {
  *
  **/
 HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
-                         const bool full_event, std::string HepMC3_output_type)
-    : HepMcInterface(name, full_event),
+                         const bool full_event, std::string HepMC3_output_type,
+                         const bool is_a_collision)
+    : HepMcInterface(name, full_event, is_a_collision),
       filename_(path / (name + "." + HepMC3_output_type)) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += +".unfinished";

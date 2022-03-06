@@ -9,6 +9,7 @@
 
 #include "smash/hepmcinterface.h"
 #include "smash/config.h"
+#include "smash/experiment.h"
 
 #include "HepMC3/GenRunInfo.h"
 #include "HepMC3/Print.h"
@@ -17,13 +18,15 @@
 
 namespace smash {
 
-HepMcInterface::HepMcInterface(const std::string& name, const bool full_event)
+HepMcInterface::HepMcInterface(const std::string& name, const bool full_event,
+                               const bool is_an_ion_collision)
     : OutputInterface(name),
       event_(HepMC3::Units::GEV, HepMC3::Units::MM),
       ion_(),
       xs_(),
       ip_(),
-      full_event_(full_event) {
+      full_event_(full_event),
+      is_an_ion_collision_(is_an_ion_collision) {
   logg[LOutput].debug() << "Name of output: " << name << " "
                         << (full_event_ ? "full event" : "final state only")
                         << " output" << std::endl;
@@ -70,7 +73,7 @@ void HepMcInterface::at_eventstart(const Particles& particles,
   smash::FourVector p_targ;
   AZ az_proj{0, 0};
   AZ az_targ{0, 0};
-  bool is_coll = (event.impact_parameter >= 0.0);
+  bool is_coll = (event.impact_parameter >= 0.0) && is_an_ion_collision_;
 
   for (auto& data : particles) {
     if (is_coll) {
@@ -111,7 +114,7 @@ void HepMcInterface::at_eventstart(const Particles& particles,
 
   coll_.resize(az_proj.first + az_targ.first);
   // Make beam particles
-  if (is_coll) {
+  if (is_coll && is_an_ion_collision_) {
     auto proj = make_gen(ion_pdg(az_proj), Status::beam, p_proj);
     auto targ = make_gen(ion_pdg(az_targ), Status::beam, p_targ);
 
@@ -161,7 +164,7 @@ void HepMcInterface::at_eventend(const Particles& particles,
                                  const int32_t /*event_number*/,
                                  const EventInfo& event) {
   // In case this was an empty event
-  if (event.empty_event) {
+  if (event.empty_event && is_an_ion_collision_) {
     clear();
     return;
   }

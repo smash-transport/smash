@@ -144,8 +144,9 @@ namespace smash {
  */
 
 RivetOutput::RivetOutput(const bf::path& path, std::string name,
-                         const bool full_event, const OutputParameters& out_par)
-    : HepMcInterface(name, full_event),
+                         const bool full_event, const bool is_an_ion_collision,
+                         const OutputParameters& out_par)
+    : HepMcInterface(name, full_event, is_an_ion_collision),
       handler_(),
       filename_(path / (name + ".yoda")),
       need_init_(true),

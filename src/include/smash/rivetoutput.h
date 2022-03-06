@@ -42,10 +42,12 @@ class RivetOutput : public HepMcInterface {
    * \param[in] name Name of the output.
    * \param[in] full_event Whether the full event or only final-state particles
                            are printed in the output
+   * \param[in] is_an_ion_collision Whether we are dealing with a heavy ion
+   *                           collision or with another kind of simulation
    * \param[in] out_par Configuration parameters of SMASH
    */
   RivetOutput(const bf::path& path, std::string name, const bool full_event,
-              const OutputParameters& out_par);
+              const bool is_an_ion_collision, const OutputParameters& out_par);
   /**
    * Destructor. Finalises the analzyses and writes out results to file
    */
