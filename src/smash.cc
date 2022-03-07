@@ -26,7 +26,7 @@
 /* build dependent variables */
 #include "smash/config.h"
 
-#include "smash/interfaces.h"
+#include "smash/library.h"
 
 namespace smash {
 

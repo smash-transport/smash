@@ -20,8 +20,8 @@
 // TODO(stdnmr) check what includes are really necessary
 
 
-#ifndef SRC_INCLUDE_SMASH_LIB_H_
-#define SRC_INCLUDE_SMASH_LIB_H_
+#ifndef SRC_INCLUDE_SMASH_LIBRARY_H_
+#define SRC_INCLUDE_SMASH_LIBRARY_H_
 
 namespace smash {
 
@@ -119,4 +119,4 @@ void initalize(Configuration &configuration, std::string version,
 
 } // namespace smash
 
-#endif  // SRC_INCLUDE_SMASH_LIB_H_
+#endif  // SRC_INCLUDE_SMASH_LIBRARY_H_
