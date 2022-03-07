@@ -27,8 +27,8 @@ namespace smash {
  * http://hepmc.web.cern.ch/hepmc/ and https://arxiv.org/abs/1912.08005.
  *
  * The SMASH HepMC output can be:
- * - _HepMC3_asciiv3_ plain human readable ASCII format
- * - _HepMC3_treeroot_ ROOT Tree binary format, readable by ROOT
+ * - _HepMC_asciiv3_ plain human readable ASCII format
+ * - _HepMC_treeroot_ ROOT Tree binary format, readable by ROOT
  *
  * Producing HepMC output in asciiv3 format requires HepMC3 to be installed.
  * Download the tarball from http://hepmc.web.cern.ch/hepmc/
@@ -52,21 +52,23 @@ namespace smash {
  * energies with the \key --ignore-beams option. When using the Rivet output
  * this check is disabled by default.
  * - The two initial ions are included in the particle list, as well.
- * - The HepMC output is best suited to \ref input_modi_collider_ modus, but
- *   it can be used in all kind of simulations
+ * - The HepMC output can be used in all kind of simulations, but is best
+ *   suited to \ref input_modi_collider_ modus .
  * - The extension of the HepMC treeroot output is simply .root because the
  *   ROOT browser tool does not recognize the .treeroot extension. On the other
  *   hand, in HepMC root and treeroot outputs are distinct.
+ * - The old option _HepMC_, equivalent to the current _HepMC_asciiv3_, is
+ *   still valid for the time being, but it is __deprecated__.
  *
  * \section output_hepmc_asciiv3_ ASCII HepMC Format
  *
  * HepMC generally structures each event into particles and vertices
  * connecting them, basically storing a graph of the event.
 
- * Two versions of HepMC are possible, if the HepMC format is specficified
- * under \key Particles. The output only provides a particle list of the
- * final state. For this only one central vertex is used. All initial state
- * particles are incoming particles and all final state
+ * Two versions of HepMC are possible by specifying HepMC_asciiv3 or
+ * HepMC_treeroot under \key Particles. The output only provides a particle
+ * list of the final state. For this only one central vertex is used. All
+ * initial state particles are incoming particles and all final state
  * particles are outgoing particles of this vertex. Scatterings
  * happening during the SMASH event are not recorded. For the collider
  * modus, the intial state particles are combined into two single

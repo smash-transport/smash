@@ -698,10 +698,11 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Initial_Conditions" && format == "ASCII") {
     outputs_.emplace_back(
         make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
-  } else if ((format == "HepMC") || (format == "HepMC_treeroot")) {
+  } else if ((format == "HepMC") || (format == "HepMC_asciiv3") ||
+          (format == "HepMC_treeroot")) {
 #ifdef SMASH_USE_HEPMC
     if (content == "Particles") {
-      if (format == "HepMC") {
+      if ((format == "HepMC") || (format == "HepMC_asciiv3")) {
         outputs_.emplace_back(
             make_unique<HepMcOutput>(output_path, "SMASH_HepMC_particles",
                                      false, "asciiv3", modus_.is_collider()));
@@ -717,7 +718,7 @@ void Experiment<Modus>::create_output(const std::string &format,
 #endif
       }
     } else if (content == "Collisions") {
-      if (format == "HepMC") {
+      if ((format == "HepMC") || (format == "HepMC_asciiv3")) {
         outputs_.emplace_back(
             make_unique<HepMcOutput>(output_path, "SMASH_HepMC_collisions",
                                      true, "asciiv3", modus_.is_collider()));
@@ -728,7 +729,7 @@ void Experiment<Modus>::create_output(const std::string &format,
                                      true, "root", modus_.is_collider()));
 #else
         logg[LExperiment].error(
-            "Requested HepMC3_treeroot output not available, "
+            "Requested HepMC_treeroot output not available, "
             "ROOT or HepMC3 ROOTIO missing or not found by cmake.");
 #endif
       }
@@ -1223,7 +1224,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
    * \subpage thermodyn_output_user_guide_
    * \subpage thermodyn_lattice_output_
    * \subpage IC_output_user_guide_
-   * - \b "HepMC", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
+   * - \b "HepMC_asciiv3", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
    *   Tree ROOT format see \ref output_hepmc_ for details
    *
    * \note Output of coordinates for the "Collisions" content in
