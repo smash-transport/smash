@@ -188,6 +188,7 @@ set(smash_src
         interpolation.cc
         interpolation2D.cc
         isoparticletype.cc
+        library.cc
         listmodus.cc
         logging.cc
         nucleus.cc
