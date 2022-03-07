@@ -412,9 +412,9 @@ int main(int argc, char *argv[]) {
 
   try {
     bool force_overwrite = false;
-    bf::path output_path = default_output_path(), input_path("./config.yaml");
+    bf::path output_path = default_output_path(), input_path("./config.yaml"), particles, decaymodes;
     std::vector<std::string> extra_config;
-    char *particles = nullptr, *decaymodes = nullptr, *modus = nullptr,
+    char *modus = nullptr,
          *end_time = nullptr, *pdg_string = nullptr, *cs_string = nullptr;
     bool list2n_activated = false;
     bool resonance_dump_activated = false;
@@ -507,8 +507,7 @@ int main(int argc, char *argv[]) {
       print_disclaimer();
     }
 
-    auto configuration =
-        configure(input_path, particles, decaymodes, extra_config);  // !
+    auto configuration = setup_config_and_logging(input_path, particles, decaymodes, extra_config);  // !
 
     check_config_version_is_compatible(configuration);
 

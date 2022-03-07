@@ -20,18 +20,20 @@
 // TODO(stdnmr) check what includes are really necessary
 
 
-#ifndef SRC_INCLUDE_SMASH_SMASHINTERFACES_H_
-#define SRC_INCLUDE_SMASH_SMASHINTERFACES_H_
+#ifndef SRC_INCLUDE_SMASH_LIB_H_
+#define SRC_INCLUDE_SMASH_LIB_H_
 
 namespace smash {
 
-/// Set up configuration and logging from input files and extra config
-// TODO(stdnmr) Maybe only use bf_paths for all files
-Configuration configure(const bf::path &config_file,
-                        const char *particles_file = nullptr,
-                        const char *decaymodes_file = nullptr,
-                        const std::vector<std::string> &extra_config = {});
+// Free functions to interface with smash
+// TODO(stdnmr) Put example program here
+// TODO(stdnmr) Place implementation into .cc
 
+/// Set up configuration and logging from input files and extra config
+Configuration setup_config_and_logging(const bf::path &config_file,
+                                       const bf::path &particles_file = {},
+                                       const bf::path &decaymodes_file = {},
+                                       const std::vector<std::string> &extra_config = {});
 
 
 /**
@@ -41,19 +43,12 @@ Configuration configure(const bf::path &config_file,
 void initalize(Configuration &configuration, std::string version,
                bf::path tabulations_path);
 
-
-
-
 ////////////////////////////////////////////////////////////////////////////////
 
-
-
-
-
-Configuration configure(const bf::path &config_file,
-                        const char *particles_file,
-                        const char *decaymodes_file ,
-                        const std::vector<std::string> &extra_config) {
+Configuration setup_config_and_logging(const bf::path &config_file,
+                           const bf::path &particles_file,
+                           const bf::path &decaymodes_file,
+                           const std::vector<std::string> &extra_config){
   // Read in config file
   Configuration configuration(config_file.parent_path(),
                               config_file.filename());
@@ -75,31 +70,28 @@ Configuration configure(const bf::path &config_file,
   /* For particles and decaymodes: external file is superior to config.
    * Hovever, warn in case of conflict.
    */
-  if (configuration.has_value({"particles"}) && particles_file) {
+  if (configuration.has_value({"particles"}) && !particles_file.empty()) {
     logg[LMain].warn(
         "Ambiguity: particles from external file ", particles_file,
         " requested, but there is also particle list in the config."
         " Using particles from ",
         particles_file);
   }
-  if (!configuration.has_value({"particles"}) || particles_file) {
+  if (!configuration.has_value({"particles"}) || !particles_file.empty()) {
     configuration["particles"] = particles_and_decays.first;
   }
 
-  if (configuration.has_value({"decaymodes"}) && decaymodes_file) {
+  if (configuration.has_value({"decaymodes"}) && !decaymodes_file.empty()) {
     logg[LMain].warn(
         "Ambiguity: decaymodes from external file ", decaymodes_file,
         " requested, but there is also decaymodes list in the config."
         " Using decaymodes from",
         decaymodes_file);
   }
-  if (!configuration.has_value({"decaymodes"}) || decaymodes_file) {
+  if (!configuration.has_value({"decaymodes"}) || !decaymodes_file.empty()) {
     configuration["decaymodes"] = particles_and_decays.second;
   }
 
-  // // TODO(stdnmr) Something fishy might go on here, need to investigate
-  // santizer tests say: smash-devel/src/smash.cc:372:15: runtime error: execution reached the end of a value-returning function without returning a value
-  // SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /Users/stdnmr/smash-devel/src/smash.cc:372:15 in
   return configuration;
 }
 
@@ -127,4 +119,4 @@ void initalize(Configuration &configuration, std::string version,
 
 } // namespace smash
 
-#endif  // SRC_INCLUDE_SMASH_SMASHINTERFACES_H_
+#endif  // SRC_INCLUDE_SMASH_LIB_H_
