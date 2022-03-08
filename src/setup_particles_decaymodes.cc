@@ -67,8 +67,7 @@ std::pair<std::string, std::string> load_particles_and_decaymodes(
   return std::make_pair(particle_string, decay_string);
 }
 
-// TODO(stdnmr) remove this function and replace in example.cc with new
-void load_default_particles_and_decaymodes() {
+void intialize_default_particles_and_decaymodes() {
   const auto pd = load_particles_and_decaymodes({}, {});
   ParticleType::create_type_list(pd.first);
   DecayModes::load_decaymodes(pd.second);

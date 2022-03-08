@@ -31,7 +31,7 @@ namespace smash {
 std::pair<std::string, std::string> load_particles_and_decaymodes(
     const boost::filesystem::path &particles_file, const boost::filesystem::path &decaymodes_file);
 /// Loads default smash particle list and decaymodes
-void load_default_particles_and_decaymodes();
+void intialize_default_particles_and_decaymodes();
 
 }  // namespace smash
 
