@@ -87,12 +87,9 @@ class HepMcInterface : public OutputInterface {
    *
    * \param[in] name    Name of output
    * \param[in] full_event Whether the full event or only final-state particles
-                           are printed in the output
-   * \param[in] is_an_ion_collision Whether we are dealing with a heavy ion
-   *                           collision or with another kind of simulation
+   *                       are printed in the output
    */
-  HepMcInterface(const std::string& name, const bool full_event,
-                 const bool is_an_ion_collision);
+  HepMcInterface(const std::string& name, const bool full_event);
   /**
    * Add the initial particles information of an event to the
    * central vertex.  Construct projectile and target particles with
@@ -223,8 +220,6 @@ class HepMcInterface : public OutputInterface {
   int ncoll_hard_;
   /** Whether the full event or only final-state particles are in the output */
   bool full_event_;
-  /** Whether this is a heavy ion collision or another kind of simulation */
-  bool is_an_ion_collision_;
 };
 }  // namespace smash
 

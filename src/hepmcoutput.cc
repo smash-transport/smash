@@ -156,9 +156,8 @@ namespace smash {
  *
  **/
 HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
-                         const bool full_event, std::string HepMC3_output_type,
-                         const bool is_a_collision)
-    : HepMcInterface(name, full_event, is_a_collision),
+                         const bool full_event, std::string HepMC3_output_type)
+    : HepMcInterface(name, full_event),
       filename_(path / (name + "." + HepMC3_output_type)) {
   filename_unfinished_ = filename_;
   filename_unfinished_ += +".unfinished";
