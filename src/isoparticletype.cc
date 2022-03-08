@@ -245,6 +245,9 @@ inline void cache_integral(
     if (!dir.empty()) {
       std::cout << "Caching tabulation to " << path.filename() << '\r'
                 << std::flush;
+    } else {
+      std::cout << "Calculating integral for " << part.name_filtered_prime()
+                << res.name_filtered_prime() << '\r' << std::flush;
     }
     if (!unstable) {
       integral = spectral_integral_semistable(integrate, *res.get_states()[0],
