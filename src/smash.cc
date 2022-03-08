@@ -519,8 +519,6 @@ int main(int argc, char *argv[]) {
     bf::path tabulations_path;
     if (cache_integrals) {
       tabulations_path = output_path.parent_path() / "tabulations";
-      bf::create_directories(tabulations_path);
-      logg[LMain].info() << "Tabulations path: " << tabulations_path;
     } else {
       tabulations_path = "";
     }

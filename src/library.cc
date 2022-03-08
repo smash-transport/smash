@@ -75,7 +75,6 @@ void initalize(Configuration &configuration, std::string version,
   DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
   ParticleType::check_consistency();
 
-  logg[LMain].info("Tabulating cross section integrals...");
   // Calculate a hash of the SMASH version, the particles and decaymodes.
   const std::string particle_string = configuration["particles"].to_string();
   const std::string decay_string = configuration["decaymodes"].to_string();
@@ -85,6 +84,13 @@ void initalize(Configuration &configuration, std::string version,
   hash_context.update(decay_string);
   const auto hash = hash_context.finalize();
   logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash);
+
+  logg[LMain].info("Tabulating cross section integrals...");
+  if (!tabulations_path.empty()) {
+    // Store tabulations on disk
+    bf::create_directories(tabulations_path);
+    logg[LMain].info() << "Tabulations path: " << tabulations_path;
+  }
   IsoParticleType::tabulate_integrals(hash, tabulations_path);
 }
 
