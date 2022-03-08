@@ -12,7 +12,6 @@
 #include "smash/decaymodes.h"
 #include "smash/inputfunctions.h"
 
-
 namespace {
 #ifndef DOXYGEN
 namespace particles_txt {
@@ -27,7 +26,8 @@ namespace decaymodes_txt {
 namespace smash {
 
 std::pair<std::string, std::string> load_particles_and_decaymodes(
-    const boost::filesystem::path &particles_file, const boost::filesystem::path &decaymodes_file) {
+    const boost::filesystem::path &particles_file,
+    const boost::filesystem::path &decaymodes_file) {
   std::string particle_string, decay_string;
   if (!particles_file.empty()) {
     if (!boost::filesystem::exists(particles_file)) {

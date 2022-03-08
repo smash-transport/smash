@@ -8,20 +8,19 @@
  */
 
 #include "smash/library.h"
-#include "smash/setup_particles_decaymodes.h"
 #include "smash/decaymodes.h"
 #include "smash/inputfunctions.h"
 #include "smash/isoparticletype.h"
 #include "smash/logging.h"
+#include "smash/setup_particles_decaymodes.h"
 
 namespace smash {
 static constexpr int LMain = LogArea::Main::id;
 
-
-Configuration setup_config_and_logging(const bf::path &config_file,
-                           const bf::path &particles_file,
-                           const bf::path &decaymodes_file,
-                           const std::vector<std::string> &extra_config){
+Configuration setup_config_and_logging(
+    const bf::path &config_file, const bf::path &particles_file,
+    const bf::path &decaymodes_file,
+    const std::vector<std::string> &extra_config) {
   // Read in config file
   Configuration configuration(config_file.parent_path(),
                               config_file.filename());
