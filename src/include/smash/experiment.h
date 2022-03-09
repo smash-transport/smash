@@ -216,7 +216,11 @@ class Experiment : public ExperimentBase {
    */
   void run_time_evolution();
 
-  /// Performs the final decays of an event
+  /**
+   * Performs the final decays of an event
+   *
+   * \throws runtime_error if found actions cannot be performed
+   */
   void do_final_decays();
 
   /// Output at the end of an event
@@ -244,11 +248,15 @@ class Experiment : public ExperimentBase {
    *
    * \param[in] action The action to perform
    * \param[in] i_ensemble index of ensemble in which action is performed
+   * \param[in] include_pauli_blocking wheter to take Pauli blocking into
+   *                                   account. Skipping Pauli blocking is
+   *                                   useful for example for final decays.
    * \return False if the action is
    *                 rejected either due to invalidity or
    *                 Pauli-blocking, or true if it's accepted and performed.
    */
-  bool perform_action(Action &action, int i_ensemble);
+  bool perform_action(Action &action, int i_ensemble,
+                      bool include_pauli_blocking = true);
   /**
    * Create a list of output files
    *
@@ -2035,7 +2043,8 @@ void Experiment<Modus>::initialize_new_event() {
 }
 
 template <typename Modus>
-bool Experiment<Modus>::perform_action(Action &action, int i_ensemble) {
+bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
+                                       bool include_pauli_blocking) {
   Particles &particles = ensembles_[i_ensemble];
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles)) {
@@ -2046,7 +2055,8 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble) {
   }
   action.generate_final_state();
   logg[LExperiment].debug("Process Type is: ", action.get_type());
-  if (pauli_blocker_ && action.is_pauli_blocked(ensembles_, *pauli_blocker_)) {
+  if (include_pauli_blocking && pauli_blocker_ &&
+      action.is_pauli_blocked(ensembles_, *pauli_blocker_)) {
     total_pauli_blocked_++;
     return false;
   }
@@ -2656,10 +2666,11 @@ template <typename Modus>
 void Experiment<Modus>::do_final_decays() {
   /* At end of time evolution: Force all resonances to decay. In order to handle
    * decay chains, we need to loop until no further actions occur. */
-  uint64_t interactions_old = 0;
+  bool actions_performed, decays_found;
+  uint64_t interactions_old;
   do {
+    decays_found = false;
     interactions_old = interactions_total_;
-
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
       Actions actions;
 
@@ -2671,15 +2682,24 @@ void Experiment<Modus>::do_final_decays() {
       }
       // Find actions.
       for (const auto &finder : action_finders_) {
-        actions.insert(finder->find_final_actions(ensembles_[i_ens]));
+        auto found_actions = finder->find_final_actions(ensembles_[i_ens]);
+        if (!found_actions.empty()) {
+          actions.insert(std::move(found_actions));
+          decays_found = true;
+        }
       }
       // Perform actions.
       while (!actions.is_empty()) {
-        perform_action(*actions.pop(), i_ens);
+        perform_action(*actions.pop(), i_ens, false);
       }
     }
+    actions_performed = interactions_total_ > interactions_old;
+    // Throw an error if actions were found but not performed
+    if (decays_found && !actions_performed) {
+      throw std::runtime_error("Final decays were found but not performed.");
+    }
     // loop until no more decays occur
-  } while (interactions_total_ > interactions_old);
+  } while (actions_performed);
 
   // Dileptons: shining of stable particles at the end
   if (dilepton_finder_ != nullptr) {
