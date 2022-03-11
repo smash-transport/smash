@@ -164,6 +164,9 @@ struct ExperimentParameters {
    * (true) or also spectators (false, default value).
    */
   bool only_participants;
+
+  /// Do weak decays at the end
+  bool do_weak_decays;
 };
 
 }  // namespace smash

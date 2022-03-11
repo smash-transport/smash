@@ -489,6 +489,7 @@ DecayBranchList ParticleType::get_partial_widths(const FourVector p,
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
     /* Calculate the sqare root s of the final state particles. */
+    const auto FinalTypes = decay_mode_list[i]->type().particle_types();
     double scale_B = 0.0;
     double scale_I3 = 0.0;
     if (pot_pointer != nullptr) {

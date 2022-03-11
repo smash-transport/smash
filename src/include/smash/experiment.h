@@ -1015,8 +1015,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           "inelastically (e.g. resonance chains), else SMASH is known to "
           "hang.");
     }
-    action_finders_.emplace_back(
-        make_unique<DecayActionsFinder>(parameters_.res_lifetime_factor));
+    action_finders_.emplace_back(make_unique<DecayActionsFinder>(
+        parameters_.res_lifetime_factor, parameters_.do_weak_decays));
   }
   bool no_coll = config.take({"Collision_Term", "No_Collisions"}, false);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
