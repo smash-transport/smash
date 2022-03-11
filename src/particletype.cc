@@ -453,29 +453,15 @@ void ParticleType::check_consistency() {
 
 bool ParticleType::wanted_decaymode(const DecayType &t,
                                     WhichDecaymodes wh) const {
-  const auto FinalTypes = t.particle_types();
   switch (wh) {
     case WhichDecaymodes::All: {
       return true;
     }
     case WhichDecaymodes::Hadronic: {
-      // No dileptons in final state particles for 2 or 3-body decays
-      return (
-          (t.particle_number() == 2 &&
-           !(is_dilepton(FinalTypes[0]->pdgcode(),
-                         FinalTypes[1]->pdgcode()))) ||
-          (t.particle_number() == 3 &&
-           !(has_lepton_pair(FinalTypes[0]->pdgcode(), FinalTypes[1]->pdgcode(),
-                             FinalTypes[2]->pdgcode()))));
+      return !t.is_dilepton_decay();
     }
     case WhichDecaymodes::Dileptons: {
-      // Lepton pair in final state particles for 2 or 3-body decays
-      return (
-          (t.particle_number() == 2 &&
-           is_dilepton(FinalTypes[0]->pdgcode(), FinalTypes[1]->pdgcode())) ||
-          (t.particle_number() == 3 &&
-           has_lepton_pair(FinalTypes[0]->pdgcode(), FinalTypes[1]->pdgcode(),
-                           FinalTypes[2]->pdgcode())));
+      return t.is_dilepton_decay();
     }
     default:
       throw std::runtime_error(
@@ -507,7 +493,6 @@ DecayBranchList ParticleType::get_partial_widths(const FourVector p,
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
     /* Calculate the sqare root s of the final state particles. */
-    const auto FinalTypes = decay_mode_list[i]->type().particle_types();
     double scale_B = 0.0;
     double scale_I3 = 0.0;
     if (pot_pointer != nullptr) {
