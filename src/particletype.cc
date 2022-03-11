@@ -473,10 +473,6 @@ DecayBranchList ParticleType::get_partial_widths(const FourVector p,
                                                  const ThreeVector x,
                                                  WhichDecaymodes wh) const {
   const auto &decay_mode_list = decay_modes().decay_mode_list();
-  if (decay_mode_list.size() == 0 ||
-      (wh == WhichDecaymodes::Hadronic && is_stable())) {
-    return {};
-  }
   /* Determine whether the decay is affected by the potentials. If it's
    * affected, read the values of the potentials at the position of the
    * particle */

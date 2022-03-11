@@ -72,6 +72,9 @@ class DecayActionsFinder : public ActionFinderInterface {
 
   /// Multiplicative factor to be applied to resonance lifetimes
   const double res_lifetime_factor_ = 1.;
+
+  /// Do weak decays at the end?
+  const bool do_final_weak_decays_ = true;
 };
 
 }  // namespace smash
