@@ -363,7 +363,8 @@ static ExperimentParameters default_parameters_vdf(
       false,  // allow collisions within nucleus
       1.0,    // cross section scaling
       0.0,    // additional elastic cross section
-      false   // in thermodynamics outputs spectators are included
+      false,  // in thermodynamics outputs spectators are included
+      false   // do weak decays
   };
 }
 
