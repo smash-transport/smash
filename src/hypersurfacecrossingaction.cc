@@ -105,6 +105,8 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
 
       double time_until_crossing = crossing_position[0] - t0;
 
+      std::cout << rap_cut_ << '\n';
+      std::cout << pT_cut_ << '\n';
       ParticleData outgoing_particle(p);
       outgoing_particle.set_4position(crossing_position);
       ActionPtr action = make_unique<HypersurfacecrossingAction>(

@@ -1067,8 +1067,31 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         proper_time = lower_bound;
       }
     }
+
+    double rapidity_cut = 0.0;
+    if (config.has_value({"Output", "Initial_Conditions", "Rapidity_Cut"})) {
+      rapidity_cut =
+          config.take({"Output", "Initial_Conditions", "Rapidity_Cut"});
+      if (rapidity_cut == 0.0) {
+        logg[LInitialConditions].error()
+            << "Rapidity cut for initial conditions set as abs(y) = "
+            << rapidity_cut << " is too small. Please choose a larger value.";
+      }
+    }
+    double transverse_momentum_cut = 0.0;
+    if (config.has_value({"Output", "Initial_Conditions", "pT_Cut"})) {
+      transverse_momentum_cut =
+          config.take({"Output", "Initial_Conditions", "pT_Cut"});
+      if (transverse_momentum_cut == 0.0) {
+        logg[LInitialConditions].error()
+            << "Transverse momentum cut for initial conditions set as pT = "
+            << transverse_momentum_cut << " is too small. Please choose"
+            << " a larger value.";
+      }
+    }
+
     action_finders_.emplace_back(
-        make_unique<HyperSurfaceCrossActionsFinder>(proper_time));
+        make_unique<HyperSurfaceCrossActionsFinder>(proper_time, rapidity_cut, transverse_momentum_cut));
   }
 
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
