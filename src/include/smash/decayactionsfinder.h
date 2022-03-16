@@ -29,6 +29,7 @@ class DecayActionsFinder : public ActionFinderInterface {
    *
    * \param[in] res_lifetime_factor The multiplicative factor to be applied to
    *                                resonance lifetimes; default is 1
+   * \param[in] do_weak_decays whether to perform weak decays at the end
    */
   explicit DecayActionsFinder(double res_lifetime_factor, bool do_weak_decays)
       : res_lifetime_factor_(res_lifetime_factor),

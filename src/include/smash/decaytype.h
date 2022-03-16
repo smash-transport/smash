@@ -79,7 +79,7 @@ class DecayType {
   virtual double in_width(double m0, double G0, double m, double m1,
                           double m2) const = 0;
 
-  // return whether the decay is a dilepton decay (most decays are hadronic)
+  /// \return whether the decay is a dilepton decay (most decays are hadronic)
   virtual bool is_dilepton_decay() const { return false; }
 
  protected:
