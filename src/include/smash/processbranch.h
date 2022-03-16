@@ -33,6 +33,8 @@ enum class ProcessType {
   TwoToTwo = 3,
   /// 2->3 scattering
   TwoToThree = 4,
+  /// 2->4 scattering
+  TwoToFour = 15,
   /// 2->5 scattering
   TwoToFive = 13,
   /// resonance decay
@@ -54,6 +56,7 @@ enum class ProcessType {
   /// multi particle scattering
   MultiParticleThreeMesonsToOne = 10,
   MultiParticleThreeToTwo = 11,
+  MultiParticleFourToTwo = 14,
   MultiParticleFiveToTwo = 12,
 
   /**
@@ -271,6 +274,26 @@ class CollisionBranch : public ProcessBranch {
     particle_types_.push_back(&type_a);
     particle_types_.push_back(&type_b);
     particle_types_.push_back(&type_c);
+  }
+
+  /**
+   * Construct collision branch with 4 particles in final state.
+   * \param[in] type_a Particle type of first final state particle.
+   * \param[in] type_b Particle type of second final state particle.
+   * \param[in] type_c Particle type of third final state particle.
+   * \param[in] type_d Particle type of fourth final state particle.
+   * \param[in] w Weight of created branch.
+   * \param[in] p_type Process type of created branch.
+   */
+  CollisionBranch(const ParticleType &type_a, const ParticleType &type_b,
+                  const ParticleType &type_c, const ParticleType &type_d,
+                  double w, ProcessType p_type)
+      : ProcessBranch(w), process_type_(p_type) {
+    particle_types_.reserve(4);
+    particle_types_.push_back(&type_a);
+    particle_types_.push_back(&type_b);
+    particle_types_.push_back(&type_c);
+    particle_types_.push_back(&type_d);
   }
 
   /**

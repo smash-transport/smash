@@ -4,8 +4,6 @@
 #include <fstream>
 #include <streambuf>
 
-#include "example.h"
-
 #include "smash/particles.h"
 #include "smash/random.h"
 #include "smash/decaymodes.h"
@@ -61,15 +59,15 @@ int main(int argc, char *argv[]) {
           if (decay_into->pdgcode() == pdg::Lambda) {
             decay_mode_has_rho = true;
           }
-          if (decay_mode_has_rho) {
-            std::cout << ptype.name() << "->";
-            for (const ParticleTypePtr decay_product :
-                       decay_branch->particle_types()) {
-              std::cout << decay_product->name();
-            }
-            std::cout << " " << decay_branch->weight() << std::endl;
-
+        }
+        if (decay_mode_has_rho) {
+          std::cout << ptype.name() << "->";
+          for (const ParticleTypePtr decay_product :
+                     decay_branch->particle_types()) {
+            std::cout << decay_product->name();
           }
+          std::cout << " " << decay_branch->weight() << std::endl;
+
         }
       }
     }

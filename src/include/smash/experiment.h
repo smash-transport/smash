@@ -216,7 +216,11 @@ class Experiment : public ExperimentBase {
    */
   void run_time_evolution();
 
-  /// Performs the final decays of an event
+  /**
+   * Performs the final decays of an event
+   *
+   * \throws runtime_error if found actions cannot be performed
+   */
   void do_final_decays();
 
   /// Output at the end of an event
@@ -244,11 +248,15 @@ class Experiment : public ExperimentBase {
    *
    * \param[in] action The action to perform
    * \param[in] i_ensemble index of ensemble in which action is performed
+   * \param[in] include_pauli_blocking wheter to take Pauli blocking into
+   *                                   account. Skipping Pauli blocking is
+   *                                   useful for example for final decays.
    * \return False if the action is
    *                 rejected either due to invalidity or
    *                 Pauli-blocking, or true if it's accepted and performed.
    */
-  bool perform_action(Action &action, int i_ensemble);
+  bool perform_action(Action &action, int i_ensemble,
+                      bool include_pauli_blocking = true);
   /**
    * Create a list of output files
    *
@@ -848,11 +856,14 @@ ExperimentParameters create_experiment_parameters(Configuration config);
  * \li \key "Deuteron_3to2" - Deuteron 3-to-2 reactions:
  * \f$\pi pn\leftrightarrow\pi d\f$, \f$Npn\leftrightarrow Nd\f$ and
  * \f$\bar{N}pn\leftrightarrow \bar{N}d\f$. The deuteron has to be uncommented
- * in particles.txt, too. 2-body reactions involving the d' have to be exluded
- * (no \key "PiDeuteron_to_pidprime" and \key "NDeuteron_to_Ndprime" in
- * \key Included_2to2), since they effectively yield the same reaction.
- * (The same cross section is used as for the d' reactions, therefore the d' in
- * particles.txt and its decay in decaymodest.txt also need to be uncommented.)
+ * in particles.txt as well. Do not uncomment d' or make sure to exclude 2-body
+ * reactions involving the d' (i.e. no \key "PiDeuteron_to_pidprime" and
+ * \key "NDeuteron_to_Ndprime" in \key Included_2to2). Otherwise, the deuteron
+ * reactions are implicitly double-counted.
+ * \li \key "A3_Nuclei_4to2" - Create or destroy
+ * A = 3 nuclei (triton, He-3, hypertriton) by \f$4 \leftrightarrow 2\f$
+ * catalysis reactions such as \f$ X NNN \leftrightarrow X t \f$, where
+ * X can be a pion, nucleon, or antinucleon.
  * \li \key "NNbar_5to2" - 5-to-2 backreaction for NNbar  annihilation:
  * \f$ \pi^0\pi^+\pi^-\pi^+\pi^- \rightarrow N\bar{N}\f$. Since detailed balance
  * is enforced, NNbar_Treatment has to be set to "two to five" for this option.
@@ -1924,7 +1935,7 @@ void Experiment<Modus>::initialize_new_event() {
   previous_interactions_total_ = 0;
   discarded_interactions_total_ = 0;
   total_pauli_blocked_ = 0;
-  projectile_target_interact_.resize(parameters_.n_ensembles, false);
+  projectile_target_interact_.assign(parameters_.n_ensembles, false);
   total_hypersurface_crossing_actions_ = 0;
   total_energy_removed_ = 0.0;
   // Print output headers
@@ -2032,7 +2043,8 @@ void Experiment<Modus>::initialize_new_event() {
 }
 
 template <typename Modus>
-bool Experiment<Modus>::perform_action(Action &action, int i_ensemble) {
+bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
+                                       bool include_pauli_blocking) {
   Particles &particles = ensembles_[i_ensemble];
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles)) {
@@ -2043,7 +2055,8 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble) {
   }
   action.generate_final_state();
   logg[LExperiment].debug("Process Type is: ", action.get_type());
-  if (pauli_blocker_ && action.is_pauli_blocked(ensembles_, *pauli_blocker_)) {
+  if (include_pauli_blocking && pauli_blocker_ &&
+      action.is_pauli_blocked(ensembles_, *pauli_blocker_)) {
     total_pauli_blocked_++;
     return false;
   }
@@ -2217,11 +2230,16 @@ void Experiment<Modus>::run_time_evolution() {
         const double min_cell_length = compute_min_cell_length(dt);
         logg[LExperiment].debug("Creating grid with minimal cell length ",
                                 min_cell_length);
+        /* For the hyper-surface-crossing actions also unformed particles are
+         * searched and therefore needed on the grid. */
+        const bool include_unformed_particles = IC_output_switch_;
         const auto &grid =
             use_grid_ ? modus_.create_grid(ensembles_[i_ens], min_cell_length,
-                                           dt, parameters_.coll_crit)
+                                           dt, parameters_.coll_crit,
+                                           include_unformed_particles)
                       : modus_.create_grid(ensembles_[i_ens], min_cell_length,
                                            dt, parameters_.coll_crit,
+                                           include_unformed_particles,
                                            CellSizeStrategy::Largest);
 
         const double gcell_vol = grid.cell_volume();
@@ -2648,10 +2666,11 @@ template <typename Modus>
 void Experiment<Modus>::do_final_decays() {
   /* At end of time evolution: Force all resonances to decay. In order to handle
    * decay chains, we need to loop until no further actions occur. */
-  uint64_t interactions_old = 0;
+  bool actions_performed, decays_found;
+  uint64_t interactions_old;
   do {
+    decays_found = false;
     interactions_old = interactions_total_;
-
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
       Actions actions;
 
@@ -2663,15 +2682,24 @@ void Experiment<Modus>::do_final_decays() {
       }
       // Find actions.
       for (const auto &finder : action_finders_) {
-        actions.insert(finder->find_final_actions(ensembles_[i_ens]));
+        auto found_actions = finder->find_final_actions(ensembles_[i_ens]);
+        if (!found_actions.empty()) {
+          actions.insert(std::move(found_actions));
+          decays_found = true;
+        }
       }
       // Perform actions.
       while (!actions.is_empty()) {
-        perform_action(*actions.pop(), i_ens);
+        perform_action(*actions.pop(), i_ens, false);
       }
     }
+    actions_performed = interactions_total_ > interactions_old;
+    // Throw an error if actions were found but not performed
+    if (decays_found && !actions_performed) {
+      throw std::runtime_error("Final decays were found but not performed.");
+    }
     // loop until no more decays occur
-  } while (interactions_total_ > interactions_old);
+  } while (actions_performed);
 
   // Dileptons: shining of stable particles at the end
   if (dilepton_finder_ != nullptr) {

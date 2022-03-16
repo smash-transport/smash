@@ -66,9 +66,14 @@ void Action::update_incoming(const Particles &particles) {
 
 FourVector Action::get_interaction_point() const {
   // Estimate for the interaction point in the calculational frame
-  FourVector interaction_point = FourVector(0., 0., 0., 0.);
+  ThreeVector interaction_point = ThreeVector(0., 0., 0.);
+  std::vector<ThreeVector> propagated_positions;
   for (const auto &part : incoming_particles_) {
-    interaction_point += part.position();
+    ThreeVector propagated_position =
+        part.position().threevec() +
+        part.velocity() * (time_of_execution_ - part.position().x0());
+    propagated_positions.push_back(propagated_position);
+    interaction_point += propagated_position;
   }
   interaction_point /= incoming_particles_.size();
   /*
@@ -83,9 +88,8 @@ FourVector Action::get_interaction_point() const {
    */
   if (box_length_ > 0 && stochastic_position_idx_ < 0) {
     assert(incoming_particles_.size() == 2);
-    const FourVector r1 = incoming_particles_[0].position(),
-                     r2 = incoming_particles_[1].position(), r = r1 - r2;
-    for (int i = 1; i < 4; i++) {
+    const ThreeVector r = propagated_positions[0] - propagated_positions[1];
+    for (int i = 0; i < 3; i++) {
       const double d = std::abs(r[i]);
       if (d > 0.5 * box_length_) {
         if (interaction_point[i] >= 0.5 * box_length_) {
@@ -99,10 +103,9 @@ FourVector Action::get_interaction_point() const {
   /* In case of scatterings via the stochastic criterion, use postion of random
    * incoming particle to prevent density hotspots in grid cell centers. */
   if (stochastic_position_idx_ >= 0) {
-    interaction_point =
-        incoming_particles_[stochastic_position_idx_].position();
+    return incoming_particles_[stochastic_position_idx_].position();
   }
-  return interaction_point;
+  return FourVector(time_of_execution_, interaction_point);
 }
 
 std::pair<FourVector, FourVector> Action::get_potential_at_interaction_point()
@@ -336,6 +339,11 @@ void Action::sample_manybody_phasespace_impl(
   }
   const double msum_all = msum[n - 1];
   int rejection_counter = -1;
+  if (sqrts <= msum_all) {
+    logg[LAction].error() << "sample_manybody_phasespace_impl: "
+                          << "Can't sample when sqrts = " << sqrts
+                          << " < msum = " << msum_all;
+  }
 
   double w, r01;
   std::vector<double> Minv(n);
@@ -352,6 +360,7 @@ void Action::sample_manybody_phasespace_impl(
   // factor to be on the safer side.
   const double safety_factor = 1.1 + (n - 2) * 0.2;
   weight_sqr_max *= (safety_factor * safety_factor);
+  bool first_warning = true;
 
   do {
     // Generate invariant masses of 1, 12, 123, 1243, etc.
@@ -378,6 +387,13 @@ void Action::sample_manybody_phasespace_impl(
       logg[LAction].warn()
           << "sample_manybody_phasespace_impl: alarm, weight > 1, w^2 = " << w
           << ". Increase safety factor." << std::endl;
+    }
+    if (rejection_counter > 20 && first_warning) {
+      logg[LAction].warn() << "sample_manybody_phasespace_impl: "
+                           << "likely hanging, way too many rejections,"
+                           << " n = " << n << ", sqrts = " << sqrts
+                           << ", msum = " << msum_all;
+      first_warning = false;
     }
   } while (w < r01 * r01);
 

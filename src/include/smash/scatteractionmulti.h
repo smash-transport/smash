@@ -81,6 +81,46 @@ class ScatterActionMulti : public Action {
     using std::invalid_argument::invalid_argument;
   };
 
+  /**
+   * Calculate the integration necessary for the three-body phase space. The
+   * defintion for the integral is given by
+   * \f[I_3 = \int dm^2_{23}dm^2_{12} =
+   * \int^{(M-m_3)^2}_{(m_1+m_2)^2}[m^2_{23, max}- m^2_{23, min}]dm^2_{12}\f]
+   * see PDG book (chapter Kinematics) for defintions of variables. The numbered
+   * masses reference the incoming particles and \f$M\f$ the mass of the
+   * outgoing particles in this case, since we are looking at the backreaction
+   * to the 1-to-3 decay.
+   *
+   * \param[in] sqrts center of mass energy of incoming particles
+   *                  (= mass of outgoing particle)
+   * \return result of integral
+   */
+  double calculate_I3(const double sqrts) const;
+
+  /**
+   * Calculate the parametrized 4-body relativistic phase space integral.
+   *
+   * The 4-body phase space is a n = 4 case of general integral over
+   * \f[d\Phi_n = (2\pi)^4 \prod_{i=1}^n \frac{d^3p_i}{2E_i (2\pi)^3}
+   *    \times \delta(E_{tot} -  \sum E_i) \delta^{(3)}(p_{tot} - \sum p_i)\f].
+   * This is a Lorentz-invariant quantity, so the result of the integration
+   * depends only on \f[ s = E_{tot}^2 - p_{tot}^2\f] and masses of the
+   * particles \f[ m_i^2 = E_i^2 - p_i^2 \f]. The dimension in general case is
+   * \f[\mathrm{GeV}^{2n-4}\f]. The \f[\hbar = c = 1 \f] convention is used
+   * here, so when this integral is used in the acceptance probability for
+   * collision, one has to restore \f[\hbar\f] to obtain correct dimensionless
+   * probability. More on phase space integrals can be found, for example, in
+   * CERN-68-15 report. For developers, I (oliiny) have compiled a document with
+   * properties and parametrizations of many-body phase space integrals here:
+   * github.com/smash-transport/smash-devel/files/7791360/n_body_relativistic_phase_space.pdf
+   * TODO: maybe find a better place to keep this kind of technical
+   * documentation.
+   *
+   * \param[in] man_s mandelstam s of reaction
+   * \return phase space integral value for 4 bodies [GeV^4]
+   */
+  double parametrizaton_phi4(const double man_s) const;
+
  protected:
   /*
    * \ingroup logging
@@ -109,11 +149,8 @@ class ScatterActionMulti : public Action {
    */
   void annihilation();
 
-  /// Perform a 3->2 process.
-  void three_to_two();
-
-  /// Perform a 5->2 process.
-  void five_to_two();
+  /// Perform a n->2 process.
+  void n_to_two();
 
   /**
    * Calculate the probability for a 3m-to-1 reaction according to the
@@ -136,13 +173,13 @@ class ScatterActionMulti : public Action {
    * \param[in] type_out type of outgoing particle
    * \param[in] dt timestep size
    * \param[in] gcell_vol grid cell volume
-   * \param[in] degen_factor degeneracy factor for reaction (including symmetry
-   *                                                         factors)
+   * \param[in] degen_sym_factor degeneracy factor for reaction
+   *                             (including symmetry factors)
    * \return probabilty for 3-to-1 reaction
    */
   double probability_three_to_one(const ParticleType& type_out, double dt,
                                   const double gcell_vol,
-                                  const int degen_factor = 1) const;
+                                  const int degen_sym_factor = 1) const;
 
   /**
    * Calculate the probability for a 3-to-2 reaction according to the
@@ -159,18 +196,40 @@ class ScatterActionMulti : public Action {
    * formula, since they are treated as input for the function.
    *
    * \param[in] type_out1 type of outgoing particle 1
-   * \param[in] type_out2 type of outgoing particle 1
+   * \param[in] type_out2 type of outgoing particle 2
    * \param[in] dt timestep size
    * \param[in] gcell_vol grid cell volume
-   * \param[in] degen_factor degeneracy factor for reaction (including symmetry
-   *                                                         factors)
+   * \param[in] degen_sym_factor degeneracy factor for reaction
+   *                             (including symmetry factors)
    * \return probabilty for 3-to-2 reaction
    */
   double probability_three_to_two(const ParticleType& type_out1,
                                   const ParticleType& type_out2, double dt,
                                   const double gcell_vol,
-                                  const double degen_factor = 1.0) const;
-
+                                  const double degen_sym_factor = 1.0) const;
+  /**
+   * Calculate the probability for a 4-to-2 reaction according to the
+   * stochastic collision criterion as given in \iref{Staudenmaier:2021lrg}.
+   *
+   * \f[ P_{4 \rightarrow 2} = \frac{1}{16E_1E_2E_3} \frac{\Delta t}{(\Delta^3
+   * x)^3} \frac{\tilde{\lambda}}{\Phi_44\pi s}\sigma_{2 \rightarrow 4},\f]
+   *
+   * where \f$\Phi_4\f$ represents the 4-body phase space. Degeneracy and
+   * symmetry factors are neglected in the formula, since they are treated as
+   * input for the function.
+   *
+   * \param[in] type_out1 type of outgoing particle 1
+   * \param[in] type_out2 type of outgoing particle 2
+   * \param[in] dt timestep size
+   * \param[in] gcell_vol grid cell volume
+   * \param[in] degen_sym_factor degeneracy factor for reaction
+   *                             (including symmetry factors)
+   * \return probabilty for 4-to-2 reaction
+   */
+  double probability_four_to_two(const ParticleType& type_out1,
+                                 const ParticleType& type_out2, double dt,
+                                 const double gcell_vol,
+                                 const double degen_sym_factor = 1.0) const;
   /**
    * Calculate the probability for a 5-to-2 reaction according to the
    * stochastic collision criterion as given in \iref{Garcia-Montero:2021haa}.
@@ -188,13 +247,13 @@ class ScatterActionMulti : public Action {
    * \param[in] m_out mass of outgoing particle types (assumes equal masses)
    * \param[in] dt timestep size
    * \param[in] gcell_vol grid cell volume
-   * \param[in] degen_factor degeneracy factor for reaction (including symmetry
-   *                                                         factors)
+   * \param[in] degen_sym_factor degeneracy factor for reaction
+   *                             (including symmetry factors)
    * \return probabilty for 5-to-2 reaction
    */
   double probability_five_to_two(const double m_out, double dt,
                                  const double gcell_vol,
-                                 const double degen_factor = 1.0) const;
+                                 const double degen_sym_factor = 1.0) const;
 
   /**
    * Calculate the parametrized 5-pion phase space. The
@@ -210,27 +269,11 @@ class ScatterActionMulti : public Action {
   double parametrizaton_phi5_pions(const double man_s) const;
 
   /**
-   * Calculate the integration necessary for the three-body phase space. The
-   * defintion for the integral is given by
-   * \f[I_3 = \int dm^2_{23}dm^2_{12} =
-   * \int^{(M-m_3)^2}_{(m_1+m_2)^2}[m^2_{23, max}- m^2_{23, min}]dm^2_{12}\f]
-   * see PDG book (chapter Kinematics) for defintions of variables. The numbered
-   * masses reference the incoming particles and \f$M\f$ the mass of the
-   * outgoing particles in this case, since we are looking at the backreaction
-   * to the 1-to-3 decay.
-   *
-   * \param[in] sqrts center of mass energy of incoming particles
-   *                  (= mass of outgoing particle)
-   * \return result of integral
-   */
-  double calculate_I3(const double sqrts) const;
-
-  /**
-   * Determine the spin degeneracy factor (\f$D_{spin}\f$) for the 3->2
+   * Determine the spin degeneracy factor (\f$D_{spin}\f$) for the N->2
    * reaction.
    *
    * \f[D_{spin} = \frac{(2J_{out1}+1)(2J_{out2}+1)}
-   * {(2J_{in1}+1)(2J_{in2}+1)(2J_{in3}+1)}\f]
+   * {(2J_{in1}+1)(2J_{in2}+1)(2J_{in3}+1)...(2J_{inN}+1)}\f]
    *
    * \param[in] spin_factor_inc product of incoming spin degeneracy
    *                            (denominator in above expression)

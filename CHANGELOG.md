@@ -19,9 +19,32 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+### Added
+* Light nuclei (A=3) production via 4-to-2 reactions
+
 ### Changed
 * Minimum supported CMake version is now version 3.9
 * Renamed `USE_ROOT`, `USE_HEPMC` and `USE_RIVET` CMake options to `TRY_USE_ROOT`, `TRY_USE_HEPMC` and `TRY_USE_RIVET`, respectively
+* Upgraded to Pythia 8.307
+
+
+## SMASH-2.1.4
+Date: 2022-02-24
+
+### Fixed
+* Properly reset for each event whether projectile and target interacted
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.1.3...SMASH-2.1.4)
+
+
+## SMASH-2.1.3
+Date: 2022-02-15
+
+### Changed
+* Include unformed particles in initial conditions output
+* Add definition of endianness macro to FindSMASH.cmake module
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.1.2...SMASH-2.1.3)
 
 
 ## SMASH-2.1.2

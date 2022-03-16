@@ -40,7 +40,7 @@ It requires the following tools & libraries:
 - the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
-- Pythia = 8.303
+- Pythia = 8.307
 
 Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version (ROOT >= 5.34, HepMC3 >= 3.2.3, Rivet >= 3.1.4) is found on the system.
 Please, note that enabling Rivet output or using ROOT >= 6.24.00 requires a compiler supporting C++14 features.
@@ -51,9 +51,9 @@ SMASH is tightly coupled to Pythia and thus requires a specific version. Using
 a different version than specified above may or may not work. It is recommended
 to build Pythia with similar flags as used for SMASH:
 
-    wget https://pythia.org/download/pythia83/pythia8303.tgz
-    tar xf pythia8303.tgz && rm pythia8303.tgz
-    cd pythia8303
+    wget https://pythia.org/download/pythia83/pythia8307.tgz
+    tar xf pythia8307.tgz && rm pythia8307.tgz
+    cd pythia8307
     ./configure --cxx-common='-std=c++11 -march=native -O3 -fPIC'
     make
 
@@ -63,7 +63,7 @@ executable as shown in the **Building SMASH** section.
 Note that although Pythia is statically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
 
-The compilation of Pythia 8.303 fails with gcc > 10.x and clang > 12.x (under GNU/Linux,
+The compilation of Pythia 8.307 fails with gcc > 10.x and clang > 12.x (under GNU/Linux,
 unless clang's `-stdlib=libc++` is used).
 
 #### Remarks for Apple users
@@ -78,9 +78,9 @@ unless clang's `-stdlib=libc++` is used).
 
 The commands above to build Pythia on a M1 Apple machine become:
 
-    curl https://pythia.org/download/pythia83/pythia8303.tgz -o pythia8303.tgz
-    tar xf pythia8303.tgz && rm pythia8303.tgz
-    cd pythia8303
+    curl https://pythia.org/download/pythia83/pythia8307.tgz -o pythia8307.tgz
+    tar xf pythia8307.tgz && rm pythia8307.tgz
+    cd pythia8307
     ./configure --cxx-common='-std=c++11 -O3 -fPIC'
     make
 
@@ -106,7 +106,7 @@ Use the following commands to build SMASH in a separate directory:
 
     mkdir build
     cd build
-    cmake .. -DPythia_CONFIG_EXECUTABLE=[...]/pythia8303/bin/pythia8-config
+    cmake .. -DPythia_CONFIG_EXECUTABLE=[...]/pythia8307/bin/pythia8-config
     make
 
 To build in parallel on N cores:

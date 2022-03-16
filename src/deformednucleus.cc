@@ -134,11 +134,18 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
   // Set the deformation parameters
   // reference for U, Pb, Au, Cu: \iref{Moller:1993ed}
   // reference for Zr and Ru: \iref{Schenke:2019ruo}
+  // reference for Xe: \iref{Moller:2015fba}
   bool listed = 0;
-  const std::map<int, std::string> A_map = {
-      {238, "Uranium"}, {208, "Lead"}, {197, "Gold"}, {63, "Copper"}};
-  const std::map<std::string, std::string> Z_map = {
-      {"Uranium", "92"}, {"Lead", "82"}, {"Gold", "79"}, {"Copper", "29"}};
+  const std::map<int, std::string> A_map = {{238, "Uranium"},
+                                            {208, "Lead"},
+                                            {197, "Gold"},
+                                            {63, "Copper"},
+                                            {129, "Xenon"}};
+  const std::map<std::string, std::string> Z_map = {{"Uranium", "92"},
+                                                    {"Lead", "82"},
+                                                    {"Gold", "79"},
+                                                    {"Copper", "29"},
+                                                    {"Xenon", "54"}};
   int A = Nucleus::number_of_particles();
   int Z = Nucleus::number_of_protons();
   switch (A) {
@@ -162,6 +169,14 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
       if (Z == 79) {
         set_beta_2(-0.131);
         set_beta_4(-0.031);
+      } else {
+        listed = true;
+      }
+      break;
+    case 129:  // Xenon
+      if (Z == 54) {
+        set_beta_2(0.162);
+        set_beta_4(-0.003);
       } else {
         listed = true;
       }
