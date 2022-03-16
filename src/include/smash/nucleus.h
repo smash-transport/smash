@@ -235,7 +235,13 @@ class Nucleus {
    * \return The Woods-Saxon density
    */
   virtual double nucleon_density(double r, double) const;
-
+  /**
+   * Return the unnormalized Woods-Saxon distribution for the given position
+   * without deformation.
+   *
+   * \param[in] r The radius
+   * \return The unnormalized Woods-Saxon distribution
+   */
   virtual double nucleon_density_unnormalized(double r, double) const;
   /**
    * \return the normalized ground state density for the corresponding
