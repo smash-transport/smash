@@ -319,7 +319,6 @@ void Nucleus::set_parameters_automatic() {
       if (Z == 54) {
         set_diffusiveness(0.59);
         set_nuclear_radius(5.36);
-        set_saturation_density(0.1786);
       }
       break;
     case 63:  // Copper
