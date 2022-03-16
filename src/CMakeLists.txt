@@ -115,10 +115,11 @@ endif()
 # find Pythia
 find_package(Pythia 8.307 EXACT REQUIRED)
 if(Pythia_FOUND)
+# the BEFORE at the line below is due to
+# https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
   include_directories(BEFORE SYSTEM
      "${Pythia_INCLUDE_DIRS}"
      )
-  link_directories("${Pythia_LIBDIR}")
   set(SMASH_LIBRARIES
      ${SMASH_LIBRARIES}
      ${Pythia_LIBRARIES} -ldl
