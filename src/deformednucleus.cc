@@ -309,12 +309,12 @@ double DeformedNucleus::nucleon_density(double r, double cosx) const {
                        Nucleus::get_diffusiveness()));
 }
 
-double DeformedNucleus::nucleon_density_unnormalized(double r, double cosx) const {
+double DeformedNucleus::nucleon_density_unnormalized(double r,
+                                                     double cosx) const {
   return 1.0 / (1 + std::exp((r - Nucleus::get_nuclear_radius() *
-                                (1 + beta2_ * y_l_0(2, cosx) +
-                                 beta4_ * y_l_0(4, cosx))) /
-                       Nucleus::get_diffusiveness()));
-         
+                                      (1 + beta2_ * y_l_0(2, cosx) +
+                                       beta4_ * y_l_0(4, cosx))) /
+                             Nucleus::get_diffusiveness()));
 }
 
 }  // namespace smash

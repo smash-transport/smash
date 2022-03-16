@@ -375,7 +375,6 @@ void Nucleus::generate_fermi_momenta() {
   const FourVector nucleus_center = center();
   const int A = N_n + N_p;
   constexpr double pi2_3 = 3.0 * M_PI * M_PI;
-
   logg[LNucleus].debug() << N_n << " neutrons, " << N_p << " protons.";
 
   ThreeVector ptot = ThreeVector(0.0, 0.0, 0.0);
