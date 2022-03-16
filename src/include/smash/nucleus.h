@@ -241,17 +241,7 @@ class Nucleus {
    * \return the normalized ground state density for the corresponding
    * Woods-Saxon parameter
    */
-  virtual double calculate_saturation_density() {
-    Integrator2d integrate;
-    // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
-    const auto result = integrate(0, 1, -1, 1, [&](double t, double cosx) {
-      const double r = (1 - t) / t;
-      return twopi * std::pow(r, 2.0) * nucleon_density_unnormalized(r, cosx) /
-             std::pow(t, 2.0);
-    });
-    const auto rho0 = number_of_particles() / result.value();
-    return rho0;
-  }
+  virtual double calculate_saturation_density() const;
   /**
    * Sets the saturation density of the nucleus
    * \see saturation_density_
