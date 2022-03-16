@@ -94,6 +94,7 @@ class BoxModus : public ModusDefault {
   Grid<GridOptions::PeriodicBoundaries> create_grid(
       const Particles &particles, double min_cell_length,
       double timestep_duration, CollisionCriterion crit,
+      const bool include_unformed_particles,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
     CellNumberLimitation limit = CellNumberLimitation::ParticleNumber;
     if (crit == CollisionCriterion::Stochastic) {
@@ -104,6 +105,7 @@ class BoxModus : public ModusDefault {
             min_cell_length,
             timestep_duration,
             limit,
+            include_unformed_particles,
             strategy};
   }
 

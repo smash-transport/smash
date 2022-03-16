@@ -113,6 +113,9 @@ class ModusDefault {
    * formation times treatment: if particle is fully or partially formed before
    * the end of the timestep, it has to be on the grid.
    * \param[in] crit Collision criterion (decides if cell number can be limited)
+   * \param[in] include_unformed_particles include unformed particles from
+                                           the grid (worsens runtime, necessary
+                                           for IC output)
    * \param[in] strategy The strategy to determine the cell size \return the
    * Grid object
    *
@@ -121,12 +124,18 @@ class ModusDefault {
   Grid<GridOptions::Normal> create_grid(
       const Particles& particles, double min_cell_length,
       double timestep_duration, CollisionCriterion crit,
+      const bool include_unformed_particles,
       CellSizeStrategy strategy = CellSizeStrategy::Optimal) const {
     CellNumberLimitation limit = CellNumberLimitation::ParticleNumber;
     if (crit == CollisionCriterion::Stochastic) {
       limit = CellNumberLimitation::None;
     }
-    return {particles, min_cell_length, timestep_duration, limit, strategy};
+    return {particles,
+            min_cell_length,
+            timestep_duration,
+            limit,
+            include_unformed_particles,
+            strategy};
   }
 
   /**

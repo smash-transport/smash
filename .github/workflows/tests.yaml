@@ -75,7 +75,7 @@ jobs:
             sudo apt-get install ${{ matrix.packages_to_add }} -y
         fi
         # we download and install Pythia
-        wget https://pythia.org/download/pythia83/pythia8303.tgz && tar xf pythia8303.tgz && rm pythia8303.tgz && cd pythia8303
+        wget https://pythia.org/download/pythia83/pythia8307.tgz && tar xf pythia8307.tgz && rm pythia8307.tgz && cd pythia8307
         ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC' && make -j$(nproc) && cd ..
         # we download and unpack clang
         if [ $SITE == "mac" ]; then curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
@@ -95,9 +95,9 @@ jobs:
         cd $SMASH_ROOT && mkdir build && cd build
         # if we use gcc-4.8 we use our self built boost
         if [ $CXX == "g++-4.8" ]; then
-            cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DBOOST_ROOT=$BOOST_DIR -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.4.0/
+            cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8307/bin/pythia8-config -DBOOST_ROOT=$BOOST_DIR -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.4.0/
         else
-            cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8303/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.4.0/
+            cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8307/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.4.0/
         fi
         make -j$(nproc)
         # we check the building of the documentation for a specific case
