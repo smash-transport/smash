@@ -213,10 +213,18 @@ class Experiment : public ExperimentBase {
    * timesteps, from action to actions.
    * Within one timestep (fixed) evolution from action to action
    * is invoked.
+   *
+   * \param[in] t_end time until run_time_evolution is run, in SMASH this is the
+   *                  configured end_time, but it might differ if SMASH is used
+   *                  as an external library
    */
-  void run_time_evolution();
+  void run_time_evolution(const double t_end);
 
-  /// Performs the final decays of an event
+  /**
+   * Performs the final decays of an event
+   *
+   * \throws runtime_error if found actions cannot be performed
+   */
   void do_final_decays();
 
   /// Output at the end of an event
@@ -244,11 +252,15 @@ class Experiment : public ExperimentBase {
    *
    * \param[in] action The action to perform
    * \param[in] i_ensemble index of ensemble in which action is performed
+   * \param[in] include_pauli_blocking wheter to take Pauli blocking into
+   *                                   account. Skipping Pauli blocking is
+   *                                   useful for example for final decays.
    * \return False if the action is
    *                 rejected either due to invalidity or
    *                 Pauli-blocking, or true if it's accepted and performed.
    */
-  bool perform_action(Action &action, int i_ensemble);
+  bool perform_action(Action &action, int i_ensemble,
+                      bool include_pauli_blocking = true);
   /**
    * Create a list of output files
    *
@@ -280,9 +292,11 @@ class Experiment : public ExperimentBase {
    * \param[in]      i_ensemble index of ensemble to be evolved
    * \param[in]      end_time_propagation time until propagation should be
    *                 performed
+   * \param[in]      end_time_run time until the whole evolution is run
    */
   void run_time_evolution_timestepless(Actions &actions, int i_ensemble,
-                                       double end_time_propagation);
+                                       const double end_time_propagation,
+                                       const double end_time_run);
 
   /// Intermediate output during an event
   void intermediate_output();
@@ -2035,7 +2049,8 @@ void Experiment<Modus>::initialize_new_event() {
 }
 
 template <typename Modus>
-bool Experiment<Modus>::perform_action(Action &action, int i_ensemble) {
+bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
+                                       bool include_pauli_blocking) {
   Particles &particles = ensembles_[i_ensemble];
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles)) {
@@ -2046,7 +2061,8 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble) {
   }
   action.generate_final_state();
   logg[LExperiment].debug("Process Type is: ", action.get_type());
-  if (pauli_blocker_ && action.is_pauli_blocked(ensembles_, *pauli_blocker_)) {
+  if (include_pauli_blocking && pauli_blocker_ &&
+      action.is_pauli_blocked(ensembles_, *pauli_blocker_)) {
     total_pauli_blocked_++;
     return false;
   }
@@ -2186,11 +2202,11 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble) {
 }
 
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution() {
-  while (parameters_.labclock->current_time() < end_time_) {
+void Experiment<Modus>::run_time_evolution(const double t_end) {
+  while (parameters_.labclock->current_time() < t_end) {
     const double t = parameters_.labclock->current_time();
     const double dt =
-        std::min(parameters_.labclock->timestep_duration(), end_time_ - t);
+        std::min(parameters_.labclock->timestep_duration(), t_end - t);
     logg[LExperiment].debug("Timestepless propagation for next ", dt, " fm/c.");
 
     // Perform forced thermalization if required
@@ -2255,21 +2271,22 @@ void Experiment<Modus>::run_time_evolution() {
 
     /* (2) Propagate from action to action until next output or timestep end */
     const double end_timestep_time =
-        std::min(parameters_.labclock->next_time(), end_time_);
+        std::min(parameters_.labclock->next_time(), t_end);
     while (next_output_time() <= end_timestep_time) {
       for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
         run_time_evolution_timestepless(actions[i_ens], i_ens,
-                                        next_output_time());
+                                        next_output_time(), t_end);
       }
       ++(*parameters_.outputclock);
 
       // Avoid duplication of final output
-      if (parameters_.outputclock->current_time() < end_time_) {
+      if (parameters_.outputclock->current_time() < t_end) {
         intermediate_output();
       }
     }
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
-      run_time_evolution_timestepless(actions[i_ens], i_ens, end_timestep_time);
+      run_time_evolution_timestepless(actions[i_ens], i_ens, end_timestep_time,
+                                      t_end);
     }
 
     /* (3) Update potentials (if computed on the lattice) and
@@ -2342,7 +2359,8 @@ inline void check_interactions_total(uint64_t interactions_total) {
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution_timestepless(
-    Actions &actions, int i_ensemble, double end_time_propagation) {
+    Actions &actions, int i_ensemble, const double end_time_propagation,
+    const double end_time_run) {
   Particles &particles = ensembles_[i_ensemble];
   logg[LExperiment].debug(
       "Timestepless propagation: ", "Actions size = ", actions.size(),
@@ -2384,7 +2402,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(
     /* (3) Update actions for newly-produced particles. */
 
     const double end_time_timestep =
-        std::min(parameters_.labclock->next_time(), end_time_);
+        std::min(parameters_.labclock->next_time(), end_time_run);
     assert(!(end_time_propagation > end_time_timestep));
     // New actions are always search until the end of the current timestep
     const double time_left = end_time_timestep - act->time_of_execution();
@@ -2656,10 +2674,11 @@ template <typename Modus>
 void Experiment<Modus>::do_final_decays() {
   /* At end of time evolution: Force all resonances to decay. In order to handle
    * decay chains, we need to loop until no further actions occur. */
-  uint64_t interactions_old = 0;
+  bool actions_performed, decays_found;
+  uint64_t interactions_old;
   do {
+    decays_found = false;
     interactions_old = interactions_total_;
-
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
       Actions actions;
 
@@ -2671,15 +2690,24 @@ void Experiment<Modus>::do_final_decays() {
       }
       // Find actions.
       for (const auto &finder : action_finders_) {
-        actions.insert(finder->find_final_actions(ensembles_[i_ens]));
+        auto found_actions = finder->find_final_actions(ensembles_[i_ens]);
+        if (!found_actions.empty()) {
+          actions.insert(std::move(found_actions));
+          decays_found = true;
+        }
       }
       // Perform actions.
       while (!actions.is_empty()) {
-        perform_action(*actions.pop(), i_ens);
+        perform_action(*actions.pop(), i_ens, false);
       }
     }
+    actions_performed = interactions_total_ > interactions_old;
+    // Throw an error if actions were found but not performed
+    if (decays_found && !actions_performed) {
+      throw std::runtime_error("Final decays were found but not performed.");
+    }
     // loop until no more decays occur
-  } while (interactions_total_ > interactions_old);
+  } while (actions_performed);
 
   // Dileptons: shining of stable particles at the end
   if (dilepton_finder_ != nullptr) {
@@ -2836,7 +2864,7 @@ void Experiment<Modus>::run() {
     // Sample initial particles, start clock, some printout and book-keeping
     initialize_new_event();
 
-    run_time_evolution();
+    run_time_evolution(end_time_);
 
     if (force_decays_) {
       do_final_decays();
