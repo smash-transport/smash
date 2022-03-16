@@ -11,13 +11,12 @@
 #ifndef SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 #define SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 
-#include <HepMC3/Writer.h>
-
 #include <memory>
 #include <string>
 #include <vector>
 
 #include <boost/filesystem.hpp>
+#include "HepMC3/Writer.h"
 #include "hepmcinterface.h"
 
 namespace smash {

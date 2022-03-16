@@ -9,8 +9,8 @@
 
 #include "smash/hepmcoutput.h"
 
-#include <HepMC3/WriterAscii.h>
 #include "HepMC3/Print.h"
+#include "HepMC3/WriterAscii.h"
 
 #ifdef SMASH_USE_HEPMC_ROOTIO
 #include "HepMC3/WriterRootTree.h"
