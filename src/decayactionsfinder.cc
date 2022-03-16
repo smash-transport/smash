@@ -75,7 +75,7 @@ ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
 
   for (const auto &p : search_list) {
     if (!do_final_weak_decays_ && p.type().is_stable()) {
-      continue;  // particle is hadronically stable
+      continue;  // particle is stable with respect to strong interaction
     }
 
     if (p.type().decay_modes().is_empty()) {
