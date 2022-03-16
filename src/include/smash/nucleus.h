@@ -239,7 +239,11 @@ class Nucleus {
   virtual double nucleon_density_unnormalized(double r, double) const;
   /**
    * \return the normalized ground state density for the corresponding
-   * Woods-Saxon parameter
+   * Woods-Saxon parameter. This is done by integrating the Woods-Saxon
+   * distribution and setting the normalization such that the integral of the
+   * Woods-Saxon distribution yields the number of particles in the nucleus
+   * \f$\int\rho(r)d^3r = N_{particles}\f$.
+   *
    */
   virtual double calculate_saturation_density() const;
   /**
