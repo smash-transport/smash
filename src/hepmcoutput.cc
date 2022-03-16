@@ -30,6 +30,9 @@ namespace smash {
  * - _HepMC_asciiv3_ plain human readable ASCII format
  * - _HepMC_treeroot_ ROOT Tree binary format, readable by ROOT
  *
+ * You can find a snippet of the configuration for this output in \ref
+ * configuring_output_.
+ *
  * Producing HepMC output in asciiv3 format requires HepMC3 to be installed.
  * Download the tarball from http://hepmc.web.cern.ch/hepmc/
  * and follow the instructions or use the pre-compiled packages for your
@@ -52,13 +55,13 @@ namespace smash {
  * energies with the \key --ignore-beams option. When using the Rivet output
  * this check is disabled by default.
  * - The two initial ions are included in the particle list, as well.
- * - The HepMC output can be used in all kind of simulations, but is best
- *   suited to \ref input_modi_collider_ modus .
- * - The extension of the HepMC treeroot output is simply .root because the
- *   ROOT browser tool does not recognize the .treeroot extension. On the other
- *   hand, in HepMC root and treeroot outputs are distinct.
- * - The old option _HepMC_, equivalent to the current _HepMC_asciiv3_, is
- *   still valid for the time being, but it is __deprecated__.
+ * - The HepMC output is best suited to \ref input_modi_collider_ modus, where
+ *   two nuclei "particles" are constructed and used as the intial incoming
+ *   particles. In other SMASH modi (box, sphere, list, etc.) only the final
+ *   hadrons are written out as the outgoing particles of a single vertex.
+ * - Even though in the HepMC library root and treeroot outputs are distinct, in
+ *   SMASH the extension of the HepMC treeroot output is simply .root because
+ *   the ROOT browser tool does not recognize the .treeroot extension.
  *
  * \section output_hepmc_asciiv3_ ASCII HepMC Format
  *
@@ -85,8 +88,6 @@ namespace smash {
  * collisions between incident nucleons as well as keep track of
  * participating incident nucleons.
  *
- * You can find a snippet of the configuration for this output in \ref
- * configuring_output_.
  *
  * \section output_hepmc_root_ ROOT HepMC Format
  *
