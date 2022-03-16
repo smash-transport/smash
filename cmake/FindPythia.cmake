@@ -62,6 +62,7 @@ find_path(Pythia_XMLDOC_DIR Version.xml HINTS  ${PYTHIA_ROOT_DIR}/xmldoc  ${PYTH
 
 if(Pythia_INCLUDE_DIR AND Pythia_XMLDOC_DIR)
     find_library(Pythia_LIBRARY NAMES pythia8 Pythia8 HINTS ${PYTHIA_ROOT_DIR}/lib ${PYTHIA_ROOT_DIR}/lib64)
+    get_filename_component(Pythia_LIBDIR ${Pythia_LIBRARY} DIRECTORY)
     find_library(Pythia_LHAPDFDummy_LIBRARY NAMES lhapdfdummy  HINTS ${PYTHIA_ROOT_DIR}/lib ${PYTHIA_ROOT_DIR}/lib64)
     set(Pythia_INCLUDE_DIRS ${Pythia_INCLUDE_DIR} ${Pythia_INCLUDE_DIR}/Pythia ${Pythia_INCLUDE_DIR}/PythiaPlugins)
     set(Pythia_LIBRARIES ${Pythia_LIBRARY})
@@ -86,7 +87,6 @@ else()
 endif()
 
 SET(Pythia_INCLUDE_DIRS  ${Pythia_INCLUDE_DIR})
-SET(Pythia_LIBDIR        ${Pythia_INCLUDE_DIR}/../lib64)
 SET(Pythia_xmldoc_PATH   ${Pythia_XMLDOC_DIR})
 
 # handle the QUIETLY and REQUIRED arguments
