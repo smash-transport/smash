@@ -8,6 +8,9 @@
  */
 
 #include "smash/library.h"
+
+#include <boost/filesystem.hpp>
+
 #include "smash/decaymodes.h"
 #include "smash/inputfunctions.h"
 #include "smash/isoparticletype.h"
@@ -18,12 +21,14 @@ namespace smash {
 static constexpr int LMain = LogArea::Main::id;
 
 Configuration setup_config_and_logging(
-    const bf::path &config_file, const bf::path &particles_file,
-    const bf::path &decaymodes_file,
+    const std::string &config_file, const std::string &particles_file,
+    const std::string &decaymodes_file,
     const std::vector<std::string> &extra_config) {
+
   // Read in config file
-  Configuration configuration(config_file.parent_path(),
-                              config_file.filename());
+  bf::path config_path(config_file);
+  Configuration configuration(config_path.parent_path(),
+                              config_path.filename());
 
   // Merge config passed via command line
   for (const auto &config : extra_config) {
@@ -37,39 +42,41 @@ Configuration setup_config_and_logging(
 
   logg[LMain].trace(SMASH_SOURCE_LOCATION, " load ParticleType and DecayModes");
 
+  bf::path particles_path(particles_file);
+  bf::path decaymodes_path(decaymodes_file);
   auto particles_and_decays =
-      load_particles_and_decaymodes(particles_file, decaymodes_file);
+      load_particles_and_decaymodes(particles_path, decaymodes_path);
   /* For particles and decaymodes: external file is superior to config.
    * However, warn in case of conflict.
    */
-  if (configuration.has_value({"particles"}) && !particles_file.empty()) {
+  if (configuration.has_value({"particles"}) && !particles_path.empty()) {
     logg[LMain].warn(
-        "Ambiguity: particles from external file ", particles_file,
+        "Ambiguity: particles from external file ", particles_path,
         " requested, but there is also particle list in the config."
         " Using particles from ",
-        particles_file);
+        particles_path);
   }
-  if (!configuration.has_value({"particles"}) || !particles_file.empty()) {
+  if (!configuration.has_value({"particles"}) || !particles_path.empty()) {
     configuration["particles"] = particles_and_decays.first;
   }
 
-  if (configuration.has_value({"decaymodes"}) && !decaymodes_file.empty()) {
+  if (configuration.has_value({"decaymodes"}) && !decaymodes_path.empty()) {
     logg[LMain].warn(
-        "Ambiguity: decaymodes from external file ", decaymodes_file,
+        "Ambiguity: decaymodes from external file ", decaymodes_path,
         " requested, but there is also decaymodes list in the config."
         " Using decaymodes from",
-        decaymodes_file);
+        decaymodes_path);
   }
-  if (!configuration.has_value({"decaymodes"}) || !decaymodes_file.empty()) {
+  if (!configuration.has_value({"decaymodes"}) || !decaymodes_path.empty()) {
     configuration["decaymodes"] = particles_and_decays.second;
   }
 
   return configuration;
 }
 
-void initalize_particles_decays_and_tabulations(Configuration &configuration,
-                                                std::string version,
-                                                bf::path tabulations_path) {
+void initalize_particles_decays_and_tabulations(
+    Configuration &configuration, std::string &version,
+    const std::string &tabulations_dir) {
   logg[LMain].trace(SMASH_SOURCE_LOCATION,
                     " create ParticleType and DecayModes");
   ParticleType::create_type_list(configuration.take({"particles"}));
@@ -87,6 +94,7 @@ void initalize_particles_decays_and_tabulations(Configuration &configuration,
   logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash);
 
   logg[LMain].info("Tabulating cross section integrals...");
+  bf::path tabulations_path(tabulations_dir);
   if (!tabulations_path.empty()) {
     // Store tabulations on disk
     bf::create_directories(tabulations_path);
