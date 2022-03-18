@@ -586,7 +586,8 @@ int main(int argc, char *argv[]) {
       // Ignore config values that don't make sense.
       initalize_particles_decays_and_tabulations(configuration, version,
                                                  tabulations_path);
-      const auto _dummy = ExperimentBase::create(configuration, "");
+      const auto _dummy = ExperimentBase::create(configuration,
+                                                 output_path);
       ignore_simulation_config_values(configuration);
       check_for_unused_config_values(configuration);
 
