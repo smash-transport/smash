@@ -29,8 +29,9 @@ Configuration setup_config_and_logging(
  * Initialize the particles and decays from the configuration, plus tabulate
  * the resonance integrals.
  */
-void initalize(Configuration &configuration, std::string version,
-               bf::path tabulations_path = {});
+void initalize_particles_decays_and_tabulations(Configuration &configuration,
+                                                std::string version,
+                                                bf::path tabulations_path = {});
 
 }  // namespace smash
 

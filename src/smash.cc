@@ -508,8 +508,8 @@ int main(int argc, char *argv[]) {
       print_disclaimer();
     }
 
-    auto configuration = setup_config_and_logging(
-        input_path, particles, decaymodes, extra_config);
+    auto configuration = setup_config_and_logging(input_path, particles,
+                                                  decaymodes, extra_config);
 
     check_config_version_is_compatible(configuration);
     setup_default_float_traps();
@@ -529,7 +529,8 @@ int main(int argc, char *argv[]) {
        * decaymodes.txt anyway */
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
       logg[LMain].info() << "Tabulations path: " << tabulations_path;
-      initalize(configuration, version, tabulations_path);
+      initalize_particles_decays_and_tabulations(configuration, version,
+                                                 tabulations_path);
       auto scat_finder = actions_finder_for_dump(configuration);
 
       ignore_simulation_config_values(configuration);
@@ -539,7 +540,8 @@ int main(int argc, char *argv[]) {
       std::exit(EXIT_SUCCESS);
     }
     if (particles_dump_iSS_format) {
-      initalize(configuration, version, tabulations_path);
+      initalize_particles_decays_and_tabulations(configuration, version,
+                                                 tabulations_path);
       ParticleTypePtrList list;
       list.clear();
       for (const auto &ptype : ParticleType::list_all()) {
@@ -582,7 +584,8 @@ int main(int argc, char *argv[]) {
     }
     if (resonance_dump_activated) {
       // Ignore config values that don't make sense.
-      initalize(configuration, version, tabulations_path);
+      initalize_particles_decays_and_tabulations(configuration, version,
+                                                 tabulations_path);
       const auto _dummy = ExperimentBase::create(configuration, "");
       ignore_simulation_config_values(configuration);
       check_for_unused_config_values(configuration);
@@ -593,7 +596,8 @@ int main(int argc, char *argv[]) {
       std::exit(EXIT_SUCCESS);
     }
     if (cross_section_dump_activated) {
-      initalize(configuration, version, tabulations_path);
+      initalize_particles_decays_and_tabulations(configuration, version,
+                                                 tabulations_path);
       std::string arg_string(cs_string);
       std::vector<std::string> args = split(arg_string, ',');
       const unsigned int n_arg = args.size();
@@ -675,7 +679,8 @@ int main(int argc, char *argv[]) {
         << "# Date     : " << BUILD_DATE << '\n'
         << configuration.to_string() << '\n';
 
-    initalize(configuration, version, tabulations_path);
+    initalize_particles_decays_and_tabulations(configuration, version,
+                                               tabulations_path);
 
     // Create an experiment
     logg[LMain].trace(SMASH_SOURCE_LOCATION, " create Experiment");

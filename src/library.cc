@@ -67,8 +67,9 @@ Configuration setup_config_and_logging(
   return configuration;
 }
 
-void initalize(Configuration &configuration, std::string version,
-               bf::path tabulations_path) {
+void initalize_particles_decays_and_tabulations(Configuration &configuration,
+                                                std::string version,
+                                                bf::path tabulations_path) {
   logg[LMain].trace(SMASH_SOURCE_LOCATION,
                     " create ParticleType and DecayModes");
   ParticleType::create_type_list(configuration.take({"particles"}));
