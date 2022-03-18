@@ -54,11 +54,12 @@ namespace smash {
  * ouput into Rivet, you need to disable the check for the beam particle
  * energies with the \key --ignore-beams option. When using the Rivet output
  * this check is disabled by default.
- * - The two initial ions are included in the particle list, as well.
  * - The HepMC output is best suited to \ref input_modi_collider_ modus, where
- *   two nuclei "particles" are constructed and used as the intial incoming
- *   particles. In other SMASH modi (box, sphere, list, etc.) only the final
- *   hadrons are written out as the outgoing particles of a single vertex.
+ *   the two ion "particles" are constructed and included as the intial incoming
+ *   particles in the particle list, as well.
+ * - In other SMASH modi (box, sphere, list, etc.) only the inital
+ *   and final hadrons are written out as the incoming and outgoing particles
+ *   of a single vertex.
  * - Even though in the HepMC library root and treeroot outputs are distinct, in
  *   SMASH the extension of the HepMC treeroot output is simply .root because
  *   the ROOT browser tool does not recognize the .treeroot extension.
