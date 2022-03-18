@@ -959,7 +959,8 @@ double calculate_mean_field_energy(
 EventInfo fill_event_info(const std::vector<Particles> &ensembles,
                           double E_mean_field, double modus_impact_parameter,
                           const ExperimentParameters &parameters,
-                          bool projectile_target_interact, bool kinematic_cut_for_SMASH_IC) {
+                          bool projectile_target_interact,
+                          bool kinematic_cut_for_SMASH_IC) {
   const QuantumNumbers current_values(ensembles);
   const double E_kinetic_total = current_values.momentum().x0();
   const double E_total = E_kinetic_total + E_mean_field;

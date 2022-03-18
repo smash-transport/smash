@@ -1905,7 +1905,8 @@ double calculate_mean_field_energy(
 EventInfo fill_event_info(const std::vector<Particles> &ensembles,
                           double E_mean_field, double modus_impact_parameter,
                           const ExperimentParameters &parameters,
-                          bool projectile_target_interact, bool kinematic_cut_for_SMASH_IC);
+                          bool projectile_target_interact,
+                          bool kinematic_cut_for_SMASH_IC);
 
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event() {
@@ -2035,9 +2036,9 @@ void Experiment<Modus>::initialize_new_event() {
   // Output at event start
   for (const auto &output : outputs_) {
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
-      auto event_info =
-          fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
-                          parameters_, projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
+      auto event_info = fill_event_info(
+          ensembles_, E_mean_field, modus_.impact_parameter(), parameters_,
+          projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
       output->at_eventstart(ensembles_[i_ens],
                             // Pretend each ensemble is an independent event
                             event_ * parameters_.n_ensembles + i_ens,
@@ -2541,9 +2542,9 @@ void Experiment<Modus>::intermediate_output() {
         continue;
       }
       for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
-        auto event_info =
-            fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
-                            parameters_, projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
+        auto event_info = fill_event_info(
+            ensembles_, E_mean_field, modus_.impact_parameter(), parameters_,
+            projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
 
         output->at_intermediate_time(ensembles_[i_ens], parameters_.outputclock,
                                      density_param_, event_info);
@@ -2872,9 +2873,9 @@ void Experiment<Modus>::final_output() {
 
   for (const auto &output : outputs_) {
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
-      auto event_info =
-          fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
-                          parameters_, projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
+      auto event_info = fill_event_info(
+          ensembles_, E_mean_field, modus_.impact_parameter(), parameters_,
+          projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
       output->at_eventend(ensembles_[i_ens],
                           // Pretend each ensemble is an independent event
                           event_ * parameters_.n_ensembles + i_ens, event_info);
