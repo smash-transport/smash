@@ -1901,6 +1901,8 @@ double calculate_mean_field_energy(
  *            such as testparticle number, see \ref ExperimentParameters
  * \param[in] projectile_target_interact true if there was at least one
  *            collision
+ * \param[in] kinematic_cut_for_SMASH_IC true if kinematic cuts in y or pT are
+              enabled when exracting initial conditions for hydrodynamics
  */
 EventInfo fill_event_info(const std::vector<Particles> &ensembles,
                           double E_mean_field, double modus_impact_parameter,
