@@ -75,7 +75,7 @@ Configuration setup_config_and_logging(
 }
 
 void initalize_particles_decays_and_tabulations(
-    Configuration &configuration, std::string &version,
+    Configuration &configuration, const std::string &version,
     const std::string &tabulations_dir) {
   logg[LMain].trace(SMASH_SOURCE_LOCATION,
                     " create ParticleType and DecayModes");

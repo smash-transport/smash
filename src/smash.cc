@@ -412,8 +412,8 @@ int main(int argc, char *argv[]) {
 
   try {
     bool force_overwrite = false;
-    bf::path output_path = default_output_path(), input_path("./config.yaml"),
-             particles, decaymodes;
+    bf::path output_path = default_output_path();
+    std::string input_path("./config.yaml"), particles, decaymodes;
     std::vector<std::string> extra_config;
     char *modus = nullptr, *end_time = nullptr, *pdg_string = nullptr,
          *cs_string = nullptr;
@@ -516,9 +516,9 @@ int main(int argc, char *argv[]) {
 
     // Check output path
     ensure_path_is_valid(output_path);
-    bf::path tabulations_path;
+    std::string tabulations_path;
     if (cache_integrals) {
-      tabulations_path = output_path.parent_path() / "tabulations";
+      tabulations_path = output_path.parent_path().string() + "/tabulations";
     } else {
       tabulations_path = "";
     }
@@ -528,7 +528,6 @@ int main(int argc, char *argv[]) {
       /* Print only 2->n, n > 1. Do not dump decays, which can be found in
        * decaymodes.txt anyway */
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
-      logg[LMain].info() << "Tabulations path: " << tabulations_path;
       initalize_particles_decays_and_tabulations(configuration, version,
                                                  tabulations_path);
       auto scat_finder = actions_finder_for_dump(configuration);

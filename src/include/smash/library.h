@@ -31,7 +31,7 @@ Configuration setup_config_and_logging(
  * the resonance integrals.
  */
 void initalize_particles_decays_and_tabulations(
-    Configuration &configuration, std::string &version,
+    Configuration &configuration, const std::string &version,
     const std::string &tabulations_dir = {});
 
 }  // namespace smash
