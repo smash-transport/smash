@@ -23,8 +23,9 @@ namespace smash {
 ExperimentPtr ExperimentBase::create(Configuration config,
                                      const bf::path &output_path) {
   if (!bf::exists(output_path)) {
-    throw NonExistingOutputPathRequest("The requested output path ("+
-                                       output_path.string() +") does not exist.");
+    throw NonExistingOutputPathRequest("The requested output path (" +
+                                       output_path.string() +
+                                       ") does not exist.");
   }
   logg[LExperiment].trace() << SMASH_SOURCE_LOCATION;
   /*!\Userguide

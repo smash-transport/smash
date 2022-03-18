@@ -24,7 +24,6 @@ Configuration setup_config_and_logging(
     const std::string &config_file, const std::string &particles_file,
     const std::string &decaymodes_file,
     const std::vector<std::string> &extra_config) {
-
   // Read in config file
   bf::path config_path(config_file);
   Configuration configuration(config_path.parent_path(),
