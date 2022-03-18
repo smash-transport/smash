@@ -12,7 +12,7 @@ include(AddCompilerFlag)
 include(FindPkgConfig)
 
 include(GetGitRevisionDescription)
-git_describe(VERSION_MAJOR)
+git_describe(SMASH_VERSION_VERBOSE)
 
 # Enable warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch")
@@ -113,12 +113,13 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
 endif()
 
 # find Pythia
-find_package(Pythia 8.303 EXACT REQUIRED)
+find_package(Pythia 8.307 EXACT REQUIRED)
 if(Pythia_FOUND)
-  include_directories(SYSTEM
+# the BEFORE at the line below is due to
+# https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
+  include_directories(BEFORE SYSTEM
      "${Pythia_INCLUDE_DIRS}"
      )
-  link_directories("${Pythia_LIBDIR}")
   set(SMASH_LIBRARIES
      ${SMASH_LIBRARIES}
      ${Pythia_LIBRARIES} -ldl

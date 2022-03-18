@@ -19,7 +19,7 @@ vim
 WORKDIR /SMASH
 
 # Install pythia
-ARG pythiaV="8303"
+ARG pythiaV="8307"
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
 cd pythia${pythiaV} && \

@@ -25,6 +25,18 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Changed
 * Minimum supported CMake version is now version 3.9
 * Renamed `USE_ROOT`, `USE_HEPMC` and `USE_RIVET` CMake options to `TRY_USE_ROOT`, `TRY_USE_HEPMC` and `TRY_USE_RIVET`, respectively
+* Upgraded to Pythia 8.307
+* Renamed version macro to `SMASH_VERSION_VERBOSE` (from `MAJOR_VERSION`)
+* Pythia installation directory can also be specified with `-DPYTHIA_ROOT_DIR` and by the environment variables `PYTHIA_ROOT_DIR` or `PYTHIA8`, with `/usr` as default
+* Big endian architectures are not officially supported and compilation on them is, by default, disabled
+
+## SMASH-2.1.4
+Date: 2022-02-24
+
+### Fixed
+* Properly reset for each event whether projectile and target interacted
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.1.3...SMASH-2.1.4)
 
 
 ## SMASH-2.1.3
