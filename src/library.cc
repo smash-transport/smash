@@ -40,7 +40,7 @@ Configuration setup_config_and_logging(
   auto particles_and_decays =
       load_particles_and_decaymodes(particles_file, decaymodes_file);
   /* For particles and decaymodes: external file is superior to config.
-   * Hovever, warn in case of conflict.
+   * However, warn in case of conflict.
    */
   if (configuration.has_value({"particles"}) && !particles_file.empty()) {
     logg[LMain].warn(
