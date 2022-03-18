@@ -789,7 +789,7 @@ class PdgCode {
       bool is_nucleus_ : 1;
       /// first bit: stores the sign.
       bool antiparticle_ : 1;
-#else  // reverse ordering
+#elif defined(BIG_ENDIAN_ARCHITECTURE)  // reverse ordering
       bool antiparticle_ : 1;
       bool is_nucleus_ : 1, : 2;
       std::uint32_t n_ : 4;
@@ -799,6 +799,8 @@ class PdgCode {
       std::uint32_t n_q2_ : 4;
       std::uint32_t n_q3_ : 4;
       std::uint32_t n_J_ : 4;
+#else
+#error Endianness macro of the machine not defined.
 #endif
     } digits_;
     /**
@@ -817,9 +819,11 @@ class PdgCode {
       std::uint32_t quarks_ : 12;
       /// The excitation digits n_, n_R_, n_L_
       std::uint32_t excitation_ : 12, : 4;
-#else  /// Reverse ordering
+#elif defined(BIG_ENDIAN_ARCHITECTURE)  // reverse ordering
       std::uint32_t : 4, excitation_ : 12;
       std::uint32_t quarks_ : 12, : 4;
+#else
+#error Endianness macro of the machine not defined.
 #endif
     } chunks_;
     /// Structure for the nuclei
@@ -831,13 +835,15 @@ class PdgCode {
       std::uint32_t I_ : 4;
       bool is_nucleus_ : 1;
       bool antiparticle_ : 1;
-#else  // Reverse ordering
+#elif defined(BIG_ENDIAN_ARCHITECTURE)  // reverse ordering
       bool antiparticle_ : 1;
       bool is_nucleus_ : 1;
       std::uint32_t I_ : 4;
       std::uint32_t A_ : 10;
       std::uint32_t Z_ : 10;
       std::uint32_t n_Lambda_ : 6;
+#else
+#error Endianness macro of the machine not defined.
 #endif
     } nucleus_;
   };
