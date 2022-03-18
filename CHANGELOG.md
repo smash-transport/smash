@@ -21,6 +21,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Added
 * Light nuclei (A=3) production via 4-to-2 reactions
+* Possibility to impose transverse momentum or rapidity cut when extracting initial conditions for hydrodynamics
 
 ### Changed
 * Minimum supported CMake version is now version 3.9
