@@ -67,13 +67,11 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
    *            rapidity up to which particles are considered for initial
    *            conditions
    * \param[in] pT Value for transverse momentum cut: maximum transverse
-   *            momentum up to which particles are considered for initial 
+   *            momentum up to which particles are considered for initial
    *            conditions
    */
-  explicit HyperSurfaceCrossActionsFinder(double tau, double y, double pT) :
-      prop_time_{tau},
-      rap_cut_{y},
-      pT_cut_{pT} {};
+  explicit HyperSurfaceCrossActionsFinder(double tau, double y, double pT)
+      : prop_time_{tau}, rap_cut_{y}, pT_cut_{pT} {};
 
   /**
    * Find the next hypersurface crossings for each particle that occur within
@@ -120,13 +118,13 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
    */
   const double rap_cut_;
 
-   /**
-    * Transverse momentum cut for the particles contributing to the initial
-    * conditions for hydrodynamics.
-    * If applied, only particles characterized by a transverse momentum between
-    * [0, pT_cut] are
-    * printed to the hypersurface.
-    */
+  /**
+   * Transverse momentum cut for the particles contributing to the initial
+   * conditions for hydrodynamics.
+   * If applied, only particles characterized by a transverse momentum between
+   * [0, pT_cut] are
+   * printed to the hypersurface.
+   */
   const double pT_cut_;
 
   /**

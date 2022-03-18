@@ -301,6 +301,18 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   Proper time at which hypersurface is created \n
  *   \key Lower_Bound (double, optional, default = 0.5 fm): Lower bound for the
  *    IC proper time if \key Proper_Time is not provided.\n
+ *   \key Rapidity_Cut (double, optional, default = no cut): If set, employ a
+ *                 rapidity cut for particles contributing to the initial
+ *                 conditions for hydrodynamics. A positive value is expected
+ *                 and the cut is employed symmetrically around 0. Only
+ *                 particles characterized by
+ *                 - \key Rapidity_Cut < y < \key Rapidity_Cut are printed to
+ *                 the output file.
+ *   \key pT_Cut (double, optional, default = no cut): If set, employ a
+ *                 transverse momentum cut for particles contributing to the
+ *                 initial conditions for hydrodynamics. A positive value is
+ *                 expected. Only particles characterized by
+ *                 0 < pT < \key pT_Cut are printed to the output file.
  *   \key Extended (bool, optional, default = false, incompatible with
  *                  Oscar1999, ROOT and ASCII format):\n
  *   \li \key true - Print extended information for each particle
