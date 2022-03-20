@@ -65,8 +65,8 @@ class HepMcOutput : public HepMcInterface {
   const bf::path filename_;
   /// Filename of output as long as simulation is still running.
   bf::path filename_unfinished_;
-  /// Vector of pointers to the HepMC3 output files
-  std::vector<std::unique_ptr<HepMC3::Writer>> output_file_;
+  /// Pointers to the base class of HepMC3 output files
+  std::unique_ptr<HepMC3::Writer> output_file_;
   /// enum to identify the HepMC3 output type
   typedef enum enum_output { asciiv3, treeroot } type_of_HepMC3_output;
   /// HepMC3 output type

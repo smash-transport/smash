@@ -166,13 +166,13 @@ HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
 #ifdef SMASH_USE_HEPMC_ROOTIO
   if (HepMC3_output_type == "asciiv3") {
 #endif
-    output_file_.push_back(make_unique<HepMC3::WriterAscii>(
-        filename_unfinished_.string(), event_.run_info()));
+    output_file_ = make_unique<HepMC3::WriterAscii>(
+        filename_unfinished_.string(), event_.run_info());
     output_type_ = asciiv3;
 #ifdef SMASH_USE_HEPMC_ROOTIO
   } else {
-    output_file_.push_back(make_unique<HepMC3::WriterRootTree>(
-        filename_unfinished_.string(), event_.run_info()));
+    output_file_ = make_unique<HepMC3::WriterRootTree>(
+        filename_unfinished_.string(), event_.run_info());
     output_type_ = treeroot;
   }
 #endif
@@ -180,7 +180,7 @@ HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
 HepMcOutput::~HepMcOutput() {
   logg[LOutput].debug() << "Renaming file " << filename_unfinished_ << " to "
                         << filename_ << std::endl;
-  output_file_[0]->close();
+  output_file_->close();
   bf::rename(filename_unfinished_, filename_);
 }
 
@@ -192,7 +192,7 @@ void HepMcOutput::at_eventend(const Particles &particles,
                         << event_.particles().size() << " particles and "
                         << event_.vertices().size() << " vertices to output "
                         << std::endl;
-  output_file_[0]->write_event(event_);
+  output_file_->write_event(event_);
 }
 
 }  // namespace smash
