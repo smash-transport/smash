@@ -75,13 +75,20 @@ option(TRY_USE_HEPMC "Turn this off to disable HepMC output support in SMASH." O
 if(TRY_USE_HEPMC OR TRY_USE_RIVET)
   find_package(HepMC3 QUIET)
   if(HepMC3_FOUND)
-    message(STATUS "Found HepMC ${HepMC3_VERSION} at ${HEPMC3_LIB}.")
+    message(STATUS "Found HepMC ${HepMC3_VERSION} at ${HEPMC3_LIBRARIES}.")
     include_directories(SYSTEM "${HEPMC3_INCLUDE_DIR}")
     set(SMASH_LIBRARIES
         ${SMASH_LIBRARIES}
-        ${HEPMC3_LIB}
+        ${HEPMC3_LIBRARIES}
     )
     add_definitions(-DSMASH_USE_HEPMC)
+    if((NOT HEPMC3_ROOTIO_LIB) OR (NOT ROOT_FOUND))
+        message(STATUS "HepMC3_treeroot output disabled, missing ROOT or/and "
+            "HepMC3 ROOT Io support")
+    else()
+        message(STATUS "HepMC3_treeroot output support enabled")
+        add_definitions(-DSMASH_USE_HEPMC_ROOTIO)
+    endif()
   else()
     message(STATUS "HepMC not found. Support disabled. See README for more information.")
   endif()

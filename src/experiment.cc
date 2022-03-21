@@ -259,12 +259,13 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *
  * - \b Particles \n
  *   \key Extended (bool, optional, default = false, incompatible with
- *                  Oscar1999, VTK, HepMC and Root formats): \n
+ *                  Oscar1999, VTK, HepMC_asciiv3, HepMC_treeroot and
+ *                  Root formats): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
  *   \key Only_Final (string, optional, default = Yes, incompatible with
-                      VTK and HepMC format): \n
+                      VTK, HepMC_asciiv3 and HepMC_treeroot format): \n
  *   \li \key Yes - Print only final particle list \n
  *   \li \key IfNotEmpty - Print only final particle list, but only if event
  *                         is not empty (i.e. any collisions happened between
@@ -273,12 +274,12 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * \n
  * - \b Collisions (VTK not available) \n
  *   \key Extended (bool, optional, default = false, incompatible with
- *                  Oscar1999, HepMC and Root formats): \n
+ *          Oscar1999, HepMC_asciiv3, HepMC_treeroot and Root formats): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
  *   \key Print_Start_End (bool, optional, default = false, incompatible with
- *                  Root and HepMC format): \n
+ *                  Root, HepMC_asciiv3 and HepMC_treeroot format): \n
  *   \li \key true - Initial and final particle list is printed out \n
  *   \li \key false - Initial and final particle list is not printed out \n
  * \n
@@ -453,14 +454,15 @@ ExperimentPtr ExperimentBase::create(Configuration config,
          Extended: False
          Proper_Time: 1.5
  \endverbatim
- * The HepMC ASCII ouput is enabled by specifying the HepmC output under
- * Particles or Collisions depdening on the content wanted.
+ * The HepMC_asciiv3 and/or HepMC_treeroot ouputs are enabled by specifying
+ * these output options under Particles or Collisions depdening on the content
+ * wanted.
  *\verbatim
  Output:
      Particles:
-         Format:          ["HepMC"]
+         Format:          ["HepMC_asciiv3","HepMC_treeroot"]
      Collisions:
-         Format:          ["HepMC"]
+         Format:          ["HepMC_asciiv3","HepMC_treeroot"]
  \endverbatim
  * If a lattice is configured and coulomb potentials are enabled, a VTK output
  * for the electric and magnetic fields is available. It can be obtained by

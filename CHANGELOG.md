@@ -17,7 +17,11 @@ The major categories to group changes in this log are:
 
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
+
 ## Unreleased
+
+### Input / Output
+* Added `HepMC_treeroot` output
 
 ### Added
 * Light nuclei (A=3) production via 4-to-2 reactions
@@ -47,6 +51,9 @@ Date: 2022-02-15
 * Add definition of endianness macro to FindSMASH.cmake module
 
 [Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.1.2...SMASH-2.1.3)
+
+### Deprecated
+ * Output option `HepMC` to enable HepMC ASCII output (equivalent to the newer `HepMC_asciiv3`)
 
 
 ## SMASH-2.1.2

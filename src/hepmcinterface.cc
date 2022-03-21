@@ -9,6 +9,7 @@
 
 #include "smash/hepmcinterface.h"
 #include "smash/config.h"
+#include "smash/experiment.h"
 
 #include "HepMC3/GenRunInfo.h"
 #include "HepMC3/Print.h"
@@ -160,8 +161,10 @@ void HepMcInterface::at_interaction(const Action& action,
 void HepMcInterface::at_eventend(const Particles& particles,
                                  const int32_t /*event_number*/,
                                  const EventInfo& event) {
+  // We evaluate if it is a heavy ion collision event
+  bool is_coll = (event.impact_parameter >= 0.0);
   // In case this was an empty event
-  if (event.empty_event) {
+  if (event.empty_event && is_coll) {
     clear();
     return;
   }

@@ -23,10 +23,16 @@ const int RootOutput::max_buffer_size_ = 500000;
 /*!\Userguide
  * \page format_root ROOT Format
  * SMASH ROOT output is a fast and disk-space efficient, but not human-readable
- * output. ROOT output files can be viewed using ROOT's TBrowser. One can also
+ * output. It is a custom format making information about the SMASH calculation
+ * accessible with ROOT, mostly mirroring the information of the
+ * \ref oscar_general_ formats. This output is distinct from the standarized
+ * \ref output_hepmc_ that is also available in ROOT format and more widely
+ * adopted.
+ *
+ * SMASH ROOT output files can be viewed using ROOT's TBrowser. One can also
  * access them using ROOT functions. The full memory structure of the ROOT
  * files can be found here: http://root.cern.ch/root/html/TFile.html. We only
- * desribe the logical structure of the SMASH ROOT output. Knowing the logical
+ * describe the logical structure of the SMASH ROOT output. Knowing the logical
  * structure is enough to read and write ROOT files, be able to view them in
  * TBrowser, or write a ROOT macro to analyze them.
  *
