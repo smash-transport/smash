@@ -213,8 +213,12 @@ class Experiment : public ExperimentBase {
    * timesteps, from action to actions.
    * Within one timestep (fixed) evolution from action to action
    * is invoked.
+   *
+   * \param[in] t_end time until run_time_evolution is run, in SMASH this is the
+   *                  configured end_time, but it might differ if SMASH is used
+   *                  as an external library
    */
-  void run_time_evolution();
+  void run_time_evolution(const double t_end);
 
   /**
    * Performs the final decays of an event
@@ -288,9 +292,11 @@ class Experiment : public ExperimentBase {
    * \param[in]      i_ensemble index of ensemble to be evolved
    * \param[in]      end_time_propagation time until propagation should be
    *                 performed
+   * \param[in]      end_time_run time until the whole evolution is run
    */
   void run_time_evolution_timestepless(Actions &actions, int i_ensemble,
-                                       double end_time_propagation);
+                                       const double end_time_propagation,
+                                       const double end_time_run);
 
   /// Intermediate output during an event
   void intermediate_output();
@@ -2196,11 +2202,11 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
 }
 
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution() {
-  while (parameters_.labclock->current_time() < end_time_) {
+void Experiment<Modus>::run_time_evolution(const double t_end) {
+  while (parameters_.labclock->current_time() < t_end) {
     const double t = parameters_.labclock->current_time();
     const double dt =
-        std::min(parameters_.labclock->timestep_duration(), end_time_ - t);
+        std::min(parameters_.labclock->timestep_duration(), t_end - t);
     logg[LExperiment].debug("Timestepless propagation for next ", dt, " fm/c.");
 
     // Perform forced thermalization if required
@@ -2265,21 +2271,22 @@ void Experiment<Modus>::run_time_evolution() {
 
     /* (2) Propagate from action to action until next output or timestep end */
     const double end_timestep_time =
-        std::min(parameters_.labclock->next_time(), end_time_);
+        std::min(parameters_.labclock->next_time(), t_end);
     while (next_output_time() <= end_timestep_time) {
       for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
         run_time_evolution_timestepless(actions[i_ens], i_ens,
-                                        next_output_time());
+                                        next_output_time(), t_end);
       }
       ++(*parameters_.outputclock);
 
       // Avoid duplication of final output
-      if (parameters_.outputclock->current_time() < end_time_) {
+      if (parameters_.outputclock->current_time() < t_end) {
         intermediate_output();
       }
     }
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
-      run_time_evolution_timestepless(actions[i_ens], i_ens, end_timestep_time);
+      run_time_evolution_timestepless(actions[i_ens], i_ens, end_timestep_time,
+                                      t_end);
     }
 
     /* (3) Update potentials (if computed on the lattice) and
@@ -2352,7 +2359,8 @@ inline void check_interactions_total(uint64_t interactions_total) {
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution_timestepless(
-    Actions &actions, int i_ensemble, double end_time_propagation) {
+    Actions &actions, int i_ensemble, const double end_time_propagation,
+    const double end_time_run) {
   Particles &particles = ensembles_[i_ensemble];
   logg[LExperiment].debug(
       "Timestepless propagation: ", "Actions size = ", actions.size(),
@@ -2394,7 +2402,7 @@ void Experiment<Modus>::run_time_evolution_timestepless(
     /* (3) Update actions for newly-produced particles. */
 
     const double end_time_timestep =
-        std::min(parameters_.labclock->next_time(), end_time_);
+        std::min(parameters_.labclock->next_time(), end_time_run);
     assert(!(end_time_propagation > end_time_timestep));
     // New actions are always search until the end of the current timestep
     const double time_left = end_time_timestep - act->time_of_execution();
@@ -2856,7 +2864,7 @@ void Experiment<Modus>::run() {
     // Sample initial particles, start clock, some printout and book-keeping
     initialize_new_event();
 
-    run_time_evolution();
+    run_time_evolution(end_time_);
 
     if (force_decays_) {
       do_final_decays();
