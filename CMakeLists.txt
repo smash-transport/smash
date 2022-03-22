@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 3.9)
 
 # The name of our project
-project(smash CXX)
+project(SMASH CXX)
 
 # Fail if cmake is called in the source directory
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
