@@ -104,7 +104,7 @@ ICOutput::ICOutput(const bf::path &path, const std::string &name,
   std::fprintf(
       file_.get(),
       "# %s initial conditions: hypersurface of constant proper time\n",
-      SMASH_VERSION_VERBOSE);
+      SMASH_VERSION);
   std::fprintf(file_.get(), "# tau x y eta mt px py Rap pdg charge\n");
   std::fprintf(file_.get(), "# fm fm fm none GeV GeV GeV none none e\n");
 }

@@ -13,6 +13,9 @@ include(FindPkgConfig)
 
 include(GetGitRevisionDescription)
 git_describe(SMASH_VERSION_VERBOSE)
+if(SMASH_VERSION_VERBOSE)
+  set(SMASH_VERSION "${SMASH_VERSION_VERBOSE}")
+endif()
 
 # Enable warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch")

@@ -150,7 +150,7 @@ TEST(full2013_format) {
       std::getline(outputfile, line);
       COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none e");
       std::getline(outputfile, line);
-      COMPARE(line, "# " SMASH_VERSION_VERBOSE);
+      COMPARE(line, "# " SMASH_VERSION);
       /* Check initial particle list description line */
       std::string initial_line =
           "# event " + std::to_string(event_id) + " in " + std::to_string(2);
@@ -277,7 +277,7 @@ TEST(final2013_format) {
       std::getline(outputfile, line);
       COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none e");
       std::getline(outputfile, line);
-      COMPARE(line, "# " SMASH_VERSION_VERBOSE);
+      COMPARE(line, "# " SMASH_VERSION);
       /* Check final particle list */
       std::getline(outputfile, line);
       std::string final_line = "# event " + std::to_string(event_id) + " out " +
@@ -361,7 +361,7 @@ TEST(full_extended_oscar) {
             "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none"
             " e none fm none none none fm none none");
     std::getline(outputfile, line);
-    COMPARE(line, "# " SMASH_VERSION_VERBOSE);
+    COMPARE(line, "# " SMASH_VERSION);
     /* Check initial particle list description line */
     std::string initial_line =
         "# event " + std::to_string(event_id) + " in " + std::to_string(2);
@@ -473,7 +473,7 @@ TEST(initial_conditions_2013_format) {
       std::getline(outputfile, line);
       COMPARE(line, "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none e");
       std::getline(outputfile, line);
-      COMPARE(line, "# " SMASH_VERSION_VERBOSE);
+      COMPARE(line, "# " SMASH_VERSION);
       /* Check initial particle list description line */
       std::string initial_line =
           "# event " + std::to_string(event_id) + " in " + std::to_string(1);

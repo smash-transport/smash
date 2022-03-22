@@ -122,7 +122,7 @@ TEST(fullhistory_format) {
       std::string header =
           "# OSC1999A\n"
           "# full_event_history\n"
-          "# " SMASH_VERSION_VERBOSE
+          "# " SMASH_VERSION
           "\n"
           "# Block format:\n"
           "# nin nout event_number\n"
@@ -252,7 +252,7 @@ TEST(particlelist_format) {
       std::string header =
           "# OSC1999A\n"
           "# final_id_p_x\n"
-          "# " SMASH_VERSION_VERBOSE
+          "# " SMASH_VERSION
           "\n"
           "# Block format:\n"
           "# nin nout event_number\n"
@@ -343,7 +343,7 @@ TEST(initial_conditions_format) {
       std::string header =
           "# OSC1999A\n"
           "# SMASH_IC\n"
-          "# " SMASH_VERSION_VERBOSE
+          "# " SMASH_VERSION
           "\n"
           "# Block format:\n"
           "# nin nout event_number\n"

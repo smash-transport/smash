@@ -199,7 +199,7 @@ void print_disclaimer() {
       << "###################################################################"
       << "############"
       << "\n"
-      << " This is SMASH version: " << SMASH_VERSION_VERBOSE << "\n"
+      << " This is SMASH version: " << SMASH_VERSION << "\n"
       << " Simulating Many Accelerated Strongly-interacting Hadrons"
       << "\n"
       << "\n"
@@ -498,7 +498,7 @@ int main(int argc, char *argv[]) {
               "%s\n"
               "Branch   : %s\nSystem   : %s\nCompiler : %s %s\n"
               "Build    : %s\nDate     : %s\n",
-              SMASH_VERSION_VERBOSE, GIT_BRANCH, CMAKE_SYSTEM,
+              SMASH_VERSION, GIT_BRANCH, CMAKE_SYSTEM,
               CMAKE_CXX_COMPILER_ID, CMAKE_CXX_COMPILER_VERSION,
               CMAKE_BUILD_TYPE, BUILD_DATE);
           std::exit(EXIT_SUCCESS);
@@ -573,7 +573,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Calculate a hash of the SMASH version, the particles and decaymodes.
-    const std::string version(SMASH_VERSION_VERBOSE);
+    const std::string version(SMASH_VERSION);
     const std::string particle_string = configuration["particles"].to_string();
     const std::string decay_string = configuration["decaymodes"].to_string();
     sha256::Context hash_context;
@@ -734,7 +734,7 @@ int main(int argc, char *argv[]) {
     /* Keep a copy of the configuration that was used in the output directory
      * also save information about SMASH build as a comment */
     bf::ofstream(output_path / "config.yaml")
-        << "# " << SMASH_VERSION_VERBOSE << '\n'
+        << "# " << SMASH_VERSION << '\n'
         << "# Branch   : " << GIT_BRANCH << '\n'
         << "# System   : " << CMAKE_SYSTEM << '\n'
         << "# Compiler : " << CMAKE_CXX_COMPILER_ID << ' '
