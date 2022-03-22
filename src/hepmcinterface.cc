@@ -42,7 +42,9 @@ HepMcInterface::HepMcInterface(const std::string& name, const bool full_event)
   HepMC3::GenRunInfo::ToolInfo tool;
   tool.name = "SMASH";
   tool.version = SMASH_VERSION;
+#ifdef GIT_BRANCH
   tool.version = tool.version + GIT_BRANCH;
+#endif
   tool.description = "";
   run_info->tools().push_back(tool);
   event_.set_run_info(run_info);
