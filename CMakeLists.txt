@@ -10,8 +10,8 @@
 # Minimum cmake version this is tested on
 cmake_minimum_required(VERSION 3.9)
 
-# The name of our project
-project(SMASH CXX)
+# The name, version and language of our project
+project(SMASH VERSION 2.1.4 LANGUAGES CXX)
 
 # Fail if cmake is called in the source directory
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
