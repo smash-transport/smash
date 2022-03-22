@@ -7,6 +7,9 @@
 #
 #########################################################
 
+# Minimum cmake version this is tested on
+cmake_minimum_required(VERSION 3.9)
+
 # The name of our project
 project(smash CXX)
 
@@ -14,9 +17,6 @@ project(smash CXX)
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
    message(FATAL_ERROR "You don't want to configure in the source directory!")
 endif()
-
-# Minimum cmake version this is tested on
-cmake_minimum_required(VERSION 3.9)
 
 if(NOT "${CMAKE_CXX_STANDARD}")
   set(CMAKE_CXX_STANDARD 11)
