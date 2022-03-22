@@ -101,4 +101,4 @@ IF(Pythia_FOUND)
 ENDIF()
 
 # the variables listed here will only show up in the GUI (ccmake) in the "advanced" view
-mark_as_advanced(Pythia_FOUND Pythia_INCLUDE_DIR Pythia_LIBRARY Pythia_LIBRARIES Pythia_XMLDOC_DIR Pythia_LIBDIR Pythia_CONFIG_EXECUTABLE)
+mark_as_advanced(Pythia_FOUND Pythia_INCLUDE_DIR Pythia_LIBRARY Pythia_LIBRARIES Pythia_LHAPDFDummy_LIBRARY Pythia_XMLDOC_DIR Pythia_LIBDIR Pythia_CONFIG_EXECUTABLE)
