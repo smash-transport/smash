@@ -195,7 +195,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * Parameter for Triangular smearing: Half of the base of a symmetric triangle
  * that represents particle density, in units of lattice spacings.
  *
- * \key Discrete (double, optional, default = 0.333333): \n
+ * \key Discrete_Weight (double, optional, default = 0.333333): \n
  * Parameter for Discrete smearing: Weight given to particle density at the
  * the center node; cannot be smaller than 1./7. (the boundary case of 1./7.
  * results in an even distribution of particle's density over the center node
@@ -367,15 +367,6 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   \li \key true - smearing applied
  *   \li \key false - smearing not applied
  *
- *   \anchor onlypart
- *   \key Only_Participants (bool, optional, default = false): \n
- *   If set to true, only participants are included in the computation of the
- *   energy momentum tensor and of the Eckart currents. In this context,
- *   a hadron is considered as a participant if it had at least one collision.
- *   When using Potentials this option must be either left unset or set to
- *   false. The reason behing this limitation is that in this case hadrons
- *   can influence the evolution of the system even without collisions.
- *
  *   The contribution to the energy-momentum tensor and current (be it electric,
  *   baryonic or strange) from a single particle in its rest frame is:
  *   \f[\begin{eqnarray} j^{\mu} = B \frac{p_0^{\mu}}{p_0^0} W \\
@@ -390,7 +381,17 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   would correspond to \key "Smearing: false". Note that using this option
  *   changes the units of the thermodynamic quantities, as they are no longer
  *   spatially normalized. One should divide this quantity by
- *   by the volume of the box to restore units to the correct ones.
+ *   by the volume of the box to restore units to the correct ones. \n
+ *   \n
+ *
+ *   \anchor onlypart
+ *   \key Only_Participants (bool, optional, default = false): \n
+ *   If set to true, only participants are included in the computation of the
+ *   energy momentum tensor and of the Eckart currents. In this context,
+ *   a hadron is considered as a participant if it had at least one collision.
+ *   When using Potentials this option must be either left unset or set to
+ *   false. The reason behing this limitation is that in this case hadrons
+ *   can influence the evolution of the system even without collisions.
  *
  * \n
  * \page configuring_output_ Output Configuration

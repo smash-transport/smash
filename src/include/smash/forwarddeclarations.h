@@ -216,7 +216,7 @@ enum class NNbarTreatment {
   Strings,
 };
 
-/*!\Userguide
+/**
  * Represents thermodynamic quantities that can be printed out
  * \anchor ThermodynamicQuantity
  */
