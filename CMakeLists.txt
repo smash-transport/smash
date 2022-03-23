@@ -7,16 +7,16 @@
 #
 #########################################################
 
-# The name of our project
-project(smash CXX)
+# Minimum cmake version this is tested on
+cmake_minimum_required(VERSION 3.9)
+
+# The name, version and language of our project
+project(SMASH VERSION 2.1.4 LANGUAGES CXX)
 
 # Fail if cmake is called in the source directory
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
    message(FATAL_ERROR "You don't want to configure in the source directory!")
 endif()
-
-# Minimum cmake version this is tested on
-cmake_minimum_required(VERSION 3.1)
 
 if(NOT "${CMAKE_CXX_STANDARD}")
   set(CMAKE_CXX_STANDARD 11)

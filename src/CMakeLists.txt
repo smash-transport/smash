@@ -12,7 +12,15 @@ include(AddCompilerFlag)
 include(FindPkgConfig)
 
 include(GetGitRevisionDescription)
+# The variable SMASH_VERSION is already set via the project()
+# command, since we specify there a VERSION option. Here check
+# if .git information is available and increase verbosity
 git_describe(SMASH_VERSION_VERBOSE)
+if(SMASH_VERSION_VERBOSE)
+  set(SMASH_VERSION "${SMASH_VERSION_VERBOSE}")
+else()
+  set(SMASH_VERSION "${CMAKE_PROJECT_NAME}-${SMASH_VERSION}")
+endif()
 
 # Enable warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch")
@@ -47,7 +55,7 @@ if(GIT_FOUND)
       OUTPUT_VARIABLE GIT_BRANCH)
     string(STRIP ${GIT_BRANCH} GIT_BRANCH)
   else()
-    set(GIT_BRANCH "UNKNOWN")
+    set(GIT_BRANCH "NOTFOUND")
   endif()
   #message("git branch: ${GIT_BRANCH}")
 endif (GIT_FOUND)

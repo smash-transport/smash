@@ -26,11 +26,14 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Added
 * Light nuclei (A=3) production via 4-to-2 reactions
 
+### Fixed
+* The `--version` option of `smash` now returns a version also when SMASH is downloaded as source package without VCS information
+
 ### Changed
 * Minimum supported CMake version is now version 3.9
 * Renamed `USE_ROOT`, `USE_HEPMC` and `USE_RIVET` CMake options to `TRY_USE_ROOT`, `TRY_USE_HEPMC` and `TRY_USE_RIVET`, respectively
 * Upgraded to Pythia 8.307
-* Renamed version macro to `SMASH_VERSION_VERBOSE` (from `MAJOR_VERSION`)
+* Renamed version macro to `SMASH_VERSION` (from `MAJOR_VERSION`)
 * Pythia installation directory can also be specified with `-DPYTHIA_ROOT_DIR` and by the environment variables `PYTHIA_ROOT_DIR` or `PYTHIA8`, with `/usr` as default
 * Big endian architectures are not officially supported and compilation on them is, by default, disabled
 
