@@ -1084,6 +1084,15 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
             "Kinematic cut for initial conditions malconfigured.");
       }
     }
+
+    if (modus_.calculation_frame_is_fixed_target() && rapidity_cut != 0.0) {
+      throw std::runtime_error(
+          "Rapidity cut for initial conditions output is not implemented "
+          "in the fixed target calculation frame. \nPlease use "
+          "\"center of velocity\" or \"center of mass\" as a "
+          "\"Calculation_Frame\" instead.");
+    }
+
     double transverse_momentum_cut = 0.0;
     if (config.has_value({"Output", "Initial_Conditions", "pT_Cut"})) {
       transverse_momentum_cut =
