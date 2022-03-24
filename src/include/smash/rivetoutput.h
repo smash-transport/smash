@@ -41,7 +41,7 @@ class RivetOutput : public HepMcInterface {
    * \param[in] path Output path.
    * \param[in] name Name of the output.
    * \param[in] full_event Whether the full event or only final-state particles
-                           are printed in the output
+   *                       are printed in the output
    * \param[in] out_par Configuration parameters of SMASH
    */
   RivetOutput(const bf::path& path, std::string name, const bool full_event,

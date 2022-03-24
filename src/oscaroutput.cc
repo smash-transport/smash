@@ -86,7 +86,7 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
     std::fprintf(file_.get(),
                  "# Units: fm fm fm fm "
                  "GeV GeV GeV GeV GeV none none e\n");
-    std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
+    std::fprintf(file_.get(), "# %s\n", SMASH_VERSION);
   } else if (Format == OscarFormat2013Extended) {
     std::fprintf(file_.get(),
                  "#!OSCAR2013Extended %s t x y z mass p0 px py pz"
@@ -96,7 +96,7 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
     std::fprintf(file_.get(),
                  "# Units: fm fm fm fm GeV GeV GeV GeV GeV"
                  " none none e none fm none none none fm none none\n");
-    std::fprintf(file_.get(), "# %s\n", VERSION_MAJOR);
+    std::fprintf(file_.get(), "# %s\n", SMASH_VERSION);
   } else {
     const std::string &oscar_name =
         name == "particle_lists" ? "final_id_p_x" : name;
@@ -104,7 +104,7 @@ OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
     // this particular string for particle output.
 
     std::fprintf(file_.get(), "# OSC1999A\n# %s\n# %s\n", oscar_name.c_str(),
-                 VERSION_MAJOR);
+                 SMASH_VERSION);
     std::fprintf(file_.get(), "# Block format:\n");
     std::fprintf(file_.get(), "# nin nout event_number\n");
     std::fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
@@ -185,7 +185,7 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
   if (Contents & OscarParticlesIC) {
     // If the runtime is too short some particles might not yet have
     // reached the hypersurface. Warning is printed.
-    if (particles.size() != 0) {
+    if (particles.size() != 0 && !event.impose_kinematic_cut_for_SMASH_IC) {
       logg[LHyperSurfaceCrossing].warn(
           "End time might be too small for initial conditions output. "
           "Hypersurface has not yet been crossed by ",

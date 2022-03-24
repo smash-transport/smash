@@ -87,7 +87,7 @@ class HepMcInterface : public OutputInterface {
    *
    * \param[in] name    Name of output
    * \param[in] full_event Whether the full event or only final-state particles
-                           are printed in the output
+   *                       are printed in the output
    */
   HepMcInterface(const std::string& name, const bool full_event);
   /**

@@ -98,7 +98,38 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     bool hypersurface_is_crossed = crosses_hypersurface(
         pdata_before_propagation, pdata_after_propagation, prop_time_);
 
-    if (hypersurface_is_crossed) {
+    /*
+       If rapidity or transverse momentum cut is to be employed; check if
+       particles are within the relevant region
+       Implementation explanation: The default for both cuts is 0.0, as a cut at
+       0 implies that not a single particle contributes to the initial
+       conditions. If the user specifies a value of 0.0 in the config, SMASH
+       crashes with a corresponding error message. The same applies to negtive
+       values.
+    */
+    bool is_within_y_cut = true;
+    // Check whether particle is in desired rapidity range
+    if (rap_cut_ > 0.0) {
+      const double rapidity =
+          0.5 * std::log((p.momentum().x0() + p.momentum().x3()) /
+                         (p.momentum().x0() - p.momentum().x3()));
+      if (abs(rapidity) > rap_cut_) {
+        is_within_y_cut = false;
+      }
+    }
+
+    bool is_within_pT_cut = true;
+    // Check whether particle is in desired pT range
+    if (pT_cut_ > 0.0) {
+      const double transverse_momentum =
+          sqrt(p.momentum().x1() * p.momentum().x1() +
+               p.momentum().x2() * p.momentum().x2());
+      if (transverse_momentum > pT_cut_) {
+        is_within_pT_cut = false;
+      }
+    }
+
+    if (hypersurface_is_crossed && is_within_y_cut && is_within_pT_cut) {
       // Get exact coordinates where hypersurface is crossed
       FourVector crossing_position = coordinates_on_hypersurface(
           pdata_before_propagation, pdata_after_propagation, prop_time_);

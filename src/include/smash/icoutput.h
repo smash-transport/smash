@@ -53,9 +53,10 @@ class ICOutput : public OutputInterface {
    * Write event end line.
    * \param[in] particles Particles at end of event, expected to be empty
    * \param[in] event_number Number of the current event.
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const int event_number,
-                   const EventInfo &) override;
+                   const EventInfo &event) override;
 
   /**
    * Unused, but needed since virtually declared in mother class.

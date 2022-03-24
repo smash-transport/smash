@@ -297,8 +297,8 @@ inline ExperimentParameters default_parameters(
 /// Creates default EventInfo object for testing purposes
 inline EventInfo default_event_info(double impact_parameter = 0.0,
                                     bool empty_event = false) {
-  return EventInfo{impact_parameter, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1,
-                   empty_event};
+  return EventInfo{impact_parameter, 0.0,  0.0, 0.0, 0.0, 0.0, 1, 1,
+                   empty_event,      false};
 }
 
 /**

@@ -12,7 +12,15 @@ include(AddCompilerFlag)
 include(FindPkgConfig)
 
 include(GetGitRevisionDescription)
-git_describe(VERSION_MAJOR)
+# The variable SMASH_VERSION is already set via the project()
+# command, since we specify there a VERSION option. Here check
+# if .git information is available and increase verbosity
+git_describe(SMASH_VERSION_VERBOSE)
+if(SMASH_VERSION_VERBOSE)
+  set(SMASH_VERSION "${SMASH_VERSION_VERBOSE}")
+else()
+  set(SMASH_VERSION "${CMAKE_PROJECT_NAME}-${SMASH_VERSION}")
+endif()
 
 # Enable warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch")
@@ -47,7 +55,7 @@ if(GIT_FOUND)
       OUTPUT_VARIABLE GIT_BRANCH)
     string(STRIP ${GIT_BRANCH} GIT_BRANCH)
   else()
-    set(GIT_BRANCH "UNKNOWN")
+    set(GIT_BRANCH "NOTFOUND")
   endif()
   #message("git branch: ${GIT_BRANCH}")
 endif (GIT_FOUND)
@@ -75,13 +83,20 @@ option(TRY_USE_HEPMC "Turn this off to disable HepMC output support in SMASH." O
 if(TRY_USE_HEPMC OR TRY_USE_RIVET)
   find_package(HepMC3 QUIET)
   if(HepMC3_FOUND)
-    message(STATUS "Found HepMC ${HepMC3_VERSION} at ${HEPMC3_LIB}.")
+    message(STATUS "Found HepMC ${HepMC3_VERSION} at ${HEPMC3_LIBRARIES}.")
     include_directories(SYSTEM "${HEPMC3_INCLUDE_DIR}")
     set(SMASH_LIBRARIES
         ${SMASH_LIBRARIES}
-        ${HEPMC3_LIB}
+        ${HEPMC3_LIBRARIES}
     )
     add_definitions(-DSMASH_USE_HEPMC)
+    if((NOT HEPMC3_ROOTIO_LIB) OR (NOT ROOT_FOUND))
+        message(STATUS "HepMC3_treeroot output disabled, missing ROOT or/and "
+            "HepMC3 ROOT Io support")
+    else()
+        message(STATUS "HepMC3_treeroot output support enabled")
+        add_definitions(-DSMASH_USE_HEPMC_ROOTIO)
+    endif()
   else()
     message(STATUS "HepMC not found. Support disabled. See README for more information.")
   endif()
@@ -115,10 +130,11 @@ endif()
 # find Pythia
 find_package(Pythia 8.307 EXACT REQUIRED)
 if(Pythia_FOUND)
-  include_directories(SYSTEM
+# the BEFORE at the line below is due to
+# https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
+  include_directories(BEFORE SYSTEM
      "${Pythia_INCLUDE_DIRS}"
      )
-  link_directories("${Pythia_LIBDIR}")
   set(SMASH_LIBRARIES
      ${SMASH_LIBRARIES}
      ${Pythia_LIBRARIES} -ldl

@@ -9,6 +9,7 @@
 
 #include "smash/hepmcinterface.h"
 #include "smash/config.h"
+#include "smash/experiment.h"
 
 #include "HepMC3/GenRunInfo.h"
 #include "HepMC3/Print.h"
@@ -40,8 +41,10 @@ HepMcInterface::HepMcInterface(const std::string& name, const bool full_event)
   run_info->set_weight_names(weightnames);
   HepMC3::GenRunInfo::ToolInfo tool;
   tool.name = "SMASH";
-  tool.version = VERSION_MAJOR;
+  tool.version = SMASH_VERSION;
+#ifdef GIT_BRANCH
   tool.version = tool.version + GIT_BRANCH;
+#endif
   tool.description = "";
   run_info->tools().push_back(tool);
   event_.set_run_info(run_info);
@@ -160,8 +163,10 @@ void HepMcInterface::at_interaction(const Action& action,
 void HepMcInterface::at_eventend(const Particles& particles,
                                  const int32_t /*event_number*/,
                                  const EventInfo& event) {
+  // We evaluate if it is a heavy ion collision event
+  bool is_coll = (event.impact_parameter >= 0.0);
   // In case this was an empty event
-  if (event.empty_event) {
+  if (event.empty_event && is_coll) {
     clear();
     return;
   }
