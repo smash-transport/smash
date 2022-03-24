@@ -20,7 +20,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## Unreleased
 
 ### Input / Output
-* Add option to `Do_Weak_Decays_At_The_End`
+* Add option to `Include_Weak_And_EM_Decays_At_The_End`
 
 ### Added
 * Light nuclei (A=3) production via 4-to-2 reactions

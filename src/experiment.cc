@@ -674,7 +674,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
           scale_xs,
           config_coll.take({"Additional_Elastic_Cross_Section"}, 0.0),
           only_participants,
-          config_coll.take({"Do_Weak_Decays_At_The_End"}, false)};
+          config_coll.take({"Include_Weak_And_EM_Decays_At_The_End"}, false)};
 }
 
 std::string format_measurements(const std::vector<Particles> &ensembles,

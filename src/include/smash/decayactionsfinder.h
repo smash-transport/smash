@@ -75,7 +75,10 @@ class DecayActionsFinder : public ActionFinderInterface {
   /// Multiplicative factor to be applied to resonance lifetimes
   const double res_lifetime_factor_ = 1.;
 
-  /// Do weak decays at the end?
+  /**
+   * Do weak decays at the end? Weak here means all non-strong decays,
+   * so electro-magnetic decays are done as well.
+   */
   const bool do_final_weak_decays_;
 };
 
