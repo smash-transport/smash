@@ -79,7 +79,7 @@ ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
     }
 
     if (p.type().decay_modes().is_empty()) {
-      continue;  // particle cannot decay (not even weakly)
+      continue;  // particle cannot decay (not even e.m. or weakly)
     }
 
     auto act = make_unique<DecayAction>(p, 0.);

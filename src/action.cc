@@ -483,13 +483,29 @@ void Action::check_conservation(const uint32_t id_process) const {
     }
     particle_names << "\n";
     std::string err_msg = before.report_deviations(after);
-    logg[LAction].error() << particle_names.str() << err_msg;
     /* Pythia does not conserve energy and momentum at high energy, so we just
-     * print the error and continue. */
+     * print the warning and continue. */
     if ((is_string_soft_process(process_type_)) ||
         (process_type_ == ProcessType::StringHard)) {
+      logg[LAction].warn()
+          << "Conservation law violations due to Pyhtia (old vs. new)\n"
+          << particle_names.str() << err_msg;
       return;
     }
+    /* We allow decay of particles stable under the strong interaction to decay
+     * at the end, so just warn about such a "weak" process violating
+     * conservation laws */
+    if (process_type_ == ProcessType::Decay &&
+        incoming_particles_[0].type().is_stable()) {
+      logg[LAction].warn()
+          << "Conservation law violations of strong interaction in weak or "
+             "e.m. decay (old vs. new)\n"
+          << particle_names.str() << err_msg;
+      return;
+    }
+    logg[LAction].error()
+        << "Conservation law violations detected (old vs. new)\n"
+        << particle_names.str() << err_msg;
     if (id_process == ID_PROCESS_PHOTON) {
       throw std::runtime_error("Conservation laws violated in photon process");
     } else {
