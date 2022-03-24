@@ -632,6 +632,9 @@ class Experiment : public ExperimentBase {
    */
   double total_energy_removed_ = 0.0;
 
+  /// This indicates whether kinematic cuts are enabled for the IC output
+  bool kinematic_cuts_for_IC_output_ = false;
+
   /// random seed for the next event.
   int64_t seed_ = -1;
 
@@ -1090,8 +1093,68 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
         proper_time = lower_bound;
       }
     }
-    action_finders_.emplace_back(
-        make_unique<HyperSurfaceCrossActionsFinder>(proper_time));
+
+    double rapidity_cut = 0.0;
+    if (config.has_value({"Output", "Initial_Conditions", "Rapidity_Cut"})) {
+      rapidity_cut =
+          config.take({"Output", "Initial_Conditions", "Rapidity_Cut"});
+      if (rapidity_cut <= 0.0) {
+        logg[LInitialConditions].fatal()
+            << "Rapidity cut for initial conditions configured as abs(y) < "
+            << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
+            << "non-zero value or employ SMASH without rapidity cut.";
+        throw std::runtime_error(
+            "Kinematic cut for initial conditions malconfigured.");
+      }
+    }
+
+    if (modus_.calculation_frame_is_fixed_target() && rapidity_cut != 0.0) {
+      throw std::runtime_error(
+          "Rapidity cut for initial conditions output is not implemented "
+          "in the fixed target calculation frame. \nPlease use "
+          "\"center of velocity\" or \"center of mass\" as a "
+          "\"Calculation_Frame\" instead.");
+    }
+
+    double transverse_momentum_cut = 0.0;
+    if (config.has_value({"Output", "Initial_Conditions", "pT_Cut"})) {
+      transverse_momentum_cut =
+          config.take({"Output", "Initial_Conditions", "pT_Cut"});
+      if (transverse_momentum_cut <= 0.0) {
+        logg[LInitialConditions].fatal()
+            << "transverse momentum cut for initial conditions configured as "
+               "pT < "
+            << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
+            << "non-zero value or employ SMASH without pT cut.";
+        throw std::runtime_error(
+            "Kinematic cut for initial conditions malconfigured.");
+      }
+    }
+
+    if (rapidity_cut > 0.0 || transverse_momentum_cut > 0.0) {
+      kinematic_cuts_for_IC_output_ = true;
+    }
+
+    if (rapidity_cut > 0.0 && transverse_momentum_cut > 0.0) {
+      logg[LInitialConditions].info()
+          << "Extracting initial conditions in kinematic range: "
+          << -rapidity_cut << " <= y <= " << rapidity_cut
+          << "; pT <= " << transverse_momentum_cut << " GeV.";
+    } else if (rapidity_cut > 0.0) {
+      logg[LInitialConditions].info()
+          << "Extracting initial conditions in kinematic range: "
+          << -rapidity_cut << " <= y <= " << rapidity_cut << ".";
+    } else if (transverse_momentum_cut > 0.0) {
+      logg[LInitialConditions].info()
+          << "Extracting initial conditions in kinematic range: pT <= "
+          << transverse_momentum_cut << " GeV.";
+    } else {
+      logg[LInitialConditions].info()
+          << "Extracting initial conditions without kinematic cuts.";
+    }
+
+    action_finders_.emplace_back(make_unique<HyperSurfaceCrossActionsFinder>(
+        proper_time, rapidity_cut, transverse_momentum_cut));
   }
 
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
@@ -1870,11 +1933,14 @@ double calculate_mean_field_energy(
  *            such as testparticle number, see \ref ExperimentParameters
  * \param[in] projectile_target_interact true if there was at least one
  *            collision
+ * \param[in] kinematic_cut_for_SMASH_IC true if kinematic cuts in y or pT are
+              enabled when exracting initial conditions for hydrodynamics
  */
 EventInfo fill_event_info(const std::vector<Particles> &ensembles,
                           double E_mean_field, double modus_impact_parameter,
                           const ExperimentParameters &parameters,
-                          bool projectile_target_interact);
+                          bool projectile_target_interact,
+                          bool kinematic_cut_for_SMASH_IC);
 
 template <typename Modus>
 void Experiment<Modus>::initialize_new_event() {
@@ -2004,9 +2070,9 @@ void Experiment<Modus>::initialize_new_event() {
   // Output at event start
   for (const auto &output : outputs_) {
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
-      auto event_info =
-          fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
-                          parameters_, projectile_target_interact_[i_ens]);
+      auto event_info = fill_event_info(
+          ensembles_, E_mean_field, modus_.impact_parameter(), parameters_,
+          projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
       output->at_eventstart(ensembles_[i_ens],
                             // Pretend each ensemble is an independent event
                             event_ * parameters_.n_ensembles + i_ens,
@@ -2510,9 +2576,9 @@ void Experiment<Modus>::intermediate_output() {
         continue;
       }
       for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
-        auto event_info =
-            fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
-                            parameters_, projectile_target_interact_[i_ens]);
+        auto event_info = fill_event_info(
+            ensembles_, E_mean_field, modus_.impact_parameter(), parameters_,
+            projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
 
         output->at_intermediate_time(ensembles_[i_ens], parameters_.outputclock,
                                      density_param_, event_info);
@@ -2841,9 +2907,9 @@ void Experiment<Modus>::final_output() {
 
   for (const auto &output : outputs_) {
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
-      auto event_info =
-          fill_event_info(ensembles_, E_mean_field, modus_.impact_parameter(),
-                          parameters_, projectile_target_interact_[i_ens]);
+      auto event_info = fill_event_info(
+          ensembles_, E_mean_field, modus_.impact_parameter(), parameters_,
+          projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
       output->at_eventend(ensembles_[i_ens],
                           // Pretend each ensemble is an independent event
                           event_ * parameters_.n_ensembles + i_ens, event_info);

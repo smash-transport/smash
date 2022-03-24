@@ -25,6 +25,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Added
 * Light nuclei (A=3) production via 4-to-2 reactions
+* Possibility to impose transverse momentum or rapidity cut when extracting initial conditions for hydrodynamics
 
 ### Fixed
 * The `--version` option of `smash` now returns a version also when SMASH is downloaded as source package without VCS information

@@ -92,6 +92,9 @@ class ModusDefault {
   double length() const { return -1.; }
   /// \return radius of the sphere; overwritten in SphereModus
   double radius() const { return -1.; }
+  /** \return Whether the calculation frame is fixed target;
+   *  overwritten in ColliderModus */
+  bool calculation_frame_is_fixed_target() const { return false; }
   /**
    * Get the passing time of the two nuclei in a collision. This time
    * corresponds to the moment when the nuclei have just passed entirely

@@ -302,6 +302,18 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *   Proper time at which hypersurface is created \n
  *   \key Lower_Bound (double, optional, default = 0.5 fm): Lower bound for the
  *    IC proper time if \key Proper_Time is not provided.\n
+ *   \key Rapidity_Cut (double, optional, default = no cut): If set, employ a
+ *                 rapidity cut for particles contributing to the initial
+ *                 conditions for hydrodynamics. A positive value is expected
+ *                 and the cut is employed symmetrically around 0. Only
+ *                 particles characterized by
+ *                 - \key Rapidity_Cut < y < \key Rapidity_Cut are printed to
+ *                 the output file.
+ *   \key pT_Cut (double, optional, default = no cut): If set, employ a
+ *                 transverse momentum cut for particles contributing to the
+ *                 initial conditions for hydrodynamics. A positive value is
+ *                 expected. Only particles characterized by
+ *                 0 < pT < \key pT_Cut are printed to the output file.
  *   \key Extended (bool, optional, default = false, incompatible with
  *                  Oscar1999, ROOT and ASCII format):\n
  *   \li \key true - Print extended information for each particle
@@ -949,7 +961,8 @@ double calculate_mean_field_energy(
 EventInfo fill_event_info(const std::vector<Particles> &ensembles,
                           double E_mean_field, double modus_impact_parameter,
                           const ExperimentParameters &parameters,
-                          bool projectile_target_interact) {
+                          bool projectile_target_interact,
+                          bool kinematic_cut_for_SMASH_IC) {
   const QuantumNumbers current_values(ensembles);
   const double E_kinetic_total = current_values.momentum().x0();
   const double E_total = E_kinetic_total + E_mean_field;
@@ -962,7 +975,8 @@ EventInfo fill_event_info(const std::vector<Particles> &ensembles,
                        E_total,
                        parameters.testparticles,
                        parameters.n_ensembles,
-                       !projectile_target_interact};
+                       !projectile_target_interact,
+                       kinematic_cut_for_SMASH_IC};
   return event_info;
 }
 

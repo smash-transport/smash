@@ -419,7 +419,7 @@ void RootOutput::at_eventend(const Particles &particles,
   if (write_initial_conditions_) {
     // If the runtime is too short some particles might not yet have
     // reached the hypersurface. Warning is printed.
-    if (particles.size() != 0) {
+    if (particles.size() != 0 && !event.impose_kinematic_cut_for_SMASH_IC) {
       logg[LHyperSurfaceCrossing].warn(
           "End time might be too small for initial conditions output. "
           "Hypersurface has not yet been crossed by ",
