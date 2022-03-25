@@ -218,7 +218,6 @@ enum class NNbarTreatment {
 
 /**
  * Represents thermodynamic quantities that can be printed out
- * \anchor ThermodynamicQuantity
  */
 enum class ThermodynamicQuantity : char {
   EckartDensity,
