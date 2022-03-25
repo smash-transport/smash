@@ -12,9 +12,6 @@
 #include "smash/decaymodes.h"
 #include "smash/inputfunctions.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-
 namespace {
 #ifndef DOXYGEN
 namespace particles_txt {
@@ -29,9 +26,10 @@ namespace decaymodes_txt {
 namespace smash {
 
 std::pair<std::string, std::string> load_particles_and_decaymodes(
-    const char *particles_file, const char *decaymodes_file) {
+    const boost::filesystem::path &particles_file,
+    const boost::filesystem::path &decaymodes_file) {
   std::string particle_string, decay_string;
-  if (particles_file) {
+  if (!particles_file.empty()) {
     if (!boost::filesystem::exists(particles_file)) {
       std::stringstream err;
       err << "The particles file was expected at '" << particles_file
@@ -49,7 +47,7 @@ std::pair<std::string, std::string> load_particles_and_decaymodes(
     particle_string = particles_txt::data;
   }
 
-  if (decaymodes_file) {
+  if (!decaymodes_file.empty()) {
     if (!boost::filesystem::exists(decaymodes_file)) {
       std::stringstream err;
       err << "The decay modes file was expected at '" << decaymodes_file
@@ -69,8 +67,8 @@ std::pair<std::string, std::string> load_particles_and_decaymodes(
   return std::make_pair(particle_string, decay_string);
 }
 
-void load_default_particles_and_decaymodes() {
-  const auto pd = load_particles_and_decaymodes(nullptr, nullptr);
+void intialize_default_particles_and_decaymodes() {
+  const auto pd = load_particles_and_decaymodes({}, {});
   ParticleType::create_type_list(pd.first);
   DecayModes::load_decaymodes(pd.second);
   ParticleType::check_consistency();

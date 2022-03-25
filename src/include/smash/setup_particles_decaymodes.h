@@ -13,6 +13,9 @@
 #include <string>
 #include <utility>
 
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+
 namespace smash {
 /**
  * Loads particles and decaymodes from provided files
@@ -26,9 +29,10 @@ namespace smash {
  *             and decaymode files.
  */
 std::pair<std::string, std::string> load_particles_and_decaymodes(
-    const char *particles_file, const char *decaymodes_file);
+    const boost::filesystem::path &particles_file,
+    const boost::filesystem::path &decaymodes_file);
 /// Loads default smash particle list and decaymodes
-void load_default_particles_and_decaymodes();
+void intialize_default_particles_and_decaymodes();
 
 }  // namespace smash
 

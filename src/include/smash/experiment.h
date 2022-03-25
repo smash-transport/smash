@@ -142,6 +142,15 @@ class ExperimentBase {
   struct InvalidModusRequest : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
+
+  /**
+   * \ingroup exception
+   * Exception class that is thrown if the requested output path in the
+   * Experiment factory is not existing.
+   */
+  struct NonExistingOutputPathRequest : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
 };
 
 template <typename Modus>

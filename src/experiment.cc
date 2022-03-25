@@ -22,6 +22,11 @@ namespace smash {
 /* ExperimentBase carries everything that is needed for the evolution */
 ExperimentPtr ExperimentBase::create(Configuration config,
                                      const bf::path &output_path) {
+  if (!bf::exists(output_path)) {
+    throw NonExistingOutputPathRequest("The requested output path (" +
+                                       output_path.string() +
+                                       ") does not exist.");
+  }
   logg[LExperiment].trace() << SMASH_SOURCE_LOCATION;
   /*!\Userguide
    * \page input_general_ General
