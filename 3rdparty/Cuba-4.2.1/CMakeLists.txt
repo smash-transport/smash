@@ -1,4 +1,10 @@
-cmake_minimum_required(VERSION 3.1)
+# This project is added via the add_subdirectory() command
+# which creates a new scope and the CMAKE_MINIMUM_REQUIRED_VERSION
+# contains the most recent minimum required version in the current
+# variable scope or any parent variable scope. Hence, using it
+# here should imply that the same SMASH requirement is imposed.
+# Omitting the command would be equivalent in this case.
+cmake_minimum_required(VERSION ${CMAKE_MINIMUM_REQUIRED_VERSION})
 project(Cuba)
 
 include(CheckFunctionExists)
