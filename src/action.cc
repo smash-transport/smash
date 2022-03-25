@@ -488,7 +488,7 @@ void Action::check_conservation(const uint32_t id_process) const {
     if ((is_string_soft_process(process_type_)) ||
         (process_type_ == ProcessType::StringHard)) {
       logg[LAction].warn()
-          << "Conservation law violations due to Pyhtia (old vs. new)\n"
+          << "Conservation law violations due to Pyhtia\n"
           << particle_names.str() << err_msg;
       return;
     }
@@ -499,12 +499,12 @@ void Action::check_conservation(const uint32_t id_process) const {
         incoming_particles_[0].type().is_stable()) {
       logg[LAction].warn()
           << "Conservation law violations of strong interaction in weak or "
-             "e.m. decay (old vs. new)\n"
+             "e.m. decay\n"
           << particle_names.str() << err_msg;
       return;
     }
     logg[LAction].error()
-        << "Conservation law violations detected (old vs. new)\n"
+        << "Conservation law violations detected\n"
         << particle_names.str() << err_msg;
     if (id_process == ID_PROCESS_PHOTON) {
       throw std::runtime_error("Conservation laws violated in photon process");
