@@ -46,8 +46,7 @@ class EnergyMomentumTensor {
   /// Return ith component of the tensor.
   double operator[](std::size_t i) const { return Tmn_[i]; }
 
-  /*!Userguide
-   * \anchor tmn_index
+  /**
    * Access the index of component \f$ (\mu, \nu) \f$.
    * \param[in] mu \f$\mu\f$ is the row index (0 to 3)
    * \param[in] nu \f$\nu\f$ is the line index (0 to 3)

@@ -80,8 +80,7 @@ namespace smash {
  * In "Lattice_ASCII" the data entries are separated by 1 space and each line of
  * the header starts with "#", followed by the description of the entry.
  *
- * The numbers corresponding to the various thermodynamic quantities (see \ref
-   ThermodynamicQuantity) are:
+ * The numbers corresponding to the various thermodynamic quantities are:
  * -0 EckartDensity
  * -1 Tmn (energy momentum tensor in the lab frame)
  * -2 TmnLandau (energy momentum tensor in Landau's frame)
@@ -113,7 +112,8 @@ namespace smash {
     }
   }
  \endcode
- * (see \ref tmn_index for more details about the components)
+ * (see SMASH documentation of the function tmn_index for more details about the
+ * components)
  *
  *
  * In the case of densities, the data payload consists
@@ -167,8 +167,8 @@ namespace smash {
     }
   }
  \endcode
- * (see \ref current_eckart for more details about the definition of
-   the currents)
+ * (see SMASH documenttion of the function current_eckart for more details about
+ * the definition of the currents)
  * Please, note that note that all currents are given in units of
    "number of charges"; multiply the electric current by the
    elementary charge \f$\sqrt{4 \pi \alpha_{EM}} \f$ for charge units.
