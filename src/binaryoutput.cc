@@ -140,7 +140,7 @@ BinaryOutputBase::BinaryOutputBase(const bf::path &path,
   write(format_version_);                  // file format version number
   std::uint16_t format_variant = static_cast<uint16_t>(extended_);
   write(format_variant);
-  write(SMASH_VERSION_VERBOSE);
+  write(SMASH_VERSION);
 }
 
 // write functions:
@@ -327,7 +327,7 @@ void BinaryOutputInitialConditions::at_eventend(const Particles &particles,
 
   // If the runtime is too short some particles might not yet have
   // reached the hypersurface. Warning is printed.
-  if (particles.size() != 0) {
+  if (particles.size() != 0 && !event.impose_kinematic_cut_for_SMASH_IC) {
     logg[HyperSurfaceCrossing].warn(
         "End time might be too small for initial conditions output. "
         "Hypersurface has not yet been crossed by ",

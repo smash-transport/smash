@@ -129,6 +129,11 @@ class ColliderModus : public ModusDefault {
   double sqrt_s_NN() const { return sqrt_s_NN_; }
   /// \return impact parameter of the collision
   double impact_parameter() const { return impact_; }
+  /// \return Whether the calculation frame is the fixed target frame
+  bool calculation_frame_is_fixed_target() const {
+    return frame_ == CalculationFrame::FixedTarget ? true : false;
+  }
+
   /**
    * \ingroup exception
    *  Thrown when either \a projectile_ or \a target_ nuclei are empty.

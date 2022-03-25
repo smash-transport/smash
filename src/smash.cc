@@ -201,7 +201,7 @@ void print_disclaimer() {
       << "###################################################################"
       << "############"
       << "\n"
-      << " This is SMASH version: " << SMASH_VERSION_VERBOSE << "\n"
+      << " This is SMASH version: " << SMASH_VERSION << "\n"
       << " Simulating Many Accelerated Strongly-interacting Hadrons"
       << "\n"
       << "\n"
@@ -481,10 +481,16 @@ int main(int argc, char *argv[]) {
         case 'v':
           std::printf(
               "%s\n"
-              "Branch   : %s\nSystem   : %s\nCompiler : %s %s\n"
+#ifdef GIT_BRANCH
+              "Branch   : %s\n"
+#endif
+              "System   : %s\nCompiler : %s %s\n"
               "Build    : %s\nDate     : %s\n",
-              SMASH_VERSION_VERBOSE, GIT_BRANCH, CMAKE_SYSTEM,
-              CMAKE_CXX_COMPILER_ID, CMAKE_CXX_COMPILER_VERSION,
+              SMASH_VERSION,
+#ifdef GIT_BRANCH
+              GIT_BRANCH,
+#endif
+              CMAKE_SYSTEM, CMAKE_CXX_COMPILER_ID, CMAKE_CXX_COMPILER_VERSION,
               CMAKE_BUILD_TYPE, BUILD_DATE);
           std::exit(EXIT_SUCCESS);
         case 'n':
@@ -523,7 +529,7 @@ int main(int argc, char *argv[]) {
     } else {
       tabulations_path = "";
     }
-    const std::string version(SMASH_VERSION_VERBOSE);
+    const std::string version(SMASH_VERSION);
 
     if (list2n_activated) {
       /* Print only 2->n, n > 1. Do not dump decays, which can be found in
@@ -670,8 +676,10 @@ int main(int argc, char *argv[]) {
     /* Keep a copy of the configuration that was used in the output directory
      * also save information about SMASH build as a comment */
     bf::ofstream(output_path / "config.yaml")
-        << "# " << SMASH_VERSION_VERBOSE << '\n'
+        << "# " << SMASH_VERSION << '\n'
+#ifdef GIT_BRANCH
         << "# Branch   : " << GIT_BRANCH << '\n'
+#endif
         << "# System   : " << CMAKE_SYSTEM << '\n'
         << "# Compiler : " << CMAKE_CXX_COMPILER_ID << ' '
         << CMAKE_CXX_COMPILER_VERSION << '\n'

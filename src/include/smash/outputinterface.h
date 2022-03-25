@@ -54,6 +54,8 @@ struct EventInfo {
   int n_ensembles;
   /// True if no collisions happened
   bool empty_event;
+  /// Whether or not kinematic cuts are employed for SMASH IC
+  bool impose_kinematic_cut_for_SMASH_IC;
 };
 
 /**

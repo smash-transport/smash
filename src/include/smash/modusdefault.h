@@ -72,7 +72,7 @@ class ModusDefault {
   /// \return Center of mass energy per nucleon pair in ColliderModus
   double sqrt_s_NN() const { return 0.; }
   /// \return The impact parameter; overwritten in ColliderModus
-  double impact_parameter() const { return 0.0; }
+  double impact_parameter() const { return -1.; }
   /// sample impact parameter for collider modus
   void sample_impact() const {}
   /** \return The beam velocity of the projectile required in the Collider
@@ -92,6 +92,9 @@ class ModusDefault {
   double length() const { return -1.; }
   /// \return radius of the sphere; overwritten in SphereModus
   double radius() const { return -1.; }
+  /** \return Whether the calculation frame is fixed target;
+   *  overwritten in ColliderModus */
+  bool calculation_frame_is_fixed_target() const { return false; }
   /**
    * Get the passing time of the two nuclei in a collision. This time
    * corresponds to the moment when the nuclei have just passed entirely
