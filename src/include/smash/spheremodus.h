@@ -127,6 +127,12 @@ class SphereModus : public ModusDefault {
    */
   const SphereInitialCondition init_distr_;
   /**
+   * Wether to add a constant radial velocity profile to the momenta of the
+   * particles in the sphere. The underlying velocity field has the form
+   * u = u_0 * r / R.
+   */
+  const double radial_velocity_;
+  /**
    * Whether to insert a single high energy particle at the center of the
    * expanding sphere (0,0,0). This particle will initially be moving along the
    * x axis, outwards from the sphere.
