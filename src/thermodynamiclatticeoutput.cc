@@ -167,7 +167,8 @@ namespace smash {
     }
   }
  \endcode
- * (see SMASH documentation of the function current_eckart for more details about
+ * (see SMASH documentation of the function current_eckart for more details
+ * about
  * the definition of the currents)
  * Please, note that note that all currents are given in units of
    "number of charges"; multiply the electric current by the
