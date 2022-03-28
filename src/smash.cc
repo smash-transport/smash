@@ -527,8 +527,8 @@ int main(int argc, char *argv[]) {
     if (cache_integrals) {
       tabulations_path =
           output_path.has_parent_path()
-              ? output_path.parent_path().string() + "/tabulations"
-              : "./tabulations";
+              ? output_path.parent_path().string() : ".";
+      tabulations_path += "/tabulations";
     } else {
       tabulations_path = "";
     }
