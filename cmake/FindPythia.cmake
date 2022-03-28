@@ -91,9 +91,9 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Pythia
 
 # display some status information
 IF(Pythia_FOUND)
-    MESSAGE(STATUS "** Pythia 8 library: ${Pythia_LIBRARIES}")
-    MESSAGE(STATUS "** Pythia 8 include: ${Pythia_INCLUDE_DIRS}")
-    MESSAGE(STATUS "** Pythia 8 xmldoc:  ${Pythia_xmldoc_PATH}")
+    MESSAGE(STATUS "Pythia 8 library: ${Pythia_LIBRARIES}")
+    MESSAGE(STATUS "Pythia 8 include: ${Pythia_INCLUDE_DIRS}")
+    MESSAGE(STATUS "Pythia 8 xmldoc:  ${Pythia_xmldoc_PATH}")
 ENDIF()
 
 # the variables listed here will only show up in the GUI (ccmake) in the "advanced" view
