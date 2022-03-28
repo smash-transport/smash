@@ -104,7 +104,7 @@ ICOutput::ICOutput(const bf::path &path, const std::string &name,
   std::fprintf(
       file_.get(),
       "# %s initial conditions: hypersurface of constant proper time\n",
-      VERSION_MAJOR);
+      SMASH_VERSION);
   std::fprintf(file_.get(), "# tau x y eta mt px py Rap pdg charge\n");
   std::fprintf(file_.get(), "# fm fm fm none GeV GeV GeV none none e\n");
 }
@@ -117,12 +117,12 @@ void ICOutput::at_eventstart(const Particles &, const int event_number,
 }
 
 void ICOutput::at_eventend(const Particles &particles, const int event_number,
-                           const EventInfo &) {
+                           const EventInfo &event) {
   std::fprintf(file_.get(), "# event %i end\n", event_number);
 
   // If the runtime is too short some particles might not yet have
   // reached the hypersurface. Warning is printed.
-  if (particles.size() != 0) {
+  if (particles.size() != 0 && !event.impose_kinematic_cut_for_SMASH_IC) {
     logg[LHyperSurfaceCrossing].warn(
         "End time might be too small for initial conditions output. "
         "Hypersurface has not yet been crossed by ",

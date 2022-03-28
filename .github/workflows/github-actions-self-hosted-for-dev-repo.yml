@@ -5,10 +5,11 @@ on:
   push:
     branches:
       - master
+      - release*
   pull_request:
     branches:
       - master
-      - develop
+      - release*
 
 jobs:
   workflow-gsi:

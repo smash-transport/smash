@@ -199,7 +199,7 @@ void print_disclaimer() {
       << "###################################################################"
       << "############"
       << "\n"
-      << " This is SMASH version: " << VERSION_MAJOR << "\n"
+      << " This is SMASH version: " << SMASH_VERSION << "\n"
       << " Simulating Many Accelerated Strongly-interacting Hadrons"
       << "\n"
       << "\n"
@@ -496,10 +496,17 @@ int main(int argc, char *argv[]) {
         case 'v':
           std::printf(
               "%s\n"
-              "Branch   : %s\nSystem   : %s\nCompiler : %s %s\n"
+#ifdef GIT_BRANCH
+              "Branch   : %s\n"
+#endif
+              "System   : %s\nCompiler : %s %s\n"
               "Build    : %s\nDate     : %s\n",
-              VERSION_MAJOR, GIT_BRANCH, CMAKE_SYSTEM, CMAKE_CXX_COMPILER_ID,
-              CMAKE_CXX_COMPILER_VERSION, CMAKE_BUILD_TYPE, BUILD_DATE);
+              SMASH_VERSION,
+#ifdef GIT_BRANCH
+              GIT_BRANCH,
+#endif
+              CMAKE_SYSTEM, CMAKE_CXX_COMPILER_ID, CMAKE_CXX_COMPILER_VERSION,
+              CMAKE_BUILD_TYPE, BUILD_DATE);
           std::exit(EXIT_SUCCESS);
         case 'n':
           cache_integrals = false;
@@ -572,7 +579,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Calculate a hash of the SMASH version, the particles and decaymodes.
-    const std::string version(VERSION_MAJOR);
+    const std::string version(SMASH_VERSION);
     const std::string particle_string = configuration["particles"].to_string();
     const std::string decay_string = configuration["decaymodes"].to_string();
     sha256::Context hash_context;
@@ -733,8 +740,10 @@ int main(int argc, char *argv[]) {
     /* Keep a copy of the configuration that was used in the output directory
      * also save information about SMASH build as a comment */
     bf::ofstream(output_path / "config.yaml")
-        << "# " << VERSION_MAJOR << '\n'
+        << "# " << SMASH_VERSION << '\n'
+#ifdef GIT_BRANCH
         << "# Branch   : " << GIT_BRANCH << '\n'
+#endif
         << "# System   : " << CMAKE_SYSTEM << '\n'
         << "# Compiler : " << CMAKE_CXX_COMPILER_ID << ' '
         << CMAKE_CXX_COMPILER_VERSION << '\n'

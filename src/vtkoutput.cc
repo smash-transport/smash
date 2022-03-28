@@ -96,7 +96,7 @@ void VtkOutput::write(const Particles &particles) {
   /* Legacy VTK file format */
   std::fprintf(file_.get(), "# vtk DataFile Version 2.0\n");
   std::fprintf(file_.get(), "Generated from molecular-offset data %s\n",
-               VERSION_MAJOR);
+               SMASH_VERSION);
   std::fprintf(file_.get(), "ASCII\n");
 
   /* Unstructured data sets are composed of points, lines, polygons, .. */

@@ -85,7 +85,7 @@ TEST(vtkoutputfile) {
       std::string output_header = "";
       std::string header =
           "# vtk DataFile Version 2.0\n"
-          "Generated from molecular-offset data " VERSION_MAJOR
+          "Generated from molecular-offset data " SMASH_VERSION
           "\n"
           "ASCII\n"
           "DATASET UNSTRUCTURED_GRID\n";

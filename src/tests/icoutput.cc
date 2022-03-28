@@ -95,7 +95,7 @@ TEST(particlelist_format) {
       /* Check header */
       std::string output_header = "";
       std::string header =
-          "# " VERSION_MAJOR
+          "# " SMASH_VERSION
           " initial conditions: hypersurface of constant proper time\n"
           "# tau x y eta mt px py Rap pdg charge\n"
           "# fm fm fm none GeV GeV GeV none none e\n"

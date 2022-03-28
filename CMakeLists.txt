@@ -7,16 +7,16 @@
 #
 #########################################################
 
-# The name of our project
-project(smash CXX)
+# Minimum cmake version this is tested on
+cmake_minimum_required(VERSION 3.9)
+
+# The name, version and language of our project
+project(SMASH VERSION 2.1.4 LANGUAGES CXX)
 
 # Fail if cmake is called in the source directory
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
    message(FATAL_ERROR "You don't want to configure in the source directory!")
 endif()
-
-# Minimum cmake version this is tested on
-cmake_minimum_required(VERSION 3.1)
 
 if(NOT "${CMAKE_CXX_STANDARD}")
   set(CMAKE_CXX_STANDARD 11)
@@ -44,6 +44,15 @@ include(TestBigEndian)
 TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
 if(IS_BIG_ENDIAN)
     message(STATUS "Big endian architecture detected.")
+    option(FORCE_USE_ON_BIG_ENDIAN "Force cmake to setup and compile on big endian machine." OFF)
+    if(NOT FORCE_USE_ON_BIG_ENDIAN)
+        message(FATAL_ERROR " \n" # See e.g. https://stackoverflow.com/a/51035045 for formatting
+                            " Using SMASH on big endian machines is not officially supported.\n"
+                            " Please, open an issue at https://github.com/smash-transport/smash/issues\n"
+                            " if you are interested in SMASH team supporting big endian architectures.\n"
+                            " At your own risk you can pass -DFORCE_USE_ON_BIG_ENDIAN=TRUE to cmake in\n"
+                            " order to setup and compile SMASH on a big endian machine.")
+    endif()
     add_definitions("-DBIG_ENDIAN_ARCHITECTURE")
 else()
     message(STATUS "Little endian architecture detected.")

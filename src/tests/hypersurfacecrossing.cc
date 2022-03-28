@@ -42,9 +42,9 @@ TEST(hypersurface_crossing_action) {
 
   ParticleList part_list = particles.copy_to_vector();
 
-  // create finder at tau = 0.5fm
+  // create finder at tau = 0.5fm without rapidity or pT cut
   double proper_time = 0.5;
-  HyperSurfaceCrossActionsFinder finder(proper_time);
+  HyperSurfaceCrossActionsFinder finder(proper_time, 0.0, 0.0);
 
   // no grid means no grid cell volume
   const double grid_cell_vol = 0.0;

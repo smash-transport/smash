@@ -230,7 +230,7 @@ TEST(fullhistory_format) {
 
     COMPARE(magic, "SMSH");
     COMPARE(format_version_number, current_format_version);
-    COMPARE(smash_version, VERSION_MAJOR);
+    COMPARE(smash_version, SMASH_VERSION);
 
     // particles at event start: expect two smashons
     VERIFY(compare_particles_block_header(2, binF));
@@ -318,7 +318,7 @@ TEST(particles_format) {
 
     COMPARE(magic, "SMSH");
     COMPARE(format_version_number, current_format_version);
-    COMPARE(smash_version, VERSION_MAJOR);
+    COMPARE(smash_version, SMASH_VERSION);
 
     int npart;
     // particles at event start: expect two smashons
@@ -416,7 +416,7 @@ TEST(extended) {
     COMPARE(magic, "SMSH");
     COMPARE(static_cast<int>(format_version_number), current_format_version);
     COMPARE(extended_version, 1);
-    COMPARE(smash_version, VERSION_MAJOR);
+    COMPARE(smash_version, SMASH_VERSION);
 
     // particles at event atart: expect two smashons
     VERIFY(compare_particles_block_header(2, binF));
@@ -503,7 +503,7 @@ TEST(initial_conditions_format) {
 
     COMPARE(magic, "SMSH");
     COMPARE(format_version_number, current_format_version);
-    COMPARE(smash_version, VERSION_MAJOR);
+    COMPARE(smash_version, SMASH_VERSION);
 
     int npart = 1;  // expect one particle in output
 
