@@ -79,6 +79,9 @@ class DecayType {
   virtual double in_width(double m0, double G0, double m, double m1,
                           double m2) const = 0;
 
+  /// \return whether the decay is a dilepton decay (most decays are hadronic)
+  virtual bool is_dilepton_decay() const { return false; }
+
  protected:
   /// final-state particles of the decay
   ParticleTypePtrList particle_types_;
@@ -278,6 +281,7 @@ class TwoBodyDecayDilepton : public TwoBodyDecayStable {
   TwoBodyDecayDilepton(ParticleTypePtrList part_types, int l);
 
   double width(double m0, double G0, double m) const override;
+  bool is_dilepton_decay() const override { return true; }
 };
 
 /**
@@ -342,6 +346,8 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
                            double m_other, ParticleTypePtr other,
                            ParticleTypePtr t);
   double width(double m0, double G0, double m) const override;
+
+  bool is_dilepton_decay() const override { return true; }
 
  protected:
   /// Tabulation of the resonance integrals.

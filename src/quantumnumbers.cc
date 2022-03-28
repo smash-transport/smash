@@ -20,7 +20,6 @@ std::string QuantumNumbers::report_deviations(const QuantumNumbers& rhs) const {
     return "";
   }
   std::stringstream error_msg;
-  error_msg << "Conservation law violations detected (old vs. new)\n";
   if (momentum_ != rhs.momentum_) {
     error_msg << "Deviation in Four-Momentum:\n" << std::scientific;
   }

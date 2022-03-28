@@ -67,6 +67,15 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  * Adding an additional contribution to them will therefore lead to unphysical
  * results and is only meant for explorative studies.
  *
+ * \key Include_Weak_And_EM_Decays_At_The_End (bool, optional, default = \key
+ * false) \n
+ * Enable to also perform weak and electro-magnetic decays at the end of the
+ * simulation. If enabled all decays in decaymodes.txt are considered at the
+ * end, even for hadrons usually considered stable (i.e. with an on-shell
+ * width larger than the width_cutoff), for example Σ, π or η. Note that for
+ * isospin violating decay modes allpossible isospin combination have to be
+ * manually specficfied in the decaymodes.txt file.
+ *
  * \key Elastic_NN_Cutoff_Sqrts (double, optional, default = 1.98): \n
  * The elastic collisions betwen two nucleons with sqrt_s below
  * Elastic_NN_Cutoff_Sqrts, in GeV, cannot happen. \n

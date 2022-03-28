@@ -453,29 +453,15 @@ void ParticleType::check_consistency() {
 
 bool ParticleType::wanted_decaymode(const DecayType &t,
                                     WhichDecaymodes wh) const {
-  const auto FinalTypes = t.particle_types();
   switch (wh) {
     case WhichDecaymodes::All: {
       return true;
     }
     case WhichDecaymodes::Hadronic: {
-      // No dileptons in final state particles for 2 or 3-body decays
-      return (
-          (t.particle_number() == 2 &&
-           !(is_dilepton(FinalTypes[0]->pdgcode(),
-                         FinalTypes[1]->pdgcode()))) ||
-          (t.particle_number() == 3 &&
-           !(has_lepton_pair(FinalTypes[0]->pdgcode(), FinalTypes[1]->pdgcode(),
-                             FinalTypes[2]->pdgcode()))));
+      return !t.is_dilepton_decay();
     }
     case WhichDecaymodes::Dileptons: {
-      // Lepton pair in final state particles for 2 or 3-body decays
-      return (
-          (t.particle_number() == 2 &&
-           is_dilepton(FinalTypes[0]->pdgcode(), FinalTypes[1]->pdgcode())) ||
-          (t.particle_number() == 3 &&
-           has_lepton_pair(FinalTypes[0]->pdgcode(), FinalTypes[1]->pdgcode(),
-                           FinalTypes[2]->pdgcode())));
+      return t.is_dilepton_decay();
     }
     default:
       throw std::runtime_error(
@@ -487,10 +473,6 @@ DecayBranchList ParticleType::get_partial_widths(const FourVector p,
                                                  const ThreeVector x,
                                                  WhichDecaymodes wh) const {
   const auto &decay_mode_list = decay_modes().decay_mode_list();
-  if (decay_mode_list.size() == 0 ||
-      (wh == WhichDecaymodes::Hadronic && is_stable())) {
-    return {};
-  }
   /* Determine whether the decay is affected by the potentials. If it's
    * affected, read the values of the potentials at the position of the
    * particle */
