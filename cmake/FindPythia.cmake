@@ -71,17 +71,6 @@ if(Pythia_INCLUDE_DIR AND Pythia_XMLDOC_DIR)
     set(Pythia_VERSION_MAJOR ${CMAKE_MATCH_1})
     set(Pythia_VERSION_MINOR ${CMAKE_MATCH_2})
     set(Pythia_VERSION ${Pythia_VERSION_MAJOR}.${Pythia_VERSION_MINOR})
-    if(NOT(${Pythia_VERSION} VERSION_EQUAL ${Pythia_FIND_VERSION}))
-         MESSAGE(STATUS "** WRONG Pythia version: ${Pythia_VERSION},"
-                        " required ${Pythia_FIND_VERSION}." )
-         set(Pythia_VERSION_OK FALSE)
-         set(Pythia_FOUND FALSE)
-    else()
-         MESSAGE(STATUS "** Pythia version ok: ${Pythia_VERSION},"
-                        " required ${Pythia_FIND_VERSION}.")
-         set(Pythia_VERSION_OK TRUE)
-         set(Pythia_FOUND TRUE)
-    endif()
 else()
     set(Pythia_FOUND FALSE)
 endif()
@@ -91,7 +80,14 @@ SET(Pythia_xmldoc_PATH   ${Pythia_XMLDOC_DIR})
 
 # handle the QUIETLY and REQUIRED arguments
 INCLUDE(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS( Pythia DEFAULT_MSG Pythia_LIBRARY Pythia_INCLUDE_DIR Pythia_xmldoc_PATH)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(Pythia
+  REQUIRED_VARS
+    Pythia_LIBRARY
+    Pythia_INCLUDE_DIRS
+    Pythia_xmldoc_PATH
+  VERSION_VAR
+    Pythia_VERSION
+)
 
 # display some status information
 IF(Pythia_FOUND)
