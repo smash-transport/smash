@@ -582,8 +582,6 @@ bool StringProcess::next_NDiffHard() {
     }
   }
 
-  // Else just pick the existing and initialized entry and go on
-  // Initialize Pythias random number generator using SMASHs seed
   const int seed_new = random::uniform_int(1, maximum_rndm_seed_in_pythia);
   hard_map_[idAB]->rndm.init(seed_new);
   logg[LPythia].debug("hard_map_[", idAB.first, "][", idAB.second,
@@ -594,7 +592,9 @@ bool StringProcess::next_NDiffHard() {
   // Short notation for Pythia event
   Pythia8::Event &event_hadron = pythia_hadron_->event;
   logg[LPythia].debug("Pythia hard event created");
-  bool final_state_success = hard_map_[idAB]->next(sqrtsAB_);
+  // we update the collision energy in the CM frame
+  hard_map_[idAB]->setKinematics(sqrtsAB_);
+  bool final_state_success = hard_map_[idAB]->next();
   logg[LPythia].debug("Pythia final state computed, success = ",
                       final_state_success);
   if (!final_state_success) {
