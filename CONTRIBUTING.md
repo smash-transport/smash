@@ -517,9 +517,13 @@ have to be mentioned.
 In general, the usage of third party codes is discouraged. If there is a scientific necessity
 or a major performance gain or time saving by using third party libraries, they can be linked
 to SMASH. For the common ones, a description on how to install them in the README file
-is sufficient whereas for the less common ones, including them in the thirdparty folder and
+is sufficient whereas for the less common ones, including them in the **_3rdparty_** folder and
 shipping them with SMASH is the better solution. Of course, this involves ensuring the proper
 copyright.
+
+Some third-party libraries are already shipped within SMASH. More information about them and,
+in particular, instruction about how to update them can be found in the README file in the
+**_3rdparty_** folder.
 
 ## Profiling and Benchmarking
 
