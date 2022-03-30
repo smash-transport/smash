@@ -184,6 +184,8 @@ SphereModus::SphereModus(Configuration modus_config,
       init_distr_(
           modus_config.take({"Sphere", "Initial_Condition"},
                             SphereInitialCondition::ThermalMomentaBoltzmann)),
+      radial_velocity_(
+          modus_config.take({"Sphere", "Add_Radial_Velocity"}, -1.)),
       insert_jet_(modus_config.has_value({"Sphere", "Jet", "Jet_PDG"})),
       jet_pdg_(insert_jet_ ? modus_config.take({"Sphere", "Jet", "Jet_PDG"})
                                  .convert_for(jet_pdg_)
@@ -327,6 +329,23 @@ double SphereModus::initial_conditions(Particles *particles,
         FourVector(start_time_, pos_phitheta.threevec() * position_radial));
     data.set_formation_time(start_time_);
   }
+
+  /* boost in radial direction with an underlying velocity field of the form u_r
+   * = u_0 * r / R */
+  if (radial_velocity_ > 0.0) {
+    if (radial_velocity_ > 1.0) {
+      throw std::invalid_argument(
+          "Additional velocity cannot be greater than 1!");
+    }
+    for (ParticleData &data : *particles) {
+      double particle_radius = std::sqrt(data.position().sqr3());
+      auto e_r = data.position().threevec() / particle_radius;
+      auto radial_velocity = radial_velocity_ * e_r * particle_radius / radius_;
+      data.set_4momentum(data.momentum().lorentz_boost(radial_velocity));
+      momentum_total += data.momentum();
+    }
+  }
+
   /* Make total 3-momentum 0 */
   for (ParticleData &data : *particles) {
     data.set_4momentum(data.momentum().abs(),
