@@ -120,19 +120,22 @@ static constexpr int LCollider = LogArea::Collider::id;
  * \li \key Diffusiveness (double, optional,
  * default = (0.545 for A <= 16; 0.54 for A > 16)): \n
  * Diffusiveness of the Woods Saxon distribution for the nucleus in fm.
- * For copper, zirconium, ruthenium, gold, lead and uranium, a more specific
+ * For copper, zirconium, ruthenium, gold, lead, Xenon and uranium, a more
+ specific
  * default value is used.
  *
  * \li \key Radius (double, optional, default = 1.2 * A^(1/3) for A <=
  * 16, else 1.12 * A^(1/3) - 0.86 * A^(-1/3)): \n
  * Radius of nucleus in fm.
- * For copper, zirconium, ruthenium, gold, lead and uranium, a more specific
+ * For copper, zirconium, ruthenium, gold, lead, Xenon and uranium, a more
+ specific
  * default value is used.
  *
- * \li \key Saturation_Density (double, optional, default = 0.168): \n
- * Saturation density of the nucleus in 1/fm^3.
- * For copper, zirconium, ruthenium, gold, lead and uranium, a more specific
- * default value is used.
+ * \li \key Saturation_Density (double, optional, default: \f$\int d^3r \rho(r)
+ = N_{nucleons}\f$): \n
+ * Saturation density of the nucleus in 1/fm^3. If not any value is specified,
+ * the saturation density is calculated such that the integral over the
+ * Woods-Saxon distribution returns the number of nucleons in the nucleus.
  *
  * - Possible incident energies when given per beam:
  *
