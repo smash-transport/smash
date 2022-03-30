@@ -265,10 +265,6 @@ class Nucleus {
     using std::length_error::length_error;
   };
 
-  /// Saturation density of this nucleus.
-  // Needed as public member for inheritance to deforormed nuclei
-  double saturation_density_ = nuclear_density;
-
  private:
   /**
    * Diffusiveness of Woods-Saxon distribution of this nucleus in fm
@@ -288,6 +284,10 @@ class Nucleus {
  protected:
   /// Particles associated with this nucleus.
   std::vector<ParticleData> particles_;
+
+  /// Saturation density of this nucleus.
+  // Needed as public member for inheritance to deformed nuclei
+  double saturation_density_ = nuclear_density;
 
   /**
    * Randomly generate Euler angles. Necessary for rotation of deformed and

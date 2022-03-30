@@ -43,7 +43,7 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
     set_saturation_density(calculate_saturation_density());
   } else {
     throw std::invalid_argument(
-        "Diffussiveness, Radius and Saturation_Density "
+        "Diffusiveness, Radius and Saturation_Density "
         "required to manually configure the Woods-Saxon"
         " distribution. Only one/two were provided. \n"
         "Providing none of the above mentioned "
