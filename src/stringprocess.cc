@@ -3046,7 +3046,6 @@ bool StringProcess::remake_kinematics_fragments(
   event_fragments[0].p(pvec_string_now);
   event_fragments[0].m(pvec_string_now.mCalc());
 
-  int n_frag = 0;
   // Sum of transverse masses of all fragmented hadrons.
   double mTrn_frag_all = 0.;
   for (int ipyth = 1; ipyth < event_fragments.size(); ipyth++) {
@@ -3054,7 +3053,6 @@ bool StringProcess::remake_kinematics_fragments(
       continue;
     }
 
-    n_frag += 1;
     FourVector p_frag =
         FourVector(event_fragments[ipyth].e(), event_fragments[ipyth].px(),
                    event_fragments[ipyth].py(), event_fragments[ipyth].pz());
