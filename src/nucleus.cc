@@ -282,78 +282,58 @@ void Nucleus::arrange_nucleons() {
 void Nucleus::set_parameters_automatic() {
   int A = Nucleus::number_of_particles();
   int Z = Nucleus::number_of_protons();
-  switch (A) {
-    case 1:  // single particle
-      /* In case of testparticles, an infinite reaction loop will be
-       * avoided by a small finite spread according to a single particles
-       * 'nucleus'. The proper solution will be to introduce parallel
-       * ensembles. */
-      set_nuclear_radius(testparticles_ == 1
-                             ? 0.
-                             : 1. - std::exp(-(testparticles_ - 1.) * 0.1));
-      set_diffusiveness(testparticles_ == 1 ? -1. : 0.02);
-      break;
-    case 238:  // Uranium
+  if (A == 1) {  // single particle
+    /* In case of testparticles, an infinite reaction loop will be
+     * avoided by a small finite spread according to a single particles
+     * 'nucleus'. The proper solution will be to introduce parallel
+     * ensembles. */
+    set_nuclear_radius(
+        testparticles_ == 1 ? 0. : 1. - std::exp(-(testparticles_ - 1.) * 0.1));
+    set_diffusiveness(testparticles_ == 1 ? -1. : 0.02);
+  } else if ((A == 238) && (Z == 92)) {  // Uranium
+    // Default values.
+    set_diffusiveness(0.556);
+    set_nuclear_radius(6.86);
+  } else if ((A == 208) && (Z == 82)) {  // Lead
+    // Default values.
+    set_diffusiveness(0.54);
+    set_nuclear_radius(6.67);
+  } else if ((A == 197) && (Z == 79)) {  // Gold
+    // Default values.
+    set_diffusiveness(0.535);
+    set_nuclear_radius(6.38);
+  } else if ((A == 129) && (Z == 54)) {  // Xenon
+    // Default values.
+    set_diffusiveness(0.59);
+    set_nuclear_radius(5.36);
+  } else if ((A == 63) && (Z == 29)) {  // Copper
+    // Default values.
+    set_diffusiveness(0.5977);
+    set_nuclear_radius(4.20641);
+  } else if (A == 96) {
+    if (Z == 40) {  // Zirconium
       // Default values.
-      if (Z == 92) {
-        set_diffusiveness(0.556);
-        set_nuclear_radius(6.86);
-      }
-      break;
-    case 208:  // Lead
+      set_diffusiveness(0.46);
+      set_nuclear_radius(5.02);
+    } else if (Z == 44) {  // Ruthenium
       // Default values.
-      if (Z == 82) {
-        set_diffusiveness(0.54);
-        set_nuclear_radius(6.67);
-      }
-      break;
-    case 197:  // Gold
-      // Default values.
-      if (Z == 79) {
-        set_diffusiveness(0.535);
-        set_nuclear_radius(6.38);
-      }
-      break;
-    case 129:  // Xenon
-      // Default values.
-      if (Z == 54) {
-        set_diffusiveness(0.59);
-        set_nuclear_radius(5.36);
-      }
-      break;
-    case 63:  // Copper
-      // Default values.
-      if (Z == 29) {
-        set_diffusiveness(0.5977);
-        set_nuclear_radius(4.20641);
-      }
-      break;
-    case 96:
-      if (Z == 40) {  // Zirconium
-        // Default values.
-        set_diffusiveness(0.46);
-        set_nuclear_radius(5.02);
-      } else if (Z == 44) {  // Ruthenium
-        // Default values.
-        set_diffusiveness(0.46);
-        set_nuclear_radius(5.085);
-      } else {
-        // radius and diffusiveness taken from \iref{Rybczynski:2013yba}
-        set_diffusiveness(0.54);
-        set_nuclear_radius(1.12 * std::pow(A, 1.0 / 3.0) -
-                           0.86 * std::pow(A, -1.0 / 3.0));
-      }
-      break;
-
-    default:
-      // saturation density already has reasonable default
-      set_nuclear_radius(default_nuclear_radius());
-      if (A <= 16) {
-        set_diffusiveness(0.545);
-      } else {
-        // diffusiveness taken from \iref{Rybczynski:2013yba}
-        set_diffusiveness(0.54);
-      }
+      set_diffusiveness(0.46);
+      set_nuclear_radius(5.085);
+    } else {
+      // radius and diffusiveness taken from \iref{Rybczynski:2013yba}
+      set_diffusiveness(0.54);
+      set_nuclear_radius(1.12 * std::pow(A, 1.0 / 3.0) -
+                         0.86 * std::pow(A, -1.0 / 3.0));
+    }
+  } else {
+    // saturation density already has reasonable default
+    set_nuclear_radius(default_nuclear_radius());
+    if (A <= 16) {
+      set_diffusiveness(0.545);
+    } else {
+      // diffusiveness taken from \iref{Rybczynski:2013yba}
+      set_diffusiveness(0.54);
+    }
   }
 }
 
