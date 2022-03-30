@@ -292,6 +292,19 @@ enum class ThermalizationAlgorithm {
   UnbiasedBF,
 };
 
+/**
+ * Defines how the number of events is determined. For FixedNumber the
+ * desired number of events is simulated disregarding of wether an
+ * interaction took place. For MinimumNonEmpty Events will be simulated
+ * until there are at least a given number of ensembles in which an interaction
+ * took place.
+ */
+enum class EventCounting {
+  FixedNumber,
+  MinimumNonEmpty,
+  Invalid,
+};
+
 /// @cond
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;

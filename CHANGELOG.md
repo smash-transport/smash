@@ -21,6 +21,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## Unreleased
 
 ### Input / Output
+* Added Option Minimum_Nonempty_Ensembles to define a minimum number of Ensembles in which interactions took place
 * Added `HepMC_treeroot` output
 * Add option to `Include_Weak_And_EM_Decays_At_The_End`
 
