@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020
+ *    Copyright (c) 2014-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,6 +12,7 @@
 #include "smash/constants.h"
 #include "smash/cxx14compat.h"
 #include "smash/decayaction.h"
+#include "smash/decaymodes.h"
 #include "smash/fourvector.h"
 #include "smash/random.h"
 
@@ -73,9 +74,14 @@ ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
   ActionList actions;
 
   for (const auto &p : search_list) {
-    if (p.type().is_stable()) {
-      continue;  // particle doesn't decay
+    if (!do_final_weak_decays_ && p.type().is_stable()) {
+      continue;  // particle is stable with respect to strong interaction
     }
+
+    if (p.type().decay_modes().is_empty()) {
+      continue;  // particle cannot decay (not even e.m. or weakly)
+    }
+
     auto act = make_unique<DecayAction>(p, 0.);
     act->add_decays(p.type().get_partial_widths(
         p.momentum(), p.position().threevec(), WhichDecaymodes::All));

@@ -32,7 +32,7 @@ set(SMASH_LIBRARIES ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY} ${Boost_LIBRARIES} ${Pyt
 set(SMASH_INCLUDE_DIR
    $ENV{SMASH_DIR}/3rdparty/Cuba-4.2.1
    $ENV{SMASH_DIR}/3rdparty/einhard
-   $ENV{SMASH_DIR}/3rdparty/yaml-cpp-0.6.2/include
+   $ENV{SMASH_DIR}/3rdparty/yaml-cpp-0.7.0/include
    $ENV{SMASH_DIR}/build/src/include
    $ENV{SMASH_DIR}/src/include
    ${GSL_INCLUDE_DIR}
@@ -44,7 +44,7 @@ set(SMASH_INCLUDE_DIR
 message(STATUS "SMASH includes found in ${SMASH_INCLUDE_DIR}")
 find_library(SMASH_LIBRARY        NAMES smash     PATHS $ENV{SMASH_DIR}/build/src)
 find_library(EINHARD_LIBRARY      NAMES einhard   PATHS $ENV{SMASH_DIR}/build/3rdparty/einhard)
-find_library(CPPYAML_LIBRARY      NAMES yaml-cpp  PATHS $ENV{SMASH_DIR}/build/3rdparty/yaml-cpp-0.6.2)
+find_library(CPPYAML_LIBRARY      NAMES yaml-cpp  PATHS $ENV{SMASH_DIR}/build/3rdparty/yaml-cpp-0.7.0)
 find_library(INTEGRATION_LIBRARY  NAMES cuhre     PATHS $ENV{SMASH_DIR}/build/3rdparty/Cuba-4.2.1/src/cuhre)
 set(SMASH_LIBRARIES ${SMASH_LIBRARIES}
    ${EINHARD_LIBRARY}

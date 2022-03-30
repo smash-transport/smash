@@ -8,11 +8,11 @@
 
 #################### non-strange mesons ####################
 
-π
+π  # decays disabled by default, enable weak and e.m. decays
 0.98823 1 γ γ
-# 0.01174 0  e⁻ e⁺ γ
+0.01174 0  e⁻ e⁺ γ
 
-η
+η  # decays disabled by default, enable weak and e.m. decays
 0.394   1  γ γ         # 39.41 +- 0.20 %
 0.327   0  π⁰ π⁰ π⁰    # 32.68 +- 0.23 %
 0.229   0  π⁺ π⁻ π⁰    # 22.92 +- 0.28 %
@@ -669,6 +669,12 @@ N(2250)
 
 #################### Σ baryons ####################
 
+Σ  # decays disabled by default, enable weak and e.m. decays
+1.     0  Λ γ
+0.4836 1  N⁰ π⁺  # this + following decays iso-spin specfic,
+0.5164 1  N⁺ π⁰  # since only possible for charged Σ
+1.     1  N⁰ π⁻
+
 Σ(1385)  # 1(1.5+)
 0.870  1      Λ π
 0.117  1      Σ π
@@ -822,6 +828,10 @@ N(2250)
 
 #################### Ξ baryons ####################
 
+Ξ  # decays disabled by default, enable weak and e.m. decays
+1.0   1  Λ π⁰
+1.0   1  Λ π⁻
+
 Ξ(1530)  # 0.5(1.5+)
 1.      1   Ξ π
 
@@ -850,6 +860,11 @@ N(2250)
 #0.00    1   Σ K̅ π      # small
 
 ########## Ω baryons ###################
+
+Ω  # decays disabled by default, enable weak and e.m. decays
+0.678   1  Λ K̅⁻
+0.236   1  Ξ⁰ π⁻
+0.086   1  Ξ⁻ π⁰
 
 Ω(2250)  # 0(? ?)
 1.      3   Ξ(1530) K̅  # >0

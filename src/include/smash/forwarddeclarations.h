@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2021
+ *    Copyright (c) 2014-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -216,9 +216,8 @@ enum class NNbarTreatment {
   Strings,
 };
 
-/*!\Userguide
+/**
  * Represents thermodynamic quantities that can be printed out
- * \anchor ThermodynamicQuantity
  */
 enum class ThermodynamicQuantity : char {
   EckartDensity,

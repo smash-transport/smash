@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2021
+ *    Copyright (c) 2013-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -164,6 +164,9 @@ struct ExperimentParameters {
    * (true) or also spectators (false, default value).
    */
   bool only_participants;
+
+  /// Do weak decays at the end
+  bool do_weak_decays;
 };
 
 }  // namespace smash

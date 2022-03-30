@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2021
+ *    Copyright (c) 2014-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -278,6 +278,8 @@ namespace smash {
  *
  * Note that SMASH has an internal width cut-off (currently 10 keV), below which
  * particles cannot decay, even if decays are specified in `decaymodes.txt`.
+ * This only changes when Include_Weak_And_EM_Decays_At_The_End is enabled, then
+ * all decays are considered in the final decays, no matter their decay width .
  *
  * Note further, that the decaymodes file will need to be modified when running
  * a box simulation in which detailed balance is expected to be conserved. See

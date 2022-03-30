@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2021
+ *    Copyright (c) 2013-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -218,8 +218,7 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
     const ThreeVector &r, const FourVector &p, const double m_inv,
     const DensityParameters &dens_par, const bool compute_gradient = false);
 
-/*!\Userguide
- * \anchor current_eckart
+/**
  * Calculates Eckart rest frame density and 4-current of a given density type
  * and optionally the gradient of the density in an arbitary frame (grad j0),
  * the curl of the 3-current, and the time, x, y, and z derivatives of the

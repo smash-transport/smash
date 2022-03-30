@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2021
+ *    Copyright (c) 2013-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -140,6 +140,15 @@ class ExperimentBase {
    * Experiment factory.
    */
   struct InvalidModusRequest : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
+
+  /**
+   * \ingroup exception
+   * Exception class that is thrown if the requested output path in the
+   * Experiment factory is not existing.
+   */
+  struct NonExistingOutputPathRequest : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
   };
 };
@@ -1047,8 +1056,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           "inelastically (e.g. resonance chains), else SMASH is known to "
           "hang.");
     }
-    action_finders_.emplace_back(
-        make_unique<DecayActionsFinder>(parameters_.res_lifetime_factor));
+    action_finders_.emplace_back(make_unique<DecayActionsFinder>(
+        parameters_.res_lifetime_factor, parameters_.do_weak_decays));
   }
   bool no_coll = config.take({"Collision_Term", "No_Collisions"}, false);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||

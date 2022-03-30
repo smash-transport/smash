@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020
+ *    Copyright (c) 2014-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -99,7 +99,6 @@ TEST(report_deviations) {
   QuantumNumbers A(P, 5, 6, 7, 8, 9, 0);
   QuantumNumbers H(Q, 5, 6, 1, -8, 12358, -15);
   COMPARE(A.report_deviations(H),
-          "Conservation law violations detected (old vs. new)\n"
           "Deviation in Four-Momentum:\n"
           " P_0: 1.000000e+00 vs. 2.000000e+00; Δ = -1.000000e+00\n"
           " P_1: 2.000000e+00 vs. 3.000000e+00; Δ = -1.000000e+00\n"
@@ -169,7 +168,6 @@ TEST(count_from_particles) {
   COMPARE(four, check4);
 
   COMPARE(three.report_deviations(list),
-          "Conservation law violations detected (old vs. new)\n"
           "Deviation in Four-Momentum:\n"
           " P_0: 6.000000e+00 vs. 0.000000e+00; Δ = 6.000000e+00\n"
           " P_1: 9.000000e+00 vs. 0.000000e+00; Δ = 9.000000e+00\n"

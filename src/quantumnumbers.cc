@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2018
+ *    Copyright (c) 2015-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -20,7 +20,6 @@ std::string QuantumNumbers::report_deviations(const QuantumNumbers& rhs) const {
     return "";
   }
   std::stringstream error_msg;
-  error_msg << "Conservation law violations detected (old vs. new)\n";
   if (momentum_ != rhs.momentum_) {
     error_msg << "Deviation in Four-Momentum:\n" << std::scientific;
   }
