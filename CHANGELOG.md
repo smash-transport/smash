@@ -20,6 +20,13 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+### Changed
+* Only UNIX-like operating systems (e.g. Linux, MacOS) are officially supported
+* Only GCC, Clang and Apple clang compilers are officially supported
+
+## SMASH-2.2rc
+Date:
+
 ### Input / Output
 * Added option `Minimum_Nonempty_Ensembles` to define a minimum number of ensembles in which interactions took place
 * Added `HepMC_treeroot` output

@@ -18,6 +18,33 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
    message(FATAL_ERROR "You don't want to configure in the source directory!")
 endif()
 
+# Restrict supported operating systems
+option(FORCE_USE_ANY_OS "Force cmake to setup and compile on any operating systems." OFF)
+if(NOT UNIX AND NOT APPLE)
+   if(NOT FORCE_USE_ANY_OS)
+      message(FATAL_ERROR " \n" # See e.g. https://stackoverflow.com/a/51035045 for formatting
+                           " Using SMASH on your operating system is not officially supported.\n"
+                           " Please, open an issue at https://github.com/smash-transport/smash/issues\n"
+                           " if you are interested in SMASH team supporting your operting system.\n"
+                           " At your own risk you can pass -DFORCE_USE_ANY_OS=TRUE to cmake in\n"
+                           " order to setup and compile SMASH on your operating system.")
+   endif()
+endif()
+
+# Restrict supported compilers
+option(FORCE_USE_ANY_COMPILER "Force cmake to setup and compile with any compiler." OFF)
+if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
+   if(NOT FORCE_USE_ANY_COMPILER)
+      message(FATAL_ERROR " \n"
+                           " Compiling SMASH with the specified compiler is not officially supported.\n"
+                           " Please, open an issue at https://github.com/smash-transport/smash/issues\n"
+                           " if you are interested in SMASH team supporting the used compiler.\n"
+                           " At your own risk you can pass -DFORCE_USE_ANY_COMPILER=TRUE to cmake in\n"
+                           " order to setup and try to compile SMASH with the chosen compiler.")
+   endif()
+endif()
+
+# Impose C++ standard
 if(NOT "${CMAKE_CXX_STANDARD}")
   set(CMAKE_CXX_STANDARD 11)
 endif()
