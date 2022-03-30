@@ -27,7 +27,7 @@ namespace smash {
  *     - \key true - Set parameters of spherical deformation based on mass
  number of the
  * nucleus. Currently the following deformed nuclei are implemented: Cu, Zr, Ru,
- Au, Pb, U. \n
+ Au, Pb, U, Xe. If set to true the other parameters should not be provided. \n
  *     - \key false - Manually set parameters of spherical deformation. This
  requires the
  * additional specification of \key Beta_2, \key Beta_4, \key Theta and
