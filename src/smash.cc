@@ -539,7 +539,7 @@ int main(int argc, char *argv[]) {
        * decaymodes.txt anyway */
       configuration.merge_yaml("{Collision_Term: {Two_to_One: False}}");
       initialize_particles_decays_and_tabulations(configuration, version,
-                                                 tabulations_path);
+                                                  tabulations_path);
       auto scat_finder = actions_finder_for_dump(configuration);
 
       ignore_simulation_config_values(configuration);
@@ -550,7 +550,7 @@ int main(int argc, char *argv[]) {
     }
     if (particles_dump_iSS_format) {
       initialize_particles_decays_and_tabulations(configuration, version,
-                                                 tabulations_path);
+                                                  tabulations_path);
       ParticleTypePtrList list;
       list.clear();
       for (const auto &ptype : ParticleType::list_all()) {
@@ -594,7 +594,7 @@ int main(int argc, char *argv[]) {
     if (resonance_dump_activated) {
       // Ignore config values that don't make sense.
       initialize_particles_decays_and_tabulations(configuration, version,
-                                                 tabulations_path);
+                                                  tabulations_path);
       const auto _dummy = ExperimentBase::create(configuration, output_path);
       ignore_simulation_config_values(configuration);
       check_for_unused_config_values(configuration);
@@ -606,7 +606,7 @@ int main(int argc, char *argv[]) {
     }
     if (cross_section_dump_activated) {
       initialize_particles_decays_and_tabulations(configuration, version,
-                                                 tabulations_path);
+                                                  tabulations_path);
       std::string arg_string(cs_string);
       std::vector<std::string> args = split(arg_string, ',');
       const unsigned int n_arg = args.size();
@@ -691,7 +691,7 @@ int main(int argc, char *argv[]) {
         << configuration.to_string() << '\n';
 
     initialize_particles_decays_and_tabulations(configuration, version,
-                                               tabulations_path);
+                                                tabulations_path);
 
     // Create an experiment
     logg[LMain].trace(SMASH_SOURCE_LOCATION, " create Experiment");

@@ -31,7 +31,7 @@ namespace smash {
  * \return Configuration object with particles, decaymodes and extra
  * configs included.
  *
- * If no particles and decaymodes files are given the default files in 
+ * If no particles and decaymodes files are given the default files in
  * the input directory are used.
  */
 Configuration setup_config_and_logging(
@@ -43,7 +43,7 @@ Configuration setup_config_and_logging(
  * Initialize the particles and decays from the given configuration,
  * plus tabulate the resonance integrals.
  *
- * \param[in] configuration Fully-setup configuration i.e. including 
+ * \param[in] configuration Fully-setup configuration i.e. including
  * particles and decaymodes.
  * \param[in] version Current version of SMASH.
  * \param[in] tabulations_dir Path where tabulations should be stored.
