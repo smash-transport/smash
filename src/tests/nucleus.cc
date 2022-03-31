@@ -259,12 +259,12 @@ TEST(Fermi_motion) {
 }
 
 TEST(nucleon_density_norm) {
-  const std::map<PdgCode, int> helium = {{0x2212, 1}, {0x2112, 1}};
+  const std::map<PdgCode, int> deuteron = {{0x2212, 1}, {0x2112, 1}};
   const std::map<PdgCode, int> carbon = {{0x2212, 6}, {0x2112, 6}};
   const std::map<PdgCode, int> lead = {{0x2212, 82}, {0x2112, 208 - 82}};
   Integrator integrate;
   {
-    Nucleus nucl(helium, 1);
+    Nucleus nucl(deuteron, 1);
     // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
     const auto result = integrate(0, 1, [&](double t) {
       const double r = (1 - t) / t;
@@ -274,7 +274,7 @@ TEST(nucleon_density_norm) {
               << "  A: " << nucl.number_of_particles() << std::endl;
     std::cout << result.value() << " ± " << result.error() << std::endl;
     // Compare to value calculated with CAS:
-    COMPARE_ABSOLUTE_ERROR(result.value(), 5.5934, 1e-4);
+    COMPARE_ABSOLUTE_ERROR(result.value(), 2., 1e-4);
   }
   {
     Nucleus nucl(carbon, 1);
@@ -287,7 +287,7 @@ TEST(nucleon_density_norm) {
               << "  A: " << nucl.number_of_particles() << std::endl;
     std::cout << result.value() << " ± " << result.error() << std::endl;
     // Compare to value calculated with CAS:
-    COMPARE_ABSOLUTE_ERROR(result.value(), 20.2643, 1e-4);
+    COMPARE_ABSOLUTE_ERROR(result.value(), 12., 1e-4);
   }
   {
     Nucleus nucl(lead, 1);

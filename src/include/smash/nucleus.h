@@ -234,7 +234,33 @@ class Nucleus {
    * \param[in] r The radius at which to sample
    * \return The Woods-Saxon density
    */
+  // This function as well as nucleon_density_unnormalized could in principle
+  // be defined without the second argument
   virtual double nucleon_density(double r, double) const;
+  /**
+   * Return the unnormalized Woods-Saxon distribution for the given position
+   * without deformation.
+   *
+   * \param[in] r The radius
+   * \return The unnormalized Woods-Saxon distribution
+   */
+  virtual double nucleon_density_unnormalized(double r, double) const;
+  /**
+   * \return the normalized ground state density for the corresponding
+   * Woods-Saxon parameter. This is done by integrating the Woods-Saxon
+   * distribution and setting the normalization such that the integral of the
+   * Woods-Saxon distribution yields the number of particles in the nucleus
+   * \f$\int\rho(r)d^3r = N_{particles}\f$.
+   *
+   */
+  virtual double calculate_saturation_density() const;
+  /**
+   * Sets the saturation density of the nucleus
+   * \see saturation_density_
+   */
+  virtual void set_saturation_density(double density) {
+    saturation_density_ = density;
+  }
 
   /// \ingroup exception
   struct TestparticleConfusion : public std::length_error {
@@ -247,8 +273,6 @@ class Nucleus {
    * (for diffusiveness_ == 0, we obtain a hard sphere).
    */
   double diffusiveness_;
-  /// Saturation density of this nucleus.
-  double saturation_density_ = nuclear_density;
   /// Nuclear radius of this nucleus
   double nuclear_radius_;
   /**
@@ -262,6 +286,10 @@ class Nucleus {
  protected:
   /// Particles associated with this nucleus.
   std::vector<ParticleData> particles_;
+
+  /// Saturation density of this nucleus.
+  // Needed as public member for inheritance to deformed nuclei
+  double saturation_density_ = nuclear_density;
 
   /**
    * Randomly generate Euler angles. Necessary for rotation of deformed and
@@ -301,13 +329,6 @@ class Nucleus {
    * \see diffusiveness_
    */
   inline double get_diffusiveness() const { return diffusiveness_; }
-  /**
-   * Sets the saturation density of the nucleus
-   * \see saturation_density_
-   */
-  inline void set_saturation_density(double density) {
-    saturation_density_ = density;
-  }
   /**
    * \return the saturation density of the nucleus
    * \see saturation_density_

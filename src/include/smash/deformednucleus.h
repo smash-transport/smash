@@ -94,6 +94,11 @@ class DeformedNucleus : public Nucleus {
   void rotate() override;
 
   /**
+   * \return the saturation density of the deformed_nucleus
+   * \see saturation_density_
+   */
+  inline double get_saturation_density() const { return saturation_density_; }
+  /**
    * Return the deformed Woods-Saxon probability density for the given position.
    * This corresponds to the nuclear density at the very same position.
    *
@@ -102,7 +107,15 @@ class DeformedNucleus : public Nucleus {
    * \return The Woods-Saxon density
    */
   double nucleon_density(double r, double cosx) const override;
-
+  /**
+   * Return the unnormalized deformed Woods-Saxon distribution for the given
+   * position.
+   *
+   * \param[in] r The radius
+   * \param[in] cosx The cosine of the polar angle
+   * \return The unnormalized Woods-Saxon distribution
+   */
+  double nucleon_density_unnormalized(double r, double cosx) const override;
   /**
    * Set deformation coefficient for Y_2_0.
    * \param[in] b2 deformation coefficient for l=2
