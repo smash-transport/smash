@@ -339,44 +339,57 @@ smash_add_runtest(reactions_dump smash smash -l)
 smash_add_runtest(crosssection_dump smash smash -s 2112,2212)
 smash_add_runtest(resonance_spectral_function_dump smash smash -r 113)
 
-# verify that default run has no mem leaks
+# Setup tests to check that default run has no memory leaks, if valgrind is available
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 if(CTEST_MEMORYCHECK_COMMAND)
-   message(STATUS "valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
-   set(KNOWN_BUG "\n       Note: Known bug with valgrind 3.11 - unrecognised instruction.")
-   set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
-   add_custom_target(memcheck_collider
-                     COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-                             ${PROJECT_BINARY_DIR}/smash
-                             -c "General: {End_Time: 5.0, Delta_Time: 0.1}"
-                             -o "${PROJECT_BINARY_DIR}/test_output/memcheck_collider"
-                             -f
-                     DEPENDS smash
-                     COMMENT "Executing test memcheck_collider. ${KNOWN_BUG}"
-                     VERBATIM)
-   add_custom_target(memcheck_box
-                     COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-                             ${PROJECT_BINARY_DIR}/smash
-                             -c "General: {End_Time: 5.0, Delta_Time: 0.1}"
-                             -i ${PROJECT_SOURCE_DIR}/input/box/config.yaml
-                             -p ${PROJECT_SOURCE_DIR}/input/box/particles.txt
-                             -d ${PROJECT_SOURCE_DIR}/input/box/decaymodes.txt
-                             -o "${PROJECT_BINARY_DIR}/test_output/memcheck_box"
-                             -f
-                     DEPENDS smash
-                     COMMENT "Executing test memcheck_box. ${KNOWN_BUG}"
-                     VERBATIM)
-   add_custom_target(memcheck_sphere
-                     COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-                     ${PROJECT_BINARY_DIR}/smash
-                     -c "General: {End_Time: 5.0, Delta_Time: 0.1}"
-                     -i ${PROJECT_SOURCE_DIR}/input/sphere/config.yaml
-                     -o "${PROJECT_BINARY_DIR}/test_output/memcheck_sphere" -f
-                     DEPENDS smash
-                     COMMENT "Executing test memcheck_sphere. ${KNOWN_BUG}"
-                     VERBATIM)
+   message(STATUS "Valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
+   # Use valgrid command to extract its version
+   execute_process(COMMAND ${CTEST_MEMORYCHECK_COMMAND} --version
+                   OUTPUT_VARIABLE VALGRIND_VERSION_STRING
+                   ERROR_QUIET
+                   OUTPUT_STRIP_TRAILING_WHITESPACE)
+   if(VALGRIND_VERSION_STRING MATCHES "^valgrind-3.11")
+      if(NOT WIN32)
+        string(ASCII 27 Esc)
+        set(DEFAULT_COL "${Esc}[m")
+        set(YELLOW      "${Esc}[33m")
+      endif()
+      message(STATUS "${YELLOW}There is a known bug with valgrind 3.11 (unrecognised instruction) - disabling memchecks.${DEFAULT_COL}")
+   else()
+      set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
+      add_custom_target(memcheck_collider
+                        COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+                                ${PROJECT_BINARY_DIR}/smash
+                                -c "General: {End_Time: 5.0, Delta_Time: 0.1}"
+                                -o "${PROJECT_BINARY_DIR}/test_output/memcheck_collider"
+                                -f
+                        DEPENDS smash
+                        COMMENT "Executing test memcheck_collider."
+                        VERBATIM)
+      add_custom_target(memcheck_box
+                        COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+                                ${PROJECT_BINARY_DIR}/smash
+                                -c "General: {End_Time: 5.0, Delta_Time: 0.1}"
+                                -i ${PROJECT_SOURCE_DIR}/input/box/config.yaml
+                                -p ${PROJECT_SOURCE_DIR}/input/box/particles.txt
+                                -d ${PROJECT_SOURCE_DIR}/input/box/decaymodes.txt
+                                -o "${PROJECT_BINARY_DIR}/test_output/memcheck_box"
+                                -f
+                        DEPENDS smash
+                        COMMENT "Executing test memcheck_box."
+                        VERBATIM)
+      add_custom_target(memcheck_sphere
+                        COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+                        ${PROJECT_BINARY_DIR}/smash
+                        -c "General: {End_Time: 5.0, Delta_Time: 0.1}"
+                        -i ${PROJECT_SOURCE_DIR}/input/sphere/config.yaml
+                        -o "${PROJECT_BINARY_DIR}/test_output/memcheck_sphere" -f
+                        DEPENDS smash
+                        COMMENT "Executing test memcheck_sphere."
+                        VERBATIM)
+   endif()
 else()
-   message(STATUS "valgrind not found. Memcheck tests are disabled!")
+   message(STATUS "Valgrind not found. Memcheck tests are disabled!")
 endif()
 
 if(USE_SANITIZER)
