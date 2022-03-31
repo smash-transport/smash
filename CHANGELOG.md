@@ -27,7 +27,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Added
 * Light nuclei (A=3) production via 4-to-2 reactions
-* Possibility to perfom weak decays at the end of the calculation
+* Possibility to perform weak decays at the end of the calculation
 * Possibility to impose transverse momentum or rapidity cut when extracting initial conditions for hydrodynamics
 * Option to add a velocity field of the form u_r = u_0 * r / R in radial direction to the sphere mode
 * Interface functions to initialize SMASH conveniently (see new `library.h`) 
