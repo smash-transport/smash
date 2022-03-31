@@ -495,6 +495,10 @@ double Nucleus::nucleon_density_unnormalized(double r, double) const {
 double Nucleus::calculate_saturation_density() const {
   Integrator2d integrate;
   // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
+  // To prevent overflow, the integration is only performed to t = 0.01 which
+  // corresponds to r = 99fm. Additionally the precision settings in the
+  // Integrator2d scheme are equally important. However both these point affect
+  // the result only after the seventh digit which should not be relevant here.
   const auto result = integrate(0.01, 1, -1, 1, [&](double t, double cosx) {
     const double r = (1 - t) / t;
     return twopi * std::pow(r, 2.0) * nucleon_density_unnormalized(r, cosx) /
