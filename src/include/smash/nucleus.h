@@ -234,6 +234,8 @@ class Nucleus {
    * \param[in] r The radius at which to sample
    * \return The Woods-Saxon density
    */
+  // This function as well as nucleon_density_unnormalized could in principle
+  // be defined without the second argument
   virtual double nucleon_density(double r, double) const;
   /**
    * Return the unnormalized Woods-Saxon distribution for the given position
