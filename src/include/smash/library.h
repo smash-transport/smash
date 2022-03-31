@@ -48,7 +48,7 @@ Configuration setup_config_and_logging(
  * \param[in] version Current version of SMASH.
  * \param[in] tabulations_dir Path where tabulations should be stored.
  */
-void initalize_particles_decays_and_tabulations(
+void initialize_particles_decays_and_tabulations(
     Configuration &configuration, const std::string &version,
     const std::string &tabulations_dir = {});
 

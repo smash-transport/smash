@@ -73,7 +73,7 @@ Configuration setup_config_and_logging(
   return configuration;
 }
 
-void initalize_particles_decays_and_tabulations(
+void initialize_particles_decays_and_tabulations(
     Configuration &configuration, const std::string &version,
     const std::string &tabulations_dir) {
   logg[LMain].trace(SMASH_SOURCE_LOCATION,
