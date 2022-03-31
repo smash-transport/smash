@@ -29,9 +29,11 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Light nuclei (A=3) production via 4-to-2 reactions
 * Possibility to perfom weak decays at the end of the calculation
 * Possibility to impose transverse momentum or rapidity cut when extracting initial conditions for hydrodynamics
+* Option to add a velocity field of the form u_r = u_0 * r / R in radial direction to the sphere mode
 
 ### Fixed
 * The `--version` option of `smash` now returns a version also when SMASH is downloaded as source package without VCS information
+* The saturation density of the woods-saxon distribution is calculated such that its integral returns the number of nucleons in the nucleus
 
 ### Changed
 * Minimum supported CMake version is now version 3.9
