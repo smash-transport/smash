@@ -29,12 +29,14 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Light nuclei (A=3) production via 4-to-2 reactions
 * Possibility to perform weak decays at the end of the calculation
 * Possibility to impose transverse momentum or rapidity cut when extracting initial conditions for hydrodynamics
-* Option to add a velocity field of the form u_r = u_0 * r / R in radial direction to the sphere mode
-* Interface functions to initialize SMASH conveniently (see new `library.h`) 
+* Option to add a velocity field of the form `u_r = u_0 * r / R` in radial direction to the sphere mode
+* Interface functions to initialize SMASH conveniently (see new `library.h`)
+* Extend benchmarks to include collisions at high energy to test strings
 
 ### Fixed
 * The `--version` option of `smash` now returns a version also when SMASH is downloaded as source package without VCS information
 * The saturation density of the woods-saxon distribution is calculated such that its integral returns the number of nucleons in the nucleus
+* Initial conditions output now includes unformed particles
 
 ### Changed
 * Minimum supported CMake version is now version 3.9
@@ -43,6 +45,10 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Renamed version macro to `SMASH_VERSION` (from `MAJOR_VERSION`)
 * Pythia installation directory can also be specified with `-DPYTHIA_ROOT_DIR` and by the environment variables `PYTHIA_ROOT_DIR` or `PYTHIA8`, with `/usr` as default
 * Big endian architectures are not officially supported and compilation on them is, by default, disabled
+* Specific parameters for Xenon nuclei are used instead of default values
+
+### Removed
+* A possibly available system installation of YAML library is not considered anymore
 
 ## SMASH-2.1.4
 Date: 2022-02-24
