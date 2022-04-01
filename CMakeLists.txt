@@ -27,7 +27,8 @@ if(NOT UNIX AND NOT APPLE)
                            " Please, contact the SMASH development team (see README) if you would\n"
                            " like to collaborate with us to get the code run on your operting system.\n"
                            " At your own risk you can pass -DFORCE_USE_ANY_OS=TRUE to cmake in\n"
-                           " order to setup and compile SMASH on your operating system.")
+                           " order to setup and compile SMASH on your operating system.\n"
+                           " Alternatively you can use the provided Docker containers (see README).")
    endif()
 endif()
 
@@ -40,7 +41,8 @@ if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
                            " Please, contact the SMASH development team (see README) if you would\n"
                            " like to collaborate with us to get the codebase support your compiler.\n"
                            " At your own risk you can pass -DFORCE_USE_ANY_COMPILER=TRUE to cmake in\n"
-                           " order to setup and try to compile SMASH with the chosen compiler.")
+                           " order to setup and try to compile SMASH with the chosen compiler.\n"
+                           " Alternatively you can use the provided Docker containers (see README).")
    endif()
 endif()
 
@@ -78,7 +80,8 @@ if(IS_BIG_ENDIAN)
                             " Please, contact the SMASH development team (see README) if you would like\n"
                             " to collaborate with us to get the code run on big endian architectures.\n"
                             " At your own risk you can pass -DFORCE_USE_ON_BIG_ENDIAN=TRUE to cmake in\n"
-                            " order to setup and compile SMASH on a big endian machine.")
+                            " order to setup and compile SMASH on a big endian machine.\n"
+                            " Alternatively you can use the provided Docker containers (see README).")
     endif()
     add_definitions("-DBIG_ENDIAN_ARCHITECTURE")
 else()
