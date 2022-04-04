@@ -12,8 +12,9 @@ version you want to benchmark.
 ## Running the benchmarks
 
 The benchmarks are run by executing the shell script.
-
-    ./benchmark.sh PREPARED_BUILD_DIR
+```console
+./benchmark.sh PREPARED_BUILD_DIR
+```
 
 First the benchmark collects system information and then runs the different
 SMASH setups. The measurement is done with `perf` and performed a few times to
@@ -24,6 +25,14 @@ to a markdown formatted file named `bm-results-SMASH-VERSION.md`.
 
 For comparison, results from previous tagged versions are attached to the
 corresponding github releases.
+
+## Comparing benchmarks among versions
+
+A utility script to easily compare the benchmark output is available and can
+be used specifying the result files of the version to be compared, e.g.
+```console
+./compare_benchmarks.bash  bm-results-SMASH-2.1rc.md  bm-results-SMASH-2.2rc.md
+```
 
 ## Adding other setups
 
