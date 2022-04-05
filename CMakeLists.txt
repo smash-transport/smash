@@ -46,9 +46,17 @@ if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
    endif()
 endif()
 
-# Impose C++ standard
+# Request a given C++ standard
+set(CXX_SMASH_STANDARD "11")
+# To be user friendly, fail early if standard not supported
+include(cmake/CheckCXXCompilerFlag.cmake)
+check_cxx_compiler_flag("-std=c++${CXX_SMASH_STANDARD}" IS_CXX_SMASH_STANDARD_SUPPORTED)
+if(NOT IS_CXX_SMASH_STANDARD_SUPPORTED)
+   message(FATAL_ERROR "The required C++${CXX_SMASH_STANDARD} standard is not supported by your compiler.")
+endif()
+# Request then the standard
 if(NOT "${CMAKE_CXX_STANDARD}")
-  set(CMAKE_CXX_STANDARD 11)
+  set(CMAKE_CXX_STANDARD ${CXX_SMASH_STANDARD})
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -138,26 +146,6 @@ if(CXX_MARCH_NATIVE_SUPPORTED)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 else()
    message(STATUS "Your C++ compiler does not support the '-march=native' flag. This will not be used.")
-endif()
-
-# check that C++11 code compiles
-# in order for this to work the policy on respecting the CXX_STANDARD for
-# try_compile has to be changed first
-# see https://cmake.org/cmake/help/v3.8/policy/CMP0067.html
-cmake_policy(SET CMP0067 NEW)
-set(CMAKE_REQUIRED_FLAGS "-std=c++11")
-CHECK_CXX_SOURCE_COMPILES("
-#include <initializer_list>
-struct A {};
-struct B : public A { using A::A; };
-template<typename T = void> int f() { return 1; }
-int main() {
-  auto l = []() { return f(); };
-  return l() - 1;
-}
-" CXX11_COMPILES)
-if(NOT CXX11_COMPILES)
-   message(FATAL_ERROR "Your compiler did not manage to compile a simple C++11 program. Please get a newer C++ compiler.")
 endif()
 
 # have binary in the build directory
