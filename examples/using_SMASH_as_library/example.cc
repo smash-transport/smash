@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
   if (example_number > 1) {
     std::cout << "\nExample 2\n---------\n" << std::endl;
     std::cout << "Loading SMASH particle types and decay modes" << std::endl;
-    smash::intialize_default_particles_and_decaymodes();
+    smash::initialize_default_particles_and_decaymodes();
     std::cout << "Print all strange mesons lighter than 1 GeV" << std::endl;
     for (const ParticleType &ptype : ParticleType::list_all()) {
       if (ptype.is_meson() && ptype.strangeness() != 0 && ptype.mass() < 1.0) {
