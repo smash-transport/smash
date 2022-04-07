@@ -46,10 +46,13 @@ if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
    endif()
 endif()
 
+# Before starting, tell cmake where to find our modules and include utilities
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(Utilities)
+
 # Request a given C++ standard
 set(CXX_SMASH_STANDARD "11")
 # To be user friendly, fail early if standard not supported
-include(cmake/CheckCXXCompilerFlag.cmake)
 check_cxx_compiler_flag("-std=c++${CXX_SMASH_STANDARD}" IS_CXX_SMASH_STANDARD_SUPPORTED)
 if(NOT IS_CXX_SMASH_STANDARD_SUPPORTED)
    message(FATAL_ERROR "The required C++${CXX_SMASH_STANDARD} standard is not supported by your compiler.")
@@ -60,9 +63,6 @@ if(NOT "${CMAKE_CXX_STANDARD}")
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
-# Tell cmake where to find our modules
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # needed for clang-tidy
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
@@ -129,7 +129,6 @@ mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LIN
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
    option(CLANG_USE_LIBC++ "If turned on clang will explicitly be asked to use libc++ (otherwise it uses the system default)" OFF)
    if(CLANG_USE_LIBC++)
-      include(cmake/AddCompilerFlag.cmake)
       AddCompilerFlag(-stdlib=libc++ CXX_FLAGS CMAKE_CXX_FLAGS CXX_RESULT _use_libcxx)
       if(_use_libcxx AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
          link_libraries(c++abi supc++)
