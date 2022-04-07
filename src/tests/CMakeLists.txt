@@ -349,12 +349,7 @@ if(CTEST_MEMORYCHECK_COMMAND)
                    ERROR_QUIET
                    OUTPUT_STRIP_TRAILING_WHITESPACE)
    if(VALGRIND_VERSION_STRING MATCHES "^valgrind-3.11")
-      if(NOT WIN32)
-        string(ASCII 27 Esc)
-        set(DEFAULT_COL "${Esc}[m")
-        set(YELLOW      "${Esc}[33m")
-      endif()
-      message(STATUS "${YELLOW}There is a known bug with valgrind 3.11 (unrecognised instruction) - disabling memchecks.${DEFAULT_COL}")
+      message(ATTENTION "There is a known bug with valgrind 3.11 (unrecognised instruction) - disabling memchecks.")
    else()
       set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
       add_custom_target(memcheck_collider
