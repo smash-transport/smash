@@ -1,8 +1,10 @@
 # - Add a given compiler flag to flags variables.
 # AddCompilerFlag(<flag> [<var>])
 # or
-# AddCompilerFlag(<flag> [C_FLAGS <var>] [CXX_FLAGS <var>] [C_RESULT <var>]
-#                        [CXX_RESULT <var>])
+# AddCompilerFlag(<flag> [C_FLAGS <var>] [CXX_FLAGS <var>]
+#                        [MIC_C_FLAGS <var>] [MIC_CXX_FLAGS <var>]
+#                        [C_RESULT <var>] [CXX_RESULT <var>]
+#                        [MIC_C_RESULT <var>] [MIC_CXX_RESULT <var>])
 
 #=============================================================================
 # Copyright 2010-2013 Matthias Kretz <kretz@kde.org>
