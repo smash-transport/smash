@@ -30,12 +30,14 @@ at elfner@itp.uni-frankfurt.de.
 
 ### Prerequisites
 
-SMASH is known to compile and work with one of these compilers (which have the
-required C++11 features):
+SMASH is known to compile and work on little endian machines with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++11 features):
 - gcc >= 4.8
-- clang >= 3.2
+- clang >= 3.3
+- Apple clang >= 5.0
 
-It requires the following tools & libraries:
+Any different operating system and/or compiler and/or endianness is not officially supported.
+
+SMASH requires the following tools and libraries:
 - cmake >= 3.9
 - the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)

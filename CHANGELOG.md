@@ -20,6 +20,13 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+### Changed
+* Only UNIX-like operating systems (e.g. Linux, MacOS) are officially supported
+* Only GCC, Clang and Apple clang compilers are officially supported
+
+## SMASH-2.2rc
+Date:
+
 ### Input / Output
 * Added option `Minimum_Nonempty_Ensembles` to define a minimum number of ensembles in which interactions took place
 * Added `HepMC_treeroot` output
@@ -49,6 +56,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Removed
 * A possibly available system installation of YAML library is not considered anymore
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.1.4...SMASH-2.2)
+
 
 ## SMASH-2.1.4
 Date: 2022-02-24
