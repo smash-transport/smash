@@ -70,7 +70,7 @@ option(TRY_USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
 if(TRY_USE_ROOT)
   find_package(ROOT 5.34 QUIET)
   if(ROOT_FOUND)
-    message(STATUS "Found ROOT ${ROOT_VERSION} at ${ROOT_LIBRARIES}.")
+    message(STATUS "Found ROOT ${ROOT_VERSION} (include at ${ROOT_INCLUDE_DIR}).")
     include_directories(SYSTEM "${ROOT_INCLUDE_DIR}")
     set(SMASH_LIBRARIES ${ROOT_LIBRARIES})
     add_definitions(-DSMASH_USE_ROOT)
@@ -83,7 +83,7 @@ option(TRY_USE_HEPMC "Turn this off to disable HepMC output support in SMASH." O
 if(TRY_USE_HEPMC OR TRY_USE_RIVET)
   find_package(HepMC3 QUIET)
   if(HepMC3_FOUND)
-    message(STATUS "Found HepMC ${HepMC3_VERSION} at ${HEPMC3_LIBRARIES}.")
+    message(STATUS "Found HepMC ${HepMC3_VERSION} (include at ${HEPMC3_INCLUDE_DIR}).")
     include_directories(SYSTEM "${HEPMC3_INCLUDE_DIR}")
     set(SMASH_LIBRARIES
         ${SMASH_LIBRARIES}
