@@ -30,9 +30,9 @@ at elfner@itp.uni-frankfurt.de.
 
 ### Prerequisites
 
-SMASH is known to compile and work on little endian machines with UNIX-like operating systems (e.g. Linux, MacOS) and one of the following compilers (which have the required C++11 features):
+SMASH is known to compile and work on little endian machines with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++11 features):
 - gcc >= 4.8
-- clang >= 3.2
+- clang >= 3.3
 - Apple clang >= 5.0
 
 Any different operating system and/or compiler and/or endianness is not officially supported.
