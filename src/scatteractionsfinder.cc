@@ -498,7 +498,12 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     if (prob > 1.) {
       std::stringstream err;
       err << "Probability larger than 1 for stochastic rates. ( P_22 = " << prob
-          << " )\nConsider using smaller timesteps.";
+          << " )\n"
+          << data_a.type().name() << data_b.type().name() << " with masses "
+          << data_a.momentum().abs() << " and " << data_b.momentum().abs()
+          << " at sqrts[GeV] = " << act->sqrt_s()
+          << " with xs[fm^2]/Ntest = " << xs
+          << "\nConsider using smaller timesteps.";
       if (only_warn_for_high_prob_) {
         logg[LFindScatter].warn(err.str());
       } else {
@@ -595,8 +600,12 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
   // 5. Check that probability is smaller than one
   if (prob > 1.) {
     std::stringstream err;
-    err << "Probability larger than 1 for stochastic rates. ( P_nm = " << prob
-        << " )\nConsider using smaller timesteps.";
+    err << "Probability " << prob << " larger than 1 for stochastic rates for ";
+    for (const ParticleData& data : plist) {
+      err << data.type().name();
+    }
+    err << " at sqrts[GeV] = " << act->sqrt_s()
+        << "\nConsider using smaller timesteps.";
     if (only_warn_for_high_prob_) {
       logg[LFindScatter].warn(err.str());
     } else {
