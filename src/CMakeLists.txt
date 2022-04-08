@@ -103,22 +103,14 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
 endif()
 
 option(TRY_USE_RIVET "Turn this off to disable Rivet output support in SMASH." ON)
-set(Rivet_FOUND FALSE)
 if(TRY_USE_RIVET AND HepMC3_FOUND)
-  find_program(RIVET_CONFIG rivet-config
-    DOC "Path to the Rivet configuration script")
-  if(RIVET_CONFIG)
-    execute_process(COMMAND ${RIVET_CONFIG} --version
-      OUTPUT_VARIABLE RIVET_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND ${RIVET_CONFIG} --includedir
-      OUTPUT_VARIABLE RIVET_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND ${RIVET_CONFIG} --libs
-      OUTPUT_VARIABLE RIVET_LIB OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "Found Rivet ${RIVET_VERSION} at ${RIVET_INCLUDE_DIR} ${RIVET_LIB}.")
+  find_package(Rivet QUIET)
+  if(Rivet_FOUND)
+    message(STATUS "Found Rivet ${RIVET_VERSION} (include at ${RIVET_INCLUDE_DIR}).")
     include_directories(SYSTEM "${RIVET_INCLUDE_DIR}")
     set(SMASH_LIBRARIES
       ${SMASH_LIBRARIES}
-      ${RIVET_LIB}
+      ${RIVET_LIBRARIES}
       )
     add_definitions(-DSMASH_USE_RIVET)
     set(Rivet_FOUND TRUE)
