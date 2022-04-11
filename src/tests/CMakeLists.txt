@@ -302,11 +302,13 @@ smash_add_runtest(initial_conditions_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/config.yaml
                   -c "Output: {Initial_Conditions: {Format: [Binary, Oscar2013]}}")
 
-if(TRY_USE_ROOT AND ROOT_FOUND AND TRY_USE_HEPMC AND HepMC3_FOUND)
+if(ROOT_FOUND AND HepMC3_FOUND AND Rivet_FOUND)
    smash_add_runtest(third_party_output_run smash smash
                      -i ${PROJECT_SOURCE_DIR}/input/config.yaml
                      -c "Output: {Particles: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
-                     -c "Output: {Collisions: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}")
+                     -c "Output: {Collisions: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
+                     -c "Output: {Rivet: {Format: [YODA]}}"
+                     -c "Output: {Rivet: {Analyses: [MC_FSPARTICLES]}}")
 endif()             
 
 # Test the shipped config files for potentials and deformed nuclei by verifying
