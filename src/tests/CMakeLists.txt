@@ -7,7 +7,10 @@
 #
 #########################################################
 
+# Add 3rd-party virtest library
+include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rdparty/virtest")
 
+# Copy needed input file to build directory
 file(COPY ../../input/config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 option(FORMAT_TEST_OUTPUT_FOR_VIM
@@ -17,9 +20,6 @@ set(UNITTEST_ARGS "")
 if(FORMAT_TEST_OUTPUT_FOR_VIM)
    set(UNITTEST_ARGS "-v")
 endif()
-
-# add 3rd-party virtest library
-include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rdparty/virtest")
 
 # tests:
 # Helper macro that adds a run_<name> target
