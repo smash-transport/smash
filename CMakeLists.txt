@@ -103,29 +103,38 @@ include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.7.0/include")
 add_subdirectory(3rdparty)
 
-# Set the relevant generic compiler flags (optimisations)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
-# Tell the compiler to ignore errno setting of math functions. This can help the compiler
-# considerably in optimizing mathematical expressions.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno")
+# Set up compile options passed to all targets. From CMake documentation:
+#   "The flags in CMAKE_<LANG>_FLAGS will be passed to the compiler
+#   before those in the per-configuration CMAKE_<LANG>_FLAGS_<CONFIG>
+#   variant, and before flags added by the add_compile_options() or
+#   target_compile_options() commands."
+#
+# NOTE: CMake provides four build configurations (Debug, Release,
+#       RelWithDebInfo, MinSizeRel) and proved sensible values
+#       for the corresponding CMAKE_(C|CXX)_FLAGS_<CONFIG>
+#       variables (cached and marked as advanced). Here we need
+#       to set those for Profiling build, only.
+#        => https://cristianadam.eu/20190223/modifying-the-default-cmake-build-types/
+add_compiler_flags_if_supported(CXX_FLAGS CMAKE_CXX_FLAGS
+   "-fPIC"           # Position independent code, this should be removed, see issue #846
+   "-fno-math-errno" # Tell the compiler to ignore errno setting of math functions.
+                     # This can help the compiler considerably in optimizing mathematical expressions.
+   "-march=native"   # The '-march=native' flag is not supported e.g. on Apple M1 machines
+   )
+# Set up the profiling build type
+if(NOT CMAKE_CXX_FLAGS_PROFILING)
+   add_compiler_flags_if_supported("-O3" "-DNDEBUG" "-pg" CXX_FLAGS SUPPORTED_CXX_FLAGS_PROFILING)
+endif()
+if(NOT CMAKE_C_FLAGS_PROFILING)
+   add_compiler_flags_if_supported("-O3" "-DNDEBUG" "-pg" C_FLAGS SUPPORTED_C_FLAGS_PROFILING)
+endif()
+set(CMAKE_CXX_FLAGS_PROFILING "${SUPPORTED_CXX_FLAGS_PROFILING}" CACHE STRING "Flags used by the C++ compiler during profile builds.")
+set(CMAKE_C_FLAGS_PROFILING "${SUPPORTED_C_FLAGS_PROFILING}" CACHE STRING "Flags used by the C compiler during profile builds.")
+set(CMAKE_EXE_LINKER_FLAGS_PROFILING "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -pg" CACHE STRING "Flags used by the linker during profile builds.")
+mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LINKER_FLAGS_PROFILING)
 
-# Disable DEBUG and TRACE output in Release builds
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DNDEBUG" CACHE
-   STRING "Flags used by the compiler during Release builds." FORCE)
-# RelWithDebInfo is just like Release, it only adds -g to add debug symbols
-# (useful for better debug and profiling information on Release builds)
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g" CACHE
-   STRING "Flags used by the compiler during Release with Debug Info builds." FORCE)
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}" CACHE
-   STRING "Flags used by the compiler during Release with Debug Info builds." FORCE)
-
-# set up the profiling build type
-set(CMAKE_CXX_FLAGS_PROFILING "-O3 -DNDEBUG -pg" CACHE STRING "Flags used by the compiler during profile builds." FORCE)
-set(CMAKE_C_FLAGS_PROFILING "-O3 -DNDEBUG -pg" CACHE STRING "Flags used by the compiler during profile builds." FORCE)
-set(CMAKE_EXE_LINKER_FLAGS_PROFILING "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -pg" CACHE STRING "Flags used by the compiler during profile builds." FORCE)
-mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LINKER_FLAGS_RELEASE)
-
+# Let Clang users on Linux be able to use libc++
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
    option(CLANG_USE_LIBC++ "If turned on clang will explicitly be asked to use libc++ (otherwise it uses the system default)" OFF)
    if(CLANG_USE_LIBC++)
@@ -134,17 +143,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
          link_libraries(c++abi supc++)
       endif()
    endif()
-endif()
-
-# The '-march=native' flag is not supported e.g. on Apple M1 machines
-#  -> check if the C++ compiler supports it
-set(CMAKE_REQUIRED_FLAGS "-march=native")
-include(CheckCXXSourceCompiles)
-CHECK_CXX_SOURCE_COMPILES("int main() {return 0;}" CXX_MARCH_NATIVE_SUPPORTED)
-if(CXX_MARCH_NATIVE_SUPPORTED)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-else()
-   message(STATUS "Your C++ compiler does not support the '-march=native' flag. This will not be used.")
 endif()
 
 # have binary in the build directory
