@@ -7,12 +7,8 @@
 #
 #########################################################
 
-# remove -Winline for test code
-string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 file(COPY ../../input/config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-string(REPLACE " -Wfloat-equal" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 option(FORMAT_TEST_OUTPUT_FOR_VIM
    "If ON the unit test output of run_* targets will work with the vim quickfix parser and vim will directly take you to the line that failed."
