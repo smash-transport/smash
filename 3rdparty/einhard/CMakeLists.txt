@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+# CMake minimum version inherited from SMASH context
 project(Einhard)
 
 # set the relevant compiler flags

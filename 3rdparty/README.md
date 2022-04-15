@@ -10,6 +10,14 @@ This README file is meant to contain information about the work that has been do
 
 :warning: :arrow_right: ADD HERE COMMENT ABOUT `-fPIC` compiler flag, see #846.
 
+All third party libraries are shipped with their requirement about the minimum CMake version and SMASH has one as well.
+**Unless the library is needing a larger version of that required by SMASH**, we drop the third library requirement,
+```diff
+- cmake_minimum_required(VERSION ...)
++ # CMake minimum version inherited from SMASH context
+```
+and this change must be in place at every update.
+
 When updating either Cuba or YAML,
 * the `include_directories` commands in the top-level _CMakeLists.txt_ file needs to be adjusted;
 * similarly the `add_subdirectory` commands in _3rdparty/CMakeLists.txt_ must be changed;
@@ -72,7 +80,7 @@ git status virtest
 ### Einhard
 
 [This library](https://gitlab.com/Marix/Einhard) seems inactive, but it is sound and it has never given problems.
-Due to CMake policies, the minimum required CMake version has been increased from `2.6.2` to `3.0`.
+Due to CMake policies, the minimum required CMake version has been implicitly increased as already described.
 It is planned to leave this library frozen, unless C++ problems arise.
 If anything will be changed at some point, **be sure not to forget the steps mentioned in the general remarks above**, as well as using a modern CMake version.
 
