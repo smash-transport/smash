@@ -255,9 +255,8 @@ if(ENABLE_NANOBENCHMARKING)
   endif()
 endif()
 
-# this is the "object library" target: compiles the sources only once
-# see stackoverflow.com/questions/2152077/is-it-possible-to-get-cmake-to
-# -build-both-a-static-and-shared-version-of-the-sam
+# this is the "object library" target: compiles the sources
+# only once see https://stackoverflow.com/a/29824424
 add_library(objlib OBJECT ${smash_src})
 # shared libraries need PIC
 set_property(TARGET objlib PROPERTY POSITION_INDEPENDENT_CODE 1)
