@@ -69,12 +69,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 
 # Set a default value for CMAKE_BUILD_TYPE, otherwise we get something
 # which is none of the options.
-if(NOT CMAKE_BUILD_TYPE)
+if(NOT DEFINED CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
    # Change RelWithDebInfo below to Release for SMASH releases
    set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
       "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel Profiling."
       FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
+elseif(NOT CMAKE_BUILD_TYPE MATCHES "^(Debug|Release|RelWithDebInfo|MinSizeRel|Profiling)$")
+   message(FATAL_ERROR " \n"
+                       " Invalid build configuration specified, CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}.\n"
+                       " Valid values are: Debug, Release, RelWithDebInfo, MinSizeRel or Profiling.\n")
+endif()
 
 # Retrieve architecture information about endianness
 include(TestBigEndian)
