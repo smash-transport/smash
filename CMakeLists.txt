@@ -28,7 +28,7 @@ if(NOT UNIX AND NOT APPLE)
                            " like to collaborate with us to get the code run on your operting system.\n"
                            " At your own risk you can pass -DFORCE_USE_ANY_OS=TRUE to cmake in\n"
                            " order to setup and compile SMASH on your operating system.\n"
-                           " Alternatively you can use the provided Docker containers (see README).")
+                           " Alternatively you can use the provided Docker containers (see README).\n")
    endif()
 endif()
 
@@ -42,7 +42,7 @@ if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
                            " like to collaborate with us to get the codebase support your compiler.\n"
                            " At your own risk you can pass -DFORCE_USE_ANY_COMPILER=TRUE to cmake in\n"
                            " order to setup and try to compile SMASH with the chosen compiler.\n"
-                           " Alternatively you can use the provided Docker containers (see README).")
+                           " Alternatively you can use the provided Docker containers (see README).\n")
    endif()
 endif()
 
@@ -87,13 +87,13 @@ if(IS_BIG_ENDIAN)
     message(STATUS "Big endian architecture detected.")
     option(FORCE_USE_ON_BIG_ENDIAN "Force cmake to setup and compile on big endian machine." OFF)
     if(NOT FORCE_USE_ON_BIG_ENDIAN)
-        message(FATAL_ERROR " \n" # See e.g. https://stackoverflow.com/a/51035045 for formatting
+        message(FATAL_ERROR " \n"
                             " Using SMASH on big endian machines is not officially supported.\n"
                             " Please, contact the SMASH development team (see README) if you would like\n"
                             " to collaborate with us to get the code run on big endian architectures.\n"
                             " At your own risk you can pass -DFORCE_USE_ON_BIG_ENDIAN=TRUE to cmake in\n"
                             " order to setup and compile SMASH on a big endian machine.\n"
-                            " Alternatively you can use the provided Docker containers (see README).")
+                            " Alternatively you can use the provided Docker containers (see README).\n")
     endif()
     add_definitions("-DBIG_ENDIAN_ARCHITECTURE")
 else()
