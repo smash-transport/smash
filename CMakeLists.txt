@@ -129,15 +129,23 @@ add_compiler_flags_if_supported(CXX_FLAGS CMAKE_CXX_FLAGS
    "-march=native"   # The '-march=native' flag is not supported e.g. on Apple M1 machines
    )
 # Set up the profiling build type
+# NOTE: Configuration variables are created and cached by CMake, hence
+#       force their value in the cache if their value is false, e.g. empty.
 if(NOT CMAKE_CXX_FLAGS_PROFILING)
    add_compiler_flags_if_supported("-O3" "-DNDEBUG" "-pg" CXX_FLAGS SUPPORTED_CXX_FLAGS_PROFILING)
 endif()
 if(NOT CMAKE_C_FLAGS_PROFILING)
    add_compiler_flags_if_supported("-O3" "-DNDEBUG" "-pg" C_FLAGS SUPPORTED_C_FLAGS_PROFILING)
 endif()
-set(CMAKE_CXX_FLAGS_PROFILING "${SUPPORTED_CXX_FLAGS_PROFILING}" CACHE STRING "Flags used by the C++ compiler during profile builds.")
-set(CMAKE_C_FLAGS_PROFILING "${SUPPORTED_C_FLAGS_PROFILING}" CACHE STRING "Flags used by the C compiler during profile builds.")
-set(CMAKE_EXE_LINKER_FLAGS_PROFILING "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -pg" CACHE STRING "Flags used by the linker during profile builds.")
+if(NOT CMAKE_CXX_FLAGS_PROFILING)
+   set(CMAKE_CXX_FLAGS_PROFILING "${SUPPORTED_CXX_FLAGS_PROFILING}" CACHE STRING "Flags used by the C++ compiler during profile builds." FORCE)
+endif()
+if(NOT CMAKE_C_FLAGS_PROFILING)
+   set(CMAKE_C_FLAGS_PROFILING "${SUPPORTED_C_FLAGS_PROFILING}" CACHE STRING "Flags used by the C compiler during profile builds." FORCE)
+endif()
+if(NOT CMAKE_EXE_LINKER_FLAGS_PROFILING)
+   set(CMAKE_EXE_LINKER_FLAGS_PROFILING "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -pg" CACHE STRING "Flags used by the linker during profile builds." FORCE)
+endif()
 mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LINKER_FLAGS_PROFILING)
 
 # Let Clang users on Linux be able to use libc++
