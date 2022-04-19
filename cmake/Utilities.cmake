@@ -146,7 +146,7 @@ function(add_compiler_flags_if_supported)
         if(DEFINED __action_on_failure)
             if(DEFINED __unsupported_lang)
                 string(REPLACE ";" "/" __unsupported_lang "${__unsupported_lang}") # list(JOIN ...) available from CMake 3.12
-                message(${__action_on_failure} "Your ${__unsupported_lang} compiler${__plural} does not support the '${__flag}' flag${__unused_flag_message}!")
+                message(${__action_on_failure} "Your ${__unsupported_lang} compiler does not support the '${__flag}' flag${__unused_flag_message}!")
             endif()
         endif()
         if(__VERBOSE)
