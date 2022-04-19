@@ -52,10 +52,12 @@ include(Utilities)
 
 # Request a given C++ standard
 set(CXX_SMASH_STANDARD "11")
-# To be user friendly, fail early if standard not supported
-check_cxx_compiler_flag("-std=c++${CXX_SMASH_STANDARD}" IS_CXX_SMASH_STANDARD_SUPPORTED)
-if(NOT IS_CXX_SMASH_STANDARD_SUPPORTED)
-   message(FATAL_ERROR "The required C++${CXX_SMASH_STANDARD} standard is not supported by your compiler.")
+# To be user friendly, fail early if standard is not supported (do it for official supported compilers only)
+if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
+   check_cxx_compiler_flag("-std=c++${CXX_SMASH_STANDARD}" IS_CXX_SMASH_STANDARD_SUPPORTED)
+   if(NOT IS_CXX_SMASH_STANDARD_SUPPORTED)
+      message(FATAL_ERROR "The required C++${CXX_SMASH_STANDARD} standard is not supported by your compiler.")
+   endif()
 endif()
 # Request then the standard
 if(NOT "${CMAKE_CXX_STANDARD}")
