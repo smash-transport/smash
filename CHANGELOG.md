@@ -20,9 +20,14 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+### Added
+* New CMake build configuration `MinSizeRel` to optimize in executable size 
+
 ### Changed
 * Only UNIX-like operating systems (e.g. Linux, MacOS) are officially supported
 * Only GCC, Clang and Apple clang compilers are officially supported
+* Use CMake default compiler flags for `RelWithDebInfo` build configuration, hence having `-O2` optimization level instead of `-03`
+
 
 ## SMASH-2.2rc
 Date:

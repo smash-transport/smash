@@ -10,7 +10,12 @@ project(Cuba)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer -Wall -DNOUNDERSCORE -DREALSIZE=8 -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -DNOUNDERSCORE -DREALSIZE=8 -fPIC")
+# Flags -pg and -fomit-frame-pointer are incompatible, hence omit
+# the latter in profiling mode, where performance is irrelevant
+if(NOT CMAKE_BUILD_TYPE STREQUAL "Profiling")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
+endif()
 # The '-march=native' flag is not supported e.g. on Apple M1 machines
 #  -> check if the C compiler supports it
 set(CMAKE_REQUIRED_FLAGS "-march=native")

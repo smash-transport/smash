@@ -7,12 +7,11 @@
 #
 #########################################################
 
-# remove -Winline for test code
-string(REPLACE "-Winline " "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+# Add 3rd-party virtest library
+include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rdparty/virtest")
 
+# Copy needed input file to build directory
 file(COPY ../../input/config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
-string(REPLACE " -Wfloat-equal" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 option(FORMAT_TEST_OUTPUT_FOR_VIM
    "If ON the unit test output of run_* targets will work with the vim quickfix parser and vim will directly take you to the line that failed."
@@ -21,9 +20,6 @@ set(UNITTEST_ARGS "")
 if(FORMAT_TEST_OUTPUT_FOR_VIM)
    set(UNITTEST_ARGS "-v")
 endif()
-
-# add 3rd-party virtest library
-include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rdparty/virtest")
 
 # tests:
 # Helper macro that adds a run_<name> target
@@ -358,12 +354,7 @@ if(CTEST_MEMORYCHECK_COMMAND)
                    ERROR_QUIET
                    OUTPUT_STRIP_TRAILING_WHITESPACE)
    if(VALGRIND_VERSION_STRING MATCHES "^valgrind-3.11")
-      if(NOT WIN32)
-        string(ASCII 27 Esc)
-        set(DEFAULT_COL "${Esc}[m")
-        set(YELLOW      "${Esc}[33m")
-      endif()
-      message(STATUS "${YELLOW}There is a known bug with valgrind 3.11 (unrecognised instruction) - disabling memchecks.${DEFAULT_COL}")
+      message(ATTENTION "There is a known bug with valgrind 3.11 (unrecognised instruction) - disabling memchecks.")
    else()
       set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
       add_custom_target(memcheck_collider

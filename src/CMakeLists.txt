@@ -22,25 +22,27 @@ else()
   set(SMASH_VERSION "${CMAKE_PROJECT_NAME}-${SMASH_VERSION}")
 endif()
 
-# Enable warnings
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch")
-if (CMAKE_COMPILER_IS_GNUCC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op")
-  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnull-dereference -Wduplicated-cond")
+# Enable warnings for supported compilers only
+# --> Here we know the compilers support the flag, do not test!
+if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch")
+  if (CMAKE_COMPILER_IS_GNUCC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op")
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnull-dereference -Wduplicated-cond")
+    endif()
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wrestrict -Wduplicated-branches")
+    endif()
   endif()
-  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wrestrict -Wduplicated-branches")
+  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")
   endif()
-endif()
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")
-endif()
-
-# Enable warnings about deprecated C functions
-option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C funtions in SMASH." OFF)
-if (DEPRECATE_C_FNS)
-  add_definitions(-include smash/deprecate_c_functions.h -DDONT_ASSERT_TEST)
+  # Enable warnings about deprecated C functions
+  option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C funtions in SMASH." OFF)
+  if (DEPRECATE_C_FNS)
+    add_definitions(-include smash/deprecate_c_functions.h -DDONT_ASSERT_TEST)
+  endif()
 endif()
 
 find_package (Git)
@@ -70,7 +72,7 @@ option(TRY_USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
 if(TRY_USE_ROOT)
   find_package(ROOT 5.34 QUIET)
   if(ROOT_FOUND)
-    message(STATUS "Found ROOT ${ROOT_VERSION} at ${ROOT_LIBRARIES}.")
+    message(STATUS "Found ROOT ${ROOT_VERSION} (include at ${ROOT_INCLUDE_DIR}).")
     include_directories(SYSTEM "${ROOT_INCLUDE_DIR}")
     set(SMASH_LIBRARIES ${ROOT_LIBRARIES})
     add_definitions(-DSMASH_USE_ROOT)
@@ -83,7 +85,7 @@ option(TRY_USE_HEPMC "Turn this off to disable HepMC output support in SMASH." O
 if(TRY_USE_HEPMC OR TRY_USE_RIVET)
   find_package(HepMC3 QUIET)
   if(HepMC3_FOUND)
-    message(STATUS "Found HepMC ${HepMC3_VERSION} at ${HEPMC3_LIBRARIES}.")
+    message(STATUS "Found HepMC ${HepMC3_VERSION} (include at ${HEPMC3_INCLUDE_DIR}).")
     include_directories(SYSTEM "${HEPMC3_INCLUDE_DIR}")
     set(SMASH_LIBRARIES
         ${SMASH_LIBRARIES}
@@ -103,22 +105,14 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
 endif()
 
 option(TRY_USE_RIVET "Turn this off to disable Rivet output support in SMASH." ON)
-set(Rivet_FOUND FALSE)
 if(TRY_USE_RIVET AND HepMC3_FOUND)
-  find_program(RIVET_CONFIG rivet-config
-    DOC "Path to the Rivet configuration script")
-  if(RIVET_CONFIG)
-    execute_process(COMMAND ${RIVET_CONFIG} --version
-      OUTPUT_VARIABLE RIVET_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND ${RIVET_CONFIG} --includedir
-      OUTPUT_VARIABLE RIVET_INCLUDE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND ${RIVET_CONFIG} --libs
-      OUTPUT_VARIABLE RIVET_LIB OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "Found Rivet ${RIVET_VERSION} at ${RIVET_INCLUDE_DIR} ${RIVET_LIB}.")
+  find_package(Rivet QUIET)
+  if(Rivet_FOUND)
+    message(STATUS "Found Rivet ${RIVET_VERSION} (include at ${RIVET_INCLUDE_DIR}).")
     include_directories(SYSTEM "${RIVET_INCLUDE_DIR}")
     set(SMASH_LIBRARIES
       ${SMASH_LIBRARIES}
-      ${RIVET_LIB}
+      ${RIVET_LIBRARIES}
       )
     add_definitions(-DSMASH_USE_RIVET)
     set(Rivet_FOUND TRUE)
@@ -261,9 +255,8 @@ if(ENABLE_NANOBENCHMARKING)
   endif()
 endif()
 
-# this is the "object library" target: compiles the sources only once
-# see stackoverflow.com/questions/2152077/is-it-possible-to-get-cmake-to
-# -build-both-a-static-and-shared-version-of-the-sam
+# this is the "object library" target: compiles the sources
+# only once see https://stackoverflow.com/a/29824424
 add_library(objlib OBJECT ${smash_src})
 # shared libraries need PIC
 set_property(TARGET objlib PROPERTY POSITION_INDEPENDENT_CODE 1)
