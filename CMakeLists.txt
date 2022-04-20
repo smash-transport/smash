@@ -8,7 +8,7 @@
 #########################################################
 
 # Minimum cmake version this is tested on
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.14)
 
 # The name, version and language of our project
 project(SMASH VERSION 2.1.4 LANGUAGES CXX)

@@ -38,7 +38,7 @@ SMASH is known to compile and work on little endian machines with UNIX-like oper
 Any different operating system and/or compiler and/or endianness is not officially supported.
 
 SMASH requires the following tools and libraries:
-- cmake >= 3.9
+- cmake >= 3.14
 - the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
 - boost filesystem >= 1.49
