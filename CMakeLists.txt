@@ -50,6 +50,15 @@ endif()
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Utilities)
 
+# SMASH will be shipped as shared library and hence we want to build position independent code
+include(CheckPIESupported)
+check_pie_supported(LANGUAGES CXX)
+if(NOT CMAKE_CXX_LINK_PIE_SUPPORTED)
+  message(ATTENTION "PIE is not supported at link time for C++. "
+                    "PIE link options will not be passed to linker.")
+endif()
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # Request a given C++ standard
 set(CXX_SMASH_STANDARD "11")
 # To be user friendly, fail early if standard is not supported (do it for official supported compilers only)
@@ -123,7 +132,6 @@ add_subdirectory(3rdparty)
 #       to set those for Profiling build, only.
 #        => https://cristianadam.eu/20190223/modifying-the-default-cmake-build-types/
 add_compiler_flags_if_supported(CXX_FLAGS CMAKE_CXX_FLAGS
-   "-fPIC"           # Position independent code, this should be removed, see issue #846
    "-fno-math-errno" # Tell the compiler to ignore errno setting of math functions.
                      # This can help the compiler considerably in optimizing mathematical expressions.
    "-march=native"   # The '-march=native' flag is not supported e.g. on Apple M1 machines

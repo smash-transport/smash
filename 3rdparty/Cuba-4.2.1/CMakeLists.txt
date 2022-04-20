@@ -10,7 +10,7 @@ project(Cuba)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -DNOUNDERSCORE -DREALSIZE=8 -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -DNOUNDERSCORE -DREALSIZE=8")
 # Flags -pg and -fomit-frame-pointer are incompatible, hence omit
 # the latter in profiling mode, where performance is irrelevant
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Profiling")
