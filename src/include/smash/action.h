@@ -448,7 +448,7 @@ class Action {
    *
    * \throw std::invalid_argument if one outgoing particle is a resonance
    */
-  void sample_manybody_phasespace();
+  virtual void sample_manybody_phasespace();
 
   /**
    * Assign the formation time to the outgoing particles.
