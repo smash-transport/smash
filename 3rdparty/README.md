@@ -8,8 +8,6 @@ This README file is meant to contain information about the work that has been do
 
 ### General remarks
 
-:warning: :arrow_right: ADD HERE COMMENT ABOUT `-fPIC` compiler flag, see #846.
-
 All third party libraries are shipped with their requirement about the minimum CMake version and SMASH has one as well.
 **Unless the library is needing a larger version of that required by SMASH**, we drop the third library requirement,
 ```diff
@@ -24,7 +22,14 @@ When updating either Cuba or YAML,
 * the _cmake/FindSMASH.cmake_ file contains few occurrences that require the same type of adjustment.
 
 Cuba and Einhard libraries use the `-march=native` flag that is not supported by e.g. Appleclang 13.0 compiler on M1 machines.
-Hence a patch has been added in [commit d064cac0](https://github.com/smash-transport/smash-devel/commit/d064cac0fa5b68089cf0c0c2ac7c11c358a1c15d) and it has to be maintained.
+Hence, it is important to add this flag using the `add_compiler_flags_if_supported` CMake function.
+This is already in place and it has to be maintained.
+
+It is worth adding a last remark about how libraries are to be compiled.
+This should not require any maintenance change, although it is not guaranteed to be so in the future.
+Since SMASH is going to be shipped as a shared library, we need to offer position independent code.
+This is imposed at SMASH CMake top-level for all targets and should propagate automatically for third-party libraries, too.
+
 
 ### YAML
 
@@ -39,11 +44,13 @@ mv yaml-cpp-yaml-cpp-"${YAML_VERSION}" yaml-cpp-"${YAML_VERSION}" && rm yaml-cpp
 git status yaml-cpp-"${YAML_VERSION}"
 unset -v 'YAML_VERSION'
 ```
-**Be sure not to forget the steps mentioned in the general remarks above!**
+**Be sure to drop any CMake version requirement as described in the general remarks above.**
+
 Of course, you should try to compile SMASH with the new version of the library and check that everything works fine.
 If third-party warnings pop up, have a look to them and see if something can be done about it.
 It is in general not desired to pollute compilation with warnings.
 For example, for version `0.7.0` the compiler flag `-Wno-shadow` has been added since some warnings otherwise where given and the YAML developers declared them [as fine](https://github.com/jbeder/yaml-cpp/issues/764).
+
 
 ### Cuba
 
@@ -63,7 +70,8 @@ rm -r Cuba-"${OLD_CUBA_VERSION}"
 git status Cuba-"${NEW_CUBA_VERSION}"
 unset -v 'OLD_CUBA_VERSION' 'NEW_CUBA_VERSION'
 ```
-**Be sure not to forget the steps mentioned in the general remarks above!**
+**Be sure not to forget the steps mentioned in the general remarks above.**
+
 
 ### Virtest
 
@@ -73,16 +81,28 @@ To check for updates, you can e.g. follow the procedure here below, from within 
 rm -r virtest
 git clone --depth 1 git@github.com:mattkretz/virtest.git
 rm -r virtest/.git
+# Apply changes done in commit 97c2b917 to remove CMake minimum version requirement
 git status virtest
 # If something changed the library evolved from that shipped with SMASH.
 ```
+The changes to drop the CMake minimum requirement of the library can be easily applied by hand to the _3rdparty/virtest/CMakeLists.txt_ file.
+Add
+```diff
++# CMake minimum version inherited from SMASH context
++
+```
+at the very top of the file and remove the call to `cmake_minimum_required`, e.g.
+```diff
+-cmake_minimum_required(VERSION 2.6)
+```
+
 
 ### Einhard
 
 [This library](https://gitlab.com/Marix/Einhard) seems inactive, but it is sound and it has never given problems.
 Due to CMake policies, the minimum required CMake version has been implicitly increased as already described.
 It is planned to leave this library frozen, unless C++ problems arise.
-If anything will be changed at some point, **be sure not to forget the steps mentioned in the general remarks above**, as well as using a modern CMake version.
+If anything will be changed at some point, **be sure not to forget the steps mentioned in the general remarks above**.
 
 
 
