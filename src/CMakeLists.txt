@@ -257,9 +257,9 @@ endif()
 
 # this is the "object library" target: compiles the sources
 # only once see https://stackoverflow.com/a/29824424
+# NOTE: shared libraries need PIC and this is already set for
+#       all targets through CMAKE_POSITION_INDEPENDENT_CODE
 add_library(objlib OBJECT ${smash_src})
-# shared libraries need PIC
-set_property(TARGET objlib PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 add_executable(smash smash.cc $<TARGET_OBJECTS:objlib>)
 
