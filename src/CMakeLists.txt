@@ -131,7 +131,7 @@ if(Pythia_FOUND)
      )
   set(SMASH_LIBRARIES
      ${SMASH_LIBRARIES}
-     ${Pythia_LIBRARIES} -ldl
+     ${Pythia_LIBRARIES} ${CMAKE_DL_LIBS}
   )
   add_definitions(
   "-DPYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
