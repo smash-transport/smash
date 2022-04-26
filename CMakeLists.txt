@@ -89,6 +89,8 @@ elseif(NOT CMAKE_BUILD_TYPE MATCHES "^(Debug|Release|RelWithDebInfo|MinSizeRel|P
    message(FATAL_ERROR " \n"
                        " Invalid build configuration specified, CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}.\n"
                        " Valid values are: Debug, Release, RelWithDebInfo, MinSizeRel or Profiling.\n")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+   message(ATTENTION "Consider adding '-O0' compiler flag for best debug information.")
 endif()
 
 # Retrieve architecture information about endianness
