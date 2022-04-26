@@ -41,7 +41,6 @@ YAML_VERSION='X.Y.Z' # Put in the right numbers
 wget https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-"${YAML_VERSION}".zip
 unzip yaml-cpp-"${YAML_VERSION}".zip
 mv yaml-cpp-yaml-cpp-"${YAML_VERSION}" yaml-cpp-"${YAML_VERSION}" && rm yaml-cpp-"${YAML_VERSION}".zip
-git status yaml-cpp-"${YAML_VERSION}"
 unset -v 'YAML_VERSION'
 ```
 **Be sure to drop any CMake version requirement as described in the general remarks above.**
