@@ -17,7 +17,13 @@ DecayActionDilepton::DecayActionDilepton(const ParticleData &p, double time,
                                          double shining_weight)
     : DecayAction({p}, time), shining_weight_(shining_weight) {}
 
-void DecayActionDilepton::sample_3body_phasespace() {
+void DecayActionDilepton::sample_manybody_phasespace() {
+  // Only Dalitz decays implemented
+  if (outgoing_particles_.size() != 3) {
+    throw std::runtime_error(
+        "Error in DecayActionDilepton::sample_manybody_phasespace: Incorrrect "
+        "number of outgoing particles in Dalitz decay");
+  }
   // find the non-lepton particle position
   int non_lepton_position = -1;
   for (int i = 0; i < 3; ++i) {
@@ -29,7 +35,8 @@ void DecayActionDilepton::sample_3body_phasespace() {
 
   if (non_lepton_position == -1) {
     throw std::runtime_error(
-        "Error in DecayActionDilepton::sample_3body_phasespace.");
+        "Error in DecayActionDilepton::sample_3body_phasespace: No "
+        "non-leptonic outgoing particle in dilepton Dalitz decay found.");
   }
 
   ParticleData &nl = outgoing_particles_[non_lepton_position];
