@@ -48,14 +48,16 @@ endfunction()
 # (i.e. testing if it is supported) and possibly warn or fail if
 # it is not. Syntax:
 #
-#    add_compiler_flags_if_supported(<flag(s)> [VERBOSE] [ON_FAILURE <value>]
+#    add_compiler_flags_if_supported(<flag(s)> [ADD_IF_PRESENT]
+#                                    [VERBOSE] [ON_FAILURE <value>]
 #                                    [C_FLAGS <var>] [CXX_FLAGS <var>])
 #
 # Passing either C_FLAGS or CXX_FLAGS or both make the function only
 # add the flag to the passed flag variable(s). If none is passed
 # the flag is added to both CMAKE_C_FLAGS and CMAKE_CXX_FLAGS.
 # ON_FAILURE accepted values are QUIET|WARN|FATAL and WARN is the
-# used one if nothing is passed.
+# used one if nothing is passed. ADD_IF_PRESENT makes the function add
+# any flag irrespectively of it being already in the flag variable(s).
 #
 # TECHNICAL NOTES:
 #  1. The function is prepared to work for flags containing ';' as well,
@@ -77,7 +79,7 @@ get_filename_component(_currentDir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include("${_currentDir}/AddCompilerFlag.cmake")
 function(add_compiler_flags_if_supported)
     # Parse arguments and do logic to set up needed variables
-    cmake_parse_arguments(PARSE_ARGV 0 "_" "VERBOSE" "ON_FAILURE;C_FLAGS;CXX_FLAGS" "")
+    cmake_parse_arguments(PARSE_ARGV 0 "_" "VERBOSE;ADD_IF_PRESENT" "ON_FAILURE;C_FLAGS;CXX_FLAGS" "")
     list(LENGTH __UNPARSED_ARGUMENTS __number_of_flags)
     if(__number_of_flags EQUAL 0)
         message(FATAL_ERROR "No flag passed to add_compiler_flags_if_supported!")
@@ -109,17 +111,6 @@ function(add_compiler_flags_if_supported)
     else()
         message(FATAL_ERROR "Syntax error for add_compiler_flags_if_supported (wrong verbosity)")
     endif()
-    # Define handy variables to avoid/simplify logic later
-    if(DEFINED __c_flags AND DEFINED __cxx_flags)
-        set(__add_to_c "TRUE")
-        set(__add_to_cxx "TRUE")
-    elseif(DEFINED __c_flags)
-        set(__add_to_c "TRUE")
-    elseif(DEFINED __cxx_flags)
-        set(__add_to_cxx "TRUE")
-    else()
-        message(FATAL_ERROR "Unexpected case for add_compiler_flags_if_supported")
-    endif()
     # Finally check/add flags and report to user
     foreach(__flag ${__flags})
         if(__flag MATCHES ";")
@@ -127,6 +118,37 @@ function(add_compiler_flags_if_supported)
                 message(ATTENTION "Compiler flags containing a semicolon cannot be added, ignoring '${__flag}'.")
             endif()
             continue()
+        endif()
+        # At each iteration (re)set what should be done
+        if(DEFINED __c_flags AND DEFINED __cxx_flags)
+            set(__add_to_c "TRUE")
+            set(__add_to_cxx "TRUE")
+        elseif(DEFINED __c_flags)
+            set(__add_to_c "TRUE")
+        elseif(DEFINED __cxx_flags)
+            set(__add_to_cxx "TRUE")
+        else()
+            message(FATAL_ERROR "Unexpected case for add_compiler_flags_if_supported")
+        endif()
+        # Check if some flag was already present
+        if(NOT __ADD_IF_PRESENT)
+            string(REGEX REPLACE "=.*$" "" __part_of_flag_till_equal "${__flag}")
+            if(__add_to_c)
+                if(${__c_flags} MATCHES "(^| )${__part_of_flag_till_equal}")
+                    unset(__add_to_c)
+                    if(__VERBOSE)
+                        message(STATUS "C flag '${__part_of_flag_till_equal}' already present in ${__c_flags}, '${__flag}' will not be added.")
+                    endif()
+                endif()
+            endif()
+            if(__add_to_cxx)
+                if(${__cxx_flags} MATCHES "(^| )${__part_of_flag_till_equal}")
+                    unset(__add_to_cxx)
+                    if(__VERBOSE)
+                        message(STATUS "C++ flag '${__part_of_flag_till_equal}' already present in ${__cxx_flags}, '${__flag}' will not be added.")
+                    endif()
+                endif()
+            endif()
         endif()
         set(MESSAGE_QUIET ON)
         if(__add_to_c AND __add_to_cxx)
