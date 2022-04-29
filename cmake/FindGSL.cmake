@@ -1,4 +1,6 @@
+#=============================================================================
 # - Try to find GSL (GNU Scientific Library)
+#
 # This will define:
 #
 #  GSL_FOUND
@@ -8,8 +10,7 @@
 #
 #  This module is based on the module provided by cmake starting with version 3.2
 #  See https://cmake.org/licensing for copyright info.
-
-
+#
 #=============================================================================
 # Copyright © 2018  SMASH Team
 #

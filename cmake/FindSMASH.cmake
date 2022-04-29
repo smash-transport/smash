@@ -1,4 +1,5 @@
-# Try to find SMASH instalation
+#=======================================================
+# - Try to find SMASH instalation
 #
 # Once done this will define:
 #
@@ -8,6 +9,7 @@
 #
 # The environment variable SMASH_DIR must be set properly to succeed, e. g.:
 # export SMASH_DIR=~/Work/SMASH/smash
+#=======================================================
 
 # At the moment a macro about the system endianness is needed from within SMASH
 include(TestBigEndian)

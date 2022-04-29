@@ -1,4 +1,6 @@
+#=======================================================
 # - Try to find ROOT
+#
 # This will define:
 #
 #  ROOT_FOUND
@@ -6,15 +8,14 @@
 #  ROOT_INCLUDE_DIR
 #  ROOT_LIBRARIES
 #  ROOT_VERSION
-
-########################################################
+#=======================================================
 #
 #    Copyright (c) 2014-2015
 #      SMASH Team
 #
 #    BSD 3-clause license
-# 
-######################################################### 
+#
+#=======================================================
 
 include(FindPackageHandleStandardArgs)
 find_program(ROOT_CONFIG NAMES root-config HINTS $ENV{ROOTSYS}/bin)

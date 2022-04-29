@@ -1,11 +1,15 @@
+#=============================================================================
 # - Check whether the C compiler supports a given flag.
-# CHECK_C_COMPILER_FLAG(<flag> <var>)
+#
+#   CHECK_C_COMPILER_FLAG(<flag> <var>)
+#
 #  <flag> - the compiler flag
 #  <var>  - variable to store the result
+#
 # This internally calls the check_c_source_compiles macro.
 # See help for CheckCSourceCompiles for a listing of variables
 # that can modify the build.
-
+#
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
 # Copyright 2006 Alexander Neundorf <neundorf@kde.org>

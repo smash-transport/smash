@@ -1,4 +1,6 @@
+#=======================================================
 # - Try to find Rivet
+#
 # This will define:
 #
 #  RIVET_CONFIG
@@ -6,15 +8,14 @@
 #  RIVET_INCLUDE_DIR
 #  RIVET_LIBRARIES
 #  Rivet_FOUND
-
-########################################################
+#=======================================================
 #
 #    Copyright (c) 2022
 #      SMASH Team
 #
 #    BSD 3-clause license
 #
-#########################################################
+#=======================================================
 
 find_program(RIVET_CONFIG rivet-config DOC "Path to the Rivet configuration script")
 

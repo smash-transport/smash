@@ -1,11 +1,11 @@
-########################################################
+#=======================================================
 #
 #    Copyright (c) 2022
 #      SMASH Team
 #
 #    BSD 3-clause license
 # 
-#########################################################
+#=======================================================
 
 # Redefine CMake message to have the possibility to suppress
 # informational messages (not warnings, errors or custom attentions)

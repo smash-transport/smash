@@ -1,11 +1,11 @@
-# This cmake code to integrate Pythia contains contributions by 
-# K. Gallmeister, Goethe University, March 2015
-# <gallmei@th.physik.uni-frankfurt.de>
+#=============================================================================
+# This cmake code to integrate Pythia contains contributions by
+#   K. Gallmeister, Goethe University, March 2015
+#   <gallmei@th.physik.uni-frankfurt.de>
 # and by
-# A. Verbytskyi, Max-Planck Institute für Physics, January 2022
-# <andrii.verbytskyi@mpp.mpg.de>
-
-
+#   A. Verbytskyi, Max-Planck Institute für Physics, January 2022
+#   <andrii.verbytskyi@mpp.mpg.de>
+#=============================================================================
 # - Locate pythia library
 #
 # Exploits the environment variables:
@@ -29,7 +29,7 @@
 #  Pythia_LIBDIR
 #  Pythia_LHAPDFDummy_LIBRARY
 #  Pythia_LIBRARIES : includes 3 libraries above; not to be used if lhapdf is used
-
+#=============================================================================
 
 if(NOT("${Pythia_CONFIG_EXECUTABLE}" STREQUAL ""))
     MESSAGE(STATUS "Trying to locate Pythia using variable Pythia_CONFIG_EXECUTABLE = ${Pythia_CONFIG_EXECUTABLE}")
