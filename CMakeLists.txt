@@ -82,7 +82,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 # Set a default value for CMAKE_BUILD_TYPE, otherwise we get something
 # which is none of the options.
 if(NOT DEFINED CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
-   # Change RelWithDebInfo below to Release for SMASH releases
    set(CMAKE_BUILD_TYPE Release CACHE STRING
       "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel Profiling."
       FORCE)
