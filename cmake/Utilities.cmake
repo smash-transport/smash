@@ -47,11 +47,11 @@ endfunction()
 # Add utility function to add a compiler flag in a sound way
 # (i.e. testing if it is supported) and possibly warn or fail if
 # it is not. Syntax:
-#
+# ~~~
 #    add_compiler_flags_if_supported(<flag(s)> [ADD_IF_PRESENT]
 #                                    [VERBOSE] [ON_FAILURE <value>]
 #                                    [C_FLAGS <var>] [CXX_FLAGS <var>])
-#
+# ~~~
 # Passing either C_FLAGS or CXX_FLAGS or both make the function only
 # add the flag to the passed flag variable(s). If none is passed
 # the flag is added to both CMAKE_C_FLAGS and CMAKE_CXX_FLAGS.
@@ -60,6 +60,7 @@ endfunction()
 # any flag irrespectively of it being already in the flag variable(s).
 #
 # TECHNICAL NOTES:
+#
 #  1. The function is prepared to work for flags containing ';' as well,
 #     but this case is excluded at the moment, since the add_compiler_flag
 #     macro, which is used internally, does not support such possibility.
