@@ -61,16 +61,16 @@ endfunction()
 #
 # TECHNICAL NOTES:
 #  1. The function is prepared to work for flags containing ';' as well,
-#     but this case is excluded at the moment, since the AddCompilerFlag
+#     but this case is excluded at the moment, since the add_compiler_flag
 #     macro, which is used internally, does not support such possibility.
 #     It was decided to postpone a fix till a real need occurs.
 #     The PARSE_ARGV variant of cmake_parse_arguments can only be used
 #     in functions and not in macro, hence this must be a function.
 #  2. This function has variables semantically very similar to the
-#     AddCompilerFlag macro. However, the same name cannot/should not
+#     add_compiler_flag macro. However, the same name cannot/should not
 #     be used, because there would be a clash due to how macros work.
 #     Functions, instead, have their own scope, but changing the
-#     AddCompilerFlag macro into a function would also not naively
+#     add_compiler_flag macro into a function would also not naively
 #     work, since its <...>_RESULT variables have to be set in the
 #     calling scope. This is possible using set(... PARENT_SCOPE)
 #     but was not done. As convention, local variables here have been
@@ -152,12 +152,12 @@ function(add_compiler_flags_if_supported)
         endif()
         set(MESSAGE_QUIET ON)
         if(__add_to_c AND __add_to_cxx)
-            AddCompilerFlag("${__flag}" C_FLAGS ${__c_flags} CXX_FLAGS ${__cxx_flags}
-                                       C_RESULT __c_result  CXX_RESULT __cxx_result)
+            add_compiler_flag("${__flag}" C_FLAGS ${__c_flags} CXX_FLAGS ${__cxx_flags}
+                                          C_RESULT __c_result  CXX_RESULT __cxx_result)
         elseif(__add_to_c)
-            AddCompilerFlag("${__flag}" C_FLAGS ${__c_flags} C_RESULT __c_result)
+            add_compiler_flag("${__flag}" C_FLAGS ${__c_flags} C_RESULT __c_result)
         elseif(__add_to_cxx)
-            AddCompilerFlag("${__flag}" CXX_FLAGS ${__cxx_flags} CXX_RESULT __cxx_result)
+            add_compiler_flag("${__flag}" CXX_FLAGS ${__cxx_flags} CXX_RESULT __cxx_result)
         endif()
         unset(MESSAGE_QUIET)
         if(__add_to_c)

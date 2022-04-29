@@ -321,16 +321,16 @@ if(BUILD_TESTING)
    # sanitizer build will be skipped altogether.
    set(SANITIZER_FLAG -fsanitize=address,undefined)
    set(_tmp "${CMAKE_REQUIRED_FLAGS}")
-   set(CMAKE_REQUIRED_FLAGS ${SANITIZER_FLAG}) # AddCompilerFlag only adds the
+   set(CMAKE_REQUIRED_FLAGS ${SANITIZER_FLAG}) # add_compiler_flag only adds the
                                                # flag for compilation - it's
                                                # also required with the link
                                                # command, though
-   AddCompilerFlag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
+   add_compiler_flag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
    set(CMAKE_REQUIRED_FLAGS "${_tmp}")
    if(NOT HAVE_SANITIZER)
       set(SANITIZER_FLAG -fsanitize=address)
       set(CMAKE_REQUIRED_FLAGS ${SANITIZER_FLAG})
-      AddCompilerFlag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
+      add_compiler_flag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
       set(CMAKE_REQUIRED_FLAGS "${_tmp}")
    endif()
 
