@@ -35,8 +35,8 @@ void DecayActionDilepton::sample_manybody_phasespace() {
 
   if (non_lepton_position == -1) {
     throw std::runtime_error(
-        "Error in DecayActionDilepton::sample_3body_phasespace: Not found "
-        "non-leptonic outgoing particle in Dalitz decay");
+        "Error in DecayActionDilepton::sample_3body_phasespace: No "
+        "non-leptonic outgoing particle in dilepton Dalitz decay found.");
   }
 
   ParticleData &nl = outgoing_particles_[non_lepton_position];
