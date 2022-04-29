@@ -1,35 +1,16 @@
-# This project is added via the add_subdirectory() command
-# which creates a new scope and the CMAKE_MINIMUM_REQUIRED_VERSION
-# contains the most recent minimum required version in the current
-# variable scope or any parent variable scope. Hence, using it
-# here should imply that the same SMASH requirement is imposed.
-# Omitting the command would be equivalent in this case.
-cmake_minimum_required(VERSION ${CMAKE_MINIMUM_REQUIRED_VERSION})
+# CMake minimum version inherited from SMASH context
 project(Cuba)
 
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -DNOUNDERSCORE -DREALSIZE=8")
+add_definitions(-DNOUNDERSCORE -DREALSIZE=8)
+add_compiler_flags_if_supported(C_FLAGS CMAKE_C_FLAGS "-Wall" "-march=native")
 # Flags -pg and -fomit-frame-pointer are incompatible, hence omit
 # the latter in profiling mode, where performance is irrelevant
 if(NOT CMAKE_BUILD_TYPE STREQUAL "Profiling")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fomit-frame-pointer")
+    add_compiler_flags_if_supported(C_FLAGS CMAKE_C_FLAGS "-fomit-frame-pointer")
 endif()
-# The '-march=native' flag is not supported e.g. on Apple M1 machines
-#  -> check if the C compiler supports it
-set(CMAKE_REQUIRED_FLAGS "-march=native")
-include(CheckCSourceCompiles)
-CHECK_C_SOURCE_COMPILES("int main(void) {return 0;}" C_MARCH_NATIVE_SUPPORTED)
-if(C_MARCH_NATIVE_SUPPORTED)
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
-else()
-   message(STATUS "Your C compiler does not support the '-march=native' flag. This will not be used.")
-endif()
-# It is crucial to unset the tested flag in order to avoid
-# affecting the following calls to 'check_function_exists'
-# and 'check_include_file' functions
-unset(CMAKE_REQUIRED_FLAGS)
 
 set(CMAKE_REQUIRED_INCLUDES "unistd.h" "sys/ipc.h" "sys/shm.h" "math.h" "stdlib.h")
 

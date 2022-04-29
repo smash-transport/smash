@@ -1,11 +1,7 @@
-cmake_minimum_required(VERSION 3.0)
+# CMake minimum version inherited from SMASH context
 project(Einhard)
 
-# set the relevant compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-if(CXX_MARCH_NATIVE_SUPPORTED)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-endif()
+add_compiler_flags_if_supported(CXX_FLAGS CMAKE_CXX_FLAGS "-std=c++11" "-march=native")
 
 add_library(einhard STATIC einhard.cpp)
 
