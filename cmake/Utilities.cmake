@@ -48,14 +48,16 @@ endfunction()
 # (i.e. testing if it is supported) and possibly warn or fail if
 # it is not. Syntax:
 #
-#    add_compiler_flags_if_supported(<flag(s)> [VERBOSE] [ON_FAILURE <value>]
+#    add_compiler_flags_if_supported(<flag(s)> [ADD_IF_PRESENT]
+#                                    [VERBOSE] [ON_FAILURE <value>]
 #                                    [C_FLAGS <var>] [CXX_FLAGS <var>])
 #
-# Passing either C_FLAGS or CXX_FLAGS or both make the function
+# Passing either C_FLAGS or CXX_FLAGS or both make the function only
 # add the flag to the passed flag variable(s). If none is passed
 # the flag is added to both CMAKE_C_FLAGS and CMAKE_CXX_FLAGS.
 # ON_FAILURE accepted values are QUIET|WARN|FATAL and WARN is the
-# used one if nothing is passed.
+# used one if nothing is passed. ADD_IF_PRESENT makes the function add
+# any flag irrespectively of it being already in the flag variable(s).
 #
 # TECHNICAL NOTES:
 #  1. The function is prepared to work for flags containing ';' as well,
@@ -77,7 +79,7 @@ get_filename_component(_currentDir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include("${_currentDir}/AddCompilerFlag.cmake")
 function(add_compiler_flags_if_supported)
     # Parse arguments and do logic to set up needed variables
-    cmake_parse_arguments(PARSE_ARGV 0 "_" "VERBOSE" "ON_FAILURE;C_FLAGS;CXX_FLAGS" "")
+    cmake_parse_arguments(PARSE_ARGV 0 "_" "VERBOSE;ADD_IF_PRESENT" "ON_FAILURE;C_FLAGS;CXX_FLAGS" "")
     list(LENGTH __UNPARSED_ARGUMENTS __number_of_flags)
     if(__number_of_flags EQUAL 0)
         message(FATAL_ERROR "No flag passed to add_compiler_flags_if_supported!")
@@ -99,12 +101,12 @@ function(add_compiler_flags_if_supported)
     else()
         set(__mode "WARN")
     endif()
-    if("${__mode}" STREQUAL "QUIET")
+    if(__mode STREQUAL "QUIET")
         unset(__action_on_failure)
-    elseif("${__mode}" STREQUAL "WARN")
+    elseif(__mode STREQUAL "WARN")
         set(__action_on_failure "ATTENTION")
         set(__unused_flag_message " and this will not be used")
-    elseif("${__mode}" STREQUAL "FATAL")
+    elseif(__mode STREQUAL "FATAL")
         set(__action_on_failure "FATAL_ERROR")
     else()
         message(FATAL_ERROR "Syntax error for add_compiler_flags_if_supported (wrong verbosity)")
@@ -117,26 +119,55 @@ function(add_compiler_flags_if_supported)
             endif()
             continue()
         endif()
-        set(MESSAGE_QUIET ON)
+        # At each iteration (re)set what should be done
         if(DEFINED __c_flags AND DEFINED __cxx_flags)
-            AddCompilerFlag("${__flag}" C_FLAGS ${__c_flags} CXX_FLAGS ${__cxx_flags}
-                                       C_RESULT __c_result  CXX_RESULT __cxx_result)
+            set(__add_to_c "TRUE")
+            set(__add_to_cxx "TRUE")
         elseif(DEFINED __c_flags)
-            AddCompilerFlag("${__flag}" C_FLAGS ${__c_flags} C_RESULT __c_result)
+            set(__add_to_c "TRUE")
         elseif(DEFINED __cxx_flags)
-            AddCompilerFlag("${__flag}" CXX_FLAGS ${__cxx_flags} CXX_RESULT __cxx_result)
+            set(__add_to_cxx "TRUE")
         else()
             message(FATAL_ERROR "Unexpected case for add_compiler_flags_if_supported")
         endif()
+        # Check if some flag was already present
+        if(NOT __ADD_IF_PRESENT)
+            string(REGEX REPLACE "=.*$" "" __part_of_flag_till_equal "${__flag}")
+            if(__add_to_c)
+                if(${__c_flags} MATCHES "(^| )${__part_of_flag_till_equal}")
+                    unset(__add_to_c)
+                    if(DEFINED __action_on_failure)
+                        message(STATUS "C flag '${__part_of_flag_till_equal}' already present in ${__c_flags}, '${__flag}' will not be added.")
+                    endif()
+                endif()
+            endif()
+            if(__add_to_cxx)
+                if(${__cxx_flags} MATCHES "(^| )${__part_of_flag_till_equal}")
+                    unset(__add_to_cxx)
+                    if(DEFINED __action_on_failure)
+                        message(STATUS "C++ flag '${__part_of_flag_till_equal}' already present in ${__cxx_flags}, '${__flag}' will not be added.")
+                    endif()
+                endif()
+            endif()
+        endif()
+        set(MESSAGE_QUIET ON)
+        if(__add_to_c AND __add_to_cxx)
+            AddCompilerFlag("${__flag}" C_FLAGS ${__c_flags} CXX_FLAGS ${__cxx_flags}
+                                       C_RESULT __c_result  CXX_RESULT __cxx_result)
+        elseif(__add_to_c)
+            AddCompilerFlag("${__flag}" C_FLAGS ${__c_flags} C_RESULT __c_result)
+        elseif(__add_to_cxx)
+            AddCompilerFlag("${__flag}" CXX_FLAGS ${__cxx_flags} CXX_RESULT __cxx_result)
+        endif()
         unset(MESSAGE_QUIET)
-        if(DEFINED __c_flags)
+        if(__add_to_c)
             if(__c_result)
                 set(__added_to "${__c_flags}")
             else()
                 set(__unsupported_lang "C")
             endif()
         endif()
-        if(DEFINED __cxx_flags)
+        if(__add_to_cxx)
             if(__cxx_result)
                 set(__added_to ${__added_to} "${__cxx_flags}")
             else()
@@ -145,13 +176,13 @@ function(add_compiler_flags_if_supported)
         endif()
         if(DEFINED __action_on_failure)
             if(DEFINED __unsupported_lang)
-                string(REPLACE ";" "/" __unsupported_lang "${__unsupported_lang}") # list(JOIN ...) available from CMake 3.12
+                list(JOIN __unsupported_lang "/" __unsupported_lang)
                 message(${__action_on_failure} "Your ${__unsupported_lang} compiler does not support the '${__flag}' flag${__unused_flag_message}!")
             endif()
         endif()
         if(__VERBOSE)
             if(DEFINED __added_to)
-                string(REPLACE ";" " and " __added_to "${__added_to}") # list(JOIN ...) available from CMake 3.12
+                list(JOIN __added_to " and " __added_to)
                 message(STATUS "Compiler flag '${__flag}' added to ${__added_to}.")
             endif()
         endif()
