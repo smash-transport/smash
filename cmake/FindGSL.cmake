@@ -41,78 +41,55 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #=============================================================================
 
-
 include(FindPackageHandleStandardArgs)
 
-# first check if GSL_ROOT_DIR is set (either as environment variable or
-# supplied as cmake-option. If so, use it
-if (EXISTS "$ENV{GSL_ROOT_DIR}")
-  file( TO_CMAKE_PATH "$ENV{GSL_ROOT_DIR}" GSL_ROOT_DIR )
-  set( GSL_ROOT_DIR "${GSL_ROOT_DIR}" CACHE PATH "Prefix for GSL installation")
+# first check if GSL_ROOT_DIR is set (either as environment variable or supplied as cmake-option. If
+# so, use it
+if(EXISTS "$ENV{GSL_ROOT_DIR}")
+    file(TO_CMAKE_PATH "$ENV{GSL_ROOT_DIR}" GSL_ROOT_DIR)
+    set(GSL_ROOT_DIR "${GSL_ROOT_DIR}" CACHE PATH "Prefix for GSL installation")
 
- elseif (EXISTS "${GSL_ROOT_DIR}" )
-  file( TO_CMAKE_PATH ${GSL_ROOT_DIR} GSL_ROOT_DIR )
-  set( GSL_ROOT_DIR "${GSL_ROOT_DIR}" CACHE PATH "Prefix for GSL installation")
+elseif(EXISTS "${GSL_ROOT_DIR}")
+    file(TO_CMAKE_PATH ${GSL_ROOT_DIR} GSL_ROOT_DIR)
+    set(GSL_ROOT_DIR "${GSL_ROOT_DIR}" CACHE PATH "Prefix for GSL installation")
 endif()
 
 # no user supplied path. Try to find gsl on our own.
-if ( NOT EXISTS "${GSL_ROOT_DIR}" )
-  set( GSL_USE_PKGCONFIG ON )
+if(NOT EXISTS "${GSL_ROOT_DIR}")
+    set(GSL_USE_PKGCONFIG ON)
 endif()
 
-
-if (GSL_USE_PKGCONFIG)
-  find_package(PkgConfig)
-  pkg_check_modules( GSL gsl )
-  if (EXISTS "${GSL_INCLUDE_DIR}")
-    get_filename_component( GSL_ROOT_DIR "${GSL_INCLUDE_DIR}" PATH CACHE )
-  endif()
+if(GSL_USE_PKGCONFIG)
+    find_package(PkgConfig)
+    pkg_check_modules(GSL gsl)
+    if(EXISTS "${GSL_INCLUDE_DIR}")
+        get_filename_component(GSL_ROOT_DIR "${GSL_INCLUDE_DIR}" PATH CACHE)
+    endif()
 endif()
 
-find_path( GSL_INCLUDE_DIR
-  NAMES gsl
-  HINTS ${GSL_ROOT_DIR}/include ${GSL_INCLUDE_DIR}
-  )
+find_path(GSL_INCLUDE_DIR NAMES gsl HINTS ${GSL_ROOT_DIR}/include ${GSL_INCLUDE_DIR})
 
+find_library(GSL_LIBRARY NAMES gsld gsl HINTS ${GSL_ROOT_DIR}/lib ${GSL_LIBDIR})
 
-find_library( GSL_LIBRARY
-  NAMES gsld gsl
-  HINTS ${GSL_ROOT_DIR}/lib ${GSL_LIBDIR}
-  )
+find_library(GSL_CBLAS_LIBRARY NAMES gslcblas cblas HINTS ${GSL_ROOT_DIR}/lib ${GSL_LIBDIR})
 
-find_library( GSL_CBLAS_LIBRARY
-  NAMES gslcblas cblas
-  HINTS ${GSL_ROOT_DIR}/lib ${GSL_LIBDIR}
-  )
-
-set (GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR} )
-set (GSL_LIBRARIES ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY} )
+set(GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR})
+set(GSL_LIBRARIES ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY})
 
 # we could probably also search in the filepath for the version.
-if (NOT GSL_VERSION)
-  find_program( GSL_CONFIG_EXE
-    NAMES gsl-config
-    HINTS ${GSL_ROOT_DIR}/bin ${GSL_ROOT_DIR}
-    )
-  if (EXISTS ${GSL_CONFIG_EXE})
-    execute_process(
-      COMMAND "${GSL_CONFIG_EXE}" "--version"
-      RESULT_VARIABLE GSL_PROC_STATUS
-      OUTPUT_VARIABLE GSL_VERSION
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      )
-   endif()
+if(NOT GSL_VERSION)
+    find_program(GSL_CONFIG_EXE NAMES gsl-config HINTS ${GSL_ROOT_DIR}/bin ${GSL_ROOT_DIR})
+    if(EXISTS ${GSL_CONFIG_EXE})
+        execute_process(COMMAND "${GSL_CONFIG_EXE}" "--version"
+                        RESULT_VARIABLE GSL_PROC_STATUS
+                        OUTPUT_VARIABLE GSL_VERSION
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
 endif()
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(GSL
-  FOUND_VAR GSL_FOUND
-  REQUIRED_VARS
-    GSL_INCLUDE_DIR
-    GSL_LIBRARY
-    GSL_CBLAS_LIBRARY
-  VERSION_VAR
-    GSL_VERSION
-   )
+find_package_handle_standard_args(GSL
+                                  FOUND_VAR GSL_FOUND
+                                  REQUIRED_VARS GSL_INCLUDE_DIR GSL_LIBRARY GSL_CBLAS_LIBRARY
+                                  VERSION_VAR GSL_VERSION)
 
- mark_as_advanced(GSL_CBLAS_LIBRARY GSL_CONFIG_EXE GSL_INCLUDE_DIRS GSL_LIBRARIES )
-
+mark_as_advanced(GSL_CBLAS_LIBRARY GSL_CONFIG_EXE GSL_INCLUDE_DIRS GSL_LIBRARIES)
