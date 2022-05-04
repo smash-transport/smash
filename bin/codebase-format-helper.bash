@@ -14,6 +14,7 @@ CHOSEN_LANGUAGE=''
 FORMATTER_COMMAND=''
 MODE_PERFORM='FALSE'
 MODE_TEST='FALSE'
+VERBOSE='TRUE'
 FILES_TO_FORMAT=()
 
 function main()
@@ -79,16 +80,18 @@ function look_for_files_to_format()
 function perform_formatting()
 {
     local filename
+    verbose ''
     for filename in "${FILES_TO_FORMAT[@]}"; do
-        printf "Formatting ${filename}\n"
+        verbose "Formatting ${filename}"
         ${FORMATTER_COMMAND} -i "${filename}"
     done
+    verbose ''
 }
 
 function test_formatting()
 {
     local check_flag file_under_examination formatting_differences
-    printf "Testing that ${FORMATTER_COMMAND} does not change the source code in the working directory...\n"
+    verbose "\n Testing that ${FORMATTER_COMMAND} does not change the source code in the working directory..."
     check_flag=0
     for file_under_examination in "${FILES_TO_FORMAT[@]}"; do
         # NOTE: cmake-format has a --check option implemented that might be used
@@ -96,8 +99,8 @@ function test_formatting()
         #       user and hence we just store them here avoiding to format twice
         formatting_differences=$(diff <(cat "${file_under_examination}") <(${FORMATTER_COMMAND} "${file_under_examination}") 2>&1)
         if [[ $? -ne 0 ]]; then
-            printf "File \"${file_under_examination}\" not properly formatted. Comparison with a properly formatted file:\n"
-            printf "${formatting_differences}\n"
+            verbose "\n File \"${file_under_examination}\" not properly formatted. Comparison with a properly formatted file:"
+            verbose "\e[0m${formatting_differences}"
             check_flag=1
         fi
     done
@@ -120,6 +123,7 @@ function usage()
     printf '    %-15s  ->  %s\n' \
            '-p | --perform' 'Perform automatic formatting (for developers)' \
            '-t | --test' 'Test that automatic formatting has been performed (for CI builds)' \
+           '-q | --quiet' 'Reduce output to minimum' \
            '-h | --help' 'Display this hel'
     printf '\n\e[0m'
 }
@@ -141,6 +145,11 @@ function parse_command_line_arguments()
         fail "First command line option must be either 'C++' or 'CMake'."
     else
         CHOSEN_LANGUAGE=$1
+        if [[ ${CHOSEN_LANGUAGE} = 'C++' ]]; then
+            FORMATTER_COMMAND='clang-format'
+        elif [[ ${CHOSEN_LANGUAGE} = 'CMake' ]]; then
+            FORMATTER_COMMAND='cmake-format'
+        fi
         shift
     fi
     while [[ $# -gt 0 ]]; do
@@ -151,18 +160,31 @@ function parse_command_line_arguments()
             -t | --test)
                 MODE_TEST='TRUE'
                 ;;
+            -q | --quiet)
+                VERBOSE='FALSE'
+                ;;
             *)
                 fail "Unrecognised option."
                 ;;
         esac
         shift
     done
+    if [[ ${MODE_PERFORM} = 'FALSE' && ${MODE_TEST} = 'FALSE' ]]; then
+        fail 'Either -t or -p option should be given. Run with -h for more information.'
+    fi
 }
 
 function fail()
 {
     printf "\n \e[1;91mERROR:\e[22m $*\e[0m\n\n" 1>&2
     exit 1
+}
+
+function verbose()
+{
+    if [[ ${VERBOSE} = 'TRUE' ]]; then
+        printf " \e[96m$*\e[0m\n"
+    fi
 }
 
 #===================================================================
