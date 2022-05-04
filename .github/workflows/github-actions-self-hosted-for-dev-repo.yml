@@ -28,9 +28,10 @@ jobs:
           export SMASH_ROOT=$GITHUB_WORKSPACE
           mkdir -p $SMASH_ROOT/build
           # variables dealing with the Singularity container
-          # here we assume that $HOME points to the home directoy of the user "smash"
+          # here we assume that $HOME points to the home directory of the user "smash"
           export TOOLS_DIR=$HOME/actions-runner/smash_stuff_github_actions
-          export PATH=$TOOLS_DIR/clang6_0_0/bin/:$PATH
+          export PATH=$TOOLS_DIR/clang6_0_0/bin/:$TOOLS_DIR/python-tools/bin/:$PATH
+          export PYTHONPATH=$TOOLS_DIR/python-tools:$PYTHONPATH
           export container_file=$TOOLS_DIR/singularity_container.sif
           # we configure and build smash using the environment provided by a Singularity container
           cd $SMASH_ROOT/build
@@ -46,7 +47,8 @@ jobs:
           singularity exec $container_file ctest -j$nproc
           # finally, we check if the code is well formatted
           cd $SMASH_ROOT
-          ./bin/codebase-format-helper.bash -t
+          ./bin/codebase-format-helper.bash C++ -t
+          ./bin/codebase-format-helper.bash CMake -t
           
      
   workflow-fias:      
@@ -67,7 +69,8 @@ jobs:
           # this directory contains pythia, clang and eigen, which are needed later
           # here we do not use $HOME because the runner is hosted in shared common group directory
           export TOOLS_DIR=/home/hyihp-repos/smash-devel_runners/smash_stuff
-          export PATH=$TOOLS_DIR/bin:$TOOLS_DIR/clang6_0_0/bin/:$TOOLS_DIR/cmake-3.20.5/bin:$PATH
+          export PATH=$TOOLS_DIR/bin:$TOOLS_DIR/clang6_0_0/bin/:$TOOLS_DIR/python-tools/bin/:$TOOLS_DIR/cmake-3.20.5/bin:$PATH
+          export PYTHONPATH=$TOOLS_DIR/python-tools:$PYTHONPATH
           # now we configure and build smash
           cd $SMASH_ROOT/build
           cmake .. -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8307/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$TOOLS_DIR/eigen-3.3.9/ \
@@ -79,5 +82,6 @@ jobs:
           # now we run the tests
           CTEST_OUTPUT_ON_FAILURE=1 ctest -j$nproc
           # finally, we check if the code is well formatted
-          ./../bin/codebase-format-helper.bash -t
+          ./../bin/codebase-format-helper.bash C++ -t
+          ./../bin/codebase-format-helper.bash CMake -t
           
