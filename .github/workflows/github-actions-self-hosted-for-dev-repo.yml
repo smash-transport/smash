@@ -46,7 +46,7 @@ jobs:
           singularity exec $container_file ctest -j$nproc
           # finally, we check if the code is well formatted
           cd $SMASH_ROOT
-          ./bin/clang-format-helper.bash -t
+          ./bin/codebase-format-helper.bash -t
           
      
   workflow-fias:      
@@ -79,5 +79,5 @@ jobs:
           # now we run the tests
           CTEST_OUTPUT_ON_FAILURE=1 ctest -j$nproc
           # finally, we check if the code is well formatted
-          ./../bin/clang-format-helper.bash -t
+          ./../bin/codebase-format-helper.bash -t
           

@@ -462,7 +462,7 @@ All code has to be formatted by running `clang-format`. This automatically
 formats the code in SMASH correctly. Use the helper script in SMASH's /bin
 directory to format the source code:
 
-    ./clang-format-helper.bash -p
+    ./codebase-format-helper.bash -p
 
 Review and commit changes afterwards. clang-format does changes that
 don't look good, you can disable it locally using comments like this:

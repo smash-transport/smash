@@ -86,6 +86,6 @@ jobs:
         # we check the building of the documentation for a specific case
         if [ $SITE == "fias" ]; then make undocumented_test && make user; fi
         # we check the correct formatting of the code with clang
-        PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/clang-format-helper.bash -t
+        PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/codebase-format-helper.bash -t
         # we run the tests
         CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
