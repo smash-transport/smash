@@ -47,11 +47,7 @@ jobs:
     steps:
     # this is an action provided by GitHub to checkout the repository
     - uses: actions/checkout@v2
-    # this is an other GitHub action to properly setup the python environment (needed for cmake-format installation)
-    - uses: actions/setup-python@v3
-      with:
-        python-version: '3.9'
-    # we set the name of the step, collecting all the tests in just one step
+    # we set the name of the step, collecting all the tests here except those about formatting
     - name: code_check
     # we set some environment variables for the specific OS version
       env:
@@ -59,7 +55,7 @@ jobs:
         CXX: ${{ matrix.cxx_compiler_to_use }}
         OS_NAME: ${{ matrix.os }}
         SITE: ${{ matrix.site }}
-      # we run the step. We recall that in YAML the pipe symbol "|" means that the follwing lines, including newlines, are interpreted literally
+      # we run the step. We recall that in YAML the pipe symbol "|" means that the following lines, including newlines, are interpreted literally
       run: |
         # which version of cmake is used
         cmake --version
@@ -92,8 +88,26 @@ jobs:
         make -j$(nproc)
         # we check the building of the documentation for a specific case
         if [ $SITE == "fias" ]; then make undocumented_test && make user; fi
-        # we check the correct formatting of the code with clang
-        PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/codebase-format-helper.bash C++ -t
-        PATH=$SMASH_ROOT/python-tools/bin/:$PATH ./../bin/codebase-format-helper.bash CMake -t
         # we run the tests
         CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
+    # We now setup python environment to then install cmake-format, but we do so on one site only
+    # since we are going to test only there whether the codebase is correctly formatted or not
+    - if: matrix.site == 'linux-default-gcc'
+      # this is an other GitHub action to properly setup the python environment
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.9'
+    - name: code_format_check
+      if: matrix.site == 'linux-default-gcc'
+      run: |
+        # we set the smash root directory
+        export SMASH_ROOT=$PWD
+        # we download and unpack clang to have clang-format available
+        curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz &&
+        mkdir clang6_0_0 && tar -xf clang6_0_0.tar.xz -C clang6_0_0 --strip-components=1 && rm clang6_0_0.tar.xz
+        # we install cmake-format in a dedicated directory and adjust environment
+        mkdir $SMASH_ROOT/python-tools && pip install --target $SMASH_ROOT/python-tools cmakelang==0.6.13
+        export PYTHONPATH=$SMASH_ROOT/python-tools:$PYTHONPATH
+        # we check the correct formatting of the code
+        PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/codebase-format-helper.bash C++ -t
+        PATH=$SMASH_ROOT/python-tools/bin/:$PATH ./../bin/codebase-format-helper.bash CMake -t
