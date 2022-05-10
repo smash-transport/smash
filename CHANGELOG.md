@@ -18,7 +18,8 @@ The major categories to group changes in this log are:
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 
-## Unreleased
+## SMASH-2.2
+Date: 2022-05-10
 
 ### Input / Output
 * Added option `Minimum_Nonempty_Ensembles` to define a minimum number of ensembles in which interactions took place
@@ -49,6 +50,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Removed
 * A possibly available system installation of YAML library is not considered anymore
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.1.4...SMASH-2.2)
+
 
 ## SMASH-2.1.4
 Date: 2022-02-24
