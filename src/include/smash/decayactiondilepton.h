@@ -43,9 +43,9 @@ class DecayActionDilepton : public DecayAction {
   }
 
   /**
-   * Generates momenta of outgoing dileptons.
+   * Generates momenta of outgoing dileptons (for Dalitz dilepton decays only).
    */
-  void sample_3body_phasespace();
+  void sample_manybody_phasespace() override;
 
  private:
   /**

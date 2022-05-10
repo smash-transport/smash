@@ -18,7 +18,8 @@ The major categories to group changes in this log are:
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 
-## Unreleased
+## SMASH-2.2
+Date: 2022-05-10
 
 ### Added
 * New CMake build configuration `MinSizeRel` to optimize in executable size 
