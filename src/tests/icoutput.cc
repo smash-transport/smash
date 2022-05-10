@@ -48,7 +48,7 @@ TEST(particlelist_format) {
   // Create particle list with mother particles
   ParticleList mother_list = {ParticleData{p1.type()}};
   // Manually enforce that number of collisions = 1 (and therefore != 0)
-  p1.set_history(1, 1, ProcessType::None, 0.01, mother_list);
+  p1.set_history(1, 0, ProcessType::None, 0.01, mother_list);
   p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
 
   // Create and perform action ("hypersurface crossing")
