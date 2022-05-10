@@ -18,8 +18,7 @@ The major categories to group changes in this log are:
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 
-## SMASH-2.2
-Date: 2022-05-10
+## Unreleased
 
 ### Added
 * New CMake build configuration `MinSizeRel` to optimize in executable size 
@@ -32,8 +31,8 @@ Date: 2022-05-10
 * Minimum supported CMake version is now version 3.14
 
 
-## SMASH-2.2rc
-Date:
+## SMASH-2.2
+Date: 2022-05-10
 
 ### Input / Output
 * Added option `Minimum_Nonempty_Ensembles` to define a minimum number of ensembles in which interactions took place
