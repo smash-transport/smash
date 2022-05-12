@@ -85,10 +85,12 @@ TEST(append_final) {
                                  .5, .0, .0, .0, .0, true, 1. / 3., true, 0.);
 
   // ParticleData object to calculate final state for
-  ParticleData a{ParticleType::find(0x2212)};
+  ParticleData a{ParticleType::find(0x211)};
+  ParticleData b{ParticleType::find(0x111)};
   // Easy momentum for easier test values
-  a.set_4momentum(1., 0., 0., 1.);
-  ParticleList intermediate = {a};
+  a.set_4momentum(0.138, 0., 0., 0.138);
+  b.set_4momentum(0.138, 0., 0., -0.138);
+  ParticleList intermediate = {a, b};
 
   // Vectors for use in tested function
   // Values make for easily calucated test values
@@ -102,10 +104,15 @@ TEST(append_final) {
   // vx and vy remain 0 even with boosting
   // As vz starts at 1 it simply gets boosted to inverse_gamma
   COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].formation_time(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[1].formation_time(), 1e-7);
   COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].velocity().x1(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[1].velocity().x1(), 1e-7);
   COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].velocity().x2(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[1].velocity().x2(), 1e-7);
   COMPARE_ABSOLUTE_ERROR(.7071067812, sp->get_final_state()[0].velocity().x3(),
                          1e-7);
+  COMPARE_ABSOLUTE_ERROR(-0.7071067812,
+                         sp->get_final_state()[1].velocity().x3(), 1e-7);
 }
 
 TEST(initialization) {
