@@ -340,7 +340,8 @@ double SphereModus::initial_conditions(Particles *particles,
     for (ParticleData &data : *particles) {
       double particle_radius = std::sqrt(data.position().sqr3());
       auto e_r = data.position().threevec() / particle_radius;
-      auto radial_velocity = radial_velocity_ * e_r * particle_radius / radius_;
+      auto radial_velocity =
+          -1.0 * radial_velocity_ * e_r * particle_radius / radius_;
       data.set_4momentum(data.momentum().lorentz_boost(radial_velocity));
       momentum_total += data.momentum();
     }
