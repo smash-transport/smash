@@ -18,6 +18,15 @@ The major categories to group changes in this log are:
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 
+## SMASH-2.2.1
+Date: 2022-05-18
+
+### Fixed
+* Properly boost in radial direction in sphere mode
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.2...SMASH-2.2.1)
+
+
 ## SMASH-2.2
 Date: 2022-05-10
 
