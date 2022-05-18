@@ -59,6 +59,7 @@ Date: 2022-05-10
 
 ### Removed
 * A possibly available system installation of YAML library is not considered anymore
+* The singularity container definition has been dropped, since a singularity container can be obtained from the shipped docker
 
 [Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.1.4...SMASH-2.2)
 
