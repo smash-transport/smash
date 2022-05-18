@@ -32,7 +32,7 @@ at elfner@itp.uni-frankfurt.de.
 
 SMASH is known to compile and work with one of these compilers (which have the
 required C++11 features):
-- gcc >= 4.8
+- gcc >= 5.0
 - clang >= 3.2
 
 It requires the following tools & libraries:
