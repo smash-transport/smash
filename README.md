@@ -31,7 +31,7 @@ at elfner@itp.uni-frankfurt.de.
 ### Prerequisites
 
 SMASH is known to compile and work on little endian machines with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++11 features):
-- gcc >= 4.8
+- gcc >= 5.0
 - clang >= 3.3
 - Apple clang >= 5.0
 

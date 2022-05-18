@@ -31,6 +31,15 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Minimum supported CMake version is now version 3.14
 
 
+## SMASH-2.2.1
+Date: 2022-05-18
+
+### Fixed
+* Properly boost in radial direction in sphere mode
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.2...SMASH-2.2.1)
+
+
 ## SMASH-2.2
 Date: 2022-05-10
 
@@ -63,6 +72,7 @@ Date: 2022-05-10
 
 ### Removed
 * A possibly available system installation of YAML library is not considered anymore
+* The singularity container definition has been dropped, since a singularity container can be obtained from the shipped docker
 
 [Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.1.4...SMASH-2.2)
 
