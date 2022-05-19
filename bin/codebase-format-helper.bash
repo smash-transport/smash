@@ -115,19 +115,15 @@ function test_formatting()
 
 function usage()
 {
-    printf '\n\e[96m'
-    printf '%s\n' \
-           ' Helper script to format source files in the codebase.' \
-           '' \
-           " Usage: ${BASH_SOURCE[0]} (C++|CMake) <option>" \
-           '' \
-           ' Possible options:'
-    printf '    %-15s  ->  %s\n' \
+    printf '\n\e[96m Helper script to format source files in the codebase.\n\n Usage: '
+    printf "\e[93m${BASH_SOURCE[0]} (C++|CMake) <option>\e[0m\n\n"
+    printf '\e[96m Possible options:\n\n'
+    printf '    \e[93m%-15s\e[0m  ->  \e[96m%s\e[0m\n' \
            '-p | --perform' 'Perform automatic formatting (for developers)' \
            '-t | --test' 'Test that automatic formatting has been performed (for CI builds)' \
            '-q | --quiet' 'Reduce output to minimum' \
-           '-h | --help' 'Display this hel'
-    printf '\n\e[0m'
+           '-h | --help' 'Display this help'
+    printf '\n'
 }
 
 function regex_in_array()
