@@ -456,15 +456,19 @@ following way:
 * Document possible strings in `config.yaml` and User Guide.
 
 
-### Code Formatting with `clang-format`
+### Code Formatting with `clang-format` and `cmake-format`
 
-All code has to be formatted by running `clang-format`. This automatically
-formats the code in SMASH correctly. Use the helper script in SMASH's /bin
+All C++ code has to be formatted by running `clang-format`, while CMake code
+requires `cmake-format` to be run. These two programs automatically format
+the code in SMASH correctly. Use the helper script in SMASH's **_/bin_**
 directory to format the source code:
 
-    ./clang-format-helper.bash -p
+    ./codebase-format-helper.bash C++ -p
+    ./codebase-format-helper.bash CMake -p
 
-Review and commit changes afterwards. clang-format does changes that
+Review and commit changes afterwards. You can also use the `-t` option
+to test whether the code is correctly formatted (the script has also a
+`-h` option that you can check out). `clang-format` does changes that
 don't look good, you can disable it locally using comments like this:
 
 
