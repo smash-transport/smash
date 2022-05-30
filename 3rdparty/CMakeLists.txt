@@ -1,3 +1,12 @@
+########################################################
+#
+#    Copyright (c) 2014,2016-2018,2021-2022
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+#########################################################
+
 # Let 3rd-party library use their own C++ standard
 unset(CMAKE_CXX_STANDARD)
 

@@ -1,3 +1,12 @@
+########################################################
+#
+#    Copyright (c) 2015-2016,2018-2022
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+#########################################################
+
 #=============================================================================
 # This cmake code to integrate Pythia contains contributions by
 #   K. Gallmeister, Goethe University, March 2015
