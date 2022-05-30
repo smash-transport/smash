@@ -700,6 +700,7 @@ libomp5-10:amd64  \
 libopengl-dev:amd64  \
 libopengl0:amd64  \
 libopenjp2-7:amd64  \
+libopenmpi-dev \
 libopus0:amd64  \
 liborc-0.4-0:amd64  \
 libp11-kit0:amd64  \
@@ -1025,6 +1026,7 @@ network-manager-pptp  \
 networkd-dispatcher  \
 odbcinst  \
 odbcinst1debian2:amd64  \
+openmpi-bin \
 openssh-client  \
 openssl  \
 p11-kit  \
@@ -1104,6 +1106,7 @@ python3-lxml:amd64  \
 python3-lz4  \
 python3-macaroonbakery  \
 python3-more-itertools  \
+python3-mpi4py \
 python3-nacl  \
 python3-numexpr  \
 python3-numpy  \
