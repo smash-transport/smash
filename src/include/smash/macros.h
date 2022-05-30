@@ -1,6 +1,6 @@
 /*
  *    Copyright (c) 2012-2020
- *              none
+ *      SMASH Team
  */
 #ifndef SRC_INCLUDE_SMASH_MACROS_H_
 #define SRC_INCLUDE_SMASH_MACROS_H_
