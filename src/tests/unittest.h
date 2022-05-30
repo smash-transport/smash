@@ -1,3 +1,8 @@
+/*
+ *    Copyright (c) 2014-2018,2020-2021
+ *      SMASH Team
+ */
+
 /*!
  * \page unittest_page Unit Testing
  * \tableofcontents
