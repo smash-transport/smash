@@ -7,6 +7,7 @@
 #
 #########################################################
 
+# cmake-format: off
 #=======================================================
 # - Try to find Rivet
 #
@@ -18,6 +19,7 @@
 #  RIVET_LIBRARIES
 #  Rivet_FOUND
 #=======================================================
+# cmake-format: on
 
 find_program(RIVET_CONFIG rivet-config DOC "Path to the Rivet configuration script")
 

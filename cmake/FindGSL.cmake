@@ -7,6 +7,7 @@
 #
 #########################################################
 
+# cmake-format: off
 #=============================================================================
 # - Try to find GSL (GNU Scientific Library)
 #
@@ -21,6 +22,7 @@
 #  See https://cmake.org/licensing for copyright info.
 #
 #=============================================================================
+# cmake-format: on
 
 include(FindPackageHandleStandardArgs)
 

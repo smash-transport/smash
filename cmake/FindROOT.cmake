@@ -7,6 +7,7 @@
 #
 #########################################################
 
+# cmake-format: off
 #=======================================================
 # - Try to find ROOT
 #
@@ -18,6 +19,7 @@
 #  ROOT_LIBRARIES
 #  ROOT_VERSION
 #=======================================================
+# cmake-format: on
 
 include(FindPackageHandleStandardArgs)
 find_program(ROOT_CONFIG NAMES root-config HINTS $ENV{ROOTSYS}/bin)
