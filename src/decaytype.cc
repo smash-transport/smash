@@ -11,7 +11,6 @@
 #include <cmath>
 
 #include "smash/constants.h"
-#include "smash/cxx14compat.h"
 #include "smash/formfactors.h"
 #include "smash/pow.h"
 
@@ -152,7 +151,7 @@ double TwoBodyDecaySemistable::rho(double mass) const {
     const double m_stable = particle_types_[0]->mass();
     const double mres_min = res->min_mass_kinematic();
 
-    tabulation_ = make_unique<Tabulation>(
+    tabulation_ = std::make_unique<Tabulation>(
         threshold(), tabulation_interval, num_tab_pts, [&](double sqrts) {
           const double mres_max = sqrts - m_stable;
           return integrate(mres_min, mres_max, [&](double m) {
@@ -208,7 +207,7 @@ double TwoBodyDecayUnstable::rho(double mass) const {
     const double sum_gamma = r1->width_at_pole() + r2->width_at_pole();
     const double tab_interval = std::max(2., 10. * sum_gamma);
 
-    tabulation_ = make_unique<Tabulation>(
+    tabulation_ = std::make_unique<Tabulation>(
         m1_min + m2_min, tab_interval, num_tab_pts, [&](double sqrts) {
           const double m1_max = sqrts - m2_min;
           const double m2_max = sqrts - m1_min;
@@ -467,7 +466,7 @@ double ThreeBodyDecayDilepton::width(double, double G0, double m) const {
     // integrate differential width to obtain partial width
     double M0 = mother_->mass();
     double G0tot = mother_->width_at_pole();
-    tabulation_ = make_unique<Tabulation>(
+    tabulation_ = std::make_unique<Tabulation>(
         m_other + 2 * m_l, M0 + 10 * G0tot, num_tab_pts, [&](double m_parent) {
           const double bottom = 2 * m_l;
           const double top = m_parent - m_other;

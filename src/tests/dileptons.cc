@@ -56,8 +56,8 @@ TEST(pion_decay) {
   FUZZY_COMPARE(piz_width, 7.7e-9);
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
-  const auto act =
-      make_unique<DecayActionDilepton>(piz, 0., mode->weight() / piz_width);
+  const auto act = std::make_unique<DecayActionDilepton>(
+      piz, 0., mode->weight() / piz_width);
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights
@@ -93,8 +93,8 @@ TEST(eta_decay) {
   FUZZY_COMPARE(etaz_width, 1.31e-6);
   DecayBranchPtr &mode = dil_modes[0];
   // π⁰ decay action
-  const auto act =
-      make_unique<DecayActionDilepton>(etaz, 0., mode->weight() / etaz_width);
+  const auto act = std::make_unique<DecayActionDilepton>(
+      etaz, 0., mode->weight() / etaz_width);
   act->add_decay(std::move(mode));
 
   // sample the final state and sum up all weights

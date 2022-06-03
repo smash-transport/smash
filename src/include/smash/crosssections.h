@@ -672,7 +672,7 @@ class CrossSections {
     }
     const auto xsection = get_xsection();
     if (xsection > really_small) {
-      process_list.push_back(make_unique<CollisionBranch>(
+      process_list.push_back(std::make_unique<CollisionBranch>(
           type_a, type_b, xsection, ProcessType::TwoToTwo));
     }
   }

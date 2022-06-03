@@ -120,8 +120,8 @@ class BoxModus : public ModusDefault {
     const std::array<double, 3> lat_size = {length_, length_, length_};
     const std::array<double, 3> origin = {0., 0., 0.};
     const bool periodicity = true;
-    return make_unique<GrandCanThermalizer>(conf, lat_size, origin,
-                                            periodicity);
+    return std::make_unique<GrandCanThermalizer>(conf, lat_size, origin,
+                                                 periodicity);
   }
 
   /// \copydoc smash::ModusDefault::max_timestep()

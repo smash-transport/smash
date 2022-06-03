@@ -206,7 +206,7 @@ CollisionBranchPtr CrossSections::elastic(double elast_par, bool use_AQM,
   /* when using a factor to scale the cross section and an additional
    * contribution to the elastic cross section, the contribution is added first
    * and then everything is scaled */
-  return make_unique<CollisionBranch>(
+  return std::make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
       (elastic_xs + add_el_xs) * scale_xs, ProcessType::Elastic);
 }
@@ -734,7 +734,7 @@ CollisionBranchList CrossSections::two_to_one() const {
 
     // If cross section is non-negligible, add resonance to the list
     if (resonance_xsection > really_small) {
-      resonance_process_list.push_back(make_unique<CollisionBranch>(
+      resonance_process_list.push_back(std::make_unique<CollisionBranch>(
           type_resonance, resonance_xsection, ProcessType::TwoToOne));
       logg[LCrossSections].debug("Found resonance: ", type_resonance);
       logg[LCrossSections].debug(type_particle_a.name(), type_particle_b.name(),
@@ -848,7 +848,7 @@ CollisionBranchList CrossSections::two_to_three() const {
       const auto& type_p = ParticleType::find(pdg::p);
       const auto& type_n = ParticleType::find(pdg::n);
 
-      process_list.push_back(make_unique<CollisionBranch>(
+      process_list.push_back(std::make_unique<CollisionBranch>(
           type_pi, type_p, type_n, two_to_three_xs(type_a, type_b, sqrt_s_),
           ProcessType::TwoToThree));
     } else {
@@ -856,7 +856,7 @@ CollisionBranchList CrossSections::two_to_three() const {
       const auto& type_anti_p = ParticleType::find(-pdg::p);
       const auto& type_anti_n = ParticleType::find(-pdg::n);
 
-      process_list.push_back(make_unique<CollisionBranch>(
+      process_list.push_back(std::make_unique<CollisionBranch>(
           type_pi, type_anti_p, type_anti_n,
           two_to_three_xs(type_a, type_b, sqrt_s_), ProcessType::TwoToThree));
     }
@@ -872,7 +872,7 @@ CollisionBranchList CrossSections::two_to_three() const {
       const auto& type_p = ParticleType::find(pdg::p);
       const auto& type_n = ParticleType::find(pdg::n);
 
-      process_list.push_back(make_unique<CollisionBranch>(
+      process_list.push_back(std::make_unique<CollisionBranch>(
           type_N, type_p, type_n, two_to_three_xs(type_a, type_b, sqrt_s_),
           ProcessType::TwoToThree));
     } else {
@@ -880,7 +880,7 @@ CollisionBranchList CrossSections::two_to_three() const {
       const auto& type_anti_p = ParticleType::find(-pdg::p);
       const auto& type_anti_n = ParticleType::find(-pdg::n);
 
-      process_list.push_back(make_unique<CollisionBranch>(
+      process_list.push_back(std::make_unique<CollisionBranch>(
           type_N, type_anti_p, type_anti_n,
           two_to_three_xs(type_a, type_b, sqrt_s_), ProcessType::TwoToThree));
     }
@@ -931,7 +931,7 @@ CollisionBranchList CrossSections::two_to_four() const {
     }
     if (sqrt_s_ > type_catalyzer->mass() + components[0]->mass() +
                       components[1]->mass() + components[2]->mass()) {
-      process_list.push_back(make_unique<CollisionBranch>(
+      process_list.push_back(std::make_unique<CollisionBranch>(
           *type_catalyzer, *(components[0]), *(components[1]), *(components[2]),
           two_to_four_xs(*type_nucleus, *type_catalyzer, sqrt_s_),
           ProcessType::TwoToFour));
@@ -2197,7 +2197,7 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet included_2to2) const {
                                   (s * cm_momentum());
 
           if (xsection > really_small) {
-            process_list.push_back(make_unique<CollisionBranch>(
+            process_list.push_back(std::make_unique<CollisionBranch>(
                 *nuc_a, *nuc_b, xsection, ProcessType::TwoToTwo));
             logg[LScatterAction].debug(type_a.name(), type_b.name(), "->",
                                        nuc_a->name(), nuc_b->name(),
@@ -2228,7 +2228,7 @@ CollisionBranchList CrossSections::dpi_xx(ReactionsBitSet included_2to2) const {
       }
       const double xsection =
           xs_dpi_dprimepi(sqrts, cm_momentum(), produced_nucleus, type_pi);
-      process_list.push_back(make_unique<CollisionBranch>(
+      process_list.push_back(std::make_unique<CollisionBranch>(
           type_pi, *produced_nucleus, xsection, ProcessType::TwoToTwo));
       logg[LScatterAction].debug(type_pi.name(), type_nucleus.name(), "→ ",
                                  type_pi.name(), produced_nucleus->name(),
@@ -2296,7 +2296,7 @@ CollisionBranchList CrossSections::dn_xx(ReactionsBitSet included_2to2) const {
     }
     const double xsection = xs_dn_dprimen(
         sqrt_s_, cm_momentum(), produced_nucleus, type_nucleus, type_N);
-    process_list.push_back(make_unique<CollisionBranch>(
+    process_list.push_back(std::make_unique<CollisionBranch>(
         type_N, *produced_nucleus, xsection, ProcessType::TwoToTwo));
     logg[LScatterAction].debug(type_N.name(), type_nucleus.name(), "→ ",
                                type_N.name(), produced_nucleus->name(), " at ",
@@ -2420,21 +2420,21 @@ CollisionBranchList CrossSections::string_excitation(
 
   /* fill the list of process channels */
   if (sig_string_soft > 0.) {
-    channel_list.push_back(make_unique<CollisionBranch>(
+    channel_list.push_back(std::make_unique<CollisionBranch>(
         single_diffr_AX, ProcessType::StringSoftSingleDiffractiveAX));
-    channel_list.push_back(make_unique<CollisionBranch>(
+    channel_list.push_back(std::make_unique<CollisionBranch>(
         single_diffr_XB, ProcessType::StringSoftSingleDiffractiveXB));
-    channel_list.push_back(make_unique<CollisionBranch>(
+    channel_list.push_back(std::make_unique<CollisionBranch>(
         double_diffr, ProcessType::StringSoftDoubleDiffractive));
-    channel_list.push_back(make_unique<CollisionBranch>(
+    channel_list.push_back(std::make_unique<CollisionBranch>(
         nondiffractive_soft, ProcessType::StringSoftNonDiffractive));
     if (can_annihilate) {
-      channel_list.push_back(make_unique<CollisionBranch>(
+      channel_list.push_back(std::make_unique<CollisionBranch>(
           sig_annihilation, ProcessType::StringSoftAnnihilation));
     }
   }
   if (nondiffractive_hard > 0.) {
-    channel_list.push_back(make_unique<CollisionBranch>(
+    channel_list.push_back(std::make_unique<CollisionBranch>(
         nondiffractive_hard, ProcessType::StringHard));
   }
   return channel_list;
@@ -2539,9 +2539,9 @@ CollisionBranchPtr CrossSections::NNbar_to_5pi(const double scale_xs) const {
   const auto& type_piz = ParticleType::find(pdg::pi_z);
   const auto& type_pip = ParticleType::find(pdg::pi_p);
   const auto& type_pim = ParticleType::find(pdg::pi_m);
-  return make_unique<CollisionBranch>(type_pip, type_pim, type_pip, type_pim,
-                                      type_piz, nnbar_xsec * scale_xs,
-                                      ProcessType::TwoToFive);
+  return std::make_unique<CollisionBranch>(
+      type_pip, type_pim, type_pip, type_pim, type_piz, nnbar_xsec * scale_xs,
+      ProcessType::TwoToFive);
 }
 
 CollisionBranchPtr CrossSections::NNbar_annihilation(
@@ -2552,9 +2552,9 @@ CollisionBranchPtr CrossSections::NNbar_annihilation(
   double nnbar_xsec = std::max(0., ppbar_total(s) * scale_xs - current_xs);
   logg[LCrossSections].debug("NNbar cross section is: ", nnbar_xsec);
   // Make collision channel NNbar -> ρh₁(1170); eventually decays into 5π
-  return make_unique<CollisionBranch>(ParticleType::find(pdg::h1),
-                                      ParticleType::find(pdg::rho_z),
-                                      nnbar_xsec, ProcessType::TwoToTwo);
+  return std::make_unique<CollisionBranch>(ParticleType::find(pdg::h1),
+                                           ParticleType::find(pdg::rho_z),
+                                           nnbar_xsec, ProcessType::TwoToTwo);
 }
 
 CollisionBranchList CrossSections::NNbar_creation() const {
@@ -2580,9 +2580,9 @@ CollisionBranchList CrossSections::NNbar_creation() const {
                                                  type_N, type_Nbar) *
                       std::max(0., ppbar_total(s) - ppbar_elastic(s));
     logg[LCrossSections].debug("NNbar reverse cross section is: ", xsection);
-    channel_list.push_back(make_unique<CollisionBranch>(
+    channel_list.push_back(std::make_unique<CollisionBranch>(
         type_N, type_Nbar, xsection, ProcessType::TwoToTwo));
-    channel_list.push_back(make_unique<CollisionBranch>(
+    channel_list.push_back(std::make_unique<CollisionBranch>(
         ParticleType::find(pdg::n), ParticleType::find(-pdg::n), xsection,
         ProcessType::TwoToTwo));
   }
@@ -2644,7 +2644,7 @@ CollisionBranchList CrossSections::bar_bar_to_nuc_nuc(
                                 (s * cm_momentum());
 
         if (xsection > really_small) {
-          process_list.push_back(make_unique<CollisionBranch>(
+          process_list.push_back(std::make_unique<CollisionBranch>(
               *nuc_a, *nuc_b, xsection, ProcessType::TwoToTwo));
           logg[LCrossSections].debug(
               "2->2 absorption with original particles: ", type_a, type_b);
@@ -2803,7 +2803,7 @@ CollisionBranchList CrossSections::find_nn_xsection_from_type(
                                 resonance_integral / (s * cm_momentum());
 
         if (xsection > really_small) {
-          channel_list.push_back(make_unique<CollisionBranch>(
+          channel_list.push_back(std::make_unique<CollisionBranch>(
               *type_res_1, *type_res_2, xsection, ProcessType::TwoToTwo));
           logg[LCrossSections].debug(
               "Found 2->2 creation process for resonance ", type_res_1, ", ",

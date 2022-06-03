@@ -166,12 +166,12 @@ HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
 #ifdef SMASH_USE_HEPMC_ROOTIO
   if (HepMC3_output_type == "asciiv3") {
 #endif
-    output_file_ = make_unique<HepMC3::WriterAscii>(
+    output_file_ = std::make_unique<HepMC3::WriterAscii>(
         filename_unfinished_.string(), event_.run_info());
     output_type_ = asciiv3;
 #ifdef SMASH_USE_HEPMC_ROOTIO
   } else {
-    output_file_ = make_unique<HepMC3::WriterRootTree>(
+    output_file_ = std::make_unique<HepMC3::WriterRootTree>(
         filename_unfinished_.string(), event_.run_info());
     output_type_ = treeroot;
   }

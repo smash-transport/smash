@@ -23,7 +23,6 @@
 #include <tuple>
 #include <utility>
 
-#include "cxx14compat.h"
 #include "fpenvironment.h"
 #include "random.h"
 

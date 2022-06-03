@@ -72,8 +72,8 @@ TEST(phasespace_five_body) {
 
   // Add CollisionBranch with 5 outgoing particles
   CollisionBranchPtr coll_b =
-      make_unique<CollisionBranch>(type_so, type_so, type_so, type_so, type_so,
-                                   10.0, ProcessType::TwoToFive);
+      std::make_unique<CollisionBranch>(type_so, type_so, type_so, type_so,
+                                        type_so, 10.0, ProcessType::TwoToFive);
   act.add_collision(std::move(coll_b));
 
   const int N_samples = 10000;

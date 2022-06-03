@@ -41,7 +41,7 @@ TEST(binary_scatterings_pi_rho0_pi_gamma) {
   const int number_of_photons = 10000;
   ParticleList in{pi, rho0};
   const auto act =
-      make_unique<ScatterActionPhoton>(in, 0.05, number_of_photons, 5.0);
+      std::make_unique<ScatterActionPhoton>(in, 0.05, number_of_photons, 5.0);
   act->add_single_process();
   double tot_weight = 0.0;
   for (int i = 0; i < number_of_photons; i++) {
@@ -64,7 +64,7 @@ TEST(binary_scatterings_pi_rho0_pi_gamma_Nfrac_1) {
   const int number_of_photons = 1;
   ParticleList in{pi, rho0};
   const auto act2 =
-      make_unique<ScatterActionPhoton>(in, 0.05, number_of_photons, 5.0);
+      std::make_unique<ScatterActionPhoton>(in, 0.05, number_of_photons, 5.0);
   act2->add_single_process();
   double tot_weight2 = 0.0;
   for (int i = 0; i < number_of_photons; i++) {
@@ -271,7 +271,7 @@ TEST(bremsstrahlung_gen_final_state) {
 
   // create bremsstrahlung action
   const auto act =
-      make_unique<BremsstrahlungAction>(in, 0.05, number_of_photons, 20.0);
+      std::make_unique<BremsstrahlungAction>(in, 0.05, number_of_photons, 20.0);
   act->add_single_process();
 
   // Sample photons, implicitly test sample_3body_phasespace() and

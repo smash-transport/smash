@@ -19,7 +19,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include "cxx14compat.h"
 #include "forwarddeclarations.h"
 
 namespace smash {

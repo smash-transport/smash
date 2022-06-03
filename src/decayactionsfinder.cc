@@ -10,7 +10,6 @@
 #include "smash/decayactionsfinder.h"
 
 #include "smash/constants.h"
-#include "smash/cxx14compat.h"
 #include "smash/decayaction.h"
 #include "smash/decaymodes.h"
 #include "smash/fourvector.h"
@@ -61,7 +60,7 @@ ActionList DecayActionsFinder::find_actions_in_cell(
     if (decay_time < dt) {
       /* => decay_time ∈ [0, dt[
        * => the particle decays in this timestep. */
-      auto act = make_unique<DecayAction>(p, decay_time);
+      auto act = std::make_unique<DecayAction>(p, decay_time);
       act->add_decays(std::move(processes));
       actions.emplace_back(std::move(act));
     }
@@ -82,7 +81,7 @@ ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
       continue;  // particle cannot decay (not even e.m. or weakly)
     }
 
-    auto act = make_unique<DecayAction>(p, 0.);
+    auto act = std::make_unique<DecayAction>(p, 0.);
     act->add_decays(p.type().get_partial_widths(
         p.momentum(), p.position().threevec(), WhichDecaymodes::All));
     actions.emplace_back(std::move(act));

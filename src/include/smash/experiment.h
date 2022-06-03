@@ -713,15 +713,15 @@ void Experiment<Modus>::create_output(const std::string &format,
 
   if (format == "VTK" && content == "Particles") {
     outputs_.emplace_back(
-        make_unique<VtkOutput>(output_path, content, out_par));
+        std::make_unique<VtkOutput>(output_path, content, out_par));
   } else if (format == "Root") {
 #ifdef SMASH_USE_ROOT
     if (content == "Initial_Conditions") {
       outputs_.emplace_back(
-          make_unique<RootOutput>(output_path, "SMASH_IC", out_par));
+          std::make_unique<RootOutput>(output_path, "SMASH_IC", out_par));
     } else {
       outputs_.emplace_back(
-          make_unique<RootOutput>(output_path, content, out_par));
+          std::make_unique<RootOutput>(output_path, content, out_par));
     }
 #else
     logg[LExperiment].error(
@@ -730,13 +730,13 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (format == "Binary") {
     if (content == "Collisions" || content == "Dileptons" ||
         content == "Photons") {
-      outputs_.emplace_back(
-          make_unique<BinaryOutputCollisions>(output_path, content, out_par));
+      outputs_.emplace_back(std::make_unique<BinaryOutputCollisions>(
+          output_path, content, out_par));
     } else if (content == "Particles") {
-      outputs_.emplace_back(
-          make_unique<BinaryOutputParticles>(output_path, content, out_par));
+      outputs_.emplace_back(std::make_unique<BinaryOutputParticles>(
+          output_path, content, out_par));
     } else if (content == "Initial_Conditions") {
-      outputs_.emplace_back(make_unique<BinaryOutputInitialConditions>(
+      outputs_.emplace_back(std::make_unique<BinaryOutputInitialConditions>(
           output_path, content, out_par));
     }
   } else if (format == "Oscar1999" || format == "Oscar2013") {
@@ -744,7 +744,7 @@ void Experiment<Modus>::create_output(const std::string &format,
         create_oscar_output(format, content, output_path, out_par));
   } else if (content == "Thermodynamics" && format == "ASCII") {
     outputs_.emplace_back(
-        make_unique<ThermodynamicOutput>(output_path, content, out_par));
+        std::make_unique<ThermodynamicOutput>(output_path, content, out_par));
   } else if (content == "Thermodynamics" &&
              (format == "Lattice_ASCII" || format == "Lattice_Binary")) {
     printout_full_lattice_any_td_ = true;
@@ -754,26 +754,26 @@ void Experiment<Modus>::create_output(const std::string &format,
     if (format == "Lattice_Binary") {
       printout_full_lattice_binary_td_ = true;
     }
-    outputs_.emplace_back(make_unique<ThermodynamicLatticeOutput>(
+    outputs_.emplace_back(std::make_unique<ThermodynamicLatticeOutput>(
         output_path, content, out_par, printout_full_lattice_ascii_td_,
         printout_full_lattice_binary_td_));
   } else if (content == "Thermodynamics" && format == "VTK") {
     printout_lattice_td_ = true;
     outputs_.emplace_back(
-        make_unique<VtkOutput>(output_path, content, out_par));
+        std::make_unique<VtkOutput>(output_path, content, out_par));
   } else if (content == "Initial_Conditions" && format == "ASCII") {
     outputs_.emplace_back(
-        make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
+        std::make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
   } else if ((format == "HepMC") || (format == "HepMC_asciiv3") ||
              (format == "HepMC_treeroot")) {
 #ifdef SMASH_USE_HEPMC
     if (content == "Particles") {
       if ((format == "HepMC") || (format == "HepMC_asciiv3")) {
-        outputs_.emplace_back(make_unique<HepMcOutput>(
+        outputs_.emplace_back(std::make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_particles", false, "asciiv3"));
       } else if (format == "HepMC_treeroot") {
 #ifdef SMASH_USE_HEPMC_ROOTIO
-        outputs_.emplace_back(make_unique<HepMcOutput>(
+        outputs_.emplace_back(std::make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_particles", false, "root"));
 #else
         logg[LExperiment].error(
@@ -783,11 +783,11 @@ void Experiment<Modus>::create_output(const std::string &format,
       }
     } else if (content == "Collisions") {
       if ((format == "HepMC") || (format == "HepMC_asciiv3")) {
-        outputs_.emplace_back(make_unique<HepMcOutput>(
+        outputs_.emplace_back(std::make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_collisions", true, "asciiv3"));
       } else if (format == "HepMC_treeroot") {
 #ifdef SMASH_USE_HEPMC_ROOTIO
-        outputs_.emplace_back(make_unique<HepMcOutput>(
+        outputs_.emplace_back(std::make_unique<HepMcOutput>(
             output_path, "SMASH_HepMC_collisions", true, "root"));
 #else
         logg[LExperiment].error(
@@ -807,7 +807,7 @@ void Experiment<Modus>::create_output(const std::string &format,
 #endif
   } else if (content == "Coulomb" && format == "VTK") {
     outputs_.emplace_back(
-        make_unique<VtkOutput>(output_path, "Fields", out_par));
+        std::make_unique<VtkOutput>(output_path, "Fields", out_par));
   } else if (content == "Rivet") {
 #ifdef SMASH_USE_RIVET
     // flag to ensure that the Rivet format has not been already assigned
@@ -820,11 +820,11 @@ void Experiment<Modus>::create_output(const std::string &format,
       return;
     }
     if (format == "YODA") {
-      outputs_.emplace_back(
-          make_unique<RivetOutput>(output_path, "SMASH_Rivet", false, out_par));
+      outputs_.emplace_back(std::make_unique<RivetOutput>(
+          output_path, "SMASH_Rivet", false, out_par));
       rivet_format_already_selected = true;
     } else if (format == "YODA-full") {
-      outputs_.emplace_back(make_unique<RivetOutput>(
+      outputs_.emplace_back(std::make_unique<RivetOutput>(
           output_path, "SMASH_Rivet_full", true, out_par));
       rivet_format_already_selected = true;
     } else {
@@ -1142,7 +1142,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
 
   // create finders
   if (dileptons_switch_) {
-    dilepton_finder_ = make_unique<DecayActionsFinderDilepton>();
+    dilepton_finder_ = std::make_unique<DecayActionsFinderDilepton>();
   }
   if (photons_switch_ || bremsstrahlung_switch_) {
     n_fractional_photons_ =
@@ -1160,14 +1160,15 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           "inelastically (e.g. resonance chains), else SMASH is known to "
           "hang.");
     }
-    action_finders_.emplace_back(make_unique<DecayActionsFinder>(
+    action_finders_.emplace_back(std::make_unique<DecayActionsFinder>(
         parameters_.res_lifetime_factor, parameters_.do_weak_decays));
   }
   bool no_coll = config.take({"Collision_Term", "No_Collisions"}, false);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
        parameters_.included_multi.any() || parameters_.strings_switch) &&
       !no_coll) {
-    auto scat_finder = make_unique<ScatterActionsFinder>(config, parameters_);
+    auto scat_finder =
+        std::make_unique<ScatterActionsFinder>(config, parameters_);
     max_transverse_distance_sqr_ =
         scat_finder->max_transverse_distance_sqr(parameters_.testparticles);
     process_string_ptr_ = scat_finder->get_process_string_ptr();
@@ -1179,7 +1180,7 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
   }
   if (modus_.is_box()) {
     action_finders_.emplace_back(
-        make_unique<WallCrossActionsFinder>(parameters_.box_length));
+        std::make_unique<WallCrossActionsFinder>(parameters_.box_length));
   }
   if (IC_output_switch_) {
     if (!modus_.is_collider()) {
@@ -1266,13 +1267,14 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
           << "Extracting initial conditions without kinematic cuts.";
     }
 
-    action_finders_.emplace_back(make_unique<HyperSurfaceCrossActionsFinder>(
-        proper_time, rapidity_cut, transverse_momentum_cut));
+    action_finders_.emplace_back(
+        std::make_unique<HyperSurfaceCrossActionsFinder>(
+            proper_time, rapidity_cut, transverse_momentum_cut));
   }
 
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     logg[LExperiment].info() << "Pauli blocking is ON.";
-    pauli_blocker_ = make_unique<PauliBlocker>(
+    pauli_blocker_ = std::make_unique<PauliBlocker>(
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
   }
   // In collider setup with sqrts >= 200 GeV particles don't form continuously
@@ -1585,7 +1587,8 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
     logg[LExperiment].info() << "Potentials are ON. Timestep is "
                              << parameters_.labclock->timestep_duration();
     // potentials need density calculation parameters from parameters_
-    potentials_ = make_unique<Potentials>(config["Potentials"], parameters_);
+    potentials_ =
+        std::make_unique<Potentials>(config["Potentials"], parameters_);
     // make sure that vdf potentials are not used together with Skyrme
     // or symmetry potentials
     if (potentials_->use_skyrme() && potentials_->use_vdf()) {
@@ -1856,89 +1859,91 @@ Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
       printout_j_QBS_ = output_parameters.td_jQBS;
     }
     if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
-      Tmn_ = make_unique<RectangularLattice<EnergyMomentumTensor>>(
+      Tmn_ = std::make_unique<RectangularLattice<EnergyMomentumTensor>>(
           l, n, origin, periodic, LatticeUpdate::AtOutput);
     }
     if (printout_j_QBS_) {
-      j_QBS_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                               LatticeUpdate::AtOutput);
+      j_QBS_lat_ = std::make_unique<DensityLattice>(l, n, origin, periodic,
+                                                    LatticeUpdate::AtOutput);
     }
     /* Create baryon and isospin density lattices regardless of config
        if potentials are on. This is because they allow to compute
        potentials faster */
     if (potentials_) {
       // Create auxiliary lattices for baryon four-current calculation
-      old_jmu_auxiliary_ = make_unique<RectangularLattice<FourVector>>(
+      old_jmu_auxiliary_ = std::make_unique<RectangularLattice<FourVector>>(
           l, n, origin, periodic, LatticeUpdate::EveryTimestep);
-      new_jmu_auxiliary_ = make_unique<RectangularLattice<FourVector>>(
+      new_jmu_auxiliary_ = std::make_unique<RectangularLattice<FourVector>>(
           l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       four_gradient_auxiliary_ =
-          make_unique<RectangularLattice<std::array<FourVector, 4>>>(
+          std::make_unique<RectangularLattice<std::array<FourVector, 4>>>(
               l, n, origin, periodic, LatticeUpdate::EveryTimestep);
 
       if (potentials_->use_skyrme()) {
-        jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                                 LatticeUpdate::EveryTimestep);
-        UB_lat_ = make_unique<RectangularLattice<FourVector>>(
+        jmu_B_lat_ = std::make_unique<DensityLattice>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
-        FB_lat_ = make_unique<
+        UB_lat_ = std::make_unique<RectangularLattice<FourVector>>(
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+        FB_lat_ = std::make_unique<
             RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       }
       if (potentials_->use_symmetry()) {
-        jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                                  LatticeUpdate::EveryTimestep);
-        UI3_lat_ = make_unique<RectangularLattice<FourVector>>(
+        jmu_I3_lat_ = std::make_unique<DensityLattice>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
-        FI3_lat_ = make_unique<
+        UI3_lat_ = std::make_unique<RectangularLattice<FourVector>>(
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+        FI3_lat_ = std::make_unique<
             RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       }
       if (potentials_->use_coulomb()) {
-        jmu_el_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                                  LatticeUpdate::EveryTimestep);
-        EM_lat_ = make_unique<
+        jmu_el_lat_ = std::make_unique<DensityLattice>(
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+        EM_lat_ = std::make_unique<
             RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       }
       if (potentials_->use_vdf()) {
-        jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                                 LatticeUpdate::EveryTimestep);
-        UB_lat_ = make_unique<RectangularLattice<FourVector>>(
+        jmu_B_lat_ = std::make_unique<DensityLattice>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
-        FB_lat_ = make_unique<
+        UB_lat_ = std::make_unique<RectangularLattice<FourVector>>(
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+        FB_lat_ = std::make_unique<
             RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       }
       if (parameters_.field_derivatives_mode == FieldDerivativesMode::Direct) {
         // Create auxiliary lattices for field calculation
-        old_fields_auxiliary_ = make_unique<RectangularLattice<FourVector>>(
-            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
-        new_fields_auxiliary_ = make_unique<RectangularLattice<FourVector>>(
-            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+        old_fields_auxiliary_ =
+            std::make_unique<RectangularLattice<FourVector>>(
+                l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+        new_fields_auxiliary_ =
+            std::make_unique<RectangularLattice<FourVector>>(
+                l, n, origin, periodic, LatticeUpdate::EveryTimestep);
         fields_four_gradient_auxiliary_ =
-            make_unique<RectangularLattice<std::array<FourVector, 4>>>(
+            std::make_unique<RectangularLattice<std::array<FourVector, 4>>>(
                 l, n, origin, periodic, LatticeUpdate::EveryTimestep);
 
         // Create the fields lattice
-        fields_lat_ = make_unique<FieldsLattice>(l, n, origin, periodic,
-                                                 LatticeUpdate::EveryTimestep);
+        fields_lat_ = std::make_unique<FieldsLattice>(
+            l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       }
     } else {
       if (dens_type_lattice_printout_ == DensityType::Baryon) {
-        jmu_B_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                                 LatticeUpdate::AtOutput);
+        jmu_B_lat_ = std::make_unique<DensityLattice>(l, n, origin, periodic,
+                                                      LatticeUpdate::AtOutput);
       }
       if (dens_type_lattice_printout_ == DensityType::BaryonicIsospin) {
-        jmu_I3_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                                  LatticeUpdate::AtOutput);
+        jmu_I3_lat_ = std::make_unique<DensityLattice>(l, n, origin, periodic,
+                                                       LatticeUpdate::AtOutput);
       }
     }
     if (dens_type_lattice_printout_ != DensityType::None &&
         dens_type_lattice_printout_ != DensityType::BaryonicIsospin &&
         dens_type_lattice_printout_ != DensityType::Baryon) {
-      jmu_custom_lat_ = make_unique<DensityLattice>(l, n, origin, periodic,
-                                                    LatticeUpdate::AtOutput);
+      jmu_custom_lat_ = std::make_unique<DensityLattice>(
+          l, n, origin, periodic, LatticeUpdate::AtOutput);
     }
   } else if (printout_lattice_td_ || printout_full_lattice_any_td_) {
     logg[LExperiment].error(
@@ -2122,7 +2127,7 @@ void Experiment<Modus>::initialize_new_event() {
         "This might happen if the formation times of the input particles are "
         "larger than the specified end time of the simulation.");
   }
-  clock_for_this_event = make_unique<UniformClock>(start_time, timestep);
+  clock_for_this_event = std::make_unique<UniformClock>(start_time, timestep);
   parameters_.labclock = std::move(clock_for_this_event);
 
   // Reset the output clock

@@ -73,7 +73,7 @@ TEST(fullhistory_format) {
   Particles particles;
   const ParticleData p1 = particles.insert(Test::smashon_random());
   const ParticleData p2 = particles.insert(Test::smashon_random());
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
+  ScatterActionPtr action = std::make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(),
                               Test::no_multiparticle_reactions(), 0., true,
                               false, false, NNbarTreatment::NoAnnihilation, 1.0,
@@ -205,7 +205,7 @@ TEST(particlelist_format) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
 
   /* Create interaction ("elastic scattering") */
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
+  ScatterActionPtr action = std::make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(),
                               Test::no_multiparticle_reactions(), 0., true,
                               false, false, NNbarTreatment::NoAnnihilation, 1.0,
@@ -300,7 +300,7 @@ TEST(initial_conditions_format) {
   p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
 
   // Create action ("hypersurface crossing")
-  ActionPtr action = make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
+  ActionPtr action = std::make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
   action->generate_final_state();
 
   const int event_id = 0;

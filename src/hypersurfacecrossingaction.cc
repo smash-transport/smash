@@ -138,7 +138,7 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
 
       ParticleData outgoing_particle(p);
       outgoing_particle.set_4position(crossing_position);
-      ActionPtr action = make_unique<HypersurfacecrossingAction>(
+      ActionPtr action = std::make_unique<HypersurfacecrossingAction>(
           p, outgoing_particle, time_until_crossing);
       actions.emplace_back(std::move(action));
     }

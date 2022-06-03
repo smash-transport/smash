@@ -18,7 +18,6 @@
 #include "../include/smash/collidermodus.h"
 #include "../include/smash/configuration.h"
 #include "../include/smash/constants.h"
-#include "../include/smash/cxx14compat.h"
 #include "../include/smash/experiment.h"
 #include "../include/smash/modusdefault.h"
 #include "../include/smash/nucleus.h"
@@ -196,9 +195,9 @@ TEST(propagation_in_test_potential) {
   const double d = 4.0;
   const double B0 = 0.5;
   std::unique_ptr<Dummy_Pot> pot1 =
-      make_unique<Dummy_Pot>(conf["Potentials"], param, U0, d, 0.);
+      std::make_unique<Dummy_Pot>(conf["Potentials"], param, U0, d, 0.);
   std::unique_ptr<Dummy_Pot> pot2 =
-      make_unique<Dummy_Pot>(conf["Potentials"], param, 0., d, B0);
+      std::make_unique<Dummy_Pot>(conf["Potentials"], param, 0., d, B0);
 
   /* Create two particles: one flies in the pure electrical field, while
    * the other flies in the pure magnetical field. */
@@ -333,11 +332,11 @@ static ExperimentParameters default_parameters_vdf(
     int testparticles = 1, double dt = 0.1,
     double triangular_smearing_range = 2.0) {
   return ExperimentParameters{
-      make_unique<UniformClock>(0., dt),  // labclock
-      make_unique<UniformClock>(0., 1.),  // outputclock
-      1,                                  // ensembles
-      testparticles,                      // testparticles
-      DerivativesMode::FiniteDifference,  // derivatives mode
+      std::make_unique<UniformClock>(0., dt),  // labclock
+      std::make_unique<UniformClock>(0., 1.),  // outputclock
+      1,                                       // ensembles
+      testparticles,                           // testparticles
+      DerivativesMode::FiniteDifference,       // derivatives mode
       // both the rest frame and the direct derivatives need to be on for the
       // test of forces calculated using chain rule and direct derivatives
       RestFrameDensityDerivativesMode::On,  // rest frame derivatives mode
@@ -472,49 +471,51 @@ TEST(vdf_chain_rule_derivatives_vs_vdf_direct_derivatives) {
 
   // lattices for calculation of the VDF force using the chain rule derivatives
   std::unique_ptr<RectangularLattice<FourVector>> old_jmu_aux =
-      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
-                                                  LatticeUpdate::EveryTimestep);
+      std::make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
   std::unique_ptr<RectangularLattice<FourVector>> new_jmu_aux =
-      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
-                                                  LatticeUpdate::EveryTimestep);
+      std::make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
   std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>>
       four_gradient_aux =
-          make_unique<RectangularLattice<std::array<FourVector, 4>>>(
+          std::make_unique<RectangularLattice<std::array<FourVector, 4>>>(
               l, n, origin, periodic, LatticeUpdate::EveryTimestep);
 
-  std::unique_ptr<DensityLattice> jmu_B_lattice = make_unique<DensityLattice>(
-      l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+  std::unique_ptr<DensityLattice> jmu_B_lattice =
+      std::make_unique<DensityLattice>(l, n, origin, periodic,
+                                       LatticeUpdate::EveryTimestep);
 
   std::unique_ptr<RectangularLattice<FourVector>> UB_lattice_density =
-      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
-                                                  LatticeUpdate::EveryTimestep);
+      std::make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
   std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
-      FB_lattice_density =
-          make_unique<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
-              l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      FB_lattice_density = std::make_unique<
+          RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
 
   // lattices for calculation of the VDF force using the direct field
   // derivatives
   std::unique_ptr<RectangularLattice<FourVector>> old_fields_aux =
-      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
-                                                  LatticeUpdate::EveryTimestep);
+      std::make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
   std::unique_ptr<RectangularLattice<FourVector>> new_fields_aux =
-      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
-                                                  LatticeUpdate::EveryTimestep);
+      std::make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
   std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>>
       fields_four_gradient_aux =
-          make_unique<RectangularLattice<std::array<FourVector, 4>>>(
+          std::make_unique<RectangularLattice<std::array<FourVector, 4>>>(
               l, n, origin, periodic, LatticeUpdate::EveryTimestep);
-  std::unique_ptr<FieldsLattice> fields_lattice = make_unique<FieldsLattice>(
-      l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+  std::unique_ptr<FieldsLattice> fields_lattice =
+      std::make_unique<FieldsLattice>(l, n, origin, periodic,
+                                      LatticeUpdate::EveryTimestep);
 
   std::unique_ptr<RectangularLattice<FourVector>> UB_lattice_field =
-      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
-                                                  LatticeUpdate::EveryTimestep);
+      std::make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
   std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
-      FB_lattice_field =
-          make_unique<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
-              l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      FB_lattice_field = std::make_unique<
+          RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
 
   update_lattice(jmu_B_lattice.get(), old_jmu_aux.get(), new_jmu_aux.get(),
                  four_gradient_aux.get(), LatticeUpdate::EveryTimestep,
@@ -878,25 +879,26 @@ TEST(spinodal_dilute) {
   const DensityParameters par(param);
 
   std::unique_ptr<RectangularLattice<FourVector>> old_jmu_auxiliary_df =
-      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
-                                                  LatticeUpdate::EveryTimestep);
+      std::make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
   std::unique_ptr<RectangularLattice<FourVector>> new_jmu_auxiliary_df =
-      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
-                                                  LatticeUpdate::EveryTimestep);
+      std::make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
   std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>>
       four_gradient_auxiliary_df =
-          make_unique<RectangularLattice<std::array<FourVector, 4>>>(
+          std::make_unique<RectangularLattice<std::array<FourVector, 4>>>(
               l, n, origin, periodic, LatticeUpdate::EveryTimestep);
 
-  std::unique_ptr<DensityLattice> jmu_B_lat_df = make_unique<DensityLattice>(
-      l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+  std::unique_ptr<DensityLattice> jmu_B_lat_df =
+      std::make_unique<DensityLattice>(l, n, origin, periodic,
+                                       LatticeUpdate::EveryTimestep);
   std::unique_ptr<RectangularLattice<FourVector>> UB_lat_df =
-      make_unique<RectangularLattice<FourVector>>(l, n, origin, periodic,
-                                                  LatticeUpdate::EveryTimestep);
+      std::make_unique<RectangularLattice<FourVector>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
   std::unique_ptr<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>
-      FB_lat_df =
-          make_unique<RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
-              l, n, origin, periodic, LatticeUpdate::EveryTimestep);
+      FB_lat_df = std::make_unique<
+          RectangularLattice<std::pair<ThreeVector, ThreeVector>>>(
+          l, n, origin, periodic, LatticeUpdate::EveryTimestep);
 
   // the mean field energy at the beginning and end of the evolution
   double E_init, E_final;

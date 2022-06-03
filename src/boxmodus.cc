@@ -16,7 +16,6 @@
 #include "smash/angles.h"
 #include "smash/boxmodus.h"
 #include "smash/constants.h"
-#include "smash/cxx14compat.h"
 #include "smash/experimentparameters.h"
 #include "smash/logging.h"
 #include "smash/quantumsampling.h"
@@ -293,7 +292,7 @@ double BoxModus::initial_conditions(Particles *particles,
   }
   std::unique_ptr<QuantumSampling> quantum_sampling;
   if (this->initial_condition_ == BoxInitialCondition::ThermalMomentaQuantum) {
-    quantum_sampling = make_unique<QuantumSampling>(init_multipl_, V, T);
+    quantum_sampling = std::make_unique<QuantumSampling>(init_multipl_, V, T);
   }
   for (ParticleData &data : *particles) {
     /* Set MOMENTUM SPACE distribution */
@@ -375,7 +374,7 @@ int BoxModus::impose_boundary_conditions(Particles *particles,
       data.set_4position(position);
       ++wraps;
       ActionPtr action =
-          make_unique<WallcrossingAction>(incoming_particle, data);
+          std::make_unique<WallcrossingAction>(incoming_particle, data);
       for (const auto &output : output_list) {
         if (!output->is_dilepton_output() && !output->is_photon_output()) {
           output->at_interaction(*action, 0.);

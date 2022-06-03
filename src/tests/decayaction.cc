@@ -13,7 +13,6 @@
 
 #include <typeinfo>
 
-#include "../include/smash/cxx14compat.h"
 #include "../include/smash/decayaction.h"
 #include "../include/smash/decaymodes.h"
 
@@ -123,6 +122,6 @@ TEST(create_decayaction) {
   COMPARE(decaymodes_counter, 3);
 
   const double time_of_execution = 4.5;
-  const auto act = make_unique<DecayAction>(H, time_of_execution);
+  const auto act = std::make_unique<DecayAction>(H, time_of_execution);
   std::cout << *act << std::endl;
 }

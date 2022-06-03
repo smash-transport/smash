@@ -61,7 +61,7 @@ TEST(vtkoutputfile) {
 
   /* Create output object */
   std::unique_ptr<VtkOutput> vtkop =
-      make_unique<VtkOutput>(testoutputpath, "Particles", out_par);
+      std::make_unique<VtkOutput>(testoutputpath, "Particles", out_par);
   int event_id = 0;
   /* Initial output */
   EventInfo event = Test::default_event_info();

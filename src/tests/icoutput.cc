@@ -52,7 +52,7 @@ TEST(particlelist_format) {
   p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
 
   // Create and perform action ("hypersurface crossing")
-  ActionPtr action = make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
+  ActionPtr action = std::make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
   action->generate_final_state();
   action->perform(&particles, 1);
 
@@ -67,8 +67,8 @@ TEST(particlelist_format) {
 
   {
     OutputParameters out_par = OutputParameters();
-    auto IC_output =
-        make_unique<ICOutput>(testoutputpath, "Initial_Conditions", out_par);
+    auto IC_output = std::make_unique<ICOutput>(testoutputpath,
+                                                "Initial_Conditions", out_par);
 
     VERIFY(bool(IC_output));
     VERIFY(bf::exists(outputfilepath_unfinished));

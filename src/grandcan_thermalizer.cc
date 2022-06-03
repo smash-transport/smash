@@ -10,7 +10,6 @@
 #include <time.h>
 
 #include "smash/angles.h"
-#include "smash/cxx14compat.h"
 #include "smash/forwarddeclarations.h"
 #include "smash/logging.h"
 #include "smash/particles.h"
@@ -118,7 +117,7 @@ GrandCanThermalizer::GrandCanThermalizer(const std::array<double, 3> lat_sizes,
       algorithm_(algo),
       BF_enforce_microcanonical_(BF_microcanonical) {
   const LatticeUpdate upd = LatticeUpdate::EveryFixedInterval;
-  lat_ = make_unique<RectangularLattice<ThermLatticeNode>>(
+  lat_ = std::make_unique<RectangularLattice<ThermLatticeNode>>(
       lat_sizes, n_cells, origin, periodicity, upd);
   const std::array<double, 3> abc = lat_->cell_sizes();
   lat_cell_volume_ = abc[0] * abc[1] * abc[2];

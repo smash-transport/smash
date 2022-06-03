@@ -13,7 +13,6 @@
 
 #include "smash/boxmodus.h"
 #include "smash/collidermodus.h"
-#include "smash/cxx14compat.h"
 #include "smash/listmodus.h"
 #include "smash/spheremodus.h"
 
@@ -55,15 +54,15 @@ ExperimentPtr ExperimentBase::create(Configuration config,
   logg[LExperiment].debug() << "Modus for this calculation: " << modus_chooser;
 
   if (modus_chooser == "Box") {
-    return make_unique<Experiment<BoxModus>>(config, output_path);
+    return std::make_unique<Experiment<BoxModus>>(config, output_path);
   } else if (modus_chooser == "List") {
-    return make_unique<Experiment<ListModus>>(config, output_path);
+    return std::make_unique<Experiment<ListModus>>(config, output_path);
   } else if (modus_chooser == "ListBox") {
-    return make_unique<Experiment<ListBoxModus>>(config, output_path);
+    return std::make_unique<Experiment<ListBoxModus>>(config, output_path);
   } else if (modus_chooser == "Collider") {
-    return make_unique<Experiment<ColliderModus>>(config, output_path);
+    return std::make_unique<Experiment<ColliderModus>>(config, output_path);
   } else if (modus_chooser == "Sphere") {
-    return make_unique<Experiment<SphereModus>>(config, output_path);
+    return std::make_unique<Experiment<SphereModus>>(config, output_path);
   } else {
     throw InvalidModusRequest("Invalid Modus (" + modus_chooser +
                               ") requested from ExperimentBase::create.");
@@ -546,10 +545,10 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
     // Add an output time larger than the end time so that the next time is
     // always defined during the time evolution
     output_times.push_back(t_end + 1.);
-    output_clock = make_unique<CustomClock>(output_times);
+    output_clock = std::make_unique<CustomClock>(output_times);
   } else {
     const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
-    output_clock = make_unique<UniformClock>(0.0, output_dt);
+    output_clock = std::make_unique<UniformClock>(0.0, output_dt);
   }
 
   // Add proper error messages if photons are not configured properly.
@@ -658,7 +657,7 @@ ExperimentParameters create_experiment_parameters(Configuration config) {
   double maximum_cross_section = config_coll.take(
       {"Maximum_Cross_Section"}, maximum_cross_section_default);
   maximum_cross_section *= scale_xs;
-  return {make_unique<UniformClock>(0.0, dt),
+  return {std::make_unique<UniformClock>(0.0, dt),
           std::move(output_clock),
           config.take({"General", "Ensembles"}, 1),
           ntest,

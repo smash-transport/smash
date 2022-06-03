@@ -243,7 +243,7 @@ RootOutput::RootOutput(const bf::path &path, const std::string &name,
   filename_unfinished_ = filename_;
   filename_unfinished_ += ".unfinished";
   root_out_file_ =
-      make_unique<TFile>(filename_unfinished_.native().c_str(), "NEW");
+      std::make_unique<TFile>(filename_unfinished_.native().c_str(), "NEW");
   init_trees();
 }
 
