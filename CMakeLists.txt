@@ -63,7 +63,7 @@ endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Request a given C++ standard
-set(CXX_SMASH_STANDARD "11")
+set(CXX_SMASH_STANDARD "17")
 # To be user friendly, fail early if standard is not supported (do it for official supported
 # compilers only)
 if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")

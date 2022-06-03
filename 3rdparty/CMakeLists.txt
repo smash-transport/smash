@@ -1,3 +1,6 @@
+# Let 3rd-party library use their own C++ standard
+unset(CMAKE_CXX_STANDARD)
+
 message(STATUS "Setting up Cuba library")
 list(APPEND CMAKE_MESSAGE_INDENT "   ")
 add_subdirectory(Cuba-4.2.1)
@@ -19,3 +22,6 @@ set(YAML_CPP_BUILD_CONTRIB OFF CACHE INTERNAL "")
 add_subdirectory(yaml-cpp-0.7.0)
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 message(STATUS "Setting up YAML library - done")
+
+# Restore SMASH C++ standard
+set(CMAKE_CXX_STANDARD ${CXX_SMASH_STANDARD})
