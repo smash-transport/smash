@@ -23,9 +23,9 @@ jobs:
         # 1st matrix element, default compiler at FIAS
         - os: ubuntu-18.04
           site: "fias"
-          packages_to_add: "libboost-all-dev g++-5 doxygen-latex graphviz libgsl-dev"
-          c_compiler_to_use: "gcc-5"
-          cxx_compiler_to_use: "g++-5"
+          packages_to_add: "libboost-all-dev g++-8 doxygen-latex graphviz libgsl-dev"
+          c_compiler_to_use: "gcc-8"
+          cxx_compiler_to_use: "g++-8"
         # 2nd matrix element, recent LTS Ubuntu distribution with gcc
         - os: ubuntu-20.04
           site: "linux-default-gcc"
