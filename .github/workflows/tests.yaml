@@ -69,7 +69,7 @@ jobs:
         fi
         # we download and install Pythia
         wget https://pythia.org/download/pythia83/pythia8307.tgz && tar xf pythia8307.tgz && rm pythia8307.tgz && cd pythia8307
-        ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC' && make -j$(nproc) && cd ..
+        ./configure --cxx-common='-std=c++17 -march=native -mfpmath=sse -O3 -fPIC' && make -j$(nproc) && cd ..
         # we download and unpack clang
         if [ $SITE == "mac" ]; then curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
         else curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz; fi &&
