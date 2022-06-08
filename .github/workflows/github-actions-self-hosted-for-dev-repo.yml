@@ -32,6 +32,8 @@ jobs:
           export TOOLS_DIR=$HOME/actions-runner/smash_stuff_github_actions
           export PATH=$TOOLS_DIR/clang6_0_0/bin/:$TOOLS_DIR/python-tools/bin/:$PATH
           export PYTHONPATH=$TOOLS_DIR/python-tools:$PYTHONPATH
+          export CC=gcc-8
+          export CXX=g++-8
           export container_file=$TOOLS_DIR/singularity_container.sif
           # we configure and build smash using the environment provided by a Singularity container
           cd $SMASH_ROOT/build
