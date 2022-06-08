@@ -16,7 +16,6 @@
 #include "smash/angles.h"
 #include "smash/constants.h"
 #include "smash/crosssections.h"
-#include "smash/cxx14compat.h"
 #include "smash/fpenvironment.h"
 #include "smash/logging.h"
 #include "smash/pdgcode.h"

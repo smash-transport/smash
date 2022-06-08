@@ -10,7 +10,6 @@
 #ifndef SRC_TESTS_SETUP_H_
 #define SRC_TESTS_SETUP_H_
 
-#include "../include/smash/cxx14compat.h"
 #include "../include/smash/decaymodes.h"
 #include "../include/smash/experiment.h"
 #include "../include/smash/outputinterface.h"
@@ -219,7 +218,7 @@ using ParticlesPtr = std::unique_ptr<Particles>;
  */
 template <typename G>
 inline ParticlesPtr create_particles(int n, G &&generator) {
-  ParticlesPtr p = make_unique<Particles>();
+  ParticlesPtr p = std::make_unique<Particles>();
   for (auto i = n; i; --i) {
     p->insert(generator());
   }
@@ -232,7 +231,7 @@ inline ParticlesPtr create_particles(int n, G &&generator) {
  */
 inline ParticlesPtr create_particles(
     const std::initializer_list<ParticleData> &init) {
-  ParticlesPtr p = make_unique<Particles>();
+  ParticlesPtr p = std::make_unique<Particles>();
   for (const auto &data : init) {
     p->insert(data);
   }
@@ -260,18 +259,18 @@ inline ExperimentParameters default_parameters(
     int testparticles = 1, double dt = 0.1,
     CollisionCriterion crit = CollisionCriterion::Geometric) {
   return ExperimentParameters{
-      make_unique<UniformClock>(0., dt),     // labclock
-      make_unique<UniformClock>(0., 1.),     // outputclock
-      1,                                     // ensembles
-      testparticles,                         // testparticles
-      DerivativesMode::CovariantGaussian,    // derivatives mode
-      RestFrameDensityDerivativesMode::Off,  // rest frame derivatives mode
-      FieldDerivativesMode::ChainRule,       // field derivatives mode
-      SmearingMode::CovariantGaussian,       // smearing mode
-      1.0,                                   // Gaussian smearing width
-      4.0,                                   // Gaussian smearing cut-off
-      0.333333,                              // discrete smearing weight
-      2.0,                                   // triangular smearing range
+      std::make_unique<UniformClock>(0., dt),  // labclock
+      std::make_unique<UniformClock>(0., 1.),  // outputclock
+      1,                                       // ensembles
+      testparticles,                           // testparticles
+      DerivativesMode::CovariantGaussian,      // derivatives mode
+      RestFrameDensityDerivativesMode::Off,    // rest frame derivatives mode
+      FieldDerivativesMode::ChainRule,         // field derivatives mode
+      SmearingMode::CovariantGaussian,         // smearing mode
+      1.0,                                     // Gaussian smearing width
+      4.0,                                     // Gaussian smearing cut-off
+      0.333333,                                // discrete smearing weight
+      2.0,                                     // triangular smearing range
       crit,
       true,  // two_to_one
       all_reactions_included(),

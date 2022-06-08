@@ -18,7 +18,6 @@
 
 #include "../include/smash/boxmodus.h"
 #include "../include/smash/configuration.h"
-#include "../include/smash/cxx14compat.h"
 #include "../include/smash/density.h"
 #include "../include/smash/experiment.h"
 #include "../include/smash/modusdefault.h"
@@ -149,8 +148,8 @@ TEST(smearing_factor_normalization) {
   const std::array<int, 3> n = {50, 60, 70};
   const std::array<double, 3> origin = {0., 0., 0.};
   bool periodicity = true;
-  auto lat = make_unique<DensityLattice>(l, n, origin, periodicity,
-                                         LatticeUpdate::EveryTimestep);
+  auto lat = std::make_unique<DensityLattice>(l, n, origin, periodicity,
+                                              LatticeUpdate::EveryTimestep);
   // Create box with 1 proton
   const int N = 1;
   const double L = 10.;
@@ -164,7 +163,7 @@ TEST(smearing_factor_normalization) {
   ExperimentParameters par = smash::Test::default_parameters();
   par.box_length = L;
   const DensityParameters dens_par = DensityParameters(par);
-  std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
+  std::unique_ptr<BoxModus> b = std::make_unique<BoxModus>(conf["Modi"], par);
   std::vector<Particles> ensembles(1);
   b->initial_conditions(&ensembles[0], par);
   // Fill lattice from particles
@@ -431,7 +430,7 @@ TEST(nucleus_density) {
   Configuration&& conf{testoutputpath, configfilename};
   ExperimentParameters par = smash::Test::default_parameters(Ntest);
   std::unique_ptr<ThermodynamicOutput> out =
-make_unique<ThermodynamicOutput>(testoutputpath, std::move(conf));
+std::make_unique<ThermodynamicOutput>(testoutputpath, std::move(conf));
   out->density_along_line("lead_densityX.dat", plist, par, dens_type,
                           lstart, lend, npoints);
 
@@ -458,7 +457,7 @@ conf.take({"Modi", "Box", "Init_Multiplicities"});
 conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = 1000;
 conf["Modi"]["Box"]["Length"] = L;
 const ExperimentParameters par = smash::Test::default_parameters(Ntest);
-std::unique_ptr<BoxModus> b = make_unique<BoxModus>(conf["Modi"], par);
+std::unique_ptr<BoxModus> b = std::make_unique<BoxModus>(conf["Modi"], par);
 Particles P;
 b->initial_conditions(&P, par);
 ParticleList plist = P.copy_to_vector();
@@ -466,7 +465,7 @@ conf["Output"]["Density"]["x"] = 0.0;
 conf["Output"]["Density"]["y"] = 0.0;
 conf["Output"]["Density"]["z"] = 0.0;
 std::unique_ptr<ThermodynamicOutput> out =
-make_unique<ThermodynamicOutput>(testoutputpath,
+std::make_unique<ThermodynamicOutput>(testoutputpath,
                                          conf["Output"]["Density"]);
 const ThreeVector lstart = ThreeVector(0.0, 0.0, 0.0);
 const ThreeVector lend = ThreeVector(L, L, L);

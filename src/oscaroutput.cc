@@ -16,7 +16,6 @@
 #include "smash/action.h"
 #include "smash/clock.h"
 #include "smash/config.h"
-#include "smash/cxx14compat.h"
 #include "smash/forwarddeclarations.h"
 
 namespace smash {
@@ -751,17 +750,17 @@ std::unique_ptr<OutputInterface> create_select_format(
   bool extended_format = (Contents & OscarInteractions) ? out_par.coll_extended
                                                         : out_par.part_extended;
   if (modern_format && extended_format) {
-    return make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(path,
-                                                                       name);
+    return std::make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(
+        path, name);
   } else if (modern_format && !extended_format) {
-    return make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
+    return std::make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
   } else if (!modern_format && !extended_format) {
-    return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
+    return std::make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
   } else {
     // Only remaining possibility: (!modern_format && extended_format)
     logg[LOutput].warn() << "Creating Oscar output: "
                          << "There is no extended Oscar1999 format.";
-    return make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
+    return std::make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
   }
 }
 }  // unnamed namespace
@@ -797,14 +796,14 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     }
   } else if (content == "Dileptons") {
     if (modern_format && out_par.dil_extended) {
-      return make_unique<
+      return std::make_unique<
           OscarOutput<OscarFormat2013Extended, OscarInteractions>>(path,
                                                                    "Dileptons");
     } else if (modern_format && !out_par.dil_extended) {
-      return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
+      return std::make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
           path, "Dileptons");
     } else if (!modern_format && !out_par.dil_extended) {
-      return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
+      return std::make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Dileptons");
     } else if (!modern_format && out_par.dil_extended) {
       logg[LOutput].warn()
@@ -813,14 +812,14 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     }
   } else if (content == "Photons") {
     if (modern_format && !out_par.photons_extended) {
-      return make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
+      return std::make_unique<OscarOutput<OscarFormat2013, OscarInteractions>>(
           path, "Photons");
     } else if (modern_format && out_par.photons_extended) {
-      return make_unique<
+      return std::make_unique<
           OscarOutput<OscarFormat2013Extended, OscarInteractions>>(path,
                                                                    "Photons");
     } else if (!modern_format && !out_par.photons_extended) {
-      return make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
+      return std::make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Photons");
     } else if (!modern_format && out_par.photons_extended) {
       logg[LOutput].warn()
@@ -829,15 +828,15 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     }
   } else if (content == "Initial_Conditions") {
     if (modern_format && !out_par.ic_extended) {
-      return make_unique<
+      return std::make_unique<
           OscarOutput<OscarFormat2013, OscarParticlesIC | OscarAtEventstart>>(
           path, "SMASH_IC");
     } else if (modern_format && out_par.ic_extended) {
-      return make_unique<OscarOutput<OscarFormat2013Extended,
-                                     OscarParticlesIC | OscarAtEventstart>>(
+      return std::make_unique<OscarOutput<
+          OscarFormat2013Extended, OscarParticlesIC | OscarAtEventstart>>(
           path, "SMASH_IC");
     } else if (!modern_format && !out_par.ic_extended) {
-      return make_unique<
+      return std::make_unique<
           OscarOutput<OscarFormat1999, OscarParticlesIC | OscarAtEventstart>>(
           path, "SMASH_IC");
     } else if (!modern_format && out_par.ic_extended) {

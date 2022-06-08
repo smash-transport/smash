@@ -13,7 +13,6 @@
 
 #include "../include/smash/boxmodus.h"
 #include "../include/smash/configuration.h"
-#include "../include/smash/cxx14compat.h"
 #include "../include/smash/experiment.h"
 #include "../include/smash/nucleus.h"
 #include "../include/smash/pauliblocking.h"
@@ -40,7 +39,7 @@ TEST(phase_space_density) {
   conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
 
   ExperimentParameters param = smash::Test::default_parameters();
-  std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(
+  std::unique_ptr<PauliBlocker> pb = std::make_unique<PauliBlocker>(
       conf["Collision_Term"]["Pauli_Blocking"], param);
   std::vector<Particles> part(1);
   PdgCode pdg = 0x2112;
@@ -103,7 +102,7 @@ TEST(phase_space_density_nucleus) {
   Au.copy_particles(&part_Au[0]);
 
   ExperimentParameters param = smash::Test::default_parameters(Ntest);
-  std::unique_ptr<PauliBlocker> pb = make_unique<PauliBlocker>(
+  std::unique_ptr<PauliBlocker> pb = std::make_unique<PauliBlocker>(
       conf["Collision_Term"]["Pauli_Blocking"], param);
 
   ThreeVector r(0.0, 0.0, 0.0);

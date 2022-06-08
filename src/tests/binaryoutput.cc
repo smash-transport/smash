@@ -175,7 +175,7 @@ TEST(fullhistory_format) {
   const double impact_parameter = 1.473;
   const bool empty_event = false;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
+  ScatterActionPtr action = std::make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(),
                               Test::no_multiparticle_reactions(), 0., true,
                               false, false, NNbarTreatment::NoAnnihilation, 1.0,
@@ -195,7 +195,7 @@ TEST(fullhistory_format) {
     output_par.coll_extended = false;
 
     /* Create an instance of binary output */
-    auto bin_output = make_unique<BinaryOutputCollisions>(
+    auto bin_output = std::make_unique<BinaryOutputCollisions>(
         testoutputpath, "Collisions", output_par);
     VERIFY(bf::exists(collisionsoutputfilepath_unfinished));
 
@@ -277,7 +277,7 @@ TEST(particles_format) {
     output_par.part_extended = false;
     output_par.part_only_final = OutputOnlyFinal::No;
     /* Create an instance of binary output */
-    auto bin_output = make_unique<BinaryOutputParticles>(
+    auto bin_output = std::make_unique<BinaryOutputParticles>(
         testoutputpath, "Particles", output_par);
     VERIFY(bool(bin_output));
     VERIFY(bf::exists(particleoutputpath_unfinished));
@@ -353,7 +353,7 @@ TEST(extended) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
 
   /* Create elastic interaction (smashon + smashon). */
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
+  ScatterActionPtr action = std::make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(),
                               Test::no_multiparticle_reactions(), 0., true,
                               false, false, NNbarTreatment::NoAnnihilation, 1.0,
@@ -377,7 +377,7 @@ TEST(extended) {
     output_par.coll_extended = true;
 
     /* Create an instance of binary output */
-    auto bin_output = make_unique<BinaryOutputCollisions>(
+    auto bin_output = std::make_unique<BinaryOutputCollisions>(
         testoutputpath, "Collisions", output_par);
     VERIFY(bf::exists(collisionsoutputfilepath_unfinished));
 
@@ -452,7 +452,7 @@ TEST(initial_conditions_format) {
   p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
 
   // Create and perform action ("hypersurface crossing")
-  ActionPtr action = make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
+  ActionPtr action = std::make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
   action->generate_final_state();
   action->perform(&particles, 1);
 
@@ -470,7 +470,7 @@ TEST(initial_conditions_format) {
     output_par.part_extended = false;
     double density = 0.0;
     /* Create an instance of binary output */
-    auto bin_output = make_unique<BinaryOutputInitialConditions>(
+    auto bin_output = std::make_unique<BinaryOutputInitialConditions>(
         testoutputpath, "SMASH_IC", output_par);
     VERIFY(bool(bin_output));
     VERIFY(bf::exists(particleoutputpath_unfinished));

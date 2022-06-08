@@ -422,7 +422,7 @@ int ListBoxModus::impose_boundary_conditions(Particles *particles,
       data.set_4position(position);
       ++wraps;
       ActionPtr action =
-          make_unique<WallcrossingAction>(incoming_particle, data);
+          std::make_unique<WallcrossingAction>(incoming_particle, data);
       for (const auto &output : output_list) {
         if (!output->is_dilepton_output() && !output->is_photon_output()) {
           output->at_interaction(*action, 0.);

@@ -14,7 +14,6 @@
 
 #include <boost/filesystem/fstream.hpp>
 
-#include "smash/cxx14compat.h"
 #include "smash/decaymodes.h"
 #include "smash/experiment.h"
 #include "smash/filelock.h"

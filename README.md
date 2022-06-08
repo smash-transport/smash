@@ -30,10 +30,10 @@ at elfner@itp.uni-frankfurt.de.
 
 ### Prerequisites
 
-SMASH is known to compile and work on little endian machines with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++11 features):
-- gcc >= 5.0
-- clang >= 3.3
-- Apple clang >= 5.0
+SMASH is known to compile and work on little endian machines with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++17 features):
+- gcc >= 8.0
+- clang >= 7.0
+- Apple clang >= 11.0
 
 Any different operating system and/or compiler and/or endianness is not officially supported.
 
@@ -45,7 +45,6 @@ SMASH requires the following tools and libraries:
 - Pythia = 8.307
 
 Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version (ROOT >= 5.34, HepMC3 >= 3.2.3, Rivet >= 3.1.4) is found on the system.
-Please, note that enabling Rivet output or using ROOT >= 6.24.00 requires a compiler supporting C++14 features.
 
 ### Building Pythia
 
@@ -55,7 +54,7 @@ Using a different version than specified above may or may not work. If the requi
     wget https://pythia.org/download/pythia83/pythia8307.tgz
     tar xf pythia8307.tgz && rm pythia8307.tgz
     cd pythia8307
-    ./configure --cxx-common='-std=c++11 -march=native -O3 -fPIC'
+    ./configure --cxx-common='-std=c++17 -march=native -O3 -fPIC'
     make
 
 To tell `cmake` where to find Pythia while building SMASH see the **Building SMASH** section.
@@ -78,7 +77,7 @@ The commands above to build Pythia on a M1 Apple machine become:
     curl https://pythia.org/download/pythia83/pythia8307.tgz -o pythia8307.tgz
     tar xf pythia8307.tgz && rm pythia8307.tgz
     cd pythia8307
-    ./configure --cxx-common='-std=c++11 -O3 -fPIC'
+    ./configure --cxx-common='-std=c++17 -O3 -fPIC'
     make
 
 ### Installing Eigen
@@ -236,16 +235,6 @@ install destination (`$HEPMC_INS`) with
 Note that if multiple CMAKE_PREFIX_PATHs are necessary, a semicolon-separated
 list of directories can be specified.
 
-### ROOT versions >= 6.24.00
-
-When compiling SMASH with ROOT >= 6.24.00 it is necessary to use a compiler supporting the C++ standard 14 and add the following argument to the `cmake` command:
-
-    cmake .. -DCMAKE_CXX_STANDARD=14
-
-When using pre-compiled ROOT binaries it might be necessary to use:
-
-    cmake .. -DCMAKE_CXX_STANDARD=17
-
 ### Enabling Rivet support
 
 The Rivet website is: https://rivet.hepforge.org/
@@ -259,13 +248,8 @@ The installation script, downloadable with:
 provides a convenient way to install Rivet and its dependencies
 (HepMC3 is among those, but, if you have already installed it, you can edit the
 script so that Rivet uses your installation).
-More infomation about Rivet, its installation and basic usage can be found in
+More information about Rivet, its installation and basic usage can be found in
 the tutorials in the Rivet website.
-Please, note that the compiler must support standard c++14 (e.g. gcc version > 5).
-This also means that the c++14 standard has to be set for the SMASH build (ideally
-from a clean build directory) by adding the following to the `cmake` command:
-
-    cmake .. -DCMAKE_CXX_STANDARD=14
 
 Please, also note that, every time Rivet is used, some environment variables
 must be set in advance. The script rivetenv.sh, in the Rivet installation directory,
@@ -273,7 +257,7 @@ takes care of this step:
 
     source [...]/rivetenv.sh
 
-where `[...]` is not a command, but a shortand for the path of the directory in
+where `[...]` is not a command, but a shorthand for the path of the directory in
 which Rivet is installed.
 
 If Rivet (with all its dependencies) is installed and the environment variables

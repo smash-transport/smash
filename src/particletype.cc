@@ -15,7 +15,6 @@
 #include <vector>
 
 #include "smash/constants.h"
-#include "smash/cxx14compat.h"
 #include "smash/decaymodes.h"
 #include "smash/distributions.h"
 #include "smash/formfactors.h"
@@ -507,7 +506,7 @@ DecayBranchList ParticleType::get_partial_widths(const FourVector p,
     if (w > 0.) {
       if (wanted_decaymode(decay_mode_list[i]->type(), wh)) {
         partial.push_back(
-            make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
+            std::make_unique<DecayBranch>(decay_mode_list[i]->type(), w));
       }
     }
   }

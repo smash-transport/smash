@@ -10,7 +10,6 @@
 #ifndef SRC_INCLUDE_SMASH_CROSSSECTIONSPHOTON_H_
 #define SRC_INCLUDE_SMASH_CROSSSECTIONSPHOTON_H_
 
-#include "cxx14compat.h"
 #include "kinematics.h"
 
 namespace smash {

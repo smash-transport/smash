@@ -1283,7 +1283,7 @@ ARG pythiaV="8307"
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
 cd pythia${pythiaV} && \
-./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC -march=x86-64' --prefix=/SMASH/pythia_install&& \
+./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64' --prefix=/SMASH/pythia_install&& \
 make -j$(nproc) && \
 make install && \
 echo /SMASH/pythia_install/lib >> /etc/ld.so.conf && ldconfig

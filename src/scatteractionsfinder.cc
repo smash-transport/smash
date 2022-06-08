@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "smash/constants.h"
-#include "smash/cxx14compat.h"
 #include "smash/decaymodes.h"
 #include "smash/logging.h"
 #include "smash/scatteraction.h"
@@ -384,7 +383,7 @@ ScatterActionsFinder::ScatterActionsFinder(
 
   if (strings_switch_) {
     auto subconfig = config["Collision_Term"]["String_Parameters"];
-    string_process_interface_ = make_unique<StringProcess>(
+    string_process_interface_ = std::make_unique<StringProcess>(
         subconfig.take({"String_Tension"}, 1.0), string_formation_time_,
         subconfig.take({"Gluon_Beta"}, 0.5),
         subconfig.take({"Gluon_Pmin"}, 0.001),
@@ -444,7 +443,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   }
 
   // Create ScatterAction object.
-  ScatterActionPtr act = make_unique<ScatterAction>(
+  ScatterActionPtr act = std::make_unique<ScatterAction>(
       data_a, data_b, time_until_collision, isotropic_, string_formation_time_,
       box_length_);
 
@@ -584,7 +583,7 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
 
   // 2. Create ScatterAction object.
   ScatterActionMultiPtr act =
-      make_unique<ScatterActionMulti>(plist, time_until_collision);
+      std::make_unique<ScatterActionMulti>(plist, time_until_collision);
 
   act->set_stochastic_pos_idx();
 
@@ -762,7 +761,7 @@ void ScatterActionsFinder::dump_reactions() const {
           for (auto mom : momentum_scan_list) {
             A.set_4momentum(A.pole_mass(), mom, 0.0, 0.0);
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
-            ScatterActionPtr act = make_unique<ScatterAction>(
+            ScatterActionPtr act = std::make_unique<ScatterAction>(
                 A, B, time, isotropic_, string_formation_time_);
             if (strings_switch_) {
               act->set_string_interface(string_process_interface_.get());
@@ -1157,7 +1156,7 @@ void ScatterActionsFinder::dump_cross_sections(
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
     const ParticleList incoming = {a_data, b_data};
-    ScatterActionPtr act = make_unique<ScatterAction>(
+    ScatterActionPtr act = std::make_unique<ScatterAction>(
         a_data, b_data, 0., isotropic_, string_formation_time_);
     if (strings_switch_) {
       act->set_string_interface(string_process_interface_.get());

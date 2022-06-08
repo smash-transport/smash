@@ -38,9 +38,9 @@ TEST(construct_and_insert) {
 
   // add actions to list
   ActionList action_vec;
-  action_vec.push_back(make_unique<DecayAction>(testparticle, time_4));
-  action_vec.push_back(make_unique<DecayAction>(testparticle, time_1));
-  action_vec.push_back(make_unique<DecayAction>(testparticle, time_6));
+  action_vec.push_back(std::make_unique<DecayAction>(testparticle, time_4));
+  action_vec.push_back(std::make_unique<DecayAction>(testparticle, time_1));
+  action_vec.push_back(std::make_unique<DecayAction>(testparticle, time_6));
 
   // construct the Actions object
   Actions actions(std::move(action_vec));
@@ -48,9 +48,9 @@ TEST(construct_and_insert) {
 
   // create new actions that are then inserted into the Actions object
   ActionList new_actions;
-  new_actions.push_back(make_unique<DecayAction>(testparticle, time_5));
-  new_actions.push_back(make_unique<DecayAction>(testparticle, time_2));
-  new_actions.push_back(make_unique<DecayAction>(testparticle, time_3));
+  new_actions.push_back(std::make_unique<DecayAction>(testparticle, time_5));
+  new_actions.push_back(std::make_unique<DecayAction>(testparticle, time_2));
+  new_actions.push_back(std::make_unique<DecayAction>(testparticle, time_3));
 
   // insert actions
   actions.insert(std::move(new_actions));

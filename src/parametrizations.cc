@@ -19,7 +19,6 @@
 #include "smash/average.h"
 #include "smash/clebschgordan.h"
 #include "smash/constants.h"
-#include "smash/cxx14compat.h"
 #include "smash/kinematics.h"
 #include "smash/lowess.h"
 #include "smash/pow.h"
@@ -113,7 +112,7 @@ static double piplusp_elastic_pdg(double mandelstam_s) {
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
     dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
     piplusp_elastic_interpolation =
-        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   return (*piplusp_elastic_interpolation)(p_lab);
@@ -156,7 +155,7 @@ double piplusp_elastic(double mandelstam_s) {
     }
     std::vector<double> y = PIPLUSP_RES_SIG;
     piplusp_elastic_res_interpolation =
-        make_unique<InterpolateDataSpline>(x, y);
+        std::make_unique<InterpolateDataSpline>(x, y);
   }
   sigma -= (*piplusp_elastic_res_interpolation)(mandelstam_s);
   if (sigma < 0) {
@@ -179,7 +178,7 @@ double piplusp_sigmapluskplus_pdg(double mandelstam_s) {
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
     dedup_y = smooth(dedup_x, dedup_y, 0.2, 5);
     piplusp_sigmapluskplus_interpolation =
-        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   return (*piplusp_sigmapluskplus_interpolation)(p_lab);
@@ -199,7 +198,7 @@ static double piminusp_elastic_pdg(double mandelstam_s) {
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
     dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
     piminusp_elastic_interpolation =
-        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   return (*piminusp_elastic_interpolation)(p_lab);
@@ -237,7 +236,7 @@ double piminusp_elastic(double mandelstam_s) {
     std::vector<double> dedup_y;
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
     piminusp_elastic_res_interpolation =
-        make_unique<InterpolateDataSpline>(dedup_x, dedup_y);
+        std::make_unique<InterpolateDataSpline>(dedup_x, dedup_y);
   }
   sigma -= (*piminusp_elastic_res_interpolation)(mandelstam_s);
   if (sigma < 0) {
@@ -260,7 +259,7 @@ double piminusp_lambdak0_pdg(double mandelstam_s) {
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
     dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
     piminusp_lambdak0_interpolation =
-        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   return (*piminusp_lambdak0_interpolation)(p_lab);
@@ -280,7 +279,7 @@ double piminusp_sigmaminuskplus_pdg(double mandelstam_s) {
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
     dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
     piminusp_sigmaminuskplus_interpolation =
-        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   return (*piminusp_sigmaminuskplus_interpolation)(p_lab);
@@ -300,7 +299,7 @@ double piminusp_sigma0k0_res(double mandelstam_s) {
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
     dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
     piminusp_sigma0k0_interpolation =
-        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double sqrts = std::sqrt(mandelstam_s);
   return (*piminusp_sigma0k0_interpolation)(sqrts);
@@ -464,7 +463,7 @@ static double kminusp_elastic_pdg(double mandelstam_s) {
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
     dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
     kminusp_elastic_interpolation =
-        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
   return (*kminusp_elastic_interpolation)(p_lab);
@@ -499,7 +498,7 @@ double kminusp_elastic_background(double mandelstam_s) {
     }
     std::vector<double> y = KMINUSP_RES_SIG;
     kminusp_elastic_res_interpolation =
-        make_unique<InterpolateDataSpline>(x, y);
+        std::make_unique<InterpolateDataSpline>(x, y);
   }
   const auto old_sigma = sigma;
   sigma -= (*kminusp_elastic_res_interpolation)(p_lab);
@@ -545,7 +544,7 @@ double kplusp_inelastic_background(double mandelstam_s) {
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
     dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
     kplusp_total_interpolation =
-        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
   return (*kplusp_total_interpolation)(p_lab)-kplusp_elastic_background(
@@ -561,7 +560,7 @@ double kplusn_inelastic_background(double mandelstam_s) {
     std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
     dedup_y = smooth(dedup_x, dedup_y, 0.05, 5);
     kplusn_total_interpolation =
-        make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
   return (*kplusn_total_interpolation)(p_lab)-kplusn_elastic_background(

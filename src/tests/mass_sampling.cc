@@ -45,7 +45,7 @@ TEST(omega_decay) {
   ParticleData omega{type_omega};
   omega.set_4momentum(0.782,                     // pole mass
                       ThreeVector(0., 0., 0.));  // at rest
-  const auto act = make_unique<DecayAction>(omega, 0.);
+  const auto act = std::make_unique<DecayAction>(omega, 0.);
   const auto srts = omega.effective_mass();
   act->add_decays(type_omega.get_partial_widths(
       FourVector(srts, 0., 0., 0.), ThreeVector(), WhichDecaymodes::Hadronic));
