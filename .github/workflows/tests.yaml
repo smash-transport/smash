@@ -20,9 +20,9 @@ jobs:
         include:
         #here we set up the various matrix elements
         #the entries in each matrix element are just variables, not keywords, with (hopefully) self-explaining names
-        # 1st matrix element, default compiler at FIAS
-        - os: ubuntu-18.04
-          site: "fias"
+        # 1st matrix element, minimum GNU compiler version
+        - os: ubuntu-20.04
+          site: "linux-minimum-gcc"
           packages_to_add: "libboost-all-dev g++-8 doxygen-latex graphviz libgsl-dev"
           c_compiler_to_use: "gcc-8"
           cxx_compiler_to_use: "g++-8"
@@ -87,7 +87,7 @@ jobs:
         cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8307/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.4.0/
         make -j$(nproc)
         # we check the building of the documentation for a specific case
-        if [ $SITE == "fias" ]; then make undocumented_test && make user; fi
+        if [ $SITE == "linux-minimum-gcc" ]; then make undocumented_test && make user; fi
         # we run the tests
         CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
     # We now setup python environment to then install cmake-format, but we do so on one site only
