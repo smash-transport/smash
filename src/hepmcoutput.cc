@@ -17,7 +17,7 @@
 #endif
 
 namespace smash {
-
+// clang-format off
 /*!\Userguide
  * \page output_hepmc_ HepMC Output
  *
@@ -64,31 +64,109 @@ namespace smash {
  *   SMASH the extension of the HepMC treeroot output is simply .root because
  *   the ROOT browser tool does not recognize the .treeroot extension.
  *
- * \section output_hepmc_asciiv3_ ASCII HepMC Format
+ * \section output_particles_collisions_ Particles and Collisions
  *
  * HepMC generally structures each event into particles and vertices
  * connecting them, basically storing a graph of the event.
+ * However, in SMASH it is possible to filter the amount of information
+ * available in the output, depending on whether the HepMC_asciiv3 or
+ * HepMC_treeroot output options are specified under \key Particles or
+ * \key Collisions (see  \ref configuring_output_ for a clarifying example).
+ * - \key Particles: the output only provides a particle
+ *   list of the final state. In HepMC only one central vertex is created.
+ *   All initial state particles are incoming particles and all final state
+ *   particles are outgoing particles of this vertex. Scatterings
+ *   happening during the SMASH event are not recorded. For the collider
+ *   modus, the intial state particles are combined into two single
+ *   colliding nucleus "particles" with a nuclear pdg code.
+ * - \key Collisions:  with this format, the full event tree is written.
+ *   Furthermore, as in the previous \key Particles case, in collider modus
+ *   we lump all incoming nucleons into nuclei, but split them out immediately
+ *   afterwards to allow tracking of the individual nucleons.
+ *
+ * \section output_hepmc_asciiv3_ ASCII HepMC Format
+ *
+ * In this case the information about each event is inserted into a plain,
+ * human readable ascii text file.
+ *
+ * In most cases the HepMC output is read by using tools like Rivet,
+ * however it can be useful to have a basic knowledge about the most important
+ * pieces of information contained there. We refer to the official HepMC
+ * documentation for more details.
+ *  
+ * Here there is an example of the first lines of the HepMC_asciiv3 output, in
+ * \key Collider modus and \key Particles output type:
 
- * Two versions of HepMC are possible by specifying HepMC_asciiv3 or
- * HepMC_treeroot under \key Particles. The output only provides a particle
- * list of the final state. For this only one central vertex is used. All
- * initial state particles are incoming particles and all final state
- * particles are outgoing particles of this vertex. Scatterings
- * happening during the SMASH event are not recorded. For the collider
- * modus, the intial state particles are combined into two single
- * colliding nucleus "particles" with a nuclear pdg code.
+ \verbatim
+
+ HepMC::Version 3.02.05
+ HepMC::Asciiv3-START_EVENT_LISTING
+ W Default
+ T SMASH\|SMASH-2.2.1-81-g450bc31amaster\|
+ E 0 1 772
+ U GEV MM
+ W 1.0000000000000000000000e+00
+ A 0 GenHeavyIon v0 -1 -1 -1 -1 -1 -1 -1 -1 -1 1.6090284 -1 -1 -1 -1 -1 -1 -1 -1 -1 0 0 
+ P 1 0 1000791970 -1.0269562977782698e-15 1.3877787807814457e-16 3.0788744605039813e+02 3.6105628807654466e+02 1.8859205636552139e+02 4
+ P 2 0 1000791970 -5.6898930012039273e-16 9.7144514654701197e-17 -3.0817189202123001e+02 3.6138985479939856e+02 1.8876628968114440e+02 4
+ V -1 0 [1,2] 
+ P 3 -1 2112 -1.3955349705352910e-01 -3.2052252367927581e-01 -1.3070952483948553e-01 1.0095240693561323e+00 9.3799999999999994e-01 1 
+ P 4 -1 2112 2.2504221328938548e-02 -8.1112446752570233e-02 1.8331677117778440e+00 2.0609302580389826e+00 9.3799999999999994e-01 1 
+ P 5 -1 111 -1.7932505641335714e-01 -2.3234517783752556e-01 7.9030334352518175e-02 3.3381364751890524e-01 1.3800000000000001e-01 1 
+ P 6 -1 -211 5.3428615692750892e-01 9.5409650270284543e-02 -1.6651817800882954e-01 5.8424053475982385e-01 1.3800000000000001e-01 1
+
+ \endverbatim
  *
- * In certain circumstances one may be interested in the full
- * event structure.  To that end, the output module provides the
- * HepMC format also for the \key Collisions content. With this format, the
- * full event tree is written.  Furthermore, as above, for collider modus,
- * we lump all incoming nucleons into nuclei, but split them out immediately
- * afterwards to allow tracking of the individual nucleons.
+ * The first 4 lines provide information about the version of HepMC3 and
+ * of the generator (i.e. SMASH) which have been used. These lines are not
+ * repeated.
  *
- * In all cases, the module will track the number of binary, inelastic
- * collisions between incident nucleons as well as keep track of
- * participating incident nucleons.
+ * Row 5: "E 0 1 772" marks the beginning of a new event, with the numbers
+ * referring to the event ID, the number of vertexes and the number of 
+ * particles, respectively, which have been recorded.
  *
+ * The content of line 8 _"A 0 GenHeavyIon ..."_ is described in
+ * Appendix A.3.3 of https://arxiv.org/pdf/1912.08005.pdf, however SMASH
+ * prints only the value of the impact parameter (1.6090284 in the example).
+ * This line closes the header, from now on, until the record of the next
+ * event, there are only lines starting with P (for particle data) or V
+ * (vertex data).
+ *
+ * Lines 9 and 10: these are the data regarding the two colliding ions,
+ * which are treated like two big particles, with PDG code based on their
+ * atomic and mass number (79 and 197, respectively, in this example with
+ *  gold).
+ *
+ * Row 11: V, i.e. vertex. The first number is the ID of the vertex, which
+ * decreases by 1 at each interaction. The square bracket contains the IDs
+ * of the incoming particles.
+ *
+ * Lines from 12: P, i.e. particle. The contents of the columns are:
+ * - "P", identifying a particle data line
+ * - the internal particle ID
+ * - the ID of the originating vertex
+ * - the particle PDG ID
+ * - particle momentum along x
+ * - particle momentum along y
+ * - particle momentum along z
+ * - particle energy
+ * - particle rest mass
+ * - interaction code ( 1: final state, 2: decay, 4: beam particle)
+ *
+ * The HepMC3_asciiv3 with output under \key Collisions presents has a similar
+ * structure, but, in addition to containing all the interaction vertexes and
+ * the non final particles, it has the following differences after the header:
+ * - a list of lines starting with "A", like
+ *   "A -6311 partial_weight 99.6726",
+ *   where the first number refers to a vertex ID and the partial_weights are
+ *   cross sections, followed by a similar list with lines like
+ *   "A -6311 weight 100.876",
+ *   where the weights are total cross sections
+ * - a list of particles and vertexes, in which the interaction code now
+ *   can be also one of those used by SMASH, shifted by 100 (e.g. 103 or 145) 
+ *
+ * In both cases, the HepMC output file ends with the line:
+ * _HepMC::Asciiv3-END_EVENT_LISTING_, followed by an empty line.
  *
  * \section output_hepmc_root_ ROOT HepMC Format
  *
@@ -157,6 +235,7 @@ namespace smash {
  * HepMC3 output of a subtype (asciiv3 or treeroot) into the other.
  *
  **/
+// clang-format on
 HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
                          const bool full_event, std::string HepMC3_output_type)
     : HepMcInterface(name, full_event),
