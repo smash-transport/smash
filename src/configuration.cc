@@ -10,12 +10,11 @@
 #include "smash/configuration.h"
 
 #include <cstdio>
+#include <filesystem>
 #include <string>
 #include <vector>
 
 #include <yaml-cpp/yaml.h>  // NOLINT(build/include_order)
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include "smash/forwarddeclarations.h"
 #include "smash/inputfunctions.h"
@@ -86,18 +85,19 @@ YAML::Node operator|=(YAML::Node a, const YAML::Node &b) {
 }  // unnamed namespace
 
 // Default constructor
-Configuration::Configuration(const bf::path &path)
+Configuration::Configuration(const std::filesystem::path &path)
     : Configuration(path, "config.yaml") {}
 
 // Constructor checking for validity of input
-Configuration::Configuration(const bf::path &path, const bf::path &filename) {
+Configuration::Configuration(const std::filesystem::path &path,
+                             const std::filesystem::path &filename) {
   const auto file_path = path / filename;
-  if (!bf::exists(file_path)) {
+  if (!std::filesystem::exists(file_path)) {
     throw FileDoesNotExist("The configuration file was expected at '" +
                            file_path.native() +
                            "', but the file does not exist.");
   }
-  if (has_crlf_line_ending(read_all(bf::ifstream((file_path))))) {
+  if (has_crlf_line_ending(read_all(std::ifstream((file_path))))) {
     throw std::runtime_error(
         "The configuration file has CR LF line endings. Please use LF "
         "line endings.");

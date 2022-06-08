@@ -11,14 +11,14 @@
 
 #include "setup.h"
 
+#include <filesystem>
+
 #include "../include/smash/boxmodus.h"
 #include "../include/smash/collidermodus.h"
 #include "../include/smash/configuration.h"
 #include "../include/smash/experimentparameters.h"
 #include "../include/smash/modusdefault.h"
 #include "../include/smash/spheremodus.h"
-
-#include <boost/filesystem.hpp>
 
 using namespace smash;
 

@@ -123,8 +123,8 @@ class ExperimentBase {
    * Most of the Configuration values are read starting from this function. The
    * configuration itself is documented in \subpage input_general_
    */
-  static std::unique_ptr<ExperimentBase> create(Configuration config,
-                                                const bf::path &output_path);
+  static std::unique_ptr<ExperimentBase> create(
+      Configuration config, const std::filesystem::path &output_path);
 
   /**
    * Runs the experiment.
@@ -208,7 +208,8 @@ class Experiment : public ExperimentBase {
    * of the object. Thus, all values that remain were not used. \param[in]
    * output_path The directory where the output files are written.
    */
-  explicit Experiment(Configuration config, const bf::path &output_path);
+  explicit Experiment(Configuration config,
+                      const std::filesystem::path &output_path);
 
   /**
    * This is called in the beginning of each event. It initializes particles
@@ -279,7 +280,8 @@ class Experiment : public ExperimentBase {
    * \param[in] par Output options.(e.g. Extended)
    */
   void create_output(const std::string &format, const std::string &content,
-                     const bf::path &output_path, const OutputParameters &par);
+                     const std::filesystem::path &output_path,
+                     const OutputParameters &par);
 
   /**
    * Propagate all particles until time to_time without any interactions
@@ -706,7 +708,7 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
 template <typename Modus>
 void Experiment<Modus>::create_output(const std::string &format,
                                       const std::string &content,
-                                      const bf::path &output_path,
+                                      const std::filesystem::path &output_path,
                                       const OutputParameters &out_par) {
   logg[LExperiment].info() << "Adding output " << content << " of format "
                            << format << std::endl;
@@ -1070,7 +1072,8 @@ ExperimentParameters create_experiment_parameters(Configuration config);
   \endverbatim
  */
 template <typename Modus>
-Experiment<Modus>::Experiment(Configuration config, const bf::path &output_path)
+Experiment<Modus>::Experiment(Configuration config,
+                              const std::filesystem::path &output_path)
     : parameters_(create_experiment_parameters(config)),
       density_param_(DensityParameters(parameters_)),
       modus_(config["Modi"], parameters_),

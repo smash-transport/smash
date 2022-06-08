@@ -11,14 +11,14 @@
 
 #include "setup.h"
 
+#include <filesystem>
+
 #include "../include/smash/boxmodus.h"
 #include "../include/smash/configuration.h"
 #include "../include/smash/experiment.h"
 #include "../include/smash/nucleus.h"
 #include "../include/smash/pauliblocking.h"
 #include "../include/smash/potentials.h"
-
-#include <boost/filesystem.hpp>
 
 using namespace smash;
 

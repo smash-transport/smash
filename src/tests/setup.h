@@ -10,6 +10,8 @@
 #ifndef SRC_TESTS_SETUP_H_
 #define SRC_TESTS_SETUP_H_
 
+#include <filesystem>
+
 #include "../include/smash/decaymodes.h"
 #include "../include/smash/experiment.h"
 #include "../include/smash/outputinterface.h"
@@ -17,8 +19,6 @@
 #include "../include/smash/particles.h"
 #include "../include/smash/particletype.h"
 #include "../include/smash/random.h"
-
-#include <boost/filesystem.hpp>
 
 namespace smash {
 namespace Test {
@@ -170,7 +170,7 @@ inline ParticleData smashon_random(int id = -1) {
  * \endcode
  */
 inline Configuration configuration(std::string overrides = {}) {
-  Configuration c{bf::path{TEST_CONFIG_PATH} / "input"};
+  Configuration c{std::filesystem::path{TEST_CONFIG_PATH} / "input"};
   if (!overrides.empty()) {
     c.merge_yaml(overrides);
   }

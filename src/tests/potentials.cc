@@ -11,6 +11,7 @@
 
 #include "setup.h"
 
+#include <filesystem>
 #include <fstream>
 #include <map>
 
@@ -25,8 +26,6 @@
 #include "../include/smash/propagation.h"
 #include "../include/smash/quantumsampling.h"
 #include "../include/smash/spheremodus.h"
-
-#include <boost/filesystem.hpp>
 
 using namespace smash;
 

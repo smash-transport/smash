@@ -7,8 +7,6 @@ DEBIAN_FRONTEND=noninteractive apt-get -y install \
 cmake \
 git \
 g++ \
-libboost1.71-dev \
-libboost-filesystem1.71-dev \
 libeigen3-dev \
 libgsl-dev \
 rsync \

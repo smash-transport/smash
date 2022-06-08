@@ -10,11 +10,11 @@
 #ifndef SRC_INCLUDE_SMASH_ROOTOUTPUT_H_
 #define SRC_INCLUDE_SMASH_ROOTOUTPUT_H_
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include "TFile.h"
 #include "TTree.h"
 
@@ -85,7 +85,7 @@ class RootOutput : public OutputInterface {
    * \param[in] name Name of the ouput.
    * \param[in] out_par A structure containing parameters of the output.
    */
-  RootOutput(const bf::path &path, const std::string &name,
+  RootOutput(const std::filesystem::path &path, const std::string &name,
              const OutputParameters &out_par);
 
   /// Destructor
@@ -130,9 +130,9 @@ class RootOutput : public OutputInterface {
 
  private:
   /// Filename of output
-  const bf::path filename_;
+  const std::filesystem::path filename_;
   /// Filename of output as long as simulation is still running.
-  bf::path filename_unfinished_;
+  std::filesystem::path filename_unfinished_;
   /// Pointer to root output file.
   std::unique_ptr<TFile> root_out_file_;
   /**

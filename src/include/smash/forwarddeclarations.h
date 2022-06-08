@@ -42,12 +42,6 @@ _LIBCPP_END_NAMESPACE_STD
 }  // namespace std
 #endif
 
-namespace boost {
-namespace filesystem {
-class path;
-}  // namespace filesystem
-}  // namespace boost
-
 namespace smash {
 
 template <typename T>
@@ -332,7 +326,6 @@ using TabulationPtr = build_unique_ptr_<Tabulation>;
 using ExperimentPtr = build_unique_ptr_<ExperimentBase>;
 using DecayTypePtr = build_unique_ptr_<DecayType>;
 
-namespace bf = boost::filesystem;
 /// @endcond
 
 }  // namespace smash

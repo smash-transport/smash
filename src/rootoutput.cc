@@ -227,8 +227,8 @@ const int RootOutput::max_buffer_size_ = 500000;
  * For more examples of extracting info from .root file see root.cern.ch
  *
  */
-RootOutput::RootOutput(const bf::path &path, const std::string &name,
-                       const OutputParameters &out_par)
+RootOutput::RootOutput(const std::filesystem::path &path,
+                       const std::string &name, const OutputParameters &out_par)
     : OutputInterface(name),
       filename_(path / (name + ".root")),
       write_collisions_(name == "Collisions" || name == "Dileptons" ||
@@ -346,7 +346,7 @@ RootOutput::~RootOutput() {
   // kOverwrite option prevents from writing extra TKey objects into root file
   root_out_file_->Write("", TObject::kOverwrite);
   root_out_file_->Close();
-  bf::rename(filename_unfinished_, filename_);
+  std::filesystem::rename(filename_unfinished_, filename_);
 }
 
 void RootOutput::at_eventstart(const Particles &particles,

@@ -66,7 +66,6 @@ string(TIMESTAMP BUILD_DATE)
 
 find_package(GSL 2.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 
 option(TRY_USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
 if(TRY_USE_ROOT)
@@ -128,14 +127,13 @@ endif()
 # set up include paths
 include_directories(include)
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
-include_directories(SYSTEM ${GSL_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+include_directories(SYSTEM ${GSL_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR})
 
 # set default libraries for linking
 set(SMASH_LIBRARIES
     ${SMASH_LIBRARIES}
     ${GSL_LIBRARY}
     ${GSL_CBLAS_LIBRARY}
-    ${Boost_LIBRARIES}
     einhard
     yaml-cpp
     cuhre

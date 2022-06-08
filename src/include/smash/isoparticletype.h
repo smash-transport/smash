@@ -212,7 +212,7 @@ class IsoParticleType {
    * cached.
    */
   static void tabulate_integrals(sha256::Hash hash,
-                                 const bf::path &tabulations_path);
+                                 const std::filesystem::path &tabulations_path);
 
   /**
    * Look up the tabulated resonance integral for the XX -> NR cross section.

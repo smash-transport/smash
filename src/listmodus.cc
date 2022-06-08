@@ -12,15 +12,13 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <list>
 #include <map>
 #include <sstream>
 #include <utility>
 #include <vector>
-
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include "smash/algorithms.h"
 #include "smash/boxmodus.h"
@@ -289,17 +287,18 @@ double ListModus::initial_conditions(Particles *particles,
   return start_time_;
 }
 
-bf::path ListModus::file_path_(const int file_id) {
+std::filesystem::path ListModus::file_path_(const int file_id) {
   std::stringstream fname;
   fname << particle_list_file_prefix_ << file_id;
 
-  const bf::path default_path = bf::absolute(particle_list_file_directory_);
+  const std::filesystem::path default_path =
+      std::filesystem::absolute(particle_list_file_directory_);
 
-  const bf::path fpath = default_path / fname.str();
+  const std::filesystem::path fpath = default_path / fname.str();
 
   logg[LList].debug() << fpath.filename().native() << '\n';
 
-  if (!bf::exists(fpath)) {
+  if (!std::filesystem::exists(fpath)) {
     logg[LList].fatal() << fpath.filename().native() << " does not exist! \n"
                         << "\n Usage of smash with external particle lists:\n"
                         << "1. Put the external particle lists in file \n"
@@ -316,8 +315,8 @@ bf::path ListModus::file_path_(const int file_id) {
 }
 
 std::string ListModus::next_event_() {
-  const bf::path fpath = file_path_(file_id_);
-  bf::ifstream ifs{fpath};
+  const std::filesystem::path fpath = file_path_(file_id_);
+  std::ifstream ifs{fpath};
   ifs.seekg(last_read_position_);
 
   if (!file_has_events_(fpath, last_read_position_)) {
@@ -353,9 +352,9 @@ std::string ListModus::next_event_() {
   return event_string;
 }
 
-bool ListModus::file_has_events_(bf::path filepath,
+bool ListModus::file_has_events_(std::filesystem::path filepath,
                                  std::streampos last_position) {
-  bf::ifstream ifs{filepath};
+  std::ifstream ifs{filepath};
   std::string line;
 
   // last event read read at end of file. we know this because errors are

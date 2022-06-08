@@ -29,11 +29,12 @@
 
 using namespace smash;
 
-static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
+static const std::filesystem::path testoutputpath =
+    std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
 
 TEST(directory_is_created) {
-  bf::create_directories(testoutputpath);
-  VERIFY(bf::exists(testoutputpath));
+  std::filesystem::create_directories(testoutputpath);
+  VERIFY(std::filesystem::exists(testoutputpath));
 }
 
 TEST(init_particletypes) { Test::create_smashon_particletypes(); }
@@ -184,9 +185,10 @@ TEST(fullhistory_format) {
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;
 
-  const bf::path collisionsoutputfilepath =
+  const std::filesystem::path collisionsoutputfilepath =
       testoutputpath / "collisions_binary.bin";
-  bf::path collisionsoutputfilepath_unfinished = collisionsoutputfilepath;
+  std::filesystem::path collisionsoutputfilepath_unfinished =
+      collisionsoutputfilepath;
   collisionsoutputfilepath_unfinished += ".unfinished";
   {
     /* Set the most verbose option */
@@ -197,7 +199,7 @@ TEST(fullhistory_format) {
     /* Create an instance of binary output */
     auto bin_output = std::make_unique<BinaryOutputCollisions>(
         testoutputpath, "Collisions", output_par);
-    VERIFY(bf::exists(collisionsoutputfilepath_unfinished));
+    VERIFY(std::filesystem::exists(collisionsoutputfilepath_unfinished));
 
     /* Write initial state output: the two smashons we created */
     bin_output->at_eventstart(particles, event_id, event);
@@ -207,8 +209,8 @@ TEST(fullhistory_format) {
     action->perform(&particles, 1);
     bin_output->at_eventend(particles, event_id, event);
   }
-  VERIFY(!bf::exists(collisionsoutputfilepath_unfinished));
-  VERIFY(bf::exists(collisionsoutputfilepath));
+  VERIFY(!std::filesystem::exists(collisionsoutputfilepath_unfinished));
+  VERIFY(std::filesystem::exists(collisionsoutputfilepath));
 
   /*
    * Now we have an artificially generated binary output.
@@ -255,7 +257,7 @@ TEST(fullhistory_format) {
     VERIFY(check_end_of_file(binF));
   }
 
-  VERIFY(bf::remove(collisionsoutputfilepath));
+  VERIFY(std::filesystem::remove(collisionsoutputfilepath));
 }
 
 TEST(particles_format) {
@@ -268,8 +270,9 @@ TEST(particles_format) {
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
   const ParticleList initial_particles = particles->copy_to_vector();
 
-  const bf::path particleoutputpath = testoutputpath / "particles_binary.bin";
-  bf::path particleoutputpath_unfinished = particleoutputpath;
+  const std::filesystem::path particleoutputpath =
+      testoutputpath / "particles_binary.bin";
+  std::filesystem::path particleoutputpath_unfinished = particleoutputpath;
   particleoutputpath_unfinished += ".unfinished";
   {
     /* Set the most verbose option */
@@ -280,7 +283,7 @@ TEST(particles_format) {
     auto bin_output = std::make_unique<BinaryOutputParticles>(
         testoutputpath, "Particles", output_par);
     VERIFY(bool(bin_output));
-    VERIFY(bf::exists(particleoutputpath_unfinished));
+    VERIFY(std::filesystem::exists(particleoutputpath_unfinished));
 
     /* Write initial state output: the two smashons we created */
     bin_output->at_eventstart(*particles, event_id, event);
@@ -295,8 +298,8 @@ TEST(particles_format) {
     bin_output->at_eventend(*particles, event_id, event);
   }
   const ParticleList final_particles = particles->copy_to_vector();
-  VERIFY(!bf::exists(particleoutputpath_unfinished));
-  VERIFY(bf::exists(particleoutputpath));
+  VERIFY(!std::filesystem::exists(particleoutputpath_unfinished));
+  VERIFY(std::filesystem::exists(particleoutputpath));
 
   /*
    * Now we have an artificially generated binary output.
@@ -343,7 +346,7 @@ TEST(particles_format) {
     VERIFY(check_end_of_file(binF));
   }
 
-  VERIFY(bf::remove(particleoutputpath));
+  VERIFY(std::filesystem::remove(particleoutputpath));
 }
 
 TEST(extended) {
@@ -367,9 +370,10 @@ TEST(extended) {
   const bool empty_event = true;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
-  const bf::path collisionsoutputfilepath =
+  const std::filesystem::path collisionsoutputfilepath =
       testoutputpath / "collisions_binary.bin";
-  bf::path collisionsoutputfilepath_unfinished = collisionsoutputfilepath;
+  std::filesystem::path collisionsoutputfilepath_unfinished =
+      collisionsoutputfilepath;
   collisionsoutputfilepath_unfinished += ".unfinished";
   {
     OutputParameters output_par = OutputParameters();
@@ -379,7 +383,7 @@ TEST(extended) {
     /* Create an instance of binary output */
     auto bin_output = std::make_unique<BinaryOutputCollisions>(
         testoutputpath, "Collisions", output_par);
-    VERIFY(bf::exists(collisionsoutputfilepath_unfinished));
+    VERIFY(std::filesystem::exists(collisionsoutputfilepath_unfinished));
 
     /* Write initial state output: the two smashons we created */
     bin_output->at_eventstart(particles, event_id, event);
@@ -389,8 +393,8 @@ TEST(extended) {
     action->perform(&particles, 1);
     bin_output->at_eventend(particles, event_id, event);
   }
-  VERIFY(!bf::exists(collisionsoutputfilepath_unfinished));
-  VERIFY(bf::exists(collisionsoutputfilepath));
+  VERIFY(!std::filesystem::exists(collisionsoutputfilepath_unfinished));
+  VERIFY(std::filesystem::exists(collisionsoutputfilepath));
 
   /*
    * Now we have an artificially generated binary output.
@@ -442,7 +446,7 @@ TEST(extended) {
     VERIFY(check_end_of_file(binF));
   }
 
-  VERIFY(bf::remove(collisionsoutputfilepath));
+  VERIFY(std::filesystem::remove(collisionsoutputfilepath));
 }
 
 TEST(initial_conditions_format) {
@@ -461,8 +465,9 @@ TEST(initial_conditions_format) {
   const double impact_parameter = 0.0;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
-  const bf::path particleoutputpath = testoutputpath / "SMASH_IC.bin";
-  bf::path particleoutputpath_unfinished = particleoutputpath;
+  const std::filesystem::path particleoutputpath =
+      testoutputpath / "SMASH_IC.bin";
+  std::filesystem::path particleoutputpath_unfinished = particleoutputpath;
   particleoutputpath_unfinished += ".unfinished";
 
   {
@@ -473,7 +478,7 @@ TEST(initial_conditions_format) {
     auto bin_output = std::make_unique<BinaryOutputInitialConditions>(
         testoutputpath, "SMASH_IC", output_par);
     VERIFY(bool(bin_output));
-    VERIFY(bf::exists(particleoutputpath_unfinished));
+    VERIFY(std::filesystem::exists(particleoutputpath_unfinished));
 
     /* Write event start information: This should do nothing for IC output */
     bin_output->at_interaction(*action, density);
@@ -484,8 +489,8 @@ TEST(initial_conditions_format) {
     /* Event end output */
     bin_output->at_eventend(particles, event_id, event);
   }
-  VERIFY(!bf::exists(particleoutputpath_unfinished));
-  VERIFY(bf::exists(particleoutputpath));
+  VERIFY(!std::filesystem::exists(particleoutputpath_unfinished));
+  VERIFY(std::filesystem::exists(particleoutputpath));
 
   /* Read the afore created output */
   {
@@ -512,5 +517,5 @@ TEST(initial_conditions_format) {
 
     VERIFY(check_end_of_file(binF));
   }
-  VERIFY(bf::remove(particleoutputpath));
+  VERIFY(std::filesystem::remove(particleoutputpath));
 }

@@ -11,12 +11,12 @@
 
 namespace smash {
 
-FilePtr fopen(const bf::path& filename, const std::string& mode) {
+FilePtr fopen(const std::filesystem::path& filename, const std::string& mode) {
   FilePtr f{std::fopen(filename.c_str(), mode.c_str())};
   return f;
 }
 
-RenamingFilePtr::RenamingFilePtr(const bf::path& filename,
+RenamingFilePtr::RenamingFilePtr(const std::filesystem::path& filename,
                                  const std::string& mode) {
   filename_ = filename;
   filename_unfinished_ = filename;
@@ -28,7 +28,7 @@ FILE* RenamingFilePtr::get() { return file_; }
 
 RenamingFilePtr::~RenamingFilePtr() {
   std::fclose(file_);
-  bf::rename(filename_unfinished_, filename_);
+  std::filesystem::rename(filename_unfinished_, filename_);
 }
 
 }  // namespace smash

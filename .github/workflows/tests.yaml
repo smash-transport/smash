@@ -23,25 +23,25 @@ jobs:
         # 1st matrix element, minimum GNU compiler version
         - os: ubuntu-20.04
           site: "linux-minimum-gcc"
-          packages_to_add: "libboost-all-dev g++-8 doxygen-latex graphviz libgsl-dev"
+          packages_to_add: "g++-8 doxygen-latex graphviz libgsl-dev"
           c_compiler_to_use: "gcc-8"
           cxx_compiler_to_use: "g++-8"
         # 2nd matrix element, recent LTS Ubuntu distribution with gcc
         - os: ubuntu-20.04
           site: "linux-default-gcc"
-          packages_to_add: "libboost-all-dev doxygen-latex graphviz libgsl-dev"
+          packages_to_add: "doxygen-latex graphviz libgsl-dev"
           c_compiler_to_use: "gcc"
           cxx_compiler_to_use: "g++"
         # 3rd matrix element, recent LTS Ubuntu distribution with clang
         - os: ubuntu-20.04
           site: "linux-default-clang"
-          packages_to_add: "libboost-all-dev libgsl-dev"
+          packages_to_add: "libgsl-dev"
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
         # 4th matrix element, osx 11 with clang
         - os: macos-11
           site: "mac"
-          packages_to_add: "boost gsl"
+          packages_to_add: "gsl"
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
     steps:

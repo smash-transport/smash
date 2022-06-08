@@ -7,8 +7,7 @@
 
 #include "smash/isoparticletype.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
 
 #include "smash/filelock.h"
 #include "smash/integrate.h"
@@ -217,22 +216,23 @@ static std::unordered_map<std::string, Tabulation> DeltaR_tabulations;
  */
 static std::unordered_map<std::string, Tabulation> rhoR_tabulations;
 
-static bf::path generate_tabulation_path(const bf::path &dir,
-                                         const std::string &prefix,
-                                         const std::string &res_name) {
+static std::filesystem::path generate_tabulation_path(
+    const std::filesystem::path &dir, const std::string &prefix,
+    const std::string &res_name) {
   return dir / (prefix + res_name + ".bin");
 }
 
 inline void cache_integral(
     std::unordered_map<std::string, Tabulation> &tabulations,
-    const bf::path &dir, sha256::Hash hash, const IsoParticleType &part,
-    const IsoParticleType &res, const IsoParticleType *antires, bool unstable) {
+    const std::filesystem::path &dir, sha256::Hash hash,
+    const IsoParticleType &part, const IsoParticleType &res,
+    const IsoParticleType *antires, bool unstable) {
   constexpr double spacing = 2.0;
   constexpr double spacing2d = 3.0;
   const auto path = generate_tabulation_path(dir, part.name_filtered_prime(),
                                              res.name_filtered_prime());
   Tabulation integral;
-  if (!dir.empty() && bf::exists(path)) {
+  if (!dir.empty() && std::filesystem::exists(path)) {
     std::ifstream file(path.string());
     integral = Tabulation::from_file(file, hash);
     if (!integral.is_empty()) {
@@ -267,13 +267,13 @@ inline void cache_integral(
   }
 }
 
-void IsoParticleType::tabulate_integrals(sha256::Hash hash,
-                                         const bf::path &tabulations_path) {
+void IsoParticleType::tabulate_integrals(
+    sha256::Hash hash, const std::filesystem::path &tabulations_path) {
   // To avoid race conditions, make sure we are the only ones currently storing
   // tabulations. Otherwise, we ignore any stored tabulations and don't store
   // our results.
   FileLock lock(tabulations_path / "tabulations.lock");
-  const bf::path &dir = lock.acquire() ? tabulations_path : "";
+  const std::filesystem::path &dir = lock.acquire() ? tabulations_path : "";
 
   const auto nuc = IsoParticleType::try_find("N");
   const auto pion = IsoParticleType::try_find("π");

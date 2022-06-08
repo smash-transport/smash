@@ -298,13 +298,6 @@ libblkid-dev:amd64  \
 libblkid1:amd64  \
 libblosc1  \
 libbluetooth3:amd64  \
-libboost-filesystem-dev:amd64  \
-libboost-filesystem1.71-dev:amd64  \
-libboost-filesystem1.71.0:amd64  \
-libboost-system1.71-dev:amd64  \
-libboost-system1.71.0:amd64  \
-libboost-thread1.71.0:amd64  \
-libboost1.71-dev:amd64  \
 libbrotli1:amd64  \
 libbsd0:amd64  \
 libbz2-1.0:amd64  \

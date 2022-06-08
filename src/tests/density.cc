@@ -11,10 +11,8 @@
 
 #include "setup.h"
 
+#include <filesystem>
 #include <map>
-
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 #include "../include/smash/boxmodus.h"
 #include "../include/smash/configuration.h"
@@ -26,11 +24,12 @@
 
 using namespace smash;
 
-static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
+static const std::filesystem::path testoutputpath =
+    std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
 
 TEST(directory_is_created) {
-  bf::create_directories(testoutputpath);
-  VERIFY(bf::exists(testoutputpath));
+  std::filesystem::create_directories(testoutputpath);
+  VERIFY(std::filesystem::exists(testoutputpath));
 }
 
 TEST(init_particle_types) {
@@ -402,8 +401,8 @@ TEST(density_eckart_frame) {
 /*
 TEST(nucleus_density) {
   std::string configfilename = "densconfig.yaml";
-  bf::ofstream(testoutputpath / configfilename) << "x: 0\ny: 0\nz: 0\n";
-  VERIFY(bf::exists(testoutputpath / configfilename));
+  std::filesystem::ofstream(testoutputpath / configfilename) << "x: 0\ny: 0\nz:
+0\n"; VERIFY(std::filesystem::exists(testoutputpath / configfilename));
 
   // Lead nuclei with 1000 test-particles
   std::map<PdgCode, int> lead_list = {{0x2212, 79}, {0x2112, 118}};

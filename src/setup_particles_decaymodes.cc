@@ -26,17 +26,17 @@ namespace decaymodes_txt {
 namespace smash {
 
 std::pair<std::string, std::string> load_particles_and_decaymodes(
-    const bf::path &particles_file,
-    const bf::path &decaymodes_file) {
+    const std::filesystem::path &particles_file,
+    const std::filesystem::path &decaymodes_file) {
   std::string particle_string, decay_string;
   if (!particles_file.empty()) {
-    if (!bf::exists(particles_file)) {
+    if (!std::filesystem::exists(particles_file)) {
       std::stringstream err;
       err << "The particles file was expected at '" << particles_file
           << "', but the file does not exist.";
       throw std::runtime_error(err.str());
     }
-    particle_string = read_all(bf::ifstream{particles_file});
+    particle_string = read_all(std::ifstream{particles_file});
     if (has_crlf_line_ending(particle_string)) {
       std::stringstream err;
       err << "The particles file has CR LF line endings. Please use LF"
@@ -48,13 +48,13 @@ std::pair<std::string, std::string> load_particles_and_decaymodes(
   }
 
   if (!decaymodes_file.empty()) {
-    if (!bf::exists(decaymodes_file)) {
+    if (!std::filesystem::exists(decaymodes_file)) {
       std::stringstream err;
       err << "The decay modes file was expected at '" << decaymodes_file
           << "', but the file does not exist.";
       throw std::runtime_error(err.str());
     }
-    decay_string = read_all(bf::ifstream{decaymodes_file});
+    decay_string = read_all(std::ifstream{decaymodes_file});
     if (has_crlf_line_ending(decay_string)) {
       std::stringstream err;
       err << "The decay mode file has CR LF line endings. Please use LF"

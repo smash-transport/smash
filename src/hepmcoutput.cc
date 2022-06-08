@@ -157,7 +157,7 @@ namespace smash {
  * HepMC3 output of a subtype (asciiv3 or treeroot) into the other.
  *
  **/
-HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
+HepMcOutput::HepMcOutput(const std::filesystem::path &path, std::string name,
                          const bool full_event, std::string HepMC3_output_type)
     : HepMcInterface(name, full_event),
       filename_(path / (name + "." + HepMC3_output_type)) {
@@ -181,7 +181,7 @@ HepMcOutput::~HepMcOutput() {
   logg[LOutput].debug() << "Renaming file " << filename_unfinished_ << " to "
                         << filename_ << std::endl;
   output_file_->close();
-  bf::rename(filename_unfinished_, filename_);
+  std::filesystem::rename(filename_unfinished_, filename_);
 }
 
 void HepMcOutput::at_eventend(const Particles &particles,

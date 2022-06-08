@@ -41,7 +41,6 @@ SMASH requires the following tools and libraries:
 - cmake >= 3.14
 - the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
-- boost filesystem >= 1.49
 - Pythia = 8.307
 
 Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version (ROOT >= 5.34, HepMC3 >= 3.2.3, Rivet >= 3.1.4) is found on the system.

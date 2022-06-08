@@ -199,7 +199,7 @@ else()
     message(WARNING "gitstats was not found. The gitstats support will be disabled.")
 endif()
 
-add_definitions("-DTEST_CONFIG_PATH=bf::path(\"${PROJECT_SOURCE_DIR}\")")
+add_definitions("-DTEST_CONFIG_PATH=std::filesystem::path(\"${PROJECT_SOURCE_DIR}\")")
 add_definitions("-DBUILD_TESTS")
 
 # compile-only tests
