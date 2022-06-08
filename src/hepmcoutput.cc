@@ -232,7 +232,8 @@ namespace smash {
  *
  * Among the examples of the HepMC3 library source code there is a converter
  * between different formats. The converter allows to transform the SMASH
- * HepMC3 output of a subtype (asciiv3 or treeroot) into the other.
+ * HepMC3 output of a subtype (asciiv3 or treeroot) into the other without
+ * loss of information.
  *
  **/
 // clang-format on
