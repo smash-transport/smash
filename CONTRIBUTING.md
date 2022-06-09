@@ -249,7 +249,7 @@ Code documentation has two important purposes:
 ### How to Write Good doxygen Comments
 
 Doxygen is very flexible in the [comments it accepts for documentation
-generation](http://www.stack.nl/~dimitri/doxygen/manual/docblocks.html). In
+generation](https://www.doxygen.nl/manual/docblocks.html). In
 general, it uses both comments and the source code itself to generate the
 documentation. In general documentation should look like this:
 
