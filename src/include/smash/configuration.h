@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_CONFIGURATION_H_
 
 #include <array>
+#include <filesystem>
 #include <set>
 #include <stdexcept>
 #include <string>

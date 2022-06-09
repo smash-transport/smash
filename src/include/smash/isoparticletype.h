@@ -8,6 +8,7 @@
 #ifndef SRC_INCLUDE_SMASH_ISOPARTICLETYPE_H_
 #define SRC_INCLUDE_SMASH_ISOPARTICLETYPE_H_
 
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <vector>
