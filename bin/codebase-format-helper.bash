@@ -9,9 +9,13 @@
 #
 #===================================================
 
+trap 'printf "\n"' EXIT
 shopt -s globstar
-CHOSEN_LANGUAGE=''
-FORMATTER_COMMAND=''
+CHOSEN_LANGUAGES=''
+declare -rA FORMATTER_COMMAND=(
+    ['C++']='clang-format'
+    ['CMake']='cmake-format'
+)
 MODE_PERFORM='FALSE'
 MODE_TEST='FALSE'
 VERBOSE='TRUE'
@@ -20,13 +24,31 @@ FILES_TO_FORMAT=()
 function main()
 {
     parse_command_line_arguments "$@"
-    check_formatter_availability
-    check_formatter_version
-    look_for_files_to_format
+    format_chosen_languages
+}
+
+function format_chosen_languages()
+{
+    local language
+    for language in "${CHOSEN_LANGUAGES[@]}"; do
+        format_given_language "${language}"
+    done
+}
+
+function format_given_language()
+{
+    check_formatter_availability "$1"
+    check_formatter_version "$1"
+    look_for_files_to_format "$1"
+    perform_or_test_formatting "$1"
+}
+
+function perform_or_test_formatting()
+{
     if [[ ${MODE_PERFORM} = 'TRUE' ]]; then
-        perform_formatting
+        perform_formatting "$1"
     elif [[ ${MODE_TEST} = 'TRUE' ]]; then
-        test_formatting
+        test_formatting "$1"
     fi
 }
 
@@ -35,35 +57,37 @@ function main()
 
 function check_formatter_availability()
 {
-    if ! type "${FORMATTER_COMMAND}" &>/dev/null; then
-        fail "${FORMATTER_COMMAND} command not found."
+    if ! type "${FORMATTER_COMMAND[$1]}" &>/dev/null; then
+        fail "'${FORMATTER_COMMAND[$1]}' command not found."
     fi
 }
 
 function check_formatter_version()
 {
-    local required found
-    found=$(${FORMATTER_COMMAND} --version)
-    if [[ ${CHOSEN_LANGUAGE} = 'C++' ]]; then
+    local language required found
+    language="$1"
+    found=$(${FORMATTER_COMMAND[${language}]} --version)
+    if [[ ${language} = 'C++' ]]; then
         required='6.0.0'
         found="${found:21:5}"
-    elif [[ ${CHOSEN_LANGUAGE} = 'CMake' ]]; then
+    elif [[ ${language} = 'CMake' ]]; then
         required='0.6.13'
     fi
     if [[ "${found}" != "${required}" ]]; then
-        fail "Wrong ${FORMATTER_COMMAND} version found: ${found} (${required} is required)."
+        fail "Wrong ${FORMATTER_COMMAND[${language}]} version found: ${found} (${required} is required)."
     fi
 }
 
 function look_for_files_to_format()
 {
-    local base_dir
-    base_dir="$(dirname $BASH_SOURCE[0])/.."
-    if [[ ${CHOSEN_LANGUAGE} = 'C++' ]]; then
+    local language base_dir
+    language="$1"
+    base_dir="$(dirname ${BASH_SOURCE[0]})/.."
+    if [[ ${language} = 'C++' ]]; then
         FILES_TO_FORMAT=(
             "${base_dir}/src"/**/*.{cc,h}
         )
-    elif [[ ${CHOSEN_LANGUAGE} = 'CMake' ]]; then
+    elif [[ ${language} = 'CMake' ]]; then
         FILES_TO_FORMAT=(
             "${base_dir}"/**/CMakeLists.txt
             "${base_dir}"/**/*.cmake
@@ -81,25 +105,27 @@ function look_for_files_to_format()
 
 function perform_formatting()
 {
-    local filename
+    local language filename
+    language="$1"
     verbose ''
     for filename in "${FILES_TO_FORMAT[@]}"; do
         verbose "Formatting ${filename}"
-        ${FORMATTER_COMMAND} -i "${filename}"
+        ${FORMATTER_COMMAND[${language}]} -i "${filename}"
     done
-    verbose ''
+    printf "\n\e[1;92m DONE:\e[22m ${language} code formatted by ${FORMATTER_COMMAND[${language}]}.\e[0m\n"
 }
 
 function test_formatting()
 {
-    local check_flag file_under_examination formatting_differences
-    verbose "\n Testing that ${FORMATTER_COMMAND} does not change the source code in the working directory..."
+    local language check_flag file_under_examination formatting_differences
+    language="$1"
+    verbose "\n Testing that ${FORMATTER_COMMAND[${language}]} does not change the source code in the working directory..."
     check_flag=0
     for file_under_examination in "${FILES_TO_FORMAT[@]}"; do
         # NOTE: cmake-format has a --check option implemented that might be used
         #       here, but if there are differences we want to print them to the
         #       user and hence we just store them here avoiding to format twice
-        formatting_differences=$(diff <(cat "${file_under_examination}") <(${FORMATTER_COMMAND} "${file_under_examination}") 2>&1)
+        formatting_differences=$(diff <(cat "${file_under_examination}") <(${FORMATTER_COMMAND[${language}]} "${file_under_examination}") 2>&1)
         if [[ $? -ne 0 ]]; then
             verbose "\n File \"${file_under_examination}\" not properly formatted. Comparison with a properly formatted file:"
             verbose "\e[0m${formatting_differences}"
@@ -107,16 +133,16 @@ function test_formatting()
         fi
     done
     if [[ ${check_flag} -eq 1 ]]; then
-        fail "${FORMATTER_COMMAND} was not properly run on latest commit."
+        fail "${FORMATTER_COMMAND[${language}]} was not properly run on latest commit."
     else
-        printf "\n\e[1;92m PASS:\e[22m No changes to source code by ${FORMATTER_COMMAND}.\e[0m\n\n"
+        printf "\n\e[1;92m PASS:\e[22m No changes to source code by ${FORMATTER_COMMAND[${language}]}.\e[0m\n"
     fi
 }
 
 function usage()
 {
     printf '\n\e[96m Helper script to format source files in the codebase.\n\n Usage: '
-    printf "\e[93m${BASH_SOURCE[0]} (C++|CMake) <option>\e[0m\n\n"
+    printf "\e[93m${BASH_SOURCE[0]} [C++|CMake] <option>\e[0m\n\n"
     printf '\e[96m Possible options:\n\n'
     printf '    \e[93m%-15s\e[0m  ->  \e[96m%s\e[0m\n' \
            '-p | --perform' 'Perform automatic formatting (for developers)' \
@@ -140,14 +166,9 @@ function parse_command_line_arguments()
         exit 0
     fi
     if [[ ! $1 =~ ^C(\+\+|Make)$ ]]; then
-        fail "First command line option must be either 'C++' or 'CMake'."
+        CHOSEN_LANGUAGES=( 'C++' 'CMake' )
     else
-        CHOSEN_LANGUAGE=$1
-        if [[ ${CHOSEN_LANGUAGE} = 'C++' ]]; then
-            FORMATTER_COMMAND='clang-format'
-        elif [[ ${CHOSEN_LANGUAGE} = 'CMake' ]]; then
-            FORMATTER_COMMAND='cmake-format'
-        fi
+        CHOSEN_LANGUAGES=( "$1" )
         shift
     fi
     while [[ $# -gt 0 ]]; do
@@ -174,7 +195,7 @@ function parse_command_line_arguments()
 
 function fail()
 {
-    printf "\n \e[1;91mERROR:\e[22m $*\e[0m\n\n" 1>&2
+    printf "\n \e[1;91mERROR:\e[22m $*\e[0m\n" 1>&2
     exit 1
 }
 
