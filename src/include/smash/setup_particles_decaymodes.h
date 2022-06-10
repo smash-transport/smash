@@ -14,8 +14,6 @@
 #include <string>
 #include <utility>
 
-#include "forwarddeclarations.h"
-
 namespace smash {
 /**
  * Loads particles and decaymodes from provided files
