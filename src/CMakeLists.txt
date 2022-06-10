@@ -27,16 +27,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
     set(CMAKE_CXX_FLAGS
         "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch"
     )
-    if(CMAKE_COMPILER_IS_GNUCC)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op")
-        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnull-dereference -Wduplicated-cond")
-        endif()
-        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wrestrict -Wduplicated-branches")
-        endif()
-    endif()
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(CMAKE_CXX_FLAGS
+            "${CMAKE_CXX_FLAGS} -Wlogical-op -Wnull-dereference -Wduplicated-cond -Wrestrict -Wduplicated-branches"
+        )
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")
     endif()
     # Enable warnings about deprecated C functions
