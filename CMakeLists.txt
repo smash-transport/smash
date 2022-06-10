@@ -62,18 +62,25 @@ if(NOT CMAKE_CXX_LINK_PIE_SUPPORTED)
 endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Request a given C++ standard
-set(CXX_SMASH_STANDARD "17")
-# To be user friendly, fail early if standard is not supported (do it for official supported
-# compilers only)
+# Fail early if a too old officially supported compiler is used
 if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
-    check_cxx_compiler_flag("-std=c++${CXX_SMASH_STANDARD}" IS_CXX_SMASH_STANDARD_SUPPORTED)
-    if(NOT IS_CXX_SMASH_STANDARD_SUPPORTED)
-        message(FATAL_ERROR "The required C++${CXX_SMASH_STANDARD} "
-                            "standard is not supported by your compiler.")
+    unset(MINIMUM_CXX_COMPILER_VERSION)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(MINIMUM_CXX_COMPILER_VERSION "8")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set(MINIMUM_CXX_COMPILER_VERSION "7")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+        set(MINIMUM_CXX_COMPILER_VERSION "11")
+    endif()
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${MINIMUM_CXX_COMPILER_VERSION})
+        message(FATAL_ERROR " At least version ${MINIMUM_CXX_COMPILER_VERSION}"
+                            " of ${CMAKE_CXX_COMPILER_ID} compiler is required.\n"
+                            " Version in use is ${CMAKE_CXX_COMPILER_VERSION}")
     endif()
 endif()
-# Request then the standard
+
+# Request a given C++ standard
+set(CXX_SMASH_STANDARD "17")
 if(NOT "${CMAKE_CXX_STANDARD}")
     set(CMAKE_CXX_STANDARD ${CXX_SMASH_STANDARD})
 endif()
