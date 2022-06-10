@@ -137,6 +137,23 @@ set(SMASH_LIBRARIES
     vegas # Cuba multidimensional integration
 )
 
+# ~~~
+# For GNU and Clang compilers, link to C++ filesystem library if compiler version requires it
+#  -> See "Notes" at https://en.cppreference.com/w/cpp/filesystem
+#
+# NOTE: As of Xcode 11 and MacOS 10.15, <filesystem> is shipped in the main
+#       libc++.dylib and there's no need to link any additional library.
+# ~~~
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
+        set(SMASH_LIBRARIES ${SMASH_LIBRARIES} stdc++fs)
+    endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+        set(SMASH_LIBRARIES ${SMASH_LIBRARIES} c++fs)
+    endif()
+endif()
+
 # list the source files
 set(smash_src
     action.cc
