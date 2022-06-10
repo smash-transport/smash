@@ -53,7 +53,7 @@ Using a different version than specified above may or may not work. If the requi
     wget https://pythia.org/download/pythia83/pythia8307.tgz
     tar xf pythia8307.tgz && rm pythia8307.tgz
     cd pythia8307
-    ./configure --cxx-common='-std=c++17 -march=native -O3 -fPIC'
+    ./configure --cxx-common='-std=c++17 -march=native -O3 -fPIC -pthread'
     make
 
 To tell `cmake` where to find Pythia while building SMASH see the **Building SMASH** section.
@@ -76,7 +76,7 @@ The commands above to build Pythia on a M1 Apple machine become:
     curl https://pythia.org/download/pythia83/pythia8307.tgz -o pythia8307.tgz
     tar xf pythia8307.tgz && rm pythia8307.tgz
     cd pythia8307
-    ./configure --cxx-common='-std=c++17 -O3 -fPIC'
+    ./configure --cxx-common='-std=c++17 -O3 -fPIC -pthread'
     make
 
 ### Installing Eigen
