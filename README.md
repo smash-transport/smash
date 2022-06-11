@@ -45,6 +45,7 @@ SMASH requires the following tools and libraries:
 
 Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version (ROOT >= 5.34, HepMC3 >= 3.2.3, Rivet >= 3.1.4) is found on the system.
 
+
 ### Building Pythia
 
 SMASH is tightly coupled to Pythia and thus requires a specific version, which is currently 8.307.
@@ -79,6 +80,7 @@ The commands above to build Pythia on a M1 Apple machine become:
     ./configure --cxx-common='-std=c++17 -O3 -fPIC -pthread'
     make
 
+
 ### Installing Eigen
 
 Usually it is possible to install Eigen with a package manager (it requires admin privileges) and in this case CMake should be able to find the header files without the need of any additional option. For example, on an Apple machine you have the possibility to install Eigen via `brew install eigen`, while, under GNU/Linux Ubuntu, via `sudo apt-get install libeigen3-dev`.
@@ -95,13 +97,14 @@ Download the latest stable release of `Eigen` from http://eigen.tuxfamily.org an
 To tell `cmake` where to find Eigen header files while bilding SMASH, pass the path to them adding the option
 `-DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/` to the `cmake` command in the following section.
 
+
 ### Building SMASH
 
 Use the following commands to build SMASH in a separate directory:
 
     mkdir build
     cd build
-    cmake .. -DPythia_CONFIG_EXECUTABLE=[...]/pythia8307/bin/pythia8-config
+    cmake -DPythia_CONFIG_EXECUTABLE=[...]/pythia8307/bin/pythia8-config ..
     make
 
 To build in parallel on N cores:
@@ -118,12 +121,13 @@ To run it with specific settings:
 A few GNU/Linux distributions provide pre-built Pythia binaries without pythia8-config. In this case, using the `-DPythia_CONFIG_EXECUTABLE` option as shown above is not possible and the top installation directory of Pythia containing `lib` has to be specified in either of the following ways:
 
 -  Either set the bash environment variables `PYTHIA8` or `PYTHIA_ROOT_DIR` (e.g. `export PYTHIA_ROOT_DIR=/opt/pythia8307`) or
--  use the CMake `-DPYTHIA_ROOT_DIR` option (e.g. `cmake .. -DPYTHIA_ROOT_DIR=/opt/pythia8307`).
+-  use the CMake `-DPYTHIA_ROOT_DIR` option (e.g. `cmake -DPYTHIA_ROOT_DIR=/opt/pythia8307 ..`).
 
 If no variables are set and no options are passed, CMake searches for Pythia under the default path `/usr`.
 We recall that it is possible to check which environment variables related to PYTHIA are currently set with:
 
     printenv | grep PYTHIA
+
 
 ### Installation
 
@@ -145,13 +149,13 @@ With `CMAKE_INSTALL_PREFIX`=_prefix_ the installation will be
 - _prefix_/`include/smash` will contain headers, and
 - _prefix_/`share/smash` will contain data files
 
+
 ### Troubleshooting
 
 #### SMASH does not compile
 
 If compilation fails (especially after changing a library), using a fresh build
 folder can sometimes fix the problem.
-
 
 #### SMASH crashes with "illegal instruction"
 
@@ -180,6 +184,7 @@ Note that the same applies to any other libraries you compile with
 If compilation of SMASH in combination with a pre-compiled ROOT binary fails,
 please install and compile ROOT locally from source (see http://root.cern.ch)
 and compile SMASH again in a clean build directory.
+
 
 ### Size of the Code
 
@@ -233,6 +238,7 @@ install destination (`$HEPMC_INS`) with
 
 Note that if multiple CMAKE_PREFIX_PATHs are necessary, a semicolon-separated
 list of directories can be specified.
+
 
 ### Enabling Rivet support
 
@@ -309,6 +315,7 @@ e.g. ROOT, HepMC and Rivet, already included
 (`ghcr.io/smash-transport/smash-max`). Running SMASH inside of a Docker container
 might negatively affect performance. More information on container usage is
 found in the README files in the `containers` directory.
+
 
 ## Running SMASH with Example Input Files
 
