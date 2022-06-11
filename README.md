@@ -202,18 +202,31 @@ everything works as expected. To see how to run the tests, see
 
 ### Changing the Compiler
 
-In order to use a particular compiler, you can set the following environment
-variables:
+In order to use a particular compiler, you can permanently set the following
+environment variables
 
-    export CC=gcc
-    export CXX=g++
+    export CC=clang
+    export CXX=clang++
+
+or simply set them for the cmake command only via
+
+    CC=clang CXX=clang++ cmake ..
 
 Alternatively the compiler can also be specified to cmake like this:
 
-    cmake .. -DCMAKE_CXX_COMPILER=g++
+    cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
 
-Note: The FPE environment only works with gcc, so e.g. you won't get backtraces
+**NOTE:** The FPE environment only works with gcc, so e.g. you won't get backtraces
 from floating point traps with clang.
+
+#### Using the LLVM implementation of the C++ standard library
+
+In case the system default implementation of the C++ standard library is e.g. that
+shipped with the GNU compiler, this will still be used even when requesting CMake
+to use Clang as compiler. However, it is possible to request to use the LLVM
+implementation using the CMake `CLANG_USE_LIBC++` option. For example:
+
+    CC=clang CXX=clang++ cmake -DPythia_CONFIG_EXECUTABLE=[...] -DCLANG_USE_LIBC++=ON ..
 
 
 ### Disabling ROOT or HepMC Support
