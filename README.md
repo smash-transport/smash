@@ -232,6 +232,17 @@ implementation using the CMake `CLANG_USE_LIBC++` option. For example:
 
     CC=clang CXX=clang++ cmake -DPythia_CONFIG_EXECUTABLE=[...] -DCLANG_USE_LIBC++=ON ..
 
+If the installation of the LLVM implementation is not in a standard place, you either need
+to set and export your `LD_LIBRARY_PATH` environment variable to the correct value, e.g.
+
+    export LD_LIBRARY_PATH=/path/to/clang/installation/lib
+
+or pass to the `cmake` command the option
+
+    -DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath -Wl,/path/to/clang/installation/lib"
+
+where, of course, the path to clang installation must be a valid path. All of this is needed
+to let the executable find the library ABI at run time.
 
 ### Disabling ROOT or HepMC Support
 
