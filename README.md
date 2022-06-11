@@ -62,6 +62,10 @@ To tell `cmake` where to find Pythia while building SMASH see the **Building SMA
 Note that although Pythia is statically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
 
+If you plan to build SMASH using the LLVM implementation of the standard C++ library,
+you should make sure that Pythia as well is built so, passing `-stdlib=libc++` together
+with the other flags to the `--cxx-common` option of the _configure_ script.
+
 #### Remarks for Apple users
 
 1. The `wget` command is not directly available on OSX.
