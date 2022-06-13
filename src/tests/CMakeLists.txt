@@ -37,12 +37,6 @@ macro(smash_add_test name depends)
 endmacro()
 
 macro(smash_add_exe name)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        # Disable variable tracking in debug mode (never used so far and gcc gives annoying notes
-        # when failing to track them)
-        set_source_files_properties(${name}.cc PROPERTIES COMPILE_FLAGS
-                                                          "-fno-var-tracking-assignments")
-    endif()
     add_executable(${name} ${name}.cc)
     target_link_libraries(${name} smash_static ${SMASH_LIBRARIES})
     if(USE_SANITIZER)
@@ -55,6 +49,16 @@ macro(smash_add_exe name)
                               PROPERTIES COMPILE_FLAGS
                                          "-DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/test_output/${name}\\\""
         )
+    endif()
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        # Disable variable tracking in debug mode (never used so far and gcc gives annoying notes
+        # when failing to track them)
+        target_compile_options(${name} PRIVATE "-fno-var-tracking-assignments")
+        # The GNU -Wduplicated-branches flag makes compilation time of the lattice.cc test file
+        # increase by order(s) of magnitude and it cannot basically be used
+        if(${name} STREQUAL "lattice")
+            target_compile_options(${name} PRIVATE "-Wno-duplicated-branches")
+        endif()
     endif()
 endmacro()
 
