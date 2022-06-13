@@ -120,6 +120,11 @@ To run it with specific settings:
     vi config.yaml
     ./smash
 
+**NOTE:** The `cmake` command above is the bare minimum needed to setup later compilation.
+However, several different options can be passed to the `cmake` command and you will find
+some guidance in the following sections. Keep in mind that you need to collect the relevant
+information in your case to build the appropriate `cmake` command according to your needs.
+
 #### Alternatives to specify the installation directory of Pythia
 
 A few GNU/Linux distributions provide pre-built Pythia binaries without pythia8-config. In this case, using the `-DPythia_CONFIG_EXECUTABLE` option as shown above is not possible and the top installation directory of Pythia containing `lib` has to be specified in either of the following ways:
