@@ -13,8 +13,7 @@
 
 #include <smash/config.h>
 #include <array>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
 #include <map>
 #include <string>
 #include <vector>
@@ -31,12 +30,13 @@ using namespace smash;
 static const double accuracy = 1.0e-4;
 static const int data_elements = 12;
 static const int data_elements_extended = 20;
-static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
+static const std::filesystem::path testoutputpath =
+    std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
 static auto random_value = random::make_uniform_distribution(-15.0, +15.0);
 
 TEST(directory_is_created) {
-  bf::create_directories(testoutputpath);
-  VERIFY(bf::exists(testoutputpath));
+  std::filesystem::create_directories(testoutputpath);
+  VERIFY(std::filesystem::exists(testoutputpath));
 }
 
 TEST(extended_has_more_fields) {
@@ -114,9 +114,9 @@ TEST(full2013_format) {
   const int event_id = 0;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
-  const bf::path outputfilename = "full_event_history.oscar";
-  const bf::path outputfilepath = testoutputpath / outputfilename;
-  bf::path outputfilepath_unfinished = outputfilepath;
+  const std::filesystem::path outputfilename = "full_event_history.oscar";
+  const std::filesystem::path outputfilepath = testoutputpath / outputfilename;
+  std::filesystem::path outputfilepath_unfinished = outputfilepath;
   outputfilepath_unfinished += ".unfinished";
   {
     OutputParameters out_par = OutputParameters();
@@ -126,18 +126,18 @@ TEST(full2013_format) {
     std::unique_ptr<OutputInterface> osc2013full =
         create_oscar_output("Oscar2013", "Collisions", testoutputpath, out_par);
     VERIFY(bool(osc2013full));
-    VERIFY(bf::exists(outputfilepath_unfinished));
+    VERIFY(std::filesystem::exists(outputfilepath_unfinished));
 
     osc2013full->at_eventstart(particles, event_id, event);
     osc2013full->at_interaction(*action, 0.);
     action->perform(&particles, 1);
     osc2013full->at_eventend(particles, event_id, event);
   }
-  VERIFY(!bf::exists(outputfilepath_unfinished));
-  VERIFY(bf::exists(outputfilepath));
+  VERIFY(!std::filesystem::exists(outputfilepath_unfinished));
+  VERIFY(std::filesystem::exists(outputfilepath));
 
   {
-    bf::fstream outputfile;
+    std::fstream outputfile;
     outputfile.open(outputfilepath, std::ios_base::in);
     VERIFY(outputfile.good());
     if (outputfile.good()) {
@@ -210,15 +210,15 @@ TEST(full2013_format) {
       COMPARE(line, end_line);
     }
   }
-  VERIFY(bf::remove(outputfilepath));
+  VERIFY(std::filesystem::remove(outputfilepath));
 }
 
 TEST(final2013_format) {
   // Set options
-  const bf::path configfilename = "oscar_2013.yaml";
-  const bf::path configfilepath = testoutputpath / configfilename;
-  bf::ofstream(configfilepath) << "    Only_Final:      Yes\n";
-  VERIFY(bf::exists(configfilepath));
+  const std::filesystem::path configfilename = "oscar_2013.yaml";
+  const std::filesystem::path configfilepath = testoutputpath / configfilename;
+  std::ofstream(configfilepath) << "    Only_Final:      Yes\n";
+  VERIFY(std::filesystem::exists(configfilepath));
 
   /* Create 2 particles */
   Particles particles;
@@ -237,9 +237,9 @@ TEST(final2013_format) {
                               0.0);
   action->generate_final_state();
 
-  const bf::path outputfilename = "particle_lists.oscar";
-  const bf::path outputfilepath = testoutputpath / outputfilename;
-  bf::path outputfilepath_unfinished = outputfilepath;
+  const std::filesystem::path outputfilename = "particle_lists.oscar";
+  const std::filesystem::path outputfilepath = testoutputpath / outputfilename;
+  std::filesystem::path outputfilepath_unfinished = outputfilepath;
   outputfilepath_unfinished += ".unfinished";
   {
     OutputParameters out_par = OutputParameters();
@@ -249,7 +249,7 @@ TEST(final2013_format) {
     std::unique_ptr<OutputInterface> osc2013final =
         create_oscar_output("Oscar2013", "Particles", testoutputpath, out_par);
     VERIFY(bool(osc2013final));
-    VERIFY(bf::exists(outputfilepath_unfinished));
+    VERIFY(std::filesystem::exists(outputfilepath_unfinished));
     /* Initial state output (note that this should not do anything!) */
     osc2013final->at_eventstart(particles, event_id, event);
     /* As with initial state output, this should not do anything */
@@ -258,13 +258,13 @@ TEST(final2013_format) {
     action->perform(&particles, 1);
     osc2013final->at_eventend(particles, event_id, event);
   }
-  VERIFY(!bf::exists(outputfilepath_unfinished));
-  VERIFY(bf::exists(outputfilepath));
+  VERIFY(!std::filesystem::exists(outputfilepath_unfinished));
+  VERIFY(std::filesystem::exists(outputfilepath));
 
   COMPARE(action->outgoing_particles(), particles.copy_to_vector());
 
   {
-    bf::fstream outputfile;
+    std::fstream outputfile;
     outputfile.open(outputfilepath, std::ios_base::in);
     VERIFY(outputfile.good());
     if (outputfile.good()) {
@@ -299,13 +299,13 @@ TEST(final2013_format) {
       COMPARE(line, end_line);
     }
   }
-  VERIFY(bf::remove(outputfilepath));
+  VERIFY(std::filesystem::remove(outputfilepath));
 }
 
 TEST(full_extended_oscar) {
-  const bf::path outputfilename = "full_event_history.oscar";
-  const bf::path outputfilepath = testoutputpath / outputfilename;
-  bf::path outputfilepath_unfinished = outputfilepath;
+  const std::filesystem::path outputfilename = "full_event_history.oscar";
+  const std::filesystem::path outputfilepath = testoutputpath / outputfilename;
+  std::filesystem::path outputfilepath_unfinished = outputfilepath;
   outputfilepath_unfinished += ".unfinished";
 
   /* Create elastic interaction (smashon + smashon). */
@@ -332,7 +332,7 @@ TEST(full_extended_oscar) {
     std::unique_ptr<OutputInterface> osc2013full =
         create_oscar_output("Oscar2013", "Collisions", testoutputpath, out_par);
     VERIFY(bool(osc2013full));
-    VERIFY(bf::exists(outputfilepath_unfinished));
+    VERIFY(std::filesystem::exists(outputfilepath_unfinished));
 
     /* Initial state output */
     osc2013full->at_eventstart(particles, event_id, event);
@@ -341,11 +341,11 @@ TEST(full_extended_oscar) {
     action->perform(&particles, 1);
     osc2013full->at_eventend(particles, event_id, event);
   }
-  VERIFY(!bf::exists(outputfilepath_unfinished));
-  VERIFY(bf::exists(outputfilepath));
+  VERIFY(!std::filesystem::exists(outputfilepath_unfinished));
+  VERIFY(std::filesystem::exists(outputfilepath));
 
   {
-    bf::fstream outputfile;
+    std::fstream outputfile;
     outputfile.open(outputfilepath, std::ios_base::in);
     VERIFY(outputfile.good());
     std::string line;
@@ -420,7 +420,7 @@ TEST(full_extended_oscar) {
                            " impact   1.783 scattering_projectile_target yes";
     COMPARE(line, end_line);
   }
-  VERIFY(bf::remove(outputfilepath));
+  VERIFY(std::filesystem::remove(outputfilepath));
 }
 
 TEST(initial_conditions_2013_format) {
@@ -438,9 +438,9 @@ TEST(initial_conditions_2013_format) {
   const double impact_parameter = 1.783;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
-  const bf::path outputfilename = "SMASH_IC.oscar";
-  const bf::path outputfilepath = testoutputpath / outputfilename;
-  bf::path outputfilepath_unfinished = outputfilepath;
+  const std::filesystem::path outputfilename = "SMASH_IC.oscar";
+  const std::filesystem::path outputfilepath = testoutputpath / outputfilename;
+  std::filesystem::path outputfilepath_unfinished = outputfilepath;
   outputfilepath_unfinished += ".unfinished";
   {
     OutputParameters out_par = OutputParameters();
@@ -449,18 +449,18 @@ TEST(initial_conditions_2013_format) {
     std::unique_ptr<OutputInterface> osc2013full = create_oscar_output(
         "Oscar2013", "Initial_Conditions", testoutputpath, out_par);
     VERIFY(bool(osc2013full));
-    VERIFY(bf::exists(outputfilepath_unfinished));
+    VERIFY(std::filesystem::exists(outputfilepath_unfinished));
 
     osc2013full->at_eventstart(particles, event_id, event);
     action->perform(&particles, 1);
     osc2013full->at_interaction(*action, 0.);
     osc2013full->at_eventend(particles, event_id, event);
   }
-  VERIFY(!bf::exists(outputfilepath_unfinished));
-  VERIFY(bf::exists(outputfilepath));
+  VERIFY(!std::filesystem::exists(outputfilepath_unfinished));
+  VERIFY(std::filesystem::exists(outputfilepath));
 
   {
-    bf::fstream outputfile;
+    std::fstream outputfile;
     outputfile.open(outputfilepath, std::ios_base::in);
     VERIFY(outputfile.good());
     if (outputfile.good()) {
@@ -498,5 +498,5 @@ TEST(initial_conditions_2013_format) {
       COMPARE(line, end_line);
     }
   }
-  VERIFY(bf::remove(outputfilepath));
+  VERIFY(std::filesystem::remove(outputfilepath));
 }

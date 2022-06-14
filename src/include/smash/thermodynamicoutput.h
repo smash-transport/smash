@@ -44,8 +44,8 @@ class ThermodynamicOutput : public OutputInterface {
    * param[in] name Filename
    * param[in] out_par Parameters of output
    */
-  ThermodynamicOutput(const bf::path &path, const std::string &name,
-                      const OutputParameters &out_par);
+  ThermodynamicOutput(const std::filesystem::path &path,
+                      const std::string &name, const OutputParameters &out_par);
   /// Default destructor
   ~ThermodynamicOutput();
 

@@ -9,10 +9,9 @@
 
 #include "smash/thermodynamicoutput.h"
 
+#include <filesystem>
 #include <fstream>
 #include <memory>
-
-#include <boost/filesystem.hpp>
 
 #include "smash/clock.h"
 #include "smash/config.h"
@@ -113,7 +112,7 @@ namespace smash {
  * i.e. all quantities in brackets will only be there if specifically asked for.
  */
 
-ThermodynamicOutput::ThermodynamicOutput(const bf::path &path,
+ThermodynamicOutput::ThermodynamicOutput(const std::filesystem::path &path,
                                          const std::string &name,
                                          const OutputParameters &out_par)
     : OutputInterface(name),

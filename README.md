@@ -41,7 +41,6 @@ SMASH requires the following tools and libraries:
 - cmake >= 3.14
 - the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
-- boost filesystem >= 1.49
 - Pythia = 8.307
 
 Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version (ROOT >= 5.34, HepMC3 >= 3.2.3, Rivet >= 3.1.4) is found on the system.
@@ -54,7 +53,7 @@ Using a different version than specified above may or may not work. If the requi
     wget https://pythia.org/download/pythia83/pythia8307.tgz
     tar xf pythia8307.tgz && rm pythia8307.tgz
     cd pythia8307
-    ./configure --cxx-common='-std=c++17 -march=native -O3 -fPIC'
+    ./configure --cxx-common='-std=c++17 -march=native -O3 -fPIC -pthread'
     make
 
 To tell `cmake` where to find Pythia while building SMASH see the **Building SMASH** section.
@@ -77,7 +76,7 @@ The commands above to build Pythia on a M1 Apple machine become:
     curl https://pythia.org/download/pythia83/pythia8307.tgz -o pythia8307.tgz
     tar xf pythia8307.tgz && rm pythia8307.tgz
     cd pythia8307
-    ./configure --cxx-common='-std=c++17 -O3 -fPIC'
+    ./configure --cxx-common='-std=c++17 -O3 -fPIC -pthread'
     make
 
 ### Installing Eigen

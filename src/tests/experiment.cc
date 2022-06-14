@@ -9,7 +9,7 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "../include/smash/collidermodus.h"
 #include "setup.h"
@@ -80,7 +80,7 @@ TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {
 
 TEST(access_particles) {
   Configuration config = Test::configuration();
-  boost::filesystem::path output_path(".");
+  std::filesystem::path output_path(".");
   auto exp = std::make_unique<Experiment<ColliderModus>>(config, output_path);
   Particles* part = exp->first_ensemble();
   part->create(0x211);

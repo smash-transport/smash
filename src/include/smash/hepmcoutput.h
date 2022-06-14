@@ -11,11 +11,11 @@
 #ifndef SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 #define SRC_INCLUDE_SMASH_HEPMCOUTPUT_H_
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include "HepMC3/Writer.h"
 #include "hepmcinterface.h"
 
@@ -44,8 +44,8 @@ class HepMcOutput : public HepMcInterface {
                            are printed in the output
    * \param[in] HepMC3_output_type: "root" or "asciiv3"
    */
-  HepMcOutput(const bf::path &path, std::string name, const bool full_event,
-              std::string HepMC3_output_type);
+  HepMcOutput(const std::filesystem::path &path, std::string name,
+              const bool full_event, std::string HepMC3_output_type);
 
   /// Destructor renames file
   ~HepMcOutput();
@@ -62,9 +62,9 @@ class HepMcOutput : public HepMcInterface {
 
  private:
   /// Filename of output
-  const bf::path filename_;
+  const std::filesystem::path filename_;
   /// Filename of output as long as simulation is still running.
-  bf::path filename_unfinished_;
+  std::filesystem::path filename_unfinished_;
   /// Pointers to the base class of HepMC3 output files
   std::unique_ptr<HepMC3::Writer> output_file_;
   /// enum to identify the HepMC3 output type

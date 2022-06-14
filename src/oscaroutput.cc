@@ -9,9 +9,8 @@
 
 #include "smash/oscaroutput.h"
 
+#include <filesystem>
 #include <string>
-
-#include <boost/filesystem.hpp>
 
 #include "smash/action.h"
 #include "smash/clock.h"
@@ -22,7 +21,7 @@ namespace smash {
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 template <OscarOutputFormat Format, int Contents>
-OscarOutput<Format, Contents>::OscarOutput(const bf::path &path,
+OscarOutput<Format, Contents>::OscarOutput(const std::filesystem::path &path,
                                            const std::string &name)
     : OutputInterface(name),
       file_{path /
@@ -745,8 +744,8 @@ namespace {
  */
 template <int Contents>
 std::unique_ptr<OutputInterface> create_select_format(
-    bool modern_format, const bf::path &path, const OutputParameters &out_par,
-    const std::string &name) {
+    bool modern_format, const std::filesystem::path &path,
+    const OutputParameters &out_par, const std::string &name) {
   bool extended_format = (Contents & OscarInteractions) ? out_par.coll_extended
                                                         : out_par.part_extended;
   if (modern_format && extended_format) {
@@ -766,8 +765,8 @@ std::unique_ptr<OutputInterface> create_select_format(
 }  // unnamed namespace
 
 std::unique_ptr<OutputInterface> create_oscar_output(
-    const std::string &format, const std::string &content, const bf::path &path,
-    const OutputParameters &out_par) {
+    const std::string &format, const std::string &content,
+    const std::filesystem::path &path, const OutputParameters &out_par) {
   if (format != "Oscar2013" && format != "Oscar1999") {
     throw std::invalid_argument("Creating Oscar output: unknown format");
   }

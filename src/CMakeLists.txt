@@ -27,16 +27,11 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
     set(CMAKE_CXX_FLAGS
         "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch"
     )
-    if(CMAKE_COMPILER_IS_GNUCC)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wlogical-op")
-        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnull-dereference -Wduplicated-cond")
-        endif()
-        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wrestrict -Wduplicated-branches")
-        endif()
-    endif()
-    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(CMAKE_CXX_FLAGS
+            "${CMAKE_CXX_FLAGS} -Wlogical-op -Wnull-dereference -Wduplicated-cond -Wrestrict -Wduplicated-branches"
+        )
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")
     endif()
     # Enable warnings about deprecated C functions
@@ -66,7 +61,6 @@ string(TIMESTAMP BUILD_DATE)
 
 find_package(GSL 2.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 
 option(TRY_USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
 if(TRY_USE_ROOT)
@@ -128,14 +122,13 @@ endif()
 # set up include paths
 include_directories(include)
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
-include_directories(SYSTEM ${GSL_INCLUDE_DIR} ${Boost_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR})
+include_directories(SYSTEM ${GSL_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR})
 
 # set default libraries for linking
 set(SMASH_LIBRARIES
     ${SMASH_LIBRARIES}
     ${GSL_LIBRARY}
     ${GSL_CBLAS_LIBRARY}
-    ${Boost_LIBRARIES}
     einhard
     yaml-cpp
     cuhre
@@ -143,6 +136,23 @@ set(SMASH_LIBRARIES
     divonne
     vegas # Cuba multidimensional integration
 )
+
+# ~~~
+# For GNU and Clang compilers, link to C++ filesystem library if compiler version requires it
+#  -> See "Notes" at https://en.cppreference.com/w/cpp/filesystem
+#
+# NOTE: As of Xcode 11 and MacOS 10.15, <filesystem> is shipped in the main
+#       libc++.dylib and there's no need to link any additional library.
+# ~~~
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
+        set(SMASH_LIBRARIES ${SMASH_LIBRARIES} stdc++fs)
+    endif()
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+        set(SMASH_LIBRARIES ${SMASH_LIBRARIES} c++fs)
+    endif()
+endif()
 
 # list the source files
 set(smash_src

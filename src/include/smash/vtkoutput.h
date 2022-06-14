@@ -10,11 +10,10 @@
 #ifndef SRC_INCLUDE_SMASH_VTKOUTPUT_H_
 #define SRC_INCLUDE_SMASH_VTKOUTPUT_H_
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <utility>
-
-#include <boost/filesystem.hpp>
 
 #include "density.h"
 #include "forwarddeclarations.h"
@@ -36,7 +35,7 @@ class VtkOutput : public OutputInterface {
    * \param name Name of the output.
    * \param out_par Additional information on the configured output.
    */
-  VtkOutput(const bf::path &path, const std::string &name,
+  VtkOutput(const std::filesystem::path &path, const std::string &name,
             const OutputParameters &out_par);
   ~VtkOutput();
 
@@ -174,7 +173,7 @@ class VtkOutput : public OutputInterface {
                         const std::string &varname, F &&function);
 
   /// filesystem path for output
-  const bf::path base_path_;
+  const std::filesystem::path base_path_;
 
   /// Event number
   int current_event_ = 0;

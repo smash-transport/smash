@@ -31,6 +31,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Use CMake default compiler flags for `RelWithDebInfo` build configuration, hence having `-O2` optimization level instead of `-03`
 * Minimum supported CMake version is now version 3.14
 
+### Removed
+* Boost is not used anymore, since the C++17 standard library is sufficient now
+
 
 ## SMASH-2.2.1
 Date: 2022-05-18

@@ -1,5 +1,6 @@
+#include <filesystem>
+
 #include <gsl/gsl_sf_bessel.h>
-#include <boost/filesystem/path.hpp>
 
 #include "smash/decaymodes.h"
 #include "smash/forwarddeclarations.h"
@@ -74,7 +75,7 @@ int main() {
   DecayModes::load_decaymodes("");
   sha256::Context hash_context;
   const auto hash = hash_context.finalize();
-  IsoParticleType::tabulate_integrals(hash, boost::filesystem::path("."));
+  IsoParticleType::tabulate_integrals(hash, std::filesystem::path("."));
 
   // 1) Prepare particle types
   const ParticleTypePtr pip = ParticleType::try_find(pdg::pi_p);

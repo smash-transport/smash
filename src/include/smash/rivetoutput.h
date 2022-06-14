@@ -11,11 +11,10 @@
 
 #include <Rivet/AnalysisHandler.hh>
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <utility>
-
-#include <boost/filesystem.hpp>
 
 #include "smash/fpenvironment.h"
 #include "smash/hepmcinterface.h"
@@ -44,8 +43,8 @@ class RivetOutput : public HepMcInterface {
    *                       are printed in the output
    * \param[in] out_par Configuration parameters of SMASH
    */
-  RivetOutput(const bf::path& path, std::string name, const bool full_event,
-              const OutputParameters& out_par);
+  RivetOutput(const std::filesystem::path& path, std::string name,
+              const bool full_event, const OutputParameters& out_par);
   /**
    * Destructor. Finalises the analzyses and writes out results to file
    */
@@ -119,7 +118,7 @@ class RivetOutput : public HepMcInterface {
   /**  Rivet analysis handler */
   std::shared_ptr<Rivet::AnalysisHandler> handler_;
   /** Output file */
-  bf::path filename_;
+  std::filesystem::path filename_;
   /** Whether we need initialisation */
   bool need_init_;
   /** Configutations for rivet */

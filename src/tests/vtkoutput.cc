@@ -13,8 +13,7 @@
 
 #include <smash/config.h>
 #include <array>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
 #include <iostream>
 #include <vector>
 
@@ -28,12 +27,13 @@
 using namespace smash;
 
 static const double accuracy = 1.0e-4;
-static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
+static const std::filesystem::path testoutputpath =
+    std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
 static auto random_value = random::make_uniform_distribution(-15.0, +15.0);
 
 TEST(directory_is_created) {
-  bf::create_directories(testoutputpath);
-  VERIFY(bf::exists(testoutputpath));
+  std::filesystem::create_directories(testoutputpath);
+  VERIFY(std::filesystem::exists(testoutputpath));
 }
 
 static void compare_threevector(const std::array<std::string, 3> &stringarray,
@@ -66,18 +66,18 @@ TEST(vtkoutputfile) {
   /* Initial output */
   EventInfo event = Test::default_event_info();
   vtkop->at_eventstart(particles, event_id, event);
-  const bf::path outputfilename = "pos_ev00000_tstep00000.vtk";
-  const bf::path outputfilepath = testoutputpath / outputfilename;
-  VERIFY(bf::exists(outputfilepath));
+  const std::filesystem::path outputfilename = "pos_ev00000_tstep00000.vtk";
+  const std::filesystem::path outputfilepath = testoutputpath / outputfilename;
+  VERIFY(std::filesystem::exists(outputfilepath));
   /* Time step output */
   DensityParameters dens_par(Test::default_parameters());
   vtkop->at_intermediate_time(particles, nullptr, dens_par, event);
-  const bf::path outputfile2path =
+  const std::filesystem::path outputfile2path =
       testoutputpath / "pos_ev00000_tstep00001.vtk";
-  VERIFY(bf::exists(outputfile2path));
+  VERIFY(std::filesystem::exists(outputfile2path));
 
   {
-    bf::fstream outputfile;
+    std::fstream outputfile;
     outputfile.open(outputfilepath, std::ios_base::in);
     if (outputfile.good()) {
       std::string line, item;
@@ -292,6 +292,6 @@ TEST(vtkoutputfile) {
       }
     }
   }
-  VERIFY(bf::remove(outputfilepath));
-  VERIFY(bf::remove(outputfile2path));
+  VERIFY(std::filesystem::remove(outputfilepath));
+  VERIFY(std::filesystem::remove(outputfile2path));
 }

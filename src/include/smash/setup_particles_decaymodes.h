@@ -10,11 +10,9 @@
 #ifndef SRC_INCLUDE_SMASH_SETUP_PARTICLES_DECAYMODES_H_
 #define SRC_INCLUDE_SMASH_SETUP_PARTICLES_DECAYMODES_H_
 
+#include <filesystem>
 #include <string>
 #include <utility>
-
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 namespace smash {
 /**
@@ -29,8 +27,8 @@ namespace smash {
  *             and decaymode files.
  */
 std::pair<std::string, std::string> load_particles_and_decaymodes(
-    const boost::filesystem::path &particles_file,
-    const boost::filesystem::path &decaymodes_file);
+    const std::filesystem::path &particles_file,
+    const std::filesystem::path &decaymodes_file);
 /// Loads default smash particle list and decaymodes
 void initialize_default_particles_and_decaymodes();
 

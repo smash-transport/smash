@@ -8,6 +8,7 @@
 #ifndef SRC_INCLUDE_SMASH_ISOPARTICLETYPE_H_
 #define SRC_INCLUDE_SMASH_ISOPARTICLETYPE_H_
 
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -212,7 +213,7 @@ class IsoParticleType {
    * cached.
    */
   static void tabulate_integrals(sha256::Hash hash,
-                                 const bf::path &tabulations_path);
+                                 const std::filesystem::path &tabulations_path);
 
   /**
    * Look up the tabulated resonance integral for the XX -> NR cross section.
