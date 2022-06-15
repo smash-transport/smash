@@ -10,7 +10,7 @@
 #===================================================
 
 trap 'printf "\n"' EXIT
-shopt -s globstar
+shopt -s globstar nullglob
 CHOSEN_LANGUAGES=''
 declare -rA FORMATTER_COMMAND=(
     ['C++']='clang-format'
@@ -84,8 +84,9 @@ function look_for_files_to_format()
     language="$1"
     base_dir="$(dirname ${BASH_SOURCE[0]})/.."
     if [[ ${language} = 'C++' ]]; then
+        # C++ extenstions accepted by GNU compiler: https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html
         FILES_TO_FORMAT=(
-            "${base_dir}/src"/**/*.{cc,h}
+            "${base_dir}/src"/**/*.{h,hh,H,hp,hxx,hpp,HPP,h++,tcc,cc,cp,cxx,cpp,CPP,c++,C,ii}
         )
     elif [[ ${language} = 'CMake' ]]; then
         FILES_TO_FORMAT=(

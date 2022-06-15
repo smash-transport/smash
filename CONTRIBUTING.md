@@ -7,7 +7,9 @@ contact the development team by reporting issues at
 https://github.com/smash-transport/smash/issues or contact us by email at elfner@itp.uni-frankfurt.de.
 
 Note that any contributions must be licensed under the same terms as SMASH, see
-[LICENSE](LICENSE).
+[LICENSE](LICENSE). In particular, it has been decided that changes to C++ or CMake
+code should be reflected in the years of the copyright notice. Therefore, be sure
+that the present year is added there in files that you are going to commit.
 
 As an external contributor, go to https://github.com/smash-transport/smash, fork
 the repository, work on a topic branch and then create a pull request. Details

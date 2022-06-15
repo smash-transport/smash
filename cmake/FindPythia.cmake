@@ -1,3 +1,13 @@
+########################################################
+#
+#    Copyright (c) 2015-2016,2018-2022
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+#########################################################
+
+# cmake-format: off
 #=============================================================================
 # This cmake code to integrate Pythia contains contributions by
 #   K. Gallmeister, Goethe University, March 2015
@@ -30,6 +40,7 @@
 #  Pythia_LHAPDFDummy_LIBRARY
 #  Pythia_LIBRARIES : includes 3 libraries above; not to be used if lhapdf is used
 #=============================================================================
+# cmake-format: on
 
 if(NOT ("${Pythia_CONFIG_EXECUTABLE}" STREQUAL ""))
     message(STATUS "Trying to locate Pythia using variable Pythia_CONFIG_EXECUTABLE = ${Pythia_CONFIG_EXECUTABLE}"
