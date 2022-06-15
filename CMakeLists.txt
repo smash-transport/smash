@@ -128,6 +128,22 @@ else()
     add_definitions("-DLITTLE_ENDIAN_ARCHITECTURE")
 endif()
 
+# Let Clang users on Linux be able to use libc++
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    option(CLANG_USE_LIBC++
+           "If turned on clang will explicitly be asked to use libc++ (otherwise it uses the system default)"
+           OFF)
+    if(CLANG_USE_LIBC++)
+        message(STATUS "Prepare compilation in order to use LLVM libc++ implementation")
+        set(MESSAGE_QUIET ON)
+        add_compiler_flag(-stdlib=libc++ CXX_FLAGS CMAKE_CXX_FLAGS CXX_RESULT _use_libcxx)
+        unset(MESSAGE_QUIET)
+        if(_use_libcxx AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+            link_libraries(c++abi supc++)
+        endif()
+    endif()
+endif()
+
 # add 3rd-party libraries (before setting compiler flags etc)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2.1")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
@@ -171,19 +187,6 @@ if(NOT CMAKE_EXE_LINKER_FLAGS_PROFILING)
         CACHE STRING "Flags used by the linker during profile builds." FORCE)
 endif()
 mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LINKER_FLAGS_PROFILING)
-
-# Let Clang users on Linux be able to use libc++
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    option(CLANG_USE_LIBC++
-           "If turned on clang will explicitly be asked to use libc++ (otherwise it uses the system default)"
-           OFF)
-    if(CLANG_USE_LIBC++)
-        add_compiler_flag(-stdlib=libc++ CXX_FLAGS CMAKE_CXX_FLAGS CXX_RESULT _use_libcxx)
-        if(_use_libcxx AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-            link_libraries(c++abi supc++)
-        endif()
-    endif()
-endif()
 
 # have binary in the build directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
