@@ -29,7 +29,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Only GCC, Clang and Apple clang compilers are officially supported
 * Default build configuration is now `Release` (instead of `RelWithDebInfo`)
 * Use CMake default compiler flags for `RelWithDebInfo` build configuration, hence having `-O2` optimization level instead of `-03`
-* Minimum supported CMake version is now version 3.14
+* Minimum supported CMake version is now version 3.16
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now
