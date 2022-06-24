@@ -79,10 +79,7 @@ macro(smash_add_runtest name depends)
 endmacro()
 
 # test source code to be clean, requires cpplint in the path
-find_program(CPPLINT cpplint.py)
-if(NOT CPPLINT)
-    find_program(CPPLINT cpplint)
-endif()
+find_program(CPPLINT cpplint NAMES cpplint cpplint.py)
 if(CPPLINT)
     message(STATUS "cpplint.py found at ${CPPLINT}")
     set(CPPLINT_ARGS
