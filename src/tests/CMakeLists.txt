@@ -78,13 +78,17 @@ macro(smash_add_runtest name depends)
                    -f)
 endmacro()
 
+# helper macro that calls a command with --version option and save the output in a variable
+macro(get_version_string command output_variable)
+    execute_process(COMMAND ${command} --version OUTPUT_VARIABLE ${output_variable}
+                    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+endmacro()
+
 # test source code to be clean, requires cpplint in the path
 find_program(CPPLINT cpplint NAMES cpplint cpplint.py)
 if(CPPLINT)
     message(STATUS "cpplint found at ${CPPLINT}")
-    # Use cpplint command to extract its version
-    execute_process(COMMAND ${CPPLINT} --version OUTPUT_VARIABLE CPPLINT_VERSION_STRING
-                    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    get_version_string(${CPPLINT} CPPLINT_VERSION_STRING)
     string(REGEX MATCH "cpplint ([0-9]+[.][0-9]+[.][0-9]+)" CPPLINT_VERSION_STRING
                  "${CPPLINT_VERSION_STRING}")
     set(CPPLINT_VERSION_FOUND "${CMAKE_MATCH_1}")
@@ -387,13 +391,10 @@ smash_add_runtest(resonance_spectral_function_dump smash smash -r 113)
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 if(CTEST_MEMORYCHECK_COMMAND)
     message(STATUS "Valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
-    # Use valgrid command to extract its version
-    execute_process(COMMAND ${CTEST_MEMORYCHECK_COMMAND} --version
-                    OUTPUT_VARIABLE VALGRIND_VERSION_STRING ERROR_QUIET
-                                                            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    get_version_string(${CTEST_MEMORYCHECK_COMMAND} VALGRIND_VERSION_STRING)
     if(VALGRIND_VERSION_STRING MATCHES "^valgrind-3.11")
-        message(ATTENTION "There is a known bug with valgrind 3.11 (unrecognised instruction) - disabling memchecks."
-        )
+        message(ATTENTION "There is a known bug with valgrind 3.11"
+                          " (unrecognised instruction) - disabling memchecks.")
     else()
         set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
         add_custom_target(memcheck_collider
