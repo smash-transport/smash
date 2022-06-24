@@ -81,49 +81,62 @@ endmacro()
 # test source code to be clean, requires cpplint in the path
 find_program(CPPLINT cpplint NAMES cpplint cpplint.py)
 if(CPPLINT)
-    message(STATUS "cpplint.py found at ${CPPLINT}")
-    set(CPPLINT_ARGS
-        --filter=-build/c++11,-build/include_subdir,+build/include_alpha,-runtime/operator,-readability/streams,-readability/function,-runtime/references,-whitespace/operators
-        --counting=detailed
-        --repository=${PROJECT_SOURCE_DIR})
-    file(GLOB CPPLINT_FILES ${PROJECT_SOURCE_DIR}/src/include/smash/*.h
-         ${PROJECT_SOURCE_DIR}/src/*.cc)
-    add_custom_target(cpplint
-                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cpplint")
-    # make sure we always run cpplint as a test
-    add_test(NAME cpplint COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
-             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-    add_custom_target(cpplint_build
-                      COMMAND ${CPPLINT} ${CPPLINT_ARGS}
-                              --filter=-build/c++11,-build/include,-readability,-runtime,-whitespace
-                              ${CPPLINT_FILES}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cpplint_build")
-    add_custom_target(cpplint_readability
-                      COMMAND ${CPPLINT} ${CPPLINT_ARGS}
-                              --filter=-build,-readability/streams,-runtime,-whitespace
-                              ${CPPLINT_FILES}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cpplint_readability")
-    add_custom_target(cpplint_runtime
-                      COMMAND ${CPPLINT} ${CPPLINT_ARGS}
-                              --filter=-build,-readability,-runtime/references,-whitespace
-                              ${CPPLINT_FILES}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cpplint_runtime")
-    add_custom_target(cpplint_whitespace
-                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build,-readability,-runtime
-                              ${CPPLINT_FILES}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cpplint_whitespace")
-    file(GLOB_RECURSE CPPLINT_FILES_FULL ${PROJECT_SOURCE_DIR}/src/include/smash/*.h
-         ${PROJECT_SOURCE_DIR}/src/*.cc)
-    add_custom_target(cpplint_full
-                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES_FULL}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cpplint_full")
+    message(STATUS "cpplint found at ${CPPLINT}")
+    # Use cpplint command to extract its version
+    execute_process(COMMAND ${CPPLINT} --version OUTPUT_VARIABLE CPPLINT_VERSION_STRING
+                    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    string(REGEX MATCH "cpplint ([0-9]+[.][0-9]+[.][0-9]+)" CPPLINT_VERSION_STRING
+                 "${CPPLINT_VERSION_STRING}")
+    set(CPPLINT_VERSION_FOUND "${CMAKE_MATCH_1}")
+    set(CPPLINT_VERSION_REQUIRED "1.6.0")
+    if(NOT CPPLINT_VERSION_FOUND VERSION_EQUAL "${CPPLINT_VERSION_REQUIRED}")
+        message(ATTENTION "cpplint version (${CPPLINT_VERSION_FOUND}) different "
+                          "from required one (${CPPLINT_VERSION_REQUIRED})"
+                          " - disabling cpplint checks.")
+    else()
+        set(CPPLINT_ARGS
+            --filter=-build/c++11,-build/include_subdir,+build/include_alpha,-runtime/operator,-readability/streams,-readability/function,-runtime/references,-whitespace/operators
+            --counting=detailed
+            --repository=${PROJECT_SOURCE_DIR})
+        file(GLOB CPPLINT_FILES ${PROJECT_SOURCE_DIR}/src/include/smash/*.h
+             ${PROJECT_SOURCE_DIR}/src/*.cc)
+        add_custom_target(cpplint
+                          COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cpplint")
+        # make sure we always run cpplint as a test
+        add_test(NAME cpplint COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
+                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+        add_custom_target(cpplint_build
+                          COMMAND ${CPPLINT} ${CPPLINT_ARGS}
+                                  --filter=-build/c++11,-build/include,-readability,-runtime,-whitespace
+                                  ${CPPLINT_FILES}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cpplint_build")
+        add_custom_target(cpplint_readability
+                          COMMAND ${CPPLINT} ${CPPLINT_ARGS}
+                                  --filter=-build,-readability/streams,-runtime,-whitespace
+                                  ${CPPLINT_FILES}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cpplint_readability")
+        add_custom_target(cpplint_runtime
+                          COMMAND ${CPPLINT} ${CPPLINT_ARGS}
+                                  --filter=-build,-readability,-runtime/references,-whitespace
+                                  ${CPPLINT_FILES}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cpplint_runtime")
+        add_custom_target(cpplint_whitespace
+                          COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build,-readability,-runtime
+                                  ${CPPLINT_FILES}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cpplint_whitespace")
+        file(GLOB_RECURSE CPPLINT_FILES_FULL ${PROJECT_SOURCE_DIR}/src/include/smash/*.h
+             ${PROJECT_SOURCE_DIR}/src/*.cc)
+        add_custom_target(cpplint_full
+                          COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES_FULL}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cpplint_full")
+    endif()
 else()
     message(WARNING "cpplint.py was not found. The cpplint test will be disabled.")
 endif()
