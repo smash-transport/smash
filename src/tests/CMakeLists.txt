@@ -85,6 +85,7 @@ macro(get_version_string command output_variable)
 endmacro()
 
 # test source code to be clean, requires cpplint in the path
+set(CPPLINT_VERSION_REQUIRED "1.6.0")
 find_program(CPPLINT cpplint NAMES cpplint cpplint.py)
 if(CPPLINT)
     message(STATUS "cpplint found at ${CPPLINT}")
@@ -92,8 +93,9 @@ if(CPPLINT)
     string(REGEX MATCH "cpplint ([0-9]+[.][0-9]+[.][0-9]+)" CPPLINT_VERSION_STRING
                  "${CPPLINT_VERSION_STRING}")
     set(CPPLINT_VERSION_FOUND "${CMAKE_MATCH_1}")
-    set(CPPLINT_VERSION_REQUIRED "1.6.0")
-    if(NOT CPPLINT_VERSION_FOUND VERSION_EQUAL "${CPPLINT_VERSION_REQUIRED}")
+    if(NOT CPPLINT_VERSION_FOUND MATCHES "^[0-9]+([.][0-9]+([.][0-9]+([.][0-9]+)?)?)?$")
+        message(ATTENTION "Unable to extract cpplint version - disabling cpplint checks.")
+    elseif(NOT CPPLINT_VERSION_FOUND VERSION_EQUAL "${CPPLINT_VERSION_REQUIRED}")
         message(ATTENTION "cpplint version (${CPPLINT_VERSION_FOUND}) different "
                           "from required one (${CPPLINT_VERSION_REQUIRED})"
                           " - disabling cpplint checks.")
@@ -142,7 +144,8 @@ if(CPPLINT)
                           COMMENT "Executing test cpplint_full")
     endif()
 else()
-    message(WARNING "cpplint.py was not found. The cpplint test will be disabled.")
+    message(WARNING " \n" " cpplint was not found (version ${CPPLINT_VERSION_REQUIRED} "
+                    " required).\n The cpplint test will be disabled.\n")
 endif()
 
 # static code analysis with cppcheck
