@@ -1,3 +1,13 @@
+########################################################
+#
+#    Copyright (c) 2022
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+#########################################################
+
+# cmake-format: off
 #=======================================================
 # - Try to find Rivet
 #
@@ -9,13 +19,7 @@
 #  RIVET_LIBRARIES
 #  Rivet_FOUND
 #=======================================================
-#
-#    Copyright (c) 2022
-#      SMASH Team
-#
-#    BSD 3-clause license
-#
-#=======================================================
+# cmake-format: on
 
 find_program(RIVET_CONFIG rivet-config DOC "Path to the Rivet configuration script")
 

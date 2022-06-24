@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2020
+ *    Copyright (c) 2015-2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -23,7 +23,6 @@
 #include <tuple>
 #include <utility>
 
-#include "cxx14compat.h"
 #include "fpenvironment.h"
 #include "random.h"
 

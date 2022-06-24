@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016-2021
+ *    Copyright (c) 2016-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,7 +14,6 @@
 #include "smash/angles.h"
 #include "smash/constants.h"
 #include "smash/crosssectionsphoton.h"
-#include "smash/cxx14compat.h"
 #include "smash/forwarddeclarations.h"
 #include "smash/outputinterface.h"
 #include "smash/particletype.h"
@@ -288,7 +287,7 @@ void ScatterActionPhoton::generate_final_state() {
 
 void ScatterActionPhoton::add_dummy_hadronic_process(
     double reaction_cross_section) {
-  CollisionBranchPtr dummy_process = make_unique<CollisionBranch>(
+  CollisionBranchPtr dummy_process = std::make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
       reaction_cross_section, ProcessType::TwoToTwo);
   add_collision(std::move(dummy_process));
@@ -342,7 +341,7 @@ CollisionBranchList ScatterActionPhoton::create_collision_branch() {
   static ParticleTypePtr photon_particle = &ParticleType::find(pdg::photon);
   double xsection = total_cross_section();
 
-  process_list.push_back(make_unique<CollisionBranch>(
+  process_list.push_back(std::make_unique<CollisionBranch>(
       *hadron_out_t_, *photon_particle, xsection, ProcessType::TwoToTwo));
   collision_branch_created_ = true;
   return process_list;

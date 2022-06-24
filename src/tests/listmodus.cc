@@ -11,8 +11,7 @@
 
 #include "setup.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
 #include <string>
 
 #include "../include/smash/listmodus.h"
@@ -21,9 +20,10 @@
 
 using namespace smash;
 static const double accuracy = 5.e-4;
-static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
+static const std::filesystem::path testoutputpath =
+    std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
 
-static bf::path create_particlefile(
+static std::filesystem::path create_particlefile(
     const OutputParameters out_par, const int file_number,
     std::vector<ParticleList> &init_particle_vec,
     const int particles_per_event = 10, const int n_events = 1) {
@@ -31,8 +31,8 @@ static bf::path create_particlefile(
       create_oscar_output("Oscar2013", "Particles", testoutputpath, out_par);
   VERIFY(bool(osc2013final));
 
-  const bf::path outputfilename = "particle_lists.oscar";
-  const bf::path outputfilepath = testoutputpath / outputfilename;
+  const std::filesystem::path outputfilename = "particle_lists.oscar";
+  const std::filesystem::path outputfilepath = testoutputpath / outputfilename;
 
   // Create random particles
   for (int event = 0; event < n_events; event++) {
@@ -61,14 +61,14 @@ static bf::path create_particlefile(
   // release and let destructor rename the file
   osc2013final.reset();
 
-  VERIFY(bf::exists(outputfilepath));
+  VERIFY(std::filesystem::exists(outputfilepath));
   // Rename the oscar file to match listmodus format
   const std::string pathstring = "event" + std::to_string(file_number);
-  const bf::path listinputfile = pathstring;
-  const bf::path inputfilepath = testoutputpath / listinputfile;
+  const std::filesystem::path listinputfile = pathstring;
+  const std::filesystem::path inputfilepath = testoutputpath / listinputfile;
   std::rename(outputfilepath.native().c_str(), inputfilepath.native().c_str());
 
-  VERIFY(bf::exists(inputfilepath));
+  VERIFY(std::filesystem::exists(inputfilepath));
 
   return inputfilepath;
 }
@@ -83,11 +83,11 @@ static void create_non_oscar_particlefile(
   auto input_path =
       create_particlefile(out_par, file_number, init_particle_vec);
 
-  bf::fstream file{input_path};
-  const bf::path tmp_file_str = "tmp_file";
-  const bf::path tmp_path = testoutputpath / tmp_file_str;
+  std::fstream file{input_path};
+  const std::filesystem::path tmp_file_str = "tmp_file";
+  const std::filesystem::path tmp_path = testoutputpath / tmp_file_str;
 
-  bf::ofstream tmp_file;
+  std::ofstream tmp_file;
   tmp_file.open(tmp_path);
   VERIFY(tmp_file.good());
   std::string line;
@@ -100,8 +100,8 @@ static void create_non_oscar_particlefile(
 }
 
 TEST(directory_is_created) {
-  bf::create_directories(testoutputpath);
-  VERIFY(bf::exists(testoutputpath));
+  std::filesystem::create_directories(testoutputpath);
+  VERIFY(std::filesystem::exists(testoutputpath));
 }
 
 TEST(create_particle_types) { Test::create_smashon_particletypes(); }

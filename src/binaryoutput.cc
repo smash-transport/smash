@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2022
+ *    Copyright (c) 2014-2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,9 +9,8 @@
 
 #include "smash/binaryoutput.h"
 
+#include <filesystem>
 #include <string>
-
-#include <boost/filesystem.hpp>
 
 #include "smash/action.h"
 #include "smash/clock.h"
@@ -131,7 +130,7 @@ static constexpr int HyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * See also \ref collisions_output_in_box_modus_.
  **/
 
-BinaryOutputBase::BinaryOutputBase(const bf::path &path,
+BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
                                    const std::string &mode,
                                    const std::string &name,
                                    bool extended_format)
@@ -149,7 +148,7 @@ void BinaryOutputBase::write(const char c) {
 }
 
 void BinaryOutputBase::write(const std::string &s) {
-  const auto size = boost::numeric_cast<uint32_t>(s.size());
+  const auto size = smash::numeric_cast<uint32_t>(s.size());
   std::fwrite(&size, sizeof(std::uint32_t), 1, file_.get());
   std::fwrite(s.c_str(), s.size(), 1, file_.get());
 }
@@ -195,9 +194,9 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
   }
 }
 
-BinaryOutputCollisions::BinaryOutputCollisions(const bf::path &path,
-                                               std::string name,
-                                               const OutputParameters &out_par)
+BinaryOutputCollisions::BinaryOutputCollisions(
+    const std::filesystem::path &path, std::string name,
+    const OutputParameters &out_par)
     : BinaryOutputBase(
           path / ((name == "Collisions" ? "collisions_binary" : name) + ".bin"),
           "wb", name, out_par.get_coll_extended(name)),
@@ -252,7 +251,7 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
   write(action.outgoing_particles());
 }
 
-BinaryOutputParticles::BinaryOutputParticles(const bf::path &path,
+BinaryOutputParticles::BinaryOutputParticles(const std::filesystem::path &path,
                                              std::string name,
                                              const OutputParameters &out_par)
     : BinaryOutputBase(path / "particles_binary.bin", "wb", name,
@@ -304,7 +303,8 @@ void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
 }
 
 BinaryOutputInitialConditions::BinaryOutputInitialConditions(
-    const bf::path &path, std::string name, const OutputParameters &out_par)
+    const std::filesystem::path &path, std::string name,
+    const OutputParameters &out_par)
     : BinaryOutputBase(path / "SMASH_IC.bin", "wb", name, out_par.ic_extended) {
 }
 

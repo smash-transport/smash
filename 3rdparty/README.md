@@ -30,6 +30,13 @@ This should not require any maintenance change, although it is not guaranteed to
 Since SMASH is going to be shipped as a shared library, we need to offer position independent code.
 This is imposed at SMASH CMake top-level for all targets and should propagate automatically for third-party libraries, too.
 
+#### Remark about the C++ standard
+
+Each third party library is responsible for itself and, in particular, this includes the choice of the C++ standard, which is not necessary the same of that used by SMASH.
+Being each library included as subdirectory, it will have its own variable scope initialized with a copy of the current variable values at the time of the `add_subdirectory()` call.
+Therefore, changes to variables like `CMAKE_CXX_FLAGS` do not affect the top-level, SMASH scope.
+Using target properties should be preferred, but strictly speaking the obsolete, traditional CMake approach of setting variables instead of properties still works.
+
 
 ### YAML
 

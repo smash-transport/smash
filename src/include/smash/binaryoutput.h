@@ -13,10 +13,9 @@
 #include <memory>
 #include <string>
 
-#include <boost/numeric/conversion/cast.hpp>
-
 #include "file.h"
 #include "forwarddeclarations.h"
+#include "numeric_cast.h"
 #include "outputinterface.h"
 #include "outputparameters.h"
 
@@ -36,8 +35,9 @@ class BinaryOutputBase : public OutputInterface {
    * \param[in] name Name of the output.
    * \param[in] extended_format Is the written output extended.
    */
-  explicit BinaryOutputBase(const bf::path &path, const std::string &mode,
-                            const std::string &name, bool extended_format);
+  explicit BinaryOutputBase(const std::filesystem::path &path,
+                            const std::string &mode, const std::string &name,
+                            bool extended_format);
 
   /**
    * Write byte to binary output.
@@ -91,7 +91,7 @@ class BinaryOutputBase : public OutputInterface {
    * Write a std::size_t to binary output.
    * \param[in] x Value to be written.
    */
-  void write(const size_t x) { write(boost::numeric_cast<uint32_t>(x)); }
+  void write(const size_t x) { write(smash::numeric_cast<uint32_t>(x)); }
 
   /**
    * Write particle data of each particle in particles to binary output.
@@ -142,7 +142,7 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * \param[in] name Name of the output.
    * \param[in] out_par A structure containing parameters of the output.
    */
-  BinaryOutputCollisions(const bf::path &path, std::string name,
+  BinaryOutputCollisions(const std::filesystem::path &path, std::string name,
                          const OutputParameters &out_par);
 
   /**
@@ -202,7 +202,7 @@ class BinaryOutputParticles : public BinaryOutputBase {
    * \param[in] name Name of the ouput.
    * \param[in] out_par A structure containing the parameters of the output.
    */
-  BinaryOutputParticles(const bf::path &path, std::string name,
+  BinaryOutputParticles(const std::filesystem::path &path, std::string name,
                         const OutputParameters &out_par);
 
   /**
@@ -262,7 +262,8 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
    * \param[in] name Name of the ouput.
    * \param[in] out_par A structure containing the parameters of the output.
    */
-  BinaryOutputInitialConditions(const bf::path &path, std::string name,
+  BinaryOutputInitialConditions(const std::filesystem::path &path,
+                                std::string name,
                                 const OutputParameters &out_par);
 
   /**

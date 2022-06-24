@@ -12,7 +12,7 @@ add_executable(example_rate_equations example_rate_equations.cc)
 set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch"
 )
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno -std=c++17")
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS})
 
 find_package(SMASH)

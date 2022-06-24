@@ -30,22 +30,21 @@ at elfner@itp.uni-frankfurt.de.
 
 ### Prerequisites
 
-SMASH is known to compile and work on little endian machines with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++11 features):
-- gcc >= 5.0
-- clang >= 3.3
-- Apple clang >= 5.0
+SMASH is known to compile and work on little endian machines with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++17 features):
+- gcc >= 8.0
+- clang >= 7.0
+- Apple clang >= 11.0
 
 Any different operating system and/or compiler and/or endianness is not officially supported.
 
 SMASH requires the following tools and libraries:
-- cmake >= 3.14
+- cmake >= 3.16
 - the GNU Scientific Library >= 2.0
 - the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
-- boost filesystem >= 1.49
 - Pythia = 8.307
 
 Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version (ROOT >= 5.34, HepMC3 >= 3.2.3, Rivet >= 3.1.4) is found on the system.
-Please, note that enabling Rivet output or using ROOT >= 6.24.00 requires a compiler supporting C++14 features.
+
 
 ### Building Pythia
 
@@ -55,13 +54,17 @@ Using a different version than specified above may or may not work. If the requi
     wget https://pythia.org/download/pythia83/pythia8307.tgz
     tar xf pythia8307.tgz && rm pythia8307.tgz
     cd pythia8307
-    ./configure --cxx-common='-std=c++11 -march=native -O3 -fPIC'
+    ./configure --cxx-common='-std=c++17 -march=native -O3 -fPIC -pthread'
     make
 
 To tell `cmake` where to find Pythia while building SMASH see the **Building SMASH** section.
 
 Note that although Pythia is statically linked into SMASH, access to
 `share/Pythia8/xmldoc` is required at runtime.
+
+If you plan to build SMASH using the LLVM implementation of the standard C++ library,
+you should make sure that Pythia as well is built so, passing `-stdlib=libc++` together
+with the other flags to the `--cxx-common` option of the _configure_ script.
 
 #### Remarks for Apple users
 
@@ -78,8 +81,9 @@ The commands above to build Pythia on a M1 Apple machine become:
     curl https://pythia.org/download/pythia83/pythia8307.tgz -o pythia8307.tgz
     tar xf pythia8307.tgz && rm pythia8307.tgz
     cd pythia8307
-    ./configure --cxx-common='-std=c++11 -O3 -fPIC'
+    ./configure --cxx-common='-std=c++17 -O3 -fPIC -pthread'
     make
+
 
 ### Installing Eigen
 
@@ -97,13 +101,14 @@ Download the latest stable release of `Eigen` from http://eigen.tuxfamily.org an
 To tell `cmake` where to find Eigen header files while bilding SMASH, pass the path to them adding the option
 `-DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/` to the `cmake` command in the following section.
 
+
 ### Building SMASH
 
 Use the following commands to build SMASH in a separate directory:
 
     mkdir build
     cd build
-    cmake .. -DPythia_CONFIG_EXECUTABLE=[...]/pythia8307/bin/pythia8-config
+    cmake -DPythia_CONFIG_EXECUTABLE=[...]/pythia8307/bin/pythia8-config ..
     make
 
 To build in parallel on N cores:
@@ -115,17 +120,23 @@ To run it with specific settings:
     vi config.yaml
     ./smash
 
+**NOTE:** The `cmake` command above is the bare minimum needed to setup later compilation.
+However, several different options can be passed to the `cmake` command and you will find
+some guidance in the following sections. Keep in mind that you need to collect the relevant
+information in your case to build the appropriate `cmake` command according to your needs.
+
 #### Alternatives to specify the installation directory of Pythia
 
 A few GNU/Linux distributions provide pre-built Pythia binaries without pythia8-config. In this case, using the `-DPythia_CONFIG_EXECUTABLE` option as shown above is not possible and the top installation directory of Pythia containing `lib` has to be specified in either of the following ways:
 
 -  Either set the bash environment variables `PYTHIA8` or `PYTHIA_ROOT_DIR` (e.g. `export PYTHIA_ROOT_DIR=/opt/pythia8307`) or
--  use the CMake `-DPYTHIA_ROOT_DIR` option (e.g. `cmake .. -DPYTHIA_ROOT_DIR=/opt/pythia8307`).
+-  use the CMake `-DPYTHIA_ROOT_DIR` option (e.g. `cmake -DPYTHIA_ROOT_DIR=/opt/pythia8307 ..`).
 
 If no variables are set and no options are passed, CMake searches for Pythia under the default path `/usr`.
 We recall that it is possible to check which environment variables related to PYTHIA are currently set with:
 
     printenv | grep PYTHIA
+
 
 ### Installation
 
@@ -147,13 +158,13 @@ With `CMAKE_INSTALL_PREFIX`=_prefix_ the installation will be
 - _prefix_/`include/smash` will contain headers, and
 - _prefix_/`share/smash` will contain data files
 
+
 ### Troubleshooting
 
 #### SMASH does not compile
 
 If compilation fails (especially after changing a library), using a fresh build
 folder can sometimes fix the problem.
-
 
 #### SMASH crashes with "illegal instruction"
 
@@ -183,6 +194,7 @@ If compilation of SMASH in combination with a pre-compiled ROOT binary fails,
 please install and compile ROOT locally from source (see http://root.cern.ch)
 and compile SMASH again in a clean build directory.
 
+
 ### Size of the Code
 
 Please note that after compilation the `smash` directory (including `build`)
@@ -199,19 +211,43 @@ everything works as expected. To see how to run the tests, see
 
 ### Changing the Compiler
 
-In order to use a particular compiler, you can set the following environment
-variables:
+In order to use a particular compiler, you can permanently set the following
+environment variables
 
-    export CC=gcc
-    export CXX=g++
+    export CC=clang
+    export CXX=clang++
+
+or simply set them for the cmake command only via
+
+    CC=clang CXX=clang++ cmake ..
 
 Alternatively the compiler can also be specified to cmake like this:
 
-    cmake .. -DCMAKE_CXX_COMPILER=g++
+    cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
 
-Note: The FPE environment only works with gcc, so e.g. you won't get backtraces
+**NOTE:** The FPE environment only works with gcc, so e.g. you won't get backtraces
 from floating point traps with clang.
 
+#### Using the LLVM implementation of the C++ standard library
+
+In case the system default implementation of the C++ standard library is e.g. that
+shipped with the GNU compiler, this will still be used even when requesting CMake
+to use Clang as compiler. However, it is possible to request to use the LLVM
+implementation using the CMake `CLANG_USE_LIBC++` option. For example:
+
+    CC=clang CXX=clang++ cmake -DPythia_CONFIG_EXECUTABLE=[...] -DCLANG_USE_LIBC++=ON ..
+
+If the installation of the LLVM implementation is not in a standard place, you either need
+to set and export your `LD_LIBRARY_PATH` environment variable to the correct value, e.g.
+
+    export LD_LIBRARY_PATH=/path/to/clang/installation/lib
+
+or pass to the `cmake` command the option
+
+    -DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath -Wl,/path/to/clang/installation/lib"
+
+where, of course, the path to clang installation must be a valid path. All of this is needed
+to let the executable find the library ABI at run time.
 
 ### Disabling ROOT or HepMC Support
 
@@ -236,15 +272,6 @@ install destination (`$HEPMC_INS`) with
 Note that if multiple CMAKE_PREFIX_PATHs are necessary, a semicolon-separated
 list of directories can be specified.
 
-### ROOT versions >= 6.24.00
-
-When compiling SMASH with ROOT >= 6.24.00 it is necessary to use a compiler supporting the C++ standard 14 and add the following argument to the `cmake` command:
-
-    cmake .. -DCMAKE_CXX_STANDARD=14
-
-When using pre-compiled ROOT binaries it might be necessary to use:
-
-    cmake .. -DCMAKE_CXX_STANDARD=17
 
 ### Enabling Rivet support
 
@@ -259,13 +286,8 @@ The installation script, downloadable with:
 provides a convenient way to install Rivet and its dependencies
 (HepMC3 is among those, but, if you have already installed it, you can edit the
 script so that Rivet uses your installation).
-More infomation about Rivet, its installation and basic usage can be found in
+More information about Rivet, its installation and basic usage can be found in
 the tutorials in the Rivet website.
-Please, note that the compiler must support standard c++14 (e.g. gcc version > 5).
-This also means that the c++14 standard has to be set for the SMASH build (ideally
-from a clean build directory) by adding the following to the `cmake` command:
-
-    cmake .. -DCMAKE_CXX_STANDARD=14
 
 Please, also note that, every time Rivet is used, some environment variables
 must be set in advance. The script rivetenv.sh, in the Rivet installation directory,
@@ -273,7 +295,7 @@ takes care of this step:
 
     source [...]/rivetenv.sh
 
-where `[...]` is not a command, but a shortand for the path of the directory in
+where `[...]` is not a command, but a shorthand for the path of the directory in
 which Rivet is installed.
 
 If Rivet (with all its dependencies) is installed and the environment variables
@@ -326,6 +348,7 @@ e.g. ROOT, HepMC and Rivet, already included
 (`ghcr.io/smash-transport/smash-max`). Running SMASH inside of a Docker container
 might negatively affect performance. More information on container usage is
 found in the README files in the `containers` directory.
+
 
 ## Running SMASH with Example Input Files
 

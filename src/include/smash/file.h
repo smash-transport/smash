@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020
+ *    Copyright (c) 2014,2017-2018,2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -17,9 +17,8 @@
 #include <stdexcept>
 #include <string>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
-#include "cxx14compat.h"
 #include "forwarddeclarations.h"
 
 namespace smash {
@@ -80,7 +79,8 @@ class RenamingFilePtr {
    *                 `std::fopen`).
    * \return The constructed object.
    */
-  RenamingFilePtr(const bf::path& filename, const std::string& mode);
+  RenamingFilePtr(const std::filesystem::path& filename,
+                  const std::string& mode);
   /// Get the underlying `FILE*` pointer.
   FILE* get();
   /// Close the file and rename it.
@@ -90,9 +90,9 @@ class RenamingFilePtr {
   /// Internal file pointer.
   FILE* file_;
   /// Path of the finished file.
-  bf::path filename_;
+  std::filesystem::path filename_;
   /// Path of the unfinished file.
-  bf::path filename_unfinished_;
+  std::filesystem::path filename_unfinished_;
 };
 
 /**
@@ -105,7 +105,7 @@ class RenamingFilePtr {
  *                 `std::fopen`).
  * \return The constructed `FilePtr`.
  */
-FilePtr fopen(const bf::path& filename, const std::string& mode);
+FilePtr fopen(const std::filesystem::path& filename, const std::string& mode);
 
 }  // namespace smash
 

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2017-2019
+ *    Copyright (c) 2017-2019,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -42,8 +42,8 @@ ActionList WallCrossActionsFinder::find_actions_in_cell(
 
     ParticleData outgoing_particle(p);
     outgoing_particle.set_4position(crossing_point);
-    ActionPtr action = make_unique<WallcrossingAction>(p, outgoing_particle,
-                                                       time_until_crossing);
+    ActionPtr action = std::make_unique<WallcrossingAction>(
+        p, outgoing_particle, time_until_crossing);
     actions.emplace_back(std::move(action));
   }
   return actions;

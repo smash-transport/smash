@@ -10,13 +10,12 @@
 #ifndef SRC_INCLUDE_SMASH_THERMODYNAMICLATTICEOUTPUT_H_
 #define SRC_INCLUDE_SMASH_THERMODYNAMICLATTICEOUTPUT_H_
 
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 
 #include "density.h"
 #include "experimentparameters.h"
@@ -53,7 +52,8 @@ class ThermodynamicLatticeOutput : public OutputInterface {
    * \param[in] enable_ascii Bool (True or False) to enable ASCII format
    * \param[in] enable_binary Bool (True or False) to enable binary format
    */
-  ThermodynamicLatticeOutput(const bf::path &path, const std::string &name,
+  ThermodynamicLatticeOutput(const std::filesystem::path &path,
+                             const std::string &name,
                              const OutputParameters &out_par,
                              const bool enable_ascii, const bool enable_binary);
   /// Default destructor
@@ -180,7 +180,7 @@ class ThermodynamicLatticeOutput : public OutputInterface {
   int to_int(const ThermodynamicQuantity &tq);
 
   /// filesystem path for output
-  const bf::path base_path_;
+  const std::filesystem::path base_path_;
 
   /// map of output file handlers for ASCII format
   std::map<ThermodynamicQuantity, std::shared_ptr<std::ofstream>>

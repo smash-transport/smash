@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020
+ *    Copyright (c) 2015,2017-2018,2020
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,31 +15,32 @@
 
 using namespace smash;
 
-static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
+static const std::filesystem::path testoutputpath =
+    std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
 
 TEST(directory_is_created) {
-  bf::create_directories(testoutputpath);
-  VERIFY(bf::exists(testoutputpath));
+  std::filesystem::create_directories(testoutputpath);
+  VERIFY(std::filesystem::exists(testoutputpath));
 }
 
 TEST(lock_is_created) {
-  const bf::path lockpath = testoutputpath / "lock";
+  const std::filesystem::path lockpath = testoutputpath / "lock";
   {
     FileLock lock(lockpath);
     VERIFY(lock.acquire());
-    VERIFY(bf::exists(lockpath));
+    VERIFY(std::filesystem::exists(lockpath));
   }
-  VERIFY(!bf::exists(lockpath));
+  VERIFY(!std::filesystem::exists(lockpath));
 }
 
 TEST(lock_is_denied) {
-  const bf::path lockpath = testoutputpath / "lock";
+  const std::filesystem::path lockpath = testoutputpath / "lock";
   {
     FileLock lock1(lockpath);
     FileLock lock2(lockpath);
     VERIFY(lock1.acquire());
     VERIFY(!lock2.acquire());
-    VERIFY(bf::exists(lockpath));
+    VERIFY(std::filesystem::exists(lockpath));
   }
-  VERIFY(!bf::exists(lockpath));
+  VERIFY(!std::filesystem::exists(lockpath));
 }

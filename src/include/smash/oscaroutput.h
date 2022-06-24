@@ -70,7 +70,7 @@ class OscarOutput : public OutputInterface {
    * \param[in] path Output path.
    * \param[in] name Name of the ouput.
    */
-  OscarOutput(const bf::path &path, const std::string &name);
+  OscarOutput(const std::filesystem::path &path, const std::string &name);
 
   /**
    * Writes the initial particle information of an event to the oscar output.
@@ -146,8 +146,8 @@ class OscarOutput : public OutputInterface {
  *             particles in event, etc.
  */
 std::unique_ptr<OutputInterface> create_oscar_output(
-    const std::string &format, const std::string &content, const bf::path &path,
-    const OutputParameters &out_par);
+    const std::string &format, const std::string &content,
+    const std::filesystem::path &path, const OutputParameters &out_par);
 
 // @}
 

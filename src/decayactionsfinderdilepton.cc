@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020
+ *    Copyright (c) 2015-2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,7 +10,6 @@
 #include "smash/decayactionsfinderdilepton.h"
 
 #include "smash/constants.h"
-#include "smash/cxx14compat.h"
 #include "smash/decayactiondilepton.h"
 #include "smash/decaymodes.h"
 

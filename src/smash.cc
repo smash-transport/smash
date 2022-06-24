@@ -8,13 +8,11 @@
  */
 #include <getopt.h>
 
+#include <filesystem>
 #include <set>
 #include <sstream>
 #include <vector>
 
-#include <boost/filesystem/fstream.hpp>
-
-#include "smash/cxx14compat.h"
 #include "smash/decaymodes.h"
 #include "smash/experiment.h"
 #include "smash/filelock.h"
@@ -262,15 +260,15 @@ struct OutputDirectoryOutOfIds : public std::runtime_error {
 };
 
 /// \return the default path for output.
-bf::path default_output_path() {
-  const bf::path p = bf::absolute("data");
-  if (!bf::exists(p)) {
+std::filesystem::path default_output_path() {
+  const std::filesystem::path p = std::filesystem::absolute("data");
+  if (!std::filesystem::exists(p)) {
     return p / "0";
   }
-  bf::path p2;
+  std::filesystem::path p2;
   for (int id = 0; id < std::numeric_limits<int>::max(); ++id) {
     p2 = p / std::to_string(id);
-    if (!bf::exists(p2)) {
+    if (!std::filesystem::exists(p2)) {
       break;
     }
   }
@@ -286,14 +284,14 @@ bf::path default_output_path() {
  * \throw OutputDirectoryExists if the Output directory already exists.
  * \param[in] path The output path to be written to
  */
-void ensure_path_is_valid(const bf::path &path) {
-  if (bf::exists(path)) {
-    if (!bf::is_directory(path)) {
+void ensure_path_is_valid(const std::filesystem::path &path) {
+  if (std::filesystem::exists(path)) {
+    if (!std::filesystem::is_directory(path)) {
       throw OutputDirectoryExists("The given path (" + path.native() +
                                   ") exists, but it is not a directory.");
     }
   } else {
-    if (!bf::create_directories(path)) {
+    if (!std::filesystem::create_directories(path)) {
       throw OutputDirectoryExists(
           "Race condition detected: The directory " + path.native() +
           " did not exist a few cycles ago, but was created in the meantime by "
@@ -408,11 +406,12 @@ int main(int argc, char *argv[]) {
       {nullptr, 0, 0, 0}};
 
   // strip any path to progname
-  const std::string progname = bf::path(argv[0]).filename().native();
+  const std::string progname =
+      std::filesystem::path(argv[0]).filename().native();
 
   try {
     bool force_overwrite = false;
-    bf::path output_path = default_output_path();
+    std::filesystem::path output_path = default_output_path();
     std::string input_path("./config.yaml"), particles, decaymodes;
     std::vector<std::string> extra_config;
     char *modus = nullptr, *end_time = nullptr, *pdg_string = nullptr,
@@ -661,7 +660,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Avoid overwriting SMASH output
-    const bf::path lock_path = output_path / "smash.lock";
+    const std::filesystem::path lock_path = output_path / "smash.lock";
     FileLock lock(lock_path);
     if (!lock.acquire()) {
       throw std::runtime_error(
@@ -670,7 +669,8 @@ int main(int argc, char *argv[]) {
           lock_path.native() + "\".");
     }
     logg[LMain].debug("output path: ", output_path);
-    if (!force_overwrite && bf::exists(output_path / "config.yaml")) {
+    if (!force_overwrite &&
+        std::filesystem::exists(output_path / "config.yaml")) {
       throw std::runtime_error(
           "Output directory would get overwritten. Select a different output "
           "directory, clean up, or tell SMASH to ignore existing files.");
@@ -678,7 +678,7 @@ int main(int argc, char *argv[]) {
 
     /* Keep a copy of the configuration that was used in the output directory
      * also save information about SMASH build as a comment */
-    bf::ofstream(output_path / "config.yaml")
+    std::ofstream(output_path / "config.yaml")
         << "# " << SMASH_VERSION << '\n'
 #ifdef GIT_BRANCH
         << "# Branch   : " << GIT_BRANCH << '\n'

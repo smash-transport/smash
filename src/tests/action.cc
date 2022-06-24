@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2021
+ *    Copyright (c) 2015,2017-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -72,8 +72,8 @@ TEST(phasespace_five_body) {
 
   // Add CollisionBranch with 5 outgoing particles
   CollisionBranchPtr coll_b =
-      make_unique<CollisionBranch>(type_so, type_so, type_so, type_so, type_so,
-                                   10.0, ProcessType::TwoToFive);
+      std::make_unique<CollisionBranch>(type_so, type_so, type_so, type_so,
+                                        type_so, 10.0, ProcessType::TwoToFive);
   act.add_collision(std::move(coll_b));
 
   const int N_samples = 10000;

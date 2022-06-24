@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2021
+ *    Copyright (c) 2012-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -20,7 +20,6 @@
 
 #include "smash/configuration.h"
 #include "smash/customnucleus.h"
-#include "smash/cxx14compat.h"
 #include "smash/experimentparameters.h"
 #include "smash/fourvector.h"
 #include "smash/logging.h"
@@ -338,10 +337,10 @@ ColliderModus::ColliderModus(Configuration modus_config,
         create_deformed_nucleus(proj_cfg, params.testparticles, "projectile");
   } else if (proj_cfg.has_value({"Custom"})) {
     same_file = same_inputfile(proj_cfg, targ_cfg);
-    projectile_ =
-        make_unique<CustomNucleus>(proj_cfg, params.testparticles, same_file);
+    projectile_ = std::make_unique<CustomNucleus>(
+        proj_cfg, params.testparticles, same_file);
   } else {
-    projectile_ = make_unique<Nucleus>(proj_cfg, params.testparticles);
+    projectile_ = std::make_unique<Nucleus>(proj_cfg, params.testparticles);
   }
   if (projectile_->size() < 1) {
     throw ColliderEmpty("Input Error: Projectile nucleus is empty.");
@@ -352,10 +351,10 @@ ColliderModus::ColliderModus(Configuration modus_config,
   if (targ_cfg.has_value({"Deformed"})) {
     target_ = create_deformed_nucleus(targ_cfg, params.testparticles, "target");
   } else if (targ_cfg.has_value({"Custom"})) {
-    target_ =
-        make_unique<CustomNucleus>(targ_cfg, params.testparticles, same_file);
+    target_ = std::make_unique<CustomNucleus>(targ_cfg, params.testparticles,
+                                              same_file);
   } else {
-    target_ = make_unique<Nucleus>(targ_cfg, params.testparticles);
+    target_ = std::make_unique<Nucleus>(targ_cfg, params.testparticles);
   }
   if (target_->size() < 1) {
     throw ColliderEmpty("Input Error: Target nucleus is empty.");
@@ -521,7 +520,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
               "Input Error: Need as many impact parameter values as yields. "
               "Please make sure that Values and Yields have the same length.");
         }
-        impact_interpolation_ = make_unique<InterpolateDataLinear<double>>(
+        impact_interpolation_ = std::make_unique<InterpolateDataLinear<double>>(
             InterpolateDataLinear<double>(impacts, yields));
 
         const auto imp_minmax =
@@ -581,7 +580,8 @@ std::unique_ptr<DeformedNucleus> ColliderModus::create_deformed_nucleus(
 
   if ((auto_deform && (!is_beta2 && !is_beta4)) ||
       (!auto_deform && (is_beta2 && is_beta4))) {
-    nucleus = make_unique<DeformedNucleus>(nucleus_cfg, ntest, auto_deform);
+    nucleus =
+        std::make_unique<DeformedNucleus>(nucleus_cfg, ntest, auto_deform);
     return nucleus;
   } else {
     throw std::domain_error("Deformation of " + nucleus_type +

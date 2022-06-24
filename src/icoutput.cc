@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2019-2022
+ *    Copyright (c) 2019-2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,9 +9,8 @@
 
 #include "smash/icoutput.h"
 
+#include <filesystem>
 #include <fstream>
-
-#include <boost/filesystem.hpp>
 
 #include "smash/action.h"
 
@@ -96,7 +95,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * each of those particles with 1/Ntest.
  */
 
-ICOutput::ICOutput(const bf::path &path, const std::string &name,
+ICOutput::ICOutput(const std::filesystem::path &path, const std::string &name,
                    const OutputParameters &out_par)
     : OutputInterface(name),
       file_{path / "SMASH_IC.dat", "w"},

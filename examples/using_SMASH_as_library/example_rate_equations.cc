@@ -1,4 +1,5 @@
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
+
 #include <gsl/gsl_sf_bessel.h>
 
 #include "smash/decaymodes.h"
@@ -44,8 +45,8 @@ static double thermal_average_sigmavrel(const ParticleTypePtr A_type,
     const double pcm = pCM(m, ma, mb);
     A.set_4momentum(ma, pcm, 0.0, 0.0);
     B.set_4momentum(mb, -pcm, 0.0, 0.0);
-    ScatterActionPtr act = make_unique<ScatterAction>(A, B, time, isotropic,
-                                                      string_formation_time);
+    ScatterActionPtr act = std::make_unique<ScatterAction>(
+        A, B, time, isotropic, string_formation_time);
     act->add_all_scatterings(
         elastic_parameter, two_to_one, incl_set, incl_multi_set, low_snn_cut,
         strings_switch, use_AQM, strings_with_probability,
@@ -74,7 +75,7 @@ int main() {
   DecayModes::load_decaymodes("");
   sha256::Context hash_context;
   const auto hash = hash_context.finalize();
-  IsoParticleType::tabulate_integrals(hash, boost::filesystem::path("."));
+  IsoParticleType::tabulate_integrals(hash, std::filesystem::path("."));
 
   // 1) Prepare particle types
   const ParticleTypePtr pip = ParticleType::try_find(pdg::pi_p);

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2022
+ *    Copyright (c) 2015-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -174,7 +174,8 @@ class ListModus : public ModusDefault {
    * \return True if there is at least one event left, false otherwise
    * \throws runtime_error If file could not be read for whatever reason.
    */
-  bool file_has_events_(bf::path filepath, std::streampos last_position);
+  bool file_has_events_(std::filesystem::path filepath,
+                        std::streampos last_position);
 
   /** Return the absolute file path based on given integer. The filename
    * is assumed to have the form (particle_list_prefix)_(file_id)
@@ -184,7 +185,7 @@ class ListModus : public ModusDefault {
    * \throws
    * runtime_error if file does not exist.
    */
-  bf::path file_path_(const int file_id);
+  std::filesystem::path file_path_(const int file_id);
 
   /**  Read the next event. Either from the current file if it has more events
    * or from the next file (with file_id += 1)

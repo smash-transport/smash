@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2021
+ *    Copyright (c) 2012-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -274,7 +274,7 @@ double SphereModus::initial_conditions(Particles *particles,
   }
   std::unique_ptr<QuantumSampling> quantum_sampling;
   if (this->init_distr_ == SphereInitialCondition::ThermalMomentaQuantum) {
-    quantum_sampling = make_unique<QuantumSampling>(init_multipl_, V, T);
+    quantum_sampling = std::make_unique<QuantumSampling>(init_multipl_, V, T);
   }
   /* loop over particle data to fill in momentum and position information */
   for (ParticleData &data : *particles) {

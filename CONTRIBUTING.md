@@ -7,7 +7,9 @@ contact the development team by reporting issues at
 https://github.com/smash-transport/smash/issues or contact us by email at elfner@itp.uni-frankfurt.de.
 
 Note that any contributions must be licensed under the same terms as SMASH, see
-[LICENSE](LICENSE).
+[LICENSE](LICENSE). In particular, it has been decided that changes to C++ or CMake
+code should be reflected in the years of the copyright notice. Therefore, be sure
+that the present year is added there in files that you are going to commit.
 
 As an external contributor, go to https://github.com/smash-transport/smash, fork
 the repository, work on a topic branch and then create a pull request. Details
@@ -249,7 +251,7 @@ Code documentation has two important purposes:
 ### How to Write Good doxygen Comments
 
 Doxygen is very flexible in the [comments it accepts for documentation
-generation](http://www.stack.nl/~dimitri/doxygen/manual/docblocks.html). In
+generation](https://www.doxygen.nl/manual/docblocks.html). In
 general, it uses both comments and the source code itself to generate the
 documentation. In general documentation should look like this:
 
@@ -458,18 +460,23 @@ following way:
 
 ### Code Formatting with `clang-format` and `cmake-format`
 
-All C++ code has to be formatted by running `clang-format`, while CMake code
-requires `cmake-format` to be run. These two programs automatically format
-the code in SMASH correctly. Use the helper script in SMASH's **_/bin_**
-directory to format the source code:
+All C++ code has to be formatted by running [`clang-format`](https://releases.llvm.org/download.html),
+(version `6.0.0`) while CMake code requires [`cmake-format`](https://github.com/cheshirekow/cmake_format)
+(version `0.6.13`) to be run. These two programs automatically format the code in SMASH correctly.
+Use the helper script in SMASH's **_/bin_** directory to format the source code via
 
     ./codebase-format-helper.bash C++ -p
     ./codebase-format-helper.bash CMake -p
 
-Review and commit changes afterwards. You can also use the `-t` option
-to test whether the code is correctly formatted (the script has also a
-`-h` option that you can check out). `clang-format` does changes that
-don't look good, you can disable it locally using comments like this:
+or by simply using
+
+    ./codebase-format-helper.bash -p
+
+to format all languages at once. Review and commit changes afterwards.
+You can also use the `-t` option to test whether the code is correctly
+formatted (the script has also a `-h` option that you can check out).
+`clang-format` does changes that don't look good, you can disable it
+locally using comments like this:
 
 
     // clang-format off

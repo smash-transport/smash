@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2022
+ *    Copyright (c) 2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -44,9 +44,9 @@ using namespace smash;
 
 TEST(common_setup) {
   // StringProcess to use member functions
-  std::unique_ptr<StringProcess> sp =
-      make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5,
-                                 .0, .0, .0, .0, true, 1. / 3., true, 0.);
+  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
+      1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
+      1. / 3., true, 0.);
 
   // Pythia object to work with
   Pythia8::Pythia pythia_interface{PYTHIA_XML_DIR, false};
@@ -80,9 +80,9 @@ TEST(common_setup) {
 
 TEST(append_final) {
   // Create StringProcess to work with
-  std::unique_ptr<StringProcess> sp =
-      make_unique<StringProcess>(1.0, 1.0, .0, 0.001, .0, .0, 1., 1., .0, .0,
-                                 .5, .0, .0, .0, .0, true, 1. / 3., true, 0.);
+  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
+      1.0, 1.0, .0, 0.001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
+      1. / 3., true, 0.);
 
   // ParticleData object to calculate final state for
   ParticleData a{ParticleType::find(0x211)};
@@ -116,9 +116,9 @@ TEST(append_final) {
 }
 
 TEST(initialization) {
-  std::unique_ptr<StringProcess> sp =
-      make_unique<StringProcess>(1.0, 1.0, .0, 0.001, .0, .0, 1., 1., .0, .0,
-                                 .5, .0, .0, .0, .0, true, 1. / 3., true, 0.);
+  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
+      1.0, 1.0, .0, 0.001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
+      1. / 3., true, 0.);
 
   ParticleData a{ParticleType::find(0x2212)};
   a.set_4momentum(1., 0., 0., 1.);
@@ -159,9 +159,9 @@ TEST(initialization) {
 
 TEST(rearrange_ex) {
   // StringProcess to use member functions
-  std::unique_ptr<StringProcess> sp =
-      make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5,
-                                 .0, .0, .0, .0, true, 1. / 3., true, 0.);
+  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
+      1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
+      1. / 3., true, 0.);
 
   // Array for total quark numbers
   std::array<int, 5> tot_quark = {0, 0, 0, 0, 0};
@@ -194,9 +194,9 @@ TEST(rearrange_ex) {
 
 TEST(find_excess) {
   // StringProcess to use member functions
-  std::unique_ptr<StringProcess> sp =
-      make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5,
-                                 .0, .0, .0, .0, true, 1. / 3., true, 0.);
+  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
+      1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
+      1. / 3., true, 0.);
 
   // PDG codes for proton and neutron
   PdgCode actual = pdg::p;
@@ -227,9 +227,9 @@ TEST(find_excess) {
 
 TEST(restore_constituents) {
   // Create StringProcess to work with member functions
-  std::unique_ptr<StringProcess> sp =
-      make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5,
-                                 .0, .0, .0, .0, true, 1. / 3., true, 0.);
+  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
+      1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
+      1. / 3., true, 0.);
 
   // create Pythia class object to simulate p-p collision
   Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
@@ -284,9 +284,9 @@ TEST(restore_constituents) {
 
 TEST(replace_const) {
   // Create StringProcess to work with member functions
-  std::unique_ptr<StringProcess> sp =
-      make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5,
-                                 .0, .0, .0, .0, true, 1. / 3., true, 0.);
+  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
+      1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
+      1. / 3., true, 0.);
 
   // Create particle entry for an electron
   Pythia8::ParticleDataEntry entry1(11, "e", "e+");
@@ -347,7 +347,7 @@ TEST(find_total_number_constituent) {
 
   // Create Pythia object to work with
   std::unique_ptr<Pythia8::Pythia> pythia_hadron =
-      make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
+      std::make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   pythia_hadron->readString("Print:quiet = on");
   pythia_hadron->readString("ProcessLevel:all = off");
   pythia_hadron->readString("Top:gg2ttbar = on");
@@ -358,9 +358,9 @@ TEST(find_total_number_constituent) {
   intermediate.init("intermediate partons", &pythia_hadron->particleData);
 
   // String process to be able to call the member functions
-  std::unique_ptr<StringProcess> sp =
-      make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5,
-                                 .0, .0, .0, .0, true, 1. / 3., true, 0.);
+  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
+      1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
+      1. / 3., true, 0.);
 
   // Arrays for quark and antiquark content
   std::array<int, 5> nquark;
@@ -387,9 +387,9 @@ TEST(string_zlund) {
 }
 
 TEST(string_incoming_lightcone_momenta) {
-  std::unique_ptr<StringProcess> sp =
-      make_unique<StringProcess>(1.0, 1.0, .0, 0.001, .0, .0, 1., 1., .0, .0,
-                                 .5, .0, .0, .0, .0, true, 1. / 3., true, 0.);
+  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
+      1.0, 1.0, .0, 0.001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
+      1. / 3., true, 0.);
 
   ParticleData a{ParticleType::find(0x2212)};
   a.set_4momentum(0.938, 0., 0., 1.);
@@ -418,7 +418,7 @@ TEST(string_lightcone_final_two) {
   double b = .0;
   double c = .0;
   double d = .0;
-  std::unique_ptr<StringProcess> sp = make_unique<StringProcess>(
+  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
       1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081, 0.7, 0.7, 0.25, 0.68, 0.98,
       0.25, 1.0, true, 1. / 3., true, 0.2);
 

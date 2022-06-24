@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020
+ *    Copyright (c) 2014-2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,7 +13,6 @@
 
 #include "smash/clebschgordan.h"
 #include "smash/constants.h"
-#include "smash/cxx14compat.h"
 #include "smash/inputfunctions.h"
 #include "smash/isoparticletype.h"
 #include "smash/logging.h"
@@ -38,7 +37,7 @@ void DecayModes::add_mode(ParticleTypePtr mother, double ratio, int L,
     }
   }
   // Add new mode.
-  decay_modes_.push_back(make_unique<DecayBranch>(*type, ratio));
+  decay_modes_.push_back(std::make_unique<DecayBranch>(*type, ratio));
 }
 
 DecayType *DecayModes::get_decay_type(ParticleTypePtr mother,
@@ -60,29 +59,29 @@ DecayType *DecayModes::get_decay_type(ParticleTypePtr mother,
       if (is_dilepton(particle_types[0]->pdgcode(),
                       particle_types[1]->pdgcode())) {
         all_decay_types->emplace_back(
-            make_unique<TwoBodyDecayDilepton>(particle_types, L));
+            std::make_unique<TwoBodyDecayDilepton>(particle_types, L));
       } else if (particle_types[0]->is_stable() &&
                  particle_types[1]->is_stable()) {
         all_decay_types->emplace_back(
-            make_unique<TwoBodyDecayStable>(particle_types, L));
+            std::make_unique<TwoBodyDecayStable>(particle_types, L));
       } else if (particle_types[0]->is_stable() ||
                  particle_types[1]->is_stable()) {
         all_decay_types->emplace_back(
-            make_unique<TwoBodyDecaySemistable>(particle_types, L));
+            std::make_unique<TwoBodyDecaySemistable>(particle_types, L));
       } else {
         all_decay_types->emplace_back(
-            make_unique<TwoBodyDecayUnstable>(particle_types, L));
+            std::make_unique<TwoBodyDecayUnstable>(particle_types, L));
       }
       break;
     case 3:
       if (has_lepton_pair(particle_types[0]->pdgcode(),
                           particle_types[1]->pdgcode(),
                           particle_types[2]->pdgcode())) {
-        all_decay_types->emplace_back(
-            make_unique<ThreeBodyDecayDilepton>(mother, particle_types, L));
+        all_decay_types->emplace_back(std::make_unique<ThreeBodyDecayDilepton>(
+            mother, particle_types, L));
       } else {
         all_decay_types->emplace_back(
-            make_unique<ThreeBodyDecay>(particle_types, L));
+            std::make_unique<ThreeBodyDecay>(particle_types, L));
       }
       break;
     default:

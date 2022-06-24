@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2019-2022
+ *    Copyright (c) 2019-2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,19 +11,19 @@
 
 #include "setup.h"
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
 
 #include "../include/smash/icoutput.h"
 #include "../include/smash/outputinterface.h"
 
 using namespace smash;
 
-static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
+static const std::filesystem::path testoutputpath =
+    std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
 
 TEST(directory_is_created) {
-  bf::create_directories(testoutputpath);
-  VERIFY(bf::exists(testoutputpath));
+  std::filesystem::create_directories(testoutputpath);
+  VERIFY(std::filesystem::exists(testoutputpath));
 }
 
 TEST(init_particletypes) { Test::create_smashon_particletypes(); }
@@ -52,7 +52,7 @@ TEST(particlelist_format) {
   p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
 
   // Create and perform action ("hypersurface crossing")
-  ActionPtr action = make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
+  ActionPtr action = std::make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
   action->generate_final_state();
   action->perform(&particles, 1);
 
@@ -61,17 +61,17 @@ TEST(particlelist_format) {
   const double impact_parameter = 0.0;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
-  const bf::path outputfilepath = testoutputpath / "SMASH_IC.dat";
-  bf::path outputfilepath_unfinished = outputfilepath;
+  const std::filesystem::path outputfilepath = testoutputpath / "SMASH_IC.dat";
+  std::filesystem::path outputfilepath_unfinished = outputfilepath;
   outputfilepath_unfinished += ".unfinished";
 
   {
     OutputParameters out_par = OutputParameters();
-    auto IC_output =
-        make_unique<ICOutput>(testoutputpath, "Initial_Conditions", out_par);
+    auto IC_output = std::make_unique<ICOutput>(testoutputpath,
+                                                "Initial_Conditions", out_par);
 
     VERIFY(bool(IC_output));
-    VERIFY(bf::exists(outputfilepath_unfinished));
+    VERIFY(std::filesystem::exists(outputfilepath_unfinished));
 
     /* Initial state output (write event number) */
     IC_output->at_eventstart(particles, event_id, event);
@@ -83,11 +83,11 @@ TEST(particlelist_format) {
     IC_output->at_eventend(particles, event_id, event);
   }
 
-  VERIFY(!bf::exists(outputfilepath_unfinished));
-  VERIFY(bf::exists(outputfilepath));
+  VERIFY(!std::filesystem::exists(outputfilepath_unfinished));
+  VERIFY(std::filesystem::exists(outputfilepath));
 
   {
-    bf::fstream outputfile;
+    std::fstream outputfile;
     outputfile.open(outputfilepath, std::ios_base::in);
     if (outputfile.good()) {
       std::string line, item;
@@ -118,6 +118,6 @@ TEST(particlelist_format) {
       // Compare eta
       COMPARE_ABSOLUTE_ERROR(std::stod(item), p1.position().eta(), 1e-6);
     }
-    VERIFY(bf::remove(outputfilepath));
+    VERIFY(std::filesystem::remove(outputfilepath));
   }
 }

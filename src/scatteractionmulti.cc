@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2021
+ *    Copyright (c) 2020-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -63,7 +63,7 @@ void ScatterActionMulti::add_possible_reactions(
         // 3pi -> omega
         const ParticleTypePtr type_omega = ParticleType::try_find(0x223);
         if (type_omega) {
-          add_reaction(make_unique<CollisionBranch>(
+          add_reaction(std::make_unique<CollisionBranch>(
               *type_omega,
               probability_three_to_one(*type_omega, dt, gcell_vol,
                                        type_omega->spin_degeneracy()),
@@ -72,7 +72,7 @@ void ScatterActionMulti::add_possible_reactions(
         // 3pi -> phi
         const ParticleTypePtr type_phi = ParticleType::try_find(0x333);
         if (type_phi) {
-          add_reaction(make_unique<CollisionBranch>(
+          add_reaction(std::make_unique<CollisionBranch>(
               *type_phi,
               probability_three_to_one(*type_phi, dt, gcell_vol,
                                        type_phi->spin_degeneracy()),
@@ -91,7 +91,7 @@ void ScatterActionMulti::add_possible_reactions(
         }
 
         if (type_eta_prime) {
-          add_reaction(make_unique<CollisionBranch>(
+          add_reaction(std::make_unique<CollisionBranch>(
               *type_eta_prime,
               probability_three_to_one(
                   *type_eta_prime, dt, gcell_vol,
@@ -131,7 +131,7 @@ void ScatterActionMulti::add_possible_reactions(
               react_degen_factor(spin_factor_inc, type_pi.spin_degeneracy(),
                                  type_deuteron->spin_degeneracy());
 
-          add_reaction(make_unique<CollisionBranch>(
+          add_reaction(std::make_unique<CollisionBranch>(
               type_pi, *type_deuteron,
               probability_three_to_two(type_pi, *type_deuteron, dt, gcell_vol,
                                        spin_degn),
@@ -155,7 +155,7 @@ void ScatterActionMulti::add_possible_reactions(
               react_degen_factor(spin_factor_inc, type_pi.spin_degeneracy(),
                                  type_anti_deuteron->spin_degeneracy());
 
-          add_reaction(make_unique<CollisionBranch>(
+          add_reaction(std::make_unique<CollisionBranch>(
               type_pi, *type_anti_deuteron,
               probability_three_to_two(type_pi, *type_anti_deuteron, dt,
                                        gcell_vol, spin_degn),
@@ -194,7 +194,7 @@ void ScatterActionMulti::add_possible_reactions(
               react_degen_factor(spin_factor_inc, type_N.spin_degeneracy(),
                                  type_deuteron->spin_degeneracy());
 
-          add_reaction(make_unique<CollisionBranch>(
+          add_reaction(std::make_unique<CollisionBranch>(
               type_N, *type_deuteron,
               probability_three_to_two(type_N, *type_deuteron, dt, gcell_vol,
                                        symmetry_factor * spin_degn),
@@ -233,7 +233,7 @@ void ScatterActionMulti::add_possible_reactions(
               react_degen_factor(spin_factor_inc, type_N.spin_degeneracy(),
                                  type_anti_deuteron->spin_degeneracy());
 
-          add_reaction(make_unique<CollisionBranch>(
+          add_reaction(std::make_unique<CollisionBranch>(
               type_N, *type_anti_deuteron,
               probability_three_to_two(type_N, *type_anti_deuteron, dt,
                                        gcell_vol, symmetry_factor * spin_degn),
@@ -321,7 +321,7 @@ void ScatterActionMulti::add_possible_reactions(
         }
       }
 
-      add_reaction(make_unique<CollisionBranch>(
+      add_reaction(std::make_unique<CollisionBranch>(
           *type_catalyst, *type_nucleus,
           probability_four_to_two(*type_catalyst, *type_nucleus, dt, gcell_vol,
                                   symmetry_factor * spin_degn),
@@ -353,10 +353,10 @@ void ScatterActionMulti::add_possible_reactions(
           const double prob = probability_five_to_two(
               type_p->mass(), dt, gcell_vol,
               symmetry_factor * spin_degn);  // same for ppbar and nnbar
-          add_reaction(make_unique<CollisionBranch>(
+          add_reaction(std::make_unique<CollisionBranch>(
               *type_p, *type_anti_p, prob,
               ProcessType::MultiParticleFiveToTwo));
-          add_reaction(make_unique<CollisionBranch>(
+          add_reaction(std::make_unique<CollisionBranch>(
               *type_n, *type_anti_n, prob,
               ProcessType::MultiParticleFiveToTwo));
         }

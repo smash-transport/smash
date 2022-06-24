@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2021
+ *    Copyright (c) 2019-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -137,10 +137,10 @@ CustomNucleus::CustomNucleus(Configuration& config, int testparticles,
   const std::string path =
       file_path(particle_list_file_directory, particle_list_file_name);
   if (same_file && !filestream_shared_) {
-    filestream_shared_ = make_unique<std::ifstream>(path);
+    filestream_shared_ = std::make_unique<std::ifstream>(path);
     used_filestream_ = &filestream_shared_;
   } else if (!same_file) {
-    filestream_ = make_unique<std::ifstream>(path);
+    filestream_ = std::make_unique<std::ifstream>(path);
     used_filestream_ = &filestream_;
   } else {
     used_filestream_ = &filestream_shared_;

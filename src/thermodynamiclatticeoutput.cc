@@ -9,10 +9,9 @@
 
 #include "smash/thermodynamiclatticeoutput.h"
 
+#include <filesystem>
 #include <fstream>
 #include <memory>
-
-#include <boost/filesystem.hpp>
 
 #include "smash/clock.h"
 #include "smash/config.h"
@@ -182,7 +181,7 @@ namespace smash {
 const double_t ThermodynamicLatticeOutput::version = 1.0;
 
 ThermodynamicLatticeOutput::ThermodynamicLatticeOutput(
-    const bf::path &path, const std::string &name,
+    const std::filesystem::path &path, const std::string &name,
     const OutputParameters &out_par, const bool enable_ascii,
     const bool enable_binary)
     : OutputInterface(name),

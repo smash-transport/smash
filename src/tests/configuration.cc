@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2021
+ *    Copyright (c) 2014-2015,2017-2021
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,17 +11,18 @@
 
 #include "setup.h"
 
+#include <filesystem>
+
 #include "../include/smash/configuration.h"
 #include "../include/smash/forwarddeclarations.h"
 #include "../include/smash/macros.h"
 
-#include <boost/filesystem.hpp>
-
 using namespace smash;
 
 static Configuration make_test_configuration() {
-  return Configuration{bf::path{TEST_CONFIG_PATH} / "src" / "tests",
-                       "test_config.yaml"};
+  return Configuration{
+      std::filesystem::path{TEST_CONFIG_PATH} / "src" / "tests",
+      "test_config.yaml"};
 }
 
 TEST(create_object) { Configuration conf = Test::configuration(); }

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020
+ *    Copyright (c) 2015,2017-2018,2020
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,7 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_FILELOCK_H_
 #define SRC_INCLUDE_SMASH_FILELOCK_H_
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "forwarddeclarations.h"
 
@@ -36,7 +36,7 @@ class FileLock {
    * \param[in] path Path to file.
    * \return Constructed object.
    */
-  explicit FileLock(const bf::path& path);
+  explicit FileLock(const std::filesystem::path& path);
   /// Delete the lock file when the guard is destroyed.
   ~FileLock();
   /** Try to acquire the file lock.
@@ -51,7 +51,7 @@ class FileLock {
 
  private:
   /// Path to the file lock.
-  bf::path path_;
+  std::filesystem::path path_;
   /// Whether the lock has been acquired.
   bool acquired_;
 };

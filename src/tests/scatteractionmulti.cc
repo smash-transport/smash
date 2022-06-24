@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2016-2021
+ *    Copyright (c) 2020-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -78,9 +78,9 @@ TEST(three_meson_to_one) {
       MultiParticleReactionsBitSet().set();
 
   ScatterActionMultiPtr act1;
-  act1 = make_unique<ScatterActionMulti>(incoming_pis, 0.05);
+  act1 = std::make_unique<ScatterActionMulti>(incoming_pis, 0.05);
   ScatterActionMultiPtr act2;
-  act2 = make_unique<ScatterActionMulti>(incoming_2pi_eta, 0.05);
+  act2 = std::make_unique<ScatterActionMulti>(incoming_2pi_eta, 0.05);
 
   act1->add_possible_reactions(0.1, 8.0, incl_all_multi_set);
   act2->add_possible_reactions(0.1, 8.0, incl_all_multi_set);
@@ -122,9 +122,9 @@ TEST(deuteron_three_to_two) {
       MultiParticleReactionsBitSet().set();
 
   ScatterActionMultiPtr act1;
-  act1 = make_unique<ScatterActionMulti>(incoming_pi, 0.05);
+  act1 = std::make_unique<ScatterActionMulti>(incoming_pi, 0.05);
   ScatterActionMultiPtr act2;
-  act2 = make_unique<ScatterActionMulti>(incoming_n, 0.05);
+  act2 = std::make_unique<ScatterActionMulti>(incoming_n, 0.05);
 
   act1->add_possible_reactions(0.1, 8.0, incl_all_multi_set);
   act2->add_possible_reactions(0.1, 8.0, incl_all_multi_set);
@@ -153,7 +153,7 @@ TEST(threebody_integral_I3) {
 
   const ParticleList& incoming_piNN{pip, p, n};
   ScatterActionMultiPtr act_piNN =
-      make_unique<ScatterActionMulti>(incoming_piNN, 0.0);
+      std::make_unique<ScatterActionMulti>(incoming_piNN, 0.0);
 
   std::vector<double> srts{2.5, 3.0, 4.0, 5.0, 6.0};
   // Answers from Mathematica
@@ -176,13 +176,13 @@ TEST(phi4_parametrization) {
   const ParticleList& incoming_NNNLa = {N, N, N, La};
 
   ScatterActionMultiPtr act_piNNN =
-      make_unique<ScatterActionMulti>(incoming_piNNN, 0.05);
+      std::make_unique<ScatterActionMulti>(incoming_piNNN, 0.05);
   ScatterActionMultiPtr act_NNNN =
-      make_unique<ScatterActionMulti>(incoming_NNNN, 0.05);
+      std::make_unique<ScatterActionMulti>(incoming_NNNN, 0.05);
   ScatterActionMultiPtr act_piNNLa =
-      make_unique<ScatterActionMulti>(incoming_piNNLa, 0.05);
+      std::make_unique<ScatterActionMulti>(incoming_piNNLa, 0.05);
   ScatterActionMultiPtr act_NNNLa =
-      make_unique<ScatterActionMulti>(incoming_NNNLa, 0.05);
+      std::make_unique<ScatterActionMulti>(incoming_NNNLa, 0.05);
 
   const double srts = 4.5;  // GeV
   const double s = srts * srts;

@@ -1,3 +1,12 @@
+########################################################
+#
+#    Copyright (c) 2017-2018,2021-2022
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+#########################################################
+
 # CMake minimum version inherited from SMASH context
 project(Cuba)
 

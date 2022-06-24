@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2019-2022
+ *    Copyright (c) 2019-2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,10 +10,9 @@
 #ifndef SRC_INCLUDE_SMASH_ICOUTPUT_H_
 #define SRC_INCLUDE_SMASH_ICOUTPUT_H_
 
+#include <filesystem>
 #include <memory>
 #include <string>
-
-#include <boost/filesystem.hpp>
 
 #include "file.h"
 #include "outputinterface.h"
@@ -38,7 +37,7 @@ class ICOutput : public OutputInterface {
    * \param[in] name Name of the output.
    * \param[in] out_par Additional information on the configured output.
    */
-  ICOutput(const bf::path &path, const std::string &name,
+  ICOutput(const std::filesystem::path &path, const std::string &name,
            const OutputParameters &out_par);
   ~ICOutput();
 

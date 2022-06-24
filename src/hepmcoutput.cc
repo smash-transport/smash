@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2022
+ *    Copyright (c) 2020-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -236,8 +236,9 @@ namespace smash {
  * loss of information.
  *
  **/
+
 // clang-format on
-HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
+HepMcOutput::HepMcOutput(const std::filesystem::path &path, std::string name,
                          const bool full_event, std::string HepMC3_output_type)
     : HepMcInterface(name, full_event),
       filename_(path / (name + "." + HepMC3_output_type)) {
@@ -246,12 +247,12 @@ HepMcOutput::HepMcOutput(const bf::path &path, std::string name,
 #ifdef SMASH_USE_HEPMC_ROOTIO
   if (HepMC3_output_type == "asciiv3") {
 #endif
-    output_file_ = make_unique<HepMC3::WriterAscii>(
+    output_file_ = std::make_unique<HepMC3::WriterAscii>(
         filename_unfinished_.string(), event_.run_info());
     output_type_ = asciiv3;
 #ifdef SMASH_USE_HEPMC_ROOTIO
   } else {
-    output_file_ = make_unique<HepMC3::WriterRootTree>(
+    output_file_ = std::make_unique<HepMC3::WriterRootTree>(
         filename_unfinished_.string(), event_.run_info());
     output_type_ = treeroot;
   }
@@ -261,7 +262,7 @@ HepMcOutput::~HepMcOutput() {
   logg[LOutput].debug() << "Renaming file " << filename_unfinished_ << " to "
                         << filename_ << std::endl;
   output_file_->close();
-  bf::rename(filename_unfinished_, filename_);
+  std::filesystem::rename(filename_unfinished_, filename_);
 }
 
 void HepMcOutput::at_eventend(const Particles &particles,

@@ -7,8 +7,6 @@ DEBIAN_FRONTEND=noninteractive apt-get -y install \
 cmake \
 git \
 g++ \
-libboost1.71-dev \
-libboost-filesystem1.71-dev \
 libeigen3-dev \
 libgsl-dev \
 rsync \
@@ -23,7 +21,7 @@ ARG pythiaV="8307"
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
 cd pythia${pythiaV} && \
-./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC -march=x86-64' && \
+./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64 -pthread' && \
 make -j$(nproc) && \
 make install && \
 echo /SMASH/pythia${pythiaV}/lib >> /etc/ld.so.conf && ldconfig

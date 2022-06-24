@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016-2021
+ *    Copyright (c) 2017-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,7 +10,6 @@
 #ifndef SRC_INCLUDE_SMASH_CROSSSECTIONSPHOTON_H_
 #define SRC_INCLUDE_SMASH_CROSSSECTIONSPHOTON_H_
 
-#include "cxx14compat.h"
 #include "kinematics.h"
 
 namespace smash {

@@ -298,13 +298,6 @@ libblkid-dev:amd64  \
 libblkid1:amd64  \
 libblosc1  \
 libbluetooth3:amd64  \
-libboost-filesystem-dev:amd64  \
-libboost-filesystem1.71-dev:amd64  \
-libboost-filesystem1.71.0:amd64  \
-libboost-system1.71-dev:amd64  \
-libboost-system1.71.0:amd64  \
-libboost-thread1.71.0:amd64  \
-libboost1.71-dev:amd64  \
 libbrotli1:amd64  \
 libbsd0:amd64  \
 libbz2-1.0:amd64  \
@@ -1283,7 +1276,7 @@ ARG pythiaV="8307"
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
 cd pythia${pythiaV} && \
-./configure --cxx-common='-std=c++11 -mfpmath=sse -O3 -fPIC -march=x86-64' --prefix=/SMASH/pythia_install&& \
+./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64  -pthread' --prefix=/SMASH/pythia_install&& \
 make -j$(nproc) && \
 make install && \
 echo /SMASH/pythia_install/lib >> /etc/ld.so.conf && ldconfig

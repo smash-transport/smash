@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2014-2015
+#    Copyright (c) 2012-2022
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -8,7 +8,7 @@
 #########################################################
 
 # Minimum cmake version this is tested on
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.16)
 
 # The name, version and language of our project
 project(SMASH VERSION 2.2.1 LANGUAGES CXX)
@@ -62,18 +62,25 @@ if(NOT CMAKE_CXX_LINK_PIE_SUPPORTED)
 endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Request a given C++ standard
-set(CXX_SMASH_STANDARD "11")
-# To be user friendly, fail early if standard is not supported (do it for official supported
-# compilers only)
+# Fail early if a too old officially supported compiler is used
 if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
-    check_cxx_compiler_flag("-std=c++${CXX_SMASH_STANDARD}" IS_CXX_SMASH_STANDARD_SUPPORTED)
-    if(NOT IS_CXX_SMASH_STANDARD_SUPPORTED)
-        message(FATAL_ERROR "The required C++${CXX_SMASH_STANDARD} "
-                            "standard is not supported by your compiler.")
+    unset(MINIMUM_CXX_COMPILER_VERSION)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(MINIMUM_CXX_COMPILER_VERSION "8")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set(MINIMUM_CXX_COMPILER_VERSION "7")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+        set(MINIMUM_CXX_COMPILER_VERSION "11")
+    endif()
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${MINIMUM_CXX_COMPILER_VERSION})
+        message(FATAL_ERROR " At least version ${MINIMUM_CXX_COMPILER_VERSION}"
+                            " of ${CMAKE_CXX_COMPILER_ID} compiler is required.\n"
+                            " Version in use is ${CMAKE_CXX_COMPILER_VERSION}")
     endif()
 endif()
-# Request then the standard
+
+# Request a given C++ standard
+set(CXX_SMASH_STANDARD "17")
 if(NOT "${CMAKE_CXX_STANDARD}")
     set(CMAKE_CXX_STANDARD ${CXX_SMASH_STANDARD})
 endif()
@@ -121,6 +128,22 @@ else()
     add_definitions("-DLITTLE_ENDIAN_ARCHITECTURE")
 endif()
 
+# Let Clang users on Linux be able to use libc++
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    option(CLANG_USE_LIBC++
+           "If turned on clang will explicitly be asked to use libc++ (otherwise it uses the system default)"
+           OFF)
+    if(CLANG_USE_LIBC++)
+        message(STATUS "Prepare compilation in order to use LLVM libc++ implementation")
+        set(MESSAGE_QUIET ON)
+        add_compiler_flag(-stdlib=libc++ CXX_FLAGS CMAKE_CXX_FLAGS CXX_RESULT _use_libcxx)
+        unset(MESSAGE_QUIET)
+        if(_use_libcxx AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+            link_libraries(c++abi supc++)
+        endif()
+    endif()
+endif()
+
 # add 3rd-party libraries (before setting compiler flags etc)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2.1")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
@@ -164,19 +187,6 @@ if(NOT CMAKE_EXE_LINKER_FLAGS_PROFILING)
         CACHE STRING "Flags used by the linker during profile builds." FORCE)
 endif()
 mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LINKER_FLAGS_PROFILING)
-
-# Let Clang users on Linux be able to use libc++
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    option(CLANG_USE_LIBC++
-           "If turned on clang will explicitly be asked to use libc++ (otherwise it uses the system default)"
-           OFF)
-    if(CLANG_USE_LIBC++)
-        add_compiler_flag(-stdlib=libc++ CXX_FLAGS CMAKE_CXX_FLAGS CXX_RESULT _use_libcxx)
-        if(_use_libcxx AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-            link_libraries(c++abi supc++)
-        endif()
-    endif()
-endif()
 
 # have binary in the build directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})

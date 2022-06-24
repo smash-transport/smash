@@ -1,6 +1,7 @@
 /*
  *
  *    Copyright (c) 2021 Christian Holm Christensen
+ *    Copyright (c) 2021-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -143,7 +144,7 @@ namespace smash {
  *
  */
 
-RivetOutput::RivetOutput(const bf::path& path, std::string name,
+RivetOutput::RivetOutput(const std::filesystem::path& path, std::string name,
                          const bool full_event, const OutputParameters& out_par)
     : HepMcInterface(name, full_event),
       handler_(),

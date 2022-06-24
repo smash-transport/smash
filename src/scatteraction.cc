@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2021
+ *    Copyright (c) 2014-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -16,7 +16,6 @@
 #include "smash/angles.h"
 #include "smash/constants.h"
 #include "smash/crosssections.h"
-#include "smash/cxx14compat.h"
 #include "smash/fpenvironment.h"
 #include "smash/logging.h"
 #include "smash/pdgcode.h"

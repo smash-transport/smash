@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2020-
+ *    Copyright (c) 2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -27,7 +27,7 @@ TEST(fail_N_points) {
   // Try creating 2D interpolation with too few points, which is expected
   // to raise an exception
   vir::test::expect_failure();
-  interp = make_unique<InterpolateData2DSpline>(x, y, z);
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 }
 
 TEST(fail_dimensions) {
@@ -38,7 +38,7 @@ TEST(fail_dimensions) {
   // Try creating 2D interpolation with not-fitting dimensions, which is
   // expected to raise an exception
   vir::test::expect_failure();
-  interp = make_unique<InterpolateData2DSpline>(x, y, z);
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 }
 
 TEST(interpolate_bicubic) {
@@ -46,7 +46,7 @@ TEST(interpolate_bicubic) {
   std::vector<double> y = {1, 4, 8, 12};
   std::vector<double> z = {1, 3, 0, 5, 0, 7, 3, 8, 9, 1,
                            2, 5, 4, 5, 6, 1, 4, 7, 9, 2};
-  interp = make_unique<InterpolateData2DSpline>(x, y, z);
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 
   // check exact values at the nodes
   FUZZY_COMPARE((*interp)(2, 4), 3.0);
@@ -75,7 +75,7 @@ TEST(extrapolate_constant) {
   std::vector<double> y = {1, 4, 8, 12};
   std::vector<double> z = {1, 3, 0, 5, 0, 7, 3, 8, 9, 1,
                            2, 5, 4, 5, 6, 1, 4, 7, 9, 2};
-  interp = make_unique<InterpolateData2DSpline>(x, y, z);
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 
   // x out of bounds
   FUZZY_COMPARE((*interp)(0.5, 4), (*interp)(1, 4));

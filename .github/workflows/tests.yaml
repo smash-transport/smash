@@ -20,28 +20,28 @@ jobs:
         include:
         #here we set up the various matrix elements
         #the entries in each matrix element are just variables, not keywords, with (hopefully) self-explaining names
-        # 1st matrix element, default compiler at FIAS
-        - os: ubuntu-18.04
-          site: "fias"
-          packages_to_add: "libboost-all-dev g++-5 doxygen-latex graphviz libgsl-dev"
-          c_compiler_to_use: "gcc-5"
-          cxx_compiler_to_use: "g++-5"
+        # 1st matrix element, minimum GNU compiler version
+        - os: ubuntu-20.04
+          site: "linux-minimum-gcc"
+          packages_to_add: "g++-8 doxygen-latex graphviz libgsl-dev"
+          c_compiler_to_use: "gcc-8"
+          cxx_compiler_to_use: "g++-8"
         # 2nd matrix element, recent LTS Ubuntu distribution with gcc
         - os: ubuntu-20.04
           site: "linux-default-gcc"
-          packages_to_add: "libboost-all-dev doxygen-latex graphviz libgsl-dev"
+          packages_to_add: "doxygen-latex graphviz libgsl-dev"
           c_compiler_to_use: "gcc"
           cxx_compiler_to_use: "g++"
         # 3rd matrix element, recent LTS Ubuntu distribution with clang
         - os: ubuntu-20.04
           site: "linux-default-clang"
-          packages_to_add: "libboost-all-dev libgsl-dev"
+          packages_to_add: "libgsl-dev"
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
         # 4th matrix element, osx 11 with clang
         - os: macos-11
           site: "mac"
-          packages_to_add: "boost gsl"
+          packages_to_add: "gsl"
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
     steps:
@@ -69,7 +69,7 @@ jobs:
         fi
         # we download and install Pythia
         wget https://pythia.org/download/pythia83/pythia8307.tgz && tar xf pythia8307.tgz && rm pythia8307.tgz && cd pythia8307
-        ./configure --cxx-common='-std=c++11 -march=native -mfpmath=sse -O3 -fPIC' && make -j$(nproc) && cd ..
+        ./configure --cxx-common='-std=c++17 -march=native -mfpmath=sse -O3 -fPIC -pthread' && make -j$(nproc) && cd ..
         # we download and unpack clang
         if [ $SITE == "mac" ]; then curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
         else curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz; fi &&
@@ -87,7 +87,7 @@ jobs:
         cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8307/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.4.0/
         make -j$(nproc)
         # we check the building of the documentation for a specific case
-        if [ $SITE == "fias" ]; then make undocumented_test && make user; fi
+        if [ $SITE == "linux-minimum-gcc" ]; then make undocumented_test && make user; fi
         # we run the tests
         CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
     # We now setup python environment to then install cmake-format, but we do so on one site only

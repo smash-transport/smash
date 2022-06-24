@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2022
+ *    Copyright (c) 2013-2014,2018-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -672,7 +672,7 @@ class CrossSections {
     }
     const auto xsection = get_xsection();
     if (xsection > really_small) {
-      process_list.push_back(make_unique<CollisionBranch>(
+      process_list.push_back(std::make_unique<CollisionBranch>(
           type_a, type_b, xsection, ProcessType::TwoToTwo));
     }
   }

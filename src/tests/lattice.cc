@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2021
+ *    Copyright (c) 2015-2018,2020-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,7 +9,6 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include "../include/smash/cxx14compat.h"
 #include "../include/smash/fourvector.h"
 #include "../include/smash/lattice.h"
 
@@ -19,7 +18,7 @@ static std::unique_ptr<RectangularLattice<FourVector>> create_lattice(bool p) {
   const std::array<double, 3> l = {10., 6., 2.};
   const std::array<int, 3> n = {4, 8, 3};
   const std::array<double, 3> origin = {0., 0., 0.};
-  return make_unique<RectangularLattice<FourVector>>(
+  return std::make_unique<RectangularLattice<FourVector>>(
       l, n, origin, p, LatticeUpdate::EveryTimestep);
 }
 

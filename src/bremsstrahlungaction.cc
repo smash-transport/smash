@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2020 -
+ *    Copyright (c) 2019-2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -169,7 +169,7 @@ void BremsstrahlungAction::sample_3body_phasespace() {
 
 void BremsstrahlungAction::add_dummy_hadronic_process(
     double reaction_cross_section) {
-  CollisionBranchPtr dummy_process = make_unique<CollisionBranch>(
+  CollisionBranchPtr dummy_process = std::make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
       reaction_cross_section, ProcessType::Bremsstrahlung);
   add_collision(std::move(dummy_process));
@@ -212,10 +212,10 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
     CollisionBranchList process_list_pipi;
 
     // Add both processes to the process_list
-    process_list_pipi.push_back(make_unique<CollisionBranch>(
+    process_list_pipi.push_back(std::make_unique<CollisionBranch>(
         incoming_particles_[0].type(), incoming_particles_[1].type(),
         *photon_particle, xsection_pipi, ProcessType::Bremsstrahlung));
-    process_list_pipi.push_back(make_unique<CollisionBranch>(
+    process_list_pipi.push_back(std::make_unique<CollisionBranch>(
         *pi_z_particle, *pi_z_particle, *photon_particle, xsection_pi0pi0,
         ProcessType::Bremsstrahlung));
 
@@ -226,7 +226,7 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
 
     xsection = proc->weight();
 
-    process_list.push_back(make_unique<CollisionBranch>(
+    process_list.push_back(std::make_unique<CollisionBranch>(
         proc->particle_list()[0].type(), proc->particle_list()[1].type(),
         *photon_particle, xsection, ProcessType::Bremsstrahlung));
 
@@ -245,7 +245,7 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
     // Prevent negative cross sections due to numerics in interpolation
     xsection = (xsection <= 0.0) ? really_small : xsection;
 
-    process_list.push_back(make_unique<CollisionBranch>(
+    process_list.push_back(std::make_unique<CollisionBranch>(
         incoming_particles_[0].type(), incoming_particles_[1].type(),
         *photon_particle, xsection, ProcessType::Bremsstrahlung));
 
@@ -257,7 +257,7 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
     // Prevent negative cross sections due to numerics in interpolation
     xsection = (xsection <= 0.0) ? really_small : xsection;
 
-    process_list.push_back(make_unique<CollisionBranch>(
+    process_list.push_back(std::make_unique<CollisionBranch>(
         *pi_p_particle, *pi_m_particle, *photon_particle, xsection,
         ProcessType::Bremsstrahlung));
   } else {
@@ -351,46 +351,52 @@ void BremsstrahlungAction::create_interpolations() {
 
   // Create interpolation objects containing linear interpolations for
   // total cross sections
-  pipi_pipi_opp_interpolation =
-      make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi_pipi_opp);
+  pipi_pipi_opp_interpolation = std::make_unique<InterpolateDataLinear<double>>(
+      sqrts, sigma_pipi_pipi_opp);
   pipi_pipi_same_interpolation =
-      make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi_pipi_same);
+      std::make_unique<InterpolateDataLinear<double>>(sqrts,
+                                                      sigma_pipi_pipi_same);
   pipi0_pipi0_interpolation =
-      make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi0_pipi0);
+      std::make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi0_pipi0);
   pipi_pi0pi0_interpolation =
-      make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi_pi0pi0);
+      std::make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi_pi0pi0);
   pi0pi0_pipi_interpolation =
-      make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pi0pi0_pipi);
+      std::make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pi0pi0_pipi);
 
   // Create interpolation objects containing bicubic interpolations for
   // differential dSigma/dk
-  pipi_pipi_opp_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
-      photon_momentum, sqrts, dsigma_dk_pipi_pipi_opp);
-  pipi_pipi_same_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
-      photon_momentum, sqrts, dsigma_dk_pipi_pipi_same);
-  pipi0_pipi0_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
-      photon_momentum, sqrts, dsigma_dk_pipi0_pipi0);
-  pipi_pi0pi0_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
-      photon_momentum, sqrts, dsigma_dk_pipi_pi0pi0);
-  pi0pi0_pipi_dsigma_dk_interpolation = make_unique<InterpolateData2DSpline>(
-      photon_momentum, sqrts, dsigma_dk_pi0pi0_pipi);
+  pipi_pipi_opp_dsigma_dk_interpolation =
+      std::make_unique<InterpolateData2DSpline>(photon_momentum, sqrts,
+                                                dsigma_dk_pipi_pipi_opp);
+  pipi_pipi_same_dsigma_dk_interpolation =
+      std::make_unique<InterpolateData2DSpline>(photon_momentum, sqrts,
+                                                dsigma_dk_pipi_pipi_same);
+  pipi0_pipi0_dsigma_dk_interpolation =
+      std::make_unique<InterpolateData2DSpline>(photon_momentum, sqrts,
+                                                dsigma_dk_pipi0_pipi0);
+  pipi_pi0pi0_dsigma_dk_interpolation =
+      std::make_unique<InterpolateData2DSpline>(photon_momentum, sqrts,
+                                                dsigma_dk_pipi_pi0pi0);
+  pi0pi0_pipi_dsigma_dk_interpolation =
+      std::make_unique<InterpolateData2DSpline>(photon_momentum, sqrts,
+                                                dsigma_dk_pi0pi0_pipi);
 
   // Create interpolation objects containing bicubic interpolations for
   // differential dSigma/dtheta
   pipi_pipi_opp_dsigma_dtheta_interpolation =
-      make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                           dsigma_dtheta_pipi_pipi_opp);
+      std::make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
+                                                dsigma_dtheta_pipi_pipi_opp);
   pipi_pipi_same_dsigma_dtheta_interpolation =
-      make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                           dsigma_dtheta_pipi_pipi_same);
+      std::make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
+                                                dsigma_dtheta_pipi_pipi_same);
   pipi0_pipi0_dsigma_dtheta_interpolation =
-      make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                           dsigma_dtheta_pipi0_pipi0);
+      std::make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
+                                                dsigma_dtheta_pipi0_pipi0);
   pipi_pi0pi0_dsigma_dtheta_interpolation =
-      make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                           dsigma_dtheta_pipi_pi0pi0);
+      std::make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
+                                                dsigma_dtheta_pipi_pi0pi0);
   pi0pi0_pipi_dsigma_dtheta_interpolation =
-      make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                           dsigma_dtheta_pi0pi0_pipi);
+      std::make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
+                                                dsigma_dtheta_pi0pi0_pipi);
 }
 }  // namespace smash

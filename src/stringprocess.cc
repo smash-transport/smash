@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2017-
+ *    Copyright (c) 2017-2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -48,7 +48,7 @@ StringProcess::StringProcess(
       prob_proton_to_d_uu_(prob_proton_to_d_uu),
       separate_fragment_baryon_(separate_fragment_baryon) {
   // setup and initialize pythia for fragmentation
-  pythia_hadron_ = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
+  pythia_hadron_ = std::make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* turn off all parton-level processes to implement only hadronization */
   pythia_hadron_->readString("ProcessLevel:all = off");
   common_setup_pythia(pythia_hadron_.get(), strange_supp, diquark_supp,
@@ -558,7 +558,7 @@ bool StringProcess::next_NDiffHard() {
   // If an entry for the calculated particle IDs does not exist, create one and
   // initialize it accordingly
   if (hard_map_.count(idAB) == 0) {
-    hard_map_[idAB] = make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
+    hard_map_[idAB] = std::make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
     hard_map_[idAB]->readString("SoftQCD:nonDiffractive = on");
     hard_map_[idAB]->readString("MultipartonInteractions:pTmin = 1.5");
     hard_map_[idAB]->readString("HadronLevel:all = off");

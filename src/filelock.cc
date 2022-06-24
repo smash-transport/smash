@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2018
+ *    Copyright (c) 2015,2017-2018
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,10 +12,12 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 namespace smash {
 
-FileLock::FileLock(const bf::path& path) : path_(path), acquired_(false) {}
+FileLock::FileLock(const std::filesystem::path& path)
+    : path_(path), acquired_(false) {}
 
 bool FileLock::acquire() {
   if (acquired_) {
@@ -38,7 +40,7 @@ bool FileLock::acquire() {
 
 FileLock::~FileLock() {
   if (acquired_) {
-    bf::remove(path_);
+    std::filesystem::remove(path_);
   }
 }
 

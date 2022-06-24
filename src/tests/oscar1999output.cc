@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2022
+ *    Copyright (c) 2014-2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,8 +13,7 @@
 
 #include <smash/config.h>
 #include <array>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -29,12 +28,13 @@
 using namespace smash;
 
 static const double accuracy = 1.0e-4;
-static const bf::path testoutputpath = bf::absolute(SMASH_TEST_OUTPUT_PATH);
+static const std::filesystem::path testoutputpath =
+    std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
 static auto random_value = random::make_uniform_distribution(-15.0, +15.0);
 
 TEST(directory_is_created) {
-  bf::create_directories(testoutputpath);
-  VERIFY(bf::exists(testoutputpath));
+  std::filesystem::create_directories(testoutputpath);
+  VERIFY(std::filesystem::exists(testoutputpath));
 }
 
 static void compare_fourvector(const std::array<std::string, 4> &stringarray,
@@ -73,7 +73,7 @@ TEST(fullhistory_format) {
   Particles particles;
   const ParticleData p1 = particles.insert(Test::smashon_random());
   const ParticleData p2 = particles.insert(Test::smashon_random());
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
+  ScatterActionPtr action = std::make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(),
                               Test::no_multiparticle_reactions(), 0., true,
                               false, false, NNbarTreatment::NoAnnihilation, 1.0,
@@ -86,9 +86,9 @@ TEST(fullhistory_format) {
   const bool empty_event = false;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
-  const bf::path outputfilepath =
+  const std::filesystem::path outputfilepath =
       testoutputpath / "full_event_history.oscar1999";
-  bf::path outputfilepath_unfinished = outputfilepath;
+  std::filesystem::path outputfilepath_unfinished = outputfilepath;
   outputfilepath_unfinished += ".unfinished";
 
   {
@@ -99,7 +99,7 @@ TEST(fullhistory_format) {
     std::unique_ptr<OutputInterface> oscfull =
         create_oscar_output("Oscar1999", "Collisions", testoutputpath, out_par);
     VERIFY(bool(oscfull));
-    VERIFY(bf::exists(outputfilepath_unfinished));
+    VERIFY(std::filesystem::exists(outputfilepath_unfinished));
 
     /* Initial state output */
     oscfull->at_eventstart(particles, event_id, event);
@@ -109,11 +109,11 @@ TEST(fullhistory_format) {
     /* Final state output */
     oscfull->at_eventend(particles, event_id, event);
   }
-  VERIFY(!bf::exists(outputfilepath_unfinished));
-  VERIFY(bf::exists(outputfilepath));
+  VERIFY(!std::filesystem::exists(outputfilepath_unfinished));
+  VERIFY(std::filesystem::exists(outputfilepath));
 
   {
-    bf::fstream outputfile;
+    std::fstream outputfile;
     outputfile.open(outputfilepath, std::ios_base::in);
     if (outputfile.good()) {
       std::string line, item;
@@ -195,7 +195,7 @@ TEST(fullhistory_format) {
       COMPARE(std::stod(item.c_str()), impact_parameter);
     }
   }
-  VERIFY(bf::remove(outputfilepath));
+  VERIFY(std::filesystem::remove(outputfilepath));
 }
 
 TEST(particlelist_format) {
@@ -205,7 +205,7 @@ TEST(particlelist_format) {
   const ParticleData p2 = particles.insert(Test::smashon_random());
 
   /* Create interaction ("elastic scattering") */
-  ScatterActionPtr action = make_unique<ScatterAction>(p1, p2, 0.);
+  ScatterActionPtr action = std::make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(10., true, Test::all_reactions_included(),
                               Test::no_multiparticle_reactions(), 0., true,
                               false, false, NNbarTreatment::NoAnnihilation, 1.0,
@@ -216,8 +216,9 @@ TEST(particlelist_format) {
   const bool empty_event = false;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
-  const bf::path outputfilepath = testoutputpath / "particle_lists.oscar1999";
-  bf::path outputfilepath_unfinished = outputfilepath;
+  const std::filesystem::path outputfilepath =
+      testoutputpath / "particle_lists.oscar1999";
+  std::filesystem::path outputfilepath_unfinished = outputfilepath;
   outputfilepath_unfinished += ".unfinished";
   {
     OutputParameters out_par = OutputParameters();
@@ -227,7 +228,7 @@ TEST(particlelist_format) {
     std::unique_ptr<OutputInterface> oscfinal =
         create_oscar_output("Oscar1999", "Particles", testoutputpath, out_par);
     VERIFY(bool(oscfinal));
-    VERIFY(bf::exists(outputfilepath_unfinished));
+    VERIFY(std::filesystem::exists(outputfilepath_unfinished));
 
     /* Initial state output (note that this should not do anything!) */
     oscfinal->at_eventstart(particles, event_id, event);
@@ -239,11 +240,11 @@ TEST(particlelist_format) {
     action->perform(&particles, 1);
     oscfinal->at_eventend(particles, event_id, event);
   }
-  VERIFY(!bf::exists(outputfilepath_unfinished));
-  VERIFY(bf::exists(outputfilepath));
+  VERIFY(!std::filesystem::exists(outputfilepath_unfinished));
+  VERIFY(std::filesystem::exists(outputfilepath));
 
   {
-    bf::fstream outputfile;
+    std::fstream outputfile;
     outputfile.open(outputfilepath, std::ios_base::in);
     if (outputfile.good()) {
       std::string line, item;
@@ -290,7 +291,7 @@ TEST(particlelist_format) {
       COMPARE(std::stod(item.c_str()), impact_parameter);
     }
   }
-  VERIFY(bf::remove(outputfilepath));
+  VERIFY(std::filesystem::remove(outputfilepath));
 }
 
 TEST(initial_conditions_format) {
@@ -300,7 +301,7 @@ TEST(initial_conditions_format) {
   p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
 
   // Create action ("hypersurface crossing")
-  ActionPtr action = make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
+  ActionPtr action = std::make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
   action->generate_final_state();
 
   const int event_id = 0;
@@ -308,8 +309,9 @@ TEST(initial_conditions_format) {
   const double impact_parameter = 2.4;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
-  const bf::path outputfilepath = testoutputpath / "SMASH_IC.oscar1999";
-  bf::path outputfilepath_unfinished = outputfilepath;
+  const std::filesystem::path outputfilepath =
+      testoutputpath / "SMASH_IC.oscar1999";
+  std::filesystem::path outputfilepath_unfinished = outputfilepath;
   outputfilepath_unfinished += ".unfinished";
   {
     OutputParameters out_par = OutputParameters();
@@ -318,7 +320,7 @@ TEST(initial_conditions_format) {
     std::unique_ptr<OutputInterface> oscfinal = create_oscar_output(
         "Oscar1999", "Initial_Conditions", testoutputpath, out_par);
     VERIFY(bool(oscfinal));
-    VERIFY(bf::exists(outputfilepath_unfinished));
+    VERIFY(std::filesystem::exists(outputfilepath_unfinished));
 
     /* Initial state output (note that this should not do anything!) */
     oscfinal->at_eventstart(particles, event_id, event);
@@ -330,11 +332,11 @@ TEST(initial_conditions_format) {
     /* Final state output; this is the only thing we expect to find in file */
     oscfinal->at_eventend(particles, event_id, event);
   }
-  VERIFY(!bf::exists(outputfilepath_unfinished));
-  VERIFY(bf::exists(outputfilepath));
+  VERIFY(!std::filesystem::exists(outputfilepath_unfinished));
+  VERIFY(std::filesystem::exists(outputfilepath));
 
   {
-    bf::fstream outputfile;
+    std::fstream outputfile;
     outputfile.open(outputfilepath, std::ios_base::in);
     if (outputfile.good()) {
       std::string line, item;
@@ -381,5 +383,5 @@ TEST(initial_conditions_format) {
       COMPARE(std::stod(item.c_str()), impact_parameter);
     }
   }
-  VERIFY(bf::remove(outputfilepath));
+  VERIFY(std::filesystem::remove(outputfilepath));
 }

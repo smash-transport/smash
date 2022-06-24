@@ -13,7 +13,6 @@
 #include <memory>
 
 #include "configuration.h"
-#include "cxx14compat.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
@@ -192,7 +191,7 @@ class ModusDefault {
     const std::array<double, 3> origin = {-0.5 * l[0], -0.5 * l[1],
                                           -0.5 * l[2]};
     const bool periodicity = false;
-    return make_unique<GrandCanThermalizer>(conf, l, origin, periodicity);
+    return std::make_unique<GrandCanThermalizer>(conf, l, origin, periodicity);
   }
 
   /**

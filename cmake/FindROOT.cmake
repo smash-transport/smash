@@ -1,3 +1,13 @@
+########################################################
+#
+#    Copyright (c) 2014-2015,2021-2022
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+#########################################################
+
+# cmake-format: off
 #=======================================================
 # - Try to find ROOT
 #
@@ -9,13 +19,7 @@
 #  ROOT_LIBRARIES
 #  ROOT_VERSION
 #=======================================================
-#
-#    Copyright (c) 2014-2015
-#      SMASH Team
-#
-#    BSD 3-clause license
-#
-#=======================================================
+# cmake-format: on
 
 include(FindPackageHandleStandardArgs)
 find_program(ROOT_CONFIG NAMES root-config HINTS $ENV{ROOTSYS}/bin)

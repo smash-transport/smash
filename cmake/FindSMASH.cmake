@@ -1,5 +1,15 @@
+########################################################
+#
+#    Copyright (c) 2018-2020,2022
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+#########################################################
+
+# cmake-format: off
 #=======================================================
-# - Try to find SMASH instalation
+# - Try to find SMASH installation
 #
 # Once done this will define:
 #
@@ -10,6 +20,7 @@
 # The environment variable SMASH_DIR must be set properly to succeed, e. g.:
 # export SMASH_DIR=~/Work/SMASH/smash
 #=======================================================
+# cmake-format: on
 
 # At the moment a macro about the system endianness is needed from within SMASH
 include(TestBigEndian)
@@ -26,15 +37,9 @@ message(STATUS "Looking for SMASH ...")
 
 find_package(GSL 2.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(Boost 1.49.0 REQUIRED COMPONENTS filesystem system)
 find_package(Pythia 8.307 EXACT REQUIRED)
 
-set(SMASH_LIBRARIES
-    ${GSL_LIBRARY}
-    ${GSL_CBLAS_LIBRARY}
-    ${Boost_LIBRARIES}
-    ${Pythia_LIBRARIES}
-    -ldl)
+set(SMASH_LIBRARIES ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY} ${Pythia_LIBRARIES} -ldl)
 
 set(SMASH_INCLUDE_DIR
     $ENV{SMASH_DIR}/3rdparty/Cuba-4.2.1
@@ -43,7 +48,6 @@ set(SMASH_INCLUDE_DIR
     $ENV{SMASH_DIR}/build/src/include
     $ENV{SMASH_DIR}/src/include
     ${GSL_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
     ${Pythia_INCLUDE_DIRS})
 

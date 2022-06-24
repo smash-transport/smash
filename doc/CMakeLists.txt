@@ -1,3 +1,12 @@
+########################################################
+#
+#    Copyright (c) 2014,2017-2018,2020-2022
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+#########################################################
+
 find_program(DOXYGEN doxygen)
 if(DOXYGEN)
     execute_process(COMMAND ${DOXYGEN} --version OUTPUT_VARIABLE DOXYGEN_VERSION

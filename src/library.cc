@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022-
+ *    Copyright (c) 2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,7 +9,7 @@
 
 #include "smash/library.h"
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 #include "smash/decaymodes.h"
 #include "smash/inputfunctions.h"
@@ -25,7 +25,7 @@ Configuration setup_config_and_logging(
     const std::string &decaymodes_file,
     const std::vector<std::string> &extra_config) {
   // Read in config file
-  bf::path config_path(config_file);
+  std::filesystem::path config_path(config_file);
   Configuration configuration(config_path.parent_path(),
                               config_path.filename());
 
@@ -41,8 +41,8 @@ Configuration setup_config_and_logging(
 
   logg[LMain].trace(SMASH_SOURCE_LOCATION, " load ParticleType and DecayModes");
 
-  bf::path particles_path(particles_file);
-  bf::path decaymodes_path(decaymodes_file);
+  std::filesystem::path particles_path(particles_file);
+  std::filesystem::path decaymodes_path(decaymodes_file);
   auto particles_and_decays =
       load_particles_and_decaymodes(particles_path, decaymodes_path);
   /* For particles and decaymodes: external file is superior to config.
@@ -93,10 +93,10 @@ void initialize_particles_decays_and_tabulations(
   logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash);
 
   logg[LMain].info("Tabulating cross section integrals...");
-  bf::path tabulations_path(tabulations_dir);
+  std::filesystem::path tabulations_path(tabulations_dir);
   if (!tabulations_path.empty()) {
     // Store tabulations on disk
-    bf::create_directories(tabulations_path);
+    std::filesystem::create_directories(tabulations_path);
     logg[LMain].info() << "Tabulations path: " << tabulations_path;
   }
   IsoParticleType::tabulate_integrals(hash, tabulations_path);
