@@ -148,56 +148,70 @@ if(CPPLINT)
     endif()
 else()
     message(WARNING " \n" " cpplint was not found (version ${CPPLINT_VERSION_REQUIRED} "
-                    " required).\n The cpplint test will be disabled.\n")
+                    " required).\n The cpplint tests will be disabled.\n")
 endif()
 
 # static code analysis with cppcheck
+set(CPPCHECK_VERSION_REQUIRED "2.8")
 find_program(CPPCHECK cppcheck)
 if(CPPCHECK)
     message(STATUS "cppcheck found at ${CPPCHECK}")
-    set(CPPCHECK_ARGS
-        -q
-        -U_LIBCPP_BEGIN_NAMESPACE_STD
-        -U_LIBCPP_END_NAMESPACE_STD
-        -I
-        src/include/
-        -i
-        src/tests/
-        src)
-    add_custom_target(cppcheck
-                      COMMAND ${CPPCHECK} "--enable=all" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck")
-    add_custom_target(cppcheck_error
-                      COMMAND ${CPPCHECK} ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_error")
-    add_custom_target(cppcheck_warning
-                      COMMAND ${CPPCHECK} "--enable=warning" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_warning")
-    add_custom_target(cppcheck_performance
-                      COMMAND ${CPPCHECK} "--enable=performance" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_performance")
-    add_custom_target(cppcheck_portability
-                      COMMAND ${CPPCHECK} "--enable=portability" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_portability")
-    add_custom_target(cppcheck_information
-                      COMMAND ${CPPCHECK} "--enable=information" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_information")
-    add_custom_target(cppcheck_style
-                      COMMAND ${CPPCHECK} "--enable=style" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_style")
-    add_custom_target(cppcheck_unused
-                      COMMAND ${CPPCHECK} "--enable=unusedFunction" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_unused")
+    get_version_string(${CPPCHECK} CPPCHECK_VERSION_STRING)
+    string(REGEX MATCH "^Cppcheck (${GENERIC_VERSION_REGEX})$" CPPCHECK_VERSION_STRING
+                 "${CPPCHECK_VERSION_STRING}")
+    set(CPPCHECK_VERSION_FOUND "${CMAKE_MATCH_1}")
+    if(NOT CPPCHECK_VERSION_FOUND MATCHES "^${GENERIC_VERSION_REGEX}$")
+        message(ATTENTION "Unable to extract cppcheck version - disabling cppcheck checks.")
+    elseif(NOT CPPCHECK_VERSION_FOUND VERSION_EQUAL "${CPPCHECK_VERSION_REQUIRED}")
+        message(ATTENTION "cppcheck version (${CPPCHECK_VERSION_FOUND}) different "
+                          "from required one (${CPPCHECK_VERSION_REQUIRED})"
+                          " - disabling cppcheck tests.")
+    else()
+        set(CPPCHECK_ARGS
+            -q
+            -U_LIBCPP_BEGIN_NAMESPACE_STD
+            -U_LIBCPP_END_NAMESPACE_STD
+            -I
+            src/include/
+            -i
+            src/tests/
+            src)
+        add_custom_target(cppcheck
+                          COMMAND ${CPPCHECK} "--enable=all" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck")
+        add_custom_target(cppcheck_error
+                          COMMAND ${CPPCHECK} ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_error")
+        add_custom_target(cppcheck_warning
+                          COMMAND ${CPPCHECK} "--enable=warning" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_warning")
+        add_custom_target(cppcheck_performance
+                          COMMAND ${CPPCHECK} "--enable=performance" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_performance")
+        add_custom_target(cppcheck_portability
+                          COMMAND ${CPPCHECK} "--enable=portability" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_portability")
+        add_custom_target(cppcheck_information
+                          COMMAND ${CPPCHECK} "--enable=information" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_information")
+        add_custom_target(cppcheck_style
+                          COMMAND ${CPPCHECK} "--enable=style" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_style")
+        add_custom_target(cppcheck_unused
+                          COMMAND ${CPPCHECK} "--enable=unusedFunction" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_unused")
+    endif()
 else()
-    message(WARNING "cppcheck was not found. The cppcheck test will be disabled.")
+    message(WARNING " \n" " cppcheck was not found (version ${CPPCHECK_VERSION_REQUIRED} "
+                    " required).\n The cppcheck tests will be disabled.\n")
 endif()
 
 # one more linter tool: clang-tidy
