@@ -147,8 +147,8 @@ if(CPPLINT)
                           COMMENT "Executing test cpplint_full")
     endif()
 else()
-    message(WARNING " \n" " cpplint was not found (version ${CPPLINT_VERSION_REQUIRED} "
-                    " required).\n The cpplint tests will be disabled.\n")
+    message(ATTENTION "cpplint not found (version ${CPPLINT_VERSION_REQUIRED}"
+                      " needed). The cpplint tests will be disabled.")
 endif()
 
 # static code analysis with cppcheck
@@ -210,8 +210,8 @@ if(CPPCHECK)
                           COMMENT "Executing test cppcheck_unused")
     endif()
 else()
-    message(WARNING " \n" " cppcheck was not found (version ${CPPCHECK_VERSION_REQUIRED} "
-                    " required).\n The cppcheck tests will be disabled.\n")
+    message(ATTENTION "cppcheck not found (version ${CPPCHECK_VERSION_REQUIRED}"
+                      " needed). The cppcheck tests will be disabled.")
 endif()
 
 # one more linter tool: clang-tidy
@@ -224,7 +224,7 @@ if(CLANGTIDY)
                       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src/
                       COMMENT "Executing test clang-tidy")
 else()
-    message(WARNING "clang-tidy was not found. The clang-tidy test will be disabled.")
+    message(ATTENTION "clang-tidy not found. The clang-tidy test will be disabled.")
 endif()
 
 # generate git statistics, requires gitstats in the path
@@ -234,7 +234,7 @@ if(GITSTATS)
     add_custom_target(stats COMMAND ${GITSTATS} ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR}/gitstats
                       COMMENT "Generating git statistics")
 else()
-    message(WARNING "gitstats was not found. The gitstats support will be disabled.")
+    message(ATTENTION "gitstats not found. The gitstats target will not be created.")
 endif()
 
 add_definitions("-DTEST_CONFIG_PATH=std::filesystem::path(\"${PROJECT_SOURCE_DIR}\")")
