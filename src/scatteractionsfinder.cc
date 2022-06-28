@@ -540,9 +540,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
                              "\n    ", data_a, "\n<-> ", data_b);
   }
 
-  // Using std::move here is redundant with newer compilers, but required for
-  // supporting GCC 4.8. Once we drop this support, std::move should be removed.
-  return std::move(act);
+  return act;
 }
 
 ActionPtr ScatterActionsFinder::check_collision_multi_part(
@@ -618,7 +616,7 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
     return nullptr;
   }
 
-  return std::move(act);
+  return act;
 }
 
 ActionList ScatterActionsFinder::find_actions_in_cell(
