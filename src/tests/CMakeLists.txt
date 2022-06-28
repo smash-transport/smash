@@ -78,106 +78,140 @@ macro(smash_add_runtest name depends)
                    -f)
 endmacro()
 
+# helper macro that calls a command with --version option and save the output in a variable
+macro(get_version_string command output_variable)
+    execute_process(COMMAND ${command} --version OUTPUT_VARIABLE ${output_variable}
+                    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+endmacro()
+
+# variable defining the regular expression for a generic version number
+set(GENERIC_VERSION_REGEX "[0-9]+([.][0-9]+([.][0-9]+([.][0-9]+)?)?)?")
+
 # test source code to be clean, requires cpplint in the path
-find_program(CPPLINT cpplint.py)
-if(NOT CPPLINT)
-    find_program(CPPLINT cpplint)
-endif()
+set(CPPLINT_VERSION_REQUIRED "1.6.0")
+find_program(CPPLINT cpplint NAMES cpplint cpplint.py)
 if(CPPLINT)
-    message(STATUS "cpplint.py found at ${CPPLINT}")
-    set(CPPLINT_ARGS
-        --filter=-build/c++11,-build/include_subdir,+build/include_alpha,-runtime/operator,-readability/streams,-readability/function,-runtime/references,-whitespace/operators
-        --counting=detailed
-        --repository=${PROJECT_SOURCE_DIR})
-    file(GLOB CPPLINT_FILES ${PROJECT_SOURCE_DIR}/src/include/smash/*.h
-         ${PROJECT_SOURCE_DIR}/src/*.cc)
-    add_custom_target(cpplint
-                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cpplint")
-    # make sure we always run cpplint as a test
-    add_test(NAME cpplint COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
-             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-    add_custom_target(cpplint_build
-                      COMMAND ${CPPLINT} ${CPPLINT_ARGS}
-                              --filter=-build/c++11,-build/include,-readability,-runtime,-whitespace
-                              ${CPPLINT_FILES}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cpplint_build")
-    add_custom_target(cpplint_readability
-                      COMMAND ${CPPLINT} ${CPPLINT_ARGS}
-                              --filter=-build,-readability/streams,-runtime,-whitespace
-                              ${CPPLINT_FILES}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cpplint_readability")
-    add_custom_target(cpplint_runtime
-                      COMMAND ${CPPLINT} ${CPPLINT_ARGS}
-                              --filter=-build,-readability,-runtime/references,-whitespace
-                              ${CPPLINT_FILES}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cpplint_runtime")
-    add_custom_target(cpplint_whitespace
-                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build,-readability,-runtime
-                              ${CPPLINT_FILES}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cpplint_whitespace")
-    file(GLOB_RECURSE CPPLINT_FILES_FULL ${PROJECT_SOURCE_DIR}/src/include/smash/*.h
-         ${PROJECT_SOURCE_DIR}/src/*.cc)
-    add_custom_target(cpplint_full
-                      COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES_FULL}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cpplint_full")
+    message(STATUS "cpplint found at ${CPPLINT}")
+    get_version_string(${CPPLINT} CPPLINT_VERSION_STRING)
+    string(REGEX MATCH "cpplint (${GENERIC_VERSION_REGEX})" CPPLINT_VERSION_STRING
+                 "${CPPLINT_VERSION_STRING}")
+    set(CPPLINT_VERSION_FOUND "${CMAKE_MATCH_1}")
+    if(NOT CPPLINT_VERSION_FOUND MATCHES "^${GENERIC_VERSION_REGEX}$")
+        message(ATTENTION "Unable to extract cpplint version - disabling cpplint checks.")
+    elseif(NOT CPPLINT_VERSION_FOUND VERSION_EQUAL "${CPPLINT_VERSION_REQUIRED}")
+        message(ATTENTION "cpplint version (${CPPLINT_VERSION_FOUND}) different "
+                          "from required one (${CPPLINT_VERSION_REQUIRED})"
+                          " - disabling cpplint checks.")
+    else()
+        set(CPPLINT_ARGS
+            --filter=-build/c++11,-build/include_subdir,+build/include_alpha,-runtime/operator,-readability/streams,-readability/function,-runtime/references,-whitespace/operators
+            --counting=detailed
+            --repository=${PROJECT_SOURCE_DIR})
+        file(GLOB CPPLINT_FILES ${PROJECT_SOURCE_DIR}/src/include/smash/*.h
+             ${PROJECT_SOURCE_DIR}/src/*.cc)
+        add_custom_target(cpplint
+                          COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cpplint")
+        # make sure we always run cpplint as a test
+        add_test(NAME cpplint COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES}
+                 WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+        add_custom_target(cpplint_build
+                          COMMAND ${CPPLINT} ${CPPLINT_ARGS}
+                                  --filter=-build/c++11,-build/include,-readability,-runtime,-whitespace
+                                  ${CPPLINT_FILES}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cpplint_build")
+        add_custom_target(cpplint_readability
+                          COMMAND ${CPPLINT} ${CPPLINT_ARGS}
+                                  --filter=-build,-readability/streams,-runtime,-whitespace
+                                  ${CPPLINT_FILES}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cpplint_readability")
+        add_custom_target(cpplint_runtime
+                          COMMAND ${CPPLINT} ${CPPLINT_ARGS}
+                                  --filter=-build,-readability,-runtime/references,-whitespace
+                                  ${CPPLINT_FILES}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cpplint_runtime")
+        add_custom_target(cpplint_whitespace
+                          COMMAND ${CPPLINT} ${CPPLINT_ARGS} --filter=-build,-readability,-runtime
+                                  ${CPPLINT_FILES}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cpplint_whitespace")
+        file(GLOB_RECURSE CPPLINT_FILES_FULL ${PROJECT_SOURCE_DIR}/src/include/smash/*.h
+             ${PROJECT_SOURCE_DIR}/src/*.cc)
+        add_custom_target(cpplint_full
+                          COMMAND ${CPPLINT} ${CPPLINT_ARGS} ${CPPLINT_FILES_FULL}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cpplint_full")
+    endif()
 else()
-    message(WARNING "cpplint.py was not found. The cpplint test will be disabled.")
+    message(ATTENTION "cpplint not found (version ${CPPLINT_VERSION_REQUIRED}"
+                      " needed). The cpplint tests will be disabled.")
 endif()
 
 # static code analysis with cppcheck
+set(CPPCHECK_VERSION_REQUIRED "2.8")
 find_program(CPPCHECK cppcheck)
 if(CPPCHECK)
     message(STATUS "cppcheck found at ${CPPCHECK}")
-    set(CPPCHECK_ARGS
-        -q
-        -U_LIBCPP_BEGIN_NAMESPACE_STD
-        -U_LIBCPP_END_NAMESPACE_STD
-        -I
-        src/include/
-        -i
-        src/tests/
-        src)
-    add_custom_target(cppcheck
-                      COMMAND ${CPPCHECK} "--enable=all" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck")
-    add_custom_target(cppcheck_error
-                      COMMAND ${CPPCHECK} ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_error")
-    add_custom_target(cppcheck_warning
-                      COMMAND ${CPPCHECK} "--enable=warning" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_warning")
-    add_custom_target(cppcheck_performance
-                      COMMAND ${CPPCHECK} "--enable=performance" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_performance")
-    add_custom_target(cppcheck_portability
-                      COMMAND ${CPPCHECK} "--enable=portability" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_portability")
-    add_custom_target(cppcheck_information
-                      COMMAND ${CPPCHECK} "--enable=information" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_information")
-    add_custom_target(cppcheck_style
-                      COMMAND ${CPPCHECK} "--enable=style" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_style")
-    add_custom_target(cppcheck_unused
-                      COMMAND ${CPPCHECK} "--enable=unusedFunction" ${CPPCHECK_ARGS}
-                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-                      COMMENT "Executing test cppcheck_unused")
+    get_version_string(${CPPCHECK} CPPCHECK_VERSION_STRING)
+    string(REGEX MATCH "^Cppcheck (${GENERIC_VERSION_REGEX})$" CPPCHECK_VERSION_STRING
+                 "${CPPCHECK_VERSION_STRING}")
+    set(CPPCHECK_VERSION_FOUND "${CMAKE_MATCH_1}")
+    if(NOT CPPCHECK_VERSION_FOUND MATCHES "^${GENERIC_VERSION_REGEX}$")
+        message(ATTENTION "Unable to extract cppcheck version - disabling cppcheck checks.")
+    elseif(NOT CPPCHECK_VERSION_FOUND VERSION_EQUAL "${CPPCHECK_VERSION_REQUIRED}")
+        message(ATTENTION "cppcheck version (${CPPCHECK_VERSION_FOUND}) different "
+                          "from required one (${CPPCHECK_VERSION_REQUIRED})"
+                          " - disabling cppcheck tests.")
+    else()
+        set(CPPCHECK_ARGS
+            -q
+            -U_LIBCPP_BEGIN_NAMESPACE_STD
+            -U_LIBCPP_END_NAMESPACE_STD
+            -I
+            src/include/
+            -i
+            src/tests/
+            src)
+        add_custom_target(cppcheck
+                          COMMAND ${CPPCHECK} "--enable=all" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck")
+        add_custom_target(cppcheck_error
+                          COMMAND ${CPPCHECK} ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_error")
+        add_custom_target(cppcheck_warning
+                          COMMAND ${CPPCHECK} "--enable=warning" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_warning")
+        add_custom_target(cppcheck_performance
+                          COMMAND ${CPPCHECK} "--enable=performance" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_performance")
+        add_custom_target(cppcheck_portability
+                          COMMAND ${CPPCHECK} "--enable=portability" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_portability")
+        add_custom_target(cppcheck_information
+                          COMMAND ${CPPCHECK} "--enable=information" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_information")
+        add_custom_target(cppcheck_style
+                          COMMAND ${CPPCHECK} "--enable=style" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_style")
+        add_custom_target(cppcheck_unused
+                          COMMAND ${CPPCHECK} "--enable=unusedFunction" ${CPPCHECK_ARGS}
+                          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+                          COMMENT "Executing test cppcheck_unused")
+    endif()
 else()
-    message(WARNING "cppcheck was not found. The cppcheck test will be disabled.")
+    message(ATTENTION "cppcheck not found (version ${CPPCHECK_VERSION_REQUIRED}"
+                      " needed). The cppcheck tests will be disabled.")
 endif()
 
 # one more linter tool: clang-tidy
@@ -190,7 +224,7 @@ if(CLANGTIDY)
                       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/src/
                       COMMENT "Executing test clang-tidy")
 else()
-    message(WARNING "clang-tidy was not found. The clang-tidy test will be disabled.")
+    message(ATTENTION "clang-tidy not found. The clang-tidy test will be disabled.")
 endif()
 
 # generate git statistics, requires gitstats in the path
@@ -200,7 +234,7 @@ if(GITSTATS)
     add_custom_target(stats COMMAND ${GITSTATS} ${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR}/gitstats
                       COMMENT "Generating git statistics")
 else()
-    message(WARNING "gitstats was not found. The gitstats support will be disabled.")
+    message(ATTENTION "gitstats not found. The gitstats target will not be created.")
 endif()
 
 add_definitions("-DTEST_CONFIG_PATH=std::filesystem::path(\"${PROJECT_SOURCE_DIR}\")")
@@ -377,13 +411,10 @@ smash_add_runtest(resonance_spectral_function_dump smash smash -r 113)
 find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
 if(CTEST_MEMORYCHECK_COMMAND)
     message(STATUS "Valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
-    # Use valgrid command to extract its version
-    execute_process(COMMAND ${CTEST_MEMORYCHECK_COMMAND} --version
-                    OUTPUT_VARIABLE VALGRIND_VERSION_STRING ERROR_QUIET
-                                                            OUTPUT_STRIP_TRAILING_WHITESPACE)
+    get_version_string(${CTEST_MEMORYCHECK_COMMAND} VALGRIND_VERSION_STRING)
     if(VALGRIND_VERSION_STRING MATCHES "^valgrind-3.11")
-        message(ATTENTION "There is a known bug with valgrind 3.11 (unrecognised instruction) - disabling memchecks."
-        )
+        message(ATTENTION "There is a known bug with valgrind 3.11"
+                          " (unrecognised instruction) - disabling memchecks.")
     else()
         set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
         add_custom_target(memcheck_collider

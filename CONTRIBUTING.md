@@ -486,15 +486,21 @@ locally using comments like this:
 
 ### Coding style and static code analysis
 
-The SMASH source code can be checked via:
+The SMASH source coding style can be checked via:
 
     make cpplint 2>&1 | grep -v 'Done processing'
 
 `cpplint` checks the formatting of the code and is also part of the unit tests.
+
 `cppcheck` is a static code analyzer that can be run additionally, but yields a
 lot of false positives:
 
     make cppcheck
+
+The `make` targets will be created by CMake stage only if given versions of the
+commands are installed and found, namely version 1.6.0 for `cpplint` and version
+2.8 for `cppcheck`.
+
 
 ### Floating-Point Precision
 
