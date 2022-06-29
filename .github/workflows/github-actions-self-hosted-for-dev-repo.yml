@@ -30,7 +30,7 @@ jobs:
           # variables dealing with the Singularity container
           # here we assume that $HOME points to the home directory of the user "smash"
           export TOOLS_DIR=$HOME/actions-runner/smash_stuff_github_actions
-          export PATH=$TOOLS_DIR/clang6_0_0/bin/:$TOOLS_DIR/python-tools/bin/:$PATH
+          export PATH=$TOOLS_DIR/clang13_0_0/bin/:$TOOLS_DIR/python-tools/bin/:$PATH
           export PYTHONPATH=$TOOLS_DIR/python-tools:$PYTHONPATH
           export CC=gcc-8
           export CXX=g++-8
@@ -72,7 +72,7 @@ jobs:
           # here we do not use $HOME because the runner is hosted in shared common group directory
           export TOOLS_DIR=/home/hyihp-repos/smash-devel_runners/smash_stuff
           export GCC_DIR=$TOOLS_DIR/gcc-10.3_x-men
-          export PATH=$TOOLS_DIR/bin:$GCC_DIR/bin:$TOOLS_DIR/clang6_0_0/bin/:$TOOLS_DIR/python-tools/bin/:$TOOLS_DIR/cmake-3.20.5/bin:$PATH
+          export PATH=$TOOLS_DIR/bin:$GCC_DIR/bin:$TOOLS_DIR/clang13_0_0/bin/:$TOOLS_DIR/python-tools/bin/:$TOOLS_DIR/cmake-3.20.5/bin:$PATH
           export LD_LIBRARY_PATH=$GCC_DIR/dep-libs/lib/:$GCC_DIR/lib/:$GCC_DIR/lib64:$LD_LIBRARY_PATH
           export PYTHONPATH=$TOOLS_DIR/python-tools:$PYTHONPATH
           # now we configure and build smash
