@@ -54,19 +54,21 @@ void test_distribution(int n_test, double dx, Chi get_chi,
 constexpr int N_TEST = 1E7;  // number of samples
 
 TEST(canonical) {
-  test_distribution(N_TEST, 0.0001, []() { return random::canonical(); },
-                    [](double) { return 1.0; });
+  test_distribution(
+      N_TEST, 0.0001, []() { return random::canonical(); },
+      [](double) { return 1.0; });
 }
 
 TEST(uniform) {
   auto random_4_6 = random::make_uniform_distribution(-4.0, 6.0);
-  test_distribution(N_TEST, 0.01, [&]() { return random_4_6(); },
-                    [](double) { return 1.0; });
+  test_distribution(
+      N_TEST, 0.01, [&]() { return random_4_6(); }, [](double) { return 1.0; });
 }
 
 TEST(exponential) {
-  test_distribution(N_TEST, 0.1, []() { return random::exponential(1.0); },
-                    [](double x) { return exp(-x); });
+  test_distribution(
+      N_TEST, 0.1, []() { return random::exponential(1.0); },
+      [](double x) { return exp(-x); });
 }
 
 TEST(x_exponential) {
@@ -77,23 +79,25 @@ TEST(x_exponential) {
 }
 
 TEST(xsquared_exponential) {
-  test_distribution(N_TEST, 0.05,
-                    []() {
-                      return random::exponential(1.0) +
-                             random::exponential(1.0) +
-                             random::exponential(1.0);
-                    },
-                    [](double x) { return x * x * exp(-x); });
+  test_distribution(
+      N_TEST, 0.05,
+      []() {
+        return random::exponential(1.0) + random::exponential(1.0) +
+               random::exponential(1.0);
+      },
+      [](double x) { return x * x * exp(-x); });
 }
 
 TEST(expo) {
-  test_distribution(N_TEST, 0.001, []() { return random::expo(2., -1., -3.); },
-                    [](double x) { return exp(2. * x); });
+  test_distribution(
+      N_TEST, 0.001, []() { return random::expo(2., -1., -3.); },
+      [](double x) { return exp(2. * x); });
 }
 
 TEST(power) {
-  test_distribution(N_TEST, 0.001, []() { return random::power(3., 0.5, 1.5); },
-                    [](double x) { return x * x * x; });
+  test_distribution(
+      N_TEST, 0.001, []() { return random::power(3., 0.5, 1.5); },
+      [](double x) { return x * x * x; });
 }
 
 TEST(cauchy) {
@@ -107,15 +111,17 @@ TEST(cauchy) {
 TEST(beta) {
   const double a = 1.1;
   const double b = 2.3;
-  test_distribution(N_TEST, 0.001, [&]() { return random::beta(a, b); },
-                    [&](double x) {
-                      return std::pow(x, a - 1.0) * std::pow(1.0 - x, b - 1.0);
-                    });
+  test_distribution(
+      N_TEST, 0.001, [&]() { return random::beta(a, b); },
+      [&](double x) {
+        return std::pow(x, a - 1.0) * std::pow(1.0 - x, b - 1.0);
+      });
 }
 
 TEST(beta_a0) {
   const double xmin = 0.01;
   const double b = 0.5;
-  test_distribution(N_TEST, 0.001, [&]() { return random::beta_a0(xmin, b); },
-                    [&](double x) { return std::pow(1.0 - x, b) / x; });
+  test_distribution(
+      N_TEST, 0.001, [&]() { return random::beta_a0(xmin, b); },
+      [&](double x) { return std::pow(1.0 - x, b) / x; });
 }

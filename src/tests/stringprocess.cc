@@ -381,9 +381,9 @@ TEST(find_total_number_constituent) {
  * Using the same framework as the tests in random.cc do.
  */
 TEST(string_zlund) {
-  test_distribution(1e7, 0.0001,
-                    []() { return StringProcess::sample_zLund(1, 1, 1); },
-                    [](double x) { return 1 / x * (1. - x) * exp(-1. / x); });
+  test_distribution(
+      1e7, 0.0001, []() { return StringProcess::sample_zLund(1, 1, 1); },
+      [](double x) { return 1 / x * (1. - x) * exp(-1. / x); });
 }
 
 TEST(string_incoming_lightcone_momenta) {
