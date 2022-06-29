@@ -64,7 +64,7 @@ TEST(two_dim) {
     const auto result =
         integrate(0, i, 0, i, [](double, double) { return 1.; });
     COMPARE_ABSOLUTE_ERROR(result.value(), double(i * i),
-                           Nsigma* result.error());
+                           Nsigma * result.error());
   }
   // linear only in one dim
   for (int i = 0; i < 10; ++i) {
