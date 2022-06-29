@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_SMASH_SPHEREMODUS_H_
 
 #include <stdint.h>
+
 #include <cmath>
 #include <list>
 #include <map>

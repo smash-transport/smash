@@ -9,14 +9,14 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include "setup.h"
+#include "../include/smash/listmodus.h"
 
 #include <filesystem>
 #include <string>
 
-#include "../include/smash/listmodus.h"
 #include "../include/smash/oscaroutput.h"
 #include "../include/smash/particles.h"
+#include "setup.h"
 
 using namespace smash;
 static const double accuracy = 5.e-4;

@@ -9,12 +9,12 @@
 #ifndef SRC_INCLUDE_SMASH_RIVETOUTPUT_H_
 #define SRC_INCLUDE_SMASH_RIVETOUTPUT_H_
 
-#include <Rivet/AnalysisHandler.hh>
-
 #include <filesystem>
 #include <memory>
 #include <string>
 #include <utility>
+
+#include <Rivet/AnalysisHandler.hh>
 
 #include "smash/fpenvironment.h"
 #include "smash/hepmcinterface.h"

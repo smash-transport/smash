@@ -5,9 +5,9 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include <istream>
-
 #include "smash/pdgcode.h"
+
+#include <istream>
 
 namespace smash {
 

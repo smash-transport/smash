@@ -9,10 +9,11 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include <vector>
-#include "setup.h"
-
 #include "../include/smash/interpolation2D.h"
+
+#include <vector>
+
+#include "setup.h"
 
 using namespace smash;
 

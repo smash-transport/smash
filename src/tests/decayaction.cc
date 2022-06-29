@@ -9,12 +9,12 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include "setup.h"
+#include "../include/smash/decayaction.h"
 
 #include <typeinfo>
 
-#include "../include/smash/decayaction.h"
 #include "../include/smash/decaymodes.h"
+#include "setup.h"
 
 using namespace smash;
 

@@ -7,15 +7,16 @@
  *
  */
 
-#include <gsl/gsl_sf_bessel.h>
+#include "smash/hadgas_eos.h"
 
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 
+#include <gsl/gsl_sf_bessel.h>
+
 #include "smash/constants.h"
-#include "smash/hadgas_eos.h"
 #include "smash/integrate.h"
 #include "smash/interpolation.h"
 #include "smash/logging.h"

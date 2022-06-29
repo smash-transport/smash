@@ -10,6 +10,7 @@
 #include "smash/action.h"
 
 #include <assert.h>
+
 #include <algorithm>
 #include <sstream>
 

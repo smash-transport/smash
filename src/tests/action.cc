@@ -9,10 +9,9 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include "setup.h"
-
 #include "../include/smash/scatteraction.h"
 #include "../include/smash/scatteractionsfinder.h"
+#include "setup.h"
 
 using namespace smash;
 using smash::Test::Momentum;

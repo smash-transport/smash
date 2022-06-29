@@ -8,6 +8,7 @@
  */
 
 #include "smash/pauliblocking.h"
+
 #include "smash/constants.h"
 #include "smash/logging.h"
 

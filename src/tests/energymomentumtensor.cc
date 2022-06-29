@@ -10,6 +10,7 @@
 #include <vir/test.h>  // This include has to be first
 
 #include "../include/smash/energymomentumtensor.h"
+
 #include "../include/smash/fourvector.h"
 
 using namespace smash;

@@ -9,13 +9,13 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include "setup.h"
-
 #include "../include/smash/grid.h"
-#include "../include/smash/logging.h"
 
 #include <set>
 #include <unordered_set>
+
+#include "../include/smash/logging.h"
+#include "setup.h"
 
 using namespace smash;
 

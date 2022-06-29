@@ -9,7 +9,7 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include "setup.h"
+#include "../include/smash/potentials.h"
 
 #include <filesystem>
 #include <fstream>
@@ -22,10 +22,10 @@
 #include "../include/smash/experiment.h"
 #include "../include/smash/modusdefault.h"
 #include "../include/smash/nucleus.h"
-#include "../include/smash/potentials.h"
 #include "../include/smash/propagation.h"
 #include "../include/smash/quantumsampling.h"
 #include "../include/smash/spheremodus.h"
+#include "setup.h"
 
 using namespace smash;
 

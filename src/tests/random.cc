@@ -9,11 +9,11 @@
 
 #include <vir/test.h>  // This include has to be first
 
+#include "../include/smash/random.h"
+
 #include <cinttypes>
 
 #include "histogram.h"
-
-#include "../include/smash/random.h"
 
 using namespace smash;
 

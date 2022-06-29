@@ -17,7 +17,6 @@
 
 #include "TFile.h"
 #include "TTree.h"
-
 #include "configuration.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"

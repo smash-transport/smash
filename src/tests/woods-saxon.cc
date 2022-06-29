@@ -11,6 +11,7 @@
 
 #include <map>
 #include <string>
+
 #include "../include/smash/nucleus.h"
 #include "../include/smash/pdgcode.h"
 

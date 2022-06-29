@@ -9,11 +9,11 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include "setup.h"
-
 #include "../include/smash/decaymodes.h"
+
 #include "../include/smash/isoparticletype.h"
 #include "../include/smash/particletype.h"
+#include "setup.h"
 
 using namespace smash;
 

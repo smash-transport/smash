@@ -10,9 +10,8 @@
 #ifndef SRC_INCLUDE_SMASH_ENERGYMOMENTUMTENSOR_H_
 #define SRC_INCLUDE_SMASH_ENERGYMOMENTUMTENSOR_H_
 
-#include <cmath>
-
 #include <array>
+#include <cmath>
 #include <string>
 
 #include "fourvector.h"

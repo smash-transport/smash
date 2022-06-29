@@ -9,10 +9,10 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include "setup.h"
+#include "../include/smash/formfactors.h"
 
 #include "../include/smash/constants.h"
-#include "../include/smash/formfactors.h"
+#include "setup.h"
 
 using namespace smash;
 

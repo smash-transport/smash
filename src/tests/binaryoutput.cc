@@ -9,9 +9,8 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include "setup.h"
+#include "../include/smash/binaryoutput.h"
 
-#include <smash/config.h>
 #include <array>
 #include <cstdio>
 #include <cstring>
@@ -20,12 +19,14 @@
 #include <string>
 #include <vector>
 
-#include "../include/smash/binaryoutput.h"
+#include <smash/config.h>
+
 #include "../include/smash/clock.h"
 #include "../include/smash/file.h"
 #include "../include/smash/outputinterface.h"
 #include "../include/smash/processbranch.h"
 #include "../include/smash/scatteraction.h"
+#include "setup.h"
 
 using namespace smash;
 

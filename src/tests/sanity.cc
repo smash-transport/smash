@@ -9,8 +9,6 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include "setup.h"
-
 #include <filesystem>
 
 #include "../include/smash/boxmodus.h"
@@ -19,6 +17,7 @@
 #include "../include/smash/experimentparameters.h"
 #include "../include/smash/modusdefault.h"
 #include "../include/smash/spheremodus.h"
+#include "setup.h"
 
 using namespace smash;
 

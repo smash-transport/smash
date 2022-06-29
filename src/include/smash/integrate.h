@@ -11,9 +11,6 @@
 #define SRC_INCLUDE_SMASH_INTEGRATE_H_
 
 #include <cuba.h>
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_monte_plain.h>
-#include <gsl/gsl_monte_vegas.h>
 
 #include <algorithm>
 #include <iostream>
@@ -22,6 +19,10 @@
 #include <string>
 #include <tuple>
 #include <utility>
+
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_monte_plain.h>
+#include <gsl/gsl_monte_vegas.h>
 
 #include "fpenvironment.h"
 #include "random.h"

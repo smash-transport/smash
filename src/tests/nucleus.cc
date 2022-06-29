@@ -9,9 +9,10 @@
 
 #include <vir/test.h>  // This include has to be first
 
+#include "../include/smash/nucleus.h"
+
 #include <map>
 
-#include "../include/smash/nucleus.h"
 #include "../include/smash/particles.h"
 #include "../include/smash/pdgcode.h"
 #include "../include/smash/pow.h"

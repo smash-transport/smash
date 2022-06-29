@@ -9,8 +9,9 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include "../include/smash/particledata.h"
 #include "../include/smash/processbranch.h"
+
+#include "../include/smash/particledata.h"
 
 using namespace smash;
 

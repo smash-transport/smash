@@ -10,9 +10,6 @@
 #ifndef SRC_INCLUDE_SMASH_INTERPOLATION_H_
 #define SRC_INCLUDE_SMASH_INTERPOLATION_H_
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
-
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -22,6 +19,9 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_spline.h>
 
 namespace smash {
 

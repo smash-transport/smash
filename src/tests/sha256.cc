@@ -9,9 +9,9 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include <string>
-
 #include "../include/smash/sha256.h"
+
+#include <string>
 
 using namespace smash;
 

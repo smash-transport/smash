@@ -9,9 +9,9 @@
 
 #include "smash/scatteractionmulti.h"
 
-#include <gsl/gsl_sf_ellint.h>
-
 #include <map>
+
+#include <gsl/gsl_sf_ellint.h>
 
 #include "smash/crosssections.h"
 #include "smash/integrate.h"

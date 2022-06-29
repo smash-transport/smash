@@ -9,8 +9,9 @@
 
 #include <vir/test.h>  // This include has to be first
 
-#include <tuple>
 #include "../include/smash/average.h"
+
+#include <tuple>
 
 using namespace smash;
 

@@ -9,13 +9,14 @@
 
 #include "smash/chemicalpotential.h"
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_multiroots.h>
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
+
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_multiroots.h>
 
 #include "smash/constants.h"
 #include "smash/distributions.h"

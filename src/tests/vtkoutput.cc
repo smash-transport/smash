@@ -9,20 +9,21 @@
 
 #include <vir/test.h>  // This has to be the first include
 
-#include "setup.h"
+#include "../include/smash/vtkoutput.h"
 
-#include <smash/config.h>
 #include <array>
 #include <filesystem>
 #include <iostream>
 #include <vector>
+
+#include <smash/config.h>
 
 #include "../include/smash/clock.h"
 #include "../include/smash/configuration.h"
 #include "../include/smash/outputinterface.h"
 #include "../include/smash/particles.h"
 #include "../include/smash/random.h"
-#include "../include/smash/vtkoutput.h"
+#include "setup.h"
 
 using namespace smash;
 

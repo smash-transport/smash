@@ -4,6 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
+#include "smash/customnucleus.h"
+
 #include <cmath>
 #include <fstream>
 #include <map>
@@ -11,7 +13,6 @@
 #include <vector>
 
 #include "smash/constants.h"
-#include "smash/customnucleus.h"
 #include "smash/particletype.h"
 #include "smash/pdgcode.h"
 

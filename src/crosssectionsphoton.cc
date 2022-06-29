@@ -8,7 +8,9 @@
  */
 
 #include "smash/crosssectionsphoton.h"
+
 #include <memory>
+
 #include "smash/logging.h"
 
 namespace {
