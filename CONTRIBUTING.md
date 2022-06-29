@@ -111,7 +111,7 @@ warnings are however still reported.
 ## Development Tools
 
 The following tools can be helpful for development:
-- clang-format = 6.0
+- clang-format = 13.0.0
 - doxygen >= 1.8.4
 - valgrind
 - cpplint
@@ -123,9 +123,8 @@ Note: The above mentioned clang-format version is enforced at each merge to mast
 
 ### Installing clang-format
 
-clang-format is a part of the clang compiler. The usage of version 6.0.0 is
-enforced. You can download the binaries here
-http://releases.llvm.org/download.html.
+clang-format is a part of the clang compiler. The usage of version 13.0.0 is
+enforced. You can download the binaries [here](http://releases.llvm.org/download.html).
 
 Make sure to pick a pre-built binary for your system. For example, for Ubuntu
 you could run:
@@ -461,7 +460,7 @@ following way:
 ### Code Formatting with `clang-format` and `cmake-format`
 
 All C++ code has to be formatted by running [`clang-format`](https://releases.llvm.org/download.html),
-(version `6.0.0`) while CMake code requires [`cmake-format`](https://github.com/cheshirekow/cmake_format)
+(version `13.0.0`) while CMake code requires [`cmake-format`](https://github.com/cheshirekow/cmake_format)
 (version `0.6.13`) to be run. These two programs automatically format the code in SMASH correctly.
 Use the helper script in SMASH's **_/bin_** directory to format the source code via
 
