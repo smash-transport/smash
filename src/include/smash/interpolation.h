@@ -20,8 +20,8 @@
 #include <utility>
 #include <vector>
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
+#include "gsl/gsl_errno.h"
+#include "gsl/gsl_spline.h"
 
 namespace smash {
 

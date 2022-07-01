@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-#include <yaml-cpp/yaml.h>  // NOLINT(build/include_order)
+#include "yaml-cpp/yaml.h"
 
 #include "density.h"
 #include "forwarddeclarations.h"

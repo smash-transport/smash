@@ -7,7 +7,7 @@
  *
  */
 
-#include <vir/test.h>  // This has to be the first include
+#include "vir/test.h"  // This has to be the first include
 
 #include "../include/smash/vtkoutput.h"
 
@@ -16,7 +16,7 @@
 #include <iostream>
 #include <vector>
 
-#include <smash/config.h>
+#include "smash/config.h"
 
 #include "../include/smash/clock.h"
 #include "../include/smash/configuration.h"

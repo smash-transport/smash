@@ -6,7 +6,7 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
 #include "../include/smash/grandcan_thermalizer.h"
 

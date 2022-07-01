@@ -7,7 +7,7 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
 #include "../include/smash/binaryoutput.h"
 
@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include <smash/config.h>
+#include "smash/config.h"
 
 #include "../include/smash/clock.h"
 #include "../include/smash/file.h"

@@ -20,9 +20,9 @@
 #include <tuple>
 #include <utility>
 
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_monte_plain.h>
-#include <gsl/gsl_monte_vegas.h>
+#include "gsl/gsl_integration.h"
+#include "gsl/gsl_monte_plain.h"
+#include "gsl/gsl_monte_vegas.h"
 
 #include "fpenvironment.h"
 #include "random.h"

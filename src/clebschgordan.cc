@@ -9,7 +9,7 @@
 
 #include <numeric>
 
-#include <gsl/gsl_sf_coupling.h>
+#include "gsl/gsl_sf_coupling.h"
 
 #include "smash/constants.h"
 #include "smash/logging.h"

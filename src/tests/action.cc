@@ -7,7 +7,7 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
 #include "../include/smash/scatteraction.h"
 #include "../include/smash/scatteractionsfinder.h"

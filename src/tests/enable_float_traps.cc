@@ -7,7 +7,7 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
 // FPE does not work with clang, so don't test it
 #if !defined __clang__

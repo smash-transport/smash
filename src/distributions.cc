@@ -12,7 +12,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include <gsl/gsl_sf_bessel.h>
+#include "gsl/gsl_sf_bessel.h"
 
 #include "smash/constants.h"
 #include "smash/logging.h"

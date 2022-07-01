@@ -7,7 +7,7 @@
  *
  */
 
-#include <vir/test.h>
+#include "vir/test.h"
 
 #include "../include/smash/formfactors.h"
 #include "../include/smash/isoparticletype.h"

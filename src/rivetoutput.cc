@@ -10,8 +10,8 @@
 
 #include "smash/rivetoutput.h"
 
-#include <Rivet/Rivet.hh>
-#include <Rivet/Tools/Logging.hh>
+#include "Rivet/Rivet.hh"
+#include "Rivet/Tools/Logging.hh"
 
 #include "smash/logging.h"
 

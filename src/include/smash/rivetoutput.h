@@ -14,7 +14,7 @@
 #include <string>
 #include <utility>
 
-#include <Rivet/AnalysisHandler.hh>
+#include "Rivet/AnalysisHandler.hh"
 
 #include "smash/fpenvironment.h"
 #include "smash/hepmcinterface.h"

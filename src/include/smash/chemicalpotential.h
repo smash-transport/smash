@@ -10,9 +10,10 @@
 #ifndef SRC_INCLUDE_SMASH_CHEMICALPOTENTIAL_H_
 #define SRC_INCLUDE_SMASH_CHEMICALPOTENTIAL_H_
 
-#include <gsl/gsl_multiroots.h>
-#include <gsl/gsl_vector.h>
-#include <smash/integrate.h>
+#include "gsl/gsl_multiroots.h"
+#include "gsl/gsl_vector.h"
+
+#include "smash/integrate.h"
 
 namespace smash {
 

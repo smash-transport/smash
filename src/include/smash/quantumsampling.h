@@ -12,8 +12,8 @@
 
 #include <map>
 
-#include <gsl/gsl_multiroots.h>
-#include <gsl/gsl_vector.h>
+#include "gsl/gsl_multiroots.h"
+#include "gsl/gsl_vector.h"
 
 #include "smash/pdgcode.h"
 #include "smash/random.h"

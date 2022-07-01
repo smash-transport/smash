@@ -7,14 +7,14 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
 #include <array>
 #include <filesystem>
 #include <string>
 #include <vector>
 
-#include <smash/config.h>
+#include "smash/config.h"
 
 #include "../include/smash/configuration.h"
 #include "../include/smash/oscaroutput.h"

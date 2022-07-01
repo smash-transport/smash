@@ -10,11 +10,11 @@
 #ifndef SRC_INCLUDE_SMASH_LOGGING_H_
 #define SRC_INCLUDE_SMASH_LOGGING_H_
 
-#include <einhard.hpp>
 #include <stdexcept>
 #include <tuple>
 
-#include <yaml-cpp/yaml.h>  // NOLINT(build/include_order)
+#include "einhard.hpp"
+#include "yaml-cpp/yaml.h"
 
 #include "macros.h"
 

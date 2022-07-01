@@ -13,8 +13,8 @@
 #include <iostream>
 #include <random>
 
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_multiroots.h>
+#include "gsl/gsl_integration.h"
+#include "gsl/gsl_multiroots.h"
 
 #include "smash/chemicalpotential.h"
 #include "smash/constants.h"

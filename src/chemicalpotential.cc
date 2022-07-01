@@ -14,9 +14,9 @@
 #include <iostream>
 #include <sstream>
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_multiroots.h>
+#include "gsl/gsl_errno.h"
+#include "gsl/gsl_integration.h"
+#include "gsl/gsl_multiroots.h"
 
 #include "smash/constants.h"
 #include "smash/distributions.h"

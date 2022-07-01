@@ -14,7 +14,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include <gsl/gsl_sf_bessel.h>
+#include "gsl/gsl_sf_bessel.h"
 
 #include "smash/constants.h"
 #include "smash/integrate.h"

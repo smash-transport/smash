@@ -12,7 +12,7 @@
 
 #include <vector>
 
-#include <gsl/gsl_spline2d.h>
+#include "gsl/gsl_spline2d.h"
 
 namespace smash {
 
