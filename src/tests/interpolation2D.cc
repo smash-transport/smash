@@ -9,7 +9,7 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/interpolation2D.h"
+#include "smash/interpolation2D.h"
 
 #include <vector>
 

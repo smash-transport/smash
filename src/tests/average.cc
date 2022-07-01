@@ -9,7 +9,7 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/average.h"
+#include "smash/average.h"
 
 #include <tuple>
 

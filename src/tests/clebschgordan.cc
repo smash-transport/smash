@@ -9,7 +9,7 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/clebschgordan.h"
+#include "smash/clebschgordan.h"
 
 #include "setup.h"
 

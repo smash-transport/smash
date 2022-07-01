@@ -9,7 +9,7 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/sha256.h"
+#include "smash/sha256.h"
 
 #include <string>
 

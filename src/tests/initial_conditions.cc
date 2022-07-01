@@ -9,11 +9,11 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/boxmodus.h"
-#include "../include/smash/collidermodus.h"
-#include "../include/smash/modusdefault.h"
-#include "../include/smash/spheremodus.h"
 #include "setup.h"
+#include "smash/boxmodus.h"
+#include "smash/collidermodus.h"
+#include "smash/modusdefault.h"
+#include "smash/spheremodus.h"
 
 using namespace smash;
 

@@ -9,9 +9,9 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/lattice.h"
+#include "smash/lattice.h"
 
-#include "../include/smash/fourvector.h"
+#include "smash/fourvector.h"
 
 using namespace smash;
 

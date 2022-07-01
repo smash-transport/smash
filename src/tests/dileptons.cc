@@ -7,8 +7,8 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/decayactiondilepton.h"
 #include "setup.h"
+#include "smash/decayactiondilepton.h"
 
 using namespace smash;
 

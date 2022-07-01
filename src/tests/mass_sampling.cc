@@ -7,13 +7,13 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/decayaction.h"
-#include "../include/smash/decaymodes.h"
-#include "../include/smash/formfactors.h"
-#include "../include/smash/kinematics.h"
-#include "../include/smash/particletype.h"
 #include "histogram.h"
 #include "setup.h"
+#include "smash/decayaction.h"
+#include "smash/decaymodes.h"
+#include "smash/formfactors.h"
+#include "smash/kinematics.h"
+#include "smash/particletype.h"
 
 using namespace smash;
 

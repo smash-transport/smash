@@ -10,8 +10,8 @@
 #include <map>
 #include <string>
 
-#include "../include/smash/file.h"
-#include "../include/smash/integrate.h"
+#include "smash/file.h"
+#include "smash/integrate.h"
 
 namespace smash {
 

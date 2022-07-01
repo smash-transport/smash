@@ -9,7 +9,7 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/integrate.h"
+#include "smash/integrate.h"
 
 // test one-dimensional integration
 

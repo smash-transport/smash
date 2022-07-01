@@ -7,7 +7,7 @@
  *
  */
 
-#include "../include/smash/angles.h"
+#include "smash/angles.h"
 
 // tests distributions for the angles.
 

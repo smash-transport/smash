@@ -9,12 +9,12 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/icoutput.h"
+#include "smash/icoutput.h"
 
 #include <filesystem>
 
-#include "../include/smash/outputinterface.h"
 #include "setup.h"
+#include "smash/outputinterface.h"
 
 using namespace smash;
 

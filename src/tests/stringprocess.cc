@@ -13,11 +13,11 @@
 
 #include "Pythia8/Pythia.h"
 
-#include "../include/smash/angles.h"
-#include "../include/smash/random.h"
-#include "../include/smash/scatteraction.h"
 #include "histogram.h"
 #include "setup.h"
+#include "smash/angles.h"
+#include "smash/random.h"
+#include "smash/scatteraction.h"
 
 using namespace smash;
 using smash::Test::Momentum;

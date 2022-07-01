@@ -8,12 +8,12 @@
  */
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/grandcan_thermalizer.h"
+#include "smash/grandcan_thermalizer.h"
 
-#include "../include/smash/boxmodus.h"
-#include "../include/smash/logging.h"
-#include "../include/smash/thermalizationaction.h"
 #include "setup.h"
+#include "smash/boxmodus.h"
+#include "smash/logging.h"
+#include "smash/thermalizationaction.h"
 
 using namespace smash;
 

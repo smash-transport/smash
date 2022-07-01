@@ -15,7 +15,7 @@
 #include <csignal>
 #include <stdexcept>
 
-#include "../include/smash/fpenvironment.h"
+#include "smash/fpenvironment.h"
 
 double blackhole = 0.;
 double divisor = 0.;

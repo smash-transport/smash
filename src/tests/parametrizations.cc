@@ -9,10 +9,10 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/parametrizations.h"
+#include "smash/parametrizations.h"
 
-#include "../include/smash/clebschgordan.h"
 #include "setup.h"
+#include "smash/clebschgordan.h"
 
 using namespace smash;
 

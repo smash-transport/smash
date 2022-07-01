@@ -11,8 +11,8 @@
 
 #include <filesystem>
 
-#include "../include/smash/collidermodus.h"
 #include "setup.h"
+#include "smash/collidermodus.h"
 
 using namespace smash;
 

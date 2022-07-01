@@ -9,16 +9,16 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/pauliblocking.h"
+#include "smash/pauliblocking.h"
 
 #include <filesystem>
 
-#include "../include/smash/boxmodus.h"
-#include "../include/smash/configuration.h"
-#include "../include/smash/experiment.h"
-#include "../include/smash/nucleus.h"
-#include "../include/smash/potentials.h"
 #include "setup.h"
+#include "smash/boxmodus.h"
+#include "smash/configuration.h"
+#include "smash/experiment.h"
+#include "smash/nucleus.h"
+#include "smash/potentials.h"
 
 using namespace smash;
 

@@ -7,7 +7,7 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/scatteractionmulti.h"
+#include "smash/scatteractionmulti.h"
 
 #include "setup.h"
 

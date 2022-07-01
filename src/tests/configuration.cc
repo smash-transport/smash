@@ -9,13 +9,13 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/configuration.h"
+#include "smash/configuration.h"
 
 #include <filesystem>
 
-#include "../include/smash/forwarddeclarations.h"
-#include "../include/smash/macros.h"
 #include "setup.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/macros.h"
 
 using namespace smash;
 

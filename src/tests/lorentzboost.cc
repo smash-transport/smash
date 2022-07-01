@@ -7,8 +7,8 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/angles.h"
-#include "../include/smash/fourvector.h"
+#include "smash/angles.h"
+#include "smash/fourvector.h"
 
 using namespace smash;
 

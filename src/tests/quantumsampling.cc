@@ -9,13 +9,13 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/quantumsampling.h"
+#include "smash/quantumsampling.h"
 
-#include "../include/smash/chemicalpotential.h"
-#include "../include/smash/constants.h"
-#include "../include/smash/hadgas_eos.h"
 #include "histogram.h"
 #include "setup.h"
+#include "smash/chemicalpotential.h"
+#include "smash/constants.h"
+#include "smash/hadgas_eos.h"
 
 using namespace smash;
 

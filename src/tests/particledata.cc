@@ -9,8 +9,8 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/pdgcode.h"
 #include "setup.h"
+#include "smash/pdgcode.h"
 
 using namespace smash;
 

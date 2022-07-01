@@ -9,8 +9,8 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/integrate.h"
 #include "setup.h"
+#include "smash/integrate.h"
 
 using namespace smash;
 

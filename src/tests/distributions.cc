@@ -9,7 +9,7 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/distributions.h"
+#include "smash/distributions.h"
 
 using namespace smash;
 

@@ -9,7 +9,7 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/clock.h"
+#include "smash/clock.h"
 
 using namespace smash;
 

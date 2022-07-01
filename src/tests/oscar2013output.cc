@@ -15,15 +15,14 @@
 #include <string>
 #include <vector>
 
-#include "smash/config.h"
-
-#include "../include/smash/oscaroutput.h"
-#include "../include/smash/outputinterface.h"
-#include "../include/smash/particles.h"
-#include "../include/smash/processbranch.h"
-#include "../include/smash/random.h"
-#include "../include/smash/scatteraction.h"
 #include "setup.h"
+#include "smash/config.h"
+#include "smash/oscaroutput.h"
+#include "smash/outputinterface.h"
+#include "smash/particles.h"
+#include "smash/processbranch.h"
+#include "smash/random.h"
+#include "smash/scatteraction.h"
 
 using namespace smash;
 

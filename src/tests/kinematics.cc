@@ -9,9 +9,9 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/kinematics.h"
+#include "smash/kinematics.h"
 
-#include "../include/smash/constants.h"
+#include "smash/constants.h"
 
 using namespace smash;
 

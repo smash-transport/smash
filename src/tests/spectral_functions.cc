@@ -9,12 +9,12 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/formfactors.h"
-#include "../include/smash/integrate.h"
-#include "../include/smash/kinematics.h"
-#include "../include/smash/stringfunctions.h"
 #include "histogram.h"
 #include "setup.h"
+#include "smash/formfactors.h"
+#include "smash/integrate.h"
+#include "smash/kinematics.h"
+#include "smash/stringfunctions.h"
 
 using namespace smash;
 

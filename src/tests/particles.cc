@@ -9,11 +9,11 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/particles.h"
+#include "smash/particles.h"
 
-#include "../include/smash/particledata.h"
-#include "../include/smash/pdgcode.h"
 #include "setup.h"
+#include "smash/particledata.h"
+#include "smash/pdgcode.h"
 
 using namespace smash;
 
