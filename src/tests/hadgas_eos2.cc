@@ -7,15 +7,14 @@
  *
  */
 
-#include <gsl/gsl_sf_bessel.h>
+#include "vir/test.h"  // This include has to be first
 
-#include <vir/test.h>  // This include has to be first
+#include "gsl/gsl_sf_bessel.h"
 
 #include "histogram.h"
 #include "setup.h"
-
-#include "../include/smash/constants.h"
-#include "../include/smash/hadgas_eos.h"
+#include "smash/constants.h"
+#include "smash/hadgas_eos.h"
 
 using namespace smash;
 

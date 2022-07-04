@@ -7,9 +7,9 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/quantumnumbers.h"
+#include "smash/quantumnumbers.h"
 
 using namespace smash;
 

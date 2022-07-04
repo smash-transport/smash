@@ -8,7 +8,7 @@
 // This is based on the public-domain implementation from
 // https://github.com/WaterJuice/WjCryptLib.
 
-#include "include/smash/sha256.h"
+#include "smash/sha256.h"
 
 #include <cstring>
 #include <iomanip>

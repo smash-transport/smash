@@ -23,7 +23,6 @@
 #include "smash/stringfunctions.h"
 /* build dependent variables */
 #include "smash/config.h"
-
 #include "smash/library.h"
 
 namespace smash {

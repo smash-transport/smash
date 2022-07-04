@@ -7,13 +7,12 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
-
-#include "setup.h"
+#include "vir/test.h"  // This include has to be first
 
 #include <typeinfo>
 
 #include "../scatteractionsfinder.cc"
+#include "setup.h"
 
 using namespace smash;
 

@@ -7,20 +7,20 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
-#include "setup.h"
+#include "smash/density.h"
 
 #include <filesystem>
 #include <map>
 
-#include "../include/smash/boxmodus.h"
-#include "../include/smash/configuration.h"
-#include "../include/smash/density.h"
-#include "../include/smash/experiment.h"
-#include "../include/smash/modusdefault.h"
-#include "../include/smash/nucleus.h"
-#include "../include/smash/thermodynamicoutput.h"
+#include "setup.h"
+#include "smash/boxmodus.h"
+#include "smash/configuration.h"
+#include "smash/experiment.h"
+#include "smash/modusdefault.h"
+#include "smash/nucleus.h"
+#include "smash/thermodynamicoutput.h"
 
 using namespace smash;
 

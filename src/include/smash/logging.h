@@ -13,8 +13,8 @@
 #include <stdexcept>
 #include <tuple>
 
-#include <yaml-cpp/yaml.h>  // NOLINT(build/include_order)
-#include <einhard.hpp>
+#include "einhard.hpp"
+#include "yaml-cpp/yaml.h"
 
 #include "macros.h"
 

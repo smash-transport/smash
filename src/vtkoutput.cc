@@ -7,6 +7,8 @@
  *
  */
 
+#include "smash/vtkoutput.h"
+
 #include <fstream>
 #include <memory>
 #include <utility>
@@ -16,7 +18,6 @@
 #include "smash/file.h"
 #include "smash/forwarddeclarations.h"
 #include "smash/particles.h"
-#include "smash/vtkoutput.h"
 
 namespace smash {
 

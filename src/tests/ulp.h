@@ -21,7 +21,6 @@
 #define SRC_TESTS_ULP_H_
 
 #include <cmath>
-
 #include <limits>
 
 #ifdef _MSC_VER

@@ -7,9 +7,9 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/angles.h"
+#include "smash/angles.h"
 
 using namespace smash;
 

@@ -7,6 +7,8 @@
  *
  */
 
+#include "smash/spheremodus.h"
+
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -26,7 +28,6 @@
 #include "smash/particles.h"
 #include "smash/quantumsampling.h"
 #include "smash/random.h"
-#include "smash/spheremodus.h"
 #include "smash/threevector.h"
 
 namespace smash {

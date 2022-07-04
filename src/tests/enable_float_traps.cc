@@ -7,15 +7,15 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
 // FPE does not work with clang, so don't test it
 #if !defined __clang__
-#include "../include/smash/fpenvironment.h"
-
 #include <csetjmp>
 #include <csignal>
 #include <stdexcept>
+
+#include "smash/fpenvironment.h"
 
 double blackhole = 0.;
 double divisor = 0.;

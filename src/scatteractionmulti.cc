@@ -9,9 +9,9 @@
 
 #include "smash/scatteractionmulti.h"
 
-#include <gsl/gsl_sf_ellint.h>
-
 #include <map>
+
+#include "gsl/gsl_sf_ellint.h"
 
 #include "smash/crosssections.h"
 #include "smash/integrate.h"
@@ -312,9 +312,9 @@ void ScatterActionMulti::add_possible_reactions(
                              type_nucleus->spin_degeneracy());
       double symmetry_factor = 1.0;
       for (const auto i : c) {
-        symmetry_factor *= (i.second == 3) ? 6.0                    // 3!
-                                           : (i.second == 2) ? 2.0  // 2!
-                                                             : 1.0;
+        symmetry_factor *= (i.second == 3)   ? 6.0  // 3!
+                           : (i.second == 2) ? 2.0  // 2!
+                                             : 1.0;
         if (i.second > 3 || i.second < 0) {
           logg[LScatterActionMulti].error("4<->2 error, incoming particles ",
                                           incoming_particles_);

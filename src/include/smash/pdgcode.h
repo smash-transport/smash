@@ -15,11 +15,10 @@
 #include <cassert>
 #include <cstdlib>
 #include <iosfwd>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-
-#include <iostream>
 
 #include "pdgcode_constants.h"
 

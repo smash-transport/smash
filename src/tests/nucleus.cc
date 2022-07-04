@@ -7,15 +7,16 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
+
+#include "smash/nucleus.h"
 
 #include <map>
 
-#include "../include/smash/nucleus.h"
-#include "../include/smash/particles.h"
-#include "../include/smash/pdgcode.h"
-#include "../include/smash/pow.h"
-#include "../include/smash/threevector.h"
+#include "smash/particles.h"
+#include "smash/pdgcode.h"
+#include "smash/pow.h"
+#include "smash/threevector.h"
 
 namespace particles_txt {
 #include <particles.txt.h>

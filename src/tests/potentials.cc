@@ -7,25 +7,25 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
-#include "setup.h"
+#include "smash/potentials.h"
 
 #include <filesystem>
 #include <fstream>
 #include <map>
 
-#include "../include/smash/algorithms.h"
-#include "../include/smash/collidermodus.h"
-#include "../include/smash/configuration.h"
-#include "../include/smash/constants.h"
-#include "../include/smash/experiment.h"
-#include "../include/smash/modusdefault.h"
-#include "../include/smash/nucleus.h"
-#include "../include/smash/potentials.h"
-#include "../include/smash/propagation.h"
-#include "../include/smash/quantumsampling.h"
-#include "../include/smash/spheremodus.h"
+#include "setup.h"
+#include "smash/algorithms.h"
+#include "smash/collidermodus.h"
+#include "smash/configuration.h"
+#include "smash/constants.h"
+#include "smash/experiment.h"
+#include "smash/modusdefault.h"
+#include "smash/nucleus.h"
+#include "smash/propagation.h"
+#include "smash/quantumsampling.h"
+#include "smash/spheremodus.h"
 
 using namespace smash;
 

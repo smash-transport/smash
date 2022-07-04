@@ -7,17 +7,17 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
+
+#include <iostream>
+
+#include "Pythia8/Pythia.h"
 
 #include "histogram.h"
 #include "setup.h"
-
-#include "../include/smash/angles.h"
-#include "../include/smash/random.h"
-#include "../include/smash/scatteraction.h"
-#include "Pythia8/Pythia.h"
-
-#include <iostream>
+#include "smash/angles.h"
+#include "smash/random.h"
+#include "smash/scatteraction.h"
 
 using namespace smash;
 using smash::Test::Momentum;
@@ -381,9 +381,9 @@ TEST(find_total_number_constituent) {
  * Using the same framework as the tests in random.cc do.
  */
 TEST(string_zlund) {
-  test_distribution(1e7, 0.0001,
-                    []() { return StringProcess::sample_zLund(1, 1, 1); },
-                    [](double x) { return 1 / x * (1. - x) * exp(-1. / x); });
+  test_distribution(
+      1e7, 0.0001, []() { return StringProcess::sample_zLund(1, 1, 1); },
+      [](double x) { return 1 / x * (1. - x) * exp(-1. / x); });
 }
 
 TEST(string_incoming_lightcone_momenta) {

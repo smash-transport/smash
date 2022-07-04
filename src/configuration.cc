@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#include <yaml-cpp/yaml.h>  // NOLINT(build/include_order)
+#include "yaml-cpp/yaml.h"
 
 #include "smash/forwarddeclarations.h"
 #include "smash/inputfunctions.h"

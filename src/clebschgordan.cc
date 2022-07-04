@@ -7,8 +7,10 @@
 
 #include "smash/clebschgordan.h"
 
-#include <gsl/gsl_sf_coupling.h>
 #include <numeric>
+
+#include "gsl/gsl_sf_coupling.h"
+
 #include "smash/constants.h"
 #include "smash/logging.h"
 

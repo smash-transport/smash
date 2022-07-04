@@ -4,6 +4,8 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
+#include "smash/boxmodus.h"
+
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -14,7 +16,6 @@
 
 #include "smash/algorithms.h"
 #include "smash/angles.h"
-#include "smash/boxmodus.h"
 #include "smash/constants.h"
 #include "smash/experimentparameters.h"
 #include "smash/logging.h"

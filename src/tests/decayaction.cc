@@ -7,14 +7,14 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
-#include "setup.h"
+#include "smash/decayaction.h"
 
 #include <typeinfo>
 
-#include "../include/smash/decayaction.h"
-#include "../include/smash/decaymodes.h"
+#include "setup.h"
+#include "smash/decaymodes.h"
 
 using namespace smash;
 

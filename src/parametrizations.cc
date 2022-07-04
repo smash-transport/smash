@@ -8,7 +8,6 @@
  */
 
 #include "smash/parametrizations.h"
-#include "smash/parametrizations_data.h"
 
 #include <cmath>
 #include <initializer_list>
@@ -21,6 +20,7 @@
 #include "smash/constants.h"
 #include "smash/kinematics.h"
 #include "smash/lowess.h"
+#include "smash/parametrizations_data.h"
 #include "smash/pow.h"
 
 namespace smash {

@@ -7,12 +7,12 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
+
+#include "smash/parametrizations.h"
 
 #include "setup.h"
-
-#include "../include/smash/clebschgordan.h"
-#include "../include/smash/parametrizations.h"
+#include "smash/clebschgordan.h"
 
 using namespace smash;
 

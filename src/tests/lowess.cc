@@ -7,9 +7,9 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/lowess.h"
+#include "smash/lowess.h"
 
 #include <numeric>
 

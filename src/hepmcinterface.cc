@@ -9,12 +9,13 @@
  */
 
 #include "smash/hepmcinterface.h"
-#include "smash/config.h"
-#include "smash/experiment.h"
 
 #include "HepMC3/GenRunInfo.h"
 #include "HepMC3/Print.h"
 #include "HepMC3/Setup.h"
+
+#include "smash/config.h"
+#include "smash/experiment.h"
 #include "smash/logging.h"
 
 namespace smash {

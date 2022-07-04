@@ -5,11 +5,11 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
+
+#include "smash/scatteractionmulti.h"
 
 #include "setup.h"
-
-#include "../include/smash/scatteractionmulti.h"
 
 using namespace smash;
 using smash::Test::Momentum;

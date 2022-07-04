@@ -7,11 +7,10 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
 #include "setup.h"
-
-#include "../include/smash/integrate.h"
+#include "smash/integrate.h"
 
 using namespace smash;
 

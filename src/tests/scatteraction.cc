@@ -7,17 +7,18 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
-#include "setup.h"
-
-#include "../include/smash/angles.h"
-#include "../include/smash/random.h"
-#include "../include/smash/scatteraction.h"
-#include "../include/smash/scatteractionmulti.h"
-#include "Pythia8/Pythia.h"
+#include "smash/scatteraction.h"
 
 #include <algorithm>
+
+#include "Pythia8/Pythia.h"
+
+#include "setup.h"
+#include "smash/angles.h"
+#include "smash/random.h"
+#include "smash/scatteractionmulti.h"
 
 using namespace smash;
 using smash::Test::Momentum;

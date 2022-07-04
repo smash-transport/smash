@@ -7,11 +7,11 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
+
+#include "smash/filelock.h"
 
 #include "setup.h"
-
-#include "../include/smash/filelock.h"
 
 using namespace smash;
 

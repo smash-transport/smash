@@ -1,6 +1,6 @@
 #include <filesystem>
 
-#include <gsl/gsl_sf_bessel.h>
+#include "gsl/gsl_sf_bessel.h"
 
 #include "smash/decaymodes.h"
 #include "smash/forwarddeclarations.h"

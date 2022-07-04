@@ -7,12 +7,12 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
+
+#include "smash/hadgas_eos.h"
 
 #include "setup.h"
-
-#include "../include/smash/constants.h"
-#include "../include/smash/hadgas_eos.h"
+#include "smash/constants.h"
 
 using namespace smash;
 

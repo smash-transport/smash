@@ -51,8 +51,8 @@ std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value> logg;
 template <int index, int stop = 0>
 constexpr typename std::enable_if<(index == stop), int>::type
 find_longest_logger_name() {
-  using LogAreaTag = typename std::remove_reference<decltype(
-      std::get<index>(std::declval<LogArea::AreaTuple &>()))>::type;
+  using LogAreaTag = typename std::remove_reference<decltype(std::get<index>(
+      std::declval<LogArea::AreaTuple &>()))>::type;
   return LogAreaTag::textual_length();
 }
 
@@ -101,8 +101,9 @@ template <std::size_t index,
           int longest_name = find_longest_logger_name<index - 1>()>
 inline typename std::enable_if<(index != 0)>::type create_all_loggers_impl(
     Configuration &config) {
-  using LogAreaTag = typename std::remove_reference<decltype(
-      std::get<index - 1>(std::declval<LogArea::AreaTuple &>()))>::type;
+  using LogAreaTag =
+      typename std::remove_reference<decltype(std::get<index - 1>(
+          std::declval<LogArea::AreaTuple &>()))>::type;
   static_assert(LogAreaTag::id == index - 1,
                 "The order of types in LogArea::AreaTuple does not match the "
                 "id values in the LogArea types. Please fix! (see top of "

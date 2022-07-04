@@ -7,14 +7,13 @@
  *
  */
 
-#include <vir/test.h>
+#include "vir/test.h"
 
 #include "setup.h"
-
-#include "../include/smash/formfactors.h"
-#include "../include/smash/isoparticletype.h"
-#include "../include/smash/kinematics.h"
-#include "../include/smash/particletype.h"
+#include "smash/formfactors.h"
+#include "smash/isoparticletype.h"
+#include "smash/kinematics.h"
+#include "smash/particletype.h"
 
 using namespace smash;
 

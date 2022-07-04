@@ -7,12 +7,12 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
 #include <filesystem>
 
-#include "../include/smash/collidermodus.h"
 #include "setup.h"
+#include "smash/collidermodus.h"
 
 using namespace smash;
 

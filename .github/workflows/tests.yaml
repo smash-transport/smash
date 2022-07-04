@@ -70,13 +70,6 @@ jobs:
         # we download and install Pythia
         wget https://pythia.org/download/pythia83/pythia8307.tgz && tar xf pythia8307.tgz && rm pythia8307.tgz && cd pythia8307
         ./configure --cxx-common='-std=c++17 -march=native -mfpmath=sse -O3 -fPIC -pthread' && make -j$(nproc) && cd ..
-        # we download and unpack clang
-        if [ $SITE == "mac" ]; then curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz;
-        else curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz; fi &&
-        mkdir clang6_0_0 && tar -xf clang6_0_0.tar.xz -C clang6_0_0 --strip-components=1
-        # we install cmake-format in a dedicated directory and adjust environment
-        mkdir $SMASH_ROOT/python-tools && pip install --target $SMASH_ROOT/python-tools cmakelang==0.6.13
-        export PYTHONPATH=$SMASH_ROOT/python-tools:$PYTHONPATH
         # we get eigen
         wget http://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && tar -xf eigen-3.4.0.tar.gz -C $HOME
         # we get cpplint
@@ -102,12 +95,12 @@ jobs:
       run: |
         # we set the smash root directory
         export SMASH_ROOT=$PWD
-        # we download and unpack clang to have clang-format available
-        curl -# -o clang6_0_0.tar.xz https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz &&
-        mkdir clang6_0_0 && tar -xf clang6_0_0.tar.xz -C clang6_0_0 --strip-components=1 && rm clang6_0_0.tar.xz
+        # we download and unpack clang to have clang-format available, curl -L to follow redirects
+        curl -# -L -o clang13_0_0.tar.xz https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz &&
+        mkdir clang13_0_0 && tar -xf clang13_0_0.tar.xz -C clang13_0_0 --strip-components=1 && rm clang13_0_0.tar.xz
         # we install cmake-format in a dedicated directory and adjust environment
         mkdir $SMASH_ROOT/python-tools && pip install --target $SMASH_ROOT/python-tools cmakelang==0.6.13
         export PYTHONPATH=$SMASH_ROOT/python-tools:$PYTHONPATH
         # we check the correct formatting of the code
-        PATH=$SMASH_ROOT/clang6_0_0/bin/:$PATH ./../bin/codebase-format-helper.bash C++ -t
+        PATH=$SMASH_ROOT/clang13_0_0/bin/:$PATH ./../bin/codebase-format-helper.bash C++ -t
         PATH=$SMASH_ROOT/python-tools/bin/:$PATH ./../bin/codebase-format-helper.bash CMake -t

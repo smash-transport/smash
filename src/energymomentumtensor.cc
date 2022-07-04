@@ -12,7 +12,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include <Eigen/Dense>  // NOLINT(build/include_order)
+#include "Eigen/Dense"
 
 #include "smash/logging.h"
 #include "smash/numerics.h"

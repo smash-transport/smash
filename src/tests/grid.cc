@@ -7,15 +7,15 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
-#include "setup.h"
-
-#include "../include/smash/grid.h"
-#include "../include/smash/logging.h"
+#include "smash/grid.h"
 
 #include <set>
 #include <unordered_set>
+
+#include "setup.h"
+#include "smash/logging.h"
 
 using namespace smash;
 

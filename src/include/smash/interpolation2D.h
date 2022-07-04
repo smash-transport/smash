@@ -10,9 +10,9 @@
 #ifndef SRC_INCLUDE_SMASH_INTERPOLATION2D_H_
 #define SRC_INCLUDE_SMASH_INTERPOLATION2D_H_
 
-#include <gsl/gsl_spline2d.h>
-
 #include <vector>
+
+#include "gsl/gsl_spline2d.h"
 
 namespace smash {
 

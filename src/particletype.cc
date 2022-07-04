@@ -10,6 +10,7 @@
 #include "smash/particletype.h"
 
 #include <assert.h>
+
 #include <algorithm>
 #include <map>
 #include <vector>

@@ -5,11 +5,10 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
 #include "setup.h"
-
-#include "../include/smash/decayactiondilepton.h"
+#include "smash/decayactiondilepton.h"
 
 using namespace smash;
 

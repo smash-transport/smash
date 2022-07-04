@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "HepMC3/Writer.h"
+
 #include "hepmcinterface.h"
 
 namespace smash {

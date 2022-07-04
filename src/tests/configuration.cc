@@ -7,15 +7,15 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
-#include "setup.h"
+#include "smash/configuration.h"
 
 #include <filesystem>
 
-#include "../include/smash/configuration.h"
-#include "../include/smash/forwarddeclarations.h"
-#include "../include/smash/macros.h"
+#include "setup.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/macros.h"
 
 using namespace smash;
 

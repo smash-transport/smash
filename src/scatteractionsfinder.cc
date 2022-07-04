@@ -459,9 +459,9 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   const double distance_squared =
       (coll_crit_ == CollisionCriterion::Geometric)
           ? act->transverse_distance_sqr()
-          : (coll_crit_ == CollisionCriterion::Covariant)
-                ? act->cov_transverse_distance_sqr()
-                : 0.0;
+      : (coll_crit_ == CollisionCriterion::Covariant)
+          ? act->cov_transverse_distance_sqr()
+          : 0.0;
 
   // Don't calculate cross section if the particles are very far apart.
   // Not needed for stochastic criterion because of cell structure.
@@ -782,11 +782,10 @@ void ScatterActionsFinder::dump_reactions() const {
                 r = A_type->name() + B_type->name() + std::string(" → strings");
               } else {
                 std::string r_type =
-                    (type == ProcessType::Elastic)
-                        ? std::string(" (el)")
-                        : (channel->get_type() == ProcessType::TwoToTwo)
-                              ? std::string(" (inel)")
-                              : std::string(" (?)");
+                    (type == ProcessType::Elastic) ? std::string(" (el)")
+                    : (channel->get_type() == ProcessType::TwoToTwo)
+                        ? std::string(" (inel)")
+                        : std::string(" (?)");
                 r = A_type->name() + B_type->name() + std::string(" → ") +
                     channel->particle_types()[0]->name() +
                     channel->particle_types()[1]->name() + r_type;

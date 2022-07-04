@@ -7,20 +7,20 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
-#include "setup.h"
-
-#include "../include/smash/constants.h"
-#include "../include/smash/deformednucleus.h"
-#include "../include/smash/fourvector.h"
-#include "../include/smash/nucleus.h"
-#include "../include/smash/particledata.h"
-#include "../include/smash/pdgcode.h"
-#include "../include/smash/pow.h"
+#include "smash/deformednucleus.h"
 
 #include <map>
 #include <vector>
+
+#include "setup.h"
+#include "smash/constants.h"
+#include "smash/fourvector.h"
+#include "smash/nucleus.h"
+#include "smash/particledata.h"
+#include "smash/pdgcode.h"
+#include "smash/pow.h"
 
 namespace particles_txt {
 #include <particles.txt.h>

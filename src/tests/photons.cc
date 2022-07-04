@@ -5,13 +5,12 @@
  *    GNU General Public License (GPLv3 or later)
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
 #include "setup.h"
-
-#include "../include/smash/bremsstrahlungaction.h"
-#include "../include/smash/crosssectionsphoton.h"
-#include "../include/smash/scatteractionphoton.h"
+#include "smash/bremsstrahlungaction.h"
+#include "smash/crosssectionsphoton.h"
+#include "smash/scatteractionphoton.h"
 
 using namespace smash;
 using smash::Test::Momentum;

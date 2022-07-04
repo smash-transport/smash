@@ -9,13 +9,13 @@
 #ifndef SRC_INCLUDE_SMASH_HADGAS_EOS_H_
 #define SRC_INCLUDE_SMASH_HADGAS_EOS_H_
 
-#include <gsl/gsl_multiroots.h>
-#include <gsl/gsl_roots.h>
-#include <gsl/gsl_vector.h>
-
 #include <array>
 #include <string>
 #include <vector>
+
+#include "gsl/gsl_multiroots.h"
+#include "gsl/gsl_roots.h"
+#include "gsl/gsl_vector.h"
 
 #include "constants.h"
 #include "particletype.h"

@@ -8,6 +8,7 @@
  */
 
 #include "smash/density.h"
+
 #include "smash/constants.h"
 #include "smash/logging.h"
 

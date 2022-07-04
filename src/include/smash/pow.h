@@ -21,11 +21,10 @@ namespace smash {
  */
 template <class T>
 inline constexpr T pow_int(const T base, unsigned const exponent) {
-  return (exponent == 0)
-             ? 1
-             : (exponent % 2 == 0)
-                   ? pow_int(base, exponent / 2) * pow_int(base, exponent / 2)
-                   : base * pow_int(base, exponent - 1);
+  return (exponent == 0) ? 1
+         : (exponent % 2 == 0)
+             ? pow_int(base, exponent / 2) * pow_int(base, exponent / 2)
+             : base * pow_int(base, exponent - 1);
 }
 
 /**

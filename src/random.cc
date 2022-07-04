@@ -8,7 +8,9 @@
  */
 
 #include "smash/random.h"
+
 #include <random>
+
 #include "smash/logging.h"
 
 namespace smash {

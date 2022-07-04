@@ -7,9 +7,9 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
-#include "../include/smash/numeric_cast.h"
+#include "smash/numeric_cast.h"
 
 TEST_CATCH(expect_overflow, std::overflow_error) {
   const size_t input = -1;

@@ -7,12 +7,13 @@
  *
  */
 
-#include <vir/test.h>
+#include "vir/test.h"
 
 #include <map>
 #include <string>
-#include "../include/smash/nucleus.h"
-#include "../include/smash/pdgcode.h"
+
+#include "smash/nucleus.h"
+#include "smash/pdgcode.h"
 
 using namespace smash;
 

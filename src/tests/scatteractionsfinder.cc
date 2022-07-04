@@ -7,17 +7,17 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
-#include "setup.h"
+#include "smash/scatteractionsfinder.h"
 
 #include <cstdio>
 
-#include "../include/smash/action.h"
-#include "../include/smash/constants.h"
-#include "../include/smash/particledata.h"
-#include "../include/smash/pdgcode.h"
-#include "../include/smash/scatteractionsfinder.h"
+#include "setup.h"
+#include "smash/action.h"
+#include "smash/constants.h"
+#include "smash/particledata.h"
+#include "smash/pdgcode.h"
 
 using namespace smash;
 

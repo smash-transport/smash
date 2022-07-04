@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_NUMERICS_H_
 
 #include <cmath>
+
 #include "constants.h"
 
 /**

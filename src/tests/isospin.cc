@@ -7,13 +7,12 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
 
 #include "setup.h"
-
-#include "../include/smash/action.h"
-#include "../include/smash/crosssections.h"
-#include "../include/smash/scatteraction.h"
+#include "smash/action.h"
+#include "smash/crosssections.h"
+#include "smash/scatteraction.h"
 
 using namespace smash;
 

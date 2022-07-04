@@ -68,8 +68,8 @@ function check_formatter_version()
     language="$1"
     found=$(${FORMATTER_COMMAND[${language}]} --version)
     if [[ ${language} = 'C++' ]]; then
-        required='6.0.0'
-        found="${found:21:5}"
+        required='13.0.0'
+        found="${found:21:6}"
     elif [[ ${language} = 'CMake' ]]; then
         required='0.6.13'
     fi

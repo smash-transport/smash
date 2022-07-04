@@ -4,10 +4,11 @@
  *
  *    GNU General Public License (GPLv3 or later)
  */
+#include "smash/fourvector.h"
+
 #include <cmath>
 #include <iostream>
 
-#include "smash/fourvector.h"
 #include "smash/iomanipulators.h"
 #include "smash/numerics.h"
 

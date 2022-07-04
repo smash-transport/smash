@@ -7,11 +7,11 @@
  *
  */
 
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
+
+#include "smash/sha256.h"
 
 #include <string>
-
-#include "../include/smash/sha256.h"
 
 using namespace smash;
 

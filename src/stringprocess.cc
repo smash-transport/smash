@@ -7,13 +7,14 @@
  *
  */
 
+#include "smash/stringprocess.h"
+
 #include <array>
 
 #include "smash/angles.h"
 #include "smash/kinematics.h"
 #include "smash/pow.h"
 #include "smash/random.h"
-#include "smash/stringprocess.h"
 
 namespace smash {
 static constexpr int LOutput = LogArea::Output::id;

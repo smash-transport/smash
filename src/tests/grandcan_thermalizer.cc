@@ -6,14 +6,14 @@
  *    GNU General Public License (GPLv3 or later)
  *
  */
-#include <vir/test.h>  // This include has to be first
+#include "vir/test.h"  // This include has to be first
+
+#include "smash/grandcan_thermalizer.h"
 
 #include "setup.h"
-
-#include "../include/smash/boxmodus.h"
-#include "../include/smash/grandcan_thermalizer.h"
-#include "../include/smash/logging.h"
-#include "../include/smash/thermalizationaction.h"
+#include "smash/boxmodus.h"
+#include "smash/logging.h"
+#include "smash/thermalizationaction.h"
 
 using namespace smash;
 

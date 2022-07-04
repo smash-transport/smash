@@ -12,13 +12,13 @@
 
 #include <filesystem>
 
-#include "../include/smash/decaymodes.h"
-#include "../include/smash/experiment.h"
-#include "../include/smash/outputinterface.h"
-#include "../include/smash/particledata.h"
-#include "../include/smash/particles.h"
-#include "../include/smash/particletype.h"
-#include "../include/smash/random.h"
+#include "smash/decaymodes.h"
+#include "smash/experiment.h"
+#include "smash/outputinterface.h"
+#include "smash/particledata.h"
+#include "smash/particles.h"
+#include "smash/particletype.h"
+#include "smash/random.h"
 
 namespace smash {
 namespace Test {
