@@ -81,6 +81,7 @@ static constexpr int HyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * <div class="line">
  * t x y z mass p0 px py pz pdg ID charge ncoll form_time xsecfac
  * proc_id_origin proc_type_origin time_last_coll pdg_mother1 pdg_mother2
+ * baryon_number
  * </div></div>
  * \li \key proc_id_origin, \key proc_type_orgin record the id and type of
  * the last reaction that the particle has experienced.
@@ -93,6 +94,8 @@ static constexpr int HyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * to 0. If it is produced in a thermal bubble, then both the pdg_mother1 and
  * pdg_mother2 are set equal to zero. Both the pdg numbers are not affected
  * by elastic scatterings.
+ * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1 for
+ * anti-baryons and 0 for mesons.
  *
  * **Event end line**
  * \code
@@ -191,6 +194,7 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
     write(history.time_last_collision);
     write(history.p1.get_decimal());
     write(history.p2.get_decimal());
+    write(p.type().baryon_number());
   }
 }
 

@@ -293,6 +293,8 @@ void RootOutput::init_trees() {
                               "pdg_mother1[npart]/I");
       particles_tree_->Branch("pdg_mother2", &pdg_mother2_[0],
                               "pdg_mother2[npart]/I");
+      particles_tree_->Branch("baryon_number", &baryon_number_[0],
+                              "baryon_number[npart]/I");
     }
   }
 
@@ -334,6 +336,8 @@ void RootOutput::init_trees() {
                                "pdg_mother1[npart]/I");
       collisions_tree_->Branch("pdg_mother2", &pdg_mother2_[0],
                                "pdg_mother2[npart]/I");
+      collisions_tree_->Branch("baryon_number", &baryon_number_[0],
+                               "baryon_number[npart]/I");
     }
   }
 }
@@ -491,6 +495,7 @@ void RootOutput::particles_to_tree(T &particles) {
         proc_type_origin_[i] = static_cast<int>(h.process_type);
         pdg_mother1_[i] = h.p1.get_decimal();
         pdg_mother2_[i] = h.p2.get_decimal();
+        baryon_number_[i] = p.type().baryon_number();
       }
 
       i++;
@@ -546,6 +551,7 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
         proc_type_origin_[i] = static_cast<int>(h.process_type);
         pdg_mother1_[i] = h.p1.get_decimal();
         pdg_mother2_[i] = h.p2.get_decimal();
+        baryon_number_[i] = p.type().baryon_number();
       }
 
       i++;

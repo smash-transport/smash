@@ -39,7 +39,7 @@ TEST(directory_is_created) {
 
 TEST(init_particletypes) { Test::create_smashon_particletypes(); }
 
-static const int current_format_version = 7;
+static const int current_format_version = 8;
 
 /* A set of convenient functions to read binary */
 
@@ -85,7 +85,8 @@ static bool compare_particle(const ParticleData &p, const FilePtr &file) {
 static void compare_particle_extended(const ParticleData &p,
                                       const FilePtr &file) {
   VERIFY(compare_particle(p, file));
-  int collisions_per_particle, id_process, process_type, p1pdg, p2pdg;
+  int collisions_per_particle, id_process, process_type, p1pdg, p2pdg,
+      baryon_number;
   double formation_time, xs_scaling_factor, time_last_collision;
   const auto h = p.get_history();
   read_binary(collisions_per_particle, file);
@@ -96,6 +97,7 @@ static void compare_particle_extended(const ParticleData &p,
   read_binary(time_last_collision, file);
   read_binary(p1pdg, file);
   read_binary(p2pdg, file);
+  read_binary(baryon_number, file);
   COMPARE(collisions_per_particle, h.collisions_per_particle);
   COMPARE(formation_time, p.formation_time());
   COMPARE(xs_scaling_factor, p.xsec_scaling_factor());
@@ -104,6 +106,7 @@ static void compare_particle_extended(const ParticleData &p,
   COMPARE(time_last_collision, h.time_last_collision);
   COMPARE(p1pdg, h.p1.get_decimal());
   COMPARE(p2pdg, h.p2.get_decimal());
+  COMPARE(baryon_number, p.type().baryon_number());
 }
 
 /* function to read and compare particle block header */

@@ -203,6 +203,7 @@ class RootOutput : public OutputInterface {
   std::vector<int> proc_type_origin_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> pdg_mother1_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> pdg_mother2_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<int> baryon_number_ = std::vector<int>(max_buffer_size_, 0);
   int npart_, tcounter_, ev_, nin_, nout_, test_p_;
   double wgt_, par_wgt_, impact_b_, modus_l_, current_t_;
   double E_kinetic_tot_, E_fields_tot_, E_tot_;
