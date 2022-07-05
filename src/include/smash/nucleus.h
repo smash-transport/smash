@@ -236,7 +236,7 @@ class Nucleus {
    */
   // This function as well as nucleon_density_unnormalized could in principle
   // be defined without the second argument
-  virtual double nucleon_density(double r, double) const;
+  virtual double nucleon_density(double r, double, double) const;
   /**
    * Return the unnormalized Woods-Saxon distribution for the given position
    * without deformation.
@@ -244,7 +244,7 @@ class Nucleus {
    * \param[in] r The radius
    * \return The unnormalized Woods-Saxon distribution
    */
-  virtual double nucleon_density_unnormalized(double r, double) const;
+  virtual double nucleon_density_unnormalized(double r, double, double) const;
   /**
    * \return the normalized ground state density for the corresponding
    * Woods-Saxon parameter. This is done by integrating the Woods-Saxon

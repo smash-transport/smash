@@ -106,7 +106,7 @@ class DeformedNucleus : public Nucleus {
    * \param[in] cosx The cosine of the polar angle at which to sample
    * \return The Woods-Saxon density
    */
-  double nucleon_density(double r, double cosx) const override;
+  double nucleon_density(double r, double cosx, double phi) const override;
   /**
    * Return the unnormalized deformed Woods-Saxon distribution for the given
    * position.
@@ -115,7 +115,7 @@ class DeformedNucleus : public Nucleus {
    * \param[in] cosx The cosine of the polar angle
    * \return The unnormalized Woods-Saxon distribution
    */
-  double nucleon_density_unnormalized(double r, double cosx) const override;
+  double nucleon_density_unnormalized(double r, double cosx, double phi) const override;
   /**
    * Set deformation coefficient for Y_2_0.
    * \param[in] b2 deformation coefficient for l=2

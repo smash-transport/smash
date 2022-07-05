@@ -123,7 +123,7 @@ ThreeVector DeformedNucleus::distribute_nucleon() {
     // sample r**2 dr
     a_radius = radius_max * std::cbrt(random::canonical());
   } while (random::canonical() >
-           nucleon_density(a_radius, a_direction.costheta()) /
+           nucleon_density(a_radius, a_direction.costheta(), a_direction.phi()) /
                Nucleus::get_saturation_density());
 
   // Update (x, y, z) positions.
@@ -290,31 +290,34 @@ void DeformedNucleus::rotate() {
   }
 }
 
-double y_l_0(int l, double cosx) {
-  if (l == 2) {
+double y_l_m(int l, int m, double cosx, double phi) {
+  if (l == 2 && m == 0) {
     return (1. / 4) * std::sqrt(5 / M_PI) * (3. * (cosx * cosx) - 1);
-  } else if (l == 4) {
+  } else if (l == 2 && m == 2) {
+    double sinx2 = 1. - cosx * cosx;
+    return (1. / 4) * std::sqrt(15 / (2. * M_PI)) * sinx2 * std::cos(2. * phi);
+  } else if (l == 4 && m == 0) {
     return (3. / 16) * std::sqrt(1 / M_PI) *
            (35. * (cosx * cosx) * (cosx * cosx) - 30. * (cosx * cosx) + 3);
   } else {
     throw std::domain_error(
-        "Not a valid angular momentum quantum number in y_l_0.");
+        "Not a valid angular momentum quantum number in y_l_m.");
   }
 }
 
-double DeformedNucleus::nucleon_density(double r, double cosx) const {
+double DeformedNucleus::nucleon_density(double r, double cosx, double phi) const {
   return Nucleus::get_saturation_density() /
          (1 + std::exp((r - Nucleus::get_nuclear_radius() *
-                                (1 + beta2_ * y_l_0(2, cosx) +
-                                 beta4_ * y_l_0(4, cosx))) /
+                                (1 + beta2_ * y_l_m(2, 0, cosx, phi) +
+                                 beta4_ * y_l_m(4, 0, cosx, phi))) /
                        Nucleus::get_diffusiveness()));
 }
 
 double DeformedNucleus::nucleon_density_unnormalized(double r,
-                                                     double cosx) const {
+                                                     double cosx, double phi) const {
   return 1.0 / (1 + std::exp((r - Nucleus::get_nuclear_radius() *
-                                      (1 + beta2_ * y_l_0(2, cosx) +
-                                       beta4_ * y_l_0(4, cosx))) /
+                                      (1 + beta2_ * y_l_m(2, 0, cosx, phi) +
+                                 beta4_ * y_l_m(4, 0, cosx, phi))) /
                              Nucleus::get_diffusiveness()));
 }
 
