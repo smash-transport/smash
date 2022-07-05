@@ -276,6 +276,7 @@ void DeformedNucleus::rotate() {
     Nucleus::random_euler_angles();
     set_azimuthal_angle(euler_phi_);
     set_polar_angle(euler_theta_);
+    set_angle_psi(euler_psi_);
   }
   for (auto &particle : *this) {
     /* Rotate every vector by the nuclear azimuth phi and polar angle
@@ -284,7 +285,7 @@ void DeformedNucleus::rotate() {
      * theta about the rotated x axis. The third angle psi is 0 by symmetry.*/
     ThreeVector three_pos = particle.position().threevec();
     three_pos.rotate(nuclear_orientation_.phi(), nuclear_orientation_.theta(),
-                     0.);
+                     nuclear_orientation_.psi());
     particle.set_3position(three_pos);
   }
 }

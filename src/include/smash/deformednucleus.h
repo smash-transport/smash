@@ -141,6 +141,13 @@ class DeformedNucleus : public Nucleus {
     nuclear_orientation_.set_phi(phi);
   }
   /**
+   * Set the angle psi.
+   * \param[in] psi Angle psi for properly rotating nucleus
+   */
+  inline void set_angle_psi(double psi) {
+    nuclear_orientation_.set_psi(psi);
+  }
+  /**
    * return the beta2 value.
    */
   inline double get_beta2() { return beta2_; }
