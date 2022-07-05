@@ -87,6 +87,13 @@ class Angles {
    */
   void set_phi(const double phi);
   /**
+   * Sets the euler angle psi.
+   *
+   * \param[in] psi Any real number to set the azimuthal angle \f$\varphi\f$
+   * to.
+   */
+  void set_psi(const double psi);
+  /**
    * Set the polar angle from its cosine.
    *
    * This is the preferred way of setting the polar information.
@@ -135,6 +142,8 @@ class Angles {
   bool add_to_theta(const double delta, const bool reverse);
   /// \return Azimuthal angle.
   double phi() const;
+  /// \return Euler angle.
+  double psi() const;
   /// \return Cosine of polar angle.
   double costheta() const;
   /// \return Sine of polar angle.
@@ -173,6 +182,8 @@ class Angles {
  private:
   /// Azimuthal angle \f$\varphi\f$.
   double phi_;
+  /// Euler angle \f$\psi\f$.
+  double psi_;
   /// Cosine of polar angle \f$\cos\vartheta\f$.
   double costheta_;
 };
@@ -196,6 +207,14 @@ void inline Angles::set_phi(const double newphi) {
   phi_ = newphi;
   if (newphi < 0 || newphi >= twopi) {
     phi_ -= twopi * std::floor(newphi / twopi);
+  }
+}
+
+void inline Angles::set_psi(const double newpsi) {
+  /* Make sure that phi is in the range [0,2pi).  */
+  psi_ = newpsi;
+  if (newpsi < 0 || newpsi >= twopi) {
+    psi_ -= twopi * std::floor(newpsi / twopi);
   }
 }
 
@@ -258,6 +277,7 @@ bool inline Angles::add_to_theta(const double delta, const bool reverse) {
 
 double inline Angles::costheta() const { return costheta_; }
 double inline Angles::phi() const { return phi_; }
+double inline Angles::psi() const { return psi_; }
 double inline Angles::sintheta() const {
   return std::sqrt(1.0 - costheta_ * costheta_);
 }
