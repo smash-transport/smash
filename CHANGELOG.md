@@ -33,6 +33,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now
+* The `Version` configuration key is not used anymore and should not be provided
 
 
 ## SMASH-2.2.1

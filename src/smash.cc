@@ -310,35 +310,6 @@ ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
   return ScatterActionsFinder(configuration, params);
 }
 
-/** Checks if the SMASH version is compatible with the version of the
- * configuration file
- *
- * \param[in] configuration The configuration object
- *
- * \throws Runtime error if versions do not match or if config version is
- * invalid
- */
-void check_config_version_is_compatible(Configuration configuration) {
-  const std::string smash_version = "1.8";
-  const std::set<std::string> compatible_config_versions = {"1.8"};
-
-  const std::string config_version = configuration.read({"Version"});
-
-  if (compatible_config_versions.find(config_version) ==
-      compatible_config_versions.end()) {
-    std::stringstream err;
-    err << "The version of the configuration file (" << config_version
-        << ") is not compatible with the SMASH version (" << smash_version
-        << ").\nThe following config versions are supported:\n";
-    for (auto it : compatible_config_versions) {
-      err << it << " ";
-    }
-    err << "\nPlease consider updating your config or using a compatible SMASH"
-           " version.";
-    throw std::runtime_error(err.str());
-  }
-}
-
 /**
  * Checks if there are unused config values.
  */
@@ -359,8 +330,8 @@ void check_for_unused_config_values(const Configuration &configuration) {
  */
 void ignore_simulation_config_values(Configuration &configuration) {
   for (const std::string s :
-       {"Version", "particles", "decaymodes", "Modi", "General", "Output",
-        "Lattice", "Potentials", "Forced_Thermalization"}) {
+       {"particles", "decaymodes", "Modi", "General", "Output", "Lattice",
+        "Potentials", "Forced_Thermalization"}) {
     if (configuration.has_value({s.c_str()})) {
       configuration.take({s.c_str()});
     }
@@ -516,7 +487,6 @@ int main(int argc, char *argv[]) {
     auto configuration = setup_config_and_logging(input_path, particles,
                                                   decaymodes, extra_config);
 
-    check_config_version_is_compatible(configuration);
     setup_default_float_traps();
 
     // Check output path
@@ -696,9 +666,13 @@ int main(int argc, char *argv[]) {
     logg[LMain].trace(SMASH_SOURCE_LOCATION, " create Experiment");
     auto experiment = ExperimentBase::create(configuration, output_path);
 
-    // Version value is not used in experiment. Get rid of it to prevent
-    // warning.
-    configuration.take({"Version"});
+    // Version key is not used anymore. If present, warn user and ignore it.
+    if (configuration.has_value({"Version"})) {
+      logg[LMain].warn(
+          "The 'Version' configuration key is not used anymore and should not "
+          "be provided.");
+      configuration.take({"Version"});
+    }
     check_for_unused_config_values(configuration);
 
     // Run the experiment
