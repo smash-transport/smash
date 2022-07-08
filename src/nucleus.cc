@@ -502,7 +502,7 @@ double Nucleus::calculate_saturation_density() const {
   // the result only after the seventh digit which should not be relevant here.
   const auto result = integrate(0.01, 1, -1, 1, [&](double t, double cosx) {
     const double r = (1 - t) / t;
-    return twopi * std::pow(r, 2.0) * nucleon_density_unnormalized(r, cosx) /
+    return twopi * std::pow(r, 2.0) * nucleon_density_unnormalized(r, cosx, 0.0) /
            std::pow(t, 2.0);
   });
   const auto rho0 = number_of_particles() / result.value();

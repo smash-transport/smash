@@ -321,4 +321,40 @@ double DeformedNucleus::nucleon_density_unnormalized(double r,
                              Nucleus::get_diffusiveness()));
 }
 
+double DeformedNucleus::integrant_nucleon_density_phi(double r, double cosx) const{
+  Integrator integrate;
+  // Perform the phi integration
+  const auto result = integrate(0.0, 2.0 * M_PI, [&](double phi) {
+      return nucleon_density_unnormalized(r, cosx, phi);
+  });
+  return result.value();
+}
+
+double DeformedNucleus::calculate_saturation_density() const {
+  Integrator2d integrate;
+  // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
+  // To prevent overflow, the integration is only performed to t = 0.01 which
+  // corresponds to r = 99fm. Additionally the precision settings in the
+  // Integrator2d scheme are equally important. However both these point affect
+  // the result only after the seventh digit which should not be relevant here.
+  if (gamma_ == 0.0){
+      const auto result = integrate(0.01, 1, -1, 1, [&](double t, double cosx) {
+      const double r = (1 - t) / t;
+      return twopi * std::pow(r, 2.0) * nucleon_density_unnormalized(r, cosx, 0.0) /
+            std::pow(t, 2.0);
+    });
+    const auto rho0 = number_of_particles() / result.value();
+    return rho0;
+  }
+  else {
+      const auto result = integrate(0.01, 1, -1, 1, [&](double t, double cosx) {
+      const double r = (1 - t) / t;
+      return std::pow(r, 2.0) * integrant_nucleon_density_phi(r, cosx) /
+            std::pow(t, 2.0);
+    });
+    const auto rho0 = number_of_particles() / result.value();
+    return rho0;
+  }
+}
+
 }  // namespace smash

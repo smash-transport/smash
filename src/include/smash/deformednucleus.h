@@ -18,13 +18,15 @@
 namespace smash {
 
 /**
- * Spherical harmonics Y_2_0 and Y_4_0.
+ * Spherical harmonics Y_2_0, Y_2_2 and Y_4_0.
  * \param[in] l Angular momentum value (2 and 4 are supported)
+ * \param[in] m projection value (l = 2 and m = 2 are supported)
  * \param[in] cosx Cosine of the polar angle
+ * \param[in] phi Azimuthal angle 
  * \return Value of the corresponding spherical harmonic
  * \throws domain_error if unsupported l is encountered
  */
-double y_l_0(int l, double cosx);
+double y_l_m(int l, int m, double cosx, double phi);
 
 /**
  * DeformedNucleus: Child of nucleus for deformed nuclei.
@@ -104,6 +106,7 @@ class DeformedNucleus : public Nucleus {
    *
    * \param[in] r The radius at which to sample
    * \param[in] cosx The cosine of the polar angle at which to sample
+   * \param[in] phi The azimuthal angle at which to sample
    * \return The Woods-Saxon density
    */
   double nucleon_density(double r, double cosx, double phi) const override;
@@ -113,14 +116,37 @@ class DeformedNucleus : public Nucleus {
    *
    * \param[in] r The radius
    * \param[in] cosx The cosine of the polar angle
+   * \param[in] phi The azimuthal angle
    * \return The unnormalized Woods-Saxon distribution
    */
   double nucleon_density_unnormalized(double r, double cosx, double phi) const override;
+  /**
+   * Return the integral over the azimuthal angle phi
+   *
+   * \param[in] r The radius
+   * \param[in] cosx The cosine of the polar angle
+   * \return The unnormalized Woods-Saxon distribution integrated over dphi
+   */
+  double integrant_nucleon_density_phi(double r, double cosx) const;
+  /**
+   * \return the normalized ground state density for the corresponding
+   * Woods-Saxon parameter. This is done by integrating the Woods-Saxon
+   * distribution and setting the normalization such that the integral of the
+   * Woods-Saxon distribution yields the number of particles in the nucleus
+   * \f$\int\rho(r)d^3r = N_{particles}\f$.
+   *
+   */
+  virtual double calculate_saturation_density() const override;
   /**
    * Set deformation coefficient for Y_2_0.
    * \param[in] b2 deformation coefficient for l=2
    */
   inline void set_beta_2(double b2) { beta2_ = b2; }
+  /**
+   * Set deformation coefficient for Y_4_0.
+   * \param[in] b4 deformation coefficient for l=4
+   */
+  inline void set_gamma(double ga) { gamma_ = ga; }
   /**
    * Set deformation coefficient for Y_4_0.
    * \param[in] b4 deformation coefficient for l=4
@@ -159,6 +185,8 @@ class DeformedNucleus : public Nucleus {
  private:
   /// Deformation parameter for angular momentum l=2.
   double beta2_ = 0.0;
+  /// Triaxiality parameter for angular momentum l=2.
+  double gamma_ = 0.0;
   /// Deformation parameter for angular momentum l=4.
   double beta4_ = 0.0;
   /**
