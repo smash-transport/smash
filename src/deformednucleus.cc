@@ -99,10 +99,10 @@ DeformedNucleus::DeformedNucleus(Configuration &config, int nTest,
     : Nucleus(config, nTest) {
   if (auto_deformation) {
     set_deformation_parameters_automatic();
-    set_saturation_density(calculate_saturation_density());
   } else {
     set_deformation_parameters_from_config(config);
   }
+  set_saturation_density(calculate_saturation_density());
   if (config.has_value({"Deformed", "Orientation"})) {
     Configuration subconfig = config["Deformed"]["Orientation"];
     set_orientation_from_config(subconfig);
@@ -311,16 +311,18 @@ double y_l_m(int l, int m, double cosx, double phi) {
 double DeformedNucleus::nucleon_density(double r, double cosx, double phi) const {
   return Nucleus::get_saturation_density() /
          (1 + std::exp((r - Nucleus::get_nuclear_radius() *
-                                (1 + beta2_ * y_l_m(2, 0, cosx, phi) +
-                                 beta4_ * y_l_m(4, 0, cosx, phi))) /
-                       Nucleus::get_diffusiveness()));
+                                (1 + \
+                                beta2_ * (std::cos(gamma_) * y_l_m(2, 0, cosx, phi) + std::sqrt(2) * std::sin(gamma_) * y_l_m(2, 2, cosx, phi)) + \
+                                beta4_ * y_l_m(4, 0, cosx, phi))) /
+                             Nucleus::get_diffusiveness()));
 }
 
 double DeformedNucleus::nucleon_density_unnormalized(double r,
                                                      double cosx, double phi) const {
   return 1.0 / (1 + std::exp((r - Nucleus::get_nuclear_radius() *
-                                      (1 + beta2_ * y_l_m(2, 0, cosx, phi) +
-                                 beta4_ * y_l_m(4, 0, cosx, phi))) /
+                                      (1 + \
+                                      beta2_ * (std::cos(gamma_) * y_l_m(2, 0, cosx, phi) + std::sqrt(2) * std::sin(gamma_) * y_l_m(2, 2, cosx, phi)) + \
+                                      beta4_ * y_l_m(4, 0, cosx, phi))) /
                              Nucleus::get_diffusiveness()));
 }
 
