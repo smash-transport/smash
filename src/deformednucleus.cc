@@ -231,6 +231,9 @@ void DeformedNucleus::set_deformation_parameters_from_config(
   if (config.has_value({"Deformed", "Beta_2"})) {
     set_beta_2(static_cast<double>(config.take({"Deformed", "Beta_2"})));
   }
+  if (config.has_value({"Deformed", "Gamma"})) {
+    set_gamma(static_cast<double>(config.take({"Deformed", "Gamma"})));
+  }
   if (config.has_value({"Deformed", "Beta_4"})) {
     set_beta_4(static_cast<double>(config.take({"Deformed", "Beta_4"})));
   }
