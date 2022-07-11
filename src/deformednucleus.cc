@@ -267,6 +267,18 @@ void DeformedNucleus::set_orientation_from_config(
     }
   }
 
+  if (orientation_config.has_value({"Psi"})) {
+    if (orientation_config.has_value({"Random_Rotation"}) &&
+        orientation_config.take({"Random_Rotation"})) {
+      throw std::domain_error(
+          "Random rotation of nuclei is activated although"
+          " psi is provided. Please specify only either of them. ");
+    } else {
+      set_angle_psi(
+          static_cast<double>(orientation_config.take({"Psi"})));
+    }
+  }
+
   if (orientation_config.take({"Random_Rotation"}, false)) {
     random_rotation_ = true;
   }
