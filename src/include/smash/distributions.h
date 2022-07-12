@@ -50,20 +50,6 @@ double breit_wigner_nonrel(double m, double pole, double width);
 double cauchy(double x, double pole, double width);
 
 /**
- * Returns the Maxwell-Boltzmann distribution
- *
- * \todo rename the following 4 functions to make clear what they are
- * and check if they are actually used
- *
- * \param[in] energy \f$E\f$ (in GeV)
- * \param[in] momentum_sqr squared \f$p\f$ (in GeV\f$^2\f$)
- * \param[in] temperature \f$T\f$ (in GeV)
- *
- * \return \f$4\pi p^2 \exp{-\frac{E}{T}}\f$
- */
-double density_integrand(const double energy, const double momentum_sqr,
-                         const double temperature);
-/**
  * density_integrand_mass - off_equilibrium distribution for massive
  * particles
  *
