@@ -1,8 +1,8 @@
 
 ---
-1. [Customizing SMASH installation](INSTALL.md#smash-installation)
-1. [Customizing SMASH compilation](INSTALL.md#building-smash)
 1. [More information about prerequisites](INSTALL.md#about-prerequisites)
+1. [Customizing SMASH compilation](INSTALL.md#building-smash)
+1. [Customizing SMASH installation](INSTALL.md#smash-installation)
 1. [Frequently asked questions](INSTALL.md#faq)
    * [SMASH does not compile. What should I do?](INSTALL.md#smash-does-not-compile-what-should-i-do)
    * [SMASH crashes with "illegal instruction". Why?](INSTALL.md#smash-crashes-with-illegal-instruction-why)
@@ -17,52 +17,6 @@
 
 In the following, whenever the `make` command is said to be used, you can specify the `-j` option followed by the number of CPU cores that should be used in parallel, e.g. `-j3` to use three cores.
 This will speed up compilation considerably.
-
-
-
-## SMASH installation
-
-Installing SMASH gives the advantage that it is possible to simply use the `smash` command from anywhere in order to run SMASH.
-
-The default installation done via `make install` installs SMASH into `/usr/local`.
-If you want to change the installation directory, define `CMAKE_INSTALL_PREFIX` when configuring the source tree.
-For example, if you want to install SMASH in `~/.local`, use
-```console
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
-make install
-```
-
-By specifying `-DCMAKE_INSTALL_PREFIX=prefix`,
-* `prefix/bin` will contain programs - e.g., `smash`,
-* `prefix/lib` will contain libraries - e.g., `libsmash.so`,
-* `prefix/include/smash` will contain headers, and
-* `prefix/share/smash` will contain data files.
-
-
-
-## Building SMASH
-
-The bare minimum needed to build SMASH from within its repository reads:
-```console
-mkdir build
-cd build
-cmake -DPythia_CONFIG_EXECUTABLE=[...]/pythia8307/bin/pythia8-config ..
-make
-```
-
-However, CMake offers plenty of possible customizations, partly natively and partly created ad-hoc for SMASH.
-In the following, the relevant explanation about these can be found and users should collect the relevant information for their case and build the appropriate `cmake` command according to their needs.
-
-#### Alternatives to specify the installation directory of Pythia
-
-A few GNU/Linux distributions provide pre-built Pythia binaries without `pythia8-config` binary.
-In this case, using the `-DPythia_CONFIG_EXECUTABLE` option as shown above is not possible and the top installation directory of Pythia containing `lib` has to be specified in either of the following ways:
-
-*  Either set the bash environment variables `PYTHIA8` or `PYTHIA_ROOT_DIR` (e.g. `export PYTHIA_ROOT_DIR=/opt/pythia8307`) or
-*  use the CMake `-DPYTHIA_ROOT_DIR` option (e.g. `cmake -DPYTHIA_ROOT_DIR=/opt/pythia8307 ..`).
-
-If no variables are set and no options are passed, CMake searches for Pythia under the default path `/usr`.
-To check which environment variables related to PYTHIA are currently set, use e.g. `printenv | grep PYTHIA`.
 
 
 
@@ -167,6 +121,52 @@ make install
 ```
 
 When setting up SMASH, use the `-DGSL_ROOT_DIR=${GSL}` CMake option to let CMake find your custom GSL installation.
+
+
+
+## Building SMASH
+
+The bare minimum needed to build SMASH from within its repository reads:
+```console
+mkdir build
+cd build
+cmake -DPythia_CONFIG_EXECUTABLE=[...]/pythia8307/bin/pythia8-config ..
+make
+```
+
+However, CMake offers plenty of possible customizations, partly natively and partly created ad-hoc for SMASH.
+In the following, the relevant explanation about these can be found and users should collect the relevant information for their case and build the appropriate `cmake` command according to their needs.
+
+#### Alternatives to specify the installation directory of Pythia
+
+A few GNU/Linux distributions provide pre-built Pythia binaries without `pythia8-config` binary.
+In this case, using the `-DPythia_CONFIG_EXECUTABLE` option as shown above is not possible and the top installation directory of Pythia containing `lib` has to be specified in either of the following ways:
+
+*  Either set the bash environment variables `PYTHIA8` or `PYTHIA_ROOT_DIR` (e.g. `export PYTHIA_ROOT_DIR=/opt/pythia8307`) or
+*  use the CMake `-DPYTHIA_ROOT_DIR` option (e.g. `cmake -DPYTHIA_ROOT_DIR=/opt/pythia8307 ..`).
+
+If no variables are set and no options are passed, CMake searches for Pythia under the default path `/usr`.
+To check which environment variables related to PYTHIA are currently set, use e.g. `printenv | grep PYTHIA`.
+
+
+
+## SMASH installation
+
+Installing SMASH gives the advantage that it is possible to simply use the `smash` command from anywhere in order to run SMASH.
+
+The default installation done via `make install` installs SMASH into `/usr/local`.
+If you want to change the installation directory, define `CMAKE_INSTALL_PREFIX` when configuring the source tree.
+For example, if you want to install SMASH in `~/.local`, use
+```console
+cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
+make install
+```
+
+By specifying `-DCMAKE_INSTALL_PREFIX=prefix`,
+* `prefix/bin` will contain programs - e.g., `smash`,
+* `prefix/lib` will contain libraries - e.g., `libsmash.so`,
+* `prefix/include/smash` will contain headers, and
+* `prefix/share/smash` will contain data files.
 
 
 
