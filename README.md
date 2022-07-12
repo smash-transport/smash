@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3484711.svg)](https://doi.org/10.5281/zenodo.3484711)
 
-SMASH (Simulating Many Accelerated Strongly-interacting Hadrons) is a relativistic hadronic transport approach for the dynamical description of heavy ion reactions.
+SMASH (Simulating Many Accelerated Strongly-interacting Hadrons) is a relativistic hadronic transport approach for the dynamical description of heavy-ion reactions.
 Please see [Phys. Rev. C 94, 054905 (2016)](https://arxiv.org/abs/1606.06642) for details and cite this reference together with the [software DOI](https://doi.org/10.5281/zenodo.3484711) for the specific code version employed, if you are using SMASH.
 A BibTeX entry for the software DOI is found on the respective Zenodo pages.
 
@@ -15,7 +15,7 @@ Report issues [on GitHub](https://github.com/smash-transport/smash/issues) or co
 
 ## How to build and install SMASH
 
-In the following you find a minimal quick start.
+In the following you can find a minimal quick start guide.
 Refer to the [INSTALL](INSTALL.md) file for more detailed information.
 
 ### Prerequisites
@@ -28,14 +28,14 @@ SMASH is known to compile and work on little endian machines with UNIX-like oper
 | Clang      |  7.0 or higher   |
 | Apple clang| 11.0 or higher   |
 
-Any different operating system and/or compiler and/or endianness is not officially supported.
+Any different operating system and/or compiler and/or endianness is not officially supported and SMASH will ask you to continue at your own risk before compilation.
 
 SMASH requires the following tools and libraries:
 
 | Software | Required version |
 |  :---:   |       :---:      |
 | [CMake](https://cmake.org) | 3.16 or higher |
-| [GNU Scientific Library](https://www.gnu.org/software/gsl/) | 2.0  or higher |
+| [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/) | 2.0  or higher |
 | [Eigen3 library](http://eigen.tuxfamily.org) | 3.0  or higher |
 | [Pythia](https://pythia.org) | 8.307 |
 
@@ -57,19 +57,22 @@ cmake -DPythia_CONFIG_EXECUTABLE=/path/to/pythia8307/bin/pythia8-config ..
 make
 ```
 
-To run it with specific settings, use e.g.
+You can run SMASH with specific settings (e.g. at a given collision energy or impact parameter) by modifying the config.yaml file, for example with
 ```console
 vi config.yaml
 ./smash
 ```
+Refer to the [section below](README.md#running-smash-with-example-input-files) for more information.
 
-If you want to install SMASH system wide (into `/usr/local`) use
+If you want to install SMASH system-wide (into `/usr/local`) use
 ```console
 make install
 ```
 
-**NOTE:** All commands above are the bare minimum needed.
-However, several different options can be passed e.g. to the `cmake` command and you can refer to the [INSTALL](INSTALL.md) file for some guidance.
+**NOTE:** All commands above are the bare minimum needed for an installation.
+It is not guaranteed that this minimum setup is appropriate for your needs or your specific computing environment.
+For example, several different options can be passed e.g. to the `cmake` command.
+We strongly advise you to further refer to the [INSTALL](INSTALL.md) file for more guidance, especially if you encounter any issues.
 
 
 ## Using the Docker containers
@@ -87,7 +90,7 @@ docker run -it ghcr.io/smash-transport/smash:newest
 
 A ready-to-use executable of SMASH is found in the `smash_bin` directory.
 Run it as explained below.
-SMASH can also be build inside the container as explained in the previous section (the SMASH source and Pythia are also found in the `/SMASH` directory).
+If needed, SMASH can also be build inside the container as explained in the previous section (the SMASH source files and Pythia are also found in the `/SMASH` directory).
 
 Two container versions of SMASH are offered: a small version (`ghcr.io/smash-transport/smash`) with a minimal set of dependencies
 pre-installed and a maximum version with all possible external dependencies, e.g. ROOT, HepMC and Rivet, already included (`ghcr.io/smash-transport/smash-max`).
@@ -121,7 +124,7 @@ In the box and the dileptons example, always from the `build` folder, this means
 ./smash -i ../input/dileptons/config.yaml -d ../input/dileptons/decaymodes.txt
 ```
 
-All command line options can be viewed with
+All available command line options for SMASH can be viewed with
 ```console
 ./smash -h
 ```

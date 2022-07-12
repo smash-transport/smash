@@ -7,7 +7,7 @@
    * [SMASH does not compile. What should I do?](INSTALL.md#smash-does-not-compile-what-should-i-do)
    * [SMASH crashes with "illegal instruction". Why?](INSTALL.md#smash-crashes-with-illegal-instruction-why)
    * [SMASH does not compile with pre-compiled ROOT binaries. What should I do?](INSTALL.md#smash-does-not-compile-with-pre-compiled-root-binaries-what-should-i-do)
-   * [I run out of memory compiling the code. Why?](INSTALL.md#i-run-out-of-memory-compiling-the-code-why)
+   * [I run out of disk space compiling the code. Why?](INSTALL.md#i-run-out-of-disk-space-compiling-the-code-why)
    * [How can I use a different compiler?](INSTALL.md#how-can-i-use-a-different-compiler)
    * [How to use the LLVM implementation of the C++ standard library?](INSTALL.md#how-to-use-the-llvm-implementation-of-the-c-standard-library)
    * [ROOT or HepMC are installed but CMake does not find them. What should I do?](INSTALL.md#root-or-hepmc-are-installed-but-cmake-does-not-find-them-what-should-i-do)
@@ -23,15 +23,16 @@ This will speed up compilation considerably.
 ## About prerequisites
 
 All UNIX-like operating systems offer package managers and it is highly encouraged to use these whenever possible.
-To mention a couple, you might use [Homebrew](https://brew.sh) on Apple machines or [APT](https://wiki.debian.org/Apt) on Debian distributions.
+To mention a couple, you might use [Homebrew](https://brew.sh) on Apple machines or [APT](https://wiki.debian.org/Apt) on Debian/Ubuntu distributions.
+The installation of compilers, CMake, GSL and Eigen3 libraries (just to mention some) should be straightforward with a package manager.
 
 It is very likely that a compiler among those supported is available out of the box on your operating system.
-However, some SMASH prerequisite is less probable to be available, Pythia first of all.
+However, some of the SMASH prerequisites are less likely to be already available, Pythia first of all.
 
 ### Building Pythia
 
 SMASH is tightly coupled to Pythia and thus requires a specific version, which is currently `8.307`.
-If the required version is not already installed or if there are issues with the available one, it is recommended to build Pythia with similar flags as used for SMASH.
+If the required version is not already installed or if there are issues with the available one, it is recommended to build Pythia with similar flags as used for SMASH, like in the example below.
 
 To download and build the needed version of Pythia, use the following commands:
 ```console
@@ -155,10 +156,10 @@ To check which environment variables related to PYTHIA are currently set, use e.
 Installing SMASH gives the advantage that it is possible to simply use the `smash` command from anywhere in order to run SMASH.
 
 The default installation done via `make install` installs SMASH into `/usr/local`.
-If you want to change the installation directory, define `CMAKE_INSTALL_PREFIX` when configuring the source tree.
+If you want to change the installation directory, use the `CMAKE_INSTALL_PREFIX` CMake option to specify a new location.
 For example, if you want to install SMASH in `~/.local`, use
 ```console
-cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
+cmake -DCMAKE_INSTALL_PREFIX=${HOME}/.local ..
 make install
 ```
 
@@ -196,7 +197,7 @@ There are three possible ways to fix this issue:
 
 If compilation of SMASH in combination with a pre-compiled ROOT binary fails, please install and compile ROOT locally from source (see http://root.cern.ch) and compile SMASH again in a clean build directory.
 
-### I run out of memory compiling the code. Why?
+### I run out of disk space compiling the code. Why?
 
 Please note that after compilation the `smash` directory (including `build`) might have a size of some GB.
 By default, the unit tests are always compiled, which requires a lot of the disk space.
