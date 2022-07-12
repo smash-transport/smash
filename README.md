@@ -20,7 +20,7 @@ Refer to the [INSTALL](INSTALL.md) file for more detailed information.
 
 ### Prerequisites
 
-SMASH is known to compile and work on little endian machines with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++17 features).
+SMASH is known to compile and work on little endian machines (most CPUs are such) with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++17 features).
 
 | Compiler   | Required version |
 |  :---:     |       :---:      |
@@ -100,24 +100,24 @@ More information on container usage is found in the README files in the `contain
 
 ## Running SMASH with Example Input Files
 
-SMASH ships with example configuration files for the collider, box, sphere, and list modus.
+SMASH ships example configuration files for the collider, box, sphere, and list modus.
 By default, i.e. by running `./smash`, the simulation is set up from the collider configuration file, called `config.yaml`, and using the default particles and decay modes files (`particles.txt` and `decaymodes.txt`, respectively).
 They are located in the repository `input` folder.
 
 Additionally, example configuration files for the box, sphere and list modus can be found in the respective directories `input/{box,sphere,list}`.
-In case of the box simulation, in order to allow for equilibration, different default particles and decay modes files need to be used.
-These files are also provided in `input/box`.
-For the list modus, an input list file to be read in is required.
-This file, `example_list0`, is located in `input/list`.
+If needed, e.g. in the case of a box simulation, different default particles and decay modes files can be used.
+Examples for these are also provided in `input/box`.
 
-To run SMASH with a non-default configuration file, use the `-i` command.
+Finally, for the list modus, an input list file to be read in is required and an example is provided as `input/list/example_list0`.
+
+In general, to run SMASH with a non-default configuration file, use the `-i` command.
 For example, for the sphere or list example file, from the `build` folder, use:
 ```console
     ./smash -i ../input/sphere/config.yaml
     ./smash -i ../input/list/config.yaml
 ```
 
-Furthermore, using non-default particles and decay modes files is necessary, and these can be specified through the `-p` and `-d` options.
+Furthermore, if using non-default particles and decay modes files is necessary, these can be specified through the `-p` and `-d` options.
 In the box and the dileptons example, always from the `build` folder, this means:
 ```console
 ./smash -i ../input/box/config.yaml -p ../input/box/particles.txt -d ../input/box/decaymodes.txt
@@ -132,8 +132,10 @@ To run SMASH completely silently for production runs, we recommend to suppress t
 ```console
 ./smash > /dev/null
 ```
-
-Warnings and error messages will still be displayed.
+and it might be useful to redirect warnings and error messages, that will still be displayed, to a file:
+```console
+./smash > /dev/null 2> /path/to/error-and-warnings-file
+```
 
 
 ## License
