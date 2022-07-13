@@ -107,10 +107,13 @@ TEST(phasespace_manybody) {
   std::vector<FourVector> momenta(m.size());
   for (size_t i = 0; i < 1000; i++) {
     Action::sample_manybody_phasespace_impl(sqrts, m, momenta);
+    // Uncomment for printout
+    /*
     for (size_t j = 0; j < m.size(); j++) {
-      // Uncomment for printout
-      // for (size_t k = 0; k < 4; k++) std::cout << momenta[j][k] << " ";
+      for (size_t k = 0; k < 4; k++)
+        std::cout << momenta[j][k] << " ";
     }
     std::cout << std::endl;
+    */
   }
 }

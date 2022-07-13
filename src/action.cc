@@ -334,10 +334,7 @@ void Action::sample_manybody_phasespace_impl(
 
   // Arrange a convenient vector of m1, m1 + m2, m1 + m2 + m3, ...
   std::vector<double> msum(n);
-  msum[0] = m[0];
-  for (size_t i = 1; i < n; i++) {
-    msum[i] = msum[i - 1] + m[i];
-  }
+  std::partial_sum(m.begin(), m.end(), msum.begin());
   const double msum_all = msum[n - 1];
   int rejection_counter = -1;
   if (sqrts <= msum_all) {
