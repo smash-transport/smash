@@ -15,7 +15,7 @@
 
 ### Preliminary note
 
-In the following, whenever the `make` command is said to be used, you can specify the `-j` option followed by the number of CPU cores that should be used in parallel, e.g. `-j3` to use three cores.
+In the following, whenever the `make` command is used, you can specify the `-j` option followed by the number of CPU cores that should be used in parallel, e.g. `-j3` to use three cores.
 This will speed up compilation considerably.
 
 
@@ -24,7 +24,7 @@ This will speed up compilation considerably.
 
 All UNIX-like operating systems offer package managers and it is highly encouraged to use these whenever possible.
 To mention a couple, you might use [Homebrew](https://brew.sh) on Apple machines or [APT](https://wiki.debian.org/Apt) on Debian/Ubuntu distributions.
-The installation of compilers, CMake, GSL and Eigen3 libraries (just to mention some) should be straightforward with a package manager.
+The installation of required compilers, CMake, GSL and Eigen3 libraries (just to mention some) should be straightforward with a package manager.
 
 It is very likely that a compiler among those supported is available out of the box on your operating system.
 However, some of the SMASH prerequisites are less likely to be already available, Pythia first of all.
@@ -46,7 +46,7 @@ To tell `cmake` where to find Pythia while building SMASH see the [**Building SM
 
 Note that although Pythia is statically linked into SMASH, access to `share/Pythia8/xmldoc` is required at runtime.
 
-If you plan to build SMASH using the LLVM implementation of the standard C++ library, you should make sure that Pythia as well is built so, passing `-stdlib=libc++` together with the other flags to the `--cxx-common` option of the _configure_ script.
+If you plan to build SMASH using the LLVM implementation of the standard C++ library, you should make sure that Pythia is built so as well, passing `-stdlib=libc++` together with the other flags to the `--cxx-common` option of the _configure_ script.
 
 #### Remarks for Apple users
 
@@ -80,7 +80,7 @@ Download the latest stable release of `Eigen` from [the official website](http:/
 ```console
 tar -xf "[latest-eigen].tar.gz" -C "${HOME}"
 ```
-To tell CMake where to find Eigen header files while building SMASH, pass the path to them adding the option `-DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/` to the `cmake` command in the SMASH setup.
+To tell CMake where to find Eigen header files while building SMASH, pass the path to them adding the option `-DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/` to the `cmake` command in the SMASH setup (cf. [Building SMASH](INSTALL.md#building-smash) section).
 
 
 ### Installing and enabling Rivet support
@@ -94,7 +94,7 @@ wget https://gitlab.com/hepcedar/rivetbootstrap/raw/3.1.4/rivet-bootstrap
 ```
 It provides a convenient way to install Rivet and its dependencies (HepMC3 is among those, but, if you have already installed it, you can edit the script so that Rivet uses your installation).
 
-Please, note that, every time Rivet is used, some environment variables must be set in advance.
+Please note that, every time Rivet is used, some environment variables must be set in advance.
 The `rivetenv.sh` script, in the Rivet installation directory, takes care of this step, if sourced
 ```console
 source "[...]/rivetenv.sh"
@@ -186,12 +186,12 @@ By default, SMASH is compiled with platform-specific optimizations, implying tha
 
 There are three possible ways to fix this issue:
 1. Make sure to compile SMASH on the platform where you run it.
-   When running SMASH on a computing cluster, this requires making the compilation step part of the job script.
+   When running SMASH on a computing cluster, this may require making the compilation step part of the job script, if e.g. the node architecture is different from that of the login or submission node.
 2. Only run SMASH on platforms similar to the one where it was compiled.
-   When running SMASH on a computing cluster, this requires restricting the jobs to the correct platform.
+   When running SMASH on a computing cluster, this may require restricting the jobs to the correct platform.
 3. Compile SMASH without machine-specific optimizations by removing `-march=native` from `CMakeLists.txt`.
-   This is the easiest solution, however it results in less efficient code.
-   Note that the same applies to any other libraries you compile with `-march=native`, like for instance Pythia.
+   This is the easiest solution, however it results in a less efficient executable.
+   Note that the same applies to any other libraries you compile with `-march=native`, for instance Pythia.
 
 ### SMASH does not compile with pre-compiled ROOT binaries. What should I do?
 
@@ -202,7 +202,7 @@ If compilation of SMASH in combination with a pre-compiled ROOT binary fails, pl
 Please note that after compilation the `smash` directory (including `build`) might have a size of some GB.
 By default, the unit tests are always compiled, which requires a lot of the disk space.
 If disk space is restricted, consider to just run `make smash`, which will only compile the SMASH binary.
-However, it is still recommended to run the unit tests at least once, when compiling in a new environment to ensure that everything works as expected.
+However, it is still recommended to run the unit tests at least once when compiling in a new environment to ensure that everything works as expected.
 To see how to run the tests, see [CONTRIBUTING](CONTRIBUTING.md).
 
 ### How can I use a different compiler?
@@ -216,9 +216,9 @@ or simply set them for the `cmake` command only via
 ```console
 CC=clang CXX=clang++ cmake ..
 ```
-Alternatively the compiler can also be specified using CMake dedicated options,
+Alternatively, the compiler can also be specified using CMake dedicated options,
 ```console
-    cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
+cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
 ```
 **NOTE:** The FPE environment only works with GCC, so e.g. you won't get back-traces from floating point traps with Clang.
 
@@ -227,15 +227,15 @@ Alternatively the compiler can also be specified using CMake dedicated options,
 In case the system default implementation of the C++ standard library is e.g. that shipped with GCC, this will still be used even when requesting CMake to use Clang as compiler.
 However, it is possible to request to use the LLVM implementation using the CMake `CLANG_USE_LIBC++` option, e.g.
 ```console
-    CC=clang CXX=clang++ cmake -DPythia_CONFIG_EXECUTABLE=[...] -DCLANG_USE_LIBC++=ON ..
+CC=clang CXX=clang++ cmake -DPythia_CONFIG_EXECUTABLE=[...] -DCLANG_USE_LIBC++=ON ..
 ```
 If the installation of the LLVM implementation is not in a standard place, you either need to set and export your `LD_LIBRARY_PATH` environment variable to the correct value, e.g.
 ```console
-    export LD_LIBRARY_PATH=/path/to/clang/installation/lib
+export LD_LIBRARY_PATH=/path/to/clang/installation/lib
 ```
 or pass to the `cmake` command the option
 ```
-    -DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath -Wl,/path/to/clang/installation/lib"
+-DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath -Wl,/path/to/clang/installation/lib"
 ```
 where, of course, the path to clang installation must be a valid path.
 All of this is needed to let the executable find the library ABI at run time.
@@ -254,6 +254,6 @@ will setup SMASH without ROOT and without HepMC support.
 
 If the ROOT or HepMC installation is not found, provide a hint to CMake about the install destination with
 ```console
-    cmake -DCMAKE_PREFIX_PATH=/path/to/root/or/HepMC/installation ..
+cmake -DCMAKE_PREFIX_PATH=/path/to/root/or/HepMC/installation ..
 ```
 Note that if multiple `CMAKE_PREFIX_PATH`s are necessary, a semicolon-separated list of directories can be specified.

@@ -3,7 +3,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3484711.svg)](https://doi.org/10.5281/zenodo.3484711)
 
 SMASH (Simulating Many Accelerated Strongly-interacting Hadrons) is a relativistic hadronic transport approach for the dynamical description of heavy-ion reactions.
-Please see [Phys. Rev. C 94, 054905 (2016)](https://arxiv.org/abs/1606.06642) for details and cite this reference together with the [software DOI](https://doi.org/10.5281/zenodo.3484711) for the specific code version employed, if you are using SMASH.
+Please see [Phys. Rev. C 94, 054905 (2016)](https://arxiv.org/abs/1606.06642) for details and, if you are using SMASH, cite this reference together with the [software DOI](https://doi.org/10.5281/zenodo.3484711) for the specific code version employed.
 A BibTeX entry for the software DOI is found on the respective Zenodo pages.
 
 See [CONTRIBUTING](CONTRIBUTING.md) for development hints.
@@ -21,7 +21,7 @@ Refer to the [INSTALL](INSTALL.md) file for more detailed information.
 
 ### Prerequisites
 
-SMASH is known to compile and work on little endian machines (most CPUs are such) with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++17 features).
+SMASH is known to compile and work on little endian machines (most CPUs are such) with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++17 features):
 
 | Compiler   | Required version |
 |  :---:     |       :---:      |
@@ -40,7 +40,7 @@ SMASH requires the following tools and libraries:
 | [Eigen3 library](http://eigen.tuxfamily.org) | 3.0  or higher |
 | [Pythia](https://pythia.org) | 8.307 |
 
-Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version is found on the system.
+Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version is found on the system:
 
 | Software | Required version |
 |  :---:   |       :---:      |
@@ -70,7 +70,7 @@ If you want to install SMASH system-wide (into `/usr/local`) use
 make install
 ```
 
-**NOTE:** All commands above are the bare minimum needed for an installation.
+:warning: **NOTE:** All commands above are the bare minimum needed for an installation.
 It is not guaranteed that this minimum setup is appropriate for your needs or your specific computing environment.
 For example, several different options can be passed e.g. to the `cmake` command.
 We strongly advise you to further refer to the [INSTALL](INSTALL.md) file for more guidance, especially if you encounter any issues.
@@ -78,7 +78,7 @@ We strongly advise you to further refer to the [INSTALL](INSTALL.md) file for mo
 
 ## Using the Docker containers
 
-Alternatively to building or installing SMASH, a Docker image of the latest or recently tagged version can be pulled from the Github container registry.
+As an alternative to building or installing SMASH, a Docker image of the latest or recently tagged version can be pulled from the Github container registry.
 Get the newest version with
 ```console
 docker pull ghcr.io/smash-transport/smash:newest
@@ -95,13 +95,13 @@ If needed, SMASH can also be build inside the container as explained in the prev
 
 Two container versions of SMASH are offered: a small version (`ghcr.io/smash-transport/smash`) with a minimal set of dependencies
 pre-installed and a maximum version with all possible external dependencies, e.g. ROOT, HepMC and Rivet, already included (`ghcr.io/smash-transport/smash-max`).
-Running SMASH inside of a Docker container might negatively affect performance.
+Note that running SMASH inside of a Docker container might negatively affect performance.
 More information on container usage is found in the README files in the `containers` directory.
 
 
 ## Running SMASH with Example Input Files
 
-SMASH ships example configuration files for the collider, box, sphere, and list modus.
+SMASH ships example configuration files for running in the collider, box, sphere, and list mode (`Modus` in the configuration jargon).
 By default, i.e. by running `./smash`, the simulation is set up from the collider configuration file, called `config.yaml`, and using the default particles and decay modes files (`particles.txt` and `decaymodes.txt`, respectively).
 They are located in the repository `input` folder.
 
@@ -150,6 +150,6 @@ For more information, see [LICENSE](LICENSE).
 
 SMASH source and documentation are provided to check and reproduce published results of the authors.
 Cooperation and joint projects with outside researchers are encouraged and comparison to results by experimental collaborations is supported.
-SMASH can be used as a 3rd party library, for examples see the `examples` folder in the repository.
 If you are interested in starting a project, please contact us to avoid interference with current thesis topics.
 If your project involves changes to the code, please refer to [CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and helpful tools.
+SMASH can also be used as a 3rd party library, for examples see the `examples` folder in the repository.
