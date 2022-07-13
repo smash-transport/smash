@@ -2,406 +2,154 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3484711.svg)](https://doi.org/10.5281/zenodo.3484711)
 
-SMASH (Simulating Many Accelerated Strongly-interacting Hadrons) is a
-relativistic hadronic transport approach for the dynamical description of heavy
-ion reactions. Please see [Phys. Rev. C 94, 054905
-(2016)](https://arxiv.org/abs/1606.06642) for details and cite this reference
-together with the [software DOI](https://doi.org/10.5281/zenodo.3484711) for
-the specific code version employed, if you are using SMASH. A BibTeX entry for
-the software DOI is found on the respective Zenodo pages.
+SMASH (Simulating Many Accelerated Strongly-interacting Hadrons) is a relativistic hadronic transport approach for the dynamical description of heavy-ion reactions.
+Please see [Phys. Rev. C 94, 054905 (2016)](https://arxiv.org/abs/1606.06642) for details and, if you are using SMASH, cite this reference together with the [software DOI](https://doi.org/10.5281/zenodo.3484711) for the specific code version employed.
+A BibTeX entry for the software DOI is found on the respective Zenodo pages.
 
+See [CONTRIBUTING](CONTRIBUTING.md) for development hints.
+A complete [User Guide](https://theory.gsi.de/~smash/userguide/current/) as well as a more detailed [development documentation](http://theory.gsi.de/~smash/doc/current/) are available for the latest version of the code.
+For documentation of older versions, refer to links in the [releases pages](https://github.com/smash-transport/smash/releases).
 
-See [CONTRIBUTING](CONTRIBUTING.md) for development hints. A complete User Guide
-can be found [here](https://theory.gsi.de/~smash/userguide/current/). For a more
-detailed development documentation, see
-[here](http://theory.gsi.de/~smash/doc/current/).
+If Pythia is used, please cite the following references: T. Sjöstrand, S. Mrenna and P. Skands, [JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175) and [Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820).
 
+Report issues [on GitHub](https://github.com/smash-transport/smash/issues) or contact us by email at elfner@itp.uni-frankfurt.de.
 
-If Pythia is used, please cite the following references:
-T. Sjöstrand, S. Mrenna and P. Skands,
-[JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175),
-[Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820).
+## How to build and install SMASH
 
-
-Report issues at https://github.com/smash-transport/smash/issues or contact us by email
-at elfner@itp.uni-frankfurt.de.
-
-## How to Build SMASH
+In the following you can find a minimal quick start guide.
+Refer to the [INSTALL](INSTALL.md) file for more detailed information.
 
 ### Prerequisites
 
-SMASH is known to compile and work on little endian machines with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++17 features):
-- gcc >= 8.0
-- clang >= 7.0
-- Apple clang >= 11.0
+SMASH is known to compile and work on little endian machines (most CPUs are such) with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++17 features):
 
-Any different operating system and/or compiler and/or endianness is not officially supported.
+| Compiler   | Required version |
+|  :---:     |       :---:      |
+| GCC        |  8.0 or higher   |
+| Clang      |  7.0 or higher   |
+| Apple clang| 11.0 or higher   |
+
+Any different operating system and/or compiler and/or endianness is not officially supported and SMASH will ask you to continue at your own risk before compilation.
 
 SMASH requires the following tools and libraries:
-- cmake >= 3.16
-- the GNU Scientific Library >= 2.0
-- the Eigen3 library for linear algebra (see http://eigen.tuxfamily.org)
-- Pythia = 8.307
 
-Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version (ROOT >= 5.34, HepMC3 >= 3.2.3, Rivet >= 3.1.4) is found on the system.
-
-
-### Building Pythia
-
-SMASH is tightly coupled to Pythia and thus requires a specific version, which is currently 8.307.
-Using a different version than specified above may or may not work. If the required version is not already installed or if there are issues, it is recommended to build Pythia with similar flags as used for SMASH:
-
-    wget https://pythia.org/download/pythia83/pythia8307.tgz
-    tar xf pythia8307.tgz && rm pythia8307.tgz
-    cd pythia8307
-    ./configure --cxx-common='-std=c++17 -march=native -O3 -fPIC -pthread'
-    make
-
-To tell `cmake` where to find Pythia while building SMASH see the **Building SMASH** section.
-
-Note that although Pythia is statically linked into SMASH, access to
-`share/Pythia8/xmldoc` is required at runtime.
-
-If you plan to build SMASH using the LLVM implementation of the standard C++ library,
-you should make sure that Pythia as well is built so, passing `-stdlib=libc++` together
-with the other flags to the `--cxx-common` option of the _configure_ script.
-
-#### Remarks for Apple users
-
-1. The `wget` command is not directly available on OSX.
-   Although this can be easily installed e.g. via `brew install wget`,
-   to download Pythia it is enough to use the `curl` command (see example below).
-
-2. On recent Apple machines provided with M1 (ARM) processors, no `gcc`
-   compiler is available and `clang` is to be used. The compiler flag
-   `-march=native` is not defined and has to be dropped.
-
-The commands above to build Pythia on a M1 Apple machine become:
-
-    curl https://pythia.org/download/pythia83/pythia8307.tgz -o pythia8307.tgz
-    tar xf pythia8307.tgz && rm pythia8307.tgz
-    cd pythia8307
-    ./configure --cxx-common='-std=c++17 -O3 -fPIC -pthread'
-    make
-
-
-### Installing Eigen
-
-Usually it is possible to install Eigen with a package manager (it requires admin privileges) and in this case CMake should be able to find the header files without the need of any additional option. For example, on an Apple machine you have the possibility to install Eigen via `brew install eigen`, while, under GNU/Linux Ubuntu, via `sudo apt-get install libeigen3-dev`.
-
-If for some reason this is not a viable approach, then you can still proceed to a manual installation as described in the following.
-
-#### Getting Eigen header files into a custom location
-
-Let's assume Eigen headers will be unpacked in `$HOME`.
-Download the latest stable release of `Eigen` from http://eigen.tuxfamily.org and unpack it via
-
-       tar -xf [latest-eigen].tar.gz -C $HOME
-
-To tell `cmake` where to find Eigen header files while bilding SMASH, pass the path to them adding the option
-`-DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/` to the `cmake` command in the following section.
-
-
-### Building SMASH
-
-Use the following commands to build SMASH in a separate directory:
-
-    mkdir build
-    cd build
-    cmake -DPythia_CONFIG_EXECUTABLE=[...]/pythia8307/bin/pythia8-config ..
-    make
-
-To build in parallel on N cores:
-
-    make -jN
-
-To run it with specific settings:
-
-    vi config.yaml
-    ./smash
-
-**NOTE:** The `cmake` command above is the bare minimum needed to setup later compilation.
-However, several different options can be passed to the `cmake` command and you will find
-some guidance in the following sections. Keep in mind that you need to collect the relevant
-information in your case to build the appropriate `cmake` command according to your needs.
-
-#### Alternatives to specify the installation directory of Pythia
-
-A few GNU/Linux distributions provide pre-built Pythia binaries without pythia8-config. In this case, using the `-DPythia_CONFIG_EXECUTABLE` option as shown above is not possible and the top installation directory of Pythia containing `lib` has to be specified in either of the following ways:
-
--  Either set the bash environment variables `PYTHIA8` or `PYTHIA_ROOT_DIR` (e.g. `export PYTHIA_ROOT_DIR=/opt/pythia8307`) or
--  use the CMake `-DPYTHIA_ROOT_DIR` option (e.g. `cmake -DPYTHIA_ROOT_DIR=/opt/pythia8307 ..`).
-
-If no variables are set and no options are passed, CMake searches for Pythia under the default path `/usr`.
-We recall that it is possible to check which environment variables related to PYTHIA are currently set with:
-
-    printenv | grep PYTHIA
-
-
-### Installation
-
-To install SMASH do
-
-    make install
-
-This will install into `/usr/local`.  If you want to change the installation directory,
-define [`CMAKE_INSTALL_PREFIX`](https://cmake.org/cmake/help/latest/variable/CMAKE_INSTALL_PREFIX.html)
-when configuring the source tree.  For example, if you want to install in `~/.local`, do
-
-    cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
-    make install
-
-With `CMAKE_INSTALL_PREFIX`=_prefix_ the installation will be
-
-- _prefix_`/bin` will contain programs - e.g., `smash`,
-- _prefix_`/lib` will contain libraries - e.g., `libsmash.so`,
-- _prefix_/`include/smash` will contain headers, and
-- _prefix_/`share/smash` will contain data files
-
-
-### Troubleshooting
-
-#### SMASH does not compile
-
-If compilation fails (especially after changing a library), using a fresh build
-folder can sometimes fix the problem.
-
-#### SMASH crashes with "illegal instruction"
-
-If running SMASH fails with "illegal instruction", it is likely due to running
-SMASH on a different platform than the one where it was compiled. By default,
-SMASH is compiled with platform-specific optimizations, implying that the binary
-only works on such platforms.
-
-There are three possible ways to fix this issue:
-
-1. Make sure to compile SMASH on the platform where you run it. When running
-   SMASH on a computing cluster, this requires making the compilation step part
-   of the job script.
-2. Only run SMASH on platforms similar to the one where it was compiled. When
-   running SMASH on a computing cluster, this requires restricting the jobs to
-   the correct platform.
-3. Compile SMASH without machine-specific optimizations by removing
-   `-march=native` from `CMakeLists.txt`. This is the easiest solution, however
-   it results in less efficient code.
-
-Note that the same applies to any other libraries you compile with
-`-march=native`, like for instance Pythia.
-
-#### SMASH does not compile with pre-compiled ROOT binaries
-
-If compilation of SMASH in combination with a pre-compiled ROOT binary fails,
-please install and compile ROOT locally from source (see http://root.cern.ch)
-and compile SMASH again in a clean build directory.
-
-
-### Size of the Code
-
-Please note that after compilation the `smash` directory (including `build`)
-has a size of about 4GB. By default, the unit tests are always compiled, which
-requires a lot of the disk space. If disk space is restricted, consider to just run
-
-    make smash
-
-which will only compile the SMASH binary. It is still recommended to run
-the unit tests at least once, when compiling in a new environment to ensure that
-everything works as expected. To see how to run the tests, see
-[CONTRIBUTING](CONTRIBUTING.md).
-
-
-### Changing the Compiler
-
-In order to use a particular compiler, you can permanently set the following
-environment variables
-
-    export CC=clang
-    export CXX=clang++
-
-or simply set them for the cmake command only via
-
-    CC=clang CXX=clang++ cmake ..
-
-Alternatively the compiler can also be specified to cmake like this:
-
-    cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
-
-**NOTE:** The FPE environment only works with gcc, so e.g. you won't get backtraces
-from floating point traps with clang.
-
-#### Using the LLVM implementation of the C++ standard library
-
-In case the system default implementation of the C++ standard library is e.g. that
-shipped with the GNU compiler, this will still be used even when requesting CMake
-to use Clang as compiler. However, it is possible to request to use the LLVM
-implementation using the CMake `CLANG_USE_LIBC++` option. For example:
-
-    CC=clang CXX=clang++ cmake -DPythia_CONFIG_EXECUTABLE=[...] -DCLANG_USE_LIBC++=ON ..
-
-If the installation of the LLVM implementation is not in a standard place, you either need
-to set and export your `LD_LIBRARY_PATH` environment variable to the correct value, e.g.
-
-    export LD_LIBRARY_PATH=/path/to/clang/installation/lib
-
-or pass to the `cmake` command the option
-
-    -DCMAKE_EXE_LINKER_FLAGS="-Wl,-rpath -Wl,/path/to/clang/installation/lib"
-
-where, of course, the path to clang installation must be a valid path. All of this is needed
-to let the executable find the library ABI at run time.
-
-### Disabling ROOT or HepMC Support
-
-Producing ROOT output requires ROOT installed (see http://root.cern.ch).
-If ROOT is found, the support for ROOT output is automatically enabled.
-In order to disable it, one can do the following:
-
-    cmake -DTRY_USE_ROOT=OFF <source_dir>
-    make
-
-The same rules apply to the HepMC output.
-
-    cmake -DTRY_USE_HEPMC=OFF <source_dir>
-    make
-
-See http://hepmc.web.cern.ch/hepmc/ for download and the projects' README for
-installation. If the HepMC installation is not found, provide the
-install destination (`$HEPMC_INS`) with
-
-    cmake -DCMAKE_PREFIX_PATH=$HEPMC_INS ..
-
-Note that if multiple CMAKE_PREFIX_PATHs are necessary, a semicolon-separated
-list of directories can be specified.
-
-
-### Enabling Rivet support
-
-The Rivet website is: https://rivet.hepforge.org/
-
-The interface with SMASH has been tested with version 3.1.4.
-
-The installation script, downloadable with:
-
-    wget https://gitlab.com/hepcedar/rivetbootstrap/raw/3.1.4/rivet-bootstrap
-
-provides a convenient way to install Rivet and its dependencies
-(HepMC3 is among those, but, if you have already installed it, you can edit the
-script so that Rivet uses your installation).
-More information about Rivet, its installation and basic usage can be found in
-the tutorials in the Rivet website.
-
-Please, also note that, every time Rivet is used, some environment variables
-must be set in advance. The script rivetenv.sh, in the Rivet installation directory,
-takes care of this step:
-
-    source [...]/rivetenv.sh
-
-where `[...]` is not a command, but a shorthand for the path of the directory in
-which Rivet is installed.
-
-If Rivet (with all its dependencies) is installed and the environment variables
-are set, it will be automatically detected by cmake.
-
-
-### Using a Custom GSL Build
-
-Download and unpack GSL:
-
-    wget ftp://ftp.gnu.org/gnu/gsl/gsl-latest.tar.gz
-    tar -zxvf gsl-latest.tar.gz
-
-This creates a folder named `gsl-[version_number]` called `$GSL` here.
-
-    cd $GSL
-    ./configure --prefix $GSL
-    make -jN
-    make install
-
-Here N is the number of cores to use in the `make` command. When compiling
-SMASH, run `cmake` with
-
-    cmake -DGSL_ROOT_DIR=$GSL ..
-
-Note: In case of problems, make sure to start with a clean build folder.
+| Software | Required version |
+|  :---:   |       :---:      |
+| [CMake](https://cmake.org) | 3.16 or higher |
+| [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/) | 2.0  or higher |
+| [Eigen3 library](http://eigen.tuxfamily.org) | 3.0  or higher |
+| [Pythia](https://pythia.org) | 8.307 |
+
+Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version is found on the system:
+
+| Software | Required version |
+|  :---:   |       :---:      |
+| ROOT     | 5.34 or higher   |
+| HepMC3   | 3.2.3 or higher  |
+| Rivet    | 3.1.4            |
+
+### Compilation and installation
+
+From within the SMASH repository, use the following commands to build the codebase in a separate directory:
+```console
+mkdir build
+cd build
+cmake -DPythia_CONFIG_EXECUTABLE=/path/to/pythia8307/bin/pythia8-config ..
+make
+```
+
+You can run SMASH with specific settings (e.g. at a given collision energy or impact parameter) by modifying the config.yaml file, for example with
+```console
+vi config.yaml
+./smash
+```
+Refer to the [section below](README.md#running-smash-with-example-input-files) for more information.
+
+If you want to install SMASH system-wide (into `/usr/local`) use
+```console
+make install
+```
+
+:warning: **NOTE:** All commands above are the bare minimum needed for an installation.
+It is not guaranteed that this minimum setup is appropriate for your needs or your specific computing environment.
+For example, several different options can be passed e.g. to the `cmake` command.
+We strongly advise you to further refer to the [INSTALL](INSTALL.md) file for more guidance, especially if you encounter any issues.
 
 
 ## Using the Docker containers
 
-Alternatively to building SMASH, a Docker image of the latest or recently
-tagged version can be pulled from the Github container registry. Get the newest
-version with
-
-    docker pull ghcr.io/smash-transport/smash:newest
+As an alternative to building or installing SMASH, a Docker image of the latest or recently tagged version can be pulled from the Github container registry.
+Get the newest version with
+```console
+docker pull ghcr.io/smash-transport/smash:newest
+```
 
 Start the container with
+```console
+docker run -it ghcr.io/smash-transport/smash:newest
+```
 
-    docker run -it ghcr.io/smash-transport/smash:newest
+A ready-to-use executable of SMASH is found in the `smash_bin` directory.
+Run it as explained below.
+If needed, SMASH can also be build inside the container as explained in the previous section (the SMASH source files and Pythia are also found in the `/SMASH` directory).
 
-A ready-to-use exectuable of smash is found in the `smash_bin` directory. Run as
-explained below. SMASH can also be build inside the container as explained at
-the beginning of the README (the SMASH source and Pythia are also found in the
-  `/SMASH` directory).
-
-Two container versions of SMASH are offered: a small version
-(`ghcr.io/smash-transport/smash`) with a minimal set of dependencies
-pre-installed and a maximum version with all possible external dependencies,
-e.g. ROOT, HepMC and Rivet, already included
-(`ghcr.io/smash-transport/smash-max`). Running SMASH inside of a Docker container
-might negatively affect performance. More information on container usage is
-found in the README files in the `containers` directory.
+Two container versions of SMASH are offered: a small version (`ghcr.io/smash-transport/smash`) with a minimal set of dependencies
+pre-installed and a maximum version with all possible external dependencies, e.g. ROOT, HepMC and Rivet, already included (`ghcr.io/smash-transport/smash-max`).
+Note that running SMASH inside of a Docker container might negatively affect performance.
+More information on container usage is found in the README files in the `containers` directory.
 
 
 ## Running SMASH with Example Input Files
 
-SMASH ships with example configuration files for the collider, box, sphere, and
-list modus. By default, i.e. by running `./smash`, the simulation is set up from
-the collider configuration file, called `config.yaml`, and the default
-particles and decaymodes files, `particles.txt` and `decaymodes.txt`. They are
-located in `/input`.
+SMASH ships example configuration files for running in the collider, box, sphere, and list mode (`Modus` in the configuration jargon).
+By default, i.e. by running `./smash`, the simulation is set up from the collider configuration file, called `config.yaml`, and using the default particles and decay modes files (`particles.txt` and `decaymodes.txt`, respectively).
+They are located in the repository `input` folder.
 
-Additionally, example configuration files for the box, sphere and list modus can
-be found in the respective directories `/input/{box,sphere,list}`. In case of the
-box simulation, in order to allow for equilibration, different default particles
-and decaymodes files need to be used. These files are also provided in
-`/input/box`. For the list modus, an input list file to be read in is required.
-This file, `example_list0`, is located in `/input/list`.
+Additionally, example configuration files for the box, sphere and list modus can be found in the respective directories `input/{box,sphere,list}`.
+If needed, e.g. in the case of a box simulation, different default particles and decay modes files can be used.
+Examples for these are also provided in `input/box`.
 
-To run SMASH with a non-default configuration file, use the `-i` command.
-For example, for the sphere or list example file:
+Finally, for the list modus, an input list file to be read in is required and an example is provided as `input/list/example_list0`.
 
+In general, to run SMASH with a non-default configuration file, use the `-i` command.
+For example, for the sphere or list example file, from the `build` folder, use:
+```console
     ./smash -i ../input/sphere/config.yaml
     ./smash -i ../input/list/config.yaml
+```
 
-Further, using non-default particles and decaymodes files is necessary, and these
-can be specified through the `-p` and `-d` options. In the box and the dileptons
-example,
-this means:
+Furthermore, if using non-default particles and decay modes files is necessary, these can be specified through the `-p` and `-d` options.
+In the box and the dileptons example, always from the `build` folder, this means:
+```console
+./smash -i ../input/box/config.yaml -p ../input/box/particles.txt -d ../input/box/decaymodes.txt
+./smash -i ../input/dileptons/config.yaml -d ../input/dileptons/decaymodes.txt
+```
 
-    ./smash -i ../input/box/config.yaml -p ../input/box/particles.txt -d ../input/box/decaymodes.txt
-    ./smash -i ../input/dileptons/config.yaml -d ../input/dileptons/decaymodes.txt
-
-All command line options can be viewed with
-
-    ./smash -h
-
-To run SMASH completely silently for production runs, we recommend to redirect
-stdout to /dev/null, warnings and error messages will still be displayed.
-
-    ./smash > /dev/null
+All available command line options for SMASH can be viewed with
+```console
+./smash -h
+```
+To run SMASH completely silently for production runs, we recommend to suppress the standard output via e.g.
+```console
+./smash > /dev/null
+```
+and it might be useful to redirect warnings and error messages, that will still be displayed, to a file:
+```console
+./smash > /dev/null 2> /path/to/error-and-warnings-file
+```
 
 
 ## License
 
-SMASH is licensed under the terms of the GNU General Public License, Version 3
-or above. The build scripts are licensed under terms of the BSD 3-clause
-license. See [LICENSE](LICENSE).
+SMASH is licensed under the terms of the GNU General Public License, Version 3 or above.
+The build scripts are licensed under terms of the BSD 3-clause license.
+For more information, see [LICENSE](LICENSE).
 
-### Projects Using SMASH
 
-SMASH source and documentation are provided to check and
-reproduce published results of the authors. Cooperation and joint projects with
-outside researchers are encouraged and comparison to results by experimental
-collaborations is supported. SMASH can be used as a 3rd party library, for
-examples see ${SMASH_DIR}/examples/ folder. If you are interested in starting a
-project, please contact us to avoid interference with current thesis topics.
-If your project involves changes to the code, please refer to
-[CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and helpful tools.
+## Projects Using SMASH
+
+SMASH source and documentation are provided to check and reproduce published results of the authors.
+Cooperation and joint projects with outside researchers are encouraged and comparison to results by experimental collaborations is supported.
+If you are interested in starting a project, please contact us to avoid interference with current thesis topics.
+If your project involves changes to the code, please refer to [CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and helpful tools.
+SMASH can also be used as a 3rd party library, for examples see the `examples` folder in the repository.
