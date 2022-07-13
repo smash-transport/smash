@@ -7,7 +7,8 @@ Please see [Phys. Rev. C 94, 054905 (2016)](https://arxiv.org/abs/1606.06642) fo
 A BibTeX entry for the software DOI is found on the respective Zenodo pages.
 
 See [CONTRIBUTING](CONTRIBUTING.md) for development hints.
-A complete [User Guide](https://theory.gsi.de/~smash/userguide/current/) as well as a more detailed [development documentation](http://theory.gsi.de/~smash/doc/current/) are available.
+A complete [User Guide](https://theory.gsi.de/~smash/userguide/current/) as well as a more detailed [development documentation](http://theory.gsi.de/~smash/doc/current/) are available for the latest version of the code.
+For documentation of older versions, refer to links in the [releases pages](https://github.com/smash-transport/smash/releases).
 
 If Pythia is used, please cite the following references: T. Sjöstrand, S. Mrenna and P. Skands, [JHEP05 (2006) 026](https://arxiv.org/abs/hep-ph/0603175) and [Comput. Phys. Comm. 178 (2008)](https://arxiv.org/abs/0710.3820).
 
