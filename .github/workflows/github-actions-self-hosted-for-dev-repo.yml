@@ -4,11 +4,11 @@ name: check_smash_devel_repo
 on:
   push:
     branches:
-      - master
+      - main
       - release*
   pull_request:
     branches:
-      - master
+      - main
       - release*
 
 jobs:

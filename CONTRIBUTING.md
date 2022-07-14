@@ -118,7 +118,7 @@ The following tools can be helpful for development:
 - cppcheck
 - codespell
 
-Note: The above mentioned clang-format version is enforced at each merge to master.
+Note: The above mentioned clang-format version is enforced at each merge to the `main` branch.
 
 
 ### Installing clang-format
