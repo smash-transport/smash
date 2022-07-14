@@ -137,7 +137,7 @@ class DeformedNucleus : public Nucleus {
    * \f$\int\rho(r)d^3r = N_{particles}\f$.
    *
    */
-  virtual double calculate_saturation_density() const override;
+  double calculate_saturation_density() const override;
   /**
    * Set deformation coefficient for Y_2_0.
    * \param[in] b2 deformation coefficient for l=2
