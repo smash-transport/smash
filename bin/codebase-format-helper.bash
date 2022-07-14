@@ -10,21 +10,37 @@
 #===================================================
 
 trap 'printf "\n"' EXIT
-shopt -s globstar nullglob
-CHOSEN_LANGUAGES=''
-declare -rA FORMATTER_COMMAND=(
-    ['C++']='clang-format'
-    ['CMake']='cmake-format'
-)
-MODE_PERFORM='FALSE'
-MODE_TEST='FALSE'
-VERBOSE='TRUE'
-FILES_TO_FORMAT=()
 
 function main()
 {
+    check_bash_version
+    do_variables_and_shell_options_setup
     parse_command_line_arguments "$@"
     format_chosen_languages
+}
+
+function do_variables_and_shell_options_setup()
+{
+    shopt -s globstar nullglob
+    CHOSEN_LANGUAGES=''
+    declare -rgA FORMATTER_COMMAND=(
+        ['C++']='clang-format'
+        ['CMake']='cmake-format'
+    )
+    MODE_PERFORM='FALSE'
+    MODE_TEST='FALSE'
+    VERBOSE='TRUE'
+    FILES_TO_FORMAT=()
+}
+
+function check_bash_version()
+{
+    local required found
+    required='4.3.0'
+    found=$(echo ${BASH_VERSINFO[@]:0:3} | tr ' ' '.')
+    if [[ $(printf '%s\n' "${required}" "${found}" | sort -V | head -n1) != "${required}" ]]; then
+        fail "Minimum bash version required is ${required}, but found ${found}."
+    fi
 }
 
 function format_chosen_languages()
