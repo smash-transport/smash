@@ -22,7 +22,7 @@ namespace smash {
  * \param[in] l Angular momentum value (2 and 4 are supported)
  * \param[in] m projection value (l = 2 and m = 2 are supported)
  * \param[in] cosx Cosine of the polar angle
- * \param[in] phi Azimuthal angle 
+ * \param[in] phi Azimuthal angle
  * \return Value of the corresponding spherical harmonic
  * \throws domain_error if unsupported l is encountered
  */
@@ -119,7 +119,8 @@ class DeformedNucleus : public Nucleus {
    * \param[in] phi The azimuthal angle
    * \return The unnormalized Woods-Saxon distribution
    */
-  double nucleon_density_unnormalized(double r, double cosx, double phi) const override;
+  double nucleon_density_unnormalized(double r, double cosx,
+                                      double phi) const override;
   /**
    * Return the integral over the azimuthal angle phi
    *
@@ -143,8 +144,8 @@ class DeformedNucleus : public Nucleus {
    */
   inline void set_beta_2(double b2) { beta2_ = b2; }
   /**
-   * Set deformation coefficient for Y_4_0.
-   * \param[in] b4 deformation coefficient for l=4
+   * Set the triaxiality coefficient gamma for Y_2_0 and Y_2_2.
+   * \param[in] ga triaxiality coefficient for l=2
    */
   inline void set_gamma(double ga) { gamma_ = ga; }
   /**
@@ -170,9 +171,7 @@ class DeformedNucleus : public Nucleus {
    * Set the angle psi.
    * \param[in] psi Angle psi for properly rotating nucleus
    */
-  inline void set_angle_psi(double psi) {
-    nuclear_orientation_.set_psi(psi);
-  }
+  inline void set_angle_psi(double psi) { nuclear_orientation_.set_psi(psi); }
   /**
    * return the beta2 value.
    */

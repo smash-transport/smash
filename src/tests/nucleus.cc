@@ -269,7 +269,8 @@ TEST(nucleon_density_norm) {
     // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
     const auto result = integrate(0, 1, [&](double t) {
       const double r = (1 - t) / t;
-      return 2 * twopi * square(r) * nucl.nucleon_density(r, 0.) / square(t);
+      return 2 * twopi * square(r) * nucl.nucleon_density(r, 0., 0.) /
+             square(t);
     });
     std::cout << "Z: " << nucl.number_of_protons()
               << "  A: " << nucl.number_of_particles() << std::endl;
@@ -282,7 +283,8 @@ TEST(nucleon_density_norm) {
     // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
     const auto result = integrate(0, 1, [&](double t) {
       const double r = (1 - t) / t;
-      return 2 * twopi * square(r) * nucl.nucleon_density(r, 0.) / square(t);
+      return 2 * twopi * square(r) * nucl.nucleon_density(r, 0., 0.) /
+             square(t);
     });
     std::cout << "Z: " << nucl.number_of_protons()
               << "  A: " << nucl.number_of_particles() << std::endl;
@@ -295,7 +297,8 @@ TEST(nucleon_density_norm) {
     // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
     const auto result = integrate(0, 1, [&](double t) {
       const double r = (1 - t) / t;
-      return 2 * twopi * square(r) * nucl.nucleon_density(r, 0.) / square(t);
+      return 2 * twopi * square(r) * nucl.nucleon_density(r, 0., 0.) /
+             square(t);
     });
     std::cout << "Z: " << nucl.number_of_protons()
               << "  A: " << nucl.number_of_particles() << std::endl;

@@ -99,10 +99,10 @@ DeformedNucleus::DeformedNucleus(Configuration &config, int nTest,
     : Nucleus(config, nTest) {
   if (auto_deformation) {
     set_deformation_parameters_automatic();
+    set_saturation_density(calculate_saturation_density());
   } else {
     set_deformation_parameters_from_config(config);
   }
-  set_saturation_density(calculate_saturation_density());
   if (config.has_value({"Deformed", "Orientation"})) {
     Configuration subconfig = config["Deformed"]["Orientation"];
     set_orientation_from_config(subconfig);
@@ -122,9 +122,10 @@ ThreeVector DeformedNucleus::distribute_nucleon() {
     a_direction.distribute_isotropically();
     // sample r**2 dr
     a_radius = radius_max * std::cbrt(random::canonical());
-  } while (random::canonical() >
-           nucleon_density(a_radius, a_direction.costheta(), a_direction.phi()) /
-               Nucleus::get_saturation_density());
+  } while (random::canonical() > nucleon_density(a_radius,
+                                                 a_direction.costheta(),
+                                                 a_direction.phi()) /
+                                     Nucleus::get_saturation_density());
 
   // Update (x, y, z) positions.
   return a_direction.threevec() * a_radius;
@@ -274,8 +275,7 @@ void DeformedNucleus::set_orientation_from_config(
           "Random rotation of nuclei is activated although"
           " psi is provided. Please specify only either of them. ");
     } else {
-      set_angle_psi(
-          static_cast<double>(orientation_config.take({"Psi"})));
+      set_angle_psi(static_cast<double>(orientation_config.take({"Psi"})));
     }
   }
 
@@ -294,10 +294,12 @@ void DeformedNucleus::rotate() {
     set_angle_psi(euler_psi_);
   }
   for (auto &particle : *this) {
-    /* Rotate every vector by the nuclear azimuth phi and polar angle
-     * theta (the Euler angles). This means applying the matrix for a
+    /* Rotate every vector by the nuclear azimuth phi, polar angle
+     * theta and psi (the Euler angles). This means applying the matrix for a
      * rotation of phi about z, followed by the matrix for a rotation
-     * theta about the rotated x axis. The third angle psi is 0 by symmetry.*/
+     * theta about the rotated x axis. If the triaxiality coefficient is not
+     * zero, one has to include the third rotation around psi as the nucleus is
+     * not symmetric under rotation of any axis.*/
     ThreeVector three_pos = particle.position().threevec();
     three_pos.rotate(nuclear_orientation_.phi(), nuclear_orientation_.theta(),
                      nuclear_orientation_.psi());
@@ -320,29 +322,42 @@ double y_l_m(int l, int m, double cosx, double phi) {
   }
 }
 
-double DeformedNucleus::nucleon_density(double r, double cosx, double phi) const {
+double DeformedNucleus::nucleon_density(double r, double cosx,
+                                        double phi) const {
   return Nucleus::get_saturation_density() /
          (1 + std::exp((r - Nucleus::get_nuclear_radius() *
-                                (1 + \
-                                beta2_ * (std::cos(gamma_) * y_l_m(2, 0, cosx, phi) + std::sqrt(2) * std::sin(gamma_) * y_l_m(2, 2, cosx, phi)) + \
-                                beta4_ * y_l_m(4, 0, cosx, phi))) /
-                             Nucleus::get_diffusiveness()));
+                                (1 +
+                                 beta2_ * (std::cos(gamma_) *
+                                               y_l_m(2, 0, cosx, phi) +
+                                           std::sqrt(2) * std::sin(gamma_) *
+                                               y_l_m(2, 2, cosx, phi)) +
+                                 beta4_ * y_l_m(4, 0, cosx, phi))) /
+                       Nucleus::get_diffusiveness()));
 }
 
-double DeformedNucleus::nucleon_density_unnormalized(double r,
-                                                     double cosx, double phi) const {
-  return 1.0 / (1 + std::exp((r - Nucleus::get_nuclear_radius() *
-                                      (1 + \
-                                      beta2_ * (std::cos(gamma_) * y_l_m(2, 0, cosx, phi) + std::sqrt(2) * std::sin(gamma_) * y_l_m(2, 2, cosx, phi)) + \
-                                      beta4_ * y_l_m(4, 0, cosx, phi))) /
-                             Nucleus::get_diffusiveness()));
+double DeformedNucleus::nucleon_density_unnormalized(double r, double cosx,
+                                                     double phi) const {
+  return 1.0 /
+         (1 + std::exp((r - Nucleus::get_nuclear_radius() *
+                                (1 +
+                                 beta2_ * (std::cos(gamma_) *
+                                               y_l_m(2, 0, cosx, phi) +
+                                           std::sqrt(2) * std::sin(gamma_) *
+                                               y_l_m(2, 2, cosx, phi)) +
+                                 beta4_ * y_l_m(4, 0, cosx, phi))) /
+                       Nucleus::get_diffusiveness()));
 }
 
-double DeformedNucleus::integrant_nucleon_density_phi(double r, double cosx) const{
+double DeformedNucleus::integrant_nucleon_density_phi(double r,
+                                                      double cosx) const {
   Integrator integrate;
-  // Perform the phi integration
+  // Perform the phi integration. This is needed if the triaxiality coefficient
+  // gamma is included, which includes a dependency around the phi axis.
+  // Unfortunately the Integrator class does not support 3d integration which is
+  // why this intermediate integral is needed. It has been checked that the
+  // integral factorizes.
   const auto result = integrate(0.0, 2.0 * M_PI, [&](double phi) {
-      return nucleon_density_unnormalized(r, cosx, phi);
+    return nucleon_density_unnormalized(r, cosx, phi);
   });
   return result.value();
 }
@@ -354,20 +369,19 @@ double DeformedNucleus::calculate_saturation_density() const {
   // corresponds to r = 99fm. Additionally the precision settings in the
   // Integrator2d scheme are equally important. However both these point affect
   // the result only after the seventh digit which should not be relevant here.
-  if (gamma_ == 0.0){
-      const auto result = integrate(0.01, 1, -1, 1, [&](double t, double cosx) {
+  if (gamma_ == 0.0) {
+    const auto result = integrate(0.01, 1, -1, 1, [&](double t, double cosx) {
       const double r = (1 - t) / t;
-      return twopi * std::pow(r, 2.0) * nucleon_density_unnormalized(r, cosx, 0.0) /
-            std::pow(t, 2.0);
+      return twopi * std::pow(r, 2.0) *
+             nucleon_density_unnormalized(r, cosx, 0.0) / std::pow(t, 2.0);
     });
     const auto rho0 = number_of_particles() / result.value();
     return rho0;
-  }
-  else {
-      const auto result = integrate(0.01, 1, -1, 1, [&](double t, double cosx) {
+  } else {
+    const auto result = integrate(0.01, 1, -1, 1, [&](double t, double cosx) {
       const double r = (1 - t) / t;
       return std::pow(r, 2.0) * integrant_nucleon_density_phi(r, cosx) /
-            std::pow(t, 2.0);
+             std::pow(t, 2.0);
     });
     const auto rho0 = number_of_particles() / result.value();
     return rho0;
