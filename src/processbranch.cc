@@ -146,6 +146,9 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
     case ProcessType::MultiParticleFiveToTwo:
       os << "FiveToTwo";
       break;
+    case ProcessType::Freeforall:
+      os << "Ffa";
+          break;
     default:
       os.setstate(std::ios_base::failbit);
   }

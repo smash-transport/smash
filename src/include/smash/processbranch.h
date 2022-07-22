@@ -95,7 +95,11 @@ enum class ProcessType {
    *  Soft String NNbar annihilation process can fail by lack of energy. This is
    *  a tag we add to avoid mislabeling the events.
    */
-  FailedString = 47
+  FailedString = 47,
+  /**
+  * Ignore conservation laws.
+  */
+  Freeforall= 90
 };
 
 /**
