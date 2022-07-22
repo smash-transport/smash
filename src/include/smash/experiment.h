@@ -51,6 +51,7 @@
 #ifdef SMASH_USE_ROOT
 #include "rootoutput.h"
 #endif
+#include "freeforallaction.h"
 #include "vtkoutput.h"
 #include "wallcrossingaction.h"
 
@@ -227,7 +228,7 @@ class Experiment : public ExperimentBase {
    *                  configured end_time, but it might differ if SMASH is used
    *                  as an external library
    */
-  void run_time_evolution(const double t_end);
+  void run_time_evolution(const double t_end, ActionList extra_actions);
 
   /**
    * Performs the final decays of an event
@@ -2257,8 +2258,8 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles)) {
     discarded_interactions_total_++;
-    logg[LExperiment].debug(~einhard::DRed(), "✘ ", action,
-                            " (discarded: invalid)");
+    logg[LExperiment].info(~einhard::DRed(), "✘ ", action,
+                           " (discarded: invalid)");
     return false;
   }
   action.generate_final_state();
@@ -2399,17 +2400,61 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     brems_act.perform_bremsstrahlung(outputs_);
   }
 
-  logg[LExperiment].debug(~einhard::Green(), "✔ ", action);
+  logg[LExperiment].info(~einhard::Green(), "✔ ", action);
   return true;
 }
 
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution(const double t_end) {
+void Experiment<Modus>::run_time_evolution(const double t_end,
+                                           ActionList extra_actions) {
   while (parameters_.labclock->current_time() < t_end) {
     const double t = parameters_.labclock->current_time();
     const double dt =
         std::min(parameters_.labclock->timestep_duration(), t_end - t);
     logg[LExperiment].debug("Timestepless propagation for next ", dt, " fm/c.");
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // Add demo action
+    constexpr double r_x = 0.1;
+    const FourVector pos_a{t, -r_x, 0., 0.};
+    const FourVector pos_b{t, r_x, 0., 0.};
+
+    // TODO(stdnmr) Set correct four vectors for pi0s
+    const FourVector m1{1.1, 1.0, 0., 0.};
+    const FourVector m2{1.1, 2.0, 0., 0.};
+
+    ParticleData a{ParticleType::find(0x111)};  // pi0
+    a.set_4position(pos_a);
+    a.set_4momentum(m1);
+
+    ParticleData b{ParticleType::find(0x111)};  // pi0
+    b.set_4position(pos_b);
+    b.set_4momentum(m2);
+
+    ParticleList in_list{};
+    ParticleList out_list{a, b};
+
+    const double demo_act_time = t + 0.5 * dt;
+    std::cout << "demo_act_time: " << demo_act_time << "\n";
+    auto demo_act = make_unique<FreeforallAction>(in_list, out_list, demo_act_time);
+
+    std::cout << demo_act->get_type() << '\n';
+
+    // FreeforallAction demo_act(in_list, out_list, demo_act_time);
+
+
+
+    // New idea directly perform action myself
+    perform_action(*demo_act, 0);
+
+    // std::vector<ActionPtr> extra_acts;
+    // extra_acts.emplace_back(std::move(demo_act));
+    //
+    // actions[0].insert(std::move(extra_acts));
+    // TODO only adds to first ensemble for now
+
+    ////////////////////////////////////////////////////////////////////////////////////////
 
     // Perform forced thermalization if required
     if (thermalizer_ &&
@@ -2487,6 +2532,10 @@ void Experiment<Modus>::run_time_evolution(const double t_end) {
       }
     }
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
+      std::cout << "run_time_evolution_timestepless"
+                << "\n";
+      std::cout << "#ensemble: " << i_ens << "\n";
+      std::cout << "actions[i_ens].size(): " << actions[i_ens].size() << "\n";
       run_time_evolution_timestepless(actions[i_ens], i_ens, end_timestep_time,
                                       t_end);
     }
@@ -2564,25 +2613,27 @@ void Experiment<Modus>::run_time_evolution_timestepless(
     Actions &actions, int i_ensemble, const double end_time_propagation,
     const double end_time_run) {
   Particles &particles = ensembles_[i_ensemble];
-  logg[LExperiment].debug(
-      "Timestepless propagation: ", "Actions size = ", actions.size(),
-      ", end time = ", end_time_propagation);
+  logg[LExperiment].info("Timestepless propagation: ", "Actions size = ",
+                         actions.size(), ", end time = ", end_time_propagation);
 
   // iterate over all actions
   while (!actions.is_empty()) {
     if (actions.earliest_time() > end_time_propagation) {
+      logg[LExperiment].info(
+          "actions.earliest_time() > end_time_propagation is true",
+          actions.earliest_time(), end_time_propagation);
       break;
     }
     // get next action
     ActionPtr act = actions.pop();
     if (!act->is_valid(particles)) {
       discarded_interactions_total_++;
-      logg[LExperiment].debug(~einhard::DRed(), "✘ ", act,
-                              " (discarded: invalid)");
+      logg[LExperiment].info(~einhard::DRed(), "✘ ", act,
+                             " (discarded: invalid)");
       continue;
     }
-    logg[LExperiment].debug(~einhard::Green(), "✔ ", act,
-                            ", action time = ", act->time_of_execution());
+    logg[LExperiment].info(~einhard::Green(), "✔ ", act,
+                           ", action time = ", act->time_of_execution());
 
     /* (1) Propagate to the next action. */
     propagate_and_shine(act->time_of_execution(), particles);
@@ -3104,7 +3155,7 @@ void Experiment<Modus>::run() {
     // Sample initial particles, start clock, some printout and book-keeping
     initialize_new_event();
 
-    run_time_evolution(end_time_);
+    run_time_evolution(end_time_, {});
 
     if (force_decays_) {
       do_final_decays();
