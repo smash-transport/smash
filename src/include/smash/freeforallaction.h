@@ -25,8 +25,14 @@ class FreeforallAction : public Action {
   FreeforallAction(const ParticleList &in_part, const ParticleList &out_part,
                    double absolute_labframe_time)
       : Action(in_part, out_part, absolute_labframe_time, ProcessType::Freeforall) {}
-  /// No need to do anything, because outgoing particles are set in constructor
-  void generate_final_state() {}
+  /// Outgoing particles are set in prinicple in constructor
+  void generate_final_state() {
+    // Set time to time for arbitrary outgoing particles to time of action
+    // TODO should we scrool back here?
+    for (auto &p : outgoing_particles_) {
+      p.set_4position({time_of_execution(), p.position().threevec()});
+    }
+  }
   double get_total_weight() const { return 0.0; }
   double get_partial_weight() const { return 0.0; }
   /**

@@ -228,7 +228,7 @@ class Experiment : public ExperimentBase {
    *                  configured end_time, but it might differ if SMASH is used
    *                  as an external library
    */
-  void run_time_evolution(const double t_end, ActionList extra_actions);
+  void run_time_evolution(const double t_end, ParticleList add_plist);
 
   /**
    * Performs the final decays of an event
@@ -2406,51 +2406,26 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const double t_end,
-                                           ActionList extra_actions) {
+                                           ParticleList add_plist) {
+
+  // Add adding plist action ///////////////////////////////////////////////////
+  const double demo_act_time = parameters_.labclock->current_time();
+  std::cout << "demo_act_time: " << demo_act_time << "\n";
+  auto demo_act = make_unique<FreeforallAction>({}, add_plist, demo_act_time);
+  std::cout << demo_act->get_type() << '\n';
+
+  // Directly perform action myself
+  // Time of add_plist particles is set to action tim in generate_final_state
+  // TODO(stdnmr) Does this time change makes sense?
+  perform_action(*demo_act, 0);
+  // TODO(stdnmr) only adds to first ensemble for now
+  /////////////////////////////////////////////////////////////////////////////
+
   while (parameters_.labclock->current_time() < t_end) {
     const double t = parameters_.labclock->current_time();
     const double dt =
         std::min(parameters_.labclock->timestep_duration(), t_end - t);
     logg[LExperiment].debug("Timestepless propagation for next ", dt, " fm/c.");
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////
-    // Add demo action
-    constexpr double r_x = 0.1;
-    const FourVector pos_a{t, -r_x, 0., 0.};
-    const FourVector pos_b{t, r_x, 0., 0.};
-
-    ParticleData a{ParticleType::find(0x111)};  // pi0
-    a.set_4position(pos_a);
-    a.set_4momentum(a.pole_mass(), 1.0, 0., 0.);
-
-    ParticleData b{ParticleType::find(0x111)};  // pi0
-    b.set_4position(pos_b);
-    b.set_4momentum(b.pole_mass(), -1.0, 0., 0.);
-
-    ParticleList in_list{};
-    ParticleList out_list{a, b};
-
-    const double demo_act_time = t + 0.5 * dt;
-    std::cout << "demo_act_time: " << demo_act_time << "\n";
-    auto demo_act = make_unique<FreeforallAction>(in_list, out_list, demo_act_time);
-
-    std::cout << demo_act->get_type() << '\n';
-
-    // FreeforallAction demo_act(in_list, out_list, demo_act_time);
-
-
-
-    // New idea directly perform action myself
-    perform_action(*demo_act, 0);
-
-    // std::vector<ActionPtr> extra_acts;
-    // extra_acts.emplace_back(std::move(demo_act));
-    //
-    // actions[0].insert(std::move(extra_acts));
-    // TODO only adds to first ensemble for now
-
-    ////////////////////////////////////////////////////////////////////////////////////////
 
     // Perform forced thermalization if required
     if (thermalizer_ &&
@@ -3151,7 +3126,23 @@ void Experiment<Modus>::run() {
     // Sample initial particles, start clock, some printout and book-keeping
     initialize_new_event();
 
-    run_time_evolution(end_time_, {});
+    ////////////////////////////////////////////////////////////////////////////
+    constexpr double r_x = 0.1;
+    const FourVector pos_a{0.0, -r_x, 0., 0.};
+    const FourVector pos_b{0.0, r_x, 0., 0.};
+
+    ParticleData a{ParticleType::find(0x111)};  // pi0
+    a.set_4position(pos_a);
+    a.set_4momentum(a.pole_mass(), 1.0, 0., 0.);
+
+    ParticleData b{ParticleType::find(0x111)};  // pi0
+    b.set_4position(pos_b);
+    b.set_4momentum(b.pole_mass(), -1.0, 0., 0.);
+
+    ParticleList out_list{a, b};
+    ////////////////////////////////////////////////////////////////////////////
+
+    run_time_evolution(end_time_, out_list);
 
     if (force_decays_) {
       do_final_decays();
