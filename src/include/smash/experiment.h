@@ -1281,9 +1281,9 @@ Experiment<Modus>::Experiment(Configuration config,
         config["Collision_Term"]["Pauli_Blocking"], parameters_);
   }
   // In collider setup with sqrts >= 200 GeV particles don't form continuously
-  ParticleData::formation_power_ =
-      config.take({"Collision_Term", "Power_Particle_Formation"},
-                  modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
+  ParticleData::formation_power_ = config.take(
+      {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
+      modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
 
   /*!\Userguide
    * \page input_general_
