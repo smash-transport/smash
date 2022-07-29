@@ -2258,7 +2258,7 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles)) {
     discarded_interactions_total_++;
-    logg[LExperiment].info(~einhard::DRed(), "✘ ", action,
+    logg[LExperiment].debug(~einhard::DRed(), "✘ ", action,
                            " (discarded: invalid)");
     return false;
   }
@@ -2400,7 +2400,7 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     brems_act.perform_bremsstrahlung(outputs_);
   }
 
-  logg[LExperiment].info(~einhard::Green(), "✔ ", action);
+  logg[LExperiment].debug(~einhard::Green(), "✔ ", action);
   return true;
 }
 
@@ -2420,17 +2420,13 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     const FourVector pos_a{t, -r_x, 0., 0.};
     const FourVector pos_b{t, r_x, 0., 0.};
 
-    // TODO(stdnmr) Set correct four vectors for pi0s
-    const FourVector m1{1.1, 1.0, 0., 0.};
-    const FourVector m2{1.1, 2.0, 0., 0.};
-
     ParticleData a{ParticleType::find(0x111)};  // pi0
     a.set_4position(pos_a);
-    a.set_4momentum(m1);
+    a.set_4momentum(a.pole_mass(), 1.0, 0., 0.);
 
     ParticleData b{ParticleType::find(0x111)};  // pi0
     b.set_4position(pos_b);
-    b.set_4momentum(m2);
+    b.set_4momentum(b.pole_mass(), -1.0, 0., 0.);
 
     ParticleList in_list{};
     ParticleList out_list{a, b};
