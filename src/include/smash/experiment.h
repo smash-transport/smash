@@ -228,7 +228,8 @@ class Experiment : public ExperimentBase {
    *                  configured end_time, but it might differ if SMASH is used
    *                  as an external library
    */
-  void run_time_evolution(const double t_end, ParticleList add_plist);
+  // TODO(stdnmr) Doc
+  void run_time_evolution(const double t_end, ParticleList add_plist = {});
 
   /**
    * Performs the final decays of an event
@@ -2408,18 +2409,22 @@ template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const double t_end,
                                            ParticleList add_plist) {
 
-  // Add adding plist action ///////////////////////////////////////////////////
-  const double demo_act_time = parameters_.labclock->current_time();
-  std::cout << "demo_act_time: " << demo_act_time << "\n";
-  auto demo_act = make_unique<FreeforallAction>({}, add_plist, demo_act_time);
-  std::cout << demo_act->get_type() << '\n';
 
-  // Directly perform action myself
-  // Time of add_plist particles is set to action tim in generate_final_state
-  // TODO(stdnmr) Does this time change makes sense?
-  perform_action(*demo_act, 0);
-  // TODO(stdnmr) only adds to first ensemble for now
-  /////////////////////////////////////////////////////////////////////////////
+  if (!add_plist.empty()) {
+    // Add adding plist action ///////////////////////////////////////////////////
+    const double demo_act_time = parameters_.labclock->current_time();
+    std::cout << "demo_act_time: " << demo_act_time << "\n";
+    ParticleList empyt_in_list {};
+    auto demo_act = make_unique<FreeforallAction>(empyt_in_list, add_plist, demo_act_time);
+    std::cout << demo_act->get_type() << '\n';
+
+    // Directly perform action myself
+    // Time of add_plist particles is set to action tim in generate_final_state
+    // TODO(stdnmr) Does this time change makes sense?
+    perform_action(*demo_act, 0);
+    // TODO(stdnmr) only adds to first ensemble for now
+    /////////////////////////////////////////////////////////////////////////////
+  }
 
   while (parameters_.labclock->current_time() < t_end) {
     const double t = parameters_.labclock->current_time();
@@ -3127,6 +3132,7 @@ void Experiment<Modus>::run() {
     initialize_new_event();
 
     ////////////////////////////////////////////////////////////////////////////
+    // Example add. out list
     constexpr double r_x = 0.1;
     const FourVector pos_a{0.0, -r_x, 0., 0.};
     const FourVector pos_b{0.0, r_x, 0., 0.};
@@ -3142,7 +3148,7 @@ void Experiment<Modus>::run() {
     ParticleList out_list{a, b};
     ////////////////////////////////////////////////////////////////////////////
 
-    run_time_evolution(end_time_, out_list);
+    run_time_evolution(end_time_);
 
     if (force_decays_) {
       do_final_decays();
