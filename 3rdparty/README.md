@@ -48,8 +48,12 @@ YAML_VERSION='X.Y.Z' # Put in the right numbers
 wget https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-"${YAML_VERSION}".zip
 unzip yaml-cpp-"${YAML_VERSION}".zip
 mv yaml-cpp-yaml-cpp-"${YAML_VERSION}" yaml-cpp-"${YAML_VERSION}" && rm yaml-cpp-"${YAML_VERSION}".zip
+rm -r yaml-cpp-"${YAML_VERSION}"/{test,util}
 unset -v 'YAML_VERSION'
 ```
+Removing the `test` and `util` folders is crucial to avoid shipping hundreds of unnecessary files which sum up to some unnecessary MB.
+This is connected to the fact we do not build YAML tests or tools (cf. `YAML_CPP_BUILD_TESTS` and `YAML_CPP_BUILD_TOOLS` CMake variables in the _3rdparty/CMakeLists.txt_ file) and it is likely not changing in the future.
+
 **Be sure to drop any CMake version requirement as described in the general remarks above.**
 
 Of course, you should try to compile SMASH with the new version of the library and check that everything works fine.
