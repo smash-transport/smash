@@ -369,7 +369,8 @@ void Nucleus::generate_fermi_momenta() {
     }
     const double r = (i->position() - nucleus_center).abs3();
     const double theta = (i->position().threevec().get_theta());
-    double rho = nucleon_density(r, std::cos(theta));
+    const double phi = (i->position().threevec().get_phi());
+    double rho = nucleon_density(r, std::cos(theta), phi);
 
     if (i->pdgcode() == pdg::p) {
       rho = rho * N_p / A;
@@ -483,12 +484,12 @@ void Nucleus::random_euler_angles() {
   euler_psi_ = twopi * random::uniform(0., 1.);
 }
 
-double Nucleus::nucleon_density(double r, double) const {
+double Nucleus::nucleon_density(double r, double, double) const {
   return get_saturation_density() /
          (std::exp((r - nuclear_radius_) / diffusiveness_) + 1.);
 }
 
-double Nucleus::nucleon_density_unnormalized(double r, double) const {
+double Nucleus::nucleon_density_unnormalized(double r, double, double) const {
   return 1.0 / (std::exp((r - nuclear_radius_) / diffusiveness_) + 1.);
 }
 
@@ -501,8 +502,8 @@ double Nucleus::calculate_saturation_density() const {
   // the result only after the seventh digit which should not be relevant here.
   const auto result = integrate(0.01, 1, -1, 1, [&](double t, double cosx) {
     const double r = (1 - t) / t;
-    return twopi * std::pow(r, 2.0) * nucleon_density_unnormalized(r, cosx) /
-           std::pow(t, 2.0);
+    return twopi * std::pow(r, 2.0) *
+           nucleon_density_unnormalized(r, cosx, 0.0) / std::pow(t, 2.0);
   });
   const auto rho0 = number_of_particles() / result.value();
   return rho0;

@@ -99,9 +99,11 @@ TEST(rotate_both) {
 // Tests if the function for spherical harmonics
 // returns correct values for given l and cosx
 // simple values for cosx for demonstration purposes
-TEST(yl0) {
-  COMPARE_ABSOLUTE_ERROR(y_l_0(2, 1.), std::sqrt(5. / M_PI) / 2., 1e-7);
-  COMPARE_ABSOLUTE_ERROR(y_l_0(4, 1.), 3. / (2. * std::sqrt(M_PI)), 1e-7);
+TEST(ylm) {
+  COMPARE_ABSOLUTE_ERROR(y_l_m(2, 0, 1., 0.), std::sqrt(5. / M_PI) / 2., 1e-7);
+  COMPARE_ABSOLUTE_ERROR(y_l_m(2, 2, 1., 0.), 0.0, 1e-7);
+  COMPARE_ABSOLUTE_ERROR(y_l_m(4, 0, 1., 0.), 3. / (2. * std::sqrt(M_PI)),
+                         1e-7);
 }
 
 TEST(deformation_parameters_from_config) {
@@ -210,8 +212,8 @@ TEST(nucleon_density) {
   Configuration col_conf1 = mod_conf1["Collider"];
   Configuration proj_conf1 = col_conf1["Projectile"];
   DeformedNucleus dnucleus1(proj_conf1, 1, 0);
-  COMPARE_ABSOLUTE_ERROR(dnucleus1.nucleon_density(.0892, .1802), 0.16599914,
-                         1e-7);
+  COMPARE_ABSOLUTE_ERROR(dnucleus1.nucleon_density(.0892, .1802, 0.),
+                         0.16599914, 1e-7);
 
   // config with values for an easy analytic deformed Woods-Saxon value
   // Lead core with default values
@@ -227,8 +229,8 @@ TEST(nucleon_density) {
   Configuration col_conf2 = mod_conf2["Collider"];
   Configuration proj_conf2 = col_conf2["Projectile"];
   DeformedNucleus dnucleus2(proj_conf2, 1, 0);
-  COMPARE_ABSOLUTE_ERROR(dnucleus2.nucleon_density(.0892, .1802), 0.16099917,
-                         1e-7);
+  COMPARE_ABSOLUTE_ERROR(dnucleus2.nucleon_density(.0892, .1802, 0.0),
+                         0.16099917, 1e-7);
 }
 
 TEST(nucleon_density_norm) {
@@ -248,7 +250,7 @@ TEST(nucleon_density_norm) {
     // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
     const auto result = integrate(0, 1, -1, 1, [&](double t, double cosx) {
       const double r = (1 - t) / t;
-      return twopi * square(r) * nucl.nucleon_density(r, cosx) / square(t);
+      return twopi * square(r) * nucl.nucleon_density(r, cosx, 0.0) / square(t);
     });
     const size_t Z = nucl.number_of_protons(), A = nucl.number_of_particles();
     std::cout << "Z: " << Z << "  A: " << A << std::endl;
