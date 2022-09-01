@@ -2958,14 +2958,15 @@ void Experiment<Modus>::final_output() {
     if (IC_output_switch_ && (total_particles == 0)) {
       // Verify there is no more energy in the system if all particles were
       // removed when crossing the hypersurface
-      const double remaining_energy =
-          conserved_initial_.momentum().x0() - total_energy_removed_;
-      if (remaining_energy > really_small) {
+      if (abs(conserved_initial_.momentum().x0() / total_energy_removed_ - 1) >
+          really_small) {
         throw std::runtime_error(
             "There is remaining energy in the system although all particles "
             "were removed.\n"
             "E_remain = " +
-            std::to_string(remaining_energy) + " [GeV]");
+            std::to_string(
+                (conserved_initial_.momentum().x0() - total_energy_removed_)) +
+            " [GeV]");
       } else {
         logg[LExperiment].info() << hline;
         logg[LExperiment].info()
