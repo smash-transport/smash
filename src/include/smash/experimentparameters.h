@@ -60,7 +60,7 @@ struct ExperimentParameters {
   /// Employed collision criterion
   const CollisionCriterion coll_crit;
 
-  /// This indicates whether two to one reactions are switched on.
+  /// This indicates whether string fragmentation is switched on.
   bool two_to_one;
 
   /// This indicates which two to two reactions are switched off.
@@ -72,9 +72,6 @@ struct ExperimentParameters {
   /// This indicates whether string fragmentation is switched on.
   bool strings_switch;
 
-  /// Whether to use the AQM or not
-  bool use_AQM;
-
   /**
    * Multiplicative factor to be applied to resonance lifetimes; in the case of
    * thermal multiplicities this should also be applied to initial
@@ -83,14 +80,6 @@ struct ExperimentParameters {
    */
   double res_lifetime_factor;
 
-  /**
-   * This indicates whether the string fragmentation is swiched on with
-   * a probability smoothly increasing with energy. If it's set equal to
-   * false, the cross section of the string fragmentation is counted by
-   * taking the difference between the parametrized total cross section
-   * and the sum of the non-string cross sections.
-   */
-  bool strings_with_probability;
   /**
    * This indicates how NN̅ annihilation should be treated; options are to
    * neglect it, make it conserve detailed balance using NN̅ → h₁(1170)ρ
@@ -142,8 +131,6 @@ struct ExperimentParameters {
    */
   double fixed_min_cell_length;  // fm
 
-  /// Allow or forbid the first collisions within the same nucleus
-  bool allow_collisions_within_nucleus;
   /**
    * Global factor which all cross sections are scaled with.
    *
@@ -151,14 +138,6 @@ struct ExperimentParameters {
    * that are constrained with data.
    */
   double scale_xs;
-
-  /**
-   * Additional constant contribution (in mb) to the elastic cross sections.
-   *
-   * Using it will break agreement with experimental data for elastic cross
-   * sections that are constrained with data.
-   */
-  double additional_el_xs;  // mb
 
   /** In thermodynamics outputs, it decides whether to use only participants
    * (true) or also spectators (false, default value).

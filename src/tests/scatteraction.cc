@@ -81,12 +81,9 @@ TEST(elastic_collision) {
 
   // add elastic channel
   constexpr double sigma = 10.0;
-  constexpr bool strings_switch = false;
-  constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_scatterings(sigma, true, Test::all_reactions_included(),
-                          Test::no_multiparticle_reactions(), 0.,
-                          strings_switch, false, false, nnbar_treatment, 1.0,
-                          0.0);
+  act.add_all_scatterings(Test::default_finder_parameters(
+      sigma, NNbarTreatment::NoAnnihilation, Test::all_reactions_included(),
+      false, false, false));
 
   // check cross section
   COMPARE(act.cross_section(), sigma);
@@ -156,13 +153,12 @@ TEST(outgoing_valid) {
   COMPARE(p2_copy.type(), ParticleType::find(0x111));
 
   // add processes
-  constexpr double elastic_parameter = 0.;  // don't include elastic scattering
-  constexpr bool strings_switch = false;
-  constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act->add_all_scatterings(
-      elastic_parameter, true, Test::all_reactions_included(),
-      Test::no_multiparticle_reactions(), 0., strings_switch, false, false,
-      nnbar_treatment, 1.0, 0.0);
+
+  double elastic_parameter = 0;  // don't include elastic scattering
+  bool strings_switch = false;
+  act->add_all_scatterings(Test::default_finder_parameters(
+      elastic_parameter, NNbarTreatment::NoAnnihilation,
+      Test::all_reactions_included(), strings_switch, false, false));
 
   VERIFY(act->cross_section() > 0.);
 
@@ -226,24 +222,18 @@ TEST(cross_sections_symmetric) {
     VERIFY(act21 != nullptr);
 
     // add processes
-    constexpr double elastic_parameter = -10.;  // no added elastic x-sections
-    constexpr bool two_to_one = true;
-    const ReactionsBitSet included_2to2 = Test::all_reactions_included();
-    const MultiParticleReactionsBitSet included_multi =
-        Test::no_multiparticle_reactions();
-    constexpr double low_snn_cut = 0.;
-    constexpr bool strings_switch = true;
-    constexpr bool use_AQM = true;
-    constexpr bool strings_with_probability = true;
-    const NNbarTreatment nnbar_treatment = NNbarTreatment::Strings;
-    act12->add_all_scatterings(elastic_parameter, two_to_one, included_2to2,
-                               included_multi, low_snn_cut, strings_switch,
-                               use_AQM, strings_with_probability,
-                               nnbar_treatment, 1.0, 0.0);
-    act21->add_all_scatterings(elastic_parameter, two_to_one, included_2to2,
-                               included_multi, low_snn_cut, strings_switch,
-                               use_AQM, strings_with_probability,
-                               nnbar_treatment, 1.0, 0.0);
+
+    double elastic_parameter = -10.;  // no added elastic cross sections
+    bool use_AQM = true;
+    bool strings_with_probability = true;
+    NNbarTreatment nnbar_treatment = NNbarTreatment::Strings;
+    ScatterActionsFinderParameters finder_params =
+        Test::default_finder_parameters(elastic_parameter, nnbar_treatment,
+                                        Test::all_reactions_included(), true,
+                                        use_AQM, strings_with_probability);
+
+    act12->add_all_scatterings(finder_params);
+    act21->add_all_scatterings(finder_params);
 
     VERIFY(act12->cross_section() >= 0.);
     VERIFY(act21->cross_section() >= 0.);
@@ -294,13 +284,13 @@ TEST(pythia_running) {
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
 
   // add processes
-  constexpr double elastic_parameter = 0.;  // don't include elastic scattering
-  constexpr bool strings_switch = true;
-  constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act->add_all_scatterings(elastic_parameter, false, ReactionsBitSet(),
-                           Test::no_multiparticle_reactions(), 0.,
-                           strings_switch, false, false, nnbar_treatment, 1.0,
-                           0.0);
+
+  double elastic_parameter = 0;  // don't include elastic scattering
+  ReactionsBitSet included_2to2 = ReactionsBitSet();
+
+  act->add_all_scatterings(Test::default_finder_parameters(
+      elastic_parameter, NNbarTreatment::NoAnnihilation, included_2to2, true,
+      false, false));
 
   VERIFY(act->cross_section() > 0.);
 
@@ -366,14 +356,12 @@ TEST(no_strings) {
     VERIFY(act != nullptr);
 
     // add processes
-    constexpr double elastic_parameter =
-        0.;  // don't include elastic scattering
-    constexpr bool strings_switch = false;
-    constexpr NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-    act->add_all_scatterings(
-        elastic_parameter, true, Test::all_reactions_included(),
-        Test::no_multiparticle_reactions(), 0., strings_switch, false, false,
-        nnbar_treatment, 1.0, 0.0);
+    double elastic_parameter = 0;  // don't include elastic scattering
+    bool strings_switch = false;
+
+    act->add_all_scatterings(Test::default_finder_parameters(
+        elastic_parameter, NNbarTreatment::NoAnnihilation,
+        Test::all_reactions_included(), strings_switch, false, false));
 
     VERIFY(act->cross_section() > 0.);
 
@@ -411,12 +399,7 @@ TEST(update_incoming) {
   VERIFY(act.is_valid(particles));
 
   // add elastic channel
-  constexpr double sigma = 10.0;
-  bool string_switch = true;
-  NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation;
-  act.add_all_scatterings(sigma, true, Test::all_reactions_included(),
-                          Test::no_multiparticle_reactions(), 0., string_switch,
-                          false, false, nnbar_treatment, 1.0, 0.0);
+  act.add_all_scatterings(Test::default_finder_parameters());
 
   // change the position of one of the particles
   const FourVector new_position(0.1, 0., 0., 0.);
@@ -482,24 +465,17 @@ TEST(particle_ordering) {
     VERIFY(act21 != nullptr);
 
     // add processes
-    constexpr double elastic_parameter = -10.;  // no added elastic x-sections
-    constexpr bool two_to_one = true;
-    const ReactionsBitSet included_2to2 = Test::all_reactions_included();
-    const MultiParticleReactionsBitSet included_multi =
-        Test::no_multiparticle_reactions();
-    constexpr double low_snn_cut = 0.;
-    constexpr bool strings_switch = true;
-    constexpr bool use_AQM = true;
-    constexpr bool strings_with_probability = true;
-    const NNbarTreatment nnbar_treatment = NNbarTreatment::Strings;
-    act12->add_all_scatterings(elastic_parameter, two_to_one, included_2to2,
-                               included_multi, low_snn_cut, strings_switch,
-                               use_AQM, strings_with_probability,
-                               nnbar_treatment, 1.0, 0.0);
-    act21->add_all_scatterings(elastic_parameter, two_to_one, included_2to2,
-                               included_multi, low_snn_cut, strings_switch,
-                               use_AQM, strings_with_probability,
-                               nnbar_treatment, 1.0, 0.0);
+    double elastic_parameter = -10.;  // no added elastic cross sections
+    bool use_AQM = true;
+    bool strings_with_probability = true;
+    NNbarTreatment nnbar_treatment = NNbarTreatment::Strings;
+    ScatterActionsFinderParameters finder_params =
+        Test::default_finder_parameters(elastic_parameter, nnbar_treatment,
+                                        Test::all_reactions_included(), true,
+                                        use_AQM, strings_with_probability);
+
+    act12->add_all_scatterings(finder_params);
+    act21->add_all_scatterings(finder_params);
 
     VERIFY(act12->cross_section() >= 0.);
     VERIFY(act21->cross_section() >= 0.);

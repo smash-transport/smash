@@ -306,35 +306,18 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration& config, const ExperimentParameters& parameters)
-    : coll_crit_(parameters.coll_crit),
-      elastic_parameter_(
-          config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.)),
-      testparticles_(parameters.testparticles),
+    : finder_parameters_(create_finder_parameters(config, parameters)),
       isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
-      two_to_one_(parameters.two_to_one),
-      incl_set_(parameters.included_2to2),
-      incl_multi_set_(parameters.included_multi),
-      scale_xs_(parameters.scale_xs),
-      additional_el_xs_(parameters.additional_el_xs),
-      low_snn_cut_(parameters.low_snn_cut),
-      strings_switch_(parameters.strings_switch),
-      use_AQM_(parameters.use_AQM),
-      strings_with_probability_(parameters.strings_with_probability),
-      nnbar_treatment_(parameters.nnbar_treatment),
       box_length_(parameters.box_length),
       string_formation_time_(config.take(
-          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)),
-      maximum_cross_section_(parameters.maximum_cross_section),
-      allow_first_collisions_within_nucleus_(
-          parameters.allow_collisions_within_nucleus),
-      only_warn_for_high_prob_(config.take(
-          {"Collision_Term", "Only_Warn_For_High_Probability"}, false)) {
+          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)) {
   if (is_constant_elastic_isotropic()) {
     logg[LFindScatter].info(
         "Constant elastic isotropic cross-section mode:", " using ",
-        elastic_parameter_, " mb as maximal cross-section.");
+        finder_parameters_.elastic_parameter, " mb as maximal cross-section.");
   }
-  if (incl_multi_set_.any() && coll_crit_ != CollisionCriterion::Stochastic) {
+  if (finder_parameters_.included_multi.any() &&
+      finder_parameters_.coll_crit != CollisionCriterion::Stochastic) {
     throw std::invalid_argument(
         "Multi-body reactions (like e.g. 3->1 or 3->2) are only possible with "
         "the stochastic "
@@ -342,9 +325,13 @@ ScatterActionsFinder::ScatterActionsFinder(
         "criterion. Change your config accordingly.");
   }
 
-  if (incl_multi_set_[IncludedMultiParticleReactions::Deuteron_3to2] == 1 &&
-      (incl_set_[IncludedReactions::PiDeuteron_to_pidprime] == 1 ||
-       incl_set_[IncludedReactions::NDeuteron_to_Ndprime] == 1)) {
+  if (finder_parameters_
+              .included_multi[IncludedMultiParticleReactions::Deuteron_3to2] ==
+          1 &&
+      (finder_parameters_
+               .included_2to2[IncludedReactions::PiDeuteron_to_pidprime] == 1 ||
+       finder_parameters_
+               .included_2to2[IncludedReactions::NDeuteron_to_Ndprime] == 1)) {
     throw std::invalid_argument(
         "To prevent double counting it is not possible to enable deuteron 3->2 "
         "reactions\nand reactions involving the d' at the same time\ni.e. to "
@@ -354,7 +341,9 @@ ScatterActionsFinder::ScatterActionsFinder(
         "Change your config accordingly.");
   }
 
-  if (incl_multi_set_[IncludedMultiParticleReactions::Deuteron_3to2] == 1 &&
+  if (finder_parameters_
+              .included_multi[IncludedMultiParticleReactions::Deuteron_3to2] ==
+          1 &&
       ParticleType::try_find(pdg::dprime)) {
     throw std::invalid_argument(
         "Do not use the d' resonance and enable \"Deuteron_3to2\" "
@@ -364,24 +353,28 @@ ScatterActionsFinder::ScatterActionsFinder(
         "deuteron 3-to-2 reactions would be double counted.");
   }
 
-  if ((nnbar_treatment_ == NNbarTreatment::TwoToFive &&
-       incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] != 1) ||
-      (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] == 1 &&
-       nnbar_treatment_ != NNbarTreatment::TwoToFive)) {
+  if ((finder_parameters_.nnbar_treatment == NNbarTreatment::TwoToFive &&
+       finder_parameters_
+               .included_multi[IncludedMultiParticleReactions::NNbar_5to2] !=
+           1) ||
+      (finder_parameters_
+               .included_multi[IncludedMultiParticleReactions::NNbar_5to2] ==
+           1 &&
+       finder_parameters_.nnbar_treatment != NNbarTreatment::TwoToFive)) {
     throw std::invalid_argument(
         "In order to conserve detailed balance, when \"NNbar_5to2\" is "
         "included in\n`Multi_Particle_Reactions`, the `NNbarTreatment` has to "
         "be set to \"two to five\" and vice versa.");
   }
 
-  if (nnbar_treatment_ == NNbarTreatment::Resonances &&
-      incl_set_[IncludedReactions::NNbar] != 1) {
+  if (finder_parameters_.nnbar_treatment == NNbarTreatment::Resonances &&
+      finder_parameters_.included_2to2[IncludedReactions::NNbar] != 1) {
     throw std::invalid_argument(
         "'NNbar' has to be in the list of allowed 2 to 2 processes "
         "to enable annihilation to go through resonances");
   }
 
-  if (strings_switch_) {
+  if (finder_parameters_.strings_switch) {
     auto subconfig = config.extract_sub_configuration(
         {"Collision_Term", "String_Parameters"}, Configuration::GetEmpty::Yes);
     string_process_interface_ = std::make_unique<StringProcess>(
@@ -405,6 +398,27 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
 }
 
+ScatterActionsFinderParameters create_finder_parameters(
+    Configuration& config, const ExperimentParameters& parameters) {
+  return {
+      config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.),
+      parameters.low_snn_cut,
+      parameters.scale_xs,
+      config.take({"Collision_Term", "Additional_Elastic_Cross_Section"}, 0.0),
+      parameters.maximum_cross_section,
+      parameters.coll_crit,
+      parameters.nnbar_treatment,
+      parameters.included_2to2,
+      parameters.included_multi,
+      parameters.testparticles,
+      parameters.two_to_one,
+      config.take({"Modi", "Collider", "Collisions_Within_Nucleus"}, false),
+      parameters.strings_switch,
+      config.take({"Collision_Term", "Use_AQM"}, true),
+      config.take({"Collision_Term", "Strings_with_Probability"}, true),
+      config.take({"Collision_Term", "Only_Warn_For_High_Probability"}, false)};
+}
+
 ActionPtr ScatterActionsFinder::check_collision_two_part(
     const ParticleData& data_a, const ParticleData& data_b, double dt,
     const std::vector<FourVector>& beam_momentum,
@@ -413,7 +427,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
    * 1) belong to one of the two colliding nuclei, and
    * 2) both of them have never experienced any collisions,
    * then the collisions between them are banned. */
-  if (!allow_first_collisions_within_nucleus_) {
+  if (!finder_parameters_.allow_collisions_within_nucleus) {
     assert(data_a.id() >= 0);
     assert(data_b.id() >= 0);
     bool in_same_nucleus = (data_a.belongs_to() == BelongsTo::Projectile &&
@@ -429,7 +443,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   }
 
   // No grid or search in cell means no collision for stochastic criterion
-  if (coll_crit_ == CollisionCriterion::Stochastic &&
+  if (finder_parameters_.coll_crit == CollisionCriterion::Stochastic &&
       gcell_vol < really_small) {
     return nullptr;
   }
@@ -448,43 +462,40 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
       data_a, data_b, time_until_collision, isotropic_, string_formation_time_,
       box_length_);
 
-  if (coll_crit_ == CollisionCriterion::Stochastic) {
+  if (finder_parameters_.coll_crit == CollisionCriterion::Stochastic) {
     act->set_stochastic_pos_idx();
   }
 
-  if (strings_switch_) {
+  if (finder_parameters_.strings_switch) {
     act->set_string_interface(string_process_interface_.get());
   }
 
   // Distance squared calculation not needed for stochastic criterion
   const double distance_squared =
-      (coll_crit_ == CollisionCriterion::Geometric)
+      (finder_parameters_.coll_crit == CollisionCriterion::Geometric)
           ? act->transverse_distance_sqr()
-      : (coll_crit_ == CollisionCriterion::Covariant)
+      : (finder_parameters_.coll_crit == CollisionCriterion::Covariant)
           ? act->cov_transverse_distance_sqr()
           : 0.0;
 
   // Don't calculate cross section if the particles are very far apart.
   // Not needed for stochastic criterion because of cell structure.
-  if (coll_crit_ != CollisionCriterion::Stochastic &&
-      distance_squared >= max_transverse_distance_sqr(testparticles_)) {
+  if (finder_parameters_.coll_crit != CollisionCriterion::Stochastic &&
+      distance_squared >=
+          max_transverse_distance_sqr(finder_parameters_.testparticles)) {
     return nullptr;
   }
 
   // Add various subprocesses.
-  act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                           incl_multi_set_, low_snn_cut_, strings_switch_,
-                           use_AQM_, strings_with_probability_,
-                           nnbar_treatment_, scale_xs_, additional_el_xs_);
-
-  double xs =
-      act->cross_section() * fm2_mb / static_cast<double>(testparticles_);
+  act->add_all_scatterings(finder_parameters_);
+  double xs = act->cross_section() * fm2_mb /
+              static_cast<double>(finder_parameters_.testparticles);
 
   // Take cross section scaling factors into account
   xs *= data_a.xsec_scaling_factor(time_until_collision);
   xs *= data_b.xsec_scaling_factor(time_until_collision);
 
-  if (coll_crit_ == CollisionCriterion::Stochastic) {
+  if (finder_parameters_.coll_crit == CollisionCriterion::Stochastic) {
     const double v_rel = act->relative_velocity();
     /* Collision probability for 2-particle scattering, see
      * \iref{Staudenmaier:2021lrg}. */
@@ -493,7 +504,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     logg[LFindScatter].debug(
         "Stochastic collison criterion parameters (2-particles):\nprob = ",
         prob, ", xs = ", xs, ", v_rel = ", v_rel, ", dt = ", dt,
-        ", gcell_vol = ", gcell_vol, ", testparticles = ", testparticles_);
+        ", gcell_vol = ", gcell_vol,
+        ", testparticles = ", finder_parameters_.testparticles);
 
     if (prob > 1.) {
       std::stringstream err;
@@ -504,7 +516,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
           << " at sqrts[GeV] = " << act->sqrt_s()
           << " with xs[fm^2]/Ntest = " << xs
           << "\nConsider using smaller timesteps.";
-      if (only_warn_for_high_prob_) {
+      if (finder_parameters_.only_warn_for_high_prob) {
         logg[LFindScatter].warn(err.str());
       } else {
         throw std::runtime_error(err.str());
@@ -517,8 +529,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
       return nullptr;
     }
 
-  } else if (coll_crit_ == CollisionCriterion::Geometric ||
-             coll_crit_ == CollisionCriterion::Covariant) {
+  } else if (finder_parameters_.coll_crit == CollisionCriterion::Geometric ||
+             finder_parameters_.coll_crit == CollisionCriterion::Covariant) {
     // just collided with this particle
     if (data_a.id_process() > 0 && data_a.id_process() == data_b.id_process()) {
       logg[LFindScatter].debug("Skipping collided particles at time ",
@@ -552,7 +564,7 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
    * 3) have never experienced any collisons,
    * then the collision between them are banned also for multi-particle
    * interactions. */
-  if (!allow_first_collisions_within_nucleus_) {
+  if (!finder_parameters_.allow_collisions_within_nucleus) {
     bool all_projectile =
         std::all_of(plist.begin(), plist.end(), [&](const ParticleData& data) {
           return data.belongs_to() == BelongsTo::Projectile;
@@ -587,13 +599,14 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
   act->set_stochastic_pos_idx();
 
   // 3. Add possible final states (dt and gcell_vol for probability calculation)
-  act->add_possible_reactions(dt, gcell_vol, incl_multi_set_);
+  act->add_possible_reactions(dt, gcell_vol, finder_parameters_.included_multi);
 
   /* 4. Return total collision probability
    *    Scales with 1 over the number of testpartciles to the power of the
    *    number of incoming particles - 1 */
   const double prob =
-      act->get_total_weight() / std::pow(testparticles_, plist.size() - 1);
+      act->get_total_weight() /
+      std::pow(finder_parameters_.testparticles, plist.size() - 1);
 
   // 5. Check that probability is smaller than one
   if (prob > 1.) {
@@ -604,7 +617,7 @@ ActionPtr ScatterActionsFinder::check_collision_multi_part(
     }
     err << " at sqrts[GeV] = " << act->sqrt_s()
         << "\nConsider using smaller timesteps.";
-    if (only_warn_for_high_prob_) {
+    if (finder_parameters_.only_warn_for_high_prob) {
       logg[LFindScatter].warn(err.str());
     } else {
       throw std::runtime_error(err.str());
@@ -634,13 +647,13 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
           actions.push_back(std::move(act));
         }
       }
-      if (incl_multi_set_.any()) {
+      if (finder_parameters_.included_multi.any()) {
         // Also, check for 3 particle scatterings with stochastic criterion
         for (const ParticleData& p3 : search_list) {
-          if (incl_multi_set_[IncludedMultiParticleReactions::Deuteron_3to2] ==
-                  1 ||
-              incl_multi_set_[IncludedMultiParticleReactions::Meson_3to1] ==
-                  1) {
+          if (finder_parameters_.included_multi
+                      [IncludedMultiParticleReactions::Deuteron_3to2] == 1 ||
+              finder_parameters_.included_multi
+                      [IncludedMultiParticleReactions::Meson_3to1] == 1) {
             if (p1.id() < p2.id() && p2.id() < p3.id()) {
               ActionPtr act =
                   check_collision_multi_part({p1, p2, p3}, dt, gcell_vol);
@@ -650,7 +663,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
             }
           }
           for (const ParticleData& p4 : search_list) {
-            if (incl_multi_set_
+            if (finder_parameters_.included_multi
                     [IncludedMultiParticleReactions::A3_Nuclei_4to2]) {
               if (p1.id() < p2.id() && p2.id() < p3.id() && p3.id() < p4.id()) {
                 ActionPtr act =
@@ -660,8 +673,8 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
                 }
               }
             }
-            if (incl_multi_set_[IncludedMultiParticleReactions::NNbar_5to2] ==
-                    1 &&
+            if (finder_parameters_.included_multi
+                        [IncludedMultiParticleReactions::NNbar_5to2] == 1 &&
                 search_list.size() >= 5) {
               for (const ParticleData& p5 : search_list) {
                 if ((p1.id() < p2.id() && p2.id() < p3.id() &&
@@ -689,7 +702,7 @@ ActionList ScatterActionsFinder::find_actions_with_neighbors(
     const ParticleList& search_list, const ParticleList& neighbors_list,
     double dt, const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
-  if (coll_crit_ == CollisionCriterion::Stochastic) {
+  if (finder_parameters_.coll_crit == CollisionCriterion::Stochastic) {
     // Only search in cells
     return actions;
   }
@@ -710,7 +723,7 @@ ActionList ScatterActionsFinder::find_actions_with_surrounding_particles(
     const ParticleList& search_list, const Particles& surrounding_list,
     double dt, const std::vector<FourVector>& beam_momentum) const {
   std::vector<ActionPtr> actions;
-  if (coll_crit_ == CollisionCriterion::Stochastic) {
+  if (finder_parameters_.coll_crit == CollisionCriterion::Stochastic) {
     // Only search in cells
     return actions;
   }
@@ -762,14 +775,10 @@ void ScatterActionsFinder::dump_reactions() const {
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = std::make_unique<ScatterAction>(
                 A, B, time, isotropic_, string_formation_time_);
-            if (strings_switch_) {
+            if (finder_parameters_.strings_switch) {
               act->set_string_interface(string_process_interface_.get());
             }
-            act->add_all_scatterings(
-                elastic_parameter_, two_to_one_, incl_set_, incl_multi_set_,
-                low_snn_cut_, strings_switch_, use_AQM_,
-                strings_with_probability_, nnbar_treatment_, scale_xs_,
-                additional_el_xs_);
+            act->add_all_scatterings(finder_parameters_);
             const double total_cs = act->cross_section();
             if (total_cs <= 0.0) {
               continue;
@@ -1156,13 +1165,10 @@ void ScatterActionsFinder::dump_cross_sections(
     const ParticleList incoming = {a_data, b_data};
     ScatterActionPtr act = std::make_unique<ScatterAction>(
         a_data, b_data, 0., isotropic_, string_formation_time_);
-    if (strings_switch_) {
+    if (finder_parameters_.strings_switch) {
       act->set_string_interface(string_process_interface_.get());
     }
-    act->add_all_scatterings(elastic_parameter_, two_to_one_, incl_set_,
-                             incl_multi_set_, low_snn_cut_, strings_switch_,
-                             use_AQM_, strings_with_probability_,
-                             nnbar_treatment_, scale_xs_, additional_el_xs_);
+    act->add_all_scatterings(finder_parameters_);
     decaytree::Node tree(a.name() + b.name(), act->cross_section(), {&a, &b},
                          {&a, &b}, {&a, &b}, {});
     const CollisionBranchList& processes = act->collision_channels();

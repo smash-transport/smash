@@ -17,6 +17,7 @@
 #include "isoparticletype.h"
 #include "particles.h"
 #include "potential_globals.h"
+#include "scatteractionsfinderparameters.h"
 #include "stringprocess.h"
 
 namespace smash {
@@ -82,32 +83,15 @@ class CrossSections {
    * according to the probability. It will then be added in
    * add_all_scatterings in scatteraction.cc
    *
-   * \param[in] elastic_parameter Value of the constant global elastic cross
-   *            section, if it is non-zero.
-   *            The parametrized elastic cross section is used otherwise.
-   * \param[in] two_to_one_switch 2->1 reactions enabled?
-   * \param[in] included_2to2 Which 2->2 ractions are enabled?
-   * \param[in] included_multi Which multi-particle reactions are enabled?
-   * \param[in] low_snn_cut Elastic collisions with CME below are forbidden.
-   * \param[in] strings_switch Are string processes enabled?
-   * \param[in] use_AQM Is the Additive Quark Model enabled?
-   * \param[in] strings_with_probability Are string processes triggered
-   *            according to a probability?
-   * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
-   *                                                        none
+   * \param[in] finder_parameters parameters for collision finding
    * \param[in] string_process a pointer to the StringProcess object,
-   *            which is used for string excitation and fragmentation.
-   * \param[in] scale_xs Factor by which all (partial) cross sections are scaled
-   * \param[in] additional_el_xs Additional constant elastic cross section
+   * which is used for string excitation and
+   * fragmentation.
    * \return List of all possible collisions.
    */
   CollisionBranchList generate_collision_list(
-      double elastic_parameter, bool two_to_one_switch,
-      ReactionsBitSet included_2to2,
-      MultiParticleReactionsBitSet included_multi, double low_snn_cut,
-      bool strings_switch, bool use_AQM, bool strings_with_probability,
-      NNbarTreatment nnbar_treatment, StringProcess* string_process,
-      double scale_xs, double additional_el_xs) const;
+      const ScatterActionsFinderParameters& finder_parameters,
+      StringProcess* string_process) const;
 
   /**
    * Helper function:

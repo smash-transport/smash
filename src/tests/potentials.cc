@@ -349,18 +349,13 @@ static ExperimentParameters default_parameters_vdf(
       false,  // two_to_one
       false, Test::no_multiparticle_reactions(),
       false,  // strings switch
-      false,  // use_AQM
-      1.0,
-      false,  // string_with_probability
-      NNbarTreatment::NoAnnihilation,
+      1.0, NNbarTreatment::NoAnnihilation,
       0.,     // low energy sigma_NN cut-off
       false,  // potential_affect_threshold
       -1.0,   // box_length
       200.0,  // max. cross section
       2.5,    // fixed min. cell length
-      false,  // allow collisions within nucleus
       1.0,    // cross section scaling
-      0.0,    // additional elastic cross section
       false,  // in thermodynamics outputs spectators are included
       false   // do weak decays
   };

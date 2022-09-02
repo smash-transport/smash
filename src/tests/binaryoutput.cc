@@ -26,6 +26,7 @@
 #include "smash/outputinterface.h"
 #include "smash/processbranch.h"
 #include "smash/scatteraction.h"
+#include "smash/scatteractionsfinderparameters.h"
 
 using namespace smash;
 
@@ -180,10 +181,7 @@ TEST(fullhistory_format) {
   const bool empty_event = false;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
   ScatterActionPtr action = std::make_unique<ScatterAction>(p1, p2, 0.);
-  action->add_all_scatterings(10., true, Test::all_reactions_included(),
-                              Test::no_multiparticle_reactions(), 0., true,
-                              false, false, NNbarTreatment::NoAnnihilation, 1.0,
-                              0.0);
+  action->add_all_scatterings(Test::default_finder_parameters());
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;
@@ -360,10 +358,7 @@ TEST(extended) {
 
   /* Create elastic interaction (smashon + smashon). */
   ScatterActionPtr action = std::make_unique<ScatterAction>(p1, p2, 0.);
-  action->add_all_scatterings(10., true, Test::all_reactions_included(),
-                              Test::no_multiparticle_reactions(), 0., true,
-                              false, false, NNbarTreatment::NoAnnihilation, 1.0,
-                              0.0);
+  action->add_all_scatterings(Test::default_finder_parameters());
   action->generate_final_state();
   ParticleList final_particles = action->outgoing_particles();
   const double rho = 0.123;
