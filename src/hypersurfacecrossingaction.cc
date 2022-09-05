@@ -113,7 +113,7 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
       const double rapidity =
           0.5 * std::log((p.momentum().x0() + p.momentum().x3()) /
                          (p.momentum().x0() - p.momentum().x3()));
-      if (abs(rapidity) > rap_cut_) {
+      if (std::fabs(rapidity) > rap_cut_) {
         is_within_y_cut = false;
       }
     }
@@ -122,8 +122,8 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     // Check whether particle is in desired pT range
     if (pT_cut_ > 0.0) {
       const double transverse_momentum =
-          sqrt(p.momentum().x1() * p.momentum().x1() +
-               p.momentum().x2() * p.momentum().x2());
+          std::sqrt(p.momentum().x1() * p.momentum().x1() +
+                    p.momentum().x2() * p.momentum().x2());
       if (transverse_momentum > pT_cut_) {
         is_within_pT_cut = false;
       }
