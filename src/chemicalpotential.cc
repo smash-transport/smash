@@ -82,7 +82,7 @@ int ChemicalPotentialSolver::root_equation_effective_chemical_potential_for_GSL(
 
 void ChemicalPotentialSolver::print_state_effective_chemical_potential(
     unsigned int iter, gsl_multiroot_fsolver *solver) {
-  printf(
+  std::printf(
       "\n***\nfind_effective_chemical_potential(): iter = %3u \t"
       "x = % .3f \t"
       "f(x) = % .3e \n",

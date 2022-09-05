@@ -67,7 +67,7 @@ int QuantumSampling::p_max_root_equation_for_GSL(const gsl_vector *roots_array,
 
 void QuantumSampling::print_state_p_max(unsigned int iter,
                                         gsl_multiroot_fsolver *solver) {
-  printf(
+  std::printf(
       "\n***\nfind_p_at_maximum_of_the_distribution(): iter = %3u \t"
       "x = % .3f \t"
       "f(x) = % .3e \n",
