@@ -372,8 +372,8 @@ comments of the form `/*!\Userguide ... */` will be used. Example:
 
 The workflow is that `doc/CMakeLists.txt` extracts all `/*!\Userguide ... */`
 Sections into `doc/userguide.dox` which is then included into the User Guide
-Doxygen tree. Currently, the cmake script processes all `src/include/*.h` and
-`src/*.cc` files.
+Doxygen tree. Currently, Cmake processes all files specified in the
+`doc/UserInputFiles.cmake` in that given order.
 
 
 ### Markdown Documents
