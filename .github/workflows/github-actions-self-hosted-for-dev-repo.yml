@@ -19,14 +19,13 @@ jobs:
     
     steps:
        # Checks out a copy of the repository
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: building_and_testing_SMASH
         run: |
           # we count the number of available cpu cores          
           export nproc=$(cat /proc/cpuinfo | grep processor | wc -l)
           # we set up the variables with the SMASH source and build directories
           export SMASH_ROOT=$GITHUB_WORKSPACE
-          mkdir -p $SMASH_ROOT/build
           # variables dealing with the Singularity container
           # here we assume that $HOME points to the home directory of the user "smash"
           export TOOLS_DIR=$HOME/actions-runner/smash_stuff_github_actions
@@ -35,22 +34,26 @@ jobs:
           export CC=gcc-8
           export CXX=g++-8
           export container_file=$TOOLS_DIR/singularity_container.sif
-          # we configure and build smash using the environment provided by a Singularity container
+          # preliminarly, we check if the code is well formatted with clang-format and cmake-format
+          cd $SMASH_ROOT
+          ./bin/codebase-format-helper.bash C++ -t
+          ./bin/codebase-format-helper.bash CMake -t
+          # we configure SMASH using the environment provided by a Singularity container
+          mkdir -p $SMASH_ROOT/build
           cd $SMASH_ROOT/build
           singularity exec $container_file cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config \
           -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3-install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=native" \
           -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=native"
-          singularity exec $container_file make -j $nproc
-          # now we build the documentation
+          # we check if the code is well formatted with cpplint
+          export CTEST_OUTPUT_ON_FAILURE=1
+          singularity exec $container_file ctest -R "cpplint"
+          # we build the documentation
           singularity exec $container_file make undocumented_test
           singularity exec $container_file make user
-          # now we run the tests
-          export CTEST_OUTPUT_ON_FAILURE=1
-          singularity exec $container_file ctest -j$nproc
-          # finally, we check if the code is well formatted
-          cd $SMASH_ROOT
-          ./bin/codebase-format-helper.bash C++ -t
-          ./bin/codebase-format-helper.bash CMake -t
+          # we build SMASH
+          singularity exec $container_file make -j $nproc
+          # now we run the tests, excluding cpplint, which has been already executed
+          singularity exec $container_file ctest -j$nproc -E "cpplint"
           
      
   workflow-fias:      
@@ -60,32 +63,36 @@ jobs:
 
     steps:
       # Checks out a copy of the repository
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: building_and_testing_SMASH
         run: |
           # we count the number of available cpu cores          
           export nproc=$(cat /home/hyihp-repos/smash-devel_runners/num_of_cpus_for_actions.dat)
           # we set up the variables with the SMASH source and build directories
           export SMASH_ROOT=$GITHUB_WORKSPACE
-          mkdir -p $SMASH_ROOT/build
           # this directory contains pythia, clang and eigen, which are needed later
-          # here we do not use $HOME because the runner is hosted in shared common group directory
+          # here we do not use $HOME because the runner is hosted in a shared common group directory
           export TOOLS_DIR=/home/hyihp-repos/smash-devel_runners/smash_stuff
           export GCC_DIR=$TOOLS_DIR/gcc-10.3_x-men
           export PATH=$TOOLS_DIR/bin:$GCC_DIR/bin:$TOOLS_DIR/clang13_0_0/bin/:$TOOLS_DIR/python-tools/bin/:$TOOLS_DIR/cmake-3.20.5/bin:$PATH
           export LD_LIBRARY_PATH=$GCC_DIR/dep-libs/lib/:$GCC_DIR/lib/:$GCC_DIR/lib64:$LD_LIBRARY_PATH
           export PYTHONPATH=$TOOLS_DIR/python-tools:$PYTHONPATH
-          # now we configure and build smash
+          # preliminarly, we check if the code is well formatted
+          cd $SMASH_ROOT
+          ./bin/codebase-format-helper.bash C++ -t
+          ./bin/codebase-format-helper.bash CMake -t
+          # now we configure SMASH 
+          mkdir -p $SMASH_ROOT/build
           cd $SMASH_ROOT/build
           cmake .. -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8307/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$TOOLS_DIR/eigen-3.3.9/ \
           -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=native" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=native"
-          make -j $nproc
-          # now we build the documentation
+          # we check if the code is well formatted with cpplint
+          export CTEST_OUTPUT_ON_FAILURE=1
+          ctest -R "cpplint"
+          # we build the documentation
           make undocumented_test
           make user
-          # now we run the tests
-          CTEST_OUTPUT_ON_FAILURE=1 ctest -j$nproc
-          # finally, we check if the code is well formatted
-          ./../bin/codebase-format-helper.bash C++ -t
-          ./../bin/codebase-format-helper.bash CMake -t
-          
+          # we build SMASH
+          make -j $nproc
+          # now we run the tests, excluding cpplint, which has been already executed
+          ctest -j$nproc -E "cpplint"
