@@ -4,14 +4,14 @@
 * [Customizing SMASH compilation](@ref building)
 * [Customizing SMASH installation](@ref customizing)
 * [Frequently asked questions](@ref faq)
-   - [SMASH does not compile. What should I do?](@ref not-compile)
-   - [SMASH crashes with 'illegal instruction'. Why?](@ref illegal-instruction)
-   - [SMASH does not compile with pre-compiled ROOT binaries. What should I do?](@ref precompiled-root)
-   - [I run out of disk space compiling the code. Why?](@ref out-of-disk-space)
-   - [How can I use a different compiler?](@ref different-compilers)
-   - [How to use the LLVM implementation of the C++ standard library?](@ref llvm-STL)
-   - [Can I disable ROOT or HepMC support?](@ref disable-root-hempc)
-   - [ROOT or HepMC are installed but CMake does not find them. What should I do?](@ref root-hepmc-not-found)
+   1. [SMASH does not compile. What should I do?](@ref not-compile)
+   2. [SMASH crashes with 'illegal instruction'. Why?](@ref illegal-instruction)
+   3. [SMASH does not compile with pre-compiled ROOT binaries. What should I do?](@ref precompiled-root)
+   4. [I run out of disk space compiling the code. Why?](@ref out-of-disk-space)
+   5. [How can I use a different compiler?](@ref different-compilers)
+   6. [How to use the LLVM implementation of the C++ standard library?](@ref llvm-STL)
+   7. [Can I disable ROOT or HepMC support?](@ref disable-root-hempc)
+   8. [ROOT or HepMC are installed but CMake does not find them. What should I do?](@ref root-hepmc-not-found)
 
 ---
 
