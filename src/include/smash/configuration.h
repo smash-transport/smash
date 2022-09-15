@@ -1353,6 +1353,26 @@ class Configuration {
   YAML::Node root_node_;
 };
 
+/**
+ * @brief Validate content of configuration in terms of YAML keys.
+ *
+ * A warning or error message is printed for deprecated or invalid keys,
+ * respectively, together with information about SMASH versions, if possible.
+ *
+ * @note Here a full validation is done by default and all keys are checked,
+ * although the validation might be shortened by returning \c false as soon as
+ * an invalid key is found. However, a full validation is more user-friendly,
+ * since as much information as possible about the input file is provided.
+ *
+ * @param[in] configuration The \c Configuration object to be validated.
+ * @param[in] full_validation Whether all keys are checked or not.
+ *
+ * @return \c true if the provided configuration contains valid keys only;
+ * @return \c false if the provided configuration contains at least one invalid
+ * key.
+ */
+bool validate(Configuration &configuration, bool full_validation = true);
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_CONFIGURATION_H_

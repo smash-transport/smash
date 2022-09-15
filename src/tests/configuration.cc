@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2021
+ *    Copyright (c) 2014-2015,2017-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -376,4 +376,18 @@ TEST(reactions_bitset) {
   for (std::size_t i = 0; i < bs3.size(); i++) {
     VERIFY(bs3.test(i));
   }
+}
+
+TEST(configuration_validation) {
+  const char *valid_conf_literal = R"(
+      General:
+          Modus: Box
+      )";
+  // The valid_conf_literal must be replaced with SMASH config.yaml file
+  Configuration valid_conf{valid_conf_literal};
+  Configuration invalid_conf = make_test_configuration();
+  VERIFY(validate(valid_conf, true));
+  VERIFY(validate(valid_conf, false));
+  VERIFY(!validate(invalid_conf, true));
+  VERIFY(!validate(invalid_conf, false));
 }
