@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2018,2020
+ *    Copyright (c) 2014-2018,2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -46,6 +46,25 @@ void isoclean(std::string &s);
  * \return Split string.
  */
 std::vector<std::string> split(const std::string &s, char delim);
+
+/**
+ * Join strings using delimiter.
+ *
+ * \param[in] v Strings to be joint.
+ * \param[in] delim Joining delimiter.
+ * \return Joint string.
+ */
+std::string join(const std::vector<std::string> &v, std::string_view delim);
+
+/**
+ * Add quotes around string.
+ * This is a simpler version of \c std::quoted that also escapes
+ * e.g. contained quotes and cannot directly be converted to a string.
+ *
+ * \param[in] s Strings to be quoted.
+ * \return Quoted string.
+ */
+std::string quote(const std::string &s);
 
 namespace utf8 {
 /**
