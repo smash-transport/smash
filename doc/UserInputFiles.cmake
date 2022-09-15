@@ -26,4 +26,5 @@ set(files_with_input
  ${PROJECT_SOURCE_DIR}/src/customnucleus.cc
  ${PROJECT_SOURCE_DIR}/src/hepmcoutput.cc
  ${PROJECT_SOURCE_DIR}/src/rivetoutput.cc
+ ${PROJECT_SOURCE_DIR}/src/include/smash/input_keys.h
  )
