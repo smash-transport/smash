@@ -263,13 +263,13 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  *
  * - \b Particles \n
  *   \key Extended (bool, optional, default = false, incompatible with
- *                  Oscar1999, VTK, HepMC_asciiv3, HepMC_treeroot and
- *                  Root formats): \n
+ *                  Oscar1999, VTK, HepMC_asciiv3 and HepMC_treeroot formats):
+ \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
  *   \key Only_Final (string, optional, default = Yes, incompatible with
-                      VTK, HepMC_asciiv3 and HepMC_treeroot format): \n
+                      VTK, HepMC_asciiv3 and HepMC_treeroot formats): \n
  *   \li \key Yes - Print only final particle list \n
  *   \li \key IfNotEmpty - Print only final particle list, but only if event
  *                         is not empty (i.e. any collisions happened between
@@ -278,12 +278,12 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  * \n
  * - \b Collisions (VTK not available) \n
  *   \key Extended (bool, optional, default = false, incompatible with
- *          Oscar1999, HepMC_asciiv3, HepMC_treeroot and Root formats): \n
+ *          Oscar1999, HepMC_asciiv3 and HepMC_treeroot formats): \n
  *   \li \key true - Print extended information for each particle \n
  *   \li \key false - Regular output for each particle
  *
  *   \key Print_Start_End (bool, optional, default = false, incompatible with
- *                  Root, HepMC_asciiv3 and HepMC_treeroot format): \n
+ *                  Root, HepMC_asciiv3 and HepMC_treeroot formats): \n
  *   \li \key true - Initial and final particle list is printed out \n
  *   \li \key false - Initial and final particle list is not printed out \n
  * \n
