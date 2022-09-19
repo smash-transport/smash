@@ -30,12 +30,15 @@ namespace smash {
  Au, Pb, U, Xe. If set to true the other parameters should not be provided. \n
  *     - \key false - Manually set parameters of spherical deformation. This
  requires the
- * additional specification of \key Beta_2, \key Beta_4, \key Theta and
- * \key Phi, which follow \iref{Moller:1993ed} and \iref{Schenke:2019ruo}. \n
+ * additional specification of \key Beta_2, \key Beta_3, \key Beta_4, \key Theta
+ * and \key Phi, which follow \iref{Moller:1993ed} and \iref{Schenke:2019ruo}.
+ \n
  * \li \key Beta_2 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_2_0 in the
  * beta decomposition of the nuclear radius in the deformed woods-saxon
  * distribution. \n
+ * \li \key Beta_3 (double, optional):\n
+ * The deformation coefficient for the spherical harmonic Y_3_0. \n
  * \li \key Beta_4 (double, optional):\n
  * The deformation coefficient for the spherical harmonic Y_4_0. \n
  * \li \key Orientation \n
@@ -68,6 +71,7 @@ namespace smash {
                  # Manually set deformation parameters
                  Automatic: False
                  Beta_2: 0.1
+                 Beta_3: 0.2
                  Beta_4: 0.3
                  Orientation:
                      Theta: 0.8
@@ -235,6 +239,9 @@ void DeformedNucleus::set_deformation_parameters_from_config(
   if (config.has_value({"Deformed", "Gamma"})) {
     set_gamma(static_cast<double>(config.take({"Deformed", "Gamma"})));
   }
+  if (config.has_value({"Deformed", "Beta_3"})) {
+    set_beta_3(static_cast<double>(config.take({"Deformed", "Beta_3"})));
+  }
   if (config.has_value({"Deformed", "Beta_4"})) {
     set_beta_4(static_cast<double>(config.take({"Deformed", "Beta_4"})));
   }
@@ -313,6 +320,9 @@ double y_l_m(int l, int m, double cosx, double phi) {
   } else if (l == 2 && m == 2) {
     double sinx2 = 1. - cosx * cosx;
     return (1. / 4) * std::sqrt(15 / (2. * M_PI)) * sinx2 * std::cos(2. * phi);
+  } else if (l == 3 && m == 0) {
+    return (1. / 4) * std::sqrt(7 / M_PI) *
+           (5. * cosx * (cosx * cosx) - 3. * cosx);
   } else if (l == 4 && m == 0) {
     return (3. / 16) * std::sqrt(1 / M_PI) *
            (35. * (cosx * cosx) * (cosx * cosx) - 30. * (cosx * cosx) + 3);
@@ -331,6 +341,7 @@ double DeformedNucleus::nucleon_density(double r, double cosx,
                                                y_l_m(2, 0, cosx, phi) +
                                            std::sqrt(2) * std::sin(gamma_) *
                                                y_l_m(2, 2, cosx, phi)) +
+                                 beta3_ * y_l_m(3, 0, cosx, phi) +
                                  beta4_ * y_l_m(4, 0, cosx, phi))) /
                        Nucleus::get_diffusiveness()));
 }
@@ -344,6 +355,7 @@ double DeformedNucleus::nucleon_density_unnormalized(double r, double cosx,
                                                y_l_m(2, 0, cosx, phi) +
                                            std::sqrt(2) * std::sin(gamma_) *
                                                y_l_m(2, 2, cosx, phi)) +
+                                 beta3_ * y_l_m(3, 0, cosx, phi) +
                                  beta4_ * y_l_m(4, 0, cosx, phi))) /
                        Nucleus::get_diffusiveness()));
 }
