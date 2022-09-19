@@ -1,26 +1,28 @@
 
 ---
-1. [More information about prerequisites](INSTALL.md#about-prerequisites)
-1. [Customizing SMASH compilation](INSTALL.md#building-smash)
-1. [Customizing SMASH installation](INSTALL.md#smash-installation)
-1. [Frequently asked questions](INSTALL.md#faq)
-   * [SMASH does not compile. What should I do?](INSTALL.md#smash-does-not-compile-what-should-i-do)
-   * [SMASH crashes with "illegal instruction". Why?](INSTALL.md#smash-crashes-with-illegal-instruction-why)
-   * [SMASH does not compile with pre-compiled ROOT binaries. What should I do?](INSTALL.md#smash-does-not-compile-with-pre-compiled-root-binaries-what-should-i-do)
-   * [I run out of disk space compiling the code. Why?](INSTALL.md#i-run-out-of-disk-space-compiling-the-code-why)
-   * [How can I use a different compiler?](INSTALL.md#how-can-i-use-a-different-compiler)
-   * [How to use the LLVM implementation of the C++ standard library?](INSTALL.md#how-to-use-the-llvm-implementation-of-the-c-standard-library)
-   * [ROOT or HepMC are installed but CMake does not find them. What should I do?](INSTALL.md#root-or-hepmc-are-installed-but-cmake-does-not-find-them-what-should-i-do)
+* [More information about prerequisites](@ref prerequisites)
+* [Customizing SMASH compilation](@ref building)
+* [Customizing SMASH installation](@ref customizing)
+* [Frequently asked questions](@ref faq)
+   1. [SMASH does not compile. What should I do?](@ref not-compile)
+   2. [SMASH crashes with 'illegal instruction'. Why?](@ref illegal-instruction)
+   3. [SMASH does not compile with pre-compiled ROOT binaries. What should I do?](@ref precompiled-root)
+   4. [I run out of disk space compiling the code. Why?](@ref out-of-disk-space)
+   5. [How can I use a different compiler?](@ref different-compilers)
+   6. [How to use the LLVM implementation of the C++ standard library?](@ref llvm-STL)
+   7. [Can I disable ROOT or HepMC support?](@ref disable-root-hempc)
+   8. [ROOT or HepMC are installed but CMake does not find them. What should I do?](@ref root-hepmc-not-found)
+
 ---
 
-### Preliminary note
+## Preliminary note
 
 In the following, whenever the `make` command is used, you can specify the `-j` option followed by the number of CPU cores that should be used in parallel, e.g. `-j3` to use three cores.
 This will speed up compilation considerably.
 
 
 
-## About prerequisites
+## About prerequisites {#prerequisites}
 
 All UNIX-like operating systems offer package managers and it is highly encouraged to use these whenever possible.
 To mention a couple, you might use [Homebrew](https://brew.sh) on Apple machines or [APT](https://wiki.debian.org/Apt) on Debian/Ubuntu distributions.
@@ -125,7 +127,7 @@ When setting up SMASH, use the `-DGSL_ROOT_DIR=${GSL}` CMake option to let CMake
 
 
 
-## Building SMASH
+## Building SMASH {#building}
 
 The bare minimum needed to build SMASH from within its repository reads:
 ```console
@@ -151,7 +153,7 @@ To check which environment variables related to PYTHIA are currently set, use e.
 
 
 
-## SMASH installation
+## SMASH installation {#customizing}
 
 Installing SMASH gives the advantage that it is possible to simply use the `smash` command from anywhere in order to run SMASH.
 
@@ -171,15 +173,15 @@ By specifying `-DCMAKE_INSTALL_PREFIX=prefix`,
 
 
 
-## FAQ
+## FAQ {#faq}
 
 If you do not find help in the following answers, feel free to browse [closed issues](https://github.com/smash-transport/smash/issues?q=is%3Aissue+is%3Aclosed) or open a new one [on GitHub](https://github.com/smash-transport/smash/issues).
 
-### SMASH does not compile. What should I do?
+### SMASH does not compile. What should I do? {#not-compile}
 
 If compilation fails (especially after changing a library), using a fresh build folder can sometimes fix the problem.
 
-### SMASH crashes with "illegal instruction". Why?
+### SMASH crashes with "illegal instruction". Why? {#illegal-instruction}
 
 If running SMASH fails with "illegal instruction", it is likely due to running SMASH on a different platform than the one where it was compiled.
 By default, SMASH is compiled with platform-specific optimizations, implying that the binary only works on such platforms.
@@ -193,11 +195,11 @@ There are three possible ways to fix this issue:
    This is the easiest solution, however it results in a less efficient executable.
    Note that the same applies to any other libraries you compile with `-march=native`, for instance Pythia.
 
-### SMASH does not compile with pre-compiled ROOT binaries. What should I do?
+### SMASH does not compile with pre-compiled ROOT binaries. What should I do? {#precompiled-root}
 
 If compilation of SMASH in combination with a pre-compiled ROOT binary fails, please install and compile ROOT locally from source (see http://root.cern.ch) and compile SMASH again in a clean build directory.
 
-### I run out of disk space compiling the code. Why?
+### I run out of disk space compiling the code. Why? {#out-of-disk-space}
 
 Please note that after compilation the `smash` directory (including `build`) might have a size of some GB.
 By default, the unit tests are always compiled, which requires a lot of the disk space.
@@ -205,7 +207,7 @@ If disk space is restricted, consider to just run `make smash`, which will only 
 However, it is still recommended to run the unit tests at least once when compiling in a new environment to ensure that everything works as expected.
 To see how to run the tests, see [CONTRIBUTING](CONTRIBUTING.md).
 
-### How can I use a different compiler?
+### How can I use a different compiler? {#different-compilers}
 
 In order to use a particular compiler, e.g. Clang, you can permanently set the following environment variables
 ```console
@@ -222,7 +224,7 @@ cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
 ```
 **NOTE:** The FPE environment only works with GCC, so e.g. you won't get back-traces from floating point traps with Clang.
 
-### How to use the LLVM implementation of the C++ standard library?
+### How to use the LLVM implementation of the C++ standard library? {#llvm-STL}
 
 In case the system default implementation of the C++ standard library is e.g. that shipped with GCC, this will still be used even when requesting CMake to use Clang as compiler.
 However, it is possible to request to use the LLVM implementation using the CMake `CLANG_USE_LIBC++` option, e.g.
@@ -240,7 +242,7 @@ or pass to the `cmake` command the option
 where, of course, the path to clang installation must be a valid path.
 All of this is needed to let the executable find the library ABI at run time.
 
-### Can I disable ROOT or HepMC support?
+### Can I disable ROOT or HepMC support? {#disable-root-hempc}
 
 By default, if SMASH setup finds ROOT and/or HepMC, it will use them.
 However, this feature can be disabled by using the CMake options `-DTRY_USE_ROOT=OFF` and/or `-DTRY_USE_HEPMC=OFF`.
@@ -250,7 +252,7 @@ cmake -DTRY_USE_ROOT=OFF -DTRY_USE_HEPMC=OFF <source_dir>
 ```
 will setup SMASH without ROOT and without HepMC support.
 
-### ROOT or HepMC are installed but CMake does not find them. What should I do?
+### ROOT or HepMC are installed but CMake does not find them. What should I do? {#root-hepmc-not-found}
 
 If the ROOT or HepMC installation is not found, provide a hint to CMake about the install destination with
 ```console

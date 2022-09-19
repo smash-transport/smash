@@ -775,9 +775,10 @@ WARN_LOGFILE           =
 
 INPUT                  = doc/ \
                          AUTHORS \
-                         README.md \
-                         CONTRIBUTING.md \
                          CHANGELOG.md \
+                         CONTRIBUTING.md \
+                         INSTALL.md \
+                         README.md \
                          bin/benchmarks/README.md \
                          @CMAKE_CURRENT_BINARY_DIR@/userguide.dox
 
