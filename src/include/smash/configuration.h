@@ -1294,6 +1294,14 @@ class Configuration {
     root_node_ = std::forward<T>(value);
     return *this;
   }
+  template <typename T>
+  void set_value(std::initializer_list<const char *> keys, T &&value) {
+    assert(keys.size() > 0);
+    auto node = root_node_;
+    for (auto key : keys)
+      node.reset(node[key]);  // see comment in take on Node::reset
+    node = std::forward<T>(value);
+  }
 
   /**
    * Returns if there is a (maybe empty) value behind the requested \p keys.
@@ -1327,7 +1335,8 @@ class Configuration {
    * copy constructor.
    */
   Configuration(const YAML::Node &node)  // NOLINT(runtime/explicit) : see above
-      : root_node_(node) {}
+      : root_node_(YAML::Clone(node)) {}
+  // : root_node_(node) {}
 
   /// the general_config.yaml contents - fully parsed
   YAML::Node root_node_;

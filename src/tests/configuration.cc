@@ -121,7 +121,6 @@ static void expect_lines(std::vector<std::string> expected,
 TEST(check_unused_report) {
   std::string reference;
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
   conf.take({"fireballs", "extorting"});
   conf.take({"fireballs", "infection"});
   conf.take({"fireballs", "arena"});
@@ -130,10 +129,10 @@ TEST(check_unused_report) {
   conf.take({"fireballs", "firebrands"});
   conf.take({"fireballs", "joker"});
   conf.take({"fireballs", "classify"});
-  modi.take({"Altaic", "Meccas"});
-  modi.take({"Altaic", "Kathleen"});
-  modi.take({"Altaic", "Brahmins"});
-  modi.take({"feathered"});
+  conf.take({"tamer", "Altaic", "Meccas"});
+  conf.take({"tamer", "Altaic", "Kathleen"});
+  conf.take({"tamer", "Altaic", "Brahmins"});
+  conf.take({"tamer", "feathered"});
   {
     std::istringstream unused(conf.unused_values_report());
     std::string line;
@@ -161,7 +160,7 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  modi.take({"pipit", "bushelling"});
+  conf.take({"tamer", "pipit", "bushelling"});
   {
     std::istringstream unused(conf.unused_values_report());
     std::string line;
@@ -174,7 +173,7 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  modi.take({"schmoozed", "warbler"});
+  conf.take({"tamer", "schmoozed", "warbler"});
   {
     std::istringstream unused(conf.unused_values_report());
     std::string line;
@@ -186,7 +185,7 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  modi.take({"schmoozed", "reedier"});
+  conf.take({"tamer", "schmoozed", "reedier"});
   {
     std::istringstream unused(conf.unused_values_report());
     std::string line;
@@ -199,7 +198,7 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  modi.take({"schmoozed", "neglects"});
+  conf.take({"tamer", "schmoozed", "neglects"});
   reference = "{}";
   COMPARE(conf.unused_values_report(), reference);
 }
@@ -231,9 +230,16 @@ TEST(test_sub_config_objects) {
 TEST(check_setting_new_value) {
   Configuration conf = make_test_configuration();
   VERIFY(!conf.has_value({"Test"}));
-  conf["Test"] = 1.;
+  conf.set_value({"Test"}, 1.);
   VERIFY(conf.has_value({"Test"}));
   COMPARE(double(conf.read({"Test"})), 1.);
+}
+
+TEST(check_changing_existing_value) {
+  Configuration conf = make_test_configuration();
+  const double new_value = 3.1415;
+  conf.set_value({"tamer", "Altaic", "Meccas"}, new_value);
+  COMPARE(double(conf.read({"tamer", "Altaic", "Meccas"})), new_value);
 }
 
 TEST(merge_override) {
@@ -247,10 +253,10 @@ TEST(merge_override) {
 
 TEST(remove_all_but) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
-  modi.remove_all_but("pipit");
-  conf.remove_all_but("tamer");
-  COMPARE(conf.to_string(), "tamer:\n  pipit:\n    bushelling: 5.0");
+  const std::string section_to_keep{"fireballs"};
+  conf.remove_all_but("fireballs");
+  COMPARE(conf.list_upmost_nodes().size(), 1);
+  COMPARE(conf.list_upmost_nodes()[0], section_to_keep);
 }
 
 TEST_CATCH(failed_sequence_conversion,
