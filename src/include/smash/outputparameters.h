@@ -7,8 +7,11 @@
 #ifndef SRC_INCLUDE_SMASH_OUTPUTPARAMETERS_H_
 #define SRC_INCLUDE_SMASH_OUTPUTPARAMETERS_H_
 
+#include <map>
+#include <optional>
 #include <set>
 #include <string>
+#include <vector>
 
 #include "configuration.h"
 #include "density.h"
@@ -17,6 +20,39 @@
 
 namespace smash {
 static constexpr int LExperiment = LogArea::Experiment::id;
+
+/**
+ * Helper structure for OutputParameters in order to store and hand over Rivet
+ * parameters. OutputParameters has one member of this type.
+ */
+struct RivetOutputParameters {
+  /// Logging in Rivet
+  std::optional<std::map<std::string, std::string>> logs{std::nullopt};
+  /// Paths to analyses libraries and data
+  std::optional<std::vector<std::string>> paths{std::nullopt};
+  /// Data files to pre-load e.g., for centrality configurations
+  std::optional<std::vector<std::string>> preloads{std::nullopt};
+  /// Analyses (including options) to add to run
+  std::optional<std::vector<std::string>> analyses{std::nullopt};
+  /// Weights to be enabled for processing
+  std::optional<std::vector<std::string>> to_be_enabled_weights{std::nullopt};
+  /// Weights to be disabled for processing
+  std::optional<std::vector<std::string>> to_be_disabled_weights{std::nullopt};
+  /// Cross sections
+  std::optional<std::array<double, 2>> cross_sections{std::nullopt};
+  /// Nominal weight name
+  std::optional<std::string> nominal_weight_name{std::nullopt};
+  /// Cap (maximum) on weights
+  std::optional<double> cap_on_weights{std::nullopt};
+  /// How to smear for NLO calculations
+  std::optional<double> nlo_smearing{std::nullopt};
+  /// Whether Rivet should not care about multi weights
+  std::optional<bool> no_multi_weight{std::nullopt};
+  /// Whether Rivet should ignore beams
+  bool ignore_beams{true};
+  /// Whether any weight parameter was specified
+  bool any_weight_parameter_was_given{false};
+};
 
 /**
  * Helper structure for Experiment to hold output options and parameters.
@@ -41,10 +77,10 @@ struct OutputParameters {
         dil_extended(false),
         photons_extended(false),
         ic_extended(false),
-        subcon_for_rivet(0) {}
+        rivet_parameters{} {}
 
   /// Constructor from configuration
-  explicit OutputParameters(Configuration&& conf) : OutputParameters() {
+  explicit OutputParameters(Configuration conf) : OutputParameters() {
     logg[LExperiment].trace(SMASH_SOURCE_LOCATION);
 
     if (conf.has_value({"Thermodynamics"})) {
@@ -94,7 +130,77 @@ struct OutputParameters {
     }
 
     if (conf.has_value({"Rivet"})) {
-      subcon_for_rivet = conf["Rivet"];
+      logg[LOutput].debug() << "Reading Rivet section from configuration:\n"
+                            << conf["Rivet"].to_string() << "\n";
+      /*
+       * std::optional<T> can be assigned from a value using the
+       *   template<class U = T> optional& operator=( U&& value );
+       * which is a perfect-forwarded assignment. However, in more complex cases
+       * like here where we use a Configuration::Value object returned by
+       * Configuration::take as value, it might be sometimes needed to
+       * explicitly specify the type U. It is then advantageous to use
+       * std::make_optional. When T is a built-in type, an assignment
+       * would work (although not that mentioned above), but for simplicity
+       * we always use make_optional.
+       */
+      if (conf.has_value({"Rivet", "Logging"})) {
+        rivet_parameters.logs =
+            std::make_optional<std::map<std::string, std::string>>(
+                conf.take({"Rivet", "Logging"}));
+      }
+      if (conf.has_value({"Rivet", "Paths"})) {
+        rivet_parameters.paths = std::make_optional<std::vector<std::string>>(
+            conf.take({"Rivet", "Paths"}));
+      }
+      if (conf.has_value({"Rivet", "Preloads"})) {
+        rivet_parameters.preloads =
+            std::make_optional<std::vector<std::string>>(
+                conf.take({"Rivet", "Preloads"}));
+      }
+      if (conf.has_value({"Rivet", "Analyses"})) {
+        rivet_parameters.analyses =
+            std::make_optional<std::vector<std::string>>(
+                conf.take({"Rivet", "Analyses"}));
+      }
+      if (conf.has_value({"Rivet", "Cross_Section"})) {
+        rivet_parameters.cross_sections =
+            std::make_optional<std::array<double, 2>>(
+                conf.take({"Rivet", "Cross_Section"}));
+      }
+      rivet_parameters.ignore_beams =
+          conf.take({"Rivet", "Ignore_Beams"}, true);
+      if (conf.has_value({"Weights"})) {
+        rivet_parameters.any_weight_parameter_was_given = true;
+        if (conf.has_value({"Rivet", "Weights", "Select"})) {
+          rivet_parameters.to_be_enabled_weights =
+              std::make_optional<std::vector<std::string>>(
+                  conf.take({"Rivet", "Weights", "Select"}));
+        }
+        if (conf.has_value({"Rivet", "Weights", "Deselect"})) {
+          rivet_parameters.to_be_disabled_weights =
+              std::make_optional<std::vector<std::string>>(
+                  conf.take({"Rivet", "Weights", "Deselect"}));
+        }
+        if (conf.has_value({"Rivet", "Weights", "Nominal"})) {
+          rivet_parameters.nominal_weight_name =
+              std::make_optional<std::string>(
+                  conf.take({"Rivet", "Weights", "Nominal"}));
+        }
+        if (conf.has_value({"Rivet", "Weights", "Cap"})) {
+          rivet_parameters.cap_on_weights = std::make_optional<double>(
+              conf.take({"Rivet", "Weights", "Cap"}));
+        }
+        if (conf.has_value({"Rivet", "Weights", "NLO_Smearing"})) {
+          rivet_parameters.nlo_smearing = std::make_optional<double>(
+              conf.take({"Rivet", "Weights", "NLO_Smearing"}));
+        }
+        if (conf.has_value({"Rivet", "Weights", "No_Multi"})) {
+          rivet_parameters.no_multi_weight = std::make_optional<bool>(
+              conf.take({"Rivet", "Weights", "No_Multi"}));
+        }
+      }
+      logg[LOutput].debug() << "After processing configuration:\n"
+                            << conf["Rivet"].to_string() << "\n";
     }
   }
 
@@ -172,8 +278,8 @@ struct OutputParameters {
   /// Extended initial conditions output
   bool ic_extended;
 
-  /// Rivet specfic setup configurations
-  Configuration subcon_for_rivet;
+  /// Rivet specfic parameters
+  RivetOutputParameters rivet_parameters;
 };
 
 }  // namespace smash
