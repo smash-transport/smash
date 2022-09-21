@@ -510,7 +510,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
   const std::string modus_chooser = config.take({"General", "Modus"});
   // remove config maps of unused Modi
-  config["Modi"].remove_all_but(modus_chooser);
+  config.remove_all_entries_in_section_but_one(modus_chooser, {"Modi"});
 
   double box_length = -1.0;
   if (config.has_value({"Modi", "Box", "Length"})) {

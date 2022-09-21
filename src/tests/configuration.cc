@@ -251,12 +251,11 @@ TEST(merge_override) {
   COMPARE(int(conf.read({"fireballs", "classify"})), 2);
 }
 
-TEST(remove_all_but) {
+TEST(remove_all_entries_in_section_but_one) {
   Configuration conf = make_test_configuration();
-  const std::string section_to_keep{"fireballs"};
-  conf.remove_all_but("fireballs");
-  COMPARE(conf.list_upmost_nodes().size(), 1);
-  COMPARE(conf.list_upmost_nodes()[0], section_to_keep);
+  conf.remove_all_entries_in_section_but_one("pipit", {"tamer"});
+  conf.remove_all_entries_in_section_but_one("tamer", {});
+  COMPARE(conf.to_string(), "tamer:\n  pipit:\n    bushelling: 5.0");
 }
 
 TEST_CATCH(failed_sequence_conversion,

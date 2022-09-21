@@ -1257,11 +1257,18 @@ class Configuration {
   }
 
   /**
-   * Removes all entries in the map except for \p key.
+   * Removes all entries in the given section except for \p key.
    *
    * \param[in] key The key of the map entry to keep.
+   * \param[in] section You can pass an arbitrary number of keys inside curly
+   *                    braces, following the nesting structure in the config
+   *                    file, in order to specify the section where to delete
+   *                    entries. Omitting the \c section is equivalent to
+   *                    specifying \c {} and the top-level section is
+   *                    understood.
    */
-  void remove_all_but(const std::string &key);
+  void remove_all_entries_in_section_but_one(
+      const std::string &key, std::initializer_list<const char *> section = {});
 
   /**
    * Access to the YAML::Node behind the requested \p keys.

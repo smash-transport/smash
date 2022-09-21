@@ -162,15 +162,17 @@ Configuration::Value Configuration::read(
   return {find_node_at(root_node_, keys), keys.begin()[keys.size() - 1]};
 }
 
-void Configuration::remove_all_but(const std::string &key) {
-  std::vector<std::string> to_remove;
-  for (auto i : root_node_) {
+void Configuration::remove_all_entries_in_section_but_one(
+    const std::string &key, std::initializer_list<const char *> section) {
+  auto node = find_node_at(root_node_, section);
+  std::vector<std::string> to_remove{};
+  for (auto i : node) {
     if (i.first.Scalar() != key) {
       to_remove.push_back(i.first.Scalar());
     }
   }
   for (auto i : to_remove) {
-    root_node_.remove(i);
+    node.remove(i);
   }
 }
 
