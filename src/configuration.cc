@@ -24,13 +24,15 @@ namespace smash {
 // internal helper functions
 namespace {
 /**
+ * Descend in the YAML tree from the given node using the provided keys.
+ *
  * Finds a node, copies its structure and replaces the previous keys by
  * the newly provided keys.
  *
- * \param[in] node YAML::node whose structure will be copied and whose key
- * values will be replaced.
- * \param[in] keys Keys that will replace the previous keys in the copied node.
- * \return Node with the same structure as the input node but with updated keys.
+ * \param[in] node YAML::Node to start the search from.
+ * \param[in] keys Keys that will be used to descend the YAML tree.
+ *
+ * \return Node in the tree reached by using the provided keys.
  */
 YAML::Node find_node_at(YAML::Node node,
                         std::initializer_list<const char *> keys) {
