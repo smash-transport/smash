@@ -1116,6 +1116,12 @@ class Configuration {
   static const char InitializeFromYAMLString = 'S';
 
   /**
+   * Flag to tune method(s) behavior such that it is descriptive from the
+   * caller side. For example, see \ref extract_sub_configuration.
+   */
+  enum class GetEmpty { Yes, No };
+
+  /**
    * Reads config.yaml from the specified path.
    *
    * \param[in] path The directory where the SMASH config files are located.
@@ -1288,6 +1294,30 @@ class Configuration {
   Configuration operator[](T &&key) {
     return root_node_[std::forward<T>(key)];
   }
+
+  /**
+   * Create a new configuration from a then-removed section of the present
+   * object. This method is meant to be used to deal with sections only, i.e.
+   * it will throw if used to extract a key value that is not a section (namely
+   * a map in YAML language). Use \ref take for that purpose, instead.
+   *
+   * \param[in] keys You can pass an arbitrary number of keys inside curly
+   *             braces, following the nesting structure in the config file.
+   * \param[in] empty_if_not_existing
+   *            Specify \c Configuration::GetEmpty::Yes if you want an empty
+   *            Configuration in case the requested section does not exist.
+   *
+   * \throw std::runtime_error if the method is used
+   *        - to access a scalar or sequence value;
+   *        - to access a key that has no value or is an empty map;
+   *        - to access a not existing key (unless explicitly allowed).
+   *
+   * \return A new \c Configuration containing the chosen section.
+   */
+  Configuration extract_sub_configuration(
+      std::initializer_list<const char *> keys,
+      Configuration::GetEmpty empty_if_not_existing =
+          Configuration::GetEmpty::No);
 
   /**
    * Overwrite the value of the specified YAML node.

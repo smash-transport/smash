@@ -34,11 +34,13 @@ namespace {
  *
  * \return Node in the tree reached by using the provided keys.
  */
-YAML::Node find_node_at(YAML::Node node,
-                        std::initializer_list<const char *> keys) {
+YAML::Node find_node_at(YAML::Node node, std::vector<const char *> keys) {
   assert(keys.size() > 0);
   for (auto key : keys) {
-    // see comment in take on Node::reset
+    // Node::reset does what you might expect Node::operator= to do. But
+    // operator= assigns a value to the node. So
+    //   node = node[*keyIt]
+    // leads to modification of the data structure, not simple traversal.
     node.reset(node[key]);
   }
   return node;
@@ -82,6 +84,21 @@ YAML::Node operator|=(YAML::Node a, const YAML::Node &b) {
     a = b;
   }
   return a;
+}
+
+/**
+ * Builds a string with a list of keys as specified in the code.
+ *
+ * @param keys The list of keys.
+ * @return A \c std::string with the desired result.
+ */
+std::string join_quoted(std::initializer_list<const char *> keys) {
+  return std::accumulate(keys.begin(), keys.end(), std::string{"{"},
+                         [](const std::string &ss, const std::string &s) {
+                           return ss + ((ss.size() == 1) ? "\"" : ", \"") + s +
+                                  "\"";
+                         }) +
+         "}";
 }
 
 }  // unnamed namespace
@@ -142,19 +159,11 @@ std::vector<std::string> Configuration::list_upmost_nodes() {
 Configuration::Value Configuration::take(
     std::initializer_list<const char *> keys) {
   assert(keys.size() > 0);
-  auto node = root_node_;
-  auto keyIt = begin(keys);
-  std::size_t i = 0;
-  for (; i < keys.size() - 1; ++i, ++keyIt) {
-    // Node::reset does what you might expect Node::operator= to do. But
-    // operator= assigns a value to the node. So
-    //   node = node[*keyIt]
-    // leads to modification of the data structure, not simple traversal.
-    node.reset(node[*keyIt]);
-  }
-  const auto r = node[*keyIt];
-  node.remove(*keyIt);
-  return {r, keys.begin()[keys.size() - 1]};
+  auto last_key_it = keys.end() - 1;
+  auto node = find_node_at(root_node_, {keys.begin(), last_key_it});
+  const auto r = node[*last_key_it];
+  node.remove(*last_key_it);
+  return {r, *last_key_it};
 }
 
 Configuration::Value Configuration::read(
@@ -173,6 +182,36 @@ void Configuration::remove_all_entries_in_section_but_one(
   }
   for (auto i : to_remove) {
     node.remove(i);
+  }
+}
+
+Configuration Configuration::extract_sub_configuration(
+    std::initializer_list<const char *> keys,
+    Configuration::GetEmpty empty_if_not_existing) {
+  assert(keys.size() > 0);
+  auto last_key_it = keys.end() - 1;
+  auto node = find_node_at(root_node_, {keys.begin(), last_key_it});
+  auto sub_conf_root_node = node[*last_key_it];
+  if (!sub_conf_root_node.IsDefined()) {
+    if (empty_if_not_existing == Configuration::GetEmpty::Yes)
+      return Configuration(YAML::Node{});
+    else
+      throw std::runtime_error("Attempt to extract not existing section " +
+                               join_quoted(keys));
+  } else if (sub_conf_root_node.IsNull() ||
+             (sub_conf_root_node.IsMap() && sub_conf_root_node.size() == 0)) {
+    // Here we put together the cases of a key without value or with
+    // an empty map {} as value (no need at the moment to distinguish)
+    throw std::runtime_error("Attempt to extract empty section " +
+                             join_quoted(keys));
+  } else if (sub_conf_root_node.IsMap() && sub_conf_root_node.size() != 0) {
+    Configuration sub_config{sub_conf_root_node};
+    node.remove(*last_key_it);
+    return sub_config;
+  } else {  // sequence or scalar or any future new YAML type
+    throw std::runtime_error("Tried to extract configuration section at " +
+                             join_quoted(keys) +
+                             " to get a key value. Use take instead!");
   }
 }
 

@@ -213,20 +213,6 @@ TEST(test_config_read) {
   COMPARE(nevents, 1);
 }
 
-TEST(test_sub_config_objects) {
-  Configuration conf = make_test_configuration();
-  Configuration general = conf["fireballs"];
-  const Configuration box = conf["tamer"]["Altaic"];
-  VERIFY(general.has_value({"classify"}));
-  int nevents = general.read({"classify"});
-  VERIFY(general.has_value({"classify"}));
-  COMPARE(nevents, 1);
-  nevents = general.take({"classify"});
-  VERIFY(!general.has_value({"classify"}));
-  COMPARE(nevents, 1);
-  COMPARE(double(box.read({"Meccas"})), 10.);
-}
-
 TEST(check_setting_new_value) {
   Configuration conf = make_test_configuration();
   VERIFY(!conf.has_value({"Test"}));
@@ -256,6 +242,69 @@ TEST(remove_all_entries_in_section_but_one) {
   conf.remove_all_entries_in_section_but_one("pipit", {"tamer"});
   conf.remove_all_entries_in_section_but_one("tamer", {});
   COMPARE(conf.to_string(), "tamer:\n  pipit:\n    bushelling: 5.0");
+}
+
+TEST(extract_sub_configuration) {
+  Configuration conf = make_test_configuration();
+  Configuration sub_conf = conf.extract_sub_configuration({"tamer", "pipit"});
+  VERIFY(!conf.has_value({"tamer", "pipit"}));
+  COMPARE(sub_conf.to_string(), "bushelling: 5.0");
+  sub_conf = conf.extract_sub_configuration({"fireballs"});
+  const auto list_of_keys = sub_conf.list_upmost_nodes();
+  const std::vector<std::string> reference = {
+      "extorting", "infection",  "arena", "pendulous",
+      "scudded",   "firebrands", "joker", "classify"};
+  COMPARE(list_of_keys.size(), reference.size());
+  for (std::size_t i = 0; i < list_of_keys.size(); ++i) {
+    COMPARE(list_of_keys[i], reference[i]);
+  }
+}
+
+TEST_CATCH(extract_scalar_key_as_section, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  auto sub_conf = conf.extract_sub_configuration({"fireballs", "joker"});
+}
+
+TEST_CATCH(extract_sequence_key_as_section, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  auto sub_conf =
+      conf.extract_sub_configuration({"tamer", "feathered", "stopcock"});
+}
+
+TEST_CATCH(extract_empty_map_as_section, std::runtime_error) {
+  Configuration conf{"section: {}"};
+  auto sub_conf = conf.extract_sub_configuration({"section"});
+}
+
+TEST_CATCH(extract_key_without_value_section, std::runtime_error) {
+  Configuration conf{"section:"};
+  auto sub_conf = conf.extract_sub_configuration({"section"});
+}
+
+TEST_CATCH(extract_not_existing_section, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  auto sub_conf = conf.extract_sub_configuration({"Not existing section"});
+}
+
+TEST(extract_not_existing_section_as_empty_conf) {
+  Configuration conf = make_test_configuration();
+  auto sub_conf = conf.extract_sub_configuration({"Not existing section"},
+                                                 Configuration::GetEmpty::Yes);
+  COMPARE(sub_conf.to_string(), "");
+}
+
+TEST(test_sub_config_objects) {
+  Configuration conf = make_test_configuration();
+  Configuration general = conf.extract_sub_configuration({"fireballs"});
+  const Configuration box = conf.extract_sub_configuration({"tamer", "Altaic"});
+  VERIFY(general.has_value({"classify"}));
+  int nevents = general.read({"classify"});
+  VERIFY(general.has_value({"classify"}));
+  COMPARE(nevents, 1);
+  nevents = general.take({"classify"});
+  VERIFY(!general.has_value({"classify"}));
+  COMPARE(nevents, 1);
+  COMPARE(double(box.read({"Meccas"})), 10.);
 }
 
 TEST_CATCH(failed_sequence_conversion,
