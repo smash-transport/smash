@@ -81,16 +81,16 @@ TEST(nucleus_potential_profile) {
   // Create a nucleus
   Configuration conf = Test::configuration();
   // All interactions off
-  conf["Collision_Term"]["Decays"] = "False";
-  conf["Collision_Term"]["Collisions"] = "False";
-  conf["Collision_Term"]["Sigma"] = 0.0;
+  conf.set_value({"Collision_Term", "Decays"}, "False");
+  conf.set_value({"Collision_Term", "Collisions"}, "False");
+  conf.set_value({"Collision_Term", "Sigma"}, 0.0);
   // Fixed target: Copper
-  conf["Modi"]["Collider"]["Calculation_Frame"] = "fixed target";
-  conf["Modi"]["Collider"]["E_Kin"] = 1.23;
-  conf["Modi"]["Collider"]["Projectile"]["Particles"]["211"] = 1;
-  conf["Modi"]["Collider"]["Target"]["Particles"]["2212"] = 29;
-  conf["Modi"]["Collider"]["Target"]["Particles"]["2112"] = 34;
-  conf["Modi"]["Collider"]["Target"]["Automatic"] = "True";
+  conf.set_value({"Modi", "Collider", "Calculation_Frame"}, "fixed target");
+  conf.set_value({"Modi", "Collider", "E_Kin"}, 1.23);
+  conf.set_value({"Modi", "Collider", "Projectile", "Particles", "211"}, 1);
+  conf.set_value({"Modi", "Collider", "Target", "Particles", "2212"}, 29);
+  conf.set_value({"Modi", "Collider", "Target", "Particles", "2112"}, 34);
+  conf.set_value({"Modi", "Collider", "Target", "Automatic"}, "True");
 
   ExperimentParameters param = smash::Test::default_parameters();
   ColliderModus c(conf["Modi"], param);
@@ -99,9 +99,9 @@ TEST(nucleus_potential_profile) {
   ParticleList plist;
 
   // Create potentials
-  conf["Potentials"]["Skyrme"]["Skyrme_A"] = -209.2;
-  conf["Potentials"]["Skyrme"]["Skyrme_B"] = 156.4;
-  conf["Potentials"]["Skyrme"]["Skyrme_Tau"] = 1.35;
+  conf.set_value({"Potentials", "Skyrme", "Skyrme_A"}, -209.2);
+  conf.set_value({"Potentials", "Skyrme", "Skyrme_B"}, 156.4);
+  conf.set_value({"Potentials", "Skyrme", "Skyrme_Tau"}, 1.35);
   Potentials pot = Potentials(conf["Potentials"], param);
 
   // Write potential XY map in a vtk output

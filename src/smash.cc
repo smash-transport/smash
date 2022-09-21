@@ -617,15 +617,17 @@ int main(int argc, char *argv[]) {
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {
-      configuration["General"]["Modus"] = std::string(modus);
+      configuration.set_value({"General", "Modus"}, std::string(modus));
     }
     if (end_time) {
-      configuration["General"]["End_Time"] = std::abs(std::atof(end_time));
+      configuration.set_value({"General", "End_Time"},
+                              std::abs(std::atof(end_time)));
     }
 
     int64_t seed = configuration.read({"General", "Randomseed"});
     if (seed < 0) {
-      configuration["General"]["Randomseed"] = random::generate_63bit_seed();
+      configuration.set_value({"General", "Randomseed"},
+                              random::generate_63bit_seed());
     }
 
     // Avoid overwriting SMASH output

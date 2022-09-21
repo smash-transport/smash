@@ -34,9 +34,11 @@ TEST(init_particle_types) {
 */
 TEST(phase_space_density) {
   Configuration conf = Test::configuration();
-  conf["Collision_Term"]["Pauli_Blocking"]["Spatial_Averaging_Radius"] = 1.86;
-  conf["Collision_Term"]["Pauli_Blocking"]["Momentum_Averaging_Radius"] = 0.08;
-  conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
+  conf.set_value(
+      {"Collision_Term", "Pauli_Blocking", "Spatial_Averaging_Radius"}, 1.86);
+  conf.set_value(
+      {"Collision_Term", "Pauli_Blocking", "Momentum_Averaging_Radius"}, 0.08);
+  conf.set_value({"Collision_Term", "Pauli_Blocking", "Gaussian_Cutoff"}, 2.2);
 
   ExperimentParameters param = smash::Test::default_parameters();
   std::unique_ptr<PauliBlocker> pb = std::make_unique<PauliBlocker>(
@@ -86,9 +88,11 @@ param);
 
 TEST(phase_space_density_nucleus) {
   Configuration conf = Test::configuration();
-  conf["Collision_Term"]["Pauli_Blocking"]["Spatial_Averaging_Radius"] = 1.86;
-  conf["Collision_Term"]["Pauli_Blocking"]["Momentum_Averaging_Radius"] = 0.08;
-  conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
+  conf.set_value(
+      {"Collision_Term", "Pauli_Blocking", "Spatial_Averaging_Radius"}, 1.86);
+  conf.set_value(
+      {"Collision_Term", "Pauli_Blocking", "Momentum_Averaging_Radius"}, 0.08);
+  conf.set_value({"Collision_Term", "Pauli_Blocking", "Gaussian_Cutoff"}, 2.2);
 
   // Gold nuclei with 1000 test-particles
   std::map<PdgCode, int> list = {{0x2212, 79}, {0x2112, 118}};

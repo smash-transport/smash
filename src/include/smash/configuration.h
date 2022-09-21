@@ -1283,17 +1283,14 @@ class Configuration {
   }
 
   /**
-   * Assignment overwrites the value of the current YAML node.
+   * Overwrite the value of the specified YAML node.
    *
+   * \param[in] keys You can pass an arbitrary number of keys inside curly
+   *                 braces, following the nesting structure in the config file.
    * \param[in] value An arbitrary value that yaml-cpp can convert into YAML
-   * representation. Any builtin type, strings, maps, and vectors can be used
-   * here.
+   *                  representation. Any builtin type, strings, maps, and
+   *                  vectors can be used here.
    */
-  template <typename T>
-  Configuration &operator=(T &&value) {
-    root_node_ = std::forward<T>(value);
-    return *this;
-  }
   template <typename T>
   void set_value(std::initializer_list<const char *> keys, T &&value) {
     assert(keys.size() > 0);

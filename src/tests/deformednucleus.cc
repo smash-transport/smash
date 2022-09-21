@@ -109,14 +109,15 @@ TEST(ylm) {
 TEST(deformation_parameters_from_config) {
   // creates config for arbitrary nucleus (Gold in this case)
   Configuration conf = Test::configuration();
-  conf["Modi"]["Collider"]["Projectile"]["Particles"]["2112"] = 118;
-  conf["Modi"]["Collider"]["Projectile"]["Particles"]["2212"] = 79;
-  conf["Modi"]["Collider"]["Projectile"]["Saturation_Density"] = 0.1968;
-  conf["Modi"]["Collider"]["Projectile"]["Diffusiveness"] = 0.8;
-  conf["Modi"]["Collider"]["Projectile"]["Radius"] = 2.0;
+  conf.set_value({"Modi", "Collider", "Projectile", "Particles", "2112"}, 118);
+  conf.set_value({"Modi", "Collider", "Projectile", "Particles", "2212"}, 79);
+  conf.set_value({"Modi", "Collider", "Projectile", "Saturation_Density"},
+                 0.1968);
+  conf.set_value({"Modi", "Collider", "Projectile", "Diffusiveness"}, 0.8);
+  conf.set_value({"Modi", "Collider", "Projectile", "Radius"}, 2.0);
   // inserts beta2_ and beta4_ values
-  conf["Modi"]["Collider"]["Projectile"]["Deformed"]["Beta_2"] = 1;
-  conf["Modi"]["Collider"]["Projectile"]["Deformed"]["Beta_4"] = 2;
+  conf.set_value({"Modi", "Collider", "Projectile", "Deformed", "Beta_2"}, 1);
+  conf.set_value({"Modi", "Collider", "Projectile", "Deformed", "Beta_4"}, 2);
 
   // verifies if the beta values have been transcribed correctly
   Configuration mod_conf = conf["Modi"];
@@ -130,12 +131,14 @@ TEST(deformation_parameters_from_config) {
 TEST(set_deformation_parameters_automatic) {
   // config for uranium nucleus
   Configuration conf1 = Test::configuration();
-  conf1["Modi"]["Collider"]["Projectile"]["Particles"]["2112"] = 146;
-  conf1["Modi"]["Collider"]["Projectile"]["Particles"]["2212"] = 92;
-  conf1["Modi"]["Collider"]["Projectile"]["Saturation_Density"] = 0.1968;
-  conf1["Modi"]["Collider"]["Projectile"]["Diffusiveness"] = 1.0;
-  conf1["Modi"]["Collider"]["Projectile"]["Radius"] = 1.0;
-  conf1["Modi"]["Collider"]["Projectile"]["Deformed"]["Automatic"] = "True";
+  conf1.set_value({"Modi", "Collider", "Projectile", "Particles", "2112"}, 146);
+  conf1.set_value({"Modi", "Collider", "Projectile", "Particles", "2212"}, 92);
+  conf1.set_value({"Modi", "Collider", "Projectile", "Saturation_Density"},
+                  0.1968);
+  conf1.set_value({"Modi", "Collider", "Projectile", "Diffusiveness"}, 1.0);
+  conf1.set_value({"Modi", "Collider", "Projectile", "Radius"}, 1.0);
+  conf1.set_value({"Modi", "Collider", "Projectile", "Deformed", "Automatic"},
+                  "True");
 
   // verifies that the values were automatically set
   Configuration mod_conf1 = conf1["Modi"];
@@ -147,12 +150,14 @@ TEST(set_deformation_parameters_automatic) {
 
   // config for copper nucleus
   Configuration conf2 = Test::configuration();
-  conf2["Modi"]["Collider"]["Projectile"]["Particles"]["2112"] = 34;
-  conf2["Modi"]["Collider"]["Projectile"]["Particles"]["2212"] = 29;
-  conf2["Modi"]["Collider"]["Projectile"]["Saturation_Density"] = 0.1968;
-  conf2["Modi"]["Collider"]["Projectile"]["Diffusiveness"] = 1.0;
-  conf2["Modi"]["Collider"]["Projectile"]["Radius"] = 1.0;
-  conf2["Modi"]["Collider"]["Projectile"]["Deformed"]["Automatic"] = "True";
+  conf2.set_value({"Modi", "Collider", "Projectile", "Particles", "2112"}, 34);
+  conf2.set_value({"Modi", "Collider", "Projectile", "Particles", "2212"}, 29);
+  conf2.set_value({"Modi", "Collider", "Projectile", "Saturation_Density"},
+                  0.1968);
+  conf2.set_value({"Modi", "Collider", "Projectile", "Diffusiveness"}, 1.0);
+  conf2.set_value({"Modi", "Collider", "Projectile", "Radius"}, 1.0);
+  conf2.set_value({"Modi", "Collider", "Projectile", "Deformed", "Automatic"},
+                  "True");
 
   // verifies that the values were automatically set
   Configuration mod_conf2 = conf2["Modi"];
@@ -164,12 +169,14 @@ TEST(set_deformation_parameters_automatic) {
 
   // config for Zirconium nucleus
   Configuration conf3 = Test::configuration();
-  conf3["Modi"]["Collider"]["Projectile"]["Particles"]["2112"] = 56;
-  conf3["Modi"]["Collider"]["Projectile"]["Particles"]["2212"] = 40;
-  conf3["Modi"]["Collider"]["Projectile"]["Saturation_Density"] = 0.1968;
-  conf3["Modi"]["Collider"]["Projectile"]["Diffusiveness"] = 1.0;
-  conf3["Modi"]["Collider"]["Projectile"]["Radius"] = 1.0;
-  conf3["Modi"]["Collider"]["Projectile"]["Deformed"]["Automatic"] = "True";
+  conf3.set_value({"Modi", "Collider", "Projectile", "Particles", "2112"}, 56);
+  conf3.set_value({"Modi", "Collider", "Projectile", "Particles", "2212"}, 40);
+  conf3.set_value({"Modi", "Collider", "Projectile", "Saturation_Density"},
+                  0.1968);
+  conf3.set_value({"Modi", "Collider", "Projectile", "Diffusiveness"}, 1.0);
+  conf3.set_value({"Modi", "Collider", "Projectile", "Radius"}, 1.0);
+  conf3.set_value({"Modi", "Collider", "Projectile", "Deformed", "Automatic"},
+                  "True");
 
   // verifies that the values were automatically set
   Configuration mod_conf3 = conf3["Modi"];
@@ -181,12 +188,14 @@ TEST(set_deformation_parameters_automatic) {
 
   // config for Ruthenium nucleus
   Configuration conf4 = Test::configuration();
-  conf4["Modi"]["Collider"]["Projectile"]["Particles"]["2112"] = 52;
-  conf4["Modi"]["Collider"]["Projectile"]["Particles"]["2212"] = 44;
-  conf4["Modi"]["Collider"]["Projectile"]["Saturation_Density"] = 0.1968;
-  conf4["Modi"]["Collider"]["Projectile"]["Diffusiveness"] = 1.0;
-  conf4["Modi"]["Collider"]["Projectile"]["Radius"] = 1.0;
-  conf4["Modi"]["Collider"]["Projectile"]["Deformed"]["Automatic"] = "True";
+  conf4.set_value({"Modi", "Collider", "Projectile", "Particles", "2112"}, 52);
+  conf4.set_value({"Modi", "Collider", "Projectile", "Particles", "2212"}, 44);
+  conf4.set_value({"Modi", "Collider", "Projectile", "Saturation_Density"},
+                  0.1968);
+  conf4.set_value({"Modi", "Collider", "Projectile", "Diffusiveness"}, 1.0);
+  conf4.set_value({"Modi", "Collider", "Projectile", "Radius"}, 1.0);
+  conf4.set_value({"Modi", "Collider", "Projectile", "Deformed", "Automatic"},
+                  "True");
 
   // verifies that the values were automatically set
   Configuration mod_conf4 = conf4["Modi"];
@@ -201,11 +210,12 @@ TEST(nucleon_density) {
   // config with values for an easy analytic deformed-woods-saxon value
   // Uranium core with default values
   Configuration conf1 = Test::configuration();
-  conf1["Modi"]["Collider"]["Projectile"]["Particles"]["2112"] = 146;
-  conf1["Modi"]["Collider"]["Projectile"]["Particles"]["2212"] = 92;
-  conf1["Modi"]["Collider"]["Projectile"]["Saturation_Density"] = 0.166;
-  conf1["Modi"]["Collider"]["Projectile"]["Diffusiveness"] = 0.556;
-  conf1["Modi"]["Collider"]["Projectile"]["Radius"] = 6.86;
+  conf1.set_value({"Modi", "Collider", "Projectile", "Particles", "2112"}, 146);
+  conf1.set_value({"Modi", "Collider", "Projectile", "Particles", "2212"}, 92);
+  conf1.set_value({"Modi", "Collider", "Projectile", "Saturation_Density"},
+                  0.166);
+  conf1.set_value({"Modi", "Collider", "Projectile", "Diffusiveness"}, 0.556);
+  conf1.set_value({"Modi", "Collider", "Projectile", "Radius"}, 6.86);
 
   // verifies that deformed Woods-Saxon is indeed 0 for some arbitrary values
   Configuration mod_conf1 = conf1["Modi"];
@@ -218,11 +228,12 @@ TEST(nucleon_density) {
   // config with values for an easy analytic deformed Woods-Saxon value
   // Lead core with default values
   Configuration conf2 = Test::configuration();
-  conf2["Modi"]["Collider"]["Projectile"]["Particles"]["2112"] = 126;
-  conf2["Modi"]["Collider"]["Projectile"]["Particles"]["2212"] = 82;
-  conf2["Modi"]["Collider"]["Projectile"]["Saturation_Density"] = 0.161;
-  conf2["Modi"]["Collider"]["Projectile"]["Diffusiveness"] = 0.54;
-  conf2["Modi"]["Collider"]["Projectile"]["Radius"] = 6.67;
+  conf2.set_value({"Modi", "Collider", "Projectile", "Particles", "2112"}, 126);
+  conf2.set_value({"Modi", "Collider", "Projectile", "Particles", "2212"}, 82);
+  conf2.set_value({"Modi", "Collider", "Projectile", "Saturation_Density"},
+                  0.161);
+  conf2.set_value({"Modi", "Collider", "Projectile", "Diffusiveness"}, 0.54);
+  conf2.set_value({"Modi", "Collider", "Projectile", "Radius"}, 6.67);
 
   // verifies that deformed Woods-Saxon is indeed 0.5
   Configuration mod_conf2 = conf2["Modi"];

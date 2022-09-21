@@ -56,7 +56,7 @@ Configuration setup_config_and_logging(
         particles_path);
   }
   if (!configuration.has_value({"particles"}) || !particles_path.empty()) {
-    configuration["particles"] = particles_and_decays.first;
+    configuration.set_value({"particles"}, particles_and_decays.first);
   }
 
   if (configuration.has_value({"decaymodes"}) && !decaymodes_path.empty()) {
@@ -67,7 +67,7 @@ Configuration setup_config_and_logging(
         decaymodes_path);
   }
   if (!configuration.has_value({"decaymodes"}) || !decaymodes_path.empty()) {
-    configuration["decaymodes"] = particles_and_decays.second;
+    configuration.set_value({"decaymodes"}, particles_and_decays.second);
   }
 
   return configuration;

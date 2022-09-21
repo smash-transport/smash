@@ -28,13 +28,13 @@ static BoxModus create_box_for_tests(const ExperimentParameters& par) {
   auto conf = Test::configuration();
   const int N = 30;
   const double T_init = 0.2;
-  conf["Modus"] = "Box";
-  conf["Modi"]["Box"]["Init_Multiplicities"]["2212"] = N;
-  conf["Modi"]["Box"]["Init_Multiplicities"]["311"] = N;
-  conf["Modi"]["Box"]["Length"] = par.box_length;
-  conf["Modi"]["Box"]["Temperature"] = T_init;
-  conf["Modi"]["Box"]["Initial_Condition"] = "thermal momenta";
-  conf["Modi"]["Box"]["Start_Time"] = 0.0;
+  conf.set_value({"Modus"}, "Box");
+  conf.set_value({"Modi", "Box", "Init_Multiplicities", "2212"}, N);
+  conf.set_value({"Modi", "Box", "Init_Multiplicities", "311"}, N);
+  conf.set_value({"Modi", "Box", "Length"}, par.box_length);
+  conf.set_value({"Modi", "Box", "Temperature"}, T_init);
+  conf.set_value({"Modi", "Box", "Initial_Condition"}, "thermal momenta");
+  conf.set_value({"Modi", "Box", "Start_Time"}, 0.0);
   return BoxModus(conf["Modi"], par);
 }
 
