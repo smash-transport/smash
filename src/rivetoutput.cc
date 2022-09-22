@@ -14,6 +14,7 @@
 #include "Rivet/Tools/Logging.hh"
 
 #include "smash/logging.h"
+#include "smash/outputparameters.h"
 
 namespace smash {
 /*!\Userguide
@@ -84,7 +85,10 @@ namespace smash {
  *
  *
  * The Rivet set-up can be configured through the \ref
- * output_general_ "Output" section in the configuration file
+ * output_general_ "Output" section in the configuration file.
+ *
+ * \note In the following, <b>no default</b> means that, if the key is
+ *       omitted, Rivet default behavior will be used.
  *
  * - \key Rivet (top of Rivet configuration)
  *   - \key Format (list of strings, no default) List of formats
@@ -93,13 +97,13 @@ namespace smash {
  *     - \key YODA Only initial (beam) and final state particles
  *       are available in the events.
  *
- *     - \key YODA-full Full event structure present to analyse
+ *     - \key YODA-full Full event structure present to analyze
  *
  *   - \key Paths (list of strings, no default)
  *     This key specifies the directories that Rivet will search for
  *     analyses and data files related to the analyses.
  *   - \key Analyses (list of strings, no default)
- *     This key specifies the analyses (including opossible options)
+ *     This key specifies the analyses (including possible options)
  *     to add to the Rivet analysis.
  *
  *   - \key Preloads (list of strings, no default)
@@ -122,7 +126,7 @@ namespace smash {
  *
  *   - \key Weights (container, no defaults)
  *
- *     - \key No_Multi (bool, default false)
+ *     - \key No_Multi (bool, no default)
  *       Ask Rivet to not do multi-weight processing
  *
  *     - \key Nominal (string, no default)
@@ -134,7 +138,7 @@ namespace smash {
  *     - \key Deselect (list of string, no default)
  *       De-select these weights for processing
  *
- *     - \key NLO_Smearing (double, default 0)
+ *     - \key NLO_Smearing (double, no default)
  *       Smearing histogram binning by given fraction of bin widths
  *       to avoid NLO counter events to flow into neighboring bin.
  *
@@ -145,14 +149,14 @@ namespace smash {
  */
 
 RivetOutput::RivetOutput(const std::filesystem::path& path, std::string name,
-                         const bool full_event, const OutputParameters& out_par)
+                         const bool full_event,
+                         const RivetOutputParameters& rivet_par)
     : HepMcInterface(name, full_event),
       handler_(),
       filename_(path / (name + ".yoda")),
-      need_init_(true),
-      rivet_confs_(out_par.subcon_for_rivet) {
+      need_init_(true) {
   handler_ = std::make_shared<Rivet::AnalysisHandler>();
-  setup();
+  setup(rivet_par);
 }
 
 RivetOutput::~RivetOutput() {
@@ -222,100 +226,87 @@ void RivetOutput::set_cross_section(double xs, double xserr) {
   analysis_handler_proxy()->setCrossSection(xs, xserr, true);
 }
 
-void RivetOutput::setup() {
-  logg[LOutput].debug() << "Setting up from configuration:\n"
-                        << rivet_confs_.to_string() << std::endl;
+void RivetOutput::setup(const RivetOutputParameters& params) {
+  logg[LOutput].debug() << "Setting up Rivet output:\n";
 
   // Paths to analyses libraries and data
-  if (rivet_confs_.has_value({"Paths"})) {
-    logg[LOutput].info() << "Processing paths" << std::endl;
-    std::vector<std::string> path = rivet_confs_.take({"Paths"});
-    for (auto p : path)
+  if (params.paths) {
+    logg[LOutput].info() << "Processing paths\n";
+    for (auto p : params.paths.value())
       add_path(p);
   }
 
   // Data files to pre-load e.g., for centrality configurations
-  if (rivet_confs_.has_value({"Preloads"})) {
-    logg[LOutput].info() << "Processing preloads" << std::endl;
-    std::vector<std::string> prel = rivet_confs_.take({"Preloads"});
-    for (auto p : prel)
+  if (params.preloads) {
+    logg[LOutput].info() << "Processing preloads\n";
+    for (auto p : params.preloads.value())
       add_preload(p);
   }
 
   // Analyses (including options) to add to run
-  if (rivet_confs_.has_value({"Analyses"})) {
-    logg[LOutput].info() << "Processing analyses" << std::endl;
-    std::vector<std::string> anas = rivet_confs_.take({"Analyses"});
-    for (auto p : anas)
+  if (params.analyses) {
+    logg[LOutput].info() << "Processing analyses\n";
+    for (auto p : params.analyses.value())
       add_analysis(p);
   }
 
   // Whether Rivet should ignore beams
-  if (rivet_confs_.has_value({"Ignore_Beams"})) {
-    set_ignore_beams(rivet_confs_.take({"Ignore_Beams"}));
-  } else {
-    // we must explicity tell Rivet, through the handler, to ignore beam checks
-    set_ignore_beams(true);
-  }
+  set_ignore_beams(params.ignore_beams);
 
   // Cross sections
-  if (rivet_confs_.has_value({"Cross_Section"})) {
-    std::array<double, 2> xs = rivet_confs_.take({"Cross_Section"});
-    set_cross_section(xs[0], xs[1]);
+  if (params.cross_sections) {
+    set_cross_section(params.cross_sections.value()[0],
+                      params.cross_sections.value()[1]);
   }
 
   // Logging in Rivet
-  if (rivet_confs_.has_value({"Logging"})) {
-    std::map<std::string, std::string> logs = rivet_confs_.take({"Logging"});
-    for (auto nl : logs)
+  if (params.logs) {
+    for (auto nl : params.logs.value())
       set_log_level(nl.first, nl.second);
   }
 
   // Treatment of event weights in Rivet
-  if (rivet_confs_.has_value({"Weights"})) {
-    auto wconf = rivet_confs_["Weights"];
-
-    // Do not care about multi weights - bool
-    if (wconf.has_value({"No_Multi"})) {
-      analysis_handler_proxy()->skipMultiWeights(wconf.take({"No_Multi"}));
+  if (params.any_weight_parameter_was_given) {
+    // Do not care about multi weights
+    if (params.no_multi_weight) {
+      analysis_handler_proxy()->skipMultiWeights(
+          params.no_multi_weight.value());
     }
 
     // Set nominal weight name
-    if (wconf.has_value({"Nominal"})) {
-      analysis_handler_proxy()->setNominalWeightName(wconf.take({"Nominal"}));
+    if (params.nominal_weight_name) {
+      analysis_handler_proxy()->setNominalWeightName(
+          params.nominal_weight_name.value());
     }
 
     // Set cap (maximum) on weights
-    if (wconf.has_value({"Cap"})) {
-      analysis_handler_proxy()->setWeightCap(wconf.take({"Cap"}));
+    if (params.cap_on_weights) {
+      analysis_handler_proxy()->setWeightCap(params.cap_on_weights.value());
     }
 
     // Whether to smear for NLO calculations
-    if (wconf.has_value({"NLO_Smearing"})) {
-      analysis_handler_proxy()->setNLOSmearing(wconf.take({"NLO_Smearing"}));
+    if (params.nlo_smearing) {
+      analysis_handler_proxy()->setNLOSmearing(params.nlo_smearing.value());
     }
 
     // Select which weights to enable
-    if (wconf.has_value({"Select"})) {
-      std::vector<std::string> sel = wconf.take({"Select"});
+    if (params.to_be_enabled_weights) {
       std::stringstream s;
       int comma = 0;
-      for (auto w : sel)
+      for (auto w : params.to_be_enabled_weights.value())
         s << (comma++ ? "," : "") << w;
       analysis_handler_proxy()->selectMultiWeights(s.str());
     }
 
     // Select weights to disable
-    if (wconf.has_value({"Deselect"})) {
-      std::vector<std::string> sel = wconf.take({"Deselect"});
+    if (params.to_be_disabled_weights) {
       std::stringstream s;
       int comma = 0;
-      for (auto w : sel)
+      for (auto w : params.to_be_disabled_weights.value())
         s << (comma++ ? "," : "") << w;
       analysis_handler_proxy()->deselectMultiWeights(s.str());
     }
   }
-  logg[LOutput].debug() << "After processing configuration:\n"
-                        << rivet_confs_.to_string() << std::endl;
+  logg[LOutput].debug() << "Setup of Rivet output done.\n";
 }
 }  // namespace smash

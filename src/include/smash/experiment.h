@@ -823,11 +823,11 @@ void Experiment<Modus>::create_output(const std::string &format,
     }
     if (format == "YODA") {
       outputs_.emplace_back(std::make_unique<RivetOutput>(
-          output_path, "SMASH_Rivet", false, out_par));
+          output_path, "SMASH_Rivet", false, out_par.rivet_parameters));
       rivet_format_already_selected = true;
     } else if (format == "YODA-full") {
       outputs_.emplace_back(std::make_unique<RivetOutput>(
-          output_path, "SMASH_Rivet_full", true, out_par));
+          output_path, "SMASH_Rivet_full", true, out_par.rivet_parameters));
       rivet_format_already_selected = true;
     } else {
       logg[LExperiment].error("Rivet format " + format +
