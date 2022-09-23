@@ -1553,17 +1553,21 @@ Experiment<Modus>::Experiment(Configuration &config,
   logg[LExperiment].debug()
       << "Density type printed to headers: " << dens_type_;
 
+  const std::vector<std::string> output_contents =
+      output_conf.list_upmost_nodes();
+  std::vector<std::vector<std::string>> list_of_formats(output_contents.size());
+  std::transform(
+      output_contents.cbegin(), output_contents.cend(), list_of_formats.begin(),
+      [&output_conf](std::string content) -> std::vector<std::string> {
+        return output_conf.take({content.c_str(), "Format"});
+      });
   const OutputParameters output_parameters(std::move(output_conf));
-
-  std::vector<std::string> output_contents = output_conf.list_upmost_nodes();
-  for (const auto &content : output_contents) {
-    auto this_output_conf = output_conf[content.c_str()];
-    const std::vector<std::string> formats = this_output_conf.take({"Format"});
-    if (output_path == "") {
-      continue;
-    }
-    for (const auto &format : formats) {
-      create_output(format, content, output_path, output_parameters);
+  if (output_path != "") {
+    for (std::size_t i = 0; i < output_contents.size(); ++i) {
+      for (const auto &format : list_of_formats[i]) {
+        create_output(format, output_contents[i], output_path,
+                      output_parameters);
+      }
     }
   }
 

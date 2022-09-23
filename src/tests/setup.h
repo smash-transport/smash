@@ -156,7 +156,7 @@ inline ParticleData smashon_random(int id = -1) {
 }
 
 /**
- * Return a configuration object filled with data from src/config.yaml. Note
+ * Return a configuration object filled with data from input/config.yaml. Note
  * that a change to that file may affect test results if you use it.
  *
  * If you want specific values in the config for testing simply overwrite the
