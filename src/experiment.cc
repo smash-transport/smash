@@ -19,7 +19,7 @@
 namespace smash {
 
 /* ExperimentBase carries everything that is needed for the evolution */
-ExperimentPtr ExperimentBase::create(Configuration config,
+ExperimentPtr ExperimentBase::create(Configuration &config,
                                      const std::filesystem::path &output_path) {
   if (!std::filesystem::exists(output_path)) {
     throw NonExistingOutputPathRequest("The requested output path (" +
@@ -490,7 +490,7 @@ ExperimentPtr ExperimentBase::create(Configuration config,
  \endverbatim
  */
 
-ExperimentParameters create_experiment_parameters(Configuration config) {
+ExperimentParameters create_experiment_parameters(Configuration &config) {
   logg[LExperiment].trace() << SMASH_SOURCE_LOCATION;
 
   const int ntest = config.take({"General", "Testparticles"}, 1);

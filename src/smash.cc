@@ -305,7 +305,7 @@ void ensure_path_is_valid(const std::filesystem::path &path) {
  * \param[in] configuration Necessary parameters to switch reactions on/off
  * \return The constructed Scatteractionsfinder.
  */
-ScatterActionsFinder actions_finder_for_dump(Configuration configuration) {
+ScatterActionsFinder actions_finder_for_dump(Configuration &configuration) {
   ExperimentParameters params = create_experiment_parameters(configuration);
   return ScatterActionsFinder(configuration, params);
 }

@@ -43,7 +43,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *            exclude some certain types of scatterings and switching
    *            among the methods to treat with the NNbar collisions.
    */
-  ScatterActionsFinder(Configuration config,
+  ScatterActionsFinder(Configuration &config,
                        const ExperimentParameters &parameters);
 
   /**
