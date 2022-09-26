@@ -78,17 +78,17 @@ void initialize_particles_decays_and_tabulations(
     const std::string &tabulations_dir) {
   logg[LMain].trace(SMASH_SOURCE_LOCATION,
                     " create ParticleType and DecayModes");
-  ParticleType::create_type_list(configuration.take({"particles"}));
-  DecayModes::load_decaymodes(configuration.take({"decaymodes"}));
+  const std::string particles_string = configuration.take({"particles"});
+  const std::string decaymodes_string = configuration.take({"decaymodes"});
+  ParticleType::create_type_list(particles_string);
+  DecayModes::load_decaymodes(decaymodes_string);
   ParticleType::check_consistency();
 
   // Calculate a hash of the SMASH version, the particles and decaymodes.
-  const std::string particle_string = configuration["particles"].to_string();
-  const std::string decay_string = configuration["decaymodes"].to_string();
   sha256::Context hash_context;
   hash_context.update(version);
-  hash_context.update(particle_string);
-  hash_context.update(decay_string);
+  hash_context.update(particles_string);
+  hash_context.update(decaymodes_string);
   const auto hash = hash_context.finalize();
   logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash);
 
