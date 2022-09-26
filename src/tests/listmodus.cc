@@ -125,7 +125,7 @@ TEST(list_from_non_oscar_output) {
   list_conf_str += "    Shift_Id: 0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
-  ListModus list_modus(config, par);
+  ListModus list_modus(std::move(config), par);
 
   // Read the file with list modus
   Particles particles_read;
@@ -177,7 +177,7 @@ TEST(multiple_file_non_oscar_output) {
   list_conf_str += "    Shift_Id: 0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
-  ListModus list_modus(config, par);
+  ListModus list_modus(std::move(config), par);
 
   std::vector<ParticleList> init_particles;
 
@@ -248,7 +248,7 @@ TEST(list_from_oscar2013_output) {
   list_conf_str += "    Shift_Id: 0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
-  ListModus list_modus(config, par);
+  ListModus list_modus(std::move(config), par);
 
   // Read the file with list modus
   Particles particles_read;
@@ -313,7 +313,7 @@ TEST(multiple_files_one_event) {
   list_conf_str += "    Shift_Id: 0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
-  ListModus list_modus(config, par);
+  ListModus list_modus(std::move(config), par);
 
   for (int i = 0; i < events_per_file * n_files; i++) {
     Particles particles_read;
@@ -373,7 +373,7 @@ TEST(multiple_files_multiple_events) {
   list_conf_str += "    Shift_Id: 0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
-  ListModus list_modus(config, par);
+  ListModus list_modus(std::move(config), par);
 
   for (int i = 0; i < events_per_file * n_files; i++) {
     Particles particles_read;
@@ -432,7 +432,7 @@ TEST(multiple_events_in_file) {
   list_conf_str += "    Shift_Id: 0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
-  ListModus list_modus(config, par);
+  ListModus list_modus(std::move(config), par);
 
   for (int cur_event = 0; cur_event < max_events; cur_event++) {
     // Read the file with list modus
@@ -487,7 +487,7 @@ TEST(try_create_particle_func) {
   list_conf_str += "    Shift_Id: 0\n";
   auto config = Configuration(list_conf_str.c_str());
   auto par = Test::default_parameters();
-  ListModus list_modus(config, par);
+  ListModus list_modus(std::move(config), par);
 
   Particles particles;
   ParticleList plist_init, plist_fin;
