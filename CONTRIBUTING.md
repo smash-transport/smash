@@ -277,7 +277,7 @@ Doxygen has a lot of commands for markup. Most importantly it uses special
 comment formatting. Comments meant for the documentation are either prefixed
 with `///` or wraped with `/** ... */`. For all the connection to code and
 some special layout commands, refer to the [Special Commands in
-Doxygen](http://www.stack.nl/~dimitri/doxygen/manual/commands.html).
+Doxygen](https://doxygen.nl/manual/commands.html).
 
 #### Rules
 
