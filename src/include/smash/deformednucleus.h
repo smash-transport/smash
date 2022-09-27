@@ -18,7 +18,7 @@
 namespace smash {
 
 /**
- * Spherical harmonics Y_2_0, Y_2_2 and Y_4_0.
+ * Spherical harmonics Y_2_0, Y_2_2, Y_3_0 and Y_4_0.
  * \param[in] l Angular momentum value (2 and 4 are supported)
  * \param[in] m projection value (l = 2 and m = 2 are supported)
  * \param[in] cosx Cosine of the polar angle
@@ -149,6 +149,11 @@ class DeformedNucleus : public Nucleus {
    */
   inline void set_gamma(double ga) { gamma_ = ga; }
   /**
+   * Set deformation coefficient for Y_3_0.
+   * \param[in] b3 deformation coefficient for l=3
+   */
+  inline void set_beta_3(double b3) { beta3_ = b3; }
+  /**
    * Set deformation coefficient for Y_4_0.
    * \param[in] b4 deformation coefficient for l=4
    */
@@ -177,6 +182,10 @@ class DeformedNucleus : public Nucleus {
    */
   inline double get_beta2() { return beta2_; }
   /**
+   * return the beta3 value.
+   */
+  inline double get_beta3() { return beta3_; }
+  /**
    * return the beta4 value.
    */
   inline double get_beta4() { return beta4_; }
@@ -186,6 +195,8 @@ class DeformedNucleus : public Nucleus {
   double beta2_ = 0.0;
   /// Triaxiality parameter for angular momentum l=2.
   double gamma_ = 0.0;
+  /// Deformation parameter for angular momentum l=3.
+  double beta3_ = 0.0;
   /// Deformation parameter for angular momentum l=4.
   double beta4_ = 0.0;
   /**
