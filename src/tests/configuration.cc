@@ -56,42 +56,59 @@ TEST(test_take) {
 
 TEST(test_take_multiple) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
-  double d = modi.take({"Altaic", "Meccas"});
+  double d = conf.take({"tamer", "Altaic", "Meccas"});
   COMPARE(d, 10.);
-  d = modi.take({"Altaic", "Kathleen"});
+  d = conf.take({"tamer", "Altaic", "Kathleen"});
   COMPARE(d, 0.2);
-  int i = modi.take({"Altaic", "Brahmins"});
+  int i = conf.take({"tamer", "Altaic", "Brahmins"});
   COMPARE(i, 1);
 }
 
 TEST_CATCH(take_incorrect_type, Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
-  int i = modi.take({"pipit", "bushelling"});
+  int i = conf.take({"tamer", "pipit", "bushelling"});
   COMPARE(i, 5);
 }
 
 TEST(take_always_converts_to_string) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
-  std::string s = modi.take({"pipit", "bushelling"});
+  std::string s = conf.take({"tamer", "pipit", "bushelling"});
   COMPARE(s, "5.0");
+}
+
+TEST_CATCH(take_not_existing_key, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  conf.take({"not existing key"});
+}
+
+TEST_CATCH(take_not_existing_key_in_existing_section, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  conf.take({"tamer", "not existing key"});
 }
 
 TEST(has_value) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
-  VERIFY(modi.has_value({"pipit", "bushelling"}));
-  VERIFY(modi.has_value({"pipit", "bushelling"}));
+  VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
 }
 
 TEST(take_removes_entry) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
-  VERIFY(modi.has_value({"pipit", "bushelling"}));
-  modi.take({"pipit", "bushelling"});
-  VERIFY(!modi.has_value({"pipit", "bushelling"}));
+  VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
+  conf.take({"tamer", "pipit", "bushelling"});
+  VERIFY(!conf.has_value({"tamer", "pipit", "bushelling"}));
+}
+
+TEST(take_removes_empty_section) {
+  Configuration conf{R"(
+    Section:
+      Sub-section:
+        Key: "Value"
+  )"};
+  VERIFY(conf.has_value({"Section"}));
+  VERIFY(conf.has_value({"Section", "Sub-section"}));
+  conf.take({"Section", "Sub-section", "Key"});
+  VERIFY(!conf.has_value({"Section", "Sub-section"}));
+  VERIFY(!conf.has_value({"Section"})) << "\n" << conf.to_string();
 }
 
 // Sorry, but I have to put this in the std namespace, otherwise it doesn't

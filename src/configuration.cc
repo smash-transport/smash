@@ -163,6 +163,7 @@ Configuration::Value Configuration::take(
   auto node = find_node_at(root_node_, {keys.begin(), last_key_it});
   const auto r = node[*last_key_it];
   node.remove(*last_key_it);
+  root_node_ = remove_empty_maps(root_node_);
   return {r, *last_key_it};
 }
 
@@ -228,7 +229,7 @@ bool Configuration::has_value(std::initializer_list<const char *> keys) const {
 
 std::string Configuration::unused_values_report() const {
   std::stringstream s;
-  s << remove_empty_maps(root_node_);
+  s << root_node_;
   return s.str();
 }
 

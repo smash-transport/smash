@@ -1214,14 +1214,23 @@ class Configuration {
    * By removing the value, the Configuration object keeps track which settings
    * were never read.
    *
+   * \note If taking a key leaves the parent key without a value, then this is
+   *       in turn removed and so on. From a performance point of view, it might
+   *       be argued that this is not needed to be checkend and done at every
+   *       \c take operation and it might be done once for all. However, on one
+   *       hand it is a natural behaviour to expect and on the other hand this
+   *       is hardly going to be an application bottle-neck.
+   *
    * \param[in] keys You can pass an arbitrary number of keys inside curly
-   * braces, following the nesting structure in the config file. Example:
-                 \verbatim
+   * braces, following the nesting structure in the config file.
+   * For example, given
+   \verbatim
      Group:
          Key: Value
-                 \endverbatim
-   *             Call \code string value = config.take({"Group", "Key"});
-   *             \endcode to read the value.
+   \endverbatim
+   * call \code string value = config.take({"Group", "Key"}); \endcode
+   * to read the value. This will make the key \c "Group" also be removed from
+   * the configuration, since it remains without any value.
    *
    * \return A proxy object that converts to the correct type automatically on
    *         assignment.
