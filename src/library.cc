@@ -37,7 +37,8 @@ Configuration setup_config_and_logging(
   // Set up logging
   set_default_loglevel(
       configuration.take({"Logging", "default"}, einhard::ALL));
-  create_all_loggers(configuration["Logging"]);
+  create_all_loggers(configuration.extract_sub_configuration(
+      {"Logging"}, Configuration::GetEmpty::Yes));
 
   logg[LMain].trace(SMASH_SOURCE_LOCATION, " load ParticleType and DecayModes");
 

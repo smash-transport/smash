@@ -93,7 +93,7 @@ TEST(nucleus_potential_profile) {
   conf.set_value({"Modi", "Collider", "Target", "Automatic"}, "True");
 
   ExperimentParameters param = smash::Test::default_parameters();
-  ColliderModus c(conf["Modi"], param);
+  ColliderModus c(conf.extract_sub_configuration({"Modi"}), param);
   std::vector<Particles> P(1);
   c.initial_conditions(&(P[0]), param);
   ParticleList plist;
@@ -102,7 +102,8 @@ TEST(nucleus_potential_profile) {
   conf.set_value({"Potentials", "Skyrme", "Skyrme_A"}, -209.2);
   conf.set_value({"Potentials", "Skyrme", "Skyrme_B"}, 156.4);
   conf.set_value({"Potentials", "Skyrme", "Skyrme_Tau"}, 1.35);
-  Potentials pot = Potentials(conf["Potentials"], param);
+  Potentials pot =
+      Potentials(conf.extract_sub_configuration({"Potentials"}), param);
 
   // Write potential XY map in a vtk output
   ThreeVector r;
@@ -304,8 +305,8 @@ TEST(ensembles_vs_testparticles) {
   param1.n_ensembles = 1;
   param2.testparticles = 1;
   param2.n_ensembles = Ntest;
-  Potentials pot1(conf1["Potentials"], param1),
-      pot2(conf2["Potentials"], param2);
+  Potentials pot1(conf1.extract_sub_configuration({"Potentials"}), param1),
+      pot2(conf2.extract_sub_configuration({"Potentials"}), param2);
 
   const ThreeVector r = ThreeVector(0., 0., 0.);
   const auto forces1 = pot1.all_forces(r, plist),
@@ -391,7 +392,7 @@ TEST(vdf_chain_rule_derivatives_vs_vdf_direct_derivatives) {
       "      Coeffs: [-209.2, 156.5]\n";
   Configuration conf = Test::configuration(conf_pot);
   ExperimentParameters param = default_parameters_vdf(Ntest);
-  Potentials pot(conf["Potentials"], param);
+  Potentials pot(conf.extract_sub_configuration({"Potentials"}), param);
 
   // the side length of the cubic space
   const double length = 10.0;
@@ -609,7 +610,8 @@ TEST(skyrme_vs_vdf_wo_lattice) {
   Configuration conf1 = Test::configuration(conf_pot1),
                 conf2 = Test::configuration(conf_pot2);
   ExperimentParameters param = default_parameters_vdf(Ntest);
-  Potentials pot1(conf1["Potentials"], param), pot2(conf2["Potentials"], param);
+  Potentials pot1(conf1.extract_sub_configuration({"Potentials"}), param),
+      pot2(conf2.extract_sub_configuration({"Potentials"}), param);
 
   // the side length of the cubic space
   const double length = 10.0;
@@ -869,7 +871,7 @@ TEST(spinodal_dilute) {
   Configuration conf = Test::configuration(conf_pot);
   ExperimentParameters param = default_parameters_vdf(Ntest, 0.1, 2.0);
 
-  Potentials pot(conf["Potentials"], param);
+  Potentials pot(conf.extract_sub_configuration({"Potentials"}), param);
   const std::array<double, 3> l = {10, 10, 10};
   const std::array<int, 3> n = {10, 10, 10};
   const std::array<double, 3> origin = {0, 0, 0};

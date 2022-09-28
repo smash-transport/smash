@@ -35,7 +35,7 @@ static BoxModus create_box_for_tests(const ExperimentParameters& par) {
   conf.set_value({"Modi", "Box", "Temperature"}, T_init);
   conf.set_value({"Modi", "Box", "Initial_Condition"}, "thermal momenta");
   conf.set_value({"Modi", "Box", "Start_Time"}, 0.0);
-  return BoxModus(conf["Modi"], par);
+  return BoxModus(conf.extract_sub_configuration({"Modi"}), par);
 }
 
 TEST(rest_frame_transformation) {

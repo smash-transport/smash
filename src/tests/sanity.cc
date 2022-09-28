@@ -97,7 +97,7 @@ TEST(sanity_box) {
   conf.set_value({"Modi", "Box", "Init_Multiplicities", "-211"}, 100);
   ExperimentParameters param = smash::Test::default_parameters();
   param.box_length = 5.0;
-  BoxModus b(conf["Modi"], param);
+  BoxModus b(conf.extract_sub_configuration({"Modi"}), param);
   Particles P;
   create_particle_list(P);
   COMPARE(b.impose_boundary_conditions(&P), 4);
@@ -115,7 +115,7 @@ TEST(sanity_collider) {
   conf.set_value({"Modi", "Collider", "Target", "Particles", "661"}, 1);
   conf.set_value({"Modi", "Collider", "E_Kin"}, 1.0);
   ExperimentParameters param = smash::Test::default_parameters();
-  ColliderModus n(conf["Modi"], param);
+  ColliderModus n(conf.extract_sub_configuration({"Modi"}), param);
   Particles P;
   create_particle_list(P);
   COMPARE(n.impose_boundary_conditions(&P), 0);
@@ -128,7 +128,7 @@ TEST(sanity_sphere) {
   conf.set_value({"Modi", "Sphere", "Start_Time"}, 0.0);
   conf.set_value({"Modi", "Sphere", "Init_Multiplicities", "661"}, 500);
   ExperimentParameters param = smash::Test::default_parameters();
-  SphereModus s(conf["Modi"], param);
+  SphereModus s(conf.extract_sub_configuration({"Modi"}), param);
   Particles P;
   create_particle_list(P);
   COMPARE(s.impose_boundary_conditions(&P), 0);

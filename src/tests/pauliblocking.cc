@@ -42,7 +42,8 @@ TEST(phase_space_density) {
 
   ExperimentParameters param = smash::Test::default_parameters();
   std::unique_ptr<PauliBlocker> pb = std::make_unique<PauliBlocker>(
-      conf["Collision_Term"]["Pauli_Blocking"], param);
+      conf.extract_sub_configuration({"Collision_Term", "Pauli_Blocking"}),
+      param);
   std::vector<Particles> part(1);
   PdgCode pdg = 0x2112;
   ParticleData one_particle{ParticleType::find(pdg)};
@@ -107,7 +108,8 @@ TEST(phase_space_density_nucleus) {
 
   ExperimentParameters param = smash::Test::default_parameters(Ntest);
   std::unique_ptr<PauliBlocker> pb = std::make_unique<PauliBlocker>(
-      conf["Collision_Term"]["Pauli_Blocking"], param);
+      conf.extract_sub_configuration({"Collision_Term", "Pauli_Blocking"}),
+      param);
 
   ThreeVector r(0.0, 0.0, 0.0);
   ThreeVector p;

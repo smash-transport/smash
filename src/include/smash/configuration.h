@@ -1286,25 +1286,6 @@ class Configuration {
       const std::string &key, std::initializer_list<const char *> section = {});
 
   /**
-   * Access to the YAML::Node behind the requested \p keys.
-   *
-   * If you want to read a value use the \ref read function above. Use the
-   * subscript operator if you want to assign a new value. The YAML::Node class
-   * will automatically convert the data you assign to a string representation
-   * suitable for the YAML file.
-   *
-   * \param[in] key The name of the key to be looked up
-   * \return An opaque object that can be assigned to.
-   *
-   * \see take
-   * \see read
-   */
-  template <typename T>
-  Configuration operator[](T &&key) {
-    return root_node_[std::forward<T>(key)];
-  }
-
-  /**
    * Create a new configuration from a then-removed section of the present
    * object. This method is meant to be used to deal with sections only, i.e.
    * it will throw if used to extract a key value that is not a section (namely

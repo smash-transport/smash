@@ -84,26 +84,26 @@ struct OutputParameters {
     logg[LExperiment].trace(SMASH_SOURCE_LOCATION);
 
     if (conf.has_value({"Thermodynamics"})) {
-      auto subcon = conf["Thermodynamics"];
-      if (subcon.has_value({"Position"})) {
-        const std::array<double, 3> a = subcon.take({"Position"});
+      auto thermo_conf = conf.extract_sub_configuration({"Thermodynamics"});
+      if (thermo_conf.has_value({"Position"})) {
+        const std::array<double, 3> a = thermo_conf.take({"Position"});
         td_position = ThreeVector(a[0], a[1], a[2]);
       }
-      std::set<ThermodynamicQuantity> quan = subcon.take({"Quantities"});
+      std::set<ThermodynamicQuantity> quan = thermo_conf.take({"Quantities"});
       td_rho_eckart = (quan.count(ThermodynamicQuantity::EckartDensity) > 0);
       td_tmn = (quan.count(ThermodynamicQuantity::Tmn) > 0);
       td_tmn_landau = (quan.count(ThermodynamicQuantity::TmnLandau) > 0);
       td_v_landau = (quan.count(ThermodynamicQuantity::LandauVelocity) > 0);
       td_jQBS = (quan.count(ThermodynamicQuantity::j_QBS) > 0);
-      td_dens_type = subcon.take({"Type"}, DensityType::Baryon);
+      td_dens_type = thermo_conf.take({"Type"}, DensityType::Baryon);
       if (td_dens_type == DensityType::None &&
           (td_rho_eckart || td_tmn || td_tmn_landau || td_v_landau)) {
         logg[LExperiment].warn(
             "Requested Thermodynamics output with Density type None. ",
             "Change the density type to avoid output being dropped.");
       }
-      td_smearing = subcon.take({"Smearing"}, true);
-      td_only_participants = subcon.take({"Only_Participants"}, false);
+      td_smearing = thermo_conf.take({"Smearing"}, true);
+      td_only_participants = thermo_conf.take({"Only_Participants"}, false);
     }
 
     if (conf.has_value({"Particles"})) {
@@ -130,8 +130,9 @@ struct OutputParameters {
     }
 
     if (conf.has_value({"Rivet"})) {
+      auto rivet_conf = conf.extract_sub_configuration({"Rivet"});
       logg[LOutput].debug() << "Reading Rivet section from configuration:\n"
-                            << conf["Rivet"].to_string() << "\n";
+                            << rivet_conf.to_string() << "\n";
       /*
        * std::optional<T> can be assigned from a value using the
        *   template<class U = T> optional& operator=( U&& value );
@@ -143,64 +144,63 @@ struct OutputParameters {
        * would work (although not that mentioned above), but for simplicity
        * we always use make_optional.
        */
-      if (conf.has_value({"Rivet", "Logging"})) {
+      if (rivet_conf.has_value({"Logging"})) {
         rivet_parameters.logs =
             std::make_optional<std::map<std::string, std::string>>(
-                conf.take({"Rivet", "Logging"}));
+                rivet_conf.take({"Logging"}));
       }
-      if (conf.has_value({"Rivet", "Paths"})) {
+      if (rivet_conf.has_value({"Paths"})) {
         rivet_parameters.paths = std::make_optional<std::vector<std::string>>(
-            conf.take({"Rivet", "Paths"}));
+            rivet_conf.take({"Paths"}));
       }
-      if (conf.has_value({"Rivet", "Preloads"})) {
+      if (rivet_conf.has_value({"Preloads"})) {
         rivet_parameters.preloads =
             std::make_optional<std::vector<std::string>>(
-                conf.take({"Rivet", "Preloads"}));
+                rivet_conf.take({"Preloads"}));
       }
-      if (conf.has_value({"Rivet", "Analyses"})) {
+      if (rivet_conf.has_value({"Analyses"})) {
         rivet_parameters.analyses =
             std::make_optional<std::vector<std::string>>(
-                conf.take({"Rivet", "Analyses"}));
+                rivet_conf.take({"Analyses"}));
       }
-      if (conf.has_value({"Rivet", "Cross_Section"})) {
+      if (rivet_conf.has_value({"Cross_Section"})) {
         rivet_parameters.cross_sections =
             std::make_optional<std::array<double, 2>>(
-                conf.take({"Rivet", "Cross_Section"}));
+                rivet_conf.take({"Cross_Section"}));
       }
-      rivet_parameters.ignore_beams =
-          conf.take({"Rivet", "Ignore_Beams"}, true);
-      if (conf.has_value({"Weights"})) {
+      rivet_parameters.ignore_beams = rivet_conf.take({"Ignore_Beams"}, true);
+      if (rivet_conf.has_value({"Weights"})) {
         rivet_parameters.any_weight_parameter_was_given = true;
-        if (conf.has_value({"Rivet", "Weights", "Select"})) {
+        if (rivet_conf.has_value({"Weights", "Select"})) {
           rivet_parameters.to_be_enabled_weights =
               std::make_optional<std::vector<std::string>>(
-                  conf.take({"Rivet", "Weights", "Select"}));
+                  rivet_conf.take({"Weights", "Select"}));
         }
-        if (conf.has_value({"Rivet", "Weights", "Deselect"})) {
+        if (rivet_conf.has_value({"Weights", "Deselect"})) {
           rivet_parameters.to_be_disabled_weights =
               std::make_optional<std::vector<std::string>>(
-                  conf.take({"Rivet", "Weights", "Deselect"}));
+                  rivet_conf.take({"Weights", "Deselect"}));
         }
-        if (conf.has_value({"Rivet", "Weights", "Nominal"})) {
+        if (rivet_conf.has_value({"Weights", "Nominal"})) {
           rivet_parameters.nominal_weight_name =
               std::make_optional<std::string>(
-                  conf.take({"Rivet", "Weights", "Nominal"}));
+                  rivet_conf.take({"Weights", "Nominal"}));
         }
-        if (conf.has_value({"Rivet", "Weights", "Cap"})) {
-          rivet_parameters.cap_on_weights = std::make_optional<double>(
-              conf.take({"Rivet", "Weights", "Cap"}));
+        if (rivet_conf.has_value({"Weights", "Cap"})) {
+          rivet_parameters.cap_on_weights =
+              std::make_optional<double>(rivet_conf.take({"Weights", "Cap"}));
         }
-        if (conf.has_value({"Rivet", "Weights", "NLO_Smearing"})) {
+        if (rivet_conf.has_value({"Weights", "NLO_Smearing"})) {
           rivet_parameters.nlo_smearing = std::make_optional<double>(
-              conf.take({"Rivet", "Weights", "NLO_Smearing"}));
+              rivet_conf.take({"Weights", "NLO_Smearing"}));
         }
-        if (conf.has_value({"Rivet", "Weights", "No_Multi"})) {
+        if (rivet_conf.has_value({"Weights", "No_Multi"})) {
           rivet_parameters.no_multi_weight = std::make_optional<bool>(
-              conf.take({"Rivet", "Weights", "No_Multi"}));
+              rivet_conf.take({"Weights", "No_Multi"}));
         }
       }
       logg[LOutput].debug() << "After processing configuration:\n"
-                            << conf["Rivet"].to_string() << "\n";
+                            << rivet_conf.to_string() << "\n";
     }
   }
 
