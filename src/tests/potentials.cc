@@ -163,9 +163,9 @@ TEST(propagation_in_test_potential) {
   // Create a dummy potential
   class Dummy_Pot : public Potentials {
    public:
-    Dummy_Pot(Configuration conf, const ExperimentParameters& param,
-              const double U0, const double d, const double B0)
-        : Potentials(std::move(conf), param), U0_(U0), d_(d), B0_(B0) {}
+    Dummy_Pot(const ExperimentParameters& param, const double U0,
+              const double d, const double B0)
+        : Potentials(Configuration(""), param), U0_(U0), d_(d), B0_(B0) {}
 
     std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector> all_forces(
         const ThreeVector& r, const ParticleList&) const override {
@@ -185,7 +185,6 @@ TEST(propagation_in_test_potential) {
   // Create spheremodus with arbitrary parameters
   // Do not initialize particles: just artificially put one particle to list
   const double p_mass = 0.938;
-  Configuration conf = Test::configuration();
   ExperimentParameters param = smash::Test::default_parameters();
 
   /* Create two dummy test potentials: one has only the electrical
@@ -194,9 +193,9 @@ TEST(propagation_in_test_potential) {
   const double d = 4.0;
   const double B0 = 0.5;
   std::unique_ptr<Dummy_Pot> pot1 =
-      std::make_unique<Dummy_Pot>(conf["Potentials"], param, U0, d, 0.);
+      std::make_unique<Dummy_Pot>(param, U0, d, 0.);
   std::unique_ptr<Dummy_Pot> pot2 =
-      std::make_unique<Dummy_Pot>(conf["Potentials"], param, 0., d, B0);
+      std::make_unique<Dummy_Pot>(param, 0., d, B0);
 
   /* Create two particles: one flies in the pure electrical field, while
    * the other flies in the pure magnetical field. */
