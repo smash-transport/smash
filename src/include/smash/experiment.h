@@ -2426,6 +2426,25 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     /////////////////////////////////////////////////////////////////////////////
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  // Protoype removing hadrons (Comment in for testing) ////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  // Pick 2 random particles of 0th ensemble
+  // const double demo_act_time = parameters_.labclock->current_time();
+  //
+  // ParticleList current_particles = ensembles_[0].copy_to_vector();
+  // // Not very efficent to use a copy here, but this is anyway a prototype that
+  // // will eventually get the particles to be removed directly
+  //
+  // const int random_idx = random::uniform_int(0, static_cast<int>(current_particles.size())-2); // -2 because we choose also the next idx to be removed below
+  //
+  // ParticleList rm_list {current_particles[random_idx], current_particles[random_idx+1]};  std::cout << "Particle to be removed: "<< rm_list << '\n';
+  // ParticleList empyt_out_list {};
+  //
+  // auto demo_act = make_unique<FreeforallAction>(rm_list, empyt_out_list, demo_act_time);
+  // perform_action(*demo_act, 0);
+  //////////////////////////////////////////////////////////////////////////////
+
   while (parameters_.labclock->current_time() < t_end) {
     const double t = parameters_.labclock->current_time();
     const double dt =
