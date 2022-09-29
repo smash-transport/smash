@@ -305,7 +305,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
  */
 
 ScatterActionsFinder::ScatterActionsFinder(
-    Configuration &config, const ExperimentParameters& parameters)
+    Configuration& config, const ExperimentParameters& parameters)
     : coll_crit_(parameters.coll_crit),
       elastic_parameter_(
           config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.)),

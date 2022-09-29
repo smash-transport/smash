@@ -109,9 +109,9 @@ class ExperimentBase {
    * This function creates a new Experiment object. The Modus template
    * argument is determined by the \p config argument.
    *
-   * \param[in] config The configuration object that sets all initial conditions
-   *            of the experiment.
-   * \param[in] output_path The directory where the output files are written.
+   * \param[inout] config The configuration object that sets all initial
+   * conditions of the experiment. \param[in] output_path The directory where
+   * the output files are written.
    *
    * \return An owning pointer to the Experiment object, using the
    *         ExperimentBase interface.
@@ -201,12 +201,12 @@ class Experiment : public ExperimentBase {
    * This constructor is only called from the ExperimentBase::create factory
    * method.
    *
-   * \param[inout] config  The Configuration object contains all initial setup of
-   * the experiment. It is forwarded to the constructors of member variables as
-   * needed. Note that the object is passed by non-const reference. This is only
-   * necessary for bookkeeping: Values are not only read, but actually taken out
-   * of the object. Thus, all values that remain were not used. \param[in]
-   * output_path The directory where the output files are written.
+   * \param[inout] config The Configuration object contains all initial setup
+   * of the experiment. It is forwarded to the constructors of member variables
+   * as needed. Note that the object is passed by non-const reference. This is
+   * only necessary for bookkeeping: Values are not only read, but actually
+   * taken out of the object. Thus, all values that remain were not used.
+   * \param[in] output_path The directory where the output files are written.
    */
   explicit Experiment(Configuration &config,
                       const std::filesystem::path &output_path);
@@ -847,7 +847,7 @@ void Experiment<Modus>::create_output(const std::string &format,
 /**
  * Gathers all general Experiment parameters.
  *
- * \param[in, out] config Configuration element
+ * \param[inout] config Configuration element
  * \return The ExperimentParameters struct filled with values from the
  *         Configuration
  */

@@ -302,8 +302,8 @@ void ensure_path_is_valid(const std::filesystem::path &path) {
 /**
  * Prepares ActionsFinder for cross-section and reaction dumps.
  *
- * \param[in] configuration Necessary parameters to switch reactions on/off
- * \return The constructed Scatteractionsfinder.
+ * \param[inout] configuration Necessary parameters to switch reactions on/off
+ * \return The constructed \c ScatterActionsFinder .
  */
 ScatterActionsFinder actions_finder_for_dump(Configuration &configuration) {
   ExperimentParameters params = create_experiment_parameters(configuration);
