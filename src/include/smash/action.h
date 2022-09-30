@@ -187,10 +187,12 @@ class Action {
    * \param[in] id_process unique id of the performed process
    * \param[out] particles particle list that is updated
    *
+   * \return the amount of energy violated in Pythia processes (if any)
+   *
    * Note that you are required to increase id_process before the next call,
    * such that you get unique numbers.
    */
-  virtual void perform(Particles *particles, uint32_t id_process);
+  virtual double perform(Particles *particles, uint32_t id_process);
 
   /**
    * Check whether the action still applies.
@@ -255,8 +257,11 @@ class Action {
    * Check various conservation laws.
    *
    * \param[in] id_process process id only used for debugging output
+   *
+   * \return the amount of energy conservation violated by Pythia processes (if
+   * any)
    */
-  virtual void check_conservation(const uint32_t id_process) const;
+  virtual double check_conservation(const uint32_t id_process) const;
 
   /**
    * Determine the total energy in the center-of-mass frame [GeV]

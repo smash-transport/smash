@@ -49,7 +49,14 @@ class HypersurfacecrossingAction : public Action {
    */
   void generate_final_state() override;
 
-  void check_conservation(const uint32_t id_process) const override;
+  /**
+   * Check various conservation laws.
+   *
+   * \param[in] id_process process id only used for debugging output
+   *
+   * \return 0.
+   */
+  double check_conservation(const uint32_t id_process) const override;
 };
 
 /**

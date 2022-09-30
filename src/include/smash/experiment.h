@@ -683,6 +683,12 @@ class Experiment : public ExperimentBase {
    */
   double total_energy_removed_ = 0.0;
 
+  /**
+   * Total energy violation introduced by Pythia.
+   *
+   */
+  double total_energy_violated_by_Pythia_ = 0.0;
+
   /// This indicates whether kinematic cuts are enabled for the IC output
   bool kinematic_cuts_for_IC_output_ = false;
 
@@ -2154,6 +2160,7 @@ void Experiment<Modus>::initialize_new_event() {
   projectile_target_interact_.assign(parameters_.n_ensembles, false);
   total_hypersurface_crossing_actions_ = 0;
   total_energy_removed_ = 0.0;
+  total_energy_violated_by_Pythia_ = 0.0;
   // Print output headers
   logg[LExperiment].info() << hline;
   logg[LExperiment].info() << "Time[fm]   Ekin[GeV]   E_MF[GeV]  ETotal[GeV]  "
@@ -2296,7 +2303,9 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   /* Make sure to pick a non-zero integer, because 0 is reserved for "no
    * interaction yet". */
   const auto id_process = static_cast<uint32_t>(interactions_total_ + 1);
-  action.perform(&particles, id_process);
+  // we perform the action and collect possible energy violations by Pythia
+  total_energy_violated_by_Pythia_ += action.perform(&particles, id_process);
+
   interactions_total_++;
   if (action.get_type() == ProcessType::Wall) {
     wall_actions_total_++;
@@ -2958,14 +2967,16 @@ void Experiment<Modus>::final_output() {
     if (IC_output_switch_ && (total_particles == 0)) {
       // Verify there is no more energy in the system if all particles were
       // removed when crossing the hypersurface
-      if (std::fabs(conserved_initial_.momentum().x0() / total_energy_removed_ -
-                    1.) > really_small) {
+      if ((std::fabs(conserved_initial_.momentum().x0() +
+                     total_energy_violated_by_Pythia_) /
+           (total_energy_removed_)-1.) > really_small) {
         throw std::runtime_error(
             "There is remaining energy in the system although all particles "
             "were removed.\n"
             "E_remain = " +
-            std::to_string(
-                (conserved_initial_.momentum().x0() - total_energy_removed_)) +
+            std::to_string((conserved_initial_.momentum().x0() +
+                            total_energy_violated_by_Pythia_ -
+                            total_energy_removed_)) +
             " [GeV]");
       } else {
         logg[LExperiment].info() << hline;
