@@ -55,6 +55,10 @@ class HypersurfacecrossingAction : public Action {
    * \param[in] id_process process id only used for debugging output
    *
    * \return 0.
+   *
+   * This function overrides Action::check_conservation that returns
+   * the amount of energy density violation due to Pythia processes,
+   * which is 0. here.
    */
   double check_conservation(const uint32_t id_process) const override;
 };

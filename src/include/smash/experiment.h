@@ -679,13 +679,11 @@ class Experiment : public ExperimentBase {
 
   /**
    * Total energy removed from the system in hypersurface crossing actions.
-   *
    */
   double total_energy_removed_ = 0.0;
 
   /**
    * Total energy violation introduced by Pythia.
-   *
    */
   double total_energy_violated_by_Pythia_ = 0.0;
 
@@ -2965,17 +2963,19 @@ void Experiment<Modus>::final_output() {
       total_particles += particles.size();
     }
     if (IC_output_switch_ && (total_particles == 0)) {
+      const double initial_system_energy_plus_Pythia_violations =
+          conserved_initial_.momentum().x0() + total_energy_violated_by_Pythia_;
+      const double fraction_of_total_system_energy_removed =
+          initial_system_energy_plus_Pythia_violations / total_energy_removed_;
       // Verify there is no more energy in the system if all particles were
       // removed when crossing the hypersurface
-      if ((std::fabs(conserved_initial_.momentum().x0() +
-                     total_energy_violated_by_Pythia_) /
-           (total_energy_removed_)-1.) > really_small) {
+      if (std::fabs(fraction_of_total_system_energy_removed - 1.) >
+          really_small) {
         throw std::runtime_error(
             "There is remaining energy in the system although all particles "
             "were removed.\n"
             "E_remain = " +
-            std::to_string((conserved_initial_.momentum().x0() +
-                            total_energy_violated_by_Pythia_ -
+            std::to_string((initial_system_energy_plus_Pythia_violations -
                             total_energy_removed_)) +
             " [GeV]");
       } else {
