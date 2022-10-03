@@ -27,7 +27,7 @@ void HypersurfacecrossingAction::generate_final_state() {
   outgoing_particles_ = empty_list;
 }
 
-void HypersurfacecrossingAction::check_conservation(
+double HypersurfacecrossingAction::check_conservation(
     const uint32_t id_process) const {
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);
@@ -45,6 +45,7 @@ void HypersurfacecrossingAction::check_conservation(
         "Particle was not removed successfully in "
         "hypersurface crossing action.");
   }
+  return 0.;
 }
 
 ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(

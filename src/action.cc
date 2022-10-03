@@ -125,9 +125,9 @@ std::pair<FourVector, FourVector> Action::get_potential_at_interaction_point()
   return std::make_pair(UB, UI3);
 }
 
-void Action::perform(Particles *particles, uint32_t id_process) {
+double Action::perform(Particles *particles, uint32_t id_process) {
   assert(id_process != 0);
-
+  double energy_violation = 0.;
   for (ParticleData &p : outgoing_particles_) {
     // store the history info
     if (process_type_ != ProcessType::Wall) {
@@ -149,8 +149,9 @@ void Action::perform(Particles *particles, uint32_t id_process) {
    * energy of the outgoing particles by the mean field potentials are not
    * taken into account. */
   if (UB_lat_pointer == nullptr && UI3_lat_pointer == nullptr) {
-    check_conservation(id_process);
+    energy_violation = check_conservation(id_process);
   }
+  return energy_violation;
 }
 
 FourVector Action::total_momentum_of_outgoing_particles() const {
@@ -467,9 +468,10 @@ void Action::sample_manybody_phasespace() {
   }
 }
 
-void Action::check_conservation(const uint32_t id_process) const {
+double Action::check_conservation(const uint32_t id_process) const {
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);
+  double energy_violation = 0.;
   if (before != after) {
     std::stringstream particle_names;
     for (const auto &p : incoming_particles_) {
@@ -487,7 +489,8 @@ void Action::check_conservation(const uint32_t id_process) const {
         (process_type_ == ProcessType::StringHard)) {
       logg[LAction].warn() << "Conservation law violations due to Pyhtia\n"
                            << particle_names.str() << err_msg;
-      return;
+      energy_violation = after.momentum()[0] - before.momentum()[0];
+      return energy_violation;
     }
     /* We allow decay of particles stable under the strong interaction to decay
      * at the end, so just warn about such a "weak" process violating
@@ -498,7 +501,7 @@ void Action::check_conservation(const uint32_t id_process) const {
           << "Conservation law violations of strong interaction in weak or "
              "e.m. decay\n"
           << particle_names.str() << err_msg;
-      return;
+      return energy_violation;
     }
     logg[LAction].error() << "Conservation law violations detected\n"
                           << particle_names.str() << err_msg;
@@ -509,6 +512,7 @@ void Action::check_conservation(const uint32_t id_process) const {
                                std::to_string(id_process));
     }
   }
+  return energy_violation;
 }
 
 std::ostream &operator<<(std::ostream &out, const ActionList &actions) {
