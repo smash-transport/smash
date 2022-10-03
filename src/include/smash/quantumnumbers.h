@@ -218,14 +218,13 @@ class QuantumNumbers {
     // difference in the four-momentum
     FourVector momentum_diff = momentum_ - rhs.momentum_;
     /* Check whether momentum is conserved.
-     * Even if the absolute difference in each component is larger than
-     * small_number, momentum is still considered to be conserved when
-     * the deviation is small enough compared to the given invariant mass. */
-    bool momentum_conserved = momentum_ == rhs.momentum_ ||
-        (std::fabs(momentum_diff.x0()) < precision_high * avg_m_inv &&
-         std::fabs(momentum_diff.x1()) < precision_high * avg_m_inv &&
-         std::fabs(momentum_diff.x2()) < precision_high * avg_m_inv &&
-         std::fabs(momentum_diff.x3()) < precision_high * avg_m_inv);
+     * The momentum is considered to be conserved when the deviation
+     * is small enough compared to the given invariant mass. */
+    bool momentum_conserved =
+        (std::fabs(momentum_diff.x0()) <= precision_high * avg_m_inv &&
+         std::fabs(momentum_diff.x1()) <= precision_high * avg_m_inv &&
+         std::fabs(momentum_diff.x2()) <= precision_high * avg_m_inv &&
+         std::fabs(momentum_diff.x3()) <= precision_high * avg_m_inv);
     return (momentum_conserved &&
             charge_ == rhs.charge_ &&
             isospin3_ == rhs.isospin3_ &&
