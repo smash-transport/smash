@@ -1320,10 +1320,7 @@ class Configuration {
    */
   template <typename T>
   void set_value(std::initializer_list<const char *> keys, T &&value) {
-    assert(keys.size() > 0);
-    auto node = root_node_;
-    for (auto key : keys)
-      node.reset(node[key]);  // see comment in take on Node::reset
+    auto node = find_node_at(root_node_, keys);
     node = std::forward<T>(value);
   }
 
@@ -1360,7 +1357,20 @@ class Configuration {
    */
   Configuration(const YAML::Node &node)  // NOLINT(runtime/explicit) : see above
       : root_node_(YAML::Clone(node)) {}
-  // : root_node_(node) {}
+
+  /**
+   * Descend in the YAML tree from the given node using the provided keys.
+   *
+   * Finds a node, copies its structure and replaces the previous keys by
+   * the newly provided keys.
+   *
+   * \param[in] node YAML::Node to start the search from.
+   * \param[in] keys Keys that will be used to descend the YAML tree.
+   *
+   * \return Node in the tree reached by using the provided keys.
+   */
+  YAML::Node find_node_at(YAML::Node node,
+                          std::vector<const char *> keys) const;
 
   /// the general_config.yaml contents - fully parsed
   YAML::Node root_node_;

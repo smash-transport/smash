@@ -24,29 +24,6 @@ namespace smash {
 // internal helper functions
 namespace {
 /**
- * Descend in the YAML tree from the given node using the provided keys.
- *
- * Finds a node, copies its structure and replaces the previous keys by
- * the newly provided keys.
- *
- * \param[in] node YAML::Node to start the search from.
- * \param[in] keys Keys that will be used to descend the YAML tree.
- *
- * \return Node in the tree reached by using the provided keys.
- */
-YAML::Node find_node_at(YAML::Node node, std::vector<const char *> keys) {
-  assert(keys.size() > 0);
-  for (auto key : keys) {
-    // Node::reset does what you might expect Node::operator= to do. But
-    // operator= assigns a value to the node. So
-    //   node = node[*keyIt]
-    // leads to modification of the data structure, not simple traversal.
-    node.reset(node[key]);
-  }
-  return node;
-}
-
-/**
  * Removes all empty maps of a YAML::Node.
  *
  * \param[in] root YAML::Node that contains empty maps.
@@ -237,6 +214,19 @@ std::string Configuration::to_string() const {
   std::stringstream s;
   s << root_node_;
   return s.str();
+}
+
+YAML::Node Configuration::find_node_at(YAML::Node node,
+                                       std::vector<const char *> keys) const {
+  assert(keys.size() > 0);
+  for (auto key : keys) {
+    // Node::reset does what you might expect Node::operator= to do. But
+    // operator= assigns a value to the node. So
+    //   node = node[*keyIt]
+    // leads to modification of the data structure, not simple traversal.
+    node.reset(node[key]);
+  }
+  return node;
 }
 
 }  // namespace smash
