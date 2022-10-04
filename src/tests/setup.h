@@ -156,7 +156,7 @@ inline ParticleData smashon_random(int id = -1) {
 }
 
 /**
- * Return a configuration object filled with data from src/config.yaml. Note
+ * Return a configuration object filled with data from input/config.yaml. Note
  * that a change to that file may affect test results if you use it.
  *
  * If you want specific values in the config for testing simply overwrite the
@@ -184,7 +184,7 @@ inline Configuration configuration(std::string overrides = {}) {
  * it will use the result from configuration above.
  */
 inline std::unique_ptr<ExperimentBase> experiment(
-    const Configuration &c = configuration()) {
+    Configuration &&c = configuration()) {
   return ExperimentBase::create(c, ".");
 }
 
@@ -193,7 +193,8 @@ inline std::unique_ptr<ExperimentBase> experiment(
  * configOverrides.
  */
 inline std::unique_ptr<ExperimentBase> experiment(const char *configOverrides) {
-  return ExperimentBase::create(configuration(configOverrides), ".");
+  Configuration c = configuration(configOverrides);
+  return ExperimentBase::create(c, ".");
 }
 
 /**

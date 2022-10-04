@@ -32,18 +32,18 @@ class ScatterActionsFinder : public ActionFinderInterface {
   /**
    * Constructor of the finder with the given parameters.
    *
-   * \param[in] config Configuration of smash from which we take:
-   *            1) A global elastic cross section [mb]. It will be used
-   *               regardless of the species of the colliding particles.
-   *               It won't be used if the value is negative.
-   *            2) An option determining whether all the scatterings are
-   *               isotropic
-   *            3) Parameters of the string process
+   * \param[inout] config Configuration of smash from which we take:
+   *               1) A global elastic cross section [mb]. It will be used
+   *                  regardless of the species of the colliding particles.
+   *                  It won't be used if the value is negative.
+   *               2) An option determining whether all the scatterings are
+   *                  isotropic
+   *               3) Parameters of the string process
    * \param[in] parameters Struct of parameters determining whether to
    *            exclude some certain types of scatterings and switching
    *            among the methods to treat with the NNbar collisions.
    */
-  ScatterActionsFinder(Configuration config,
+  ScatterActionsFinder(Configuration &config,
                        const ExperimentParameters &parameters);
 
   /**

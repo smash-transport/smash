@@ -109,9 +109,9 @@ class ExperimentBase {
    * This function creates a new Experiment object. The Modus template
    * argument is determined by the \p config argument.
    *
-   * \param[in] config The configuration object that sets all initial conditions
-   *            of the experiment.
-   * \param[in] output_path The directory where the output files are written.
+   * \param[inout] config The configuration object that sets all initial
+   * conditions of the experiment. \param[in] output_path The directory where
+   * the output files are written.
    *
    * \return An owning pointer to the Experiment object, using the
    *         ExperimentBase interface.
@@ -124,7 +124,7 @@ class ExperimentBase {
    * configuration itself is documented in \subpage input_general_
    */
   static std::unique_ptr<ExperimentBase> create(
-      Configuration config, const std::filesystem::path &output_path);
+      Configuration &config, const std::filesystem::path &output_path);
 
   /**
    * Runs the experiment.
@@ -201,14 +201,14 @@ class Experiment : public ExperimentBase {
    * This constructor is only called from the ExperimentBase::create factory
    * method.
    *
-   * \param[in] config  The Configuration object contains all initial setup of
-   * the experiment. It is forwarded to the constructors of member variables as
-   * needed. Note that the object is passed by non-const reference. This is only
-   * necessary for bookkeeping: Values are not only read, but actually taken out
-   * of the object. Thus, all values that remain were not used. \param[in]
-   * output_path The directory where the output files are written.
+   * \param[inout] config The Configuration object contains all initial setup
+   * of the experiment. It is forwarded to the constructors of member variables
+   * as needed. Note that the object is passed by non-const reference. This is
+   * only necessary for bookkeeping: Values are not only read, but actually
+   * taken out of the object. Thus, all values that remain were not used.
+   * \param[in] output_path The directory where the output files are written.
    */
-  explicit Experiment(Configuration config,
+  explicit Experiment(Configuration &config,
                       const std::filesystem::path &output_path);
 
   /**
@@ -851,11 +851,11 @@ void Experiment<Modus>::create_output(const std::string &format,
 /**
  * Gathers all general Experiment parameters.
  *
- * \param[in, out] config Configuration element
+ * \param[inout] config Configuration element
  * \return The ExperimentParameters struct filled with values from the
  *         Configuration
  */
-ExperimentParameters create_experiment_parameters(Configuration config);
+ExperimentParameters create_experiment_parameters(Configuration &config);
 
 /*!\Userguide
  * \page input_general_
@@ -1076,7 +1076,7 @@ ExperimentParameters create_experiment_parameters(Configuration config);
   \endverbatim
  */
 template <typename Modus>
-Experiment<Modus>::Experiment(Configuration config,
+Experiment<Modus>::Experiment(Configuration &config,
                               const std::filesystem::path &output_path)
     : parameters_(create_experiment_parameters(config)),
       density_param_(DensityParameters(parameters_)),
@@ -1557,17 +1557,21 @@ Experiment<Modus>::Experiment(Configuration config,
   logg[LExperiment].debug()
       << "Density type printed to headers: " << dens_type_;
 
+  const std::vector<std::string> output_contents =
+      output_conf.list_upmost_nodes();
+  std::vector<std::vector<std::string>> list_of_formats(output_contents.size());
+  std::transform(
+      output_contents.cbegin(), output_contents.cend(), list_of_formats.begin(),
+      [&output_conf](std::string content) -> std::vector<std::string> {
+        return output_conf.take({content.c_str(), "Format"});
+      });
   const OutputParameters output_parameters(std::move(output_conf));
-
-  std::vector<std::string> output_contents = output_conf.list_upmost_nodes();
-  for (const auto &content : output_contents) {
-    auto this_output_conf = output_conf[content.c_str()];
-    const std::vector<std::string> formats = this_output_conf.take({"Format"});
-    if (output_path == "") {
-      continue;
-    }
-    for (const auto &format : formats) {
-      create_output(format, content, output_path, output_parameters);
+  if (output_path != "") {
+    for (std::size_t i = 0; i < output_contents.size(); ++i) {
+      for (const auto &format : list_of_formats[i]) {
+        create_output(format, output_contents[i], output_path,
+                      output_parameters);
+      }
     }
   }
 

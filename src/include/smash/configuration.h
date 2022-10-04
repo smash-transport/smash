@@ -1175,9 +1175,9 @@ class Configuration {
 #endif
 
   /// If you want to copy this you're doing it wrong
-  Configuration(const Configuration &) = default;
+  Configuration(const Configuration &) = delete;
   /// If you want to copy this you're doing it wrong
-  Configuration &operator=(const Configuration &) = default;
+  Configuration &operator=(const Configuration &) = delete;
 
   /// Moving is fine
   Configuration(Configuration &&) = default;

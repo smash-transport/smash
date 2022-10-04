@@ -165,7 +165,7 @@ TEST(propagation_in_test_potential) {
    public:
     Dummy_Pot(Configuration conf, const ExperimentParameters& param,
               const double U0, const double d, const double B0)
-        : Potentials(conf, param), U0_(U0), d_(d), B0_(B0) {}
+        : Potentials(std::move(conf), param), U0_(U0), d_(d), B0_(B0) {}
 
     std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector> all_forces(
         const ThreeVector& r, const ParticleList&) const override {
