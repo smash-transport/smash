@@ -253,7 +253,6 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * The OSCAR particles format follows the general block structure of the OSCAR
  * format: \ref oscar_general_. We distinguish between two versions -
  * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
- * https://karman.physics.purdue.edu/OSCAR and
  * http://phy.duke.edu/~jeb65/oscar2013. \n
  * Enabling the OSCAR output for particles in the config.yaml file
  * (see \ref input_output_options_), a so-called \c particle_lists.oscar file is
