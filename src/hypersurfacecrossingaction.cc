@@ -154,13 +154,13 @@ bool HyperSurfaceCrossActionsFinder::crosses_hypersurface(
   const bool t_greater_z_before_prop =
       (std::fabs(pdata_before_propagation.position().x0()) >
                std::fabs(pdata_before_propagation.position().x3())
-           ? 1
-           : 0);
+           ? true
+           : false);
   const bool t_greater_z_after_prop =
       (std::fabs(pdata_after_propagation.position().x0()) >
                std::fabs(pdata_after_propagation.position().x3())
-           ? 1
-           : 0);
+           ? true
+           : false);
 
   if (t_greater_z_before_prop && t_greater_z_after_prop) {
     // proper time before and after propagation
