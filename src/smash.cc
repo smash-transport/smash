@@ -314,7 +314,7 @@ ScatterActionsFinder actions_finder_for_dump(Configuration &configuration) {
  * Checks if there are unused config values.
  */
 void check_for_unused_config_values(const Configuration &configuration) {
-  const std::string report = configuration.unused_values_report();
+  const std::string report = configuration.to_string();
 
   if (report != "{}") {
     throw std::runtime_error(

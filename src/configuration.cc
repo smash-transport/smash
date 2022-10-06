@@ -24,7 +24,7 @@ namespace smash {
 // internal helper functions
 namespace {
 /**
- * Removes all empty maps of a YAML::Node.
+ * Remove all empty maps of a YAML::Node.
  *
  * \param[in] root YAML::Node that contains empty maps.
  * \return YAML::Node from above without empty maps.
@@ -64,7 +64,7 @@ YAML::Node operator|=(YAML::Node a, const YAML::Node &b) {
 }
 
 /**
- * Builds a string with a list of keys as specified in the code.
+ * Build a string with a list of keys as specified in the code.
  *
  * @param keys The list of keys.
  * @return A \c std::string with the desired result.
@@ -202,12 +202,6 @@ bool Configuration::has_value_including_empty(
 bool Configuration::has_value(std::initializer_list<const char *> keys) const {
   const auto n = find_node_at(root_node_, keys);
   return n.IsDefined() && (!n.IsNull());
-}
-
-std::string Configuration::unused_values_report() const {
-  std::stringstream s;
-  s << root_node_;
-  return s.str();
 }
 
 std::string Configuration::to_string() const {

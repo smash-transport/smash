@@ -151,7 +151,7 @@ TEST(check_unused_report) {
   conf.take({"tamer", "Altaic", "Brahmins"});
   conf.take({"tamer", "feathered"});
   {
-    std::istringstream unused(conf.unused_values_report());
+    std::istringstream unused(conf.to_string());
     std::string line;
     getline(unused, line);
     COMPARE(line, "tamer:");
@@ -179,7 +179,7 @@ TEST(check_unused_report) {
 
   conf.take({"tamer", "pipit", "bushelling"});
   {
-    std::istringstream unused(conf.unused_values_report());
+    std::istringstream unused(conf.to_string());
     std::string line;
     getline(unused, line);
     COMPARE(line, "tamer:");
@@ -192,7 +192,7 @@ TEST(check_unused_report) {
 
   conf.take({"tamer", "schmoozed", "warbler"});
   {
-    std::istringstream unused(conf.unused_values_report());
+    std::istringstream unused(conf.to_string());
     std::string line;
     getline(unused, line);
     COMPARE(line, "tamer:");
@@ -204,7 +204,7 @@ TEST(check_unused_report) {
 
   conf.take({"tamer", "schmoozed", "reedier"});
   {
-    std::istringstream unused(conf.unused_values_report());
+    std::istringstream unused(conf.to_string());
     std::string line;
     getline(unused, line);
     COMPARE(line, "tamer:");
@@ -217,7 +217,7 @@ TEST(check_unused_report) {
 
   conf.take({"tamer", "schmoozed", "neglects"});
   reference = "{}";
-  COMPARE(conf.unused_values_report(), reference);
+  COMPARE(conf.to_string(), reference);
 }
 
 TEST(test_config_read) {

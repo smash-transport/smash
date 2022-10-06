@@ -502,7 +502,7 @@ class Configuration {
     const char *const key_;
 
     /**
-     * Constructs the Value wrapper from a YAML::Node.
+     * Construct the Value wrapper from a YAML::Node.
      *
      * \note This constructor must be implicit, otherwise it's impossible to
      * return an rvalue Value object - because the copy constructor is deleted.
@@ -1122,14 +1122,14 @@ class Configuration {
   enum class GetEmpty { Yes, No };
 
   /**
-   * Reads config.yaml from the specified path.
+   * Read config.yaml from the specified path.
    *
    * \param[in] path The directory where the SMASH config files are located.
    */
   explicit Configuration(const std::filesystem::path &path);
 
   /**
-   * Reads a YAML config file from the specified path.
+   * Read a YAML config file from the specified path.
    *
    * \param[in] path The directory where the SMASH config files are located.
    * \param[in] filename The filename (without path) of the YAML config file, in
@@ -1272,7 +1272,7 @@ class Configuration {
   }
 
   /**
-   * Removes all entries in the given section except for \p key.
+   * Remove all entries in the given section except for \p key.
    *
    * \param[in] key The key of the map entry to keep.
    * \param[in] section You can pass an arbitrary number of keys inside curly
@@ -1325,31 +1325,24 @@ class Configuration {
   }
 
   /**
-   * Returns if there is a (maybe empty) value behind the requested \p keys.
+   * Return whether there is a (maybe empty) value behind the requested \p keys.
    * \param[in] keys List of keys to be checked for
    */
   bool has_value_including_empty(
       std::initializer_list<const char *> keys) const;
   /**
-   * Returns whether there is a non-empty value behind the requested \p keys.
+   * Return whether there is a non-empty value behind the requested \p keys.
    * \param[in] keys List of keys to be checked for
    */
   bool has_value(std::initializer_list<const char *> keys) const;
 
   /**
-   * Returns a string listing the key/value pairs that have not been taken yet.
-   */
-  std::string unused_values_report() const;
-
-  /**
-   * Returns a YAML string of the current tree.
-   *
-   * This differs from the above in that it does not remove empty maps.
+   * Return a \c string of the current YAML tree.
    */
   std::string to_string() const;
 
  private:
-  /** Creates a subobject that has its root node at the given node.
+  /** Create a subobject that has its root node at the given node.
    *
    * \note This constructor is not explicit because it can be called only from
    * inside Configuration and by making it explicit a return would require the
@@ -1361,8 +1354,8 @@ class Configuration {
   /**
    * Descend in the YAML tree from the given node using the provided keys.
    *
-   * Finds a node, copies its structure and replaces the previous keys by
-   * the newly provided keys.
+   * More precisely, it finds a node, copies its structure and replaces the
+   * previous keys by the newly provided keys.
    *
    * \param[in] node YAML::Node to start the search from.
    * \param[in] keys Keys that will be used to descend the YAML tree.
