@@ -510,7 +510,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
   const std::string modus_chooser = config.take({"General", "Modus"});
   // remove config maps of unused Modi
-  config["Modi"].remove_all_but(modus_chooser);
+  config.remove_all_entries_in_section_but_one(modus_chooser, {"Modi"});
 
   double box_length = -1.0;
   if (config.has_value({"Modi", "Box", "Length"})) {
@@ -553,7 +553,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
   // Add proper error messages if photons are not configured properly.
   // 1) Missing Photon config section.
-  if (config["Output"].has_value({"Photons"}) &&
+  if (config.has_value({"Output", "Photons"}) &&
       (!config.has_value({"Collision_Term", "Photons"}))) {
     throw std::invalid_argument(
         "Photon output is enabled although photon production is disabled. "
@@ -564,7 +564,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   // 2) Missing Photon output section.
   bool missing_output_2to2 = false;
   bool missing_output_brems = false;
-  if (!(config["Output"].has_value({"Photons"}))) {
+  if (!(config.has_value({"Output", "Photons"}))) {
     if (config.has_value({"Collision_Term", "Photons", "2to2_Scatterings"})) {
       missing_output_2to2 =
           config.read({"Collision_Term", "Photons", "2to2_Scatterings"});
@@ -583,7 +583,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
   // Add proper error messages if dileptons are not configured properly.
   // 1) Missing Dilepton config section.
-  if (config["Output"].has_value({"Dileptons"}) &&
+  if (config.has_value({"Output", "Dileptons"}) &&
       (!config.has_value({"Collision_Term", "Dileptons"}))) {
     throw std::invalid_argument(
         "Dilepton output is enabled although dilepton production is disabled. "
@@ -593,7 +593,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
   // 2) Missing Dilepton output section.
   bool missing_output_decays = false;
-  if (!(config["Output"].has_value({"Dileptons"}))) {
+  if (!(config.has_value({"Output", "Dileptons"}))) {
     if (config.has_value({"Collision_Term", "Dileptons", "Decays"})) {
       missing_output_decays =
           config.read({"Collision_Term", "Dileptons", "Decays"});
@@ -607,7 +607,8 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     }
   }
 
-  auto config_coll = config["Collision_Term"];
+  auto config_coll = config.extract_sub_configuration(
+      {"Collision_Term"}, Configuration::GetEmpty::Yes);
   /* Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded. */
   const double low_snn_cut =

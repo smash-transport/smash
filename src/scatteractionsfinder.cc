@@ -382,7 +382,8 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
 
   if (strings_switch_) {
-    auto subconfig = config["Collision_Term"]["String_Parameters"];
+    auto subconfig = config.extract_sub_configuration(
+        {"Collision_Term", "String_Parameters"}, Configuration::GetEmpty::Yes);
     string_process_interface_ = std::make_unique<StringProcess>(
         subconfig.take({"String_Tension"}, 1.0), string_formation_time_,
         subconfig.take({"Gluon_Beta"}, 0.5),

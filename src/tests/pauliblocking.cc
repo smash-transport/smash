@@ -34,13 +34,16 @@ TEST(init_particle_types) {
 */
 TEST(phase_space_density) {
   Configuration conf = Test::configuration();
-  conf["Collision_Term"]["Pauli_Blocking"]["Spatial_Averaging_Radius"] = 1.86;
-  conf["Collision_Term"]["Pauli_Blocking"]["Momentum_Averaging_Radius"] = 0.08;
-  conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
+  conf.set_value(
+      {"Collision_Term", "Pauli_Blocking", "Spatial_Averaging_Radius"}, 1.86);
+  conf.set_value(
+      {"Collision_Term", "Pauli_Blocking", "Momentum_Averaging_Radius"}, 0.08);
+  conf.set_value({"Collision_Term", "Pauli_Blocking", "Gaussian_Cutoff"}, 2.2);
 
   ExperimentParameters param = smash::Test::default_parameters();
   std::unique_ptr<PauliBlocker> pb = std::make_unique<PauliBlocker>(
-      conf["Collision_Term"]["Pauli_Blocking"], param);
+      conf.extract_sub_configuration({"Collision_Term", "Pauli_Blocking"}),
+      param);
   std::vector<Particles> part(1);
   PdgCode pdg = 0x2112;
   ParticleData one_particle{ParticleType::find(pdg)};
@@ -86,9 +89,11 @@ param);
 
 TEST(phase_space_density_nucleus) {
   Configuration conf = Test::configuration();
-  conf["Collision_Term"]["Pauli_Blocking"]["Spatial_Averaging_Radius"] = 1.86;
-  conf["Collision_Term"]["Pauli_Blocking"]["Momentum_Averaging_Radius"] = 0.08;
-  conf["Collision_Term"]["Pauli_Blocking"]["Gaussian_Cutoff"] = 2.2;
+  conf.set_value(
+      {"Collision_Term", "Pauli_Blocking", "Spatial_Averaging_Radius"}, 1.86);
+  conf.set_value(
+      {"Collision_Term", "Pauli_Blocking", "Momentum_Averaging_Radius"}, 0.08);
+  conf.set_value({"Collision_Term", "Pauli_Blocking", "Gaussian_Cutoff"}, 2.2);
 
   // Gold nuclei with 1000 test-particles
   std::map<PdgCode, int> list = {{0x2212, 79}, {0x2112, 118}};
@@ -103,7 +108,8 @@ TEST(phase_space_density_nucleus) {
 
   ExperimentParameters param = smash::Test::default_parameters(Ntest);
   std::unique_ptr<PauliBlocker> pb = std::make_unique<PauliBlocker>(
-      conf["Collision_Term"]["Pauli_Blocking"], param);
+      conf.extract_sub_configuration({"Collision_Term", "Pauli_Blocking"}),
+      param);
 
   ThreeVector r(0.0, 0.0, 0.0);
   ThreeVector p;

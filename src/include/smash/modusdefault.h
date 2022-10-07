@@ -170,11 +170,9 @@ class ModusDefault {
      * activates forced thermalization in cells in which the energy density is
      * above 0.3 GeV/fm^3. The lattice is initialized with 21 cells in x and y
      * direction and 101 cells in z-direction. The lattice size is 20 fm in x
-     and
-     * y direction and 50 fm in z-direction. The thermalization is applied only
-     * for times later than 10 fm with a timestep of 1 fm/c. The sampling is
-     done
-     * according to the "biased BF" algorithm.
+     * and y direction and 50 fm in z-direction. The thermalization is applied
+     * only for times later than 10 fm with a timestep of 1 fm/c. The sampling
+     * is done according to the "biased BF" algorithm.
      * \n
      *\verbatim
      Forced_Thermalization:

@@ -31,6 +31,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Default build configuration is now `Release` (instead of `RelWithDebInfo`)
 * Use CMake default compiler flags for `RelWithDebInfo` build configuration, hence having `-O2` optimization level instead of `-03`
 * Minimum supported CMake version is now version 3.16
+* Changed interface of the `Configuration` class, which is now not copyable and offers more explicit methods, making it harder to be misused
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now

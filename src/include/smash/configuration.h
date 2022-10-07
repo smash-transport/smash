@@ -502,7 +502,7 @@ class Configuration {
     const char *const key_;
 
     /**
-     * Constructs the Value wrapper from a YAML::Node.
+     * Construct the Value wrapper from a YAML::Node.
      *
      * \note This constructor must be implicit, otherwise it's impossible to
      * return an rvalue Value object - because the copy constructor is deleted.
@@ -1116,14 +1116,20 @@ class Configuration {
   static const char InitializeFromYAMLString = 'S';
 
   /**
-   * Reads config.yaml from the specified path.
+   * Flag to tune method(s) behavior such that it is descriptive from the
+   * caller side. For example, see \ref extract_sub_configuration.
+   */
+  enum class GetEmpty { Yes, No };
+
+  /**
+   * Read config.yaml from the specified path.
    *
    * \param[in] path The directory where the SMASH config files are located.
    */
   explicit Configuration(const std::filesystem::path &path);
 
   /**
-   * Reads a YAML config file from the specified path.
+   * Read a YAML config file from the specified path.
    *
    * \param[in] path The directory where the SMASH config files are located.
    * \param[in] filename The filename (without path) of the YAML config file, in
@@ -1208,14 +1214,23 @@ class Configuration {
    * By removing the value, the Configuration object keeps track which settings
    * were never read.
    *
+   * \note If taking a key leaves the parent key without a value, then this is
+   *       in turn removed and so on. From a performance point of view, it might
+   *       be argued that this is not needed to be checkend and done at every
+   *       \c take operation and it might be done once for all. However, on one
+   *       hand it is a natural behaviour to expect and on the other hand this
+   *       is hardly going to be an application bottle-neck.
+   *
    * \param[in] keys You can pass an arbitrary number of keys inside curly
-   * braces, following the nesting structure in the config file. Example:
-                 \verbatim
+   * braces, following the nesting structure in the config file.
+   * For example, given
+   \verbatim
      Group:
          Key: Value
-                 \endverbatim
-   *             Call \code string value = config.take({"Group", "Key"});
-   *             \endcode to read the value.
+   \endverbatim
+   * call \code string value = config.take({"Group", "Key"}); \endcode
+   * to read the value. This will make the key \c "Group" also be removed from
+   * the configuration, since it remains without any value.
    *
    * \return A proxy object that converts to the correct type automatically on
    *         assignment.
@@ -1257,77 +1272,98 @@ class Configuration {
   }
 
   /**
-   * Removes all entries in the map except for \p key.
+   * Remove all entries in the given section except for \p key.
    *
    * \param[in] key The key of the map entry to keep.
+   * \param[in] section You can pass an arbitrary number of keys inside curly
+   *                    braces, following the nesting structure in the config
+   *                    file, in order to specify the section where to delete
+   *                    entries. Omitting the \c section is equivalent to
+   *                    specifying \c {} and the top-level section is
+   *                    understood.
    */
-  void remove_all_but(const std::string &key);
+  void remove_all_entries_in_section_but_one(
+      const std::string &key, std::initializer_list<const char *> section = {});
 
   /**
-   * Access to the YAML::Node behind the requested \p keys.
+   * Create a new configuration from a then-removed section of the present
+   * object. This method is meant to be used to deal with sections only, i.e.
+   * it will throw if used to extract a key value that is not a section (namely
+   * a map in YAML language). Use \ref take for that purpose, instead.
    *
-   * If you want to read a value use the \ref read function above. Use the
-   * subscript operator if you want to assign a new value. The YAML::Node class
-   * will automatically convert the data you assign to a string representation
-   * suitable for the YAML file.
+   * \param[in] keys You can pass an arbitrary number of keys inside curly
+   *             braces, following the nesting structure in the config file.
+   * \param[in] empty_if_not_existing
+   *            Specify \c Configuration::GetEmpty::Yes if you want an empty
+   *            Configuration in case the requested section does not exist.
    *
-   * \param[in] key The name of the key to be looked up
-   * \return An opaque object that can be assigned to.
+   * \throw std::runtime_error if the method is used
+   *        - to access a scalar or sequence value;
+   *        - to access a key that has no value or is an empty map;
+   *        - to access a not existing key (unless explicitly allowed).
    *
-   * \see take
-   * \see read
+   * \return A new \c Configuration containing the chosen section.
    */
-  template <typename T>
-  Configuration operator[](T &&key) {
-    return root_node_[std::forward<T>(key)];
-  }
+  Configuration extract_sub_configuration(
+      std::initializer_list<const char *> keys,
+      Configuration::GetEmpty empty_if_not_existing =
+          Configuration::GetEmpty::No);
 
   /**
-   * Assignment overwrites the value of the current YAML node.
+   * Overwrite the value of the specified YAML node.
    *
+   * \param[in] keys You can pass an arbitrary number of keys inside curly
+   *                 braces, following the nesting structure in the config file.
    * \param[in] value An arbitrary value that yaml-cpp can convert into YAML
-   * representation. Any builtin type, strings, maps, and vectors can be used
-   * here.
+   *                  representation. Any builtin type, strings, maps, and
+   *                  vectors can be used here.
    */
   template <typename T>
-  Configuration &operator=(T &&value) {
-    root_node_ = std::forward<T>(value);
-    return *this;
+  void set_value(std::initializer_list<const char *> keys, T &&value) {
+    auto node = find_node_at(root_node_, keys);
+    node = std::forward<T>(value);
   }
 
   /**
-   * Returns if there is a (maybe empty) value behind the requested \p keys.
+   * Return whether there is a (maybe empty) value behind the requested \p keys.
    * \param[in] keys List of keys to be checked for
    */
   bool has_value_including_empty(
       std::initializer_list<const char *> keys) const;
   /**
-   * Returns whether there is a non-empty value behind the requested \p keys.
+   * Return whether there is a non-empty value behind the requested \p keys.
    * \param[in] keys List of keys to be checked for
    */
   bool has_value(std::initializer_list<const char *> keys) const;
 
   /**
-   * Returns a string listing the key/value pairs that have not been taken yet.
-   */
-  std::string unused_values_report() const;
-
-  /**
-   * Returns a YAML string of the current tree.
-   *
-   * This differs from the above in that it does not remove empty maps.
+   * Return a \c string of the current YAML tree.
    */
   std::string to_string() const;
 
  private:
-  /** Creates a subobject that has its root node at the given node.
+  /** Create a subobject that has its root node at the given node.
    *
    * \note This constructor is not explicit because it can be called only from
    * inside Configuration and by making it explicit a return would require the
    * copy constructor.
    */
   Configuration(const YAML::Node &node)  // NOLINT(runtime/explicit) : see above
-      : root_node_(node) {}
+      : root_node_(YAML::Clone(node)) {}
+
+  /**
+   * Descend in the YAML tree from the given node using the provided keys.
+   *
+   * More precisely, it finds a node, copies its structure and replaces the
+   * previous keys by the newly provided keys.
+   *
+   * \param[in] node YAML::Node to start the search from.
+   * \param[in] keys Keys that will be used to descend the YAML tree.
+   *
+   * \return Node in the tree reached by using the provided keys.
+   */
+  YAML::Node find_node_at(YAML::Node node,
+                          std::vector<const char *> keys) const;
 
   /// the general_config.yaml contents - fully parsed
   YAML::Node root_node_;

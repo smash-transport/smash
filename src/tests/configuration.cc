@@ -56,42 +56,59 @@ TEST(test_take) {
 
 TEST(test_take_multiple) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
-  double d = modi.take({"Altaic", "Meccas"});
+  double d = conf.take({"tamer", "Altaic", "Meccas"});
   COMPARE(d, 10.);
-  d = modi.take({"Altaic", "Kathleen"});
+  d = conf.take({"tamer", "Altaic", "Kathleen"});
   COMPARE(d, 0.2);
-  int i = modi.take({"Altaic", "Brahmins"});
+  int i = conf.take({"tamer", "Altaic", "Brahmins"});
   COMPARE(i, 1);
 }
 
 TEST_CATCH(take_incorrect_type, Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
-  int i = modi.take({"pipit", "bushelling"});
+  int i = conf.take({"tamer", "pipit", "bushelling"});
   COMPARE(i, 5);
 }
 
 TEST(take_always_converts_to_string) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
-  std::string s = modi.take({"pipit", "bushelling"});
+  std::string s = conf.take({"tamer", "pipit", "bushelling"});
   COMPARE(s, "5.0");
+}
+
+TEST_CATCH(take_not_existing_key, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  conf.take({"not existing key"});
+}
+
+TEST_CATCH(take_not_existing_key_in_existing_section, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  conf.take({"tamer", "not existing key"});
 }
 
 TEST(has_value) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
-  VERIFY(modi.has_value({"pipit", "bushelling"}));
-  VERIFY(modi.has_value({"pipit", "bushelling"}));
+  VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
 }
 
 TEST(take_removes_entry) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
-  VERIFY(modi.has_value({"pipit", "bushelling"}));
-  modi.take({"pipit", "bushelling"});
-  VERIFY(!modi.has_value({"pipit", "bushelling"}));
+  VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
+  conf.take({"tamer", "pipit", "bushelling"});
+  VERIFY(!conf.has_value({"tamer", "pipit", "bushelling"}));
+}
+
+TEST(take_removes_empty_section) {
+  Configuration conf{R"(
+    Section:
+      Sub-section:
+        Key: "Value"
+  )"};
+  VERIFY(conf.has_value({"Section"}));
+  VERIFY(conf.has_value({"Section", "Sub-section"}));
+  conf.take({"Section", "Sub-section", "Key"});
+  VERIFY(!conf.has_value({"Section", "Sub-section"}));
+  VERIFY(!conf.has_value({"Section"})) << "\n" << conf.to_string();
 }
 
 // Sorry, but I have to put this in the std namespace, otherwise it doesn't
@@ -121,7 +138,6 @@ static void expect_lines(std::vector<std::string> expected,
 TEST(check_unused_report) {
   std::string reference;
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
   conf.take({"fireballs", "extorting"});
   conf.take({"fireballs", "infection"});
   conf.take({"fireballs", "arena"});
@@ -130,12 +146,12 @@ TEST(check_unused_report) {
   conf.take({"fireballs", "firebrands"});
   conf.take({"fireballs", "joker"});
   conf.take({"fireballs", "classify"});
-  modi.take({"Altaic", "Meccas"});
-  modi.take({"Altaic", "Kathleen"});
-  modi.take({"Altaic", "Brahmins"});
-  modi.take({"feathered"});
+  conf.take({"tamer", "Altaic", "Meccas"});
+  conf.take({"tamer", "Altaic", "Kathleen"});
+  conf.take({"tamer", "Altaic", "Brahmins"});
+  conf.take({"tamer", "feathered"});
   {
-    std::istringstream unused(conf.unused_values_report());
+    std::istringstream unused(conf.to_string());
     std::string line;
     getline(unused, line);
     COMPARE(line, "tamer:");
@@ -161,9 +177,9 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  modi.take({"pipit", "bushelling"});
+  conf.take({"tamer", "pipit", "bushelling"});
   {
-    std::istringstream unused(conf.unused_values_report());
+    std::istringstream unused(conf.to_string());
     std::string line;
     getline(unused, line);
     COMPARE(line, "tamer:");
@@ -174,9 +190,9 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  modi.take({"schmoozed", "warbler"});
+  conf.take({"tamer", "schmoozed", "warbler"});
   {
-    std::istringstream unused(conf.unused_values_report());
+    std::istringstream unused(conf.to_string());
     std::string line;
     getline(unused, line);
     COMPARE(line, "tamer:");
@@ -186,9 +202,9 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  modi.take({"schmoozed", "reedier"});
+  conf.take({"tamer", "schmoozed", "reedier"});
   {
-    std::istringstream unused(conf.unused_values_report());
+    std::istringstream unused(conf.to_string());
     std::string line;
     getline(unused, line);
     COMPARE(line, "tamer:");
@@ -199,9 +215,9 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  modi.take({"schmoozed", "neglects"});
+  conf.take({"tamer", "schmoozed", "neglects"});
   reference = "{}";
-  COMPARE(conf.unused_values_report(), reference);
+  COMPARE(conf.to_string(), reference);
 }
 
 TEST(test_config_read) {
@@ -214,26 +230,19 @@ TEST(test_config_read) {
   COMPARE(nevents, 1);
 }
 
-TEST(test_sub_config_objects) {
-  Configuration conf = make_test_configuration();
-  Configuration general = conf["fireballs"];
-  const Configuration box = conf["tamer"]["Altaic"];
-  VERIFY(general.has_value({"classify"}));
-  int nevents = general.read({"classify"});
-  VERIFY(general.has_value({"classify"}));
-  COMPARE(nevents, 1);
-  nevents = general.take({"classify"});
-  VERIFY(!general.has_value({"classify"}));
-  COMPARE(nevents, 1);
-  COMPARE(double(box.read({"Meccas"})), 10.);
-}
-
 TEST(check_setting_new_value) {
   Configuration conf = make_test_configuration();
   VERIFY(!conf.has_value({"Test"}));
-  conf["Test"] = 1.;
+  conf.set_value({"Test"}, 1.);
   VERIFY(conf.has_value({"Test"}));
   COMPARE(double(conf.read({"Test"})), 1.);
+}
+
+TEST(check_changing_existing_value) {
+  Configuration conf = make_test_configuration();
+  const double new_value = 3.1415;
+  conf.set_value({"tamer", "Altaic", "Meccas"}, new_value);
+  COMPARE(double(conf.read({"tamer", "Altaic", "Meccas"})), new_value);
 }
 
 TEST(merge_override) {
@@ -245,12 +254,74 @@ TEST(merge_override) {
   COMPARE(int(conf.read({"fireballs", "classify"})), 2);
 }
 
-TEST(remove_all_but) {
+TEST(remove_all_entries_in_section_but_one) {
   Configuration conf = make_test_configuration();
-  Configuration modi = conf["tamer"];
-  modi.remove_all_but("pipit");
-  conf.remove_all_but("tamer");
+  conf.remove_all_entries_in_section_but_one("pipit", {"tamer"});
+  conf.remove_all_entries_in_section_but_one("tamer", {});
   COMPARE(conf.to_string(), "tamer:\n  pipit:\n    bushelling: 5.0");
+}
+
+TEST(extract_sub_configuration) {
+  Configuration conf = make_test_configuration();
+  Configuration sub_conf = conf.extract_sub_configuration({"tamer", "pipit"});
+  VERIFY(!conf.has_value({"tamer", "pipit"}));
+  COMPARE(sub_conf.to_string(), "bushelling: 5.0");
+  sub_conf = conf.extract_sub_configuration({"fireballs"});
+  const auto list_of_keys = sub_conf.list_upmost_nodes();
+  const std::vector<std::string> reference = {
+      "extorting", "infection",  "arena", "pendulous",
+      "scudded",   "firebrands", "joker", "classify"};
+  COMPARE(list_of_keys.size(), reference.size());
+  for (std::size_t i = 0; i < list_of_keys.size(); ++i) {
+    COMPARE(list_of_keys[i], reference[i]);
+  }
+}
+
+TEST_CATCH(extract_scalar_key_as_section, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  auto sub_conf = conf.extract_sub_configuration({"fireballs", "joker"});
+}
+
+TEST_CATCH(extract_sequence_key_as_section, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  auto sub_conf =
+      conf.extract_sub_configuration({"tamer", "feathered", "stopcock"});
+}
+
+TEST_CATCH(extract_empty_map_as_section, std::runtime_error) {
+  Configuration conf{"section: {}"};
+  auto sub_conf = conf.extract_sub_configuration({"section"});
+}
+
+TEST_CATCH(extract_key_without_value_section, std::runtime_error) {
+  Configuration conf{"section:"};
+  auto sub_conf = conf.extract_sub_configuration({"section"});
+}
+
+TEST_CATCH(extract_not_existing_section, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  auto sub_conf = conf.extract_sub_configuration({"Not existing section"});
+}
+
+TEST(extract_not_existing_section_as_empty_conf) {
+  Configuration conf = make_test_configuration();
+  auto sub_conf = conf.extract_sub_configuration({"Not existing section"},
+                                                 Configuration::GetEmpty::Yes);
+  COMPARE(sub_conf.to_string(), "");
+}
+
+TEST(test_sub_config_objects) {
+  Configuration conf = make_test_configuration();
+  Configuration general = conf.extract_sub_configuration({"fireballs"});
+  const Configuration box = conf.extract_sub_configuration({"tamer", "Altaic"});
+  VERIFY(general.has_value({"classify"}));
+  int nevents = general.read({"classify"});
+  VERIFY(general.has_value({"classify"}));
+  COMPARE(nevents, 1);
+  nevents = general.take({"classify"});
+  VERIFY(!general.has_value({"classify"}));
+  COMPARE(nevents, 1);
+  COMPARE(double(box.read({"Meccas"})), 10.);
 }
 
 TEST_CATCH(failed_sequence_conversion,

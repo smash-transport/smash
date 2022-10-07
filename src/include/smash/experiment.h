@@ -1080,7 +1080,7 @@ Experiment<Modus>::Experiment(Configuration &config,
                               const std::filesystem::path &output_path)
     : parameters_(create_experiment_parameters(config)),
       density_param_(DensityParameters(parameters_)),
-      modus_(config["Modi"], parameters_),
+      modus_(config.extract_sub_configuration({"Modi"}), parameters_),
       ensembles_(parameters_.n_ensembles),
       nevents_(config.take({"General", "Nevents"}, 0)),
       end_time_(config.take({"General", "End_Time"})),
@@ -1282,7 +1282,8 @@ Experiment<Modus>::Experiment(Configuration &config,
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
     logg[LExperiment].info() << "Pauli blocking is ON.";
     pauli_blocker_ = std::make_unique<PauliBlocker>(
-        config["Collision_Term"]["Pauli_Blocking"], parameters_);
+        config.extract_sub_configuration({"Collision_Term", "Pauli_Blocking"}),
+        parameters_);
   }
   // In collider setup with sqrts >= 200 GeV particles don't form continuously
   ParticleData::formation_power_ = config.take(
@@ -1325,7 +1326,8 @@ Experiment<Modus>::Experiment(Configuration &config,
   logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
                           " create OutputInterface objects");
 
-  auto output_conf = config["Output"];
+  auto output_conf = config.extract_sub_configuration(
+      {"Output"}, Configuration::GetEmpty::Yes);
   /*!\Userguide
    * \page output_general_ Output
    *
@@ -1598,8 +1600,8 @@ Experiment<Modus>::Experiment(Configuration &config,
     logg[LExperiment].info() << "Potentials are ON. Timestep is "
                              << parameters_.labclock->timestep_duration();
     // potentials need density calculation parameters from parameters_
-    potentials_ =
-        std::make_unique<Potentials>(config["Potentials"], parameters_);
+    potentials_ = std::make_unique<Potentials>(
+        config.extract_sub_configuration({"Potentials"}), parameters_);
     // make sure that vdf potentials are not used together with Skyrme
     // or symmetry potentials
     if (potentials_->use_skyrme() && potentials_->use_vdf()) {
@@ -1988,7 +1990,8 @@ Experiment<Modus>::Experiment(Configuration &config,
 
   // Create forced thermalizer
   if (config.has_value({"Forced_Thermalization"})) {
-    Configuration &&th_conf = config["Forced_Thermalization"];
+    Configuration th_conf =
+        config.extract_sub_configuration({"Forced_Thermalization"});
     thermalizer_ = modus_.create_grandcan_thermalizer(th_conf);
   }
 

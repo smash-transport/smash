@@ -18,60 +18,61 @@ using namespace smash;
 
 TEST(init_particle_types) { Test::create_actual_particletypes(); }
 
+Configuration get_common_configuration() {
+  return Configuration{R"(
+    General:
+      Modus: ToBeSet
+      End_Time: 100.0
+      Nevents: 1
+      Randomseed: 1
+    )"};
+}
+
 TEST(create_box) {
-  VERIFY(!!Test::experiment(
-      Configuration("General:\n"
-                    "  Modus: Box\n"
-                    "  End_Time: 100.0\n"
-                    "  Nevents: 1\n"
-                    "  Randomseed: 1\n"
-                    "Collision_Term:\n"
-                    "  Strings: False\n"
-                    "Modi: \n"
-                    "  Box:\n"
-                    "    Initial_Condition: \"peaked momenta\"\n"
-                    "    Length: 10.0\n"
-                    "    Temperature: 0.2\n"
-                    "    Start_Time: 0.0\n"
-                    "    Init_Multiplicities:\n"
-                    "      661: 724\n")));
+  auto config = get_common_configuration();
+  config.set_value({"General", "Modus"}, "Box");
+  config.merge_yaml(R"(
+    Modi:
+      Box:
+        Initial_Condition: "peaked momenta"
+        Length: 10.0
+        Temperature: 0.2
+        Start_Time: 0.0
+        Init_Multiplicities:
+          661: 724
+  )");
+  VERIFY(!!Test::experiment(std::move(config)));
 }
 
 TEST(create_collider) {
-  VERIFY(!!Test::experiment(
-      Configuration("General:\n"
-                    "  Modus: Collider\n"
-                    "  End_Time: 100.0\n"
-                    "  Nevents: 1\n"
-                    "  Randomseed: 1\n"
-                    "Collision_Term:\n"
-                    "  Strings: False\n"
-                    "Modi: \n"
-                    "  Collider:\n"
-                    "    Projectile: \n"
-                    "      Particles: {2212: 79, 2112: 118}\n"
-                    "    Target: \n"
-                    "      Particles: {2212: 79, 2112: 118}\n"
-                    "    E_Kin: 1.23\n")));
+  auto config = get_common_configuration();
+  config.set_value({"General", "Modus"}, "Collider");
+  config.merge_yaml(R"(
+    Modi:
+      Collider:
+        Projectile:
+          Particles: {2212: 79, 2112: 118}
+        Target:
+          Particles: {2212: 79, 2112: 118}
+        E_Kin: 1.23
+  )");
+  VERIFY(!!Test::experiment(std::move(config)));
 }
 
 TEST(create_sphere) {
-  VERIFY(!!Test::experiment(
-      Configuration("General:\n"
-                    "  Modus: Sphere\n"
-                    "  End_Time: 100.0\n"
-                    "  Nevents: 1\n"
-                    "  Randomseed: 1\n"
-                    "Collision_Term:\n"
-                    "  Strings: False\n"
-                    "Modi: \n"
-                    "  Sphere:\n"
-                    "    Initial_Condition: \"thermal momenta\"\n"
-                    "    Radius: 5.0\n"
-                    "    Temperature: 0.2\n"
-                    "    Start_Time: 0.0\n"
-                    "    Init_Multiplicities:\n"
-                    "      661: 724\n")));
+  auto config = get_common_configuration();
+  config.set_value({"General", "Modus"}, "Sphere");
+  config.merge_yaml(R"(
+    Modi:
+      Sphere:
+        Initial_Condition: "thermal momenta"
+        Radius: 5.0
+        Temperature: 0.2
+        Start_Time: 0.0
+        Init_Multiplicities:
+          661: 724
+  )");
+  VERIFY(!!Test::experiment(std::move(config)));
 }
 
 TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {

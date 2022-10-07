@@ -37,7 +37,8 @@ Configuration setup_config_and_logging(
   // Set up logging
   set_default_loglevel(
       configuration.take({"Logging", "default"}, einhard::ALL));
-  create_all_loggers(configuration["Logging"]);
+  create_all_loggers(configuration.extract_sub_configuration(
+      {"Logging"}, Configuration::GetEmpty::Yes));
 
   logg[LMain].trace(SMASH_SOURCE_LOCATION, " load ParticleType and DecayModes");
 
@@ -56,7 +57,7 @@ Configuration setup_config_and_logging(
         particles_path);
   }
   if (!configuration.has_value({"particles"}) || !particles_path.empty()) {
-    configuration["particles"] = particles_and_decays.first;
+    configuration.set_value({"particles"}, particles_and_decays.first);
   }
 
   if (configuration.has_value({"decaymodes"}) && !decaymodes_path.empty()) {
@@ -67,7 +68,7 @@ Configuration setup_config_and_logging(
         decaymodes_path);
   }
   if (!configuration.has_value({"decaymodes"}) || !decaymodes_path.empty()) {
-    configuration["decaymodes"] = particles_and_decays.second;
+    configuration.set_value({"decaymodes"}, particles_and_decays.second);
   }
 
   return configuration;
