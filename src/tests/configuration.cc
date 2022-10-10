@@ -383,11 +383,11 @@ TEST(configuration_validation) {
       General:
           Modus: Box
       )";
-  // The valid_conf_literal must be replaced with SMASH config.yaml file
+  // The valid_conf_literal must still be replaced with SMASH config.yaml file
   Configuration valid_conf{valid_conf_literal};
   Configuration invalid_conf = make_test_configuration();
-  VERIFY(validate(valid_conf, true));
-  VERIFY(validate(valid_conf, false));
-  VERIFY(!validate(invalid_conf, true));
-  VERIFY(!validate(invalid_conf, false));
+  VERIFY(valid_conf.validate(true));
+  VERIFY(valid_conf.validate(false));
+  VERIFY(!invalid_conf.validate(true));
+  VERIFY(!invalid_conf.validate(false));
 }

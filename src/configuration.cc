@@ -233,99 +233,63 @@ YAML::Node Configuration::find_node_at(YAML::Node node,
 // internal helper functions
 namespace {
 /**
- * @brief Implementation of the algorithm to translate a configuration into
- * lists of labels, each identifying a key from the root YAML node.
+ * Implementation of the algorithm to translate a YAML tree into
+ * lists of labels, each identifying a key from the YAML root node.
  *
  * Since the level of nesting sections in a YAML input file is arbitrary, this
  * is a typical task to be solved using recursion. The main idea here is to
- * take advantage of Configuration functionality and in particular of its
- * Configuration::list_upmost_nodes method as well as the
- * Configuration::operator[]. In particular, from the configuration top-level
- * all upmost nodes are extracted and for each of them, recursively, the
- * same procedure is done over and over again. Before the recursive call, the
- * present section label is added to the list of labels in process to be
- * created and after the recursive call, the list of labels is added to the
- * main list if a value has been found in the previous recursive call.
- * The only aspect to pay attention to is to store for each recursive call
- * whether a value has been found and accordingly push a new element in the
- * main list or not. Such a \c bool flag is implemented as return value.
+ * take advantage of YAML functionality and in particular of the possibility
+ * to iterate over trees and test for nature of a node (is it a Map or not?).
+ * Roughly speaking, from the tree top-level all upmost nodes are extracted
+ * and for each of them, recursively, the same procedure is done over and
+ * over again if they are maps. If a non-map node is found, i.e. a key value
+ * is found, then recursion ends a new entry to \c list is added.
  *
- * @param[in] configuration The input configuration to extract from.
+ * @param[in] root_node The root YAML node to extract from.
  * @param[inout] list The list of lists of labels to be filled.
  * @param[inout] new_list_entry New list of labels in process to be filled
  *                              during recursion.
- * @param[inout] push_to_main_list Whether to push or not to the main list.
- *                                 This is an array and not a single \c bool
- *                                 value, in order to keep track of all levels
- *                                 of recursion.
- * @return \c true if the passed configuration has no sections (just a value).
- * @return \c false if the passed configuration has sections.
  */
-bool fill_list_of_labels_per_key_from_configuration_implementation(
-    Configuration &configuration, std::vector<std::vector<std::string>> &list,
-    std::vector<std::string> &new_list_entry,
-    std::vector<bool> &push_to_main_list) {
-  std::vector<std::string> list_of_sections{};
-  try {
-    list_of_sections = configuration.list_upmost_nodes();
-  } catch (YAML::InvalidNode &) {
-    /*
-     * This happens for keys that are not sections and whose value
-     * cannot be interpreted as a YAML Scalar, e.g. lists [2112, 2212].
-     */
-    return true;
-  };
-
-  if (list_of_sections.empty()) {
-    // This happens when a key is not a section and has a Scalar value.
-    return true;
-  }
-
-  for (const auto &section : list_of_sections) {
-    new_list_entry.push_back(section);
-    Configuration sub_configuration =
-        configuration.extract_sub_configuration({section.c_str()});
-    push_to_main_list.push_back(
-        fill_list_of_labels_per_key_from_configuration_implementation(
-            sub_configuration, list, new_list_entry, push_to_main_list));
-    if (push_to_main_list.back()) {
+void fill_list_of_labels_per_key_in_yaml_tree(
+    const YAML::Node &root_node, std::vector<std::vector<std::string>> &list,
+    std::vector<std::string> &new_list_entry) {
+  // Here sub_node is an iterator value, i.e. a key/value pair of nodes,
+  // not a single YAML node (that's how YAML library works)
+  for (const auto &sub_node : root_node) {
+    new_list_entry.push_back(sub_node.first.as<std::string>());
+    if (sub_node.second.IsMap())
+      fill_list_of_labels_per_key_in_yaml_tree(sub_node.second, list,
+                                               new_list_entry);
+    else
       list.push_back(new_list_entry);
-    }
     new_list_entry.pop_back();
-    push_to_main_list.pop_back();
   }
-  /* If the function is executed till here, it means that only sections and
-   * not keys with values have been found. These are not to be pushed into the
-   * main list. Hence, return false.
-   */
-  return false;
 }
 
 /**
- * @brief Clear and fill the given list object using the passed configuration.
+ * Create a list of lists of key labels present in the passed YAML node
+ * considered to be the root one of a YAML tree.
  *
- * Given a \c Configuration object, for each YAML key having a value, all
- * labels to reach the given key from the root node are collected and a \c
- * std::vector containing them is built and inserted into the given list. This
- * function is calling the actual implementation preparing auxiliary needed
- * variables.
+ * Given a \c YAML::Node, for each key having a value, all labels to reach
+ * the given key from the passed node are collected and a \c std::vector
+ * containing them is built and inserted into the given list. This function
+ * is calling the actual implementation preparing auxiliary needed variables.
  *
- * @param[in] configuration The input configuration to extract from.
- * @param[inout] list The list of lists of labels to be filled.
+ * @param[in] root_node The root node of the YAML tree to be considered.
+ *
+ * @return A \c std::vector<std::vector<std::string>> containing the desired
+ *          information.
  */
-void fill_list_of_labels_per_key_from_configuration(
-    Configuration &configuration, std::vector<std::vector<std::string>> &list) {
-  std::vector<std::string> aux_v1{};
-  std::vector<bool> aux_v2{};
-  list.clear();
-  SMASH_UNUSED(fill_list_of_labels_per_key_from_configuration_implementation(
-      configuration, list, aux_v1, aux_v2));
+auto get_list_of_labels_per_key_in_yaml_tree(const YAML::Node &root_node) {
+  std::vector<std::vector<std::string>> list{};
+  std::vector<std::string> aux{};
+  fill_list_of_labels_per_key_in_yaml_tree(root_node, list, aux);
+  return list;
 }
 
 /**
- * @brief Given some YAML labels (assumed to be in order from the top
- * section), it is checked whether any valid SMASH key with the same key
- * exists.
+ * Given some YAML labels (assumed to be in order from the top section),
+ * it is checked whether any valid SMASH key with the same key exists.
  *
  * All possible checks are done in a way such that the user is informed about
  *  - if the key has never been valid;
@@ -337,8 +301,7 @@ void fill_list_of_labels_per_key_from_configuration(
  * @return \c true if the key is valid and
  * @return \c false otherwise.
  */
-bool validate_key_based_on_labels(const std::vector<std::string> &labels) {
-  using key_ref_var = smash::InputKeys::key_references_variant;
+bool is_key_valid(const std::vector<std::string> &labels) {
   auto key_ref_var_it = std::find_if(
       smash::InputKeys::list.begin(), smash::InputKeys::list.end(),
       [&labels](auto key) {
@@ -352,7 +315,7 @@ bool validate_key_based_on_labels(const std::vector<std::string> &labels) {
     return false;
   }
 
-  key_ref_var found_variant = *key_ref_var_it;
+  smash::InputKeys::key_references_variant found_variant = *key_ref_var_it;
   const auto key_labels =
       std::visit([](auto &&arg) { return static_cast<std::string>(arg.get()); },
                  found_variant);
@@ -372,23 +335,22 @@ bool validate_key_based_on_labels(const std::vector<std::string> &labels) {
     logg[LConf].warn("Key ", key_labels, " has been deprecated in version ",
                      v_deprecation);
   } else
-    logg[LConf].debug("Key ", key_labels, " valid!");
+    logg[LConf].debug("Key ", key_labels, " is valid!");
   return true;
 }
 
 }  // namespace
 
-bool validate(Configuration &configuration, bool full_validation) {
-  std::vector<std::vector<std::string>> list{};
-  fill_list_of_labels_per_key_from_configuration(configuration, list);
+bool Configuration::validate(bool full_validation) const {
+  std::vector<std::vector<std::string>> list =
+      get_list_of_labels_per_key_in_yaml_tree(root_node_);
   if (full_validation)
     return std::transform_reduce(
         list.begin(), list.end(), bool{true},
-        [](bool result, bool value) { return result && value; },
-        validate_key_based_on_labels);
+        [](bool result, bool value) { return result && value; }, is_key_valid);
   else {
-    return std::find_if_not(list.begin(), list.end(),
-                            validate_key_based_on_labels) == list.end();
+    return std::find_if_not(list.begin(), list.end(), is_key_valid) ==
+           list.end();
   }
 }
 
