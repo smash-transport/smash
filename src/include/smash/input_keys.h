@@ -177,11 +177,11 @@ class Key {
   /**
    * @brief Converts a Key to a \c std::string using all labels.
    *
-   * @return \c std::string with labels concatenated with \c -> and quotes all
-   * around.
+   * @return \c std::string with labels concatenated with \c :␣ (colon-space)
+   *         and quotes all around.
    */
   explicit operator std::string() const noexcept {
-    return smash::quote(smash::join(labels_, " -> "));
+    return smash::quote(smash::join(labels_, ": "));
   }
 
  private:

@@ -310,7 +310,7 @@ bool is_key_valid(const std::vector<std::string> &labels) {
             key);
       });
   if (key_ref_var_it == smash::InputKeys::list.end()) {
-    logg[LConf].error("Key ", smash::quote(smash::join(labels, " -> ")),
+    logg[LConf].error("Key ", smash::quote(smash::join(labels, ": ")),
                       " is not a valid SMASH input key.");
     return false;
   }
