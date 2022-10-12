@@ -379,12 +379,8 @@ TEST(reactions_bitset) {
 }
 
 TEST(configuration_validation) {
-  const char *valid_conf_literal = R"(
-      General:
-          Modus: Box
-      )";
-  // The valid_conf_literal must still be replaced with SMASH config.yaml file
-  Configuration valid_conf{valid_conf_literal};
+  Configuration valid_conf{std::filesystem::path{TEST_CONFIG_PATH} / "input",
+                           "config.yaml"};
   Configuration invalid_conf = make_test_configuration();
   VERIFY(valid_conf.validate(true));
   VERIFY(valid_conf.validate(false));
