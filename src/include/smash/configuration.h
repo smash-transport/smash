@@ -62,66 +62,7 @@ struct convert {
 }  // namespace YAML
 
 namespace smash {
-/*!\Userguide
- * \page input Input
- *
- * There are three input files used by SMASH:
- *
- * - `config.yaml` for configuring the simulation. This file is required. See
- *   \subpage inputconfig.
- * - `particles.txt` for defining the particles used by SMASH. This file is
- *   optional. See \subpage inputparticles.
- * - `decaymodes.txt` for defining the decays (and corresponding resonance
- *   formations) possible in SMASH. This file is
- *   optional. See \subpage inputdecaymodes.
- *
- * \page inputconfig Configuration
- *
- * SMASH is configured via an input file in YAML format. Typically you will
- * start from the supplied `config.yaml` file and modify it according to your
- * needs. If you ever make a mistake there and specify a configuration key that
- * SMASH does not recognize, then on startup it will tell you about the keys it
- * could not make any sense of.
- *
- * By default, SMASH copies the config.yaml file used to set up the SMASH run to
- * the output directory of the simulation. For the sake of reproducibility,
- * the randomly generated number seed (if the user specified a negative seed) is
- * inserted into the copied file and the used particles and decaymodes are
- * appended as well.
- *
- * \par The available keys are documented on the following pages:
- * \li \subpage input_general_
- * \li \subpage input_logging_
- * \li \subpage input_collision_term_
- * \li \subpage input_modi_
- * \li \subpage input_output_options_
- * \li \subpage input_lattice_
- * \li \subpage input_potentials_
- * \li \subpage input_forced_thermalization_
- *
- * \par Information on formatting of the input file can be found here:
- * \li \subpage input_indentation_
- *
- * \ifnot user
- * \par The relevant functions and classes for input are:
- * \li \ref Configuration
- * \li \ref ExperimentBase::create()
- * \li \ref ColliderModus
- * \li \ref BoxModus
- * \li \ref SphereModus
- * \li \ref ListModus
- * \li \ref ListBoxModus
- * \endif
- */
 
-/*!\Userguide
- * \page input_general_ General
- * This section in the `config.yaml` file contains all general/global
- * configuration options to SMASH.
- *
- * Available Settings
- * ------------------
- */
 
 /*!\Userguide
  * \page input_indentation_ Indentation
