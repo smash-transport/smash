@@ -21,7 +21,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## Unreleased
 
 ### Added
-* New CMake build configuration `MinSizeRel` to optimize in executable size 
+* New CMake build configuration `MinSizeRel` to optimize in executable size
+* New examples for usage of SMASH as a library: Full SMASH wrapper and rate equations
 
 ### Changed
 * :warning: The `master` branch has been renamed to `main`
