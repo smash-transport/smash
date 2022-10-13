@@ -122,6 +122,8 @@ int main() {
   const double dt = 0.01;    // fm/c, integration timestep
   const double tend = 20.0;  // fm/c, end time
 
+  std::cout << "\nRate Equation Example\n---------------------" << std::endl;
+
   // 3) Prepare averages cross sections
   // Here and further assuming that cross sections do not depend on pion charge
   const double sig_pid = thermal_average_sigmavrel(pip, d, T);
