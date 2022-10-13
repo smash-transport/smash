@@ -6,6 +6,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 add_executable(example example.cc)
 add_executable(example_rate_equations example_rate_equations.cc)
+add_executable(example_smash_wrapper example_smash_wrapper.cc)
 
 # Set the relevant generic compiler flags (optimisation + warnings) Try to be close to what SMASH
 # uses
@@ -22,4 +23,5 @@ if(${SMASH_FOUND})
     # SYSTEM supresses compiling warnings from external libraries
     target_link_libraries(example SYSTEM ${SMASH_LIBRARIES})
     target_link_libraries(example_rate_equations SYSTEM ${SMASH_LIBRARIES})
+    target_link_libraries(example_smash_wrapper SYSTEM ${SMASH_LIBRARIES})
 endif(${SMASH_FOUND})
