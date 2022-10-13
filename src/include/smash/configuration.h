@@ -63,21 +63,6 @@ struct convert {
 
 namespace smash {
 
-
-/*!\Userguide
- * \page input_indentation_ Indentation
- * In the config.yaml file, it is important to keep a consistent indentation.
- * The convention that is agreed on is the use of 4 spaces. For example:
- * \code
- * Output:
- *     Output_Interval: 1.0
- *     Particles:
- *         Format:      ["Oscar2013"]
- * \endcode
- * This is a part of the output configuration. The Output_Interval attribute
- * belongs to the Output category, whereas Particles is a subcategory.
- */
-
 /*!\Userguide
  * \page inputparticles Particles
  *

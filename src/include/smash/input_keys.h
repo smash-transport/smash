@@ -228,8 +228,23 @@ class Key {
  * \li \subpage input_potentials_
  * \li \subpage input_forced_thermalization_
  *
- * \par Information on formatting of the input file can be found here:
- * \li \subpage input_indentation_
+ * \par Information on formatting of the input file
+ *
+ * The input file is made of sections, i.e. of keys containing as "value" a
+ * series of keys and/or sections. In order to identify the content of a
+ * section, it is important to keep a consistent indentation in the input file.
+ * The convention is to use 4 spaces indentation in order to specify keys inside
+ * a section.  For example:
+ * \code
+ * Output:
+ *     Output_Interval: 1.0
+ *     Particles:
+ *         Format: ["Oscar2013"]
+ * \endcode
+ * This is a part of the input file. The `Output_Interval` key belongs to the
+ * `Output` section, whereas `Particles` is in turn a section containing the
+ * `Format` key.
+ *
  *
  * \ifnot user
  * \par The relevant functions and classes for input are:
