@@ -1,5 +1,6 @@
-This is an example, how to set up a project using SMASH as a library.
-
+This is an example, how to set up a project using SMASH as a library. The two main interface functions
+to be used when using SMASH as a library to setup and initialize are found and documented in library.h
+in the SMASH source.
 
 ## Prequisites
 
