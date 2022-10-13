@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(SMASH_as_a_library_example)
 
-# Tell cmake where to find modules
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+# Tell cmake where to find modules (also append ../../cmake for testing)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake" "${CMAKE_CURRENT_LIST_DIR}/../../cmake")
 
 add_executable(example example.cc)
 add_executable(example_rate_equations example_rate_equations.cc)
