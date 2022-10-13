@@ -297,6 +297,26 @@ class Key {
  * will provide the desired number of non-empty events.
  */
 
+/*!\Userguide
+ * \page input_logging_ Logging
+ *
+ * The `Logging` section in the input file controls the logging levels for
+ * different areas of the code, each of which can have a different verbosity
+ * level. All keys and hence the section itself are optional. Valid key values
+ * are the following:
+ * - `"ALL"`   &rarr; Log all messages (default)
+ * - `"TRACE"` &rarr; The lowest level for messages describing the program flow
+ * - `"DEBUG"` &rarr; Debug messages
+ * - `"INFO"`  &rarr; Messages of informational nature
+ * - `"WARN"`  &rarr; Warning messages
+ * - `"ERROR"` &rarr; Non-fatal errors
+ * - `"FATAL"` &rarr; Messages that indicate terminal application failure
+ * - `"OFF"`   &rarr; If selected no messages will be printed to the output
+ *
+ * Note that the logging levels `TRACE` and `DEBUG` are only available in
+ * debug builds (i.e. running `cmake` with `-DCMAKE_BUILD_TYPE=Debug`).
+ */
+
 /**
  * @brief A container to keep track of all ever existed input keys.
  *
@@ -742,12 +762,335 @@ struct InputKeys {
   inline static const Key<bool> gen_useGrid{
       {"General", "Use_Grid"}, true, {"1.0"}};
 
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_default_,default,string,ALL}
+   *
+   * It determines the default logging level for all areas
+   */
+  /**
+   * \see_key{log_default_}
+   */
+  inline static const Key<einhard::LogLevel> log_default{
+      {"Logging", "default"}, einhard::ALL, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_main_,Main,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_main_}
+   */
+  inline static const Key<einhard::LogLevel> log_main{{"Logging", "Main"},
+                                                      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_experiment_,Experiment,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_experiment_}
+   */
+  inline static const Key<einhard::LogLevel> log_experiment{
+      {"Logging", "Experiment"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_box_,Box,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_box_}
+   */
+  inline static const Key<einhard::LogLevel> log_box{{"Logging", "Box"},
+                                                     {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_collider_,Collider,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_collider_}
+   */
+  inline static const Key<einhard::LogLevel> log_collider{
+      {"Logging", "Collider"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_sphere_,Sphere,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_sphere_}
+   */
+  inline static const Key<einhard::LogLevel> log_sphere{{"Logging", "Sphere"},
+                                                        {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_action_,Action,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_action_}
+   */
+  inline static const Key<einhard::LogLevel> log_action{{"Logging", "Action"},
+                                                        {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_input_parser_,InputParser,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_input_parser_}
+   */
+  inline static const Key<einhard::LogLevel> log_inputParser{
+      {"Logging", "InputParser"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_particle_type_,ParticleType,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_particle_type_}
+   */
+  inline static const Key<einhard::LogLevel> log_particleType{
+      {"Logging", "ParticleType"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_find_scatter_,FindScatter,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_find_scatter_}
+   */
+  inline static const Key<einhard::LogLevel> log_findScatter{
+      {"Logging", "FindScatter"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_clock_,Clock,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_clock_}
+   */
+  inline static const Key<einhard::LogLevel> log_clock{{"Logging", "Clock"},
+                                                       {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_decay_modes_,DecayModes,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_decay_modes_}
+   */
+  inline static const Key<einhard::LogLevel> log_decayModes{
+      {"Logging", "DecayModes"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_resonances_,Resonances,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_resonances_}
+   */
+  inline static const Key<einhard::LogLevel> log_resonances{
+      {"Logging", "Resonances"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_scatter_action_,ScatterAction,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_scatter_action_}
+   */
+  inline static const Key<einhard::LogLevel> log_scatterAction{
+      {"Logging", "ScatterAction"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_distributions_,Distributions,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_distributions_}
+   */
+  inline static const Key<einhard::LogLevel> log_distributions{
+      {"Logging", "Distributions"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_propagation_,Propagation,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_propagation_}
+   */
+  inline static const Key<einhard::LogLevel> log_propagation{
+      {"Logging", "Propagation"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_grid_,Grid,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_grid_}
+   */
+  inline static const Key<einhard::LogLevel> log_grid{{"Logging", "Grid"},
+                                                      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_list_,List,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_list_}
+   */
+  inline static const Key<einhard::LogLevel> log_list{{"Logging", "List"},
+                                                      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_nucleus_,Nucleus,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_nucleus_}
+   */
+  inline static const Key<einhard::LogLevel> log_nucleus{{"Logging", "Nucleus"},
+                                                         {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_density_,Density,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_density_}
+   */
+  inline static const Key<einhard::LogLevel> log_density{{"Logging", "Density"},
+                                                         {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_pauli_blocking_,PauliBlocking,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_pauli_blocking_}
+   */
+  inline static const Key<einhard::LogLevel> log_pauliBlocking{
+      {"Logging", "PauliBlocking"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_tmn_,Tmn,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_tmn_}
+   */
+  inline static const Key<einhard::LogLevel> log_tmn{{"Logging", "Tmn"},
+                                                     {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_fpe_,Fpe,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_fpe_}
+   */
+  inline static const Key<einhard::LogLevel> log_fpe{{"Logging", "Fpe"},
+                                                     {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_lattice_,Lattice,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_lattice_}
+   */
+  inline static const Key<einhard::LogLevel> log_lattice{{"Logging", "Lattice"},
+                                                         {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_pythia_,Pythia,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_pythia_}
+   */
+  inline static const Key<einhard::LogLevel> log_pythia{{"Logging", "Pythia"},
+                                                        {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_grandcan_thermalizer_}
+   */
+  inline static const Key<einhard::LogLevel> log_grandcanThermalizer{
+      {"Logging", "GrandcanThermalizer"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_cross_sections_,CrossSections,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_cross_sections_}
+   */
+  inline static const Key<einhard::LogLevel> log_crossSections{
+      {"Logging", "CrossSections"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_output_,Output,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_output_}
+   */
+  inline static const Key<einhard::LogLevel> log_output{{"Logging", "Output"},
+                                                        {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_hyper_surface_crossing_,HyperSurfaceCrossing,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_hyper_surface_crossing_}
+   */
+  inline static const Key<einhard::LogLevel> log_hyperSurfaceCrossing{
+      {"Logging", "HyperSurfaceCrossing"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_initial_conditions_,InitialConditions,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_initial_conditions_}
+   */
+  inline static const Key<einhard::LogLevel> log_initialConditions{
+      {"Logging", "InitialConditions"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_scatter_action_multi_,ScatterActionMulti,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_scatter_action_multi_}
+   */
+  inline static const Key<einhard::LogLevel> log_scatterActionMulti{
+      {"Logging", "ScatterActionMulti"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{log_yaml_configuration_,YAML_Configuration,string,$\{default\}}
+   */
+  /**
+   * \see_key{log_yaml_configuration_}
+   */
+  inline static const Key<einhard::LogLevel> log_yamlConfiguration{
+      {"Logging", "YAML_Configuration"}, {"1.0"}};
+
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
       std::reference_wrapper<const Key<bool>>,
       std::reference_wrapper<const Key<int>>,
       std::reference_wrapper<const Key<double>>,
       std::reference_wrapper<const Key<std::string>>,
+      std::reference_wrapper<const Key<einhard::LogLevel>>,
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<RestFrameDensityDerivativesMode>>,
@@ -775,7 +1118,39 @@ struct InputKeys {
       std::cref(gen_smearingDiscreteWeight),
       std::cref(gen_testparticles),
       std::cref(gen_timeStepMode),
-      std::cref(gen_useGrid)};
+      std::cref(gen_useGrid),
+      std::cref(log_default),
+      std::cref(log_main),
+      std::cref(log_experiment),
+      std::cref(log_box),
+      std::cref(log_collider),
+      std::cref(log_sphere),
+      std::cref(log_action),
+      std::cref(log_inputParser),
+      std::cref(log_particleType),
+      std::cref(log_findScatter),
+      std::cref(log_clock),
+      std::cref(log_decayModes),
+      std::cref(log_resonances),
+      std::cref(log_scatterAction),
+      std::cref(log_distributions),
+      std::cref(log_propagation),
+      std::cref(log_grid),
+      std::cref(log_list),
+      std::cref(log_nucleus),
+      std::cref(log_density),
+      std::cref(log_pauliBlocking),
+      std::cref(log_tmn),
+      std::cref(log_fpe),
+      std::cref(log_lattice),
+      std::cref(log_pythia),
+      std::cref(log_grandcanThermalizer),
+      std::cref(log_crossSections),
+      std::cref(log_output),
+      std::cref(log_hyperSurfaceCrossing),
+      std::cref(log_initialConditions),
+      std::cref(log_scatterActionMulti),
+      std::cref(log_yamlConfiguration)};
 };
 
 }  // namespace smash
@@ -812,6 +1187,28 @@ struct InputKeys {
           Maximum_Ensembles_Run: 2000
       Ensembles: 20
   \endverbatim
-  */
+ */
+
+/*!\Userguide
+ * \page input_logging_
+ * <hr>
+ * \par Example: Configuring the Logging Area
+ *
+ * To activate different logging levels for different logging areas, change the
+ * default level for the desired areas. For example:
+ *\verbatim
+ Logging:
+     default:    "WARN"
+     Main:       "INFO"
+     Experiment: "INFO"
+     Pythia:     "DEBUG"
+     Fpe:        "OFF"
+ \endverbatim
+ *
+ * This will set all levels to `WARN` verbosity, still asking for informational
+ * messages of `Main` and `Experiment` areas. Furthermore, `Pythia` debug
+ * messages are requested, while any floating point exception message is turned
+ * off.
+ */
 
 #endif  // SRC_INCLUDE_SMASH_VALIDATION_H_
