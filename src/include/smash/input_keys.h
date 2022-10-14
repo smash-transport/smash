@@ -332,6 +332,100 @@ class Key {
  * debug builds (i.e. running `cmake` with `-DCMAKE_BUILD_TYPE=Debug`).
  */
 
+/*!\Userguide
+ * \page input_collision_term_ Collision term
+ *
+ * The `Collision_Term` section in the input file can be used to configure SMASH
+ * interactions. Before describing each possible key in detail, it is useful to
+ * give some taste with a couple of examples.
+ *
+ * \par A real life example
+ *
+ * The following section in the input file configures SMASH to include all but
+ * strangeness exchange involving 2 &harr; 2 scatterings, to treat N + Nbar
+ * processes as resonance formations and to not force decays at the end of the
+ * simulation. The elastic cross section is globally set to 30 mbarn and the
+ * \f$ \sqrt{s} \f$ cutoff for elastic nucleon + nucleon collisions is 1.93 GeV.
+ * All collisions are performed isotropically and 2 &harr; 1 processes are
+ * forbidden.
+ *
+ *\verbatim
+ Collision_Term:
+     Included_2to2: ["Elastic","NN_to_NR","NN_to_DR","KN_to_KN","KN_to_KDelta"]
+     Two_to_One: true
+     Force_Decays_At_End: false
+     NNbar_Treatment: "resonances"
+     Elastic_Cross_Section: 30.0
+     Elastic_NN_Cutoff_Sqrts: 1.93
+     Isotropic: true
+ \endverbatim
+ *
+ * If necessary, all collisions can be turned off by adding
+ *\verbatim
+     No_Collisions: True
+ \endverbatim
+ * in the configuration file.
+ *
+ * \par Configuring deuteron multi-particle reactions
+ *
+ * The following example configures SMASH to include deuteron multi-particle
+ * reactions scatterings.
+ *\verbatim
+ Collision_Term:
+     Collision_Criterion: Stochastic
+     Multi_Particle_Reactions: ["Deuteron_3to2"]
+ \endverbatim
+ * Note, that the d' should not be included in the \e particels.txt file,
+ * otherwise `PiDeuteron_to_pidprime` and `NDeuteron_to_Ndprime` have to be
+ * excluded from `Included_2to2` by listing all 2-to-2 reactions except those
+ * two.
+ *
+ * <hr>
+ * In this page many generic keys are described. For information about further
+ * tuning possibilities, see the following pages:
+ * - \subpage input_collision_term_pauliblocker_
+ * - \subpage input_collision_term_string_parameters_
+ * - \subpage input_collision_term_dileptons_
+ * - \subpage input_collision_term_photons_
+ */
+
+/*!\Userguide
+ * \page input_collision_term_pauliblocker_ Pauli Blocking
+ *
+ * Pauli blocking can be activated and customized using the `Pauli_Blocking`
+ * section within `Collision_Term`. For example:
+ *\verbatim
+ Collision_Term:
+     Pauli_Blocking:
+         Spatial_Averaging_Radius: 1.86
+         Gaussian_Cutoff: 2.2
+         Momentum_Averaging_Radius: 0.08
+ \endverbatim
+ */
+
+/*!\Userguide
+ * \page input_collision_term_string_parameters_ String Parameters
+ *
+ * Within `Collision_Term` section, the `String_Parameters` section can be used
+ * to modify a series of parameters which affect the string fragmentation.
+ */
+
+/*!\Userguide
+ * \page input_collision_term_dileptons_ Dileptons
+ *
+ * Dilepton production can be enabled in the corresponding `Dileptons`
+ * section in the `Collision_Term` one of the configuration file.
+ * Remember to also activate the dilepton output in the output section.
+ */
+
+/*!\Userguide
+ * \page input_collision_term_photons_ Photons
+ *
+ * Photon production can be enabled in the corresponding `Photon` section
+ * in the `Collision_Term` one of the configuration file.
+ * Remember to also activate the photon output in the output section.
+ */
+
 /**
  * @brief A container to keep track of all ever existed input keys.
  *
@@ -1099,6 +1193,826 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_yamlConfiguration{
       {"Logging", "YAML_Configuration"}, {"1.0"}};
 
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_two_to_one_,Two_to_One,bool,true}
+   *
+   * Enable 2 &harr; 1 processes (resonance formation and decays).
+   */
+  /**
+   * \see_key{CT_two_to_one_}
+   */
+  inline static const Key<bool> collTerm_twoToOne{
+      {"Collision_Term", "Two_to_One"}, true, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_included_2to2_,Included_2to2,list of strings,["All"]}
+   *
+   * List that contains all possible 2 &harr; 2 process categories. Each process
+   * of the listed category can be performed within the simulation. Possible
+   * categories are:
+   * - `"Elastic"` &rarr; elastic binary scatterings
+   * - `"NN_to_NR"` &rarr; nucleon + nucleon &harr; nucleon + resonance
+   * - `"NN_to_DR"` &rarr; nucleon + nucleon &harr; delta + resonance
+   * - `"KN_to_KN"` &rarr; kaon + nucleon &harr; kaon + nucleon
+   * - `"KN_to_KDelta"` &rarr; kaon + nucleon &harr; kaon + delta
+   * - `"Strangeness_exchange"` &rarr; processes with strangeness exchange
+   * - `"NNbar"` &rarr; annihilation processes, when NNbar_treatment is set to
+   *   resonances; this is superseded if NNbar_treatment is set to anything else
+   * - `"PiDeuteron_to_NN"` &rarr; deuteron + pion &harr; nucleon + nucleon and
+   *   its CPT-conjugate
+   * - `"PiDeuteron_to_pidprime"` &rarr; deuteron + pion &harr; d' + pion
+   * - `"NDeuteron_to_Ndprime"` &rarr; deuteron + (anti-)nucleon &harr;
+   *   d' + (anti-)nucleon, and their CPT-conjugates
+   * - `"All"` &rarr; include all binary processes, no necessity to list each
+   *   single category
+   *
+   * Detailed balance is preserved by these reaction switches: if a forward
+   * reaction is off then the reverse is automatically off too.
+   */
+  /**
+   * \see_key{CT_included_2to2_}
+   */
+  inline static const Key<ReactionsBitSet> collTerm_includedTwoToTwo{
+      {"Collision_Term", "Included_2to2"},
+      ReactionsBitSet{}.set(),  // All interactions => all bit set
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_mp_reactions_,Multi_Particle_Reactions,list of strings,[]}
+   *
+   * List of reactions with more than 2 in- or outgoing particles that contains
+   * all possible multi-particle process categories. Multi particle reactions
+   * only work with the stochastic collision criterion. Possible categories are:
+   * - `"Meson_3to1"` &rarr; Mesonic 3-to-1 reactions:
+   *   <table>
+   *   <tr>
+   *   <td> \f$\strut\pi^0\pi^+\pi^-\leftrightarrow\omega\f$
+   *   <td> \f$\strut\pi^0\pi^+\pi^-\leftrightarrow\phi\f$
+   *   <td> \f$\strut\eta\pi^+\pi^-\leftrightarrow\eta'\f$
+   *   <td> \f$\strut\eta\pi^0\pi^0\leftrightarrow\eta'\f$
+   *   </table>
+   *   Since detailed balance is enforced, the corresponding decays also have to
+   *   be added in decaymodes.txt to enable the reactions.
+   * - `"Deuteron_3to2"` &rarr; Deuteron 3-to-2 reactions:
+   *   <table>
+   *   <tr>
+   *   <td> \f$\strut \pi pn\leftrightarrow\pi d\f$
+   *   <td> \f$\strut Npn\leftrightarrow Nd\f$
+   *   <td> \f$\strut \bar{N}pn\leftrightarrow\bar{N}d\f$
+   *   </table>
+   *   The deuteron has to be uncommented in particles.txt as well.
+   *   Do not uncomment d' or make sure to exclude 2-body reactions involving
+   *   the d' (i.e. no `"PiDeuteron_to_pidprime"` and `"NDeuteron_to_Ndprime"`
+   *   in `Included_2to2`). Otherwise, the deuteron reactions are implicitly
+   *   double-counted.
+   * - `"A3_Nuclei_4to2"` &rarr; Create or destroy A = 3 nuclei (triton, He-3,
+   *   hypertriton) by 4 &harr; 2 catalysis reactions such as
+   *   \f$X NNN \leftrightarrow X t\f$, where \f$X\f$ can be a pion, nucleon, or
+   *   antinucleon.
+   * - `"NNbar_5to2"` &rarr; 5-to-2 back-reaction for NNbar annihilation:
+   *   \f$\pi^0\pi^+\pi^-\pi^+\pi^- \rightarrow N\bar{N}\f$. Since detailed
+   *   balance is enforced, `NNbar_Treatment` has to be set to "two to five" for
+   *   this option.
+   */
+  /**
+   * \see_key{CT_mp_reactions_}
+   */
+  inline static const Key<MultiParticleReactionsBitSet>
+      collTerm_multiParticleReactions{
+          {"Collision_Term", "Multi_Particle_Reactions"},
+          MultiParticleReactionsBitSet{}.reset(),  // Empty list => no bit set
+          {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_force_decays_at_end_,Force_Decays_At_End,bool,true}
+   *
+   * - `true` &rarr; Force all resonances to decay after last timestep.
+   * - `false` &rarr; Don't force decays (final output can contain resonances).
+   */
+  /**
+   * \see_key{CT_force_decays_at_end_}
+   */
+  inline static const Key<bool> collTerm_forceDecaysAtEnd{
+      {"Collision_Term", "Force_Decays_At_End"}, true, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_no_collisions_,No_Collisions,bool,false}
+   *
+   * Disable all possible collisions, only allow decays to occur if not
+   * forbidden by other options. Useful for running SMASH as a decay
+   * afterburner, but not recommended in general, because it breaks the detailed
+   * balance.
+   */
+  /**
+   * \see_key{CT_no_collisions_}
+   */
+  inline static const Key<bool> collTerm_noCollisions{
+      {"Collision_Term", "No_Collisions"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_nnbar_treatment_,NNbar_Treatment,string,"strings"}
+   *
+   * - `"no annihilation"` &rarr; No annihilation of NNbar is performed.
+   * - `"resonances"` &rarr; Annihilation through
+   *   \f$N\bar{N}\rightarrow\rho h_1(1170)\f$; combined with
+   *   \f$\rho\rightarrow\pi\pi\f$ and \f$h_1(1170)\rightarrow\pi\rho\f$, which
+   *   gives 5 pions on average. This option requires `"NNbar"` to be enabled in
+   *   <tt>\ref CT_included_2to2_ "Included_2to2"</tt>.
+   * - `"two to five"` &rarr; Direct Annhilation of NNbar to \f$5\pi\f$,
+   *   matching the resonance treatment:
+   *   \f$N\bar{N}\rightarrow\pi^0\pi^+\pi^-\pi^+\pi^-\f$.
+   *   This option requires `"NNbar_5to2"` to be enabled in
+   *   <tt>\ref CT_mp_reactions_ "Multi_Particle_Reactions"</tt>.
+   * - `"strings"` &rarr; Annihilation through string fragmentation.
+   */
+  /**
+   * \see_key{CT_nnbar_treatment_}
+   */
+  inline static const Key<std::string> collTerm_nnbarTreatment{
+      {"Collision_Term", "NNbar_Treatment"}, "strings", {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_use_aqm_,Use_AQM,bool,true}
+   *
+   * Turn on AQM cross-sections for exotic combination of particles
+   * (baryon-baryon cross-sections are scaled from proton-proton high energy
+   * parametrization, for example). This includes both elastic and non-elastic
+   * contributions; non-elastic contributions go through string fragmentation.
+   * Turning off strings or elastic collisions while leaving this on will
+   * result in the corresponding part of the AQM cross-sections to also be off.
+   * Cross-sections parametrization are scaled according to
+   * \f[
+   * \frac{\sigma^{\mathrm{AQM}}_{\mathrm{process}}}
+   * {\sigma^{\mathrm{AQM}}_\mathrm{ref\_process}}
+   * \sigma^{\mathrm{param}}_\mathrm{ref\_process}
+   * \f]
+   * where \f$ \sigma^{\mathrm{AQM}}_x = 40 \left( \frac{2}{3}
+   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) \f$, with
+   * \f$n_\mathrm{meson}\f$ being the number of mesons in the process,
+   * \f$x^s_{1,2}\f$ the fraction of strange quarks in the participant.
+   * "process" is then a generic process and "ref_process" a reference process
+   * such as PP for which solid parametrizations exist.
+   * (\iref{Bass:1998ca})
+   */
+  /**
+   * \see_key{CT_use_aqm_}
+   */
+  inline static const Key<bool> collTerm_useAQM{
+      {"Collision_Term", "Use_AQM"}, true, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_res_lifetime_mod_,Resonance_Lifetime_Modifier,double,1.0}
+   *
+   * Multiplicative factor by which to scale the resonance lifetimes up or down.
+   * This additionally has the effect of modifying the initial densities by
+   * the same factor in the case of a box initialized with thermal
+   * multiplicities (see `Use_Thermal_Multiplicities` in \ref XXX and \ref YYY).
+   *
+   * \warning This option is not fully physically consistent with some of the
+   * other assumptions used in SMASH; notably, modifying this value **will**
+   * break detailed balance in any gas which allows resonances to collide
+   * inelastically, as this option breaks the relationship between the width and
+   * lifetime of resonances. Note as well that in such gases, using a value of
+   * 0.0 is known to make SMASH hang; it is recommended to use a small non-zero
+   * value instead in these cases.
+   */
+  /**
+   * \see_key{CT_res_lifetime_mod_}
+   */
+  inline static const Key<double> collTerm_resonanceLifetimeModifier{
+      {"Collision_Term", "Resonance_Lifetime_Modifier"}, 1.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_string_with_prob_,Strings_with_Probability,bool,true}
+   *
+   * - `true` &rarr;
+   *   String processes are triggered according to a probability increasing
+   *   smoothly with the collisional energy from 0 to 1 in a certain energy
+   *   window. At energies beyond that window, all the inelastic scatterings are
+   *   via strings, while at the energies below that window, all the scatterings
+   *   are via non-string processes. One should be careful that in this
+   *   approach, the scatterings via resoances are also suppressed in the
+   *   intermediate energy region, and vanishes at high energies, e.g.
+   *   \f$p\pi\rightarrow\Delta\rightarrow\Sigma K\f$
+   *   can't happen at a collisional energy beyond 2.2 GeV in this approach.
+   *   Therefore, the cross sections of the scatterings to the certain final
+   *   states, which might be crucial for the production of the rare species,
+   *   will be reduced at the high energies.
+   * - `false` &rarr;
+   *   String processes always happen as long as the collisional energy exceeds
+   *   the threshold value by 0.9 GeV, and the parametrized total cross section
+   *   is larger than the sum of cross sections contributed by the non-string
+   *   processes. The string cross section is thus obtained by taking the
+   *   difference between them.
+   */
+  /**
+   * \see_key{CT_string_with_prob_}
+   */
+  inline static const Key<bool> collTerm_stringsWithProbability{
+      {"Collision_Term", "Strings_with_Probability"}, true, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_elastic_cross_section_,Elastic_Cross_Section,double,-1.0}
+   *
+   * If a non-negative value is given, it will override the parametrized
+   * elastic cross sections (which are energy-dependent) with a constant value
+   * (in mb). This constant elastic cross section is used for all collisions.
+   */
+  /**
+   * \see_key{CT_elastic_cross_section_}
+   */
+  inline static const Key<double> collTerm_elasticCrossSection{
+      {"Collision_Term", "Elastic_Cross_Section"}, -1.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_isotropic_,Isotropic,bool,false}
+   *
+   * Do all collisions isotropically.
+   */
+  /**
+   * \see_key{CT_isotropic_}
+   */
+  inline static const Key<bool> collTerm_isotropic{
+      {"Collision_Term", "Isotropic"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_max_cs_,Maximum_Cross_Section,double,200</tt> or <tt>2000}
+   *
+   * The maximal cross section that should be used when looking for collisions.
+   * This means that all particle pairs, whose transverse distance is smaller or
+   * equal to \f$\sqrt{\sigma_\mathrm{max}/\pi}\f$, will be checked for
+   * collisions. <b>The default value is usually set to 200 (in mb)</b> and this
+   * value occurs in the Delta peak of the \f$\pi+p\f$ cross section. Many SMASH
+   * cross sections diverge close at the threshold; these divergent parts are
+   * effectively cut off. If deuteron production via d' is considered, then the
+   * default is increased to 2000 mb to function correctly (see
+   * \iref{Oliinychenko:2018ugs}). The maximal cross section is scaled with
+   * <tt>\ref CT_cs_scaling_ "Cross_Section_Scaling"</tt> factor.
+   */
+  /**
+   * \see_key{CT_max_cs_}
+   */
+  inline static const Key<double> collTerm_maximumCrossSection{
+      {"Collision_Term", "Maximum_Cross_Section"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,double,2.5}
+   *
+   * The (minimal) length <b>in fm</b> used for the grid cells of the stochastic
+   * criterion, only. Collisions are searched within grid cells only. Cell
+   * lengths are scaled up so that grid contains all particles if fraction of a
+   * cell length would remain at end of the grid.
+   */
+  /**
+   * \see_key{CT_fixed_min_cell_length_}
+   */
+  inline static const Key<double> collTerm_fixedMinCellLength{
+      {"Collision_Term", "Fixed_Min_Cell_Length"}, 2.5, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_cs_scaling_,Cross_Section_Scaling,double,1.0}
+   *
+   * Scale all cross sections by a global factor.
+   * \warning Most cross sections are constrained by experimental data. Scaling
+   * them will therefore lead to nonphysical results and is only meant for
+   * explorative studies.
+   */
+  /**
+   * \see_key{CT_cs_scaling_}
+   */
+  inline static const Key<double> collTerm_crossSectionScaling{
+      {"Collision_Term", "Cross_Section_Scaling"}, 1.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_additional_el_cs_,Additional_Elastic_Cross_Section,double,0.0}
+   *
+   * Add an additional constant contribution <b>in mb</b> to the elastic cross
+   * section.
+   * \warning Most elastic cross sections are constrained by experimental data.
+   * Adding an additional contribution to them will therefore lead to
+   * nonphysical results and is only meant for explorative studies.
+   */
+  /**
+   * \see_key{CT_additional_el_cs_}
+   */
+  inline static const Key<double> collTerm_additionalElasticCrossSection{
+      {"Collision_Term", "Additional_Elastic_Cross_Section"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_include_decays_end_,Include_Weak_And_EM_Decays_At_The_End,bool,false}
+   *
+   * Enable to also perform weak and electro-magnetic decays at the end of the
+   * simulation. If enabled, all decays in the *decaymodes.txt* file are
+   * considered at the end, even for hadrons usually considered stable (i.e.
+   * with an on-shell width larger than the width_cutoff), for example
+   * \f$\Sigma\f$, \f$\pi\f$ or \f$\eta\f$. Note that for isospin violating
+   * decay modes all possible isospin combination have to be manually specified
+   * in the *decaymodes.txt* file.
+   */
+  /**
+   * \see_key{CT_include_decays_end_}
+   */
+  inline static const Key<bool> collTerm_includeDecaysAtTheEnd{
+      {"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
+      false,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_elastic_nn_cutoff_sqrts_,Elastic_NN_Cutoff_Sqrts,double,1.98}
+   *
+   * The elastic collisions between two nucleons with \f$\sqrt{s}\f$ below
+   * the specified value (<b>in GeV</b>) cannot happen.
+   * - `Elastic_NN_Cutoff_Sqrts` < 1.88 &rarr;
+   *   Below the threshold energy of the elastic collision, no effect.
+   * - `Elastic_NN_Cutoff_Sqrts` > 2.02 &rarr;
+   *   Beyond the threshold energy of the inelastic collision
+   *   \f$NN\rightarrow NN\pi\f$, not suggested.
+   */
+  /**
+   * \see_key{CT_elastic_nn_cutoff_sqrts_}
+   */
+  inline static const Key<double> collTerm_elasticNNCutoffSqrts{
+      {"Collision_Term", "Elastic_NN_Cutoff_Sqrts"}, 1.98, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_strings_,Strings,bool,(\ref gen_modus_ "Modus"!="Box")}
+   *
+   * - `true` &rarr; String excitation is enabled
+   * - `false` &rarr; String excitation is disabled
+   */
+  /**
+   * \see_key{CT_strings_}
+   */
+  inline static const Key<bool> collTerm_strings{{"Collision_Term", "Strings"},
+                                                 {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_collision_criterion_,Collision_Criterion,string,"Covariant"}
+   *
+   * The following collision criterions can be used.
+   *
+   * - `"Geometric"` &rarr; <b>Geometric collision criterion</b>\n
+   *   The geometric collision criterion calculates the two-particle impact
+   *   parameter as the closest approach distance in the two-particle
+   *   center-of-momentum frame by boosting to the respective frame. The
+   *   collision time used for the ordering is calculated as the time of the
+   *   closest approach in the computational frame. For further details, see
+   *   \iref{Bass:1998ca}.
+   *
+   * - `"Stochastic"` &rarr; <b>Stochastic collision criterion</b>\n
+   *   The stochastic collision criterion employs a probability to decide
+   *   whether particles collide inside a given space-time cell. The probability
+   *   is derived directly from the scattering rate given by the Boltzmann
+   *   equation. The stochastic criterion is the only criterion that allows to
+   *   treat multi-particle reactions. For more details, see
+   *   \iref{Staudenmaier:2021lrg}.
+   *   \note
+   *   The stochastic criterion is only applicable within limits. For example,
+   *   it might not lead to reasonable results for very dilute systems like pp
+   *   collisions. Futhermore, the fixed time step mode is required. The
+   *   assumption for the criterion is that only one reaction per particle per
+   *   timestep occurs. Therefore, small enough timesteps (<tt>\ref
+   *   gen_delta_time_ "Delta_Time"</tt>) have to be used. In doubt, test if the
+   *   results change with smaller timesteps. Since the probability value is not
+   *   by defintion limited to 1 in case of large timesteps, an error is thrown
+   *   if it gets larger than 1.
+   *
+   * - `"Covariant"` &rarr; <b>Covariant collision criterion</b>\n
+   *   The covariant collision criterion uses a covariant expression of the
+   *   two-particle impact parameter in the two-particle center-of-momentum
+   *   frame, which allows for its calculation in the computational frame
+   *   without boosting. Furthermore, it calculates the collision times used for
+   *   the collision ordering in the two-particle center-of-momentum frame.
+   *   Further details are described in \iref{Hirano:2012yy}.
+   */
+  /**
+   * \see_key{CT_collision_criterion_}
+   */
+  inline static const Key<std::string> collTerm_collisionCriterion{
+      {"Collision_Term", "Strings"}, "Covariant", {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_
+   * \optional_key{CT_warn_high_prob_,Only_Warn_For_High_Probability,bool,false}
+   *
+   * Only warn and not error for reaction probabilities higher than 1.
+   * This switch is meant for very long production runs with the stochastic
+   * criterion. It has no effect on the other criteria. If enabled, it is user
+   * responsibility to make sure that the warning, that the probability has
+   * slipped above 1, is printed very rarely.
+   */
+  /**
+   * \see_key{CT_warn_high_prob_}
+   */
+  inline static const Key<bool> collTerm_onlyWarnForHighProbability{
+      {"Collision_Term", "Only_Warn_For_High_Probability"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_pauliblocker_
+   * \optional_key{CT_PB_spatial_averaging_radius_,Spatial_Averaging_Radius,double,1.86}
+   *
+   * Radius <b>in fm</b> of sphere for averaging in the coordinate space.
+   */
+  /**
+   * \see_key{CT_PB_spatial_averaging_radius_}
+   */
+  inline static const Key<double> collTerm_pauliBlocking_spatialAveragingRadius{
+      {"Collision_Term", "Pauli_Blocking", "Spatial_Averaging_Radius"},
+      1.86,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_pauliblocker_
+   * \optional_key{CT_PB_gaussian_cutoff_,Gaussian_Cutoff,double,2.2}
+   *
+   * Radius <b>in fm</b> at which Gaussians used for smoothing are cut.
+   */
+  /**
+   * \see_key{CT_PB_gaussian_cutoff_}
+   */
+  inline static const Key<double> collTerm_pauliBlocking_gaussianCutoff{
+      {"Collision_Term", "Pauli_Blocking", "Gaussian_Cutoff"}, 2.2, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_pauliblocker_
+   * \optional_key{CT_PB_momentum_av_radius_,Momentum_Averaging_Radius,double,0.08}
+   *
+   * Radius <b>in GeV/c</b> of sphere for averaging in the momentum space.
+   */
+  /**
+   * \see_key{CT_PB_momentum_av_radius_}
+   */
+  inline static const Key<double>
+      collTerm_pauliBlocking_momentumAveragingRadius{
+          {"Collision_Term", "Pauli_Blocking", "Momentum_Averaging_Radius"},
+          0.08,
+          {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_string_tension_,String_Tension,double,1.0}
+   *
+   * String tension \f$\kappa\f$ <b>in GeV/fm</b> connecting massless quarks in
+   * Hamiltonian, \f[H=|p_1|+|p_2|+\kappa |x_1-x_2|\;.\f]
+   * This parameter is only used to determine particles' formation times
+   * according to the yo-yo formalism (in the soft string routine for now).
+   */
+  /**
+   * \see_key{CT_SP_string_tension_}
+   */
+  inline static const Key<double> collTerm_stringParam_stringTension{
+      {"Collision_Term", "String_Parameters", "String_Tension"}, 1.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_gluon_beta_,Gluon_Beta,double,0.5}
+   *
+   * Parameter \f$\beta\f$ in parton distribution function for gluons,
+   * \f[\mathrm{PDF}_g(x) \propto \frac{1}{x}(1-x)^{\beta+1}\;.\f]
+   */
+  /**
+   * \see_key{CT_SP_gluon_beta_}
+   */
+  inline static const Key<double> collTerm_stringParam_gluonBeta{
+      {"Collision_Term", "String_Parameters", "Gluon_Beta"}, 0.5, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_gluon_pmin_,Gluon_Pmin,double,0.001}
+   *
+   * Smallest possible scale for gluon lightcone momentum <b>in GeV</b>.
+   * This is divided by \f$\sqrt{s}\f$ to get the minimum fraction to be sampled
+   * from PDF shown in <tt>\ref CT_SP_gluon_beta_ "Gluon_Beta"</tt>.
+   */
+  /**
+   * \see_key{CT_SP_gluon_pmin_}
+   */
+  inline static const Key<double> collTerm_stringParam_gluonPMin{
+      {"Collision_Term", "String_Parameters", "Gluon_Pmin"}, 0.001, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_quark_alpha_,Quark_Alpha,double,2.0}
+   *
+   * Parameter \f$\alpha\f$ in parton distribution function for quarks,
+   * \f[\mathrm{PDF}_q\propto x^{\alpha-1}(1-x)^{\beta-1}\;.\f]
+   */
+  /**
+   * \see_key{CT_SP_quark_alpha_}
+   */
+  inline static const Key<double> collTerm_stringParam_quarkAlpha{
+      {"Collision_Term", "String_Parameters", "Quark_Alpha"}, 2.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_quark_beta_,Quark_Beta,double,7.0}
+   *
+   * Parameter \f$\beta\f$ in PDF for quarks shown in <tt>\ref
+   * CT_SP_quark_alpha_ "Quark_Alpha"</tt>.
+   */
+  /**
+   * \see_key{CT_SP_quark_beta_}
+   */
+  inline static const Key<double> collTerm_stringParam_quarkBeta{
+      {"Collision_Term", "String_Parameters", "Quark_Beta"}, 7.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_strange_supp_,Strange_Supp,double,0.16}
+   *
+   * Strangeness suppression factor \f$\lambda\f$,
+   * \f[\lambda=
+   * \frac{P(s\bar{s})}{P(u\bar{u})\vphantom{\bar{d}}}=
+   * \frac{P(s\bar{s})}{P(d\bar{d})}\;.
+   * \f]
+   * Defines the probability to produce a \f$s\bar{s}\f$ pair relative to
+   * producing a light \f$q\bar{q}\f$ pair.
+   */
+  /**
+   * \see_key{CT_SP_strange_supp_}
+   */
+  inline static const Key<double> collTerm_stringParam_strangeSuppression{
+      {"Collision_Term", "String_Parameters", "Strange_Supp"}, 0.16, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_diquark_supp_,Diquark_Supp,double,0.036}
+   *
+   * Diquark suppression factor. Defines the probability to produce a diquark
+   * antidiquark pair relative to producing a qurk antiquark pair.
+   */
+  /**
+   * \see_key{CT_SP_diquark_supp_}
+   */
+  inline static const Key<double> collTerm_stringParam_diquarkSuppression{
+      {"Collision_Term", "String_Parameters", "Diquark_Supp"}, 0.036, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_sigma_perp_,Sigma_Perp,double,0.42}
+   *
+   * Parameter \f$\sigma_\perp\f$ <b>in GeV</b> in the distribution for
+   * transverse momentum transfer between colliding hadrons \f$p_\perp\f$ and
+   * string mass \f$M_X\f$,
+   * \f[
+   * \frac{d^3N}{dM^2_Xd^2\mathbf{p_\perp}}\propto
+   * \frac{1}{M_X^2} \exp\left(-\frac{p_\perp^2}{\sigma_\perp^2}\right)\;.
+   * \f]
+   */
+  /**
+   * \see_key{CT_SP_sigma_perp_}
+   */
+  inline static const Key<double> collTerm_stringParam_sigmaPerp{
+      {"Collision_Term", "String_Parameters", "Sigma_Perp"}, 0.42, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_stringz_a_,StringZ_A,double,2.0}
+   *
+   * Parameter \f$a\f$ in Pythia fragmentation function \f$f(z)\f$,
+   * \f[f(z) = \frac{1}{z} (1-z)^a \exp\left(-b\frac{m_T^2}{z}\right)\;.\f]
+   */
+  /**
+   * \see_key{CT_SP_stringz_a_}
+   */
+  inline static const Key<double> collTerm_stringParam_stringZA{
+      {"Collision_Term", "String_Parameters", "StringZ_A"}, 2.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_stringz_b_,StringZ_B,double,0.55}
+   *
+   * Parameter \f$b\f$ <b>in 1/GeV²</b> in Pythia fragmentation function shown
+   * in <tt>\ref CT_SP_stringz_a_ "StringZ_A"</tt>.
+   */
+  /**
+   * \see_key{CT_SP_stringz_b_}
+   */
+  inline static const Key<double> collTerm_stringParam_stringZB{
+      {"Collision_Term", "String_Parameters", ""}, 0.55, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_separate_fragment_bar_,Separate_Fragment_Baryon,bool,true}
+   *
+   * Whether to use a separate fragmentation function for leading baryons in
+   * non-diffractive string processes.
+   */
+  /**
+   * \see_key{CT_SP_separate_fragment_bar_}
+   */
+  inline static const Key<bool> collTerm_stringParam_separateFragmentBaryon{
+      {"Collision_Term", "String_Parameters", "Separate_Fragment_Baryon"},
+      true,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.2}
+   *
+   * Parameter \f$a\f$ in Lund fragmentation function used to sample the light
+   * cone momentum fraction of leading baryons in non-diffractive string
+   * processes.
+   */
+  /**
+   * \see_key{CT_SP_stringz_a_leading_}
+   */
+  inline static const Key<double> collTerm_stringParam_stringZALeading{
+      {"Collision_Term", "String_Parameters", "StringZ_A_Leading"},
+      0.2,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_stringz_b_leading_,StringZ_B_Leading,double,2.0}
+   *
+   * Parameter \f$b\f$ <b>in 1/GeV²</b> in Lund fraghmentation function used to
+   * sample the light cone momentum fraction of leading baryons in
+   * non-diffractive string processes.
+   */
+  /**
+   * \see_key{CT_SP_stringz_b_leading_}
+   */
+  inline static const Key<double> collTerm_stringParam_stringZBLeading{
+      {"Collision_Term", "String_Parameters", "StringZ_B_Leading"},
+      2.0,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_string_sigma_t_,String_Sigma_T,double,0.5}
+   *
+   * Standard deviation <b>in GeV</b> in Gaussian for transverse momentum
+   * distributed to string fragments during fragmentation.
+   */
+  /**
+   * \see_key{CT_SP_string_sigma_t_}
+   */
+  inline static const Key<double> collTerm_stringParam_stringSigmaT{
+      {"Collision_Term", "String_Parameters", "String_Sigma_T"}, 0.5, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_form_time_factor_,Form_Time_Factor,double,1.0}
+   *
+   * Factor to be multiplied with the formation time of string fragments from
+   * the soft string routine.
+   */
+  /**
+   * \see_key{CT_SP_form_time_factor_}
+   */
+  inline static const Key<double> collTerm_stringParam_formTimeFactor{
+      {"Collision_Term", "String_Parameters", "Form_Time_Factor"},
+      1.0,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_power_part_formation_,Power_Particle_Formation,double,±1}
+   *
+   * The default value of this parameter is `+1` if
+   * \f$\sqrt{s}<200\,\mathrm{GeV}\f$ and `-1` otherwise. If positive, the power
+   * with which the cross section scaling factor of string fragments grows in
+   * time until it reaches 1. If negative, the scaling factor will be constant
+   * and jump to 1 once the particle forms.
+   */
+  /**
+   * \see_key{CT_SP_power_part_formation_}
+   */
+  inline static const Key<double> collTerm_stringParam_powerParticleFormation{
+      {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_formation_time_,Formation_Time,double,1.0}
+   *
+   * Parameter for formation time in string fragmentation, <b>in fm</b>.
+   */
+  /**
+   * \see_key{CT_SP_formation_time_}
+   */
+  inline static const Key<double> collTerm_stringParam_formationTime{
+      {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_m_dependent_formation_t_,Mass_Dependent_Formation_Times,bool,false}
+   *
+   * Whether the formation time of string fragments should depend on their mass.
+   * If it is set to `true`, the formation time is calculated as
+   * \f$\tau = \sqrt{2}\frac{m}{\kappa} \f$.
+   */
+  /**
+   * \see_key{CT_SP_m_dependent_formation_t_}
+   */
+  inline static const Key<bool> collTerm_stringParam_mDependentFormationTimes{
+      {"Collision_Term", "String_Parameters", "Mass_Dependent_Formation_Times"},
+      false,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_probability_p_to_duu_,Prob_proton_to_d_uu,double,1./3}
+   *
+   * Probability of splitting an (anti)nucleon into the quark it has only once
+   * and the diquark it contains twice in terms of flavour in the soft string
+   * routine.
+   */
+  /**
+   * \see_key{CT_SP_probability_p_to_duu_}
+   */
+  inline static const Key<double> collTerm_stringParam_probabilityPToDUU{
+      {"Collision_Term", "String_Parameters", "Prob_proton_to_d_uu"},
+      1.0 / 3,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
+   * \optional_key{CT_SP_popcorn_rate_,Popcorn_Rate,double,0.15}
+   *
+   * Parameter StringFlav:popcornRate, which determines production rate of
+   * popcorn mesons in string fragmentation. It is possible to produce a popcorn
+   * meson from the diquark end of a string with certain probability (i.e.,
+   * diquark to meson + diquark).
+   */
+  /**
+   * \see_key{CT_SP_popcorn_rate_}
+   */
+  inline static const Key<double> collTerm_stringParam_popcornRate{
+      {"Collision_Term", "String_Parameters", "Popcorn_Rate"}, 0.15, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_dileptons_
+   * \optional_key{CT_dileptons_decays_,Decays,bool,false}
+   *
+   * Whether or not to enable dilepton production from hadron decays.
+   * This includes direct decays as well as Dalitz decays. Dilepton decays
+   * additionally have to be uncommented in the used *decaymodes.txt* file
+   * (see also \ref input_collision_term_dileptons_note_ "this note").
+   */
+  /**
+   * \see_key{CT_dileptons_decays_}
+   */
+  inline static const Key<bool> collTerm_dileptons_decays{
+      {"Collision_Term", "Dileptons", "Decays"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_photons_
+   * \required_key{CT_photons_fractional_photons,Fractional_Photons,int}
+   *
+   * Number of fractional photons sampled per single perturbatively produced
+   * photon.
+   */
+  /**
+   * \see_key{CT_photons_fractional_photons}
+   */
+  inline static const Key<int> collTerm_photons_fractionalPhotons{
+      {"Collision_Term", "Photons", "Fractional_Photons"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_photons_
+   * \optional_key{CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false}
+   *
+   * Whether or not to enable photon production in mesonic scattering processes.
+   */
+  /**
+   * \see_key{CT_photons_2to2_scatterings_}
+   */
+  inline static const Key<bool> collTerm_photons_twoToTwoScatterings{
+      {"Collision_Term", "Photons", "2to2_Scatterings"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_photons_
+   * \optional_key{CT_photons_bremsstrahlung_,Bremsstrahlung,bool,false}
+   *
+   * Whether or not to enable photon production in bremsstrahlung processes.
+   */
+  /**
+   * \see_key{CT_photons_bremsstrahlung_}
+   */
+  inline static const Key<bool> collTerm_photons_bremsstrahlung{
+      {"Collision_Term", "Photons", "Bremsstrahlung"}, false, {"1.0"}};
+
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
       std::reference_wrapper<const Key<bool>>,
@@ -1108,6 +2022,8 @@ struct InputKeys {
       std::reference_wrapper<const Key<einhard::LogLevel>>,
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
+      std::reference_wrapper<const Key<MultiParticleReactionsBitSet>>,
+      std::reference_wrapper<const Key<ReactionsBitSet>>,
       std::reference_wrapper<const Key<RestFrameDensityDerivativesMode>>,
       std::reference_wrapper<const Key<SmearingMode>>,
       std::reference_wrapper<const Key<TimeStepMode>>>;
@@ -1165,10 +2081,55 @@ struct InputKeys {
       std::cref(log_hyperSurfaceCrossing),
       std::cref(log_initialConditions),
       std::cref(log_scatterActionMulti),
-      std::cref(log_yamlConfiguration)};
+      std::cref(log_yamlConfiguration),
+      std::cref(collTerm_twoToOne),
+      std::cref(collTerm_includedTwoToTwo),
+      std::cref(collTerm_multiParticleReactions),
+      std::cref(collTerm_forceDecaysAtEnd),
+      std::cref(collTerm_noCollisions),
+      std::cref(collTerm_nnbarTreatment),
+      std::cref(collTerm_useAQM),
+      std::cref(collTerm_resonanceLifetimeModifier),
+      std::cref(collTerm_stringsWithProbability),
+      std::cref(collTerm_elasticCrossSection),
+      std::cref(collTerm_isotropic),
+      std::cref(collTerm_maximumCrossSection),
+      std::cref(collTerm_fixedMinCellLength),
+      std::cref(collTerm_crossSectionScaling),
+      std::cref(collTerm_additionalElasticCrossSection),
+      std::cref(collTerm_includeDecaysAtTheEnd),
+      std::cref(collTerm_elasticNNCutoffSqrts),
+      std::cref(collTerm_strings),
+      std::cref(collTerm_collisionCriterion),
+      std::cref(collTerm_onlyWarnForHighProbability),
+      std::cref(collTerm_pauliBlocking_spatialAveragingRadius),
+      std::cref(collTerm_pauliBlocking_gaussianCutoff),
+      std::cref(collTerm_pauliBlocking_momentumAveragingRadius),
+      std::cref(collTerm_stringParam_stringTension),
+      std::cref(collTerm_stringParam_gluonBeta),
+      std::cref(collTerm_stringParam_gluonPMin),
+      std::cref(collTerm_stringParam_quarkAlpha),
+      std::cref(collTerm_stringParam_quarkBeta),
+      std::cref(collTerm_stringParam_strangeSuppression),
+      std::cref(collTerm_stringParam_diquarkSuppression),
+      std::cref(collTerm_stringParam_sigmaPerp),
+      std::cref(collTerm_stringParam_stringZA),
+      std::cref(collTerm_stringParam_stringZB),
+      std::cref(collTerm_stringParam_separateFragmentBaryon),
+      std::cref(collTerm_stringParam_stringZALeading),
+      std::cref(collTerm_stringParam_stringZBLeading),
+      std::cref(collTerm_stringParam_stringSigmaT),
+      std::cref(collTerm_stringParam_formTimeFactor),
+      std::cref(collTerm_stringParam_powerParticleFormation),
+      std::cref(collTerm_stringParam_formationTime),
+      std::cref(collTerm_stringParam_mDependentFormationTimes),
+      std::cref(collTerm_stringParam_probabilityPToDUU),
+      std::cref(collTerm_stringParam_popcornRate),
+      std::cref(collTerm_dileptons_decays),
+      std::cref(collTerm_photons_fractionalPhotons),
+      std::cref(collTerm_photons_twoToTwoScatterings),
+      std::cref(collTerm_photons_bremsstrahlung)};
 };
-
-}  // namespace smash
 
 /*!\Userguide
  * \page minimum_nonempty_ensembles_
@@ -1225,5 +2186,171 @@ struct InputKeys {
  * messages are requested, while any floating point exception message is turned
  * off.
  */
+
+/*!\Userguide
+ * \page input_collision_term_string_parameters_
+ * <hr>
+ * \par Example of string paramters customization
+ *
+ *\verbatim
+ Collision_Term:
+     Strings: True
+     String_Parameters:
+         String_Tension: 1.0
+         Gluon_Beta: 0.5
+         Gluon_Pmin: 0.001
+         Quark_Alpha: 2.0
+         Quark_Beta: 7.0
+         Strange_Supp: 0.16
+         Diquark_Supp: 0.036
+         Sigma_Perp: 0.42
+         StringZ_A_Leading: 0.2
+         StringZ_B_Leading: 2.0
+         StringZ_A: 2.0
+         StringZ_B: 0.55
+         String_Sigma_T: 0.5
+         Prob_proton_to_d_uu: 0.33
+         Separate_Fragment_Baryon: True
+         Popcorn_Rate: 0.15
+ \endverbatim
+ */
+
+/*!\Userguide
+ * \page input_collision_term_dileptons_
+ * <hr>
+ * \par Example of dileptons configuration
+ *
+ * The following example configures the dilepton production for dileptons
+ * originating from resonance decays. In addition, the extended OSCAR2013
+ * dilepton output is enabled.
+ *
+ *\verbatim
+ Output:
+     Dileptons:
+         Format: ["Oscar2013"]
+         Extended: True
+ Collision_Term:
+     Dileptons:
+         Decays: True
+ \endverbatim
+ *
+ * <hr>
+ * \par Dilepton production in SMASH
+ *
+ * The treatment of Dilepton Decays is special:
+ * - Dileptons are treated via the time integration method, also called
+ *   *shining*, as e.g. described in \iref{Schmidt:2008hm}, chapter 2D.
+ *   This means that, because dilepton decays are so rare, possible decays are
+ *   written in the output at every hadron propagation without ever performing
+ *   them. The are weighted with a "shining weight" to compensate for the
+ *   over-production.
+ * - The shining weight can be found in the weight element of the output.
+ * - The shining method is implemented in the DecayActionsFinderDilepton,
+ *   which is automatically enabled together with the dilepton output.
+ *
+ * \anchor input_collision_term_dileptons_note_ \note
+ * If you want dilepton decays, you have to modify the *decaymodes.txt* file
+ * of your choice, which you then specify as the input with the `-d` command
+ * line option. <b>Without this decay modes modification the dilepton output
+ * will be empty</b>. Dilepton decays are commented out by default. Therefore,
+ * you need to uncomment them. For the N(1520) Dalitz decay, two treatments are
+ * available: Either by proxy of the \f$\rho N\f$ decay, which is enabled by
+ * default (and leads to a dilepton Dalitz decay, if \f$\rho \rightarrow
+ * e^+e^-\f$ is also enabled) or as a direct Dalitz decay to \f$e^+e^- N\f$.
+ * If using the latter comment-out the \f$\rho N\f$ decay to avoid double
+ * counting. The form factor in the direct case, is constant and fixed at the
+ * real photon point. Furthermore note, that for dilepton decays, new decay
+ * channels can \b not simply be added to the *decaymodes.txt* file. You also
+ * have to modify the decay width formulas \c TwoBodyDecayDilepton::width and
+ * \c ThreeBodyDecayDilepton::diff_width in *decaytype.cc* file.
+ *
+ */
+
+/*!\Userguide
+ * \page input_collision_term_photons_
+ * <hr>
+ * \par Example of photons configuration
+ *
+ * The following example configures the photon production in both binary
+ * scatterings and bremsstrahlung processes, where 1000 fractional photons are
+ * sampled per single perturbatively produced photon. In addition, the binary
+ * photon output is enabled.
+ *
+ *\verbatim
+ Output:
+     Photons:
+         Format: ["Binary"]
+ Collision_Term:
+     Photons:
+         Fractional_Photons: 1000
+         2to2_Scatterings: True
+         Bremsstrahlung: True
+ \endverbatim
+ *
+ * <hr>
+ * \par Photon production in SMASH
+ *
+ * Photons are treated perturbatively and are produced from binary
+ * scattering processes. Their production follows the framework from Turbide
+ * et al. described in \iref{Turbide:2006zz}. Following the perturbative
+ * treatment, the produced photons do not contribute to the evolution of the
+ * hadronic system. They are rather direcly printed to the photon output.
+ * The mechanism for photon production is the following:
+ * -# Look for hadronic interactions of particles that are also incoming
+ *    particles of a photon process. Currently, the latter include binar
+ *    scatterings of \f$ \pi \f$ and \f$ \rho \f$ mesons in the case of
+ *    photons from 2-to-2-scatterings or \f$ \pi \f$ scatterings in the case
+ *    of bremsstrahlung photons.
+ * -# Perform the photon action and write the results to the photon output.
+ *    The final state particles are not of interest anymore as they are not
+ *    propagated further in the evolution. To account for the probability that
+ *    photon processes are significantly less likely than hadronic processes,
+ *    the produced photons are weighted according to the ratio of the photon
+ *    cross section to the hadronic cross section used to find the interaction,
+ *    \f[W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\;.\f]
+ *    This weight can be found in the weight element of the photon output,
+ *    denoted as `photon_weight` in the above.
+ * -# Perform the original hadronic action based on which the photon action
+ *    was found. Propagate all final states particles throughout the hadronic
+ *    evolution as if no photon action had occured.
+ *
+ * As photons are produced very rarely, a lot of statistics is necessery to
+ * yield useful results. Alternatively, it it possible to use fractional
+ * photons (see \ref output_content_specific_options_
+ * "Content-specific output options" on how to activate them).
+ * This means that for each produced photon, \f$ N_{\text{Frac}} \f$
+ * photons are actually sampled with different kinematic properties so that
+ * more phase space is covered. In case fractional photons are used, the
+ * weight for 2-to-2-scatterings is redefined as
+ * \f[ W = \frac{\frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}t} \ (t_2 - t_1)}{
+ *                     N_\mathrm{frac} \ \sigma_{\mathrm{had}}}. \f]
+ *
+ * Unlike for binary scatterings, the final state kinematics of bremsstrahlung
+ * processes are not entirly defined from the incoming particles. Moreover,
+ * the final state momentum of the photon and as well as the scattering angle
+ * with respect to the incoming pion collision axis are free parameters whose
+ * distribution is encapsulated in the the differential cross section
+ * \f$ \frac{\mathrm{d}^2\sigma_\gamma}{\mathrm{d}k\ \mathrm{d} \theta}\f$.
+ * For numerical reasons and as the differential cross section can be
+ * approximately factorized over the common \f$ k \f$ and
+ * \f$ \theta \f$ range, \f$ \frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}k}\f$
+ * and \f$ \frac{\mathrm{d}\sigma_\gamma}{\mathrm{d} \theta}\f$ are considered
+ * separately. Consequently, the weighting factor in the case of bremsstrahlung
+ * photons is redefined as:
+ * \f[
+ * W = \frac{
+ *       \sqrt{\frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}k} \ \Delta k \
+ *             \frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}\theta}\ \Delta\theta}
+ *     }{N_\mathrm{frac}\ \sigma_{\mathrm{had}}}\;,
+ * \f]
+ * where \f$ \Delta k \f$ and \f$ \Delta\theta \f$ correspond to the
+ * available \f$ k \f$ and \f$ \theta \f$ ranges.
+ *
+ * \note As photons are treated perturbatively, the produced photons are only
+ * written to the photon output, but neither to the usual collision output,
+ * nor to the particle lists.
+ */
+
+}  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_VALIDATION_H_

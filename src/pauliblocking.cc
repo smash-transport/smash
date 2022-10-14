@@ -23,29 +23,6 @@ PauliBlocker::PauliBlocker(Configuration conf,
       rp_(conf.take({"Momentum_Averaging_Radius"}, 0.08)),
       ntest_(param.testparticles),
       n_ensembles_(param.n_ensembles) {
-  /*!\Userguide
-   * \page pauliblocker Pauli_Blocking
-   *
-   * \key Spatial_Averaging_Radius (double, optional, default = 1.86): \n
-   * Radius [fm] of sphere for averaging in the coordinate space
-   *
-   * \key Gaussian_Cutoff (double, optional, default = 2.2): \n
-   * Radius [fm] at which gaussians used for smoothing are cut
-   *
-   * \key Momentum_Averaging_Radius (double, optional, default = 0.08): \n
-   * Radius [GeV/c] of sphere for averaging in the momentum space
-   *
-   *
-   * **Examples: Configuring Pauli Blocking**\n
-   * Pauli Blocking can be activated with the follwing example subsection.
-   *\verbatim
-   Collision_Term:
-       Pauli_Blocking:
-           Spatial_Averaging_Radius: 1.86
-           Momentum_Averaging_Radius: 0.08
-           Gaussian_Cutoff: 2.2
-   \endverbatim
-   */
 
   if (ntest_ * n_ensembles_ < 20) {
     logg[LPauliBlocking].warn(
