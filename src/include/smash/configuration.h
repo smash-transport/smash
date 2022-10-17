@@ -862,22 +862,6 @@ class Configuration {
     }
 
     /**
-     * Set RestFrameDensityDerivatives mode.
-     */
-    operator RestFrameDensityDerivativesMode() const {
-      const std::string s = operator std::string();
-      if (s == "On") {
-        return RestFrameDensityDerivativesMode::On;
-      }
-      if (s == "Off") {
-        return RestFrameDensityDerivativesMode::Off;
-      }
-      throw IncorrectTypeInAssignment("The value for key \"" +
-                                      std::string(key_) +
-                                      "\" should be \"On\" or \"Off\".");
-    }
-
-    /**
      * Set FieldDerivatives mode.
      */
     operator FieldDerivativesMode() const {

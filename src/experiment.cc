@@ -99,32 +99,33 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  * However, the densities and mean-field potentials are computed as averages
  * over all ensembles (within a given event). This process can be also viewed as
  * calculating densities and mean-fields by summing over particles in all
- * ensembles combined, where each particle carries a fraction 1/n_ensembles of
- * its "real" charge. Such technique is called *parallel ensemble* technique. It
- * increases statistics necessary for precise density calculation without
- * increasing the number of collisions, which is not the case in the *full
- * ensemble* method (see below). Because of this, the parallel ensembles
- * technique is computationally faster than the full ensemble technique.
+ * ensembles combined, where each particle contributes to the local charge with
+ * a weight of 1/n_ensembles. Such technique is called the *parallel ensemble*
+ * technique. It increases the statistics necessary for a precise density
+ * calculation without increasing the number of collisions, which is not the
+ * case in the *full ensemble* method (see below). Because of this, the parallel
+ * ensembles technique is computationally faster than the full ensemble
+ * technique.
  *
  * \key Testparticles (int, optional, default = 1): \n
  * Number of test-particles per real particle in the simulation.
  *
- * Amount of initial sampled particles is increased by this factor,
+ * The number of initial sampled particles is increased by this factor,
  * while all cross sections are decreased by this factor. In this
- * way mean free path does not change. Larger number of testparticles
+ * way the mean free path does not change. Larger number of testparticles
  * helps to reduce spurious effects of geometric collision criterion
  * (see \iref{Cheng:2001dz}). It also reduces correlations related
  * to collisions and decays (but not the ones related to mean fields),
  * therefore the larger the number of testparticles, the closer the results
- * of the simulations should be to the solution of Boltzmann equation.
- * These advantages come at a cost of computational time.
+ * of the simulations should be to the solution of the Boltzmann equation.
+ * These advantages come at a cost of a larger computational time.
  *
  * Testparticles are a way to increase statistics necessary for
- * precise density calculation, which is why they are needed for mean field
+ * precise density calculation, which is why they are needed for mean-field
  * potentials. The technique of using testparticles for mean field
- * is called *full ensemble* technique. The number of collisions (and
+ * is called the *full ensemble* technique. The number of collisions (and
  * consequently the simulation time) scales as square of the number of
- * testparticles, and that is why full ensemble is slower than parallel
+ * testparticles, and that is why a full ensemble is slower than a parallel
  * ensemble.
  *
  * \key Derivatives_Mode (string, optional, default = "Covariant Gaussian"): \n
@@ -137,12 +138,6 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  * calculated based on finite differences of a given quantity at adjacent
  * lattice nodes; this mode is more numerically efficient.
 
- * \key Rest_Frame_Density_Derivatives_Mode (string, optional, default = "Off"):
- * \n
- * The mode of calculating the gradients of currents, decides whether the rest
- * frame density derivatives are copmuted (these derivatives are needed for the
- * VDF potentials, but not for the Skyrme potentials).
- *
  * \key Smearing_Mode (string, optional, default = "Covariant Gaussian"): \n
  * The mode of smearing for density calculation.
  *

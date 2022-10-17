@@ -36,6 +36,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now
 * The `Version` configuration key is not used anymore and should not be provided
+* Removed `Rest_Frame_Density_Derivatives_Mode` input key which was not used in the code
 
 
 ## SMASH-2.2.1
