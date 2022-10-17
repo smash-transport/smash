@@ -28,14 +28,6 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
   }
   logg[LExperiment].trace() << SMASH_SOURCE_LOCATION;
 
-  /*!\Userguide
-   * \page input_modi_ Modi
-   * \li \subpage input_modi_collider_
-   * \li \subpage input_modi_sphere_
-   * \li \subpage input_modi_box_
-   * \li \subpage input_modi_list_
-   * \li \subpage input_modi_listbox_
-   */
   const std::string modus_chooser = config.read({"General", "Modus"});
   logg[LExperiment].debug() << "Modus for this calculation: " << modus_chooser;
 

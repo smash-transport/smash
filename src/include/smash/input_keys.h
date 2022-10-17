@@ -426,6 +426,67 @@ class Key {
  * Remember to also activate the photon output in the output section.
  */
 
+/*!\Userguide
+ * \page input_modi_ Modi
+ *
+ * The `Modi` section is the place where the specified <tt>\ref gen_modus_
+ * "Modus"</tt> shall be configured. For each possibility refer to the
+ * corresponding documentation page:
+ * - \subpage input_modi_collider_
+ * - \subpage input_modi_sphere_
+ * - \subpage input_modi_box_
+ * - \subpage input_modi_list_
+ * - \subpage input_modi_listbox_
+ */
+
+/*!\Userguide
+ * \page input_modi_collider_ Collider
+ *
+ * The `Collider` modus can be customized using the options here below.
+ * To further configure the projectile, target and the impact parameter, see
+ * - \subpage input_modi_collider_projectile_and_target_ and
+ * - \subpage input_modi_collider_impact_parameter_.
+ *
+ * \attention
+ * The incident energy can be specified in different ways and one (and only one)
+ * of these must be used. Alternatively, one can specify the individual beam
+ * energies or momenta in the `Projectile` and `Target` sections (see \ref
+ * input_modi_collider_projectile_and_target_ for details). In this case,
+ * one must give either `E_Tot` or `E_Kin` or `P_Lab` for both `Projectile`
+ * and `Target`.
+ *
+ * <hr>
+ */
+
+/*!\Userguide
+ * \page input_modi_collider_projectile_and_target_ Projectile and Target
+ *
+ * Within the `Collider` section, two sections can be used for further
+ * customizations:
+ * - `Projectile` &rarr; Section for projectile nucleus. The projectile will
+ *   start at \f$z<0\f$ and fly in positive \f$z\f$-direction, at \f$x\ge 0\f$.
+ * - `Target` &rarr; Section for target nucleus. The target will start at
+ *   \f$z>0\f$ and fly in negative \f$z\f$-direction, at \f$x \le 0\f$.
+ *
+ * <b>All keys described here below can be specified in the `Projectile` and/or
+ * in the `Target` section.</b> Examples are given after the keys description.
+ */
+
+/*!\Userguide
+ * \page input_modi_collider_impact_parameter_ Impact Parameter
+ *
+ * Within the `Collider` section, the `Impact` section can be used to specify
+ * information about the impact parameter, defined as the distance <b>in fm</b>
+ * of the two straight lines that the center of masses of the nuclei travel on.
+ * The separation of the two colliding nuclei is by default along the x-axis.
+ *
+ * \warning
+ * Note that there are no safeguards to prevent you from specifying negative
+ * impact parameters. The value chosen here is simply the x-component of
+ * \f$\vec{\mkern0mu b}\f$. The result will be that the projectile and target
+ * will have switched position in x.
+ */
+
 /**
  * @brief A container to keep track of all ever existed input keys.
  *
@@ -492,7 +553,8 @@ struct InputKeys {
    *
    * Selects a modus for the calculation, e.g.\ infinite matter
    * calculation, collision of two particles or collision of nuclei. The modus
-   * will be configured in \ref input_modi_. Recognized values are:
+   * will be configured in the <tt>\ref input_modi_ "Modi"</tt> section.
+   * Recognized values are:
    * - `"Collider"` &rarr; For collisions of nuclei or compound objects. See
    *   \ref \ColliderModus
    * - `"Sphere"` &rarr; For calculations of the expansion of a thermalized
@@ -2013,12 +2075,625 @@ struct InputKeys {
   inline static const Key<bool> collTerm_photons_bremsstrahlung{
       {"Collision_Term", "Photons", "Bremsstrahlung"}, false, {"1.0"}};
 
+  /*!\Userguide
+   * \page input_modi_collider_
+   *
+   * \par Ways to specify incident energies &rarr; Only one can be given!
+   *
+   * \required_key_no_line{MC_sqrtsnn_,Sqrtsnn,double}
+   *
+   * Defines the energy of the collision as center-of-mass energy in the
+   * collision of one participant each from both nuclei (using the average
+   * participant mass in the given nucleus). This key can be omitted if
+   * the incident energy is specified in a different way.
+   */
+  /**
+   * \see_key{MC_sqrtsnn_}
+   */
+  inline static const Key<double> modi_collider_sqrtSNN{
+      {"Modi", "Collider", "Sqrtsnn"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_
+   * \required_key_no_line{MC_e_kin_,E_Kin,double}
+   *
+   * Defines the energy of the collision by the kinetic energy per nucleon of
+   * the projectile nucleus, <b>in AGeV</b>. This assumes the target nucleus is
+   * at rest. Note, this can also be given per-beam as described in \ref
+   * input_modi_collider_projectile_and_target_. This key can be omitted if
+   * the incident energy is specified in a different way.
+   */
+  /**
+   * \see_key{MC_e_kin_}
+   */
+  inline static const Key<double> modi_collider_eKin{
+      {"Modi", "Collider", "E_Kin"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_
+   * \required_key_no_line{MC_e_tot_,E_Tot,double}
+   *
+   * Defines the energy of the collision by the total energy per nucleon of
+   * the projectile nucleus, <b>in AGeV</b>. This assumes the target nucleus is
+   * at rest. Note, this can also be given per-beam as described in \ref
+   * input_modi_collider_projectile_and_target_. This key can be omitted if
+   * the incident energy is specified in a different way.
+   */
+  /**
+   * \see_key{MC_e_tot_}
+   */
+  inline static const Key<double> modi_collider_eTot{
+      {"Modi", "Collider", "E_Tot"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_
+   * \required_key_no_line{MC_p_lab_,P_Lab,double}
+   *
+   * Defines the energy of the collision by the initial momentum per nucleon
+   * of the projectile nucleus, <b>in AGeV</b>. This assumes the target nucleus
+   * is at rest.  This must be positive.  Note, this can also be given per-beam
+   * as described in \ref input_modi_collider_projectile_and_target_. This key
+   * can be omitted if the incident energy is specified in a different way.
+   */
+  /**
+   * \see_key{MC_p_lab_}
+   */
+  inline static const Key<double> modi_collider_pLab{
+      {"Modi", "Collider", "P_Lab"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_
+   * \optional_key{MC_calc_frame_,Calculation_Frame,string,"center of velocity"}
+   *
+   * The frame in which the collision is calculated. Possible values are
+   * - `"center of velocity"`
+   * - `"center of mass"`
+   * - `"fixed target"`
+   *
+   * \note
+   * Using `E_Tot`, `E_kin` or `P_Lab` to quantify the collision energy is not
+   * sufficient to configure a collision in a fixed target frame. You need to
+   * additionally change the `Calculation_Frame`. Any format of incident energy
+   * can however be combined with any calculation frame, the provided incident
+   * energy is then intrinsically translated to the quantity needed for the
+   * computation.
+   */
+  /**
+   * \see_key{MC_calc_frame_}
+   */
+  inline static const Key<std::string> modi_collider_calculationFrame{
+      {"Modi", "Collider", "Calculation_Frame"}, "center of velocity", {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_
+   * \optional_key{MC_fermi_motion_,Fermi_Motion,string,"off"}
+   *
+   * - `"on"` &rarr; Switch Fermi motion on, it is recommended to also activate
+   * potentials.
+   * - `"off"` &rarr; Switch Fermi motion off.
+   * - `"frozen"` &rarr; Use "frozen" if you want to use Fermi motion
+   * without potentials.
+   */
+  /**
+   * \see_key{MC_fermi_motion_}
+   */
+  inline static const Key<std::string> modi_collider_fermiMotion{
+      {"Modi", "Collider", "Fermi_Motion"}, "off", {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_
+   * \optional_key{MC_collision_within_nucleus_,Collisions_Within_Nucleus,bool,false}
+   *
+   * Determine whether to allow the first collisions within the same nucleus.
+   * - `true` &rarr; First collisions within the same nucleus allowed.
+   * - `false` &rarr; First collisions within the same nucleus forbidden.
+   */
+  /**
+   * \see_key{MC_collision_within_nucleus_}
+   */
+  inline static const Key<bool> modi_collider_collisionWithinNucleus{
+      {"Modi", "Collider", "Collisions_Within_Nucleus"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_
+   * \optional_key{MC_initial_distance_,Initial_Distance,double,2.0}
+   *
+   * The initial distance of the two nuclei <b>in fm</b>:
+   * \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
+   *
+   * Note that this distance is applied before the Lorentz boost to the chosen
+   * calculation frame, and thus the actual distance may be different.
+   */
+  /**
+   * \see_key{MC_initial_distance_}
+   */
+  inline static const Key<double> modi_collider_initialDistance{
+      {"Modi", "Collider", "Initial_Distance"}, 2.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \required_key{MC_PT_particles_,%Particles,map<int\,int>}
+   *
+   * A map in which the keys are PDG codes and the values are number of
+   * particles with that PDG code that should be in the current nucleus.
+   * For example:
+   * - `{2212: 82, 2112: 126}` &rarr; a lead-208 nucleus (82 protons and 126
+   *   neutrons = 208 nucleons)
+   * - `{2212: 1, 2112: 1, 3122: 1}` &rarr; for Hyper-Triton (one proton, one
+   *   neutron and one \f$\Lambda\f$).
+   */
+  /**
+   * \see_key{MC_PT_particles_}
+   */
+  inline static const Key<std::map<PdgCode, int>>
+      modi_collider_projectile_particles{
+          {"Modi", "Collider", "Projectile", "Particles"}, {"1.0"}};
+  /**
+   * \see_key{MC_PT_particles_}
+   */
+  inline static const Key<std::map<PdgCode, int>>
+      modi_collider_target_particles{
+          {"Modi", "Collider", "Target", "Particles"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \optional_key{MC_PT_diffusiveness_,Diffusiveness,double,d(A)}
+   *
+   * Diffusiveness of the Woods-Saxon distribution for the nucleus <b>in fm</b>.
+   * In general, the default value is
+   * \f[
+   * d(A)=\begin{cases}
+   * 0.545 & A \le 16\\
+   * 0.54  & A > 16
+   * \end{cases}\;.
+   * \f]
+   * For copper, zirconium, ruthenium, xenon, gold, lead and uranium, a more
+   * specific default value is used (see nucleus.cc).
+   */
+  /**
+   * \see_key{MC_PT_diffusiveness_}
+   */
+  inline static const Key<double> modi_collider_projectile_diffusiveness{
+      {"Modi", "Collider", "Projectile", "Diffusiveness"}, {"1.0"}};
+  /**
+   * \see_key{MC_PT_diffusiveness_}
+   */
+  inline static const Key<double> modi_collider_target_diffusiveness{
+      {"Modi", "Collider", "Target", "Diffusiveness"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \optional_key{MC_PT_radius_,Radius,double,r(A)}
+   *
+   * Radius of nucleus <b>in fm</b>. In general, the default value is
+   * \f[
+   * d(A)=\begin{cases}
+   * 1.2  \, A^{1/3}                     & A \le 16\\
+   * 1.12 \, A^{1/3} - 0.86 \, A^{-1/3}  & A > 16
+   * \end{cases}\;.
+   * \f]
+   * For copper, zirconium, ruthenium, xenon, gold, lead, and uranium, a more
+   * specific default value is used (see nucleus.cc).
+   */
+  /**
+   * \see_key{MC_PT_radius_}
+   */
+  inline static const Key<double> modi_collider_projectile_radius{
+      {"Modi", "Collider", "Projectile", "Radius"}, {"1.0"}};
+  /**
+   * \see_key{MC_PT_radius_}
+   */
+  inline static const Key<double> modi_collider_target_radius{
+      {"Modi", "Collider", "Target", "Radius"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \optional_key{MC_PT_saturation_density_,Saturation_Density,double,
+   * </tt>\f$\int\rho(r)\:\mathrm{d}^3r=N_{nucleons}\f$<tt>}
+   *
+   * Saturation density of the nucleus <b>in 1/fm³</b>.
+   * If not any value is specified, the saturation density is calculated such
+   * that the integral over the Woods-Saxon distribution returns the number of
+   * nucleons in the nucleus.
+   */
+  /**
+   * \see_key{MC_PT_saturation_density_}
+   */
+  inline static const Key<double> modi_collider_projectile_saturationDensity{
+      {"Modi", "Collider", "Projectile", "Saturation_Density"}, {"1.0"}};
+  /**
+   * \see_key{MC_PT_saturation_density_}
+   */
+  inline static const Key<double> modi_collider_target_saturationDensity{
+      {"Modi", "Collider", "Target", "Saturation_Density"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * <hr>
+   * \par Possible incident energies given per beam
+   *
+   * \required_key_no_line{MC_PT_e_tot_,E_Tot,double}
+   *
+   * Set the totat energy <b>in GeV</b> per particle of the beam. This key,
+   * if used, must be present in both `Projectile` and `Target` section. This
+   * key can be omitted if the incident energy is specified in a different way.
+   */
+  /**
+   * \see_key{MC_PT_e_tot_}
+   */
+  inline static const Key<double> modi_collider_projectile_eTot{
+      {"Modi", "Collider", "Projectile", "E_Tot"}, {"1.0"}};
+  /**
+   * \see_key{MC_PT_e_tot_}
+   */
+  inline static const Key<double> modi_collider_target_eTot{
+      {"Modi", "Collider", "Target", "E_Tot"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \required_key_no_line{MC_PT_e_kin_,E_Kin,double}
+   *
+   * Set the kinetic energy <b>in GeV</b> per particle of the beam. This key,
+   * if used, must be present in both `Projectile` and `Target` section. This
+   * key can be omitted if the incident energy is specified in a different way.
+   */
+  /**
+   * \see_key{MC_PT_e_kin_}
+   */
+  inline static const Key<double> modi_collider_projectile_eKin{
+      {"Modi", "Collider", "Projectile", "E_Kin"}, {"1.0"}};
+  /**
+   * \see_key{MC_PT_e_kin_}
+   */
+  inline static const Key<double> modi_collider_target_eKin{
+      {"Modi", "Collider", "Target", "E_Kin"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \required_key_no_line{MC_PT_p_lab_,P_Lab,double}
+   *
+   * Set the momentum <b>in GeV/c</b> per particle of the beam. This key,
+   * if used, must be present in both `Projectile` and `Target` section. This
+   * key can be omitted if the incident energy is specified in a different way.
+   *
+   * \note
+   * If the beam specific kinetic energy or momentum is set using either of
+   * these keys, then it must be specified in the same way (not necessarily same
+   * value) for both beams. This is for example useful to simulate for p-Pb
+   * collisions at the LHC, where the centre-of-mass system does not correspond
+   * to the laboratory system (see \ref
+   * input_modi_collider_projectile_and_target_ex1_ "example").
+   */
+  /**
+   * \see_key{MC_PT_p_lab_}
+   */
+  inline static const Key<double> modi_collider_projectile_pLab{
+      {"Modi", "Collider", "Projectile", "P_Lab"}, {"1.0"}};
+  /**
+   * \see_key{MC_PT_p_lab_}
+   */
+  inline static const Key<double> modi_collider_target_pLab{
+      {"Modi", "Collider", "Target", "P_Lab"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * <hr>
+   * \par CUSTOM NUCLEI
+   *
+   * It is possible to further customize the projectile and/or target using the
+   * `Custom` section, which should then contain few required keys, if given.
+   *
+   * \required_key_no_line{MC_PT_custom_file_dir_,File_Directory,string}
+   *
+   * The directory where the external list with the nucleon configurations
+   * is located. <b>Make sure to use an absolute path!</b>
+   */
+  /**
+   * \see_key{MC_PT_custom_file_dir_}
+   */
+  inline static const Key<std::string>
+      modi_collider_projectile_custom_fileDirectory{
+          {"Modi", "Collider", "Projectile", "Custom", "File_Directory"},
+          {"1.0"}};
+  /**
+   * \see_key{MC_PT_custom_file_dir_}
+   */
+  inline static const Key<std::string>
+      modi_collider_target_custom_fileDirectory{
+          {"Modi", "Collider", "Target", "Custom", "File_Directory"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \required_key_no_line{MC_PT_custom_file_name_,File_Name,string}
+   *
+   * The file name of the external list with the nucleon configurations.
+   */
+  /**
+   * \see_key{MC_PT_custom_file_name_}
+   */
+  inline static const Key<std::string> modi_collider_projectile_custom_fileName{
+      {"Modi", "Collider", "Projectile", "Custom", "File_Name"}, {"1.0"}};
+  /**
+   * \see_key{MC_PT_custom_file_name_}
+   */
+  inline static const Key<std::string> modi_collider_target_custom_fileName{
+      {"Modi", "Collider", "Target", "Custom", "File_Name"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * <hr>
+   * \par DEFORMED NUCLEI
+   *
+   * It is possible to deform the projectile and/or target nuclei using the
+   * `Deformed` section, which should then contain some configuration, if given.
+   *
+   * \required_key_no_line{MC_PT_deformed_auto_,Automatic,bool}
+   *
+   * - `true` &rarr; Set parameters of spherical deformation based on mass
+   *   number of the nucleus. Currently the following deformed nuclei are
+   *   implemented: Cu, Zr, Ru, Au, Pb, U, and Xe (see deformednucleus.cc). If
+   *   set to true the other parameters should not be provided.
+   * - `false` &rarr; Manually set parameters of spherical deformation. This
+   *   requires the additional specification of `Beta_2`, `Beta_3`, `Beta_4`,
+   *   `Theta` and `Phi`, \ref TBC which follow \iref{Moller:1993ed} and
+   *   \iref{Schenke:2019ruo}.
+   */
+  /**
+   * \see_key{MC_PT_deformed_auto_}
+   */
+  inline static const Key<bool> modi_collider_projectile_deformed_automatic{
+      {"Modi", "Collider", "Projectile", "Deformed", "Automatic"}, {"1.0"}};
+  /**
+   * \see_key{MC_PT_deformed_auto_}
+   */
+  inline static const Key<bool> modi_collider_target_deformed_automatic{
+      {"Modi", "Collider", "Target", "Deformed", "Automatic"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \required_key_no_line{MC_PT_deformed_betaII_,Beta_2,double}
+   *
+   * The deformation coefficient for the spherical harmonic Y_2_0 in the beta
+   * decomposition of the nuclear radius in the deformed Woods-Saxon
+   * distribution. This key can be omitted for automatic deformation
+   * (`Automatic: true`).
+   */
+  /**
+   * \see_key{MC_PT_deformed_betaII_}
+   */
+  inline static const Key<double> modi_collider_projectile_deformed_beta2{
+      {"Modi", "Collider", "Projectile", "Deformed", "Beta_2"}, {"1.0"}};
+  /**
+   * \see_key{MC_PT_deformed_betaII_}
+   */
+  inline static const Key<double> modi_collider_target_deformed_beta2{
+      {"Modi", "Collider", "Target", "Deformed", "Beta_2"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \required_key_no_line{MC_PT_deformed_betaIII_,Beta_3,double}
+   *
+   * The deformation coefficient for the spherical harmonic Y_3_0. This key can
+   * be omitted for automatic deformation (`Automatic: true`).
+   */
+  /**
+   * \see_key{MC_PT_deformed_betaIII_}
+   */
+  inline static const Key<double> modi_collider_projectile_deformed_beta3{
+      {"Modi", "Collider", "Projectile", "Deformed", "Beta_3"}, {"1.0"}};
+  /**
+   * \see_key{MC_PT_deformed_betaIII_}
+   */
+  inline static const Key<double> modi_collider_target_deformed_beta3{
+      {"Modi", "Collider", "Target", "Deformed", "Beta_3"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \required_key_no_line{MC_PT_deformed_betaIV_,Beta_4,double}
+   *
+   * The deformation coefficient for the spherical harmonic Y_4_0. This key can
+   * be omitted for automatic deformation (`Automatic: true`).
+   */
+  /**
+   * \see_key{MC_PT_deformed_betaIV_}
+   */
+  inline static const Key<double> modi_collider_projectile_deformed_beta4{
+      {"Modi", "Collider", "Projectile", "Deformed", "Beta_4"}, {"1.0"}};
+  /**
+   * \see_key{MC_PT_deformed_betaIV_}
+   */
+  inline static const Key<double> modi_collider_target_deformed_beta4{
+      {"Modi", "Collider", "Target", "Deformed", "Beta_4"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \par Defining orientation
+   *
+   * In the `Orientation` section it is possible to specify the orientation of
+   * the nucleus by rotations which are performed about the axes of a coordinate
+   * system that is fixed with respect to the nucleus and whose axes are
+   * parallel to those of the computational frame before the first rotation.
+   * Note that the nucleus is first rotated by phi and then by theta.
+   *
+   * \optional_key_no_line{MC_PT_deformed_orientation_phi_,Phi,double,0.0}
+   *
+   * The angle by which to rotate the nucleus about the z-axis.
+   */
+  /**
+   * \see_key{MC_PT_deformed_orientation_phi_}
+   */
+  inline static const Key<double>
+      modi_collider_projectile_deformed_orientation_phi{
+          {"Modi", "Collider", "Projectile", "Deformed", "Orientation", "Phi"},
+          0.0,
+          {"1.0"}};
+  /**
+   * \see_key{MC_PT_deformed_orientation_phi_}
+   */
+  inline static const Key<double> modi_collider_target_deformed_orientation_phi{
+      {"Modi", "Collider", "Target", "Deformed", "Orientation", "Phi"},
+      0.0,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \optional_key_no_line{MC_PT_deformed_orientation_theta_,Theta,double,π/2}
+   *
+   * The angle by which to rotate the nucleus about the rotated x-axis.
+   */
+  /**
+   * \see_key{MC_PT_deformed_orientation_theta_}
+   */
+  inline static const Key<double>
+      modi_collider_projectile_deformed_orientation_theta{
+          {"Modi", "Collider", "Projectile", "Deformed", "Orientation",
+           "Theta"},
+          M_PI / 2,
+          {"1.0"}};
+  /**
+   * \see_key{MC_PT_deformed_orientation_theta_}
+   */
+  inline static const Key<double>
+      modi_collider_target_deformed_orientation_theta{
+          {"Modi", "Collider", "Target", "Deformed", "Orientation", "Theta"},
+          M_PI / 2,
+          {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \optional_key_no_line{MC_PT_deformed_orientation_random_,Random_Rotation,bool,false}
+   *
+   * Whether the created nucleus object should be randomly rotated in space.
+   */
+  /**
+   * \see_key{MC_PT_deformed_orientation_random_}
+   */
+  inline static const Key<bool>
+      modi_collider_projectile_deformed_orientation_randomRotation{
+          {"Modi", "Collider", "Projectile", "Deformed", "Orientation",
+           "Random_Rotation"},
+          false,
+          {"1.0"}};
+  /**
+   * \see_key{MC_PT_deformed_orientation_random_}
+   */
+  inline static const Key<bool>
+      modi_collider_target_deformed_orientation_randomRotation{
+          {"Modi", "Collider", "Target", "Deformed", "Orientation",
+           "Random_Rotation"},
+          false,
+          {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_impact_parameter_
+   * \optional_key{MC_impact_rnd_reaction_plane_,Random_Reaction_Plane,bool,false}
+   *
+   * Rotate the direction of the separation of the two nuclei due to the impact
+   * parameter with a uniform random angle in the x-y plane.
+   */
+  /**
+   * \see_key{MC_impact_rnd_reaction_plane_}
+   */
+  inline static const Key<bool> modi_collider_impact_randomReactionPlane{
+      {"Modi", "Collider", "Impact", "Random_Reaction_Plane"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_impact_parameter_
+   * \optional_key{MC_impact_value_,Value,double,0.0}
+   *
+   * Fixed value for the impact parameter <b>in fm</b>.
+   * \attention If this value is set, all further `Impact` keys are ignored.
+   */
+  /**
+   * \see_key{MC_impact_value_}
+   */
+  inline static const Key<double> modi_collider_impact_value{
+      {"Modi", "Collider", "Impact", "Value"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_impact_parameter_
+   * \optional_key{MC_impact_sample_,Sample,string,"quadratic"}
+   *
+   * - `"uniform"` &rarr; use uniform sampling of the impact parameter
+   *   (uniform in \f$b\f$: \f$dP(b) = db\f$)
+   * - `"quadratic"` &rarr; use areal (aka quadratic) input sampling (the
+   *   probability of an input parameter range is proportional to the area
+   *   corresponding to that range, uniform in \f$b^2\f$:
+   *   \f$dP(b) = b\,db\f$).
+   * - `"custom"` &rarr; requires `Values` and `Yields` to interpolate the
+   *   impact parameter distribution and use rejection sampling.
+   */
+  /**
+   * \see_key{MC_impact_sample_}
+   */
+  inline static const Key<std::string> modi_collider_impact_sample{
+      {"Modi", "Collider", "Impact", "Sample"}, "quadratic", {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_impact_parameter_
+   * <hr>
+   * \par Custom sampling
+   * \required_key_no_line{MC_impact_values_,Values,list of doubles}
+   *
+   * Values of the impact parameter <b>in fm</b>, with corresponding `Yields`.
+   * Must be same length as `Yields`. This key can be omitted if `Sample` is not
+   * set to `"custom"`.
+   */
+  /**
+   * \see_key{MC_impact_values_}
+   */
+  inline static const Key<std::vector<double>> modi_collider_impact_values{
+      {"Modi", "Collider", "Impact", "Values"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_impact_parameter_
+   * \required_key_no_line{MC_impact_yields_,Yields,list of doubles}
+   *
+   * Values of the particle yields, corresponding to `Values`, i.e. the value
+   * of the custom distribution at this value. Must be same length as `Values`.
+   * This key can be omitted if `Sample` is not set to `"custom"`.
+   */
+  /**
+   * \see_key{MC_impact_sample_}
+   */
+  inline static const Key<std::vector<double>> modi_collider_impact_yields{
+      {"Modi", "Collider", "Impact", "Yields"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_impact_parameter_
+   * \optional_key{MC_impact_range_,Range,list of two doubles,[0.0\,0.0]}
+   *
+   * A list of minimal and maximal impact parameters <b>in fm</b> between which
+   * \f$b\f$ should be chosen. The order of these is not important.
+   */
+  /**
+   * \see_key{MC_impact_range_}
+   */
+  inline static const Key<std::array<double, 2>> modi_collider_impact_range{
+      {"Modi", "Collider", "Impact", "Range"}, {{0.0, 0.0}}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_impact_parameter_
+   * \optional_key{MC_impact_max_,Max,double,0.0}
+   *
+   * Like `Range: [0.0, Max]`. Note that if both `Range` and `Max` are
+   * specified, `Max` takes precedence.
+   */
+  /**
+   * \see_key{MC_impact_max_}
+   */
+  inline static const Key<double> modi_collider_impact_max{
+      {"Modi", "Collider", "Impact", "Max"}, 0.0, {"1.0"}};
+
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
       std::reference_wrapper<const Key<bool>>,
       std::reference_wrapper<const Key<int>>,
       std::reference_wrapper<const Key<double>>,
       std::reference_wrapper<const Key<std::string>>,
+      std::reference_wrapper<const Key<std::array<double, 2>>>,
+      std::reference_wrapper<const Key<std::vector<double>>>,
+      std::reference_wrapper<const Key<std::map<PdgCode, int>>>,
       std::reference_wrapper<const Key<einhard::LogLevel>>,
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
@@ -2128,7 +2803,54 @@ struct InputKeys {
       std::cref(collTerm_dileptons_decays),
       std::cref(collTerm_photons_fractionalPhotons),
       std::cref(collTerm_photons_twoToTwoScatterings),
-      std::cref(collTerm_photons_bremsstrahlung)};
+      std::cref(collTerm_photons_bremsstrahlung),
+      std::cref(modi_collider_sqrtSNN),
+      std::cref(modi_collider_eKin),
+      std::cref(modi_collider_eTot),
+      std::cref(modi_collider_pLab),
+      std::cref(modi_collider_calculationFrame),
+      std::cref(modi_collider_fermiMotion),
+      std::cref(modi_collider_collisionWithinNucleus),
+      std::cref(modi_collider_initialDistance),
+      std::cref(modi_collider_projectile_particles),
+      std::cref(modi_collider_target_particles),
+      std::cref(modi_collider_projectile_diffusiveness),
+      std::cref(modi_collider_target_diffusiveness),
+      std::cref(modi_collider_projectile_radius),
+      std::cref(modi_collider_target_radius),
+      std::cref(modi_collider_projectile_saturationDensity),
+      std::cref(modi_collider_target_saturationDensity),
+      std::cref(modi_collider_projectile_eTot),
+      std::cref(modi_collider_target_eTot),
+      std::cref(modi_collider_projectile_eKin),
+      std::cref(modi_collider_target_eKin),
+      std::cref(modi_collider_projectile_pLab),
+      std::cref(modi_collider_target_pLab),
+      std::cref(modi_collider_projectile_custom_fileDirectory),
+      std::cref(modi_collider_target_custom_fileDirectory),
+      std::cref(modi_collider_projectile_custom_fileName),
+      std::cref(modi_collider_target_custom_fileName),
+      std::cref(modi_collider_projectile_deformed_automatic),
+      std::cref(modi_collider_target_deformed_automatic),
+      std::cref(modi_collider_projectile_deformed_beta2),
+      std::cref(modi_collider_target_deformed_beta2),
+      std::cref(modi_collider_projectile_deformed_beta3),
+      std::cref(modi_collider_target_deformed_beta3),
+      std::cref(modi_collider_projectile_deformed_beta4),
+      std::cref(modi_collider_target_deformed_beta4),
+      std::cref(modi_collider_projectile_deformed_orientation_phi),
+      std::cref(modi_collider_target_deformed_orientation_phi),
+      std::cref(modi_collider_projectile_deformed_orientation_theta),
+      std::cref(modi_collider_target_deformed_orientation_theta),
+      std::cref(modi_collider_projectile_deformed_orientation_randomRotation),
+      std::cref(modi_collider_target_deformed_orientation_randomRotation),
+      std::cref(modi_collider_impact_randomReactionPlane),
+      std::cref(modi_collider_impact_value),
+      std::cref(modi_collider_impact_sample),
+      std::cref(modi_collider_impact_values),
+      std::cref(modi_collider_impact_yields),
+      std::cref(modi_collider_impact_range),
+      std::cref(modi_collider_impact_max)};
 };
 
 /*!\Userguide
@@ -2349,6 +3071,233 @@ struct InputKeys {
  * \note As photons are treated perturbatively, the produced photons are only
  * written to the photon output, but neither to the usual collision output,
  * nor to the particle lists.
+ */
+
+/*!\Userguide
+ * \page input_modi_collider_
+ * <hr>
+ * \par Example of heavy-ion collision configuration
+ *
+ * The following example configures a Cu63-Cu63 collision at
+ * \f$\sqrt{s_{NN}}=3.0\,\mathrm{GeV}\f$ with zero impact parameter and Fermi
+ * motion taken into consideration. The calculation frame is the default, center
+ * of velocity, and the nuclei are not deformed. Refer to \ref
+ * input_modi_collider_projectile_and_target_ for information about the
+ * `Particles` and `Target` sections.
+ *
+ *\verbatim
+ Modi:
+     Collider:
+         Projectile:
+             Particles: {2212: 29, 2112 :34}
+         Target:
+             Particles: {2212: 29, 2112 :34}
+         Sqrtsnn: 3.0
+ \endverbatim
+ *
+ * To further use Fermi motion and allow the first collisions within the
+ * projectile or target nucleus, the corresponding options need to be activated
+ * by means of:
+ *\verbatim
+         Fermi_Motion: "on"
+         Collisions_Within_Nucleus: True
+ \endverbatim
+ *
+ * Additionally, the impact parameter may be specified manually. See
+ * \ref input_modi_collider_impact_parameter_ for an example.
+ * <hr>
+ *
+ * \note
+ * By default, executing SMASH from the codebase build folder without further
+ * specifying the configuration, particles and decay modes files, a collider
+ * simulation is set up according to the default _config.yaml_, _particles.txt_
+ * and _decaymodes.txt_ files located in the _**input**_ directory at the
+ * top-level of the codebase. However, changing the _**input**_ directory
+ * content will not affect the default SMASH run, unless a clean build folder is
+ * created over again. This is because the triplet of input files are
+ * transformed into another triplet of files into the build directory when
+ * `cmake` is run. Hence prefer to use `smash` command line options in case you
+ * want to refer to possibly modified configuration, particles and decay modes
+ * files.\n
+ * To run SMASH in the (default) collider setup, execute
+ * \verbatim
+    ./smash
+ \endverbatim
+ * from the codebase build folder.
+ */
+
+/*!\Userguide
+ * \page input_modi_collider_projectile_and_target_
+ * <hr>
+ * \anchor input_modi_collider_projectile_and_target_ex1_
+ * \par p-Pb collisions at the LHC
+ *
+ * Note that SMASH performs its calculation in the centre-of-velocity and the
+ * particles are returned in the centre-of-mass frame. The particles therefore
+ * need to be boosted by the rapidity of the centre-of-mass (-0.465 for p-Pb
+ * at 5.02TeV).
+ * \verbatim
+ Modi:
+     Collider:
+         Calculation_Frame: center of velocity
+         Impact:
+             Random_Reaction_Plane: True
+             Range: [0, 8.5]
+         Projectile:
+             E_Tot: 1580
+             Particles:
+                 2212: 82
+                 2112: 126
+         Target:
+             E_Tot: 4000
+             Particles:
+                 2212: 1
+                 2112: 0
+ \endverbatim
+ *
+ * <hr>
+ * \anchor input_modi_collider_projectile_and_target_ex2_
+ * \par Configuring custom nuclei from external file
+ *
+ * The following example illustrates how to configure a center-of-mass heavy-ion
+ * collision with nuclei generated from an external file. The nucleon positions
+ * are not sampled by SMASH but read in from an external file. The given path
+ * and name of the external file are made up and should be defined by the user
+ * according to the used file.
+ *\verbatim
+ Modi:
+     Collider:
+         Projectile:
+             Particles: {2212: 79, 2112: 118}
+             Custom:
+                 File_Directory: "/home/username/custom_lists"
+                 File_Name: "Au197_custom.txt"
+         Target:
+             Particles: {2212: 79, 2112: 118}
+             Custom:
+                 File_Directory: "/home/username/custom_lists"
+                 File_Name: "Au197_custom.txt"
+         Sqrtsnn: 7.7
+ \endverbatim
+ *
+ * The _Au197_custom.txt_ file should be formatted as follows:
+ *
+ * <div class="fragment">
+ * <div class="line"><span class="preprocessor"> 0.20100624   0.11402423
+ * -2.40964466   0   0</span></div>
+ * <div class="line"><span class="preprocessor"> 1.69072087  -3.21471918
+ *  1.06050693   0   1</span></div>
+ * <div class="line"><span class="preprocessor">-1.95791109  -3.51483782
+ *  2.47294656   1   1</span></div>
+ * <div class="line"><span class="preprocessor"> 0.43554894   4.35250733
+ *  0.13331011   1   0</span></div>
+ * <div class="line"><span class="preprocessor"> ...</span></div>
+ * </div>
+ *
+ * It contains 5 columns (x, y, z, s, c). The first three columns specify the
+ * spatial cordinates <b>in fm</b>. The fourth column denotes the spin
+ * projection. The fifth contains the charge with 1 and 0 for protons and
+ * neutrons respectively. In the example given the first line defines a neutron
+ * and the second one a proton. Please make sure that your file contains as many
+ * particles as you specified in the configuration. For the example considered
+ * here, the file needs to contain 79 protons and 118 neutrons in the first 197
+ * lines. And the same number in the following 197 lines. The read in nuclei are
+ * randomly rotated and recentered. Therefore you can run SMASH even if your
+ * file does not contain enough nuclei for the number of events you want to
+ * simulate as the missing nuclei are generated by rotation of the given
+ * configurations.
+ *
+ * \note
+ * SMASH is shipped with an example configuration file to set up a collision
+ * with externally generated nucleon positions. This requires a particle list to
+ * be read in. Both, the configuration file and the particle list, are located
+ * in the _**input/custom_nucleus**_ folder at the top-level of SMASH codebase.
+ * To run SMASH with the provided example configuration and particle list,
+ execute
+ * \verbatim
+    ./smash -i INPUT_DIR/custom_nucleus/config.yaml
+ \endverbatim
+ * where `INPUT_DIR` needs to be replaced by the path to the input directory
+ * at the top-level of SMASH codebase.
+ *
+ * <hr>
+ * \anchor input_modi_collider_projectile_and_target_ex2_
+ * \par Configuring a deformed nucleus
+ *
+ * To configure a fixed target heavy-ion collision with deformed nuclei, whose
+ * spherical deformation is explicitly declared, it can be done according to the
+ * following example. For explanatory (and not physics) reasons, the
+ * projectile's Woods-Saxon distribution is initialized automatically and
+ * its spherical deformation manually, while the target nucleus is configured
+ * just the opposite.
+ *\verbatim
+ Modi:
+     Collider:
+         Projectile:
+             Particles: {2212: 29, 2112: 34}
+             Deformed:
+                 # Manually set deformation parameters
+                 Automatic: false
+                 Beta_2: 0.1
+                 Beta_3: 0.2
+                 Beta_4: 0.3
+                 Orientation:
+                     Theta: 0.8
+                     Phi: 0.02
+         Target:
+             Particles: {2212: 29, 2112: 34}
+             # manually set Woods-Saxon parameters
+             Saturation_Density: 0.1968
+             Diffusiveness: 0.8
+             Radius: 2.0
+             Deformed:
+                 # Automatically set deformation parameters
+                 Automatic: true
+                 Orientation:
+                     # Randomly rotate nucleus
+                     Random_Rotation: true
+         E_kin: 1.2
+         Calculation_Frame: "fixed target"
+ \endverbatim
+ */
+
+/*!\Userguide
+ * \page input_modi_collider_impact_parameter_
+ * <hr>
+ * \par Configuring the Impact Parameter
+ *
+ * The impact parameter can be configured to have a fixed value in the
+ * `Collider` subsection of `Modi`. In addition, the initial distance of the
+ * nuclei in \f$z\f$-direction is assigned a specific value. This does not
+ * affect the time at which the nuclei will collide, but only changes the start
+ * time of the simulation as the nuclei are further apart when the simulation
+ * begins.
+ *\verbatim
+ Modi:
+     Collider:
+         Impact:
+             Value: 0.1
+ \endverbatim
+ * The impact parameter may further be sampled within a certain impact parameter
+ * range. By default, a quadratic distribution is used for the sampling.
+ * However, this may be set to `"uniform"` if necessary.
+ *\verbatim
+ Modi:
+     Collider:
+         Impact:
+             Sample: "quadratic"
+             Range: [3.0, 6.0]
+ \endverbatim
+ * A custom impact parameter distribution based on a set of `Values` and
+ * `Yields`, can be configured as follows:
+ *\verbatim
+ Modi:
+     Collider:
+         Impact:
+             Sample: "custom"
+             Values: [0.0, 3.0, 6.0, 9.0]
+             Yields: [0.000000, 2.999525, 5.959843, 6.995699]
+ \endverbatim
  */
 
 }  // namespace smash
