@@ -450,6 +450,10 @@ else()
     message(STATUS "Valgrind not found. Memcheck tests are disabled!")
 endif()
 
+add_test(NAME usage_of_SMASH_as_library
+         COMMAND bash run_examples_for_testing.bash ${PROJECT_SOURCE_DIR} ${EIGEN3_INCLUDE_DIR} ${Pythia_CONFIG_EXECUTABLE}
+         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/examples/using_SMASH_as_library)
+
 if(USE_SANITIZER)
     smash_add_runtest(sanitizer_box smash_sanitizer smash_sanitizer
                       -e 5.0
