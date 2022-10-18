@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(SMASH_as_a_library_example)
 
 # Tell cmake where to find modules (also append ../../cmake for testing)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake" "${CMAKE_CURRENT_LIST_DIR}/../../cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake"
+     "${CMAKE_CURRENT_LIST_DIR}/../../cmake")
 
 add_executable(example example.cc)
 add_executable(example_rate_equations example_rate_equations.cc)
@@ -20,8 +21,7 @@ find_package(SMASH)
 if(${SMASH_FOUND})
     message("SMASH libraries = ${SMASH_LIBRARIES}")
     include_directories(${SMASH_INCLUDE_DIR})
-    # SYSTEM supresses compiling warnings from external libraries
-    target_link_libraries(example SYSTEM ${SMASH_LIBRARIES})
-    target_link_libraries(example_rate_equations SYSTEM ${SMASH_LIBRARIES})
-    target_link_libraries(example_smash_wrapper SYSTEM ${SMASH_LIBRARIES})
+    target_link_libraries(example ${SMASH_LIBRARIES})
+    target_link_libraries(example_rate_equations ${SMASH_LIBRARIES})
+    target_link_libraries(example_smash_wrapper ${SMASH_LIBRARIES})
 endif(${SMASH_FOUND})

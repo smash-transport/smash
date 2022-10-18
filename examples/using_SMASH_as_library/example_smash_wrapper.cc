@@ -12,6 +12,7 @@ For more details have a look in the SMASH source for the main function in
 smash.cc, Experiment::run() and the functions library.h.
 */
 
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <iostream>
@@ -22,7 +23,6 @@ smash.cc, Experiment::run() and the functions library.h.
 #include "smash/config.h"
 #include "smash/collidermodus.h"
 #include "smash/forwarddeclarations.h"
-#include "smash/cxx14compat.h"
 
 
 int main() {
@@ -59,7 +59,7 @@ int main() {
                                                       tabulations_path);
 
     // Create experiment
-    auto experiment = make_unique<smash::Experiment<smash::ColliderModus>>(config, output_path);
+    auto experiment = std::make_unique<smash::Experiment<smash::ColliderModus>>(config, output_path);
 
 
     ////////////////////////////////////////////////////////////////////////////
