@@ -22,3 +22,8 @@ This example assumes that SMASH is installed and compiled, therefore, all the li
       mkdir build && cd build
       cmake $MY_PROJECT_DIR -DCMAKE_INSTALL_PREFIX=[...]/eigen3 -DPythia_CONFIG_EXECUTABLE=[...]/pythia8307/bin/pythia8-config
       make
+
+
+## Script
+
+There is also a script found in this directory (run_examples_for_testing.bash) that is used for building and running the examples for testing. If you read through the script, you will also find the instructions explained above. In the script the build directory is automatically removed after running, but you can uncomment the corresponding lines, if you want to run it for yourself.
