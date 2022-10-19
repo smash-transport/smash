@@ -498,6 +498,37 @@ class Key {
  * \page input_modi_box_ Box
  */
 
+/*!\Userguide
+ * \page input_modi_list_ List
+ * The `List` modus provides a modus for hydro afterburner calculations. It
+ * takes files with a list of particles in \ref oscar2013_format
+ * "Oscar 2013 format" as an input. These particles are treated as a starting
+ * setup. Multiple events per file are supported. In the following, the input
+ * keys are listed with a short description, an example is given and some
+ * information about the input particle files is provided.
+ */
+
+/*!\Userguide
+ * \page input_modi_listbox_ ListBox
+ *
+ * The `ListBox` modus provides the possibility to initialize a box with a given
+ * set of particles. This modus uses all functionality from the `List` modus
+ * itself. The only difference is that one has to specify the length of the box.
+ * Apart from that, the usage should be equivalent to \ref input_modi_list_
+ * "the \c List modus". Refer to it for more details.
+ *
+ * ### Configuration example
+ * \verbatim
+ Modi:
+     ListBox:
+         File_Directory: "particle_lists_in"
+         File_Prefix: "event"
+         Shift_Id: 0
+         Length: 10.0
+
+ \endverbatim
+ */
+
 /**
  * @brief A container to keep track of all ever existed input keys.
  *
@@ -3093,6 +3124,56 @@ struct InputKeys {
   inline static const Key<double> modi_box_jet_jetMomentum{
       {"Modi", "Box", "Jet", "Jet_Momentum"}, 20.0, {"1.0"}};
 
+  /*!\Userguide
+   * \page input_modi_list_
+   * \required_key{ML_file_dir_,File_Directory,string}
+   *
+   * Directory for the external particle lists.
+   */
+  /**
+   * \see_key{ML_file_dir_}
+   */
+  inline static const Key<std::string> modi_list_fileDirectory{
+      {"Modi", "List", "File_Directory"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_list_
+   * \required_key{ML_file_prefix_,File_Prefix,string}
+   *
+   * Prefix for the external particle lists file.
+   */
+  /**
+   * \see_key{ML_file_prefix_}
+   */
+  inline static const Key<std::string> modi_list_filePrefix{
+      {"Modi", "List", "File_Prefix"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_list_
+   * \required_key{ML_shift_id_,Shift_Id,int}
+   *
+   * Starting index for the particle list file(s). To be used to indicate which
+   * is the first file to is read.
+   */
+  /**
+   * \see_key{ML_shift_id_}
+   */
+  inline static const Key<std::string> modi_list_shiftId{
+      {"Modi", "List", "Shift_Id"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_listbox_
+   * \required_key{MLB_length_,Length,double}
+   *
+   * See &nbsp;
+   * <tt>\ref MB_length_ "Box: Length"</tt>.
+   */
+  /**
+   * \see_key{MB_length_}
+   */
+  inline static const Key<double> modi_listBox_length{
+      {"Modi", "ListBox", "Length"}, {"1.0"}};
+
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
       std::reference_wrapper<const Key<bool>>,
@@ -3286,7 +3367,11 @@ struct InputKeys {
       std::cref(modi_box_chargeChemicalPotential),
       std::cref(modi_box_accountResonanceWidths),
       std::cref(modi_box_jet_jetPdg),
-      std::cref(modi_box_jet_jetMomentum)};
+      std::cref(modi_box_jet_jetMomentum),
+      std::cref(modi_list_fileDirectory),
+      std::cref(modi_list_filePrefix),
+      std::cref(modi_list_shiftId),
+      std::cref(modi_listBox_length)};
 };
 
 /*!\Userguide
@@ -3896,6 +3981,61 @@ General:
     ./smash -i INPUT_DIR/box/config.yaml\
             -p INPUT_DIR/box/particles.txt\
             -d INPUT_DIR/box/decaymodes.txt
+ \endverbatim
+ * where `INPUT_DIR` needs to be replaced by the path to the input directory
+ * at the top-level of SMASH codebase.
+ */
+
+/*!\Userguide
+ * \page input_modi_list_
+ * <hr>
+ * ### Configuring an afterburner simulation
+ *
+ * The following example sets up an afterburner simulation for a set of particle
+ * files located in _**particle_lists_in**_ folder. The files are named as
+ * _event10_, _event11_, etc. (the first being number 10 is specified by the key
+ * `Shift_Id`). SMASH is run once for each event in the folder.
+ * \verbatim
+ Modi:
+     List:
+         File_Directory: "particle_lists_in"
+         File_Prefix: "event"
+         Shift_Id: 10
+ \endverbatim
+ *
+ * <hr>
+ * ## Some information about the structure of input particle file
+ *
+ * This is how an input particle file might look like:
+ * <div class="fragment">
+ * <div class="line"><span class="preprocessor">#!OSCAR2013 particle_lists
+ * t x y z mass p0 px py pz pdg ID charge</span></div>
+ * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm
+ * GeV GeV GeV GeV GeV none none none</span></div>
+ * <div class="line"><span class="preprocessor">0.1 6.42036 1.66473 9.38499
+ * 0.138 0.232871 0.116953 -0.115553 0.090303 111 0 0</span></div>
+ * <div class="line"><span class="preprocessor">\# event 0 end</span></div>
+ * <div class="line"><span class="preprocessor">\# event 1</span></div>
+ * <div class="line"><span class="preprocessor">0.1 6.42036 1.66473 9.38499
+ * 0.138 0.232871 0.116953 -0.115553 0.090303 111 0 0</span></div>
+ * <div class="line"><span class="preprocessor">\# event 1 end</span></div>
+ * </div>
+ * Each colum contains the described quantities. In particular, in the example
+ * above, one \f$\pi^0\f$ with spatial coordinates
+ * \f[(t, x, y, z) = (0.1, 6.42036, 1.66473, 9.38499)\,\mathrm{fm}\f]
+ * and and 4-momenta
+ * \f[(p_0,p_x,p_y,p_z)=(0.232871,0.116953,-0.115553,0.090303)\,\mathrm{GeV}\f]
+ * with mass = 0.138 GeV, pdg = 111, id = 0 and charge 0 will be initialized for
+ * the first event (and also for the second event).
+ *
+ * \note
+ * SMASH is shipped with an example configuration file to set up an afterburner
+ * simulation by means of the list modus. This also requires a particle list to
+ * be read in. Both, the configuration file and the particle list, are located
+ * in the _**input/list**_ folder at the top-level of SMASH codebase. To run
+ * SMASH with the provided example configuration and particle list, execute
+ * \verbatim
+    ./smash -i INPUT_DIR/list/config.yaml
  \endverbatim
  * where `INPUT_DIR` needs to be replaced by the path to the input directory
  * at the top-level of SMASH codebase.
