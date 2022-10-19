@@ -339,7 +339,7 @@ class Key {
  * interactions. Before describing each possible key in detail, it is useful to
  * give some taste with a couple of examples.
  *
- * \par A real life example
+ * ### A real life example
  *
  * The following section in the input file configures SMASH to include all but
  * strangeness exchange involving 2 &harr; 2 scatterings, to treat N + Nbar
@@ -366,7 +366,7 @@ class Key {
  \endverbatim
  * in the configuration file.
  *
- * \par Configuring deuteron multi-particle reactions
+ * ### Configuring deuteron multi-particle reactions
  *
  * The following example configures SMASH to include deuteron multi-particle
  * reactions scatterings.
@@ -539,7 +539,7 @@ struct InputKeys {
   /*!\Userguide
    * \page input_general_
    * <hr>
-   * \par MANDATORY KEYS
+   * ### Mandatory keys
    */
 
   /*!\Userguide
@@ -633,7 +633,7 @@ struct InputKeys {
   /*!\Userguide
    * \page input_general_
    * <hr>
-   * \par OPTIONAL KEYS
+   * ### Optional keys
    */
 
   /*!\Userguide
@@ -2385,7 +2385,7 @@ struct InputKeys {
   /*!\Userguide
    * \page input_modi_collider_projectile_and_target_
    * <hr>
-   * \par CUSTOM NUCLEI
+   * ### Custom nuclei
    *
    * It is possible to further customize the projectile and/or target using the
    * `Custom` section, which should then contain few required keys, if given.
@@ -2429,7 +2429,7 @@ struct InputKeys {
   /*!\Userguide
    * \page input_modi_collider_projectile_and_target_
    * <hr>
-   * \par DEFORMED NUCLEI
+   * ### Deformed nuclei
    *
    * It is possible to deform the projectile and/or target nuclei using the
    * `Deformed` section, which should then contain some configuration, if given.
@@ -3060,7 +3060,7 @@ struct InputKeys {
 /*!\Userguide
  * \page minimum_nonempty_ensembles_
  * <hr>
- * \par Examples
+ * ### Examples
  *
  * In the following example, the number of desired non-empty events is 1000
  * with a maximum number of 2000 events to be calculated. In this case the
@@ -3094,7 +3094,7 @@ struct InputKeys {
 /*!\Userguide
  * \page input_logging_
  * <hr>
- * \par Example: Configuring the Logging Area
+ * ### Example: Configuring the Logging Area
  *
  * To activate different logging levels for different logging areas, change the
  * default level for the desired areas. For example:
@@ -3116,7 +3116,7 @@ struct InputKeys {
 /*!\Userguide
  * \page input_collision_term_string_parameters_
  * <hr>
- * \par Example of string paramters customization
+ * ### Example of string paramters customization
  *
  *\verbatim
  Collision_Term:
@@ -3144,7 +3144,7 @@ struct InputKeys {
 /*!\Userguide
  * \page input_collision_term_dileptons_
  * <hr>
- * \par Example of dileptons configuration
+ * ### Example of dileptons configuration
  *
  * The following example configures the dilepton production for dileptons
  * originating from resonance decays. In addition, the extended OSCAR2013
@@ -3161,7 +3161,7 @@ struct InputKeys {
  \endverbatim
  *
  * <hr>
- * \par Dilepton production in SMASH
+ * ## Dilepton production in SMASH
  *
  * The treatment of Dilepton Decays is special:
  * - Dileptons are treated via the time integration method, also called
@@ -3195,7 +3195,7 @@ struct InputKeys {
 /*!\Userguide
  * \page input_collision_term_photons_
  * <hr>
- * \par Example of photons configuration
+ * ### Example of photons configuration
  *
  * The following example configures the photon production in both binary
  * scatterings and bremsstrahlung processes, where 1000 fractional photons are
@@ -3214,7 +3214,7 @@ struct InputKeys {
  \endverbatim
  *
  * <hr>
- * \par Photon production in SMASH
+ * ## Photon production in SMASH
  *
  * Photons are treated perturbatively and are produced from binary
  * scattering processes. Their production follows the framework from Turbide
@@ -3280,7 +3280,7 @@ struct InputKeys {
 /*!\Userguide
  * \page input_modi_collider_
  * <hr>
- * \par Example of heavy-ion collision configuration
+ * ### Example of heavy-ion collision configuration
  *
  * The following example configures a Cu63-Cu63 collision at
  * \f$\sqrt{s_{NN}}=3.0\,\mathrm{GeV}\f$ with zero impact parameter and Fermi
@@ -3334,7 +3334,7 @@ struct InputKeys {
  * \page input_modi_collider_projectile_and_target_
  * <hr>
  * \anchor input_modi_collider_projectile_and_target_ex1_
- * \par p-Pb collisions at the LHC
+ * ### p-Pb collisions at the LHC
  *
  * Note that SMASH performs its calculation in the centre-of-velocity and the
  * particles are returned in the centre-of-mass frame. The particles therefore
@@ -3361,7 +3361,7 @@ struct InputKeys {
  *
  * <hr>
  * \anchor input_modi_collider_projectile_and_target_ex2_
- * \par Configuring custom nuclei from external file
+ * ### Configuring custom nuclei from external file
  *
  * The following example illustrates how to configure a center-of-mass heavy-ion
  * collision with nuclei generated from an external file. The nucleon positions
@@ -3426,7 +3426,7 @@ struct InputKeys {
  *
  * <hr>
  * \anchor input_modi_collider_projectile_and_target_ex2_
- * \par Configuring a deformed nucleus
+ * ### Configuring a deformed nucleus
  *
  * To configure a fixed target heavy-ion collision with deformed nuclei, whose
  * spherical deformation is explicitly declared, it can be done according to the
@@ -3468,7 +3468,7 @@ struct InputKeys {
 /*!\Userguide
  * \page input_modi_collider_impact_parameter_
  * <hr>
- * \par Configuring the Impact Parameter
+ * ### Configuring the Impact Parameter
  *
  * The impact parameter can be configured to have a fixed value in the
  * `Collider` subsection of `Modi`. In addition, the initial distance of the
