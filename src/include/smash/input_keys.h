@@ -437,6 +437,9 @@ class Key {
  * - \subpage input_modi_box_
  * - \subpage input_modi_list_
  * - \subpage input_modi_listbox_
+ *
+ * The `Modi` section has to contain a section named after the chosen modus and
+ * in it the corresponding customization takes place.
  */
 
 /*!\Userguide
@@ -485,6 +488,10 @@ class Key {
  * impact parameters. The value chosen here is simply the x-component of
  * \f$\vec{\mkern0mu b}\f$. The result will be that the projectile and target
  * will have switched position in x.
+ */
+
+/*!\Userguide
+ * \page input_modi_sphere_ Sphere
  */
 
 /**
@@ -2682,8 +2689,192 @@ struct InputKeys {
   /**
    * \see_key{MC_impact_max_}
    */
-  inline static const Key<double> modi_collider_impact_max{
+  inline static const Key<double> modi_collider_impactMax{
       {"Modi", "Collider", "Impact", "Max"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
+   * \required_key_no_line{MS_radius_,Radius,double}
+   *
+   * Radius of the sphere <b>in fm</b>.
+   */
+  /**
+   * \see_key{MS_radius_}
+   */
+  inline static const Key<double> modi_sphere_radius{
+      {"Modi", "Sphere", "Radius"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
+   * \required_key{MS_temperature_,Temperature,double}
+   *
+   * Temperature <b>in GeV</b> to sample momenta in the sphere.
+   */
+  /**
+   * \see_key{MS_radius_}
+   */
+  inline static const Key<double> modi_sphere_temperature{
+      {"Modi", "Sphere", "Temperature"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
+   * \required_key{MS_start_time_,Start_Time,double}
+   *
+   * Starting time of sphere calculation.
+   */
+  /**
+   * \see_key{MS_start_time_}
+   */
+  inline static const Key<double> modi_sphere_startTime{
+      {"Modi", "Sphere", "Start_Time"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
+   * \required_key{MS_init_mult_,Init_Multiplicities,map<int\,int>}
+   *
+   * Initial multiplicities per particle species. The value of this key shall be
+   * a map of PDG number and amount corresponding to it. Use this key to specify
+   * how many particles of each species will be initialized. This key can be
+   * omitted if <tt>\ref MS_use_thermal_mult_ "Use_Thermal_Multiplicities"</tt>
+   * is `true`.
+   */
+  /**
+   * \see_key{MS_init_mult_}
+   */
+  inline static const Key<std::map<PdgCode, int>>
+      modi_sphere_initialMultiplicities{
+          {"Modi", "Sphere", "Init_Multiplicities"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
+   * \optional_key{MS_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
+   *
+   * If this option is set to `true` then <tt>\ref MS_init_mult_
+   * "Init_Multiplicities"</tt> are ignored and the box is initialized with all
+   * particle species of the particle table that belong to the hadron gas
+   * equation of state, see HadronGasEos::is_eos_particle(). The multiplicities
+   * are sampled from Poisson distributions \f$\mathrm{Poi}(n_i V)\f$, where
+   * \f$n_i\f$ are the grand-canonical thermal densities of the corresponding
+   * species and \f$V\f$ is the box volume. This option simulates the
+   * grand-canonical ensemble, where the number of particles is not fixed from
+   * event to event.
+   */
+  /**
+   * \see_key{MS_use_thermal_mult_}
+   */
+  inline static const Key<bool> modi_sphere_useThermalMultiplicities{
+      {"Modi", "Sphere", "Use_Thermal_Multiplicities"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
+   * \optional_key{MS_use_bar_chem_pot_,Baryon_Chemical_Potential,double,0.0}
+   *
+   * Baryon chemical potential \f$\mu_B\f$. This key is used to compute thermal
+   * densities \f$n_i\f$ only if <tt>\ref MS_use_thermal_mult_
+   * "Use_Thermal_Multiplicities"</tt> is `true`.
+   */
+  /**
+   * \see_key{MS_use_bar_chem_pot_}
+   */
+  inline static const Key<double> modi_sphere_baryonChemicalPotential{
+      {"Modi", "Sphere", "Baryon_Chemical_Potential"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
+   * \optional_key{MS_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
+   *
+   * Strangeness chemical potential \f$\mu_S\f$. This key is used to compute
+   * thermal densities \f$n_i\f$ only if <tt>\ref MS_use_thermal_mult_
+   * "Use_Thermal_Multiplicities"</tt> is `true`.
+   */
+  /**
+   * \see_key{MS_strange_chem_pot_}
+   */
+  inline static const Key<double> modi_sphere_strangeChemicalPotential{
+      {"Modi", "Sphere", "Strange_Chemical_Potential"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
+   * \optional_key{MS_charge_chem_pot_,Charge_Chemical_Potential,double,0.0}
+   *
+   * Charge chemical potential \f$\mu_Q\f$. This key is used to compute
+   * thermal densities \f$n_i\f$ only if <tt>\ref MS_use_thermal_mult_
+   * "Use_Thermal_Multiplicities"</tt> is `true`.
+   */
+  /**
+   * \see_key{MS_charge_chem_pot_}
+   */
+  inline static const Key<double> modi_sphere_chargeChemicalPotential{
+      {"Modi", "Sphere", "Charge_Chemical_Potential"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
+   * \optional_key{MS_account_res_widths_,Account_Resonance_Widths,bool,true}
+   *
+   * This key is considered only in case of thermal initialization an the
+   * following two behaviors can be choosen:
+   * - `true` &rarr; Account for resonance spectral functions, while computing
+   *   multiplicities and sampling masses.
+   * - `false` &rarr; Simply use pole masses.
+   */
+  /**
+   * \see_key{MS_account_res_widths_}
+   */
+  inline static const Key<bool> modi_sphere_accountResonanceWidths{
+      {"Modi", "Sphere", "Account_Resonance_Widths"}, true, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
+   * \optional_key{MS_initial_cond_,Initial_Condition,string,"thermal momenta"}
+   *
+   * Initial distribution to use for momenta of particles. Mainly used in the
+   * expanding universe scenario, options are:
+   * - `"thermal momenta"` &rarr; equilibrium Boltzmann distribution
+   * - `"IC_ES"` &rarr; off-equilibrium distribution
+   * - `"IC_1M"` &rarr; off-equilibrium distribution
+   * - `"IC_2M"` &rarr; off-equilibrium distribution
+   * - `"IC_Massive"` &rarr; off-equilibrium distribution
+   *
+   * See \iref{Bazow:2016oky} and \iref{Tindall:2016try} for further
+   * explanations about the different distribution functions.
+   */
+  /**
+   * \see_key{MS_initial_cond_}
+   */
+  inline static const Key<std::string> modi_sphere_initialCondition{
+      {"Modi", "Sphere", "Initial_Condition"}, "thermal momenta", {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
+   * <hr>
+   * #### Specifying jets
+   *
+   * The `Jet` section within the `Sphere` one is used to put a single high
+   * energy particle (a "jet") in the center of the sphere, on an outbound
+   * trajectory along the x-axis; if no PDG is specified no jet is produced.
+   *
+   * \optional_key_no_line{MS_jet_jet_pdg_,Jet_PDG,int,no jet}
+   *
+   * The type of particle to be used as a jet, as given by its PDG code;
+   * if none is provided no jet is initialized.
+   */
+  /**
+   * \see_key{MS_jet_jet_pdg_}
+   */
+  inline static const Key<PdgCode> modi_sphere_jet_jetPdg{
+      {"Modi", "Sphere", "Jet", "Jet_PDG"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
+   * \optional_key_no_line{MS_jet_jet_momentum_,Jet_Momentum,double,20.0}
+   *
+   * The initial momentum <b>in GeV</b> to give to the jet particle.
+   */
+  /**
+   * \see_key{MS_jet_jet_momentum_}
+   */
+  inline static const Key<double> modi_sphere_jet_jetMomentum{
+      {"Modi", "Sphere", "Jet", "Jet_Momentum"}, 20.0, {"1.0"}};
 
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
@@ -2698,6 +2889,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<MultiParticleReactionsBitSet>>,
+      std::reference_wrapper<const Key<PdgCode>>,
       std::reference_wrapper<const Key<ReactionsBitSet>>,
       std::reference_wrapper<const Key<RestFrameDensityDerivativesMode>>,
       std::reference_wrapper<const Key<SmearingMode>>,
@@ -2850,7 +3042,19 @@ struct InputKeys {
       std::cref(modi_collider_impact_values),
       std::cref(modi_collider_impact_yields),
       std::cref(modi_collider_impact_range),
-      std::cref(modi_collider_impact_max)};
+      std::cref(modi_collider_impactMax),
+      std::cref(modi_sphere_radius),
+      std::cref(modi_sphere_temperature),
+      std::cref(modi_sphere_startTime),
+      std::cref(modi_sphere_initialMultiplicities),
+      std::cref(modi_sphere_useThermalMultiplicities),
+      std::cref(modi_sphere_baryonChemicalPotential),
+      std::cref(modi_sphere_strangeChemicalPotential),
+      std::cref(modi_sphere_chargeChemicalPotential),
+      std::cref(modi_sphere_accountResonanceWidths),
+      std::cref(modi_sphere_initialCondition),
+      std::cref(modi_sphere_jet_jetPdg),
+      std::cref(modi_sphere_jet_jetMomentum)};
 };
 
 /*!\Userguide
@@ -3031,7 +3235,7 @@ struct InputKeys {
  *    cross section to the hadronic cross section used to find the interaction,
  *    \f[W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\;.\f]
  *    This weight can be found in the weight element of the photon output,
- *    denoted as `photon_weight` in the above.
+ *    denoted as `photon_weight` there.
  * -# Perform the original hadronic action based on which the photon action
  *    was found. Propagate all final states particles throughout the hadronic
  *    evolution as if no photon action had occured.
@@ -3298,6 +3502,69 @@ struct InputKeys {
              Values: [0.0, 3.0, 6.0, 9.0]
              Yields: [0.000000, 2.999525, 5.959843, 6.995699]
  \endverbatim
+ */
+
+/*!\Userguide
+ * \page input_modi_sphere_
+ * <hr>
+ * ### Configuring a sphere simulation
+ *
+ * The following example configures an expanding sphere with a radius of 5 fm
+ * at a temperature of 200 MeV. The particles are initialized with thermal
+ * momenta at a start time of 0 fm. The particle numbers at initialization are
+ * 100 \f$ \pi^+ \f$, 100 \f$ \pi^0 \f$, 100 \f$ \pi^- \f$, 50 protons and 50
+ * neutrons.
+ *
+ *\verbatim
+ Modi:
+     Sphere:
+         Radius: 5.0
+         Temperature: 0.2
+         Initial_Condition: "thermal momenta"
+         Start_Time: 0.0
+         Init_Multiplicities:
+             211: 100
+             111: 100
+             -211: 100
+             2212: 50
+             2112: 50
+ \endverbatim
+ *
+ * It is also possible to initialize a sphere based on thermal multiplicities.
+ * This is done via
+ *\verbatim
+ Modi:
+     Sphere:
+         Radius: 10.0
+         Temperature: 0.2
+         Use_Thermal_Multiplicities: True
+ \endverbatim
+ *
+ * If one wants to simulate a jet in the hadronic medium, this can be done by
+ * using the following configuration setup:
+ *\verbatim
+ Modi:
+     Sphere:
+         Radius: 10.0
+         Temperature: 0.2
+         Use_Thermal_Multiplicities: True
+         Jet:
+             Jet_PDG: 211
+             Jet_Momentum: 100.0
+\endverbatim
+ *
+ * \note
+ * SMASH is shipped with an example configuration file to set up an expanding
+ * sphere simulation initialized with predefined initial particle
+ * multiplicities. This file is located in the _**input/sphere**_ folder at the
+ * top-level of SMASH codebase. To run SMASH with the provided example
+ * configuration for the sphere, execute
+ * \verbatim
+    ./smash -i INPUT_DIR/sphere/config.yaml
+ \endverbatim
+ * where `INPUT_DIR` needs to be replaced by the path to the input directory
+ * at the top-level of SMASH codebase.
+ *
  */
 
 }  // namespace smash
