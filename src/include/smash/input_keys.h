@@ -494,6 +494,10 @@ class Key {
  * \page input_modi_sphere_ Sphere
  */
 
+/*!\Userguide
+ * \page input_modi_box_ Box
+ */
+
 /**
  * @brief A container to keep track of all ever existed input keys.
  *
@@ -2771,12 +2775,12 @@ struct InputKeys {
    * \optional_key{MS_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
    *
    * If this option is set to `true` then <tt>\ref MS_init_mult_
-   * "Init_Multiplicities"</tt> are ignored and the box is initialized with all
-   * particle species of the particle table that belong to the hadron gas
+   * "Init_Multiplicities"</tt> are ignored and the system is initialized with
+   * all particle species of the particle table that belong to the hadron gas
    * equation of state, see HadronGasEos::is_eos_particle(). The multiplicities
    * are sampled from Poisson distributions \f$\mathrm{Poi}(n_i V)\f$, where
    * \f$n_i\f$ are the grand-canonical thermal densities of the corresponding
-   * species and \f$V\f$ is the box volume. This option simulates the
+   * species and \f$V\f$ is the system volume. This option simulates the
    * grand-canonical ensemble, where the number of particles is not fixed from
    * event to event.
    */
@@ -2832,7 +2836,7 @@ struct InputKeys {
    * \page input_modi_sphere_
    * \optional_key{MS_account_res_widths_,Account_Resonance_Widths,bool,true}
    *
-   * This key is considered only in case of thermal initialization an the
+   * This key is considered only in case of thermal initialization and the
    * following two behaviors can be choosen:
    * - `true` &rarr; Account for resonance spectral functions, while computing
    *   multiplicities and sampling masses.
@@ -2871,7 +2875,7 @@ struct InputKeys {
    * #### Specifying jets
    *
    * The `Jet` section within the `Sphere` one is used to put a single high
-   * energy particle (a "jet") in the center of the sphere, on an outbound
+   * energy particle (a "jet") in the center of the system, on an outbound
    * trajectory along the x-axis; if no PDG is specified no jet is produced.
    *
    * \optional_key_no_line{MS_jet_jet_pdg_,Jet_PDG,int,no jet}
@@ -2896,6 +2900,198 @@ struct InputKeys {
    */
   inline static const Key<double> modi_sphere_jet_jetMomentum{
       {"Modi", "Sphere", "Jet", "Jet_Momentum"}, 20.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * \required_key_no_line{MB_initial_condition_,Initial_Condition,string}
+   *
+   * Controls initial momentum distribution of particles.
+   * - `"peaked momenta"` &rarr; All particles have momentum \f$p=3\,T\f$,
+   *   where \f$T\f$ is the temperature. Directions of momenta are uniformly
+   *   distributed.
+   * - `"thermal momenta"` &rarr; Momenta are sampled from a Maxwell-Boltzmann
+   *   distribution.
+   */
+  /**
+   * \see_key{MB_initial_condition_}
+   */
+  inline static const Key<std::string> modi_box_initialCondition{
+      {"Modi", "Box", "Initial_Condition"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * \required_key{MB_length_,Length,double}
+   *
+   * Length of the cube's edge <b>in fm</b>.
+   */
+  /**
+   * \see_key{MB_length_}
+   */
+  inline static const Key<double> modi_box_length{{"Modi", "Box", "Length"},
+                                                  {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * \required_key{MB_temperature_,Temperature,double}
+   *
+   * Temperature <b>in GeV</b> of the box.
+   */
+  /**
+   * \see_key{MB_temperature_}
+   */
+  inline static const Key<double> modi_box_temperature{
+      {"Modi", "Box", "Temperature"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * \required_key{MB_start_time_,Start_Time,double}
+   *
+   * Starting time of the simulation. All particles in the box are initialized
+   * with \f$x^0=\f$`Start_Time`.
+   */
+  /**
+   * \see_key{MB_start_time_}
+   */
+  inline static const Key<double> modi_box_startTime{
+      {"Modi", "Box", "Start_Time"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * \optional_key{MB_equilibration_time_,Equilibration_Time,double, -1.0}
+   *
+   * Time after which the output of the box is written out. The first time
+   * however will be printed. This is useful if one wants to simulate boxes for
+   * very long times and knows at which time the box reaches its thermal and
+   * chemical equilibrium.
+   * The default set to -1 is meaning that output is written from beginning on,
+   * if this key is not given.
+   */
+  /**
+   * \see_key{MB_equilibration_time_}
+   */
+  inline static const Key<double> modi_box_equilibrationTime{
+      {"Modi", "Box", "Equilibration_Time"}, -1.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * \required_key{MB_init_mult_,Init_Multiplicities,map<int\,int>}
+   *
+   * See &nbsp;
+   * <tt>\ref MS_init_mult_ "Sphere: Init_Multiplicities"</tt>.
+   */
+  /**
+   * \see_key{MB_init_mult_}
+   */
+  inline static const Key<std::map<PdgCode, int>>
+      modi_box_initialMultiplicities{{"Modi", "Box", "Init_Multiplicities"},
+                                     {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * \optional_key{MB_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
+   *
+   * See &nbsp;
+   * <tt>\ref MS_use_thermal_mult_ "Sphere: Use_Thermal_Multiplicities"</tt>.
+   */
+  /**
+   * \see_key{MB_use_thermal_mult_}
+   */
+  inline static const Key<bool> modi_box_useThermalMultiplicities{
+      {"Modi", "Box", "Use_Thermal_Multiplicities"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * \optional_key{MB_use_bar_chem_pot_,Baryon_Chemical_Potential,double,0.0}
+   *
+   * See &nbsp;
+   * <tt>\ref MS_use_bar_chem_pot_ "Sphere: Baryon_Chemical_Potential"</tt>.
+   */
+  /**
+   * \see_key{MB_use_bar_chem_pot_}
+   */
+  inline static const Key<double> modi_box_baryonChemicalPotential{
+      {"Modi", "Box", "Baryon_Chemical_Potential"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * \optional_key{MB_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
+   *
+   * See &nbsp;
+   * <tt>\ref MS_strange_chem_pot_ "Sphere: Strange_Chemical_Potential"</tt>.
+   */
+  /**
+   * \see_key{MB_strange_chem_pot_}
+   */
+  inline static const Key<double> modi_box_strangeChemicalPotential{
+      {"Modi", "Box", "Strange_Chemical_Potential"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * \optional_key{MB_charge_chem_pot_,Charge_Chemical_Potential,bool,false}
+   *
+   * See &nbsp;
+   * <tt>\ref MS_charge_chem_pot_ "Sphere: Charge_Chemical_Potential"</tt>.
+   */
+  /**
+   * \see_key{MB_charge_chem_pot_}
+   */
+  inline static const Key<double> modi_box_chargeChemicalPotential{
+      {"Modi", "Box", "Charge_Chemical_Potential"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * \optional_key{MB_account_res_widths_,Account_Resonance_Widths,bool,true}
+   *
+   * See &nbsp;
+   * <tt>\ref MS_account_res_widths_ "Sphere: Account_Resonance_Widths"</tt>.
+   *
+   * \note
+   * Normally, one wants this option `true`. For example, for the detailed
+   * balance studies, it is better to account for spectral functions, because
+   * then at \f$t=0\f$ one has exactly the expected thermal grand-canonical
+   * multiplicities, that can be compared to final ones.  However, by toggling
+   * `true` to `false` one can observe the effect of spectral function on the
+   * multiplicity. This is useful for understanding the implications of
+   * different ways of sampling resonances in hydrodynamics.
+   */
+  /**
+   * \see_key{MB_account_res_widths_}
+   */
+  inline static const Key<bool> modi_box_accountResonanceWidths{
+      {"Modi", "Box", "Account_Resonance_Widths"}, true, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * <hr>
+   * #### Specifying jets
+   *
+   * The `Jet` section can be specified in the `Box` section with the same
+   * meaning it has for the `Sphere` modus. It is namely possible to put a
+   * jet in the center of the box, on a outbound trajectory along the x-axis.
+   *
+   * \optional_key_no_line{MB_jet_jet_pdg_,Jet_PDG,int,no jet}
+   *
+   * See &nbsp;
+   * <tt>\ref MS_jet_jet_pdg_ "Sphere: Jet: Jet_PDG"</tt>.
+   */
+  /**
+   * \see_key{MB_jet_jet_pdg_}
+   */
+  inline static const Key<PdgCode> modi_box_jet_jetPdg{
+      {"Modi", "Box", "Jet", "Jet_PDG"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_box_
+   * \optional_key_no_line{MB_jet_jet_momentum_,Jet_Momentum,double,20.0}
+   *
+   * See &nbsp;
+   * <tt>\ref MS_jet_jet_momentum_ "Sphere: Jet: Jet_Momentum"</tt>.
+   */
+  /**
+   * \see_key{MB_jet_jet_momentum_}
+   */
+  inline static const Key<double> modi_box_jet_jetMomentum{
+      {"Modi", "Box", "Jet", "Jet_Momentum"}, 20.0, {"1.0"}};
 
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
@@ -3077,49 +3273,63 @@ struct InputKeys {
       std::cref(modi_sphere_accountResonanceWidths),
       std::cref(modi_sphere_initialCondition),
       std::cref(modi_sphere_jet_jetPdg),
-      std::cref(modi_sphere_jet_jetMomentum)};
+      std::cref(modi_sphere_jet_jetMomentum),
+      std::cref(modi_box_initialCondition),
+      std::cref(modi_box_length),
+      std::cref(modi_box_temperature),
+      std::cref(modi_box_startTime),
+      std::cref(modi_box_equilibrationTime),
+      std::cref(modi_box_initialMultiplicities),
+      std::cref(modi_box_useThermalMultiplicities),
+      std::cref(modi_box_baryonChemicalPotential),
+      std::cref(modi_box_strangeChemicalPotential),
+      std::cref(modi_box_chargeChemicalPotential),
+      std::cref(modi_box_accountResonanceWidths),
+      std::cref(modi_box_jet_jetPdg),
+      std::cref(modi_box_jet_jetMomentum)};
 };
 
 /*!\Userguide
- * \page minimum_nonempty_ensembles_
- * <hr>
- * ### Examples
- *
- * In the following example, the number of desired non-empty events is 1000
- * with a maximum number of 2000 events to be calculated. In this case the
- * calculation will stop either if 1000 events are not empty or 2000 events
- * have been calculated.
- * \verbatim
-  General:
-      Modus: Collider
-      Minimum_Nonempty_Ensembles:
-          Number: 1000
-          Maximum_Ensembles_Run: 2000
-      Ensembles: 1
-  \endverbatim
- *
- * In contrast to the first example, in the next example we use 20 parallel
- * ensembles. Here, the maximum number of ensembles run is 2000. The calculation
- * will continue until either this number of ensembles is reached or 1000
- * ensembles contain interactions. Note that an event consists of 20 ensembles.
- * The 20 ensembles run in parallel, so the number of non-empty ensembles in the
- * ouput is between 1000 and 1019.
- * \verbatim
-  General:
-      Modus: Collider
-      Minimum_Nonempty_Ensembles:
-          Number: 1000
-          Maximum_Ensembles_Run: 2000
-      Ensembles: 20
-  \endverbatim
- */
+* \page minimum_nonempty_ensembles_
+* <hr>
+* ### Examples
+*
+* In the following example, the number of desired non-empty events is 1000
+* with a maximum number of 2000 events to be calculated. In this case the
+* calculation will stop either if 1000 events are not empty or 2000 events
+* have been calculated.
+* \verbatim
+General:
+  Modus: Collider
+  Minimum_Nonempty_Ensembles:
+      Number: 1000
+      Maximum_Ensembles_Run: 2000
+  Ensembles: 1
+\endverbatim
+*
+* In contrast to the first example, in the next example we use 20 parallel
+* ensembles. Here, the maximum number of ensembles run is 2000. The calculation
+* will continue until either this number of ensembles is reached or 1000
+* ensembles contain interactions. Note that an event consists of 20 ensembles.
+* The 20 ensembles run in parallel, so the number of non-empty ensembles in the
+* ouput is between 1000 and 1019.
+* \verbatim
+General:
+  Modus: Collider
+  Minimum_Nonempty_Ensembles:
+      Number: 1000
+      Maximum_Ensembles_Run: 2000
+  Ensembles: 20
+\endverbatim
+*/
 
 /*!\Userguide
  * \page input_logging_
  * <hr>
  * ### Example: Configuring the Logging Area
  *
- * To activate different logging levels for different logging areas, change the
+ * To activate different logging levels for different logging areas, change
+ the
  * default level for the desired areas. For example:
  *\verbatim
  Logging:
@@ -3130,9 +3340,11 @@ struct InputKeys {
      Fpe:        "OFF"
  \endverbatim
  *
- * This will set all levels to `WARN` verbosity, still asking for informational
+ * This will set all levels to `WARN` verbosity, still asking for
+ informational
  * messages of `Main` and `Experiment` areas. Furthermore, `Pythia` debug
- * messages are requested, while any floating point exception message is turned
+ * messages are requested, while any floating point exception message is
+ turned
  * off.
  */
 
@@ -3202,7 +3414,8 @@ struct InputKeys {
  * of your choice, which you then specify as the input with the `-d` command
  * line option. <b>Without this decay modes modification the dilepton output
  * will be empty</b>. Dilepton decays are commented out by default. Therefore,
- * you need to uncomment them. For the N(1520) Dalitz decay, two treatments are
+ * you need to uncomment them. For the N(1520) Dalitz decay, two treatments
+ are
  * available: Either by proxy of the \f$\rho N\f$ decay, which is enabled by
  * default (and leads to a dilepton Dalitz decay, if \f$\rho \rightarrow
  * e^+e^-\f$ is also enabled) or as a direct Dalitz decay to \f$e^+e^- N\f$.
@@ -3255,7 +3468,8 @@ struct InputKeys {
  *    propagated further in the evolution. To account for the probability that
  *    photon processes are significantly less likely than hadronic processes,
  *    the produced photons are weighted according to the ratio of the photon
- *    cross section to the hadronic cross section used to find the interaction,
+ *    cross section to the hadronic cross section used to find the
+ interaction,
  *    \f[W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\;.\f]
  *    This weight can be found in the weight element of the photon output,
  *    denoted as `photon_weight` there.
@@ -3284,7 +3498,8 @@ struct InputKeys {
  * approximately factorized over the common \f$ k \f$ and
  * \f$ \theta \f$ range, \f$ \frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}k}\f$
  * and \f$ \frac{\mathrm{d}\sigma_\gamma}{\mathrm{d} \theta}\f$ are considered
- * separately. Consequently, the weighting factor in the case of bremsstrahlung
+ * separately. Consequently, the weighting factor in the case of
+ bremsstrahlung
  * photons is redefined as:
  * \f[
  * W = \frac{
@@ -3307,7 +3522,8 @@ struct InputKeys {
  *
  * The following example configures a Cu63-Cu63 collision at
  * \f$\sqrt{s_{NN}}=3.0\,\mathrm{GeV}\f$ with zero impact parameter and Fermi
- * motion taken into consideration. The calculation frame is the default, center
+ * motion taken into consideration. The calculation frame is the default,
+ center
  * of velocity, and the nuclei are not deformed. Refer to \ref
  * input_modi_collider_projectile_and_target_ for information about the
  * `Particles` and `Target` sections.
@@ -3323,7 +3539,8 @@ struct InputKeys {
  \endverbatim
  *
  * To further use Fermi motion and allow the first collisions within the
- * projectile or target nucleus, the corresponding options need to be activated
+ * projectile or target nucleus, the corresponding options need to be
+ activated
  * by means of:
  *\verbatim
          Fermi_Motion: "on"
@@ -3337,13 +3554,16 @@ struct InputKeys {
  * \note
  * By default, executing SMASH from the codebase build folder without further
  * specifying the configuration, particles and decay modes files, a collider
- * simulation is set up according to the default _config.yaml_, _particles.txt_
+ * simulation is set up according to the default _config.yaml_,
+ _particles.txt_
  * and _decaymodes.txt_ files located in the _**input**_ directory at the
  * top-level of the codebase. However, changing the _**input**_ directory
- * content will not affect the default SMASH run, unless a clean build folder is
+ * content will not affect the default SMASH run, unless a clean build folder
+ is
  * created over again. This is because the triplet of input files are
  * transformed into another triplet of files into the build directory when
- * `cmake` is run. Hence prefer to use `smash` command line options in case you
+ * `cmake` is run. Hence prefer to use `smash` command line options in case
+ you
  * want to refer to possibly modified configuration, particles and decay modes
  * files.\n
  * To run SMASH in the (default) collider setup, execute
@@ -3386,8 +3606,10 @@ struct InputKeys {
  * \anchor input_modi_collider_projectile_and_target_ex2_
  * ### Configuring custom nuclei from external file
  *
- * The following example illustrates how to configure a center-of-mass heavy-ion
- * collision with nuclei generated from an external file. The nucleon positions
+ * The following example illustrates how to configure a center-of-mass
+ heavy-ion
+ * collision with nuclei generated from an external file. The nucleon
+ positions
  * are not sampled by SMASH but read in from an external file. The given path
  * and name of the external file are made up and should be defined by the user
  * according to the used file.
@@ -3424,11 +3646,15 @@ struct InputKeys {
  * It contains 5 columns (x, y, z, s, c). The first three columns specify the
  * spatial cordinates <b>in fm</b>. The fourth column denotes the spin
  * projection. The fifth contains the charge with 1 and 0 for protons and
- * neutrons respectively. In the example given the first line defines a neutron
- * and the second one a proton. Please make sure that your file contains as many
+ * neutrons respectively. In the example given the first line defines a
+ neutron
+ * and the second one a proton. Please make sure that your file contains as
+ many
  * particles as you specified in the configuration. For the example considered
- * here, the file needs to contain 79 protons and 118 neutrons in the first 197
- * lines. And the same number in the following 197 lines. The read in nuclei are
+ * here, the file needs to contain 79 protons and 118 neutrons in the first
+ 197
+ * lines. And the same number in the following 197 lines. The read in nuclei
+ are
  * randomly rotated and recentered. Therefore you can run SMASH even if your
  * file does not contain enough nuclei for the number of events you want to
  * simulate as the missing nuclei are generated by rotation of the given
@@ -3436,9 +3662,11 @@ struct InputKeys {
  *
  * \note
  * SMASH is shipped with an example configuration file to set up a collision
- * with externally generated nucleon positions. This requires a particle list to
+ * with externally generated nucleon positions. This requires a particle list
+ to
  * be read in. Both, the configuration file and the particle list, are located
- * in the _**input/custom_nucleus**_ folder at the top-level of SMASH codebase.
+ * in the _**input/custom_nucleus**_ folder at the top-level of SMASH
+ codebase.
  * To run SMASH with the provided example configuration and particle list,
  execute
  * \verbatim
@@ -3452,7 +3680,8 @@ struct InputKeys {
  * ### Configuring a deformed nucleus
  *
  * To configure a fixed target heavy-ion collision with deformed nuclei, whose
- * spherical deformation is explicitly declared, it can be done according to the
+ * spherical deformation is explicitly declared, it can be done according to
+ the
  * following example. For explanatory (and not physics) reasons, the
  * projectile's Woods-Saxon distribution is initialized automatically and
  * its spherical deformation manually, while the target nucleus is configured
@@ -3497,7 +3726,8 @@ struct InputKeys {
  * The impact parameter can be configured to have a fixed value in the
  * `Collider` subsection of `Modi`. In addition, the initial distance of the
  * nuclei in \f$z\f$-direction is assigned a specific value. This does not
- * affect the time at which the nuclei will collide, but only changes the start
+ * affect the time at which the nuclei will collide, but only changes the
+ start
  * time of the simulation as the nuclei are further apart when the simulation
  * begins.
  *\verbatim
@@ -3506,7 +3736,8 @@ struct InputKeys {
          Impact:
              Value: 0.1
  \endverbatim
- * The impact parameter may further be sampled within a certain impact parameter
+ * The impact parameter may further be sampled within a certain impact
+ parameter
  * range. By default, a quadratic distribution is used for the sampling.
  * However, this may be set to `"uniform"` if necessary.
  *\verbatim
@@ -3580,15 +3811,94 @@ struct InputKeys {
  * \note
  * SMASH is shipped with an example configuration file to set up an expanding
  * sphere simulation initialized with predefined initial particle
- * multiplicities. This file is located in the _**input/sphere**_ folder at the
- * top-level of SMASH codebase. To run SMASH with the provided example
- * configuration for the sphere, execute
+ * multiplicities. This file is located in the _**input/sphere**_ folder at
+ * the top-level of SMASH codebase. To run SMASH with the provided example
+ * configuration for the sphere system, execute
  * \verbatim
     ./smash -i INPUT_DIR/sphere/config.yaml
  \endverbatim
  * where `INPUT_DIR` needs to be replaced by the path to the input directory
  * at the top-level of SMASH codebase.
  *
+ */
+
+/*!\Userguide
+ * \page input_modi_box_
+ * <hr>
+ * ### Configuring a Box Simulation
+ *
+ * The following example configures an infinite matter simulation in a Box with
+ * 10 fm cube length at a temperature of 200 MeV. The particles are initialized
+ * with thermal momenta at a start time of 10 fm. The particle numbers at
+ * initialization are 100 \f$ \pi^+ \f$, 100 \f$ \pi^0 \f$, 100 \f$ \pi^- \f$,
+ * 50 protons and 50 neutrons.
+ *
+ *\verbatim
+ Modi:
+     Box:
+         Length: 10.0
+         Temperature: 0.2
+         Initial_Condition: "thermal momenta"
+         Start_Time: 10.0
+         Init_Multiplicities:
+             211: 100
+             111: 100
+             -211: 100
+             2212: 50
+             2112: 50
+ \endverbatim
+ * On the contrary, it is also possible to initialize a thermal box based on
+ * thermal multiplicities. This is done via
+ *\verbatim
+ Modi:
+     Box:
+         Length: 10.0
+         Temperature: 0.2
+         Use_Thermal_Multiplicities: True
+         Initial_Condition: "thermal momenta"
+         Baryon_Chemical_Potential: 0.0
+         Strange_Chemical_Potential: 0.0
+         Charge_Chemical_Potential: 0.0
+         Account_Resonance_Widths: True
+ \endverbatim
+ *
+ * If one wants to simulate a jet in the hadronic medium, this can be done
+ * by using the following configuration setup:
+ *\verbatim
+ Modi:
+     Box:
+         Length: 10.0
+         Temperature: 0.2
+         Use_Thermal_Multiplicities: True
+         Initial_Condition: "thermal momenta"
+         Jet:
+             Jet_PDG: 211
+             Jet_Momentum: 100.0
+\endverbatim
+ *
+ * \note
+ * The box modus is most useful for infinite matter simulations with thermal and
+ * chemical equilibration and detailed balance. Detailed balance can however not
+ * be conserved if 3-body decays (or higher) are performed. To yield useful
+ * results applying a SMASH box simulation, it is therefore necessary to modify
+ * the provided default _particles.txt_ and _decaymodes.txt_ files by removing
+ * 3-body and higher order decays from the decay modes file and all
+ * corresponding particles that can no longer be produced from the particles
+ * file. In addtion, strings need to be turned off, since they also break
+ * detailed balance due to lacking backreactions.\n\n
+ * SMASH is shipped with example files (_config.yaml_, _particles.txt_ and
+ * _decaymodes.txt_) meeting the above mentioned requirements to set up an
+ * infinite matter simulation. These files are located in the _**input/box**_
+ * folder at the top-level of SMASH codebase. To run SMASH with the provided
+ * example configuration for the box system, execute
+ * \n
+ * \verbatim
+    ./smash -i INPUT_DIR/box/config.yaml\
+            -p INPUT_DIR/box/particles.txt\
+            -d INPUT_DIR/box/decaymodes.txt
+ \endverbatim
+ * where `INPUT_DIR` needs to be replaced by the path to the input directory
+ * at the top-level of SMASH codebase.
  */
 
 }  // namespace smash
