@@ -2442,8 +2442,7 @@ struct InputKeys {
    *   set to true the other parameters should not be provided.
    * - `false` &rarr; Manually set parameters of spherical deformation. This
    *   requires the additional specification of `Beta_2`, `Beta_3`, `Beta_4`,
-   *   `Theta` and `Phi`, \ref TBC which follow \iref{Moller:1993ed} and
-   *   \iref{Schenke:2019ruo}.
+   *   which follow \iref{Moller:1993ed} and \iref{Schenke:2019ruo}.
    */
   /**
    * \see_key{MC_PT_deformed_auto_}
@@ -2565,6 +2564,28 @@ struct InputKeys {
           {"Modi", "Collider", "Target", "Deformed", "Orientation", "Theta"},
           M_PI / 2,
           {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \optional_key_no_line{MC_PT_deformed_orientation_psi_,Psi,double,0.0}
+   *
+   * The angle by which to rotate the nucleus about the rotated y-axis.
+   */
+  /**
+   * \see_key{MC_PT_deformed_orientation_psi_}
+   */
+  inline static const Key<double>
+      modi_collider_projectile_deformed_orientation_psi{
+          {"Modi", "Collider", "Projectile", "Deformed", "Orientation", "Psi"},
+          0.0,
+          {"1.0"}};
+  /**
+   * \see_key{MC_PT_deformed_orientation_psi_}
+   */
+  inline static const Key<double> modi_collider_target_deformed_orientation_psi{
+      {"Modi", "Collider", "Target", "Deformed", "Orientation", "Psi"},
+      0.0,
+      {"1.0"}};
 
   /*!\Userguide
    * \page input_modi_collider_projectile_and_target_
@@ -3032,6 +3053,8 @@ struct InputKeys {
       std::cref(modi_collider_target_deformed_beta4),
       std::cref(modi_collider_projectile_deformed_orientation_phi),
       std::cref(modi_collider_target_deformed_orientation_phi),
+      std::cref(modi_collider_projectile_deformed_orientation_psi),
+      std::cref(modi_collider_target_deformed_orientation_psi),
       std::cref(modi_collider_projectile_deformed_orientation_theta),
       std::cref(modi_collider_target_deformed_orientation_theta),
       std::cref(modi_collider_projectile_deformed_orientation_randomRotation),
@@ -3448,6 +3471,7 @@ struct InputKeys {
                  Orientation:
                      Theta: 0.8
                      Phi: 0.02
+                     Psi: 0.13
          Target:
              Particles: {2212: 29, 2112: 34}
              # manually set Woods-Saxon parameters
