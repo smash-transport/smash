@@ -44,7 +44,7 @@ namespace smash {
  * file. They will be calculated using **one** of the following density types:
  * hadron, baryon, baryonic isospin, pion, or none.\n
  * The output file does contain any information about whether all hadrons are
- * included or \ref output_thermo_only_part_ "only participants".
+ * included or \ref key_output_thermo_only_part_ "only participants".
  *
  * The format of the file is the following: \n
  *
