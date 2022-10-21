@@ -47,6 +47,7 @@ namespace smash {
  *   interaction point. This allows tracking of the individual
  *   nucleons.
  *
+ * Refer to https://yoda.hepforge.org/ for further details.
  * Only one format can be chosen. SMASH will use the first format recognized as
  * valid, ignoring the rest.
  * Please, note that choosing YODA or YODA-full determines the kind of

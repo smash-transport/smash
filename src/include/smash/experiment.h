@@ -1172,6 +1172,8 @@ Experiment<Modus>::Experiment(Configuration &config,
    * \subpage IC_output_user_guide_
    * - \b "HepMC_asciiv3", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
    *   Tree ROOT format see \ref output_hepmc_ for details
+   * - \b "YODA", \b "YODA-full" - compact ASCII text format used by the
+   *   Rivet output, see \ref rivet_output_user_guide_ for details
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
