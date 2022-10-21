@@ -309,7 +309,7 @@ class Key {
  * SMASH input file</b>.
  *
  * number of ensembles is equal to the number of events, so that this option
- * will provide the desired number of non-empty events.
+ * will provide the desired number of non-empty events. \ref TBC
  */
 
 /*!\Userguide
@@ -581,7 +581,7 @@ struct InputKeys {
    * \page input_general_
    * \required_key_no_line{gen_end_time_,End_Time,double}
    *
-   * The time in fm after which the evolution is stopped. Note
+   * The time <b>in fm</b> after which the evolution is stopped. Note
    * that the starting time depends on the chosen `Modus`.
    */
   /**
@@ -679,16 +679,16 @@ struct InputKeys {
    * potentials are on, momenta are updated according to the equations of
    * motion. The collision-finding grid finds all the collisions from time
    * t_{beginning_of_timestep} until time t_{beginning_of_timestep} +
-   * Delta_Time, and puts them into a vector. The collisions are then sorted in
-   * order of occurrence, and particles are propagated from collision to
+   * `Delta_Time`, and puts them into a vector. The collisions are then sorted
+   * in order of occurrence, and particles are propagated from collision to
    * collision. After each performed collision, additional collisions are found
    * for outgoing particles and merged into the sorted vector.
    *
    * If potentials are on, the Delta_Time should be small enough, typically
    * around 0.1 fm/c. However, if potentials are off, it can be arbitrarily
    * large. In this case it only influences the runtime, but not physics.
-   * If Time_Step_Mode = None is chosen, then the user-provided value of
-   * Delta_Time is ignored and Delta_Time is set to the End_Time.
+   * If `Time_Step_Mode = "None"` is chosen, then the user-provided value of
+   * `Delta_Time` is ignored and `Delta_Time` is set to the `End_Time`.
    */
   /**
    * \see_key{gen_delta_time_}
@@ -2279,7 +2279,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_modi_collider_projectile_and_target_
-   * \optional_key{MC_PT_diffusiveness_,Diffusiveness,double,d(A)}
+   * \optional_key{MC_PT_diffusiveness_,Diffusiveness,double,</tt>\f$d(A)\f$<tt>}
    *
    * Diffusiveness of the Woods-Saxon distribution for the nucleus <b>in fm</b>.
    * In general, the default value is
@@ -2305,11 +2305,11 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_modi_collider_projectile_and_target_
-   * \optional_key{MC_PT_radius_,Radius,double,r(A)}
+   * \optional_key{MC_PT_radius_,Radius,double,</tt>\f$r(A)\f$<tt>}
    *
    * Radius of nucleus <b>in fm</b>. In general, the default value is
    * \f[
-   * d(A)=\begin{cases}
+   * r(A)=\begin{cases}
    * 1.2  \, A^{1/3}                     & A \le 16\\
    * 1.12 \, A^{1/3} - 0.86 \, A^{-1/3}  & A > 16
    * \end{cases}\;.
@@ -3128,7 +3128,9 @@ struct InputKeys {
    * \page input_modi_list_
    * \required_key{ML_file_dir_,File_Directory,string}
    *
-   * Directory for the external particle lists.
+   * Directory for the external particle lists. Although relative paths to the
+   * execution directory should work, you are encouraged to <b>prefer absolute
+   * paths</b>.
    */
   /**
    * \see_key{ML_file_dir_}

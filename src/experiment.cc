@@ -254,7 +254,7 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  *   can influence the evolution of the system even without collisions.
  *
  * \n
- * \page configuring_output_ Output Configuration
+ * \page configuring_output_ Output configuration examples
  * **Example: Configuring the SMASH Output**\n
  * The following example configures the output to be printed in an interval of
  * 1 fm and with the net baryon density being printed to the header.

@@ -34,7 +34,7 @@ namespace smash {
  *
  * Internally, this output module generates HepMC events.  These can
  * be made in two ways, selected by the formats \key YODA and \key
- * YODA-full
+ * YODA-full.
  *
  * - \key YODA In this format only initial (beam) and final state
  *   particles are stored in the event structure and there is only
