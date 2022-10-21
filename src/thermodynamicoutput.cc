@@ -31,7 +31,7 @@ namespace smash {
  *     in an event (\key Smearing: off - mostly useful for box setups).
  *
  * Smearing can be switched on or off in the configuration file, see
- * \ref output_content_specific_options_ "content-specific output options".
+ * \ref input_output_content_specific_ "content-specific output options".
  *
  * The calculated quantities of the file can include: the Eckart density, the
  * energy-momentum tensor in the lab and/or Landau frame, the Landau

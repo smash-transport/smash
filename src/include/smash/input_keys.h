@@ -3509,7 +3509,7 @@ struct InputKeys {
    * \page input_output_
    * <hr>
    * ## Content-specific output options
-   * \anchor output_content_specific_options_
+   * \anchor input_output_content_specific_
    *
    * Every possible content-specific section is documented in the following.
    * Refer to \ref configuring_output_ "this page" for concrete output
@@ -4767,7 +4767,7 @@ General:
  *
  * As photons are produced very rarely, a lot of statistics is necessery to
  * yield useful results. Alternatively, it it possible to use fractional
- * photons (see \ref output_content_specific_options_
+ * photons (see \ref input_output_content_specific_
  * "Content-specific output options" on how to activate them).
  * This means that for each produced photon, \f$ N_{\text{Frac}} \f$
  * photons are actually sampled with different kinematic properties so that

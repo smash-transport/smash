@@ -264,7 +264,7 @@ void VtkOutput::thermodynamics_output(
  * be opened
  * directly with ParaView (http://paraview.org).
  *
- * For configuring the output see \ref output_content_specific_options_
+ * For configuring the output see \ref input_output_content_specific_
  * "content-specific output options".
  */
 

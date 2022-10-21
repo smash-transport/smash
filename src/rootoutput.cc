@@ -86,7 +86,7 @@ const int RootOutput::max_buffer_size_ = 500000;
  * \li \c E_fields_tot is total mean field energy * test_p
  * \li \c E_total is the sum of E_kinetic_tot and E_fields_tot
  *
- * In case of extended output (see \ref output_content_specific_options_) more
+ * In case of extended output (see \ref input_output_content_specific_) more
  * fields are added. Their description is the same that in case of OSCAR
  * format, see \ref extended_output_format_.
  *
