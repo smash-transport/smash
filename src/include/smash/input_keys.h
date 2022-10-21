@@ -539,6 +539,26 @@ class Key {
  * can be used for further customization.
  */
 
+/*!\Userguide
+ * \page input_lattice_ Lattice
+ *
+ * It is possible to configure a Lattice for the 3D space, which can be useful
+ * to speed up the computation of the potentials. Note though, that this goes in
+ * hand with a loss of accuracy: If the lattice is applied, the evaluation of
+ * the potentials is carried out only on the nodes of the lattice. Intermediate
+ * values are interpolated.
+ *
+ * The configuration of a lattice is usually not necessary, it is however
+ * required if the \ref output_vtk_lattice_ "Thermodynamic VTK Output", the
+ * \ref thermodyn_lattice_output_ "Thermodynamic Lattice Output" or the
+ * <tt>\ref lattice_pot_affect_threshold "Potentials_Affect_Thresholds"</tt>
+ * option is enabled. To configure the thermodynamic output, use \ref
+ * input_output_ "the \c Output section".
+ *
+ * The following parameters are only required, if the `Lattice` section is used
+ * in the configuration file. Otherwise, no lattice will be used at all.
+ */
+
 /**
  * @brief A container to keep track of all ever existed input keys.
  *
@@ -3825,12 +3845,81 @@ struct InputKeys {
   inline static const Key<bool> output_thermodynamics_onlyParticipants{
       {"Output", "Thermodynamics", "Only_Participants"}, false, {"1.0"}};
 
+  /*!\Userguide
+   * \page input_lattice_
+   * \optional_key{lattice_sizes_,Sizes,list of 3 doubles,
+   * </tt>depends on <tt>\ref gen_modus_ "Modus"}
+   *
+   * Sizes of lattice in x, y, z directions <b>in fm</b>.
+   */
+  /**
+   * \see_key{lattice_sizes_}
+   */
+  inline static const Key<std::array<double, 3>> lattice_sizes{
+      {"Lattice", "Sizes"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_lattice_
+   * \optional_key{lattice_cell_number_,Cell_Number,list of 3 ints,
+   * </tt>depends on <tt>\ref gen_modus_ "Modus"}
+   *
+   * Number of cells in x, y, z directions.
+   */
+  /**
+   * \see_key{lattice_cell_number_}
+   */
+  inline static const Key<std::array<int, 3>> lattice_cellNumber{
+      {"Lattice", "Cell_Number"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_lattice_
+   * \optional_key{lattice_origin_,Origin,list of 3 doubles,
+   * </tt>depends on <tt>\ref gen_modus_ "Modus"}
+   *
+   * Coordinates of the left, down, near corner of the lattice <b>in fm</b>.
+   */
+  /**
+   * \see_key{lattice_origin_}
+   */
+  inline static const Key<std::array<double, 3>> lattice_origin{
+      {"Lattice", "Origin"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_lattice_
+   * \optional_key{lattice_periodic_,Periodic,bool,
+   * (\ref gen_modus_ "Modus" == "Box")}
+   *
+   * Use periodic continuation or not. With periodic continuation
+   * \f$(x,y,z) + (i\cdot L_x,\,j\cdot L_y,\,k\cdot L_z) \equiv (x,y,z)\f$
+   * with \f$i,\,j,\,k\in\mathbb{Z}\f$ and \f$L_x,\,L_y,\,L_z\f$ being the
+   * lattice sizes.
+   */
+  /**
+   * \see_key{lattice_periodic_}
+   */
+  inline static const Key<bool> lattice_periodic{{"Lattice", "Periodic"},
+                                                 {"1.0"}};
+
+  /*!\Userguide
+   * \page input_lattice_
+   * \optional_key{lattice_pot_affect_threshold,Potentials_Affect_Thresholds,bool,false}
+   *
+   * Include potential effects, since mean field potentials change the threshold
+   * energies of the actions.
+   */
+  /**
+   * \see_key{lattice_pot_affect_threshold}
+   */
+  inline static const Key<bool> lattice_potentialsAffectThreshold{
+      {"Lattice", "Potentials_Affect_Thresholds"}, false, {"1.0"}};
+
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
       std::reference_wrapper<const Key<bool>>,
       std::reference_wrapper<const Key<int>>,
       std::reference_wrapper<const Key<double>>,
       std::reference_wrapper<const Key<std::string>>,
+      std::reference_wrapper<const Key<std::array<int, 3>>>,
       std::reference_wrapper<const Key<std::array<double, 2>>>,
       std::reference_wrapper<const Key<std::array<double, 3>>>,
       std::reference_wrapper<const Key<std::vector<double>>>,
@@ -4065,7 +4154,12 @@ struct InputKeys {
       std::cref(output_thermodynamics_quantites),
       std::cref(output_thermodynamics_position),
       std::cref(output_thermodynamics_smearing),
-      std::cref(output_thermodynamics_onlyParticipants)};
+      std::cref(output_thermodynamics_onlyParticipants),
+      std::cref(lattice_sizes),
+      std::cref(lattice_cellNumber),
+      std::cref(lattice_origin),
+      std::cref(lattice_periodic),
+      std::cref(lattice_potentialsAffectThreshold)};
 };
 
 /*!\Userguide
@@ -4733,6 +4827,43 @@ General:
  \endverbatim
  * where `INPUT_DIR` needs to be replaced by the path to the input directory
  * at the top-level of SMASH codebase.
+ */
+
+/*!\Userguide
+ * \page input_lattice_
+ * <hr>
+ * ### Configuring the Lattice
+ *
+ * The following example configures the lattice with the origin in (0,0,0), 20
+ * cells of 10 fm size in each direction and with periodic boundary conditions.
+ * The potential effects on the thresholds are taken into consideration. Note
+ * that, as the origin is by definition the left down near corner of the cell,
+ * center is located at (5, 5, 5).
+ *\verbatim
+ Lattice:
+     Origin: [0.0, 0.0, 0.0]
+     Sizes: [10.0, 10.0, 10.0]
+     Cell_Number: [20, 20, 20]
+     Periodic: True
+     Potentials_Affect_Thresholds: True
+ \endverbatim
+ * In case of `"Collider"`, `"Box"`, and `"Sphere"` <tt>\ref gen_modus_
+ * "Modus"</tt> there is also an option to set up lattice automatically. For
+ * example, for `"Collider"` modus
+ *\verbatim
+ Lattice:
+ \endverbatim
+ * sets up a lattice that (heuristically) covers causally allowed particle
+ * positions until the <tt>\ref gen_end_time_ "End_Time"</tt> of the simulation.
+ * The lattice may also be automatically contracted in z direction depending
+ * on the chosen way of density calculation.
+ *
+ * Another example for `"Box"` modus:
+ *\verbatim
+ Lattice:
+     Cell_Number: [20, 20, 20]
+ \endverbatim
+ * This sets up a periodic lattice that matches box sizes.
  */
 
 }  // namespace smash
