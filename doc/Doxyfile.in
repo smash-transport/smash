@@ -241,6 +241,7 @@ ALIASES                = "NucleusModus=smash::NucleusModus" \
                          "optional_key{4}=\aux_key{<hr>,\1,\2,\3,optional\, default = ,<tt>\4</tt>}"\
                          "optional_key_no_line{4}=\aux_key{,\1,\2,\3,optional\, default = ,<tt>\4</tt>}"\
                          "see_key{1}=See \ref \1 \"user guide description\" for more information."\
+                         "unit{1}=<b>\1</b>"\
                          "Userguide=" \
                          "mocking=\xrefitem unittest_mocking \"\" \"\"" \
                          "iref{1}=<a href= http://inspirehep.net/search?p=\1&of=hd>\1</a> \cite \1"

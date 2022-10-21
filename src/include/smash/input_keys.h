@@ -479,7 +479,7 @@ class Key {
  * \page input_modi_collider_impact_parameter_ Impact Parameter
  *
  * Within the `Collider` section, the `Impact` section can be used to specify
- * information about the impact parameter, defined as the distance <b>in fm</b>
+ * information about the impact parameter, defined as the distance \unit{in fm}
  * of the two straight lines that the center of masses of the nuclei travel on.
  * The separation of the two colliding nuclei is by default along the x-axis.
  *
@@ -774,7 +774,7 @@ struct InputKeys {
    * \page input_general_
    * \required_key_no_line{key_gen_end_time_,End_Time,double}
    *
-   * The time <b>in fm</b> after which the evolution is stopped. Note
+   * The time \unit{in fm} after which the evolution is stopped. Note
    * that the starting time depends on the chosen `Modus`.
    */
   /**
@@ -1057,8 +1057,8 @@ struct InputKeys {
    * \page input_general_
    * \optional_key_no_line{key_gen_gaussian_sigma_,Gaussian_Sigma,double,1.0}
    *
-   * Parameter for Covariant Gaussian smearing: Width of Gaussian distributions
-   * that represent Wigner density of particles, in fm.
+   * Parameter for Covariant Gaussian smearing: Width \unit{in fm} of Gaussian
+   * distributions that represent Wigner density of particles.
    */
   /**
    * \see_key{key_gen_gaussian_sigma_}
@@ -1726,7 +1726,8 @@ struct InputKeys {
    *
    * If a non-negative value is given, it will override the parametrized
    * elastic cross sections (which are energy-dependent) with a constant value
-   * (in mb). This constant elastic cross section is used for all collisions.
+   * \unit{in mb}. This constant elastic cross section is used for all
+   * collisions.
    */
   /**
    * \see_key{key_CT_elastic_cross_section_}
@@ -1751,14 +1752,14 @@ struct InputKeys {
    * \optional_key{key_CT_max_cs_,Maximum_Cross_Section,double,
    * 200</tt> or <tt>2000}
    *
-   * The maximal cross section that should be used when looking for collisions.
-   * This means that all particle pairs, whose transverse distance is smaller or
-   * equal to \f$\sqrt{\sigma_\mathrm{max}/\pi}\f$, will be checked for
-   * collisions. <b>The default value is usually set to 200 (in mb)</b> and this
-   * value occurs in the Delta peak of the \f$\pi+p\f$ cross section. Many SMASH
-   * cross sections diverge close at the threshold; these divergent parts are
-   * effectively cut off. If deuteron production via d' is considered, then the
-   * default is increased to 2000 mb to function correctly (see
+   * The maximal cross section \unit{in mb} that should be used when looking for
+   * collisions. This means that all particle pairs, whose transverse distance
+   * is smaller or equal to \f$\sqrt{\sigma_\mathrm{max}/\pi}\f$, will be
+   * checked for collisions. <b>The default value is usually set to 200 mb</b>
+   * and this value occurs in the Delta peak of the \f$\pi+p\f$ cross section.
+   * Many SMASH cross sections diverge close at the threshold; these divergent
+   * parts are effectively cut off. If deuteron production via d' is considered,
+   * then the default is increased to 2000 mb to function correctly (see
    * \iref{Oliinychenko:2018ugs}). The maximal cross section is scaled with
    * <tt>\ref key_CT_cs_scaling_ "Cross_Section_Scaling"</tt> factor.
    */
@@ -1772,7 +1773,7 @@ struct InputKeys {
    * \page input_collision_term_
    * \optional_key{key_CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,double,2.5}
    *
-   * The (minimal) length <b>in fm</b> used for the grid cells of the stochastic
+   * The (minimal) length \unit{in fm} used for the grid cells of the stochastic
    * criterion, only. Collisions are searched within grid cells only. Cell
    * lengths are scaled up so that grid contains all particles if fraction of a
    * cell length would remain at end of the grid.
@@ -1802,7 +1803,7 @@ struct InputKeys {
    * \page input_collision_term_
    * \optional_key{key_CT_additional_el_cs_,Additional_Elastic_Cross_Section,double,0.0}
    *
-   * Add an additional constant contribution <b>in mb</b> to the elastic cross
+   * Add an additional constant contribution \unit{in mb} to the elastic cross
    * section.
    * \warning Most elastic cross sections are constrained by experimental data.
    * Adding an additional contribution to them will therefore lead to
@@ -1839,7 +1840,7 @@ struct InputKeys {
    * \optional_key{key_CT_elastic_nn_cutoff_sqrts_,Elastic_NN_Cutoff_Sqrts,double,1.98}
    *
    * The elastic collisions between two nucleons with \f$\sqrt{s}\f$ below
-   * the specified value (<b>in GeV</b>) cannot happen.
+   * the specified value (\unit{in GeV}) cannot happen.
    * - `Elastic_NN_Cutoff_Sqrts` < 1.88 &rarr;
    *   Below the threshold energy of the elastic collision, no effect.
    * - `Elastic_NN_Cutoff_Sqrts` > 2.02 &rarr;
@@ -1932,7 +1933,7 @@ struct InputKeys {
    * \page input_collision_term_pauliblocker_
    * \optional_key{key_CT_PB_spatial_averaging_radius_,Spatial_Averaging_Radius,double,1.86}
    *
-   * Radius <b>in fm</b> of sphere for averaging in the coordinate space.
+   * Radius \unit{in fm} of sphere for averaging in the coordinate space.
    */
   /**
    * \see_key{key_CT_PB_spatial_averaging_radius_}
@@ -1946,7 +1947,7 @@ struct InputKeys {
    * \page input_collision_term_pauliblocker_
    * \optional_key{key_CT_PB_gaussian_cutoff_,Gaussian_Cutoff,double,2.2}
    *
-   * Radius <b>in fm</b> at which Gaussians used for smoothing are cut.
+   * Radius \unit{in fm} at which Gaussians used for smoothing are cut.
    */
   /**
    * \see_key{key_CT_PB_gaussian_cutoff_}
@@ -1958,7 +1959,7 @@ struct InputKeys {
    * \page input_collision_term_pauliblocker_
    * \optional_key{key_CT_PB_momentum_av_radius_,Momentum_Averaging_Radius,double,0.08}
    *
-   * Radius <b>in GeV/c</b> of sphere for averaging in the momentum space.
+   * Radius \unit{in GeV/c} of sphere for averaging in the momentum space.
    */
   /**
    * \see_key{key_CT_PB_momentum_av_radius_}
@@ -1973,7 +1974,7 @@ struct InputKeys {
    * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_string_tension_,String_Tension,double,1.0}
    *
-   * String tension \f$\kappa\f$ <b>in GeV/fm</b> connecting massless quarks in
+   * String tension \f$\kappa\f$ \unit{in GeV/fm} connecting massless quarks in
    * Hamiltonian, \f[H=|p_1|+|p_2|+\kappa |x_1-x_2|\;.\f]
    * This parameter is only used to determine particles' formation times
    * according to the yo-yo formalism (in the soft string routine for now).
@@ -2001,7 +2002,7 @@ struct InputKeys {
    * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_gluon_pmin_,Gluon_Pmin,double,0.001}
    *
-   * Smallest possible scale for gluon lightcone momentum <b>in GeV</b>.
+   * Smallest possible scale for gluon lightcone momentum \unit{in GeV}.
    * This is divided by \f$\sqrt{s}\f$ to get the minimum fraction to be sampled
    * from PDF shown in <tt>\ref key_CT_SP_gluon_beta_ "Gluon_Beta"</tt>.
    */
@@ -2072,7 +2073,7 @@ struct InputKeys {
    * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_sigma_perp_,Sigma_Perp,double,0.42}
    *
-   * Parameter \f$\sigma_\perp\f$ <b>in GeV</b> in the distribution for
+   * Parameter \f$\sigma_\perp\f$ \unit{in GeV} in the distribution for
    * transverse momentum transfer between colliding hadrons \f$p_\perp\f$ and
    * string mass \f$M_X\f$,
    * \f[
@@ -2103,7 +2104,7 @@ struct InputKeys {
    * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.55}
    *
-   * Parameter \f$b\f$ <b>in 1/GeV²</b> in Pythia fragmentation function shown
+   * Parameter \f$b\f$ \unit{in 1/GeV²} in Pythia fragmentation function shown
    * in <tt>\ref key_CT_SP_stringz_a_ "StringZ_A"</tt>.
    */
   /**
@@ -2147,7 +2148,7 @@ struct InputKeys {
    * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_stringz_b_leading_,StringZ_B_Leading,double,2.0}
    *
-   * Parameter \f$b\f$ <b>in 1/GeV²</b> in Lund fraghmentation function used to
+   * Parameter \f$b\f$ \unit{in 1/GeV²} in Lund fraghmentation function used to
    * sample the light cone momentum fraction of leading baryons in
    * non-diffractive string processes.
    */
@@ -2163,7 +2164,7 @@ struct InputKeys {
    * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_string_sigma_t_,String_Sigma_T,double,0.5}
    *
-   * Standard deviation <b>in GeV</b> in Gaussian for transverse momentum
+   * Standard deviation \unit{in GeV} in Gaussian for transverse momentum
    * distributed to string fragments during fragmentation.
    */
   /**
@@ -2208,7 +2209,7 @@ struct InputKeys {
    * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_formation_time_,Formation_Time,double,1.0}
    *
-   * Parameter for formation time in string fragmentation, <b>in fm</b>.
+   * Parameter for formation time in string fragmentation, \unit{in fm}.
    */
   /**
    * \see_key{key_CT_SP_formation_time_}
@@ -2338,7 +2339,7 @@ struct InputKeys {
    * \required_key_no_line{key_MC_e_kin_,E_Kin,double}
    *
    * Defines the energy of the collision by the kinetic energy per nucleon of
-   * the projectile nucleus, <b>in AGeV</b>. This assumes the target nucleus is
+   * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus is
    * at rest. Note, this can also be given per-beam as described in \ref
    * input_modi_collider_projectile_and_target_. This key can be omitted if
    * the incident energy is specified in a different way.
@@ -2354,7 +2355,7 @@ struct InputKeys {
    * \required_key_no_line{key_MC_e_tot_,E_Tot,double}
    *
    * Defines the energy of the collision by the total energy per nucleon of
-   * the projectile nucleus, <b>in AGeV</b>. This assumes the target nucleus is
+   * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus is
    * at rest. Note, this can also be given per-beam as described in \ref
    * input_modi_collider_projectile_and_target_. This key can be omitted if
    * the incident energy is specified in a different way.
@@ -2370,7 +2371,7 @@ struct InputKeys {
    * \required_key_no_line{key_MC_p_lab_,P_Lab,double}
    *
    * Defines the energy of the collision by the initial momentum per nucleon
-   * of the projectile nucleus, <b>in AGeV</b>. This assumes the target nucleus
+   * of the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus
    * is at rest.  This must be positive.  Note, this can also be given per-beam
    * as described in \ref input_modi_collider_projectile_and_target_. This key
    * can be omitted if the incident energy is specified in a different way.
@@ -2439,7 +2440,7 @@ struct InputKeys {
    * \page input_modi_collider_
    * \optional_key{key_MC_initial_distance_,Initial_Distance,double,2.0}
    *
-   * The initial distance of the two nuclei <b>in fm</b>:
+   * The initial distance of the two nuclei \unit{in fm}:
    * \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
    *
    * Note that this distance is applied before the Lorentz boost to the chosen
@@ -2480,7 +2481,7 @@ struct InputKeys {
    * \page input_modi_collider_projectile_and_target_
    * \optional_key{key_MC_PT_diffusiveness_,Diffusiveness,double,</tt>\f$d(A)\f$<tt>}
    *
-   * Diffusiveness of the Woods-Saxon distribution for the nucleus <b>in fm</b>.
+   * Diffusiveness of the Woods-Saxon distribution for the nucleus \unit{in fm}.
    * In general, the default value is
    * \f[
    * d(A)=\begin{cases}
@@ -2506,7 +2507,7 @@ struct InputKeys {
    * \page input_modi_collider_projectile_and_target_
    * \optional_key{key_MC_PT_radius_,Radius,double,</tt>\f$r(A)\f$<tt>}
    *
-   * Radius of nucleus <b>in fm</b>. In general, the default value is
+   * Radius of nucleus \unit{in fm}. In general, the default value is
    * \f[
    * r(A)=\begin{cases}
    * 1.2  \, A^{1/3}                     & A \le 16\\
@@ -2532,7 +2533,7 @@ struct InputKeys {
    * \optional_key{key_MC_PT_saturation_density_,Saturation_Density,double,
    * </tt>\f$\int\rho(r)\:\mathrm{d}^3r=N_{nucleons}\f$<tt>}
    *
-   * Saturation density of the nucleus <b>in 1/fm³</b>.
+   * Saturation density of the nucleus \unit{in 1/fm³}.
    * If not any value is specified, the saturation density is calculated such
    * that the integral over the Woods-Saxon distribution returns the number of
    * nucleons in the nucleus.
@@ -2555,7 +2556,7 @@ struct InputKeys {
    *
    * \required_key_no_line{key_MC_PT_e_tot_,E_Tot,double}
    *
-   * Set the totat energy <b>in GeV</b> per particle of the beam. This key,
+   * Set the totat energy \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
    * key can be omitted if the incident energy is specified in a different way.
    */
@@ -2574,7 +2575,7 @@ struct InputKeys {
    * \page input_modi_collider_projectile_and_target_
    * \required_key_no_line{key_MC_PT_e_kin_,E_Kin,double}
    *
-   * Set the kinetic energy <b>in GeV</b> per particle of the beam. This key,
+   * Set the kinetic energy \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
    * key can be omitted if the incident energy is specified in a different way.
    */
@@ -2593,7 +2594,7 @@ struct InputKeys {
    * \page input_modi_collider_projectile_and_target_
    * \required_key_no_line{key_MC_PT_p_lab_,P_Lab,double}
    *
-   * Set the momentum <b>in GeV/c</b> per particle of the beam. This key,
+   * Set the momentum \unit{in GeV/c} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
    * key can be omitted if the incident energy is specified in a different way.
    *
@@ -2863,7 +2864,7 @@ struct InputKeys {
    * \page input_modi_collider_impact_parameter_
    * \optional_key{key_MC_impact_value_,Value,double,0.0}
    *
-   * Fixed value for the impact parameter <b>in fm</b>.
+   * Fixed value for the impact parameter \unit{in fm}.
    * \attention If this value is set, all further `Impact` keys are ignored.
    */
   /**
@@ -2897,7 +2898,7 @@ struct InputKeys {
    * \par Custom sampling
    * \required_key_no_line{key_MC_impact_values_,Values,list of doubles}
    *
-   * Values of the impact parameter <b>in fm</b>, with corresponding `Yields`.
+   * Values of the impact parameter \unit{in fm}, with corresponding `Yields`.
    * Must be same length as `Yields`. This key can be omitted if `Sample` is not
    * set to `"custom"`.
    */
@@ -2925,7 +2926,7 @@ struct InputKeys {
    * \page input_modi_collider_impact_parameter_
    * \optional_key{key_MC_impact_range_,Range,list of two doubles,[0.0\,0.0]}
    *
-   * A list of minimal and maximal impact parameters <b>in fm</b> between which
+   * A list of minimal and maximal impact parameters \unit{in fm} between which
    * \f$b\f$ should be chosen. The order of these is not important.
    */
   /**
@@ -2951,7 +2952,7 @@ struct InputKeys {
    * \page input_modi_sphere_
    * \required_key_no_line{key_MS_radius_,Radius,double}
    *
-   * Radius of the sphere <b>in fm</b>.
+   * Radius of the sphere \unit{in fm}.
    */
   /**
    * \see_key{key_MS_radius_}
@@ -2963,7 +2964,7 @@ struct InputKeys {
    * \page input_modi_sphere_
    * \required_key{key_MS_temperature_,Temperature,double}
    *
-   * Temperature <b>in GeV</b> to sample momenta in the sphere.
+   * Temperature \unit{in GeV} to sample momenta in the sphere.
    */
   /**
    * \see_key{key_MS_radius_}
@@ -3124,7 +3125,7 @@ struct InputKeys {
    * \page input_modi_sphere_
    * \optional_key_no_line{key_MS_jet_jet_momentum_,Jet_Momentum,double,20.0}
    *
-   * The initial momentum <b>in GeV</b> to give to the jet particle.
+   * The initial momentum \unit{in GeV} to give to the jet particle.
    */
   /**
    * \see_key{key_MS_jet_jet_momentum_}
@@ -3153,7 +3154,7 @@ struct InputKeys {
    * \page input_modi_box_
    * \required_key{key_MB_length_,Length,double}
    *
-   * Length of the cube's edge <b>in fm</b>.
+   * Length of the cube's edge \unit{in fm}.
    */
   /**
    * \see_key{key_MB_length_}
@@ -3165,7 +3166,7 @@ struct InputKeys {
    * \page input_modi_box_
    * \required_key{key_MB_temperature_,Temperature,double}
    *
-   * Temperature <b>in GeV</b> of the box.
+   * Temperature \unit{in GeV} of the box.
    */
   /**
    * \see_key{key_MB_temperature_}
@@ -3646,7 +3647,7 @@ struct InputKeys {
    * \page input_output_
    * \optional_key_no_line{key_output_IC_lower_bound_,Lower_Bound,double,0.5}
    *
-   * Lower bound <b>in fm</b> for the IC proper time if
+   * Lower bound \unit{in fm} for the IC proper time if
    * <tt>\ref key_output_IC_proper_time_ "Proper_Time"</tt> is not provided.
    */
   /**
@@ -3786,7 +3787,7 @@ struct InputKeys {
    * \optional_key_no_line{key_output_rivet_cross_sections_,Cross_Section,
    * list of two doubles,</tt><b>no default</b><tt>}
    *
-   * Set the cross-section <b>in pico-barns</b>.
+   * Set the cross-section \unit{in pb}.
    */
   /**
    * \see_key{key_output_rivet_cross_sections_}
@@ -4025,7 +4026,7 @@ struct InputKeys {
    * \optional_key{key_lattice_sizes_,Sizes,list of 3 doubles,
    * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
    *
-   * Sizes of lattice in x, y, z directions <b>in fm</b>.
+   * Sizes of lattice in x, y, z directions \unit{in fm}.
    */
   /**
    * \see_key{key_lattice_sizes_}
@@ -4051,7 +4052,7 @@ struct InputKeys {
    * \optional_key{key_lattice_origin_,Origin,list of 3 doubles,
    * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
    *
-   * Coordinates of the left, down, near corner of the lattice <b>in fm</b>.
+   * Coordinates of the left, down, near corner of the lattice \unit{in fm}.
    */
   /**
    * \see_key{key_lattice_origin_}
@@ -4092,7 +4093,7 @@ struct InputKeys {
    * \page input_potentials_skyrme_
    * \required_key{key_potentials_skyrme_a_,Skyrme_A,double}
    *
-   * Parameter \f$A\f$ of Skyrme potential <b>in MeV</b>.
+   * Parameter \f$A\f$ of Skyrme potential \unit{in MeV}.
    */
   /**
    * \see_key{key_potentials_skyrme_a_}
@@ -4104,7 +4105,7 @@ struct InputKeys {
    * \page input_potentials_skyrme_
    * \required_key{key_potentials_skyrme_b_,Skyrme_B,double}
    *
-   * Parameter \f$B\f$ of Skyrme potential <b>in MeV</b>.
+   * Parameter \f$B\f$ of Skyrme potential \unit{in MeV}.
    */
   /**
    * \see_key{key_potentials_skyrme_b_}
@@ -4129,7 +4130,7 @@ struct InputKeys {
    * \page input_potentials_symmetry_
    * \required_key{key_potentials_symmetry_s_pot_,S_pot,double}
    *
-   * Parameter \f$S_{pot}\f$ of symmetry potential <b>in MeV</b>.
+   * Parameter \f$S_{pot}\f$ of symmetry potential \unit{in MeV}.
    */
   /**
    * \see_key{key_potentials_symmetry_s_pot_}
@@ -4156,7 +4157,7 @@ struct InputKeys {
    * \page input_potentials_VDF_
    * \required_key{key_potentials_vdf_sat_rhoB_,Sat_rhoB,double}
    *
-   * The saturation density of nuclear matter <b>in 1/fm³</b>.
+   * The saturation density of nuclear matter \unit{in 1/fm³}.
    */
   /**
    * \see_key{key_potentials_symmetry_gamma_}
@@ -4168,7 +4169,7 @@ struct InputKeys {
    * \page input_potentials_VDF_
    * \required_key{key_potentials_vdf_coeffs_,Coeffs,list of doubles}
    *
-   * Parameters \f$C_i\f$ of the VDF potential <b>in MeV</b>.
+   * Parameters \f$C_i\f$ of the VDF potential \unit{in MeV}.
    */
   /**
    * \see_key{key_potentials_vdf_coeffs_}
@@ -4219,7 +4220,7 @@ struct InputKeys {
    * \page input_forced_thermalization_
    * \required_key{key_forced_therm_critical_edens_,Critical_Edens,double}
    *
-   * Critical energy density <b>in GeV/fm³</b> above which forced thermalization
+   * Critical energy density \unit{in GeV/fm³} above which forced thermalization
    * is applied.
    */
   /**
@@ -4232,7 +4233,7 @@ struct InputKeys {
    * \page input_forced_thermalization_
    * \required_key{key_forced_therm_start_time_,Start_Time,double}
    *
-   * Time <b>in fm/c</b> after which forced thermalization may be applied, if
+   * Time \unit{in fm/c} after which forced thermalization may be applied, if
    * the energy density is sufficiently high.
    */
   /**
@@ -4245,7 +4246,7 @@ struct InputKeys {
    * \page input_forced_thermalization_
    * \required_key{key_forced_therm_timestep_,Timestep,double}
    *
-   * Timestep of thermalization <b>in fm/c</b>.
+   * Timestep of thermalization \unit{in fm/c}.
    */
   /**
    * \see_key{key_forced_therm_timestep_}
@@ -4931,7 +4932,7 @@ General:
  * </div>
  *
  * It contains 5 columns (x, y, z, s, c). The first three columns specify the
- * spatial cordinates <b>in fm</b>. The fourth column denotes the spin
+ * spatial cordinates \unit{in fm}. The fourth column denotes the spin
  * projection. The fifth contains the charge with 1 and 0 for protons and
  * neutrons respectively. In the example given the first line defines a
  neutron
