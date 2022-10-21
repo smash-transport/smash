@@ -715,6 +715,13 @@ class Key {
  * one assumes the current and density to be constant in the cell.
  */
 
+/*!\Userguide
+ * \page input_forced_thermalization_ Forced Thermalization
+ *
+ * Forced thermalization for certain regions is applied if the corresponding
+ * `Forced_Thermalization` section is present in the configuration file.
+ */
+
 /**
  * @brief A container to keep track of all ever existed input keys.
  *
@@ -4184,6 +4191,113 @@ struct InputKeys {
   inline static const Key<std::vector<double>> potentials_coulomb_rCut{
       {"Potentials", "Coulomb", "R_Cut"}, {"1.0"}};
 
+  /*!\Userguide
+   * \page input_forced_thermalization_
+   * \required_key{forced_therm_cell_number_,Cell_Number,list of 3 doubles}
+   *
+   * Number of cells in each direction (x,y,z).
+   */
+  /**
+   * \see_key{forced_therm_cell_number_}
+   */
+  inline static const Key<std::array<int, 3>> forcedThermalization_cellNumber{
+      {"Forced_Thermalization", "Cell_Number"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_forced_thermalization_
+   * \required_key{forced_therm_critical_edens_,Critical_Edens,double}
+   *
+   * Critical energy density <b>in GeV/fm³</b> above which forced thermalization
+   * is applied.
+   */
+  /**
+   * \see_key{forced_therm_critical_edens_}
+   */
+  inline static const Key<double> forcedThermalization_criticalEDensity{
+      {"Forced_Thermalization", "Critical_Edens"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_forced_thermalization_
+   * \required_key{forced_therm_start_time_,Start_Time,double}
+   *
+   * Time <b>in fm/c</b> after which forced thermalization may be applied, if
+   * the energy density is sufficiently high.
+   */
+  /**
+   * \see_key{forced_therm_start_time_}
+   */
+  inline static const Key<double> forcedThermalization_startTime{
+      {"Forced_Thermalization", "Start_Time"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_forced_thermalization_
+   * \required_key{forced_therm_timestep_,Timestep,double}
+   *
+   * Timestep of thermalization <b>in fm/c</b>.
+   */
+  /**
+   * \see_key{forced_therm_timestep_}
+   */
+  inline static const Key<double> forcedThermalization_timestep{
+      {"Forced_Thermalization", "Timestep"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_forced_thermalization_
+   * \optional_key{forced_therm_algorithm_,Algorithm,string,"biased BF"}
+   *
+   * Algorithm applied to enforce thermalization, see
+   * \iref{Oliinychenko:2016vkg} for more details.
+   * - `"unbiased BF"` &rarr; slowest, but theoretically most robust
+   * - `"biased BF"` &rarr; faster, but theoretically less robust
+   * - `"mode sampling"` &rarr; fastest, but least robust
+   */
+  /**
+   * \see_key{forced_therm_algorithm_}
+   */
+  inline static const Key<std::string> forcedThermalization_algorithm{
+      {"Forced_Thermalization", "Algorithm"}, "biased BF", {"1.0"}};
+
+  /*!\Userguide
+   * \page input_forced_thermalization_
+   * \optional_key{forced_therm_microcanonical_,Microcanonical,bool,false}
+   *
+   * Enforce energy conservation or not as part of sampling algorithm. Relevant
+   * for biased and unbiased Becattini-Ferroni (BF) algorithms. If this option
+   * is on, samples with energies deviating too far from the initial one will be
+   * rejected. This is different from simple energy and momentum
+   * renormalization, which is done in the end anyway. If energy conservation
+   * is enforced at sampling, the distributions become microcanonical instead
+   * of canonical. One particular effect is that multiplicity distributions
+   * become narrower.
+   *
+   * The downside of having this option on is that the sampling takes
+   * significantly longer time.
+   */
+  /**
+   * \see_key{forced_therm_microcanonical_}
+   */
+  inline static const Key<bool> forcedThermalization_microcanonical{
+      {"Forced_Thermalization", "Microcanonical"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_forced_thermalization_
+   * \required_key{forced_therm_lattice_sizes_,Lattice_Sizes,list of 3 doubles}
+   *
+   * The lattice is placed such that the center is [0.0,0.0,0.0].
+   * If one wants to have a central cell with center at [0.0,0.0,0.0] then
+   * number of cells should be odd (2k+1) in every direction.
+   *
+   * `Lattice_Sizes` is required for all modi, except the `"Box"` modus. In
+   * case of `"Box"` modus, the lattice is set up automatically to match the box
+   * size, and the user should not (and is not allowed to) specify it.
+   */
+  /**
+   * \see_key{forced_therm_lattice_sizes_}
+   */
+  inline static const Key<std::array<double, 3>>
+      forcedThermalization_latticeSizes{
+          {"Forced_Thermalization", "Lattice_Sizes"}, {"1.0"}};
+
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
       std::reference_wrapper<const Key<bool>>,
@@ -4439,7 +4553,14 @@ struct InputKeys {
       std::cref(potentials_vdf_satRhoB),
       std::cref(potentials_vdf_coeffs),
       std::cref(potentials_vdf_powers),
-      std::cref(potentials_vdf_powers)};
+      std::cref(potentials_coulomb_rCut),
+      std::cref(forcedThermalization_cellNumber),
+      std::cref(forcedThermalization_criticalEDensity),
+      std::cref(forcedThermalization_startTime),
+      std::cref(forcedThermalization_timestep),
+      std::cref(forcedThermalization_algorithm),
+      std::cref(forcedThermalization_microcanonical),
+      std::cref(forcedThermalization_latticeSizes)};
 };
 
 /*!\Userguide
@@ -5144,6 +5265,28 @@ General:
      Cell_Number: [20, 20, 20]
  \endverbatim
  * This sets up a periodic lattice that matches box sizes.
+ */
+
+/*!\Userguide
+ * \page input_forced_thermalization_
+ * <hr>
+ * ### Configuring forced thermalization
+ *
+ * The following example activates forced thermalization in cells in which the
+ * energy density is above 0.3 GeV/fm³. The lattice is initialized with 21
+ * cells in x and y direction and 101 cells in z-direction. The lattice size is
+ * 20 fm in x and y direction and 50 fm in z-direction. The thermalization is
+ * applied only for times later than 10 fm with a timestep of 1 fm/c. The
+ * sampling is done according to the "biased BF" algorithm.
+ *\verbatim
+ Forced_Thermalization:
+     Lattice_Sizes: [20.0, 20.0, 50.0]
+     Cell_Number: [21, 21, 101]
+     Critical_Edens: 0.3
+     Start_Time: 10.0
+     Timestep: 1.0
+     Algorithm: "biased BF"
+ \endverbatim
  */
 
 }  // namespace smash

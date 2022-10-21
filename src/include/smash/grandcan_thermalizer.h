@@ -167,44 +167,6 @@ enum class HadronClass {
   ZeroQZeroSMeson = 6,
 };
 
-/*!\Userguide
- * \page input_forced_thermalization_ Forced Thermalization
- *
- * \key Cell_Number (list of 3 doubles, required, no default): \n
- * Number of cells in each direction (x,y,z).
- *
- * \key Critical_Edens (double, required, )
- * Critical energydensity above which forced thermalization is applied, in
- * GeV/fm^3.
- *
- * \key Start_Time (double, required, no default): \n
- * Time after which forced thermalization may be applied (in fm/c), if
- * energydensity is sufficiently high.
- *
- * \key Timestep (double, required, no default): \n
- * Timestep of thermalization, in fm/c.
- *
- * \key Algorithm (string, optional, default = "biased BF") \n
- * Algorithm applied to enforce thermalization. See \iref{Oliinychenko:2016vkg}
- * for more details.
- * \li \key "unbiased BF" - slowest, but theoretically most robust
- * \li \key "biased BF" - faster, but theoretically less robust
- * \li \key "mode sampling" - fastest, but least robust
- *
- * \key Microcanonical (bool, optional, default = false) \n
- * Enforce energy conservation or not as part of sampling algorithm. Relevant
- * for biased and unbiased Becattini-Ferroni (BF) algorithms. If this option is
- * on, samples with energies deviating too far from the initial one will
- * be rejected. This is different from simple energy and momentum
- * renormalization, which is done in the end anyway. If energy conservation
- * is enforced at sampling, the distributions become microcanonical instead
- * of canonical. One particular effect is that multiplicity distributions
- * become narrower.
- *
- * The downside of having this option on is that the sampling takes
- * significantly longer time.
- */
-
 /**
  * The GrandCanThermalizer class implements the following functionality:
  *  1. Create a lattice and find the local rest frame energy density in each
@@ -223,7 +185,6 @@ enum class HadronClass {
  *  is not the case for multiplicity fluctuations. For details see
  *  \iref{Oliinychenko:2016vkg}.
  */
-
 class GrandCanThermalizer {
  public:
   /**
