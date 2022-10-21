@@ -559,6 +559,162 @@ class Key {
  * in the configuration file. Otherwise, no lattice will be used at all.
  */
 
+/*!\Userguide
+ * \page input_potentials_ %Potentials
+ *
+ * SMASH simulation supports two sets of potentials:
+ * -# Skyrme and/or Symmetry potentials
+ * -# VDF (vector density functional) model potentials,
+ *    https://arxiv.org/pdf/2011.06635.pdf \n
+ *
+ * Coulomb potentials can be additionally enabled.
+ *
+ * Skyrme and VDF potentials both describe the behavior of symmetric nuclear
+ * matter. The symmetry potential can adjust the Skyrme potential (but not the
+ * VDF potential) to include effects due to isospin. The Skyrme and Symmetry
+ * potentials are semi-relativistic, while the VDF potential is fully
+ * relativistic.
+ * - \subpage input_potentials_skyrme_
+ * - \subpage input_potentials_symmetry_
+ * - \subpage input_potentials_VDF_
+ * - \subpage input_potentials_coulomb_
+ *
+ * ### Configuring Skyrme potentials
+ *
+ * The following snippet of the configuration file configures SMASH such
+ * that the Skyrme as well as the Symmetry potential are activated for the
+ * simulation. There is however no requirement to include both simultaneously.
+ * They can be switched on and off individually.
+ *\verbatim
+ Potentials:
+     Skyrme:
+         Skyrme_A: -209.2
+         Skyrme_B: 156.4
+         Skyrme_Tau: 1.35
+     Symmetry:
+         S_Pot: 18.0
+     Coulomb:
+         R_Cut: 5.0
+ \endverbatim
+ * Note that the Coulomb potential requires a <tt>\ref input_lattice_
+ * "Lattice"</tt> while for the other potentials it can be used as an
+ * optimisation.
+ *
+ * ### Configuring VDF Potentials
+ *
+ * The following snippets from the configuration file configure SMASH such
+ * that the VDF potential is activated for the simulation.
+ *
+ * In the first example, VDF potentials are configured to reproduce the default
+ * SMASH Skyrme potentials (without the symmetry potential, as it is not
+ * described within the VDF model):
+ *\verbatim
+ Potentials:
+     VDF:
+         Sat_rhoB: 0.168
+         Powers: [2.0, 2.35]
+         Coeffs: [-209.2, 156.5]
+ \endverbatim
+ *
+ * In the second example, VDF potentials are configured to describe nuclear
+ * matter with saturation density of \f$\rho_0 = \mathrm{0.160 fm}^{-3}\f$,
+ * binding energy of \f$B_0 = -16.3\f$ MeV, the critical point of the
+ * ordinary nuclear liquid-gas phase transition at \f$T_c^{(N)} = 18\f$ MeV and
+ * \f$\rho_c^{(N)} = 0.375 \rho_0\f$, the critical point of the conjectured
+ * "QGP-like" phase transition at \f$T_c^{(Q)} = 100\f$ MeV and
+ * \f$\rho_c^{(Q)} = 3.0\rho_0\f$, and the boundaries of the spinodal region
+ * of the "QGP-like" phase transition at \f$\eta_L = 2.50 \rho_0\f$ and
+ * \f$\eta_R = 3.315 \rho_0\f$:
+ *\verbatim
+ Potentials:
+     VDF:
+         Sat_rhoB: 0.160
+         Powers: [1.7681391, 3.5293515, 5.4352788, 6.3809822]
+         Coeffs: [-8.450948e+01, 3.843139e+01, -7.958557e+00, 1.552594e+00]
+ \endverbatim
+ */
+
+/*!\Userguide
+ * \page input_potentials_skyrme_ Skyrme
+ *
+ * The Skyrme potential has the form
+ * \f[ U_{Sk} = A(\rho/\rho_0) + B (\rho/\rho_0)^{\tau} \,, \f]
+ * where \f$\rho\f$ is baryon density in the local Eckart rest frame.
+ * Its parameters must be specified in the `Skyrme` subsection of the
+ * `%Potentials` one.
+ */
+
+/*!\Userguide
+ * \page input_potentials_symmetry_ Symmetry
+ *
+ * The symmetry potential has the form
+ * \f[ U_{Sym} = \pm 2 S_{pot} \frac{I_3}{I} \frac{\rho_{I_3}}{\rho_0}
+ * + S(\rho_B)\left(\frac{\rho_{I_3}}{\rho_B}\right)^2 \,, \f]
+ * where \f$ \rho_{I_3}\f$ is the density of the relative isospin \f$ I_3/I
+ * \f$ and \f$ \rho_B \f$ is the net baryon density and
+ * \f[ S(\rho_B)=12.3\,\mathrm{MeV}\times
+ * \left(\frac{\rho_B}{\rho_0}\right)^{2/3}+
+ * 20\,\mathrm{MeV}\times\left(\frac{\rho_B}{\rho_0}\right)^\gamma\;. \f]
+ * Parameters must be specified in the `Symmetry` subsection of the
+ * `%Potentials` one.
+ */
+
+/*!\Userguide
+ * \page input_potentials_VDF_ VDF
+ *
+ * The VDF potential is a four-vector of the form
+ * \f[
+ * A^{\mu} = \sum_{i=1}^N C_i
+ * \left(\frac{\rho}{\rho_0}\right)^{b_i - 2}
+ * \frac{j^{\mu}}{\rho_0} \,,
+ * \f]
+ * where \f$j^{\mu}\f$ is baryon 4-current, \f$\rho\f$ is baryon density in the
+ * local Eckart rest frame, and \f$\rho_0\f$ is the saturation density. The
+ * parameters of the potential, the coefficients \f$C_i\f$ and the powers
+ * \f$b_i\f$, are fitted to reproduce a chosen set of properties of dense
+ * nuclear matter, and in particular these may include describing two first
+ * order phase transitions: the well-known phase transition in ordinary nuclear
+ * matter, and a transition at high baryon densities meant to model a possible
+ * QCD phase transition (a "QGP-like" phase transition); see
+ * https://arxiv.org/pdf/2011.06635.pdf for details and example parameter sets
+ * for the case \f$N=4\f$. The user can decide how many terms \f$N\f$ should
+ * enter the potential by populating the coefficients and powers vectors in the
+ * config file with a chosen number of entries. The number of coefficients must
+ * match the number of powers.
+ *
+ * The potential parameters must be specified in the `VDF` subsection of the
+ * `%Potentials` one.
+ */
+
+/*!\Userguide
+ * \page input_potentials_coulomb_ Coulomb
+ *
+ * The Coulomb potential in SMASH includes the electric and magnetic field.
+ * For simplicity we assume magnetostatics such that the fields can be
+ * directly calculated as
+ * \f[
+ * \vec{E}(\vec{r})=-\vec{\nabla} \phi(\vec{r}) =
+ * -\vec{\nabla}\int\frac{\rho(\vec{r}')}{|\vec{r}-\vec{r}'|} dV'
+ * =\int\frac{\rho(\vec{r}')(\vec{r}-\vec{r}')}{|\vec{r}-\vec{r}'|^3}dV'
+ * \f]
+ * and
+ * \f[
+ * \vec{B}(\vec{r}) = \vec{\nabla}\times\vec{A}(\vec{r})
+ * =\vec{\nabla}\times\int \frac{\vec{j}(\vec{r}')}{|\vec{r}-\vec{r}'|}dV'
+ * =\int\vec{j}(\vec{r}')\times\frac{\vec{r}-\vec{r}'}{|\vec{r}-\vec{r}'|^3}dV'.
+ * \f] These integrals are solved numerically on the SMASH lattice, where the
+ * discretized equations read
+ * \f[ \vec{E}(\vec{r}_j) = \sum_{i\neq j}
+ * \frac{\rho(\vec{r}_i)(\vec{r}_j-\vec{r}_i)}{|\vec{r}_j-\vec{r}_i|^3}\Delta
+ * V \f] and \f[ \vec{B}(\vec{r}_j)=\sum_{i\neq j} \vec{j}(\vec{r}_i)\times
+ * \frac{\vec{r}_j-\vec{r}_i}{|\vec{r}_j-\vec{r}_i|^3} \Delta V \f]
+ * with the lattice cell volume \f$ \Delta V \f$. For efficiency the integration
+ * volume is cut at \f$ R_\mathrm{cut} \f$, which is taken from the
+ * configuration. Note that in the final equations the summand for \f$i=j\f$
+ * drops out because the contribution from that cell to the integral vanishes if
+ * one assumes the current and density to be constant in the cell.
+ */
+
 /**
  * @brief A container to keep track of all ever existed input keys.
  *
@@ -3913,6 +4069,121 @@ struct InputKeys {
   inline static const Key<bool> lattice_potentialsAffectThreshold{
       {"Lattice", "Potentials_Affect_Thresholds"}, false, {"1.0"}};
 
+  /*!\Userguide
+   * \page input_potentials_skyrme_
+   * \required_key{potentials_skyrme_a_,Skyrme_A,double}
+   *
+   * Parameter \f$A\f$ of Skyrme potential <b>in MeV</b>.
+   */
+  /**
+   * \see_key{potentials_skyrme_a_}
+   */
+  inline static const Key<double> potentials_skyrme_skyrmeA{
+      {"Potentials", "Skyrme", "Skyrme_A"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_potentials_skyrme_
+   * \required_key{potentials_skyrme_b_,Skyrme_B,double}
+   *
+   * Parameter \f$B\f$ of Skyrme potential <b>in MeV</b>.
+   */
+  /**
+   * \see_key{potentials_skyrme_b_}
+   */
+  inline static const Key<double> potentials_skyrme_skyrmeB{
+      {"Potentials", "Skyrme", "Skyrme_B"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_potentials_skyrme_
+   * \required_key{potentials_skyrme_tau_,Skyrme_Tau,double}
+   *
+   * Parameter \f$\tau\f$ of Skyrme potential.
+   *
+   */
+  /**
+   * \see_key{potentials_skyrme_tau_}
+   */
+  inline static const Key<double> potentials_skyrme_skyrmeTau{
+      {"Potentials", "Skyrme", "Skyrme_Tau"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_potentials_symmetry_
+   * \required_key{potentials_symmetry_s_pot_,S_pot,double}
+   *
+   * Parameter \f$S_{pot}\f$ of symmetry potential <b>in MeV</b>.
+   */
+  /**
+   * \see_key{potentials_symmetry_s_pot_}
+   */
+  inline static const Key<double> potentials_symmetry_sPot{
+      {"Potentials", "Symmetry", "S_pot"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_potentials_symmetry_
+   * \optional_key{potentials_symmetry_gamma_,gamma,double,
+   * </tt>do not consider last term in \f$S(\rho_B)\f$<tt>}
+   *
+   * Exponent \f$\gamma\f$ in formula for \f$S(\rho_B)\f$. If `gamma` is
+   * specified, the baryon density dependence is included in the potential.
+   * Otherwise only the first term of the potential will be taken into account.
+   */
+  /**
+   * \see_key{potentials_symmetry_gamma_}
+   */
+  inline static const Key<double> potentials_symmetry_gamma{
+      {"Potentials", "Symmetry", "gamma"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_potentials_VDF_
+   * \required_key{potentials_vdf_sat_rhoB_,Sat_rhoB,double}
+   *
+   * The saturation density of nuclear matter <b>in 1/fm³</b>.
+   */
+  /**
+   * \see_key{potentials_symmetry_gamma_}
+   */
+  inline static const Key<double> potentials_vdf_satRhoB{
+      {"Potentials", "VDF", "Sat_rhoB"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_potentials_VDF_
+   * \required_key{potentials_vdf_coeffs_,Coeffs,list of doubles}
+   *
+   * Parameters \f$C_i\f$ of the VDF potential <b>in MeV</b>.
+   */
+  /**
+   * \see_key{potentials_vdf_coeffs_}
+   */
+  inline static const Key<std::vector<double>> potentials_vdf_coeffs{
+      {"Potentials", "VDF", "Coeffs"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_potentials_VDF_
+   * \required_key{potentials_vdf_powers_,Powers,double}
+   *
+   * Parameters \f$b_i\f$ of the VDF potential.
+   *
+   * \warning
+   * You need to provide as many entries for `Powers` as provided for `Coeffs`.
+   */
+  /**
+   * \see_key{potentials_vdf_powers_}
+   */
+  inline static const Key<std::vector<double>> potentials_vdf_powers{
+      {"Potentials", "VDF", "Powers"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_potentials_coulomb_
+   * \required_key{potentials_coulomb_r_cut_,R_Cut,double}
+   *
+   * The value at which the integration volume is cut.
+   */
+  /**
+   * \see_key{potentials_coulomb_r_cut_}
+   */
+  inline static const Key<std::vector<double>> potentials_coulomb_rCut{
+      {"Potentials", "Coulomb", "R_Cut"}, {"1.0"}};
+
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
       std::reference_wrapper<const Key<bool>>,
@@ -4159,7 +4430,16 @@ struct InputKeys {
       std::cref(lattice_cellNumber),
       std::cref(lattice_origin),
       std::cref(lattice_periodic),
-      std::cref(lattice_potentialsAffectThreshold)};
+      std::cref(lattice_potentialsAffectThreshold),
+      std::cref(potentials_skyrme_skyrmeA),
+      std::cref(potentials_skyrme_skyrmeB),
+      std::cref(potentials_skyrme_skyrmeTau),
+      std::cref(potentials_symmetry_sPot),
+      std::cref(potentials_symmetry_gamma),
+      std::cref(potentials_vdf_satRhoB),
+      std::cref(potentials_vdf_coeffs),
+      std::cref(potentials_vdf_powers),
+      std::cref(potentials_vdf_powers)};
 };
 
 /*!\Userguide
