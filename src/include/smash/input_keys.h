@@ -1094,10 +1094,10 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_general_
-   * \optional_key_no_line{key_gen_discrete_weight_,Discrete_Weight,double,0.333333}
+   * \optional_key_no_line{key_gen_discrete_weight_,Discrete_Weight,double,1./3}
    *
    * Parameter for Discrete smearing: Weight given to particle density at the
-   * the center node; cannot be smaller than 1./7. (the boundary case of 1./7.
+   * the center node; cannot be smaller than 1./7 (the boundary case of 1./7
    * results in an even distribution of particle's density over the center node
    * and 6 neighboring nodes).
    */
@@ -1105,7 +1105,7 @@ struct InputKeys {
    * \see_key{key_gen_discrete_weight_}
    */
   inline static const Key<double> gen_smearingDiscreteWeight{
-      {"General", "Discrete_Weight"}, 0.333333, {"1.0"}};
+      {"General", "Discrete_Weight"}, 1. / 3, {"1.0"}};
 
   /*!\Userguide
    * \page input_general_
