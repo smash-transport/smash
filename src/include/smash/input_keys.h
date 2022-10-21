@@ -223,7 +223,7 @@ class Key {
  * \li \subpage input_logging_
  * \li \subpage input_collision_term_
  * \li \subpage input_modi_
- * \li \subpage input_output_options_
+ * \li \subpage input_output_
  * \li \subpage input_lattice_
  * \li \subpage input_potentials_
  * \li \subpage input_forced_thermalization_
@@ -527,6 +527,16 @@ class Key {
          Length: 10.0
 
  \endverbatim
+ */
+
+/*!\Userguide
+ * \page input_output_ Output
+ *
+ * To produce a certain output content it is necessary to explicitly configure
+ * it in the `Output` section of the configuration file. This means, that the
+ * `Output` section needs to contain one or more subsection for each desired
+ * content. Additionally, there are general output configuration parameters that
+ * can be used for further customization.
  */
 
 /**
@@ -3176,6 +3186,645 @@ struct InputKeys {
   inline static const Key<double> modi_listBox_length{
       {"Modi", "ListBox", "Length"}, {"1.0"}};
 
+  /*!\Userguide
+   * \page input_output_
+   *
+   * ## General output configuration parameters
+   *
+   * \optional_key_no_line{output_out_interval_,Output_Interval,double,\ref
+   * gen_end_time_ "End_Time"}
+   *
+   * Defines the period of intermediate output of the status of the simulated
+   * system in Standard Output and other output formats which support this
+   * functionality.
+   */
+  /**
+   * \see_key{output_out_interval_}
+   */
+  inline static const Key<double> output_outputInterval{
+      {"Output", "Output_Interval"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key{output_out_times_,Output_Times,list of doubles,
+   * use \ref output_out_interval_ "Output_Interval"}
+   *
+   * Explicitly defines the times where output is generated in the form of
+   * a list. This cannot be used in combination with `Output_Interval`. Output
+   * times outside the simulation time are ignored and both the initial and
+   * final time are always considered. The following example will produce output
+   * at event start, event end and at the specified times as long as they are
+   * within the simulation time.
+   *\verbatim
+   Output:
+       Output_Times: [-0.1, 0.0, 1.0, 2.0, 10.0]
+   \endverbatim
+   */
+  /**
+   * \see_key{output_out_times_}
+   */
+  inline static const Key<std::vector<double>> output_outputTimes{
+      {"Output", "Output_Times"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key{output_density_type_,Density_Type,string,"none"}
+   *
+   * Determines which kind of density is printed into the headers of the
+   * collision files. Possible valuesare:
+   * - `"hadron"` &rarr; Total hadronic density
+   * - `"baryon"` &rarr; Net baryon density
+   * - `"baryonic isospin"` &rarr; Baryonic isospin density
+   * - `"pion"` &rarr; Pion density
+   * - `"none"` &rarr; Do not calculate density, print 0.0
+   */
+  /**
+   * \see_key{output_density_type_}
+   */
+  inline static const Key<std::string> output_densityType{
+      {"Output", "Density_Type"}, "none", {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * <hr>
+   * ## Output format independently of the specific output content
+   *
+   * A dedicated subsection in the `Output` section exists for every single
+   * output content and dedicated options are described further below. Refer to
+   * \ref output_contents_ "output contents" for the list of possible contents.
+   * Independently of the content, i.e. in every subsection, it is always
+   * necessary (i.e. it is probably desired) to provide the format in which the
+   * output should be generated.
+   *
+   * \optional_key_no_line{output_content_format_,Format,list of strings,[]}
+   *
+   * List of formats for writing particular content. Available formats for every
+   * content are listed and described \ref output_contents_ "here", while
+   * \ref list_of_output_formats "here" all possible output formats are given.
+   *
+   * \warning If a `Format` list in a content `section` is not given or it is
+   * left empty, i.e. `Format = []`, no output for that given content is
+   * produced. Furthermore, if a not existing format is given in the formats
+   * list, SMASH is giving a non-fatal error and simply ignoring that format.
+   */
+  /**
+   * \see_key{output_content_format_}
+   */
+  inline static const Key<std::vector<std::string>> output_particles_format{
+      {"Output", "Particles", "Format"}, {}, {"1.0"}};
+  /**
+   * \see_key{output_content_format_}
+   */
+  inline static const Key<std::vector<std::string>> output_collisions_format{
+      {"Output", "Collisions", "Format"}, {}, {"1.0"}};
+  /**
+   * \see_key{output_content_format_}
+   */
+  inline static const Key<std::vector<std::string>> output_dileptons_format{
+      {"Output", "Dileptons", "Format"}, {}, {"1.0"}};
+  /**
+   * \see_key{output_content_format_}
+   */
+  inline static const Key<std::vector<std::string>> output_photons_format{
+      {"Output", "Photons", "Format"}, {}, {"1.0"}};
+  /**
+   * \see_key{output_content_format_}
+   */
+  inline static const Key<std::vector<std::string>>
+      output_initialConditions_format{
+          {"Output", "Initial_Conditions", "Format"}, {}, {"1.0"}};
+  /**
+   * \see_key{output_content_format_}
+   */
+  inline static const Key<std::vector<std::string>> output_rivet_format{
+      {"Output", "Rivet", "Format"}, {}, {"1.0"}};
+  /**
+   * \see_key{output_content_format_}
+   */
+  inline static const Key<std::vector<std::string>> output_coulomb_format{
+      {"Output", "Coulomb", "Format"}, {}, {"1.0"}};
+  /**
+   * \see_key{output_content_format_}
+   */
+  inline static const Key<std::vector<std::string>>
+      output_thermodynamics_format{
+          {"Output", "Thermodynamics", "Format"}, {}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * <hr>
+   * ## Content-specific output options
+   * \anchor output_content_specific_options_
+   *
+   * Every possible content-specific section is documented in the following.
+   * Refer to \ref configuring_output_ "this page" for concrete output
+   * configuration examples.
+   *
+   * <hr>
+   * ### &diams; Particles
+   *
+   * \optional_key_no_line{output_particles_extended_,Extended,bool,false}
+   *
+   * &rArr; Incompatible with `Oscar1999`, `VTK`, `HepMC_asciiv3` and
+   * `HepMC_treeroot` formats.
+   * - `true` &rarr; Print extended information for each particle
+   * - `false` &rarr; Regular output for each particle
+   */
+  /**
+   * \see_key{output_particles_extended_}
+   */
+  inline static const Key<bool> output_particles_extended{
+      {"Output", "Particles", "Extended"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_particles_only_final_,Only_Final,string,"Yes"}
+   *
+   * &rArr; Incompatible with `VTK`, `HepMC_asciiv3` and `HepMC_treeroot`
+   * - `"Yes"` &rarr; Print only final particle list.
+   * - `"IfNotEmpty"` &rarr; Print only final particle list, but only if event
+   *   is not empty (i.e. any collisions happened between projectile and
+   *   target). Useful to save disk space.
+   * - `"No"` &rarr; Particle list at output interval including initial time.
+   */
+  /**
+   * \see_key{output_particles_only_final_}
+   */
+  inline static const Key<std::string> output_particles_onlyFinal{
+      {"Output", "Particles", "Only_Final"}, "Yes", {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * <hr>
+   * ### &diams; Collisions
+   * &rArr; Format `VTK` not available
+   *
+   * \optional_key_no_line{output_collisions_extended_,Extended,bool,false}
+   *
+   * &rArr; Incompatible with `Oscar1999`, `HepMC_asciiv3` and `HepMC_treeroot`
+   * formats.
+   * - `true` &rarr; Print extended information for each particle
+   * - `false` &rarr; Regular output for each particle
+   */
+  /**
+   * \see_key{output_collisions_extended_}
+   */
+  inline static const Key<bool> output_collisions_extended{
+      {"Output", "Collisions", "Extended"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_collisions_print_start_end_,Print_Start_End,bool,false}
+   *
+   * &rArr; Incompatible with `Root`, `HepMC_asciiv3` and `HepMC_treeroot`
+   * formats.
+   * - `true` &rarr; Initial and final particle list is printed out
+   * - `false` &rarr; Initial and final particle list is not printed out
+   */
+  /**
+   * \see_key{output_collisions_print_start_end_}
+   */
+  inline static const Key<bool> output_collisions_printStartEnd{
+      {"Output", "Collisions", "Print_Start_End"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * <hr>
+   * ### &diams; Dileptons
+   * &rArr; Only `Oscar1999`, `Oscar2013` and `Binary` formats.
+   *
+   * \optional_key_no_line{output_dileptons_extended_,Extended,bool,false}
+   *
+   * &rArr; Incompatible with `Oscar1999` format.
+   * - `true` &rarr; Print extended information for each particle
+   * - `false` &rarr; Regular output for each particle
+   */
+  /**
+   * \see_key{output_dileptons_extended_}
+   */
+  inline static const Key<bool> output_dileptons_extended{
+      {"Output", "Dileptons", "Extended"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * <hr>
+   * ### &diams; Photons
+   * &rArr; Only `Oscar1999`, `Oscar2013` and `Binary` formats.
+   *
+   * \optional_key_no_line{output_photons_extended_,Extended,bool,false}
+   *
+   * &rArr; Incompatible with `Oscar1999` format.
+   * - `true` &rarr; Print extended information for each particle
+   * - `false` &rarr; Regular output for each particle
+   */
+  /**
+   * \see_key{output_photons_extended_}
+   */
+  inline static const Key<bool> output_photons_extended{
+      {"Output", "Photons", "Extended"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * <hr>
+   * ### &diams; Initial_Conditions
+   * &rArr; Only `Oscar1999`, `Oscar2013`, `Binary`, `ROOT` and `ASCII` (special
+   * ASCII IC, see \ref IC_output_user_guide_) formats.
+   *
+   * \optional_key_no_line{output_IC_proper_time_,Proper_Time,double,
+   * </tt>\f$f(t_{np})\f$<tt>}
+   *
+   * Proper time at which hypersurface is created. Its default value depends on
+   * the nuclei passing time \f$t_{np}\f$ as follows,
+   * \f[
+   * f(t_{np})=\begin{cases}
+   * \mathrm{\texttt{Lower_Bound}}  & t_{np} \le \mathrm{\texttt{Lower_Bound}}\\
+   * t_{np} & t_{np} > \mathrm{\texttt{Lower_Bound}}
+   * \end{cases}\;.
+   * \f]
+   */
+  /**
+   * \see_key{output_IC_proper_time_}
+   */
+  inline static const Key<double> output_initialConditions_properTime{
+      {"Output", "Initial_Conditions", "Proper_Time"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_IC_lower_bound_,Lower_Bound,double,0.5}
+   *
+   * Lower bound <b>in fm</b> for the IC proper time if
+   * <tt>\ref output_IC_proper_time_ "Proper_Time"</tt> is not provided.
+   */
+  /**
+   * \see_key{output_IC_lower_bound_}
+   */
+  inline static const Key<double> output_initialConditions_lowerBound{
+      {"Output", "Initial_Conditions", "Lower_Bound"}, 0.5, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_IC_rapidity_cut_,Rapidity_Cut,double,
+   * </tt>No cut is done<tt>}
+   *
+   * If set, employ a rapidity cut for particles contributing to the initial
+   * conditions for hydrodynamics. A positive value is expected and the cut is
+   * employed symmetrically around 0. Only particles characterized by
+   * \f$|\mathrm{\texttt{Rapidity_Cut}}|<y\f$ are printed to the
+   * output file.
+   */
+  /**
+   * \see_key{output_IC_rapidity_cut_}
+   */
+  inline static const Key<double> output_initialConditions_rapidityCut{
+      {"Output", "Initial_Conditions", "Rapidity_Cut"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_IC_pt_cut_,pT_Cut,double,
+   * </tt>No cut is done<tt>}
+   *
+   * If set, employ a transverse momentum cut for particles contributing to the
+   * initial conditions for hydrodynamics. A positive value is expected. Only
+   * particles characterized by \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed
+   * to the output file.
+   */
+  /**
+   * \see_key{output_IC_pt_cut_}
+   */
+  inline static const Key<double> output_initialConditions_pTCut{
+      {"Output", "Initial_Conditions", "pT_Cut"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_IC_extended_,Extended,bool,false}
+   *
+   * &rArr; Incompatible with `Oscar1999`, `ROOT` and `ASCII` formats.
+   * - `true` &rarr' Print extended information for each particle
+   * - `false` &rarr' Regular output for each particle
+   */
+  /**
+   * \see_key{output_IC_extended_}
+   */
+  inline static const Key<bool> output_initialConditions_extended{
+      {"Output", "Initial_Conditions", "Extended"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * <hr> \anchor input_output_rivet_
+   * ### &diams; Rivet
+   * &rArr; Only `YODA` format (see \ref rivet_output_user_guide_ "here" for
+   * more information about the format).
+   *
+   * \note In the following, <b>no default</b> means that, if the key is
+   *       omitted, Rivet default behavior will be used.
+   *
+   * \optional_key_no_line{output_rivet_paths_,Paths,list of strings,
+   * </tt><b>no default</b><tt>}
+   *
+   * This key specifies the directories that Rivet will search for analyses
+   * and data files related to the analyses.
+   */
+  /**
+   * \see_key{output_rivet_paths_}
+   */
+  inline static const Key<std::vector<std::string>> output_rivet_paths{
+      {"Output", "Rivet", "Paths"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_rivet_analyses_,Analyses,list of strings,
+   * </tt><b>no default</b><tt>}
+   *
+   * This key specifies the analyses (including possible options) to add to the
+   * Rivet analysis.
+   */
+  /**
+   * \see_key{output_rivet_analyses_}
+   */
+  inline static const Key<std::vector<std::string>> output_rivet_analyses{
+      {"Output", "Rivet", "Analyses"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_rivet_preloads_,Preloads,list of strings,
+   * </tt><b>no default</b><tt>}
+   *
+   * Specify data files to read into Rivet (e.g., centrality calibrations) at
+   * start-up.
+   */
+  /**
+   * \see_key{output_rivet_preloads_}
+   */
+  inline static const Key<std::vector<std::string>> output_rivet_preloads{
+      {"Output", "Rivet", "Preloads"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_rivet_logging_,Logging,map<string\,string>,
+   * </tt><b>no default</b><tt>}
+   *
+   * Specifies log levels for various parts of Rivet, including analyses. Each
+   * entry is a log name followed by a log level (one among `"TRACE"`,
+   * `"DEBUG"`, `"INFO"`, `"WARN"`, `"ERROR"`, and `"FATAL"`).
+   */
+  /**
+   * \see_key{output_rivet_logging_}
+   */
+  inline static const Key<std::map<std::string, std::string>>
+      output_rivet_logging{{"Output", "Rivet", "Logging"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_rivet_ignore_beams_,Ignore_Beams,bool,true}
+   *
+   * Ask Rivet to not validate beams before running analyses. This is needed if
+   * you use the <tt>\ref MC_fermi_motion_ "Fermi_Motion"</tt> option that
+   * disrupts the collision energy event-by-event.
+   */
+  /**
+   * \see_key{output_rivet_ignore_beams_}
+   */
+  inline static const Key<bool> output_rivet_ignoreBeams{
+      {"Output", "Rivet", "Ignore_Beams"}, true, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_rivet_cross_sections_,Cross_Section,
+   * list of two doubles,</tt><b>no default</b><tt>}
+   *
+   * Set the cross-section <b>in pico-barns</b>.
+   */
+  /**
+   * \see_key{output_rivet_cross_sections_}
+   */
+  inline static const Key<std::array<double, 2>> output_rivet_crossSection{
+      {"Output", "Rivet", "Cross_Section"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   *
+   * #### Weights keys
+   *
+   * Some operations about weights can be customized in the `Weights` section.
+   *
+   * \optional_key_no_line{output_rivet_weights_no_multi_,No_Multi,bool,
+   * </tt><b>no default</b><tt>}
+   *
+   * Ask Rivet not to do multi-weight processing.
+   */
+  /**
+   * \see_key{output_rivet_weights_no_multi_}
+   */
+  inline static const Key<std::array<double, 2>> output_rivet_weights_noMulti{
+      {"Output", "Rivet", "Weights", "No_Multi"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_rivet_weights_nominal_,Nominal,string,
+   * </tt><b>no default</b><tt>}
+   *
+   * The nominal weight name.
+   */
+  /**
+   * \see_key{output_rivet_weights_nominal_}
+   */
+  inline static const Key<std::string> output_rivet_weights_nominal{
+      {"Output", "Rivet", "Weights", "Nominal"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_rivet_weights_select_,Select,
+   * list of strings, </tt><b>no default</b><tt>}
+   *
+   * Select these weights for processing.
+   */
+  /**
+   * \see_key{output_rivet_weights_select_}
+   */
+  inline static const Key<std::vector<std::string>> output_rivet_weights_select{
+      {"Output", "Rivet", "Weights", "Select"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_rivet_weights_deselect_,Deselect,
+   * list of strings, </tt><b>no default</b><tt>}
+   *
+   * De-select these weights for processing.
+   */
+  /**
+   * \see_key{output_rivet_weights_deselect_}
+   */
+  inline static const Key<std::vector<std::string>>
+      output_rivet_weights_deselect{{"Output", "Rivet", "Weights", "Deselect"},
+                                    {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_rivet_weights_nlo_smearing_,NLO_Smearing,
+   * double, </tt><b>no default</b><tt>}
+   *
+   * Smearing histogram binning by given fraction of bin widths to avoid NLO
+   * counter events to flow into neighboring bin.
+   */
+  /**
+   * \see_key{output_rivet_weights_nlo_smearing_}
+   */
+  inline static const Key<double> output_rivet_weights_nloSmearing{
+      {"Output", "Rivet", "Weights", "NLO_Smearing"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_rivet_weights_cap_,Cap,double,
+   * </tt><b>no default</b><tt>}
+   *
+   * Cap weights to this value.
+   */
+  /**
+   * \see_key{output_rivet_weights_cap_}
+   */
+  inline static const Key<double> output_rivet_weights_cap{
+      {"Output", "Rivet", "Weights", "Cap"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * <hr>
+   * ### &diams; Coulomb
+   * &rArr; Only `VTK` format.
+   *
+   * No content-specific output options, apart from the <tt>\ref
+   * output_content_format_ "Format"</tt> key which accept `["VTK"]` value only.
+   */
+
+  /*!\Userguide
+   * \page input_output_
+   * <hr> \anchor input_output_thermodynamics_
+   * ### &diams; Thermodynamics
+   *
+   * The user can print thermodynamical quantities
+   * -# on the spatial lattice to VTK output;
+   * -# on the spatial lattice to ASCII output;
+   * -# at a given point to ASCII output;
+   * -# averaged over all particles to ASCII output.
+   *
+   * <b>About 1 and 2:</b> Note that this output requires a lattice, which needs
+   * to be enabled in the conguration file and is regulated by the options of
+   * \ref input_lattice_. See \ref output_vtk_lattice_ for further information.
+   *
+   * <b>About 3 and 4:</b> See \ref thermodyn_output_user_guide_ for further
+   * information.
+   *
+   * \optional_key_no_line{output_thermo_type_,Type,string,"baryon"}
+   *
+   * Particle type taken into consideration, one among
+   * - `"hadron"`
+   * - `"baryon"` (corresponds to "net baryon")
+   * - `"baryonic isospin"`
+   * - `"pion"`
+   * - `"none"`
+   * - `"total isospin"`
+   */
+  /**
+   * \see_key{output_thermo_type_}
+   */
+  inline static const Key<DensityType> output_thermodynamics_type{
+      {"Output", "Thermodynamics", "Type"}, DensityType::Baryon, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_thermo_quantities_,Quantities,
+   * list of strings,[]}
+   *
+   * List of thermodynamic quantities that are printed to the output.
+   * Possible quantities are:
+   * - `"rho_eckart"` &rarr; Eckart rest frame density.
+   * - `"tmn"` &rarr; Energy-momentum tensor \f$T^{\mu\nu}(t,x,y,z)\f$.
+   * - `"tmn_landau"` &rarr; Energy-momentum tensor in the Landau rest frame.
+   *   This tensor is computed by boosting \f$T^{\mu\nu}(t,x,y,z)\f$ to the
+   *   local rest frame, where \f$T^{0i}\f$ = 0.
+   * - `"landau_velocity"` &rarr; Velocity of the Landau rest frame. The
+   *   velocity is obtained from the energy-momentum tensor
+   *   \f$T^{\mu\nu}(t,x,y,z)\f$ by solving the generalized eigenvalue equation
+   *   \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0\f$.
+   * - `"j_QBS"` &rarr; Electric (Q), baryonic (B) and strange (S) currents
+   *   \f$j^{\mu}_{QBS}(t,x,y,z) \f$; note that all currents are given in units
+   *   of "number of charges"; multiply the electric current by the elementary
+   *   charge \f$\sqrt{4 \pi \alpha_{EM}} \f$ for charge units.
+   */
+  /**
+   * \see_key{output_thermo_type_}
+   */
+  inline static const Key<std::vector<std::string>>
+      output_thermodynamics_quantites{
+          {"Output", "Thermodynamics", "Quantities"}, {}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_thermo_position_,Position,
+   * list of 3 doubles,[0.0\, 0.0\, 0.0]}
+   *
+   * Point at which thermodynamic quantities are computed.
+   */
+  /**
+   * \see_key{output_thermo_position_}
+   */
+  inline static const Key<std::array<double, 3>> output_thermodynamics_position{
+      {"Output", "Thermodynamics", "Position"}, {{0.0, 0.0, 0.0}}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_thermo_smearing_,Smearing,bool,true}
+   *
+   * Using Gaussian smearing for computing thermodynamic quantities or not. This
+   * triggers whether thermodynamic quantities are evaluated at a fixed point
+   * (`true`) or summed over all particles (`false`).
+   * - `true` &rarr; smearing applied
+   * - `false` &rarr; smearing not applied
+   *
+   * The contribution to the energy-momentum tensor and current (be it electric,
+   * baryonic or strange) from a single particle in its rest frame is:
+   * \f[\begin{eqnarray}
+   * j^{\mu} = B \frac{p_0^{\mu}}{p_0^0} W \\
+   * T^{\mu \nu} = \frac{p_0^{\mu}p_0^{\nu}}{p_0^0} W
+   * \end{eqnarray}
+   * \f]
+   * with B being the charge of interest and W being the weight given to this
+   * particle. Normally, if one computes thermodynamic quantities at a point,
+   * smearing should be applied, and then \f$W\f$ takes on the following shape:
+   * \f[
+   * W = (2 \pi \sigma^2)^{-3/2} \exp\left(
+   * - \frac{(\mathbf{r}-\mathbf{r_0(t)})^2}{2\sigma^2}
+   * \right)\f]
+   * It can however be useful to compute the thermodynamic quantities of all
+   * particles in a box with \f$W=1\f$, which would correspond to <tt>"Smearing:
+   * false"</tt>. Note that using this option changes the units of the
+   * thermodynamic quantities, as they are no longer spatially normalized. One
+   * should divide this quantity by the volume of the box to restore units to
+   * the correct ones.
+   */
+  /**
+   * \see_key{output_thermo_smearing_}
+   */
+  inline static const Key<bool> output_thermodynamics_smearing{
+      {"Output", "Thermodynamics", "Smearing"}, true, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_output_
+   * \optional_key_no_line{output_thermo_only_part_,Only_Participants,bool,false}
+   *
+   * If set to `true`, only participants are included in the computation of the
+   * energy momentum tensor and of the Eckart currents. In this context, a
+   * hadron is considered as a participant if it had at least one collision.
+   * When using \ref input_potentials_ "Potentials" this option must be either
+   * left unset or set to `false`. The reason behing this limitation is that in
+   * this case hadrons can influence the evolution of the system even without
+   * collisions.
+   */
+  /**
+   * \see_key{output_thermo_only_part_}
+   */
+  inline static const Key<bool> output_thermodynamics_onlyParticipants{
+      {"Output", "Thermodynamics", "Only_Participants"}, false, {"1.0"}};
+
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
       std::reference_wrapper<const Key<bool>>,
@@ -3183,9 +3832,13 @@ struct InputKeys {
       std::reference_wrapper<const Key<double>>,
       std::reference_wrapper<const Key<std::string>>,
       std::reference_wrapper<const Key<std::array<double, 2>>>,
+      std::reference_wrapper<const Key<std::array<double, 3>>>,
       std::reference_wrapper<const Key<std::vector<double>>>,
+      std::reference_wrapper<const Key<std::vector<std::string>>>,
       std::reference_wrapper<const Key<std::map<PdgCode, int>>>,
+      std::reference_wrapper<const Key<std::map<std::string, std::string>>>,
       std::reference_wrapper<const Key<einhard::LogLevel>>,
+      std::reference_wrapper<const Key<DensityType>>,
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<MultiParticleReactionsBitSet>>,
@@ -3373,7 +4026,46 @@ struct InputKeys {
       std::cref(modi_list_fileDirectory),
       std::cref(modi_list_filePrefix),
       std::cref(modi_list_shiftId),
-      std::cref(modi_listBox_length)};
+      std::cref(modi_listBox_length),
+      std::cref(output_outputInterval),
+      std::cref(output_outputTimes),
+      std::cref(output_densityType),
+      std::cref(output_particles_format),
+      std::cref(output_collisions_format),
+      std::cref(output_dileptons_format),
+      std::cref(output_photons_format),
+      std::cref(output_initialConditions_format),
+      std::cref(output_rivet_format),
+      std::cref(output_coulomb_format),
+      std::cref(output_thermodynamics_format),
+      std::cref(output_particles_extended),
+      std::cref(output_particles_onlyFinal),
+      std::cref(output_collisions_extended),
+      std::cref(output_collisions_printStartEnd),
+      std::cref(output_dileptons_extended),
+      std::cref(output_photons_extended),
+      std::cref(output_initialConditions_properTime),
+      std::cref(output_initialConditions_lowerBound),
+      std::cref(output_initialConditions_rapidityCut),
+      std::cref(output_initialConditions_pTCut),
+      std::cref(output_initialConditions_extended),
+      std::cref(output_rivet_paths),
+      std::cref(output_rivet_analyses),
+      std::cref(output_rivet_preloads),
+      std::cref(output_rivet_preloads),
+      std::cref(output_rivet_preloads),
+      std::cref(output_rivet_crossSection),
+      std::cref(output_rivet_weights_noMulti),
+      std::cref(output_rivet_weights_nominal),
+      std::cref(output_rivet_weights_select),
+      std::cref(output_rivet_weights_deselect),
+      std::cref(output_rivet_weights_nloSmearing),
+      std::cref(output_rivet_weights_cap),
+      std::cref(output_thermodynamics_type),
+      std::cref(output_thermodynamics_quantites),
+      std::cref(output_thermodynamics_position),
+      std::cref(output_thermodynamics_smearing),
+      std::cref(output_thermodynamics_onlyParticipants)};
 };
 
 /*!\Userguide

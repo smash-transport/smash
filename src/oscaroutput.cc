@@ -255,7 +255,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
  * http://phy.duke.edu/~jeb65/oscar2013. \n
  * Enabling the OSCAR output for particles in the config.yaml file
- * (see \ref input_output_options_), a so-called \c particle_lists.oscar file is
+ * (see \ref input_output_), a so-called \c particle_lists.oscar file is
  * produced when executing SMASH. It allows for a certain degree of flexibility,
  * see \ref output_content_specific_options_ "Content-specific output options"
  * for further details. \n
@@ -495,7 +495,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * https://karman.physics.purdue.edu/OSCAR and
  * http://phy.duke.edu/~jeb65/oscar2013. \n
  * Enabling the OSCAR output for collisions in the config.yaml file
- * (see \ref input_output_options_), a so-called \c full_event_history.oscar
+ * (see \ref input_output_), a so-called \c full_event_history.oscar
  * file is produced when executing SMASH. It allows for a certain degree of
  * flexibility, see \ref output_content_specific_options_
  * "Content-specific output options" for further details. \n

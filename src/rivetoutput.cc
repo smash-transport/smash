@@ -84,69 +84,8 @@ namespace smash {
         - MC_FSPARTICLES
  \endverbatim
  *
- *
- * The Rivet set-up can be configured through the \ref
- * output_general_ "Output" section in the configuration file.
- *
- * \note In the following, <b>no default</b> means that, if the key is
- *       omitted, Rivet default behavior will be used.
- *
- * - \key Rivet (top of Rivet configuration)
- *   - \key Format (list of strings, no default) List of formats
- *     to generate Rivet instance for. Can be one of
- *
- *     - \key YODA Only initial (beam) and final state particles
- *       are available in the events.
- *
- *     - \key YODA-full Full event structure present to analyze
- *
- *   - \key Paths (list of strings, no default)
- *     This key specifies the directories that Rivet will search for
- *     analyses and data files related to the analyses.
- *   - \key Analyses (list of strings, no default)
- *     This key specifies the analyses (including possible options)
- *     to add to the Rivet analysis.
- *
- *   - \key Preloads (list of strings, no default)
- *     Specify data files to read into Rivet (e.g., centrality
- *     calibrations) at start-up.
- *
- *   - \key Logging (map of string to string, no default)
- *     Specifies log levels for various parts of Rivet, including
- *     analyses.  Each entry is a log name followed by a log level
- *     (one of TRACE,DEBUG,INFO,WARN,ERROR, and FATAL)
- *
- *   - \key Ignore_Beams (bool, default true) Ask Rivet to not
- *     validate beams before running analyses.  This is needed if
- *     you use the option \key Fermi_Motion (\ref
- *     input_modi_collider_) that disrupts the collision energy
- *     event-by-event
- *
- *   - \key Cross_Section (double,double, no default)
- *     Set the cross-section in pico-barns
- *
- *   - \key Weights (container, no defaults)
- *
- *     - \key No_Multi (bool, no default)
- *       Ask Rivet to not do multi-weight processing
- *
- *     - \key Nominal (string, no default)
- *       The nominal weight name
- *
- *     - \key Select (list of string, no default)
- *       Select these weights for processing
- *
- *     - \key Deselect (list of string, no default)
- *       De-select these weights for processing
- *
- *     - \key NLO_Smearing (double, no default)
- *       Smearing histogram binning by given fraction of bin widths
- *       to avoid NLO counter events to flow into neighboring bin.
- *
- *     - \key Cap (double, no default)
- *       Cap weights to this value.
- *
- *
+ * The Rivet set-up can be configured using the \ref input_output_rivet_
+ * "content specific \c Rivet section" in the configuration file.
  */
 
 RivetOutput::RivetOutput(const std::filesystem::path& path, std::string name,

@@ -1127,7 +1127,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   - Available formats: \ref format_oscar_collisions,
    *                   \ref format_binary_ and \ref format_root.
    * - \b Thermodynamics   This output allows to print out thermodynamic
-   *          quantities, see \ref Thermodynamics.
+   *          quantities, see \ref input_output_thermodynamics_.
    *    - Available formats: \ref thermodyn_output_user_guide_,
    *      \ref thermodyn_lattice_output_,
    *      \ref output_vtk_lattice_
@@ -1516,7 +1516,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    *
    * For information on the format of the lattice output see
    * \ref output_vtk_lattice_ or \ref thermodyn_lattice_output_. To configure
-   * the thermodynamic output, see \ref input_output_options_.
+   * the thermodynamic output, see \ref input_output_.
    *
    * \n
    * Examples: Configuring the Lattice
