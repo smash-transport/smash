@@ -28,7 +28,7 @@ class FreeforallAction : public Action {
   /// Outgoing particles are set in prinicple in constructor
   void generate_final_state() {
     // Set time to time for arbitrary outgoing particles to time of action
-    // TODO should we scrool back here?
+    // TODO(#977) Should the position also scrolled back here?
     for (auto &p : outgoing_particles_) {
       p.set_4position({time_of_execution(), p.position().threevec()});
     }

@@ -2415,14 +2415,14 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     const double demo_act_time = parameters_.labclock->current_time();
     std::cout << "demo_act_time: " << demo_act_time << "\n";
     ParticleList empyt_in_list {};
-    // TODO Check that additonal hadrons are ok? (e.g. fulfill energy mometum relation)
-    // similar to ListModus::try_create_particle()
+    // TODO(#977) Check that additonal hadrons are ok? Best to perfom the same check as
+    // in ListModus::try_create_particle() (see function documentation in listmodus.h)
     auto demo_act = make_unique<FreeforallAction>(empyt_in_list, add_plist, demo_act_time);
     std::cout << demo_act->get_type() << '\n';
 
-    // Directly perform action myself
-    // Time of add_plist particles is set to action tim in generate_final_state
-    // TODO(stdnmr) Does this time change makes sense?
+    // Directly perform action here
+    // Time of add_plist particles is set to action time i.e. current_time in generate_final_state
+    // TODO(#977) Does this time setting makes sense in the end?
     perform_action(*demo_act, 0); // Only adds to first ensemble for now (probably
                                   // ok as JETSCAPE anyway only works with one
                                   // (0th) ensemble)
