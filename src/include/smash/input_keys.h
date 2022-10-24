@@ -308,8 +308,9 @@ class Key {
  * specified, <b>this section with all its required keys must be present in the
  * SMASH input file</b>.
  *
- * number of ensembles is equal to the number of events, so that this option
- * will provide the desired number of non-empty events. \ref TBC
+ * Without parallel ensembles (`Ensembles: 1`) the number of ensembles is equal
+ * to the number of events, so that this option will provide the desired number
+ * of non-empty events.
  */
 
 /*!\Userguide
@@ -1674,7 +1675,8 @@ struct InputKeys {
    * Multiplicative factor by which to scale the resonance lifetimes up or down.
    * This additionally has the effect of modifying the initial densities by
    * the same factor in the case of a box initialized with thermal
-   * multiplicities (see `Use_Thermal_Multiplicities` in \ref XXX and \ref YYY).
+   * multiplicities (see <tt>\ref key_MB_use_thermal_mult_
+   * "Box: Use_Thermal_Multiplicities"</tt>).
    *
    * \warning This option is not fully physically consistent with some of the
    * other assumptions used in SMASH; notably, modifying this value **will**
