@@ -206,17 +206,26 @@ class Key {
  *
  * \page inputconfig Configuration
  *
- * SMASH is configured via an input file in YAML format. Typically you will
+ * SMASH is configured via an input file in %YAML format. Typically you will
  * start from the supplied `config.yaml` file and modify it according to your
  * needs. If you ever make a mistake there and specify a configuration key that
  * SMASH does not recognize, then on startup it will tell you about the keys it
  * could not make any sense of.
  *
+ * \anchor input_configuration_copy_mechanism_ \attention
  * By default, SMASH copies the `config.yaml` file used to set up the SMASH run
  * to the output directory of the simulation. For the sake of reproducibility,
  * the randomly generated number seed (if the user specified a negative seed) is
- * inserted into the copied file and the used particles and decay modes are
- * appended as well.
+ * inserted into the copied file. The used particles and decay modes are
+ * appended there as well. For this purpose, a `particles` and a `decaymodes`
+ * key are used and their value are a one-line version of the corresponding
+ * files (see \ref inputparticles and \ref inputdecaymodes for information about
+ * them). To manually input the values of these keys is not an intended use case
+ * and you are discouraged from doing so. On the other hand, you could use the
+ * %YAML file copied by SMASH to the output directory for reproducibility
+ * purposes. In this case, since particles and decay modes are included in the
+ * configuration file, using a particles and/or a decay modes file as well
+ * should be avoided, otherwise the configuration content will be ignored.
  *
  * \par The available keys are documented on the following pages:
  * \li \subpage input_general_
@@ -235,14 +244,14 @@ class Key {
  * section, it is important to keep a consistent indentation in the input file.
  * The convention is to use 4 spaces indentation in order to specify keys inside
  * a section.  For example:
- * \code
- * Output:
- *     Output_Interval: 1.0
- *     Particles:
- *         Format: ["Oscar2013"]
- * \endcode
+ * \verbatim
+ Output:
+     Output_Interval: 1.0
+     Particles:
+         Format: ["Oscar2013"]
+ \endverbatim
  * This is a part of the input file. The `Output_Interval` key belongs to the
- * `Output` section, whereas `Particles` is in turn a section containing the
+ * `Output` section, whereas `%Particles` is in turn a section containing the
  * `Format` key.
  *
  *
@@ -765,6 +774,15 @@ class Key {
  *       are put next to each other.
  */
 struct InputKeys {
+  /**
+   * \see_key{input_configuration_copy_mechanism_}
+   */
+  inline static const Key<std::string> particles{{"particles"}, {"1.0"}};
+  /**
+   * \see_key{input_configuration_copy_mechanism_}
+   */
+  inline static const Key<std::string> decaymodes{{"decaymodes"}, {"1.0"}};
+
   /*!\Userguide
    * \page input_general_
    * <hr>
@@ -4424,6 +4442,8 @@ struct InputKeys {
 
   /// List of references to all existing SMASH keys.
   inline static const std::vector<key_references_variant> list = {
+      std::cref(particles),
+      std::cref(decaymodes),
       std::cref(gen_endTime),
       std::cref(gen_modus),
       std::cref(gen_nevents),
