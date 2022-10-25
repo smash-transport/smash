@@ -379,11 +379,22 @@ TEST(reactions_bitset) {
 }
 
 TEST(configuration_validation) {
-  Configuration valid_conf{std::filesystem::path{TEST_CONFIG_PATH} / "input",
-                           "config.yaml"};
-  Configuration invalid_conf = make_test_configuration();
-  VERIFY(valid_conf.validate(true));
-  VERIFY(valid_conf.validate(false));
+  const Configuration invalid_conf = make_test_configuration();
   VERIFY(!invalid_conf.validate(true));
   VERIFY(!invalid_conf.validate(false));
+}
+
+TEST(shipped_input_files_validation) {
+  const std::filesystem::path codebase_path{TEST_CONFIG_PATH};
+  const std::string input_folder_name{"input"};
+  const std::string extension(".yaml");
+  for (auto &input_file : std::filesystem::recursive_directory_iterator(
+           codebase_path / input_folder_name)) {
+    if (input_file.path().extension() == extension) {
+      std::cout << "Validating " << input_file.path() << '\n';
+      Configuration config{input_file.path().parent_path(),
+                           input_file.path().filename()};
+      VERIFY(config.validate());
+    }
+  }
 }
