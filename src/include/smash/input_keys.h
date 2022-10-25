@@ -1213,7 +1213,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_experiment_,Experiment,string,$\{default\}}
+   * \optional_key{key_log_experiment_,%Experiment,string,$\{default\}}
    */
   /**
    * \see_key{key_log_experiment_}
@@ -1253,7 +1253,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_action_,Action,string,$\{default\}}
+   * \optional_key{key_log_action_,%Action,string,$\{default\}}
    */
   /**
    * \see_key{key_log_action_}
@@ -1273,7 +1273,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_particle_type_,ParticleType,string,$\{default\}}
+   * \optional_key{key_log_particle_type_,%ParticleType,string,$\{default\}}
    */
   /**
    * \see_key{key_log_particle_type_}
@@ -1293,7 +1293,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_clock_,Clock,string,$\{default\}}
+   * \optional_key{key_log_clock_,%Clock,string,$\{default\}}
    */
   /**
    * \see_key{key_log_clock_}
@@ -1303,7 +1303,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_decay_modes_,DecayModes,string,$\{default\}}
+   * \optional_key{key_log_decay_modes_,%DecayModes,string,$\{default\}}
    */
   /**
    * \see_key{key_log_decay_modes_}
@@ -1323,7 +1323,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_scatter_action_,ScatterAction,string,$\{default\}}
+   * \optional_key{key_log_scatter_action_,%ScatterAction,string,$\{default\}}
    */
   /**
    * \see_key{key_log_scatter_action_}
@@ -1353,7 +1353,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_grid_,Grid,string,$\{default\}}
+   * \optional_key{key_log_grid_,%Grid,string,$\{default\}}
    */
   /**
    * \see_key{key_log_grid_}
@@ -1373,7 +1373,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_nucleus_,Nucleus,string,$\{default\}}
+   * \optional_key{key_log_nucleus_,%Nucleus,string,$\{default\}}
    */
   /**
    * \see_key{key_log_nucleus_}
@@ -1453,7 +1453,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_cross_sections_,CrossSections,string,$\{default\}}
+   * \optional_key{key_log_cross_sections_,%CrossSections,string,$\{default\}}
    */
   /**
    * \see_key{key_log_cross_sections_}
@@ -1493,7 +1493,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_scatter_action_multi_,ScatterActionMulti,string,$\{default\}}
+   * \optional_key{key_log_scatter_action_multi_,%ScatterActionMulti,string,$\{default\}}
    */
   /**
    * \see_key{key_log_scatter_action_multi_}
@@ -3798,8 +3798,8 @@ struct InputKeys {
    * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
    *
    * &rArr; Incompatible with `Oscar1999`, `ROOT` and `ASCII` formats.
-   * - `true` &rarr' Print extended information for each particle
-   * - `false` &rarr' Regular output for each particle
+   * - `true` &rarr; Print extended information for each particle
+   * - `false` &rarr; Regular output for each particle
    */
   /**
    * \see_key{key_output_IC_extended_}
@@ -4092,7 +4092,7 @@ struct InputKeys {
    * smearing should be applied, and then \f$W\f$ takes on the following shape:
    * \f[
    * W = (2 \pi \sigma^2)^{-3/2} \exp\left(
-   * - \frac{(\mathbf{r}-\mathbf{r_0(t)})^2}{2\sigma^2}
+   * - \frac{(\mathbf{r}-\mathbf{r}_0(t))^2}{2\sigma^2}
    * \right)\f]
    * It can however be useful to compute the thermodynamic quantities of all
    * particles in a box with \f$W=1\f$, which would correspond to <tt>"Smearing:

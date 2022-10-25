@@ -210,7 +210,7 @@ namespace smash {
  * want that feature).
  *
  * For the typical usage in SMASH one needs to read the value once. In that
- * case, use the Configuration::take function:
+ * case, use the Configuration::take function, for example:
  * \code
  * double sigma = config.take({"General", "SIGMA"});
  * \endcode
