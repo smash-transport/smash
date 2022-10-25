@@ -602,12 +602,10 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     }
   }
 
-  auto config_coll = config.extract_sub_configuration(
-      {"Collision_Term"}, Configuration::GetEmpty::Yes);
   /* Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded. */
   const double low_snn_cut =
-      config_coll.take({"Elastic_NN_Cutoff_Sqrts"}, 1.98);
+      config.take({"Collision_Term", "Elastic_NN_Cutoff_Sqrts"}, 1.98);
   const auto proton = ParticleType::try_find(pdg::p);
   const auto pion = ParticleType::try_find(pdg::pi_z);
   if (proton && pion &&
@@ -617,18 +615,19 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   }
   const bool potential_affect_threshold =
       config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);
-  const double scale_xs = config_coll.take({"Cross_Section_Scaling"}, 1.0);
+  const double scale_xs =
+      config.take({"Collision_Term", "Cross_Section_Scaling"}, 1.0);
 
-  const auto criterion =
-      config_coll.take({"Collision_Criterion"}, CollisionCriterion::Covariant);
+  const auto criterion = config.take({"Collision_Term", "Collision_Criterion"},
+                                     CollisionCriterion::Covariant);
 
-  if (config_coll.has_value({"Fixed_Min_Cell_Length"}) &&
+  if (config.has_value({"Collision_Term", "Fixed_Min_Cell_Length"}) &&
       criterion != CollisionCriterion::Stochastic) {
     throw std::invalid_argument(
         "Only use a fixed minimal cell length with the stochastic collision "
         "criterion.");
   }
-  if (config_coll.has_value({"Maximum_Cross_Section"}) &&
+  if (config.has_value({"Collision_Term", "Maximum_Cross_Section"}) &&
       criterion == CollisionCriterion::Stochastic) {
     throw std::invalid_argument(
         "Only use maximum cross section with the "
@@ -650,46 +649,50 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
   bool cll_in_nucleus =
       config.take({"Modi", "Collider", "Collisions_Within_Nucleus"}, false);
-  double maximum_cross_section = config_coll.take(
-      {"Maximum_Cross_Section"}, maximum_cross_section_default);
+  double maximum_cross_section =
+      config.take({"Collision_Term", "Maximum_Cross_Section"},
+                  maximum_cross_section_default);
   maximum_cross_section *= scale_xs;
-  return {std::make_unique<UniformClock>(0.0, dt),
-          std::move(output_clock),
-          config.take({"General", "Ensembles"}, 1),
-          ntest,
-          config.take({"General", "Derivatives_Mode"},
-                      DerivativesMode::CovariantGaussian),
-          config.has_value({"Potentials", "VDF"})
-              ? RestFrameDensityDerivativesMode::On
-              : RestFrameDensityDerivativesMode::Off,
-          config.take({"General", "Field_Derivatives_Mode"},
-                      FieldDerivativesMode::ChainRule),
-          config.take({"General", "Smearing_Mode"},
-                      SmearingMode::CovariantGaussian),
-          config.take({"General", "Gaussian_Sigma"}, 1.),
-          config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
-          config.take({"General", "Discrete_Weight"}, 1. / 3.0),
-          config.take({"General", "Triangular_Range"}, 2.0),
-          criterion,
-          config_coll.take({"Two_to_One"}, true),
-          config_coll.take({"Included_2to2"}, ReactionsBitSet().set()),
-          config_coll.take({"Multi_Particle_Reactions"},
-                           MultiParticleReactionsBitSet().reset()),
-          config_coll.take({"Strings"}, modus_chooser != "Box"),
-          config_coll.take({"Use_AQM"}, true),
-          config_coll.take({"Resonance_Lifetime_Modifier"}, 1.),
-          config_coll.take({"Strings_with_Probability"}, true),
-          config_coll.take({"NNbar_Treatment"}, NNbarTreatment::Strings),
-          low_snn_cut,
-          potential_affect_threshold,
-          box_length,
-          maximum_cross_section,
-          config_coll.take({"Fixed_Min_Cell_Length"}, 2.5),
-          cll_in_nucleus,
-          scale_xs,
-          config_coll.take({"Additional_Elastic_Cross_Section"}, 0.0),
-          only_participants,
-          config_coll.take({"Include_Weak_And_EM_Decays_At_The_End"}, false)};
+  return {
+      std::make_unique<UniformClock>(0.0, dt),
+      std::move(output_clock),
+      config.take({"General", "Ensembles"}, 1),
+      ntest,
+      config.take({"General", "Derivatives_Mode"},
+                  DerivativesMode::CovariantGaussian),
+      config.has_value({"Potentials", "VDF"})
+          ? RestFrameDensityDerivativesMode::On
+          : RestFrameDensityDerivativesMode::Off,
+      config.take({"General", "Field_Derivatives_Mode"},
+                  FieldDerivativesMode::ChainRule),
+      config.take({"General", "Smearing_Mode"},
+                  SmearingMode::CovariantGaussian),
+      config.take({"General", "Gaussian_Sigma"}, 1.),
+      config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
+      config.take({"General", "Discrete_Weight"}, 1. / 3.0),
+      config.take({"General", "Triangular_Range"}, 2.0),
+      criterion,
+      config.take({"Collision_Term", "Two_to_One"}, true),
+      config.take({"Collision_Term", "Included_2to2"}, ReactionsBitSet().set()),
+      config.take({"Collision_Term", "Multi_Particle_Reactions"},
+                  MultiParticleReactionsBitSet().reset()),
+      config.take({"Collision_Term", "Strings"}, modus_chooser != "Box"),
+      config.take({"Collision_Term", "Use_AQM"}, true),
+      config.take({"Collision_Term", "Resonance_Lifetime_Modifier"}, 1.),
+      config.take({"Collision_Term", "Strings_with_Probability"}, true),
+      config.take({"Collision_Term", "NNbar_Treatment"},
+                  NNbarTreatment::Strings),
+      low_snn_cut,
+      potential_affect_threshold,
+      box_length,
+      maximum_cross_section,
+      config.take({"Collision_Term", "Fixed_Min_Cell_Length"}, 2.5),
+      cll_in_nucleus,
+      scale_xs,
+      config.take({"Collision_Term", "Additional_Elastic_Cross_Section"}, 0.0),
+      only_participants,
+      config.take({"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
+                  false)};
 }
 
 std::string format_measurements(const std::vector<Particles> &ensembles,
