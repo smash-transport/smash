@@ -1913,7 +1913,7 @@ struct InputKeys {
    * \see_key{key_CT_collision_criterion_}
    */
   inline static const Key<std::string> collTerm_collisionCriterion{
-      {"Collision_Term", "Strings"}, "Covariant", {"1.0"}};
+      {"Collision_Term", "Collision_Criterion"}, "Covariant", {"1.0"}};
 
   /*!\Userguide
    * \page input_collision_term_
@@ -2113,7 +2113,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_b_}
    */
   inline static const Key<double> collTerm_stringParam_stringZB{
-      {"Collision_Term", "String_Parameters", ""}, 0.55, {"1.0"}};
+      {"Collision_Term", "String_Parameters", "StringZ_B"}, 0.55, {"1.0"}};
 
   /*!\Userguide
    * \page input_collision_term_string_parameters_
@@ -2676,10 +2676,22 @@ struct InputKeys {
    * - `true` &rarr; Set parameters of spherical deformation based on mass
    *   number of the nucleus. Currently the following deformed nuclei are
    *   implemented: Cu, Zr, Ru, Au, Pb, U, and Xe (see deformednucleus.cc). If
-   *   set to true the other parameters should not be provided.
+   *   set to `true` the other parameters should not be provided.
    * - `false` &rarr; Manually set parameters of spherical deformation. This
-   *   requires the additional specification of `Beta_2`, `Beta_3`, `Beta_4`,
-   *   which follow \iref{Moller:1993ed} and \iref{Schenke:2019ruo}.
+   *   requires the additional specification of at least one among `Beta_2`,
+   *   `Beta_3`, `Beta_4`, which follow \iref{Moller:1993ed} and
+   *   \iref{Schenke:2019ruo}. These parameters enter the radius in the
+   *   Wood-Saxon profile as follows,
+   *   \f[
+   *   R(\theta,\phi) = R_0 \cdot \biggl\{
+   *   1+
+   *   \beta_2\,\Bigl[\cos\gamma\, Y_2^0(\theta,\phi) +
+   *        \sqrt{2}\,\sin\gamma\,\Re\bigl(Y_2^2(\theta,\phi)\bigr)\Bigr]+
+   *   \beta_3^{\phantom{0}}\,Y_3^0(\theta,\phi)+
+   *   \beta_4^{\phantom{0}}\,Y_4^0(\theta,\phi)
+   *   \biggr\}
+   *   \f]
+   *   and are set to 0 if not specified.
    */
   /**
    * \see_key{key_MC_PT_deformed_auto_}
@@ -2694,59 +2706,75 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_modi_collider_projectile_and_target_
-   * \required_key_no_line{key_MC_PT_deformed_betaII_,Beta_2,double}
+   * \optional_key_no_line{key_MC_PT_deformed_betaII_,Beta_2,double,0.0}
    *
-   * The deformation coefficient for the spherical harmonic Y_2_0 in the beta
-   * decomposition of the nuclear radius in the deformed Woods-Saxon
-   * distribution. This key can be omitted for automatic deformation
-   * (`Automatic: true`).
+   * The deformation coefficient \f$\beta_2\f$ for the spherical harmonic
+   * \f$Y_2^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
    */
   /**
    * \see_key{key_MC_PT_deformed_betaII_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta2{
-      {"Modi", "Collider", "Projectile", "Deformed", "Beta_2"}, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "Deformed", "Beta_2"}, 0.0, {"1.0"}};
   /**
    * \see_key{key_MC_PT_deformed_betaII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta2{
-      {"Modi", "Collider", "Target", "Deformed", "Beta_2"}, {"1.0"}};
+      {"Modi", "Collider", "Target", "Deformed", "Beta_2"}, 0.0, {"1.0"}};
 
   /*!\Userguide
    * \page input_modi_collider_projectile_and_target_
-   * \required_key_no_line{key_MC_PT_deformed_betaIII_,Beta_3,double}
+   * \optional_key_no_line{key_MC_PT_deformed_gamma_,Gamma,double,0.0}
    *
-   * The deformation coefficient for the spherical harmonic Y_3_0. This key can
-   * be omitted for automatic deformation (`Automatic: true`).
+   * The parameter describes triaxiality \f$\gamma\f$ of the nucleus in
+   * \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
+   */
+  /**
+   * \see_key{key_MC_PT_deformed_gamma_}
+   */
+  inline static const Key<double> modi_collider_projectile_deformed_gamma{
+      {"Modi", "Collider", "Projectile", "Deformed", "Gamma"}, 0.0, {"1.0"}};
+  /**
+   * \see_key{key_MC_PT_deformed_gamma_}
+   */
+  inline static const Key<double> modi_collider_target_deformed_gamma{
+      {"Modi", "Collider", "Target", "Deformed", "Gamma"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_collider_projectile_and_target_
+   * \optional_key_no_line{key_MC_PT_deformed_betaIII_,Beta_3,double,0.0}
+   *
+   * The deformation coefficient \f$\beta_3\f$ for the spherical harmonic
+   * \f$Y_3^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
    */
   /**
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta3{
-      {"Modi", "Collider", "Projectile", "Deformed", "Beta_3"}, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "Deformed", "Beta_3"}, 0.0, {"1.0"}};
   /**
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta3{
-      {"Modi", "Collider", "Target", "Deformed", "Beta_3"}, {"1.0"}};
+      {"Modi", "Collider", "Target", "Deformed", "Beta_3"}, 0.0, {"1.0"}};
 
   /*!\Userguide
    * \page input_modi_collider_projectile_and_target_
-   * \required_key_no_line{key_MC_PT_deformed_betaIV_,Beta_4,double}
+   * \optional_key_no_line{key_MC_PT_deformed_betaIV_,Beta_4,double,0.0}
    *
-   * The deformation coefficient for the spherical harmonic Y_4_0. This key can
-   * be omitted for automatic deformation (`Automatic: true`).
+   * The deformation coefficient \f$\beta_4\f$ for the spherical harmonic
+   * \f$Y_4^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
    */
   /**
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta4{
-      {"Modi", "Collider", "Projectile", "Deformed", "Beta_4"}, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "Deformed", "Beta_4"}, 0.0, {"1.0"}};
   /**
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta4{
-      {"Modi", "Collider", "Target", "Deformed", "Beta_4"}, {"1.0"}};
+      {"Modi", "Collider", "Target", "Deformed", "Beta_4"}, 0.0, {"1.0"}};
 
   /*!\Userguide
    * \page input_modi_collider_projectile_and_target_
@@ -3105,6 +3133,23 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_modi_sphere_
+   * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,-1.0}
+   *
+   * This can be used in order to give each particle in the sphere an additional
+   * velocity in radial direction of the size \f$u_r = u_0 \, \frac{r}{R}\f$
+   * with \f$u_0\f$ being the parameter of this feature, \f$r\f$ the radius of
+   * the particle and \f$R\f$ the total radius of the sphere. \f$u_0\f$ can only
+   * take values in \f$[0, 1]\f$ and specifying a negative value is equivalent
+   * in omitting this key (i.e. not attributing any additional radial velocity).
+   */
+  /**
+   * \see_key{key_MS_add_radial_velocity_}
+   */
+  inline static const Key<double> modi_sphere_addRadialVelocity{
+      {"Modi", "Sphere", "Add_Radial_Velocity"}, -1.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_sphere_
    * <hr>
    * #### Specifying jets
    *
@@ -3366,8 +3411,47 @@ struct InputKeys {
   /**
    * \see_key{key_ML_shift_id_}
    */
-  inline static const Key<std::string> modi_list_shiftId{
-      {"Modi", "List", "Shift_Id"}, {"1.0"}};
+  inline static const Key<int> modi_list_shiftId{{"Modi", "List", "Shift_Id"},
+                                                 {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_listbox_
+   * \required_key{key_MLB_file_dir_,File_Directory,string}
+   *
+   * See &nbsp;
+   * <tt>\ref key_ML_file_dir_ "Box: File_Directory"</tt>.
+   */
+  /**
+   * \see_key{key_MLB_file_dir_}
+   */
+  inline static const Key<std::string> modi_listBox_fileDirectory{
+      {"Modi", "ListBox", "File_Directory"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_listbox_
+   * \required_key{key_MLB_file_prefix_,File_Prefix,string}
+   *
+   * See &nbsp;
+   * <tt>\ref key_ML_file_prefix_ "Box: File_Prefix"</tt>.
+   */
+  /**
+   * \see_key{key_MLB_file_prefix_}
+   */
+  inline static const Key<std::string> modi_listBox_filePrefix{
+      {"Modi", "ListBox", "File_Prefix"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_modi_listbox_
+   * \required_key{key_MLB_shift_id_,Shift_Id,int}
+   *
+   * See &nbsp;
+   * <tt>\ref key_ML_shift_id_ "Box: Shift_Id"</tt>.
+   */
+  /**
+   * \see_key{key_MLB_shift_id_}
+   */
+  inline static const Key<int> modi_listBox_shiftId{
+      {"Modi", "ListBox", "Shift_Id"}, {"1.0"}};
 
   /*!\Userguide
    * \page input_modi_listbox_
@@ -3377,7 +3461,7 @@ struct InputKeys {
    * <tt>\ref key_MB_length_ "Box: Length"</tt>.
    */
   /**
-   * \see_key{key_MB_length_}
+   * \see_key{key_MLB_length_}
    */
   inline static const Key<double> modi_listBox_length{
       {"Modi", "ListBox", "Length"}, {"1.0"}};
@@ -4130,7 +4214,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_potentials_symmetry_
-   * \required_key{key_potentials_symmetry_s_pot_,S_pot,double}
+   * \required_key{key_potentials_symmetry_s_pot_,S_Pot,double}
    *
    * Parameter \f$S_{pot}\f$ of symmetry potential \unit{in MeV}.
    */
@@ -4138,7 +4222,7 @@ struct InputKeys {
    * \see_key{key_potentials_symmetry_s_pot_}
    */
   inline static const Key<double> potentials_symmetry_sPot{
-      {"Potentials", "Symmetry", "S_pot"}, {"1.0"}};
+      {"Potentials", "Symmetry", "S_Pot"}, {"1.0"}};
 
   /*!\Userguide
    * \page input_potentials_symmetry_
@@ -4469,16 +4553,18 @@ struct InputKeys {
       std::cref(modi_collider_target_deformed_automatic),
       std::cref(modi_collider_projectile_deformed_beta2),
       std::cref(modi_collider_target_deformed_beta2),
+      std::cref(modi_collider_projectile_deformed_gamma),
+      std::cref(modi_collider_target_deformed_gamma),
       std::cref(modi_collider_projectile_deformed_beta3),
       std::cref(modi_collider_target_deformed_beta3),
       std::cref(modi_collider_projectile_deformed_beta4),
       std::cref(modi_collider_target_deformed_beta4),
       std::cref(modi_collider_projectile_deformed_orientation_phi),
       std::cref(modi_collider_target_deformed_orientation_phi),
-      std::cref(modi_collider_projectile_deformed_orientation_psi),
-      std::cref(modi_collider_target_deformed_orientation_psi),
       std::cref(modi_collider_projectile_deformed_orientation_theta),
       std::cref(modi_collider_target_deformed_orientation_theta),
+      std::cref(modi_collider_projectile_deformed_orientation_psi),
+      std::cref(modi_collider_target_deformed_orientation_psi),
       std::cref(modi_collider_projectile_deformed_orientation_randomRotation),
       std::cref(modi_collider_target_deformed_orientation_randomRotation),
       std::cref(modi_collider_impact_randomReactionPlane),
@@ -4498,6 +4584,7 @@ struct InputKeys {
       std::cref(modi_sphere_chargeChemicalPotential),
       std::cref(modi_sphere_accountResonanceWidths),
       std::cref(modi_sphere_initialCondition),
+      std::cref(modi_sphere_addRadialVelocity),
       std::cref(modi_sphere_jet_jetPdg),
       std::cref(modi_sphere_jet_jetMomentum),
       std::cref(modi_box_initialCondition),
@@ -4516,6 +4603,9 @@ struct InputKeys {
       std::cref(modi_list_fileDirectory),
       std::cref(modi_list_filePrefix),
       std::cref(modi_list_shiftId),
+      std::cref(modi_listBox_fileDirectory),
+      std::cref(modi_listBox_filePrefix),
+      std::cref(modi_listBox_shiftId),
       std::cref(modi_listBox_length),
       std::cref(output_outputInterval),
       std::cref(output_outputTimes),
@@ -4542,8 +4632,8 @@ struct InputKeys {
       std::cref(output_rivet_paths),
       std::cref(output_rivet_analyses),
       std::cref(output_rivet_preloads),
-      std::cref(output_rivet_preloads),
-      std::cref(output_rivet_preloads),
+      std::cref(output_rivet_logging),
+      std::cref(output_rivet_ignoreBeams),
       std::cref(output_rivet_crossSection),
       std::cref(output_rivet_weights_noMulti),
       std::cref(output_rivet_weights_nominal),
@@ -4631,11 +4721,9 @@ General:
  \endverbatim
  *
  * This will set all levels to `WARN` verbosity, still asking for
- informational
- * messages of `Main` and `Experiment` areas. Furthermore, `Pythia` debug
- * messages are requested, while any floating point exception message is
- turned
- * off.
+ * informational messages of `Main` and `%Experiment` areas. Furthermore,
+ * `Pythia` debug messages are requested, while any floating point exception
+ * message is turned off.
  */
 
 /*!\Userguide
