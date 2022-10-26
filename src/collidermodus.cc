@@ -442,7 +442,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   // Option 5: Total energy per nucleon of _each_ beam
   if (proj_cfg.has_value({"E_Tot"}) && targ_cfg.has_value({"E_Tot"})) {
     const double e_tot_p = proj_cfg.take({"E_Tot"});
-    const double e_tot_t = targ_cfg.take({"E_tot"});
+    const double e_tot_t = targ_cfg.take({"E_Tot"});
     if (e_tot_p < 0 || e_tot_t < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
