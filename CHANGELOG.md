@@ -23,6 +23,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Added
 * New CMake build configuration `MinSizeRel` to optimize in executable size 
 
+### Fixed
+* Fix bug in collider modus when setting the total energy per nucleon of _each_ beam
+
 ### Changed
 * :warning: The `master` branch has been renamed to `main`
 * SMASH makes now use of C++17 standard and minimum compiler requirements have changed
