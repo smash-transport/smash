@@ -1721,8 +1721,8 @@ struct InputKeys {
   /**
    * \see_key{key_CT_nnbar_treatment_}
    */
-  inline static const Key<std::string> collTerm_nnbarTreatment{
-      {"Collision_Term", "NNbar_Treatment"}, "strings", {"1.0"}};
+  inline static const Key<NNbarTreatment> collTerm_nnbarTreatment{
+      {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::Strings, {"1.0"}};
 
   /*!\Userguide
    * \page input_collision_term_
@@ -1998,8 +1998,10 @@ struct InputKeys {
   /**
    * \see_key{key_CT_collision_criterion_}
    */
-  inline static const Key<std::string> collTerm_collisionCriterion{
-      {"Collision_Term", "Collision_Criterion"}, "Covariant", {"1.0"}};
+  inline static const Key<CollisionCriterion> collTerm_collisionCriterion{
+      {"Collision_Term", "Collision_Criterion"},
+      CollisionCriterion::Covariant,
+      {"1.0"}};
 
   /*!\Userguide
    * \page input_collision_term_
@@ -2491,8 +2493,10 @@ struct InputKeys {
   /**
    * \see_key{key_MC_calc_frame_}
    */
-  inline static const Key<std::string> modi_collider_calculationFrame{
-      {"Modi", "Collider", "Calculation_Frame"}, "center of velocity", {"1.0"}};
+  inline static const Key<CalculationFrame> modi_collider_calculationFrame{
+      {"Modi", "Collider", "Calculation_Frame"},
+      CalculationFrame::CenterOfVelocity,
+      {"1.0"}};
 
   /*!\Userguide
    * \page input_modi_collider_
@@ -2507,8 +2511,8 @@ struct InputKeys {
   /**
    * \see_key{key_MC_fermi_motion_}
    */
-  inline static const Key<std::string> modi_collider_fermiMotion{
-      {"Modi", "Collider", "Fermi_Motion"}, "off", {"1.0"}};
+  inline static const Key<FermiMotion> modi_collider_fermiMotion{
+      {"Modi", "Collider", "Fermi_Motion"}, FermiMotion::Off, {"1.0"}};
 
   /*!\Userguide
    * \page input_modi_collider_
@@ -3005,8 +3009,8 @@ struct InputKeys {
   /**
    * \see_key{key_MC_impact_sample_}
    */
-  inline static const Key<std::string> modi_collider_impact_sample{
-      {"Modi", "Collider", "Impact", "Sample"}, "quadratic", {"1.0"}};
+  inline static const Key<Sampling> modi_collider_impact_sample{
+      {"Modi", "Collider", "Impact", "Sample"}, Sampling::Quadratic, {"1.0"}};
 
   /*!\Userguide
    * \page input_modi_collider_impact_parameter_
@@ -3197,12 +3201,14 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_modi_sphere_
-   * \optional_key{key_MS_initial_cond_,Initial_Condition,string,"thermal
-   * momenta"}
+   * \optional_key{key_MS_initial_cond_,Initial_Condition,string,
+   * "thermal momenta"}
    *
    * Initial distribution to use for momenta of particles. Mainly used in the
    * expanding universe scenario, options are:
    * - `"thermal momenta"` &rarr; equilibrium Boltzmann distribution
+   * - `"thermal momenta quantum"` &rarr; equilibrium Fermi-Dirac or
+   *   Bose-Einstein distribution
    * - `"IC_ES"` &rarr; off-equilibrium distribution
    * - `"IC_1M"` &rarr; off-equilibrium distribution
    * - `"IC_2M"` &rarr; off-equilibrium distribution
@@ -3214,8 +3220,10 @@ struct InputKeys {
   /**
    * \see_key{key_MS_initial_cond_}
    */
-  inline static const Key<std::string> modi_sphere_initialCondition{
-      {"Modi", "Sphere", "Initial_Condition"}, "thermal momenta", {"1.0"}};
+  inline static const Key<SphereInitialCondition> modi_sphere_initialCondition{
+      {"Modi", "Sphere", "Initial_Condition"},
+      SphereInitialCondition::ThermalMomentaBoltzmann,
+      {"1.0"}};
 
   /*!\Userguide
    * \page input_modi_sphere_
@@ -3276,11 +3284,14 @@ struct InputKeys {
    *   distributed.
    * - `"thermal momenta"` &rarr; Momenta are sampled from a Maxwell-Boltzmann
    *   distribution.
+   * - `"thermal momenta quantum"` &rarr; Momenta are sampled from a Fermi-Dirac
+   *   distribution or a Bose-Einstein distribution, depending on the type of
+   *   particle.
    */
   /**
    * \see_key{key_MB_initial_condition_}
    */
-  inline static const Key<std::string> modi_box_initialCondition{
+  inline static const Key<BoxInitialCondition> modi_box_initialCondition{
       {"Modi", "Box", "Initial_Condition"}, {"1.0"}};
 
   /*!\Userguide
@@ -3717,8 +3728,8 @@ struct InputKeys {
   /**
    * \see_key{key_output_particles_only_final_}
    */
-  inline static const Key<std::string> output_particles_onlyFinal{
-      {"Output", "Particles", "Only_Final"}, "Yes", {"1.0"}};
+  inline static const Key<OutputOnlyFinal> output_particles_onlyFinal{
+      {"Output", "Particles", "Only_Final"}, OutputOnlyFinal::Yes, {"1.0"}};
 
   /*!\Userguide
    * \page input_output_
@@ -4121,7 +4132,7 @@ struct InputKeys {
   /**
    * \see_key{key_output_thermo_type_}
    */
-  inline static const Key<std::vector<std::string>>
+  inline static const Key<std::set<ThermodynamicQuantity>>
       output_thermodynamics_quantites{
           {"Output", "Thermodynamics", "Quantities"}, {}, {"1.0"}};
 
@@ -4439,8 +4450,10 @@ struct InputKeys {
   /**
    * \see_key{key_forced_therm_algorithm_}
    */
-  inline static const Key<std::string> forcedThermalization_algorithm{
-      {"Forced_Thermalization", "Algorithm"}, "biased BF", {"1.0"}};
+  inline static const Key<ThermalizationAlgorithm>
+      forcedThermalization_algorithm{{"Forced_Thermalization", "Algorithm"},
+                                     ThermalizationAlgorithm::BiasedBF,
+                                     {"1.0"}};
 
   /*!\Userguide
    * \page input_forced_thermalization_
@@ -4495,18 +4508,28 @@ struct InputKeys {
       std::reference_wrapper<const Key<std::array<double, 3>>>,
       std::reference_wrapper<const Key<std::vector<double>>>,
       std::reference_wrapper<const Key<std::vector<std::string>>>,
+      std::reference_wrapper<const Key<std::set<ThermodynamicQuantity>>>,
       std::reference_wrapper<const Key<std::map<PdgCode, int>>>,
       std::reference_wrapper<const Key<std::map<std::string, std::string>>>,
       std::reference_wrapper<const Key<einhard::LogLevel>>,
+      std::reference_wrapper<const Key<BoxInitialCondition>>,
+      std::reference_wrapper<const Key<CalculationFrame>>,
+      std::reference_wrapper<const Key<CollisionCriterion>>,
       std::reference_wrapper<const Key<DensityType>>,
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
+      std::reference_wrapper<const Key<FermiMotion>>,
       std::reference_wrapper<const Key<FieldDerivativesMode>>,
       std::reference_wrapper<const Key<MultiParticleReactionsBitSet>>,
+      std::reference_wrapper<const Key<NNbarTreatment>>,
+      std::reference_wrapper<const Key<OutputOnlyFinal>>,
       std::reference_wrapper<const Key<PdgCode>>,
       std::reference_wrapper<const Key<ReactionsBitSet>>,
       std::reference_wrapper<const Key<RestFrameDensityDerivativesMode>>,
+      std::reference_wrapper<const Key<Sampling>>,
       std::reference_wrapper<const Key<SmearingMode>>,
+      std::reference_wrapper<const Key<SphereInitialCondition>>,
+      std::reference_wrapper<const Key<ThermalizationAlgorithm>>,
       std::reference_wrapper<const Key<TimeStepMode>>>;
 
   /// List of references to all existing SMASH keys.
@@ -5001,9 +5024,9 @@ General:
  Modi:
      Collider:
          Projectile:
-             Particles: {2212: 29, 2112 :34}
+             Particles: {2212: 29, 2112: 34}
          Target:
-             Particles: {2212: 29, 2112 :34}
+             Particles: {2212: 29, 2112: 34}
          Sqrtsnn: 3.0
  \endverbatim
  *
