@@ -230,6 +230,7 @@ class Key {
  * \par The available keys are documented on the following pages:
  * \li \subpage input_general_
  * \li \subpage input_logging_
+ * \li \subpage input_version_
  * \li \subpage input_collision_term_
  * \li \subpage input_modi_
  * \li \subpage input_output_
@@ -340,6 +341,10 @@ class Key {
  *
  * Note that the logging levels `TRACE` and `DEBUG` are only available in
  * debug builds (i.e. running `cmake` with `-DCMAKE_BUILD_TYPE=Debug`).
+ */
+
+/*!\Userguide
+ * \page input_version_ Version
  */
 
 /*!\Userguide
@@ -747,6 +752,16 @@ class Key {
  *            the general codebase rules (it adds readability in this case).
  *            Abbreviations are allowed, but be consistent if any already
  *            exists.
+ *         -# Add some description to the user guide, using the same format
+ *            as for the other existing keys. In particular, one of the Doxygen
+ *            aliases among `\required_key`, `\required_key_no_line`,
+ *            `\optional_key` and `\optional_key_no_line` should be used. The
+ *            first two need three arguments (anchor in documentation, key name,
+ *            key type) while the last two need 4 (the same three as for
+ *            required keys plus the default key value). Add as well a Doxygen
+ *            documentation to the new class member, by simply using there the
+ *            `\see_key` alias that needs as single argument the key anchor in
+ *            documentation you defined in the user guide.
  *         -# If the newly introduced key has a new type w.r.t. all existing
  *            keys, you need to add it to the \c key_references_variant alias.
  *            In particular, you need to add a type to the \c std::variant which
@@ -764,14 +779,18 @@ class Key {
  *            Instead, after having added the version in which the key
  *            has been deprecated or removed, <b>adjust the user documentation
  *            by marking the key as deprecated or by removing the key and
- *            its description</b>.
+ *            its description (in the user guide, only)</b>. If doing so a full
+ *            page is removed, make sure that all reference to it are removed,
+ *            too. If a key is removed and no user guide to refer to exists
+ *            anymore, change the `\see_key` Doxygen alias to `\removed_key` in
+ *            the member documentation (pass the SMASH version number to it in
+ *            which the key has been removed).
  *
  * @note Ordering of members in this class is imposed by how keys shall appear
- *       in the documentation. In particular, all mandatory keys per page are
- *       listed first and all optional after in respective sub-sections. Every
- *       block of keys contains them <b>in alphabetical order</b>, keep it so.
- *       Although not strictly necessary, all keys belonging to the same page
- *       are put next to each other.
+ *       in the documentation. For example, in the `General` section, all
+ *       mandatory keys are listed first and all optional afterwards <b>in
+ *       alphabetical order</b>, keep it so. Although not strictly necessary,
+ *       all keys belonging to the same page are put next to each other.
  */
 struct InputKeys {
   /**
@@ -1541,6 +1560,24 @@ struct InputKeys {
    */
   inline static const Key<einhard::LogLevel> log_yamlConfiguration{
       {"Logging", "YAML_Configuration"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_version_
+   * \anchor key_version_
+   * \warning The `Version` key is now deprecated and specifying it has no
+   * effect, because it is completely ignored.
+   *
+   * This entry in the `config.yaml` file used to set the version number of the
+   * configuration file. Its intent was to ensure comptability with the SMASH
+   * version used. Refer to previous versions documentation to know how it was
+   * intended to be used. Now that the input file is validated by SMASH, the
+   * user will get all needed information in case deprecated or invalid keys are
+   * tried to be used.
+   */
+  /**
+   * \see_key{key_version_}
+   */
+  inline static const Key<std::string> version{{"Version"}, {"1.0", "3.0"}};
 
   /*!\Userguide
    * \page input_collision_term_
@@ -4529,6 +4566,7 @@ struct InputKeys {
       std::cref(log_initialConditions),
       std::cref(log_scatterActionMulti),
       std::cref(log_yamlConfiguration),
+      std::cref(version),
       std::cref(collTerm_twoToOne),
       std::cref(collTerm_includedTwoToTwo),
       std::cref(collTerm_multiParticleReactions),
