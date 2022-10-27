@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ $# -ne 3 ]]; then
+  echo "Script requires exactly three arguments. Usage: $0 SMASH_DIR EIGEN_DIR PYTHIA_DIR_VAR"
+  exit 1
+fi
+
 SMASH_DIR_VAR=$1
 EIGEN_DIR_VAR=$2
 PYTHIA_DIR_VAR=$3
