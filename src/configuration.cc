@@ -296,12 +296,13 @@ auto get_list_of_labels_per_key_in_yaml_tree(const YAML::Node &root_node) {
  *  - if the key was valid in the past but it has been removed;
  *  - if the key is valid but deprecated.
  *
- * @param[in] labels The series of labels identifying the key.
+ * \param[in] labels The series of labels identifying the key.
  *
- * @return \c true if the key is valid and
- * @return \c false otherwise.
+ * \return \c Configuration::Is::Valid if the key is valid;
+ * \return \c Configuration::Is::Deprecated if the key is Deprecated and
+ * \return \c Configuration::Is::Invalid if the key is invalid.
  */
-bool is_key_valid(const std::vector<std::string> &labels) {
+Configuration::Is validate_key(const std::vector<std::string> &labels) {
   auto key_ref_var_it = std::find_if(
       smash::InputKeys::list.begin(), smash::InputKeys::list.end(),
       [&labels](auto key) {
@@ -312,7 +313,7 @@ bool is_key_valid(const std::vector<std::string> &labels) {
   if (key_ref_var_it == smash::InputKeys::list.end()) {
     logg[LConf].error("Key ", smash::quote(smash::join(labels, ": ")),
                       " is not a valid SMASH input key.");
-    return false;
+    return Configuration::Is::Invalid;
   }
 
   smash::InputKeys::key_references_variant found_variant = *key_ref_var_it;
@@ -326,7 +327,7 @@ bool is_key_valid(const std::vector<std::string> &labels) {
         [](auto &&arg) { return arg.get().removed_in(); }, found_variant);
     logg[LConf].error("Key ", key_labels, " has been removed in version ",
                       v_removal, " and it is not valid anymore.");
-    return false;
+    return Configuration::Is::Invalid;
   }
   if (std::visit([](auto &&arg) { return arg.get().is_deprecated(); },
                  found_variant)) {
@@ -334,23 +335,43 @@ bool is_key_valid(const std::vector<std::string> &labels) {
         [](auto &&arg) { return arg.get().deprecated_in(); }, found_variant);
     logg[LConf].warn("Key ", key_labels, " has been deprecated in version ",
                      v_deprecation);
-  } else
+    return Configuration::Is::Deprecated;
+  } else {
     logg[LConf].debug("Key ", key_labels, " is valid!");
-  return true;
+    return Configuration::Is::Valid;
+  }
 }
 
 }  // namespace
 
-bool Configuration::validate(bool full_validation) const {
+Configuration::Is Configuration::validate(bool full_validation) const {
   std::vector<std::vector<std::string>> list =
       get_list_of_labels_per_key_in_yaml_tree(root_node_);
   if (full_validation)
     return std::transform_reduce(
-        list.begin(), list.end(), bool{true},
-        [](bool result, bool value) { return result && value; }, is_key_valid);
+        list.begin(), list.end(), Is{Is::Valid},
+        [](Is result_so_far, Is present_value) {
+          switch (result_so_far) {
+            case Is::Invalid:
+              return result_so_far;
+              break;
+            case Is::Deprecated:
+              return (present_value == Is::Valid) ? result_so_far
+                                                  : present_value;
+              break;
+            case Is::Valid:
+              return present_value;
+              break;
+          }
+        },
+        validate_key);
   else {
-    return std::find_if_not(list.begin(), list.end(), is_key_valid) ==
-           list.end();
+    for (const auto &key_labels : list) {
+      Is key_state = validate_key(key_labels);
+      if (key_state != Is::Valid)
+        return key_state;
+    }
+    return Is::Valid;
   }
 }
 

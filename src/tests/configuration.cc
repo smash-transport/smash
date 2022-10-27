@@ -380,8 +380,10 @@ TEST(reactions_bitset) {
 
 TEST(configuration_validation) {
   const Configuration invalid_conf = make_test_configuration();
-  VERIFY(!invalid_conf.validate(true));
-  VERIFY(!invalid_conf.validate(false));
+  VERIFY(invalid_conf.validate(false) == Configuration::Is::Invalid);
+  VERIFY(invalid_conf.validate(true) == Configuration::Is::Invalid);
+  const Configuration deprecated_conf = Configuration{"Version: 1.8"};
+  VERIFY(deprecated_conf.validate() == Configuration::Is::Deprecated);
 }
 
 TEST(shipped_input_files_validation) {
@@ -394,7 +396,8 @@ TEST(shipped_input_files_validation) {
       std::cout << "Validating " << input_file.path() << '\n';
       Configuration config{input_file.path().parent_path(),
                            input_file.path().filename()};
-      VERIFY(config.validate());
+      VERIFY(config.validate(false) == Configuration::Is::Valid);
+      VERIFY(config.validate(true) == Configuration::Is::Valid);
     }
   }
 }

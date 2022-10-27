@@ -874,6 +874,12 @@ class Configuration {
   enum class GetEmpty { Yes, No };
 
   /**
+   * Return type of Configuration::validate which conveys more information that
+   * simply a two-state boolean variable.
+   */
+  enum class Is { Invalid, Deprecated, Valid };
+
+  /**
    * Read config.yaml from the specified path.
    *
    * \param[in] path The directory where the SMASH config files are located.
@@ -1099,18 +1105,18 @@ class Configuration {
    * A warning or error message is printed for deprecated or invalid keys,
    * respectively, together with information about SMASH versions, if possible.
    *
-   * @note Here a full validation is done by default and all keys are checked,
+   * \note Here a full validation is done by default and all keys are checked,
    * although the validation might be shortened by returning \c false as soon as
    * an invalid key is found. However, a full validation is more user-friendly,
    * since as much information as possible about the input file is provided.
    *
-   * @param[in] full_validation Whether all keys are checked or not.
+   * \param[in] full_validation Whether all keys are checked or not.
    *
-   * @return \c true if the provided configuration contains valid keys only;
-   * @return \c false if the provided configuration contains at least one
-   *                  invalid key.
+   * \return \c Is::Valid if the object contains valid keys only;
+   * \return \c Is::Deprecated if the object is valid but has deprecated key(s);
+   * \return \c Is::Invalid if the object contains at least one invalid key.
    */
-  bool validate(bool full_validation = true) const;
+  Is validate(bool full_validation = true) const;
 
  private:
   /** Create a subobject that has its root node at the given node.
