@@ -5,6 +5,9 @@ project(SMASH_as_a_library_example)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake"
      "${CMAKE_CURRENT_LIST_DIR}/../../cmake")
 
+# We can assume that SMASH_DIR is set here as it is required by FindSMASH.cmake
+add_definitions("-DSMASH_TOP_LEVEL_DIR=\"$ENV{SMASH_DIR}\"")
+
 add_executable(example example.cc)
 add_executable(example_rate_equations example_rate_equations.cc)
 add_executable(example_smash_wrapper example_smash_wrapper.cc)
