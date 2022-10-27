@@ -574,21 +574,35 @@ std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
 
 std::unique_ptr<DeformedNucleus> ColliderModus::create_deformed_nucleus(
     Configuration &nucleus_cfg, int ntest, const std::string &nucleus_type) {
-  bool auto_deform = nucleus_cfg.take({"Deformed", "Automatic"});
-  bool is_beta2 = nucleus_cfg.has_value({"Deformed", "Beta_2"}) ? true : false;
-  bool is_beta4 = nucleus_cfg.has_value({"Deformed", "Beta_4"}) ? true : false;
-  std::unique_ptr<DeformedNucleus> nucleus;
+  bool automatic_deformation = nucleus_cfg.take({"Deformed", "Automatic"});
+  bool was_any_beta_given = nucleus_cfg.has_value({"Deformed", "Beta_2"}) ||
+                            nucleus_cfg.has_value({"Deformed", "Beta_3"}) ||
+                            nucleus_cfg.has_value({"Deformed", "Beta_4"});
+  bool was_any_deformation_parameter_given =
+      was_any_beta_given || nucleus_cfg.has_value({"Deformed", "Gamma"});
+  bool was_gamma_given_without_beta_2 =
+      nucleus_cfg.has_value({"Deformed", "Gamma"}) &&
+      !nucleus_cfg.has_value({"Deformed", "Beta_2"});
 
-  if ((auto_deform && (!is_beta2 && !is_beta4)) ||
-      (!auto_deform && (is_beta2 && is_beta4))) {
-    nucleus =
-        std::make_unique<DeformedNucleus>(nucleus_cfg, ntest, auto_deform);
-    return nucleus;
+  if (automatic_deformation && was_any_deformation_parameter_given) {
+    throw std::domain_error(
+        "Automatic deformation of " + nucleus_type +
+        " nucleus requested, but deformation parameter(s) were provided as"
+        " well. Please, check the 'Deformed' section in your input file.");
+  } else if (!automatic_deformation && !was_any_beta_given) {
+    throw std::domain_error(
+        "Manual deformation of " + nucleus_type +
+        " nucleus requested, but no deformation beta parameter was provided."
+        " Please, check the 'Deformed' section in your input file.");
+  } else if (!automatic_deformation && was_gamma_given_without_beta_2) {
+    throw std::domain_error(
+        "Manual deformation of " + nucleus_type +
+        " nucleus requested, but 'Gamma' parameter was provided without "
+        "providing a value of 'Beta_2' having hence no deformation effect. "
+        "Please, check the 'Deformed' section in your input file.");
   } else {
-    throw std::domain_error("Deformation of " + nucleus_type +
-                            " nucleus not configured "
-                            "properly, please check whether all necessary "
-                            "parameters are set.");
+    return std::make_unique<DeformedNucleus>(nucleus_cfg, ntest,
+                                             automatic_deformation);
   }
 }
 
