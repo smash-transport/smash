@@ -935,6 +935,37 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_general_
+   * \optional_key{key_gen_field_derivatives_mode_,Field_Derivatives_Mode,string,
+   * "Chain Rule"}
+   *
+   * The mode of calculating field derivatives entering the equations of motion
+   * (only available for the VDF potentials). The mean-field equations of motion
+   * are proportional to temporal and spatial derivatives of the potential,
+   * which themselves depend on the baryon number density. When calculating
+   * these derivatives numerically, one can either take finite differences of
+   * the potential itself (direct field derivatives), or use the chain rule and
+   * take finite differences of the baryon number density (chain rule field
+   * derivatives). Using direct field derivatives is numerically (slightly) more
+   * stable. For more information and explicit equations, see section 4.2.5 (p.
+   * 130) and Table 4.3 (p. 137) of https://arxiv.org/abs/2109.08105.
+   *
+   * - `"Direct"` &rarr; Induces using the computed values of the baryon
+   *   4-current on the lattice to calculate a lattice of the 4-field
+   *   \f$A^\mu\f$, finite differences of which are used to obtain the VDF
+   *   equations of motion.
+   * - `"Chain Rule"` &rarr; Uses the chain rule and finite differences of the
+   *   baryon number 4-current to obtain the the VDF equations of motion.
+   */
+  /**
+   * \see_key{key_gen_derivatives_mode_}
+   */
+  inline static const Key<FieldDerivativesMode> gen_fieldDerivativesMode{
+      {"General", "Field_Derivatives_Mode"},
+      FieldDerivativesMode::ChainRule,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_general_
    * \optional_key{key_gen_ensembles_,Ensembles,int,1}
    *
    * Number of parallel ensembles in the simulation.
@@ -4433,6 +4464,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<DensityType>>,
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
+      std::reference_wrapper<const Key<FieldDerivativesMode>>,
       std::reference_wrapper<const Key<MultiParticleReactionsBitSet>>,
       std::reference_wrapper<const Key<PdgCode>>,
       std::reference_wrapper<const Key<ReactionsBitSet>>,
@@ -4452,6 +4484,7 @@ struct InputKeys {
       std::cref(gen_randomseed),
       std::cref(gen_deltaTime),
       std::cref(gen_derivativesMode),
+      std::cref(gen_fieldDerivativesMode),
       std::cref(gen_ensembles),
       std::cref(gen_expansionRate),
       std::cref(gen_metricType),
