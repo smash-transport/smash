@@ -212,12 +212,15 @@ std::string Configuration::to_string() const {
 
 YAML::Node Configuration::find_node_at(YAML::Node node,
                                        std::vector<const char *> keys) const {
-  assert(keys.size() > 0);
+  /* Here we do not assert(keys.size()>0) and allow to pass in an empty vector,
+     in which case the passed in YAML:Node is simply returned. This might happen
+     e.g. in the take or extract_sub_configuration methods if called with a
+     label of a key at top level of the configuration file. */
   for (auto key : keys) {
-    // Node::reset does what you might expect Node::operator= to do. But
-    // operator= assigns a value to the node. So
-    //   node = node[*keyIt]
-    // leads to modification of the data structure, not simple traversal.
+    /* Node::reset does what you might expect Node::operator= to do. But
+       operator= assigns a value to the node. So
+         node = node[*keyIt]
+       leads to modification of the data structure, not simple traversal. */
     node.reset(node[key]);
   }
   return node;
