@@ -29,6 +29,13 @@ namespace smash {
 using Version = std::string;
 
 /**
+ * Descriptive alias for storing key labels, i.e. the series of strings that
+ * identify a key in the input file from the main section.
+ * At the moment simply a \c std::vector<std::string> .
+ */
+using KeyLabels = std::vector<std::string>;
+
+/**
  * @brief Object to store a YAML input file key together with metadata
  * associated to it.
  *
@@ -108,6 +115,11 @@ class Key {
   }
 
   /**
+   * @brief Let the clients of this class have access to the key type.
+   */
+  using type = default_type;
+
+  /**
    * @brief Get the default value of the key.
    *
    * @return A \c default_type variable.
@@ -163,7 +175,7 @@ class Key {
    * @return \c true if all labels match in the given order,
    * @return \c false otherwise.
    */
-  bool has_same_labels(const std::vector<std::string>& labels) const noexcept {
+  bool has_same_labels(const KeyLabels& labels) const noexcept {
     return std::equal(std::begin(labels_), std::end(labels_),
                       std::begin(labels), std::end(labels));
   }
@@ -178,6 +190,13 @@ class Key {
     return smash::quote(smash::join(labels_, ": "));
   }
 
+  /**
+   * \brief Method to access the \c Key labels.
+   *
+   * \return A constant reference to the labels member for read-only access.
+   */
+  const KeyLabels& labels() const { return labels_; }
+
  private:
   /// SMASH version in which the key has been introduced
   Version introduced_in_{};
@@ -188,7 +207,7 @@ class Key {
   /// Key default value, if any
   std::optional<default_type> default_{};
   /// The label(s) identifying the key in the YAML input file
-  std::vector<std::string> labels_{};
+  KeyLabels labels_{};
 };
 
 /*!\Userguide

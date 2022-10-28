@@ -393,7 +393,7 @@ TEST(shipped_input_files_validation) {
   for (auto &input_file : std::filesystem::recursive_directory_iterator(
            codebase_path / input_folder_name)) {
     if (input_file.path().extension() == extension) {
-      std::cout << "Validating " << input_file.path() << '\n';
+      std::cout << " Validating " << input_file.path() << '\n';
       Configuration config{input_file.path().parent_path(),
                            input_file.path().filename()};
       VERIFY(config.validate(false) == Configuration::Is::Valid);

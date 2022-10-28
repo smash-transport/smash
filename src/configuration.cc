@@ -250,9 +250,9 @@ namespace {
  * @param[inout] new_list_entry New list of labels in process to be filled
  *                              during recursion.
  */
-void fill_list_of_labels_per_key_in_yaml_tree(
-    const YAML::Node &root_node, std::vector<std::vector<std::string>> &list,
-    std::vector<std::string> &new_list_entry) {
+void fill_list_of_labels_per_key_in_yaml_tree(const YAML::Node &root_node,
+                                              std::vector<KeyLabels> &list,
+                                              KeyLabels &new_list_entry) {
   // Here sub_node is an iterator value, i.e. a key/value pair of nodes,
   // not a single YAML node (that's how YAML library works)
   for (const auto &sub_node : root_node) {
@@ -277,14 +277,109 @@ void fill_list_of_labels_per_key_in_yaml_tree(
  *
  * @param[in] root_node The root node of the YAML tree to be considered.
  *
- * @return A \c std::vector<std::vector<std::string>> containing the desired
- *          information.
+ * @return A \c std::vector<KeyLabels> containing the desired information.
  */
 auto get_list_of_labels_per_key_in_yaml_tree(const YAML::Node &root_node) {
-  std::vector<std::vector<std::string>> list{};
-  std::vector<std::string> aux{};
+  std::vector<KeyLabels> list{};
+  KeyLabels aux{};
   fill_list_of_labels_per_key_in_yaml_tree(root_node, list, aux);
   return list;
+}
+
+#if 1
+/**
+ * \brief An utility \c struct to check if a SMASH \c Key has a map as value.
+ *
+ * \tparam T A generic template parameter.
+ */
+template <typename T>
+struct IsSmashKeyTakenAsMap {
+  /**
+   * A boolean value to indicate whether \c T is a map or not. Here it is always
+   * \c false, because there is another template specialization that will select
+   * those cases where \c value is going to be \c true.
+   */
+  static constexpr bool value = false;
+};
+
+/**
+ * \brief A specialization of \c IsSmashKeyTakenAsMap<T> for cases where the
+ * boolean value should be set to \c true.
+ *
+ * \tparam MapKey A type to indicate map keys.
+ * \tparam MapValue A type to indicate map values.
+ */
+template <typename MapKey, typename MapValue>
+struct IsSmashKeyTakenAsMap<std::map<MapKey, MapValue>> {
+  /**
+   * A boolean value to indicate whether \c T is a map or not. Here it is always
+   * \c true, because this is a template specialization for maps only.
+   */
+  static constexpr bool value = true;
+};
+
+/**
+ * \brief Extract from the \c InputKeys database the labels of keys that
+ * have a \c std::map as type.
+ *
+ * \return A list of key labels.
+ */
+auto collect_input_keys_taken_as_maps() {
+  std::vector<KeyLabels> labels_of_keys_taken_as_map{};
+  for (const auto &keys_variant : smash::InputKeys::list) {
+    std::visit(
+        [&labels_of_keys_taken_as_map](auto &&arg) {
+          /*
+           * The following if checks if the SMASH input key has a map as value
+           * and it deserves some explanation about the type extraction:
+           *
+           *   - arg -> object of type: std::cref(const Key<T>)
+           *   - arg.get() -> object of type: const Key<T>&
+           *   - decltype(arg.get()) ->  type: const Key<T>&
+           *   - std::decay_t<decltype(arg.get())>::type -> type: Key<T>
+           *   - std::decay_t<decltype(arg.get())>::type::value -> type: T
+           */
+          if (IsSmashKeyTakenAsMap<
+                  typename std::decay_t<decltype(arg.get())>::type>::value)
+            labels_of_keys_taken_as_map.push_back(arg.get().labels());
+        },
+        keys_variant);
+  }
+  return labels_of_keys_taken_as_map;
+}
+#endif
+
+/**
+ * \brief Remove last labels of keys that are taken as maps in SMASH and remove
+ * duplicates from the resulting list.
+ *
+ * The keys that are taken as maps in SMASH are here manually listed and the
+ * list of keys contained in the configuration must be adjusted by hand. This is
+ * a corner case, since YAML nodes that are maps are **by definition** sections
+ * and cannot be distinguished from keys "with a map value" in the recursive
+ * process to create the list of keys as series of labels.
+ *
+ * \param[in,out] list The list of keys to be adjusted.
+ */
+void adjust_list_of_labels_dealing_with_keys_taken_as_maps(
+    std::vector<KeyLabels> &list_of_input_key_labels) {
+  const std::vector<KeyLabels> labels_of_keys_taken_as_map =
+      collect_input_keys_taken_as_maps();
+  for (const auto &labels : labels_of_keys_taken_as_map) {
+    std::for_each(list_of_input_key_labels.begin(),
+                  list_of_input_key_labels.end(),
+                  [&labels](KeyLabels &labels_of_input_key) {
+                    if (std::equal(labels.begin(), labels.end(),
+                                   labels_of_input_key.begin(),
+                                   labels_of_input_key.begin() + labels.size()))
+                      labels_of_input_key = labels;
+                  });
+  }
+  // The identical keys in list are now next to each other and we do
+  // not need/want to sort the list before calling std::unique.
+  list_of_input_key_labels.erase(std::unique(list_of_input_key_labels.begin(),
+                                             list_of_input_key_labels.end()),
+                                 list_of_input_key_labels.end());
 }
 
 /**
@@ -302,7 +397,7 @@ auto get_list_of_labels_per_key_in_yaml_tree(const YAML::Node &root_node) {
  * \return \c Configuration::Is::Deprecated if the key is Deprecated and
  * \return \c Configuration::Is::Invalid if the key is invalid.
  */
-Configuration::Is validate_key(const std::vector<std::string> &labels) {
+Configuration::Is validate_key(const KeyLabels &labels) {
   auto key_ref_var_it = std::find_if(
       smash::InputKeys::list.begin(), smash::InputKeys::list.end(),
       [&labels](auto key) {
@@ -345,8 +440,8 @@ Configuration::Is validate_key(const std::vector<std::string> &labels) {
 }  // namespace
 
 Configuration::Is Configuration::validate(bool full_validation) const {
-  std::vector<std::vector<std::string>> list =
-      get_list_of_labels_per_key_in_yaml_tree(root_node_);
+  auto list = get_list_of_labels_per_key_in_yaml_tree(root_node_);
+  adjust_list_of_labels_dealing_with_keys_taken_as_maps(list);
   if (full_validation)
     return std::transform_reduce(
         list.begin(), list.end(), Is{Is::Valid},
