@@ -3146,23 +3146,6 @@ void Experiment<Modus>::run() {
     // Sample initial particles, start clock, some printout and book-keeping
     initialize_new_event();
 
-    ////////////////////////////////////////////////////////////////////////////
-    // Example add. out list
-    constexpr double r_x = 0.1;
-    const FourVector pos_a{0.0, -r_x, 0., 0.};
-    const FourVector pos_b{0.0, r_x, 0., 0.};
-
-    ParticleData a{ParticleType::find(0x111)};  // pi0
-    a.set_4position(pos_a);
-    a.set_4momentum(a.pole_mass(), 1.0, 0., 0.);
-
-    ParticleData b{ParticleType::find(0x111)};  // pi0
-    b.set_4position(pos_b);
-    b.set_4momentum(b.pole_mass(), -1.0, 0., 0.);
-
-    ParticleList out_list{a, b};
-    ////////////////////////////////////////////////////////////////////////////
-
     run_time_evolution(end_time_);
 
     if (force_decays_) {
