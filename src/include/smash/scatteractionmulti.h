@@ -113,8 +113,6 @@ class ScatterActionMulti : public Action {
    * CERN-68-15 report. For developers, I (oliiny) have compiled a document with
    * properties and parametrizations of many-body phase space integrals here:
    * github.com/smash-transport/smash-devel/files/7791360/n_body_relativistic_phase_space.pdf
-   * TODO: maybe find a better place to keep this kind of technical
-   * documentation.
    *
    * \param[in] man_s mandelstam s of reaction
    * \return phase space integral value for 4 bodies [GeV^4]
@@ -211,8 +209,9 @@ class ScatterActionMulti : public Action {
    * Calculate the probability for a 4-to-2 reaction according to the
    * stochastic collision criterion as given in \iref{Staudenmaier:2021lrg}.
    *
-   * \f[ P_{4 \rightarrow 2} = \frac{1}{16E_1E_2E_3} \frac{\Delta t}{(\Delta^3
-   * x)^3} \frac{\tilde{\lambda}}{\Phi_44\pi s}\sigma_{2 \rightarrow 4},\f]
+   * \f[ P_{4 \rightarrow 2} = \frac{1}{16E_1E_2E_3E_4}
+   * \frac{\Delta t}{(\Delta^3 x)^3} \frac{\tilde{\lambda}}{\Phi_44\pi s}
+   * \sigma_{2 \rightarrow 4},\f]
    *
    * where \f$\Phi_4\f$ represents the 4-body phase space. Degeneracy and
    * symmetry factors are neglected in the formula, since they are treated as
