@@ -2260,7 +2260,7 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   if (!action.is_valid(particles)) {
     discarded_interactions_total_++;
     logg[LExperiment].debug(~einhard::DRed(), "✘ ", action,
-                           " (discarded: invalid)");
+                            " (discarded: invalid)");
     return false;
   }
   action.generate_final_state();
@@ -2530,10 +2530,6 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
       }
     }
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
-      std::cout << "run_time_evolution_timestepless"
-                << "\n";
-      std::cout << "#ensemble: " << i_ens << "\n";
-      std::cout << "actions[i_ens].size(): " << actions[i_ens].size() << "\n";
       run_time_evolution_timestepless(actions[i_ens], i_ens, end_timestep_time,
                                       t_end);
     }
@@ -2611,27 +2607,24 @@ void Experiment<Modus>::run_time_evolution_timestepless(
     Actions &actions, int i_ensemble, const double end_time_propagation,
     const double end_time_run) {
   Particles &particles = ensembles_[i_ensemble];
-  logg[LExperiment].info("Timestepless propagation: ", "Actions size = ",
+  logg[LExperiment].debug("Timestepless propagation: ", "Actions size = ",
                          actions.size(), ", end time = ", end_time_propagation);
 
   // iterate over all actions
   while (!actions.is_empty()) {
     if (actions.earliest_time() > end_time_propagation) {
-      logg[LExperiment].info(
-          "actions.earliest_time() > end_time_propagation is true",
-          actions.earliest_time(), end_time_propagation);
       break;
     }
     // get next action
     ActionPtr act = actions.pop();
     if (!act->is_valid(particles)) {
       discarded_interactions_total_++;
-      logg[LExperiment].info(~einhard::DRed(), "✘ ", act,
-                             " (discarded: invalid)");
+      logg[LExperiment].debug(~einhard::DRed(), "✘ ", act,
+                              " (discarded: invalid)");
       continue;
     }
-    logg[LExperiment].info(~einhard::Green(), "✔ ", act,
-                           ", action time = ", act->time_of_execution());
+    logg[LExperiment].debug(~einhard::Green(), "✔ ", act,
+                            ", action time = ", act->time_of_execution());
 
     /* (1) Propagate to the next action. */
     propagate_and_shine(act->time_of_execution(), particles);
