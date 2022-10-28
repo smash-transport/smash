@@ -257,6 +257,13 @@ class Experiment : public ExperimentBase {
    */
   Modus *modus() { return &modus_; }
 
+  /**
+   * Increase the event number by one. Helpful if SMASH is used as a 3rd-party
+   * library.
+   */
+  void increase_event_no();
+
+
  private:
   /**
    * Perform the given action.
@@ -3138,9 +3145,14 @@ bool Experiment<Modus>::is_finished() {
 }
 
 template <typename Modus>
+void Experiment<Modus>::increase_event_no() {
+  event_++;
+}
+
+template <typename Modus>
 void Experiment<Modus>::run() {
   const auto &mainlog = logg[LMain];
-  for (event_ = 0; !is_finished(); event_++) {
+  for (event_ = 0; !is_finished(); increase_event_no()) {
     mainlog.info() << "Event " << event_;
 
     // Sample initial particles, start clock, some printout and book-keeping
