@@ -60,19 +60,19 @@ int main() {
                                                       tabulations_path);
 
     // Create experiment
-    auto experiment = std::make_unique<smash::Experiment<smash::ColliderModus>>(config, output_path);
+    auto experiment = smash::Experiment<smash::ColliderModus>(config, output_path);
 
 
     ////////////////////////////////////////////////////////////////////////////
     // Run the experiment in a special way here, mimicking new JETSCAPE features
     // i.e. feed addtional particles at different times and perform the runtime
     // evolution manually.
-    // If you want to just run SMASH as ususal just call  experiment->run()
+    // If you want to just run SMASH as ususal just call  experiment.run()
     // instead.
     ////////////////////////////////////////////////////////////////////////////
 
     // Run manually in timesteps
-    experiment->initialize_new_event();
+    experiment.initialize_new_event();
 
     const double delta_time = 20.0;
     const double start_time = 0.0;
@@ -81,12 +81,12 @@ int main() {
     do {
       current_time += delta_time;
       std::cout << "Propagate to " << current_time << '\n';
-      experiment->run_time_evolution(current_time);
+      experiment.run_time_evolution(current_time);
     } while (current_time < new_end_time);
 
     std::cout << "Last time: " << current_time << '\n';
-    experiment->do_final_decays();
-    experiment->final_output();
+    experiment.do_final_decays();
+    experiment.final_output();
 
   } catch (std::exception &e) {
     std::cout << "SMASH failed with the following error:\n"

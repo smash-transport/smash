@@ -451,8 +451,8 @@ else()
 endif()
 
 add_test(NAME usage_of_SMASH_as_library
-         COMMAND bash run_examples_for_testing.bash ${PROJECT_SOURCE_DIR} ${EIGEN3_INCLUDE_DIR}
-                 ${Pythia_CONFIG_EXECUTABLE}
+         COMMAND bash run_examples_for_testing.bash "${PROJECT_SOURCE_DIR}" "${EIGEN3_INCLUDE_DIR}"
+                 "${Pythia_CONFIG_EXECUTABLE}"
          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/examples/using_SMASH_as_library)
 
 if(USE_SANITIZER)
