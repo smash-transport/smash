@@ -288,12 +288,12 @@ auto get_list_of_labels_per_key_in_yaml_tree(const YAML::Node &root_node) {
 
 #if 1
 /**
- * \brief An utility \c struct to check if a SMASH \c Key has a map as value.
+ * \brief A utility type to be specialized to check if a type is a \c std::map .
  *
  * \tparam T A generic template parameter.
  */
 template <typename T>
-struct IsSmashKeyTakenAsMap {
+struct IsStdMap {
   /**
    * A boolean value to indicate whether \c T is a map or not. Here it is always
    * \c false, because there is another template specialization that will select
@@ -303,14 +303,14 @@ struct IsSmashKeyTakenAsMap {
 };
 
 /**
- * \brief A specialization of \c IsSmashKeyTakenAsMap<T> for cases where the
+ * \brief A specialization of \c IsStdMap<T> for cases where the
  * boolean value should be set to \c true.
  *
  * \tparam MapKey A type to indicate map keys.
  * \tparam MapValue A type to indicate map values.
  */
 template <typename MapKey, typename MapValue>
-struct IsSmashKeyTakenAsMap<std::map<MapKey, MapValue>> {
+struct IsStdMap<std::map<MapKey, MapValue>> {
   /**
    * A boolean value to indicate whether \c T is a map or not. Here it is always
    * \c true, because this is a template specialization for maps only.
@@ -328,7 +328,7 @@ auto collect_input_keys_taken_as_maps() {
   std::vector<KeyLabels> labels_of_keys_taken_as_map{};
   for (const auto &keys_variant : smash::InputKeys::list) {
     std::visit(
-        [&labels_of_keys_taken_as_map](auto &&arg) {
+        [&labels_of_keys_taken_as_map](auto &&var) {
           /*
            * The following if checks if the SMASH input key has a map as value
            * and it deserves some explanation about the type extraction:
@@ -339,9 +339,9 @@ auto collect_input_keys_taken_as_maps() {
            *   - std::decay_t<decltype(arg.get())>::type -> type: Key<T>
            *   - std::decay_t<decltype(arg.get())>::type::value -> type: T
            */
-          if (IsSmashKeyTakenAsMap<
-                  typename std::decay_t<decltype(arg.get())>::type>::value)
-            labels_of_keys_taken_as_map.push_back(arg.get().labels());
+          if constexpr (IsStdMap<typename std::decay_t<
+                            decltype(var.get())>::type>::value)
+            labels_of_keys_taken_as_map.push_back(var.get().labels());
         },
         keys_variant);
   }
@@ -353,13 +353,13 @@ auto collect_input_keys_taken_as_maps() {
  * \brief Remove last labels of keys that are taken as maps in SMASH and remove
  * duplicates from the resulting list.
  *
- * The keys that are taken as maps in SMASH are here manually listed and the
- * list of keys contained in the configuration must be adjusted by hand. This is
- * a corner case, since YAML nodes that are maps are **by definition** sections
- * and cannot be distinguished from keys "with a map value" in the recursive
- * process to create the list of keys as series of labels.
+ * The keys that are taken as maps in SMASH are here collected using the
+ * database \c InputKeys and the list of keys contained in the configuration
+ * must be adjusted by hand. This is a corner case, since YAML nodes that are
+ * maps are **by definition** sections and cannot be distinguished from keys
+ * "with a map value" in the recursive process to create the list of key labels.
  *
- * \param[in,out] list The list of keys to be adjusted.
+ * \param[in,out] list_of_input_key_labels The list of key labels to adjust.
  */
 void adjust_list_of_labels_dealing_with_keys_taken_as_maps(
     std::vector<KeyLabels> &list_of_input_key_labels) {
@@ -413,21 +413,21 @@ Configuration::Is validate_key(const KeyLabels &labels) {
 
   smash::InputKeys::key_references_variant found_variant = *key_ref_var_it;
   const auto key_labels =
-      std::visit([](auto &&arg) { return static_cast<std::string>(arg.get()); },
+      std::visit([](auto &&var) { return static_cast<std::string>(var.get()); },
                  found_variant);
 
-  if (std::visit([](auto &&arg) { return !arg.get().is_allowed(); },
+  if (std::visit([](auto &&var) { return !var.get().is_allowed(); },
                  found_variant)) {
     const auto v_removal = std::visit(
-        [](auto &&arg) { return arg.get().removed_in(); }, found_variant);
+        [](auto &&var) { return var.get().removed_in(); }, found_variant);
     logg[LConf].error("Key ", key_labels, " has been removed in version ",
                       v_removal, " and it is not valid anymore.");
     return Configuration::Is::Invalid;
   }
-  if (std::visit([](auto &&arg) { return arg.get().is_deprecated(); },
+  if (std::visit([](auto &&var) { return var.get().is_deprecated(); },
                  found_variant)) {
     const auto v_deprecation = std::visit(
-        [](auto &&arg) { return arg.get().deprecated_in(); }, found_variant);
+        [](auto &&var) { return var.get().deprecated_in(); }, found_variant);
     logg[LConf].warn("Key ", key_labels, " has been deprecated in version ",
                      v_deprecation);
     return Configuration::Is::Deprecated;
