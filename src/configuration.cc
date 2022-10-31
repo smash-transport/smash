@@ -23,7 +23,7 @@
 #include "smash/stringfunctions.h"
 
 namespace smash {
-static constexpr int LConf = LogArea::YAML_Configuration::id;
+static constexpr int LConf = LogArea::Configuration::id;
 
 // internal helper functions
 namespace {

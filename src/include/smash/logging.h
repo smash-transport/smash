@@ -120,7 +120,7 @@ DECLARE_LOGAREA(28, HadronGasEos);
 DECLARE_LOGAREA(29, HyperSurfaceCrossing);
 DECLARE_LOGAREA(30, InitialConditions);
 DECLARE_LOGAREA(31, ScatterActionMulti);
-DECLARE_LOGAREA(32, YAML_Configuration);
+DECLARE_LOGAREA(32, Configuration);
 
 /**
  * This type collects all existing log areas so they will be created with the
@@ -133,7 +133,7 @@ using AreaTuple =
                Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling, Pythia,
                GrandcanThermalizer, CrossSections, Output, HadronGasEos,
                HyperSurfaceCrossing, InitialConditions, ScatterActionMulti,
-               YAML_Configuration>;
+               Configuration>;
 }  // namespace LogArea
 
 /**

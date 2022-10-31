@@ -1572,13 +1572,13 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_yaml_configuration_,YAML_Configuration,string,$\{default\}}
+   * \optional_key{key_log_configuration_,%Configuration,string,$\{default\}}
    */
   /**
-   * \see_key{key_log_yaml_configuration_}
+   * \see_key{key_log_configuration_}
    */
   inline static const Key<einhard::LogLevel> log_yamlConfiguration{
-      {"Logging", "YAML_Configuration"}, {"1.0"}};
+      {"Logging", "Configuration"}, {"1.0"}};
 
   /*!\Userguide
    * \page input_version_
