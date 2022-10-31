@@ -2503,8 +2503,8 @@ void Experiment<Modus>::run_time_evolution(const double t_end) {
       }
       ++(*parameters_.outputclock);
 
-      // Avoid duplication of final output
-      if (parameters_.outputclock->current_time() < t_end) {
+      // Avoid duplication of final output at end time
+      if (parameters_.outputclock->current_time() < end_time_) {
         intermediate_output();
       }
     }
