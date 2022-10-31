@@ -23,6 +23,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Added
 * New CMake build configuration `MinSizeRel` to optimize in executable size
 * New examples for usage of SMASH as a library: Full SMASH wrapper and rate equations
+* New validation mechanism of SMASH input (configuration file and `-c` command line option)
 
 ### Fixed
 * Fix bug in collider modus when setting the total energy per nucleon of _each_ beam
