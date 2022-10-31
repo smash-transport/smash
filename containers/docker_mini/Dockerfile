@@ -7,6 +7,7 @@ DEBIAN_FRONTEND=noninteractive apt-get -y install \
 cmake \
 git \
 g++ \
+libboost-all-dev \
 libeigen3-dev \
 libgsl-dev \
 rsync \
@@ -21,10 +22,17 @@ ARG pythiaV="8307"
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
 cd pythia${pythiaV} && \
-./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64 -pthread' && \
+./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64 -pthread' --prefix=/SMASH/pythia_instal && \
 make -j$(nproc) && \
 make install && \
 echo /SMASH/pythia${pythiaV}/lib >> /etc/ld.so.conf && ldconfig
+
+ENV PYTHIA8=/SMASH/pythia_install/
+ENV PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
+ENV PYTHIA_LIBRARY=$PYTHIA8/lib
+ENV PYTHIA_INCLUDE=$PYTHIA8/include
+ENV LD_LIBRARY_PATH=$PYTHIA_LIBRARY:$LD_LIBRARY_PATH
+ENV PATH=$PYTHIA8/bin:$PATH
 
 # Get and build public SMASH
 RUN git clone https://github.com/smash-transport/smash.git && \

@@ -1,6 +1,6 @@
-# we import a basic GNU/Linux distribution from the Docker repositories
+# we import the small smash container
 
-FROM ubuntu:20.04
+FROM ghcr.io/smash-transport/smash:new-base
 
 # we add some info about authors and contacts
 
@@ -11,11 +11,11 @@ LABEL maintainer.website="https://smash-transport.github.io"
 
 RUN echo "deb http://ftp.uni-mainz.de/ubuntu/ focal restricted multiverse main universe" > /etc/apt/sources.list \
 && echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-updates restricted multiverse main universe" >> /etc/apt/sources.list \
-&& echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-security restricted multiverse main universe" >> /etc/apt/sources.list 
+&& echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-security restricted multiverse main universe" >> /etc/apt/sources.list
 
 # we want to install the packages non interactively
 
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections 
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 
 # we update the distribution and we install several additional packages
@@ -70,7 +70,6 @@ clang-10  \
 clang-tidy  \
 clang-tidy-10  \
 clang-tools-10  \
-cmake  \
 cmake-data  \
 colord  \
 colord-data  \
@@ -129,7 +128,6 @@ fonts-urw-base35  \
 fprintd  \
 freeglut3:amd64  \
 freeglut3-dev:amd64  \
-g++  \
 g++-9  \
 gawk  \
 gcc  \
@@ -174,7 +172,6 @@ gir1.2-secret-1:amd64  \
 gir1.2-soup-2.4:amd64  \
 gir1.2-upowerglib-1.0:amd64  \
 gir1.2-vte-2.91:amd64  \
-git  \
 git-man  \
 gjs  \
 gkbd-capplet  \
@@ -396,7 +393,6 @@ libedit2:amd64  \
 libegl-dev:amd64  \
 libegl-mesa0:amd64  \
 libegl1:amd64  \
-libeigen3-dev  \
 libelf1:amd64  \
 libenchant-2-2:amd64  \
 libepoxy0:amd64  \
@@ -527,7 +523,6 @@ libgraphite2-3:amd64  \
 libgraphviz-dev:amd64  \
 libgs9:amd64  \
 libgs9-common  \
-libgsl-dev  \
 libgsl23:amd64  \
 libgslcblas0:amd64  \
 libgsoap-2.8.91:amd64  \
@@ -1160,7 +1155,6 @@ qiv  \
 qt5-gtk-platformtheme:amd64  \
 qttranslations5-l10n  \
 readline-common  \
-rsync  \
 rtkit  \
 rygel  \
 samba-libs:amd64  \
@@ -1208,11 +1202,9 @@ usbmuxd  \
 util-linux  \
 uuid-dev:amd64  \
 valgrind  \
-vim  \
 vim-common  \
 vim-runtime  \
 wamerican  \
-wget  \
 whoopsie-preferences  \
 wireless-regdb  \
 wpasupplicant  \
@@ -1271,22 +1263,6 @@ WORKDIR /SMASH
 
 # here we download and install several libraries/programs used by SMASH
 
-ARG pythiaV="8307"
-
-RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
-tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
-cd pythia${pythiaV} && \
-./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64  -pthread' --prefix=/SMASH/pythia_install&& \
-make -j$(nproc) && \
-make install && \
-echo /SMASH/pythia_install/lib >> /etc/ld.so.conf && ldconfig
-ENV PYTHIA8=/SMASH/pythia_install/
-ENV PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
-ENV PYTHIA_LIBRARY=$PYTHIA8/lib
-ENV PYTHIA_INCLUDE=$PYTHIA8/include
-ENV LD_LIBRARY_PATH=$PYTHIA_LIBRARY:$LD_LIBRARY_PATH
-ENV PATH=$PYTHIA8/bin:$PATH
-
 ARG rootV="6.26.00"
 
 RUN cd /SMASH && \
@@ -1328,7 +1304,7 @@ ENV LD_LIBRARY_PATH="/SMASH/hepmc3_install/lib:$LD_LIBRARY_PATH"
 RUN cd /SMASH && \
 git clone https://github.com/hoxu/gitstats.git && \
 cd gitstats && \
-make install 
+make install
 
 RUN cd /SMASH && \
 wget https://github.com/danmar/cppcheck/archive/2.2.tar.gz && \
@@ -1344,7 +1320,7 @@ ENV PATH=$PATH:/SMASH/auxiliary_progs
 
 ARG rivetV="3.1.5"
 
-RUN mkdir -p rivet_build && cd rivet_build 
+RUN mkdir -p rivet_build && cd rivet_build
 RUN wget https://gitlab.com/hepcedar/rivetbootstrap/raw/${rivetV}/rivet-bootstrap
 # we set the Rivet installation directory
 RUN sed -i "9s/\$PWD\/local/\/SMASH\/Rivet_install/" rivet-bootstrap
@@ -1367,7 +1343,7 @@ RUN chmod +x rivet-bootstrap && \
 ./rivet-bootstrap && \
 echo /SMASH/Rivet_install/lib >> /etc/ld.so.conf && \
 echo /SMASH/Rivet_install/lib64 >> /etc/ld.so.conf && \
-ldconfig 
+ldconfig
 
 ENV PATH=/SMASH/Rivet_install/bin:$PATH
 ENV LD_LIBRARY_PATH="/SMASH/Rivet_install/lib:/SMASH/Rivet_install/lib64:$LD_LIBRARY_PATH"
@@ -1381,14 +1357,15 @@ ENV LATEXINPUTS="/SMASH/Rivet_install/share/Rivet/texmf/tex//:$LATEXINPUTS"
 # we install matplotlib 3.5.1, not available in Ubuntu 18.04
 RUN pip3 install matplotlib==3.5.1
 
-# eventually, we download and compile SMASH
+# eventually, we re-compile SMASH with all dependcies
 
-RUN cd /SMASH && \ 
-git clone https://github.com/smash-transport/smash.git && \
-mkdir -p smash_bin && \
-cd smash_bin && \
-cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" \
--DCMAKE_CXX_STANDARD=14 && make -j$(nproc)
+RUN cd /SMASH/smash && \
+mkdir build && cd build && \
+cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" \
+-DCMAKE_CXX_STANDARD=14 && make -j$(nproc) && \
+cp smash  /SMASH/smash_bin/ && \
+cp config.yaml /SMASH/smash_bin/ && \
+rm -r /SMASH/smash/build
 ENV PATH=$PATH:/SMASH/smash_bin
 
 # we remove most of the sources
