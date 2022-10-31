@@ -70,5 +70,4 @@ TEST(quote) {
   COMPARE(quote(input), result);
 }
 
-
 }  // namespace smash

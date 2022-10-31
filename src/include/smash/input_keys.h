@@ -7,12 +7,14 @@
  *
  */
 
-#ifndef SRC_INCLUDE_SMASH_VALIDATION_H_
-#define SRC_INCLUDE_SMASH_VALIDATION_H_
+#ifndef SRC_INCLUDE_SMASH_INPUT_KEYS_H_
+#define SRC_INCLUDE_SMASH_INPUT_KEYS_H_
 
 #include <any>
 #include <functional>
+#include <map>
 #include <optional>
+#include <set>
 #include <string>
 #include <string_view>
 #include <variant>
@@ -5528,4 +5530,4 @@ General:
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SMASH_VALIDATION_H_
+#endif  // SRC_INCLUDE_SMASH_INPUT_KEYS_H_

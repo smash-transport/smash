@@ -81,7 +81,7 @@ TEST(has_same_labels) {
   VERIFY(!key.has_same_labels({"Test", "Other_Key"}));
 }
 
-TEST(to_string){
+TEST(to_string) {
   const auto key = get_test_key<int>();
   const std::string result = "\"Test -> Key\"";
   COMPARE(static_cast<std::string>(key), result);

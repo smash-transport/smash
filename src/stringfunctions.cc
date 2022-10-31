@@ -125,14 +125,13 @@ std::vector<std::string> split(const std::string &s, char delim) {
 }
 
 std::string join(const std::vector<std::string> &v, std::string_view delim) {
-  return std::accumulate(std::begin(v), std::end(v), std::string{},
-                         [&delim](const std::string &ss, const std::string &s) {
-                           return ss.empty() ? s : ss + std::string{delim} + s;
-                         });
+  return std::accumulate(
+      std::begin(v), std::end(v), std::string{},
+      [&delim](const std::string &ss, const std::string &s) {
+        return ss.empty() ? s : ss + static_cast<std::string>(delim) + s;
+      });
 }
 
-std::string quote(const std::string &s){
-  return "\"" + s + "\"";
-}
+std::string quote(const std::string &s) { return "\"" + s + "\""; }
 
 }  // namespace smash

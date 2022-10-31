@@ -442,7 +442,7 @@ Configuration::Is validate_key(const KeyLabels &labels) {
 Configuration::Is Configuration::validate(bool full_validation) const {
   auto list = get_list_of_labels_per_key_in_yaml_tree(root_node_);
   adjust_list_of_labels_dealing_with_keys_taken_as_maps(list);
-  if (full_validation)
+  if (full_validation) {
     return std::transform_reduce(
         list.begin(), list.end(), Is{Is::Valid},
         [](Is result_so_far, Is present_value) {
@@ -460,7 +460,7 @@ Configuration::Is Configuration::validate(bool full_validation) const {
           }
         },
         validate_key);
-  else {
+  } else {
     for (const auto &key_labels : list) {
       Is key_state = validate_key(key_labels);
       if (key_state != Is::Valid)

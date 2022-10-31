@@ -23,7 +23,6 @@ PauliBlocker::PauliBlocker(Configuration conf,
       rp_(conf.take({"Momentum_Averaging_Radius"}, 0.08)),
       ntest_(param.testparticles),
       n_ensembles_(param.n_ensembles) {
-
   if (ntest_ * n_ensembles_ < 20) {
     logg[LPauliBlocking].warn(
         "Phase-space density calculation in Pauli blocking"
