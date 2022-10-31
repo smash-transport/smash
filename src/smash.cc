@@ -69,10 +69,11 @@ void usage(const int rc, const std::string &progname) {
    *     override the particles to the exact set defined in the file. Multiple
    *     `-p` arguments are not supported.
    * <tr><td>`-c <YAML string>` <td>`--config <YAML string>`
-   * <td>The string argument to `-c` containts YAML markup to override input
-   *     options from the input file (`-i`). Multiple `-c` arguments are
-   *     supported. (Later settings may override preceding settings.) This can
-   *     be a handy way to test different scenarios from a script.
+   * <td>The string argument to `-c` contains YAML markup to override input key
+   *     values of the input file (`-i`) and/or supply additional keys. Multiple
+   *     `-c` arguments are supported. Later specified values of the same key
+   *     will override preceding settings. This can be a handy way to test
+   *     different scenarios from a script.
    * <tr><td>`-m <modus>` <td>`--modus <modus>`
    * <td>This is a shortcut for <tt>-c 'General: { Modus: \<modus\> }'</tt>.
    * Note that `-m` always overrides `-c`.
