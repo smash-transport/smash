@@ -437,37 +437,49 @@ Configuration::Is validate_key(const KeyLabels &labels) {
   }
 }
 
+/**
+ * \brief Utility function to accumulate validation results of keys.
+ *
+ * This is basically the logic needed to make a full validation of a
+ * configuration, considered that we have three possible states. It extend the
+ * logical AND between two boolean values.
+ *
+ * \param[in,out] result_so_far Status of the configuration so far to be
+ *                              combined with the new key state.
+ * \param[in] new_value New key state to be considered.
+ */
+void accumulate_validation(Configuration::Is &result_so_far,
+                           Configuration::Is new_value) {
+  switch (result_so_far) {
+    case Configuration::Is::Invalid:
+      break;
+    case Configuration::Is::Deprecated:
+      if (new_value != Configuration::Is::Valid) {
+        result_so_far = new_value;
+      }
+      break;
+    case Configuration::Is::Valid:
+      result_so_far = new_value;
+      break;
+  }
+}
+
 }  // namespace
 
 Configuration::Is Configuration::validate(bool full_validation) const {
   auto list = get_list_of_labels_per_key_in_yaml_tree(root_node_);
   adjust_list_of_labels_dealing_with_keys_taken_as_maps(list);
-  if (full_validation) {
-    return std::transform_reduce(
-        list.begin(), list.end(), Is{Is::Valid},
-        [](Is result_so_far, Is present_value) {
-          switch (result_so_far) {
-            case Is::Invalid:
-              return result_so_far;
-              break;
-            case Is::Deprecated:
-              return (present_value == Is::Valid) ? result_so_far
-                                                  : present_value;
-              break;
-            case Is::Valid:
-              return present_value;
-              break;
-          }
-        },
-        validate_key);
-  } else {
-    for (const auto &key_labels : list) {
-      Is key_state = validate_key(key_labels);
+  Is validation_result{Is::Valid};
+  for (const auto &key_labels : list) {
+    Is key_state = validate_key(key_labels);
+    if (full_validation) {
+      accumulate_validation(validation_result, key_state);
+    } else {
       if (key_state != Is::Valid)
         return key_state;
     }
-    return Is::Valid;
   }
+  return validation_result;
 }
 
 }  // namespace smash
