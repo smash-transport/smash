@@ -90,8 +90,8 @@ inline double post_ff_sqr(double m, double M0, double srts0, double L) {
  * \return Electromagnetic transition form factor for P → γ e⁺ e⁻, with a
  * pseudoscalar meson P = π⁰,η,η', as a function of the dilepton mass.
  *
- * For the π⁰ see \iref{Landsberg:1986fd}. For the η the Lambda parameter is
- * fitted to NA60 data, see \iref{Arnaldi:2009aa}.
+ * For the π⁰ see \iref{Landsberg:1985gaz}. For the η the Lambda parameter is
+ * fitted to NA60 data, see \iref{NA60:2009una}.
  *
  * \param pdg PDG code of the decaying meson.
  * \param mass Invariant dilepton mass [GeV].
