@@ -54,7 +54,7 @@ std::vector<std::string> split(const std::string &s, char delim);
  * \param[in] delim Joining delimiter.
  * \return Joint string.
  */
-std::string join(const std::vector<std::string> &v, std::string_view delim);
+std::string join(const std::vector<std::string> &v, const std::string &delim);
 
 /**
  * Add quotes around string.
