@@ -83,6 +83,6 @@ TEST(has_same_labels) {
 
 TEST(to_string) {
   const auto key = get_test_key<int>();
-  const std::string result = "\"Test -> Key\"";
+  const std::string result = "\"Test: Key\"";
   COMPARE(static_cast<std::string>(key), result);
 }
