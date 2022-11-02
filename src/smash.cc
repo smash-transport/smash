@@ -27,6 +27,95 @@
 
 namespace smash {
 
+/*!\Userguide
+ * \page page_smash_invocation SMASH Invocation
+ *
+ * SMASH can be run simply by executing the binary without any options (i.e.
+ * there are no required arguments). It does require an input file, though
+ * (see \ref inputconfig).
+ * Per default, the input file is expected in the current working directory
+ * with the name '`config.yaml`'.
+ *
+ * The following options are supported:
+ *
+ * <table>
+ * <tr><th>Short&nbsp;Variant <th>Long&nbsp;Variant <th>Documentation
+ * <tr><td>`-h` <td>`--help`
+ * <td>Prints usage information and quits the program.
+ * <tr><td>`-v` <td>`--version`
+ * <td>Prints the version of SMASH and quits the program.
+ * <tr><td>`-i <file>` <td>`--inputfile <file>`
+ * <td>Overrides the location of the default '`config.yaml`' input file. The
+ *     input settings will be read from the specified file instead.
+ * <tr><td>`-d <file>` <td>`--decaymodes <file>`
+ * <td>The default decay modes are compiled in. With this argument you can
+ *     override the decay modes to the exact set defined in the file. Multiple
+ *     `-d` arguments are not supported.
+ * <tr><td>`-p <file>` <td>`--particles <file>`
+ * <td>The default particle data is compiled in. With this argument you can
+ *     override the particles to the exact set defined in the file. Multiple
+ *     `-p` arguments are not supported.
+ * <tr><td>`-c <YAML string>` <td>`--config <YAML string>`
+ * <td>The string argument to `-c` contains YAML markup to override input key
+ *     values of the input file (`-i`) and/or supply additional keys. Multiple
+ *     `-c` arguments are supported. Later specified values of the same key
+ *     will override preceding settings. This can be a handy way to test
+ *     different scenarios from a script.
+ * <tr><td>`-m <modus>` <td>`--modus <modus>`
+ * <td>This is a shortcut for <tt>-c 'General: { Modus: \<modus\> }'</tt>.
+ * Note that `-m` always overrides `-c`.
+ * <tr><td>`-e <time>` <td>`--endtime <time>`
+ * <td>This is a shortcut for <tt>-c 'General: { End_Time: \<time\> }'</tt>.
+ * Note that `-e` always overrides `-c`.
+ * <tr><td>`-o <dir>` <td>`--output <dir>`
+ * <td>Sets the output directory. The default output directory is
+ *     `./data/<runid>`, where `<rundid>` is an automatically incrementing
+ *     integer. Note that this might cause races if several instances of SMASH
+ *     run in parallel. In that case, make sure to specify a different output
+ *     directory for every instance of SMASH.
+ * <tr><td>`-l <dir>` <td>`--list-2-to-n <dir>`
+ * <td>Dumps the list of all possible 2 &rarr; n reactions (n > 1). Note that
+ *     resonance decays and formations are NOT dumped. Every particle
+ *     available in SMASH is collided against every and reactions with
+ *     non-zero cross-section are dumped. Both colliding particles are
+ *     assigned momenta from 0.1 to 10 GeV in the opposite directions to
+ *     scan the possible &radic;S.
+ * <tr><td>`-r <pdg>` <td>`--resonance <pdg>`
+ * <td>Dumps the width(m) and m * spectral function(m^2) versus resonance
+ *     mass m.
+ * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2]`
+ * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
+ * <td>Dumps all the partial cross-sections of `<pdg1> + <pdg2>` with
+ *     masses `mass1` and `mass2`. Masses are optional, default values are
+ *     pole masses. Optionally, the lab frame momenta (fixed target) in GeV
+ *     can be specified. The value of `plab1` depends on the order of the
+ *     particles. The first particle is considered to be the projectile,
+ *     the second one the target.
+ * <tr><td>`-f` <td>`--force`
+ * <td>Forces overwriting files in the output directory.
+ * <tr><td>`-S <pdg1>,<pdg2>[,mass1,mass2]`
+ * <td>`--cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
+ * <td>Dumps an approximation of the final-state cross-sections of `<pdg1> +
+ *     <pdg2>` with masses `mass1` and `mass2`. Masses are optional, default
+ *     values are pole masses. Optionally, the lab frame momenta (fixed
+ *     target) in GeV can be specified. The value of `plab1` depends on the
+ *     order of the particles. The first is considered to be the projectile,
+ *     the second one the target. After the initial collision, only decays are
+ *     considered and all resonances are assumed to have their pole mass. This
+ *     may yield different results than a full simulation with SMASH, where
+ *     the resonances masses are sampled from the spectral function.
+ *     Typically, this results in errors of less than 1 mb in the worst case.
+ *     Also, contributions from strings are not considered.
+ * <tr><td>`-f` <td>`--force`
+ * <td>Forces overwriting files in the output directory. Normally, if you
+ *     specifiy an output directory with `-o`, the directory must be empty.
+ *     With `-f` this check is skipped.
+ * <tr><td>`-q` <td>`--quiet`
+ * <td>Quiets the disclaimer for scenarios where no printout is wanted. To
+ *     get no printout, you also need to disable logging from the config.
+ * </table>
+ */
+
 namespace {
 /**
  * Prints usage information and exits the program
@@ -40,94 +129,6 @@ namespace {
  * the exit status is EXIT_FAIL.
  */
 void usage(const int rc, const std::string &progname) {
-  /*!\Userguide
-   * \page page_smash_invocation SMASH Invocation
-   *
-   * SMASH can be run simply by executing the binary without any options (i.e.
-   * there are no required arguments). It does require an input file, though
-   * (see \ref inputconfig).
-   * Per default, the input file is expected in the current working directory
-   * with the name '`config.yaml`'.
-   *
-   * The following options are supported:
-   *
-   * <table>
-   * <tr><th>Short&nbsp;Variant <th>Long&nbsp;Variant <th>Documentation
-   * <tr><td>`-h` <td>`--help`
-   * <td>Prints usage information and quits the program.
-   * <tr><td>`-v` <td>`--version`
-   * <td>Prints the version of SMASH and quits the program.
-   * <tr><td>`-i <file>` <td>`--inputfile <file>`
-   * <td>Overrides the location of the default '`config.yaml`' input file. The
-   *     input settings will be read from the specified file instead.
-   * <tr><td>`-d <file>` <td>`--decaymodes <file>`
-   * <td>The default decay modes are compiled in. With this argument you can
-   *     override the decay modes to the exact set defined in the file. Multiple
-   *     `-d` arguments are not supported.
-   * <tr><td>`-p <file>` <td>`--particles <file>`
-   * <td>The default particle data is compiled in. With this argument you can
-   *     override the particles to the exact set defined in the file. Multiple
-   *     `-p` arguments are not supported.
-   * <tr><td>`-c <YAML string>` <td>`--config <YAML string>`
-   * <td>The string argument to `-c` contains YAML markup to override input key
-   *     values of the input file (`-i`) and/or supply additional keys. Multiple
-   *     `-c` arguments are supported. Later specified values of the same key
-   *     will override preceding settings. This can be a handy way to test
-   *     different scenarios from a script.
-   * <tr><td>`-m <modus>` <td>`--modus <modus>`
-   * <td>This is a shortcut for <tt>-c 'General: { Modus: \<modus\> }'</tt>.
-   * Note that `-m` always overrides `-c`.
-   * <tr><td>`-e <time>` <td>`--endtime <time>`
-   * <td>This is a shortcut for <tt>-c 'General: { End_Time: \<time\> }'</tt>.
-   * Note that `-e` always overrides `-c`.
-   * <tr><td>`-o <dir>` <td>`--output <dir>`
-   * <td>Sets the output directory. The default output directory is
-   *     `./data/<runid>`, where `<rundid>` is an automatically incrementing
-   *     integer. Note that this might cause races if several instances of SMASH
-   *     run in parallel. In that case, make sure to specify a different output
-   *     directory for every instance of SMASH.
-   * <tr><td>`-l <dir>` <td>`--list-2-to-n <dir>`
-   * <td>Dumps the list of all possible 2 &rarr; n reactions (n > 1). Note that
-   *     resonance decays and formations are NOT dumped. Every particle
-   *     available in SMASH is collided against every and reactions with
-   *     non-zero cross-section are dumped. Both colliding particles are
-   *     assigned momenta from 0.1 to 10 GeV in the opposite directions to
-   *     scan the possible &radic;S.
-   * <tr><td>`-r <pdg>` <td>`--resonance <pdg>`
-   * <td>Dumps the width(m) and m * spectral function(m^2) versus resonance
-   *     mass m.
-   * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2]`
-   * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
-   * <td>Dumps all the partial cross-sections of `<pdg1> + <pdg2>` with
-   *     masses `mass1` and `mass2`. Masses are optional, default values are
-   *     pole masses. Optionally, the lab frame momenta (fixed target) in GeV
-   *     can be specified. The value of `plab1` depends on the order of the
-   *     particles. The first particle is considered to be the projectile,
-   *     the second one the target.
-   * <tr><td>`-f` <td>`--force`
-   * <td>Forces overwriting files in the output directory.
-   * <tr><td>`-S <pdg1>,<pdg2>[,mass1,mass2]`
-   * <td>`--cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
-   * <td>Dumps an approximation of the final-state cross-sections of `<pdg1> +
-   *     <pdg2>` with masses `mass1` and `mass2`. Masses are optional, default
-   *     values are pole masses. Optionally, the lab frame momenta (fixed
-   *     target) in GeV can be specified. The value of `plab1` depends on the
-   *     order of the particles. The first is considered to be the projectile,
-   *     the second one the target. After the initial collision, only decays are
-   *     considered and all resonances are assumed to have their pole mass. This
-   *     may yield different results than a full simulation with SMASH, where
-   *     the resonances masses are sampled from the spectral function.
-   *     Typically, this results in errors of less than 1 mb in the worst case.
-   *     Also, contributions from strings are not considered.
-   * <tr><td>`-f` <td>`--force`
-   * <td>Forces overwriting files in the output directory. Normally, if you
-   *     specifiy an output directory with `-o`, the directory must be empty.
-   *     With `-f` this check is skipped.
-   * <tr><td>`-q` <td>`--quiet`
-   * <td>Quiets the disclaimer for scenarios where no printout is wanted. To
-   *     get no printout, you also need to disable logging from the config.
-   * </table>
-   */
   std::printf("\nUsage: %s [option]\n\n", progname.c_str());
   std::printf(
       "  -h, --help              usage information\n"
