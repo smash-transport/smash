@@ -36,7 +36,7 @@ endif()
 message(STATUS "Looking for SMASH ...")
 
 find_package(GSL 2.0 REQUIRED)
-find_package(Eigen3 REQUIRED)
+find_package(Eigen3 3.0 REQUIRED)
 find_package(Pythia 8.307 EXACT REQUIRED)
 
 set(SMASH_LIBRARIES ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY} ${Pythia_LIBRARIES} -ldl)
