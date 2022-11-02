@@ -70,7 +70,7 @@ If you want to install SMASH system-wide (into `/usr/local`) use
 make install
 ```
 
-:warning: **NOTE:** All commands above are the bare minimum needed for an installation.
+⚠️ **NOTE:** All commands above are the bare minimum needed for an installation.
 It is not guaranteed that this minimum setup is appropriate for your needs or your specific computing environment.
 For example, several different options can be passed e.g. to the `cmake` command.
 We strongly advise you to further refer to the [INSTALL](INSTALL.md) file for more guidance, especially if you encounter any issues.

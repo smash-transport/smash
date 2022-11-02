@@ -1,17 +1,17 @@
 
 ---
-* [More information about prerequisites](@ref prerequisites)
-* [Customizing SMASH compilation](@ref building)
-* [Customizing SMASH installation](@ref customizing)
-* [Frequently asked questions](@ref faq)
-   1. [SMASH does not compile. What should I do?](@ref not-compile)
-   2. [SMASH crashes with 'illegal instruction'. Why?](@ref illegal-instruction)
-   3. [SMASH does not compile with pre-compiled ROOT binaries. What should I do?](@ref precompiled-root)
-   4. [I run out of disk space compiling the code. Why?](@ref out-of-disk-space)
-   5. [How can I use a different compiler?](@ref different-compilers)
-   6. [How to use the LLVM implementation of the C++ standard library?](@ref llvm-STL)
-   7. [Can I disable ROOT or HepMC support?](@ref disable-root-hempc)
-   8. [ROOT or HepMC are installed but CMake does not find them. What should I do?](@ref root-hepmc-not-found)
+* [More information about prerequisites](#prerequisites)
+* [Customizing SMASH compilation](#building)
+* [Customizing SMASH installation](#customizing)
+* [Frequently asked questions](#faq)
+   1. [SMASH does not compile. What should I do?](#not-compile)
+   2. [SMASH crashes with 'illegal instruction'. Why?](#illegal-instruction)
+   3. [SMASH does not compile with pre-compiled ROOT binaries. What should I do?](#precompiled-root)
+   4. [I run out of disk space compiling the code. Why?](#out-of-disk-space)
+   5. [How can I use a different compiler?](#different-compilers)
+   6. [How to use the LLVM implementation of the C++ standard library?](#llvm-STL)
+   7. [Can I disable ROOT or HepMC support?](#disable-root-hempc)
+   8. [ROOT or HepMC are installed but CMake does not find them. What should I do?](#root-hepmc-not-found)
 
 ---
 
@@ -22,7 +22,9 @@ This will speed up compilation considerably.
 
 
 
-## About prerequisites {#prerequisites}
+<a id="prerequisites"></a>
+
+## About prerequisites
 
 All UNIX-like operating systems offer package managers and it is highly encouraged to use these whenever possible.
 To mention a couple, you might use [Homebrew](https://brew.sh) on Apple machines or [APT](https://wiki.debian.org/Apt) on Debian/Ubuntu distributions.
@@ -44,7 +46,7 @@ cd pythia8307
 ./configure --cxx-common='-std=c++17 -march=native -O3 -fPIC -pthread'
 make
 ```
-To tell `cmake` where to find Pythia while building SMASH see the [**Building SMASH**](INSTALL.md#building-smash) section.
+To tell `cmake` where to find Pythia while building SMASH see the [**Building SMASH**](#building) section.
 
 Note that although Pythia is statically linked into SMASH, access to `share/Pythia8/xmldoc` is required at runtime.
 
@@ -82,7 +84,7 @@ Download the latest stable release of `Eigen` from [the official website](http:/
 ```console
 tar -xf "[latest-eigen].tar.gz" -C "${HOME}"
 ```
-To tell CMake where to find Eigen header files while building SMASH, pass the path to them adding the option `-DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/` to the `cmake` command in the SMASH setup (cf. [Building SMASH](INSTALL.md#building-smash) section).
+To tell CMake where to find Eigen header files while building SMASH, pass the path to them adding the option `-DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/` to the `cmake` command in the SMASH setup (cf. [Building SMASH](#building) section).
 
 
 ### Installing and enabling Rivet support
@@ -127,7 +129,9 @@ When setting up SMASH, use the `-DGSL_ROOT_DIR=${GSL}` CMake option to let CMake
 
 
 
-## Building SMASH {#building}
+<a id="building"></a>
+
+## Building SMASH
 
 The bare minimum needed to build SMASH from within its repository reads:
 ```console
@@ -152,8 +156,9 @@ If no variables are set and no options are passed, CMake searches for Pythia und
 To check which environment variables related to PYTHIA are currently set, use e.g. `printenv | grep PYTHIA`.
 
 
+<a id="customizing"></a>
 
-## SMASH installation {#customizing}
+## SMASH installation
 
 Installing SMASH gives the advantage that it is possible to simply use the `smash` command from anywhere in order to run SMASH.
 
@@ -173,15 +178,21 @@ By specifying `-DCMAKE_INSTALL_PREFIX=prefix`,
 
 
 
-## FAQ {#faq}
+<a id="faq"></a>
+
+## FAQ
 
 If you do not find help in the following answers, feel free to browse [closed issues](https://github.com/smash-transport/smash/issues?q=is%3Aissue+is%3Aclosed) or open a new one [on GitHub](https://github.com/smash-transport/smash/issues).
 
-### SMASH does not compile. What should I do? {#not-compile}
+<a id="not-compile"></a>
+
+### SMASH does not compile. What should I do?
 
 If compilation fails (especially after changing a library), using a fresh build folder can sometimes fix the problem.
 
-### SMASH crashes with "illegal instruction". Why? {#illegal-instruction}
+<a id="illegal-instruction"></a>
+
+### SMASH crashes with "illegal instruction". Why?
 
 If running SMASH fails with "illegal instruction", it is likely due to running SMASH on a different platform than the one where it was compiled.
 By default, SMASH is compiled with platform-specific optimizations, implying that the binary only works on such platforms.
@@ -195,11 +206,15 @@ There are three possible ways to fix this issue:
    This is the easiest solution, however it results in a less efficient executable.
    Note that the same applies to any other libraries you compile with `-march=native`, for instance Pythia.
 
-### SMASH does not compile with pre-compiled ROOT binaries. What should I do? {#precompiled-root}
+<a id="precompiled-root"></a>
+
+### SMASH does not compile with pre-compiled ROOT binaries. What should I do?
 
 If compilation of SMASH in combination with a pre-compiled ROOT binary fails, please install and compile ROOT locally from source (see http://root.cern.ch) and compile SMASH again in a clean build directory.
 
-### I run out of disk space compiling the code. Why? {#out-of-disk-space}
+<a id="out-of-disk-space"></a>
+
+### I run out of disk space compiling the code. Why?
 
 Please note that after compilation the `smash` directory (including `build`) might have a size of some GB.
 By default, the unit tests are always compiled, which requires a lot of the disk space.
@@ -207,7 +222,9 @@ If disk space is restricted, consider to just run `make smash`, which will only 
 However, it is still recommended to run the unit tests at least once when compiling in a new environment to ensure that everything works as expected.
 To see how to run the tests, see [CONTRIBUTING](CONTRIBUTING.md).
 
-### How can I use a different compiler? {#different-compilers}
+<a id="different-compilers"></a>
+
+### How can I use a different compiler?
 
 In order to use a particular compiler, e.g. Clang, you can permanently set the following environment variables
 ```console
@@ -224,7 +241,9 @@ cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
 ```
 **NOTE:** The FPE environment only works with GCC, so e.g. you won't get back-traces from floating point traps with Clang.
 
-### How to use the LLVM implementation of the C++ standard library? {#llvm-STL}
+<a id="llvm-STL"></a>
+
+### How to use the LLVM implementation of the C++ standard library?
 
 In case the system default implementation of the C++ standard library is e.g. that shipped with GCC, this will still be used even when requesting CMake to use Clang as compiler.
 However, it is possible to request to use the LLVM implementation using the CMake `CLANG_USE_LIBC++` option, e.g.
@@ -242,7 +261,9 @@ or pass to the `cmake` command the option
 where, of course, the path to clang installation must be a valid path.
 All of this is needed to let the executable find the library ABI at run time.
 
-### Can I disable ROOT or HepMC support? {#disable-root-hempc}
+<a id="disable-root-hempc"></a>
+
+### Can I disable ROOT or HepMC support?
 
 By default, if SMASH setup finds ROOT and/or HepMC, it will use them.
 However, this feature can be disabled by using the CMake options `-DTRY_USE_ROOT=OFF` and/or `-DTRY_USE_HEPMC=OFF`.
@@ -252,7 +273,9 @@ cmake -DTRY_USE_ROOT=OFF -DTRY_USE_HEPMC=OFF <source_dir>
 ```
 will setup SMASH without ROOT and without HepMC support.
 
-### ROOT or HepMC are installed but CMake does not find them. What should I do? {#root-hepmc-not-found}
+<a id="root-hepmc-not-found"></a>
+
+### ROOT or HepMC are installed but CMake does not find them. What should I do?
 
 If the ROOT or HepMC installation is not found, provide a hint to CMake about the install destination with
 ```console
