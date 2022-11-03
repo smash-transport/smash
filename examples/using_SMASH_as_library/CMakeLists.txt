@@ -22,7 +22,7 @@ message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS})
 
 find_package(SMASH)
 if(${SMASH_FOUND})
-    message("SMASH libraries = ${SMASH_LIBRARIES}")
+    message(STATUS "SMASH libraries = ${SMASH_LIBRARIES}")
     include_directories(${SMASH_INCLUDE_DIR})
     target_link_libraries(example ${SMASH_LIBRARIES})
     target_link_libraries(example_rate_equations ${SMASH_LIBRARIES})
