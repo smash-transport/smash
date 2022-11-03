@@ -53,6 +53,16 @@ endif()
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Utilities)
 
+# The variable SMASH_VERSION is already set via the project() command, since we specify there a
+# VERSION option. Here we check if .git information is available and increase verbosity
+include(GetGitRevisionDescription)
+git_describe(SMASH_VERSION_VERBOSE)
+if(SMASH_VERSION_VERBOSE)
+    set(SMASH_VERSION "${SMASH_VERSION_VERBOSE}")
+else()
+    set(SMASH_VERSION "${CMAKE_PROJECT_NAME}-${SMASH_VERSION}")
+endif()
+
 # SMASH will be shipped as shared library and hence we want to build position independent code
 include(CheckPIESupported)
 check_pie_supported(LANGUAGES CXX)

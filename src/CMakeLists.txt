@@ -11,16 +11,6 @@ include(CheckLibraryExists)
 include(AddCompilerFlag)
 include(FindPkgConfig)
 
-include(GetGitRevisionDescription)
-# The variable SMASH_VERSION is already set via the project() command, since we specify there a
-# VERSION option. Here check if .git information is available and increase verbosity
-git_describe(SMASH_VERSION_VERBOSE)
-if(SMASH_VERSION_VERBOSE)
-    set(SMASH_VERSION "${SMASH_VERSION_VERBOSE}")
-else()
-    set(SMASH_VERSION "${CMAKE_PROJECT_NAME}-${SMASH_VERSION}")
-endif()
-
 # Enable warnings for supported compilers only --> Here we know the compilers support the flag, do
 # not test!
 if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
