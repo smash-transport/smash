@@ -115,11 +115,16 @@ endif()
 
 option(TRY_USE_RIVET "Turn this off to disable Rivet output support in SMASH." ON)
 if(TRY_USE_RIVET AND HepMC3_FOUND)
-    find_package(Rivet QUIET) # Version requirement not handled here but after to better inform user
+    find_package(Rivet QUIET) # Min version not handled here but after to better inform user
+    set(Rivet_MINIMUM_VERSION "3.1")
     if(Rivet_FOUND)
-        message(STATUS "Candidate Rivet version ${RIVET_VERSION} found, requested 3.1.x")
-        if(${RIVET_VERSION} VERSION_LESS "3.1" OR ${RIVET_VERSION} VERSION_GREATER_EQUAL "3.2")
+        message(STATUS "Candidate Rivet version ${RIVET_VERSION} found, "
+                       "requested ${Rivet_MINIMUM_VERSION}")
+        if(${RIVET_VERSION} VERSION_LESS "${Rivet_MINIMUM_VERSION}")
             set(Rivet_FOUND FALSE)
+        elseif(${RIVET_VERSION} VERSION_GREATER_EQUAL "3.2")
+            message(ATTENTION "Rivet version larger than 3.1.x found. "
+                              "The SMASH interface might miss some functionality.")
         endif()
     endif()
     if(Rivet_FOUND)
@@ -322,9 +327,12 @@ if(BUILD_TESTING)
     add_library(smash_static STATIC $<TARGET_OBJECTS:objlib>)
     set_target_properties(smash_static PROPERTIES OUTPUT_NAME smash)
     # Look for sanitizers supported by the compiler. Sanitizers add instrumentation code to the
-    # executable that test correctness of the code: * address: looks for use-after-free and
-    # out-of-bounds like errors * undefined: looks for undefined behavior in the code like
-    # misaligned accesses, creation of infinity/NaN values, or conversions to unrepresentable values
+    # executable that test correctness of the code:
+    #
+    # * address: looks for use-after-free and out-of-bounds like errors
+    # * undefined: looks for undefined behavior in the code like misaligned accesses, creation of
+    #   infinity/NaN values, or conversions to unrepresentable values
+    #
     # If the undefined sanitizer is not available with the compiler it will fall back to address
     # sanitizer only. If this ones also not available the sanitizer build will be skipped
     # altogether.
