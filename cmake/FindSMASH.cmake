@@ -53,7 +53,7 @@ else()
 endif()
 
 find_package(GSL 2.0 REQUIRED)
-find_package(Eigen3 REQUIRED)
+find_package(Eigen3 3.0 REQUIRED)
 find_package(Pythia 8.307 EXACT REQUIRED)
 
 set(SMASH_INCLUDE_DIR

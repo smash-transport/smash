@@ -60,52 +60,82 @@ endif(GIT_FOUND)
 string(TIMESTAMP BUILD_DATE)
 
 find_package(GSL 2.0 REQUIRED)
-find_package(Eigen3 REQUIRED)
+find_package(Eigen3 3.0 REQUIRED)
 
 option(TRY_USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
 if(TRY_USE_ROOT)
-    find_package(ROOT 5.34 QUIET)
+    find_package(ROOT QUIET) # Min version not handled here but after to better inform user
+    set(ROOT_MINIMUM_VERSION "5.34")
     if(ROOT_FOUND)
-        message(STATUS "Found ROOT ${ROOT_VERSION} (include at ${ROOT_INCLUDE_DIR}).")
+        message(STATUS "Candidate ROOT version ${ROOT_VERSION} found, "
+                       "requested ${ROOT_MINIMUM_VERSION}")
+        if(${ROOT_VERSION} VERSION_LESS ${ROOT_MINIMUM_VERSION})
+            set(ROOT_FOUND FALSE)
+        endif()
+    endif()
+    if(ROOT_FOUND)
+        message(STATUS "Found valid ROOT ${ROOT_VERSION} (include at ${ROOT_INCLUDE_DIR}).")
         include_directories(SYSTEM "${ROOT_INCLUDE_DIR}")
         set(SMASH_LIBRARIES ${ROOT_LIBRARIES})
         add_definitions(-DSMASH_USE_ROOT)
     else()
-        message(STATUS "ROOT not found. Support disabled. See README for more information.")
+        message(STATUS "Suitable ROOT not found. Support disabled. "
+                       "See README for more information.")
     endif()
 endif()
 
 option(TRY_USE_HEPMC "Turn this off to disable HepMC output support in SMASH." ON)
 if(TRY_USE_HEPMC OR TRY_USE_RIVET)
-    find_package(HepMC3 QUIET)
+    find_package(HepMC3 QUIET) # Min version not handled here but after to better inform user
+    set(HepMC3_MINIMUM_VERSION "3.2.3")
     if(HepMC3_FOUND)
-        message(STATUS "Found HepMC ${HepMC3_VERSION} (include at ${HEPMC3_INCLUDE_DIR}).")
+        message(STATUS "Candidate HepMC version ${HepMC3_VERSION} found, "
+                       "requested ${HepMC3_MINIMUM_VERSION}")
+        if(${HepMC3_VERSION} VERSION_LESS ${HepMC3_MINIMUM_VERSION})
+            set(HepMC3_FOUND FALSE)
+        endif()
+    endif()
+    if(HepMC3_FOUND)
+        message(STATUS "Found valid HepMC ${HepMC3_VERSION} (include at ${HEPMC3_INCLUDE_DIR}).")
         include_directories(SYSTEM "${HEPMC3_INCLUDE_DIR}")
         set(SMASH_LIBRARIES ${SMASH_LIBRARIES} ${HEPMC3_LIBRARIES})
         add_definitions(-DSMASH_USE_HEPMC)
         if((NOT HEPMC3_ROOTIO_LIB) OR (NOT ROOT_FOUND))
-            message(STATUS "HepMC3_treeroot output disabled, missing ROOT or/and "
+            message(STATUS "HepMC3_treeroot output disabled, missing ROOT and/or "
                            "HepMC3 ROOT Io support")
         else()
             message(STATUS "HepMC3_treeroot output support enabled")
             add_definitions(-DSMASH_USE_HEPMC_ROOTIO)
         endif()
     else()
-        message(STATUS "HepMC not found. Support disabled. See README for more information.")
+        message(STATUS "Suitable HepMC not found. Support disabled. "
+                       "See README for more information.")
     endif()
 endif()
 
 option(TRY_USE_RIVET "Turn this off to disable Rivet output support in SMASH." ON)
 if(TRY_USE_RIVET AND HepMC3_FOUND)
-    find_package(Rivet QUIET)
+    find_package(Rivet QUIET) # Min version not handled here but after to better inform user
+    set(Rivet_MINIMUM_VERSION "3.1")
     if(Rivet_FOUND)
-        message(STATUS "Found Rivet ${RIVET_VERSION} (include at ${RIVET_INCLUDE_DIR}).")
+        message(STATUS "Candidate Rivet version ${RIVET_VERSION} found, "
+                       "requested ${Rivet_MINIMUM_VERSION}")
+        if(${RIVET_VERSION} VERSION_LESS "${Rivet_MINIMUM_VERSION}")
+            set(Rivet_FOUND FALSE)
+        elseif(${RIVET_VERSION} VERSION_GREATER_EQUAL "3.2")
+            message(ATTENTION "Rivet version larger than 3.1.x found. "
+                              "The SMASH interface might miss some functionality.")
+        endif()
+    endif()
+    if(Rivet_FOUND)
+        message(STATUS "Found valid Rivet ${RIVET_VERSION} (include at ${RIVET_INCLUDE_DIR}).")
         include_directories(SYSTEM "${RIVET_INCLUDE_DIR}")
         set(SMASH_LIBRARIES ${SMASH_LIBRARIES} ${RIVET_LIBRARIES})
         add_definitions(-DSMASH_USE_RIVET)
         set(Rivet_FOUND TRUE)
     else()
-        message(STATUS "Rivet not found. Support disabled. See README for more information.")
+        message(STATUS "Suitable Rivet not found. Support disabled. "
+                       "See README for more information.")
     endif()
 endif()
 
@@ -297,9 +327,12 @@ if(BUILD_TESTING)
     add_library(smash_static STATIC $<TARGET_OBJECTS:objlib>)
     set_target_properties(smash_static PROPERTIES OUTPUT_NAME smash)
     # Look for sanitizers supported by the compiler. Sanitizers add instrumentation code to the
-    # executable that test correctness of the code: * address: looks for use-after-free and
-    # out-of-bounds like errors * undefined: looks for undefined behavior in the code like
-    # misaligned accesses, creation of infinity/NaN values, or conversions to unrepresentable values
+    # executable that test correctness of the code:
+    #
+    # * address: looks for use-after-free and out-of-bounds like errors
+    # * undefined: looks for undefined behavior in the code like misaligned accesses, creation of
+    #   infinity/NaN values, or conversions to unrepresentable values
+    #
     # If the undefined sanitizer is not available with the compiler it will fall back to address
     # sanitizer only. If this ones also not available the sanitizer build will be skipped
     # altogether.
