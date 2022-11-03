@@ -243,7 +243,7 @@ namespace {
  * Roughly speaking, from the tree top-level all upmost nodes are extracted
  * and for each of them, recursively, the same procedure is done over and
  * over again if they are maps. If a non-map node is found, i.e. a key value
- * is found, then recursion ends a new entry to \c list is added.
+ * is found, then recursion ends and a new entry is added to \c list .
  *
  * @param[in] root_node The root YAML node to extract from.
  * @param[inout] list The list of lists of labels to be filled.
@@ -286,7 +286,6 @@ auto get_list_of_labels_per_key_in_yaml_tree(const YAML::Node &root_node) {
   return list;
 }
 
-#if 1
 /**
  * \brief A utility type to be specialized to check if a type is a \c std::map .
  *
@@ -347,7 +346,6 @@ auto collect_input_keys_taken_as_maps() {
   }
   return labels_of_keys_taken_as_map;
 }
-#endif
 
 /**
  * \brief Remove last labels of keys that are taken as maps in SMASH and remove

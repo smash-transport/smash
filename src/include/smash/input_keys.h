@@ -73,7 +73,7 @@ class Key {
       : Key{labels, std::nullopt, versions} {}
 
   /**
-   * @brief Construct a new \c Key object without default value.
+   * @brief Construct a new \c Key object with default value.
    *
    * Note that the default value could be simply taken as parameter of type
    * \c default_type . However, this would complicate delegating construction
@@ -95,7 +95,7 @@ class Key {
       : default_{value}, labels_{labels.begin(), labels.end()} {
     /*
      * The following switch statement is a compact way to initialize the
-     * three version member variables without repetition and lot's of logic
+     * three version member variables without repetition and lots of logic
      * clauses. The versions variable can have 1, 2 or 3 entries. The use of
      * the iterator is needed, since std::initializer_list has no access
      * operator.
@@ -239,7 +239,7 @@ class Key {
  * the randomly generated number seed (if the user specified a negative seed) is
  * inserted into the copied file. The used particles and decay modes are
  * appended there as well. For this purpose, a `particles` and a `decaymodes`
- * key are used and their value are a one-line version of the corresponding
+ * key are used and their values are a one-line version of the corresponding
  * files (see \ref inputparticles and \ref inputdecaymodes for information about
  * them). To manually input the values of these keys is not an intended use case
  * and you are discouraged from doing so. On the other hand, you could use the
@@ -301,7 +301,7 @@ class Key {
  *
  * This section in the `config.yaml` file contains all general/global
  * configuration options to SMASH. Before describing all possible keys in
- * detail, let's tart off with a couple of examples.
+ * detail, let's start off with a couple of examples.
  *
  * The `General` section in SMASH input file might read as follows:
  *
@@ -331,7 +331,7 @@ class Key {
 /*!\Userguide
  * \page minimum_nonempty_ensembles_ Minimum non-empty ensembles
  *
- * Instead of defining the number of Events it is possible to define a minimum
+ * Instead of defining the number of events it is possible to define a minimum
  * number of ensembles in which an interaction took place. Using this option
  * by providing a `Minimum_Nonempty_Ensembles` section in the input file,
  * events will be calculated until the desired number of non-empty ensembles
@@ -411,10 +411,10 @@ class Key {
      Collision_Criterion: Stochastic
      Multi_Particle_Reactions: ["Deuteron_3to2"]
  \endverbatim
- * Note, that the d' should not be included in the \e particels.txt file,
- * otherwise `PiDeuteron_to_pidprime` and `NDeuteron_to_Ndprime` have to be
- * excluded from `Included_2to2` by listing all 2-to-2 reactions except those
- * two.
+ * Note, that the that the fake baryon resonance d' should not be included in
+ * the \e particles.txt file, otherwise `PiDeuteron_to_pidprime` and
+ * `NDeuteron_to_Ndprime` have to be excluded from `Included_2to2` by listing
+ * all 2-to-2 reactions except those two.
  *
  * <hr>
  * In this page many generic keys are described. For information about further
@@ -578,7 +578,7 @@ class Key {
 /*!\Userguide
  * \page input_lattice_ Lattice
  *
- * It is possible to configure a Lattice for the 3D space, which can be useful
+ * It is possible to configure a lattice for the 3D space, which can be useful
  * to speed up the computation of the potentials. Note though, that this goes in
  * hand with a loss of accuracy: If the lattice is applied, the evaluation of
  * the potentials is carried out only on the nodes of the lattice. Intermediate
@@ -591,8 +591,9 @@ class Key {
  * "Potentials_Affect_Thresholds"</tt> option is enabled. To configure the
  * thermodynamic output, use \ref input_output_ "the \c Output section".
  *
- * The following parameters are only required, if the `Lattice` section is used
- * in the configuration file. Otherwise, no lattice will be used at all.
+ * To enable a lattice it is necessary to add a `Lattice` section with the
+ * following parameters. If no `Lattice` section is used in the configuration,
+ * no lattice will be used at all.
  */
 
 /*!\Userguide
@@ -2435,9 +2436,9 @@ struct InputKeys {
    * \required_key_no_line{key_MC_sqrtsnn_,Sqrtsnn,double}
    *
    * Defines the energy of the collision as center-of-mass energy in the
-   * collision of one participant each from both nuclei (using the average
-   * participant mass in the given nucleus). This key can be omitted if
-   * the incident energy is specified in a different way.
+   * collision of two hadrons, one for each nucleus, having the average mass of
+   * all the hadrons composing the given nucleus. This key can be omitted if the
+   * incident energy is specified in a different way.
    */
   /**
    * \see_key{key_MC_sqrtsnn_}
@@ -3166,9 +3167,10 @@ struct InputKeys {
    * \page input_modi_sphere_
    * \optional_key{key_MS_use_bar_chem_pot_,Baryon_Chemical_Potential,double,0.0}
    *
-   * Baryon chemical potential \f$\mu_B\f$. This key is used to compute thermal
-   * densities \f$n_i\f$ only if <tt>\ref key_MS_use_thermal_mult_
-   * "Use_Thermal_Multiplicities"</tt> is `true`.
+   * Baryon chemical potential \f$\mu_B\f$ \unit{in GeV}. This key is used to
+   * compute thermal densities \f$n_i\f$ only if
+   * <tt>\ref key_MS_use_thermal_mult_ "Use_Thermal_Multiplicities"</tt> is
+   * `true`.
    */
   /**
    * \see_key{key_MS_use_bar_chem_pot_}
@@ -3180,9 +3182,10 @@ struct InputKeys {
    * \page input_modi_sphere_
    * \optional_key{key_MS_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
    *
-   * Strangeness chemical potential \f$\mu_S\f$. This key is used to compute
-   * thermal densities \f$n_i\f$ only if <tt>\ref key_MS_use_thermal_mult_
-   * "Use_Thermal_Multiplicities"</tt> is `true`.
+   * Strangeness chemical potential \f$\mu_S\f$ \unit{in GeV}. This key is used
+   * to compute thermal densities \f$n_i\f$ only if
+   * <tt>\ref key_MS_use_thermal_mult_ "Use_Thermal_Multiplicities"</tt> is
+   * `true`.
    */
   /**
    * \see_key{key_MS_strange_chem_pot_}
@@ -3194,9 +3197,10 @@ struct InputKeys {
    * \page input_modi_sphere_
    * \optional_key{key_MS_charge_chem_pot_,Charge_Chemical_Potential,double,0.0}
    *
-   * Charge chemical potential \f$\mu_Q\f$. This key is used to compute
-   * thermal densities \f$n_i\f$ only if <tt>\ref key_MS_use_thermal_mult_
-   * "Use_Thermal_Multiplicities"</tt> is `true`.
+   * Charge chemical potential \f$\mu_Q\f$ \unit{in GeV}. This key is used to
+   * compute thermal densities \f$n_i\f$ only if
+   * <tt>\ref key_MS_use_thermal_mult_ "Use_Thermal_Multiplicities"</tt> is
+   * `true`.
    */
   /**
    * \see_key{key_MS_charge_chem_pot_}
@@ -3450,7 +3454,7 @@ struct InputKeys {
    * balance studies, it is better to account for spectral functions, because
    * then at \f$t=0\f$ one has exactly the expected thermal grand-canonical
    * multiplicities, that can be compared to final ones.  However, by toggling
-   * `true` to `false` one can observe the effect of spectral function on the
+   * `true` to `false` one can observe the effect of spectral functions on the
    * multiplicity. This is useful for understanding the implications of
    * different ways of sampling resonances in hydrodynamics.
    */
