@@ -7,23 +7,19 @@
 #
 #########################################################
 
-find_program(DOXYGEN doxygen)
-if(DOXYGEN)
-    execute_process(COMMAND ${DOXYGEN} --version OUTPUT_VARIABLE DOXYGEN_VERSION
-                    OUTPUT_STRIP_TRAILING_WHITESPACE)
-    if("${DOXYGEN_VERSION}" VERSION_LESS "1.8.4")
-        message(WARNING "Doxygen ${DOXYGEN_VERSION} found, but at least 1.8.4 is expected.")
-    else()
-        message(STATUS "Doxygen ${DOXYGEN_VERSION} found at ${DOXYGEN}")
-    endif()
+find_package(Doxygen 1.8.4 OPTIONAL_COMPONENTS dot)
+if(DOXYGEN_FOUND)
+    # Store Doxygen executable full path in a variable for later
+    get_target_property(DOXYGEN Doxygen::doxygen IMPORTED_LOCATION)
 
-    find_program(DOT_EXECUTABLE dot)
-    if(DOT_EXECUTABLE)
+    # In the following, we set CMake variables that seems to be unused, but which instead are used
+    # by configure_file to set-up Doxy* files. E.g. HAVE_DOT, DOT_EXECUTABLE, DOXYGEN_EXTRACT_ALL
+    if(Doxygen_dot_FOUND)
         set(HAVE_DOT "YES")
+        get_target_property(DOT_EXECUTABLE Doxygen::dot IMPORTED_LOCATION)
     else()
         set(HAVE_DOT "NO")
     endif()
-
     set(DOXYGEN_EXTRACT_ALL "YES")
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
                    @ONLY)
@@ -34,16 +30,14 @@ if(DOXYGEN)
                       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                       COMMENT "Building Doxygen Code Documentation"
                       VERBATIM)
+
+    # Collect requirement tools (sed, bash) and set up user-guide target
     find_program(SED sed)
     execute_process(COMMAND ${SED} --version OUTPUT_VARIABLE _sed_version)
     if(NOT "${_sed_version}" MATCHES "GNU sed")
         unset(SED CACHE)
         set(SED "SED-NOTFOUND")
         message(WARNING "GNU sed is required to build the user guide")
-    endif()
-    find_program(GREP grep)
-    if(NOT GREP)
-        message(WARNING "grep not found, docs might be incomplete/faulty")
     endif()
     find_program(BASH bash)
     if(NOT BASH)
@@ -69,6 +63,8 @@ if(DOXYGEN)
                           VERBATIM)
     endif()
 
+    # Collect requirement tools and set up utility targets
+    find_program(GREP grep)
     find_program(XARGS xargs)
     find_program(PRINTF printf)
     find_program(SORT sort)
@@ -163,6 +159,4 @@ if(DOXYGEN)
                      GREP
                      DOT_EXECUTABLE
                      DOXYGEN)
-else()
-    message(STATUS "Doxygen not found.")
 endif()
