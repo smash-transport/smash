@@ -601,7 +601,6 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
           "Please enable the dilepton output.");
     }
   }
-
   /* Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded. */
   const double low_snn_cut =
@@ -647,8 +646,6 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   const double maximum_cross_section_default =
       ParticleType::exists("d'") ? 2000.0 : 200.0;
 
-  bool cll_in_nucleus =
-      config.take({"Modi", "Collider", "Collisions_Within_Nucleus"}, false);
   double maximum_cross_section =
       config.take({"Collision_Term", "Maximum_Cross_Section"},
                   maximum_cross_section_default);
@@ -677,9 +674,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
       config.take({"Collision_Term", "Multi_Particle_Reactions"},
                   MultiParticleReactionsBitSet().reset()),
       config.take({"Collision_Term", "Strings"}, modus_chooser != "Box"),
-      config.take({"Collision_Term", "Use_AQM"}, true),
       config.take({"Collision_Term", "Resonance_Lifetime_Modifier"}, 1.),
-      config.take({"Collision_Term", "Strings_with_Probability"}, true),
       config.take({"Collision_Term", "NNbar_Treatment"},
                   NNbarTreatment::Strings),
       low_snn_cut,
@@ -687,9 +682,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
       box_length,
       maximum_cross_section,
       config.take({"Collision_Term", "Fixed_Min_Cell_Length"}, 2.5),
-      cll_in_nucleus,
       scale_xs,
-      config.take({"Collision_Term", "Additional_Elastic_Cross_Section"}, 0.0),
       only_participants,
       config.take({"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
                   false)};

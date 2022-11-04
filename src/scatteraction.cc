@@ -109,16 +109,11 @@ void ScatterAction::generate_final_state() {
 }
 
 void ScatterAction::add_all_scatterings(
-    double elastic_parameter, bool two_to_one, ReactionsBitSet included_2to2,
-    MultiParticleReactionsBitSet included_multi, double low_snn_cut,
-    bool strings_switch, bool use_AQM, bool strings_with_probability,
-    NNbarTreatment nnbar_treatment, double scale_xs, double additional_el_xs) {
+    const ScatterActionsFinderParameters &finder_parameters) {
   CrossSections xs(incoming_particles_, sqrt_s(),
                    get_potential_at_interaction_point());
-  CollisionBranchList processes = xs.generate_collision_list(
-      elastic_parameter, two_to_one, included_2to2, included_multi, low_snn_cut,
-      strings_switch, use_AQM, strings_with_probability, nnbar_treatment,
-      string_process_, scale_xs, additional_el_xs);
+  CollisionBranchList processes =
+      xs.generate_collision_list(finder_parameters, string_process_);
 
   /* Add various subprocesses.*/
   add_collisions(std::move(processes));
@@ -129,12 +124,15 @@ void ScatterAction::add_all_scatterings(
    * square root s exceeds the threshold by at least 0.9 GeV. The cross section
    * of the string processes are counted by taking the difference between the
    * parametrized total and the sum of the non-strings. */
-  if (!strings_with_probability &&
-      xs.string_probability(strings_switch, strings_with_probability, use_AQM,
-                            nnbar_treatment == NNbarTreatment::Strings) == 1.) {
+  if (!finder_parameters.strings_with_probability &&
+      xs.string_probability(
+          finder_parameters.strings_switch,
+          finder_parameters.strings_with_probability, finder_parameters.use_AQM,
+          finder_parameters.nnbar_treatment == NNbarTreatment::Strings) == 1.) {
     const double xs_diff = xs.high_energy() - cross_section();
     if (xs_diff > 0.) {
-      add_collisions(xs.string_excitation(xs_diff, string_process_, use_AQM));
+      add_collisions(xs.string_excitation(xs_diff, string_process_,
+                                          finder_parameters.use_AQM));
     }
   }
 }

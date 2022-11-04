@@ -102,7 +102,7 @@ function look_for_files_to_format()
     if [[ ${language} = 'C++' ]]; then
         # C++ extenstions accepted by GNU compiler: https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html
         FILES_TO_FORMAT=(
-            "${base_dir}/src"/**/*.{h,hh,H,hp,hxx,hpp,HPP,h++,tcc,cc,cp,cxx,cpp,CPP,c++,C,ii}
+            "${base_dir}/"{src,examples}/**/*.{h,hh,H,hp,hxx,hpp,HPP,h++,tcc,cc,cp,cxx,cpp,CPP,c++,C,ii}
         )
     elif [[ ${language} = 'CMake' ]]; then
         FILES_TO_FORMAT=(

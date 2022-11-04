@@ -18,6 +18,7 @@
 #include "actionfinderfactory.h"
 #include "configuration.h"
 #include "scatteraction.h"
+#include "scatteractionsfinderparameters.h"
 
 namespace smash {
 
@@ -65,7 +66,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
   inline double collision_time(
       const ParticleData &p1, const ParticleData &p2, double dt,
       const std::vector<FourVector> &beam_momentum) const {
-    if (coll_crit_ == CollisionCriterion::Stochastic) {
+    if (finder_parameters_.coll_crit == CollisionCriterion::Stochastic) {
       return dt * random::uniform(0., 1.);
     } else {
       /*
@@ -94,7 +95,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
       const FourVector p2_mom = (p2_has_no_prior_interactions)
                                     ? beam_momentum[p2.id()]
                                     : p2.momentum();
-      if (coll_crit_ == CollisionCriterion::Covariant) {
+      if (finder_parameters_.coll_crit == CollisionCriterion::Covariant) {
         /**
          * JAM collision times from the closest approach
          * in the two-particle center-of-mass-framem,
@@ -210,8 +211,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *         and isotropic
    */
   inline bool is_constant_elastic_isotropic() const {
-    return ParticleType::list_all().size() == 1 && !two_to_one_ && isotropic_ &&
-           elastic_parameter_ > 0.;
+    return ParticleType::list_all().size() == 1 &&
+           !finder_parameters_.two_to_one && isotropic_ &&
+           finder_parameters_.elastic_parameter > 0.;
   }
 
   /**
@@ -227,8 +229,9 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *         collision criterion.
    */
   double max_transverse_distance_sqr(int testparticles) const {
-    return (is_constant_elastic_isotropic() ? elastic_parameter_
-                                            : maximum_cross_section_) /
+    return (is_constant_elastic_isotropic()
+                ? finder_parameters_.elastic_parameter
+                : finder_parameters_.maximum_cross_section) /
            testparticles * fm2_mb * M_1_PI;
   }
 
@@ -260,7 +263,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *         If string is turned off, the null pointer is returned.
    */
   StringProcess *get_process_string_ptr() {
-    if (strings_switch_) {
+    if (finder_parameters_.strings_switch) {
       return string_process_interface_.get();
     } else {
       return NULL;
@@ -313,39 +316,12 @@ class ScatterActionsFinder : public ActionFinderInterface {
   ActionPtr check_collision_multi_part(const ParticleList &plist, double dt,
                                        const double gcell_vol) const;
 
+  /// Struct collecting several parameters.
+  ScatterActionsFinderParameters finder_parameters_;
   /// Class that deals with strings, interfacing Pythia.
   std::unique_ptr<StringProcess> string_process_interface_;
-  /// Specifies which collision criterion is used
-  const CollisionCriterion coll_crit_;
-  /// Elastic cross section parameter (in mb).
-  const double elastic_parameter_;
-  /// Number of test particles.
-  const int testparticles_;
   /// Do all collisions isotropically.
   const bool isotropic_;
-  /// Enable 2->1 processes.
-  const bool two_to_one_;
-  /// List of included 2<->2 reactions
-  const ReactionsBitSet incl_set_;
-  /// List of included multi-particle reactions
-  const MultiParticleReactionsBitSet incl_multi_set_;
-  /// Factor by which all (partial) cross sections are scaled
-  const double scale_xs_;
-  /// Additional constant elastic cross section
-  const double additional_el_xs_;
-  /**
-   * Elastic collsions between two nucleons with sqrt_s below low_snn_cut_ are
-   * excluded.
-   */
-  const double low_snn_cut_;
-  /// Switch to turn off string excitation.
-  const bool strings_switch_;
-  /// Switch to control whether to use AQM or not
-  const bool use_AQM_;
-  /// Decide whether to implement string fragmentation based on a probability
-  const bool strings_with_probability_;
-  /// Switch for NNbar reactions
-  const NNbarTreatment nnbar_treatment_;
   /**
    * Box length: needed to determine coordinates of collision
    * correctly in case of collision through the wall.
@@ -354,17 +330,19 @@ class ScatterActionsFinder : public ActionFinderInterface {
   const double box_length_;
   /// Parameter for formation time
   const double string_formation_time_;
-  /// \see input_collision_term_
-  const double maximum_cross_section_;
-  /// If particles within nucleus are allowed to collide for their first time
-  const bool allow_first_collisions_within_nucleus_;
-  /**
-   * Switch to turn off throwing an exception for collision probabilities larger
-   * than 1. In larger production runs it is ok, if the probability rarely slips
-   * over 1.
-   */
-  const bool only_warn_for_high_prob_;
 };
+
+/**
+ * Gather all relevant parameters for a \c ScatterActionsFinder either getting
+ * them from an \c ExperimentParameters  instance or extracting them from
+ * a \c Configuration .
+ *
+ * \param[in] parameters The parameters of the considered experiment
+ * \param[inout] config SMASH input configuration
+ * \return A \c ScatterActionsFinderParameters appropriately filled.
+ */
+ScatterActionsFinderParameters create_finder_parameters(
+    Configuration &config, const ExperimentParameters &parameters);
 
 }  // namespace smash
 

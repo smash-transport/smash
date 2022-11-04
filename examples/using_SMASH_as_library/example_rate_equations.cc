@@ -39,6 +39,23 @@ static double thermal_average_sigmavrel(const ParticleTypePtr A_type,
   const double norm =
       1.0 / (4.0 * ma * ma * mb * mb * T * gsl_sf_bessel_Kn(2, ma / T) *
              gsl_sf_bessel_Kn(2, mb / T));
+  ScatterActionsFinderParameters finder_params{elastic_parameter,
+                                               low_snn_cut,
+                                               scale_xs,
+                                               addition_elastic_xs,
+                                               200.,
+                                               CollisionCriterion::Stochastic,
+                                               NNbarTreatment::NoAnnihilation,
+                                               incl_set,
+                                               incl_multi_set,
+                                               1,
+                                               two_to_one,
+                                               false,
+                                               strings_switch,
+                                               use_AQM,
+                                               strings_with_probability,
+                                               true};
+
   const auto integral = integrate(0.0, 1.0, [&](double x) {
     const double m = (ma + mb) / x;
     const double jac = m / x;
@@ -47,10 +64,7 @@ static double thermal_average_sigmavrel(const ParticleTypePtr A_type,
     B.set_4momentum(mb, -pcm, 0.0, 0.0);
     ScatterActionPtr act = std::make_unique<ScatterAction>(
         A, B, time, isotropic, string_formation_time);
-    act->add_all_scatterings(
-        elastic_parameter, two_to_one, incl_set, incl_multi_set, low_snn_cut,
-        strings_switch, use_AQM, strings_with_probability,
-        NNbarTreatment::NoAnnihilation, scale_xs, addition_elastic_xs);
+    act->add_all_scatterings(finder_params);
     const double sigma = act->cross_section();
     if (std::isnan(sigma) || sigma <= 0.0)
       return 0.0;

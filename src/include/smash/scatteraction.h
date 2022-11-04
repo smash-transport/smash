@@ -17,6 +17,7 @@
 
 #include "action.h"
 #include "isoparticletype.h"
+#include "scatteractionsfinderparameters.h"
 #include "stringprocess.h"
 
 namespace smash {
@@ -133,28 +134,10 @@ class ScatterAction : public Action {
   /**
    * Add all possible scattering subprocesses for this action object.
    *
-   * \param[in] elastic_parameter If non-zero, given global
-   *            elastic cross section.
-   * \param[in] two_to_one  2->1 reactions enabled?
-   * \param[in] included_2to2 Which 2->2 reactions are enabled?
-   * \param[in] included_multi Which multi-particle reactions are enabled?
-   * \param[in] low_snn_cut Elastic collisions with CME below are forbidden.
-   * \param[in] strings_switch Are string processes enabled?
-   * \param[in] use_AQM use elastic cross sections via AQM?
-   * \param[in] strings_with_probability Are string processes triggered
-   *            according to a probability?
-   * \param[in] nnbar_treatment NNbar treatment through resonance, strings or
-   *                                                        none
-   * \param[in] scale_xs Factor by which all (partial) cross sections are scaled
-   * \param[in] additional_el_xs Additional constant elastic cross section
+   * \param[in] finder_parameters parameters for collision finding.
    */
-  void add_all_scatterings(double elastic_parameter, bool two_to_one,
-                           ReactionsBitSet included_2to2,
-                           MultiParticleReactionsBitSet included_multi,
-                           double low_snn_cut, bool strings_switch,
-                           bool use_AQM, bool strings_with_probability,
-                           NNbarTreatment nnbar_treatment, double scale_xs,
-                           double additional_el_xs);
+  void add_all_scatterings(
+      const ScatterActionsFinderParameters& finder_parameters);
 
   /**
    * Get list of possible collision channels.

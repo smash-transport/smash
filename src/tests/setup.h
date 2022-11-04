@@ -19,6 +19,7 @@
 #include "smash/particles.h"
 #include "smash/particletype.h"
 #include "smash/random.h"
+#include "smash/scatteractionsfinderparameters.h"
 
 namespace smash {
 namespace Test {
@@ -277,20 +278,48 @@ inline ExperimentParameters default_parameters(
       all_reactions_included(),
       no_multiparticle_reactions(),
       false,  // strings switch
-      false,  // use_AQM
       1.0,
-      false,  // string_with_probability
       NNbarTreatment::NoAnnihilation,
       0.,     // low energy sigma_NN cut-off
       false,  // potential_affect_threshold
       -1.0,   // box_length
       200.0,  // max. cross section
       2.5,    // fixed min. cell length
-      false,  // allow collisions within nucleus
       1.0,    // cross section scaling
-      0.0,    // additional elastic cross section
       false,  // in thermodynamics outputs spectators are included
       false   // do weak decays
+  };
+}
+
+/**
+ * Creates a standard ScatterActionsFinderParameters object which works for
+ * almost all testing purposes.
+ *
+ * The selected arguments are changed between different tests.
+ */
+inline ScatterActionsFinderParameters default_finder_parameters(
+    double elastic_parameter = 10,
+    NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation,
+    ReactionsBitSet included_2to2 = all_reactions_included(),
+    bool strings_switch = true, bool use_AQM = false,
+    bool strings_with_probability = false) {
+  return {
+      elastic_parameter,
+      0.,    // low_snn_cut
+      1.,    // scale_xs
+      0.,    // additional_el_xs
+      200.,  // maximum_cross_section
+      CollisionCriterion::Geometric,
+      nnbar_treatment,
+      included_2to2,
+      no_multiparticle_reactions(),
+      1,      // testparticles
+      true,   // two_to_one
+      false,  // allow_first_collisions_within_nucleus
+      strings_switch,
+      use_AQM,
+      strings_with_probability,
+      true  // only_warn_for_high_prob
   };
 }
 

@@ -113,32 +113,32 @@ CrossSections::CrossSections(const ParticleList& incoming_particles,
               incoming_particles_[0].type().get_antiparticle()->pdgcode()) {}
 
 CollisionBranchList CrossSections::generate_collision_list(
-    double elastic_parameter, bool two_to_one_switch,
-    ReactionsBitSet included_2to2, MultiParticleReactionsBitSet included_multi,
-    double low_snn_cut, bool strings_switch, bool use_AQM,
-    bool strings_with_probability, NNbarTreatment nnbar_treatment,
-    StringProcess* string_process, double scale_xs,
-    double additional_el_xs) const {
+    const ScatterActionsFinderParameters& finder_parameters,
+    StringProcess* string_process) const {
   CollisionBranchList process_list;
   const ParticleType& t1 = incoming_particles_[0].type();
   const ParticleType& t2 = incoming_particles_[1].type();
 
   double p_pythia = 0.;
-  if (strings_with_probability) {
-    p_pythia =
-        string_probability(strings_switch, strings_with_probability, use_AQM,
-                           nnbar_treatment == NNbarTreatment::Strings);
+  if (finder_parameters.strings_with_probability) {
+    p_pythia = string_probability(
+        finder_parameters.strings_switch,
+        finder_parameters.strings_with_probability, finder_parameters.use_AQM,
+        finder_parameters.nnbar_treatment == NNbarTreatment::Strings);
   }
 
   /* Elastic collisions between two nucleons with sqrt_s below
    * low_snn_cut can not happen. */
   const bool reject_by_nucleon_elastic_cutoff =
       t1.is_nucleon() && t2.is_nucleon() &&
-      t1.antiparticle_sign() == t2.antiparticle_sign() && sqrt_s_ < low_snn_cut;
-  bool incl_elastic = included_2to2[IncludedReactions::Elastic];
+      t1.antiparticle_sign() == t2.antiparticle_sign() &&
+      sqrt_s_ < finder_parameters.low_snn_cut;
+  bool incl_elastic =
+      finder_parameters.included_2to2[IncludedReactions::Elastic];
   if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
-    process_list.emplace_back(
-        elastic(elastic_parameter, use_AQM, additional_el_xs, scale_xs));
+    process_list.emplace_back(elastic(
+        finder_parameters.elastic_parameter, finder_parameters.use_AQM,
+        finder_parameters.additional_el_xs, finder_parameters.scale_xs));
   }
   if (p_pythia > 0.) {
     /* String-excitation cross section =
@@ -146,47 +146,57 @@ CollisionBranchList CrossSections::generate_collision_list(
      * from all other present channels. */
     const double sig_current = sum_xs_of(process_list);
     const double sig_string =
-        std::max(0., scale_xs * high_energy() - sig_current);
+        std::max(0., finder_parameters.scale_xs * high_energy() - sig_current);
     append_list(process_list,
-                string_excitation(sig_string, string_process, use_AQM),
+                string_excitation(sig_string, string_process,
+                                  finder_parameters.use_AQM),
                 p_pythia);
-    append_list(process_list, rare_two_to_two(), p_pythia * scale_xs);
+    append_list(process_list, rare_two_to_two(),
+                p_pythia * finder_parameters.scale_xs);
   }
   if (p_pythia < 1.) {
-    if (two_to_one_switch) {
+    if (finder_parameters.two_to_one) {
       // resonance formation (2->1)
-      append_list(process_list, two_to_one(), (1. - p_pythia) * scale_xs);
+      append_list(process_list, two_to_one(),
+                  (1. - p_pythia) * finder_parameters.scale_xs);
     }
-    if (included_2to2.any()) {
+    if (finder_parameters.included_2to2.any()) {
       // 2->2 (inelastic)
-      append_list(process_list, two_to_two(included_2to2),
-                  (1. - p_pythia) * scale_xs);
+      append_list(process_list, two_to_two(finder_parameters.included_2to2),
+                  (1. - p_pythia) * finder_parameters.scale_xs);
     }
-    if (included_multi[IncludedMultiParticleReactions::Deuteron_3to2] == 1) {
+    if (finder_parameters
+            .included_multi[IncludedMultiParticleReactions::Deuteron_3to2] ==
+        1) {
       // 2->3 (deuterons only 2-to-3 reaction at the moment)
-      append_list(process_list, two_to_three(), (1. - p_pythia) * scale_xs);
+      append_list(process_list, two_to_three(),
+                  (1. - p_pythia) * finder_parameters.scale_xs);
     }
-    if (included_multi[IncludedMultiParticleReactions::A3_Nuclei_4to2] == 1) {
+    if (finder_parameters
+            .included_multi[IncludedMultiParticleReactions::A3_Nuclei_4to2] ==
+        1) {
       // 2->4
-      append_list(process_list, two_to_four(), (1. - p_pythia) * scale_xs);
+      append_list(process_list, two_to_four(),
+                  (1. - p_pythia) * finder_parameters.scale_xs);
     }
   }
-  if (nnbar_treatment == NNbarTreatment::TwoToFive && is_NNbar_pair_) {
+  if (finder_parameters.nnbar_treatment == NNbarTreatment::TwoToFive &&
+      is_NNbar_pair_) {
     // NNbar directly to 5 pions (2-to-5)
-    process_list.emplace_back(NNbar_to_5pi(scale_xs));
+    process_list.emplace_back(NNbar_to_5pi(finder_parameters.scale_xs));
   }
 
   /* NNbar annihilation thru NNbar → ρh₁(1170); combined with the decays
    * ρ → ππ and h₁(1170) → πρ, this gives a final state of 5 pions.
    * Only use in cases when detailed balance MUST happen, i.e. in a box! */
-  if (nnbar_treatment == NNbarTreatment::Resonances) {
+  if (finder_parameters.nnbar_treatment == NNbarTreatment::Resonances) {
     if (is_NNbar_pair_) {
       /* Has to be called after the other processes are already determined,
        * so that the sum of the cross sections includes all other processes. */
-      process_list.emplace_back(
-          NNbar_annihilation(sum_xs_of(process_list), scale_xs));
+      process_list.emplace_back(NNbar_annihilation(sum_xs_of(process_list),
+                                                   finder_parameters.scale_xs));
     } else {
-      append_list(process_list, NNbar_creation(), scale_xs);
+      append_list(process_list, NNbar_creation(), finder_parameters.scale_xs);
     }
   }
   return process_list;

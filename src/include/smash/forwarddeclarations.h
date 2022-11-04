@@ -73,6 +73,7 @@ class CollisionBranch;
 class Tabulation;
 class ExperimentBase;
 struct ExperimentParameters;
+struct ScatterActionsFinderParameters;
 struct Nucleoncorr;
 
 /// @endcond
