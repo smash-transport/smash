@@ -13,55 +13,52 @@ smash.cc, Experiment::run() and the functions library.h.
 */
 
 #include <filesystem>
+#include <iostream>
 #include <memory>
 #include <string>
-#include <iostream>
 
 #include "smash/action.h"
-#include "smash/library.h"
-#include "smash/experiment.h"
-#include "smash/config.h"
 #include "smash/collidermodus.h"
+#include "smash/config.h"
+#include "smash/experiment.h"
 #include "smash/forwarddeclarations.h"
-
+#include "smash/library.h"
 
 int main() {
   try {
-
     std::cout << "\nTest-run SMASH\n--------------" << '\n';
 
     // All the input that is needed
     const std::string config_file(SMASH_TOP_LEVEL_DIR "/input/config.yaml");
     const std::filesystem::path output_path("./data");
     const std::string tabulations_path("./tabulations");
-    const std::string particles_file(SMASH_TOP_LEVEL_DIR "/input/particles.txt");
-    const std::string decaymodes_file(SMASH_TOP_LEVEL_DIR "/input/decaymodes.txt");
-
+    const std::string particles_file(SMASH_TOP_LEVEL_DIR
+                                     "/input/particles.txt");
+    const std::string decaymodes_file(SMASH_TOP_LEVEL_DIR
+                                      "/input/decaymodes.txt");
 
     ////////////////////////////
     // Setup SMASH            //
     ////////////////////////////
 
     // 1) Set-up config
-    auto config = smash::setup_config_and_logging(config_file,
-                                                  particles_file,
+    auto config = smash::setup_config_and_logging(config_file, particles_file,
                                                   decaymodes_file);
 
     // 2) Do addtional configurations e.g. set a custom end time by
     float new_end_time = 180.0;
-    config.set_value({"General","End_Time"}, new_end_time);
+    config.set_value({"General", "End_Time"}, new_end_time);
     // ...
 
     std::string smash_version = SMASH_VERSION;
 
     // 3) Intialize decaymodes, particletypes, tabulations
-    smash::initialize_particles_decays_and_tabulations(config,
-                                                      smash_version,
-                                                      tabulations_path);
+    smash::initialize_particles_decays_and_tabulations(config, smash_version,
+                                                       tabulations_path);
 
     // Create experiment
-    auto experiment = smash::Experiment<smash::ColliderModus>(config, output_path);
-
+    auto experiment =
+        smash::Experiment<smash::ColliderModus>(config, output_path);
 
     ////////////////////////////////////////////////////////////////////////////
     // Run the experiment in a special way here, mimicking new JETSCAPE features
@@ -89,8 +86,7 @@ int main() {
     experiment.final_output();
 
   } catch (std::exception &e) {
-    std::cout << "SMASH failed with the following error:\n"
-                        << e.what() << '\n';
+    std::cout << "SMASH failed with the following error:\n" << e.what() << '\n';
     return EXIT_FAILURE;
   }
   return 0;
