@@ -112,7 +112,7 @@ warnings are however still reported.
 
 The following tools can be helpful for development:
 - clang-format = 13.0.0
-- doxygen >= 1.8.4
+- doxygen >= 1.9
 - valgrind
 - cpplint
 - cppcheck

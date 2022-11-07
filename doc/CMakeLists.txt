@@ -7,7 +7,7 @@
 #
 #########################################################
 
-find_package(Doxygen 1.8.4 OPTIONAL_COMPONENTS dot)
+find_package(Doxygen 1.9 OPTIONAL_COMPONENTS dot)
 if(DOXYGEN_FOUND)
     # Store Doxygen executable full path in a variable for later
     get_target_property(DOXYGEN Doxygen::doxygen IMPORTED_LOCATION)
