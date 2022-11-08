@@ -929,17 +929,17 @@ struct InputKeys {
    * \page input_general_
    * \optional_key_no_line{key_gen_delta_time_,Delta_Time,double,1.0}
    *
-   * Fixed time step at which the collision-finding grid is recreated, and, if
-   * potentials are on, momenta are updated according to the equations of
-   * motion. The collision-finding grid finds all the collisions from time
-   * t_{beginning_of_timestep} until time t_{beginning_of_timestep} +
+   * Fixed time step \units{in fm} at which the collision-finding grid is
+   * recreated, and, if potentials are on, momenta are updated according to the
+   * equations of motion. The collision-finding grid finds all the collisions
+   * from time t_{beginning_of_timestep} until time t_{beginning_of_timestep} +
    * `Delta_Time`, and puts them into a vector. The collisions are then sorted
    * in order of occurrence, and particles are propagated from collision to
    * collision. After each performed collision, additional collisions are found
    * for outgoing particles and merged into the sorted vector.
    *
-   * If potentials are on, the Delta_Time should be small enough, typically
-   * around 0.1 fm/c. However, if potentials are off, it can be arbitrarily
+   * If potentials are on, the `Delta_Time` should be small enough, typically
+   * around 0.1 fm. However, if potentials are off, it can be arbitrarily
    * large. In this case it only influences the runtime, but not physics.
    * If `Time_Step_Mode = "None"` is chosen, then the user-provided value of
    * `Delta_Time` is ignored and `Delta_Time` is set to the `End_Time`.
@@ -2072,7 +2072,7 @@ struct InputKeys {
    * \page input_collision_term_pauliblocker_
    * \optional_key{key_CT_PB_momentum_av_radius_,Momentum_Averaging_Radius,double,0.08}
    *
-   * Radius \unit{in GeV/c} of sphere for averaging in the momentum space.
+   * Radius \unit{in GeV} of sphere for averaging in the momentum space.
    */
   /**
    * \see_key{key_CT_PB_momentum_av_radius_}
@@ -2436,10 +2436,10 @@ struct InputKeys {
    *
    * \required_key_no_line{key_MC_sqrtsnn_,Sqrtsnn,double}
    *
-   * Defines the energy of the collision as center-of-mass energy in the
-   * collision of two hadrons, one for each nucleus, having the average mass of
-   * all the hadrons composing the given nucleus. This key can be omitted if the
-   * incident energy is specified in a different way.
+   * Defines the energy of the collision \unit{in GeV} as center-of-mass energy
+   * in the collision of two hadrons, one for each nucleus, having the average
+   * mass of all the hadrons composing the given nucleus. This key can be
+   * omitted if the incident energy is specified in a different way.
    */
   /**
    * \see_key{key_MC_sqrtsnn_}
@@ -2709,7 +2709,7 @@ struct InputKeys {
    * \page input_modi_collider_projectile_and_target_
    * \required_key_no_line{key_MC_PT_p_lab_,P_Lab,double}
    *
-   * Set the momentum \unit{in GeV/c} per particle of the beam. This key,
+   * Set the momentum \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
    * key can be omitted if the incident energy is specified in a different way.
    *
@@ -3083,7 +3083,7 @@ struct InputKeys {
    * \optional_key{key_MC_impact_max_,Max,double,0.0}
    *
    * Like `Range: [0.0, Max]`. Note that if both `Range` and `Max` are
-   * specified, `Max` takes precedence.
+   * specified, `Max` takes precedence (\unit{in fm}).
    */
   /**
    * \see_key{key_MC_impact_max_}
@@ -3119,7 +3119,7 @@ struct InputKeys {
    * \page input_modi_sphere_
    * \required_key{key_MS_start_time_,Start_Time,double}
    *
-   * Starting time of sphere calculation.
+   * Starting time of sphere calculation \unit{in fm}.
    */
   /**
    * \see_key{key_MS_start_time_}
@@ -3348,8 +3348,8 @@ struct InputKeys {
    * \page input_modi_box_
    * \required_key{key_MB_start_time_,Start_Time,double}
    *
-   * Starting time of the simulation. All particles in the box are initialized
-   * with \f$x^0=\f$`Start_Time`.
+   * Starting time of the simulation \unit{in fm}. All particles in the box are
+   * initialized with \f$x^0=\f$`Start_Time`.
    */
   /**
    * \see_key{key_MB_start_time_}
@@ -3361,12 +3361,11 @@ struct InputKeys {
    * \page input_modi_box_
    * \optional_key{key_MB_equilibration_time_,Equilibration_Time,double, -1.0}
    *
-   * Time after which the output of the box is written out. The first time
-   * however will be printed. This is useful if one wants to simulate boxes for
-   * very long times and knows at which time the box reaches its thermal and
-   * chemical equilibrium.
-   * The default set to -1 is meaning that output is written from beginning on,
-   * if this key is not given.
+   * Time \unit{in fm} after which the output of the box is written out. The
+   * first time however will be printed. This is useful if one wants to simulate
+   * boxes for very long times and knows at which time the box reaches its
+   * thermal and chemical equilibrium. The default set to -1 is meaning that
+   * output is written from beginning on, if this key is not given.
    */
   /**
    * \see_key{key_MB_equilibration_time_}
@@ -3599,7 +3598,7 @@ struct InputKeys {
    *
    * Defines the period of intermediate output of the status of the simulated
    * system in Standard Output and other output formats which support this
-   * functionality.
+   * functionality (\unit{in fm}).
    */
   /**
    * \see_key{key_output_out_interval_}
@@ -3612,12 +3611,12 @@ struct InputKeys {
    * \optional_key{key_output_out_times_,Output_Times,list of doubles,
    * use \ref key_output_out_interval_ "Output_Interval"}
    *
-   * Explicitly defines the times where output is generated in the form of
-   * a list. This cannot be used in combination with `Output_Interval`. Output
-   * times outside the simulation time are ignored and both the initial and
-   * final time are always considered. The following example will produce output
-   * at event start, event end and at the specified times as long as they are
-   * within the simulation time.
+   * Explicitly defines the times \unit{in fm} where output is generated in the
+   * form of a list. This cannot be used in combination with `Output_Interval`.
+   * Output times outside the simulation time are ignored and both the initial
+   * and final time are always considered. The following example will produce
+   * output at event start, event end and at the specified times as long as they
+   * are within the simulation time.
    *\verbatim
    Output:
        Output_Times: [-0.1, 0.0, 1.0, 2.0, 10.0]
@@ -3837,8 +3836,8 @@ struct InputKeys {
    * \optional_key_no_line{key_output_IC_proper_time_,Proper_Time,double,
    * </tt>\f$f(t_{np})\f$<tt>}
    *
-   * Proper time at which hypersurface is created. Its default value depends on
-   * the nuclei passing time \f$t_{np}\f$ as follows,
+   * Proper time \unit{in fm} at which hypersurface is created. Its default
+   * value depends on the nuclei passing time \f$t_{np}\f$ as follows,
    * \f[
    * f(t_{np})=\begin{cases}
    * \mathrm{\texttt{Lower_Bound}}  & t_{np} \le \mathrm{\texttt{Lower_Bound}}\\
@@ -3888,9 +3887,9 @@ struct InputKeys {
    * </tt>No cut is done<tt>}
    *
    * If set, employ a transverse momentum cut for particles contributing to the
-   * initial conditions for hydrodynamics. A positive value is expected. Only
-   * particles characterized by \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed
-   * to the output file.
+   * initial conditions for hydrodynamics. A positive value \unit{in GeV} is
+   * expected. Only particles characterized by
+   * \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed to the output file.
    */
   /**
    * \see_key{key_output_IC_pt_cut_}
@@ -4167,7 +4166,7 @@ struct InputKeys {
    * \optional_key_no_line{key_output_thermo_position_,Position,
    * list of 3 doubles,[0.0\, 0.0\, 0.0]}
    *
-   * Point at which thermodynamic quantities are computed.
+   * Point at which thermodynamic quantities are computed (\unit{in fm}).
    */
   /**
    * \see_key{key_output_thermo_position_}
@@ -4405,7 +4404,7 @@ struct InputKeys {
    * \page input_potentials_coulomb_
    * \required_key{key_potentials_coulomb_r_cut_,R_Cut,double}
    *
-   * The value at which the integration volume is cut.
+   * The radius value \unit{in fm} at which the integration volume is cut.
    */
   /**
    * \see_key{key_potentials_coulomb_r_cut_}
@@ -4415,7 +4414,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_forced_thermalization_
-   * \required_key{key_forced_therm_cell_number_,Cell_Number,list of 3 doubles}
+   * \required_key{key_forced_therm_cell_number_,Cell_Number,list of 3 ints}
    *
    * Number of cells in each direction (x,y,z).
    */
@@ -4442,7 +4441,7 @@ struct InputKeys {
    * \page input_forced_thermalization_
    * \required_key{key_forced_therm_start_time_,Start_Time,double}
    *
-   * Time \unit{in fm/c} after which forced thermalization may be applied, if
+   * Time \unit{in fm} after which forced thermalization may be applied, if
    * the energy density is sufficiently high.
    */
   /**
@@ -4455,7 +4454,7 @@ struct InputKeys {
    * \page input_forced_thermalization_
    * \required_key{key_forced_therm_timestep_,Timestep,double}
    *
-   * Timestep of thermalization \unit{in fm/c}.
+   * Timestep of thermalization \unit{in fm}.
    */
   /**
    * \see_key{key_forced_therm_timestep_}
@@ -4514,7 +4513,8 @@ struct InputKeys {
    *
    * `Lattice_Sizes` is required for all modi, except the `"Box"` modus. In
    * case of `"Box"` modus, the lattice is set up automatically to match the box
-   * size, and the user should not (and is not allowed to) specify it.
+   * size, and the user should not (and is not allowed to) specify it. Sizes are
+   * to be specified \unit{in fm}.
    */
   /**
    * \see_key{key_forced_therm_lattice_sizes_}
