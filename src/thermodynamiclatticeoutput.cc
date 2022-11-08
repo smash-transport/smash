@@ -172,9 +172,9 @@ namespace smash {
  * Please, note that note that all currents are given in units of
    "number of charges"; multiply the electric current by the
    elementary charge \f$\sqrt{4 \pi \alpha_{EM}} \f$ for charge units.
-*
-* Please, have a look also at \ref Thermodynamics for additional information
-  about the computation of the various Thermodynamics quantities.
+ *
+ * Please, have a look also at \ref input_output_thermodynamics_ for additional
+ * information about the computation of the various Thermodynamics quantities.
  */
 
 /* initialization of the static member version */

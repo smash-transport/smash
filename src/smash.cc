@@ -489,6 +489,10 @@ int main(int argc, char *argv[]) {
     auto configuration = setup_config_and_logging(input_path, particles,
                                                   decaymodes, extra_config);
 
+    if (configuration.validate() == Configuration::Is::Invalid) {
+      throw std::runtime_error("Validation of SMASH input failed.");
+    }
+
     setup_default_float_traps();
 
     // Check output path
@@ -670,11 +674,8 @@ int main(int argc, char *argv[]) {
     logg[LMain].trace(SMASH_SOURCE_LOCATION, " create Experiment");
     auto experiment = ExperimentBase::create(configuration, output_path);
 
-    // Version key is not used anymore. If present, warn user and ignore it.
+    // Version key is deprecated. If present, ignore it.
     if (configuration.has_value({"Version"})) {
-      logg[LMain].warn(
-          "The 'Version' configuration key is not used anymore and should not "
-          "be provided.");
       configuration.take({"Version"});
     }
     check_for_unused_config_values(configuration);

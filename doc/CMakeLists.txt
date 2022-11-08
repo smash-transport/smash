@@ -7,7 +7,7 @@
 #
 #########################################################
 
-find_package(Doxygen 1.8.4 OPTIONAL_COMPONENTS dot)
+find_package(Doxygen 1.9 OPTIONAL_COMPONENTS dot)
 if(DOXYGEN_FOUND)
     # Store Doxygen executable full path in a variable for later
     get_target_property(DOXYGEN Doxygen::doxygen IMPORTED_LOCATION)
@@ -44,7 +44,7 @@ if(DOXYGEN_FOUND)
         message(WARNING "bash not found, docs might be incomplete/faulty")
     endif()
     if(SED)
-        include(UserInputFiles.txt)
+        include(UserInputFiles.cmake)
         add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
                            COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/generateuserdocs.sh ${SED}
                                    ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox ${files_with_input}

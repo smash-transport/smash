@@ -112,7 +112,7 @@ warnings are however still reported.
 
 The following tools can be helpful for development:
 - clang-format = 13.0.0
-- doxygen >= 1.8.4
+- doxygen >= 1.9
 - valgrind
 - cpplint
 - cppcheck
@@ -372,8 +372,8 @@ comments of the form `/*!\Userguide ... */` will be used. Example:
 
 The workflow is that `doc/CMakeLists.txt` extracts all `/*!\Userguide ... */`
 Sections into `doc/userguide.dox` which is then included into the User Guide
-Doxygen tree. Currently, the cmake script processes all `src/include/*.h` and
-`src/*.cc` files.
+Doxygen tree. Currently, Cmake processes all files specified in the
+`doc/UserInputFiles.cmake` in that given order.
 
 
 ### Markdown Documents
@@ -447,22 +447,25 @@ enum class MyEnum {
 ```
 
 
-### How to Add an enum for a new Configuration Value
+### How to add a new input key for SMASH configuration
 
-If a new option is added to the `config.yaml`, it should be done in the
+If a new key is added to the `config.yaml`, it should be done in the
 following way:
 
-* Add `enum class` to `forwarddeclarations.h`.
+* If the key has not a C++ built-in type, add a new `enum class` to
+  _forwarddeclarations.h_ for the new key type.
 * Add `Configuration::Value` cast operator overload.
-* Document possible strings in `config.yaml` and User Guide.
+* Declare the new key in the _input_keys.h_ file according to the
+  instructions you find in the documentation of the `InputKeys` class.
+  Doing so you will also add the needed description for the User Guide.
 
 
-### Code Formatting with `clang-format` and `cmake-format`
+### Code Formatting with used utilities
 
 All C++ code has to be formatted by running [`clang-format`](https://releases.llvm.org/download.html),
 (version `13.0.0`) while CMake code requires [`cmake-format`](https://github.com/cheshirekow/cmake_format)
 (version `0.6.13`) to be run. These two programs automatically format the code in SMASH correctly.
-Use the helper script in SMASH's **_/bin_** directory to format the source code via
+Use the helper script in SMASH's _**bin**_ directory to format the source code via
 
     ./codebase-format-helper.bash C++ -p
     ./codebase-format-helper.bash CMake -p

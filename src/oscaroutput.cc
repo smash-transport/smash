@@ -72,7 +72,7 @@ OscarOutput<Format, Contents>::OscarOutput(const std::filesystem::path &path,
    * time is larger or equal than \c End_Time in configuration file) and
    * periodically during the evolution, the output period is defined by
    * the \c Output_Interval option in the configuration file, see
-   * \ref output_content_specific_options_ "content-specific output options".
+   * \ref input_output_content_specific_ "content-specific output options".
    * The collisions output contains all collisions / decays / box wall crossings
    * and optionally the initial and final configuration.
    */
@@ -255,9 +255,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
  * http://phy.duke.edu/~jeb65/oscar2013. \n
  * Enabling the OSCAR output for particles in the config.yaml file
- * (see \ref input_output_options_), a so-called \c particle_lists.oscar file is
+ * (see \ref input_output_), a so-called \c particle_lists.oscar file is
  * produced when executing SMASH. It allows for a certain degree of flexibility,
- * see \ref output_content_specific_options_ "Content-specific output options"
+ * see \ref input_output_content_specific_ "Content-specific output options"
  * for further details. \n
  * **Unless IC output is enabled, the Particle output always provides the
  * current particle list at a specific time.** See \ref input_ic for details
@@ -362,7 +362,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * If desired, the OSCAR2013 output can be extended
  * by additional particle properties. This requires enabling the extended
  * output in the configuration file, see the \key Extended switch in
- * \ref output_content_specific_options_ "content-specific output options" for
+ * \ref input_output_content_specific_ "content-specific output options" for
  * further details. The header of the extended OSCAR output is structured
  * identically to the non-extended version, but simply contains more columns
  * because of the additional entries:
@@ -495,9 +495,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * https://karman.physics.purdue.edu/OSCAR and
  * http://phy.duke.edu/~jeb65/oscar2013. \n
  * Enabling the OSCAR output for collisions in the config.yaml file
- * (see \ref input_output_options_), a so-called \c full_event_history.oscar
+ * (see \ref input_output_), a so-called \c full_event_history.oscar
  * file is produced when executing SMASH. It allows for a certain degree of
- * flexibility, see \ref output_content_specific_options_
+ * flexibility, see \ref input_output_content_specific_
  * "Content-specific output options" for further details. \n
  * **Collision output always gives
  * a list of collisions/decays/box wall crossings plus optionally
@@ -549,7 +549,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \ref process_type for possible types.
  *
  * If the \key Print_Start_End option is set (see \ref
- * output_content_specific_options_ "content-specific output options" for
+ * input_output_content_specific_ "content-specific output options" for
  * details), (nin, nout) = (0, Nparticles) in the
  * initial timestep and (nin, nout) = (Nparticles, 0) in the final timestep.
  *
@@ -606,7 +606,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * If desired, the OSCAR2013 output can be extended
  * by additional particle properties. This requires enabling the extended
  * output in the configuration file, see the \key Extended switch in
- * \ref output_content_specific_options_ "content-specific output options" for
+ * \ref input_output_content_specific_ "content-specific output options" for
  * further details. The header of the extended OSCAR output is structured
  * identically to the non-extended version, but simply contains more columns
  * because of the additional entries:

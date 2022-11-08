@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015,2017-2020
+ *    Copyright (c) 2015,2017-2020,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -54,6 +54,20 @@ TEST(split) {
   COMPARE(storage[0], "xπ");
   COMPARE(storage[1], ".90928");
   COMPARE(storage[2], "_is_pion_");
+}
+
+TEST(join) {
+  const std::vector<std::string> v = {"Hello", "my", "SMASHies!"};
+  const std::string j1 = "Hello my SMASHies!";
+  const std::string j2 = "Hello__my__SMASHies!";
+  COMPARE(join(v, " "), j1);
+  COMPARE(join(v, "__"), j2);
+}
+
+TEST(quote) {
+  const std::string input = "To be quoted";
+  const std::string result = "\"To be quoted\"";
+  COMPARE(quote(input), result);
 }
 
 }  // namespace smash

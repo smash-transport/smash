@@ -31,7 +31,7 @@ namespace smash {
  *     in an event (\key Smearing: off - mostly useful for box setups).
  *
  * Smearing can be switched on or off in the configuration file, see
- * \ref output_content_specific_options_ "content-specific output options".
+ * \ref input_output_content_specific_ "content-specific output options".
  *
  * The calculated quantities of the file can include: the Eckart density, the
  * energy-momentum tensor in the lab and/or Landau frame, the Landau
@@ -44,7 +44,7 @@ namespace smash {
  * file. They will be calculated using **one** of the following density types:
  * hadron, baryon, baryonic isospin, pion, or none.\n
  * The output file does contain any information about whether all hadrons are
- * included or \ref onlypart "only participants".
+ * included or \ref key_output_thermo_only_part_ "only participants".
  *
  * The format of the file is the following: \n
  *

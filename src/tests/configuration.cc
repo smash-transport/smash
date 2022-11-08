@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2021
+ *    Copyright (c) 2014-2015,2017-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -375,5 +375,29 @@ TEST(reactions_bitset) {
   ReactionsBitSet bs3 = conf.take({"test3"});
   for (std::size_t i = 0; i < bs3.size(); i++) {
     VERIFY(bs3.test(i));
+  }
+}
+
+TEST(configuration_validation) {
+  const Configuration invalid_conf = make_test_configuration();
+  VERIFY(invalid_conf.validate(false) == Configuration::Is::Invalid);
+  VERIFY(invalid_conf.validate(true) == Configuration::Is::Invalid);
+  const Configuration deprecated_conf = Configuration{"Version: 1.8"};
+  VERIFY(deprecated_conf.validate() == Configuration::Is::Deprecated);
+}
+
+TEST(shipped_input_files_validation) {
+  const std::filesystem::path codebase_path{TEST_CONFIG_PATH};
+  const std::string input_folder_name{"input"};
+  const std::string extension(".yaml");
+  for (auto &input_file : std::filesystem::recursive_directory_iterator(
+           codebase_path / input_folder_name)) {
+    if (input_file.path().extension() == extension) {
+      std::cout << " Validating " << input_file.path() << '\n';
+      Configuration config{input_file.path().parent_path(),
+                           input_file.path().filename()};
+      VERIFY(config.validate(false) == Configuration::Is::Valid);
+      VERIFY(config.validate(true) == Configuration::Is::Valid);
+    }
   }
 }

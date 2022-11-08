@@ -234,6 +234,15 @@ ALIASES                = "NucleusModus=input_modi_nucleus_" \
                          "ColliderModus=input_modi_collider_" \
                          "ListModus=input_modi_list_" \
                          "key=\c" \
+                         "collect_key=\xrefitem configuration_keys \"\" \"\""\
+                         "aux_key{6}=\1\anchor \2 \collect_key <b>\key \3</b> &mdash; \4, \5\6"\
+                         "required_key{3}=\aux_key{<hr>,\1,\2,\3,required,}"\
+                         "required_key_no_line{3}=\aux_key{,\1,\2,\3,required,}"\
+                         "optional_key{4}=\aux_key{<hr>,\1,\2,\3,optional\, default = ,<tt>\4</tt>}"\
+                         "optional_key_no_line{4}=\aux_key{,\1,\2,\3,optional\, default = ,<tt>\4</tt>}"\
+                         "see_key{1}=See \ref \1 \"user guide description\" for more information."\
+                         "removed_key{1}=This key has been removed in <tt>SMASH-\1</tt> version."\
+                         "unit{1}=<b>\1</b>"\
                          "Userguide=" \
                          "iref{1}=<a href= http://inspirehep.net/search?p=\1&of=hd>\1</a> \cite \1"
 

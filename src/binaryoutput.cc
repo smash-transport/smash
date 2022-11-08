@@ -114,7 +114,7 @@ static constexpr int HyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * The particles output is Written to the \c particles_binary.bin file.
  * It contains the current particle list at specific moments of time. Every
  * moment of time is written as a 'p' block. For options of this output see
- * \ref output_content_specific_options_ "content-specific output options".
+ * \ref input_output_content_specific_ "content-specific output options".
  *
  * Collisions output
  * -----------------
@@ -128,7 +128,7 @@ static constexpr int HyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * indicating the types of the reaction, such as resonance decay,
  * elastic scattering, soft string process, hard string process, etc.,
  * are written in the 'process_type' blocks. For options of this output see
- * \ref output_content_specific_options_ "content-specific output options".
+ * \ref input_output_content_specific_ "content-specific output options".
  *
  * See also \ref collisions_output_in_box_modus_.
  **/

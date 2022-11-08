@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2018
+ *    Copyright (c) 2014-2018,2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,6 +9,7 @@
 
 #include "smash/stringfunctions.h"
 
+#include <numeric>
 #include <sstream>
 
 namespace smash {
@@ -122,5 +123,14 @@ std::vector<std::string> split(const std::string &s, char delim) {
   split(s, delim, std::back_inserter(elems));
   return elems;
 }
+
+std::string join(const std::vector<std::string> &v, const std::string &delim) {
+  return std::accumulate(std::begin(v), std::end(v), std::string{},
+                         [&delim](const std::string &ss, const std::string &s) {
+                           return ss.empty() ? s : ss + delim + s;
+                         });
+}
+
+std::string quote(const std::string &s) { return "\"" + s + "\""; }
 
 }  // namespace smash

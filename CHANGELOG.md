@@ -23,6 +23,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Added
 * New CMake build configuration `MinSizeRel` to optimize in executable size
 * New examples for usage of SMASH as a library: Full SMASH wrapper and rate equations
+* New validation mechanism of SMASH input (configuration file and `-c` command line option)
 
 ### Fixed
 * Fix bug in collider modus when setting the total energy per nucleon of _each_ beam
@@ -35,11 +36,12 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Default build configuration is now `Release` (instead of `RelWithDebInfo`)
 * Use CMake default compiler flags for `RelWithDebInfo` build configuration, hence having `-O2` optimization level instead of `-03`
 * Minimum supported CMake version is now version 3.16
+* Minimum version to build documentation is now 1.9
 * Changed interface of the `Configuration` class, which is now not copyable and offers more explicit methods, making it harder to be misused
+* The `Version` configuration key is not used anymore and has been deprecated
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now
-* The `Version` configuration key is not used anymore and should not be provided
 * Removed `Rest_Frame_Density_Derivatives_Mode` input key which was not used in the code
 
 

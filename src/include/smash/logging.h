@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2021
+ *    Copyright (c) 2014-2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -22,99 +22,6 @@ namespace smash {
 
 /// Configuration object to set the verbosity of each area independently.
 class Configuration;
-
-/*!\Userguide
- * \page input_logging_ Logging
- * This section controls the logging levels for different areas of the code.
- * It contains the following keys, all of which have string values and are
- * optional:
- * \li \key default (determines the default logging level for all areas)
- * \li \key Legacy
- * \li \key Main
- * \li \key Experiment
- * \li \key Box
- * \li \key Collider
- * \li \key Sphere
- * \li \key Action
- * \li \key InputParser
- * \li \key ParticleType
- * \li \key FindScatter
- * \li \key Clock
- * \li \key DecayModes
- * \li \key Resonances
- * \li \key ScatterAction
- * \li \key Distributions
- * \li \key Propagation
- * \li \key Grid
- * \li \key List
- * \li \key Nucleus
- * \li \key Density
- * \li \key PauliBlocking
- * \li \key Tmn
- * \li \key Fpe
- * \li \key Lattice
- * \li \key Pythia
- * \li \key GrandcanThermalizer
- * \li \key CrossSections
- * \li \key Output
- * \li \key HyperSurfaceCrossing
- * \li \key InitialConditions
- * \li \key ScatterActionMulti
- *
- * Each key can have one of the following values:
- * \li ALL   - Log all messages (default)
- * \li TRACE - The lowest severity for messages describing the program flow
- * \li DEBUG - Debug messages
- * \li INFO  - Messages of informational nature
- * \li WARN  - Warning messages
- * \li ERROR - Non-fatal errors
- * \li FATAL - Messages that indicate terminal application failure
- * \li OFF   - If selected no messages will be output
- *
- * Note that the logging levels TRACE and DEBUG are only available in
- * debugging builds (i.e. with -DCMAKE_BUILD_TYPE=Debug). \n
- *
- * \n
- * **Example: Configuring the Logging Area**\n
- * To activate all informational messages (\key INFO) for all logging areas,
- * include the following in the configuration file:
- *\verbatim
- Logging:
-     default: INFO
-     Legacy: INFO
-     Main: INFO
-     Experiment: INFO
-     Box: INFO
-     Collider: INFO
-     Sphere: INFO
-     ParticleType: INFO
-     Action: INFO
-     FindScatter: INFO
-     DecayModes: INFO
-     ScatterAction: INFO
-     Pythia: INFO
-     InputParser: INFO
-     Clock: INFO
-     Resonances: INFO
-     Distributions: INFO
-     Propagation: INFO
-     Grid: INFO
-     List: INFO
-     Nucleus: INFO
-     Density: INFO
-     PauliBlocking: INFO
-     Tmn: INFO
-     Fpe: INFO
-     Lattice: INFO
-     GrandcanThermalizer: INFO
-     CrossSections: INFO
-     Output: INFO
-     HadronGasEos: INFO
-     HyperSurfaceCrossing: INFO
-     InitialConditions: INFO
-     ScatterActionMulti: INFO
- \endverbatim
- */
 
 /** \addtogroup logging
  * @{
@@ -177,7 +84,8 @@ class Configuration;
  *
  * To add a new area add one more line with DECLARE_LOGAREA at the bottom: Pick
  * the next number for the id and a name to identify it in the log and source
- * code. Then add the name to the end of the AreaTuple.
+ * code. Then add the name to the end of the AreaTuple and create a new logging
+ * key in the InputKeys object in the input_keys.h file.
  */
 namespace LogArea {
 DECLARE_LOGAREA(0, Main);
@@ -212,18 +120,18 @@ DECLARE_LOGAREA(28, HadronGasEos);
 DECLARE_LOGAREA(29, HyperSurfaceCrossing);
 DECLARE_LOGAREA(30, InitialConditions);
 DECLARE_LOGAREA(31, ScatterActionMulti);
+DECLARE_LOGAREA(32, Configuration);
 
 /**
  * This type collects all existing log areas so they will be created with the
  * correct log level automatically.
  */
-using AreaTuple =
-    std::tuple<Main, Experiment, Box, Collider, Sphere, Action, InputParser,
-               ParticleType, FindScatter, Clock, DecayModes, Resonances,
-               ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
-               Density, PauliBlocking, Tmn, Fpe, Lattice, Sampling, Pythia,
-               GrandcanThermalizer, CrossSections, Output, HadronGasEos,
-               HyperSurfaceCrossing, InitialConditions, ScatterActionMulti>;
+using AreaTuple = std::tuple<
+    Main, Experiment, Box, Collider, Sphere, Action, InputParser, ParticleType,
+    FindScatter, Clock, DecayModes, Resonances, ScatterAction, Distributions,
+    Propagation, Grid, List, Nucleus, Density, PauliBlocking, Tmn, Fpe, Lattice,
+    Sampling, Pythia, GrandcanThermalizer, CrossSections, Output, HadronGasEos,
+    HyperSurfaceCrossing, InitialConditions, ScatterActionMulti, Configuration>;
 }  // namespace LogArea
 
 /**
