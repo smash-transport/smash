@@ -601,8 +601,7 @@ class Key {
  *
  * SMASH simulation supports two sets of potentials:
  * -# Skyrme and/or Symmetry potentials
- * -# VDF (vector density functional) model potentials,
- *    https://arxiv.org/pdf/2011.06635.pdf \n
+ * -# VDF (vector density functional) model potentials, \iref{Sorensen:2020ygf}.
  *
  * Coulomb potentials can be additionally enabled.
  *
@@ -713,11 +712,11 @@ class Key {
  * order phase transitions: the well-known phase transition in ordinary nuclear
  * matter, and a transition at high baryon densities meant to model a possible
  * QCD phase transition (a "QGP-like" phase transition); see
- * https://arxiv.org/pdf/2011.06635.pdf for details and example parameter sets
- * for the case \f$N=4\f$. The user can decide how many terms \f$N\f$ should
- * enter the potential by populating the coefficients and powers vectors in the
- * config file with a chosen number of entries. The number of coefficients must
- * match the number of powers.
+ * \iref{Sorensen:2020ygf} for details and example parameter sets for the case
+ * \f$N=4\f$. The user can decide how many terms \f$N\f$ should enter the
+ * potential by populating the coefficients and powers vectors in the config
+ * file with a chosen number of entries. The number of coefficients must match
+ * the number of powers.
  *
  * The potential parameters must be specified in the `VDF` subsection of the
  * `%Potentials` one.

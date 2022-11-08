@@ -244,7 +244,7 @@ ALIASES                = "NucleusModus=input_modi_nucleus_" \
                          "removed_key{1}=This key has been removed in <tt>SMASH-\1</tt> version."\
                          "unit{1}=<b>\1</b>"\
                          "Userguide=" \
-                         "iref{1}=<a href= http://inspirehep.net/search?p=\1&of=hd>\1</a> \cite \1"
+                         "iref{1}=<a href= https://inspirehep.net/search?p=\1&of=hd>\1</a> \cite \1"
 
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C sources
 # only. Doxygen will then generate output that is more tailored for C. For

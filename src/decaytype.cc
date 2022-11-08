@@ -359,7 +359,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
         // width for decay into 2γ
         const double gamma_2g = t->get_partial_width(m_par, {&photon, &photon});
         double ff = em_form_factor_ps(pdg, m_dil);  // form factor
-        /// π⁰, η, η': see \iref{Landsberg:1986fd}, equation (3.8)
+        /// π⁰, η, η': see \iref{Landsberg:1985gaz}, equation (3.8)
         return (4. * fine_structure / (3. * M_PI)) * gamma_2g / m_dil *
                pow_int(1. - m_dil / m_par * m_dil / m_par, 3) * ff * ff *
                ph_sp_factor;
@@ -369,7 +369,7 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
         const double gamma_pg = t->get_partial_width(m_par, {other, &photon});
         double ff_sqr =
             em_form_factor_sqr_vec(pdg, m_dil);  // form factor squared
-        /// ω, φ: see \iref{Landsberg:1986fd}, equation (3.4)
+        /// ω, φ: see \iref{Landsberg:1985gaz}, equation (3.4)
         const double n1 = m_par_sqr - m_other_sqr;
         const double rad = pow_int(1. + m_dil_sqr / n1, 2) -
                            4. * m_par_sqr * m_dil_sqr / (n1 * n1);

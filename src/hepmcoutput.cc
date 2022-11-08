@@ -24,7 +24,7 @@ namespace smash {
  * SMASH HepMC output is an implementation of the HepMC3 Event Record Library.
  * The aim is to provide a format compatible with other frameworks like Rivet
  * (https://rivet.hepforge.org). For resources regarding HepMC, see
- * http://hepmc.web.cern.ch/hepmc/ and https://arxiv.org/abs/1912.08005.
+ * http://hepmc.web.cern.ch/hepmc/ and \iref{Buckley:2019xhk}.
  *
  * The SMASH HepMC output can be:
  * - _HepMC_asciiv3_ plain human readable ASCII format
@@ -55,7 +55,7 @@ namespace smash {
  * energies with the \key --ignore-beams option. When using the Rivet output
  * this check is disabled by default.
  * - The HepMC output is best suited to \ref input_modi_collider_ modus, where
- *   the two ion "particles" are constructed and included as the intial incoming
+ *   the two ion "particles" are constructed and included as the initial incoming
  *   particles in the particle list, as well.
  * - In other SMASH modi (box, sphere, list, etc.) only the inital
  *   and final hadrons are written out as the incoming and outgoing particles
@@ -77,7 +77,7 @@ namespace smash {
  *   All initial state particles are incoming particles and all final state
  *   particles are outgoing particles of this vertex. Scatterings
  *   happening during the SMASH event are not recorded. For the collider
- *   modus, the intial state particles are combined into two single
+ *   modus, the initial state particles are combined into two single
  *   colliding nucleus "particles" with a nuclear pdg code.
  * - \key Collisions:  with this format, the full event tree is written.
  *   Furthermore, as in the previous \key Particles case, in collider modus
@@ -126,7 +126,7 @@ namespace smash {
  * particles, respectively, which have been recorded.
  *
  * The content of line 8 _"A 0 GenHeavyIon ..."_ is described in
- * Appendix A.3.3 of https://arxiv.org/pdf/1912.08005.pdf, however SMASH
+ * Appendix A.3.3 of \iref{Buckley:2019xhk}, however SMASH
  * prints only the value of the impact parameter (1.6090284 in the example).
  * This line closes the header, from now on, until the record of the next
  * event, there are only lines starting with P (for particle data) or V
