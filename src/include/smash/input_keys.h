@@ -518,6 +518,8 @@ class Key {
  * information about the impact parameter, defined as the distance \unit{in fm}
  * of the two straight lines that the center of masses of the nuclei travel on.
  * The separation of the two colliding nuclei is by default along the x-axis.
+ * If the `Impact` section is not specified, default values here below will be
+ * used, e.g. the impact parameter will be set to 0 fm.
  *
  * \warning
  * Note that there are no safeguards to prevent you from specifying negative
