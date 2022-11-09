@@ -139,7 +139,7 @@ class BoxModus : public ModusDefault {
  private:
   /// Initial momenta distribution: thermal or peaked momenta
   const BoxInitialCondition initial_condition_;
-  /// Length of the cube's edge in fm/c
+  /// Length of the cube's edge in fm
   const double length_;
   /// time after which output is written
   const double equilibration_time_;

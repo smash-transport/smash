@@ -287,7 +287,7 @@ class Experiment : public ExperimentBase {
    * Propagate all particles until time to_time without any interactions
    * and shine dileptons.
    *
-   * \param[in] to_time Time at the end of propagation [fm/c]
+   * \param[in] to_time Time at the end of propagation [fm]
    * \param[in, out] particles Particles to be propagated
    */
   void propagate_and_shine(double to_time, Particles &particles);
@@ -320,7 +320,7 @@ class Experiment : public ExperimentBase {
    * ScatterActionsFinder will find all collisions within the maximal
    * transverse distance (which is determined by the maximal cross section).
    *
-   * \param[in] dt The current time step size [fm/c]
+   * \param[in] dt The current time step size [fm]
    * \return The minimal required size of cells
    */
   double compute_min_cell_length(double dt) const {
@@ -704,7 +704,7 @@ class Experiment : public ExperimentBase {
 /// Creates a verbose textual description of the setup of the Experiment.
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  out << "End time: " << e.end_time_ << " fm/c\n";
+  out << "End time: " << e.end_time_ << " fm\n";
   out << e.modus_;
   return out;
 }
@@ -1686,12 +1686,12 @@ const std::string hline(113, '-');
  * \param[in] conserved_initial Initial quantum numbers needed to check the
  *            conservations.
  * \param[in] time_start Moment in the REAL WORLD when SMASH starts to run [s].
- * \param[in] time Current moment in SMASH [fm/c].
+ * \param[in] time Current moment in SMASH [fm].
  * \param[in] E_mean_field Value of the mean-field contribution to the total
  *            energy of the system at the current time.
  * \param[in] E_mean_field_initial Value of the mean-field contribution to the
  *            total energy of the system at t=0.
- * \return 'Current time in SMASH [fm/c]', 'Total kinetic energy in the system
+ * \return 'Current time in SMASH [fm]', 'Total kinetic energy in the system
  *         [GeV]', 'Total mean field energy in the system [GeV]', 'Total energy
  *         in the system [GeV]', 'Total energy per particle [GeV]', 'Deviation
  *         of the energy per particle from the initial value [GeV]', 'Number of
@@ -2102,7 +2102,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end) {
     const double t = parameters_.labclock->current_time();
     const double dt =
         std::min(parameters_.labclock->timestep_duration(), t_end - t);
-    logg[LExperiment].debug("Timestepless propagation for next ", dt, " fm/c.");
+    logg[LExperiment].debug("Timestepless propagation for next ", dt, " fm.");
 
     // Perform forced thermalization if required
     if (thermalizer_ &&
@@ -2355,7 +2355,7 @@ void Experiment<Modus>::intermediate_output() {
           logg[LExperiment].info()
               << "\n\n\n\t The mean field at t = "
               << parameters_.outputclock->current_time()
-              << " [fm/c] differs from the mean field at t = 0:"
+              << " [fm] differs from the mean field at t = 0:"
               << "\n\t\t                 initial_mean_field_energy_ = "
               << initial_mean_field_energy_ << " [GeV]"
               << "\n\t\t abs[(E_MF - E_MF(t=0))/(E_MF + E_MF(t=0))] = "

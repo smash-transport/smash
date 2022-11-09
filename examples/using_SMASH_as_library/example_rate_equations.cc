@@ -133,8 +133,8 @@ int main() {
   const double Nhe3_init = 0;
   const double NH3L_init = 0;
 
-  const double dt = 0.01;    // fm/c, integration timestep
-  const double tend = 20.0;  // fm/c, end time
+  const double dt = 0.01;    // fm, integration timestep
+  const double tend = 20.0;  // fm, end time
 
   std::cout << "\nRate Equation Example\n---------------------" << std::endl;
 
@@ -183,7 +183,7 @@ int main() {
          la_he3 = Nhe3_init / (nth_he3 * V), la_H3L = NH3L_init / (nth_H3L * V);
 
   int step_max = std::ceil(tend / dt);
-  std::cout << "# t[fm/c], p, n, La, d, t, he3, H3L, NB, NS" << std::endl;
+  std::cout << "# t[fm], p, n, La, d, t, he3, H3L, NB, NS" << std::endl;
   for (int step = 0; step < step_max; step++) {
     const double nB = la_p * nth_p + la_n * nth_n + 2 * la_d * nth_d +
                       la_La * nth_La +

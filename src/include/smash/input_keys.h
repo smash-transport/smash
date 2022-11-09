@@ -5520,7 +5520,7 @@ General:
  * energy density is above 0.3 GeV/fm³. The lattice is initialized with 21
  * cells in x and y direction and 101 cells in z-direction. The lattice size is
  * 20 fm in x and y direction and 50 fm in z-direction. The thermalization is
- * applied only for times later than 10 fm with a timestep of 1 fm/c. The
+ * applied only for times later than 10 fm with a timestep of 1 fm. The
  * sampling is done according to the "biased BF" algorithm.
  *\verbatim
  Forced_Thermalization:

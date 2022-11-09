@@ -74,7 +74,7 @@ const int RootOutput::max_buffer_size_ = 500000;
  * \li \c npart is number of particles in the block
  * \li \c test_p is number of testparticles per particle
  * \li \c modus_l is modus length
- * \li \c current_t is time associated with the output block, in fm/c
+ * \li \c current_t is time associated with the output block, in fm
  * \li \c impact_b is the impact parameter of the event
  * \li \c empty_event indicates whether the projectile did not interact with the
  * target

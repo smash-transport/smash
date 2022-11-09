@@ -504,7 +504,7 @@ void GrandCanThermalizer::thermalize_mode_algo(
 void GrandCanThermalizer::thermalize(const Particles &particles, double time,
                                      int ntest) {
   logg[LGrandcanThermalizer].info("Starting forced thermalization, time ", time,
-                                  " fm/c");
+                                  " fm");
   to_remove_.clear();
   sampled_list_.clear();
   /* Remove particles from the cells with e > e_crit_,
@@ -624,7 +624,7 @@ void GrandCanThermalizer::print_statistics(const Clock &clock) const {
     in_therm_reg.nq /= e_sum_in_therm_reg;
   }
 
-  std::cout << "Current time [fm/c]: " << clock.current_time() << std::endl;
+  std::cout << "Current time [fm]: " << clock.current_time() << std::endl;
   std::cout << "Averages on the lattice - T[GeV], mub[GeV], mus[GeV], muq[GeV] "
             << "nb[fm^-3], ns[fm^-3], nq[fm^-3]: " << on_lattice.T << " "
             << on_lattice.mub << " " << on_lattice.mus << " " << on_lattice.muq

@@ -59,7 +59,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
    * only necessary for frozen Fermi motion
    * \return How long does it take for the two incoming particles
-   *         to propagate before scattering [fm/c]. It's set equal
+   *         to propagate before scattering [fm]. It's set equal
    *         to -1 if the two particles are not moving relative to each
    *         other.
    */
@@ -126,7 +126,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
          * position of particle 2: \f$r_2\f$ [fm]
          * velocity of particle 1: \f$v_1\f$
          * velocity of particle 1: \f$v_2\f$
-         * \f[t_{coll} = - (r_1 - r_2) . (v_1 - v_2) / (v_1 - v_2)^2\f] [fm/c]
+         * \f[t_{coll} = - (r_1 - r_2) . (v_1 - v_2) / (v_1 - v_2)^2\f] [fm]
          */
         const ThreeVector dv_times_e1e2 =
             p1_mom.threevec() * p2_mom.x0() - p2_mom.threevec() * p1_mom.x0();
@@ -167,7 +167,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *
    * \param[in] search_list A list of particles within the current cell
    * \param[in] neighbors_list A list of particles within the neighboring cell
-   * \param[in] dt The maximum time interval at the current time step [fm/c]
+   * \param[in] dt The maximum time interval at the current time step [fm]
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
    * only necessary for frozen Fermi motion
    * \return A list of possible scatter actions
@@ -182,7 +182,7 @@ class ScatterActionsFinder : public ActionFinderInterface {
    *
    * \param[in] search_list A list of particles within the current cell
    * \param[in] surrounding_list The whole particle list
-   * \param[in] dt The maximum time interval at the current time step [fm/c]
+   * \param[in] dt The maximum time interval at the current time step [fm]
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
    * only necessary for frozen Fermi motion
    * \return A list of possible scatter actions

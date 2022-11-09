@@ -153,7 +153,7 @@ TEST(scatter_particle_pair_only_once) {
                           std::to_string(elastic_parameter) + "}");
   ScatterActionsFinder finder(config, exp_par);
   ParticleList search_list = p.copy_to_vector();
-  double dt = 0.9;                   // fm/c
+  double dt = 0.9;                   // fm
   const double grid_cell_vol = 0.0;  // no grid
 
   // look for scatters, we expect one

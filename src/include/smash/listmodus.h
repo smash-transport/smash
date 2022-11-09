@@ -312,7 +312,7 @@ class ListBoxModus : public ListModus {
   /// shift_id is the start number of file_id_
   const int shift_id_;
 
-  /// Length of the cube's edge in fm/c
+  /// Length of the cube's edge in fm
   const double length_;
 
   /// file_id_ is the id of the current file
