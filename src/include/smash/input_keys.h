@@ -524,8 +524,8 @@ class Key {
  * \warning
  * Note that there are no safeguards to prevent you from specifying negative
  * impact parameters. The value chosen here is simply the x-component of
- * \f$\vec{\mkern0mu b}\f$. The result will be that the projectile and target
- * will have switched position in x.
+ * \f$\mathbf{b}\f$. The result will be that the projectile and target will have
+ * switched position in x.
  */
 
 /*!\Userguide
@@ -601,7 +601,7 @@ class Key {
 /*!\Userguide
  * \page input_potentials_ %Potentials
  *
- * SMASH simulation supports two sets of potentials:
+ * SMASH simulation supports two sets of nuclear potentials:
  * -# Skyrme and/or Symmetry potentials
  * -# VDF (vector density functional) model potentials, \iref{Sorensen:2020ygf}.
  *
@@ -731,21 +731,36 @@ class Key {
  * For simplicity we assume magnetostatics such that the fields can be
  * directly calculated as
  * \f[
- * \vec{E}(\vec{r})=-\vec{\nabla} \phi(\vec{r}) =
- * -\vec{\nabla}\int\frac{\rho(\vec{r}')}{|\vec{r}-\vec{r}'|} dV'
- * =\int\frac{\rho(\vec{r}')(\vec{r}-\vec{r}')}{|\vec{r}-\vec{r}'|^3}dV'
+ * \mathbf{E}(\mathbf{r})
+ * = -\boldsymbol{\nabla} \phi(\mathbf{r})
+ * = -\boldsymbol{\nabla}\int\frac{\rho(\mathbf{r}')}
+ *                                {|\mathbf{r}-\mathbf{r}'|} dV'
+ * = \int\frac{\rho(\mathbf{r}')(\mathbf{r}-\mathbf{r}')}
+ *            {|\mathbf{r}-\mathbf{r}'|^3}dV'
  * \f]
  * and
  * \f[
- * \vec{B}(\vec{r}) = \vec{\nabla}\times\vec{A}(\vec{r})
- * =\vec{\nabla}\times\int \frac{\vec{j}(\vec{r}')}{|\vec{r}-\vec{r}'|}dV'
- * =\int\vec{j}(\vec{r}')\times\frac{\vec{r}-\vec{r}'}{|\vec{r}-\vec{r}'|^3}dV'.
- * \f] These integrals are solved numerically on the SMASH lattice, where the
+ * \mathbf{B}(\mathbf{r})
+ * = \boldsymbol{\nabla}\times\mathbf{A}(\mathbf{r})
+ * = \boldsymbol{\nabla}\times
+ *   \int\frac{\mathbf{j}(\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|}dV'
+ * = \int\mathbf{j}(\mathbf{r}')\times
+ *   \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|^3}dV'\;.
+ * \f]
+ * These integrals are solved numerically on the SMASH lattice, where the
  * discretized equations read
- * \f[ \vec{E}(\vec{r}_j) = \sum_{i\neq j}
- * \frac{\rho(\vec{r}_i)(\vec{r}_j-\vec{r}_i)}{|\vec{r}_j-\vec{r}_i|^3}\Delta
- * V \f] and \f[ \vec{B}(\vec{r}_j)=\sum_{i\neq j} \vec{j}(\vec{r}_i)\times
- * \frac{\vec{r}_j-\vec{r}_i}{|\vec{r}_j-\vec{r}_i|^3} \Delta V \f]
+ * \f[
+ * \mathbf{E}(\mathbf{r}_j)
+ * = \sum_{i\neq j} \frac{\rho(\mathbf{r}_i)(\mathbf{r}_j-\mathbf{r}_i)}
+ *                       {|\mathbf{r}_j-\mathbf{r}_i|^3}\Delta V
+ * \f]
+ * and
+ * \f[
+ * \mathbf{B}(\mathbf{r}_j)
+ * = \sum_{i\neq j}\mathbf{j}(\mathbf{r}_i)\times
+ *                 \frac{\mathbf{r}_j-\mathbf{r}_i}
+ *                      {|\mathbf{r}_j-\mathbf{r}_i|^3} \Delta V
+ * \f]
  * with the lattice cell volume \f$ \Delta V \f$. For efficiency the integration
  * volume is cut at \f$ R_\mathrm{cut} \f$, which is taken from the
  * configuration. Note that in the final equations the summand for \f$i=j\f$

@@ -159,7 +159,7 @@ class ParticleData {
 
   /**
    * Set the particle's 4-momentum directly
-   * \param[in] momentum_vector 4-vector \f$p^\mu = (E,\vec{p})^T\f$
+   * \param[in] momentum_vector 4-vector \f$p^\mu = (E,\mathbf{p})^T\f$
    */
   void set_4momentum(const FourVector &momentum_vector) {
     momentum_ = momentum_vector;

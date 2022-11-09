@@ -204,8 +204,8 @@ class Nucleus {
 
   /**
    * Calculate geometrical center of the nucleus
-   * \return \f$\vec r_s = \frac{1}{N} \sum_{i=1}^N \vec r_i\f$ (for a
-   * nucleus with N particles that are at the positions \f$\vec r_i\f$).
+   * \return \f$\mathbf{r}_s = \frac{1}{N} \sum_{i=1}^N \mathbf{r}_i\f$ (for a
+   * nucleus with N particles that are at the positions \f$\mathbf{r}_i\f$).
    */
   FourVector center() const;
 
