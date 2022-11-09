@@ -602,10 +602,14 @@ class Key {
  * \page input_potentials_ %Potentials
  *
  * SMASH simulation supports two sets of nuclear potentials:
- * -# Skyrme and/or Symmetry potentials
+ * -# Skyrme with (optional) Symmetry potentials;
  * -# VDF (vector density functional) model potentials, \iref{Sorensen:2020ygf}.
  *
- * Coulomb potentials can be additionally enabled.
+ * In addition to these nuclear potentials, Coulomb potentials can also be
+ * enabled.
+ *
+ * \note Skyrme and Symmetry potentials do not need to be both active, but if
+ * one of the two is enabled, then one cannot use VDF potentials.
  *
  * Skyrme and VDF potentials both describe the behavior of symmetric nuclear
  * matter. The symmetry potential can adjust the Skyrme potential (but not the
@@ -617,7 +621,7 @@ class Key {
  * - \subpage input_potentials_VDF_
  * - \subpage input_potentials_coulomb_
  *
- * ### Configuring Skyrme potentials
+ * ### Configuring potentials
  *
  * The following snippet of the configuration file configures SMASH such
  * that the Skyrme as well as the Symmetry potential are activated for the
