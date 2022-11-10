@@ -362,6 +362,16 @@ class Key {
  *
  * Note that the logging levels `TRACE` and `DEBUG` are only available in
  * debug builds (i.e. running `cmake` with `-DCMAKE_BUILD_TYPE=Debug`).
+ *
+ * \warning
+ * In the following you will find more logging areas that as user you are
+ * probably going to need. Most of them are useful to developers e.g. for
+ * debugging purposes and that's also the reason why, in Release mode, only few
+ * logging areas appear in the standard output. If the explanation of a given
+ * key looks cryptic to you, you are likely not going to need that key. For the
+ * sake of completeness, though, we list here all possible logging areas, trying
+ * to list first those logging areas that might most likely be relevant for the
+ * user.
  */
 
 /*!\Userguide
@@ -1285,7 +1295,7 @@ struct InputKeys {
    * \page input_logging_
    * \optional_key{key_log_default_,default,string,ALL}
    *
-   * It determines the default logging level for all areas
+   * It determines the default logging level for all areas.
    */
   /**
    * \see_key{key_log_default_}
@@ -1296,6 +1306,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_main_,Main,string,$\{default\}}
+   *
+   * Messages coming from top-level of the application belong to this area.
    */
   /**
    * \see_key{key_log_main_}
@@ -1306,6 +1318,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_experiment_,%Experiment,string,$\{default\}}
+   *
+   * Messages mostly coming from the `Experiment` class belong to this area.
    */
   /**
    * \see_key{key_log_experiment_}
@@ -1316,6 +1330,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_box_,Box,string,$\{default\}}
+   *
+   * Messages specific to the box modus implementation belong to this area.
    */
   /**
    * \see_key{key_log_box_}
@@ -1326,6 +1342,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_collider_,Collider,string,$\{default\}}
+   *
+   * Messages specific to the collider modus implementation belong to this area.
    */
   /**
    * \see_key{key_log_collider_}
@@ -1336,6 +1354,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_sphere_,Sphere,string,$\{default\}}
+   *
+   * Messages specific to the sphere modus implementation belong to this area.
    */
   /**
    * \see_key{key_log_sphere_}
@@ -1346,6 +1366,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_action_,%Action,string,$\{default\}}
+   *
+   * Messages mostly coming from the `Action` class belong to this area.
    */
   /**
    * \see_key{key_log_action_}
@@ -1356,6 +1378,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_input_parser_,InputParser,string,$\{default\}}
+   *
+   * Messages coming from input parsing tools belong to this area.
    */
   /**
    * \see_key{key_log_input_parser_}
@@ -1366,6 +1390,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_particle_type_,%ParticleType,string,$\{default\}}
+   *
+   * Messages coming from particle types implementation belong to this area.
    */
   /**
    * \see_key{key_log_particle_type_}
@@ -1376,6 +1402,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_find_scatter_,FindScatter,string,$\{default\}}
+   *
+   * Messages coming from search tools for scattering belong to this area.
    */
   /**
    * \see_key{key_log_find_scatter_}
@@ -1386,6 +1414,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_clock_,%Clock,string,$\{default\}}
+   *
+   * Messages coming from clock implementation belong to this area.
    */
   /**
    * \see_key{key_log_clock_}
@@ -1396,6 +1426,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_decay_modes_,%DecayModes,string,$\{default\}}
+   *
+   * Messages coming from decay tools belong to this area.
    */
   /**
    * \see_key{key_log_decay_modes_}
@@ -1406,6 +1438,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_resonances_,Resonances,string,$\{default\}}
+   *
+   ** Messages coming from resonances aspects belong to this area.
    */
   /**
    * \see_key{key_log_resonances_}
@@ -1416,6 +1450,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_scatter_action_,%ScatterAction,string,$\{default\}}
+   *
+   * Messages about scattering events belong to this area.
    */
   /**
    * \see_key{key_log_scatter_action_}
@@ -1426,6 +1462,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_distributions_,Distributions,string,$\{default\}}
+   *
+   * Messages about quantity distributions belong to this area.
    */
   /**
    * \see_key{key_log_distributions_}
@@ -1436,6 +1474,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_propagation_,Propagation,string,$\{default\}}
+   *
+   * Messages about particles propagation belong to this area.
    */
   /**
    * \see_key{key_log_propagation_}
@@ -1446,6 +1486,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_grid_,%Grid,string,$\{default\}}
+   *
+   * Messages coming from the grid implementation belong to this area.
    */
   /**
    * \see_key{key_log_grid_}
@@ -1456,6 +1498,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_list_,List,string,$\{default\}}
+   *
+   * Messages specific to the list modus implementation belong to this area.
    */
   /**
    * \see_key{key_log_list_}
@@ -1466,6 +1510,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_nucleus_,%Nucleus,string,$\{default\}}
+   *
+   * Messages coming from the nucleus implementation belong to this area.
    */
   /**
    * \see_key{key_log_nucleus_}
@@ -1476,6 +1522,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_density_,Density,string,$\{default\}}
+   *
+   * Messages coming from density calculations belong to this area.
    */
   /**
    * \see_key{key_log_density_}
@@ -1486,6 +1534,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_pauli_blocking_,PauliBlocking,string,$\{default\}}
+   *
+   * Messages about Pauli blocking belong to this area.
    */
   /**
    * \see_key{key_log_pauli_blocking_}
@@ -1496,6 +1546,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_tmn_,Tmn,string,$\{default\}}
+   *
+   * Messages about the energy momentum tensor belong to this area.
    */
   /**
    * \see_key{key_log_tmn_}
@@ -1506,6 +1558,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_fpe_,Fpe,string,$\{default\}}
+   *
+   * Messages about floating point exceptions belong to this area.
    */
   /**
    * \see_key{key_log_fpe_}
@@ -1516,6 +1570,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_lattice_,Lattice,string,$\{default\}}
+   *
+   * Messages coming from the lattice implementation belong to this area.
    */
   /**
    * \see_key{key_log_lattice_}
@@ -1526,6 +1582,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_pythia_,Pythia,string,$\{default\}}
+   *
+   * Messages coming from Pythia usage in SMASH belong to this area.
    */
   /**
    * \see_key{key_log_pythia_}
@@ -1536,6 +1594,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{default\}}
+   *
+   * Messages about the gran-canonical thermalization belong to this area.
    */
   /**
    * \see_key{key_log_grandcan_thermalizer_}
@@ -1546,6 +1606,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_cross_sections_,%CrossSections,string,$\{default\}}
+   *
+   * Messages about cross sections belong to this area.
    */
   /**
    * \see_key{key_log_cross_sections_}
@@ -1556,6 +1618,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_output_,Output,string,$\{default\}}
+   *
+   * Messages output functionality belong to this area.
    */
   /**
    * \see_key{key_log_output_}
@@ -1566,6 +1630,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_hyper_surface_crossing_,HyperSurfaceCrossing,string,$\{default\}}
+   *
+   * Messages about hypersurface crossing belong to this area.
    */
   /**
    * \see_key{key_log_hyper_surface_crossing_}
@@ -1576,6 +1642,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_initial_conditions_,InitialConditions,string,$\{default\}}
+   *
+   * Messages about initial conditions belong to this area.
    */
   /**
    * \see_key{key_log_initial_conditions_}
@@ -1586,6 +1654,9 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_scatter_action_multi_,%ScatterActionMulti,string,$\{default\}}
+   *
+   * Messages about scattering events with multiple particles belong to this
+   * area.
    */
   /**
    * \see_key{key_log_scatter_action_multi_}
@@ -1596,6 +1667,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_configuration_,%Configuration,string,$\{default\}}
+   *
+   * Messages about the input configuration file belong to this area.
    */
   /**
    * \see_key{key_log_configuration_}

@@ -111,27 +111,26 @@ DECLARE_LOGAREA(19, PauliBlocking);
 DECLARE_LOGAREA(20, Tmn);
 DECLARE_LOGAREA(21, Fpe);
 DECLARE_LOGAREA(22, Lattice);
-DECLARE_LOGAREA(23, Sampling);
-DECLARE_LOGAREA(24, Pythia);
-DECLARE_LOGAREA(25, GrandcanThermalizer);
-DECLARE_LOGAREA(26, CrossSections);
-DECLARE_LOGAREA(27, Output);
-DECLARE_LOGAREA(28, HadronGasEos);
-DECLARE_LOGAREA(29, HyperSurfaceCrossing);
-DECLARE_LOGAREA(30, InitialConditions);
-DECLARE_LOGAREA(31, ScatterActionMulti);
-DECLARE_LOGAREA(32, Configuration);
+DECLARE_LOGAREA(23, Pythia);
+DECLARE_LOGAREA(24, GrandcanThermalizer);
+DECLARE_LOGAREA(25, CrossSections);
+DECLARE_LOGAREA(26, Output);
+DECLARE_LOGAREA(27, HyperSurfaceCrossing);
+DECLARE_LOGAREA(28, InitialConditions);
+DECLARE_LOGAREA(29, ScatterActionMulti);
+DECLARE_LOGAREA(30, Configuration);
 
 /**
  * This type collects all existing log areas so they will be created with the
  * correct log level automatically.
  */
-using AreaTuple = std::tuple<
-    Main, Experiment, Box, Collider, Sphere, Action, InputParser, ParticleType,
-    FindScatter, Clock, DecayModes, Resonances, ScatterAction, Distributions,
-    Propagation, Grid, List, Nucleus, Density, PauliBlocking, Tmn, Fpe, Lattice,
-    Sampling, Pythia, GrandcanThermalizer, CrossSections, Output, HadronGasEos,
-    HyperSurfaceCrossing, InitialConditions, ScatterActionMulti, Configuration>;
+using AreaTuple =
+    std::tuple<Main, Experiment, Box, Collider, Sphere, Action, InputParser,
+               ParticleType, FindScatter, Clock, DecayModes, Resonances,
+               ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
+               Density, PauliBlocking, Tmn, Fpe, Lattice, Pythia,
+               GrandcanThermalizer, CrossSections, Output, HyperSurfaceCrossing,
+               InitialConditions, ScatterActionMulti, Configuration>;
 }  // namespace LogArea
 
 /**
