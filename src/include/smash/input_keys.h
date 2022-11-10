@@ -1293,7 +1293,10 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_default_,default,string,ALL}
+   * <hr>
+   * ### Setting the default for all logging areas
+   *
+   * \optional_key_no_line{key_log_default_,default,string,ALL}
    *
    * It determines the default logging level for all areas.
    */
@@ -1305,7 +1308,10 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_main_,Main,string,$\{default\}}
+   * <hr>
+   * ### Most user-relevant logging areas
+   *
+   * \optional_key_no_line{key_log_main_,Main,string,$\{default\}}
    *
    * Messages coming from top-level of the application belong to this area.
    */
@@ -1353,6 +1359,18 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
+   * \optional_key{key_log_list_,List,string,$\{default\}}
+   *
+   * Messages specific to the list modus implementation belong to this area.
+   */
+  /**
+   * \see_key{key_log_list_}
+   */
+  inline static const Key<einhard::LogLevel> log_list{{"Logging", "List"},
+                                                      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
    * \optional_key{key_log_sphere_,Sphere,string,$\{default\}}
    *
    * Messages specific to the sphere modus implementation belong to this area.
@@ -1365,7 +1383,58 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_action_,%Action,string,$\{default\}}
+   * \optional_key{key_log_configuration_,%Configuration,string,$\{default\}}
+   *
+   * Messages about the input configuration file belong to this area.
+   */
+  /**
+   * \see_key{key_log_configuration_}
+   */
+  inline static const Key<einhard::LogLevel> log_yamlConfiguration{
+      {"Logging", "Configuration"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_output_,Output,string,$\{default\}}
+   *
+   * Messages output functionality belong to this area.
+   */
+  /**
+   * \see_key{key_log_output_}
+   */
+  inline static const Key<einhard::LogLevel> log_output{{"Logging", "Output"},
+                                                        {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_initial_conditions_,InitialConditions,string,$\{default\}}
+   *
+   * Messages about initial conditions belong to this area.
+   */
+  /**
+   * \see_key{key_log_initial_conditions_}
+   */
+  inline static const Key<einhard::LogLevel> log_initialConditions{
+      {"Logging", "InitialConditions"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{default\}}
+   *
+   * Messages about the gran-canonical thermalization belong to this area.
+   */
+  /**
+   * \see_key{key_log_grandcan_thermalizer_}
+   */
+  inline static const Key<einhard::LogLevel> log_grandcanThermalizer{
+      {"Logging", "GrandcanThermalizer"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * <hr>
+   * ### Most technical logging areas (in alphabetical order)
+   *
+   * \optional_key_no_line{key_log_action_,%Action,string,$\{default\}}
    *
    * Messages mostly coming from the `Action` class belong to this area.
    */
@@ -1374,42 +1443,6 @@ struct InputKeys {
    */
   inline static const Key<einhard::LogLevel> log_action{{"Logging", "Action"},
                                                         {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_input_parser_,InputParser,string,$\{default\}}
-   *
-   * Messages coming from input parsing tools belong to this area.
-   */
-  /**
-   * \see_key{key_log_input_parser_}
-   */
-  inline static const Key<einhard::LogLevel> log_inputParser{
-      {"Logging", "InputParser"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_particle_type_,%ParticleType,string,$\{default\}}
-   *
-   * Messages coming from particle types implementation belong to this area.
-   */
-  /**
-   * \see_key{key_log_particle_type_}
-   */
-  inline static const Key<einhard::LogLevel> log_particleType{
-      {"Logging", "ParticleType"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_find_scatter_,FindScatter,string,$\{default\}}
-   *
-   * Messages coming from search tools for scattering belong to this area.
-   */
-  /**
-   * \see_key{key_log_find_scatter_}
-   */
-  inline static const Key<einhard::LogLevel> log_findScatter{
-      {"Logging", "FindScatter"}, {"1.0"}};
 
   /*!\Userguide
    * \page input_logging_
@@ -1425,6 +1458,18 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
+   * \optional_key{key_log_cross_sections_,%CrossSections,string,$\{default\}}
+   *
+   * Messages about cross sections belong to this area.
+   */
+  /**
+   * \see_key{key_log_cross_sections_}
+   */
+  inline static const Key<einhard::LogLevel> log_crossSections{
+      {"Logging", "CrossSections"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
    * \optional_key{key_log_decay_modes_,%DecayModes,string,$\{default\}}
    *
    * Messages coming from decay tools belong to this area.
@@ -1434,6 +1479,162 @@ struct InputKeys {
    */
   inline static const Key<einhard::LogLevel> log_decayModes{
       {"Logging", "DecayModes"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_density_,Density,string,$\{default\}}
+   *
+   * Messages coming from density calculations belong to this area.
+   */
+  /**
+   * \see_key{key_log_density_}
+   */
+  inline static const Key<einhard::LogLevel> log_density{{"Logging", "Density"},
+                                                         {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_distributions_,Distributions,string,$\{default\}}
+   *
+   * Messages about quantity distributions belong to this area.
+   */
+  /**
+   * \see_key{key_log_distributions_}
+   */
+  inline static const Key<einhard::LogLevel> log_distributions{
+      {"Logging", "Distributions"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_find_scatter_,FindScatter,string,$\{default\}}
+   *
+   * Messages coming from search tools for scattering belong to this area.
+   */
+  /**
+   * \see_key{key_log_find_scatter_}
+   */
+  inline static const Key<einhard::LogLevel> log_findScatter{
+      {"Logging", "FindScatter"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_fpe_,Fpe,string,$\{default\}}
+   *
+   * Messages about floating point exceptions belong to this area.
+   */
+  /**
+   * \see_key{key_log_fpe_}
+   */
+  inline static const Key<einhard::LogLevel> log_fpe{{"Logging", "Fpe"},
+                                                     {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_grid_,%Grid,string,$\{default\}}
+   *
+   * Messages coming from the grid implementation belong to this area.
+   */
+  /**
+   * \see_key{key_log_grid_}
+   */
+  inline static const Key<einhard::LogLevel> log_grid{{"Logging", "Grid"},
+                                                      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_hyper_surface_crossing_,HyperSurfaceCrossing,string,$\{default\}}
+   *
+   * Messages about hypersurface crossing belong to this area.
+   */
+  /**
+   * \see_key{key_log_hyper_surface_crossing_}
+   */
+  inline static const Key<einhard::LogLevel> log_hyperSurfaceCrossing{
+      {"Logging", "HyperSurfaceCrossing"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_input_parser_,InputParser,string,$\{default\}}
+   *
+   * Messages coming from input parsing tools belong to this area.
+   */
+  /**
+   * \see_key{key_log_input_parser_}
+   */
+  inline static const Key<einhard::LogLevel> log_inputParser{
+      {"Logging", "InputParser"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_lattice_,Lattice,string,$\{default\}}
+   *
+   * Messages coming from the lattice implementation belong to this area.
+   */
+  /**
+   * \see_key{key_log_lattice_}
+   */
+  inline static const Key<einhard::LogLevel> log_lattice{{"Logging", "Lattice"},
+                                                         {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_nucleus_,%Nucleus,string,$\{default\}}
+   *
+   * Messages coming from the nucleus implementation belong to this area.
+   */
+  /**
+   * \see_key{key_log_nucleus_}
+   */
+  inline static const Key<einhard::LogLevel> log_nucleus{{"Logging", "Nucleus"},
+                                                         {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_particle_type_,%ParticleType,string,$\{default\}}
+   *
+   * Messages coming from particle types implementation belong to this area.
+   */
+  /**
+   * \see_key{key_log_particle_type_}
+   */
+  inline static const Key<einhard::LogLevel> log_particleType{
+      {"Logging", "ParticleType"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_pauli_blocking_,PauliBlocking,string,$\{default\}}
+   *
+   * Messages about Pauli blocking belong to this area.
+   */
+  /**
+   * \see_key{key_log_pauli_blocking_}
+   */
+  inline static const Key<einhard::LogLevel> log_pauliBlocking{
+      {"Logging", "PauliBlocking"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_propagation_,Propagation,string,$\{default\}}
+   *
+   * Messages about particles propagation belong to this area.
+   */
+  /**
+   * \see_key{key_log_propagation_}
+   */
+  inline static const Key<einhard::LogLevel> log_propagation{
+      {"Logging", "Propagation"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_pythia_,Pythia,string,$\{default\}}
+   *
+   * Messages coming from Pythia usage in SMASH belong to this area.
+   */
+  /**
+   * \see_key{key_log_pythia_}
+   */
+  inline static const Key<einhard::LogLevel> log_pythia{{"Logging", "Pythia"},
+                                                        {"1.0"}};
 
   /*!\Userguide
    * \page input_logging_
@@ -1461,198 +1662,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_distributions_,Distributions,string,$\{default\}}
-   *
-   * Messages about quantity distributions belong to this area.
-   */
-  /**
-   * \see_key{key_log_distributions_}
-   */
-  inline static const Key<einhard::LogLevel> log_distributions{
-      {"Logging", "Distributions"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_propagation_,Propagation,string,$\{default\}}
-   *
-   * Messages about particles propagation belong to this area.
-   */
-  /**
-   * \see_key{key_log_propagation_}
-   */
-  inline static const Key<einhard::LogLevel> log_propagation{
-      {"Logging", "Propagation"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_grid_,%Grid,string,$\{default\}}
-   *
-   * Messages coming from the grid implementation belong to this area.
-   */
-  /**
-   * \see_key{key_log_grid_}
-   */
-  inline static const Key<einhard::LogLevel> log_grid{{"Logging", "Grid"},
-                                                      {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_list_,List,string,$\{default\}}
-   *
-   * Messages specific to the list modus implementation belong to this area.
-   */
-  /**
-   * \see_key{key_log_list_}
-   */
-  inline static const Key<einhard::LogLevel> log_list{{"Logging", "List"},
-                                                      {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_nucleus_,%Nucleus,string,$\{default\}}
-   *
-   * Messages coming from the nucleus implementation belong to this area.
-   */
-  /**
-   * \see_key{key_log_nucleus_}
-   */
-  inline static const Key<einhard::LogLevel> log_nucleus{{"Logging", "Nucleus"},
-                                                         {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_density_,Density,string,$\{default\}}
-   *
-   * Messages coming from density calculations belong to this area.
-   */
-  /**
-   * \see_key{key_log_density_}
-   */
-  inline static const Key<einhard::LogLevel> log_density{{"Logging", "Density"},
-                                                         {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_pauli_blocking_,PauliBlocking,string,$\{default\}}
-   *
-   * Messages about Pauli blocking belong to this area.
-   */
-  /**
-   * \see_key{key_log_pauli_blocking_}
-   */
-  inline static const Key<einhard::LogLevel> log_pauliBlocking{
-      {"Logging", "PauliBlocking"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_tmn_,Tmn,string,$\{default\}}
-   *
-   * Messages about the energy momentum tensor belong to this area.
-   */
-  /**
-   * \see_key{key_log_tmn_}
-   */
-  inline static const Key<einhard::LogLevel> log_tmn{{"Logging", "Tmn"},
-                                                     {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_fpe_,Fpe,string,$\{default\}}
-   *
-   * Messages about floating point exceptions belong to this area.
-   */
-  /**
-   * \see_key{key_log_fpe_}
-   */
-  inline static const Key<einhard::LogLevel> log_fpe{{"Logging", "Fpe"},
-                                                     {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_lattice_,Lattice,string,$\{default\}}
-   *
-   * Messages coming from the lattice implementation belong to this area.
-   */
-  /**
-   * \see_key{key_log_lattice_}
-   */
-  inline static const Key<einhard::LogLevel> log_lattice{{"Logging", "Lattice"},
-                                                         {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_pythia_,Pythia,string,$\{default\}}
-   *
-   * Messages coming from Pythia usage in SMASH belong to this area.
-   */
-  /**
-   * \see_key{key_log_pythia_}
-   */
-  inline static const Key<einhard::LogLevel> log_pythia{{"Logging", "Pythia"},
-                                                        {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{default\}}
-   *
-   * Messages about the gran-canonical thermalization belong to this area.
-   */
-  /**
-   * \see_key{key_log_grandcan_thermalizer_}
-   */
-  inline static const Key<einhard::LogLevel> log_grandcanThermalizer{
-      {"Logging", "GrandcanThermalizer"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_cross_sections_,%CrossSections,string,$\{default\}}
-   *
-   * Messages about cross sections belong to this area.
-   */
-  /**
-   * \see_key{key_log_cross_sections_}
-   */
-  inline static const Key<einhard::LogLevel> log_crossSections{
-      {"Logging", "CrossSections"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_output_,Output,string,$\{default\}}
-   *
-   * Messages output functionality belong to this area.
-   */
-  /**
-   * \see_key{key_log_output_}
-   */
-  inline static const Key<einhard::LogLevel> log_output{{"Logging", "Output"},
-                                                        {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_hyper_surface_crossing_,HyperSurfaceCrossing,string,$\{default\}}
-   *
-   * Messages about hypersurface crossing belong to this area.
-   */
-  /**
-   * \see_key{key_log_hyper_surface_crossing_}
-   */
-  inline static const Key<einhard::LogLevel> log_hyperSurfaceCrossing{
-      {"Logging", "HyperSurfaceCrossing"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_initial_conditions_,InitialConditions,string,$\{default\}}
-   *
-   * Messages about initial conditions belong to this area.
-   */
-  /**
-   * \see_key{key_log_initial_conditions_}
-   */
-  inline static const Key<einhard::LogLevel> log_initialConditions{
-      {"Logging", "InitialConditions"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
    * \optional_key{key_log_scatter_action_multi_,%ScatterActionMulti,string,$\{default\}}
    *
    * Messages about scattering events with multiple particles belong to this
@@ -1666,15 +1675,15 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_configuration_,%Configuration,string,$\{default\}}
+   * \optional_key{key_log_tmn_,Tmn,string,$\{default\}}
    *
-   * Messages about the input configuration file belong to this area.
+   * Messages about the energy momentum tensor belong to this area.
    */
   /**
-   * \see_key{key_log_configuration_}
+   * \see_key{key_log_tmn_}
    */
-  inline static const Key<einhard::LogLevel> log_yamlConfiguration{
-      {"Logging", "Configuration"}, {"1.0"}};
+  inline static const Key<einhard::LogLevel> log_tmn{{"Logging", "Tmn"},
+                                                     {"1.0"}};
 
   /*!\Userguide
    * \page input_version_
