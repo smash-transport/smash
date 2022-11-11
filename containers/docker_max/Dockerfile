@@ -1,1223 +1,150 @@
-# we import the small smash container
+# Import the base smash container.
 
 FROM ghcr.io/smash-transport/smash:new-base
 
-# we add some info about authors and contacts
+# Set bash as the default shell in this Dockerfile.
+
+SHELL ["/bin/bash", "-c"]
+
+# Add some info about authors and contents.
 
 LABEL maintainer.name="SMASH team"
 LABEL maintainer.website="https://smash-transport.github.io"
+LABEL description="SMASH with ROOT 6.26.06, HepMC3 3.2.5, Rivet, 3.1.7 and several other tools"
+LABEL org.opencontainers.image.source https://github.com/smash-transport/smash
 
-# we set the repositories to be used to upgrade and expand the basic GNU/Linux distribution
-
-RUN echo "deb http://ftp.uni-mainz.de/ubuntu/ focal restricted multiverse main universe" > /etc/apt/sources.list \
-&& echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-updates restricted multiverse main universe" >> /etc/apt/sources.list \
-&& echo "deb http://ftp.uni-mainz.de/ubuntu/ focal-security restricted multiverse main universe" >> /etc/apt/sources.list
-
-# we want to install the packages non interactively
+# Install the packages non interactively.
 
 RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
-
-# we update the distribution and we install several additional packages
+# Update the distribution and install several additional packages.
 
 RUN apt-get update && \
 ln -sf /usr/share/zoneinfo/UTC /etc/localtime && \
 apt-get -y upgrade && \
 apt-get -y install \
-accountsservice  \
-acl  \
-adduser  \
-adwaita-icon-theme  \
-aglfn  \
-alsa-topology-conf  \
-alsa-ucm-conf  \
-apg  \
-apport  \
-apport-symptoms  \
-apt  \
-aptdaemon  \
-aptdaemon-data  \
-apt-utils \
 aspell  \
 aspell-en  \
-at-spi2-core  \
 autoconf  \
 automake  \
 autotools-dev  \
-avahi-daemon  \
-avahi-utils  \
-base-files  \
-base-passwd  \
-bash  \
 bc \
-bind9-host  \
-bind9-libs:amd64  \
-binfmt-support  \
-binutils  \
-binutils-common:amd64  \
-binutils-x86-64-linux-gnu  \
-blt  \
-bluez  \
-bolt  \
-bsdmainutils  \
-bsdutils  \
-bubblewrap  \
 build-essential  \
 bzip2  \
 ca-certificates  \
-cheese-common  \
-clang-10  \
-clang-tidy  \
-clang-tidy-10  \
-clang-tools-10  \
-cmake-data  \
-colord  \
-colord-data  \
+clang-13 \
 coreutils  \
-cpp  \
-cpp-9  \
-cracklib-runtime  \
-crda  \
-cups-pk-helper  \
-curl  \
-cython \
 cython3 \
-dash  \
-davix-dev:amd64  \
-dbus  \
-dbus-user-session  \
-dbus-x11  \
-dcap-dev:amd64  \
-dconf-cli  \
-dconf-gsettings-backend:amd64  \
-dconf-service  \
 ddd  \
-debconf  \
 debianutils  \
-desktop-file-utils  \
-dictionaries-common  \
 diffutils  \
-dirmngr  \
-distro-info-data  \
-dmsetup  \
-dns-root-data  \
-dnsmasq-base  \
-docbook-xml  \
 doxygen  \
-dpkg  \
-dpkg-dev  \
-e2fsprogs  \
-emacsen-common  \
-enchant-2  \
 evince  \
-evince-common  \
-evolution-data-server  \
-evolution-data-server-common  \
-fakeroot  \
-fdisk  \
-file  \
 findutils  \
-fontconfig  \
-fontconfig-config  \
-fonts-dejavu-core  \
-fonts-droid-fallback  \
-fonts-freefont-ttf  \
-fonts-lyx  \
-fonts-noto-mono  \
-fonts-urw-base35  \
-fprintd  \
-freeglut3:amd64  \
-freeglut3-dev:amd64  \
-g++-9  \
 gawk  \
+g++ \
 gcc  \
-gcc-10-base:amd64  \
-gcc-9  \
-gcc-9-base:amd64  \
 gcr  \
 gdb  \
-gdbserver  \
-gdm3  \
-geoclue-2.0  \
-gettext-base  \
 gfortran  \
-gfortran-9  \
-gir1.2-accountsservice-1.0  \
-gir1.2-atk-1.0:amd64  \
-gir1.2-atspi-2.0:amd64  \
-gir1.2-freedesktop:amd64  \
-gir1.2-gck-1:amd64  \
-gir1.2-gcr-3:amd64  \
-gir1.2-gdesktopenums-3.0:amd64  \
-gir1.2-gdkpixbuf-2.0:amd64  \
-gir1.2-gdm-1.0:amd64  \
-gir1.2-geoclue-2.0:amd64  \
-gir1.2-glib-2.0:amd64  \
-gir1.2-gnomebluetooth-1.0:amd64  \
-gir1.2-gnomedesktop-3.0:amd64  \
-gir1.2-graphene-1.0:amd64  \
-gir1.2-gtk-3.0:amd64  \
-gir1.2-gweather-3.0:amd64  \
-gir1.2-ibus-1.0:amd64  \
-gir1.2-json-1.0:amd64  \
-gir1.2-mutter-6:amd64  \
-gir1.2-nm-1.0:amd64  \
-gir1.2-nma-1.0:amd64  \
-gir1.2-notify-0.7:amd64  \
-gir1.2-packagekitglib-1.0  \
-gir1.2-pango-1.0:amd64  \
-gir1.2-polkit-1.0  \
-gir1.2-rsvg-2.0:amd64  \
-gir1.2-secret-1:amd64  \
-gir1.2-soup-2.4:amd64  \
-gir1.2-upowerglib-1.0:amd64  \
-gir1.2-vte-2.91:amd64  \
-git-man  \
-gjs  \
-gkbd-capplet  \
-glib-networking:amd64  \
-glib-networking-common  \
-glib-networking-services  \
-gnome-control-center  \
-gnome-control-center-data  \
-gnome-control-center-faces  \
-gnome-desktop3-data  \
-gnome-keyring  \
-gnome-keyring-pkcs11:amd64  \
-gnome-menus  \
-gnome-online-accounts  \
-gnome-session-bin  \
-gnome-session-common  \
-gnome-settings-daemon  \
-gnome-settings-daemon-common  \
-gnome-shell  \
-gnome-shell-common  \
-gnome-startup-applications  \
-gnome-user-docs  \
 gnupg  \
-gnupg-l10n  \
 gnupg-utils  \
 gnuplot  \
-gnuplot-data  \
 gnuplot-qt  \
 gperf  \
-gpg  \
-gpg-agent  \
-gpg-wks-client  \
-gpg-wks-server  \
-gpgconf  \
-gpgsm  \
-gpgv  \
 graphviz \
 grep  \
-groff-base  \
-gsettings-desktop-schemas  \
-gstreamer1.0-clutter-3.0:amd64  \
-gstreamer1.0-gl:amd64  \
-gstreamer1.0-plugins-base:amd64  \
-gstreamer1.0-plugins-good:amd64  \
-gstreamer1.0-pulseaudio:amd64  \
-gstreamer1.0-x:amd64  \
-gtk-update-icon-cache  \
 gzip  \
-hicolor-icon-theme  \
-hostname  \
-humanity-icon-theme  \
-hunspell-en-us  \
-ibus  \
-ibus-data  \
-ibus-gtk:amd64  \
-ibus-gtk3:amd64  \
-icu-devtools  \
-iio-sensor-proxy  \
 imagemagick \
-im-config  \
-init-system-helpers  \
-ippusbxd  \
-iptables  \
 ipython3  \
-iso-codes  \
-iw  \
-javascript-common  \
-keyboard-configuration  \
-kmod  \
-krb5-locales  \
-language-pack-en  \
-language-pack-en-base  \
-language-selector-common  \
-language-selector-gnome  \
-less  \
-lib32gcc-s1  \
-lib32stdc++6  \
-libaa1:amd64  \
-libaccountsservice0:amd64  \
-libacl1:amd64  \
-libaec0:amd64  \
-libafterimage-dev  \
-libafterimage0:amd64  \
-libalgorithm-diff-perl  \
-libalgorithm-diff-xs-perl  \
-libalgorithm-merge-perl  \
-libamd2:amd64  \
-libapparmor1:amd64  \
-libappindicator3-1  \
-libappstream4:amd64  \
-libapt-pkg6.0:amd64  \
-libarchive13:amd64  \
-libargon2-1:amd64  \
-libasan5:amd64  \
-libasn1-8-heimdal:amd64  \
-libasound2:amd64  \
-libasound2-data  \
-libasound2-plugins:amd64  \
-libaspell15:amd64  \
-libassuan0:amd64  \
-libasyncns0:amd64  \
-libatk-bridge2.0-0:amd64  \
-libatk1.0-0:amd64  \
-libatk1.0-data  \
-libatomic1:amd64  \
-libatspi2.0-0:amd64  \
-libattr1:amd64  \
-libattr1-dev:amd64  \
-libaudit-common  \
-libaudit1:amd64  \
-libavahi-client3:amd64  \
-libavahi-common-data:amd64  \
-libavahi-common3:amd64  \
-libavahi-core7:amd64  \
-libavahi-glib1:amd64  \
-libavc1394-0:amd64  \
-libbabeltrace1:amd64  \
-libbinutils:amd64  \
-libblas3:amd64  \
-libblkid-dev:amd64  \
-libblkid1:amd64  \
-libblosc1  \
-libbluetooth3:amd64  \
-libbrotli1:amd64  \
-libbsd0:amd64  \
-libbz2-1.0:amd64  \
+jupyter-notebook \
 libc-bin  \
 libc-dev-bin  \
-libc6:amd64  \
-libc6-dbg:amd64  \
-libc6-dev:amd64  \
-libc6-i386  \
-libcaca0:amd64  \
-libcairo-gobject2:amd64  \
-libcairo-script-interpreter2:amd64  \
-libcairo2:amd64  \
-libcairo2-dev:amd64  \
-libcamd2:amd64  \
-libcamel-1.2-62:amd64  \
-libcanberra-gtk3-0:amd64  \
-libcanberra-gtk3-module:amd64  \
-libcanberra-pulse:amd64  \
-libcanberra0:amd64  \
-libcap-ng0:amd64  \
-libcap2:amd64  \
-libcap2-bin  \
-libcbor0.6:amd64  \
-libcc1-0:amd64  \
-libccolamd2:amd64  \
-libcdparanoia0:amd64  \
-libcdt5:amd64  \
-libcfitsio-dev:amd64  \
-libcfitsio-doc  \
-libcfitsio8:amd64  \
-libcgraph6:amd64  \
-libcgsi-gsoap1:amd64  \
-libcheese-gtk25:amd64  \
-libcheese8:amd64  \
-libcholmod3:amd64  \
-libclang-common-10-dev  \
-libclang-cpp10  \
-libclang1-10  \
-libclutter-1.0-0:amd64  \
-libclutter-1.0-common  \
-libclutter-gst-3.0-0:amd64  \
-libclutter-gtk-1.0-0:amd64  \
-libcogl-common  \
-libcogl-pango20:amd64  \
-libcogl-path20:amd64  \
-libcogl20:amd64  \
-libcolamd2:amd64  \
-libcolord-gtk1:amd64  \
-libcolord2:amd64  \
-libcolorhug2:amd64  \
-libcom-err2:amd64  \
-libcrack2:amd64  \
-libcrypt-dev:amd64  \
-libcrypt1:amd64  \
-libcryptsetup12:amd64  \
-libctf-nobfd0:amd64  \
-libctf0:amd64  \
-libcups2:amd64  \
-libcurl3-gnutls:amd64  \
-libcurl4:amd64  \
-libdaemon0:amd64  \
-libdatrie1:amd64  \
-libdavix0v5:amd64  \
-libdb5.3:amd64  \
-libdbus-1-3:amd64  \
-libdbus-glib-1-2:amd64  \
-libdbusmenu-glib4:amd64  \
-libdbusmenu-gtk3-4:amd64  \
-libdcap1:amd64  \
-libdconf1:amd64  \
-libdebconfclient0:amd64  \
-libdevmapper1.02.1:amd64  \
-libdjvulibre-text  \
-libdjvulibre21:amd64  \
-libdouble-conversion3:amd64  \
-libdpkg-perl  \
-libdrm-amdgpu1:amd64  \
-libdrm-common  \
-libdrm-intel1:amd64  \
-libdrm-nouveau2:amd64  \
-libdrm-radeon1:amd64  \
-libdrm2:amd64  \
-libdsdp-5.8gf  \
-libdv4:amd64  \
-libdw1:amd64  \
-libebackend-1.2-10:amd64  \
-libebook-1.2-20:amd64  \
-libebook-contacts-1.2-3:amd64  \
-libecal-2.0-1:amd64  \
-libedata-book-1.2-26:amd64  \
-libedata-cal-2.0-1:amd64  \
-libedataserver-1.2-24:amd64  \
-libedataserverui-1.2-2:amd64  \
-libedit2:amd64  \
-libegl-dev:amd64  \
-libegl-mesa0:amd64  \
-libegl1:amd64  \
-libelf1:amd64  \
-libenchant-2-2:amd64  \
-libepoxy0:amd64  \
-liberror-perl  \
-libevdev2:amd64  \
-libevdocument3-4:amd64  \
-libevview3-3:amd64  \
-libexif12:amd64  \
-libexpat1:amd64  \
-libexpat1-dev:amd64  \
-libext2fs2:amd64  \
-libfakeroot:amd64  \
-libfcgi-bin  \
-libfcgi-dev:amd64  \
-libfcgi0ldbl:amd64  \
-libfdisk1:amd64  \
-libffi-dev:amd64  \
-libffi7:amd64  \
-libfftw3-3:amd64  \
-libfftw3-bin  \
-libfftw3-dev:amd64  \
-libfftw3-double3:amd64  \
-libfftw3-long3:amd64  \
-libfftw3-quad3:amd64  \
-libfftw3-single3:amd64  \
-libfido2-1:amd64  \
-libfile-fcntllock-perl  \
-libflac8:amd64  \
-libfontconfig1:amd64  \
-libfontconfig1-dev:amd64  \
-libfontenc1:amd64  \
-libfprint-2-2:amd64  \
-libfreetype-dev:amd64  \
-libfreetype6:amd64  \
-libfreetype6-dev:amd64  \
-libfribidi0:amd64  \
-libftgl-dev  \
-libftgl2:amd64  \
-libgail-common:amd64  \
-libgail18:amd64  \
-libgbm1:amd64  \
-libgc1c2:amd64  \
-libgcc-9-dev:amd64  \
-libgcc-s1:amd64  \
-libgck-1-0:amd64  \
-libgcr-base-3-1:amd64  \
-libgcr-ui-3-1:amd64  \
-libgcrypt20:amd64  \
-libgd3:amd64  \
-libgdata-common  \
-libgdata22:amd64  \
-libgdbm-compat4:amd64  \
-libgdbm6:amd64  \
-libgdk-pixbuf2.0-0:amd64  \
-libgdk-pixbuf2.0-bin  \
-libgdk-pixbuf2.0-common  \
-libgdk-pixbuf2.0-dev:amd64  \
-libgdm1  \
-libgee-0.8-2:amd64  \
-libgeoclue-2-0:amd64  \
-libgeocode-glib0:amd64  \
-libgfal-srm-ifce1:amd64  \
-libgfal-transfer2:amd64  \
-libgfal2-2:amd64  \
-libgfal2-dev:amd64  \
-libgfortran-9-dev:amd64  \
-libgfortran5:amd64  \
+libc-devtools \
+libfreetype-dev \
 libgif-dev  \
-libgif7:amd64  \
-libgirepository-1.0-1:amd64  \
-libgjs0g:amd64  \
-libgl-dev:amd64  \
-libgl1:amd64  \
-libgl1-mesa-dev:amd64  \
-libgl1-mesa-dri:amd64  \
-libgl2ps-dev  \
-libgl2ps1.4  \
-libglapi-mesa:amd64  \
-libgles-dev:amd64  \
-libgles1:amd64  \
-libgles2:amd64  \
-libglew-dev:amd64  \
-libglew2.1:amd64  \
-libglib2.0-0:amd64  \
-libglib2.0-bin  \
-libglib2.0-data  \
-libglib2.0-dev:amd64  \
-libglib2.0-dev-bin  \
-libglobus-callout0:amd64  \
-libglobus-common0:amd64  \
-libglobus-gsi-callback0:amd64  \
-libglobus-gsi-cert-utils0:amd64  \
-libglobus-gsi-credential1:amd64  \
-libglobus-gsi-openssl-error0:amd64  \
-libglobus-gsi-proxy-core0:amd64  \
-libglobus-gsi-proxy-ssl1:amd64  \
-libglobus-gsi-sysconfig1:amd64  \
-libglobus-gss-assist3:amd64  \
-libglobus-gssapi-gsi4:amd64  \
-libglobus-openssl-module0:amd64  \
-libglpk40:amd64  \
-libglu1-mesa:amd64  \
-libglu1-mesa-dev:amd64  \
-libglvnd-dev:amd64  \
-libglvnd0:amd64  \
-libglx-dev:amd64  \
-libglx-mesa0:amd64  \
-libglx0:amd64  \
-libgmp10:amd64  \
 libgmp-dev  \
-libgnome-autoar-0-0:amd64  \
-libgnome-bluetooth13:amd64  \
-libgnome-desktop-3-19:amd64  \
-libgnomekbd-common  \
-libgnomekbd8:amd64  \
-libgnutls30:amd64  \
-libgoa-1.0-0b:amd64  \
-libgoa-1.0-common  \
-libgoa-backend-1.0-1:amd64  \
-libgomp1:amd64  \
-libgpg-error0:amd64  \
-libgphoto2-6:amd64  \
-libgphoto2-l10n  \
-libgphoto2-port12:amd64  \
-libgpm2:amd64  \
-libgraphene-1.0-0:amd64  \
-libgraphite2-3:amd64  \
-libgraphviz-dev:amd64  \
-libgs9:amd64  \
-libgs9-common  \
-libgsl23:amd64  \
-libgslcblas0:amd64  \
-libgsoap-2.8.91:amd64  \
-libgsound0:amd64  \
-libgspell-1-2:amd64  \
-libgspell-1-common  \
-libgssapi-krb5-2:amd64  \
-libgssapi3-heimdal:amd64  \
-libgssdp-1.2-0:amd64  \
-libgstreamer-gl1.0-0:amd64  \
-libgstreamer-plugins-base1.0-0:amd64  \
-libgstreamer-plugins-good1.0-0:amd64  \
-libgstreamer1.0-0:amd64  \
-libgtk-3-0:amd64  \
-libgtk-3-bin  \
-libgtk-3-common  \
-libgtk2.0-0:amd64  \
-libgtk2.0-bin  \
-libgtk2.0-common  \
-libgtop-2.0-11:amd64  \
-libgtop2-common  \
-libgts-0.7-5:amd64  \
-libgts-bin  \
-libgudev-1.0-0:amd64  \
-libgupnp-1.2-0:amd64  \
-libgupnp-av-1.0-2  \
-libgupnp-dlna-2.0-3  \
-libgusb2:amd64  \
-libgvc6  \
-libgvc6-plugins-gtk  \
-libgvpr2:amd64  \
-libgweather-3-16:amd64  \
-libgweather-common  \
-libgxps2:amd64  \
-libharfbuzz-icu0:amd64  \
-libharfbuzz0b:amd64  \
-libhcrypto4-heimdal:amd64  \
-libhdf5-103:amd64  \
-libheimbase1-heimdal:amd64  \
-libheimntlm0-heimdal:amd64  \
-libhogweed5:amd64  \
-libhunspell-1.7-0:amd64  \
-libhx509-5-heimdal:amd64  \
-libhyphen0:amd64  \
-libibus-1.0-5:amd64  \
-libical3:amd64  \
-libice-dev:amd64  \
-libice6:amd64  \
-libicu-dev:amd64  \
-libicu66:amd64  \
-libid3tag0:amd64  \
-libidn11:amd64  \
-libidn2-0:amd64  \
-libiec61883-0:amd64  \
-libieee1284-3:amd64  \
-libijs-0.35:amd64  \
-libimagequant0:amd64  \
-libimlib2:amd64  \
-libimobiledevice6:amd64  \
-libinput-bin  \
-libinput10:amd64  \
-libip4tc2:amd64  \
-libip6tc2:amd64  \
-libisl22:amd64  \
-libitm1:amd64  \
-libjack-jackd2-0:amd64  \
-libjansson4:amd64  \
-libjavascriptcoregtk-4.0-18:amd64  \
-libjbig-dev:amd64  \
-libjbig0:amd64  \
-libjbig2dec0:amd64  \
-libjpeg-dev:amd64  \
-libjpeg-turbo8:amd64  \
-libjpeg-turbo8-dev:amd64  \
-libjpeg8:amd64  \
-libjpeg8-dev:amd64  \
-libjs-jquery  \
-libjs-jquery-ui  \
-libjson-c4:amd64  \
-libjson-glib-1.0-0:amd64  \
-libjson-glib-1.0-common  \
-libjsoncpp1:amd64  \
-libk5crypto3:amd64  \
-libkeyutils1:amd64  \
-libkmod2:amd64  \
-libkpathsea6:amd64  \
-libkrb5-26-heimdal:amd64  \
-libkrb5-3:amd64  \
-libkrb5support0:amd64  \
-libksba8:amd64  \
-liblab-gamut1:amd64  \
-liblapack3:amd64  \
-liblbfgsb0:amd64  \
-liblcms2-2:amd64  \
-libldap-2.4-2:amd64  \
-libldap-common  \
-libldb2:amd64  \
-libllvm10:amd64  \
-libllvm11:amd64  \
-liblmdb0:amd64  \
-liblocale-gettext-perl  \
-liblsan0:amd64  \
-libltdl-dev:amd64  \
-libltdl7:amd64  \
-liblua5.3-0:amd64  \
-liblz4-1:amd64  \
-liblz4-dev:amd64  \
-liblzma-dev:amd64  \
-liblzma5:amd64  \
-liblzo2-2:amd64  \
-libmagic-mgc  \
-libmagic1:amd64  \
-libmaxminddb0:amd64  \
-libmbim-glib4:amd64  \
-libmbim-proxy  \
-libmediaart-2.0-0:amd64  \
-libmetis5:amd64  \
-libmm-glib0:amd64  \
-libmnl0:amd64  \
-libmotif-common  \
-libmount-dev:amd64  \
-libmount1:amd64  \
-libmozjs-68-0:amd64  \
-libmp3lame0:amd64  \
-libmpc3:amd64  \
-libmpdec2:amd64  \
-libmpfr6:amd64  \
+libgraphviz-dev  \
+libjpeg-dev  \
+libjpeg8-dev  \
+liblzma-dev  \
 libmpfr-dev  \
 libmpfrc++-dev  \
-libmpg123-0:amd64  \
-libmtdev1:amd64  \
-libmutter-6-0:amd64  \
-libmysqlclient-dev  \
-libmysqlclient21:amd64  \
-libnautilus-extension1a:amd64  \
-libncurses-dev:amd64  \
-libncurses6:amd64  \
-libncursesw6:amd64  \
-libndp0:amd64  \
-libnetfilter-conntrack3:amd64  \
-libnettle7:amd64  \
-libnewt0.52:amd64  \
-libnfnetlink0:amd64  \
-libnftnl11:amd64  \
-libnghttp2-14:amd64  \
-libnl-3-200:amd64  \
-libnl-genl-3-200:amd64  \
-libnl-route-3-200:amd64  \
-libnm0:amd64  \
-libnma0:amd64  \
-libnotify4:amd64  \
-libnpth0:amd64  \
-libnspr4:amd64  \
-libnss-mdns:amd64  \
-libnss-systemd:amd64  \
-libnss3:amd64  \
-libobjc-9-dev:amd64  \
-libobjc4:amd64  \
-libodbc1:amd64  \
-libogg0:amd64  \
-libomp-10-dev  \
-libomp5-10:amd64  \
-libopengl-dev:amd64  \
-libopengl0:amd64  \
-libopenjp2-7:amd64  \
 libopenmpi-dev \
-libopus0:amd64  \
-liborc-0.4-0:amd64  \
-libp11-kit0:amd64  \
-libpackagekit-glib2-18:amd64  \
-libpam-cap:amd64  \
-libpam-fprintd:amd64  \
-libpam-gnome-keyring:amd64  \
-libpam-modules:amd64  \
-libpam-modules-bin  \
-libpam-runtime  \
-libpam-systemd:amd64  \
-libpam0g:amd64  \
-libpango-1.0-0:amd64  \
-libpangocairo-1.0-0:amd64  \
-libpangoft2-1.0-0:amd64  \
-libpangoxft-1.0-0:amd64  \
-libpaper-utils  \
-libpaper1:amd64  \
-libpathplan4:amd64  \
-libpcap0.8:amd64  \
-libpci3:amd64  \
-libpciaccess0:amd64  \
+libpcre3-dev \
 libpcre++-dev  \
-libpcre++0v5:amd64  \
-libpcre16-3:amd64  \
-libpcre2-16-0:amd64  \
-libpcre2-32-0:amd64  \
-libpcre2-8-0:amd64  \
-libpcre2-dev:amd64  \
-libpcre2-posix2:amd64  \
-libpcre3:amd64  \
-libpcre3-dev:amd64  \
-libpcre32-3:amd64  \
-libpcrecpp0v5:amd64  \
-libpcsclite1:amd64  \
-libperl5.30:amd64  \
-libpfm4:amd64  \
-libphonenumber7:amd64  \
-libpipeline1:amd64  \
-libpixman-1-0:amd64  \
-libpixman-1-dev:amd64  \
-libplist3:amd64  \
-libpng-dev:amd64  \
+libpng-dev  \
 libpng-tools  \
-libpng16-16:amd64  \
-libpolkit-agent-1-0:amd64  \
-libpolkit-gobject-1-0:amd64  \
-libpoppler-glib8:amd64  \
-libpoppler97:amd64  \
-libpopt0:amd64  \
-libpq-dev  \
-libpq5:amd64  \
-libprocps8:amd64  \
-libprotobuf17:amd64  \
-libproxy1v5:amd64  \
-libpsl5:amd64  \
-libpthread-stubs0-dev:amd64  \
-libpulse-mainloop-glib0:amd64  \
-libpulse0:amd64  \
-libpulsedsp:amd64  \
-libpwquality-common  \
-libpwquality1:amd64  \
-libpython3-dev:amd64  \
-libpython3-stdlib:amd64  \
-libpython3.8:amd64  \
-libpython3.8-dev:amd64  \
-libpython3.8-minimal:amd64  \
-libpython3.8-stdlib:amd64  \
-libqmi-glib5:amd64  \
-libqmi-proxy  \
-libqt5core5a:amd64  \
-libqt5dbus5:amd64  \
-libqt5gui5:amd64  \
-libqt5network5:amd64  \
-libqt5printsupport5:amd64  \
-libqt5svg5:amd64  \
-libqt5widgets5:amd64  \
-libquadmath0:amd64  \
-libraw1394-11:amd64  \
-libreadline8:amd64  \
-librest-0.7-0:amd64  \
-librhash0:amd64  \
-libroken18-heimdal:amd64  \
-librsvg2-2:amd64  \
-librsvg2-common:amd64  \
-librsvg2-dev:amd64  \
-librtmp1:amd64  \
-librygel-core-2.6-2:amd64  \
-librygel-db-2.6-2:amd64  \
-librygel-renderer-2.6-2:amd64  \
-librygel-server-2.6-2:amd64  \
-libsamplerate0:amd64  \
-libsane:amd64  \
-libsane-common  \
-libsasl2-2:amd64  \
-libsasl2-modules:amd64  \
-libsasl2-modules-db:amd64  \
-libsbc1:amd64  \
-libseccomp2:amd64  \
-libsecret-1-0:amd64  \
-libsecret-common  \
-libselinux1:amd64  \
-libselinux1-dev:amd64  \
-libsemanage-common  \
-libsemanage1:amd64  \
-libsensors-config  \
-libsensors5:amd64  \
-libsepol1:amd64  \
-libsepol1-dev:amd64  \
-libshout3:amd64  \
-libsigsegv2:amd64  \
-libslang2:amd64  \
-libsm-dev:amd64  \
-libsm6:amd64  \
-libsmartcols1:amd64  \
-libsmbclient:amd64  \
-libsnapd-glib1:amd64  \
-libsnappy1v5:amd64  \
-libsndfile1:amd64  \
-libsnmp-base  \
-libsnmp35:amd64  \
-libsodium23:amd64  \
-libsoup-gnome2.4-1:amd64  \
-libsoup2.4-1:amd64  \
-libsoxr0:amd64  \
-libspectre1:amd64  \
-libspeex1:amd64  \
-libspeexdsp1:amd64  \
-libsqlite3-0:amd64  \
-libsqlite3-dev:amd64  \
-libss2:amd64  \
-libssh-4:amd64  \
-libssl-dev:amd64  \
-libssl1.1:amd64  \
-libstartup-notification0:amd64  \
-libstdc++-9-dev:amd64  \
-libstdc++6:amd64  \
-libstemmer0d:amd64  \
-libsuitesparseconfig5:amd64  \
-libsynctex2:amd64  \
-libsystemd0:amd64  \
-libsz2:amd64  \
-libtag1v5:amd64  \
-libtag1v5-vanilla:amd64  \
-libtalloc2:amd64  \
-libtasn1-6:amd64  \
-libtbb-dev:amd64  \
-libtbb2:amd64  \
-libtcl8.6:amd64  \
-libtdb1:amd64  \
-libteamdctl0:amd64  \
-libtevent0:amd64  \
-libtext-iconv-perl  \
-libthai-data  \
-libthai0:amd64  \
-libtheora0:amd64  \
-libtiff-dev:amd64  \
-libtiff5:amd64  \
-libtiff5-dev  \
-libtiffxx5:amd64  \
-libtinfo-dev:amd64  \
-libtinfo6:amd64  \
-libtk8.6:amd64  \
 libtool  \
-libtsan0:amd64  \
-libtwolame0:amd64  \
-libubsan1:amd64  \
-libuchardet0:amd64  \
-libudev1:amd64  \
-libudisks2-0:amd64  \
-libumfpack5:amd64  \
-libunistring2:amd64  \
-libunwind8:amd64  \
-libupower-glib3:amd64  \
-libusb-1.0-0:amd64  \
-libusbmuxd6:amd64  \
-libuuid1:amd64  \
-libuv1:amd64  \
-libv4l-0:amd64  \
-libv4lconvert0:amd64  \
-libvisual-0.4-0:amd64  \
-libvomsapi1v5:amd64  \
-libvorbis0a:amd64  \
-libvorbisenc2:amd64  \
-libvorbisfile3:amd64  \
-libvpx6:amd64  \
-libvte-2.91-0:amd64  \
-libvte-2.91-common  \
-libvulkan1:amd64  \
-libwacom-bin  \
-libwacom-common  \
-libwacom2:amd64  \
-libwavpack1:amd64  \
-libwayland-client0:amd64  \
-libwayland-cursor0:amd64  \
-libwayland-egl1:amd64  \
-libwayland-server0:amd64  \
-libwbclient0:amd64  \
-libwebkit2gtk-4.0-37:amd64  \
-libwebp6:amd64  \
-libwebpdemux2:amd64  \
-libwebpmux3:amd64  \
-libwebrtc-audio-processing1:amd64  \
-libwhoopsie-preferences0  \
-libwhoopsie0:amd64  \
-libwind0-heimdal:amd64  \
-libwoff1:amd64  \
-libwrap0:amd64  \
-libwxbase3.0-0v5:amd64  \
-libwxgtk3.0-gtk3-0v5:amd64  \
-libx11-6:amd64  \
-libx11-data  \
-libx11-dev:amd64  \
-libx11-xcb1:amd64  \
-libxapian30:amd64  \
-libxatracker2:amd64  \
-libxau-dev:amd64  \
-libxau6:amd64  \
-libxaw7:amd64  \
-libxcb-dri2-0:amd64  \
-libxcb-dri3-0:amd64  \
-libxcb-glx0:amd64  \
-libxcb-icccm4:amd64  \
-libxcb-image0:amd64  \
-libxcb-keysyms1:amd64  \
-libxcb-present0:amd64  \
-libxcb-randr0:amd64  \
-libxcb-render-util0:amd64  \
-libxcb-render0:amd64  \
-libxcb-render0-dev:amd64  \
-libxcb-res0:amd64  \
-libxcb-shape0:amd64  \
-libxcb-shm0:amd64  \
-libxcb-shm0-dev:amd64  \
-libxcb-sync1:amd64  \
-libxcb-util1:amd64  \
-libxcb-xfixes0:amd64  \
-libxcb-xinerama0:amd64  \
-libxcb-xinput0:amd64  \
-libxcb-xkb1:amd64  \
-libxcb-xv0:amd64  \
-libxcb1:amd64  \
-libxcb1-dev:amd64  \
-libxcomposite1:amd64  \
-libxcursor1:amd64  \
-libxdamage1:amd64  \
-libxdmcp-dev:amd64  \
-libxdmcp6:amd64  \
-libxdot4:amd64  \
-libxext-dev:amd64  \
-libxext6:amd64  \
-libxfixes3:amd64  \
-libxfont2:amd64  \
-libxft-dev:amd64  \
-libxft2:amd64  \
-libxi6:amd64  \
-libxinerama-dev:amd64  \
-libxinerama1:amd64  \
-libxkbcommon-x11-0:amd64  \
-libxkbcommon0:amd64  \
-libxkbfile1:amd64  \
-libxklavier16:amd64  \
-libxm4:amd64  \
-libxml2:amd64  \
-libxml2-dev:amd64  \
-libxmu6:amd64  \
-libxmuu1:amd64  \
-libxpm-dev:amd64  \
-libxpm4:amd64  \
-libxrandr2:amd64  \
-libxrender-dev:amd64  \
-libxrender1:amd64  \
-libxshmfence1:amd64  \
-libxslt1.1:amd64  \
-libxss1:amd64  \
-libxt-dev:amd64  \
-libxt6:amd64  \
-libxtables12:amd64  \
-libxtst6:amd64  \
-libxv1:amd64  \
-libxvmc1:amd64  \
-libxxf86vm1:amd64  \
-libxxhash-dev:amd64  \
-libxxhash0:amd64  \
-libyaml-0-2:amd64  \
-libyelp0:amd64  \
-libz3-4:amd64  \
-libz3-dev:amd64  \
-libzstd-dev:amd64  \
-libzstd1:amd64  \
-linux-libc-dev:amd64  \
-llvm-10  \
-llvm-10-dev  \
-llvm-10-runtime  \
-llvm-10-tools  \
-locales  \
-login  \
-logsave  \
+libx11-dev  \
+libxext-dev \
+libxft-dev \
+libxml2-dev \
+libxpm-dev \
+libxxhash-dev \
+libzstd-dev \
+linux-libc-dev \
+llvm-13 \
+llvm-13-dev \
+llvm-13-tools \
+locales \
+locales-all \
 lsb-base  \
 lsb-release  \
 lzma  \
-m4  \
-make  \
-man-db  \
-manpages  \
-manpages-dev  \
-mawk  \
-mesa-vulkan-drivers:amd64  \
-mime-support  \
-mobile-broadband-provider-info  \
-modemmanager  \
-mount  \
-mousetweaks  \
-mutter  \
-mutter-common  \
-mysql-common  \
-ncurses-base  \
-ncurses-bin  \
-netbase  \
-network-manager  \
-network-manager-gnome  \
-network-manager-pptp  \
-networkd-dispatcher  \
-odbcinst  \
-odbcinst1debian2:amd64  \
-openmpi-bin \
-openssh-client  \
-openssl  \
-p11-kit  \
-p11-kit-modules:amd64  \
-packagekit  \
-packagekit-tools  \
-passwd  \
-patch  \
-pci.ids  \
-psmisc \
-perl  \
-perl-base  \
-perl-modules-5.30  \
-pinentry-curses  \
-pinentry-gnome3  \
-pkg-config  \
-policykit-1  \
-poppler-data  \
-ppp  \
-pptp-linux  \
-procps  \
-publicsuffix  \
-pulseaudio  \
-pulseaudio-module-bluetooth  \
-pulseaudio-utils  \
-python3  \
-python3-apport  \
-python3-apt  \
-python3-aptdaemon  \
-python3-aptdaemon.gtk3widgets  \
 python3-args  \
 python3-atomicwrites  \
-python3-attr  \
-python3-backcall  \
-python3-blinker  \
-python3-bs4  \
-python3-cairo:amd64  \
-python3-certifi  \
-python3-cffi-backend  \
-python3-chardet  \
 python3-colorama  \
 python3-cryptography  \
-python3-cups  \
-python3-cupshelpers  \
-python3-cvxopt  \
-python3-cycler  \
 python3-dateutil  \
-python3-dbus  \
 python3-decorator  \
-python3-defer  \
 python3-dev  \
 python3-distro  \
 python3-distutils  \
 python3-entrypoints  \
-python3-et-xmlfile  \
 python3-future  \
-python3-gi  \
-python3-html5lib  \
-python3-httplib2  \
-python3-ibus-1.0  \
-python3-idna  \
 python3-importlib-metadata  \
 python3-ipython  \
 python3-ipython-genutils  \
 python-is-python3  \
-python3-jdcal  \
-python3-jedi  \
-python3-joblib  \
-python3-jwt  \
-python3-keyring  \
-python3-kiwisolver  \
-python3-launchpadlib  \
-python3-lazr.restfulclient  \
-python3-lazr.uri  \
-python3-lib2to3  \
-python3-lxml:amd64  \
-python3-lz4  \
-python3-macaroonbakery  \
-python3-more-itertools  \
-python3-mpi4py \
-python3-nacl  \
 python3-numexpr  \
 python3-numpy  \
-python3-oauthlib  \
-python3-olefile  \
-python3-openpyxl  \
-python3-packaging  \
 python3-pandas  \
-python3-pandas-lib  \
-python3-parso  \
 python3-patsy  \
-python3-pexpect  \
 python3-pickleshare  \
-python3-pil:amd64  \
 python3-pip \
 python3-pkg-resources  \
-python3-pluggy  \
-python3-problem-report  \
 python3-prompt-toolkit  \
-python3-protobuf  \
 python3-psutil  \
 python3-ptyprocess  \
 python3-py  \
-python3-pygments  \
-python3-pymacaroons  \
-python3-pyparsing  \
 python3-pytest  \
-python3-requests  \
-python3-requests-unixsocket  \
-python3-rfc3339  \
 python3-scipy  \
 python3-seaborn  \
 python3-secretstorage  \
 python3-setuptools  \
 python3-simplejson  \
-python3-six  \
-python3-soupsieve  \
 python3-statsmodels  \
-python3-statsmodels-lib:amd64  \
 python3-systemd  \
 python3-tables  \
-python3-tables-lib  \
-python3-talloc:amd64  \
-python3-tk:amd64  \
-python3-traitlets  \
-python3-tz  \
 python3-urllib3  \
-python3-wadllib  \
-python3-wcwidth  \
-python3-webencodings  \
-python3-xlrd  \
-python3-xlwt  \
 python3-yaml  \
 python3-zipp  \
-python3.8  \
-python3.8-dev  \
 qiv  \
-qt5-gtk-platformtheme:amd64  \
-qttranslations5-l10n  \
-readline-common  \
-rtkit  \
-rygel  \
-samba-libs:amd64  \
-sane-utils  \
 screen  \
 sed  \
 sensible-utils  \
-session-migration  \
-sgml-base  \
-sgml-data  \
-shared-mime-info  \
-sound-theme-freedesktop  \
 sqlite3  \
-srm-ifce-dev:amd64  \
-switcheroo-control  \
-system-config-printer  \
-system-config-printer-common  \
-system-config-printer-udev  \
-systemd  \
-systemd-sysv  \
-systemd-timesyncd  \
-sysvinit-utils  \
 tar  \
 texlive-latex-base \
 texlive-pstricks \
-tk8.6-blt2.5  \
-ttf-bitstream-vera  \
-tzdata  \
-ubuntu-docs  \
-ubuntu-keyring  \
-ubuntu-mono  \
-ubuntu-session  \
-ubuntu-wallpapers  \
-ubuntu-wallpapers-focal  \
-ucf  \
-udev  \
-unixodbc-dev:amd64  \
 unzip  \
-update-inetd  \
-upower  \
-usb-modeswitch  \
-usb-modeswitch-data  \
-usb.ids  \
-usbmuxd  \
 util-linux  \
-uuid-dev:amd64  \
 valgrind  \
-vim-common  \
-vim-runtime  \
-wamerican  \
-whoopsie-preferences  \
-wireless-regdb  \
-wpasupplicant  \
 x11-common  \
 x11-xkb-utils  \
 x11-xserver-utils  \
-x11proto-core-dev  \
-x11proto-dev  \
-x11proto-xext-dev  \
-x11proto-xinerama-dev  \
 xauth  \
-xdg-dbus-proxy  \
-xdg-user-dirs  \
 xdot \
 xfonts-base  \
 xfonts-encodings  \
@@ -1226,44 +153,25 @@ xkb-data  \
 xml-core  \
 xorg-sgml-doctools  \
 xserver-common  \
-xserver-xephyr  \
 xserver-xorg  \
 xserver-xorg-core  \
 xserver-xorg-input-all  \
 xserver-xorg-input-libinput  \
-xserver-xorg-input-wacom  \
 xserver-xorg-legacy  \
-xserver-xorg-video-all  \
-xserver-xorg-video-amdgpu  \
-xserver-xorg-video-ati  \
-xserver-xorg-video-fbdev  \
-xserver-xorg-video-intel  \
-xserver-xorg-video-nouveau  \
-xserver-xorg-video-qxl  \
-xserver-xorg-video-radeon  \
-xserver-xorg-video-vesa  \
-xserver-xorg-video-vmware  \
-xtrans-dev  \
-xwayland  \
-xxd  \
+xxhash \
 xz-utils  \
-yaru-theme-gnome-shell  \
-yelp  \
-yelp-xsl  \
 zenity  \
-zenity-common  \
-zip  \
-zlib1g:amd64  \
-zlib1g-dev:amd64
+zip 
 
+# Set generic x86-64 architecture optimization flags for compilation using makefiles.
 
-# we create the /SMASH directory
+ARG CPPFLAGS="-O3 -march=x86-64 --std=c++17"
+ARG CXXFLAGS=${CPPFLAGS}
+ARG CFLAGS="-O3 -march=x86-64"
 
-WORKDIR /SMASH
+# Install ROOT.
 
-# here we download and install several libraries/programs used by SMASH
-
-ARG rootV="6.26.00"
+ARG rootV="6.26.06"
 
 RUN cd /SMASH && \
 wget https://root.cern/download/root_v${rootV}.source.tar.gz && \
@@ -1272,7 +180,7 @@ mv root-${rootV} root_src && \
 mkdir -p root_install && \
 mkdir -p root_build && \
 cd root_build && \
-cmake -DCMAKE_INSTALL_PREFIX=../root_install ../root_src  -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64"&& \
+cmake -DCMAKE_INSTALL_PREFIX=../root_install ../root_src -Dxrootd=OFF && \
 cmake --build . --target install -j$(nproc)
 ENV ROOTSYS=/SMASH/root_install
 ENV PATH=$ROOTSYS/bin:$PATH
@@ -1288,6 +196,8 @@ ENV CLING_STANDARD_PCH=none
 RUN echo /SMASH/root_install/lib >> /etc/ld.so.conf && ldconfig && \
 echo /SMASH/hepmc3_install/lib >> /etc/ld.so.conf && ldconfig
 
+# Install HepMC3.
+
 ARG hepmcV="3.2.5"
 
 RUN cd /SMASH && \
@@ -1295,101 +205,160 @@ wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${hepmcV}.tar.gz && \
 tar xf HepMC3-${hepmcV}.tar.gz && \
 mkdir -p HepMC3_build && \
 cd HepMC3_build && \
-cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=ON -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" ../HepMC3-${hepmcV} && \
+cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=ON -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3_install ../HepMC3-${hepmcV} && \
 make -j$(nproc) && \
 make install
 ENV PATH="/SMASH/hepmc3_install/bin:$PATH"
 ENV LD_LIBRARY_PATH="/SMASH/hepmc3_install/lib:$LD_LIBRARY_PATH"
+
+# Install gitstats.
 
 RUN cd /SMASH && \
 git clone https://github.com/hoxu/gitstats.git && \
 cd gitstats && \
 make install
 
+# Install cppcheck and cpplint.
+
+ARG cppcheckV="2.8"
+ARG cpplintV="1.6.0"
+
 RUN cd /SMASH && \
-wget https://github.com/danmar/cppcheck/archive/2.2.tar.gz && \
-tar xf 2.2.tar.gz && \
-cd cppcheck-2.2 && \
-g++ -o cppcheck -std=c++11 -Iexternals -Iexternals/simplecpp -Iexternals/tinyxml -Ilib cli/*.cpp lib/*.cpp externals/simplecpp/simplecpp.cpp externals/tinyxml/*.cpp && \
-wget https://raw.githubusercontent.com/cpplint/cpplint/develop/cpplint.py && \
-mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck cpplint.py /SMASH/auxiliary_progs/  && \
+wget https://github.com/danmar/cppcheck/archive/${cppcheckV}.tar.gz && \
+tar xf ${cppcheckV}.tar.gz && \
+cd cppcheck-${cppcheckV} && \
+mkdir -p build && cd build && cmake .. && cmake --build . && \
+cd /SMASH && wget https://github.com/cpplint/cpplint/archive/refs/tags/${cpplintV}.tar.gz && tar xf ${cpplintV}.tar.gz && \
+mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck-${cppcheckV}/build/bin/cppcheck cpplint-${cpplintV}/cpplint.py /SMASH/auxiliary_progs/  && \
 chmod +x /SMASH/auxiliary_progs/*
 ENV PATH=$PATH:/SMASH/auxiliary_progs
 
-# now we install Rivet, first fixing a few details in the bootstrap script
+# Install Rivet.
+# The versions of the dependent libraries are chosen according to the bootstrap script downloadable from the Rivet website.
 
-ARG rivetV="3.1.5"
+ARG RIVET_VERSION="3.1.7"
+ARG YODA_VERSION="1.9.7"
+ARG FASTJET_VERSION="3.4.0"
+ARG FJCONTRIB_VERSION="1.049"
+ARG CXXDIALECT="c++17"
+ARG INSTALL_PREFIX="/SMASH/Rivet_install"
+ARG HEPMCPATH="/SMASH/hepmc3_install"
+ARG BUILD_PREFIX="/SMASH/rivet_build"
 
-RUN mkdir -p rivet_build && cd rivet_build
-RUN wget https://gitlab.com/hepcedar/rivetbootstrap/raw/${rivetV}/rivet-bootstrap
-# we set the Rivet installation directory
-RUN sed -i "9s/\$PWD\/local/\/SMASH\/Rivet_install/" rivet-bootstrap
-# we set the number of concurrent compilation processes
-RUN sed -i "10s/j3/j$(nproc)/" rivet-bootstrap
-# we disable the installation of hepmc3, already installed
-RUN sed -i "12s/1/0/" rivet-bootstrap
-# we update the hepmc3 version
-#RUN sed -i "18s/2.06.11/${hepmcV}/" rivet-bootstrap
-# we provide the hepm3 installation path
-RUN sed -i "53s/usr/\SMASH\/hepmc3_install/" rivet-bootstrap
-# we want compile only the MC analyses
-RUN sed -i '193i     sed -i "542,556d;558,566d" analyses/Makefile.in' rivet-bootstrap
-RUN sed -i '194i     rm -rf analyses/plugin[A-L]* analyses/pluginMisc analyses/plugin[N-Z]*' rivet-bootstrap
-
-# now we really compile and install Rivet
 ENV PYTHON=/usr/bin/python3
-
-RUN chmod +x rivet-bootstrap && \
-./rivet-bootstrap && \
-echo /SMASH/Rivet_install/lib >> /etc/ld.so.conf && \
-echo /SMASH/Rivet_install/lib64 >> /etc/ld.so.conf && \
-ldconfig
-
 ENV PATH=/SMASH/Rivet_install/bin:$PATH
 ENV LD_LIBRARY_PATH="/SMASH/Rivet_install/lib:/SMASH/Rivet_install/lib64:$LD_LIBRARY_PATH"
-ENV PYTHONPATH="/SMASH/Rivet_install/lib/python3.8/site-packages:$PYTHONPATH"
-ENV TEXMFHOME="/SMASH/Rivet_install/share/Rivet/texmf:$TEXMFHOME"
-ENV HOMETEXMF="/SMASH/Rivet_install/share/Rivet/texmf:$HOMETEXMF"
-ENV TEXMFCNF="/SMASH/Rivet_install/share/Rivet/texmf/cnf:$TEXMFCNF"
-ENV TEXINPUTS="/SMASH/Rivet_install/share/Rivet/texmf/tex//:$TEXINPUTS"
-ENV LATEXINPUTS="/SMASH/Rivet_install/share/Rivet/texmf/tex//:$LATEXINPUTS"
 
-# we install matplotlib 3.5.1, not available in Ubuntu 18.04
-RUN pip3 install matplotlib==3.5.1
+RUN mkdir -p $INSTALL_PREFIX/etc/bash_completion.d && mkdir -p $INSTALL_PREFIX/lib && ln -s lib $INSTALL_PREFIX/lib64
 
-# eventually, we re-compile SMASH with all dependcies
+RUN mkdir -p $BUILD_PREFIX && cd $BUILD_PREFIX
 
-RUN cd /SMASH/smash && \
-mkdir build && cd build && \
-cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=x86-64" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=x86-64" \
--DCMAKE_CXX_STANDARD=14 && make -j$(nproc) && \
-cp smash  /SMASH/smash_bin/ && \
-cp config.yaml /SMASH/smash_bin/ && \
-rm -r /SMASH/smash/build
-ENV PATH=$PATH:/SMASH/smash_bin
+RUN wget --no-check-certificate --no-verbose http://www.fastjet.fr/repo/fastjet-$FASTJET_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
+cd fastjet-$FASTJET_VERSION && ./configure --prefix=$INSTALL_PREFIX --enable-shared --disable-auto-ptr --enable-allcxxplugins &&\
+make -j$(nproc) && make install
+ARG FASTJETPATH=$INSTALL_PREFIX
 
-# we remove most of the sources
+RUN cd $BUILD_PREFIX &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/fjcontrib-$FJCONTRIB_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
+cd fjcontrib-$FJCONTRIB_VERSION && ./configure --fastjet-config=$FASTJETPATH/bin/fastjet-config CXXFLAGS=-fPIC &&\
+sed -i.bak -e 's/#include <array>/#include <array>\n#include <limits>/' LundPlane/EEHelpers.hh &&\
+make -j1 fragile-shared-install && make install
+
+RUN cd $BUILD_PREFIX &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/YODA-$YODA_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
+cd YODA-$YODA_VERSION && ./configure --prefix=$INSTALL_PREFIX && make -j$(nproc) && make install && cp yodaenv.sh $INSTALL_PREFIX/yodaenv.sh
+ARG YODAPATH=$INSTALL_PREFIX
+
+# Remove all the experimental analyses and leave only the analysis for simulators.
+# The lines need to be checked and probably adjusted at each new Rivet release.
+
+RUN cd $BUILD_PREFIX &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/Rivet-$RIVET_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
+cd Rivet-$RIVET_VERSION &&\
+sed -i "542,556d;558,566d" analyses/Makefile.in && rm -rf analyses/plugin[A-L]* analyses/pluginMisc analyses/plugin[N-Z]* &&\
+./configure --prefix=$INSTALL_PREFIX --with-yoda=$YODAPATH -with-hepmc3=$HEPMCPATH --with-fastjet=$FASTJETPATH &&\
+make -j$(nproc) && make install && cp rivetenv.sh $INSTALL_PREFIX
+
+RUN echo $INSTALL_PREFIX/lib >> /etc/ld.so.conf && \
+ldconfig 
+
+# The python version must be updated together with the underlying linux distribution.
+# Unfortunately something like $(python3 -V | cut -d " " -f 2) does not work.
+ENV PYTHONPATH="$INSTALL_PREFIX/lib/python3.8.10/site-packages:$PYTHONPATH"
+ENV TEXMFHOME="$INSTALL_PREFIX/share/Rivet/texmf:$TEXMFHOME"
+ENV HOMETEXMF="$INSTALL_PREFIX/share/Rivet/texmf:$HOMETEXMF"
+ENV TEXMFCNF="$INSTALL_PREFIX/share/Rivet/texmf/cnf:$TEXMFCNF"
+ENV TEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$TEXINPUTS"
+ENV LATEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$LATEXINPUTS"
+
+# Install julia.
+
+ARG julia_majV="1.8"
+ARG julia_minV="2"
+
+RUN cd /opt &&\
+wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_majV}/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz &&\
+tar xf julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
+ARG julia_path=/opt/julia-${julia_majV}.${julia_minV}/bin
+ENV PATH=${julia_path}:$PATH
+
+# Prepare to build SMASH.
+
+RUN cd /SMASH
+
+# Replace the flags -march=native with -march=x86-64 to make the container more portable.
+
+RUN cd smash && for i in $(find ./ -depth -name "*"); do if [ ! -d $i ]; then sed -i 's/-march=native/-march=x86-64/' $i; fi; done && cd -
+
+# Recompile SMASH.
+
+RUN rm -rf smash_bin && mkdir -p smash_bin && \
+cd smash_bin && \
+cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install \
+-DCMAKE_CXX_STANDARD=17 && make -j$(nproc)
+
+# Set the locations of the SMASH sources and build directory for the variables used by FindSMASH.cmake.
+
+ENV SMASH_DIR=/SMASH/smash
+ENV SMASH_BUILD_DIR=/SMASH/smash_bin
+
+# Remove most of the sources.
 
 RUN cd /SMASH && \
-rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build pythia${pythiaV} gitstats cppcheck-2.2 2.2.tar.gz root_v${rootV}.source.tar.gz root_build root_src rivet_build /var/cache/apt/archives/*.deb cython-* fastjet-* fjcontrib-* Rivet-* YODA-*
+rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build pythia${pythiaV} gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb /opt/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
 
-# we allow Imagemagick to process PS, EPS and PDF files
+# Allow Imagemagick to process PS, EPS and PDF files.
+
 RUN sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" -e "/EPS/d" -e "/PDF/d" -e "/XPS/d" /etc/ImageMagick-6/policy.xml
 
-# we set a few other environment variables
+# Set a few other environment variables.
 
 ENV LC_ALL=en_US.UTF-8
 ENV LANG en=US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 
-# shell prompt
+# Shell prompt when using the container image under Docker.
 
 ENV PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "
 
-# we set up the shell prompt during the container execution, this works when we convert the Docker into a Singularity container
+# Shell prompt when using the container image under Singularity.
 
 RUN mkdir -p /.singularity.d/env/ && \
 CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh && \
 echo '#!/bin/bash' > $CUSTOM_ENV && \
 echo 'PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "' >> $CUSTOM_ENV && \
 chmod 755 $CUSTOM_ENV
+
+# Adjustment for screen to make its usage more convenient.
+
+RUN mv /usr/bin/screen /usr/bin/screen.exe &&\
+echo "echo 'Executing screen wrapper script around original program /usr/bin/screen.exe'" > /usr/bin/screen &&\
+echo "echo 'We try to set the environment variable SCREENDIR to \$HOME/.screen_dir," >> /usr/bin/screen &&\
+echo "echo 'if this directory is not accessible, please, manually set SCREENDIR to another directory" >> /usr/bin/screen &&\
+echo "echo 'before launching /usr/bin/screen.exe'" >> /usr/bin/screen &&\
+echo "sleep 3" >> /usr/bin/screen &&\
+echo "export SCREENDIR=\$HOME/.screen_dir" >> /usr/bin/screen &&\
+echo "mkdir -p \$SCREENDIR" >> /usr/bin/screen &&\
+echo "chmod 700 \$SCREENDIR" >> /usr/bin/screen &&\
+echo "exec /usr/bin/screen.exe \$@" >> /usr/bin/screen &&\
+chmod 755 /usr/bin/screen

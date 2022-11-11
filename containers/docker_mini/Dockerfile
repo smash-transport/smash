@@ -1,9 +1,20 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
+
+# Set bash as the default shell in this Dockerfile
+SHELL ["/bin/bash", "-c"]
+
+# Add some info about authors and contents
+
+LABEL maintainer.name="SMASH team"
+LABEL maintainer.website="https://smash-transport.github.io"
+LABEL description="Basic SMASH image (sources, compiler and bare executable, without ROOT, HepMC3 and Rivet)."
+LABEL org.opencontainers.image.source https://github.com/smash-transport/smash
 
 # Install minimal set of requirements
 RUN apt-get update && \
 apt-get -y upgrade && \
 DEBIAN_FRONTEND=noninteractive apt-get -y install \
+bash \
 cmake \
 git \
 g++ \
@@ -19,15 +30,15 @@ WORKDIR /SMASH
 
 # Install pythia
 ARG pythiaV="8307"
+ENV PYTHIA8=/SMASH/pythia_install/
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
 cd pythia${pythiaV} && \
-./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64 -pthread' --prefix=/SMASH/pythia_instal && \
+./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64 -pthread' --prefix=${PYTHIA8} && \
 make -j$(nproc) && \
 make install && \
-echo /SMASH/pythia${pythiaV}/lib >> /etc/ld.so.conf && ldconfig
+echo ${PYTHIA8}/lib >> /etc/ld.so.conf && ldconfig
 
-ENV PYTHIA8=/SMASH/pythia_install/
 ENV PYTHIA8DATA=$PYTHIA8/share/Pythia8/xmldoc
 ENV PYTHIA_LIBRARY=$PYTHIA8/lib
 ENV PYTHIA_INCLUDE=$PYTHIA8/include
@@ -44,3 +55,7 @@ make smash -j$(nproc) && \
 cp smash  /SMASH/smash_bin/ && \
 cp config.yaml /SMASH/smash_bin/ && \
 rm -r /SMASH/smash/build
+
+# Set PATH
+
+ENV PATH=/SMASH/smash_bin:$PATH
