@@ -958,7 +958,7 @@ struct InputKeys {
    * \page input_general_
    * \optional_key_no_line{key_gen_delta_time_,Delta_Time,double,1.0}
    *
-   * Fixed time step \units{in fm} at which the collision-finding grid is
+   * Fixed time step \unit{in fm} at which the collision-finding grid is
    * recreated, and, if potentials are on, momenta are updated according to the
    * equations of motion. The collision-finding grid finds all the collisions
    * from time t_{beginning_of_timestep} until time t_{beginning_of_timestep} +
@@ -2346,9 +2346,9 @@ struct InputKeys {
    * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.2}
    *
-   * Parameter \f$a\f$ in Lund fragmentation function used to sample the light
-   * cone momentum fraction of leading baryons in non-diffractive string
-   * processes.
+   * Parameter \f$a\f$ in Lund fragmentation function (see <tt>\ref
+   * key_CT_SP_stringz_a_ "StringZ_A"</tt>) used to sample the light cone
+   * momentum fraction of leading baryons in non-diffractive string processes.
    */
   /**
    * \see_key{key_CT_SP_stringz_a_leading_}
@@ -2362,9 +2362,10 @@ struct InputKeys {
    * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_stringz_b_leading_,StringZ_B_Leading,double,2.0}
    *
-   * Parameter \f$b\f$ \unit{in 1/GeV²} in Lund fraghmentation function used to
-   * sample the light cone momentum fraction of leading baryons in
-   * non-diffractive string processes.
+   * Parameter \f$b\f$ \unit{in 1/GeV²} in Lund fraghmentation function (see
+   * <tt>\ref key_CT_SP_stringz_a_ "StringZ_B"</tt>) used to sample the light
+   * cone momentum fraction of leading baryons in non-diffractive string
+   * processes.
    */
   /**
    * \see_key{key_CT_SP_stringz_b_leading_}

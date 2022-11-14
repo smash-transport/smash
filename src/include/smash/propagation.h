@@ -90,7 +90,7 @@ void expand_space_time(Particles *particles,
  * Updates the momenta of all particles at the current
  * time step according to the equations of motion:
  *
- * \f[ \frac{dp}{dt} = \mathbf{E} + \mathbf{v} \times \mathbf{B} \f]
+ * \f[ \frac{dp}{dt} = q\,(\mathbf{E} + \mathbf{v} \times \mathbf{B}) \f]
  *
  * \param[out] particles The particle list in the event
  * \param[in] dt timestep
