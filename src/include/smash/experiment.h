@@ -1030,7 +1030,7 @@ Experiment<Modus>::Experiment(Configuration &config,
             << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
             << "non-zero value or employ SMASH without pT cut.";
         throw std::runtime_error(
-            "Kinematic cut for initial conditions malconfigured.");
+            "Kinematic cut for initial conditions misconfigured.");
       }
     }
 
