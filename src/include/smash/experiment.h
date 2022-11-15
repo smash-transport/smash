@@ -1305,12 +1305,22 @@ Experiment<Modus>::Experiment(Configuration &config,
   // create outputs
   logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
                           " create OutputInterface objects");
-  auto output_conf = config.extract_sub_configuration(
-      {"Output"}, Configuration::GetEmpty::Yes);
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
   logg[LExperiment].debug()
       << "Density type printed to headers: " << dens_type_;
 
+  /* Parse configuration about output contents and formats, doing all logical
+   * checks about specified formats, creating all needed output objects. */
+  auto output_conf = config.extract_sub_configuration(
+      {"Output"}, Configuration::GetEmpty::Yes);
+  if (output_path == "") {
+    throw std::invalid_argument(
+        "Invalid empty output path provided to Experiment constructor.");
+  }
+  if (output_conf.to_string() == "") {
+    logg[LExperiment].warn() << "No \"Output\" section found in the input "
+                                "file. No output file will be produced.";
+  }
   const std::vector<std::string> output_contents =
       output_conf.list_upmost_nodes();
   std::vector<std::vector<std::string>> list_of_formats(output_contents.size());
