@@ -1072,12 +1072,6 @@ Experiment<Modus>::Experiment(Configuration &config,
       {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
       modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
 
-  // create outputs
-  logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
-                          " create OutputInterface objects");
-
-  auto output_conf = config.extract_sub_configuration(
-      {"Output"}, Configuration::GetEmpty::Yes);
   /*!\Userguide
    * \page output_general_ Output
    *
@@ -1307,6 +1301,12 @@ Experiment<Modus>::Experiment(Configuration &config,
    * printed, but the general structure for particle TTrees, as described in
    * \ref format_root, is preserved.
    */
+
+  // create outputs
+  logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
+                          " create OutputInterface objects");
+  auto output_conf = config.extract_sub_configuration(
+      {"Output"}, Configuration::GetEmpty::Yes);
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
   logg[LExperiment].debug()
       << "Density type printed to headers: " << dens_type_;
