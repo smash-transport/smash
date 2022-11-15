@@ -9,6 +9,17 @@
 
 find_package(Doxygen 1.9 OPTIONAL_COMPONENTS dot)
 if(DOXYGEN_FOUND)
+    if(DOXYGEN_VERSION VERSION_GREATER "1.9.5")
+        message(ATTENTION "Your Doxygen version has not been tested. "
+                          "Only versions 1.9.[0-3] are known to correctly work. "
+                          "Warnings and/or unexpected behavior might occurr.")
+    elseif(DOXYGEN_VERSION VERSION_GREATER "1.9.3")
+        message(ATTENTION "Doxygen version ${DOXYGEN_VERSION} is known "
+                          "not to build SMASH documentation fully as expected. "
+                          "Only versions 1.9.[0-3] are known to correctly work. "
+                          "Use at your own risk.")
+    endif()
+
     # Store Doxygen executable full path in a variable for later
     get_target_property(DOXYGEN Doxygen::doxygen IMPORTED_LOCATION)
 
@@ -159,4 +170,6 @@ if(DOXYGEN_FOUND)
                      GREP
                      DOT_EXECUTABLE
                      DOXYGEN)
+else()
+    message(ATTENTION "Without Doxygen, it won't be possible to compile the documentation.")
 endif()
