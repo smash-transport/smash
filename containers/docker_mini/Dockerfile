@@ -46,11 +46,11 @@ ENV LD_LIBRARY_PATH=$PYTHIA_LIBRARY:$LD_LIBRARY_PATH
 ENV PATH=$PYTHIA8/bin:$PATH
 
 # Get and build public SMASH
-RUN git clone https://github.com/smash-transport/smash.git && \
+RUN cd /SMASH && git clone https://github.com/smash-transport/smash.git && \
 mkdir -p smash/build && \
 mkdir -p smash_bin && \
 cd smash/build && \
-cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${pythiaV}/bin/pythia8-config && \
+cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${pythiaV}/bin/pythia8-config -DCMAKE_C_FLAGS="-march=x86-64" -DCMAKE_CXX_FLAGS="-march=x86-64" && \
 make smash -j$(nproc) && \
 cp smash  /SMASH/smash_bin/ && \
 cp config.yaml /SMASH/smash_bin/ && \

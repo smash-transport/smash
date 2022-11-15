@@ -1,6 +1,8 @@
+# syntax=docker/dockerfile:1.4
+
 # Import the base smash container.
 
-FROM ghcr.io/smash-transport/smash:new-base
+FROM ghcr.io/smash-transport/smash:newest
 
 # Set bash as the default shell in this Dockerfile.
 
@@ -193,8 +195,7 @@ ENV CMAKE_PREFIX_PATH=$ROOTSYS:$CMAKE_PREFIX_PATH
 ENV JUPYTER_PATH=$ROOTSYS/etc/notebook:$JUPYTER_PATH
 ENV JUPYTER_CONFIG_DIR=$ROOTSYS/etc/notebook:$JUPYTER_CONFIG_DIR
 ENV CLING_STANDARD_PCH=none
-RUN echo /SMASH/root_install/lib >> /etc/ld.so.conf && ldconfig && \
-echo /SMASH/hepmc3_install/lib >> /etc/ld.so.conf && ldconfig
+RUN echo /SMASH/root_install/lib >> /etc/ld.so.conf && ldconfig
 
 # Install HepMC3.
 
@@ -209,7 +210,7 @@ cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=ON -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INST
 make -j$(nproc) && \
 make install
 ENV PATH="/SMASH/hepmc3_install/bin:$PATH"
-ENV LD_LIBRARY_PATH="/SMASH/hepmc3_install/lib:$LD_LIBRARY_PATH"
+RUN echo /SMASH/hepmc3_install/lib >> /etc/ld.so.conf && ldconfig
 
 # Install gitstats.
 
@@ -275,15 +276,13 @@ ARG YODAPATH=$INSTALL_PREFIX
 RUN cd $BUILD_PREFIX &&\
 wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/Rivet-$RIVET_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
 cd Rivet-$RIVET_VERSION &&\
-sed -i "542,556d;558,566d" analyses/Makefile.in && rm -rf analyses/plugin[A-L]* analyses/pluginMisc analyses/plugin[N-Z]* &&\
 ./configure --prefix=$INSTALL_PREFIX --with-yoda=$YODAPATH -with-hepmc3=$HEPMCPATH --with-fastjet=$FASTJETPATH &&\
 make -j$(nproc) && make install && cp rivetenv.sh $INSTALL_PREFIX
 
-RUN echo $INSTALL_PREFIX/lib >> /etc/ld.so.conf && \
-ldconfig 
+RUN echo $INSTALL_PREFIX/lib >> /etc/ld.so.conf && ldconfig 
 
 # The python version must be updated together with the underlying linux distribution.
-# Unfortunately something like $(python3 -V | cut -d " " -f 2) does not work.
+# Unfortunately something like $(python3 -V | cut -d " " -f 2) does not work in an ENV statement.
 ENV PYTHONPATH="$INSTALL_PREFIX/lib/python3.8.10/site-packages:$PYTHONPATH"
 ENV TEXMFHOME="$INSTALL_PREFIX/share/Rivet/texmf:$TEXMFHOME"
 ENV HOMETEXMF="$INSTALL_PREFIX/share/Rivet/texmf:$HOMETEXMF"
@@ -302,20 +301,11 @@ tar xf julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
 ARG julia_path=/opt/julia-${julia_majV}.${julia_minV}/bin
 ENV PATH=${julia_path}:$PATH
 
-# Prepare to build SMASH.
-
-RUN cd /SMASH
-
-# Replace the flags -march=native with -march=x86-64 to make the container more portable.
-
-RUN cd smash && for i in $(find ./ -depth -name "*"); do if [ ! -d $i ]; then sed -i 's/-march=native/-march=x86-64/' $i; fi; done && cd -
-
 # Recompile SMASH.
 
-RUN rm -rf smash_bin && mkdir -p smash_bin && \
-cd smash_bin && \
+RUN cd /SMASH && rm -rf smash_bin && mkdir -p smash_bin && cd smash_bin && \
 cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install \
--DCMAKE_CXX_STANDARD=17 && make -j$(nproc)
+-DCMAKE_CXX_STANDARD=17 -DCMAKE_C_FLAGS="-march=x86-64" -DCMAKE_CXX_FLAGS="-march=x86-64" && make -j$(nproc)
 
 # Set the locations of the SMASH sources and build directory for the variables used by FindSMASH.cmake.
 
@@ -325,13 +315,15 @@ ENV SMASH_BUILD_DIR=/SMASH/smash_bin
 # Remove most of the sources.
 
 RUN cd /SMASH && \
-rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build pythia${pythiaV} gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb /opt/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
+rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build pythia${pythiaV} gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz \
+cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb \
+/opt/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
 
-# Allow Imagemagick to process PS, EPS and PDF files.
+# Allow Imagemagick to process PS, EPS and PDF files in case the user needs to use `convert` inside the container
 
 RUN sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" -e "/EPS/d" -e "/PDF/d" -e "/XPS/d" /etc/ImageMagick-6/policy.xml
 
-# Set a few other environment variables.
+# Set a few other environment variables (just to be sure which locale is used).
 
 ENV LC_ALL=en_US.UTF-8
 ENV LANG en=US.UTF-8
@@ -341,7 +333,7 @@ ENV LANGUAGE=en_US.UTF-8
 
 ENV PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "
 
-# Shell prompt when using the container image under Singularity.
+# Shell prompt when using the container image under Singularity (CUSTOM_ENV file automatically sourced by Singularity).
 
 RUN mkdir -p /.singularity.d/env/ && \
 CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh && \
@@ -349,16 +341,23 @@ echo '#!/bin/bash' > $CUSTOM_ENV && \
 echo 'PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "' >> $CUSTOM_ENV && \
 chmod 755 $CUSTOM_ENV
 
-# Adjustment for screen to make its usage more convenient.
+# Build wrapper script around screen executable to make it usable from within the container
+# (it needs write access to SCREENDIR folder)
 
-RUN mv /usr/bin/screen /usr/bin/screen.exe &&\
-echo "echo 'Executing screen wrapper script around original program /usr/bin/screen.exe'" > /usr/bin/screen &&\
-echo "echo 'We try to set the environment variable SCREENDIR to \$HOME/.screen_dir," >> /usr/bin/screen &&\
-echo "echo 'if this directory is not accessible, please, manually set SCREENDIR to another directory" >> /usr/bin/screen &&\
-echo "echo 'before launching /usr/bin/screen.exe'" >> /usr/bin/screen &&\
-echo "sleep 3" >> /usr/bin/screen &&\
-echo "export SCREENDIR=\$HOME/.screen_dir" >> /usr/bin/screen &&\
-echo "mkdir -p \$SCREENDIR" >> /usr/bin/screen &&\
-echo "chmod 700 \$SCREENDIR" >> /usr/bin/screen &&\
-echo "exec /usr/bin/screen.exe \$@" >> /usr/bin/screen &&\
-chmod 755 /usr/bin/screen
+RUN mv /usr/bin/screen /usr/bin/screen.exe && \
+export SCREENDIR='"${HOME}/.screen_dir"' &&\
+export CLINE='"$@"' &&\
+cat <<EOF > /usr/bin/screen
+printf '%s\n'\\
+       'Executing screen wrapper script around original program /usr/bin/screen.exe'\\
+       'We try to set the environment variable SCREENDIR to \${HOME}/.screen_dir,'\\
+       'if this directory is not accessible, please, manually set SCREENDIR to another directory'\\
+       'before launching /usr/bin/screen.exe'
+sleep 3
+export SCREENDIR=${SCREENDIR}
+mkdir -p ${SCREENDIR}
+chmod 700 ${SCREENDIR}
+exec /usr/bin/screen.exe ${CLINE}
+EOF
+RUN chmod 755 /usr/bin/screen
+
