@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_CONFIGURATION_H_
 
 #include <array>
+#include <exception>
 #include <filesystem>
 #include <optional>
 #include <set>
@@ -206,29 +207,51 @@ namespace smash {
 /**
  * Interface to the SMASH configuration files.
  *
- * The configuration is created from a YAML file and then stores a nested map of
- * maps (normally a tree, but YAML allows it to be cyclic - even though we don't
- * want that feature).
+ * The configuration is created from a %YAML file and then stores a nested map
+ * of maps (normally a tree, but %YAML allows it to be cyclic - even though we
+ * don't want that feature). Since the resource owned by the object is a
+ * \c YAML::Node that handle memory in a similar way as a pointer does, it is
+ * forbidden (nor should it be needed) to copy instances of this class, while
+ * moving is fine (see special members documentation for more information).
+ *
+ * The typical usage of a Configuration is to create it, consume (i.e.
+ * <tt>take</tt>) all its values and let it being destructed. Since this is the
+ * contact point with SMASH input file, the class is meant to be strict in its
+ * usage, so that it is possible to help the inexpert user, who might being
+ * using a wrong input file and/or e.g. specify an unused key hoping in an
+ * effect that indeed does not occur. Therefore, it is imposed that <b>all keys
+ * must be parsed before an instance gets destroyed</b>. If this is not the
+ * case, an exception will be thrown.
  *
  * For the typical usage in SMASH one needs to read the value once. In that
  * case, use the Configuration::take function, for example:
  * \code
  * double sigma = config.take({"General", "SIGMA"});
  * \endcode
- * Note the curly braces in the function call. It is a std::initializer_list of
- * strings. This allows an arbitrary nesting depth via the same function.
- * But as a consequence the keys must all be given as constant strings at
- * compile time.
+ * Note the curly braces in the function call. It is a \c std::initializer_list
+ * of strings. This allows an arbitrary nesting depth via the same function. But
+ * as a consequence the keys must all be given as constant strings at compile
+ * time.
  *
- * If you need to access the configuration values from a run-time string you can
- * use Configuration::operator[]. This returns a Configuration object that
- * references the respective sub-tree.
+ * The opposite operation of \c take is the Configuration::set_value method,
+ * which has a similar syntax, but needs the new value to be assigned, e.g.
+ * \code
+ * config.set_value({"General", "SIGMA"}, 3.1415);
+ * \endcode
  *
- * By taking values (instead of just reading), the configuration object should
- * be empty at the end of the initialization. If the object is not empty, SMASH
- * will print a warning (using Configuration::unused_values_report). This can be
- * important for the user to discover typos in his configuration file (or
- * command line parameters).
+ * If you need to delegate parsing of a section to some object, you can use the
+ * Configuration::extract_sub_configuration method, which is taking a full
+ * section and returning a new, distinct Configuration instance.
+ *
+ * Last but not least, the Configuration::validate method is used by SMASH to
+ * check that all given keys are allowed in the present version of the codebase.
+ * This is achieved querying the "database" InputKeys class.
+ *
+ * \attention As the Configuration is implemented, it does not make sense in
+ * practice to have constant instances, because their keys could not be taken
+ * and their destruction would lead to an exception being thrown. However, it
+ * still makes perfectly sense to have constant methods (think e.g. of a
+ * <tt>const %Configuration&</tt> being passed to a function).
  */
 class Configuration {
  public:
@@ -931,15 +954,55 @@ class Configuration {
   }
 #endif
 
-  /// If you want to copy this you're doing it wrong
+  /**
+   * Prevent Configuration objects from being copied.
+   *
+   * Underneath, the resource is a \c YAML::Node and since this handle memory
+   * in a similar way as a pointer would do, copying an object would make
+   * several instances point to the same memory and it would make it difficult
+   * to use this object correctly. Therefore, copies are not allowed.
+   */
   Configuration(const Configuration &) = delete;
-  /// If you want to copy this you're doing it wrong
+  /**
+   * Prevent Configuration objects from being copy-assigned.
+   *
+   * See copy constructor Configuration(const Configuration &) for more
+   * information.
+   */
   Configuration &operator=(const Configuration &) = delete;
 
-  /// Moving is fine
-  Configuration(Configuration &&) = default;
-  /// Moving is fine
-  Configuration &operator=(Configuration &&) = default;
+  /**
+   * Provide class with move constructor.
+   *
+   * In contrast to copying, moving is fine, since this keeps the owner
+   * of the resource unique.
+   *
+   * \note Since the class has the peculiar behavior that all keys must be
+   * parsed before it gets destroyed (otherwise an exception is thrown),
+   * it is important to manually implement the move operations, in order to
+   * ensure that objects that are moved from result cleared and their
+   * destruction is not leading to any throw. This is not guaranteed if the
+   * special members are defaulted to the compiler generated versions.
+   */
+  Configuration(Configuration &&);
+
+  /**
+   * Provide class with move assignment operator.
+   *
+   * See move constructor Configuration(Configuration &&) for more information.
+   */
+  Configuration &operator=(Configuration &&);
+
+  /**
+   * Destroy the object, optionally throwing if not all keys were taken.
+   *
+   * This is a way to enforce that the object has to be consumed (i.e.
+   * completely parsed) during its lifetime. Since this object might be
+   * destructed during stack unwinding, the destructor has to throw only
+   * if it is safe to do so and the uncaught_exceptions_ member is used
+   * to properly implement this behavior.
+   */
+  ~Configuration() noexcept(false);
 
   /**
    * Merge the configuration in \p yaml into the existing tree.
@@ -1167,8 +1230,11 @@ class Configuration {
   std::optional<YAML::Node> find_existing_node(
       std::vector<const char *> keys) const;
 
-  /// the general_config.yaml contents - fully parsed
+  /// The general_config.yaml contents - fully parsed
   YAML::Node root_node_{YAML::NodeType::Map};
+
+  /// Counter to be able to optionally throw in destructor
+  int uncaught_exceptions_{std::uncaught_exceptions()};
 };
 
 }  // namespace smash
