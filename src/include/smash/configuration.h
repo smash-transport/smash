@@ -1095,6 +1095,12 @@ class Configuration {
   bool has_value(std::initializer_list<const char *> keys) const;
 
   /**
+   * @return \c true if the object is empty;
+   * @return \c false if at least one key exists.
+   */
+  bool is_empty() const { return root_node_.size() == 0; }
+
+  /**
    * Return a \c string of the current YAML tree.
    */
   std::string to_string() const;

@@ -1317,7 +1317,7 @@ Experiment<Modus>::Experiment(Configuration &config,
     throw std::invalid_argument(
         "Invalid empty output path provided to Experiment constructor.");
   }
-  if (output_conf.to_string() == "") {
+  if (output_conf.is_empty()) {
     logg[LExperiment].warn() << "No \"Output\" section found in the input "
                                 "file. No output file will be produced.";
   }
