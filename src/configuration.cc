@@ -196,6 +196,7 @@ void Configuration::merge_yaml(const std::string &yaml) {
 
 std::vector<std::string> Configuration::list_upmost_nodes() {
   std::vector<std::string> r;
+  r.reserve(root_node_.size());
   for (auto i : root_node_) {
     r.emplace_back(i.first.Scalar());
   }
