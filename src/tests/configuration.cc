@@ -25,7 +25,10 @@ static Configuration make_test_configuration() {
       "test_config.yaml"};
 }
 
-TEST(create_object) { Configuration conf = Test::configuration(); }
+TEST(create_object) {
+  Configuration conf = Test::configuration();
+  conf.clear();
+}
 
 TEST(merge_does_override) {
   Configuration conf = make_test_configuration();
@@ -34,6 +37,7 @@ TEST(merge_does_override) {
   conf.merge_yaml("fireballs: { classify: 2 }");
   COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
   COMPARE(int(conf.read({"fireballs", "classify"})), 2);
+  conf.clear();
 }
 
 TEST_CATCH(merge_with_incorrect_indent, Configuration::ParseError) {
@@ -45,6 +49,7 @@ TEST(take) {
   Configuration conf = make_test_configuration();
   double d = conf.take({"tamer", "pipit", "bushelling"});
   COMPARE(d, 5.);
+  conf.clear();
 }
 
 TEST(take_multiple) {
@@ -55,6 +60,7 @@ TEST(take_multiple) {
   COMPARE(d, 0.2);
   int i = conf.take({"tamer", "Altaic", "Brahmins"});
   COMPARE(i, 1);
+  conf.clear();
 }
 
 TEST_CATCH(take_incorrect_type, Configuration::IncorrectTypeInAssignment) {
@@ -67,6 +73,7 @@ TEST(take_always_converts_to_string) {
   Configuration conf = make_test_configuration();
   std::string s = conf.take({"tamer", "pipit", "bushelling"});
   COMPARE(s, "5.0");
+  conf.clear();
 }
 
 TEST_CATCH(take_not_existing_key, std::invalid_argument) {
@@ -84,6 +91,7 @@ TEST(take_array) {
   conf.merge_yaml("{test: [123, 456, 789]}");
   std::array<int, 3> x = conf.take({"test"});
   VERIFY(x[0] == 123 && x[1] == 456 && x[2] == 789);
+  conf.clear();
 }
 
 TEST_CATCH(take_array_wrong_n, Configuration::IncorrectTypeInAssignment) {
@@ -117,6 +125,7 @@ TEST(take_reactions_bitset) {
   for (std::size_t i = 0; i < bs3.size(); i++) {
     VERIFY(bs3.test(i));
   }
+  conf.clear();
 }
 
 TEST(take_removes_entry) {
@@ -124,6 +133,7 @@ TEST(take_removes_entry) {
   VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
   conf.take({"tamer", "pipit", "bushelling"});
   VERIFY(!conf.has_value({"tamer", "pipit", "bushelling"}));
+  conf.clear();
 }
 
 TEST(take_removes_empty_section) {
@@ -148,6 +158,7 @@ TEST(take_removes_empty_section_but_not_empty_lists) {
   )"};
   conf.take({"Section", "Sub-section", "Key"});
   VERIFY(conf.has_value({"Section", "Sub-section"}));
+  conf.clear();
 }
 
 TEST_CATCH(read_failed_sequence_conversion,
@@ -169,6 +180,7 @@ TEST(read_check_config_general_contents) {
   COMPARE(double(conf.read({"fireballs", "firebrands"})), 10.0);
   COMPARE(int(conf.read({"fireballs", "joker"})), 1);
   COMPARE(int(conf.read({"fireballs", "classify"})), 1);
+  conf.clear();
 }
 
 TEST(read_check_config_collider_contents) {
@@ -176,6 +188,7 @@ TEST(read_check_config_collider_contents) {
   COMPARE(int(conf.read({"tamer", "schmoozed", "warbler"})), 211);
   COMPARE(int(conf.read({"tamer", "schmoozed", "neglects"})), -211);
   COMPARE(double(conf.read({"tamer", "schmoozed", "reedier"})), 1.0);
+  conf.clear();
 }
 
 TEST(read_does_not_take) {
@@ -186,6 +199,7 @@ TEST(read_does_not_take) {
   COMPARE(nevents, 1);
   nevents = conf.take({"fireballs", "classify"});
   COMPARE(nevents, 1);
+  conf.clear();
 }
 
 TEST(set_existing_value) {
@@ -193,6 +207,7 @@ TEST(set_existing_value) {
   const double new_value = 3.1415;
   conf.set_value({"tamer", "Altaic", "Meccas"}, new_value);
   COMPARE(double(conf.read({"tamer", "Altaic", "Meccas"})), new_value);
+  conf.clear();
 }
 
 TEST(set_new_value_on_non_empty_conf) {
@@ -201,6 +216,7 @@ TEST(set_new_value_on_non_empty_conf) {
   conf.set_value({"Test"}, 1.);
   VERIFY(conf.has_value({"Test"}));
   COMPARE(double(conf.read({"Test"})), 1.);
+  conf.clear();
 }
 
 TEST(set_value_on_empty_conf) {
@@ -208,6 +224,7 @@ TEST(set_value_on_empty_conf) {
   conf.set_value({"New section", "New key"}, 42);
   VERIFY(conf.has_value({"New section"}));
   VERIFY(conf.has_value({"New section", "New key"}));
+  conf.clear();
 }
 
 TEST(set_value_on_conf_created_with_empty_file) {
@@ -223,6 +240,7 @@ TEST(set_value_on_conf_created_with_empty_file) {
   VERIFY(conf.has_value({"New section", "New key"}));
   ofs.close();
   std::filesystem::remove(tmp_dir / tmp_file);
+  conf.clear();
 }
 
 TEST(remove_all_entries_in_section_but_one) {
@@ -230,6 +248,7 @@ TEST(remove_all_entries_in_section_but_one) {
   conf.remove_all_entries_in_section_but_one("pipit", {"tamer"});
   conf.remove_all_entries_in_section_but_one("tamer", {});
   COMPARE(conf.to_string(), "tamer:\n  pipit:\n    bushelling: 5.0");
+  conf.clear();
 }
 
 TEST(extract_sub_configuration) {
@@ -246,6 +265,8 @@ TEST(extract_sub_configuration) {
   for (std::size_t i = 0; i < list_of_keys.size(); ++i) {
     COMPARE(list_of_keys[i], reference[i]);
   }
+  conf.clear();
+  sub_conf.clear();
 }
 
 TEST_CATCH(extract_scalar_key_as_section, std::runtime_error) {
@@ -279,17 +300,20 @@ TEST(extract_not_existing_section_as_empty_conf) {
   auto sub_conf = conf.extract_sub_configuration({"Not existing section"},
                                                  Configuration::GetEmpty::Yes);
   COMPARE(sub_conf.to_string(), "");
+  conf.clear();
 }
 
 TEST(has_value_including_empty) {
   Configuration conf = Configuration{"Empty:"};
   VERIFY(!conf.has_value({"Empty"}));
   VERIFY(conf.has_value_including_empty({"Empty"}));
+  conf.clear();
 }
 
 TEST(has_value) {
   Configuration conf = make_test_configuration();
   VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
+  conf.clear();
 }
 
 TEST(is_empty) {
@@ -297,6 +321,7 @@ TEST(is_empty) {
   VERIFY(conf.is_empty());
   conf = Configuration{"Key: Value"};
   VERIFY(!conf.is_empty());
+  conf.clear();
 }
 
 TEST(to_string) {
@@ -307,11 +332,13 @@ TEST(to_string) {
 TEST(validate) {
   // Disable logger output -> reenable if needed to e.g. debug
   logg[LogArea::Configuration::id].setVerbosity(einhard::OFF);
-  const Configuration invalid_conf = make_test_configuration();
+  Configuration invalid_conf = make_test_configuration();
   VERIFY(invalid_conf.validate(false) == Configuration::Is::Invalid);
   VERIFY(invalid_conf.validate(true) == Configuration::Is::Invalid);
-  const Configuration deprecated_conf = Configuration{"Version: 1.8"};
+  Configuration deprecated_conf = Configuration{"Version: 1.8"};
   VERIFY(deprecated_conf.validate() == Configuration::Is::Deprecated);
+  invalid_conf.clear();
+  deprecated_conf.clear();
 }
 
 TEST(validate_shipped_input_files) {
@@ -328,6 +355,7 @@ TEST(validate_shipped_input_files) {
                            input_file.path().filename()};
       VERIFY(config.validate(false) == Configuration::Is::Valid);
       VERIFY(config.validate(true) == Configuration::Is::Valid);
+      config.clear();
     }
   }
 }

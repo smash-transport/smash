@@ -1162,6 +1162,14 @@ class Configuration {
   std::string to_string() const;
 
   /**
+   * Erase the Configuration content.
+   *
+   * This function is useful e.g. in tests to clean up not taken keys
+   * that would trigger an exception being thrown at by the destructor.
+   */
+  void clear() { root_node_.reset(); }
+
+  /**
    * Validate content of configuration in terms of YAML keys.
    *
    * A warning or error message is printed for deprecated or invalid keys,
