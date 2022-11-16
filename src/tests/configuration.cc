@@ -111,6 +111,17 @@ TEST(take_removes_empty_section) {
   VERIFY(!conf.has_value({"Section"})) << "\n" << conf.to_string();
 }
 
+TEST(take_removes_empty_section_but_not_empty_lists) {
+  Configuration conf{R"(
+    Section:
+      Sub-section:
+        Key: "Value"
+        Empty_list: []
+  )"};
+  conf.take({"Section", "Sub-section", "Key"});
+  VERIFY(conf.has_value({"Section", "Sub-section"}));
+}
+
 // Sorry, but I have to put this in the std namespace, otherwise it doesn't
 // compile. That's because the << operator is called from inside the vir::test
 // namespace and all involved types are in the std namespace.
