@@ -38,7 +38,8 @@ YAML::Node remove_empty_maps(YAML::Node root) {
     std::vector<std::string> to_remove(root.size());
     for (auto n : root) {
       remove_empty_maps(n.second);
-      if ((n.second.IsMap() || n.second.IsSequence()) && n.second.size() == 0) {
+      // If the node is an empty sequence, we do NOT remove it!
+      if (n.second.IsMap() && n.second.size() == 0) {
         to_remove.emplace_back(n.first.Scalar());
       }
     }
