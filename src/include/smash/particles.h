@@ -226,25 +226,40 @@ class Particles {
 
   /**
    * \internal
-   * Iterator type that skips over the holes in data_. It implements a standard
-   * bidirectional iterator over the ParticleData objects in Particles.
+   * Iterator type that skips over the holes in `data_`. It implements a
+   * standard bidirectional iterator over the ParticleData objects in Particles.
+   * <b>Each iterator must expose 5 types to correctly interact with the
+   * STL</b>:
+   *  - \c iterator_category
+   *  - \c value_type
+   *  - \c difference_type
+   *  - \c pointer
+   *  - \c reference
+   *
+   * Prior to C++17 it was common habit to inherit from \c std::iterator to
+   * simplify the implementation of user-defined iterators, but this turned out
+   * not to be the most readable choice and this habit has been deprecated in
+   * C++17. It is simply better to explicitly expose the 5 types.
    */
   template <typename T>
-  class GenericIterator
-      : public std::iterator<std::bidirectional_iterator_tag, T> {
+  class GenericIterator {
     friend class Particles;
 
    public:
-    /// remove const qualification
-    using value_type = typename std::remove_const<T>::type;
-    /// provide the pointer of a reference
-    using pointer = typename std::add_pointer<T>::type;
-    /// creates a lvalue reference
-    using reference = typename std::add_lvalue_reference<T>::type;
+    /// <b>Required by STL:</b> expose iterator_category
+    using iterator_category = std::bidirectional_iterator_tag;
+    /// <b>Required by STL:</b> expose value_type removing const qualification
+    using value_type = std::remove_const_t<T>;
+    /// <b>Required by STL:</b> expose difference_type
+    using difference_type = std::ptrdiff_t;
+    /// <b>Required by STL:</b> expose pointer (of a reference)
+    using pointer = std::add_pointer_t<T>;
+    /// <b>Required by STL:</b> expose reference (lvalue)
+    using reference = std::add_lvalue_reference_t<T>;
     /// add const qualification to a pointer
-    using const_pointer = typename std::add_const<pointer>::type;
+    using const_pointer = std::add_const_t<pointer>;
     /// add const qualification to a reference
-    using const_reference = typename std::add_const<reference>::type;
+    using const_reference = std::add_const_t<reference>;
 
    private:
     /**

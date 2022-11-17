@@ -129,8 +129,13 @@ class I_tot_range {
     I_min_ = std::max(I_min_, std::abs(I_z));
   }
 
-  /// Iterator class for determination of total isospin.
-  class iterator : public std::iterator<std::forward_iterator_tag, int> {
+  /**
+   * Iterator class for determination of total isospin.
+   *
+   * See documentation of smash::Particles::GenericIterator class for more
+   * information about exposed types.
+   */
+  class iterator {
    private:
     /// Element of the iterator
     int c_;
@@ -138,6 +143,16 @@ class I_tot_range {
     I_tot_range &parent_;
 
    public:
+    /// <b>Required by STL:</b> expose iterator_category
+    using iterator_category = std::forward_iterator_tag;
+    /// <b>Required by STL:</b> expose value_type
+    using value_type = int;
+    /// <b>Required by STL:</b> expose difference_type
+    using difference_type = int;
+    /// <b>Required by STL:</b> expose pointer
+    using pointer = int *;
+    /// <b>Required by STL:</b> expose reference
+    using reference = int &;
     /**
      * Construct an iterator.
      * \param start Initial value.
