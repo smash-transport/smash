@@ -74,9 +74,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
 
   // Get the Fermi-Motion input (off, on, frozen)
   if (modus_cfg.has_value({"Fermi_Motion"})) {
-    // We only read the value, because it is still required by the experiment
-    // class to make sure we don't use frozen Fermi momenta with potentials.
-    fermi_motion_ = modus_cfg.read({"Fermi_Motion"});
+    fermi_motion_ = modus_cfg.take({"Fermi_Motion"}, FermiMotion::Off);
   }
 
   // Get the total nucleus-nucleus collision energy. Since there is
