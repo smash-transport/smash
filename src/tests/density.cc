@@ -152,18 +152,19 @@ TEST(smearing_factor_normalization) {
   // Create box with 1 proton
   const int N = 1;
   const double L = 10.;
-  auto conf = Test::configuration();
-  conf.set_value({"Modus"}, "Box");
-  conf.set_value({"Modi", "Box", "Init_Multiplicities", "2212"}, N);
-  conf.set_value({"Modi", "Box", "Length"}, L);
-  conf.set_value({"Modi", "Box", "Initial_Condition"}, "thermal momenta");
-  conf.set_value({"Modi", "Box", "Temperature"}, 0.2);
-  conf.set_value({"Modi", "Box", "Start_Time"}, 0.0);
+  Configuration conf{R"(
+    Box:
+      Initial_Condition: "thermal momenta"
+      Temperature: 0.2
+      Start_Time: 0.0
+  )"};
+  conf.set_value({"Box", "Init_Multiplicities", "2212"}, N);
+  conf.set_value({"Box", "Length"}, L);
   ExperimentParameters par = smash::Test::default_parameters();
   par.box_length = L;
   const DensityParameters dens_par = DensityParameters(par);
   std::unique_ptr<BoxModus> b =
-      std::make_unique<BoxModus>(conf.extract_sub_configuration({"Modi"}), par);
+      std::make_unique<BoxModus>(std::move(conf), par);
   std::vector<Particles> ensembles(1);
   b->initial_conditions(&ensembles[0], par);
   // Fill lattice from particles

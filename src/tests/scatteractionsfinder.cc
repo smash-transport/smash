@@ -27,6 +27,14 @@ static ParticleData create_smashon_particle(int id = -1) {
   return ParticleData{ParticleType::find(0x661), id};
 }
 
+static Configuration create_configuration_for_tests(double cross_section) {
+  const std::string tmp{R"(
+    Collision_Term:
+      Elastic_Cross_Section: )" +
+                        std::to_string(cross_section)};
+  return Configuration{tmp.c_str()};
+}
+
 TEST(collision_order) {
   // create particles, the type doesn't matter at all because we will set a
   // different mass anyway and decays are switched off
@@ -65,9 +73,7 @@ TEST(collision_order) {
   const double radius = 0.11;                                        // in fm
   const double elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
   ExperimentParameters exp_par = Test::default_parameters();
-  Configuration config =
-      Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
-                          std::to_string(elastic_parameter) + "}");
+  Configuration config = create_configuration_for_tests(elastic_parameter);
   ScatterActionsFinder finder(config, exp_par);
 
   // prepare lists
@@ -148,9 +154,7 @@ TEST(scatter_particle_pair_only_once) {
   const double radius = 0.11;                                        // in fm
   const double elastic_parameter = radius * radius * M_PI / fm2_mb;  // in mb
   ExperimentParameters exp_par = Test::default_parameters();
-  Configuration config =
-      Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
-                          std::to_string(elastic_parameter) + "}");
+  Configuration config = create_configuration_for_tests(elastic_parameter);
   ScatterActionsFinder finder(config, exp_par);
   ParticleList search_list = p.copy_to_vector();
   double dt = 0.9;                   // fm
@@ -212,9 +216,7 @@ TEST(find_next_action) {
   constexpr double elastic_parameter =
       radius * radius * M_PI / fm2_mb;  // in mb
   ExperimentParameters exp_par = Test::default_parameters();
-  Configuration config =
-      Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
-                          std::to_string(elastic_parameter) + "}");
+  Configuration config = create_configuration_for_tests(elastic_parameter);
   ScatterActionsFinder finder(config, exp_par);
 
   // prepare list of particles that will be checked for possible actions
@@ -260,8 +262,7 @@ TEST(increasing_scaling_factors) {
   p_a.set_slow_formation_times(time, time + 2. * delta_t_coll);
   p_a.set_cross_section_scaling_factor(0.);
   // Set up scatter actions finder
-  Configuration config = Test::configuration(
-      "Collision_Term: {Elastic_Cross_Section: " + std::to_string(xsec) + "}");
+  Configuration config = create_configuration_for_tests(xsec);
   // For a power of larger than alpha, the particles should collide.
   ParticleData::formation_power_ = alpha - 0.1;
   ExperimentParameters exp_par = Test::default_parameters();
@@ -297,9 +298,7 @@ TEST(check_stochastic_collision) {
   const double elastic_parameter = 10.0;  // in mb
   ExperimentParameters exp_par = Test::default_parameters(
       testparticles, dt, CollisionCriterion::Stochastic);
-  Configuration config =
-      Test::configuration("Collision_Term: {Elastic_Cross_Section: " +
-                          std::to_string(elastic_parameter) + "}");
+  Configuration config = create_configuration_for_tests(elastic_parameter);
   ScatterActionsFinder finder(config, exp_par);
 
   // prepare lists

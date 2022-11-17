@@ -28,6 +28,21 @@ Configuration get_common_configuration() {
     )"};
 }
 
+Configuration get_collider_configuration() {
+  auto config = get_common_configuration();
+  config.set_value({"General", "Modus"}, "Collider");
+  config.merge_yaml(R"(
+    Modi:
+      Collider:
+        Projectile:
+          Particles: {2212: 79, 2112: 118}
+        Target:
+          Particles: {2212: 79, 2112: 118}
+        E_Kin: 1.23
+  )");
+  return config;
+}
+
 TEST(create_box) {
   auto config = get_common_configuration();
   config.set_value({"General", "Modus"}, "Box");
@@ -45,18 +60,7 @@ TEST(create_box) {
 }
 
 TEST(create_collider) {
-  auto config = get_common_configuration();
-  config.set_value({"General", "Modus"}, "Collider");
-  config.merge_yaml(R"(
-    Modi:
-      Collider:
-        Projectile:
-          Particles: {2212: 79, 2112: 118}
-        Target:
-          Particles: {2212: 79, 2112: 118}
-        E_Kin: 1.23
-  )");
-  VERIFY(!!Test::experiment(std::move(config)));
+  VERIFY(!!Test::experiment(get_collider_configuration()));
 }
 
 TEST(create_sphere) {
@@ -80,9 +84,8 @@ TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {
 }
 
 TEST(access_particles) {
-  Configuration config = Test::configuration();
-  std::filesystem::path output_path(".");
-  auto exp = std::make_unique<Experiment<ColliderModus>>(config, output_path);
+  auto config = get_collider_configuration();
+  auto exp = std::make_unique<Experiment<ColliderModus>>(config, ".");
   Particles* part = exp->first_ensemble();
   part->create(0x211);
   ParticleList part_list = part->copy_to_vector();
