@@ -28,6 +28,38 @@ static constexpr int LConfiguration = LogArea::Configuration::id;
 // internal helper functions
 namespace {
 /**
+ * Reset the passed in node to that one at the provided key, which is expected
+ * to exist in the node. If this is not the case, the node is set to
+ * <tt>std::nullopt</tt>.
+ *
+ * \param[in,out] node An optional node to be reset.
+ * \param[in] key The key expected to exist in the given node.
+ */
+void descend_one_existing_level(std::optional<YAML::Node> &node,
+                                std::string_view key) {
+  if (node) {
+    for (const auto &section : node.value()) {
+      /* Two remarks:
+           1) The Node::operator[] is created an undefined node if the
+              node does not exist and hence in this function we need to use it
+              only if we are sure the node exists.
+           2) Node::reset does what you might expect Node::operator= to do.
+              But operator= assigns a value to the node and so
+                 node = node[key]
+              would lead to a further modification of the data structure and
+              this function would not be simply traversal. Note that node and
+              root_node_ point to the same memory and modification to the first
+              would affect the second, too. */
+      if (section.first.Scalar() == key) {
+        node.value().reset(node.value()[key]);
+        return;
+      }
+    }
+    node = std::nullopt;
+  }
+}
+
+/**
  * Remove all empty maps of a YAML::Node.
  *
  * \param[in] root YAML::Node that contains empty maps.
@@ -141,55 +173,99 @@ std::vector<std::string> Configuration::list_upmost_nodes() {
 Configuration::Value Configuration::take(
     std::initializer_list<const char *> keys) {
   assert(keys.size() > 0);
+  /* Here we want to descend the YAML tree but not all the way to the last key,
+     because we need the node associated to the previous to last key in order to
+     remove the taken key. */
   auto last_key_it = keys.end() - 1;
-  auto node = find_node_at(root_node_, {keys.begin(), last_key_it});
-  const auto r = node[*last_key_it];
-  node.remove(*last_key_it);
+  auto previous_to_last_node = find_existing_node({keys.begin(), last_key_it});
+  auto to_be_returned{previous_to_last_node};
+  descend_one_existing_level(to_be_returned, *last_key_it);
+  if (!previous_to_last_node || !to_be_returned) {
+    throw std::invalid_argument(
+        "Attempt to take value of a not existing key: " + join_quoted(keys));
+  }
+  previous_to_last_node.value().remove(*last_key_it);
   root_node_ = remove_empty_maps(root_node_);
-  return {r, *last_key_it};
+  return {to_be_returned.value(), *last_key_it};
 }
 
 Configuration::Value Configuration::read(
     std::initializer_list<const char *> keys) const {
-  return {find_node_at(root_node_, keys), keys.begin()[keys.size() - 1]};
+  auto found_node = find_existing_node(keys);
+  if (found_node) {
+    return {found_node.value(), keys.begin()[keys.size() - 1]};
+  } else {
+    throw std::invalid_argument(
+        "Attempt to read value of a not existing key: " + join_quoted(keys));
+  }
 }
 
 void Configuration::remove_all_entries_in_section_but_one(
     const std::string &key, std::initializer_list<const char *> section) {
-  auto node = find_node_at(root_node_, section);
-  std::vector<std::string> to_remove{};
-  for (auto i : node) {
-    if (i.first.Scalar() != key) {
-      to_remove.push_back(i.first.Scalar());
+  auto found_node = find_existing_node(section);
+  if (found_node) {
+    std::vector<std::string> to_remove{};
+    bool key_exists = false;
+    for (auto i : found_node.value()) {
+      if (i.first.Scalar() != key) {
+        to_remove.push_back(i.first.Scalar());
+      } else {
+        key_exists = true;
+      }
     }
-  }
-  for (auto i : to_remove) {
-    node.remove(i);
+    if (!key_exists) {
+      std::string section_string{" section "};
+      if (section.size() > 0) {
+        section_string += join_quoted(section) + " ";
+      } else {
+        section_string = " top-level" + section_string;
+      }
+      throw std::invalid_argument("Attempt to remove all keys in" +
+                                  section_string +
+                                  "except not existing one: \"" + key + "\"");
+    } else {
+      for (auto i : to_remove) {
+        found_node.value().remove(i);
+      }
+    }
+  } else {
+    throw std::invalid_argument(
+        "Attempt to remove entries in not existing section: " +
+        join_quoted(section));
   }
 }
 
 Configuration Configuration::extract_sub_configuration(
     std::initializer_list<const char *> keys,
     Configuration::GetEmpty empty_if_not_existing) {
+  // Same logic as in take method
   assert(keys.size() > 0);
   auto last_key_it = keys.end() - 1;
-  auto node = find_node_at(root_node_, {keys.begin(), last_key_it});
-  auto sub_conf_root_node = node[*last_key_it];
-  if (!sub_conf_root_node.IsDefined()) {
+  auto previous_to_section_node =
+      find_existing_node({keys.begin(), last_key_it});
+  auto sub_conf_root_node{previous_to_section_node};
+  descend_one_existing_level(sub_conf_root_node, *last_key_it);
+  if (!previous_to_section_node || !sub_conf_root_node) {
     if (empty_if_not_existing == Configuration::GetEmpty::Yes)
       return Configuration(YAML::Node{});
     else
       throw std::runtime_error("Attempt to extract not existing section " +
                                join_quoted(keys));
-  } else if (sub_conf_root_node.IsNull() ||
-             (sub_conf_root_node.IsMap() && sub_conf_root_node.size() == 0)) {
+
+  }
+  /* Here sub_conf_root_node cannot be a nullopt, since if it was the function
+     would have returned before and it cannot be that previous_to_section_node
+     is nullopt and sub_conf_root_node is not */
+  else if (sub_conf_root_node->IsNull() ||
+           (sub_conf_root_node->IsMap() && sub_conf_root_node->size() == 0)) {
     // Here we put together the cases of a key without value or with
     // an empty map {} as value (no need at the moment to distinguish)
     throw std::runtime_error("Attempt to extract empty section " +
                              join_quoted(keys));
-  } else if (sub_conf_root_node.IsMap() && sub_conf_root_node.size() != 0) {
-    Configuration sub_config{sub_conf_root_node};
-    node.remove(*last_key_it);
+  } else if (sub_conf_root_node->IsMap() && sub_conf_root_node->size() != 0) {
+    Configuration sub_config{*sub_conf_root_node};
+    previous_to_section_node->remove(*last_key_it);
+    root_node_ = remove_empty_maps(root_node_);
     return sub_config;
   } else {  // sequence or scalar or any future new YAML type
     throw std::runtime_error("Tried to extract configuration section at " +
@@ -200,13 +276,13 @@ Configuration Configuration::extract_sub_configuration(
 
 bool Configuration::has_value_including_empty(
     std::initializer_list<const char *> keys) const {
-  const auto n = find_node_at(root_node_, keys);
-  return n.IsDefined();
+  const auto found_node = find_existing_node(keys);
+  return found_node.has_value();
 }
 
 bool Configuration::has_value(std::initializer_list<const char *> keys) const {
-  const auto n = find_node_at(root_node_, keys);
-  return n.IsDefined() && (!n.IsNull());
+  const auto found_node = find_existing_node(keys);
+  return found_node.has_value() && !(found_node.value().IsNull());
 }
 
 std::string Configuration::to_string() const {
@@ -215,17 +291,25 @@ std::string Configuration::to_string() const {
   return s.str();
 }
 
-YAML::Node Configuration::find_node_at(YAML::Node node,
-                                       std::vector<const char *> keys) const {
+std::optional<YAML::Node> Configuration::find_existing_node(
+    std::vector<const char *> keys) const {
   /* Here we do not assert(keys.size()>0) and allow to pass in an empty vector,
      in which case the passed in YAML:Node is simply returned. This might happen
      e.g. in the take or extract_sub_configuration methods if called with a
      label of a key at top level of the configuration file. */
-  for (auto key : keys) {
-    /* Node::reset does what you might expect Node::operator= to do. But
-       operator= assigns a value to the node. So
-         node = node[*keyIt]
-       leads to modification of the data structure, not simple traversal. */
+  std::optional<YAML::Node> node{root_node_};
+  for (const auto &key : keys) {
+    descend_one_existing_level(node, key);
+  }
+  return node;
+}
+
+YAML::Node Configuration::find_node_creating_it_if_not_existing(
+    std::vector<const char *> keys) const {
+  assert(keys.size() > 0);
+  YAML::Node node{root_node_};
+  for (const auto &key : keys) {
+    // See comments in descend_one_existing_level function
     node.reset(node[key]);
   }
   return node;

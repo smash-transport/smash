@@ -76,12 +76,12 @@ TEST(take_always_converts_to_string) {
   COMPARE(s, "5.0");
 }
 
-TEST_CATCH(take_not_existing_key, std::runtime_error) {
+TEST_CATCH(take_not_existing_key, std::invalid_argument) {
   Configuration conf = make_test_configuration();
   conf.take({"not existing key"});
 }
 
-TEST_CATCH(take_not_existing_key_in_existing_section, std::runtime_error) {
+TEST_CATCH(take_not_existing_key_in_existing_section, std::invalid_argument) {
   Configuration conf = make_test_configuration();
   conf.take({"tamer", "not existing key"});
 }
@@ -397,6 +397,8 @@ TEST(reactions_bitset) {
 }
 
 TEST(configuration_validation) {
+  // Disable logger output -> reenable if needed to e.g. debug
+  logg[LogArea::Configuration::id].setVerbosity(einhard::OFF);
   const Configuration invalid_conf = make_test_configuration();
   VERIFY(invalid_conf.validate(false) == Configuration::Is::Invalid);
   VERIFY(invalid_conf.validate(true) == Configuration::Is::Invalid);
@@ -411,7 +413,7 @@ TEST(shipped_input_files_validation) {
   for (auto &input_file : std::filesystem::recursive_directory_iterator(
            codebase_path / input_folder_name)) {
     if (input_file.path().extension() == extension) {
-      std::cout << " Validating " << input_file.path() << '\n';
+      logg[0].debug() << " Validating " << input_file.path() << '\n';
       Configuration config{input_file.path().parent_path(),
                            input_file.path().filename()};
       VERIFY(config.validate(false) == Configuration::Is::Valid);
