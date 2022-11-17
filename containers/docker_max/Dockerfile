@@ -109,6 +109,7 @@ python3-importlib-metadata  \
 python3-ipython  \
 python3-ipython-genutils  \
 python-is-python3  \
+python3-mpi4py \
 python3-numexpr  \
 python3-numpy  \
 python3-pandas  \
@@ -140,6 +141,7 @@ sqlite3  \
 tar  \
 texlive-latex-base \
 texlive-pstricks \
+tree \
 unzip  \
 util-linux  \
 valgrind  \
@@ -301,11 +303,20 @@ tar xf julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
 ARG julia_path=/opt/julia-${julia_majV}.${julia_minV}/bin
 ENV PATH=${julia_path}:$PATH
 
-# Recompile SMASH.
+# Recompile SMASH (if the repository exists).
 
-RUN cd /SMASH && rm -rf smash_bin && mkdir -p smash_bin && cd smash_bin && \
-cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install \
--DCMAKE_CXX_STANDARD=17 -DCMAKE_C_FLAGS="-march=x86-64" -DCMAKE_CXX_FLAGS="-march=x86-64" && make -j$(nproc)
+RUN <<EOF
+if [ -d /SMASH/smash ]
+then
+  cd /SMASH
+  rm -rf smash_bin
+  mkdir -p smash_bin
+  cd smash_bin
+  cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install \
+  || echo "cmake SMASH build configuration failed!"
+  make -j$(nproc) || echo "SMASH or tests compilation failed!"
+fi
+EOF
 
 # Set the locations of the SMASH sources and build directory for the variables used by FindSMASH.cmake.
 
@@ -345,8 +356,6 @@ chmod 755 $CUSTOM_ENV
 # (it needs write access to SCREENDIR folder)
 
 RUN mv /usr/bin/screen /usr/bin/screen.exe && \
-export SCREENDIR='"${HOME}/.screen_dir"' &&\
-export CLINE='"$@"' &&\
 cat <<EOF > /usr/bin/screen
 printf '%s\n'\\
        'Executing screen wrapper script around original program /usr/bin/screen.exe'\\
@@ -354,10 +363,9 @@ printf '%s\n'\\
        'if this directory is not accessible, please, manually set SCREENDIR to another directory'\\
        'before launching /usr/bin/screen.exe'
 sleep 3
-export SCREENDIR=${SCREENDIR}
-mkdir -p ${SCREENDIR}
-chmod 700 ${SCREENDIR}
-exec /usr/bin/screen.exe ${CLINE}
+export SCREENDIR="\${HOME}/.screen_dir"
+mkdir -p "\${SCREENDIR}"
+chmod 700 "\${SCREENDIR}"
+/usr/bin/screen.exe "\$@"
 EOF
 RUN chmod 755 /usr/bin/screen
-

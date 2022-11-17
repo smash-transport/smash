@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.4
+
 FROM ubuntu:22.04
 
 # Set bash as the default shell in this Dockerfile
@@ -18,7 +20,6 @@ bash \
 cmake \
 git \
 g++ \
-libboost-all-dev \
 libeigen3-dev \
 libgsl-dev \
 rsync \
@@ -50,11 +51,19 @@ RUN cd /SMASH && git clone https://github.com/smash-transport/smash.git && \
 mkdir -p smash/build && \
 mkdir -p smash_bin && \
 cd smash/build && \
-cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${pythiaV}/bin/pythia8-config -DCMAKE_C_FLAGS="-march=x86-64" -DCMAKE_CXX_FLAGS="-march=x86-64" && \
-make smash -j$(nproc) && \
-cp smash  /SMASH/smash_bin/ && \
-cp config.yaml /SMASH/smash_bin/ && \
-rm -r /SMASH/smash/build
+cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${pythiaV}/bin/pythia8-config -DCMAKE_C_FLAGS="-march=x86-64" -DCMAKE_CXX_FLAGS="-march=x86-64" \
+|| echo "cmake SMASH build configuration failed!"
+RUN cd /SMASH/smash/build && make smash -j$(nproc) || echo "make SMASH compilation failed!"
+RUN <<EOF
+if [ -f /SMASH/smash/build/smash ]
+then
+  cp /SMASH/smash/build/smash /SMASH/smash_bin/
+  cp /SMASH/smash/build/config.yaml /SMASH/smash_bin/
+  rm -r /SMASH/smash/build
+else
+  rm -r /SMASH/smash /SMASH/smash_bin
+fi
+EOF
 
 # Set PATH
 
