@@ -1334,14 +1334,12 @@ Experiment<Modus>::Experiment(Configuration &config,
    * always have to take it, otherwise SMASH will complain about unused
    * options. We have to provide a default value for modi other than Collider.
    */
-  const FermiMotion motion =
-      config.take({"Modi", "Collider", "Fermi_Motion"}, FermiMotion::Off);
   if (config.has_value({"Potentials"})) {
     if (time_step_mode_ == TimeStepMode::None) {
       logg[LExperiment].error() << "Potentials only work with time steps!";
       throw std::invalid_argument("Can't use potentials without time steps!");
     }
-    if (motion == FermiMotion::Frozen) {
+    if (modus_.fermi_motion() == FermiMotion::Frozen) {
       logg[LExperiment].error()
           << "Potentials don't work with frozen Fermi momenta! "
              "Use normal Fermi motion instead.";
