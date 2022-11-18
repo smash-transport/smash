@@ -315,6 +315,11 @@ then
   cmake /SMASH/smash -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=/SMASH/hepmc3_install \
   || echo "cmake SMASH build configuration failed!"
   make -j$(nproc) || echo "SMASH or tests compilation failed!"
+  cd /SMASH
+  if [ ! -f /SMASH/smash_bin/smash ]
+  then
+    rm -rf /SMASH/smash /SMASH/smash_bin
+  fi
 fi
 EOF
 
