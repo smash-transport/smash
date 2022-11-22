@@ -2251,7 +2251,7 @@ struct InputKeys {
    */
   inline static const Key<bool> collTerm_stringParam_useMonashTune{
       {"Collision_Term", "String_Parameters", "Use_Monash_Tune"},
-      true,
+      false,
       {"3.0"}};
 
   /*!\Userguide
