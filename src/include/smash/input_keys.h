@@ -2243,7 +2243,8 @@ struct InputKeys {
    * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_set_monash_tune_,Set_Monash_Tune,bool,false}
    *
-   * Whether to use the monash tune \iref{Skands:2014pea} for all string processes.
+   * Whether to use the monash tune \iref{Skands:2014pea} for all string
+   * processes.
    */
   /**
    * \see_key{key_CT_SP_set_monash_tune_}

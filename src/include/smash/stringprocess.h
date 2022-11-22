@@ -163,7 +163,8 @@ class StringProcess {
   /// Whether to use a separate fragmentation function for leading baryons.
   bool separate_fragment_baryon_;
 
-  /// Whether to use the monash tune \iref{Skands:2014pea} for all string processes.
+  /// Whether to use the monash tune \iref{Skands:2014pea} for all string
+  /// processes.
   bool set_monash_tune_;
 
   /**
