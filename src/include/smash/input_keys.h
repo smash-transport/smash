@@ -2241,6 +2241,20 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_collision_term_string_parameters_
+   * \optional_key{key_CT_SP_set_monash_tune_,Set_Monash_Tune,bool,false}
+   *
+   * Whether to use the monash tune for all string processes.
+   */
+  /**
+   * \see_key{key_CT_SP_set_monash_tune_}
+   */
+  inline static const Key<bool> collTerm_stringParam_setMonashTune{
+      {"Collision_Term", "String_Parameters", "Set_Monash_Tune"},
+      true,
+      {"3.0"}};
+
+  /*!\Userguide
+   * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.2}
    *
    * Parameter \f$a\f$ in Lund fragmentation function used to sample the light
@@ -4648,6 +4662,7 @@ struct InputKeys {
       std::cref(collTerm_stringParam_stringZA),
       std::cref(collTerm_stringParam_stringZB),
       std::cref(collTerm_stringParam_separateFragmentBaryon),
+      std::cref(collTerm_stringParam_setMonashTune),
       std::cref(collTerm_stringParam_stringZALeading),
       std::cref(collTerm_stringParam_stringZBLeading),
       std::cref(collTerm_stringParam_stringSigmaT),
