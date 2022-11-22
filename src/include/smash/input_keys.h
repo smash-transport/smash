@@ -2241,16 +2241,16 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_collision_term_string_parameters_
-   * \optional_key{key_CT_SP_set_monash_tune_,Set_Monash_Tune,bool,false}
+   * \optional_key{key_CT_SP_use_monash_tune_,Use_Monash_Tune,bool,false}
    *
    * Whether to use the monash tune \iref{Skands:2014pea} for all string
    * processes.
    */
   /**
-   * \see_key{key_CT_SP_set_monash_tune_}
+   * \see_key{key_CT_SP_use_monash_tune_}
    */
-  inline static const Key<bool> collTerm_stringParam_setMonashTune{
-      {"Collision_Term", "String_Parameters", "Set_Monash_Tune"},
+  inline static const Key<bool> collTerm_stringParam_useMonashTune{
+      {"Collision_Term", "String_Parameters", "Use_Monash_Tune"},
       true,
       {"3.0"}};
 
@@ -4663,7 +4663,7 @@ struct InputKeys {
       std::cref(collTerm_stringParam_stringZA),
       std::cref(collTerm_stringParam_stringZB),
       std::cref(collTerm_stringParam_separateFragmentBaryon),
-      std::cref(collTerm_stringParam_setMonashTune),
+      std::cref(collTerm_stringParam_useMonashTune),
       std::cref(collTerm_stringParam_stringZALeading),
       std::cref(collTerm_stringParam_stringZBLeading),
       std::cref(collTerm_stringParam_stringSigmaT),

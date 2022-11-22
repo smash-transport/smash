@@ -26,7 +26,7 @@ StringProcess::StringProcess(
     double stringz_a_leading, double stringz_b_leading, double stringz_a,
     double stringz_b, double string_sigma_T, double factor_t_form,
     bool mass_dependent_formation_times, double prob_proton_to_d_uu,
-    bool separate_fragment_baryon, double popcorn_rate, bool set_monash_tune)
+    bool separate_fragment_baryon, double popcorn_rate, bool use_monash_tune)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -48,7 +48,7 @@ StringProcess::StringProcess(
       mass_dependent_formation_times_(mass_dependent_formation_times),
       prob_proton_to_d_uu_(prob_proton_to_d_uu),
       separate_fragment_baryon_(separate_fragment_baryon),
-      set_monash_tune_(set_monash_tune) {
+      use_monash_tune_(use_monash_tune) {
   // setup and initialize pythia for fragmentation
   pythia_hadron_ = std::make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* turn off all parton-level processes to implement only hadronization */
@@ -147,7 +147,7 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
   // make energy-momentum conservation in PYTHIA more precise
   pythia_in->readString("Check:epTolErr = 1e-6");
   pythia_in->readString("Check:epTolWarn = 1e-8");
-  if (set_monash_tune_) {
+  if (use_monash_tune_) {
     pythia_in->readString("Tune:ee = 7");
     pythia_in->readString("Tune:pp = 14");
   }
