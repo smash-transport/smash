@@ -30,7 +30,7 @@ RenamingFilePtr::~RenamingFilePtr() {
   std::fclose(file_);
   // we rename the output file only if we are not unwinding the stack
   // because of an exception
-  if (std::uncaught_exceptions() == 0) {
+  if (std::uncaught_exceptions() == uncaught_exceptions_) {
     std::filesystem::rename(filename_unfinished_, filename_);
   }
 }

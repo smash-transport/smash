@@ -92,6 +92,13 @@ class RenamingFilePtr {
   std::filesystem::path filename_;
   /// Path of the unfinished file.
   std::filesystem::path filename_unfinished_;
+  /**
+   * Number of uncaught exceptions at the time when the object is created.
+   * If it has not changed when the object is destroyed, we suppose that
+   * the contents of the file are reliable and in the destructor we can safely
+   * rename the file and remove the _.unfinished_ suffix.
+   */
+  int uncaught_exceptions_{std::uncaught_exceptions()};
 };
 
 /**
