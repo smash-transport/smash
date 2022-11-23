@@ -28,7 +28,11 @@ FILE* RenamingFilePtr::get() { return file_; }
 
 RenamingFilePtr::~RenamingFilePtr() {
   std::fclose(file_);
-  std::filesystem::rename(filename_unfinished_, filename_);
+  // we rename the output file only if we are not unwinding the stack
+  // because of an exception
+  if (std::uncaught_exceptions() == 0) {
+    std::filesystem::rename(filename_unfinished_, filename_);
+  }
 }
 
 }  // namespace smash
