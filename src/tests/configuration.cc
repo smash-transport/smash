@@ -27,34 +27,27 @@ static Configuration make_test_configuration() {
 
 TEST(create_object) { Configuration conf = Test::configuration(); }
 
-TEST(check_config_general_contents) {
+TEST(merge_does_override) {
   Configuration conf = make_test_configuration();
-
-  std::string modus = conf.read({"fireballs", "extorting"});
-  COMPARE(modus, "feathered");
-  COMPARE(double(conf.read({"fireballs", "infection"})), 0.01);
   COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
-  COMPARE(int(conf.read({"fireballs", "pendulous"})), 10);
-  COMPARE(int(conf.read({"fireballs", "scudded"})), 1);
-  COMPARE(double(conf.read({"fireballs", "firebrands"})), 10.0);
-  COMPARE(int(conf.read({"fireballs", "joker"})), 1);
   COMPARE(int(conf.read({"fireballs", "classify"})), 1);
+  conf.merge_yaml("fireballs: { classify: 2 }");
+  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
+  COMPARE(int(conf.read({"fireballs", "classify"})), 2);
 }
 
-TEST(check_config_collider_contents) {
+TEST_CATCH(merge_with_incorrect_indent, Configuration::ParseError) {
   Configuration conf = make_test_configuration();
-  COMPARE(int(conf.read({"tamer", "schmoozed", "warbler"})), 211);
-  COMPARE(int(conf.read({"tamer", "schmoozed", "neglects"})), -211);
-  COMPARE(double(conf.read({"tamer", "schmoozed", "reedier"})), 1.0);
+  conf.merge_yaml("fireballs:\n foo: 1\n  test: 1\n");
 }
 
-TEST(test_take) {
+TEST(take) {
   Configuration conf = make_test_configuration();
   double d = conf.take({"tamer", "pipit", "bushelling"});
   COMPARE(d, 5.);
 }
 
-TEST(test_take_multiple) {
+TEST(take_multiple) {
   Configuration conf = make_test_configuration();
   double d = conf.take({"tamer", "Altaic", "Meccas"});
   COMPARE(d, 10.);
@@ -86,16 +79,44 @@ TEST_CATCH(take_not_existing_key_in_existing_section, std::invalid_argument) {
   conf.take({"tamer", "not existing key"});
 }
 
-TEST(has_value) {
+TEST(take_array) {
   Configuration conf = make_test_configuration();
-  VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
+  conf.merge_yaml("{test: [123, 456, 789]}");
+  std::array<int, 3> x = conf.take({"test"});
+  VERIFY(x[0] == 123 && x[1] == 456 && x[2] == 789);
 }
 
-TEST(is_empty) {
-  Configuration conf{""};
-  VERIFY(conf.is_empty());
-  conf = Configuration{"Key: Value"};
-  VERIFY(!conf.is_empty());
+TEST_CATCH(take_array_wrong_n, Configuration::IncorrectTypeInAssignment) {
+  Configuration conf = make_test_configuration();
+  conf.merge_yaml("{test: [123, 456, 789]}");
+  std::array<int, 4> x = conf.take({"test"});
+  SMASH_UNUSED(x);
+}
+
+TEST(take_reactions_bitset) {
+  // Make sure that only the right bits are set
+  Configuration conf = make_test_configuration();
+  conf.merge_yaml("{test: [NN_to_NR, KN_to_KN]}");
+  ReactionsBitSet bs = conf.take({"test"});
+  for (std::size_t i = 0; i < bs.size(); i++) {
+    if (i == IncludedReactions::NN_to_NR || i == IncludedReactions::KN_to_KN) {
+      VERIFY(bs.test(i));
+    } else {
+      VERIFY(!bs.test(i));
+    }
+  }
+  // Make sure that all bits are set
+  conf.merge_yaml("{test2: [All]}");
+  ReactionsBitSet bs2 = conf.take({"test2"});
+  for (std::size_t i = 0; i < bs2.size(); i++) {
+    VERIFY(bs2.test(i));
+  }
+  // All means really ALL reactions are on
+  conf.merge_yaml("{test3: [NN_to_NR, All]}");
+  ReactionsBitSet bs3 = conf.take({"test3"});
+  for (std::size_t i = 0; i < bs3.size(); i++) {
+    VERIFY(bs3.test(i));
+  }
 }
 
 TEST(take_removes_entry) {
@@ -129,6 +150,186 @@ TEST(take_removes_empty_section_but_not_empty_lists) {
   VERIFY(conf.has_value({"Section", "Sub-section"}));
 }
 
+TEST_CATCH(read_failed_sequence_conversion,
+           Configuration::IncorrectTypeInAssignment) {
+  Configuration conf = make_test_configuration();
+  conf.merge_yaml("{test: [123 456]}");
+  std::vector<int> x = conf.read({"test"});
+}
+
+TEST(read_check_config_general_contents) {
+  Configuration conf = make_test_configuration();
+
+  std::string modus = conf.read({"fireballs", "extorting"});
+  COMPARE(modus, "feathered");
+  COMPARE(double(conf.read({"fireballs", "infection"})), 0.01);
+  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
+  COMPARE(int(conf.read({"fireballs", "pendulous"})), 10);
+  COMPARE(int(conf.read({"fireballs", "scudded"})), 1);
+  COMPARE(double(conf.read({"fireballs", "firebrands"})), 10.0);
+  COMPARE(int(conf.read({"fireballs", "joker"})), 1);
+  COMPARE(int(conf.read({"fireballs", "classify"})), 1);
+}
+
+TEST(read_check_config_collider_contents) {
+  Configuration conf = make_test_configuration();
+  COMPARE(int(conf.read({"tamer", "schmoozed", "warbler"})), 211);
+  COMPARE(int(conf.read({"tamer", "schmoozed", "neglects"})), -211);
+  COMPARE(double(conf.read({"tamer", "schmoozed", "reedier"})), 1.0);
+}
+
+TEST(read_does_not_take) {
+  Configuration conf = make_test_configuration();
+  int nevents = conf.read({"fireballs", "classify"});
+  COMPARE(nevents, 1);
+  nevents = conf.read({"fireballs", "classify"});
+  COMPARE(nevents, 1);
+  nevents = conf.take({"fireballs", "classify"});
+  COMPARE(nevents, 1);
+}
+
+TEST(set_existing_value) {
+  Configuration conf = make_test_configuration();
+  const double new_value = 3.1415;
+  conf.set_value({"tamer", "Altaic", "Meccas"}, new_value);
+  COMPARE(double(conf.read({"tamer", "Altaic", "Meccas"})), new_value);
+}
+
+TEST(set_new_value_on_non_empty_conf) {
+  Configuration conf = make_test_configuration();
+  VERIFY(!conf.has_value({"Test"}));
+  conf.set_value({"Test"}, 1.);
+  VERIFY(conf.has_value({"Test"}));
+  COMPARE(double(conf.read({"Test"})), 1.);
+}
+
+TEST(set_value_on_empty_conf) {
+  auto conf = Configuration("");
+  conf.set_value({"New section", "New key"}, 42);
+  VERIFY(conf.has_value({"New section"}));
+  VERIFY(conf.has_value({"New section", "New key"}));
+}
+
+TEST(set_value_on_conf_created_with_empty_file) {
+  auto tmp_dir = std::filesystem::temp_directory_path();
+  auto tmp_file = "empty_config.yaml";
+  std::ofstream ofs(tmp_dir / tmp_file);
+  if (!ofs) {
+    FAIL() << "Unable to create empty temporary file!";
+  }
+  auto conf = Configuration{tmp_dir, tmp_file};
+  conf.set_value({"New section", "New key"}, 42);
+  VERIFY(conf.has_value({"New section"}));
+  VERIFY(conf.has_value({"New section", "New key"}));
+  ofs.close();
+  std::filesystem::remove(tmp_dir / tmp_file);
+}
+
+TEST(remove_all_entries_in_section_but_one) {
+  Configuration conf = make_test_configuration();
+  conf.remove_all_entries_in_section_but_one("pipit", {"tamer"});
+  conf.remove_all_entries_in_section_but_one("tamer", {});
+  COMPARE(conf.to_string(), "tamer:\n  pipit:\n    bushelling: 5.0");
+}
+
+TEST(extract_sub_configuration) {
+  Configuration conf = make_test_configuration();
+  Configuration sub_conf = conf.extract_sub_configuration({"tamer", "pipit"});
+  VERIFY(!conf.has_value({"tamer", "pipit"}));
+  COMPARE(sub_conf.to_string(), "bushelling: 5.0");
+  sub_conf = conf.extract_sub_configuration({"fireballs"});
+  const auto list_of_keys = sub_conf.list_upmost_nodes();
+  const std::vector<std::string> reference = {
+      "extorting", "infection",  "arena", "pendulous",
+      "scudded",   "firebrands", "joker", "classify"};
+  COMPARE(list_of_keys.size(), reference.size());
+  for (std::size_t i = 0; i < list_of_keys.size(); ++i) {
+    COMPARE(list_of_keys[i], reference[i]);
+  }
+}
+
+TEST_CATCH(extract_scalar_key_as_section, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  auto sub_conf = conf.extract_sub_configuration({"fireballs", "joker"});
+}
+
+TEST_CATCH(extract_sequence_key_as_section, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  auto sub_conf =
+      conf.extract_sub_configuration({"tamer", "feathered", "stopcock"});
+}
+
+TEST_CATCH(extract_empty_map_as_section, std::runtime_error) {
+  Configuration conf{"section: {}"};
+  auto sub_conf = conf.extract_sub_configuration({"section"});
+}
+
+TEST_CATCH(extract_key_without_value_section, std::runtime_error) {
+  Configuration conf{"section:"};
+  auto sub_conf = conf.extract_sub_configuration({"section"});
+}
+
+TEST_CATCH(extract_not_existing_section, std::runtime_error) {
+  Configuration conf = make_test_configuration();
+  auto sub_conf = conf.extract_sub_configuration({"Not existing section"});
+}
+
+TEST(extract_not_existing_section_as_empty_conf) {
+  Configuration conf = make_test_configuration();
+  auto sub_conf = conf.extract_sub_configuration({"Not existing section"},
+                                                 Configuration::GetEmpty::Yes);
+  COMPARE(sub_conf.to_string(), "");
+}
+
+TEST(has_value_including_empty) {
+  Configuration conf = Configuration{"Empty:"};
+  VERIFY(!conf.has_value({"Empty"}));
+  VERIFY(conf.has_value_including_empty({"Empty"}));
+}
+
+TEST(has_value) {
+  Configuration conf = make_test_configuration();
+  VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
+}
+
+TEST(is_empty) {
+  Configuration conf{""};
+  VERIFY(conf.is_empty());
+  conf = Configuration{"Key: Value"};
+  VERIFY(!conf.is_empty());
+}
+
+TEST(to_string) {
+  Configuration conf = Configuration{""};
+  COMPARE(conf.to_string(), "{}");
+}
+
+TEST(validate) {
+  // Disable logger output -> reenable if needed to e.g. debug
+  logg[LogArea::Configuration::id].setVerbosity(einhard::OFF);
+  const Configuration invalid_conf = make_test_configuration();
+  VERIFY(invalid_conf.validate(false) == Configuration::Is::Invalid);
+  VERIFY(invalid_conf.validate(true) == Configuration::Is::Invalid);
+  const Configuration deprecated_conf = Configuration{"Version: 1.8"};
+  VERIFY(deprecated_conf.validate() == Configuration::Is::Deprecated);
+}
+
+TEST(validate_shipped_input_files) {
+  const std::filesystem::path codebase_path{TEST_CONFIG_PATH};
+  const std::string input_folder_name{"input"};
+  const std::string extension(".yaml");
+  for (auto &input_file : std::filesystem::recursive_directory_iterator(
+           codebase_path / input_folder_name)) {
+    if (input_file.path().extension() == extension) {
+      logg[0].debug() << " Validating " << input_file.path() << '\n';
+      Configuration config{input_file.path().parent_path(),
+                           input_file.path().filename()};
+      VERIFY(config.validate(false) == Configuration::Is::Valid);
+      VERIFY(config.validate(true) == Configuration::Is::Valid);
+    }
+  }
+}
+
 // Sorry, but I have to put this in the std namespace, otherwise it doesn't
 // compile. That's because the << operator is called from inside the vir::test
 // namespace and all involved types are in the std namespace.
@@ -153,6 +354,7 @@ static void expect_lines(std::vector<std::string> expected,
   }
 }
 
+// Test not on Configuration functionality but more as integration test
 TEST(check_unused_report) {
   std::string reference;
   Configuration conf = make_test_configuration();
@@ -236,210 +438,4 @@ TEST(check_unused_report) {
   conf.take({"tamer", "schmoozed", "neglects"});
   reference = "{}";
   COMPARE(conf.to_string(), reference);
-}
-
-TEST(test_config_read) {
-  Configuration conf = make_test_configuration();
-  int nevents = conf.read({"fireballs", "classify"});
-  COMPARE(nevents, 1);
-  nevents = conf.read({"fireballs", "classify"});
-  COMPARE(nevents, 1);
-  nevents = conf.take({"fireballs", "classify"});
-  COMPARE(nevents, 1);
-}
-
-TEST(check_setting_new_value) {
-  Configuration conf = make_test_configuration();
-  VERIFY(!conf.has_value({"Test"}));
-  conf.set_value({"Test"}, 1.);
-  VERIFY(conf.has_value({"Test"}));
-  COMPARE(double(conf.read({"Test"})), 1.);
-}
-
-TEST(check_changing_existing_value) {
-  Configuration conf = make_test_configuration();
-  const double new_value = 3.1415;
-  conf.set_value({"tamer", "Altaic", "Meccas"}, new_value);
-  COMPARE(double(conf.read({"tamer", "Altaic", "Meccas"})), new_value);
-}
-
-TEST(merge_override) {
-  Configuration conf = make_test_configuration();
-  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
-  COMPARE(int(conf.read({"fireballs", "classify"})), 1);
-  conf.merge_yaml("fireballs: { classify: 2 }");
-  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
-  COMPARE(int(conf.read({"fireballs", "classify"})), 2);
-}
-
-TEST(remove_all_entries_in_section_but_one) {
-  Configuration conf = make_test_configuration();
-  conf.remove_all_entries_in_section_but_one("pipit", {"tamer"});
-  conf.remove_all_entries_in_section_but_one("tamer", {});
-  COMPARE(conf.to_string(), "tamer:\n  pipit:\n    bushelling: 5.0");
-}
-
-TEST(extract_sub_configuration) {
-  Configuration conf = make_test_configuration();
-  Configuration sub_conf = conf.extract_sub_configuration({"tamer", "pipit"});
-  VERIFY(!conf.has_value({"tamer", "pipit"}));
-  COMPARE(sub_conf.to_string(), "bushelling: 5.0");
-  sub_conf = conf.extract_sub_configuration({"fireballs"});
-  const auto list_of_keys = sub_conf.list_upmost_nodes();
-  const std::vector<std::string> reference = {
-      "extorting", "infection",  "arena", "pendulous",
-      "scudded",   "firebrands", "joker", "classify"};
-  COMPARE(list_of_keys.size(), reference.size());
-  for (std::size_t i = 0; i < list_of_keys.size(); ++i) {
-    COMPARE(list_of_keys[i], reference[i]);
-  }
-}
-
-TEST_CATCH(extract_scalar_key_as_section, std::runtime_error) {
-  Configuration conf = make_test_configuration();
-  auto sub_conf = conf.extract_sub_configuration({"fireballs", "joker"});
-}
-
-TEST_CATCH(extract_sequence_key_as_section, std::runtime_error) {
-  Configuration conf = make_test_configuration();
-  auto sub_conf =
-      conf.extract_sub_configuration({"tamer", "feathered", "stopcock"});
-}
-
-TEST_CATCH(extract_empty_map_as_section, std::runtime_error) {
-  Configuration conf{"section: {}"};
-  auto sub_conf = conf.extract_sub_configuration({"section"});
-}
-
-TEST_CATCH(extract_key_without_value_section, std::runtime_error) {
-  Configuration conf{"section:"};
-  auto sub_conf = conf.extract_sub_configuration({"section"});
-}
-
-TEST_CATCH(extract_not_existing_section, std::runtime_error) {
-  Configuration conf = make_test_configuration();
-  auto sub_conf = conf.extract_sub_configuration({"Not existing section"});
-}
-
-TEST(extract_not_existing_section_as_empty_conf) {
-  Configuration conf = make_test_configuration();
-  auto sub_conf = conf.extract_sub_configuration({"Not existing section"},
-                                                 Configuration::GetEmpty::Yes);
-  COMPARE(sub_conf.to_string(), "");
-}
-
-TEST(test_sub_config_objects) {
-  Configuration conf = make_test_configuration();
-  Configuration general = conf.extract_sub_configuration({"fireballs"});
-  const Configuration box = conf.extract_sub_configuration({"tamer", "Altaic"});
-  VERIFY(general.has_value({"classify"}));
-  int nevents = general.read({"classify"});
-  VERIFY(general.has_value({"classify"}));
-  COMPARE(nevents, 1);
-  nevents = general.take({"classify"});
-  VERIFY(!general.has_value({"classify"}));
-  COMPARE(nevents, 1);
-  COMPARE(double(box.read({"Meccas"})), 10.);
-}
-
-TEST_CATCH(failed_sequence_conversion,
-           Configuration::IncorrectTypeInAssignment) {
-  Configuration conf = make_test_configuration();
-  conf.merge_yaml("{test: [123 456]}");
-  std::vector<int> x = conf.read({"test"});
-}
-
-TEST_CATCH(incorrect_indent, Configuration::ParseError) {
-  Configuration conf = make_test_configuration();
-  conf.merge_yaml("fireballs:\n foo: 1\n  test: 1\n");
-  int x = conf.read({"fireballs", "test"});
-  COMPARE(x, 1);
-}
-
-TEST(take_array) {
-  Configuration conf = make_test_configuration();
-  conf.merge_yaml("{test: [123, 456, 789]}");
-  std::array<int, 3> x = conf.take({"test"});
-  VERIFY(x[0] == 123 && x[1] == 456 && x[2] == 789);
-}
-
-TEST_CATCH(take_array_wrong_n, Configuration::IncorrectTypeInAssignment) {
-  Configuration conf = make_test_configuration();
-  conf.merge_yaml("{test: [123, 456, 789]}");
-  std::array<int, 4> x = conf.take({"test"});
-  SMASH_UNUSED(x);
-}
-
-TEST(reactions_bitset) {
-  // Make sure that only the right bits are set
-  Configuration conf = make_test_configuration();
-  conf.merge_yaml("{test: [NN_to_NR, KN_to_KN]}");
-  ReactionsBitSet bs = conf.take({"test"});
-  for (std::size_t i = 0; i < bs.size(); i++) {
-    if (i == IncludedReactions::NN_to_NR || i == IncludedReactions::KN_to_KN) {
-      VERIFY(bs.test(i));
-    } else {
-      VERIFY(!bs.test(i));
-    }
-  }
-  // Make sure that all bits are set
-  conf.merge_yaml("{test2: [All]}");
-  ReactionsBitSet bs2 = conf.take({"test2"});
-  for (std::size_t i = 0; i < bs2.size(); i++) {
-    VERIFY(bs2.test(i));
-  }
-  // All means really ALL reactions are on
-  conf.merge_yaml("{test3: [NN_to_NR, All]}");
-  ReactionsBitSet bs3 = conf.take({"test3"});
-  for (std::size_t i = 0; i < bs3.size(); i++) {
-    VERIFY(bs3.test(i));
-  }
-}
-
-TEST(configuration_validation) {
-  // Disable logger output -> reenable if needed to e.g. debug
-  logg[LogArea::Configuration::id].setVerbosity(einhard::OFF);
-  const Configuration invalid_conf = make_test_configuration();
-  VERIFY(invalid_conf.validate(false) == Configuration::Is::Invalid);
-  VERIFY(invalid_conf.validate(true) == Configuration::Is::Invalid);
-  const Configuration deprecated_conf = Configuration{"Version: 1.8"};
-  VERIFY(deprecated_conf.validate() == Configuration::Is::Deprecated);
-}
-
-TEST(shipped_input_files_validation) {
-  const std::filesystem::path codebase_path{TEST_CONFIG_PATH};
-  const std::string input_folder_name{"input"};
-  const std::string extension(".yaml");
-  for (auto &input_file : std::filesystem::recursive_directory_iterator(
-           codebase_path / input_folder_name)) {
-    if (input_file.path().extension() == extension) {
-      logg[0].debug() << " Validating " << input_file.path() << '\n';
-      Configuration config{input_file.path().parent_path(),
-                           input_file.path().filename()};
-      VERIFY(config.validate(false) == Configuration::Is::Valid);
-      VERIFY(config.validate(true) == Configuration::Is::Valid);
-    }
-  }
-}
-
-TEST(set_value_on_empty_conf) {
-  auto conf = Configuration("");
-  conf.set_value({"New section", "New key"}, 42);
-  VERIFY(conf.has_value({"New section"}));
-  VERIFY(conf.has_value({"New section", "New key"}));
-}
-
-TEST(set_value_on_conf_created_with_empty_file) {
-  auto tmp_dir = std::filesystem::temp_directory_path();
-  auto tmp_file = "empty_config.yaml";
-  std::ofstream ofs(tmp_dir / tmp_file);
-  if (!ofs) {
-    FAIL() << "Unable to create empty temporary file!";
-  }
-  auto conf = Configuration{tmp_dir, tmp_file};
-  conf.set_value({"New section", "New key"}, 42);
-  VERIFY(conf.has_value({"New section"}));
-  VERIFY(conf.has_value({"New section", "New key"}));
-  ofs.close();
-  std::filesystem::remove(tmp_dir / tmp_file);
 }

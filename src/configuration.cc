@@ -251,12 +251,11 @@ Configuration Configuration::extract_sub_configuration(
     else
       throw std::runtime_error("Attempt to extract not existing section " +
                                join_quoted(keys));
-
   }
   /* Here sub_conf_root_node cannot be a nullopt, since if it was the function
      would have returned before and it cannot be that previous_to_section_node
      is nullopt and sub_conf_root_node is not */
-  else if (sub_conf_root_node->IsNull() ||
+  else if (sub_conf_root_node->IsNull() || // NOLINT[whitespace/newline]
            (sub_conf_root_node->IsMap() && sub_conf_root_node->size() == 0)) {
     // Here we put together the cases of a key without value or with
     // an empty map {} as value (no need at the moment to distinguish)

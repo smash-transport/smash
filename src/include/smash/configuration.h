@@ -1034,6 +1034,21 @@ class Configuration {
   }
 
   /**
+   * Overwrite the value of the specified YAML node.
+   *
+   * \param[in] keys You can pass an arbitrary number of keys inside curly
+   *                 braces, following the nesting structure in the config file.
+   * \param[in] value An arbitrary value that yaml-cpp can convert into YAML
+   *                  representation. Any builtin type, strings, maps, and
+   *                  vectors can be used here.
+   */
+  template <typename T>
+  void set_value(std::initializer_list<const char *> keys, T &&value) {
+    auto node = find_node_creating_it_if_not_existing(keys);
+    node = std::forward<T>(value);
+  }
+
+  /**
    * Remove all entries in the given section except for \p key.
    *
    * \param[in] key The key of the map entry to keep.
@@ -1070,21 +1085,6 @@ class Configuration {
       std::initializer_list<const char *> keys,
       Configuration::GetEmpty empty_if_not_existing =
           Configuration::GetEmpty::No);
-
-  /**
-   * Overwrite the value of the specified YAML node.
-   *
-   * \param[in] keys You can pass an arbitrary number of keys inside curly
-   *                 braces, following the nesting structure in the config file.
-   * \param[in] value An arbitrary value that yaml-cpp can convert into YAML
-   *                  representation. Any builtin type, strings, maps, and
-   *                  vectors can be used here.
-   */
-  template <typename T>
-  void set_value(std::initializer_list<const char *> keys, T &&value) {
-    auto node = find_node_creating_it_if_not_existing(keys);
-    node = std::forward<T>(value);
-  }
 
   /**
    * Return whether there is a (maybe empty) value behind the requested \p keys.
