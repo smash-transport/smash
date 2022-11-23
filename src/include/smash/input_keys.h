@@ -3760,7 +3760,7 @@ struct InputKeys {
    * always necessary (i.e. it is probably desired) to provide the format in
    * which the output should be generated.
    *
-   * \optional_key_no_line{key_output_content_format_,Format,list of strings,[]}
+   * \required_key_no_line{key_output_content_format_,Format,list of strings}
    *
    * List of formats for writing particular content. Available formats for every
    * content are listed and described \ref output_contents_ "here", while
@@ -3768,9 +3768,13 @@ struct InputKeys {
    * given.
    *
    * \warning If a `Format` list in a content `section` is not given or it is
-   * left empty, i.e. `Format = []`, no output for that given content is
-   * produced. Furthermore, if a not existing format is given in the formats
-   * list, SMASH is giving a non-fatal error and simply ignoring that format.
+   * left empty, i.e. `Format: []`, SMASH will abort with a fatal error.
+   * Furthermore, SMASH also aborts if a not existing format is given in the
+   * formats list. This is meant to prevent to e.g. lose output information
+   * because of a typo in the configuration file.  If no output for a given
+   * content is desired, you can suppress it by using `Format: ["None"]`.
+   * However, it is not allowed to use valid formats together with the `"None"`
+   * special "format" string.
    */
   /**
    * \see_key{key_output_content_format_}

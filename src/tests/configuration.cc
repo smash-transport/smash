@@ -91,6 +91,13 @@ TEST(has_value) {
   VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
 }
 
+TEST(is_empty) {
+  Configuration conf{""};
+  VERIFY(conf.is_empty());
+  conf = Configuration{"Key: Value"};
+  VERIFY(!conf.is_empty());
+}
+
 TEST(take_removes_entry) {
   Configuration conf = make_test_configuration();
   VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));

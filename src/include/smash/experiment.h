@@ -1030,7 +1030,7 @@ Experiment<Modus>::Experiment(Configuration &config,
             << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
             << "non-zero value or employ SMASH without pT cut.";
         throw std::runtime_error(
-            "Kinematic cut for initial conditions malconfigured.");
+            "Kinematic cut for initial conditions misconfigured.");
       }
     }
 
@@ -1072,12 +1072,6 @@ Experiment<Modus>::Experiment(Configuration &config,
       {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
       modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
 
-  // create outputs
-  logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
-                          " create OutputInterface objects");
-
-  auto output_conf = config.extract_sub_configuration(
-      {"Output"}, Configuration::GetEmpty::Yes);
   /*!\Userguide
    * \page output_general_ Output
    *
@@ -1307,26 +1301,71 @@ Experiment<Modus>::Experiment(Configuration &config,
    * printed, but the general structure for particle TTrees, as described in
    * \ref format_root, is preserved.
    */
+
+  // create outputs
+  logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
+                          " create OutputInterface objects");
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
   logg[LExperiment].debug()
       << "Density type printed to headers: " << dens_type_;
 
+  /* Parse configuration about output contents and formats, doing all logical
+   * checks about specified formats, creating all needed output objects. */
+  auto output_conf = config.extract_sub_configuration(
+      {"Output"}, Configuration::GetEmpty::Yes);
+  if (output_path == "") {
+    throw std::invalid_argument(
+        "Invalid empty output path provided to Experiment constructor.");
+  }
+  if (output_conf.is_empty()) {
+    logg[LExperiment].warn() << "No \"Output\" section found in the input "
+                                "file. No output file will be produced.";
+  }
   const std::vector<std::string> output_contents =
       output_conf.list_upmost_nodes();
   std::vector<std::vector<std::string>> list_of_formats(output_contents.size());
   std::transform(
       output_contents.cbegin(), output_contents.cend(), list_of_formats.begin(),
       [&output_conf](std::string content) -> std::vector<std::string> {
-        return output_conf.take({content.c_str(), "Format"});
+        /* Use here a default value for "Format" even though it is a required
+         * key, just because then here below the error for the user is more
+         * informative, if the key was not given in the input file. */
+        return output_conf.take({content.c_str(), "Format"},
+                                std::vector<std::string>{});
       });
   const OutputParameters output_parameters(std::move(output_conf));
-  if (output_path != "") {
-    for (std::size_t i = 0; i < output_contents.size(); ++i) {
-      for (const auto &format : list_of_formats[i]) {
-        create_output(format, output_contents[i], output_path,
-                      output_parameters);
+  std::size_t total_number_of_requested_formats = 0;
+  auto abort_because_of_invalid_input_file = []() {
+    throw std::invalid_argument("Invalid configuration input file.");
+  };
+  for (std::size_t i = 0; i < output_contents.size(); ++i) {
+    if (list_of_formats[i].empty()) {
+      logg[LExperiment].fatal()
+          << "Empty or unspecified list of formats for "
+          << std::quoted(output_contents[i]) << " content.";
+      abort_because_of_invalid_input_file();
+    } else if (std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
+                         "None") != list_of_formats[i].end()) {
+      if (list_of_formats[i].size() > 1) {
+        logg[LExperiment].fatal()
+            << "Use of \"None\" output format together with other formats is "
+               "not allowed.\nInvalid \"Format\" key for "
+            << std::quoted(output_contents[i]) << " content.";
+        abort_because_of_invalid_input_file();
+      } else {
+        // Clear vector so that the for below is skipped and no output created
+        list_of_formats[i].clear();
       }
     }
+    for (const auto &format : list_of_formats[i]) {
+      create_output(format, output_contents[i], output_path, output_parameters);
+      ++total_number_of_requested_formats;
+    }
+  }
+  if (outputs_.size() != total_number_of_requested_formats) {
+    logg[LExperiment].fatal()
+        << "At least one invalid output format has been provided.";
+    abort_because_of_invalid_input_file();
   }
 
   /* We can take away the Fermi motion flag, because the collider modus is

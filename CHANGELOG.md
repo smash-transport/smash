@@ -39,6 +39,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Minimum version to build documentation is now 1.9
 * Changed interface of the `Configuration` class, which is now not copyable and offers more explicit methods, making it harder to be misused
 * The `Version` configuration key is not used anymore and has been deprecated
+* SMASH now aborts if any content output format in the configuration file is invalid or absent
+* `Format: ["None"]` can be used in the configuration file to suppress any content output
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now
