@@ -66,7 +66,8 @@ using FilePtr = std::unique_ptr<std::FILE, FileDeleter>;
  * While open, the file name ends with ".unfinished".
  *
  * Automatically closes and renames the file to the original when it goes out of
- * scope.
+ * scope. If the object is destroyed because of stack unwinding, no renaming
+ * is done.
  */
 class RenamingFilePtr {
  public:
