@@ -187,7 +187,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     output_clock = std::make_unique<CustomClock>(output_times);
   } else {
     const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
-    output_clock = std::make_unique<UniformClock>(0.0, output_dt);
+    output_clock = std::make_unique<UniformClock>(0.0, output_dt, t_end);
   }
 
   // Add proper error messages if photons are not configured properly.
@@ -295,7 +295,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
                   maximum_cross_section_default);
   maximum_cross_section *= scale_xs;
   return {
-      std::make_unique<UniformClock>(0.0, dt),
+      std::make_unique<UniformClock>(0.0, dt, t_end),
       std::move(output_clock),
       config.take({"General", "Ensembles"}, 1),
       ntest,

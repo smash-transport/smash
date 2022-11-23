@@ -331,8 +331,8 @@ static ExperimentParameters default_parameters_vdf(
     int testparticles = 1, double dt = 0.1,
     double triangular_smearing_range = 2.0) {
   return ExperimentParameters{
-      std::make_unique<UniformClock>(0., dt),  // labclock
-      std::make_unique<UniformClock>(0., 1.),  // outputclock
+      std::make_unique<UniformClock>(0., dt, 300.0),  // labclock
+      std::make_unique<UniformClock>(0., 1., 300.0),  // outputclock
       1,                                       // ensembles
       testparticles,                           // testparticles
       DerivativesMode::FiniteDifference,       // derivatives mode

@@ -261,8 +261,8 @@ inline ExperimentParameters default_parameters(
     int testparticles = 1, double dt = 0.1,
     CollisionCriterion crit = CollisionCriterion::Geometric) {
   return ExperimentParameters{
-      std::make_unique<UniformClock>(0., dt),  // labclock
-      std::make_unique<UniformClock>(0., 1.),  // outputclock
+      std::make_unique<UniformClock>(0., dt, 300.0),  // labclock
+      std::make_unique<UniformClock>(0., 1., 300.0),  // outputclock
       1,                                       // ensembles
       testparticles,                           // testparticles
       DerivativesMode::CovariantGaussian,      // derivatives mode
