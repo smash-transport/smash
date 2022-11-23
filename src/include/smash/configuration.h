@@ -916,17 +916,6 @@ class Configuration {
     }
   }
 
-  /**
-   * Trivial constructor for testing purposes
-   *
-   * \param[in] invalue Integer passed by value, currently it does nothing
-   */
-  explicit Configuration(int invalue) {
-    if (invalue == 0) {
-      invalue = 1;
-    }
-  }
-
 #ifdef BUILD_TESTS
   /**
    * \mocking
