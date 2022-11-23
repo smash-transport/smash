@@ -362,6 +362,16 @@ class Key {
  *
  * Note that the logging levels `TRACE` and `DEBUG` are only available in
  * debug builds (i.e. running `cmake` with `-DCMAKE_BUILD_TYPE=Debug`).
+ *
+ * \warning
+ * In the following you will find more logging areas that as user you are
+ * probably going to need. Most of them are useful to developers e.g. for
+ * debugging purposes and that's also the reason why, in Release mode, only few
+ * logging areas appear in the standard output. If the explanation of a given
+ * key looks cryptic to you, you are likely not going to need that key. For the
+ * sake of completeness, though, we list here all possible logging areas, trying
+ * to list first those logging areas that might most likely be relevant for the
+ * user.
  */
 
 /*!\Userguide
@@ -518,12 +528,14 @@ class Key {
  * information about the impact parameter, defined as the distance \unit{in fm}
  * of the two straight lines that the center of masses of the nuclei travel on.
  * The separation of the two colliding nuclei is by default along the x-axis.
+ * If the `Impact` section is not specified, default values here below will be
+ * used, e.g. the impact parameter will be set to 0 fm.
  *
  * \warning
  * Note that there are no safeguards to prevent you from specifying negative
  * impact parameters. The value chosen here is simply the x-component of
- * \f$\vec{\mkern0mu b}\f$. The result will be that the projectile and target
- * will have switched position in x.
+ * \f$\mathbf{b}\f$. The result will be that the projectile and target will have
+ * switched position in x.
  */
 
 /*!\Userguide
@@ -599,11 +611,15 @@ class Key {
 /*!\Userguide
  * \page input_potentials_ %Potentials
  *
- * SMASH simulation supports two sets of potentials:
- * -# Skyrme and/or Symmetry potentials
+ * SMASH simulation supports two sets of nuclear potentials:
+ * -# Skyrme with (optional) Symmetry potentials;
  * -# VDF (vector density functional) model potentials, \iref{Sorensen:2020ygf}.
  *
- * Coulomb potentials can be additionally enabled.
+ * In addition to these nuclear potentials, Coulomb potentials can also be
+ * enabled.
+ *
+ * \note Skyrme and Symmetry potentials do not need to be both active, but if
+ * one of the two is enabled, then one cannot use VDF potentials.
  *
  * Skyrme and VDF potentials both describe the behavior of symmetric nuclear
  * matter. The symmetry potential can adjust the Skyrme potential (but not the
@@ -615,7 +631,7 @@ class Key {
  * - \subpage input_potentials_VDF_
  * - \subpage input_potentials_coulomb_
  *
- * ### Configuring Skyrme potentials
+ * ### Configuring potentials
  *
  * The following snippet of the configuration file configures SMASH such
  * that the Skyrme as well as the Symmetry potential are activated for the
@@ -729,21 +745,36 @@ class Key {
  * For simplicity we assume magnetostatics such that the fields can be
  * directly calculated as
  * \f[
- * \vec{E}(\vec{r})=-\vec{\nabla} \phi(\vec{r}) =
- * -\vec{\nabla}\int\frac{\rho(\vec{r}')}{|\vec{r}-\vec{r}'|} dV'
- * =\int\frac{\rho(\vec{r}')(\vec{r}-\vec{r}')}{|\vec{r}-\vec{r}'|^3}dV'
+ * \mathbf{E}(\mathbf{r})
+ * = -\boldsymbol{\nabla} \phi(\mathbf{r})
+ * = -\boldsymbol{\nabla}\int\frac{\rho(\mathbf{r}')}
+ *                                {|\mathbf{r}-\mathbf{r}'|} dV'
+ * = \int\frac{\rho(\mathbf{r}')(\mathbf{r}-\mathbf{r}')}
+ *            {|\mathbf{r}-\mathbf{r}'|^3}dV'
  * \f]
  * and
  * \f[
- * \vec{B}(\vec{r}) = \vec{\nabla}\times\vec{A}(\vec{r})
- * =\vec{\nabla}\times\int \frac{\vec{j}(\vec{r}')}{|\vec{r}-\vec{r}'|}dV'
- * =\int\vec{j}(\vec{r}')\times\frac{\vec{r}-\vec{r}'}{|\vec{r}-\vec{r}'|^3}dV'.
- * \f] These integrals are solved numerically on the SMASH lattice, where the
+ * \mathbf{B}(\mathbf{r})
+ * = \boldsymbol{\nabla}\times\mathbf{A}(\mathbf{r})
+ * = \boldsymbol{\nabla}\times
+ *   \int\frac{\mathbf{j}(\mathbf{r}')}{|\mathbf{r}-\mathbf{r}'|}dV'
+ * = \int\mathbf{j}(\mathbf{r}')\times
+ *   \frac{\mathbf{r}-\mathbf{r}'}{|\mathbf{r}-\mathbf{r}'|^3}dV'\;.
+ * \f]
+ * These integrals are solved numerically on the SMASH lattice, where the
  * discretized equations read
- * \f[ \vec{E}(\vec{r}_j) = \sum_{i\neq j}
- * \frac{\rho(\vec{r}_i)(\vec{r}_j-\vec{r}_i)}{|\vec{r}_j-\vec{r}_i|^3}\Delta
- * V \f] and \f[ \vec{B}(\vec{r}_j)=\sum_{i\neq j} \vec{j}(\vec{r}_i)\times
- * \frac{\vec{r}_j-\vec{r}_i}{|\vec{r}_j-\vec{r}_i|^3} \Delta V \f]
+ * \f[
+ * \mathbf{E}(\mathbf{r}_j)
+ * = \sum_{i\neq j} \frac{\rho(\mathbf{r}_i)(\mathbf{r}_j-\mathbf{r}_i)}
+ *                       {|\mathbf{r}_j-\mathbf{r}_i|^3}\Delta V
+ * \f]
+ * and
+ * \f[
+ * \mathbf{B}(\mathbf{r}_j)
+ * = \sum_{i\neq j}\mathbf{j}(\mathbf{r}_i)\times
+ *                 \frac{\mathbf{r}_j-\mathbf{r}_i}
+ *                      {|\mathbf{r}_j-\mathbf{r}_i|^3} \Delta V
+ * \f]
  * with the lattice cell volume \f$ \Delta V \f$. For efficiency the integration
  * volume is cut at \f$ R_\mathrm{cut} \f$, which is taken from the
  * configuration. Note that in the final equations the summand for \f$i=j\f$
@@ -927,17 +958,17 @@ struct InputKeys {
    * \page input_general_
    * \optional_key_no_line{key_gen_delta_time_,Delta_Time,double,1.0}
    *
-   * Fixed time step at which the collision-finding grid is recreated, and, if
-   * potentials are on, momenta are updated according to the equations of
-   * motion. The collision-finding grid finds all the collisions from time
-   * t_{beginning_of_timestep} until time t_{beginning_of_timestep} +
+   * Fixed time step \unit{in fm} at which the collision-finding grid is
+   * recreated, and, if potentials are on, momenta are updated according to the
+   * equations of motion. The collision-finding grid finds all the collisions
+   * from time t_{beginning_of_timestep} until time t_{beginning_of_timestep} +
    * `Delta_Time`, and puts them into a vector. The collisions are then sorted
    * in order of occurrence, and particles are propagated from collision to
    * collision. After each performed collision, additional collisions are found
    * for outgoing particles and merged into the sorted vector.
    *
-   * If potentials are on, the Delta_Time should be small enough, typically
-   * around 0.1 fm/c. However, if potentials are off, it can be arbitrarily
+   * If potentials are on, the `Delta_Time` should be small enough, typically
+   * around 0.1 fm. However, if potentials are off, it can be arbitrarily
    * large. In this case it only influences the runtime, but not physics.
    * If `Time_Step_Mode = "None"` is chosen, then the user-provided value of
    * `Delta_Time` is ignored and `Delta_Time` is set to the `End_Time`.
@@ -1262,9 +1293,12 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_default_,default,string,ALL}
+   * <hr>
+   * ### Setting the default for all logging areas
    *
-   * It determines the default logging level for all areas
+   * \optional_key_no_line{key_log_default_,default,string,ALL}
+   *
+   * It determines the default logging level for all areas.
    */
   /**
    * \see_key{key_log_default_}
@@ -1274,7 +1308,12 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_main_,Main,string,$\{default\}}
+   * <hr>
+   * ### Most user-relevant logging areas
+   *
+   * \optional_key_no_line{key_log_main_,Main,string,$\{default\}}
+   *
+   * Messages coming from top-level of the application belong to this area.
    */
   /**
    * \see_key{key_log_main_}
@@ -1285,6 +1324,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_experiment_,%Experiment,string,$\{default\}}
+   *
+   * Messages mostly coming from the `Experiment` class belong to this area.
    */
   /**
    * \see_key{key_log_experiment_}
@@ -1295,6 +1336,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_box_,Box,string,$\{default\}}
+   *
+   * Messages specific to the box modus implementation belong to this area.
    */
   /**
    * \see_key{key_log_box_}
@@ -1305,6 +1348,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_collider_,Collider,string,$\{default\}}
+   *
+   * Messages specific to the collider modus implementation belong to this area.
    */
   /**
    * \see_key{key_log_collider_}
@@ -1314,7 +1359,21 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
+   * \optional_key{key_log_list_,List,string,$\{default\}}
+   *
+   * Messages specific to the list modus implementation belong to this area.
+   */
+  /**
+   * \see_key{key_log_list_}
+   */
+  inline static const Key<einhard::LogLevel> log_list{{"Logging", "List"},
+                                                      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
    * \optional_key{key_log_sphere_,Sphere,string,$\{default\}}
+   *
+   * Messages specific to the sphere modus implementation belong to this area.
    */
   /**
    * \see_key{key_log_sphere_}
@@ -1324,7 +1383,60 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_action_,%Action,string,$\{default\}}
+   * \optional_key{key_log_configuration_,%Configuration,string,$\{default\}}
+   *
+   * Messages about the input configuration file belong to this area.
+   */
+  /**
+   * \see_key{key_log_configuration_}
+   */
+  inline static const Key<einhard::LogLevel> log_yamlConfiguration{
+      {"Logging", "Configuration"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_output_,Output,string,$\{default\}}
+   *
+   * Messages output functionality belong to this area.
+   */
+  /**
+   * \see_key{key_log_output_}
+   */
+  inline static const Key<einhard::LogLevel> log_output{{"Logging", "Output"},
+                                                        {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_initial_conditions_,InitialConditions,string,$\{default\}}
+   *
+   * Messages about initial conditions belong to this area.
+   */
+  /**
+   * \see_key{key_log_initial_conditions_}
+   */
+  inline static const Key<einhard::LogLevel> log_initialConditions{
+      {"Logging", "InitialConditions"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{default\}}
+   *
+   * Messages about the gran-canonical thermalization belong to this area.
+   */
+  /**
+   * \see_key{key_log_grandcan_thermalizer_}
+   */
+  inline static const Key<einhard::LogLevel> log_grandcanThermalizer{
+      {"Logging", "GrandcanThermalizer"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * <hr>
+   * ### Most technical logging areas (in alphabetical order)
+   *
+   * \optional_key_no_line{key_log_action_,%Action,string,$\{default\}}
+   *
+   * Messages mostly coming from the `Action` class belong to this area.
    */
   /**
    * \see_key{key_log_action_}
@@ -1334,37 +1446,9 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_input_parser_,InputParser,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_input_parser_}
-   */
-  inline static const Key<einhard::LogLevel> log_inputParser{
-      {"Logging", "InputParser"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_particle_type_,%ParticleType,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_particle_type_}
-   */
-  inline static const Key<einhard::LogLevel> log_particleType{
-      {"Logging", "ParticleType"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_find_scatter_,FindScatter,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_find_scatter_}
-   */
-  inline static const Key<einhard::LogLevel> log_findScatter{
-      {"Logging", "FindScatter"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
    * \optional_key{key_log_clock_,%Clock,string,$\{default\}}
+   *
+   * Messages coming from clock implementation belong to this area.
    */
   /**
    * \see_key{key_log_clock_}
@@ -1374,7 +1458,21 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
+   * \optional_key{key_log_cross_sections_,%CrossSections,string,$\{default\}}
+   *
+   * Messages about cross sections belong to this area.
+   */
+  /**
+   * \see_key{key_log_cross_sections_}
+   */
+  inline static const Key<einhard::LogLevel> log_crossSections{
+      {"Logging", "CrossSections"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
    * \optional_key{key_log_decay_modes_,%DecayModes,string,$\{default\}}
+   *
+   * Messages coming from decay tools belong to this area.
    */
   /**
    * \see_key{key_log_decay_modes_}
@@ -1384,7 +1482,165 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
+   * \optional_key{key_log_density_,Density,string,$\{default\}}
+   *
+   * Messages coming from density calculations belong to this area.
+   */
+  /**
+   * \see_key{key_log_density_}
+   */
+  inline static const Key<einhard::LogLevel> log_density{{"Logging", "Density"},
+                                                         {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_distributions_,Distributions,string,$\{default\}}
+   *
+   * Messages about quantity distributions belong to this area.
+   */
+  /**
+   * \see_key{key_log_distributions_}
+   */
+  inline static const Key<einhard::LogLevel> log_distributions{
+      {"Logging", "Distributions"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_find_scatter_,FindScatter,string,$\{default\}}
+   *
+   * Messages coming from search tools for scattering belong to this area.
+   */
+  /**
+   * \see_key{key_log_find_scatter_}
+   */
+  inline static const Key<einhard::LogLevel> log_findScatter{
+      {"Logging", "FindScatter"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_fpe_,Fpe,string,$\{default\}}
+   *
+   * Messages about floating point exceptions belong to this area.
+   */
+  /**
+   * \see_key{key_log_fpe_}
+   */
+  inline static const Key<einhard::LogLevel> log_fpe{{"Logging", "Fpe"},
+                                                     {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_grid_,%Grid,string,$\{default\}}
+   *
+   * Messages coming from the grid implementation belong to this area.
+   */
+  /**
+   * \see_key{key_log_grid_}
+   */
+  inline static const Key<einhard::LogLevel> log_grid{{"Logging", "Grid"},
+                                                      {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_hyper_surface_crossing_,HyperSurfaceCrossing,string,$\{default\}}
+   *
+   * Messages about hypersurface crossing belong to this area.
+   */
+  /**
+   * \see_key{key_log_hyper_surface_crossing_}
+   */
+  inline static const Key<einhard::LogLevel> log_hyperSurfaceCrossing{
+      {"Logging", "HyperSurfaceCrossing"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_input_parser_,InputParser,string,$\{default\}}
+   *
+   * Messages coming from input parsing tools belong to this area.
+   */
+  /**
+   * \see_key{key_log_input_parser_}
+   */
+  inline static const Key<einhard::LogLevel> log_inputParser{
+      {"Logging", "InputParser"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_lattice_,Lattice,string,$\{default\}}
+   *
+   * Messages coming from the lattice implementation belong to this area.
+   */
+  /**
+   * \see_key{key_log_lattice_}
+   */
+  inline static const Key<einhard::LogLevel> log_lattice{{"Logging", "Lattice"},
+                                                         {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_nucleus_,%Nucleus,string,$\{default\}}
+   *
+   * Messages coming from the nucleus implementation belong to this area.
+   */
+  /**
+   * \see_key{key_log_nucleus_}
+   */
+  inline static const Key<einhard::LogLevel> log_nucleus{{"Logging", "Nucleus"},
+                                                         {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_particle_type_,%ParticleType,string,$\{default\}}
+   *
+   * Messages coming from particle types implementation belong to this area.
+   */
+  /**
+   * \see_key{key_log_particle_type_}
+   */
+  inline static const Key<einhard::LogLevel> log_particleType{
+      {"Logging", "ParticleType"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_pauli_blocking_,PauliBlocking,string,$\{default\}}
+   *
+   * Messages about Pauli blocking belong to this area.
+   */
+  /**
+   * \see_key{key_log_pauli_blocking_}
+   */
+  inline static const Key<einhard::LogLevel> log_pauliBlocking{
+      {"Logging", "PauliBlocking"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_propagation_,Propagation,string,$\{default\}}
+   *
+   * Messages about particles propagation belong to this area.
+   */
+  /**
+   * \see_key{key_log_propagation_}
+   */
+  inline static const Key<einhard::LogLevel> log_propagation{
+      {"Logging", "Propagation"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
+   * \optional_key{key_log_pythia_,Pythia,string,$\{default\}}
+   *
+   * Messages coming from Pythia usage in SMASH belong to this area.
+   */
+  /**
+   * \see_key{key_log_pythia_}
+   */
+  inline static const Key<einhard::LogLevel> log_pythia{{"Logging", "Pythia"},
+                                                        {"1.0"}};
+
+  /*!\Userguide
+   * \page input_logging_
    * \optional_key{key_log_resonances_,Resonances,string,$\{default\}}
+   *
+   ** Messages coming from resonances aspects belong to this area.
    */
   /**
    * \see_key{key_log_resonances_}
@@ -1395,6 +1651,8 @@ struct InputKeys {
   /*!\Userguide
    * \page input_logging_
    * \optional_key{key_log_scatter_action_,%ScatterAction,string,$\{default\}}
+   *
+   * Messages about scattering events belong to this area.
    */
   /**
    * \see_key{key_log_scatter_action_}
@@ -1404,167 +1662,10 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_distributions_,Distributions,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_distributions_}
-   */
-  inline static const Key<einhard::LogLevel> log_distributions{
-      {"Logging", "Distributions"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_propagation_,Propagation,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_propagation_}
-   */
-  inline static const Key<einhard::LogLevel> log_propagation{
-      {"Logging", "Propagation"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_grid_,%Grid,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_grid_}
-   */
-  inline static const Key<einhard::LogLevel> log_grid{{"Logging", "Grid"},
-                                                      {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_list_,List,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_list_}
-   */
-  inline static const Key<einhard::LogLevel> log_list{{"Logging", "List"},
-                                                      {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_nucleus_,%Nucleus,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_nucleus_}
-   */
-  inline static const Key<einhard::LogLevel> log_nucleus{{"Logging", "Nucleus"},
-                                                         {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_density_,Density,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_density_}
-   */
-  inline static const Key<einhard::LogLevel> log_density{{"Logging", "Density"},
-                                                         {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_pauli_blocking_,PauliBlocking,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_pauli_blocking_}
-   */
-  inline static const Key<einhard::LogLevel> log_pauliBlocking{
-      {"Logging", "PauliBlocking"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_tmn_,Tmn,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_tmn_}
-   */
-  inline static const Key<einhard::LogLevel> log_tmn{{"Logging", "Tmn"},
-                                                     {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_fpe_,Fpe,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_fpe_}
-   */
-  inline static const Key<einhard::LogLevel> log_fpe{{"Logging", "Fpe"},
-                                                     {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_lattice_,Lattice,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_lattice_}
-   */
-  inline static const Key<einhard::LogLevel> log_lattice{{"Logging", "Lattice"},
-                                                         {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_pythia_,Pythia,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_pythia_}
-   */
-  inline static const Key<einhard::LogLevel> log_pythia{{"Logging", "Pythia"},
-                                                        {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_grandcan_thermalizer_}
-   */
-  inline static const Key<einhard::LogLevel> log_grandcanThermalizer{
-      {"Logging", "GrandcanThermalizer"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_cross_sections_,%CrossSections,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_cross_sections_}
-   */
-  inline static const Key<einhard::LogLevel> log_crossSections{
-      {"Logging", "CrossSections"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_output_,Output,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_output_}
-   */
-  inline static const Key<einhard::LogLevel> log_output{{"Logging", "Output"},
-                                                        {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_hyper_surface_crossing_,HyperSurfaceCrossing,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_hyper_surface_crossing_}
-   */
-  inline static const Key<einhard::LogLevel> log_hyperSurfaceCrossing{
-      {"Logging", "HyperSurfaceCrossing"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
-   * \optional_key{key_log_initial_conditions_,InitialConditions,string,$\{default\}}
-   */
-  /**
-   * \see_key{key_log_initial_conditions_}
-   */
-  inline static const Key<einhard::LogLevel> log_initialConditions{
-      {"Logging", "InitialConditions"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page input_logging_
    * \optional_key{key_log_scatter_action_multi_,%ScatterActionMulti,string,$\{default\}}
+   *
+   * Messages about scattering events with multiple particles belong to this
+   * area.
    */
   /**
    * \see_key{key_log_scatter_action_multi_}
@@ -1574,13 +1675,15 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_logging_
-   * \optional_key{key_log_configuration_,%Configuration,string,$\{default\}}
+   * \optional_key{key_log_tmn_,Tmn,string,$\{default\}}
+   *
+   * Messages about the energy momentum tensor belong to this area.
    */
   /**
-   * \see_key{key_log_configuration_}
+   * \see_key{key_log_tmn_}
    */
-  inline static const Key<einhard::LogLevel> log_yamlConfiguration{
-      {"Logging", "Configuration"}, {"1.0"}};
+  inline static const Key<einhard::LogLevel> log_tmn{{"Logging", "Tmn"},
+                                                     {"1.0"}};
 
   /*!\Userguide
    * \page input_version_
@@ -2070,7 +2173,7 @@ struct InputKeys {
    * \page input_collision_term_pauliblocker_
    * \optional_key{key_CT_PB_momentum_av_radius_,Momentum_Averaging_Radius,double,0.08}
    *
-   * Radius \unit{in GeV/c} of sphere for averaging in the momentum space.
+   * Radius \unit{in GeV} of sphere for averaging in the momentum space.
    */
   /**
    * \see_key{key_CT_PB_momentum_av_radius_}
@@ -2243,9 +2346,9 @@ struct InputKeys {
    * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.2}
    *
-   * Parameter \f$a\f$ in Lund fragmentation function used to sample the light
-   * cone momentum fraction of leading baryons in non-diffractive string
-   * processes.
+   * Parameter \f$a\f$ in Lund fragmentation function (see <tt>\ref
+   * key_CT_SP_stringz_a_ "StringZ_A"</tt>) used to sample the light cone
+   * momentum fraction of leading baryons in non-diffractive string processes.
    */
   /**
    * \see_key{key_CT_SP_stringz_a_leading_}
@@ -2259,9 +2362,10 @@ struct InputKeys {
    * \page input_collision_term_string_parameters_
    * \optional_key{key_CT_SP_stringz_b_leading_,StringZ_B_Leading,double,2.0}
    *
-   * Parameter \f$b\f$ \unit{in 1/GeV²} in Lund fraghmentation function used to
-   * sample the light cone momentum fraction of leading baryons in
-   * non-diffractive string processes.
+   * Parameter \f$b\f$ \unit{in 1/GeV²} in Lund fraghmentation function (see
+   * <tt>\ref key_CT_SP_stringz_a_ "StringZ_B"</tt>) used to sample the light
+   * cone momentum fraction of leading baryons in non-diffractive string
+   * processes.
    */
   /**
    * \see_key{key_CT_SP_stringz_b_leading_}
@@ -2434,10 +2538,10 @@ struct InputKeys {
    *
    * \required_key_no_line{key_MC_sqrtsnn_,Sqrtsnn,double}
    *
-   * Defines the energy of the collision as center-of-mass energy in the
-   * collision of two hadrons, one for each nucleus, having the average mass of
-   * all the hadrons composing the given nucleus. This key can be omitted if the
-   * incident energy is specified in a different way.
+   * Defines the energy of the collision \unit{in GeV} as center-of-mass energy
+   * in the collision of two hadrons, one for each nucleus, having the average
+   * mass of all the hadrons composing the given nucleus. This key can be
+   * omitted if the incident energy is specified in a different way.
    */
   /**
    * \see_key{key_MC_sqrtsnn_}
@@ -2707,7 +2811,7 @@ struct InputKeys {
    * \page input_modi_collider_projectile_and_target_
    * \required_key_no_line{key_MC_PT_p_lab_,P_Lab,double}
    *
-   * Set the momentum \unit{in GeV/c} per particle of the beam. This key,
+   * Set the momentum \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
    * key can be omitted if the incident energy is specified in a different way.
    *
@@ -3081,7 +3185,7 @@ struct InputKeys {
    * \optional_key{key_MC_impact_max_,Max,double,0.0}
    *
    * Like `Range: [0.0, Max]`. Note that if both `Range` and `Max` are
-   * specified, `Max` takes precedence.
+   * specified, `Max` takes precedence (\unit{in fm}).
    */
   /**
    * \see_key{key_MC_impact_max_}
@@ -3117,7 +3221,7 @@ struct InputKeys {
    * \page input_modi_sphere_
    * \required_key{key_MS_start_time_,Start_Time,double}
    *
-   * Starting time of sphere calculation.
+   * Starting time of sphere calculation \unit{in fm}.
    */
   /**
    * \see_key{key_MS_start_time_}
@@ -3346,8 +3450,8 @@ struct InputKeys {
    * \page input_modi_box_
    * \required_key{key_MB_start_time_,Start_Time,double}
    *
-   * Starting time of the simulation. All particles in the box are initialized
-   * with \f$x^0=\f$`Start_Time`.
+   * Starting time of the simulation \unit{in fm}. All particles in the box are
+   * initialized with \f$x^0=\f$`Start_Time`.
    */
   /**
    * \see_key{key_MB_start_time_}
@@ -3359,12 +3463,11 @@ struct InputKeys {
    * \page input_modi_box_
    * \optional_key{key_MB_equilibration_time_,Equilibration_Time,double, -1.0}
    *
-   * Time after which the output of the box is written out. The first time
-   * however will be printed. This is useful if one wants to simulate boxes for
-   * very long times and knows at which time the box reaches its thermal and
-   * chemical equilibrium.
-   * The default set to -1 is meaning that output is written from beginning on,
-   * if this key is not given.
+   * Time \unit{in fm} after which the output of the box is written out. The
+   * first time however will be printed. This is useful if one wants to simulate
+   * boxes for very long times and knows at which time the box reaches its
+   * thermal and chemical equilibrium. The default set to -1 is meaning that
+   * output is written from beginning on, if this key is not given.
    */
   /**
    * \see_key{key_MB_equilibration_time_}
@@ -3597,7 +3700,7 @@ struct InputKeys {
    *
    * Defines the period of intermediate output of the status of the simulated
    * system in Standard Output and other output formats which support this
-   * functionality.
+   * functionality (\unit{in fm}).
    */
   /**
    * \see_key{key_output_out_interval_}
@@ -3610,12 +3713,12 @@ struct InputKeys {
    * \optional_key{key_output_out_times_,Output_Times,list of doubles,
    * use \ref key_output_out_interval_ "Output_Interval"}
    *
-   * Explicitly defines the times where output is generated in the form of
-   * a list. This cannot be used in combination with `Output_Interval`. Output
-   * times outside the simulation time are ignored and both the initial and
-   * final time are always considered. The following example will produce output
-   * at event start, event end and at the specified times as long as they are
-   * within the simulation time.
+   * Explicitly defines the times \unit{in fm} where output is generated in the
+   * form of a list. This cannot be used in combination with `Output_Interval`.
+   * Output times outside the simulation time are ignored and both the initial
+   * and final time are always considered. The following example will produce
+   * output at event start, event end and at the specified times as long as they
+   * are within the simulation time.
    *\verbatim
    Output:
        Output_Times: [-0.1, 0.0, 1.0, 2.0, 10.0]
@@ -3835,8 +3938,8 @@ struct InputKeys {
    * \optional_key_no_line{key_output_IC_proper_time_,Proper_Time,double,
    * </tt>\f$f(t_{np})\f$<tt>}
    *
-   * Proper time at which hypersurface is created. Its default value depends on
-   * the nuclei passing time \f$t_{np}\f$ as follows,
+   * Proper time \unit{in fm} at which hypersurface is created. Its default
+   * value depends on the nuclei passing time \f$t_{np}\f$ as follows,
    * \f[
    * f(t_{np})=\begin{cases}
    * \mathrm{\texttt{Lower_Bound}}  & t_{np} \le \mathrm{\texttt{Lower_Bound}}\\
@@ -3886,9 +3989,9 @@ struct InputKeys {
    * </tt>No cut is done<tt>}
    *
    * If set, employ a transverse momentum cut for particles contributing to the
-   * initial conditions for hydrodynamics. A positive value is expected. Only
-   * particles characterized by \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed
-   * to the output file.
+   * initial conditions for hydrodynamics. A positive value \unit{in GeV} is
+   * expected. Only particles characterized by
+   * \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed to the output file.
    */
   /**
    * \see_key{key_output_IC_pt_cut_}
@@ -4165,7 +4268,7 @@ struct InputKeys {
    * \optional_key_no_line{key_output_thermo_position_,Position,
    * list of 3 doubles,[0.0\, 0.0\, 0.0]}
    *
-   * Point at which thermodynamic quantities are computed.
+   * Point at which thermodynamic quantities are computed (\unit{in fm}).
    */
   /**
    * \see_key{key_output_thermo_position_}
@@ -4403,7 +4506,7 @@ struct InputKeys {
    * \page input_potentials_coulomb_
    * \required_key{key_potentials_coulomb_r_cut_,R_Cut,double}
    *
-   * The value at which the integration volume is cut.
+   * The radius value \unit{in fm} at which the integration volume is cut.
    */
   /**
    * \see_key{key_potentials_coulomb_r_cut_}
@@ -4413,7 +4516,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page input_forced_thermalization_
-   * \required_key{key_forced_therm_cell_number_,Cell_Number,list of 3 doubles}
+   * \required_key{key_forced_therm_cell_number_,Cell_Number,list of 3 ints}
    *
    * Number of cells in each direction (x,y,z).
    */
@@ -4440,7 +4543,7 @@ struct InputKeys {
    * \page input_forced_thermalization_
    * \required_key{key_forced_therm_start_time_,Start_Time,double}
    *
-   * Time \unit{in fm/c} after which forced thermalization may be applied, if
+   * Time \unit{in fm} after which forced thermalization may be applied, if
    * the energy density is sufficiently high.
    */
   /**
@@ -4453,7 +4556,7 @@ struct InputKeys {
    * \page input_forced_thermalization_
    * \required_key{key_forced_therm_timestep_,Timestep,double}
    *
-   * Timestep of thermalization \unit{in fm/c}.
+   * Timestep of thermalization \unit{in fm}.
    */
   /**
    * \see_key{key_forced_therm_timestep_}
@@ -4512,7 +4615,8 @@ struct InputKeys {
    *
    * `Lattice_Sizes` is required for all modi, except the `"Box"` modus. In
    * case of `"Box"` modus, the lattice is set up automatically to match the box
-   * size, and the user should not (and is not allowed to) specify it.
+   * size, and the user should not (and is not allowed to) specify it. Sizes are
+   * to be specified \unit{in fm}.
    */
   /**
    * \see_key{key_forced_therm_lattice_sizes_}
@@ -5518,7 +5622,7 @@ General:
  * energy density is above 0.3 GeV/fm³. The lattice is initialized with 21
  * cells in x and y direction and 101 cells in z-direction. The lattice size is
  * 20 fm in x and y direction and 50 fm in z-direction. The thermalization is
- * applied only for times later than 10 fm with a timestep of 1 fm/c. The
+ * applied only for times later than 10 fm with a timestep of 1 fm. The
  * sampling is done according to the "biased BF" algorithm.
  *\verbatim
  Forced_Thermalization:

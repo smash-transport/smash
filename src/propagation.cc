@@ -189,7 +189,7 @@ void update_momenta(
     logg[LPropagation].warn()
         << "The time step size is too large for an accurate propagation "
         << "with potentials. Maximum safe value: "
-        << safety_factor * min_time_scale << " fm/c.\n"
+        << safety_factor * min_time_scale << " fm.\n"
         << "In case of Triangular or Discrete smearing you may additionally "
         << "need to increase the number of ensembles or testparticles.";
   }

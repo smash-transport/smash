@@ -40,7 +40,7 @@ struct EventInfo {
   double impact_parameter;
   /// Box length in case of box simulation, otherwise dummy
   double modus_length;
-  /// Time in fm/c
+  /// Time in fm
   double current_time;
   /// Sum of kinetic energies of all particles
   double total_kinetic_energy;

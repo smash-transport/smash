@@ -23,7 +23,7 @@
 #include "smash/stringfunctions.h"
 
 namespace smash {
-static constexpr int LConf = LogArea::Configuration::id;
+static constexpr int LConfiguration = LogArea::Configuration::id;
 
 // internal helper functions
 namespace {
@@ -405,8 +405,8 @@ Configuration::Is validate_key(const KeyLabels &labels) {
             key);
       });
   if (key_ref_var_it == smash::InputKeys::list.end()) {
-    logg[LConf].error("Key ", smash::quote(smash::join(labels, ": ")),
-                      " is not a valid SMASH input key.");
+    logg[LConfiguration].error("Key ", smash::quote(smash::join(labels, ": ")),
+                               " is not a valid SMASH input key.");
     return Configuration::Is::Invalid;
   }
 
@@ -419,19 +419,20 @@ Configuration::Is validate_key(const KeyLabels &labels) {
                  found_variant)) {
     const auto v_removal = std::visit(
         [](auto &&var) { return var.get().removed_in(); }, found_variant);
-    logg[LConf].error("Key ", key_labels, " has been removed in version ",
-                      v_removal, " and it is not valid anymore.");
+    logg[LConfiguration].error("Key ", key_labels,
+                               " has been removed in version ", v_removal,
+                               " and it is not valid anymore.");
     return Configuration::Is::Invalid;
   }
   if (std::visit([](auto &&var) { return var.get().is_deprecated(); },
                  found_variant)) {
     const auto v_deprecation = std::visit(
         [](auto &&var) { return var.get().deprecated_in(); }, found_variant);
-    logg[LConf].warn("Key ", key_labels, " has been deprecated in version ",
-                     v_deprecation);
+    logg[LConfiguration].warn(
+        "Key ", key_labels, " has been deprecated in version ", v_deprecation);
     return Configuration::Is::Deprecated;
   } else {
-    logg[LConf].debug("Key ", key_labels, " is valid!");
+    logg[LConfiguration].debug("Key ", key_labels, " is valid!");
     return Configuration::Is::Valid;
   }
 }

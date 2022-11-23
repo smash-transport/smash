@@ -292,9 +292,12 @@ question what should be documented:
   exception that are thrown
 * Template parameters are documented with `\tparam`
 * Syntax for inline math is `\f$ <math expression> \f$`
+* Syntax for display math is `\f[ <math expression> \f]`
+* Syntax for generic LaTeX equation environments, `\f{<env-name>} <math expression> \f}`
+* Use `\mathbf{x}` instead of `\vec{x}` for vectors in formulae and use
+  `\boldsymbol{\alpha}` for greek letters or symbols like `\nabla`
 * Use square brackets for units `[...]`
-* Check if the documentation is properly parsed by doxygen with `make doc` (see
-  below)
+* Check if the documentation is properly parsed by doxygen with `make doc` (see below)
 * Doxygen comment formatting:
   * 1-line
 ```
@@ -320,7 +323,7 @@ question what should be documented:
 
 ### How to Insert References to Publications
 
-In order to refer to a paper inside a doxygen comment, the `iref` command should
+In order to refer to a paper inside a doxygen comment, the `\iref` command should
 be used:
 
 \code
@@ -336,12 +339,12 @@ automatically translate `\iref{XXX}` into a link to the paper on Inspire.
 
 After adding a new reference, you should run the script `doc/get_bibtex.sh`,
 which will update the file `/doc/inspire.bib` by fetching the BibTex entries of
-all `iref` references from Inspire. It also reports references that are not
+all `\iref` references from Inspire. It also reports references that are not
 found on Inspire.
 
 References that are not contained in the Inspire database can be handled as
 follows: A corresponding BibTex entry should be put into `doc/non_inspire.bib`
-manually. It can then be referenced via the `cite` command:
+manually. It can then be referenced via the `\cite` command:
 
 \code
 /** ... this function implements ... as described in \cite XXX. */

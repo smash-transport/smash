@@ -80,7 +80,7 @@ class SphereModus : public ModusDefault {
   double radius() const { return radius_; }
 
  private:
-  /// Sphere radius (in fm/c)
+  /// Sphere radius (in fm)
   double radius_;
   /// Temperature for momentum distribution (in GeV)
   double sphere_temperature_;
