@@ -936,7 +936,10 @@ class Configuration {
    * actual SMASH code. The intention is to avoid creating a mock object for
    * Configuration to test other classes of SMASH.
    */
-  explicit Configuration(const char *yaml) : root_node_(YAML::Load(yaml)) {}
+  explicit Configuration(const char *yaml) : root_node_(YAML::Load(yaml)) {
+    if (root_node_.IsNull())
+      root_node_ = YAML::Node{YAML::NodeType::Map};
+  }
 #endif
 
   /// If you want to copy this you're doing it wrong
@@ -1176,7 +1179,7 @@ class Configuration {
       std::vector<const char *> keys) const;
 
   /// the general_config.yaml contents - fully parsed
-  YAML::Node root_node_;
+  YAML::Node root_node_{YAML::NodeType::Map};
 };
 
 }  // namespace smash

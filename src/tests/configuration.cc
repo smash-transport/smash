@@ -421,3 +421,25 @@ TEST(shipped_input_files_validation) {
     }
   }
 }
+
+TEST(set_value_on_empty_conf) {
+  auto conf = Configuration("");
+  conf.set_value({"New section", "New key"}, 42);
+  VERIFY(conf.has_value({"New section"}));
+  VERIFY(conf.has_value({"New section", "New key"}));
+}
+
+TEST(set_value_on_conf_created_with_empty_file) {
+  auto tmp_dir = std::filesystem::temp_directory_path();
+  auto tmp_file = "empty_config.yaml";
+  std::ofstream ofs(tmp_dir / tmp_file);
+  if (!ofs) {
+    FAIL() << "Unable to create empty temporary file!";
+  }
+  auto conf = Configuration{tmp_dir, tmp_file};
+  conf.set_value({"New section", "New key"}, 42);
+  VERIFY(conf.has_value({"New section"}));
+  VERIFY(conf.has_value({"New section", "New key"}));
+  ofs.close();
+  std::filesystem::remove(tmp_dir / tmp_file);
+}
