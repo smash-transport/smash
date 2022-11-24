@@ -333,9 +333,9 @@ static ExperimentParameters default_parameters_vdf(
   return ExperimentParameters{
       std::make_unique<UniformClock>(0., dt, 300.0),  // labclock
       std::make_unique<UniformClock>(0., 1., 300.0),  // outputclock
-      1,                                       // ensembles
-      testparticles,                           // testparticles
-      DerivativesMode::FiniteDifference,       // derivatives mode
+      1,                                              // ensembles
+      testparticles,                                  // testparticles
+      DerivativesMode::FiniteDifference,              // derivatives mode
       // both the rest frame and the direct derivatives need to be on for the
       // test of forces calculated using chain rule and direct derivatives
       RestFrameDensityDerivativesMode::On,  // rest frame derivatives mode

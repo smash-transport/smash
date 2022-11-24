@@ -1810,7 +1810,8 @@ void Experiment<Modus>::initialize_new_event() {
         "This might happen if the formation times of the input particles are "
         "larger than the specified end time of the simulation.");
   }
-  clock_for_this_event = std::make_unique<UniformClock>(start_time, timestep, end_time_);
+  clock_for_this_event =
+      std::make_unique<UniformClock>(start_time, timestep, end_time_);
   parameters_.labclock = std::move(clock_for_this_event);
 
   // Reset the output clock

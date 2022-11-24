@@ -196,8 +196,9 @@ class UniformClock : public Clock {
    * \param[in] time_end end time of particle propagation
    */
   UniformClock(const double time, const double dt, const double time_end)
-      : timestep_duration_(convert(dt)), reset_time_(convert(time)),
-      time_end_(convert(time_end)) {
+      : timestep_duration_(convert(dt)),
+        reset_time_(convert(time)),
+        time_end_(convert(time_end)) {
     if (dt < 0.) {
       throw std::range_error("No negative time increment allowed");
     }
@@ -219,19 +220,19 @@ class UniformClock : public Clock {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
     if ((reset_time_ + timestep_duration_ * (counter_ + 1)) > time_end_) {
-        return convert(time_end_);
+      return convert(time_end_);
     } else {
-        return convert(reset_time_ + timestep_duration_ * (counter_ + 1));
+      return convert(reset_time_ + timestep_duration_ * (counter_ + 1));
     }
   }
   /// \return the time step size.
   double timestep_duration() const override {
     if ((reset_time_ + timestep_duration_ * (counter_ + 1)) > time_end_) {
-        Representation last_timestep = time_end_
-                            - (reset_time_ + timestep_duration_ * counter_);
-        return convert(last_timestep);
+      Representation last_timestep =
+          time_end_ - (reset_time_ + timestep_duration_ * counter_);
+      return convert(last_timestep);
     } else {
-        return convert(timestep_duration_);
+      return convert(timestep_duration_);
     }
   }
   /**
