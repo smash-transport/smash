@@ -321,6 +321,8 @@ TEST(validate_shipped_input_files) {
   for (auto &input_file : std::filesystem::recursive_directory_iterator(
            codebase_path / input_folder_name)) {
     if (input_file.path().extension() == extension) {
+      /* Use 0 just because the logging area is irrelevant here and
+         in any case not set, since create_all_loggers is not called! */
       logg[0].debug() << " Validating " << input_file.path() << '\n';
       Configuration config{input_file.path().parent_path(),
                            input_file.path().filename()};
