@@ -40,11 +40,12 @@ void descend_one_existing_level(std::optional<YAML::Node> &node,
   if (node) {
     for (const auto &section : node.value()) {
       /* Two remarks:
-           1) The Node::operator[] is created an undefined node if the
-              node does not exist and hence in this function we need to use it
-              only if we are sure the node exists.
-           2) Node::reset does what you might expect Node::operator= to do.
-              But operator= assigns a value to the node and so
+           1) The Node::operator[] creates an undefined node in the YAML tree if
+              the node corresponding to the passed key does not exist and hence
+              in this function, which descend one level which is expected to
+              exist, we need to use it only if we are sure the node exists.
+           2) Node::reset does what you might expect Node::operator= to do. But
+              operator= assigns a value to the node and so
                  node = node[key]
               would lead to a further modification of the data structure and
               this function would not be simply traversal. Note that node and
