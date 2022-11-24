@@ -68,7 +68,7 @@ class FieldsOnLattice {
   /**
    * Compute the curl of the field on the local lattice
    *
-   * \return \f$\nabla\times\vec{A}\f$
+   * \return \f$\boldsymbol{\nabla}\times\mathbf{A}\f$
    */
   ThreeVector curl_vecA() {
     ThreeVector curl_vec_A = ThreeVector();

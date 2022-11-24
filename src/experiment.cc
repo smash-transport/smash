@@ -161,7 +161,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   }
 
   /* If this Delta_Time option is absent (this can be for timestepless mode)
-   * just assign 1.0 fm/c, reasonable value will be set at event initialization
+   * just assign 1.0 fm, reasonable value will be set at event initialization
    */
   const double dt = config.take({"General", "Delta_Time"}, 1.);
   const double t_end = config.read({"General", "End_Time"});

@@ -39,7 +39,7 @@ struct ExpansionProperties {
 
 /**
  * Calculate the Hubble parameter \f$H(t)\f$, which describes how large
- * the expansion flow is. The flow \f$\vec v=H(t) \vec x\f$
+ * the expansion flow is. The flow \f$\mathbf{v}=H(t)\:\mathbf{x}\f$
  * \iref{Tindall:2016try}
  *
  * \param[in] time time in the computational frame. [fm]
@@ -54,8 +54,8 @@ double calc_hubble(double time, const ExpansionProperties &metric);
  * to a given moment.
  *
  * For each particle, the position is shifted:
- * \f[ \vec x^\prime = \vec x + \vec v \Delta t \f]
- * where \f$\vec x\f$ is the current position, \f$\vec v\f$ its
+ * \f[ \mathbf{x}^\prime = \mathbf{x} + \mathbf{v}\:\Delta t \f]
+ * where \f$\mathbf{x}\f$ is the current position, \f$\mathbf{v}\f$ its
  * velocity and \f$\Delta t\f$ the duration of this timestep.
  *
  * \param[out] particles The particle list in the event
@@ -90,7 +90,7 @@ void expand_space_time(Particles *particles,
  * Updates the momenta of all particles at the current
  * time step according to the equations of motion:
  *
- * \f[ \frac{dp}{dt} = \vec E + \vec v \times \vec B \f]
+ * \f[ \frac{dp}{dt} = q\,(\mathbf{E} + \mathbf{v} \times \mathbf{B}) \f]
  *
  * \param[out] particles The particle list in the event
  * \param[in] dt timestep

@@ -287,7 +287,7 @@ class Experiment : public ExperimentBase {
    * Propagate all particles until time to_time without any interactions
    * and shine dileptons.
    *
-   * \param[in] to_time Time at the end of propagation [fm/c]
+   * \param[in] to_time Time at the end of propagation [fm]
    * \param[in, out] particles Particles to be propagated
    */
   void propagate_and_shine(double to_time, Particles &particles);
@@ -318,7 +318,7 @@ class Experiment : public ExperimentBase {
    * ScatterActionsFinder will find all collisions within the maximal
    * transverse distance (which is determined by the maximal cross section).
    *
-   * \param[in] dt The current time step size [fm/c]
+   * \param[in] dt The current time step size [fm]
    * \return The minimal required size of cells
    */
   double compute_min_cell_length(double dt) const {
@@ -702,7 +702,7 @@ class Experiment : public ExperimentBase {
 /// Creates a verbose textual description of the setup of the Experiment.
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
-  out << "End time: " << e.end_time_ << " fm/c\n";
+  out << "End time: " << e.end_time_ << " fm\n";
   out << e.modus_;
   return out;
 }
@@ -1028,7 +1028,7 @@ Experiment<Modus>::Experiment(Configuration &config,
             << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
             << "non-zero value or employ SMASH without pT cut.";
         throw std::runtime_error(
-            "Kinematic cut for initial conditions malconfigured.");
+            "Kinematic cut for initial conditions misconfigured.");
       }
     }
 
@@ -1070,12 +1070,6 @@ Experiment<Modus>::Experiment(Configuration &config,
       {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
       modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
 
-  // create outputs
-  logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
-                          " create OutputInterface objects");
-
-  auto output_conf = config.extract_sub_configuration(
-      {"Output"}, Configuration::GetEmpty::Yes);
   /*!\Userguide
    * \page output_general_ Output
    *
@@ -1305,26 +1299,71 @@ Experiment<Modus>::Experiment(Configuration &config,
    * printed, but the general structure for particle TTrees, as described in
    * \ref format_root, is preserved.
    */
+
+  // create outputs
+  logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
+                          " create OutputInterface objects");
   dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
   logg[LExperiment].debug()
       << "Density type printed to headers: " << dens_type_;
 
+  /* Parse configuration about output contents and formats, doing all logical
+   * checks about specified formats, creating all needed output objects. */
+  auto output_conf = config.extract_sub_configuration(
+      {"Output"}, Configuration::GetEmpty::Yes);
+  if (output_path == "") {
+    throw std::invalid_argument(
+        "Invalid empty output path provided to Experiment constructor.");
+  }
+  if (output_conf.is_empty()) {
+    logg[LExperiment].warn() << "No \"Output\" section found in the input "
+                                "file. No output file will be produced.";
+  }
   const std::vector<std::string> output_contents =
       output_conf.list_upmost_nodes();
   std::vector<std::vector<std::string>> list_of_formats(output_contents.size());
   std::transform(
       output_contents.cbegin(), output_contents.cend(), list_of_formats.begin(),
       [&output_conf](std::string content) -> std::vector<std::string> {
-        return output_conf.take({content.c_str(), "Format"});
+        /* Use here a default value for "Format" even though it is a required
+         * key, just because then here below the error for the user is more
+         * informative, if the key was not given in the input file. */
+        return output_conf.take({content.c_str(), "Format"},
+                                std::vector<std::string>{});
       });
   const OutputParameters output_parameters(std::move(output_conf));
-  if (output_path != "") {
-    for (std::size_t i = 0; i < output_contents.size(); ++i) {
-      for (const auto &format : list_of_formats[i]) {
-        create_output(format, output_contents[i], output_path,
-                      output_parameters);
+  std::size_t total_number_of_requested_formats = 0;
+  auto abort_because_of_invalid_input_file = []() {
+    throw std::invalid_argument("Invalid configuration input file.");
+  };
+  for (std::size_t i = 0; i < output_contents.size(); ++i) {
+    if (list_of_formats[i].empty()) {
+      logg[LExperiment].fatal()
+          << "Empty or unspecified list of formats for "
+          << std::quoted(output_contents[i]) << " content.";
+      abort_because_of_invalid_input_file();
+    } else if (std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
+                         "None") != list_of_formats[i].end()) {
+      if (list_of_formats[i].size() > 1) {
+        logg[LExperiment].fatal()
+            << "Use of \"None\" output format together with other formats is "
+               "not allowed.\nInvalid \"Format\" key for "
+            << std::quoted(output_contents[i]) << " content.";
+        abort_because_of_invalid_input_file();
+      } else {
+        // Clear vector so that the for below is skipped and no output created
+        list_of_formats[i].clear();
       }
     }
+    for (const auto &format : list_of_formats[i]) {
+      create_output(format, output_contents[i], output_path, output_parameters);
+      ++total_number_of_requested_formats;
+    }
+  }
+  if (outputs_.size() != total_number_of_requested_formats) {
+    logg[LExperiment].fatal()
+        << "At least one invalid output format has been provided.";
+    abort_because_of_invalid_input_file();
   }
 
   /* We can take away the Fermi motion flag, because the collider modus is
@@ -1684,12 +1723,12 @@ const std::string hline(113, '-');
  * \param[in] conserved_initial Initial quantum numbers needed to check the
  *            conservations.
  * \param[in] time_start Moment in the REAL WORLD when SMASH starts to run [s].
- * \param[in] time Current moment in SMASH [fm/c].
+ * \param[in] time Current moment in SMASH [fm].
  * \param[in] E_mean_field Value of the mean-field contribution to the total
  *            energy of the system at the current time.
  * \param[in] E_mean_field_initial Value of the mean-field contribution to the
  *            total energy of the system at t=0.
- * \return 'Current time in SMASH [fm/c]', 'Total kinetic energy in the system
+ * \return 'Current time in SMASH [fm]', 'Total kinetic energy in the system
  *         [GeV]', 'Total mean field energy in the system [GeV]', 'Total energy
  *         in the system [GeV]', 'Total energy per particle [GeV]', 'Deviation
  *         of the energy per particle from the initial value [GeV]', 'Number of
@@ -2099,7 +2138,7 @@ template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const double t_end) {
   while (parameters_.labclock->current_time() < t_end) {
     const double dt = parameters_.labclock->timestep_duration();
-    logg[LExperiment].debug("Timestepless propagation for next ", dt, " fm/c.");
+    logg[LExperiment].debug("Timestepless propagation for next ", dt, " fm.");
 
     // Perform forced thermalization if required
     if (thermalizer_ &&
@@ -2347,7 +2386,7 @@ void Experiment<Modus>::intermediate_output() {
           logg[LExperiment].info()
               << "\n\n\n\t The mean field at t = "
               << parameters_.outputclock->current_time()
-              << " [fm/c] differs from the mean field at t = 0:"
+              << " [fm] differs from the mean field at t = 0:"
               << "\n\t\t                 initial_mean_field_energy_ = "
               << initial_mean_field_energy_ << " [GeV]"
               << "\n\t\t abs[(E_MF - E_MF(t=0))/(E_MF + E_MF(t=0))] = "

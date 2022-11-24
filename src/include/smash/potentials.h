@@ -144,11 +144,15 @@ class Potentials {
    *            [fm\f$^{-4}\f$
    * \param[in] curl_vecjB Curl of the baryon vector current
    *            density [fm\f$^{-4}\f$
-   * \return (\f$E_B, B_B\f$), where \f[E_B =
-   *         -V_B^\prime(\rho^\ast)(\nabla\rho_B
-   *         + \partial_t \vec j_B)\f]
+   * \return (\f$E_B, B_B\f$), where
+   *         \f[
+   *         E_B = - V_B^\prime(\rho^\ast)(\boldsymbol{\nabla}\rho_B
+   *               + \partial_t\,\mathbf{j}_B)
+   *         \f]
    *         is the electro component of Skyrme force and
-   *         \f[B_B = V_B^\prime(\rho^\ast) \nabla\times\vec j_B\f]
+   *         \f[
+   *         B_B = V_B^\prime(\rho^\ast) \boldsymbol{\nabla}\times\mathbf{j}_B
+   *         \f]
    *         is the magnetic component of the Skyrme force
    *         with \f$\rho^\ast\f$ being the Eckart baryon density.
    */
@@ -171,17 +175,22 @@ class Potentials {
    *            computational frame
    * \param[in] dvecjB_dt Time derivative of the net-baryon vector current
    * density \param[in] curl_vecjB Curl of the net-baryon vector current density
-   * \return (\f$E_I3, B_I3\f$) [GeV/fm],
-   *         where \f[\vec{E} = - \frac{\partial
-   *         V^\ast}{\partial\rho_{I_3}^\ast}
-   *         (\nabla\rho_{I_3} + \partial_t \vec j_{I_3})
-   *         - \frac{\partial V^\ast}{\partial\rho_B^\ast}(\nabla\rho_B
-   *         + \partial_t \vec j_B)\f]
+   * \return (\f$E_{I_3}, B_{I_3}\f$) [GeV/fm], where
+   *         \f[
+   *         \mathbf{E}
+   *         = - \frac{\partial V^\ast}{\partial\rho_{I_3}^\ast}
+   *             (\boldsymbol{\nabla}\rho_{I_3} + \partial_t \mathbf{j}_{I_3})
+   *           - \frac{\partial V^\ast}{\partial\rho_B^\ast}
+   *             (\boldsymbol{\nabla}\rho_B + \partial_t\,\mathbf{j}_B)
+   *         \f]
    *         is the electrical component of symmetry force and
-   *         \f[\vec{B} = \frac{\partial V^\ast}{\rho_{I_3}^\ast}
-   *         \nabla\times\vec j_{I_3}
-   *         + \frac{\partial V^\ast}{\rho_B^\ast}
-   *         \nabla\times\vec j_B \f]
+   *         \f[
+   *         \mathbf{B}
+   *         = \frac{\partial V^\ast}{\rho_{I_3}^\ast}
+   *           \boldsymbol{\nabla}\times\mathbf{j}_{I_3}
+   *           + \frac{\partial V^\ast}{\rho_B^\ast}
+   *           \boldsymbol{\nabla}\times\mathbf{j}_B
+   *         \f]
    *         is the magnetic component of the symmetry force
    *         with \f$\rho^\ast\f$ being the respective Eckart density.
    */
@@ -194,8 +203,12 @@ class Potentials {
   /**
    * Integrand for calculating the electric field.
    *
-   * The field is calculaed via \f[\vec{E}(\vec{r})=
-   * \int\frac{(\vec{r}-\vec{r}')\rho(\vec{r}')}{|\vec{r}-\vec{r}'|^3}d^3r' \f]
+   * The field is calculated via
+   * \f[
+   * \mathbf{E}(\mathbf{r})
+   * = \int\frac{(\mathbf{r}-\mathbf{r}^\prime)\rho(\mathbf{r}^\prime)}
+   *            {|\mathbf{r}-\mathbf{r}^\prime|^3}d^3r^\prime
+   * \f]
    *
    * \param[in] pos position vector to be integrated over
    * \param[in] charge_density electric charge density at position pos
@@ -247,16 +260,25 @@ class Potentials {
    * \param[in] curl_vecjB curl of the 3-vector baryon current
    * \return (\f$E_{VDF},
    *         B_{VDF}\f$) [GeV/fm],
-   *         where \f[\vec{E}_{VDF} = - F_1  \big((\vec{\nabla} \rho) j^0 +
-   *         (\partial_t \rho) \vec{j}\big) - F_2  (\vec{\nabla} j^0 +
-   *         \partial_t\vec{j})\f]
+   *         where
+   *         \f[
+   *         \mathbf{E}_{VDF}
+   *         = - F_1  \big[(\boldsymbol{\nabla} \rho)\,j^0 +
+   *                       (\partial_t \rho)\,\mathbf{j}\big]
+   *           - F_2  (\boldsymbol{\nabla} j^0 + \partial_t\,\mathbf{j})
+   *         \f]
    *         is the electrical component of VDF force and
-   *         \f[\vec{B}_{VDF} = F_1  (\vec{\nabla} \rho) \times \vec{j} + F_2
-   *         \vec{\nabla} \times \vec{j}\f]
+   *         \f[
+   *         \mathbf{B}_{VDF}
+   *         =   F_1 (\boldsymbol{\nabla} \rho) \times \mathbf{j}
+   *           + F_2  \boldsymbol{\nabla} \times \mathbf{j}
+   *         \f]
    *         is the magnetic component of the VDF force, with
-   *         \f[F_1 = \sum_i C_i (b_i - 2)
-   *         \frac{\rho^{b_i - 3}}{\rho_0^{b_i - 1}} \,, \f]
-   *         \f[F_2 = \sum_i C_i \frac{\rho^{b_i - 2}}{\rho_0^{b_i - 1}} \,, \f]
+   *         \f{aligned}
+   *         F_1 &= \sum_i C_i (b_i - 2)
+   *                       \frac{\rho^{b_i - 3}}{\rho_0^{b_i - 1}}\\
+   *         F_2 &= \sum_i C_i \frac{\rho^{b_i - 2}}{\rho_0^{b_i - 1}} \;,
+   *         \f}
    *         where \f$\rho_0\f$ is the saturation density.
    */
   std::pair<ThreeVector, ThreeVector> vdf_force(
@@ -272,11 +294,14 @@ class Potentials {
    * \param[in] grad_A_0 gradient of the zeroth component of the field A^mu
    * \param[in] dA_dt time derivative of the field A^mu
    * \param[in] curl_vecA curl of the vector component of the field A^mu
-   * \return (\f$E_{VDF},
-   *         B_{VDF}\f$) [GeV/fm],
-   *         where \f[\vec{E}_{VDF} = - \vec{\nabla} A^0 - \partial_t\vec{A}\f]
+   * \return (\f$E_{VDF}, B_{VDF}\f$) [GeV/fm], where
+   *         \f[
+   *         \mathbf{E}_{VDF} = - \boldsymbol{\nabla} A^0 - \partial_t\mathbf{A}
+   *         \f]
    *         is the electrical component of VDF force and
-   *         \f[\vec{B}_{VDF} = \vec{\nabla} \times \vec{A}\f]
+   *         \f[
+   *         \mathbf{B}_{VDF} = \boldsymbol{\nabla} \times \mathbf{A}
+   *         \f]
    *         is the magnetic component of the VDF force.
    */
   std::pair<ThreeVector, ThreeVector> vdf_force(
@@ -292,11 +317,11 @@ class Potentials {
    *            calculation. If the distance between particle and calculation
    *            point r, \f$ |r-r_i| > r_{cut} \f$ then particle input
    *            to density will be ignored.
-   * \return (\f$E_B, B_B, E_{I3}, B_{I3}\f$) [GeV/fm], where
+   * \return (\f$E_B, B_B, E_{I_3}, B_{I_3}\f$) [GeV/fm], where
    *          \f$E_B\f$: the electric component of the Skyrme or VDF force,
    *          \f$B_B\f$: the magnetic component of the Skyrme or VDF force,
-   *          \f$E_{I3}\f$: the electric component of the symmetry force,
-   *          \f$B_{I3}\f$: the magnetic component of the symmetry force
+   *          \f$E_{I_3}\f$: the electric component of the symmetry force,
+   *          \f$B_{I_3}\f$: the magnetic component of the symmetry force
    */
   virtual std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector>
   all_forces(const ThreeVector &r, const ParticleList &plist) const;

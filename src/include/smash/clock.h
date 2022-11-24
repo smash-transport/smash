@@ -27,10 +27,12 @@ static constexpr int LClock = LogArea::Clock::id;
 /**
  * Clock tracks the time in the simulation.
  *
- * The basic unit is 1 fm/c = \f$1 / 2.99798542 \cdot 10^{-23}\f$s
- * \f$\approx 0.33 \cdot 10^{-24}\f$ s.
- * The resolution of the clock is 0.000001 fm/c. I.e. only multiples of 0.000001
- * fm/c are representable internally.
+ * The basic unit is 1 fm in natural units which correspond to
+ * \f$\frac{10^{-15}}{299\,792\,458}\,\mathrm{s} \approx
+ * 0.33\cdot10^{-23}\,\mathrm{s}\f$ in the international system of units. The
+ * resolution of the clock is \f$0.000001\,\mathrm{fm}=10^{-6}\,\mathrm{fm}\f$,
+ * i.e. only multiples of \f$0.000001\,\mathrm{fm}\f$ are internally
+ * representable.
  *
  * Potential usage for adapting time steps:
  * ------
@@ -111,7 +113,7 @@ class Clock {
   }
 
   /**
-   * advances the clock by an arbitrary number of ticks.
+   * Advances the clock by an arbitrary number of ticks.
    *
    * \param[in] advance_several_timesteps Number of the timesteps added
    *                                      to the clock
@@ -264,8 +266,8 @@ class UniformClock : public Clock {
       reset_time = start_time;
     }
     if (reset_time < current_time()) {
-      logg[LClock].debug("Resetting clock from", current_time(), " fm/c to ",
-                         reset_time, " fm/c");
+      logg[LClock].debug("Resetting clock from", current_time(), " fm to ",
+                         reset_time, " fm");
     }
     reset_time_ = convert(reset_time);
     counter_ = 0;
@@ -274,7 +276,7 @@ class UniformClock : public Clock {
   void remove_times_in_past(double) override{};
 
   /**
-   * Advances the clock by an arbitrary timestep (multiple of 0.000001 fm/c).
+   * Advances the clock by an arbitrary timestep (multiple of 0.000001 fm).
    *
    * \tparam T type of the timestep
    * \param[in] big_timestep Timestep by which the clock is advanced.
@@ -320,7 +322,7 @@ class UniformClock : public Clock {
   /// Convert an internal int value \p x into the double representation.
   static double convert(Representation x) { return x * to_double; }
 
-  /// The time step size \f$\Delta t\f$ in $10^{-3}$ fm.
+  /// The time step size \f$\Delta t\f$ in \f$10^{-6}\,\mathrm{fm}\f$.
   Representation timestep_duration_ = 0u;
   /// The time of last reset (when counter_ was set to 0).
   Representation reset_time_ = 0;

@@ -29,7 +29,7 @@ function(message)
     # Do as CMake does, from documentation of message command: "If more than one message string is
     # given, they are concatenated into a single message with no separator between the strings." To
     # stay general is not trivial, since one could pass strings containing semicolons here and we do
-    # not want to "loose" them treating as separators in lists
+    # not want to "lose" them treating as separators in lists
     # https://cmake.org/cmake/help/latest/manual/cmake-language.7.html#lists
     math(EXPR _stop_at "${ARGC}-1")
     foreach(index RANGE ${_message_start_at} ${_stop_at})
