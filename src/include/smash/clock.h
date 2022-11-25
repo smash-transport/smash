@@ -207,7 +207,11 @@ class UniformClock : public Clock {
   }
   /// \return the current time.
   double current_time() const override {
-    return convert(reset_time_ + timestep_duration_ * counter_);
+    if ((reset_time_ + timestep_duration_ * counter_) > time_end_) {
+      return convert(time_end_);
+    } else {
+      return convert(reset_time_ + timestep_duration_ * counter_);
+    }
   }
   /**
    * \return the time in the next tick.

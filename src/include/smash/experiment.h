@@ -2664,9 +2664,17 @@ void Experiment<Modus>::final_output() {
                                                    EM_lat_.get(), parameters_);
       }
     }
-    logg[LExperiment].info() << format_measurements(
-        ensembles_, interactions_this_interval, conserved_initial_, time_start_,
-        end_time_, E_mean_field, initial_mean_field_energy_);
+    if (std::abs(parameters_.labclock->current_time() - end_time_) >
+        really_small) {
+      logg[LExperiment].warn()
+          << "SMASH not propagated until configured end time. Current time = "
+          << parameters_.labclock->current_time()
+          << "fm. End time = " << end_time_ << "fm.";
+    } else {
+      logg[LExperiment].info() << format_measurements(
+          ensembles_, interactions_this_interval, conserved_initial_,
+          time_start_, end_time_, E_mean_field, initial_mean_field_energy_);
+    }
     int total_particles = 0;
     for (const Particles &particles : ensembles_) {
       total_particles += particles.size();
