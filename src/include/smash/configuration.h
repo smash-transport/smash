@@ -12,6 +12,7 @@
 
 #include <array>
 #include <filesystem>
+#include <optional>
 #include <set>
 #include <stdexcept>
 #include <string>
@@ -915,17 +916,6 @@ class Configuration {
     }
   }
 
-  /**
-   * Trivial constructor for testing purposes
-   *
-   * \param[in] invalue Integer passed by value, currently it does nothing
-   */
-  explicit Configuration(int invalue) {
-    if (invalue == 0) {
-      invalue = 1;
-    }
-  }
-
 #ifdef BUILD_TESTS
   /**
    * \mocking
@@ -935,7 +925,10 @@ class Configuration {
    * actual SMASH code. The intention is to avoid creating a mock object for
    * Configuration to test other classes of SMASH.
    */
-  explicit Configuration(const char *yaml) : root_node_(YAML::Load(yaml)) {}
+  explicit Configuration(const char *yaml) : root_node_(YAML::Load(yaml)) {
+    if (root_node_.IsNull())
+      root_node_ = YAML::Node{YAML::NodeType::Map};
+  }
 #endif
 
   /// If you want to copy this you're doing it wrong
@@ -1030,6 +1023,21 @@ class Configuration {
   }
 
   /**
+   * Overwrite the value of the specified YAML node.
+   *
+   * \param[in] keys You can pass an arbitrary number of keys inside curly
+   *                 braces, following the nesting structure in the config file.
+   * \param[in] value An arbitrary value that yaml-cpp can convert into YAML
+   *                  representation. Any builtin type, strings, maps, and
+   *                  vectors can be used here.
+   */
+  template <typename T>
+  void set_value(std::initializer_list<const char *> keys, T &&value) {
+    auto node = find_node_creating_it_if_not_existing(keys);
+    node = std::forward<T>(value);
+  }
+
+  /**
    * Remove all entries in the given section except for \p key.
    *
    * \param[in] key The key of the map entry to keep.
@@ -1066,21 +1074,6 @@ class Configuration {
       std::initializer_list<const char *> keys,
       Configuration::GetEmpty empty_if_not_existing =
           Configuration::GetEmpty::No);
-
-  /**
-   * Overwrite the value of the specified YAML node.
-   *
-   * \param[in] keys You can pass an arbitrary number of keys inside curly
-   *                 braces, following the nesting structure in the config file.
-   * \param[in] value An arbitrary value that yaml-cpp can convert into YAML
-   *                  representation. Any builtin type, strings, maps, and
-   *                  vectors can be used here.
-   */
-  template <typename T>
-  void set_value(std::initializer_list<const char *> keys, T &&value) {
-    auto node = find_node_at(root_node_, keys);
-    node = std::forward<T>(value);
-  }
 
   /**
    * Return whether there is a (maybe empty) value behind the requested \p keys.
@@ -1125,7 +1118,8 @@ class Configuration {
   Is validate(bool full_validation = true) const;
 
  private:
-  /** Create a subobject that has its root node at the given node.
+  /**
+   * Create a subobject that has its root node at the given node.
    *
    * \note This constructor is not explicit because it can be called only from
    * inside Configuration and by making it explicit a return would require the
@@ -1135,21 +1129,46 @@ class Configuration {
       : root_node_(YAML::Clone(node)) {}
 
   /**
-   * Descend in the YAML tree from the given node using the provided keys.
+   * Descend in and if needed modify the YAML tree from the given node using the
+   * provided keys.
    *
-   * More precisely, it finds a node, copies its structure and replaces the
-   * previous keys by the newly provided keys.
+   * After this call nodes corresponding to the passed keys are guaranteed to
+   * exist in the tree.
    *
-   * \param[in] node YAML::Node to start the search from.
-   * \param[in] keys Keys that will be used to descend the YAML tree.
+   * \param[in] keys Keys that will be possibly added to the YAML tree.
    *
    * \return Node in the tree reached by using the provided keys.
    */
-  YAML::Node find_node_at(YAML::Node node,
-                          std::vector<const char *> keys) const;
+  YAML::Node find_node_creating_it_if_not_existing(
+      std::vector<const char *> keys) const;
+
+  /**
+   * Descend in the YAML tree from the given node using the provided keys.
+   *
+   * This function \b must not use the YAML::Node subscript operator, which is
+   * at the very bottom level creating an undefined node in the %YAML tree,
+   * hence "wasting" some memory. Note that the fact that this method is marked
+   * as const does not forbid to use the access operator on <tt>root_node_</tt>,
+   * because of how the %YAML library works. We want the tree to be completely
+   * untouched by this method.
+   *
+   * \param[in] keys Keys that will be used to descend the YAML tree.
+   *
+   * \return \c std::optional<YAML::Node> containing the node in the tree
+   *         reached by using the provided keys, if it exists;
+   * \return \c std::nullopt otherwise.
+   *
+   * \note It has been decided to return an optional value rather than throwing
+   *       an exception because this method is going to be used in other methods
+   *       like \c has_value and putting there a try-catch block would probably
+   *       cause a performance cost that can be avoided (exceptions on the
+   *       exceptional path are expensive).
+   */
+  std::optional<YAML::Node> find_existing_node(
+      std::vector<const char *> keys) const;
 
   /// the general_config.yaml contents - fully parsed
-  YAML::Node root_node_;
+  YAML::Node root_node_{YAML::NodeType::Map};
 };
 
 }  // namespace smash
