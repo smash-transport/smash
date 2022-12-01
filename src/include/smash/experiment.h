@@ -2209,10 +2209,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end) {
       }
       ++(*parameters_.outputclock);
 
-      // Avoid duplication of final output at end time
-      if (parameters_.outputclock->current_time() <= end_time_) {
-        intermediate_output();
-      }
+      intermediate_output();
     }
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
       run_time_evolution_timestepless(actions[i_ens], i_ens, end_timestep_time);
