@@ -26,7 +26,7 @@ static Configuration make_test_configuration() {
 }
 
 TEST(create_object) {
-  Configuration conf = Test::configuration();
+  Configuration conf = make_test_configuration();
   conf.clear();
 }
 

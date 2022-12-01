@@ -80,7 +80,7 @@ TEST(create_sphere) {
 }
 
 TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {
-  Test::experiment("General: {Modus: Invalid}");
+  Test::experiment(Configuration{"General: {Modus: Invalid}"});
 }
 
 TEST(access_particles) {

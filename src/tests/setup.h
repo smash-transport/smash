@@ -157,44 +157,9 @@ inline ParticleData smashon_random(int id = -1) {
 }
 
 /**
- * Return a configuration object filled with data from input/config.yaml. Note
- * that a change to that file may affect test results if you use it.
- *
- * If you want specific values in the config for testing simply overwrite the
- * relevant settings e.g. with:
- * \code
- * auto config = Test::configuration(
- *   "General:\n"
- *   "  Modus: Box\n"
- *   "  Testparticles: 100\n"
- * );
- * \endcode
+ * Create an experiment given an input configuration.
  */
-inline Configuration configuration(std::string overrides = {}) {
-  Configuration c{std::filesystem::path{TEST_CONFIG_PATH} / "input"};
-  if (!overrides.empty()) {
-    c.merge_yaml(overrides);
-  }
-  return c;
-}
-
-/**
- * Create an experiment.
- *
- * If you want a specific configuration you can pass it as parameter, otherwise
- * it will use the result from configuration above.
- */
-inline std::unique_ptr<ExperimentBase> experiment(
-    Configuration &&c = configuration()) {
-  return ExperimentBase::create(c, ".");
-}
-
-/**
- * Creates an experiment using the default config and the specified \p
- * configOverrides.
- */
-inline std::unique_ptr<ExperimentBase> experiment(const char *configOverrides) {
-  Configuration c = configuration(configOverrides);
+inline std::unique_ptr<ExperimentBase> experiment(Configuration c) {
   return ExperimentBase::create(c, ".");
 }
 
