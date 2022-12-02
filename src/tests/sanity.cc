@@ -114,7 +114,6 @@ TEST(sanity_collider) {
       Target:
           Particles: {661: 1}
       E_Kin: 1.0
-      Fermi_Motion: "frozen"
   )"};
   ExperimentParameters param = smash::Test::default_parameters();
   ColliderModus n(std::move(conf), param);
