@@ -245,7 +245,7 @@ namespace smash {
  *
  * Last but not least, the Configuration::validate method is used by SMASH to
  * check that all given keys are allowed in the present version of the codebase.
- * This is achieved querying the "database" InputKeys class.
+ * This is achieved by querying the "database" InputKeys class.
  *
  * \attention As the Configuration is implemented, it does not make sense in
  * practice to have constant instances, because their keys could not be taken
@@ -957,7 +957,7 @@ class Configuration {
   /**
    * Prevent Configuration objects from being copied.
    *
-   * Underneath, the resource is a \c YAML::Node and since this handle memory
+   * Underneath, the resource is a \c YAML::Node and since this handles memory
    * in a similar way as a pointer would do, copying an object would make
    * several instances point to the same memory and it would make it difficult
    * to use this object correctly. Therefore, copies are not allowed.
