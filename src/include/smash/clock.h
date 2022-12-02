@@ -37,8 +37,8 @@ static constexpr int LClock = LogArea::Clock::id;
  * Potential usage for adapting time steps:
  * ------
  * \code
- *   UniformClock labtime(0., 0.1);
- *   UniformClock endtime(10., 0.);
+ *   UniformClock labtime(0., 0.1, end_time_);
+ *   UniformClock endtime(10., 0., end_time_);
  *   while (labtime < endtime) {
  *     // do something
  *     // adapt the timestep size to external circumstances:
@@ -195,16 +195,23 @@ class UniformClock : public Clock {
    *
    * \param[in] time base time
    * \param[in] dt step size
+   * \param[in] time_end end time of particle propagation
    */
-  UniformClock(const double time, const double dt)
-      : timestep_duration_(convert(dt)), reset_time_(convert(time)) {
+  UniformClock(const double time, const double dt, const double time_end)
+      : timestep_duration_(convert(dt)),
+        reset_time_(convert(time)),
+        time_end_(convert(time_end)) {
     if (dt < 0.) {
       throw std::range_error("No negative time increment allowed");
     }
   }
   /// \return the current time.
   double current_time() const override {
-    return convert(reset_time_ + timestep_duration_ * counter_);
+    if ((reset_time_ + timestep_duration_ * counter_) > time_end_) {
+      return convert(time_end_);
+    } else {
+      return convert(reset_time_ + timestep_duration_ * counter_);
+    }
   }
   /**
    * \return the time in the next tick.
@@ -218,11 +225,21 @@ class UniformClock : public Clock {
         std::numeric_limits<Representation>::max() - timestep_duration_) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
-    return convert(reset_time_ + timestep_duration_ * (counter_ + 1));
+    if ((reset_time_ + timestep_duration_ * (counter_ + 1)) > time_end_) {
+      return convert(time_end_);
+    } else {
+      return convert(reset_time_ + timestep_duration_ * (counter_ + 1));
+    }
   }
   /// \return the time step size.
   double timestep_duration() const override {
-    return convert(timestep_duration_);
+    if ((reset_time_ + timestep_duration_ * (counter_ + 1)) > time_end_) {
+      Representation last_timestep =
+          time_end_ - (reset_time_ + timestep_duration_ * counter_);
+      return convert(last_timestep);
+    } else {
+      return convert(timestep_duration_);
+    }
   }
   /**
    * Sets the time step size (and resets the counter).
@@ -313,6 +330,8 @@ class UniformClock : public Clock {
   Representation timestep_duration_ = 0u;
   /// The time of last reset (when counter_ was set to 0).
   Representation reset_time_ = 0;
+  /// The end time of the particle propagation
+  Representation time_end_ = 0;
 };
 
 /// Clock with explicitly defined time steps
