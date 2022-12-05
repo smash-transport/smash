@@ -1,59 +1,56 @@
-/*!\Userguide
-\page authors Authors
+# Authors
 
-The SMASH Team:
+## The SMASH Team
 
-<pre>
-Copyright (c) 2019-2020 Agnieszka Wergieluk <awergieluk@gmail.com>
-Copyright (c) 2014-2016, 2019-2020 Janus Weil <weil@fias.uni-frankfurt.de>
-Copyright (c) 2016 Joseph Tindall <tindall@fias.uni-frankfurt.de>
-Copyright (c) 2015-2020 Vinzent Steinberg <steinberg@fias.uni-frankfurt.de>
-Copyright (c) 2015- Jan Staudenmaier <staudenmaier@fias.uni-frankfurt.de>
-Copyright (c) 2020- Agnieszka Sorensen <awergieluk@gmail.com>
-Copyright (c) 2021- Alessandro Sciarra <asciarra@fias.uni-frankfurt.de>
-Copyright (c) 2017- Anna Schäfer <aschaefer@fias.uni-frankfurt.de>
-Copyright (c) 2017-2019 Sangwook Ryu <ryu@fias.uni-frankfurt.de>
-Copyright (c) 2017-2019 Jonas Rothermel <rothermel@fias.uni-frankfurt.de>
-Copyright (c) 2016-2019 Jean-Bernard Rose <rose@fias.uni-frankfurt.de>
-Copyright (c) 2013-2018 Hannah Petersen <petersen@fias.uni-frankfurt.de>
-Copyright (c) 2019 Lukas Prinz <lprinz@fias.uni-frankfurt.de>
-Copyright (c) 2015-2017 Longgang Pang <pang@fias.uni-frankfurt.de>
-Copyright (c) 2014- Dmytro Oliinychenko <oliiny@fias.uni-frankfurt.de>
-Copyright (c) 2017- Justin Mohs <mohs@fias.uni-frankfurt.de>
-Copyright (c) 2019-2020 Damjan Mitrovic <mitrovic@fias.uni-frankfurt.de>
-Copyright (c) 2017 Markus Mayer <mayer@fias.uni-frankfurt.de>
-Copyright (c) 2014-2015, 2020 Matthias Kretz <kretz@compeng.uni-frankfurt.de>
-Copyright (c) 2016-2018 Feng Li <fengli@fias.uni-frankfurt.de>
-Copyright (c) 2020-2021 Natey Kübler <kuebler@fias.uni-frankfurt.de>
-Copyright (c) 2015 Thomas Kehrenberg <kehrenberg@fias.uni-frankfurt.de>
-Copyright (c) 2021- Gabriele Inghirami <inghirami@fias.uni-frankfurt.de> 
-Copyright (c) 2019- Jan Hammelmann <hammelmann@fias.uni-frankfurt.de>
-Copyright (c) 2014 Andy Goldschmidt <goldschmidt@fias.uni-frankfurt.de>
-Copyright (c) 2021- Niklas Götz <goetz@fias.uni-frankfurt.de> 
-Copyright (c) 2019-2020 Leon Geiger <geiger@fias.uni-frankfurt.de>
-Copyright (c) 2020- Oscar Garcia-Montero <garcia@fias.uni-frankfurt.de> 
-Copyright (c) 2018- Hannah Elfner <elfner@fias.uni-frankfurt.de>
-Copyright (c) 2016 Niklas Ehlert <ehlert@fias.uni-frankfurt.de>
-Copyright (c) 2012-2014 Bjørn Bäuchle <baeuchle@fias.uni-frankfurt.de>
-Copyright (c) 2012-2014 Jussi Auvinen <auvinen@fias.uni-frankfurt.de>
-Copyright (c) 2012-2014 Maximilian Attems <attems@fias.uni-frankfurt.de>
-</pre>
+Author  |  &ensp;E-Mail&ensp; | Copyright © 
+ :----:  |  :----: | :--------- 
+ Agnieszka Wergieluk  |  [✉️](mailto:awergieluk@gmail.com) | `2019-2020`
+ Janus Weil  |  [✉️](mailto:weil@fias.uni-frankfurt.de) | `2014-2016,2019-2020`
+ Joseph Tindall  |  [✉️](mailto:tindall@fias.uni-frankfurt.de) | `2016`
+ Vinzent Steinberg  |  [✉️](mailto:steinberg@fias.uni-frankfurt.de) | `2015-2020`
+ Jan Staudenmaier  |  [✉️](mailto:staudenmaier@fias.uni-frankfurt.de) | `2015-`
+ Agnieszka Sorensen  |  [✉️](mailto:awergieluk@gmail.com) | `2020-`
+ Alessandro Sciarra  |  [✉️](mailto:asciarra@fias.uni-frankfurt.de) | `2021-`
+ Anna Schäfer  |  [✉️](mailto:aschaefer@fias.uni-frankfurt.de) | `2017-`
+ Sangwook Ryu  |  [✉️](mailto:ryu@fias.uni-frankfurt.de) | `2017-2019`
+ Jonas Rothermel  |  [✉️](mailto:rothermel@fias.uni-frankfurt.de) | `2017-2019`
+ Jean-Bernard Rose  |  [✉️](mailto:rose@fias.uni-frankfurt.de) | `2016-2019`
+ Hannah Petersen  |  [✉️](mailto:petersen@fias.uni-frankfurt.de) | `2013-2018`
+ Lukas Prinz  |  [✉️](mailto:lprinz@fias.uni-frankfurt.de) | `2019`
+ Longgang Pang  |  [✉️](mailto:pang@fias.uni-frankfurt.de) | `2015-2017`
+ Dmytro Oliinychenko  |  [✉️](mailto:oliiny@fias.uni-frankfurt.de) | `2014-`
+ Justin Mohs  |  [✉️](mailto:mohs@fias.uni-frankfurt.de) | `2017-`
+ Damjan Mitrovic  |  [✉️](mailto:mitrovic@fias.uni-frankfurt.de) | `2019-2020`
+ Markus Mayer  |  [✉️](mailto:mayer@fias.uni-frankfurt.de) | `2017`
+ Matthias Kretz  |  [✉️](mailto:kretz@compeng.uni-frankfurt.de) | `2014-2015,2020`
+ Feng Li  |  [✉️](mailto:fengli@fias.uni-frankfurt.de) | `2016-2018`
+ Natey Kübler  |  [✉️](mailto:kuebler@fias.uni-frankfurt.de) | `2020-2021`
+ Thomas Kehrenberg  |  [✉️](mailto:kehrenberg@fias.uni-frankfurt.de) | `2015`
+ Gabriele Inghirami  |  [✉️](mailto:inghirami@fias.uni-frankfurt.de) | `2021-`
+ Jan Hammelmann  |  [✉️](mailto:hammelmann@fias.uni-frankfurt.de) | `2019-`
+ Andy Goldschmidt  |  [✉️](mailto:goldschmidt@fias.uni-frankfurt.de) | `2014`
+ Niklas Götz  |  [✉️](mailto:goetz@fias.uni-frankfurt.de) | `2021-`
+ Leon Geiger  |  [✉️](mailto:geiger@fias.uni-frankfurt.de) | `2019-2020`
+ Oscar Garcia-Montero  |  [✉️](mailto:garcia@fias.uni-frankfurt.de) | `2020-`
+ Hannah Elfner  |  [✉️](mailto:elfner@fias.uni-frankfurt.de) | `2018-`
+ Niklas Ehlert  |  [✉️](mailto:ehlert@fias.uni-frankfurt.de) | `2016`
+ Bjørn Bäuchle  |  [✉️](mailto:baeuchle@fias.uni-frankfurt.de) | `2012-2014`
+ Jussi Auvinen  |  [✉️](mailto:auvinen@fias.uni-frankfurt.de) | `2012-2014`
+ Maximilian Attems  |  [✉️](mailto:attems@fias.uni-frankfurt.de) | `2012-2014`
 
+## External contributions
 
-External Contributions:
+Year  | Author | E-Mail
+:---: | :----: | :----:
+`2021`  | Christian Holm Christensen | [✉️](mailto:cholm@nbi.ku.dk)
 
-<pre>
-2021 Christian Holm Christensen <cholm@nbi.ku.dk>
-</pre>
+## Further acknowledgments
 
+Contributions by the following people are acknowledged.
 
-Contributions by the following people are acknowledged:
-
-<pre>
-2012-2013 Jochen Gerhard
-2013 Janus Weil
-2013-2014 Kai Gallmeister
-2022 Andrii Verbytskyi <andrii.verbytskyi@mpp.mpg.de>
-</pre>
-
-*/
+Year  | Author | E-Mail |
+:---: | :----: | :----: |
+`2012-2013` | Jochen Gerhard | |
+`2013` | Janus Weil | |
+`2013-2014` | Kai Gallmeister | |
+`2022` | Andrii Verbytskyi | [✉️](mailto:andrii.verbytskyi@mpp.mpg.de) |
