@@ -149,6 +149,37 @@ Configuration::Configuration(const std::filesystem::path &path,
   }
 }
 
+Configuration::Configuration(Configuration &&other)
+    : root_node_(std::move(other.root_node_)),
+      uncaught_exceptions_(std::move(other.uncaught_exceptions_)) {
+  other.root_node_.reset();
+  other.uncaught_exceptions_ = 0;
+}
+
+Configuration &Configuration::operator=(Configuration &&other) {
+  // YAML does not offer != operator between nodes
+  if (!(root_node_ == other.root_node_)) {
+    root_node_ = std::move(other.root_node_);
+    uncaught_exceptions_ = std::move(other.uncaught_exceptions_);
+    other.root_node_.reset();
+    other.uncaught_exceptions_ = 0;
+  }
+  return *this;
+}
+
+Configuration::~Configuration() noexcept(false) {
+  // Make sure that stack unwinding is not taking place befor throwing
+  if (std::uncaught_exceptions() == uncaught_exceptions_) {
+    // In this scenario is fine to throw
+    if (root_node_.size() != 0) {
+      throw std::logic_error(
+          "Configuration object destroyed with unused keys:\n" + to_string());
+    }
+  }
+  /* If this destructor is called during stack unwinding, it is irrelevant
+     that the Configuration has not be completely parsed. */
+}
+
 void Configuration::merge_yaml(const std::string &yaml) {
   try {
     root_node_ |= YAML::Load(yaml);
@@ -165,6 +196,7 @@ void Configuration::merge_yaml(const std::string &yaml) {
 
 std::vector<std::string> Configuration::list_upmost_nodes() {
   std::vector<std::string> r;
+  r.reserve(root_node_.size());
   for (auto i : root_node_) {
     r.emplace_back(i.first.Scalar());
   }

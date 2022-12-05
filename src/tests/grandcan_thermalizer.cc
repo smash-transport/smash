@@ -25,17 +25,18 @@ TEST(create_part_list) {
 }
 
 static BoxModus create_box_for_tests(const ExperimentParameters& par) {
-  auto conf = Test::configuration();
+  Configuration conf{R"(
+    Box:
+      Initial_Condition: "thermal momenta"
+      Start_Time: 0.0
+  )"};
   const int N = 30;
   const double T_init = 0.2;
-  conf.set_value({"Modus"}, "Box");
-  conf.set_value({"Modi", "Box", "Init_Multiplicities", "2212"}, N);
-  conf.set_value({"Modi", "Box", "Init_Multiplicities", "311"}, N);
-  conf.set_value({"Modi", "Box", "Length"}, par.box_length);
-  conf.set_value({"Modi", "Box", "Temperature"}, T_init);
-  conf.set_value({"Modi", "Box", "Initial_Condition"}, "thermal momenta");
-  conf.set_value({"Modi", "Box", "Start_Time"}, 0.0);
-  return BoxModus(conf.extract_sub_configuration({"Modi"}), par);
+  conf.set_value({"Box", "Init_Multiplicities", "2212"}, N);
+  conf.set_value({"Box", "Init_Multiplicities", "311"}, N);
+  conf.set_value({"Box", "Length"}, par.box_length);
+  conf.set_value({"Box", "Temperature"}, T_init);
+  return BoxModus(std::move(conf), par);
 }
 
 TEST(rest_frame_transformation) {

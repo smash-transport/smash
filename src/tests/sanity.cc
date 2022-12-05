@@ -85,50 +85,53 @@ TEST(sanity_default) {
 }
 
 TEST(sanity_box) {
-  Configuration conf = Test::configuration();
-  conf.set_value({"Modi", "Box", "Initial_Condition"}, "peaked momenta");
-  conf.set_value({"Modi", "Box", "Length"}, 5.0);
-  conf.set_value({"Modi", "Box", "Temperature"}, 0.13);
-  conf.set_value({"Modi", "Box", "Start_Time"}, 0.2);
-  conf.set_value({"Modi", "Box", "Init_Multiplicities", "2212"}, 50);
-  conf.set_value({"Modi", "Box", "Init_Multiplicities", "2112"}, 50);
-  conf.set_value({"Modi", "Box", "Init_Multiplicities", "211"}, 100);
-  conf.set_value({"Modi", "Box", "Init_Multiplicities", "111"}, 100);
-  conf.set_value({"Modi", "Box", "Init_Multiplicities", "-211"}, 100);
+  Configuration conf{R"(
+    Box:
+      Initial_Condition: "peaked momenta"
+      Length:  5.0
+      Temperature:  0.13
+      Start_Time:  0.2
+      Init_Multiplicities:
+        2212: 50
+        2112: 50
+        211:  100
+        111:  100
+        -211: 100
+  )"};
   ExperimentParameters param = smash::Test::default_parameters();
   param.box_length = 5.0;
-  BoxModus b(conf.extract_sub_configuration({"Modi"}), param);
+  BoxModus b(std::move(conf), param);
   Particles P;
   create_particle_list(P);
   COMPARE(b.impose_boundary_conditions(&P), 4);
 }
 
 TEST(sanity_collider) {
-  // Remove the particles from the default configuration. The
-  // Test::configuration needs to be called with an empty particle list,
-  // otherwise the new particles would just be appended to the existing ones.
-  Configuration conf = Test::configuration(
-      "Modi: {Collider: {Projectile: }} \n"
-      "Modi: {Collider: {Target: }}");
-  // Specify the new particles after the old ones were removed
-  conf.set_value({"Modi", "Collider", "Projectile", "Particles", "661"}, 1);
-  conf.set_value({"Modi", "Collider", "Target", "Particles", "661"}, 1);
-  conf.set_value({"Modi", "Collider", "E_Kin"}, 1.0);
+  Configuration conf{R"(
+    Collider:
+      Projectile:
+          Particles: {661: 1}
+      Target:
+          Particles: {661: 1}
+      E_Kin: 1.0
+  )"};
   ExperimentParameters param = smash::Test::default_parameters();
-  ColliderModus n(conf.extract_sub_configuration({"Modi"}), param);
+  ColliderModus n(std::move(conf), param);
   Particles P;
   create_particle_list(P);
   COMPARE(n.impose_boundary_conditions(&P), 0);
 }
 
 TEST(sanity_sphere) {
-  Configuration conf = Test::configuration();
-  conf.set_value({"Modi", "Sphere", "Radius"}, 10);
-  conf.set_value({"Modi", "Sphere", "Temperature"}, 0.2);
-  conf.set_value({"Modi", "Sphere", "Start_Time"}, 0.0);
-  conf.set_value({"Modi", "Sphere", "Init_Multiplicities", "661"}, 500);
+  Configuration conf{R"(
+    Sphere:
+      Radius: 10
+      Temperature: 0.2
+      Start_Time: 0.0
+      Init_Multiplicities: {661: 500}
+  )"};
   ExperimentParameters param = smash::Test::default_parameters();
-  SphereModus s(conf.extract_sub_configuration({"Modi"}), param);
+  SphereModus s(std::move(conf), param);
   Particles P;
   create_particle_list(P);
   COMPARE(s.impose_boundary_conditions(&P), 0);

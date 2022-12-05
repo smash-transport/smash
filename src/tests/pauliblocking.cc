@@ -29,21 +29,21 @@ TEST(init_particle_types) {
       "N0 0.938 0.0 + 2112\n");
 }
 
+static Configuration get_pauli_blocking_conf() {
+  return Configuration{R"(
+    Spatial_Averaging_Radius: 1.86
+    Momentum_Averaging_Radius: 0.08
+    Gaussian_Cutoff: 2.2
+  )"};
+}
+
 /* Checks if phase space density gives correct result
    for a particular simple case: one particle in the phase-space sphere.
 */
 TEST(phase_space_density) {
-  Configuration conf = Test::configuration();
-  conf.set_value(
-      {"Collision_Term", "Pauli_Blocking", "Spatial_Averaging_Radius"}, 1.86);
-  conf.set_value(
-      {"Collision_Term", "Pauli_Blocking", "Momentum_Averaging_Radius"}, 0.08);
-  conf.set_value({"Collision_Term", "Pauli_Blocking", "Gaussian_Cutoff"}, 2.2);
-
   ExperimentParameters param = smash::Test::default_parameters();
-  std::unique_ptr<PauliBlocker> pb = std::make_unique<PauliBlocker>(
-      conf.extract_sub_configuration({"Collision_Term", "Pauli_Blocking"}),
-      param);
+  std::unique_ptr<PauliBlocker> pb =
+      std::make_unique<PauliBlocker>(get_pauli_blocking_conf(), param);
   std::vector<Particles> part(1);
   PdgCode pdg = 0x2112;
   ParticleData one_particle{ParticleType::find(pdg)};
@@ -88,13 +88,6 @@ param);
 }*/
 
 TEST(phase_space_density_nucleus) {
-  Configuration conf = Test::configuration();
-  conf.set_value(
-      {"Collision_Term", "Pauli_Blocking", "Spatial_Averaging_Radius"}, 1.86);
-  conf.set_value(
-      {"Collision_Term", "Pauli_Blocking", "Momentum_Averaging_Radius"}, 0.08);
-  conf.set_value({"Collision_Term", "Pauli_Blocking", "Gaussian_Cutoff"}, 2.2);
-
   // Gold nuclei with 1000 test-particles
   std::map<PdgCode, int> list = {{0x2212, 79}, {0x2112, 118}};
   int Ntest = 100;
@@ -107,9 +100,8 @@ TEST(phase_space_density_nucleus) {
   Au.copy_particles(&part_Au[0]);
 
   ExperimentParameters param = smash::Test::default_parameters(Ntest);
-  std::unique_ptr<PauliBlocker> pb = std::make_unique<PauliBlocker>(
-      conf.extract_sub_configuration({"Collision_Term", "Pauli_Blocking"}),
-      param);
+  std::unique_ptr<PauliBlocker> pb =
+      std::make_unique<PauliBlocker>(get_pauli_blocking_conf(), param);
 
   ThreeVector r(0.0, 0.0, 0.0);
   ThreeVector p;

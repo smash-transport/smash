@@ -25,16 +25,15 @@ PauliBlocker::PauliBlocker(Configuration conf,
       n_ensembles_(param.n_ensembles) {
   if (ntest_ * n_ensembles_ < 20) {
     logg[LPauliBlocking].warn(
-        "Phase-space density calculation in Pauli blocking"
-        " will not work reasonably. Either use testparticles or ensembles, or "
-        "both."
-        " The recommended testparticles * ensembles is at least 20");
+        "Phase-space density calculation in Pauli blocking will not work "
+        "reasonably.\nEither use testparticles or ensembles, or both.\n"
+        "The recommended testparticles * ensembles is at least 20.");
   }
 
   if (rc_ < rr_ || rr_ < 0.0 || rp_ < 0) {
     logg[LPauliBlocking].error(
-        "Please choose reasonable parameters for Pauli blocking:"
-        "All radii have to be positive and Gaussian_Cutoff should"
+        "Please choose reasonable parameters for Pauli blocking:\n"
+        "All radii have to be positive and Gaussian_Cutoff should\n"
         "be larger than Spatial_Averaging_Radius");
   }
 
