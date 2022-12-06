@@ -48,9 +48,9 @@ Year  | Author | E-Mail
 
 Contributions by the following people are acknowledged.
 
-Year  | Author | E-Mail |
-:---: | :----: | :----: |
-`2012-2013` | Jochen Gerhard | |
-`2013` | Janus Weil | |
-`2013-2014` | Kai Gallmeister | |
-`2022` | Andrii Verbytskyi | [✉️](mailto:andrii.verbytskyi@mpp.mpg.de) |
+Year  | Author | E-Mail
+:---: | :----: | :----:
+`2012-2013` | Jochen Gerhard | [✉️](mailto:jochen.gerhard@compeng.uni-frankfurt.de)
+`2013` | Janus Weil | [✉️](mailto:weil@fias.uni-frankfurt.de)
+`2013-2014` | Kai Gallmeister | [✉️](mailto:gallmeister@itp.uni-frankfurt.de)
+`2022` | Andrii Verbytskyi | [✉️](mailto:andrii.verbytskyi@mpp.mpg.de)
