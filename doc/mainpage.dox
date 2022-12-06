@@ -10,10 +10,10 @@ For a quick overview on how to get started, see the <a href=../user/index.html> 
 - \ref smash::Configuration
 
 \par Configuration options
-- \ref input
+- \ref doxypage_input
 
 \par Unit Testing
-- \ref unittest_page
+- \ref doxypage_unittest_page
 
 */
 

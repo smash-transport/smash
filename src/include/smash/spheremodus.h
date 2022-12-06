@@ -43,7 +43,8 @@ namespace smash {
  *              # definitions here
  * \endcode
  *
- * The following configuration options are understood: \ref input_modi_sphere_
+ * The following configuration options are understood: \ref
+ * doxypage_input_modi_sphere_
  */
 class SphereModus : public ModusDefault {
  public:

@@ -229,12 +229,12 @@ TAB_SIZE               = 4
 # newlines.
 
 ALIASES                = "NucleusModus=input_modi_nucleus_" \
-                         "SphereModus=input_modi_sphere_" \
-                         "BoxModus=input_modi_box_" \
-                         "ColliderModus=input_modi_collider_" \
-                         "ListModus=input_modi_list_" \
+                         "SphereModus=doxypage_input_modi_sphere_" \
+                         "BoxModus=doxypage_input_modi_box_" \
+                         "ColliderModus=doxypage_input_modi_collider_" \
+                         "ListModus=doxypage_input_modi_list_" \
                          "key=\c" \
-                         "collect_key=\xrefitem configuration_keys \"\" \"\""\
+                         "collect_key=\xrefitem doxypage_configuration_keys \"\" \"\""\
                          "aux_key{6}=\1\anchor \2 \collect_key <b>\key \3</b> &mdash; \4, \5\6"\
                          "required_key{3}=\aux_key{<hr>,\1,\2,\3,required,}"\
                          "required_key_no_line{3}=\aux_key{,\1,\2,\3,required,}"\

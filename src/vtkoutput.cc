@@ -36,7 +36,7 @@ VtkOutput::VtkOutput(const std::filesystem::path &path, const std::string &name,
 VtkOutput::~VtkOutput() {}
 
 /*!\Userguide
- * \page format_vtk VTK Format
+ * \page doxypage_format_vtk
  * In general VTK is a very versatile format, which allows many possible
  * structures. For generic VTK format one can see http://vtk.org. Here only
  * SMASH-specific VTK format is described.
@@ -44,7 +44,7 @@ VtkOutput::~VtkOutput() {}
  * SMASH VTK files contain a snapshot of simulation at one moment of time.
  * VTK output files are written at initialization at event start and
  * every period of time \f$ \Delta t \f$, where \f$ \Delta t \f$ is regulated
- * by option (see \ref input_general_). For every new output moment
+ * by option (see \ref doxypage_input_general_). For every new output moment
  * a separate VTK file is written. File names are constructed as follows:
  * pos_ev<event>_tstep<output_number>.vtk.
  *
@@ -56,7 +56,7 @@ VtkOutput::~VtkOutput() {}
  * human-readable text files.
  *
  * There is also a possibility to print a lattice with thermodynamical
- * quantities to vtk files, see \ref output_vtk_lattice_.
+ * quantities to vtk files, see \ref doxypage_output_vtk_lattice_.
  **/
 
 void VtkOutput::at_eventstart(const Particles &particles,
@@ -167,7 +167,7 @@ void VtkOutput::write(const Particles &particles) {
 }
 
 /*!\Userguide
- * \page output_vtk_lattice_ Thermodynamics VTK Output
+ * \page doxypage_output_vtk_lattice_
  * Density on the lattice can be printed out in the VTK format of
  * structured grid. At every output moment a new vtk file is created.
  * The name format is
@@ -253,7 +253,7 @@ void VtkOutput::thermodynamics_output(
 }
 
 /*!\Userguide
- * \page output_vtk_lattice_
+ * \page doxypage_output_vtk_lattice_
  * Additionally to density, energy-momentum tensor \f$T^{\mu\nu} \f$,
  * energy-momentum tensor in Landau rest frame \f$T^{\mu\nu}_L \f$ and
  * velocity of Landau rest frame \f$v_L\f$ on the lattice can be printed out

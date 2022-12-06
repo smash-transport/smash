@@ -23,7 +23,7 @@
 namespace smash {
 
 /*!\Userguide
- * \page thermodyn_output_user_guide_ ASCII Thermodynamics Output
+ * \page doxypage_thermodyn_output_user_guide_
  *
  * The thermodynamics output (thermodynamics.dat) is used to output either:
  * \li thermodynamic quantities at one point (\key Smearing: on)

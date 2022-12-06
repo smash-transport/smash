@@ -40,7 +40,7 @@ namespace smash {
  *              # options here
  * \endcode
 
- * For configuring see \ref input_modi_list_.
+ * For configuring see \ref doxypage_input_modi_list_.
  *
  *
  * Since SMASH is searching for collisions in computational frame time 't',
@@ -254,7 +254,7 @@ class ListModus : public ModusDefault {
  * \endcode
 
  * The ListBoxModus inherits all functionality from the ListModus.
- * For more detailed configuring see \ref input_modi_list_.
+ * For more detailed configuring see \ref doxypage_input_modi_list_.
  *
  *
  * Since SMASH is searching for collisions in computational frame time 't',
