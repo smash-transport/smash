@@ -209,7 +209,7 @@ void print_disclaimer() {
       << "\n"
       << " See LICENSE for details."
       << "\n"
-      << " For the full list of contributors see AUTHORS."
+      << " For the full list of contributors see the AUTHORS.md file."
       << "\n"
       << "\n"
       << " When using SMASH, please cite"
