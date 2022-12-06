@@ -10,7 +10,9 @@ See [CONTRIBUTING](CONTRIBUTING.md) for development hints.
 A complete [User Guide](https://theory.gsi.de/~smash/userguide/current/) as well as a more detailed [development documentation](http://theory.gsi.de/~smash/doc/current/) are available for the latest version of the code.
 For documentation of older versions, refer to links in the [releases pages](https://github.com/smash-transport/smash/releases).
 
-If Pythia is used, please cite the following references (both article and the codebase release you used): _A comprehensive guide to the physics and usage of PYTHIA 8.3_, C. Bierlich et al; SciPost Phys. Codebases 8 (2022) (DOI: 10.21468/SciPostPhysCodeb.8), [arXiv:2203.11601 [hep-ph]](https://arxiv.org/abs/2203.11601); SciPost Phys. Codebases 8-r8.3 (2022) (DOI: https://scipost.org/SciPostPhysCodeb.8-r8.3).
+If Pythia is used, please cite the following references (both article and the codebase release you used):
+* [_A comprehensive guide to the physics and usage of PYTHIA 8.3_](https://scipost.org/SciPostPhysCodeb.8), C. Bierlich et al; SciPost Phys. Codebases 8 (2022), DOI: `10.21468/SciPostPhysCodeb.8`, also available on [arXiv](https://arxiv.org/abs/2203.11601);
+* [SciPost Phys. Codebases 8-r8.3](https://scipost.org/SciPostPhysCodeb.8-r8.3) (2022), DOI: `10.21468/SciPostPhysCodeb.8-r8.3`.
 
 Report issues [on GitHub](https://github.com/smash-transport/smash/issues) or contact us by email at elfner@itp.uni-frankfurt.de.
 
