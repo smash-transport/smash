@@ -16,6 +16,15 @@ the repository, work on a topic branch and then create a pull request. Details
 on this workflow can be found e.g.
 [here](https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project).
 
+
+## Be consistent!
+
+The first and main guideline beyond all the following ones in this file is:
+**Be consistent with anything that is already existing in the codebase.**
+This is valid in the most general sense, ranging from style, to notation,
+to nomenclature and whatever else you might notice.
+
+
 ## Testing
 
 ### Running Tests
