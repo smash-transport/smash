@@ -71,6 +71,7 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
     case ProcessType::MultiParticleThreeToTwo:
     case ProcessType::MultiParticleFourToTwo:
     case ProcessType::MultiParticleFiveToTwo:
+    case ProcessType::Freeforall:
     case ProcessType::None:
       // nullify parents
       history_.p1 = 0x0;

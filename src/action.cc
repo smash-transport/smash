@@ -503,6 +503,12 @@ double Action::check_conservation(const uint32_t id_process) const {
           << particle_names.str() << err_msg;
       return energy_violation;
     }
+    if (process_type_ == ProcessType::Freeforall) {
+        logg[LAction].warn()
+                << "Conservation law violation, but we want it (FREE4ALL).\n"
+                << particle_names.str() << err_msg;
+        return;
+    }
     logg[LAction].error() << "Conservation law violations detected\n"
                           << particle_names.str() << err_msg;
     if (id_process == ID_PROCESS_PHOTON) {

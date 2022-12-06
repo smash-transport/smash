@@ -51,6 +51,7 @@
 #ifdef SMASH_USE_ROOT
 #include "rootoutput.h"
 #endif
+#include "freeforallaction.h"
 #include "vtkoutput.h"
 #include "wallcrossingaction.h"
 
@@ -219,16 +220,18 @@ class Experiment : public ExperimentBase {
   void initialize_new_event();
 
   /**
-   * Runs the time evolution of an event with fixed-sized time steps or without
+   * Runs the time evolution of an event with fixed-size time steps or without
    * timesteps, from action to actions.
    * Within one timestep (fixed) evolution from action to action
    * is invoked.
    *
-   * \param[in] t_end time until run_time_evolution is run, in SMASH this is the
+   * \param[in] t_end Time until run_time_evolution is run, in SMASH this is the
    *                  configured end_time, but it might differ if SMASH is used
    *                  as an external library
+   * \param[in] add_plist A particle list which has to be evolved in time if
+   *                      SMASH is used as an external library.
    */
-  void run_time_evolution(const double t_end);
+  void run_time_evolution(const double t_end, ParticleList add_plist = {});
 
   /**
    * Performs the final decays of an event
@@ -255,6 +258,12 @@ class Experiment : public ExperimentBase {
    * SMASH is used as a 3rd-party library.
    */
   Modus *modus() { return &modus_; }
+
+  /**
+   * Increase the event number by one. This function is especially helpful if
+   * SMASH is used as a library.
+   */
+   void increase_event_no();
 
  private:
   /**
@@ -2135,7 +2144,47 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
 }
 
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution(const double t_end) {
+void Experiment<Modus>::run_time_evolution(const double t_end,
+                                        ParticleList add_plist) {
+
+  if (!add_plist.empty()) {
+          // Add adding plist action ///////////////////////////////////////////////////
+          const double demo_act_time = parameters_.labclock->current_time();
+          std::cout << "demo_act_time: " << demo_act_time << "\n";
+          ParticleList empyt_in_list {};
+          // TODO(#977) Check that additonal hadrons are ok? Best to perfom the same check as
+          // in ListModus::try_create_particle() (see function documentation in listmodus.h)
+          auto demo_act = make_unique<FreeforallAction>(empyt_in_list, add_plist, demo_act_time);
+          std::cout << demo_act->get_type() << '\n';
+
+          // Directly perform action here
+          // Time of add_plist particles is set to action time i.e. current_time in generate_final_state
+          // TODO(#977) Does this time setting makes sense in the end?
+          perform_action(*demo_act, 0); // Only adds to first ensemble for now (probably
+                              // ok as JETSCAPE anyway only works with one
+                              // (0th) ensemble)
+        /////////////////////////////////////////////////////////////////////////////
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+// Protoype removing hadrons (Comment in for testing) ////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+// Pick 2 random particles of 0th ensemble
+// const double demo_act_time = parameters_.labclock->current_time();
+//
+// ParticleList current_particles = ensembles_[0].copy_to_vector();
+// // Not very efficent to use a copy here, but this is anyway a prototype that
+// // will eventually get the particles to be removed directly
+//
+// const int random_idx = random::uniform_int(0, static_cast<int>(current_particles.size())-2); // -2 because we choose also the next idx to be removed below
+//
+// ParticleList rm_list {current_particles[random_idx], current_particles[random_idx+1]};  std::cout << "Particle to be removed: "<< rm_list << '\n';
+// ParticleList empty_out_list {};
+//
+// auto demo_act = make_unique<FreeforallAction>(rm_list, empty_out_list, demo_act_time);
+// perform_action(*demo_act, 0);
+//////////////////////////////////////////////////////////////////////////////
+
   while (parameters_.labclock->current_time() < t_end) {
     const double dt = parameters_.labclock->timestep_duration();
     logg[LExperiment].debug("Timestepless propagation for next ", dt, " fm.");
@@ -2830,9 +2879,14 @@ bool Experiment<Modus>::is_finished() {
 }
 
 template <typename Modus>
+void Experiment<Modus>::increase_event_no() {
+        event_++;
+}
+
+template <typename Modus>
 void Experiment<Modus>::run() {
   const auto &mainlog = logg[LMain];
-  for (event_ = 0; !is_finished(); event_++) {
+  for (event_ = 0; !is_finished(); increase_event_no()) {
     mainlog.info() << "Event " << event_;
 
     // Sample initial particles, start clock, some printout and book-keeping
