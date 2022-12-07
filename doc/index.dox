@@ -1,66 +1,100 @@
-# This file, which is considered as first by Doxygen since it is appearing first
-# in tag INPUT in the setup file, is intended to enforce a given page ordering.
-# Hence, Doxygen pages should be added with title here and elsewhere simply be
-# referred to with their anchor, i.e. use here the \page command with two
-# arguments and elsewhere with one.
+# AN INDEX FILE FOR DOCUMENTATION ORDERING
 #
-# NOTE: The main page is not listed here, because it is included before in INPUT
-#       together with the markdown generic files.
+# This file, which is considered as first by Doxygen since it is appearing
+# just after the main page in the INPUT tag in Doxygen setup file, is
+# intended to enforce a given page ordering. Hence, Doxygen pages should
+# be added here with the title and elsewhere only be referred to with their
+# anchor. Said differently, use here the \page command with two arguments
+# and elsewhere with one.
+#
+# NOTE: The main page is not listed here, because it is included before in
+#       INPUT together with the markdown generic files.
+#
+# ATTENTION: Sub-pages are "anchored" by Doxygen to their parent page, in order
+#            of appearance. Therefore, declaring them here is not affecting
+#            their ordering in the processed documentation. However, it still
+#            makes sense to list them here, in order to have all the page
+#            titles in one place. To make reading and maintenance easier, one
+#            level of indentation is added whenever a new sub-page is created.
+#
+# NOTE FOR POSSIBLE FUTURE NEEDS:
+#
+# The Doxygen \subpage command is like \ref, with the additional behaviour that
+# it intrnally marks the specified page as sub-page of the current one. Being
+# as \ref, though, it will also print a link to the sub-page at the place wher
+# used in the documentation. Therefore, naively, it is not possible to use it
+# here to enforce a given order of sub-pages in the documentation. In fact,
+# w.r.t. ordering, it would be possible to declare all sub-pages here, first
+# using the \subpage command with their anchor only and then as \page
+# themselves. Doing so, one has only to ensure that all \subpage commands come
+# after the \page command they refer to. However, this would lead to undesired
+# links in the documentation. A patchy way to get around this aspect (which
+# would work for HTML documentation only!) is to use an extra .css style that
+# should be created in the doc folder and be given to Doxygen via
+#
+#   HTML_EXTRA_STYLESHEET = @CMAKE_CURRENT_SOURCE_DIR@/new_style.css
+#
+#  tag in the Doxygen setup files. In that style file a new CSS class
+#
+#   .invisible-text {
+#     display: none;
+#   }
+#
+# would be defined and here it would be used around \subpage commands via e.g.
+# <div class="invisible-text"> [...] </div> to "delete" the links from the
+# documentation.
 #
 /**
 \page doxypage_input Input
-\page doxypage_inputconfig Configuration
-\page doxypage_input_general_ General
-\page doxypage_minimum_nonempty_ensembles_ Minimum non-empty ensembles
-\page doxypage_input_version_ Version
-\page doxypage_input_logging_ Logging
-\page doxypage_input_collision_term_ Collision term
-\page doxypage_input_collision_term_pauliblocker_ Pauli Blocking
-\page doxypage_input_collision_term_string_parameters_ String Parameters
-\page doxypage_input_collision_term_dileptons_ Dileptons
-\page doxypage_input_collision_term_photons_ Photons
-\page doxypage_input_modi_ Modi
-\page doxypage_input_modi_collider_ Collider
-\page doxypage_input_modi_collider_projectile_and_target_ Projectile and Target
-\page doxypage_input_modi_collider_impact_parameter_ Impact Parameter
-\page doxypage_input_modi_sphere_ Sphere
-\page doxypage_input_modi_box_ Box
-\page doxypage_input_modi_list_ List
-\page doxypage_input_modi_listbox_ ListBox
-\page doxypage_input_output_ Output
-\page doxypage_input_lattice_ Lattice
-\page doxypage_input_potentials_ %Potentials
-\page doxypage_input_potentials_skyrme_ Skyrme
-\page doxypage_input_potentials_symmetry_ Symmetry
-\page doxypage_input_potentials_VDF_ VDF
-\page doxypage_input_potentials_coulomb_ Coulomb
-\page doxypage_input_forced_thermalization_ Forced Thermalization
-\page doxypage_inputparticles Particles
-\page doxypage_inputdecaymodes Decay Modes
+    \page doxypage_inputconfig Configuration
+        \page doxypage_input_general_ General
+            \page doxypage_minimum_nonempty_ensembles_ Minimum non-empty ensembles
+        \page doxypage_input_logging_ Logging
+        \page doxypage_input_version_ Version
+        \page doxypage_input_collision_term_ Collision term
+            \page doxypage_input_collision_term_pauliblocker_ Pauli Blocking
+            \page doxypage_input_collision_term_string_parameters_ String Parameters
+            \page doxypage_input_collision_term_dileptons_ Dileptons
+            \page doxypage_input_collision_term_photons_ Photons
+        \page doxypage_input_modi_ Modi
+            \page doxypage_input_modi_collider_ Collider
+                \page doxypage_input_modi_collider_projectile_and_target_ Projectile and Target
+                \page doxypage_input_modi_collider_impact_parameter_ Impact Parameter
+            \page doxypage_input_modi_sphere_ Sphere
+            \page doxypage_input_modi_box_ Box
+            \page doxypage_input_modi_list_ List
+            \page doxypage_input_modi_listbox_ ListBox
+        \page doxypage_input_output_ Output
+        \page doxypage_input_lattice_ Lattice
+        \page doxypage_input_potentials_ %Potentials
+            \page doxypage_input_potentials_skyrme_ Skyrme
+            \page doxypage_input_potentials_symmetry_ Symmetry
+            \page doxypage_input_potentials_VDF_ VDF
+            \page doxypage_input_potentials_coulomb_ Coulomb
+        \page doxypage_input_forced_thermalization_ Forced Thermalization
+    \page doxypage_inputparticles Particles
+    \page doxypage_inputdecaymodes Decay Modes
 \page doxypage_configuration_keys Input short reference
-
 \page doxypage_output_general_ Output
-\page doxypage_configuring_output_ Output configuration examples
-\page doxypage_output_hepmc_ HepMC Output
-\page doxypage_output_dileptons Dileptons
-\page doxypage_output_photons Photons
-\page doxypage_output_initial_conditions Initial Conditions
-\page doxypage_rivet_output_user_guide_ Rivet Output User Guide
-\page doxypage_format_oscar_particlelist OSCAR Particles Format
-\page doxypage_process_type Process Types
-\page doxypage_format_oscar_collisions OSCAR Collisions Format
-\page doxypage_oscar_general_ OSCAR Block Structure
-\page doxypage_format_binary_ Binary Format
-\page doxypage_format_root ROOT Format
-\page doxypage_format_vtk VTK Format
-\page doxypage_output_vtk_lattice_ Thermodynamics VTK Output
-\page doxypage_thermodyn_output_user_guide_ ASCII Thermodynamics Output
-\page doxypage_thermodyn_lattice_output_ Thermodynamics Lattice Output
-\page doxypage_IC_output_user_guide_ ASCII IC Output
-\page doxypage_collisions_output_in_box_modus_ Collision Output in Box Modus
-
+    \page doxypage_configuring_output_ Output configuration examples
+    \page doxypage_output_hepmc_ HepMC Output
+    \page doxypage_output_dileptons Dileptons
+    \page doxypage_output_photons Photons
+    \page doxypage_output_initial_conditions Initial Conditions
+    \page doxypage_rivet_output_user_guide_ Rivet Output User Guide
+    \page doxypage_format_oscar_particlelist OSCAR Particles Format
+    \page doxypage_process_type Process Types
+    \page doxypage_format_oscar_collisions OSCAR Collisions Format
+    \page doxypage_oscar_general_ OSCAR Block Structure
+    \page doxypage_format_binary_ Binary Format
+    \page doxypage_format_root ROOT Format
+    \page doxypage_format_vtk VTK Format
+    \page doxypage_output_vtk_lattice_ Thermodynamics VTK Output
+    \page doxypage_thermodyn_output_user_guide_ ASCII Thermodynamics Output
+    \page doxypage_thermodyn_lattice_output_ Thermodynamics Lattice Output
+    \page doxypage_IC_output_user_guide_ ASCII IC Output
+    \page doxypage_collisions_output_in_box_modus_ Collision Output in Box Modus
 \page doxypage_smash_invocation SMASH Invocation
-
 \ifnot user
 \page doxypage_unittest_page Unit Testing
 \page doxypage_unittest_mocking Mock Functions/Classes

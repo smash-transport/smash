@@ -299,6 +299,12 @@ and then add content to it simply by using
 
 at the desired place in the codebase.
 
+Sub-pages are pages themselves, but Doxygen classifies pages as sub-pages as soon
+as it encounters the `\subpage` command in a given `\page`. At that point the
+anchor given to the `\subpage` command tells Doxygen which page should be marked
+as sub-page of which other. Refer to the explanation at the beginning of the
+_doc/index.dox_ file for further information about how to handle sub-pages.
+
 
 ### What to document in the code
 
