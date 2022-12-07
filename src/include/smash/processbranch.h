@@ -99,7 +99,7 @@ enum class ProcessType {
   /*
    * Ignore conservation laws.
    */
-   Freeforall = 90
+  Freeforall = 90
 };
 
 /**

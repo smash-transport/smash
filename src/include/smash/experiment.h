@@ -260,10 +260,10 @@ class Experiment : public ExperimentBase {
   Modus *modus() { return &modus_; }
 
   /**
-   * Increase the event number by one. This function is especially helpful if
-   * SMASH is used as a library.
+   * Increase the event number by one. This function is helpful if
+   * SMASH is used as an external library.
    */
-   void increase_event_no();
+  void increase_event_no();
 
  private:
   /**
@@ -699,6 +699,14 @@ class Experiment : public ExperimentBase {
 
   /// random seed for the next event.
   int64_t seed_ = -1;
+
+  /// Counter for mass-check warnings if a hadron list is added (avoid spamming)
+  int n_warns_precision_ = 0;
+
+  /** Counter for energy-momentum conservation warnings if a hadron list is
+   * added (avoid spamming)
+   */
+  int n_warns_mass_consistency_ = 0;
 
   /**
    * \ingroup logging
@@ -2145,45 +2153,103 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const double t_end,
-                                        ParticleList add_plist) {
-
+                                           ParticleList add_plist) {
   if (!add_plist.empty()) {
-          // Add adding plist action ///////////////////////////////////////////////////
-          const double demo_act_time = parameters_.labclock->current_time();
-          std::cout << "demo_act_time: " << demo_act_time << "\n";
-          ParticleList empyt_in_list {};
-          // TODO(#977) Check that additonal hadrons are ok? Best to perfom the same check as
-          // in ListModus::try_create_particle() (see function documentation in listmodus.h)
-          auto demo_act = make_unique<FreeforallAction>(empyt_in_list, add_plist, demo_act_time);
-          std::cout << demo_act->get_type() << '\n';
+    /// Add plist action
+    const double demo_act_time = parameters_.labclock->current_time();
+    std::cout << "demo_act_time: " << demo_act_time << "\n";
+    ParticleList empty_in_list{};
 
-          // Directly perform action here
-          // Time of add_plist particles is set to action time i.e. current_time in generate_final_state
-          // TODO(#977) Does this time setting makes sense in the end?
-          perform_action(*demo_act, 0); // Only adds to first ensemble for now (probably
-                              // ok as JETSCAPE anyway only works with one
-                              // (0th) ensemble)
-        /////////////////////////////////////////////////////////////////////////////
+    // check if the particles in the list are valid, perfom the same check
+    // as in ListModus::try_create_particle()
+    // (see function documentation in listmodus.h)
+    ParticleList add_plist_checked;
+    constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
+    int pdgcode = 0;
+    for (auto &particle : add_plist) {
+      try {
+        pdgcode = particle.pdgcode().get_decimal();
+        ParticleData new_p{ParticleType::find(PdgCode::from_decimal(pdgcode))};
+        FourVector p = particle.momentum();
+        const double mass = p.abs();
+        if (particle.type().is_stable() &&
+            std::abs(mass - particle.pole_mass()) > really_small) {
+          if (n_warns_precision_ < max_warns_precision) {
+            logg[LExperiment].warn()
+                << "Provided mass of " << particle.type().name() << " = "
+                << mass << " [GeV] is inconsistent with SMASH value = "
+                << particle.pole_mass() << ". Forcing E = sqrt(p^2 + m^2)"
+                << ", where m is SMASH mass.";
+            n_warns_precision_++;
+          } else if (n_warns_precision_ == max_warns_precision) {
+            logg[LExperiment].warn(
+                "Further warnings about SMASH mass versus input mass"
+                " inconsistencies will be suppressed.");
+            n_warns_precision_++;
+          }
+          new_p.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
+        } else {
+          new_p.set_4momentum(FourVector(p.x0(), p.x1(), p.x2(), p.x3()));
+        }
+
+        // On-shell condition consistency check
+        if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
+          if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
+            logg[LExperiment].warn()
+                << "Provided 4-momentum " << particle.momentum() << " and "
+                << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
+                << " This may originate from the lack of numerical"
+                << " precision in the input. Setting E to sqrt(p^2 + m^2).";
+            n_warns_mass_consistency_++;
+          } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
+            logg[LExperiment].warn(
+                "Further warnings about E != sqrt(p^2 + m^2) will"
+                " be suppressed.");
+            n_warns_mass_consistency_++;
+          }
+          new_p.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
+        }
+        // Set spatial coordinates, they will later be backpropagated if needed
+        FourVector r = particle.position();
+        new_p.set_4position(FourVector(r.x0(), r.x1(), r.x2(), r.x3()));
+        add_plist_checked.push_back(new_p);
+      } catch (ParticleType::PdgNotFoundFailure &) {
+        logg[LExperiment].warn()
+            << "SMASH does not recognize pdg code " << pdgcode
+            << " obtained from hadron list. This particle will be ignored.\n";
+      }
+    }
+
+    auto demo_act = std::make_unique<FreeforallAction>(
+        empty_in_list, add_plist_checked, demo_act_time);
+    std::cout << demo_act->get_type() << '\n';
+
+    // Directly perform action here
+    // Time of add_plist particles is set to action time i.e. current_time in
+    // generate_final_state
+    // TODO(#977) Does this time setting makes sense in the end?
+    perform_action(*demo_act, 0);  // Only adds to first ensemble for now
+                                   // (probably ok as JETSCAPE anyway only works
+                                   // with one (0th) ensemble)
   }
 
   //////////////////////////////////////////////////////////////////////////////
-// Protoype removing hadrons (Comment in for testing) ////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-// Pick 2 random particles of 0th ensemble
-// const double demo_act_time = parameters_.labclock->current_time();
-//
-// ParticleList current_particles = ensembles_[0].copy_to_vector();
-// // Not very efficent to use a copy here, but this is anyway a prototype that
-// // will eventually get the particles to be removed directly
-//
-// const int random_idx = random::uniform_int(0, static_cast<int>(current_particles.size())-2); // -2 because we choose also the next idx to be removed below
-//
-// ParticleList rm_list {current_particles[random_idx], current_particles[random_idx+1]};  std::cout << "Particle to be removed: "<< rm_list << '\n';
-// ParticleList empty_out_list {};
-//
-// auto demo_act = make_unique<FreeforallAction>(rm_list, empty_out_list, demo_act_time);
-// perform_action(*demo_act, 0);
-//////////////////////////////////////////////////////////////////////////////
+  // Protoype removing hadrons (Comment in for testing) ////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  // Pick 2 random particles of 0th ensemble
+  // const double demo_act_time = parameters_.labclock->current_time();
+  //
+  // ParticleList current_particles = ensembles_[0].copy_to_vector();
+  // // Not very efficent to use a copy here, but this is anyway a prototype
+  // that
+  // // will eventually get the particles to be removed directly
+  // const int random_idx = random::uniform_int(0,static_cast<int>(current_particles.size())-2); // -2 because we choose also the next idx to be removed below
+  // ParticleList rm_list {current_particles[random_idx],
+  // current_particles[random_idx+1]};  std::cout << "Particle to be removed:"<< rm_list << '\n';
+  // ParticleList empty_out_list {};
+  // auto demo_act = std::make_unique<FreeforallAction>(rm_list, empty_out_list,demo_act_time);
+  // perform_action(*demo_act, 0);
+  //////////////////////////////////////////////////////////////////////////////
 
   while (parameters_.labclock->current_time() < t_end) {
     const double dt = parameters_.labclock->timestep_duration();
@@ -2880,7 +2946,7 @@ bool Experiment<Modus>::is_finished() {
 
 template <typename Modus>
 void Experiment<Modus>::increase_event_no() {
-        event_++;
+  event_++;
 }
 
 template <typename Modus>
@@ -2892,7 +2958,24 @@ void Experiment<Modus>::run() {
     // Sample initial particles, start clock, some printout and book-keeping
     initialize_new_event();
 
-    run_time_evolution(end_time_);
+    ////////////////////////////////////////////////////////////////////////////
+    // Example add. out list
+    constexpr double r_x = 0.1;
+    const FourVector pos_a{0.0, -r_x, 0., 0.};
+    const FourVector pos_b{0.0, r_x, 0., 0.};
+
+    ParticleData a{ParticleType::find(0x111)};  // pi0
+    a.set_4position(pos_a);
+    a.set_4momentum(0.140, 1.0, 0., 0.);
+
+    ParticleData b{ParticleType::find(0x111)};  // pi0
+    b.set_4position(pos_b);
+    b.set_4momentum(b.pole_mass(), -1.0, 0., 0.);
+
+    ParticleList out_list{a, b};
+    ////////////////////////////////////////////////////////////////////////////
+
+    run_time_evolution(end_time_, out_list);
 
     if (force_decays_) {
       do_final_decays();

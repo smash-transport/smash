@@ -148,6 +148,7 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
       break;
     case ProcessType::Freeforall:
       os << "Ffa";
+      break;
     default:
       os.setstate(std::ios_base::failbit);
   }
