@@ -69,7 +69,8 @@ namespace smash {
  * - version of the output (ASCII: fixed 2 digits float, Binary: double)
  * - thermodynamic quantity (ASCII: string, Binary: int)
  * - nx, ny, nz:  cells of the lattice along x, y, z, respectively
- *   (set in: Lattice->Cell_Number, see \ref doxypage_input_conf_lattice) (3 ints)
+ *   (set in: Lattice->Cell_Number, see \ref doxypage_input_conf_lattice)
+ *   (3 ints)
  * - x0, y0, z0: coordinates of the origin of the lattice
  *   (set in Lattice->Origin)
  *   (ASCII: 3 fixed 6 digits precision floats, Binary: 3 doubles)

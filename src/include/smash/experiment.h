@@ -1114,13 +1114,13 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   - Available formats: \ref doxypage_output_oscar_collisions, \ref
    *                        doxypage_output_binary, \ref doxypage_output_root,
    *                        \subpage doxypage_output_hepmc
-   * - \b Dileptons  Special dilepton output, see \subpage
-   *                 doxypage_output_dileptons.
+   * - \b Dileptons  Special dilepton output, see
+   *                 \subpage doxypage_output_dileptons.
    *   - Available formats: \ref doxypage_output_oscar_collisions,
    *                        \ref doxypage_output_binary and \ref
    *                        doxypage_output_root
-   * - \b Photons   Special photon output, see \subpage
-   *                doxypage_output_photons.
+   * - \b Photons   Special photon output, see
+   *                \subpage doxypage_output_photons.
    *   - Available formats: \ref doxypage_output_oscar_collisions,
    *                        \ref doxypage_output_binary and \ref
    *                        doxypage_output_root.
@@ -1150,8 +1150,8 @@ Experiment<Modus>::Experiment(Configuration &config,
    * - \b "Oscar1999", \b "Oscar2013" - human-readable text output\n
    *   - For "Particles" content: \subpage doxypage_output_oscar_particles
    *   - For "Collisions" content: \subpage doxypage_output_oscar_collisions
-   *   - General block structure of OSCAR formats: \subpage
-   *     doxypage_output_oscar_general
+   *   - General block structure of OSCAR formats:
+   *     \subpage doxypage_output_oscar_general
    * - \b "Binary" - binary, not human-readable output
    *   - Faster to read and write than text outputs
    *   - Saves coordinates and momenta with the full double precision
@@ -1277,10 +1277,10 @@ Experiment<Modus>::Experiment(Configuration &config,
    * initial conditions are enabled, the output file named SMASH_IC (followed by
    * the appropriate suffix) is generated when SMASH is executed. \n The output
    * is available in Oscar1999, Oscar2013, binary and ROOT format, as well as in
-   * an additional ASCII format (see \ref doxypage_output_initial_conditions). The
-   * latter is meant to directly serve as an input for the vHLLE hydrodynamics
-   * code (I. Karpenko, P. Huovinen, M. Bleicher: Comput. Phys. Commun. 185,
-   * 3016 (2014)).\n \n
+   * an additional ASCII format (see \ref doxypage_output_initial_conditions).
+   * The latter is meant to directly serve as an input for the vHLLE
+   * hydrodynamics code (I. Karpenko, P. Huovinen, M. Bleicher: Comput. Phys.
+   * Commun. 185, 3016 (2014)).\n \n
    * ### Oscar output
    * In case
    * of the Oscar1999 and Oscar2013 format, the structure is identical to the

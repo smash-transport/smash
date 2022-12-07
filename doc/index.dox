@@ -52,14 +52,14 @@
         \page doxypage_input_conf_logging Logging
         \page doxypage_input_conf_version Version
         \page doxypage_input_conf_collision_term Collision term
-            \page doxypage_input_conf_ct_pauliblocker Pauli Blocking
-            \page doxypage_input_conf_ct_string_parameters String Parameters
+            \page doxypage_input_conf_ct_pauliblocker Pauli blocking
+            \page doxypage_input_conf_ct_string_parameters String parameters
             \page doxypage_input_conf_ct_dileptons Dileptons
             \page doxypage_input_conf_ct_photons Photons
         \page doxypage_input_conf_modi Modi
             \page doxypage_input_conf_modi_collider Collider
-                \page doxypage_input_conf_modi_C_proj_targ Projectile and Target
-                \page doxypage_input_conf_modi_C_impact_parameter Impact Parameter
+                \page doxypage_input_conf_modi_C_proj_targ Projectile and target
+                \page doxypage_input_conf_modi_C_impact_parameter Impact parameter
             \page doxypage_input_conf_modi_sphere Sphere
             \page doxypage_input_conf_modi_box Box
             \page doxypage_input_conf_modi_list List
@@ -73,30 +73,30 @@
             \page doxypage_input_conf_pot_coulomb Coulomb
         \page doxypage_input_conf_forced_therm Forced Thermalization
     \page doxypage_input_particles Particles
-    \page doxypage_input_decaymodes Decay Modes
+    \page doxypage_input_decaymodes Decay modes
 \page doxypage_input_short_ref Input short reference
 \page doxypage_output Output
     \page doxypage_output_conf_examples Output configuration examples
     \page doxypage_output_hepmc HepMC Output
     \page doxypage_output_dileptons Dileptons
     \page doxypage_output_photons Photons
-    \page doxypage_output_initial_conditions Initial Conditions
-    \page doxypage_output_rivet Rivet Output User Guide
-    \page doxypage_output_oscar_particles OSCAR Particles Format
-        \page doxypage_output_oscar_particles_process_types Process Types
-    \page doxypage_output_oscar_collisions OSCAR Collisions Format
-    \page doxypage_output_oscar_general OSCAR Block Structure
-    \page doxypage_output_binary Binary Format
-    \page doxypage_output_root ROOT Format
-    \page doxypage_output_vtk VTK Format
-    \page doxypage_output_vtk_lattice Thermodynamics VTK Output
-    \page doxypage_output_thermodyn ASCII Thermodynamics Output
-    \page doxypage_output_thermodyn_lattice Thermodynamics Lattice Output
-    \page doxypage_output_initial_conditions ASCII IC Output
-    \page doxypage_output_collisions_box_modus Collision Output in Box Modus
-\page doxypage_smash_invocation SMASH Invocation
+    \page doxypage_output_initial_conditions Initial conditions
+    \page doxypage_output_rivet Rivet Output
+    \page doxypage_output_oscar_particles OSCAR particles format
+        \page doxypage_output_oscar_particles_process_types Process types
+    \page doxypage_output_oscar_collisions OSCAR collisions format
+    \page doxypage_output_oscar_general OSCAR block structure
+    \page doxypage_output_binary Binary format
+    \page doxypage_output_root ROOT format
+    \page doxypage_output_vtk VTK format
+    \page doxypage_output_vtk_lattice Thermodynamics VTK output
+    \page doxypage_output_thermodyn ASCII thermodynamics output
+    \page doxypage_output_thermodyn_lattice Thermodynamics lattice output
+    \page doxypage_output_initial_conditions ASCII initial conditions output
+    \page doxypage_output_collisions_box_modus Collision output in box modus
+\page doxypage_smash_invocation SMASH invocation
 \ifnot user
-\page doxypage_unit_testing Unit Testing
-\page doxypage_unit_testing_mocking Mock Functions/Classes
+\page doxypage_unit_testing Unit testing
+\page doxypage_unit_testing_mocking Mock functions and classes
 \endif
 */

@@ -251,14 +251,14 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 /*!\Userguide
  * \page doxypage_output_oscar_particles
  * The OSCAR particles format follows the general block structure of the OSCAR
- * format: \ref doxypage_output_oscar_general. We distinguish between two versions -
- * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
- * http://phy.duke.edu/~jeb65/oscar2013. \n
- * Enabling the OSCAR output for particles in the config.yaml file
- * (see \ref doxypage_input_conf_output), a so-called \c particle_lists.oscar file
- * is produced when executing SMASH. It allows for a certain degree of
- * flexibility, see \ref input_output_content_specific_ "Content-specific output
- * options" for further details. \n
+ * format: \ref doxypage_output_oscar_general. We distinguish between two
+ * versions, OSCAR2013 and OSCAR1999. Information about OSCAR standard can be
+ * found at http://phy.duke.edu/~jeb65/oscar2013. \n Enabling the OSCAR output
+ * for particles in the config.yaml file (see \ref doxypage_input_conf_output),
+ * a so-called \c particle_lists.oscar file is produced when executing SMASH. It
+ * allows for a certain degree of flexibility, see \ref
+ * input_output_content_specific_ "Content-specific output options" for further
+ * details. \n
  * **Unless IC output is enabled, the Particle output always provides the
  * current particle list at a specific time.** See \ref
  * doxypage_output_initial_conditions for details about the particles IC output.
@@ -437,8 +437,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *     factor)
  * \li \key proc_id_origin: ID of the process of the particle's last interaction
  * \li \key proc_type_origin: Type of the last process the particle has
- *     undergone. The possible process types are listed in \subpage
- *     doxypage_output_oscar_particles_process_types.
+ *     undergone. The possible process types are listed in
+ *     \subpage doxypage_output_oscar_particles_process_types.
  * \li \key t_last_coll: time of the particle's last interaction (except wall
  *     crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle (0 in case the
@@ -493,14 +493,14 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \n
  * \page doxypage_output_oscar_collisions
  * The OSCAR particles format follows the general block structure of the OSCAR
- * format: \ref doxypage_output_oscar_general. We distinguish between two versions -
- * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
- * https://karman.physics.purdue.edu/OSCAR and
+ * format: \ref doxypage_output_oscar_general. We distinguish between two
+ * versions, OSCAR2013 and OSCAR1999. Information about OSCAR standard can be
+ * found at https://karman.physics.purdue.edu/OSCAR and
  * http://phy.duke.edu/~jeb65/oscar2013. \n
  * Enabling the OSCAR output for collisions in the config.yaml file
- * (see \ref doxypage_input_conf_output), a so-called \c full_event_history.oscar
- * file is produced when executing SMASH. It allows for a certain degree of
- * flexibility, see \ref input_output_content_specific_
+ * (see \ref doxypage_input_conf_output), a so-called \c
+ * full_event_history.oscar file is produced when executing SMASH. It allows for
+ * a certain degree of flexibility, see \ref input_output_content_specific_
  * "Content-specific output options" for further details. \n
  * **Collision output always gives
  * a list of collisions/decays/box wall crossings plus optionally

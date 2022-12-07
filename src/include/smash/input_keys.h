@@ -240,14 +240,14 @@ class Key {
  * inserted into the copied file. The used particles and decay modes are
  * appended there as well. For this purpose, a `particles` and a `decaymodes`
  * key are used and their values are a one-line version of the corresponding
- * files (see \ref doxypage_input_particles and \ref doxypage_input_decaymodes for
- * information about them). To manually input the values of these keys is not an
- * intended use case and you are discouraged from doing so. On the other hand,
- * you could use the %YAML file copied by SMASH to the output directory for
- * reproducibility purposes. In this case, since particles and decay modes are
- * included in the configuration file, using a particles and/or a decay modes
- * file as well should be avoided, otherwise the configuration content will be
- * ignored.
+ * files (see \ref doxypage_input_particles and \ref doxypage_input_decaymodes
+ * for information about them). To manually input the values of these keys is
+ * not an intended use case and you are discouraged from doing so. On the other
+ * hand, you could use the %YAML file copied by SMASH to the output directory
+ * for reproducibility purposes. In this case, since particles and decay modes
+ * are included in the configuration file, using a particles and/or a decay
+ * modes file as well should be avoided, otherwise the configuration content
+ * will be ignored.
  *
  * \par The available keys are documented on the following pages:
  * \li \subpage doxypage_input_conf_general
@@ -564,7 +564,8 @@ class Key {
  * set of particles. This modus uses all functionality from the `List` modus
  * itself. The only difference is that one has to specify the length of the box.
  * Apart from that, the usage should be equivalent to \ref
- * doxypage_input_conf_modi_list "the \c List modus". Refer to it for more details.
+ * doxypage_input_conf_modi_list "the \c List modus". Refer to it for more
+ * details.
  *
  * ### Configuration example
  * \verbatim
@@ -650,9 +651,9 @@ class Key {
      Coulomb:
          R_Cut: 5.0
  \endverbatim
- * Note that the Coulomb potential requires a <tt>\ref doxypage_input_conf_lattice
- * "Lattice"</tt> while for the other potentials it can be used as an
- * optimisation.
+ * Note that the Coulomb potential requires a <tt>\ref
+ * doxypage_input_conf_lattice "Lattice"</tt> while for the other potentials it
+ * can be used as an optimisation.
  *
  * ### Configuring VDF Potentials
  *
@@ -4328,10 +4329,10 @@ struct InputKeys {
    * If set to `true`, only participants are included in the computation of the
    * energy momentum tensor and of the Eckart currents. In this context, a
    * hadron is considered as a participant if it had at least one collision.
-   * When using \ref doxypage_input_conf_potentials "Potentials" this option must be
-   * either left unset or set to `false`. The reason behing this limitation is
-   * that in this case hadrons can influence the evolution of the system even
-   * without collisions.
+   * When using \ref doxypage_input_conf_potentials "Potentials" this option
+   * must be either left unset or set to `false`. The reason behing this
+   * limitation is that in this case hadrons can influence the evolution of the
+   * system even without collisions.
    */
   /**
    * \see_key{key_output_thermo_only_part_}
