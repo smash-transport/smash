@@ -24,11 +24,11 @@
 namespace smash {
 
 /*!\Userguide
- * \page doxypage_thermodyn_lattice_output_
+ * \page doxypage_output_thermodyn_lattice
  *
  * The thermodynamics lattice output prints "smeared" thermodynamic quantities
  *  evaluated at the nodes of a Lattice, defined as defined in
- * \ref doxypage_input_lattice_.
+ * \ref doxypage_input_conf_lattice.
  *
  * The calculated quantities can include: the Eckart density, the
  * energy-momentum tensor in the lab and/or Landau frame, the Landau
@@ -69,7 +69,7 @@ namespace smash {
  * - version of the output (ASCII: fixed 2 digits float, Binary: double)
  * - thermodynamic quantity (ASCII: string, Binary: int)
  * - nx, ny, nz:  cells of the lattice along x, y, z, respectively
- *   (set in: Lattice->Cell_Number, see \ref doxypage_input_lattice_) (3 ints)
+ *   (set in: Lattice->Cell_Number, see \ref doxypage_input_conf_lattice) (3 ints)
  * - x0, y0, z0: coordinates of the origin of the lattice
  *   (set in Lattice->Origin)
  *   (ASCII: 3 fixed 6 digits precision floats, Binary: 3 doubles)

@@ -18,7 +18,7 @@ namespace smash {
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 /*!\Userguide
- * \page doxypage_IC_output_user_guide_
+ * \page doxypage_output_initial_conditions
  * The ASCII initial conditions output (SMASH_IC.dat) contains a list of
  * particles on a hypersurface of constant proper time. This output is formatted
  * such that it is directly compatible with the

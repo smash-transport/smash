@@ -39,7 +39,7 @@ struct ExperimentParameters;
  * configuration.
  *
  * The following configuration options are understood: \ref
- * doxypage_input_modi_collider_
+ * doxypage_input_conf_modi_collider
  */
 class ColliderModus : public ModusDefault {
  public:

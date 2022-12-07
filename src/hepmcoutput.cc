@@ -19,7 +19,7 @@
 namespace smash {
 // clang-format off
 /*!\Userguide
- * \page doxypage_output_hepmc_
+ * \page doxypage_output_hepmc
  *
  * SMASH HepMC output is an implementation of the HepMC3 Event Record Library.
  * The aim is to provide a format compatible with other frameworks like Rivet
@@ -31,7 +31,7 @@ namespace smash {
  * - _HepMC_treeroot_ ROOT Tree binary format, readable by ROOT
  *
  * You can find a snippet of the configuration for this output in \ref
- * doxypage_configuring_output_.
+ * doxypage_output_conf_examples.
  *
  * Producing HepMC output in asciiv3 format requires HepMC3 to be installed.
  * Download the tarball from http://hepmc.web.cern.ch/hepmc/
@@ -54,7 +54,7 @@ namespace smash {
  * ouput into Rivet, you need to disable the check for the beam particle
  * energies with the \key --ignore-beams option. When using the Rivet output
  * this check is disabled by default.
- * - The HepMC output is best suited to \ref doxypage_input_modi_collider_ modus, where
+ * - The HepMC output is best suited to \ref doxypage_input_conf_modi_collider modus, where
  *   the two ion "particles" are constructed and included as the initial incoming
  *   particles in the particle list, as well.
  * - In other SMASH modi (box, sphere, list, etc.) only the inital
@@ -71,7 +71,7 @@ namespace smash {
  * However, in SMASH it is possible to filter the amount of information
  * available in the output, depending on whether the HepMC_asciiv3 or
  * HepMC_treeroot output options are specified under \key Particles or
- * \key Collisions (see  \ref doxypage_configuring_output_ for a clarifying example).
+ * \key Collisions (see  \ref doxypage_output_conf_examples for a clarifying example).
  * - \key Particles: the output only provides a particle
  *   list of the final state. In HepMC only one central vertex is created.
  *   All initial state particles are incoming particles and all final state

@@ -218,14 +218,14 @@ class Key {
  * There are three input files used by SMASH:
  *
  * - `config.yaml` for configuring the simulation. This file is required. See
- *   \subpage doxypage_inputconfig.
+ *   \subpage doxypage_input_configuration.
  * - `particles.txt` for defining the particles used by SMASH. This file is
- *   optional. See \subpage doxypage_inputparticles.
+ *   optional. See \subpage doxypage_input_particles.
  * - `decaymodes.txt` for defining the decays (and corresponding resonance
  *   formations) possible in SMASH. This file is
- *   optional. See \subpage doxypage_inputdecaymodes.
+ *   optional. See \subpage doxypage_input_decaymodes.
  *
- * \page doxypage_inputconfig
+ * \page doxypage_input_configuration
  *
  * SMASH is configured via an input file in %YAML format. Typically you will
  * start from the supplied `config.yaml` file and modify it according to your
@@ -240,7 +240,7 @@ class Key {
  * inserted into the copied file. The used particles and decay modes are
  * appended there as well. For this purpose, a `particles` and a `decaymodes`
  * key are used and their values are a one-line version of the corresponding
- * files (see \ref doxypage_inputparticles and \ref doxypage_inputdecaymodes for
+ * files (see \ref doxypage_input_particles and \ref doxypage_input_decaymodes for
  * information about them). To manually input the values of these keys is not an
  * intended use case and you are discouraged from doing so. On the other hand,
  * you could use the %YAML file copied by SMASH to the output directory for
@@ -250,15 +250,15 @@ class Key {
  * ignored.
  *
  * \par The available keys are documented on the following pages:
- * \li \subpage doxypage_input_general_
- * \li \subpage doxypage_input_logging_
- * \li \subpage doxypage_input_version_
- * \li \subpage doxypage_input_collision_term_
- * \li \subpage doxypage_input_modi_
- * \li \subpage doxypage_input_output_
- * \li \subpage doxypage_input_lattice_
- * \li \subpage doxypage_input_potentials_
- * \li \subpage doxypage_input_forced_thermalization_
+ * \li \subpage doxypage_input_conf_general
+ * \li \subpage doxypage_input_conf_logging
+ * \li \subpage doxypage_input_conf_version
+ * \li \subpage doxypage_input_conf_collision_term
+ * \li \subpage doxypage_input_conf_modi
+ * \li \subpage doxypage_input_conf_output
+ * \li \subpage doxypage_input_conf_lattice
+ * \li \subpage doxypage_input_conf_potentials
+ * \li \subpage doxypage_input_conf_forced_therm
  *
  * \par Information on formatting of the input file
  *
@@ -291,14 +291,14 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_configuration_keys
+ * \page doxypage_input_short_ref
  *
  * This is a look-up reference of input keys. Refer to each corresponding page
  * for a detailed description of each key.
  */
 
 /*!\Userguide
- * \page doxypage_input_general_
+ * \page doxypage_input_conf_general
  *
  * This section in the `config.yaml` file contains all general/global
  * configuration options to SMASH. Before describing all possible keys in
@@ -330,7 +330,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_minimum_nonempty_ensembles_
+ * \page doxypage_input_conf_general_mne
  *
  * Instead of defining the number of events it is possible to define a minimum
  * number of ensembles in which an interaction took place. Using this option
@@ -346,7 +346,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_logging_
+ * \page doxypage_input_conf_logging
  *
  * The `Logging` section in the input file controls the logging levels for
  * different areas of the code, each of which can have a different verbosity
@@ -376,11 +376,11 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_version_
+ * \page doxypage_input_conf_version
  */
 
 /*!\Userguide
- * \page doxypage_input_collision_term_
+ * \page doxypage_input_conf_collision_term
  *
  * The `Collision_Term` section in the input file can be used to configure SMASH
  * interactions. Before describing each possible key in detail, it is useful to
@@ -430,14 +430,14 @@ class Key {
  * <hr>
  * In this page many generic keys are described. For information about further
  * tuning possibilities, see the following pages:
- * - \subpage doxypage_input_collision_term_pauliblocker_
- * - \subpage doxypage_input_collision_term_string_parameters_
- * - \subpage doxypage_input_collision_term_dileptons_
- * - \subpage doxypage_input_collision_term_photons_
+ * - \subpage doxypage_input_conf_ct_pauliblocker
+ * - \subpage doxypage_input_conf_ct_string_parameters
+ * - \subpage doxypage_input_conf_ct_dileptons
+ * - \subpage doxypage_input_conf_ct_photons
  */
 
 /*!\Userguide
- * \page doxypage_input_collision_term_pauliblocker_
+ * \page doxypage_input_conf_ct_pauliblocker
  *
  * Pauli blocking can be activated and customized using the `Pauli_Blocking`
  * section within `Collision_Term`. For example:
@@ -451,14 +451,14 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_collision_term_string_parameters_
+ * \page doxypage_input_conf_ct_string_parameters
  *
  * Within `Collision_Term` section, the `String_Parameters` section can be used
  * to modify a series of parameters which affect the string fragmentation.
  */
 
 /*!\Userguide
- * \page doxypage_input_collision_term_dileptons_
+ * \page doxypage_input_conf_ct_dileptons
  *
  * Dilepton production can be enabled in the corresponding `Dileptons`
  * section in the `Collision_Term` one of the configuration file.
@@ -466,7 +466,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_collision_term_photons_
+ * \page doxypage_input_conf_ct_photons
  *
  * Photon production can be enabled in the corresponding `Photon` section
  * in the `Collision_Term` one of the configuration file.
@@ -474,34 +474,34 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_
+ * \page doxypage_input_conf_modi
  *
  * The `Modi` section is the place where the specified <tt>\ref key_gen_modus_
  * "Modus"</tt> shall be configured. For each possibility refer to the
  * corresponding documentation page:
- * - \subpage doxypage_input_modi_collider_
- * - \subpage doxypage_input_modi_sphere_
- * - \subpage doxypage_input_modi_box_
- * - \subpage doxypage_input_modi_list_
- * - \subpage doxypage_input_modi_listbox_
+ * - \subpage doxypage_input_conf_modi_collider
+ * - \subpage doxypage_input_conf_modi_sphere
+ * - \subpage doxypage_input_conf_modi_box
+ * - \subpage doxypage_input_conf_modi_list
+ * - \subpage doxypage_input_conf_modi_listbox
  *
  * The `Modi` section has to contain a section named after the chosen modus and
  * in it the corresponding customization takes place.
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_collider_
+ * \page doxypage_input_conf_modi_collider
  *
  * The `Collider` modus can be customized using the options here below.
  * To further configure the projectile, target and the impact parameter, see
- * - \subpage doxypage_input_modi_collider_projectile_and_target_ and
- * - \subpage doxypage_input_modi_collider_impact_parameter_.
+ * - \subpage doxypage_input_conf_modi_C_proj_targ and
+ * - \subpage doxypage_input_conf_modi_C_impact_parameter.
  *
  * \attention
  * The incident energy can be specified in different ways and one (and only one)
  * of these must be used. Alternatively, one can specify the individual beam
  * energies or momenta in the `Projectile` and `Target` sections (see \ref
- * doxypage_input_modi_collider_projectile_and_target_ for details). In this
+ * doxypage_input_conf_modi_C_proj_targ for details). In this
  * case, one must give either `E_Tot` or `E_Kin` or `P_Lab` for both
  * `Projectile` and `Target`.
  *
@@ -509,7 +509,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_collider_projectile_and_target_
+ * \page doxypage_input_conf_modi_C_proj_targ
  *
  * Within the `Collider` section, two sections can be used for further
  * customizations:
@@ -523,7 +523,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_collider_impact_parameter_
+ * \page doxypage_input_conf_modi_C_impact_parameter
  *
  * Within the `Collider` section, the `Impact` section can be used to specify
  * information about the impact parameter, defined as the distance \unit{in fm}
@@ -540,15 +540,15 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_sphere_
+ * \page doxypage_input_conf_modi_sphere
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_box_
+ * \page doxypage_input_conf_modi_box
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_list_
+ * \page doxypage_input_conf_modi_list
  * The `List` modus provides a modus for hydro afterburner calculations. It
  * takes files with a list of particles in \ref oscar2013_format
  * "Oscar 2013 format" as an input. These particles are treated as a starting
@@ -558,13 +558,13 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_listbox_
+ * \page doxypage_input_conf_modi_listbox
  *
  * The `ListBox` modus provides the possibility to initialize a box with a given
  * set of particles. This modus uses all functionality from the `List` modus
  * itself. The only difference is that one has to specify the length of the box.
  * Apart from that, the usage should be equivalent to \ref
- * doxypage_input_modi_list_ "the \c List modus". Refer to it for more details.
+ * doxypage_input_conf_modi_list "the \c List modus". Refer to it for more details.
  *
  * ### Configuration example
  * \verbatim
@@ -579,7 +579,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_output_
+ * \page doxypage_input_conf_output
  *
  * To produce a certain output content it is necessary to explicitly configure
  * it in the `Output` section of the configuration file. This means, that the
@@ -589,7 +589,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_lattice_
+ * \page doxypage_input_conf_lattice
  *
  * It is possible to configure a lattice for the 3D space, which can be useful
  * to speed up the computation of the potentials. Note though, that this goes in
@@ -598,11 +598,11 @@ class Key {
  * values are interpolated.
  *
  * The configuration of a lattice is usually not necessary, it is however
- * required if the \ref doxypage_output_vtk_lattice_ "Thermodynamic VTK Output",
- * the \ref doxypage_thermodyn_lattice_output_ "Thermodynamic Lattice Output" or
+ * required if the \ref doxypage_output_vtk_lattice "Thermodynamic VTK Output",
+ * the \ref doxypage_output_thermodyn_lattice "Thermodynamic Lattice Output" or
  * the <tt>\ref key_lattice_pot_affect_threshold_
  * "Potentials_Affect_Thresholds"</tt> option is enabled. To configure the
- * thermodynamic output, use \ref doxypage_input_output_ "the \c Output
+ * thermodynamic output, use \ref doxypage_input_conf_output "the \c Output
  * section".
  *
  * To enable a lattice it is necessary to add a `Lattice` section with the
@@ -611,7 +611,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_potentials_
+ * \page doxypage_input_conf_potentials
  *
  * SMASH simulation supports two sets of nuclear potentials:
  * -# Skyrme with (optional) Symmetry potentials;
@@ -628,10 +628,10 @@ class Key {
  * VDF potential) to include effects due to isospin. The Skyrme and Symmetry
  * potentials are semi-relativistic, while the VDF potential is fully
  * relativistic.
- * - \subpage doxypage_input_potentials_skyrme_
- * - \subpage doxypage_input_potentials_symmetry_
- * - \subpage doxypage_input_potentials_VDF_
- * - \subpage doxypage_input_potentials_coulomb_
+ * - \subpage doxypage_input_conf_pot_skyrme_
+ * - \subpage doxypage_input_conf_pot_symmetry
+ * - \subpage doxypage_input_conf_pot_VDF
+ * - \subpage doxypage_input_conf_pot_coulomb
  *
  * ### Configuring potentials
  *
@@ -650,7 +650,7 @@ class Key {
      Coulomb:
          R_Cut: 5.0
  \endverbatim
- * Note that the Coulomb potential requires a <tt>\ref doxypage_input_lattice_
+ * Note that the Coulomb potential requires a <tt>\ref doxypage_input_conf_lattice
  * "Lattice"</tt> while for the other potentials it can be used as an
  * optimisation.
  *
@@ -689,7 +689,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_potentials_skyrme_
+ * \page doxypage_input_conf_pot_skyrme_
  *
  * The Skyrme potential has the form
  * \f[ U_{Sk} = A(\rho/\rho_0) + B (\rho/\rho_0)^{\tau} \,, \f]
@@ -699,7 +699,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_potentials_symmetry_
+ * \page doxypage_input_conf_pot_symmetry
  *
  * The symmetry potential has the form
  * \f[ U_{Sym} = \pm 2 S_{pot} \frac{I_3}{I} \frac{\rho_{I_3}}{\rho_0}
@@ -714,7 +714,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_potentials_VDF_
+ * \page doxypage_input_conf_pot_VDF
  *
  * The VDF potential is a four-vector of the form
  * \f[
@@ -741,7 +741,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_potentials_coulomb_
+ * \page doxypage_input_conf_pot_coulomb
  *
  * The Coulomb potential in SMASH includes the electric and magnetic field.
  * For simplicity we assume magnetostatics such that the fields can be
@@ -785,7 +785,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_forced_thermalization_
+ * \page doxypage_input_conf_forced_therm
  *
  * Forced thermalization for certain regions is applied if the corresponding
  * `Forced_Thermalization` section is present in the configuration file.
@@ -857,13 +857,13 @@ struct InputKeys {
   inline static const Key<std::string> decaymodes{{"decaymodes"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * <hr>
    * ### Mandatory keys
    */
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \required_key_no_line{key_gen_end_time_,End_Time,double}
    *
    * The time \unit{in fm} after which the evolution is stopped. Note
@@ -875,12 +875,12 @@ struct InputKeys {
   inline static const Key<double> gen_endTime{{"General", "End_Time"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \required_key{key_gen_modus_,Modus,string}
    *
    * Selects a modus for the calculation, e.g.\ infinite matter
    * calculation, collision of two particles or collision of nuclei. The modus
-   * will be configured in the <tt>\ref doxypage_input_modi_ "Modi"</tt>
+   * will be configured in the <tt>\ref doxypage_input_conf_modi "Modi"</tt>
    * section. Recognized values are:
    * - `"Collider"` &rarr; For collisions of nuclei or compound objects. See
    *   \ref \ColliderModus
@@ -897,14 +897,14 @@ struct InputKeys {
   inline static const Key<std::string> gen_modus{{"General", "Modus"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \required_key{key_gen_nevents_,Nevents,int}
    *
    * Number of events to calculate.
    *
    * This key may be omitted on constraint that a minimum number
    * of ensembles containing interactions is requested, see
-   * \subpage doxypage_minimum_nonempty_ensembles_.
+   * \subpage doxypage_input_conf_general_mne.
    */
   /**
    * \see_key{key_gen_nevents_}
@@ -912,7 +912,7 @@ struct InputKeys {
   inline static const Key<int> gen_nevents{{"General", "Nevents"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_minimum_nonempty_ensembles_
+   * \page doxypage_input_conf_general_mne
    * \required_key{key_gen_mnee_number_,Number,int}
    *
    * The number of desired non-empty ensembles.\n
@@ -924,7 +924,7 @@ struct InputKeys {
       {"General", "Minimum_Nonempty_Ensembles", "Number"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_minimum_nonempty_ensembles_
+   * \page doxypage_input_conf_general_mne
    * \required_key{key_gen_mnee_maximum_ensembles_,Maximum_Ensembles_Run,int}
    *
    * Maximum number of ensembles run. This number serves as a safeguard
@@ -938,7 +938,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \required_key{key_gen_randomseed_,Randomseed,int}
    *
    * Initial seed for the random number generator. If this is negative, the
@@ -951,13 +951,13 @@ struct InputKeys {
                                               {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * <hr>
    * ### Optional keys
    */
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key_no_line{key_gen_delta_time_,Delta_Time,double,1.0}
    *
    * Fixed time step \unit{in fm} at which the collision-finding grid is
@@ -982,7 +982,7 @@ struct InputKeys {
       {"General", "Delta_Time"}, 1.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key{key_gen_derivatives_mode_,Derivatives_Mode,string,"Covariant
    * Gaussian"}
    *
@@ -1007,7 +1007,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key{key_gen_field_derivatives_mode_,Field_Derivatives_Mode,string,
    * "Chain Rule"}
    *
@@ -1038,7 +1038,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key{key_gen_ensembles_,Ensembles,int,1}
    *
    * Number of parallel ensembles in the simulation.
@@ -1068,7 +1068,7 @@ struct InputKeys {
       {"General", "Ensembles"}, 1, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key{key_gen_expansion_rate_,Expansion_Rate,double,0.1}
    *
    * Corresponds to the speed of expansion of the universe in non-Minkowski
@@ -1086,7 +1086,7 @@ struct InputKeys {
       {"General", "Expansion_Rate"}, 0.1, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key{key_gen_metric_type_,Metric_Type,string,"NoExpansion"}
    *
    * Select which kind of expansion the metric should have. This needs only be
@@ -1103,7 +1103,7 @@ struct InputKeys {
       {"General", "Metric_Type"}, ExpansionMode::NoExpansion, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key{key_gen_rfdd_mode_,Rest_Frame_Density_Derivatives_Mode,string,"Off"}
    *
    * The mode of calculating the gradients of currents, decides whether the rest
@@ -1120,7 +1120,7 @@ struct InputKeys {
           {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key{key_gen_smearing_mode_,Smearing_Mode,string,"Covariant
    * Gaussian"}
    *
@@ -1177,7 +1177,7 @@ struct InputKeys {
       {"General", "Smearing_Mode"}, SmearingMode::CovariantGaussian, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key_no_line{key_gen_gaussian_sigma_,Gaussian_Sigma,double,1.0}
    *
    * Parameter for Covariant Gaussian smearing: Width \unit{in fm} of Gaussian
@@ -1190,7 +1190,7 @@ struct InputKeys {
       {"General", "Gaussian_Sigma"}, 1.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key_no_line{key_gen_gauss_cutoff_in_sigma_,Gauss_Cutoff_In_Sigma,double,4.0}
    *
    * Parameter for Covariant Gaussian smearing: Distance in sigma at which
@@ -1203,7 +1203,7 @@ struct InputKeys {
       {"General", "Gauss_Cutoff_In_Sigma"}, 4.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key_no_line{key_gen_triangular_range_,Triangular_Range,double,2.0}
    *
    * Parameter for Triangular smearing: Half of the base of a symmetric triangle
@@ -1216,7 +1216,7 @@ struct InputKeys {
       {"General", "Triangular_Range"}, 2.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key_no_line{key_gen_discrete_weight_,Discrete_Weight,double,1./3}
    *
    * Parameter for Discrete smearing: Weight given to particle density at the
@@ -1231,7 +1231,7 @@ struct InputKeys {
       {"General", "Discrete_Weight"}, 1. / 3, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key{key_gen_testparticles_,Testparticles,int,1}
    *
    * Number of test-particles per real particle in the simulation.
@@ -1261,7 +1261,7 @@ struct InputKeys {
       {"General", "Testparticles"}, 1, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key{key_gen_time_step_mode_,Time_Step_Mode,string,"Fixed"}
    *
    * The mode of time stepping. Possible values:
@@ -1280,7 +1280,7 @@ struct InputKeys {
       {"General", "Time_Step_Mode"}, TimeStepMode::Fixed, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_general_
+   * \page doxypage_input_conf_general
    * \optional_key{key_gen_use_grid_,Use_Grid,bool,true}
    *
    * - `true` &rarr; A grid is used to reduce the combinatorics of interaction
@@ -1294,7 +1294,7 @@ struct InputKeys {
       {"General", "Use_Grid"}, true, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * <hr>
    * ### Setting the default for all logging areas
    *
@@ -1309,7 +1309,7 @@ struct InputKeys {
       {"Logging", "default"}, einhard::ALL, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * <hr>
    * ### Most user-relevant logging areas
    *
@@ -1324,7 +1324,7 @@ struct InputKeys {
                                                       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_experiment_,%Experiment,string,$\{default\}}
    *
    * Messages mostly coming from the `Experiment` class belong to this area.
@@ -1336,7 +1336,7 @@ struct InputKeys {
       {"Logging", "Experiment"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_box_,Box,string,$\{default\}}
    *
    * Messages specific to the box modus implementation belong to this area.
@@ -1348,7 +1348,7 @@ struct InputKeys {
                                                      {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_collider_,Collider,string,$\{default\}}
    *
    * Messages specific to the collider modus implementation belong to this area.
@@ -1360,7 +1360,7 @@ struct InputKeys {
       {"Logging", "Collider"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_list_,List,string,$\{default\}}
    *
    * Messages specific to the list modus implementation belong to this area.
@@ -1372,7 +1372,7 @@ struct InputKeys {
                                                       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_sphere_,Sphere,string,$\{default\}}
    *
    * Messages specific to the sphere modus implementation belong to this area.
@@ -1384,7 +1384,7 @@ struct InputKeys {
                                                         {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_configuration_,%Configuration,string,$\{default\}}
    *
    * Messages about the input configuration file belong to this area.
@@ -1396,7 +1396,7 @@ struct InputKeys {
       {"Logging", "Configuration"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_output_,Output,string,$\{default\}}
    *
    * Messages output functionality belong to this area.
@@ -1408,7 +1408,7 @@ struct InputKeys {
                                                         {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_initial_conditions_,InitialConditions,string,$\{default\}}
    *
    * Messages about initial conditions belong to this area.
@@ -1420,7 +1420,7 @@ struct InputKeys {
       {"Logging", "InitialConditions"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{default\}}
    *
    * Messages about the gran-canonical thermalization belong to this area.
@@ -1432,7 +1432,7 @@ struct InputKeys {
       {"Logging", "GrandcanThermalizer"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * <hr>
    * ### Most technical logging areas (in alphabetical order)
    *
@@ -1447,7 +1447,7 @@ struct InputKeys {
                                                         {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_clock_,%Clock,string,$\{default\}}
    *
    * Messages coming from clock implementation belong to this area.
@@ -1459,7 +1459,7 @@ struct InputKeys {
                                                        {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_cross_sections_,%CrossSections,string,$\{default\}}
    *
    * Messages about cross sections belong to this area.
@@ -1471,7 +1471,7 @@ struct InputKeys {
       {"Logging", "CrossSections"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_decay_modes_,%DecayModes,string,$\{default\}}
    *
    * Messages coming from decay tools belong to this area.
@@ -1483,7 +1483,7 @@ struct InputKeys {
       {"Logging", "DecayModes"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_density_,Density,string,$\{default\}}
    *
    * Messages coming from density calculations belong to this area.
@@ -1495,7 +1495,7 @@ struct InputKeys {
                                                          {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_distributions_,Distributions,string,$\{default\}}
    *
    * Messages about quantity distributions belong to this area.
@@ -1507,7 +1507,7 @@ struct InputKeys {
       {"Logging", "Distributions"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_find_scatter_,FindScatter,string,$\{default\}}
    *
    * Messages coming from search tools for scattering belong to this area.
@@ -1519,7 +1519,7 @@ struct InputKeys {
       {"Logging", "FindScatter"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_fpe_,Fpe,string,$\{default\}}
    *
    * Messages about floating point exceptions belong to this area.
@@ -1531,7 +1531,7 @@ struct InputKeys {
                                                      {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_grid_,%Grid,string,$\{default\}}
    *
    * Messages coming from the grid implementation belong to this area.
@@ -1543,7 +1543,7 @@ struct InputKeys {
                                                       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_hyper_surface_crossing_,HyperSurfaceCrossing,string,$\{default\}}
    *
    * Messages about hypersurface crossing belong to this area.
@@ -1555,7 +1555,7 @@ struct InputKeys {
       {"Logging", "HyperSurfaceCrossing"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_input_parser_,InputParser,string,$\{default\}}
    *
    * Messages coming from input parsing tools belong to this area.
@@ -1567,7 +1567,7 @@ struct InputKeys {
       {"Logging", "InputParser"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_lattice_,Lattice,string,$\{default\}}
    *
    * Messages coming from the lattice implementation belong to this area.
@@ -1579,7 +1579,7 @@ struct InputKeys {
                                                          {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_nucleus_,%Nucleus,string,$\{default\}}
    *
    * Messages coming from the nucleus implementation belong to this area.
@@ -1591,7 +1591,7 @@ struct InputKeys {
                                                          {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_particle_type_,%ParticleType,string,$\{default\}}
    *
    * Messages coming from particle types implementation belong to this area.
@@ -1603,7 +1603,7 @@ struct InputKeys {
       {"Logging", "ParticleType"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_pauli_blocking_,PauliBlocking,string,$\{default\}}
    *
    * Messages about Pauli blocking belong to this area.
@@ -1615,7 +1615,7 @@ struct InputKeys {
       {"Logging", "PauliBlocking"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_propagation_,Propagation,string,$\{default\}}
    *
    * Messages about particles propagation belong to this area.
@@ -1627,7 +1627,7 @@ struct InputKeys {
       {"Logging", "Propagation"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_pythia_,Pythia,string,$\{default\}}
    *
    * Messages coming from Pythia usage in SMASH belong to this area.
@@ -1639,7 +1639,7 @@ struct InputKeys {
                                                         {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_resonances_,Resonances,string,$\{default\}}
    *
    ** Messages coming from resonances aspects belong to this area.
@@ -1651,7 +1651,7 @@ struct InputKeys {
       {"Logging", "Resonances"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_scatter_action_,%ScatterAction,string,$\{default\}}
    *
    * Messages about scattering events belong to this area.
@@ -1663,7 +1663,7 @@ struct InputKeys {
       {"Logging", "ScatterAction"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_scatter_action_multi_,%ScatterActionMulti,string,$\{default\}}
    *
    * Messages about scattering events with multiple particles belong to this
@@ -1676,7 +1676,7 @@ struct InputKeys {
       {"Logging", "ScatterActionMulti"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_logging_
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_tmn_,Tmn,string,$\{default\}}
    *
    * Messages about the energy momentum tensor belong to this area.
@@ -1688,7 +1688,7 @@ struct InputKeys {
                                                      {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_version_
+   * \page doxypage_input_conf_version
    * \anchor key_version_
    * \warning The `Version` key is now deprecated and specifying it has no
    * effect, because it is completely ignored.
@@ -1706,7 +1706,7 @@ struct InputKeys {
   inline static const Key<std::string> version{{"Version"}, {"1.0", "3.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_two_to_one_,Two_to_One,bool,true}
    *
    * Enable 2 &harr; 1 processes (resonance formation and decays).
@@ -1718,7 +1718,7 @@ struct InputKeys {
       {"Collision_Term", "Two_to_One"}, true, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_included_2to2_,Included_2to2,list of strings,["All"]}
    *
    * List that contains all possible 2 &harr; 2 process categories. Each process
@@ -1752,7 +1752,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_mp_reactions_,Multi_Particle_Reactions,list of
    * strings,[]}
    *
@@ -1800,7 +1800,7 @@ struct InputKeys {
           {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_force_decays_at_end_,Force_Decays_At_End,bool,true}
    *
    * - `true` &rarr; Force all resonances to decay after last timestep.
@@ -1813,7 +1813,7 @@ struct InputKeys {
       {"Collision_Term", "Force_Decays_At_End"}, true, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_no_collisions_,No_Collisions,bool,false}
    *
    * Disable all possible collisions, only allow decays to occur if not
@@ -1828,7 +1828,7 @@ struct InputKeys {
       {"Collision_Term", "No_Collisions"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_nnbar_treatment_,NNbar_Treatment,string,"strings"}
    *
    * - `"no annihilation"` &rarr; No annihilation of NNbar is performed.
@@ -1851,7 +1851,7 @@ struct InputKeys {
       {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::Strings, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_use_aqm_,Use_AQM,bool,true}
    *
    * Turn on AQM cross-sections for exotic combination of particles
@@ -1881,7 +1881,7 @@ struct InputKeys {
       {"Collision_Term", "Use_AQM"}, true, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_res_lifetime_mod_,Resonance_Lifetime_Modifier,double,1.0}
    *
    * Multiplicative factor by which to scale the resonance lifetimes up or down.
@@ -1905,7 +1905,7 @@ struct InputKeys {
       {"Collision_Term", "Resonance_Lifetime_Modifier"}, 1.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_string_with_prob_,Strings_with_Probability,bool,true}
    *
    * - `true` &rarr;
@@ -1935,7 +1935,7 @@ struct InputKeys {
       {"Collision_Term", "Strings_with_Probability"}, true, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_elastic_cross_section_,Elastic_Cross_Section,double,-1.0}
    *
    * If a non-negative value is given, it will override the parametrized
@@ -1950,7 +1950,7 @@ struct InputKeys {
       {"Collision_Term", "Elastic_Cross_Section"}, -1.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_isotropic_,Isotropic,bool,false}
    *
    * Do all collisions isotropically.
@@ -1962,7 +1962,7 @@ struct InputKeys {
       {"Collision_Term", "Isotropic"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_max_cs_,Maximum_Cross_Section,double,
    * 200</tt> or <tt>2000}
    *
@@ -1984,7 +1984,7 @@ struct InputKeys {
       {"Collision_Term", "Maximum_Cross_Section"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,double,2.5}
    *
    * The (minimal) length \unit{in fm} used for the grid cells of the stochastic
@@ -1999,7 +1999,7 @@ struct InputKeys {
       {"Collision_Term", "Fixed_Min_Cell_Length"}, 2.5, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_cs_scaling_,Cross_Section_Scaling,double,1.0}
    *
    * Scale all cross sections by a global factor.
@@ -2014,7 +2014,7 @@ struct InputKeys {
       {"Collision_Term", "Cross_Section_Scaling"}, 1.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_additional_el_cs_,Additional_Elastic_Cross_Section,double,0.0}
    *
    * Add an additional constant contribution \unit{in mb} to the elastic cross
@@ -2030,7 +2030,7 @@ struct InputKeys {
       {"Collision_Term", "Additional_Elastic_Cross_Section"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_include_decays_end_,Include_Weak_And_EM_Decays_At_The_End,bool,false}
    *
    * Enable to also perform weak and electro-magnetic decays at the end of the
@@ -2050,7 +2050,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_elastic_nn_cutoff_sqrts_,Elastic_NN_Cutoff_Sqrts,double,1.98}
    *
    * The elastic collisions between two nucleons with \f$\sqrt{s}\f$ below
@@ -2068,7 +2068,7 @@ struct InputKeys {
       {"Collision_Term", "Elastic_NN_Cutoff_Sqrts"}, 1.98, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_strings_,Strings,bool,
    * (\ref key_gen_modus_ "Modus"!="Box")}
    *
@@ -2082,7 +2082,7 @@ struct InputKeys {
                                                  {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_collision_criterion_,Collision_Criterion,string,"Covariant"}
    *
    * The following collision criterions can be used.
@@ -2130,7 +2130,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_warn_high_prob_,Only_Warn_For_High_Probability,bool,false}
    *
    * Only warn and not error for reaction probabilities higher than 1.
@@ -2146,7 +2146,7 @@ struct InputKeys {
       {"Collision_Term", "Only_Warn_For_High_Probability"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_pauliblocker_
+   * \page doxypage_input_conf_ct_pauliblocker
    * \optional_key{key_CT_PB_spatial_averaging_radius_,Spatial_Averaging_Radius,double,1.86}
    *
    * Radius \unit{in fm} of sphere for averaging in the coordinate space.
@@ -2160,7 +2160,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_pauliblocker_
+   * \page doxypage_input_conf_ct_pauliblocker
    * \optional_key{key_CT_PB_gaussian_cutoff_,Gaussian_Cutoff,double,2.2}
    *
    * Radius \unit{in fm} at which Gaussians used for smoothing are cut.
@@ -2172,7 +2172,7 @@ struct InputKeys {
       {"Collision_Term", "Pauli_Blocking", "Gaussian_Cutoff"}, 2.2, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_pauliblocker_
+   * \page doxypage_input_conf_ct_pauliblocker
    * \optional_key{key_CT_PB_momentum_av_radius_,Momentum_Averaging_Radius,double,0.08}
    *
    * Radius \unit{in GeV} of sphere for averaging in the momentum space.
@@ -2187,7 +2187,7 @@ struct InputKeys {
           {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_string_tension_,String_Tension,double,1.0}
    *
    * String tension \f$\kappa\f$ \unit{in GeV/fm} connecting massless quarks in
@@ -2202,7 +2202,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "String_Tension"}, 1.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_gluon_beta_,Gluon_Beta,double,0.5}
    *
    * Parameter \f$\beta\f$ in parton distribution function for gluons,
@@ -2215,7 +2215,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "Gluon_Beta"}, 0.5, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_gluon_pmin_,Gluon_Pmin,double,0.001}
    *
    * Smallest possible scale for gluon lightcone momentum \unit{in GeV}.
@@ -2229,7 +2229,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "Gluon_Pmin"}, 0.001, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_quark_alpha_,Quark_Alpha,double,2.0}
    *
    * Parameter \f$\alpha\f$ in parton distribution function for quarks,
@@ -2242,7 +2242,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "Quark_Alpha"}, 2.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_quark_beta_,Quark_Beta,double,7.0}
    *
    * Parameter \f$\beta\f$ in PDF for quarks shown in <tt>\ref
@@ -2255,7 +2255,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "Quark_Beta"}, 7.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_strange_supp_,Strange_Supp,double,0.16}
    *
    * Strangeness suppression factor \f$\lambda\f$,
@@ -2273,7 +2273,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "Strange_Supp"}, 0.16, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_diquark_supp_,Diquark_Supp,double,0.036}
    *
    * Diquark suppression factor. Defines the probability to produce a diquark
@@ -2286,7 +2286,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "Diquark_Supp"}, 0.036, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_sigma_perp_,Sigma_Perp,double,0.42}
    *
    * Parameter \f$\sigma_\perp\f$ \unit{in GeV} in the distribution for
@@ -2304,7 +2304,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "Sigma_Perp"}, 0.42, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_stringz_a_,StringZ_A,double,2.0}
    *
    * Parameter \f$a\f$ in Pythia fragmentation function \f$f(z)\f$,
@@ -2317,7 +2317,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "StringZ_A"}, 2.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.55}
    *
    * Parameter \f$b\f$ \unit{in 1/GeV²} in Pythia fragmentation function shown
@@ -2330,7 +2330,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "StringZ_B"}, 0.55, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_separate_fragment_bar_,Separate_Fragment_Baryon,bool,true}
    *
    * Whether to use a separate fragmentation function for leading baryons in
@@ -2345,7 +2345,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.2}
    *
    * Parameter \f$a\f$ in Lund fragmentation function (see <tt>\ref
@@ -2361,7 +2361,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_stringz_b_leading_,StringZ_B_Leading,double,2.0}
    *
    * Parameter \f$b\f$ \unit{in 1/GeV²} in Lund fraghmentation function (see
@@ -2378,7 +2378,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_string_sigma_t_,String_Sigma_T,double,0.5}
    *
    * Standard deviation \unit{in GeV} in Gaussian for transverse momentum
@@ -2391,7 +2391,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "String_Sigma_T"}, 0.5, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_form_time_factor_,Form_Time_Factor,double,1.0}
    *
    * Factor to be multiplied with the formation time of string fragments from
@@ -2406,7 +2406,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_power_part_formation_,Power_Particle_Formation,double,±1}
    *
    * The default value of this parameter is `+1` if
@@ -2423,7 +2423,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_formation_time_,Formation_Time,double,1.0}
    *
    * Parameter for formation time in string fragmentation, \unit{in fm}.
@@ -2435,7 +2435,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_m_dependent_formation_t_,Mass_Dependent_Formation_Times,bool,false}
    *
    * Whether the formation time of string fragments should depend on their mass.
@@ -2451,7 +2451,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_probability_p_to_duu_,Prob_proton_to_d_uu,double,1./3}
    *
    * Probability of splitting an (anti)nucleon into the quark it has only once
@@ -2467,7 +2467,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_string_parameters_
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_popcorn_rate_,Popcorn_Rate,double,0.15}
    *
    * Parameter StringFlav:popcornRate, which determines production rate of
@@ -2482,7 +2482,7 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "Popcorn_Rate"}, 0.15, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_dileptons_
+   * \page doxypage_input_conf_ct_dileptons
    * \optional_key{key_CT_dileptons_decays_,Decays,bool,false}
    *
    * Whether or not to enable dilepton production from hadron decays.
@@ -2497,7 +2497,7 @@ struct InputKeys {
       {"Collision_Term", "Dileptons", "Decays"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_photons_
+   * \page doxypage_input_conf_ct_photons
    * \required_key{key_CT_photons_fractional_photons,Fractional_Photons,int}
    *
    * Number of fractional photons sampled per single perturbatively produced
@@ -2510,7 +2510,7 @@ struct InputKeys {
       {"Collision_Term", "Photons", "Fractional_Photons"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_photons_
+   * \page doxypage_input_conf_ct_photons
    * \optional_key{key_CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false}
    *
    * Whether or not to enable photon production in mesonic scattering processes.
@@ -2522,7 +2522,7 @@ struct InputKeys {
       {"Collision_Term", "Photons", "2to2_Scatterings"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_collision_term_photons_
+   * \page doxypage_input_conf_ct_photons
    * \optional_key{key_CT_photons_bremsstrahlung_,Bremsstrahlung,bool,false}
    *
    * Whether or not to enable photon production in bremsstrahlung processes.
@@ -2534,7 +2534,7 @@ struct InputKeys {
       {"Collision_Term", "Photons", "Bremsstrahlung"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_
+   * \page doxypage_input_conf_modi_collider
    *
    * \par Ways to specify incident energies &rarr; Only one can be given!
    *
@@ -2552,13 +2552,13 @@ struct InputKeys {
       {"Modi", "Collider", "Sqrtsnn"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_
+   * \page doxypage_input_conf_modi_collider
    * \required_key_no_line{key_MC_e_kin_,E_Kin,double}
    *
    * Defines the energy of the collision by the kinetic energy per nucleon of
    * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus is
    * at rest. Note, this can also be given per-beam as described in \ref
-   * doxypage_input_modi_collider_projectile_and_target_. This key can be
+   * doxypage_input_conf_modi_C_proj_targ. This key can be
    * omitted if the incident energy is specified in a different way.
    */
   /**
@@ -2568,13 +2568,13 @@ struct InputKeys {
       {"Modi", "Collider", "E_Kin"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_
+   * \page doxypage_input_conf_modi_collider
    * \required_key_no_line{key_MC_e_tot_,E_Tot,double}
    *
    * Defines the energy of the collision by the total energy per nucleon of
    * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus is
    * at rest. Note, this can also be given per-beam as described in \ref
-   * doxypage_input_modi_collider_projectile_and_target_. This key can be
+   * doxypage_input_conf_modi_C_proj_targ. This key can be
    * omitted if the incident energy is specified in a different way.
    */
   /**
@@ -2584,13 +2584,13 @@ struct InputKeys {
       {"Modi", "Collider", "E_Tot"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_
+   * \page doxypage_input_conf_modi_collider
    * \required_key_no_line{key_MC_p_lab_,P_Lab,double}
    *
    * Defines the energy of the collision by the initial momentum per nucleon
    * of the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus
    * is at rest.  This must be positive.  Note, this can also be given per-beam
-   * as described in \ref doxypage_input_modi_collider_projectile_and_target_.
+   * as described in \ref doxypage_input_conf_modi_C_proj_targ.
    * This key can be omitted if the incident energy is specified in a different
    * way.
    */
@@ -2601,7 +2601,7 @@ struct InputKeys {
       {"Modi", "Collider", "P_Lab"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_
+   * \page doxypage_input_conf_modi_collider
    * \optional_key{key_MC_calc_frame_,Calculation_Frame,string,"center of
    * velocity"}
    *
@@ -2627,7 +2627,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_
+   * \page doxypage_input_conf_modi_collider
    * \optional_key{key_MC_fermi_motion_,Fermi_Motion,string,"off"}
    *
    * - `"on"` &rarr; Switch Fermi motion on, it is recommended to also activate
@@ -2643,7 +2643,7 @@ struct InputKeys {
       {"Modi", "Collider", "Fermi_Motion"}, FermiMotion::Off, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_
+   * \page doxypage_input_conf_modi_collider
    * \optional_key{key_MC_collision_within_nucleus_,Collisions_Within_Nucleus,bool,false}
    *
    * Determine whether to allow the first collisions within the same nucleus.
@@ -2657,7 +2657,7 @@ struct InputKeys {
       {"Modi", "Collider", "Collisions_Within_Nucleus"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_
+   * \page doxypage_input_conf_modi_collider
    * \optional_key{key_MC_initial_distance_,Initial_Distance,double,2.0}
    *
    * The initial distance of the two nuclei \unit{in fm}:
@@ -2673,7 +2673,7 @@ struct InputKeys {
       {"Modi", "Collider", "Initial_Distance"}, 2.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \required_key{key_MC_PT_particles_,%Particles,map<int\,int>}
    *
    * A map in which the keys are PDG codes and the values are number of
@@ -2698,7 +2698,7 @@ struct InputKeys {
           {"Modi", "Collider", "Target", "Particles"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key{key_MC_PT_diffusiveness_,Diffusiveness,double,</tt>\f$d(A)\f$<tt>}
    *
    * Diffusiveness of the Woods-Saxon distribution for the nucleus \unit{in fm}.
@@ -2724,7 +2724,7 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "Diffusiveness"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key{key_MC_PT_radius_,Radius,double,</tt>\f$r(A)\f$<tt>}
    *
    * Radius of nucleus \unit{in fm}. In general, the default value is
@@ -2749,7 +2749,7 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "Radius"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key{key_MC_PT_saturation_density_,Saturation_Density,double,
    * </tt>\f$\int\rho(r)\:\mathrm{d}^3r=N_{nucleons}\f$<tt>}
    *
@@ -2770,7 +2770,7 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "Saturation_Density"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
    * \par Possible incident energies given per beam
    *
@@ -2792,7 +2792,7 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "E_Tot"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \required_key_no_line{key_MC_PT_e_kin_,E_Kin,double}
    *
    * Set the kinetic energy \unit{in GeV} per particle of the beam. This key,
@@ -2811,7 +2811,7 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "E_Kin"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \required_key_no_line{key_MC_PT_p_lab_,P_Lab,double}
    *
    * Set the momentum \unit{in GeV} per particle of the beam. This key,
@@ -2838,7 +2838,7 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "P_Lab"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
    * ### Custom nuclei
    *
@@ -2865,7 +2865,7 @@ struct InputKeys {
           {"Modi", "Collider", "Target", "Custom", "File_Directory"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \required_key_no_line{key_MC_PT_custom_file_name_,File_Name,string}
    *
    * The file name of the external list with the nucleon configurations.
@@ -2882,7 +2882,7 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "Custom", "File_Name"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
    * ### Deformed nuclei
    *
@@ -2923,7 +2923,7 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "Deformed", "Automatic"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_betaII_,Beta_2,double,0.0}
    *
    * The deformation coefficient \f$\beta_2\f$ for the spherical harmonic
@@ -2941,7 +2941,7 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "Deformed", "Beta_2"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_gamma_,Gamma,double,0.0}
    *
    * The parameter describes triaxiality \f$\gamma\f$ of the nucleus in
@@ -2959,7 +2959,7 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "Deformed", "Gamma"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_betaIII_,Beta_3,double,0.0}
    *
    * The deformation coefficient \f$\beta_3\f$ for the spherical harmonic
@@ -2977,7 +2977,7 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "Deformed", "Beta_3"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_betaIV_,Beta_4,double,0.0}
    *
    * The deformation coefficient \f$\beta_4\f$ for the spherical harmonic
@@ -2995,7 +2995,7 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "Deformed", "Beta_4"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \par Defining orientation
    *
    * In the `Orientation` section it is possible to specify the orientation of
@@ -3025,7 +3025,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_orientation_theta_,Theta,double,π/2}
    *
    * The angle by which to rotate the nucleus about the rotated x-axis.
@@ -3049,7 +3049,7 @@ struct InputKeys {
           {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_orientation_psi_,Psi,double,0.0}
    *
    * The angle by which to rotate the nucleus about the rotated y-axis.
@@ -3071,7 +3071,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_projectile_and_target_
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_orientation_random_,Random_Rotation,bool,false}
    *
    * Whether the created nucleus object should be randomly rotated in space.
@@ -3096,7 +3096,7 @@ struct InputKeys {
           {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_impact_parameter_
+   * \page doxypage_input_conf_modi_C_impact_parameter
    * \optional_key{key_MC_impact_rnd_reaction_plane_,Random_Reaction_Plane,bool,false}
    *
    * Rotate the direction of the separation of the two nuclei due to the impact
@@ -3109,7 +3109,7 @@ struct InputKeys {
       {"Modi", "Collider", "Impact", "Random_Reaction_Plane"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_impact_parameter_
+   * \page doxypage_input_conf_modi_C_impact_parameter
    * \optional_key{key_MC_impact_value_,Value,double,0.0}
    *
    * Fixed value for the impact parameter \unit{in fm}.
@@ -3122,7 +3122,7 @@ struct InputKeys {
       {"Modi", "Collider", "Impact", "Value"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_impact_parameter_
+   * \page doxypage_input_conf_modi_C_impact_parameter
    * \optional_key{key_MC_impact_sample_,Sample,string,"quadratic"}
    *
    * - `"uniform"` &rarr; use uniform sampling of the impact parameter
@@ -3141,7 +3141,7 @@ struct InputKeys {
       {"Modi", "Collider", "Impact", "Sample"}, Sampling::Quadratic, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_impact_parameter_
+   * \page doxypage_input_conf_modi_C_impact_parameter
    * <hr>
    * \par Custom sampling
    * \required_key_no_line{key_MC_impact_values_,Values,list of doubles}
@@ -3157,7 +3157,7 @@ struct InputKeys {
       {"Modi", "Collider", "Impact", "Values"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_impact_parameter_
+   * \page doxypage_input_conf_modi_C_impact_parameter
    * \required_key_no_line{key_MC_impact_yields_,Yields,list of doubles}
    *
    * Values of the particle yields, corresponding to `Values`, i.e. the value
@@ -3171,7 +3171,7 @@ struct InputKeys {
       {"Modi", "Collider", "Impact", "Yields"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_impact_parameter_
+   * \page doxypage_input_conf_modi_C_impact_parameter
    * \optional_key{key_MC_impact_range_,Range,list of two doubles,[0.0\,0.0]}
    *
    * A list of minimal and maximal impact parameters \unit{in fm} between which
@@ -3184,7 +3184,7 @@ struct InputKeys {
       {"Modi", "Collider", "Impact", "Range"}, {{0.0, 0.0}}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_collider_impact_parameter_
+   * \page doxypage_input_conf_modi_C_impact_parameter
    * \optional_key{key_MC_impact_max_,Max,double,0.0}
    *
    * Like `Range: [0.0, Max]`. Note that if both `Range` and `Max` are
@@ -3197,7 +3197,7 @@ struct InputKeys {
       {"Modi", "Collider", "Impact", "Max"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * \required_key_no_line{key_MS_radius_,Radius,double}
    *
    * Radius of the sphere \unit{in fm}.
@@ -3209,7 +3209,7 @@ struct InputKeys {
       {"Modi", "Sphere", "Radius"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * \required_key{key_MS_temperature_,Temperature,double}
    *
    * Temperature \unit{in GeV} to sample momenta in the sphere.
@@ -3221,7 +3221,7 @@ struct InputKeys {
       {"Modi", "Sphere", "Temperature"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * \required_key{key_MS_start_time_,Start_Time,double}
    *
    * Starting time of sphere calculation \unit{in fm}.
@@ -3233,7 +3233,7 @@ struct InputKeys {
       {"Modi", "Sphere", "Start_Time"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * \required_key{key_MS_init_mult_,Init_Multiplicities,map<int\,int>}
    *
    * Initial multiplicities per particle species. The value of this key shall be
@@ -3250,7 +3250,7 @@ struct InputKeys {
           {"Modi", "Sphere", "Init_Multiplicities"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
    *
    * If this option is set to `true` then <tt>\ref key_MS_init_mult_
@@ -3270,7 +3270,7 @@ struct InputKeys {
       {"Modi", "Sphere", "Use_Thermal_Multiplicities"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_use_bar_chem_pot_,Baryon_Chemical_Potential,double,0.0}
    *
    * Baryon chemical potential \f$\mu_B\f$ \unit{in GeV}. This key is used to
@@ -3285,7 +3285,7 @@ struct InputKeys {
       {"Modi", "Sphere", "Baryon_Chemical_Potential"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
    *
    * Strangeness chemical potential \f$\mu_S\f$ \unit{in GeV}. This key is used
@@ -3300,7 +3300,7 @@ struct InputKeys {
       {"Modi", "Sphere", "Strange_Chemical_Potential"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_charge_chem_pot_,Charge_Chemical_Potential,double,0.0}
    *
    * Charge chemical potential \f$\mu_Q\f$ \unit{in GeV}. This key is used to
@@ -3315,7 +3315,7 @@ struct InputKeys {
       {"Modi", "Sphere", "Charge_Chemical_Potential"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_account_res_widths_,Account_Resonance_Widths,bool,true}
    *
    * This key is considered only in case of thermal initialization and the
@@ -3331,7 +3331,7 @@ struct InputKeys {
       {"Modi", "Sphere", "Account_Resonance_Widths"}, true, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_initial_cond_,Initial_Condition,string,
    * "thermal momenta"}
    *
@@ -3357,7 +3357,7 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,-1.0}
    *
    * This can be used in order to give each particle in the sphere an additional
@@ -3374,7 +3374,7 @@ struct InputKeys {
       {"Modi", "Sphere", "Add_Radial_Velocity"}, -1.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * <hr>
    * #### Specifying jets
    *
@@ -3394,7 +3394,7 @@ struct InputKeys {
       {"Modi", "Sphere", "Jet", "Jet_PDG"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_sphere_
+   * \page doxypage_input_conf_modi_sphere
    * \optional_key_no_line{key_MS_jet_jet_momentum_,Jet_Momentum,double,20.0}
    *
    * The initial momentum \unit{in GeV} to give to the jet particle.
@@ -3406,7 +3406,7 @@ struct InputKeys {
       {"Modi", "Sphere", "Jet", "Jet_Momentum"}, 20.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * \required_key_no_line{key_MB_initial_condition_,Initial_Condition,string}
    *
    * Controls initial momentum distribution of particles.
@@ -3426,7 +3426,7 @@ struct InputKeys {
       {"Modi", "Box", "Initial_Condition"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * \required_key{key_MB_length_,Length,double}
    *
    * Length of the cube's edge \unit{in fm}.
@@ -3438,7 +3438,7 @@ struct InputKeys {
                                                   {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * \required_key{key_MB_temperature_,Temperature,double}
    *
    * Temperature \unit{in GeV} of the box.
@@ -3450,7 +3450,7 @@ struct InputKeys {
       {"Modi", "Box", "Temperature"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * \required_key{key_MB_start_time_,Start_Time,double}
    *
    * Starting time of the simulation \unit{in fm}. All particles in the box are
@@ -3463,7 +3463,7 @@ struct InputKeys {
       {"Modi", "Box", "Start_Time"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * \optional_key{key_MB_equilibration_time_,Equilibration_Time,double, -1.0}
    *
    * Time \unit{in fm} after which the output of the box is written out. The
@@ -3479,7 +3479,7 @@ struct InputKeys {
       {"Modi", "Box", "Equilibration_Time"}, -1.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * \required_key{key_MB_init_mult_,Init_Multiplicities,map<int\,int>}
    *
    * See &nbsp;
@@ -3493,7 +3493,7 @@ struct InputKeys {
                                      {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * \optional_key{key_MB_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
    *
    * See &nbsp;
@@ -3507,7 +3507,7 @@ struct InputKeys {
       {"Modi", "Box", "Use_Thermal_Multiplicities"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * \optional_key{key_MB_use_bar_chem_pot_,Baryon_Chemical_Potential,double,0.0}
    *
    * See &nbsp;
@@ -3520,7 +3520,7 @@ struct InputKeys {
       {"Modi", "Box", "Baryon_Chemical_Potential"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * \optional_key{key_MB_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
    *
    * See &nbsp;
@@ -3534,7 +3534,7 @@ struct InputKeys {
       {"Modi", "Box", "Strange_Chemical_Potential"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * \optional_key{key_MB_charge_chem_pot_,Charge_Chemical_Potential,bool,false}
    *
    * See &nbsp;
@@ -3547,7 +3547,7 @@ struct InputKeys {
       {"Modi", "Box", "Charge_Chemical_Potential"}, 0.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * \optional_key{key_MB_account_res_widths_,Account_Resonance_Widths,bool,true}
    *
    * See &nbsp;
@@ -3570,7 +3570,7 @@ struct InputKeys {
       {"Modi", "Box", "Account_Resonance_Widths"}, true, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * <hr>
    * #### Specifying jets
    *
@@ -3590,7 +3590,7 @@ struct InputKeys {
       {"Modi", "Box", "Jet", "Jet_PDG"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_box_
+   * \page doxypage_input_conf_modi_box
    * \optional_key_no_line{key_MB_jet_jet_momentum_,Jet_Momentum,double,20.0}
    *
    * See &nbsp;
@@ -3603,7 +3603,7 @@ struct InputKeys {
       {"Modi", "Box", "Jet", "Jet_Momentum"}, 20.0, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_list_
+   * \page doxypage_input_conf_modi_list
    * \required_key{key_ML_file_dir_,File_Directory,string}
    *
    * Directory for the external particle lists. Although relative paths to the
@@ -3617,7 +3617,7 @@ struct InputKeys {
       {"Modi", "List", "File_Directory"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_list_
+   * \page doxypage_input_conf_modi_list
    * \required_key{key_ML_file_prefix_,File_Prefix,string}
    *
    * Prefix for the external particle lists file.
@@ -3629,7 +3629,7 @@ struct InputKeys {
       {"Modi", "List", "File_Prefix"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_list_
+   * \page doxypage_input_conf_modi_list
    * \required_key{key_ML_shift_id_,Shift_Id,int}
    *
    * Starting index for the particle list file(s). To be used to indicate which
@@ -3642,7 +3642,7 @@ struct InputKeys {
                                                  {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_listbox_
+   * \page doxypage_input_conf_modi_listbox
    * \required_key{key_MLB_file_dir_,File_Directory,string}
    *
    * See &nbsp;
@@ -3655,7 +3655,7 @@ struct InputKeys {
       {"Modi", "ListBox", "File_Directory"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_listbox_
+   * \page doxypage_input_conf_modi_listbox
    * \required_key{key_MLB_file_prefix_,File_Prefix,string}
    *
    * See &nbsp;
@@ -3668,7 +3668,7 @@ struct InputKeys {
       {"Modi", "ListBox", "File_Prefix"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_listbox_
+   * \page doxypage_input_conf_modi_listbox
    * \required_key{key_MLB_shift_id_,Shift_Id,int}
    *
    * See &nbsp;
@@ -3681,7 +3681,7 @@ struct InputKeys {
       {"Modi", "ListBox", "Shift_Id"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_modi_listbox_
+   * \page doxypage_input_conf_modi_listbox
    * \required_key{key_MLB_length_,Length,double}
    *
    * See &nbsp;
@@ -3694,7 +3694,7 @@ struct InputKeys {
       {"Modi", "ListBox", "Length"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    *
    * ## General output configuration parameters
    *
@@ -3712,7 +3712,7 @@ struct InputKeys {
       {"Output", "Output_Interval"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key{key_output_out_times_,Output_Times,list of doubles,
    * use \ref key_output_out_interval_ "Output_Interval"}
    *
@@ -3734,7 +3734,7 @@ struct InputKeys {
       {"Output", "Output_Times"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key{key_output_density_type_,Density_Type,string,"none"}
    *
    * Determines which kind of density is printed into the headers of the
@@ -3752,7 +3752,7 @@ struct InputKeys {
       {"Output", "Density_Type"}, "none", {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * <hr>
    * ## Output format independently of the specific output content
    *
@@ -3823,13 +3823,13 @@ struct InputKeys {
           {"Output", "Thermodynamics", "Format"}, {}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * <hr>
    * ## Content-specific output options
    * \anchor input_output_content_specific_
    *
    * Every possible content-specific section is documented in the following.
-   * Refer to \ref doxypage_configuring_output_ "this page" for concrete output
+   * Refer to \ref doxypage_output_conf_examples "this page" for concrete output
    * configuration examples.
    *
    * <hr>
@@ -3849,7 +3849,7 @@ struct InputKeys {
       {"Output", "Particles", "Extended"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_particles_only_final_,Only_Final,string,"Yes"}
    *
    * &rArr; Incompatible with `VTK`, `HepMC_asciiv3` and `HepMC_treeroot`
@@ -3866,7 +3866,7 @@ struct InputKeys {
       {"Output", "Particles", "Only_Final"}, OutputOnlyFinal::Yes, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * <hr>
    * ### &diams; Collisions
    * &rArr; Format `VTK` not available
@@ -3885,7 +3885,7 @@ struct InputKeys {
       {"Output", "Collisions", "Extended"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_collisions_print_start_end_,Print_Start_End,bool,false}
    *
    * &rArr; Incompatible with `Root`, `HepMC_asciiv3` and `HepMC_treeroot`
@@ -3900,7 +3900,7 @@ struct InputKeys {
       {"Output", "Collisions", "Print_Start_End"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * <hr>
    * ### &diams; Dileptons
    * &rArr; Only `Oscar1999`, `Oscar2013` and `Binary` formats.
@@ -3918,7 +3918,7 @@ struct InputKeys {
       {"Output", "Dileptons", "Extended"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * <hr>
    * ### &diams; Photons
    * &rArr; Only `Oscar1999`, `Oscar2013` and `Binary` formats.
@@ -3936,11 +3936,11 @@ struct InputKeys {
       {"Output", "Photons", "Extended"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * <hr>
    * ### &diams; Initial_Conditions
    * &rArr; Only `Oscar1999`, `Oscar2013`, `Binary`, `ROOT` and `ASCII` (special
-   * ASCII IC, see \ref doxypage_IC_output_user_guide_) formats.
+   * ASCII IC, see \ref doxypage_output_initial_conditions) formats.
    *
    * \optional_key_no_line{key_output_IC_proper_time_,Proper_Time,double,
    * </tt>\f$f(t_{np})\f$<tt>}
@@ -3961,7 +3961,7 @@ struct InputKeys {
       {"Output", "Initial_Conditions", "Proper_Time"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_IC_lower_bound_,Lower_Bound,double,0.5}
    *
    * Lower bound \unit{in fm} for the IC proper time if
@@ -3974,7 +3974,7 @@ struct InputKeys {
       {"Output", "Initial_Conditions", "Lower_Bound"}, 0.5, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_IC_rapidity_cut_,Rapidity_Cut,double,
    * </tt>No cut is done<tt>}
    *
@@ -3991,7 +3991,7 @@ struct InputKeys {
       {"Output", "Initial_Conditions", "Rapidity_Cut"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_IC_pt_cut_,pT_Cut,double,
    * </tt>No cut is done<tt>}
    *
@@ -4007,7 +4007,7 @@ struct InputKeys {
       {"Output", "Initial_Conditions", "pT_Cut"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
    *
    * &rArr; Incompatible with `Oscar1999`, `ROOT` and `ASCII` formats.
@@ -4021,10 +4021,10 @@ struct InputKeys {
       {"Output", "Initial_Conditions", "Extended"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * <hr> \anchor input_output_rivet_
    * ### &diams; Rivet
-   * &rArr; Only `YODA` format (see \ref doxypage_rivet_output_user_guide_
+   * &rArr; Only `YODA` format (see \ref doxypage_output_rivet
    * "here" for more information about the format).
    *
    * \note In the following, <b>no default</b> means that, if the key is
@@ -4043,7 +4043,7 @@ struct InputKeys {
       {"Output", "Rivet", "Paths"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_analyses_,Analyses,list of strings,
    * </tt><b>no default</b><tt>}
    *
@@ -4057,7 +4057,7 @@ struct InputKeys {
       {"Output", "Rivet", "Analyses"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_preloads_,Preloads,list of strings,
    * </tt><b>no default</b><tt>}
    *
@@ -4071,7 +4071,7 @@ struct InputKeys {
       {"Output", "Rivet", "Preloads"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_logging_,Logging,map<string\,string>,
    * </tt><b>no default</b><tt>}
    *
@@ -4086,7 +4086,7 @@ struct InputKeys {
       output_rivet_logging{{"Output", "Rivet", "Logging"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_ignore_beams_,Ignore_Beams,bool,true}
    *
    * Ask Rivet to not validate beams before running analyses. This is needed if
@@ -4100,7 +4100,7 @@ struct InputKeys {
       {"Output", "Rivet", "Ignore_Beams"}, true, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_cross_sections_,Cross_Section,
    * list of two doubles,</tt><b>no default</b><tt>}
    *
@@ -4113,7 +4113,7 @@ struct InputKeys {
       {"Output", "Rivet", "Cross_Section"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    *
    * #### Weights keys
    *
@@ -4131,7 +4131,7 @@ struct InputKeys {
       {"Output", "Rivet", "Weights", "No_Multi"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_nominal_,Nominal,string,
    * </tt><b>no default</b><tt>}
    *
@@ -4144,7 +4144,7 @@ struct InputKeys {
       {"Output", "Rivet", "Weights", "Nominal"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_select_,Select,
    * list of strings, </tt><b>no default</b><tt>}
    *
@@ -4157,7 +4157,7 @@ struct InputKeys {
       {"Output", "Rivet", "Weights", "Select"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_deselect_,Deselect,
    * list of strings, </tt><b>no default</b><tt>}
    *
@@ -4171,7 +4171,7 @@ struct InputKeys {
                                     {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_nlo_smearing_,NLO_Smearing,
    * double, </tt><b>no default</b><tt>}
    *
@@ -4185,7 +4185,7 @@ struct InputKeys {
       {"Output", "Rivet", "Weights", "NLO_Smearing"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_cap_,Cap,double,
    * </tt><b>no default</b><tt>}
    *
@@ -4198,7 +4198,7 @@ struct InputKeys {
       {"Output", "Rivet", "Weights", "Cap"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * <hr>
    * ### &diams; Coulomb
    * &rArr; Only `VTK` format.
@@ -4209,7 +4209,7 @@ struct InputKeys {
    */
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * <hr> \anchor input_output_thermodynamics_
    * ### &diams; Thermodynamics
    *
@@ -4221,10 +4221,10 @@ struct InputKeys {
    *
    * <b>About 1 and 2:</b> Note that this output requires a lattice, which needs
    * to be enabled in the conguration file and is regulated by the options of
-   * \ref doxypage_input_lattice_. See \ref doxypage_output_vtk_lattice_ for
+   * \ref doxypage_input_conf_lattice. See \ref doxypage_output_vtk_lattice for
    * further information.
    *
-   * <b>About 3 and 4:</b> See \ref doxypage_thermodyn_output_user_guide_ for
+   * <b>About 3 and 4:</b> See \ref doxypage_output_thermodyn for
    * further information.
    *
    * \optional_key_no_line{key_output_thermo_type_,Type,string,"baryon"}
@@ -4244,7 +4244,7 @@ struct InputKeys {
       {"Output", "Thermodynamics", "Type"}, DensityType::Baryon, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_thermo_quantities_,Quantities,
    * list of strings,[]}
    *
@@ -4272,7 +4272,7 @@ struct InputKeys {
           {"Output", "Thermodynamics", "Quantities"}, {}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_thermo_position_,Position,
    * list of 3 doubles,[0.0\, 0.0\, 0.0]}
    *
@@ -4285,7 +4285,7 @@ struct InputKeys {
       {"Output", "Thermodynamics", "Position"}, {{0.0, 0.0, 0.0}}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_thermo_smearing_,Smearing,bool,true}
    *
    * Using Gaussian smearing for computing thermodynamic quantities or not. This
@@ -4322,13 +4322,13 @@ struct InputKeys {
       {"Output", "Thermodynamics", "Smearing"}, true, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_output_
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_thermo_only_part_,Only_Participants,bool,false}
    *
    * If set to `true`, only participants are included in the computation of the
    * energy momentum tensor and of the Eckart currents. In this context, a
    * hadron is considered as a participant if it had at least one collision.
-   * When using \ref doxypage_input_potentials_ "Potentials" this option must be
+   * When using \ref doxypage_input_conf_potentials "Potentials" this option must be
    * either left unset or set to `false`. The reason behing this limitation is
    * that in this case hadrons can influence the evolution of the system even
    * without collisions.
@@ -4340,7 +4340,7 @@ struct InputKeys {
       {"Output", "Thermodynamics", "Only_Participants"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_lattice_
+   * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_sizes_,Sizes,list of 3 doubles,
    * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
    *
@@ -4353,7 +4353,7 @@ struct InputKeys {
       {"Lattice", "Sizes"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_lattice_
+   * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_cell_number_,Cell_Number,list of 3 ints,
    * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
    *
@@ -4366,7 +4366,7 @@ struct InputKeys {
       {"Lattice", "Cell_Number"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_lattice_
+   * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_origin_,Origin,list of 3 doubles,
    * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
    *
@@ -4379,7 +4379,7 @@ struct InputKeys {
       {"Lattice", "Origin"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_lattice_
+   * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_periodic_,Periodic,bool,
    * (\ref key_gen_modus_ "Modus" == "Box")}
    *
@@ -4395,7 +4395,7 @@ struct InputKeys {
                                                  {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_lattice_
+   * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_pot_affect_threshold_,Potentials_Affect_Thresholds,bool,false}
    *
    * Include potential effects, since mean field potentials change the threshold
@@ -4408,7 +4408,7 @@ struct InputKeys {
       {"Lattice", "Potentials_Affect_Thresholds"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_potentials_skyrme_
+   * \page doxypage_input_conf_pot_skyrme_
    * \required_key{key_potentials_skyrme_a_,Skyrme_A,double}
    *
    * Parameter \f$A\f$ of Skyrme potential \unit{in MeV}.
@@ -4420,7 +4420,7 @@ struct InputKeys {
       {"Potentials", "Skyrme", "Skyrme_A"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_potentials_skyrme_
+   * \page doxypage_input_conf_pot_skyrme_
    * \required_key{key_potentials_skyrme_b_,Skyrme_B,double}
    *
    * Parameter \f$B\f$ of Skyrme potential \unit{in MeV}.
@@ -4432,7 +4432,7 @@ struct InputKeys {
       {"Potentials", "Skyrme", "Skyrme_B"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_potentials_skyrme_
+   * \page doxypage_input_conf_pot_skyrme_
    * \required_key{key_potentials_skyrme_tau_,Skyrme_Tau,double}
    *
    * Parameter \f$\tau\f$ of Skyrme potential.
@@ -4445,7 +4445,7 @@ struct InputKeys {
       {"Potentials", "Skyrme", "Skyrme_Tau"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_potentials_symmetry_
+   * \page doxypage_input_conf_pot_symmetry
    * \required_key{key_potentials_symmetry_s_pot_,S_Pot,double}
    *
    * Parameter \f$S_{pot}\f$ of symmetry potential \unit{in MeV}.
@@ -4457,7 +4457,7 @@ struct InputKeys {
       {"Potentials", "Symmetry", "S_Pot"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_potentials_symmetry_
+   * \page doxypage_input_conf_pot_symmetry
    * \optional_key{key_potentials_symmetry_gamma_,gamma,double,
    * </tt>do not consider last term in \f$S(\rho_B)\f$<tt>}
    *
@@ -4472,7 +4472,7 @@ struct InputKeys {
       {"Potentials", "Symmetry", "gamma"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_potentials_VDF_
+   * \page doxypage_input_conf_pot_VDF
    * \required_key{key_potentials_vdf_sat_rhoB_,Sat_rhoB,double}
    *
    * The saturation density of nuclear matter \unit{in 1/fm³}.
@@ -4484,7 +4484,7 @@ struct InputKeys {
       {"Potentials", "VDF", "Sat_rhoB"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_potentials_VDF_
+   * \page doxypage_input_conf_pot_VDF
    * \required_key{key_potentials_vdf_coeffs_,Coeffs,list of doubles}
    *
    * Parameters \f$C_i\f$ of the VDF potential \unit{in MeV}.
@@ -4496,7 +4496,7 @@ struct InputKeys {
       {"Potentials", "VDF", "Coeffs"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_potentials_VDF_
+   * \page doxypage_input_conf_pot_VDF
    * \required_key{key_potentials_vdf_powers_,Powers,double}
    *
    * Parameters \f$b_i\f$ of the VDF potential.
@@ -4511,7 +4511,7 @@ struct InputKeys {
       {"Potentials", "VDF", "Powers"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_potentials_coulomb_
+   * \page doxypage_input_conf_pot_coulomb
    * \required_key{key_potentials_coulomb_r_cut_,R_Cut,double}
    *
    * The radius value \unit{in fm} at which the integration volume is cut.
@@ -4523,7 +4523,7 @@ struct InputKeys {
       {"Potentials", "Coulomb", "R_Cut"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_forced_thermalization_
+   * \page doxypage_input_conf_forced_therm
    * \required_key{key_forced_therm_cell_number_,Cell_Number,list of 3 ints}
    *
    * Number of cells in each direction (x,y,z).
@@ -4535,7 +4535,7 @@ struct InputKeys {
       {"Forced_Thermalization", "Cell_Number"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_forced_thermalization_
+   * \page doxypage_input_conf_forced_therm
    * \required_key{key_forced_therm_critical_edens_,Critical_Edens,double}
    *
    * Critical energy density \unit{in GeV/fm³} above which forced thermalization
@@ -4548,7 +4548,7 @@ struct InputKeys {
       {"Forced_Thermalization", "Critical_Edens"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_forced_thermalization_
+   * \page doxypage_input_conf_forced_therm
    * \required_key{key_forced_therm_start_time_,Start_Time,double}
    *
    * Time \unit{in fm} after which forced thermalization may be applied, if
@@ -4561,7 +4561,7 @@ struct InputKeys {
       {"Forced_Thermalization", "Start_Time"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_forced_thermalization_
+   * \page doxypage_input_conf_forced_therm
    * \required_key{key_forced_therm_timestep_,Timestep,double}
    *
    * Timestep of thermalization \unit{in fm}.
@@ -4573,7 +4573,7 @@ struct InputKeys {
       {"Forced_Thermalization", "Timestep"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_forced_thermalization_
+   * \page doxypage_input_conf_forced_therm
    * \optional_key{key_forced_therm_algorithm_,Algorithm,string,"biased BF"}
    *
    * Algorithm applied to enforce thermalization, see
@@ -4591,7 +4591,7 @@ struct InputKeys {
                                      {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_forced_thermalization_
+   * \page doxypage_input_conf_forced_therm
    * \optional_key{key_forced_therm_microcanonical_,Microcanonical,bool,false}
    *
    * Enforce energy conservation or not as part of sampling algorithm. Relevant
@@ -4613,7 +4613,7 @@ struct InputKeys {
       {"Forced_Thermalization", "Microcanonical"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_forced_thermalization_
+   * \page doxypage_input_conf_forced_therm
    * \required_key{key_forced_therm_lattice_sizes_,Lattice_Sizes,list of 3
    * doubles}
    *
@@ -4920,7 +4920,7 @@ struct InputKeys {
 };
 
 /*!\Userguide
-* \page doxypage_minimum_nonempty_ensembles_
+* \page doxypage_input_conf_general_mne
 * <hr>
 * ### Examples
 *
@@ -4954,7 +4954,7 @@ General:
 */
 
 /*!\Userguide
- * \page doxypage_input_logging_
+ * \page doxypage_input_conf_logging
  * <hr>
  * ### Example: Configuring the Logging Area
  *
@@ -4977,7 +4977,7 @@ General:
  */
 
 /*!\Userguide
- * \page doxypage_input_collision_term_string_parameters_
+ * \page doxypage_input_conf_ct_string_parameters
  * <hr>
  * ### Example of string paramters customization
  *
@@ -5005,7 +5005,7 @@ General:
  */
 
 /*!\Userguide
- * \page doxypage_input_collision_term_dileptons_
+ * \page doxypage_input_conf_ct_dileptons
  * <hr>
  * ### Example of dileptons configuration
  *
@@ -5057,7 +5057,7 @@ General:
  */
 
 /*!\Userguide
- * \page doxypage_input_collision_term_photons_
+ * \page doxypage_input_conf_ct_photons
  * <hr>
  * ### Example of photons configuration
  *
@@ -5144,7 +5144,7 @@ General:
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_collider_
+ * \page doxypage_input_conf_modi_collider
  * <hr>
  * ### Example of heavy-ion collision configuration
  *
@@ -5153,7 +5153,7 @@ General:
  * motion taken into consideration. The calculation frame is the default,
  center
  * of velocity, and the nuclei are not deformed. Refer to \ref
- * doxypage_input_modi_collider_projectile_and_target_ for information about the
+ * doxypage_input_conf_modi_C_proj_targ for information about the
  * `Particles` and `Target` sections.
  *
  *\verbatim
@@ -5176,7 +5176,7 @@ General:
  \endverbatim
  *
  * Additionally, the impact parameter may be specified manually. See
- * \ref doxypage_input_modi_collider_impact_parameter_ for an example.
+ * \ref doxypage_input_conf_modi_C_impact_parameter for an example.
  * <hr>
  *
  * \note
@@ -5202,7 +5202,7 @@ General:
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_collider_projectile_and_target_
+ * \page doxypage_input_conf_modi_C_proj_targ
  * <hr>
  * \anchor input_modi_collider_projectile_and_target_ex1_
  * ### p-Pb collisions at the LHC
@@ -5347,7 +5347,7 @@ General:
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_collider_impact_parameter_
+ * \page doxypage_input_conf_modi_C_impact_parameter
  * <hr>
  * ### Configuring the Impact Parameter
  *
@@ -5388,7 +5388,7 @@ General:
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_sphere_
+ * \page doxypage_input_conf_modi_sphere
  * <hr>
  * ### Configuring a sphere simulation
  *
@@ -5451,7 +5451,7 @@ General:
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_box_
+ * \page doxypage_input_conf_modi_box
  * <hr>
  * ### Configuring a Box Simulation
  *
@@ -5530,7 +5530,7 @@ General:
  */
 
 /*!\Userguide
- * \page doxypage_input_modi_list_
+ * \page doxypage_input_conf_modi_list
  * <hr>
  * ### Configuring an afterburner simulation
  *
@@ -5585,7 +5585,7 @@ General:
  */
 
 /*!\Userguide
- * \page doxypage_input_lattice_
+ * \page doxypage_input_conf_lattice
  * <hr>
  * ### Configuring the Lattice
  *
@@ -5622,7 +5622,7 @@ General:
  */
 
 /*!\Userguide
- * \page doxypage_input_forced_thermalization_
+ * \page doxypage_input_conf_forced_therm
  * <hr>
  * ### Configuring forced thermalization
  *

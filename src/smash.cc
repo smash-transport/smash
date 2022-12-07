@@ -32,7 +32,7 @@ namespace smash {
  *
  * SMASH can be run simply by executing the binary without any options (i.e.
  * there are no required arguments). It does require an input file, though
- * (see \ref doxypage_inputconfig).
+ * (see \ref doxypage_input_configuration).
  * Per default, the input file is expected in the current working directory
  * with the name '`config.yaml`'.
  *

@@ -46,57 +46,57 @@
 #
 /**
 \page doxypage_input Input
-    \page doxypage_inputconfig Configuration
-        \page doxypage_input_general_ General
-            \page doxypage_minimum_nonempty_ensembles_ Minimum non-empty ensembles
-        \page doxypage_input_logging_ Logging
-        \page doxypage_input_version_ Version
-        \page doxypage_input_collision_term_ Collision term
-            \page doxypage_input_collision_term_pauliblocker_ Pauli Blocking
-            \page doxypage_input_collision_term_string_parameters_ String Parameters
-            \page doxypage_input_collision_term_dileptons_ Dileptons
-            \page doxypage_input_collision_term_photons_ Photons
-        \page doxypage_input_modi_ Modi
-            \page doxypage_input_modi_collider_ Collider
-                \page doxypage_input_modi_collider_projectile_and_target_ Projectile and Target
-                \page doxypage_input_modi_collider_impact_parameter_ Impact Parameter
-            \page doxypage_input_modi_sphere_ Sphere
-            \page doxypage_input_modi_box_ Box
-            \page doxypage_input_modi_list_ List
-            \page doxypage_input_modi_listbox_ ListBox
-        \page doxypage_input_output_ Output
-        \page doxypage_input_lattice_ Lattice
-        \page doxypage_input_potentials_ %Potentials
-            \page doxypage_input_potentials_skyrme_ Skyrme
-            \page doxypage_input_potentials_symmetry_ Symmetry
-            \page doxypage_input_potentials_VDF_ VDF
-            \page doxypage_input_potentials_coulomb_ Coulomb
-        \page doxypage_input_forced_thermalization_ Forced Thermalization
-    \page doxypage_inputparticles Particles
-    \page doxypage_inputdecaymodes Decay Modes
-\page doxypage_configuration_keys Input short reference
-\page doxypage_output_general_ Output
-    \page doxypage_configuring_output_ Output configuration examples
-    \page doxypage_output_hepmc_ HepMC Output
+    \page doxypage_input_configuration Configuration
+        \page doxypage_input_conf_general General
+            \page doxypage_input_conf_general_mne Minimum non-empty ensembles
+        \page doxypage_input_conf_logging Logging
+        \page doxypage_input_conf_version Version
+        \page doxypage_input_conf_collision_term Collision term
+            \page doxypage_input_conf_ct_pauliblocker Pauli Blocking
+            \page doxypage_input_conf_ct_string_parameters String Parameters
+            \page doxypage_input_conf_ct_dileptons Dileptons
+            \page doxypage_input_conf_ct_photons Photons
+        \page doxypage_input_conf_modi Modi
+            \page doxypage_input_conf_modi_collider Collider
+                \page doxypage_input_conf_modi_C_proj_targ Projectile and Target
+                \page doxypage_input_conf_modi_C_impact_parameter Impact Parameter
+            \page doxypage_input_conf_modi_sphere Sphere
+            \page doxypage_input_conf_modi_box Box
+            \page doxypage_input_conf_modi_list List
+            \page doxypage_input_conf_modi_listbox ListBox
+        \page doxypage_input_conf_output Output
+        \page doxypage_input_conf_lattice Lattice
+        \page doxypage_input_conf_potentials %Potentials
+            \page doxypage_input_conf_pot_skyrme_ Skyrme
+            \page doxypage_input_conf_pot_symmetry Symmetry
+            \page doxypage_input_conf_pot_VDF VDF
+            \page doxypage_input_conf_pot_coulomb Coulomb
+        \page doxypage_input_conf_forced_therm Forced Thermalization
+    \page doxypage_input_particles Particles
+    \page doxypage_input_decaymodes Decay Modes
+\page doxypage_input_short_ref Input short reference
+\page doxypage_output Output
+    \page doxypage_output_conf_examples Output configuration examples
+    \page doxypage_output_hepmc HepMC Output
     \page doxypage_output_dileptons Dileptons
     \page doxypage_output_photons Photons
     \page doxypage_output_initial_conditions Initial Conditions
-    \page doxypage_rivet_output_user_guide_ Rivet Output User Guide
-    \page doxypage_format_oscar_particlelist OSCAR Particles Format
-    \page doxypage_process_type Process Types
-    \page doxypage_format_oscar_collisions OSCAR Collisions Format
-    \page doxypage_oscar_general_ OSCAR Block Structure
-    \page doxypage_format_binary_ Binary Format
-    \page doxypage_format_root ROOT Format
-    \page doxypage_format_vtk VTK Format
-    \page doxypage_output_vtk_lattice_ Thermodynamics VTK Output
-    \page doxypage_thermodyn_output_user_guide_ ASCII Thermodynamics Output
-    \page doxypage_thermodyn_lattice_output_ Thermodynamics Lattice Output
-    \page doxypage_IC_output_user_guide_ ASCII IC Output
-    \page doxypage_collisions_output_in_box_modus_ Collision Output in Box Modus
+    \page doxypage_output_rivet Rivet Output User Guide
+    \page doxypage_output_oscar_particles OSCAR Particles Format
+        \page doxypage_output_oscar_particles_process_types Process Types
+    \page doxypage_output_oscar_collisions OSCAR Collisions Format
+    \page doxypage_output_oscar_general OSCAR Block Structure
+    \page doxypage_output_binary Binary Format
+    \page doxypage_output_root ROOT Format
+    \page doxypage_output_vtk VTK Format
+    \page doxypage_output_vtk_lattice Thermodynamics VTK Output
+    \page doxypage_output_thermodyn ASCII Thermodynamics Output
+    \page doxypage_output_thermodyn_lattice Thermodynamics Lattice Output
+    \page doxypage_output_initial_conditions ASCII IC Output
+    \page doxypage_output_collisions_box_modus Collision Output in Box Modus
 \page doxypage_smash_invocation SMASH Invocation
 \ifnot user
-\page doxypage_unittest_page Unit Testing
-\page doxypage_unittest_mocking Mock Functions/Classes
+\page doxypage_unit_testing Unit Testing
+\page doxypage_unit_testing_mocking Mock Functions/Classes
 \endif
 */

@@ -44,7 +44,7 @@ namespace smash {
  * \endcode
  *
  * The following configuration options are understood: \ref
- * doxypage_input_modi_sphere_
+ * doxypage_input_conf_modi_sphere
  */
 class SphereModus : public ModusDefault {
  public:

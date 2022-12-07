@@ -22,12 +22,12 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 const int RootOutput::max_buffer_size_ = 500000;
 
 /*!\Userguide
- * \page doxypage_format_root
+ * \page doxypage_output_root
  * SMASH ROOT output is a fast and disk-space efficient, but not human-readable
  * output. It is a custom format making information about the SMASH calculation
  * accessible with ROOT, mostly mirroring the information of the
- * \ref doxypage_oscar_general_ formats. This output is distinct from the
- * standarized \ref doxypage_output_hepmc_ that is also available in ROOT format
+ * \ref doxypage_output_oscar_general formats. This output is distinct from the
+ * standarized \ref doxypage_output_hepmc that is also available in ROOT format
  * and more widely adopted.
  *
  * SMASH ROOT output files can be viewed using ROOT's TBrowser. One can also
@@ -39,7 +39,7 @@ const int RootOutput::max_buffer_size_ = 500000;
  *
  * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
  *
- * Depending on configuration (see \ref doxypage_output_general_) SMASH can
+ * Depending on configuration (see \ref doxypage_output) SMASH can
  * produces up to two ROOT files per run: \c Particles.root and \c
  * Collisions.root. These files contain a TTree called \c particles and a TTree
  * called \c collisions. The \c particles tree contains information about the
@@ -102,7 +102,7 @@ const int RootOutput::max_buffer_size_ = 500000;
  * Currently writing initial and final configuration to collisions tree is
  * not supported.
  *
- * See also \ref doxypage_collisions_output_in_box_modus_.
+ * See also \ref doxypage_output_collisions_box_modus.
  *
  * Here is an example of a basic ROOT macro to read the ROOT output of SMASH:
  * \code

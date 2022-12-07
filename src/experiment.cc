@@ -49,7 +49,7 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
 
 /*!\Userguide
  * \n
- * \page doxypage_configuring_output_
+ * \page doxypage_output_conf_examples
  * **Example: Configuring the SMASH Output**\n
  * The following example configures the output to be printed in an interval of
  * 1 fm and with the net baryon density being printed to the header.
