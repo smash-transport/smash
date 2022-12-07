@@ -240,7 +240,7 @@ The online version of the code documentation is found
 
 ### How to build documentation with Doxygen yourself
 
-You need to have Doxygen installed. Then just call:
+You need to have Doxygen installed. Then, from your build directory, just call:
 
     make doc
 
@@ -262,12 +262,42 @@ the main purpose of both is that all warnings are displayed when running.
 
 #### Building the user guide
 
-In the `build` directory, run
+In the build directory, run
 
     make user
 
-to obtain the files in `doc/user/`. Open 'index.html' in your favorite
-browser.
+to obtain the files in _**doc/user/**_. Open _doc/user/index.html_ in your
+favorite browser.
+
+
+### Doxygen pages and their ordering
+
+New pages can be created using the `\page` Doxygen command, which takes an anchor
+name as first argument and the page title as second argument. It is possible to
+use the `\page` command with the **same** anchor name in order to add content
+to the same page from different places. Therefore, the second argument is optional
+and should be used only at the first `\page` occurrence (to avoid inconsistencies).
+In general, this is not trivial, but in SMASH we collect pages "declarations" in
+the _doc/index.dox_ file, which is meant to enforce pages ordering (Doxygen picks
+up pages in the order it encounters them). So, in this file titles should be
+specified, while elsewhere not.
+
+To make searching for documentation pages easier, a `doxypage_` prefix for their
+anchors has been decided to be used and you should do the same. For instance, if
+you create a new documentation page, you will declare it with title in the
+_doc/index.dox_ file where you want it to appear as
+
+    \page doxypage_my_new_page My wonderful title
+
+and then add content to it simply by using
+
+    /**
+     * \page doxypage_my_new_page
+     *
+     * [...]
+     */
+
+at the desired place in the codebase.
 
 
 ### What to document in the code
