@@ -16,6 +16,20 @@ the repository, work on a topic branch and then create a pull request. Details
 on this workflow can be found e.g.
 [here](https://git-scm.com/book/en/v2/GitHub-Contributing-to-a-Project).
 
+### Table of content
+
+1. [The most important rule](#consistency)
+2. [Testing](#testing)
+3. [Choosing a build type](#build-type)
+4. [Development tools](#development-tools)
+5. [Code documentation](#documentation)
+6. [Coding rules](#coding-rules)
+7. [General policies](#general-policies)
+8. [Profiling and benchmarking](#profiling)
+
+---
+
+<a id="consistency"></a>
 
 ## Be consistent!
 
@@ -25,9 +39,12 @@ This is valid in the most general sense, ranging from style, to notation,
 to nomenclature and whatever else you might notice.
 
 
+
+<a id="testing"></a>
+
 ## Testing
 
-### Running Tests
+### Running tests
 
 To run the various unit tests, use the following:
 
@@ -49,7 +66,7 @@ causing the test to always fail when run again. To fix this problem, just remove
 the folder.
 
 
-### Runtime Memory Checking with valgrind
+### Runtime memory checking with valgrind
 
 The SMASH binary memory usage can be checked for the different modi with the the
 following cmake targets:
@@ -66,7 +83,10 @@ Note: There is known bug with `valgrind-3.11` that leads to an error about an
 unrecognized instruction. The memchecks will not run with this version.
 
 
-## Choosing a Build Type
+
+<a id="build-type"></a>
+
+## Choosing a build type
 
 There are different build types available, which compile the SMASH code for
 different situations.
@@ -94,11 +114,11 @@ crashes. The debug info makes the binaries larger, but only has a marginal
 performance impact.
 
 
-### Enhancing Build Verbosity
+### Enhancing build verbosity
 
 To find cmake build errors (best debugged with full compiler output) use:
 
-    make VERBOSE=1
+    VERBOSE=1 make
 
 ### Find deprecated C library function calls
 
@@ -117,7 +137,11 @@ Note: Do not use this as a default, since it increases compilation time. Use
 clang for compilation here, since gcc runs into an internal compiler error,
 warnings are however still reported.
 
-## Development Tools
+
+
+<a id="development-tools"></a>
+
+## Development tools
 
 The following tools can be helpful for development:
 - clang-format = 13.0.0
@@ -127,7 +151,8 @@ The following tools can be helpful for development:
 - cppcheck
 - codespell
 
-Note: The above mentioned clang-format version is enforced at each merge to the `main` branch.
+**NOTE:** The formatting with the above mentioned `clang-format` version is enforced
+at each merge to the `main` branch.
 
 
 ### Installing clang-format
@@ -187,32 +212,35 @@ it like this:
 It is the same as installing cpplint.
 
 
-### Installing Binaries as a User
+### Installing binaries as a user
 
 If you do not have administrator privileges on the machine you are using, you can
 still install software locally. Just copy the binary (in this example
-`clang-format`) to a local folder and update your path:
+`clang-format`) to a local folder and update your path, e.g.:
 
     mkdir ~/bin
     cp ./clang-format ~/bin
-    echo 'export PATH=$PATH:~/bin' >> ~/.bashrc
+    echo 'export PATH=${PATH}:${HOME}/bin' >> ~/.bashrc
     source ~/.bashrc
 
 After this, you can just copy executable files to `~/bin` to install them. This
-also works for other exectuables like cpplint. You might have to set them to be
+also works for other executables like cpplint. You might have to set them to be
 executable with `chmod u+x ~/bin/my-binary`.
 
 
-## Code Documentation
+
+<a id="documentation"></a>
+
+## Code documentation
 
 We use [doxygen](http://doxygen.org) for generating documentation from our code.
 The online version of the code documentation is found
 [here](https://theory.gsi.de/~smash/doc/current/).
 
 
-### How to Build Docs with doxygen Yourself
+### How to build documentation with Doxygen yourself
 
-You need to have doxygen installed. Then just call:
+You need to have Doxygen installed. Then just call:
 
     make doc
 
@@ -226,23 +254,23 @@ completeness of the documentation:
     make undocumented
     make undocumented_count
 
-The first target outputs all doxygen warnings about missing documentation and
+The first target outputs all Doxygen warnings about missing documentation and
 the second one only counts (and outputs) the number of warnings. Both are
-building the doxygen documentation only for completely documented entities, but
+building the Doxygen documentation only for completely documented entities, but
 the main purpose of both is that all warnings are displayed when running.
 
 
-#### Building the User Guide
+#### Building the user guide
 
 In the `build` directory, run
 
     make user
 
-to obtain the files in `doc/user/`. Open 'index.html' in your favourite
+to obtain the files in `doc/user/`. Open 'index.html' in your favorite
 browser.
 
 
-### What to Document in the Code
+### What to document in the code
 
 Code documentation has two important purposes:
 
@@ -256,7 +284,7 @@ Code documentation has two important purposes:
   ideas.
 
 
-### How to Write Good doxygen Comments
+### How to write good Doxygen comments
 
 Doxygen is very flexible in the [comments it accepts for documentation
 generation](https://www.doxygen.nl/manual/docblocks.html). In
@@ -284,7 +312,7 @@ class Something {
 
 Doxygen has a lot of commands for markup. Most importantly it uses special
 comment formatting. Comments meant for the documentation are either prefixed
-with `///` or wraped with `/** ... */`. For all the connection to code and
+with `///` or wrapped with `/** ... */`. For all the connection to code and
 some special layout commands, refer to the [Special Commands in
 Doxygen](https://doxygen.nl/manual/commands.html).
 
@@ -330,7 +358,7 @@ question what should be documented:
 ```
 
 
-### How to Insert References to Publications
+### How to insert references to publications
 
 In order to refer to a paper inside a doxygen comment, the `\iref` command should
 be used:
@@ -361,7 +389,7 @@ int fun int(x);
 \endcode
 
 
-### User Guide
+### User guide
 
 The User Guide will be written in the code base, i.e., documentation of
 configuration options are described where they are used. Comments that are in
@@ -388,7 +416,7 @@ Doxygen tree. Currently, Cmake processes all files specified in the
 `doc/UserInputFiles.cmake` in that given order.
 
 
-### Markdown Documents
+### Markdown documents
 
 The markdown documents included in the repository follow the Markdown dialect of Github that is specified [here](https://github.github.com/gfm/).
 
@@ -407,7 +435,10 @@ details have to be specified. For all other code updates only major changes like
 new features or bug fixes have to be given.
 
 
-## Coding Rules
+
+<a id="coding-rules"></a>
+
+## Coding rules
 
 * [Google Naming & Formatting
 Rules](https://theory.gsi.de/~smash/extra/code_guidelines/cppnaming.xml) -
@@ -424,7 +455,7 @@ hand to be in accordance with the style guide.
 A notable naming rule is that class member variables have to end in an
 underscore (`_`).
 
-### Specific Naming Conventions for SMASH
+### Specific naming conventions for SMASH
 
 * for particles going into or coming out of an interaction we use:
   * `incoming_particles`
@@ -436,7 +467,7 @@ underscore (`_`).
 * to enumerate particles in any context we use:
   * `particle_a, particle_b, particle_c, ...`
 
-### Exceptions to the Rules
+### Exceptions to the rules
 
 1. Ensure that there is only one statement per line.
 
@@ -472,7 +503,7 @@ following way:
   Doing so you will also add the needed description for the User Guide.
 
 
-### Code Formatting with used utilities
+### Code formatting with used utilities
 
 All C++ code has to be formatted by running [`clang-format`](https://releases.llvm.org/download.html),
 (version `13.0.0`) while CMake code requires [`cmake-format`](https://github.com/cheshirekow/cmake_format)
@@ -516,7 +547,7 @@ commands are installed and found, namely version 1.6.0 for `cpplint` and version
 2.8 for `cppcheck`.
 
 
-### Floating-Point Precision
+### Floating-point precision
 
 All floating point numbers are represented using doubles.
 
@@ -526,24 +557,22 @@ As a guideline, try to include only those header files in the class which are di
 the file.
 
 
-## General Policies
 
-### Input and Output Compatibility
+<a id="general-policies"></a>
+
+## General policies
+
+### Input and output compatibility
 
 In general, input and output interfaces should be backwards compatible, when
 introducing changes. If there are backwards incompatible changes that affect the
-config.yaml or the binary output, the associated version numbers need to be
-increased at the next SMASH release.
-
-The new SMASH version is used as the new config.yaml version. This way the
-config.yaml version always represents the minimal SMASH version to use with this
-config file.
+YAML input or the binary output, these should be mentioned in the CHANGELOG file. For example, input keys that got deprecated or removed should be listed.
 
 The release notes need to include a prominent mention of **all** changes,
 backwards incompatible or not. In particular, newly introduced config parameters
 have to be mentioned.
 
-### Third Party Codes
+### Third party codes
 
 In general, the usage of third party codes is discouraged. If there is a scientific necessity
 or a major performance gain or time saving by using third party libraries, they can be linked
@@ -556,7 +585,11 @@ Some third-party libraries are already shipped within SMASH. More information ab
 in particular, instruction about how to update them can be found in the README file in the
 **_3rdparty_** folder.
 
-## Profiling and Benchmarking
+
+
+<a id="profiling"></a>
+
+## Profiling and benchmarking
 
 This section discusses tools that can be used to measure the
 performance.
