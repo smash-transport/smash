@@ -438,7 +438,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key proc_id_origin: ID of the process of the particle's last interaction
  * \li \key proc_type_origin: Type of the last process the particle has
  *     undergone. The possible process types are listed in
- *     \subpage doxypage_output_oscar_particles_process_types.
+ *     \ref doxypage_output_oscar_particles_process_types.
  * \li \key t_last_coll: time of the particle's last interaction (except wall
  *     crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle (0 in case the

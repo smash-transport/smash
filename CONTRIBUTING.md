@@ -302,8 +302,9 @@ at the desired place in the codebase.
 Sub-pages are pages themselves, but Doxygen classifies pages as sub-pages as soon
 as it encounters the `\subpage` command in a given `\page`. At that point the
 anchor given to the `\subpage` command tells Doxygen which page should be marked
-as sub-page of which other. Refer to the explanation at the beginning of the
-_doc/index.dox_ file for further information about how to handle sub-pages.
+as sub-page of which other. Also sub-pages ordering is fixed in the _doc/index.dox_
+file and you may refer to it for further information. In short, remember to use
+the `\subpage` command **only* in the index file and the `\ref` command elsewhere.
 
 
 ### What to document in the code

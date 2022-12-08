@@ -218,12 +218,12 @@ class Key {
  * There are three input files used by SMASH:
  *
  * - `config.yaml` for configuring the simulation. This file is required. See
- *   \subpage doxypage_input_configuration.
+ *   \ref doxypage_input_configuration.
  * - `particles.txt` for defining the particles used by SMASH. This file is
- *   optional. See \subpage doxypage_input_particles.
+ *   optional. See \ref doxypage_input_particles.
  * - `decaymodes.txt` for defining the decays (and corresponding resonance
  *   formations) possible in SMASH. This file is
- *   optional. See \subpage doxypage_input_decaymodes.
+ *   optional. See \ref doxypage_input_decaymodes.
  *
  * \page doxypage_input_configuration
  *
@@ -250,15 +250,15 @@ class Key {
  * will be ignored.
  *
  * \par The available keys are documented on the following pages:
- * \li \subpage doxypage_input_conf_general
- * \li \subpage doxypage_input_conf_logging
- * \li \subpage doxypage_input_conf_version
- * \li \subpage doxypage_input_conf_collision_term
- * \li \subpage doxypage_input_conf_modi
- * \li \subpage doxypage_input_conf_output
- * \li \subpage doxypage_input_conf_lattice
- * \li \subpage doxypage_input_conf_potentials
- * \li \subpage doxypage_input_conf_forced_therm
+ * \li \ref doxypage_input_conf_general
+ * \li \ref doxypage_input_conf_logging
+ * \li \ref doxypage_input_conf_version
+ * \li \ref doxypage_input_conf_collision_term
+ * \li \ref doxypage_input_conf_modi
+ * \li \ref doxypage_input_conf_output
+ * \li \ref doxypage_input_conf_lattice
+ * \li \ref doxypage_input_conf_potentials
+ * \li \ref doxypage_input_conf_forced_therm
  *
  * \par Information on formatting of the input file
  *
@@ -430,10 +430,10 @@ class Key {
  * <hr>
  * In this page many generic keys are described. For information about further
  * tuning possibilities, see the following pages:
- * - \subpage doxypage_input_conf_ct_pauliblocker
- * - \subpage doxypage_input_conf_ct_string_parameters
- * - \subpage doxypage_input_conf_ct_dileptons
- * - \subpage doxypage_input_conf_ct_photons
+ * - \ref doxypage_input_conf_ct_pauliblocker
+ * - \ref doxypage_input_conf_ct_string_parameters
+ * - \ref doxypage_input_conf_ct_dileptons
+ * - \ref doxypage_input_conf_ct_photons
  */
 
 /*!\Userguide
@@ -479,11 +479,11 @@ class Key {
  * The `Modi` section is the place where the specified <tt>\ref key_gen_modus_
  * "Modus"</tt> shall be configured. For each possibility refer to the
  * corresponding documentation page:
- * - \subpage doxypage_input_conf_modi_collider
- * - \subpage doxypage_input_conf_modi_sphere
- * - \subpage doxypage_input_conf_modi_box
- * - \subpage doxypage_input_conf_modi_list
- * - \subpage doxypage_input_conf_modi_listbox
+ * - \ref doxypage_input_conf_modi_collider
+ * - \ref doxypage_input_conf_modi_sphere
+ * - \ref doxypage_input_conf_modi_box
+ * - \ref doxypage_input_conf_modi_list
+ * - \ref doxypage_input_conf_modi_listbox
  *
  * The `Modi` section has to contain a section named after the chosen modus and
  * in it the corresponding customization takes place.
@@ -494,8 +494,8 @@ class Key {
  *
  * The `Collider` modus can be customized using the options here below.
  * To further configure the projectile, target and the impact parameter, see
- * - \subpage doxypage_input_conf_modi_C_proj_targ and
- * - \subpage doxypage_input_conf_modi_C_impact_parameter.
+ * - \ref doxypage_input_conf_modi_C_proj_targ and
+ * - \ref doxypage_input_conf_modi_C_impact_parameter.
  *
  * \attention
  * The incident energy can be specified in different ways and one (and only one)
@@ -629,10 +629,10 @@ class Key {
  * VDF potential) to include effects due to isospin. The Skyrme and Symmetry
  * potentials are semi-relativistic, while the VDF potential is fully
  * relativistic.
- * - \subpage doxypage_input_conf_pot_skyrme
- * - \subpage doxypage_input_conf_pot_symmetry
- * - \subpage doxypage_input_conf_pot_VDF
- * - \subpage doxypage_input_conf_pot_coulomb
+ * - \ref doxypage_input_conf_pot_skyrme
+ * - \ref doxypage_input_conf_pot_symmetry
+ * - \ref doxypage_input_conf_pot_VDF
+ * - \ref doxypage_input_conf_pot_coulomb
  *
  * ### Configuring potentials
  *
@@ -905,7 +905,7 @@ struct InputKeys {
    *
    * This key may be omitted on constraint that a minimum number
    * of ensembles containing interactions is requested, see
-   * \subpage doxypage_input_conf_general_mne.
+   * \ref doxypage_input_conf_general_mne.
    */
   /**
    * \see_key{key_gen_nevents_}

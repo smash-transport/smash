@@ -101,7 +101,7 @@
  * Instead of creating complete mock classes we can use the BUILD_TESTS macro in
  * actual SMASH classes to easily construct mock objects
  *
- * See \subpage doxypage_unit_testing_mocking.
+ * See \ref doxypage_unit_testing_mocking.
  *
  * \subsection unittest_smash_good_example Good Example
  * While implementing the initial conditions (see

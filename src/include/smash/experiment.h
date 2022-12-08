@@ -121,7 +121,7 @@ class ExperimentBase {
    *         string.
    *
    * Most of the Configuration values are read starting from this function. The
-   * configuration itself is documented in \subpage doxypage_input_conf_general
+   * configuration itself is documented in \ref doxypage_input_conf_general
    */
   static std::unique_ptr<ExperimentBase> create(
       Configuration &config, const std::filesystem::path &output_path);
@@ -1097,7 +1097,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * formats _simultaneously_.
    *
    * For an example of choosing specific output contents see
-   * \subpage doxypage_output_conf_examples.
+   * \ref doxypage_output_conf_examples.
    *
    * The list of possible contents follows:
    *
@@ -1113,14 +1113,14 @@ Experiment<Modus>::Experiment(Configuration &config,
    *                 is printed out.
    *   - Available formats: \ref doxypage_output_oscar_collisions, \ref
    *                        doxypage_output_binary, \ref doxypage_output_root,
-   *                        \subpage doxypage_output_hepmc
+   *                        \ref doxypage_output_hepmc
    * - \b Dileptons  Special dilepton output, see
-   *                 \subpage doxypage_output_dileptons.
+   *                 \ref doxypage_output_dileptons.
    *   - Available formats: \ref doxypage_output_oscar_collisions,
    *                        \ref doxypage_output_binary and \ref
    *                        doxypage_output_root
    * - \b Photons   Special photon output, see
-   *                \subpage doxypage_output_photons.
+   *                \ref doxypage_output_photons.
    *   - Available formats: \ref doxypage_output_oscar_collisions,
    *                        \ref doxypage_output_binary and \ref
    *                        doxypage_output_root.
@@ -1130,12 +1130,12 @@ Experiment<Modus>::Experiment(Configuration &config,
    *                         \ref doxypage_output_thermodyn_lattice,
    *                         \ref doxypage_output_vtk_lattice
    * - \b Initial_Conditions  Special initial conditions output, see
-   *                          \subpage doxypage_output_initial_conditions for
+   *                          \ref doxypage_output_initial_conditions for
    *                          details.
    *   - Available formats: \ref doxypage_output_oscar_particles, \ref
    *                        doxypage_output_initial_conditions
    * - \b Rivet Run Rivet analysis on generated events and output
-   *            results, see \subpage doxypage_output_rivet for
+   *            results, see \ref doxypage_output_rivet for
    *            details.
    *    - Available formats: \ref doxypage_output_rivet
    *
@@ -1148,29 +1148,29 @@ Experiment<Modus>::Experiment(Configuration &config,
    * \ref doxypage_output_conf_examples.
    * Every output content can be printed out in several formats:
    * - \b "Oscar1999", \b "Oscar2013" - human-readable text output\n
-   *   - For "Particles" content: \subpage doxypage_output_oscar_particles
-   *   - For "Collisions" content: \subpage doxypage_output_oscar_collisions
+   *   - For "Particles" content: \ref doxypage_output_oscar_particles
+   *   - For "Collisions" content: \ref doxypage_output_oscar_collisions
    *   - General block structure of OSCAR formats:
-   *     \subpage doxypage_output_oscar_general
+   *     \ref doxypage_output_oscar_general
    * - \b "Binary" - binary, not human-readable output
    *   - Faster to read and write than text outputs
    *   - Saves coordinates and momenta with the full double precision
    *   - General file structure is similar to \ref doxypage_output_oscar_general
-   *   - Detailed description: \subpage doxypage_output_binary
+   *   - Detailed description: \ref doxypage_output_binary
    * - \b "Root" - binary output in the format used by ROOT software
    *     (http://root.cern.ch)
    *   - Even faster to read and write, requires less disk space
-   *   - Format description: \subpage doxypage_output_root
+   *   - Format description: \ref doxypage_output_root
    * - \b "VTK" - text output suitable for an easy
    *     visualization using paraview software
    *   - This output can be opened by paraview to see the visulalization.
-   *   - For "Particles" content \subpage doxypage_output_vtk
-   *   - For "Thermodynamics" content \subpage doxypage_output_vtk_lattice
+   *   - For "Particles" content \ref doxypage_output_vtk
+   *   - For "Thermodynamics" content \ref doxypage_output_vtk_lattice
    * - \b "ASCII" - a human-readable text-format table of values
    *   - Used for "Thermodynamics" and "Initial_Conditions", see
-   * \subpage doxypage_output_thermodyn
-   * \subpage doxypage_output_thermodyn_lattice
-   * \subpage doxypage_output_initial_conditions
+   * \ref doxypage_output_thermodyn
+   * \ref doxypage_output_thermodyn_lattice
+   * \ref doxypage_output_initial_conditions
    * - \b "HepMC_asciiv3", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
    *   Tree ROOT format see \ref doxypage_output_hepmc for details
    * - \b "YODA", \b "YODA-full" - compact ASCII text format used by the
@@ -1178,7 +1178,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
-   *       \subpage doxypage_output_collisions_box_modus
+   *       \ref doxypage_output_collisions_box_modus
    */
 
   /*!\Userguide
