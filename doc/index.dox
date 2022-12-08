@@ -46,7 +46,7 @@
 #
 /**
 \page doxypage_input Input
-    \page doxypage_input_configuration Configuration
+    \page doxypage_input_configuration %Configuration
         \page doxypage_input_conf_general General
             \page doxypage_input_conf_general_mne Minimum non-empty ensembles
         \page doxypage_input_conf_logging Logging
@@ -81,7 +81,7 @@
     \page doxypage_output_dileptons Dileptons
     \page doxypage_output_photons Photons
     \page doxypage_output_initial_conditions Initial conditions
-    \page doxypage_output_rivet Rivet Output
+    \page doxypage_output_rivet Rivet output
     \page doxypage_output_oscar_particles OSCAR particles format
         \page doxypage_output_oscar_particles_process_types Process types
     \page doxypage_output_oscar_collisions OSCAR collisions format
