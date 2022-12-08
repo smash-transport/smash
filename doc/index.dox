@@ -19,9 +19,9 @@
 #
 # NOTE FOR POSSIBLE FUTURE NEEDS:
 #
-# The Doxygen \subpage command is like \ref, with the additional behaviour that
-# it intrnally marks the specified page as sub-page of the current one. Being
-# as \ref, though, it will also print a link to the sub-page at the place wher
+# The Doxygen \subpage command is like \ref, with the additional behavior that
+# it internally marks the specified page as sub-page of the current one. Being
+# as \ref, though, it will also print a link to the sub-page at the place where
 # used in the documentation. Therefore, naively, it is not possible to use it
 # here to enforce a given order of sub-pages in the documentation. In fact,
 # w.r.t. ordering, it would be possible to declare all sub-pages here, first
@@ -67,7 +67,7 @@
         \page doxypage_input_conf_output Output
         \page doxypage_input_conf_lattice Lattice
         \page doxypage_input_conf_potentials %Potentials
-            \page doxypage_input_conf_pot_skyrme_ Skyrme
+            \page doxypage_input_conf_pot_skyrme Skyrme
             \page doxypage_input_conf_pot_symmetry Symmetry
             \page doxypage_input_conf_pot_VDF VDF
             \page doxypage_input_conf_pot_coulomb Coulomb

@@ -51,6 +51,9 @@ if(DOXYGEN_FOUND)
          "src/"
          "3rdparty/einhard/einhard.hpp"
          "${COMMON_TECHNICAL_FILES}")
+    # The user guide has the main page in the doc folder in the userguide.dox file, while all the
+    # /*!\Userguide blocks are extracted in the build/doc/userguide.dox folder. Both files, although
+    # with the same name, have to be included, the former first and the second after the md files.
     list(APPEND
          DOCUMENTATION_FILES_USER
          "doc/userguide.dox"

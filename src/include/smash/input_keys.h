@@ -629,7 +629,7 @@ class Key {
  * VDF potential) to include effects due to isospin. The Skyrme and Symmetry
  * potentials are semi-relativistic, while the VDF potential is fully
  * relativistic.
- * - \subpage doxypage_input_conf_pot_skyrme_
+ * - \subpage doxypage_input_conf_pot_skyrme
  * - \subpage doxypage_input_conf_pot_symmetry
  * - \subpage doxypage_input_conf_pot_VDF
  * - \subpage doxypage_input_conf_pot_coulomb
@@ -690,7 +690,7 @@ class Key {
  */
 
 /*!\Userguide
- * \page doxypage_input_conf_pot_skyrme_
+ * \page doxypage_input_conf_pot_skyrme
  *
  * The Skyrme potential has the form
  * \f[ U_{Sk} = A(\rho/\rho_0) + B (\rho/\rho_0)^{\tau} \,, \f]
@@ -4330,7 +4330,7 @@ struct InputKeys {
    * energy momentum tensor and of the Eckart currents. In this context, a
    * hadron is considered as a participant if it had at least one collision.
    * When using \ref doxypage_input_conf_potentials "Potentials" this option
-   * must be either left unset or set to `false`. The reason behing this
+   * must be either left unset or set to `false`. The reason behind this
    * limitation is that in this case hadrons can influence the evolution of the
    * system even without collisions.
    */
@@ -4409,7 +4409,7 @@ struct InputKeys {
       {"Lattice", "Potentials_Affect_Thresholds"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_pot_skyrme_
+   * \page doxypage_input_conf_pot_skyrme
    * \required_key{key_potentials_skyrme_a_,Skyrme_A,double}
    *
    * Parameter \f$A\f$ of Skyrme potential \unit{in MeV}.
@@ -4421,7 +4421,7 @@ struct InputKeys {
       {"Potentials", "Skyrme", "Skyrme_A"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_pot_skyrme_
+   * \page doxypage_input_conf_pot_skyrme
    * \required_key{key_potentials_skyrme_b_,Skyrme_B,double}
    *
    * Parameter \f$B\f$ of Skyrme potential \unit{in MeV}.
@@ -4433,7 +4433,7 @@ struct InputKeys {
       {"Potentials", "Skyrme", "Skyrme_B"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_pot_skyrme_
+   * \page doxypage_input_conf_pot_skyrme
    * \required_key{key_potentials_skyrme_tau_,Skyrme_Tau,double}
    *
    * Parameter \f$\tau\f$ of Skyrme potential.
