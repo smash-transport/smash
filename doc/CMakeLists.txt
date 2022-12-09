@@ -32,6 +32,37 @@ if(DOXYGEN_FOUND)
         set(HAVE_DOT "NO")
     endif()
     set(DOXYGEN_EXTRACT_ALL "YES")
+    # Prepare list of files to be used as input for user guide and development documentation
+    set(COMMON_GENERIC_FILES
+        "README.md"
+        "INSTALL.md"
+        "CHANGELOG.md"
+        "CONTRIBUTING.md"
+        "AUTHORS.md"
+        "doc/index.dox")
+    set(COMMON_TECHNICAL_FILES "bin/benchmarks/README.md")
+    list(APPEND
+         DOCUMENTATION_FILES_DEVEL
+         "doc/mainpage.dox"
+         "${COMMON_GENERIC_FILES}"
+         "src/include/smash/"
+         "src/tests/unittest.h"
+         "src/tests/setup.h"
+         "src/"
+         "3rdparty/einhard/einhard.hpp"
+         "${COMMON_TECHNICAL_FILES}")
+    # The user guide has the main page in the doc folder in the userguide.dox file, while all the
+    # /*!\Userguide blocks are extracted in the build/doc/userguide.dox folder. Both files, although
+    # with the same name, have to be included, the former first and the second after the md files.
+    list(APPEND
+         DOCUMENTATION_FILES_USER
+         "doc/userguide.dox"
+         "${COMMON_GENERIC_FILES}"
+         "${CMAKE_CURRENT_BINARY_DIR}/userguide.dox"
+         "${COMMON_TECHNICAL_FILES}")
+    set(INDENTATION "                         ")
+    list(JOIN DOCUMENTATION_FILES_DEVEL "\\\n${INDENTATION}" DOCUMENTATION_FILES_DEVEL)
+    list(JOIN DOCUMENTATION_FILES_USER "\\\n${INDENTATION}" DOCUMENTATION_FILES_USER)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
                    @ONLY)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/DoxyUser.in ${CMAKE_CURRENT_BINARY_DIR}/DoxyUser

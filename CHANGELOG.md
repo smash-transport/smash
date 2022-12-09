@@ -29,7 +29,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Fix bug in collider modus when setting the total energy per nucleon of _each_ beam
 
 ### Changed
-* :warning: The `master` branch has been renamed to `main`
+* ⚠️ The `master` branch has been renamed to `main`
 * SMASH makes now use of C++17 standard and minimum compiler requirements have changed
 * Only UNIX-like operating systems (e.g. Linux, MacOS) are officially supported
 * Only GCC, Clang and Apple clang compilers are officially supported

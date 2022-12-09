@@ -38,7 +38,8 @@ struct ExperimentParameters;
  * Options for ColliderModus go in the "Modi"→"Collider" section of the
  * configuration.
  *
- * The following configuration options are understood: \ref input_modi_collider_
+ * The following configuration options are understood: \ref
+ * doxypage_input_conf_modi_collider
  */
 class ColliderModus : public ModusDefault {
  public:

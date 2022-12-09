@@ -41,7 +41,7 @@ namespace smash {
  * \endcode
  *
  * The following configuration options are understood:
- * \ref input_modi_box_
+ * \ref doxypage_input_conf_modi_box
  */
 class BoxModus : public ModusDefault {
  public:
