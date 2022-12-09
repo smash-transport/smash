@@ -1151,11 +1151,11 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   - For "Particles" content: \ref doxypage_output_oscar_particles
    *   - For "Collisions" content: \ref doxypage_output_oscar_collisions
    *   - General block structure of OSCAR formats:
-   *     \ref doxypage_output_oscar_general
+   *     \ref doxypage_output_oscar
    * - \b "Binary" - binary, not human-readable output
    *   - Faster to read and write than text outputs
    *   - Saves coordinates and momenta with the full double precision
-   *   - General file structure is similar to \ref doxypage_output_oscar_general
+   *   - General file structure is similar to \ref doxypage_output_oscar
    *   - Detailed description: \ref doxypage_output_binary
    * - \b "Root" - binary output in the format used by ROOT software
    *     (http://root.cern.ch)

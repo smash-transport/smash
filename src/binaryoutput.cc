@@ -29,7 +29,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * (16 digits). By accident, this makes the sizes of the binary output files
  * approximately the same as the OSCAR ASCII files.
  * **The binary format follows the general block structure of the OSCAR
- * format:** \ref doxypage_output_oscar_general. However, for the binary format,
+ * format:** \ref doxypage_output_oscar. However, for the binary format,
  * the data type specification is stricter. The types used for the output are 4
  * bytes signed integers, 8 bytes doubles and 1 byte chars.
  *

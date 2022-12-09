@@ -28,7 +28,7 @@ OscarOutput<Format, Contents>::OscarOutput(const std::filesystem::path &path,
                 (name + ".oscar" + ((Format == OscarFormat1999) ? "1999" : "")),
             "w"} {
   /*!\Userguide
-   * \page doxypage_output_oscar_general
+   * \page doxypage_output_oscar
    * OSCAR outputs are a family of ASCII and binary formats that follow
    * the OSCAR format conventions. \n
    * **All OSCAR outputs have the same general structure: a header and an
@@ -251,7 +251,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 /*!\Userguide
  * \page doxypage_output_oscar_particles
  * The OSCAR particles format follows the general block structure of the OSCAR
- * format: \ref doxypage_output_oscar_general. We distinguish between two
+ * format: \ref doxypage_output_oscar. We distinguish between two
  * versions, OSCAR2013 and OSCAR1999. Information about OSCAR standard can be
  * found at http://phy.duke.edu/~jeb65/oscar2013. \n Enabling the OSCAR output
  * for particles in the config.yaml file (see \ref doxypage_input_conf_output),
@@ -493,7 +493,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \n
  * \page doxypage_output_oscar_collisions
  * The OSCAR particles format follows the general block structure of the OSCAR
- * format: \ref doxypage_output_oscar_general. We distinguish between two
+ * format: \ref doxypage_output_oscar. We distinguish between two
  * versions, OSCAR2013 and OSCAR1999. Information about OSCAR standard can be
  * found at https://karman.physics.purdue.edu/OSCAR and
  * http://phy.duke.edu/~jeb65/oscar2013. \n

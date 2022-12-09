@@ -119,9 +119,7 @@
     \subpage doxypage_output_photons
     \subpage doxypage_output_initial_conditions
     \subpage doxypage_output_rivet
-    \subpage doxypage_output_oscar_particles
-    \subpage doxypage_output_oscar_collisions
-    \subpage doxypage_output_oscar_general
+    \subpage doxypage_output_oscar
     \subpage doxypage_output_binary
     \subpage doxypage_output_root
     \subpage doxypage_output_vtk
@@ -137,13 +135,17 @@
     \page doxypage_output_photons Photons
     \page doxypage_output_initial_conditions Initial conditions
     \page doxypage_output_rivet Rivet output
-    \page doxypage_output_oscar_particles OSCAR particles format
+    \page doxypage_output_oscar OSCAR format
         <div class="invisible-content">
-        \subpage doxypage_output_oscar_particles_process_types
+        \subpage doxypage_output_oscar_collisions
+        \subpage doxypage_output_oscar_particles
         </div>
-        \page doxypage_output_oscar_particles_process_types Process types
-    \page doxypage_output_oscar_collisions OSCAR collisions format
-    \page doxypage_output_oscar_general OSCAR block structure
+        \page doxypage_output_oscar_collisions OSCAR collisions format
+        \page doxypage_output_oscar_particles OSCAR particles format
+            <div class="invisible-content">
+            \subpage doxypage_output_oscar_particles_process_types
+            </div>
+            \page doxypage_output_oscar_particles_process_types Process types
     \page doxypage_output_binary Binary format
     \page doxypage_output_root ROOT format
     \page doxypage_output_vtk VTK format

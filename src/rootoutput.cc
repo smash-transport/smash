@@ -26,7 +26,7 @@ const int RootOutput::max_buffer_size_ = 500000;
  * SMASH ROOT output is a fast and disk-space efficient, but not human-readable
  * output. It is a custom format making information about the SMASH calculation
  * accessible with ROOT, mostly mirroring the information of the
- * \ref doxypage_output_oscar_general formats. This output is distinct from the
+ * \ref doxypage_output_oscar formats. This output is distinct from the
  * standarized \ref doxypage_output_hepmc that is also available in ROOT format
  * and more widely adopted.
  *
