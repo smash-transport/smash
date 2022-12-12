@@ -505,7 +505,7 @@ double Action::check_conservation(const uint32_t id_process) const {
     }
     if (process_type_ == ProcessType::Freeforall) {
       logg[LAction].warn()
-          << "Conservation law violation, but we want it (FREE4ALL).\n"
+          << "Conservation law violation, but we want it (Freeforall Action).\n"
           << particle_names.str() << err_msg;
       return energy_violation;
     }
