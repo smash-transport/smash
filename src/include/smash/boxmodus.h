@@ -41,7 +41,7 @@ namespace smash {
  * \endcode
  *
  * The following configuration options are understood:
- * \ref input_modi_box_
+ * \ref doxypage_input_conf_modi_box
  */
 class BoxModus : public ModusDefault {
  public:
@@ -139,7 +139,7 @@ class BoxModus : public ModusDefault {
  private:
   /// Initial momenta distribution: thermal or peaked momenta
   const BoxInitialCondition initial_condition_;
-  /// Length of the cube's edge in fm/c
+  /// Length of the cube's edge in fm
   const double length_;
   /// time after which output is written
   const double equilibration_time_;

@@ -40,7 +40,7 @@ struct EventInfo {
   double impact_parameter;
   /// Box length in case of box simulation, otherwise dummy
   double modus_length;
-  /// Time in fm/c
+  /// Time in fm
   double current_time;
   /// Sum of kinetic energies of all particles
   double total_kinetic_energy;
@@ -48,7 +48,7 @@ struct EventInfo {
   double total_mean_field_energy;
   /// Kinetic + mean field energy
   double total_energy;
-  /// Testparticle number, see Testparticles in \ref input_general_
+  /// Testparticle number, see Testparticles in \ref doxypage_input_conf_general
   int test_particles;
   /// Number of ensembles
   int n_ensembles;
@@ -287,7 +287,7 @@ class OutputInterface {
    *            computed
    * * \param[in] dens_param set of parameters, defining smearing.
    *            For more info about
-   *            smearing see \ref thermodyn_output_user_guide_.
+   *            smearing see \ref doxypage_output_thermodyn.
    *
    * Used for thermodynamic lattice output.
    */

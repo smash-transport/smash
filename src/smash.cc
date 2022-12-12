@@ -28,11 +28,11 @@
 namespace smash {
 
 /*!\Userguide
- * \page page_smash_invocation SMASH Invocation
+ * \page doxypage_smash_invocation
  *
  * SMASH can be run simply by executing the binary without any options (i.e.
  * there are no required arguments). It does require an input file, though
- * (see \ref inputconfig).
+ * (see \ref doxypage_input_configuration).
  * Per default, the input file is expected in the current working directory
  * with the name '`config.yaml`'.
  *
@@ -209,7 +209,7 @@ void print_disclaimer() {
       << "\n"
       << " See LICENSE for details."
       << "\n"
-      << " For the full list of contributors see AUTHORS."
+      << " For the full list of contributors see the AUTHORS.md file."
       << "\n"
       << "\n"
       << " When using SMASH, please cite"
@@ -223,9 +223,11 @@ void print_disclaimer() {
       << "\n"
       << " In addition, if Pythia is used please cite"
       << "\n"
-      << "      T. Sjöstrand, S. Mrenna and P. Skands, JHEP05 (2006) 026,"
+      << "      C. Bierlich et al, SciPost Phys. Codebases 8 (2022)"
       << "\n"
-      << "              Comput. Phys. Comm. 178 (2008) 852."
+      << " together with the Codebase release you used:"
+      << "\n"
+      << "      https://doi.org/10.21468/SciPostPhysCodeb.8-r8.3."
       << "\n"
       << "\n"
       << " Webpage: https://smash-transport.github.io"
@@ -316,11 +318,10 @@ ScatterActionsFinder actions_finder_for_dump(Configuration &configuration) {
  * Checks if there are unused config values.
  */
 void check_for_unused_config_values(const Configuration &configuration) {
-  const std::string report = configuration.to_string();
-
-  if (report != "{}") {
+  if (!configuration.is_empty()) {
     throw std::runtime_error(
-        "The following configuration values were not used:\n" + report);
+        "The following configuration values were not used:\n" +
+        configuration.to_string());
   }
 }
 

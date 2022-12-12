@@ -84,7 +84,7 @@ class PauliBlocker {
   /// Radius of averaging in coordinate space, fm
   double rr_;
 
-  /// Radius of averaging in momentum space, GeV/c
+  /// Radius of averaging in momentum space, GeV
   double rp_;
 
   /// Testparticles number

@@ -27,7 +27,7 @@ TEST(impossible_collision) {
   const auto b =
       Test::smashon(Position{2., 2., 2., 2.}, Momentum{0.1, 0.3, -0.1, 0.2}, 2);
 
-  Configuration config = Test::configuration("");
+  Configuration config{""};
   ExperimentParameters exp_par = Test::default_parameters();
   ScatterActionsFinder finder(config, exp_par);
 

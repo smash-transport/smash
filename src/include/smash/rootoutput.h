@@ -50,7 +50,7 @@ class Particles;
  * npart - number of particles in the block,
  * test_p - number of testpartciles per particle,
  * modus_l - modus length,
- * current_t - time associated with the output block, in fm/c,
+ * current_t - time associated with the output block, in fm,
  * impact_b - impact parameter of the event,
  * empty_event - whether there was no interaction between the projectile and
  * the target,

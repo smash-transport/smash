@@ -23,7 +23,7 @@
 namespace smash {
 
 /*!\Userguide
- * \page thermodyn_output_user_guide_ ASCII Thermodynamics Output
+ * \page doxypage_output_thermodyn
  *
  * The thermodynamics output (thermodynamics.dat) is used to output either:
  * \li thermodynamic quantities at one point (\key Smearing: on)
@@ -54,7 +54,7 @@ namespace smash {
  * # **smash_version** thermodynamics output
  * # @ point ( **position** ) [fm]
  * # **density_type**
- * # time [fm/c], ** a list of all columns that will be printed, + units **
+ * # time [fm], ** a list of all columns that will be printed, + units **
  * \endcode
  *
  * The header consists of 4 lines starting with a '#', containing the following
@@ -70,7 +70,7 @@ namespace smash {
  * # **smash_version** thermodynamics output
  * # averaged over the entire volume
  * # **density_type**
- * # time [fm/c], ** a list of all columns that will be printed, + units **
+ * # time [fm], ** a list of all columns that will be printed, + units **
  * \endcode
  *
  * The header consists of 4 lines starting with a '#', containing the following
@@ -130,7 +130,7 @@ ThermodynamicOutput::ThermodynamicOutput(const std::filesystem::path &path,
     std::fprintf(file_.get(), "# averaged over the entire volume\n");
   }
   std::fprintf(file_.get(), "# %s\n", to_string(out_par.td_dens_type));
-  std::fprintf(file_.get(), "# time [fm/c], ");
+  std::fprintf(file_.get(), "# time [fm], ");
   if (out_par_.td_rho_eckart) {
     std::fprintf(file_.get(), "%s [fm^-3], ",
                  to_string(ThermodynamicQuantity::EckartDensity));

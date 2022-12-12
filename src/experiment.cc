@@ -49,7 +49,7 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
 
 /*!\Userguide
  * \n
- * \page configuring_output_ Output configuration examples
+ * \page doxypage_output_conf_examples
  * **Example: Configuring the SMASH Output**\n
  * The following example configures the output to be printed in an interval of
  * 1 fm and with the net baryon density being printed to the header.
@@ -161,7 +161,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   }
 
   /* If this Delta_Time option is absent (this can be for timestepless mode)
-   * just assign 1.0 fm/c, reasonable value will be set at event initialization
+   * just assign 1.0 fm, reasonable value will be set at event initialization
    */
   const double dt = config.take({"General", "Delta_Time"}, 1.);
   const double t_end = config.read({"General", "End_Time"});
@@ -187,7 +187,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     output_clock = std::make_unique<CustomClock>(output_times);
   } else {
     const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
-    output_clock = std::make_unique<UniformClock>(0.0, output_dt);
+    output_clock = std::make_unique<UniformClock>(0.0, output_dt, t_end);
   }
 
   // Add proper error messages if photons are not configured properly.
@@ -295,7 +295,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
                   maximum_cross_section_default);
   maximum_cross_section *= scale_xs;
   return {
-      std::make_unique<UniformClock>(0.0, dt),
+      std::make_unique<UniformClock>(0.0, dt, t_end),
       std::move(output_clock),
       config.take({"General", "Ensembles"}, 1),
       ntest,

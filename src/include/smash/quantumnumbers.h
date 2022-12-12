@@ -138,7 +138,7 @@ class QuantumNumbers {
 
   /**
    * \return The total momentum four-vector.
-   * \f$P^\mu = \sum_{i \in \mbox{particles}} (E_i, \vec p_i)\f$ [GeV]
+   * \f$P^\mu = \sum_{i \in \mbox{particles}} (E_i, \mathbf{p}_i)\f$ [GeV]
    *
    * \see QuantumNumbers::momentum_
    * \see ParticleData::momentum()

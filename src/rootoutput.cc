@@ -22,13 +22,13 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 const int RootOutput::max_buffer_size_ = 500000;
 
 /*!\Userguide
- * \page format_root ROOT Format
+ * \page doxypage_output_root
  * SMASH ROOT output is a fast and disk-space efficient, but not human-readable
  * output. It is a custom format making information about the SMASH calculation
  * accessible with ROOT, mostly mirroring the information of the
- * \ref oscar_general_ formats. This output is distinct from the standarized
- * \ref output_hepmc_ that is also available in ROOT format and more widely
- * adopted.
+ * \ref doxypage_output_oscar formats. This output is distinct from the
+ * standarized \ref doxypage_output_hepmc that is also available in ROOT format
+ * and more widely adopted.
  *
  * SMASH ROOT output files can be viewed using ROOT's TBrowser. One can also
  * access them using ROOT functions. The full memory structure of the ROOT
@@ -39,21 +39,22 @@ const int RootOutput::max_buffer_size_ = 500000;
  *
  * Producing ROOT output requires ROOT installed (see http://root.cern.ch).
  *
- * Depending on configuration (see \ref output_general_) SMASH can produces up
- * to two ROOT files per run: \c Particles.root and \c Collisions.root. These
- * files contain a TTree called \c particles and a TTree called \c collisions.
- * The \c particles tree contains information about the parameters of the run
- * (such as the number of testparticles and event number), information relating
- * to individual particles (such as their position or charge), and information
- * about bulk observables in the system (kinetic energy, mean field energy, and
- * total energy). The \c collisions tree contains information about
- * each collision, such as number of incoming and outgoing particles. It also
- * has the full information about the incoming and outgoing particles of each
- * collision.
+ * Depending on configuration (see \ref doxypage_output) SMASH can
+ * produces up to two ROOT files per run: \c Particles.root and \c
+ * Collisions.root. These files contain a TTree called \c particles and a TTree
+ * called \c collisions. The \c particles tree contains information about the
+ * parameters of the run (such as the number of testparticles and event number),
+ * information relating to individual particles (such as their position or
+ * charge), and information about bulk observables in the system (kinetic
+ * energy, mean field energy, and total energy). The \c collisions tree contains
+ * information about each collision, such as number of incoming and outgoing
+ * particles. It also has the full information about the incoming and outgoing
+ * particles of each collision.
  *
  * In case that the ROOT format is used for dilepton output
- * (see \ref output_dileptons), the ROOT file is called \c Dileptons.root and
- * only contains a \c collisions tree with all the dilepton decays.
+ * (see \ref doxypage_output_dileptons), the ROOT file is called \c
+ * Dileptons.root and only contains a \c collisions tree with all the dilepton
+ * decays.
  *
  * Every physical quantity corresponds to a separate TBranch.
  * One entry in the \c particles TTree is:
@@ -74,7 +75,7 @@ const int RootOutput::max_buffer_size_ = 500000;
  * \li \c npart is number of particles in the block
  * \li \c test_p is number of testparticles per particle
  * \li \c modus_l is modus length
- * \li \c current_t is time associated with the output block, in fm/c
+ * \li \c current_t is time associated with the output block, in fm
  * \li \c impact_b is the impact parameter of the event
  * \li \c empty_event indicates whether the projectile did not interact with the
  * target
@@ -101,7 +102,7 @@ const int RootOutput::max_buffer_size_ = 500000;
  * Currently writing initial and final configuration to collisions tree is
  * not supported.
  *
- * See also \ref collisions_output_in_box_modus_.
+ * See also \ref doxypage_output_collisions_box_modus.
  *
  * Here is an example of a basic ROOT macro to read the ROOT output of SMASH:
  * \code

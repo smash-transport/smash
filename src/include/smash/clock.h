@@ -27,16 +27,18 @@ static constexpr int LClock = LogArea::Clock::id;
 /**
  * Clock tracks the time in the simulation.
  *
- * The basic unit is 1 fm/c = \f$1 / 2.99798542 \cdot 10^{-23}\f$s
- * \f$\approx 0.33 \cdot 10^{-24}\f$ s.
- * The resolution of the clock is 0.000001 fm/c. I.e. only multiples of 0.000001
- * fm/c are representable internally.
+ * The basic unit is 1 fm in natural units which correspond to
+ * \f$\frac{10^{-15}}{299\,792\,458}\,\mathrm{s} \approx
+ * 0.33\cdot10^{-23}\,\mathrm{s}\f$ in the international system of units. The
+ * resolution of the clock is \f$0.000001\,\mathrm{fm}=10^{-6}\,\mathrm{fm}\f$,
+ * i.e. only multiples of \f$0.000001\,\mathrm{fm}\f$ are internally
+ * representable.
  *
  * Potential usage for adapting time steps:
  * ------
  * \code
- *   UniformClock labtime(0., 0.1);
- *   UniformClock endtime(10., 0.);
+ *   UniformClock labtime(0., 0.1, end_time_);
+ *   UniformClock endtime(10., 0., end_time_);
  *   while (labtime < endtime) {
  *     // do something
  *     // adapt the timestep size to external circumstances:
@@ -111,7 +113,7 @@ class Clock {
   }
 
   /**
-   * advances the clock by an arbitrary number of ticks.
+   * Advances the clock by an arbitrary number of ticks.
    *
    * \param[in] advance_several_timesteps Number of the timesteps added
    *                                      to the clock
@@ -193,16 +195,23 @@ class UniformClock : public Clock {
    *
    * \param[in] time base time
    * \param[in] dt step size
+   * \param[in] time_end end time of particle propagation
    */
-  UniformClock(const double time, const double dt)
-      : timestep_duration_(convert(dt)), reset_time_(convert(time)) {
+  UniformClock(const double time, const double dt, const double time_end)
+      : timestep_duration_(convert(dt)),
+        reset_time_(convert(time)),
+        time_end_(convert(time_end)) {
     if (dt < 0.) {
       throw std::range_error("No negative time increment allowed");
     }
   }
   /// \return the current time.
   double current_time() const override {
-    return convert(reset_time_ + timestep_duration_ * counter_);
+    if ((reset_time_ + timestep_duration_ * counter_) > time_end_) {
+      return convert(time_end_);
+    } else {
+      return convert(reset_time_ + timestep_duration_ * counter_);
+    }
   }
   /**
    * \return the time in the next tick.
@@ -216,11 +225,21 @@ class UniformClock : public Clock {
         std::numeric_limits<Representation>::max() - timestep_duration_) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
-    return convert(reset_time_ + timestep_duration_ * (counter_ + 1));
+    if ((reset_time_ + timestep_duration_ * (counter_ + 1)) > time_end_) {
+      return convert(time_end_);
+    } else {
+      return convert(reset_time_ + timestep_duration_ * (counter_ + 1));
+    }
   }
   /// \return the time step size.
   double timestep_duration() const override {
-    return convert(timestep_duration_);
+    if ((reset_time_ + timestep_duration_ * (counter_ + 1)) > time_end_) {
+      Representation last_timestep =
+          time_end_ - (reset_time_ + timestep_duration_ * counter_);
+      return convert(last_timestep);
+    } else {
+      return convert(timestep_duration_);
+    }
   }
   /**
    * Sets the time step size (and resets the counter).
@@ -251,8 +270,8 @@ class UniformClock : public Clock {
       reset_time = start_time;
     }
     if (reset_time < current_time()) {
-      logg[LClock].debug("Resetting clock from", current_time(), " fm/c to ",
-                         reset_time, " fm/c");
+      logg[LClock].debug("Resetting clock from", current_time(), " fm to ",
+                         reset_time, " fm");
     }
     reset_time_ = convert(reset_time);
     counter_ = 0;
@@ -261,7 +280,7 @@ class UniformClock : public Clock {
   void remove_times_in_past(double) override{};
 
   /**
-   * Advances the clock by an arbitrary timestep (multiple of 0.000001 fm/c).
+   * Advances the clock by an arbitrary timestep (multiple of 0.000001 fm).
    *
    * \tparam T type of the timestep
    * \param[in] big_timestep Timestep by which the clock is advanced.
@@ -307,10 +326,12 @@ class UniformClock : public Clock {
   /// Convert an internal int value \p x into the double representation.
   static double convert(Representation x) { return x * to_double; }
 
-  /// The time step size \f$\Delta t\f$ in $10^{-3}$ fm.
+  /// The time step size \f$\Delta t\f$ in \f$10^{-6}\,\mathrm{fm}\f$.
   Representation timestep_duration_ = 0u;
   /// The time of last reset (when counter_ was set to 0).
   Representation reset_time_ = 0;
+  /// The end time of the particle propagation
+  Representation time_end_ = 0;
 };
 
 /// Clock with explicitly defined time steps

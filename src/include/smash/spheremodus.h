@@ -43,7 +43,8 @@ namespace smash {
  *              # definitions here
  * \endcode
  *
- * The following configuration options are understood: \ref input_modi_sphere_
+ * The following configuration options are understood: \ref
+ * doxypage_input_conf_modi_sphere
  */
 class SphereModus : public ModusDefault {
  public:
@@ -80,7 +81,7 @@ class SphereModus : public ModusDefault {
   double radius() const { return radius_; }
 
  private:
-  /// Sphere radius (in fm/c)
+  /// Sphere radius (in fm)
   double radius_;
   /// Temperature for momentum distribution (in GeV)
   double sphere_temperature_;

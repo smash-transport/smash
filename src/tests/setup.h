@@ -157,44 +157,9 @@ inline ParticleData smashon_random(int id = -1) {
 }
 
 /**
- * Return a configuration object filled with data from input/config.yaml. Note
- * that a change to that file may affect test results if you use it.
- *
- * If you want specific values in the config for testing simply overwrite the
- * relevant settings e.g. with:
- * \code
- * auto config = Test::configuration(
- *   "General:\n"
- *   "  Modus: Box\n"
- *   "  Testparticles: 100\n"
- * );
- * \endcode
+ * Create an experiment given an input configuration.
  */
-inline Configuration configuration(std::string overrides = {}) {
-  Configuration c{std::filesystem::path{TEST_CONFIG_PATH} / "input"};
-  if (!overrides.empty()) {
-    c.merge_yaml(overrides);
-  }
-  return c;
-}
-
-/**
- * Create an experiment.
- *
- * If you want a specific configuration you can pass it as parameter, otherwise
- * it will use the result from configuration above.
- */
-inline std::unique_ptr<ExperimentBase> experiment(
-    Configuration &&c = configuration()) {
-  return ExperimentBase::create(c, ".");
-}
-
-/**
- * Creates an experiment using the default config and the specified \p
- * configOverrides.
- */
-inline std::unique_ptr<ExperimentBase> experiment(const char *configOverrides) {
-  Configuration c = configuration(configOverrides);
+inline std::unique_ptr<ExperimentBase> experiment(Configuration c) {
   return ExperimentBase::create(c, ".");
 }
 
@@ -261,18 +226,18 @@ inline ExperimentParameters default_parameters(
     int testparticles = 1, double dt = 0.1,
     CollisionCriterion crit = CollisionCriterion::Geometric) {
   return ExperimentParameters{
-      std::make_unique<UniformClock>(0., dt),  // labclock
-      std::make_unique<UniformClock>(0., 1.),  // outputclock
-      1,                                       // ensembles
-      testparticles,                           // testparticles
-      DerivativesMode::CovariantGaussian,      // derivatives mode
-      RestFrameDensityDerivativesMode::Off,    // rest frame derivatives mode
-      FieldDerivativesMode::ChainRule,         // field derivatives mode
-      SmearingMode::CovariantGaussian,         // smearing mode
-      1.0,                                     // Gaussian smearing width
-      4.0,                                     // Gaussian smearing cut-off
-      0.333333,                                // discrete smearing weight
-      2.0,                                     // triangular smearing range
+      std::make_unique<UniformClock>(0., dt, 300.0),  // labclock
+      std::make_unique<UniformClock>(0., 1., 300.0),  // outputclock
+      1,                                              // ensembles
+      testparticles,                                  // testparticles
+      DerivativesMode::CovariantGaussian,             // derivatives mode
+      RestFrameDensityDerivativesMode::Off,  // rest frame derivatives mode
+      FieldDerivativesMode::ChainRule,       // field derivatives mode
+      SmearingMode::CovariantGaussian,       // smearing mode
+      1.0,                                   // Gaussian smearing width
+      4.0,                                   // Gaussian smearing cut-off
+      0.333333,                              // discrete smearing weight
+      2.0,                                   // triangular smearing range
       crit,
       true,  // two_to_one
       all_reactions_included(),

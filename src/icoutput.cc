@@ -18,7 +18,7 @@ namespace smash {
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 /*!\Userguide
- * \page IC_output_user_guide_ ASCII IC Output
+ * \page doxypage_output_initial_conditions
  * The ASCII initial conditions output (SMASH_IC.dat) contains a list of
  * particles on a hypersurface of constant proper time. This output is formatted
  * such that it is directly compatible with the
@@ -28,7 +28,8 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * be excluded anyways in order to initialize the hydrodynamics evolution. Note
  * though that for all other output formats the full particle list is printed to
  * the IC output, including spectators. The particle data is provided in the
- * computational frame. For further details, see \ref input_ic. \n
+ * computational frame. For further details, see \ref
+ * doxypage_output_initial_conditions. \n
  *
  * \n
  * The ASCII initial conditions output is formatted as follows:

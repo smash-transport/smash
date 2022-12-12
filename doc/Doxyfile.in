@@ -32,7 +32,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = SMASH
+PROJECT_NAME           = SMASH Development Documentation
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -234,7 +234,7 @@ ALIASES                = "NucleusModus=smash::NucleusModus" \
                          "ColliderModus=smash::ColliderModus" \
                          "ListModus=smash::ListModus" \
                          "key=\c" \
-                         "collect_key=\xrefitem configuration_keys \"\" \"\""\
+                         "collect_key=\xrefitem doxypage_input_short_ref \"\" \"\""\
                          "aux_key{6}=\1\anchor \2 \collect_key <b>\key \3</b> &mdash; \4, \5\6"\
                          "required_key{3}=\aux_key{<hr>,\1,\2,\3,required,}"\
                          "required_key_no_line{3}=\aux_key{,\1,\2,\3,required,}"\
@@ -244,7 +244,7 @@ ALIASES                = "NucleusModus=smash::NucleusModus" \
                          "removed_key{1}=This key has been removed in <tt>SMASH-\1</tt> version."\
                          "unit{1}=<b>\1</b>"\
                          "Userguide=" \
-                         "mocking=\xrefitem unittest_mocking \"\" \"\"" \
+                         "mocking=\xrefitem doxypage_unit_testing_mocking \"\" \"\"" \
                          "iref{1}=<a href= https://inspirehep.net/search?p=\1&of=hd>\1</a> \cite \1"
 
 # Set the OPTIMIZE_OUTPUT_FOR_C tag to YES if your project consists of C sources
@@ -783,15 +783,7 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = doc/ \
-                         src/include/smash/ \
-                         src/tests/unittest.h \
-                         src/tests/setup.h \
-                         src/ \
-                         CONTRIBUTING.md \
-                         CHANGELOG.md \
-                         bin/benchmarks/README.md \
-                         3rdparty/einhard/einhard.hpp
+INPUT                  = @DOCUMENTATION_FILES_DEVEL@
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1126,7 +1118,7 @@ HTML_STYLESHEET        =
 # list). For an example see the documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  =
+HTML_EXTRA_STYLESHEET  = @CMAKE_CURRENT_SOURCE_DIR@/extra_style.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note

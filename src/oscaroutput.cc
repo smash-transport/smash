@@ -28,7 +28,7 @@ OscarOutput<Format, Contents>::OscarOutput(const std::filesystem::path &path,
                 (name + ".oscar" + ((Format == OscarFormat1999) ? "1999" : "")),
             "w"} {
   /*!\Userguide
-   * \page oscar_general_ OSCAR Block Structure
+   * \page doxypage_output_oscar
    * OSCAR outputs are a family of ASCII and binary formats that follow
    * the OSCAR format conventions. \n
    * **All OSCAR outputs have the same general structure: a header and an
@@ -61,10 +61,10 @@ OscarOutput<Format, Contents>::OscarOutput(const std::filesystem::path &path,
    * \li event end line
    *
    * Each OSCAR output can produce two types of files: collisions output (see
-   * \ref format_oscar_collisions) and particles output (see \ref
-   * format_oscar_particlelist). In both output types, the above structure is
-   * the same, however the meaning of the blocks is different. **In the
-   * collision file one output block typically corresponds to one collision
+   * \ref doxypage_output_oscar_collisions) and particles output (see \ref
+   * doxypage_output_oscar_particles). In both output types, the above
+   * structure is the same, however the meaning of the blocks is different. **In
+   * the collision file one output block typically corresponds to one collision
    * / decay / box wall crossing, while in the particles output one block
    * corresponds to the current particle list at one moment of time.**
    * The particles output may contain the particle list at event start
@@ -249,19 +249,20 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 }
 
 /*!\Userguide
- * \page format_oscar_particlelist OSCAR Particles Format
+ * \page doxypage_output_oscar_particles
  * The OSCAR particles format follows the general block structure of the OSCAR
- * format: \ref oscar_general_. We distinguish between two versions -
- * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
- * http://phy.duke.edu/~jeb65/oscar2013. \n
- * Enabling the OSCAR output for particles in the config.yaml file
- * (see \ref input_output_), a so-called \c particle_lists.oscar file is
- * produced when executing SMASH. It allows for a certain degree of flexibility,
- * see \ref input_output_content_specific_ "Content-specific output options"
- * for further details. \n
+ * format: \ref doxypage_output_oscar. We distinguish between two
+ * versions, OSCAR2013 and OSCAR1999. Information about OSCAR standard can be
+ * found at http://phy.duke.edu/~jeb65/oscar2013. \n Enabling the OSCAR output
+ * for particles in the config.yaml file (see \ref doxypage_input_conf_output),
+ * a so-called \c particle_lists.oscar file is produced when executing SMASH. It
+ * allows for a certain degree of flexibility, see \ref
+ * input_output_content_specific_ "Content-specific output options" for further
+ * details. \n
  * **Unless IC output is enabled, the Particle output always provides the
- * current particle list at a specific time.** See \ref input_ic for details
- * about the particles IC output. \n
+ * current particle list at a specific time.** See \ref
+ * doxypage_output_initial_conditions for details about the particles IC output.
+ * \n
  *
  * \n
  * Oscar1999
@@ -431,26 +432,28 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key ncoll: Number of collisions the particle has undergone
  * \li \key form_time: Formation time of the particle
  * \li \key xsecfac: Cross section scaling factor (if the particles are
- * not yet fully formed at the time of interaction, the cross section for the
- * underlying process is scaled down by the cross section scaling factor)
+ *     not yet fully formed at the time of interaction, the cross section for
+ *     the underlying process is scaled down by the cross section scaling
+ *     factor)
  * \li \key proc_id_origin: ID of the process of the particle's last interaction
  * \li \key proc_type_origin: Type of the last process the particle has
- * undergone. The possible process types are listed in \subpage process_type.
+ *     undergone. The possible process types are listed in
+ *     \ref doxypage_output_oscar_particles_process_types.
  * \li \key t_last_coll: time of the particle's last interaction (except wall
- * crossings)
+ *     crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle (0 in case the
- * particle is sampled in a thermal bubble. It is not updated by elastic
- * scatterings.)
+ *     particle is sampled in a thermal bubble. It is not updated by elastic
+ *     scatterings.)
  * \li \key pdg_mother2: PDG code of the 2nd mother particle (0 in case the
- * particle results from the decay of a resonance or the appearance of a
- * thermal bubble. In the former case, \key pdg_mother1 is the PDG code of this
- * resonance. It is not updated by elastic scatterings.)
+ *     particle results from the decay of a resonance or the appearance of a
+ *     thermal bubble. In the former case, \key pdg_mother1 is the PDG code of
+ *     this resonance. It is not updated by elastic scatterings.)
  * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1 for
- * anti-baryons and 0 for mesons.
+ *     anti-baryons and 0 for mesons.
  *
  * The mother particles are also set in case of an elastic scattering process.
  *
- * \page process_type Process Types
+ * \page doxypage_output_oscar_particles_process_types
  * The available process types are:
  * \li \key 0: No previous process yet, particle was created at initialization
  * \li \key 1: Elastic scattering
@@ -469,7 +472,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key 46: Hard string excitation
  * \li \key 47: Failed string process
  *
- * \page format_oscar_particlelist
+ * \page doxypage_output_oscar_particles
  * \n
  * **Event end line**\n
  * The end of an event is indicated by the following line:
@@ -488,22 +491,22 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * Note that 'event', 'end', 'impact' and 'empty' are no variables, but words
  * that are printed in the header. \n
  * \n
- * \page format_oscar_collisions OSCAR Collisions Format
+ * \page doxypage_output_oscar_collisions
  * The OSCAR particles format follows the general block structure of the OSCAR
- * format: \ref oscar_general_. We distinguish between two versions -
- * OSCAR2013 and OSCAR1999. Information about OSCAR standard can be found at
- * https://karman.physics.purdue.edu/OSCAR and
+ * format: \ref doxypage_output_oscar. We distinguish between two
+ * versions, OSCAR2013 and OSCAR1999. Information about OSCAR standard can be
+ * found at https://karman.physics.purdue.edu/OSCAR and
  * http://phy.duke.edu/~jeb65/oscar2013. \n
  * Enabling the OSCAR output for collisions in the config.yaml file
- * (see \ref input_output_), a so-called \c full_event_history.oscar
- * file is produced when executing SMASH. It allows for a certain degree of
- * flexibility, see \ref input_output_content_specific_
+ * (see \ref doxypage_input_conf_output), a so-called \c
+ * full_event_history.oscar file is produced when executing SMASH. It allows for
+ * a certain degree of flexibility, see \ref input_output_content_specific_
  * "Content-specific output options" for further details. \n
  * **Collision output always gives
  * a list of collisions/decays/box wall crossings plus optionally
  * initial and final configuration.**
  *
- * See also \ref collisions_output_in_box_modus_. \n
+ * See also \ref doxypage_output_collisions_box_modus. \n
  *
  * Oscar1999
  * ---------
@@ -546,7 +549,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key part_weight: The partial weight of the interaction. This is the
  * specific weight for the chosen final state.
  * \li \key proc_type: The type of the underlying process. See
- * \ref process_type for possible types.
+ * \ref doxypage_output_oscar_particles_process_types for possible types.
  *
  * If the \key Print_Start_End option is set (see \ref
  * input_output_content_specific_ "content-specific output options" for
@@ -631,16 +634,17 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *part_weight type proc_type </span></div>
  * </div>
  * where
- * \li \key nin: Number of ingoing
- *particles (initial state particles) \li \key nout: Number of outgoing
- *particles (final state particles) \li \key density: Density at the interaction
- *point \li \key tot_weight: Total weight of the interaction. This is the total
- *cross section in case of a scattering and the total decay width in case of a
- *decay. If there is no weight for the specific process, e.g. a wall crossing,
- *it's value is 0.0. \li \key part_weight: The partial weight of the
- *interaction. This is the specific weight for the chosen final state. \li \key
- *proc_type: The type of the underlying process. See \ref process_type for
- *possible types.
+ * \li \key nin: Number of ingoing particles (initial state particles)
+ * \li \key nout: Number of outgoing particles (final state particles)
+ * \li \key density: Density at the interaction point
+ * \li \key tot_weight: Total weight of the interaction. This is the total
+ *     cross section in case of a scattering and the total decay width in case
+ *     of a decay. If there is no weight for the specific process, e.g. a wall
+ *     crossing, it's value is 0.0.
+ * \li \key part_weight: The partial weight of the interaction. This is the
+ *     specific weight for the chosen final state.
+ * \li \key proc_type: The type of the underlying process. See \ref
+ *     doxypage_output_oscar_particles_process_types for possible types.
  *
  * Note, that "interaction", "in", "out", "rho", "weight", "partial" and "type"
  * are no variables, but words that are printed.\n
@@ -671,19 +675,21 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key ncoll: Number of collisions the particle has undergone
  * \li \key form_time: Formation time of the particle
  * \li \key xsecfac: Cross section scaling factor (if the particles are
- * not yet fully formed at the time of interaction, the cross section for the
- * underlying process is scaled down by the cross section scaling factor)
+ *     not yet fully formed at the time of interaction, the cross section for
+ *     the underlying process is scaled down by the cross section scaling
+ *     factor)
  * \li \key proc_id_origin: ID of the process of the particle's last interaction
  * \li \key proc_type_origin: Type of the last process the particle has
- * undergone. The possible process types are listed in \ref process_type.
+ *     undergone. The possible process types are listed in \ref
+ *     doxypage_output_oscar_particles_process_types.
  * \li \key t_last_coll: time of the particle's last interaction (except wall
- * crossings)
+ *     crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle
  * \li \key pdg_mother2: PDG code of the 2nd mother particle (0 in case the
- * particle results from the decay of a resonance, then \key pdg_mother1 is
- * the PDG code of this resonance)
+ *     particle results from the decay of a resonance, then \key pdg_mother1 is
+ *     the PDG code of this resonance)
  * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1 for
- * anti-baryons and 0 for mesons.
+ *     anti-baryons and 0 for mesons.
  *
  * The mother particles are also set in case of an elastic scattering process.
  * \n

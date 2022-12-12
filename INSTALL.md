@@ -1,3 +1,4 @@
+# Install
 
 ---
 * [More information about prerequisites](#prerequisites)

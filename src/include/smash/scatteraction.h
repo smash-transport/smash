@@ -63,14 +63,19 @@ class ScatterAction : public Action {
    * Calculate the transverse distance of the two incoming particles in their
    * local rest frame.
    *
-   * According to UrQMD criterion
-   * position of particle a: x_a \n
-   * position of particle b: x_b \n
-   * momentum of particle a: p_a \n
-   * momentum of particle b: p_b \n
-   * \f[d^2_\mathrm{coll} = (\vec{x_a} - \vec{x_b})^2 - \frac{((\vec{x_a} -
-   * \vec{x_b}) \cdot (\vec{p_a} - \vec{p_b}))^2 } {(\vec{p_a} -
-   * \vec{p_b})^2}\f]
+   * According to UrQMD criterion, \iref{Bass:1998ca} eq. (3.27):
+   *  - position of particle a: \f$\mathbf{x}_a\f$
+   *  - position of particle b: \f$\mathbf{x}_b\f$
+   *  - momentum of particle a: \f$\mathbf{p}_a\f$
+   *  - momentum of particle b: \f$\mathbf{p}_b\f$
+   *
+   * \f[
+   * d^2_\mathrm{coll}
+   * = (\mathbf{x}_a - \mathbf{x}_b)^2 -
+   *   \frac{\bigl[(\mathbf{x}_a - \mathbf{x}_b) \cdot
+   *               (\mathbf{p}_a - \mathbf{p}_b)\bigr]^2 }
+   *        {(\mathbf{p}_a - \mathbf{p}_b)^2}
+   * \f]
    *
    * \return  squared distance \f$d^2_\mathrm{coll}\f$.
    */

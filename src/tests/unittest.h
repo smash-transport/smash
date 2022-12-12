@@ -4,7 +4,7 @@
  */
 
 /*!
- * \page unittest_page Unit Testing
+ * \page doxypage_unit_testing
  * \tableofcontents
  *
  * See also: \ref unittest
@@ -101,7 +101,7 @@
  * Instead of creating complete mock classes we can use the BUILD_TESTS macro in
  * actual SMASH classes to easily construct mock objects
  *
- * See \subpage unittest_mocking.
+ * See \ref doxypage_unit_testing_mocking.
  *
  * \subsection unittest_smash_good_example Good Example
  * While implementing the initial conditions (see
@@ -212,7 +212,7 @@
  */
 
 /**
- * \page unittest_mocking Mock Functions/Classes
+ * \page doxypage_unit_testing_mocking
  *
  * This is a list of functions and classes that can be useful in unit tests for
  * creating objects that are necessary for testing a class in (more or less)

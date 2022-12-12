@@ -79,29 +79,30 @@ static ParticleData create_proton(int id = -1) {
 // Create nuclear potential profile in XY plane
 TEST(nucleus_potential_profile) {
   // Create a nucleus
-  Configuration conf = Test::configuration();
-  // All interactions off
-  conf.set_value({"Collision_Term", "Decays"}, "False");
-  conf.set_value({"Collision_Term", "Collisions"}, "False");
-  conf.set_value({"Collision_Term", "Sigma"}, 0.0);
-  // Fixed target: Copper
-  conf.set_value({"Modi", "Collider", "Calculation_Frame"}, "fixed target");
-  conf.set_value({"Modi", "Collider", "E_Kin"}, 1.23);
-  conf.set_value({"Modi", "Collider", "Projectile", "Particles", "211"}, 1);
-  conf.set_value({"Modi", "Collider", "Target", "Particles", "2212"}, 29);
-  conf.set_value({"Modi", "Collider", "Target", "Particles", "2112"}, 34);
-  conf.set_value({"Modi", "Collider", "Target", "Automatic"}, "True");
-
+  Configuration conf{R"(
+    Modi:
+      Collider:
+        Calculation_Frame: "fixed target"
+        E_Kin: 1.23
+        Projectile:
+          Particles:
+            211: 1
+        Target:
+          Particles:
+            2212: 29
+            2112: 34
+    Potentials:
+      Skyrme:
+        Skyrme_A: -209.2
+        Skyrme_B: 156.4
+        Skyrme_Tau: 1.35
+  )"};
+  conf.validate();
   ExperimentParameters param = smash::Test::default_parameters();
   ColliderModus c(conf.extract_sub_configuration({"Modi"}), param);
   std::vector<Particles> P(1);
   c.initial_conditions(&(P[0]), param);
   ParticleList plist;
-
-  // Create potentials
-  conf.set_value({"Potentials", "Skyrme", "Skyrme_A"}, -209.2);
-  conf.set_value({"Potentials", "Skyrme", "Skyrme_B"}, 156.4);
-  conf.set_value({"Potentials", "Skyrme", "Skyrme_Tau"}, 1.35);
   Potentials pot =
       Potentials(conf.extract_sub_configuration({"Potentials"}), param);
 
@@ -166,7 +167,7 @@ TEST(propagation_in_test_potential) {
    public:
     Dummy_Pot(const ExperimentParameters& param, const double U0,
               const double d, const double B0)
-        : Potentials(Configuration(""), param), U0_(U0), d_(d), B0_(B0) {}
+        : Potentials(Configuration{""}, param), U0_(U0), d_(d), B0_(B0) {}
 
     std::tuple<ThreeVector, ThreeVector, ThreeVector, ThreeVector> all_forces(
         const ThreeVector& r, const ParticleList&) const override {
@@ -289,24 +290,22 @@ TEST(ensembles_vs_testparticles) {
     plist.push_back(p);
   }
 
-  std::string conf_pot =
-      "Potentials:\n"
-      "    Skyrme:\n"
-      "        Skyrme_A: -209.2\n"
-      "        Skyrme_B: 156.4\n"
-      "        Skyrme_Tau: 1.35\n"
-      "    Symmetry:\n"
-      "        S_Pot: 18.0\n";
-  Configuration conf1 = Test::configuration(conf_pot),
-                conf2 = Test::configuration(conf_pot);
+  const char* conf_pot{R"(
+    Skyrme:
+        Skyrme_A: -209.2
+        Skyrme_B: 156.4
+        Skyrme_Tau: 1.35
+    Symmetry:
+        S_Pot: 18.0
+  )"};
+  Configuration conf1{conf_pot}, conf2{conf_pot};
   ExperimentParameters param1 = smash::Test::default_parameters(),
                        param2 = smash::Test::default_parameters();
   param1.testparticles = Ntest;
   param1.n_ensembles = 1;
   param2.testparticles = 1;
   param2.n_ensembles = Ntest;
-  Potentials pot1(conf1.extract_sub_configuration({"Potentials"}), param1),
-      pot2(conf2.extract_sub_configuration({"Potentials"}), param2);
+  Potentials pot1(std::move(conf1), param1), pot2(std::move(conf2), param2);
 
   const ThreeVector r = ThreeVector(0., 0., 0.);
   const auto forces1 = pot1.all_forces(r, plist),
@@ -331,11 +330,11 @@ static ExperimentParameters default_parameters_vdf(
     int testparticles = 1, double dt = 0.1,
     double triangular_smearing_range = 2.0) {
   return ExperimentParameters{
-      std::make_unique<UniformClock>(0., dt),  // labclock
-      std::make_unique<UniformClock>(0., 1.),  // outputclock
-      1,                                       // ensembles
-      testparticles,                           // testparticles
-      DerivativesMode::FiniteDifference,       // derivatives mode
+      std::make_unique<UniformClock>(0., dt, 300.0),  // labclock
+      std::make_unique<UniformClock>(0., 1., 300.0),  // outputclock
+      1,                                              // ensembles
+      testparticles,                                  // testparticles
+      DerivativesMode::FiniteDifference,              // derivatives mode
       // both the rest frame and the direct derivatives need to be on for the
       // test of forces calculated using chain rule and direct derivatives
       RestFrameDensityDerivativesMode::On,  // rest frame derivatives mode
@@ -379,15 +378,14 @@ TEST(vdf_chain_rule_derivatives_vs_vdf_direct_derivatives) {
   // a large Ntest is necessary for high precision
   const int Ntest = 1000;
   // initialize the experiment parameters and potentials
-  std::string conf_pot =
-      "Potentials:\n"
-      "    VDF:\n"
-      "      Sat_rhoB: 0.168\n"
-      "      Powers: [2.0, 2.35]\n"
-      "      Coeffs: [-209.2, 156.5]\n";
-  Configuration conf = Test::configuration(conf_pot);
+  Configuration conf{R"(
+    VDF:
+      Sat_rhoB: 0.168
+      Powers: [2.0, 2.35]
+      Coeffs: [-209.2, 156.5]
+  )"};
   ExperimentParameters param = default_parameters_vdf(Ntest);
-  Potentials pot(conf.extract_sub_configuration({"Potentials"}), param);
+  Potentials pot(std::move(conf), param);
 
   // the side length of the cubic space
   const double length = 10.0;
@@ -589,24 +587,22 @@ TEST(skyrme_vs_vdf_wo_lattice) {
   // a large Ntest is necessary for high precision
   const int Ntest = 1000;
   // initialize the experiment parameters and potentials
-  std::string conf_pot1 =
-      "Potentials:\n"
-      "    Skyrme:\n"
-      "        Skyrme_A: -209.2\n"
-      "        Skyrme_B: 156.4\n"
-      "        Skyrme_Tau: 1.35\n";
+  Configuration conf_pot1{R"(
+    Skyrme:
+        Skyrme_A: -209.2
+        Skyrme_B: 156.4
+        Skyrme_Tau: 1.35
+  )"};
 
-  std::string conf_pot2 =
-      "Potentials:\n"
-      "    VDF:\n"
-      "      Sat_rhoB: 0.168\n"
-      "      Powers: [2.0, 2.35]\n"
-      "      Coeffs: [-209.2, 156.5]\n";
-  Configuration conf1 = Test::configuration(conf_pot1),
-                conf2 = Test::configuration(conf_pot2);
+  Configuration conf_pot2{R"(
+    VDF:
+      Sat_rhoB: 0.168
+      Powers: [2.0, 2.35]
+      Coeffs: [-209.2, 156.5]
+  )"};
   ExperimentParameters param = default_parameters_vdf(Ntest);
-  Potentials pot1(conf1.extract_sub_configuration({"Potentials"}), param),
-      pot2(conf2.extract_sub_configuration({"Potentials"}), param);
+  Potentials pot1(std::move(conf_pot1), param),
+      pot2(std::move(conf_pot2), param);
 
   // the side length of the cubic space
   const double length = 10.0;
@@ -856,17 +852,15 @@ TEST(spinodal_dilute) {
   }
 
   // initialize potential
-  std::string conf_pot =
-      "Potentials:\n"
-      "    VDF:\n"
-      "      Sat_rhoB: 0.168\n"
-      "      Powers: [2.0, 2.35]\n"
-      "      Coeffs: [-209.2, 156.5]\n";
-
-  Configuration conf = Test::configuration(conf_pot);
+  Configuration conf{R"(
+    VDF:
+      Sat_rhoB: 0.168
+      Powers: [2.0, 2.35]
+      Coeffs: [-209.2, 156.5]
+  )"};
   ExperimentParameters param = default_parameters_vdf(Ntest, 0.1, 2.0);
 
-  Potentials pot(conf.extract_sub_configuration({"Potentials"}), param);
+  Potentials pot(std::move(conf), param);
   const std::array<double, 3> l = {10, 10, 10};
   const std::array<int, 3> n = {10, 10, 10};
   const std::array<double, 3> origin = {0, 0, 0};

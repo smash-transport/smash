@@ -40,7 +40,7 @@ namespace smash {
  *              # options here
  * \endcode
 
- * For configuring see \ref input_modi_list_.
+ * For configuring see \ref doxypage_input_conf_modi_list.
  *
  *
  * Since SMASH is searching for collisions in computational frame time 't',
@@ -254,7 +254,7 @@ class ListModus : public ModusDefault {
  * \endcode
 
  * The ListBoxModus inherits all functionality from the ListModus.
- * For more detailed configuring see \ref input_modi_list_.
+ * For more detailed configuring see \ref doxypage_input_conf_modi_list.
  *
  *
  * Since SMASH is searching for collisions in computational frame time 't',
@@ -312,7 +312,7 @@ class ListBoxModus : public ListModus {
   /// shift_id is the start number of file_id_
   const int shift_id_;
 
-  /// Length of the cube's edge in fm/c
+  /// Length of the cube's edge in fm
   const double length_;
 
   /// file_id_ is the id of the current file

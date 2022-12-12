@@ -22,7 +22,7 @@ namespace smash {
  * \ingroup data
  *
  * The ThreeVector class represents a physical three-vector
- * \f$ \vec{x} = (x_1,x_2,x_3)\f$
+ * \f$ \mathbf{x} = (x_1,x_2,x_3)\f$
  * with the components \f$ x_1,x_2,x_3 \f$.
  * It is related to the classes FourVector and Angles,
  * both of which can be converted into a ThreeVector using
@@ -104,15 +104,27 @@ class ThreeVector {
    * \param[in] r direction in which new z-axis is aligned
    */
   void inline rotate_z_axis_to(ThreeVector &r);
-  /// negation: Returns \f$-\vec x\f$
+  /// Negation: Returns \f$-\mathbf{x}\f$
   ThreeVector inline operator-() const;
-  /// increase this vector by \f$\vec v: \vec x^\prime = \vec x + \vec v\f$
+  /**
+   * Increase this vector by \f$\mathbf{v}\f$:
+   * \f$ \mathbf{x}^\prime = \mathbf{x} + \mathbf{v} \f$
+   */
   ThreeVector inline operator+=(const ThreeVector &v);
-  /// decrease this vector by \f$\vec v: \vec x^\prime = \vec x - \vec v\f$
+  /**
+   * Decrease this vector by \f$\mathbf{v}\f$:
+   * \f$ \mathbf{x}^\prime = \mathbf{x} - \mathbf{v} \f$
+   */
   ThreeVector inline operator-=(const ThreeVector &v);
-  /// scale this vector by \f$a: \vec x^\prime = a \cdot \vec x\f$
+  /**
+   * Scale this vector by \f$a\f$:
+   * \f$ \mathbf{x}^\prime = a \cdot \mathbf{x} \f$
+   */
   ThreeVector inline operator*=(const double &a);
-  /// divide this vector by \f$a: \vec x^\prime = \frac{1}{a} \cdot \vec x\f$
+  /**
+   * Divide this vector by \f$a\f$:
+   * \f$ \mathbf x^\prime = \frac{1}{a} \cdot \mathbf{x}\f$
+   */
   ThreeVector inline operator/=(const double &a);
 
   /// \return whether the vector is identical to another vector
@@ -121,8 +133,8 @@ class ThreeVector {
   bool operator!=(const ThreeVector &rhs) const { return x_ != rhs.x_; }
 
   /**
-   * \return cross product of this vector and another vector
-   * \f$ \vec{this} \times \vec{b} \f$
+   * \return cross product of this vector \f$\mathbf{x}\f$ and another vector:
+   *         \f$ \mathbf{x} \times \mathbf{b} \f$
    */
   ThreeVector inline cross_product(const ThreeVector &b) const;
   /// iterates over the components
@@ -186,7 +198,7 @@ ThreeVector inline ThreeVector::operator+=(const ThreeVector &v) {
   return *this;
 }
 
-/// \return sum of two three-vectors \f$ \vec{a} + \vec{b} \f$.
+/// \return sum of two three-vectors: \f$ \mathbf{a} + \mathbf{b} \f$.
 ThreeVector inline operator+(ThreeVector a, const ThreeVector &b) {
   a += b;
   return a;
@@ -199,7 +211,7 @@ ThreeVector inline ThreeVector::operator-=(const ThreeVector &v) {
   return *this;
 }
 
-/// \return difference between two three-vectors \f$ \vec{a} - \vec{b} \f$.
+/// \return difference between two three-vectors: \f$\mathbf{a}-\mathbf{b}\f$.
 ThreeVector inline operator-(ThreeVector a, const ThreeVector &b) {
   a -= b;
   return a;
@@ -212,30 +224,25 @@ ThreeVector inline ThreeVector::operator*=(const double &a) {
   return *this;
 }
 
-/// multiply a three-vector by constant factor \f$ b \vec{a} \f$.
+/// multiply a three-vector by constant factor: \f$ b\cdot\mathbf{a} \f$.
 inline ThreeVector operator*(ThreeVector a, const double &b) {
   a *= b;
   return a;
 }
 
-/// multiply a three-vector by constant factor \f$ a \vec{b} \f$.
+/// multiply a three-vector by constant factor: \f$ a\cdot\mathbf{b} \f$.
 inline ThreeVector operator*(const double &a, ThreeVector b) {
   b *= a;
   return b;
 }
 
 /**
- * \return inner product of two three-vectors
- * \f$ \vec{a} \cdot \vec{b} \f$
+ * \return inner product of two three-vectors: \f$\mathbf{a}\cdot\mathbf{b}\f$.
  */
 inline double operator*(ThreeVector a, const ThreeVector &b) {
   return a.x1() * b.x1() + a.x2() * b.x2() + a.x3() * b.x3();
 }
 
-/**
- * \return cross product of two three-vectors
- * \f$ \vec{a} \times \vec{b} \f$
- */
 ThreeVector inline ThreeVector::cross_product(const ThreeVector &b) const {
   return ThreeVector(x_[1] * b.x3() - x_[2] * b.x2(),
                      x_[2] * b.x1() - x_[0] * b.x3(),
@@ -250,7 +257,7 @@ ThreeVector inline ThreeVector::operator/=(const double &a) {
   return *this;
 }
 
-/// divide a three-vector by constant factor \f$ \vec{a} / b \f$.
+/// divide a three-vector by constant factor: \f$\mathbf{a}/b\f$.
 ThreeVector inline operator/(ThreeVector a, const double &b) {
   a /= b;
   return a;

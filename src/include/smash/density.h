@@ -161,8 +161,8 @@ class DensityParameters {
   double two_sig_sqr_inv() const { return two_sig_sqr_inv_; }
   /**
    * \return Normalization for smearing factor. Unnormalized smearing factor
-   *         \f$ sf(\vec{r}) \f$ has to be multiplied by this to have
-   *         \f$ \int d^3r \, sf(\vec{r}) = 1 \f$.
+   *         \f$ sf(\mathbf{r}) \f$ has to be multiplied by this to have
+   *         \f$ \int d^3r \, sf(\mathbf{r}) = 1 \f$.
    */
   double norm_factor_sf() const { return norm_factor_sf_; }
   /// \return counting only participants (true) or also spectators (false)
@@ -223,9 +223,14 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  * and optionally the gradient of the density in an arbitary frame (grad j0),
  * the curl of the 3-current, and the time, x, y, and z derivatives of the
  * 4-current.
- * \f[j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N C_i u^{\mu}_i
- * exp \left(- \frac{(\vec r -\vec r_i + \frac{\gamma_i^2}{1 + \gamma_i}
- * \vec \beta_i (\vec \beta_i, \vec r - \vec r_i))^2}{2\sigma^2} \right)\f]
+ * \f[
+ * j^{\mu} = (\sqrt{2\pi} \sigma )^{-3} \sum_{i=1}^N C_i u^{\mu}_i \exp
+ * \left(
+ *   - \frac{\bigl[\mathbf{r} - \mathbf{r}_i + \frac{\gamma_i^2}{1 + \gamma_i}
+ *     \boldsymbol{\beta}_i (\boldsymbol{\beta}_i, \mathbf{r} - \mathbf{r}_i)
+ * \bigr]^2}{2\sigma^2}
+ * \right)
+ * \f]
  * \f[ \rho^{Eckart} = \sqrt{j^{\mu} j_{\mu}} \f]
  * Here \f$ C_i \f$ is a corresponding value of "charge". If baryon
  * current option is selected then \f$ C_i \f$ is 1 for baryons,
@@ -260,8 +265,8 @@ std::pair<double, ThreeVector> unnormalized_smearing_factor(
  *            and only makes sense to turn off for output purposes in a box.
  * \return (rest frame density in the local Eckart frame [fm\f$^{-3}\f$],
  *          \f$ j^\mu \f$ as a 4-vector,
- *          \f$ \vec{\nabla}\cdot j^0 \f$ or a 0 3-vector,
- *          \f$ \vec{\nabla} \times \vec{j} \f$ or a 0 3-vector,
+ *          \f$ \boldsymbol{\nabla}\cdot j^0 \f$ or a 0 3-vector,
+ *          \f$ \boldsymbol{\nabla} \times \mathbf{j} \f$ or a 0 3-vector,
  *          \f$ \partial_t j^\mu \f$ or a 0 4-vector,
  *          \f$ \partial_x j^\mu \f$ or a 0 4-vector,
  *          \f$ \partial_y j^\mu \f$ or a 0 4-vector,
@@ -301,10 +306,11 @@ current_eckart(const ThreeVector &r, const Particles &plist,
  * -# Get the net rest frame density via rho().
  * -# Get the derivatives of the net current via djmu_dxnu()
  * -# Get the derivatives of the net rest frame baryon density via drho_dxnu()
- * -# Get \f$\vec{\nabla} j^0\f$ via grad_j0()
- * -# Get \f$\vec{\nabla} \times \vec{j}\f$ via curl_vecj()
- * -# Get \f$\partial_t \vec{j}\f$ via dvecj_dt()
- * -# Get \f$(\vec{\nabla} \rho) \times \vec{j}\f$ via grad_rho_cross_vecj()
+ * -# Get \f$\boldsymbol{\nabla} j^0\f$ via grad_j0()
+ * -# Get \f$\boldsymbol{\nabla} \times \mathbf{j}\f$ via curl_vecj()
+ * -# Get \f$\partial_t\,\mathbf{j}\f$ via dvecj_dt()
+ * -# Get \f$(\boldsymbol{\nabla} \rho) \times \mathbf{j}\f$ via
+ *    grad_rho_cross_vecj()
  */
 class DensityOnLattice {
  public:
@@ -383,7 +389,7 @@ class DensityOnLattice {
    * Compute curl of the current on the local lattice
    *
    * \param[in] norm_factor Normalization factor
-   * \return \f$\vec{\nabla}\times\vec{j}\f$ [fm \f$^{-4}\f$]
+   * \return \f$\boldsymbol{\nabla}\times\mathbf{j}\f$ [fm \f$^{-4}\f$]
    */
   ThreeVector curl_vecj(const double norm_factor = 1.0) {
     ThreeVector curl_vec_j = ThreeVector();
@@ -399,7 +405,7 @@ class DensityOnLattice {
    * (that is of the computational frame density) on the local lattice
    *
    * \param[in] norm_factor Normalization factor
-   * \return \f$\vec{\nabla} j^0\f$ [fm \f$^{-4}\f$]
+   * \return \f$\boldsymbol{\nabla} j^0\f$ [fm \f$^{-4}\f$]
    */
   ThreeVector grad_j0(const double norm_factor = 1.0) {
     ThreeVector j0_grad = ThreeVector();
@@ -413,7 +419,7 @@ class DensityOnLattice {
    * Compute time derivative of the current density on the local lattice
    *
    * \param[in] norm_factor Normalization factor
-   * \return \f$\partial_t \vec j\f$ [fm \f$^{-4}\f$]
+   * \return \f$\partial_t \mathbf{j}\f$ [fm \f$^{-4}\f$]
    */
   ThreeVector dvecj_dt(const double norm_factor = 1.0) {
     return djmu_dxnu_[0].threevec() * norm_factor;
@@ -459,8 +465,9 @@ class DensityOnLattice {
   std::array<FourVector, 4> djmu_dxnu() const { return djmu_dxnu_; }
 
   /**
-   * Compute the  cross product of \f$\vec{\nabla}\rho\f$ and \f$j^\mu\f$
-   * \return the cross product of \f$\vec{\nabla} \rho\f$ and \f$\vec{j}\f$
+   * Compute the  cross product of \f$\boldsymbol{\nabla}\rho\f$ and \f$j^\mu\f$
+   * \return the cross product of \f$\boldsymbol{\nabla} \rho\f$ and
+   *         \f$\mathbf{j}\f$
    */
   ThreeVector grad_rho_cross_vecj() const {
     const ThreeVector grad_rho = drho_dxnu_.threevec();

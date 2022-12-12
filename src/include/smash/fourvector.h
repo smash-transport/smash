@@ -125,14 +125,14 @@ class FourVector {
   /**
    * calculate the square of the spatial three-vector
    *
-   * \return \f$\vec x \cdot \vec x\f$
+   * \return \f$\mathbf{x} \cdot \mathbf{x}\f$
    */
   double inline sqr3() const;
 
   /**
    * calculate the absolute value of the spatial three-vector
    *
-   * \return \f$\sqrt{\vec x \cdot \vec x}\f$
+   * \return \f$\sqrt{\mathbf{x} \cdot \mathbf{x}}\f$
    */
   double inline abs3() const;
 
@@ -152,33 +152,38 @@ class FourVector {
    *
    * The current FourVector is not changed.
    *
-   * \param v (\f$\vec{v}\f$) is a ThreeVector representing the
-   * boost velocity
+   * \param[in] v (\f$\mathbf{v}\f$ in the explanation below) is a ThreeVector
+   * representing the boost velocity
    *
-   * Algorithmic
-   * -----------
+   * ### Algorithmic
    *
-   * (Notation: \f$\vec{a}\f$ is a Three-Vector, \f$a^\mu\f$ is a Four-Vector.)
+   * Notation:
+   *  - \f$\mathbf{a}\f$ is a Three-Vector,
+   *  - \f$a^\mu\f$ is a Four-Vector.
    *
-   * The gamma factor is \f$\gamma = 1/\sqrt{1-\vec{v}^2}\f$.
+   * The gamma factor is \f$\gamma = 1/\sqrt{1-\mathbf{v}^2}\f$.
    *
    * The time-like component of a Lorentz-boosted FourVector \f$x^\mu =
-   * (x_0, x_1, x_2, x_3) = (x_0, \vec{r})\f$ with velocity \f$\vec v\f$
+   * (x_0, x_1, x_2, x_3) = (x_0, \mathbf{r})\f$ with velocity \f$\mathbf{v}\f$
    * is
    *
-   * \f{eqnarray*}{x^\prime_0 = \gamma \cdot (x_0 - \vec{r}\cdot\vec{v}),\f}
+   * \f{eqnarray*}{
+   * x^\prime_0 = \gamma \cdot (x_0 - \mathbf{r}\cdot\mathbf{v})\;,
+   * \f}
    *
    * and the space-like components i = 1, 2, 3 are:
    * \f{eqnarray*}{
-   * x^\prime_i &=& x_i + v_i \cdot (\frac{\gamma - 1}{\vec{v}^2} \cdot
-   * \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
-   *            &=& x_i + v_i \cdot (\frac{\gamma^2}{\gamma + 1} \cdot
-   * \vec{r}\cdot\vec{v} - \gamma \cdot x_0)\\
-   *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (\gamma(x_0
-   * -
-   * \vec{r}\cdot\vec{v}) + x_0 )\\
-   *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot (x^\prime_0
-   * + x_0) \f}
+   * x^\prime_i &=& x_i + v_i \cdot
+   *                      \Bigl(\frac{\gamma - 1}{\mathbf{v}^2} \cdot
+   *                      \mathbf{r}\cdot\mathbf{v} - \gamma \cdot x_0\Bigr)\\
+   *            &=& x_i + v_i \cdot
+   *                      \Bigl(\frac{\gamma^2}{\gamma + 1} \cdot
+   *                      \mathbf{r}\cdot\mathbf{v} - \gamma \cdot x_0\Bigr)\\
+   *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot
+   *                \bigl[\gamma\,(x_0 - \mathbf{r}\cdot\mathbf{v})+x_0\bigr]\\
+   *            &=& x_i - v_i \cdot \frac{\gamma}{\gamma + 1} \cdot
+   *                      (x^\prime_0 + x^{\vphantom{\prime}}_0)
+   * \f}
    *
    * Note: This function is equivalent to -velocity Boost from ROOT
    */

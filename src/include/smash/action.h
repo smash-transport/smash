@@ -249,7 +249,7 @@ class Action {
   /**
    * Get the time at which the action is supposed to be performed
    *
-   * \return absolute time in the calculation frame in fm/c
+   * \return absolute time in the calculation frame in fm
    */
   double time_of_execution() const { return time_of_execution_; }
 
@@ -354,7 +354,7 @@ class Action {
 
   /**
    * Time at which the action is supposed to be performed
-   * (absolute time in the lab frame in fm/c).
+   * (absolute time in the lab frame in fm).
    */
   const double time_of_execution_;
 
