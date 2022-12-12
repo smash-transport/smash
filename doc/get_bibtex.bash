@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 #
+########################################################
+#
+#    Copyright (c) 2015,2019-2020,2022
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+#########################################################
+#
 # This script produces a bibtex file 'inspire.bib' including all papers
 # referenced in the Smash source code via the doxygen command \iref{}.
 #
