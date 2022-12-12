@@ -88,8 +88,8 @@ if(DOXYGEN_FOUND)
     if(SED)
         include(UserInputFiles.cmake)
         add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
-                           COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/generateuserdocs.sh ${SED}
-                                   ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox ${files_with_input}
+                           COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/prepare_userguide_source.bash ${SED}
+                                   ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox -- ${files_with_input}
                            DEPENDS ${files_with_input}
                            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                            COMMENT "Generating User Guide input file"
