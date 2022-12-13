@@ -125,6 +125,11 @@ current_eckart_impl(const ThreeVector &r, const T &plist,
     }
   }
 
+  if (smearing) {
+    jmu_pos *= par.norm_factor_sf();
+    jmu_neg *= par.norm_factor_sf();
+  }
+
   // Eckart density (rest frame density)
   const double rho_eck = (jmu_pos.abs() - jmu_neg.abs()) * par.norm_factor_sf();
 
@@ -158,9 +163,8 @@ current_eckart_impl(const ThreeVector &r, const T &plist,
       grad_j0[i - 1] += djmu_dxnu[i].x0() * par.norm_factor_sf();
     }
   }
-  return std::make_tuple(rho_eck, (jmu_pos + jmu_neg) * par.norm_factor_sf(),
-                         grad_j0, curl_vecj, djmu_dt, djmu_dx, djmu_dy,
-                         djmu_dz);
+  return std::make_tuple(rho_eck, jmu_pos + jmu_neg, grad_j0, curl_vecj,
+                         djmu_dt, djmu_dx, djmu_dy, djmu_dz);
 }
 
 std::tuple<double, FourVector, ThreeVector, ThreeVector, FourVector, FourVector,
