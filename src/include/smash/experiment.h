@@ -230,10 +230,10 @@ class Experiment : public ExperimentBase {
    *                  as an external library
    * \param[in] add_plist A particle list which is added to the current particle
    *                      content of the system if SMASH is used as an
-   *                      external library.
-   * \param[in] remove_plist A particle list which is added to the current
+   *                      external library
+   * \param[in] remove_plist A particle list which is removed from the current
    *                         particle content of the system if SMASH is used as
-   *                         an external library.
+   *                         an external library
    */
   void run_time_evolution(const double t_end, ParticleList add_plist = {},
                           ParticleList remove_plist = {});

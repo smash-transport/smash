@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2017-
+ *    Copyright (c) 2022
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -16,14 +16,23 @@ namespace smash {
 
 /**
  * \ingroup action
- * Action class to create any incoming/outgoing particle combination freely.
+ * \brief Action class to create any incoming/outgoing particle combination freely.
+ * This class is in particular designed to add and remove particles from the 
+ * evolution. This introduces violations of the conservation laws, but it is
+ * e.g. needed for a concurrent running of transport and hydrodynamics.
  */
 class FreeforallAction : public Action {
  public:
   /**
+   * The FreeforallAction is able to add particles by providing an empty
+   * particle list for in_part and a list with particles which are supposed to
+   * be added to the evolution as out_part.
+   * If particles should be removed a filled particle list with the
+   * corresponding particles should be provided as in_part and an empty list as
+   * out_part.
    * \param[in] in_part List of incoming particles
    * \param[in] out_part List of outgoing particles
-   * \param[in] absolute_execution_time Absolute time at which the action is
+   * \param[in] absolute_labframe_time Absolute time at which the action is
    *                                             supposed to take place
    */
   FreeforallAction(const ParticleList &in_part, const ParticleList &out_part,
