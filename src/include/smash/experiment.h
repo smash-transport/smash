@@ -2162,7 +2162,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
                                            ParticleList remove_plist) {
   // the next block performs checks for particles stored in a list which
   // are supposed to be added to the evolution
-  const double demo_act_time = parameters_.labclock->current_time();
+  const double act_time = parameters_.labclock->current_time();
   ParticleList empty_in_list;
   ParticleList add_plist_checked;
   // check particle list for additional particles if a non-empty list is given
@@ -2235,6 +2235,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
   // the next block performs checks for particles stored in a list which
   // are supposed to be deleted from the evolution
   ParticleList remove_plist_final;
+  ParticleList empty_out_list;
   if (!remove_plist.empty()) {
     // check if the particles in the list are valid, perfom the same checks
     // as in ListModus::try_create_particle()
@@ -2329,15 +2330,28 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     }
   }
 
-  if (!add_plist_checked.empty() || !remove_plist_final.empty()) {
-    auto demo_act = std::make_unique<FreeforallAction>(
-        remove_plist_final, add_plist_checked, demo_act_time);
+  if (!add_plist_checked.empty()) {
+    auto act_add = std::make_unique<FreeforallAction>(
+        empty_in_list, add_plist_checked, act_time);
     // Perform the action directly here
     // Time of add_plist_checked is set to action time, i.e. current_time
     // in generate_final_state() in freeforallaction.h
-    // TODO(#977) Does this time setting makes sense in the end?
-    perform_action(*demo_act, 0);
-    // Particles are only added and removed to the first ensemble, which is
+    // TODO(#977) Does this time setting make sense in the end?
+    perform_action(*act_add, 0);
+    // Particles are only added to the first ensemble, which is
+    // currently the only one needed for the use of SMASH as an external
+    // library (e.g. in JETSCAPE / XSCAPE)
+  }
+
+  if (!remove_plist_final.empty()) {
+    auto act_remove = std::make_unique<FreeforallAction>(
+        remove_plist_final, empty_out_list, act_time);
+    // Perform the action directly here
+    // Time of add_plist_checked is set to action time, i.e. current_time
+    // in generate_final_state() in freeforallaction.h
+    // TODO(#977) Does this time setting make sense in the end?
+    perform_action(*act_remove, 0);
+    // Particles are only removed to the first ensemble, which is
     // currently the only one needed for the use of SMASH as an external
     // library (e.g. in JETSCAPE / XSCAPE)
   }
@@ -3049,25 +3063,7 @@ void Experiment<Modus>::run() {
     // Sample initial particles, start clock, some printout and book-keeping
     initialize_new_event();
 
-    ////////////////////////////////////////////////////////////////////////////
-    // Example add. out list
-    /*constexpr double r_x = 0.1;
-    const FourVector pos_a{0.0, -r_x, 0., 0.};
-    const FourVector pos_b{0.0, r_x, 0., 0.};
-
-    ParticleData a{ParticleType::find(0x111)};  // pi0
-    a.set_4position(pos_a);
-    a.set_4momentum(a.pole_mass(), 1.0, 0., 0.);
-
-    ParticleData b{ParticleType::find(0x111)};  // pi0
-    b.set_4position(pos_b);
-    b.set_4momentum(b.pole_mass(), -1.0, 0., 0.);
-
-    ParticleList add_list{a, b};
-    ParticleList remove_list{a};*/
-    ////////////////////////////////////////////////////////////////////////////
-
-    run_time_evolution(end_time_);//, add_list, remove_list);
+    run_time_evolution(end_time_);
 
     if (force_decays_) {
       do_final_decays();
