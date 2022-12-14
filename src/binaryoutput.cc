@@ -21,7 +21,7 @@ namespace smash {
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 /*!\Userguide
- * \page format_binary_ Binary Format
+ * \page doxypage_output_binary
  * SMASH supports a binary output version similar to the OSCAR 2013 standard.
  * It is faster to read and write and theoretically needs less disk space.
  * However, currently in ASCII OSCAR 2013 only 5 digits after the comma are
@@ -29,10 +29,9 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * (16 digits). By accident, this makes the sizes of the binary output files
  * approximately the same as the OSCAR ASCII files.
  * **The binary format follows the general block structure of the OSCAR
- * format:**
- * \ref oscar_general_. However, for the binary format, the data type
- * specification is stricter. The types used for the output are 4 bytes signed
- * integers, 8 bytes doubles and 1 byte chars.
+ * format:** \ref doxypage_output_oscar. However, for the binary format,
+ * the data type specification is stricter. The types used for the output are 4
+ * bytes signed integers, 8 bytes doubles and 1 byte chars.
  *
  * As for OSCAR ASCII output there are two kinds of binary output:
  * particles and collisions.
@@ -130,7 +129,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * are written in the 'process_type' blocks. For options of this output see
  * \ref input_output_content_specific_ "content-specific output options".
  *
- * See also \ref collisions_output_in_box_modus_.
+ * See also \ref doxypage_output_collisions_box_modus.
  **/
 
 BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,

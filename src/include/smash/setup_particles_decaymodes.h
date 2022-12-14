@@ -20,9 +20,9 @@ namespace smash {
  * particles_file and decaymodes_file. In case if particles_file
  * or decaymodes_file are nullptr, the defaults are taken
  * \param[in] particles_file a file containing particles list.
- *            See \ref inputparticles.
+ *            See \ref doxypage_input_particles.
  * \param[in] decaymodes_file a file containing decay modes of
- *            the resonances. See \ref inputdecaymodes.
+ *            the resonances. See \ref doxypage_input_decaymodes.
  * \return a pair of strings -- the contents of particle
  *             and decaymode files.
  */

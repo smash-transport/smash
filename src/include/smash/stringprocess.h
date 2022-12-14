@@ -33,7 +33,7 @@ static constexpr int LPythia = LogArea::Pythia::id;
  * This class implements string excitation processes based on the UrQMD model
  * \iref{Bass:1998ca}, \iref{Bleicher:1999xi} and subsequent fragmentation
  * according to the LUND/PYTHIA fragmentation scheme
- * \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
+ * \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}, \iref{Bierlich:2022pfr}.
  *
  * The class implements the following functionality:
  * - given two colliding initial state particles it provides hadronic final
@@ -887,7 +887,8 @@ class StringProcess {
 
   /**
    * perform string fragmentation to determine species and momenta of hadrons
-   * by implementing PYTHIA 8.2 \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea}.
+   * by exploiting PYTHIA 8.3 \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea},
+   * \iref{Bierlich:2022pfr}.
    * \param[in] idq1 PDG id of quark or anti-diquark (carrying color index).
    * \param[in] idq2 PDG id of diquark or anti-quark (carrying anti-color index).
    * \param[in] mString the string mass. [GeV]

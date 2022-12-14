@@ -122,7 +122,7 @@ class ExperimentBase {
    *         string.
    *
    * Most of the Configuration values are read starting from this function. The
-   * configuration itself is documented in \subpage input_general_
+   * configuration itself is documented in \ref doxypage_input_conf_general
    */
   static std::unique_ptr<ExperimentBase> create(
       Configuration &config, const std::filesystem::path &output_path);
@@ -1093,7 +1093,7 @@ Experiment<Modus>::Experiment(Configuration &config,
       modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
 
   /*!\Userguide
-   * \page output_general_ Output
+   * \page doxypage_output
    *
    * \section output_directory_ Output directory
    *
@@ -1119,39 +1119,47 @@ Experiment<Modus>::Experiment(Configuration &config,
    * formats _simultaneously_.
    *
    * For an example of choosing specific output contents see
-   * \subpage configuring_output_.
+   * \ref doxypage_output_conf_examples.
    *
    * The list of possible contents follows:
    *
    * - \b Particles  List of particles at regular time intervals in the
    *                 computational frame or (optionally) only at the event end.
-   *   - Available formats: \ref format_oscar_particlelist,
-   *      \ref format_binary_, \ref format_root, \ref format_vtk, \ref
-   * output_hepmc_
+   *   - Available formats: \ref doxypage_output_oscar_particles,
+   *                        \ref doxypage_output_binary, \ref
+   *                        doxypage_output_root, \ref doxypage_output_vtk, \ref
+   *                        doxypage_output_hepmc
    * - \b Collisions List of interactions: collisions, decays, box wall
    *                 crossings and forced thermalizations. Information about
    *                 incoming, outgoing particles and the interaction itself
    *                 is printed out.
-   *   - Available formats: \ref format_oscar_collisions, \ref format_binary_,
-   *                 \ref format_root, \subpage output_hepmc_
-   * - \b Dileptons  Special dilepton output, see \subpage output_dileptons.
-   *   - Available formats: \ref format_oscar_collisions,
-   *                   \ref format_binary_ and \ref format_root
-   * - \b Photons    Special photon output, see \subpage output_photons.
-   *   - Available formats: \ref format_oscar_collisions,
-   *                   \ref format_binary_ and \ref format_root.
+   *   - Available formats: \ref doxypage_output_oscar_collisions, \ref
+   *                        doxypage_output_binary, \ref doxypage_output_root,
+   *                        \ref doxypage_output_hepmc
+   * - \b Dileptons  Special dilepton output, see
+   *                 \ref doxypage_output_dileptons.
+   *   - Available formats: \ref doxypage_output_oscar_collisions,
+   *                        \ref doxypage_output_binary and \ref
+   *                        doxypage_output_root
+   * - \b Photons   Special photon output, see
+   *                \ref doxypage_output_photons.
+   *   - Available formats: \ref doxypage_output_oscar_collisions,
+   *                        \ref doxypage_output_binary and \ref
+   *                        doxypage_output_root.
    * - \b Thermodynamics   This output allows to print out thermodynamic
-   *          quantities, see \ref input_output_thermodynamics_.
-   *    - Available formats: \ref thermodyn_output_user_guide_,
-   *      \ref thermodyn_lattice_output_,
-   *      \ref output_vtk_lattice_
+   *                       quantities, see \ref input_output_thermodynamics_.
+   *    - Available formats: \ref doxypage_output_thermodyn,
+   *                         \ref doxypage_output_thermodyn_lattice,
+   *                         \ref doxypage_output_vtk_lattice
    * - \b Initial_Conditions  Special initial conditions output, see
-   *                          \subpage input_ic for details
-   *   - Available formats: \ref format_oscar_particlelist, \ref
-   * IC_output_user_guide_
+   *                          \ref doxypage_output_initial_conditions for
+   *                          details.
+   *   - Available formats: \ref doxypage_output_oscar_particles, \ref
+   *                        doxypage_output_initial_conditions
    * - \b Rivet Run Rivet analysis on generated events and output
-   *    results, see \subpage rivet_output_user_guide_ for details.
-   *    - Available formats: \ref rivet_output_user_guide_
+   *            results, see \ref doxypage_output_rivet for
+   *            details.
+   *    - Available formats: \ref doxypage_output_rivet
    *
    *
    * \n
@@ -1159,53 +1167,54 @@ Experiment<Modus>::Experiment(Configuration &config,
    * \section list_of_output_formats Output formats
    *
    * For choosing output formats see
-   * \ref configuring_output_.
+   * \ref doxypage_output_conf_examples.
    * Every output content can be printed out in several formats:
    * - \b "Oscar1999", \b "Oscar2013" - human-readable text output\n
-   *   - For "Particles" content: \subpage format_oscar_particlelist
-   *   - For "Collisions" content: \subpage format_oscar_collisions
-   *   - General block structure of OSCAR formats: \subpage oscar_general_
+   *   - For "Particles" content: \ref doxypage_output_oscar_particles
+   *   - For "Collisions" content: \ref doxypage_output_oscar_collisions
+   *   - General block structure of OSCAR formats:
+   *     \ref doxypage_output_oscar
    * - \b "Binary" - binary, not human-readable output
    *   - Faster to read and write than text outputs
    *   - Saves coordinates and momenta with the full double precision
-   *   - General file structure is similar to \ref oscar_general_
-   *   - Detailed description: \subpage format_binary_
+   *   - General file structure is similar to \ref doxypage_output_oscar
+   *   - Detailed description: \ref doxypage_output_binary
    * - \b "Root" - binary output in the format used by ROOT software
    *     (http://root.cern.ch)
    *   - Even faster to read and write, requires less disk space
-   *   - Format description: \subpage format_root
+   *   - Format description: \ref doxypage_output_root
    * - \b "VTK" - text output suitable for an easy
    *     visualization using paraview software
    *   - This output can be opened by paraview to see the visulalization.
-   *   - For "Particles" content \subpage format_vtk
-   *   - For "Thermodynamics" content \subpage output_vtk_lattice_
+   *   - For "Particles" content \ref doxypage_output_vtk
+   *   - For "Thermodynamics" content \ref doxypage_output_vtk_lattice
    * - \b "ASCII" - a human-readable text-format table of values
    *   - Used for "Thermodynamics" and "Initial_Conditions", see
-   * \subpage thermodyn_output_user_guide_
-   * \subpage thermodyn_lattice_output_
-   * \subpage IC_output_user_guide_
+   * \ref doxypage_output_thermodyn
+   * \ref doxypage_output_thermodyn_lattice
+   * \ref doxypage_output_initial_conditions
    * - \b "HepMC_asciiv3", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
-   *   Tree ROOT format see \ref output_hepmc_ for details
+   *   Tree ROOT format see \ref doxypage_output_hepmc for details
    * - \b "YODA", \b "YODA-full" - compact ASCII text format used by the
-   *   Rivet output, see \ref rivet_output_user_guide_ for details
+   *   Rivet output, see \ref doxypage_output_rivet for details
    *
    * \note Output of coordinates for the "Collisions" content in
    *       the periodic box has a feature:
-   *       \subpage collisions_output_in_box_modus_
+   *       \ref doxypage_output_collisions_box_modus
    */
 
   /*!\Userguide
-   * \page output_dileptons Dileptons
+   * \page doxypage_output_dileptons
    * The existence of a dilepton subsection in the collision term section of the
    * configuration file enables the dilepton production. In addition, the
    * dilepton output also needs to be enabled in the output section and dilepton
    * decays have to be uncommented in the used decaymodes.txt file. The output
    * file named Dileptons (followed by the appropriate suffix) is generated when
    * SMASH is executed. It's format is identical to the collision output (see
-   * \ref format_oscar_collisions), it does however only contain information
-   * about the dilepton decays. \n Further, the block headers differ from the
-   * usual collision output: <div class="fragment"> <div class="line"> <span
-   * class="preprocessor">
+   * \ref doxypage_output_oscar_collisions), it does however only contain
+   * information about the dilepton decays. \n Further, the block headers differ
+   * from the usual collision output: <div class="fragment"> <div class="line">
+   * <span class="preprocessor">
    *  \# interaction in nin out nout rho density weight shining_weight partial
    *  part_weight type proc_type </span></div>
    * </div>
@@ -1231,30 +1240,30 @@ Experiment<Modus>::Experiment(Configuration &config,
    **/
 
   /*!\Userguide
-   * \page output_photons Photons
-   * The existance of a photon subsection in the output section of the
+   * \page doxypage_output_photons
+   * The existence of a photon subsection in the output section of the
    * configuration file enables the photon output.
    * If photons are enabled, the output file named Photons (followed by the
    * appropriate suffix) is generated when SMASH is executed. It's format is
-   * identical to the collision output (see \ref format_oscar_collisions),
-   * it does however only contain information about all particles participating
-   * in the photon producing interactions at each timestep. \n
-   * Further, the block headers differ from the usual collision output:
-   * <div class="fragment">
-   * <div class="line"> <span class="preprocessor">
+   * identical to the collision output (see \ref
+   * doxypage_output_oscar_collisions), it does however only contain information
+   * about all particles participating in the photon producing interactions at
+   * each timestep. \n Further, the block headers differ from the usual
+   * collision output: <div class="fragment"> <div class="line"> <span
+   * class="preprocessor">
    *  \# interaction in nin out nout rho density weight photon_weight partial
    *  part_weight type proc_type </span></div>
    * </div>
    * where
    * \li \key density: Density at the interaction point
    * \li \key photon_weight: Weight of the photon process relative to the
-   * underlying hadonic interaction. Make sure to weigh each photon in your
+   * underlying hadronic interaction. Make sure to weigh each photon in your
    * analysis with this value. Otherwise the photon production is highly
    * overestimated.
    * \li \key part_weight: Always 0.0 for photon processes, as they
    * are hardcoded.
    * \li \key proc_type: The type of the underlying process. See
-   * \ref process_type for possible types.
+   * \ref doxypage_output_oscar_particles_process_types for possible types.
    *
    * Note, that "interaction", "in", "out", "rho", "weight", "partial" and
    * "type" are no variables, but words that are printed. \n
@@ -1264,8 +1273,8 @@ Experiment<Modus>::Experiment(Configuration &config,
    **/
 
   /*!\Userguide
-   * \page input_ic Initial Conditions
-   * The existance of an initial conditions subsection in the output section of
+   * \page doxypage_output_initial_conditions
+   * The existence of an initial conditions subsection in the output section of
    * the configuration file enables the IC output. In addition, all particles
    * that cross the hypersurface of predefined proper time are removed from the
    * evolution. This proper time is taken from the \key Proper_Time field
@@ -1282,29 +1291,29 @@ Experiment<Modus>::Experiment(Configuration &config,
    * \sqrt{s_\mathrm{NN}}\f$
    * is the collision energy per nucleon and \f$ m_\mathrm{N} \f$ the nucleon
    * mass. Note though that, if the passing time is smaller than 0.5 fm, the
-   * default porper time of the hypersurface is taken to be \f$\tau = 0.5 \f$
+   * default proper time of the hypersurface is taken to be \f$\tau = 0.5 \f$
    * as a minimum bound to ensure the proper time is large enough
    * to also extract reasonable initial conditions at RHIC/LHC energies. If
-   * desired, this lowest possible value can also be specifie in the
+   * desired, this lowest possible value can also be specified in the
    * configuration file in the \key Lower_Bound field. \n Once
    * initial conditions are enabled, the output file named SMASH_IC (followed by
    * the appropriate suffix) is generated when SMASH is executed. \n The output
    * is available in Oscar1999, Oscar2013, binary and ROOT format, as well as in
-   * an aditional ASCII format (see \ref IC_output_user_guide_). The latter is
-   * meant to directly serve
-   * as an input for the vHLLE hydrodynamics code (I. Karpenko, P. Huovinen, M.
-   * Bleicher: Comput. Phys. Commun. 185, 3016 (2014)).\n \n
+   * an additional ASCII format (see \ref doxypage_output_initial_conditions).
+   * The latter is meant to directly serve as an input for the vHLLE
+   * hydrodynamics code (I. Karpenko, P. Huovinen, M. Bleicher: Comput. Phys.
+   * Commun. 185, 3016 (2014)).\n \n
    * ### Oscar output
    * In case
    * of the Oscar1999 and Oscar2013 format, the structure is identical to the
-   * Oscar Particles Format (see \ref format_oscar_particlelist). \n
+   * Oscar Particles Format (see \ref doxypage_output_oscar_particles). \n
    * In contrast
    * to the usual particles output however, the initial conditions output
    * provides a
    * **list of all particles removed from the evolution** at the time when
    * crossing the hypersurface. This implies that neither the initial particle
    * list nor the particle list at each time step is printed.\n The general
-   * Oscar structure as described in \ref format_oscar_particlelist is
+   * Oscar structure as described in \ref doxypage_output_oscar_particles is
    * preserved. \n
    * \n
    * ### Binary output
@@ -1312,14 +1321,14 @@ Experiment<Modus>::Experiment(Configuration &config,
    * conditions output also provides a list of all particles removed from the
    * evolution at the time when crossing the hypersurface. For each removed
    * particle a 'p' block is created stores the particle data. The general
-   * binary output structure as described in \ref format_binary_ is preserved.\n
-   * \n
+   * binary output structure as described in \ref doxypage_output_binary is
+   * preserved.\n \n
    * ### ROOT output
    * The initial conditions output in shape of a list of all particles removed
    * from the SMASH evolution when crossing the hypersurface is also available
    * in ROOT format. Neither the initial nor the final particle lists are
    * printed, but the general structure for particle TTrees, as described in
-   * \ref format_root, is preserved.
+   * \ref doxypage_output_root, is preserved.
    */
 
   // create outputs
@@ -2063,7 +2072,7 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
                                      smearing));
   }
   /*!\Userguide
-   * \page collisions_output_in_box_modus_ Collision Output in Box Modus
+   * \page doxypage_output_collisions_box_modus
    * \note When SMASH is running in the box modus, particle coordinates
    * in the collision output can be out of the box. This is not an error.  Box
    * boundary conditions are intentionally not imposed before collision output

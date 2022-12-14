@@ -68,14 +68,14 @@ class ThermodynamicOutput : public OutputInterface {
 
   /**
    *  Writes thermodynamics every fixed time interval. For configuring
-   *  the output see \ref thermodyn_output_user_guide_.
+   *  the output see \ref doxypage_output_thermodyn.
    *
    * \param[in] ensembles Particles, from which thermodynamic variables are
    *            computed
    * \param[in] clock Clock, needed to get current time
    * \param[in] dens_param set of parameters, defining smearing.
    *            For more info about
-   *            smearing see \ref thermodyn_output_user_guide_.
+   *            smearing see \ref doxypage_output_thermodyn.
    */
   void at_intermediate_time(const std::vector<Particles> &ensembles,
                             const std::unique_ptr<Clock> &clock,

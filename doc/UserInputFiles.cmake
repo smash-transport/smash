@@ -1,5 +1,5 @@
 set(files_with_input
-    ${PROJECT_SOURCE_DIR}/AUTHORS
+    ${PROJECT_SOURCE_DIR}/AUTHORS.md
     ${PROJECT_SOURCE_DIR}/src/include/smash/configuration.h
     ${PROJECT_SOURCE_DIR}/src/experiment.cc
     ${PROJECT_SOURCE_DIR}/src/include/smash/experiment.h

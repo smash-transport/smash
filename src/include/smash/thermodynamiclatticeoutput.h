@@ -108,7 +108,7 @@ class ThermodynamicLatticeOutput : public OutputInterface {
    *            computed
    * * \param[in] dens_param set of parameters, defining smearing.
    *            For more info about
-   *            smearing see \ref thermodyn_output_user_guide_.
+   *            smearing see \ref doxypage_output_thermodyn.
    */
   void thermodynamics_lattice_output(
       RectangularLattice<DensityOnLattice> &lattice, const double current_time,
