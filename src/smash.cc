@@ -490,10 +490,6 @@ int main(int argc, char *argv[]) {
     auto configuration = setup_config_and_logging(input_path, particles,
                                                   decaymodes, extra_config);
 
-    if (configuration.validate() == Configuration::Is::Invalid) {
-      throw std::runtime_error("Validation of SMASH input failed.");
-    }
-
     setup_default_float_traps();
 
     // Check output path

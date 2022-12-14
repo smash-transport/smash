@@ -34,6 +34,11 @@ Configuration setup_config_and_logging(
     configuration.merge_yaml(config);
   }
 
+  // Fully validate the configuration
+  if (configuration.validate() == Configuration::Is::Invalid) {
+    throw std::runtime_error("Validation of SMASH input failed.");
+  }
+
   // Set up logging
   set_default_loglevel(
       configuration.take({"Logging", "default"}, einhard::ALL));
