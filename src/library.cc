@@ -11,6 +11,7 @@
 
 #include <filesystem>
 
+#include "smash/configuration.h"
 #include "smash/decaymodes.h"
 #include "smash/inputfunctions.h"
 #include "smash/isoparticletype.h"
@@ -21,72 +22,23 @@
 namespace smash {
 static constexpr int LMain = LogArea::Main::id;
 
-static void do_minimal_loggers_setup_for_config_validation() {
-  const std::string conf_tag = LogArea::Configuration::textual();
-  const std::string main_tag = LogArea::Main::textual();
-  const auto size =
-      conf_tag.size() > main_tag.size() ? conf_tag.size() : main_tag.size();
-  logg[LogArea::Configuration::id].setAreaName(utf8::fill_both(conf_tag, size));
-  logg[LogArea::Main::id].setAreaName(utf8::fill_both(main_tag, size));
-}
+static Configuration create_configuration(const std::string &,
+                                          const std::vector<std::string> &);
+static void do_minimal_loggers_setup_for_config_validation();
+static void fully_validate_configuration(const Configuration &);
+static void setup_logging(Configuration &);
+static void read_particles_and_decaymodes_files_setting_keys_in_configuration(
+    const std::string &, const std::string &, Configuration &);
 
 Configuration setup_config_and_logging(
     const std::string &config_file, const std::string &particles_file,
     const std::string &decaymodes_file,
     const std::vector<std::string> &extra_config) {
-  // Read in config file
-  std::filesystem::path config_path(config_file);
-  Configuration configuration(config_path.parent_path(),
-                              config_path.filename());
-
-  // Merge config passed via command line
-  for (const auto &config : extra_config) {
-    configuration.merge_yaml(config);
-  }
-
-  // Fully validate the configuration
-  do_minimal_loggers_setup_for_config_validation();
-  if (configuration.validate() == Configuration::Is::Invalid) {
-    throw std::runtime_error("Validation of SMASH input failed.");
-  }
-
-  // Set up logging
-  set_default_loglevel(
-      configuration.take({"Logging", "default"}, einhard::ALL));
-  create_all_loggers(configuration.extract_sub_configuration(
-      {"Logging"}, Configuration::GetEmpty::Yes));
-
-  logg[LMain].trace(SMASH_SOURCE_LOCATION, " load ParticleType and DecayModes");
-
-  std::filesystem::path particles_path(particles_file);
-  std::filesystem::path decaymodes_path(decaymodes_file);
-  auto particles_and_decays =
-      load_particles_and_decaymodes(particles_path, decaymodes_path);
-  /* For particles and decaymodes: external file is superior to config.
-   * However, warn in case of conflict.
-   */
-  if (configuration.has_value({"particles"}) && !particles_path.empty()) {
-    logg[LMain].warn(
-        "Ambiguity: particles from external file ", particles_path,
-        " requested, but there is also particle list in the config."
-        " Using particles from ",
-        particles_path);
-  }
-  if (!configuration.has_value({"particles"}) || !particles_path.empty()) {
-    configuration.set_value({"particles"}, particles_and_decays.first);
-  }
-
-  if (configuration.has_value({"decaymodes"}) && !decaymodes_path.empty()) {
-    logg[LMain].warn(
-        "Ambiguity: decaymodes from external file ", decaymodes_path,
-        " requested, but there is also decaymodes list in the config."
-        " Using decaymodes from",
-        decaymodes_path);
-  }
-  if (!configuration.has_value({"decaymodes"}) || !decaymodes_path.empty()) {
-    configuration.set_value({"decaymodes"}, particles_and_decays.second);
-  }
-
+  Configuration configuration = create_configuration(config_file, extra_config);
+  fully_validate_configuration(configuration);
+  setup_logging(configuration);
+  read_particles_and_decaymodes_files_setting_keys_in_configuration(
+      particles_file, decaymodes_file, configuration);
   return configuration;
 }
 
@@ -117,6 +69,77 @@ void initialize_particles_decays_and_tabulations(
     logg[LMain].info() << "Tabulations path: " << tabulations_path;
   }
   IsoParticleType::tabulate_integrals(hash, tabulations_path);
+}
+
+static Configuration create_configuration(
+    const std::string &config_file,
+    const std::vector<std::string> &extra_config) {
+  // Read in config file
+  std::filesystem::path config_path(config_file);
+  Configuration configuration(config_path.parent_path(),
+                              config_path.filename());
+
+  // Merge config passed via command line
+  for (const auto &config : extra_config) {
+    configuration.merge_yaml(config);
+  }
+  return configuration;
+}
+
+static void do_minimal_loggers_setup_for_config_validation() {
+  const std::string conf_tag = LogArea::Configuration::textual();
+  const std::string main_tag = LogArea::Main::textual();
+  const auto size =
+      conf_tag.size() > main_tag.size() ? conf_tag.size() : main_tag.size();
+  logg[LogArea::Configuration::id].setAreaName(utf8::fill_both(conf_tag, size));
+  logg[LogArea::Main::id].setAreaName(utf8::fill_both(main_tag, size));
+}
+
+static void fully_validate_configuration(const Configuration &configuration) {
+  do_minimal_loggers_setup_for_config_validation();
+  if (configuration.validate() == Configuration::Is::Invalid) {
+    throw std::runtime_error("Validation of SMASH input failed.");
+  }
+}
+
+static void setup_logging(Configuration &configuration) {
+  set_default_loglevel(
+      configuration.take({"Logging", "default"}, einhard::ALL));
+  create_all_loggers(configuration.extract_sub_configuration(
+      {"Logging"}, Configuration::GetEmpty::Yes));
+}
+
+static void read_particles_and_decaymodes_files_setting_keys_in_configuration(
+    const std::string &particles_file, const std::string &decaymodes_file,
+    Configuration &configuration) {
+  logg[LMain].trace(SMASH_SOURCE_LOCATION, " load ParticleType and DecayModes");
+  std::filesystem::path particles_path(particles_file);
+  std::filesystem::path decaymodes_path(decaymodes_file);
+  auto particles_and_decays =
+      load_particles_and_decaymodes(particles_path, decaymodes_path);
+  /* For particles and decaymodes: external file is superior to config.
+   * However, warn in case of conflict. */
+  if (configuration.has_value({"particles"}) && !particles_path.empty()) {
+    logg[LMain].warn(
+        "Ambiguity: particles from external file ", particles_path,
+        " requested, but there is also particle list in the config."
+        " Using particles from ",
+        particles_path);
+  }
+  if (!configuration.has_value({"particles"}) || !particles_path.empty()) {
+    configuration.set_value({"particles"}, particles_and_decays.first);
+  }
+
+  if (configuration.has_value({"decaymodes"}) && !decaymodes_path.empty()) {
+    logg[LMain].warn(
+        "Ambiguity: decaymodes from external file ", decaymodes_path,
+        " requested, but there is also decaymodes list in the config."
+        " Using decaymodes from",
+        decaymodes_path);
+  }
+  if (!configuration.has_value({"decaymodes"}) || !decaymodes_path.empty()) {
+    configuration.set_value({"decaymodes"}, particles_and_decays.second);
+  }
 }
 
 }  // namespace smash
