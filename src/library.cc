@@ -16,9 +16,19 @@
 #include "smash/isoparticletype.h"
 #include "smash/logging.h"
 #include "smash/setup_particles_decaymodes.h"
+#include "smash/stringfunctions.h"
 
 namespace smash {
 static constexpr int LMain = LogArea::Main::id;
+
+static void do_minimal_loggers_setup_for_config_validation() {
+  const std::string conf_tag = LogArea::Configuration::textual();
+  const std::string main_tag = LogArea::Main::textual();
+  const auto size =
+      conf_tag.size() > main_tag.size() ? conf_tag.size() : main_tag.size();
+  logg[LogArea::Configuration::id].setAreaName(utf8::fill_both(conf_tag, size));
+  logg[LogArea::Main::id].setAreaName(utf8::fill_both(main_tag, size));
+}
 
 Configuration setup_config_and_logging(
     const std::string &config_file, const std::string &particles_file,
@@ -35,6 +45,7 @@ Configuration setup_config_and_logging(
   }
 
   // Fully validate the configuration
+  do_minimal_loggers_setup_for_config_validation();
   if (configuration.validate() == Configuration::Is::Invalid) {
     throw std::runtime_error("Validation of SMASH input failed.");
   }
