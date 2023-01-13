@@ -173,9 +173,15 @@ add_compiler_flags_if_supported("-fno-math-errno" # Tell the compiler to ignore 
                                                   # math functions. This can help the compiler
                                                   # considerably in optimizing mathematical
                                                   # expressions.
+                                "-ffp-contract=off" # See note below
                                 "-march=native" # The '-march=native' flag is not supported e.g. on
                                                 # Apple M1 machines
                                 CXX_FLAGS CMAKE_CXX_FLAGS)
+# NOTE: It turned out that the -ffp-contract option of GNU and LLVM compilers (whose default is
+# different in the two compilers and among versions) is affecting reproducibility of results when
+# e.g. optimizing for different architectures (e.g. -march=native VS -march=x86-64). Therefore, we
+# decided to switch this feature off to ensure by default easy reproducibility of the result.
+
 # Set up the profiling build type NOTE: Configuration variables are created and cached by CMake,
 # hence force their value in the cache if their value is false, e.g. empty.
 if(NOT CMAKE_CXX_FLAGS_PROFILING)
