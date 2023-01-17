@@ -7,7 +7,7 @@
 * [Frequently asked questions](#faq)
    1. [SMASH does not compile. What should I do?](#not-compile)
    2. [SMASH crashes with 'illegal instruction'. Why?](#illegal-instruction)
-   3. [I want the compiler to use contracted floating-point operations. What should I do?](#fuse-math-expr)
+   3. [SMASH output slightly differs on different platforms. Why?](#fuse-math-expr)
    4. [SMASH does not compile with pre-compiled ROOT binaries. What should I do?](#precompiled-root)
    5. [I run out of disk space compiling the code. Why?](#out-of-disk-space)
    6. [How can I use a different compiler?](#different-compilers)
@@ -212,15 +212,19 @@ There are various possible ways to fix this issue:
 
 <a id="fuse-math-expr"></a>
 
-### I want the compiler to use contracted floating-point operations. What should I do?
+### SMASH output slightly differs on different platforms. Why?
 
-How to permit the compiler to form fused floating-point operations, such as fused multiply-add (FMA), depends on the compiler you use and you should check out which is the correct value of the flag `-ffp-contract` flag in the compiler documentation.
+By default, SMASH is compiled optimizing for the native architecture, i.e. that where the compilation is done.
+If hardware supports different optimizations on different machines, the default compilation of SMASH can indeed lead to (physically irrelevant) differences in the outcome of the same identical run.
+The major (and possibly only) source of discrepancy that is worth mentioning is the usage of contracted mathematical expressions, which in SMASH default compilation are allowed, if the hardware supports them.
+How to permit the compiler to form fused floating-point operations, such as fused multiply-add (FMA), depends on the compiler in use and you should check out which is the default value of the `-ffp-contract` flag in your compiler documentation.
 Allowing contracted expression will produce slightly more precise results, since there is usually one rounding less operation.
 However, exact (bit-wise) reproducibility of results is then not guaranteed and you will likely have (physically irrelevant) discrepancies across different platforms.
 
-If this is acceptable for your use case, when setting up SMASH compilation, pass the correct flag to CMake.
-For LLVM `clang` compiler, use e.g. `-DCMAKE_CXX_FLAGS="-ffp-contract=on" -DCMAKE_C_FLAGS="-ffp-contract=on"`.
-The GNU compiler (checked up to `g++-12.2`) implements the `-ffp-contract=on` flag as `-ffp-contract=off` and the way to allow fused operations is to restore the `-ffp-contract=fast` default value.
+If this is not acceptable for your use case (as it is not for SMASH tests, where this feature is disabled), when setting up SMASH compilation, you can disable this feature, by passing the correct flag to CMake e.g. via
+```console
+cmake -DPythia_CONFIG_EXECUTABLE=[...] -DCMAKE_CXX_FLAGS="-ffp-contract=off" -DCMAKE_C_FLAGS="-ffp-contract=off"` ..
+```
 
 <a id="precompiled-root"></a>
 
