@@ -13,7 +13,7 @@ docker build .
 ```
 in a terminal, in the same directory of _Dockerfile_.
 
-Docker keeps the information about the container in a directory (e.g. in _**/var/lib/docker/**_ under GNU/Linux), instead of just in a file like Singularity.
+Docker keeps the information about the container in a directory (e.g. in ***/var/lib/docker/*** under GNU/Linux), instead of just in a file like Singularity.
 One can get an overview of the current Docker containers/installation with `docker info` and, in particular, it is possible to list the available images with `docker images`.
 The images have each its own id.
 One can recognize the last one just produced by the creation date (tags are also possible, but not discussed here).
@@ -46,7 +46,7 @@ All local changes will be reflected in this directory and SMASH can be build wit
 # From Docker to Singularity
 
 In most cases Singularity is able to import or directly run commands from Docker containers without significant problems.
-In both situations Singularity caches information in a subdirectory of _**~/.singularity**_.
+In both situations Singularity caches information in a subdirectory of ***~/.singularity***.
 More information can be found [here](https://sylabs.io/guides/3.6/user-guide/singularity_and_docker.html).
 
 ### Import a Docker container from an online registry
