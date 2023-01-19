@@ -46,10 +46,12 @@ if(DOXYGEN_FOUND)
          "doc/mainpage.dox"
          "${COMMON_GENERIC_FILES}"
          "src/include/smash/"
+         "3rdparty/einhard/einhard.hpp"
          "src/tests/unittest.h"
          "src/tests/setup.h"
          "src/"
-         "3rdparty/einhard/einhard.hpp"
+         "3rdparty/README.md"
+         "containers/README.md"
          "${COMMON_TECHNICAL_FILES}")
     # The user guide has the main page in the doc folder in the userguide.dox file, which has to be
     # configured by CMake in order to possibly set the correct link to the codebase source. Hence
