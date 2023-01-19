@@ -40,7 +40,7 @@ if(DOXYGEN_FOUND)
         "CONTRIBUTING.md"
         "AUTHORS.md"
         "doc/index.dox")
-    set(COMMON_TECHNICAL_FILES "bin/benchmarks/README.md")
+    set(COMMON_TECHNICAL_FILES "containers/README.md" "bin/benchmarks/README.md")
     list(APPEND
          DOCUMENTATION_FILES_DEVEL
          "doc/mainpage.dox"
@@ -51,7 +51,6 @@ if(DOXYGEN_FOUND)
          "src/tests/setup.h"
          "src/"
          "3rdparty/README.md"
-         "containers/README.md"
          "${COMMON_TECHNICAL_FILES}")
     # The user guide has the main page in the doc folder in the userguide.dox file, which has to be
     # configured by CMake in order to possibly set the correct link to the codebase source. Hence
