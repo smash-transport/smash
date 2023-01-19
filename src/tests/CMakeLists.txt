@@ -60,6 +60,14 @@ macro(smash_add_exe name)
             target_compile_options(${name} PRIVATE "-Wno-duplicated-branches")
         endif()
     endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
+        # It turned out that the -ffp-contract option of GNU and LLVM compilers (whose default is
+        # different in the two compilers and among versions) is affecting reproducibility of results
+        # when e.g. optimizing for different architectures (e.g. -march=native VS -march=x86-64).
+        # Therefore, we decided to switch this feature off for tests to ensure that tests behave in
+        # the same way on all machines.
+        target_compile_options(${name} PRIVATE "-ffp-contract=off")
+    endif()
 endmacro()
 
 macro(smash_add_unittest name)

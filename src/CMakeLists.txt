@@ -23,6 +23,16 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
         )
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "14")
+            # Use of contracted mathematical expression like FMA (if the hardware supports them) are
+            # controlled by a flag whose default unfortunately varies among compilers and versions
+            # thereof. Since clang-14 changed the default from "off" to "on", we set here the value
+            # to "on" also for older versions. GNU default is "fast", but this seems to be similar
+            # to clang's "on" (which fuses in the same statement) than to clang's "fast" (which
+            # fuses across statements). Here we simply try to have the same behaviour across the
+            # supported compilers.
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffp-contract=on")
+        endif()
     endif()
     # Enable warnings about deprecated C functions
     option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C funtions in SMASH."
