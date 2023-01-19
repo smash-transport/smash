@@ -26,6 +26,7 @@ on this workflow can be found e.g.
 6. [Coding rules](#coding-rules)
 7. [General policies](#general-policies)
 8. [Profiling and benchmarking](#profiling)
+9. [SMASH containers](#containers)
 
 ---
 
@@ -758,3 +759,12 @@ If you get mangled names of the functions, try this as a second line
 The x axis represents the total duration that the corresponding stack frame
 lived for. The order and the colors are arbitrary and optimized for readability.
 The y axis represents the position on the stack.
+
+
+
+<a id="containers"></a>
+
+## SMASH containers
+
+Containers for SMASH are built and shipped next to each new public release.
+Instructions about how to build them can be found [here](containers/README.md).
