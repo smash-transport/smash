@@ -23,7 +23,7 @@ namespace smash {
  * integer numbers are given explicitly, because they appear in the output.
  */
 enum class ProcessType {
-  /// nothing
+  /// \see_process_type{0}
   None = 0,
   /// elastic scattering: particles remain the same, only momenta change
   Elastic = 1,

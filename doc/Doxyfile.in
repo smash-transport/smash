@@ -243,6 +243,8 @@ ALIASES                = "NucleusModus=smash::NucleusModus" \
                          "see_key{1}=See \ref \1 \"user guide description\" for more information."\
                          "removed_key{1}=This key has been removed in <tt>SMASH-\1</tt> version."\
                          "unit{1}=<b>\1</b>"\
+                         "process_type{1}=\li \anchor process_type_\1 <tt>\1</tt>:"\
+                         "see_process_type{1}=See \ref process_type_\1 \"here\" for a short description."\
                          "Userguide=" \
                          "mocking=\xrefitem doxypage_unit_testing_mocking \"\" \"\"" \
                          "iref{1}=<a href= https://inspirehep.net/search?p=\1&of=hd>\1</a> \cite \1"
