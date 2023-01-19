@@ -215,7 +215,7 @@ TEST(cross_sections_symmetric) {
     std::unique_ptr<StringProcess> string_process_interface =
         std::make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217,
                                         0.081, 0.7, 0.7, 0.25, 0.68, 0.98, 0.25,
-                                        1.0, true, 1. / 3., true, 0.2);
+                                        1.0, true, 1. / 3., true, 0.2, false);
     act12->set_string_interface(string_process_interface.get());
     act21->set_string_interface(string_process_interface.get());
     VERIFY(act12 != nullptr);
@@ -278,7 +278,7 @@ TEST(pythia_running) {
   std::unique_ptr<StringProcess> string_process_interface =
       std::make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217,
                                       0.081, 0.7, 0.7, 0.25, 0.68, 0.98, 0.25,
-                                      1.0, true, 1. / 3., true, 0.2);
+                                      1.0, true, 1. / 3., true, 0.2, false);
   act->set_string_interface(string_process_interface.get());
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
@@ -458,7 +458,7 @@ TEST(particle_ordering) {
     std::unique_ptr<StringProcess> string_process_interface =
         std::make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217,
                                         0.081, 0.7, 0.7, 0.25, 0.68, 0.98, 0.25,
-                                        1.0, true, 1. / 3., true, 0.15);
+                                        1.0, true, 1. / 3., true, 0.15, false);
     act12->set_string_interface(string_process_interface.get());
     act21->set_string_interface(string_process_interface.get());
     VERIFY(act12 != nullptr);

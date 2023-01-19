@@ -18,7 +18,7 @@ using namespace smash;
 
 TEST(init_particle_types) { Test::create_actual_particletypes(); }
 
-Configuration get_common_configuration() {
+static Configuration get_common_configuration() {
   return Configuration{R"(
     General:
       Modus: ToBeSet
@@ -28,7 +28,7 @@ Configuration get_common_configuration() {
     )"};
 }
 
-Configuration get_collider_configuration() {
+static Configuration get_collider_configuration() {
   auto config = get_common_configuration();
   config.set_value({"General", "Modus"}, "Collider");
   config.merge_yaml(R"(

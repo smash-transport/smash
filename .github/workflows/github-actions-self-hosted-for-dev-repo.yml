@@ -28,7 +28,7 @@ jobs:
           export SMASH_ROOT=$GITHUB_WORKSPACE
           # variables dealing with the Singularity container
           # here we assume that $HOME points to the home directory of the user "smash"
-          export TOOLS_DIR=$HOME/actions-runner/smash_stuff_github_actions
+          export TOOLS_DIR=$HOME/actions-runner-SMASH-devel/smash_stuff_github_actions
           export PATH=$TOOLS_DIR/clang13_0_0/bin/:$TOOLS_DIR/python-tools/bin/:$PATH
           export PYTHONPATH=$TOOLS_DIR/python-tools:$PYTHONPATH
           export CC=gcc-8

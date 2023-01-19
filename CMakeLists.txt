@@ -53,6 +53,16 @@ endif()
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Utilities)
 
+# The variable SMASH_VERSION is already set via the project() command, since we specify there a
+# VERSION option. Here we check if .git information is available and increase verbosity
+include(GetGitRevisionDescription)
+git_describe(SMASH_VERSION_VERBOSE)
+if(SMASH_VERSION_VERBOSE)
+    set(SMASH_VERSION "${SMASH_VERSION_VERBOSE}")
+else()
+    set(SMASH_VERSION "${CMAKE_PROJECT_NAME}-${SMASH_VERSION}")
+endif()
+
 # SMASH will be shipped as shared library and hence we want to build position independent code
 include(CheckPIESupported)
 check_pie_supported(LANGUAGES CXX)
@@ -154,11 +164,6 @@ add_subdirectory(3rdparty)
 # CMAKE_<LANG>_FLAGS will be passed to the compiler before those in the per-configuration
 # CMAKE_<LANG>_FLAGS_<CONFIG> variant, and before flags added by the add_compile_options() or
 # target_compile_options() commands."
-#
-# NOTE: CMake provides four build configurations (Debug, Release, RelWithDebInfo, MinSizeRel) and
-# proved sensible values for the corresponding CMAKE_(C|CXX)_FLAGS_<CONFIG> variables (cached and
-# marked as advanced). Here we need to set those for Profiling build, only. =>
-# https://cristianadam.eu/20190223/modifying-the-default-cmake-build-types/
 add_compiler_flags_if_supported("-fno-math-errno" # Tell the compiler to ignore errno setting of
                                                   # math functions. This can help the compiler
                                                   # considerably in optimizing mathematical
@@ -166,8 +171,14 @@ add_compiler_flags_if_supported("-fno-math-errno" # Tell the compiler to ignore 
                                 "-march=native" # The '-march=native' flag is not supported e.g. on
                                                 # Apple M1 machines
                                 CXX_FLAGS CMAKE_CXX_FLAGS)
-# Set up the profiling build type NOTE: Configuration variables are created and cached by CMake,
-# hence force their value in the cache if their value is false, e.g. empty.
+
+# CMake provides 4 build configurations (Debug, Release, RelWithDebInfo, MinSizeRel) together with
+# sensible values for the corresponding CMAKE_(C|CXX)_FLAGS_<CONFIG> variables (cached and marked as
+# advanced). Here we need to set those for Profiling build, only. Since the relevant variables are
+# created and cached by CMake, we need to force their value in the cache if their value is false,
+# e.g. empty.
+#
+# See https://cristianadam.eu/20190223/modifying-the-default-cmake-build-types/ for more infos.
 if(NOT CMAKE_CXX_FLAGS_PROFILING)
     add_compiler_flags_if_supported("-O3" "-DNDEBUG" "-pg" CXX_FLAGS SUPPORTED_CXX_FLAGS_PROFILING)
 endif()

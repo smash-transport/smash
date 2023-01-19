@@ -164,6 +164,12 @@ class StringProcess {
   bool separate_fragment_baryon_;
 
   /**
+   * Whether to use the monash tune \iref{Skands:2014pea} for all string
+   * processes.
+   */
+  bool use_monash_tune_;
+
+  /**
    * final state array
    * which must be accessed after the collision
    */
@@ -235,6 +241,9 @@ class StringProcess {
    * \param[in] popcorn_rate parameter (StringFlav:popcornRate)
    *        to determine the production rate of popcorn mesons from
    *        the diquark end of a string.
+   * \param[in] use_monash_tune whether to use the monash tune for all string
+   *            processes. This is recommended if one runs smash at LHC
+   *            energies
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
@@ -253,7 +262,8 @@ class StringProcess {
                 double factor_t_form,
                 bool mass_dependent_formation_times,
                 double prob_proton_to_d_uu,
-                bool separate_fragment_baryon, double popcorn_rate);
+                bool separate_fragment_baryon, double popcorn_rate,
+                bool use_monash_tune);
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines
