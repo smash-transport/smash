@@ -23,7 +23,14 @@ namespace smash {
  * integer numbers are given explicitly, because they appear in the output.
  */
 enum class ProcessType {
-  /// \see_process_type{0}
+  /**
+   * @attention If you add a new process type here, please include the
+   * corresponding documentation to the user guide in the oscaroutput.cc file
+   * under the page "doxypage_output_oscar_particles_process_types" and
+   * reference it here with "\see_process_type{}".
+   *
+   * \see_process_type{0}
+   */
   None = 0,
   /// \see_process_type{1}
   Elastic = 1,
@@ -41,16 +48,8 @@ enum class ProcessType {
   Decay = 5,
   /// \see_process_type{6}
   Wall = 6,
-  /**
-   *  forced thermalization, many particles are replaced
-   *  by a thermalized ensemble
-   */
   /// \see_process_type{7}
   Thermalization = 7,
-  /** Hypersurface crossing
-   *  Particles are removed from the evolution and printed to a separate output
-   *  to serve as initial conditions for hybrid models.
-   */
   /// \see_process_type{8}
   HyperSurfaceCrossing = 8,
   /// \see_process_type{9}
@@ -71,38 +70,20 @@ enum class ProcessType {
    *         string decays. Depending on which quark and anti- (or di-)quarks
    *         are selected for string formation, the process has one of the
    *         following types.
+   *
+   * \see_process_type{41}
    */
-  /// \see_process_type{41}
   StringSoftSingleDiffractiveAX = 41,
-  /**
-   *  single diffractive AB->XB. Both quark and anti-/di-quark taken from A.
-   *  It makes sense to distinguish it from AB->AX, because A and B can be
-   *  particles of different types, for example, a pion and a proton.
-   *  It matters then, whether the pion creates a string or the proton.
-   */
   /// \see_process_type{42}
   StringSoftSingleDiffractiveXB = 42,
   /// \see_process_type{43}
   StringSoftDoubleDiffractive = 43,
-  /**
-   * a special case of baryon-antibaryon annihilation. One pair qqbar
-   * annihilates immediately and then two strings are formed.
-   */
   /// \see_process_type{44}
   StringSoftAnnihilation = 44,
   /// \see_process_type{45}
   StringSoftNonDiffractive = 45,
-  /**
-   *  hard string process involving 2->2 QCD process by PYTHIA. Here quarks
-   *  do not simply form a string. They actually scatter on parton level first.
-   */
   /// \see_process_type{46}
   StringHard = 46,
-
-  /**
-   *  Soft String NNbar annihilation process can fail by lack of energy. This is
-   *  a tag we add to avoid mislabeling the events.
-   */
   /// \see_process_type{47}
   FailedString = 47
 };

@@ -456,28 +456,67 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \page doxypage_output_oscar_particles_process_types
  * The available process types are:
  * \process_type{0} No previous process yet, particle was created at
- *initialization \process_type{1} Elastic scattering \process_type{2} Resonance
- *formation (2 &rarr; 1) \process_type{3} Inelastic binary scattering (2 &rarr;
- *2) \process_type{4} Inelastic multi-particle scattering (2 &rarr; 3)
+ *initialization
+ *
+ * \process_type{1} Elastic scattering
+ *
+ * \process_type{2} Resonance formation (2 &rarr; 1)
+ *
+ * \process_type{3} Inelastic binary scattering (2 &rarr; 2)
+ *
+ * \process_type{4} Inelastic multi-particle scattering (2 &rarr; 3)
+ *
  * \process_type{5} Resonance decay
+ *
  * \process_type{6} Box wall crossing (due to periodic boundary conditions)
- * \process_type{7} Forced thermalization
- * \process_type{8} Hypersurface crossing
- * \process_type{9} Bremsstrahlung process: a + b -> a + b + photon
+ *
+ * \process_type{7} Forced thermalization, many particles are replaced by a
+ * thermalized ensemble
+ *
+ * \process_type{8} Hypersurface crossing, Particles are removed from the
+ * evolution and printed to a separate output to serve as initial conditions for
+ * hybrid models.
+ *
+ * \process_type{9} Bremsstrahlung process: a + b &rarr; a + b + photon
+ *
  * \process_type{10} Inelastic multi-particle meson scattering (3 &rarr; 1)
+ *
  * \process_type{11} Inelastic multi-particle scattering (3 &rarr; 2)
+ *
  * \process_type{12} Inelastic multi-particle scattering (5 &rarr; 2)
+ *
  * \process_type{13} Inelastic multi-particle scattering (2 &rarr; 5)
+ *
  * \process_type{14} Inelastic multi-particle scattering (4 &rarr; 2)
+ *
  * \process_type{15} Inelastic multi-particle scattering (2 &rarr; 4)
+ *
  * \process_type{41} Soft string excitation, single diffractive AB &rarr; AX.
- *Both quark and anti-/di-quark taken from B. \process_type{42} Soft string
- *excitation, single diffractive AB &rarr; XB \process_type{43} Soft string
- *excitation, double diffractive. Two strings are formed, one from A and one
- *from B. \process_type{44} Soft string N-Nbar annihilation \process_type{45}
- *Soft sring excitation, non-diffractive. Two strings are formed both have ends
- *in A and B. \process_type{46} Hard string excitation \process_type{47} Failed
- *string process
+ * Both quark and anti-/di-quark taken from B.
+ *
+ * \process_type{42} Soft string excitation, single diffractive AB &rarr; XB.
+ * Both quark and anti-/di-quark taken from A. It makes sense to distinguish it
+ * from AB &rarr; AX, because A and B can be particles of different types, for
+ * example, a pion and a proton. It matters then, whether the pion creates a
+ * string or the proton.
+ *
+ * \process_type{43} Soft string excitation, double diffractive. Two strings are
+ * formed, one from A and one from B.
+ *
+ * \process_type{44} Soft string N-Nbar annihilation, a special case of
+ * baryon-antibaryon annihilation. One pair qqbar annihilates immediately and
+ * then two strings are formed.
+ *
+ * \process_type{45} Soft string excitation, non-diffractive. Two strings are
+ * formed both have ends in A and B.
+ *
+ * \process_type{46} Hard string excitation, hard string process involving 2
+ * &rarr; 2 QCD process by PYTHIA. Here quarks do not simply form a string. They
+ * actually scatter on parton level first.
+ *
+ * \process_type{47} Failed string process, Soft String NNbar annihilation
+ * process can fail by lack of energy. This is a tag we add to avoid mislabeling
+ * the events.
  *
  * \page doxypage_output_oscar_particles
  * \n
