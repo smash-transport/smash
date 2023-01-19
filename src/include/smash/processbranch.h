@@ -41,8 +41,16 @@ enum class ProcessType {
   Decay = 5,
   /// \see_process_type{6}
   Wall = 6,
+  /**
+   *  forced thermalization, many particles are replaced
+   *  by a thermalized ensemble
+   */
   /// \see_process_type{7}
   Thermalization = 7,
+  /** Hypersurface crossing
+   *  Particles are removed from the evolution and printed to a separate output
+   *  to serve as initial conditions for hybrid models.
+   */
   /// \see_process_type{8}
   HyperSurfaceCrossing = 8,
   /// \see_process_type{9}
