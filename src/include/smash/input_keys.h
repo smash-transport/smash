@@ -17,6 +17,7 @@
 #include <set>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -431,6 +432,7 @@ class Key {
  * In this page many generic keys are described. For information about further
  * tuning possibilities, see the following pages:
  * - \ref doxypage_input_conf_ct_pauliblocker
+ * - \ref doxypage_input_conf_ct_string_transition
  * - \ref doxypage_input_conf_ct_string_parameters
  * - \ref doxypage_input_conf_ct_dileptons
  * - \ref doxypage_input_conf_ct_photons
@@ -447,6 +449,27 @@ class Key {
          Spatial_Averaging_Radius: 1.86
          Gaussian_Cutoff: 2.2
          Momentum_Averaging_Radius: 0.08
+ \endverbatim
+ */
+
+/*!\Userguide
+ * \page doxypage_input_conf_ct_string_transition
+ *
+ * Within `Collision_Term` section, the `String_Transition` section can be
+ * used to modify a series of parameters which interpolate linearly the cross
+ * section transition between resonances and strings. This also controls the
+ * shape of the total cross section around the intermediate energies. If this
+ * section is omitted, default values are used.
+ *
+ * For example, this creates a relaxed transition starting immediately at the
+ mass threshold:
+ *\verbatim
+ Collision_Term:
+     String_Transition:
+         Sqrts_Range_NN: [1.9,4.5]
+         Sqrts_Range_Npi: [1.1,2.5]
+         Sqrts_Lower: 0
+         Sqrts_Range_Width: 1.5
  \endverbatim
  */
 
@@ -2186,6 +2209,100 @@ struct InputKeys {
           {"Collision_Term", "Pauli_Blocking", "Momentum_Averaging_Radius"},
           0.08,
           {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_transition
+   * \optional_key{key_CT_ST_rangeNPi_,Sqrts_Range_Npi,list of two
+   * doubles,[1.9\,2.2]}
+   *
+   * Transition region in N\f$\pi\f$ scatterings \unit{in GeV}. The lowest value
+   * for the first parameter is the mass threshold 1.08.
+   */
+  /**
+   * \see_key{key_CT_ST_rangeNPi_}
+   */
+
+  inline static const Key<std::pair<double, double>>
+      collTerm_stringTrans_rangeNpi{
+          {"Collision_Term", "String_Transition", "Sqrts_Range_Npi"},
+          std::make_pair(1.9, 2.2),
+          {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_transition
+   * \optional_key{key_CT_ST_rangeNN_,Sqrts_Range_NN,list of two
+   * doubles,[3.5\,4.5]}
+   *
+   * Transition range in NN collisions \unit{in GeV}. The lowest value for the
+   * first parameter is the mass threshold 1.88. The default is tuned to
+   * reproduce experimental exclusive cross section data, and at the same
+   * produce excitation functions that are as smooth as possible. The default of
+   * a 1 GeV range is preserved.
+   */
+  /**
+   * \see_key{key_CT_ST_rangeNN_}
+   */
+  inline static const Key<std::pair<double, double>>
+      collTerm_stringTrans_rangeNN{
+          {"Collision_Term", "String_Transition", "Sqrts_Range_NN"},
+          std::make_pair(3.5, 4.5),
+          {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_transition
+   * \optional_key{key_CT_ST_lower_,Sqrts_Lower,double,0.9}
+   *
+   * Lower end of transition region \unit{in GeV} for the remaining
+   * interactions, in case of AQM this is added to the sum of masses.
+   */
+  /**
+   * \see_key{key_CT_ST_lower_}
+   */
+  inline static const Key<double> collTerm_stringTrans_lower{
+      {"Collision_Term", "String_Transition", "Sqrts_Lower"}, 0.9, {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_transition
+   * \optional_key{key_CT_ST_range_width_,Sqrts_Range_Width,double,1.0}
+   *
+   * Width of the transition region \unit{in GeV} for the remaining
+   * interactions, in case of AQM this is added to <tt>\ref key_CT_ST_lower_
+   * "Sqrts_Lower"</tt>.
+   */
+  /**
+   * \see_key{key_CT_ST_range_width_}
+   */
+  inline static const Key<double> collTerm_stringTrans_range_width{
+      {"Collision_Term", "String_Transition", "Sqrts_Range_Width"},
+      1.0,
+      {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_transition
+   * \optional_key{key_CT_ST_pipi_offset_,PiPi_Offset,double,1.12}
+   *
+   * Offset \unit{in GeV} to turn on the strings and elastic processes
+   * for \f$\pi\pi\f$ reactions (this is an exception because the normal AQM
+   * behavior destroys the cross section at very low \f$\sqrt{s}\f$ and around
+   * the \f$f_2\f$ peak)
+   */
+  /**
+   * \see_key{key_CT_ST_pipi_offset_}
+   */
+  inline static const Key<double> collTerm_stringTrans_pipiOffset{
+      {"Collision_Term", "String_Transition", "PiPi_Offset"}, 1.12, {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_transition
+   * \optional_key{key_CT_ST_KN_offset_,KN_Offset,double,15.15}
+   *
+   * Offset \unit{in GeV} to turn on the strings for KN reactions.
+   */
+  /**
+   * \see_key{key_CT_ST_KN_offset_}
+   */
+  inline static const Key<double> collTerm_stringTrans_KNOffset{
+      {"Collision_Term", "String_Transition", "KN_Offset"}, 15.15, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -4658,6 +4775,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<std::array<int, 3>>>,
       std::reference_wrapper<const Key<std::array<double, 2>>>,
       std::reference_wrapper<const Key<std::array<double, 3>>>,
+      std::reference_wrapper<const Key<std::pair<double, double>>>,
       std::reference_wrapper<const Key<std::vector<double>>>,
       std::reference_wrapper<const Key<std::vector<std::string>>>,
       std::reference_wrapper<const Key<std::set<ThermodynamicQuantity>>>,
@@ -4765,6 +4883,12 @@ struct InputKeys {
       std::cref(collTerm_pauliBlocking_spatialAveragingRadius),
       std::cref(collTerm_pauliBlocking_gaussianCutoff),
       std::cref(collTerm_pauliBlocking_momentumAveragingRadius),
+      std::cref(collTerm_stringTrans_rangeNpi),
+      std::cref(collTerm_stringTrans_rangeNN),
+      std::cref(collTerm_stringTrans_lower),
+      std::cref(collTerm_stringTrans_range_width),
+      std::cref(collTerm_stringTrans_pipiOffset),
+      std::cref(collTerm_stringTrans_KNOffset),
       std::cref(collTerm_stringParam_stringTension),
       std::cref(collTerm_stringParam_gluonBeta),
       std::cref(collTerm_stringParam_gluonPMin),
@@ -4996,7 +5120,7 @@ General:
 /*!\Userguide
  * \page doxypage_input_conf_ct_string_parameters
  * <hr>
- * ### Example of string paramters customization
+ * ### Example of string parameters customization
  *
  *\verbatim
  Collision_Term:

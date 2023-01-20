@@ -22,41 +22,6 @@
 
 namespace smash {
 
-/// constants related to transition between low and high collision energies
-namespace transit_high_energy {
-/// transition range in N-pi collisions
-const std::array<double, 2> sqrts_range_Npi = {1.9, 2.2};
-/** transition range in N-N collisions:
- * Tuned to reproduce experimental exclusive cross section data, and at the same
- * produce excitation functions that are as smooth as possible. The default of
- * a 1 GeV range is preserved.
- */
-const std::array<double, 2> sqrts_range_NN = {3.5, 4.5};
-/**
- * constant for the lower end of transition region in the case of AQM
- * this is added to the sum of masses
- */
-const double sqrts_add_lower = 0.9;
-/**
- * constant for the range of transition region in the case of AQM
- * this is added to the sum of masses + sqrts_add_lower
- */
-const double sqrts_range = 1.0;
-
-/**
- * Constant offset as to where to turn on the strings and elastic processes
- * for pi pi reactions (this is an exception because the normal AQM behavior
- * destroys the cross-section at very low sqrt_s and around the f2 peak)
- */
-const double pipi_offset = 1.12;
-
-/**
- * Constant offset as to where to shift from 2to2 to string
- * processes (in GeV) in the case of KN reactions
- */
-const double KN_offset = 15.15;
-}  // namespace transit_high_energy
-
 /**
  * The cross section class assembels everything that is needed to
  * calculate the cross section and returns a list of all possible reactions
@@ -73,7 +38,7 @@ class CrossSections {
    * \param[in] potentials Potentials at the interacting point. they are
    *            used to calculate the corrections on the thresholds.
    */
-  CrossSections(const ParticleList& incoming_particles, const double sqrt_s,
+  CrossSections(const ParticleList& incoming_particles, double sqrt_s,
                 const std::pair<FourVector, FourVector> potentials);
 
   /**
@@ -83,10 +48,10 @@ class CrossSections {
    * according to the probability. It will then be added in
    * add_all_scatterings in scatteraction.cc
    *
-   * \param[in] finder_parameters parameters for collision finding
+   * \param[in] finder_parameters parameters for collision finding.
    * \param[in] string_process a pointer to the StringProcess object,
-   * which is used for string excitation and
-   * fragmentation.
+   * which is used for string excitation and fragmentation.
+   *
    * \return List of all possible collisions.
    */
   CollisionBranchList generate_collision_list(
@@ -112,10 +77,8 @@ class CrossSections {
    * (if available). Optional a constant additional elastic cross section is
    * added
    *
-   * \param[in] elast_par Elastic cross section parameter from the input file.
-   * \param[in] use_AQM Whether to extend elastic cross-sections with AQM.
-   * \param[in] add_el_xs Additional constant elastic cross section
-   * \param[in] scale_xs Factor by which all (partial) cross sections are scaled
+   * \param[in] finder_parameters parameters for collision finding, including
+   * cross section modifications from config file.
    *
    * \note The additional constant elastic cross section contribution is added
    * after the scaling of the cross section.
@@ -123,8 +86,8 @@ class CrossSections {
    * \return A ProcessBranch object containing the cross section and
    * final-state IDs.
    */
-  CollisionBranchPtr elastic(double elast_par, bool use_AQM, double add_el_xs,
-                             double scale_xs) const;
+  CollisionBranchPtr elastic(
+      const ScatterActionsFinderParameters& finder_parameters) const;
 
   /**
    * Find all resonances that can be produced in a 2->1 collision of the two
@@ -163,7 +126,7 @@ class CrossSections {
    * the different scatterings. But so far, only Nucleon-Pion to Hyperon-
    * Kaon scattering is implemented.
    *
-   * \return List of all possibe rare 2->2 processes.
+   * \return List of all possible rare 2->2 processes.
    */
   CollisionBranchList rare_two_to_two() const;
 
@@ -174,9 +137,13 @@ class CrossSections {
    * the different scatterings.
    *
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
-   * \return List of all possibe inelastic 2->2 processes.
+   * \param[in] KN_offset Offset to the minimum energy for string production in
+   * KN scatterings
+   *
+   * \return List of all possible inelastic 2->2 processes.
    */
-  CollisionBranchList two_to_two(ReactionsBitSet included_2to2) const;
+  CollisionBranchList two_to_two(const ReactionsBitSet& included_2to2,
+                                 double KN_offset) const;
 
   /**
    * Find all 2->3 processes for the given scattering.
@@ -184,7 +151,7 @@ class CrossSections {
    * This function calls the different, more specific functions for
    * the different scatterings.
    *
-   * \return List of all possibe 2->3 processes.
+   * \return List of all possible 2->3 processes.
    */
   CollisionBranchList two_to_three() const;
 
@@ -194,7 +161,7 @@ class CrossSections {
    * This function calls the different, more specific functions for
    * the different scatterings.
    *
-   * \return List of all possibe 2->4 processes.
+   * \return List of all possible 2->4 processes.
    */
   CollisionBranchList two_to_four() const;
 
@@ -236,8 +203,8 @@ class CrossSections {
    * have been determined.
    * \todo Same assumption made by string_excitation. Resolve.
    */
-  CollisionBranchPtr NNbar_annihilation(const double current_xs,
-                                        const double scale_xs) const;
+  CollisionBranchPtr NNbar_annihilation(double current_xs,
+                                        double scale_xs) const;
 
   /**
    * Determine the cross section for NNbar creation, which is given by
@@ -257,7 +224,7 @@ class CrossSections {
    * \return Collision Branch with NNbar annihilation process
    *
    */
-  CollisionBranchPtr NNbar_to_5pi(const double scale_xs) const;
+  CollisionBranchPtr NNbar_to_5pi(double scale_xs) const;
 
   /**
    * Parametrization of deuteron-pion inelastic cross section
@@ -326,7 +293,8 @@ class CrossSections {
    *
    * This is rescaled by AQM factors.
    */
-  double high_energy() const;
+  double high_energy(
+      const StringTransitionParameters& transition_high_energy) const;
 
   /**
    * \return the probability whether the scattering between the incoming
@@ -363,33 +331,32 @@ class CrossSections {
    * not, it just requires the proper combination of incoming particles and
    * config parameters.
    *
-   * \param[in] strings_switch Is string fragmentation enabled?
-   * \param[in] use_transition_probability which algorithm to use for string
-   *                         treatment (see Switch_on_String_with_Probability)
-   * \param[in] use_AQM whether AQM is activated
-   * \param[in] treat_nnbar_with_strings use strings for nnbar treatment?
+   * \param[in] finder_parameters parameters for collision finding and cross
+   * sections.
    */
-  double string_probability(bool strings_switch,
-                            bool use_transition_probability, bool use_AQM,
-                            bool treat_nnbar_with_strings) const;
+  double string_probability(
+      const ScatterActionsFinderParameters& finder_parameters) const;
 
   /**
    * \param[in] region_lower the lowest sqrts in the transition region [GeV]
    * \param[in] region_upper the highest sqrts in the transition region [GeV]
    * \return probability to have the high energy interaction (via string)
    */
-  double probability_transit_high(const double region_lower,
-                                  const double region_upper) const;
+  double probability_transit_high(double region_lower,
+                                  double region_upper) const;
 
  private:
   /**
    * Choose the appropriate parametrizations for given incoming particles and
    * return the (parametrized) elastic cross section.
    *
-   * \param[in] use_AQM whether AQM is activated
+   * \param[in] use_AQM Whether to extend string cross-sections with AQM.
+   * \param[in] pipi_offset Offset to the minimum energy for string production
+   * in \f$\pi\pi \f$ scatterings
+   *
    * \return Elastic cross section
    */
-  double elastic_parametrization(bool use_AQM) const;
+  double elastic_parametrization(bool use_AQM, double pipi_offset) const;
 
   /**
    * Determine the (parametrized) elastic cross section for a
@@ -441,7 +408,8 @@ class CrossSections {
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible BB reactions with their cross sections
    */
-  CollisionBranchList bb_xx_except_nn(ReactionsBitSet included_2to2) const;
+  CollisionBranchList bb_xx_except_nn(
+      const ReactionsBitSet& included_2to2) const;
 
   /**
    * Find all inelastic 2->2 processes for Nucelon-Nucelon Scattering.
@@ -459,29 +427,35 @@ class CrossSections {
    * of the two nucleons. Each element in the list contains the type(s) of the
    * final state particle(s) and the cross section for that particular process.
    */
-  CollisionBranchList nn_xx(ReactionsBitSet included_2to2) const;
+  CollisionBranchList nn_xx(const ReactionsBitSet& included_2to2) const;
 
   /**
    * Find all inelastic 2->2 background processes for Nucleon-Kaon (NK)
    * Scattering.
+   *
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
-   * \return List of all possible NK reactions with their cross sections
+   * \param[in] KN_offset Offset to the minimum energy for string production in
+   * KN scatterings
+   *
+   * \return List of all possible NK reactions with their cross
+   * sections
    */
-  CollisionBranchList nk_xx(ReactionsBitSet included_2to2) const;
+  CollisionBranchList nk_xx(const ReactionsBitSet& included_2to2,
+                            double KN_offset) const;
 
   /**
    * Find all inelastic 2->2 processes for Delta-Kaon (DeltaK) Scattering.
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible DeltaK reactions with their cross sections
    * */
-  CollisionBranchList deltak_xx(ReactionsBitSet included_2to2) const;
+  CollisionBranchList deltak_xx(const ReactionsBitSet& included_2to2) const;
 
   /**
    * Find all inelastic 2->2 processes for Hyperon-Pion (Ypi) Scattering.
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible Ypi reactions with their cross sections
    */
-  CollisionBranchList ypi_xx(ReactionsBitSet included_2to2) const;
+  CollisionBranchList ypi_xx(const ReactionsBitSet& included_2to2) const;
 
   /**
    * Find all inelastic 2->2 processes involving Pion and (anti-) Deuteron
@@ -490,7 +464,7 @@ class CrossSections {
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible dpi reactions with their cross sections
    */
-  CollisionBranchList dpi_xx(ReactionsBitSet included_2to2) const;
+  CollisionBranchList dpi_xx(const ReactionsBitSet& included_2to2) const;
 
   /**
    * Find all inelastic 2->2 processes involving Nucleon and (anti-) Deuteron
@@ -499,7 +473,7 @@ class CrossSections {
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible dN reactions with their cross sections
    */
-  CollisionBranchList dn_xx(ReactionsBitSet included_2to2) const;
+  CollisionBranchList dn_xx(const ReactionsBitSet& included_2to2) const;
 
   /**
    * Parametrized cross section for πd→ πd' (mockup for πd→ πnp), πd̅→ πd̅' and
@@ -510,7 +484,7 @@ class CrossSections {
    * \param[in] type_pi type of scattering pion
    * \return cross section for given scattering
    */
-  static double xs_dpi_dprimepi(const double sqrts, const double cm_mom,
+  static double xs_dpi_dprimepi(double sqrts, double cm_mom,
                                 ParticleTypePtr produced_nucleus,
                                 const ParticleType& type_pi);
 
@@ -524,7 +498,7 @@ class CrossSections {
    * \param[in] type_N type of scattering nucleon
    * \return cross section for given scattering
    */
-  static double xs_dn_dprimen(const double sqrts, const double cm_mom,
+  static double xs_dn_dprimen(double sqrts, double cm_mom,
                               ParticleTypePtr produced_nucleus,
                               const ParticleType& type_nucleus,
                               const ParticleType& type_N);

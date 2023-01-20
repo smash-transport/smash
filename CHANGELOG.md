@@ -25,6 +25,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * New examples for usage of SMASH as a library: Full SMASH wrapper and rate equations
 * New validation mechanism of SMASH input (configuration file and `-c` command line option)
 * Add the option to employ the monash tune for all pythia processes
+* Cross section parameters for the transition to strings are now optional inputs
 
 ### Fixed
 * Fix bug in collider modus when setting the total energy per nucleon of _each_ beam

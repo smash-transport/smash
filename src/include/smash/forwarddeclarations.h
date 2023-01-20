@@ -74,6 +74,7 @@ class Tabulation;
 class ExperimentBase;
 struct ExperimentParameters;
 struct ScatterActionsFinderParameters;
+struct StringTransitionParameters;
 struct Nucleoncorr;
 
 /// @endcond

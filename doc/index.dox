@@ -67,11 +67,13 @@
         \page doxypage_input_conf_collision_term Collision term
             <div class="invisible-content">
             \subpage doxypage_input_conf_ct_pauliblocker
+            \subpage doxypage_input_conf_ct_string_transition 
             \subpage doxypage_input_conf_ct_string_parameters
             \subpage doxypage_input_conf_ct_dileptons
             \subpage doxypage_input_conf_ct_photons
             </div>
             \page doxypage_input_conf_ct_pauliblocker Pauli blocking
+            \page doxypage_input_conf_ct_string_transition String transition
             \page doxypage_input_conf_ct_string_parameters String parameters
             \page doxypage_input_conf_ct_dileptons Dileptons
             \page doxypage_input_conf_ct_photons Photons

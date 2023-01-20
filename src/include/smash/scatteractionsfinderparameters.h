@@ -9,8 +9,52 @@
 
 #include <memory>
 #include <set>
+#include <utility>
+
+#include "input_keys.h"
 
 namespace smash {
+
+/// Constants related to transition between low and high collision energies.
+struct StringTransitionParameters {
+  /// Transition range in N\f$\pi \f$ collisions
+  const std::pair<double, double> sqrts_range_Npi =
+      InputKeys::collTerm_stringTrans_rangeNpi.default_value();
+  /**
+   * Transition range in NN collisions.
+   * Tuned to reproduce experimental exclusive cross section data, and at the
+   * same produce excitation functions that are as smooth as possible. The
+   * default of a 1 GeV range is preserved.
+   */
+  const std::pair<double, double> sqrts_range_NN =
+      InputKeys::collTerm_stringTrans_rangeNN.default_value();
+  /**
+   * Constant for the lower end of transition region in the case of AQM
+   * this is added to the sum of masses
+   */
+  const double sqrts_add_lower =
+      InputKeys::collTerm_stringTrans_lower.default_value();
+  /**
+   * Constant for the range of transition region, in the case of AQM
+   * this is added to the sum of masses + sqrts_add_lower
+   */
+  const double sqrts_range_width =
+      InputKeys::collTerm_stringTrans_range_width.default_value();
+  /**
+   * Constant offset as to where to turn on the strings and elastic processes
+   * for \f$ \pi \pi \f$ reactions (this is an exception because the normal AQM
+   * behavior destroys the cross-section at very low \f$\sqrt{s} \f$ and around
+   * the \f$ f_2 \f$ peak)
+   */
+  const double pipi_offset =
+      InputKeys::collTerm_stringTrans_pipiOffset.default_value();
+  /**
+   * Constant offset as to where to shift from 2to2 to string
+   * processes (in GeV) in the case of KN reactions
+   */
+  const double KN_offset =
+      InputKeys::collTerm_stringTrans_KNOffset.default_value();
+};
 
 /**
  * Helper structure for ScatterActionsFinder.
@@ -70,6 +114,11 @@ struct ScatterActionsFinderParameters {
    * over 1.
    */
   const bool only_warn_for_high_prob;
+  /**
+   * Constants related to transition between low collision energies - mediated
+   * via resonances - and high collision energies - mediated via strings.
+   */
+  const StringTransitionParameters transition_high_energy;
 };
 
 }  // namespace smash
