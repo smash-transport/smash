@@ -19,18 +19,25 @@
 namespace smash {
 
 /**
- * Process Types are used to identify the type of the process. Corresponding
- * integer numbers are given explicitly, because they appear in the output.
+ * <tt>ProcessType</tt>s are used to identify the type of the process.
+ * Corresponding integer numbers are given explicitly, because they appear in
+ * the output.
+ *
+ * @note Types (41-45) refers to soft string excitations. Here \b "soft" means
+ * that the process does not involve quark or gluon scattering. A string is
+ * formed by quark and antiquark, or quark and diquark, in its ends. Then this
+ * string decays. Depending on which quark and anti- (or di-)quarks are selected
+ * for string formation, the process has one of the following types.
+ *
+ * @attention Since the process type numbers appear in the output, it is
+ * important to have an explanation in the user guide. We therefore do not give
+ * here an explicit members description and we simply refer to the user guide.
+ * If you add a new process type here, document the new member as the other
+ * existing ones and include the corresponding description in the Doxygen page
+ * with anchor "doxypage_output_oscar_particles_process_types".
  */
 enum class ProcessType {
-  /**
-   * @attention If you add a new process type here, please include the
-   * corresponding documentation to the user guide in the oscaroutput.cc file
-   * under the page "doxypage_output_oscar_particles_process_types" and
-   * reference it here with "\see_process_type{}".
-   *
-   * \see_process_type{0}
-   */
+  /// \see_process_type{0}
   None = 0,
   /// \see_process_type{1}
   Elastic = 1,
@@ -62,17 +69,7 @@ enum class ProcessType {
   MultiParticleFourToTwo = 14,
   /// \see_process_type{12}
   MultiParticleFiveToTwo = 12,
-
-  /**
-   * (41-45) soft string excitations. Here "soft" means that the process does
-   *         not involve quark or gluon scattering. A string is formed by quark
-   *         and antiquark, or quark and diquark, in its ends. Then this
-   *         string decays. Depending on which quark and anti- (or di-)quarks
-   *         are selected for string formation, the process has one of the
-   *         following types.
-   *
-   * \see_process_type{41}
-   */
+  /// \see_process_type{41}
   StringSoftSingleDiffractiveAX = 41,
   /// \see_process_type{42}
   StringSoftSingleDiffractiveXB = 42,
