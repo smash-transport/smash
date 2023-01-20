@@ -14,7 +14,7 @@ If Pythia is used, please cite the following references (both article and the co
 * [_A comprehensive guide to the physics and usage of PYTHIA 8.3_](https://scipost.org/SciPostPhysCodeb.8), C. Bierlich et al; SciPost Phys. Codebases 8 (2022), DOI: `10.21468/SciPostPhysCodeb.8`, also available on [arXiv](https://arxiv.org/abs/2203.11601);
 * [SciPost Phys. Codebases 8-r8.3](https://scipost.org/SciPostPhysCodeb.8-r8.3) (2022), DOI: `10.21468/SciPostPhysCodeb.8-r8.3`.
 
-Report issues [on GitHub](https://github.com/smash-transport/smash/issues) or contact us by email at elfner@itp.uni-frankfurt.de.
+Report issues [on GitHub](https://github.com/smash-transport/smash/issues) or contact us by  [✉️ email](mailto:elfner@itp.uni-frankfurt.de).
 
 ## How to build and install SMASH
 
@@ -93,35 +93,38 @@ docker run -it ghcr.io/smash-transport/smash:newest
 
 A ready-to-use executable of SMASH is found in the `smash_bin` directory.
 Run it as explained below.
-If needed, SMASH can also be build inside the container as explained in the previous section (the SMASH source files and Pythia are also found in the `/SMASH` directory).
+If needed, SMASH can also be built inside the container as explained in the previous section (the SMASH source files and Pythia are also found in the `/SMASH` directory).
 
-Two container versions of SMASH are offered: a small version (`ghcr.io/smash-transport/smash`) with a minimal set of dependencies
-pre-installed and a maximum version with all possible external dependencies, e.g. ROOT, HepMC and Rivet, already included (`ghcr.io/smash-transport/smash-max`).
+Two container versions of SMASH are offered:
+* a small version (`ghcr.io/smash-transport/smash`) with a minimal set of dependencies
+pre-installed and
+* a large version with all possible external dependencies, e.g. ROOT, HepMC and Rivet, already included (`ghcr.io/smash-transport/smash-max`).
+
 Note that running SMASH inside of a Docker container might negatively affect performance.
-More information on container usage is found in the README files in the `containers` directory.
+More information about containers usage can be found [here](containers/README.md).
 
 
 ## Running SMASH with Example Input Files
 
 SMASH ships example configuration files for running in the collider, box, sphere, and list mode (`Modus` in the configuration jargon).
-By default, i.e. by running `./smash`, the simulation is set up from the collider configuration file, called `config.yaml`, and using the default particles and decay modes files (`particles.txt` and `decaymodes.txt`, respectively).
-They are located in the repository `input` folder.
+By default, i.e. by running `./smash`, the simulation is set up from the collider configuration file, called _config.yaml_, and using the default particles and decay modes files (_particles.txt_ and _decaymodes.txt_, respectively).
+They are located in the repository ***input*** folder.
 
-Additionally, example configuration files for the box, sphere and list modus can be found in the respective directories `input/{box,sphere,list}`.
+Additionally, example configuration files for the box, sphere and list modus can be found in the respective directories ***input/{box,sphere,list}***.
 If needed, e.g. in the case of a box simulation, different default particles and decay modes files can be used.
-Examples for these are also provided in `input/box`.
+Examples for these are also provided in ***input/box***.
 
-Finally, for the list modus, an input list file to be read in is required and an example is provided as `input/list/example_list0`.
+Finally, for the list modus, an input list file to be read in is required and an example is provided as _input/list/example_list0_.
 
 In general, to run SMASH with a non-default configuration file, use the `-i` command.
-For example, for the sphere or list example file, from the `build` folder, use:
+For example, for the sphere or list example file, from the ***build*** folder, use:
 ```console
     ./smash -i ../input/sphere/config.yaml
     ./smash -i ../input/list/config.yaml
 ```
 
 Furthermore, if using non-default particles and decay modes files is necessary, these can be specified through the `-p` and `-d` options.
-In the box and the dileptons example, always from the `build` folder, this means:
+In the box and the dileptons example, always from the ***build*** folder, this means:
 ```console
 ./smash -i ../input/box/config.yaml -p ../input/box/particles.txt -d ../input/box/decaymodes.txt
 ./smash -i ../input/dileptons/config.yaml -d ../input/dileptons/decaymodes.txt
@@ -154,4 +157,4 @@ SMASH source and documentation are provided to check and reproduce published res
 Cooperation and joint projects with outside researchers are encouraged and comparison to results by experimental collaborations is supported.
 If you are interested in starting a project, please contact us to avoid interference with current thesis topics.
 If your project involves changes to the code, please refer to [CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and helpful tools.
-SMASH can also be used as a 3rd party library, for examples see the `examples` folder in the repository.
+SMASH can also be used as a 3rd party library, for examples see the ***examples*** folder in the repository.
