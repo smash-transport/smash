@@ -2185,6 +2185,12 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     for (auto &particle : add_plist) {
       try {
         pdgcode_a = particle.pdgcode().get_decimal();
+
+        // convert Kaon-L or Kaon-S into K0 or Anti-K0
+        if (pdgcode_a == 310 || pdgcode_a == 130) {
+          pdgcode_a = (random::uniform_int(0, 1) == 0) ? 311 : -311;
+        }
+
         ParticleData new_p{
             ParticleType::find(PdgCode::from_decimal(pdgcode_a))};
         const FourVector p = particle.momentum();
