@@ -729,6 +729,53 @@ in the page table for use in the TLB. Page-faults must happen after memory
 allocations (unless `malloc` is able to reuse previously deallocated memory)
 and are therefore an indicator for "irresponsible" memory allocations.
 
+
+### Callgrind
+
+Valgrind includes a tool that can profile your code, which should compiled with
+debug symbols and optimization turned on, i.e. as `RelWithDebInfo`. Once compiled
+SMASH in this mode, run
+
+    valgrind --tool=callgrind ./smash
+
+from the ***build*** directory. Note that this tool is **great and accurate**,
+but it will make the execution of your code **extremely slow**. For one default
+SMASH event, the execution time will pass from few dozens seconds to the realm of
+(tens of) minutes, roughly speaking. Once terminated, the run generates a file
+called _callgrind.out.X_, where _X_ usually is the process ID. Use the
+`kcachegrind` tool to read this file. It will give you a graphical analysis
+of things with results like which lines cost how much. Alternatively, you can use
+`gprof2dot` that is a tool to visualize different profilers output (see below).
+
+It is worth remarking that using the `Profiling` build for this type of measurement
+will make calls to `mcount` appear in the calling graph, but this is an artefact
+of the profiling procedure, which might even affect measured performance and, hence,
+should be avoided.
+
+
+### gprof2dot
+
+This is a very nice way to visualize profilers output. The software is written in
+Python and [open-source](https://github.com/jrfonseca/gprof2dot). You can install
+it via `pip`, e.g. via
+
+    pip install --user gprof2dot
+
+for a user-only installation. Then you are ready to use it. Check out the [README
+examples](https://github.com/jrfonseca/gprof2dot#examples) as quick-start. To
+produce a graph out of the Valgrind output, use something like
+
+    gprof2dot --strip -f callgrind callgrind.out.X | dot -Tsvg -o output.svg
+
+where you need to replace `X` by the proper number and you can choose a better
+name for the produced SVG output file. The `--strip` option will
+
+> strip function parameters, template parameters, and
+> const modifiers from demangled C++ function names
+
+and it is encouraged to be used to obtain a more readable result with SMASH.
+
+
 ### Flame Graphs
 
 Flame graphs are a useful way to visualize the call graph output of a profiler.
