@@ -998,6 +998,9 @@ struct InputKeys {
    * large. In this case it only influences the runtime, but not physics.
    * If `Time_Step_Mode = "None"` is chosen, then the user-provided value of
    * `Delta_Time` is ignored and `Delta_Time` is set to the `End_Time`.
+   *
+   * If the boxmodus is employed, only the "Fixed" time step mode can be used,
+   * see \ref \BoxModus.
    */
   /**
    * \see_key{key_gen_delta_time_}
@@ -5668,6 +5671,13 @@ General:
  \endverbatim
  * where `INPUT_DIR` needs to be replaced by the path to the input directory
  * at the top-level of SMASH codebase.
+ *
+ * The time step size Delta_Time has to be chosen appropriately. The reason
+ * being that the frequency with which collisions through the walls are searched
+ * for is performed once in each time step. A rough approximation is that a time
+ * step size of dt <= l_box / 10 is necessary, but a smaller time step might be
+ * needed. So the user should be aware that the collision rates close to the
+ * walls might depend on this quantity.
  */
 
 /*!\Userguide
