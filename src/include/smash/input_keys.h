@@ -3254,7 +3254,7 @@ struct InputKeys {
   /**
    * \see_key{key_MC_impact_max_}
    */
-  inline static const Key<double> modi_collider_impactMax{
+  inline static const Key<double> modi_collider_impact_max{
       {"Modi", "Collider", "Impact", "Max"}, 0.0, {"1.0"}};
 
   /*!\Userguide
@@ -5017,7 +5017,7 @@ struct InputKeys {
       std::cref(modi_collider_target_deformed_orientation_randomRotation),
       std::cref(modi_collider_projectile_deformed_orientation_theta),
       std::cref(modi_collider_target_deformed_orientation_theta),
-      std::cref(modi_collider_impactMax),
+      std::cref(modi_collider_impact_max),
       std::cref(modi_collider_impact_randomReactionPlane),
       std::cref(modi_collider_impact_range),
       std::cref(modi_collider_impact_sample),
