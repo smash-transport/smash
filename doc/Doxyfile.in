@@ -228,12 +228,7 @@ TAB_SIZE               = 4
 # "Side Effects:". You can put \n's in the value part of an alias to insert
 # newlines.
 
-ALIASES                = "NucleusModus=smash::NucleusModus" \
-                         "SphereModus=smash::SphereModus" \
-                         "BoxModus=smash::BoxModus" \
-                         "ColliderModus=smash::ColliderModus" \
-                         "ListModus=smash::ListModus" \
-                         "key=\c" \
+ALIASES                = "key=\c" \
                          "collect_key=\xrefitem doxypage_input_short_ref \"\" \"\""\
                          "aux_key{6}=\1\anchor \2 \collect_key <b>\key \3</b> &mdash; \4, \5\6"\
                          "required_key{3}=\aux_key{<hr>,\1,\2,\3,required,}"\

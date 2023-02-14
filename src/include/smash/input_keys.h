@@ -907,13 +907,16 @@ struct InputKeys {
    * will be configured in the <tt>\ref doxypage_input_conf_modi "Modi"</tt>
    * section. Recognized values are:
    * - `"Collider"` &rarr; For collisions of nuclei or compound objects. See
-   *   \ref \ColliderModus
+   *   \ref doxypage_input_conf_modi_collider "here" for further information.
    * - `"Sphere"` &rarr; For calculations of the expansion of a thermalized
-   *   sphere. See \ref \SphereModus
+   *   sphere. See \ref doxypage_input_conf_modi_sphere "here" for further
+   *   information.
    * - `"Box"` &rarr; For infinite matter calculation in a rectangular box. See
-   *   \ref \BoxModus
-   * - `"List"` &rarr; For given external particle list. See \ref \ListModus
-   * - `"ListBox"` &rarr; For given external particle list in the Box.
+   *   \ref doxypage_input_conf_modi_box "here" for further information.
+   * - `"List"` &rarr; For given external particle list. See
+   *   \ref doxypage_input_conf_modi_list "here" for further information.
+   * - `"ListBox"` &rarr; For given external particle list in the Box. See
+   *   \ref doxypage_input_conf_modi_listbox "here" for further information.
    */
   /**
    * \see_key{key_gen_modus_}
