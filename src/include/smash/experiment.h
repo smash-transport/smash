@@ -922,6 +922,11 @@ Experiment<Modus>::Experiment(Configuration &config,
         "mode and with a grid!");
   }
 
+  if (modus_.is_box() && (time_step_mode_ != TimeStepMode::Fixed)) {
+    throw std::invalid_argument(
+        "The box modus can only be used with the fixed time step mode!");
+  }
+
   logg[LExperiment].info("Using ", parameters_.testparticles,
                          " testparticles per particle.");
   logg[LExperiment].info("Using ", parameters_.n_ensembles,
