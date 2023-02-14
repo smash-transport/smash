@@ -568,6 +568,13 @@ class Key {
 
 /*!\Userguide
  * \page doxypage_input_conf_modi_box
+ * \attention
+ * The time step size `Delta_Time` has to be chosen appropriately. The reason
+ * being that the frequency with which collisions through the walls are searched
+ * for is performed once in each time step. A rough approximation is that a time
+ * step size of \f$ dt \le \mathtt{Length}/10 \f$ is necessary, but a smaller
+ * time step might be needed. So the user should be aware that the collision
+ * rates close to the walls might depend on this quantity.
  */
 
 /*!\Userguide
@@ -1001,9 +1008,6 @@ struct InputKeys {
    * large. In this case it only influences the runtime, but not physics.
    * If `Time_Step_Mode = "None"` is chosen, then the user-provided value of
    * `Delta_Time` is ignored and `Delta_Time` is set to the `End_Time`.
-   *
-   * If the boxmodus is employed, only the "Fixed" time step mode can be used,
-   * see \ref \BoxModus.
    */
   /**
    * \see_key{key_gen_delta_time_}
@@ -1302,6 +1306,11 @@ struct InputKeys {
    *   is provided by user.
    *
    * For `Delta_Time` explanation see \ref key_gen_delta_time_ "here".
+   *
+   * If the box modus is employed, only the "Fixed" time step mode can be used
+   * and the value of `Delta_Time` cannot be too large. For a more detailed
+   * explanation, see \ref doxypage_input_conf_modi_box "box modus".
+   *
    */
   /**
    * \see_key{key_gen_time_step_mode_}
@@ -3546,7 +3555,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key_no_line{key_MB_initial_condition_,Initial_Condition,string}
+   * \required_key{key_MB_initial_condition_,Initial_Condition,string}
    *
    * Controls initial momentum distribution of particles.
    * - `"peaked momenta"` &rarr; All particles have momentum \f$p=3\,T\f$,
@@ -5674,13 +5683,6 @@ General:
  \endverbatim
  * where `INPUT_DIR` needs to be replaced by the path to the input directory
  * at the top-level of SMASH codebase.
- *
- * The time step size Delta_Time has to be chosen appropriately. The reason
- * being that the frequency with which collisions through the walls are searched
- * for is performed once in each time step. A rough approximation is that a time
- * step size of dt <= l_box / 10 is necessary, but a smaller time step might be
- * needed. So the user should be aware that the collision rates close to the
- * walls might depend on this quantity.
  */
 
 /*!\Userguide
