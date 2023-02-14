@@ -1307,7 +1307,7 @@ struct InputKeys {
    *
    * For `Delta_Time` explanation see \ref key_gen_delta_time_ "here".
    *
-   * If the box modus is employed, only the "Fixed" time step mode can be used
+   * If the box modus is employed, only the `"Fixed"` time step mode can be used
    * and the value of `Delta_Time` cannot be too large. For a more detailed
    * explanation, see \ref doxypage_input_conf_modi_box "box modus".
    *
