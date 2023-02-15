@@ -39,6 +39,7 @@
 # from the documentation.
 #
 /**
+\page doxypage_input_short_ref Input short reference
 \page doxypage_input Input
     <div class="invisible-content">
     \subpage doxypage_input_configuration
@@ -112,7 +113,6 @@
         \page doxypage_input_conf_forced_therm Forced Thermalization
     \page doxypage_input_particles Particles
     \page doxypage_input_decaymodes Decay modes
-\page doxypage_input_short_ref Input short reference
 \page doxypage_output Output
     <div class="invisible-content">
     \subpage doxypage_output_conf_examples
