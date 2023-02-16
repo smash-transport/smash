@@ -151,6 +151,9 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                                         1. / max_interaction_length,
                                         1. / max_interaction_length};
   for (std::size_t i = 0; i < number_of_cells_.size(); ++i) {
+    if ((double)length_[i] > INT_MAX / (double)index_factor[i]) {
+      throw std::overflow_error("Integer overflow for number_of_cells");
+    }
     number_of_cells_[i] =
         (strategy == CellSizeStrategy::Largest)
             ? 2
