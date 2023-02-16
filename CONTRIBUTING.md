@@ -733,19 +733,21 @@ and are therefore an indicator for "irresponsible" memory allocations.
 ### Callgrind
 
 Valgrind includes a tool that can profile your code, which should compiled with
-debug symbols and optimization turned on, i.e. as `RelWithDebInfo`. Once compiled
-SMASH in this mode, run
+debug symbols and optimization turned on. This can be easily achieved in SMASH
+by specifying the `-DCMAKE_BUILD_TYPE=RelWithDebInfo` CMake option when setting
+up the project. Once compiled SMASH in this mode, run
 
     valgrind --tool=callgrind ./smash
 
 from the ***build*** directory. Note that this tool is **great and accurate**,
-but it will make the execution of your code **extremely slow**. For one default
-SMASH event, the execution time will pass from few dozens seconds to the realm of
-(tens of) minutes, roughly speaking. Once terminated, the run generates a file
-called _callgrind.out.X_, where _X_ usually is the process ID. Use the
-`kcachegrind` tool to read this file. It will give you a graphical analysis
-of things with results like which lines cost how much. Alternatively, you can use
-`gprof2dot` that is a tool to visualize different profilers output (see below).
+but it will make the execution of your code **extremely slow**. For one SMASH
+event with the default configuration file, the execution time will pass from few
+dozens seconds to the realm of (tens of) minutes, roughly speaking. Once
+terminated, the run generates a file called _callgrind.out.X_, where _X_ usually
+is the process ID. Use the `kcachegrind` tool to read this file. It will give
+you a graphical analysis of the profiling output with results like which lines
+cost how much. Alternatively, you can use `gprof2dot`, which is a more general
+tool to visualize the output of different profilers (see below).
 
 It is worth remarking that using the `Profiling` build for this type of measurement
 will make calls to `mcount` appear in the calling graph, but this is an artefact
