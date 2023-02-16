@@ -151,9 +151,13 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                                         1. / max_interaction_length,
                                         1. / max_interaction_length};
   for (std::size_t i = 0; i < number_of_cells_.size(); ++i) {
-    if (static_cast<double>(length_[i]) >
-        INT_MAX / static_cast<double>(index_factor[i])) {
-      throw std::overflow_error("Integer overflow for number_of_cells");
+    if (unlikely(length_[i] >
+                 std::numeric_limits<int>::max() / index_factor[i])) {
+      throw std::overflow_error(
+          "An integer overflow would occur constructing the system grid. "
+          "Impossible to (further) simulate the provided system using SMASH. "
+          "Refer to the user guide for further information (see list modus "
+          "page).");
     }
     number_of_cells_[i] =
         (strategy == CellSizeStrategy::Largest)
