@@ -97,8 +97,10 @@ TEST(particlelist_format) {
       std::string header =
           "# " SMASH_VERSION
           " initial conditions: hypersurface of constant proper time\n"
-          "# tau x y eta mt px py Rap pdg charge\n"
-          "# fm fm fm none GeV GeV GeV none none e\n"
+          "# tau x y eta mt px py Rap pdg charge "
+          "baryon_number strangeness\n"
+          "# fm fm fm none GeV GeV GeV none none e "
+          "none none\n"
           "# event 0 start\n";
       int line_number = 0;
       do {

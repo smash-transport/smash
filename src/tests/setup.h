@@ -268,24 +268,24 @@ inline ScatterActionsFinderParameters default_finder_parameters(
     ReactionsBitSet included_2to2 = all_reactions_included(),
     bool strings_switch = true, bool use_AQM = false,
     bool strings_with_probability = false) {
-  return {
-      elastic_parameter,
-      0.,    // low_snn_cut
-      1.,    // scale_xs
-      0.,    // additional_el_xs
-      200.,  // maximum_cross_section
-      CollisionCriterion::Geometric,
-      nnbar_treatment,
-      included_2to2,
-      no_multiparticle_reactions(),
-      1,      // testparticles
-      true,   // two_to_one
-      false,  // allow_first_collisions_within_nucleus
-      strings_switch,
-      use_AQM,
-      strings_with_probability,
-      true  // only_warn_for_high_prob
-  };
+  StringTransitionParameters default_transition_params{};
+  return {elastic_parameter,
+          0.,    // low_snn_cut
+          1.,    // scale_xs
+          0.,    // additional_el_xs
+          200.,  // maximum_cross_section
+          CollisionCriterion::Geometric,
+          nnbar_treatment,
+          included_2to2,
+          no_multiparticle_reactions(),
+          1,      // testparticles
+          true,   // two_to_one
+          false,  // allow_first_collisions_within_nucleus
+          strings_switch,
+          use_AQM,
+          strings_with_probability,
+          true,  // only_warn_for_high_prob
+          default_transition_params};
 }
 
 /// Creates default EventInfo object for testing purposes

@@ -79,7 +79,7 @@ class ICOutput : public OutputInterface {
   /**
    * Proper time of the particles removed when extracting initial conditions.
    * Parameter used for testing purposes only. Used to verify that the initial
-   * proper time remains unchanged during the evolution. Dewtermined from the
+   * proper time remains unchanged during the evolution. Determined from the
    * actually removed particles.
    * By construction, tau > 0. Nevertheless it is initialized with a negative
    * number to easily find the first particle that is removed from the evolution

@@ -445,8 +445,15 @@ double ParticleType::total_width(const double m) const {
 void ParticleType::check_consistency() {
   for (const ParticleType &ptype : ParticleType::list_all()) {
     if (!ptype.is_stable() && ptype.decay_modes().is_empty()) {
-      throw std::runtime_error("Unstable particle " + ptype.name() +
-                               " has no decay chanels!");
+      throw std::runtime_error(
+          "Unstable particle " + ptype.name() +
+          " has no decay chanels! Either add one to it in decaymodes file or "
+          "set it's width to 0 in particles file.");
+    }
+    if (ptype.is_dprime() && !ParticleType::try_find(pdg::d)) {
+      throw std::runtime_error(
+          "d' cannot be used without deuteron. Modify input particles file "
+          "accordingly.");
     }
   }
 }

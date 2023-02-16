@@ -25,9 +25,11 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * New examples for usage of SMASH as a library: Full SMASH wrapper and rate equations
 * New validation mechanism of SMASH input (configuration file and `-c` command line option)
 * Add the option to employ the monash tune for all pythia processes
+* Cross section parameters for the transition to strings are now optional inputs
 
 ### Fixed
 * Fix bug in collider modus when setting the total energy per nucleon of _each_ beam
+* The box modus can only be used with the fixed time step mode
 
 ### Changed
 * ⚠️ The `master` branch has been renamed to `main`
@@ -42,6 +44,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * The `Version` configuration key is not used anymore and has been deprecated
 * SMASH now aborts if any content output format in the configuration file is invalid or absent
 * `Format: ["None"]` can be used in the configuration file to suppress any content output
+* Added two quantities (baryon number, strangeness) in the particle line in ASCII initial conditions output (SMASH_IC.dat)
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now
