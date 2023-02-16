@@ -326,6 +326,35 @@ TEST(current_curl_in_rotating_box) {
   COMPARE_ABSOLUTE_ERROR(rot_j_T_over_z, 0., 0.01);
 }
 
+TEST(baryon_current_j_B_smearing_false) {
+  // create a proton
+  ParticleData particle = create_proton();
+  double mass = 0.938;
+  double px = 1.0;
+  double E0 = sqrt(px * px + mass * mass);
+  // set momenta:
+  particle.set_4momentum(mass, px, 0.0, 0.0);
+  particle.set_4position(FourVector(0.0, 0.0, 0.0, 0.0));
+  // make particle list out of them
+  ParticleList P;
+  P.push_back(particle);
+  // set default parameters
+  const ExperimentParameters par = smash::Test::default_parameters();
+  // define the position for the calculation. The result should not depend on r0
+  const ThreeVector r0 = ThreeVector(0.0, 0.0, 0.0);
+  // calculate j_B
+  DensityType dtype = DensityType::Baryon;
+  // calculate the density
+  bool comp_gradien = false;
+  bool smearing = false;
+  const auto j_mu_B =
+      std::get<1>(current_eckart(r0, P, par, dtype, comp_gradien, smearing));
+  COMPARE_ABSOLUTE_ERROR(j_mu_B[0], 1.0, 1e-2);
+  COMPARE_ABSOLUTE_ERROR(j_mu_B[1], px / E0, 1e-2);
+  COMPARE_ABSOLUTE_ERROR(j_mu_B[2], 0.0, 1e-2);
+  COMPARE_ABSOLUTE_ERROR(j_mu_B[3], 0.0, 1e-2);
+}
+
 /*
    This test does not compare anything. It only prints density map versus
    time to vtk files, so that one can open it with paraview and make sure
