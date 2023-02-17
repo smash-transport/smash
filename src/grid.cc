@@ -165,11 +165,10 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
       number_of_cells_[i] =
           static_cast<int>(std::floor(length_[i] * index_factor[i]));
     }
-
-    if (number_of_cells_[i] == 0) {
+    if (number_of_cells_[i] == 0 && O != GridOptions::PeriodicBoundaries) {
       // In case of zero cells, make at least one cell that is then smaller than
       // the minimal cell length. This is ok for all setups, since all particles
-      // are inside the same cell, except for the box with peroidic boundary
+      // are inside the same cell, except for the box with periodic boundary
       // conditions, where we need a 2x2x2 grid.
       number_of_cells_[i] = 1;
     } else if (number_of_cells_[i] < 2 &&
@@ -177,13 +176,15 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
       // Double the minimal cell length exceeds the length of the box, but we
       // need at least 2x2x2 cells for periodic boundaries.
       std::string error_box_too_small =
-          "Input error: Your box is too small for the grid.\n"
-          "The minimal length of the box is given by: " +
+          "Input error: With the chosen time step (Delta_Time), your box is\n"
+          "too small for the grid. Using the provided time step, the minimal\n"
+          "length of the box should be " +
           std::to_string(2 * max_interaction_length) +
-          " fm with the given timestep size.\n"
-          "If you have large timesteps please reduce them.\n"
-          "A larger box or the use of testparticles also helps.\n"
-          "Please take a look at your config.";
+          "fm. Using a smaller time step\n"
+          "will reduce the minimal needed box size. The use of test particles\n"
+          "also helps reducing the minimum needed size. Have a look to the\n"
+          "user guide (e.g. box modus page) for further information.\n"
+          "Please, adjust your config file and run SMASH again.";
       throw std::runtime_error(error_box_too_small);
     } else if (limit == CellNumberLimitation::ParticleNumber &&
                number_of_cells_[i] > max_cells) {
