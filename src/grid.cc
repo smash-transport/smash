@@ -154,10 +154,9 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
     if (unlikely(length_[i] >
                  std::numeric_limits<int>::max() / index_factor[i])) {
       throw std::overflow_error(
-          "An integer overflow would occur constructing the system grid. "
-          "Impossible to (further) simulate the provided system using SMASH. "
-          "Refer to the user guide for further information (see list modus "
-          "page).");
+          "An integer overflow would occur constructing the system grid.\n"
+          "Impossible to (further) simulate the provided system using SMASH.\n"
+          "Refer to the user guide for more information (see the Modi page).");
     }
     number_of_cells_[i] =
         (strategy == CellSizeStrategy::Largest)
