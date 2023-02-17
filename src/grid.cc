@@ -151,17 +151,20 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
                                         1. / max_interaction_length,
                                         1. / max_interaction_length};
   for (std::size_t i = 0; i < number_of_cells_.size(); ++i) {
-    if (unlikely(length_[i] >
-                 std::numeric_limits<int>::max() / index_factor[i])) {
+    if (strategy == CellSizeStrategy::Largest) {
+      number_of_cells_[i] = 2;
+    } else if (unlikely(length_[i] >
+                        std::numeric_limits<int>::max() / index_factor[i])) {
       throw std::overflow_error(
           "An integer overflow would occur constructing the system grid.\n"
-          "Impossible to (further) simulate the provided system using SMASH.\n"
-          "Refer to the user guide for more information (see the Modi page).");
+          "Impossible to (further) simulate the provided system using "
+          "SMASH.\n"
+          "Refer to the user guide for more information (see the Modi "
+          "page).");
+    } else {
+      number_of_cells_[i] =
+          static_cast<int>(std::floor(length_[i] * index_factor[i]));
     }
-    number_of_cells_[i] =
-        (strategy == CellSizeStrategy::Largest)
-            ? 2
-            : static_cast<int>(std::floor(length_[i] * index_factor[i]));
 
     if (number_of_cells_[i] == 0) {
       // In case of zero cells, make at least one cell that is then smaller than
