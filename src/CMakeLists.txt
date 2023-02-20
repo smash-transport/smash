@@ -140,7 +140,7 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
 endif()
 
 # find Pythia
-find_package(Pythia 8.307 EXACT REQUIRED)
+find_package(Pythia 8.309 EXACT REQUIRED)
 if(Pythia_FOUND)
     # the BEFORE at the line below is due to
     # https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
