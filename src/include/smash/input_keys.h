@@ -510,6 +510,12 @@ class Key {
  *
  * The `Modi` section has to contain a section named after the chosen modus and
  * in it the corresponding customization takes place.
+ *
+ * \note In some very rare cases, SMASH will throw an error that an integer
+ * overflow would occur constructing the system grid. This happens if the grid
+ * at a fixed grid size is constructed with too many cells. One case where this
+ * might occur is the `List` modus, if the input particle list contains
+ * particles with nonphysically large position values.
  */
 
 /*!\Userguide
