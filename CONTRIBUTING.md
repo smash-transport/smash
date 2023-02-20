@@ -420,10 +420,10 @@ question what should be documented:
 In order to refer to a paper inside a doxygen comment, the `\iref` command should
 be used:
 
-\code
+```cpp
 /** ... this function implements ... as described in \iref{XXX}. */
 int fun int(x);
-\endcode
+```
 
 Here, `XXX` should be the BibTex key for the paper from Inspire e.g.
 `Weil:2016zrk`. In order to find it, search for the paper on
@@ -440,11 +440,10 @@ References that are not contained in the Inspire database can be handled as
 follows: A corresponding BibTex entry should be put into `doc/non_inspire.bib`
 manually. It can then be referenced via the `\cite` command:
 
-\code
+```cpp
 /** ... this function implements ... as described in \cite XXX. */
 int fun int(x);
-\endcode
-
+```
 
 ### User guide
 
@@ -453,7 +452,7 @@ configuration options are described where they are used. Comments that are in
 normal doxygen format do not appear in the User Guide. Instead only multi-line
 comments of the form `/*!\Userguide ... */` will be used. Example:
 
-``` cpp
+```cpp
 /*!\Userguide
  * \if user
  * This text ONLY appears in the User Guide (useful for a headline that the

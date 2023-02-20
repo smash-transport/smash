@@ -8,17 +8,97 @@
 #include "smash/clebschgordan.h"
 
 #include <numeric>
+#include <unordered_map>
 
 #include "gsl/gsl_sf_coupling.h"
 
 #include "smash/constants.h"
 #include "smash/logging.h"
 
+namespace {
+
+/**
+ * Auxiliary struct to be used as key in the look up table of Clebsch-Gordan
+ * coefficients. It basically contains the input to retrieve one coefficient.
+ */
+struct ThreeSpins {
+  int j1;  /// First spin
+  int j2;  /// Second spin
+  int j3;  /// Third spin
+  int m1;  /// First isospin
+  int m2;  /// Second isospin
+  int m3;  /// Third isospin
+
+  /**
+   * Comparison operator between two set of spin information. This is needed in
+   * order to use this object in a \c std::unordered_map container.
+   *
+   * @param other The object to be compared to
+   * @return \c true If all 6 spins value are identical
+   * @return \c false otherwise
+   */
+  bool operator==(const ThreeSpins &other) const {
+    return std::tie(j1, j2, j3, m1, m2, m3) ==
+           std::tie(other.j1, other.j2, other.j3, other.m1, other.m2, other.m3);
+  }
+};
+
+/**
+ * This is one of the possible ways to prepare a hashing mechanism to use a
+ * custom object in a \c std::unordered_map container. It has been preferred
+ * here to use a new \c struct instead of injecting a specialization into the
+ * \c std namespace, because we are in an anonymous namespace and working in
+ * one specific cpp file only. Since the hash is not trivial, we also preferred
+ * this approach to using a lambda function to declare the hashing function.
+ */
+struct ThreeSpinHash {
+  /**
+   * The overload of the \c operator() is the only needed ingredient to make
+   * this class ready to be used as hashing algorithm.
+   *
+   * Since there is not (yet) a C++ standard way of combining hashes, to
+   * implement functions like this one, it is necessary to choose a hashing
+   * algorithm. The algorithm should minimize the hash collision (different
+   * input giving the same output), but at the same time be as fast as possible.
+   * One could use boost library approach, which defines
+   * \code {.cpp}
+   * template <typename T>
+   * inline void hash_combine(std::size_t &seed, const T &val) {
+   *   seed ^= std::hash<T>{}(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+   * }
+   * \endcode
+   * as function to combine hashes. Then this should be used here on each \c in
+   * member to produce the final hash. Although it has been tested to work,
+   * there is a more physics driven approach. In \cite Rasch2004 an algorithm
+   * to efficiently store Clebsch-Gordan coefficient is discussed. In it a way
+   * to map the three spins information to a single integer is proposed and this
+   * can be used here as hashing function, basically offering the guarantee that
+   * no hash collision will occur.
+   *
+   * @param in The spin information (meant to be used as input to be hashed)
+   * @return \c std::size_t The calculated hash value
+   */
+  std::size_t operator()(const ThreeSpins &in) const noexcept {
+    const int S = -in.j1 + in.j2 + in.j3;
+    const int L = +in.j1 - in.j2 + in.j3;
+    const int X = +in.j1 - in.m1;
+    const int B = +in.j2 - in.m2;
+    const int T = +in.j3 + in.m3;
+    auto hash = L * (24 + L * (50 + L * (35 + L * (10 + L)))) / 120 +
+                X * (6 + X * (11 + X * (6 + X))) / 24 +
+                T * (2 + T * (3 + T)) / 6 + B * (B + 1) / 2 + S + 1;
+    return hash;
+  }
+};
+
+}  // namespace
+
 namespace smash {
 static constexpr int LResonances = LogArea::Resonances::id;
 
-double clebsch_gordan(const int j_a, const int j_b, const int j_c,
-                      const int m_a, const int m_b, const int m_c) {
+static double clebsch_gordan_calculation(const int j_a, const int j_b,
+                                         const int j_c, const int m_a,
+                                         const int m_b, const int m_c) {
   const double wigner_3j = gsl_sf_coupling_3j(j_a, j_b, j_c, m_a, m_b, -m_c);
   if (std::abs(wigner_3j) < really_small) {
     return 0.;
@@ -33,6 +113,25 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
                           " izR: ", m_c);
 
   return result;
+}
+
+double clebsch_gordan(const int j_a, const int j_b, const int j_c,
+                      const int m_a, const int m_b, const int m_c) {
+  /* Use a standard unordered map here as look up container. Unordered map is an
+   associative container where search, insertion, and removal of elements have
+   average constant-time complexity (worst case linear in the size of the
+   container). */
+  static std::unordered_map<ThreeSpins, double, ThreeSpinHash>
+      coefficients_look_up_table{};
+  ThreeSpins spin_information = {j_a, j_b, j_c, m_a, m_b, m_c};
+  if (auto search = coefficients_look_up_table.find(spin_information);
+      search != coefficients_look_up_table.end()) {
+    return search->second;
+  } else {
+    double result = clebsch_gordan_calculation(j_a, j_b, j_c, m_a, m_b, m_c);
+    coefficients_look_up_table[spin_information] = result;
+    return result;
+  }
 }
 
 /**
