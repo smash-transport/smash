@@ -19,11 +19,16 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
       use_skyrme_(conf.has_value({"Skyrme"})),
       use_symmetry_(conf.has_value({"Symmetry"})),
       use_coulomb_(conf.has_value({"Coulomb"})),
-      use_vdf_(conf.has_value({"VDF"})) {
+      use_vdf_(conf.has_value({"VDF"})),
+      use_mom_dependence_(conf.has_value({"Momentum_Dependence"})) {
   if (use_skyrme_) {
     skyrme_a_ = conf.take({"Skyrme", "Skyrme_A"});
     skyrme_b_ = conf.take({"Skyrme", "Skyrme_B"});
     skyrme_tau_ = conf.take({"Skyrme", "Skyrme_Tau"});
+  }
+  if (use_mom_dependence_) {
+    mom_dependence_Lambda_ = conf.take({"Momentum_Dependence", "Lambda"});
+    mom_dependence_C_ = conf.take({"Momentum_Dependence", "C"});
   }
 
   if (use_symmetry_) {

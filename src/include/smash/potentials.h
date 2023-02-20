@@ -77,6 +77,8 @@ class Potentials {
     ThreeVector momentum;
     FourVector current;
     double mass;
+    double param_C;
+    double param_Lambda;
   };
 
   /**
@@ -95,7 +97,8 @@ class Potentials {
     int status = GSL_CONTINUE;
     size_t iter = 0;
     const size_t problem_dimension = 1;
-    struct ParametersForPotentialSolver parameters = {mom, jmu_B, mass};
+    struct ParametersForPotentialSolver parameters = {
+        mom, jmu_B, mass, mom_dependence_C_, mom_dependence_Lambda_};
     gsl_multiroot_function EnergyCalcFrame = {
         &(Potentials::root_equation_potentials_GSL), problem_dimension,
         &parameters};
@@ -149,7 +152,8 @@ class Potentials {
 
   static double rest_frame_effective_mass_sqr(const double energy_calc,
                                               ThreeVector mom_calc,
-                                              FourVector jmu, double m) {
+                                              FourVector jmu, double m,
+                                              double C, double Lambda) {
     // get velocity for boost to the local rest frame
     double rho_LRF = jmu.abs();
     ThreeVector beta_LRF = rho_LRF > really_small ? jmu.threevec() / jmu.x0()
@@ -165,9 +169,10 @@ class Potentials {
     double B = 136.8;   // 156.4;
     double tau = 1.26;  // 1.35;
 
-    double energy_LRF = sqrt(m * m + p_LRF * p_LRF) +
-                        mev_to_gev * (A * rho_rel + B * std::pow(rho_rel, tau) +
-                                      momentum_dependent_part(p_LRF, rho_LRF));
+    double energy_LRF =
+        sqrt(m * m + p_LRF * p_LRF) +
+        mev_to_gev * (A * rho_rel + B * std::pow(rho_rel, tau) +
+                      momentum_dependent_part(p_LRF, rho_LRF, C, Lambda));
     return energy_LRF * energy_LRF - p_LRF * p_LRF;
   }
 
@@ -189,9 +194,12 @@ class Potentials {
     const ThreeVector mom = (par->momentum);
     const FourVector jmu = (par->current);
     const double m = (par->mass);
+    const double C = (par->param_C);
+    const double Lambda = (par->param_Lambda);
     const double energy = gsl_vector_get(roots_array, 0);
-    double root_equation = energy * energy - mom.sqr() -
-                           rest_frame_effective_mass_sqr(energy, mom, jmu, m);
+    double root_equation =
+        energy * energy - mom.sqr() -
+        rest_frame_effective_mass_sqr(energy, mom, jmu, m, C, Lambda);
     gsl_vector_set(function, 0, root_equation);
     // std::cout << "root equation called for given energy " << energy <<
     //             "compared to kinetic energy " << std::sqrt(m*m+ mom*mom)<<
@@ -206,10 +214,9 @@ class Potentials {
    *
    * \return momenutm dependent part of the potential in MeV
    */
-  static double momentum_dependent_part(double mom, double rho) {
-    double Lambda = 2.13;  // 1/fm
-    double C = -63.6;      // MeV
-    int g = 2;             // degeneracy factor
+  static double momentum_dependent_part(double mom, double rho, double C,
+                                        double Lambda) {
+    int g = 2;  // degeneracy factor
     double fermi_momentum = std::cbrt(6. * M_PI * M_PI * rho / g);  // in 1/fm
     mom = mom / hbarc;  // convert to 1/fm
     double temp1 = 2 * g * C * M_PI * std::pow(Lambda, 3) /
@@ -559,6 +566,9 @@ class Potentials {
   /// VDF potential on/off
   bool use_vdf_;
 
+  /// Momentum-dependent part on/off
+  bool use_mom_dependence_;
+
   /**
    * Parameter of skyrme potentials:
    * the coefficient in front of \f$\frac{\rho}{\rho_0}\f$ in GeV
@@ -576,6 +586,18 @@ class Potentials {
    * the power index.
    */
   double skyrme_tau_;
+
+  /**
+   * Parameter Lambda of the momentum-dependent part of the potentials
+   * given in 1/fm
+   */
+  double mom_dependence_Lambda_;
+
+  /**
+   * Parameter C of the momentum-dependent part of the potentials
+   * given in MeV
+   */
+  double mom_dependence_C_;
 
   /// Parameter S_Pot in the symmetry potential in MeV
   double symmetry_S_Pot_;

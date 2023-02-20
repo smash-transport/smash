@@ -4847,6 +4847,13 @@ struct InputKeys {
   inline static const Key<std::vector<double>> potentials_coulomb_rCut{
       {"Potentials", "Coulomb", "R_Cut"}, {"2.1"}};
 
+  inline static const Key<std::vector<double>>
+      potentials_momentum_dependence_Lambda{
+          {"Potentials", "Momentum_Dependence", "Lambda"}, {"2.13"}};
+
+  inline static const Key<std::vector<double>> potentials_momentum_dependence_C{
+      {"Potentials", "Momentum_Dependence", "C"}, {"-63.6"}};
+
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
    * <hr>
@@ -5259,6 +5266,8 @@ struct InputKeys {
       std::cref(potentials_vdf_powers),
       std::cref(potentials_vdf_satRhoB),
       std::cref(potentials_coulomb_rCut),
+      std::cref(potentials_momentum_dependence_C),
+      std::cref(potentials_momentum_dependence_Lambda),
       std::cref(forcedThermalization_cellNumber),
       std::cref(forcedThermalization_criticalEDensity),
       std::cref(forcedThermalization_startTime),
