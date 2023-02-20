@@ -349,6 +349,13 @@ TEST(baryon_current_j_B_smearing_false) {
   bool smearing = false;
   const auto j_mu_B =
       std::get<1>(current_eckart(r0, P, par, dtype, comp_gradien, smearing));
+  /* In the case of no smearing, the four current j_B is calculated as j_B^k =
+   * \sum_i B_i * p^k_i / p^0_i with the sum running over all particles. Since
+   * in the above system there is only one proton, the result should simply be
+   * j^\mu = (1, p^1 / p^0, 0, 0). In principle a four current density is
+   * calculated however, the division by the volume has to be added by hand so
+   * the volume plays no role here.
+   */
   COMPARE_ABSOLUTE_ERROR(j_mu_B[0], 1.0, 1e-2);
   COMPARE_ABSOLUTE_ERROR(j_mu_B[1], px / E0, 1e-2);
   COMPARE_ABSOLUTE_ERROR(j_mu_B[2], 0.0, 1e-2);
