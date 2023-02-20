@@ -30,7 +30,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Fixed
 * Fix bug in collider modus when setting the total energy per nucleon of _each_ beam
 * The box modus can only be used with the fixed time step mode
-* Fix falsely applied smearing factor in thermodynamic output of the charge currents j_BQS in the case of no smearing
+* Fix falsely applied smearing factor in thermodynamic output of the charge currents `j_BQS` in the case of no smearing
 
 ### Changed
 * ⚠️ The `master` branch has been renamed to `main`
