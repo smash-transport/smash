@@ -105,7 +105,8 @@ void update_momenta(
     std::vector<Particles> &particles, double dt, const Potentials &pot,
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FB_lat,
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat,
-    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *EM_lat);
+    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *EM_lat,
+    DensityLattice *jB_lat);
 
 }  // namespace smash
 #endif  // SRC_INCLUDE_SMASH_PROPAGATION_H_

@@ -119,18 +119,18 @@ DECLARE_LOGAREA(27, HyperSurfaceCrossing);
 DECLARE_LOGAREA(28, InitialConditions);
 DECLARE_LOGAREA(29, ScatterActionMulti);
 DECLARE_LOGAREA(30, Configuration);
+DECLARE_LOGAREA(31, Potentials);
 
 /**
  * This type collects all existing log areas so they will be created with the
  * correct log level automatically.
  */
-using AreaTuple =
-    std::tuple<Main, Experiment, Box, Collider, Sphere, Action, InputParser,
-               ParticleType, FindScatter, Clock, DecayModes, Resonances,
-               ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
-               Density, PauliBlocking, Tmn, Fpe, Lattice, Pythia,
-               GrandcanThermalizer, CrossSections, Output, HyperSurfaceCrossing,
-               InitialConditions, ScatterActionMulti, Configuration>;
+using AreaTuple = std::tuple<
+    Main, Experiment, Box, Collider, Sphere, Action, InputParser, ParticleType,
+    FindScatter, Clock, DecayModes, Resonances, ScatterAction, Distributions,
+    Propagation, Grid, List, Nucleus, Density, PauliBlocking, Tmn, Fpe, Lattice,
+    Pythia, GrandcanThermalizer, CrossSections, Output, HyperSurfaceCrossing,
+    InitialConditions, ScatterActionMulti, Configuration, Potentials>;
 }  // namespace LogArea
 
 /**

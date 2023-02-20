@@ -112,7 +112,8 @@ void update_momenta(
     std::vector<Particles> &ensembles, double dt, const Potentials &pot,
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FB_lat,
     RectangularLattice<std::pair<ThreeVector, ThreeVector>> *FI3_lat,
-    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *EM_lat) {
+    RectangularLattice<std::pair<ThreeVector, ThreeVector>> *EM_lat,
+    DensityLattice *jB_lat) {
   // Copy particles from ALL ensembles to a single list before propagation
   // and calculate potentials from this list
   ParticleList plist;
@@ -155,12 +156,18 @@ void update_momenta(
         FB = std::make_pair(std::get<0>(tmp), std::get<1>(tmp));
         FI3 = std::make_pair(std::get<2>(tmp), std::get<3>(tmp));
       }
-      ThreeVector Force =
-          scale.first *
+      ThreeVector energy_grad = pot.energy_gradient(
+          jB_lat, data.position().threevec(), data.momentum().threevec(),
+          data.effective_mass());
+      ThreeVector Force = -energy_grad * scale.first;
+      Force +=
+          scale.second * data.type().isospin3_rel() *
+          (FI3.first + data.momentum().velocity().cross_product(FI3.second));
+      /*ThreeVector Force = scale.first *
               (FB.first + data.momentum().velocity().cross_product(FB.second)) +
           scale.second * data.type().isospin3_rel() *
               (FI3.first +
-               data.momentum().velocity().cross_product(FI3.second));
+               data.momentum().velocity().cross_product(FI3.second)); */
       // Potentially add Lorentz force
       if (pot.use_coulomb() && EM_lat->value_at(r, EM_fields)) {
         // factor hbar*c to convert fields from 1/fm^2 to GeV/fm
