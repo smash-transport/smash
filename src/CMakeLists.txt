@@ -194,6 +194,7 @@ set(smash_src
     bremsstrahlungaction.cc
     chemicalpotential.cc
     clebschgordan.cc
+    clebschgordan_lookup.cc
     collidermodus.cc
     configuration.cc
     crosssections.cc
