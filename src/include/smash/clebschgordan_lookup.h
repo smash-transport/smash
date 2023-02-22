@@ -22,11 +22,11 @@ class ClebschGordan {
  public:
   /**
    * Check in the Clebsch-Gordan lookup table if the requested coefficient is
-   * available. If so, return it, otherwise calculated the requested one and
-   * store it in the lookup table.
+   * available. If so, return it, otherwise calculate the requested one, store
+   * it in the lookup table and return it.
    *
-   * \see calculate_coefficient for a description of arguments and return
-   * value.
+   * \see calculate_coefficient for a description of function arguments and
+   * return value.
    */
   static double coefficient(const int j_a, const int j_b, const int j_c,
                             const int m_a, const int m_b, const int m_c);
@@ -38,12 +38,12 @@ class ClebschGordan {
    * e.g. in tests.
    */
   struct ThreeSpins {
-    int j1;  /// First spin
-    int j2;  /// Second spin
-    int j3;  /// Third spin
-    int m1;  /// First isospin
-    int m2;  /// Second isospin
-    int m3;  /// Third isospin
+    int j1;  ///< First isospin
+    int j2;  ///< Second isospin
+    int j3;  ///< Third isospin
+    int m1;  ///< z component of first isospin
+    int m2;  ///< z component of second isospin
+    int m3;  ///< z component of third isospin
 
    private:
     /**
@@ -73,16 +73,16 @@ class ClebschGordan {
   /**
    * Calculate Clebsch-Gordan coefficient
    * \f$(-1)^{j_a - j_b + m_c} \sqrt{(2 j_c + 1)} \cdot [Wigner 3J symbol] \f$
-   * \param[in] j_a spin of first particle
-   * \param[in] j_b spin of second particle
-   * \param[in] j_c spin of resonance
-   * \param[in] m_a isospin of first particle
-   * \param[in] m_b isospin of second particle
-   * \param[in] m_c isospin of resonance
+   * \param[in] j_a isospin of first particle
+   * \param[in] j_b isospin of second particle
+   * \param[in] j_c isospin of resonance
+   * \param[in] m_a z-component of isospin of first particle
+   * \param[in] m_b z-component of isospin of second particle
+   * \param[in] m_c z-component of isospin of resonance
    * \return Clebsch-Gordan coefficient for coupling of particles a, b and c
    *
-   * Note that the calculation assumes that the spin/isospin values (j/m)
-   * have been multiplied by two (in order to be integer).
+   * Note that the calculation assumes that the isospin values (j/m) have been
+   * multiplied by two (in order to be integer).
    */
   static double calculate_coefficient(const int j_a, const int j_b,
                                       const int j_c, const int m_a,
@@ -132,10 +132,9 @@ class ClebschGordan {
       const int X = +in.j1 - in.m1;
       const int B = +in.j2 - in.m2;
       const int T = +in.j3 + in.m3;
-      auto hash = L * (24 + L * (50 + L * (35 + L * (10 + L)))) / 120 +
-                  X * (6 + X * (11 + X * (6 + X))) / 24 +
-                  T * (2 + T * (3 + T)) / 6 + B * (B + 1) / 2 + S + 1;
-      return hash;
+      return L * (24 + L * (50 + L * (35 + L * (10 + L)))) / 120 +
+             X * (6 + X * (11 + X * (6 + X))) / 24 + T * (2 + T * (3 + T)) / 6 +
+             B * (B + 1) / 2 + S + 1;
     }
   };
 
