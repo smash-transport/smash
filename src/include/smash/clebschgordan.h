@@ -28,8 +28,19 @@ namespace smash {
  * Note that the calculation assumes that the spin/isospin values (j/m)
  * have been multiplied by two (in order to be integer).
  */
-double clebsch_gordan(const int j_a, const int j_b, const int j_c,
-                      const int m_a, const int m_b, const int m_c);
+double clebsch_gordan_calculation(const int j_a, const int j_b, const int j_c,
+                                  const int m_a, const int m_b, const int m_c);
+
+/**
+ * Check in the Clebsch-Gordan lookup table if the requested coefficient is
+ * available. If so, return it, otherwise calculated the requested one and store
+ * it in the lookup table.
+ *
+ * \see clebsch_gordan_calculation for a description of arguments and return
+ * value.
+ */
+double clebsch_gordan_coefficient(const int j_a, const int j_b, const int j_c,
+                                  const int m_a, const int m_b, const int m_c);
 
 /**
  * Calculate the squared isospin Clebsch-Gordan coefficient for two particles
@@ -42,9 +53,9 @@ double clebsch_gordan(const int j_a, const int j_b, const int j_c,
 inline double isospin_clebsch_gordan_sqr_2to1(const ParticleType &p_a,
                                               const ParticleType &p_b,
                                               const ParticleType &Res) {
-  const double cg =
-      clebsch_gordan(p_a.isospin(), p_b.isospin(), Res.isospin(),
-                     p_a.isospin3(), p_b.isospin3(), Res.isospin3());
+  const double cg = clebsch_gordan_coefficient(p_a.isospin(), p_b.isospin(),
+                                               Res.isospin(), p_a.isospin3(),
+                                               p_b.isospin3(), Res.isospin3());
   return cg * cg;
 }
 

@@ -83,7 +83,7 @@ TEST(coefficient) {
   spinz[6][2] = 0;
   correct_coefficient[6] = 1 / sqrt(6.);
   for (int i = 0; i < 7; i++) {
-    double cg = clebsch_gordan(spin[i][0], spin[i][1], spin[i][2], spinz[i][0],
+    double cg = clebsch_gordan_coefficient(spin[i][0], spin[i][1], spin[i][2], spinz[i][0],
                                spinz[i][1], spinz[i][2]);
     FUZZY_COMPARE(cg, correct_coefficient[i])
         << '\n'  // Using double quotes here produces an error(?!)
