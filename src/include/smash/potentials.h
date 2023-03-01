@@ -50,24 +50,39 @@ class Potentials {
   virtual ~Potentials();
 
   ThreeVector energy_gradient(DensityLattice *jB_lat, const ThreeVector &pos,
-                              const ThreeVector &mom, double mass) const {
-    std::array<double, 3> dr = jB_lat->cell_sizes();
+                              const ThreeVector &mom, double mass,
+                              ParticleList &plist) const {
+    std::array<double, 3> dr;
+    if (jB_lat) {
+      dr = jB_lat->cell_sizes();
+    } else {
+      dr = {0.1, 0.1, 0.1};
+    }
     ThreeVector result, pos_left, pos_right;
     DensityOnLattice jmu_left, jmu_right;
+    FourVector net_4current_left, net_4current_right;
     for (int i = 0; i < 3; i++) {
       pos_left = pos;
       pos_left[i] -= dr[i];
       pos_right = pos;
       pos_right[i] += dr[i];
-      if (!(jB_lat->value_at(pos_left, jmu_left) &&
-            (jB_lat->value_at(pos_right, jmu_right)))) {
-        logg[LPotentials].warn(
-            "Can't get density from lattice for energy gradient calculation! "
-            "Particle will not be affected by potentials.");
-        return {0, 0, 0};
+
+      if (jB_lat && jB_lat->value_at(pos_left, jmu_left)) {
+        net_4current_left = jmu_left.jmu_net();
+      } else {
+        auto current = current_eckart(pos_left, plist, param_,
+                                      DensityType::Baryon, false, true);
+        net_4current_left = std::get<1>(current);
       }
-      result[i] = (calculation_frame_energy(mom, jmu_right.jmu_net(), mass) -
-                   calculation_frame_energy(mom, jmu_left.jmu_net(), mass)) /
+      if (jB_lat && jB_lat->value_at(pos_right, jmu_right)) {
+        net_4current_right = jmu_right.jmu_net();
+      } else {
+        auto current = current_eckart(pos_right, plist, param_,
+                                      DensityType::Baryon, false, true);
+        net_4current_right = std::get<1>(current);
+      }
+      result[i] = (calculation_frame_energy(mom, net_4current_right, mass) -
+                   calculation_frame_energy(mom, net_4current_left, mass)) /
                   (2 * dr[i]);
     }
     return result;
@@ -77,6 +92,9 @@ class Potentials {
     ThreeVector momentum;
     FourVector current;
     double mass;
+    double skyrme_a;
+    double skyrme_b;
+    double skyrme_tau;
     double param_C;
     double param_Lambda;
   };
@@ -97,8 +115,14 @@ class Potentials {
     int status = GSL_CONTINUE;
     size_t iter = 0;
     const size_t problem_dimension = 1;
-    struct ParametersForPotentialSolver parameters = {
-        mom, jmu_B, mass, mom_dependence_C_, mom_dependence_Lambda_};
+    struct ParametersForPotentialSolver parameters = {mom,
+                                                      jmu_B,
+                                                      mass,
+                                                      skyrme_a_,
+                                                      skyrme_b_,
+                                                      skyrme_tau_,
+                                                      mom_dependence_C_,
+                                                      mom_dependence_Lambda_};
     gsl_multiroot_function EnergyCalcFrame = {
         &(Potentials::root_equation_potentials_GSL), problem_dimension,
         &parameters};
@@ -119,11 +143,11 @@ class Potentials {
         iter++;
         status = gsl_multiroot_fsolver_iterate(Root_finder);
         if (status) {
-          /*std::cout << "\nGSL error message:\n"
-                  << gsl_strerror(status) << "\n\n"
-                  << std::endl;
-          std::cout << "Momentum: " << mom<< "\n Current: "<< jmu_B <<
-          std::endl;*/
+          logg[LPotentials].debug(
+              "GSL ERROR in root finding: " +
+              static_cast<std::string>(gsl_strerror(status)) +
+              "\n with starting value " +
+              std::to_string(roots_array_initial[0]));
           break;
         }
         status =
@@ -143,16 +167,10 @@ class Potentials {
     return 0.0;
   }
 
-  /*void write_energies(ThreeVector mom,FourVector j, double m ) const{
-    for (double e=-1000; e<1000; e+=5.0) {
-      std::cout << e << " " << e*e-mom.sqr() << " " <<
-  rest_frame_effective_mass_sqr(e,mom,j,m) << std::endl;
-    }
-  }*/
-
   static double rest_frame_effective_mass_sqr(const double energy_calc,
                                               ThreeVector mom_calc,
                                               FourVector jmu, double m,
+                                              double A, double B, double tau,
                                               double C, double Lambda) {
     // get velocity for boost to the local rest frame
     double rho_LRF = jmu.abs();
@@ -163,16 +181,9 @@ class Potentials {
     FourVector pmu_LRF = pmu_calc.lorentz_boost(beta_LRF);
     // double energy_LRF_guess = pmu_LRF.x0();
     double p_LRF = pmu_LRF.threevec().abs();
-
-    double rho_rel = rho_LRF / nuclear_density;
-    double A = -108.6;  //-209.2;
-    double B = 136.8;   // 156.4;
-    double tau = 1.26;  // 1.35;
-
-    double energy_LRF =
-        sqrt(m * m + p_LRF * p_LRF) +
-        mev_to_gev * (A * rho_rel + B * std::pow(rho_rel, tau) +
-                      momentum_dependent_part(p_LRF, rho_LRF, C, Lambda));
+    double energy_LRF = sqrt(m * m + p_LRF * p_LRF) +
+                        skyrme_pot_impl(rho_LRF, A, B, tau) +
+                        momentum_dependent_part(p_LRF, rho_LRF, C, Lambda);
     return energy_LRF * energy_LRF - p_LRF * p_LRF;
   }
 
@@ -194,12 +205,15 @@ class Potentials {
     const ThreeVector mom = (par->momentum);
     const FourVector jmu = (par->current);
     const double m = (par->mass);
+    const double A = (par->skyrme_a);
+    const double B = (par->skyrme_b);
+    const double tau = (par->skyrme_tau);
     const double C = (par->param_C);
     const double Lambda = (par->param_Lambda);
     const double energy = gsl_vector_get(roots_array, 0);
-    double root_equation =
-        energy * energy - mom.sqr() -
-        rest_frame_effective_mass_sqr(energy, mom, jmu, m, C, Lambda);
+    double root_equation = energy * energy - mom.sqr() -
+                           rest_frame_effective_mass_sqr(energy, mom, jmu, m, A,
+                                                         B, tau, C, Lambda);
     gsl_vector_set(function, 0, root_equation);
     // std::cout << "root equation called for given energy " << energy <<
     //             "compared to kinetic energy " << std::sqrt(m*m+ mom*mom)<<
@@ -212,7 +226,7 @@ class Potentials {
    *
    * To be added to the momentum independent part.
    *
-   * \return momenutm dependent part of the potential in MeV
+   * \return momenutm dependent part of the potential in GeV
    */
   static double momentum_dependent_part(double mom, double rho, double C,
                                         double Lambda) {
@@ -231,9 +245,7 @@ class Potentials {
     double temp7 = (mom - fermi_momentum) / Lambda;
     double result = temp1 * (temp2 * std::log(temp3 / temp4) + temp5 -
                              2 * (std::atan(temp6) - atan(temp7)));
-    // std::cout << "Value of the momentum dependent part is " << result << "
-    // MeV"<< std::endl;
-    return result;
+    return mev_to_gev * result;
   }
 
   /**
@@ -244,7 +256,12 @@ class Potentials {
    * \return Skyrme potential \f[U_B=10^{-3}\times\frac{\rho}{|\rho|}
    *         (A\frac{\rho}{\rho_0}+B(\frac{\rho}{\rho_0})^\tau)\f] in GeV
    */
-  double skyrme_pot(const double baryon_density) const;
+  double skyrme_pot(const double baryon_density) const {
+    return skyrme_pot_impl(baryon_density, skyrme_a_, skyrme_b_, skyrme_tau_);
+  }
+
+  static double skyrme_pot_impl(const double baryon_density, const double A,
+                                const double B, const double tau);
 
   /**
    * Evaluates symmetry potential given baryon isospin density.
@@ -522,6 +539,8 @@ class Potentials {
   virtual bool use_symmetry() const { return use_symmetry_; }
   /// \return Is Coulomb potential on?
   virtual bool use_coulomb() const { return use_coulomb_; }
+  /// \return Use momentum-dependent part of the potential?
+  virtual bool use_mom_dependence() const { return use_mom_dependence_; }
 
   /// \return Skyrme parameter skyrme_a, in MeV
   double skyrme_a() const { return skyrme_a_; }
