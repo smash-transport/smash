@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2022
+ *    Copyright (c) 2013-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -620,6 +620,80 @@ EventInfo fill_event_info(const std::vector<Particles> &ensembles,
                        !projectile_target_interact,
                        kinematic_cut_for_SMASH_IC};
   return event_info;
+}
+
+ParticleList check_particle_list(ParticleList &particle_list,
+                                 int &n_warns_precision,
+                                 int &n_warns_mass_consistency) {
+  // Check if the particles in the list are valid, perfom the same checks
+  // as in ListModus::try_create_particle()
+  // (see function documentation in listmodus.h)
+  constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
+  ParticleList plist_checked;
+  int pdgcode_a = 0;
+  for (auto &particle : particle_list) {
+    try {
+      pdgcode_a = particle.pdgcode().get_decimal();
+
+      // Convert Kaon-L or Kaon-S into K0 or Anti-K0 used in SMASH
+      if (pdgcode_a == 310 || pdgcode_a == 130) {
+        pdgcode_a = (random::uniform_int(0, 1) == 0) ? 311 : -311;
+      }
+
+      ParticleData new_p{ParticleType::find(PdgCode::from_decimal(pdgcode_a))};
+      const FourVector p = particle.momentum();
+      const double mass = p.abs();
+
+      // Check mass of particles in list
+      if (particle.type().is_stable() &&
+          std::abs(mass - particle.pole_mass()) > really_small) {
+        if (n_warns_precision < max_warns_precision) {
+          logg[LExperiment].warn()
+              << "Provided mass of " << particle.type().name() << " = " << mass
+              << " [GeV] is inconsistent with SMASH value = "
+              << particle.pole_mass() << ". Forcing E = sqrt(p^2 + m^2)"
+              << ", where m is SMASH mass.";
+          n_warns_precision++;
+        } else if (n_warns_precision == max_warns_precision) {
+          logg[LExperiment].warn(
+              "Further warnings about SMASH mass versus input mass"
+              " inconsistencies will be suppressed.");
+          n_warns_precision++;
+        }
+        new_p.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
+      } else {
+        new_p.set_4momentum(FourVector(p.x0(), p.x1(), p.x2(), p.x3()));
+      }
+
+      // On-shell condition consistency check
+      if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
+        if (n_warns_mass_consistency < max_warn_mass_consistency) {
+          logg[LExperiment].warn()
+              << "Provided 4-momentum " << particle.momentum() << " and "
+              << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
+              << " This may originate from the lack of numerical"
+              << " precision in the input. Setting E to sqrt(p^2 + m^2).";
+          n_warns_mass_consistency++;
+        } else if (n_warns_mass_consistency == max_warn_mass_consistency) {
+          logg[LExperiment].warn(
+              "Further warnings about E != sqrt(p^2 + m^2) will"
+              " be suppressed.");
+          n_warns_mass_consistency++;
+        }
+        new_p.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
+      }
+      // Set spatial coordinates, they will later be backpropagated if needed
+      const FourVector r = particle.position();
+      new_p.set_4position(FourVector(r.x0(), r.x1(), r.x2(), r.x3()));
+      new_p.set_cross_section_scaling_factor(1.0);
+      plist_checked.push_back(new_p);
+    } catch (ParticleType::PdgNotFoundFailure &) {
+      logg[LExperiment].warn()
+          << "SMASH does not recognize pdg code " << pdgcode_a
+          << " obtained from hadron list. This particle will be ignored.\n";
+    }
+  }
+  return plist_checked;
 }
 
 }  // namespace smash

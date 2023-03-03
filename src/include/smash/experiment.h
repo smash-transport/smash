@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2022
+ *    Copyright (c) 2013-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -252,8 +252,6 @@ class Experiment : public ExperimentBase {
    * Provides external access to SMASH particles. This is helpful if SMASH
    * is used as a 3rd-party library.
    */
-  // todo(oliiny): this should be made compatible with JetScape on
-  // the JetScape side
   Particles *first_ensemble() { return &ensembles_[0]; }
   /// Getter for all ensembles
   std::vector<Particles> *all_ensembles() { return &ensembles_; }
@@ -265,8 +263,8 @@ class Experiment : public ExperimentBase {
   Modus *modus() { return &modus_; }
 
   /**
-   * Increase the event number by one. This function is helpful if
-   * SMASH is used as an external library.
+   * Increases the event number by one. This function is helpful if
+   * SMASH is used as a 3rd-party library.
    */
   void increase_event_no();
 
@@ -704,14 +702,6 @@ class Experiment : public ExperimentBase {
 
   /// random seed for the next event.
   int64_t seed_ = -1;
-
-  /// Counter for mass-check warnings if a hadron list is added (avoid spamming)
-  int n_warns_precision_ = 0;
-
-  /** Counter for energy-momentum conservation warnings if a hadron list is
-   * added (avoid spamming)
-   */
-  int n_warns_mass_consistency_ = 0;
 
   /**
    * \ingroup logging
@@ -2165,163 +2155,60 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   return true;
 }
 
+/**
+ * Check particle lists which are supposed to be added/removed from the SMASH
+ * evolution. This is important if SMASH is used as a 3rd-party library, e.g.,
+ * in X-SCAPE for concurrent running.
+ *
+ * \param[in] particle_list The particle list, which should be checked for
+ * correctness. \return ParticleList with the accepted particles.
+ */
+ParticleList check_particle_list(ParticleList &particle_list,
+                                 int &n_warns_precision,
+                                 int &n_warns_mass_consistency);
+
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const double t_end,
                                            ParticleList add_plist,
                                            ParticleList remove_plist) {
-  // the next block performs checks for particles stored in a list which
-  // are supposed to be added to the evolution
+  // check particles, which are supposed to be added to the evolution, when
+  // SMASH is used as a 3rd-party library
   const double act_time = parameters_.labclock->current_time();
-  ParticleList empty_in_list;
+  // Counter for mass-check warnings if a hadron list is added (avoid spamming)
+  int n_warns_precision = 0;
+  // Counter for energy-momentum conservation warnings if a hadron list is
+  // added (avoid spamming)
+  int n_warns_mass_consistency = 0;
   ParticleList add_plist_checked;
   // check particle list for additional particles if a non-empty list is given
   if (!add_plist.empty()) {
-    // check if the particles in the list are valid, perfom the same checks
-    // as in ListModus::try_create_particle()
-    // (see function documentation in listmodus.h)
-    constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
-    int pdgcode_a = 0;
-
-    for (auto &particle : add_plist) {
-      try {
-        pdgcode_a = particle.pdgcode().get_decimal();
-
-        // convert Kaon-L or Kaon-S into K0 or Anti-K0
-        if (pdgcode_a == 310 || pdgcode_a == 130) {
-          pdgcode_a = (random::uniform_int(0, 1) == 0) ? 311 : -311;
-        }
-
-        ParticleData new_p{
-            ParticleType::find(PdgCode::from_decimal(pdgcode_a))};
-        const FourVector p = particle.momentum();
-        const double mass = p.abs();
-
-        // check mass of particles in list
-        if (particle.type().is_stable() &&
-            std::abs(mass - particle.pole_mass()) > really_small) {
-          if (n_warns_precision_ < max_warns_precision) {
-            logg[LExperiment].warn()
-                << "Provided mass of " << particle.type().name() << " = "
-                << mass << " [GeV] is inconsistent with SMASH value = "
-                << particle.pole_mass() << ". Forcing E = sqrt(p^2 + m^2)"
-                << ", where m is SMASH mass.";
-            n_warns_precision_++;
-          } else if (n_warns_precision_ == max_warns_precision) {
-            logg[LExperiment].warn(
-                "Further warnings about SMASH mass versus input mass"
-                " inconsistencies will be suppressed.");
-            n_warns_precision_++;
-          }
-          new_p.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
-        } else {
-          new_p.set_4momentum(FourVector(p.x0(), p.x1(), p.x2(), p.x3()));
-        }
-
-        // On-shell condition consistency check
-        if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
-          if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
-            logg[LExperiment].warn()
-                << "Provided 4-momentum " << particle.momentum() << " and "
-                << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
-                << " This may originate from the lack of numerical"
-                << " precision in the input. Setting E to sqrt(p^2 + m^2).";
-            n_warns_mass_consistency_++;
-          } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
-            logg[LExperiment].warn(
-                "Further warnings about E != sqrt(p^2 + m^2) will"
-                " be suppressed.");
-            n_warns_mass_consistency_++;
-          }
-          new_p.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
-        }
-        // Set spatial coordinates, they will later be backpropagated if needed
-        const FourVector r = particle.position();
-        new_p.set_4position(FourVector(r.x0(), r.x1(), r.x2(), r.x3()));
-        new_p.set_cross_section_scaling_factor(1.0);
-        add_plist_checked.push_back(new_p);
-      } catch (ParticleType::PdgNotFoundFailure &) {
-        logg[LExperiment].warn()
-            << "SMASH does not recognize pdg code " << pdgcode_a
-            << " obtained from hadron list. This particle will be ignored.\n";
-      }
-    }
+    add_plist_checked = check_particle_list(add_plist, n_warns_precision,
+                                            n_warns_mass_consistency);
+  }
+  if (!add_plist_checked.empty()) {
+    ParticleList empty_in_list;
+    auto act_add = std::make_unique<FreeforallAction>(
+        empty_in_list, add_plist_checked, act_time);
+    // Time of add_plist_checked is set to action time, i.e. current_time
+    // in generate_final_state() in freeforallaction.h
+    perform_action(*act_add, 0);
+    // Particles are only added to the first ensemble, which is
+    // currently the only one needed for the use of SMASH as an external
+    // library (e.g. in JETSCAPE / XSCAPE)
   }
 
-  // the next block performs checks for particles stored in a list which
-  // are supposed to be deleted from the evolution
+  // check particles, which are supposed to be removed from the evolution, when
+  // SMASH is used as a 3rd-party library
   ParticleList remove_plist_final;
-  ParticleList empty_out_list;
+  int remove_plist_size = 0;
   if (!remove_plist.empty()) {
-    // check if the particles in the list are valid, perfom the same checks
-    // as in ListModus::try_create_particle()
-    // (see function documentation in listmodus.h)
-    ParticleList remove_plist_checked;
-    n_warns_precision_ = n_warns_mass_consistency_ = 0;
-    constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
-    int pdgcode_r = 0;
-
-    for (auto &particle : remove_plist) {
-      try {
-        pdgcode_r = particle.pdgcode().get_decimal();
-        ParticleData new_p{
-            ParticleType::find(PdgCode::from_decimal(pdgcode_r))};
-        const FourVector p = particle.momentum();
-        const double mass = p.abs();
-
-        // check mass of particles in list
-        if (particle.type().is_stable() &&
-            std::abs(mass - particle.pole_mass()) > really_small) {
-          if (n_warns_precision_ < max_warns_precision) {
-            logg[LExperiment].warn()
-                << "Provided mass of " << particle.type().name() << " = "
-                << mass << " [GeV] is inconsistent with SMASH value = "
-                << particle.pole_mass() << ". Forcing E = sqrt(p^2 + m^2)"
-                << ", where m is SMASH mass.";
-            n_warns_precision_++;
-          } else if (n_warns_precision_ == max_warns_precision) {
-            logg[LExperiment].warn(
-                "Further warnings about SMASH mass versus input mass"
-                " inconsistencies will be suppressed.");
-            n_warns_precision_++;
-          }
-          new_p.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
-        } else {
-          new_p.set_4momentum(FourVector(p.x0(), p.x1(), p.x2(), p.x3()));
-        }
-
-        // On-shell condition consistency check
-        if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
-          if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
-            logg[LExperiment].warn()
-                << "Provided 4-momentum " << particle.momentum() << " and "
-                << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
-                << " This may originate from the lack of numerical"
-                << " precision in the input. Setting E to sqrt(p^2 + m^2).";
-            n_warns_mass_consistency_++;
-          } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
-            logg[LExperiment].warn(
-                "Further warnings about E != sqrt(p^2 + m^2) will"
-                " be suppressed.");
-            n_warns_mass_consistency_++;
-          }
-          new_p.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
-        }
-        // Set spatial coordinates, they will later be backpropagated if needed
-        const FourVector r = particle.position();
-        new_p.set_4position(FourVector(r.x0(), r.x1(), r.x2(), r.x3()));
-        new_p.set_cross_section_scaling_factor(1.0);
-        remove_plist_checked.push_back(new_p);
-      } catch (ParticleType::PdgNotFoundFailure &) {
-        logg[LExperiment].warn()
-            << "SMASH does not recognize pdg code " << pdgcode_r
-            << " obtained from hadron list. This particle will be ignored.\n";
-      }
-    }
-
+    ParticleList remove_plist_checked = check_particle_list(
+        remove_plist, n_warns_precision, n_warns_mass_consistency);
+    remove_plist_size = remove_plist_checked.size();
     // find the particles which should be removed in ensembles_[0]
+    // at the moment this is the only ensemble, which is used in X-SCAPE
     for (const auto &particle_remove : remove_plist_checked) {
       const int pdgcode_remove = particle_remove.pdgcode().get_decimal();
-
       for (const auto &particle_smash : ensembles_[0]) {
         const int pdgcode_smash = particle_smash.pdgcode().get_decimal();
         if (pdgcode_smash == pdgcode_remove) {
@@ -2336,35 +2223,19 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
         }
       }
     }
-
     // check if all particles which should be deleted were found
-    if (remove_plist_checked.size() != remove_plist_final.size()) {
+    if (remove_plist_size != remove_plist_final.size()) {
       logg[LExperiment].warn()
-          << remove_plist_checked.size() - remove_plist_final.size()
+          << remove_plist_size - remove_plist_final.size()
           << " particle(s) supposed to be deleted, but could not be found.";
     }
   }
-
-  if (!add_plist_checked.empty()) {
-    auto act_add = std::make_unique<FreeforallAction>(
-        empty_in_list, add_plist_checked, act_time);
-    // Perform the action directly here
-    // Time of add_plist_checked is set to action time, i.e. current_time
-    // in generate_final_state() in freeforallaction.h
-    // TODO(#977) Does this time setting make sense in the end?
-    perform_action(*act_add, 0);
-    // Particles are only added to the first ensemble, which is
-    // currently the only one needed for the use of SMASH as an external
-    // library (e.g. in JETSCAPE / XSCAPE)
-  }
-
   if (!remove_plist_final.empty()) {
+    ParticleList empty_out_list;
     auto act_remove = std::make_unique<FreeforallAction>(
         remove_plist_final, empty_out_list, act_time);
-    // Perform the action directly here
     // Time of add_plist_checked is set to action time, i.e. current_time
     // in generate_final_state() in freeforallaction.h
-    // TODO(#977) Does this time setting make sense in the end?
     perform_action(*act_remove, 0);
     // Particles are only removed to the first ensemble, which is
     // currently the only one needed for the use of SMASH as an external

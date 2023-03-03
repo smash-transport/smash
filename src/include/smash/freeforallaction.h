@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022
+ *    Copyright (c) 2022-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -16,10 +16,10 @@ namespace smash {
 
 /**
  * \ingroup action
- * \brief Action class to create any incoming/outgoing particle combination freely.
- * This class is in particular designed to add and remove particles from the 
- * evolution. This introduces violations of the conservation laws, but it is
- * e.g. needed for a concurrent running of transport and hydrodynamics.
+ * \brief Action class to create any incoming/outgoing particle combination
+ * freely. This class is in particular designed to add and remove particles from
+ * the evolution. This introduces violations of the conservation laws, but it is
+ * needed for a concurrent running of transport and hydrodynamics.
  */
 class FreeforallAction : public Action {
  public:
@@ -33,16 +33,16 @@ class FreeforallAction : public Action {
    * \param[in] in_part List of incoming particles
    * \param[in] out_part List of outgoing particles
    * \param[in] absolute_labframe_time Absolute time at which the action is
-   *                                             supposed to take place
+   * supposed to take place
    */
   FreeforallAction(const ParticleList &in_part, const ParticleList &out_part,
                    double absolute_labframe_time)
       : Action(in_part, out_part, absolute_labframe_time,
                ProcessType::Freeforall) {}
 
-  /// Outgoing particles are set in prinicple in constructor
+  /// Outgoing particles are set in principle in constructor
   void generate_final_state() {
-    // Set time to time for arbitrary outgoing particles to time of action
+    // Set time for arbitrary outgoing particles to time of action
     // TODO(#977) Should the position also scrolled back here?
     for (auto &r : outgoing_particles_) {
       r.set_4position({time_of_execution(), r.position().threevec()});

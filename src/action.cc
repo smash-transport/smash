@@ -487,7 +487,7 @@ double Action::check_conservation(const uint32_t id_process) const {
      * print the warning and continue. */
     if ((is_string_soft_process(process_type_)) ||
         (process_type_ == ProcessType::StringHard)) {
-      logg[LAction].warn() << "Conservation law violations due to Pyhtia\n"
+      logg[LAction].warn() << "Conservation law violations due to Pythia\n"
                            << particle_names.str() << err_msg;
       energy_violation = after.momentum()[0] - before.momentum()[0];
       return energy_violation;
