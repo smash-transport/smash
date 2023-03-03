@@ -46,6 +46,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * SMASH now aborts if any content output format in the configuration file is invalid or absent
 * `Format: ["None"]` can be used in the configuration file to suppress any content output
 * Added two quantities (baryon number, strangeness) in the particle line in ASCII initial conditions output (SMASH_IC.dat)
+* Upgraded to Pythia 8.309
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now
