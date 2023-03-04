@@ -145,7 +145,7 @@ warnings are however still reported.
 ## Development tools
 
 The following tools can be helpful for development:
-- clang-format = 13.0.0
+- clang-format = 13.0.x
 - doxygen >= 1.9 (not 1.9.4 or 1.9.5)
 - valgrind
 - cpplint
@@ -158,8 +158,9 @@ at each merge to the `main` branch.
 
 ### Installing clang-format
 
-clang-format is a part of the clang compiler. The usage of version 13.0.0 is
-enforced. You can download the binaries [here](http://releases.llvm.org/download.html).
+clang-format is a part of the clang compiler. The usage of version 13.0.x is
+enforced (x stands for any digit).
+You can download the binaries [here](http://releases.llvm.org/download.html).
 
 Make sure to pick a pre-built binary for your system. For example, for Ubuntu
 you could run:
@@ -177,6 +178,17 @@ look for an older version to get pre-built binaries.)
 It is sufficient to unpack the archive with `tar xf` and to copy only the
 binary you need (`clang-format` in the `bin` folder of the archive), see
 "Installing binaries as a user" below.
+
+
+**NOTE:** The name of the clang-format executable should not have any suffix,
+like e.g. `clang-format-13`. If this is the case, a possible workaround is to
+create a symbolic link to this exectuable called `clang-format` in a directory
+included in the environment variable PATH.
+For example:
+
+    mkdir -p ${HOME}/bin
+    ln -s $(which clang-format-13) ${HOME}/bin/clang-format
+    export PATH=${HOME}/bin:${PATH}
 
 
 ### Installing cpplint
