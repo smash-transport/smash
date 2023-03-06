@@ -159,7 +159,7 @@ at each merge to the `main` branch.
 ### Installing clang-format
 
 clang-format is a part of the clang compiler. The usage of version 13.0.x is
-enforced (x stands for any digit).
+enforced (x stands for any number).
 You can download the binaries [here](http://releases.llvm.org/download.html).
 
 Make sure to pick a pre-built binary for your system. For example, for Ubuntu
@@ -186,9 +186,16 @@ create a symbolic link to this exectuable called `clang-format` in a directory
 included in the environment variable PATH.
 For example:
 
-    mkdir -p ${HOME}/bin
-    ln -s $(which clang-format-13) ${HOME}/bin/clang-format
-    export PATH=${HOME}/bin:${PATH}
+```
+    mkdir -p "${HOME}/bin"
+    ln -s "$(which clang-format-13)" "${HOME}/bin/clang-format"
+    export "PATH=${HOME}/bin:${PATH}"
+```
+
+Of course, if the user has writing permissions, the symbolic link can be also
+directly created in the same directory in which the executable is and, if this
+is already in the system PATH (for example `/usr/bin`), no further actions are
+needed to use it as a normal command.
 
 
 ### Installing cpplint
