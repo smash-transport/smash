@@ -369,8 +369,6 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
     // determine scattering angles in center-of-mass frame
     phitheta = Angles(2. * M_PI * random::canonical(),
                       1. - 2. * (t - t_range[0]) / (t_range[1] - t_range[0]));
-    logg[LScatterAction].warn("t: ,", t,
-                              " cos(th): ", phitheta.costheta());  // WARN
   } else if (nn_scattering && p_a->pdgcode().is_Delta() &&
              p_b->pdgcode().is_nucleon() &&
              p_a->pdgcode().antiparticle_sign() ==
