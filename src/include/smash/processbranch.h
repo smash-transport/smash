@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2021
+ *    Copyright (c) 2013-2021,2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -97,7 +97,8 @@ enum class ProcessType {
    */
   FailedString = 47,
   /*
-   * Ignore conservation laws.
+   * Ignore conservation laws, when FreeforallAction is used to add a list of
+   * particles or remove a list of particles from the evolution.
    */
   Freeforall = 90
 };

@@ -2171,7 +2171,7 @@ template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const double t_end,
                                            ParticleList add_plist,
                                            ParticleList remove_plist) {
-  // check particles, which are supposed to be added to the evolution, when
+  // Check particles, which are supposed to be added to the evolution, when
   // SMASH is used as a 3rd-party library
   const double act_time = parameters_.labclock->current_time();
   // Counter for mass-check warnings if a hadron list is added (avoid spamming)
@@ -2180,32 +2180,31 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
   // added (avoid spamming)
   int n_warns_mass_consistency = 0;
   ParticleList add_plist_checked;
-  // check particle list for additional particles if a non-empty list is given
+  // Check particle list for additional particles if a non-empty list is given
   if (!add_plist.empty()) {
     add_plist_checked = check_particle_list(add_plist, n_warns_precision,
                                             n_warns_mass_consistency);
   }
   if (!add_plist_checked.empty()) {
     ParticleList empty_in_list;
-    auto act_add = std::make_unique<FreeforallAction>(
-        empty_in_list, add_plist_checked, act_time);
     // Time of add_plist_checked is set to action time, i.e. current_time
     // in generate_final_state() in freeforallaction.h
-    perform_action(*act_add, 0);
+    auto act_add = std::make_unique<FreeforallAction>(
+        empty_in_list, add_plist_checked, act_time);
     // Particles are only added to the first ensemble, which is
     // currently the only one needed for the use of SMASH as an external
     // library (e.g. in JETSCAPE / XSCAPE)
+    perform_action(*act_add, 0);
   }
 
-  // check particles, which are supposed to be removed from the evolution, when
+  // Check particles, which are supposed to be removed from the evolution, when
   // SMASH is used as a 3rd-party library
   ParticleList remove_plist_final;
-  int remove_plist_size = 0;
   if (!remove_plist.empty()) {
     ParticleList remove_plist_checked = check_particle_list(
         remove_plist, n_warns_precision, n_warns_mass_consistency);
-    remove_plist_size = remove_plist_checked.size();
-    // find the particles which should be removed in ensembles_[0]
+    const int remove_plist_size = remove_plist_checked.size();
+    // Find the particles which should be removed in ensembles_[0],
     // at the moment this is the only ensemble, which is used in X-SCAPE
     for (const auto &particle_remove : remove_plist_checked) {
       const int pdgcode_remove = particle_remove.pdgcode().get_decimal();
@@ -2223,7 +2222,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
         }
       }
     }
-    // check if all particles which should be deleted were found
+    // Check if all particles which should be deleted were found
     if (remove_plist_size != remove_plist_final.size()) {
       logg[LExperiment].warn()
           << remove_plist_size - remove_plist_final.size()
@@ -2232,14 +2231,14 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
   }
   if (!remove_plist_final.empty()) {
     ParticleList empty_out_list;
-    auto act_remove = std::make_unique<FreeforallAction>(
-        remove_plist_final, empty_out_list, act_time);
     // Time of add_plist_checked is set to action time, i.e. current_time
     // in generate_final_state() in freeforallaction.h
-    perform_action(*act_remove, 0);
-    // Particles are only removed to the first ensemble, which is
+    auto act_remove = std::make_unique<FreeforallAction>(
+        remove_plist_final, empty_out_list, act_time);
+    // Particles are only removed from the first ensemble, which is
     // currently the only one needed for the use of SMASH as an external
     // library (e.g. in JETSCAPE / XSCAPE)
+    perform_action(*act_remove, 0);
   }
 
   while (parameters_.labclock->current_time() < t_end) {

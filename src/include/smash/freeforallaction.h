@@ -40,18 +40,24 @@ class FreeforallAction : public Action {
       : Action(in_part, out_part, absolute_labframe_time,
                ProcessType::Freeforall) {}
 
-  /// Outgoing particles are set in principle in constructor
+  double get_total_weight() const { return 0.0; }
+  double get_partial_weight() const { return 0.0; }
+
+  /**
+   * Generate a final state for the FreeforallAction in the sense that the
+   * time and position of the particles in the list is scrolled back to the
+   * action time. The outgoing particles are set in the constructor.
+   */
   void generate_final_state() {
     // Set time for arbitrary outgoing particles to time of action
-    // TODO(#977) Should the position also scrolled back here?
-    for (auto &r : outgoing_particles_) {
-      r.set_4position({time_of_execution(), r.position().threevec()});
+    for (auto &particle : outgoing_particles_) {
+      const double t = particle.position().x0();
+      const FourVector u(1.0, particle.velocity());
+      particle.set_formation_time(t);
+      particle.set_4position(particle.position() +
+                             u * (time_of_execution() - t));
     }
   }
-
-  double get_total_weight() const { return 0.0; }
-
-  double get_partial_weight() const { return 0.0; }
 
   /**
    * Function for debug output of incoming and outgoing particles from
