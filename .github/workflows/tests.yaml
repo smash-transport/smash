@@ -73,7 +73,7 @@ jobs:
         # we get eigen
         wget http://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && tar -xf eigen-3.4.0.tar.gz -C $HOME
         # we get cpplint
-        wget https://raw.githubusercontent.com/cpplint/cpplint/develop/cpplint.py && chmod +x cpplint.py && mkdir -p $HOME/bin && mv cpplint.py $HOME/bin
+        wget https://raw.githubusercontent.com/cpplint/cpplint/1.6.0/cpplint.py && chmod +x cpplint.py && mkdir -p $HOME/bin && mv cpplint.py $HOME/bin
         export PATH=$HOME/bin:$PATH
         # now we build SMASH
         cd $SMASH_ROOT && mkdir build && cd build
