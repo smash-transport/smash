@@ -48,7 +48,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * `Format: ["None"]` can be used in the configuration file to suppress any content output
 * Added two quantities (baryon number, strangeness) in the particle line in ASCII initial conditions output (SMASH_IC.dat)
 * Upgraded to Pythia 8.309
-* Clebsch-Gordan coefficients are now tabulated resulting into a performance increase at low energies
+* Clebsch-Gordan coefficients are now tabulated resulting into a performance increase, especially at low energies
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now

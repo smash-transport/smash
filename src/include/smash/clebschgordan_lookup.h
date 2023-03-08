@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2022
+ *    Copyright (c) 2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -140,7 +140,7 @@ class ClebschGordan {
 
   /**
    * Tabulation of Clebsch-Gordan coefficients. The C++ code to produce this
-   * member declaration can be in the "tabulate" unit test of this file.
+   * member declaration can be found in the "tabulate" unit test of this file.
    */
   inline static std::unordered_map<ThreeSpins, double, ThreeSpinHash>
       lookup_table = {

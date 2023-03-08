@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2018,2020
+ *    Copyright (c) 2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -96,6 +96,7 @@ TEST(coefficient) {
   }
 }
 
+// This help function is used in the commented out part of the tabulate test
 [[maybe_unused]] static std::ostream &operator<<(
     std::ostream &out, const ClebschGordan::ThreeSpins &v) {
   out.put('{');
@@ -107,14 +108,17 @@ TEST(coefficient) {
 
 /*
  * This test is not really supposed to be a unit test, but rather a way to
- * include somewhere the calculation of the tabulated Clebsch-Gordan
- * coefficients. Here we use a couple of vectors in order to then print
- * the coefficients ordered w.r.t. to j1, j2, j3, m1, m2, m3, respectively.
- * Note that physics symmetries and properties could be used to reduce the
- * number of iterations, since j1+j2+j3 should be even (here all j and m
- * are twice the physical quantity, so even means that its half is integer),
- * m1+m2=m3 (since m3 here enters the CG formula as -m3) and |m3|≤j3. Instead,
- * these properties are used to test the obtained non-zero results.
+ * include somewhere in the codebase the snippet of code that we used to
+ * calculate the tabulated Clebsch-Gordan coefficients. By default the (long)
+ * list of tabulated coefficients is not printed to the output, but the code to
+ * print it is included commented out at the end of this test. Here we use a
+ * couple of vectors in order to then print the coefficients ordered w.r.t. to
+ * j1, j2, j3, m1, m2, m3, respectively. Note that physics symmetries and
+ * properties could be used to reduce the number of iterations, since j1+j2+j3
+ * should be even (here all j and m are twice the physical quantity, so even
+ * means that its half is integer), m1+m2=m3 (since m3 here enters the CG
+ * formula as -m3) and |m3|≤j3. Instead, these properties are used to test the
+ * obtained non-zero results.
  */
 TEST(tabulate) {
   std::vector<ClebschGordan::ThreeSpins> keys{};
