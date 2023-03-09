@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2012-2022
+#    Copyright (c) 2012-2023
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -194,6 +194,7 @@ set(smash_src
     bremsstrahlungaction.cc
     chemicalpotential.cc
     clebschgordan.cc
+    clebschgordan_lookup.cc
     collidermodus.cc
     configuration.cc
     crosssections.cc
