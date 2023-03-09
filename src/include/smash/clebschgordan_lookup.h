@@ -8,6 +8,7 @@
 #ifndef SRC_INCLUDE_SMASH_CLEBSCHGORDAN_LOOKUP_H_
 #define SRC_INCLUDE_SMASH_CLEBSCHGORDAN_LOOKUP_H_
 
+#include <cassert>
 #include <iostream>
 #include <unordered_map>
 
@@ -115,26 +116,72 @@ class ClebschGordan {
      *           (seed << 6) + (seed >> 2);
      * }
      * \endcode
-     * as function to combine hashes. Then this should be used here on each \c
-     * in member to produce the final hash. Although it has been tested to work,
-     * there is a more physics driven approach. In \cite Rasch2004 an algorithm
-     * to efficiently store Clebsch-Gordan coefficient is discussed. In it a way
-     * to map the three spins information to a single integer is proposed and
-     * this can be used here as hashing function, basically offering the
-     * guarantee that no hash collision will occur.
+     * as function to combine hashes. Then this should be used here on each
+     * \c in member to produce the final hash. Although it has been tested to
+     * work, there is a simpler approach.
+     *
+     * -# It can be assumed (asserted in the code), that all \c ThreeSpins
+     *    members are numbers smaller than 16 (in absolute value). Hence 5 bits
+     *    are enough to represent them (numbers between -16 and 15). Using
+     *    bit-shift operations, it is then possible to build a bit-sequence that
+     *    in its last 6*5=30 bits contains the 6 integer information,
+     *    appropriately "converted" to 5-bit sequences that are then
+     *    concatenated.
+     * -# To get an \c int as a 5 bits integer into a \c std::size_t variable,
+     *    one way is to cast to it first and then get rid of all but 5 rightmost
+     *    bits. If e.g. the result variable is 64 bits large, this means to
+     *    bit-shift to the left by 64-5=59 positions and then again to the right
+     *    to bring the 5 bits back to the least significant positions (this is
+     *    only an example, since the size of \c std::size_t is architecture
+     *    dependent).
+     * -# Finally, once having the 6 5-bits integer as \c std::size_t variables,
+     *    these can be combined shifting them to the left in a way that the 5
+     *    relevant bits do not "overlap" (i.e. occupy different positions) and
+     *    then summing them. In the implementation we use the minimum needed
+     *    shift, i.e. having N=6 numbers we shift the first number by (N-1)*5,
+     *    the second by (N-2)*5 and so on till the last one that does not get
+     *    shifted. Since both the cast to "5-bits" numbers and the preparation
+     *    of the sum involve bit-shifts, these are combined together.
+     *
+     * \note
+     * A couple of remarks a worth:
+     * - Using \c std::bitset would probably make the code easier to read, but
+     *   it has been benchmarked to be some % slower at low energies.
+     * - Yet another possibility would be to use mathematics/physics to come up
+     *   with a map between the 6 integers and a super-index. This has been
+     *   devised in \cite Rasch2004, where an algorithm to efficiently store
+     *   Clebsch-Gordan coefficient is discussed. In it a way to map the three
+     *   spins information to a single integer is proposed and this can be used
+     *   here as hashing function, basically offering the guarantee that no hash
+     *   collision will occur. However, the simpler hand-made hash discussed
+     *   above and implemented in the following turned out to be more efficient
+     *   with GNU compiler (equivalent with LLVM).
      *
      * @param in The spin information (meant to be used as input to be hashed)
      * @return \c std::size_t The calculated hash value
      */
     std::size_t operator()(const ThreeSpins &in) const noexcept {
-      const int S = -in.j1 + in.j2 + in.j3;
-      const int L = +in.j1 - in.j2 + in.j3;
-      const int X = +in.j1 - in.m1;
-      const int B = +in.j2 - in.m2;
-      const int T = +in.j3 + in.m3;
-      return L * (24 + L * (50 + L * (35 + L * (10 + L)))) / 120 +
-             X * (6 + X * (11 + X * (6 + X))) / 24 + T * (2 + T * (3 + T)) / 6 +
-             B * (B + 1) / 2 + S + 1;
+      assert(in.j1 >= 0 && in.j1 < 16);
+      assert(in.j2 >= 0 && in.j2 < 16);
+      assert(in.j3 >= 0 && in.j3 < 16);
+      assert(std::abs(in.m1) < 16);
+      assert(std::abs(in.m2) < 16);
+      assert(std::abs(in.m3) < 16);
+      /*
+       * Although strictly speaking, this would only generate a very poor hash,
+       * we prefer making compilation fail if size_t has less than 32 bits.
+       * This is after all very unlikely and we'll deal with it only if needed.
+       */
+      static_assert(sizeof(std::size_t) >= 4);
+      // This is the amount to shift to obtain "5-bits numbers"
+      constexpr auto bitshift = sizeof(size_t) * 8 - 5;
+      // The different shift to the right make the 5-bit occupy different bits
+      return (static_cast<std::size_t>(in.j1) << bitshift >> (bitshift - 25)) +
+             (static_cast<std::size_t>(in.j2) << bitshift >> (bitshift - 20)) +
+             (static_cast<std::size_t>(in.j3) << bitshift >> (bitshift - 15)) +
+             (static_cast<std::size_t>(in.m1) << bitshift >> (bitshift - 10)) +
+             (static_cast<std::size_t>(in.m2) << bitshift >> (bitshift - 5)) +
+             (static_cast<std::size_t>(in.m3) << bitshift >> bitshift);
     }
   };
 
