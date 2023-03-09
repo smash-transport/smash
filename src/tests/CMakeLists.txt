@@ -464,6 +464,9 @@ add_test(NAME usage_of_SMASH_as_library
                  "${Pythia_CONFIG_EXECUTABLE}"
          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/examples/using_SMASH_as_library)
 
+set_tests_properties(usage_of_SMASH_as_library PROPERTIES ENVIRONMENT
+                                                          SMASH_BUILD_DIR=${PROJECT_BINARY_DIR})
+
 if(USE_SANITIZER)
     smash_add_runtest(sanitizer_box smash_sanitizer smash_sanitizer
                       -e 5.0
