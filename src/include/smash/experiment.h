@@ -2193,7 +2193,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
         empty_in_list, add_plist_checked, act_time);
     // Particles are only added to the first ensemble, which is
     // currently the only one needed for the use of SMASH as an external
-    // library (e.g. in JETSCAPE / XSCAPE)
+    // library (e.g. in JETSCAPE / X-SCAPE)
     perform_action(*act_add, 0);
   }
 
@@ -2212,11 +2212,14 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
         const int pdgcode_smash = particle_smash.pdgcode().get_decimal();
         if (pdgcode_smash == pdgcode_remove) {
           const FourVector p_remove = particle_remove.momentum();
-          const FourVector r_remove = particle_remove.position();
           const FourVector p_smash = particle_smash.momentum();
+          // Scroll particle position back to act_time for the position check
+          const double t = particle_remove.position().x0();
+          const FourVector u(1.0, particle_remove.velocity());
+          const FourVector r_remove_scrolled =
+              particle_remove.position() + u * (act_time - t);
           const FourVector r_smash = particle_smash.position();
-
-          if ((p_smash == p_remove) && (r_smash == r_remove)) {
+          if ((p_smash == p_remove) && (r_smash == r_remove_scrolled)) {
             remove_plist_final.push_back(particle_smash);
           }
         }
@@ -2237,7 +2240,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
         remove_plist_final, empty_out_list, act_time);
     // Particles are only removed from the first ensemble, which is
     // currently the only one needed for the use of SMASH as an external
-    // library (e.g. in JETSCAPE / XSCAPE)
+    // library (e.g. in JETSCAPE / X-SCAPE)
     perform_action(*act_remove, 0);
   }
 
