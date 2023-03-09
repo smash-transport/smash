@@ -266,7 +266,7 @@ class Experiment : public ExperimentBase {
    * Increases the event number by one. This function is helpful if
    * SMASH is used as a 3rd-party library.
    */
-  void increase_event_no();
+  void increase_event_number();
 
  private:
   /**
@@ -2171,77 +2171,83 @@ template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const double t_end,
                                            ParticleList add_plist,
                                            ParticleList remove_plist) {
-  // Check particles, which are supposed to be added to the evolution, when
-  // SMASH is used as a 3rd-party library
-  const double act_time = parameters_.labclock->current_time();
-  // Counter for mass-check warnings if a hadron list is added (avoid spamming)
-  int n_warns_precision = 0;
-  // Counter for energy-momentum conservation warnings if a hadron list is
-  // added (avoid spamming)
-  int n_warns_mass_consistency = 0;
-  ParticleList add_plist_checked;
-  // Check particle list for additional particles if a non-empty list is given
-  if (!add_plist.empty()) {
-    add_plist_checked = check_particle_list(add_plist, n_warns_precision,
-                                            n_warns_mass_consistency);
-  }
-  if (!add_plist_checked.empty()) {
-    ParticleList empty_in_list;
-    // Time of add_plist_checked is set to action time, i.e. current_time
-    // in generate_final_state() in freeforallaction.h
-    auto act_add = std::make_unique<FreeforallAction>(
-        empty_in_list, add_plist_checked, act_time);
-    // Particles are only added to the first ensemble, which is
+  if (!add_plist.empty() || !remove_plist.empty()) {
+    // Particles are only added/removed to/from the first ensemble, which is
     // currently the only one needed for the use of SMASH as an external
     // library (e.g. in JETSCAPE / X-SCAPE)
-    perform_action(*act_add, 0);
-  }
+    if (ensembles_.size() > 1) {
+      throw std::runtime_error(
+          "Adding or removing particles from SMASH is only possible when one "
+          "ensemble is used.");
+    }
+    // Check particles, which are supposed to be added to the evolution, when
+    // SMASH is used as a 3rd-party library
+    const double action_time = parameters_.labclock->current_time();
+    // Counter for mass-check warnings if a hadron list is added (avoid
+    // spamming)
+    int n_warns_precision = 0;
+    // Counter for energy-momentum conservation warnings if a hadron list is
+    // added (avoid spamming)
+    int n_warns_mass_consistency = 0;
+    ParticleList add_plist_checked;
+    // Check particle list for additional particles if a non-empty list is given
+    if (!add_plist.empty()) {
+      add_plist_checked = check_particle_list(add_plist, n_warns_precision,
+                                              n_warns_mass_consistency);
+    }
+    if (!add_plist_checked.empty()) {
+      ParticleList empty_in_list;
+      // Time of add_plist_checked is set to action time, i.e. current_time
+      // in generate_final_state() in freeforallaction.h
+      auto action_add_particles = std::make_unique<FreeforallAction>(
+          empty_in_list, add_plist_checked, action_time);
+      perform_action(*action_add_particles, 0);
+    }
 
-  // Check particles, which are supposed to be removed from the evolution, when
-  // SMASH is used as a 3rd-party library
-  ParticleList remove_plist_final;
-  if (!remove_plist.empty()) {
-    ParticleList remove_plist_checked = check_particle_list(
-        remove_plist, n_warns_precision, n_warns_mass_consistency);
-    const int remove_plist_size = remove_plist_checked.size();
-    // Find the particles which should be removed in ensembles_[0],
-    // at the moment this is the only ensemble, which is used in X-SCAPE
-    for (const auto &particle_remove : remove_plist_checked) {
-      const int pdgcode_remove = particle_remove.pdgcode().get_decimal();
-      for (const auto &particle_smash : ensembles_[0]) {
-        const int pdgcode_smash = particle_smash.pdgcode().get_decimal();
-        if (pdgcode_smash == pdgcode_remove) {
-          const FourVector p_remove = particle_remove.momentum();
-          const FourVector p_smash = particle_smash.momentum();
-          // Scroll particle position back to act_time for the position check
-          const double t = particle_remove.position().x0();
-          const FourVector u(1.0, particle_remove.velocity());
-          const FourVector r_remove_scrolled =
-              particle_remove.position() + u * (act_time - t);
-          const FourVector r_smash = particle_smash.position();
-          if ((p_smash == p_remove) && (r_smash == r_remove_scrolled)) {
-            remove_plist_final.push_back(particle_smash);
+    // Check particles, which are supposed to be removed from the evolution,
+    // when SMASH is used as a 3rd-party library
+    ParticleList remove_plist_final;
+    if (!remove_plist.empty()) {
+      ParticleList remove_plist_checked = check_particle_list(
+          remove_plist, n_warns_precision, n_warns_mass_consistency);
+      const int remove_plist_size = remove_plist_checked.size();
+      // Find the particles which should be removed in ensembles_[0],
+      // at the moment this is the only ensemble, which is used in X-SCAPE
+      for (const auto &particle_remove : remove_plist_checked) {
+        const int pdgcode_remove = particle_remove.pdgcode().get_decimal();
+        for (const auto &particle_smash : ensembles_[0]) {
+          const int pdgcode_smash = particle_smash.pdgcode().get_decimal();
+          if (pdgcode_smash == pdgcode_remove) {
+            const FourVector p_remove = particle_remove.momentum();
+            const FourVector p_smash = particle_smash.momentum();
+            // Scroll particle position back to action_time for the position
+            // check
+            const double t = particle_remove.position().x0();
+            const FourVector u(1.0, particle_remove.velocity());
+            const FourVector r_remove_scrolled =
+                particle_remove.position() + u * (action_time - t);
+            const FourVector r_smash = particle_smash.position();
+            if ((p_smash == p_remove) && (r_smash == r_remove_scrolled)) {
+              remove_plist_final.push_back(particle_smash);
+            }
           }
         }
       }
+      // Check if all particles which should be deleted were found
+      if (remove_plist_size != remove_plist_final.size()) {
+        logg[LExperiment].warn()
+            << remove_plist_size - remove_plist_final.size()
+            << " particle(s) supposed to be deleted, but could not be found.";
+      }
     }
-    // Check if all particles which should be deleted were found
-    if (remove_plist_size != remove_plist_final.size()) {
-      logg[LExperiment].warn()
-          << remove_plist_size - remove_plist_final.size()
-          << " particle(s) supposed to be deleted, but could not be found.";
+    if (!remove_plist_final.empty()) {
+      ParticleList empty_out_list;
+      // Time of add_plist_checked is set to action time, i.e. current_time
+      // in generate_final_state() in freeforallaction.h
+      auto action_remove_particles = std::make_unique<FreeforallAction>(
+          remove_plist_final, empty_out_list, action_time);
+      perform_action(*action_remove_particles, 0);
     }
-  }
-  if (!remove_plist_final.empty()) {
-    ParticleList empty_out_list;
-    // Time of add_plist_checked is set to action time, i.e. current_time
-    // in generate_final_state() in freeforallaction.h
-    auto act_remove = std::make_unique<FreeforallAction>(
-        remove_plist_final, empty_out_list, act_time);
-    // Particles are only removed from the first ensemble, which is
-    // currently the only one needed for the use of SMASH as an external
-    // library (e.g. in JETSCAPE / X-SCAPE)
-    perform_action(*act_remove, 0);
   }
 
   while (parameters_.labclock->current_time() < t_end) {
@@ -2938,14 +2944,14 @@ bool Experiment<Modus>::is_finished() {
 }
 
 template <typename Modus>
-void Experiment<Modus>::increase_event_no() {
+void Experiment<Modus>::increase_event_number() {
   event_++;
 }
 
 template <typename Modus>
 void Experiment<Modus>::run() {
   const auto &mainlog = logg[LMain];
-  for (event_ = 0; !is_finished(); increase_event_no()) {
+  for (event_ = 0; !is_finished(); increase_event_number()) {
     mainlog.info() << "Event " << event_;
 
     // Sample initial particles, start clock, some printout and book-keeping

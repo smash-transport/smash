@@ -630,17 +630,18 @@ ParticleList check_particle_list(ParticleList &particle_list,
   // (see function documentation in listmodus.h)
   constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
   ParticleList plist_checked;
-  int pdgcode_a = 0;
+  int pdgcode = 0;
   for (auto &particle : particle_list) {
     try {
-      pdgcode_a = particle.pdgcode().get_decimal();
+      pdgcode = particle.pdgcode().get_decimal();
 
       // Convert Kaon-L or Kaon-S into K0 or Anti-K0 used in SMASH
-      if (pdgcode_a == 310 || pdgcode_a == 130) {
-        pdgcode_a = (random::uniform_int(0, 1) == 0) ? 311 : -311;
+      if (pdgcode == 310 || pdgcode == 130) {
+        pdgcode = (random::uniform_int(0, 1) == 0) ? 311 : -311;
       }
 
-      ParticleData new_p{ParticleType::find(PdgCode::from_decimal(pdgcode_a))};
+      ParticleData new_particle{
+          ParticleType::find(PdgCode::from_decimal(pdgcode))};
       const FourVector p = particle.momentum();
       const double mass = p.abs();
 
@@ -660,9 +661,9 @@ ParticleList check_particle_list(ParticleList &particle_list,
               " inconsistencies will be suppressed.");
           n_warns_precision++;
         }
-        new_p.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
+        new_particle.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
       } else {
-        new_p.set_4momentum(FourVector(p.x0(), p.x1(), p.x2(), p.x3()));
+        new_particle.set_4momentum(FourVector(p.x0(), p.x1(), p.x2(), p.x3()));
       }
 
       // On-shell condition consistency check
@@ -680,16 +681,16 @@ ParticleList check_particle_list(ParticleList &particle_list,
               " be suppressed.");
           n_warns_mass_consistency++;
         }
-        new_p.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
+        new_particle.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
       }
       // Set spatial coordinates, they will later be backpropagated if needed
       const FourVector r = particle.position();
-      new_p.set_4position(FourVector(r.x0(), r.x1(), r.x2(), r.x3()));
-      new_p.set_cross_section_scaling_factor(1.0);
-      plist_checked.push_back(new_p);
+      new_particle.set_4position(FourVector(r.x0(), r.x1(), r.x2(), r.x3()));
+      new_particle.set_cross_section_scaling_factor(1.0);
+      plist_checked.push_back(new_particle);
     } catch (ParticleType::PdgNotFoundFailure &) {
       logg[LExperiment].warn()
-          << "SMASH does not recognize pdg code " << pdgcode_a
+          << "SMASH does not recognize pdg code " << pdgcode
           << " obtained from hadron list. This particle will be ignored.\n";
     }
   }
