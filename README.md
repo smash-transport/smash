@@ -23,7 +23,7 @@ Refer to the [INSTALL](INSTALL.md) file for more detailed information.
 
 ### Prerequisites
 
-SMASH is known to compile and work on little endian machines (most CPUs are such) with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++17 features):
+SMASH is known to compile and work on 64-bit little endian machines (most CPUs are such) with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++17 features):
 
 | Compiler   | Required version |
 |  :---:     |       :---:      |
