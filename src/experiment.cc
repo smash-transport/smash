@@ -643,7 +643,7 @@ ParticleList check_particle_list(ParticleList &particle_list,
       ParticleData new_particle{
           ParticleType::find(PdgCode::from_decimal(pdgcode))};
       const FourVector p = particle.momentum();
-      const double mass = p.abs();
+      const double mass = p.effective_mass();
 
       // Check mass of particles in list
       if (particle.type().is_stable() &&
