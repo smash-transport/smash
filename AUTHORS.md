@@ -15,7 +15,7 @@ Author  |  &ensp;E-Mail&ensp; | Copyright ©
  Sangwook Ryu  |  [✉️](mailto:ryu@fias.uni-frankfurt.de) | `2017-2019`
  Jonas Rothermel  |  [✉️](mailto:rothermel@fias.uni-frankfurt.de) | `2017-2019`
  Jean-Bernard Rose  |  [✉️](mailto:rose@fias.uni-frankfurt.de) | `2016-2019`
- Hendrik Roch  |  [✉️](mailto:hroch@physik.uni-bielefeld.de) | `2022-`
+ Hendrik Roch  |  [✉️](mailto:roch@fias.uni-frankfurt.de) | `2022-`
  Hannah Petersen  |  [✉️](mailto:petersen@fias.uni-frankfurt.de) | `2013-2018`
  Lukas Prinz  |  [✉️](mailto:lprinz@fias.uni-frankfurt.de) | `2019`
  Zuzana Paulinyova  |  [✉️](mailto:paulinyova@fias.uni-frankfurt.de) | `2023-`
