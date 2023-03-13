@@ -20,15 +20,22 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 endif()
 
 # Restrict supported operating systems
-if(NOT UNIX AND NOT APPLE)
-    option(FORCE_USE_ANY_OS "Force cmake to setup and compile on any operating systems." OFF)
-    if(NOT FORCE_USE_ANY_OS)
+if(NOT UNIX AND NOT APPLE OR CMAKE_SIZEOF_VOID_P LESS 8)
+    option(FORCE_USE_ANY_SYSTEM "Force cmake to setup and compile on any OS/architecture." OFF)
+    if(NOT FORCE_USE_ANY_SYSTEM)
+        if(CMAKE_SIZEOF_VOID_P LESS 8)
+            set(AUX_MSG "32-bit architecture")
+        endif()
+        if(NOT UNIX AND NOT APPLE)
+            list(APPEND AUX_MSG "operating system")
+            list(JOIN AUX_MSG "/" AUX_MSG)
+        endif()
         message(FATAL_ERROR " \n" # See e.g. https://stackoverflow.com/a/51035045 for formatting
-                            " Using SMASH on your operating system is not officially supported.\n"
+                            " Using SMASH on your ${AUX_MSG} is not officially supported.\n"
                             " Please, contact the SMASH development team (see README) if you would\n"
-                            " like to collaborate with us to get the code run on your operting system.\n"
-                            " At your own risk you can pass -DFORCE_USE_ANY_OS=TRUE to cmake in\n"
-                            " order to setup and compile SMASH on your operating system.\n"
+                            " like to collaborate with us to get the code run on your system.\n"
+                            " At your own risk you can pass -DFORCE_USE_ANY_SYSTEM =TRUE to\n"
+                            " cmake in order to setup and compile SMASH on your system.\n"
                             " Alternatively you can use the provided Docker containers (see README).\n"
         )
     endif()

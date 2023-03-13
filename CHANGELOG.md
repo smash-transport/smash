@@ -36,7 +36,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Changed
 * ⚠️ The `master` branch has been renamed to `main`
 * SMASH makes now use of C++17 standard and minimum compiler requirements have changed
-* Only UNIX-like operating systems (e.g. Linux, MacOS) are officially supported
+* Only 64-bit UNIX-like operating systems (e.g. Linux, MacOS) are officially supported
 * Only GCC, Clang and Apple clang compilers are officially supported
 * Default build configuration is now `Release` (instead of `RelWithDebInfo`)
 * Use CMake default compiler flags for `RelWithDebInfo` build configuration, hence having `-O2` optimization level instead of `-03`
