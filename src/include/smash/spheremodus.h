@@ -135,18 +135,14 @@ class SphereModus : public ModusDefault {
    */
   const double radial_velocity_;
   /**
-   * Whether to insert a single high energy particle at the center of the
-   * expanding sphere (0,0,0). This particle will initially be moving along the
-   * x axis, outwards from the sphere.
+   * Optional PDG code of the particle to use as a jet, i.e. a single high
+   * energy particle at the center of the expanding sphere (0,0,0). This
+   * particle will initially be moving along the x axis, outwards from the
+   * sphere.
    */
-  const bool insert_jet_ = false;
+  const std::optional<PdgCode> jet_pdg_;
   /**
-   * Pdg of the particle to use as a jet; necessary if insert_jet_ is true,
-   * unused otherwise
-   */
-  const PdgCode jet_pdg_;
-  /**
-   * Initial momentum of the jet particle; only used if insert_jet_ is true
+   * Initial momentum of the jet particle; only used if jet_pdg_ is not nullopt
    */
   const double jet_mom_;
   /**\ingroup logging

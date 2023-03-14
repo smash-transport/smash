@@ -21,6 +21,7 @@
 #include "smash/chemicalpotential.h"
 #include "smash/configuration.h"
 #include "smash/constants.h"
+#include "smash/cxx17compat.h"
 #include "smash/experimentparameters.h"
 #include "smash/fourvector.h"
 #include "smash/hadgas_eos.h"
@@ -54,10 +55,17 @@ SphereModus::SphereModus(Configuration modus_config,
                             SphereInitialCondition::ThermalMomentaBoltzmann)),
       radial_velocity_(
           modus_config.take({"Sphere", "Add_Radial_Velocity"}, -1.)),
-      insert_jet_(modus_config.has_value({"Sphere", "Jet", "Jet_PDG"})),
-      jet_pdg_(insert_jet_ ? modus_config.take({"Sphere", "Jet", "Jet_PDG"})
-                                 .convert_for(jet_pdg_)
-                           : pdg::p),  // dummy default; never used
+      /* Note that it is crucial not to take other keys from the Jet section
+       * before Jet_PDG, since we want here the take to throw in case the user
+       * had a Jet section without the mandatory Jet_PDG key. If all other keys
+       * are taken first, the section is removed from modus_config, because
+       * empty, and that has_value({"Sphere", "Jet"}) method would return false.
+       */
+      jet_pdg_(modus_config.has_value({"Sphere", "Jet"})
+                   ? make_optional<PdgCode>(
+                         modus_config.take({"Sphere", "Jet", "Jet_PDG"}))
+                   : std::nullopt),
+
       jet_mom_(modus_config.take({"Sphere", "Jet", "Jet_Momentum"}, 20.)) {}
 
 /* console output on startup of sphere specific parameters */
@@ -95,8 +103,8 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
       out << "Sphere Initial Condition is IC_Massive";
       break;
   }
-  if (m.insert_jet_) {
-    ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_);
+  if (m.jet_pdg_) {
+    ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_.value());
     out << "Adding a " << ptype->name() << " as a jet in the middle "
         << "of the sphere with " << m.jet_mom_ << " GeV initial momentum.\n";
   }
@@ -223,11 +231,11 @@ double SphereModus::initial_conditions(Particles *particles,
   }
 
   /* Add a single highly energetic particle in the center of the sphere (jet) */
-  if (insert_jet_) {
-    auto &jet_particle = particles->create(jet_pdg_);
+  if (jet_pdg_) {
+    auto &jet_particle = particles->create(jet_pdg_.value());
     jet_particle.set_formation_time(start_time_);
     jet_particle.set_4position(FourVector(start_time_, 0., 0., 0.));
-    jet_particle.set_4momentum(ParticleType::find(jet_pdg_).mass(),
+    jet_particle.set_4momentum(ParticleType::find(jet_pdg_.value()).mass(),
                                ThreeVector(jet_mom_, 0., 0.));
   }
 
