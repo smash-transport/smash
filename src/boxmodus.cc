@@ -17,6 +17,7 @@
 #include "smash/algorithms.h"
 #include "smash/angles.h"
 #include "smash/constants.h"
+#include "smash/cxx17compat.h"
 #include "smash/experimentparameters.h"
 #include "smash/logging.h"
 #include "smash/quantumsampling.h"
@@ -53,8 +54,8 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
           << " GeV.\n";
       break;
   }
-  if (m.insert_jet_) {
-    ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_);
+  if (m.jet_pdg_) {
+    ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_.value());
     out << "Adding a " << ptype->name() << " as a jet in the middle "
         << "of the box with " << m.jet_mom_ << " GeV initial momentum.\n";
   }
@@ -80,10 +81,17 @@ BoxModus::BoxModus(Configuration modus_config,
                         ? std::map<PdgCode, int>()
                         : modus_config.take({"Box", "Init_Multiplicities"})
                               .convert_for(init_multipl_)),
-      insert_jet_(modus_config.has_value({"Box", "Jet", "Jet_PDG"})),
-      jet_pdg_(insert_jet_ ? modus_config.take({"Box", "Jet", "Jet_PDG"})
-                                 .convert_for(jet_pdg_)
-                           : pdg::p),  // dummy default; never used
+      /* Note that it is crucial not to take other keys from the Jet section
+       * before Jet_PDG, since we want here the take to throw in case the user
+       * had a Jet section without the mandatory Jet_PDG key. If all other keys
+       * are taken first, the section is removed from modus_config, because
+       * empty, and that has_value({"Box", "Jet"}) method would return false.
+       */
+      jet_pdg_(modus_config.has_value({"Box", "Jet"})
+                   ? make_optional<PdgCode>(
+                         modus_config.take({"Box", "Jet", "Jet_PDG"}))
+                   : std::nullopt),
+
       jet_mom_(modus_config.take({"Box", "Jet", "Jet_Momentum"}, 20.)) {
   if (parameters.res_lifetime_factor < 0.) {
     throw std::invalid_argument(
@@ -187,11 +195,11 @@ double BoxModus::initial_conditions(Particles *particles,
   }
 
   /* Add a single highly energetic particle in the center of the box (jet) */
-  if (insert_jet_) {
-    auto &jet_particle = particles->create(jet_pdg_);
+  if (jet_pdg_) {
+    auto &jet_particle = particles->create(jet_pdg_.value());
     jet_particle.set_formation_time(start_time_);
     jet_particle.set_4position(FourVector(start_time_, 0., 0., 0.));
-    jet_particle.set_4momentum(ParticleType::find(jet_pdg_).mass(),
+    jet_particle.set_4momentum(ParticleType::find(jet_pdg_.value()).mass(),
                                ThreeVector(jet_mom_, 0., 0.));
   }
 
