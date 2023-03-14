@@ -49,6 +49,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Added two quantities (baryon number, strangeness) in the particle line in ASCII initial conditions output (SMASH_IC.dat)
 * Upgraded to Pythia 8.309
 * Clebsch-Gordan coefficients are now tabulated resulting into a performance increase, especially at low energies
+* Made the input `Jet_PDG` key in the `Jet` section in sphere and box modus mandatory, when the `Jet` section is provided
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now
