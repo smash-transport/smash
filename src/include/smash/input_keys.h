@@ -510,6 +510,12 @@ class Key {
  *
  * The `Modi` section has to contain a section named after the chosen modus and
  * in it the corresponding customization takes place.
+ *
+ * \note In some very rare cases, SMASH will throw an error that an integer
+ * overflow would occur constructing the system grid. This happens if the grid
+ * at a fixed grid size is constructed with too many cells. One case where this
+ * might occur is the `List` modus, if the input particle list contains
+ * particles with nonphysically large position values.
  */
 
 /*!\Userguide
@@ -569,12 +575,28 @@ class Key {
 /*!\Userguide
  * \page doxypage_input_conf_modi_box
  * \attention
- * The time step size `Delta_Time` has to be chosen appropriately. The reason
- * being that the frequency with which collisions through the walls are searched
- * for is performed once in each time step. A rough approximation is that a time
- * step size of \f$ dt \le \mathtt{Length}/10 \f$ is necessary, but a smaller
- * time step might be needed. So the user should be aware that the collision
- * rates close to the walls might depend on this quantity.
+ * To perform the box simulation, SMASH introduces a grid to divide space into
+ * cells and the choice of the minimum cell size is driven by physics. In
+ * particular, the box is split into cells which have to be larger than the
+ * maximum interaction range of a particle traveling at the speed of light
+ * throughout a time step. Therefore the choice of the <tt>\ref
+ * key_gen_delta_time_ "Delta_Time"</tt> and <tt>\ref key_MB_length_
+ * "Length"</tt> keys has to be done carefully. Larger time steps will require a
+ * larger minimum cell size which, in turn, will need a larger box, since at
+ * least 2 cells in each direction have to exist (because of periodic boundary
+ * conditions). If this condition is not fulfilled, SMASH will abort with an
+ * error. It is worth mentioning that using <tt>\ref key_gen_testparticles_
+ * "Testparticles"</tt> might also be advantageous, as they reduce the
+ * particles maximum interaction length and, hence, the minimal cell size.
+ *
+ * \attention
+ * Furthermore, even if the grid can be constructed, the value of `Delta_Time`
+ * is connected to another aspect and it should not be chosen too large, since
+ * the frequency with which collisions through the walls are searched for is
+ * performed only once in each time step. A rough approximation (imposed in the
+ * code) is that \f$ 10\cdot\mathtt{Delta\_Time} \le \mathtt{Length} \f$,
+ * and a smaller time step than the provided one might be needed in case SMASH
+ * aborts with an error about this aspect.
  */
 
 /*!\Userguide

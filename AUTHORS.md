@@ -54,3 +54,4 @@ Year  | Author | E-Mail
 `2013` | Janus Weil | [✉️](mailto:weil@fias.uni-frankfurt.de)
 `2013-2014` | Kai Gallmeister | [✉️](mailto:gallmeister@itp.uni-frankfurt.de)
 `2022` | Andrii Verbytskyi | [✉️](mailto:andrii.verbytskyi@mpp.mpg.de)
+`2022-2023` | Simon Spies | [✉️](mailto:s.spies@gsi.de)

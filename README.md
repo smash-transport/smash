@@ -23,7 +23,7 @@ Refer to the [INSTALL](INSTALL.md) file for more detailed information.
 
 ### Prerequisites
 
-SMASH is known to compile and work on little endian machines (most CPUs are such) with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++17 features):
+SMASH is known to compile and work on 64-bit little endian machines (most CPUs are such) with UNIX-like operating systems (e.g. GNU/Linux, MacOS) and one of the following compilers (which have the required C++17 features):
 
 | Compiler   | Required version |
 |  :---:     |       :---:      |
@@ -40,7 +40,7 @@ SMASH requires the following tools and libraries:
 | [CMake](https://cmake.org) | 3.16 or higher |
 | [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/) | 2.0  or higher |
 | [Eigen3 library](http://eigen.tuxfamily.org) | 3.0  or higher |
-| [Pythia](https://pythia.org) | 8.307 |
+| [Pythia](https://pythia.org) | 8.309 |
 
 Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version is found on the system:
 
@@ -56,7 +56,7 @@ From within the SMASH repository, use the following commands to build the codeba
 ```console
 mkdir build
 cd build
-cmake -DPythia_CONFIG_EXECUTABLE=/path/to/pythia8307/bin/pythia8-config ..
+cmake -DPythia_CONFIG_EXECUTABLE=/path/to/pythia8309/bin/pythia8-config ..
 make
 ```
 

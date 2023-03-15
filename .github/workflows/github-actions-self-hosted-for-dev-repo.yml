@@ -85,7 +85,7 @@ jobs:
           # now we configure SMASH 
           mkdir -p $SMASH_ROOT/build
           cd $SMASH_ROOT/build
-          cmake .. -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8307/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$TOOLS_DIR/eigen-3.3.9/ \
+          cmake .. -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8309/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$TOOLS_DIR/eigen-3.3.9/ \
           -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=native" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=native"
           # we check if the code is well formatted with cpplint
           export CTEST_OUTPUT_ON_FAILURE=1

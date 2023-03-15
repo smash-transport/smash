@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2012-2022
+#    Copyright (c) 2012-2023
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -21,6 +21,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
         set(CMAKE_CXX_FLAGS
             "${CMAKE_CXX_FLAGS} -Wlogical-op -Wnull-dereference -Wduplicated-cond -Wrestrict -Wduplicated-branches"
         )
+        # Needed for workaround about C++17 compatibility (bug in some GNU versions)
+        add_compile_definitions(GCC_COMPILER)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")
         if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "14")
@@ -140,7 +142,7 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
 endif()
 
 # find Pythia
-find_package(Pythia 8.307 EXACT REQUIRED)
+find_package(Pythia 8.309 EXACT REQUIRED)
 if(Pythia_FOUND)
     # the BEFORE at the line below is due to
     # https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
@@ -192,6 +194,7 @@ set(smash_src
     bremsstrahlungaction.cc
     chemicalpotential.cc
     clebschgordan.cc
+    clebschgordan_lookup.cc
     collidermodus.cc
     configuration.cc
     crosssections.cc

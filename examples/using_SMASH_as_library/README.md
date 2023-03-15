@@ -20,7 +20,7 @@ This example assumes that SMASH is installed and compiled, therefore, all the li
 - Do the coding for your project (an example is given here) and run
 
       mkdir build && cd build
-      cmake $MY_PROJECT_DIR -DCMAKE_INSTALL_PREFIX=[...]/eigen3 -DPythia_CONFIG_EXECUTABLE=[...]/pythia8307/bin/pythia8-config
+      cmake $MY_PROJECT_DIR -DCMAKE_INSTALL_PREFIX=[...]/eigen3 -DPythia_CONFIG_EXECUTABLE=[...]/pythia8309/bin/pythia8-config
       make
 
 
