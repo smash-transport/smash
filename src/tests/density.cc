@@ -356,10 +356,10 @@ TEST(baryon_current_j_B_smearing_false) {
    * calculated however, the division by the volume has to be added by hand so
    * the volume plays no role here.
    */
-  COMPARE_ABSOLUTE_ERROR(j_mu_B[0], 1.0, 1e-2);
-  COMPARE_ABSOLUTE_ERROR(j_mu_B[1], px / E0, 1e-2);
-  COMPARE_ABSOLUTE_ERROR(j_mu_B[2], 0.0, 1e-2);
-  COMPARE_ABSOLUTE_ERROR(j_mu_B[3], 0.0, 1e-2);
+  COMPARE_ABSOLUTE_ERROR(j_mu_B[0], 1.0, 1e-12);
+  COMPARE_ABSOLUTE_ERROR(j_mu_B[1], px / E0, 1e-12);
+  COMPARE_ABSOLUTE_ERROR(j_mu_B[2], 0.0, 1e-12);
+  COMPARE_ABSOLUTE_ERROR(j_mu_B[3], 0.0, 1e-12);
 }
 
 /*
