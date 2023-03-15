@@ -352,9 +352,9 @@ TEST(baryon_current_j_B_smearing_false) {
   /* In the case of no smearing, the four current j_B is calculated as j_B^k =
    * \sum_i B_i * p^k_i / p^0_i with the sum running over all particles. Since
    * in the above system there is only one proton, the result should simply be
-   * j^\mu = (1, p^1 / p^0, 0, 0). In principle a four current density is
-   * calculated however, the division by the volume has to be added by hand so
-   * the volume plays no role here.
+   * j^\mu = (1, p^1 / p^0, 0, 0). Note that in the case of no smearing the
+   * function returns just the current and no current density. As a result the
+   * volume plays no role here.
    */
   COMPARE_ABSOLUTE_ERROR(j_mu_B[0], 1.0, 1e-12);
   COMPARE_ABSOLUTE_ERROR(j_mu_B[1], px / E0, 1e-12);
