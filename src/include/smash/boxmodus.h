@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2022
+ *    Copyright (c) 2012-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -184,7 +184,8 @@ class BoxModus : public ModusDefault {
    */
   std::map<PdgCode, double> average_multipl_;
   /**
-   * Optional PDG code of the particle to use as a jet.
+   * Optional PDG code of the particle to use as a jet. Same setup as in the
+   * sphere modus case.
    */
   const std::optional<PdgCode> jet_pdg_;
   /**

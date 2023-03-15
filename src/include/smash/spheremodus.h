@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2022
+ *    Copyright (c) 2013-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -136,9 +136,10 @@ class SphereModus : public ModusDefault {
   const double radial_velocity_;
   /**
    * Optional PDG code of the particle to use as a jet, i.e. a single high
-   * energy particle at the center of the expanding sphere (0,0,0). This
-   * particle will initially be moving along the x axis, outwards from the
-   * sphere.
+   * energy particle at the center (0,0,0) of the expanding sphere. This
+   * particle will be placed at t=0 and will initially be moving along the x
+   * axis, in the positive or negative direction depending on the sign of
+   * its momentum.
    */
   const std::optional<PdgCode> jet_pdg_;
   /**
