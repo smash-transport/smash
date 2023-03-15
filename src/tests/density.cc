@@ -345,10 +345,10 @@ TEST(baryon_current_j_B_smearing_false) {
   // calculate j_B
   DensityType dtype = DensityType::Baryon;
   // calculate the density
-  bool comp_gradien = false;
+  bool comp_gradient = false;
   bool smearing = false;
   const auto j_mu_B =
-      std::get<1>(current_eckart(r0, P, par, dtype, comp_gradien, smearing));
+      std::get<1>(current_eckart(r0, P, par, dtype, comp_gradient, smearing));
   /* In the case of no smearing, the four current j_B is calculated as j_B^k =
    * \sum_i B_i * p^k_i / p^0_i with the sum running over all particles. Since
    * in the above system there is only one proton, the result should simply be
