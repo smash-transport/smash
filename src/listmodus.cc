@@ -119,7 +119,7 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
             " inconsistencies will be suppressed.");
         n_warns_precision_++;
       }
-      particle.set_4momentum(mass, ThreeVector(px, py, pz));
+      particle.set_4momentum(particle.pole_mass(), ThreeVector(px, py, pz));
     }
     particle.set_4momentum(FourVector(E, px, py, pz));
     // On-shell condition consistency check
@@ -137,7 +137,7 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
             " be suppressed.");
         n_warns_mass_consistency_++;
       }
-      particle.set_4momentum(mass, ThreeVector(px, py, pz));
+      particle.set_4momentum(particle.pole_mass(), ThreeVector(px, py, pz));
     }
     // Set spatial coordinates, they will later be backpropagated if needed
     particle.set_4position(FourVector(t, x, y, z));
