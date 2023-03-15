@@ -99,6 +99,10 @@
             \page doxypage_input_conf_modi_listbox ListBox
         \page doxypage_input_conf_output Output
         \page doxypage_input_conf_lattice Lattice
+            <div class="invisible-content">
+            \subpage doxypage_input_lattice_default_parameters
+            </div>
+            \page doxypage_input_lattice_default_parameters Lattice default parameters
         \page doxypage_input_conf_potentials %Potentials
             <div class="invisible-content">
             \subpage doxypage_input_conf_pot_skyrme
