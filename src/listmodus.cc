@@ -110,7 +110,7 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
                            << " = " << mass
                            << " [GeV] is inconsistent with SMASH value = "
                            << particle.pole_mass()
-                           << ". Forcing E = sqrt(p^2 + m^2)"
+                           << " [GeV]. Forcing E = sqrt(p^2 + m^2)"
                            << ", where m is SMASH mass.";
         n_warns_precision_++;
       } else if (n_warns_precision_ == max_warns_precision) {
