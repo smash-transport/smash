@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022
+ *    Copyright (c) 2022-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -3602,7 +3602,8 @@ struct InputKeys {
    *
    * The `Jet` section within the `Sphere` one is used to put a single high
    * energy particle (a "jet") in the center of the system, on an outbound
-   * trajectory along the x-axis; if no PDG is specified no jet is produced.
+   * trajectory along the x-axis. If no PDG code is specified, but the section
+   * is given, an error about the missing key is raised.
    */
 
   /*!\Userguide
@@ -3619,10 +3620,9 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key_no_line{key_MS_jet_jet_pdg_,Jet_PDG,int,no jet}
+   * \required_key_no_line{key_MS_jet_jet_pdg_,Jet_PDG,int}
    *
-   * The type of particle to be used as a jet, as given by its PDG code;
-   * if none is provided no jet is initialized.
+   * The type of particle to be used as a jet, as given by its PDG code.
    */
   /**
    * \see_key{key_MS_jet_jet_pdg_}
@@ -3814,6 +3814,8 @@ struct InputKeys {
    * The `Jet` section can be specified in the `Box` section with the same
    * meaning it has for the `Sphere` modus. It is namely possible to put a
    * jet in the center of the box, on a outbound trajectory along the x-axis.
+   * Also here, if no PDG code is specified, but the section is given, an error
+   * about the missing key is raised.
    */
 
   /*!\Userguide
@@ -3831,7 +3833,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key_no_line{key_MB_jet_jet_pdg_,Jet_PDG,int,no jet}
+   * \required_key_no_line{key_MB_jet_jet_pdg_,Jet_PDG,int}
    *
    * See &nbsp;
    * <tt>\ref key_MS_jet_jet_pdg_ "Sphere: Jet: Jet_PDG"</tt>.
