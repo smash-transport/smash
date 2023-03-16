@@ -50,6 +50,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Upgraded to Pythia 8.309
 * Clebsch-Gordan coefficients are now tabulated resulting into a performance increase, especially at low energies
 * Made the input `Jet_PDG` key in the `Jet` section in sphere and box modus mandatory, when the `Jet` section is provided
+* The `Lattice` section in the input file cannot be any more empty; the key `Automatic: True` must be now used to fully automatically generate the lattice
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now

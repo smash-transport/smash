@@ -79,6 +79,15 @@ TEST(create_sphere) {
   VERIFY(!!Test::experiment(std::move(config)));
 }
 
+TEST(create_experiment_with_default_lattice) {
+  auto config = get_collider_configuration();
+  config.merge_yaml(R"(
+    Lattice:
+      Automatic: True
+  )");
+  VERIFY(!!Test::experiment(std::move(config)));
+}
+
 TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {
   Test::experiment(Configuration{"General: {Modus: Invalid}"});
 }

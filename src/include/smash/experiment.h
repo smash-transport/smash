@@ -1530,6 +1530,17 @@ Experiment<Modus>::Experiment(Configuration &config,
 
   // Create lattices
   if (config.has_value({"Lattice"})) {
+    if (!config.has_value({"Lattice", "Cell_Number"}) &&
+        !config.has_value({"Lattice", "Origin"}) &&
+        !config.has_value({"Lattice", "Sizes"}) &&
+        !config.has_value({"Lattice", "Automatic"})) {
+      throw std::invalid_argument(
+          "The lattice was not requested to be fully automatically "
+          "generated, but no\nlattice geometrical property was specified. "
+          "Either specify \"Automatic: True\"\nor provide at least one key "
+          "among \"Cell_Number\", \"Origin\" and \"Sizes\".");
+    }
+    [[maybe_unused]] bool unused = config.take({"Lattice", "Automatic"}, true);
     std::array<double, 3> l_default{20., 20., 20.};
     std::array<int, 3> n_default{10, 10, 10};
     std::array<double, 3> origin_default{-20., -20., -20.};
