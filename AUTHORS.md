@@ -15,8 +15,10 @@ Author  |  &ensp;E-Mail&ensp; | Copyright ©
  Sangwook Ryu  |  [✉️](mailto:ryu@fias.uni-frankfurt.de) | `2017-2019`
  Jonas Rothermel  |  [✉️](mailto:rothermel@fias.uni-frankfurt.de) | `2017-2019`
  Jean-Bernard Rose  |  [✉️](mailto:rose@fias.uni-frankfurt.de) | `2016-2019`
+ Hendrik Roch  |  [✉️](mailto:roch@fias.uni-frankfurt.de) | `2022-`
  Hannah Petersen  |  [✉️](mailto:petersen@fias.uni-frankfurt.de) | `2013-2018`
  Lukas Prinz  |  [✉️](mailto:lprinz@fias.uni-frankfurt.de) | `2019`
+ Zuzana Paulinyova  |  [✉️](mailto:paulinyova@fias.uni-frankfurt.de) | `2023-`
  Longgang Pang  |  [✉️](mailto:pang@fias.uni-frankfurt.de) | `2015-2017`
  Dmytro Oliinychenko  |  [✉️](mailto:oliiny@fias.uni-frankfurt.de) | `2014-`
  Justin Mohs  |  [✉️](mailto:mohs@fias.uni-frankfurt.de) | `2017-`
@@ -27,7 +29,9 @@ Author  |  &ensp;E-Mail&ensp; | Copyright ©
  Natey Kübler  |  [✉️](mailto:kuebler@fias.uni-frankfurt.de) | `2020-2021`
  Thomas Kehrenberg  |  [✉️](mailto:kehrenberg@fias.uni-frankfurt.de) | `2015`
  Gabriele Inghirami  |  [✉️](mailto:inghirami@fias.uni-frankfurt.de) | `2021-`
+ Renan Hirayama  |  [✉️](mailto:hirayama@fias.uni-frankfurt.de) | `2022-`
  Jan Hammelmann  |  [✉️](mailto:hammelmann@fias.uni-frankfurt.de) | `2019-`
+ Julia Groebel  |  [✉️](mailto:groebel@fias.uni-frankfurt.de) | `2022`
  Andy Goldschmidt  |  [✉️](mailto:goldschmidt@fias.uni-frankfurt.de) | `2014`
  Niklas Götz  |  [✉️](mailto:goetz@fias.uni-frankfurt.de) | `2021-`
  Leon Geiger  |  [✉️](mailto:geiger@fias.uni-frankfurt.de) | `2019-2020`
@@ -53,5 +57,7 @@ Year  | Author | E-Mail
 `2012-2013` | Jochen Gerhard | [✉️](mailto:jochen.gerhard@compeng.uni-frankfurt.de)
 `2013` | Janus Weil | [✉️](mailto:weil@fias.uni-frankfurt.de)
 `2013-2014` | Kai Gallmeister | [✉️](mailto:gallmeister@itp.uni-frankfurt.de)
+`2020` | Nikita Ermakov | [✉️](mailto:sh1r4s3@mail.si-head.nl)
+`2022` | Niels-Uwe F. Bastian | [✉️](mailto:bastian.niels-uwe@uwr.edu.pl)
 `2022` | Andrii Verbytskyi | [✉️](mailto:andrii.verbytskyi@mpp.mpg.de)
 `2022-2023` | Simon Spies | [✉️](mailto:s.spies@gsi.de)
