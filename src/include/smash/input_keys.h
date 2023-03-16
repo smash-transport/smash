@@ -607,6 +607,20 @@ class Key {
  * setup. Multiple events per file are supported. In the following, the input
  * keys are listed with a short description, an example is given and some
  * information about the input particle files is provided.
+ *
+ * \attention
+ * In `List` modus, the provided list of particles has to
+ * match information contained in the particles file (either
+ * the SMASH default one or that provided via the `-p`
+ * option), when appropriate. In particular, the mass of
+ * stable particles has to match that of the particles file.
+ * In case of a mismatch, the latter is used (modifying its
+ * energy to put the particle back on shell) and the user
+ * warned. Furthermore, all particles have to be on their
+ * mass shell. If not, their energy is adjusted and the user
+ * warned. Note that this type of warning is given only
+ * once and <b>it is user responsibility to ensure that this
+ * is a desired behaviour</b>.
  */
 
 /*!\Userguide

@@ -214,11 +214,6 @@ class ListModus : public ModusDefault {
   /// file_id_ is the id of the current file
   int file_id_;
 
-  /// Counter for mass-check warnings to avoid spamming
-  int n_warns_precision_ = 0;
-  /// Counter for energy-momentum conservation warnings to avoid spamming
-  int n_warns_mass_consistency_ = 0;
-
   /// last read position in current file
   std::streampos last_read_position_;
 
