@@ -22,7 +22,7 @@ using namespace smash;
 static const double accuracy = 5.e-4;
 static const std::filesystem::path testoutputpath =
     std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
-static const auto par = Test::default_parameters();
+static const auto parameters = Test::default_parameters();
 
 static std::filesystem::path create_particlefile(
     const OutputParameters out_par, const int file_number,
@@ -108,7 +108,7 @@ static ListModus create_list_modus() {
       Shift_Id: 0
     )"};
   config.set_value({"List", "File_Directory"}, testoutputpath.string());
-  return ListModus(std::move(config), par);
+  return ListModus(std::move(config), parameters);
 }
 
 TEST(directory_is_created) {
@@ -132,7 +132,7 @@ TEST(list_from_non_oscar_output) {
 
   // Read the file with list modus
   Particles particles_read;
-  list_modus.initial_conditions(&particles_read, par);
+  list_modus.initial_conditions(&particles_read, parameters);
 
   /*
   std::cout << "Particles from list modus:" << std::endl;
@@ -185,7 +185,7 @@ TEST(multiple_file_non_oscar_output) {
   // Read particles with list modus
   for (size_t current_event = 0; current_event < max_events; current_event++) {
     Particles particles_read;
-    list_modus.initial_conditions(&particles_read, par);
+    list_modus.initial_conditions(&particles_read, parameters);
 
     /*
     std::cout << "Particles from list modus:" << std::endl;
@@ -236,7 +236,7 @@ TEST(list_from_oscar2013_output) {
 
   // Read the file with list modus
   Particles particles_read;
-  list_modus.initial_conditions(&particles_read, par);
+  list_modus.initial_conditions(&particles_read, parameters);
 
   /*
   std::cout << "Particles from list modus:" << std::endl;
@@ -291,7 +291,7 @@ TEST(multiple_files_one_event) {
 
   for (int i = 0; i < events_per_file * n_files; i++) {
     Particles particles_read;
-    list_modus.initial_conditions(&particles_read, par);
+    list_modus.initial_conditions(&particles_read, parameters);
 
     // Scroll particles back to the earliest time, as list modus should do
     double earliest_t = 1.e8;
@@ -342,7 +342,7 @@ TEST(multiple_files_multiple_events) {
 
   for (int i = 0; i < events_per_file * n_files; i++) {
     Particles particles_read;
-    list_modus.initial_conditions(&particles_read, par);
+    list_modus.initial_conditions(&particles_read, parameters);
 
     // Scroll particles back to the earliest time, as ListModus should do
     double earliest_t = 1.e8;
@@ -389,7 +389,7 @@ TEST(multiple_events_in_file) {
   for (int cur_event = 0; cur_event < max_events; cur_event++) {
     // Read the file with list modus
     Particles particles_read;
-    list_modus.initial_conditions(&particles_read, par);
+    list_modus.initial_conditions(&particles_read, parameters);
 
     /*
     std::cout << "Particles from list modus:" << std::endl;

@@ -214,9 +214,9 @@ class ListModus : public ModusDefault {
   /// file_id_ is the id of the current file
   int file_id_;
 
-  /// Auxiliary to warn about mass-discrepancies only once per instance
+  /// Auxiliary flag to warn about mass-discrepancies only once per instance
   bool warn_about_mass_discrepancy_ = true;
-  /// Auxiliary to warn about off-shell particles only once per instance
+  /// Auxiliary flag to warn about off-shell particles only once per instance
   bool warn_about_off_shell_particles_ = true;
 
   /// last read position in current file
