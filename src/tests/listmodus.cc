@@ -116,7 +116,7 @@ TEST(directory_is_created) {
   VERIFY(std::filesystem::exists(testoutputpath));
 }
 
-TEST(create_particle_types) { Test::create_smashon_particletypes(); }
+TEST(create_particle_types) { Test::create_stable_smashon_particletypes(); }
 
 static void compare_fourvector(const FourVector &a, const FourVector &b) {
   COMPARE_ABSOLUTE_ERROR(a.x0(), b.x0(), accuracy);
@@ -456,18 +456,21 @@ TEST(try_create_particle_func) {
     COMPARE(a.pdgcode(), b.pdgcode());
   }
 
-  // Create smashons off-shell and check if they are returned on-shell
+  // Create stable smashons some with a mass discrepancy and some off-shell
+  // because of their energy. Test if they are returned on-shell with pole mass.
   particles.reset();
   plist_init.clear();
   plist_fin.clear();
-  for (int i = 0; i < npart; i++) {
+  for (int i = 0; i < 2 * npart; i++) {
     ParticleData smashon = Test::smashon_random();
     plist_init.push_back(smashon);
     FourVector r = smashon.position(), p = smashon.momentum();
     PdgCode pdg = smashon.pdgcode();
+    const auto creation_mass = m0 + (i < npart);
+    const auto creation_energy = p.x0() + (i >= npart);
     list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(),
-                                   r.x3(), m0 + 0.1, p.x0(), p.x1(), p.x2(),
-                                   p.x3());
+                                   r.x3(), creation_mass, creation_energy,
+                                   p.x1(), p.x2(), p.x3());
   }
   plist_fin = particles.copy_to_vector();
   for (int i = 0; i < npart; i++) {
@@ -477,9 +480,9 @@ TEST(try_create_particle_func) {
     plist_fin.pop_back();
     // Test smashon should be on mass shell with pole mass
     COMPARE_ABSOLUTE_ERROR(a.momentum().abs(), m0, accuracy);
-    // The smashon read from the list should have the mass m created by user,
+    // The smashon read from the list should have the pole mass,
     // but still obey E^2 - p^2 = m^2.
-    COMPARE_ABSOLUTE_ERROR(b.momentum().abs(), m0 + 0.1, accuracy);
+    COMPARE_ABSOLUTE_ERROR(b.momentum().abs(), m0, accuracy);
     compare_fourvector(a.position(), b.position());
     COMPARE_ABSOLUTE_ERROR(b.formation_time(), a.position().x0(), accuracy);
     COMPARE(a.pdgcode(), b.pdgcode());
