@@ -99,14 +99,12 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
                                     double t, double x, double y, double z,
                                     double mass, double E, double px, double py,
                                     double pz) {
-  static bool warn_mass_discrepancy = true;
-  static bool warn_off_shell = true;
   try {
     ParticleData &particle = particles.create(pdgcode);
     // SMASH mass versus input mass consistency check
     if (particle.type().is_stable() &&
         std::abs(mass - particle.pole_mass()) > really_small) {
-      if (warn_mass_discrepancy) {
+      if (warn_about_mass_discrepancy_) {
         logg[LList].warn()
             << "Provided mass of stable particle " << particle.type().name()
             << " = " << mass
@@ -117,14 +115,14 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
             << "mass and the mass contained in the particles file"
             << " will be suppressed.\nPlease make sure that changing input "
             << "particle properties is a desired behavior.";
-        warn_mass_discrepancy = false;
+        warn_about_mass_discrepancy_ = false;
       }
       particle.set_4momentum(particle.pole_mass(), ThreeVector(px, py, pz));
     } else {
       particle.set_4momentum(FourVector(E, px, py, pz));
       // On-shell condition consistency check
       if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
-        if (warn_off_shell) {
+        if (warn_about_off_shell_particles_) {
           logg[LList].warn()
               << "Provided 4-momentum " << particle.momentum() << " [GeV] and "
               << " mass " << mass << " [GeV] do not satisfy E^2 - p^2 = m^2.\n"
@@ -133,7 +131,7 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
               << "m^2).\nFurther warnings about E != sqrt(p^2 + m^2) will"
               << " be suppressed.\nPlease make sure that setting "
               << "particles back on the mass shell is a desired behavior.";
-          warn_off_shell = false;
+          warn_about_off_shell_particles_ = false;
         }
         particle.set_4momentum(mass, ThreeVector(px, py, pz));
       }
