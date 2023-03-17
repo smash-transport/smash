@@ -22,6 +22,7 @@ using namespace smash;
 static const double accuracy = 5.e-4;
 static const std::filesystem::path testoutputpath =
     std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
+static const auto par = Test::default_parameters();
 
 static std::filesystem::path create_particlefile(
     const OutputParameters out_par, const int file_number,
@@ -99,6 +100,17 @@ static void create_non_oscar_particlefile(
   std::rename(tmp_path.native().c_str(), input_path.native().c_str());
 }
 
+static ListModus create_list_modus() {
+  Configuration config{R"(
+    List:
+      File_Directory: ToBeSet
+      File_Prefix: event
+      Shift_Id: 0
+    )"};
+  config.set_value({"List", "File_Directory"}, testoutputpath.string());
+  return ListModus(std::move(config), par);
+}
+
 TEST(directory_is_created) {
   std::filesystem::create_directories(testoutputpath);
   VERIFY(std::filesystem::exists(testoutputpath));
@@ -116,16 +128,7 @@ static void compare_fourvector(const FourVector &a, const FourVector &b) {
 TEST(list_from_non_oscar_output) {
   std::vector<ParticleList> init_particles;
   create_non_oscar_particlefile(0, init_particles);
-
-  // Create list modus
-  std::string list_conf_str = "List:\n";
-  list_conf_str += "    File_Directory: \"";
-  list_conf_str += testoutputpath.native() + "\"\n";
-  list_conf_str += "    File_Prefix: \"event\"\n";
-  list_conf_str += "    Shift_Id: 0\n";
-  auto config = Configuration(list_conf_str.c_str());
-  auto par = Test::default_parameters();
-  ListModus list_modus(std::move(config), par);
+  ListModus list_modus = create_list_modus();
 
   // Read the file with list modus
   Particles particles_read;
@@ -138,7 +141,7 @@ TEST(list_from_non_oscar_output) {
   }
   */
 
-  // Scroll particles back to the earliest time, as list modus is supposed to do
+  // Scroll particles back to the earliest time, as list modus should do
   double earliest_t = 1.e8;
   for (const auto &particle : init_particles[0]) {
     if (particle.position().x0() < earliest_t) {
@@ -169,15 +172,7 @@ TEST(list_from_non_oscar_output) {
 }
 
 TEST(multiple_file_non_oscar_output) {
-  // Create list modus
-  std::string list_conf_str = "List:\n";
-  list_conf_str += "    File_Directory: \"";
-  list_conf_str += testoutputpath.native() + "\"\n";
-  list_conf_str += "    File_Prefix: \"event\"\n";
-  list_conf_str += "    Shift_Id: 0\n";
-  auto config = Configuration(list_conf_str.c_str());
-  auto par = Test::default_parameters();
-  ListModus list_modus(std::move(config), par);
+  ListModus list_modus = create_list_modus();
 
   std::vector<ParticleList> init_particles;
 
@@ -199,8 +194,7 @@ TEST(multiple_file_non_oscar_output) {
     }
     */
 
-    // Scroll particles back to the earliest time, as list modus is supposed to
-    // do
+    // Scroll particles back to the earliest time, as list modus should do
     double earliest_t = 1.e8;
     for (const auto &particle : init_particles[current_event]) {
       if (particle.position().x0() < earliest_t) {
@@ -236,19 +230,9 @@ TEST(list_from_oscar2013_output) {
   OutputParameters out_par = OutputParameters();
   out_par.part_only_final = OutputOnlyFinal::Yes;
   out_par.part_extended = false;
-
   std::vector<ParticleList> init_particles;
   create_particlefile(out_par, 0, init_particles, 10, 1);
-
-  // Create list modus
-  std::string list_conf_str = "List:\n";
-  list_conf_str += "    File_Directory: \"";
-  list_conf_str += testoutputpath.native() + "\"\n";
-  list_conf_str += "    File_Prefix: \"event\"\n";
-  list_conf_str += "    Shift_Id: 0\n";
-  auto config = Configuration(list_conf_str.c_str());
-  auto par = Test::default_parameters();
-  ListModus list_modus(std::move(config), par);
+  ListModus list_modus = create_list_modus();
 
   // Read the file with list modus
   Particles particles_read;
@@ -261,7 +245,7 @@ TEST(list_from_oscar2013_output) {
   }
   */
 
-  // Scroll particles back to the earliest time, as list modus is supposed to do
+  // Scroll particles back to the earliest time, as list modus should do
   double earliest_t = 1.e8;
   for (const auto &particle : init_particles[0]) {
     if (particle.position().x0() < earliest_t) {
@@ -295,32 +279,21 @@ TEST(multiple_files_one_event) {
   OutputParameters out_par = OutputParameters();
   out_par.part_only_final = OutputOnlyFinal::Yes;
   out_par.part_extended = false;
-
   std::vector<ParticleList> init_particles;
   constexpr int events_per_file = 1;
   constexpr int particles_per_event = 2;
   constexpr int n_files = 2;
-
   for (int i = 0; i < n_files; i++) {
     create_particlefile(out_par, i, init_particles, particles_per_event,
                         events_per_file);
   }
-  // Create list modus
-  std::string list_conf_str = "List:\n";
-  list_conf_str += "    File_Directory: \"";
-  list_conf_str += testoutputpath.native() + "\"\n";
-  list_conf_str += "    File_Prefix: \"event\"\n";
-  list_conf_str += "    Shift_Id: 0\n";
-  auto config = Configuration(list_conf_str.c_str());
-  auto par = Test::default_parameters();
-  ListModus list_modus(std::move(config), par);
+  ListModus list_modus = create_list_modus();
 
   for (int i = 0; i < events_per_file * n_files; i++) {
     Particles particles_read;
     list_modus.initial_conditions(&particles_read, par);
 
-    // Scroll particles back to the earliest time, as list modus is supposed to
-    // do
+    // Scroll particles back to the earliest time, as list modus should do
     double earliest_t = 1.e8;
     for (const auto &particle : init_particles[i]) {
       if (particle.position().x0() < earliest_t) {
@@ -365,22 +338,13 @@ TEST(multiple_files_multiple_events) {
     create_particlefile(out_par, i, init_particles, particles_per_event,
                         events_per_file);
   }
-  // Create list modus
-  std::string list_conf_str = "List:\n";
-  list_conf_str += "    File_Directory: \"";
-  list_conf_str += testoutputpath.native() + "\"\n";
-  list_conf_str += "    File_Prefix: \"event\"\n";
-  list_conf_str += "    Shift_Id: 0\n";
-  auto config = Configuration(list_conf_str.c_str());
-  auto par = Test::default_parameters();
-  ListModus list_modus(std::move(config), par);
+  ListModus list_modus = create_list_modus();
 
   for (int i = 0; i < events_per_file * n_files; i++) {
     Particles particles_read;
     list_modus.initial_conditions(&particles_read, par);
 
-    // Scroll particles back to the earliest time, as list modus is supposed to
-    // do
+    // Scroll particles back to the earliest time, as ListModus should do
     double earliest_t = 1.e8;
     for (const auto &particle : init_particles[i]) {
       if (particle.position().x0() < earliest_t) {
@@ -415,24 +379,12 @@ TEST(multiple_events_in_file) {
   OutputParameters out_par = OutputParameters();
   out_par.part_only_final = OutputOnlyFinal::Yes;
   out_par.part_extended = false;
-
   constexpr int max_events = 2;
   constexpr int particles_per_event = 10;
-
   std::vector<ParticleList> init_particles;
-
   create_particlefile(out_par, 0, init_particles, particles_per_event,
                       max_events);
-
-  // Create list modus
-  std::string list_conf_str = "List:\n";
-  list_conf_str += "    File_Directory: \"";
-  list_conf_str += testoutputpath.native() + "\"\n";
-  list_conf_str += "    File_Prefix: \"event\"\n";
-  list_conf_str += "    Shift_Id: 0\n";
-  auto config = Configuration(list_conf_str.c_str());
-  auto par = Test::default_parameters();
-  ListModus list_modus(std::move(config), par);
+  ListModus list_modus = create_list_modus();
 
   for (int cur_event = 0; cur_event < max_events; cur_event++) {
     // Read the file with list modus
@@ -446,8 +398,7 @@ TEST(multiple_events_in_file) {
     }
     */
 
-    // Scroll particles back to the earliest time, as list modus is supposed
-    // to do
+    // Scroll particles back to the earliest time, as list modus should do
     double earliest_t = 1.e8;
     for (const auto &particle : init_particles[cur_event]) {
       if (particle.position().x0() < earliest_t) {
@@ -479,16 +430,7 @@ TEST(multiple_events_in_file) {
 }
 
 TEST(try_create_particle_func) {
-  // Create list modus
-  std::string list_conf_str = "List:\n";
-  list_conf_str += "    File_Directory: \"";
-  list_conf_str += testoutputpath.native() + "\"\n";
-  list_conf_str += "    File_Prefix: \"event\"\n";
-  list_conf_str += "    Shift_Id: 0\n";
-  auto config = Configuration(list_conf_str.c_str());
-  auto par = Test::default_parameters();
-  ListModus list_modus(std::move(config), par);
-
+  ListModus list_modus = create_list_modus();
   Particles particles;
   ParticleList plist_init, plist_fin;
   const int npart = 10;
