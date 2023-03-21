@@ -68,28 +68,32 @@ namespace smash {
 /*!\Userguide
  * \page doxypage_input_particles
  *
- * The particles available to SMASH are defined in `particles.txt`, which is
- * located in '$SMASH_SRC_DIRECTORY/input'. If you want to modify and use this
- * file to set up SMASH, execute
+ * <h3>How the particles file is used</h3>
+ * The particles available to SMASH are defined in the *input/particles.txt*
+ * file. The content of this file is internally copied by CMake to the
+ * ***build*** directory when running the `cmake` command **for the first time**
+ * to set up SMASH. If you want to modify the particles file, you are encouraged
+ * to copy the provided one to a wished location, which has then to be passed to
+ * SMASH via the `-p` option. For example, assuming to have a
+ * *custom_particles.txt* file in the ***build*** folder, the SMASH executable
+ * can be run from there and instructed to use the own particles file via
+ * ```console
+ * ./smash -p custom_particles.txt
  * ```
- * ./smash -p $SMASH_SRC_DIRECTORY/input/particles.txt
- * ```
- * in the '$SMASH_SRC_DIRECTORY/build' directory. \n
  *
- * The particles are
- * given as a table with the particles properties in different columns. Note,
- * that these columns may be separated by an arbitrary number of spaces:
+ * <h3>The particle file format</h3>
+ * %Particles are specified as a table with particles properties in different
+ * columns, which may be separated by an arbitrary number of spaces:
  * ```
  * <name> <mass in GeV> <width in GeV> <parity> <PDG codes>
  * ```
- *
  * The name has to be a unique UTF-8 string. Conventionally, unicode names are
  * used in SMASH to make the file more readable and generate prettier output. It
  * is possible to only specify the isospin multiplet and SMASH will fill in the
  * properties of the components of the multiplet assuming isospin symmetry. The
  * names generated this way will have the charges appended to the multiplet name
  * using the unicode characters `⁻`, `⁰` and `⁺`. This is appropriate for almost
- * all particles. Anti particles do not have to be specified explicitely.
+ * all particles. Anti particles do not have to be specified explicitly.
  *
  * The pole mass and the on-shell width of the particle or multiplet have to be
  * specified as floating point numbers in GeV.
@@ -105,7 +109,7 @@ namespace smash {
  * a PDG code for all multiplet members, except for anti particles.
  *
  * For example, to define all three pions (π⁻, π⁰, π⁺), it is sufficient to
- * specify the π multiplet using the following line in `particles.txt`, where
+ * specify the π multiplet using the following line in *particles.txt*, where
  * the 4th column contains the PDG number of the neutral and the 5th PDG number
  * of the charged state:
  * ```
@@ -120,22 +124,35 @@ namespace smash {
  * e⁻  0.000511  0  11
  * ```
  *
- * Comments can be added to `particles.txt` using the `#` character. Everything
- * after `#` until the end of the line is ignored.
+ * Comments can be added to the particles file using the `#` character.
+ * Everything after `#` until the end of the line is ignored.
  *
- * Note that some reactions in SMASH are parametrized and require specific
- * particles in the final state. When such a reaction happens and the required
- * particle is not defined, SMASH will crash.
- *
- * If you specify an incorrect value, SMASH will print an error similar to the
- * following:
- * ```
- * Failed to convert the input string to the expected data types.
- * ```
- *
- * When running a box simulation in which detailed balance is expected to be
- * conserved, the particles file will need to be modified. See \ref
- * doxypage_input_conf_modi_box for further information.
+ * <hr>
+ * \attention
+ * -# If you specify an incorrect value, SMASH will print an error similar to
+ *    the following:
+ *    ```
+ *    Failed to convert the input string to the expected data types.
+ *    ```
+ * -# SMASH validates (up to some small numeric precision) the mass of some
+ *    particles. Therefore, totally nonphysical mass values cannot be used and
+ *    SMASH will abort with a message error like e.g. the following:
+ *    ```
+ *    Nucleon mass in input file different from 0.938
+ *    ```
+ *    If you really need to use SMASH with nonphysical mass values, feel free to
+ *    contact us or open an issue.
+ * -# Related to the previous point, it is important to mention that all hadrons
+ *    belonging to the same isospin multiplet must have the same mass and this
+ *    is enforced by SMASH, which will fail otherwise. Feel free to get in touch
+ *    with us, if this restriction represents a problem for you.
+ * -# Some reactions in SMASH are parametrized and require specific particles in
+ *    the final state. When such a reaction happens and the required particle is
+ *    not defined, SMASH will crash.
+ * -# When running a box simulation in which detailed balance is expected to be
+ *    conserved, the particles file will need to be modified. See \ref
+ *    modi_box_usage_remark "this remark about the box modus" for further
+ *    information.
  */
 
 /*!\Userguide
@@ -159,7 +176,7 @@ namespace smash {
  * ```
  * The blocks have to be separated by at least one empty line.
  *
- * The names have to be the ones defined in `particles.txt` (see \ref
+ * The names have to be the ones defined in *particles.txt* (see \ref
  * doxypage_input_particles). If multiplet names are used, the other branching
  * ratios are generated by SMASH assuming isospin symmetry. Note that currently
  * decay channels can only be specified for whole multiplets; individual

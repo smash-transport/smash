@@ -5737,7 +5737,7 @@ General:
              Jet_Momentum: 100.0
 \endverbatim
  *
- * \note
+ * \note\anchor modi_box_usage_remark
  * The box modus is most useful for infinite matter simulations with thermal and
  * chemical equilibration and detailed balance. Detailed balance can however not
  * be conserved if 3-body decays (or higher) are performed. To yield useful
