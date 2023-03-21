@@ -115,7 +115,7 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
             "Further warnings about discrepancies between the input mass ",
             "and the mass contained in the particles file will be ",
             "suppressed.\n", emph, "Please make sure that changing ",
-            "input particle properties is a desired behavior.",
+            "input particle properties is an acceptable behavior.",
             restore_default);
         warn_about_mass_discrepancy_ = false;
       }
@@ -132,7 +132,7 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
               " precision in the input. Setting E to sqrt(p^2 + ",
               "m^2).\nFurther warnings about E != sqrt(p^2 + m^2) will",
               " be suppressed.\n", emph, "Please make sure that setting ",
-              "particles back on the mass shell is a desired behavior.",
+              "particles back on the mass shell is an acceptable behavior.",
               restore_default);
           warn_about_off_shell_particles_ = false;
         }

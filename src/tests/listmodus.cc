@@ -100,7 +100,7 @@ static void create_non_oscar_particlefile(
   std::rename(tmp_path.native().c_str(), input_path.native().c_str());
 }
 
-static ListModus create_list_modus() {
+static ListModus create_list_modus_for_test() {
   Configuration config{R"(
     List:
       File_Directory: ToBeSet
@@ -128,7 +128,7 @@ static void compare_fourvector(const FourVector &a, const FourVector &b) {
 TEST(list_from_non_oscar_output) {
   std::vector<ParticleList> init_particles;
   create_non_oscar_particlefile(0, init_particles);
-  ListModus list_modus = create_list_modus();
+  ListModus list_modus = create_list_modus_for_test();
 
   // Read the file with list modus
   Particles particles_read;
@@ -172,7 +172,7 @@ TEST(list_from_non_oscar_output) {
 }
 
 TEST(multiple_file_non_oscar_output) {
-  ListModus list_modus = create_list_modus();
+  ListModus list_modus = create_list_modus_for_test();
 
   std::vector<ParticleList> init_particles;
 
@@ -232,7 +232,7 @@ TEST(list_from_oscar2013_output) {
   out_par.part_extended = false;
   std::vector<ParticleList> init_particles;
   create_particlefile(out_par, 0, init_particles, 10, 1);
-  ListModus list_modus = create_list_modus();
+  ListModus list_modus = create_list_modus_for_test();
 
   // Read the file with list modus
   Particles particles_read;
@@ -287,7 +287,7 @@ TEST(multiple_files_one_event) {
     create_particlefile(out_par, i, init_particles, particles_per_event,
                         events_per_file);
   }
-  ListModus list_modus = create_list_modus();
+  ListModus list_modus = create_list_modus_for_test();
 
   for (int i = 0; i < events_per_file * n_files; i++) {
     Particles particles_read;
@@ -338,7 +338,7 @@ TEST(multiple_files_multiple_events) {
     create_particlefile(out_par, i, init_particles, particles_per_event,
                         events_per_file);
   }
-  ListModus list_modus = create_list_modus();
+  ListModus list_modus = create_list_modus_for_test();
 
   for (int i = 0; i < events_per_file * n_files; i++) {
     Particles particles_read;
@@ -384,7 +384,7 @@ TEST(multiple_events_in_file) {
   std::vector<ParticleList> init_particles;
   create_particlefile(out_par, 0, init_particles, particles_per_event,
                       max_events);
-  ListModus list_modus = create_list_modus();
+  ListModus list_modus = create_list_modus_for_test();
 
   for (int cur_event = 0; cur_event < max_events; cur_event++) {
     // Read the file with list modus
@@ -430,7 +430,7 @@ TEST(multiple_events_in_file) {
 }
 
 TEST(try_create_particle_func) {
-  ListModus list_modus = create_list_modus();
+  ListModus list_modus = create_list_modus_for_test();
   Particles particles;
   ParticleList plist_init, plist_fin;
   const int npart = 10;
