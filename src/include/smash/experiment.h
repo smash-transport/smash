@@ -700,6 +700,12 @@ class Experiment : public ExperimentBase {
   /// This indicates whether kinematic cuts are enabled for the IC output
   bool kinematic_cuts_for_IC_output_ = false;
 
+  /// Auxiliary flag to warn about mass-discrepancies only once per instance
+  bool warn_about_mass_discrepancy_ = true;
+
+  /// Auxiliary flag to warn about off-shell particles only once per instance
+  bool warn_about_off_shell_particles_ = true;
+
   /// random seed for the next event.
   int64_t seed_ = -1;
 
@@ -2169,11 +2175,12 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
  * in X-SCAPE for concurrent running.
  *
  * \param[in] particle_list The particle list, which should be checked for
- * correctness. \return ParticleList with the accepted particles.
+ * correctness.
+ * \return ParticleList with the accepted particles.
  */
 ParticleList check_particle_list(ParticleList &particle_list,
-                                 int &n_warns_precision,
-                                 int &n_warns_mass_consistency);
+                                 bool &warn_mass_discrepancy,
+                                 bool &warn_off_shell_particle);
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const double t_end,
@@ -2191,17 +2198,12 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     // Check particles, which are supposed to be added to the evolution, when
     // SMASH is used as a 3rd-party library
     const double action_time = parameters_.labclock->current_time();
-    // Counter for mass-check warnings if a hadron list is added (avoid
-    // spamming)
-    int n_warns_precision = 0;
-    // Counter for energy-momentum conservation warnings if a hadron list is
-    // added (avoid spamming)
-    int n_warns_mass_consistency = 0;
     ParticleList add_plist_checked;
     // Check particle list for additional particles if a non-empty list is given
     if (!add_plist.empty()) {
-      add_plist_checked = check_particle_list(add_plist, n_warns_precision,
-                                              n_warns_mass_consistency);
+      add_plist_checked =
+          check_particle_list(add_plist, warn_about_mass_discrepancy_,
+                              warn_about_off_shell_particles_);
     }
     if (!add_plist_checked.empty()) {
       ParticleList empty_in_list;
@@ -2211,16 +2213,14 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
           empty_in_list, add_plist_checked, action_time);
       perform_action(*action_add_particles, 0);
     }
-
     // Check particles, which are supposed to be removed from the evolution,
     // when SMASH is used as a 3rd-party library
     ParticleList remove_plist_final;
     if (!remove_plist.empty()) {
-      ParticleList remove_plist_checked = check_particle_list(
-          remove_plist, n_warns_precision, n_warns_mass_consistency);
-      const int remove_plist_size = remove_plist_checked.size();
-      // Find the particles which should be removed in ensembles_[0],
-      // at the moment this is the only ensemble, which is used in X-SCAPE
+      ParticleList remove_plist_checked =
+          check_particle_list(remove_plist, warn_about_mass_discrepancy_,
+                              warn_about_off_shell_particles_);
+      const long unsigned int remove_plist_size = remove_plist_checked.size();
       for (const auto &particle_remove : remove_plist_checked) {
         const int pdgcode_remove = particle_remove.pdgcode().get_decimal();
         for (const auto &particle_smash : ensembles_[0]) {
@@ -2250,7 +2250,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     }
     if (!remove_plist_final.empty()) {
       ParticleList empty_out_list;
-      // Time of add_plist_checked is set to action time, i.e. current_time
+      // Time of remove_plist_final is set to action time, i.e. current_time
       // in generate_final_state() in freeforallaction.h
       auto action_remove_particles = std::make_unique<FreeforallAction>(
           remove_plist_final, empty_out_list, action_time);

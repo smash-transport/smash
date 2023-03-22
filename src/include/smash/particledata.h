@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2020
+ *    Copyright (c) 2012-2020,2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -509,6 +509,26 @@ inline PrintParticleListDetailed detailed(const ParticleList &list) {
  */
 std::ostream &operator<<(std::ostream &out,
                          const PrintParticleListDetailed &particle_list);
+
+/**
+ * Check particle mass and if the particle is on-shell in case a particle is
+ * supposed to be added. Prints a warning once, if a stable particle is not on
+ * the SMASH mass shell and changes the four momentum to put it on the SMASH
+ * mass shell. If the particle is not stable the on-shell condition is checked,
+ * and if it is not fulfulled, then the energy of the particle is adjusted to
+ * put it on its mass shell.
+ * \param[in] pdgcode PdgCode of the particle which is supposed to be checked
+ * \param[in] mass Mass of the new particle
+ * \param[in] four_momentum Momentum four vector of the new particles
+ * \param[in] log_area Logging area for the warning
+ * \param[in] mass_warning Bool to have only one warning if the mass is not
+ * matching the SMASH mass
+ * \param[in] on_shell_warning Bool to have only one warning if the on-shell
+ * condition is not fulfilled
+ */
+void create_valid_smash_particle_matching_provided_quantities(
+    PdgCode pdgcode, double mass, FourVector &four_momentum,
+    const int &log_area, bool &mass_warning, bool &on_shell_warning);
 
 }  // namespace smash
 

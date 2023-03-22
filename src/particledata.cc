@@ -15,6 +15,7 @@
 
 #include "smash/constants.h"
 #include "smash/iomanipulators.h"
+#include "smash/logging.h"
 
 namespace smash {
 
@@ -158,5 +159,61 @@ std::ostream &operator<<(std::ostream &out,
 }
 
 double ParticleData::formation_power_ = 0.0;
+
+void create_valid_smash_particle_matching_provided_quantities(
+    PdgCode pdgcode, double mass, FourVector &four_momentum,
+    const int &log_area, bool &mass_warning, bool &on_shell_warning) {
+  auto warn_if_needed = [&log_area](bool &warn_flag,
+                                    const std::string &warn_message) {
+    if (warn_flag) {
+      logg[log_area].warn(warn_message);
+      warn_flag = false;
+    }
+  };
+
+  ParticleData smash_particle{ParticleType::find(pdgcode)};
+  const FourVector p = four_momentum;
+
+  const auto emph = einhard::Yellow_t_::ANSI();
+  const auto restore_default = einhard::NoColor_t_::ANSI();
+  std::stringstream mass_warn_message;
+  mass_warn_message << "Provided mass of stable particle "
+                    << smash_particle.type().name() << " = " << mass
+                    << " [GeV] is inconsistent with value = "
+                    << smash_particle.pole_mass() << " [GeV] from "
+                    << "particles file.\nForcing E = sqrt(p^2 + m^2)"
+                    << ", where m is the mass contained in the particles file."
+                    << "\nFurther warnings about discrepancies between the "
+                    << "input mass and the mass contained in the particles file"
+                    << " will be suppressed.\n" << emph << "Please make sure"
+                    << " that changing input particle properties is an "
+                    << "acceptable behavior." << restore_default;
+  std::stringstream on_shell_warn_message;
+  on_shell_warn_message
+      << "Provided 4-momentum " << p << " [GeV] and "
+      << " mass " << mass << " [GeV] do not satisfy E^2 - p^2 = m^2.\n"
+      << "This may originate from the lack of numerical"
+      << " precision in the input. Setting E to sqrt(p^2 + "
+      << "m^2).\nFurther warnings about E != sqrt(p^2 + m^2) will"
+      << " be suppressed.\n" << emph << "Please make sure that setting "
+      << "particles back on the mass shell is an acceptable behavior."
+      << restore_default;
+  // SMASH mass versus input mass consistency check
+  if (smash_particle.type().is_stable() &&
+      std::abs(mass - smash_particle.pole_mass()) > really_small) {
+    warn_if_needed(mass_warning, mass_warn_message.str());
+    smash_particle.set_4momentum(smash_particle.pole_mass(),
+                                 ThreeVector(p.x1(), p.x2(), p.x3()));
+  } else {
+    smash_particle.set_4momentum(FourVector(p.x0(), p.x1(), p.x2(), p.x3()));
+    // On-shell condition consistency check
+    if (std::abs(smash_particle.momentum().sqr() - mass * mass) >
+        really_small) {
+      warn_if_needed(on_shell_warning, on_shell_warn_message.str());
+      smash_particle.set_4momentum(mass, ThreeVector(p.x1(), p.x2(), p.x3()));
+    }
+  }
+  four_momentum = smash_particle.momentum();
+}
 
 }  // namespace smash
