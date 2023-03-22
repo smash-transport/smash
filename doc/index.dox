@@ -39,6 +39,7 @@
 # from the documentation.
 #
 /**
+\page doxypage_input_short_ref Input short reference
 \page doxypage_input Input
     <div class="invisible-content">
     \subpage doxypage_input_configuration
@@ -67,11 +68,13 @@
         \page doxypage_input_conf_collision_term Collision term
             <div class="invisible-content">
             \subpage doxypage_input_conf_ct_pauliblocker
+            \subpage doxypage_input_conf_ct_string_transition 
             \subpage doxypage_input_conf_ct_string_parameters
             \subpage doxypage_input_conf_ct_dileptons
             \subpage doxypage_input_conf_ct_photons
             </div>
             \page doxypage_input_conf_ct_pauliblocker Pauli blocking
+            \page doxypage_input_conf_ct_string_transition String transition
             \page doxypage_input_conf_ct_string_parameters String parameters
             \page doxypage_input_conf_ct_dileptons Dileptons
             \page doxypage_input_conf_ct_photons Photons
@@ -96,6 +99,10 @@
             \page doxypage_input_conf_modi_listbox ListBox
         \page doxypage_input_conf_output Output
         \page doxypage_input_conf_lattice Lattice
+            <div class="invisible-content">
+            \subpage doxypage_input_lattice_default_parameters
+            </div>
+            \page doxypage_input_lattice_default_parameters Lattice default parameters
         \page doxypage_input_conf_potentials %Potentials
             <div class="invisible-content">
             \subpage doxypage_input_conf_pot_skyrme
@@ -108,9 +115,8 @@
             \page doxypage_input_conf_pot_VDF VDF
             \page doxypage_input_conf_pot_coulomb Coulomb
         \page doxypage_input_conf_forced_therm Forced Thermalization
-    \page doxypage_input_particles Particles
+    \page doxypage_input_particles %Particles
     \page doxypage_input_decaymodes Decay modes
-\page doxypage_input_short_ref Input short reference
 \page doxypage_output Output
     <div class="invisible-content">
     \subpage doxypage_output_conf_examples

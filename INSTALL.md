@@ -7,12 +7,13 @@
 * [Frequently asked questions](#faq)
    1. [SMASH does not compile. What should I do?](#not-compile)
    2. [SMASH crashes with 'illegal instruction'. Why?](#illegal-instruction)
-   3. [SMASH does not compile with pre-compiled ROOT binaries. What should I do?](#precompiled-root)
-   4. [I run out of disk space compiling the code. Why?](#out-of-disk-space)
-   5. [How can I use a different compiler?](#different-compilers)
-   6. [How to use the LLVM implementation of the C++ standard library?](#llvm-STL)
-   7. [Can I disable ROOT or HepMC support?](#disable-root-hempc)
-   8. [ROOT or HepMC are installed but CMake does not find them. What should I do?](#root-hepmc-not-found)
+   3. [SMASH output slightly differs on different platforms. Why?](#fuse-math-expr)
+   4. [SMASH does not compile with pre-compiled ROOT binaries. What should I do?](#precompiled-root)
+   5. [I run out of disk space compiling the code. Why?](#out-of-disk-space)
+   6. [How can I use a different compiler?](#different-compilers)
+   7. [How to use the LLVM implementation of the C++ standard library?](#llvm-STL)
+   8. [Can I disable ROOT or HepMC support?](#disable-root-hempc)
+   9. [ROOT or HepMC are installed but CMake does not find them. What should I do?](#root-hepmc-not-found)
 
 ---
 
@@ -36,14 +37,14 @@ However, some of the SMASH prerequisites are less likely to be already available
 
 ### Building Pythia
 
-SMASH is tightly coupled to Pythia and thus requires a specific version, which is currently `8.307`.
+SMASH is tightly coupled to Pythia and thus requires a specific version, which is currently `8.309`.
 If the required version is not already installed or if there are issues with the available one, it is recommended to build Pythia with similar flags as used for SMASH, like in the example below.
 
 To download and build the needed version of Pythia, use the following commands:
 ```console
-wget https://pythia.org/download/pythia83/pythia8307.tgz
-tar xf pythia8307.tgz && rm pythia8307.tgz
-cd pythia8307
+wget https://pythia.org/download/pythia83/pythia8309.tgz
+tar xf pythia8309.tgz && rm pythia8309.tgz
+cd pythia8309
 ./configure --cxx-common='-std=c++17 -march=native -O3 -fPIC -pthread'
 make
 ```
@@ -63,9 +64,9 @@ If you plan to build SMASH using the LLVM implementation of the standard C++ lib
 
 The commands to build Pythia on a M1 Apple machine become:
 ```console
-curl https://pythia.org/download/pythia83/pythia8307.tgz -o pythia8307.tgz
-tar xf pythia8307.tgz && rm pythia8307.tgz
-cd pythia8307
+curl https://pythia.org/download/pythia83/pythia8309.tgz -o pythia8309.tgz
+tar xf pythia8309.tgz && rm pythia8309.tgz
+cd pythia8309
 ./configure --cxx-common='-std=c++17 -O3 -fPIC -pthread'
 make
 ```
@@ -138,7 +139,7 @@ The bare minimum needed to build SMASH from within its repository reads:
 ```console
 mkdir build
 cd build
-cmake -DPythia_CONFIG_EXECUTABLE=[...]/pythia8307/bin/pythia8-config ..
+cmake -DPythia_CONFIG_EXECUTABLE=[...]/pythia8309/bin/pythia8-config ..
 make
 ```
 
@@ -150,8 +151,8 @@ In the following, the relevant explanation about these can be found and users sh
 A few GNU/Linux distributions provide pre-built Pythia binaries without `pythia8-config` binary.
 In this case, using the `-DPythia_CONFIG_EXECUTABLE` option as shown above is not possible and the top installation directory of Pythia containing `lib` has to be specified in either of the following ways:
 
-*  Either set the bash environment variables `PYTHIA8` or `PYTHIA_ROOT_DIR` (e.g. `export PYTHIA_ROOT_DIR=/opt/pythia8307`) or
-*  use the CMake `-DPYTHIA_ROOT_DIR` option (e.g. `cmake -DPYTHIA_ROOT_DIR=/opt/pythia8307 ..`).
+*  Either set the bash environment variables `PYTHIA8` or `PYTHIA_ROOT_DIR` (e.g. `export PYTHIA_ROOT_DIR=/opt/pythia8309`) or
+*  use the CMake `-DPYTHIA_ROOT_DIR` option (e.g. `cmake -DPYTHIA_ROOT_DIR=/opt/pythia8309 ..`).
 
 If no variables are set and no options are passed, CMake searches for Pythia under the default path `/usr`.
 To check which environment variables related to PYTHIA are currently set, use e.g. `printenv | grep PYTHIA`.
@@ -198,14 +199,32 @@ If compilation fails (especially after changing a library), using a fresh build 
 If running SMASH fails with "illegal instruction", it is likely due to running SMASH on a different platform than the one where it was compiled.
 By default, SMASH is compiled with platform-specific optimizations, implying that the binary only works on such platforms.
 
-There are three possible ways to fix this issue:
+There are various possible ways to fix this issue:
 1. Make sure to compile SMASH on the platform where you run it.
    When running SMASH on a computing cluster, this may require making the compilation step part of the job script, if e.g. the node architecture is different from that of the login or submission node.
 2. Only run SMASH on platforms similar to the one where it was compiled.
    When running SMASH on a computing cluster, this may require restricting the jobs to the correct platform.
-3. Compile SMASH without machine-specific optimizations by removing `-march=native` from `CMakeLists.txt`.
+3. Find out for which platform you need to compile SMASH and specify it setting up the compilation.
+   For this purpose, use CMake command line options, as e.g. `-DCMAKE_CXX_FLAGS="-march=x86-64" -DCMAKE_C_FLAGS="-march=x86-64"`.
+4. As last resort, compile SMASH without machine-specific optimizations by removing `-march=native` from `CMakeLists.txt`.
    This is the easiest solution, however it results in a less efficient executable.
    Note that the same applies to any other libraries you compile with `-march=native`, for instance Pythia.
+
+<a id="fuse-math-expr"></a>
+
+### SMASH output slightly differs on different platforms. Why?
+
+By default, SMASH is compiled optimizing for the native architecture, i.e. that where the compilation is done.
+If hardware supports different optimizations on different machines, the default compilation of SMASH can indeed lead to (physically irrelevant) differences in the outcome of the same identical run.
+The major (and possibly only) source of discrepancy that is worth mentioning is the usage of contracted mathematical expressions, which in SMASH default compilation are allowed, if the hardware supports them.
+How to permit the compiler to form fused floating-point operations, such as fused multiply-add (FMA), depends on the compiler in use and you should check out which is the default value of the `-ffp-contract` flag in your compiler documentation.
+Allowing contracted expression will produce slightly more precise results, since there is usually one rounding less operation.
+However, exact (bit-wise) reproducibility of results is then not guaranteed and you will likely have (physically irrelevant) discrepancies across different platforms.
+
+If this is not acceptable for your use case (as it is not for SMASH tests, where this feature is disabled), when setting up SMASH compilation, you can disable this feature, by passing the correct flag to CMake e.g. via
+```console
+cmake -DPythia_CONFIG_EXECUTABLE=[...] -DCMAKE_CXX_FLAGS="-ffp-contract=off" -DCMAKE_C_FLAGS="-ffp-contract=off"` ..
+```
 
 <a id="precompiled-root"></a>
 

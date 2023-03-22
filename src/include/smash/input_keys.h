@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022
+ *    Copyright (c) 2022-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -17,6 +17,7 @@
 #include <set>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -431,6 +432,7 @@ class Key {
  * In this page many generic keys are described. For information about further
  * tuning possibilities, see the following pages:
  * - \ref doxypage_input_conf_ct_pauliblocker
+ * - \ref doxypage_input_conf_ct_string_transition
  * - \ref doxypage_input_conf_ct_string_parameters
  * - \ref doxypage_input_conf_ct_dileptons
  * - \ref doxypage_input_conf_ct_photons
@@ -447,6 +449,27 @@ class Key {
          Spatial_Averaging_Radius: 1.86
          Gaussian_Cutoff: 2.2
          Momentum_Averaging_Radius: 0.08
+ \endverbatim
+ */
+
+/*!\Userguide
+ * \page doxypage_input_conf_ct_string_transition
+ *
+ * Within `Collision_Term` section, the `String_Transition` section can be
+ * used to modify a series of parameters which interpolate linearly the cross
+ * section transition between resonances and strings. This also controls the
+ * shape of the total cross section around the intermediate energies. If this
+ * section is omitted, default values are used.
+ *
+ * For example, this creates a relaxed transition starting immediately at the
+ mass threshold:
+ *\verbatim
+ Collision_Term:
+     String_Transition:
+         Sqrts_Range_NN: [1.9,4.5]
+         Sqrts_Range_Npi: [1.1,2.5]
+         Sqrts_Lower: 0
+         Sqrts_Range_Width: 1.5
  \endverbatim
  */
 
@@ -487,6 +510,12 @@ class Key {
  *
  * The `Modi` section has to contain a section named after the chosen modus and
  * in it the corresponding customization takes place.
+ *
+ * \note In some very rare cases, SMASH will throw an error that an integer
+ * overflow would occur constructing the system grid. This happens if the grid
+ * at a fixed grid size is constructed with too many cells. One case where this
+ * might occur is the `List` modus, if the input particle list contains
+ * particles with nonphysically large position values.
  */
 
 /*!\Userguide
@@ -545,6 +574,29 @@ class Key {
 
 /*!\Userguide
  * \page doxypage_input_conf_modi_box
+ * \attention
+ * To perform the box simulation, SMASH introduces a grid to divide space into
+ * cells and the choice of the minimum cell size is driven by physics. In
+ * particular, the box is split into cells which have to be larger than the
+ * maximum interaction range of a particle traveling at the speed of light
+ * throughout a time step. Therefore the choice of the <tt>\ref
+ * key_gen_delta_time_ "Delta_Time"</tt> and <tt>\ref key_MB_length_
+ * "Length"</tt> keys has to be done carefully. Larger time steps will require a
+ * larger minimum cell size which, in turn, will need a larger box, since at
+ * least 2 cells in each direction have to exist (because of periodic boundary
+ * conditions). If this condition is not fulfilled, SMASH will abort with an
+ * error. It is worth mentioning that using <tt>\ref key_gen_testparticles_
+ * "Testparticles"</tt> might also be advantageous, as they reduce the
+ * particles maximum interaction length and, hence, the minimal cell size.
+ *
+ * \attention
+ * Furthermore, even if the grid can be constructed, the value of `Delta_Time`
+ * is connected to another aspect and it should not be chosen too large, since
+ * the frequency with which collisions through the walls are searched for is
+ * performed only once in each time step. A rough approximation (imposed in the
+ * code) is that \f$ 10\cdot\mathtt{Delta\_Time} \le \mathtt{Length} \f$,
+ * and a smaller time step than the provided one might be needed in case SMASH
+ * aborts with an error about this aspect.
  */
 
 /*!\Userguide
@@ -555,6 +607,17 @@ class Key {
  * setup. Multiple events per file are supported. In the following, the input
  * keys are listed with a short description, an example is given and some
  * information about the input particle files is provided.
+ *
+ * \attention
+ * In `List` modus, the provided list of particles has to match information
+ * contained in the particles file (either the SMASH default one or that
+ * provided via the `-p` option), when appropriate. In particular, the mass of
+ * stable particles has to match that of the particles file. In case of a
+ * mismatch, the latter is used (modifying its energy to put the particle back
+ * on shell) and the user warned. Furthermore, all particles have to be on their
+ * mass shell. If not, their energy is adjusted and the user warned. Note that
+ * this type of warning is given only once and <b>it is user responsibility to
+ * ensure that this is a desired behaviour</b>.
  */
 
 /*!\Userguide
@@ -609,6 +672,46 @@ class Key {
  * To enable a lattice it is necessary to add a `Lattice` section with the
  * following parameters. If no `Lattice` section is used in the configuration,
  * no lattice will be used at all.
+ */
+
+/*!\Userguide
+ * \page doxypage_input_lattice_default_parameters
+ *
+ * The default configuration for the \ref doxypage_input_conf_lattice depends on
+ * the modus and is in most cases based on some heuristic to approximate the
+ * region in space that particles usually reach during the evolution.
+ *
+ * <h3>Collider</h3>
+ * The maximum expected longitudinal velocity is approximated to the speed of
+ * light \f$v_z=1\f$ and the maximum expected velocity in each transverse
+ * direction is \f$v_x=v_y = 0.7\f$. Assuming an \f$R=5\f$ fm nucleus that is
+ * contracted along the z-direction by \f$\gamma = \frac{\sqrt{s}_{NN}}{2m_N}\f$
+ * and the particles propagating until \ref key_gen_end_time_ "end time", we end
+ * up with \f[ z_{\rm max} = \frac{5\,{\rm fm}}{\gamma} + t_{\rm end} \f] \f[
+ * x_{\rm max} = y_{\rm max} = 5\,{\rm fm} + 0.7 t_{\rm end}\,. \f] The lattice
+ * then covers the range \f$ -x_{\rm max} < x < x_{\rm max}\f$ , \f$ -y_{\rm
+ * max} < y < y_{\rm max}\f$ and \f$ -z_{\rm max} < z < z_{\rm max}\f$ . The
+ * cell size in x and y is 0.8 fm and the cell size in z-direction is contracted
+ * to \f$\frac{0.8\,{\rm fm}}{\gamma}\f$
+ *
+ * <h3>Box and ListBox</h3>
+ * The lattice covers exactly the entire box from 0 to \ref
+ * key_MB_length_ "box length" in x,y and z. The cell size is 0.5 and only in
+ * this case the lattice is <tt>\ref key_lattice_periodic_ "periodic"</tt>.
+ *
+ * <h3>Sphere</h3>
+ * Since the Sphere has an initial <tt>\ref key_MS_radius_ "Radius"</tt>,
+ * the maximum distance in all directions can be estimated to
+ * \f[ x_{\rm max} = y_{\rm max} = z_{\rm max} = R_0 + t_{\rm end} \f]
+ * using the speed of light as a maximum expansion velocity.
+ * The cell size is 0.8 fm in each direction.
+ *
+ * <h3>List</h3>
+ * The default for the list modus is constructed assuming it is used for an
+ * afterburner calculation. As in the case for the collider we take th speed of
+ * light for the maximum longitudinal expansion velocity and 0.7 fo the
+ * transverse one. The cells size is 0.8 fm in ach direction, meaning they are
+ * not lorentz contracted as they would be in the case of the collider setup.
  */
 
 /*!\Userguide
@@ -806,7 +909,9 @@ class Key {
  *            one word, use lowerCamelCase convention, although this violates
  *            the general codebase rules (it adds readability in this case).
  *            Abbreviations are allowed, but be consistent if any already
- *            exists.
+ *            exists. <b>Keys must be alphabetically ordered within the same
+ *            documentation section</b> (this usually matches the %YAML section)
+ *            and you need to manually ensure this.
  *         -# Add some description to the user guide, using the same format
  *            as for the other existing keys. In particular, one of the Doxygen
  *            aliases among `\required_key`, `\required_key_no_line`,
@@ -884,13 +989,16 @@ struct InputKeys {
    * will be configured in the <tt>\ref doxypage_input_conf_modi "Modi"</tt>
    * section. Recognized values are:
    * - `"Collider"` &rarr; For collisions of nuclei or compound objects. See
-   *   \ref \ColliderModus
+   *   \ref doxypage_input_conf_modi_collider "here" for further information.
    * - `"Sphere"` &rarr; For calculations of the expansion of a thermalized
-   *   sphere. See \ref \SphereModus
+   *   sphere. See \ref doxypage_input_conf_modi_sphere "here" for further
+   *   information.
    * - `"Box"` &rarr; For infinite matter calculation in a rectangular box. See
-   *   \ref \BoxModus
-   * - `"List"` &rarr; For given external particle list. See \ref \ListModus
-   * - `"ListBox"` &rarr; For given external particle list in the Box.
+   *   \ref doxypage_input_conf_modi_box "here" for further information.
+   * - `"List"` &rarr; For given external particle list. See
+   *   \ref doxypage_input_conf_modi_list "here" for further information.
+   * - `"ListBox"` &rarr; For given external particle list in the Box. See
+   *   \ref doxypage_input_conf_modi_listbox "here" for further information.
    */
   /**
    * \see_key{key_gen_modus_}
@@ -913,16 +1021,17 @@ struct InputKeys {
   inline static const Key<int> gen_nevents{{"General", "Nevents"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_general_mne
-   * \required_key{key_gen_mnee_number_,Number,int}
+   * \page doxypage_input_conf_general
+   * \required_key{key_gen_randomseed_,Randomseed,int}
    *
-   * The number of desired non-empty ensembles.\n
+   * Initial seed for the random number generator. If this is negative, the
+   * seed will be randomly generated by the operating system.
    */
   /**
-   * \see_key{key_gen_mnee_number_}
+   * \see_key{key_gen_randomseed_}
    */
-  inline static const Key<int> gen_minNonEmptyEnsembles_number{
-      {"General", "Minimum_Nonempty_Ensembles", "Number"}, {"1.0"}};
+  inline static const Key<int> gen_randomseed{{"General", "Randomseed"},
+                                              {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general_mne
@@ -939,17 +1048,16 @@ struct InputKeys {
       {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_general
-   * \required_key{key_gen_randomseed_,Randomseed,int}
+   * \page doxypage_input_conf_general_mne
+   * \required_key{key_gen_mnee_number_,Number,int}
    *
-   * Initial seed for the random number generator. If this is negative, the
-   * seed will be randomly generated by the operating system.
+   * The number of desired non-empty ensembles.\n
    */
   /**
-   * \see_key{key_gen_randomseed_}
+   * \see_key{key_gen_mnee_number_}
    */
-  inline static const Key<int> gen_randomseed{{"General", "Randomseed"},
-                                              {"1.0"}};
+  inline static const Key<int> gen_minNonEmptyEnsembles_number{
+      {"General", "Minimum_Nonempty_Ensembles", "Number"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1009,34 +1117,18 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_field_derivatives_mode_,Field_Derivatives_Mode,string,
-   * "Chain Rule"}
+   * \optional_key{key_gen_discrete_weight_,Discrete_Weight,double,1./3}
    *
-   * The mode of calculating field derivatives entering the equations of motion
-   * (only available for the VDF potentials). The mean-field equations of motion
-   * are proportional to temporal and spatial derivatives of the potential,
-   * which themselves depend on the baryon number density. When calculating
-   * these derivatives numerically, one can either take finite differences of
-   * the potential itself (direct field derivatives), or use the chain rule and
-   * take finite differences of the baryon number density (chain rule field
-   * derivatives). Using direct field derivatives is numerically (slightly) more
-   * stable. For more information and explicit equations, see section 4.2.5 (p.
-   * 130) and Table 4.3 (p. 137) of https://arxiv.org/abs/2109.08105.
-   *
-   * - `"Direct"` &rarr; Induces using the computed values of the baryon
-   *   4-current on the lattice to calculate a lattice of the 4-field
-   *   \f$A^\mu\f$, finite differences of which are used to obtain the VDF
-   *   equations of motion.
-   * - `"Chain Rule"` &rarr; Uses the chain rule and finite differences of the
-   *   baryon number 4-current to obtain the the VDF equations of motion.
+   * Parameter for Discrete smearing: Weight given to particle density at the
+   * the center node; cannot be smaller than 1./7 (the boundary case of 1./7
+   * results in an even distribution of particle's density over the center node
+   * and 6 neighboring nodes).
    */
   /**
-   * \see_key{key_gen_derivatives_mode_}
+   * \see_key{key_gen_discrete_weight_}
    */
-  inline static const Key<FieldDerivativesMode> gen_fieldDerivativesMode{
-      {"General", "Field_Derivatives_Mode"},
-      FieldDerivativesMode::ChainRule,
-      {"1.0"}};
+  inline static const Key<double> gen_smearingDiscreteWeight{
+      {"General", "Discrete_Weight"}, 1. / 3, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1085,6 +1177,63 @@ struct InputKeys {
    */
   inline static const Key<double> gen_expansionRate{
       {"General", "Expansion_Rate"}, 0.1, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_general
+   * \optional_key{key_gen_field_derivatives_mode_,Field_Derivatives_Mode,string,
+   * "Chain Rule"}
+   *
+   * The mode of calculating field derivatives entering the equations of motion
+   * (only available for the VDF potentials). The mean-field equations of motion
+   * are proportional to temporal and spatial derivatives of the potential,
+   * which themselves depend on the baryon number density. When calculating
+   * these derivatives numerically, one can either take finite differences of
+   * the potential itself (direct field derivatives), or use the chain rule and
+   * take finite differences of the baryon number density (chain rule field
+   * derivatives). Using direct field derivatives is numerically (slightly) more
+   * stable. For more information and explicit equations, see section 4.2.5 (p.
+   * 130) and Table 4.3 (p. 137) of https://arxiv.org/abs/2109.08105.
+   *
+   * - `"Direct"` &rarr; Induces using the computed values of the baryon
+   *   4-current on the lattice to calculate a lattice of the 4-field
+   *   \f$A^\mu\f$, finite differences of which are used to obtain the VDF
+   *   equations of motion.
+   * - `"Chain Rule"` &rarr; Uses the chain rule and finite differences of the
+   *   baryon number 4-current to obtain the the VDF equations of motion.
+   */
+  /**
+   * \see_key{key_gen_derivatives_mode_}
+   */
+  inline static const Key<FieldDerivativesMode> gen_fieldDerivativesMode{
+      {"General", "Field_Derivatives_Mode"},
+      FieldDerivativesMode::ChainRule,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_general
+   * \optional_key{key_gen_gauss_cutoff_in_sigma_,Gauss_Cutoff_In_Sigma,double,4.0}
+   *
+   * Parameter for Covariant Gaussian smearing: Distance in sigma at which
+   * gaussian is considered 0.
+   */
+  /**
+   * \see_key{key_gen_gauss_cutoff_in_sigma_}
+   */
+  inline static const Key<double> gen_smearingGaussCutoffInSigma{
+      {"General", "Gauss_Cutoff_In_Sigma"}, 4.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_general
+   * \optional_key{key_gen_gaussian_sigma_,Gaussian_Sigma,double,1.0}
+   *
+   * Parameter for Covariant Gaussian smearing: Width \unit{in fm} of Gaussian
+   * distributions that represent Wigner density of particles.
+   */
+  /**
+   * \see_key{key_gen_gaussian_sigma_}
+   */
+  inline static const Key<double> gen_smearingGaussianSigma{
+      {"General", "Gaussian_Sigma"}, 1.0, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1179,60 +1328,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key_no_line{key_gen_gaussian_sigma_,Gaussian_Sigma,double,1.0}
-   *
-   * Parameter for Covariant Gaussian smearing: Width \unit{in fm} of Gaussian
-   * distributions that represent Wigner density of particles.
-   */
-  /**
-   * \see_key{key_gen_gaussian_sigma_}
-   */
-  inline static const Key<double> gen_smearingGaussianSigma{
-      {"General", "Gaussian_Sigma"}, 1.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_general
-   * \optional_key_no_line{key_gen_gauss_cutoff_in_sigma_,Gauss_Cutoff_In_Sigma,double,4.0}
-   *
-   * Parameter for Covariant Gaussian smearing: Distance in sigma at which
-   * gaussian is considered 0.
-   */
-  /**
-   * \see_key{key_gen_gauss_cutoff_in_sigma_}
-   */
-  inline static const Key<double> gen_smearingGaussCutoffInSigma{
-      {"General", "Gauss_Cutoff_In_Sigma"}, 4.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_general
-   * \optional_key_no_line{key_gen_triangular_range_,Triangular_Range,double,2.0}
-   *
-   * Parameter for Triangular smearing: Half of the base of a symmetric triangle
-   * that represents particle density, in units of lattice spacings.
-   */
-  /**
-   * \see_key{key_gen_triangular_range_}
-   */
-  inline static const Key<double> gen_smearingTriangularRange{
-      {"General", "Triangular_Range"}, 2.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_general
-   * \optional_key_no_line{key_gen_discrete_weight_,Discrete_Weight,double,1./3}
-   *
-   * Parameter for Discrete smearing: Weight given to particle density at the
-   * the center node; cannot be smaller than 1./7 (the boundary case of 1./7
-   * results in an even distribution of particle's density over the center node
-   * and 6 neighboring nodes).
-   */
-  /**
-   * \see_key{key_gen_discrete_weight_}
-   */
-  inline static const Key<double> gen_smearingDiscreteWeight{
-      {"General", "Discrete_Weight"}, 1. / 3, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_general
    * \optional_key{key_gen_testparticles_,Testparticles,int,1}
    *
    * Number of test-particles per real particle in the simulation.
@@ -1273,12 +1368,30 @@ struct InputKeys {
    *   is provided by user.
    *
    * For `Delta_Time` explanation see \ref key_gen_delta_time_ "here".
+   *
+   * If the box modus is employed, only the `"Fixed"` time step mode can be used
+   * and the value of `Delta_Time` cannot be too large. For a more detailed
+   * explanation, see \ref doxypage_input_conf_modi_box "box modus".
+   *
    */
   /**
    * \see_key{key_gen_time_step_mode_}
    */
   inline static const Key<TimeStepMode> gen_timeStepMode{
       {"General", "Time_Step_Mode"}, TimeStepMode::Fixed, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_general
+   * \optional_key{key_gen_triangular_range_,Triangular_Range,double,2.0}
+   *
+   * Parameter for Triangular smearing: Half of the base of a symmetric triangle
+   * that represents particle density, in units of lattice spacings.
+   */
+  /**
+   * \see_key{key_gen_triangular_range_}
+   */
+  inline static const Key<double> gen_smearingTriangularRange{
+      {"General", "Triangular_Range"}, 2.0, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1314,31 +1427,7 @@ struct InputKeys {
    * <hr>
    * ### Most user-relevant logging areas
    *
-   * \optional_key_no_line{key_log_main_,Main,string,$\{default\}}
-   *
-   * Messages coming from top-level of the application belong to this area.
-   */
-  /**
-   * \see_key{key_log_main_}
-   */
-  inline static const Key<einhard::LogLevel> log_main{{"Logging", "Main"},
-                                                      {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_logging
-   * \optional_key{key_log_experiment_,%Experiment,string,$\{default\}}
-   *
-   * Messages mostly coming from the `Experiment` class belong to this area.
-   */
-  /**
-   * \see_key{key_log_experiment_}
-   */
-  inline static const Key<einhard::LogLevel> log_experiment{
-      {"Logging", "Experiment"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_logging
-   * \optional_key{key_log_box_,Box,string,$\{default\}}
+   * \optional_key_no_line{key_log_box_,Box,string,$\{default\}}
    *
    * Messages specific to the box modus implementation belong to this area.
    */
@@ -1362,30 +1451,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_list_,List,string,$\{default\}}
-   *
-   * Messages specific to the list modus implementation belong to this area.
-   */
-  /**
-   * \see_key{key_log_list_}
-   */
-  inline static const Key<einhard::LogLevel> log_list{{"Logging", "List"},
-                                                      {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_logging
-   * \optional_key{key_log_sphere_,Sphere,string,$\{default\}}
-   *
-   * Messages specific to the sphere modus implementation belong to this area.
-   */
-  /**
-   * \see_key{key_log_sphere_}
-   */
-  inline static const Key<einhard::LogLevel> log_sphere{{"Logging", "Sphere"},
-                                                        {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_logging
    * \optional_key{key_log_configuration_,%Configuration,string,$\{default\}}
    *
    * Messages about the input configuration file belong to this area.
@@ -1398,15 +1463,27 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_output_,Output,string,$\{default\}}
+   * \optional_key{key_log_experiment_,%Experiment,string,$\{default\}}
    *
-   * Messages output functionality belong to this area.
+   * Messages mostly coming from the `Experiment` class belong to this area.
    */
   /**
-   * \see_key{key_log_output_}
+   * \see_key{key_log_experiment_}
    */
-  inline static const Key<einhard::LogLevel> log_output{{"Logging", "Output"},
-                                                        {"1.0"}};
+  inline static const Key<einhard::LogLevel> log_experiment{
+      {"Logging", "Experiment"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_logging
+   * \optional_key{key_log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{default\}}
+   *
+   * Messages about the gran-canonical thermalization belong to this area.
+   */
+  /**
+   * \see_key{key_log_grandcan_thermalizer_}
+   */
+  inline static const Key<einhard::LogLevel> log_grandcanThermalizer{
+      {"Logging", "GrandcanThermalizer"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1422,15 +1499,51 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{default\}}
+   * \optional_key{key_log_list_,List,string,$\{default\}}
    *
-   * Messages about the gran-canonical thermalization belong to this area.
+   * Messages specific to the list modus implementation belong to this area.
    */
   /**
-   * \see_key{key_log_grandcan_thermalizer_}
+   * \see_key{key_log_list_}
    */
-  inline static const Key<einhard::LogLevel> log_grandcanThermalizer{
-      {"Logging", "GrandcanThermalizer"}, {"1.0"}};
+  inline static const Key<einhard::LogLevel> log_list{{"Logging", "List"},
+                                                      {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_logging
+   * \optional_key{key_log_main_,Main,string,$\{default\}}
+   *
+   * Messages coming from top-level of the application belong to this area.
+   */
+  /**
+   * \see_key{key_log_main_}
+   */
+  inline static const Key<einhard::LogLevel> log_main{{"Logging", "Main"},
+                                                      {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_logging
+   * \optional_key{key_log_output_,Output,string,$\{default\}}
+   *
+   * Messages output functionality belong to this area.
+   */
+  /**
+   * \see_key{key_log_output_}
+   */
+  inline static const Key<einhard::LogLevel> log_output{{"Logging", "Output"},
+                                                        {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_logging
+   * \optional_key{key_log_sphere_,Sphere,string,$\{default\}}
+   *
+   * Messages specific to the sphere modus implementation belong to this area.
+   */
+  /**
+   * \see_key{key_log_sphere_}
+   */
+  inline static const Key<einhard::LogLevel> log_sphere{{"Logging", "Sphere"},
+                                                        {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1708,314 +1821,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_two_to_one_,Two_to_One,bool,true}
-   *
-   * Enable 2 &harr; 1 processes (resonance formation and decays).
-   */
-  /**
-   * \see_key{key_CT_two_to_one_}
-   */
-  inline static const Key<bool> collTerm_twoToOne{
-      {"Collision_Term", "Two_to_One"}, true, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_included_2to2_,Included_2to2,list of strings,["All"]}
-   *
-   * List that contains all possible 2 &harr; 2 process categories. Each process
-   * of the listed category can be performed within the simulation. Possible
-   * categories are:
-   * - `"Elastic"` &rarr; elastic binary scatterings
-   * - `"NN_to_NR"` &rarr; nucleon + nucleon &harr; nucleon + resonance
-   * - `"NN_to_DR"` &rarr; nucleon + nucleon &harr; delta + resonance
-   * - `"KN_to_KN"` &rarr; kaon + nucleon &harr; kaon + nucleon
-   * - `"KN_to_KDelta"` &rarr; kaon + nucleon &harr; kaon + delta
-   * - `"Strangeness_exchange"` &rarr; processes with strangeness exchange
-   * - `"NNbar"` &rarr; annihilation processes, when NNbar_treatment is set to
-   *   resonances; this is superseded if NNbar_treatment is set to anything else
-   * - `"PiDeuteron_to_NN"` &rarr; deuteron + pion &harr; nucleon + nucleon and
-   *   its CPT-conjugate
-   * - `"PiDeuteron_to_pidprime"` &rarr; deuteron + pion &harr; d' + pion
-   * - `"NDeuteron_to_Ndprime"` &rarr; deuteron + (anti-)nucleon &harr;
-   *   d' + (anti-)nucleon, and their CPT-conjugates
-   * - `"All"` &rarr; include all binary processes, no necessity to list each
-   *   single category
-   *
-   * Detailed balance is preserved by these reaction switches: if a forward
-   * reaction is off then the reverse is automatically off too.
-   */
-  /**
-   * \see_key{key_CT_included_2to2_}
-   */
-  inline static const Key<ReactionsBitSet> collTerm_includedTwoToTwo{
-      {"Collision_Term", "Included_2to2"},
-      ReactionsBitSet{}.set(),  // All interactions => all bit set
-      {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_mp_reactions_,Multi_Particle_Reactions,list of
-   * strings,[]}
-   *
-   * List of reactions with more than 2 in- or outgoing particles that contains
-   * all possible multi-particle process categories. Multi particle reactions
-   * only work with the stochastic collision criterion. Possible categories are:
-   * - `"Meson_3to1"` &rarr; Mesonic 3-to-1 reactions:
-   *   <table>
-   *   <tr>
-   *   <td> \f$\strut\pi^0\pi^+\pi^-\leftrightarrow\omega\f$
-   *   <td> \f$\strut\pi^0\pi^+\pi^-\leftrightarrow\phi\f$
-   *   <td> \f$\strut\eta\pi^+\pi^-\leftrightarrow\eta'\f$
-   *   <td> \f$\strut\eta\pi^0\pi^0\leftrightarrow\eta'\f$
-   *   </table>
-   *   Since detailed balance is enforced, the corresponding decays also have to
-   *   be added in decaymodes.txt to enable the reactions.
-   * - `"Deuteron_3to2"` &rarr; Deuteron 3-to-2 reactions:
-   *   <table>
-   *   <tr>
-   *   <td> \f$\strut \pi pn\leftrightarrow\pi d\f$
-   *   <td> \f$\strut Npn\leftrightarrow Nd\f$
-   *   <td> \f$\strut \bar{N}pn\leftrightarrow\bar{N}d\f$
-   *   </table>
-   *   The deuteron has to be uncommented in particles.txt as well.
-   *   Do not uncomment d' or make sure to exclude 2-body reactions involving
-   *   the d' (i.e. no `"PiDeuteron_to_pidprime"` and `"NDeuteron_to_Ndprime"`
-   *   in `Included_2to2`). Otherwise, the deuteron reactions are implicitly
-   *   double-counted.
-   * - `"A3_Nuclei_4to2"` &rarr; Create or destroy A = 3 nuclei (triton, He-3,
-   *   hypertriton) by 4 &harr; 2 catalysis reactions such as
-   *   \f$X NNN \leftrightarrow X t\f$, where \f$X\f$ can be a pion, nucleon, or
-   *   antinucleon.
-   * - `"NNbar_5to2"` &rarr; 5-to-2 back-reaction for NNbar annihilation:
-   *   \f$\pi^0\pi^+\pi^-\pi^+\pi^- \rightarrow N\bar{N}\f$. Since detailed
-   *   balance is enforced, `NNbar_Treatment` has to be set to "two to five" for
-   *   this option.
-   */
-  /**
-   * \see_key{key_CT_mp_reactions_}
-   */
-  inline static const Key<MultiParticleReactionsBitSet>
-      collTerm_multiParticleReactions{
-          {"Collision_Term", "Multi_Particle_Reactions"},
-          MultiParticleReactionsBitSet{}.reset(),  // Empty list => no bit set
-          {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_force_decays_at_end_,Force_Decays_At_End,bool,true}
-   *
-   * - `true` &rarr; Force all resonances to decay after last timestep.
-   * - `false` &rarr; Don't force decays (final output can contain resonances).
-   */
-  /**
-   * \see_key{key_CT_force_decays_at_end_}
-   */
-  inline static const Key<bool> collTerm_forceDecaysAtEnd{
-      {"Collision_Term", "Force_Decays_At_End"}, true, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_no_collisions_,No_Collisions,bool,false}
-   *
-   * Disable all possible collisions, only allow decays to occur if not
-   * forbidden by other options. Useful for running SMASH as a decay
-   * afterburner, but not recommended in general, because it breaks the detailed
-   * balance.
-   */
-  /**
-   * \see_key{key_CT_no_collisions_}
-   */
-  inline static const Key<bool> collTerm_noCollisions{
-      {"Collision_Term", "No_Collisions"}, false, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_nnbar_treatment_,NNbar_Treatment,string,"strings"}
-   *
-   * - `"no annihilation"` &rarr; No annihilation of NNbar is performed.
-   * - `"resonances"` &rarr; Annihilation through
-   *   \f$N\bar{N}\rightarrow\rho h_1(1170)\f$; combined with
-   *   \f$\rho\rightarrow\pi\pi\f$ and \f$h_1(1170)\rightarrow\pi\rho\f$, which
-   *   gives 5 pions on average. This option requires `"NNbar"` to be enabled in
-   *   <tt>\ref key_CT_included_2to2_ "Included_2to2"</tt>.
-   * - `"two to five"` &rarr; Direct Annhilation of NNbar to \f$5\pi\f$,
-   *   matching the resonance treatment:
-   *   \f$N\bar{N}\rightarrow\pi^0\pi^+\pi^-\pi^+\pi^-\f$.
-   *   This option requires `"NNbar_5to2"` to be enabled in
-   *   <tt>\ref key_CT_mp_reactions_ "Multi_Particle_Reactions"</tt>.
-   * - `"strings"` &rarr; Annihilation through string fragmentation.
-   */
-  /**
-   * \see_key{key_CT_nnbar_treatment_}
-   */
-  inline static const Key<NNbarTreatment> collTerm_nnbarTreatment{
-      {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::Strings, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_use_aqm_,Use_AQM,bool,true}
-   *
-   * Turn on AQM cross-sections for exotic combination of particles
-   * (baryon-baryon cross-sections are scaled from proton-proton high energy
-   * parametrization, for example). This includes both elastic and non-elastic
-   * contributions; non-elastic contributions go through string fragmentation.
-   * Turning off strings or elastic collisions while leaving this on will
-   * result in the corresponding part of the AQM cross-sections to also be off.
-   * Cross-sections parametrization are scaled according to
-   * \f[
-   * \frac{\sigma^{\mathrm{AQM}}_{\mathrm{process}}}
-   * {\sigma^{\mathrm{AQM}}_\mathrm{ref\_process}}
-   * \sigma^{\mathrm{param}}_\mathrm{ref\_process}
-   * \f]
-   * where \f$ \sigma^{\mathrm{AQM}}_x = 40 \left( \frac{2}{3}
-   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) \f$, with
-   * \f$n_\mathrm{meson}\f$ being the number of mesons in the process,
-   * \f$x^s_{1,2}\f$ the fraction of strange quarks in the participant.
-   * "process" is then a generic process and "ref_process" a reference process
-   * such as PP for which solid parametrizations exist.
-   * (\iref{Bass:1998ca})
-   */
-  /**
-   * \see_key{key_CT_use_aqm_}
-   */
-  inline static const Key<bool> collTerm_useAQM{
-      {"Collision_Term", "Use_AQM"}, true, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_res_lifetime_mod_,Resonance_Lifetime_Modifier,double,1.0}
-   *
-   * Multiplicative factor by which to scale the resonance lifetimes up or down.
-   * This additionally has the effect of modifying the initial densities by
-   * the same factor in the case of a box initialized with thermal
-   * multiplicities (see <tt>\ref key_MB_use_thermal_mult_
-   * "Box: Use_Thermal_Multiplicities"</tt>).
-   *
-   * \warning This option is not fully physically consistent with some of the
-   * other assumptions used in SMASH; notably, modifying this value **will**
-   * break detailed balance in any gas which allows resonances to collide
-   * inelastically, as this option breaks the relationship between the width and
-   * lifetime of resonances. Note as well that in such gases, using a value of
-   * 0.0 is known to make SMASH hang; it is recommended to use a small non-zero
-   * value instead in these cases.
-   */
-  /**
-   * \see_key{key_CT_res_lifetime_mod_}
-   */
-  inline static const Key<double> collTerm_resonanceLifetimeModifier{
-      {"Collision_Term", "Resonance_Lifetime_Modifier"}, 1.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_string_with_prob_,Strings_with_Probability,bool,true}
-   *
-   * - `true` &rarr;
-   *   String processes are triggered according to a probability increasing
-   *   smoothly with the collisional energy from 0 to 1 in a certain energy
-   *   window. At energies beyond that window, all the inelastic scatterings are
-   *   via strings, while at the energies below that window, all the scatterings
-   *   are via non-string processes. One should be careful that in this
-   *   approach, the scatterings via resoances are also suppressed in the
-   *   intermediate energy region, and vanishes at high energies, e.g.
-   *   \f$p\pi\rightarrow\Delta\rightarrow\Sigma K\f$
-   *   can't happen at a collisional energy beyond 2.2 GeV in this approach.
-   *   Therefore, the cross sections of the scatterings to the certain final
-   *   states, which might be crucial for the production of the rare species,
-   *   will be reduced at the high energies.
-   * - `false` &rarr;
-   *   String processes always happen as long as the collisional energy exceeds
-   *   the threshold value by 0.9 GeV, and the parametrized total cross section
-   *   is larger than the sum of cross sections contributed by the non-string
-   *   processes. The string cross section is thus obtained by taking the
-   *   difference between them.
-   */
-  /**
-   * \see_key{key_CT_string_with_prob_}
-   */
-  inline static const Key<bool> collTerm_stringsWithProbability{
-      {"Collision_Term", "Strings_with_Probability"}, true, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_elastic_cross_section_,Elastic_Cross_Section,double,-1.0}
-   *
-   * If a non-negative value is given, it will override the parametrized
-   * elastic cross sections (which are energy-dependent) with a constant value
-   * \unit{in mb}. This constant elastic cross section is used for all
-   * collisions.
-   */
-  /**
-   * \see_key{key_CT_elastic_cross_section_}
-   */
-  inline static const Key<double> collTerm_elasticCrossSection{
-      {"Collision_Term", "Elastic_Cross_Section"}, -1.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_isotropic_,Isotropic,bool,false}
-   *
-   * Do all collisions isotropically.
-   */
-  /**
-   * \see_key{key_CT_isotropic_}
-   */
-  inline static const Key<bool> collTerm_isotropic{
-      {"Collision_Term", "Isotropic"}, false, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_max_cs_,Maximum_Cross_Section,double,
-   * 200</tt> or <tt>2000}
-   *
-   * The maximal cross section \unit{in mb} that should be used when looking for
-   * collisions. This means that all particle pairs, whose transverse distance
-   * is smaller or equal to \f$\sqrt{\sigma_\mathrm{max}/\pi}\f$, will be
-   * checked for collisions. <b>The default value is usually set to 200 mb</b>
-   * and this value occurs in the Delta peak of the \f$\pi+p\f$ cross section.
-   * Many SMASH cross sections diverge close at the threshold; these divergent
-   * parts are effectively cut off. If deuteron production via d' is considered,
-   * then the default is increased to 2000 mb to function correctly (see
-   * \iref{Oliinychenko:2018ugs}). The maximal cross section is scaled with
-   * <tt>\ref key_CT_cs_scaling_ "Cross_Section_Scaling"</tt> factor.
-   */
-  /**
-   * \see_key{key_CT_max_cs_}
-   */
-  inline static const Key<double> collTerm_maximumCrossSection{
-      {"Collision_Term", "Maximum_Cross_Section"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,double,2.5}
-   *
-   * The (minimal) length \unit{in fm} used for the grid cells of the stochastic
-   * criterion, only. Collisions are searched within grid cells only. Cell
-   * lengths are scaled up so that grid contains all particles if fraction of a
-   * cell length would remain at end of the grid.
-   */
-  /**
-   * \see_key{key_CT_fixed_min_cell_length_}
-   */
-  inline static const Key<double> collTerm_fixedMinCellLength{
-      {"Collision_Term", "Fixed_Min_Cell_Length"}, 2.5, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_cs_scaling_,Cross_Section_Scaling,double,1.0}
-   *
-   * Scale all cross sections by a global factor.
-   * \warning Most cross sections are constrained by experimental data. Scaling
-   * them will therefore lead to nonphysical results and is only meant for
-   * explorative studies.
-   */
-  /**
-   * \see_key{key_CT_cs_scaling_}
-   */
-  inline static const Key<double> collTerm_crossSectionScaling{
-      {"Collision_Term", "Cross_Section_Scaling"}, 1.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_additional_el_cs_,Additional_Elastic_Cross_Section,double,0.0}
    *
    * Add an additional constant contribution \unit{in mb} to the elastic cross
@@ -2029,58 +1834,6 @@ struct InputKeys {
    */
   inline static const Key<double> collTerm_additionalElasticCrossSection{
       {"Collision_Term", "Additional_Elastic_Cross_Section"}, 0.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_include_decays_end_,Include_Weak_And_EM_Decays_At_The_End,bool,false}
-   *
-   * Enable to also perform weak and electro-magnetic decays at the end of the
-   * simulation. If enabled, all decays in the *decaymodes.txt* file are
-   * considered at the end, even for hadrons usually considered stable (i.e.
-   * with an on-shell width larger than the width_cutoff), for example
-   * \f$\Sigma\f$, \f$\pi\f$ or \f$\eta\f$. Note that for isospin violating
-   * decay modes all possible isospin combination have to be manually specified
-   * in the *decaymodes.txt* file.
-   */
-  /**
-   * \see_key{key_CT_include_decays_end_}
-   */
-  inline static const Key<bool> collTerm_includeDecaysAtTheEnd{
-      {"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
-      false,
-      {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_elastic_nn_cutoff_sqrts_,Elastic_NN_Cutoff_Sqrts,double,1.98}
-   *
-   * The elastic collisions between two nucleons with \f$\sqrt{s}\f$ below
-   * the specified value (\unit{in GeV}) cannot happen.
-   * - `Elastic_NN_Cutoff_Sqrts` < 1.88 &rarr;
-   *   Below the threshold energy of the elastic collision, no effect.
-   * - `Elastic_NN_Cutoff_Sqrts` > 2.02 &rarr;
-   *   Beyond the threshold energy of the inelastic collision
-   *   \f$NN\rightarrow NN\pi\f$, not suggested.
-   */
-  /**
-   * \see_key{key_CT_elastic_nn_cutoff_sqrts_}
-   */
-  inline static const Key<double> collTerm_elasticNNCutoffSqrts{
-      {"Collision_Term", "Elastic_NN_Cutoff_Sqrts"}, 1.98, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_strings_,Strings,bool,
-   * (\ref key_gen_modus_ "Modus"!="Box")}
-   *
-   * - `true` &rarr; String excitation is enabled
-   * - `false` &rarr; String excitation is disabled
-   */
-  /**
-   * \see_key{key_CT_strings_}
-   */
-  inline static const Key<bool> collTerm_strings{{"Collision_Term", "Strings"},
-                                                 {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2132,6 +1885,256 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_cs_scaling_,Cross_Section_Scaling,double,1.0}
+   *
+   * Scale all cross sections by a global factor.
+   * \warning Most cross sections are constrained by experimental data. Scaling
+   * them will therefore lead to nonphysical results and is only meant for
+   * explorative studies.
+   */
+  /**
+   * \see_key{key_CT_cs_scaling_}
+   */
+  inline static const Key<double> collTerm_crossSectionScaling{
+      {"Collision_Term", "Cross_Section_Scaling"}, 1.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_elastic_cross_section_,Elastic_Cross_Section,double,-1.0}
+   *
+   * If a non-negative value is given, it will override the parametrized
+   * elastic cross sections (which are energy-dependent) with a constant value
+   * \unit{in mb}. This constant elastic cross section is used for all
+   * collisions.
+   */
+  /**
+   * \see_key{key_CT_elastic_cross_section_}
+   */
+  inline static const Key<double> collTerm_elasticCrossSection{
+      {"Collision_Term", "Elastic_Cross_Section"}, -1.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_elastic_nn_cutoff_sqrts_,Elastic_NN_Cutoff_Sqrts,double,1.98}
+   *
+   * The elastic collisions between two nucleons with \f$\sqrt{s}\f$ below
+   * the specified value (\unit{in GeV}) cannot happen.
+   * - `Elastic_NN_Cutoff_Sqrts` < 1.88 &rarr;
+   *   Below the threshold energy of the elastic collision, no effect.
+   * - `Elastic_NN_Cutoff_Sqrts` > 2.02 &rarr;
+   *   Beyond the threshold energy of the inelastic collision
+   *   \f$NN\rightarrow NN\pi\f$, not suggested.
+   */
+  /**
+   * \see_key{key_CT_elastic_nn_cutoff_sqrts_}
+   */
+  inline static const Key<double> collTerm_elasticNNCutoffSqrts{
+      {"Collision_Term", "Elastic_NN_Cutoff_Sqrts"}, 1.98, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,double,2.5}
+   *
+   * The (minimal) length \unit{in fm} used for the grid cells of the stochastic
+   * criterion, only. Collisions are searched within grid cells only. Cell
+   * lengths are scaled up so that grid contains all particles if fraction of a
+   * cell length would remain at end of the grid.
+   */
+  /**
+   * \see_key{key_CT_fixed_min_cell_length_}
+   */
+  inline static const Key<double> collTerm_fixedMinCellLength{
+      {"Collision_Term", "Fixed_Min_Cell_Length"}, 2.5, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_force_decays_at_end_,Force_Decays_At_End,bool,true}
+   *
+   * - `true` &rarr; Force all resonances to decay after last timestep.
+   * - `false` &rarr; Don't force decays (final output can contain resonances).
+   */
+  /**
+   * \see_key{key_CT_force_decays_at_end_}
+   */
+  inline static const Key<bool> collTerm_forceDecaysAtEnd{
+      {"Collision_Term", "Force_Decays_At_End"}, true, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_include_decays_end_,Include_Weak_And_EM_Decays_At_The_End,bool,false}
+   *
+   * Enable to also perform weak and electro-magnetic decays at the end of the
+   * simulation. If enabled, all decays in the *decaymodes.txt* file are
+   * considered at the end, even for hadrons usually considered stable (i.e.
+   * with an on-shell width larger than the width_cutoff), for example
+   * \f$\Sigma\f$, \f$\pi\f$ or \f$\eta\f$. Note that for isospin violating
+   * decay modes all possible isospin combination have to be manually specified
+   * in the *decaymodes.txt* file.
+   */
+  /**
+   * \see_key{key_CT_include_decays_end_}
+   */
+  inline static const Key<bool> collTerm_includeDecaysAtTheEnd{
+      {"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
+      false,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_included_2to2_,Included_2to2,list of strings,["All"]}
+   *
+   * List that contains all possible 2 &harr; 2 process categories. Each process
+   * of the listed category can be performed within the simulation. Possible
+   * categories are:
+   * - `"Elastic"` &rarr; elastic binary scatterings
+   * - `"NN_to_NR"` &rarr; nucleon + nucleon &harr; nucleon + resonance
+   * - `"NN_to_DR"` &rarr; nucleon + nucleon &harr; delta + resonance
+   * - `"KN_to_KN"` &rarr; kaon + nucleon &harr; kaon + nucleon
+   * - `"KN_to_KDelta"` &rarr; kaon + nucleon &harr; kaon + delta
+   * - `"Strangeness_exchange"` &rarr; processes with strangeness exchange
+   * - `"NNbar"` &rarr; annihilation processes, when NNbar_treatment is set to
+   *   resonances; this is superseded if NNbar_treatment is set to anything else
+   * - `"PiDeuteron_to_NN"` &rarr; deuteron + pion &harr; nucleon + nucleon and
+   *   its CPT-conjugate
+   * - `"PiDeuteron_to_pidprime"` &rarr; deuteron + pion &harr; d' + pion
+   * - `"NDeuteron_to_Ndprime"` &rarr; deuteron + (anti-)nucleon &harr;
+   *   d' + (anti-)nucleon, and their CPT-conjugates
+   * - `"All"` &rarr; include all binary processes, no necessity to list each
+   *   single category
+   *
+   * Detailed balance is preserved by these reaction switches: if a forward
+   * reaction is off then the reverse is automatically off too.
+   */
+  /**
+   * \see_key{key_CT_included_2to2_}
+   */
+  inline static const Key<ReactionsBitSet> collTerm_includedTwoToTwo{
+      {"Collision_Term", "Included_2to2"},
+      ReactionsBitSet{}.set(),  // All interactions => all bit set
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_isotropic_,Isotropic,bool,false}
+   *
+   * Do all collisions isotropically.
+   */
+  /**
+   * \see_key{key_CT_isotropic_}
+   */
+  inline static const Key<bool> collTerm_isotropic{
+      {"Collision_Term", "Isotropic"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_max_cs_,Maximum_Cross_Section,double,
+   * 200</tt> or <tt>2000}
+   *
+   * The maximal cross section \unit{in mb} that should be used when looking for
+   * collisions. This means that all particle pairs, whose transverse distance
+   * is smaller or equal to \f$\sqrt{\sigma_\mathrm{max}/\pi}\f$, will be
+   * checked for collisions. <b>The default value is usually set to 200 mb</b>
+   * and this value occurs in the Delta peak of the \f$\pi+p\f$ cross section.
+   * Many SMASH cross sections diverge close at the threshold; these divergent
+   * parts are effectively cut off. If deuteron production via d' is considered,
+   * then the default is increased to 2000 mb to function correctly (see
+   * \iref{Oliinychenko:2018ugs}). The maximal cross section is scaled with
+   * <tt>\ref key_CT_cs_scaling_ "Cross_Section_Scaling"</tt> factor.
+   */
+  /**
+   * \see_key{key_CT_max_cs_}
+   */
+  inline static const Key<double> collTerm_maximumCrossSection{
+      {"Collision_Term", "Maximum_Cross_Section"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_mp_reactions_,Multi_Particle_Reactions,list of
+   * strings,[]}
+   *
+   * List of reactions with more than 2 in- or outgoing particles that contains
+   * all possible multi-particle process categories. Multi particle reactions
+   * only work with the stochastic collision criterion. Possible categories are:
+   * - `"Meson_3to1"` &rarr; Mesonic 3-to-1 reactions:
+   *   <table>
+   *   <tr>
+   *   <td> \f$\strut\pi^0\pi^+\pi^-\leftrightarrow\omega\f$
+   *   <td> \f$\strut\pi^0\pi^+\pi^-\leftrightarrow\phi\f$
+   *   <td> \f$\strut\eta\pi^+\pi^-\leftrightarrow\eta'\f$
+   *   <td> \f$\strut\eta\pi^0\pi^0\leftrightarrow\eta'\f$
+   *   </table>
+   *   Since detailed balance is enforced, the corresponding decays also have to
+   *   be added in decaymodes.txt to enable the reactions.
+   * - `"Deuteron_3to2"` &rarr; Deuteron 3-to-2 reactions:
+   *   <table>
+   *   <tr>
+   *   <td> \f$\strut \pi pn\leftrightarrow\pi d\f$
+   *   <td> \f$\strut Npn\leftrightarrow Nd\f$
+   *   <td> \f$\strut \bar{N}pn\leftrightarrow\bar{N}d\f$
+   *   </table>
+   *   The deuteron has to be uncommented in particles.txt as well.
+   *   Do not uncomment d' or make sure to exclude 2-body reactions involving
+   *   the d' (i.e. no `"PiDeuteron_to_pidprime"` and `"NDeuteron_to_Ndprime"`
+   *   in `Included_2to2`). Otherwise, the deuteron reactions are implicitly
+   *   double-counted.
+   * - `"A3_Nuclei_4to2"` &rarr; Create or destroy A = 3 nuclei (triton, He-3,
+   *   hypertriton) by 4 &harr; 2 catalysis reactions such as
+   *   \f$X NNN \leftrightarrow X t\f$, where \f$X\f$ can be a pion, nucleon, or
+   *   antinucleon.
+   * - `"NNbar_5to2"` &rarr; 5-to-2 back-reaction for NNbar annihilation:
+   *   \f$\pi^0\pi^+\pi^-\pi^+\pi^- \rightarrow N\bar{N}\f$. Since detailed
+   *   balance is enforced, `NNbar_Treatment` has to be set to "two to five" for
+   *   this option.
+   */
+  /**
+   * \see_key{key_CT_mp_reactions_}
+   */
+  inline static const Key<MultiParticleReactionsBitSet>
+      collTerm_multiParticleReactions{
+          {"Collision_Term", "Multi_Particle_Reactions"},
+          MultiParticleReactionsBitSet{}.reset(),  // Empty list => no bit set
+          {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_nnbar_treatment_,NNbar_Treatment,string,"strings"}
+   *
+   * - `"no annihilation"` &rarr; No annihilation of NNbar is performed.
+   * - `"resonances"` &rarr; Annihilation through
+   *   \f$N\bar{N}\rightarrow\rho h_1(1170)\f$; combined with
+   *   \f$\rho\rightarrow\pi\pi\f$ and \f$h_1(1170)\rightarrow\pi\rho\f$, which
+   *   gives 5 pions on average. This option requires `"NNbar"` to be enabled in
+   *   <tt>\ref key_CT_included_2to2_ "Included_2to2"</tt>.
+   * - `"two to five"` &rarr; Direct Annhilation of NNbar to \f$5\pi\f$,
+   *   matching the resonance treatment:
+   *   \f$N\bar{N}\rightarrow\pi^0\pi^+\pi^-\pi^+\pi^-\f$.
+   *   This option requires `"NNbar_5to2"` to be enabled in
+   *   <tt>\ref key_CT_mp_reactions_ "Multi_Particle_Reactions"</tt>.
+   * - `"strings"` &rarr; Annihilation through string fragmentation.
+   */
+  /**
+   * \see_key{key_CT_nnbar_treatment_}
+   */
+  inline static const Key<NNbarTreatment> collTerm_nnbarTreatment{
+      {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::Strings, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_no_collisions_,No_Collisions,bool,false}
+   *
+   * Disable all possible collisions, only allow decays to occur if not
+   * forbidden by other options. Useful for running SMASH as a decay
+   * afterburner, but not recommended in general, because it breaks the detailed
+   * balance.
+   */
+  /**
+   * \see_key{key_CT_no_collisions_}
+   */
+  inline static const Key<bool> collTerm_noCollisions{
+      {"Collision_Term", "No_Collisions"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_warn_high_prob_,Only_Warn_For_High_Probability,bool,false}
    *
    * Only warn and not error for reaction probabilities higher than 1.
@@ -2147,18 +2150,114 @@ struct InputKeys {
       {"Collision_Term", "Only_Warn_For_High_Probability"}, false, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_ct_pauliblocker
-   * \optional_key{key_CT_PB_spatial_averaging_radius_,Spatial_Averaging_Radius,double,1.86}
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_res_lifetime_mod_,Resonance_Lifetime_Modifier,double,1.0}
    *
-   * Radius \unit{in fm} of sphere for averaging in the coordinate space.
+   * Multiplicative factor by which to scale the resonance lifetimes up or down.
+   * This additionally has the effect of modifying the initial densities by
+   * the same factor in the case of a box initialized with thermal
+   * multiplicities (see <tt>\ref key_MB_use_thermal_mult_
+   * "Box: Use_Thermal_Multiplicities"</tt>).
+   *
+   * \warning This option is not fully physically consistent with some of the
+   * other assumptions used in SMASH; notably, modifying this value **will**
+   * break detailed balance in any gas which allows resonances to collide
+   * inelastically, as this option breaks the relationship between the width and
+   * lifetime of resonances. Note as well that in such gases, using a value of
+   * 0.0 is known to make SMASH hang; it is recommended to use a small non-zero
+   * value instead in these cases.
    */
   /**
-   * \see_key{key_CT_PB_spatial_averaging_radius_}
+   * \see_key{key_CT_res_lifetime_mod_}
    */
-  inline static const Key<double> collTerm_pauliBlocking_spatialAveragingRadius{
-      {"Collision_Term", "Pauli_Blocking", "Spatial_Averaging_Radius"},
-      1.86,
-      {"1.0"}};
+  inline static const Key<double> collTerm_resonanceLifetimeModifier{
+      {"Collision_Term", "Resonance_Lifetime_Modifier"}, 1.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_strings_,Strings,bool,
+   * (\ref key_gen_modus_ "Modus"!="Box")}
+   *
+   * - `true` &rarr; String excitation is enabled
+   * - `false` &rarr; String excitation is disabled
+   */
+  /**
+   * \see_key{key_CT_strings_}
+   */
+  inline static const Key<bool> collTerm_strings{{"Collision_Term", "Strings"},
+                                                 {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_string_with_prob_,Strings_with_Probability,bool,true}
+   *
+   * - `true` &rarr;
+   *   String processes are triggered according to a probability increasing
+   *   smoothly with the collisional energy from 0 to 1 in a certain energy
+   *   window. At energies beyond that window, all the inelastic scatterings are
+   *   via strings, while at the energies below that window, all the scatterings
+   *   are via non-string processes. One should be careful that in this
+   *   approach, the scatterings via resoances are also suppressed in the
+   *   intermediate energy region, and vanishes at high energies, e.g.
+   *   \f$p\pi\rightarrow\Delta\rightarrow\Sigma K\f$
+   *   can't happen at a collisional energy beyond 2.2 GeV in this approach.
+   *   Therefore, the cross sections of the scatterings to the certain final
+   *   states, which might be crucial for the production of the rare species,
+   *   will be reduced at the high energies.
+   * - `false` &rarr;
+   *   String processes always happen as long as the collisional energy exceeds
+   *   the threshold value by 0.9 GeV, and the parametrized total cross section
+   *   is larger than the sum of cross sections contributed by the non-string
+   *   processes. The string cross section is thus obtained by taking the
+   *   difference between them.
+   */
+  /**
+   * \see_key{key_CT_string_with_prob_}
+   */
+  inline static const Key<bool> collTerm_stringsWithProbability{
+      {"Collision_Term", "Strings_with_Probability"}, true, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_two_to_one_,Two_to_One,bool,true}
+   *
+   * Enable 2 &harr; 1 processes (resonance formation and decays).
+   */
+  /**
+   * \see_key{key_CT_two_to_one_}
+   */
+  inline static const Key<bool> collTerm_twoToOne{
+      {"Collision_Term", "Two_to_One"}, true, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_use_aqm_,Use_AQM,bool,true}
+   *
+   * Turn on AQM cross-sections for exotic combination of particles
+   * (baryon-baryon cross-sections are scaled from proton-proton high energy
+   * parametrization, for example). This includes both elastic and non-elastic
+   * contributions; non-elastic contributions go through string fragmentation.
+   * Turning off strings or elastic collisions while leaving this on will
+   * result in the corresponding part of the AQM cross-sections to also be off.
+   * Cross-sections parametrization are scaled according to
+   * \f[
+   * \frac{\sigma^{\mathrm{AQM}}_{\mathrm{process}}}
+   * {\sigma^{\mathrm{AQM}}_\mathrm{ref\_process}}
+   * \sigma^{\mathrm{param}}_\mathrm{ref\_process}
+   * \f]
+   * where \f$ \sigma^{\mathrm{AQM}}_x = 40 \left( \frac{2}{3}
+   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) \f$, with
+   * \f$n_\mathrm{meson}\f$ being the number of mesons in the process,
+   * \f$x^s_{1,2}\f$ the fraction of strange quarks in the participant.
+   * "process" is then a generic process and "ref_process" a reference process
+   * such as PP for which solid parametrizations exist.
+   * (\iref{Bass:1998ca})
+   */
+  /**
+   * \see_key{key_CT_use_aqm_}
+   */
+  inline static const Key<bool> collTerm_useAQM{
+      {"Collision_Term", "Use_AQM"}, true, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
@@ -2188,19 +2287,151 @@ struct InputKeys {
           {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_string_tension_,String_Tension,double,1.0}
+   * \page doxypage_input_conf_ct_pauliblocker
+   * \optional_key{key_CT_PB_spatial_averaging_radius_,Spatial_Averaging_Radius,double,1.86}
    *
-   * String tension \f$\kappa\f$ \unit{in GeV/fm} connecting massless quarks in
-   * Hamiltonian, \f[H=|p_1|+|p_2|+\kappa |x_1-x_2|\;.\f]
-   * This parameter is only used to determine particles' formation times
-   * according to the yo-yo formalism (in the soft string routine for now).
+   * Radius \unit{in fm} of sphere for averaging in the coordinate space.
    */
   /**
-   * \see_key{key_CT_SP_string_tension_}
+   * \see_key{key_CT_PB_spatial_averaging_radius_}
    */
-  inline static const Key<double> collTerm_stringParam_stringTension{
-      {"Collision_Term", "String_Parameters", "String_Tension"}, 1.0, {"1.0"}};
+  inline static const Key<double> collTerm_pauliBlocking_spatialAveragingRadius{
+      {"Collision_Term", "Pauli_Blocking", "Spatial_Averaging_Radius"},
+      1.86,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_transition
+   * \optional_key{key_CT_ST_KN_offset_,KN_Offset,double,15.15}
+   *
+   * Offset \unit{in GeV} to turn on the strings for KN reactions.
+   */
+  /**
+   * \see_key{key_CT_ST_KN_offset_}
+   */
+  inline static const Key<double> collTerm_stringTrans_KNOffset{
+      {"Collision_Term", "String_Transition", "KN_Offset"}, 15.15, {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_transition
+   * \optional_key{key_CT_ST_pipi_offset_,PiPi_Offset,double,1.12}
+   *
+   * Offset \unit{in GeV} to turn on the strings and elastic processes
+   * for \f$\pi\pi\f$ reactions (this is an exception because the normal AQM
+   * behavior destroys the cross section at very low \f$\sqrt{s}\f$ and around
+   * the \f$f_2\f$ peak)
+   */
+  /**
+   * \see_key{key_CT_ST_pipi_offset_}
+   */
+  inline static const Key<double> collTerm_stringTrans_pipiOffset{
+      {"Collision_Term", "String_Transition", "PiPi_Offset"}, 1.12, {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_transition
+   * \optional_key{key_CT_ST_lower_,Sqrts_Lower,double,0.9}
+   *
+   * Lower end of transition region \unit{in GeV} for the remaining
+   * interactions, in case of AQM this is added to the sum of masses.
+   */
+  /**
+   * \see_key{key_CT_ST_lower_}
+   */
+  inline static const Key<double> collTerm_stringTrans_lower{
+      {"Collision_Term", "String_Transition", "Sqrts_Lower"}, 0.9, {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_transition
+   * \optional_key{key_CT_ST_rangeNN_,Sqrts_Range_NN,list of two
+   * doubles,[3.5\,4.5]}
+   *
+   * Transition range in NN collisions \unit{in GeV}. The lowest value for the
+   * first parameter is the mass threshold 1.88. The default is tuned to
+   * reproduce experimental exclusive cross section data, and at the same
+   * produce excitation functions that are as smooth as possible. The default of
+   * a 1 GeV range is preserved.
+   */
+  /**
+   * \see_key{key_CT_ST_rangeNN_}
+   */
+  inline static const Key<std::pair<double, double>>
+      collTerm_stringTrans_rangeNN{
+          {"Collision_Term", "String_Transition", "Sqrts_Range_NN"},
+          std::make_pair(3.5, 4.5),
+          {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_transition
+   * \optional_key{key_CT_ST_rangeNPi_,Sqrts_Range_Npi,list of two
+   * doubles,[1.9\,2.2]}
+   *
+   * Transition region in N\f$\pi\f$ scatterings \unit{in GeV}. The lowest value
+   * for the first parameter is the mass threshold 1.08.
+   */
+  /**
+   * \see_key{key_CT_ST_rangeNPi_}
+   */
+  inline static const Key<std::pair<double, double>>
+      collTerm_stringTrans_rangeNpi{
+          {"Collision_Term", "String_Transition", "Sqrts_Range_Npi"},
+          std::make_pair(1.9, 2.2),
+          {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_transition
+   * \optional_key{key_CT_ST_range_width_,Sqrts_Range_Width,double,1.0}
+   *
+   * Width of the transition region \unit{in GeV} for the remaining
+   * interactions, in case of AQM this is added to <tt>\ref key_CT_ST_lower_
+   * "Sqrts_Lower"</tt>.
+   */
+  /**
+   * \see_key{key_CT_ST_range_width_}
+   */
+  inline static const Key<double> collTerm_stringTrans_range_width{
+      {"Collision_Term", "String_Transition", "Sqrts_Range_Width"},
+      1.0,
+      {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_diquark_supp_,Diquark_Supp,double,0.036}
+   *
+   * Diquark suppression factor. Defines the probability to produce a diquark
+   * antidiquark pair relative to producing a qurk antiquark pair.
+   */
+  /**
+   * \see_key{key_CT_SP_diquark_supp_}
+   */
+  inline static const Key<double> collTerm_stringParam_diquarkSuppression{
+      {"Collision_Term", "String_Parameters", "Diquark_Supp"}, 0.036, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_form_time_factor_,Form_Time_Factor,double,1.0}
+   *
+   * Factor to be multiplied with the formation time of string fragments from
+   * the soft string routine.
+   */
+  /**
+   * \see_key{key_CT_SP_form_time_factor_}
+   */
+  inline static const Key<double> collTerm_stringParam_formTimeFactor{
+      {"Collision_Term", "String_Parameters", "Form_Time_Factor"},
+      1.0,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_formation_time_,Formation_Time,double,1.0}
+   *
+   * Parameter for formation time in string fragmentation, \unit{in fm}.
+   */
+  /**
+   * \see_key{key_CT_SP_formation_time_}
+   */
+  inline static const Key<double> collTerm_stringParam_formationTime{
+      {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.0, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2231,6 +2462,22 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_m_dependent_formation_t_,Mass_Dependent_Formation_Times,bool,false}
+   *
+   * Whether the formation time of string fragments should depend on their mass.
+   * If it is set to `true`, the formation time is calculated as
+   * \f$\tau = \sqrt{2}\frac{m}{\kappa} \f$.
+   */
+  /**
+   * \see_key{key_CT_SP_m_dependent_formation_t_}
+   */
+  inline static const Key<bool> collTerm_stringParam_mDependentFormationTimes{
+      {"Collision_Term", "String_Parameters", "Mass_Dependent_Formation_Times"},
+      false,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_quark_alpha_,Quark_Alpha,double,2.0}
    *
    * Parameter \f$\alpha\f$ in parton distribution function for quarks,
@@ -2257,34 +2504,66 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_strange_supp_,Strange_Supp,double,0.16}
+   * \optional_key{key_CT_SP_popcorn_rate_,Popcorn_Rate,double,0.15}
    *
-   * Strangeness suppression factor \f$\lambda\f$,
-   * \f[\lambda=
-   * \frac{P(s\bar{s})}{P(u\bar{u})\vphantom{\bar{d}}}=
-   * \frac{P(s\bar{s})}{P(d\bar{d})}\;.
-   * \f]
-   * Defines the probability to produce a \f$s\bar{s}\f$ pair relative to
-   * producing a light \f$q\bar{q}\f$ pair.
+   * Parameter StringFlav:popcornRate, which determines production rate of
+   * popcorn mesons in string fragmentation. It is possible to produce a popcorn
+   * meson from the diquark end of a string with certain probability (i.e.,
+   * diquark to meson + diquark).
    */
   /**
-   * \see_key{key_CT_SP_strange_supp_}
+   * \see_key{key_CT_SP_popcorn_rate_}
    */
-  inline static const Key<double> collTerm_stringParam_strangeSuppression{
-      {"Collision_Term", "String_Parameters", "Strange_Supp"}, 0.16, {"1.0"}};
+  inline static const Key<double> collTerm_stringParam_popcornRate{
+      {"Collision_Term", "String_Parameters", "Popcorn_Rate"}, 0.15, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_diquark_supp_,Diquark_Supp,double,0.036}
+   * \optional_key{key_CT_SP_power_part_formation_,Power_Particle_Formation,double,±1}
    *
-   * Diquark suppression factor. Defines the probability to produce a diquark
-   * antidiquark pair relative to producing a qurk antiquark pair.
+   * The default value of this parameter is `+1` if
+   * \f$\sqrt{s}<200\,\mathrm{GeV}\f$ and `-1` otherwise. If positive, the power
+   * with which the cross section scaling factor of string fragments grows in
+   * time until it reaches 1. If negative, the scaling factor will be constant
+   * and jump to 1 once the particle forms.
    */
   /**
-   * \see_key{key_CT_SP_diquark_supp_}
+   * \see_key{key_CT_SP_power_part_formation_}
    */
-  inline static const Key<double> collTerm_stringParam_diquarkSuppression{
-      {"Collision_Term", "String_Parameters", "Diquark_Supp"}, 0.036, {"1.0"}};
+  inline static const Key<double> collTerm_stringParam_powerParticleFormation{
+      {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_probability_p_to_duu_,Prob_proton_to_d_uu,double,1./3}
+   *
+   * Probability of splitting an (anti)nucleon into the quark it has only once
+   * and the diquark it contains twice in terms of flavour in the soft string
+   * routine.
+   */
+  /**
+   * \see_key{key_CT_SP_probability_p_to_duu_}
+   */
+  inline static const Key<double> collTerm_stringParam_probabilityPToDUU{
+      {"Collision_Term", "String_Parameters", "Prob_proton_to_d_uu"},
+      1.0 / 3,
+      {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_separate_fragment_bar_,Separate_Fragment_Baryon,bool,true}
+   *
+   * Whether to use a separate fragmentation function for leading baryons in
+   * non-diffractive string processes.
+   */
+  /**
+   * \see_key{key_CT_SP_separate_fragment_bar_}
+   */
+  inline static const Key<bool> collTerm_stringParam_separateFragmentBaryon{
+      {"Collision_Term", "String_Parameters", "Separate_Fragment_Baryon"},
+      true,
+      {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2306,6 +2585,52 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_strange_supp_,Strange_Supp,double,0.16}
+   *
+   * Strangeness suppression factor \f$\lambda\f$,
+   * \f[\lambda=
+   * \frac{P(s\bar{s})}{P(u\bar{u})\vphantom{\bar{d}}}=
+   * \frac{P(s\bar{s})}{P(d\bar{d})}\;.
+   * \f]
+   * Defines the probability to produce a \f$s\bar{s}\f$ pair relative to
+   * producing a light \f$q\bar{q}\f$ pair.
+   */
+  /**
+   * \see_key{key_CT_SP_strange_supp_}
+   */
+  inline static const Key<double> collTerm_stringParam_strangeSuppression{
+      {"Collision_Term", "String_Parameters", "Strange_Supp"}, 0.16, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_string_sigma_t_,String_Sigma_T,double,0.5}
+   *
+   * Standard deviation \unit{in GeV} in Gaussian for transverse momentum
+   * distributed to string fragments during fragmentation.
+   */
+  /**
+   * \see_key{key_CT_SP_string_sigma_t_}
+   */
+  inline static const Key<double> collTerm_stringParam_stringSigmaT{
+      {"Collision_Term", "String_Parameters", "String_Sigma_T"}, 0.5, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_string_tension_,String_Tension,double,1.0}
+   *
+   * String tension \f$\kappa\f$ \unit{in GeV/fm} connecting massless quarks in
+   * Hamiltonian, \f[H=|p_1|+|p_2|+\kappa |x_1-x_2|\;.\f]
+   * This parameter is only used to determine particles' formation times
+   * according to the yo-yo formalism (in the soft string routine for now).
+   */
+  /**
+   * \see_key{key_CT_SP_string_tension_}
+   */
+  inline static const Key<double> collTerm_stringParam_stringTension{
+      {"Collision_Term", "String_Parameters", "String_Tension"}, 1.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_stringz_a_,StringZ_A,double,2.0}
    *
    * Parameter \f$a\f$ in Pythia fragmentation function \f$f(z)\f$,
@@ -2316,34 +2641,6 @@ struct InputKeys {
    */
   inline static const Key<double> collTerm_stringParam_stringZA{
       {"Collision_Term", "String_Parameters", "StringZ_A"}, 2.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.55}
-   *
-   * Parameter \f$b\f$ \unit{in 1/GeV²} in Pythia fragmentation function shown
-   * in <tt>\ref key_CT_SP_stringz_a_ "StringZ_A"</tt>.
-   */
-  /**
-   * \see_key{key_CT_SP_stringz_b_}
-   */
-  inline static const Key<double> collTerm_stringParam_stringZB{
-      {"Collision_Term", "String_Parameters", "StringZ_B"}, 0.55, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_separate_fragment_bar_,Separate_Fragment_Baryon,bool,true}
-   *
-   * Whether to use a separate fragmentation function for leading baryons in
-   * non-diffractive string processes.
-   */
-  /**
-   * \see_key{key_CT_SP_separate_fragment_bar_}
-   */
-  inline static const Key<bool> collTerm_stringParam_separateFragmentBaryon{
-      {"Collision_Term", "String_Parameters", "Separate_Fragment_Baryon"},
-      true,
-      {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2360,6 +2657,19 @@ struct InputKeys {
       {"Collision_Term", "String_Parameters", "StringZ_A_Leading"},
       0.2,
       {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.55}
+   *
+   * Parameter \f$b\f$ \unit{in 1/GeV²} in Pythia fragmentation function shown
+   * in <tt>\ref key_CT_SP_stringz_a_ "StringZ_A"</tt>.
+   */
+  /**
+   * \see_key{key_CT_SP_stringz_b_}
+   */
+  inline static const Key<double> collTerm_stringParam_stringZB{
+      {"Collision_Term", "String_Parameters", "StringZ_B"}, 0.55, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2380,107 +2690,18 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_string_sigma_t_,String_Sigma_T,double,0.5}
+   * \optional_key{key_CT_SP_use_monash_tune_,Use_Monash_Tune,bool,false}
    *
-   * Standard deviation \unit{in GeV} in Gaussian for transverse momentum
-   * distributed to string fragments during fragmentation.
+   * Whether to use the monash tune \iref{Skands:2014pea} for all string
+   * processes.
    */
   /**
-   * \see_key{key_CT_SP_string_sigma_t_}
+   * \see_key{key_CT_SP_use_monash_tune_}
    */
-  inline static const Key<double> collTerm_stringParam_stringSigmaT{
-      {"Collision_Term", "String_Parameters", "String_Sigma_T"}, 0.5, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_form_time_factor_,Form_Time_Factor,double,1.0}
-   *
-   * Factor to be multiplied with the formation time of string fragments from
-   * the soft string routine.
-   */
-  /**
-   * \see_key{key_CT_SP_form_time_factor_}
-   */
-  inline static const Key<double> collTerm_stringParam_formTimeFactor{
-      {"Collision_Term", "String_Parameters", "Form_Time_Factor"},
-      1.0,
-      {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_power_part_formation_,Power_Particle_Formation,double,±1}
-   *
-   * The default value of this parameter is `+1` if
-   * \f$\sqrt{s}<200\,\mathrm{GeV}\f$ and `-1` otherwise. If positive, the power
-   * with which the cross section scaling factor of string fragments grows in
-   * time until it reaches 1. If negative, the scaling factor will be constant
-   * and jump to 1 once the particle forms.
-   */
-  /**
-   * \see_key{key_CT_SP_power_part_formation_}
-   */
-  inline static const Key<double> collTerm_stringParam_powerParticleFormation{
-      {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
-      {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_formation_time_,Formation_Time,double,1.0}
-   *
-   * Parameter for formation time in string fragmentation, \unit{in fm}.
-   */
-  /**
-   * \see_key{key_CT_SP_formation_time_}
-   */
-  inline static const Key<double> collTerm_stringParam_formationTime{
-      {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_m_dependent_formation_t_,Mass_Dependent_Formation_Times,bool,false}
-   *
-   * Whether the formation time of string fragments should depend on their mass.
-   * If it is set to `true`, the formation time is calculated as
-   * \f$\tau = \sqrt{2}\frac{m}{\kappa} \f$.
-   */
-  /**
-   * \see_key{key_CT_SP_m_dependent_formation_t_}
-   */
-  inline static const Key<bool> collTerm_stringParam_mDependentFormationTimes{
-      {"Collision_Term", "String_Parameters", "Mass_Dependent_Formation_Times"},
+  inline static const Key<bool> collTerm_stringParam_useMonashTune{
+      {"Collision_Term", "String_Parameters", "Use_Monash_Tune"},
       false,
-      {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_probability_p_to_duu_,Prob_proton_to_d_uu,double,1./3}
-   *
-   * Probability of splitting an (anti)nucleon into the quark it has only once
-   * and the diquark it contains twice in terms of flavour in the soft string
-   * routine.
-   */
-  /**
-   * \see_key{key_CT_SP_probability_p_to_duu_}
-   */
-  inline static const Key<double> collTerm_stringParam_probabilityPToDUU{
-      {"Collision_Term", "String_Parameters", "Prob_proton_to_d_uu"},
-      1.0 / 3,
-      {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_popcorn_rate_,Popcorn_Rate,double,0.15}
-   *
-   * Parameter StringFlav:popcornRate, which determines production rate of
-   * popcorn mesons in string fragmentation. It is possible to produce a popcorn
-   * meson from the diquark end of a string with certain probability (i.e.,
-   * diquark to meson + diquark).
-   */
-  /**
-   * \see_key{key_CT_SP_popcorn_rate_}
-   */
-  inline static const Key<double> collTerm_stringParam_popcornRate{
-      {"Collision_Term", "String_Parameters", "Popcorn_Rate"}, 0.15, {"1.0"}};
+      {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
@@ -2496,19 +2717,6 @@ struct InputKeys {
    */
   inline static const Key<bool> collTerm_dileptons_decays{
       {"Collision_Term", "Dileptons", "Decays"}, false, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_ct_photons
-   * \required_key{key_CT_photons_fractional_photons,Fractional_Photons,int}
-   *
-   * Number of fractional photons sampled per single perturbatively produced
-   * photon.
-   */
-  /**
-   * \see_key{key_CT_photons_fractional_photons}
-   */
-  inline static const Key<int> collTerm_photons_fractionalPhotons{
-      {"Collision_Term", "Photons", "Fractional_Photons"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
@@ -2535,25 +2743,23 @@ struct InputKeys {
       {"Collision_Term", "Photons", "Bremsstrahlung"}, false, {"1.0"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_ct_photons
+   * \required_key{key_CT_photons_fractional_photons,Fractional_Photons,int}
+   *
+   * Number of fractional photons sampled per single perturbatively produced
+   * photon.
+   */
+  /**
+   * \see_key{key_CT_photons_fractional_photons}
+   */
+  inline static const Key<int> collTerm_photons_fractionalPhotons{
+      {"Collision_Term", "Photons", "Fractional_Photons"}, {"1.0"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_modi_collider
    *
    * \par Ways to specify incident energies &rarr; Only one can be given!
    *
-   * \required_key_no_line{key_MC_sqrtsnn_,Sqrtsnn,double}
-   *
-   * Defines the energy of the collision \unit{in GeV} as center-of-mass energy
-   * in the collision of two hadrons, one for each nucleus, having the average
-   * mass of all the hadrons composing the given nucleus. This key can be
-   * omitted if the incident energy is specified in a different way.
-   */
-  /**
-   * \see_key{key_MC_sqrtsnn_}
-   */
-  inline static const Key<double> modi_collider_sqrtSNN{
-      {"Modi", "Collider", "Sqrtsnn"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_collider
    * \required_key_no_line{key_MC_e_kin_,E_Kin,double}
    *
    * Defines the energy of the collision by the kinetic energy per nucleon of
@@ -2603,6 +2809,21 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
+   * \required_key_no_line{key_MC_sqrtsnn_,Sqrtsnn,double}
+   *
+   * Defines the energy of the collision \unit{in GeV} as center-of-mass energy
+   * in the collision of two hadrons, one for each nucleus, having the average
+   * mass of all the hadrons composing the given nucleus. This key can be
+   * omitted if the incident energy is specified in a different way.
+   */
+  /**
+   * \see_key{key_MC_sqrtsnn_}
+   */
+  inline static const Key<double> modi_collider_sqrtSNN{
+      {"Modi", "Collider", "Sqrtsnn"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_collider
    * \optional_key{key_MC_calc_frame_,Calculation_Frame,string,"center of
    * velocity"}
    *
@@ -2629,6 +2850,20 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
+   * \optional_key{key_MC_collision_within_nucleus_,Collisions_Within_Nucleus,bool,false}
+   *
+   * Determine whether to allow the first collisions within the same nucleus.
+   * - `true` &rarr; First collisions within the same nucleus allowed.
+   * - `false` &rarr; First collisions within the same nucleus forbidden.
+   */
+  /**
+   * \see_key{key_MC_collision_within_nucleus_}
+   */
+  inline static const Key<bool> modi_collider_collisionWithinNucleus{
+      {"Modi", "Collider", "Collisions_Within_Nucleus"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_collider
    * \optional_key{key_MC_fermi_motion_,Fermi_Motion,string,"off"}
    *
    * - `"on"` &rarr; Switch Fermi motion on, it is recommended to also activate
@@ -2645,20 +2880,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \optional_key{key_MC_collision_within_nucleus_,Collisions_Within_Nucleus,bool,false}
-   *
-   * Determine whether to allow the first collisions within the same nucleus.
-   * - `true` &rarr; First collisions within the same nucleus allowed.
-   * - `false` &rarr; First collisions within the same nucleus forbidden.
-   */
-  /**
-   * \see_key{key_MC_collision_within_nucleus_}
-   */
-  inline static const Key<bool> modi_collider_collisionWithinNucleus{
-      {"Modi", "Collider", "Collisions_Within_Nucleus"}, false, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_collider
    * \optional_key{key_MC_initial_distance_,Initial_Distance,double,2.0}
    *
    * The initial distance of the two nuclei \unit{in fm}:
@@ -2672,31 +2893,6 @@ struct InputKeys {
    */
   inline static const Key<double> modi_collider_initialDistance{
       {"Modi", "Collider", "Initial_Distance"}, 2.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_C_proj_targ
-   * \required_key{key_MC_PT_particles_,%Particles,map<int\,int>}
-   *
-   * A map in which the keys are PDG codes and the values are number of
-   * particles with that PDG code that should be in the current nucleus.
-   * For example:
-   * - `{2212: 82, 2112: 126}` &rarr; a lead-208 nucleus (82 protons and 126
-   *   neutrons = 208 nucleons)
-   * - `{2212: 1, 2112: 1, 3122: 1}` &rarr; for Hyper-Triton (one proton, one
-   *   neutron and one \f$\Lambda\f$).
-   */
-  /**
-   * \see_key{key_MC_PT_particles_}
-   */
-  inline static const Key<std::map<PdgCode, int>>
-      modi_collider_projectile_particles{
-          {"Modi", "Collider", "Projectile", "Particles"}, {"1.0"}};
-  /**
-   * \see_key{key_MC_PT_particles_}
-   */
-  inline static const Key<std::map<PdgCode, int>>
-      modi_collider_target_particles{
-          {"Modi", "Collider", "Target", "Particles"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -2723,6 +2919,31 @@ struct InputKeys {
    */
   inline static const Key<double> modi_collider_target_diffusiveness{
       {"Modi", "Collider", "Target", "Diffusiveness"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_proj_targ
+   * \required_key{key_MC_PT_particles_,%Particles,map<int\,int>}
+   *
+   * A map in which the keys are PDG codes and the values are number of
+   * particles with that PDG code that should be in the current nucleus.
+   * For example:
+   * - `{2212: 82, 2112: 126}` &rarr; a lead-208 nucleus (82 protons and 126
+   *   neutrons = 208 nucleons)
+   * - `{2212: 1, 2112: 1, 3122: 1}` &rarr; for Hyper-Triton (one proton, one
+   *   neutron and one \f$\Lambda\f$).
+   */
+  /**
+   * \see_key{key_MC_PT_particles_}
+   */
+  inline static const Key<std::map<PdgCode, int>>
+      modi_collider_projectile_particles{
+          {"Modi", "Collider", "Projectile", "Particles"}, {"1.0"}};
+  /**
+   * \see_key{key_MC_PT_particles_}
+   */
+  inline static const Key<std::map<PdgCode, int>>
+      modi_collider_target_particles{
+          {"Modi", "Collider", "Target", "Particles"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -2775,25 +2996,6 @@ struct InputKeys {
    * <hr>
    * \par Possible incident energies given per beam
    *
-   * \required_key_no_line{key_MC_PT_e_tot_,E_Tot,double}
-   *
-   * Set the totat energy \unit{in GeV} per particle of the beam. This key,
-   * if used, must be present in both `Projectile` and `Target` section. This
-   * key can be omitted if the incident energy is specified in a different way.
-   */
-  /**
-   * \see_key{key_MC_PT_e_tot_}
-   */
-  inline static const Key<double> modi_collider_projectile_eTot{
-      {"Modi", "Collider", "Projectile", "E_Tot"}, {"1.0"}};
-  /**
-   * \see_key{key_MC_PT_e_tot_}
-   */
-  inline static const Key<double> modi_collider_target_eTot{
-      {"Modi", "Collider", "Target", "E_Tot"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_C_proj_targ
    * \required_key_no_line{key_MC_PT_e_kin_,E_Kin,double}
    *
    * Set the kinetic energy \unit{in GeV} per particle of the beam. This key,
@@ -2810,6 +3012,25 @@ struct InputKeys {
    */
   inline static const Key<double> modi_collider_target_eKin{
       {"Modi", "Collider", "Target", "E_Kin"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_proj_targ
+   * \required_key_no_line{key_MC_PT_e_tot_,E_Tot,double}
+   *
+   * Set the totat energy \unit{in GeV} per particle of the beam. This key,
+   * if used, must be present in both `Projectile` and `Target` section. This
+   * key can be omitted if the incident energy is specified in a different way.
+   */
+  /**
+   * \see_key{key_MC_PT_e_tot_}
+   */
+  inline static const Key<double> modi_collider_projectile_eTot{
+      {"Modi", "Collider", "Projectile", "E_Tot"}, {"1.0"}};
+  /**
+   * \see_key{key_MC_PT_e_tot_}
+   */
+  inline static const Key<double> modi_collider_target_eTot{
+      {"Modi", "Collider", "Target", "E_Tot"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -2943,24 +3164,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_gamma_,Gamma,double,0.0}
-   *
-   * The parameter describes triaxiality \f$\gamma\f$ of the nucleus in
-   * \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
-   */
-  /**
-   * \see_key{key_MC_PT_deformed_gamma_}
-   */
-  inline static const Key<double> modi_collider_projectile_deformed_gamma{
-      {"Modi", "Collider", "Projectile", "Deformed", "Gamma"}, 0.0, {"1.0"}};
-  /**
-   * \see_key{key_MC_PT_deformed_gamma_}
-   */
-  inline static const Key<double> modi_collider_target_deformed_gamma{
-      {"Modi", "Collider", "Target", "Deformed", "Gamma"}, 0.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_betaIII_,Beta_3,double,0.0}
    *
    * The deformation coefficient \f$\beta_3\f$ for the spherical harmonic
@@ -2997,6 +3200,24 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
+   * \optional_key_no_line{key_MC_PT_deformed_gamma_,Gamma,double,0.0}
+   *
+   * The parameter describes triaxiality \f$\gamma\f$ of the nucleus in
+   * \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
+   */
+  /**
+   * \see_key{key_MC_PT_deformed_gamma_}
+   */
+  inline static const Key<double> modi_collider_projectile_deformed_gamma{
+      {"Modi", "Collider", "Projectile", "Deformed", "Gamma"}, 0.0, {"1.0"}};
+  /**
+   * \see_key{key_MC_PT_deformed_gamma_}
+   */
+  inline static const Key<double> modi_collider_target_deformed_gamma{
+      {"Modi", "Collider", "Target", "Deformed", "Gamma"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_proj_targ
    * \par Defining orientation
    *
    * In the `Orientation` section it is possible to specify the orientation of
@@ -3024,30 +3245,6 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "Deformed", "Orientation", "Phi"},
       0.0,
       {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_orientation_theta_,Theta,double,π/2}
-   *
-   * The angle by which to rotate the nucleus about the rotated x-axis.
-   */
-  /**
-   * \see_key{key_MC_PT_deformed_orientation_theta_}
-   */
-  inline static const Key<double>
-      modi_collider_projectile_deformed_orientation_theta{
-          {"Modi", "Collider", "Projectile", "Deformed", "Orientation",
-           "Theta"},
-          M_PI / 2,
-          {"1.0"}};
-  /**
-   * \see_key{key_MC_PT_deformed_orientation_theta_}
-   */
-  inline static const Key<double>
-      modi_collider_target_deformed_orientation_theta{
-          {"Modi", "Collider", "Target", "Deformed", "Orientation", "Theta"},
-          M_PI / 2,
-          {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3097,6 +3294,43 @@ struct InputKeys {
           {"1.0"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_modi_C_proj_targ
+   * \optional_key_no_line{key_MC_PT_deformed_orientation_theta_,Theta,double,π/2}
+   *
+   * The angle by which to rotate the nucleus about the rotated x-axis.
+   */
+  /**
+   * \see_key{key_MC_PT_deformed_orientation_theta_}
+   */
+  inline static const Key<double>
+      modi_collider_projectile_deformed_orientation_theta{
+          {"Modi", "Collider", "Projectile", "Deformed", "Orientation",
+           "Theta"},
+          M_PI / 2,
+          {"1.0"}};
+  /**
+   * \see_key{key_MC_PT_deformed_orientation_theta_}
+   */
+  inline static const Key<double>
+      modi_collider_target_deformed_orientation_theta{
+          {"Modi", "Collider", "Target", "Deformed", "Orientation", "Theta"},
+          M_PI / 2,
+          {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_impact_parameter
+   * \optional_key{key_MC_impact_max_,Max,double,0.0}
+   *
+   * Like `Range: [0.0, Max]`. Note that if both `Range` and `Max` are
+   * specified, `Max` takes precedence (\unit{in fm}).
+   */
+  /**
+   * \see_key{key_MC_impact_max_}
+   */
+  inline static const Key<double> modi_collider_impact_max{
+      {"Modi", "Collider", "Impact", "Max"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
    * \optional_key{key_MC_impact_rnd_reaction_plane_,Random_Reaction_Plane,bool,false}
    *
@@ -3111,16 +3345,16 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_value_,Value,double,0.0}
+   * \optional_key{key_MC_impact_range_,Range,list of two doubles,[0.0\,0.0]}
    *
-   * Fixed value for the impact parameter \unit{in fm}.
-   * \attention If this value is set, all further `Impact` keys are ignored.
+   * A list of minimal and maximal impact parameters \unit{in fm} between which
+   * \f$b\f$ should be chosen. The order of these is not important.
    */
   /**
-   * \see_key{key_MC_impact_value_}
+   * \see_key{key_MC_impact_range_}
    */
-  inline static const Key<double> modi_collider_impact_value{
-      {"Modi", "Collider", "Impact", "Value"}, 0.0, {"1.0"}};
+  inline static const Key<std::array<double, 2>> modi_collider_impact_range{
+      {"Modi", "Collider", "Impact", "Range"}, {{0.0, 0.0}}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -3140,6 +3374,19 @@ struct InputKeys {
    */
   inline static const Key<Sampling> modi_collider_impact_sample{
       {"Modi", "Collider", "Impact", "Sample"}, Sampling::Quadratic, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_impact_parameter
+   * \optional_key{key_MC_impact_value_,Value,double,0.0}
+   *
+   * Fixed value for the impact parameter \unit{in fm}.
+   * \attention If this value is set, all further `Impact` keys are ignored.
+   */
+  /**
+   * \see_key{key_MC_impact_value_}
+   */
+  inline static const Key<double> modi_collider_impact_value{
+      {"Modi", "Collider", "Impact", "Value"}, 0.0, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -3172,70 +3419,13 @@ struct InputKeys {
       {"Modi", "Collider", "Impact", "Yields"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_range_,Range,list of two doubles,[0.0\,0.0]}
-   *
-   * A list of minimal and maximal impact parameters \unit{in fm} between which
-   * \f$b\f$ should be chosen. The order of these is not important.
+   * \page doxypage_input_conf_modi_sphere
+   * ### Mandatory keys
    */
-  /**
-   * \see_key{key_MC_impact_range_}
-   */
-  inline static const Key<std::array<double, 2>> modi_collider_impact_range{
-      {"Modi", "Collider", "Impact", "Range"}, {{0.0, 0.0}}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_max_,Max,double,0.0}
-   *
-   * Like `Range: [0.0, Max]`. Note that if both `Range` and `Max` are
-   * specified, `Max` takes precedence (\unit{in fm}).
-   */
-  /**
-   * \see_key{key_MC_impact_max_}
-   */
-  inline static const Key<double> modi_collider_impactMax{
-      {"Modi", "Collider", "Impact", "Max"}, 0.0, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \required_key_no_line{key_MS_radius_,Radius,double}
-   *
-   * Radius of the sphere \unit{in fm}.
-   */
-  /**
-   * \see_key{key_MS_radius_}
-   */
-  inline static const Key<double> modi_sphere_radius{
-      {"Modi", "Sphere", "Radius"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_sphere
-   * \required_key{key_MS_temperature_,Temperature,double}
-   *
-   * Temperature \unit{in GeV} to sample momenta in the sphere.
-   */
-  /**
-   * \see_key{key_MS_radius_}
-   */
-  inline static const Key<double> modi_sphere_temperature{
-      {"Modi", "Sphere", "Temperature"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_sphere
-   * \required_key{key_MS_start_time_,Start_Time,double}
-   *
-   * Starting time of sphere calculation \unit{in fm}.
-   */
-  /**
-   * \see_key{key_MS_start_time_}
-   */
-  inline static const Key<double> modi_sphere_startTime{
-      {"Modi", "Sphere", "Start_Time"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_sphere
-   * \required_key{key_MS_init_mult_,Init_Multiplicities,map<int\,int>}
+   * \required_key_no_line{key_MS_init_mult_,Init_Multiplicities,map<int\,int>}
    *
    * Initial multiplicities per particle species. The value of this key shall be
    * a map of PDG number and amount corresponding to it. Use this key to specify
@@ -3252,23 +3442,78 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
+   * \required_key{key_MS_radius_,Radius,double}
    *
-   * If this option is set to `true` then <tt>\ref key_MS_init_mult_
-   * "Init_Multiplicities"</tt> are ignored and the system is initialized with
-   * all particle species of the particle table that belong to the hadron gas
-   * equation of state, see HadronGasEos::is_eos_particle(). The multiplicities
-   * are sampled from Poisson distributions \f$\mathrm{Poi}(n_i V)\f$, where
-   * \f$n_i\f$ are the grand-canonical thermal densities of the corresponding
-   * species and \f$V\f$ is the system volume. This option simulates the
-   * grand-canonical ensemble, where the number of particles is not fixed from
-   * event to event.
+   * Radius of the sphere \unit{in fm}.
    */
   /**
-   * \see_key{key_MS_use_thermal_mult_}
+   * \see_key{key_MS_radius_}
    */
-  inline static const Key<bool> modi_sphere_useThermalMultiplicities{
-      {"Modi", "Sphere", "Use_Thermal_Multiplicities"}, false, {"1.0"}};
+  inline static const Key<double> modi_sphere_radius{
+      {"Modi", "Sphere", "Radius"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
+   * \required_key{key_MS_start_time_,Start_Time,double}
+   *
+   * Starting time of sphere calculation \unit{in fm}.
+   */
+  /**
+   * \see_key{key_MS_start_time_}
+   */
+  inline static const Key<double> modi_sphere_startTime{
+      {"Modi", "Sphere", "Start_Time"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
+   * \required_key{key_MS_temperature_,Temperature,double}
+   *
+   * Temperature \unit{in GeV} to sample momenta in the sphere.
+   */
+  /**
+   * \see_key{key_MS_radius_}
+   */
+  inline static const Key<double> modi_sphere_temperature{
+      {"Modi", "Sphere", "Temperature"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
+   * <hr>
+   * ### Optional keys
+   */
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
+   * \optional_key_no_line{key_MS_account_res_widths_,Account_Resonance_Widths,bool,true}
+   *
+   * This key is considered only in case of thermal initialization and the
+   * following two behaviors can be choosen:
+   * - `true` &rarr; Account for resonance spectral functions, while computing
+   *   multiplicities and sampling masses.
+   * - `false` &rarr; Simply use pole masses.
+   */
+  /**
+   * \see_key{key_MS_account_res_widths_}
+   */
+  inline static const Key<bool> modi_sphere_accountResonanceWidths{
+      {"Modi", "Sphere", "Account_Resonance_Widths"}, true, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
+   * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,-1.0}
+   *
+   * This can be used in order to give each particle in the sphere an additional
+   * velocity in radial direction of the size \f$u_r = u_0 \, \frac{r}{R}\f$
+   * with \f$u_0\f$ being the parameter of this feature, \f$r\f$ the radius of
+   * the particle and \f$R\f$ the total radius of the sphere. \f$u_0\f$ can only
+   * take values in \f$[0, 1]\f$ and specifying a negative value is equivalent
+   * in omitting this key (i.e. not attributing any additional radial velocity).
+   */
+  /**
+   * \see_key{key_MS_add_radial_velocity_}
+   */
+  inline static const Key<double> modi_sphere_addRadialVelocity{
+      {"Modi", "Sphere", "Add_Radial_Velocity"}, -1.0, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3287,21 +3532,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
-   *
-   * Strangeness chemical potential \f$\mu_S\f$ \unit{in GeV}. This key is used
-   * to compute thermal densities \f$n_i\f$ only if
-   * <tt>\ref key_MS_use_thermal_mult_ "Use_Thermal_Multiplicities"</tt> is
-   * `true`.
-   */
-  /**
-   * \see_key{key_MS_strange_chem_pot_}
-   */
-  inline static const Key<double> modi_sphere_strangeChemicalPotential{
-      {"Modi", "Sphere", "Strange_Chemical_Potential"}, 0.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_charge_chem_pot_,Charge_Chemical_Potential,double,0.0}
    *
    * Charge chemical potential \f$\mu_Q\f$ \unit{in GeV}. This key is used to
@@ -3314,22 +3544,6 @@ struct InputKeys {
    */
   inline static const Key<double> modi_sphere_chargeChemicalPotential{
       {"Modi", "Sphere", "Charge_Chemical_Potential"}, 0.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_account_res_widths_,Account_Resonance_Widths,bool,true}
-   *
-   * This key is considered only in case of thermal initialization and the
-   * following two behaviors can be choosen:
-   * - `true` &rarr; Account for resonance spectral functions, while computing
-   *   multiplicities and sampling masses.
-   * - `false` &rarr; Simply use pole masses.
-   */
-  /**
-   * \see_key{key_MS_account_res_widths_}
-   */
-  inline static const Key<bool> modi_sphere_accountResonanceWidths{
-      {"Modi", "Sphere", "Account_Resonance_Widths"}, true, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3359,20 +3573,38 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,-1.0}
+   * \optional_key{key_MS_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
    *
-   * This can be used in order to give each particle in the sphere an additional
-   * velocity in radial direction of the size \f$u_r = u_0 \, \frac{r}{R}\f$
-   * with \f$u_0\f$ being the parameter of this feature, \f$r\f$ the radius of
-   * the particle and \f$R\f$ the total radius of the sphere. \f$u_0\f$ can only
-   * take values in \f$[0, 1]\f$ and specifying a negative value is equivalent
-   * in omitting this key (i.e. not attributing any additional radial velocity).
+   * Strangeness chemical potential \f$\mu_S\f$ \unit{in GeV}. This key is used
+   * to compute thermal densities \f$n_i\f$ only if
+   * <tt>\ref key_MS_use_thermal_mult_ "Use_Thermal_Multiplicities"</tt> is
+   * `true`.
    */
   /**
-   * \see_key{key_MS_add_radial_velocity_}
+   * \see_key{key_MS_strange_chem_pot_}
    */
-  inline static const Key<double> modi_sphere_addRadialVelocity{
-      {"Modi", "Sphere", "Add_Radial_Velocity"}, -1.0, {"1.0"}};
+  inline static const Key<double> modi_sphere_strangeChemicalPotential{
+      {"Modi", "Sphere", "Strange_Chemical_Potential"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
+   * \optional_key{key_MS_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
+   *
+   * If this option is set to `true` then <tt>\ref key_MS_init_mult_
+   * "Init_Multiplicities"</tt> are ignored and the system is initialized with
+   * all particle species of the particle table that belong to the hadron gas
+   * equation of state, see HadronGasEos::is_eos_particle(). The multiplicities
+   * are sampled from Poisson distributions \f$\mathrm{Poi}(n_i V)\f$, where
+   * \f$n_i\f$ are the grand-canonical thermal densities of the corresponding
+   * species and \f$V\f$ is the system volume. This option simulates the
+   * grand-canonical ensemble, where the number of particles is not fixed from
+   * event to event.
+   */
+  /**
+   * \see_key{key_MS_use_thermal_mult_}
+   */
+  inline static const Key<bool> modi_sphere_useThermalMultiplicities{
+      {"Modi", "Sphere", "Use_Thermal_Multiplicities"}, false, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3381,18 +3613,9 @@ struct InputKeys {
    *
    * The `Jet` section within the `Sphere` one is used to put a single high
    * energy particle (a "jet") in the center of the system, on an outbound
-   * trajectory along the x-axis; if no PDG is specified no jet is produced.
-   *
-   * \optional_key_no_line{key_MS_jet_jet_pdg_,Jet_PDG,int,no jet}
-   *
-   * The type of particle to be used as a jet, as given by its PDG code;
-   * if none is provided no jet is initialized.
+   * trajectory along the x-axis. If no PDG code is specified, but the section
+   * is given, an error about the missing key is raised.
    */
-  /**
-   * \see_key{key_MS_jet_jet_pdg_}
-   */
-  inline static const Key<PdgCode> modi_sphere_jet_jetPdg{
-      {"Modi", "Sphere", "Jet", "Jet_PDG"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3407,8 +3630,40 @@ struct InputKeys {
       {"Modi", "Sphere", "Jet", "Jet_Momentum"}, 20.0, {"1.0"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
+   * \required_key_no_line{key_MS_jet_jet_pdg_,Jet_PDG,int}
+   *
+   * The type of particle to be used as a jet, as given by its PDG code.
+   */
+  /**
+   * \see_key{key_MS_jet_jet_pdg_}
+   */
+  inline static const Key<PdgCode> modi_sphere_jet_jetPdg{
+      {"Modi", "Sphere", "Jet", "Jet_PDG"}, {"1.0"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key_no_line{key_MB_initial_condition_,Initial_Condition,string}
+   * <hr>
+   * ### Mandatory keys
+   */
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_box
+   * \required_key_no_line{key_MB_init_mult_,Init_Multiplicities,map<int\,int>}
+   *
+   * See &nbsp;
+   * <tt>\ref key_MS_init_mult_ "Sphere: Init_Multiplicities"</tt>.
+   */
+  /**
+   * \see_key{key_MB_init_mult_}
+   */
+  inline static const Key<std::map<PdgCode, int>>
+      modi_box_initialMultiplicities{{"Modi", "Box", "Init_Multiplicities"},
+                                     {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_box
+   * \required_key{key_MB_initial_condition_,Initial_Condition,string}
    *
    * Controls initial momentum distribution of particles.
    * - `"peaked momenta"` &rarr; All particles have momentum \f$p=3\,T\f$,
@@ -3440,18 +3695,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key{key_MB_temperature_,Temperature,double}
-   *
-   * Temperature \unit{in GeV} of the box.
-   */
-  /**
-   * \see_key{key_MB_temperature_}
-   */
-  inline static const Key<double> modi_box_temperature{
-      {"Modi", "Box", "Temperature"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_box
    * \required_key{key_MB_start_time_,Start_Time,double}
    *
    * Starting time of the simulation \unit{in fm}. All particles in the box are
@@ -3465,91 +3708,25 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_equilibration_time_,Equilibration_Time,double, -1.0}
+   * \required_key{key_MB_temperature_,Temperature,double}
    *
-   * Time \unit{in fm} after which the output of the box is written out. The
-   * first time however will be printed. This is useful if one wants to simulate
-   * boxes for very long times and knows at which time the box reaches its
-   * thermal and chemical equilibrium. The default set to -1 is meaning that
-   * output is written from beginning on, if this key is not given.
+   * Temperature \unit{in GeV} of the box.
    */
   /**
-   * \see_key{key_MB_equilibration_time_}
+   * \see_key{key_MB_temperature_}
    */
-  inline static const Key<double> modi_box_equilibrationTime{
-      {"Modi", "Box", "Equilibration_Time"}, -1.0, {"1.0"}};
+  inline static const Key<double> modi_box_temperature{
+      {"Modi", "Box", "Temperature"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key{key_MB_init_mult_,Init_Multiplicities,map<int\,int>}
-   *
-   * See &nbsp;
-   * <tt>\ref key_MS_init_mult_ "Sphere: Init_Multiplicities"</tt>.
+   * <hr>
+   * ### Optional keys
    */
-  /**
-   * \see_key{key_MB_init_mult_}
-   */
-  inline static const Key<std::map<PdgCode, int>>
-      modi_box_initialMultiplicities{{"Modi", "Box", "Init_Multiplicities"},
-                                     {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
-   *
-   * See &nbsp;
-   * <tt>\ref key_MS_use_thermal_mult_
-   * "Sphere: Use_Thermal_Multiplicities"</tt>.
-   */
-  /**
-   * \see_key{key_MB_use_thermal_mult_}
-   */
-  inline static const Key<bool> modi_box_useThermalMultiplicities{
-      {"Modi", "Box", "Use_Thermal_Multiplicities"}, false, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_use_bar_chem_pot_,Baryon_Chemical_Potential,double,0.0}
-   *
-   * See &nbsp;
-   * <tt>\ref key_MS_use_bar_chem_pot_ "Sphere: Baryon_Chemical_Potential"</tt>.
-   */
-  /**
-   * \see_key{key_MB_use_bar_chem_pot_}
-   */
-  inline static const Key<double> modi_box_baryonChemicalPotential{
-      {"Modi", "Box", "Baryon_Chemical_Potential"}, 0.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
-   *
-   * See &nbsp;
-   * <tt>\ref key_MS_strange_chem_pot_
-   * "Sphere: Strange_Chemical_Potential"</tt>.
-   */
-  /**
-   * \see_key{key_MB_strange_chem_pot_}
-   */
-  inline static const Key<double> modi_box_strangeChemicalPotential{
-      {"Modi", "Box", "Strange_Chemical_Potential"}, 0.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_charge_chem_pot_,Charge_Chemical_Potential,bool,false}
-   *
-   * See &nbsp;
-   * <tt>\ref key_MS_charge_chem_pot_ "Sphere: Charge_Chemical_Potential"</tt>.
-   */
-  /**
-   * \see_key{key_MB_charge_chem_pot_}
-   */
-  inline static const Key<double> modi_box_chargeChemicalPotential{
-      {"Modi", "Box", "Charge_Chemical_Potential"}, 0.0, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_account_res_widths_,Account_Resonance_Widths,bool,true}
+   * \optional_key_no_line{key_MB_account_res_widths_,Account_Resonance_Widths,bool,true}
    *
    * See &nbsp;
    * <tt>\ref key_MS_account_res_widths_
@@ -3572,23 +3749,85 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
+   * \optional_key{key_MB_use_bar_chem_pot_,Baryon_Chemical_Potential,double,0.0}
+   *
+   * See &nbsp;
+   * <tt>\ref key_MS_use_bar_chem_pot_ "Sphere: Baryon_Chemical_Potential"</tt>.
+   */
+  /**
+   * \see_key{key_MB_use_bar_chem_pot_}
+   */
+  inline static const Key<double> modi_box_baryonChemicalPotential{
+      {"Modi", "Box", "Baryon_Chemical_Potential"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_box
+   * \optional_key{key_MB_charge_chem_pot_,Charge_Chemical_Potential,bool,false}
+   *
+   * See &nbsp;
+   * <tt>\ref key_MS_charge_chem_pot_ "Sphere: Charge_Chemical_Potential"</tt>.
+   */
+  /**
+   * \see_key{key_MB_charge_chem_pot_}
+   */
+  inline static const Key<double> modi_box_chargeChemicalPotential{
+      {"Modi", "Box", "Charge_Chemical_Potential"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_box
+   * \optional_key{key_MB_equilibration_time_,Equilibration_Time,double, -1.0}
+   *
+   * Time \unit{in fm} after which the output of the box is written out. The
+   * first time however will be printed. This is useful if one wants to simulate
+   * boxes for very long times and knows at which time the box reaches its
+   * thermal and chemical equilibrium. The default set to -1 is meaning that
+   * output is written from beginning on, if this key is not given.
+   */
+  /**
+   * \see_key{key_MB_equilibration_time_}
+   */
+  inline static const Key<double> modi_box_equilibrationTime{
+      {"Modi", "Box", "Equilibration_Time"}, -1.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_box
+   * \optional_key{key_MB_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
+   *
+   * See &nbsp;
+   * <tt>\ref key_MS_strange_chem_pot_
+   * "Sphere: Strange_Chemical_Potential"</tt>.
+   */
+  /**
+   * \see_key{key_MB_strange_chem_pot_}
+   */
+  inline static const Key<double> modi_box_strangeChemicalPotential{
+      {"Modi", "Box", "Strange_Chemical_Potential"}, 0.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_box
+   * \optional_key{key_MB_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
+   *
+   * See &nbsp;
+   * <tt>\ref key_MS_use_thermal_mult_
+   * "Sphere: Use_Thermal_Multiplicities"</tt>.
+   */
+  /**
+   * \see_key{key_MB_use_thermal_mult_}
+   */
+  inline static const Key<bool> modi_box_useThermalMultiplicities{
+      {"Modi", "Box", "Use_Thermal_Multiplicities"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_box
    * <hr>
    * #### Specifying jets
    *
    * The `Jet` section can be specified in the `Box` section with the same
    * meaning it has for the `Sphere` modus. It is namely possible to put a
    * jet in the center of the box, on a outbound trajectory along the x-axis.
-   *
-   * \optional_key_no_line{key_MB_jet_jet_pdg_,Jet_PDG,int,no jet}
-   *
-   * See &nbsp;
-   * <tt>\ref key_MS_jet_jet_pdg_ "Sphere: Jet: Jet_PDG"</tt>.
+   * Also here, if no PDG code is specified, but the section is given, an error
+   * about the missing key is raised.
    */
-  /**
-   * \see_key{key_MB_jet_jet_pdg_}
-   */
-  inline static const Key<PdgCode> modi_box_jet_jetPdg{
-      {"Modi", "Box", "Jet", "Jet_PDG"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -3602,6 +3841,19 @@ struct InputKeys {
    */
   inline static const Key<double> modi_box_jet_jetMomentum{
       {"Modi", "Box", "Jet", "Jet_Momentum"}, 20.0, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_box
+   * \required_key_no_line{key_MB_jet_jet_pdg_,Jet_PDG,int}
+   *
+   * See &nbsp;
+   * <tt>\ref key_MS_jet_jet_pdg_ "Sphere: Jet: Jet_PDG"</tt>.
+   */
+  /**
+   * \see_key{key_MB_jet_jet_pdg_}
+   */
+  inline static const Key<PdgCode> modi_box_jet_jetPdg{
+      {"Modi", "Box", "Jet", "Jet_PDG"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
@@ -3647,7 +3899,7 @@ struct InputKeys {
    * \required_key{key_MLB_file_dir_,File_Directory,string}
    *
    * See &nbsp;
-   * <tt>\ref key_ML_file_dir_ "Box: File_Directory"</tt>.
+   * <tt>\ref key_ML_file_dir_ "List: File_Directory"</tt>.
    */
   /**
    * \see_key{key_MLB_file_dir_}
@@ -3660,26 +3912,13 @@ struct InputKeys {
    * \required_key{key_MLB_file_prefix_,File_Prefix,string}
    *
    * See &nbsp;
-   * <tt>\ref key_ML_file_prefix_ "Box: File_Prefix"</tt>.
+   * <tt>\ref key_ML_file_prefix_ "List: File_Prefix"</tt>.
    */
   /**
    * \see_key{key_MLB_file_prefix_}
    */
   inline static const Key<std::string> modi_listBox_filePrefix{
       {"Modi", "ListBox", "File_Prefix"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_listbox
-   * \required_key{key_MLB_shift_id_,Shift_Id,int}
-   *
-   * See &nbsp;
-   * <tt>\ref key_ML_shift_id_ "Box: Shift_Id"</tt>.
-   */
-  /**
-   * \see_key{key_MLB_shift_id_}
-   */
-  inline static const Key<int> modi_listBox_shiftId{
-      {"Modi", "ListBox", "Shift_Id"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -3695,11 +3934,42 @@ struct InputKeys {
       {"Modi", "ListBox", "Length"}, {"1.0"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_modi_listbox
+   * \required_key{key_MLB_shift_id_,Shift_Id,int}
+   *
+   * See &nbsp;
+   * <tt>\ref key_ML_shift_id_ "List: Shift_Id"</tt>.
+   */
+  /**
+   * \see_key{key_MLB_shift_id_}
+   */
+  inline static const Key<int> modi_listBox_shiftId{
+      {"Modi", "ListBox", "Shift_Id"}, {"1.0"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_output
    *
    * ## General output configuration parameters
    *
-   * \optional_key_no_line{key_output_out_interval_,Output_Interval,double,
+   * \optional_key_no_line{key_output_density_type_,Density_Type,string,"none"}
+   *
+   * Determines which kind of density is printed into the headers of the
+   * collision files. Possible valuesare:
+   * - `"hadron"` &rarr; Total hadronic density
+   * - `"baryon"` &rarr; Net baryon density
+   * - `"baryonic isospin"` &rarr; Baryonic isospin density
+   * - `"pion"` &rarr; Pion density
+   * - `"none"` &rarr; Do not calculate density, print 0.0
+   */
+  /**
+   * \see_key{key_output_density_type_}
+   */
+  inline static const Key<std::string> output_densityType{
+      {"Output", "Density_Type"}, "none", {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key{key_output_out_interval_,Output_Interval,double,
    * \ref key_gen_end_time_ "End_Time"}
    *
    * Defines the period of intermediate output of the status of the simulated
@@ -3733,24 +4003,6 @@ struct InputKeys {
    */
   inline static const Key<std::vector<double>> output_outputTimes{
       {"Output", "Output_Times"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
-   * \optional_key{key_output_density_type_,Density_Type,string,"none"}
-   *
-   * Determines which kind of density is printed into the headers of the
-   * collision files. Possible valuesare:
-   * - `"hadron"` &rarr; Total hadronic density
-   * - `"baryon"` &rarr; Net baryon density
-   * - `"baryonic isospin"` &rarr; Baryonic isospin density
-   * - `"pion"` &rarr; Pion density
-   * - `"none"` &rarr; Do not calculate density, print 0.0
-   */
-  /**
-   * \see_key{key_output_density_type_}
-   */
-  inline static const Key<std::string> output_densityType{
-      {"Output", "Density_Type"}, "none", {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -3943,6 +4195,33 @@ struct InputKeys {
    * &rArr; Only `Oscar1999`, `Oscar2013`, `Binary`, `ROOT` and `ASCII` (special
    * ASCII IC, see \ref doxypage_output_initial_conditions) formats.
    *
+   * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
+   *
+   * &rArr; Incompatible with `Oscar1999`, `ROOT` and `ASCII` formats.
+   * - `true` &rarr; Print extended information for each particle
+   * - `false` &rarr; Regular output for each particle
+   */
+  /**
+   * \see_key{key_output_IC_extended_}
+   */
+  inline static const Key<bool> output_initialConditions_extended{
+      {"Output", "Initial_Conditions", "Extended"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_IC_lower_bound_,Lower_Bound,double,0.5}
+   *
+   * Lower bound \unit{in fm} for the IC proper time if
+   * <tt>\ref key_output_IC_proper_time_ "Proper_Time"</tt> is not provided.
+   */
+  /**
+   * \see_key{key_output_IC_lower_bound_}
+   */
+  inline static const Key<double> output_initialConditions_lowerBound{
+      {"Output", "Initial_Conditions", "Lower_Bound"}, 0.5, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_IC_proper_time_,Proper_Time,double,
    * </tt>\f$f(t_{np})\f$<tt>}
    *
@@ -3963,16 +4242,19 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_lower_bound_,Lower_Bound,double,0.5}
+   * \optional_key_no_line{key_output_IC_pt_cut_,pT_Cut,double,
+   * </tt>No cut is done<tt>}
    *
-   * Lower bound \unit{in fm} for the IC proper time if
-   * <tt>\ref key_output_IC_proper_time_ "Proper_Time"</tt> is not provided.
+   * If set, employ a transverse momentum cut for particles contributing to the
+   * initial conditions for hydrodynamics. A positive value \unit{in GeV} is
+   * expected. Only particles characterized by
+   * \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed to the output file.
    */
   /**
-   * \see_key{key_output_IC_lower_bound_}
+   * \see_key{key_output_IC_pt_cut_}
    */
-  inline static const Key<double> output_initialConditions_lowerBound{
-      {"Output", "Initial_Conditions", "Lower_Bound"}, 0.5, {"1.0"}};
+  inline static const Key<double> output_initialConditions_pTCut{
+      {"Output", "Initial_Conditions", "pT_Cut"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -3993,36 +4275,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_pt_cut_,pT_Cut,double,
-   * </tt>No cut is done<tt>}
-   *
-   * If set, employ a transverse momentum cut for particles contributing to the
-   * initial conditions for hydrodynamics. A positive value \unit{in GeV} is
-   * expected. Only particles characterized by
-   * \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed to the output file.
-   */
-  /**
-   * \see_key{key_output_IC_pt_cut_}
-   */
-  inline static const Key<double> output_initialConditions_pTCut{
-      {"Output", "Initial_Conditions", "pT_Cut"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
-   *
-   * &rArr; Incompatible with `Oscar1999`, `ROOT` and `ASCII` formats.
-   * - `true` &rarr; Print extended information for each particle
-   * - `false` &rarr; Regular output for each particle
-   */
-  /**
-   * \see_key{key_output_IC_extended_}
-   */
-  inline static const Key<bool> output_initialConditions_extended{
-      {"Output", "Initial_Conditions", "Extended"}, false, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
    * <hr> \anchor input_output_rivet_
    * ### &diams; Rivet
    * &rArr; Only `YODA` format (see \ref doxypage_output_rivet
@@ -4031,20 +4283,6 @@ struct InputKeys {
    * \note In the following, <b>no default</b> means that, if the key is
    *       omitted, Rivet default behavior will be used.
    *
-   * \optional_key_no_line{key_output_rivet_paths_,Paths,list of strings,
-   * </tt><b>no default</b><tt>}
-   *
-   * This key specifies the directories that Rivet will search for analyses
-   * and data files related to the analyses.
-   */
-  /**
-   * \see_key{key_output_rivet_paths_}
-   */
-  inline static const Key<std::vector<std::string>> output_rivet_paths{
-      {"Output", "Rivet", "Paths"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_analyses_,Analyses,list of strings,
    * </tt><b>no default</b><tt>}
    *
@@ -4059,17 +4297,30 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_rivet_preloads_,Preloads,list of strings,
-   * </tt><b>no default</b><tt>}
+   * \optional_key_no_line{key_output_rivet_cross_sections_,Cross_Section,
+   * list of two doubles,</tt><b>no default</b><tt>}
    *
-   * Specify data files to read into Rivet (e.g., centrality calibrations) at
-   * start-up.
+   * Set the cross-section \unit{in pb}.
    */
   /**
-   * \see_key{key_output_rivet_preloads_}
+   * \see_key{key_output_rivet_cross_sections_}
    */
-  inline static const Key<std::vector<std::string>> output_rivet_preloads{
-      {"Output", "Rivet", "Preloads"}, {"1.0"}};
+  inline static const Key<std::array<double, 2>> output_rivet_crossSection{
+      {"Output", "Rivet", "Cross_Section"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_rivet_ignore_beams_,Ignore_Beams,bool,true}
+   *
+   * Ask Rivet to not validate beams before running analyses. This is needed if
+   * you use the <tt>\ref key_MC_fermi_motion_ "Fermi_Motion"</tt> option that
+   * disrupts the collision energy event-by-event.
+   */
+  /**
+   * \see_key{key_output_rivet_ignore_beams_}
+   */
+  inline static const Key<bool> output_rivet_ignoreBeams{
+      {"Output", "Rivet", "Ignore_Beams"}, true, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4088,30 +4339,31 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_rivet_ignore_beams_,Ignore_Beams,bool,true}
+   * \optional_key_no_line{key_output_rivet_paths_,Paths,list of strings,
+   * </tt><b>no default</b><tt>}
    *
-   * Ask Rivet to not validate beams before running analyses. This is needed if
-   * you use the <tt>\ref key_MC_fermi_motion_ "Fermi_Motion"</tt> option that
-   * disrupts the collision energy event-by-event.
+   * This key specifies the directories that Rivet will search for analyses
+   * and data files related to the analyses.
    */
   /**
-   * \see_key{key_output_rivet_ignore_beams_}
+   * \see_key{key_output_rivet_paths_}
    */
-  inline static const Key<bool> output_rivet_ignoreBeams{
-      {"Output", "Rivet", "Ignore_Beams"}, true, {"1.0"}};
+  inline static const Key<std::vector<std::string>> output_rivet_paths{
+      {"Output", "Rivet", "Paths"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_rivet_cross_sections_,Cross_Section,
-   * list of two doubles,</tt><b>no default</b><tt>}
+   * \optional_key_no_line{key_output_rivet_preloads_,Preloads,list of strings,
+   * </tt><b>no default</b><tt>}
    *
-   * Set the cross-section \unit{in pb}.
+   * Specify data files to read into Rivet (e.g., centrality calibrations) at
+   * start-up.
    */
   /**
-   * \see_key{key_output_rivet_cross_sections_}
+   * \see_key{key_output_rivet_preloads_}
    */
-  inline static const Key<std::array<double, 2>> output_rivet_crossSection{
-      {"Output", "Rivet", "Cross_Section"}, {"1.0"}};
+  inline static const Key<std::vector<std::string>> output_rivet_preloads{
+      {"Output", "Rivet", "Preloads"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4120,6 +4372,47 @@ struct InputKeys {
    *
    * Some operations about weights can be customized in the `Weights` section.
    *
+   * \optional_key_no_line{key_output_rivet_weights_cap_,Cap,double,
+   * </tt><b>no default</b><tt>}
+   *
+   * Cap weights to this value.
+   */
+  /**
+   * \see_key{key_output_rivet_weights_cap_}
+   */
+  inline static const Key<double> output_rivet_weights_cap{
+      {"Output", "Rivet", "Weights", "Cap"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_rivet_weights_deselect_,Deselect,
+   * list of strings, </tt><b>no default</b><tt>}
+   *
+   * De-select these weights for processing.
+   */
+  /**
+   * \see_key{key_output_rivet_weights_deselect_}
+   */
+  inline static const Key<std::vector<std::string>>
+      output_rivet_weights_deselect{{"Output", "Rivet", "Weights", "Deselect"},
+                                    {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_rivet_weights_nlo_smearing_,NLO_Smearing,
+   * double, </tt><b>no default</b><tt>}
+   *
+   * Smearing histogram binning by given fraction of bin widths to avoid NLO
+   * counter events to flow into neighboring bin.
+   */
+  /**
+   * \see_key{key_output_rivet_weights_nlo_smearing_}
+   */
+  inline static const Key<double> output_rivet_weights_nloSmearing{
+      {"Output", "Rivet", "Weights", "NLO_Smearing"}, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_no_multi_,No_Multi,bool,
    * </tt><b>no default</b><tt>}
    *
@@ -4159,47 +4452,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_rivet_weights_deselect_,Deselect,
-   * list of strings, </tt><b>no default</b><tt>}
-   *
-   * De-select these weights for processing.
-   */
-  /**
-   * \see_key{key_output_rivet_weights_deselect_}
-   */
-  inline static const Key<std::vector<std::string>>
-      output_rivet_weights_deselect{{"Output", "Rivet", "Weights", "Deselect"},
-                                    {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_rivet_weights_nlo_smearing_,NLO_Smearing,
-   * double, </tt><b>no default</b><tt>}
-   *
-   * Smearing histogram binning by given fraction of bin widths to avoid NLO
-   * counter events to flow into neighboring bin.
-   */
-  /**
-   * \see_key{key_output_rivet_weights_nlo_smearing_}
-   */
-  inline static const Key<double> output_rivet_weights_nloSmearing{
-      {"Output", "Rivet", "Weights", "NLO_Smearing"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_rivet_weights_cap_,Cap,double,
-   * </tt><b>no default</b><tt>}
-   *
-   * Cap weights to this value.
-   */
-  /**
-   * \see_key{key_output_rivet_weights_cap_}
-   */
-  inline static const Key<double> output_rivet_weights_cap{
-      {"Output", "Rivet", "Weights", "Cap"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
    * <hr>
    * ### &diams; Coulomb
    * &rArr; Only `VTK` format.
@@ -4228,21 +4480,34 @@ struct InputKeys {
    * <b>About 3 and 4:</b> See \ref doxypage_output_thermodyn for
    * further information.
    *
-   * \optional_key_no_line{key_output_thermo_type_,Type,string,"baryon"}
+   * \optional_key_no_line{key_output_thermo_only_part_,Only_Participants,bool,false}
    *
-   * Particle type taken into consideration, one among
-   * - `"hadron"`
-   * - `"baryon"` (corresponds to "net baryon")
-   * - `"baryonic isospin"`
-   * - `"pion"`
-   * - `"none"`
-   * - `"total isospin"`
+   * If set to `true`, only participants are included in the computation of the
+   * energy momentum tensor and of the Eckart currents. In this context, a
+   * hadron is considered as a participant if it had at least one collision.
+   * When using \ref doxypage_input_conf_potentials "Potentials" this option
+   * must be either left unset or set to `false`. The reason behind this
+   * limitation is that in this case hadrons can influence the evolution of the
+   * system even without collisions.
    */
   /**
-   * \see_key{key_output_thermo_type_}
+   * \see_key{key_output_thermo_only_part_}
    */
-  inline static const Key<DensityType> output_thermodynamics_type{
-      {"Output", "Thermodynamics", "Type"}, DensityType::Baryon, {"1.0"}};
+  inline static const Key<bool> output_thermodynamics_onlyParticipants{
+      {"Output", "Thermodynamics", "Only_Participants"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_thermo_position_,Position,
+   * list of 3 doubles,[0.0\, 0.0\, 0.0]}
+   *
+   * Point at which thermodynamic quantities are computed (\unit{in fm}).
+   */
+  /**
+   * \see_key{key_output_thermo_position_}
+   */
+  inline static const Key<std::array<double, 3>> output_thermodynamics_position{
+      {"Output", "Thermodynamics", "Position"}, {{0.0, 0.0, 0.0}}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4271,19 +4536,6 @@ struct InputKeys {
   inline static const Key<std::set<ThermodynamicQuantity>>
       output_thermodynamics_quantites{
           {"Output", "Thermodynamics", "Quantities"}, {}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_thermo_position_,Position,
-   * list of 3 doubles,[0.0\, 0.0\, 0.0]}
-   *
-   * Point at which thermodynamic quantities are computed (\unit{in fm}).
-   */
-  /**
-   * \see_key{key_output_thermo_position_}
-   */
-  inline static const Key<std::array<double, 3>> output_thermodynamics_position{
-      {"Output", "Thermodynamics", "Position"}, {{0.0, 0.0, 0.0}}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4324,39 +4576,27 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_thermo_only_part_,Only_Participants,bool,false}
+   * \optional_key_no_line{key_output_thermo_type_,Type,string,"baryon"}
    *
-   * If set to `true`, only participants are included in the computation of the
-   * energy momentum tensor and of the Eckart currents. In this context, a
-   * hadron is considered as a participant if it had at least one collision.
-   * When using \ref doxypage_input_conf_potentials "Potentials" this option
-   * must be either left unset or set to `false`. The reason behind this
-   * limitation is that in this case hadrons can influence the evolution of the
-   * system even without collisions.
+   * Particle type taken into consideration, one among
+   * - `"hadron"`
+   * - `"baryon"` (corresponds to "net baryon")
+   * - `"baryonic isospin"`
+   * - `"pion"`
+   * - `"none"`
+   * - `"total isospin"`
    */
   /**
-   * \see_key{key_output_thermo_only_part_}
+   * \see_key{key_output_thermo_type_}
    */
-  inline static const Key<bool> output_thermodynamics_onlyParticipants{
-      {"Output", "Thermodynamics", "Only_Participants"}, false, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_lattice
-   * \optional_key{key_lattice_sizes_,Sizes,list of 3 doubles,
-   * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
-   *
-   * Sizes of lattice in x, y, z directions \unit{in fm}.
-   */
-  /**
-   * \see_key{key_lattice_sizes_}
-   */
-  inline static const Key<std::array<double, 3>> lattice_sizes{
-      {"Lattice", "Sizes"}, {"1.0"}};
+  inline static const Key<DensityType> output_thermodynamics_type{
+      {"Output", "Thermodynamics", "Type"}, DensityType::Baryon, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_cell_number_,Cell_Number,list of 3 ints,
    * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
+   * (see \ref doxypage_input_lattice_default_parameters)
    *
    * Number of cells in x, y, z directions.
    */
@@ -4370,8 +4610,14 @@ struct InputKeys {
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_origin_,Origin,list of 3 doubles,
    * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
+   * (see \ref doxypage_input_lattice_default_parameters)
    *
-   * Coordinates of the left, down, near corner of the lattice \unit{in fm}.
+   * The lattice covers a cuboid region whose vertices \f$V_n\f$ are uniquely
+   * identified by the origin coordinates \f$(O_x, O_y, O_z)\f$ and the lattice
+   * sizes \f$(L_x, L_y, L_z)\f$ as follows:
+   * \f[ V_n = (O_x+i\cdot L_x, O_y+j\cdot L_y, O_z+k\cdot L_z) \f] where
+   * \f$(i,j,k)\in\{0,1\}\times\{0,1\}\times\{0,1\}\f$. Coordinates of the
+   * lattice are given \unit{in fm}.
    */
   /**
    * \see_key{key_lattice_origin_}
@@ -4382,7 +4628,8 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_periodic_,Periodic,bool,
-   * (\ref key_gen_modus_ "Modus" == "Box")}
+   * (\ref key_gen_modus_ "Modus" == "Box"
+   * || \ref key_gen_modus_ "Modus" == "ListBox")}
    *
    * Use periodic continuation or not. With periodic continuation
    * \f$(x,y,z) + (i\cdot L_x,\,j\cdot L_y,\,k\cdot L_z) \equiv (x,y,z)\f$
@@ -4407,6 +4654,20 @@ struct InputKeys {
    */
   inline static const Key<bool> lattice_potentialsAffectThreshold{
       {"Lattice", "Potentials_Affect_Thresholds"}, false, {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_lattice
+   * \optional_key{key_lattice_sizes_,Sizes,list of 3 doubles,
+   * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
+   * (see \ref doxypage_input_lattice_default_parameters)
+   *
+   * Sizes of lattice in x, y, z directions \unit{in fm}.
+   */
+  /**
+   * \see_key{key_lattice_sizes_}
+   */
+  inline static const Key<std::array<double, 3>> lattice_sizes{
+      {"Lattice", "Sizes"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
@@ -4447,18 +4708,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_symmetry
-   * \required_key{key_potentials_symmetry_s_pot_,S_Pot,double}
-   *
-   * Parameter \f$S_{pot}\f$ of symmetry potential \unit{in MeV}.
-   */
-  /**
-   * \see_key{key_potentials_symmetry_s_pot_}
-   */
-  inline static const Key<double> potentials_symmetry_sPot{
-      {"Potentials", "Symmetry", "S_Pot"}, {"1.0"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_pot_symmetry
    * \optional_key{key_potentials_symmetry_gamma_,gamma,double,
    * </tt>do not consider last term in \f$S(\rho_B)\f$<tt>}
    *
@@ -4473,16 +4722,16 @@ struct InputKeys {
       {"Potentials", "Symmetry", "gamma"}, {"1.0"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_pot_VDF
-   * \required_key{key_potentials_vdf_sat_rhoB_,Sat_rhoB,double}
+   * \page doxypage_input_conf_pot_symmetry
+   * \required_key{key_potentials_symmetry_s_pot_,S_Pot,double}
    *
-   * The saturation density of nuclear matter \unit{in 1/fm³}.
+   * Parameter \f$S_{pot}\f$ of symmetry potential \unit{in MeV}.
    */
   /**
-   * \see_key{key_potentials_symmetry_gamma_}
+   * \see_key{key_potentials_symmetry_s_pot_}
    */
-  inline static const Key<double> potentials_vdf_satRhoB{
-      {"Potentials", "VDF", "Sat_rhoB"}, {"1.0"}};
+  inline static const Key<double> potentials_symmetry_sPot{
+      {"Potentials", "Symmetry", "S_Pot"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_VDF
@@ -4512,6 +4761,18 @@ struct InputKeys {
       {"Potentials", "VDF", "Powers"}, {"1.0"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_pot_VDF
+   * \required_key{key_potentials_vdf_sat_rhoB_,Sat_rhoB,double}
+   *
+   * The saturation density of nuclear matter \unit{in 1/fm³}.
+   */
+  /**
+   * \see_key{key_potentials_symmetry_gamma_}
+   */
+  inline static const Key<double> potentials_vdf_satRhoB{
+      {"Potentials", "VDF", "Sat_rhoB"}, {"1.0"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_pot_coulomb
    * \required_key{key_potentials_coulomb_r_cut_,R_Cut,double}
    *
@@ -4525,7 +4786,14 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \required_key{key_forced_therm_cell_number_,Cell_Number,list of 3 ints}
+   * <hr>
+   * ### Mandatory keys
+   */
+
+  /*!\Userguide
+   * \page doxypage_input_conf_forced_therm
+   * \required_key_no_line{key_forced_therm_cell_number_,Cell_Number,list of 3
+   * ints}
    *
    * Number of cells in each direction (x,y,z).
    */
@@ -4575,7 +4843,14 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \optional_key{key_forced_therm_algorithm_,Algorithm,string,"biased BF"}
+   * <hr>
+   * ### Optional keys
+   */
+
+  /*!\Userguide
+   * \page doxypage_input_conf_forced_therm
+   * \optional_key_no_line{key_forced_therm_algorithm_,Algorithm,string,"biased
+   * BF"}
    *
    * Algorithm applied to enforce thermalization, see
    * \iref{Oliinychenko:2016vkg} for more details.
@@ -4590,6 +4865,27 @@ struct InputKeys {
       forcedThermalization_algorithm{{"Forced_Thermalization", "Algorithm"},
                                      ThermalizationAlgorithm::BiasedBF,
                                      {"1.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_forced_therm
+   * \required_key{key_forced_therm_lattice_sizes_,Lattice_Sizes,list of 3
+   * doubles}
+   *
+   * The lattice is placed such that the center is [0.0,0.0,0.0].
+   * If one wants to have a central cell with center at [0.0,0.0,0.0] then
+   * number of cells should be odd (2k+1) in every direction.
+   *
+   * `Lattice_Sizes` is required for all modi, except the `"Box"` modus. In
+   * case of `"Box"` modus, the lattice is set up automatically to match the box
+   * size, and the user should not (and is not allowed to) specify it. Sizes are
+   * to be specified \unit{in fm}.
+   */
+  /**
+   * \see_key{key_forced_therm_lattice_sizes_}
+   */
+  inline static const Key<std::array<double, 3>>
+      forcedThermalization_latticeSizes{
+          {"Forced_Thermalization", "Lattice_Sizes"}, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -4613,27 +4909,6 @@ struct InputKeys {
   inline static const Key<bool> forcedThermalization_microcanonical{
       {"Forced_Thermalization", "Microcanonical"}, false, {"1.0"}};
 
-  /*!\Userguide
-   * \page doxypage_input_conf_forced_therm
-   * \required_key{key_forced_therm_lattice_sizes_,Lattice_Sizes,list of 3
-   * doubles}
-   *
-   * The lattice is placed such that the center is [0.0,0.0,0.0].
-   * If one wants to have a central cell with center at [0.0,0.0,0.0] then
-   * number of cells should be odd (2k+1) in every direction.
-   *
-   * `Lattice_Sizes` is required for all modi, except the `"Box"` modus. In
-   * case of `"Box"` modus, the lattice is set up automatically to match the box
-   * size, and the user should not (and is not allowed to) specify it. Sizes are
-   * to be specified \unit{in fm}.
-   */
-  /**
-   * \see_key{key_forced_therm_lattice_sizes_}
-   */
-  inline static const Key<std::array<double, 3>>
-      forcedThermalization_latticeSizes{
-          {"Forced_Thermalization", "Lattice_Sizes"}, {"1.0"}};
-
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
       std::reference_wrapper<const Key<bool>>,
@@ -4643,6 +4918,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<std::array<int, 3>>>,
       std::reference_wrapper<const Key<std::array<double, 2>>>,
       std::reference_wrapper<const Key<std::array<double, 3>>>,
+      std::reference_wrapper<const Key<std::pair<double, double>>>,
       std::reference_wrapper<const Key<std::vector<double>>>,
       std::reference_wrapper<const Key<std::vector<std::string>>>,
       std::reference_wrapper<const Key<std::set<ThermodynamicQuantity>>>,
@@ -4676,124 +4952,131 @@ struct InputKeys {
       std::cref(gen_endTime),
       std::cref(gen_modus),
       std::cref(gen_nevents),
-      std::cref(gen_minNonEmptyEnsembles_number),
-      std::cref(gen_minNonEmptyEnsembles_maximumEnsembles),
       std::cref(gen_randomseed),
+      std::cref(gen_minNonEmptyEnsembles_maximumEnsembles),
+      std::cref(gen_minNonEmptyEnsembles_number),
       std::cref(gen_deltaTime),
       std::cref(gen_derivativesMode),
-      std::cref(gen_fieldDerivativesMode),
+      std::cref(gen_smearingDiscreteWeight),
       std::cref(gen_ensembles),
       std::cref(gen_expansionRate),
+      std::cref(gen_fieldDerivativesMode),
+      std::cref(gen_smearingGaussCutoffInSigma),
+      std::cref(gen_smearingGaussianSigma),
       std::cref(gen_metricType),
       std::cref(gen_restFrameDensityDerivativeMode),
       std::cref(gen_smearingMode),
-      std::cref(gen_smearingGaussianSigma),
-      std::cref(gen_smearingGaussCutoffInSigma),
-      std::cref(gen_smearingTriangularRange),
-      std::cref(gen_smearingDiscreteWeight),
       std::cref(gen_testparticles),
       std::cref(gen_timeStepMode),
+      std::cref(gen_smearingTriangularRange),
       std::cref(gen_useGrid),
       std::cref(log_default),
-      std::cref(log_main),
-      std::cref(log_experiment),
       std::cref(log_box),
       std::cref(log_collider),
+      std::cref(log_yamlConfiguration),
+      std::cref(log_experiment),
+      std::cref(log_grandcanThermalizer),
+      std::cref(log_initialConditions),
+      std::cref(log_list),
+      std::cref(log_main),
+      std::cref(log_output),
       std::cref(log_sphere),
       std::cref(log_action),
-      std::cref(log_inputParser),
-      std::cref(log_particleType),
-      std::cref(log_findScatter),
       std::cref(log_clock),
+      std::cref(log_crossSections),
       std::cref(log_decayModes),
+      std::cref(log_density),
+      std::cref(log_distributions),
+      std::cref(log_findScatter),
+      std::cref(log_fpe),
+      std::cref(log_grid),
+      std::cref(log_hyperSurfaceCrossing),
+      std::cref(log_inputParser),
+      std::cref(log_lattice),
+      std::cref(log_nucleus),
+      std::cref(log_particleType),
+      std::cref(log_pauliBlocking),
+      std::cref(log_propagation),
+      std::cref(log_pythia),
       std::cref(log_resonances),
       std::cref(log_scatterAction),
-      std::cref(log_distributions),
-      std::cref(log_propagation),
-      std::cref(log_grid),
-      std::cref(log_list),
-      std::cref(log_nucleus),
-      std::cref(log_density),
-      std::cref(log_pauliBlocking),
-      std::cref(log_tmn),
-      std::cref(log_fpe),
-      std::cref(log_lattice),
-      std::cref(log_pythia),
-      std::cref(log_grandcanThermalizer),
-      std::cref(log_crossSections),
-      std::cref(log_output),
-      std::cref(log_hyperSurfaceCrossing),
-      std::cref(log_initialConditions),
       std::cref(log_scatterActionMulti),
-      std::cref(log_yamlConfiguration),
+      std::cref(log_tmn),
       std::cref(version),
-      std::cref(collTerm_twoToOne),
-      std::cref(collTerm_includedTwoToTwo),
-      std::cref(collTerm_multiParticleReactions),
-      std::cref(collTerm_forceDecaysAtEnd),
-      std::cref(collTerm_noCollisions),
-      std::cref(collTerm_nnbarTreatment),
-      std::cref(collTerm_useAQM),
-      std::cref(collTerm_resonanceLifetimeModifier),
-      std::cref(collTerm_stringsWithProbability),
+      std::cref(collTerm_additionalElasticCrossSection),
+      std::cref(collTerm_collisionCriterion),
+      std::cref(collTerm_crossSectionScaling),
       std::cref(collTerm_elasticCrossSection),
+      std::cref(collTerm_elasticNNCutoffSqrts),
+      std::cref(collTerm_fixedMinCellLength),
+      std::cref(collTerm_forceDecaysAtEnd),
+      std::cref(collTerm_includeDecaysAtTheEnd),
+      std::cref(collTerm_includedTwoToTwo),
       std::cref(collTerm_isotropic),
       std::cref(collTerm_maximumCrossSection),
-      std::cref(collTerm_fixedMinCellLength),
-      std::cref(collTerm_crossSectionScaling),
-      std::cref(collTerm_additionalElasticCrossSection),
-      std::cref(collTerm_includeDecaysAtTheEnd),
-      std::cref(collTerm_elasticNNCutoffSqrts),
-      std::cref(collTerm_strings),
-      std::cref(collTerm_collisionCriterion),
+      std::cref(collTerm_multiParticleReactions),
+      std::cref(collTerm_nnbarTreatment),
+      std::cref(collTerm_noCollisions),
       std::cref(collTerm_onlyWarnForHighProbability),
-      std::cref(collTerm_pauliBlocking_spatialAveragingRadius),
+      std::cref(collTerm_resonanceLifetimeModifier),
+      std::cref(collTerm_strings),
+      std::cref(collTerm_stringsWithProbability),
+      std::cref(collTerm_twoToOne),
+      std::cref(collTerm_useAQM),
       std::cref(collTerm_pauliBlocking_gaussianCutoff),
       std::cref(collTerm_pauliBlocking_momentumAveragingRadius),
-      std::cref(collTerm_stringParam_stringTension),
+      std::cref(collTerm_pauliBlocking_spatialAveragingRadius),
+      std::cref(collTerm_stringTrans_KNOffset),
+      std::cref(collTerm_stringTrans_pipiOffset),
+      std::cref(collTerm_stringTrans_lower),
+      std::cref(collTerm_stringTrans_rangeNN),
+      std::cref(collTerm_stringTrans_rangeNpi),
+      std::cref(collTerm_stringTrans_range_width),
+      std::cref(collTerm_stringParam_diquarkSuppression),
+      std::cref(collTerm_stringParam_formTimeFactor),
+      std::cref(collTerm_stringParam_formationTime),
       std::cref(collTerm_stringParam_gluonBeta),
       std::cref(collTerm_stringParam_gluonPMin),
+      std::cref(collTerm_stringParam_mDependentFormationTimes),
       std::cref(collTerm_stringParam_quarkAlpha),
       std::cref(collTerm_stringParam_quarkBeta),
-      std::cref(collTerm_stringParam_strangeSuppression),
-      std::cref(collTerm_stringParam_diquarkSuppression),
-      std::cref(collTerm_stringParam_sigmaPerp),
-      std::cref(collTerm_stringParam_stringZA),
-      std::cref(collTerm_stringParam_stringZB),
-      std::cref(collTerm_stringParam_separateFragmentBaryon),
-      std::cref(collTerm_stringParam_stringZALeading),
-      std::cref(collTerm_stringParam_stringZBLeading),
-      std::cref(collTerm_stringParam_stringSigmaT),
-      std::cref(collTerm_stringParam_formTimeFactor),
-      std::cref(collTerm_stringParam_powerParticleFormation),
-      std::cref(collTerm_stringParam_formationTime),
-      std::cref(collTerm_stringParam_mDependentFormationTimes),
-      std::cref(collTerm_stringParam_probabilityPToDUU),
       std::cref(collTerm_stringParam_popcornRate),
+      std::cref(collTerm_stringParam_powerParticleFormation),
+      std::cref(collTerm_stringParam_probabilityPToDUU),
+      std::cref(collTerm_stringParam_separateFragmentBaryon),
+      std::cref(collTerm_stringParam_sigmaPerp),
+      std::cref(collTerm_stringParam_strangeSuppression),
+      std::cref(collTerm_stringParam_stringSigmaT),
+      std::cref(collTerm_stringParam_stringTension),
+      std::cref(collTerm_stringParam_stringZA),
+      std::cref(collTerm_stringParam_stringZALeading),
+      std::cref(collTerm_stringParam_stringZB),
+      std::cref(collTerm_stringParam_stringZBLeading),
+      std::cref(collTerm_stringParam_useMonashTune),
       std::cref(collTerm_dileptons_decays),
-      std::cref(collTerm_photons_fractionalPhotons),
       std::cref(collTerm_photons_twoToTwoScatterings),
       std::cref(collTerm_photons_bremsstrahlung),
-      std::cref(modi_collider_sqrtSNN),
+      std::cref(collTerm_photons_fractionalPhotons),
       std::cref(modi_collider_eKin),
       std::cref(modi_collider_eTot),
       std::cref(modi_collider_pLab),
+      std::cref(modi_collider_sqrtSNN),
       std::cref(modi_collider_calculationFrame),
-      std::cref(modi_collider_fermiMotion),
       std::cref(modi_collider_collisionWithinNucleus),
+      std::cref(modi_collider_fermiMotion),
       std::cref(modi_collider_initialDistance),
-      std::cref(modi_collider_projectile_particles),
-      std::cref(modi_collider_target_particles),
       std::cref(modi_collider_projectile_diffusiveness),
       std::cref(modi_collider_target_diffusiveness),
+      std::cref(modi_collider_projectile_particles),
+      std::cref(modi_collider_target_particles),
       std::cref(modi_collider_projectile_radius),
       std::cref(modi_collider_target_radius),
       std::cref(modi_collider_projectile_saturationDensity),
       std::cref(modi_collider_target_saturationDensity),
-      std::cref(modi_collider_projectile_eTot),
-      std::cref(modi_collider_target_eTot),
       std::cref(modi_collider_projectile_eKin),
       std::cref(modi_collider_target_eKin),
+      std::cref(modi_collider_projectile_eTot),
+      std::cref(modi_collider_target_eTot),
       std::cref(modi_collider_projectile_pLab),
       std::cref(modi_collider_target_pLab),
       std::cref(modi_collider_projectile_custom_fileDirectory),
@@ -4804,63 +5087,63 @@ struct InputKeys {
       std::cref(modi_collider_target_deformed_automatic),
       std::cref(modi_collider_projectile_deformed_beta2),
       std::cref(modi_collider_target_deformed_beta2),
-      std::cref(modi_collider_projectile_deformed_gamma),
-      std::cref(modi_collider_target_deformed_gamma),
       std::cref(modi_collider_projectile_deformed_beta3),
       std::cref(modi_collider_target_deformed_beta3),
       std::cref(modi_collider_projectile_deformed_beta4),
       std::cref(modi_collider_target_deformed_beta4),
+      std::cref(modi_collider_projectile_deformed_gamma),
+      std::cref(modi_collider_target_deformed_gamma),
       std::cref(modi_collider_projectile_deformed_orientation_phi),
       std::cref(modi_collider_target_deformed_orientation_phi),
-      std::cref(modi_collider_projectile_deformed_orientation_theta),
-      std::cref(modi_collider_target_deformed_orientation_theta),
       std::cref(modi_collider_projectile_deformed_orientation_psi),
       std::cref(modi_collider_target_deformed_orientation_psi),
       std::cref(modi_collider_projectile_deformed_orientation_randomRotation),
       std::cref(modi_collider_target_deformed_orientation_randomRotation),
+      std::cref(modi_collider_projectile_deformed_orientation_theta),
+      std::cref(modi_collider_target_deformed_orientation_theta),
+      std::cref(modi_collider_impact_max),
       std::cref(modi_collider_impact_randomReactionPlane),
-      std::cref(modi_collider_impact_value),
+      std::cref(modi_collider_impact_range),
       std::cref(modi_collider_impact_sample),
+      std::cref(modi_collider_impact_value),
       std::cref(modi_collider_impact_values),
       std::cref(modi_collider_impact_yields),
-      std::cref(modi_collider_impact_range),
-      std::cref(modi_collider_impactMax),
-      std::cref(modi_sphere_radius),
-      std::cref(modi_sphere_temperature),
-      std::cref(modi_sphere_startTime),
       std::cref(modi_sphere_initialMultiplicities),
-      std::cref(modi_sphere_useThermalMultiplicities),
-      std::cref(modi_sphere_baryonChemicalPotential),
-      std::cref(modi_sphere_strangeChemicalPotential),
-      std::cref(modi_sphere_chargeChemicalPotential),
+      std::cref(modi_sphere_radius),
+      std::cref(modi_sphere_startTime),
+      std::cref(modi_sphere_temperature),
       std::cref(modi_sphere_accountResonanceWidths),
-      std::cref(modi_sphere_initialCondition),
       std::cref(modi_sphere_addRadialVelocity),
-      std::cref(modi_sphere_jet_jetPdg),
+      std::cref(modi_sphere_baryonChemicalPotential),
+      std::cref(modi_sphere_chargeChemicalPotential),
+      std::cref(modi_sphere_initialCondition),
+      std::cref(modi_sphere_strangeChemicalPotential),
+      std::cref(modi_sphere_useThermalMultiplicities),
       std::cref(modi_sphere_jet_jetMomentum),
+      std::cref(modi_sphere_jet_jetPdg),
+      std::cref(modi_box_initialMultiplicities),
       std::cref(modi_box_initialCondition),
       std::cref(modi_box_length),
-      std::cref(modi_box_temperature),
       std::cref(modi_box_startTime),
-      std::cref(modi_box_equilibrationTime),
-      std::cref(modi_box_initialMultiplicities),
-      std::cref(modi_box_useThermalMultiplicities),
-      std::cref(modi_box_baryonChemicalPotential),
-      std::cref(modi_box_strangeChemicalPotential),
-      std::cref(modi_box_chargeChemicalPotential),
+      std::cref(modi_box_temperature),
       std::cref(modi_box_accountResonanceWidths),
-      std::cref(modi_box_jet_jetPdg),
+      std::cref(modi_box_baryonChemicalPotential),
+      std::cref(modi_box_chargeChemicalPotential),
+      std::cref(modi_box_equilibrationTime),
+      std::cref(modi_box_strangeChemicalPotential),
+      std::cref(modi_box_useThermalMultiplicities),
       std::cref(modi_box_jet_jetMomentum),
+      std::cref(modi_box_jet_jetPdg),
       std::cref(modi_list_fileDirectory),
       std::cref(modi_list_filePrefix),
       std::cref(modi_list_shiftId),
       std::cref(modi_listBox_fileDirectory),
       std::cref(modi_listBox_filePrefix),
-      std::cref(modi_listBox_shiftId),
       std::cref(modi_listBox_length),
+      std::cref(modi_listBox_shiftId),
+      std::cref(output_densityType),
       std::cref(output_outputInterval),
       std::cref(output_outputTimes),
-      std::cref(output_densityType),
       std::cref(output_particles_format),
       std::cref(output_collisions_format),
       std::cref(output_dileptons_format),
@@ -4875,49 +5158,49 @@ struct InputKeys {
       std::cref(output_collisions_printStartEnd),
       std::cref(output_dileptons_extended),
       std::cref(output_photons_extended),
-      std::cref(output_initialConditions_properTime),
-      std::cref(output_initialConditions_lowerBound),
-      std::cref(output_initialConditions_rapidityCut),
-      std::cref(output_initialConditions_pTCut),
       std::cref(output_initialConditions_extended),
-      std::cref(output_rivet_paths),
+      std::cref(output_initialConditions_lowerBound),
+      std::cref(output_initialConditions_properTime),
+      std::cref(output_initialConditions_pTCut),
+      std::cref(output_initialConditions_rapidityCut),
       std::cref(output_rivet_analyses),
-      std::cref(output_rivet_preloads),
-      std::cref(output_rivet_logging),
-      std::cref(output_rivet_ignoreBeams),
       std::cref(output_rivet_crossSection),
+      std::cref(output_rivet_ignoreBeams),
+      std::cref(output_rivet_logging),
+      std::cref(output_rivet_paths),
+      std::cref(output_rivet_preloads),
+      std::cref(output_rivet_weights_cap),
+      std::cref(output_rivet_weights_deselect),
+      std::cref(output_rivet_weights_nloSmearing),
       std::cref(output_rivet_weights_noMulti),
       std::cref(output_rivet_weights_nominal),
       std::cref(output_rivet_weights_select),
-      std::cref(output_rivet_weights_deselect),
-      std::cref(output_rivet_weights_nloSmearing),
-      std::cref(output_rivet_weights_cap),
-      std::cref(output_thermodynamics_type),
-      std::cref(output_thermodynamics_quantites),
-      std::cref(output_thermodynamics_position),
-      std::cref(output_thermodynamics_smearing),
       std::cref(output_thermodynamics_onlyParticipants),
-      std::cref(lattice_sizes),
+      std::cref(output_thermodynamics_position),
+      std::cref(output_thermodynamics_quantites),
+      std::cref(output_thermodynamics_smearing),
+      std::cref(output_thermodynamics_type),
       std::cref(lattice_cellNumber),
       std::cref(lattice_origin),
       std::cref(lattice_periodic),
       std::cref(lattice_potentialsAffectThreshold),
+      std::cref(lattice_sizes),
       std::cref(potentials_skyrme_skyrmeA),
       std::cref(potentials_skyrme_skyrmeB),
       std::cref(potentials_skyrme_skyrmeTau),
-      std::cref(potentials_symmetry_sPot),
       std::cref(potentials_symmetry_gamma),
-      std::cref(potentials_vdf_satRhoB),
+      std::cref(potentials_symmetry_sPot),
       std::cref(potentials_vdf_coeffs),
       std::cref(potentials_vdf_powers),
+      std::cref(potentials_vdf_satRhoB),
       std::cref(potentials_coulomb_rCut),
       std::cref(forcedThermalization_cellNumber),
       std::cref(forcedThermalization_criticalEDensity),
       std::cref(forcedThermalization_startTime),
       std::cref(forcedThermalization_timestep),
       std::cref(forcedThermalization_algorithm),
-      std::cref(forcedThermalization_microcanonical),
-      std::cref(forcedThermalization_latticeSizes)};
+      std::cref(forcedThermalization_latticeSizes),
+      std::cref(forcedThermalization_microcanonical)};
 };
 
 /*!\Userguide
@@ -4980,7 +5263,7 @@ General:
 /*!\Userguide
  * \page doxypage_input_conf_ct_string_parameters
  * <hr>
- * ### Example of string paramters customization
+ * ### Example of string parameters customization
  *
  *\verbatim
  Collision_Term:
@@ -5505,7 +5788,7 @@ General:
              Jet_Momentum: 100.0
 \endverbatim
  *
- * \note
+ * \note\anchor modi_box_usage_remark
  * The box modus is most useful for infinite matter simulations with thermal and
  * chemical equilibration and detailed balance. Detailed balance can however not
  * be conserved if 3-body decays (or higher) are performed. To yield useful
@@ -5603,23 +5886,26 @@ General:
      Periodic: True
      Potentials_Affect_Thresholds: True
  \endverbatim
- * In case of `"Collider"`, `"Box"`, and `"Sphere"` <tt>\ref key_gen_modus_
- * "Modus"</tt> there is also an option to set up lattice automatically. For
- * example, for `"Collider"` modus
+ * A default lattice is also available for each modus. In this case the
+ * lattice is setup automatically with reasonable size, cell number and
+ * placement.
+ * See \ref doxypage_input_lattice_default_parameters for more details on the
+ * defaults. The default lattice is used if the `"Lattice"` section in the
+ * configuration is given without further content as shown in the following
+ * example.
  *\verbatim
  Lattice:
  \endverbatim
- * sets up a lattice that (heuristically) covers causally allowed particle
- * positions until the <tt>\ref key_gen_end_time_ "End_Time"</tt> of the
- * simulation. The lattice may also be automatically contracted in z direction
- * depending on the chosen way of density calculation.
  *
- * Another example for `"Box"` modus:
+ * It is also possible to explicity set some lattice parameters and use the
+ * default for the rest. See the following example for the `"Box"` modus:
  *\verbatim
  Lattice:
      Cell_Number: [20, 20, 20]
  \endverbatim
- * This sets up a periodic lattice that matches box sizes.
+ * As explicitly specified, there will be twenty cells for each direction.
+ * The origin and the sizes of the lattice are automatically set such
+ * that the lattice exactly covers the entire box.
  */
 
 /*!\Userguide

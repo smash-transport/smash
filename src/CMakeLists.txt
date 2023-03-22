@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2012-2022
+#    Copyright (c) 2012-2023
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -10,16 +10,6 @@
 include(CheckLibraryExists)
 include(AddCompilerFlag)
 include(FindPkgConfig)
-
-include(GetGitRevisionDescription)
-# The variable SMASH_VERSION is already set via the project() command, since we specify there a
-# VERSION option. Here check if .git information is available and increase verbosity
-git_describe(SMASH_VERSION_VERBOSE)
-if(SMASH_VERSION_VERBOSE)
-    set(SMASH_VERSION "${SMASH_VERSION_VERBOSE}")
-else()
-    set(SMASH_VERSION "${CMAKE_PROJECT_NAME}-${SMASH_VERSION}")
-endif()
 
 # Enable warnings for supported compilers only --> Here we know the compilers support the flag, do
 # not test!
@@ -31,8 +21,20 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
         set(CMAKE_CXX_FLAGS
             "${CMAKE_CXX_FLAGS} -Wlogical-op -Wnull-dereference -Wduplicated-cond -Wrestrict -Wduplicated-branches"
         )
+        # Needed for workaround about C++17 compatibility (bug in some GNU versions)
+        add_compile_definitions(GCC_COMPILER)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "14")
+            # Use of contracted mathematical expression like FMA (if the hardware supports them) are
+            # controlled by a flag whose default unfortunately varies among compilers and versions
+            # thereof. Since clang-14 changed the default from "off" to "on", we set here the value
+            # to "on" also for older versions. GNU default is "fast", but this seems to be similar
+            # to clang's "on" (which fuses in the same statement) than to clang's "fast" (which
+            # fuses across statements). Here we simply try to have the same behaviour across the
+            # supported compilers.
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffp-contract=on")
+        endif()
     endif()
     # Enable warnings about deprecated C functions
     option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C funtions in SMASH."
@@ -140,7 +142,7 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
 endif()
 
 # find Pythia
-find_package(Pythia 8.307 EXACT REQUIRED)
+find_package(Pythia 8.309 EXACT REQUIRED)
 if(Pythia_FOUND)
     # the BEFORE at the line below is due to
     # https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
@@ -192,6 +194,7 @@ set(smash_src
     bremsstrahlungaction.cc
     chemicalpotential.cc
     clebschgordan.cc
+    clebschgordan_lookup.cc
     collidermodus.cc
     configuration.cc
     crosssections.cc

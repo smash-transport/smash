@@ -68,16 +68,16 @@ jobs:
             sudo apt-get install ${{ matrix.packages_to_add }} -y
         fi
         # we download and install Pythia
-        wget https://pythia.org/download/pythia83/pythia8307.tgz && tar xf pythia8307.tgz && rm pythia8307.tgz && cd pythia8307
+        wget https://pythia.org/download/pythia83/pythia8309.tgz && tar xf pythia8309.tgz && rm pythia8309.tgz && cd pythia8309
         ./configure --cxx-common='-std=c++17 -march=native -mfpmath=sse -O3 -fPIC -pthread' && make -j$(nproc) && cd ..
         # we get eigen
         wget http://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && tar -xf eigen-3.4.0.tar.gz -C $HOME
         # we get cpplint
-        wget https://raw.githubusercontent.com/cpplint/cpplint/develop/cpplint.py && chmod +x cpplint.py && mkdir -p $HOME/bin && mv cpplint.py $HOME/bin
+        wget https://raw.githubusercontent.com/cpplint/cpplint/1.6.0/cpplint.py && chmod +x cpplint.py && mkdir -p $HOME/bin && mv cpplint.py $HOME/bin
         export PATH=$HOME/bin:$PATH
         # now we build SMASH
         cd $SMASH_ROOT && mkdir build && cd build
-        cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8307/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.4.0/
+        cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8309/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.4.0/
         make -j$(nproc)
         # we check the building of the documentation for a specific case
         if [ $SITE == "linux-minimum-gcc" ]; then make undocumented_test && make user; fi

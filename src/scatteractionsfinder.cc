@@ -120,12 +120,37 @@ ScatterActionsFinder::ScatterActionsFinder(
         subconfig.take({"Mass_Dependent_Formation_Times"}, false),
         subconfig.take({"Prob_proton_to_d_uu"}, 1. / 3.),
         subconfig.take({"Separate_Fragment_Baryon"}, true),
-        subconfig.take({"Popcorn_Rate"}, 0.15));
+        subconfig.take({"Popcorn_Rate"}, 0.15),
+        subconfig.take({"Use_Monash_Tune"}, false));
   }
 }
 
 ScatterActionsFinderParameters create_finder_parameters(
     Configuration& config, const ExperimentParameters& parameters) {
+  std::pair<double, double> sqrts_range_Npi =
+      config.take({"Collision_Term", "String_Transition", "Sqrts_Range_Npi"},
+                  InputKeys::collTerm_stringTrans_rangeNpi.default_value());
+  std::pair<double, double> sqrts_range_NN =
+      config.take({"Collision_Term", "String_Transition", "Sqrts_Range_NN"},
+                  InputKeys::collTerm_stringTrans_rangeNN.default_value());
+  if (sqrts_range_Npi.first < nucleon_mass + pion_mass) {
+    sqrts_range_Npi.first = nucleon_mass + pion_mass;
+    if (sqrts_range_Npi.second < sqrts_range_Npi.first)
+      sqrts_range_Npi.second = sqrts_range_Npi.first;
+    logg[LFindScatter].warn(
+        "Lower bound of Sqrts_Range_Npi too small, setting it to mass "
+        "threshold. New range is [",
+        sqrts_range_Npi.first, ',', sqrts_range_Npi.second, "] GeV");
+  }
+  if (sqrts_range_NN.first < 2 * nucleon_mass) {
+    sqrts_range_NN.first = 2 * nucleon_mass;
+    if (sqrts_range_NN.second < sqrts_range_NN.first)
+      sqrts_range_NN.second = sqrts_range_NN.first;
+    logg[LFindScatter].warn(
+        "Lower bound of Sqrts_Range_NN too small, setting it to mass "
+        "threshold. New range is [",
+        sqrts_range_NN.first, ',', sqrts_range_NN.second, "] GeV.");
+  }
   return {
       config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.),
       parameters.low_snn_cut,
@@ -142,7 +167,20 @@ ScatterActionsFinderParameters create_finder_parameters(
       parameters.strings_switch,
       config.take({"Collision_Term", "Use_AQM"}, true),
       config.take({"Collision_Term", "Strings_with_Probability"}, true),
-      config.take({"Collision_Term", "Only_Warn_For_High_Probability"}, false)};
+      config.take({"Collision_Term", "Only_Warn_For_High_Probability"}, false),
+      StringTransitionParameters{
+          sqrts_range_Npi, sqrts_range_NN,
+          config.take({"Collision_Term", "String_Transition", "Sqrts_Lower"},
+                      InputKeys::collTerm_stringTrans_lower.default_value()),
+          config.take(
+              {"Collision_Term", "String_Transition", "Sqrts_Range_Width"},
+              InputKeys::collTerm_stringTrans_range_width.default_value()),
+          config.take(
+              {"Collision_Term", "String_Transition", "PiPi_Offset"},
+              InputKeys::collTerm_stringTrans_pipiOffset.default_value()),
+          config.take(
+              {"Collision_Term", "String_Transition", "KN_Offset"},
+              InputKeys::collTerm_stringTrans_KNOffset.default_value())}};
 }
 
 ActionPtr ScatterActionsFinder::check_collision_two_part(
@@ -866,12 +904,6 @@ void ScatterActionsFinder::dump_cross_sections(
   ParticleData a_data(a), b_data(b);
   int n_momentum_points = 200;
   constexpr double momentum_step = 0.02;
-  /*
-  // Round to output precision.
-  for (auto& p : plab) {
-    p = std::floor((p * 100000) + 0.5) / 100000;
-  }
-  */
   if (plab.size() > 0) {
     n_momentum_points = plab.size();
     // Remove duplicates.

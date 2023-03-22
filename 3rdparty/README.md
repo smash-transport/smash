@@ -1,4 +1,4 @@
-## Third-party libraries into SMASH
+# Third-party libraries into SMASH
 
 Few external libraries are included and shipped within SMASH.
 Since some of them are still under active development, they are regularly updated.
@@ -6,7 +6,7 @@ In general, for different reasons, some adjustments in third-party _CMakeLists.t
 This README file is meant to contain information about the work that has been done on external libraries as well as guidance for future changes.
 **It is crucial to follow the advice here while updating any external library.**
 
-### General remarks
+## General remarks
 
 All third party libraries are shipped with their requirement about the minimum CMake version and SMASH has one as well.
 **Unless the library is needing a larger version of that required by SMASH**, we drop the third library requirement,
@@ -30,7 +30,7 @@ This should not require any maintenance change, although it is not guaranteed to
 Since SMASH is going to be shipped as a shared library, we need to offer position independent code.
 This is imposed at SMASH CMake top-level for all targets and should propagate automatically for third-party libraries, too.
 
-#### Remark about the C++ standard
+### Remark about the C++ standard
 
 Each third party library is responsible for itself and, in particular, this includes the choice of the C++ standard, which is not necessary the same of that used by SMASH.
 Being each library included as subdirectory, it will have its own variable scope initialized with a copy of the current variable values at the time of the `add_subdirectory()` call.
@@ -38,7 +38,7 @@ Therefore, changes to variables like `CMAKE_CXX_FLAGS` do not affect the top-lev
 Using target properties should be preferred, but strictly speaking the obsolete, traditional CMake approach of setting variables instead of properties still works.
 
 
-### YAML
+## YAML
 
 We use [this library](https://github.com/jbeder/yaml-cpp) mainly for SMASH configuration files and we update it from time to time, since it is maintained and active.
 If you want to include a new version inside SMASH codebase, you need to do something along the following lines (from within the `3rdparty` folder).
@@ -62,7 +62,7 @@ It is in general not desired to pollute compilation with warnings.
 For example, for version `0.7.0` the compiler flag `-Wno-shadow` has been added since some warnings otherwise where given and the YAML developers declared them [as fine](https://github.com/jbeder/yaml-cpp/issues/764).
 
 
-### Cuba
+## Cuba
 
 Releases and further information are available on [a dedicated webpage](http://www.feynarts.de/cuba/).
 The library is maintained and active and we plan to update it from time to time.
@@ -83,7 +83,7 @@ unset -v 'OLD_CUBA_VERSION' 'NEW_CUBA_VERSION'
 **Be sure not to forget the steps mentioned in the general remarks above.**
 
 
-### Virtest
+## Virtest
 
 Although not very active, we check for updates of [this library](https://github.com/mattkretz/virtest) from time to time and, in particular, after every release.
 To check for updates, you can e.g. follow the procedure here below, from within the `3rdparty` folder.
@@ -107,7 +107,7 @@ at the very top of the file and remove the call to `cmake_minimum_required`, e.g
 ```
 
 
-### Einhard
+## Einhard
 
 [This library](https://gitlab.com/Marix/Einhard) seems inactive, but it is sound and it has never given problems.
 Due to CMake policies, the minimum required CMake version has been implicitly increased as already described.

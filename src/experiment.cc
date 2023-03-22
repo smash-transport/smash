@@ -170,7 +170,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   if (box_length > 0.0 && dt > box_length / 10.0) {
     throw std::invalid_argument(
         "Please decrease the timestep size. "
-        "A value of (dt < l_box / 10) is recommended in the boxmodus.");
+        "A value of (dt <= l_box / 10) is necessary in the box modus.");
   }
 
   // define output clock

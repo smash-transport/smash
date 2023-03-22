@@ -228,12 +228,7 @@ TAB_SIZE               = 4
 # "Side Effects:". You can put \n's in the value part of an alias to insert
 # newlines.
 
-ALIASES                = "NucleusModus=smash::NucleusModus" \
-                         "SphereModus=smash::SphereModus" \
-                         "BoxModus=smash::BoxModus" \
-                         "ColliderModus=smash::ColliderModus" \
-                         "ListModus=smash::ListModus" \
-                         "key=\c" \
+ALIASES                = "key=\c" \
                          "collect_key=\xrefitem doxypage_input_short_ref \"\" \"\""\
                          "aux_key{6}=\1\anchor \2 \collect_key <b>\key \3</b> &mdash; \4, \5\6"\
                          "required_key{3}=\aux_key{<hr>,\1,\2,\3,required,}"\
@@ -243,6 +238,8 @@ ALIASES                = "NucleusModus=smash::NucleusModus" \
                          "see_key{1}=See \ref \1 \"user guide description\" for more information."\
                          "removed_key{1}=This key has been removed in <tt>SMASH-\1</tt> version."\
                          "unit{1}=<b>\1</b>"\
+                         "process_type{1}=<tr><td align=center>\anchor process_type_\1 <tt>\1</tt><td>"\
+                         "see_process_type{1}=See \ref process_type_\1 \"here\" for a short description."\
                          "Userguide=" \
                          "mocking=\xrefitem doxypage_unit_testing_mocking \"\" \"\"" \
                          "iref{1}=<a href= https://inspirehep.net/search?p=\1&of=hd>\1</a> \cite \1"

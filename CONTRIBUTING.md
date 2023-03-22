@@ -26,6 +26,7 @@ on this workflow can be found e.g.
 6. [Coding rules](#coding-rules)
 7. [General policies](#general-policies)
 8. [Profiling and benchmarking](#profiling)
+9. [SMASH containers](#containers)
 
 ---
 
@@ -144,7 +145,7 @@ warnings are however still reported.
 ## Development tools
 
 The following tools can be helpful for development:
-- clang-format = 13.0.0
+- clang-format = 13.0.x
 - doxygen >= 1.9 (not 1.9.4 or 1.9.5)
 - valgrind
 - cpplint
@@ -157,8 +158,9 @@ at each merge to the `main` branch.
 
 ### Installing clang-format
 
-clang-format is a part of the clang compiler. The usage of version 13.0.0 is
-enforced. You can download the binaries [here](http://releases.llvm.org/download.html).
+clang-format is a part of the clang compiler. The usage of version 13.0.x is
+enforced (x stands for any number).
+You can download the binaries [here](http://releases.llvm.org/download.html).
 
 Make sure to pick a pre-built binary for your system. For example, for Ubuntu
 you could run:
@@ -176,6 +178,24 @@ look for an older version to get pre-built binaries.)
 It is sufficient to unpack the archive with `tar xf` and to copy only the
 binary you need (`clang-format` in the `bin` folder of the archive), see
 "Installing binaries as a user" below.
+
+
+**NOTE:** The name of the clang-format executable should not have any suffix,
+like e.g. `clang-format-13`. If this is the case, a possible workaround is to
+create a symbolic link to this exectuable called `clang-format` in a directory
+included in the environment variable PATH.
+For example:
+
+```
+    mkdir -p "${HOME}/bin"
+    ln -s "$(which clang-format-13)" "${HOME}/bin/clang-format"
+    export "PATH=${HOME}/bin:${PATH}"
+```
+
+Of course, if the user has writing permissions, the symbolic link can be also
+directly created in the same directory in which the executable is and, if this
+is already in the system PATH (for example `/usr/bin`), no further actions are
+needed to use it as a normal command.
 
 
 ### Installing cpplint
@@ -400,10 +420,10 @@ question what should be documented:
 In order to refer to a paper inside a doxygen comment, the `\iref` command should
 be used:
 
-\code
+```cpp
 /** ... this function implements ... as described in \iref{XXX}. */
 int fun int(x);
-\endcode
+```
 
 Here, `XXX` should be the BibTex key for the paper from Inspire e.g.
 `Weil:2016zrk`. In order to find it, search for the paper on
@@ -420,11 +440,10 @@ References that are not contained in the Inspire database can be handled as
 follows: A corresponding BibTex entry should be put into `doc/non_inspire.bib`
 manually. It can then be referenced via the `\cite` command:
 
-\code
+```cpp
 /** ... this function implements ... as described in \cite XXX. */
 int fun int(x);
-\endcode
-
+```
 
 ### User guide
 
@@ -433,7 +452,7 @@ configuration options are described where they are used. Comments that are in
 normal doxygen format do not appear in the User Guide. Instead only multi-line
 comments of the form `/*!\Userguide ... */` will be used. Example:
 
-``` cpp
+```cpp
 /*!\Userguide
  * \if user
  * This text ONLY appears in the User Guide (useful for a headline that the
@@ -728,6 +747,55 @@ in the page table for use in the TLB. Page-faults must happen after memory
 allocations (unless `malloc` is able to reuse previously deallocated memory)
 and are therefore an indicator for "irresponsible" memory allocations.
 
+
+### Callgrind
+
+Valgrind includes a tool that can profile your code, which should compiled with
+debug symbols and optimization turned on. This can be easily achieved in SMASH
+by specifying the `-DCMAKE_BUILD_TYPE=RelWithDebInfo` CMake option when setting
+up the project. Once compiled SMASH in this mode, run
+
+    valgrind --tool=callgrind ./smash
+
+from the ***build*** directory. Note that this tool is **great and accurate**,
+but it will make the execution of your code **extremely slow**. For one SMASH
+event with the default configuration file, the execution time will pass from few
+dozens seconds to the realm of (tens of) minutes, roughly speaking. Once
+terminated, the run generates a file called _callgrind.out.X_, where _X_ usually
+is the process ID. Use the `kcachegrind` tool to read this file. It will give
+you a graphical analysis of the profiling output with results like which lines
+cost how much. Alternatively, you can use `gprof2dot`, which is a more general
+tool to visualize the output of different profilers (see below).
+
+It is worth remarking that using the `Profiling` build for this type of measurement
+will make calls to `mcount` appear in the calling graph, but this is an artefact
+of the profiling procedure, which might even affect measured performance and, hence,
+should be avoided.
+
+
+### gprof2dot
+
+This is a very nice way to visualize profilers output. The software is written in
+Python and [open-source](https://github.com/jrfonseca/gprof2dot). You can install
+it via `pip`, e.g. via
+
+    pip install --user gprof2dot
+
+for a user-only installation. Then you are ready to use it. Check out the [README
+examples](https://github.com/jrfonseca/gprof2dot#examples) as quick-start. To
+produce a graph out of the Valgrind output, use something like
+
+    gprof2dot --strip -f callgrind callgrind.out.X | dot -Tsvg -o output.svg
+
+where you need to replace `X` by the proper number and you can choose a better
+name for the produced SVG output file. The `--strip` option will
+
+> strip function parameters, template parameters, and
+> const modifiers from demangled C++ function names
+
+and it is encouraged to be used to obtain a more readable result with SMASH.
+
+
 ### Flame Graphs
 
 Flame graphs are a useful way to visualize the call graph output of a profiler.
@@ -758,3 +826,12 @@ If you get mangled names of the functions, try this as a second line
 The x axis represents the total duration that the corresponding stack frame
 lived for. The order and the colors are arbitrary and optimized for readability.
 The y axis represents the position on the stack.
+
+
+
+<a id="containers"></a>
+
+## SMASH containers
+
+Containers for SMASH are built and shipped next to each new public release.
+Instructions about how to build them can be found [here](containers/README.md).

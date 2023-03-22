@@ -37,8 +37,8 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * **Header**
  * \code
  * # **smash_version** initial conditions: hypersurface of constant proper time
- * # tau x y eta mt px py Rap pdg charge
- * # fm fm fm none GeV GeV GeV none none e
+ * # tau x y eta mt px py Rap pdg charge baryon_number strangeness
+ * # fm fm fm none GeV GeV GeV none none e none none
  * \endcode
  * The header consists of 3 lines starting with a '#', containing the following
  * information:
@@ -64,7 +64,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  *
  * The particle lines are formatted as follows:
  * \code
- * tau x y eta mt px py Rap pdg charge
+ * tau x y eta mt px py Rap pdg charge baryon_number strangeness
  * \endcode
  * where
  * \li \key tau: Proper time of the particle
@@ -77,6 +77,8 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * It contains all quantum numbers and uniquely identifies its type.
  * every particle in the event.
  * \li \key charge: electric charge of the particle
+ * \li \key baryon_number: baryon number of the particle
+ * \li \key strangeness: strangeness of the particle
  *
  * **Event end line**
  *
@@ -105,8 +107,12 @@ ICOutput::ICOutput(const std::filesystem::path &path, const std::string &name,
       file_.get(),
       "# %s initial conditions: hypersurface of constant proper time\n",
       SMASH_VERSION);
-  std::fprintf(file_.get(), "# tau x y eta mt px py Rap pdg charge\n");
-  std::fprintf(file_.get(), "# fm fm fm none GeV GeV GeV none none e\n");
+  std::fprintf(file_.get(),
+               "# tau x y eta mt px py Rap pdg charge "
+               "baryon_number strangeness\n");
+  std::fprintf(file_.get(),
+               "# fm fm fm none GeV GeV GeV none none e "
+               "none none\n");
 }
 
 ICOutput::~ICOutput() {}
@@ -159,11 +165,13 @@ void ICOutput::at_interaction(const Action &action, const double) {
 
   // write particle data excluding spectators
   if (!is_spectator) {
-    std::fprintf(file_.get(), "%g %g %g %g %g %g %g %g %s %i \n",
+    std::fprintf(file_.get(), "%g %g %g %g %g %g %g %g %s %i %i %i \n",
                  particle.position().tau(), particle.position()[1],
                  particle.position()[2], particle.position().eta(), m_trans,
                  particle.momentum()[1], particle.momentum()[2], rapidity,
-                 particle.pdgcode().string().c_str(), particle.type().charge());
+                 particle.pdgcode().string().c_str(), particle.type().charge(),
+                 particle.type().baryon_number(),
+                 particle.type().strangeness());
   }
 
   if (IC_proper_time_ < 0.0) {

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2022
+ *    Copyright (c) 2012-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -183,17 +183,11 @@ class BoxModus : public ModusDefault {
    * Saved to avoid recalculating at every event
    */
   std::map<PdgCode, double> average_multipl_;
-
   /**
-   * Whether to insert a single high energy particle at the center of the
-   * box (0,0,0). This particle will initially be moving along the x-axis.
+   * Optional PDG code of the particle to use as a jet. Same setup as in the
+   * sphere modus case.
    */
-  const bool insert_jet_ = false;
-  /**
-   * Pdg of the particle to use as a jet; necessary if insert_jet_ is true,
-   * unused otherwise
-   */
-  const PdgCode jet_pdg_;
+  const std::optional<PdgCode> jet_pdg_;
   /**
    * Initial momentum of the jet particle; only used if insert_jet_ is true
    */

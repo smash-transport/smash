@@ -28,7 +28,7 @@ jobs:
           export SMASH_ROOT=$GITHUB_WORKSPACE
           # variables dealing with the Singularity container
           # here we assume that $HOME points to the home directory of the user "smash"
-          export TOOLS_DIR=$HOME/actions-runner/smash_stuff_github_actions
+          export TOOLS_DIR=$HOME/actions-runner-SMASH-devel/smash_stuff_github_actions
           export PATH=$TOOLS_DIR/clang13_0_0/bin/:$TOOLS_DIR/python-tools/bin/:$PATH
           export PYTHONPATH=$TOOLS_DIR/python-tools:$PYTHONPATH
           export CC=gcc-8
@@ -85,7 +85,7 @@ jobs:
           # now we configure SMASH 
           mkdir -p $SMASH_ROOT/build
           cd $SMASH_ROOT/build
-          cmake .. -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8307/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$TOOLS_DIR/eigen-3.3.9/ \
+          cmake .. -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8309/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$TOOLS_DIR/eigen-3.3.9/ \
           -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=native" -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=native"
           # we check if the code is well formatted with cpplint
           export CTEST_OUTPUT_ON_FAILURE=1

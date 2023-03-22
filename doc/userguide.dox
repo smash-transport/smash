@@ -7,7 +7,5 @@ and supported \ref doxypage_input "input" and \ref doxypage_output "output" opti
 For a more detailed development documentation, have a look <a
 href=../html/index.html> here</a>.
 
-The source code for this version can be found <a
-href="https://github.com/smash-transport/smash-devel"> here</a>.
-
+@SENTENCE_WITH_CODEBASE_LINK@
 */

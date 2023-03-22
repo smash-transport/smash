@@ -125,11 +125,10 @@ void ScatterAction::add_all_scatterings(
    * of the string processes are counted by taking the difference between the
    * parametrized total and the sum of the non-strings. */
   if (!finder_parameters.strings_with_probability &&
-      xs.string_probability(
-          finder_parameters.strings_switch,
-          finder_parameters.strings_with_probability, finder_parameters.use_AQM,
-          finder_parameters.nnbar_treatment == NNbarTreatment::Strings) == 1.) {
-    const double xs_diff = xs.high_energy() - cross_section();
+      xs.string_probability(finder_parameters)) {
+    const double xs_diff =
+        xs.high_energy(finder_parameters.transition_high_energy) -
+        cross_section();
     if (xs_diff > 0.) {
       add_collisions(xs.string_excitation(xs_diff, string_process_,
                                           finder_parameters.use_AQM));
@@ -243,24 +242,36 @@ double ScatterAction::cov_transverse_distance_sqr() const {
 }
 
 /**
+ * Computes the B coefficients from the STAR fit, see fig. (6) in
+ * \iref{STAR:2020phn}.
+ *
+ * \param[in] plab Lab momentum in GeV.
+ *
+ * \return B coefficients of high-energy elastic proton-proton scatterings.
+ */
+static double high_energy_bpp(double plab) {
+  double mandelstam_s = s_from_plab(plab, nucleon_mass, nucleon_mass);
+  return 7.6 + 0.66 * std::log(mandelstam_s);
+}
+
+/**
  * Computes the B coefficients from the Cugnon parametrization of the angular
  * distribution in elastic pp scattering.
  *
  * See equation (8) in \iref{Cugnon:1996kh}.
  * Note: The original Cugnon parametrization is only applicable for
- * plab < 6 GeV and keeps rising above that. We add an upper limit of b <= 9,
- * in order to be compatible with high-energy data (up to plab ~ 25 GeV).
+ * plab < 6 GeV and keeps rising above that.
  *
  * \param[in] plab Lab momentum in GeV.
  *
- * \return Cugnon B coefficient for elatic proton-proton scatterings.
+ * \return Cugnon B coefficient for elastic proton-proton scatterings.
  */
 static double Cugnon_bpp(double plab) {
   if (plab < 2.) {
     double p8 = pow_int(plab, 8);
     return 5.5 * p8 / (7.7 + p8);
   } else {
-    return std::min(9.0, 5.334 + 0.67 * (plab - 2.));
+    return std::min(high_energy_bpp(plab), 5.334 + 0.67 * (plab - 2.));
   }
 }
 

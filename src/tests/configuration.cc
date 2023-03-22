@@ -339,6 +339,8 @@ TEST(validate) {
   VERIFY(deprecated_conf.validate() == Configuration::Is::Deprecated);
   invalid_conf.clear();
   deprecated_conf.clear();
+  // Reenable logger output (it is global)
+  logg[LogArea::Configuration::id].setVerbosity(einhard::ALL);
 }
 
 TEST(validate_shipped_input_files) {

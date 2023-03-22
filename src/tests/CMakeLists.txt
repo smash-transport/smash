@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2012-2022
+#    Copyright (c) 2012-2023
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -59,6 +59,14 @@ macro(smash_add_exe name)
         if(${name} STREQUAL "lattice")
             target_compile_options(${name} PRIVATE "-Wno-duplicated-branches")
         endif()
+    endif()
+    if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
+        # It turned out that the -ffp-contract option of GNU and LLVM compilers (whose default is
+        # different in the two compilers and among versions) is affecting reproducibility of results
+        # when e.g. optimizing for different architectures (e.g. -march=native VS -march=x86-64).
+        # Therefore, we decided to switch this feature off for tests to ensure that tests behave in
+        # the same way on all machines.
+        target_compile_options(${name} PRIVATE "-ffp-contract=off")
     endif()
 endmacro()
 
@@ -252,6 +260,7 @@ smash_add_unittest(angles)
 smash_add_unittest(average)
 smash_add_unittest(binaryoutput)
 smash_add_unittest(clebschgordan)
+smash_add_unittest(clebschgordan_lookup)
 smash_add_unittest(clock)
 smash_add_unittest(configuration)
 smash_add_unittest(decayaction)
@@ -455,6 +464,9 @@ add_test(NAME usage_of_SMASH_as_library
          COMMAND bash run_examples_for_testing.bash "${PROJECT_SOURCE_DIR}" "${EIGEN3_INCLUDE_DIR}"
                  "${Pythia_CONFIG_EXECUTABLE}"
          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/examples/using_SMASH_as_library)
+
+set_tests_properties(usage_of_SMASH_as_library PROPERTIES ENVIRONMENT
+                                                          SMASH_BUILD_DIR=${PROJECT_BINARY_DIR})
 
 if(USE_SANITIZER)
     smash_add_runtest(sanitizer_box smash_sanitizer smash_sanitizer

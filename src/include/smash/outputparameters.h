@@ -8,12 +8,12 @@
 #define SRC_INCLUDE_SMASH_OUTPUTPARAMETERS_H_
 
 #include <map>
-#include <optional>
 #include <set>
 #include <string>
 #include <vector>
 
 #include "configuration.h"
+#include "cxx17compat.h"
 #include "density.h"
 #include "forwarddeclarations.h"
 #include "logging.h"
@@ -133,70 +133,71 @@ struct OutputParameters {
       auto rivet_conf = conf.extract_sub_configuration({"Rivet"});
       logg[LOutput].debug() << "Reading Rivet section from configuration:\n"
                             << rivet_conf.to_string() << "\n";
+
       /*
        * std::optional<T> can be assigned from a value using the
-       *   template<class U = T> optional& operator=( U&& value );
+       *    template<class U = T> optional& operator=( U&& value );
        * which is a perfect-forwarded assignment. However, in more complex cases
        * like here where we use a Configuration::Value object returned by
        * Configuration::take as value, it might be sometimes needed to
        * explicitly specify the type U. It is then advantageous to use
-       * std::make_optional. When T is a built-in type, an assignment
-       * would work (although not that mentioned above), but for simplicity
-       * we always use make_optional.
+       * std::make_optional. When T is a built-in type, an assignment would work
+       * (although not that mentioned above), but std::make_optional also works.
+       * Note that GNU compiler has a buggy implementation of std::make_optional
+       * in versions from 8.1 till 8.3 and hence we use here make_optional and
+       * not std::make_optional. For faulty GNU versions the implementation
+       * shipped within smash namespace is then used, while in all other cases
+       * std::make_optional is used.
        */
       if (rivet_conf.has_value({"Logging"})) {
         rivet_parameters.logs =
-            std::make_optional<std::map<std::string, std::string>>(
+            make_optional<std::map<std::string, std::string>>(
                 rivet_conf.take({"Logging"}));
       }
       if (rivet_conf.has_value({"Paths"})) {
-        rivet_parameters.paths = std::make_optional<std::vector<std::string>>(
-            rivet_conf.take({"Paths"}));
+        rivet_parameters.paths =
+            make_optional<std::vector<std::string>>(rivet_conf.take({"Paths"}));
       }
       if (rivet_conf.has_value({"Preloads"})) {
-        rivet_parameters.preloads =
-            std::make_optional<std::vector<std::string>>(
-                rivet_conf.take({"Preloads"}));
+        rivet_parameters.preloads = make_optional<std::vector<std::string>>(
+            rivet_conf.take({"Preloads"}));
       }
       if (rivet_conf.has_value({"Analyses"})) {
-        rivet_parameters.analyses =
-            std::make_optional<std::vector<std::string>>(
-                rivet_conf.take({"Analyses"}));
+        rivet_parameters.analyses = make_optional<std::vector<std::string>>(
+            rivet_conf.take({"Analyses"}));
       }
       if (rivet_conf.has_value({"Cross_Section"})) {
-        rivet_parameters.cross_sections =
-            std::make_optional<std::array<double, 2>>(
-                rivet_conf.take({"Cross_Section"}));
+        rivet_parameters.cross_sections = make_optional<std::array<double, 2>>(
+            rivet_conf.take({"Cross_Section"}));
       }
       rivet_parameters.ignore_beams = rivet_conf.take({"Ignore_Beams"}, true);
       if (rivet_conf.has_value({"Weights"})) {
         rivet_parameters.any_weight_parameter_was_given = true;
         if (rivet_conf.has_value({"Weights", "Select"})) {
           rivet_parameters.to_be_enabled_weights =
-              std::make_optional<std::vector<std::string>>(
+              make_optional<std::vector<std::string>>(
                   rivet_conf.take({"Weights", "Select"}));
         }
         if (rivet_conf.has_value({"Weights", "Deselect"})) {
           rivet_parameters.to_be_disabled_weights =
-              std::make_optional<std::vector<std::string>>(
+              make_optional<std::vector<std::string>>(
                   rivet_conf.take({"Weights", "Deselect"}));
         }
         if (rivet_conf.has_value({"Weights", "Nominal"})) {
-          rivet_parameters.nominal_weight_name =
-              std::make_optional<std::string>(
-                  rivet_conf.take({"Weights", "Nominal"}));
+          rivet_parameters.nominal_weight_name = make_optional<std::string>(
+              rivet_conf.take({"Weights", "Nominal"}));
         }
         if (rivet_conf.has_value({"Weights", "Cap"})) {
           rivet_parameters.cap_on_weights =
-              std::make_optional<double>(rivet_conf.take({"Weights", "Cap"}));
+              make_optional<double>(rivet_conf.take({"Weights", "Cap"}));
         }
         if (rivet_conf.has_value({"Weights", "NLO_Smearing"})) {
-          rivet_parameters.nlo_smearing = std::make_optional<double>(
+          rivet_parameters.nlo_smearing = make_optional<double>(
               rivet_conf.take({"Weights", "NLO_Smearing"}));
         }
         if (rivet_conf.has_value({"Weights", "No_Multi"})) {
-          rivet_parameters.no_multi_weight = std::make_optional<bool>(
-              rivet_conf.take({"Weights", "No_Multi"}));
+          rivet_parameters.no_multi_weight =
+              make_optional<bool>(rivet_conf.take({"Weights", "No_Multi"}));
         }
       }
       logg[LOutput].debug() << "After processing configuration:\n"

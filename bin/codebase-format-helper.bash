@@ -2,7 +2,7 @@
 
 #===================================================
 #
-#    Copyright (c) 2018-2019,2021-2022
+#    Copyright (c) 2018-2019,2021-2023
 #      SMASH Team
 #
 #    GNU General Public License (GPLv3 or later)
@@ -84,8 +84,8 @@ function check_formatter_version()
     language="$1"
     found=$(${FORMATTER_COMMAND[${language}]} --version)
     if [[ ${language} = 'C++' ]]; then
-        required='13.0.0'
-        found="${found:21:6}"
+        required="13.0"
+        found=$(grep -oE '[1-9][0-9]*[.][0-9]+' <<< "${found}" | head -n1)
     elif [[ ${language} = 'CMake' ]]; then
         required='0.6.13'
     fi

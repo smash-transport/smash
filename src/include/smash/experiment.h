@@ -934,6 +934,11 @@ Experiment<Modus>::Experiment(Configuration &config,
         "mode and with a grid!");
   }
 
+  if (modus_.is_box() && (time_step_mode_ != TimeStepMode::Fixed)) {
+    throw std::invalid_argument(
+        "The box modus can only be used with the fixed time step mode!");
+  }
+
   logg[LExperiment].info("Using ", parameters_.testparticles,
                          " testparticles per particle.");
   logg[LExperiment].info("Using ", parameters_.n_ensembles,
@@ -1541,9 +1546,12 @@ Experiment<Modus>::Experiment(Configuration &config,
     std::array<int, 3> n_default{10, 10, 10};
     std::array<double, 3> origin_default{-20., -20., -20.};
     bool periodic_default = false;
-    if (modus_.is_collider()) {
+    if (modus_.is_collider() || (modus_.is_list() && !modus_.is_box())) {
       // Estimates on how far particles could get in x, y, z
-      const double gam = modus_.sqrt_s_NN() / (2.0 * nucleon_mass);
+      // The default lattice is currently not contracted for afterburner runs
+      const double gam = modus_.is_collider()
+                             ? modus_.sqrt_s_NN() / (2.0 * nucleon_mass)
+                             : 1.0;
       const double max_z = 5.0 / gam + end_time_;
       const double estimated_max_transverse_velocity = 0.7;
       const double max_xy = 5.0 + estimated_max_transverse_velocity * end_time_;

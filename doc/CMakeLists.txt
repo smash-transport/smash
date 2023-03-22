@@ -40,23 +40,28 @@ if(DOXYGEN_FOUND)
         "CONTRIBUTING.md"
         "AUTHORS.md"
         "doc/index.dox")
-    set(COMMON_TECHNICAL_FILES "bin/benchmarks/README.md")
+    set(COMMON_TECHNICAL_FILES "containers/README.md" "bin/benchmarks/README.md")
     list(APPEND
          DOCUMENTATION_FILES_DEVEL
          "doc/mainpage.dox"
          "${COMMON_GENERIC_FILES}"
          "src/include/smash/"
+         "3rdparty/einhard/einhard.hpp"
          "src/tests/unittest.h"
          "src/tests/setup.h"
          "src/"
-         "3rdparty/einhard/einhard.hpp"
+         "3rdparty/README.md"
          "${COMMON_TECHNICAL_FILES}")
-    # The user guide has the main page in the doc folder in the userguide.dox file, while all the
-    # /*!\Userguide blocks are extracted in the build/doc/userguide.dox folder. Both files, although
-    # with the same name, have to be included, the former first and the second after the md files.
+    # The user guide has the main page in the doc folder in the userguide.dox file, which has to be
+    # configured by CMake in order to possibly set the correct link to the codebase source. Hence
+    # here we already include the output of such configuration which will be put in the build/doc
+    # folder as userguide_mainpage.dox file. All the /*!\Userguide blocks, instead, are extracted in
+    # the build/doc/userguide.dox folder. Both files have to be included, the former first and the
+    # second after the md files.
+    set(USERGUIDE_MAINPAGE "${CMAKE_CURRENT_BINARY_DIR}/userguide_mainpage.dox")
     list(APPEND
          DOCUMENTATION_FILES_USER
-         "doc/userguide.dox"
+         "${USERGUIDE_MAINPAGE}"
          "${COMMON_GENERIC_FILES}"
          "${CMAKE_CURRENT_BINARY_DIR}/userguide.dox"
          "${COMMON_TECHNICAL_FILES}")
@@ -86,19 +91,39 @@ if(DOXYGEN_FOUND)
         message(WARNING "bash not found, docs might be incomplete/faulty")
     endif()
     if(SED)
+        # We want that the shipped public user guide contains a link to the repository, but the
+        # documentation might also be built in-between stable releases and it might be misleading to
+        # leave there the same sentence. Hence fine-tune here.
+        if(NOT SMASH_VERSION MATCHES "^SMASH-[0-9]+([.][0-9]+)*$")
+            string(CONCAT SENTENCE_WITH_CODEBASE_LINK
+                          "\\note This user guide has not been generated "
+                          "from a stable version of the codebase.")
+            set(SENTENCE_FOR_TARGET_COLOR "--yellow")
+            set(SENTENCE_FOR_TARGET "Not on stable release, add note to user guide")
+        else()
+            set(LINK_TO_GITHUB
+                "https://github.com/smash-transport/smash/releases/tag/${SMASH_VERSION}")
+            string(CONCAT SENTENCE_WITH_CODEBASE_LINK
+                          "The source code for the stable release from "
+                          "which this user guide originated can be found "
+                          "<a href=\"${LINK_TO_GITHUB}\">here</a>.")
+            set(SENTENCE_FOR_TARGET_COLOR "--cyan")
+            set(SENTENCE_FOR_TARGET "On stable release, add link to codebase in user guide")
+        endif()
+        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/userguide.dox ${USERGUIDE_MAINPAGE} @ONLY)
         include(UserInputFiles.cmake)
         add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
-                           COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/generateuserdocs.sh ${SED}
-                                   ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox ${files_with_input}
+                           COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/prepare_userguide_source.bash ${SED}
+                                   ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox -- ${files_with_input}
                            DEPENDS ${files_with_input}
                            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                            COMMENT "Generating User Guide input file"
                            VERBATIM)
+
         add_custom_target(user
                           ${DOXYGEN} ${CMAKE_CURRENT_BINARY_DIR}/DoxyUser
-                          COMMAND ${CMAKE_COMMAND} -E env source_dir=${PROJECT_SOURCE_DIR}
-                                  binary_dir=${CMAKE_CURRENT_BINARY_DIR} bash
-                                  ${CMAKE_CURRENT_SOURCE_DIR}/set_smash_version.sh
+                          COMMAND ${CMAKE_COMMAND} -E cmake_echo_color
+                                  "${SENTENCE_FOR_TARGET_COLOR}" --bold "${SENTENCE_FOR_TARGET}"
                           DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/userguide.dox
                           WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                           COMMENT "Building User Guide"
