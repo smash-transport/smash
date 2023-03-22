@@ -115,7 +115,7 @@
             \page doxypage_input_conf_pot_VDF VDF
             \page doxypage_input_conf_pot_coulomb Coulomb
         \page doxypage_input_conf_forced_therm Forced Thermalization
-    \page doxypage_input_particles Particles
+    \page doxypage_input_particles %Particles
     \page doxypage_input_decaymodes Decay modes
 \page doxypage_output Output
     <div class="invisible-content">

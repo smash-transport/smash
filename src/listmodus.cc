@@ -99,45 +99,45 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
                                     double t, double x, double y, double z,
                                     double mass, double E, double px, double py,
                                     double pz) {
-  constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
+  const auto emph = einhard::Yellow_t_::ANSI();
+  const auto restore_default = einhard::NoColor_t_::ANSI();
   try {
     ParticleData &particle = particles.create(pdgcode);
     // SMASH mass versus input mass consistency check
     if (particle.type().is_stable() &&
         std::abs(mass - particle.pole_mass()) > really_small) {
-      if (n_warns_precision_ < max_warns_precision) {
-        logg[LList].warn() << "Provided mass of " << particle.type().name()
-                           << " = " << mass
-                           << " [GeV] is inconsistent with SMASH value = "
-                           << particle.pole_mass()
-                           << ". Forcing E = sqrt(p^2 + m^2)"
-                           << ", where m is SMASH mass.";
-        n_warns_precision_++;
-      } else if (n_warns_precision_ == max_warns_precision) {
+      if (warn_about_mass_discrepancy_) {
         logg[LList].warn(
-            "Further warnings about SMASH mass versus input mass"
-            " inconsistencies will be suppressed.");
-        n_warns_precision_++;
+            "Provided mass of stable particle ", particle.type().name(), " = ",
+            mass, " [GeV] is inconsistent with value = ", particle.pole_mass(),
+            " [GeV] from particles file.\nForcing E = sqrt(p^2 + m^2)",
+            ", where m is the mass contained in the particles file.\n",
+            "Further warnings about discrepancies between the input mass ",
+            "and the mass contained in the particles file will be ",
+            "suppressed.\n", emph, "Please make sure that changing ",
+            "input particle properties is an acceptable behavior.",
+            restore_default);
+        warn_about_mass_discrepancy_ = false;
       }
-      particle.set_4momentum(mass, ThreeVector(px, py, pz));
-    }
-    particle.set_4momentum(FourVector(E, px, py, pz));
-    // On-shell condition consistency check
-    if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
-      if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
-        logg[LList].warn()
-            << "Provided 4-momentum " << particle.momentum() << " and "
-            << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
-            << " This may originate from the lack of numerical"
-            << " precision in the input. Setting E to sqrt(p^2 + m^2).";
-        n_warns_mass_consistency_++;
-      } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
-        logg[LList].warn(
-            "Further warnings about E != sqrt(p^2 + m^2) will"
-            " be suppressed.");
-        n_warns_mass_consistency_++;
+      particle.set_4momentum(particle.pole_mass(), ThreeVector(px, py, pz));
+    } else {
+      particle.set_4momentum(FourVector(E, px, py, pz));
+      // On-shell condition consistency check
+      if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
+        if (warn_about_off_shell_particles_) {
+          logg[LList].warn(
+              "Provided 4-momentum ", particle.momentum(), " [GeV] and ",
+              " mass ", mass, " [GeV] do not satisfy E^2 - p^2 = m^2.\n",
+              "This may originate from the lack of numerical",
+              " precision in the input. Setting E to sqrt(p^2 + ",
+              "m^2).\nFurther warnings about E != sqrt(p^2 + m^2) will",
+              " be suppressed.\n", emph, "Please make sure that setting ",
+              "particles back on the mass shell is an acceptable behavior.",
+              restore_default);
+          warn_about_off_shell_particles_ = false;
+        }
+        particle.set_4momentum(mass, ThreeVector(px, py, pz));
       }
-      particle.set_4momentum(mass, ThreeVector(px, py, pz));
     }
     // Set spatial coordinates, they will later be backpropagated if needed
     particle.set_4position(FourVector(t, x, y, z));
