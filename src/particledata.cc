@@ -185,7 +185,8 @@ void create_valid_smash_particle_matching_provided_quantities(
                     << ", where m is the mass contained in the particles file."
                     << "\nFurther warnings about discrepancies between the "
                     << "input mass and the mass contained in the particles file"
-                    << " will be suppressed.\n" << emph << "Please make sure"
+                    << " will be suppressed.\n"
+                    << emph << "Please make sure"
                     << " that changing input particle properties is an "
                     << "acceptable behavior." << restore_default;
   std::stringstream on_shell_warn_message;
@@ -195,7 +196,8 @@ void create_valid_smash_particle_matching_provided_quantities(
       << "This may originate from the lack of numerical"
       << " precision in the input. Setting E to sqrt(p^2 + "
       << "m^2).\nFurther warnings about E != sqrt(p^2 + m^2) will"
-      << " be suppressed.\n" << emph << "Please make sure that setting "
+      << " be suppressed.\n"
+      << emph << "Please make sure that setting "
       << "particles back on the mass shell is an acceptable behavior."
       << restore_default;
   // SMASH mass versus input mass consistency check
