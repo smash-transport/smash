@@ -700,12 +700,6 @@ class Experiment : public ExperimentBase {
   /// This indicates whether kinematic cuts are enabled for the IC output
   bool kinematic_cuts_for_IC_output_ = false;
 
-  /// Auxiliary flag to warn about mass-discrepancies only once per instance
-  bool warn_about_mass_discrepancy_ = true;
-
-  /// Auxiliary flag to warn about off-shell particles only once per instance
-  bool warn_about_off_shell_particles_ = true;
-
   /// random seed for the next event.
   int64_t seed_ = -1;
 
@@ -2170,90 +2164,64 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
 }
 
 /**
- * Check particle lists which are supposed to be added/removed from the SMASH
- * evolution. This is important if SMASH is used as a 3rd-party library, e.g.,
- * in X-SCAPE for concurrent running.
+ * Validate a particle list adjusting each particle to be a valid SMASH
+ * particle. If the provided particle has an invalid PDG code, it is removed
+ * from the list and the user warned. If the particles in the list are adjusted,
+ * the function warns the user only the first time this function is called.
+ * \see create_valid_smash_particle_matching_provided_quantities for more
+ * information about which adjustements are made to the particles.
  *
- * \param[in] particle_list The particle list, which should be checked for
- * correctness.
- * \return ParticleList with the accepted particles.
+ * \param[in] particle_list The particle list which should be adjusted
  */
-ParticleList check_particle_list(ParticleList &particle_list,
-                                 bool &warn_mass_discrepancy,
-                                 bool &warn_off_shell_particle);
+void validate_and_adjust_particle_list(ParticleList &particle_list);
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const double t_end,
                                            ParticleList add_plist,
                                            ParticleList remove_plist) {
   if (!add_plist.empty() || !remove_plist.empty()) {
-    // Particles are only added/removed to/from the first ensemble, which is
-    // currently the only one needed for the use of SMASH as an external
-    // library (e.g. in JETSCAPE / X-SCAPE)
     if (ensembles_.size() > 1) {
       throw std::runtime_error(
           "Adding or removing particles from SMASH is only possible when one "
           "ensemble is used.");
     }
-    // Check particles, which are supposed to be added to the evolution, when
-    // SMASH is used as a 3rd-party library
     const double action_time = parameters_.labclock->current_time();
-    ParticleList add_plist_checked;
-    // Check particle list for additional particles if a non-empty list is given
     if (!add_plist.empty()) {
-      add_plist_checked =
-          check_particle_list(add_plist, warn_about_mass_discrepancy_,
-                              warn_about_off_shell_particles_);
+      validate_and_adjust_particle_list(add_plist);
     }
-    if (!add_plist_checked.empty()) {
-      ParticleList empty_in_list;
-      // Time of add_plist_checked is set to action time, i.e. current_time
-      // in generate_final_state() in freeforallaction.h
+    if (!add_plist.empty()) {
+      // Create and perform action to add particle(s)
       auto action_add_particles = std::make_unique<FreeforallAction>(
-          empty_in_list, add_plist_checked, action_time);
+          ParticleList{}, add_plist, action_time);
       perform_action(*action_add_particles, 0);
     }
-    // Check particles, which are supposed to be removed from the evolution,
-    // when SMASH is used as a 3rd-party library
-    ParticleList remove_plist_final;
     if (!remove_plist.empty()) {
-      ParticleList remove_plist_checked =
-          check_particle_list(remove_plist, warn_about_mass_discrepancy_,
-                              warn_about_off_shell_particles_);
-      const long unsigned int remove_plist_size = remove_plist_checked.size();
-      for (const auto &particle_remove : remove_plist_checked) {
-        const int pdgcode_remove = particle_remove.pdgcode().get_decimal();
-        for (const auto &particle_smash : ensembles_[0]) {
-          const int pdgcode_smash = particle_smash.pdgcode().get_decimal();
-          if (pdgcode_smash == pdgcode_remove) {
-            const FourVector p_remove = particle_remove.momentum();
-            const FourVector p_smash = particle_smash.momentum();
-            // Scroll particle position back to action_time for the position
-            // check
-            const double t = particle_remove.position().x0();
-            const FourVector u(1.0, particle_remove.velocity());
-            const FourVector r_remove_scrolled =
-                particle_remove.position() + u * (action_time - t);
-            const FourVector r_smash = particle_smash.position();
-            if ((p_smash == p_remove) && (r_smash == r_remove_scrolled)) {
-              remove_plist_final.push_back(particle_smash);
-            }
-          }
+      validate_and_adjust_particle_list(remove_plist);
+      int not_found_particles = 0;
+      for (auto it = remove_plist.begin(); it != remove_plist.end();) {
+        auto particle_remove = *it;
+        if (std::find_if(
+                ensembles_[0].begin(), ensembles_[0].end(),
+                [&particle_remove, &action_time](const ParticleData &p) {
+                  return are_particles_identical_at_given_time(particle_remove,
+                                                               p, action_time);
+                }) == ensembles_[0].end()) {
+          remove_plist.erase(it);
+          not_found_particles++;
+        } else {
+          it++;
         }
       }
-      // Check if all particles which should be deleted were found
-      if (remove_plist_size != remove_plist_final.size()) {
-        logg[LExperiment].warn()
-            << remove_plist_size - remove_plist_final.size()
-            << " particle(s) supposed to be deleted, but could not be found.";
+      if (not_found_particles != 0) {
+        logg[LExperiment].warn(
+            not_found_particles,
+            " particle(s) supposed to be deleted, but could not be found.");
       }
     }
-    if (!remove_plist_final.empty()) {
-      ParticleList empty_out_list;
-      // Time of remove_plist_final is set to action time, i.e. current_time
-      // in generate_final_state() in freeforallaction.h
+    if (!remove_plist.empty()) {
+      // Create and perform action to remove particles
       auto action_remove_particles = std::make_unique<FreeforallAction>(
-          remove_plist_final, empty_out_list, action_time);
+          remove_plist, ParticleList{}, action_time);
       perform_action(*action_remove_particles, 0);
     }
   }

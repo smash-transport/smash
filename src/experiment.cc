@@ -622,38 +622,32 @@ EventInfo fill_event_info(const std::vector<Particles> &ensembles,
   return event_info;
 }
 
-ParticleList check_particle_list(ParticleList &particle_list,
-                                 bool &warn_mass_discrepancy,
-                                 bool &warn_off_shell_particle) {
-  ParticleList plist_checked;
-  int pdgcode = 0;
-  for (auto &particle : particle_list) {
+void validate_and_adjust_particle_list(ParticleList &particle_list) {
+  static bool warn_mass_discrepancy = true;
+  static bool warn_off_shell_particle = true;
+  for (auto it = particle_list.begin(); it != particle_list.end(); it++) {
+    auto particle = *it;
+    auto pdgcode = particle.pdgcode().get_decimal();
     try {
-      pdgcode = particle.pdgcode().get_decimal();
       // Convert Kaon-L or Kaon-S into K0 or Anti-K0 used in SMASH
       if (pdgcode == 310 || pdgcode == 130) {
         pdgcode = (random::uniform_int(0, 1) == 0) ? 311 : -311;
       }
-      ParticleData new_particle{
-          ParticleType::find(PdgCode::from_decimal(pdgcode))};
-      FourVector particle_momentum = particle.momentum();
-      const double mass = particle.effective_mass();
-      create_valid_smash_particle_matching_provided_quantities(
-          pdgcode, mass, particle_momentum, LExperiment, warn_mass_discrepancy,
+      auto position_to_be_used = particle.position();
+      particle = create_valid_smash_particle_matching_provided_quantities(
+          PdgCode::from_decimal(pdgcode), particle.effective_mass(),
+          particle.momentum(), LExperiment, warn_mass_discrepancy,
           warn_off_shell_particle);
-      new_particle.set_4momentum(particle_momentum);
-      // Set spatial coordinates, they will later be backpropagated if needed
-      const FourVector r = particle.position();
-      new_particle.set_4position(FourVector(r.x0(), r.x1(), r.x2(), r.x3()));
-      new_particle.set_cross_section_scaling_factor(1.0);
-      plist_checked.push_back(new_particle);
+      particle.set_4position(position_to_be_used);
+      particle.set_cross_section_scaling_factor(1.0);
     } catch (ParticleType::PdgNotFoundFailure &) {
       logg[LExperiment].warn()
           << "SMASH does not recognize pdg code " << pdgcode
           << " obtained from hadron list. This particle will be ignored.\n";
+      particle_list.erase(it);
+      it--;  // Correct iterator for next loop iteration
     }
   }
-  return plist_checked;
 }
 
 }  // namespace smash

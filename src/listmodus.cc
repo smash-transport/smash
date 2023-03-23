@@ -101,16 +101,15 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
                                     double mass, double E, double px, double py,
                                     double pz) {
   try {
-    ParticleData &particle = particles.create(pdgcode);
-    FourVector particle_momentum(E, px, py, pz);
-    create_valid_smash_particle_matching_provided_quantities(
-        pdgcode, mass, particle_momentum, LList, warn_about_mass_discrepancy_,
-        warn_about_off_shell_particles_);
-    particle.set_4momentum(particle_momentum);
+    ParticleData new_particle =
+        create_valid_smash_particle_matching_provided_quantities(
+            pdgcode, mass, {E, px, py, pz}, LList, warn_about_mass_discrepancy_,
+            warn_about_off_shell_particles_);
     // Set spatial coordinates, they will later be backpropagated if needed
-    particle.set_4position(FourVector(t, x, y, z));
-    particle.set_formation_time(t);
-    particle.set_cross_section_scaling_factor(1.0);
+    new_particle.set_4position(FourVector(t, x, y, z));
+    new_particle.set_formation_time(t);
+    new_particle.set_cross_section_scaling_factor(1.0);
+    particles.insert(new_particle);
   } catch (ParticleType::PdgNotFoundFailure &) {
     logg[LList].warn() << "SMASH does not recognize pdg code " << pdgcode
                        << " loaded from file. This particle will be ignored.\n";
