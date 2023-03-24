@@ -627,15 +627,15 @@ void validate_and_adjust_particle_list(ParticleList &particle_list) {
   static bool warn_off_shell_particle = true;
   for (auto it = particle_list.begin(); it != particle_list.end();) {
     auto &particle = *it;
-    auto pdgcode = particle.pdgcode().get_decimal();
+    auto pdgcode = particle.pdgcode();
     try {
       // Convert Kaon-L or Kaon-S into K0 or Anti-K0 used in SMASH
-      if (pdgcode == 310 || pdgcode == 130) {
-        pdgcode = (random::uniform_int(0, 1) == 0) ? 311 : -311;
+      if (pdgcode == 0x310 || pdgcode == 0x130) {
+        pdgcode = (random::uniform_int(0, 1) == 0) ? pdg::K_z : pdg::Kbar_z;
       }
       auto valid_smash_particle =
           create_valid_smash_particle_matching_provided_quantities(
-              PdgCode::from_decimal(pdgcode), particle.effective_mass(),
+              pdgcode, particle.effective_mass(),
               particle.momentum(), LExperiment, warn_mass_discrepancy,
               warn_off_shell_particle);
       particle.set_4momentum(valid_smash_particle.momentum());
