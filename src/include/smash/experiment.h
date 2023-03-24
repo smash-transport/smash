@@ -2214,8 +2214,10 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
           remove_plist.end());
       if (auto delta = number_of_particles_to_be_removed - remove_plist.size();
           delta > 0) {
-        logg[LExperiment].warn(delta, " particle(s) supposed to be deleted, ",
-                               "but could not be found.");
+        logg[LExperiment].warn(
+            "When trying to remove particle(s) at the beginning of the "
+            "system evolution, ",
+            delta, " particle(s) could not be found and will be ignored.");
       }
     }
     if (!remove_plist.empty()) {
