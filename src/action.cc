@@ -503,8 +503,11 @@ double Action::check_conservation(const uint32_t id_process) const {
           << particle_names.str() << err_msg;
       return energy_violation;
     }
+    /* If particles are added or removed, it is not surprising that conservation
+     * laws are potentially violated. Do not warn the user but print some
+     * information for debug */
     if (process_type_ == ProcessType::Freeforall) {
-      logg[LAction].warn()
+      logg[LAction].debug()
           << "Conservation law violation, but we want it (Freeforall Action).\n"
           << particle_names.str() << err_msg;
       return energy_violation;
