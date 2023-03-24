@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2022
+ *    Copyright (c) 2014-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -499,6 +499,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \process_type{47} Failed string process, Soft String NNbar annihilation
  *                   process can fail by lack of energy. This is a tag we add to
  *                   avoid mislabeling the events.
+ * \process_type{90} Freeforall action process, Ignores conservation laws, when
+ *                   FreeforallAction is used to add a list of particles or
+ *                   remove a list of particles from the evolution.
  * </table>
  *
  * \page doxypage_output_oscar_particles

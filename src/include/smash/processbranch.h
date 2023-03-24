@@ -81,16 +81,9 @@ enum class ProcessType {
   StringSoftNonDiffractive = 45,
   /// \see_process_type{46}
   StringHard = 46,
-
-  /**
-   *  Soft String NNbar annihilation process can fail by lack of energy. This is
-   *  a tag we add to avoid mislabeling the events.
-   */
+  /// \see_process_type{47}
   FailedString = 47,
-  /*
-   * Ignore conservation laws, when FreeforallAction is used to add a list of
-   * particles or remove a list of particles from the evolution.
-   */
+  /// \see_process_type{90}
   Freeforall = 90
 };
 

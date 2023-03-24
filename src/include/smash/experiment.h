@@ -2929,7 +2929,7 @@ void Experiment<Modus>::increase_event_number() {
 template <typename Modus>
 void Experiment<Modus>::run() {
   const auto &mainlog = logg[LMain];
-  for (event_ = 0; !is_finished(); increase_event_number()) {
+  for (event_ = 0; !is_finished(); event_++) {
     mainlog.info() << "Event " << event_;
 
     // Sample initial particles, start clock, some printout and book-keeping
