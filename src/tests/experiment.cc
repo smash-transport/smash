@@ -111,8 +111,7 @@ TEST(add_and_remove_particles) {
   VERIFY(exp->first_ensemble()->size() == 0);
 
   // Add 1 pion off shell -> expect pion added on shell
-  ParticleData pion_plus = ParticleData{ParticleType::find(pdg::pi_p)};
-  ;
+  ParticleData pion_plus{ParticleType::find(pdg::pi_p)};
   pion_plus.set_4momentum(FourVector(1.0, 0.95, 0.0, 0.0));
   pion_plus.set_4position(FourVector(0.0, 0.0, 0.0, 0.0));
   exp->run_time_evolution(1., ParticleList{pion_plus}, ParticleList{});
@@ -128,8 +127,7 @@ TEST(add_and_remove_particles) {
   VERIFY(exp->first_ensemble()->size() == 0);
 
   // Add pion and omega off shell -> expect 2 particles (omega on its shell)
-  ParticleData omega = ParticleData{ParticleType::find(pdg::omega)};
-  ;
+  ParticleData omega{ParticleType::find(pdg::omega)};
   omega.set_4momentum(FourVector(0.783, 0.5, 0.0, 0.0));
   omega.set_4position(FourVector(0.0, 1.0, 0.0, 0.0));
   exp->run_time_evolution(1., ParticleList{pion_plus, omega}, ParticleList{});
@@ -138,8 +136,7 @@ TEST(add_and_remove_particles) {
                          omega.effective_mass(), very_small_double);
 
   // Remove non existing eta -> still 2 particles
-  ParticleData eta = ParticleData{ParticleType::find(pdg::eta)};
-  ;
+  ParticleData eta{ParticleType::find(pdg::eta)};
   eta.set_4momentum(FourVector(0.548, 0.0, 0.0, 0.0));
   eta.set_4position(FourVector(0.0, 2.0, 0.0, 0.0));
   exp->run_time_evolution(1., ParticleList{}, ParticleList{eta});

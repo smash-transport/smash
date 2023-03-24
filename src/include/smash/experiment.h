@@ -2198,25 +2198,24 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     }
     if (!remove_plist.empty()) {
       validate_and_adjust_particle_list(remove_plist);
-      int not_found_particles = 0;
-      for (auto it = remove_plist.begin(); it != remove_plist.end();) {
-        const auto particle_remove = *it;
-        if (std::find_if(
-                ensembles_[0].begin(), ensembles_[0].end(),
-                [&particle_remove, &action_time](const ParticleData &p) {
-                  return are_particles_identical_at_given_time(particle_remove,
-                                                               p, action_time);
-                }) == ensembles_[0].end()) {
-          it = remove_plist.erase(it);
-          not_found_particles++;
-        } else {
-          it++;
-        }
-      }
-      if (not_found_particles != 0) {
-        logg[LExperiment].warn(
-            not_found_particles,
-            " particle(s) supposed to be deleted, but could not be found.");
+      const auto number_of_particles_to_be_removed = remove_plist.size();
+      remove_plist.erase(
+          remove_if(
+              remove_plist.begin(), remove_plist.end(),
+              [this, &action_time](const ParticleData &particle_to_remove) {
+                return std::find_if(
+                           ensembles_[0].begin(), ensembles_[0].end(),
+                           [&particle_to_remove,
+                            &action_time](const ParticleData &p) {
+                             return are_particles_identical_at_given_time(
+                                 particle_to_remove, p, action_time);
+                           }) == ensembles_[0].end();
+              }),
+          remove_plist.end());
+      if (auto delta = number_of_particles_to_be_removed - remove_plist.size();
+          delta > 0) {
+        logg[LExperiment].warn(delta, " particle(s) supposed to be deleted, ",
+                               "but could not be found.");
       }
     }
     if (!remove_plist.empty()) {
