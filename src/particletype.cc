@@ -53,7 +53,7 @@ const ParticleTypeList &ParticleType::list_all() {
   return *all_particle_types;
 }
 
-// For performance reasonce one might want to inline this function.
+// For performance reasons one might want to inline this function.
 ParticleTypePtr ParticleType::operator&() const {
   // Calculate the offset via pointer subtraction:
   const auto offset = this - std::addressof(list_all()[0]);

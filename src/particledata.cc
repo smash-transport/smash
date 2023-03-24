@@ -11,6 +11,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <optional>
 #include <vector>
 
 #include "smash/constants.h"
@@ -204,25 +205,25 @@ ParticleData create_valid_smash_particle_matching_provided_quantities(
       flag = false;
     }
   };
-  auto is_particle_stable_and_with_invalid_mass = [](const ParticleData &p,
-                                                     double mass) {
-    return p.type().is_stable() &&
-           std::abs(mass - p.pole_mass()) > really_small;
-  };
-  auto is_particle_off_its_mass_shell = [](const ParticleData &p, double mass) {
+  auto is_particle_stable_and_with_invalid_mass =
+      [&mass](const ParticleData &p) {
+        return p.type().is_stable() &&
+               std::abs(mass - p.pole_mass()) > really_small;
+      };
+  auto is_particle_off_its_mass_shell = [&mass](const ParticleData &p) {
     return std::abs(p.momentum().sqr() - mass * mass) > really_small;
   };
 
   // Actual implementation
   ParticleData smash_particle{ParticleType::find(pdgcode)};
   const auto warnings = prepare_needed_warnings(smash_particle);
-  if (is_particle_stable_and_with_invalid_mass(smash_particle, mass)) {
+  if (is_particle_stable_and_with_invalid_mass(smash_particle)) {
     warn_if_needed(mass_warning, warnings[0]);
     smash_particle.set_4momentum(smash_particle.pole_mass(),
                                  four_momentum.threevec());
   } else {
     smash_particle.set_4momentum(four_momentum);
-    if (is_particle_off_its_mass_shell(smash_particle, mass)) {
+    if (is_particle_off_its_mass_shell(smash_particle)) {
       warn_if_needed(on_shell_warning, warnings[1]);
       smash_particle.set_4momentum(mass, four_momentum.threevec());
     }
