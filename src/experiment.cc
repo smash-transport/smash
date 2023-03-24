@@ -625,27 +625,27 @@ EventInfo fill_event_info(const std::vector<Particles> &ensembles,
 void validate_and_adjust_particle_list(ParticleList &particle_list) {
   static bool warn_mass_discrepancy = true;
   static bool warn_off_shell_particle = true;
-  for (auto it = particle_list.begin(); it != particle_list.end(); it++) {
-    auto particle = *it;
+  for (auto it = particle_list.begin(); it != particle_list.end();) {
+    auto &particle = *it;
     auto pdgcode = particle.pdgcode().get_decimal();
     try {
       // Convert Kaon-L or Kaon-S into K0 or Anti-K0 used in SMASH
       if (pdgcode == 310 || pdgcode == 130) {
         pdgcode = (random::uniform_int(0, 1) == 0) ? 311 : -311;
       }
-      auto position_to_be_used = particle.position();
-      particle = create_valid_smash_particle_matching_provided_quantities(
-          PdgCode::from_decimal(pdgcode), particle.effective_mass(),
-          particle.momentum(), LExperiment, warn_mass_discrepancy,
-          warn_off_shell_particle);
-      particle.set_4position(position_to_be_used);
+      auto valid_smash_particle =
+          create_valid_smash_particle_matching_provided_quantities(
+              PdgCode::from_decimal(pdgcode), particle.effective_mass(),
+              particle.momentum(), LExperiment, warn_mass_discrepancy,
+              warn_off_shell_particle);
+      particle.set_4momentum(valid_smash_particle.momentum());
       particle.set_cross_section_scaling_factor(1.0);
+      it++;
     } catch (ParticleType::PdgNotFoundFailure &) {
       logg[LExperiment].warn()
           << "SMASH does not recognize pdg code " << pdgcode
           << " obtained from hadron list. This particle will be ignored.\n";
-      particle_list.erase(it);
-      it--;  // Correct iterator for next loop iteration
+      it = particle_list.erase(it);
     }
   }
 }

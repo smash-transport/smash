@@ -2199,14 +2199,14 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
       validate_and_adjust_particle_list(remove_plist);
       int not_found_particles = 0;
       for (auto it = remove_plist.begin(); it != remove_plist.end();) {
-        auto particle_remove = *it;
+        const auto particle_remove = *it;
         if (std::find_if(
                 ensembles_[0].begin(), ensembles_[0].end(),
                 [&particle_remove, &action_time](const ParticleData &p) {
                   return are_particles_identical_at_given_time(particle_remove,
                                                                p, action_time);
                 }) == ensembles_[0].end()) {
-          remove_plist.erase(it);
+          it = remove_plist.erase(it);
           not_found_particles++;
         } else {
           it++;
