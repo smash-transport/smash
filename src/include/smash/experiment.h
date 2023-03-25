@@ -2200,7 +2200,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
       validate_and_adjust_particle_list(remove_plist);
       const auto number_of_particles_to_be_removed = remove_plist.size();
       remove_plist.erase(
-          remove_if(
+          std::remove_if(
               remove_plist.begin(), remove_plist.end(),
               [this, &action_time](const ParticleData &particle_to_remove) {
                 return std::find_if(
@@ -2215,9 +2215,9 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
       if (auto delta = number_of_particles_to_be_removed - remove_plist.size();
           delta > 0) {
         logg[LExperiment].warn(
-            "When trying to remove particle(s) at the beginning of the "
-            "system evolution, ",
-            delta, " particle(s) could not be found and will be ignored.");
+            "When trying to remove particle(s) at the beginning ",
+            "of the system evolution,\n", delta,
+            " particle(s) could not be found and will be ignored.");
       }
     }
     if (!remove_plist.empty()) {

@@ -633,11 +633,16 @@ void validate_and_adjust_particle_list(ParticleList &particle_list) {
       if (pdgcode == 0x310 || pdgcode == 0x130) {
         pdgcode = (random::uniform_int(0, 1) == 0) ? pdg::K_z : pdg::Kbar_z;
       }
+      /* ATTENTION: It would be wrong to directly assign here the return value
+       * to 'particle', because this would potentially also change its id and
+       * process number, which in turn, might lead to actions to be discarded.
+       * Here, only the particle momentum has to be adjusted and this is done
+       * creating a new particle and using its momentum to set 'particle' one.
+       */
       auto valid_smash_particle =
           create_valid_smash_particle_matching_provided_quantities(
-              pdgcode, particle.effective_mass(),
-              particle.momentum(), LExperiment, warn_mass_discrepancy,
-              warn_off_shell_particle);
+              pdgcode, particle.effective_mass(), particle.momentum(),
+              LExperiment, warn_mass_discrepancy, warn_off_shell_particle);
       particle.set_4momentum(valid_smash_particle.momentum());
       particle.set_cross_section_scaling_factor(1.0);
       it++;

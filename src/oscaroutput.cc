@@ -499,9 +499,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \process_type{47} Failed string process, Soft String NNbar annihilation
  *                   process can fail by lack of energy. This is a tag we add to
  *                   avoid mislabeling the events.
- * \process_type{90} Freeforall action process, Ignores conservation laws, when
- *                   FreeforallAction is used to add a list of particles or
- *                   remove a list of particles from the evolution.
+ * \process_type{90} Add or remove particle(s) process, which ignores
+ *                   conservation laws. It can be thought of as a 0 &rarr; 1 or
+ *                   a 1 &rarr; 0 process.
  * </table>
  *
  * \page doxypage_output_oscar_particles
