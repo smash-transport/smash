@@ -169,8 +169,8 @@ class PdgCode {
    * interface for all cases is definitely user-friendly.
    *
    * Since the string constructor works, we delegate here the construction to
-   * it. In order to do execute the needed code to built the string in the
-   * member initializer list, we use a common lambda idiom that consists in
+   * it. In order to execute the needed code to built the string in the member
+   * initializer list, we use a common lambda idiom (IIFE) that consists in
    * immediately invoking a lambda function. Using \c std::invoke makes it more
    * explicit than using \c () after the lambda braces.
    *
@@ -195,13 +195,28 @@ class PdgCode {
    * Type-traits are used to limit the template instantiation to reasonable
    * cases, only.
    *
+   * \warning
+   * In C++, it is more common to enable constructors template via a non-type
+   * template parameter, i.e.
+   * \code
+   * template <typename T,
+   * template <typename T,
+   *           typename std::enable_if_t<
+   *               std::is_integral_v<T> && 4 < sizeof(T), bool
+   *           > = true>
+   * PdgCode(T codenumber) // ...
+   * \endcode
+   * but this breaks Doxygen documentation, because apparently multiple "nested"
+   * template parameters are not able to be correctly handled.
+   *
    * \param[in] codenumber The hexadecimal PDG code
-   * \tparam T The type of the PDG code, irrelevant for the user and deduced by
-   * the compiler
+   * \tparam T The type of the PDG code, irrelevant for the user
+   *           and deduced by the compiler
    */
-  template <typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true,
-            std::enable_if_t<4 < sizeof(T), bool> = true>
-  PdgCode(T codenumber)  // NOLINT(runtime/explicit)
+  template <typename T>
+  PdgCode(T codenumber,  // NOLINT(runtime/explicit)
+          typename std::enable_if_t<std::is_integral_v<T> && 4 < sizeof(T),
+                                    bool> = true)
       : PdgCode{std::invoke([&codenumber]() {
           std::stringstream stream;
           char sign = '+';
@@ -440,7 +455,7 @@ class PdgCode {
     const auto c = code();
     return (c == pdg::pi_z) || (c == pdg::pi_p) || (c == pdg::pi_m);
   }
-  
+
   /// \return whether this is a a1 meson
   inline bool is_a1() const {
     const auto c = code();
