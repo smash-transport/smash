@@ -98,7 +98,7 @@ int main() {
   const ParticleTypePtr p = ParticleType::try_find(pdg::p);
   const ParticleTypePtr n = ParticleType::try_find(pdg::n);
   const ParticleTypePtr La = ParticleType::try_find(pdg::Lambda);
-  const ParticleTypePtr d = ParticleType::try_find(pdg::d);
+  const ParticleTypePtr d = ParticleType::try_find(pdg::deuteron);
   const ParticleTypePtr t = ParticleType::try_find(pdg::triton);
   const ParticleTypePtr he3 = ParticleType::try_find(pdg::he3);
   const ParticleTypePtr H3L = ParticleType::try_find(pdg::hypertriton);

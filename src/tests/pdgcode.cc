@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2021
+ *    Copyright (c) 2014-2021,2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -68,6 +68,18 @@ PdgCode antimu(-0x13);
 // bosons
 PdgCode photon(0x22);
 PdgCode higgs(0x25);
+
+TEST(create_nuclei_using_hexadecimal_codes) {
+  VERIFY(deutron == PdgCode{0x1000010020});
+  VERIFY(antideutron == PdgCode{-0x1000010020});
+  VERIFY(triton == PdgCode{0x1000010030});
+  VERIFY(antitriton == PdgCode{-0x1000010030});
+  VERIFY(he3 == PdgCode{0x1000020030});
+  VERIFY(antihe3 == PdgCode{-0x1000020030});
+  VERIFY(He4 == PdgCode{0x1000020040});
+  VERIFY(H3L == PdgCode{0x1010010030});
+  VERIFY(antiH3L == PdgCode{-0x1010010030});
+}
 
 TEST(write_codes) {
   std::printf("######################### Non-Hadrons:\n");

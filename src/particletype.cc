@@ -450,7 +450,7 @@ void ParticleType::check_consistency() {
           " has no decay chanels! Either add one to it in decaymodes file or "
           "set it's width to 0 in particles file.");
     }
-    if (ptype.is_dprime() && !ParticleType::try_find(pdg::d)) {
+    if (ptype.is_dprime() && !ParticleType::try_find(pdg::deuteron)) {
       throw std::runtime_error(
           "d' cannot be used without deuteron. Modify input particles file "
           "accordingly.");

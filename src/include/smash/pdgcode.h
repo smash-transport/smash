@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2022
+ *    Copyright (c) 2014-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,11 +14,14 @@
 #include <array>
 #include <cassert>
 #include <cstdlib>
+#include <functional>
+#include <iomanip>
 #include <iosfwd>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 
 #include "pdgcode_constants.h"
 
@@ -148,7 +151,7 @@ class PdgCode {
     set_fields(codenumber);
   }
   /**
-   * receive an unsigned integer and process it into a PDG Code. The
+   * Receive an unsigned integer and process it into a PDG Code. The
    * first bit is taken and used as antiparticle boolean.
    */
   explicit PdgCode(const std::uint32_t abscode) : dump_(0x0) {
@@ -156,6 +159,59 @@ class PdgCode {
     digits_.antiparticle_ = ((abscode & 0x80000000u) != 0);
     set_fields(abscode);
   }
+
+  /**
+   * The creation of \c PdgCode instances for nuclei that have a 10-digits code
+   * cannot be done using the integer constructors above, since a 10-digits
+   * hexadecimal number like 0x1000020030 exceeds the int32_t capacity. Nuclei
+   * instances can in principle either be created with the string constructor or
+   * via the \c PdgCode::from_decimal() static member, but offering a uniform
+   * interface for all cases is definitely user-friendly.
+   *
+   * Since the string constructor works, we delegate here the construction to
+   * it. In order to do execute the needed code to built the string in the
+   * member initializer list, we use a common lambda idiom that consists in
+   * immediately invoking a lambda function. Using \c std::invoke makes it more
+   * explicit than using \c () after the lambda braces.
+   *
+   * \note
+   * One might wonder why a function template has been used instead of e.g.
+   * adding a constructor taking a \c int64_t argument. The reason is to
+   * facilitate the class usage. Having a fixed type would have required the
+   * users of this class to \b exactly match the argument type (and for
+   * \c int64_t there is no standard literal suffix), otherwise the call would
+   * have been ambiguous and compilation would have failed. Said differently, we
+   * would like
+   * \code
+   * PdgCode deuteron(0x1000010020);
+   * \endcode
+   * to work and not oblige the user to write
+   * \code
+   * PdgCode deuteron(INT64_C(0x1000010020));
+   * \endcode
+   * just because the constructor takes an \c int64_t number.
+   * The idea here is to offer a better matching to the compiler when the
+   * constructor is called with an integer type with size larger than 4 bytes.
+   * Type-traits are used to limit the template instantiation to reasonable
+   * cases, only.
+   *
+   * \param[in] codenumber The hexadecimal PDG code
+   * \tparam T The type of the PDG code, irrelevant for the user and deduced by
+   * the compiler
+   */
+  template <typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true,
+            std::enable_if_t<4 < sizeof(T), bool> = true>
+  PdgCode(T codenumber)  // NOLINT(runtime/explicit)
+      : PdgCode{std::invoke([&codenumber]() {
+          std::stringstream stream;
+          char sign = '+';
+          if (codenumber < 0) {
+            sign = '-';
+            codenumber = -codenumber;
+          }
+          stream << sign << std::hex << codenumber;
+          return stream.str();
+        })} {}
 
   /****************************************************************************
    *                                                                          *
@@ -1051,31 +1107,6 @@ inline bool has_lepton_pair(const PdgCode pdg1, const PdgCode pdg2,
   return is_dilepton(pdg1, pdg2) || is_dilepton(pdg1, pdg3) ||
          is_dilepton(pdg2, pdg3);
 }
-
-/**
- * Constants representing PDG codes of nuclei.
- */
-namespace pdg {
-/// Deuteron.
-const PdgCode d(PdgCode::from_decimal(1000010020));
-/// Anti-deuteron in decimal digits.
-const PdgCode antid(PdgCode::from_decimal(-1000010020));
-/// Deuteron-prime resonance.
-const PdgCode dprime(PdgCode::from_decimal(1000010021));
-/// Triton.
-const PdgCode triton(PdgCode::from_decimal(1000010030));
-/// Anti-triton.
-const PdgCode antitriton(PdgCode::from_decimal(-1000010030));
-/// He-3
-const PdgCode he3(PdgCode::from_decimal(1000020030));
-/// Anti-He-3
-const PdgCode antihe3(PdgCode::from_decimal(-1000020030));
-/// Hypertriton
-const PdgCode hypertriton(PdgCode::from_decimal(1010010030));
-/// Anti-Hypertriton
-const PdgCode antihypertriton(PdgCode::from_decimal(-1010010030));
-
-}  // namespace pdg
 
 }  // namespace smash
 

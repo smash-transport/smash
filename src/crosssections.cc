@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2018-2022
+ *    Copyright (c) 2018-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -1135,8 +1135,8 @@ CollisionBranchList CrossSections::nn_xx(
   }
 
   // Find N N → dπ and N̅ N̅→ d̅π channels.
-  ParticleTypePtr deutron = ParticleType::try_find(pdg::d);
-  ParticleTypePtr antideutron = ParticleType::try_find(pdg::antid);
+  ParticleTypePtr deutron = ParticleType::try_find(pdg::deuteron);
+  ParticleTypePtr antideutron = ParticleType::try_find(pdg::antideuteron);
   ParticleTypePtr pim = ParticleType::try_find(pdg::pi_m);
   ParticleTypePtr pi0 = ParticleType::try_find(pdg::pi_z);
   ParticleTypePtr pip = ParticleType::try_find(pdg::pi_p);
