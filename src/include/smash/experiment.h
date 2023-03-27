@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2022
+ *    Copyright (c) 2013-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -51,6 +51,7 @@
 #ifdef SMASH_USE_ROOT
 #include "rootoutput.h"
 #endif
+#include "freeforallaction.h"
 #include "vtkoutput.h"
 #include "wallcrossingaction.h"
 
@@ -219,16 +220,24 @@ class Experiment : public ExperimentBase {
   void initialize_new_event();
 
   /**
-   * Runs the time evolution of an event with fixed-sized time steps or without
+   * Runs the time evolution of an event with fixed-size time steps or without
    * timesteps, from action to actions.
-   * Within one timestep (fixed) evolution from action to action
-   * is invoked.
+   * Within one timestep (fixed) evolution from action to action is invoked.
    *
-   * \param[in] t_end time until run_time_evolution is run, in SMASH this is the
+   * \param[in] t_end Time until run_time_evolution is run, in SMASH this is the
    *                  configured end_time, but it might differ if SMASH is used
    *                  as an external library
+   * \param[in] add_plist A by-default empty particle list which is added to the
+   *                      current particle content of the system
+   * \param[in] remove_plist A by-default empty particle list which is removed
+   *                         from the current particle content of the system
+   *
+   * \note
+   * This function is meant to take over ownership of the to-be-added/removed
+   * particle lists and that's why these are passed by rvalue reference.
    */
-  void run_time_evolution(const double t_end);
+  void run_time_evolution(const double t_end, ParticleList &&add_plist = {},
+                          ParticleList &&remove_plist = {});
 
   /**
    * Performs the final decays of an event
@@ -244,8 +253,6 @@ class Experiment : public ExperimentBase {
    * Provides external access to SMASH particles. This is helpful if SMASH
    * is used as a 3rd-party library.
    */
-  // todo(oliiny): this should be made compatible with JetScape on
-  // the JetScape side
   Particles *first_ensemble() { return &ensembles_[0]; }
   /// Getter for all ensembles
   std::vector<Particles> *all_ensembles() { return &ensembles_; }
@@ -255,6 +262,12 @@ class Experiment : public ExperimentBase {
    * SMASH is used as a 3rd-party library.
    */
   Modus *modus() { return &modus_; }
+
+  /**
+   * Increases the event number by one. This function is helpful if
+   * SMASH is used as a 3rd-party library.
+   */
+  void increase_event_number();
 
  private:
   /**
@@ -2151,8 +2164,70 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   return true;
 }
 
+/**
+ * Validate a particle list adjusting each particle to be a valid SMASH
+ * particle. If the provided particle has an invalid PDG code, it is removed
+ * from the list and the user warned. If the particles in the list are adjusted,
+ * the function warns the user only the first time this function is called.
+ * \see create_valid_smash_particle_matching_provided_quantities for more
+ * information about which adjustements are made to the particles.
+ *
+ * \param[in] particle_list The particle list which should be adjusted
+ */
+void validate_and_adjust_particle_list(ParticleList &particle_list);
+
 template <typename Modus>
-void Experiment<Modus>::run_time_evolution(const double t_end) {
+void Experiment<Modus>::run_time_evolution(const double t_end,
+                                           ParticleList &&add_plist,
+                                           ParticleList &&remove_plist) {
+  if (!add_plist.empty() || !remove_plist.empty()) {
+    if (ensembles_.size() > 1) {
+      throw std::runtime_error(
+          "Adding or removing particles from SMASH is only possible when one "
+          "ensemble is used.");
+    }
+    const double action_time = parameters_.labclock->current_time();
+    if (!add_plist.empty()) {
+      validate_and_adjust_particle_list(add_plist);
+    }
+    if (!add_plist.empty()) {
+      // Create and perform action to add particle(s)
+      auto action_add_particles = std::make_unique<FreeforallAction>(
+          ParticleList{}, add_plist, action_time);
+      perform_action(*action_add_particles, 0);
+    }
+    if (!remove_plist.empty()) {
+      validate_and_adjust_particle_list(remove_plist);
+      const auto number_of_particles_to_be_removed = remove_plist.size();
+      remove_plist.erase(
+          std::remove_if(
+              remove_plist.begin(), remove_plist.end(),
+              [this, &action_time](const ParticleData &particle_to_remove) {
+                return std::find_if(
+                           ensembles_[0].begin(), ensembles_[0].end(),
+                           [&particle_to_remove,
+                            &action_time](const ParticleData &p) {
+                             return are_particles_identical_at_given_time(
+                                 particle_to_remove, p, action_time);
+                           }) == ensembles_[0].end();
+              }),
+          remove_plist.end());
+      if (auto delta = number_of_particles_to_be_removed - remove_plist.size();
+          delta > 0) {
+        logg[LExperiment].warn(
+            "When trying to remove particle(s) at the beginning ",
+            "of the system evolution,\n", delta,
+            " particle(s) could not be found and will be ignored.");
+      }
+    }
+    if (!remove_plist.empty()) {
+      // Create and perform action to remove particles
+      auto action_remove_particles = std::make_unique<FreeforallAction>(
+          remove_plist, ParticleList{}, action_time);
+      perform_action(*action_remove_particles, 0);
+    }
+  }
+
   while (parameters_.labclock->current_time() < t_end) {
     const double dt = parameters_.labclock->timestep_duration();
     logg[LExperiment].debug("Timestepless propagation for next ", dt, " fm.");
@@ -2844,6 +2919,11 @@ bool Experiment<Modus>::is_finished() {
   }
   throw std::runtime_error("Event counting option is invalid");
   return false;
+}
+
+template <typename Modus>
+void Experiment<Modus>::increase_event_number() {
+  event_++;
 }
 
 template <typename Modus>

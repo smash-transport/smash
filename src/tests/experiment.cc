@@ -91,3 +91,54 @@ TEST(access_particles) {
   ParticleList part_list = part->copy_to_vector();
   VERIFY(part_list.size() == 1);
 }
+
+TEST(add_and_remove_particles) {
+  /*
+   * NOTE: As in the first test of this file Test::create_actual_particletypes
+   *       is called, only particles with valid PDG codes can be easily used.
+   *       Although ParticleData{ParticleType{"Inv", 0, 0, Parity::Neg, 0x0}}
+   *       seems valid it would fail in Debug mode because of an assert in the
+   *       overload of the address operator of ParticleType. Therefore, adding
+   *       or removing invalid particles is not tested here.
+   */
+
+  // Set up collider experiment without setting up initial state (no Au-Au)
+  auto config = get_collider_configuration();
+  auto exp = std::make_unique<Experiment<ColliderModus>>(config, ".");
+
+  // Neither add nor remove particles -> expect 0 particles
+  exp->run_time_evolution(1., ParticleList{}, ParticleList{});
+  VERIFY(exp->first_ensemble()->size() == 0);
+
+  // Add 1 pion off shell -> expect pion added on shell
+  ParticleData pion_plus{ParticleType::find(pdg::pi_p)};
+  pion_plus.set_4momentum(FourVector(1.0, 0.95, 0.0, 0.0));
+  pion_plus.set_4position(FourVector(0.0, 0.0, 0.0, 0.0));
+  exp->run_time_evolution(1., ParticleList{pion_plus}, ParticleList{});
+  VERIFY(exp->first_ensemble()->size() == 1);
+  COMPARE_ABSOLUTE_ERROR(
+      exp->first_ensemble()->begin()->momentum().x0(),
+      std::sqrt(0.95 * 0.95 + pion_plus.pole_mass() * pion_plus.pole_mass()),
+      very_small_double);
+
+  // Remove existing pion -> expect 0 particles
+  exp->run_time_evolution(1., ParticleList{},
+                          exp->first_ensemble()->copy_to_vector());
+  VERIFY(exp->first_ensemble()->size() == 0);
+
+  // Add pion and omega off shell -> expect 2 particles (omega on its shell)
+  ParticleData omega{ParticleType::find(pdg::omega)};
+  omega.set_4momentum(FourVector(0.783, 0.5, 0.0, 0.0));
+  omega.set_4position(FourVector(0.0, 1.0, 0.0, 0.0));
+  exp->run_time_evolution(1., ParticleList{pion_plus, omega}, ParticleList{});
+  VERIFY(exp->first_ensemble()->size() == 2);
+  COMPARE_ABSOLUTE_ERROR(exp->first_ensemble()->back().momentum().abs(),
+                         omega.effective_mass(), very_small_double);
+
+  // Remove non existing eta -> still 2 particles
+  ParticleData eta{ParticleType::find(pdg::eta)};
+  eta.set_4momentum(FourVector(0.548, 0.0, 0.0, 0.0));
+  eta.set_4position(FourVector(0.0, 2.0, 0.0, 0.0));
+  exp->run_time_evolution(1., ParticleList{}, ParticleList{eta});
+  VERIFY(exp->first_ensemble()->size() == 2);
+}

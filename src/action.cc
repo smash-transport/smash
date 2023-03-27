@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2022
+ *    Copyright (c) 2014-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -487,7 +487,7 @@ double Action::check_conservation(const uint32_t id_process) const {
      * print the warning and continue. */
     if ((is_string_soft_process(process_type_)) ||
         (process_type_ == ProcessType::StringHard)) {
-      logg[LAction].warn() << "Conservation law violations due to Pyhtia\n"
+      logg[LAction].warn() << "Conservation law violations due to Pythia\n"
                            << particle_names.str() << err_msg;
       energy_violation = after.momentum()[0] - before.momentum()[0];
       return energy_violation;
@@ -500,6 +500,15 @@ double Action::check_conservation(const uint32_t id_process) const {
       logg[LAction].warn()
           << "Conservation law violations of strong interaction in weak or "
              "e.m. decay\n"
+          << particle_names.str() << err_msg;
+      return energy_violation;
+    }
+    /* If particles are added or removed, it is not surprising that conservation
+     * laws are potentially violated. Do not warn the user but print some
+     * information for debug */
+    if (process_type_ == ProcessType::Freeforall) {
+      logg[LAction].debug()
+          << "Conservation law violation, but we want it (Freeforall Action).\n"
           << particle_names.str() << err_msg;
       return energy_violation;
     }

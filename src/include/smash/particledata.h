@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2020
+ *    Copyright (c) 2012-2020,2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -509,6 +509,54 @@ inline PrintParticleListDetailed detailed(const ParticleList &list) {
  */
 std::ostream &operator<<(std::ostream &out,
                          const PrintParticleListDetailed &particle_list);
+
+/**
+ * This function creates a SMASH particle validating the provided information.
+ *
+ *  - A particle is first created using the given PDG code, setting its
+ *    4-momentum to the given one.
+ *  - Afterwards, if stable, its mass is compared to the given one and, if these
+ *    do not match (up to numeric rounding), the internal SMASH value (i.e. that
+ *    from the particles file) is used to put the particle on the SMASH mass
+ *    shell.
+ *  - Finally, for unstable particles or if the previous mass check passed, the
+ *    particle is checked to be on its mass shell and, if not, its energy is
+ *    adjusted to put the particle on its mass shell.
+ *
+ * This function possibly warns the user, if requested.
+ *
+ * \param[in] pdgcode PdgCode  of the particle which is supposed to be checked
+ * \param[in] mass Mass of the new particle
+ * \param[in] four_momentum Momentum four vector of the new particles
+ * \param[in] log_area Logging area for the warning
+ * \param[inout] mass_warning Whether to warn about mass discrepancies
+ * \param[inout] on_shell_warning Whether to warn about off-shell particles
+ * \return
+ *
+ * \note The boolean flags are passed by reference, since we want to allow
+ * client code to warn the user only once per flag. Hence, this function is
+ * turning the flags to \c false after having warned the user.
+ */
+ParticleData create_valid_smash_particle_matching_provided_quantities(
+    PdgCode pdgcode, double mass, const FourVector &four_momentum, int log_area,
+    bool &mass_warning, bool &on_shell_warning);
+
+/**
+ * Utility function to compare two \c ParticleData instances with respect to
+ * their PDG code, 4-position and 4-momenta.
+ *
+ * The particles are propagated to the given time before being compared.
+ * 4-vectors are compared using the \c FourVector::operator== overload.
+ *
+ * @param p1 The first particle
+ * @param p2 The second particle
+ * @param time The time at which the comparison should take place
+ * @return \c true if the two particles have the same PDG codes, 4-position and
+ * 4-momentum;
+ * @return \c false otherwise.
+ */
+bool are_particles_identical_at_given_time(const ParticleData &p1,
+                                           const ParticleData &p2, double time);
 
 }  // namespace smash
 
