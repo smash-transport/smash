@@ -135,13 +135,16 @@ namespace smash {
  *    Failed to convert the input string to the expected data types.
  *    ```
  * -# SMASH validates (up to some small numeric precision) the mass of some
- *    particles. Therefore, totally nonphysical mass values cannot be used and
- *    SMASH will abort with a message error like e.g. the following:
+ *    particles (e.g. N, π, K, ω, a₁, Δ, D). Therefore, totally nonphysical mass
+ *    values cannot be used and SMASH will abort with a message error like e.g.
+ *    the following
  *    ```
- *    Nucleon mass in input file different from 0.938
+ *    Nucleon mass in input file different from 0.938000
  *    ```
- *    If you really need to use SMASH with nonphysical mass values, feel free to
- *    contact us or open an issue.
+ *    if a mass discrepancy for one of the validated particle is detected. This
+ *    constraint is due to internal assumptions in SMASH and is needed to
+ *    guarantee correctness of the results. If you really need to use SMASH with
+ *    nonphysical mass values, feel free to contact us or open an issue.
  * -# Related to the previous point, it is important to mention that all hadrons
  *    belonging to the same isospin multiplet must have the same mass and this
  *    is enforced by SMASH, which will fail otherwise. Feel free to get in touch

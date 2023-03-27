@@ -32,7 +32,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Fix bug in collider modus when setting the total energy per nucleon of _each_ beam
 * The box modus can only be used with the fixed time step mode
 * Avoid integer overflow to silently happen in grid construction
-* Correct tau lepton mass in particles list files
+* Correct tau lepton and a₁ meson mass in particles list files
 * Fix code behavior in list modi setup to be coherent with given warnings in case of input discrepancies
 
 ### Changed
@@ -52,7 +52,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Upgraded to Pythia 8.309
 * Clebsch-Gordan coefficients are now tabulated resulting into a performance increase, especially at low energies
 * Made the input `Jet_PDG` key in the `Jet` section in sphere and box modus mandatory, when the `Jet` section is provided
-* The `Lattice` section in the input file cannot be any more empty; the key `Automatic: True` must be now used to fully automatically generate the lattice
+* The `Lattice` section in the input file cannot be any more empty; the key `Automatic: True` must be now used to automatically generate the lattice and `Automatic: False` is needed if the geometry is fully specified.
+* Validate all input mass values whose value needs to match the SMASH internally used one
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now

@@ -440,6 +440,18 @@ class PdgCode {
     const auto c = code();
     return (c == pdg::pi_z) || (c == pdg::pi_p) || (c == pdg::pi_m);
   }
+  
+  /// \return whether this is a a1 meson
+  inline bool is_a1() const {
+    const auto c = code();
+    return (c == pdg::a1_z) || (c == pdg::a1_p) || (c == pdg::a1_m);
+  }
+
+  /// \return whether this is an omega meson
+  inline bool is_omega() const {
+    const auto c = code();
+    return c == pdg::omega;
+  }
 
   /// \return whether this is a rho meson (rho+/rho0/rho-)
   inline bool is_rho() const {

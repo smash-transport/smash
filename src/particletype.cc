@@ -251,17 +251,32 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     /* Check if nucleon, kaon, and delta masses are
      * the same as hardcoded ones, if present */
     if (pdgcode[0].is_nucleon() && !almost_equal(mass, nucleon_mass)) {
-      throw std::runtime_error(
-          "Nucleon mass in input file different from 0.938");
+      throw std::runtime_error("Nucleon mass in input file different from " +
+                               std::to_string(nucleon_mass));
+    }
+    if (pdgcode[0].is_pion() && !almost_equal(mass, pion_mass)) {
+      throw std::runtime_error("Pion mass in input file different from " +
+                               std::to_string(pion_mass));
     }
     if (pdgcode[0].is_kaon() && !almost_equal(mass, kaon_mass)) {
-      throw std::runtime_error("Kaon mass in input file different from 0.494");
+      throw std::runtime_error("Kaon mass in input file different from " +
+                               std::to_string(kaon_mass));
+    }
+    if (pdgcode[0].is_omega() && !almost_equal(mass, omega_mass)) {
+      throw std::runtime_error("Omega mass in input file different from " +
+                               std::to_string(omega_mass));
+    }
+    if (pdgcode[0].is_a1() && !almost_equal(mass, a1_mass)) {
+      throw std::runtime_error("a1 mass in input file different from " +
+                               std::to_string(a1_mass));
     }
     if (pdgcode[0].is_Delta() && !almost_equal(mass, delta_mass)) {
-      throw std::runtime_error("Delta mass in input file different from 1.232");
+      throw std::runtime_error("Delta mass in input file different from " +
+                               std::to_string(delta_mass));
     }
     if (pdgcode[0].is_deuteron() && !almost_equal(mass, deuteron_mass)) {
-      throw std::runtime_error("d mass in input file different from 1.8756");
+      throw std::runtime_error("d mass in input file different from " +
+                               std::to_string(deuteron_mass));
     }
 
     // add all states to type list
