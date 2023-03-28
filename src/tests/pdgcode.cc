@@ -52,7 +52,7 @@ PdgCode xi_c(0x4322);
 PdgCode omega_c_bar(-0x4332);
 PdgCode xi_cc_bar(-0x4422);
 PdgCode omega_bc(0x5432);
-PdgCode deutron("1000010020");
+PdgCode deuteron("1000010020");
 PdgCode antideutron("-1000010020");
 PdgCode triton("1000010030");
 PdgCode antitriton("-1000010030");
@@ -70,7 +70,7 @@ PdgCode photon(0x22);
 PdgCode higgs(0x25);
 
 TEST(create_nuclei_using_hexadecimal_codes) {
-  VERIFY(deutron == PdgCode{0x1000010020});
+  VERIFY(deuteron == PdgCode{0x1000010020});
   VERIFY(antideutron == PdgCode{-0x1000010020});
   VERIFY(triton == PdgCode{0x1000010030});
   VERIFY(antitriton == PdgCode{-0x1000010030});
@@ -174,7 +174,7 @@ TEST(pdg_string) {
   COMPARE(antidelta.string(), "-122224");
   COMPARE(lambda.string(), "3122");
   COMPARE(antixi.string(), "-103312");
-  COMPARE(deutron.string(), "1000010020");
+  COMPARE(deuteron.string(), "1000010020");
   COMPARE(antideutron.string(), "-1000010020");
   COMPARE(He4.string(), "1000020040");
   COMPARE(H3L.string(), "1010010030");
@@ -189,7 +189,7 @@ TEST(decimal) {
   COMPARE(antidelta.get_decimal(), -122224);
   COMPARE(lambda.get_decimal(), 3122);
   COMPARE(antixi.get_decimal(), -103312);
-  COMPARE(deutron.get_decimal(), 1000010020);
+  COMPARE(deuteron.get_decimal(), 1000010020);
   COMPARE(antideutron.get_decimal(), -1000010020);
   COMPARE(He4.get_decimal(), 1000020040);
   COMPARE(H3L.get_decimal(), 1010010030);
@@ -207,7 +207,7 @@ TEST(hadron) {
   VERIFY(pion.is_hadron());
   VERIFY(proton.is_hadron());
   VERIFY(antidelta.is_hadron());
-  VERIFY(!deutron.is_hadron());
+  VERIFY(!deuteron.is_hadron());
   VERIFY(!antideutron.is_hadron());
 }
 
@@ -216,7 +216,7 @@ TEST(nucleus) {
   VERIFY(!pion.is_nucleus());
   VERIFY(!proton.is_nucleus());
   VERIFY(!antidelta.is_nucleus());
-  VERIFY(deutron.is_nucleus());
+  VERIFY(deuteron.is_nucleus());
   VERIFY(antideutron.is_nucleus());
   VERIFY(He4.is_nucleus());
   VERIFY(H3L.is_nucleus());
@@ -229,12 +229,12 @@ TEST(lepton) {
   VERIFY(!photon.is_lepton());
   VERIFY(!pion.is_lepton());
   VERIFY(!proton.is_lepton());
-  VERIFY(!deutron.is_lepton());
+  VERIFY(!deuteron.is_lepton());
 }
 
 TEST(is_meson) {
   VERIFY(pion.is_meson());
-  VERIFY(!deutron.is_meson());
+  VERIFY(!deuteron.is_meson());
   VERIFY(!antideutron.is_meson());
   VERIFY(!proton.is_meson());
   VERIFY(!antiproton.is_meson());
@@ -243,7 +243,7 @@ TEST(is_meson) {
 
 TEST(is_baryon) {
   VERIFY(!pion.is_baryon());
-  VERIFY(!deutron.is_baryon());
+  VERIFY(!deuteron.is_baryon());
   VERIFY(!antideutron.is_baryon());
   VERIFY(proton.is_baryon());
   VERIFY(antiproton.is_baryon());
@@ -285,7 +285,7 @@ TEST(baryon_number) {
   COMPARE(omega_c_bar.baryon_number(), -1);
   COMPARE(xi_cc_bar.baryon_number(), -1);
   COMPARE(omega_bc.baryon_number(), 1);
-  COMPARE(deutron.baryon_number(), 2);
+  COMPARE(deuteron.baryon_number(), 2);
   COMPARE(antideutron.baryon_number(), -2);
   COMPARE(antitriton.baryon_number(), -3);
   COMPARE(he3.baryon_number(), 3);
@@ -316,7 +316,7 @@ TEST(isospin3) {
   COMPARE(omega_c_bar.isospin3(), 0);
   COMPARE(xi_cc_bar.isospin3(), -1);
   COMPARE(omega_bc.isospin3(), 0);
-  COMPARE(deutron.isospin3(), 0);
+  COMPARE(deuteron.isospin3(), 0);
   COMPARE(antideutron.isospin3(), 0);
   COMPARE(triton.isospin3(), -1);
   COMPARE(antitriton.isospin3(), 1);
@@ -349,7 +349,7 @@ TEST(strangeness) {
   COMPARE(omega_c_bar.strangeness(), +2);
   COMPARE(xi_cc_bar.strangeness(), 0);
   COMPARE(omega_bc.strangeness(), -1);
-  COMPARE(deutron.strangeness(), 0);
+  COMPARE(deuteron.strangeness(), 0);
   COMPARE(antideutron.strangeness(), 0);
   COMPARE(H3L.strangeness(), -1);
 }
@@ -377,7 +377,7 @@ TEST(charmness) {
   COMPARE(omega_c_bar.charmness(), -1);
   COMPARE(xi_cc_bar.charmness(), -2);
   COMPARE(omega_bc.charmness(), +1);
-  COMPARE(deutron.charmness(), 0);
+  COMPARE(deuteron.charmness(), 0);
 }
 TEST(bottomness) {
   COMPARE(electron.bottomness(), 0);
@@ -403,7 +403,7 @@ TEST(bottomness) {
   COMPARE(omega_c_bar.bottomness(), 0);
   COMPARE(xi_cc_bar.bottomness(), 0);
   COMPARE(omega_bc.bottomness(), -1);
-  COMPARE(deutron.bottomness(), 0);
+  COMPARE(deuteron.bottomness(), 0);
 }
 TEST(charge) {
   COMPARE(electron.charge(), -1);
@@ -431,7 +431,7 @@ TEST(charge) {
   COMPARE(omega_c_bar.charge(), 0);
   COMPARE(xi_cc_bar.charge(), -2);
   COMPARE(omega_bc.charge(), 0);
-  COMPARE(deutron.charge(), 1);
+  COMPARE(deuteron.charge(), 1);
   COMPARE(antideutron.charge(), -1);
   COMPARE(He4.charge(), 2);
   COMPARE(H3L.charge(), 1);
@@ -489,7 +489,7 @@ TEST(spin) {
   COMPARE(omega_c_bar.spin(), 1u);
   COMPARE(xi_cc_bar.spin(), 1u);
   COMPARE(omega_bc.spin(), 1u);
-  COMPARE(deutron.spin(), 2u);
+  COMPARE(deuteron.spin(), 2u);
   COMPARE(antideutron.spin(), 2u);
   COMPARE(He4.spin(), 0u);
   COMPARE(H3L.spin(), 1u);
@@ -667,7 +667,7 @@ TEST(from_decimal) {
   COMPARE(pion, PdgCode::from_decimal(211));
   COMPARE(Kminus, PdgCode::from_decimal(-321));
   COMPARE(antixi, PdgCode::from_decimal(-103312));
-  COMPARE(deutron, PdgCode::from_decimal(1000010020));
+  COMPARE(deuteron, PdgCode::from_decimal(1000010020));
   COMPARE(antideutron, PdgCode::from_decimal(-1000010020));
 }
 
@@ -689,7 +689,7 @@ TEST(antiparticles) {
   COMPARE(electron.has_antiparticle(), true);
   COMPARE(antimu.has_antiparticle(), true);
   COMPARE(photon.has_antiparticle(), false);
-  COMPARE(deutron.has_antiparticle(), true);
+  COMPARE(deuteron.has_antiparticle(), true);
   COMPARE(antideutron.has_antiparticle(), true);
   COMPARE(He4.has_antiparticle(), true);
   COMPARE(H3L.has_antiparticle(), true);

@@ -275,7 +275,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
                                std::to_string(delta_mass));
     }
     if (pdgcode[0].is_deuteron() && !almost_equal(mass, deuteron_mass)) {
-      throw std::runtime_error("d mass in input file different from " +
+      throw std::runtime_error("Deuteron mass in input file different from " +
                                std::to_string(deuteron_mass));
     }
 
