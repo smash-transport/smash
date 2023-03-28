@@ -248,8 +248,7 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
                    [](const std::string &s) { return PdgCode(s); });
     ensure_all_read(lineinput, line);
 
-    /* Check if nucleon, kaon, and delta masses are
-     * the same as hardcoded ones, if present */
+    // Check if provided masses are the same as hardcoded ones, if present
     if (pdgcode[0].is_nucleon() && !almost_equal(mass, nucleon_mass)) {
       throw std::runtime_error("Nucleon mass in input file different from " +
                                std::to_string(nucleon_mass));
@@ -265,10 +264,6 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
     if (pdgcode[0].is_omega() && !almost_equal(mass, omega_mass)) {
       throw std::runtime_error("Omega mass in input file different from " +
                                std::to_string(omega_mass));
-    }
-    if (pdgcode[0].is_a1() && !almost_equal(mass, a1_mass)) {
-      throw std::runtime_error("a1 mass in input file different from " +
-                               std::to_string(a1_mass));
     }
     if (pdgcode[0].is_Delta() && !almost_equal(mass, delta_mass)) {
       throw std::runtime_error("Delta mass in input file different from " +

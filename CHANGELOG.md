@@ -32,7 +32,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Fix bug in collider modus when setting the total energy per nucleon of _each_ beam
 * The box modus can only be used with the fixed time step mode
 * Avoid integer overflow to silently happen in grid construction
-* Correct tau lepton and a₁ meson mass in particles list files
+* Correct tau lepton mass in particles list files
 * Fix code behavior in list modi setup to be coherent with given warnings in case of input discrepancies
 
 ### Changed

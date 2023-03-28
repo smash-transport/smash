@@ -44,12 +44,6 @@ TEST_CATCH(wrong_kaon_mass, std::runtime_error) {
       "K   0.493 0 - 311 321\n");
 }
 
-TEST_CATCH(wrong_a1_mass, std::runtime_error) {
-  ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
-      "a₁(1260) 1.261  0.42 + 20113 20213\n");
-}
-
 TEST_CATCH(wrong_deuteron_mass, std::runtime_error) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"

@@ -70,13 +70,6 @@ constexpr int pi_z = 0x111;
 /// π⁻.
 constexpr int pi_m = -0x211;
 
-/// a₁⁺.
-constexpr int a1_p = 0x20213;
-/// a₁⁰.
-constexpr int a1_z = 0x20113;
-/// a₁⁻.
-constexpr int a1_m = -0x20213;
-
 /// K⁺.
 constexpr int K_p = 0x321;
 /// K⁰.

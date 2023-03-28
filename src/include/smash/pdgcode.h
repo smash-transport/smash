@@ -207,7 +207,9 @@ class PdgCode {
    * PdgCode(T codenumber) // ...
    * \endcode
    * but this breaks Doxygen documentation, because apparently multiple "nested"
-   * template parameters are not able to be correctly handled.
+   * template parameters are not able to be correctly handled (possibly because
+   * of the additional less-than symbol). This limitation has been detected
+   * using Doxygen 1.9.X and might be solved in future versions.
    *
    * \param[in] codenumber The hexadecimal PDG code
    * \tparam T The type of the PDG code, irrelevant for the user
@@ -454,12 +456,6 @@ class PdgCode {
   inline bool is_pion() const {
     const auto c = code();
     return (c == pdg::pi_z) || (c == pdg::pi_p) || (c == pdg::pi_m);
-  }
-
-  /// \return whether this is a a1 meson
-  inline bool is_a1() const {
-    const auto c = code();
-    return (c == pdg::a1_z) || (c == pdg::a1_p) || (c == pdg::a1_m);
   }
 
   /// \return whether this is an omega meson
