@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2022
+ *    Copyright (c) 2013-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -1530,75 +1530,88 @@ Experiment<Modus>::Experiment(Configuration &config,
 
   // Create lattices
   if (config.has_value({"Lattice"})) {
-    if (!config.has_value({"Lattice", "Cell_Number"}) &&
-        !config.has_value({"Lattice", "Origin"}) &&
-        !config.has_value({"Lattice", "Sizes"}) &&
-        !config.has_value({"Lattice", "Automatic"})) {
+    bool automatic = config.take({"Lattice", "Automatic"}, false);
+    bool all_geometrical_properties_specified =
+        config.has_value({"Lattice", "Cell_Number"}) &&
+        config.has_value({"Lattice", "Origin"}) &&
+        config.has_value({"Lattice", "Sizes"});
+    if (!automatic && !all_geometrical_properties_specified) {
       throw std::invalid_argument(
-          "The lattice was not requested to be fully automatically "
-          "generated, but no\nlattice geometrical property was specified. "
-          "Either specify \"Automatic: True\"\nor provide at least one key "
-          "among \"Cell_Number\", \"Origin\" and \"Sizes\".");
+          "The lattice was requested to be manually generated, but some\n"
+          "lattice geometrical property was not specified. Be sure to provide\n"
+          "both \"Cell_Number\" and \"Origin\" and \"Sizes\".");
     }
-    [[maybe_unused]] bool unused = config.take({"Lattice", "Automatic"}, true);
-    std::array<double, 3> l_default{20., 20., 20.};
-    std::array<int, 3> n_default{10, 10, 10};
-    std::array<double, 3> origin_default{-20., -20., -20.};
-    bool periodic_default = false;
-    if (modus_.is_collider() || (modus_.is_list() && !modus_.is_box())) {
-      // Estimates on how far particles could get in x, y, z
-      // The default lattice is currently not contracted for afterburner runs
-      const double gam = modus_.is_collider()
-                             ? modus_.sqrt_s_NN() / (2.0 * nucleon_mass)
-                             : 1.0;
-      const double max_z = 5.0 / gam + end_time_;
-      const double estimated_max_transverse_velocity = 0.7;
-      const double max_xy = 5.0 + estimated_max_transverse_velocity * end_time_;
-      origin_default = {-max_xy, -max_xy, -max_z};
-      l_default = {2 * max_xy, 2 * max_xy, 2 * max_z};
-      // Go for approximately 0.8 fm cell size and contract
-      // lattice in z by gamma factor
-      const int n_xy = std::ceil(2 * max_xy / 0.8);
-      int nz = std::ceil(2 * max_z / 0.8);
-      // Contract lattice by gamma factor in case of smearing where
-      // smearing length is bound to the lattice cell length
-      if (parameters_.smearing_mode == SmearingMode::Discrete ||
-          parameters_.smearing_mode == SmearingMode::Triangular) {
-        nz = static_cast<int>(std::ceil(2 * max_z / 0.8 * gam));
+    if (automatic && all_geometrical_properties_specified) {
+      throw std::invalid_argument(
+          "The lattice was requested to be automatically generated, but all\n"
+          "lattice geometrical properties were specified. In this case you\n"
+          "need to set \"Automatic: False\".");
+    }
+    bool periodic = config.take({"Lattice", "Periodic"}, modus_.is_box());
+    const auto [l, n, origin] = [&config, automatic, this]() {
+      if (!automatic) {
+        return std::make_tuple<std::array<double, 3>, std::array<int, 3>,
+                               std::array<double, 3>>(
+            config.take({"Lattice", "Sizes"}),
+            config.take({"Lattice", "Cell_Number"}),
+            config.take({"Lattice", "Origin"}));
+      } else {
+        std::array<double, 3> l_default{20., 20., 20.};
+        std::array<int, 3> n_default{10, 10, 10};
+        std::array<double, 3> origin_default{-20., -20., -20.};
+        if (modus_.is_collider() || (modus_.is_list() && !modus_.is_box())) {
+          // Estimates on how far particles could get in x, y, z. The
+          // default lattice is currently not contracted for afterburner runs
+          const double gam = modus_.is_collider()
+                                 ? modus_.sqrt_s_NN() / (2.0 * nucleon_mass)
+                                 : 1.0;
+          const double max_z = 5.0 / gam + end_time_;
+          const double estimated_max_transverse_velocity = 0.7;
+          const double max_xy =
+              5.0 + estimated_max_transverse_velocity * end_time_;
+          origin_default = {-max_xy, -max_xy, -max_z};
+          l_default = {2 * max_xy, 2 * max_xy, 2 * max_z};
+          // Go for approximately 0.8 fm cell size and contract
+          // lattice in z by gamma factor
+          const int n_xy = std::ceil(2 * max_xy / 0.8);
+          int nz = std::ceil(2 * max_z / 0.8);
+          // Contract lattice by gamma factor in case of smearing where
+          // smearing length is bound to the lattice cell length
+          if (parameters_.smearing_mode == SmearingMode::Discrete ||
+              parameters_.smearing_mode == SmearingMode::Triangular) {
+            nz = static_cast<int>(std::ceil(2 * max_z / 0.8 * gam));
+          }
+          n_default = {n_xy, n_xy, nz};
+        } else if (modus_.is_box()) {
+          origin_default = {0., 0., 0.};
+          const double bl = modus_.length();
+          l_default = {bl, bl, bl};
+          const int n_xyz = std::ceil(bl / 0.5);
+          n_default = {n_xyz, n_xyz, n_xyz};
+        } else if (modus_.is_sphere()) {
+          // Maximal distance from (0, 0, 0) at which a particle
+          // may be found at the end of the simulation
+          const double max_d = modus_.radius() + end_time_;
+          origin_default = {-max_d, -max_d, -max_d};
+          l_default = {2 * max_d, 2 * max_d, 2 * max_d};
+          // Go for approximately 0.8 fm cell size
+          const int n_xyz = std::ceil(2 * max_d / 0.8);
+          n_default = {n_xyz, n_xyz, n_xyz};
+        }
+        // Take lattice properties from config to assign them to all lattices
+        return std::make_tuple<std::array<double, 3>, std::array<int, 3>,
+                               std::array<double, 3>>(
+            config.take({"Lattice", "Sizes"}, l_default),
+            config.take({"Lattice", "Cell_Number"}, n_default),
+            config.take({"Lattice", "Origin"}, origin_default));
       }
-      n_default = {n_xy, n_xy, nz};
-    } else if (modus_.is_box()) {
-      periodic_default = true;
-      origin_default = {0., 0., 0.};
-      const double bl = modus_.length();
-      l_default = {bl, bl, bl};
-      const int n_xyz = std::ceil(bl / 0.5);
-      n_default = {n_xyz, n_xyz, n_xyz};
-    } else if (modus_.is_sphere()) {
-      // Maximal distance from (0, 0, 0) at which a particle
-      // may be found at the end of the simulation
-      const double max_d = modus_.radius() + end_time_;
-      origin_default = {-max_d, -max_d, -max_d};
-      l_default = {2 * max_d, 2 * max_d, 2 * max_d};
-      // Go for approximately 0.8 fm cell size
-      const int n_xyz = std::ceil(2 * max_d / 0.8);
-      n_default = {n_xyz, n_xyz, n_xyz};
-    }
-    // Take lattice properties from config to assign them to all lattices
-    const std::array<double, 3> l =
-        config.take({"Lattice", "Sizes"}, l_default);
-    const std::array<int, 3> n =
-        config.take({"Lattice", "Cell_Number"}, n_default);
-    const std::array<double, 3> origin =
-        config.take({"Lattice", "Origin"}, origin_default);
-    const bool periodic =
-        config.take({"Lattice", "Periodic"}, periodic_default);
+    }();
 
     logg[LExperiment].info()
         << "Lattice is ON. Origin = (" << origin[0] << "," << origin[1] << ","
         << origin[2] << "), sizes = (" << l[0] << "," << l[1] << "," << l[2]
         << "), number of cells = (" << n[0] << "," << n[1] << "," << n[2]
-        << ")";
+        << "), periodic = " << std::boolalpha << periodic;
 
     if (printout_lattice_td_ || printout_full_lattice_any_td_) {
       dens_type_lattice_printout_ = output_parameters.td_dens_type;

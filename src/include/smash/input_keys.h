@@ -4585,12 +4585,12 @@ struct InputKeys {
    * \page doxypage_input_conf_lattice
    * \required_key{key_lattice_automatic_,Automatic,bool}
    *
-   * Whether to \b fully automatically determine the geometry of the lattice.
-   * This key can be omitted (it is anyways ignored) if either the <tt>\ref
-   * key_lattice_cell_number_ "Cell_Number"</tt> or <tt>\ref key_lattice_origin_
-   * "Origin"</tt> or <tt>\ref key_lattice_sizes_ "Sizes"</tt> key is specified.
-   * In such a case the missing information is automatically determined as
-   * described in \ref doxypage_input_lattice_default_parameters.
+   * Whether to automatically determine the geometry of the lattice. If set to
+   * `False`, both <tt>\ref key_lattice_cell_number_ "Cell_Number"</tt> and
+   * <tt>\ref key_lattice_origin_ "Origin"</tt> and <tt>\ref key_lattice_sizes_
+   * "Sizes"</tt> keys must be specified. If set to `True` at least one of the
+   * geometrical properties must be omitted. SMASH will determine the missing
+   * properties as described in \ref doxypage_input_lattice_default_parameters.
    *
    * \attention
    * Specifying only \b some geometrical parameters (among `Cell_Number`,
