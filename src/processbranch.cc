@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2022
+ *    Copyright (c) 2014-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -145,6 +145,9 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
       break;
     case ProcessType::MultiParticleFiveToTwo:
       os << "FiveToTwo";
+      break;
+    case ProcessType::Freeforall:
+      os << "Freeforall";
       break;
     default:
       os.setstate(std::ios_base::failbit);

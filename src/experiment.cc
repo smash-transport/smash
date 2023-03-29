@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2022
+ *    Copyright (c) 2013-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -620,6 +620,39 @@ EventInfo fill_event_info(const std::vector<Particles> &ensembles,
                        !projectile_target_interact,
                        kinematic_cut_for_SMASH_IC};
   return event_info;
+}
+
+void validate_and_adjust_particle_list(ParticleList &particle_list) {
+  static bool warn_mass_discrepancy = true;
+  static bool warn_off_shell_particle = true;
+  for (auto it = particle_list.begin(); it != particle_list.end();) {
+    auto &particle = *it;
+    auto pdgcode = particle.pdgcode();
+    try {
+      // Convert Kaon-L or Kaon-S into K0 or Anti-K0 used in SMASH
+      if (pdgcode == 0x310 || pdgcode == 0x130) {
+        pdgcode = (random::uniform_int(0, 1) == 0) ? pdg::K_z : pdg::Kbar_z;
+      }
+      /* ATTENTION: It would be wrong to directly assign here the return value
+       * to 'particle', because this would potentially also change its id and
+       * process number, which in turn, might lead to actions to be discarded.
+       * Here, only the particle momentum has to be adjusted and this is done
+       * creating a new particle and using its momentum to set 'particle' one.
+       */
+      auto valid_smash_particle =
+          create_valid_smash_particle_matching_provided_quantities(
+              pdgcode, particle.effective_mass(), particle.momentum(),
+              LExperiment, warn_mass_discrepancy, warn_off_shell_particle);
+      particle.set_4momentum(valid_smash_particle.momentum());
+      particle.set_cross_section_scaling_factor(1.0);
+      it++;
+    } catch (ParticleType::PdgNotFoundFailure &) {
+      logg[LExperiment].warn()
+          << "SMASH does not recognize pdg code " << pdgcode
+          << " obtained from hadron list. This particle will be ignored.\n";
+      it = particle_list.erase(it);
+    }
+  }
 }
 
 }  // namespace smash

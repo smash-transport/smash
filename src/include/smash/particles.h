@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2018,2020
+ *    Copyright (c) 2013-2018,2020,2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -193,7 +193,7 @@ class Particles {
    * This function expects \p old_state to be a valid copy (i.e. is_valid
    * returns \c true). This is enforced in DEBUG builds.
    *
-   * \param[in] old_state Paticles of old states
+   * \param[in] old_state Particles of old states
    * \param[in] new_state New states of these particles
    * \param[in] do_replace Whether to replace the old states by the new ones
    */

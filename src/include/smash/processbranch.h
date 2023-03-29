@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2021
+ *    Copyright (c) 2013-2021,2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -82,7 +82,9 @@ enum class ProcessType {
   /// \see_process_type{46}
   StringHard = 46,
   /// \see_process_type{47}
-  FailedString = 47
+  FailedString = 47,
+  /// \see_process_type{90}
+  Freeforall = 90
 };
 
 /**

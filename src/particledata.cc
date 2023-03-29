@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2021
+ *    Copyright (c) 2014-2021,2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,10 +11,12 @@
 
 #include <iomanip>
 #include <iostream>
+#include <optional>
 #include <vector>
 
 #include "smash/constants.h"
 #include "smash/iomanipulators.h"
+#include "smash/logging.h"
 
 namespace smash {
 
@@ -71,6 +73,7 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
     case ProcessType::MultiParticleThreeToTwo:
     case ProcessType::MultiParticleFourToTwo:
     case ProcessType::MultiParticleFiveToTwo:
+    case ProcessType::Freeforall:
     case ProcessType::None:
       // nullify parents
       history_.p1 = 0x0;
@@ -157,5 +160,93 @@ std::ostream &operator<<(std::ostream &out,
 }
 
 double ParticleData::formation_power_ = 0.0;
+
+ParticleData create_valid_smash_particle_matching_provided_quantities(
+    PdgCode pdgcode, double mass, const FourVector &four_momentum, int log_area,
+    bool &mass_warning, bool &on_shell_warning) {
+  // Some preliminary tool to avoid duplication later
+  static const auto emph = einhard::Yellow_t_::ANSI();
+  static const auto restore_default = einhard::NoColor_t_::ANSI();
+  auto prepare_needed_warnings = [&mass_warning, &on_shell_warning, &mass,
+                                  &four_momentum](const ParticleData &p) {
+    std::array<std::optional<std::string>, 2> warnings{};
+    if (mass_warning) {
+      warnings[0] = "Provided mass of stable particle " + p.type().name() +
+                    " = " + std::to_string(mass) +
+                    " [GeV] is inconsistent with value = " +
+                    std::to_string(p.pole_mass()) + " [GeV] from " +
+                    "particles file.\nForcing E = sqrt(p^2 + m^2)" +
+                    ", where m is the mass contained in the particles file." +
+                    "\nFurther warnings about discrepancies between the " +
+                    "input mass and the mass contained in the particles file" +
+                    " will be suppressed.\n" + emph + "Please make sure" +
+                    " that changing input particle properties is an " +
+                    "acceptable behavior." + restore_default;
+    }
+    if (on_shell_warning) {
+      std::stringstream ss{};
+      ss << four_momentum;
+      warnings[1] =
+          "Provided 4-momentum " + ss.str() + " [GeV] and mass " +
+          std::to_string(mass) + " [GeV] do not satisfy E^2 - p^2 = m^2.\n" +
+          "This may originate from the lack of numerical" +
+          " precision in the input. Setting E to sqrt(p^2 + " +
+          "m^2).\nFurther warnings about E != sqrt(p^2 + m^2) will" +
+          " be suppressed.\n" + emph + "Please make sure that setting " +
+          "particles back on the mass shell is an acceptable behavior." +
+          restore_default;
+    }
+    return warnings;
+  };
+  auto warn_if_needed = [&log_area](bool &flag,
+                                    const std::optional<std::string> &message) {
+    if (flag) {
+      logg[log_area].warn(message.value());
+      flag = false;
+    }
+  };
+  auto is_particle_stable_and_with_invalid_mass =
+      [&mass](const ParticleData &p) {
+        return p.type().is_stable() &&
+               std::abs(mass - p.pole_mass()) > really_small;
+      };
+  auto is_particle_off_its_mass_shell = [&mass](const ParticleData &p) {
+    return std::abs(p.momentum().sqr() - mass * mass) > really_small;
+  };
+
+  // Actual implementation
+  ParticleData smash_particle{ParticleType::find(pdgcode)};
+  const auto warnings = prepare_needed_warnings(smash_particle);
+  if (is_particle_stable_and_with_invalid_mass(smash_particle)) {
+    warn_if_needed(mass_warning, warnings[0]);
+    smash_particle.set_4momentum(smash_particle.pole_mass(),
+                                 four_momentum.threevec());
+  } else {
+    smash_particle.set_4momentum(four_momentum);
+    if (is_particle_off_its_mass_shell(smash_particle)) {
+      warn_if_needed(on_shell_warning, warnings[1]);
+      smash_particle.set_4momentum(mass, four_momentum.threevec());
+    }
+  }
+  return smash_particle;
+}
+
+bool are_particles_identical_at_given_time(const ParticleData &p1,
+                                           const ParticleData &p2,
+                                           double time) {
+  if (p1.pdgcode() != p2.pdgcode()) {
+    return false;
+  } else {
+    if (p1.momentum() != p2.momentum()) {
+      return false;
+    }
+    auto get_propagated_position = [&time](const ParticleData &p) {
+      const double t = p.position().x0();
+      const FourVector u(1.0, p.velocity());
+      return p.position() + u * (time - t);
+    };
+    return get_propagated_position(p1) == get_propagated_position(p2);
+  }
+}
 
 }  // namespace smash

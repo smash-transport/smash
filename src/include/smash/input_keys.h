@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022
+ *    Copyright (c) 2022-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -607,6 +607,17 @@ class Key {
  * setup. Multiple events per file are supported. In the following, the input
  * keys are listed with a short description, an example is given and some
  * information about the input particle files is provided.
+ *
+ * \attention
+ * In `List` modus, the provided list of particles has to match information
+ * contained in the particles file (either the SMASH default one or that
+ * provided via the `-p` option), when appropriate. In particular, the mass of
+ * stable particles has to match that of the particles file. In case of a
+ * mismatch, the latter is used (modifying its energy to put the particle back
+ * on shell) and the user warned. Furthermore, all particles have to be on their
+ * mass shell. If not, their energy is adjusted and the user warned. Note that
+ * this type of warning is given only once and <b>it is user responsibility to
+ * ensure that this is a desired behaviour</b>.
  */
 
 /*!\Userguide
@@ -661,6 +672,46 @@ class Key {
  * To enable a lattice it is necessary to add a `Lattice` section with the
  * following parameters. If no `Lattice` section is used in the configuration,
  * no lattice will be used at all.
+ */
+
+/*!\Userguide
+ * \page doxypage_input_lattice_default_parameters
+ *
+ * The default configuration for the \ref doxypage_input_conf_lattice depends on
+ * the modus and is in most cases based on some heuristic to approximate the
+ * region in space that particles usually reach during the evolution.
+ *
+ * <h3>Collider</h3>
+ * The maximum expected longitudinal velocity is approximated to the speed of
+ * light \f$v_z=1\f$ and the maximum expected velocity in each transverse
+ * direction is \f$v_x=v_y = 0.7\f$. Assuming an \f$R=5\f$ fm nucleus that is
+ * contracted along the z-direction by \f$\gamma = \frac{\sqrt{s}_{NN}}{2m_N}\f$
+ * and the particles propagating until \ref key_gen_end_time_ "end time", we end
+ * up with \f[ z_{\rm max} = \frac{5\,{\rm fm}}{\gamma} + t_{\rm end} \f] \f[
+ * x_{\rm max} = y_{\rm max} = 5\,{\rm fm} + 0.7 t_{\rm end}\,. \f] The lattice
+ * then covers the range \f$ -x_{\rm max} < x < x_{\rm max}\f$ , \f$ -y_{\rm
+ * max} < y < y_{\rm max}\f$ and \f$ -z_{\rm max} < z < z_{\rm max}\f$ . The
+ * cell size in x and y is 0.8 fm and the cell size in z-direction is contracted
+ * to \f$\frac{0.8\,{\rm fm}}{\gamma}\f$
+ *
+ * <h3>Box and ListBox</h3>
+ * The lattice covers exactly the entire box from 0 to \ref
+ * key_MB_length_ "box length" in x,y and z. The cell size is 0.5 and only in
+ * this case the lattice is <tt>\ref key_lattice_periodic_ "periodic"</tt>.
+ *
+ * <h3>Sphere</h3>
+ * Since the Sphere has an initial <tt>\ref key_MS_radius_ "Radius"</tt>,
+ * the maximum distance in all directions can be estimated to
+ * \f[ x_{\rm max} = y_{\rm max} = z_{\rm max} = R_0 + t_{\rm end} \f]
+ * using the speed of light as a maximum expansion velocity.
+ * The cell size is 0.8 fm in each direction.
+ *
+ * <h3>List</h3>
+ * The default for the list modus is constructed assuming it is used for an
+ * afterburner calculation. As in the case for the collider we take th speed of
+ * light for the maximum longitudinal expansion velocity and 0.7 fo the
+ * transverse one. The cells size is 0.8 fm in ach direction, meaning they are
+ * not lorentz contracted as they would be in the case of the collider setup.
  */
 
 /*!\Userguide
@@ -3562,7 +3613,8 @@ struct InputKeys {
    *
    * The `Jet` section within the `Sphere` one is used to put a single high
    * energy particle (a "jet") in the center of the system, on an outbound
-   * trajectory along the x-axis; if no PDG is specified no jet is produced.
+   * trajectory along the x-axis. If no PDG code is specified, but the section
+   * is given, an error about the missing key is raised.
    */
 
   /*!\Userguide
@@ -3579,10 +3631,9 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key_no_line{key_MS_jet_jet_pdg_,Jet_PDG,int,no jet}
+   * \required_key_no_line{key_MS_jet_jet_pdg_,Jet_PDG,int}
    *
-   * The type of particle to be used as a jet, as given by its PDG code;
-   * if none is provided no jet is initialized.
+   * The type of particle to be used as a jet, as given by its PDG code.
    */
   /**
    * \see_key{key_MS_jet_jet_pdg_}
@@ -3774,6 +3825,8 @@ struct InputKeys {
    * The `Jet` section can be specified in the `Box` section with the same
    * meaning it has for the `Sphere` modus. It is namely possible to put a
    * jet in the center of the box, on a outbound trajectory along the x-axis.
+   * Also here, if no PDG code is specified, but the section is given, an error
+   * about the missing key is raised.
    */
 
   /*!\Userguide
@@ -3791,7 +3844,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key_no_line{key_MB_jet_jet_pdg_,Jet_PDG,int,no jet}
+   * \required_key_no_line{key_MB_jet_jet_pdg_,Jet_PDG,int}
    *
    * See &nbsp;
    * <tt>\ref key_MS_jet_jet_pdg_ "Sphere: Jet: Jet_PDG"</tt>.
@@ -4543,6 +4596,7 @@ struct InputKeys {
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_cell_number_,Cell_Number,list of 3 ints,
    * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
+   * (see \ref doxypage_input_lattice_default_parameters)
    *
    * Number of cells in x, y, z directions.
    */
@@ -4556,8 +4610,14 @@ struct InputKeys {
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_origin_,Origin,list of 3 doubles,
    * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
+   * (see \ref doxypage_input_lattice_default_parameters)
    *
-   * Coordinates of the left, down, near corner of the lattice \unit{in fm}.
+   * The lattice covers a cuboid region whose vertices \f$V_n\f$ are uniquely
+   * identified by the origin coordinates \f$(O_x, O_y, O_z)\f$ and the lattice
+   * sizes \f$(L_x, L_y, L_z)\f$ as follows:
+   * \f[ V_n = (O_x+i\cdot L_x, O_y+j\cdot L_y, O_z+k\cdot L_z) \f] where
+   * \f$(i,j,k)\in\{0,1\}\times\{0,1\}\times\{0,1\}\f$. Coordinates of the
+   * lattice are given \unit{in fm}.
    */
   /**
    * \see_key{key_lattice_origin_}
@@ -4568,7 +4628,8 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_periodic_,Periodic,bool,
-   * (\ref key_gen_modus_ "Modus" == "Box")}
+   * (\ref key_gen_modus_ "Modus" == "Box"
+   * || \ref key_gen_modus_ "Modus" == "ListBox")}
    *
    * Use periodic continuation or not. With periodic continuation
    * \f$(x,y,z) + (i\cdot L_x,\,j\cdot L_y,\,k\cdot L_z) \equiv (x,y,z)\f$
@@ -4598,6 +4659,7 @@ struct InputKeys {
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_sizes_,Sizes,list of 3 doubles,
    * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
+   * (see \ref doxypage_input_lattice_default_parameters)
    *
    * Sizes of lattice in x, y, z directions \unit{in fm}.
    */
@@ -5726,7 +5788,7 @@ General:
              Jet_Momentum: 100.0
 \endverbatim
  *
- * \note
+ * \note\anchor modi_box_usage_remark
  * The box modus is most useful for infinite matter simulations with thermal and
  * chemical equilibration and detailed balance. Detailed balance can however not
  * be conserved if 3-body decays (or higher) are performed. To yield useful
@@ -5824,23 +5886,26 @@ General:
      Periodic: True
      Potentials_Affect_Thresholds: True
  \endverbatim
- * In case of `"Collider"`, `"Box"`, and `"Sphere"` <tt>\ref key_gen_modus_
- * "Modus"</tt> there is also an option to set up lattice automatically. For
- * example, for `"Collider"` modus
+ * A default lattice is also available for each modus. In this case the
+ * lattice is setup automatically with reasonable size, cell number and
+ * placement.
+ * See \ref doxypage_input_lattice_default_parameters for more details on the
+ * defaults. The default lattice is used if the `"Lattice"` section in the
+ * configuration is given without further content as shown in the following
+ * example.
  *\verbatim
  Lattice:
  \endverbatim
- * sets up a lattice that (heuristically) covers causally allowed particle
- * positions until the <tt>\ref key_gen_end_time_ "End_Time"</tt> of the
- * simulation. The lattice may also be automatically contracted in z direction
- * depending on the chosen way of density calculation.
  *
- * Another example for `"Box"` modus:
+ * It is also possible to explicity set some lattice parameters and use the
+ * default for the rest. See the following example for the `"Box"` modus:
  *\verbatim
  Lattice:
      Cell_Number: [20, 20, 20]
  \endverbatim
- * This sets up a periodic lattice that matches box sizes.
+ * As explicitly specified, there will be twenty cells for each direction.
+ * The origin and the sizes of the lattice are automatically set such
+ * that the lattice exactly covers the entire box.
  */
 
 /*!\Userguide

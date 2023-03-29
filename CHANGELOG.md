@@ -26,12 +26,14 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * New validation mechanism of SMASH input (configuration file and `-c` command line option)
 * Add the option to employ the monash tune for all pythia processes
 * Cross section parameters for the transition to strings are now optional inputs
+* Add a new functionality to add or remove particles when using SMASH as a library
 
 ### Fixed
 * Fix bug in collider modus when setting the total energy per nucleon of _each_ beam
 * The box modus can only be used with the fixed time step mode
 * Avoid integer overflow to silently happen in grid construction
 * Correct tau lepton mass in particles list files
+* Fix code behavior in list modi setup to be coherent with given warnings in case of input discrepancies
 * Fix falsely applied smearing factor in thermodynamic output of the charge currents `j_BQS` in the case of no smearing
 
 ### Changed
@@ -50,6 +52,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Added two quantities (baryon number, strangeness) in the particle line in ASCII initial conditions output (SMASH_IC.dat)
 * Upgraded to Pythia 8.309
 * Clebsch-Gordan coefficients are now tabulated resulting into a performance increase, especially at low energies
+* Made the input `Jet_PDG` key in the `Jet` section in sphere and box modus mandatory, when the `Jet` section is provided
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now

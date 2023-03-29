@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2022
+ *    Copyright (c) 2015-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -28,6 +28,7 @@
 #include "smash/fourvector.h"
 #include "smash/inputfunctions.h"
 #include "smash/logging.h"
+#include "smash/particledata.h"
 #include "smash/threevector.h"
 #include "smash/wallcrossingaction.h"
 
@@ -99,50 +100,16 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
                                     double t, double x, double y, double z,
                                     double mass, double E, double px, double py,
                                     double pz) {
-  constexpr int max_warns_precision = 10, max_warn_mass_consistency = 10;
   try {
-    ParticleData &particle = particles.create(pdgcode);
-    // SMASH mass versus input mass consistency check
-    if (particle.type().is_stable() &&
-        std::abs(mass - particle.pole_mass()) > really_small) {
-      if (n_warns_precision_ < max_warns_precision) {
-        logg[LList].warn() << "Provided mass of " << particle.type().name()
-                           << " = " << mass
-                           << " [GeV] is inconsistent with SMASH value = "
-                           << particle.pole_mass()
-                           << ". Forcing E = sqrt(p^2 + m^2)"
-                           << ", where m is SMASH mass.";
-        n_warns_precision_++;
-      } else if (n_warns_precision_ == max_warns_precision) {
-        logg[LList].warn(
-            "Further warnings about SMASH mass versus input mass"
-            " inconsistencies will be suppressed.");
-        n_warns_precision_++;
-      }
-      particle.set_4momentum(mass, ThreeVector(px, py, pz));
-    }
-    particle.set_4momentum(FourVector(E, px, py, pz));
-    // On-shell condition consistency check
-    if (std::abs(particle.momentum().sqr() - mass * mass) > really_small) {
-      if (n_warns_mass_consistency_ < max_warn_mass_consistency) {
-        logg[LList].warn()
-            << "Provided 4-momentum " << particle.momentum() << " and "
-            << " mass " << mass << " do not satisfy E^2 - p^2 = m^2."
-            << " This may originate from the lack of numerical"
-            << " precision in the input. Setting E to sqrt(p^2 + m^2).";
-        n_warns_mass_consistency_++;
-      } else if (n_warns_mass_consistency_ == max_warn_mass_consistency) {
-        logg[LList].warn(
-            "Further warnings about E != sqrt(p^2 + m^2) will"
-            " be suppressed.");
-        n_warns_mass_consistency_++;
-      }
-      particle.set_4momentum(mass, ThreeVector(px, py, pz));
-    }
+    ParticleData new_particle =
+        create_valid_smash_particle_matching_provided_quantities(
+            pdgcode, mass, {E, px, py, pz}, LList, warn_about_mass_discrepancy_,
+            warn_about_off_shell_particles_);
     // Set spatial coordinates, they will later be backpropagated if needed
-    particle.set_4position(FourVector(t, x, y, z));
-    particle.set_formation_time(t);
-    particle.set_cross_section_scaling_factor(1.0);
+    new_particle.set_4position(FourVector(t, x, y, z));
+    new_particle.set_formation_time(t);
+    new_particle.set_cross_section_scaling_factor(1.0);
+    particles.insert(new_particle);
   } catch (ParticleType::PdgNotFoundFailure &) {
     logg[LList].warn() << "SMASH does not recognize pdg code " << pdgcode
                        << " loaded from file. This particle will be ignored.\n";
