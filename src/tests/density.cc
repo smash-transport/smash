@@ -353,7 +353,7 @@ TEST(baryon_current_j_B_smearing_false) {
    * \sum_i B_i * p^k_i / p^0_i with the sum running over all particles. Since
    * in the above system there is only one proton, the result should simply be
    * j^\mu = (1, p^1 / p^0, 0, 0). Note that in the case of no smearing the
-   * function returns just the current and no current density. As a result the
+   * function returns just the current and not current density. As a result the
    * volume plays no role here.
    */
   COMPARE_ABSOLUTE_ERROR(j_mu_B[0], 1.0, 1e-12);
