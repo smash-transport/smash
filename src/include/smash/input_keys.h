@@ -5897,6 +5897,7 @@ General:
  * center is located at (5, 5, 5).
  *\verbatim
  Lattice:
+     Automatic: False
      Origin: [0.0, 0.0, 0.0]
      Sizes: [10.0, 10.0, 10.0]
      Cell_Number: [20, 20, 20]
@@ -5918,6 +5919,7 @@ General:
  * default for the rest. See the following example for the `"Box"` modus:
  *\verbatim
  Lattice:
+     Automatic: True
      Cell_Number: [20, 20, 20]
  \endverbatim
  * As explicitly specified, there will be twenty cells for each direction.
