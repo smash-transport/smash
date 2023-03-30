@@ -4594,6 +4594,33 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
+   * \required_key{key_lattice_automatic_,Automatic,bool}
+   *
+   * Whether to automatically determine the geometry of the lattice. If set to
+   * `False`, both <tt>\ref key_lattice_cell_number_ "Cell_Number"</tt> and
+   * <tt>\ref key_lattice_origin_ "Origin"</tt> and <tt>\ref key_lattice_sizes_
+   * "Sizes"</tt> keys must be specified. If set to `True` at least one of the
+   * geometrical properties must be omitted. SMASH will determine the missing
+   * properties as described in \ref doxypage_input_lattice_default_parameters.
+   *
+   * \attention
+   * Specifying only \b some geometrical parameters (among `Cell_Number`,
+   * `Origin` and `Sizes`) and letting SMASH determine the remaining ones should
+   * be carefully done as it might give an undesired result. This is due to the
+   * fact that SMASH determines the full geometry of the lattice as described in
+   * \ref doxypage_input_lattice_default_parameters and **only afterwards** the
+   * provided keys are overwriting the calculated ones. Therefore, for example,
+   * specifing only the `Origin` will shift the automatically determined lattice
+   * and this might not be the desired effect.
+   */
+  /**
+   * \see_key{key_lattice_automatic_}
+   */
+  inline static const Key<bool> lattice_automatic{{"Lattice", "Automatic"},
+                                                  {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_cell_number_,Cell_Number,list of 3 ints,
    * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
    * (see \ref doxypage_input_lattice_default_parameters)
@@ -5180,6 +5207,7 @@ struct InputKeys {
       std::cref(output_thermodynamics_quantites),
       std::cref(output_thermodynamics_smearing),
       std::cref(output_thermodynamics_type),
+      std::cref(lattice_automatic),
       std::cref(lattice_cellNumber),
       std::cref(lattice_origin),
       std::cref(lattice_periodic),
@@ -5880,6 +5908,7 @@ General:
  * center is located at (5, 5, 5).
  *\verbatim
  Lattice:
+     Automatic: False
      Origin: [0.0, 0.0, 0.0]
      Sizes: [10.0, 10.0, 10.0]
      Cell_Number: [20, 20, 20]
@@ -5891,16 +5920,17 @@ General:
  * placement.
  * See \ref doxypage_input_lattice_default_parameters for more details on the
  * defaults. The default lattice is used if the `"Lattice"` section in the
- * configuration is given without further content as shown in the following
- * example.
+ * configuration is given as shown in the following example.
  *\verbatim
  Lattice:
+     Automatic: True
  \endverbatim
  *
  * It is also possible to explicity set some lattice parameters and use the
  * default for the rest. See the following example for the `"Box"` modus:
  *\verbatim
  Lattice:
+     Automatic: True
      Cell_Number: [20, 20, 20]
  \endverbatim
  * As explicitly specified, there will be twenty cells for each direction.
