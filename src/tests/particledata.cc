@@ -14,15 +14,51 @@
 
 using namespace smash;
 
+TEST_CATCH(wrong_pion_mass, std::runtime_error) {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "π⁰ 0.1350 0      -  111\n");
+}
+
+TEST_CATCH(wrong_omega_mass, std::runtime_error) {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "ω  0.7827 0.0085 -  223\n");
+}
+
+TEST_CATCH(wrong_neutron_mass, std::runtime_error) {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "N⁰ 0.9381  0      + 2112\n");
+}
+
+TEST_CATCH(wrong_delta_mass, std::runtime_error) {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "Δ  1.2319  0.117  + 2224 2214 2114 1114\n");
+}
+
+TEST_CATCH(wrong_kaon_mass, std::runtime_error) {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "K   0.493 0 - 311 321\n");
+}
+
+TEST_CATCH(wrong_deuteron_mass, std::runtime_error) {
+  ParticleType::create_type_list(
+      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
+      "d  1.8755 0 +  1000010020\n");
+}
+
 TEST(init_particle_types) {
   ParticleType::create_type_list(
       "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
       "σ  0.123  1.2    +  661\n"
-      "π⁰ 0.1350 0      -  111\n"
-      "π⁺ 0.1396 0      -  211\n"
+      "π⁰ 0.1380 0      -  111\n"
+      "π⁺ 0.1380 0      -  211\n"
       "ρ  0.7755 0.149  -  113 213\n"
       "η  0.5479 1.3e-6 -  221\n"
-      "ω  0.7827 0.0085 -  223\n"
+      "ω  0.7830 0.0085 -  223\n"
       "N⁺ 0.938  0      + 2212\n"
       "N⁰ 0.938  0      + 2112\n"
       "Δ  1.232  0.117  + 2224 2214 2114 1114\n");

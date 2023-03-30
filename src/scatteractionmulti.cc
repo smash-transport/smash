@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2020-2022
+ *    Copyright (c) 2020-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -105,9 +105,10 @@ void ScatterActionMulti::add_possible_reactions(
       const PdgCode pdg_a = incoming_particles_[0].pdgcode();
       const PdgCode pdg_b = incoming_particles_[1].pdgcode();
       const PdgCode pdg_c = incoming_particles_[2].pdgcode();
-      const ParticleTypePtr type_deuteron = ParticleType::try_find(pdg::d);
+      const ParticleTypePtr type_deuteron =
+          ParticleType::try_find(pdg::deuteron);
       const ParticleTypePtr type_anti_deuteron =
-          ParticleType::try_find(pdg::antid);
+          ParticleType::try_find(pdg::antideuteron);
 
       const int spin_factor_inc = pdg_a.spin_degeneracy() *
                                   pdg_b.spin_degeneracy() *

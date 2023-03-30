@@ -2,11 +2,11 @@
 
 ########## unflavored mesons ##########
 
-π               0.138   7.7e-9    -      111     211
+π               0.138   7.7e-9    -      111     211     # [mass validated by SMASH, cannot be changed]
 η               0.548   1.31e-6   -      221
 σ               0.800   0.400     +  9000221
 ρ               0.776   0.149     -      113     213     # mass required by EOS code
-ω               0.783   8.49e-3   -      223
+ω               0.783   8.49e-3   -      223             # [mass validated by SMASH, cannot be changed]
 η'              0.958   1.96e-4   -      331
 f₀(980)         0.990   0.060     +  9010221
 a₀(980)         0.989   0.075     +  9000111 9000211     # should be heavy enough for KK
@@ -52,14 +52,14 @@ f₂(2340)        2.350   0.32     +   9090225
 
 ########## strange mesons ##############
 
-K         0.494  0      -     311    321
+K         0.494  0      -     311    321   # [mass validated by SMASH, cannot be changed]
 #K*₀(700)  0.824  0.480  + 9000311 900321  # no known decays
 K*(892)   0.892  0.050  -     313    323
 K₁(1270)  1.272  0.090  +   10313  10323
 K₁(1400)  1.403  0.174  +   20313  20323
 K*(1410)  1.421  0.236  -  100313 100323
-K*₀(1430) 1.453  0.27   +   10311  10321  # should be heavy enough for Kη'
-K*₂(1430) 1.429  0.104  +     315    325  # PDG masses and widths averaged
+K*₀(1430) 1.453  0.27   +   10311  10321   # should be heavy enough for Kη'
+K*₂(1430) 1.429  0.104  +     315    325   # PDG masses and widths averaged
 K*(1680)  1.718  0.320  -   30313  30323
 K₂(1770)  1.773  0.186  -   10315  10325
 K*₃(1780) 1.776  0.159  -     317    327
@@ -68,7 +68,7 @@ K*₄(2045) 2.045  0.198  +     319    329
 
 ########## N baryons ###################
 
-N       0.938 0     +      2112     2212
+N       0.938 0     +      2112     2212   # [mass validated by SMASH, cannot be changed]
 N(1440) 1.440 0.350 +     12112    12212
 N(1520) 1.515 0.110 -      1214     2124
 N(1535) 1.530 0.150 -     22112    22212
@@ -93,7 +93,7 @@ N(2250) 2.250 0.470 -  19932119 19932219
 
 ########## Δ baryons ###################
 
-Δ       1.232 0.117 +   1114    2114    2214    2224
+Δ       1.232 0.117 +   1114    2114    2214    2224   # [mass validated by SMASH, cannot be changed]
 #Δ(1600) 1.570 0.250 +   31114   32114   32214   32224
 #^ this results in overshooting the pi+p cross section
 Δ(1620) 1.610 0.130 -   1112    1212    2122    2222
@@ -154,7 +154,7 @@ N(2250) 2.250 0.470 -  19932119 19932219
 ########## light nuclei #########
 # These are normally represented by neutrons and protons
 # and should be uncommented only for specific studies
-# d  1.8756 0     +  1000010020
+# d  1.8756 0     +  1000010020   # [mass validated by SMASH, cannot be changed]
 # Fake dibaryon resonance
 # introduced to describe Xd <-> Xnp reactions via Xd <-> Xd' <->Xnp
 # d' 1.8856 0.100 -  1000010021

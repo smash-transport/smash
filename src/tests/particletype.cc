@@ -50,15 +50,15 @@ TEST_CATCH(load_duplicate_particle, ParticleType::LoadFailure) {
 
 TEST(create_type_list) {
   ParticleType::create_type_list(
-      "π⁰ 0.1350 -1.0 - 111\n"
+      "π⁰ 0.138 -1.0 - 111\n"
       "# Hello\n"
       "  # Will you ignore me? #### sldfkjsdf\n"
       "\t\t  \t # yes?\n"
-      "π⁺ 0.1396 -1.0 - 211 # This is pi+. Swell.\n"
+      "π⁺ 0.138 -1.0 - 211 # This is pi+. Swell.\n"
       "\t\n\t  ρ⁰ 0.7755 \t 0.149 - 113\n"
       "ρ⁺ 0.7755 0.149 - 213\n"
       "η 0.5479 1.0e-6 - 221\n"
-      "ω 0.7827 0.0085 - 223\n"
+      "ω 0.783 0.0085 - 223\n"
       "K⁺ 0.494 0.0 -    321\n"
       "K⁰ 0.494 0.0 -    311\n"
       "N⁺ 0.938 -1.0 + 2212\n"
@@ -75,7 +75,7 @@ TEST(create_type_list) {
 
   // pi0
   ParticleTypePtr type = &ParticleType::find(0x111);
-  COMPARE(type->mass(), 0.135);
+  COMPARE(type->mass(), 0.138);
   COMPARE(type->width_at_pole(), -1.);
   COMPARE(type->parity(), Parity::Neg);
   COMPARE(type->pdgcode(), PdgCode(0x111));
@@ -87,7 +87,7 @@ TEST(create_type_list) {
 
   // pi+
   type = &ParticleType::find(0x211);
-  COMPARE(type->mass(), 0.1396);
+  COMPARE(type->mass(), 0.138);
   COMPARE(type->width_at_pole(), -1.);
   COMPARE(type->parity(), Parity::Neg);
   COMPARE(type->pdgcode(), PdgCode(0x211));

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2017-2022
+ *    Copyright (c) 2017-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -139,6 +139,17 @@ class CrosssectionsPhoton<ComputationMethod::Analytic> {
   ///@}
   /// Value of \f$ \pi \f$
   constexpr static double Pi = M_PI;
+  /**
+   * Value of a1 mass in GeV.
+   *
+   * \note The cross section calculated here relies on the following value of
+   * the a1 particle, which is slightly different from the value used in the
+   * particles.txt file. Other mass values (like the pion mass) are globally
+   * defined and imposed to be identical to those provided in the particles.txt
+   * file. For a1 we want to allow in general different values from 1.26 GeV.
+   * This is why we declare the value here.
+   */
+  constexpr static double a1_mass = 1.26;
 };
 
 }  // namespace smash

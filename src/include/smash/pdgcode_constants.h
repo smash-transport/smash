@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016-2021
+ *    Copyright (c) 2016-2021,2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -93,6 +93,30 @@ constexpr int rho_m = -0x213;
 
 /// h₁(1170).
 constexpr int h1 = 0x10223;
+
+/*
+ * Constants representing PDG codes of nuclei.
+ */
+
+/// Deuteron.
+constexpr int64_t deuteron = 0x1000010020;
+/// Anti-deuteron in decimal digits.
+constexpr int64_t antideuteron = -0x1000010020;
+/// Deuteron-prime resonance.
+constexpr int64_t dprime = 0x1000010021;
+/// Triton.
+constexpr int64_t triton = 0x1000010030;
+/// Anti-triton.
+constexpr int64_t antitriton = -0x1000010030;
+/// He-3
+constexpr int64_t he3 = 0x1000020030;
+/// Anti-He-3
+constexpr int64_t antihe3 = -0x1000020030;
+/// Hypertriton
+constexpr int64_t hypertriton = 0x1010010030;
+/// Anti-Hypertriton
+constexpr int64_t antihypertriton = -0x1010010030;
+
 }  // namespace pdg
 
 /**

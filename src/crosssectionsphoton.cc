@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2017-2021
+ *    Copyright (c) 2017-2021,2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -43,7 +43,7 @@ double HeavisideTheta(double x) {
    The cross sections presented in this file are calculated applying an average
    over initial states and sum over final states. In transport simulations
    individual particles are propagated which have a specific degeneracy
-   state such that an average over initial states is superflous. The cross
+   state such that an average over initial states is superfluous. The cross
    sections need thus be divided by the spin degeneracy factor of the initial
    particles to account for these particle properties.
    The C-naming is in accordance to the matrix elements from

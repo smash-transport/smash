@@ -79,12 +79,6 @@ constexpr double kaon_mass = 0.494;
 constexpr double omega_mass = 0.783;
 
 /**
- * a1 mass in GeV.
- *
- * Note that this should be the same as in particles.txt.
- */
-constexpr double a1_mass = 1.26;
-/**
  * Delta mass in GeV.
  *
  * Note that this should be the same as in particles.txt.
