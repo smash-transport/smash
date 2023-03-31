@@ -34,6 +34,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Avoid integer overflow to silently happen in grid construction
 * Correct tau lepton mass in particles list files
 * Fix code behavior in list modi setup to be coherent with given warnings in case of input discrepancies
+* Fix falsely applied smearing factor in thermodynamic output of the charge currents `j_BQS` in the case of no smearing
 
 ### Changed
 * ⚠️ The `master` branch has been renamed to `main`
