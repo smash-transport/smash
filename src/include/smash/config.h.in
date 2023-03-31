@@ -1,3 +1,12 @@
+/*
+ *
+ *    Copyright (c) 2012-2015,2018,2022-2023
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
+ */
+
 /* the configured options and settings from cmake */
 #define SMASH_VERSION "@SMASH_VERSION@"
 #define CMAKE_SYSTEM "@CMAKE_SYSTEM@"
