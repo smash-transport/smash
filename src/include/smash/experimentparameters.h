@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_SMASH_EXPERIMENTPARAMETERS_H_
 
 #include <memory>
+#include <optional>
 #include <set>
 
 #include "clock.h"
