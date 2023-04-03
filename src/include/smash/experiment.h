@@ -972,6 +972,8 @@ Experiment<Modus>::Experiment(Configuration &config,
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
        parameters_.included_multi.any() || parameters_.strings_switch) &&
       !no_coll) {
+    parameters_.use_monash_tune_default =
+        (modus_.is_collider() && modus_.sqrt_s_NN() >= 200.);
     auto scat_finder =
         std::make_unique<ScatterActionsFinder>(config, parameters_);
     max_transverse_distance_sqr_ =

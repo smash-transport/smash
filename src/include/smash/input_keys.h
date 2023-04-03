@@ -2690,10 +2690,14 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_use_monash_tune_,Use_Monash_Tune,bool,false}
+   * \optional_key{key_CT_SP_use_monash_tune_,Use_Monash_Tune,bool,
+   * (\ref key_gen_modus_ "Modus" == "Collider" &&
+   *  \ref key_MC_sqrtsnn_ "Sqrtsnn" >= 200)}
    *
    * Whether to use the monash tune \iref{Skands:2014pea} for all string
-   * processes.
+   * processes. If nothing is specified, this option will be generally `false`
+   * unless SMASH is run in the collider modus with an energy per nucleon pair
+   * \f$\mathtt{Sqrtsnn}\geq 200\,\mathrm{GeV}\f$.
    */
   /**
    * \see_key{key_CT_SP_use_monash_tune_}
