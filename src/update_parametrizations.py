@@ -1,3 +1,12 @@
+#===================================================
+#
+#    Copyright (c) 2016-2017,2019,2023
+#      SMASH Team
+#
+#    GNU General Public License (GPLv3 or later)
+#
+#===================================================
+
 import argparse
 import numpy as np
 
