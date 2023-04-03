@@ -20,6 +20,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+## SMASH-3.0rc
+Date:
+
 ### Added
 * New CMake build configuration `MinSizeRel` to optimize in executable size
 * New examples for usage of SMASH as a library: Full SMASH wrapper and rate equations
@@ -39,26 +42,29 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Changed
 * ⚠️ The `master` branch has been renamed to `main`
 * SMASH makes now use of C++17 standard and minimum compiler requirements have changed
+* Upgraded to Pythia 8.309
+* Minimum supported CMake version is now version 3.16
+* Minimum Doxygen version to build documentation is now 1.9
 * Only 64-bit UNIX-like operating systems (e.g. Linux, MacOS) are officially supported
 * Only GCC, Clang and Apple clang compilers are officially supported
 * Default build configuration is now `Release` (instead of `RelWithDebInfo`)
 * Use CMake default compiler flags for `RelWithDebInfo` build configuration, hence having `-O2` optimization level instead of `-03`
-* Minimum supported CMake version is now version 3.16
-* Minimum version to build documentation is now 1.9
 * Changed interface of the `Configuration` class, which is now not copyable and offers more explicit methods, making it harder to be misused
 * The `Version` configuration key is not used anymore and has been deprecated
 * SMASH now aborts if any content output format in the configuration file is invalid or absent
 * `Format: ["None"]` can be used in the configuration file to suppress any content output
 * Added two quantities (baryon number, strangeness) in the particle line in ASCII initial conditions output (SMASH_IC.dat)
-* Upgraded to Pythia 8.309
 * Clebsch-Gordan coefficients are now tabulated resulting into a performance increase, especially at low energies
 * Made the input `Jet_PDG` key in the `Jet` section in sphere and box modus mandatory, when the `Jet` section is provided
-* The `Lattice` section in the input file cannot be any more empty; the key `Automatic: True` must be now used to automatically generate the lattice and `Automatic: False` is needed if the geometry is fully specified.
-* Validate all input mass values whose value needs to match the SMASH internally used one
+* The `Lattice` section in the input file cannot be anymore empty; the key `Automatic: True` must be now used to automatically generate the lattice and `Automatic: False` is needed if the geometry is fully specified.
+* All input mass values that need to match the SMASH internally used ones are now validated
+* Updated 2 → 2 angular distribution parametrization for high energies
 
 ### Removed
 * Boost is not used anymore, since the C++17 standard library is sufficient now
 * Removed `Rest_Frame_Density_Derivatives_Mode` input key which was not used in the code
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-2.2.1...SMASH-3.0)
 
 
 ## SMASH-2.2.1
