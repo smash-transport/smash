@@ -1,3 +1,12 @@
+########################################################
+#
+#    Copyright (c) 2018-2023
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+#########################################################
+
 set(files_with_input
     ${PROJECT_SOURCE_DIR}/AUTHORS.md
     ${PROJECT_SOURCE_DIR}/src/include/smash/configuration.h

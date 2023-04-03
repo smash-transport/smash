@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+#===================================================
+#
+#    Copyright (c) 2022-2023
+#      SMASH Team
+#
+#    GNU General Public License (GPLv3 or later)
+#
+#===================================================
+
 trap 'printf "\n"' EXIT
 
 function main()

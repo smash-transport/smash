@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2012-2022
+#    Copyright (c) 2012-2023
 #      SMASH Team
 #
 #    BSD 3-clause license

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2017-2022
+ *    Copyright (c) 2017-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
