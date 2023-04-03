@@ -8,10 +8,10 @@ Author  |  &ensp;E-Mail&ensp; | Copyright ©
  Janus Weil  |  [✉️](mailto:weil@fias.uni-frankfurt.de) | `2014-2016,2019-2020`
  Joseph Tindall  |  [✉️](mailto:tindall@fias.uni-frankfurt.de) | `2016`
  Vinzent Steinberg  |  [✉️](mailto:steinberg@fias.uni-frankfurt.de) | `2015-2020`
- Jan Staudenmaier  |  [✉️](mailto:staudenmaier@fias.uni-frankfurt.de) | `2015-`
+ Jan Staudenmaier  |  [✉️](mailto:staudenmaier@fias.uni-frankfurt.de) | `2015-2022`
  Agnieszka Sorensen  |  [✉️](mailto:awergieluk@gmail.com) | `2020-`
  Alessandro Sciarra  |  [✉️](mailto:asciarra@fias.uni-frankfurt.de) | `2021-`
- Anna Schäfer  |  [✉️](mailto:aschaefer@fias.uni-frankfurt.de) | `2017-`
+ Anna Schäfer  |  [✉️](mailto:aschaefer@fias.uni-frankfurt.de) | `2017-2022`
  Sangwook Ryu  |  [✉️](mailto:ryu@fias.uni-frankfurt.de) | `2017-2019`
  Jonas Rothermel  |  [✉️](mailto:rothermel@fias.uni-frankfurt.de) | `2017-2019`
  Jean-Bernard Rose  |  [✉️](mailto:rose@fias.uni-frankfurt.de) | `2016-2019`
@@ -29,7 +29,7 @@ Author  |  &ensp;E-Mail&ensp; | Copyright ©
  Natey Kübler  |  [✉️](mailto:kuebler@fias.uni-frankfurt.de) | `2020-2021`
  Thomas Kehrenberg  |  [✉️](mailto:kehrenberg@fias.uni-frankfurt.de) | `2015`
  Gabriele Inghirami  |  [✉️](mailto:inghirami@fias.uni-frankfurt.de) | `2021-`
- Renan Hirayama  |  [✉️](mailto:hirayama@fias.uni-frankfurt.de) | `2022-`
+ Renan Hirayama  |  [✉️](mailto:hirayama@fias.uni-frankfurt.de) | `2021-`
  Jan Hammelmann  |  [✉️](mailto:hammelmann@fias.uni-frankfurt.de) | `2019-`
  Julia Groebel  |  [✉️](mailto:groebel@fias.uni-frankfurt.de) | `2022`
  Andy Goldschmidt  |  [✉️](mailto:goldschmidt@fias.uni-frankfurt.de) | `2014`
