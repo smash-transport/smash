@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_SMASH_EXPERIMENTPARAMETERS_H_
 
 #include <memory>
+#include <optional>
 #include <set>
 
 #include "clock.h"
@@ -146,6 +147,13 @@ struct ExperimentParameters {
 
   /// Do weak decays at the end
   bool do_weak_decays;
+
+  /** Bool for the default usage of the monash tune in the collider modus.
+   * The used type is std::optional since its value might not be known at
+   * creation time. E.g. in Experiment this flag is set after the instance is
+   * created.
+   */
+  std::optional<bool> use_monash_tune_default;
 };
 
 }  // namespace smash

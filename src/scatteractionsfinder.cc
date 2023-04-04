@@ -121,7 +121,8 @@ ScatterActionsFinder::ScatterActionsFinder(
         subconfig.take({"Prob_proton_to_d_uu"}, 1. / 3.),
         subconfig.take({"Separate_Fragment_Baryon"}, true),
         subconfig.take({"Popcorn_Rate"}, 0.15),
-        subconfig.take({"Use_Monash_Tune"}, false));
+        subconfig.take({"Use_Monash_Tune"},
+                       parameters.use_monash_tune_default.value()));
   }
 }
 

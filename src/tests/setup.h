@@ -245,14 +245,15 @@ inline ExperimentParameters default_parameters(
       false,  // strings switch
       1.0,
       NNbarTreatment::NoAnnihilation,
-      0.,     // low energy sigma_NN cut-off
-      false,  // potential_affect_threshold
-      -1.0,   // box_length
-      200.0,  // max. cross section
-      2.5,    // fixed min. cell length
-      1.0,    // cross section scaling
-      false,  // in thermodynamics outputs spectators are included
-      false   // do weak decays
+      0.,           // low energy sigma_NN cut-off
+      false,        // potential_affect_threshold
+      -1.0,         // box_length
+      200.0,        // max. cross section
+      2.5,          // fixed min. cell length
+      1.0,          // cross section scaling
+      false,        // in thermodynamics outputs spectators are included
+      false,        // do weak decays
+      std::nullopt  // use monash tune, not known
   };
 }
 

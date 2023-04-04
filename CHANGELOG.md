@@ -27,7 +27,7 @@ Date:
 * New CMake build configuration `MinSizeRel` to optimize in executable size
 * New examples for usage of SMASH as a library: Full SMASH wrapper and rate equations
 * New validation mechanism of SMASH input (configuration file and `-c` command line option)
-* Add the option to employ the monash tune for all pythia processes
+* Add an input key to employ the Monash tune for all Pythia processes (this is automatically enabled in `Collider` mode for `Sqrtsnn` ≥ 200 GeV, unless explicitly disabled)
 * Cross section parameters for the transition to strings are now optional inputs
 * Add a new functionality to add or remove particles when using SMASH as a library
 

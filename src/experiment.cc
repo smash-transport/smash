@@ -329,7 +329,8 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
       scale_xs,
       only_participants,
       config.take({"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
-                  false)};
+                  false),
+      std::nullopt};
 }
 
 std::string format_measurements(const std::vector<Particles> &ensembles,
