@@ -35,6 +35,8 @@ The installation of required compilers, CMake, GSL and Eigen3 libraries (just to
 It is very likely that a compiler among those supported is available out of the box on your operating system.
 However, some of the SMASH prerequisites are less likely to be already available, Pythia first of all.
 
+<a id="pythia"></a>
+
 ### Building Pythia
 
 SMASH is tightly coupled to Pythia and thus requires a specific version, which is currently `8.309`.
@@ -53,6 +55,10 @@ To tell `cmake` where to find Pythia while building SMASH see the [**Building SM
 Note that although Pythia is statically linked into SMASH, access to `share/Pythia8/xmldoc` is required at runtime.
 
 If you plan to build SMASH using the LLVM implementation of the standard C++ library, you should make sure that Pythia is built so as well, passing `-stdlib=libc++` together with the other flags to the `--cxx-common` option of the _configure_ script.
+Of course, you should then use Clang compiler to build Pythia and this can either be achieved via the `CXX` environment variable (set via `export CXX=/path/to/clang++`) or by setting the variable for the Pythia configuration, e.g.
+```console
+CXX=clang++ ./configure --cxx-common='-std=c++17 -stdlib=libc++ -march=native -O3 -fPIC -pthread'
+```
 
 #### Remarks for Apple users
 
@@ -259,6 +265,14 @@ Alternatively, the compiler can also be specified using CMake dedicated options,
 ```console
 cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ ..
 ```
+
+It is worth noticing that, when a GCC system-wide installation is present (e.g. under GNU/Linux Ubuntu), Clang compiler is by default locating it, in order to use its include files and its STL library implementation.
+If several GCC installations are found, the most recent version is selected.
+You can check which installation is selected by running `clang++ -v`.
+It is important to be aware of this mechanism to possibly explain unexpected (but also unlikely) failures or simply different behavior.
+For example, if the system default GCC compiler is not the latest among the available installations, Clang will use a different version of the STL from the GCC compiler.
+Furthermore, if the most recent GCC compiler installation were lacking some needed file(s), Clang would simply fail either at compilation or at linking time.
+
 **NOTE:** The FPE environment only works with GCC, so e.g. you won't get back-traces from floating point traps with Clang.
 
 <a id="llvm-STL"></a>
@@ -270,6 +284,13 @@ However, it is possible to request to use the LLVM implementation using the CMak
 ```console
 CC=clang CXX=clang++ cmake -DPythia_CONFIG_EXECUTABLE=[...] -DCLANG_USE_LIBC++=ON ..
 ```
+Still, when CMake performs some preliminary checks on the compiler, these are done using the default STL implementation found by Clang (i.e. that of the most recent GCC system-wide installation).
+If you want to go 100% LLVM or in case some default file looked for by Clang is missing, you also need to set the corresponding CMake flag via
+```console
+CC=clang CXX=clang++ CXXFLAGS=-stdlib=libc++ cmake -DPythia_CONFIG_EXECUTABLE=[...] -DCLANG_USE_LIBC++=ON ..
+```
+which can also given as `-DCXXFLAGS="-stdlib=libc++"` argument to the `cmake` command.
+
 If the installation of the LLVM implementation is not in a standard place, you either need to set and export your `LD_LIBRARY_PATH` environment variable to the correct value, e.g.
 ```console
 export LD_LIBRARY_PATH=/path/to/clang/installation/lib
@@ -280,6 +301,8 @@ or pass to the `cmake` command the option
 ```
 where, of course, the path to clang installation must be a valid path.
 All of this is needed to let the executable find the library ABI at run time.
+
+**NOTE:** Remember to compile Pythia using LLVM implementation, too, as [previously described](#pythia).
 
 <a id="disable-root-hempc"></a>
 
