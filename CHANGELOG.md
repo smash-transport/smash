@@ -23,6 +23,18 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## SMASH-3.0rc
 Date:
 
+### New major version of SMASH
+
+Summary of major changes from `SMASH-2.2.1`:
+* ⚠️ The `master` branch has been renamed to `main`
+* Updated to Pythia 8.309 and introduced automatic usage of Monash tune for high beam energies to match multiplicities up to LHC energies
+* SMASH has now more functionality when used as an external library
+* Optimized SMASH at low energies achieving a ~25% speedup
+* Added new validation mechanism of input configuration file to prevent misuse and improve corresponding documentation
+* Upgraded to C++17 standard and get rid of Boost dependency
+* Minimum versions requirements of prerequisites have increased and officially supported systems were made explicit
+* Backward incompatible changes have occurred, mainly on the input configuration side (few keys changed and the internal parsing class interface was substantially rewritten)
+
 ### Added
 * New CMake build configuration `MinSizeRel` to optimize in executable size
 * New examples for usage of SMASH as a library: Full SMASH wrapper and rate equations
@@ -40,7 +52,7 @@ Date:
 * Fix falsely applied smearing factor in thermodynamic output of the charge currents `j_BQS` in the case of no smearing
 
 ### Changed
-* ⚠️ The `master` branch has been renamed to `main`
+* The `master` branch has been renamed to `main`
 * SMASH makes now use of C++17 standard and minimum compiler requirements have changed
 * Upgraded to Pythia 8.309
 * Minimum supported CMake version is now version 3.16
