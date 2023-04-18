@@ -882,8 +882,8 @@ Experiment<Modus>::Experiment(Configuration &config,
          * section is extracted. If this were not done in this way, the
          * sub-configuration given to ColliderModus would be deleted at the end
          * of its constructor not empty and this would throw an exception.*/
-        const auto key_labels = {"Modi", "Collider",
-                                 "Collisions_Within_Nucleus"};
+        const std::initializer_list<const char *> key_labels = {
+            "Modi", "Collider", "Collisions_Within_Nucleus"};
         const bool restore_key = config.has_value(key_labels);
         const bool temporary_taken_key = config.take(key_labels, false);
         auto modus_config = config.extract_sub_configuration({"Modi"});
