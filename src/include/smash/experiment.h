@@ -873,7 +873,25 @@ Experiment<Modus>::Experiment(Configuration &config,
                               const std::filesystem::path &output_path)
     : parameters_(create_experiment_parameters(config)),
       density_param_(DensityParameters(parameters_)),
-      modus_(config.extract_sub_configuration({"Modi"}), parameters_),
+      modus_(std::invoke([&]() {
+        /* This immediately invoked lambda is a work-around to cope with the
+         * fact that the "Collisions_Within_Nucleus" key belongs to the
+         * "Collider" section, but is used by the ScatterActionsFinder through
+         * the ScatterActionsFinderParameters member. Here that key is taken
+         * from the main configuration and put there back after the "Collider"
+         * section is extracted. If this were not done in this way, the
+         * sub-configuration given to ColliderModus would be deleted at the end
+         * of its constructor not empty and this would throw an exception.*/
+        const std::initializer_list<const char *> key_labels = {
+            "Modi", "Collider", "Collisions_Within_Nucleus"};
+        const bool restore_key = config.has_value(key_labels);
+        const bool temporary_taken_key = config.take(key_labels, false);
+        auto modus_config = config.extract_sub_configuration({"Modi"});
+        if (restore_key) {
+          config.set_value(key_labels, temporary_taken_key);
+        }
+        return Modus{std::move(modus_config), parameters_};
+      })),
       ensembles_(parameters_.n_ensembles),
       nevents_(config.take({"General", "Nevents"}, 0)),
       end_time_(config.take({"General", "End_Time"})),

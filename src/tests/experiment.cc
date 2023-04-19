@@ -31,6 +31,9 @@ static Configuration get_common_configuration() {
 static Configuration get_collider_configuration() {
   auto config = get_common_configuration();
   config.set_value({"General", "Modus"}, "Collider");
+  /* The 'Collisions_Within_Nucleus' key is here used with its default value to
+   * make sure Experiment parses it correctly (it is in the "Collider" section,
+   * but it is taken by ScatterActionsFinderParameters).*/
   config.merge_yaml(R"(
     Modi:
       Collider:
@@ -39,6 +42,7 @@ static Configuration get_collider_configuration() {
         Target:
           Particles: {2212: 79, 2112: 118}
         E_Kin: 1.23
+      Collisions_Within_Nucleus: false
   )");
   return config;
 }
