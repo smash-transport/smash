@@ -1,5 +1,4 @@
 # syntax=docker/dockerfile:1.4
-
 # Import the base smash container.
 
 FROM ghcr.io/smash-transport/smash:newest
@@ -12,7 +11,7 @@ SHELL ["/bin/bash", "-c"]
 
 LABEL maintainer.name="SMASH team"
 LABEL maintainer.website="https://smash-transport.github.io"
-LABEL description="SMASH with ROOT 6.26.06, HepMC3 3.2.5, Rivet, 3.1.7 and several other tools"
+LABEL description="SMASH with ROOT 6.26.10, HepMC3 3.2.6, Rivet, 3.1.7 and several other tools"
 LABEL org.opencontainers.image.source https://github.com/smash-transport/smash
 
 # Install the packages non interactively.
@@ -35,6 +34,9 @@ build-essential  \
 bzip2  \
 ca-certificates  \
 clang-13 \
+clang-format-13 \
+clang-tidy-13 \
+clang-tools-13 \
 coreutils  \
 cython3 \
 ddd  \
@@ -63,12 +65,20 @@ jupyter-notebook \
 libc-bin  \
 libc-dev-bin  \
 libc-devtools \
+libc++-13-dev \
+libc++1-13 \
+libc++abi-13-dev \
+libc++abi1-13 \
+libclang-common-13-dev \
+libclang-cpp13 \
+libclang1-13 \
 libfreetype-dev \
 libgif-dev  \
 libgmp-dev  \
 libgraphviz-dev  \
 libjpeg-dev  \
 libjpeg8-dev  \
+libllvm13 \
 liblzma-dev  \
 libmpfr-dev  \
 libmpfrc++-dev  \
@@ -88,6 +98,8 @@ libzstd-dev \
 linux-libc-dev \
 llvm-13 \
 llvm-13-dev \
+llvm-13-linker-tools \
+llvm-13-runtime \
 llvm-13-tools \
 locales \
 locales-all \
@@ -175,7 +187,7 @@ ARG CFLAGS="-O3 -march=x86-64"
 
 # Install ROOT.
 
-ARG rootV="6.26.06"
+ARG rootV="6.26.10"
 
 RUN cd /SMASH && \
 wget https://root.cern/download/root_v${rootV}.source.tar.gz && \
@@ -201,7 +213,7 @@ RUN echo /SMASH/root_install/lib >> /etc/ld.so.conf && ldconfig
 
 # Install HepMC3.
 
-ARG hepmcV="3.2.5"
+ARG hepmcV="3.2.6"
 
 RUN cd /SMASH && \
 wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${hepmcV}.tar.gz && \
@@ -295,7 +307,7 @@ ENV LATEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$LATEXINPUTS"
 # Install julia.
 
 ARG julia_majV="1.8"
-ARG julia_minV="2"
+ARG julia_minV="5"
 
 RUN cd /opt &&\
 wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_majV}/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz &&\
@@ -344,6 +356,13 @@ RUN sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" -e "/EPS/d" -e
 ENV LC_ALL=en_US.UTF-8
 ENV LANG en=US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
+
+# We set a symbolic link to clang-format-13 and clang-tidy-13 to make them usable from the SMASH formatting script
+RUN ln -s /usr/bin/clang-format-13 /usr/bin/clang-format &&\
+ln -s /usr/bin/clang-tidy-13 /usr/bin/clang-tidy
+
+# we install cmake-format
+RUN pip install cmakelang
 
 # Shell prompt when using the container image under Docker.
 
