@@ -29,6 +29,9 @@ vim
 # Create main project directory
 WORKDIR /SMASH
 
+# Create directory for mounting filesystems
+RUN mkdir /MNT
+
 # Install pythia
 ARG pythiaV="8309"
 ENV PYTHIA8=/SMASH/pythia_install/
