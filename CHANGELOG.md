@@ -20,8 +20,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
-## SMASH-3.0rc
-Date:
+## SMASH-3.0
+Date: 2023-04-27
 
 ### New major version of SMASH
 
