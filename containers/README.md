@@ -9,7 +9,7 @@ As explained in the [SMASH README file](../README.md), Docker images are provide
 
 Assuming that Docker is already installed, one can also build images locally by executing
 ```
-docker build .
+docker buildx build -f Dockerfile .
 ```
 in a terminal, in the same directory of _Dockerfile_.
 
@@ -43,32 +43,39 @@ All local changes will be reflected in this directory and SMASH can be build wit
 
 <a id="docker-to-singularity"></a>
 
-# From Docker to Singularity
+# From Docker to Singularity/Apptainer
 
-In most cases Singularity is able to import or directly run commands from Docker containers without significant problems.
-In both situations Singularity caches information in a subdirectory of ***~/.singularity***.
-More information can be found [here](https://sylabs.io/guides/3.6/user-guide/singularity_and_docker.html).
+We remind that in many HPC systems Singularity is actually replaced by Apptainer, but the two projects have tight contacts and an extremely high compatibility.
+In the examples we will refer only to Singularity, but the commands are exactly the same also with Apptainer, including the name of the executable `singularity`.
+In most cases Singularity and Apptainer are able to import or directly run commands from Docker containers without significant problems.
+In both situations Singularity and Apptainer cache information in a subdirectory of ***~/.singularity*** or ***~/.apptainer***, respectively.
+More information can be found [here](https://docs.sylabs.io/guides/latest/user-guide/singularity_and_docker.html) and [here](https://apptainer.org/docs/user/latest/docker_and_oci.html).
 
-### Import a Docker container from an online registry
+### Import a Docker image from an online registry
 
-It is possible to retrieve a Docker container _docker-cont_ from an online registry `ghcr.io/repositoryname/` and tranform it into a Singularity container, named in this case _mycontainer.sif_, with:
+It is possible to retrieve a Docker image _docker-image_ from an online registry `ghcr.io/repositoryname/` and tranform it into a Singularity image, named in this case _my-singularity-image.sif_, with:
 ```
-singularity pull mycontainer.sif docker://ghcr.io/repositoryname/docker-cont
+singularity pull my-singularity-image.sif docker://ghcr.io/repositoryname/docker-image
+```
+
+For example, in the case of the official SMASH basic image:
+```
+singularity pull smash.sif docker://ghcr.io/smash-transport/smash:newest
 ```
 
 It is possible also to execute single commands in the container.
 For example
 ```
-singularity exec docker://ghcr.io/repositoryname/docker-cont bash
+singularity exec docker://ghcr.io/repositoryname/docker-image bash
 ```
 launches a bash shell within the container.
 If the Docker image has been already cached, Singularity uses the local copy in `.sif` format, otherwise it downloads the Docker image and converts it into `.sif` format in the internal cache without creating another additional `.sif` file.
 Then, of course, Singularity executes the command.
 
 
-### Import a local Docker container
+### Import a local Docker image
 
-First, the local Docker container should be exported as a tar archive.
+First, the local Docker image should be exported as a tar archive.
 For example, assuming that we want to export the image _abcd1234_, use
 ```
 docker save --output=abcd1234-docker-cont.tar abcd1234
@@ -76,9 +83,9 @@ docker save --output=abcd1234-docker-cont.tar abcd1234
 
 In general it is convenient to compress the tar archive before transmission over internet and decompress it before conversion.
 
-To convert _abcd1234-docker-cont.tar_ into _mycontainer.sif_ (both in the same current working directory) use
+To convert _abcd1234-docker-cont.tar_ into _mycontainer-image.sif_ (both in the same current working directory) use
 ```
-singularity build mycontainer.sif docker-archive://abcd1234.tar
+singularity build mycontainer-image.sif docker-archive://abcd1234.tar
 ```
 
 This kind of operation does not require root privileges.
