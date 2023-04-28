@@ -72,7 +72,6 @@ launches a bash shell within the container.
 If the Docker image has been already cached, Singularity uses the local copy in `.sif` format, otherwise it downloads the Docker image and converts it into `.sif` format in the internal cache without creating another additional `.sif` file.
 Then, of course, Singularity executes the command.
 
-
 ### Import a local Docker image
 
 First, the local Docker image should be exported as a tar archive.
@@ -90,11 +89,11 @@ singularity build mycontainer-image.sif docker-archive://abcd1234.tar
 
 This kind of operation does not require root privileges.
 
+# Note for Apple users with ARM cpus (e.g. M1/M2 chips)
 
-### Note for Apple users with ARM cpus (e.g. M1/M2 chips)
-
-Our Docker images are prepared for the x86-64 cpu architecture; 
-to make them compatible with Apple computers with ARM cpus (like in the case of M1 and M2 chips), `docker` must be launched with the `--platform=linux/amd64` option.
+Our Docker images are prepared for the x86-64 cpu architecture, 
+to make them compatible with Apple computers with ARM cpus (like in the case of M1 and M2 chips),
+`docker` must be launched with the `--platform=linux/amd64` option.
 For example
 ```
 docker buildx build -f Dockerfile .
@@ -103,4 +102,3 @@ becomes
 ```
 docker buildx build --platform=linux/amd64 -f Dockerfile .
 ```
-.
