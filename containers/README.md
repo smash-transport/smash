@@ -89,3 +89,18 @@ singularity build mycontainer-image.sif docker-archive://abcd1234.tar
 ```
 
 This kind of operation does not require root privileges.
+
+
+### Note for Apple users with ARM cpus (e.g. M1/M2 chips)
+
+Our Docker images are prepared for the x86-64 cpu architecture; 
+to make them compatible with Apple computers with ARM cpus (like in the case of M1 and M2 chips), `docker` must be launched with the `--platform=linux/amd64` option.
+For example
+```
+docker buildx build -f Dockerfile .
+```
+becomes
+```
+docker buildx build --platform=linux/amd64 -f Dockerfile .
+```
+.
