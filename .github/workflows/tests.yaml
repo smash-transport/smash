@@ -1,5 +1,7 @@
 on:
-  # Trigger the workflow on push or pull request,
+  # trigger the workflow upon request
+  workflow_dispatch:
+  # trigger the workflow on push or pull request,
   # but only for the main branch
   push:
     branches:
@@ -23,23 +25,29 @@ jobs:
         # 1st matrix element, minimum GNU compiler version
         - os: ubuntu-20.04
           site: "linux-minimum-gcc"
-          packages_to_add: "g++-8 doxygen-latex graphviz libgsl-dev"
+          packages_to_add: "g++-8 libgsl-dev"
           c_compiler_to_use: "gcc-8"
           cxx_compiler_to_use: "g++-8"
         # 2nd matrix element, recent LTS Ubuntu distribution with gcc
-        - os: ubuntu-20.04
+        - os: ubuntu-22.04
           site: "linux-default-gcc"
-          packages_to_add: "doxygen-latex graphviz libgsl-dev"
+          packages_to_add: "libgsl-dev doxygen-latex graphviz"
           c_compiler_to_use: "gcc"
           cxx_compiler_to_use: "g++"
         # 3rd matrix element, recent LTS Ubuntu distribution with clang
-        - os: ubuntu-20.04
-          site: "linux-default-clang"
-          packages_to_add: "libgsl-dev"
-          c_compiler_to_use: "clang"
-          cxx_compiler_to_use: "clang++"
+        - os: ubuntu-22.04
+          site: "linux-clang-13"
+          packages_to_add: "libgsl-dev clang-13 clang-format-13 clang-tidy-13 libc++-13-dev libc++1-13 libc++abi-13-dev libc++abi1-13"
+          c_compiler_to_use: "clang-13"
+          cxx_compiler_to_use: "clang++-13"
         # 4th matrix element, osx 11 with clang
         - os: macos-11
+          site: "mac"
+          packages_to_add: "gsl"
+          c_compiler_to_use: "clang"
+          cxx_compiler_to_use: "clang++"
+        # 5th matrix element, osx 13 with clang
+        - os: macos-13
           site: "mac"
           packages_to_add: "gsl"
           c_compiler_to_use: "clang"
@@ -80,25 +88,26 @@ jobs:
         cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8309/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.4.0/
         make -j$(nproc)
         # we check the building of the documentation for a specific case
-        if [ $SITE == "linux-minimum-gcc" ]; then make undocumented_test && make user; fi
+        if [ $SITE == "linux-default-gcc" ]; then make undocumented_test && make user; fi
         # we run the tests
         CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
     # We now setup python environment to then install cmake-format, but we do so on one site only
     # since we are going to test only there whether the codebase is correctly formatted or not
-    - if: matrix.site == 'linux-default-gcc'
+    - if: matrix.site == 'linux-default-clang'
       # this is an other GitHub action to properly setup the python environment
       uses: actions/setup-python@v3
       with:
-        python-version: '3.9'
+        python-version: '3.10'
     - name: code_format_check
-      if: matrix.site == 'linux-default-gcc'
+      if: matrix.site == 'linux-default-clang'
       run: |
-        # we download and unpack clang in $HOME to have clang-format available, curl -L to follow redirects
-        curl -# -L -o $HOME/clang13_0_0.tar.xz https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz &&
-        mkdir $HOME/clang13_0_0 && tar -xf $HOME/clang13_0_0.tar.xz -C $HOME/clang13_0_0 --strip-components=1
         # we install cmake-format in a dedicated directory
         mkdir $HOME/python-tools && pip install --target $HOME/python-tools cmakelang==0.6.13
         export PYTHONPATH=$HOME/python-tools:$PYTHONPATH
+        # we want to be sure that clang-format refers to clang-format version 13.0
+        mkdir -p $HOME/bin
+        ln -s /usr/bin/clang-format-13 $HOME/bin/clang-format
+        export PATH=$HOME/bin:$PATH
         # we check the correct formatting of the code
-        PATH=$HOME/clang13_0_0/bin/:$PATH ./bin/codebase-format-helper.bash C++ -t
+        ./bin/codebase-format-helper.bash C++ -t
         PATH=$HOME/python-tools/bin/:$PATH ./bin/codebase-format-helper.bash CMake -t
