@@ -38,7 +38,7 @@ ENV PYTHIA8=/SMASH/pythia_install/
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
 cd pythia${pythiaV} && \
-./configure --cxx-common='-std=c++17 -mfpmath=sse -O3 -fPIC -march=x86-64 -pthread' --prefix=${PYTHIA8} && \
+./configure --cxx-common='-std=c++17 -O3 -fPIC -march=x86-64 -pthread' --prefix=${PYTHIA8} && \
 make -j$(nproc) && \
 make install && \
 echo ${PYTHIA8}/lib >> /etc/ld.so.conf && ldconfig
