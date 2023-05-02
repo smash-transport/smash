@@ -94,7 +94,7 @@ jobs:
     # We now setup python environment to then install cmake-format, but we do so on one site only
     # since we are going to test only there whether the codebase is correctly formatted or not
     - if: matrix.site == 'linux-default-clang'
-      # this is an other GitHub action to properly setup the python environment
+      # this is another GitHub action to properly setup the python environment
       uses: actions/setup-python@v3
       with:
         python-version: '3.10'
