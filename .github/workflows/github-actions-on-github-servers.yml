@@ -1,3 +1,5 @@
+name: actions_on_github_servers
+
 on:
   # trigger the workflow upon request
   workflow_dispatch:
