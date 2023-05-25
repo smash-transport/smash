@@ -4752,6 +4752,76 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_IC_dynamic_,Dynamic,bool,</tt>false<tt>}
+   *
+   * The initial condition is generated dynamically, depending on the local
+   * energy density, which is interpolated by a lattice. This lattice is
+   * constant until 20 fm, after that it grows at each time step, mantaining a
+   * fixed number of cells.
+   */
+  /**
+   * \see_key{key_output_IC_dynamic_}
+   */
+  inline static const Key<bool> output_initialConditions_dynamic{
+      {"Output", "Initial_Conditions", "Dynamic"}, false, {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_IC_eden_threshold_,Energy_Density_Threshold,double,</tt>0.5 \unit{in GeV/fm³}<tt>}
+   *
+   * Set the minimum energy density for a particle to be considered fluid. It
+   * is only used if the dynamic initial condition is active.
+   */
+  /**
+   * \see_key{key_output_IC_eden_threshold_}
+   */
+  inline static const Key<double> output_initialConditions_eDenThreshold{
+      {"Output", "Initial_Conditions", "Energy_Density_Threshold"},
+      0.5, {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_IC_mintime_,Minimum_Time,double,</tt>0 \unit{in fm}<tt>}
+   *
+   * Set the minimum time for a particle to be considered fluid. It is only
+   * used if the dynamic initial condition is active.
+   */
+  /**
+   * \see_key{key_output_IC_mintime_}
+   */
+  inline static const Key<double> output_initialConditions_minTime{
+      {"Output", "Initial_Conditions", "Minimum_Time"}, 0, {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_IC_maxtime_,Maximum_Time,double,</tt>100 \unit{in fm}<tt>}
+   *
+   * Set the maximum time for a particle to be considered fluid. It is only
+   * used if the dynamic initial condition is active.
+   */
+  /**
+   * \see_key{key_output_IC_maxtime_}
+   */
+  inline static const Key<double> output_initialConditions_maxTime{
+      {"Output", "Initial_Conditions", "Maximum_Time"}, 100, {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_IC_fluid_cells_,Fluidization_Cells,int,</tt>50
+   * cells<tt>}
+   *
+   * Fixed number of cells to select fluidizing particles. Ideally the cell
+   * should be small enough for a meaningful interpolation.
+   */
+  /**
+   * \see_key{key_output_IC_fluid_cells_}
+   */
+  inline static const Key<int> output_initialConditions_fluidCells{
+      {"Output", "Initial_Conditions", "Fluidization_Cells"}, 50, {"3.1"}};
+>>>>>>> 9d47252fe (Improves naming of functions and default parameters in constructor of finder)
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
    * <hr> \anchor input_output_rivet_
    * ### &diams; Rivet
    * &rArr; Only `YODA` format (see \ref doxypage_output_rivet
@@ -5748,6 +5818,11 @@ struct InputKeys {
       std::cref(output_initialConditions_properTime),
       std::cref(output_initialConditions_pTCut),
       std::cref(output_initialConditions_rapidityCut),
+      std::cref(output_initialConditions_dynamic),
+      std::cref(output_initialConditions_eDenThreshold),
+      std::cref(output_initialConditions_minTime),
+      std::cref(output_initialConditions_maxTime),
+      std::cref(output_initialConditions_fluidCells),
       std::cref(output_rivet_analyses),
       std::cref(output_rivet_crossSection),
       std::cref(output_rivet_ignoreBeams),

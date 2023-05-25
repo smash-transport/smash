@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2019-2020,2022
+ *    Copyright (c) 2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -117,5 +117,17 @@ bool above_threshold(ParticleData &pdata){
   return fluidize;
 }
 
+void build_fluidization_lattice(
+    RectangularLattice<EnergyMomentumTensor> *e_den_lat, const double t,
+    const std::vector<Particles> &ensembles, const DensityParameters &dens_par) {
+  if (t > 20) {
+    std::array<double, 3> new_l{2 * t, 2 * t, 2 * t};
+    std::array<double, 3> new_orig{-t, -t, -t};
+    e_den_lat->reset_and_resize(new_l, new_orig);
+  }
+
+  update_lattice(e_den_lat, LatticeUpdate::EveryTimestep, DensityType::Hadron,
+                 dens_par, ensembles, false);
+}
 
 }  // namespace smash

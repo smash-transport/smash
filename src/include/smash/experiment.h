@@ -260,6 +260,17 @@ class Experiment : public ExperimentBase {
   std::vector<Particles> *all_ensembles() { return &ensembles_; }
 
   /**
+   *  Update the hydrodynamic background energy density, to be called by an
+   * external manager.
+   *
+   *  \param[in] background map with particle indices as keys and their
+   * corresponding background energy density as values
+   */
+  void update_fluidization_background(std::map<int32_t, double> background) {
+    *fluidization_background_ = std::move(background);
+  }
+
+  /**
    * Provides external access to SMASH calculation modus. This is helpful if
    * SMASH is used as a 3rd-party library.
    */
