@@ -487,4 +487,42 @@ TEST(try_create_particle_func) {
     COMPARE_ABSOLUTE_ERROR(b.formation_time(), a.position().x0(), accuracy);
     COMPARE(a.pdgcode(), b.pdgcode());
   }
+
+  // Create a particle with either a NAN value in the position or the momentum
+  // to trigger an invalid_argument error. The particle will be ignored by the
+  // try_create_particle function.
+  particles.reset();
+  for (int i = 0; i < npart; i++) {
+    ParticleData smashon = Test::smashon_random();
+    FourVector r = smashon.position(), p = smashon.momentum();
+    PdgCode pdg = smashon.pdgcode();
+    if (i == 0) {
+      list_modus.try_create_particle(particles, pdg, NAN, r.x1(), r.x2(),
+                                     r.x3(), m0, p.x0(), p.x1(), p.x2(),
+                                     p.x3());
+    } else {
+      list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(),
+                                     r.x3(), m0, p.x0(), p.x1(), p.x2(),
+                                     p.x3());
+    }
+  }
+  ParticleList plist_error = particles.copy_to_vector();
+  VERIFY(plist_error.size() == npart - 1);
+
+  particles.reset();
+  for (int i = 0; i < npart; i++) {
+    ParticleData smashon = Test::smashon_random();
+    FourVector r = smashon.position(), p = smashon.momentum();
+    PdgCode pdg = smashon.pdgcode();
+    if (i == 0) {
+      list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(),
+                                     r.x3(), m0, NAN, p.x1(), p.x2(), p.x3());
+    } else {
+      list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(),
+                                     r.x3(), m0, p.x0(), p.x1(), p.x2(),
+                                     p.x3());
+    }
+  }
+  plist_error = particles.copy_to_vector();
+  VERIFY(plist_error.size() == npart - 1);
 }
