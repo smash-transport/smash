@@ -14,9 +14,9 @@ trap 'printf "\n"' EXIT
 #===================================================================
 # Required versions of formatting programs (global variables)
 
-declare -r minimum_bash_version='4.3.0'
-declare -r clang_format_required_version='13.0'
-declare -r cmake_format_required_version='0.6.13'
+declare -rg minimum_bash_version='4.3.0'
+declare -rg clang_format_required_version='13.0'
+declare -rg cmake_format_required_version='0.6.13'
 
 #===================================================================
 # Principal functions
@@ -34,7 +34,7 @@ function do_variables_and_shell_options_setup()
     shopt -s globstar nullglob
     CHOSEN_LANGUAGES=''
     declare -gA FORMATTER_COMMAND=(
-        ['C++']='clang-format'
+        ['C++']='clang-format-'${clang_format_required_version%%.*}
         ['CMake']='cmake-format'
     )
     MODE_PERFORM='FALSE'
@@ -84,9 +84,8 @@ function perform_or_test_formatting()
 function check_formatter_availability()
 {
     if ! hash "${FORMATTER_COMMAND[$1]}" &>/dev/null; then
-        if [[ ${FORMATTER_COMMAND[$1]} = 'clang-format' ]]; then
-            local clang_format_major_version=${clang_format_required_version::-2}
-            FORMATTER_COMMAND['C++']=${FORMATTER_COMMAND['C++']}'-'${clang_format_major_version}
+        if [[ $1 = 'C++' ]] && [[ "${FORMATTER_COMMAND[$1]}" != 'clang-format' ]]; then
+            FORMATTER_COMMAND['C++']='clang-format'
             check_formatter_availability 'C++'
         else
             fail "'${FORMATTER_COMMAND[$1]}' command not found."
