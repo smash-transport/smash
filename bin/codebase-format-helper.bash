@@ -11,6 +11,16 @@
 
 trap 'printf "\n"' EXIT
 
+#===================================================================
+# Required versions of formatting programs (global variables)
+
+declare -rg minimum_bash_version='4.3.0'
+declare -rg clang_format_required_version='13.0'
+declare -rg cmake_format_required_version='0.6.13'
+
+#===================================================================
+# Principal functions
+
 function main()
 {
     check_bash_version
@@ -23,8 +33,8 @@ function do_variables_and_shell_options_setup()
 {
     shopt -s globstar nullglob
     CHOSEN_LANGUAGES=''
-    declare -rgA FORMATTER_COMMAND=(
-        ['C++']='clang-format'
+    declare -gA FORMATTER_COMMAND=(
+        ['C++']='clang-format-'${clang_format_required_version%%.*}
         ['CMake']='cmake-format'
     )
     MODE_PERFORM='FALSE'
@@ -36,7 +46,7 @@ function do_variables_and_shell_options_setup()
 function check_bash_version()
 {
     local required found
-    required='4.3.0'
+    required=${minimum_bash_version}
     found=$(echo ${BASH_VERSINFO[@]:0:3} | tr ' ' '.')
     if [[ $(printf '%s\n' "${required}" "${found}" | sort -V | head -n1) != "${required}" ]]; then
         fail "Minimum bash version required is ${required}, but found ${found}."
@@ -69,12 +79,19 @@ function perform_or_test_formatting()
 }
 
 #===================================================================
-# Auciliary functions
+# Auxiliary functions
 
 function check_formatter_availability()
 {
-    if ! type "${FORMATTER_COMMAND[$1]}" &>/dev/null; then
-        fail "'${FORMATTER_COMMAND[$1]}' command not found."
+    if ! hash "${FORMATTER_COMMAND[$1]}" &>/dev/null; then
+        if [[ $1 = 'C++' ]] && [[ "${FORMATTER_COMMAND[$1]}" != 'clang-format' ]]; then
+            FORMATTER_COMMAND['C++']='clang-format'
+            check_formatter_availability 'C++'
+        else
+            fail "'${FORMATTER_COMMAND[$1]}' command not found."
+        fi
+    else
+        readonly -A FORMATTER_COMMAND[$1]
     fi
 }
 
@@ -84,10 +101,10 @@ function check_formatter_version()
     language="$1"
     found=$(${FORMATTER_COMMAND[${language}]} --version)
     if [[ ${language} = 'C++' ]]; then
-        required="13.0"
+        required=${clang_format_required_version}
         found=$(grep -oE '[1-9][0-9]*[.][0-9]+' <<< "${found}" | head -n1)
     elif [[ ${language} = 'CMake' ]]; then
-        required='0.6.13'
+        required=${cmake_format_required_version}
     fi
     if [[ "${found}" != "${required}" ]]; then
         fail "Wrong ${FORMATTER_COMMAND[${language}]} version found: ${found} (${required} is required)."
