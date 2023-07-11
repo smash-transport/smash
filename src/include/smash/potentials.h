@@ -230,7 +230,7 @@ class Potentials {
    */
   static double momentum_dependent_part(double mom, double rho, double C,
                                         double Lambda) {
-    int g = 2;  // degeneracy factor
+    int g = 4;  // degeneracy factor
     double fermi_momentum = std::cbrt(6. * M_PI * M_PI * rho / g);  // in 1/fm
     mom = mom / hbarc;  // convert to 1/fm
     double temp1 = 2 * g * C * M_PI * std::pow(Lambda, 3) /
