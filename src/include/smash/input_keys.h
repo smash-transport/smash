@@ -740,11 +740,14 @@ class Key {
  * matter. The symmetry potential can adjust the Skyrme potential (but not the
  * VDF potential) to include effects due to isospin. The Skyrme and Symmetry
  * potentials are semi-relativistic, while the VDF potential is fully
- * relativistic.
+ * relativistic. A momentum-dependent term can be added to the Skyrme potential.
+ * The additional term is not treated fully Lorentz-invariant. Visit the
+ * following subpages for more information:
  * - \ref doxypage_input_conf_pot_skyrme
  * - \ref doxypage_input_conf_pot_symmetry
  * - \ref doxypage_input_conf_pot_VDF
  * - \ref doxypage_input_conf_pot_coulomb
+ * - \ref doxypage_input_conf_pot_momentum_dependence
  *
  * ### Configuring potentials
  *
@@ -799,6 +802,25 @@ class Key {
          Powers: [1.7681391, 3.5293515, 5.4352788, 6.3809822]
          Coeffs: [-8.450948e+01, 3.843139e+01, -7.958557e+00, 1.552594e+00]
  \endverbatim
+ * ### Configuring the momentum-depndent part
+ * The momentum-dependent term can be added to the Skyrme potential. In order
+ * to activate it one has to specify the parameters C and Lambda in MeV and
+ * 1/fm respctively. Note that the parameters from the momentum-dependent part
+ * and the Skyrme potential need to match in order to reproduce nuclear ground
+ * state properties. An example of a medium-stiff (K=290 MeV) equation of state
+ * is given in the following.
+ * \verbatim
+ Potentials:
+  Symmetry:
+    S_Pot: 18.0
+  Skyrme:
+    Skyrme_Tau: 1.76
+    Skyrme_B: 57.2
+    Skyrme_A: -29.3
+  Momentum_Dependence:
+    C: -63.5
+    Lambda: 2.13
+\endverbatim
  */
 
 /*!\Userguide
@@ -895,6 +917,11 @@ class Key {
  * configuration. Note that in the final equations the summand for \f$i=j\f$
  * drops out because the contribution from that cell to the integral vanishes if
  * one assumes the current and density to be constant in the cell.
+ */
+
+/*!\Userguide
+ * \page doxypage_input_conf_pot_momentum_dependence
+ * Here goes the content :)
  */
 
 /*!\Userguide
@@ -4847,12 +4874,25 @@ struct InputKeys {
   inline static const Key<std::vector<double>> potentials_coulomb_rCut{
       {"Potentials", "Coulomb", "R_Cut"}, {"2.1"}};
 
-  inline static const Key<std::vector<double>>
-      potentials_momentum_dependence_Lambda{
-          {"Potentials", "Momentum_Dependence", "Lambda"}, {"2.13"}};
+  /*!\Userguide
+   * \page doxypage_input_conf_pot_momentum_dependence
+   * \required_key{key_potentials_momentum_dependence_C,C,double}
+   *
+   * Parameter C of the momentum-dependent part of the
+   * potential \unit{in MeV}.
+   */
+  inline static const Key<double> potentials_momentum_dependence_C{
+      {"Potentials", "Momentum_Dependence", "C"}, {"3.0"}};
 
-  inline static const Key<std::vector<double>> potentials_momentum_dependence_C{
-      {"Potentials", "Momentum_Dependence", "C"}, {"-63.6"}};
+  /*!\Userguide
+   * \page doxypage_input_conf_pot_momentum_dependence
+   * \required_key{key_potentials_momentum_dependence_Lmbda,Lambda,double}
+   *
+   * Parameter Lambda of the momentum-dependent part of the
+   * potential \unit{in 1/fm}.
+   */
+  inline static const Key<double> potentials_momentum_dependence_Lambda{
+      {"Potentials", "Momentum_Dependence", "Lambda"}, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
