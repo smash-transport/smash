@@ -1580,6 +1580,18 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
+   * \optional_key{key_log_potentials_,Potentials,string,$\{default\}}
+   *
+   * Messages regarding the potentials belong to this area.
+   */
+  /**
+   * \see_key{key_log_potentials_}
+   */
+  inline static const Key<einhard::LogLevel> log_potentials{
+      {"Logging", "Potentials"}, {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_sphere_,Sphere,string,$\{default\}}
    *
    * Messages specific to the sphere modus implementation belong to this area.
