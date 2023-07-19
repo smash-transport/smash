@@ -1592,6 +1592,18 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
+   * \optional_key{key_log_rootsolver_,RootSolver,string,$\{default\}}
+   *
+   * Messages specific to the root finding belong to this area.
+   */
+  /**
+   * \see_key{key_log_rootsolver_}
+   */
+  inline static const Key<einhard::LogLevel> log_rootsolver{
+      {"Logging", "SootSolver"}, {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_logging
    * \optional_key{key_log_sphere_,Sphere,string,$\{default\}}
    *
    * Messages specific to the sphere modus implementation belong to this area.

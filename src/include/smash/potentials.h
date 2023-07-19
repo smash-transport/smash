@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2022
+ *    Copyright (c) 2014-2015,2017-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -21,6 +21,7 @@
 #include "density.h"
 #include "forwarddeclarations.h"
 #include "particledata.h"
+#include "rootsolver.h"
 #include "threevector.h"
 
 namespace smash {
@@ -109,82 +110,28 @@ class Potentials {
    **/
   double calculation_frame_energy(ThreeVector mom, FourVector jmu_B,
                                   double mass) const {
-    const gsl_multiroot_fsolver_type *Solver_name;
-    gsl_multiroot_fsolver *Root_finder;
-
-    int status = GSL_CONTINUE;
-    size_t iter = 0;
-    const size_t problem_dimension = 1;
-    struct ParametersForPotentialSolver parameters = {mom,
-                                                      jmu_B,
-                                                      mass,
-                                                      skyrme_a_,
-                                                      skyrme_b_,
-                                                      skyrme_tau_,
-                                                      mom_dependence_C_,
-                                                      mom_dependence_Lambda_};
-    gsl_multiroot_function EnergyCalcFrame = {
-        &(Potentials::root_equation_potentials_GSL), problem_dimension,
-        &parameters};
-    std::array<double, 9> starting_guess_addition = {
-        0.0, 1.0, -1.0, 10.0, -10.0, 100.0, -100.0, 1000000.0, -1000000.0};
-    gsl_vector *roots_array = gsl_vector_alloc(problem_dimension);
-    double solution_precision = 1e-7;
-    for (int ntry = 0; ntry < 7; ntry++) {
-      iter = 0;
-      status = GSL_CONTINUE;
-      double roots_array_initial[1] = {std::sqrt(mass * mass + mom * mom) +
-                                       starting_guess_addition[ntry]};
-      gsl_vector_set(roots_array, 0, roots_array_initial[0]);
-      Solver_name = gsl_multiroot_fsolver_hybrids;
-      Root_finder = gsl_multiroot_fsolver_alloc(Solver_name, problem_dimension);
-      gsl_multiroot_fsolver_set(Root_finder, &EnergyCalcFrame, roots_array);
-      do {
-        iter++;
-        status = gsl_multiroot_fsolver_iterate(Root_finder);
-        if (status) {
-          logg[LPotentials].debug(
-              "GSL ERROR in root finding: " +
-              static_cast<std::string>(gsl_strerror(status)) +
-              "\n with starting value " +
-              std::to_string(roots_array_initial[0]));
-          break;
-        }
-        status =
-            gsl_multiroot_test_residual(Root_finder->f, solution_precision);
-        if (status == GSL_SUCCESS) {
-          double energy = gsl_vector_get(Root_finder->x, 0);
-          gsl_multiroot_fsolver_free(Root_finder);
-          gsl_vector_free(roots_array);
-          return energy;
-        }
-      } while (status == GSL_CONTINUE && iter < 100000);
+    std::function<double(double)> root_equation = [mom, jmu_B, mass,
+                                                   this](double energy) {
+      return root_eq_potentials(energy, mom, jmu_B, mass, skyrme_a_, skyrme_b_,
+                                skyrme_tau_, mom_dependence_C_,
+                                mom_dependence_Lambda_);
+    };
+    auto rootsolver = RootSolver1D(root_equation);
+    std::array<double, 9> starting_guess_addition = {0.0,   1.0,   -1.0,  10.0,
+                                                     -10.0, 100.0, -100.0};
+    for (double initial_guess_add : starting_guess_addition) {
+      double initial_guess =
+          std::sqrt(mass * mass + mom * mom) + initial_guess_add;
+      double calc_frame_energy = 0.0;
+      bool root_found =
+          rootsolver.try_find_root(initial_guess, 100000, calc_frame_energy);
+      if (root_found) {
+        return calc_frame_energy;
+      }
     }
-    gsl_multiroot_fsolver_free(Root_finder);
-    gsl_vector_free(roots_array);
     throw std::runtime_error(
-        "100k iterations not enough to find root for potentials");
+        "Failed to find root for momentum-dependent potentials");
     return 0.0;
-  }
-
-  static double rest_frame_effective_mass_sqr(const double energy_calc,
-                                              ThreeVector mom_calc,
-                                              FourVector jmu, double m,
-                                              double A, double B, double tau,
-                                              double C, double Lambda) {
-    // get velocity for boost to the local rest frame
-    double rho_LRF = jmu.abs();
-    ThreeVector beta_LRF = rho_LRF > really_small ? jmu.threevec() / jmu.x0()
-                                                  : ThreeVector(0, 0, 0);
-    // get momentum in the local rest frame
-    FourVector pmu_calc = FourVector(energy_calc, mom_calc);
-    FourVector pmu_LRF = pmu_calc.lorentz_boost(beta_LRF);
-    // double energy_LRF_guess = pmu_LRF.x0();
-    double p_LRF = pmu_LRF.threevec().abs();
-    double energy_LRF = sqrt(m * m + p_LRF * p_LRF) +
-                        skyrme_pot_impl(rho_LRF, A, B, tau) +
-                        momentum_dependent_part(p_LRF, rho_LRF, C, Lambda);
-    return energy_LRF * energy_LRF - p_LRF * p_LRF;
   }
 
   /**
@@ -197,28 +144,25 @@ class Potentials {
    * \return effective mass squared in calculation frame minus effective mass in
    * rest_frame in GeV^2
    */
-  static int root_equation_potentials_GSL(const gsl_vector *roots_array,
-                                          void *parameters,
-                                          gsl_vector *function) {
-    struct ParametersForPotentialSolver *par =
-        static_cast<ParametersForPotentialSolver *>(parameters);
-    const ThreeVector mom = (par->momentum);
-    const FourVector jmu = (par->current);
-    const double m = (par->mass);
-    const double A = (par->skyrme_a);
-    const double B = (par->skyrme_b);
-    const double tau = (par->skyrme_tau);
-    const double C = (par->param_C);
-    const double Lambda = (par->param_Lambda);
-    const double energy = gsl_vector_get(roots_array, 0);
-    double root_equation = energy * energy - mom.sqr() -
-                           rest_frame_effective_mass_sqr(energy, mom, jmu, m, A,
-                                                         B, tau, C, Lambda);
-    gsl_vector_set(function, 0, root_equation);
-    // std::cout << "root equation called for given energy " << energy <<
-    //             "compared to kinetic energy " << std::sqrt(m*m+ mom*mom)<<
-    //              " and error was " << root_equation << std::endl;
-    return GSL_SUCCESS;
+
+  static double root_eq_potentials(const double energy_calc,
+                                   ThreeVector mom_calc, FourVector jmu,
+                                   double m, double A, double B, double tau,
+                                   double C, double Lambda) {
+    // get velocity for boost to the local rest frame
+    double rho_LRF = jmu.abs();
+    ThreeVector beta_LRF = rho_LRF > really_small ? jmu.threevec() / jmu.x0()
+                                                  : ThreeVector(0, 0, 0);
+    // get momentum in the local rest frame
+    FourVector pmu_calc = FourVector(energy_calc, mom_calc);
+    FourVector pmu_LRF = pmu_calc.lorentz_boost(beta_LRF);
+    // double energy_LRF_guess = pmu_LRF.x0();
+    double p_LRF = pmu_LRF.threevec().abs();
+    double energy_LRF = sqrt(m * m + p_LRF * p_LRF) +
+                        skyrme_pot_impl(rho_LRF, A, B, tau) +
+                        momentum_dependent_part(p_LRF, rho_LRF, C, Lambda);
+    return energy_calc * energy_calc - mom_calc.sqr() -
+           (energy_LRF * energy_LRF - p_LRF * p_LRF);
   }
 
   /**

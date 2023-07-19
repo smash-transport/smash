@@ -120,6 +120,7 @@ DECLARE_LOGAREA(28, InitialConditions);
 DECLARE_LOGAREA(29, ScatterActionMulti);
 DECLARE_LOGAREA(30, Configuration);
 DECLARE_LOGAREA(31, Potentials);
+DECLARE_LOGAREA(32, RootSolver);
 
 /**
  * This type collects all existing log areas so they will be created with the
