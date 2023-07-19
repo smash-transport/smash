@@ -21,12 +21,13 @@
 #include "chrono.h"
 #include "decayactionsfinder.h"
 #include "decayactionsfinderdilepton.h"
+#include "dynamicfluidfinder.h"
 #include "energymomentumtensor.h"
 #include "fields.h"
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
 #include "grid.h"
-#include "hypersurfacecrossingaction.h"
+#include "hypersurfacecrossingfinder.h"
 #include "numeric_cast.h"
 #include "outputparameters.h"
 #include "pauliblocking.h"
@@ -1156,6 +1157,62 @@ Experiment<Modus>::Experiment(Configuration &config,
       logg[LInitialConditions].info()
           << "Extracting initial conditions without kinematic cuts.";
     }
+
+    if (IC_dynamic_) {  // Dynamic fluidization
+      const double energy_threshold = config.take(
+          {"Output", "Initial_Conditions", "Energy_Density_Threshold"}, 0.5);
+      const double min_time = std::max(
+          config.take({"Output", "Initial_Conditions", "Minimum_Time"}, 0.),
+          0.);
+      const double max_time =
+          std::min(config.take({"Output", "Initial_Conditions", "Maximum_Time"},
+                               end_time_),
+                   end_time_);
+      const int fluid_cell = config.take(
+          {"Output", "Initial_Conditions", "Fluidization_Cells"}, 50);
+      if (energy_threshold <= 0 || max_time < min_time || fluid_cell < 2) {
+        logg[LInitialConditions].fatal()
+            << "Bad parameters chosen for dynamic initial conditions";
+      }
+      logg[LInitialConditions].info()
+          << "Dynamic Initial Conditions with threshold " << energy_threshold
+          << " GeV, between " << min_time << " and " << max_time << " fm.";
+
+      double min_size = std::max(min_time, 10.);
+      std::array<double, 3> l{2 * min_size, 2 * min_size, 2 * min_size};
+      std::array<int, 3> n{fluid_cell, fluid_cell, fluid_cell};
+      std::array<double, 3> origin{-min_size, -min_size, -min_size};
+
+      fluidization_lat_ =
+          std::make_unique<RectangularLattice<EnergyMomentumTensor>>(
+              l, n, origin, false, LatticeUpdate::EveryTimestep);
+      fluidization_background_ = std::make_unique<std::map<int32_t, double>>();
+
+      action_finders_.emplace_back(std::make_unique<DynamicFluidizationFinder>(
+          fluidization_lat_.get(), fluidization_background_.get(),
+          energy_threshold, min_time, max_time, fluid_cell));
+    } else {  // Iso-tau hypersurface
+      double proper_time;
+      if (config.has_value({"Output", "Initial_Conditions", "Proper_Time"})) {
+        // Read in proper time from config
+        proper_time =
+            config.take({"Output", "Initial_Conditions", "Proper_Time"});
+      } else {
+        // Default proper time is the passing time of the two nuclei
+        double default_proper_time = modus_.nuclei_passing_time();
+        double lower_bound =
+            config.take({"Output", "Initial_Conditions", "Lower_Bound"}, 0.5);
+        if (default_proper_time >= lower_bound) {
+          proper_time = default_proper_time;
+        } else {
+          logg[LInitialConditions].warn()
+              << "Nuclei passing time is too short, hypersurface proper time "
+                 "set "
+                 "to tau = "
+              << lower_bound << " fm.";
+          proper_time = lower_bound;
+        }
+      }
 
     action_finders_.emplace_back(
         std::make_unique<HyperSurfaceCrossActionsFinder>(proper_time,

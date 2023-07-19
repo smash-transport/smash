@@ -8,7 +8,6 @@
  */
 
 #include "smash/fluidizationaction.h"
-
 #include "smash/logging.h"
 #include "smash/quantumnumbers.h"
 

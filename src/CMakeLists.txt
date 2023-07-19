@@ -210,6 +210,7 @@ set(smash_src
     density.cc
     decayactiondilepton.cc
     decayactionsfinderdilepton.cc
+    dynamicfluidfinder.cc
     distributions.cc
     energymomentumtensor.cc
     experiment.cc
@@ -221,7 +222,7 @@ set(smash_src
     grandcan_thermalizer.cc
     grid.cc
     hadgas_eos.cc
-    hypersurfacecrossingaction.cc
+    hypersurfacecrossingfinder.cc
     icoutput.cc
     inputfunctions.cc
     interpolation.cc

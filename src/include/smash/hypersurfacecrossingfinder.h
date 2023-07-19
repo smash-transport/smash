@@ -19,52 +19,6 @@ namespace smash {
 
 /**
  * \ingroup action
- * Hypersurfacecrossingaction is a special action which indicates that a
- * particle has crossed a hypersurface of given proper time. This can be used
- * to generate initial conditions for hybrid models. If this action is performed
- * the incoming particles are removed from the evolution.
- */
-class HypersurfacecrossingAction : public Action {
- public:
-  /**
-   * Construct hypersurfacecrossing action.
-   * \param[in] in_part Data of incoming particle.
-   * \param[in] out_part Data of particles leaving hypersurface
-   * \param[in] time_until Time when the crossing takes place[fm]
-   */
-  HypersurfacecrossingAction(const ParticleData &in_part,
-                             const ParticleData &out_part,
-                             const double time_until)
-      : Action(in_part, out_part, time_until,
-               ProcessType::HyperSurfaceCrossing) {}
-  double get_total_weight() const override { return 0.0; };
-  double get_partial_weight() const override { return 0.0; };
-  void format_debug_output(std::ostream &out) const override {
-    out << "Hypersurface crossing of " << incoming_particles_;
-  }
-
-  /**
-   * Generate the final state of the hypersurface crossing particles.
-   * Removes all particles crossing the hypersurface from the evolution.
-   */
-  void generate_final_state() override;
-
-  /**
-   * Check various conservation laws.
-   *
-   * \param[in] id_process process id only used for debugging output
-   *
-   * \return 0.
-   *
-   * This function overrides Action::check_conservation that returns
-   * the amount of energy density violation due to Pythia processes,
-   * which is 0. here.
-   */
-  double check_conservation(const uint32_t id_process) const override;
-};
-
-/**
- * \ingroup action
  * Finder for hypersurface crossing actions.
  * Loops through all particles and checks if they cross the hypersurface
  * during the next timestep.

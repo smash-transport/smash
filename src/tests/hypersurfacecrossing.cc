@@ -11,7 +11,7 @@
 
 #include "setup.h"
 #include "smash/experiment.h"
-#include "smash/hypersurfacecrossingaction.h"
+#include "smash/hypersurfacecrossingfinder.h"
 
 using namespace smash;
 using smash::Test::Momentum;
