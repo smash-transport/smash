@@ -4905,15 +4905,21 @@ struct InputKeys {
    * Parameter C of the momentum-dependent part of the
    * potential \unit{in MeV}.
    */
+  /**
+   * \see_key{key_potentials_momentum_dependence_C}
+   */
   inline static const Key<double> potentials_momentum_dependence_C{
       {"Potentials", "Momentum_Dependence", "C"}, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_momentum_dependence
-   * \required_key{key_potentials_momentum_dependence_Lmbda,Lambda,double}
+   * \required_key{key_potentials_momentum_dependence_Lambda,Lambda,double}
    *
    * Parameter Lambda of the momentum-dependent part of the
    * potential \unit{in 1/fm}.
+   */
+  /**
+   * \see_key{key_potentials_momentum_dependence_Lambda}
    */
   inline static const Key<double> potentials_momentum_dependence_Lambda{
       {"Potentials", "Momentum_Dependence", "Lambda"}, {"3.0"}};

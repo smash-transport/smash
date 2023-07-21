@@ -50,6 +50,18 @@ class Potentials {
   /// Standard destructor
   virtual ~Potentials();
 
+  /**
+   * Calculates the gradient of the energy including potentials in the
+   * calculation frame in MeV/fm
+   *
+   * \param jB_lat Pointer to the baryon density lattice
+   * \param pos Position of the particle of interest in fm
+   * \param mom Momentum of the particle of interest in GeV
+   * \param mass Mass of the particle of interest in GeV
+   * \param plist List of all particles
+   * \return ThreeVector gradient of the single particle energy in the
+   * calculation frame in MeV/fm
+   */
   ThreeVector energy_gradient(DensityLattice *jB_lat, const ThreeVector &pos,
                               const ThreeVector &mom, double mass,
                               ParticleList &plist) const {
@@ -89,24 +101,14 @@ class Potentials {
     return result;
   }
 
-  struct ParametersForPotentialSolver {
-    ThreeVector momentum;
-    FourVector current;
-    double mass;
-    double skyrme_a;
-    double skyrme_b;
-    double skyrme_tau;
-    double param_C;
-    double param_Lambda;
-  };
-
   /**
    * Evaluates the single-particle energy of a particle at a given position
    * and momentum including the potential in the calculation frame
    *
    * \param[in] mom Momentum of interest in GeV
-   * \param[in] pos Position of interest in fm
    * \param[in] jmu_B Baryon current density at pos
+   * \param[in] mass mass of the particle of interest
+   * \return the energy of a particle in the calculation frame
    **/
   double calculation_frame_energy(ThreeVector mom, FourVector jmu_B,
                                   double mass) const {
@@ -204,6 +206,15 @@ class Potentials {
     return skyrme_pot_impl(baryon_density, skyrme_a_, skyrme_b_, skyrme_tau_);
   }
 
+  /**
+   * Single particle Skyrme potential in MeV
+   *
+   * \param baryon_density net baryon densityin the local rest-frame in 1/fm^3
+   * \param A Skyrme parameter A in MeV
+   * \param B Skyrme parameter B in MeV
+   * \param tau Skyrme parameter tau
+   * \return Single particle Skyrme potential in MeV
+   */
   static double skyrme_pot_impl(const double baryon_density, const double A,
                                 const double B, const double tau);
 

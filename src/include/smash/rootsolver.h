@@ -17,14 +17,29 @@
 
 namespace smash {
 static constexpr int LRootSolver = LogArea::RootSolver::id;
+/**
+ * A class used for calculating the root of a one-dimensional equation.
+ * It takes care of all tecnicalities and provides an interace to GSL.
+ */
 class RootSolver1D {
  public:
+  /**
+   * Construct a new Root Solver 1D object
+   *
+   * \param[in] eq The function of which a root is desired
+   */
   RootSolver1D(std::function<double(double)> eq) {
     root_eq_ = std::make_unique<std::function<double(double)>>(eq);
   }
 
   ~RootSolver1D() { root_eq_ = nullptr; }
-
+  /**
+   * The function of which a root should be found in the form that GSL expects
+   *
+   * \param[inout] roots_array C-Array with x-values of the function
+   * \param[inout] function c-Array with f(x)-values of the function
+   * \return Feedback whether the equation was evaluatd successfully
+   */
   static int gsl_func(const gsl_vector *roots_array, void *,
                       gsl_vector *function) {
     double x = gsl_vector_get(roots_array, 0);
@@ -32,6 +47,14 @@ class RootSolver1D {
     return GSL_SUCCESS;
   }
 
+  /**
+   * Attempt to find a root with a given initial guess
+   *
+   * \param[in] initial_guess First x-value to start root finding
+   * \param[in] itermax maximum number of steps for root finding
+   * \param[out] root
+   * \return true if a root was successfully found
+   */
   bool try_find_root(double initial_guess, size_t itermax, double &root) {
     gsl_multiroot_function function_GSL = {&(gsl_func), 1, nullptr};
     int status = GSL_CONTINUE;
@@ -65,14 +88,18 @@ class RootSolver1D {
   }
 
  private:
+  /// GSL solver to use for rootfingding
   const gsl_multiroot_fsolver_type *Solver_name_ =
       gsl_multiroot_fsolver_hybrids;
 
+  /// GSL rootfinding object to take care of root findung
   gsl_multiroot_fsolver *Root_finder_;
 
+  /// Static pointer to the function to solve
   static inline std::unique_ptr<std::function<double(double)>> root_eq_ =
       nullptr;
 
+  /// Expected precision of the root
   double solution_precision_ = 1e-7;
 };
 

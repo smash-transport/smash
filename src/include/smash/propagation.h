@@ -100,6 +100,7 @@ void expand_space_time(Particles *particles,
  * \param[in] FI3_lat Lattice for the electric and magnetic
  *            components of the symmetry force
  * \param[in] EM_lat Lattice for the electric and magnetic field
+ * \param[in] jB_lat Lattice of the net baryon density
  */
 void update_momenta(
     std::vector<Particles> &particles, double dt, const Potentials &pot,
