@@ -8,6 +8,7 @@
  */
 
 #include "smash/dynamicfluidfinder.h"
+
 #include "smash/fluidizationaction.h"
 #include "smash/logging.h"
 
@@ -18,11 +19,11 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
     const ParticleList &search_list, double dt,
     [[maybe_unused]] const double gcell_vol,
     [[maybe_unused]] const std::vector<FourVector> &beam_momentum) const {
-  std::vector<ActionPtr> actions;
+  ActionList actions;
 
   for (const ParticleData &p : search_list) {
-    double t0 = p.position().x0();
-    double t_end = t0 + dt;  // Time at the end of timestep
+    const double t0 = p.position().x0();
+    const double t_end = t0 + dt;  // Time at the end of timestep
     // Particles should not be removed before the nuclei collide, and after some
     // time max_time_ there won't be any fluidization, so this saves resources
     if (t0 < min_time_ || t_end > max_time_)
@@ -30,10 +31,9 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
 
     const int32_t id = p.id();
     if (queue_.count(id)) {
-      if (queue_.at(id) < t_end) {
-        ActionPtr action =
-            std::make_unique<FluidizationAction>(p, p, queue_.at(id) - t0);
-        actions.emplace_back(std::move(action));
+      if (queue_[id] < t_end) {
+        actions.emplace_back(
+            std::make_unique<FluidizationAction>(p, p, queue_[id] - t0));
         queue_.erase(id);
       }
     } else {
@@ -50,9 +50,8 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
                                     : formation - t0;
             // todo(hirayama): add option to not wait for formation (also
             // leading hadrons) or scale it
-            ActionPtr action =
-                std::make_unique<FluidizationAction>(p, p, time_until);
-            actions.emplace_back(std::move(action));
+            actions.emplace_back(
+                std::make_unique<FluidizationAction>(p, p, time_until));
           }
         }
       }
@@ -66,7 +65,7 @@ bool DynamicFluidizationFinder::above_threshold(
   EnergyMomentumTensor Tmunu;
   bool fluidize = false;
 
-  double background = background_[pdata.id()];
+  const double background = background_[pdata.id()];
   // value_at returns false if pdata is out of bounds, this is desirable here
   bool inside = e_den_lat_.value_at(pdata.position().threevec(), Tmunu);
   if (inside) {
@@ -84,15 +83,21 @@ bool DynamicFluidizationFinder::above_threshold(
 
 void build_fluidization_lattice(
     RectangularLattice<EnergyMomentumTensor> *e_den_lat, const double t,
-    const std::vector<Particles> &ensembles, const DensityParameters &dens_par) {
+    const std::vector<Particles> &ensembles,
+    const DensityParameters &dens_par) {
+  if (e_den_lat == nullptr) {
+    return;
+  }
+
   if (t > 20) {
     std::array<double, 3> new_l{2 * t, 2 * t, 2 * t};
     std::array<double, 3> new_orig{-t, -t, -t};
     e_den_lat->reset_and_resize(new_l, new_orig);
+    logg[LFluidization].warn() << "lattice resizing at " << t;
   }
 
   update_lattice(e_den_lat, LatticeUpdate::EveryTimestep, DensityType::Hadron,
                  dens_par, ensembles, false);
 }
 
-} // namespace smash
+}  // namespace smash

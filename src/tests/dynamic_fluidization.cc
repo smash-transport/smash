@@ -1,0 +1,133 @@
+/*
+ *
+ *    Copyright (c) 2019-2020,2022
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
+ */
+
+#include "vir/test.h"  // This include has to be first
+
+#include "setup.h"
+#include "smash/dynamicfluidfinder.h"
+#include "smash/experiment.h"
+#include "smash/random.h"
+
+using namespace smash;
+using smash::Test::Momentum;
+using smash::Test::Position;
+
+ParticleData create_particle_at(PdgCode pdg, Position pos);
+
+static FourVector unit{1, 0, 0, 0};
+static DensityParameters dens_par(Test::default_parameters());
+
+TEST(dynamic_fluidization_action) {
+  Test::create_actual_particletypes();
+  Test::create_actual_decaymodes();
+  ParticleList mother{ParticleData(ParticleType::find(0x2124), -1)};
+  std::vector<Particles> ensembles(1);
+  ParticleData a =
+      ensembles[0].insert(create_particle_at(0x2212, Position{0, -5, -5, -5}));
+  ParticleData b =
+      ensembles[0].insert(create_particle_at(0x111, Position{0, 5, 5, 5}));
+
+  a.set_4momentum(unit);  // set rest mass to 1 GeV
+  ensembles[0].update_particle(a, a);
+
+  // create large and coarse lattice
+  const std::array<double, 3> l{20, 20, 20}, origin{-10, -10, -10};
+  const std::array<int, 3> n{2, 2, 2};
+  auto lat = std::make_unique<RectangularLattice<EnergyMomentumTensor>>(
+      l, n, origin, false, LatticeUpdate::EveryTimestep);
+  build_fluidization_lattice(lat.get(), 0, ensembles, dens_par);
+
+  // create fake background
+  auto background = std::make_unique<std::map<int32_t, double>>();
+  background->emplace(a.id(), 1.0);
+  background->emplace(b.id(), 0.0);
+
+  // create finder with 1 GeV threshold
+  DynamicFluidizationFinder finder(*lat.get(), *background.get(), 1, 0, 1, 2);
+
+  // check that background works
+  VERIFY(finder.above_threshold(a));
+  VERIFY(!finder.above_threshold(b));
+
+  EnergyMomentumTensor Tmunu;
+  lat->value_at(a.position().threevec(), Tmunu);
+  // with zero 3-momentum the LRF is the lab frame
+  COMPARE(unit, Tmunu.landau_frame_4velocity());
+  // for unit mass/momentum, T^{00} evaluates to the normalization
+  COMPARE(Tmunu[0], dens_par.norm_factor_sf());
+
+  ActionList actions =
+      finder.find_actions_in_cell(ensembles[0].copy_to_vector(), 1, 0, {});
+  // particles should only fluidize if they come from hadronic or string decays
+  COMPARE(actions.size(), 0u);
+
+  a.set_history(1, a.id_process(), ProcessType::Decay, 0, mother);
+  ensembles[0].update_particle(a, a);
+  b.set_history(1, b.id_process(), ProcessType::Decay, 0, mother);
+  ensembles[0].update_particle(b, b);
+
+  actions =
+      finder.find_actions_in_cell(ensembles[0].copy_to_vector(), 1, 0, {});
+  COMPARE(actions.size(), 1u);
+
+  // the finder ignores when the time step finishes after end time
+  actions =
+      finder.find_actions_in_cell(ensembles[0].copy_to_vector(), 100, 0, {});
+  COMPARE(actions.size(), 0u);
+
+  // modifying background has an effect even after the finder is constructed
+  background->at(b.id()) = 1.0;
+  VERIFY(finder.above_threshold(b));
+  actions =
+      finder.find_actions_in_cell(ensembles[0].copy_to_vector(), 1, 0, {});
+  COMPARE(actions.size(), 2u);
+}
+
+/*
+ * The logic here is that a small region with 50 protons
+ * (from appropriate processes) will fluidize completely
+ */
+TEST(dense_region_fluidizes) {
+  ParticleList mother{ParticleData(ParticleType::find(0x2124), -1)};
+  const int large_particle_number = 50;
+  const double range = 0.5;
+  std::vector<Particles> ensembles(1);
+  random::set_seed(random::generate_63bit_seed());
+  for (int i = 0; i < large_particle_number; i++) {
+    auto [x, y, z] = std::make_tuple<double, double, double>(
+        random::uniform(-range, range), random::uniform(-range, range),
+        random::uniform(-range, range));
+    ensembles[0].insert(create_particle_at(0x2212, Position{0, x, y, z}));
+  }
+  // create small and fine lattice
+  const std::array<double, 3> l{2, 2, 2}, origin{-1, -1, -1};
+  const std::array<int, 3> n{20, 20, 20};
+  auto lat = std::make_unique<RectangularLattice<EnergyMomentumTensor>>(
+      l, n, origin, false, LatticeUpdate::EveryTimestep);
+
+  build_fluidization_lattice(lat.get(), 0, ensembles, dens_par);
+  auto background = std::make_unique<std::map<int32_t, double>>();
+  DynamicFluidizationFinder finder(*lat.get(), *background.get(), 1, 0, 1, 2);
+
+  for (ParticleData &p : ensembles[0]) {
+    background->emplace(p.id(), 0.0);
+    p.set_history(1, p.id_process(), ProcessType::Decay, 0, mother);
+  }
+
+  ActionList actions =
+      finder.find_actions_in_cell(ensembles[0].copy_to_vector(), 1, 0, {});
+  COMPARE(actions.size(), large_particle_number);
+}
+
+ParticleData create_particle_at(PdgCode pdg, Position pos) {
+  ParticleData particle{ParticleType::find(pdg)};
+  particle.set_4position(pos);
+  particle.set_4momentum(Momentum{particle.pole_mass(), 0, 0, 0});
+  return particle;
+}

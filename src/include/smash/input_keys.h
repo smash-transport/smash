@@ -4767,7 +4767,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_eden_threshold_,Energy_Density_Threshold,double,</tt>0.5 \unit{in GeV/fm³}<tt>}
+   * \optional_key_no_line{key_output_IC_eden_threshold_,Energy_Density_Threshold,double,</tt>0.5
+   * \unit{in GeV/fm³}<tt>}
    *
    * Set the minimum energy density for a particle to be considered fluid. It
    * is only used if the dynamic initial condition is active.
@@ -4777,11 +4778,13 @@ struct InputKeys {
    */
   inline static const Key<double> output_initialConditions_eDenThreshold{
       {"Output", "Initial_Conditions", "Energy_Density_Threshold"},
-      0.5, {"3.1"}};
+      0.5,
+      {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_mintime_,Minimum_Time,double,</tt>0 \unit{in fm}<tt>}
+   * \optional_key_no_line{key_output_IC_mintime_,Minimum_Time,double,</tt>0
+   * \unit{in fm}<tt>}
    *
    * Set the minimum time for a particle to be considered fluid. It is only
    * used if the dynamic initial condition is active.
@@ -4794,7 +4797,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_maxtime_,Maximum_Time,double,</tt>100 \unit{in fm}<tt>}
+   * \optional_key_no_line{key_output_IC_maxtime_,Maximum_Time,double,</tt>100
+   * \unit{in fm}<tt>}
    *
    * Set the maximum time for a particle to be considered fluid. It is only
    * used if the dynamic initial condition is active.

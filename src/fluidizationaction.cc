@@ -8,6 +8,7 @@
  */
 
 #include "smash/fluidizationaction.h"
+
 #include "smash/logging.h"
 #include "smash/quantumnumbers.h"
 
@@ -17,13 +18,11 @@ static constexpr int LFluidization = LogArea::HyperSurfaceCrossing::id;
 void HypersurfacecrossingAction::generate_final_state() {
   logg[LFluidization].debug("Process: Fluidization. ");
 
-  ParticleList empty_list;
-
   // check that there is only 1 incoming particle
   assert(incoming_particles_.size() == 1);
 
   // Return empty list because we want to remove the incoming particle
-  outgoing_particles_ = empty_list;
+  outgoing_particles_ = {};
 }
 
 void FluidizationAction::check_conservation(
@@ -31,11 +30,10 @@ void FluidizationAction::check_conservation(
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);
   if (before == after) {
-    // Conservation laws should not be conserved since particles are removed
-    // from the evolution
     throw std::runtime_error(
-        "Conservation laws conserved during fluidization action. "
-        "Particle was not properly removed in process: " +
+        "Conservation laws obeyed during fluidization, which should not happen "
+        "as particles are removed. Particle was not properly removed in "
+        "process: " +
         std::to_string(id_process));
   }
 

@@ -261,11 +261,11 @@ class Experiment : public ExperimentBase {
   std::vector<Particles> *all_ensembles() { return &ensembles_; }
 
   /**
-   *  Update the hydrodynamic background energy density, to be called by an
-   * external manager.
+   * Update the background energy density due to hydrodynamics, to be
+   * called by an external manager.
    *
-   *  \param[in] background map with particle indices as keys and their
-   * corresponding background energy density as values
+   * \param[in] background Map with particle indices as keys and their
+   * corresponding background energy density as values.
    */
   void update_fluidization_background(std::map<int32_t, double> background) {
     *fluidization_background_ = std::move(background);
@@ -440,6 +440,16 @@ class Experiment : public ExperimentBase {
 
   /// Number of fractional photons produced per single reaction
   int n_fractional_photons_;
+
+  /**
+   * Energy density background from hydrodynamic evolution, with particle
+   * indices as keys. Useful when using SMASH as a library.
+   */
+  std::unique_ptr<std::map<int32_t, double>> fluidization_background_ = nullptr;
+
+  /// Energy-momentum tensor lattice for dynamic fluidization
+  std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> fluidization_lat_ =
+      nullptr;
 
   /// 4-current for j_QBS lattice output
   std::unique_ptr<DensityLattice> j_QBS_lat_;
@@ -1161,23 +1171,50 @@ Experiment<Modus>::Experiment(Configuration &config,
     if (IC_dynamic_) {  // Dynamic fluidization
       const double energy_threshold = config.take(
           {"Output", "Initial_Conditions", "Energy_Density_Threshold"}, 0.5);
-      const double min_time = std::max(
-          config.take({"Output", "Initial_Conditions", "Minimum_Time"}, 0.),
-          0.);
-      const double max_time =
-          std::min(config.take({"Output", "Initial_Conditions", "Maximum_Time"},
-                               end_time_),
-                   end_time_);
+      const double min_time = std::invoke([&]() {
+        const double time =
+            config.take({"Output", "Initial_Conditions", "Minimum_Time"}, 0.);
+        if (time < 0.) {
+          logg[LInitialConditions].warn()
+              << "Input Minimum_Time is negative. Setting it to 0.";
+          return 0.;
+        }
+        return time;
+      });
+      const double max_time = std::invoke([&]() {
+        const double time = config.take(
+            {"Output", "Initial_Conditions", "Maximum_Time"}, end_time_);
+        if (time > end_time_) {
+          logg[LInitialConditions].warn()
+              << "Input Maximum_Time is too large. Setting it to end time.";
+          return end_time_;
+        }
+        return time;
+      });
       const int fluid_cell = config.take(
           {"Output", "Initial_Conditions", "Fluidization_Cells"}, 50);
       if (energy_threshold <= 0 || max_time < min_time || fluid_cell < 2) {
         logg[LInitialConditions].fatal()
-            << "Bad parameters chosen for dynamic initial conditions";
+            << "Bad parameters chosen for dynamic initial conditions. At least "
+               "one of the following inequalities is violated:\n"
+            << "  Energy_Density_Threshold = " << energy_threshold << " > 0\n"
+            << "  Maximum_Time = " << max_time << " > " << min_time
+            << " = Minimum_Time\n"
+            << "  Fluidization_Cells = " << fluid_cell << " > 2";
       }
       logg[LInitialConditions].info()
           << "Dynamic Initial Conditions with threshold " << energy_threshold
           << " GeV, between " << min_time << " and " << max_time << " fm.";
 
+      // This abuses the usage of take. If the keys are not present, the
+      // if-condition is not met. But if they are, this already removes them
+      // from config
+      if (config.take({"Output", "Initial_Conditions", "Proper_Time"}, 0) ||
+          config.take({"Output", "Initial_Conditions", "Lower_Bound"}, 0)) {
+        logg[LInitialConditions].warn()
+            << "Ignoring Lower_Bound and/or Proper_Time keys, which are only "
+               "applicable without dynamic initialization";
+      }
       double min_size = std::max(min_time, 10.);
       std::array<double, 3> l{2 * min_size, 2 * min_size, 2 * min_size};
       std::array<int, 3> n{fluid_cell, fluid_cell, fluid_cell};
@@ -1189,7 +1226,7 @@ Experiment<Modus>::Experiment(Configuration &config,
       fluidization_background_ = std::make_unique<std::map<int32_t, double>>();
 
       action_finders_.emplace_back(std::make_unique<DynamicFluidizationFinder>(
-          fluidization_lat_.get(), fluidization_background_.get(),
+          *fluidization_lat_.get(), *fluidization_background_.get(),
           energy_threshold, min_time, max_time, fluid_cell));
     } else {  // Iso-tau hypersurface
       double proper_time;
@@ -1207,8 +1244,7 @@ Experiment<Modus>::Experiment(Configuration &config,
         } else {
           logg[LInitialConditions].warn()
               << "Nuclei passing time is too short, hypersurface proper time "
-                 "set "
-                 "to tau = "
+                 "set to tau = "
               << lower_bound << " fm.";
           proper_time = lower_bound;
         }

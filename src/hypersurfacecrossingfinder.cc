@@ -8,6 +8,7 @@
  */
 
 #include "smash/hypersurfacecrossingfinder.h"
+
 #include "smash/fluidizationaction.h"
 #include "smash/logging.h"
 
@@ -17,7 +18,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     const ParticleList &plist, double dt, const double,
     const std::vector<FourVector> &beam_momentum) const {
-  std::vector<ActionPtr> actions;
+  ActionList actions;
 
   for (const ParticleData &p : plist) {
     ParticleData pdata_before_propagation = p;

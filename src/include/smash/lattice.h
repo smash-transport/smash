@@ -791,20 +791,25 @@ class RectangularLattice {
   }
 
   /**
-   * Rebuilds the lattice with a different size, reseting it to zero values. The parameters are all optional with different types, if none are passed the function is skipped.
+   * Rebuilds the lattice with a different size, reseting it to zero values. The
+   * parameters are all optional with different types, if none are passed the
+   * function is skipped.
    *
    * \param[in] new_length 3-dimensional array indicates the new size of
    *            the lattice [fm].
-   * \param[in] new_origin 3-dimensional array (nx,ny,nz) indicates the origin of the
-   * lattice.
-   * \param[in] new_cells 3-dimensional array with the new number of lattice cells.
+   * \param[in] new_origin 3-dimensional array (nx,ny,nz) indicates the origin
+   * of the lattice. \param[in] new_cells 3-dimensional array with the new
+   * number of lattice cells.
    */
-  void reset_and_resize(const std::optional<std::array<double, 3>> new_length = std::nullopt, const std::optional<std::array<double, 3>> new_origin = std::nullopt, const std::optional<std::array<int, 3>> new_cells = std::nullopt) {
+  void reset_and_resize(
+      const std::optional<std::array<double, 3>> new_length = std::nullopt,
+      const std::optional<std::array<double, 3>> new_origin = std::nullopt,
+      const std::optional<std::array<int, 3>> new_cells = std::nullopt) {
     if (new_length || new_origin || new_cells) {
-      reset(); 
-      if (new_length) 
+      reset();
+      if (new_length)
         lattice_sizes_ = new_length.value();
-      if (new_origin) 
+      if (new_origin)
         origin_ = new_origin.value();
       if (new_cells)
         n_cells_ = new_cells.value();
@@ -813,9 +818,9 @@ class RectangularLattice {
                      lattice_sizes_[2] / n_cells_[2]};
       cell_volume_ = cell_sizes_[0] * cell_sizes_[1] * cell_sizes_[2];
     } else {
-        logg[LLattice].warn() << "RectangularLattice::reset_and_resize called without arguments, lattice was not changed.";
-      }
-
+      logg[LLattice].warn() << "RectangularLattice::reset_and_resize called "
+                               "without arguments, lattice was not changed.";
+    }
   }
 
  protected:

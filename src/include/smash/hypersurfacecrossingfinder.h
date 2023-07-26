@@ -1,14 +1,14 @@
 /*
  *
- *    Copyright (c) 2019-2020,2022
+ *    Copyright (c) 2019-2020,2022-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
  *
  */
 
-#ifndef SRC_INCLUDE_SMASH_HYPERSURFACECROSSINGACTION_H_
-#define SRC_INCLUDE_SMASH_HYPERSURFACECROSSINGACTION_H_
+#ifndef SRC_INCLUDE_SMASH_HYPERSURFACECROSSINGFINDER_H_
+#define SRC_INCLUDE_SMASH_HYPERSURFACECROSSINGFINDER_H_
 
 #include <vector>
 
@@ -122,4 +122,4 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SMASH_HYPERSURFACECROSSINGACTION_H_
+#endif  // SRC_INCLUDE_SMASH_HYPERSURFACECROSSINGFINDER_H_
