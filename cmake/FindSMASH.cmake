@@ -54,7 +54,7 @@ endif()
 
 find_package(GSL 2.0 REQUIRED)
 find_package(Eigen3 3.0 REQUIRED)
-find_package(Pythia 8.309 EXACT REQUIRED)
+find_package(Pythia 8.310 EXACT REQUIRED)
 
 set(SMASH_INCLUDE_DIR
     $ENV{SMASH_DIR}/3rdparty/Cuba-4.2.1

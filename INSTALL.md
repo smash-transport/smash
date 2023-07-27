@@ -39,14 +39,14 @@ However, some of the SMASH prerequisites are less likely to be already available
 
 ### Building Pythia
 
-SMASH is tightly coupled to Pythia and thus requires a specific version, which is currently `8.309`.
+SMASH is tightly coupled to Pythia and thus requires a specific version, which is currently `8.310`.
 If the required version is not already installed or if there are issues with the available one, it is recommended to build Pythia with similar flags as used for SMASH, like in the example below.
 
 To download and build the needed version of Pythia, use the following commands:
 ```console
-wget https://pythia.org/download/pythia83/pythia8309.tgz
-tar xf pythia8309.tgz && rm pythia8309.tgz
-cd pythia8309
+wget https://pythia.org/download/pythia83/pythia8310.tgz
+tar xf pythia8310.tgz && rm pythia8310.tgz
+cd pythia8310
 ./configure --cxx-common='-std=c++17 -march=native -O3 -fPIC -pthread'
 make
 ```
@@ -70,9 +70,9 @@ CXX=clang++ ./configure --cxx-common='-std=c++17 -stdlib=libc++ -march=native -O
 
 The commands to build Pythia on a M1 Apple machine become:
 ```console
-curl https://pythia.org/download/pythia83/pythia8309.tgz -o pythia8309.tgz
-tar xf pythia8309.tgz && rm pythia8309.tgz
-cd pythia8309
+curl https://pythia.org/download/pythia83/pythia8310.tgz -o pythia8310.tgz
+tar xf pythia8310.tgz && rm pythia8310.tgz
+cd pythia8310
 ./configure --cxx-common='-std=c++17 -O3 -fPIC -pthread'
 make
 ```
@@ -145,7 +145,7 @@ The bare minimum needed to build SMASH from within its repository reads:
 ```console
 mkdir build
 cd build
-cmake -DPythia_CONFIG_EXECUTABLE=[...]/pythia8309/bin/pythia8-config ..
+cmake -DPythia_CONFIG_EXECUTABLE=[...]/pythia8310/bin/pythia8-config ..
 make
 ```
 
@@ -157,8 +157,8 @@ In the following, the relevant explanation about these can be found and users sh
 A few GNU/Linux distributions provide pre-built Pythia binaries without `pythia8-config` binary.
 In this case, using the `-DPythia_CONFIG_EXECUTABLE` option as shown above is not possible and the top installation directory of Pythia containing `lib` has to be specified in either of the following ways:
 
-*  Either set the bash environment variables `PYTHIA8` or `PYTHIA_ROOT_DIR` (e.g. `export PYTHIA_ROOT_DIR=/opt/pythia8309`) or
-*  use the CMake `-DPYTHIA_ROOT_DIR` option (e.g. `cmake -DPYTHIA_ROOT_DIR=/opt/pythia8309 ..`).
+*  Either set the bash environment variables `PYTHIA8` or `PYTHIA_ROOT_DIR` (e.g. `export PYTHIA_ROOT_DIR=/opt/pythia8310`) or
+*  use the CMake `-DPYTHIA_ROOT_DIR` option (e.g. `cmake -DPYTHIA_ROOT_DIR=/opt/pythia8310 ..`).
 
 If no variables are set and no options are passed, CMake searches for Pythia under the default path `/usr`.
 To check which environment variables related to PYTHIA are currently set, use e.g. `printenv | grep PYTHIA`.
