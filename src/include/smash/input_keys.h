@@ -921,7 +921,27 @@ class Key {
 
 /*!\Userguide
  * \page doxypage_input_conf_pot_momentum_dependence
- * Here goes the content :)
+ * The momentum-dependent part of the potential can be added to the Skyrme
+ * parametrisation. In total the potential has the following form:
+ * \f[
+ *  U(\mathbf{r}, \mathbf{p}) = A\frac{\rho(\mathbf{r})}{\rho_0} +
+ *  B\left(\frac{\rho(\mathbf{r})}{\rho_0}\right)^\tau +
+ *  \frac{2C}{\rho_0}g\int\frac{d^3p'}{(2\pi)^3}\frac{f(\mathbf{r},
+ *  \mathbf{p}')}{1+\left(\frac{\mathbf{p}-\mathbf{p}'}{\Lambda}\right)^2}
+ * \f]
+ * This shape of the potential is taken from \iref{Welke:1988zz}
+ * and includes an integral in momentum. This integral is quite costly to
+ * evaluate during runtime and one typically makes the assumption that
+ * the distribution function takes the form of cold nuclear matter
+ * \f$ f(\mathbf{r}, \mathbf{p}) = \Theta(p-p_F)\f$, where \f$ p_F \f$
+ * is the Fermi momentum. Note that the Fermi momentum depends on the
+ * density and therfore on the position in general. With this assumption
+ * the integral has an analytic solution and can be evaluated relatively
+ * quickly, making the potential viable to use in transport. \n
+ * When choosing the parameters \f$ C \f$ and \f$ \Lambda\f$ it is important
+ * to make sure that nuclear ground state properties are realistic. In
+ * other words the momentum dependence parameters cannot be choosen
+ * independently from the Skyrme parameters.
  */
 
 /*!\Userguide
