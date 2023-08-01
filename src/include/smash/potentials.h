@@ -119,7 +119,7 @@ class Potentials {
                                 mom_dependence_Lambda_);
     };
     auto rootsolver = RootSolver1D(root_equation);
-    std::array<double, 9> starting_guess_addition = {0.0,   1.0,   -1.0,  10.0,
+    std::array<double, 7> starting_guess_addition = {0.0,   1.0,   -1.0,  10.0,
                                                      -10.0, 100.0, -100.0};
     for (double initial_guess_add : starting_guess_addition) {
       double initial_guess =
