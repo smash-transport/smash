@@ -10,6 +10,10 @@
 #ifndef SRC_INCLUDE_SMASH_ROOTSOLVER_H_
 #define SRC_INCLUDE_SMASH_ROOTSOLVER_H_
 
+#include <functional>
+#include <memory>
+#include <string>
+
 #include "gsl/gsl_multiroots.h"
 #include "gsl/gsl_vector.h"
 
@@ -28,7 +32,7 @@ class RootSolver1D {
    *
    * \param[in] eq The function of which a root is desired
    */
-  RootSolver1D(std::function<double(double)> eq) {
+  explicit RootSolver1D(std::function<double(double)> eq) {
     root_eq_ = std::make_unique<std::function<double(double)>>(eq);
   }
 
@@ -106,3 +110,4 @@ class RootSolver1D {
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_ROOTSOLVER_H_
+
