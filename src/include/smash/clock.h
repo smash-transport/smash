@@ -264,8 +264,8 @@ class UniformClock : public Clock {
   void reset(const double start_time, const bool is_output_clock) override {
     double reset_time;
     if (is_output_clock) {
-      reset_time =
-          std::floor(start_time / timestep_duration()) * timestep_duration();
+      auto delta_t = convert(timestep_duration_);
+      reset_time = std::floor(start_time / delta_t) * delta_t;
     } else {
       reset_time = start_time;
     }

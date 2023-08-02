@@ -20,6 +20,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+### Fixed
+* Fix bug in the time step calculation of SMASH output in events successive to the first one when the `End_Time` is not a multiple of the `Output_Interval`
+
 ### Changed
 * Upgraded to Pythia 8.310
 
