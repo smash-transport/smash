@@ -103,12 +103,8 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
   try {
     ParticleData new_particle =
         create_valid_smash_particle_matching_provided_quantities(
-            pdgcode, mass, {E, px, py, pz}, LList, warn_about_mass_discrepancy_,
-            warn_about_off_shell_particles_);
-    // Set spatial coordinates, they will later be backpropagated if needed
-    new_particle.set_4position(FourVector(t, x, y, z));
-    new_particle.set_formation_time(t);
-    new_particle.set_cross_section_scaling_factor(1.0);
+            pdgcode, mass, {t, x, y, z}, {E, px, py, pz}, LList,
+            warn_about_mass_discrepancy_, warn_about_off_shell_particles_);
     particles.insert(new_particle);
   } catch (ParticleType::PdgNotFoundFailure &) {
     logg[LList].warn() << "SMASH does not recognize pdg code " << pdgcode

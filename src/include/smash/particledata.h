@@ -513,6 +513,7 @@ std::ostream &operator<<(std::ostream &out,
 /**
  * This function creates a SMASH particle validating the provided information.
  *
+ *  - The input position and momentum is checked for nan values.
  *  - A particle is first created using the given PDG code, setting its
  *    4-momentum to the given one.
  *  - Afterwards, if stable, its mass is compared to the given one and, if these
@@ -527,7 +528,8 @@ std::ostream &operator<<(std::ostream &out,
  *
  * \param[in] pdgcode PdgCode  of the particle which is supposed to be checked
  * \param[in] mass Mass of the new particle
- * \param[in] four_momentum Momentum four vector of the new particles
+ * \param[in] four_position Position four vector of the new particle
+ * \param[in] four_momentum Momentum four vector of the new particle
  * \param[in] log_area Logging area for the warning
  * \param[inout] mass_warning Whether to warn about mass discrepancies
  * \param[inout] on_shell_warning Whether to warn about off-shell particles
@@ -538,8 +540,9 @@ std::ostream &operator<<(std::ostream &out,
  * turning the flags to \c false after having warned the user.
  */
 ParticleData create_valid_smash_particle_matching_provided_quantities(
-    PdgCode pdgcode, double mass, const FourVector &four_momentum, int log_area,
-    bool &mass_warning, bool &on_shell_warning);
+    PdgCode pdgcode, double mass, const FourVector &four_position,
+    const FourVector &four_momentum, int log_area, bool &mass_warning,
+    bool &on_shell_warning);
 
 /**
  * Utility function to compare two \c ParticleData instances with respect to

@@ -108,10 +108,13 @@ class ListModus : public ModusDefault {
    * (iii) Any stable particle is on-shell, i.e. \f$ E^2 - p^2 = m^2 \f$. If it
    *       is not, then a warning is printed and the energy is set to
    *       \f$ E^2 = p^2 + m^2 \f$.
-   * This very tolerant behaviour is justified by the practical usage of SMASH
-   * as afterburner. Usually particles unknown to SMASH are rare resonances,
-   * which do not play a large role. Mass mismatch is typically less than 1%
-   * and comes from rounding and from SMASH enforcing isospin symmetry
+   * (iv) If there are nan values in the position or momentum of the particle an
+   *      error is thrown.
+   *
+   * This very tolerant behaviour is justified by the practical
+   * usage of SMASH as afterburner. Usually particles unknown to SMASH are rare
+   * resonances, which do not play a large role. Mass mismatch is typically less
+   * than 1% and comes from rounding and from SMASH enforcing isospin symmetry
    * (for example the mass of neutral pion is artificially forced to be the
    * same as charged pion). On-shellness violation typically comes from the
    * insufficient number of significant digits in the input file + rounding.

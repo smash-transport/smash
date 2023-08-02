@@ -162,8 +162,19 @@ std::ostream &operator<<(std::ostream &out,
 double ParticleData::formation_power_ = 0.0;
 
 ParticleData create_valid_smash_particle_matching_provided_quantities(
-    PdgCode pdgcode, double mass, const FourVector &four_momentum, int log_area,
-    bool &mass_warning, bool &on_shell_warning) {
+    PdgCode pdgcode, double mass, const FourVector &four_position,
+    const FourVector &four_momentum, int log_area, bool &mass_warning,
+    bool &on_shell_warning) {
+  // Check input position and momentum for nan values
+  for (int i = 0; i < 4; i++) {
+    if (isnan(four_position[i]) || isnan(four_momentum[i])) {
+      logg[log_area].error() << "Input particle has at least one nan value in "
+                                "position or momentum four vector.";
+      throw std::invalid_argument(
+          "Invalid input (nan) for particle position or momentum.");
+    }
+  }
+
   // Some preliminary tool to avoid duplication later
   static const auto emph = einhard::Yellow_t_::ANSI();
   static const auto restore_default = einhard::NoColor_t_::ANSI();
@@ -228,6 +239,12 @@ ParticleData create_valid_smash_particle_matching_provided_quantities(
       smash_particle.set_4momentum(mass, four_momentum.threevec());
     }
   }
+
+  // Set spatial coordinates, they will later be backpropagated if needed
+  smash_particle.set_4position(four_position);
+  smash_particle.set_formation_time(four_position.x0());
+  smash_particle.set_cross_section_scaling_factor(1.0);
+
   return smash_particle;
 }
 
