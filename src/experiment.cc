@@ -639,7 +639,7 @@ void validate_and_adjust_particle_list(ParticleList &particle_list) {
        * process number, which in turn, might lead to actions to be discarded.
        * Here, only the particle momentum has to be adjusted and this is done
        * creating a new particle and using its momentum to set 'particle' one.
-       * The position of the particle is checked for nan values.
+       * The position and momentum of the particle are checked for nan values.
        */
       auto valid_smash_particle =
           create_valid_smash_particle_matching_provided_quantities(

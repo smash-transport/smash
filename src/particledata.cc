@@ -17,6 +17,7 @@
 #include "smash/constants.h"
 #include "smash/iomanipulators.h"
 #include "smash/logging.h"
+#include "smash/numerics.h"
 
 namespace smash {
 
@@ -166,13 +167,11 @@ ParticleData create_valid_smash_particle_matching_provided_quantities(
     const FourVector &four_momentum, int log_area, bool &mass_warning,
     bool &on_shell_warning) {
   // Check input position and momentum for nan values
-  for (int i = 0; i < 4; i++) {
-    if (isnan(four_position[i]) || isnan(four_momentum[i])) {
-      logg[log_area].error() << "Input particle has at least one nan value in "
-                                "position or momentum four vector.";
-      throw std::invalid_argument(
-          "Invalid input (nan) for particle position or momentum.");
-    }
+  if (is_any_nan(four_position) || is_any_nan(four_momentum)) {
+    logg[log_area].fatal() << "Input particle has at least one nan value in "
+                              "position and/or momentum four vector.";
+    throw std::invalid_argument(
+        "Invalid input (nan) for particle position or momentum.");
   }
 
   // Some preliminary tool to avoid duplication later

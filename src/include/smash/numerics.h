@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2018,2020,2022
+ *    Copyright (c) 2014-2018,2020,2022-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -64,6 +64,26 @@ bool almost_equal_physics(const N x, const N y) {
   return (std::abs(x - y) <= N(small_number) ||
           std::abs(x - y) <=
               N(0.5 * small_number) * (std::abs(x) + std::abs(y)));
+}
+
+/*
+ * This function iterates through the elements of a collection and checks if any
+ * of them is NaN using the std::isnan function. NaN is a special floating-point
+ * value that represents undefined or unrepresentable values.
+ *
+ * \tparam T The type of the collection. It can be any iterable container of
+ * numeric values.
+ * \param collection The collection to be checked for NaN
+ * values.
+ * \return true if any element in the collection is NaN, false otherwise
+ */
+template <typename T = std::initializer_list<double>>
+bool is_any_nan(const T& collection) {
+  for (const auto& number : collection) {
+    if (unlikely(std::isnan(number)))
+      return true;
+  }
+  return false;
 }
 
 }  // namespace smash

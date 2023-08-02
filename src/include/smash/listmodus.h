@@ -109,7 +109,7 @@ class ListModus : public ModusDefault {
    *       is not, then a warning is printed and the energy is set to
    *       \f$ E^2 = p^2 + m^2 \f$.
    * (iv) If there are nan values in the position or momentum of the particle an
-   *      error is thrown.
+   *      exception is thrown.
    *
    * This very tolerant behaviour is justified by the practical
    * usage of SMASH as afterburner. Usually particles unknown to SMASH are rare
