@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_NUMERICS_H_
 
 #include <cmath>
+#include <initializer_list>
 
 #include "constants.h"
 
@@ -66,16 +67,16 @@ bool almost_equal_physics(const N x, const N y) {
               N(0.5 * small_number) * (std::abs(x) + std::abs(y)));
 }
 
-/*
+/**
  * This function iterates through the elements of a collection and checks if any
- * of them is NaN using the std::isnan function. NaN is a special floating-point
- * value that represents undefined or unrepresentable values.
+ * of them is NaN using the \c std::isnan function. NaN is a special
+ * floating-point value that represents undefined or unrepresentable values.
  *
  * \tparam T The type of the collection. It can be any iterable container of
- * numeric values.
+ *         numeric values.
  * \param collection The collection to be checked for NaN
- * values.
- * \return true if any element in the collection is NaN, false otherwise
+ *        values.
+ * \return \c true if any element in the collection is NaN, \c false otherwise
  */
 template <typename T = std::initializer_list<double>>
 bool is_any_nan(const T& collection) {
