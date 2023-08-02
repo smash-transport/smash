@@ -100,22 +100,7 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
                                     double t, double x, double y, double z,
                                     double mass, double E, double px, double py,
                                     double pz) {
-  bool isnan_position = false;
-  bool isnan_momentum = false;
   try {
-    if (unlikely(isnan(t)) || unlikely(isnan(x)) || unlikely(isnan(y)) ||
-        unlikely(isnan(z))) {
-      isnan_position = true;
-      throw std::invalid_argument(
-          "The input 4position of the particle contains at least one 'nan' "
-          "value. This particle will be ignored.\n");
-    } else if (unlikely(isnan(E)) || unlikely(isnan(px)) ||
-               unlikely(isnan(py)) || unlikely(isnan(pz))) {
-      isnan_position = true;
-      throw std::invalid_argument(
-          "The input 4momentum of the particle contains at least one 'nan' "
-          "value. This particle will be ignored.\n");
-    }
     ParticleData new_particle =
         create_valid_smash_particle_matching_provided_quantities(
             pdgcode, mass, {t, x, y, z}, {E, px, py, pz}, LList,
@@ -124,12 +109,6 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
   } catch (ParticleType::PdgNotFoundFailure &) {
     logg[LList].warn() << "SMASH does not recognize pdg code " << pdgcode
                        << " loaded from file. This particle will be ignored.\n";
-  } catch (std::invalid_argument const &err) {
-    if (isnan_position) {
-      logg[LList].warn() << err.what();
-    } else if (isnan_momentum) {
-      logg[LList].warn() << err.what();
-    }
   }
 }
 
