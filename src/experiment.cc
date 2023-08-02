@@ -639,13 +639,17 @@ void validate_and_adjust_particle_list(ParticleList &particle_list) {
        * process number, which in turn, might lead to actions to be discarded.
        * Here, only the particle momentum has to be adjusted and this is done
        * creating a new particle and using its momentum to set 'particle' one.
+       * The position and momentum of the particle are checked for nan values.
        */
       auto valid_smash_particle =
           create_valid_smash_particle_matching_provided_quantities(
-              pdgcode, particle.effective_mass(), particle.momentum(),
-              LExperiment, warn_mass_discrepancy, warn_off_shell_particle);
+              pdgcode, particle.effective_mass(), particle.position(),
+              particle.momentum(), LExperiment, warn_mass_discrepancy,
+              warn_off_shell_particle);
+      particle.set_4position(valid_smash_particle.position());
       particle.set_4momentum(valid_smash_particle.momentum());
-      particle.set_cross_section_scaling_factor(1.0);
+      particle.set_cross_section_scaling_factor(
+          valid_smash_particle.xsec_scaling_factor());
       it++;
     } catch (ParticleType::PdgNotFoundFailure &) {
       logg[LExperiment].warn()

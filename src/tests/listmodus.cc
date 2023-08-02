@@ -488,3 +488,17 @@ TEST(try_create_particle_func) {
     COMPARE(a.pdgcode(), b.pdgcode());
   }
 }
+
+TEST_CATCH(create_particle_with_nan, std::invalid_argument) {
+  ListModus list_modus = create_list_modus_for_test();
+  Particles particles;
+  const double m0 = Test::smashon_mass;
+  ParticleData smashon = Test::smashon_random();
+  FourVector r = smashon.position(), p = smashon.momentum();
+  PdgCode pdg = smashon.pdgcode();
+
+  // Create a particle with either a NAN value in the position
+  // to trigger an invalid_argument error.
+  list_modus.try_create_particle(particles, pdg, NAN, r.x1(), r.x2(), r.x3(),
+                                 m0, p.x0(), p.x1(), p.x2(), p.x3());
+}
