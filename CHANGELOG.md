@@ -20,6 +20,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+### Changed
+* Upgraded to Pythia 8.310
+
 ## SMASH-3.0
 Date: 2023-04-27
 

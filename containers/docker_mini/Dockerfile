@@ -33,7 +33,7 @@ WORKDIR /SMASH
 RUN mkdir /MNT
 
 # Install pythia
-ARG pythiaV="8309"
+ARG pythiaV="8310"
 ENV PYTHIA8=/SMASH/pythia_install/
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
