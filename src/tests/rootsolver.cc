@@ -15,6 +15,6 @@ TEST(root_of_cosine) {
   std::function<double(double)> cosinus = [](double x) { return std::cos(x); };
   auto rootsolver = RootSolver1D(cosinus);
   double hopefully_pi_half = 0.0;
-  VERIFY(rootsolver.try_find_root(0.6, 10000, hopefully_pi_half));
+  VERIFY(rootsolver.try_find_root(0.0, M_PI, 10000, hopefully_pi_half));
   COMPARE_ABSOLUTE_ERROR(hopefully_pi_half, M_PI / 2.0, 1e-7);
 }
