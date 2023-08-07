@@ -14,8 +14,9 @@
 #include <memory>
 #include <string>
 
-#include "gsl/gsl_multiroots.h"
-#include "gsl/gsl_vector.h"
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_roots.h>
 
 #include "logging.h"
 
@@ -44,11 +45,8 @@ class RootSolver1D {
    * \param[inout] function c-Array with f(x)-values of the function
    * \return Feedback whether the equation was evaluatd successfully
    */
-  static int gsl_func(const gsl_vector *roots_array, void *,
-                      gsl_vector *function) {
-    double x = gsl_vector_get(roots_array, 0);
-    gsl_vector_set(function, 0, (*root_eq_)(x));
-    return GSL_SUCCESS;
+  static double  gsl_func(const double x, void *) {
+    return (*root_eq_)(x);
   }
 
   /**
@@ -59,45 +57,44 @@ class RootSolver1D {
    * \param[out] root
    * \return true if a root was successfully found
    */
-  bool try_find_root(double initial_guess, size_t itermax, double &root) {
-    gsl_multiroot_function function_GSL = {&(gsl_func), 1, nullptr};
+  bool try_find_root(double initial_guess_low, double initial_guess_high, size_t itermax, double &root) {
+    // check if root is in the given interval
+    if ((*root_eq_)(initial_guess_low) * (*root_eq_)(initial_guess_high) > 0) {
+      return false;
+    }
+    gsl_function function_GSL = {&(gsl_func), nullptr};
     int status = GSL_CONTINUE;
     size_t iter = 0;
-    gsl_vector *roots_array = gsl_vector_alloc(1);
-    Root_finder_ = gsl_multiroot_fsolver_alloc(Solver_name_, 1);
-    gsl_vector_set(roots_array, 0, initial_guess);
-    gsl_multiroot_fsolver_set(Root_finder_, &function_GSL, roots_array);
+    Root_finder_ = gsl_root_fsolver_alloc(Solver_name_);
+    gsl_root_fsolver_set(Root_finder_, &function_GSL, initial_guess_low, initial_guess_high);
     do {
       iter++;
-      status = gsl_multiroot_fsolver_iterate(Root_finder_);
+      status = gsl_root_fsolver_iterate(Root_finder_);
       if (status != GSL_SUCCESS) {
         logg[LRootSolver].debug("GSL ERROR in root finding: " +
-                                static_cast<std::string>(gsl_strerror(status)) +
-                                "\n with starting value " +
-                                std::to_string(initial_guess));
+                                static_cast<std::string>(gsl_strerror(status)));
         break;
       }
-      status =
-          gsl_multiroot_test_residual(Root_finder_->f, solution_precision_);
+      double xlow = gsl_root_fsolver_x_lower(Root_finder_);
+      double xhigh = gsl_root_fsolver_x_upper(Root_finder_);
+      status = gsl_root_test_interval (xlow, xhigh, 0, solution_precision_);
       if (status == GSL_SUCCESS) {
-        root = gsl_vector_get(Root_finder_->x, 0);
-        gsl_multiroot_fsolver_free(Root_finder_);
-        gsl_vector_free(roots_array);
+        root = 0.5 * (xlow + xhigh);
+        gsl_root_fsolver_free(Root_finder_);
         return true;
       }
     } while (status == GSL_CONTINUE && iter < itermax);
-    gsl_multiroot_fsolver_free(Root_finder_);
-    gsl_vector_free(roots_array);
+    gsl_root_fsolver_free(Root_finder_);
     return false;
   }
 
  private:
   /// GSL solver to use for rootfingding
-  const gsl_multiroot_fsolver_type *Solver_name_ =
-      gsl_multiroot_fsolver_hybrids;
+  const gsl_root_fsolver_type *Solver_name_ =
+      gsl_root_fsolver_brent;
 
   /// GSL rootfinding object to take care of root findung
-  gsl_multiroot_fsolver *Root_finder_;
+  gsl_root_fsolver *Root_finder_;
 
   /// Static pointer to the function to solve
   static inline std::unique_ptr<std::function<double(double)>> root_eq_ =

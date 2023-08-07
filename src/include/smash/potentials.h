@@ -119,14 +119,13 @@ class Potentials {
                                 mom_dependence_Lambda_);
     };
     auto rootsolver = RootSolver1D(root_equation);
-    std::array<double, 7> starting_guess_addition = {0.0,   1.0,   -1.0,  10.0,
-                                                     -10.0, 100.0, -100.0};
-    for (double initial_guess_add : starting_guess_addition) {
+    std::array<double, 4> starting_interval_width = {0.1,   1.0,  10.0, 100.0};
+    for (double width : starting_interval_width) {
       double initial_guess =
-          std::sqrt(mass * mass + mom * mom) + initial_guess_add;
+          std::sqrt(mass * mass + mom * mom);
       double calc_frame_energy = 0.0;
       bool root_found =
-          rootsolver.try_find_root(initial_guess, 100000, calc_frame_energy);
+          rootsolver.try_find_root(initial_guess-width/2, initial_guess+width/2, 100000, calc_frame_energy);
       if (root_found) {
         return calc_frame_energy;
       }
