@@ -10,13 +10,13 @@
 #ifndef SRC_INCLUDE_SMASH_ROOTSOLVER_H_
 #define SRC_INCLUDE_SMASH_ROOTSOLVER_H_
 
-#include <functional>
-#include <memory>
-#include <string>
-
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_roots.h>
+
+#include <functional>
+#include <memory>
+#include <string>
 
 #include "logging.h"
 
