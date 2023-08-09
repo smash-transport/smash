@@ -225,18 +225,18 @@ class UniformClock : public Clock {
         std::numeric_limits<Representation>::max() - timestep_duration_) {
       throw std::overflow_error("Too many timesteps, clock overflow imminent");
     }
-    if ((reset_time_ + timestep_duration_ * (counter_ + 1)) > time_end_) {
+    auto next_point_in_time = reset_time_ + timestep_duration_ * (counter_ + 1);
+    if (next_point_in_time > time_end_) {
       return convert(time_end_);
     } else {
-      return convert(reset_time_ + timestep_duration_ * (counter_ + 1));
+      return convert(next_point_in_time);
     }
   }
   /// \return the time step size.
   double timestep_duration() const override {
-    if ((reset_time_ + timestep_duration_ * (counter_ + 1)) > time_end_) {
-      Representation last_timestep =
-          time_end_ - (reset_time_ + timestep_duration_ * counter_);
-      return convert(last_timestep);
+    auto present_time = reset_time_ + timestep_duration_ * counter_;
+    if (present_time + timestep_duration_ > time_end_) {
+      return convert(time_end_ - present_time);
     } else {
       return convert(timestep_duration_);
     }
@@ -264,8 +264,8 @@ class UniformClock : public Clock {
   void reset(const double start_time, const bool is_output_clock) override {
     double reset_time;
     if (is_output_clock) {
-      reset_time =
-          std::floor(start_time / timestep_duration()) * timestep_duration();
+      auto delta_t = convert(timestep_duration_);
+      reset_time = std::floor(start_time / delta_t) * delta_t;
     } else {
       reset_time = start_time;
     }

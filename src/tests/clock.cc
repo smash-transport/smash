@@ -18,7 +18,7 @@ TEST(size) {
   // changed (using other types or the addition of new variables) or the
   // alignment of the internal structure is somehow different. In both
   // cases, this test is meant to warn future developers to check if the
-  // new behaviour is wanted or an unintendet side effect that should be
+  // new behaviour is wanted or an unintended side effect that should be
   // corrected.
   COMPARE(sizeof(Clock), 2 * sizeof(Clock::Representation));
   COMPARE(sizeof(UniformClock), 5 * sizeof(Clock::Representation));
@@ -47,12 +47,14 @@ TEST(run_clock) {
 }
 
 TEST(reset_timestep) {
-  UniformClock labtime(0.0, 0.1, 300.0);
+  UniformClock labtime(0.0, 0.1, 0.6);
   ++labtime;
   ++labtime;
-  labtime.set_timestep_duration(0.2);
+  labtime.set_timestep_duration(0.3);
   ++labtime;
-  FUZZY_COMPARE(labtime.current_time(), 0.4);
+  FUZZY_COMPARE(labtime.current_time(), 0.5);
+  labtime.reset(-0.75, true);
+  FUZZY_COMPARE(labtime.current_time(), -0.9);
 }
 
 TEST(compare) {
