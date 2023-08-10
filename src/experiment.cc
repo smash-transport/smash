@@ -164,6 +164,11 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
    * just assign 1.0 fm, reasonable value will be set at event initialization
    */
   const double dt = config.take({"General", "Delta_Time"}, 1.);
+  if (dt <= 0.) {
+    throw std::invalid_argument(
+      "Delta_Time cannot be a negative value or zero.");
+  }
+  
   const double t_end = config.read({"General", "End_Time"});
 
   // Enforce a small time step, if the box modus is used
@@ -187,7 +192,13 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     output_clock = std::make_unique<CustomClock>(output_times);
   } else {
     const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
-    output_clock = std::make_unique<UniformClock>(0.0, output_dt, t_end);
+    if (output_dt <= 0.) {
+      throw std::invalid_argument(
+          "Output_Interval cannot be a negative value or zero.");
+    }
+    else {
+      output_clock = std::make_unique<UniformClock>(0.0, output_dt, t_end);
+    }
   }
 
   // Add proper error messages if photons are not configured properly.
