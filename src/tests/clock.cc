@@ -39,7 +39,7 @@ TEST(run_clock) {
   FUZZY_COMPARE(labtime.current_time(), 0.6);
   labtime += 2;
   FUZZY_COMPARE(labtime.current_time(), 0.8);
-  UniformClock endtime(1.0, 0.0, 300.0);
+  double endtime = 1.0;
   while (labtime < endtime) {
     ++labtime;
   }
@@ -58,8 +58,8 @@ TEST(reset_timestep) {
 }
 
 TEST(compare) {
-  UniformClock labtime(0.0, 0.0, 300.0);
-  UniformClock comtime(1.0, 0.0, 300.0);
+  UniformClock labtime(0.0, 0.1, 300.0);
+  UniformClock comtime(1.0, 0.1, 300.0);
   VERIFY(labtime < comtime);
   VERIFY(labtime < 0.1);
   VERIFY(comtime > 0.1);
@@ -74,6 +74,9 @@ TEST(assignment) {
   COMPARE(labtime.current_time(), 4.2);
 }
 
+TEST_CATCH(init_zero_dt, std::range_error) {
+  UniformClock labtime(4.4, 0.0, 300);
+}
 TEST_CATCH(init_negative_dt, std::range_error) {
   UniformClock labtime(4.4, -0.2, 300.0);
 }
