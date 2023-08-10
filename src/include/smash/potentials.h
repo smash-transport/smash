@@ -40,7 +40,7 @@ class Potentials {
    *
    * \param[in] conf Configuration which contains the switches
    *            determining whether to turn on the Skyrme or the
-   *            symmetry potentials, and the coefficents controlling
+   *            symmetry potentials, and the coefficients controlling
    *            how strong the potentials are.
    * \param[in] parameters Struct that contains the gaussian smearing factor
    *            \f$\sigma\f$, the distance cutoff \f$r_{\rm cut}\f$ and
@@ -139,7 +139,7 @@ class Potentials {
    * Difference of the effective mass squared in calculation frame and rest
    * frame
    *
-   * Should be zero due to Lorentz invariance but a root finder is requiered to
+   * Should be zero due to Lorentz invariance but a root finder is required to
    * determine the energy such that this is indeed the case
    *
    * \return effective mass squared in calculation frame minus effective mass in
@@ -171,7 +171,7 @@ class Potentials {
    *
    * To be added to the momentum independent part.
    *
-   * \return momenutm dependent part of the potential in GeV
+   * \return momentum dependent part of the potential in GeV
    */
   static double momentum_dependent_part(double mom, double rho, double C,
                                         double Lambda) {
@@ -194,7 +194,7 @@ class Potentials {
   }
 
   /**
-   * Evaluates skyrme potential given a baryon density.
+   * Evaluates Skyrme potential given a baryon density.
    *
    * \param[in] baryon_density Baryon density \f$\rho\f$ evaluated in the
    *            local rest frame in fm\f$^{-3}\f$.
@@ -208,7 +208,7 @@ class Potentials {
   /**
    * Single particle Skyrme potential in MeV
    *
-   * \param baryon_density net baryon densityin the local rest-frame in 1/fm^3
+   * \param baryon_density net baryon density in the local rest-frame in 1/fm^3
    * \param A Skyrme parameter A in MeV
    * \param B Skyrme parameter B in MeV
    * \param tau Skyrme parameter tau

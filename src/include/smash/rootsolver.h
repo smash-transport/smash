@@ -10,13 +10,13 @@
 #ifndef SRC_INCLUDE_SMASH_ROOTSOLVER_H_
 #define SRC_INCLUDE_SMASH_ROOTSOLVER_H_
 
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_roots.h>
-
 #include <functional>
 #include <memory>
 #include <string>
+
+#include "gsl/gsl_errno.h"
+#include "gsl/gsl_math.h"
+#include "gsl/gsl_roots.h"
 
 #include "logging.h"
 
@@ -24,7 +24,7 @@ namespace smash {
 static constexpr int LRootSolver = LogArea::RootSolver::id;
 /**
  * A class used for calculating the root of a one-dimensional equation.
- * It takes care of all tecnicalities and provides an interace to GSL.
+ * It takes care of all technicalities and provides an interface to GSL.
  */
 class RootSolver1D {
  public:
@@ -43,7 +43,7 @@ class RootSolver1D {
    *
    * \param[in] x Position on x-axis where the function should be evaluated
    *
-   * \return Feedback whether the equation was evaluatd successfully
+   * \return Feedback whether the equation was evaluated successfully
    */
   static double gsl_func(const double x, void *) { return (*root_eq_)(x); }
 
@@ -90,10 +90,10 @@ class RootSolver1D {
   }
 
  private:
-  /// GSL solver to use for rootfingding
+  /// GSL solver to use for root finding
   const gsl_root_fsolver_type *Solver_name_ = gsl_root_fsolver_brent;
 
-  /// GSL rootfinding object to take care of root findung
+  /// GSL root finding object to take care of root finding
   gsl_root_fsolver *Root_finder_;
 
   /// Static pointer to the function to solve
