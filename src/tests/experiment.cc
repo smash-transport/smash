@@ -92,8 +92,27 @@ TEST(create_experiment_with_default_lattice) {
   VERIFY(!!Test::experiment(std::move(config)));
 }
 
-TEST_CATCH(create_invalid, ExperimentBase::InvalidModusRequest) {
+TEST_CATCH(create_experiment_with_invalid_modus,
+           ExperimentBase::InvalidModusRequest) {
   Test::experiment(Configuration{"General: {Modus: Invalid}"});
+}
+
+TEST_CATCH(create_experiment_with_invalid_delta_time, std::invalid_argument) {
+  auto config = get_collider_configuration();
+  config.set_value({"General", "Delta_Time"}, 0.0);
+  Test::experiment(std::move(config));
+}
+
+TEST_CATCH(create_experiment_with_invalid_output_interval,
+           std::invalid_argument) {
+  auto config = get_collider_configuration();
+  config.merge_yaml(R"(
+    Output:
+      Output_Interval: 0.0
+      Particles:
+        Format: ["Oscar2013"]
+  )");
+  Test::experiment(std::move(config));
 }
 
 TEST(access_particles) {
