@@ -1724,15 +1724,15 @@ Experiment<Modus>::Experiment(Configuration &config,
         fields_lat_ = std::make_unique<FieldsLattice>(
             l, n, origin, periodic, LatticeUpdate::EveryTimestep);
       }
-    } else {
-      if (dens_type_lattice_printout_ == DensityType::Baryon) {
-        jmu_B_lat_ = std::make_unique<DensityLattice>(l, n, origin, periodic,
-                                                      LatticeUpdate::AtOutput);
-      }
-      if (dens_type_lattice_printout_ == DensityType::BaryonicIsospin) {
-        jmu_I3_lat_ = std::make_unique<DensityLattice>(l, n, origin, periodic,
-                                                       LatticeUpdate::AtOutput);
-      }
+    }
+    if (dens_type_lattice_printout_ == DensityType::Baryon && !jmu_B_lat_) {
+      jmu_B_lat_ = std::make_unique<DensityLattice>(l, n, origin, periodic,
+                                                    LatticeUpdate::AtOutput);
+    }
+    if (dens_type_lattice_printout_ == DensityType::BaryonicIsospin &&
+        !jmu_I3_lat_) {
+      jmu_I3_lat_ = std::make_unique<DensityLattice>(l, n, origin, periodic,
+                                                     LatticeUpdate::AtOutput);
     }
     if (dens_type_lattice_printout_ != DensityType::None &&
         dens_type_lattice_printout_ != DensityType::BaryonicIsospin &&
