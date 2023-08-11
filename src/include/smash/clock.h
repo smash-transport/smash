@@ -204,6 +204,12 @@ class UniformClock : public Clock {
     if (dt <= 0.) {
       throw std::range_error("Time increment must be positive and non-zero");
     }
+    if (reset_time_ >= time_end_) {
+      throw std::range_error(
+        "The initial time of UniformClock must be smaller than the end time. "
+        "(Attempt to set initial time to " + std::to_string(time) + " and end time to "
+        + std::to_string(time_end) + " not possible)");
+    }
   }
   /// \return the current time.
   double current_time() const override {
@@ -248,7 +254,7 @@ class UniformClock : public Clock {
    */
   void set_timestep_duration(const double dt) {
     if (dt <= 0.) {
-      throw std::range_error("Time increment must be positive and non-zero");
+      throw std::range_error("Time increment must be positive and non-zero!");
     }
     reset_time_ += timestep_duration_ * counter_;
     counter_ = 0;
