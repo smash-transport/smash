@@ -168,8 +168,13 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     throw std::invalid_argument(
       "Delta_Time cannot be a negative value or zero.");
   }
-  
+
   const double t_end = config.read({"General", "End_Time"});
+  if (t_end <= 0.) {
+    throw std::invalid_argument(
+      "The current SMASH version does not support "
+      "an End_Time that is negative or zero.");
+  }
 
   // Enforce a small time step, if the box modus is used
   if (box_length > 0.0 && dt > box_length / 10.0) {
