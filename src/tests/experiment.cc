@@ -103,6 +103,12 @@ TEST_CATCH(create_experiment_with_invalid_delta_time, std::invalid_argument) {
   Test::experiment(std::move(config));
 }
 
+TEST_CATCH(create_experiment_with_invalid_end_time, std::invalid_argument) {
+  auto config = get_collider_configuration();
+  config.set_value({"General", "End_Time"}, 0.0);
+  Test::experiment(std::move(config));
+}
+
 TEST_CATCH(create_experiment_with_invalid_output_interval,
            std::invalid_argument) {
   auto config = get_collider_configuration();
