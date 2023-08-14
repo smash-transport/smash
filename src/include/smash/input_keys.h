@@ -2941,13 +2941,13 @@ struct InputKeys {
    */
   inline static const Key<std::map<PdgCode, int>>
       modi_collider_projectile_particles{
-          {"Modi", "Collider", "Projectile", "Particles"}, {"1.0"}};
+          {"Modi", "Collider", "Projectile", "Particles"}, {"0.50"}};
   /**
    * \see_key{key_MC_PT_particles_}
    */
   inline static const Key<std::map<PdgCode, int>>
       modi_collider_target_particles{
-          {"Modi", "Collider", "Target", "Particles"}, {"1.0"}};
+          {"Modi", "Collider", "Target", "Particles"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3442,7 +3442,7 @@ struct InputKeys {
    */
   inline static const Key<std::map<PdgCode, int>>
       modi_sphere_initialMultiplicities{
-          {"Modi", "Sphere", "Init_Multiplicities"}, {"1.0"}};
+          {"Modi", "Sphere", "Init_Multiplicities"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3454,7 +3454,7 @@ struct InputKeys {
    * \see_key{key_MS_radius_}
    */
   inline static const Key<double> modi_sphere_radius{
-      {"Modi", "Sphere", "Radius"}, {"1.0"}};
+      {"Modi", "Sphere", "Radius"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3466,7 +3466,7 @@ struct InputKeys {
    * \see_key{key_MS_start_time_}
    */
   inline static const Key<double> modi_sphere_startTime{
-      {"Modi", "Sphere", "Start_Time"}, {"1.0"}};
+      {"Modi", "Sphere", "Start_Time"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3478,7 +3478,7 @@ struct InputKeys {
    * \see_key{key_MS_radius_}
    */
   inline static const Key<double> modi_sphere_temperature{
-      {"Modi", "Sphere", "Temperature"}, {"1.0"}};
+      {"Modi", "Sphere", "Temperature"}, {"1.5.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3500,7 +3500,7 @@ struct InputKeys {
    * \see_key{key_MS_account_res_widths_}
    */
   inline static const Key<bool> modi_sphere_accountResonanceWidths{
-      {"Modi", "Sphere", "Account_Resonance_Widths"}, true, {"1.0"}};
+      {"Modi", "Sphere", "Account_Resonance_Widths"}, true, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3547,7 +3547,7 @@ struct InputKeys {
    * \see_key{key_MS_charge_chem_pot_}
    */
   inline static const Key<double> modi_sphere_chargeChemicalPotential{
-      {"Modi", "Sphere", "Charge_Chemical_Potential"}, 0.0, {"1.0"}};
+      {"Modi", "Sphere", "Charge_Chemical_Potential"}, 0.0, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3573,7 +3573,7 @@ struct InputKeys {
   inline static const Key<SphereInitialCondition> modi_sphere_initialCondition{
       {"Modi", "Sphere", "Initial_Condition"},
       SphereInitialCondition::ThermalMomentaBoltzmann,
-      {"1.0"}};
+      {"1.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3631,7 +3631,7 @@ struct InputKeys {
    * \see_key{key_MS_jet_jet_momentum_}
    */
   inline static const Key<double> modi_sphere_jet_jetMomentum{
-      {"Modi", "Sphere", "Jet", "Jet_Momentum"}, 20.0, {"1.0"}};
+      {"Modi", "Sphere", "Jet", "Jet_Momentum"}, 20.0, {"1.5.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3643,7 +3643,7 @@ struct InputKeys {
    * \see_key{key_MS_jet_jet_pdg_}
    */
   inline static const Key<PdgCode> modi_sphere_jet_jetPdg{
-      {"Modi", "Sphere", "Jet", "Jet_PDG"}, {"1.0"}};
+      {"Modi", "Sphere", "Jet", "Jet_PDG"}, {"1.5.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -3663,7 +3663,7 @@ struct InputKeys {
    */
   inline static const Key<std::map<PdgCode, int>>
       modi_box_initialMultiplicities{{"Modi", "Box", "Init_Multiplicities"},
-                                     {"1.0"}};
+                                     {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -3683,7 +3683,7 @@ struct InputKeys {
    * \see_key{key_MB_initial_condition_}
    */
   inline static const Key<BoxInitialCondition> modi_box_initialCondition{
-      {"Modi", "Box", "Initial_Condition"}, {"1.0"}};
+      {"Modi", "Box", "Initial_Condition"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -3695,7 +3695,7 @@ struct InputKeys {
    * \see_key{key_MB_length_}
    */
   inline static const Key<double> modi_box_length{{"Modi", "Box", "Length"},
-                                                  {"1.0"}};
+                                                  {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -3708,7 +3708,7 @@ struct InputKeys {
    * \see_key{key_MB_start_time_}
    */
   inline static const Key<double> modi_box_startTime{
-      {"Modi", "Box", "Start_Time"}, {"1.0"}};
+      {"Modi", "Box", "Start_Time"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -3720,7 +3720,7 @@ struct InputKeys {
    * \see_key{key_MB_temperature_}
    */
   inline static const Key<double> modi_box_temperature{
-      {"Modi", "Box", "Temperature"}, {"1.0"}};
+      {"Modi", "Box", "Temperature"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -3749,7 +3749,7 @@ struct InputKeys {
    * \see_key{key_MB_account_res_widths_}
    */
   inline static const Key<bool> modi_box_accountResonanceWidths{
-      {"Modi", "Box", "Account_Resonance_Widths"}, true, {"1.0"}};
+      {"Modi", "Box", "Account_Resonance_Widths"}, true, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -3775,7 +3775,7 @@ struct InputKeys {
    * \see_key{key_MB_charge_chem_pot_}
    */
   inline static const Key<double> modi_box_chargeChemicalPotential{
-      {"Modi", "Box", "Charge_Chemical_Potential"}, 0.0, {"1.0"}};
+      {"Modi", "Box", "Charge_Chemical_Potential"}, 0.0, {"2.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -3844,7 +3844,7 @@ struct InputKeys {
    * \see_key{key_MB_jet_jet_momentum_}
    */
   inline static const Key<double> modi_box_jet_jetMomentum{
-      {"Modi", "Box", "Jet", "Jet_Momentum"}, 20.0, {"1.0"}};
+      {"Modi", "Box", "Jet", "Jet_Momentum"}, 20.0, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -3857,7 +3857,7 @@ struct InputKeys {
    * \see_key{key_MB_jet_jet_pdg_}
    */
   inline static const Key<PdgCode> modi_box_jet_jetPdg{
-      {"Modi", "Box", "Jet", "Jet_PDG"}, {"1.0"}};
+      {"Modi", "Box", "Jet", "Jet_PDG"}, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
@@ -3871,7 +3871,7 @@ struct InputKeys {
    * \see_key{key_ML_file_dir_}
    */
   inline static const Key<std::string> modi_list_fileDirectory{
-      {"Modi", "List", "File_Directory"}, {"1.0"}};
+      {"Modi", "List", "File_Directory"}, {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
@@ -3883,7 +3883,7 @@ struct InputKeys {
    * \see_key{key_ML_file_prefix_}
    */
   inline static const Key<std::string> modi_list_filePrefix{
-      {"Modi", "List", "File_Prefix"}, {"1.0"}};
+      {"Modi", "List", "File_Prefix"}, {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
@@ -3896,7 +3896,7 @@ struct InputKeys {
    * \see_key{key_ML_shift_id_}
    */
   inline static const Key<int> modi_list_shiftId{{"Modi", "List", "Shift_Id"},
-                                                 {"1.0"}};
+                                                 {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -3909,7 +3909,7 @@ struct InputKeys {
    * \see_key{key_MLB_file_dir_}
    */
   inline static const Key<std::string> modi_listBox_fileDirectory{
-      {"Modi", "ListBox", "File_Directory"}, {"1.0"}};
+      {"Modi", "ListBox", "File_Directory"}, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -3922,7 +3922,7 @@ struct InputKeys {
    * \see_key{key_MLB_file_prefix_}
    */
   inline static const Key<std::string> modi_listBox_filePrefix{
-      {"Modi", "ListBox", "File_Prefix"}, {"1.0"}};
+      {"Modi", "ListBox", "File_Prefix"}, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -3935,7 +3935,7 @@ struct InputKeys {
    * \see_key{key_MLB_length_}
    */
   inline static const Key<double> modi_listBox_length{
-      {"Modi", "ListBox", "Length"}, {"1.0"}};
+      {"Modi", "ListBox", "Length"}, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -3948,7 +3948,7 @@ struct InputKeys {
    * \see_key{key_MLB_shift_id_}
    */
   inline static const Key<int> modi_listBox_shiftId{
-      {"Modi", "ListBox", "Shift_Id"}, {"1.0"}};
+      {"Modi", "ListBox", "Shift_Id"}, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4103,7 +4103,7 @@ struct InputKeys {
    * \see_key{key_output_particles_extended_}
    */
   inline static const Key<bool> output_particles_extended{
-      {"Output", "Particles", "Extended"}, false, {"1.0"}};
+      {"Output", "Particles", "Extended"}, false, {"1.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4139,7 +4139,7 @@ struct InputKeys {
    * \see_key{key_output_collisions_extended_}
    */
   inline static const Key<bool> output_collisions_extended{
-      {"Output", "Collisions", "Extended"}, false, {"1.0"}};
+      {"Output", "Collisions", "Extended"}, false, {"1.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4172,7 +4172,7 @@ struct InputKeys {
    * \see_key{key_output_dileptons_extended_}
    */
   inline static const Key<bool> output_dileptons_extended{
-      {"Output", "Dileptons", "Extended"}, false, {"1.0"}};
+      {"Output", "Dileptons", "Extended"}, false, {"1.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4190,7 +4190,7 @@ struct InputKeys {
    * \see_key{key_output_photons_extended_}
    */
   inline static const Key<bool> output_photons_extended{
-      {"Output", "Photons", "Extended"}, false, {"1.0"}};
+      {"Output", "Photons", "Extended"}, false, {"1.5"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4209,7 +4209,7 @@ struct InputKeys {
    * \see_key{key_output_IC_extended_}
    */
   inline static const Key<bool> output_initialConditions_extended{
-      {"Output", "Initial_Conditions", "Extended"}, false, {"1.0"}};
+      {"Output", "Initial_Conditions", "Extended"}, false, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4635,7 +4635,7 @@ struct InputKeys {
    * \see_key{key_lattice_cell_number_}
    */
   inline static const Key<std::array<int, 3>> lattice_cellNumber{
-      {"Lattice", "Cell_Number"}, {"1.0"}};
+      {"Lattice", "Cell_Number"}, {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
