@@ -22,6 +22,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Fixed
 * Fix bug in the time step calculation of SMASH output in events successive to the first one when the `End_Time` is not a multiple of the `Output_Interval`
+* Fix bug that setting `Output_Interval` or `Delta_Time` to zero was possible (now forbidden)
+* Avoid bug that `End_Time` set to zero (now forbidden) resulted in SMASH not running properly in collider mode
 
 ### Changed
 * Upgraded to Pythia 8.310
