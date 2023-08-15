@@ -1045,7 +1045,7 @@ struct InputKeys {
    */
   inline static const Key<int> gen_minNonEmptyEnsembles_maximumEnsembles{
       {"General", "Minimum_Nonempty_Ensembles", "Maximum_Ensembles_Run"},
-      {"1.0"}};
+      {"2.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general_mne
@@ -2011,7 +2011,7 @@ struct InputKeys {
   inline static const Key<ReactionsBitSet> collTerm_includedTwoToTwo{
       {"Collision_Term", "Included_2to2"},
       ReactionsBitSet{}.set(),  // All interactions => all bit set
-      {"1.0"}};
+      {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2093,7 +2093,7 @@ struct InputKeys {
       collTerm_multiParticleReactions{
           {"Collision_Term", "Multi_Particle_Reactions"},
           MultiParticleReactionsBitSet{}.reset(),  // Empty list => no bit set
-          {"1.0"}};
+          {"2.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -3358,7 +3358,7 @@ struct InputKeys {
    * \see_key{key_MC_impact_range_}
    */
   inline static const Key<std::array<double, 2>> modi_collider_impact_range{
-      {"Modi", "Collider", "Impact", "Range"}, {{0.0, 0.0}}, {"1.0"}};
+      {"Modi", "Collider", "Impact", "Range"}, {{0.0, 0.0}}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -4040,17 +4040,17 @@ struct InputKeys {
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_particles_format{
-      {"Output", "Particles", "Format"}, {}, {"1.0"}};
+      {"Output", "Particles", "Format"}, {}, {"1.2"}};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_collisions_format{
-      {"Output", "Collisions", "Format"}, {}, {"1.0"}};
+      {"Output", "Collisions", "Format"}, {}, {"1.2"}};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_dileptons_format{
-      {"Output", "Dileptons", "Format"}, {}, {"1.0"}};
+      {"Output", "Dileptons", "Format"}, {}, {"0.85"}};
   /**
    * \see_key{key_output_content_format_}
    */
@@ -4061,23 +4061,23 @@ struct InputKeys {
    */
   inline static const Key<std::vector<std::string>>
       output_initialConditions_format{
-          {"Output", "Initial_Conditions", "Format"}, {}, {"1.0"}};
+          {"Output", "Initial_Conditions", "Format"}, {}, {"1.7"}};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_format{
-      {"Output", "Rivet", "Format"}, {}, {"1.0"}};
+      {"Output", "Rivet", "Format"}, {}, {"2.0.2"}};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_coulomb_format{
-      {"Output", "Coulomb", "Format"}, {}, {"1.0"}};
+      {"Output", "Coulomb", "Format"}, {}, {"2.1"}};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>>
       output_thermodynamics_format{
-          {"Output", "Thermodynamics", "Format"}, {}, {"1.0"}};
+          {"Output", "Thermodynamics", "Format"}, {}, {"1.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
