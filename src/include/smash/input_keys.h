@@ -261,6 +261,15 @@ class Key {
  * \li \ref doxypage_input_conf_potentials
  * \li \ref doxypage_input_conf_forced_therm
  *
+ * \note
+ * In the evolution of the software some new input keys have been introduced and
+ * some other removed. From `SMASH-3.0` a systematic deprecation and removal
+ * mechanism has been introduced, such that a key can be marked as deprecated
+ * by developer in some version and been removed in a later release. Therefore,
+ * it can be easily read in the code in which version a key has been introduced,
+ * deprecated or removed. Refer to the documentation of the `InputKeys` class in
+ * the developer guide for further information.
+ *
  * \par Information on formatting of the input file
  *
  * The input file is made of sections, i.e. of keys containing as "value" a
@@ -898,6 +907,13 @@ class Key {
 /**
  * @brief A container to keep track of all ever existed input keys.
  *
+ * @remark This class has been implemented in SMASH-3.0 and for all existing
+ *         keys at that point in time it has been determined in which past
+ *         version each key had been introduced. Therefore the user can read in
+ *         this class whether a key is compatible and can be used with a given
+ *         SMASH version. However, **keys that have existed and were removed
+ *         before SMASH-3.0 are not included here**.
+ *
  * @remark Each input key exists as static constant member and a reference to it
  *         is stored in the InputKeys::list container. Therefore, the following
  *         steps are needed in order to add a new key.
@@ -978,7 +994,8 @@ struct InputKeys {
   /**
    * \see_key{key_gen_end_time_}
    */
-  inline static const Key<double> gen_endTime{{"General", "End_Time"}, {"0.50"}};
+  inline static const Key<double> gen_endTime{{"General", "End_Time"},
+                                              {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1003,7 +1020,8 @@ struct InputKeys {
   /**
    * \see_key{key_gen_modus_}
    */
-  inline static const Key<std::string> gen_modus{{"General", "Modus"}, {"0.50"}};
+  inline static const Key<std::string> gen_modus{{"General", "Modus"},
+                                                 {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
