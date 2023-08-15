@@ -1459,7 +1459,7 @@ struct InputKeys {
    * \see_key{key_log_configuration_}
    */
   inline static const Key<einhard::LogLevel> log_yamlConfiguration{
-      {"Logging", "Configuration"}, {"1.0"}};
+      {"Logging", "Configuration"}, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1471,7 +1471,7 @@ struct InputKeys {
    * \see_key{key_log_experiment_}
    */
   inline static const Key<einhard::LogLevel> log_experiment{
-      {"Logging", "Experiment"}, {"1.0"}};
+      {"Logging", "Experiment"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1483,7 +1483,7 @@ struct InputKeys {
    * \see_key{key_log_grandcan_thermalizer_}
    */
   inline static const Key<einhard::LogLevel> log_grandcanThermalizer{
-      {"Logging", "GrandcanThermalizer"}, {"1.0"}};
+      {"Logging", "GrandcanThermalizer"}, {"1.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1495,7 +1495,7 @@ struct InputKeys {
    * \see_key{key_log_initial_conditions_}
    */
   inline static const Key<einhard::LogLevel> log_initialConditions{
-      {"Logging", "InitialConditions"}, {"1.0"}};
+      {"Logging", "InitialConditions"}, {"1.8"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1519,7 +1519,7 @@ struct InputKeys {
    * \see_key{key_log_main_}
    */
   inline static const Key<einhard::LogLevel> log_main{{"Logging", "Main"},
-                                                      {"1.0"}};
+                                                      {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1558,7 +1558,7 @@ struct InputKeys {
    * \see_key{key_log_action_}
    */
   inline static const Key<einhard::LogLevel> log_action{{"Logging", "Action"},
-                                                        {"1.0"}};
+                                                        {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1570,7 +1570,7 @@ struct InputKeys {
    * \see_key{key_log_clock_}
    */
   inline static const Key<einhard::LogLevel> log_clock{{"Logging", "Clock"},
-                                                       {"1.0"}};
+                                                       {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1582,7 +1582,7 @@ struct InputKeys {
    * \see_key{key_log_cross_sections_}
    */
   inline static const Key<einhard::LogLevel> log_crossSections{
-      {"Logging", "CrossSections"}, {"1.0"}};
+      {"Logging", "CrossSections"}, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1594,7 +1594,7 @@ struct InputKeys {
    * \see_key{key_log_decay_modes_}
    */
   inline static const Key<einhard::LogLevel> log_decayModes{
-      {"Logging", "DecayModes"}, {"1.0"}};
+      {"Logging", "DecayModes"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1618,7 +1618,7 @@ struct InputKeys {
    * \see_key{key_log_distributions_}
    */
   inline static const Key<einhard::LogLevel> log_distributions{
-      {"Logging", "Distributions"}, {"1.0"}};
+      {"Logging", "Distributions"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1630,7 +1630,7 @@ struct InputKeys {
    * \see_key{key_log_find_scatter_}
    */
   inline static const Key<einhard::LogLevel> log_findScatter{
-      {"Logging", "FindScatter"}, {"1.0"}};
+      {"Logging", "FindScatter"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1642,7 +1642,7 @@ struct InputKeys {
    * \see_key{key_log_fpe_}
    */
   inline static const Key<einhard::LogLevel> log_fpe{{"Logging", "Fpe"},
-                                                     {"1.0"}};
+                                                     {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1654,7 +1654,7 @@ struct InputKeys {
    * \see_key{key_log_grid_}
    */
   inline static const Key<einhard::LogLevel> log_grid{{"Logging", "Grid"},
-                                                      {"1.0"}};
+                                                      {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1666,7 +1666,7 @@ struct InputKeys {
    * \see_key{key_log_hyper_surface_crossing_}
    */
   inline static const Key<einhard::LogLevel> log_hyperSurfaceCrossing{
-      {"Logging", "HyperSurfaceCrossing"}, {"1.0"}};
+      {"Logging", "HyperSurfaceCrossing"}, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1678,7 +1678,7 @@ struct InputKeys {
    * \see_key{key_log_input_parser_}
    */
   inline static const Key<einhard::LogLevel> log_inputParser{
-      {"Logging", "InputParser"}, {"1.0"}};
+      {"Logging", "InputParser"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1714,7 +1714,7 @@ struct InputKeys {
    * \see_key{key_log_particle_type_}
    */
   inline static const Key<einhard::LogLevel> log_particleType{
-      {"Logging", "ParticleType"}, {"1.0"}};
+      {"Logging", "ParticleType"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1726,7 +1726,7 @@ struct InputKeys {
    * \see_key{key_log_pauli_blocking_}
    */
   inline static const Key<einhard::LogLevel> log_pauliBlocking{
-      {"Logging", "PauliBlocking"}, {"1.0"}};
+      {"Logging", "PauliBlocking"}, {"0.7.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1738,7 +1738,7 @@ struct InputKeys {
    * \see_key{key_log_propagation_}
    */
   inline static const Key<einhard::LogLevel> log_propagation{
-      {"Logging", "Propagation"}, {"1.0"}};
+      {"Logging", "Propagation"}, {"0.7.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1762,7 +1762,7 @@ struct InputKeys {
    * \see_key{key_log_resonances_}
    */
   inline static const Key<einhard::LogLevel> log_resonances{
-      {"Logging", "Resonances"}, {"1.0"}};
+      {"Logging", "Resonances"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1774,7 +1774,7 @@ struct InputKeys {
    * \see_key{key_log_scatter_action_}
    */
   inline static const Key<einhard::LogLevel> log_scatterAction{
-      {"Logging", "ScatterAction"}, {"1.0"}};
+      {"Logging", "ScatterAction"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1787,7 +1787,7 @@ struct InputKeys {
    * \see_key{key_log_scatter_action_multi_}
    */
   inline static const Key<einhard::LogLevel> log_scatterActionMulti{
-      {"Logging", "ScatterActionMulti"}, {"1.0"}};
+      {"Logging", "ScatterActionMulti"}, {"2.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1799,7 +1799,7 @@ struct InputKeys {
    * \see_key{key_log_tmn_}
    */
   inline static const Key<einhard::LogLevel> log_tmn{{"Logging", "Tmn"},
-                                                     {"0.90"}};
+                                                     {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_version
