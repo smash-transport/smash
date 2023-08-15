@@ -2776,7 +2776,7 @@ struct InputKeys {
    * \see_key{key_MC_e_kin_}
    */
   inline static const Key<double> modi_collider_eKin{
-      {"Modi", "Collider", "E_Kin"}, {"1.0"}};
+      {"Modi", "Collider", "E_Kin"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
@@ -2792,7 +2792,7 @@ struct InputKeys {
    * \see_key{key_MC_e_tot_}
    */
   inline static const Key<double> modi_collider_eTot{
-      {"Modi", "Collider", "E_Tot"}, {"1.0"}};
+      {"Modi", "Collider", "E_Tot"}, {"2.0.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
@@ -2809,7 +2809,7 @@ struct InputKeys {
    * \see_key{key_MC_p_lab_}
    */
   inline static const Key<double> modi_collider_pLab{
-      {"Modi", "Collider", "P_Lab"}, {"1.0"}};
+      {"Modi", "Collider", "P_Lab"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
@@ -2917,12 +2917,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_diffusiveness_}
    */
   inline static const Key<double> modi_collider_projectile_diffusiveness{
-      {"Modi", "Collider", "Projectile", "Diffusiveness"}, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "Diffusiveness"}, {"0.90"}};
   /**
    * \see_key{key_MC_PT_diffusiveness_}
    */
   inline static const Key<double> modi_collider_target_diffusiveness{
-      {"Modi", "Collider", "Target", "Diffusiveness"}, {"1.0"}};
+      {"Modi", "Collider", "Target", "Diffusiveness"}, {"0.90"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -2967,12 +2967,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_radius_}
    */
   inline static const Key<double> modi_collider_projectile_radius{
-      {"Modi", "Collider", "Projectile", "Radius"}, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "Radius"}, {"0.50"}};
   /**
    * \see_key{key_MC_PT_radius_}
    */
   inline static const Key<double> modi_collider_target_radius{
-      {"Modi", "Collider", "Target", "Radius"}, {"1.0"}};
+      {"Modi", "Collider", "Target", "Radius"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -2988,12 +2988,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_saturation_density_}
    */
   inline static const Key<double> modi_collider_projectile_saturationDensity{
-      {"Modi", "Collider", "Projectile", "Saturation_Density"}, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "Saturation_Density"}, {"0.50"}};
   /**
    * \see_key{key_MC_PT_saturation_density_}
    */
   inline static const Key<double> modi_collider_target_saturationDensity{
-      {"Modi", "Collider", "Target", "Saturation_Density"}, {"1.0"}};
+      {"Modi", "Collider", "Target", "Saturation_Density"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3010,12 +3010,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_e_kin_}
    */
   inline static const Key<double> modi_collider_projectile_eKin{
-      {"Modi", "Collider", "Projectile", "E_Kin"}, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "E_Kin"}, {"0.50"}};
   /**
    * \see_key{key_MC_PT_e_kin_}
    */
   inline static const Key<double> modi_collider_target_eKin{
-      {"Modi", "Collider", "Target", "E_Kin"}, {"1.0"}};
+      {"Modi", "Collider", "Target", "E_Kin"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3029,12 +3029,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_e_tot_}
    */
   inline static const Key<double> modi_collider_projectile_eTot{
-      {"Modi", "Collider", "Projectile", "E_Tot"}, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "E_Tot"}, {"2.0.2"}};
   /**
    * \see_key{key_MC_PT_e_tot_}
    */
   inline static const Key<double> modi_collider_target_eTot{
-      {"Modi", "Collider", "Target", "E_Tot"}, {"1.0"}};
+      {"Modi", "Collider", "Target", "E_Tot"}, {"2.0.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3056,12 +3056,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_p_lab_}
    */
   inline static const Key<double> modi_collider_projectile_pLab{
-      {"Modi", "Collider", "Projectile", "P_Lab"}, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "P_Lab"}, {"0.50"}};
   /**
    * \see_key{key_MC_PT_p_lab_}
    */
   inline static const Key<double> modi_collider_target_pLab{
-      {"Modi", "Collider", "Target", "P_Lab"}, {"1.0"}};
+      {"Modi", "Collider", "Target", "P_Lab"}, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3082,13 +3082,13 @@ struct InputKeys {
   inline static const Key<std::string>
       modi_collider_projectile_custom_fileDirectory{
           {"Modi", "Collider", "Projectile", "Custom", "File_Directory"},
-          {"1.0"}};
+          {"1.6"}};
   /**
    * \see_key{key_MC_PT_custom_file_dir_}
    */
   inline static const Key<std::string>
       modi_collider_target_custom_fileDirectory{
-          {"Modi", "Collider", "Target", "Custom", "File_Directory"}, {"1.0"}};
+          {"Modi", "Collider", "Target", "Custom", "File_Directory"}, {"1.6"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3100,12 +3100,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_custom_file_name_}
    */
   inline static const Key<std::string> modi_collider_projectile_custom_fileName{
-      {"Modi", "Collider", "Projectile", "Custom", "File_Name"}, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "Custom", "File_Name"}, {"1.6"}};
   /**
    * \see_key{key_MC_PT_custom_file_name_}
    */
   inline static const Key<std::string> modi_collider_target_custom_fileName{
-      {"Modi", "Collider", "Target", "Custom", "File_Name"}, {"1.0"}};
+      {"Modi", "Collider", "Target", "Custom", "File_Name"}, {"1.6"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3141,12 +3141,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_auto_}
    */
   inline static const Key<bool> modi_collider_projectile_deformed_automatic{
-      {"Modi", "Collider", "Projectile", "Deformed", "Automatic"}, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "Deformed", "Automatic"}, {"1.5"}};
   /**
    * \see_key{key_MC_PT_deformed_auto_}
    */
   inline static const Key<bool> modi_collider_target_deformed_automatic{
-      {"Modi", "Collider", "Target", "Deformed", "Automatic"}, {"1.0"}};
+      {"Modi", "Collider", "Target", "Deformed", "Automatic"}, {"1.5"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3159,12 +3159,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaII_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta2{
-      {"Modi", "Collider", "Projectile", "Deformed", "Beta_2"}, 0.0, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "Deformed", "Beta_2"}, 0.0, {"1.5"}};
   /**
    * \see_key{key_MC_PT_deformed_betaII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta2{
-      {"Modi", "Collider", "Target", "Deformed", "Beta_2"}, 0.0, {"1.0"}};
+      {"Modi", "Collider", "Target", "Deformed", "Beta_2"}, 0.0, {"1.5"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3177,12 +3177,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta3{
-      {"Modi", "Collider", "Projectile", "Deformed", "Beta_3"}, 0.0, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "Deformed", "Beta_3"}, 0.0, {"3.0"}};
   /**
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta3{
-      {"Modi", "Collider", "Target", "Deformed", "Beta_3"}, 0.0, {"1.0"}};
+      {"Modi", "Collider", "Target", "Deformed", "Beta_3"}, 0.0, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3195,12 +3195,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta4{
-      {"Modi", "Collider", "Projectile", "Deformed", "Beta_4"}, 0.0, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "Deformed", "Beta_4"}, 0.0, {"1.5"}};
   /**
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta4{
-      {"Modi", "Collider", "Target", "Deformed", "Beta_4"}, 0.0, {"1.0"}};
+      {"Modi", "Collider", "Target", "Deformed", "Beta_4"}, 0.0, {"1.5"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3213,12 +3213,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_gamma_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_gamma{
-      {"Modi", "Collider", "Projectile", "Deformed", "Gamma"}, 0.0, {"1.0"}};
+      {"Modi", "Collider", "Projectile", "Deformed", "Gamma"}, 0.0, {"3.0"}};
   /**
    * \see_key{key_MC_PT_deformed_gamma_}
    */
   inline static const Key<double> modi_collider_target_deformed_gamma{
-      {"Modi", "Collider", "Target", "Deformed", "Gamma"}, 0.0, {"1.0"}};
+      {"Modi", "Collider", "Target", "Deformed", "Gamma"}, 0.0, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3241,14 +3241,14 @@ struct InputKeys {
       modi_collider_projectile_deformed_orientation_phi{
           {"Modi", "Collider", "Projectile", "Deformed", "Orientation", "Phi"},
           0.0,
-          {"1.0"}};
+          {"0.50"}};
   /**
    * \see_key{key_MC_PT_deformed_orientation_phi_}
    */
   inline static const Key<double> modi_collider_target_deformed_orientation_phi{
       {"Modi", "Collider", "Target", "Deformed", "Orientation", "Phi"},
       0.0,
-      {"1.0"}};
+      {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3263,14 +3263,14 @@ struct InputKeys {
       modi_collider_projectile_deformed_orientation_psi{
           {"Modi", "Collider", "Projectile", "Deformed", "Orientation", "Psi"},
           0.0,
-          {"1.0"}};
+          {"3.0"}};
   /**
    * \see_key{key_MC_PT_deformed_orientation_psi_}
    */
   inline static const Key<double> modi_collider_target_deformed_orientation_psi{
       {"Modi", "Collider", "Target", "Deformed", "Orientation", "Psi"},
       0.0,
-      {"1.0"}};
+      {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3286,7 +3286,7 @@ struct InputKeys {
           {"Modi", "Collider", "Projectile", "Deformed", "Orientation",
            "Random_Rotation"},
           false,
-          {"1.0"}};
+          {"1.7"}};
   /**
    * \see_key{key_MC_PT_deformed_orientation_random_}
    */
@@ -3295,7 +3295,7 @@ struct InputKeys {
           {"Modi", "Collider", "Target", "Deformed", "Orientation",
            "Random_Rotation"},
           false,
-          {"1.0"}};
+          {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3311,7 +3311,7 @@ struct InputKeys {
           {"Modi", "Collider", "Projectile", "Deformed", "Orientation",
            "Theta"},
           M_PI / 2,
-          {"1.0"}};
+          {"0.50"}};
   /**
    * \see_key{key_MC_PT_deformed_orientation_theta_}
    */
@@ -3319,7 +3319,7 @@ struct InputKeys {
       modi_collider_target_deformed_orientation_theta{
           {"Modi", "Collider", "Target", "Deformed", "Orientation", "Theta"},
           M_PI / 2,
-          {"1.0"}};
+          {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -4832,7 +4832,7 @@ struct InputKeys {
    * \see_key{key_forced_therm_cell_number_}
    */
   inline static const Key<std::array<int, 3>> forcedThermalization_cellNumber{
-      {"Forced_Thermalization", "Cell_Number"}, {"1.0"}};
+      {"Forced_Thermalization", "Cell_Number"}, {"1.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -4858,7 +4858,7 @@ struct InputKeys {
    * \see_key{key_forced_therm_start_time_}
    */
   inline static const Key<double> forcedThermalization_startTime{
-      {"Forced_Thermalization", "Start_Time"}, {"1.0"}};
+      {"Forced_Thermalization", "Start_Time"}, {"1.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
