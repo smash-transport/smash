@@ -165,15 +165,12 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
    */
   const double dt = config.take({"General", "Delta_Time"}, 1.);
   if (dt <= 0.) {
-    throw std::invalid_argument(
-      "Delta_Time cannot be a negative value or zero.");
+    throw std::invalid_argument("Delta_Time cannot be zero or negative.");
   }
 
   const double t_end = config.read({"General", "End_Time"});
   if (t_end <= 0.) {
-    throw std::invalid_argument(
-      "The current SMASH version does not support "
-      "an End_Time that is negative or zero.");
+    throw std::invalid_argument("End_Time cannot be zero or negative.");
   }
 
   // Enforce a small time step, if the box modus is used
@@ -199,11 +196,9 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
     if (output_dt <= 0.) {
       throw std::invalid_argument(
-          "Output_Interval cannot be a negative value or zero.");
+          "Output_Interval cannot be zero or negative.");
     }
-    else {
-      output_clock = std::make_unique<UniformClock>(0.0, output_dt, t_end);
-    }
+    output_clock = std::make_unique<UniformClock>(0.0, output_dt, t_end);
   }
 
   // Add proper error messages if photons are not configured properly.

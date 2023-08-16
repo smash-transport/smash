@@ -206,9 +206,10 @@ class UniformClock : public Clock {
     }
     if (reset_time_ >= time_end_) {
       throw std::range_error(
-        "The initial time of UniformClock must be smaller than the end time. "
-        "(Attempt to set initial time to " + std::to_string(time) + " and end time to "
-        + std::to_string(time_end) + " not possible)");
+          "The initial time of UniformClock must be smaller than the end time. "
+          "(Attempt to set initial time to " +
+          std::to_string(time) + " and end time to " +
+          std::to_string(time_end) + " not possible)");
     }
   }
   /// \return the current time.
