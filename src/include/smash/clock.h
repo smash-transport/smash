@@ -201,8 +201,15 @@ class UniformClock : public Clock {
       : timestep_duration_(convert(dt)),
         reset_time_(convert(time)),
         time_end_(convert(time_end)) {
-    if (dt < 0.) {
-      throw std::range_error("No negative time increment allowed");
+    if (dt <= 0.) {
+      throw std::range_error("Time increment must be positive and non-zero");
+    }
+    if (reset_time_ >= time_end_) {
+      throw std::range_error(
+          "The initial time of UniformClock must be smaller than the end time. "
+          "(Attempt to set initial time to " +
+          std::to_string(time) + " and end time to " +
+          std::to_string(time_end) + " not possible)");
     }
   }
   /// \return the current time.
@@ -247,8 +254,8 @@ class UniformClock : public Clock {
    * \param[in] dt new time step size
    */
   void set_timestep_duration(const double dt) {
-    if (dt < 0.) {
-      throw std::range_error("No negative time increment allowed");
+    if (dt <= 0.) {
+      throw std::range_error("Time increment must be positive and non-zero!");
     }
     reset_time_ += timestep_duration_ * counter_;
     counter_ = 0;
