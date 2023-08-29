@@ -85,7 +85,11 @@ class OutputInterface {
       : is_dilepton_output_(name == "Dileptons"),
         is_photon_output_(name == "Photons"),
         is_IC_output_(name == "SMASH_IC") {}
-  virtual ~OutputInterface() = default;
+  /**
+   * Pure virtual destructor to make class abstract and prevent its
+   * instantiation. It needs a definition which is done outside the class.
+   */
+  virtual ~OutputInterface() = 0;
 
   /**
    * Output launched at event start after initialization, when particles are
@@ -325,6 +329,8 @@ class OutputInterface {
         "Not implemented method of output interface was called!");
   }
 };
+
+inline OutputInterface::~OutputInterface() = default;
 
 }  // namespace smash
 
