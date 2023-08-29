@@ -342,9 +342,11 @@ dist:
 #	$(RM) $(TARDIR)
 
 pub: dist
-	new=`date -r $(TARFILE) +%F`; \
-	old=`date -r web/cuba/$(TARFILE) +%F`; \
-	  test $$new = $$old || mv -f web/cuba/$(TARDIR){,_$$old}.tar.gz
+	test -e web/cuba/$(TARFILE) && { \
+	  new=`date -r $(TARFILE) +%F`; \
+	  old=`date -r web/cuba/$(TARFILE) +%F`; \
+	  test $$new = $$old || mv -f web/cuba/$(TARDIR){,_$$old}.tar.gz; \
+	}; true
 	mv -f $(TARFILE) web/cuba/
 	./mkwebpage
 
