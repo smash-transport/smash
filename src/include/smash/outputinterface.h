@@ -68,6 +68,12 @@ struct EventInfo {
  * 1) At event start and event end: at_eventstart, at_eventend
  * 2) After every fixed time period: at_intermediate_time, thermodynamics_output
  * 3) At each interaction: at_interaction
+ *
+ * \attention This class provides more virtual methods than those needed in
+ * different children classes. Although this is against the inheritance "is-a"
+ * relationship, it somehow simplifies here the hierarchy, because we avoid
+ * having many more interfaces. Furthermore all base virtual methods throw if
+ * called and this is a way to signal a wrong usage of the interface.
  */
 class OutputInterface {
  public:
@@ -84,267 +90,162 @@ class OutputInterface {
   /**
    * Output launched at event start after initialization, when particles are
    * generated but not yet propagated.
-   * \param particles List of particles.
-   * \param event_number Number of the current event.
-   * \param[in] info Event info, see \ref event_info
    */
-  virtual void at_eventstart(const Particles &particles, const int event_number,
-                             const EventInfo &info) {
-    SMASH_UNUSED(particles);
-    SMASH_UNUSED(event_number);
-    SMASH_UNUSED(info);
-  }
-  /**
-   * Output launched at event start after initialization, when particles are
-   * generated but not yet propagated.
-   * \param ensembles List of particles.
-   * \param[in] event_number Number of the current event.
-   */
-  virtual void at_eventstart(const std::vector<Particles> &ensembles,
-                             int event_number) {
-    SMASH_UNUSED(ensembles);
-    SMASH_UNUSED(event_number);
+  virtual void at_eventstart(const Particles &, const int, const EventInfo &) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
    * Output launched at event start after initialization, when particles are
    * generated but not yet propagated.
-   * \param[in] event_number Number of the current event.
-   * \param[in] tq Thermodynamic quantity to deal with.
-   * \param[in] dens_type Density type for the reference frame.
-   * \param[in] lattice Lattice of tabulated values.
    */
-  virtual void at_eventstart(const int event_number,
-                             const ThermodynamicQuantity tq,
-                             const DensityType dens_type,
-                             RectangularLattice<DensityOnLattice> lattice) {
-    SMASH_UNUSED(event_number);
-    SMASH_UNUSED(tq);
-    SMASH_UNUSED(dens_type);
-    SMASH_UNUSED(lattice);
+  virtual void at_eventstart(const std::vector<Particles> &, int) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
-   * Output launched atevent start after initialization, when particles are
+   * Output launched at event start after initialization, when particles are
    * generated but not yet propagated.
-   * \param[in] event_number Number of the current event.
-   * \param[in] tq Thermodynamic quantity to deal with.
-   * \param[in] dens_type Density type for the reference frame.
-   * \param[in] lattice Lattice of tabulated values.
    */
-  virtual void at_eventstart(const int event_number,
-                             const ThermodynamicQuantity tq,
-                             const DensityType dens_type,
-                             RectangularLattice<EnergyMomentumTensor> lattice) {
-    SMASH_UNUSED(event_number);
-    SMASH_UNUSED(tq);
-    SMASH_UNUSED(dens_type);
-    SMASH_UNUSED(lattice);
+  virtual void at_eventstart(const int, const ThermodynamicQuantity,
+                             const DensityType,
+                             RectangularLattice<DensityOnLattice>) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
-   * Output launched at event end. Event end is determined by maximal timestep
-   * option.
-   * \param[in] event_number Number of the current event.
-   * \param[in] tq Thermodynamic quantity to deal with
-   * \param[in] dens_type Density type for the evaluation of thermodynamic
-   *                      quantities
+   * Output launched at event start after initialization, when particles are
+   * generated but not yet propagated.
    */
-  virtual void at_eventend(const int event_number,
-                           const ThermodynamicQuantity tq,
-                           const DensityType dens_type) {
-    SMASH_UNUSED(event_number);
-    SMASH_UNUSED(tq);
-    SMASH_UNUSED(dens_type);
+  virtual void at_eventstart(const int, const ThermodynamicQuantity,
+                             const DensityType,
+                             RectangularLattice<EnergyMomentumTensor>) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
-   * Output launched at event end. Event end is determined by maximal timestep
+   * Output launched at event end. Event end is determined by maximal time-step
    * option.
-   * \param[in] tq Thermodynamic quantity to deal with.
    */
-  virtual void at_eventend(const ThermodynamicQuantity tq) { SMASH_UNUSED(tq); }
+  virtual void at_eventend(const int, const ThermodynamicQuantity,
+                           const DensityType) {
+    throw_because_of_unimplemented_method();
+  }
 
   /**
-   * Output launched at event end. Event end is determined by maximal timestep
+   * Output launched at event end. Event end is determined by maximal time-step
    * option.
-   * \param particles List of particles.
-   * \param event_number Number of the current event.
-   * \param[in] info Event info, see \ref event_info
    */
-  virtual void at_eventend(const Particles &particles, const int event_number,
-                           const EventInfo &info) {
-    SMASH_UNUSED(particles);
-    SMASH_UNUSED(event_number);
-    SMASH_UNUSED(info);
+  virtual void at_eventend(const ThermodynamicQuantity) {
+    throw_because_of_unimplemented_method();
+  }
+
+  /**
+   * Output launched at event end. Event end is determined by maximal time-step
+   * option.
+   */
+  virtual void at_eventend(const Particles &, const int, const EventInfo &) {
+    throw_because_of_unimplemented_method();
   }
   /**
-   * Output launched at event end. Event end is determined by maximal timestep
+   * Output launched at event end. Event end is determined by maximal time-step
    * option.
-   * \param ensembles List of particles.
-   * \param event_number Number of the current event.
    */
-  virtual void at_eventend(const std::vector<Particles> &ensembles,
-                           const int event_number) {
-    SMASH_UNUSED(ensembles);
-    SMASH_UNUSED(event_number);
+  virtual void at_eventend(const std::vector<Particles> &, const int) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
    * Called whenever an action modified one or more particles.
-   *
-   * \param action The action object, containing the initial and final state
-   * etc.
-   * \param density The density at the interaction point.
    */
-  virtual void at_interaction(const Action &action, const double density) {
-    SMASH_UNUSED(action);
-    SMASH_UNUSED(density);
+  virtual void at_interaction(const Action &, const double) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
-   * Output launched after every N'th timestep. N is controlled by an option.
-   * \param particles List of particles.
-   * \param clock System clock.
-   * \param dens_param Parameters for density calculation.
-   * \param[in] info Event info, see \ref event_info
+   * Output launched after every N'th time-step. N is controlled by an option.
    */
-  virtual void at_intermediate_time(const Particles &particles,
-                                    const std::unique_ptr<Clock> &clock,
-                                    const DensityParameters &dens_param,
-                                    const EventInfo &info) {
-    SMASH_UNUSED(particles);
-    SMASH_UNUSED(clock);
-    SMASH_UNUSED(dens_param);
-    SMASH_UNUSED(info);
+  virtual void at_intermediate_time(const Particles &,
+                                    const std::unique_ptr<Clock> &,
+                                    const DensityParameters &,
+                                    const EventInfo &) {
+    throw_because_of_unimplemented_method();
   }
   /**
    * Output launched after every N'th timestep. N is controlled by an option.
-   * \param ensembles List of particles.
-   * \param clock System clock.
-   * \param dens_param Parameters for density calculation.
    */
-  virtual void at_intermediate_time(const std::vector<Particles> &ensembles,
-                                    const std::unique_ptr<Clock> &clock,
-                                    const DensityParameters &dens_param) {
-    SMASH_UNUSED(ensembles);
-    SMASH_UNUSED(clock);
-    SMASH_UNUSED(dens_param);
+  virtual void at_intermediate_time(const std::vector<Particles> &,
+                                    const std::unique_ptr<Clock> &,
+                                    const DensityParameters &) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
    * Output to write thermodynamics from the lattice.
-   * \param tq Thermodynamic quantity to be written, used for file name etc.
-   * \param dt Type of density, i.e. which particles to take into account.
-   * \param lattice Lattice of tabulated values.
-   *
    * Used for vtk output.
    */
-  virtual void thermodynamics_output(
-      const ThermodynamicQuantity tq, const DensityType dt,
-      RectangularLattice<DensityOnLattice> &lattice) {
-    SMASH_UNUSED(tq);
-    SMASH_UNUSED(dt);
-    SMASH_UNUSED(lattice);
+  virtual void thermodynamics_output(const ThermodynamicQuantity,
+                                     const DensityType,
+                                     RectangularLattice<DensityOnLattice> &) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
    * Output to write energy-momentum tensor and related quantities from the
-   * lattice.
-   * \param tq Thermodynamic quantity to be written: Tmn, Tmn_Landau, v_Landau.
-   * \param dt Type of density, i.e. which particles to take into account.
-   * \param lattice Lattice of tabulated values.
-   *
-   * Used for vtk output.
+   * lattice. Used for vtk output.
    */
   virtual void thermodynamics_output(
-      const ThermodynamicQuantity tq, const DensityType dt,
-      RectangularLattice<EnergyMomentumTensor> &lattice) {
-    SMASH_UNUSED(tq);
-    SMASH_UNUSED(dt);
-    SMASH_UNUSED(lattice);
+      const ThermodynamicQuantity, const DensityType,
+      RectangularLattice<EnergyMomentumTensor> &) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
    * Output to write thermodynamics from the lattice.
-   * \param[in] lattice Lattice type DensityOnLattice of tabulated values.
-   * \param[in] current_time Time of the simulation in the computational frame.
-   *
    * Used for thermodynamic lattice output.
    */
   virtual void thermodynamics_lattice_output(
-      RectangularLattice<DensityOnLattice> &lattice,
-      const double current_time) {
-    SMASH_UNUSED(lattice);
-    SMASH_UNUSED(current_time);
+      RectangularLattice<DensityOnLattice> &, const double) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
    * Output to write thermodynamics from the lattice.
-   * \param[in] lattice Lattice type FourVector of tabulated values.
-   * \param[in] current_time Time of the simulation in the computational frame.
-   * \param[in] ensembles Particles, from which the 4-currents j_{Q,B,S} are
-   *            computed
-   * * \param[in] dens_param set of parameters, defining smearing.
-   *            For more info about
-   *            smearing see \ref doxypage_output_thermodyn.
-   *
    * Used for thermodynamic lattice output.
    */
   virtual void thermodynamics_lattice_output(
-      RectangularLattice<DensityOnLattice> &lattice, const double current_time,
-      const std::vector<Particles> &ensembles,
-      const DensityParameters &dens_param) {
-    SMASH_UNUSED(lattice);
-    SMASH_UNUSED(current_time);
-    SMASH_UNUSED(ensembles);
-    SMASH_UNUSED(dens_param);
+      RectangularLattice<DensityOnLattice> &, const double,
+      const std::vector<Particles> &, const DensityParameters &) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
    * Output to write energy-momentum tensor and related quantities from the
-   * lattice.
-   * \param[in] tq Thermodynamic quantity to be written, used for file name etc.
-   * \param[in] lattice Lattice type EnergyMomentumTensor of tabulated values.
-   * \param[in] current_time Time of the simulation in the computational frame.
-   *
-   * Used for thermodynamic lattice output.
+   * lattice. Used for thermodynamic lattice output.
    */
   virtual void thermodynamics_lattice_output(
-      const ThermodynamicQuantity tq,
-      RectangularLattice<EnergyMomentumTensor> &lattice,
-      const double current_time) {
-    SMASH_UNUSED(tq);
-    SMASH_UNUSED(lattice);
-    SMASH_UNUSED(current_time);
+      const ThermodynamicQuantity, RectangularLattice<EnergyMomentumTensor> &,
+      const double) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
    * Output to write energy-momentum tensor and related quantities from the
    * thermalizer class.
-   * \param gct Pointer to thermalizer
-   *
    * Only used for vtk output. Not connected to ThermodynamicOutput.
    */
-  virtual void thermodynamics_output(const GrandCanThermalizer &gct) {
-    SMASH_UNUSED(gct);
+  virtual void thermodynamics_output(const GrandCanThermalizer &) {
+    throw_because_of_unimplemented_method();
   }
 
   /**
    * Write fields in vtk output
-   *
    * Fields are a pair of threevectors for example electric and magnetic field
-   *
-   * \param[in] name1 Name of the first field
-   * \param[in] name2 Name of the second field
-   * \param[in] lat Lattice storing both fields
    */
   virtual void fields_output(
-      const std::string name1, const std::string name2,
-      RectangularLattice<std::pair<ThreeVector, ThreeVector>> &lat) {
-    SMASH_UNUSED(name1);
-    SMASH_UNUSED(name2);
-    SMASH_UNUSED(lat);
+      const std::string, const std::string,
+      RectangularLattice<std::pair<ThreeVector, ThreeVector>> &) {
+    throw_because_of_unimplemented_method();
   }
 
   /// Get, whether this is the dilepton output?
@@ -413,6 +314,16 @@ class OutputInterface {
 
   /// Is this the IC output?
   const bool is_IC_output_;
+
+ private:
+  /**
+   * Function to be used in all virtual methods to abort if unexpectedly called
+   * from children classes (as only overridden method should be called).
+   */
+  void throw_because_of_unimplemented_method() {
+    throw std::logic_error(
+        "Not implemented method of output interface was called!");
+  }
 };
 
 }  // namespace smash
