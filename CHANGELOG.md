@@ -26,6 +26,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Changed
 * Upgraded to Pythia 8.310
+* Upgraded to Cuba 4.2.2
+
 
 ## SMASH-3.0
 Date: 2023-04-27

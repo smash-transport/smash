@@ -2,7 +2,7 @@
 	Split.c
 		determine optimal cuts for splitting a region
 		this file is part of Divonne
-		last modified 12 Mar 15 th
+		last modified 28 Feb 22 th
 */
 
 
@@ -116,12 +116,13 @@ static inline void SolveEqs(Cut *cut, count ncuts,
 
   last = Div(c->lhs - last, r);
 
-  for( ; c >= cut; last += (--c)->lhs ) {
+  for( ; c >= cut; --c ) {
     creal delmin = -(c->delta = delta[c->i]);
     creal delmax = FRACT*(delmin + c->save);
     c->sol = Div(last, c->df);
     if( c->sol > delmax ) c->sol = .75*delmax;
     if( c->sol < delmin ) c->sol = .75*delmin;
+    last += c->lhs;
   }
 }
 
