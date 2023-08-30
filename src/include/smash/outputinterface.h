@@ -72,8 +72,13 @@ struct EventInfo {
  * \attention This class provides more virtual methods than those needed in
  * different children classes. Although this is against the inheritance "is-a"
  * relationship, it somehow simplifies here the hierarchy, because we avoid
- * having many more interfaces. Furthermore all base virtual methods throw if
- * called and this is a way to signal a wrong usage of the interface.
+ * having many more interfaces. Furthermore all base virtual methods are
+ * implemented as no-operations, i.e. empty. This implies that they can and will
+ * be called if the interface is used polymorphically but the child does not
+ * implement the called method. This happens e.g. in the Experiment class where
+ * an array of pointers to the base class is initialized with different children
+ * and then different methods are called on all array entries (some will do what
+ * has to be done, but most will just do nothing).
  */
 class OutputInterface {
  public:
@@ -95,27 +100,13 @@ class OutputInterface {
    * Output launched at event start after initialization, when particles are
    * generated but not yet propagated.
    */
-  virtual void at_eventstart(const Particles &, const int, const EventInfo &) {
-    throw_because_of_unimplemented_method();
-  }
+  virtual void at_eventstart(const Particles &, const int, const EventInfo &) {}
 
   /**
    * Output launched at event start after initialization, when particles are
    * generated but not yet propagated.
    */
-  virtual void at_eventstart(const std::vector<Particles> &, int) {
-    throw_because_of_unimplemented_method();
-  }
-
-  /**
-   * Output launched at event start after initialization, when particles are
-   * generated but not yet propagated.
-   */
-  virtual void at_eventstart(const int, const ThermodynamicQuantity,
-                             const DensityType,
-                             RectangularLattice<DensityOnLattice>) {
-    throw_because_of_unimplemented_method();
-  }
+  virtual void at_eventstart(const std::vector<Particles> &, int) {}
 
   /**
    * Output launched at event start after initialization, when particles are
@@ -123,48 +114,44 @@ class OutputInterface {
    */
   virtual void at_eventstart(const int, const ThermodynamicQuantity,
                              const DensityType,
-                             RectangularLattice<EnergyMomentumTensor>) {
-    throw_because_of_unimplemented_method();
-  }
+                             RectangularLattice<DensityOnLattice>) {}
+
+  /**
+   * Output launched at event start after initialization, when particles are
+   * generated but not yet propagated.
+   */
+  virtual void at_eventstart(const int, const ThermodynamicQuantity,
+                             const DensityType,
+                             RectangularLattice<EnergyMomentumTensor>) {}
 
   /**
    * Output launched at event end. Event end is determined by maximal time-step
    * option.
    */
   virtual void at_eventend(const int, const ThermodynamicQuantity,
-                           const DensityType) {
-    throw_because_of_unimplemented_method();
-  }
+                           const DensityType) {}
 
   /**
    * Output launched at event end. Event end is determined by maximal time-step
    * option.
    */
-  virtual void at_eventend(const ThermodynamicQuantity) {
-    throw_because_of_unimplemented_method();
-  }
+  virtual void at_eventend(const ThermodynamicQuantity) {}
 
   /**
    * Output launched at event end. Event end is determined by maximal time-step
    * option.
    */
-  virtual void at_eventend(const Particles &, const int, const EventInfo &) {
-    throw_because_of_unimplemented_method();
-  }
+  virtual void at_eventend(const Particles &, const int, const EventInfo &) {}
   /**
    * Output launched at event end. Event end is determined by maximal time-step
    * option.
    */
-  virtual void at_eventend(const std::vector<Particles> &, const int) {
-    throw_because_of_unimplemented_method();
-  }
+  virtual void at_eventend(const std::vector<Particles> &, const int) {}
 
   /**
    * Called whenever an action modified one or more particles.
    */
-  virtual void at_interaction(const Action &, const double) {
-    throw_because_of_unimplemented_method();
-  }
+  virtual void at_interaction(const Action &, const double) {}
 
   /**
    * Output launched after every N'th time-step. N is controlled by an option.
@@ -172,17 +159,13 @@ class OutputInterface {
   virtual void at_intermediate_time(const Particles &,
                                     const std::unique_ptr<Clock> &,
                                     const DensityParameters &,
-                                    const EventInfo &) {
-    throw_because_of_unimplemented_method();
-  }
+                                    const EventInfo &) {}
   /**
    * Output launched after every N'th timestep. N is controlled by an option.
    */
   virtual void at_intermediate_time(const std::vector<Particles> &,
                                     const std::unique_ptr<Clock> &,
-                                    const DensityParameters &) {
-    throw_because_of_unimplemented_method();
-  }
+                                    const DensityParameters &) {}
 
   /**
    * Output to write thermodynamics from the lattice.
@@ -190,9 +173,7 @@ class OutputInterface {
    */
   virtual void thermodynamics_output(const ThermodynamicQuantity,
                                      const DensityType,
-                                     RectangularLattice<DensityOnLattice> &) {
-    throw_because_of_unimplemented_method();
-  }
+                                     RectangularLattice<DensityOnLattice> &) {}
 
   /**
    * Output to write energy-momentum tensor and related quantities from the
@@ -200,18 +181,14 @@ class OutputInterface {
    */
   virtual void thermodynamics_output(
       const ThermodynamicQuantity, const DensityType,
-      RectangularLattice<EnergyMomentumTensor> &) {
-    throw_because_of_unimplemented_method();
-  }
+      RectangularLattice<EnergyMomentumTensor> &) {}
 
   /**
    * Output to write thermodynamics from the lattice.
    * Used for thermodynamic lattice output.
    */
   virtual void thermodynamics_lattice_output(
-      RectangularLattice<DensityOnLattice> &, const double) {
-    throw_because_of_unimplemented_method();
-  }
+      RectangularLattice<DensityOnLattice> &, const double) {}
 
   /**
    * Output to write thermodynamics from the lattice.
@@ -219,9 +196,7 @@ class OutputInterface {
    */
   virtual void thermodynamics_lattice_output(
       RectangularLattice<DensityOnLattice> &, const double,
-      const std::vector<Particles> &, const DensityParameters &) {
-    throw_because_of_unimplemented_method();
-  }
+      const std::vector<Particles> &, const DensityParameters &) {}
 
   /**
    * Output to write energy-momentum tensor and related quantities from the
@@ -229,18 +204,14 @@ class OutputInterface {
    */
   virtual void thermodynamics_lattice_output(
       const ThermodynamicQuantity, RectangularLattice<EnergyMomentumTensor> &,
-      const double) {
-    throw_because_of_unimplemented_method();
-  }
+      const double) {}
 
   /**
    * Output to write energy-momentum tensor and related quantities from the
    * thermalizer class.
    * Only used for vtk output. Not connected to ThermodynamicOutput.
    */
-  virtual void thermodynamics_output(const GrandCanThermalizer &) {
-    throw_because_of_unimplemented_method();
-  }
+  virtual void thermodynamics_output(const GrandCanThermalizer &) {}
 
   /**
    * Write fields in vtk output
@@ -248,9 +219,7 @@ class OutputInterface {
    */
   virtual void fields_output(
       const std::string, const std::string,
-      RectangularLattice<std::pair<ThreeVector, ThreeVector>> &) {
-    throw_because_of_unimplemented_method();
-  }
+      RectangularLattice<std::pair<ThreeVector, ThreeVector>> &) {}
 
   /// Get, whether this is the dilepton output?
   bool is_dilepton_output() const { return is_dilepton_output_; }
@@ -318,16 +287,6 @@ class OutputInterface {
 
   /// Is this the IC output?
   const bool is_IC_output_;
-
- private:
-  /**
-   * Function to be used in all virtual methods to abort if unexpectedly called
-   * from children classes (as only overridden method should be called).
-   */
-  void throw_because_of_unimplemented_method() {
-    throw std::logic_error(
-        "Not implemented method of output interface was called!");
-  }
 };
 
 inline OutputInterface::~OutputInterface() = default;
