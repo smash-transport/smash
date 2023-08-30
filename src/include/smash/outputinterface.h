@@ -79,6 +79,11 @@ struct EventInfo {
  * an array of pointers to the base class is initialized with different children
  * and then different methods are called on all array entries (some will do what
  * has to be done, but most will just do nothing).
+ *
+ * \note The parameters of most methods in this base class are not documented,
+ * as irrelevant for the empty implementation. However, every child class which
+ * overrides some methods documents them in detail. Refer to them for further
+ * information.
  */
 class OutputInterface {
  public:
