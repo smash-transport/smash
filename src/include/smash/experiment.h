@@ -516,14 +516,6 @@ class Experiment : public ExperimentBase {
   bool printout_lattice_td_ = false;
 
   /// Whether to print the thermodynamics quantities evaluated on the lattices,
-  /// point by point, in ASCII format
-  bool printout_full_lattice_ascii_td_ = false;
-
-  /// Whether to print the thermodynamics quantities evaluated on the lattices,
-  /// point by point, in Binary format
-  bool printout_full_lattice_binary_td_ = false;
-
-  /// Whether to print the thermodynamics quantities evaluated on the lattices,
   /// point by point, in any format
   bool printout_full_lattice_any_td_ = false;
 
@@ -765,15 +757,9 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (content == "Thermodynamics" &&
              (format == "Lattice_ASCII" || format == "Lattice_Binary")) {
     printout_full_lattice_any_td_ = true;
-    if (format == "Lattice_ASCII") {
-      printout_full_lattice_ascii_td_ = true;
-    }
-    if (format == "Lattice_Binary") {
-      printout_full_lattice_binary_td_ = true;
-    }
     outputs_.emplace_back(std::make_unique<ThermodynamicLatticeOutput>(
-        output_path, content, out_par, printout_full_lattice_ascii_td_,
-        printout_full_lattice_binary_td_));
+        output_path, content, out_par, format == "Lattice_ASCII",
+        format == "Lattice_Binary"));
   } else if (content == "Thermodynamics" && format == "VTK") {
     printout_lattice_td_ = true;
     outputs_.emplace_back(
