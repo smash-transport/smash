@@ -97,8 +97,7 @@ TEST(take_array) {
 TEST_CATCH(take_array_wrong_n, Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
   conf.merge_yaml("{test: [123, 456, 789]}");
-  std::array<int, 4> x = conf.take({"test"});
-  SMASH_UNUSED(x);
+  [[maybe_unused]] std::array<int, 4> x = conf.take({"test"});
 }
 
 TEST(take_reactions_bitset) {
