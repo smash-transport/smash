@@ -52,15 +52,15 @@ class FreeforallAction : public Action {
     }
   }
 
-  double get_total_weight() const { return 0.0; }
-  double get_partial_weight() const { return 0.0; }
+  double get_total_weight() const override { return 0.0; }
+  double get_partial_weight() const override { return 0.0; }
 
   /**
    * Generate a final state for the FreeforallAction in the sense that the
    * time and position of the particles in the list is scrolled back to the
    * action time. The outgoing particles are set in the constructor.
    */
-  void generate_final_state() {
+  void generate_final_state() override {
     // Set time for arbitrary outgoing particles to time of action
     for (auto &particle : outgoing_particles_) {
       const double t = particle.position().x0();
@@ -76,7 +76,7 @@ class FreeforallAction : public Action {
    * freeforall action
    * \param[in] out Location of the output stream
    */
-  void format_debug_output(std::ostream &out) const {
+  void format_debug_output(std::ostream &out) const override {
     out << "Freeforall action of " << incoming_particles_.size() << " to "
         << outgoing_particles_.size() << " particles.";
   }
