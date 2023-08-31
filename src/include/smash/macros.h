@@ -16,13 +16,6 @@
 #define unlikely(x) (x)
 #endif
 
-/**
- * Mark as unused, silencing compiler warnings.
- *
- * This is useful for unused arguments.
- */
-#define SMASH_UNUSED(x) (void)(x)
-
 /// Mark as deprecated, generating compiler warnings when used.
 #define SMASH_DEPRECATED(msg) __attribute__((deprecated(msg)))
 

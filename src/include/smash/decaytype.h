@@ -51,8 +51,7 @@ class DecayType {
    *
    * \param[in] mother Particle type to be checked.
    */
-  virtual bool has_mother(ParticleTypePtr mother) const {
-    SMASH_UNUSED(mother);
+  virtual bool has_mother([[maybe_unused]] ParticleTypePtr mother) const {
     return true;
   }
   /// \return the particle types associated with this branch.
@@ -120,10 +119,7 @@ class TwoBodyDecay : public DecayType {
    * \param[in] mass Resonance mass of the decay.
    * \return Width of the decay at the given \p mass.
    * */
-  virtual double rho(double mass) const {
-    SMASH_UNUSED(mass);
-    return 1.;
-  }
+  virtual double rho([[maybe_unused]] double mass) const { return 1.; }
 };
 
 /**
@@ -166,6 +162,9 @@ class TwoBodyDecayStable : public TwoBodyDecay {
                   double m2) const override;
 
  protected:
+  /**
+   * See TwoBodyDecay::rho.
+   */
   double rho(double m) const override;
 };
 
@@ -209,6 +208,9 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
                   double m2) const override;
 
  protected:
+  /**
+   * See TwoBodyDecay::rho.
+   */
   double rho(double m) const override;
 
   /**
@@ -251,6 +253,9 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
                   double m2) const override;
 
  protected:
+  /**
+   * See TwoBodyDecay::rho.
+   */
   double rho(double m) const override;
   /**
    * \return the cut-off parameter Λ for unstable decays,
@@ -322,6 +327,9 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
   ThreeBodyDecayDilepton(ParticleTypePtr mother, ParticleTypePtrList part_types,
                          int l);
 
+  /**
+   * See DecayType::has_mother.
+   */
   bool has_mother(ParticleTypePtr mother) const override;
 
   /**

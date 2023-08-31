@@ -143,10 +143,7 @@ inline double em_form_factor_sqr_vec(PdgCode pdg, double mass) {
  *
  * Currently assumed to be constant, normalized at the real-photon point.
  */
-inline double form_factor_delta(double m) {
-  SMASH_UNUSED(m);
-  return 3.12;
-}
+inline double form_factor_delta([[maybe_unused]] double m) { return 3.12; }
 
 }  // namespace smash
 

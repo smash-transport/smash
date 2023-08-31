@@ -201,10 +201,10 @@ FourVector HyperSurfaceCrossActionsFinder::coordinates_on_hypersurface(
   // the latter is usually out of the t-interval we are looking at.
   const double sol1 = n * m / (1 - m * m) +
                       std::sqrt((1 - m * m) * tau * tau + n * n) / (1 - m * m);
-  const double sol2 = n * m / (1 - m * m) -
-                      std::sqrt((1 - m * m) * tau * tau + n * n) / (1 - m * m);
+  [[maybe_unused]] const double sol2 =  // only used in DEBUG output
+      n * m / (1 - m * m) -
+      std::sqrt((1 - m * m) * tau * tau + n * n) / (1 - m * m);
 
-  SMASH_UNUSED(sol2);  // only used in DEBUG output
   assert((sol1 >= t1 && sol1 <= t2));
   assert(!(sol2 >= t1 && sol2 <= t2));
 
