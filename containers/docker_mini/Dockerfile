@@ -3,12 +3,14 @@
 FROM ubuntu:22.04
 
 # Set bash as the default shell in this Dockerfile
+
 SHELL ["/bin/bash", "-c"]
 
 # Set the proper general cpu family architecture flag for the compiler,
 # in most cases either "x86-64" (for Intel/AMD cpus) or "arm64" (for ARM processors in Apple computers).
 # Please, note that, if you are not interested in the portability on other cpus, you can choose more specific flags
 # (e.g. "native" if you plan to run the container only on cpus like the one used for the the creation of its image).
+
 ARG TARGET_ARCHITECTURE="x86-64"
 
 # Add some info about authors and contents
@@ -19,6 +21,7 @@ LABEL description="Basic SMASH image (sources, compiler and bare executable, wit
 LABEL org.opencontainers.image.source https://github.com/smash-transport/smash
 
 # Install minimal set of requirements
+
 RUN apt-get update && \
 apt-get -y upgrade && \
 DEBIAN_FRONTEND=noninteractive apt-get -y install \
@@ -33,17 +36,21 @@ wget \
 vim
 
 # Set generic optimization, architecture and desired version of C++-standard flags for compilation using makefiles.
+
 ARG CPPFLAGS="-O3 -march=${TARGET_ARCHITECTURE} --std=c++17"
 ARG CXXFLAGS=${CPPFLAGS}
 ARG CFLAGS="-O3 -march=${TARGET_ARCHITECTURE}"
 
 # Create main project directory
+
 WORKDIR /SMASH
 
 # Create directory for mounting filesystems
+
 RUN mkdir /MNT
 
 # Install pythia
+
 ARG pythiaV="8310"
 ENV PYTHIA8=/SMASH/pythia_install/
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
@@ -61,6 +68,7 @@ ENV LD_LIBRARY_PATH=$PYTHIA_LIBRARY:$LD_LIBRARY_PATH
 ENV PATH=$PYTHIA8/bin:$PATH
 
 # Get and build public SMASH
+
 RUN cd /SMASH && git clone https://github.com/smash-transport/smash.git && \
 mkdir -p smash/build && \
 mkdir -p smash_bin && \

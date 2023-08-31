@@ -307,6 +307,7 @@ RUN echo $INSTALL_PREFIX/lib >> /etc/ld.so.conf && ldconfig
 
 # The python version must be updated together with the underlying linux distribution.
 # Unfortunately something like $(python3 -V | cut -d " " -f 2) does not work in an ENV statement.
+
 ENV PYTHONPATH="$INSTALL_PREFIX/lib/python3.8.10/site-packages:$PYTHONPATH"
 ENV TEXMFHOME="$INSTALL_PREFIX/share/Rivet/texmf:$TEXMFHOME"
 ENV HOMETEXMF="$INSTALL_PREFIX/share/Rivet/texmf:$HOMETEXMF"
@@ -368,10 +369,12 @@ ENV LANG en=US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 
 # We set a symbolic link to clang-format-13 and clang-tidy-13 to make them usable from the SMASH formatting script
+
 RUN ln -s /usr/bin/clang-format-13 /usr/bin/clang-format &&\
 ln -s /usr/bin/clang-tidy-13 /usr/bin/clang-tidy
 
 # we install cmake-format
+
 RUN pip install cmakelang
 
 # Shell prompt when using the container image under Docker.
