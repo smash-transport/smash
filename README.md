@@ -59,6 +59,8 @@ cd build
 cmake -DPythia_CONFIG_EXECUTABLE=/path/to/pythia8310/bin/pythia8-config ..
 make
 ```
+Please note that the `make` command builds everything (executables, tests and libraries) and might take a while.
+You can use `make smash` if you are interest in the SMASH executable only or use `make smash_shared` to exclusively build the libraries (needed e.g. in another project using SMASH as library).
 
 You can run SMASH with specific settings (e.g. at a given collision energy or impact parameter) by modifying the config.yaml file, for example with
 ```console
