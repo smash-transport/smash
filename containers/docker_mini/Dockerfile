@@ -5,6 +5,12 @@ FROM ubuntu:22.04
 # Set bash as the default shell in this Dockerfile
 SHELL ["/bin/bash", "-c"]
 
+# Set the proper general cpu family architecture flag for the compiler,
+# in most cases either "x86-64" (for Intel/AMD cpus) or "arm64" (for ARM processors in Apple computers).
+# Please, note that, if you are not interested in the portability on other cpus, you can choose more specific flags
+# (e.g. "native" if you plan to run the container only on cpus like the one used for the the creation of its image).
+ARG TARGET_ARCHITECTURE="x86-64"
+
 # Add some info about authors and contents
 
 LABEL maintainer.name="SMASH team"
@@ -26,6 +32,11 @@ rsync \
 wget \
 vim
 
+# Set generic optimization, architecture and desired version of C++-standard flags for compilation using makefiles.
+ARG CPPFLAGS="-O3 -march=${TARGET_ARCHITECTURE} --std=c++17"
+ARG CXXFLAGS=${CPPFLAGS}
+ARG CFLAGS="-O3 -march=${TARGET_ARCHITECTURE}"
+
 # Create main project directory
 WORKDIR /SMASH
 
@@ -38,7 +49,7 @@ ENV PYTHIA8=/SMASH/pythia_install/
 RUN wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz && \
 tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz && \
 cd pythia${pythiaV} && \
-./configure --cxx-common='-std=c++17 -O3 -fPIC -march=x86-64 -pthread' --prefix=${PYTHIA8} && \
+./configure --cxx-common="${CPPFLAGS} -fPIC -pthread" --prefix=${PYTHIA8} && \
 make -j$(nproc) && \
 make install && \
 echo ${PYTHIA8}/lib >> /etc/ld.so.conf && ldconfig
@@ -54,7 +65,7 @@ RUN cd /SMASH && git clone https://github.com/smash-transport/smash.git && \
 mkdir -p smash/build && \
 mkdir -p smash_bin && \
 cd smash/build && \
-cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${pythiaV}/bin/pythia8-config -DCMAKE_C_FLAGS="-march=x86-64" -DCMAKE_CXX_FLAGS="-march=x86-64" \
+cmake .. -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${pythiaV}/bin/pythia8-config -DCMAKE_C_FLAGS=${CFLAGS} -DCMAKE_CXX_FLAGS=${CXXFLAGS} \
 || echo "cmake SMASH build configuration failed!"
 RUN cd /SMASH/smash/build && make smash -j$(nproc) || echo "make SMASH compilation failed!"
 RUN <<EOF
