@@ -162,6 +162,9 @@ class TwoBodyDecayStable : public TwoBodyDecay {
                   double m2) const override;
 
  protected:
+  /**
+   * See TwoBodyDecay::rho.
+   */
   double rho(double m) const override;
 };
 
@@ -205,6 +208,9 @@ class TwoBodyDecaySemistable : public TwoBodyDecay {
                   double m2) const override;
 
  protected:
+  /**
+   * See TwoBodyDecay::rho.
+   */
   double rho(double m) const override;
 
   /**
@@ -247,6 +253,9 @@ class TwoBodyDecayUnstable : public TwoBodyDecay {
                   double m2) const override;
 
  protected:
+  /**
+   * See TwoBodyDecay::rho.
+   */
   double rho(double m) const override;
   /**
    * \return the cut-off parameter Λ for unstable decays,
@@ -318,6 +327,9 @@ class ThreeBodyDecayDilepton : public ThreeBodyDecay {
   ThreeBodyDecayDilepton(ParticleTypePtr mother, ParticleTypePtrList part_types,
                          int l);
 
+  /**
+   * See DecayType::has_mother.
+   */
   bool has_mother(ParticleTypePtr mother) const override;
 
   /**
