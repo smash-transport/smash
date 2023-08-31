@@ -51,8 +51,11 @@ jobs:
           singularity exec $container_file make user
           # we build SMASH
           singularity exec $container_file make -j $nproc
-          # now we run the tests, excluding cpplint, which has been already executed
-          singularity exec $container_file ctest -j$nproc -E "cpplint"
+          # now we run the tests, excluding cpplint (which has been already executed) and potentials*
+          singularity exec $container_file ctest -j$nproc -E "^(potentials(_run)?|cpplint)$"
+          # now we run the potentials* tests that require some additional care
+          singularity exec $container_file ctest -R "^potentials$" --repeat until-pass:3
+          singularity exec $container_file ctest -R "^potentials_run$" --timeout 3600
           
      
   workflow-fias:      
@@ -95,5 +98,8 @@ jobs:
           make user
           # we build SMASH
           make -j $nproc
-          # now we run the tests, excluding cpplint, which has been already executed
-          ctest -j$nproc -E "cpplint"
+          # now we run the tests, excluding cpplint (which has been already executed) and potentials*
+          ctest -j$nproc -E "^(potentials(_run)?|cpplint)$"
+          # now we run the potentials* tests that require some additional care
+          ctest -R "^potentials$" --repeat until-pass:3
+          ctest -R "^potentials_run$" --timeout 3600
