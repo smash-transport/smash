@@ -19,7 +19,7 @@ ARG TARGET_ARCHITECTURE="x86-64"
 
 LABEL maintainer.name="SMASH team"
 LABEL maintainer.website="https://smash-transport.github.io"
-LABEL description="SMASH with ROOT 6.26.10, HepMC3 3.2.6, Rivet, 3.1.7 and several other tools"
+LABEL description="SMASH with ROOT 6.28.06, HepMC3 3.2.6, Rivet, 3.1.7 and several other tools"
 LABEL org.opencontainers.image.source https://github.com/smash-transport/smash
 
 # Install the packages non interactively.
@@ -196,7 +196,7 @@ ARG CXXFLAGS=${CPPFLAGS}
 
 # Install ROOT.
 
-ARG rootV="6.26.10"
+ARG rootV="6.28.06"
 
 RUN cd /SMASH && \
 wget https://root.cern/download/root_v${rootV}.source.tar.gz && \
@@ -316,13 +316,12 @@ ENV LATEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$LATEXINPUTS"
 
 # Install julia.
 
-ARG julia_majV="1.8"
-ARG julia_minV="5"
+ARG juliaV="1.9.3"
 
 RUN cd /opt &&\
-wget https://github.com/JuliaLang/julia/releases/download/v${julia_majV}.${julia_minV}/julia-${julia_majV}.${julia_minV}.tar.gz &&\
-tar xf julia-${julia_majV}.${julia_minV}.tar.gz && cd julia-${julia_majV}.${julia_minV} && make -j$(nproc)
-ARG julia_path=/opt/julia-${julia_majV}.${julia_minV}
+wget https://github.com/JuliaLang/julia/releases/download/v${juliaV}/julia-${juliaV}.tar.gz &&\
+tar xf julia-${juliaV}.tar.gz && cd julia-${juliaV} && make -j$(nproc)
+ARG julia_path=/opt/julia-${juliaV}
 ENV PATH=${julia_path}:$PATH
 
 # Recompile SMASH (if the repository exists).
