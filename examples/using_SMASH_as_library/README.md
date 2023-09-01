@@ -4,7 +4,8 @@ This is an example, how to set up a project using SMASH as a library. The exampl
 ## Prequisites
 
 This example assumes that SMASH is installed and compiled, therefore, all the libraries it needs are already there.
-
+In particular, you can use `make smash_shared` from SMASH build folder to compile SMASH as library.
+Such a command will also create those libraries on which SMASH depends.
 
 ## Creating the project
 
