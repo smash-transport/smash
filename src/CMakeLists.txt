@@ -19,12 +19,13 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
     )
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set(CMAKE_CXX_FLAGS
-            "${CMAKE_CXX_FLAGS} -Wlogical-op -Wnull-dereference -Wduplicated-cond -Wrestrict -Wduplicated-branches"
+            "${CMAKE_CXX_FLAGS} -Wlogical-op -Wnull-dereference -Wduplicated-cond -Wrestrict -Wduplicated-branches -Wsuggest-override"
         )
         # Needed for workaround about C++17 compatibility (bug in some GNU versions)
         add_compile_definitions(GCC_COMPILER)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-braces")
+        set(CMAKE_CXX_FLAGS
+            "${CMAKE_CXX_FLAGS} -Wno-missing-braces -Winconsistent-missing-override")
         if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "14")
             # Use of contracted mathematical expression like FMA (if the hardware supports them) are
             # controlled by a flag whose default unfortunately varies among compilers and versions

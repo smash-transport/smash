@@ -32,9 +32,9 @@ class ThermalizationAction : public Action {
   ThermalizationAction(const GrandCanThermalizer& gct,
                        double absolute_labframe_time);
   /// No need to do anything, because outgoing particles are set in constructor
-  void generate_final_state() {}
-  double get_total_weight() const { return 0.0; }
-  double get_partial_weight() const { return 0.0; }
+  void generate_final_state() override {}
+  double get_total_weight() const override { return 0.0; }
+  double get_partial_weight() const override { return 0.0; }
   /// This method checks, if there are particles in the region to be thermalized
   bool any_particles_thermalized() const {
     return (incoming_particles_.size() > 0);
@@ -44,7 +44,7 @@ class ThermalizationAction : public Action {
    * thermalization action
    * \param[in] out Location of the output stream
    */
-  void format_debug_output(std::ostream& out) const {
+  void format_debug_output(std::ostream& out) const override {
     out << " Thermalization action of " << incoming_particles_.size() << " to "
         << outgoing_particles_.size() << " particles.";
   }
