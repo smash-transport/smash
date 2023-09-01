@@ -10,10 +10,8 @@ FROM ghcr.io/smash-transport/smash:newest
 
 SHELL ["/bin/bash", "-c"]
 
-# Set the proper general cpu family architecture flag for the compiler,
-# in most cases either "x86-64" (for Intel/AMD cpus) or "arm64" (for ARM processors in Apple computers).
-# Please, note that, if you are not interested in the portability on other cpus, you can choose a more specific flag
-# (e.g. "native" if you plan to run the container only on cpus like the one used for the the creation of its image).
+# Set the proper general cpu family architecture flag.
+# Please, for more information refer to the documention of your compiler.
 
 ARG TARGET_ARCHITECTURE="x86-64"
 
@@ -189,10 +187,11 @@ xz-utils  \
 zenity  \
 zip 
 
-# Set the compiler flags for generic optimization, cpu architecture and version of the C++ standard.
+# Set cpu architecture flags for compilation
+# ARG sets these flags as temporary environment variables that are used by cmake and by other tools
 
 ARG CFLAGS="-O3 -march=${TARGET_ARCHITECTURE}"
-ARG CPPFLAGS="${CFLAGS} --std=c++17"
+ARG CPPFLAGS="${CFLAGS} -std=c++17"
 ARG CXXFLAGS=${CPPFLAGS}
 
 # Install ROOT.
@@ -321,9 +320,9 @@ ARG julia_majV="1.8"
 ARG julia_minV="5"
 
 RUN cd /opt &&\
-wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_majV}/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz &&\
-tar xf julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
-ARG julia_path=/opt/julia-${julia_majV}.${julia_minV}/bin
+wget https://github.com/JuliaLang/julia/releases/download/v${julia_majV}.${julia_minV}/julia-${julia_majV}.${julia_minV}.tar.gz &&\
+tar xf julia-${julia_majV}.${julia_minV}.tar.gz && cd julia-${julia_majV}.${julia_minV} && make -j$(nproc)
+ARG julia_path=/opt/julia-${julia_majV}.${julia_minV}
 ENV PATH=${julia_path}:$PATH
 
 # Recompile SMASH (if the repository exists).
@@ -355,8 +354,7 @@ ENV SMASH_BUILD_DIR=/SMASH/smash_bin
 
 RUN cd /SMASH && \
 rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build pythia${pythiaV} gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz \
-cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb \
-/opt/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
+cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb
 
 # Allow Imagemagick to process PS, EPS and PDF files in case the user needs to use `convert` inside the container
 
