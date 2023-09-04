@@ -87,6 +87,7 @@ libpcre3-dev \
 libpcre++-dev  \
 libpng-dev  \
 libpng-tools  \
+libssl-dev  \
 libtool  \
 libx11-dev  \
 libxext-dev \
