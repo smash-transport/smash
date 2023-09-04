@@ -105,15 +105,16 @@ pre-installed and
 Note that running SMASH inside of a Docker container might negatively affect performance.
 More information about containers usage can be found [here](containers/README.md).
 
-#### Note for Apple users with ARM cpus (e.g. M1/M2 chips)
+#### Note for users with ARM CPUs (e.g. Apple M1/M2 chips)
 
-Our Docker images are prepared for the x86-64 cpu architecture,
-to make them compatible with Apple computers with ARM cpus (like in the case of M1 and M2 chips),
+Our Docker images are prepared for the x86-64 CPU architecture.
+To make them compatible with computers with ARM CPUs (like in the case of Apple M1 and M2 chips),
 `docker` must be launched with the `--platform=linux/amd64` option.
 For example:
 ```console
 docker run --platform=linux/amd64 -it ghcr.io/smash-transport/smash:newest
 ```
+However, this is not always guaranteed to work and it might be necessary to build an image for the ARM architecture, as described [here](containers/README.md).
 
 ## Running SMASH with Example Input Files
 
