@@ -344,7 +344,7 @@ ENV SMASH_BUILD_DIR=/SMASH/smash_bin
 # Remove most of the sources.
 
 RUN cd /SMASH && \
-rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build pythia${pythiaV} gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz \
+rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz \
 cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb \
 /opt/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
 
