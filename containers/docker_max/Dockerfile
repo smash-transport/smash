@@ -95,6 +95,7 @@ libpcre3-dev \
 libpcre++-dev  \
 libpng-dev  \
 libpng-tools  \
+libssl-dev  \
 libtool  \
 libx11-dev  \
 libxext-dev \
@@ -352,8 +353,8 @@ ENV SMASH_BUILD_DIR=/SMASH/smash_bin
 # Remove most of the sources.
 
 RUN cd /SMASH && \
-rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build pythia${pythiaV} gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz \
-cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb
+rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz \
+cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb 
 
 # Allow Imagemagick to process PS, EPS and PDF files in case the user needs to use `convert` inside the container
 

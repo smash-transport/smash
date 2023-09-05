@@ -12,11 +12,18 @@ Assuming that Docker is already installed, one can also build images locally by 
 docker buildx build -f Dockerfile .
 ```
 in a terminal, in the same directory of _Dockerfile_.
+Our images offer the possibility to choose the architecture to target at compilation time in the following way:
+```console
+docker buildx build -f Dockerfile --build-arg="TARGET_ARCHITECTURE=x86-64" .
+```
+Of course, `x86-64` can be changed using any general cpu family architecture flag.
 
-#### Note for Apple users with ARM cpus (e.g. M1/M2 chips)
+The option `-t <tag_name>` can be added to assign the `<tag_name>` tag to the built image.
 
-Our Docker images are prepared for the x86-64 cpu architecture,
-to make them compatible with Apple computers with ARM cpus (like in the case of M1 and M2 chips),
+#### Note for users with ARM CPUs (e.g. Apple M1/M2 chips)
+
+Our Docker images are by default prepared for the x86-64 CPU architecture.
+To make them compatible with computers with ARM CPUs (like in the case of Apple M1 and M2 chips),
 `docker` must be launched with the `--platform=linux/amd64` option.
 For example
 ```console
@@ -26,6 +33,18 @@ becomes
 ```console
 docker buildx build --platform=linux/amd64 -f Dockerfile .
 ```
+However, in this way, roughly speaking, Docker adds a layer of virtualization and an image for an x86-64 machine is built (and potentially run with the same option) e.g. from an arm64 one.
+This can lead to problems and it is not guaranteed to work, though.
+
+If you plan to use the image on ARM CPUs **only**, then you do not need to add any further virtualization layer.
+Instead, you can use the `--build-arg` option of the `docker` command to target your architecture at compilation time and build the image from and for your ARM CPU.
+For instance
+```console
+docker buildx build -f Dockerfile --build-arg="TARGET_ARCHITECTURE=native" .
+```
+will optimize the image for the architecture of the machine on which the image itself is built.
+
+**NOTE:** To build the "max" SMASH image on your ARM machine, you need to first build the "min" one and specify it in the `FROM` command at the beginning of the "max" image Dockerfile, using there the tag name used to tag the "min" image.
 
 #### Docker in a nutshell
 
