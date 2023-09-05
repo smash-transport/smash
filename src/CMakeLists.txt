@@ -382,9 +382,11 @@ if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
+# Since at the top level the dependency of the install target on all target was disabled, it is
+# needed to now build the smash library and exectuable target here before installing them
+install(CODE "execute_process(COMMAND cmake --build ${PROJECT_BINARY_DIR} -t smash_shared smash)")
 install(TARGETS smash_shared LIBRARY DESTINATION lib)
 install(TARGETS smash RUNTIME DESTINATION bin)
-
 install(DIRECTORY include/smash DESTINATION include)
 install(FILES ${generated_headers} DESTINATION include/smash)
 install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" DESTINATION include)
