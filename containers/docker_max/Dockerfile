@@ -1,5 +1,8 @@
 # syntax=docker/dockerfile:1.4
-# Import the base smash container.
+
+# Import the base smash Docker container image.
+# Adjust the address as needed. In particular, be sure to use a base image compatible with your cpu.
+# The official Docker images are prepared for a generic Intel/AMD x86-64 cpu.
 
 FROM ghcr.io/smash-transport/smash:newest
 
@@ -7,11 +10,16 @@ FROM ghcr.io/smash-transport/smash:newest
 
 SHELL ["/bin/bash", "-c"]
 
+# Set the proper general cpu family architecture flag.
+# Please, for more information refer to the documention of your compiler.
+
+ARG TARGET_ARCHITECTURE="x86-64"
+
 # Add some info about authors and contents.
 
 LABEL maintainer.name="SMASH team"
 LABEL maintainer.website="https://smash-transport.github.io"
-LABEL description="SMASH with ROOT 6.26.10, HepMC3 3.2.6, Rivet, 3.1.7 and several other tools"
+LABEL description="SMASH with ROOT 6.28.06, HepMC3 3.2.6, Rivet, 3.1.7 and several other tools"
 LABEL org.opencontainers.image.source https://github.com/smash-transport/smash
 
 # Install the packages non interactively.
@@ -180,15 +188,16 @@ xz-utils  \
 zenity  \
 zip 
 
-# Set generic x86-64 architecture optimization flags for compilation using makefiles.
+# Set cpu architecture flags for compilation
+# ARG sets these flags as temporary environment variables that are used by cmake and by other tools
 
-ARG CPPFLAGS="-O3 -march=x86-64 --std=c++17"
+ARG CFLAGS="-O3 -march=${TARGET_ARCHITECTURE}"
+ARG CPPFLAGS="${CFLAGS} -std=c++17"
 ARG CXXFLAGS=${CPPFLAGS}
-ARG CFLAGS="-O3 -march=x86-64"
 
 # Install ROOT.
 
-ARG rootV="6.26.10"
+ARG rootV="6.28.06"
 
 RUN cd /SMASH && \
 wget https://root.cern/download/root_v${rootV}.source.tar.gz && \
@@ -298,6 +307,7 @@ RUN echo $INSTALL_PREFIX/lib >> /etc/ld.so.conf && ldconfig
 
 # The python version must be updated together with the underlying linux distribution.
 # Unfortunately something like $(python3 -V | cut -d " " -f 2) does not work in an ENV statement.
+
 ENV PYTHONPATH="$INSTALL_PREFIX/lib/python3.8.10/site-packages:$PYTHONPATH"
 ENV TEXMFHOME="$INSTALL_PREFIX/share/Rivet/texmf:$TEXMFHOME"
 ENV HOMETEXMF="$INSTALL_PREFIX/share/Rivet/texmf:$HOMETEXMF"
@@ -307,13 +317,12 @@ ENV LATEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$LATEXINPUTS"
 
 # Install julia.
 
-ARG julia_majV="1.8"
-ARG julia_minV="5"
+ARG juliaV="1.9.3"
 
 RUN cd /opt &&\
-wget https://julialang-s3.julialang.org/bin/linux/x64/${julia_majV}/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz &&\
-tar xf julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
-ARG julia_path=/opt/julia-${julia_majV}.${julia_minV}/bin
+wget https://github.com/JuliaLang/julia/releases/download/v${juliaV}/julia-${juliaV}.tar.gz &&\
+tar xf julia-${juliaV}.tar.gz && cd julia-${juliaV} && make -j$(nproc)
+ARG julia_path=/opt/julia-${juliaV}
 ENV PATH=${julia_path}:$PATH
 
 # Recompile SMASH (if the repository exists).
@@ -345,8 +354,7 @@ ENV SMASH_BUILD_DIR=/SMASH/smash_bin
 
 RUN cd /SMASH && \
 rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz \
-cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb \
-/opt/julia-${julia_majV}.${julia_minV}-linux-x86_64.tar.gz
+cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb 
 
 # Allow Imagemagick to process PS, EPS and PDF files in case the user needs to use `convert` inside the container
 
@@ -359,10 +367,12 @@ ENV LANG en=US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 
 # We set a symbolic link to clang-format-13 and clang-tidy-13 to make them usable from the SMASH formatting script
+
 RUN ln -s /usr/bin/clang-format-13 /usr/bin/clang-format &&\
 ln -s /usr/bin/clang-tidy-13 /usr/bin/clang-tidy
 
 # we install cmake-format
+
 RUN pip install cmakelang
 
 # Shell prompt when using the container image under Docker.
