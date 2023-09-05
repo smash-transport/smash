@@ -63,8 +63,8 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
 
 Potentials::~Potentials() {}
 
-double Potentials::skyrme_pot_impl(const double baryon_density, const double A,
-                                   const double B, const double tau) {
+double Potentials::skyrme_pot(const double baryon_density, const double A,
+                              const double B, const double tau) {
   const double tmp = baryon_density / nuclear_density;
   /* U = U(|rho|) * sgn , because the sign of the potential changes
    * under a charge reversal transformation. */

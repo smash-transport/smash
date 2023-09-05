@@ -51,52 +51,52 @@ class Potentials {
   virtual ~Potentials();
 
   /**
-   * Calculates the gradient of the energy including potentials in the
-   * calculation frame in MeV/fm
+   * Calculates the gradient of the single-particle energy including potentials
+   * in the calculation frame in MeV/fm
    *
-   * \param jB_lat Pointer to the baryon density lattice
-   * \param pos Position of the particle of interest in fm
-   * \param mom Momentum of the particle of interest in GeV
+   * \param jB_lattice Pointer to the baryon density lattice
+   * \param position Position of the particle of interest in fm
+   * \param momentum Momentum of the particle of interest in GeV
    * \param mass Mass of the particle of interest in GeV
    * \param plist List of all particles
    * \return ThreeVector gradient of the single particle energy in the
    * calculation frame in MeV/fm
    */
-  ThreeVector energy_gradient(DensityLattice *jB_lat, const ThreeVector &pos,
-                              const ThreeVector &mom, double mass,
-                              ParticleList &plist) const {
-    std::array<double, 3> dr;
-    if (jB_lat) {
-      dr = jB_lat->cell_sizes();
-    } else {
-      dr = {0.1, 0.1, 0.1};
-    }
-    ThreeVector result, pos_left, pos_right;
+  ThreeVector single_particle_energy_gradient(DensityLattice *jB_lattice,
+                                              const ThreeVector &position,
+                                              const ThreeVector &momentum,
+                                              double mass,
+                                              ParticleList &plist) const {
+    const std::array<double, 3> dr = (jB_lattice)
+                                         ? jB_lattice->cell_sizes()
+                                         : std::array<double, 3>{0.1, 0.1, 0.1};
+    ThreeVector result, position_left, position_right;
     DensityOnLattice jmu_left, jmu_right;
     FourVector net_4current_left, net_4current_right;
     for (int i = 0; i < 3; i++) {
-      pos_left = pos;
-      pos_left[i] -= dr[i];
-      pos_right = pos;
-      pos_right[i] += dr[i];
+      position_left = position;
+      position_left[i] -= dr[i];
+      position_right = position;
+      position_right[i] += dr[i];
 
-      if (jB_lat && jB_lat->value_at(pos_left, jmu_left)) {
+      if (jB_lattice && jB_lattice->value_at(position_left, jmu_left)) {
         net_4current_left = jmu_left.jmu_net();
       } else {
-        auto current = current_eckart(pos_left, plist, param_,
+        auto current = current_eckart(position_left, plist, param_,
                                       DensityType::Baryon, false, true);
         net_4current_left = std::get<1>(current);
       }
-      if (jB_lat && jB_lat->value_at(pos_right, jmu_right)) {
+      if (jB_lattice && jB_lattice->value_at(position_right, jmu_right)) {
         net_4current_right = jmu_right.jmu_net();
       } else {
-        auto current = current_eckart(pos_right, plist, param_,
+        auto current = current_eckart(position_right, plist, param_,
                                       DensityType::Baryon, false, true);
         net_4current_right = std::get<1>(current);
       }
-      result[i] = (calculation_frame_energy(mom, net_4current_right, mass) -
-                   calculation_frame_energy(mom, net_4current_left, mass)) /
-                  (2 * dr[i]);
+      result[i] =
+          (calculation_frame_energy(momentum, net_4current_right, mass) -
+           calculation_frame_energy(momentum, net_4current_left, mass)) /
+          (2 * dr[i]);
     }
     return result;
   }
@@ -105,92 +105,32 @@ class Potentials {
    * Evaluates the single-particle energy of a particle at a given position
    * and momentum including the potential in the calculation frame
    *
-   * \param[in] mom Momentum of interest in GeV
+   * \param[in] momentum Momentum of interest in GeV
    * \param[in] jmu_B Baryon current density at pos
    * \param[in] mass mass of the particle of interest
    * \return the energy of a particle in the calculation frame
    **/
-  double calculation_frame_energy(ThreeVector mom, FourVector jmu_B,
-                                  double mass) const {
-    std::function<double(double)> root_equation = [mom, jmu_B, mass,
+  double calculation_frame_energy(const ThreeVector &momentum,
+                                  const FourVector &jmu_B, double mass) const {
+    std::function<double(double)> root_equation = [momentum, jmu_B, mass,
                                                    this](double energy) {
-      return root_eq_potentials(energy, mom, jmu_B, mass, skyrme_a_, skyrme_b_,
-                                skyrme_tau_, mom_dependence_C_,
+      return root_eq_potentials(energy, momentum, jmu_B, mass, skyrme_a_,
+                                skyrme_b_, skyrme_tau_, mom_dependence_C_,
                                 mom_dependence_Lambda_);
     };
     auto rootsolver = RootSolver1D(root_equation);
-    std::array<double, 4> starting_interval_width = {0.1, 1.0, 10.0, 100.0};
+    const std::array<double, 4> starting_interval_width = {0.1, 1.0, 10.0,
+                                                           100.0};
     for (double width : starting_interval_width) {
-      double initial_guess = std::sqrt(mass * mass + mom * mom);
-      double calc_frame_energy = 0.0;
-      bool root_found = rootsolver.try_find_root(initial_guess - width / 2,
-                                                 initial_guess + width / 2,
-                                                 100000, calc_frame_energy);
-      if (root_found) {
-        return calc_frame_energy;
+      const double initial_guess = std::sqrt(mass * mass + momentum * momentum);
+      auto calc_frame_energy = rootsolver.try_find_root(
+          initial_guess - width / 2, initial_guess + width / 2, 100000);
+      if (calc_frame_energy) {
+        return *calc_frame_energy;
       }
     }
     throw std::runtime_error(
         "Failed to find root for momentum-dependent potentials");
-    return 0.0;
-  }
-
-  /**
-   * Difference of the effective mass squared in calculation frame and rest
-   * frame
-   *
-   * Should be zero due to Lorentz invariance but a root finder is required to
-   * determine the energy such that this is indeed the case
-   *
-   * \return effective mass squared in calculation frame minus effective mass in
-   * rest_frame in GeV^2
-   */
-
-  static double root_eq_potentials(const double energy_calc,
-                                   ThreeVector mom_calc, FourVector jmu,
-                                   double m, double A, double B, double tau,
-                                   double C, double Lambda) {
-    // get velocity for boost to the local rest frame
-    double rho_LRF = jmu.abs();
-    ThreeVector beta_LRF = rho_LRF > really_small ? jmu.threevec() / jmu.x0()
-                                                  : ThreeVector(0, 0, 0);
-    // get momentum in the local rest frame
-    FourVector pmu_calc = FourVector(energy_calc, mom_calc);
-    FourVector pmu_LRF = pmu_calc.lorentz_boost(beta_LRF);
-    // double energy_LRF_guess = pmu_LRF.x0();
-    double p_LRF = pmu_LRF.threevec().abs();
-    double energy_LRF = sqrt(m * m + p_LRF * p_LRF) +
-                        skyrme_pot_impl(rho_LRF, A, B, tau) +
-                        momentum_dependent_part(p_LRF, rho_LRF, C, Lambda);
-    return energy_calc * energy_calc - mom_calc.sqr() -
-           (energy_LRF * energy_LRF - p_LRF * p_LRF);
-  }
-
-  /**
-   * Momentum dependent part of the potential
-   *
-   * To be added to the momentum independent part.
-   *
-   * \return momentum dependent part of the potential in GeV
-   */
-  static double momentum_dependent_part(double mom, double rho, double C,
-                                        double Lambda) {
-    int g = 4;  // degeneracy factor
-    double fermi_momentum = std::cbrt(6. * M_PI * M_PI * rho / g);  // in 1/fm
-    mom = mom / hbarc;  // convert to 1/fm
-    double temp1 = 2 * g * C * M_PI * std::pow(Lambda, 3) /
-                   (std::pow(2 * M_PI, 3) * nuclear_density);
-    double temp2 =
-        (fermi_momentum * fermi_momentum + Lambda * Lambda - mom * mom) /
-        (2 * mom * Lambda);
-    double temp3 = std::pow(mom + fermi_momentum, 2) + Lambda * Lambda;
-    double temp4 = std::pow(mom - fermi_momentum, 2) + Lambda * Lambda;
-    double temp5 = 2 * fermi_momentum / Lambda;
-    double temp6 = (mom + fermi_momentum) / Lambda;
-    double temp7 = (mom - fermi_momentum) / Lambda;
-    double result = temp1 * (temp2 * std::log(temp3 / temp4) + temp5 -
-                             2 * (std::atan(temp6) - atan(temp7)));
-    return mev_to_gev * result;
   }
 
   /**
@@ -202,20 +142,8 @@ class Potentials {
    *         (A\frac{\rho}{\rho_0}+B(\frac{\rho}{\rho_0})^\tau)\f] in GeV
    */
   double skyrme_pot(const double baryon_density) const {
-    return skyrme_pot_impl(baryon_density, skyrme_a_, skyrme_b_, skyrme_tau_);
+    return skyrme_pot(baryon_density, skyrme_a_, skyrme_b_, skyrme_tau_);
   }
-
-  /**
-   * Single particle Skyrme potential in MeV
-   *
-   * \param baryon_density net baryon density in the local rest-frame in 1/fm^3
-   * \param A Skyrme parameter A in MeV
-   * \param B Skyrme parameter B in MeV
-   * \param tau Skyrme parameter tau
-   * \return Single particle Skyrme potential in MeV
-   */
-  static double skyrme_pot_impl(const double baryon_density, const double A,
-                                const double B, const double tau);
 
   /**
    * Evaluates symmetry potential given baryon isospin density.
@@ -637,6 +565,93 @@ class Potentials {
    *         net baryon density.
    */
   double dVsym_drhoB(const double rhoB, const double rhoI3) const;
+
+  /**
+   * Single particle Skyrme potential in MeV
+   *
+   * \param baryon_density net baryon density in the local rest-frame in 1/fm^3
+   * \param A Skyrme parameter A in MeV
+   * \param B Skyrme parameter B in MeV
+   * \param tau Skyrme parameter tau
+   * \return Single particle Skyrme potential in MeV
+   */
+  static double skyrme_pot(const double baryon_density, const double A,
+                           const double B, const double tau);
+
+  /**
+   * Root equation used to determine the energy in the calculation frame
+   *
+   * It is the difference between energy (including potential) squared minus
+   * momentum squared in the calculation frame and in the local rest-frame The
+   * equation should be zero due to Lorentz invariance but a root finder is
+   * required to determine the energy such that this is indeed the case.
+   *
+   * \param[in] energy_calc Energy in the calculation frame at which the
+   * equation should be evaluated in GeV \param[in] momentum_calc Momentum of
+   * the particle in calculation frame of interest in GeV \param[in] jmu Baryon
+   * current fourvector at the position of the particle \param[in] m Mass of the
+   * particle of interest in GeV \param[in] A Skyrme parameter A in MeV
+   * \param[in] B Skyrme parameter B in MeV
+   * \param[in] tau Skyrme parameter tau
+   * \param[in] C Parameter C of the momentum dependent part of the potential in
+   * MeV \param[in] Lambda Parameter Lambda of the momentum-dependent part of
+   * the potential in 1/fm \return effective mass squared in calculation frame
+   * minus effective mass in rest_frame in GeV^2
+   */
+  static double root_eq_potentials(double energy_calc,
+                                   const ThreeVector &momentum_calc,
+                                   const FourVector &jmu, double m, double A,
+                                   double B, double tau, double C,
+                                   double Lambda) {
+    // get velocity for boost to the local rest frame
+    double rho_LRF = jmu.abs();
+    ThreeVector beta_LRF = rho_LRF > really_small ? jmu.threevec() / jmu.x0()
+                                                  : ThreeVector(0, 0, 0);
+    // get momentum in the local rest frame
+    FourVector pmu_calc = FourVector(energy_calc, momentum_calc);
+    FourVector pmu_LRF = pmu_calc.lorentz_boost(beta_LRF);
+    double p_LRF = pmu_LRF.threevec().abs();
+    double energy_LRF = std::sqrt(m * m + p_LRF * p_LRF) +
+                        skyrme_pot(rho_LRF, A, B, tau) +
+                        momentum_dependent_part(p_LRF, rho_LRF, C, Lambda);
+    return energy_calc * energy_calc - momentum_calc.sqr() -
+           (energy_LRF * energy_LRF - p_LRF * p_LRF);
+  }
+
+  /**
+   * Momentum dependent part of the potential
+   *
+   * To be added to the momentum independent part.
+   *
+   * \param[in] momentum Absolute momentum of the particle of interest in the
+   * local rest-frame in GeV \param[in] rho Baryon density in the Eckart frame
+   * in 1/fm^3 \param[in] C Parameter C of the momentum dependent part of the
+   * potential in MeV \param[in] Lambda Parameter Lambda of the
+   * momentum-dependent part of the potential in 1/fm \return momentum dependent
+   * part of the potential in GeV
+   */
+  static double momentum_dependent_part(double momentum, double rho, double C,
+                                        double Lambda) {
+    int g = 4;  // degeneracy factor
+    const double fermi_momentum =
+        std::cbrt(6. * M_PI * M_PI * rho / g);  // in 1/fm
+    momentum = momentum / hbarc;                // convert to 1/fm
+    const double temp1 = 2 * g * C * M_PI * std::pow(Lambda, 3) /
+                         (std::pow(2 * M_PI, 3) * nuclear_density);
+    const double temp2 = (fermi_momentum * fermi_momentum + Lambda * Lambda -
+                          momentum * momentum) /
+                         (2 * momentum * Lambda);
+    const double temp3 =
+        std::pow(momentum + fermi_momentum, 2) + Lambda * Lambda;
+    const double temp4 =
+        std::pow(momentum - fermi_momentum, 2) + Lambda * Lambda;
+    const double temp5 = 2 * fermi_momentum / Lambda;
+    const double temp6 = (momentum + fermi_momentum) / Lambda;
+    const double temp7 = (momentum - fermi_momentum) / Lambda;
+    const double result = temp1 * (temp2 * std::log(temp3 / temp4) + temp5 -
+                                   2 * (std::atan(temp6) - atan(temp7)));
+    return mev_to_gev * result;
+  }
 };
 
 }  // namespace smash

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2022
+ *    Copyright (c) 2014-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -126,12 +126,14 @@ DECLARE_LOGAREA(32, RootSolver);
  * This type collects all existing log areas so they will be created with the
  * correct log level automatically.
  */
-using AreaTuple = std::tuple<
-    Main, Experiment, Box, Collider, Sphere, Action, InputParser, ParticleType,
-    FindScatter, Clock, DecayModes, Resonances, ScatterAction, Distributions,
-    Propagation, Grid, List, Nucleus, Density, PauliBlocking, Tmn, Fpe, Lattice,
-    Pythia, GrandcanThermalizer, CrossSections, Output, HyperSurfaceCrossing,
-    InitialConditions, ScatterActionMulti, Configuration, Potentials>;
+using AreaTuple =
+    std::tuple<Main, Experiment, Box, Collider, Sphere, Action, InputParser,
+               ParticleType, FindScatter, Clock, DecayModes, Resonances,
+               ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
+               Density, PauliBlocking, Tmn, Fpe, Lattice, Pythia,
+               GrandcanThermalizer, CrossSections, Output, HyperSurfaceCrossing,
+               InitialConditions, ScatterActionMulti, Configuration, Potentials,
+               RootSolver>;
 }  // namespace LogArea
 
 /**

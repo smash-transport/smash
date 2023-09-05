@@ -158,7 +158,7 @@ void update_momenta(
       }
       ThreeVector Force;
       if (pot.use_mom_dependence()) {
-        ThreeVector energy_grad = pot.energy_gradient(
+        ThreeVector energy_grad = pot.single_particle_energy_gradient(
             jB_lat, data.position().threevec(), data.momentum().threevec(),
             data.effective_mass(), plist);
         Force = -energy_grad * scale.first;

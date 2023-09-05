@@ -741,8 +741,8 @@ class Key {
  * VDF potential) to include effects due to isospin. The Skyrme and Symmetry
  * potentials are semi-relativistic, while the VDF potential is fully
  * relativistic. A momentum-dependent term can be added to the Skyrme potential.
- * The additional term is not treated fully Lorentz-invariant. Visit the
- * following subpages for more information:
+ * The additional term is not treated in a fully Lorentz-invariant way. Visit
+ * the following subpages for more information:
  * - \ref doxypage_input_conf_pot_skyrme
  * - \ref doxypage_input_conf_pot_symmetry
  * - \ref doxypage_input_conf_pot_VDF
@@ -802,11 +802,13 @@ class Key {
          Powers: [1.7681391, 3.5293515, 5.4352788, 6.3809822]
          Coeffs: [-8.450948e+01, 3.843139e+01, -7.958557e+00, 1.552594e+00]
  \endverbatim
- * ### Configuring the momentum-depndent part
+ * ### Configuring the momentum-dependent part
  * The momentum-dependent term can be added to the Skyrme potential. In order
  * to activate it one has to specify the parameters C and Lambda in MeV and
- * 1/fm respctively. Note that the parameters from the momentum-dependent part
- * and the Skyrme potential need to match in order to reproduce nuclear ground
+ * 1/fm respectively in the "Momentum_Dependence" section under "Potentials".
+ * Note that the parameters from the momentum-dependent part
+ * and the Skyrme potential need to be consistent in order to reproduce nuclear
+ * ground
  * state properties. An example of a medium-stiff (K=290 MeV) equation of state
  * is given in the following.
  * \verbatim
@@ -930,18 +932,18 @@ class Key {
  *  \mathbf{p}')}{1+\left(\frac{\mathbf{p}-\mathbf{p}'}{\Lambda}\right)^2}
  * \f]
  * This shape of the potential is taken from \iref{Welke:1988zz}
- * and includes an integral in momentum. This integral is quite costly to
- * evaluate during runtime and one typically makes the assumption that
- * the distribution function takes the form of cold nuclear matter
- * \f$ f(\mathbf{r}, \mathbf{p}) = \Theta(p-p_F)\f$, where \f$ p_F \f$
- * is the Fermi momentum. Note that the Fermi momentum depends on the
- * density and therfore on the position in general. With this assumption
- * the integral has an analytic solution and can be evaluated relatively
- * quickly, making the potential viable to use in transport. \n
- * When choosing the parameters \f$ C \f$ and \f$ \Lambda\f$ it is important
- * to make sure that nuclear ground state properties are realistic. In
- * other words the momentum dependence parameters cannot be choosen
- * independently from the Skyrme parameters.
+ * and includes an integral over momentum. This integral is quite costly to
+ * evaluate during runtime and to reduce numerical cost, also following
+ * \iref{Welke:1988zz}, we make the assumption that the distribution function
+ * takes the form of cold nuclear matter \f$ f(\mathbf{r}, \mathbf{p}) =
+ * \Theta(p-p_F)\f$, where \f$ p_F \f$ is the Fermi momentum. Note that the
+ * Fermi momentum depends on the density and therefore on the position in
+ * general. With this assumption the integral has an analytic solution and can
+ * be evaluated relatively quickly, making the potential viable to use in
+ * transport. \n When choosing the parameters \f$ C \f$ and \f$ \Lambda\f$ it is
+ * important to make sure that nuclear ground state properties are realistic. In
+ * other words the momentum dependence parameters have to be constrained
+ * together with the Skyrme potential parameters.
  */
 
 /*!\Userguide
@@ -1608,7 +1610,7 @@ struct InputKeys {
    * \see_key{key_log_potentials_}
    */
   inline static const Key<einhard::LogLevel> log_potentials{
-      {"Logging", "Potentials"}, {"3.0"}};
+      {"Logging", "Potentials"}, {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1620,7 +1622,7 @@ struct InputKeys {
    * \see_key{key_log_rootsolver_}
    */
   inline static const Key<einhard::LogLevel> log_rootsolver{
-      {"Logging", "SootSolver"}, {"3.0"}};
+      {"Logging", "RootSolver"}, {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -4922,27 +4924,27 @@ struct InputKeys {
    * \page doxypage_input_conf_pot_momentum_dependence
    * \required_key{key_potentials_momentum_dependence_C,C,double}
    *
-   * Parameter C of the momentum-dependent part of the
+   * Parameter \f$ C \f$ of the momentum-dependent part of the
    * potential \unit{in MeV}.
    */
   /**
    * \see_key{key_potentials_momentum_dependence_C}
    */
   inline static const Key<double> potentials_momentum_dependence_C{
-      {"Potentials", "Momentum_Dependence", "C"}, {"3.0"}};
+      {"Potentials", "Momentum_Dependence", "C"}, {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_momentum_dependence
    * \required_key{key_potentials_momentum_dependence_Lambda,Lambda,double}
    *
-   * Parameter Lambda of the momentum-dependent part of the
+   * Parameter \f$ \Lambda \f$ of the momentum-dependent part of the
    * potential \unit{in 1/fm}.
    */
   /**
    * \see_key{key_potentials_momentum_dependence_Lambda}
    */
   inline static const Key<double> potentials_momentum_dependence_Lambda{
-      {"Potentials", "Momentum_Dependence", "Lambda"}, {"3.0"}};
+      {"Potentials", "Momentum_Dependence", "Lambda"}, {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -5156,9 +5158,11 @@ struct InputKeys {
       std::cref(log_nucleus),
       std::cref(log_particleType),
       std::cref(log_pauliBlocking),
+      std::cref(log_potentials),
       std::cref(log_propagation),
       std::cref(log_pythia),
       std::cref(log_resonances),
+      std::cref(log_rootsolver),
       std::cref(log_scatterAction),
       std::cref(log_scatterActionMulti),
       std::cref(log_tmn),

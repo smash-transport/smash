@@ -38,14 +38,6 @@ class RootSolver1D {
   }
 
   ~RootSolver1D() { root_eq_ = nullptr; }
-  /**
-   * The function of which a root should be found in the form that GSL expects
-   *
-   * \param[in] x Position on x-axis where the function should be evaluated
-   *
-   * \return Feedback whether the equation was evaluated successfully
-   */
-  static double gsl_func(const double x, void *) { return (*root_eq_)(x); }
 
   /**
    * Attempt to find a root in a given interval
@@ -53,14 +45,14 @@ class RootSolver1D {
    * \param[in] initial_guess_low Lower boundary of the interval
    * \param[in] initial_guess_high Higher boundary of the interval
    * \param[in] itermax maximum number of steps for root finding
-   * \param[out] root Root of the function if found successfully
-   * \return true if a root was successfully found
+   * \return the root if it was found
    */
-  bool try_find_root(double initial_guess_low, double initial_guess_high,
-                     size_t itermax, double &root) {
+  std::optional<double> try_find_root(double initial_guess_low,
+                                      double initial_guess_high,
+                                      size_t itermax) {
     // check if root is in the given interval
     if ((*root_eq_)(initial_guess_low) * (*root_eq_)(initial_guess_high) > 0) {
-      return false;
+      return std::nullopt;
     }
     gsl_function function_GSL = {&(gsl_func), nullptr};
     int status = GSL_CONTINUE;
@@ -80,13 +72,13 @@ class RootSolver1D {
       double xhigh = gsl_root_fsolver_x_upper(Root_finder_);
       status = gsl_root_test_interval(xlow, xhigh, 0, solution_precision_);
       if (status == GSL_SUCCESS) {
-        root = 0.5 * (xlow + xhigh);
+        double root = 0.5 * (xlow + xhigh);
         gsl_root_fsolver_free(Root_finder_);
-        return true;
+        return root;
       }
     } while (status == GSL_CONTINUE && iter < itermax);
     gsl_root_fsolver_free(Root_finder_);
-    return false;
+    return std::nullopt;
   }
 
  private:
@@ -94,7 +86,7 @@ class RootSolver1D {
   const gsl_root_fsolver_type *Solver_name_ = gsl_root_fsolver_brent;
 
   /// GSL root finding object to take care of root finding
-  gsl_root_fsolver *Root_finder_;
+  gsl_root_fsolver *Root_finder_ = nullptr;
 
   /// Static pointer to the function to solve
   static inline std::unique_ptr<std::function<double(double)>> root_eq_ =
@@ -102,6 +94,15 @@ class RootSolver1D {
 
   /// Expected precision of the root
   double solution_precision_ = 1e-7;
+
+  /**
+   * The function of which a root should be found in the form that GSL expects
+   *
+   * \param[in] x Position on x-axis where the function should be evaluated
+   *
+   * \return The value of the function at point x
+   */
+  static double gsl_func(const double x, void *) { return (*root_eq_)(x); }
 };
 
 }  // namespace smash

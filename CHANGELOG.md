@@ -21,6 +21,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## Unreleased
 
 ### Added
+* Added momentum-dependent part for the Skyrme potential
 * Option `Decay_Initial_Particles` which blocks the decay of resonances created at initialization
 
 ### Fixed
