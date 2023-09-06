@@ -10,11 +10,11 @@
 # Let 3rd-party library use their own C++ standard
 unset(CMAKE_CXX_STANDARD)
 
-message(STATUS "Setting up Cuba library")
+message(STATUS "Setting up Cuba library") # From v3.17 one should use message(CHECK_START ...)
 list(APPEND CMAKE_MESSAGE_INDENT "   ")
 add_subdirectory(Cuba-4.2.2)
 list(POP_BACK CMAKE_MESSAGE_INDENT)
-message(STATUS "Setting up Cuba library - done") # From v3.17 one should use message(CHECK_START ...)
+message(STATUS "Setting up Cuba library - done")
 
 message(STATUS "Setting up Einhard library")
 list(APPEND CMAKE_MESSAGE_INDENT "   ")
