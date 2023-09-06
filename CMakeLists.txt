@@ -220,4 +220,4 @@ add_subdirectory(doc)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY TRUE)
 
 # Copy the default input files to the installation directory
-install(DIRECTORY input/ DESTINATION share/smash)
+install(DIRECTORY input/ DESTINATION smash/share/smash_input_files)
