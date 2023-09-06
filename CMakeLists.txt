@@ -216,4 +216,8 @@ include(CTest)
 add_subdirectory(src)
 add_subdirectory(doc)
 
+# Don’t make the install target depend on the all target (i.e. also all tests, if on)
+set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY TRUE)
+
+# Copy the default input files to the installation directory
 install(DIRECTORY input/ DESTINATION share/smash)
