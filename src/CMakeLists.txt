@@ -387,8 +387,8 @@ endif()
 install(CODE "execute_process(COMMAND cmake
                                       --build ${PROJECT_BINARY_DIR}
                                       --target smash_shared smash)")
-install(TARGETS smash_shared LIBRARY DESTINATION smash/lib)
-install(TARGETS smash RUNTIME DESTINATION smash/bin)
-install(DIRECTORY include/smash DESTINATION smash/include)
-install(FILES ${generated_headers} DESTINATION smash/include/smash)
-install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" DESTINATION smash/include)
+install(TARGETS smash_shared LIBRARY)
+install(TARGETS smash RUNTIME)
+install(DIRECTORY include/smash DESTINATION include)
+install(FILES ${generated_headers} DESTINATION include/smash)
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" DESTINATION include)
