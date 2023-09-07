@@ -27,6 +27,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Changed
 * Upgraded to Pythia 8.310
 * Upgraded to Cuba 4.2.2
+* SMASH installation procedure was improved and allows now to use SMASH as library relying on installation folder only
 
 
 ## SMASH-3.0
