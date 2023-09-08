@@ -384,11 +384,15 @@ endif()
 
 # Since at the top level the dependency of the install target on all target was disabled, it is
 # needed to now build the smash library and exectuable target here before installing them
-install(CODE "execute_process(COMMAND cmake
+install(CODE "execute_process(COMMAND ${CMAKE_COMMAND}
                                       --build ${PROJECT_BINARY_DIR}
                                       --target smash_shared smash)")
-install(TARGETS smash_shared LIBRARY)
+install(TARGETS smash_shared LIBRARY DESTINATION "lib/${SMASH_INSTALLATION_SUBFOLDER}")
 install(TARGETS smash RUNTIME)
-install(DIRECTORY include/smash DESTINATION include)
-install(FILES ${generated_headers} DESTINATION include/smash)
-install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" DESTINATION include)
+install(FILES ${generated_headers} DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}")
+# Note that the trailing slash in the DIRECTORY argument is crucial to avoid to create an additional
+# "smash" folder at destination!
+install(DIRECTORY include/smash/ DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}"
+        PATTERN "*.h.in" EXCLUDE)
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash/"
+        DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}")

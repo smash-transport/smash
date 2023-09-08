@@ -71,8 +71,7 @@ else()
 endif()
 
 # Define installation top-level directory name inside which SMASH files are installed in sub-folders
-string(TOLOWER "${SMASH_VERSION}" SMASH_INSTALLATION_TOP_FOLDER)
-string(APPEND CMAKE_INSTALL_PREFIX "/${SMASH_INSTALLATION_TOP_FOLDER}")
+string(TOLOWER "${SMASH_VERSION}" SMASH_INSTALLATION_SUBFOLDER)
 
 # SMASH will be shipped as shared library and hence we want to build position independent code
 include(CheckPIESupported)
@@ -224,4 +223,4 @@ add_subdirectory(doc)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY TRUE)
 
 # Copy the default input files to the installation directory
-install(DIRECTORY input/ DESTINATION share/smash_input_files)
+install(DIRECTORY input/ DESTINATION "share/${SMASH_INSTALLATION_SUBFOLDER}/input_files")

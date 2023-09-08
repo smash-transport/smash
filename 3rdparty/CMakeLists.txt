@@ -37,13 +37,14 @@ set(CMAKE_CXX_STANDARD ${CXX_SMASH_STANDARD})
 
 # Install 3rdparty libraries building their targets first. Note that libraries are installed both as
 # static (ARCHIVE) and as shared (LIBRARY) so that whatever built versions get copied.
-install(CODE "execute_process(COMMAND cmake
+install(CODE "execute_process(COMMAND ${CMAKE_COMMAND}
                                       --build ${CMAKE_BINARY_DIR}
                                       --target cuhre divonne suave vegas einhard yaml-cpp)")
-install(FILES Cuba-4.2.2/cuba.h DESTINATION include/cuba)
-install(FILES einhard/einhard.hpp einhard/stacktrace.h DESTINATION include/einhard)
+install(FILES Cuba-4.2.2/cuba.h DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}/cuba")
+install(FILES einhard/einhard.hpp einhard/stacktrace.h
+        DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}/einhard")
 install(DIRECTORY yaml-cpp-0.7.0/include/yaml-cpp
-        DESTINATION include
+        DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}"
         FILES_MATCHING
         PATTERN "*.h")
 install(TARGETS cuhre
@@ -52,5 +53,5 @@ install(TARGETS cuhre
                 vegas
                 einhard
                 yaml-cpp
-        ARCHIVE
-        LIBRARY)
+        ARCHIVE DESTINATION "lib/${SMASH_INSTALLATION_SUBFOLDER}"
+        LIBRARY DESTINATION "lib/${SMASH_INSTALLATION_SUBFOLDER}")
