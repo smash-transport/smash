@@ -178,6 +178,7 @@ For example, if you want to install SMASH in `~/.local`, use
 cmake -DCMAKE_INSTALL_PREFIX=${HOME}/.local ..
 make install
 ```
+You might need to use `sudo` for a system-wide installation.
 
 By specifying `-DCMAKE_INSTALL_PREFIX=prefix`,
 * `prefix/bin` will contain programs - e.g., `smash`,
@@ -187,6 +188,7 @@ By specifying `-DCMAKE_INSTALL_PREFIX=prefix`,
 
 The string `X.Y-suffix` refers to the SMASH version and the `-suffix` to the Git commit at which the codebase was installed.
 This won't appear for SMASH stable releases.
+Such a suffix is also used for the executable, but a symbolic link to it named `smash` is also created in the binary folder, so that the `smash` command can be used after the installation.
 
 On Unix OS you might be used to use [the `DESTDIR` mechanism](https://cmake.org/cmake/help/latest/envvar/DESTDIR.html) to relocate the whole installation, but refer to the CMake documentation to be sure that this is what you want.
 
