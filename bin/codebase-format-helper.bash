@@ -127,7 +127,7 @@ function look_for_files_to_format()
             "${base_dir}"/**/*.cmake
         )
         for index in "${!FILES_TO_FORMAT[@]}"; do
-            if [[ ${FILES_TO_FORMAT[index]} =~ ^${base_dir}/3rdparty/Cuba[^/]*/ ]]; then
+            if [[ ${FILES_TO_FORMAT[index]} =~ ^${base_dir}/3rdparty/(Cuba[^/]*/|CMakeLists.txt$) ]]; then
                 continue
             elif [[ ${FILES_TO_FORMAT[index]} =~ ^${base_dir}/(3rdparty|build[^/]*)/ ]]; then
                 unset -v 'FILES_TO_FORMAT[index]'

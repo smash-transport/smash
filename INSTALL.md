@@ -168,7 +168,8 @@ To check which environment variables related to PYTHIA are currently set, use e.
 
 ## SMASH installation
 
-Installing SMASH gives the advantage that it is possible to simply use the `smash` command from anywhere in order to run SMASH.
+Installing SMASH gives the advantage that it is possible to simply use the `smash` command from anywhere in order to run SMASH (provided that the installation `bin` directory is contained in the `PATH` system environment variable).
+Users planning to use SMASH as a library are encouraged to install SMASH, in order to disentangle the SMASH codebase source code from the version used as a library from other software.
 
 The default installation done via `make install` installs SMASH into `/usr/local`.
 If you want to change the installation directory, use the `CMAKE_INSTALL_PREFIX` CMake option to specify a new location.
@@ -177,13 +178,26 @@ For example, if you want to install SMASH in `~/.local`, use
 cmake -DCMAKE_INSTALL_PREFIX=${HOME}/.local ..
 make install
 ```
+You might need to use `sudo` for a system-wide installation.
 
 By specifying `-DCMAKE_INSTALL_PREFIX=prefix`,
 * `prefix/bin` will contain programs - e.g., `smash`,
-* `prefix/lib` will contain libraries - e.g., `libsmash.so`,
-* `prefix/include/smash` will contain headers, and
-* `prefix/share/smash` will contain data files.
+* `prefix/lib/smash-X.Y-suffix` will contain libraries - e.g., `libsmash.so`,
+* `prefix/include/smash-X.Y-suffix` will contain headers, and
+* `prefix/share/smash-X.Y-suffix` will contain data files.
 
+The string `X.Y-suffix` refers to the SMASH version and the `-suffix` to the Git commit at which the codebase was installed.
+This won't appear for SMASH stable releases.
+Such a suffix is also used for the executable, but a symbolic link to it named `smash` is also created in the binary folder, so that the `smash` command can be used after the installation.
+
+On Unix OS you might be used to use [the `DESTDIR` mechanism](https://cmake.org/cmake/help/latest/envvar/DESTDIR.html) to relocate the whole installation, but refer to the CMake documentation to be sure that this is what you want.
+
+**NOTE:** CMake does not always support multi-core builds using the installation target and, on some machines, `make -jN install` results in a warning similar to
+
+> gmake[1]: warning: jobserver unavailable: using -j1.  Add '+' to parent make rule.
+
+which, in turn, informs you that the build for the installation will be done with one single core.
+It is likely that future CMake versions will fix this, but a simple work around is to first build SMASH and then install it: `make -jN smash && make install`.
 
 
 <a id="faq"></a>

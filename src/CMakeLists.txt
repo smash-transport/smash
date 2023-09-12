@@ -384,9 +384,23 @@ endif()
 
 # Since at the top level the dependency of the install target on all target was disabled, it is
 # needed to now build the smash library and exectuable target here before installing them
-install(CODE "execute_process(COMMAND cmake --build ${PROJECT_BINARY_DIR} -t smash_shared smash)")
-install(TARGETS smash_shared LIBRARY DESTINATION lib)
-install(TARGETS smash RUNTIME DESTINATION bin)
-install(DIRECTORY include/smash DESTINATION include)
-install(FILES ${generated_headers} DESTINATION include/smash)
-install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" DESTINATION include)
+install(CODE "execute_process(COMMAND ${CMAKE_COMMAND}
+                                      --build ${PROJECT_BINARY_DIR}
+                                      --target smash_shared smash)")
+install(TARGETS smash_shared LIBRARY DESTINATION "lib/${SMASH_INSTALLATION_SUBFOLDER}")
+install(FILES ${generated_headers} DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}")
+# Note that the trailing slash in the DIRECTORY argument is crucial to avoid to create an additional
+# "smash" folder at destination!
+install(DIRECTORY include/smash/ DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}"
+        PATTERN "*.h.in" EXCLUDE)
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash/"
+        DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}")
+# Copy SMASH executable to installation bin folder adding a suffix to allow different versions to
+# coexist. A symbolic link called 'smash' is also created, pointing to the last installed version.
+# Due to this mechanism, we do not use "install(TARGETS ...)", as it does not offer a renaming
+# mechanism.
+install(PROGRAMS $<TARGET_FILE_NAME:smash> DESTINATION bin RENAME "${SMASH_INSTALLATION_SUBFOLDER}")
+install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+                                      ${SMASH_INSTALLATION_SUBFOLDER}
+                                      smash
+                              WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)")
