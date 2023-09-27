@@ -23,7 +23,7 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
 
   for (const ParticleData &p : search_list) {
     const double t0 = p.position().x0();
-    const double t_end = t0 + dt;  // Time at the end of timestep
+    const double t_end = t0 + dt;
     // Particles should not be removed before the nuclei collide, and after some
     // time max_time_ there won't be any fluidization, so this saves resources
     if (t0 < min_time_ || t_end > max_time_)
@@ -37,9 +37,9 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
         queue_.erase(id);
       }
     } else {
-      const auto proc = p.get_history().process_type;
-      if (proc == ProcessType::Decay || is_string_soft_process(proc) ||
-          proc == ProcessType::StringHard) {
+      const auto process_type = p.get_history().process_type;
+      if (process_type == ProcessType::Decay || is_string_soft_process(process_type) ||
+          process_type == ProcessType::StringHard) {
         if (above_threshold(p)) {
           double formation = p.formation_time();
           if (formation >= t_end) {
@@ -63,40 +63,39 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
 bool DynamicFluidizationFinder::above_threshold(
     const ParticleData &pdata) const {
   EnergyMomentumTensor Tmunu;
-  bool fluidize = false;
-
-  const double background = background_[pdata.id()];
   // value_at returns false if pdata is out of bounds, this is desirable here
-  bool inside = e_den_lat_.value_at(pdata.position().threevec(), Tmunu);
+  bool inside = energy_density_lattice_.value_at(pdata.position().threevec(), Tmunu);
   if (inside) {
-    double e_den_particles = Tmunu.boosted(Tmunu.landau_frame_4velocity())[0];
+    // If the particle is not in the map, the background evaluates to 0.
+    const double background = background_[pdata.id()];
+    const double e_den_particles = Tmunu.boosted(Tmunu.landau_frame_4velocity())[0];
     if (e_den_particles + background >= energy_density_threshold_) {
-      fluidize = true;
       logg[LFluidization].debug()
           << "Fluidize " << pdata.id() << " with " << e_den_particles
           << " and background " << background << " GeV/fm^3 at "
           << pdata.formation_time();
+      return true;
     }
   }
-  return fluidize;
+  return false;
 }
 
 void build_fluidization_lattice(
-    RectangularLattice<EnergyMomentumTensor> *e_den_lat, const double t,
+    RectangularLattice<EnergyMomentumTensor> *energy_density_lattice, const double t,
     const std::vector<Particles> &ensembles,
     const DensityParameters &dens_par) {
-  if (e_den_lat == nullptr) {
+  if (energy_density_lattice == nullptr) {
     return;
   }
-
+  // In most scenarios where dynamic fluidization is applicable, t > 20 fm is dilute enough to not need a very fine lattice.
   if (t > 20) {
     std::array<double, 3> new_l{2 * t, 2 * t, 2 * t};
     std::array<double, 3> new_orig{-t, -t, -t};
-    e_den_lat->reset_and_resize(new_l, new_orig);
-    logg[LFluidization].warn() << "lattice resizing at " << t;
-  }
+    energy_density_lattice->reset_and_resize(new_l, new_orig);
+    logg[LFluidization].debug() << "Lattice resizing at " << t;
+  }  
 
-  update_lattice(e_den_lat, LatticeUpdate::EveryTimestep, DensityType::Hadron,
+  update_lattice(energy_density_lattice, LatticeUpdate::EveryTimestep, DensityType::Hadron,
                  dens_par, ensembles, false);
 }
 

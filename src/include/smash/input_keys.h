@@ -4752,7 +4752,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_dynamic_,Dynamic,bool,</tt>false<tt>}
+   * \optional_key_no_line{key_output_IC_dynamic_,Dynamic,bool,false}
    *
    * The initial condition is generated dynamically, depending on the local
    * energy density, which is interpolated by a lattice. This lattice is
@@ -4767,11 +4767,9 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_eden_threshold_,Energy_Density_Threshold,double,</tt>0.5
-   * \unit{in GeV/fm³}<tt>}
+   * \optional_key_no_line{key_output_IC_eden_threshold_,Energy_Density_Threshold,double,0.5}
    *
-   * Set the minimum energy density for a particle to be considered fluid. It
-   * is only used if the dynamic initial condition is active.
+   * Set the minimum energy density \unit{in GeV/fm³} for a particle to be considered fluid. It is only used if the dynamic initial condition is active.
    */
   /**
    * \see_key{key_output_IC_eden_threshold_}
@@ -4783,11 +4781,9 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_mintime_,Minimum_Time,double,</tt>0
-   * \unit{in fm}<tt>}
+   * \optional_key_no_line{key_output_IC_mintime_,Minimum_Time,double,0}
    *
-   * Set the minimum time for a particle to be considered fluid. It is only
-   * used if the dynamic initial condition is active.
+   * Set the minimum time \unit{in fm} for a particle to be considered fluid. It is only used if the dynamic initial condition is active.
    */
   /**
    * \see_key{key_output_IC_mintime_}
@@ -4797,10 +4793,9 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_maxtime_,Maximum_Time,double,</tt>100
-   * \unit{in fm}<tt>}
+   * \optional_key_no_line{key_output_IC_maxtime_,Maximum_Time,double,100}
    *
-   * Set the maximum time for a particle to be considered fluid. It is only
+   * Set the maximum time \unit{in fm} for a particle to be considered fluid. It is only
    * used if the dynamic initial condition is active.
    */
   /**
@@ -4811,8 +4806,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_fluid_cells_,Fluidization_Cells,int,</tt>50
-   * cells<tt>}
+   * \optional_key_no_line{key_output_IC_fluid_cells_,Fluidization_Cells,int,50}
    *
    * Fixed number of cells to select fluidizing particles. Ideally the cell
    * should be small enough for a meaningful interpolation.
