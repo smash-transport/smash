@@ -20,6 +20,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+### Added
+* Option `Decay_Initial_Particles` which blocks the decay of resonances created at initialization
+
 ### Fixed
 * Fix bug in the time step calculation of SMASH output in events successive to the first one when the `End_Time` is not a multiple of the `Output_Interval`
 * SMASH now aborts with a user-friendly message if any input key among `End_Time`, `Delta_Time` or `Output_Interval` is zero

@@ -253,6 +253,7 @@ inline ExperimentParameters default_parameters(
       1.0,          // cross section scaling
       false,        // in thermodynamics outputs spectators are included
       false,        // do weak decays
+      true,         // decay initial particles
       std::nullopt  // use monash tune, not known
   };
 }

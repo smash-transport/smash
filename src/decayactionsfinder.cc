@@ -30,6 +30,11 @@ ActionList DecayActionsFinder::find_actions_in_cell(
       continue;  // particle doesn't decay
     }
 
+    if (!decay_initial_particles_ &&
+        p.get_history().collisions_per_particle == 0) {
+      continue;
+    }
+
     DecayBranchList processes = p.type().get_partial_widths(
         p.momentum(), p.position().threevec(), WhichDecaymodes::Hadronic);
     // total decay width (mass-dependent)

@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "actionfinderfactory.h"
+#include "input_keys.h"
 
 namespace smash {
 
@@ -80,6 +81,13 @@ class DecayActionsFinder : public ActionFinderInterface {
    * so electro-magnetic decays are done as well.
    */
   const bool do_final_weak_decays_;
+
+  /**
+   * Whether to initial state particles can decay. Useful for analyzing
+   * interactions involving one or more resonances.
+   */
+  const bool decay_initial_particles_ =
+      InputKeys::collTerm_decayInitial.default_value();
 };
 
 }  // namespace smash

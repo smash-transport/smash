@@ -1999,6 +1999,20 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_decay_initial_,Decay_Initial_Particles,bool,true}
+   *
+   * Allow or prohibit initial state particles from decaying before their first
+   * collision. This is relevant when, for instance, studying the interactions
+   * a resonance can go through.
+   */
+  /**
+   * \see_key{key_CT_decay_initial_}
+   */
+  inline static const Key<bool> collTerm_decayInitial{
+      {"Collision_Term", "Decay_Initial_Particles"}, true, {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_included_2to2_,Included_2to2,list of strings,["All"]}
    *
    * List that contains all possible 2 &harr; 2 process categories. Each process
@@ -5060,6 +5074,7 @@ struct InputKeys {
       std::cref(collTerm_fixedMinCellLength),
       std::cref(collTerm_forceDecaysAtEnd),
       std::cref(collTerm_includeDecaysAtTheEnd),
+      std::cref(collTerm_decayInitial),
       std::cref(collTerm_includedTwoToTwo),
       std::cref(collTerm_isotropic),
       std::cref(collTerm_maximumCrossSection),

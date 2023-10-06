@@ -341,6 +341,8 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
       only_participants,
       config.take({"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
                   false),
+      config.take({"Collision_Term", "Decay_Initial_Particles"},
+                  InputKeys::collTerm_decayInitial.default_value()),
       std::nullopt};
 }
 
