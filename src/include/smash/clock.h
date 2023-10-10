@@ -94,7 +94,6 @@ class Clock {
    *
    * \param[in] start_time starting time of the simulation
    */
-
   virtual void remove_times_in_past(double start_time) = 0;
   /**
    * Advances the clock by one tick.
@@ -334,7 +333,7 @@ class UniformClock : public Clock {
   static double convert(Representation x) { return x * to_double; }
 
   /// The time step size \f$\Delta t\f$ in \f$10^{-6}\,\mathrm{fm}\f$.
-  Representation timestep_duration_ = 0u;
+  Representation timestep_duration_ = 0;
   /// The time of last reset (when counter_ was set to 0).
   Representation reset_time_ = 0;
   /// The end time of the particle propagation
