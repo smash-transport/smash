@@ -2258,7 +2258,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     }
   }
 
-  while (parameters_.labclock->current_time() < t_end) {
+  while (*(parameters_.labclock) < t_end) {
     const double dt = parameters_.labclock->timestep_duration();
     logg[LExperiment].debug("Timestepless propagation for next ", dt, " fm.");
 
