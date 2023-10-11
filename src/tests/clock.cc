@@ -46,6 +46,28 @@ TEST(run_clock) {
   FUZZY_COMPARE(labtime.current_time(), 1.0);
 }
 
+TEST(tick_clock_beyond_end_time) {
+  const auto end_time = 10.0;
+  UniformClock labtime(0.0, 10, end_time);
+  VERIFY(labtime < end_time);
+  ++labtime;
+  VERIFY(!(labtime < end_time));
+  VERIFY(!(labtime > end_time));
+  ++labtime;
+  VERIFY(labtime > end_time);
+}
+
+TEST(run_clock_across_end_time) {
+  const auto end_time = 20.100001;
+  UniformClock labtime(0.0, 0.1, end_time);
+  auto counter = 0u;
+  while (labtime < end_time) {
+    ++labtime;
+    ++counter;
+  }
+  COMPARE(counter, 202);
+}
+
 TEST(reset_timestep) {
   UniformClock labtime(0.0, 0.1, 0.6);
   ++labtime;

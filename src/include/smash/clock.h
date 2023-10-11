@@ -142,31 +142,43 @@ class Clock {
   }
 
   /**
-   * Compares the times between two clocks.
+   * Compares the internal times of two clocks.
    *
    * \param[in] rhs The other clock.
    */
   bool operator<(const Clock& rhs) const {
-    return current_time() < rhs.current_time();
+    return present_internal_time() < rhs.present_internal_time();
   }
 
   /**
-   * Compares the time of the clock against a fixed time.
+   * Compares the internal time of the clock against a fixed time.
    *
    * \param[in] time The other time.
    */
-  bool operator<(double time) const { return current_time() < time; }
+  bool operator<(double time) const { return present_internal_time() < time; }
 
   /**
-   * Compares the time of the clock against a fixed time.
+   * Compares the internal time of the clock against a fixed time.
    *
    * \param[in] time The other time.
    */
-  bool operator>(double time) const { return current_time() > time; }
+  bool operator>(double time) const { return present_internal_time() > time; }
 
   virtual ~Clock() = default;
 
  protected:
+  /**
+   * This function \b always returns the clock time, even if children might
+   * attribute a different behaviour to \c current_time method (as UniformClock
+   * does).
+   *
+   * \warning It is important to have this method that is in turn used in the
+   * comparison operators, so that clock comparisons are independent from
+   * other possible existing mechanism (like that of the UniformClock).
+   *
+   * \return The present internal clock time.
+   */
+  virtual double present_internal_time() const = 0;
   /**
    * Internally used to count the number of time steps.
    */
@@ -238,11 +250,12 @@ class UniformClock : public Clock {
    * \return the current time or the end time if the clock ticked beyond it.
    */
   double current_time() const override {
-    auto present_time = reset_time_ + timestep_duration_ * counter_;
-    if (present_time > time_end_) {
+    auto present_time = present_internal_time();
+    // Do comparison in internal representation unit and return converted values
+    if (convert(present_time) > time_end_) {
       return convert(time_end_);
     } else {
-      return convert(present_time);
+      return present_time;
     }
   }
   /**
@@ -273,7 +286,7 @@ class UniformClock : public Clock {
    * printed. \see UniformClock description.
    */
   double timestep_duration() const override {
-    auto present_time = reset_time_ + timestep_duration_ * counter_;
+    auto present_time = convert(present_internal_time());
     if (present_time > time_end_) {
       logg[LClock].warn() << "UniformClock asked for timestep duration beyond "
                              "end of simulation, returning 0.";
@@ -356,6 +369,16 @@ class UniformClock : public Clock {
     return *this;
   }
 
+ protected:
+  /**
+   * Access the internal time of the clock, independently from the end time.
+   *
+   * \return the internal clock time.
+   */
+  double present_internal_time() const override {
+    return convert(reset_time_ + timestep_duration_ * counter_);
+  }
+
  private:
   /// A multiplier transfering the internal integer to the real time.
   static constexpr double to_double = resolution;
@@ -431,6 +454,15 @@ class CustomClock : public Clock {
                      }
                    });
   }
+
+ protected:
+  /**
+   * For the CustomClock, the internal time is basically by design the same as
+   * what the current_time() method returns.
+   *
+   * \return the same as \c current_time does.
+   */
+  double present_internal_time() const override { return current_time(); }
 
  private:
   /// Vector of times where output is generated
