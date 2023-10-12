@@ -605,17 +605,25 @@ class Potentials {
                                    double Lambda) {
     // get velocity for boost to the local rest frame
     double rho_LRF = jmu.abs();
-    ThreeVector beta_LRF = rho_LRF > really_small ? jmu.threevec() / jmu.x0()
-                                                  : ThreeVector(0, 0, 0);
+    ThreeVector beta_LRF = jmu.x0() > really_small ? jmu.threevec() / jmu.x0()
+                                                   : ThreeVector(0, 0, 0);
     // get momentum in the local rest frame
     FourVector pmu_calc = FourVector(energy_calc, momentum_calc);
-    FourVector pmu_LRF = pmu_calc.lorentz_boost(beta_LRF);
+    FourVector pmu_LRF = beta_LRF.abs() > really_small
+                             ? pmu_calc.lorentz_boost(beta_LRF)
+                             : pmu_calc;
     double p_LRF = pmu_LRF.threevec().abs();
     double energy_LRF = std::sqrt(m * m + p_LRF * p_LRF) +
                         skyrme_pot(rho_LRF, A, B, tau) +
                         momentum_dependent_part(p_LRF, rho_LRF, C, Lambda);
-    return energy_calc * energy_calc - momentum_calc.sqr() -
-           (energy_LRF * energy_LRF - p_LRF * p_LRF);
+    const double result = energy_calc * energy_calc - momentum_calc.sqr() -
+                          (energy_LRF * energy_LRF - p_LRF * p_LRF);
+    logg[LPotentials].debug()
+        << "root equation for potentials called with E_calc=" << energy_calc
+        << " p_calc=" << momentum_calc << " jmu=" << jmu << " m=" << m
+        << " tau=" << tau << " A=" << A << " B=" << B << " C=" << C
+        << " Lambda=" << Lambda << " and the root equation is " << result;
+    return result;
   }
 
   /**
@@ -636,6 +644,11 @@ class Potentials {
     const double fermi_momentum =
         std::cbrt(6. * M_PI * M_PI * rho / g);  // in 1/fm
     momentum = momentum / hbarc;                // convert to 1/fm
+    if (momentum < really_small) [[unlikely]] {
+      return mev_to_gev * g * C / (M_PI * M_PI * nuclear_density) *
+             (Lambda * Lambda * fermi_momentum -
+              std::pow(Lambda, 3) * std::atan(fermi_momentum / Lambda));
+    }
     const double temp1 = 2 * g * C * M_PI * std::pow(Lambda, 3) /
                          (std::pow(2 * M_PI, 3) * nuclear_density);
     const double temp2 = (fermi_momentum * fermi_momentum + Lambda * Lambda -

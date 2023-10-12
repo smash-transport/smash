@@ -14,12 +14,14 @@
 #include <filesystem>
 #include <fstream>
 #include <map>
+#include <memory>
 
 #include "setup.h"
 #include "smash/algorithms.h"
 #include "smash/collidermodus.h"
 #include "smash/configuration.h"
 #include "smash/constants.h"
+#include "smash/density.h"
 #include "smash/experiment.h"
 #include "smash/modusdefault.h"
 #include "smash/nucleus.h"
@@ -324,6 +326,96 @@ TEST(ensembles_vs_testparticles) {
   b = std::get<3>(forces2);
   VERIFY(a == b) << a << " " << b;
 }
+
+/*
+ * Compare the calculation of the energy gradient in the calculation frame using
+ * single_particle_energy_gradient to the gradient of the Skyrme potential
+ * calculated using the chain rule. They should coincide when no boosts are
+ * involved, so when the local rest-frame and the calculation frame coincide.
+ */
+TEST(energy_gradient_vs_pot_gradient) {
+  double length = 5.0;  // consider a 5 fm box
+  // create some protons but make sure they are at rest
+  std::vector<Particles> ensembles(1);
+  Particles parts;
+  auto uniform_length = random::make_uniform_distribution(0.0, length);
+  auto uniform_zero_to_one = random::make_uniform_distribution(0.0, 1.0);
+  const int nparticles = 500;
+  int isampled = 0;
+  for (int itry = 0; (isampled < nparticles) && (itry < 1000 * nparticles);
+       itry++) {
+    const ThreeVector position_sample = {uniform_length(), uniform_length(),
+                                         uniform_length()};
+    // sample particles according to P ~ z/length to create a finite gradient
+    const double weight = position_sample.x3() / length;
+    if (weight < uniform_zero_to_one()) {
+      continue;
+    }
+    ParticleData p(ParticleType::find(0x2212), itry);
+    p.set_4momentum(0.938, 0.0, 0.0, 0.0);
+    p.set_3position(position_sample);
+    ensembles[0].insert(p);
+    isampled++;
+  }
+  if (isampled < nparticles) {
+    throw std::runtime_error("Failed to sample enough particles, sampled " +
+                             std::to_string(isampled) + " instead of " +
+                             std::to_string(nparticles));
+  }
+  // set up lattice
+  std::array<double, 3> lengths = {length, length, length};
+  std::array<int, 3> ncells = {
+      11, 11, 51};  // lattice needs to be fine because we compare different
+                    // types of derivatives in the following
+  std::array<double, 3> origin = {0.0, 0.0, 0.0};
+  std::unique_ptr<RectangularLattice<DensityOnLattice>> lat =
+      std::make_unique<RectangularLattice<DensityOnLattice>>(
+          lengths, ncells, origin, false, LatticeUpdate::EveryTimestep);
+  // update lattice to calculate densities
+  ExperimentParameters exp_par = Test::default_parameters();
+  exp_par.testparticles = 50;
+  DensityParameters denspar(exp_par);
+  update_lattice(lat.get(), LatticeUpdate::EveryTimestep, DensityType::Baryon,
+                 denspar, ensembles, true);
+  DensityOnLattice jB = (*lat)[lat->index1d(
+      ncells[0] / 2, ncells[1] / 2,
+      ncells[2] / 2)];  // density in the center (int division intended)
+  // set up a potentials object without momentum dependence
+  const char* conf_pot{R"(
+    Skyrme:
+        Skyrme_A: -209.2
+        Skyrme_B: 156.4
+        Skyrme_Tau: 1.35
+    Momentum_Dependence:
+        C: 0.0
+        Lambda: 2.13
+  )"};
+  Configuration conf{conf_pot};
+  Potentials pot(std::move(conf), denspar);
+
+  // calculate some needed densities
+  double baryon_density = jB.rho();
+  ThreeVector baryon_grad_j0 = jB.grad_j0();
+  ThreeVector baryon_dvecj_dt = jB.dvecj_dt();
+  ThreeVector baryon_curl_vecj = jB.curl_vecj();
+  ThreeVector force_chain_rule =
+      pot.skyrme_force(baryon_density, baryon_grad_j0, baryon_dvecj_dt,
+                       baryon_curl_vecj)
+          .first;
+
+  // calculate Force via the gradient of the single particle energy
+  ParticleList dummy_plist;
+  ThreeVector energy_grad = pot.single_particle_energy_gradient(
+      lat.get(), {2.5, 2.5, 2.5}, {0.0, 0.0, 0.0}, 0.938, dummy_plist);
+  COMPARE_ABSOLUTE_ERROR((-energy_grad - force_chain_rule).abs(), 0.0, 0.001);
+  COMPARE_RELATIVE_ERROR(-energy_grad[2], force_chain_rule[2], 0.01);
+
+  // do the same calculation without using the lattice for the energy gradient
+  ParticleList real_plist = ensembles[0].copy_to_vector();
+  energy_grad = pot.single_particle_energy_gradient(
+      nullptr, {2.5, 2.5, 2.5}, {0.0, 0.0, 0.0}, 0.938, real_plist);
+  COMPARE_RELATIVE_ERROR(-energy_grad[2], force_chain_rule[2], 0.001);
+};
 
 // create experiment parameters for tests with VDF
 static ExperimentParameters default_parameters_vdf(
