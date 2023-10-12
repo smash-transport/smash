@@ -30,6 +30,12 @@ TEST(set_clock) {
   FUZZY_COMPARE(labtime.timestep_duration(), 0.234);
 }
 
+TEST(set_clock_negative_start_end_time) {
+  UniformClock labtime(-0.123, 0.04, -0.03);
+  COMPARE(labtime.current_time(), -0.123);
+  FUZZY_COMPARE(labtime.timestep_duration(), 0.04);
+}
+
 TEST(run_clock) {
   UniformClock labtime(0.0, 0.1, 300.0);
   COMPARE(labtime.current_time(), 0.0);
