@@ -11,12 +11,14 @@ SHELL ["/bin/bash", "-c"]
 
 ARG TARGET_ARCHITECTURE="x86-64"
 
-# Add some info about authors and contents
+# Add some info about authors and contents using the rules o the OCI Image Format Specification
+# https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
 
-LABEL maintainer.name="SMASH team"
-LABEL maintainer.website="https://smash-transport.github.io"
-LABEL description="Basic SMASH image (sources, compiler and bare executable, without ROOT, HepMC3 and Rivet)."
-LABEL org.opencontainers.image.source https://github.com/smash-transport/smash
+LABEL org.opencontainers.image.title "SMASH-mini"
+LABEL org.opencontainers.image.authors "SMASH team"
+LABEL org.opencontainers.image.url "https://smash-transport.github.io"
+LABEL org.opencontainers.image.description "Basic SMASH image (sources, compiler and bare executable, without ROOT, HepMC3 and Rivet)."
+LABEL org.opencontainers.image.source "https://github.com/smash-transport/smash"
 
 # Install minimal set of requirements
 
