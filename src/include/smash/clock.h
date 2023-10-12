@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022
+ *    Copyright (c) 2014-2020,2022-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -127,9 +127,9 @@ class Clock {
   /**
    * Advances the clock by an arbitrary number of ticks.
    *
-   * \param[in] advance_several_timesteps Number of the timesteps added
+   * \param[in] advance_several_timesteps Number of the time steps added
    *                                      to the clock
-   * \throw OverflowError if the number of the added timesteps exceeds
+   * \throw OverflowError if the number of the added time steps exceeds
    *                      the maximum value.
    */
   Clock& operator+=(Representation advance_several_timesteps) {
@@ -282,7 +282,7 @@ class UniformClock : public Clock {
   /**
    * \return the time step size from the current time. If a full tick would
    * result in a time larger then the end time, a smaller size is returned. If
-   * the clock is already beyond the end time, 0.0 is returned and a wanring is
+   * the clock is already beyond the end time, 0.0 is returned and a warning is
    * printed. \see UniformClock description.
    */
   double timestep_duration() const override {
@@ -339,7 +339,7 @@ class UniformClock : public Clock {
    * Advances the clock by an arbitrary timestep (multiple of 0.000001 fm).
    *
    * \tparam T type of the timestep
-   * \param[in] big_timestep Timestep by which the clock is advanced.
+   * \param[in] big_timestep Time step by which the clock is advanced.
    * \note It uses a template parameter only for disambiguation with the
    * overload below.
    */
@@ -380,9 +380,9 @@ class UniformClock : public Clock {
   }
 
  private:
-  /// A multiplier transfering the internal integer to the real time.
+  /// A multiplier transferring the internal integer to the real time.
   static constexpr double to_double = resolution;
-  /// A multiplier transfering the real time to the internal integer.
+  /// A multiplier transferring the real time to the internal integer.
   static constexpr double from_double = 1. / resolution;
 
   /// Convert a double \p x into the internal int representation.
