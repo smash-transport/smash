@@ -2258,6 +2258,13 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     }
   }
 
+  if (t_end > end_time_) {
+    logg[LExperiment].fatal()
+        << "Evolution asked to be run until " << t_end << " > " << end_time_
+        << " and this cannot be done (because of how the clock works).";
+    throw std::logic_error(
+        "Experiment cannot evolve the system beyond End_Time.");
+  }
   while (*(parameters_.labclock) < t_end) {
     const double dt = parameters_.labclock->timestep_duration();
     logg[LExperiment].debug("Timestepless propagation for next ", dt, " fm.");
