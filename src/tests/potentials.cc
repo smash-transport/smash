@@ -402,18 +402,22 @@ TEST(energy_gradient_vs_pot_gradient) {
       pot.skyrme_force(baryon_density, baryon_grad_j0, baryon_dvecj_dt,
                        baryon_curl_vecj)
           .first;
-
   // calculate Force via the gradient of the single particle energy
   ParticleList dummy_plist;
   ThreeVector energy_grad = pot.single_particle_energy_gradient(
       lat.get(), {2.5, 2.5, 2.5}, {0.0, 0.0, 0.0}, 0.938, dummy_plist);
+  /* compare the two with relatively large tolerance as the gradients are
+   * calculated in a different way, energy_grad uses finite difference but the
+   * density gradient is done with Gaussian derivatives. They would converge for
+   * a very fine lattice. */
   COMPARE_ABSOLUTE_ERROR((-energy_grad - force_chain_rule).abs(), 0.0, 0.001);
-  COMPARE_RELATIVE_ERROR(-energy_grad[2], force_chain_rule[2], 0.01);
+  COMPARE_RELATIVE_ERROR(-energy_grad[2], force_chain_rule[2], 0.001);
 
   // do the same calculation without using the lattice for the energy gradient
   ParticleList real_plist = ensembles[0].copy_to_vector();
   energy_grad = pot.single_particle_energy_gradient(
       nullptr, {2.5, 2.5, 2.5}, {0.0, 0.0, 0.0}, 0.938, real_plist);
+  COMPARE_ABSOLUTE_ERROR((-energy_grad - force_chain_rule).abs(), 0.0, 0.001);
   COMPARE_RELATIVE_ERROR(-energy_grad[2], force_chain_rule[2], 0.001);
 };
 
