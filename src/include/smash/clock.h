@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022
+ *    Copyright (c) 2014-2020,2022-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -34,40 +34,53 @@ static constexpr int LClock = LogArea::Clock::id;
  * i.e. only multiples of \f$0.000001\,\mathrm{fm}\f$ are internally
  * representable.
  *
- * Potential usage for adapting time steps:
- * ------
+ * \attention
+ * There are two very different types of clocks implemented.
+ * -# The UniformClock is meant to track time in a simulation and it has the
+ *    quite peculiar feature that it is aware of the end time of the simulation.
+ *    Therefore, although it can be ticked beyond such a time, its methods about
+ *    the current time, the next time and the time-step duration will adjust
+ *    their return value when the clock gets to or past the simulation end time.
+ * -# The CustomClock is meant to track a list of time points and it is best
+ *    suited for output. Ticking this clock means to consider the following
+ *    point in time. Ticking beyond the last time point is considered an error.
+ *
+ * ### Potential usage for adapting time steps:
+ *
  * \code
- *   UniformClock labtime(0., 0.1, end_time_);
- *   UniformClock endtime(10., 0., end_time_);
- *   while (labtime < endtime) {
+ *   const double end_time = 10.;
+ *   UniformClock lab_time(0., 0.1, end_time);
+ *   while (lab_time < end_time) {
  *     // do something
  *     // adapt the timestep size to external circumstances:
  *     if (system_is_very_dense()) {
- *       labtime.set_timestep_duration(labtime.timestep_duration() / 2.);
+ *       lab_time.set_timestep_duration(lab_time.timestep_duration() / 2.);
  *     }
  *     if (system_is_very_dilute()) {
- *       labtime.set_timestep_duration(labtime.timestep_duration() * 2.);
+ *       lab_time.set_timestep_duration(lab_time.timestep_duration() * 2.);
  *     }
  *     // let the clock tick
- *     ++labtime;
+ *     ++lab_time;
  *   }
  * \endcode
  *
- * Possible actions for Clock are:
+ * ### Possible actions for Clock
+ *
  * \li look at it and find out the current time
  * \see current_time()
  * \see next_time()
  * \li advance the clock (by one tick, by several ticks, or by a given
  * time)
  * \see operator++()
- * \see operator+=(T)
+ * \see UniformClock::operator+=(T)
  * \see operator+=(Representation)
  * \li set / retrieve the timestep (length of one tick)
- * \see set_timestep_duration() \see timestep_duration()
+ * \see UniformClock::set_timestep_duration(double)
+ * \see timestep_duration()
  * \li compare time against different clock or fixed value
  * \see operator<(const Clock&) const
- * \see operator<(float) const
- * \see operator>(float) const
+ * \see operator<(double) const
+ * \see operator>(double) const
  *
  **/
 class Clock {
@@ -83,18 +96,17 @@ class Clock {
   /**
    * reset the clock to the starting time of the simulation
    *
-   * \param[in] start_time starting time of the imulation
+   * \param[in] start_time starting time of the simulation
    * \param[in] is_output_clock whether this is an output clock rather than a
    *                            lab clock
    */
-  virtual void reset(double start_time, const bool is_output_clock) = 0;
+  virtual void reset(double start_time, bool is_output_clock) = 0;
   /**
    * Remove output times before the starting time of the simulation if this
    * is a custom clock.
    *
    * \param[in] start_time starting time of the simulation
    */
-
   virtual void remove_times_in_past(double start_time) = 0;
   /**
    * Advances the clock by one tick.
@@ -115,9 +127,9 @@ class Clock {
   /**
    * Advances the clock by an arbitrary number of ticks.
    *
-   * \param[in] advance_several_timesteps Number of the timesteps added
+   * \param[in] advance_several_timesteps Number of the time steps added
    *                                      to the clock
-   * \throw OverflowError if the number of the added timesteps exceeds
+   * \throw OverflowError if the number of the added time steps exceeds
    *                      the maximum value.
    */
   Clock& operator+=(Representation advance_several_timesteps) {
@@ -130,31 +142,43 @@ class Clock {
   }
 
   /**
-   * Compares the times between two clocks.
+   * Compares the internal times of two clocks.
    *
    * \param[in] rhs The other clock.
    */
   bool operator<(const Clock& rhs) const {
-    return current_time() < rhs.current_time();
+    return present_internal_time() < rhs.present_internal_time();
   }
 
   /**
-   * Compares the time of the clock against a fixed time.
+   * Compares the internal time of the clock against a fixed time.
    *
    * \param[in] time The other time.
    */
-  bool operator<(double time) const { return current_time() < time; }
+  bool operator<(double time) const { return present_internal_time() < time; }
 
   /**
-   * Compares the time of the clock against a fixed time.
+   * Compares the internal time of the clock against a fixed time.
    *
    * \param[in] time The other time.
    */
-  bool operator>(double time) const { return current_time() > time; }
+  bool operator>(double time) const { return present_internal_time() > time; }
 
   virtual ~Clock() = default;
 
  protected:
+  /**
+   * This function \b always returns the clock time, even if children might
+   * attribute a different behaviour to \c current_time method (as UniformClock
+   * does).
+   *
+   * \warning It is important to have this method that is in turn used in the
+   * comparison operators, so that clock comparisons are independent from
+   * other possible existing mechanism (like that of the UniformClock).
+   *
+   * \return The present internal clock time.
+   */
+  virtual double present_internal_time() const = 0;
   /**
    * Internally used to count the number of time steps.
    */
@@ -163,18 +187,28 @@ class Clock {
 
 /** Clock with uniformly spaced time steps
  *
- * Internals
- * ---------
+ * ### Internal clock mechanisms
  *
- * Clock stores a time step size \f$\Delta t\f$ and a base time
- * \f$t_0\f$ as well as a counter \f$n\f$. The current time is
- * calculated from \f$t = t_0 + n \cdot \Delta t\f$. When \f$\Delta t\f$
- * is changed, \f$t_0\f$ is reset.
- *
+ * This clock stores a time step size \f$\Delta t\f$, a base time \f$t_0\f$ as
+ * well as an end time \f$t_{end}\f$ and a counter \f$n\f$. The current time is
+ * calculated from \f$t = t_0 + n \cdot \Delta t\f$. When \f$\Delta t\f$ is
+ * changed, \f$t_0\f$ is reset to the present time and \f$n\f$ is set to 0.
+ * As soon as \f$t\geq t_{end}\f$, the clock will always return \f$t_{end}\f$ as
+ * current and next time. The time step size can be retrieved and the returned
+ * value is
+ * \f[
+ * \begin{aligned}
+ *   \Delta t       \qquad&\mbox{if}& &t\leq t_{end}-\Delta t \\
+ *   t_{end}-t      \qquad&\mbox{if}& t_{end}-\Delta t<{}&t<t_{end} \\
+ *   0.0            \qquad&\mbox{if}& &t\geq t_{end} \\
+ * \end{aligned}
+ * \f]
+ * In the last case, i.e. if the time step size is required when the clock
+ * ticked beyond the simulation end, a warning is given to the user.
  */
 class UniformClock : public Clock {
   /**
-   * Defines the resolution of the clock (i.e. the smallest representable time
+   * Defines the resolution of the clock (namely the smallest representable time
    * difference).
    *
    * The value 0.000001 is very well suited because
@@ -197,7 +231,7 @@ class UniformClock : public Clock {
    * \param[in] dt step size
    * \param[in] time_end end time of particle propagation
    */
-  UniformClock(const double time, const double dt, const double time_end)
+  UniformClock(double time, double dt, double time_end)
       : timestep_duration_(convert(dt)),
         reset_time_(convert(time)),
         time_end_(convert(time_end)) {
@@ -212,20 +246,25 @@ class UniformClock : public Clock {
           std::to_string(time_end) + " not possible)");
     }
   }
-  /// \return the current time.
+  /**
+   * \return the current time or the end time if the clock ticked beyond it.
+   */
   double current_time() const override {
-    if ((reset_time_ + timestep_duration_ * counter_) > time_end_) {
+    auto present_time = present_internal_time();
+    // Do comparison in internal representation unit and return converted values
+    if (convert(present_time) > time_end_) {
       return convert(time_end_);
     } else {
-      return convert(reset_time_ + timestep_duration_ * counter_);
+      return present_time;
     }
   }
   /**
-   * \return the time in the next tick.
+   * \return the time in the next tick or the end time if the clock ticked
+   *         beyond it.
    *
-   * This function is needed, because current_time() + timestep_duration()
-   * is not the same as the next tick (numerically; this is due to
-   * floating point arithmetic).
+   * \note This function is needed, because current_time() + timestep_duration()
+   *       is not the same as the next tick (numerically; this is due to
+   *       floating point arithmetic).
    */
   double next_time() const override {
     if (counter_ * timestep_duration_ >=
@@ -239,10 +278,20 @@ class UniformClock : public Clock {
       return convert(next_point_in_time);
     }
   }
-  /// \return the time step size.
+
+  /**
+   * \return the time step size from the current time. If a full tick would
+   * result in a time larger then the end time, a smaller size is returned. If
+   * the clock is already beyond the end time, 0.0 is returned and a warning is
+   * printed. \see UniformClock description.
+   */
   double timestep_duration() const override {
-    auto present_time = reset_time_ + timestep_duration_ * counter_;
-    if (present_time + timestep_duration_ > time_end_) {
+    auto present_time = convert(present_internal_time());
+    if (present_time > time_end_) {
+      logg[LClock].warn() << "UniformClock asked for timestep duration beyond "
+                             "end of simulation, returning 0.";
+      return 0.0;
+    } else if (present_time + timestep_duration_ > time_end_) {
       return convert(time_end_ - present_time);
     } else {
       return convert(timestep_duration_);
@@ -253,7 +302,7 @@ class UniformClock : public Clock {
    *
    * \param[in] dt new time step size
    */
-  void set_timestep_duration(const double dt) {
+  void set_timestep_duration(double dt) {
     if (dt <= 0.) {
       throw std::range_error("Time increment must be positive and non-zero!");
     }
@@ -268,7 +317,7 @@ class UniformClock : public Clock {
    * \param[in] start_time Starting time of the simulation
    * \param[in] is_output_clock whether this is an output clock or a lab clock
    */
-  void reset(const double start_time, const bool is_output_clock) override {
+  void reset(double start_time, bool is_output_clock) override {
     double reset_time;
     if (is_output_clock) {
       auto delta_t = convert(timestep_duration_);
@@ -290,7 +339,7 @@ class UniformClock : public Clock {
    * Advances the clock by an arbitrary timestep (multiple of 0.000001 fm).
    *
    * \tparam T type of the timestep
-   * \param[in] big_timestep Timestep by which the clock is advanced.
+   * \param[in] big_timestep Time step by which the clock is advanced.
    * \note It uses a template parameter only for disambiguation with the
    * overload below.
    */
@@ -320,10 +369,20 @@ class UniformClock : public Clock {
     return *this;
   }
 
+ protected:
+  /**
+   * Access the internal time of the clock, independently from the end time.
+   *
+   * \return the internal clock time.
+   */
+  double present_internal_time() const override {
+    return convert(reset_time_ + timestep_duration_ * counter_);
+  }
+
  private:
-  /// A multiplier transfering the internal integer to the real time.
+  /// A multiplier transferring the internal integer to the real time.
   static constexpr double to_double = resolution;
-  /// A multiplier transfering the real time to the internal integer.
+  /// A multiplier transferring the real time to the internal integer.
   static constexpr double from_double = 1. / resolution;
 
   /// Convert a double \p x into the internal int representation.
@@ -334,7 +393,7 @@ class UniformClock : public Clock {
   static double convert(Representation x) { return x * to_double; }
 
   /// The time step size \f$\Delta t\f$ in \f$10^{-6}\,\mathrm{fm}\f$.
-  Representation timestep_duration_ = 0u;
+  Representation timestep_duration_ = 0;
   /// The time of last reset (when counter_ was set to 0).
   Representation reset_time_ = 0;
   /// The end time of the particle propagation
@@ -395,6 +454,15 @@ class CustomClock : public Clock {
                      }
                    });
   }
+
+ protected:
+  /**
+   * For the CustomClock, the internal time is basically by design the same as
+   * what the current_time() method returns.
+   *
+   * \return the same as \c current_time does.
+   */
+  double present_internal_time() const override { return current_time(); }
 
  private:
   /// Vector of times where output is generated

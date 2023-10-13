@@ -22,7 +22,7 @@ static Configuration get_common_configuration() {
   return Configuration{R"(
     General:
       Modus: ToBeSet
-      End_Time: 100.0
+      End_Time: 20.1
       Nevents: 1
       Randomseed: 1
     )"};
@@ -119,6 +119,12 @@ TEST_CATCH(create_experiment_with_invalid_output_interval,
         Format: ["Oscar2013"]
   )");
   Test::experiment(std::move(config));
+}
+
+TEST_CATCH(run_experiment_beyond_end_time, std::logic_error) {
+  auto config = get_collider_configuration();
+  auto exp = std::make_unique<Experiment<ColliderModus>>(config, ".");
+  exp->run_time_evolution(1000);
 }
 
 TEST(access_particles) {

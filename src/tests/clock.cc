@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2020,2022
+ *    Copyright (c) 2014-2015,2017-2020,2022-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -30,6 +30,12 @@ TEST(set_clock) {
   FUZZY_COMPARE(labtime.timestep_duration(), 0.234);
 }
 
+TEST(set_clock_negative_start_end_time) {
+  UniformClock labtime(-0.123, 0.04, -0.03);
+  COMPARE(labtime.current_time(), -0.123);
+  FUZZY_COMPARE(labtime.timestep_duration(), 0.04);
+}
+
 TEST(run_clock) {
   UniformClock labtime(0.0, 0.1, 300.0);
   COMPARE(labtime.current_time(), 0.0);
@@ -44,6 +50,28 @@ TEST(run_clock) {
     ++labtime;
   }
   FUZZY_COMPARE(labtime.current_time(), 1.0);
+}
+
+TEST(tick_clock_beyond_end_time) {
+  const auto end_time = 10.0;
+  UniformClock labtime(0.0, 10, end_time);
+  VERIFY(labtime < end_time);
+  ++labtime;
+  VERIFY(!(labtime < end_time));
+  VERIFY(!(labtime > end_time));
+  ++labtime;
+  VERIFY(labtime > end_time);
+}
+
+TEST(run_clock_across_end_time) {
+  const auto end_time = 20.100001;
+  UniformClock labtime(0.0, 0.1, end_time);
+  auto counter = 0u;
+  while (labtime < end_time) {
+    ++labtime;
+    ++counter;
+  }
+  COMPARE(counter, 202);
 }
 
 TEST(reset_timestep) {
