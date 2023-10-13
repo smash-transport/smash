@@ -88,7 +88,13 @@ class RootSolver1D {
   /// GSL root finding object to take care of root finding
   gsl_root_fsolver *Root_finder_ = nullptr;
 
-  /// Static pointer to the function to solve
+  /** Static pointer to the function to solve
+   * \note This member has to be \c static since it is used inside the `static
+   * gsl_func` method. As \c static methods exist and can be used without a
+   * class instance, it is not possible to use non-static members inside them
+   * (non-static members \b are bound to a class instance). \see gsl_func to
+   * understand why that method needs to be \c static as well.
+   */
   static inline std::unique_ptr<std::function<double(double)>> root_eq_ =
       nullptr;
 
@@ -101,6 +107,15 @@ class RootSolver1D {
    * \param[in] x Position on x-axis where the function should be evaluated
    *
    * \return The value of the function at point x
+   *
+   * \note
+   * This function needs to be \c static because GSL uses an object of type \c
+   * gsl_function that has to be initialised with a pointer to a function and
+   * this cannot be created from a class non-static method as a class non-static
+   * method cannot exist as entity without an instance of that type. On the
+   * contrary, a pointer to a static member function can be used as a normal
+   * pointer to a free function, because a \c static method exists without
+   * needing any instance of the class.
    */
   static double gsl_func(const double x, void *) { return (*root_eq_)(x); }
 };
