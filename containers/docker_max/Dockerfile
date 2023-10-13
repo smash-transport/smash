@@ -15,6 +15,18 @@ SHELL ["/bin/bash", "-c"]
 
 ARG TARGET_ARCHITECTURE="x86-64"
 
+# Declare all together the versions of the going to be installed codebases
+
+ARG rootV="6.28.06"
+ARG hepmcV="3.2.6"
+ARG cppcheckV="2.8"
+ARG cpplintV="1.6.0"
+ARG rivetV="3.1.7"
+ARG yodaV="1.9.7"
+ARG fastjetV="3.4.0"
+ARG fjcontribV="1.049"
+ARG juliaV="1.9.3"
+
 # Add some info about authors and contents using the rules o the OCI Image Format Specification
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
 
@@ -23,7 +35,7 @@ LABEL org.opencontainers.image.authors "SMASH team"
 LABEL org.opencontainers.image.url "https://smash-transport.github.io"
 LABEL org.opencontainers.image.source "https://github.com/smash-transport/smash"
 LABEL org.opencontainers.image.description \
-      "SMASH with ROOT 6.28.06, HepMC3 3.2.6, Rivet, 3.1.7 and several other tools"
+      "SMASH with ROOT ${rootV}, HepMC3 ${hepmcV}, Rivet ${rivetV} and several other tools"
 
 # Install the packages non interactively.
 
@@ -200,8 +212,6 @@ ARG CXXFLAGS=${CPPFLAGS}
 
 # Install ROOT.
 
-ARG rootV="6.28.06"
-
 RUN cd /SMASH && \
 wget https://root.cern/download/root_v${rootV}.source.tar.gz && \
 tar xf root_v${rootV}.source.tar.gz && \
@@ -212,21 +222,19 @@ cd root_build && \
 cmake -DCMAKE_INSTALL_PREFIX=../root_install ../root_src -Dxrootd=OFF && \
 cmake --build . --target install -j$(nproc)
 ENV ROOTSYS=/SMASH/root_install
-ENV PATH=$ROOTSYS/bin:$PATH
-ENV LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH
-ENV SHLIB_PATH=$ROOTSYS/lib
-ENV LIBPATH=$ROOTSYS/lib
-ENV PYTHONPATH=$ROOTSYS/lib:$PYTHONPATH
-ENV MANPATH=$ROOTSYS/man:$MANPATH
-ENV CMAKE_PREFIX_PATH=$ROOTSYS:$CMAKE_PREFIX_PATH
-ENV JUPYTER_PATH=$ROOTSYS/etc/notebook:$JUPYTER_PATH
-ENV JUPYTER_CONFIG_DIR=$ROOTSYS/etc/notebook:$JUPYTER_CONFIG_DIR
+ENV PATH=${ROOTSYS}/bin:${PATH}
+ENV LD_LIBRARY_PATH=${ROOTSYS}/lib:${LD_LIBRARY_PATH}
+ENV SHLIB_PATH=${ROOTSYS}/lib
+ENV LIBPATH=${ROOTSYS}/lib
+ENV PYTHONPATH=${ROOTSYS}/lib:${PYTHONPATH}
+ENV MANPATH=${ROOTSYS}/man:${MANPATH}
+ENV CMAKE_PREFIX_PATH=${ROOTSYS}:${CMAKE_PREFIX_PATH}
+ENV JUPYTER_PATH=${ROOTSYS}/etc/notebook:${JUPYTER_PATH}
+ENV JUPYTER_CONFIG_DIR=${ROOTSYS}/etc/notebook:${JUPYTER_CONFIG_DIR}
 ENV CLING_STANDARD_PCH=none
 RUN echo /SMASH/root_install/lib >> /etc/ld.so.conf && ldconfig
 
 # Install HepMC3.
-
-ARG hepmcV="3.2.6"
 
 RUN cd /SMASH && \
 wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${hepmcV}.tar.gz && \
@@ -236,7 +244,7 @@ cd HepMC3_build && \
 cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=ON -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3_install ../HepMC3-${hepmcV} && \
 make -j$(nproc) && \
 make install
-ENV PATH="/SMASH/hepmc3_install/bin:$PATH"
+ENV PATH="/SMASH/hepmc3_install/bin:${PATH}"
 RUN echo /SMASH/hepmc3_install/lib >> /etc/ld.so.conf && ldconfig
 
 # Install gitstats.
@@ -248,9 +256,6 @@ make install
 
 # Install cppcheck and cpplint.
 
-ARG cppcheckV="2.8"
-ARG cpplintV="1.6.0"
-
 RUN cd /SMASH && \
 wget https://github.com/danmar/cppcheck/archive/${cppcheckV}.tar.gz && \
 tar xf ${cppcheckV}.tar.gz && \
@@ -259,74 +264,68 @@ mkdir -p build && cd build && cmake .. && cmake --build . && \
 cd /SMASH && wget https://github.com/cpplint/cpplint/archive/refs/tags/${cpplintV}.tar.gz && tar xf ${cpplintV}.tar.gz && \
 mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck-${cppcheckV}/build/bin/cppcheck cpplint-${cpplintV}/cpplint.py /SMASH/auxiliary_progs/  && \
 chmod +x /SMASH/auxiliary_progs/*
-ENV PATH=$PATH:/SMASH/auxiliary_progs
+ENV PATH=${PATH}:/SMASH/auxiliary_progs
 
 # Install Rivet.
 # The versions of the dependent libraries are chosen according to the bootstrap script downloadable from the Rivet website.
 
-ARG RIVET_VERSION="3.1.7"
-ARG YODA_VERSION="1.9.7"
-ARG FASTJET_VERSION="3.4.0"
-ARG FJCONTRIB_VERSION="1.049"
 ARG CXXDIALECT="c++17"
 ARG INSTALL_PREFIX="/SMASH/Rivet_install"
 ARG HEPMCPATH="/SMASH/hepmc3_install"
 ARG BUILD_PREFIX="/SMASH/rivet_build"
 
 ENV PYTHON=/usr/bin/python3
-ENV PATH=/SMASH/Rivet_install/bin:$PATH
-ENV LD_LIBRARY_PATH="/SMASH/Rivet_install/lib:/SMASH/Rivet_install/lib64:$LD_LIBRARY_PATH"
+ENV PATH=/SMASH/Rivet_install/bin:${PATH}
+ENV LD_LIBRARY_PATH="/SMASH/Rivet_install/lib:/SMASH/Rivet_install/lib64:${LD_LIBRARY_PATH}"
 
-RUN mkdir -p $INSTALL_PREFIX/etc/bash_completion.d && mkdir -p $INSTALL_PREFIX/lib && ln -s lib $INSTALL_PREFIX/lib64
+RUN mkdir -p ${INSTALL_PREFIX}/etc/bash_completion.d && mkdir -p ${INSTALL_PREFIX}/lib && ln -s lib ${INSTALL_PREFIX}/lib64
 
-RUN mkdir -p $BUILD_PREFIX && cd $BUILD_PREFIX
+RUN mkdir -p ${BUILD_PREFIX} && cd ${BUILD_PREFIX}
 
-RUN wget --no-check-certificate --no-verbose http://www.fastjet.fr/repo/fastjet-$FASTJET_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
-cd fastjet-$FASTJET_VERSION && ./configure --prefix=$INSTALL_PREFIX --enable-shared --disable-auto-ptr --enable-allcxxplugins &&\
+RUN wget --no-check-certificate --no-verbose http://www.fastjet.fr/repo/fastjet-${fastjetV}.tar.gz -O- | tar --no-same-owner -xz &&\
+cd fastjet-${fastjetV} && ./configure --prefix=${INSTALL_PREFIX} --enable-shared --disable-auto-ptr --enable-allcxxplugins &&\
 make -j$(nproc) && make install
-ARG FASTJETPATH=$INSTALL_PREFIX
+ARG FASTJETPATH=${INSTALL_PREFIX}
 
-RUN cd $BUILD_PREFIX &&\
-wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/fjcontrib-$FJCONTRIB_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
-cd fjcontrib-$FJCONTRIB_VERSION && ./configure --fastjet-config=$FASTJETPATH/bin/fastjet-config CXXFLAGS=-fPIC &&\
+RUN cd ${BUILD_PREFIX} &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/fjcontrib-${fjcontribV}.tar.gz -O- | tar --no-same-owner -xz &&\
+cd fjcontrib-${fjcontribV} && ./configure --fastjet-config=${FASTJETPATH}/bin/fastjet-config CXXFLAGS=-fPIC &&\
 sed -i.bak -e 's/#include <array>/#include <array>\n#include <limits>/' LundPlane/EEHelpers.hh &&\
 make -j1 fragile-shared-install && make install
 
-RUN cd $BUILD_PREFIX &&\
-wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/YODA-$YODA_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
-cd YODA-$YODA_VERSION && ./configure --prefix=$INSTALL_PREFIX && make -j$(nproc) && make install && cp yodaenv.sh $INSTALL_PREFIX/yodaenv.sh
-ARG YODAPATH=$INSTALL_PREFIX
+RUN cd ${BUILD_PREFIX} &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/YODA-${yodaV}.tar.gz -O- | tar --no-same-owner -xz &&\
+cd YODA-${yodaV} && ./configure --prefix=${INSTALL_PREFIX} && make -j$(nproc) && make install && cp yodaenv.sh ${INSTALL_PREFIX}/yodaenv.sh
+ARG YODAPATH=${INSTALL_PREFIX}
 
 # Remove all the experimental analyses and leave only the analysis for simulators.
 # The lines need to be checked and probably adjusted at each new Rivet release.
 
-RUN cd $BUILD_PREFIX &&\
-wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/Rivet-$RIVET_VERSION.tar.gz -O- | tar --no-same-owner -xz &&\
-cd Rivet-$RIVET_VERSION &&\
-./configure --prefix=$INSTALL_PREFIX --with-yoda=$YODAPATH -with-hepmc3=$HEPMCPATH --with-fastjet=$FASTJETPATH &&\
-make -j$(nproc) && make install && cp rivetenv.sh $INSTALL_PREFIX
+RUN cd ${BUILD_PREFIX} &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/Rivet-${rivetV}.tar.gz -O- | tar --no-same-owner -xz &&\
+cd Rivet-${rivetV} &&\
+./configure --prefix=${INSTALL_PREFIX} --with-yoda=${YODAPATH} -with-hepmc3=${HEPMCPATH} --with-fastjet=${FASTJETPATH} &&\
+make -j$(nproc) && make install && cp rivetenv.sh ${INSTALL_PREFIX}
 
-RUN echo $INSTALL_PREFIX/lib >> /etc/ld.so.conf && ldconfig 
+RUN echo ${INSTALL_PREFIX}/lib >> /etc/ld.so.conf && ldconfig
 
 # The python version must be updated together with the underlying linux distribution.
 # Unfortunately something like $(python3 -V | cut -d " " -f 2) does not work in an ENV statement.
 
-ENV PYTHONPATH="$INSTALL_PREFIX/lib/python3.8.10/site-packages:$PYTHONPATH"
-ENV TEXMFHOME="$INSTALL_PREFIX/share/Rivet/texmf:$TEXMFHOME"
-ENV HOMETEXMF="$INSTALL_PREFIX/share/Rivet/texmf:$HOMETEXMF"
-ENV TEXMFCNF="$INSTALL_PREFIX/share/Rivet/texmf/cnf:$TEXMFCNF"
-ENV TEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$TEXINPUTS"
-ENV LATEXINPUTS="$INSTALL_PREFIX/share/Rivet/texmf/tex:$LATEXINPUTS"
+ENV PYTHONPATH="${INSTALL_PREFIX}/lib/python3.8.10/site-packages:${PYTHONPATH}"
+ENV TEXMFHOME="${INSTALL_PREFIX}/share/Rivet/texmf:${TEXMFHOME}"
+ENV HOMETEXMF="${INSTALL_PREFIX}/share/Rivet/texmf:${HOMETEXMF}"
+ENV TEXMFCNF="${INSTALL_PREFIX}/share/Rivet/texmf/cnf:${TEXMFCNF}"
+ENV TEXINPUTS="${INSTALL_PREFIX}/share/Rivet/texmf/tex:${TEXINPUTS}"
+ENV LATEXINPUTS="${INSTALL_PREFIX}/share/Rivet/texmf/tex:${LATEXINPUTS}"
 
 # Install julia.
-
-ARG juliaV="1.9.3"
 
 RUN cd /opt &&\
 wget https://github.com/JuliaLang/julia/releases/download/v${juliaV}/julia-${juliaV}.tar.gz &&\
 tar xf julia-${juliaV}.tar.gz && cd julia-${juliaV} && make -j$(nproc)
 ARG julia_path=/opt/julia-${juliaV}
-ENV PATH=${julia_path}:$PATH
+ENV PATH=${julia_path}:${PATH}
 
 # Recompile SMASH (if the repository exists).
 
@@ -357,7 +356,7 @@ ENV SMASH_BUILD_DIR=/SMASH/smash_bin
 
 RUN cd /SMASH && \
 rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz \
-cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src $BUILD_PREFIX /var/cache/apt/archives/*.deb 
+cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src ${BUILD_PREFIX} /var/cache/apt/archives/*.deb
 
 # Allow Imagemagick to process PS, EPS and PDF files in case the user needs to use `convert` inside the container
 
@@ -380,15 +379,15 @@ RUN pip install cmakelang
 
 # Shell prompt when using the container image under Docker.
 
-ENV PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "
+ENV PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+(${debian_chroot})}\u@\h:\w\$ "
 
 # Shell prompt when using the container image under Singularity (CUSTOM_ENV file automatically sourced by Singularity).
 
 RUN mkdir -p /.singularity.d/env/ && \
 CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh && \
-echo '#!/bin/bash' > $CUSTOM_ENV && \
-echo 'PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+($debian_chroot)}\u@\h:\w\$ "' >> $CUSTOM_ENV && \
-chmod 755 $CUSTOM_ENV
+echo '#!/bin/bash' > "${CUSTOM_ENV}" && \
+echo 'PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+(${debian_chroot})}\u@\h:\w\$ "' >> "${CUSTOM_ENV}" && \
+chmod 755 "${CUSTOM_ENV}"
 
 # Build wrapper script around screen executable to make it usable from within the container
 # (it needs write access to SCREENDIR folder)
