@@ -15,12 +15,15 @@ SHELL ["/bin/bash", "-c"]
 
 ARG TARGET_ARCHITECTURE="x86-64"
 
-# Add some info about authors and contents.
+# Add some info about authors and contents using the rules o the OCI Image Format Specification
+# https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
 
-LABEL maintainer.name="SMASH team"
-LABEL maintainer.website="https://smash-transport.github.io"
-LABEL description="SMASH with ROOT 6.28.06, HepMC3 3.2.6, Rivet, 3.1.7 and several other tools"
-LABEL org.opencontainers.image.source https://github.com/smash-transport/smash
+LABEL org.opencontainers.image.title "SMASH-max"
+LABEL org.opencontainers.image.authors "SMASH team"
+LABEL org.opencontainers.image.url "https://smash-transport.github.io"
+LABEL org.opencontainers.image.source "https://github.com/smash-transport/smash"
+LABEL org.opencontainers.image.description \
+      "SMASH with ROOT 6.28.06, HepMC3 3.2.6, Rivet, 3.1.7 and several other tools"
 
 # Install the packages non interactively.
 

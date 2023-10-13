@@ -17,8 +17,9 @@ ARG TARGET_ARCHITECTURE="x86-64"
 LABEL org.opencontainers.image.title "SMASH-mini"
 LABEL org.opencontainers.image.authors "SMASH team"
 LABEL org.opencontainers.image.url "https://smash-transport.github.io"
-LABEL org.opencontainers.image.description "Basic SMASH image (sources, compiler and bare executable, without ROOT, HepMC3 and Rivet)."
 LABEL org.opencontainers.image.source "https://github.com/smash-transport/smash"
+LABEL org.opencontainers.image.description \
+      "Basic SMASH image (sources, compiler and bare executable, without ROOT, HepMC3 and Rivet)."
 
 # Install minimal set of requirements
 
