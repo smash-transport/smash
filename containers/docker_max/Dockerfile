@@ -17,15 +17,15 @@ ARG TARGET_ARCHITECTURE="x86-64"
 
 # Declare all together the versions of the going to be installed codebases
 
-ARG rootV="6.28.06"
-ARG hepmcV="3.2.6"
-ARG cppcheckV="2.8"
-ARG cpplintV="1.6.0"
-ARG rivetV="3.1.7"
-ARG yodaV="1.9.7"
-ARG fastjetV="3.4.0"
-ARG fjcontribV="1.049"
-ARG juliaV="1.9.3"
+ARG ROOT_VERSION="6.28.06"
+ARG HEPMC_VERSION="3.2.6"
+ARG CPPCHECK_VERSION="2.8"
+ARG CPPLINT_VERSION="1.6.0"
+ARG RIVET_VERSION="3.1.7"
+ARG YODA_VERSION="1.9.7"
+ARG FASTJET_VERSION="3.4.0"
+ARG FJCONTRIB_VERSION="1.049"
+ARG JULIA_VERSION="1.9.3"
 
 # Add some info about authors and contents using the rules o the OCI Image Format Specification
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
@@ -35,7 +35,7 @@ LABEL org.opencontainers.image.authors "SMASH team"
 LABEL org.opencontainers.image.url "https://smash-transport.github.io"
 LABEL org.opencontainers.image.source "https://github.com/smash-transport/smash"
 LABEL org.opencontainers.image.description \
-      "SMASH with ROOT ${rootV}, HepMC3 ${hepmcV}, Rivet ${rivetV} and several other tools"
+      "SMASH with ROOT ${ROOT_VERSION}, HepMC3 ${HEPMC_VERSION}, Rivet ${RIVET_VERSION} and several other tools"
 
 # Install the packages non interactively.
 
@@ -213,9 +213,9 @@ ARG CXXFLAGS=${CPPFLAGS}
 # Install ROOT.
 
 RUN cd /SMASH && \
-wget https://root.cern/download/root_v${rootV}.source.tar.gz && \
-tar xf root_v${rootV}.source.tar.gz && \
-mv root-${rootV} root_src && \
+wget https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz && \
+tar xf root_v${ROOT_VERSION}.source.tar.gz && \
+mv root-${ROOT_VERSION} root_src && \
 mkdir -p root_install && \
 mkdir -p root_build && \
 cd root_build && \
@@ -237,11 +237,11 @@ RUN echo /SMASH/root_install/lib >> /etc/ld.so.conf && ldconfig
 # Install HepMC3.
 
 RUN cd /SMASH && \
-wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${hepmcV}.tar.gz && \
-tar xf HepMC3-${hepmcV}.tar.gz && \
+wget https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${HEPMC_VERSION}.tar.gz && \
+tar xf HepMC3-${HEPMC_VERSION}.tar.gz && \
 mkdir -p HepMC3_build && \
 cd HepMC3_build && \
-cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=ON -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3_install ../HepMC3-${hepmcV} && \
+cmake -DHEPMC3_ENABLE_ROOTIO:BOOL=ON -DHEPMC3_ENABLE_TEST:BOOL=OFF -DHEPMC3_INSTALL_INTERFACES:BOOL=ON -DHEPMC3_ENABLE_PYTHON:BOOL=OFF -DHEPMC3_BUILD_STATIC_LIBS:BOOL=OFF -DHEPMC3_BUILD_DOCS:BOOL=OFF -DCMAKE_INSTALL_PREFIX=../hepmc3_install ../HepMC3-${HEPMC_VERSION} && \
 make -j$(nproc) && \
 make install
 ENV PATH="/SMASH/hepmc3_install/bin:${PATH}"
@@ -257,12 +257,12 @@ make install
 # Install cppcheck and cpplint.
 
 RUN cd /SMASH && \
-wget https://github.com/danmar/cppcheck/archive/${cppcheckV}.tar.gz && \
-tar xf ${cppcheckV}.tar.gz && \
-cd cppcheck-${cppcheckV} && \
+wget https://github.com/danmar/cppcheck/archive/${CPPCHECK_VERSION}.tar.gz && \
+tar xf ${CPPCHECK_VERSION}.tar.gz && \
+cd cppcheck-${CPPCHECK_VERSION} && \
 mkdir -p build && cd build && cmake .. && cmake --build . && \
-cd /SMASH && wget https://github.com/cpplint/cpplint/archive/refs/tags/${cpplintV}.tar.gz && tar xf ${cpplintV}.tar.gz && \
-mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck-${cppcheckV}/build/bin/cppcheck cpplint-${cpplintV}/cpplint.py /SMASH/auxiliary_progs/  && \
+cd /SMASH && wget https://github.com/cpplint/cpplint/archive/refs/tags/${CPPLINT_VERSION}.tar.gz && tar xf ${CPPLINT_VERSION}.tar.gz && \
+mkdir -p /SMASH/auxiliary_progs/ && mv cppcheck-${CPPCHECK_VERSION}/build/bin/cppcheck cpplint-${CPPLINT_VERSION}/cpplint.py /SMASH/auxiliary_progs/  && \
 chmod +x /SMASH/auxiliary_progs/*
 ENV PATH=${PATH}:/SMASH/auxiliary_progs
 
@@ -282,28 +282,28 @@ RUN mkdir -p ${INSTALL_PREFIX}/etc/bash_completion.d && mkdir -p ${INSTALL_PREFI
 
 RUN mkdir -p ${BUILD_PREFIX} && cd ${BUILD_PREFIX}
 
-RUN wget --no-check-certificate --no-verbose http://www.fastjet.fr/repo/fastjet-${fastjetV}.tar.gz -O- | tar --no-same-owner -xz &&\
-cd fastjet-${fastjetV} && ./configure --prefix=${INSTALL_PREFIX} --enable-shared --disable-auto-ptr --enable-allcxxplugins &&\
+RUN wget --no-check-certificate --no-verbose http://www.fastjet.fr/repo/fastjet-${FASTJET_VERSION}.tar.gz -O- | tar --no-same-owner -xz &&\
+cd fastjet-${FASTJET_VERSION} && ./configure --prefix=${INSTALL_PREFIX} --enable-shared --disable-auto-ptr --enable-allcxxplugins &&\
 make -j$(nproc) && make install
 ARG FASTJETPATH=${INSTALL_PREFIX}
 
 RUN cd ${BUILD_PREFIX} &&\
-wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/fjcontrib-${fjcontribV}.tar.gz -O- | tar --no-same-owner -xz &&\
-cd fjcontrib-${fjcontribV} && ./configure --fastjet-config=${FASTJETPATH}/bin/fastjet-config CXXFLAGS=-fPIC &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/fjcontrib-${FJCONTRIB_VERSION}.tar.gz -O- | tar --no-same-owner -xz &&\
+cd fjcontrib-${FJCONTRIB_VERSION} && ./configure --fastjet-config=${FASTJETPATH}/bin/fastjet-config CXXFLAGS=-fPIC &&\
 sed -i.bak -e 's/#include <array>/#include <array>\n#include <limits>/' LundPlane/EEHelpers.hh &&\
 make -j1 fragile-shared-install && make install
 
 RUN cd ${BUILD_PREFIX} &&\
-wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/YODA-${yodaV}.tar.gz -O- | tar --no-same-owner -xz &&\
-cd YODA-${yodaV} && ./configure --prefix=${INSTALL_PREFIX} && make -j$(nproc) && make install && cp yodaenv.sh ${INSTALL_PREFIX}/yodaenv.sh
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/YODA-${YODA_VERSION}.tar.gz -O- | tar --no-same-owner -xz &&\
+cd YODA-${YODA_VERSION} && ./configure --prefix=${INSTALL_PREFIX} && make -j$(nproc) && make install && cp yodaenv.sh ${INSTALL_PREFIX}/yodaenv.sh
 ARG YODAPATH=${INSTALL_PREFIX}
 
 # Remove all the experimental analyses and leave only the analysis for simulators.
 # The lines need to be checked and probably adjusted at each new Rivet release.
 
 RUN cd ${BUILD_PREFIX} &&\
-wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/Rivet-${rivetV}.tar.gz -O- | tar --no-same-owner -xz &&\
-cd Rivet-${rivetV} &&\
+wget --no-check-certificate --no-verbose http://cedar-tools.web.cern.ch/downloads/Rivet-${RIVET_VERSION}.tar.gz -O- | tar --no-same-owner -xz &&\
+cd Rivet-${RIVET_VERSION} &&\
 ./configure --prefix=${INSTALL_PREFIX} --with-yoda=${YODAPATH} -with-hepmc3=${HEPMCPATH} --with-fastjet=${FASTJETPATH} &&\
 make -j$(nproc) && make install && cp rivetenv.sh ${INSTALL_PREFIX}
 
@@ -322,9 +322,9 @@ ENV LATEXINPUTS="${INSTALL_PREFIX}/share/Rivet/texmf/tex:${LATEXINPUTS}"
 # Install julia.
 
 RUN cd /opt &&\
-wget https://github.com/JuliaLang/julia/releases/download/v${juliaV}/julia-${juliaV}.tar.gz &&\
-tar xf julia-${juliaV}.tar.gz && cd julia-${juliaV} && make -j$(nproc)
-ARG julia_path=/opt/julia-${juliaV}
+wget https://github.com/JuliaLang/julia/releases/download/v${JULIA_VERSION}/julia-${JULIA_VERSION}.tar.gz &&\
+tar xf julia-${JULIA_VERSION}.tar.gz && cd julia-${JULIA_VERSION} && make -j$(nproc)
+ARG julia_path=/opt/julia-${JULIA_VERSION}
 ENV PATH=${julia_path}:${PATH}
 
 # Recompile SMASH (if the repository exists).
@@ -355,8 +355,8 @@ ENV SMASH_BUILD_DIR=/SMASH/smash_bin
 # Remove most of the sources.
 
 RUN cd /SMASH && \
-rm -rf HepMC3-${hepmcV} HepMC3-${hepmcV}.tar.gz HepMC3_build gitstats cppcheck-${cppcheckV} ${cppcheckV}.tar.gz \
-cpplint-${cpplintV} ${cpplintV}.tar.gz root_v${rootV}.source.tar.gz root_build root_src ${BUILD_PREFIX} /var/cache/apt/archives/*.deb
+rm -rf HepMC3-${HEPMC_VERSION} HepMC3-${HEPMC_VERSION}.tar.gz HepMC3_build gitstats cppcheck-${CPPCHECK_VERSION} ${CPPCHECK_VERSION}.tar.gz \
+cpplint-${CPPLINT_VERSION} ${CPPLINT_VERSION}.tar.gz root_v${ROOT_VERSION}.source.tar.gz root_build root_src ${BUILD_PREFIX} /var/cache/apt/archives/*.deb
 
 # Allow Imagemagick to process PS, EPS and PDF files in case the user needs to use `convert` inside the container
 
