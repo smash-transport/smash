@@ -118,17 +118,25 @@ class Potentials {
                                 skyrme_b_, skyrme_tau_, mom_dependence_C_,
                                 mom_dependence_Lambda_);
     };
-    auto rootsolver = RootSolver1D(root_equation);
+    RootSolver1D root_solver{root_equation};
     const std::array<double, 4> starting_interval_width = {0.1, 1.0, 10.0,
                                                            100.0};
     for (double width : starting_interval_width) {
       const double initial_guess = std::sqrt(mass * mass + momentum * momentum);
-      auto calc_frame_energy = rootsolver.try_find_root(
+      auto calc_frame_energy = root_solver.try_find_root(
           initial_guess - width / 2, initial_guess + width / 2, 100000);
       if (calc_frame_energy) {
         return *calc_frame_energy;
+      } else {
+        logg[LPotentials].debug()
+            << "Did not find a root for potentials in the interval ["
+            << initial_guess - width / 2 << " GeV ,"
+            << initial_guess + width / 2 << " GeV]. Trying a wider interval";
       }
     }
+    logg[LPotentials].debug(
+        "Root for potentials was not found in any of the intervals "
+        "tried.");
     throw std::runtime_error(
         "Failed to find root for momentum-dependent potentials");
   }
@@ -649,20 +657,20 @@ class Potentials {
              (Lambda * Lambda * fermi_momentum -
               std::pow(Lambda, 3) * std::atan(fermi_momentum / Lambda));
     }
-    const double temp1 = 2 * g * C * M_PI * std::pow(Lambda, 3) /
-                         (std::pow(2 * M_PI, 3) * nuclear_density);
-    const double temp2 = (fermi_momentum * fermi_momentum + Lambda * Lambda -
-                          momentum * momentum) /
-                         (2 * momentum * Lambda);
-    const double temp3 =
-        std::pow(momentum + fermi_momentum, 2) + Lambda * Lambda;
-    const double temp4 =
-        std::pow(momentum - fermi_momentum, 2) + Lambda * Lambda;
-    const double temp5 = 2 * fermi_momentum / Lambda;
-    const double temp6 = (momentum + fermi_momentum) / Lambda;
-    const double temp7 = (momentum - fermi_momentum) / Lambda;
-    const double result = temp1 * (temp2 * std::log(temp3 / temp4) + temp5 -
-                                   2 * (std::atan(temp6) - atan(temp7)));
+    const std::array<double, 7> temp = {
+        2 * g * C * M_PI * std::pow(Lambda, 3) /
+            (std::pow(2 * M_PI, 3) * nuclear_density),
+        (fermi_momentum * fermi_momentum + Lambda * Lambda -
+         momentum * momentum) /
+            (2 * momentum * Lambda),
+        std::pow(momentum + fermi_momentum, 2) + Lambda * Lambda,
+        std::pow(momentum - fermi_momentum, 2) + Lambda * Lambda,
+        2 * fermi_momentum / Lambda,
+        (momentum + fermi_momentum) / Lambda,
+        (momentum - fermi_momentum) / Lambda};
+    const double result =
+        temp[0] * (temp[1] * std::log(temp[2] / temp[3]) + temp[4] -
+                   2 * (std::atan(temp[5]) - atan(temp[6])));
     return mev_to_gev * result;
   }
 };

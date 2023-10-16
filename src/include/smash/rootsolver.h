@@ -52,6 +52,10 @@ class RootSolver1D {
                                       size_t itermax) {
     // check if root is in the given interval
     if ((*root_eq_)(initial_guess_low) * (*root_eq_)(initial_guess_high) > 0) {
+      logg[LRootSolver].debug()
+          << "Function has same sign at both ends of the interval ["
+          << initial_guess_low << ", " << initial_guess_high
+          << "]. Root can't be found in this interval.";
       return std::nullopt;
     }
     gsl_function function_GSL = {&(gsl_func), nullptr};
