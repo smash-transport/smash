@@ -263,6 +263,8 @@ RUN <<EOF
 EOF
 
 ENV PATH=${HEPMC_INSTALL}/bin:${PATH}
+# This is needed to make ROOT correctly find HEPMC files
+ENV ROOT_INCLUDE_PATH=/SMASH/hepmc3_install/include/
 
 # Install gitstats
 
