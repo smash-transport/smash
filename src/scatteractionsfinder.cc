@@ -188,6 +188,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     const ParticleData& data_a, const ParticleData& data_b, double dt,
     const std::vector<FourVector>& beam_momentum,
     const double gcell_vol) const {
+  
+  const bool top_down = true;
   /* If the two particles
    * 1) belong to one of the two colliding nuclei, and
    * 2) both of them have never experienced any collisions,
@@ -251,8 +253,13 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     return nullptr;
   }
 
-  // Add various subprocesses.
-  act->add_all_scatterings(finder_parameters_);
+  if (!top_down) {
+    // Add various subprocesses.
+    act->add_all_scatterings(finder_parameters_);
+  }
+  else {
+    act->set_parametrized_total_cross_section(finder_parameters_);
+  }
   double xs = act->cross_section() * fm2_mb /
               static_cast<double>(finder_parameters_.testparticles);
 
@@ -316,6 +323,11 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
 
     logg[LFindScatter].debug("particle distance squared: ", distance_squared,
                              "\n    ", data_a, "\n<-> ", data_b);
+  }
+
+  if (top_down){
+    const double parametrized_total_xs = act->cross_section();
+    act->add_all_scatterings(finder_parameters_, parametrized_total_xs);
   }
 
   return act;
@@ -438,9 +450,7 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
                 }
               }
             }
-            if (finder_parameters_.included_multi
-                        [IncludedMultiParticleReactions::NNbar_5to2] == 1 &&
-                search_list.size() >= 5) {
+            if (finder_parameters_.included_multi[IncludedMultiParticleReactions::NNbar_5to2] == 1 && search_list.size() >= 5) {
               for (const ParticleData& p5 : search_list) {
                 if ((p1.id() < p2.id() && p2.id() < p3.id() &&
                      p3.id() < p4.id() && p4.id() < p5.id()) &&

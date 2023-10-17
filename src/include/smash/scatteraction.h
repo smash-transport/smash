@@ -142,6 +142,14 @@ class ScatterAction : public Action {
    * \param[in] finder_parameters parameters for collision finding.
    */
   void add_all_scatterings(
+      const ScatterActionsFinderParameters& finder_parameters,
+      const double goal_total_xs = -1);
+
+  /***/
+  void reweight(const double goal_total_xs); 
+	  
+  /***/
+  void set_parametrized_total_cross_section(
       const ScatterActionsFinderParameters& finder_parameters);
 
   /**

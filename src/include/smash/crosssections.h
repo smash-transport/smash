@@ -58,6 +58,9 @@ class CrossSections {
       const ScatterActionsFinderParameters& finder_parameters,
       StringProcess* string_process) const;
 
+  double parametrized_total(
+      const ScatterActionsFinderParameters& finder_parameters) const;
+
   /**
    * Helper function:
    * Sum all cross sections of the given process list.

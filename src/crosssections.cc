@@ -202,6 +202,32 @@ CollisionBranchList CrossSections::generate_collision_list(
   return process_list;
 }
 
+double CrossSections::parametrized_total (
+     const ScatterActionsFinderParameters& finder_parameters) const {
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
+  double total_xs = 0.;
+  if ((pdg_a.is_nucleon() && pdg_b.is_pion()) ||
+      (pdg_b.is_nucleon() && pdg_a.is_pion())) {
+    // Elastic Nucleon Pion Scattering
+    total_xs = 0.;
+  } else if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
+             (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
+    // Elastic Nucleon Kaon Scattering
+    total_xs = 0.;
+  } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon() &&
+             pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign() &&
+	     sqrt_s_ > finder_parameters.low_snn_cut) {
+    // Elastic Nucleon Nucleon Scattering
+    total_xs = (pdg_a == pdg_b) ? pp_total(sqrt_s_*sqrt_s_) : np_total(sqrt_s_*sqrt_s_);
+  } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon() &&
+             pdg_a.antiparticle_sign() == -pdg_b.antiparticle_sign()) {
+    // Elastic Nucleon anti-Nucleon Scattering
+    total_xs = ppbar_elastic(sqrt_s_ * sqrt_s_);
+  }
+  return total_xs;
+}
+
 CollisionBranchPtr CrossSections::elastic(
     const ScatterActionsFinderParameters& finder_parameters) const {
   double elastic_xs = 0.;
