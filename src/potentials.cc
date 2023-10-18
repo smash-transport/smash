@@ -20,7 +20,9 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
       use_symmetry_(conf.has_value({"Symmetry"})),
       use_coulomb_(conf.has_value({"Coulomb"})),
       use_vdf_(conf.has_value({"VDF"})),
-      use_momentum_dependence_(conf.has_value({"Momentum_Dependence"})) {
+      use_momentum_dependence_(conf.has_value({"Momentum_Dependence"})),
+      use_potentials_outside_lattice_(
+          conf.take({"Use_Potentials_Outside_Lattice"}, true)) {
   if (use_skyrme_) {
     skyrme_a_ = conf.take({"Skyrme", "Skyrme_A"});
     skyrme_b_ = conf.take({"Skyrme", "Skyrme_B"});
