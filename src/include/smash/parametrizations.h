@@ -322,6 +322,10 @@ double deuteron_pion_elastic(double mandelstam_s);
  */
 double deuteron_nucleon_elastic(double mandelstam_s);
 
+double kplusp_total(double mandelstam_s);
+double kplusn_total(double mandelstam_s);
+double kminusp_total(double mandelstam_s);
+
 /**
  * K+ p elastic background cross section parametrization.
  * sigma(K+n->K+n) = sigma(K+n->K0p) = 0.5 * sigma(K+p->K+p)

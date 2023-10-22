@@ -428,6 +428,51 @@ double deuteron_nucleon_elastic(double mandelstam_s) {
          600.0 * std::exp(-smash::square(s - 7.93) / 0.1) + 10.0;
 }
 
+double kplusp_total(double mandelstam_s) {
+  if (kplusp_total_interpolation == nullptr) {
+    std::vector<double> x = KPLUSP_TOT_PLAB;
+    std::vector<double> y = KPLUSP_TOT_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
+    kplusp_total_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
+  return (*kplusp_total_interpolation)(p_lab);
+}
+
+double kplusn_total(double mandelstam_s) {
+  if (kplusn_total_interpolation == nullptr) {
+    std::vector<double> x = KPLUSN_TOT_PLAB;
+    std::vector<double> y = KPLUSN_TOT_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.05, 5);
+    kplusn_total_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
+  return (*kplusn_total_interpolation)(p_lab);
+}
+
+double kminusp_total(double mandelstam_s) {
+  if (kminusp_total_interpolation == nullptr) {
+    std::vector<double> x = KMINUSP_TOT_PLAB;
+    std::vector<double> y = KMINUSP_TOT_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
+    kminusp_total_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
+  return (*kminusp_total_interpolation)(p_lab);
+}
+
 double kplusp_elastic_background(double mandelstam_s) {
   constexpr double a0 = 10.508;  // mb
   constexpr double a1 = -3.716;  // mb/GeV

@@ -161,6 +161,10 @@ const std::initializer_list<double> KMINUSP_TOT_PLAB = {
     55.000,  70.000,  100.000, 100.000, 100.000, 120.000, 147.000, 150.000,
     150.000, 170.000, 175.000, 200.000, 200.000, 240.000, 280.000, 310.000};
 
+/// An interpolation that gets lazily filled using the KMINUSP_TOT data.
+static std::unique_ptr<InterpolateDataLinear<double>>
+    kminusp_total_interpolation = nullptr;
+
 /// PDG data on K- p total cross section: cross section.
 const std::initializer_list<double> KMINUSP_TOT_SIG = {
     113.80, 98.00, 94.00, 96.70, 75.10, 89.30, 90.70, 82.50, 79.40, 78.60,

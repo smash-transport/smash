@@ -207,24 +207,101 @@ double CrossSections::parametrized_total (
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
   double total_xs = 0.;
-  if ((pdg_a.is_nucleon() && pdg_b.is_pion()) ||
-      (pdg_b.is_nucleon() && pdg_a.is_pion())) {
-    // Elastic Nucleon Pion Scattering
-    total_xs = 0.;
-  } else if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
-             (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
-    // Elastic Nucleon Kaon Scattering
-    total_xs = 0.;
-  } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon() &&
-             pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign() &&
-	     sqrt_s_ > finder_parameters.low_snn_cut) {
-    // Elastic Nucleon Nucleon Scattering
-    total_xs = (pdg_a == pdg_b) ? pp_total(sqrt_s_*sqrt_s_) : np_total(sqrt_s_*sqrt_s_);
-  } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon() &&
-             pdg_a.antiparticle_sign() == -pdg_b.antiparticle_sign()) {
-    // Elastic Nucleon anti-Nucleon Scattering
-    total_xs = ppbar_elastic(sqrt_s_ * sqrt_s_);
+  if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
+    if (sqrt_s_ > finder_parameters.low_snn_cut) {  //merge two ifs later
+      // NN
+      if (pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign()) {
+        total_xs = (pdg_a == pdg_b) ? pp_total(sqrt_s_*sqrt_s_) : np_total(sqrt_s_*sqrt_s_);
+      }
+      // NNbar
+      else {
+        total_xs = ppbar_total(sqrt_s_*sqrt_s_); // should be improved with isospin (different hadrons?)
+      }
+      total_xs *= (1-0.4*pdg_a.frac_strange())*(1-0.4*pdg_b.frac_strange());
+    }
   }
+  else
+    total_xs = 40.;
+//    total_xs = kminusp_total(sqrt_s_*sqrt_s_);
+//  else if ((pdg_a.is_baryon() && pdg_b.is_meson()) ||
+//            pdg_a.is_meson() && pdg_b.is_baryon()) {
+//    const PdgCode &meson = pdg_a.is_meson() ? pdg_a : pdg_b; 
+//    const PdgCode &baryon = pdg_a.is_meson() ? pdg_b : pdg_a; 
+//    if (meson.is_kaon() && baryon.is_nucleon()) {
+//      // K⁺p, K⁰n 
+//      if ((meson.code() == pdg::K_p && baryon.code() == pdg::p) ||
+//          (meson.code() == pdg::K_z && baryon.code() == pdg::n) ||
+//	  (meson.code() == pdg::K_m && baryon.code() == -pdg::p) ||
+//	  (meson.code() == pdg::Kbar_z && baryon.code() == -pdg::n)) {
+//	total_xs = kplusp_total(sqrt_s_*sqrt_s_);
+//      }
+//      // K⁻p, K̅⁰n
+//      else if ((meson.code() == pdg::K_p && baryon.code() == -pdg::p) ||
+//          (meson.code() == pdg::K_z && baryon.code() == -pdg::n) ||
+//          (meson.code() == pdg::K_m && baryon.code() == pdg::p) ||
+//          (meson.code() == pdg::Kbar_z && baryon.code() == pdg::n)) {
+//        total_xs = kminusp_total(sqrt_s_*sqrt_s_);
+//      }
+//      // K⁺n, K⁰p
+//      else if ((meson.code() == pdg::K_p && baryon.code() == pdg::n) ||
+//          (meson.code() == pdg::K_z && baryon.code() == pdg::p) ||
+//          (meson.code() == pdg::K_m && baryon.code() == -pdg::n) ||
+//          (meson.code() == pdg::Kbar_z && baryon.code() == -pdg::p)) {
+//        total_xs = kplusn_total(sqrt_s_*sqrt_s_);
+//      }
+//      // K⁻n, K̅⁰p: similar total cross section to K⁻p overall
+//      else if ((meson.code() == pdg::K_p && baryon.code() == -pdg::n) ||
+//          (meson.code() == pdg::K_z && baryon.code() == -pdg::p) ||
+//          (meson.code() == pdg::K_m && baryon.code() == pdg::n) ||
+//          (meson.code() == pdg::Kbar_z && baryon.code() == pdg::p)) {
+//        total_xs = kminusp_total(sqrt_s_*sqrt_s_);
+//      } 
+//    }
+//    else if (meson.is_pion() && baryon.is_nucleon()) {
+//      if ((meson.code() == pdg::pi_p && 
+//		(baryon.code() == pdg::p || baryon.code() == -pdg::n)) ||
+//          (meson.code() == pdg::pi_m && 
+//	        (baryon.code() == pdg::n || baryon.code() == -pdg::p))) {
+//        total_xs = kplusp_total(sqrt_s_*sqrt_s_);
+//      }
+//      else if (meson.code() == pdg::pi_z) {
+//	total_xs = (kplusp_total(sqrt_s_*sqrt_s_) + kminusp_total(sqrt_s_*sqrt_s_))/2.;
+//      }
+//      else {
+//	total_xs = kminusp_total(sqrt_s_*sqrt_s_);
+//      }
+//    }
+//    else {
+//      total_xs = kminusp_total(sqrt_s_*sqrt_s_)*(1-0.4*pdg_a.frac_strange())*(1-0.4*pdg_b.frac_strange());
+//    }
+//  }
+//  else if (pdg_a.is_meson() && pdg_b.is_meson()) {
+//    if (pdg_a.is_pion() && pdg_b.is_pion()) {
+//      switch (pdg_a.isospin3()*pdg_b.isospin3()) {
+//	case -1:
+//          total_xs = kminusp_total(sqrt_s_*sqrt_s_);
+//	  // pi⁺pi⁻
+//	  break;
+//        case 0:
+//	  if (pdg_a.isospin3()+pdg_b.isospin3() == 0) {
+//            total_xs = kminusp_total(sqrt_s_*sqrt_s_);
+//	    //pi⁰pi⁰
+//	  }
+//	  else {
+//            total_xs = kminusp_total(sqrt_s_*sqrt_s_);
+//	    //pi⁰pi⁺ is similar to pi⁺pi⁻
+//	  }
+//	  break;
+//	case 1:
+//	  total_xs = kminusp_total(sqrt_s_*sqrt_s_);
+//	  // pi⁺pi⁺
+//      }
+//    }
+//    else {
+//      //logg[LCrossSections].warn() << "resonances! " << pdg_a << " " << pdg_b;
+//      total_xs = kminusp_total(sqrt_s_*sqrt_s_)*(2./3.)*(1-0.4*pdg_a.frac_strange())*(1-0.4*pdg_b.frac_strange());
+//    }
+//  }
   return total_xs;
 }
 
@@ -3022,4 +3099,4 @@ double CrossSections::probability_transit_high(
   return prob;
 }
 
-}  // namespace smash
+}
