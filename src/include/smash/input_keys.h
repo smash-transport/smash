@@ -1951,6 +1951,31 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_totXS_strat_,Total_Cross_Section_Strategy,string,"BottomUp"}
+   *
+   * Which strategy to use when evaluating total cross sections for collision
+   * finding. Currently, possible options are
+   * - `BottomUp`
+   *   Partial cross sections of a given initial state are summed up. This
+   * matches most inclusive experimental cross sections with the 3 and 4-star
+   * hadronic list from PDG2018, but is susceptible to changes once new
+   * resonances are added.
+   * - `TopDown`
+   *   The total cross section of measured processes is parametrized, and the
+   * partial cross sections are rescaled to match it. Unmeasured processes use
+   * the high energy parametrization even in low energies, ignoring possible
+   * resonance peaks.
+   */
+  /**
+   * \see_key{key_CT_totXS_strat_}
+   */
+  inline static const Key<TotalCrossSectionStrategy> collTerm_totXS_strat{
+      {"Collision_Term", "Total_Cross_Section_Strategy"},
+      TotalCrossSectionStrategy::BottomUp,
+      {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,double,2.5}
    *
    * The (minimal) length \unit{in fm} used for the grid cells of the stochastic
@@ -5039,7 +5064,8 @@ struct InputKeys {
       std::reference_wrapper<const Key<SmearingMode>>,
       std::reference_wrapper<const Key<SphereInitialCondition>>,
       std::reference_wrapper<const Key<ThermalizationAlgorithm>>,
-      std::reference_wrapper<const Key<TimeStepMode>>>;
+      std::reference_wrapper<const Key<TimeStepMode>>,
+      std::reference_wrapper<const Key<TotalCrossSectionStrategy>>>;
 
   /// List of references to all existing SMASH keys.
   inline static const std::vector<key_references_variant> list = {
@@ -5104,6 +5130,7 @@ struct InputKeys {
       std::cref(collTerm_crossSectionScaling),
       std::cref(collTerm_elasticCrossSection),
       std::cref(collTerm_elasticNNCutoffSqrts),
+      std::cref(collTerm_totXS_strat),
       std::cref(collTerm_fixedMinCellLength),
       std::cref(collTerm_forceDecaysAtEnd),
       std::cref(collTerm_includeDecaysAtTheEnd),

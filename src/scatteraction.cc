@@ -48,7 +48,9 @@ void ScatterAction::add_collisions(CollisionBranchList pv) {
 void ScatterAction::generate_final_state() {
   logg[LScatterAction].debug("Incoming particles: ", incoming_particles_);
 
-  logg[LScatterAction].warn() << "incoming: " << incoming_particles_[0].pdgcode() << " " << incoming_particles_[1].pdgcode() << " xs: " << total_cross_section_ << " sqrt_s: " << sqrt_s() ;
+  // logg[LScatterAction].warn() << "incoming: " <<
+  // incoming_particles_[0].pdgcode() << " " << incoming_particles_[1].pdgcode()
+  // << " xs: " << total_cross_section_ << " sqrt_s: " << sqrt_s() ;
   /* Decide for a particular final state. */
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
       collision_channels_, total_cross_section_);
@@ -110,15 +112,14 @@ void ScatterAction::generate_final_state() {
 }
 
 void ScatterAction::add_all_scatterings(
-    const ScatterActionsFinderParameters &finder_parameters, 
+    const ScatterActionsFinderParameters &finder_parameters,
     const double goal_total_xs) {
   CrossSections xs(incoming_particles_, sqrt_s(),
                    get_potential_at_interaction_point());
   CollisionBranchList processes =
       xs.generate_collision_list(finder_parameters, string_process_);
-  
-  logg[LScatterAction].warn() << "total cross section before: " << total_cross_section_;
-  total_cross_section_=0;
+
+  total_cross_section_ = 0;
   /* Add various subprocesses.*/
   add_collisions(std::move(processes));
 
@@ -139,44 +140,42 @@ void ScatterAction::add_all_scatterings(
     }
   }
 
-  // Rescale the branching ratios so that their sum matches the goal
-  if (finder_parameters.top_down) { //Ren: this will be a bool in finder_parameters
+  /* If using parametrized total cross sections, rescale the branching ratios
+   * so that their sum matches the goal */
+  if (finder_parameters.total_xs_strategy ==
+      TotalCrossSectionStrategy::TopDown) {
     if (goal_total_xs < really_small) {
-      logg[LScatterAction].fatal() << "Reweighting requested but goal total cross section not supplied.";
-      throw std::invalid_argument("Goal total cross section is missing from function call");
+      logg[LScatterAction].fatal()
+          << "Reweighting requested but goal total cross section not supplied.";
+      throw std::invalid_argument(
+          "Goal total cross section is missing from function call");
     }
     reweight(goal_total_xs);
-  } 
-  double test_sum=0;
-  for (auto &proc : collision_channels_) {
-    test_sum += proc->weight();
   }
-  logg[LScatterAction].warn() << test_sum << " " << total_cross_section_ << " " << goal_total_xs;
 }
 
-/* \todo (ren): some exclusive channels may be measured and fixed by experiment, 
+/* \todo (ren): some exclusive channels may be measured and fixed by experiment,
  * so there should be an option to not reweight them */
-void ScatterAction::reweight(const double goal_total_xs) {  
-  if (total_cross_section_ < really_small ) {
-    logg[LScatterAction].warn() << "Total cross section is too small, not reweighting.";
-    logg[LScatterAction].warn() << incoming_particles_[0] << " and " << incoming_particles_[1] << " sqrt_s " << sqrt_s(); 
-  }
-  else {
-    const double reweight = goal_total_xs/total_cross_section_;
-    logg[LScatterAction].warn() << "reweighting " << total_cross_section_ << " to " << goal_total_xs;
+void ScatterAction::reweight(const double goal_total_xs) {
+  if (total_cross_section_ < really_small) {
+    logg[LScatterAction].warn()
+        << "Current total cross section is zero, not reweighting.";
+  } else {
+    const double reweight = goal_total_xs / total_cross_section_;
+    logg[LScatterAction].debug()
+        << "Reweighting " << total_cross_section_ << " to " << goal_total_xs;
     for (auto &proc : collision_channels_) {
-      proc->set_weight(proc->weight()*reweight);
+      proc->set_weight(proc->weight() * reweight);
     }
     total_cross_section_ = goal_total_xs;
   }
 }
 
-void ScatterAction::set_parametrized_total_cross_section(
-    const ScatterActionsFinderParameters &finder_parameters) {
+void ScatterAction::set_parametrized_total_cross_section() {
   CrossSections xs(incoming_particles_, sqrt_s(),
                    get_potential_at_interaction_point());
 
-  total_cross_section_ = xs.parametrized_total(finder_parameters);
+  total_cross_section_ = xs.parametrized_total();
 }
 
 double ScatterAction::get_total_weight() const {

@@ -58,8 +58,13 @@ class CrossSections {
       const ScatterActionsFinderParameters& finder_parameters,
       StringProcess* string_process) const;
 
-  double parametrized_total(
-      const ScatterActionsFinderParameters& finder_parameters) const;
+  /**
+   * Select the parametrization for the total cross section, given the types of
+   * incoming particles.
+   *
+   * return The appropriate total cross section value.
+   */
+  double parametrized_total() const;
 
   /**
    * Helper function:

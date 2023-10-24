@@ -181,15 +181,15 @@ ScatterActionsFinderParameters create_finder_parameters(
               InputKeys::collTerm_stringTrans_pipiOffset.default_value()),
           config.take(
               {"Collision_Term", "String_Transition", "KN_Offset"},
-              InputKeys::collTerm_stringTrans_KNOffset.default_value())}};
+              InputKeys::collTerm_stringTrans_KNOffset.default_value())},
+      config.take({"Collision_Term", "Total_Cross_Section_Strategy"},
+                  InputKeys::collTerm_totXS_strat.default_value())};
 }
 
 ActionPtr ScatterActionsFinder::check_collision_two_part(
     const ParticleData& data_a, const ParticleData& data_b, double dt,
     const std::vector<FourVector>& beam_momentum,
     const double gcell_vol) const {
-  
-  const bool top_down = true;
   /* If the two particles
    * 1) belong to one of the two colliding nuclei, and
    * 2) both of them have never experienced any collisions,
@@ -253,12 +253,12 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     return nullptr;
   }
 
-  if (!top_down) {
+  if (finder_parameters_.total_xs_strategy ==
+      TotalCrossSectionStrategy::TopDown) {
+    act->set_parametrized_total_cross_section(finder_parameters_);
+  } else {
     // Add various subprocesses.
     act->add_all_scatterings(finder_parameters_);
-  }
-  else {
-    act->set_parametrized_total_cross_section(finder_parameters_);
   }
   double xs = act->cross_section() * fm2_mb /
               static_cast<double>(finder_parameters_.testparticles);
@@ -325,7 +325,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
                              "\n    ", data_a, "\n<-> ", data_b);
   }
 
-  if (top_down){
+  if (finder_parameters_.total_xs_strategy ==
+      TotalCrossSectionStrategy::TopDown) {
     const double parametrized_total_xs = act->cross_section();
     act->add_all_scatterings(finder_parameters_, parametrized_total_xs);
   }
@@ -450,7 +451,9 @@ ActionList ScatterActionsFinder::find_actions_in_cell(
                 }
               }
             }
-            if (finder_parameters_.included_multi[IncludedMultiParticleReactions::NNbar_5to2] == 1 && search_list.size() >= 5) {
+            if (finder_parameters_.included_multi
+                        [IncludedMultiParticleReactions::NNbar_5to2] == 1 &&
+                search_list.size() >= 5) {
               for (const ParticleData& p5 : search_list) {
                 if ((p1.id() < p2.id() && p2.id() < p3.id() &&
                      p3.id() < p4.id() && p4.id() < p5.id()) &&

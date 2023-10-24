@@ -119,10 +119,8 @@ struct ScatterActionsFinderParameters {
    * via resonances - and high collision energies - mediated via strings.
    */
   const StringTransitionParameters transition_high_energy;
-  /**
-   *
-   */
-  const bool top_down = true;
+  /// Method used to evaluate total cross sections for collision finding.
+  const TotalCrossSectionStrategy total_xs_strategy;
 };
 
 }  // namespace smash

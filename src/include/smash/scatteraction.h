@@ -140,17 +140,27 @@ class ScatterAction : public Action {
    * Add all possible scattering subprocesses for this action object.
    *
    * \param[in] finder_parameters parameters for collision finding.
+   * \param[in] goal_total_xs desired total cross section value. If positive,
+   * this triggers a reweighting of all possible branches.
    */
   void add_all_scatterings(
       const ScatterActionsFinderParameters& finder_parameters,
       const double goal_total_xs = -1);
 
-  /***/
-  void reweight(const double goal_total_xs); 
-	  
-  /***/
-  void set_parametrized_total_cross_section(
-      const ScatterActionsFinderParameters& finder_parameters);
+  /**
+   * Loops over the possible branches and rescales their weight according to the
+   * desired total cross section. In case the current total is 0, a warning is
+   * issued as this should not happen in an usual run.
+   *
+   * \param[in] goal_total_xs The desired total cross section.
+   */
+  void reweight(const double goal_total_xs);
+
+  /**
+   * Given the incoming particles, assigns the correct parametrization of the
+   * total cross section.
+   */
+  void set_parametrized_total_cross_section();
 
   /**
    * Get list of possible collision channels.

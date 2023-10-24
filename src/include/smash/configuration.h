@@ -883,6 +883,29 @@ class Configuration {
     }
 
     /**
+     * Set total cross section strategy from configuration values.
+     *
+     * \return TotalCrossSectionStrategy.
+     * \throw IncorrectTypeInAssignment in case a strategy that is
+     * not available is provided as a configuration value.
+     */
+    operator TotalCrossSectionStrategy() const {
+      const std::string s = operator std::string();
+      if (s == "BottomUp") {
+        return TotalCrossSectionStrategy::BottomUp;
+      }
+      if (s == "TopDown") {
+        return TotalCrossSectionStrategy::TopDown;
+      }
+      if (s == "TopDownStable") {
+        return TotalCrossSectionStrategy::TopDownStable;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) + "\" should be " +
+          "\"BottomUp\", \"TopDown\" " + "or \"TopDownStable\".");
+    }
+
+    /**
      * Set OutputOnlyFinal for particles output from configuration values.
      *
      * \return OutputOnlyFinal.

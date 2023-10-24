@@ -98,6 +98,42 @@ double pipi_string_hard(double mandelstam_s) {
   return xs_string_hard(mandelstam_s, 0.013, 2.3, 4.7);
 }
 
+double pipluspiminus_total(double sqrts) {
+  if (pipluspiminus_total_interpolation == nullptr) {
+    std::vector<double> x = PIPLUSPIMINUS_TOT_SQRTS;
+    std::vector<double> y = PIPLUSPIMINUS_TOT_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 10);
+    pipluspiminus_total_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  std::initializer_list<double>::iterator end = PIPLUSPIMINUS_TOT_SQRTS.end();
+  if (sqrts < *(--end))
+    return (*pipluspiminus_total_interpolation)(sqrts);
+  else
+    return pipi_string_hard(sqrts * sqrts);
+}
+
+double piplusp_total(double sqrts) {
+  if (piplusp_total_interpolation == nullptr) {
+    std::vector<double> x = PIPLUSP_TOT_SQRTS;
+    std::vector<double> y = PIPLUSP_TOT_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    piplusp_total_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  std::initializer_list<double>::iterator end = PIPLUSP_TOT_SQRTS.end();
+  if (sqrts < *(--end))
+    return (*piplusp_total_interpolation)(sqrts);
+  else
+    return piplusp_high_energy(sqrts * sqrts);
+}
+
 /* pi+ p elastic cross section parametrization, PDG data.
  *
  * The PDG data is smoothed using the LOWESS algorithm. If more than one
@@ -182,6 +218,24 @@ double piplusp_sigmapluskplus_pdg(double mandelstam_s) {
   }
   const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   return (*piplusp_sigmapluskplus_interpolation)(p_lab);
+}
+
+double piminusp_total(double sqrts) {
+  if (piminusp_total_interpolation == nullptr) {
+    std::vector<double> x = PIMINUSP_TOT_SQRTS;
+    std::vector<double> y = PIMINUSP_TOT_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    piminusp_total_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  std::initializer_list<double>::iterator end = PIMINUSP_TOT_SQRTS.end();
+  if (sqrts < *(--end))
+    return (*piminusp_total_interpolation)(sqrts);
+  else
+    return piminusp_high_energy(sqrts * sqrts);
 }
 
 /* pi- p elastic cross section parametrization, PDG data.

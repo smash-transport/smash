@@ -407,7 +407,6 @@ class Action {
         return proc.get();
       }
     }
-    logg[LAction].warn() << "random: "<< random_weight << ", sum: " << weight_sum << ", total:" << total_weight;
     /* Should never get here. */
     logg[LAction].fatal(SMASH_SOURCE_LOCATION,
                         "Problem in choose_channel: ", subprocesses.size(), " ",

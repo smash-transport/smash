@@ -148,6 +148,22 @@ double Npi_string_hard(double mandelstam_s);
 double pipi_string_hard(double mandelstam_s);
 
 /**
+ *  pi+ pi- total cross section parametrized from PDG2018.
+ *
+ *  \param[in] sqrts the rest frame total energy [GeV]
+ *  \return the parametrized cross-section [mb]
+ */
+double pipluspiminus_total(double sqrts);
+
+/**
+ *  pi+ p total cross section parametrized from PDG2018.
+ *
+ *  \param[in] sqrts the rest frame total energy [GeV]
+ *  \return the parametrized cross-section [mb]
+ */
+double piplusp_total(double sqrts);
+
+/**
  * pi+p elactic cross section parametrization.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
  * Elastic contributions from decays are not subtracted, high energy
@@ -196,6 +212,14 @@ double piplusp_elastic(double mandelstam_s);
  * are averaged.
  */
 double piplusp_sigmapluskplus_pdg(double mandelstam_s);
+
+/**
+ *  pi- p total cross section parametrized from PDG2018
+ *
+ *  \param[in] sqrts the rest frame total energy [GeV]
+ *  \return the parametrized cross-section [mb]
+ */
+double piminusp_total(double sqrts);
 
 /**
  * pi-p elastic cross section parametrization
@@ -322,8 +346,31 @@ double deuteron_pion_elastic(double mandelstam_s);
  */
 double deuteron_nucleon_elastic(double mandelstam_s);
 
+/**
+ * K+ p total cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.8
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
+ */
 double kplusp_total(double mandelstam_s);
+
+/**
+ * K+ n total cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.8
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
+ */
 double kplusn_total(double mandelstam_s);
+
+/**
+ * K- p total cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.8
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
+ */
 double kminusp_total(double mandelstam_s);
 
 /**
