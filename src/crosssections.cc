@@ -202,19 +202,19 @@ CollisionBranchList CrossSections::generate_collision_list(
   return process_list;
 }
 
-double CrossSections::parametrized_total() const {
+double CrossSections::parametrized_total(
+    const ScatterActionsFinderParameters& finder_parameters) const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
   double total_xs = 0.;
   if (pdg_a.is_baryon() && pdg_b.is_baryon() &&
       sqrt_s_ > finder_parameters.low_snn_cut) {
-    // NN
     if (pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign()) {
+      // NN
       total_xs = (pdg_a == pdg_b) ? pp_total(sqrt_s_ * sqrt_s_)
                                   : np_total(sqrt_s_ * sqrt_s_);
-    }
-    // NNbar
-    else {
+    } else {
+      // NNbar
       total_xs = ppbar_total(sqrt_s_ * sqrt_s_);
     }
     total_xs *=
@@ -224,32 +224,29 @@ double CrossSections::parametrized_total() const {
     const PdgCode& meson = pdg_a.is_meson() ? pdg_a : pdg_b;
     const PdgCode& baryon = pdg_a.is_meson() ? pdg_b : pdg_a;
     if (meson.is_kaon() && baryon.is_nucleon()) {
-      // K⁺p, K⁰n
       if ((meson.code() == pdg::K_p && baryon.code() == pdg::p) ||
           (meson.code() == pdg::K_z && baryon.code() == pdg::n) ||
           (meson.code() == pdg::K_m && baryon.code() == -pdg::p) ||
           (meson.code() == pdg::Kbar_z && baryon.code() == -pdg::n)) {
+        // K⁺p, K⁰n
         total_xs = kplusp_total(sqrt_s_ * sqrt_s_);
-      }
-      // K⁻p, K̅⁰n
-      else if ((meson.code() == pdg::K_p && baryon.code() == -pdg::p) ||
-               (meson.code() == pdg::K_z && baryon.code() == -pdg::n) ||
-               (meson.code() == pdg::K_m && baryon.code() == pdg::p) ||
-               (meson.code() == pdg::Kbar_z && baryon.code() == pdg::n)) {
+      } else if ((meson.code() == pdg::K_p && baryon.code() == -pdg::p) ||
+                 (meson.code() == pdg::K_z && baryon.code() == -pdg::n) ||
+                 (meson.code() == pdg::K_m && baryon.code() == pdg::p) ||
+                 (meson.code() == pdg::Kbar_z && baryon.code() == pdg::n)) {
+        // K⁻p, K̅⁰n
         total_xs = kminusp_total(sqrt_s_ * sqrt_s_);
-      }
-      // K⁺n, K⁰p
-      else if ((meson.code() == pdg::K_p && baryon.code() == pdg::n) ||
-               (meson.code() == pdg::K_z && baryon.code() == pdg::p) ||
-               (meson.code() == pdg::K_m && baryon.code() == -pdg::n) ||
-               (meson.code() == pdg::Kbar_z && baryon.code() == -pdg::p)) {
+      } else if ((meson.code() == pdg::K_p && baryon.code() == pdg::n) ||
+                 (meson.code() == pdg::K_z && baryon.code() == pdg::p) ||
+                 (meson.code() == pdg::K_m && baryon.code() == -pdg::n) ||
+                 (meson.code() == pdg::Kbar_z && baryon.code() == -pdg::p)) {
+        // K⁺n, K⁰p
         total_xs = kplusn_total(sqrt_s_ * sqrt_s_);
-      }
-      // K⁻n, K̅⁰p: similar total cross section to K⁻p overall
-      else if ((meson.code() == pdg::K_p && baryon.code() == -pdg::n) ||
-               (meson.code() == pdg::K_z && baryon.code() == -pdg::p) ||
-               (meson.code() == pdg::K_m && baryon.code() == pdg::n) ||
-               (meson.code() == pdg::Kbar_z && baryon.code() == pdg::p)) {
+      } else if ((meson.code() == pdg::K_p && baryon.code() == -pdg::n) ||
+                 (meson.code() == pdg::K_z && baryon.code() == -pdg::p) ||
+                 (meson.code() == pdg::K_m && baryon.code() == pdg::n) ||
+                 (meson.code() == pdg::Kbar_z && baryon.code() == pdg::p)) {
+        // K⁻n, K̅⁰p: similar total cross section to K⁻p overall
         total_xs = kminusp_total(sqrt_s_ * sqrt_s_);
       }
     } else if (meson.is_pion() && baryon.is_nucleon()) {
@@ -259,13 +256,11 @@ double CrossSections::parametrized_total() const {
           (meson.code() == pdg::pi_m &&
            (baryon.code() == pdg::n || baryon.code() == -pdg::p))) {
         total_xs = piplusp_total(sqrt_s_);
-      }
-      // π⁰N
-      else if (meson.code() == pdg::pi_z) {
+      } else if (meson.code() == pdg::pi_z) {
+        // π⁰N
         total_xs = (piplusp_total(sqrt_s_) + piminusp_total(sqrt_s_)) / 2.;
-      }
-      // π⁻p, π⁺n
-      else {
+      } else {
+        // π⁻p, π⁺n
         total_xs = piminusp_total(sqrt_s_);
       }
     } else {
@@ -284,10 +279,9 @@ double CrossSections::parametrized_total() const {
         case 0:
           // π⁰π⁰
           if (pdg_a.isospin3() + pdg_b.isospin3() == 0) {
-            total_xs = piminusp_total(sqrt_s_);
-          }
-          // π⁺π⁰: similar to π⁺π⁻
-          else {
+            total_xs = pizeropizero_total(sqrt_s_);
+          } else {
+            // π⁺π⁰: similar to π⁺π⁻
             total_xs = pipluspiminus_total(sqrt_s_);
           }
           break;
@@ -296,9 +290,8 @@ double CrossSections::parametrized_total() const {
           total_xs = (2. / 3.) * piminusp_high_energy(sqrt_s_ * sqrt_s_);
           break;
       }
-    }
-    // M*+M* goes to AQM high energy π⁻p
-    else {
+    } else {
+      // M*+M* goes to AQM high energy π⁻p
       total_xs = (2. / 3.) * piminusp_high_energy(sqrt_s_ * sqrt_s_) *
                  (1 - 0.4 * pdg_a.frac_strange()) *
                  (1 - 0.4 * pdg_b.frac_strange());

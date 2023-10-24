@@ -897,12 +897,12 @@ class Configuration {
       if (s == "TopDown") {
         return TotalCrossSectionStrategy::TopDown;
       }
-      if (s == "TopDownStable") {
-        return TotalCrossSectionStrategy::TopDownStable;
+      if (s == "TopDownMeasured") {
+        return TotalCrossSectionStrategy::TopDownMeasured;
       }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) + "\" should be " +
-          "\"BottomUp\", \"TopDown\" " + "or \"TopDownStable\".");
+          "\"BottomUp\", \"TopDown\" " + "or \"TopDownMeasured\".");
     }
 
     /**

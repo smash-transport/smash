@@ -1965,6 +1965,9 @@ struct InputKeys {
    * partial cross sections are rescaled to match it. Unmeasured processes use
    * the high energy parametrization even in low energies, ignoring possible
    * resonance peaks.
+   * - `TopDownMeasured`
+   *   Mixes above options, with parametrization only for \f$NN, N\bar{N}, NK,
+   * N\pi, and \pi\pi\f$. Remaining processes use sum of partial cross sections.
    */
   /**
    * \see_key{key_CT_totXS_strat_}

@@ -159,8 +159,11 @@ class ScatterAction : public Action {
   /**
    * Given the incoming particles, assigns the correct parametrization of the
    * total cross section.
+   *
+   * \param[in] finder_parameters Parameters for collision finding.
    */
-  void set_parametrized_total_cross_section();
+  void set_parametrized_total_cross_section(
+      const ScatterActionsFinderParameters& finder_parameters);
 
   /**
    * Get list of possible collision channels.

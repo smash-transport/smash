@@ -16,6 +16,7 @@
 #include "smash/constants.h"
 #include "smash/decaymodes.h"
 #include "smash/logging.h"
+#include "smash/parametrizations.h"
 #include "smash/scatteraction.h"
 #include "smash/scatteractionmulti.h"
 #include "smash/scatteractionphoton.h"
@@ -253,8 +254,16 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     return nullptr;
   }
 
+  bool incoming_parametrized = false;
   if (finder_parameters_.total_xs_strategy ==
-      TotalCrossSectionStrategy::TopDown) {
+      TotalCrossSectionStrategy::TopDownMeasured) {
+    const PdgCode& pdg_a = data_a.type().pdgcode();
+    const PdgCode& pdg_b = data_b.type().pdgcode();
+    incoming_parametrized = parametrization_exists(pdg_a, pdg_b);
+  }
+  if (finder_parameters_.total_xs_strategy ==
+          TotalCrossSectionStrategy::TopDown ||
+      incoming_parametrized) {
     act->set_parametrized_total_cross_section(finder_parameters_);
   } else {
     // Add various subprocesses.
@@ -326,7 +335,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   }
 
   if (finder_parameters_.total_xs_strategy ==
-      TotalCrossSectionStrategy::TopDown) {
+          TotalCrossSectionStrategy::TopDown ||
+      incoming_parametrized) {
     const double parametrized_total_xs = act->cross_section();
     act->add_all_scatterings(finder_parameters_, parametrized_total_xs);
   }

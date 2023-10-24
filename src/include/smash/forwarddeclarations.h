@@ -305,13 +305,14 @@ enum class EventCounting {
  * Determine how total cross sections for collision finding should be computed.
  * BottomUp sums the existing partial contributions; TopDown uses
  * parametrizations based on existing data, rescaling with AQM for unmeasured
- * processes; TopDownStable mixes the two above, using the parametrizations only
- * for measured processes, and summing up partials for unmeasured interactions.
+ * processes; TopDownMeasured mixes the two above, using the parametrizations
+ * only for measured processes, and summing up partials for unmeasured
+ * interactions.
  */
 enum class TotalCrossSectionStrategy {
   BottomUp,
   TopDown,
-  TopDownStable,
+  TopDownMeasured,
 };
 
 /// @cond

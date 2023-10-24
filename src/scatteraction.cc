@@ -171,11 +171,12 @@ void ScatterAction::reweight(const double goal_total_xs) {
   }
 }
 
-void ScatterAction::set_parametrized_total_cross_section() {
+void ScatterAction::set_parametrized_total_cross_section(
+    const ScatterActionsFinderParameters &finder_parameters) {
   CrossSections xs(incoming_particles_, sqrt_s(),
                    get_potential_at_interaction_point());
 
-  total_cross_section_ = xs.parametrized_total();
+  total_cross_section_ = xs.parametrized_total(finder_parameters);
 }
 
 double ScatterAction::get_total_weight() const {

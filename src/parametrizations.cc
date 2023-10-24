@@ -13,6 +13,7 @@
 #include <initializer_list>
 #include <iostream>
 #include <memory>
+#include <set>
 #include <vector>
 
 #include "smash/average.h"
@@ -24,6 +25,20 @@
 #include "smash/pow.h"
 
 namespace smash {
+
+bool parametrization_exists(const PdgCode& pdg_a, const PdgCode& pdg_b) {
+  if (pdg_a.is_nucleon() && pdg_b.is_nucleon())
+    return true;
+  else if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
+           (pdg_a.is_kaon() && pdg_b.is_nucleon()))
+    return true;
+  else if ((pdg_a.is_nucleon() && pdg_b.is_pion()) ||
+           (pdg_a.is_pion() && pdg_b.is_nucleon()))
+    return true;
+  else if (pdg_a.is_pion() && pdg_b.is_pion())
+    return true;
+  return false;
+}
 
 double xs_high_energy(double mandelstam_s, bool is_opposite_charge, double ma,
                       double mb, double P, double R1, double R2) {
@@ -112,6 +127,24 @@ double pipluspiminus_total(double sqrts) {
   std::initializer_list<double>::iterator end = PIPLUSPIMINUS_TOT_SQRTS.end();
   if (sqrts < *(--end))
     return (*pipluspiminus_total_interpolation)(sqrts);
+  else
+    return pipi_string_hard(sqrts * sqrts);
+}
+
+double pizeropizero_total(double sqrts) {
+  if (pizeropizero_total_interpolation == nullptr) {
+    std::vector<double> x = PIZEROPIZERO_TOT_SQRTS;
+    std::vector<double> y = PIZEROPIZERO_TOT_SIG;
+    std::vector<double> dedup_x;
+    std::vector<double> dedup_y;
+    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 10);
+    pizeropizero_total_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  std::initializer_list<double>::iterator end = PIZEROPIZERO_TOT_SQRTS.end();
+  if (sqrts < *(--end))
+    return (*pizeropizero_total_interpolation)(sqrts);
   else
     return pipi_string_hard(sqrts * sqrts);
 }

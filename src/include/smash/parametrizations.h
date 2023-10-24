@@ -21,6 +21,15 @@
 namespace smash {
 
 /**
+ * Checks if supplied codes have existing parametrizations of total cross
+ * sections
+ *
+ * \param[in] pdg_a PDG code of first incoming particle
+ * \param[in] pdg_b PDG code of second incoming particle
+ * \return Whether the parametrization exists
+ */
+bool parametrization_exists(const PdgCode& pdg_a, const PdgCode& pdg_b);
+/**
  * total hadronic cross sections at high energies parametrized in the 2016 PDG
  * book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf)
  *
@@ -154,6 +163,14 @@ double pipi_string_hard(double mandelstam_s);
  *  \return the parametrized cross-section [mb]
  */
 double pipluspiminus_total(double sqrts);
+
+/**
+ *  pi0 pi0 total cross section parametrized from PDG2018.
+ *
+ *  \param[in] sqrts the rest frame total energy [GeV]
+ *  \return the parametrized cross-section [mb]
+ */
+double pizeropizero_total(double sqrts);
 
 /**
  *  pi+ p total cross section parametrized from PDG2018.
