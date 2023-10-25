@@ -15,6 +15,7 @@
 #include "pdgcode.h"
 #include "processbranch.h"
 
+
 namespace smash {
 
 enum class BelongsTo : uint8_t {
@@ -67,7 +68,7 @@ class ParticleData {
    * \param[in] unique_id id of particle to be created
    */
   explicit ParticleData(const ParticleType &particle_type, int unique_id = -1)
-      : id_(unique_id), type_(&particle_type) {}
+      : id_(unique_id), type_(&particle_type), spin_projection_(random_spin_projection()) {}
 
   /**
    * Get the id of the particle
@@ -332,6 +333,31 @@ class ParticleData {
   void boost_momentum(const ThreeVector &v) {
     set_4momentum(momentum_.lorentz_boost(v));
   }
+  /**
+   * Get the (maximum positive) spin s of a particle in multiples of 1/2.
+   * E.g. for a spin-1 particle s=2.
+   * \return particle's spin in multiples of 1/2
+   */
+  int spin() const { return pdgcode().spin(); }
+  /**
+   * Get the current spin projection s_z of a particle's spin in multiples
+   * of 1/2. E.g. for a spin-1 particle \f$s_z=[-2, 0, +2]$
+   * \return current spin projection of a particle's spin in multiples of 1/2
+   */
+  int spin_projection() { return spin_projection_; }
+  /**
+   * Set the current spin projection s_z of a particle with given spin s
+   * in multiples of 1/2. E.g. for a spin-1 particle \f$s_z=[-2, 0, +2]$
+   * \param[in] s_z projection of particle's spin in multiples of 1/2
+   */
+  void set_spin_projection(const int s_z) { spin_projection_ = s_z; }
+  /**
+   * Determines one allowed spin projection randomly from a 
+   * particle's spin in multiples of 1/2
+   * 
+   * \return Random allowed spin projection in multiples of 1/2
+   */
+  int random_spin_projection();
 
   /// Setter for belongs_to label
   void set_belongs_to(BelongsTo label) { belongs_to_ = label; }
@@ -374,7 +400,7 @@ class ParticleData {
    * \param[in] index index of the particle to be constructed
    */
   ParticleData(const ParticleType &ptype, int uid, int index)
-      : id_(uid), index_(index), type_(&ptype) {}
+      : id_(uid), index_(index), type_(&ptype), spin_projection_(random_spin_projection()) {}
 
   /**
    * Return the cross section scaling factor at a given time.
@@ -392,7 +418,7 @@ class ParticleData {
   friend class Particles;
   /// Default constructor.
   ParticleData() = default;
-
+  
   /**
    * Copies some information of the particle to the given particle \p dst.
    *
@@ -403,6 +429,7 @@ class ParticleData {
     dst.history_ = history_;
     dst.momentum_ = momentum_;
     dst.position_ = position_;
+    dst.spin_projection_ = spin_projection_;
     dst.formation_time_ = formation_time_;
     dst.initial_xsec_scaling_factor_ = initial_xsec_scaling_factor_;
     dst.begin_formation_time_ = begin_formation_time_;
@@ -453,6 +480,11 @@ class ParticleData {
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
+  /**
+   * The current spin projection of a particle in multiples of 1/2. For example
+   * a spin-1 particle has projections [-1,0,+1], so spin_projection_=[-2,0,+2]
+   */
+  int spin_projection_= -42;
   /** Formation time at which the particle is fully formed
    *  given as an absolute value in the computational frame
    */
@@ -525,7 +557,7 @@ std::ostream &operator<<(std::ostream &out,
  *    adjusted to put the particle on its mass shell.
  *
  * This function possibly warns the user, if requested.
- *
+ * 
  * \param[in] pdgcode PdgCode  of the particle which is supposed to be checked
  * \param[in] mass Mass of the new particle
  * \param[in] four_position Position four vector of the new particle
@@ -539,6 +571,7 @@ std::ostream &operator<<(std::ostream &out,
  * client code to warn the user only once per flag. Hence, this function is
  * turning the flags to \c false after having warned the user.
  */
+// TODO: add return in new branch and open PR
 ParticleData create_valid_smash_particle_matching_provided_quantities(
     PdgCode pdgcode, double mass, const FourVector &four_position,
     const FourVector &four_momentum, int log_area, bool &mass_warning,

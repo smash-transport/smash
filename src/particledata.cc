@@ -18,6 +18,7 @@
 #include "smash/iomanipulators.h"
 #include "smash/logging.h"
 #include "smash/numerics.h"
+#include "smash/random.h"
 
 namespace smash {
 
@@ -80,6 +81,17 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
       history_.p1 = 0x0;
       history_.p2 = 0x0;
       break;
+  }
+}
+
+int ParticleData::random_spin_projection() {
+  const int particle_spin = spin() ;
+  if (particle_spin == 0) {
+    return 0 ;
+  } else {
+    const int random_spin_projection = 
+    2 * smash::random::uniform_int(0, particle_spin) - particle_spin ;
+    return random_spin_projection ; 
   }
 }
 

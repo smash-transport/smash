@@ -163,3 +163,16 @@ TEST(parity) {
   COMPARE(p * p, p);
   COMPARE(n * n, p);
 }
+
+TEST(spin_projection) {
+  for(int i=0; i<1000; i++){
+    ParticleData p1{ParticleType::find(smash::pdg::pi_p)};
+    VERIFY(p1.spin_projection() == 0);
+    ParticleData p2{ParticleType::find(smash::pdg::p)};
+    auto s2 = p2.spin_projection();
+    VERIFY(s2 == 1 || s2 == -1);
+    ParticleData p3{ParticleType::find(0x1114)};
+    auto s3 = p3.spin_projection();
+    VERIFY(s3 == -3 || s3 == -1 || s3 == 1 || s3 == 3);
+  }
+}
