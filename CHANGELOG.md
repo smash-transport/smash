@@ -34,6 +34,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Upgraded to Cuba 4.2.2
 * SMASH installation procedure was improved and allows now to use SMASH as library relying on installation folder only
 * Make `Clock` class comparison operators refer to internally represented time and not to `current_time()` return value.
+* Add strangeness to all extended output formats in the particle line
 
 
 ## SMASH-3.0
