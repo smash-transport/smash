@@ -70,20 +70,29 @@ namespace smash {
  * connecting them, basically storing a graph of the event.
  * However, in SMASH it is possible to filter the amount of information
  * available in the output, depending on whether the HepMC_asciiv3 or
- * HepMC_treeroot output options are specified under \key Particles or
+ * HepMC_treeroot output options are specified under \key %Particles or
  * \key Collisions (see  \ref doxypage_output_conf_examples for a clarifying example).
- * - \key Particles: the output only provides a particle
- *   list of the final state. In HepMC only one central vertex is created.
+ * - \key %Particles: the output only provides a particle
+ *   <b>list of the final state</b>. In HepMC only one central vertex is created.
  *   All initial state particles are incoming particles and all final state
  *   particles are outgoing particles of this vertex. Scatterings
  *   happening during the SMASH event are not recorded. For the collider
  *   modus, the initial state particles are combined into two single
  *   colliding nucleus "particles" with a nuclear pdg code.
- * - \key Collisions:  with this format, the full event tree is written.
- *   Furthermore, as in the previous \key Particles case, in collider modus
+ * - \key Collisions:  with this format, the <b>full event tree</b> is written.
+ *   Furthermore, as in the previous \key %Particles case, in collider modus
  *   we lump all incoming nucleons into nuclei, but split them out immediately
  *   afterwards to allow tracking of the individual nucleons.
  *
+ * \attention
+ * - If the HepMC output is intended to be part of a Rivet analysis that requires 
+ * access to the parent particles of the final state particles, then the \key Collisions 
+ * output should be used.
+ * - By default, SMASH exclusively handles strong decays at the end of the evolution.
+ * If one intends to include weak and electromagnetic decays as well, 
+ * the \key Include_Weak_And_EM_Decays_At_The_End option in the 
+ * \ref doxypage_input_conf_collision_term section of the configuration should be enabled.
+ * 
  * \section output_hepmc_asciiv3_ ASCII HepMC Format
  *
  * In this case the information about each event is inserted into a plain,
