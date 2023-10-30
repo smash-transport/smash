@@ -110,6 +110,16 @@ static ListModus create_list_modus_for_test() {
   return ListModus(std::move(config), parameters);
 }
 
+static ListModus create_list_modus_with_single_file_for_test() {
+  Configuration config{R"(
+    List:
+      File_Directory: ToBeSet
+      Filename: event0
+    )"};
+  config.set_value({"List", "File_Directory"}, testoutputpath.string());
+  return ListModus(std::move(config), parameters);
+}
+
 TEST(directory_is_created) {
   std::filesystem::create_directories(testoutputpath);
   VERIFY(std::filesystem::exists(testoutputpath));
@@ -383,7 +393,7 @@ TEST(multiple_events_in_file) {
   std::vector<ParticleList> init_particles;
   create_particlefile(out_par, 0, init_particles, particles_per_event,
                       max_events);
-  ListModus list_modus = create_list_modus_for_test();
+  ListModus list_modus = create_list_modus_with_single_file_for_test();
 
   for (int cur_event = 0; cur_event < max_events; cur_event++) {
     // Read the file with list modus
