@@ -70,9 +70,9 @@ namespace smash {
  * connecting them, basically storing a graph of the event.
  * However, in SMASH it is possible to filter the amount of information
  * available in the output, depending on whether the HepMC_asciiv3 or
- * HepMC_treeroot output options are specified under \key Particles or
+ * HepMC_treeroot output options are specified under \key %Particles or
  * \key Collisions (see  \ref doxypage_output_conf_examples for a clarifying example).
- * - \key Particles: the output only provides a particle
+ * - \key %Particles: the output only provides a particle
  *   <b>list of the final state</b>. In HepMC only one central vertex is created.
  *   All initial state particles are incoming particles and all final state
  *   particles are outgoing particles of this vertex. Scatterings
@@ -80,11 +80,11 @@ namespace smash {
  *   modus, the initial state particles are combined into two single
  *   colliding nucleus "particles" with a nuclear pdg code.
  * - \key Collisions:  with this format, the <b>full event tree</b> is written.
- *   Furthermore, as in the previous \key Particles case, in collider modus
+ *   Furthermore, as in the previous \key %Particles case, in collider modus
  *   we lump all incoming nucleons into nuclei, but split them out immediately
  *   afterwards to allow tracking of the individual nucleons.
  *
- * \note
+ * \attention
  * - If the HepMC output is intended to be part of a Rivet analysis that requires 
  * access to the parent particles of the final state particles, then the \key Collisions 
  * output should be used.
