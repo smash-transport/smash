@@ -105,7 +105,6 @@ static ListModus create_list_modus_for_test() {
     List:
       File_Directory: ToBeSet
       File_Prefix: event
-      Shift_Id: 0
     )"};
   config.set_value({"List", "File_Directory"}, testoutputpath.string());
   return ListModus(std::move(config), parameters);
