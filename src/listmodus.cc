@@ -251,27 +251,8 @@ bool ListModus::file_has_events_(std::filesystem::path filepath,
 
 ListBoxModus::ListBoxModus(Configuration modus_config,
                            const ExperimentParameters &param)
-    : shift_id_(modus_config.take({"ListBox", "Shift_Id"})),
-      length_(modus_config.take({"ListBox", "Length"})) {
-  std::string fd = modus_config.take({"ListBox", "File_Directory"});
-  particle_list_file_directory_ = fd;
-
-  std::string fp = modus_config.take({"ListBox", "File_Prefix"});
-  particle_list_file_prefix_ = fp;
-
-  event_id_ = 0;
-  file_id_ = shift_id_;
-
-  // Set specific values in the ListModus class
-  ListModus::set_file_id(file_id_);
-  ListModus::set_particle_list_file_directory(particle_list_file_directory_);
-  ListModus::set_particle_list_file_prefix(particle_list_file_prefix_);
-  ListModus::set_event_id(event_id_);
-
-  if (param.n_ensembles > 1) {
-    throw std::runtime_error("ListModus only makes sense with one ensemble");
-  }
-}
+    : ListModus(std::move(modus_config), param),
+      length_(modus_config.take({"ListBox", "Length"})) {}
 
 int ListBoxModus::impose_boundary_conditions(Particles *particles,
                                              const OutputsList &output_list) {

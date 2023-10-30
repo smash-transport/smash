@@ -312,23 +312,8 @@ class ListBoxModus : public ListModus {
   }
 
  private:
-  /// shift_id is the start number of file_id_
-  const int shift_id_;
-
   /// Length of the cube's edge in fm
   const double length_;
-
-  /// file_id_ is the id of the current file
-  int file_id_;
-
-  /// event_id_ = the unique id of the current event
-  int event_id_;
-
-  /// File directory of the particle list
-  std::string particle_list_file_directory_;
-
-  /// File prefix of the particle list
-  std::string particle_list_file_prefix_;
 };
 
 }  // namespace smash
