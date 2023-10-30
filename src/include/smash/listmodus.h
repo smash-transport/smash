@@ -68,7 +68,7 @@ class ListModus : public ModusDefault {
                      const ExperimentParameters &parameters);
 
   /// Construct an empty list. Useful for convenient JetScape connection.
-  ListModus() : shift_id_(0) {}
+  ListModus() = default;
 
   /**
    * Generates initial state of the particles in the system according to a list.
@@ -179,15 +179,19 @@ class ListModus : public ModusDefault {
   bool file_has_events_(std::filesystem::path filepath,
                         std::streampos last_position);
 
-  /** Return the absolute file path based on given integer. The filename
-   * is assumed to have the form (particle_list_prefix)_(file_id)
+  /**
+   * Return the absolute path of the data file. If an integer is passed, the
+   * filename is constructed using \c particle_list_file_prefix_ concatenated
+   * with the given number, otherwise the file prefix is understood to be the
+   * full filename. The file is expected to be in
+   * \c particle_list_file_directory_ folder.
    *
-   * \param[in] file_id integer of wanted file
+   * \param[in] file_id An \c std::optional integer
    * \return Absolute file path to file
-   * \throws
-   * runtime_error if file does not exist.
+   *
+   * \throws runtime_error if file does not exist.
    */
-  std::filesystem::path file_path_(const int file_id);
+  std::filesystem::path file_path_(std::optional<int> file_id);
 
   /**  Read the next event. Either from the current file if it has more events
    * or from the next file (with file_id += 1)
@@ -201,20 +205,18 @@ class ListModus : public ModusDefault {
   /// File directory of the particle list
   std::string particle_list_file_directory_;
 
-  /// File prefix of the particle list
+  /**
+   * Prefix of the file(s) containing the particle list. If the user want to
+   * use a single file without numbering, this will contain the full filename.
+   */
   std::string particle_list_file_prefix_;
 
-  /// File name of current file
-  std::string current_particle_list_file_;
-
-  /// shift_id is the start number of file_id_
-  const int shift_id_;
+  /// file_id_ is the id of the current file
+  std::optional<int> file_id_;
 
   /// event_id_ = the unique id of the current event
   int event_id_;
 
-  /// file_id_ is the id of the current file
-  int file_id_;
   /// last read position in current file
   std::streampos last_read_position_ = 0;
 
