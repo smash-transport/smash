@@ -43,6 +43,7 @@ ListModus::ListModus(Configuration modus_config,
                                             particle_list_file_directory_)},
       file_id_{std::nullopt},
       event_id_{0} {
+  // Impose strict requirement on possible keys present in configuration file
   bool file_prefix_used = modus_config.has_value({"List", "File_Prefix"});
   bool filename_used = modus_config.has_value({"List", "Filename"});
   if (file_prefix_used == filename_used) {
@@ -50,15 +51,14 @@ ListModus::ListModus(Configuration modus_config,
         "Either 'Filename' or 'File_Prefix' key must be used in 'List' section "
         "in configuration file. Please, adjust your configuration file.");
   }
+  std::string key_to_take = "Filename";
   if (file_prefix_used) {
-    particle_list_file_prefix_ = modus_config.take({"List", "File_Prefix"})
-                                     .convert_for(particle_list_file_prefix_);
+    key_to_take = "File_Prefix";
     file_id_ = modus_config.take({"List", "Shift_Id"}, 0);
   }
-  if (filename_used) {
-    particle_list_file_prefix_ = modus_config.take({"List", "Filename"})
-                                     .convert_for(particle_list_file_prefix_);
-  }
+  particle_list_filename_or_prefix_ =
+      modus_config.take({"List", key_to_take.c_str()})
+          .convert_for(particle_list_filename_or_prefix_);
   if (param.n_ensembles > 1) {
     throw std::runtime_error("ListModus only makes sense with one ensemble");
   }
@@ -164,8 +164,8 @@ double ListModus::initial_conditions(Particles *particles,
 }
 
 std::filesystem::path ListModus::file_path_(std::optional<int> file_id) {
-  std::string fname =
-      particle_list_file_prefix_ + ((file_id) ? std::to_string(*file_id) : "");
+  std::string fname = particle_list_filename_or_prefix_ +
+                      ((file_id) ? std::to_string(*file_id) : "");
 
   const std::filesystem::path default_path =
       std::filesystem::absolute(particle_list_file_directory_);

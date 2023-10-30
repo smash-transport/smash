@@ -149,7 +149,8 @@ class ListModus : public ModusDefault {
   double start_time_ = 0.;
 
  private:
-  /** Check if the file given by filepath has events left after streampos
+  /**
+   * Check if the file given by filepath has events left after streampos
    * last_position
    *
    * \param[in] filepath Path to file to be checked.
@@ -163,10 +164,10 @@ class ListModus : public ModusDefault {
 
   /**
    * Return the absolute path of the data file. If an integer is passed, the
-   * filename is constructed using \c particle_list_file_prefix_ concatenated
-   * with the given number, otherwise the file prefix is understood to be the
-   * full filename. The file is expected to be in
-   * \c particle_list_file_directory_ folder.
+   * filename is constructed using \c particle_list_filename_or_prefix_
+   * concatenated with the given number, otherwise the file prefix is understood
+   * to be the full filename. The file is expected to be in \c
+   * particle_list_file_directory_ folder.
    *
    * \param[in] file_id An \c std::optional integer
    * \return Absolute file path to file
@@ -175,7 +176,8 @@ class ListModus : public ModusDefault {
    */
   std::filesystem::path file_path_(std::optional<int> file_id);
 
-  /**  Read the next event. Either from the current file if it has more events
+  /**
+   * Read the next event. Either from the current file if it has more events
    * or from the next file (with file_id += 1)
    *
    * \returns
@@ -191,15 +193,15 @@ class ListModus : public ModusDefault {
    * Prefix of the file(s) containing the particle list. If the user want to
    * use a single file without numbering, this will contain the full filename.
    */
-  std::string particle_list_file_prefix_;
+  std::string particle_list_filename_or_prefix_;
 
-  /// file_id_ is the id of the current file
+  /// The id of the current file
   std::optional<int> file_id_;
 
-  /// event_id_ = the unique id of the current event
+  /// The unique id of the current event
   int event_id_;
 
-  /// last read position in current file
+  /// Last read position in current file
   std::streampos last_read_position_ = 0;
 
   /// Auxiliary flag to warn about mass-discrepancies only once per instance
