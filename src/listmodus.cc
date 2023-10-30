@@ -160,7 +160,7 @@ std::filesystem::path ListModus::file_path_(const int file_id) {
 
   const std::filesystem::path fpath = default_path / fname.str();
 
-  logg[LList].debug() << fpath.filename().native() << '\n';
+  logg[LList].debug() << "File: " << std::filesystem::absolute(fpath) << '\n';
 
   if (!std::filesystem::exists(fpath)) {
     logg[LList].fatal() << fpath.filename().native() << " does not exist! \n"

@@ -62,8 +62,7 @@ class ListModus : public ModusDefault {
    *
    * \param[in] modus_config The configuration object that sets all
    *                         initial conditions of the experiment.
-   * \param[in] parameters Unused, but necessary because of templated
-   *                       initialization
+   * \param[in] parameters Necessary because of templated usage in Experiment.
    */
   explicit ListModus(Configuration modus_config,
                      const ExperimentParameters &parameters);
@@ -172,7 +171,7 @@ class ListModus : public ModusDefault {
    * last_position
    *
    * \param[in] filepath Path to file to be checked.
-   * \param[in] last_position Streamposition in file after which check is
+   * \param[in] last_position Stream position in file after which check is
    * performed
    * \return True if there is at least one event left, false otherwise
    * \throws runtime_error If file could not be read for whatever reason.
@@ -216,14 +215,13 @@ class ListModus : public ModusDefault {
 
   /// file_id_ is the id of the current file
   int file_id_;
+  /// last read position in current file
+  std::streampos last_read_position_ = 0;
 
   /// Auxiliary flag to warn about mass-discrepancies only once per instance
   bool warn_about_mass_discrepancy_ = true;
   /// Auxiliary flag to warn about off-shell particles only once per instance
   bool warn_about_off_shell_particles_ = true;
-
-  /// last read position in current file
-  std::streampos last_read_position_;
 
   /**\ingroup logging
    * Writes the initial state for the List to the output stream.
