@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022
+ *    Copyright (c) 2014-2020,2022-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -80,7 +80,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * <div class="line">
  * t x y z mass p0 px py pz pdg ID charge ncoll form_time xsecfac
  * proc_id_origin proc_type_origin time_last_coll pdg_mother1 pdg_mother2
- * baryon_number
+ * baryon_number strangeness
  * </div></div>
  * \li \key proc_id_origin, \key proc_type_orgin record the id and type of
  * the last reaction that the particle has experienced.
@@ -194,6 +194,7 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
     write(history.p1.get_decimal());
     write(history.p2.get_decimal());
     write(p.type().baryon_number());
+    write(p.type().strangeness());
   }
 }
 

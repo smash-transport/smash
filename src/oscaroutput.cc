@@ -90,11 +90,12 @@ OscarOutput<Format, Contents>::OscarOutput(const std::filesystem::path &path,
                  "#!OSCAR2013Extended %s t x y z mass p0 px py pz"
                  " pdg ID charge ncoll form_time xsecfac proc_id_origin"
                  " proc_type_origin time_last_coll pdg_mother1 pdg_mother2"
-                 " baryon_number\n",
+                 " baryon_number strangeness\n",
                  name.c_str());
-    std::fprintf(file_.get(),
-                 "# Units: fm fm fm fm GeV GeV GeV GeV GeV"
-                 " none none e none fm none none none fm none none none\n");
+    std::fprintf(
+        file_.get(),
+        "# Units: fm fm fm fm GeV GeV GeV GeV GeV"
+        " none none e none fm none none none fm none none none none\n");
     std::fprintf(file_.get(), "# %s\n", SMASH_VERSION);
   } else {
     const std::string &oscar_name =
@@ -371,7 +372,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <div class="line"><span class="preprocessor">#!OSCAR2013 particle_lists
  *   t x y z mass p0 px py pz pdg
  *   ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
- *   t_last_coll pdg_mother1 pdg_mother2 baryon_number</span></div>
+ *   t_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span></div>
  * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm GeV GeV
  * GeV GeV GeV none none e none fm none none none fm none none</span></div>
  * <div class="line"><span class="preprocessor">\# SMASH_version</span></div>
@@ -423,7 +424,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <div class="fragment">
  * <div class="line"><span class="preprocessor">t x y z mass p0 px py pz pdg
  * ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
- * time_last_coll pdg_mother1 pdg_mother2 baryon_number</span></div>
+ * time_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span></div>
  * </div>
  *
  * \anchor extended_output_format_
@@ -649,7 +650,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <div class="line"><span class="preprocessor">#!OSCAR2013 particle_lists
  *   t x y z mass p0 px py pz pdg
  *   ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
- *   t_last_coll pdg_mother1 pdg_mother2 baryon_number</span></div>
+ *   t_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span></div>
  * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm GeV GeV
  * GeV GeV GeV none none e none fm none none none fm none none</span></div>
  * <div class="line"><span class="preprocessor">\# SMASH_version</span></div>
@@ -699,7 +700,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <div class="line"><span class="preprocessor">t x y z
  *  mass p0 px py pz pdg ID charge Ncoll formation_time
  *  xsecfac process_ID_origin process_type_origin t_last_coll
- *  PDG_mother1 PDG_mother2 baryon_number</span></div>
+ *  PDG_mother1 PDG_mother2 baryon_number strangeness</span></div>
  * </div>
  *
  * The additional particle properties available in the extended output format
@@ -754,17 +755,17 @@ void OscarOutput<Format, Contents>::write_particledata(
                  data.type().charge());
   } else if (Format == OscarFormat2013Extended) {
     const auto h = data.get_history();
-    std::fprintf(file_.get(),
-                 "%g %g %g %g %g %.9g %.9g %.9g"
-                 " %.9g %s %i %i %i %g %g %i %i %g %s %s %i\n",
-                 pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(),
-                 mom.x0(), mom.x1(), mom.x2(), mom.x3(),
-                 data.pdgcode().string().c_str(), data.id(),
-                 data.type().charge(), h.collisions_per_particle,
-                 data.formation_time(), data.xsec_scaling_factor(),
-                 h.id_process, static_cast<int>(h.process_type),
-                 h.time_last_collision, h.p1.string().c_str(),
-                 h.p2.string().c_str(), data.type().baryon_number());
+    std::fprintf(
+        file_.get(),
+        "%g %g %g %g %g %.9g %.9g %.9g"
+        " %.9g %s %i %i %i %g %g %i %i %g %s %s %i %i\n",
+        pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(), mom.x0(),
+        mom.x1(), mom.x2(), mom.x3(), data.pdgcode().string().c_str(),
+        data.id(), data.type().charge(), h.collisions_per_particle,
+        data.formation_time(), data.xsec_scaling_factor(), h.id_process,
+        static_cast<int>(h.process_type), h.time_last_collision,
+        h.p1.string().c_str(), h.p2.string().c_str(),
+        data.type().baryon_number(), data.type().strangeness());
   } else {
     std::fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n",
                  data.id(), data.pdgcode().string().c_str(), 0, mom.x1(),

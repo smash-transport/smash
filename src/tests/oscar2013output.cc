@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022
+ *    Copyright (c) 2014-2020,2022-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -28,7 +28,7 @@ using namespace smash;
 
 static const double accuracy = 1.0e-4;
 static const int data_elements = 12;
-static const int data_elements_extended = 21;
+static const int data_elements_extended = 22;
 static const std::filesystem::path testoutputpath =
     std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
 static auto random_value = random::make_uniform_distribution(-15.0, +15.0);
@@ -93,10 +93,9 @@ static void compare_extended_particledata(
                          h.time_last_collision, accuracy);
   COMPARE(datastring.at(18), h.p1.string());
   COMPARE(datastring.at(19), h.p2.string());
-  std::cout << "1";
   COMPARE(std::atoi(datastring.at(20).c_str()),
           particle.type().baryon_number());
-  std::cout << "2";
+  COMPARE(std::atoi(datastring.at(21).c_str()), particle.type().strangeness());
 }
 
 TEST(full2013_format) {
@@ -345,15 +344,16 @@ TEST(full_extended_oscar) {
     std::string line;
     /* Check header */
     std::getline(outputfile, line);
-    COMPARE(line,
-            "#!OSCAR2013Extended full_event_history"
-            " t x y z mass p0 px py pz pdg ID charge ncoll"
-            " form_time xsecfac proc_id_origin proc_type_origin"
-            " time_last_coll pdg_mother1 pdg_mother2 baryon_number");
+    COMPARE(
+        line,
+        "#!OSCAR2013Extended full_event_history"
+        " t x y z mass p0 px py pz pdg ID charge ncoll"
+        " form_time xsecfac proc_id_origin proc_type_origin"
+        " time_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness");
     std::getline(outputfile, line);
     COMPARE(line,
             "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none"
-            " e none fm none none none fm none none none");
+            " e none fm none none none fm none none none none");
     std::getline(outputfile, line);
     COMPARE(line, "# " SMASH_VERSION);
     /* Check initial particle list description line */

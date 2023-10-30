@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022
+ *    Copyright (c) 2014-2020,2022-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -116,7 +116,7 @@ class BinaryOutputBase : public OutputInterface {
 
  private:
   /// Binary file format version number
-  const uint16_t format_version_ = 8;
+  const uint16_t format_version_ = 9;
   /// Option for extended output
   bool extended_;
 };
