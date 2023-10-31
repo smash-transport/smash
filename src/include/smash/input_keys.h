@@ -3965,6 +3965,19 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
+   * \required_key{key_MLB_filename_,Filename,string}
+   *
+   * See &nbsp;
+   * <tt>\ref key_ML_filename_ "List: Filename"</tt>.
+   */
+  /**
+   * \see_key{key_MLB_filename_}
+   */
+  inline static const Key<std::string> modi_listBox_filename{
+      {"Modi", "ListBox", "Filename"}, {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_listbox
    * \required_key{key_MLB_file_prefix_,File_Prefix,string}
    *
    * See &nbsp;
@@ -4000,7 +4013,7 @@ struct InputKeys {
    * \see_key{key_MLB_shift_id_}
    */
   inline static const Key<int> modi_listBox_shiftId{
-      {"Modi", "ListBox", "Shift_Id"}, {"2.1"}};
+      {"Modi", "ListBox", "Shift_Id"}, 0, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5223,6 +5236,7 @@ struct InputKeys {
       std::cref(modi_list_filePrefix),
       std::cref(modi_list_shiftId),
       std::cref(modi_listBox_fileDirectory),
+      std::cref(modi_listBox_filename),
       std::cref(modi_listBox_filePrefix),
       std::cref(modi_listBox_length),
       std::cref(modi_listBox_shiftId),
