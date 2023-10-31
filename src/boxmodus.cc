@@ -62,7 +62,7 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
   return out;
 }
 
-BoxModus::BoxModus(Configuration modus_config,
+BoxModus::BoxModus(Configuration& modus_config,
                    const ExperimentParameters &parameters)
     : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
       length_(modus_config.take({"Box", "Length"})),

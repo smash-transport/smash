@@ -876,7 +876,7 @@ Experiment<Modus>::Experiment(Configuration &config,
         if (restore_key) {
           config.set_value(key_labels, temporary_taken_key);
         }
-        return Modus{std::move(modus_config), parameters_};
+        return Modus{modus_config, parameters_};
       })),
       ensembles_(parameters_.n_ensembles),
       nevents_(config.take({"General", "Nevents"}, 0)),

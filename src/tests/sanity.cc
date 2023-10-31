@@ -100,7 +100,7 @@ TEST(sanity_box) {
   )"};
   ExperimentParameters param = smash::Test::default_parameters();
   param.box_length = 5.0;
-  BoxModus b(std::move(conf), param);
+  BoxModus b(conf, param);
   Particles P;
   create_particle_list(P);
   COMPARE(b.impose_boundary_conditions(&P), 4);
@@ -116,7 +116,7 @@ TEST(sanity_collider) {
       E_Kin: 1.0
   )"};
   ExperimentParameters param = smash::Test::default_parameters();
-  ColliderModus n(std::move(conf), param);
+  ColliderModus n(conf, param);
   Particles P;
   create_particle_list(P);
   COMPARE(n.impose_boundary_conditions(&P), 0);
@@ -131,7 +131,7 @@ TEST(sanity_sphere) {
       Init_Multiplicities: {661: 500}
   )"};
   ExperimentParameters param = smash::Test::default_parameters();
-  SphereModus s(std::move(conf), param);
+  SphereModus s(conf, param);
   Particles P;
   create_particle_list(P);
   COMPARE(s.impose_boundary_conditions(&P), 0);

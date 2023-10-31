@@ -34,7 +34,7 @@
 namespace smash {
 static constexpr int LSphere = LogArea::Sphere::id;
 
-SphereModus::SphereModus(Configuration modus_config,
+SphereModus::SphereModus(Configuration& modus_config,
                          const ExperimentParameters &)
     : radius_(modus_config.take({"Sphere", "Radius"})),
       sphere_temperature_(modus_config.take({"Sphere", "Temperature"})),

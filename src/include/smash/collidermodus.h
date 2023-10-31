@@ -51,8 +51,10 @@ class ColliderModus : public ModusDefault {
    *
    * \param[in] modus_config The configuration object that sets all
    *                         initial conditions of the experiment.
-   * \param[in] parameters Unused, but necessary because of templated
-   *                       initialization
+   * \param[in] parameters Parameters of the experiment.
+   *
+   * \see BoxModus ctor note about why the configuration is passed by reference.
+   *
    * \throw ColliderEmpty if projectile or nucleus are empty (i.e. do
    *                      not contain particles)
    * \throw InvalidEnergy if sqrts from config is not large enough to support
@@ -63,7 +65,7 @@ class ColliderModus : public ModusDefault {
    *                     impact parameter Values and Yields are improperly
    *                     supplied
    **/
-  explicit ColliderModus(Configuration modus_config,
+  explicit ColliderModus(Configuration& modus_config,
                          const ExperimentParameters &parameters);
   /**
    * Creates full path string consisting of file_directory and file_name

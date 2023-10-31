@@ -99,7 +99,8 @@ TEST(nucleus_potential_profile) {
   )"};
   conf.validate();
   ExperimentParameters param = smash::Test::default_parameters();
-  ColliderModus c(conf.extract_sub_configuration({"Modi"}), param);
+  auto modus_conf = conf.extract_sub_configuration({"Modi"});
+  ColliderModus c(modus_conf, param);
   std::vector<Particles> P(1);
   c.initial_conditions(&(P[0]), param);
   ParticleList plist;

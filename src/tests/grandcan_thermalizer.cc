@@ -36,7 +36,7 @@ static BoxModus create_box_for_tests(const ExperimentParameters& par) {
   conf.set_value({"Box", "Init_Multiplicities", "311"}, N);
   conf.set_value({"Box", "Length"}, par.box_length);
   conf.set_value({"Box", "Temperature"}, T_init);
-  return BoxModus(std::move(conf), par);
+  return BoxModus(conf, par);
 }
 
 TEST(rest_frame_transformation) {

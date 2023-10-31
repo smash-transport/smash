@@ -163,8 +163,7 @@ TEST(smearing_factor_normalization) {
   ExperimentParameters par = smash::Test::default_parameters();
   par.box_length = L;
   const DensityParameters dens_par = DensityParameters(par);
-  std::unique_ptr<BoxModus> b =
-      std::make_unique<BoxModus>(std::move(conf), par);
+  std::unique_ptr<BoxModus> b = std::make_unique<BoxModus>(conf, par);
   std::vector<Particles> ensembles(1);
   b->initial_conditions(&ensembles[0], par);
   // Fill lattice from particles
