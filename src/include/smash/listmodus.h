@@ -67,7 +67,10 @@ class ListModus : public ModusDefault {
   explicit ListModus(Configuration modus_config,
                      const ExperimentParameters &parameters);
 
-  /// Construct an empty list. Useful for convenient JetScape connection.
+  /**
+   * Construct an empty list. This is needed for children construction but it is
+   * offered as public instead of protected as it is also useful for JetScape.
+   */
   ListModus() = default;
 
   /**

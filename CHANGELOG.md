@@ -38,7 +38,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Add strangeness to all extended output formats in the particle line
 
 ### Removed
-* Some public setter of the `ListModus` class have been removed
+* Some public setters of the `ListModus` class have been removed
 
 
 ## SMASH-3.0

@@ -37,15 +37,19 @@ static constexpr int LList = LogArea::List::id;
 
 ListModus::ListModus(Configuration modus_config,
                      const ExperimentParameters &param)
-    : particle_list_file_directory_{modus_config
-                                        .take({"List", "File_Directory"})
-                                        .convert_for(
-                                            particle_list_file_directory_)},
-      file_id_{std::nullopt},
-      event_id_{0} {
+    : file_id_{std::nullopt}, event_id_{0} {
+  /*
+   * Extract the only expected section of the configuration to make this
+   * constructor work also for children classes. These do the same but have a
+   * different section name (like for instance 'ListBox' instead of 'List')
+   */
+  const auto config_sections = modus_config.list_upmost_nodes();
+  assert(config_sections.size() == 1);
+  auto plain_config =
+      modus_config.extract_sub_configuration({config_sections[0].c_str()});
   // Impose strict requirement on possible keys present in configuration file
-  bool file_prefix_used = modus_config.has_value({"List", "File_Prefix"});
-  bool filename_used = modus_config.has_value({"List", "Filename"});
+  bool file_prefix_used = plain_config.has_value({"File_Prefix"});
+  bool filename_used = plain_config.has_value({"Filename"});
   if (file_prefix_used == filename_used) {
     throw std::invalid_argument(
         "Either 'Filename' or 'File_Prefix' key must be used in 'List' section "
@@ -54,11 +58,14 @@ ListModus::ListModus(Configuration modus_config,
   std::string key_to_take = "Filename";
   if (file_prefix_used) {
     key_to_take = "File_Prefix";
-    file_id_ = modus_config.take({"List", "Shift_Id"}, 0);
+    file_id_ = plain_config.take({"Shift_Id"}, 0);
   }
   particle_list_filename_or_prefix_ =
-      modus_config.take({"List", key_to_take.c_str()})
+      plain_config.take({key_to_take.c_str()})
           .convert_for(particle_list_filename_or_prefix_);
+  particle_list_file_directory_ =
+      plain_config.take({"File_Directory"})
+          .convert_for(particle_list_file_directory_);
   if (param.n_ensembles > 1) {
     throw std::runtime_error("ListModus only makes sense with one ensemble");
   }
@@ -266,8 +273,23 @@ bool ListModus::file_has_events_(std::filesystem::path filepath,
 
 ListBoxModus::ListBoxModus(Configuration modus_config,
                            const ExperimentParameters &param)
-    : ListModus(std::move(modus_config), param),
-      length_(modus_config.take({"ListBox", "Length"})) {}
+    : ListModus(), length_(modus_config.take({"ListBox", "Length"})) {
+  /*
+   * ATTENTION: In a child class initialization list nothing can be done before
+   * calling the base constructor. However, here we cannot hand over the
+   * configuration to the base class as there are child-specific keys to be
+   * taken before. This cannot be done after having moved the configuration and
+   * changing the constructor signature would be a big change as all modus
+   * classes should have the same constructor signature to allow Experiment to
+   * template on it. Therefore, we abuse C++ here by default-initializing the
+   * parent class, then taking the child-specific key(s) and then assigning a
+   * parent instance to the child using the parent assignment operator. In
+   * general this would be risky as it would open up the possibility to leave
+   * part of the children uninitialized, but here we should have under control
+   * what exactly happens at initialization time.
+   */
+  this->ListModus::operator=(ListModus(std::move(modus_config), param));
+}
 
 int ListBoxModus::impose_boundary_conditions(Particles *particles,
                                              const OutputsList &output_list) {

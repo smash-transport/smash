@@ -110,6 +110,17 @@ static ListModus create_list_modus_for_test() {
   return ListModus(std::move(config), parameters);
 }
 
+static ListBoxModus create_list_box_modus_for_test() {
+  Configuration config{R"(
+    ListBox:
+      File_Directory: ToBeSet
+      File_Prefix: event
+      Length: 3
+    )"};
+  config.set_value({"ListBox", "File_Directory"}, testoutputpath.string());
+  return ListBoxModus(std::move(config), parameters);
+}
+
 static ListModus create_list_modus_with_single_file_for_test() {
   Configuration config{R"(
     List:
@@ -178,6 +189,16 @@ TEST(list_from_non_oscar_output) {
     COMPARE_ABSOLUTE_ERROR(a.formation_time(), b.formation_time(), accuracy);
     COMPARE(a.pdgcode(), b.pdgcode());
   }
+}
+
+TEST(listbox_creation_from_non_oscar_output) {
+  std::vector<ParticleList> init_particles;
+  create_non_oscar_particlefile(0, init_particles);
+  ListBoxModus list_box_modus = create_list_box_modus_for_test();
+
+  // Read the file with list modus
+  Particles particles_read;
+  list_box_modus.initial_conditions(&particles_read, parameters);
 }
 
 TEST(multiple_file_non_oscar_output) {
