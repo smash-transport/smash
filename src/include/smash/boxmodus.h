@@ -52,17 +52,10 @@ class BoxModus : public ModusDefault {
    *
    * \param[in] modus_config The configuration object that sets all
    *                         initial conditions of the experiment.
-   * \param[in] parameters Parameters of the experiment.
-   *
-   * \note The configuration is passed by reference as all modi constructors
-   * must have the same signature (the modus is a template in Experiment) and
-   * for some modus classes the parsing of the configuration is partially done
-   * in children classes to get children-specific keys. Hence, passing here the
-   * configuration by value (i.e. moving from the caller the configuration in)
-   * would require the constructor to completely parse it (to avoid exceptions
-   * when destructing it) and this is not always possible.
+   * \param[in] parameters Unused, but necessary because of templated
+   *                       initialization
    */
-  explicit BoxModus(Configuration &modus_config,
+  explicit BoxModus(Configuration modus_config,
                     const ExperimentParameters &parameters);
 
   /**

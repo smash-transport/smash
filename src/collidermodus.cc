@@ -28,7 +28,7 @@
 namespace smash {
 static constexpr int LCollider = LogArea::Collider::id;
 
-ColliderModus::ColliderModus(Configuration& modus_config,
+ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &params) {
   Configuration modus_cfg =
       modus_config.extract_sub_configuration({"Collider"});

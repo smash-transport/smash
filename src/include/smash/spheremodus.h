@@ -56,11 +56,10 @@ class SphereModus : public ModusDefault {
    *
    * \param[in] modus_config The configuration object that sets all
    *                         initial conditions of the experiment.
-   * \param[in] parameters Parameters of the experiment.
-   *
-   * \see BoxModus ctor note about why the configuration is passed by reference.
+   * \param[in] parameters Unused, but necessary because of templated
+   *                       initialization
    */
-  explicit SphereModus(Configuration& modus_config,
+  explicit SphereModus(Configuration modus_config,
                        const ExperimentParameters &parameters);
 
   /**

@@ -62,14 +62,9 @@ class ListModus : public ModusDefault {
    *
    * \param[in] modus_config The configuration object that sets all
    *                         initial conditions of the experiment.
-   * \param[in] parameters Parameters of the experiment.
-   *
-   * \note The configuration is passed here by reference and not moved into the
-   * constructor, because the constructor might not parse it completely, as some
-   * keys might be children-specific and therefore parsed \b later in children
-   * constructors.
+   * \param[in] parameters Necessary because of templated usage in Experiment.
    */
-  explicit ListModus(Configuration &modus_config,
+  explicit ListModus(Configuration modus_config,
                      const ExperimentParameters &parameters);
 
   /// Construct an empty list. Useful for convenient JetScape connection.
@@ -152,25 +147,6 @@ class ListModus : public ModusDefault {
  protected:
   /// Starting time for the List; changed to the earliest formation time
   double start_time_ = 0.;
-
-  // /**
-  //  * Left-over configuration for children initialization. Children might have
-  //  * more keys to parse in the modus section and these cannot be parsed from
-  //  the
-  //  * parent. However a configuration cannot be destroyed if not empty and
-  //  * therefore keys not belonging to the parent should be stored for later.
-  //  */
-  // std::unique_ptr<Configuration> leftover_config = nullptr;
-
-  // /**
-  //  * This constructor is to be used from children classes to work-around the
-  //  * configuration parsing of children-specific keys. It delegate
-  //  construction
-  //  * do the public constructor but before doing so
-  //  */
-  // ListModus(Configuration modus_config, const ExperimentParameters
-  // &parameters,
-  //           bool is_child);
 
  private:
   /**
@@ -287,11 +263,10 @@ class ListBoxModus : public ListModus {
    *
    * \param[in] modus_config The configuration object that sets all
    *                         initial conditions of the experiment.
-   * \param[in] parameters Parameters of the experiment.
-   *
-   * \see BoxModus ctor note about why the configuration is passed by reference.
+   * \param[in] parameters Unused, but necessary because of templated
+   *                       initialization
    */
-  explicit ListBoxModus(Configuration &modus_config,
+  explicit ListBoxModus(Configuration modus_config,
                         const ExperimentParameters &parameters);
 
   /// in the case of the ListBoxModus is_box has to be true

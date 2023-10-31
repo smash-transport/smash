@@ -35,21 +35,17 @@
 namespace smash {
 static constexpr int LList = LogArea::List::id;
 
-ListModus::ListModus(Configuration &modus_config,
+ListModus::ListModus(Configuration modus_config,
                      const ExperimentParameters &param)
-    : file_id_{std::nullopt}, event_id_{0} {
-  /*
-   * Extract the only expected section of the configuration to make this
-   * constructor work also for children classes. These do the same but have a
-   * different section name (like for instance 'ListBox' instead of 'List')
-   */
-  const auto config_sections = modus_config.list_upmost_nodes();
-  assert(config_sections.size() == 1);
-  auto plain_config =
-      modus_config.extract_sub_configuration({config_sections[0].c_str()});
+    : particle_list_file_directory_{modus_config
+                                        .take({"List", "File_Directory"})
+                                        .convert_for(
+                                            particle_list_file_directory_)},
+      file_id_{std::nullopt},
+      event_id_{0} {
   // Impose strict requirement on possible keys present in configuration file
-  bool file_prefix_used = plain_config.has_value({"File_Prefix"});
-  bool filename_used = plain_config.has_value({"Filename"});
+  bool file_prefix_used = modus_config.has_value({"List", "File_Prefix"});
+  bool filename_used = modus_config.has_value({"List", "Filename"});
   if (file_prefix_used == filename_used) {
     throw std::invalid_argument(
         "Either 'Filename' or 'File_Prefix' key must be used in 'List' section "
@@ -58,25 +54,13 @@ ListModus::ListModus(Configuration &modus_config,
   std::string key_to_take = "Filename";
   if (file_prefix_used) {
     key_to_take = "File_Prefix";
-    file_id_ = plain_config.take({"Shift_Id"}, 0);
+    file_id_ = modus_config.take({"List", "Shift_Id"}, 0);
   }
   particle_list_filename_or_prefix_ =
-      plain_config.take({key_to_take.c_str()})
+      modus_config.take({"List", key_to_take.c_str()})
           .convert_for(particle_list_filename_or_prefix_);
-  particle_list_file_directory_ =
-      plain_config.take({"File_Directory"})
-          .convert_for(particle_list_file_directory_);
   if (param.n_ensembles > 1) {
     throw std::runtime_error("ListModus only makes sense with one ensemble");
-  }
-  /*
-   * Put back unparsed keys assuming here that they belong to children and add
-   * back the top-level section to make children behaviour more transparent
-   */
-  if (!plain_config.is_empty()) {
-    modus_config.merge_yaml(config_sections[0] + ": {" +
-                            plain_config.to_string() + "}");
-    plain_config.clear();
   }
 }
 
@@ -280,9 +264,9 @@ bool ListModus::file_has_events_(std::filesystem::path filepath,
   return true;
 }
 
-ListBoxModus::ListBoxModus(Configuration &modus_config,
+ListBoxModus::ListBoxModus(Configuration modus_config,
                            const ExperimentParameters &param)
-    : ListModus(modus_config, param),
+    : ListModus(std::move(modus_config), param),
       length_(modus_config.take({"ListBox", "Length"})) {}
 
 int ListBoxModus::impose_boundary_conditions(Particles *particles,
