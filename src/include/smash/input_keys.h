@@ -3907,9 +3907,25 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
+   * \required_key{key_ML_filename_,Filename,string}
+   *
+   * External particle lists filename. This key shall be omitted if
+   * <tt>\ref key_ML_file_prefix_ "List: File_Prefix"</tt> is used. By using
+   * this key, it is understood that all events to be processed are contained in
+   * the given file, as this is the only one which will be read.
+   */
+  /**
+   * \see_key{key_ML_filename_}
+   */
+  inline static const Key<std::string> modi_list_filename{
+      {"Modi", "List", "Filename"}, {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_list
    * \required_key{key_ML_file_prefix_,File_Prefix,string}
    *
-   * Prefix for the external particle lists file.
+   * Prefix for the external particle lists file. This key shall be omitted if
+   * <tt>\ref key_ML_filename_ "List: Filename"</tt> is used.
    */
   /**
    * \see_key{key_ML_file_prefix_}
@@ -3919,16 +3935,20 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
-   * \required_key{key_ML_shift_id_,Shift_Id,int}
+   * \optional_key{key_ML_shift_id_,Shift_Id,int,0}
    *
-   * Starting index for the particle list file(s). To be used to indicate which
-   * is the first file to is read.
+   * Index of the \b first processed particle list file. Files with index
+   * smaller than the specidifed value are skipped. This key is considered when
+   * <tt>\ref key_ML_file_prefix_ "List: File_Prefix"</tt> is used to specify
+   * which particles list file(s) should be read. If, instead, the user
+   * specifies the <tt>\ref key_ML_filename_ "List: Filename"</tt> key, this key
+   * is ignored.
    */
   /**
    * \see_key{key_ML_shift_id_}
    */
-  inline static const Key<int> modi_list_shiftId{{"Modi", "List", "Shift_Id"},
-                                                 {"0.60"}};
+  inline static const Key<int> modi_list_shiftId{
+      {"Modi", "List", "Shift_Id"}, 0, {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -3942,6 +3962,19 @@ struct InputKeys {
    */
   inline static const Key<std::string> modi_listBox_fileDirectory{
       {"Modi", "ListBox", "File_Directory"}, {"2.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_listbox
+   * \required_key{key_MLB_filename_,Filename,string}
+   *
+   * See &nbsp;
+   * <tt>\ref key_ML_filename_ "List: Filename"</tt>.
+   */
+  /**
+   * \see_key{key_MLB_filename_}
+   */
+  inline static const Key<std::string> modi_listBox_filename{
+      {"Modi", "ListBox", "Filename"}, {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -3971,7 +4004,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
-   * \required_key{key_MLB_shift_id_,Shift_Id,int}
+   * \optional_key{key_MLB_shift_id_,Shift_Id,int,0}
    *
    * See &nbsp;
    * <tt>\ref key_ML_shift_id_ "List: Shift_Id"</tt>.
@@ -3980,7 +4013,7 @@ struct InputKeys {
    * \see_key{key_MLB_shift_id_}
    */
   inline static const Key<int> modi_listBox_shiftId{
-      {"Modi", "ListBox", "Shift_Id"}, {"2.1"}};
+      {"Modi", "ListBox", "Shift_Id"}, 0, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5199,9 +5232,11 @@ struct InputKeys {
       std::cref(modi_box_jet_jetMomentum),
       std::cref(modi_box_jet_jetPdg),
       std::cref(modi_list_fileDirectory),
+      std::cref(modi_list_filename),
       std::cref(modi_list_filePrefix),
       std::cref(modi_list_shiftId),
       std::cref(modi_listBox_fileDirectory),
+      std::cref(modi_listBox_filename),
       std::cref(modi_listBox_filePrefix),
       std::cref(modi_listBox_length),
       std::cref(modi_listBox_shiftId),
@@ -5893,6 +5928,16 @@ General:
          File_Directory: "particle_lists_in"
          File_Prefix: "event"
          Shift_Id: 10
+ \endverbatim
+ *
+ * Alternatively, if all events are contained in a single file (or if only one
+ * file has to be processed), the following configuration can be used (SMASH
+ * will then read the *particle_lists_in/single_file_to_be_used.dat* file).
+ * \verbatim
+ Modi:
+     List:
+         File_Directory: "particle_lists_in"
+         Filename: "single_file_to_be_used.dat"
  \endverbatim
  *
  * <hr>

@@ -37,16 +37,35 @@ static constexpr int LList = LogArea::List::id;
 
 ListModus::ListModus(Configuration modus_config,
                      const ExperimentParameters &param)
-    : shift_id_(modus_config.take({"List", "Shift_Id"})) {
-  std::string fd = modus_config.take({"List", "File_Directory"});
-  particle_list_file_directory_ = fd;
-
-  std::string fp = modus_config.take({"List", "File_Prefix"});
-  particle_list_file_prefix_ = fp;
-
-  event_id_ = 0;
-  file_id_ = shift_id_;
-
+    : file_id_{std::nullopt}, event_id_{0} {
+  /*
+   * Extract the only expected section of the configuration to make this
+   * constructor work also for children classes. These do the same but have a
+   * different section name (like for instance 'ListBox' instead of 'List')
+   */
+  const auto config_sections = modus_config.list_upmost_nodes();
+  assert(config_sections.size() == 1);
+  auto plain_config =
+      modus_config.extract_sub_configuration({config_sections[0].c_str()});
+  // Impose strict requirement on possible keys present in configuration file
+  bool file_prefix_used = plain_config.has_value({"File_Prefix"});
+  bool filename_used = plain_config.has_value({"Filename"});
+  if (file_prefix_used == filename_used) {
+    throw std::invalid_argument(
+        "Either 'Filename' or 'File_Prefix' key must be used in 'List' section "
+        "in configuration file. Please, adjust your configuration file.");
+  }
+  std::string key_to_take = "Filename";
+  if (file_prefix_used) {
+    key_to_take = "File_Prefix";
+    file_id_ = plain_config.take({"Shift_Id"}, 0);
+  }
+  particle_list_filename_or_prefix_ =
+      plain_config.take({key_to_take.c_str()})
+          .convert_for(particle_list_filename_or_prefix_);
+  particle_list_file_directory_ =
+      plain_config.take({"File_Directory"})
+          .convert_for(particle_list_file_directory_);
   if (param.n_ensembles > 1) {
     throw std::runtime_error("ListModus only makes sense with one ensemble");
   }
@@ -151,27 +170,25 @@ double ListModus::initial_conditions(Particles *particles,
   return start_time_;
 }
 
-std::filesystem::path ListModus::file_path_(const int file_id) {
-  std::stringstream fname;
-  fname << particle_list_file_prefix_ << file_id;
+std::filesystem::path ListModus::file_path_(std::optional<int> file_id) {
+  std::string fname = particle_list_filename_or_prefix_ +
+                      ((file_id) ? std::to_string(*file_id) : "");
 
   const std::filesystem::path default_path =
       std::filesystem::absolute(particle_list_file_directory_);
 
-  const std::filesystem::path fpath = default_path / fname.str();
+  const std::filesystem::path fpath = default_path / fname;
 
-  logg[LList].debug() << fpath.filename().native() << '\n';
+  logg[LList].debug() << "File: " << std::filesystem::absolute(fpath) << '\n';
 
   if (!std::filesystem::exists(fpath)) {
-    logg[LList].fatal() << fpath.filename().native() << " does not exist! \n"
-                        << "\n Usage of smash with external particle lists:\n"
-                        << "1. Put the external particle lists in file \n"
-                        << "File_Directory/File_Prefix{id} where {id} "
-                        << "traversal [Shift_Id, Nevent-1]\n"
-                        << "2. Particles info: t x y z mass p0 px py pz"
-                        << " pdg ID charge\n"
-                        << "in units of: fm fm fm fm GeV GeV GeV GeV GeV"
-                        << " none none e\n";
+    logg[LList].fatal()
+        << fpath.filename().native() << " does not exist! \n\n"
+        << "Usage of smash with external particle lists:\n"
+        << "  1. Put the external particle lists in one or more files\n"
+        << "     according to the user guide instructions.\n"
+        << "  2. Particles info: t x y z mass p0 px py pz pdg ID charge\n"
+        << "     in units of: fm fm fm fm GeV GeV GeV GeV GeV none none e\n";
     throw std::runtime_error("External particle list does not exist!");
   }
 
@@ -184,12 +201,17 @@ std::string ListModus::next_event_() {
   ifs.seekg(last_read_position_);
 
   if (!file_has_events_(fpath, last_read_position_)) {
-    // current file out of events. get next file and call this function
-    // recursively.
-    file_id_++;
-    last_read_position_ = 0;
-    ifs.close();
-    return next_event_();
+    if (file_id_) {
+      // Get next file and call this function recursively
+      (*file_id_)++;
+      last_read_position_ = 0;
+      ifs.close();
+      return next_event_();
+    } else {
+      throw std::runtime_error(
+          "Attempt to read in next event in Listmodus object but no further "
+          "data found in single provided file. Please, check your setup.");
+    }
   }
 
   // read one event. events marked by line # event end i in case of Oscar
@@ -251,26 +273,22 @@ bool ListModus::file_has_events_(std::filesystem::path filepath,
 
 ListBoxModus::ListBoxModus(Configuration modus_config,
                            const ExperimentParameters &param)
-    : shift_id_(modus_config.take({"ListBox", "Shift_Id"})),
-      length_(modus_config.take({"ListBox", "Length"})) {
-  std::string fd = modus_config.take({"ListBox", "File_Directory"});
-  particle_list_file_directory_ = fd;
-
-  std::string fp = modus_config.take({"ListBox", "File_Prefix"});
-  particle_list_file_prefix_ = fp;
-
-  event_id_ = 0;
-  file_id_ = shift_id_;
-
-  // Set specific values in the ListModus class
-  ListModus::set_file_id(file_id_);
-  ListModus::set_particle_list_file_directory(particle_list_file_directory_);
-  ListModus::set_particle_list_file_prefix(particle_list_file_prefix_);
-  ListModus::set_event_id(event_id_);
-
-  if (param.n_ensembles > 1) {
-    throw std::runtime_error("ListModus only makes sense with one ensemble");
-  }
+    : ListModus(), length_(modus_config.take({"ListBox", "Length"})) {
+  /*
+   * ATTENTION: In a child class initialization list nothing can be done before
+   * calling the base constructor. However, here we cannot hand over the
+   * configuration to the base class as there are child-specific keys to be
+   * taken before. This cannot be done after having moved the configuration and
+   * changing the constructor signature would be a big change as all modus
+   * classes should have the same constructor signature to allow Experiment to
+   * template on it. Therefore, we abuse C++ here by default-initializing the
+   * parent class, then taking the child-specific key(s) and then assigning a
+   * parent instance to the child using the parent assignment operator. In
+   * general this would be risky as it would open up the possibility to leave
+   * part of the children uninitialized, but here we should have under control
+   * what exactly happens at initialization time.
+   */
+  this->ListModus::operator=(ListModus(std::move(modus_config), param));
 }
 
 int ListBoxModus::impose_boundary_conditions(Particles *particles,
