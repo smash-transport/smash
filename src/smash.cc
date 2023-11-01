@@ -108,8 +108,13 @@ namespace smash {
  *     Also, contributions from strings are not considered.
  * <tr><td>`-f` <td>`--force`
  * <td>Forces overwriting files in the output directory. Normally, if you
- *     specifiy an output directory with `-o`, the directory must be empty.
+ *     specify an output directory with `-o`, the directory must be empty.
  *     With `-f` this check is skipped.
+ * <tr><td>`-n` <td>`--no-cache`
+ * <td>Don't cache integrals in form of tabulations on the disc. Usually, in
+ *     order for future smash runs to save computational time, the tabulations
+ *     folder is created above the output directory and contains the results of
+ *     integrals stored in many different files.
  * <tr><td>`-q` <td>`--quiet`
  * <td>Quiets the disclaimer for scenarios where no printout is wanted. To
  *     get no printout, you also need to disable logging from the config.

@@ -23,6 +23,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Added
 * Option `Decay_Initial_Particles` which blocks the decay of resonances created at initialization
 * The `List` and `ListBox` modi can now be used specifying a single particles input file using the `Filename` key
+* Option to run smash with `-n` to not cache integrals in the form of the tabulations folder on the disc.
 
 ### Fixed
 * Fix bug in the time step calculation of SMASH output in events successive to the first one when the `End_Time` is not a multiple of the `Output_Interval`
