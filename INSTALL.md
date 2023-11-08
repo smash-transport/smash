@@ -12,8 +12,9 @@
    5. [I run out of disk space compiling the code. Why?](#out-of-disk-space)
    6. [How can I use a different compiler?](#different-compilers)
    7. [How to use the LLVM implementation of the C++ standard library?](#llvm-STL)
-   8. [Can I disable ROOT or HepMC support?](#disable-root-hempc)
-   9. [ROOT or HepMC are installed but CMake does not find them. What should I do?](#root-hepmc-not-found)
+   8. [How can I use SMASH as an external library?](#smash-as-an-external-library)
+   9. [Can I disable ROOT or HepMC support?](#disable-root-hempc)
+   10. [ROOT or HepMC are installed but CMake does not find them. What should I do?](#root-hepmc-not-found)
 
 ---
 
@@ -317,6 +318,20 @@ where, of course, the path to clang installation must be a valid path.
 All of this is needed to let the executable find the library ABI at run time.
 
 **NOTE:** Remember to compile Pythia using LLVM implementation, too, as [previously described](#pythia).
+
+<a id="smash-as-an-external-library"></a>
+
+### How can I use SMASH as an external library?
+
+The recommended way to use SMASH as a library in another software is to first install it according to the [instructions above](#customizing).
+This will build and copy all necessary SMASH files to the installation folder and, therefore, prevent unexpected surprises in your software behavior in case the SMASH source code changes (e.g. because of git operations).
+In your software you can then use the files in the SMASH installation directory and manually pass them to the compiler.
+However, we encourage you to set up your project with CMake, too.
+In that case, you can use the _FindSMASH.cmake_ module shipped in the ***cmake*** folder.
+Refer to the *examples/using_SMASH_as_library/CMakeLists.txt* file for an example.
+There are two important aspects to mention, in order to let the CMake `find_package(SMASH)` command succeed:
+1. The folder where *FindSMASH.cmake* is needs to be in the `CMAKE_MODULE_PATH` CMake variable;
+2. The `SMASH_INSTALL_DIR` environment variable must be correctly set.
 
 <a id="disable-root-hempc"></a>
 
