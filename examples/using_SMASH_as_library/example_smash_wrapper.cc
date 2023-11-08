@@ -29,13 +29,13 @@ int main() {
     std::cout << "\nTest-run SMASH\n--------------" << '\n';
 
     // All the input that is needed
-    const std::string config_file(SMASH_TOP_LEVEL_DIR "/input/config.yaml");
+    const std::string config_file(SMASH_TOP_LEVEL_DIR "/config.yaml");
     const std::filesystem::path output_path("./data");
     const std::string tabulations_path("./tabulations");
     const std::string particles_file(SMASH_TOP_LEVEL_DIR
-                                     "/input/particles.txt");
+                                     "/particles.txt");
     const std::string decaymodes_file(SMASH_TOP_LEVEL_DIR
-                                      "/input/decaymodes.txt");
+                                      "/decaymodes.txt");
 
     ////////////////////////////
     // Setup SMASH            //
