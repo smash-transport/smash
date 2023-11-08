@@ -37,6 +37,9 @@ int main() {
     const std::string decaymodes_file(SMASH_TOP_LEVEL_DIR
                                       "/decaymodes.txt");
 
+    // Ensure output_path exists
+    std::filesystem::create_directories(output_path);
+
     ////////////////////////////
     // Setup SMASH            //
     ////////////////////////////

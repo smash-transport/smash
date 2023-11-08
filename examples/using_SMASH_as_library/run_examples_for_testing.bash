@@ -32,7 +32,6 @@ make -j$(nproc) || fail_and_rm_build "Failed to build SMASH library examples"
 
 ./example || fail_and_rm_build "Failed to run SMASH library examples"
 ./example_rate_equations || fail_and_rm_build "Failed to run SMASH rate equation library examples"
-mkdir data  # create output directory for smash wrapper
 ./example_smash_wrapper || fail_and_rm_build "Failed to execute SMASH wrapper library example"
 
 cd .. && rm -r build # Clean-up
