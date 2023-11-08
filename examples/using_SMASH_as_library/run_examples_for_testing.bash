@@ -28,12 +28,12 @@ fail_and_rm_build() {
 cd $EXAMPLE_DIR
 mkdir -p build && cd build
 # Assume the default compiler is fine or that `CC` and `CXX` environment variables are set
-cmake .. -DCMAKE_INSTALL_PREFIX=$EIGEN_DIR_VAR $PYTHIA_OPTION_FOR_CMAKE || fail_and_rm_build "Failed to setup cmake for SMASH libary examples"
-make -j$(nproc) || fail_and_rm_build "Failed to build SMASH libary examples"
+cmake .. -DCMAKE_INSTALL_PREFIX=$EIGEN_DIR_VAR $PYTHIA_OPTION_FOR_CMAKE || fail_and_rm_build "Failed to setup cmake for SMASH library examples"
+make -j$(nproc) || fail_and_rm_build "Failed to build SMASH library examples"
 
-./example || fail_and_rm_build "Failed to run SMASH libary examples"
-./example_rate_equations || fail_and_rm_build "Failed to run SMASH rate equation libary examples"
+./example || fail_and_rm_build "Failed to run SMASH library examples"
+./example_rate_equations || fail_and_rm_build "Failed to run SMASH rate equation library examples"
 mkdir data  # create output directory for smash wrapper
-./example_smash_wrapper || fail_and_rm_build "Failed to execute SMASH wrapper libary example"
+./example_smash_wrapper || fail_and_rm_build "Failed to execute SMASH wrapper library example"
 
 cd .. && rm -r build # Clean-up
