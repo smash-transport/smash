@@ -39,6 +39,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Make `Clock` class comparison operators refer to internally represented time and not to `current_time()` return value
 * Add strangeness to all extended output formats in the particle line
 
+### Deprecated
+* Locate SMASH in external projects using the `SMASH_DIR` and not relying on an installation
+
 ### Removed
 * Some public setters of the `ListModus` class have been removed
 
