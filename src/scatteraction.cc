@@ -153,6 +153,8 @@ void ScatterAction::add_all_scatterings(
   if (is_total_parametrized_) {
     rescale_outgoing_branches();
   }
+
+  were_processes_added_ = true;
 }
 
 void ScatterAction::rescale_outgoing_branches() {
