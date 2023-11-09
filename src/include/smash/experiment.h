@@ -1347,6 +1347,16 @@ Experiment<Modus>::Experiment(Configuration &config,
   if (output_path == "") {
     throw std::invalid_argument(
         "Invalid empty output path provided to Experiment constructor.");
+  } else if (!std::filesystem::exists(output_path)) {
+    logg[LExperiment].fatal(
+        "Output path \"" + output_path.string() +
+        "\" used to create an Experiment object does not exist.");
+    throw NonExistingOutputPathRequest("Attempt to use not existing path.");
+  } else if (!std::filesystem::is_directory(output_path)) {
+    logg[LExperiment].fatal("Output path \"" + output_path.string() +
+                            "\" used to create an Experiment object "
+                            "exists, but it is not a directory.");
+    throw std::logic_error("Attempt to use invalid existing path.");
   }
   if (output_conf.is_empty()) {
     logg[LExperiment].warn() << "No \"Output\" section found in the input "
