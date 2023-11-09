@@ -299,9 +299,9 @@ void Nucleus::set_parameters_automatic() {
     set_diffusiveness(0.54);
     set_nuclear_radius(6.67);
   } else if ((A == 197) && (Z == 79)) {  // Gold
-    // Default values.
-    set_diffusiveness(0.535);
-    set_nuclear_radius(6.38);
+    // Default values from \iref{Schopper:2004qco}
+    set_diffusiveness(0.523);
+    set_nuclear_radius(6.55);
   } else if ((A == 129) && (Z == 54)) {  // Xenon
     // Default values.
     set_diffusiveness(0.59);

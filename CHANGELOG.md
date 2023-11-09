@@ -32,6 +32,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Fix bug about SMASH getting stuck with some particular values of `End_Time` and `Delta_Time`
 
 ### Changed
+* Use updated gold radius of 6.55 fm instead of 6.38 fm and a diffusiveness of 0.523 fm instead of 0.535
 * Upgraded to Pythia 8.310
 * Upgraded to Cuba 4.2.2
 * SMASH installation procedure was improved and allows now to use SMASH as library relying on installation folder only
