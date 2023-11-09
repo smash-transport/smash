@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2020
+ *    Copyright (c) 2013-2020,2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)

@@ -63,8 +63,8 @@ class CrossSections {
    * incoming particles.
    *
    * \param[in] finder_parameters Parameters for collision finding, containing
-   * cut for low energy NN interactions. return The appropriate total cross
-   * section value.
+   * cut for low energy NN interactions.
+   * \return The appropriate total cross section value.
    */
   double parametrized_total(
       const ScatterActionsFinderParameters& finder_parameters) const;

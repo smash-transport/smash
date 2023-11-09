@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2022
+ *    Copyright (c) 2015-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -212,10 +212,7 @@ TEST(cross_sections_symmetric) {
     ScatterActionPtr act12, act21;
     act12 = std::make_unique<ScatterAction>(p1, p2, 0.2, false, 1.0);
     act21 = std::make_unique<ScatterAction>(p2, p1, 0.2, false, 1.0);
-    std::unique_ptr<StringProcess> string_process_interface =
-        std::make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217,
-                                        0.081, 0.7, 0.7, 0.25, 0.68, 0.98, 0.25,
-                                        1.0, true, 1. / 3., true, 0.2, false);
+    auto string_process_interface = Test::default_string_process_interface();
     act12->set_string_interface(string_process_interface.get());
     act21->set_string_interface(string_process_interface.get());
     VERIFY(act12 != nullptr);
@@ -275,10 +272,7 @@ TEST(pythia_running) {
   // construct action
   ScatterActionPtr act;
   act = std::make_unique<ScatterAction>(p1_copy, p2_copy, 0.2, false, 1.0);
-  std::unique_ptr<StringProcess> string_process_interface =
-      std::make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217,
-                                      0.081, 0.7, 0.7, 0.25, 0.68, 0.98, 0.25,
-                                      1.0, true, 1. / 3., true, 0.2, false);
+  auto string_process_interface = Test::default_string_process_interface();
   act->set_string_interface(string_process_interface.get());
   VERIFY(act != nullptr);
   COMPARE(p2_copy.type(), ParticleType::find(0x2212));
@@ -455,10 +449,7 @@ TEST(particle_ordering) {
     ScatterActionPtr act12, act21;
     act12 = std::make_unique<ScatterAction>(p1, p2, 0.2, false, 1.0);
     act21 = std::make_unique<ScatterAction>(p2, p1, 0.2, false, 1.0);
-    std::unique_ptr<StringProcess> string_process_interface =
-        std::make_unique<StringProcess>(1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217,
-                                        0.081, 0.7, 0.7, 0.25, 0.68, 0.98, 0.25,
-                                        1.0, true, 1. / 3., true, 0.15, false);
+    auto string_process_interface = Test::default_string_process_interface();
     act12->set_string_interface(string_process_interface.get());
     act21->set_string_interface(string_process_interface.get());
     VERIFY(act12 != nullptr);
@@ -489,6 +480,74 @@ TEST(particle_ordering) {
                             return collisionbranches_equal(branchptr1,
                                                            branchptr2);
                           }) != branch21.end());
+    }
+  }
+}
+
+TEST_CATCH(set_parametrized_total_bottomup, std::logic_error) {
+  ParticleData particle{ParticleType::find(0x111)};  // pi0
+  ScatterActionPtr act_bottomup = std::make_unique<ScatterAction>(
+      particle, particle, 0.1, false, 1.0, -1.0, false);
+  act_bottomup->set_parametrized_total_cross_section(
+      Test::default_finder_parameters());
+}
+
+TEST_CATCH(add_branches_only_once, std::logic_error) {
+  ParticleData particle{ParticleType::find(0x111)};  // pi0
+  ScatterActionPtr act_bottomup = std::make_unique<ScatterAction>(
+      particle, particle, 0.1, false, 1.0, -1.0, false);
+  auto finder_parameters_bottomup = Test::default_finder_parameters();
+
+  act_bottomup->add_all_scatterings(finder_parameters_bottomup);
+  std::cout << "Added branches for the first time." << std::endl;
+  act_bottomup->add_all_scatterings(finder_parameters_bottomup);
+}
+
+TEST(top_down_sum_matches_parametrization) {
+  const auto& all_types = ParticleType::list_all();
+  int ntypes = all_types.size();
+  int64_t seed = random::generate_63bit_seed();
+  random::set_seed(seed);
+  for (int i = 0; i < 42; i++) {
+    // create a random pair of particles
+    ParticleData p1{ParticleType::find(
+        all_types[random::uniform_int(0, ntypes - 1)].pdgcode())};
+    ParticleData p2{ParticleType::find(
+        all_types[random::uniform_int(0, ntypes - 1)].pdgcode())};
+    // set position
+    p1.set_4position(pos_a);
+    p2.set_4position(pos_b);
+    // set momenta
+    double p_x = random::uniform(0., 0.5);
+    p1.set_4momentum(p1.pole_mass(), p_x, 0., 0.);
+    p2.set_4momentum(p2.pole_mass(), -p_x, 0., 0.);
+
+    ScatterActionPtr act_topdown =
+        std::make_unique<ScatterAction>(p1, p2, 0.1, false, 1.0, -1.0, true);
+    VERIFY(act_topdown->cross_section() <= really_small);
+
+    auto string_process_interface = Test::default_string_process_interface();
+    act_topdown->set_string_interface(string_process_interface.get());
+
+    auto finder_parameters_topdown = Test::default_finder_parameters(
+        0, NNbarTreatment::Strings, Test::all_reactions_included(), true, true,
+        true, TotalCrossSectionStrategy::TopDown);
+    act_topdown->set_parametrized_total_cross_section(
+        finder_parameters_topdown);
+
+    vir::test::setFuzzyness<double>(5);
+    if (p1.is_hadron() && p2.is_hadron()) {
+      VERIFY(act_topdown->cross_section() > really_small);
+
+      act_topdown->add_all_scatterings(finder_parameters_topdown);
+
+      double sum_partials = 0;
+      for (const auto& proc : act_topdown->collision_channels()) {
+        sum_partials += proc->weight();
+      }
+      FUZZY_COMPARE(sum_partials, act_topdown->cross_section());
+    } else {
+      FUZZY_COMPARE(act_topdown->cross_section(), 0);
     }
   }
 }

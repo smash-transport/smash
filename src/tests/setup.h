@@ -269,7 +269,9 @@ inline ScatterActionsFinderParameters default_finder_parameters(
     NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation,
     ReactionsBitSet included_2to2 = all_reactions_included(),
     bool strings_switch = true, bool use_AQM = false,
-    bool strings_with_probability = false) {
+    bool strings_with_probability = false,
+    TotalCrossSectionStrategy xs_strategy =
+        TotalCrossSectionStrategy::BottomUp) {
   StringTransitionParameters default_transition_params{};
   return {elastic_parameter,
           0.,    // low_snn_cut
@@ -288,7 +290,7 @@ inline ScatterActionsFinderParameters default_finder_parameters(
           strings_with_probability,
           true,  // only_warn_for_high_prob
           default_transition_params,
-          TotalCrossSectionStrategy::BottomUp};
+          xs_strategy};
 }
 
 /// Creates default EventInfo object for testing purposes
@@ -296,6 +298,31 @@ inline EventInfo default_event_info(double impact_parameter = 0.0,
                                     bool empty_event = false) {
   return EventInfo{impact_parameter, 0.0,  0.0, 0.0, 0.0, 0.0, 1, 1,
                    empty_event,      false};
+}
+
+/// Creates a default StringProcessInterface object for testing
+inline std::unique_ptr<StringProcess> default_string_process_interface() {
+  return std::make_unique<StringProcess>(
+      1.0,      // String_Tension
+      1.0,      // String_Formation_Time
+      0.5,      // Gluon_Beta
+      0.001,    // Gluon_Pmin
+      2.0,      // Quark_Alpha
+      7.0,      // Quark_Beta
+      0.16,     // Strange_Supp
+      0.036,    // Diquark_Supp
+      0.42,     // Sigma_Perp
+      0.2,      // StringZ_A_Leading
+      2.0,      // StringZ_B_Leading
+      2.0,      // StringZ_A
+      0.55,     // StringZ_B
+      0.5,      // String_Sigma_T
+      1.0,      // Form_Time_Factor
+      false,    // Mass_Dependent_Formation_Times
+      1. / 3.,  // Prob_proton_to_d_uu
+      true,     // Separate_Fragment_Baryon
+      0.15,     // Popcorn_Rate
+      false);   // Use_Monash_Tune
 }
 
 /**

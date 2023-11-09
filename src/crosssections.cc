@@ -228,29 +228,30 @@ double CrossSections::parametrized_total(
           (meson.code() == pdg::K_z && baryon.code() == pdg::n) ||
           (meson.code() == pdg::K_m && baryon.code() == -pdg::p) ||
           (meson.code() == pdg::Kbar_z && baryon.code() == -pdg::n)) {
-        // K⁺p, K⁰n
+        // K⁺p, K⁰n, and anti-processes
         total_xs = kplusp_total(sqrt_s_ * sqrt_s_);
       } else if ((meson.code() == pdg::K_p && baryon.code() == -pdg::p) ||
                  (meson.code() == pdg::K_z && baryon.code() == -pdg::n) ||
                  (meson.code() == pdg::K_m && baryon.code() == pdg::p) ||
                  (meson.code() == pdg::Kbar_z && baryon.code() == pdg::n)) {
-        // K⁻p, K̅⁰n
+        // K⁻p, K̅⁰n, and anti-processes
         total_xs = kminusp_total(sqrt_s_ * sqrt_s_);
       } else if ((meson.code() == pdg::K_p && baryon.code() == pdg::n) ||
                  (meson.code() == pdg::K_z && baryon.code() == pdg::p) ||
                  (meson.code() == pdg::K_m && baryon.code() == -pdg::n) ||
                  (meson.code() == pdg::Kbar_z && baryon.code() == -pdg::p)) {
-        // K⁺n, K⁰p
+        // K⁺n, K⁰p, and anti-processes
         total_xs = kplusn_total(sqrt_s_ * sqrt_s_);
       } else if ((meson.code() == pdg::K_p && baryon.code() == -pdg::n) ||
                  (meson.code() == pdg::K_z && baryon.code() == -pdg::p) ||
                  (meson.code() == pdg::K_m && baryon.code() == pdg::n) ||
                  (meson.code() == pdg::Kbar_z && baryon.code() == pdg::p)) {
-        // K⁻n, K̅⁰p: similar total cross section to K⁻p overall
+        // K⁻n, K̅⁰p and anti-processes: similar total cross section to K⁻p
+        // overall
         total_xs = kminusp_total(sqrt_s_ * sqrt_s_);
       }
     } else if (meson.is_pion() && baryon.is_nucleon()) {
-      // π⁺p, π⁻n
+      // π⁺(p,nbar), π⁻(n,pbar)
       if ((meson.code() == pdg::pi_p &&
            (baryon.code() == pdg::p || baryon.code() == -pdg::n)) ||
           (meson.code() == pdg::pi_m &&
@@ -258,9 +259,9 @@ double CrossSections::parametrized_total(
         total_xs = piplusp_total(sqrt_s_);
       } else if (meson.code() == pdg::pi_z) {
         // π⁰N
-        total_xs = (piplusp_total(sqrt_s_) + piminusp_total(sqrt_s_)) / 2.;
+        total_xs = 0.5 * (piplusp_total(sqrt_s_) + piminusp_total(sqrt_s_));
       } else {
-        // π⁻p, π⁺n
+        // π⁻(p,nbar), π⁺(n,pbar)
         total_xs = piminusp_total(sqrt_s_);
       }
     } else {
@@ -289,6 +290,8 @@ double CrossSections::parametrized_total(
         case 1:
           total_xs = (2. / 3.) * piminusp_high_energy(sqrt_s_ * sqrt_s_);
           break;
+        default:
+          throw std::runtime_error("wrong isospin in ππ scattering");
       }
     } else {
       // M*+M* goes to AQM high energy π⁻p
@@ -297,7 +300,8 @@ double CrossSections::parametrized_total(
                  (1 - 0.4 * pdg_b.frac_strange());
     }
   }
-  return total_xs;
+  return (total_xs + finder_parameters.additional_el_xs) *
+         finder_parameters.scale_xs;
 }
 
 CollisionBranchPtr CrossSections::elastic(

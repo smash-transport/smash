@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2018,2020
+ *    Copyright (c) 2013-2018,2020,2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -157,7 +157,9 @@ double Npi_string_hard(double mandelstam_s);
 double pipi_string_hard(double mandelstam_s);
 
 /**
- *  pi+ pi- total cross section parametrized from PDG2018.
+ *  pi+ pi- total cross section parametrized from PDG2018, smoothed using the
+ * LOWESS algorithm. If the requested energy is out of the interpolation bounds,
+ * the hard string value is returned.
  *
  *  \param[in] sqrts the rest frame total energy [GeV]
  *  \return the parametrized cross-section [mb]
@@ -165,7 +167,9 @@ double pipi_string_hard(double mandelstam_s);
 double pipluspiminus_total(double sqrts);
 
 /**
- *  pi0 pi0 total cross section parametrized from PDG2018.
+ *  pi0 pi0 total cross section parametrized from PDG2018, smoothed using the
+ * LOWESS algorithm. If the requested energy is out of the interpolation bounds,
+ * the hard string value is returned.
  *
  *  \param[in] sqrts the rest frame total energy [GeV]
  *  \return the parametrized cross-section [mb]
@@ -173,7 +177,9 @@ double pipluspiminus_total(double sqrts);
 double pizeropizero_total(double sqrts);
 
 /**
- *  pi+ p total cross section parametrized from PDG2018.
+ *  pi+ p total cross section parametrized from PDG2018, smoothed using the
+ * LOWESS algorithm. If the requested energy is out of the interpolation bounds,
+ * the high energy cross section is returned.
  *
  *  \param[in] sqrts the rest frame total energy [GeV]
  *  \return the parametrized cross-section [mb]
@@ -231,7 +237,9 @@ double piplusp_elastic(double mandelstam_s);
 double piplusp_sigmapluskplus_pdg(double mandelstam_s);
 
 /**
- *  pi- p total cross section parametrized from PDG2018
+ *  pi- p total cross section parametrized from PDG2018, smoothed using the
+ * LOWESS algorithm. If the requested energy is out of the interpolation bounds,
+ * the high energy cross section is returned.
  *
  *  \param[in] sqrts the rest frame total energy [GeV]
  *  \return the parametrized cross-section [mb]

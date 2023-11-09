@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2022
+ *    Copyright (c) 2013-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -27,17 +27,13 @@
 namespace smash {
 
 bool parametrization_exists(const PdgCode& pdg_a, const PdgCode& pdg_b) {
-  if (pdg_a.is_nucleon() && pdg_b.is_nucleon())
-    return true;
-  else if ((pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
-           (pdg_a.is_kaon() && pdg_b.is_nucleon()))
-    return true;
-  else if ((pdg_a.is_nucleon() && pdg_b.is_pion()) ||
-           (pdg_a.is_pion() && pdg_b.is_nucleon()))
-    return true;
-  else if (pdg_a.is_pion() && pdg_b.is_pion())
-    return true;
-  return false;
+  const bool two_nucleons = pdg_a.is_nucleon() && pdg_b.is_nucleon();
+  const bool nucleon_and_kaon = (pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
+                                (pdg_a.is_kaon() && pdg_b.is_nucleon());
+  const bool nucleon_and_pion = (pdg_a.is_nucleon() && pdg_b.is_pion()) ||
+                                (pdg_a.is_pion() && pdg_b.is_nucleon());
+  const bool two_pions = pdg_a.is_pion() && pdg_b.is_pion();
+  return two_nucleons || nucleon_and_kaon || nucleon_and_pion || two_pions;
 }
 
 double xs_high_energy(double mandelstam_s, bool is_opposite_charge, double ma,
@@ -115,17 +111,14 @@ double pipi_string_hard(double mandelstam_s) {
 
 double pipluspiminus_total(double sqrts) {
   if (pipluspiminus_total_interpolation == nullptr) {
-    std::vector<double> x = PIPLUSPIMINUS_TOT_SQRTS;
-    std::vector<double> y = PIPLUSPIMINUS_TOT_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(PIPLUSPIMINUS_TOT_SQRTS, PIPLUSPIMINUS_TOT_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.01, 10);
     pipluspiminus_total_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
-  std::initializer_list<double>::iterator end = PIPLUSPIMINUS_TOT_SQRTS.end();
-  if (sqrts < *(--end))
+  const double last = *(PIPLUSPIMINUS_TOT_SQRTS.end() - 1);
+  if (sqrts < last)
     return (*pipluspiminus_total_interpolation)(sqrts);
   else
     return pipi_string_hard(sqrts * sqrts);
@@ -133,17 +126,14 @@ double pipluspiminus_total(double sqrts) {
 
 double pizeropizero_total(double sqrts) {
   if (pizeropizero_total_interpolation == nullptr) {
-    std::vector<double> x = PIZEROPIZERO_TOT_SQRTS;
-    std::vector<double> y = PIZEROPIZERO_TOT_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(PIZEROPIZERO_TOT_SQRTS, PIZEROPIZERO_TOT_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.01, 10);
     pizeropizero_total_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
-  std::initializer_list<double>::iterator end = PIZEROPIZERO_TOT_SQRTS.end();
-  if (sqrts < *(--end))
+  const double last = *(PIZEROPIZERO_TOT_SQRTS.end() - 1);
+  if (sqrts < last)
     return (*pizeropizero_total_interpolation)(sqrts);
   else
     return pipi_string_hard(sqrts * sqrts);
@@ -151,17 +141,14 @@ double pizeropizero_total(double sqrts) {
 
 double piplusp_total(double sqrts) {
   if (piplusp_total_interpolation == nullptr) {
-    std::vector<double> x = PIPLUSP_TOT_SQRTS;
-    std::vector<double> y = PIPLUSP_TOT_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
-    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(PIPLUSP_TOT_SQRTS, PIPLUSP_TOT_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 10);
     piplusp_total_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
-  std::initializer_list<double>::iterator end = PIPLUSP_TOT_SQRTS.end();
-  if (sqrts < *(--end))
+  const double last = *(PIPLUSP_TOT_SQRTS.end() - 1);
+  if (sqrts < last)
     return (*piplusp_total_interpolation)(sqrts);
   else
     return piplusp_high_energy(sqrts * sqrts);
@@ -174,11 +161,8 @@ double piplusp_total(double sqrts) {
  * are averaged. */
 static double piplusp_elastic_pdg(double mandelstam_s) {
   if (piplusp_elastic_interpolation == nullptr) {
-    std::vector<double> x = PIPLUSP_ELASTIC_P_LAB;
-    std::vector<double> y = PIPLUSP_ELASTIC_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(PIPLUSP_ELASTIC_P_LAB, PIPLUSP_ELASTIC_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
     piplusp_elastic_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
@@ -240,11 +224,8 @@ double piplusp_elastic(double mandelstam_s) {
  * are averaged. */
 double piplusp_sigmapluskplus_pdg(double mandelstam_s) {
   if (piplusp_sigmapluskplus_interpolation == nullptr) {
-    std::vector<double> x = PIPLUSP_SIGMAPLUSKPLUS_P_LAB;
-    std::vector<double> y = PIPLUSP_SIGMAPLUSKPLUS_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] = dedup_avg<double>(PIPLUSP_SIGMAPLUSKPLUS_P_LAB,
+                                                PIPLUSP_SIGMAPLUSKPLUS_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.2, 5);
     piplusp_sigmapluskplus_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
@@ -255,17 +236,14 @@ double piplusp_sigmapluskplus_pdg(double mandelstam_s) {
 
 double piminusp_total(double sqrts) {
   if (piminusp_total_interpolation == nullptr) {
-    std::vector<double> x = PIMINUSP_TOT_SQRTS;
-    std::vector<double> y = PIMINUSP_TOT_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(PIMINUSP_TOT_SQRTS, PIMINUSP_TOT_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
     piminusp_total_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
-  std::initializer_list<double>::iterator end = PIMINUSP_TOT_SQRTS.end();
-  if (sqrts < *(--end))
+  const double last = *(PIMINUSP_TOT_SQRTS.end() - 1);
+  if (sqrts < last)
     return (*piminusp_total_interpolation)(sqrts);
   else
     return piminusp_high_energy(sqrts * sqrts);
@@ -278,11 +256,8 @@ double piminusp_total(double sqrts) {
  * are averaged. */
 static double piminusp_elastic_pdg(double mandelstam_s) {
   if (piminusp_elastic_interpolation == nullptr) {
-    std::vector<double> x = PIMINUSP_ELASTIC_P_LAB;
-    std::vector<double> y = PIMINUSP_ELASTIC_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(PIMINUSP_ELASTIC_P_LAB, PIMINUSP_ELASTIC_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
     piminusp_elastic_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
@@ -319,9 +294,7 @@ double piminusp_elastic(double mandelstam_s) {
       i = i * i;
     }
     std::vector<double> y = PIMINUSP_RES_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] = dedup_avg(x, y);
     piminusp_elastic_res_interpolation =
         std::make_unique<InterpolateDataSpline>(dedup_x, dedup_y);
   }
@@ -339,11 +312,8 @@ double piminusp_elastic(double mandelstam_s) {
  * are averaged. */
 double piminusp_lambdak0_pdg(double mandelstam_s) {
   if (piminusp_lambdak0_interpolation == nullptr) {
-    std::vector<double> x = PIMINUSP_LAMBDAK0_P_LAB;
-    std::vector<double> y = PIMINUSP_LAMBDAK0_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(PIMINUSP_LAMBDAK0_P_LAB, PIMINUSP_LAMBDAK0_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
     piminusp_lambdak0_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
@@ -359,11 +329,8 @@ double piminusp_lambdak0_pdg(double mandelstam_s) {
  * are averaged. */
 double piminusp_sigmaminuskplus_pdg(double mandelstam_s) {
   if (piminusp_sigmaminuskplus_interpolation == nullptr) {
-    std::vector<double> x = PIMINUSP_SIGMAMINUSKPLUS_P_LAB;
-    std::vector<double> y = PIMINUSP_SIGMAMINUSKPLUS_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] = dedup_avg<double>(PIMINUSP_SIGMAMINUSKPLUS_P_LAB,
+                                                PIMINUSP_SIGMAMINUSKPLUS_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
     piminusp_sigmaminuskplus_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
@@ -379,11 +346,8 @@ double piminusp_sigmaminuskplus_pdg(double mandelstam_s) {
  * are averaged. */
 double piminusp_sigma0k0_res(double mandelstam_s) {
   if (piminusp_sigma0k0_interpolation == nullptr) {
-    std::vector<double> x = PIMINUSP_SIGMA0K0_RES_SQRTS;
-    std::vector<double> y = PIMINUSP_SIGMA0K0_RES_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] = dedup_avg<double>(PIMINUSP_SIGMA0K0_RES_SQRTS,
+                                                PIMINUSP_SIGMA0K0_RES_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.2, 6);
     piminusp_sigma0k0_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
@@ -517,11 +481,8 @@ double deuteron_nucleon_elastic(double mandelstam_s) {
 
 double kplusp_total(double mandelstam_s) {
   if (kplusp_total_interpolation == nullptr) {
-    std::vector<double> x = KPLUSP_TOT_PLAB;
-    std::vector<double> y = KPLUSP_TOT_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(KPLUSP_TOT_PLAB, KPLUSP_TOT_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
     kplusp_total_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
@@ -532,11 +493,8 @@ double kplusp_total(double mandelstam_s) {
 
 double kplusn_total(double mandelstam_s) {
   if (kplusn_total_interpolation == nullptr) {
-    std::vector<double> x = KPLUSN_TOT_PLAB;
-    std::vector<double> y = KPLUSN_TOT_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(KPLUSN_TOT_PLAB, KPLUSN_TOT_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.05, 5);
     kplusn_total_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
@@ -547,11 +505,8 @@ double kplusn_total(double mandelstam_s) {
 
 double kminusp_total(double mandelstam_s) {
   if (kminusp_total_interpolation == nullptr) {
-    std::vector<double> x = KMINUSP_TOT_PLAB;
-    std::vector<double> y = KMINUSP_TOT_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(KMINUSP_TOT_PLAB, KMINUSP_TOT_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
     kminusp_total_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
@@ -588,11 +543,8 @@ double kplusn_k0p(double mandelstam_s) {
  * are averaged. */
 static double kminusp_elastic_pdg(double mandelstam_s) {
   if (kminusp_elastic_interpolation == nullptr) {
-    std::vector<double> x = KMINUSP_ELASTIC_P_LAB;
-    std::vector<double> y = KMINUSP_ELASTIC_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(KMINUSP_ELASTIC_P_LAB, KMINUSP_ELASTIC_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
     kminusp_elastic_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
@@ -669,11 +621,8 @@ double kbar0n_elastic_background(double mandelstam_s) {
 
 double kplusp_inelastic_background(double mandelstam_s) {
   if (kplusp_total_interpolation == nullptr) {
-    std::vector<double> x = KPLUSP_TOT_PLAB;
-    std::vector<double> y = KPLUSP_TOT_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(KPLUSP_TOT_PLAB, KPLUSP_TOT_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
     kplusp_total_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
@@ -685,11 +634,8 @@ double kplusp_inelastic_background(double mandelstam_s) {
 
 double kplusn_inelastic_background(double mandelstam_s) {
   if (kplusn_total_interpolation == nullptr) {
-    std::vector<double> x = KPLUSN_TOT_PLAB;
-    std::vector<double> y = KPLUSN_TOT_SIG;
-    std::vector<double> dedup_x;
-    std::vector<double> dedup_y;
-    std::tie(dedup_x, dedup_y) = dedup_avg(x, y);
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(KPLUSN_TOT_PLAB, KPLUSN_TOT_SIG);
     dedup_y = smooth(dedup_x, dedup_y, 0.05, 5);
     kplusn_total_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);

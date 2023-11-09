@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2022
+ *    Copyright (c) 2014-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -40,10 +40,13 @@ class ScatterAction : public Action {
    * \param[in] box_length Passing box length to determine
    *            coordinate of the collision, in case it happened through
    *            the wall in a box. If negative, then there is no wrapping.
+   * \param[in] is_total_parametrized Whether the total cross section used for
+   * collision finding is parametrized
    */
   ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
                 double time, bool isotropic = false,
-                double string_formation_time = 1.0, double box_length = -1.0);
+                double string_formation_time = 1.0, double box_length = -1.0,
+                bool is_total_parametrized = false);
 
   /**
    * Add a new collision channel.
@@ -137,24 +140,13 @@ class ScatterAction : public Action {
                      double kinetic_energy_cm) override;
 
   /**
-   * Add all possible scattering subprocesses for this action object.
+   * Add all possible scattering subprocesses for this action object. This can
+   * only be called once per ScatterAction instance.
    *
    * \param[in] finder_parameters parameters for collision finding.
-   * \param[in] goal_total_xs desired total cross section value. If positive,
-   * this triggers a reweighting of all possible branches.
    */
   void add_all_scatterings(
-      const ScatterActionsFinderParameters& finder_parameters,
-      const double goal_total_xs = -1);
-
-  /**
-   * Loops over the possible branches and rescales their weight according to the
-   * desired total cross section. In case the current total is 0, a warning is
-   * issued as this should not happen in an usual run.
-   *
-   * \param[in] goal_total_xs The desired total cross section.
-   */
-  void reweight(const double goal_total_xs);
+      const ScatterActionsFinderParameters& finder_parameters);
 
   /**
    * Given the incoming particles, assigns the correct parametrization of the
@@ -195,11 +187,17 @@ class ScatterAction : public Action {
   }
 
   /**
-   * Get the total cross section of the scattering particles.
+   * Get the total cross section of the scattering particles, either from a
+   * parametrization, or from the sum of partials.
    *
    * \return total cross section.
    */
-  virtual double cross_section() const { return total_cross_section_; }
+  virtual double cross_section() const {
+    if (is_total_parametrized_) {
+      return *parametrized_total_cross_section_;
+    }
+    return sum_of_partial_cross_sections_;
+  }
 
  protected:
   /**
@@ -262,8 +260,8 @@ class ScatterAction : public Action {
   /// List of possible collisions
   CollisionBranchList collision_channels_;
 
-  /// Total hadronic cross section
-  double total_cross_section_;
+  /// Current sum of partial hadronic cross sections
+  double sum_of_partial_cross_sections_;
 
   /// Partial cross-section to the chosen outgoing channel
   double partial_cross_section_;
@@ -288,8 +286,26 @@ class ScatterAction : public Action {
    */
   void resonance_formation();
 
+  /**
+   * Loops over the possible branches and rescales their weight according to the
+   * desired total cross section. In case the current total is 0, a warning is
+   * issued as this should not happen in an usual run.
+   *
+   * \param[in] goal_total_xs The desired total cross section.
+   */
+  void rescale_outgoing_branches();
+
   /// Pointer to interface class for strings
   StringProcess* string_process_ = nullptr;
+
+  /// Whether the total cross section is parametrized
+  bool is_total_parametrized_;
+
+  /// If cross section is parametrized, store the value
+  std::optional<double> parametrized_total_cross_section_ = std::nullopt;
+
+  /// Lock for calling add_all_scatterings only once
+  bool were_processes_added_ = false;
 };
 
 }  // namespace smash
