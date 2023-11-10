@@ -149,12 +149,11 @@ void ScatterAction::add_all_scatterings(
     }
   }
 
+  were_processes_added_ = true;
   // Rescale the branches so that their sum matches the parametrization
   if (is_total_parametrized_) {
     rescale_outgoing_branches();
   }
-
-  were_processes_added_ = true;
 }
 
 void ScatterAction::rescale_outgoing_branches() {
