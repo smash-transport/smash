@@ -755,6 +755,15 @@ inline ParticleTypePtr ParticleType::get_antiparticle() const {
   return &find(pdgcode_.get_antiparticle());
 }
 
+/**
+ * Stores a map with a set of incoming particles and associates it with resonances with compatible conserved quantum numbers. Not necessarily the inverse processes exists in the decay modes list, but the evaluation of the width will return 0 for such cases.
+ *
+ * \param[in] type_a first incoming particle.
+ * \param[in] type_b second incoming particle.
+ * \return list of possible resonances.
+ */
+ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a, const ParticleTypePtr type_b);
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_PARTICLETYPE_H_

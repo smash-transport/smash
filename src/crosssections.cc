@@ -848,29 +848,19 @@ CollisionBranchList CrossSections::two_to_one() const {
   const double m2 = incoming_particles_[1].effective_mass();
   const double p_cm_sqr = pCM_sqr(sqrt_s_, m1, m2);
 
-  // Find all the possible resonances
-  for (const ParticleType& type_resonance : ParticleType::list_all()) {
-    /* Not a resonance, go to next type of particle */
-    if (type_resonance.is_stable()) {
-      continue;
-    }
-    // Same resonance as in the beginning, ignore
-    if ((!type_particle_a.is_stable() &&
-         type_resonance.pdgcode() == type_particle_a.pdgcode()) ||
-        (!type_particle_b.is_stable() &&
-         type_resonance.pdgcode() == type_particle_b.pdgcode())) {
-      continue;
-    }
+  ParticleTypePtrList possible_resonances = list_possible_resonances(&type_particle_a, &type_particle_b);
 
-    double resonance_xsection = formation(type_resonance, p_cm_sqr);
+  // Find all the possible resonances
+  for (const ParticleTypePtr type_resonance : possible_resonances) {
+    double resonance_xsection = formation(*type_resonance, p_cm_sqr);
 
     // If cross section is non-negligible, add resonance to the list
     if (resonance_xsection > really_small) {
       resonance_process_list.push_back(std::make_unique<CollisionBranch>(
-          type_resonance, resonance_xsection, ProcessType::TwoToOne));
-      logg[LCrossSections].debug("Found resonance: ", type_resonance);
+          *type_resonance, resonance_xsection, ProcessType::TwoToOne));
+      logg[LCrossSections].debug("Found resonance: ", *type_resonance);
       logg[LCrossSections].debug(type_particle_a.name(), type_particle_b.name(),
-                                 "->", type_resonance.name(),
+                                 "->", type_resonance->name(),
                                  " at sqrt(s)[GeV] = ", sqrt_s_,
                                  " with xs[mb] = ", resonance_xsection);
     }

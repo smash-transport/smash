@@ -767,4 +767,46 @@ std::ostream &operator<<(std::ostream &out, const ParticleType &type) {
              << ", spin:" << field<2> << pdg.spin() << "/2 ]";
 }
 
+/* 
+ * This is valid for two particles of the same species because the operator = for smart pointers compares the pointed object. In this case, the set incoming will contain one element instead of two.
+ */
+ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a, const ParticleTypePtr type_b) {
+  static std::map<std::set<ParticleTypePtr>, ParticleTypePtrList> map_possible_resonances_of;
+  std::set<ParticleTypePtr> incoming{type_a, type_b};
+
+  // Fill map if set is not yet present 
+  if (map_possible_resonances_of.count(incoming) == 0) {
+    logg[LResonances].debug() <<"Filling map of compatible resonances for ptypes "<< type_a->name() << " " << type_b->name();
+    ParticleTypePtrList resonance_list;
+    for (const ParticleType& resonance : ParticleType::list_all()) {
+      /* Not a resonance, go to next type of particle */
+      if (resonance.is_stable()) {
+        continue;
+      }
+      // Same resonance as in the beginning, ignore
+      if ((resonance.pdgcode() == type_a->pdgcode()) ||
+          (resonance.pdgcode() == type_b->pdgcode())) {
+        continue;
+      }
+      // Check for charge conservation.
+      if (resonance.charge() != type_a->charge() + type_b->charge()) {
+        continue;
+      }
+      // Check for baryon-number conservation.
+      if (resonance.baryon_number() != type_a->baryon_number() + type_b->baryon_number()) {
+        continue;
+      }
+      // Check for strangeness conservation.
+      if (resonance.strangeness() !=
+          type_a->strangeness() + type_b->strangeness()) {
+        continue;
+      }
+      resonance_list.push_back(&resonance);
+    }
+    map_possible_resonances_of[incoming] = resonance_list;
+  }
+
+  return map_possible_resonances_of[incoming];
+}
+
 }  // namespace smash
