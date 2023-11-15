@@ -28,29 +28,35 @@ static constexpr int LScatterAction = LogArea::ScatterAction::id;
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b, double time,
                              bool isotropic, double string_formation_time,
-                             double box_length)
+                             double box_length, bool is_total_parametrized)
     : Action({in_part_a, in_part_b}, time),
-      total_cross_section_(0.),
+      sum_of_partial_cross_sections_(0.),
       isotropic_(isotropic),
-      string_formation_time_(string_formation_time) {
+      string_formation_time_(string_formation_time),
+      is_total_parametrized_(is_total_parametrized) {
   box_length_ = box_length;
+  if (is_total_parametrized_) {
+    parametrized_total_cross_section_ = NAN;
+  }
 }
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
-  add_process<CollisionBranch>(p, collision_channels_, total_cross_section_);
+  add_process<CollisionBranch>(p, collision_channels_,
+                               sum_of_partial_cross_sections_);
 }
 
 void ScatterAction::add_collisions(CollisionBranchList pv) {
   add_processes<CollisionBranch>(std::move(pv), collision_channels_,
-                                 total_cross_section_);
+                                 sum_of_partial_cross_sections_);
 }
 
 void ScatterAction::generate_final_state() {
   logg[LScatterAction].debug("Incoming particles: ", incoming_particles_);
 
-  /* Decide for a particular final state. */
   const CollisionBranch *proc = choose_channel<CollisionBranch>(
-      collision_channels_, total_cross_section_);
+      collision_channels_, is_total_parametrized_
+                               ? *parametrized_total_cross_section_
+                               : sum_of_partial_cross_sections_);
   process_type_ = proc->get_type();
   outgoing_particles_ = proc->particle_list();
   partial_cross_section_ = proc->weight();
@@ -110,6 +116,14 @@ void ScatterAction::generate_final_state() {
 
 void ScatterAction::add_all_scatterings(
     const ScatterActionsFinderParameters &finder_parameters) {
+  if (were_processes_added_) {
+    logg[LScatterAction].fatal() << "Trying to add processes again.";
+    throw std::logic_error(
+        "add_all_scatterings should be called only once per ScatterAction "
+        "instance");
+  } else {
+    were_processes_added_ = true;
+  }
   CrossSections xs(incoming_particles_, sqrt_s(),
                    get_potential_at_interaction_point());
   CollisionBranchList processes =
@@ -128,16 +142,67 @@ void ScatterAction::add_all_scatterings(
       xs.string_probability(finder_parameters)) {
     const double xs_diff =
         xs.high_energy(finder_parameters.transition_high_energy) -
-        cross_section();
+        sum_of_partial_cross_sections_;
     if (xs_diff > 0.) {
       add_collisions(xs.string_excitation(xs_diff, string_process_,
                                           finder_parameters.use_AQM));
     }
   }
+
+  // Rescale the branches so that their sum matches the parametrization
+  if (is_total_parametrized_) {
+    rescale_outgoing_branches();
+  }
+}
+
+void ScatterAction::rescale_outgoing_branches() {
+  if (!were_processes_added_) {
+    logg[LScatterAction].fatal()
+        << "Trying to rescale branches before adding processes.";
+    throw std::logic_error(
+        "This function can only be called after having added processes.");
+  }
+  if (sum_of_partial_cross_sections_ < really_small) {
+    logg[LScatterAction].warn() << "Current total cross section is roughly "
+                                   "zero and no rescaling to match "
+                                   "the parametrized one will be done.\nAn "
+                                   "elastic process will be added,"
+                                   "instead, to match the total cross section.";
+    auto elastic_branch = std::make_unique<CollisionBranch>(
+        incoming_particles_[0].type(), incoming_particles_[1].type(),
+        *parametrized_total_cross_section_, ProcessType::Elastic);
+    add_collision(std::move(elastic_branch));
+  } else {
+    const double reweight =
+        *parametrized_total_cross_section_ / sum_of_partial_cross_sections_;
+    logg[LScatterAction].debug("Reweighting ", sum_of_partial_cross_sections_,
+                               " to ", *parametrized_total_cross_section_);
+    for (auto &proc : collision_channels_) {
+      proc->set_weight(proc->weight() * reweight);
+    }
+  }
+}
+
+void ScatterAction::set_parametrized_total_cross_section(
+    const ScatterActionsFinderParameters &finder_parameters) {
+  CrossSections xs(incoming_particles_, sqrt_s(),
+                   get_potential_at_interaction_point());
+
+  if (is_total_parametrized_) {
+    parametrized_total_cross_section_ =
+        xs.parametrized_total(finder_parameters);
+  } else {
+    logg[LScatterAction].fatal()
+        << "Trying to parametrize total cross section when it shouldn't be.";
+    throw std::logic_error(
+        "This function can only be called on ScatterAction objects with "
+        "parametrized cross section.");
+  }
 }
 
 double ScatterAction::get_total_weight() const {
-  return total_cross_section_ * incoming_particles_[0].xsec_scaling_factor() *
+  return sum_of_partial_cross_sections_ *
+         incoming_particles_[0].xsec_scaling_factor() *
          incoming_particles_[1].xsec_scaling_factor();
 }
 

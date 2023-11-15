@@ -59,6 +59,17 @@ class CrossSections {
       StringProcess* string_process) const;
 
   /**
+   * Select the parametrization for the total cross section, given the types of
+   * incoming particles.
+   *
+   * \param[in] finder_parameters Parameters for collision finding, containing
+   * cut for low energy NN interactions.
+   * \return The appropriate total cross section value.
+   */
+  double parametrized_total(
+      const ScatterActionsFinderParameters& finder_parameters) const;
+
+  /**
    * Helper function:
    * Sum all cross sections of the given process list.
    */

@@ -90,7 +90,8 @@ namespace smash {
  *     pole masses. Optionally, the lab frame momenta (fixed target) in GeV
  *     can be specified. The value of `plab1` depends on the order of the
  *     particles. The first particle is considered to be the projectile,
- *     the second one the target.
+ *     the second one the target. These cross sections are not rescaled to
+ *     match the parametrized total.
  * <tr><td>`-f` <td>`--force`
  * <td>Forces overwriting files in the output directory.
  * <tr><td>`-S <pdg1>,<pdg2>[,mass1,mass2]`
@@ -105,7 +106,8 @@ namespace smash {
  *     may yield different results than a full simulation with SMASH, where
  *     the resonances masses are sampled from the spectral function.
  *     Typically, this results in errors of less than 1 mb in the worst case.
- *     Also, contributions from strings are not considered.
+ *     Also, contributions from strings are not considered, and the values are
+ *     not rescaled to match the parametrized total cross section.
  * <tr><td>`-f` <td>`--force`
  * <td>Forces overwriting files in the output directory. Normally, if you
  *     specify an output directory with `-o`, the directory must be empty.

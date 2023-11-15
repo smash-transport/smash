@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2018,2020
+ *    Copyright (c) 2013-2018,2020,2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -20,6 +20,15 @@
 
 namespace smash {
 
+/**
+ * Checks if supplied codes have existing parametrizations of total cross
+ * sections
+ *
+ * \param[in] pdg_a PDG code of first incoming particle
+ * \param[in] pdg_b PDG code of second incoming particle
+ * \return Whether the parametrization exists
+ */
+bool parametrization_exists(const PdgCode& pdg_a, const PdgCode& pdg_b);
 /**
  * total hadronic cross sections at high energies parametrized in the 2016 PDG
  * book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf)
@@ -148,6 +157,36 @@ double Npi_string_hard(double mandelstam_s);
 double pipi_string_hard(double mandelstam_s);
 
 /**
+ *  pi+ pi- total cross section parametrized from PDG2018, smoothed using the
+ * LOWESS algorithm. If the requested energy is out of the interpolation bounds,
+ * the hard string value is returned.
+ *
+ *  \param[in] sqrts the rest frame total energy [GeV]
+ *  \return the parametrized cross-section [mb]
+ */
+double pipluspiminus_total(double sqrts);
+
+/**
+ *  pi0 pi0 total cross section parametrized from PDG2018, smoothed using the
+ * LOWESS algorithm. If the requested energy is out of the interpolation bounds,
+ * the hard string value is returned.
+ *
+ *  \param[in] sqrts the rest frame total energy [GeV]
+ *  \return the parametrized cross-section [mb]
+ */
+double pizeropizero_total(double sqrts);
+
+/**
+ *  pi+ p total cross section parametrized from PDG2018, smoothed using the
+ * LOWESS algorithm. If the requested energy is out of the interpolation bounds,
+ * the high energy cross section is returned.
+ *
+ *  \param[in] sqrts the rest frame total energy [GeV]
+ *  \return the parametrized cross-section [mb]
+ */
+double piplusp_total(double sqrts);
+
+/**
  * pi+p elactic cross section parametrization.
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
  * Elastic contributions from decays are not subtracted, high energy
@@ -196,6 +235,16 @@ double piplusp_elastic(double mandelstam_s);
  * are averaged.
  */
 double piplusp_sigmapluskplus_pdg(double mandelstam_s);
+
+/**
+ *  pi- p total cross section parametrized from PDG2018, smoothed using the
+ * LOWESS algorithm. If the requested energy is out of the interpolation bounds,
+ * the high energy cross section is returned.
+ *
+ *  \param[in] sqrts the rest frame total energy [GeV]
+ *  \return the parametrized cross-section [mb]
+ */
+double piminusp_total(double sqrts);
 
 /**
  * pi-p elastic cross section parametrization
@@ -321,6 +370,33 @@ double deuteron_pion_elastic(double mandelstam_s);
  * \return the parametrized cross-section [mb]
  */
 double deuteron_nucleon_elastic(double mandelstam_s);
+
+/**
+ * K+ p total cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.8
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
+ */
+double kplusp_total(double mandelstam_s);
+
+/**
+ * K+ n total cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.8
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
+ */
+double kplusn_total(double mandelstam_s);
+
+/**
+ * K- p total cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.8
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
+ */
+double kminusp_total(double mandelstam_s);
 
 /**
  * K+ p elastic background cross section parametrization.

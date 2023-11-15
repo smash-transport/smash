@@ -16,6 +16,7 @@
 #include "smash/constants.h"
 #include "smash/decaymodes.h"
 #include "smash/logging.h"
+#include "smash/parametrizations.h"
 #include "smash/scatteraction.h"
 #include "smash/scatteractionmulti.h"
 #include "smash/scatteractionphoton.h"
@@ -152,6 +153,20 @@ ScatterActionsFinderParameters create_finder_parameters(
         "threshold. New range is [",
         sqrts_range_NN.first, ',', sqrts_range_NN.second, "] GeV.");
   }
+  auto xs_strategy =
+      config.take({"Collision_Term", "Total_Cross_Section_Strategy"},
+                  InputKeys::collTerm_totXsStrategy.default_value());
+  if (xs_strategy == TotalCrossSectionStrategy::BottomUp) {
+    logg[LFindScatter].info(
+        "Evaluating total cross sections from partial processes.");
+  } else if (xs_strategy == TotalCrossSectionStrategy::TopDown) {
+    logg[LFindScatter].info(
+        "Evaluating total cross sections from parametrizations.");
+  } else if (xs_strategy == TotalCrossSectionStrategy::TopDownMeasured) {
+    logg[LFindScatter].info(
+        "Evaluating total cross sections from parametrizations only for "
+        "measured processes.");
+  }
   return {
       config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.),
       parameters.low_snn_cut,
@@ -181,7 +196,8 @@ ScatterActionsFinderParameters create_finder_parameters(
               InputKeys::collTerm_stringTrans_pipiOffset.default_value()),
           config.take(
               {"Collision_Term", "String_Transition", "KN_Offset"},
-              InputKeys::collTerm_stringTrans_KNOffset.default_value())}};
+              InputKeys::collTerm_stringTrans_KNOffset.default_value())},
+      xs_strategy};
 }
 
 ActionPtr ScatterActionsFinder::check_collision_two_part(
@@ -222,10 +238,20 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     return nullptr;
   }
 
+  // Determine which total cross section to use
+  bool incoming_parametrized = (finder_parameters_.total_xs_strategy ==
+                                TotalCrossSectionStrategy::TopDown);
+  if (finder_parameters_.total_xs_strategy ==
+      TotalCrossSectionStrategy::TopDownMeasured) {
+    const PdgCode& pdg_a = data_a.type().pdgcode();
+    const PdgCode& pdg_b = data_b.type().pdgcode();
+    incoming_parametrized = parametrization_exists(pdg_a, pdg_b);
+  }
+
   // Create ScatterAction object.
   ScatterActionPtr act = std::make_unique<ScatterAction>(
       data_a, data_b, time_until_collision, isotropic_, string_formation_time_,
-      box_length_);
+      box_length_, incoming_parametrized);
 
   if (finder_parameters_.coll_crit == CollisionCriterion::Stochastic) {
     act->set_stochastic_pos_idx();
@@ -251,8 +277,13 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     return nullptr;
   }
 
-  // Add various subprocesses.
-  act->add_all_scatterings(finder_parameters_);
+  if (incoming_parametrized) {
+    act->set_parametrized_total_cross_section(finder_parameters_);
+  } else {
+    // Add various subprocesses.
+    act->add_all_scatterings(finder_parameters_);
+  }
+
   double xs = act->cross_section() * fm2_mb /
               static_cast<double>(finder_parameters_.testparticles);
 
@@ -316,6 +347,11 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
 
     logg[LFindScatter].debug("particle distance squared: ", distance_squared,
                              "\n    ", data_a, "\n<-> ", data_b);
+  }
+
+  // Include possible outgoing branches
+  if (incoming_parametrized) {
+    act->add_all_scatterings(finder_parameters_);
   }
 
   return act;
@@ -539,7 +575,7 @@ void ScatterActionsFinder::dump_reactions() const {
             A.set_4momentum(A.pole_mass(), mom, 0.0, 0.0);
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = std::make_unique<ScatterAction>(
-                A, B, time, isotropic_, string_formation_time_);
+                A, B, time, isotropic_, string_formation_time_, false);
             if (finder_parameters_.strings_switch) {
               act->set_string_interface(string_process_interface_.get());
             }
@@ -923,7 +959,7 @@ void ScatterActionsFinder::dump_cross_sections(
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
     const ParticleList incoming = {a_data, b_data};
     ScatterActionPtr act = std::make_unique<ScatterAction>(
-        a_data, b_data, 0., isotropic_, string_formation_time_);
+        a_data, b_data, 0., isotropic_, string_formation_time_, false);
     if (finder_parameters_.strings_switch) {
       act->set_string_interface(string_process_interface_.get());
     }

@@ -149,39 +149,39 @@ enum class TimeStepMode : char {
 /**
  * Initial condition for a particle in a box.
  *
- * If PeakedMomenta is used, all particles have the same momentum
- * \f$p = 3 \cdot T\f$ with T being the temperature.
- *
- * Else, a thermalized ensemble is generated (the momenta are sampled
- * from a Maxwell-Boltzmann distribution).
- *
- * In either case, the positions in space are chosen randomly.
+ * In all cases, the positions in space are chosen randomly.
  */
 enum class BoxInitialCondition {
+  /// A thermalized ensemble is generated, with momenta sampled from a
+  /// Maxwell-Boltzmann distribution
   ThermalMomentaBoltzmann,
+  /// A thermalized ensemble is generated, with momenta of baryons(mesons)
+  /// sampled from a Fermi(Bose) distribution
   ThermalMomentaQuantum,
+  /// All particles have the same momentum \f$p = 3 \cdot T\f$ with T being the
+  /// temperature.
   PeakedMomenta,
 };
 
-/**
- * Initial condition for a particle in a sphere
- *
- * IC_ES, IC_1M and IC_2M are off-equilibrium distributions used in massless
- * comparisons of SMASH to the extended universe metric. They are described in
- * some detail in iref \iref{Bazow:2016oky}
- *
- * IC_Massive is a generalization of IC_ES for the non-zero mass case; note that
- * there is currently no analytical comparison possible with this distribution.
- *
- * The default value, ThermalMomenta, samples momenta from a Maxwell-Boltzmann
- * distribution and thus generates a thermal ensemble.
- */
+/// Initial condition for a particle in a sphere
 enum class SphereInitialCondition {
+  /// A thermalized ensemble is generated, with momenta sampled from a
+  /// Maxwell-Boltzmann distribution
   ThermalMomentaBoltzmann,
+  /// A thermalized ensemble is generated, with momenta of baryons(mesons)
+  /// sampled from a Fermi(Bose) distribution
   ThermalMomentaQuantum,
+  /// Off-equilibrium distribution used in massless comparisons of SMASH to the
+  /// extended universe metric. See eq. (76) in \iref{Bazow:2016oky}
   IC_ES,
+  /// Off-equilibrium distribution used in massless comparisons of SMASH to the
+  /// extended universe metric. See eq. (77) in \iref{Bazow:2016oky}
   IC_1M,
+  /// Off-equilibrium distribution used in massless comparisons of SMASH to the
+  /// extended universe metric. See eq. (78) in \iref{Bazow:2016oky}
   IC_2M,
+  /// A generalization of IC_ES for the non-zero mass case; note that there is
+  /// currently no analytical comparison possible with this distribution.
   IC_Massive,
 };
 
@@ -214,18 +214,24 @@ enum class NNbarTreatment {
 
 /**
  * Represents thermodynamic quantities that can be printed out
+ * \see_key{key_output_thermo_type_}
  */
 enum class ThermodynamicQuantity : char {
+  /// Density in the Eckart frame
   EckartDensity,
+  /// Energy-momentum tensor in lab frame
   Tmn,
+  /// Energy-momentum tensor in Landau rest frame
   TmnLandau,
+  /// Velocity of the Landau rest frame
   LandauVelocity,
+  /// Electric (Q), baryonic (B) and strange (S) currents
   j_QBS
 };
 
 /// Criteria used to check collisions
 enum class CollisionCriterion {
-  /// (Default) geometric criterion.
+  /// Geometric criterion.
   Geometric,
   /// Stochastic Criteiron.
   Stochastic,
@@ -288,17 +294,28 @@ enum class ThermalizationAlgorithm {
   UnbiasedBF,
 };
 
-/**
- * Defines how the number of events is determined. For FixedNumber the
- * desired number of events is simulated disregarding of wether an
- * interaction took place. For MinimumNonEmpty Events will be simulated
- * until there are at least a given number of ensembles in which an interaction
- * took place.
- */
+/// Defines how the number of events is determined.
 enum class EventCounting {
+  /// The desired number of events is simulated disregarding of whether an
+  /// interaction took place.
   FixedNumber,
+  /// Events are simulated until there are at least a given number of ensembles
+  /// in which an interaction took place
   MinimumNonEmpty,
+  /// Unused, only in the code for internal logic
   Invalid,
+};
+
+/// Determine how total cross sections for collision finding should be computed.
+enum class TotalCrossSectionStrategy {
+  /// Sum the existing partial contributions
+  BottomUp,
+  /// Use parametrizations based on existing data, rescaling with AQM for
+  /// unmeasured processes
+  TopDown,
+  /// Mix the two above, using the parametrizations only for measured processes,
+  /// and summing up partials for unmeasured interactions.
+  TopDownMeasured,
 };
 
 /// @cond
