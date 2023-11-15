@@ -499,7 +499,6 @@ TEST_CATCH(add_branches_only_once, std::logic_error) {
   auto finder_parameters_bottomup = Test::default_finder_parameters();
 
   act_bottomup->add_all_scatterings(finder_parameters_bottomup);
-  std::cout << "Added branches for the first time." << std::endl;
   act_bottomup->add_all_scatterings(finder_parameters_bottomup);
 }
 
@@ -524,7 +523,7 @@ TEST(top_down_sum_matches_parametrization) {
 
     ScatterActionPtr act_topdown =
         std::make_unique<ScatterAction>(p1, p2, 0.1, false, 1.0, -1.0, true);
-    VERIFY(act_topdown->cross_section() <= really_small);
+    VERIFY(std::isnan(act_topdown->cross_section()));
 
     auto string_process_interface = Test::default_string_process_interface();
     act_topdown->set_string_interface(string_process_interface.get());
@@ -535,6 +534,7 @@ TEST(top_down_sum_matches_parametrization) {
     act_topdown->set_parametrized_total_cross_section(
         finder_parameters_topdown);
 
+    // fuzzyness needs to be slightly larger than 1 ulp for some compilers
     vir::test::setFuzzyness<double>(5);
     if (p1.is_hadron() && p2.is_hadron()) {
       VERIFY(act_topdown->cross_section() > really_small);
@@ -547,7 +547,7 @@ TEST(top_down_sum_matches_parametrization) {
       }
       FUZZY_COMPARE(sum_partials, act_topdown->cross_section());
     } else {
-      FUZZY_COMPARE(act_topdown->cross_section(), 0);
+      FUZZY_COMPARE(act_topdown->cross_section(), 0.);
     }
   }
 }

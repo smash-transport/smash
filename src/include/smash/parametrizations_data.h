@@ -1202,9 +1202,11 @@ const std::initializer_list<double> PIPLUSPIMINUS_TOT_SQRTS = {
     3.4562500, 3.4645000, 3.4727500, 3.4810000, 3.4892500, 3.4975000, 3.5057500,
     3.5140000, 3.5222500, 3.5305000, 3.5387500, 3.5470000, 3.5552500, 3.5635000,
     3.5717500, 3.5800000};
-/// Total π⁺ π⁻  cross section parametrized from bottom-up SMASH-3.0,
-/// using the hadronic list from PDG2018.
-///
+
+/**
+ * Total π⁺ π⁻  cross section parametrized from bottom-up SMASH-3.0,
+ * using the hadronic list from PDG2018.
+ */
 const std::initializer_list<double> PIPLUSPIMINUS_TOT_SIG = {
     7.542964,   7.673451,   7.808281,   7.968326,   8.162403,   8.344765,
     8.547502,   8.800306,   9.065026,   9.321825,   9.611654,   9.940196,
@@ -1338,9 +1340,11 @@ const std::initializer_list<double> PIZEROPIZERO_TOT_SQRTS = {
     3.4562500, 3.4645000, 3.4727500, 3.4810000, 3.4892500, 3.4975000, 3.5057500,
     3.5140000, 3.5222500, 3.5305000, 3.5387500, 3.5470000, 3.5552500, 3.5635000,
     3.5717500, 3.5800000};
-/// Total π⁰ π⁰  cross section parametrized from bottom-up SMASH-3.0,
-/// using the hadronic list from PDG2018.
-///
+
+/**
+ * Total π⁰ π⁰  cross section parametrized from bottom-up SMASH-3.0
+ * using the hadronic list from PDG2018.
+ */
 const std::initializer_list<double> PIZEROPIZERO_TOT_SIG = {
     12.539807, 12.634504, 12.767629, 12.867964, 12.993971, 13.127818, 13.273229,
     13.375527, 13.564121, 13.684778, 13.860326, 14.039581, 14.208049, 14.386911,

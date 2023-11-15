@@ -32,9 +32,12 @@ ScatterAction::ScatterAction(const ParticleData &in_part_a,
     : Action({in_part_a, in_part_b}, time),
       sum_of_partial_cross_sections_(0.),
       isotropic_(isotropic),
-      string_formation_time_(string_formation_time) {
+      string_formation_time_(string_formation_time),
+      is_total_parametrized_(is_total_parametrized) {
   box_length_ = box_length;
-  is_total_parametrized_ = is_total_parametrized;
+  if (is_total_parametrized_) {
+    parametrized_total_cross_section_ = NAN;
+  }
 }
 
 void ScatterAction::add_collision(CollisionBranchPtr p) {
@@ -118,6 +121,8 @@ void ScatterAction::add_all_scatterings(
     throw std::logic_error(
         "add_all_scatterings should be called only once per ScatterAction "
         "instance");
+  } else {
+    were_processes_added_ = true;
   }
   CrossSections xs(incoming_particles_, sqrt_s(),
                    get_potential_at_interaction_point());
@@ -144,7 +149,6 @@ void ScatterAction::add_all_scatterings(
     }
   }
 
-  were_processes_added_ = true;
   // Rescale the branches so that their sum matches the parametrization
   if (is_total_parametrized_) {
     rescale_outgoing_branches();
@@ -154,14 +158,16 @@ void ScatterAction::add_all_scatterings(
 void ScatterAction::rescale_outgoing_branches() {
   if (!were_processes_added_) {
     logg[LScatterAction].fatal()
-        << "Trying to rescale branches without adding processes.";
+        << "Trying to rescale branches before adding processes.";
     throw std::logic_error(
-        "This function can only be called if (were_processes_added_==True)");
+        "This function can only be called after having added processes.");
   }
   if (sum_of_partial_cross_sections_ < really_small) {
-    logg[LScatterAction].warn()
-        << "Current total cross section is zero, not reweighting. Filling up "
-           "with the elastic process instead.";
+    logg[LScatterAction].warn() << "Current total cross section is roughly "
+                                   "zero and no rescaling to match "
+                                   "the parametrized one will be done.\nAn "
+                                   "elastic process will be added,"
+                                   "instead, to match the total cross section.";
     auto elastic_branch = std::make_unique<CollisionBranch>(
         incoming_particles_[0].type(), incoming_particles_[1].type(),
         *parametrized_total_cross_section_, ProcessType::Elastic);
@@ -189,7 +195,8 @@ void ScatterAction::set_parametrized_total_cross_section(
     logg[LScatterAction].fatal()
         << "Trying to parametrize total cross section when it shouldn't be.";
     throw std::logic_error(
-        "This function can only be called if (is_total_parametrized_==True)");
+        "This function can only be called on ScatterAction objects with "
+        "parametrized cross section.");
   }
 }
 

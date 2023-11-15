@@ -287,11 +287,10 @@ class ScatterAction : public Action {
   void resonance_formation();
 
   /**
-   * Loops over the possible branches and rescales their weight according to the
-   * desired total cross section. In case the current total is 0, a warning is
-   * issued as this should not happen in an usual run.
-   *
-   * \param[in] goal_total_xs The desired total cross section.
+   * Loop over the possible branches and rescales their weight according to the
+   * desired total cross section. In case the current sum of partials is close
+   * to 0, a warning is issued as this would not happen in an usual run, and an
+   * elastic process is added to match the total.
    */
   void rescale_outgoing_branches();
 
@@ -299,7 +298,7 @@ class ScatterAction : public Action {
   StringProcess* string_process_ = nullptr;
 
   /// Whether the total cross section is parametrized
-  bool is_total_parametrized_;
+  bool is_total_parametrized_ = false;
 
   /// If cross section is parametrized, store the value
   std::optional<double> parametrized_total_cross_section_ = std::nullopt;

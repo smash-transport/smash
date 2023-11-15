@@ -1955,21 +1955,22 @@ struct InputKeys {
    *
    * Which strategy to use when evaluating total cross sections for collision
    * finding. Currently, possible options are
-   * - `BottomUp`
+   * - `BottomUp` &rarr;
    *   Partial cross sections of a given initial state are summed up. This
    *   matches most inclusive experimental cross sections with the 3- and 4-star
    *   hadronic list from PDG2018, but is susceptible to changes once new
-   *   resonances are added.
-   * - `TopDown`
+   *   resonances are added in the \ref doxypage_input_particles "particles"
+   *   file.
+   * - `TopDown` &rarr;
    *   The total cross section of measured processes is parametrized, and the
    *   partial cross sections are rescaled to match it. Unmeasured processes use
    *   the high energy parametrization even in low energies, ignoring possible
    *   resonance peaks, and scaled with AQM. This is then insensitive to changes
-   * in the input hadronic list.
-   * - `TopDownMeasured`
+   *   in the input hadronic list.
+   * - `TopDownMeasured` &rarr;
    *   Mixes the options above, with parametrizations only for \f$NN, N\bar{N},
-   * NK, N\pi, and \pi\pi\f$. Remaining processes use sum of partial cross
-   * sections.
+   *   NK, N\pi,\f$ and \f$\pi\pi\f$. Remaining processes use sum of partial
+   *   cross sections.
    */
   /**
    * \see_key{key_CT_totXsStrategy_}
