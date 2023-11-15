@@ -768,12 +768,13 @@ std::ostream &operator<<(std::ostream &out, const ParticleType &type) {
 }
 
 /* 
- * This is valid for two particles of the same species because the operator = for smart pointers compares the pointed object. In this case, the set incoming will contain one element instead of two.
+ * This is valid for two particles of the same species because the comparison operator for smart pointers compares the pointed object. In this case, the set incoming will contain one element instead of two.
  */
 ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a, const ParticleTypePtr type_b) {
   static std::map<std::set<ParticleTypePtr>, ParticleTypePtrList> map_possible_resonances_of;
+  // \hirayama: give list instead of two? conversion of list to set?
   std::set<ParticleTypePtr> incoming{type_a, type_b};
-
+  const ParticleTypePtrList incoming_types = {type_a,type_b};
   // Fill map if set is not yet present 
   if (map_possible_resonances_of.count(incoming) == 0) {
     logg[LResonances].debug() <<"Filling map of compatible resonances for ptypes "<< type_a->name() << " " << type_b->name();
@@ -801,12 +802,32 @@ ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a, const
           type_a->strangeness() + type_b->strangeness()) {
         continue;
       }
-      resonance_list.push_back(&resonance);
+      const auto &decaymodes = resonance.decay_modes().decay_mode_list();
+      for (const auto &mode : decaymodes) {
+        if (mode->type().has_particles(incoming_types)) {
+          resonance_list.push_back(&resonance);
+	  break;
+	}
+      }
     }
+
     map_possible_resonances_of[incoming] = resonance_list;
   }
 
   return map_possible_resonances_of[incoming];
+}
+
+ParticleTypePtr try_find_pseudoresonance(const ParticleTypePtr type_a, const ParticleTypePtr type_b) {
+  ParticleTypePtr largest = type_a;
+  for (const ParticleTypePtr resonance : list_possible_resonances(type_a, type_b)) {
+    if (resonance->mass() > largest->mass()) {
+      largest = resonance;
+    }
+  }
+  if (largest==type_a) {
+    return {};
+  }
+  return largest;
 }
 
 }  // namespace smash

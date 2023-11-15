@@ -872,17 +872,6 @@ double CrossSections::formation(const ParticleType& type_resonance,
                                 double cm_momentum_sqr) const {
   const ParticleType& type_particle_a = incoming_particles_[0].type();
   const ParticleType& type_particle_b = incoming_particles_[1].type();
-  // Check for charge conservation.
-  if (type_resonance.charge() !=
-      type_particle_a.charge() + type_particle_b.charge()) {
-    return 0.;
-  }
-
-  // Check for baryon-number conservation.
-  if (type_resonance.baryon_number() !=
-      type_particle_a.baryon_number() + type_particle_b.baryon_number()) {
-    return 0.;
-  }
 
   // Calculate partial in-width.
   const double partial_width = type_resonance.get_partial_in_width(

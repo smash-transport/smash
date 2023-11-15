@@ -149,6 +149,19 @@ void ScatterAction::add_all_scatterings(
     }
   }
 
+//  if(creat_pseudoresonance) {
+    ParticleTypePtr pseudoresonance = try_find_pseudoresonance(&incoming_particles_[0].type(), &incoming_particles_[1].type());
+    // compute xs_diff
+    const double xs_tot = is_total_parametrized_ ? *parametrized_total_cross_section_ : xs.high_energy(finder_parameters.transition_high_energy); 
+    const double xs_diff = xs_tot - sum_of_partial_cross_sections_;
+    // The pseudoresonance cross section cannot be negative
+    if (pseudoresonance && (xs_diff>really_small)) {
+      auto pseudoresonance_branch = std::make_unique<CollisionBranch>(*pseudoresonance, xs_diff, ProcessType::TwoToOne);
+      add_collision(std::move(pseudoresonance_branch));
+      logg[LScatterAction].warn() << "Pseudoresonance is " << pseudoresonance->name() << "with xs="<<xs_diff;
+    }
+//  }
+
   were_processes_added_ = true;
   // Rescale the branches so that their sum matches the parametrization
   if (is_total_parametrized_) {
