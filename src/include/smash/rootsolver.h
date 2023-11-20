@@ -108,9 +108,9 @@ class RootSolver1D {
   /**
    * The function of which a root should be found in the form that GSL expects
    *
-   * \param[in] x Position on x-axis where the function should be evaluated
+   * \param[in] x Argument of the function
    *
-   * \return The value of the function at point x
+   * \return The value of the function for the given argument x
    *
    * \note
    * This function needs to be \c static because GSL uses an object of type \c

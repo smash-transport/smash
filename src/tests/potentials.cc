@@ -337,7 +337,7 @@ TEST(energy_gradient_vs_pot_gradient) {
   double length = 5.0;  // consider a 5 fm box
   // create some protons but make sure they are at rest
   std::vector<Particles> ensembles(1);
-  Particles parts;
+  Particles particles;
   auto uniform_length = random::make_uniform_distribution(0.0, length);
   auto uniform_zero_to_one = random::make_uniform_distribution(0.0, 1.0);
   const int nparticles = 500;
@@ -393,7 +393,7 @@ TEST(energy_gradient_vs_pot_gradient) {
   Configuration conf{conf_pot};
   Potentials pot(std::move(conf), denspar);
 
-  // calculate some needed densities
+  // calculate needed densities
   double baryon_density = jB.rho();
   ThreeVector baryon_grad_j0 = jB.grad_j0();
   ThreeVector baryon_dvecj_dt = jB.dvecj_dt();

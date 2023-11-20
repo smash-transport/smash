@@ -156,11 +156,11 @@ void update_momenta(
         FB = std::make_pair(std::get<0>(tmp), std::get<1>(tmp));
         FI3 = std::make_pair(std::get<2>(tmp), std::get<3>(tmp));
       }
-      /* Floating points traps should be raised if the force is not overwritten
+      /* Floating point traps should be raised if the force is not overwritten
        * with a meaningful value */
       const auto sNaN = std::numeric_limits<double>::signaling_NaN();
       ThreeVector force(sNaN, sNaN, sNaN);
-      if (pot.use_mom_dependence()) {
+      if (pot.use_momentum_dependence()) {
         ThreeVector energy_grad = pot.single_particle_energy_gradient(
             jB_lat, data.position().threevec(), data.momentum().threevec(),
             data.effective_mass(), plist);

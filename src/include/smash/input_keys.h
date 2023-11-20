@@ -802,14 +802,15 @@ class Key {
          Powers: [1.7681391, 3.5293515, 5.4352788, 6.3809822]
          Coeffs: [-8.450948e+01, 3.843139e+01, -7.958557e+00, 1.552594e+00]
  \endverbatim
- * ### Configuring the momentum-dependent part
+ * ### Configuring the momentum dependence
  * The momentum-dependent term can be added to the Skyrme potential. In order
  * to activate it one has to specify the parameters C and Lambda in MeV and
  * 1/fm respectively in the "Momentum_Dependence" section under "Potentials".
- * Note that the parameters from the momentum-dependent part
+ * Note that the parameters from the momentum-dependent term
  * and the Skyrme potential need to be consistent in order to reproduce nuclear
  * ground
- * state properties. An example of a medium-stiff (K=290 MeV) equation of state
+ * state properties. An example of parameters corresponding to a medium-stiff
+(K=290 MeV) equation of state
  * is given in the following.
  * \verbatim
  Potentials:
@@ -933,17 +934,16 @@ class Key {
  * \f]
  * This shape of the potential is taken from \iref{Welke:1988zz}
  * and includes an integral over momentum. This integral is quite costly to
- * evaluate during runtime and to reduce numerical cost, also following
- * \iref{Welke:1988zz}, we make the assumption that the distribution function
- * takes the form of cold nuclear matter \f$ f(\mathbf{r}, \mathbf{p}) =
- * \Theta(p-p_F)\f$, where \f$ p_F \f$ is the Fermi momentum. Note that the
- * Fermi momentum depends on the density and therefore on the position in
- * general. With this assumption the integral has an analytic solution and can
- * be evaluated relatively quickly, making the potential viable to use in
- * transport. \n When choosing the parameters \f$ C \f$ and \f$ \Lambda\f$ it is
- * important to make sure that nuclear ground state properties are realistic. In
- * other words the momentum dependence parameters have to be constrained
- * together with the Skyrme potential parameters.
+ * evaluate during runtime and to reduce numerical cost, following the GiBUU
+ * implementation \iref{Buss:2011mx}, we make the assumption that the
+ * distribution function takes the form of cold nuclear matter \f$ f(\mathbf{r},
+ * \mathbf{p}) = \Theta(p-p_F)\f$, where \f$ p_F \f$ is the Fermi momentum. Note
+ * that the Fermi momentum depends on the density and therefore on the position
+ * in general. With this assumption the integral has an analytic solution and
+ * can be evaluated relatively quickly. When choosing the parameters \f$ C \f$
+ * and \f$ \Lambda\f$ it is important to make sure that nuclear ground state
+ * properties are realistic. In other words the momentum dependence parameters
+ * have to be constrained together with the Skyrme potential parameters.
  */
 
 /*!\Userguide
@@ -4924,7 +4924,7 @@ struct InputKeys {
    * \page doxypage_input_conf_pot_momentum_dependence
    * \required_key{key_potentials_momentum_dependence_C,C,double}
    *
-   * Parameter \f$ C \f$ of the momentum-dependent part of the
+   * Parameter \f$ C \f$ of the momentum-dependent term of the
    * potential \unit{in MeV}.
    */
   /**
@@ -4937,7 +4937,7 @@ struct InputKeys {
    * \page doxypage_input_conf_pot_momentum_dependence
    * \required_key{key_potentials_momentum_dependence_Lambda,Lambda,double}
    *
-   * Parameter \f$ \Lambda \f$ of the momentum-dependent part of the
+   * Parameter \f$ \Lambda \f$ of the momentum-dependent term in the
    * potential \unit{in 1/fm}.
    */
   /**

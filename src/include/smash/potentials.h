@@ -51,8 +51,8 @@ class Potentials {
   virtual ~Potentials();
 
   /**
-   * Calculates the gradient of the single-particle energy including potentials
-   * in the calculation frame in MeV/fm
+   * Calculates the gradient of the single-particle energy (including
+   * potentials) in the calculation frame in MeV/fm
    *
    * \param jB_lattice Pointer to the baryon density lattice
    * \param position Position of the particle of interest in fm
@@ -271,7 +271,8 @@ class Potentials {
    * \param[in] grad_j0B  Gradient of the net-baryon density in the
    *            computational frame
    * \param[in] dvecjB_dt Time derivative of the net-baryon vector current
-   * density \param[in] curl_vecjB Curl of the net-baryon vector current density
+   *            density
+   * \param[in] curl_vecjB Curl of the net-baryon vector current density
    * \return (\f$E_{I_3}, B_{I_3}\f$) [GeV/fm], where
    *         \f[
    *         \mathbf{E}
@@ -430,7 +431,9 @@ class Potentials {
   /// \return Is Coulomb potential on?
   virtual bool use_coulomb() const { return use_coulomb_; }
   /// \return Use momentum-dependent part of the potential?
-  virtual bool use_mom_dependence() const { return use_mom_dependence_; }
+  virtual bool use_momentum_dependence() const {
+    return use_momentum_dependence_;
+  }
 
   /// \return Skyrme parameter skyrme_a, in MeV
   double skyrme_a() const { return skyrme_a_; }
@@ -476,7 +479,7 @@ class Potentials {
   bool use_vdf_;
 
   /// Momentum-dependent part on/off
-  bool use_mom_dependence_;
+  bool use_momentum_dependence_;
 
   /**
    * Parameter of skyrme potentials:
@@ -590,21 +593,27 @@ class Potentials {
    * Root equation used to determine the energy in the calculation frame
    *
    * It is the difference between energy (including potential) squared minus
-   * momentum squared in the calculation frame and in the local rest-frame The
+   * momentum squared in the calculation frame and in the local rest-frame. The
    * equation should be zero due to Lorentz invariance but a root finder is
-   * required to determine the energy such that this is indeed the case.
+   * required to determine the calculation frame energy such that this is indeed
+   * the case.
    *
    * \param[in] energy_calc Energy in the calculation frame at which the
-   * equation should be evaluated in GeV \param[in] momentum_calc Momentum of
-   * the particle in calculation frame of interest in GeV \param[in] jmu Baryon
-   * current fourvector at the position of the particle \param[in] m Mass of the
-   * particle of interest in GeV \param[in] A Skyrme parameter A in MeV
+   *                        equation should be evaluated in GeV
+   * \param[in] momentum_calc Momentum of
+   *                          the particle in calculation frame of interest
+   *                          in GeV
+   * \param[in] jmu Baryon current fourvector at the position of the particle
+   * \param[in] m Mass of the particle of interest in GeV
+   * \param[in] A Skyrme parameter A in MeV
    * \param[in] B Skyrme parameter B in MeV
    * \param[in] tau Skyrme parameter tau
-   * \param[in] C Parameter C of the momentum dependent part of the potential in
-   * MeV \param[in] Lambda Parameter Lambda of the momentum-dependent part of
-   * the potential in 1/fm \return effective mass squared in calculation frame
-   * minus effective mass in rest_frame in GeV^2
+   * \param[in] C Parameter C of the momentum dependent part of the potential
+   *              in MeV
+   * \param[in] Lambda Parameter Lambda of the momentum-dependent term of
+   *                   the potential in 1/fm
+   * \return effective mass squared in calculation frame
+   *         minus effective mass in rest_frame in GeV^2
    */
   static double root_eq_potentials(double energy_calc,
                                    const ThreeVector &momentum_calc,
@@ -635,16 +644,18 @@ class Potentials {
   }
 
   /**
-   * Momentum dependent part of the potential
+   * Momentum dependent term of the potential
    *
    * To be added to the momentum independent part.
    *
    * \param[in] momentum Absolute momentum of the particle of interest in the
-   * local rest-frame in GeV \param[in] rho Baryon density in the Eckart frame
-   * in 1/fm^3 \param[in] C Parameter C of the momentum dependent part of the
-   * potential in MeV \param[in] Lambda Parameter Lambda of the
-   * momentum-dependent part of the potential in 1/fm \return momentum dependent
-   * part of the potential in GeV
+   *                     local rest-frame in GeV
+   * \param[in] rho Baryon density in the Eckart frame in 1/fm^3
+   * \param[in] C Parameter C of the momentum dependent part of the
+   *              potential in MeV
+   * \param[in] Lambda Parameter Lambda of the momentum-dependent part of the
+   *                   potential in 1/fm
+   * \return momentum dependent part of the potential in GeV
    */
   static double momentum_dependent_part(double momentum, double rho, double C,
                                         double Lambda) {
