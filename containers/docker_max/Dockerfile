@@ -16,8 +16,16 @@ SHELL ["/bin/bash", "-c"]
 ARG TARGET_ARCHITECTURE="x86-64"
 
 # Declare all together the versions of the going to be installed codebases
+#
+# ATTENTION: Versions 6.28.XX of ROOT are affected by some memory leaks in ROOT's internal
+#            C++ interpreter (Cling). On one hand this will make SMASH tests fail, as they
+#            are built with the address sanitizer switched on. On the other hand, such a leak
+#            leads to a small but constant increase of memory used by a SMASH run and we do
+#            not want to offer such a behaviour in our container. Therefore we stick to the
+#            last ROOT version without this problem. It has to be checked if future versions
+#            solve the problem before using them.
 
-ARG ROOT_VERSION="6.28.06"
+ARG ROOT_VERSION="6.26.10"
 ARG HEPMC_VERSION="3.2.6"
 ARG CPPCHECK_VERSION="2.8"
 ARG CPPLINT_VERSION="1.6.0"
@@ -211,17 +219,6 @@ ARG CPPFLAGS="${CFLAGS} -std=c++17"
 ARG CXXFLAGS=${CPPFLAGS}
 
 # Install ROOT
-#
-# NOTE: Apparently, using ROOT in an application that is build with the address sanitizer
-#       switched on (as SMASH tests are) can report some memory leaks in ROOT's internal
-#       C++ interpreter (Cling). This leaks are probably false positives as they happen
-#       in the container only and not on all host systems. However, they make SMASH tests
-#       fail and this might mislead the newbie. Therefore, we suppress such a leaks using
-#       https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer#suppressions
-#       sanitizer documentation. Actually, according to official ROOT instructions,
-#       https://gitlab.ep1.rub.de/fp311online/cern-root/-/tree/v6-22-08-ep1/core/sanitizer?ref_type=heads
-#       a suppression template file is shipped with ROOT and we will add a line to this
-#       and use it in our environment.
 
 RUN <<EOF
   set -eux
@@ -235,8 +232,6 @@ RUN <<EOF
   cmake --build . --target install -j$(nproc)
   printf '/SMASH/root_install/lib\n' >> /etc/ld.so.conf
   ldconfig
-  cd /SMASH/root_install/etc/
-  printf '\n#Full libCling for SMASH\nleak:libCling\n' >> lsan-root.supp
 EOF
 
 ENV ROOTSYS=/SMASH/root_install
@@ -250,8 +245,6 @@ ENV CMAKE_PREFIX_PATH=${ROOTSYS}:${CMAKE_PREFIX_PATH}
 ENV JUPYTER_PATH=${ROOTSYS}/etc/notebook:${JUPYTER_PATH}
 ENV JUPYTER_CONFIG_DIR=${ROOTSYS}/etc/notebook:${JUPYTER_CONFIG_DIR}
 ENV CLING_STANDARD_PCH=none
-# This will let sanitizer suppress leaks according to suppressions file list of patterns
-ENV LSAN_OPTIONS="suppressions=${ROOTSYS}/etc/lsan-root.supp:print_suppressions=0"
 
 # Install HepMC3
 
