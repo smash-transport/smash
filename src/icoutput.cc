@@ -151,7 +151,7 @@ void ICOutput::at_interaction(const Action &action, const double) {
 
   // transverse mass
   const double m_trans =
-      std::sqrt(particle.type().mass() * particle.type().mass() +
+      std::sqrt(particle.effective_mass() * particle.effective_mass() +
                 particle.momentum()[1] * particle.momentum()[1] +
                 particle.momentum()[2] * particle.momentum()[2]);
   // momentum space rapidity

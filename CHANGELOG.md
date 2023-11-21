@@ -31,6 +31,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * SMASH now aborts with a user-friendly message if any input key among `End_Time`, `Delta_Time` or `Output_Interval` is zero
 * Fix bug in thermodynamics lattice ASCII output when both ASCII and binary formats are requested
 * Fix bug about SMASH getting stuck with some particular values of `End_Time` and `Delta_Time`
+* Fix value of particles mass in SMASH IC ASCII output (the pole mass was printed instead of the real mass)
 
 ### Changed
 * Upgraded to Pythia 8.310
