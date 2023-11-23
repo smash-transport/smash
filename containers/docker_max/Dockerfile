@@ -34,6 +34,7 @@ ARG YODA_VERSION="1.9.7"
 ARG FASTJET_VERSION="3.4.0"
 ARG FJCONTRIB_VERSION="1.049"
 ARG JULIA_VERSION="1.9.3"
+ARG YQ_VERSION="4.40.3"
 
 # Add some info about authors and contents using the rules o the OCI Image Format Specification
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
@@ -389,6 +390,17 @@ RUN <<EOF
 EOF
 
 ENV PATH=${JULIA_PATH}:${PATH}
+
+# Install yq
+
+ARG YQ_BINARY=yq_linux_amd64
+
+RUN <<EOF
+  set -eux
+  cd /opt
+  wget https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/${YQ_BINARY} -O /usr/bin/yq
+  chmod +x /usr/bin/yq
+EOF
 
 # Recompile SMASH (if the repository exists)
 
