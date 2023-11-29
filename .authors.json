@@ -1,0 +1,368 @@
+{
+  "SMASH team": [
+    {
+      "last name": "Wergieluk",
+      "first name": "Agnieszka",
+      "email": "awergieluk@gmail.com",
+      "years": "2019-2020",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Weil",
+      "first name": "Janus",
+      "email": "weil@fias.uni-frankfurt.de",
+      "years": "2014-2016,2019-2020",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Tindall",
+      "first name": "Joseph",
+      "email": "tindall@fias.uni-frankfurt.de",
+      "years": "2016",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Steinberg",
+      "first name": "Vinzent",
+      "email": "steinberg@fias.uni-frankfurt.de",
+      "years": "2015-2020",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Staudenmaier",
+      "first name": "Jan",
+      "email": "staudenmaier@fias.uni-frankfurt.de",
+      "years": "2015-2022",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Sorensen",
+      "first name": "Agnieszka",
+      "email": "awergieluk@gmail.com",
+      "years": "2020-",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Sciarra",
+      "first name": "Alessandro",
+      "email": "asciarra@fias.uni-frankfurt.de",
+      "years": "2021-",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Schäfer",
+      "first name": "Anna",
+      "email": "aschaefer@fias.uni-frankfurt.de",
+      "years": "2017-2022",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Ryu",
+      "first name": "Sangwook",
+      "email": "ryu@fias.uni-frankfurt.de",
+      "years": "2017-2019",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Rothermel",
+      "first name": "Jonas",
+      "email": "rothermel@fias.uni-frankfurt.de",
+      "years": "2017-2019",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Rose",
+      "first name": "Jean-Bernard",
+      "email": "rose@fias.uni-frankfurt.de",
+      "years": "2016-2019",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Roch",
+      "first name": "Hendrik",
+      "email": "roch@fias.uni-frankfurt.de",
+      "years": "2022-",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Petersen",
+      "first name": "Hannah",
+      "email": "petersen@fias.uni-frankfurt.de",
+      "years": "2013-2018",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Prinz",
+      "first name": "Lukas",
+      "email": "lprinz@fias.uni-frankfurt.de",
+      "years": "2019",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Paulinyova",
+      "first name": "Zuzana",
+      "email": "paulinyova@fias.uni-frankfurt.de",
+      "years": "2023-",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Pang",
+      "first name": "Longgang",
+      "email": "pang@fias.uni-frankfurt.de",
+      "years": "2015-2017",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Oliinychenko",
+      "first name": "Dmytro",
+      "email": "oliiny@fias.uni-frankfurt.de",
+      "years": "2014-",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Mohs",
+      "first name": "Justin",
+      "email": "mohs@fias.uni-frankfurt.de",
+      "years": "2017-",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Mitrovic",
+      "first name": "Damjan",
+      "email": "mitrovic@fias.uni-frankfurt.de",
+      "years": "2019-2020",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Mayer",
+      "first name": "Markus",
+      "email": "mayer@fias.uni-frankfurt.de",
+      "years": "2017",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Kretz",
+      "first name": "Matthias",
+      "email": "kretz@compeng.uni-frankfurt.de",
+      "years": "2014-2015,2020",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Li",
+      "first name": "Feng",
+      "email": "fengli@fias.uni-frankfurt.de",
+      "years": "2016-2018",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Kübler",
+      "first name": "Natey",
+      "email": "kuebler@fias.uni-frankfurt.de",
+      "years": "2020-2021",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Kehrenberg",
+      "first name": "Thomas",
+      "email": "kehrenberg@fias.uni-frankfurt.de",
+      "years": "2015",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Inghirami",
+      "first name": "Gabriele",
+      "email": "inghirami@fias.uni-frankfurt.de",
+      "years": "2021-",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Hirayama",
+      "first name": "Renan",
+      "email": "hirayama@fias.uni-frankfurt.de",
+      "years": "2021-",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Hammelmann",
+      "first name": "Jan",
+      "email": "hammelmann@fias.uni-frankfurt.de",
+      "years": "2019-",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Groebel",
+      "first name": "Julia",
+      "email": "groebel@fias.uni-frankfurt.de",
+      "years": "2022",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Goldschmidt",
+      "first name": "Andy",
+      "email": "goldschmidt@fias.uni-frankfurt.de",
+      "years": "2014",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Götz",
+      "first name": "Niklas",
+      "email": "goetz@fias.uni-frankfurt.de",
+      "years": "2021-",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Geiger",
+      "first name": "Leon",
+      "email": "geiger@fias.uni-frankfurt.de",
+      "years": "2019-2020",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Garcia-Montero",
+      "first name": "Oscar",
+      "email": "garcia@fias.uni-frankfurt.de",
+      "years": "2020-",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Elfner",
+      "first name": "Hannah",
+      "email": "elfner@fias.uni-frankfurt.de",
+      "years": "2018-",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Ehlert",
+      "first name": "Niklas",
+      "email": "ehlert@fias.uni-frankfurt.de",
+      "years": "2016",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Bäuchle",
+      "first name": "Bjørn",
+      "email": "baeuchle@fias.uni-frankfurt.de",
+      "years": "2012-2014",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Auvinen",
+      "first name": "Jussi",
+      "email": "auvinen@fias.uni-frankfurt.de",
+      "years": "2012-2014",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Attems",
+      "first name": "Maximilian",
+      "email": "attems@fias.uni-frankfurt.de",
+      "years": "2012-2014",
+      "affiliation": "",
+      "orcid": ""
+    }
+  ],
+  "External contributors": [
+    {
+      "last name": "Holm Christensen",
+      "first name": "Christian",
+      "email": "cholm@nbi.ku.dk",
+      "years": "2021",
+      "affiliation": "",
+      "orcid": ""
+    }
+  ],
+  "Acknowledgments": [
+    {
+      "last name": "Gerhard",
+      "first name": "Jochen",
+      "email": "jochen.gerhard@compeng.uni-frankfurt.de",
+      "years": "2012-2013",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Weil",
+      "first name": "Janus",
+      "email": "weil@fias.uni-frankfurt.de",
+      "years": "2013",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Gallmeister",
+      "first name": "Kai",
+      "email": "gallmeister@itp.uni-frankfurt.de",
+      "years": "2013-2014",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Ermakov",
+      "first name": "Nikita",
+      "email": "sh1r4s3@mail.si-head.nl",
+      "years": "2020",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "F. Bastian",
+      "first name": "Niels-Uwe",
+      "email": "bastian.niels-uwe@uwr.edu.pl",
+      "years": "2022",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Verbytskyi",
+      "first name": "Andrii",
+      "email": "andrii.verbytskyi@mpp.mpg.de",
+      "years": "2022",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "last name": "Spies",
+      "first name": "Simon",
+      "email": "s.spies@gsi.de",
+      "years": "2022-2023",
+      "affiliation": "",
+      "orcid": ""
+    }
+  ]
+}
