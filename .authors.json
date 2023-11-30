@@ -14,7 +14,7 @@
       "email": "weil@fias.uni-frankfurt.de",
       "years": "2014-2016,2019-2020",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0002-1984-8023"
     },
     {
       "last name": "Tindall",
@@ -22,7 +22,7 @@
       "email": "tindall@fias.uni-frankfurt.de",
       "years": "2016",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0003-1335-8637"
     },
     {
       "last name": "Steinberg",
@@ -38,7 +38,7 @@
       "email": "staudenmaier@fias.uni-frankfurt.de",
       "years": "2015-2022",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0003-1335-8637"
     },
     {
       "last name": "Sorensen",
@@ -46,7 +46,7 @@
       "email": "awergieluk@gmail.com",
       "years": "2020-",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0002-1984-8023"
     },
     {
       "last name": "Sciarra",
@@ -54,7 +54,7 @@
       "email": "asciarra@fias.uni-frankfurt.de",
       "years": "2021-",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0002-4608-1905"
     },
     {
       "last name": "Schäfer",
@@ -62,7 +62,7 @@
       "email": "aschaefer@fias.uni-frankfurt.de",
       "years": "2017-2022",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0002-2918-2288"
     },
     {
       "last name": "Ryu",
@@ -70,7 +70,7 @@
       "email": "ryu@fias.uni-frankfurt.de",
       "years": "2017-2019",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0002-4907-6650"
     },
     {
       "last name": "Rothermel",
@@ -86,7 +86,7 @@
       "email": "rose@fias.uni-frankfurt.de",
       "years": "2016-2019",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0001-7313-2942"
     },
     {
       "last name": "Roch",
@@ -94,7 +94,7 @@
       "email": "roch@fias.uni-frankfurt.de",
       "years": "2022-",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0002-0187-6843"
     },
     {
       "last name": "Petersen",
@@ -134,7 +134,7 @@
       "email": "oliiny@fias.uni-frankfurt.de",
       "years": "2014-",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0002-5773-6137"
     },
     {
       "last name": "Mohs",
@@ -142,7 +142,7 @@
       "email": "mohs@fias.uni-frankfurt.de",
       "years": "2017-",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0001-8437-0946"
     },
     {
       "last name": "Mitrovic",
@@ -166,7 +166,7 @@
       "email": "kretz@compeng.uni-frankfurt.de",
       "years": "2014-2015,2020",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0002-0867-243X"
     },
     {
       "last name": "Li",
@@ -182,7 +182,7 @@
       "email": "kuebler@fias.uni-frankfurt.de",
       "years": "2020-2021",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0003-0633-5808"
     },
     {
       "last name": "Kehrenberg",
@@ -198,7 +198,7 @@
       "email": "inghirami@fias.uni-frankfurt.de",
       "years": "2021-",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0002-4059-120X"
     },
     {
       "last name": "Hirayama",
@@ -238,7 +238,7 @@
       "email": "goetz@fias.uni-frankfurt.de",
       "years": "2021-",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0002-5992-1643"
     },
     {
       "last name": "Geiger",
@@ -254,7 +254,7 @@
       "email": "garcia@fias.uni-frankfurt.de",
       "years": "2020-",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0003-0409-1547"
     },
     {
       "last name": "Elfner",
@@ -262,7 +262,7 @@
       "email": "elfner@fias.uni-frankfurt.de",
       "years": "2018-",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0002-6213-3613"
     },
     {
       "last name": "Ehlert",
@@ -294,7 +294,7 @@
       "email": "attems@fias.uni-frankfurt.de",
       "years": "2012-2014",
       "affiliation": "",
-      "orcid": ""
+      "orcid": "0000-0001-8764-3022"
     }
   ],
   "External contributors": [
@@ -312,57 +312,43 @@
       "last name": "Gerhard",
       "first name": "Jochen",
       "email": "jochen.gerhard@compeng.uni-frankfurt.de",
-      "years": "2012-2013",
-      "affiliation": "",
-      "orcid": ""
+      "years": "2012-2013"
     },
     {
       "last name": "Weil",
       "first name": "Janus",
       "email": "weil@fias.uni-frankfurt.de",
-      "years": "2013",
-      "affiliation": "",
-      "orcid": ""
+      "years": "2013"
     },
     {
       "last name": "Gallmeister",
       "first name": "Kai",
       "email": "gallmeister@itp.uni-frankfurt.de",
-      "years": "2013-2014",
-      "affiliation": "",
-      "orcid": ""
+      "years": "2013-2014"
     },
     {
       "last name": "Ermakov",
       "first name": "Nikita",
       "email": "sh1r4s3@mail.si-head.nl",
-      "years": "2020",
-      "affiliation": "",
-      "orcid": ""
+      "years": "2020"
     },
     {
       "last name": "F. Bastian",
       "first name": "Niels-Uwe",
       "email": "bastian.niels-uwe@uwr.edu.pl",
-      "years": "2022",
-      "affiliation": "",
-      "orcid": ""
+      "years": "2022"
     },
     {
       "last name": "Verbytskyi",
       "first name": "Andrii",
       "email": "andrii.verbytskyi@mpp.mpg.de",
-      "years": "2022",
-      "affiliation": "",
-      "orcid": ""
+      "years": "2022"
     },
     {
       "last name": "Spies",
       "first name": "Simon",
       "email": "s.spies@gsi.de",
-      "years": "2022-2023",
-      "affiliation": "",
-      "orcid": ""
+      "years": "2022-2023"
     }
   ]
 }
