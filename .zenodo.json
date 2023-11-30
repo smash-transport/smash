@@ -1,0 +1,202 @@
+{
+  "creators": [
+    {
+      "name": "Wergieluk, Agnieszka",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Weil, Janus",
+      "affiliation": "",
+      "orcid": "0000-0002-1984-8023"
+    },
+    {
+      "name": "Tindall, Joseph",
+      "affiliation": "",
+      "orcid": "0000-0003-1335-8637"
+    },
+    {
+      "name": "Steinberg, Vinzent",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Staudenmaier, Jan",
+      "affiliation": "",
+      "orcid": "0000-0003-1335-8637"
+    },
+    {
+      "name": "Sorensen, Agnieszka",
+      "affiliation": "",
+      "orcid": "0000-0002-1984-8023"
+    },
+    {
+      "name": "Sciarra, Alessandro",
+      "affiliation": "",
+      "orcid": "0000-0002-4608-1905"
+    },
+    {
+      "name": "Schäfer, Anna",
+      "affiliation": "",
+      "orcid": "0000-0002-2918-2288"
+    },
+    {
+      "name": "Ryu, Sangwook",
+      "affiliation": "",
+      "orcid": "0000-0002-4907-6650"
+    },
+    {
+      "name": "Rothermel, Jonas",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Rose, Jean-Bernard",
+      "affiliation": "",
+      "orcid": "0000-0001-7313-2942"
+    },
+    {
+      "name": "Roch, Hendrik",
+      "affiliation": "",
+      "orcid": "0000-0002-0187-6843"
+    },
+    {
+      "name": "Prinz, Lukas",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Petersen, Hannah",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Paulinyova, Zuzana",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Pang, Longgang",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Oliinychenko, Dmytro",
+      "affiliation": "",
+      "orcid": "0000-0002-5773-6137"
+    },
+    {
+      "name": "Mohs, Justin",
+      "affiliation": "",
+      "orcid": "0000-0001-8437-0946"
+    },
+    {
+      "name": "Mitrovic, Damjan",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Mayer, Markus",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Li, Feng",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Kübler, Natey",
+      "affiliation": "",
+      "orcid": "0000-0003-0633-5808"
+    },
+    {
+      "name": "Kretz, Matthias",
+      "affiliation": "",
+      "orcid": "0000-0002-0867-243X"
+    },
+    {
+      "name": "Kehrenberg, Thomas",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Inghirami, Gabriele",
+      "affiliation": "",
+      "orcid": "0000-0002-4059-120X"
+    },
+    {
+      "name": "Holm Christensen, Christian",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Hirayama, Renan",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Hammelmann, Jan",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Götz, Niklas",
+      "affiliation": "",
+      "orcid": "0000-0002-5992-1643"
+    },
+    {
+      "name": "Groebel, Julia",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Goldschmidt, Andy",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Geiger, Leon",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Garcia-Montero, Oscar",
+      "affiliation": "",
+      "orcid": "0000-0003-0409-1547"
+    },
+    {
+      "name": "Elfner, Hannah",
+      "affiliation": "",
+      "orcid": "0000-0002-6213-3613"
+    },
+    {
+      "name": "Ehlert, Niklas",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Bäuchle, Bjørn",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Auvinen, Jussi",
+      "affiliation": "",
+      "orcid": ""
+    },
+    {
+      "name": "Attems, Maximilian",
+      "affiliation": "",
+      "orcid": "0000-0001-8764-3022"
+    }
+  ],
+  "related_identifiers": [
+    {
+      "scheme": "doi",
+      "identifier": "https://doi.org/10.1103/PhysRevC.94.054905",
+      "relation": "isDescribedBy",
+      "resource_type": "publication-article"
+    }
+  ]
+}
