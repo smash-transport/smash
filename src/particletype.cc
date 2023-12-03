@@ -817,17 +817,4 @@ ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a, const
   return map_possible_resonances_of[incoming];
 }
 
-ParticleTypePtr try_find_pseudoresonance(const ParticleTypePtr type_a, const ParticleTypePtr type_b) {
-  ParticleTypePtr largest = type_a;
-  for (const ParticleTypePtr resonance : list_possible_resonances(type_a, type_b)) {
-    if (resonance->mass() > largest->mass()) {
-      largest = resonance;
-    }
-  }
-  if (largest==type_a) {
-    return {};
-  }
-  return largest;
-}
-
 }  // namespace smash

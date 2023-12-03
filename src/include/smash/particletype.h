@@ -764,12 +764,6 @@ inline ParticleTypePtr ParticleType::get_antiparticle() const {
  */
 ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a, const ParticleTypePtr type_b);
 
-  
-/**
- *  \hirayama: document
- */
-ParticleTypePtr try_find_pseudoresonance(const ParticleTypePtr type_a, const ParticleTypePtr type_b);
-
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_PARTICLETYPE_H_

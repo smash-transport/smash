@@ -314,8 +314,18 @@ enum class TotalCrossSectionStrategy {
   /// unmeasured processes
   TopDown,
   /// Mix the two above, using the parametrizations only for measured processes,
-  /// and summing up partials for unmeasured interactions.
+  /// and summing up partials for unmeasured interactions
   TopDownMeasured,
+};
+
+/// Whether to create pseudoresonances to fill inelastic gap in cross sections.
+enum class PseudoResonances {
+  /// No pseudoresonance is created
+  None,
+  /// Largest possible resonance from processes with at least one resonance in the incoming particles
+  LargestFromUnstable,
+  /// Closest resonance for a given mass from processes with at least one resonance in the incoming particles
+  ClosestFromUnstable,
 };
 
 /// @cond

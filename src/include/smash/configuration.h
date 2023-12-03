@@ -906,6 +906,29 @@ class Configuration {
     }
 
     /**
+     * Set whether pseudoresonances are used from configuration values.
+     *
+     * \return PseudoResonances.
+     * \throw IncorrectTypeInAssignment in case a key that is
+     * not available is provided as a configuration value.
+     */
+    operator PseudoResonances() const {
+      const std::string s = operator std::string();
+      if (s == "None" || s == "false") {
+        return PseudoResonances::None;
+      }
+      if (s == "LargestFromUnstable" || s == "true") {
+        return PseudoResonances::LargestFromUnstable;
+      }
+      if (s == "ClosestFromUnstable") {
+        return PseudoResonances::ClosestFromUnstable;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) + "\" should be " +
+          "\"None\", \"LargestFromUnstable\", or \"ClosestFromUnstable\".");
+    }
+
+    /**
      * Set OutputOnlyFinal for particles output from configuration values.
      *
      * \return OutputOnlyFinal.

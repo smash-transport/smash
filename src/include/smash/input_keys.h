@@ -1980,6 +1980,9 @@ struct InputKeys {
       TotalCrossSectionStrategy::BottomUp,
       {"3.1"}};
 
+  inline static const Key<PseudoResonances> collTerm_pseudoresonance{
+      {"Collision_Term", "Pseudoresonances"}, PseudoResonances::None, {"3.1"}};
+
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,double,2.5}
@@ -5064,6 +5067,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<NNbarTreatment>>,
       std::reference_wrapper<const Key<OutputOnlyFinal>>,
       std::reference_wrapper<const Key<PdgCode>>,
+      std::reference_wrapper<const Key<PseudoResonances>>,
       std::reference_wrapper<const Key<ReactionsBitSet>>,
       std::reference_wrapper<const Key<RestFrameDensityDerivativesMode>>,
       std::reference_wrapper<const Key<Sampling>>,
@@ -5137,6 +5141,7 @@ struct InputKeys {
       std::cref(collTerm_elasticCrossSection),
       std::cref(collTerm_elasticNNCutoffSqrts),
       std::cref(collTerm_totXsStrategy),
+      std::cref(collTerm_pseudoresonance),
       std::cref(collTerm_fixedMinCellLength),
       std::cref(collTerm_forceDecaysAtEnd),
       std::cref(collTerm_includeDecaysAtTheEnd),

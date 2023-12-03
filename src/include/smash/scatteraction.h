@@ -294,6 +294,11 @@ class ScatterAction : public Action {
    */
   void rescale_outgoing_branches();
 
+  /**
+   *  \hirayama: document
+   */
+  ParticleTypePtr try_find_pseudoresonance(const PseudoResonances method) const;
+
   /// Pointer to interface class for strings
   StringProcess* string_process_ = nullptr;
 
