@@ -149,16 +149,26 @@ void ScatterAction::add_all_scatterings(
     }
   }
 
-  if (finder_parameters.pseudoresonance_method != PseudoResonances::None) {
-    ParticleTypePtr pseudoresonance = try_find_pseudoresonance(finder_parameters.pseudoresonance_method);
+  ParticleTypePtr pseudoresonance =
+      try_find_pseudoresonance(finder_parameters.pseudoresonance_method,
+                               finder_parameters.transition_high_energy);
+  if (pseudoresonance) {
     // compute xs_diff
-    const double xs_tot = is_total_parametrized_ ? *parametrized_total_cross_section_ : xs.high_energy(finder_parameters.transition_high_energy); 
+    const double xs_tot =
+        is_total_parametrized_
+            ? *parametrized_total_cross_section_
+            : xs.high_energy(finder_parameters.transition_high_energy);
     const double xs_diff = xs_tot - sum_of_partial_cross_sections_;
     // The pseudoresonance cross section cannot be negative
-    if (pseudoresonance && (xs_diff>really_small)) {
-      auto pseudoresonance_branch = std::make_unique<CollisionBranch>(*pseudoresonance, xs_diff, ProcessType::TwoToOne);
+    if (xs_diff > really_small) {
+      auto pseudoresonance_branch = std::make_unique<CollisionBranch>(
+          *pseudoresonance, xs_diff, ProcessType::TwoToOne);
       add_collision(std::move(pseudoresonance_branch));
-      logg[LScatterAction].warn() << "Pseudoresonance is " << pseudoresonance->name() << "with xs="<<xs_diff;
+      logg[LScatterAction].warn()
+          << "Pseudoresonance between " << incoming_particles_[0].type().name()
+          << " and " << incoming_particles_[1].type().name()
+          << pseudoresonance->name() << " with cross section " << xs_diff
+          << "mb.";
     }
   }
   were_processes_added_ = true;
@@ -196,30 +206,70 @@ void ScatterAction::rescale_outgoing_branches() {
   }
 }
 
-ParticleTypePtr ScatterAction::try_find_pseudoresonance(const PseudoResonances method) const {
+ParticleTypePtr ScatterAction::try_find_pseudoresonance(
+    const PseudoResonance method,
+    const StringTransitionParameters &transition) const {
   const ParticleTypePtr type_a = &incoming_particles_[0].type();
   const ParticleTypePtr type_b = &incoming_particles_[1].type();
   const double desired_mass = sqrt_s();
   ParticleTypePtr pseudoresonance = type_a;
-  if (!type_a->is_stable() || !type_b->is_stable()) {
-    for (const ParticleTypePtr resonance : list_possible_resonances(type_a, type_b)) {
-      switch (method) {
-        case PseudoResonances::LargestFromUnstable:
-          if (resonance->mass() > pseudoresonance->mass()) {
-  	  pseudoresonance = resonance;
-  	  }
-  	  break;
-        case PseudoResonances::ClosestFromUnstable:
-  	  if (std::fabs(resonance->mass() - desired_mass) < std::fabs(pseudoresonance->mass() - desired_mass)) {
-            pseudoresonance = resonance;
-          }
-          break;
-        default:
-  	  throw std::logic_error("Unknown method for selecting pseudoresonance.");
-      }
-    }
+
+  double string_offset = 0.5 * transition.sqrts_add_lower;
+  if ((type_a->is_nucleon() && type_b->is_pion()) ||
+      (type_a->is_pion() && type_b->is_nucleon())) {
+    string_offset = transition.sqrts_range_Npi.first - pion_mass - nucleon_mass;
+  } else if (type_a->is_nucleon() && type_b->is_nucleon()) {
+    string_offset = transition.sqrts_range_NN.first - 2 * nucleon_mass;
+  } else if (type_a->is_pion() && type_b->is_pion()) {
+    string_offset = transition.pipi_offset;
+  } else if ((type_a->is_nucleon() && type_b->is_kaon()) ||
+             (type_a->is_kaon() && type_b->is_nucleon())) {
+    string_offset = transition.KN_offset;
   }
-  if (pseudoresonance==type_a) {
+  /*
+   * Artificial cutoff to create a pseudoresonance only close to the string
+   * transition, where data or first-principle models are unhelpful
+   */
+  if (desired_mass < incoming_particles_[0].effective_mass() +
+                         incoming_particles_[1].effective_mass() +
+                         string_offset) {
+    return {};
+  }
+
+  switch (method) {
+    case PseudoResonance::None:
+      break;
+    case PseudoResonance::LargestFromUnstable:
+      if (type_a->is_stable() && type_b->is_stable()) {
+        break;
+      }
+      [[fallthrough]];
+    case PseudoResonance::Largest:
+      for (const ParticleTypePtr resonance :
+           list_possible_resonances(type_a, type_b)) {
+        if (resonance->mass() > pseudoresonance->mass()) {
+          pseudoresonance = resonance;
+        }
+      }
+      break;
+    case PseudoResonance::ClosestFromUnstable:
+      if (type_a->is_stable() && type_b->is_stable()) {
+        break;
+      }
+      [[fallthrough]];
+    case PseudoResonance::Closest:
+      for (const ParticleTypePtr resonance :
+           list_possible_resonances(type_a, type_b)) {
+        if (std::fabs(resonance->mass() - desired_mass) <
+            std::fabs(pseudoresonance->mass() - desired_mass)) {
+          pseudoresonance = resonance;
+        }
+      }
+      break;
+    default:
+      throw std::logic_error("Unknown method for selecting pseudoresonance.");
+  }
+  if (pseudoresonance == type_a) {
     return {};
   }
   return pseudoresonance;

@@ -217,6 +217,9 @@ class ParticleType {
   /// \copydoc PdgCode::is_pion
   bool is_pion() const { return pdgcode_.is_pion(); }
 
+  /// \copydoc PdgCode::is_kaon
+  bool is_kaon() const { return pdgcode_.is_kaon(); }
+
   /// \copydoc PdgCode::is_Delta
   bool is_Delta() const { return pdgcode_.is_Delta(); }
 
@@ -756,13 +759,15 @@ inline ParticleTypePtr ParticleType::get_antiparticle() const {
 }
 
 /**
- * Stores a map with a set of incoming particles and associates it with possible resonances. 
+ * Stores a map with a set of incoming particles and associates it with possible
+ * resonances.
  *
  * \param[in] type_a first incoming particle.
  * \param[in] type_b second incoming particle.
  * \return list of possible resonances.
  */
-ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a, const ParticleTypePtr type_b);
+ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a,
+                                             const ParticleTypePtr type_b);
 
 }  // namespace smash
 

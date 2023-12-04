@@ -295,9 +295,19 @@ class ScatterAction : public Action {
   void rescale_outgoing_branches();
 
   /**
-   *  \hirayama: document
+   * Try to find a pseudoresonance that can be created between the incoming
+   * particles, within a given method.
+   *
+   * \param[in] method used to select the candidate
+   * \see_key{key_CT_pseudoresonance_}.
+   * \param[in] transition parameters for the string transition region, which
+   * also determine when a pseudoresonance can be created.
+   * \return the appropriate pseudoresonance, if there is any, or an
+   * empty list otherwise.
    */
-  ParticleTypePtr try_find_pseudoresonance(const PseudoResonances method) const;
+  ParticleTypePtr try_find_pseudoresonance(
+      const PseudoResonance method,
+      const StringTransitionParameters& transition) const;
 
   /// Pointer to interface class for strings
   StringProcess* string_process_ = nullptr;

@@ -906,26 +906,33 @@ class Configuration {
     }
 
     /**
-     * Set whether pseudoresonances are used from configuration values.
+     * Set how pseudoresonances are used from configuration values.
      *
-     * \return PseudoResonances.
+     * \return PseudoResonance.
      * \throw IncorrectTypeInAssignment in case a key that is
      * not available is provided as a configuration value.
      */
-    operator PseudoResonances() const {
+    operator PseudoResonance() const {
       const std::string s = operator std::string();
       if (s == "None" || s == "false") {
-        return PseudoResonances::None;
+        return PseudoResonance::None;
+      }
+      if (s == "Largest") {
+        return PseudoResonance::Largest;
+      }
+      if (s == "Closest") {
+        return PseudoResonance::Closest;
       }
       if (s == "LargestFromUnstable" || s == "true") {
-        return PseudoResonances::LargestFromUnstable;
+        return PseudoResonance::LargestFromUnstable;
       }
       if (s == "ClosestFromUnstable") {
-        return PseudoResonances::ClosestFromUnstable;
+        return PseudoResonance::ClosestFromUnstable;
       }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) + "\" should be " +
-          "\"None\", \"LargestFromUnstable\", or \"ClosestFromUnstable\".");
+          "\"None\",  \"Largest\",  \"Closest\", \"LargestFromUnstable\", or "
+          "\"ClosestFromUnstable\".");
     }
 
     /**

@@ -291,7 +291,7 @@ inline ScatterActionsFinderParameters default_finder_parameters(
           true,  // only_warn_for_high_prob
           default_transition_params,
           xs_strategy,
-          PseudoResonances::None};
+          PseudoResonance::None};
 }
 
 /// Creates default EventInfo object for testing purposes

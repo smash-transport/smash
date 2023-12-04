@@ -848,7 +848,8 @@ CollisionBranchList CrossSections::two_to_one() const {
   const double m2 = incoming_particles_[1].effective_mass();
   const double p_cm_sqr = pCM_sqr(sqrt_s_, m1, m2);
 
-  ParticleTypePtrList possible_resonances = list_possible_resonances(&type_particle_a, &type_particle_b);
+  ParticleTypePtrList possible_resonances =
+      list_possible_resonances(&type_particle_a, &type_particle_b);
 
   // Find all the possible resonances
   for (const ParticleTypePtr type_resonance : possible_resonances) {

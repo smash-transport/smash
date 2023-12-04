@@ -1980,8 +1980,32 @@ struct InputKeys {
       TotalCrossSectionStrategy::BottomUp,
       {"3.1"}};
 
-  inline static const Key<PseudoResonances> collTerm_pseudoresonance{
-      {"Collision_Term", "Pseudoresonances"}, PseudoResonances::None, {"3.1"}};
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,"None"}
+   *
+   * Whether and how to select a resonance that fills the inelastic gap.
+   * Candidates are resonances that decay into the incoming pair. Possible
+   * options for this key are
+   * - `None` &rarr;
+   *   No pseudoresonance is created.
+   * - `Largest` &rarr;
+   *   Use the resonance with largest mass.
+   * - `Closest` &rarr;
+   *   Select the resonance that has the closest pole mass to the available
+   * energy (\f$\sqrt{s} of the incoming pair\f$).
+   * - `LargestFromUnstable` &rarr;
+   *   Same as `Largest` but a pseudoresonance is used only for processes that
+   * have at least one incoming unstable particle.
+   * - `ClosestFromUnstable` &rarr;
+   *   Same as `Closest` but a pseudoresonance is used only for processes that
+   * have at least one incoming unstable particle.
+   */
+  /**
+   * \see_key{key_CT_pseudoresonance_}
+   */
+  inline static const Key<PseudoResonance> collTerm_pseudoresonance{
+      {"Collision_Term", "Pseudoresonance"}, PseudoResonance::None, {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -5067,7 +5091,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<NNbarTreatment>>,
       std::reference_wrapper<const Key<OutputOnlyFinal>>,
       std::reference_wrapper<const Key<PdgCode>>,
-      std::reference_wrapper<const Key<PseudoResonances>>,
+      std::reference_wrapper<const Key<PseudoResonance>>,
       std::reference_wrapper<const Key<ReactionsBitSet>>,
       std::reference_wrapper<const Key<RestFrameDensityDerivativesMode>>,
       std::reference_wrapper<const Key<Sampling>>,
