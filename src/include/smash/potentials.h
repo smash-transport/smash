@@ -102,8 +102,9 @@ class Potentials {
   }
 
   /**
-   * Evaluates the single-particle energy of a particle at a given position
-   * and momentum including the potential in the calculation frame
+   * Evaluates the single-particle energy (including the potential) of a
+   * particle at a given position and momentum including the potential in the
+   * calculation frame
    *
    * \param[in] momentum Momentum of interest in GeV
    * \param[in] jmu_B Baryon current density at pos
@@ -659,7 +660,12 @@ class Potentials {
    */
   static double momentum_dependent_part(double momentum, double rho, double C,
                                         double Lambda) {
-    int g = 4;  // degeneracy factor
+    /* We assume here that the distribution function is the one of cold
+     * nuclear matter, which consists only of protons and neutrons.
+     * So we have the degeneracy factor of spin times isospin even though
+     * all baryons contribute to the density and the potential is applied
+     * to all baryons. */
+    int g = 4;
     const double fermi_momentum =
         std::cbrt(6. * M_PI * M_PI * rho / g);  // in 1/fm
     momentum = momentum / hbarc;                // convert to 1/fm

@@ -924,7 +924,7 @@ class Key {
 
 /*!\Userguide
  * \page doxypage_input_conf_pot_momentum_dependence
- * The momentum-dependent part of the potential can be added to the Skyrme
+ * A momentum-dependent term of the potential can be added to the Skyrme
  * parametrisation. In total the potential has the following form:
  * \f[
  *  U(\mathbf{r}, \mathbf{p}) = A\frac{\rho(\mathbf{r})}{\rho_0} +
