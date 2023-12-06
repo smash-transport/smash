@@ -500,6 +500,9 @@ class Experiment : public ExperimentBase {
   std::unique_ptr<RectangularLattice<std::array<FourVector, 4>>>
       fields_four_gradient_auxiliary_;
 
+  /// Whether to print the Eckart rest frame density
+  bool printout_rho_eckart_ = false;
+
   /// Whether to print the energy-momentum tensor
   bool printout_tmn_ = false;
 
@@ -1644,6 +1647,7 @@ Experiment<Modus>::Experiment(Configuration &config,
 
     if (printout_lattice_td_ || printout_full_lattice_any_td_) {
       dens_type_lattice_printout_ = output_parameters.td_dens_type;
+      printout_rho_eckart_ = output_parameters.td_rho_eckart;
       printout_tmn_ = output_parameters.td_tmn;
       printout_tmn_landau_ = output_parameters.td_tmn_landau;
       printout_v_landau_ = output_parameters.td_v_landau;
@@ -1994,20 +1998,26 @@ void Experiment<Modus>::initialize_new_event() {
     output->at_eventstart(ensembles_, event_);
     // For thermodynamic lattice output
     if (printout_full_lattice_any_td_) {
-      switch (dens_type_lattice_printout_) {
-        case DensityType::Baryon:
-          output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
-                                DensityType::Baryon, *jmu_B_lat_);
-          break;
-        case DensityType::BaryonicIsospin:
-          output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
-                                DensityType::BaryonicIsospin, *jmu_I3_lat_);
-          break;
-        case DensityType::None:
-          break;
-        default:
-          output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
-                                DensityType::BaryonicIsospin, *jmu_custom_lat_);
+      if (printout_rho_eckart_) {
+        switch (dens_type_lattice_printout_) {
+          case DensityType::Baryon:
+            logg[0].warn() << "Baryon\n";
+            output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
+                                  DensityType::Baryon, *jmu_B_lat_);
+            break;
+          case DensityType::BaryonicIsospin:
+            logg[0].warn() << "BaryonIsospin\n";
+            output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
+                                  DensityType::BaryonicIsospin, *jmu_I3_lat_);
+            break;
+          case DensityType::None:
+            break;
+          default:
+            logg[0].warn() << "Default\n";
+            output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
+                                  DensityType::BaryonicIsospin,
+                                  *jmu_custom_lat_);
+        }
       }
       if (printout_tmn_) {
         output->at_eventstart(event_, ThermodynamicQuantity::Tmn,
@@ -2562,36 +2572,38 @@ void Experiment<Modus>::intermediate_output() {
                                    density_param_);
 
       // Thermodynamic output on the lattice versus time
-      switch (dens_type_lattice_printout_) {
-        case DensityType::Baryon:
-          update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
-                         density_param_, ensembles_, false);
-          output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
-                                        DensityType::Baryon, *jmu_B_lat_);
-          output->thermodynamics_lattice_output(*jmu_B_lat_,
-                                                computational_frame_time);
-          break;
-        case DensityType::BaryonicIsospin:
-          update_lattice(jmu_I3_lat_.get(), lat_upd,
-                         DensityType::BaryonicIsospin, density_param_,
-                         ensembles_, false);
-          output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
-                                        DensityType::BaryonicIsospin,
-                                        *jmu_I3_lat_);
-          output->thermodynamics_lattice_output(*jmu_I3_lat_,
-                                                computational_frame_time);
-          break;
-        case DensityType::None:
-          break;
-        default:
-          update_lattice(jmu_custom_lat_.get(), lat_upd,
-                         dens_type_lattice_printout_, density_param_,
-                         ensembles_, false);
-          output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
-                                        dens_type_lattice_printout_,
-                                        *jmu_custom_lat_);
-          output->thermodynamics_lattice_output(*jmu_custom_lat_,
-                                                computational_frame_time);
+      if (printout_rho_eckart_) {
+        switch (dens_type_lattice_printout_) {
+          case DensityType::Baryon:
+            update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
+                           density_param_, ensembles_, false);
+            output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
+                                          DensityType::Baryon, *jmu_B_lat_);
+            output->thermodynamics_lattice_output(*jmu_B_lat_,
+                                                  computational_frame_time);
+            break;
+          case DensityType::BaryonicIsospin:
+            update_lattice(jmu_I3_lat_.get(), lat_upd,
+                           DensityType::BaryonicIsospin, density_param_,
+                           ensembles_, false);
+            output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
+                                          DensityType::BaryonicIsospin,
+                                          *jmu_I3_lat_);
+            output->thermodynamics_lattice_output(*jmu_I3_lat_,
+                                                  computational_frame_time);
+            break;
+          case DensityType::None:
+            break;
+          default:
+            update_lattice(jmu_custom_lat_.get(), lat_upd,
+                           dens_type_lattice_printout_, density_param_,
+                           ensembles_, false);
+            output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
+                                          dens_type_lattice_printout_,
+                                          *jmu_custom_lat_);
+            output->thermodynamics_lattice_output(*jmu_custom_lat_,
+                                                  computational_frame_time);
+        }
       }
       if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
         update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
@@ -2907,10 +2919,12 @@ void Experiment<Modus>::final_output() {
     output->at_eventend(ensembles_, event_);
 
     // For thermodynamic lattice output
-    if (dens_type_lattice_printout_ != DensityType::None) {
-      output->at_eventend(event_, ThermodynamicQuantity::EckartDensity,
-                          dens_type_lattice_printout_);
-      output->at_eventend(ThermodynamicQuantity::EckartDensity);
+    if (printout_rho_eckart_) {
+      if (dens_type_lattice_printout_ != DensityType::None) {
+        output->at_eventend(event_, ThermodynamicQuantity::EckartDensity,
+                            dens_type_lattice_printout_);
+        output->at_eventend(ThermodynamicQuantity::EckartDensity);
+      }
     }
     if (printout_tmn_) {
       output->at_eventend(event_, ThermodynamicQuantity::Tmn,
