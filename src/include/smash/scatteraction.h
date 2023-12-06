@@ -199,6 +199,8 @@ class ScatterAction : public Action {
     return sum_of_partial_cross_sections_;
   }
 
+
+
  protected:
   /**
    * Get the momentum of the center of mass of the incoming particles
@@ -308,9 +310,6 @@ class ScatterAction : public Action {
   ParticleTypePtr try_find_pseudoresonance(
       const PseudoResonance method,
       const StringTransitionParameters& transition) const;
-
-  // Flip the spin projection s_z of a particle.
-  void flip_spin_projection(ParticleData &particle);
 
   /// Pointer to interface class for strings
   StringProcess* string_process_ = nullptr;

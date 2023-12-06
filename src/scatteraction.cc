@@ -589,16 +589,10 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
 void ScatterAction::elastic_scattering() {
   // copy initial particles into final state 
   // spin flip as a simple interaction
-  std::cout << "Elastic Scattering:" << std::endl;
-  std::cout << "Incoming Spin 1: " << incoming_particles_[0].spin_projection() << 
-            "   Incoming Spin 2: " << incoming_particles_[1].spin_projection() << std::endl;
   outgoing_particles_[0] = incoming_particles_[0];
-  flip_spin_projection(outgoing_particles_[0]);
+  outgoing_particles_[0].flip_spin_projection();
   outgoing_particles_[1] = incoming_particles_[1];
-  flip_spin_projection(outgoing_particles_[1]);
-  std::cout << "Outgoing Spin 1: " << outgoing_particles_[0].spin_projection() << 
-            "   Outgoing Spin 2: " << outgoing_particles_[1].spin_projection() << std::endl;
-
+  outgoing_particles_[1].flip_spin_projection();
   // resample momenta
   sample_angles({outgoing_particles_[0].effective_mass(),
                  outgoing_particles_[1].effective_mass()},
@@ -636,10 +630,6 @@ void ScatterAction::resonance_formation() {
   /* this momentum is evaluated in the computational frame. */
   logg[LScatterAction].debug("Momentum of the new particle: ",
                              outgoing_particles_[0].momentum());
-}
-
-void ScatterAction::flip_spin_projection(ParticleData &particle) {
-  particle.set_spin_projection(-particle.spin_projection())
 }
 
 /* This function generates the outgoing state when

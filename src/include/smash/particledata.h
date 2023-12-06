@@ -358,6 +358,10 @@ class ParticleData {
    * \return Random allowed spin projection in multiples of 1/2
    */
   int random_spin_projection();
+  /**
+   * Flip the spin projection s_z of a particle to -s_z.
+   */
+  void flip_spin_projection() { spin_projection_ = -spin_projection_; }
 
   /// Setter for belongs_to label
   void set_belongs_to(BelongsTo label) { belongs_to_ = label; }
