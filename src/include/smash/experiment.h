@@ -2001,19 +2001,16 @@ void Experiment<Modus>::initialize_new_event() {
       if (printout_rho_eckart_) {
         switch (dens_type_lattice_printout_) {
           case DensityType::Baryon:
-            logg[0].warn() << "Baryon\n";
             output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
                                   DensityType::Baryon, *jmu_B_lat_);
             break;
           case DensityType::BaryonicIsospin:
-            logg[0].warn() << "BaryonIsospin\n";
             output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
                                   DensityType::BaryonicIsospin, *jmu_I3_lat_);
             break;
           case DensityType::None:
             break;
           default:
-            logg[0].warn() << "Default\n";
             output->at_eventstart(event_, ThermodynamicQuantity::EckartDensity,
                                   DensityType::BaryonicIsospin,
                                   *jmu_custom_lat_);
