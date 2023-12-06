@@ -4,7 +4,7 @@ JETSCAPE.
 
 Main steps are
 - Setup smash configuration object
-- Intalize particles, decaymodes and tabulation for this config
+- Initialize particles, decay modes and tabulation for this config
 - Create experiment
 - Perform run time evolution
 
@@ -29,13 +29,14 @@ int main() {
     std::cout << "\nTest-run SMASH\n--------------" << '\n';
 
     // All the input that is needed
-    const std::string config_file(SMASH_TOP_LEVEL_DIR "/input/config.yaml");
+    const std::string config_file(SMASH_INPUT_DIR "/config.yaml");
     const std::filesystem::path output_path("./data");
     const std::string tabulations_path("./tabulations");
-    const std::string particles_file(SMASH_TOP_LEVEL_DIR
-                                     "/input/particles.txt");
-    const std::string decaymodes_file(SMASH_TOP_LEVEL_DIR
-                                      "/input/decaymodes.txt");
+    const std::string particles_file(SMASH_INPUT_DIR "/particles.txt");
+    const std::string decaymodes_file(SMASH_INPUT_DIR "/decaymodes.txt");
+
+    // Ensure output_path exists
+    std::filesystem::create_directories(output_path);
 
     ////////////////////////////
     // Setup SMASH            //
@@ -45,14 +46,14 @@ int main() {
     auto config = smash::setup_config_and_logging(config_file, particles_file,
                                                   decaymodes_file);
 
-    // 2) Do addtional configurations e.g. set a custom end time by
+    // 2) Do additional configurations e.g. set a custom end time by
     float new_end_time = 180.0;
     config.set_value({"General", "End_Time"}, new_end_time);
     // ...
 
     std::string smash_version = SMASH_VERSION;
 
-    // 3) Intialize decaymodes, particletypes, tabulations
+    // 3) Initialize decay modes, particle types, tabulations
     smash::initialize_particles_decays_and_tabulations(config, smash_version,
                                                        tabulations_path);
 
@@ -62,13 +63,13 @@ int main() {
 
     ////////////////////////////////////////////////////////////////////////////
     // Run the experiment in a special way here, mimicking new JETSCAPE features
-    // i.e. feed addtional particles at different times and perform the runtime
+    // i.e. feed additional particles at different times and perform the runtime
     // evolution manually.
-    // If you want to just run SMASH as ususal just call  experiment.run()
+    // If you want to just run SMASH as usual just call  experiment.run()
     // instead.
     ////////////////////////////////////////////////////////////////////////////
 
-    // Run manually in timesteps
+    // Run manually in time steps
     experiment.initialize_new_event();
 
     const double delta_time = 20.0;

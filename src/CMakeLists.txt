@@ -388,12 +388,12 @@ install(CODE "execute_process(COMMAND ${CMAKE_COMMAND}
                                       --build ${PROJECT_BINARY_DIR}
                                       --target smash_shared smash)")
 install(TARGETS smash_shared LIBRARY DESTINATION "lib/${SMASH_INSTALLATION_SUBFOLDER}")
-install(FILES ${generated_headers} DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}")
-# Note that the trailing slash in the DIRECTORY argument is crucial to avoid to create an additional
+install(FILES ${generated_headers} DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}/smash")
+# Note that the absent trailing slash in the DIRECTORY argument is crucial to create an additional
 # "smash" folder at destination!
-install(DIRECTORY include/smash/ DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}"
+install(DIRECTORY include/smash DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}"
         PATTERN "*.h.in" EXCLUDE)
-install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash/"
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash"
         DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}")
 # Copy SMASH executable to installation bin folder adding a suffix to allow different versions to
 # coexist. A symbolic link called 'smash' is also created, pointing to the last installed version.

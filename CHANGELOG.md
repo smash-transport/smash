@@ -38,8 +38,12 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Upgraded to Pythia 8.310
 * Upgraded to Cuba 4.2.2
 * SMASH installation procedure was improved and allows now to use SMASH as library relying on installation folder only
+* CMake module to find SMASH in an external project offers now a better approach based on the new installation procedure
 * Make `Clock` class comparison operators refer to internally represented time and not to `current_time()` return value
 * Add strangeness to all extended output formats in the particle line
+
+### Deprecated
+* Locate SMASH in external projects using the `SMASH_DIR` and not relying on an installation
 
 ### Removed
 * Some public setters of the `ListModus` class have been removed

@@ -5,15 +5,11 @@ project(SMASH_as_a_library_example)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake"
      "${CMAKE_CURRENT_LIST_DIR}/../../cmake")
 
-# We can assume that SMASH_DIR is set here as it is required by FindSMASH.cmake
-add_definitions("-DSMASH_TOP_LEVEL_DIR=\"$ENV{SMASH_DIR}\"")
-
 add_executable(example example.cc)
 add_executable(example_rate_equations example_rate_equations.cc)
 add_executable(example_smash_wrapper example_smash_wrapper.cc)
 
-# Set the relevant generic compiler flags (optimisation + warnings) Try to be close to what SMASH
-# uses
+# Set the relevant generic compiler flags, trying to be close to what SMASH uses
 set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch"
 )
@@ -27,6 +23,7 @@ if(SMASH_FOUND)
     target_link_libraries(example ${SMASH_LIBRARIES})
     target_link_libraries(example_rate_equations ${SMASH_LIBRARIES})
     target_link_libraries(example_smash_wrapper ${SMASH_LIBRARIES})
+    add_definitions("-DSMASH_INPUT_DIR=\"${SMASH_INPUT_FILES_DIR}\"")
 else()
     message(FATAL_ERROR "SMASH libraries not found!")
 endif()
