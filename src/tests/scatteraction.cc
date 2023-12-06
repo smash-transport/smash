@@ -19,6 +19,7 @@
 #include "smash/angles.h"
 #include "smash/random.h"
 #include "smash/scatteractionmulti.h"
+#include "smash/scatteraction.h"
 
 using namespace smash;
 using smash::Test::Momentum;
@@ -181,6 +182,23 @@ TEST(outgoing_valid) {
   ThreeVector interaction_point =
       middle + 0.2 * (p1.velocity() + p2.velocity()) / 2.0;
   COMPARE(outgoing_particles[0].position(), FourVector(0.2, interaction_point));
+}
+
+TEST(spin_flip) {
+  // create a list of all particles
+  const auto& all_types = ParticleType::list_all();
+  int ntypes = all_types.size();
+  int64_t seed = random::generate_63bit_seed();
+  random::set_seed(seed);
+  for (int i = 0; i < 1000; i++) {
+    // create a random particle
+    ParticleData p{ParticleType::find(
+        all_types[random::uniform_int(0, ntypes - 1)].pdgcode())};
+    const int spin_before_flip = p.spin_projection();
+    p.flip_spin_projection();
+    const int spin_after_flip = p.spin_projection();
+    COMPARE(spin_before_flip, -spin_after_flip);
+  }
 }
 
 TEST(cross_sections_symmetric) {
