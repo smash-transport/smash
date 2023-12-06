@@ -309,6 +309,9 @@ class ScatterAction : public Action {
       const PseudoResonance method,
       const StringTransitionParameters& transition) const;
 
+  // Flip the spin projection s_z of a particle.
+  void flip_spin_projection(ParticleData &particle);
+
   /// Pointer to interface class for strings
   StringProcess* string_process_ = nullptr;
 
