@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <limits>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -1400,6 +1401,14 @@ Experiment<Modus>::Experiment(Configuration &config,
         // Clear vector so that the for below is skipped and no output created
         list_of_formats[i].clear();
       }
+    } else if (std::set<std::string> tmp_set(list_of_formats[i].begin(),
+                                             list_of_formats[i].end());
+               list_of_formats[i].size() != tmp_set.size()) {
+      logg[LExperiment].fatal()
+          << "Repeating the same \"Format\" output multiple times is "
+             "not allowed.\nInvalid \"Format\" key for "
+          << std::quoted(output_contents[i]) << " content.";
+      abort_because_of_invalid_input_file();
     }
     for (const auto &format : list_of_formats[i]) {
       create_output(format, output_contents[i], output_path, output_parameters);
