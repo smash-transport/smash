@@ -593,6 +593,7 @@ void ScatterAction::elastic_scattering() {
   outgoing_particles_[0].flip_spin_projection();
   outgoing_particles_[1] = incoming_particles_[1];
   outgoing_particles_[1].flip_spin_projection();
+
   // resample momenta
   sample_angles({outgoing_particles_[0].effective_mass(),
                  outgoing_particles_[1].effective_mass()},
