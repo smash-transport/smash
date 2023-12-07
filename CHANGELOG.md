@@ -32,6 +32,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Fix bug in thermodynamics lattice ASCII output when both ASCII and binary formats are requested
 * Fix bug about SMASH getting stuck with some particular values of `End_Time` and `Delta_Time`
 * Fix value of particles mass in SMASH IC ASCII output (the pole mass was printed instead of the real mass)
+* SMASH does not crash if `rho_eckart` is not specified in the `Thermodynamics` output
+* SMASH does not crash if the same output format is repeated
 
 ### Changed
 * Use updated gold radius of 6.55 fm instead of 6.38 fm and a diffusiveness of 0.523 fm instead of 0.535
