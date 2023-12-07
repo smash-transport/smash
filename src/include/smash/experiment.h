@@ -1404,11 +1404,22 @@ Experiment<Modus>::Experiment(Configuration &config,
     } else if (std::set<std::string> tmp_set(list_of_formats[i].begin(),
                                              list_of_formats[i].end());
                list_of_formats[i].size() != tmp_set.size()) {
-      logg[LExperiment].fatal()
-          << "Repeating the same \"Format\" output multiple times is "
-             "not allowed.\nInvalid \"Format\" key for "
-          << std::quoted(output_contents[i]) << " content.";
-      abort_because_of_invalid_input_file();
+      auto join_container = [](const auto &container) {
+        std::string result{};
+        std::for_each(container.cbegin(), container.cend(),
+                      [&result](const std::string s) {
+                        result += (result == "") ? s : ", " + s;
+                      });
+        return result;
+      };
+      const std::string old_formats = join_container(list_of_formats[i]),
+                        new_formats = join_container(tmp_set);
+      logg[LExperiment].warn()
+          << "Found the same output format multiple times for "
+          << std::quoted(output_contents[i])
+          << " content. Duplicates will be ignored:\n 'Format: [" << old_formats
+          << "] -> [" << new_formats << "]'";
+      list_of_formats[i].assign(tmp_set.begin(), tmp_set.end());
     }
     for (const auto &format : list_of_formats[i]) {
       create_output(format, output_contents[i], output_path, output_parameters);
