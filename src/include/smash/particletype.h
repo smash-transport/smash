@@ -759,12 +759,15 @@ inline ParticleTypePtr ParticleType::get_antiparticle() const {
 }
 
 /**
- * Stores a map with a set of incoming particles and associates it with possible
- * resonances.
+ * Lists the possible resonances that decay into two particles.
  *
  * \param[in] type_a first incoming particle.
  * \param[in] type_b second incoming particle.
  * \return list of possible resonances.
+ *
+ * \note Internally, a `static std::map` is used as a caching mechanism and is
+ * filled the first time this function is called, such that calling it again
+ * just returns the same list.
  */
 ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a,
                                              const ParticleTypePtr type_b);

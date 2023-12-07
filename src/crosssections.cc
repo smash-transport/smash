@@ -881,6 +881,11 @@ double CrossSections::formation(const ParticleType& type_resonance,
     return 0.;
   }
 
+  assert(type_resonance.charge() ==
+         type_particle_a.charge() + type_particle_b.charge());
+  assert(type_resonance.baryon_number() ==
+         type_particle_a.baryon_number() + type_particle_b.baryon_number());
+
   // Calculate spin factor
   const double spinfactor =
       static_cast<double>(type_resonance.spin() + 1) /

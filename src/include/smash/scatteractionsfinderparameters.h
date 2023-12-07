@@ -121,7 +121,7 @@ struct ScatterActionsFinderParameters {
   const StringTransitionParameters transition_high_energy;
   /// Method used to evaluate total cross sections for collision finding.
   const TotalCrossSectionStrategy total_xs_strategy;
-  /// How to compute pseudoresonances.
+  /// Which pseudo-resonance to choose.
   const PseudoResonance pseudoresonance_method;
 };
 

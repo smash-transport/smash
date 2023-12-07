@@ -906,7 +906,7 @@ class Configuration {
     }
 
     /**
-     * Set how pseudoresonances are used from configuration values.
+     * Set how pseudo-resonances are used from configuration values.
      *
      * \return PseudoResonance.
      * \throw IncorrectTypeInAssignment in case a key that is
@@ -914,7 +914,7 @@ class Configuration {
      */
     operator PseudoResonance() const {
       const std::string s = operator std::string();
-      if (s == "None" || s == "false") {
+      if (s == "None") {
         return PseudoResonance::None;
       }
       if (s == "Largest") {
@@ -923,7 +923,7 @@ class Configuration {
       if (s == "Closest") {
         return PseudoResonance::Closest;
       }
-      if (s == "LargestFromUnstable" || s == "true") {
+      if (s == "LargestFromUnstable") {
         return PseudoResonance::LargestFromUnstable;
       }
       if (s == "ClosestFromUnstable") {

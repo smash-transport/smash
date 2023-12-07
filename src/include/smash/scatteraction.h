@@ -295,15 +295,15 @@ class ScatterAction : public Action {
   void rescale_outgoing_branches();
 
   /**
-   * Try to find a pseudoresonance that can be created between the incoming
-   * particles, within a given method.
+   * Try to find a pseudo-resonance that can be created from the incoming
+   * particles using a given method.
    *
-   * \param[in] method used to select the candidate
-   * \see_key{key_CT_pseudoresonance_}.
+   * \param[in] method used to select the pseudo-resonance among possible
+   * candidates. \see_key{key_CT_pseudoresonance_}
    * \param[in] transition parameters for the string transition region, which
-   * also determine when a pseudoresonance can be created.
-   * \return the appropriate pseudoresonance, if there is any, or an
-   * empty list otherwise.
+   * are also used to determine when a pseudo-resonance can be created.
+   * \return the appropriate pseudo-resonance, if there is any, or an invalid
+   * pointer otherwise.
    */
   ParticleTypePtr try_find_pseudoresonance(
       const PseudoResonance method,

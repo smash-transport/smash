@@ -770,7 +770,7 @@ std::ostream &operator<<(std::ostream &out, const ParticleType &type) {
 /*
  * This is valid for two particles of the same species because the comparison
  * operator for smart pointers compares the pointed object. In this case, the
- * set incoming will contain one element instead of two.
+ * `std::set<ParticleTypePtr> incoming` will contain one element instead of two.
  */
 ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a,
                                              const ParticleTypePtr type_b) {
@@ -783,7 +783,9 @@ ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a,
     logg[LResonances].debug()
         << "Filling map of compatible resonances for ptypes " << type_a->name()
         << " " << type_b->name();
-    ParticleTypePtrList resonance_list;
+    ParticleTypePtrList resonance_list{};
+    // The tests below are redundant as the decay modes already obey them, but
+    // they are quicker to check and so improve performance.
     for (const ParticleType &resonance : ParticleType::list_all()) {
       /* Not a resonance, go to next type of particle */
       if (resonance.is_stable()) {
@@ -816,7 +818,8 @@ ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a,
         }
       }
     }
-
+    // Here `resonance_list` can be empty, corresponding to the case where there
+    // are no possible resonances.
     map_possible_resonances_of[incoming] = resonance_list;
   }
 

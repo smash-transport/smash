@@ -318,9 +318,12 @@ enum class TotalCrossSectionStrategy {
   TopDownMeasured,
 };
 
-/// How to select pseudoresonances to fill inelastic gap in cross sections.
+/**
+ *  Which pseudo-resonance fills the inelastic gap in the transition to string
+ * region of cross sections. \see_key{key_CT_pseudoresonance_}
+ */
 enum class PseudoResonance {
-  /// No pseudoresonance is created
+  /// No pseudo-resonance is created
   None,
   /// Resonance of largest mass for all processes
   Largest,

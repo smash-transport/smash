@@ -1984,21 +1984,26 @@ struct InputKeys {
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,"None"}
    *
-   * Whether and how to select a resonance that fills the inelastic gap.
-   * Candidates are resonances that decay into the incoming pair. Possible
-   * options for this key are
+   * Due to the lack of known high-mass resonances for several processes, the
+   * energy region between resonances and strings might lack inelastic
+   * processes, which is referred to as “inelastic gap”. To mitigate this,
+   * “pseudo-resonances” based on existing resonances can be extended to fill
+   * said gap, using the difference between the high energy parametrization of
+   * the total cross section and the sum of cross sections from all processes
+   * as a proxy for how large it is. Candidates are resonances that decay
+   * into the incoming pair. Possible options for this key are
    * - `None` &rarr;
-   *   No pseudoresonance is created.
+   *   No pseudo-resonance is created.
    * - `Largest` &rarr;
    *   Use the resonance with largest mass.
    * - `Closest` &rarr;
    *   Select the resonance that has the closest pole mass to the available
    * energy (\f$\sqrt{s} of the incoming pair\f$).
    * - `LargestFromUnstable` &rarr;
-   *   Same as `Largest` but a pseudoresonance is used only for processes that
+   *   Same as `Largest` but a pseudo-resonance is used only for processes that
    * have at least one incoming unstable particle.
    * - `ClosestFromUnstable` &rarr;
-   *   Same as `Closest` but a pseudoresonance is used only for processes that
+   *   Same as `Closest` but a pseudo-resonance is used only for processes that
    * have at least one incoming unstable particle.
    */
   /**
