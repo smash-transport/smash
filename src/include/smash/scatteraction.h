@@ -294,6 +294,21 @@ class ScatterAction : public Action {
    */
   void rescale_outgoing_branches();
 
+  /**
+   * Try to find a pseudo-resonance that can be created from the incoming
+   * particles using a given method.
+   *
+   * \param[in] method used to select the pseudo-resonance among possible
+   * candidates. \see_key{key_CT_pseudoresonance_}
+   * \param[in] transition parameters for the string transition region, which
+   * are also used to determine when a pseudo-resonance can be created.
+   * \return the appropriate pseudo-resonance, if there is any, or an invalid
+   * pointer otherwise.
+   */
+  ParticleTypePtr try_find_pseudoresonance(
+      const PseudoResonance method,
+      const StringTransitionParameters& transition) const;
+
   /// Pointer to interface class for strings
   StringProcess* string_process_ = nullptr;
 

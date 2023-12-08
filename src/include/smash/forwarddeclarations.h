@@ -314,8 +314,28 @@ enum class TotalCrossSectionStrategy {
   /// unmeasured processes
   TopDown,
   /// Mix the two above, using the parametrizations only for measured processes,
-  /// and summing up partials for unmeasured interactions.
+  /// and summing up partials for unmeasured interactions
   TopDownMeasured,
+};
+
+/**
+ *  Which pseudo-resonance fills the inelastic gap in the transition to string
+ * region of cross sections. \see_key{key_CT_pseudoresonance_}
+ */
+enum class PseudoResonance {
+  /// No pseudo-resonance is created
+  None,
+  /// Resonance of largest mass for all processes
+  Largest,
+  /// Resonance with the pole mass closest from the invariant mass of incoming
+  /// particles for all processes
+  Closest,
+  /// Heaviest possible resonance from processes with at least one resonance in
+  /// the incoming particles
+  LargestFromUnstable,
+  /// Closest resonance for a given mass from processes with at least one
+  /// resonance in the incoming particles
+  ClosestFromUnstable,
 };
 
 /// @cond

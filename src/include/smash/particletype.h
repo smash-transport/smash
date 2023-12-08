@@ -217,6 +217,9 @@ class ParticleType {
   /// \copydoc PdgCode::is_pion
   bool is_pion() const { return pdgcode_.is_pion(); }
 
+  /// \copydoc PdgCode::is_kaon
+  bool is_kaon() const { return pdgcode_.is_kaon(); }
+
   /// \copydoc PdgCode::is_Delta
   bool is_Delta() const { return pdgcode_.is_Delta(); }
 
@@ -754,6 +757,20 @@ inline ParticleTypePtr ParticleType::get_antiparticle() const {
   assert(has_antiparticle());
   return &find(pdgcode_.get_antiparticle());
 }
+
+/**
+ * Lists the possible resonances that decay into two particles.
+ *
+ * \param[in] type_a first incoming particle.
+ * \param[in] type_b second incoming particle.
+ * \return list of possible resonances.
+ *
+ * \note Internally, a `static std::map` is used as a caching mechanism and is
+ * filled the first time this function is called, such that calling it again
+ * just returns the same list.
+ */
+ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a,
+                                             const ParticleTypePtr type_b);
 
 }  // namespace smash
 

@@ -1982,6 +1982,38 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,"None"}
+   *
+   * Due to the lack of known high-mass resonances for several processes, the
+   * energy region between resonances and strings might lack inelastic
+   * processes, which is referred to as “inelastic gap”. To mitigate this,
+   * “pseudo-resonances” based on existing resonances can be extended to fill
+   * said gap, using the difference between the high energy parametrization of
+   * the total cross section and the sum of cross sections from all processes
+   * as a proxy for how large it is. Candidates are resonances that decay
+   * into the incoming pair. Possible options for this key are
+   * - `None` &rarr;
+   *   No pseudo-resonance is created.
+   * - `Largest` &rarr;
+   *   Use the resonance with largest mass.
+   * - `Closest` &rarr;
+   *   Select the resonance that has the closest pole mass to the available
+   * energy (\f$\sqrt{s} of the incoming pair\f$).
+   * - `LargestFromUnstable` &rarr;
+   *   Same as `Largest` but a pseudo-resonance is used only for processes that
+   * have at least one incoming unstable particle.
+   * - `ClosestFromUnstable` &rarr;
+   *   Same as `Closest` but a pseudo-resonance is used only for processes that
+   * have at least one incoming unstable particle.
+   */
+  /**
+   * \see_key{key_CT_pseudoresonance_}
+   */
+  inline static const Key<PseudoResonance> collTerm_pseudoresonance{
+      {"Collision_Term", "Pseudoresonance"}, PseudoResonance::None, {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,double,2.5}
    *
    * The (minimal) length \unit{in fm} used for the grid cells of the stochastic
@@ -5064,6 +5096,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<NNbarTreatment>>,
       std::reference_wrapper<const Key<OutputOnlyFinal>>,
       std::reference_wrapper<const Key<PdgCode>>,
+      std::reference_wrapper<const Key<PseudoResonance>>,
       std::reference_wrapper<const Key<ReactionsBitSet>>,
       std::reference_wrapper<const Key<RestFrameDensityDerivativesMode>>,
       std::reference_wrapper<const Key<Sampling>>,
@@ -5137,6 +5170,7 @@ struct InputKeys {
       std::cref(collTerm_elasticCrossSection),
       std::cref(collTerm_elasticNNCutoffSqrts),
       std::cref(collTerm_totXsStrategy),
+      std::cref(collTerm_pseudoresonance),
       std::cref(collTerm_fixedMinCellLength),
       std::cref(collTerm_forceDecaysAtEnd),
       std::cref(collTerm_includeDecaysAtTheEnd),
