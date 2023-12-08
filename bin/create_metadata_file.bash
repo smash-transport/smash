@@ -14,7 +14,8 @@ trap 'printf "\n"' EXIT
 #===================================================================
 # This script expects a ".authors.json" file to be present were run
 # and produces a "".zenodo.json" and/or a "AUTHORS.md" file in the
-# same place. The jq tool is used to deal with JSON files.
+# same place. The jq tool is used to deal with JSON files and the
+# yq tool is used to deal with YAML files.
 #===================================================================
 
 # Bash stricter mode
@@ -24,17 +25,20 @@ shopt -s inherit_errexit
 readonly \
     INPUT_FILE='.authors.json'\
     OUTPUT_AUTHORS_FILE='AUTHORS.md'\
-    OUTPUT_ZENODO_FILE='.zenodo.json'
+    OUTPUT_ZENODO_FILE='.zenodo.json'\
+    OUTPUT_CITATION_FILE='CITATION.cff'
 
 CREATE_ZENODO_FILE='FALSE'
 CREATE_AUTHORS_FILE='FALSE'
+CREATE_CITATION_FILE='FALSE'
 
 function main()
 {
-    make_preliminary_checks
     parse_command_line_arguments "$@"
+    make_preliminary_checks
     create_authors_file_if_requested
     create_zenodo_file_if_requested
+    create_citation_file_if_requested
 }
 
 function make_preliminary_checks()
@@ -43,6 +47,13 @@ function make_preliminary_checks()
         fail\
             "Program 'jq' not found."\
             'Follow instructions at https://jqlang.github.io/jq/download/ to install it.'
+    fi
+    if [[ ${CREATE_CITATION_FILE} = 'TRUE' ]]; then
+        if ! hash yq; then
+            fail\
+                "Program 'yq' not found."\
+                'Follow instructions at https://github.com/mikefarah/yq#install to install it.'
+        fi
     fi
     if [[ ! -f "${INPUT_FILE}" ]]; then
         fail "File '${INPUT_FILE}' not found."
@@ -55,8 +66,9 @@ function usage()
     printf "\e[93m${BASH_SOURCE[0]} <option>\e[0m\n\n"
     printf '\e[96m Possible options:\n\n'
     printf '    \e[93m%-15s\e[0m  ->  \e[96m%s\e[0m\n' \
-           '-z | --zenodo'  'Create Zenodo .zenodo.json metadata file' \
-           '-a | --authors' 'Create AUTHORS.md metadata file'
+           '-a | --authors' 'Create AUTHORS.md metadata file'\
+           '-c | --citation' 'Create CITATION.cff metadata file'\
+           '-z | --zenodo'  'Create Zenodo .zenodo.json metadata file'
     printf '\n'
 }
 
@@ -78,6 +90,9 @@ function parse_command_line_arguments()
             -a | --authors)
                 CREATE_AUTHORS_FILE='TRUE'
                 ;;
+            -c | --citation)
+                CREATE_CITATION_FILE='TRUE'
+                ;;
             -z | --zenodo)
                 CREATE_ZENODO_FILE='TRUE'
                 ;;
@@ -87,8 +102,10 @@ function parse_command_line_arguments()
         esac
         shift
     done
-    if [[ ${CREATE_AUTHORS_FILE} = 'FALSE' && ${CREATE_ZENODO_FILE} = 'FALSE' ]]; then
-        warn "No output file was asked to be created, specify -a and/or -z option(s)."
+    if [[ ${CREATE_AUTHORS_FILE} = 'FALSE' && \
+          ${CREATE_ZENODO_FILE} = 'FALSE' && \
+          ${CREATE_CITATION_FILE} = 'FALSE' ]]; then
+        warn "No output file was asked to be created, specify -a and/or -c and/or -z option(s)."
     fi
 }
 
@@ -254,6 +271,37 @@ function print_related_identifiers_json_map()
   ]
 }
 EOF
+}
+
+function create_citation_file_if_requested()
+{
+    if [[ ${CREATE_CITATION_FILE} = 'TRUE' ]]; then
+        printf '\n Creating CITATION.cff file...'
+        cat \
+            <(print_citation_file_metadata) \
+            <(print_authors_for_citation_file) > "${OUTPUT_CITATION_FILE}"
+        printf ' done!\n'
+    fi
+}
+
+function print_citation_file_metadata()
+{
+    :
+}
+
+function print_authors_for_citation_file()
+{
+    # Refer to the comment in the print_smash_team_for_zenodo function to get a
+    # description of the following jq command. Here yq is used to convert the
+    # JSON output to YAML format.
+    jq '
+    {
+        authors: [
+            ."SMASH team"[], ."External contributors"[] |
+            {"given-names": ."first name", "family-names": ."last name", affiliation, orcid}] |
+            sort_by(."family-names") | reverse
+    }
+    ' "${INPUT_FILE}" | yq -P -oy
 }
 
 function fail()
