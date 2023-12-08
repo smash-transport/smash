@@ -12,6 +12,7 @@ Author  |  &ensp;E-Mail&ensp; | Copyright ©
  Agnieszka Sorensen  |  [✉️](mailto:awergieluk@gmail.com) | `2020-`
  Alessandro Sciarra  |  [✉️](mailto:asciarra@fias.uni-frankfurt.de) | `2021-`
  Anna Schäfer  |  [✉️](mailto:aschaefer@fias.uni-frankfurt.de) | `2017-2022`
+ Robin Sattler  |  [✉️](mailto:sattler@fias.uni-frankfurt.de) | `2023-`
  Sangwook Ryu  |  [✉️](mailto:ryu@fias.uni-frankfurt.de) | `2017-2019`
  Jonas Rothermel  |  [✉️](mailto:rothermel@fias.uni-frankfurt.de) | `2017-2019`
  Jean-Bernard Rose  |  [✉️](mailto:rose@fias.uni-frankfurt.de) | `2016-2019`
