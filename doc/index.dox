@@ -109,11 +109,13 @@
             \subpage doxypage_input_conf_pot_symmetry
             \subpage doxypage_input_conf_pot_VDF
             \subpage doxypage_input_conf_pot_coulomb
+            \subpage doxypage_input_conf_pot_momentum_dependence
             </div>
             \page doxypage_input_conf_pot_skyrme Skyrme
             \page doxypage_input_conf_pot_symmetry Symmetry
             \page doxypage_input_conf_pot_VDF VDF
             \page doxypage_input_conf_pot_coulomb Coulomb
+            \page doxypage_input_conf_pot_momentum_dependence Momentum Dependence
         \page doxypage_input_conf_forced_therm Forced Thermalization
     \page doxypage_input_particles %Particles
     \page doxypage_input_decaymodes Decay modes

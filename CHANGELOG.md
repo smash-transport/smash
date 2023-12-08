@@ -21,6 +21,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## Unreleased
 
 ### Added
+* Added cold nuclear matter approximation for the momentum dependence of the Skyrme potential
 * Option `Decay_Initial_Particles` which blocks the decay of resonances created at initialization
 * The `List` and `ListBox` modi can now be used specifying a single particles input file using the `Filename` key
 * Command-line option to run smash with `-n` to avoid caching integrals in the ***tabulations*** folder on the disk.

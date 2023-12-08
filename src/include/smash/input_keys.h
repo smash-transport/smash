@@ -740,11 +740,14 @@ class Key {
  * matter. The symmetry potential can adjust the Skyrme potential (but not the
  * VDF potential) to include effects due to isospin. The Skyrme and Symmetry
  * potentials are semi-relativistic, while the VDF potential is fully
- * relativistic.
+ * relativistic. A momentum-dependent term can be added to the Skyrme potential.
+ * The additional term is not treated in a fully Lorentz-invariant way. Visit
+ * the following subpages for more information:
  * - \ref doxypage_input_conf_pot_skyrme
  * - \ref doxypage_input_conf_pot_symmetry
  * - \ref doxypage_input_conf_pot_VDF
  * - \ref doxypage_input_conf_pot_coulomb
+ * - \ref doxypage_input_conf_pot_momentum_dependence
  *
  * ### Configuring potentials
  *
@@ -799,6 +802,28 @@ class Key {
          Powers: [1.7681391, 3.5293515, 5.4352788, 6.3809822]
          Coeffs: [-8.450948e+01, 3.843139e+01, -7.958557e+00, 1.552594e+00]
  \endverbatim
+ * ### Configuring the momentum dependence
+ * The momentum-dependent term can be added to the Skyrme potential. In order
+ * to activate it one has to specify the parameters C and Lambda in MeV and
+ * 1/fm respectively in the "Momentum_Dependence" section under "Potentials".
+ * Note that the parameters from the momentum-dependent term
+ * and the Skyrme potential need to be consistent in order to reproduce nuclear
+ * ground
+ * state properties. An example of parameters corresponding to a medium-stiff
+(K=290 MeV) equation of state
+ * is given in the following.
+ * \verbatim
+ Potentials:
+  Symmetry:
+    S_Pot: 18.0
+  Skyrme:
+    Skyrme_Tau: 1.76
+    Skyrme_B: 57.2
+    Skyrme_A: -29.3
+  Momentum_Dependence:
+    C: -63.5
+    Lambda: 2.13
+\endverbatim
  */
 
 /*!\Userguide
@@ -895,6 +920,30 @@ class Key {
  * configuration. Note that in the final equations the summand for \f$i=j\f$
  * drops out because the contribution from that cell to the integral vanishes if
  * one assumes the current and density to be constant in the cell.
+ */
+
+/*!\Userguide
+ * \page doxypage_input_conf_pot_momentum_dependence
+ * A momentum-dependent term of the potential can be added to the Skyrme
+ * parametrisation. In total the potential has the following form:
+ * \f[
+ *  U(\mathbf{r}, \mathbf{p}) = A\frac{\rho(\mathbf{r})}{\rho_0} +
+ *  B\left(\frac{\rho(\mathbf{r})}{\rho_0}\right)^\tau +
+ *  \frac{2C}{\rho_0}g\int\frac{d^3p'}{(2\pi)^3}\frac{f(\mathbf{r},
+ *  \mathbf{p}')}{1+\left(\frac{\mathbf{p}-\mathbf{p}'}{\Lambda}\right)^2}
+ * \f]
+ * This shape of the potential is taken from \iref{Welke:1988zz}
+ * and includes an integral over momentum. This integral is quite costly to
+ * evaluate during runtime and to reduce numerical cost, following the GiBUU
+ * implementation \iref{Buss:2011mx}, we make the assumption that the
+ * distribution function takes the form of cold nuclear matter \f$ f(\mathbf{r},
+ * \mathbf{p}) = \Theta(p-p_F)\f$, where \f$ p_F \f$ is the Fermi momentum. Note
+ * that the Fermi momentum depends on the density and therefore on the position
+ * in general. With this assumption the integral has an analytic solution and
+ * can be evaluated relatively quickly. When choosing the parameters \f$ C \f$
+ * and \f$ \Lambda\f$ it is important to make sure that nuclear ground state
+ * properties are realistic. In other words the momentum dependence parameters
+ * have to be constrained together with the Skyrme potential parameters.
  */
 
 /*!\Userguide
@@ -1550,6 +1599,30 @@ struct InputKeys {
    */
   inline static const Key<einhard::LogLevel> log_output{{"Logging", "Output"},
                                                         {"0.60"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_logging
+   * \optional_key{key_log_potentials_,Potentials,string,$\{default\}}
+   *
+   * Messages regarding the potentials belong to this area.
+   */
+  /**
+   * \see_key{key_log_potentials_}
+   */
+  inline static const Key<einhard::LogLevel> log_potentials{
+      {"Logging", "Potentials"}, {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_logging
+   * \optional_key{key_log_rootsolver_,RootSolver,string,$\{default\}}
+   *
+   * Messages specific to the root finding belong to this area.
+   */
+  /**
+   * \see_key{key_log_rootsolver_}
+   */
+  inline static const Key<einhard::LogLevel> log_rootsolver{
+      {"Logging", "RootSolver"}, {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -4944,6 +5017,32 @@ struct InputKeys {
       {"Potentials", "Coulomb", "R_Cut"}, {"2.1"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_pot_momentum_dependence
+   * \required_key{key_potentials_momentum_dependence_C,C,double}
+   *
+   * Parameter \f$ C \f$ of the momentum-dependent term of the
+   * potential \unit{in MeV}.
+   */
+  /**
+   * \see_key{key_potentials_momentum_dependence_C}
+   */
+  inline static const Key<double> potentials_momentum_dependence_C{
+      {"Potentials", "Momentum_Dependence", "C"}, {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_pot_momentum_dependence
+   * \required_key{key_potentials_momentum_dependence_Lambda,Lambda,double}
+   *
+   * Parameter \f$ \Lambda \f$ of the momentum-dependent term in the
+   * potential \unit{in 1/fm}.
+   */
+  /**
+   * \see_key{key_potentials_momentum_dependence_Lambda}
+   */
+  inline static const Key<double> potentials_momentum_dependence_Lambda{
+      {"Potentials", "Momentum_Dependence", "Lambda"}, {"3.1"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_forced_therm
    * <hr>
    * ### Mandatory keys
@@ -5157,9 +5256,11 @@ struct InputKeys {
       std::cref(log_nucleus),
       std::cref(log_particleType),
       std::cref(log_pauliBlocking),
+      std::cref(log_potentials),
       std::cref(log_propagation),
       std::cref(log_pythia),
       std::cref(log_resonances),
+      std::cref(log_rootsolver),
       std::cref(log_scatterAction),
       std::cref(log_scatterActionMulti),
       std::cref(log_tmn),
@@ -5361,6 +5462,8 @@ struct InputKeys {
       std::cref(potentials_vdf_powers),
       std::cref(potentials_vdf_satRhoB),
       std::cref(potentials_coulomb_rCut),
+      std::cref(potentials_momentum_dependence_C),
+      std::cref(potentials_momentum_dependence_Lambda),
       std::cref(forcedThermalization_cellNumber),
       std::cref(forcedThermalization_criticalEDensity),
       std::cref(forcedThermalization_startTime),

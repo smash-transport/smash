@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2022
+ *    Copyright (c) 2014-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -119,6 +119,8 @@ DECLARE_LOGAREA(27, HyperSurfaceCrossing);
 DECLARE_LOGAREA(28, InitialConditions);
 DECLARE_LOGAREA(29, ScatterActionMulti);
 DECLARE_LOGAREA(30, Configuration);
+DECLARE_LOGAREA(31, Potentials);
+DECLARE_LOGAREA(32, RootSolver);
 
 /**
  * This type collects all existing log areas so they will be created with the
@@ -130,7 +132,8 @@ using AreaTuple =
                ScatterAction, Distributions, Propagation, Grid, List, Nucleus,
                Density, PauliBlocking, Tmn, Fpe, Lattice, Pythia,
                GrandcanThermalizer, CrossSections, Output, HyperSurfaceCrossing,
-               InitialConditions, ScatterActionMulti, Configuration>;
+               InitialConditions, ScatterActionMulti, Configuration, Potentials,
+               RootSolver>;
 }  // namespace LogArea
 
 /**

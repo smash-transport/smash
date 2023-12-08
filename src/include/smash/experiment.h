@@ -2386,8 +2386,8 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     if (potentials_) {
       update_potentials();
       update_momenta(ensembles_, parameters_.labclock->timestep_duration(),
-                     *potentials_, FB_lat_.get(), FI3_lat_.get(),
-                     EM_lat_.get());
+                     *potentials_, FB_lat_.get(), FI3_lat_.get(), EM_lat_.get(),
+                     jmu_B_lat_.get());
     }
 
     /* (4) Expand universe if non-minkowskian metric; updates

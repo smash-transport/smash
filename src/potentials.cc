@@ -19,11 +19,16 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
       use_skyrme_(conf.has_value({"Skyrme"})),
       use_symmetry_(conf.has_value({"Symmetry"})),
       use_coulomb_(conf.has_value({"Coulomb"})),
-      use_vdf_(conf.has_value({"VDF"})) {
+      use_vdf_(conf.has_value({"VDF"})),
+      use_momentum_dependence_(conf.has_value({"Momentum_Dependence"})) {
   if (use_skyrme_) {
     skyrme_a_ = conf.take({"Skyrme", "Skyrme_A"});
     skyrme_b_ = conf.take({"Skyrme", "Skyrme_B"});
     skyrme_tau_ = conf.take({"Skyrme", "Skyrme_Tau"});
+  }
+  if (use_momentum_dependence_) {
+    mom_dependence_Lambda_ = conf.take({"Momentum_Dependence", "Lambda"});
+    mom_dependence_C_ = conf.take({"Momentum_Dependence", "C"});
   }
 
   if (use_symmetry_) {
@@ -58,16 +63,17 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
 
 Potentials::~Potentials() {}
 
-double Potentials::skyrme_pot(const double baryon_density) const {
+double Potentials::skyrme_pot(const double baryon_density, const double A,
+                              const double B, const double tau) {
   const double tmp = baryon_density / nuclear_density;
   /* U = U(|rho|) * sgn , because the sign of the potential changes
    * under a charge reversal transformation. */
   const int sgn = tmp > 0 ? 1 : -1;
   // Return in GeV
   return mev_to_gev * sgn *
-         (skyrme_a_ * std::abs(tmp) +
-          skyrme_b_ * std::pow(std::abs(tmp), skyrme_tau_));
+         (A * std::abs(tmp) + B * std::pow(std::abs(tmp), tau));
 }
+
 double Potentials::symmetry_S(const double baryon_density) const {
   if (symmetry_is_rhoB_dependent_) {
     return 12.3 * std::pow(baryon_density / nuclear_density, 2. / 3.) +

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2022
+ *    Copyright (c) 2014-2015,2017-2023
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,14 +14,18 @@
 #include <utility>
 #include <vector>
 
+#include "gsl/gsl_multiroots.h"
+#include "gsl/gsl_vector.h"
+
 #include "configuration.h"
 #include "density.h"
 #include "forwarddeclarations.h"
 #include "particledata.h"
+#include "rootsolver.h"
 #include "threevector.h"
 
 namespace smash {
-
+static constexpr int LPotentials = LogArea::Potentials::id;
 /**
  * A class that stores parameters of potentials, calculates
  * potentials and their gradients. Potentials are responsible
@@ -36,7 +40,7 @@ class Potentials {
    *
    * \param[in] conf Configuration which contains the switches
    *            determining whether to turn on the Skyrme or the
-   *            symmetry potentials, and the coefficents controlling
+   *            symmetry potentials, and the coefficients controlling
    *            how strong the potentials are.
    * \param[in] parameters Struct that contains the gaussian smearing factor
    *            \f$\sigma\f$, the distance cutoff \f$r_{\rm cut}\f$ and
@@ -47,14 +51,107 @@ class Potentials {
   virtual ~Potentials();
 
   /**
-   * Evaluates skyrme potential given a baryon density.
+   * Calculates the gradient of the single-particle energy (including
+   * potentials) in the calculation frame in MeV/fm
+   *
+   * \param jB_lattice Pointer to the baryon density lattice
+   * \param position Position of the particle of interest in fm
+   * \param momentum Momentum of the particle of interest in GeV
+   * \param mass Mass of the particle of interest in GeV
+   * \param plist List of all particles
+   * \return ThreeVector gradient of the single particle energy in the
+   * calculation frame in MeV/fm
+   */
+  ThreeVector single_particle_energy_gradient(DensityLattice *jB_lattice,
+                                              const ThreeVector &position,
+                                              const ThreeVector &momentum,
+                                              double mass,
+                                              ParticleList &plist) const {
+    const std::array<double, 3> dr = (jB_lattice)
+                                         ? jB_lattice->cell_sizes()
+                                         : std::array<double, 3>{0.1, 0.1, 0.1};
+    ThreeVector result, position_left, position_right;
+    DensityOnLattice jmu_left, jmu_right;
+    FourVector net_4current_left, net_4current_right;
+    for (int i = 0; i < 3; i++) {
+      position_left = position;
+      position_left[i] -= dr[i];
+      position_right = position;
+      position_right[i] += dr[i];
+
+      if (jB_lattice && jB_lattice->value_at(position_left, jmu_left)) {
+        net_4current_left = jmu_left.jmu_net();
+      } else {
+        auto current = current_eckart(position_left, plist, param_,
+                                      DensityType::Baryon, false, true);
+        net_4current_left = std::get<1>(current);
+      }
+      if (jB_lattice && jB_lattice->value_at(position_right, jmu_right)) {
+        net_4current_right = jmu_right.jmu_net();
+      } else {
+        auto current = current_eckart(position_right, plist, param_,
+                                      DensityType::Baryon, false, true);
+        net_4current_right = std::get<1>(current);
+      }
+      result[i] =
+          (calculation_frame_energy(momentum, net_4current_right, mass) -
+           calculation_frame_energy(momentum, net_4current_left, mass)) /
+          (2 * dr[i]);
+    }
+    return result;
+  }
+
+  /**
+   * Evaluates the single-particle energy (including the potential) of a
+   * particle at a given position and momentum in the calculation frame
+   *
+   * \param[in] momentum Momentum of interest in GeV
+   * \param[in] jmu_B Baryon current density at pos
+   * \param[in] mass mass of the particle of interest
+   * \return the energy of a particle in the calculation frame
+   **/
+  double calculation_frame_energy(const ThreeVector &momentum,
+                                  const FourVector &jmu_B, double mass) const {
+    std::function<double(double)> root_equation = [momentum, jmu_B, mass,
+                                                   this](double energy) {
+      return root_eq_potentials(energy, momentum, jmu_B, mass, skyrme_a_,
+                                skyrme_b_, skyrme_tau_, mom_dependence_C_,
+                                mom_dependence_Lambda_);
+    };
+    RootSolver1D root_solver{root_equation};
+    const std::array<double, 4> starting_interval_width = {0.1, 1.0, 10.0,
+                                                           100.0};
+    for (double width : starting_interval_width) {
+      const double initial_guess = std::sqrt(mass * mass + momentum * momentum);
+      auto calc_frame_energy = root_solver.try_find_root(
+          initial_guess - width / 2, initial_guess + width / 2, 100000);
+      if (calc_frame_energy) {
+        return *calc_frame_energy;
+      } else {
+        logg[LPotentials].debug()
+            << "Did not find a root for potentials in the interval ["
+            << initial_guess - width / 2 << " GeV ,"
+            << initial_guess + width / 2 << " GeV]. Trying a wider interval";
+      }
+    }
+    logg[LPotentials].debug(
+        "Root for potentials was not found in any of the intervals "
+        "tried.");
+    throw std::runtime_error(
+        "Failed to find root for momentum-dependent potentials");
+  }
+
+  /**
+   * Evaluates Skyrme potential given a baryon density.
    *
    * \param[in] baryon_density Baryon density \f$\rho\f$ evaluated in the
    *            local rest frame in fm\f$^{-3}\f$.
    * \return Skyrme potential \f[U_B=10^{-3}\times\frac{\rho}{|\rho|}
    *         (A\frac{\rho}{\rho_0}+B(\frac{\rho}{\rho_0})^\tau)\f] in GeV
    */
-  double skyrme_pot(const double baryon_density) const;
+  double skyrme_pot(const double baryon_density) const {
+    return skyrme_pot(baryon_density, skyrme_a_, skyrme_b_, skyrme_tau_);
+  }
 
   /**
    * Evaluates symmetry potential given baryon isospin density.
@@ -174,7 +271,8 @@ class Potentials {
    * \param[in] grad_j0B  Gradient of the net-baryon density in the
    *            computational frame
    * \param[in] dvecjB_dt Time derivative of the net-baryon vector current
-   * density \param[in] curl_vecjB Curl of the net-baryon vector current density
+   *            density
+   * \param[in] curl_vecjB Curl of the net-baryon vector current density
    * \return (\f$E_{I_3}, B_{I_3}\f$) [GeV/fm], where
    *         \f[
    *         \mathbf{E}
@@ -332,6 +430,10 @@ class Potentials {
   virtual bool use_symmetry() const { return use_symmetry_; }
   /// \return Is Coulomb potential on?
   virtual bool use_coulomb() const { return use_coulomb_; }
+  /// \return Use momentum-dependent part of the potential?
+  virtual bool use_momentum_dependence() const {
+    return use_momentum_dependence_;
+  }
 
   /// \return Skyrme parameter skyrme_a, in MeV
   double skyrme_a() const { return skyrme_a_; }
@@ -376,6 +478,9 @@ class Potentials {
   /// VDF potential on/off
   bool use_vdf_;
 
+  /// Momentum-dependent part on/off
+  bool use_momentum_dependence_;
+
   /**
    * Parameter of skyrme potentials:
    * the coefficient in front of \f$\frac{\rho}{\rho_0}\f$ in GeV
@@ -393,6 +498,18 @@ class Potentials {
    * the power index.
    */
   double skyrme_tau_;
+
+  /**
+   * Parameter Lambda of the momentum-dependent part of the potentials
+   * given in 1/fm
+   */
+  double mom_dependence_Lambda_;
+
+  /**
+   * Parameter C of the momentum-dependent part of the potentials
+   * given in MeV
+   */
+  double mom_dependence_C_;
 
   /// Parameter S_Pot in the symmetry potential in MeV
   double symmetry_S_Pot_;
@@ -459,6 +576,119 @@ class Potentials {
    *         net baryon density.
    */
   double dVsym_drhoB(const double rhoB, const double rhoI3) const;
+
+  /**
+   * Single particle Skyrme potential in MeV
+   *
+   * \param baryon_density net baryon density in the local rest-frame in 1/fm^3
+   * \param A Skyrme parameter A in MeV
+   * \param B Skyrme parameter B in MeV
+   * \param tau Skyrme parameter tau
+   * \return Single particle Skyrme potential in MeV
+   */
+  static double skyrme_pot(const double baryon_density, const double A,
+                           const double B, const double tau);
+
+  /**
+   * Root equation used to determine the energy in the calculation frame
+   *
+   * It is the difference between energy (including potential) squared minus
+   * momentum squared in the calculation frame and in the local rest-frame. The
+   * equation should be zero due to Lorentz invariance but a root finder is
+   * required to determine the calculation frame energy such that this is indeed
+   * the case.
+   *
+   * \param[in] energy_calc Energy in the calculation frame at which the
+   *                        equation should be evaluated in GeV
+   * \param[in] momentum_calc Momentum of
+   *                          the particle in calculation frame of interest
+   *                          in GeV
+   * \param[in] jmu Baryon current fourvector at the position of the particle
+   * \param[in] m Mass of the particle of interest in GeV
+   * \param[in] A Skyrme parameter A in MeV
+   * \param[in] B Skyrme parameter B in MeV
+   * \param[in] tau Skyrme parameter tau
+   * \param[in] C Parameter C of the momentum dependent part of the potential
+   *              in MeV
+   * \param[in] Lambda Parameter Lambda of the momentum-dependent term of
+   *                   the potential in 1/fm
+   * \return effective mass squared in calculation frame
+   *         minus effective mass in rest_frame in GeV^2
+   */
+  static double root_eq_potentials(double energy_calc,
+                                   const ThreeVector &momentum_calc,
+                                   const FourVector &jmu, double m, double A,
+                                   double B, double tau, double C,
+                                   double Lambda) {
+    // get velocity for boost to the local rest frame
+    double rho_LRF = jmu.abs();
+    ThreeVector beta_LRF = jmu.x0() > really_small ? jmu.threevec() / jmu.x0()
+                                                   : ThreeVector(0, 0, 0);
+    // get momentum in the local rest frame
+    FourVector pmu_calc = FourVector(energy_calc, momentum_calc);
+    FourVector pmu_LRF = beta_LRF.abs() > really_small
+                             ? pmu_calc.lorentz_boost(beta_LRF)
+                             : pmu_calc;
+    double p_LRF = pmu_LRF.threevec().abs();
+    double energy_LRF = std::sqrt(m * m + p_LRF * p_LRF) +
+                        skyrme_pot(rho_LRF, A, B, tau) +
+                        momentum_dependent_part(p_LRF, rho_LRF, C, Lambda);
+    const double result = energy_calc * energy_calc - momentum_calc.sqr() -
+                          (energy_LRF * energy_LRF - p_LRF * p_LRF);
+    logg[LPotentials].debug()
+        << "root equation for potentials called with E_calc=" << energy_calc
+        << " p_calc=" << momentum_calc << " jmu=" << jmu << " m=" << m
+        << " tau=" << tau << " A=" << A << " B=" << B << " C=" << C
+        << " Lambda=" << Lambda << " and the root equation is " << result;
+    return result;
+  }
+
+  /**
+   * Momentum dependent term of the potential
+   *
+   * To be added to the momentum independent part.
+   *
+   * \param[in] momentum Absolute momentum of the particle of interest in the
+   *                     local rest-frame in GeV
+   * \param[in] rho Baryon density in the Eckart frame in 1/fm^3
+   * \param[in] C Parameter C of the momentum dependent part of the
+   *              potential in MeV
+   * \param[in] Lambda Parameter Lambda of the momentum-dependent part of the
+   *                   potential in 1/fm
+   * \return momentum dependent part of the potential in GeV
+   */
+  static double momentum_dependent_part(double momentum, double rho, double C,
+                                        double Lambda) {
+    /* We assume here that the distribution function is the one of cold
+     * nuclear matter, which consists only of protons and neutrons.
+     * That is, the degeneracy factor simply equals nucleon spin degeneracy
+     * times nucleon isospin degeneracy, even though all baryons contribute
+     * to the density and the potential is applied to all baryons. */
+    int g = 4;
+    const double fermi_momentum =
+        std::cbrt(6. * M_PI * M_PI * rho / g);  // in 1/fm
+    momentum = momentum / hbarc;                // convert to 1/fm
+    if (momentum < really_small) [[unlikely]] {
+      return mev_to_gev * g * C / (M_PI * M_PI * nuclear_density) *
+             (Lambda * Lambda * fermi_momentum -
+              std::pow(Lambda, 3) * std::atan(fermi_momentum / Lambda));
+    }
+    const std::array<double, 7> temp = {
+        2 * g * C * M_PI * std::pow(Lambda, 3) /
+            (std::pow(2 * M_PI, 3) * nuclear_density),
+        (fermi_momentum * fermi_momentum + Lambda * Lambda -
+         momentum * momentum) /
+            (2 * momentum * Lambda),
+        std::pow(momentum + fermi_momentum, 2) + Lambda * Lambda,
+        std::pow(momentum - fermi_momentum, 2) + Lambda * Lambda,
+        2 * fermi_momentum / Lambda,
+        (momentum + fermi_momentum) / Lambda,
+        (momentum - fermi_momentum) / Lambda};
+    const double result =
+        temp[0] * (temp[1] * std::log(temp[2] / temp[3]) + temp[4] -
+                   2 * (std::atan(temp[5]) - atan(temp[6])));
+    return mev_to_gev * result;
+  }
 };
 
 }  // namespace smash
