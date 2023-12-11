@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2015,2017-2018,2020,2022
+ *    Copyright (c) 2013-2015,2017-2018,2020,2022-2023
  *      SMASH Team
  */
 #ifndef SRC_INCLUDE_SMASH_MACROS_H_
