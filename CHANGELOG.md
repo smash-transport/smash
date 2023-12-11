@@ -20,6 +20,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+## SMASH-3.1rc
+Date:
+
 ### Added
 * Added momentum dependence of the Skyrme potential using the cold nuclear matter approximation
 * Option `Decay_Initial_Particles` which blocks the decay of resonances created at initialization
@@ -50,6 +53,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Removed
 * Some public setters of the `ListModus` class have been removed
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-3.0...SMASH-3.1)
 
 
 ## SMASH-3.0
