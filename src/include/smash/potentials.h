@@ -686,7 +686,7 @@ class Potentials {
         (momentum - fermi_momentum) / Lambda};
     const double result =
         temp[0] * (temp[1] * std::log(temp[2] / temp[3]) + temp[4] -
-                   2 * (std::atan(temp[5]) - atan(temp[6])));
+                   2 * (std::atan(temp[5]) - std::atan(temp[6])));
     return mev_to_gev * result;
   }
 };
