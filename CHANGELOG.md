@@ -21,11 +21,11 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## Unreleased
 
 ### Added
-* Added cold nuclear matter approximation for the momentum dependence of the Skyrme potential
+* Added momentum dependence of the Skyrme potential using the cold nuclear matter approximation
 * Option `Decay_Initial_Particles` which blocks the decay of resonances created at initialization
 * The `List` and `ListBox` modi can now be used specifying a single particles input file using the `Filename` key
-* Command-line option to run smash with `-n` to avoid caching integrals in the ***tabulations*** folder on the disk.
-* ⚠️  The `Total_Cross_Section_Strategy` key determines how the total cross sections for collision finding are evaluated, whether from summing the partial contributions or using a parametrization.
+* Command-line option to run smash with `-n` to avoid caching integrals in the ***tabulations*** folder on the disk
+* ⚠️  The `Total_Cross_Section_Strategy` key determines how the total cross sections for collision finding are evaluated, whether from summing the partial contributions or using a parametrization
 
 ### Fixed
 * Fix bug in the time step calculation of SMASH output in events successive to the first one when the `End_Time` is not a multiple of the `Output_Interval`
@@ -37,7 +37,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * SMASH does not crash if the same output format is repeated
 
 ### Changed
-* Use updated gold radius of 6.55 fm instead of 6.38 fm and a diffusiveness of 0.523 fm instead of 0.535
+* Use updated gold radius of 6.55 fm instead of 6.38 fm and a diffusiveness of 0.523 fm instead of 0.535 fm
 * Upgraded to Pythia 8.310
 * Upgraded to Cuba 4.2.2
 * SMASH installation procedure was improved and allows now to use SMASH as library relying on installation folder only
