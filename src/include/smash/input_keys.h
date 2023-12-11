@@ -2024,7 +2024,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_totXsStrategy_,Total_Cross_Section_Strategy,string,"BottomUp"}
+   * \optional_key{key_CT_totXsStrategy_,Total_Cross_Section_Strategy,string,"TopDownMeasured"}
    *
    * Which strategy to use when evaluating total cross sections for collision
    * finding. Currently, possible options are
@@ -2050,12 +2050,12 @@ struct InputKeys {
    */
   inline static const Key<TotalCrossSectionStrategy> collTerm_totXsStrategy{
       {"Collision_Term", "Total_Cross_Section_Strategy"},
-      TotalCrossSectionStrategy::BottomUp,
+      TotalCrossSectionStrategy::TopDownMeasured,
       {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,"None"}
+   * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,"LargestFromUnstable"}
    *
    * Due to the lack of known high-mass resonances for several processes, the
    * energy region between resonances and strings might lack inelastic
@@ -2083,7 +2083,9 @@ struct InputKeys {
    * \see_key{key_CT_pseudoresonance_}
    */
   inline static const Key<PseudoResonance> collTerm_pseudoresonance{
-      {"Collision_Term", "Pseudoresonance"}, PseudoResonance::None, {"3.1"}};
+      {"Collision_Term", "Pseudoresonance"},
+      PseudoResonance::LargestFromUnstable,
+      {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
