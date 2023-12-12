@@ -304,10 +304,10 @@ function print_authors_for_citation_file()
     {
         authors: [
             ."SMASH team"[], ."External contributors"[] |
-            {"given-names": ."first name", "family-names": ."last name", affiliation, orcid}] |
+            {"given-names": ."first name", "family-names": ."last name", affiliation, "orcid": ("https://orcid.org/" + .orcid)}] |
             sort_by(."family-names") | reverse
     }
-    ' "${INPUT_FILE}" | yq -P -oy
+    ' "${INPUT_FILE}" | yq -P -oy | yq '.. style="double"'
 }
 
 function fail()

@@ -14,159 +14,159 @@ contact:
     given-names: "Hannah"
     website: "https://www.elfner-group.science/index.html"
 authors:
-  - given-names: Agnieszka
-    family-names: Wergieluk
+  - given-names: "Agnieszka"
+    family-names: "Wergieluk"
     affiliation: ""
-    orcid: ""
-  - given-names: Janus
-    family-names: Weil
+    orcid: "https://orcid.org/"
+  - given-names: "Janus"
+    family-names: "Weil"
     affiliation: ""
-    orcid: 0000-0002-1984-8023
-  - given-names: Joseph
-    family-names: Tindall
+    orcid: "https://orcid.org/0000-0002-1984-8023"
+  - given-names: "Joseph"
+    family-names: "Tindall"
     affiliation: ""
-    orcid: 0000-0003-1335-8637
-  - given-names: Vinzent
-    family-names: Steinberg
+    orcid: "https://orcid.org/0000-0003-1335-8637"
+  - given-names: "Vinzent"
+    family-names: "Steinberg"
     affiliation: ""
-    orcid: ""
-  - given-names: Jan
-    family-names: Staudenmaier
+    orcid: "https://orcid.org/"
+  - given-names: "Jan"
+    family-names: "Staudenmaier"
     affiliation: ""
-    orcid: 0000-0003-1335-8637
-  - given-names: Agnieszka
-    family-names: Sorensen
+    orcid: "https://orcid.org/0000-0003-1335-8637"
+  - given-names: "Agnieszka"
+    family-names: "Sorensen"
     affiliation: ""
-    orcid: 0000-0002-1984-8023
-  - given-names: Alessandro
-    family-names: Sciarra
+    orcid: "https://orcid.org/0000-0002-1984-8023"
+  - given-names: "Alessandro"
+    family-names: "Sciarra"
     affiliation: ""
-    orcid: 0000-0002-4608-1905
-  - given-names: Anna
-    family-names: Schäfer
+    orcid: "https://orcid.org/0000-0002-4608-1905"
+  - given-names: "Anna"
+    family-names: "Schäfer"
     affiliation: ""
-    orcid: 0000-0002-2918-2288
-  - given-names: Robin
-    family-names: Sattler
+    orcid: "https://orcid.org/0000-0002-2918-2288"
+  - given-names: "Robin"
+    family-names: "Sattler"
     affiliation: ""
-    orcid: ""
-  - given-names: Sangwook
-    family-names: Ryu
+    orcid: "https://orcid.org/"
+  - given-names: "Sangwook"
+    family-names: "Ryu"
     affiliation: ""
-    orcid: 0000-0002-4907-6650
-  - given-names: Jonas
-    family-names: Rothermel
+    orcid: "https://orcid.org/0000-0002-4907-6650"
+  - given-names: "Jonas"
+    family-names: "Rothermel"
     affiliation: ""
-    orcid: ""
-  - given-names: Jean-Bernard
-    family-names: Rose
+    orcid: "https://orcid.org/"
+  - given-names: "Jean-Bernard"
+    family-names: "Rose"
     affiliation: ""
-    orcid: 0000-0001-7313-2942
-  - given-names: Hendrik
-    family-names: Roch
+    orcid: "https://orcid.org/0000-0001-7313-2942"
+  - given-names: "Hendrik"
+    family-names: "Roch"
     affiliation: ""
-    orcid: 0000-0002-0187-6843
-  - given-names: Lukas
-    family-names: Prinz
+    orcid: "https://orcid.org/0000-0002-0187-6843"
+  - given-names: "Lukas"
+    family-names: "Prinz"
     affiliation: ""
-    orcid: ""
-  - given-names: Hannah
-    family-names: Petersen
+    orcid: "https://orcid.org/"
+  - given-names: "Hannah"
+    family-names: "Petersen"
     affiliation: ""
-    orcid: ""
-  - given-names: Zuzana
-    family-names: Paulinyova
+    orcid: "https://orcid.org/"
+  - given-names: "Zuzana"
+    family-names: "Paulinyova"
     affiliation: ""
-    orcid: ""
-  - given-names: Long-Gang
-    family-names: Pang
+    orcid: "https://orcid.org/"
+  - given-names: "Long-Gang"
+    family-names: "Pang"
     affiliation: ""
-    orcid: ""
-  - given-names: Dmytro
-    family-names: Oliinychenko
+    orcid: "https://orcid.org/"
+  - given-names: "Dmytro"
+    family-names: "Oliinychenko"
     affiliation: ""
-    orcid: 0000-0002-5773-6137
-  - given-names: Justin
-    family-names: Mohs
+    orcid: "https://orcid.org/0000-0002-5773-6137"
+  - given-names: "Justin"
+    family-names: "Mohs"
     affiliation: ""
-    orcid: 0000-0001-8437-0946
-  - given-names: Damjan
-    family-names: Mitrovic
+    orcid: "https://orcid.org/0000-0001-8437-0946"
+  - given-names: "Damjan"
+    family-names: "Mitrovic"
     affiliation: ""
-    orcid: ""
-  - given-names: Markus
-    family-names: Mayer
+    orcid: "https://orcid.org/"
+  - given-names: "Markus"
+    family-names: "Mayer"
     affiliation: ""
-    orcid: ""
-  - given-names: Feng
-    family-names: Li
+    orcid: "https://orcid.org/"
+  - given-names: "Feng"
+    family-names: "Li"
     affiliation: ""
-    orcid: ""
-  - given-names: Natey
-    family-names: Kübler
+    orcid: "https://orcid.org/"
+  - given-names: "Natey"
+    family-names: "Kübler"
     affiliation: ""
-    orcid: 0000-0003-0633-5808
-  - given-names: Matthias
-    family-names: Kretz
+    orcid: "https://orcid.org/0000-0003-0633-5808"
+  - given-names: "Matthias"
+    family-names: "Kretz"
     affiliation: ""
-    orcid: 0000-0002-0867-243X
-  - given-names: Thomas
-    family-names: Kehrenberg
+    orcid: "https://orcid.org/0000-0002-0867-243X"
+  - given-names: "Thomas"
+    family-names: "Kehrenberg"
     affiliation: ""
-    orcid: ""
-  - given-names: Gabriele
-    family-names: Inghirami
+    orcid: "https://orcid.org/"
+  - given-names: "Gabriele"
+    family-names: "Inghirami"
     affiliation: ""
-    orcid: 0000-0002-4059-120X
-  - given-names: Christian
-    family-names: Holm Christensen
+    orcid: "https://orcid.org/0000-0002-4059-120X"
+  - given-names: "Christian"
+    family-names: "Holm Christensen"
     affiliation: ""
-    orcid: ""
-  - given-names: Renan
-    family-names: Hirayama
+    orcid: "https://orcid.org/"
+  - given-names: "Renan"
+    family-names: "Hirayama"
     affiliation: ""
-    orcid: ""
-  - given-names: Jan
-    family-names: Hammelmann
+    orcid: "https://orcid.org/"
+  - given-names: "Jan"
+    family-names: "Hammelmann"
     affiliation: ""
-    orcid: ""
-  - given-names: Niklas
-    family-names: Götz
+    orcid: "https://orcid.org/"
+  - given-names: "Niklas"
+    family-names: "Götz"
     affiliation: ""
-    orcid: 0000-0002-5992-1643
-  - given-names: Julia
-    family-names: Groebel
+    orcid: "https://orcid.org/0000-0002-5992-1643"
+  - given-names: "Julia"
+    family-names: "Groebel"
     affiliation: ""
-    orcid: ""
-  - given-names: Andy
-    family-names: Goldschmidt
+    orcid: "https://orcid.org/"
+  - given-names: "Andy"
+    family-names: "Goldschmidt"
     affiliation: ""
-    orcid: ""
-  - given-names: Leon
-    family-names: Geiger
+    orcid: "https://orcid.org/"
+  - given-names: "Leon"
+    family-names: "Geiger"
     affiliation: ""
-    orcid: ""
-  - given-names: Oscar
-    family-names: Garcia-Montero
+    orcid: "https://orcid.org/"
+  - given-names: "Oscar"
+    family-names: "Garcia-Montero"
     affiliation: ""
-    orcid: 0000-0003-0409-1547
-  - given-names: Hannah
-    family-names: Elfner
+    orcid: "https://orcid.org/0000-0003-0409-1547"
+  - given-names: "Hannah"
+    family-names: "Elfner"
     affiliation: ""
-    orcid: 0000-0002-6213-3613
-  - given-names: Niklas
-    family-names: Ehlert
+    orcid: "https://orcid.org/0000-0002-6213-3613"
+  - given-names: "Niklas"
+    family-names: "Ehlert"
     affiliation: ""
-    orcid: ""
-  - given-names: Bjørn
-    family-names: Bäuchle
+    orcid: "https://orcid.org/"
+  - given-names: "Bjørn"
+    family-names: "Bäuchle"
     affiliation: ""
-    orcid: ""
-  - given-names: Jussi
-    family-names: Auvinen
+    orcid: "https://orcid.org/"
+  - given-names: "Jussi"
+    family-names: "Auvinen"
     affiliation: ""
-    orcid: ""
-  - given-names: Maximilian
-    family-names: Attems
+    orcid: "https://orcid.org/"
+  - given-names: "Maximilian"
+    family-names: "Attems"
     affiliation: ""
-    orcid: 0000-0001-8764-3022
+    orcid: "https://orcid.org/0000-0001-8764-3022"
