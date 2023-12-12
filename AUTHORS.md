@@ -20,7 +20,7 @@ Hendrik Roch | [✉️](mailto:roch@fias.uni-frankfurt.de) | `2022-`
 Hannah Petersen | [✉️](mailto:petersen@fias.uni-frankfurt.de) | `2013-2018`
 Lukas Prinz | [✉️](mailto:lprinz@fias.uni-frankfurt.de) | `2019`
 Zuzana Paulinyova | [✉️](mailto:paulinyova@fias.uni-frankfurt.de) | `2023-`
-Longgang Pang | [✉️](mailto:pang@fias.uni-frankfurt.de) | `2015-2017`
+Long-Gang Pang | [✉️](mailto:pang@fias.uni-frankfurt.de) | `2015-2017`
 Dmytro Oliinychenko | [✉️](mailto:oliiny@fias.uni-frankfurt.de) | `2014-`
 Justin Mohs | [✉️](mailto:mohs@fias.uni-frankfurt.de) | `2017-`
 Damjan Mitrovic | [✉️](mailto:mitrovic@fias.uni-frankfurt.de) | `2019-2020`
