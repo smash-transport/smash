@@ -377,6 +377,10 @@ double deuteron_nucleon_elastic(double mandelstam_s);
  *
  * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
  * \return the parametrized cross-section [mb]
+ *
+ * \note \anchor KN_note In total parametrizations of KN processes,
+ * if the interaction energy exceeds the bounds of the interpolation,
+ * the last value available is returned, which is desired behavior.
  */
 double kplusp_total(double mandelstam_s);
 
@@ -386,6 +390,8 @@ double kplusp_total(double mandelstam_s);
  *
  * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
  * \return the parametrized cross-section [mb]
+ *
+ * \note See \ref KN_note "this note" about the return value.
  */
 double kplusn_total(double mandelstam_s);
 
@@ -395,6 +401,8 @@ double kplusn_total(double mandelstam_s);
  *
  * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
  * \return the parametrized cross-section [mb]
+ *
+ * \note See \ref KN_note "this note" about return value.
  */
 double kminusp_total(double mandelstam_s);
 

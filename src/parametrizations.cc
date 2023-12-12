@@ -27,22 +27,6 @@
 
 namespace smash {
 
-static constexpr int LCrossSections = LogArea::CrossSections::id;
-/**
- * Auxiliary function to print out-of-bound warnings
- *
- * \param[in] p_lab value requested for the interpolation
- * \param[in] last last abscissa data point in interpolation
- */
-static void warn_if_too_large_energy(double p_lab, double last) {
-  if (p_lab < last) {
-    logg[LCrossSections].warn()
-        << "Desired p_lab of " << p_lab << " GeV/c for total cross section"
-        << "parametrization exceeds maximum value of " << last
-        << ", which is used instead.";
-  }
-}
-
 bool parametrization_exists(const PdgCode& pdg_a, const PdgCode& pdg_b) {
   const bool two_nucleons = pdg_a.is_nucleon() && pdg_b.is_nucleon();
   const bool nucleon_and_kaon = (pdg_a.is_nucleon() && pdg_b.is_kaon()) ||
@@ -508,8 +492,6 @@ double kplusp_total(double mandelstam_s) {
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  const double last = *(KPLUSP_TOT_PLAB.end() - 1);
-  warn_if_too_large_energy(p_lab, last);
   return (*kplusp_total_interpolation)(p_lab);
 }
 
@@ -522,8 +504,6 @@ double kplusn_total(double mandelstam_s) {
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  const double last = *(KPLUSN_TOT_PLAB.end() - 1);
-  warn_if_too_large_energy(p_lab, last);
   return (*kplusn_total_interpolation)(p_lab);
 }
 
@@ -536,8 +516,6 @@ double kminusp_total(double mandelstam_s) {
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  const double last = *(KMINUSP_TOT_PLAB.end() - 1);
-  warn_if_too_large_energy(p_lab, last);
   return (*kminusp_total_interpolation)(p_lab);
 }
 
