@@ -281,8 +281,7 @@ function create_citation_file_if_requested()
         printf '\n Creating CITATION.cff file...'
         cat \
             <(print_citation_file_metadata) \
-            <(print_authors_for_citation_file) \
-            <(print_preferred_citation_for_citation_file) > "${OUTPUT_CITATION_FILE}"
+            <(print_authors_for_citation_file) > "${OUTPUT_CITATION_FILE}"
         printf ' done!\n'
     fi
 }
@@ -291,7 +290,7 @@ function print_citation_file_metadata()
 {
     printf '%s\n' \
         'cff-version: 1.2.0' \
-        'message: "If you use this software, please cite both the article from preferred-citation and the software itself."' \
+        'message: "If you use this software, please cite it using these metadata."' \
         'title: "SMASH"' \
         "version: ${SMASH_VERSION}" \
         "date-released: ${SMASH_RELEASE_DATE}" \
@@ -309,51 +308,6 @@ function print_citation_file_metadata()
         '    given-names: Hannah'\
         '    website: "https://www.elfner-group.science/index.html"' \
         ''
-}
-
-function print_preferred_citation_for_citation_file()
-{
-    printf '%s\n' \
-        '' \
-        'preferred-citation:' \
-        '  title: "Particle production and equilibrium properties within a new hadron transport approach for heavy-ion collisions"' \
-        '  authors:' \
-        '    - family-names: Weil' \
-        '      given-names: Janus' \
-        '    - family-names: Steinberg' \
-        '      given-names: Vinzent' \
-        '    - family-names: Staudenmaier' \
-        '      given-names: Jan' \
-        '    - family-names: Pang' \
-        '      given-names: Long-Gang' \
-        '    - family-names: Oliinychenko' \
-        '      given-names: Dmytro' \
-        '    - family-names: Mohs' \
-        '      given-names: Justin' \
-        '    - family-names: Kretz' \
-        '      given-names: Matthias' \
-        '    - family-names: Kehrenberg' \
-        '      given-names: Thomas' \
-        '    - family-names: Goldschmidt' \
-        '      given-names: Andy' \
-        '    - family-names: Bäuchle' \
-        '      given-names: Bjørn' \
-        '    - family-names: Auvinen' \
-        '      given-names: Jussi' \
-        '    - family-names: Attems' \
-        '      given-names: Maximilian' \
-        '    - family-names: Petersen' \
-        '      given-names: Hannah' \
-        '  volume: 94' \
-        '  issn: "2469-9993"' \
-        '  url: "http://dx.doi.org/10.1103/PhysRevC.94.054905"' \
-        '  doi: 10.1103/physrevc.94.054905' \
-        '  number: 5' \
-        '  journal: "Physical Review C"' \
-        '  publisher: "American Physical Society (APS)"' \
-        '  year: 2016' \
-        '  month: 11' \
-        '  type: article'
 }
 
 function print_authors_for_citation_file()
