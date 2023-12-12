@@ -26,7 +26,9 @@ readonly \
     INPUT_FILE='.authors.json'\
     OUTPUT_AUTHORS_FILE='AUTHORS.md'\
     OUTPUT_ZENODO_FILE='.zenodo.json'\
-    OUTPUT_CITATION_FILE='CITATION.cff'
+    OUTPUT_CITATION_FILE='CITATION.cff'\
+    SMASH_VERSION='3.0'\
+    SMASH_RELEASE_DATE='2023-04-27'
 
 CREATE_ZENODO_FILE='FALSE'
 CREATE_AUTHORS_FILE='FALSE'
@@ -279,19 +281,84 @@ function create_citation_file_if_requested()
         printf '\n Creating CITATION.cff file...'
         cat \
             <(print_citation_file_metadata) \
-            <(print_authors_for_citation_file) > "${OUTPUT_CITATION_FILE}"
+            <(print_authors_for_citation_file) \
+            <(print_preferred_citation_for_citation_file) > "${OUTPUT_CITATION_FILE}"
         printf ' done!\n'
     fi
 }
 
 function print_citation_file_metadata()
 {
-    :
+    printf '%s\n' \
+        'cff-version: 1.2.0' \
+        'message: "If you use this software, please cite both the article from preferred-citation and the software itself."' \
+        'title: "SMASH"' \
+        "version: ${SMASH_VERSION}" \
+        "date-released: ${SMASH_RELEASE_DATE}" \
+        'identifiers:' \
+        '  - type: doi' \
+        '    value: 10.5281/zenodo.3484711' \
+        '    description: "The concept DOI of the software."' \
+        'license: GPL-3.0-or-later' \
+        'repository-code: "https://github.com/smash-transport/smash"' \
+        'url: "https://smash-transport.github.io"' \
+        'type: software' \
+        'contact:' \
+        '  - email: elfner@itp.uni-frankfurt.de' \
+        '    family-names: Elfner' \
+        '    given-names: Hannah'\
+        '    website: "https://www.elfner-group.science/index.html"' \
+        ''
+}
+
+function print_preferred_citation_for_citation_file()
+{
+    printf '%s\n' \
+        '' \
+        'preferred-citation:' \
+        '  title: "Particle production and equilibrium properties within a new hadron transport approach for heavy-ion collisions"' \
+        '  authors:' \
+        '    - family-names: Weil' \
+        '      given-names: Janus' \
+        '    - family-names: Steinberg' \
+        '      given-names: Vinzent' \
+        '    - family-names: Staudenmaier' \
+        '      given-names: Jan' \
+        '    - family-names: Pang' \
+        '      given-names: Long-Gang' \
+        '    - family-names: Oliinychenko' \
+        '      given-names: Dmytro' \
+        '    - family-names: Mohs' \
+        '      given-names: Justin' \
+        '    - family-names: Kretz' \
+        '      given-names: Matthias' \
+        '    - family-names: Kehrenberg' \
+        '      given-names: Thomas' \
+        '    - family-names: Goldschmidt' \
+        '      given-names: Andy' \
+        '    - family-names: Bäuchle' \
+        '      given-names: Bjørn' \
+        '    - family-names: Auvinen' \
+        '      given-names: Jussi' \
+        '    - family-names: Attems' \
+        '      given-names: Maximilian' \
+        '    - family-names: Petersen' \
+        '      given-names: Hannah' \
+        '  volume: 94' \
+        '  issn: "2469-9993"' \
+        '  url: "http://dx.doi.org/10.1103/PhysRevC.94.054905"' \
+        '  doi: 10.1103/physrevc.94.054905' \
+        '  number: 5' \
+        '  journal: "Physical Review C"' \
+        '  publisher: "American Physical Society (APS)"' \
+        '  year: 2016' \
+        '  month: 11' \
+        '  type: article'
 }
 
 function print_authors_for_citation_file()
 {
-    # Refer to the comment in the print_smash_team_for_zenodo function to get a
+    # Refer to the comment in the 'print_smash_team_for_zenodo' function to get a
     # description of the following jq command. Here yq is used to convert the
     # JSON output to YAML format.
     jq '
