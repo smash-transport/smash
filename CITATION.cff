@@ -1,0 +1,216 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite both the article from preferred-citation and the software itself."
+title: "SMASH"
+version: 3.0
+date-released: 2023-04-27
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.3484711
+    description: "The concept DOI of the software."
+license: GPL-3.0-or-later
+repository-code: "https://github.com/smash-transport/smash"
+url: "https://smash-transport.github.io"
+type: software
+contact:
+  - email: elfner@itp.uni-frankfurt.de
+    family-names: Elfner
+    given-names: Hannah
+    website: "https://www.elfner-group.science/index.html"
+
+authors:
+  - given-names: Agnieszka
+    family-names: Wergieluk
+    affiliation: ""
+    orcid: ""
+  - given-names: Janus
+    family-names: Weil
+    affiliation: ""
+    orcid: 0000-0002-1984-8023
+  - given-names: Joseph
+    family-names: Tindall
+    affiliation: ""
+    orcid: 0000-0003-1335-8637
+  - given-names: Vinzent
+    family-names: Steinberg
+    affiliation: ""
+    orcid: ""
+  - given-names: Jan
+    family-names: Staudenmaier
+    affiliation: ""
+    orcid: 0000-0003-1335-8637
+  - given-names: Agnieszka
+    family-names: Sorensen
+    affiliation: ""
+    orcid: 0000-0002-1984-8023
+  - given-names: Alessandro
+    family-names: Sciarra
+    affiliation: ""
+    orcid: 0000-0002-4608-1905
+  - given-names: Anna
+    family-names: Schäfer
+    affiliation: ""
+    orcid: 0000-0002-2918-2288
+  - given-names: Robin
+    family-names: Sattler
+    affiliation: ""
+    orcid: ""
+  - given-names: Sangwook
+    family-names: Ryu
+    affiliation: ""
+    orcid: 0000-0002-4907-6650
+  - given-names: Jonas
+    family-names: Rothermel
+    affiliation: ""
+    orcid: ""
+  - given-names: Jean-Bernard
+    family-names: Rose
+    affiliation: ""
+    orcid: 0000-0001-7313-2942
+  - given-names: Hendrik
+    family-names: Roch
+    affiliation: ""
+    orcid: 0000-0002-0187-6843
+  - given-names: Lukas
+    family-names: Prinz
+    affiliation: ""
+    orcid: ""
+  - given-names: Hannah
+    family-names: Petersen
+    affiliation: ""
+    orcid: ""
+  - given-names: Zuzana
+    family-names: Paulinyova
+    affiliation: ""
+    orcid: ""
+  - given-names: Long-Gang
+    family-names: Pang
+    affiliation: ""
+    orcid: ""
+  - given-names: Dmytro
+    family-names: Oliinychenko
+    affiliation: ""
+    orcid: 0000-0002-5773-6137
+  - given-names: Justin
+    family-names: Mohs
+    affiliation: ""
+    orcid: 0000-0001-8437-0946
+  - given-names: Damjan
+    family-names: Mitrovic
+    affiliation: ""
+    orcid: ""
+  - given-names: Markus
+    family-names: Mayer
+    affiliation: ""
+    orcid: ""
+  - given-names: Feng
+    family-names: Li
+    affiliation: ""
+    orcid: ""
+  - given-names: Natey
+    family-names: Kübler
+    affiliation: ""
+    orcid: 0000-0003-0633-5808
+  - given-names: Matthias
+    family-names: Kretz
+    affiliation: ""
+    orcid: 0000-0002-0867-243X
+  - given-names: Thomas
+    family-names: Kehrenberg
+    affiliation: ""
+    orcid: ""
+  - given-names: Gabriele
+    family-names: Inghirami
+    affiliation: ""
+    orcid: 0000-0002-4059-120X
+  - given-names: Christian
+    family-names: Holm Christensen
+    affiliation: ""
+    orcid: ""
+  - given-names: Renan
+    family-names: Hirayama
+    affiliation: ""
+    orcid: ""
+  - given-names: Jan
+    family-names: Hammelmann
+    affiliation: ""
+    orcid: ""
+  - given-names: Niklas
+    family-names: Götz
+    affiliation: ""
+    orcid: 0000-0002-5992-1643
+  - given-names: Julia
+    family-names: Groebel
+    affiliation: ""
+    orcid: ""
+  - given-names: Andy
+    family-names: Goldschmidt
+    affiliation: ""
+    orcid: ""
+  - given-names: Leon
+    family-names: Geiger
+    affiliation: ""
+    orcid: ""
+  - given-names: Oscar
+    family-names: Garcia-Montero
+    affiliation: ""
+    orcid: 0000-0003-0409-1547
+  - given-names: Hannah
+    family-names: Elfner
+    affiliation: ""
+    orcid: 0000-0002-6213-3613
+  - given-names: Niklas
+    family-names: Ehlert
+    affiliation: ""
+    orcid: ""
+  - given-names: Bjørn
+    family-names: Bäuchle
+    affiliation: ""
+    orcid: ""
+  - given-names: Jussi
+    family-names: Auvinen
+    affiliation: ""
+    orcid: ""
+  - given-names: Maximilian
+    family-names: Attems
+    affiliation: ""
+    orcid: 0000-0001-8764-3022
+
+preferred-citation:
+  title: "Particle production and equilibrium properties within a new hadron transport approach for heavy-ion collisions"
+  authors:
+    - family-names: Weil
+      given-names: Janus
+    - family-names: Steinberg
+      given-names: Vinzent
+    - family-names: Staudenmaier
+      given-names: Jan
+    - family-names: Pang
+      given-names: Long-Gang
+    - family-names: Oliinychenko
+      given-names: Dmytro
+    - family-names: Mohs
+      given-names: Justin
+    - family-names: Kretz
+      given-names: Matthias
+    - family-names: Kehrenberg
+      given-names: Thomas
+    - family-names: Goldschmidt
+      given-names: Andy
+    - family-names: Bäuchle
+      given-names: Bjørn
+    - family-names: Auvinen
+      given-names: Jussi
+    - family-names: Attems
+      given-names: Maximilian
+    - family-names: Petersen
+      given-names: Hannah
+  volume: 94
+  issn: "2469-9993"
+  url: "http://dx.doi.org/10.1103/PhysRevC.94.054905"
+  doi: 10.1103/physrevc.94.054905
+  number: 5
+  journal: "Physical Review C"
+  publisher: "American Physical Society (APS)"
+  year: 2016
+  month: 11
+  type: article
