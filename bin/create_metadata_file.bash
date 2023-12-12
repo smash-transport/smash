@@ -12,10 +12,13 @@
 trap 'printf "\n"' EXIT
 
 #===================================================================
-# This script expects a ".authors.json" file to be present were run
-# and produces a "".zenodo.json" and/or a "AUTHORS.md" file in the
-# same place. The jq tool is used to deal with JSON files and the
-# yq tool is used to deal with YAML files.
+# This script expects a ".metadata.json" file to be present were run
+# and produces either among the following files in the same place:
+#  - CITATION.cff
+#  - .zenodo.json
+#  - AUTHORS.md
+# The 'jq' program is used to deal with JSON files, while 'yq' is
+# used to deal with YAML ones.
 #===================================================================
 
 # Bash stricter mode
@@ -23,12 +26,10 @@ set -euo pipefail
 shopt -s inherit_errexit
 
 readonly \
-    INPUT_FILE='.authors.json'\
+    INPUT_FILE='.metadata.json'\
     OUTPUT_AUTHORS_FILE='AUTHORS.md'\
     OUTPUT_ZENODO_FILE='.zenodo.json'\
-    OUTPUT_CITATION_FILE='CITATION.cff'\
-    SMASH_VERSION='SMASH-3.0'\
-    SMASH_RELEASE_DATE='2023-04-27'
+    OUTPUT_CITATION_FILE='CITATION.cff'
 
 CREATE_ZENODO_FILE='FALSE'
 CREATE_AUTHORS_FILE='FALSE'
@@ -288,23 +289,10 @@ function create_citation_file_if_requested()
 
 function print_citation_file_metadata()
 {
-    printf '%s\n' \
-        'cff-version: 1.2.0' \
-        'message: "If you use this software, please cite it using these metadata."' \
-        "title: \"smash-transport/smash: ${SMASH_VERSION}\"" \
-        "version: \"${SMASH_VERSION}\"" \
-        "date-released: ${SMASH_RELEASE_DATE}" \
-        'doi: 10.5281/zenodo.3484711   # The concept DOI of the software' \
-        'license: GPL-3.0-or-later' \
-        'repository-code: "https://github.com/smash-transport/smash"' \
-        'url: "https://smash-transport.github.io"' \
-        'type: software' \
-        'contact:' \
-        '  - email: elfner@itp.uni-frankfurt.de' \
-        '    family-names: Elfner' \
-        '    given-names: Hannah'\
-        '    website: "https://www.elfner-group.science/index.html"' \
-        ''
+    # This extract the 'Citation metadata' entry from the input JSON file
+    # and hands it over to yq to convert it to YAML and then once again to
+    # get all values of the keys consistently double quoted.
+    jq '."Citation metadata"' "${INPUT_FILE}" | yq -P -oy | yq '.. style="double"'
 }
 
 function print_authors_for_citation_file()

@@ -1,19 +1,18 @@
-cff-version: 1.2.0
+cff-version: "1.2.0"
 message: "If you use this software, please cite it using these metadata."
 title: "smash-transport/smash: SMASH-3.0"
 version: "SMASH-3.0"
-date-released: 2023-04-27
-doi: 10.5281/zenodo.3484711   # The concept DOI of the software
-license: GPL-3.0-or-later
+date-released: "2023-04-27"
+doi: "10.5281/zenodo.3484711"
+license: "GPL-3.0-or-later"
 repository-code: "https://github.com/smash-transport/smash"
 url: "https://smash-transport.github.io"
-type: software
+type: "software"
 contact:
-  - email: elfner@itp.uni-frankfurt.de
-    family-names: Elfner
-    given-names: Hannah
+  - email: "elfner@itp.uni-frankfurt.de"
+    family-names: "Elfner"
+    given-names: "Hannah"
     website: "https://www.elfner-group.science/index.html"
-
 authors:
   - given-names: Agnieszka
     family-names: Wergieluk
