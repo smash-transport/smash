@@ -3,10 +3,7 @@ message: "If you use this software, please cite it using these metadata."
 title: "smash-transport/smash: SMASH-3.0"
 version: "SMASH-3.0"
 date-released: 2023-04-27
-identifiers:
-  - type: doi
-    value: 10.5281/zenodo.3484711
-    description: "The concept DOI of the software."
+doi: 10.5281/zenodo.3484711   # The concept DOI of the software
 license: GPL-3.0-or-later
 repository-code: "https://github.com/smash-transport/smash"
 url: "https://smash-transport.github.io"

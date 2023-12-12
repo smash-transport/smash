@@ -294,10 +294,7 @@ function print_citation_file_metadata()
         "title: \"smash-transport/smash: ${SMASH_VERSION}\"" \
         "version: \"${SMASH_VERSION}\"" \
         "date-released: ${SMASH_RELEASE_DATE}" \
-        'identifiers:' \
-        '  - type: doi' \
-        '    value: 10.5281/zenodo.3484711' \
-        '    description: "The concept DOI of the software."' \
+        'doi: 10.5281/zenodo.3484711   # The concept DOI of the software' \
         'license: GPL-3.0-or-later' \
         'repository-code: "https://github.com/smash-transport/smash"' \
         'url: "https://smash-transport.github.io"' \
