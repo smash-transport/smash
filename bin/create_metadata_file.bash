@@ -27,7 +27,7 @@ readonly \
     OUTPUT_AUTHORS_FILE='AUTHORS.md'\
     OUTPUT_ZENODO_FILE='.zenodo.json'\
     OUTPUT_CITATION_FILE='CITATION.cff'\
-    SMASH_VERSION='3.0'\
+    SMASH_VERSION='SMASH-3.0'\
     SMASH_RELEASE_DATE='2023-04-27'
 
 CREATE_ZENODO_FILE='FALSE'
@@ -291,8 +291,8 @@ function print_citation_file_metadata()
     printf '%s\n' \
         'cff-version: 1.2.0' \
         'message: "If you use this software, please cite it using these metadata."' \
-        'title: "SMASH"' \
-        "version: ${SMASH_VERSION}" \
+        "title: \"smash-transport/smash: ${SMASH_VERSION}\"" \
+        "version: \"${SMASH_VERSION}\"" \
         "date-released: ${SMASH_RELEASE_DATE}" \
         'identifiers:' \
         '  - type: doi' \

@@ -1,7 +1,7 @@
 cff-version: 1.2.0
-message: "If you use this software, please cite both the article from preferred-citation and the software itself."
-title: "SMASH"
-version: 3.0
+message: "If you use this software, please cite it using these metadata."
+title: "smash-transport/smash: SMASH-3.0"
+version: "SMASH-3.0"
 date-released: 2023-04-27
 identifiers:
   - type: doi
