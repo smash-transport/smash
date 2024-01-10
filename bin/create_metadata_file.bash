@@ -248,14 +248,19 @@ function print_smash_team_for_zenodo()
     #   - The external {} and [] after creators: do an object and an array construction
     #   - The () group whatever is inside and around a key like (.XXX) make jq evaluate the key
     #   - The + for strings is a concatenation
+    #   - The + for objects {...} + {...} is a merge
+    #   - Merging an object with null gives the object: {...} + null = {...}
     #   - The affiliation and orcid fields expand to the corresponding key:value pair
+    #   - The if has(...) construct checks if a key is present
     #   - The sort_by and reverse do what the name says
     jq '
     {
         creators: [
             ."SMASH team"[], ."External contributors"[] |
-            {name: (."last name"+", "+."first name"), affiliation, orcid}
-        ] | sort_by(.name) | reverse
+                {name: (."last name"+", "+."first name")} +
+                if has("affiliation") then {affiliation} else null end +
+                if has("orcid") then {"orcid": ("https://orcid.org/" + .orcid)} else null end
+            ] | sort_by(.name) | reverse
     }
     ' "${INPUT_FILE}"
 }
@@ -304,8 +309,10 @@ function print_authors_for_citation_file()
     {
         authors: [
             ."SMASH team"[], ."External contributors"[] |
-            {"given-names": ."first name", "family-names": ."last name", affiliation, "orcid": ("https://orcid.org/" + .orcid)}] |
-            sort_by(."family-names") | reverse
+                {"given-names": ."first name", "family-names": ."last name"} +
+                if has("affiliation") then {affiliation} else null end +
+                if has("orcid") then {"orcid": ("https://orcid.org/" + .orcid)} else null end
+            ] | sort_by(."family-names") | reverse
     }
     ' "${INPUT_FILE}" | yq -P -oy | yq '.. style="double"'
 }

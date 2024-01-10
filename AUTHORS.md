@@ -21,7 +21,7 @@ Hannah Petersen | [✉️](mailto:petersen@fias.uni-frankfurt.de) | `2013-2018`
 Lukas Prinz | [✉️](mailto:lprinz@fias.uni-frankfurt.de) | `2019`
 Zuzana Paulinyova | [✉️](mailto:paulinyova@fias.uni-frankfurt.de) | `2023-`
 Long-Gang Pang | [✉️](mailto:pang@fias.uni-frankfurt.de) | `2015-2017`
-Dmytro Oliinychenko | [✉️](mailto:oliiny@fias.uni-frankfurt.de) | `2014-`
+Dmytro Oliinychenko | [✉️](mailto:oliiny@fias.uni-frankfurt.de) | `2014-2022`
 Justin Mohs | [✉️](mailto:mohs@fias.uni-frankfurt.de) | `2017-`
 Damjan Mitrovic | [✉️](mailto:mitrovic@fias.uni-frankfurt.de) | `2019-2020`
 Markus Mayer | [✉️](mailto:mayer@fias.uni-frankfurt.de) | `2017`
@@ -36,7 +36,7 @@ Julia Groebel | [✉️](mailto:groebel@fias.uni-frankfurt.de) | `2022`
 Andy Goldschmidt | [✉️](mailto:goldschmidt@fias.uni-frankfurt.de) | `2014`
 Niklas Götz | [✉️](mailto:goetz@fias.uni-frankfurt.de) | `2021-`
 Leon Geiger | [✉️](mailto:geiger@fias.uni-frankfurt.de) | `2019-2020`
-Oscar Garcia-Montero | [✉️](mailto:garcia@fias.uni-frankfurt.de) | `2020-`
+Oscar Garcia-Montero | [✉️](mailto:garcia@fias.uni-frankfurt.de) | `2020-2021`
 Hannah Elfner | [✉️](mailto:elfner@fias.uni-frankfurt.de) | `2018-`
 Niklas Ehlert | [✉️](mailto:ehlert@fias.uni-frankfurt.de) | `2016`
 Bjørn Bäuchle | [✉️](mailto:baeuchle@fias.uni-frankfurt.de) | `2012-2014`
