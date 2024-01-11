@@ -2,7 +2,7 @@
 
 #===================================================
 #
-#    Copyright (c) 2022-2023
+#    Copyright (c) 2022-2024
 #      SMASH Team
 #
 #    GNU General Public License (GPLv3 or later)
@@ -15,6 +15,11 @@ function main()
 {
     printf '\n'
     Validate_command_line_options "$@"
+    Compare_Two_Benchmarks "$1" "$2"
+}
+
+function Compare_Two_Benchmarks()
+{
     readonly results_filename_old="$1"
     readonly results_filename_new="$2"
     readonly version_old=$(Extract_version_from_filename "${results_filename_old}")
@@ -43,7 +48,7 @@ function main()
     Print_list_of_benchmarks "dismissed after ${version_old}" "${old_dismissed_benchmarks[@]}"
     Print_list_of_benchmarks "newly introduced ${version_new}" "${new_introduced_benchmarks[@]}"
 }
- 
+
 function Validate_command_line_options()
 {
     if [[ $# -ne 2 ]]; then
@@ -80,7 +85,7 @@ function Extract_benchmarks_data_from_file()
         exit 2
     elif [[ $3 =~ [^a-zA-Z_] ]]; then
         printf "Function '${FUNCNAME}' must be called with valid array_name as third argument.\n"
-        exit 1        
+        exit 1
     fi
     local filename array_name list_of_benchmarks list_of_timings
     filename=$1
@@ -105,7 +110,7 @@ function Set_length_longest_label()
 
 function Print_report_header()
 {
-    printf "%${width_benchmark_column}s%20s%20s%15s\n" 'BENCHMARK' "${version_old} {s}" "${version_new} {s}" 'Time change'
+    printf "%${width_benchmark_column}s%25s%25s%18s\n" 'BENCHMARK' "${version_old} {s}" "${version_new} {s}" 'Time change'
 }
 
 function Print_report_line()
@@ -113,7 +118,7 @@ function Print_report_line()
     local delta color
     delta="$(awk -v old="$2" -v new="$3" 'BEGIN{printf "%+6.2f", (new-old)/new*100}')"
     color="$(awk -v x="${delta}" 'BEGIN{printf "%d", (x>0) ? 91 : 92}')"
-    printf "\e[96m%${width_benchmark_column}s\e[0m%20s%20s\e[${color}m%15s\e[0m\n" "$1" "$2" "$3" "${delta}%"
+    printf "\e[96m%${width_benchmark_column}s\e[0m%25s%25s\e[${color}m%18s\e[0m\n" "$1" "$2" "$3" "${delta}%"
 }
 
 function Print_list_of_benchmarks()
