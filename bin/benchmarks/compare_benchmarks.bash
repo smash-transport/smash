@@ -9,39 +9,72 @@
 #
 #===================================================
 
+# NOTE: We use the 'BM_' prefix for global variables and in particular the idea
+#       behind this script is to extract the benchmark timings with their errors
+#       from the benchmark files into global associative arrays which have the
+#       names of the benchmark as keys.
+
 trap 'printf "\n"' EXIT
 
 function main()
 {
     printf '\n'
     Validate_command_line_options "$@"
-    Compare_Two_Benchmarks "$1" "$2"
+    Extract_Benchmarks_Timings_Into_Global_Arrays "$@"
+    if [[ $# -eq 2 ]]; then
+        Compare_Two_Benchmarks "$1" "$2"
+    fi
+}
+
+function Validate_command_line_options()
+{
+    if [[ $# -lt 2 ]]; then
+        printf 'Usage: %s file_1 file_2 [further_files]...\n' "${BASH_SOURCE}"
+        exit 1
+    fi
+    local filename
+    for filename in "$@"; do
+        if [[ ! -f "${filename}" ]]; then
+            printf "File '${filename}' not found.\n"
+            exit 1
+        elif [[ $(basename "${filename}") != bm-results-SMASH-*.md ]]; then
+            printf '%s\n'\
+                   "File '${filename}' does not seem to be a benchmark result file."\
+                   "Benchmark results files must match the 'bm-results-SMASH-*.md' glob."
+            exit 1
+        fi
+    done
+}
+
+function Extract_Benchmarks_Timings_Into_Global_Arrays()
+{
+    local filename counter=1
+    for filename in "$@"; do
+        declare -g -A BM_timings_${counter}{,_errors}
+        Extract_benchmarks_data_from_file "${filename}" into_array BM_timings_${counter}
+        (( counter++ ))
+    done
 }
 
 function Compare_Two_Benchmarks()
 {
-    readonly results_filename_old="$1"
-    readonly results_filename_new="$2"
-    readonly version_old=$(Extract_version_from_filename "${results_filename_old}")
-    readonly version_new=$(Extract_version_from_filename "${results_filename_new}")
-    # Parse benchmark results
-    declare -A benchmarks_old{,_errors} benchmarks_new{,_errors}
-    Extract_benchmarks_data_from_file "${results_filename_old}" into_array 'benchmarks_old'
-    Extract_benchmarks_data_from_file "${results_filename_new}" into_array 'benchmarks_new'
+    readonly version_old=$(Extract_version_from_filename "$1")
+    readonly version_new=$(Extract_version_from_filename "$2")
     # Print report
+    local old_dismissed_benchmarks new_introduced_benchmarks benchmark
     old_dismissed_benchmarks=()
     new_introduced_benchmarks=()
-    Set_length_longest_label "${!benchmarks_old[@]}" # TODO: Adjust if longest was dismissed
+    Set_length_longest_label "${!BM_timings_1[@]}" # TODO: Adjust if longest was dismissed
     Print_report_header
-    for benchmark in "${!benchmarks_old[@]}"; do
-        if [[ ${benchmarks_new["${benchmark}"]} = '' ]]; then
+    for benchmark in "${!BM_timings_1[@]}"; do
+        if [[ ${BM_timings_2["${benchmark}"]} = '' ]]; then
             old_dismissed_benchmarks+=( "${benchmark}" )
         else
-            Print_report_line "${benchmark}" ${benchmarks_old["${benchmark}"]} ${benchmarks_new["${benchmark}"]}
+            Print_report_line "${benchmark}" ${BM_timings_1["${benchmark}"]} ${BM_timings_2["${benchmark}"]}
         fi
     done
-    for benchmark in "${!benchmarks_new[@]}"; do
-        if [[ ${benchmarks_old["${benchmark}"]} = '' ]]; then
+    for benchmark in "${!BM_timings_2[@]}"; do
+        if [[ ${BM_timings_1["${benchmark}"]} = '' ]]; then
             new_introduced_benchmarks+=( "${benchmark}" )
         fi
     done
@@ -49,27 +82,7 @@ function Compare_Two_Benchmarks()
     Print_list_of_benchmarks "newly introduced ${version_new}" "${new_introduced_benchmarks[@]}"
 }
 
-function Validate_command_line_options()
-{
-    if [[ $# -ne 2 ]]; then
-        printf 'Usage: %s <old_benchmark_results_file> <new_benchmark_results_file>\n' "${BASH_SOURCE}"
-        exit 1
-    fi
-    if [[ ! -f $1 ]]; then
-        printf "File '$1' not found.\n"
-        exit 1
-    elif [[ $(basename "$1") != bm-results-SMASH-*.md ]]; then
-        printf "File '$1' does not seem to be a benchmark result file.\n"
-        exit 1
-    fi
-    if [[ ! -f $2 ]]; then
-        printf "File '$2' not found.\n"
-        exit 1
-    elif [[ $(basename "$2") != bm-results-SMASH-*.md ]]; then
-        printf "File '$1' does not seem to be a benchmark result file.\n"
-        exit 1
-    fi
-}
+#========================== Utility functions ==================================
 
 function Extract_version_from_filename()
 {
@@ -87,7 +100,7 @@ function Extract_benchmarks_data_from_file()
     if [[ $2 != 'into_array' ]]; then
         printf "Function '${FUNCNAME}' wrongly called.\n"
         exit 2
-    elif [[ $3 =~ [^a-zA-Z_] ]]; then
+    elif [[ $3 =~ [^a-zA-Z0-9_] ]]; then
         printf "Function '${FUNCNAME}' must be called with valid array_name as third argument.\n"
         exit 1
     elif ! declare -p $3 &> /dev/null; then
@@ -120,7 +133,8 @@ function Set_length_longest_label()
 
 function Print_report_header()
 {
-    printf "%${width_benchmark_column}s%25s%25s%18s\n" 'BENCHMARK' "${version_old} {s}" "${version_new} {s}" 'Time change'
+    printf "%${width_benchmark_column}s%25s%25s%18s\n"\
+           'BENCHMARK' "${version_old} {s}" "${version_new} {s}" 'Time change'
 }
 
 function Print_report_line()
