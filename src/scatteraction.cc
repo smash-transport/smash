@@ -589,10 +589,9 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
 }
 
 void ScatterAction::elastic_scattering() {
-  // copy initial particles into final state 
+  // copy initial particles into final state
   outgoing_particles_[0] = incoming_particles_[0];
   outgoing_particles_[1] = incoming_particles_[1];
-
   // resample momenta
   sample_angles({outgoing_particles_[0].effective_mass(),
                  outgoing_particles_[1].effective_mass()},

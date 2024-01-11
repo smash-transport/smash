@@ -199,8 +199,6 @@ class ScatterAction : public Action {
     return sum_of_partial_cross_sections_;
   }
 
-
-
  protected:
   /**
    * Get the momentum of the center of mass of the incoming particles
@@ -253,11 +251,8 @@ class ScatterAction : public Action {
    */
   void string_excitation();
 
-  
-
+  /// Perform spin interaction in binary interactions
   void spin_interaction();
-
-
 
   /**
    * \ingroup logging

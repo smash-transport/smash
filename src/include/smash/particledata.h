@@ -575,7 +575,6 @@ std::ostream &operator<<(std::ostream &out,
  * client code to warn the user only once per flag. Hence, this function is
  * turning the flags to \c false after having warned the user.
  */
-// TODO: add return in new branch and open PR
 ParticleData create_valid_smash_particle_matching_provided_quantities(
     PdgCode pdgcode, double mass, const FourVector &four_position,
     const FourVector &four_momentum, int log_area, bool &mass_warning,
