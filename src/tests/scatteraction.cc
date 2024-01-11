@@ -184,21 +184,45 @@ TEST(outgoing_valid) {
   COMPARE(outgoing_particles[0].position(), FourVector(0.2, interaction_point));
 }
 
-TEST(spin_flip) {
-  // create a list of all particles
-  const auto& all_types = ParticleType::list_all();
-  int ntypes = all_types.size();
-  int64_t seed = random::generate_63bit_seed();
-  random::set_seed(seed);
-  for (int i = 0; i < 1000; i++) {
-    // create a random particle
-    ParticleData p{ParticleType::find(
-        all_types[random::uniform_int(0, ntypes - 1)].pdgcode())};
-    const int spin_before_flip = p.spin_projection();
-    p.flip_spin_projection();
-    const int spin_after_flip = p.spin_projection();
-    COMPARE(spin_before_flip, -spin_after_flip);
-  }
+TEST(spin_flip_in_elastic_scatterings) {
+  // put particles in list
+  Particles particles;
+  ParticleData a{ParticleType::find(smash::pdg::p)};  // Proton
+  a.set_4position(pos_a);
+  a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
+  a.set_spin_projection(1);
+  a.set_history(3, 1, ProcessType::None, 1.2, ParticleList{});
+
+  ParticleData b{ParticleType::find(0x1114)};  // Delta-
+  b.set_4position(pos_b);
+  b.set_4momentum(Momentum{1.1, -1.0, 0., 0.});
+  b.set_spin_projection(-3);
+  b.set_history(3, 1, ProcessType::None, 1.2, ParticleList{});
+
+  a = particles.insert(a);
+  b = particles.insert(b);
+
+  // create action
+  constexpr double time = 1.;
+  ScatterAction act(a, b, time);
+
+  // add elastic channel
+  constexpr double sigma = 10.0;
+  act.add_all_scatterings(Test::default_finder_parameters(
+      sigma, NNbarTreatment::NoAnnihilation, Test::all_reactions_included(),
+      false, false, false));
+
+  // generate final state
+  act.generate_final_state();
+
+  // verify that the action is indeed elastic
+  COMPARE(act.get_type(), ProcessType::Elastic);
+
+  // verify that particle's spin projections were flipped
+  ParticleList in = act.incoming_particles();
+  ParticleList out = act.outgoing_particles();
+  VERIFY((in[0].spin_projection() == -out[0].spin_projection() && 
+          in[1].spin_projection() == -out[1].spin_projection()));
 }
 
 TEST(cross_sections_symmetric) {

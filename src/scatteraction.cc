@@ -71,6 +71,7 @@ void ScatterAction::generate_final_state() {
     case ProcessType::Elastic:
       /* 2->2 elastic scattering */
       elastic_scattering();
+      spin_interaction();
       break;
     case ProcessType::TwoToOne:
       /* resonance formation */
@@ -80,6 +81,7 @@ void ScatterAction::generate_final_state() {
       /* 2->2 inelastic scattering */
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
+      spin_interaction();
       break;
     case ProcessType::TwoToThree:
     case ProcessType::TwoToFour:
@@ -588,11 +590,8 @@ void ScatterAction::sample_angles(std::pair<double, double> masses,
 
 void ScatterAction::elastic_scattering() {
   // copy initial particles into final state 
-  // spin flip as a simple interaction
   outgoing_particles_[0] = incoming_particles_[0];
-  outgoing_particles_[0].flip_spin_projection();
   outgoing_particles_[1] = incoming_particles_[1];
-  outgoing_particles_[1].flip_spin_projection();
 
   // resample momenta
   sample_angles({outgoing_particles_[0].effective_mass(),
@@ -744,6 +743,16 @@ void ScatterAction::string_excitation() {
       create_string_final_state();
     }
   }
+}
+
+void ScatterAction::spin_interaction() {
+  /* 2->2 elastic scattering */
+  if (process_type_ == ProcessType::Elastic) {
+   // Spin flip as a first spin interaction. 
+    outgoing_particles_[0].flip_spin_projection() ;
+    outgoing_particles_[1].flip_spin_projection();
+  }
+  /* TODO: 2->2 inelastic scattering needs to be added */
 }
 
 void ScatterAction::format_debug_output(std::ostream &out) const {
