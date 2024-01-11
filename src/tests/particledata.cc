@@ -166,13 +166,38 @@ TEST(parity) {
 
 TEST(spin_projection) {
   for(int i=0; i<1000; i++){
+    // Pi+
     ParticleData p1{ParticleType::find(smash::pdg::pi_p)};
     VERIFY(p1.spin_projection() == 0);
+    // Proton
     ParticleData p2{ParticleType::find(smash::pdg::p)};
     auto s2 = p2.spin_projection();
     VERIFY(s2 == 1 || s2 == -1);
+    // Delta-
     ParticleData p3{ParticleType::find(0x1114)};
     auto s3 = p3.spin_projection();
     VERIFY(s3 == -3 || s3 == -1 || s3 == 1 || s3 == 3);
   }
+}
+
+TEST(spin_flip) {
+  // S=0
+  ParticleData p1{ParticleType::find(smash::pdg::pi_p)};
+  // S=3/2
+  ParticleData p2{ParticleType::find(0x1114)};
+  ParticleData p3{ParticleType::find(0x1114)};
+
+  p2.set_spin_projection(-3);
+  p3.set_spin_projection(1);
+
+  // flip all spin projections
+  p1.flip_spin_projection();
+  p2.flip_spin_projection();
+  p3.flip_spin_projection();
+
+  VERIFY(
+    p1.spin_projection() == 0 && 
+    p2.spin_projection() == 3 &&
+    p3.spin_projection() == -1  
+  );
 }
