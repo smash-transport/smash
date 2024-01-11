@@ -25,7 +25,7 @@ function Compare_Two_Benchmarks()
     readonly version_old=$(Extract_version_from_filename "${results_filename_old}")
     readonly version_new=$(Extract_version_from_filename "${results_filename_new}")
     # Parse benchmark results
-    declare -A benchmarks_old benchmarks_new
+    declare -A benchmarks_old{,_errors} benchmarks_new{,_errors}
     Extract_benchmarks_data_from_file "${results_filename_old}" into_array 'benchmarks_old'
     Extract_benchmarks_data_from_file "${results_filename_new}" into_array 'benchmarks_new'
     # Print report
@@ -80,20 +80,30 @@ function Extract_version_from_filename()
 # Function requires to be invoked with 'into_array' as second argument
 function Extract_benchmarks_data_from_file()
 {
+    local filename array_name errors_array_name
+    filename=$1
+    array_name=$3
+    errors_array_name="${array_name}_errors"
     if [[ $2 != 'into_array' ]]; then
         printf "Function '${FUNCNAME}' wrongly called.\n"
         exit 2
     elif [[ $3 =~ [^a-zA-Z_] ]]; then
         printf "Function '${FUNCNAME}' must be called with valid array_name as third argument.\n"
         exit 1
+    elif ! declare -p $3 &> /dev/null; then
+        printf "Array '$3' must be declared before calling '${FUNCNAME}'.\n"
+        exit 1
+    elif ! declare -p "${3}_errors" &> /dev/null; then
+        printf "Array '${3}_errors' must be declared before calling '${FUNCNAME}'.\n"
+        exit 1
     fi
-    local filename array_name list_of_benchmarks list_of_timings
-    filename=$1
-    array_name=$3
+    local list_of_benchmarks list_of_timings list_of_errors
     readarray -t list_of_benchmarks < <(grep -E '^### [A-Z]' "${filename}" | sed 's/### //')
     readarray -t list_of_timings    < <(grep -E 'seconds time elapsed' "${filename}" | awk '{print $1}')
+    readarray -t list_of_errors     < <(grep -E 'seconds time elapsed' "${filename}" | awk '{print $3}')
     for index in "${!list_of_benchmarks[@]}"; do
         eval ${array_name}["'"${list_of_benchmarks[index]}"'"]=${list_of_timings[index]}
+        eval ${errors_array_name}["'"${list_of_benchmarks[index]}"'"]=${list_of_errors[index]}
     done
 }
 
