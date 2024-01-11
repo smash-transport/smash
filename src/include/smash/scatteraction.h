@@ -253,6 +253,12 @@ class ScatterAction : public Action {
    */
   void string_excitation();
 
+  
+
+  void spin_interaction();
+
+
+
   /**
    * \ingroup logging
    * Writes information about this scatter action to the \p out stream.
