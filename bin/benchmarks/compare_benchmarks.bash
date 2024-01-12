@@ -18,33 +18,66 @@ trap 'printf "\n"' EXIT
 
 function main()
 {
+    Parse_command_line_options "$@"
     printf '\n'
-    Validate_command_line_options "$@"
-    Extract_Benchmarks_Timings_Into_Global_Arrays "$@"
+    Extract_Benchmarks_Timings_Into_Global_Arrays "${BM_benchmarks_files[@]}"
     if [[ $# -eq 2 ]]; then
-        Compare_Two_Benchmarks "$1" "$2"
+        Compare_Two_Benchmarks "${BM_benchmarks_files[@]}"
     fi
-    Make_Benchmark_Plot "$@"
+    Make_Benchmark_Plot "${BM_benchmarks_files[@]}"
 }
 
-function Validate_command_line_options()
+function Parse_command_line_options()
 {
-    if [[ $# -lt 2 ]]; then
-        printf 'Usage: %s file_1 file_2 [further_files]...\n' "${BASH_SOURCE}"
-        exit 1
-    fi
-    local filename
-    for filename in "$@"; do
+    local option filename
+    for option in "$@"; do
+        if [[ ${option} =~ ^-(h|-help)$ ]]; then
+            printf '\nUsage: \e[96m%s [OPTIONS] [--] file_1 file_2 [further_files]...\e[0m\n\nAccepted options:\n' "${BASH_SOURCE}"
+            printf '\e[93m%20s\e[0m  ->  \e[96m%s\e[0m\n'\
+                '-a | --annotate' 'Which bars to annotate as Python bool or list (default: True).'
+            exit 0
+        fi
+    done
+    BM_bars_annotations='True'
+    BM_benchmarks_files=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -a | --annotate )
+                if [[ $2 =~ ^(True|False|\[[0-9]+(,[0-9]+)*\])$ ]]; then
+                    BM_bars_annotations="$2"
+                else
+                    Fail "Error specifying value of '-a' option.\n"
+                fi
+                shift 2
+                ;;
+            -- )
+                shift
+                BM_benchmarks_files+=( "$@" )
+                shift $#
+                ;;
+            [^-]* )
+                BM_benchmarks_files+=( "$1" )
+                shift 1
+                ;;
+            * )
+                Fail "Unrecognized option '$1'."
+                ;;
+        esac
+    done
+    for filename in "${BM_benchmarks_files[@]}"; do
         if [[ ! -f "${filename}" ]]; then
-            printf "File '${filename}' not found.\n"
+            Fail "File '${filename}' not found."
             exit 1
         elif [[ $(basename "${filename}") != bm-results-SMASH-*.md ]]; then
-            printf '%s\n'\
-                   "File '${filename}' does not seem to be a benchmark result file."\
-                   "Benchmark results files must match the 'bm-results-SMASH-*.md' glob."
+            Fail \
+                "File '${filename}' does not seem to be a benchmark result file."\
+                "Benchmark results files must match the 'bm-results-SMASH-*.md' glob."
             exit 1
         fi
     done
+    if [[ "${#BM_benchmarks_files[@]}" -lt 2 ]]; then
+        Fail 'At least two benchmark files must be passed to the script.'
+    fi
 }
 
 function Extract_Benchmarks_Timings_Into_Global_Arrays()
@@ -134,8 +167,7 @@ function Make_Benchmark_Plot()
     x_ticks="${x_ticks//without/w\/o}"      # 'without' -> 'w/o'
     x_ticks="${x_ticks//with/w.}"           # 'with' -> 'w.'
     x_ticks="${x_ticks//Testparticles/TP}"  # 'Testparticles' -> 'TP'
-    echo "$x_ticks"
-    echo "${data_dictionary}"
+    # Make final plot
     python3 - <<EOF
 from multi_bar_histogram_plot import make_multi_bar_histogram_plot
 
@@ -145,7 +177,7 @@ make_multi_bar_histogram_plot(data, total_width=.75, single_width=.95,
                               xticks=${x_ticks},
                               ylabel="Run time {s}",
                               ymargin=0.2,
-                              annotate=True)
+                              annotate=${BM_bars_annotations})
 EOF
 }
 
@@ -224,5 +256,10 @@ function Print_list_of_benchmarks()
     fi
 }
 
+function Fail()
+{
+    printf "\n \e[1;91mERROR:\e[22m $*\e[0m\n" 1>&2
+    exit 1
+}
 
 main "$@"

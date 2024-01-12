@@ -58,10 +58,13 @@ def make_multi_bar_histogram_plot(data, colors=None, total_width=0.8,
         The padding added to the top limit of the y-axis relative to its
         natural range.
 
-    annotate: bool, optional, default: False
-        If this is set to true, an annotation on each bar (except the first in
+    annotate: bool or array-like, optional, default: False
+        If this is set to True, an annotation on each bar (except the first in
         each group) will be placed. This is in percentage the height difference
-        w.r.t. the previous bar in the same group.
+        w.r.t. the previous bar in the same group. If the value is array-like
+        only the bars in the given list will be annotated, e.g. [1,2] will
+        annotate the second and third bar in each group. The value 0 is accepted
+        but it does not produce an annotation as it does not make sense.
     """
 
     # Prepare figure with axis
@@ -93,7 +96,14 @@ def make_multi_bar_histogram_plot(data, colors=None, total_width=0.8,
                          yerr=dy, capsize=3, color=colors[i % len(colors)],
                          error_kw={"elinewidth": error_thickness,
                                    "capthick": error_thickness})
-            if annotate and i > 0:
+            # Understand what to annotate and do so if requested
+            if annotate == True:
+                bars_to_annotate = [i for i, _ in enumerate(data.keys())]
+            elif annotate == False:
+                bars_to_annotate=[]
+            else:
+                bars_to_annotate = annotate
+            if i in bars_to_annotate and i > 0:
                 previous_bar_height = list(data.values())[i-1][x][0]
                 if y != 0:
                     delta = (y-previous_bar_height)/y*100
@@ -120,7 +130,7 @@ def make_multi_bar_histogram_plot(data, colors=None, total_width=0.8,
     if ylabel != "":
         plt.ylabel(ylabel)
 
-    # Adjust the y-axis margin if 
+    # Adjust the y-axis margin if desired
     if ymargin != 0.0:
         ax.margins(y=ymargin)
 
