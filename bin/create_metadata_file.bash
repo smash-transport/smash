@@ -2,7 +2,7 @@
 
 #===================================================
 #
-#    Copyright (c) 2023
+#    Copyright (c) 2023-2024
 #      SMASH Team
 #
 #    GNU General Public License (GPLv3 or later)
@@ -12,8 +12,8 @@
 trap 'printf "\n"' EXIT
 
 #===================================================================
-# This script expects a ".metadata.json" file to be present were run
-# and produces either among the following files in the same place:
+# This script expects a ".metadata.json" file to be present where run
+# and produces any among the following files in the same place:
 #  - CITATION.cff
 #  - .zenodo.json
 #  - AUTHORS.md
@@ -50,12 +50,16 @@ function make_preliminary_checks()
         fail\
             "Program 'jq' not found."\
             'Follow instructions at https://jqlang.github.io/jq/download/ to install it.'
+    elif [[ ! $(jq --version) =~ jq-1\. ]]; then # This script was tested with v1.7 of jq
+        warn "jq version is not 1.x and this script might hence not work as expected."
     fi
     if [[ ${CREATE_CITATION_FILE} = 'TRUE' ]]; then
         if ! hash yq; then
             fail\
                 "Program 'yq' not found."\
                 'Follow instructions at https://github.com/mikefarah/yq#install to install it.'
+        elif [[ ! $(yq --version) =~ v4\. ]]; then # This script was tested with v4.34.1 of yq
+            warn "yq version is not 4.x and this script probably won't work as expected."
         fi
     fi
     if [[ ! -f "${INPUT_FILE}" ]]; then
@@ -100,7 +104,7 @@ function parse_command_line_arguments()
                 CREATE_ZENODO_FILE='TRUE'
                 ;;
             *)
-                fail "Unrecognized option '${$1}'."
+                fail "Unrecognized option '$1'."
                 ;;
         esac
         shift
@@ -308,7 +312,7 @@ function create_citation_file_if_requested()
 
 function print_citation_file_metadata()
 {
-    # This extract the 'Citation metadata' entry from the input JSON file
+    # This extracts the 'Citation metadata' entry from the input JSON file
     # and hands it over to yq to convert it to YAML and then once again to
     # get all values of the keys consistently double quoted.
     jq '."Citation metadata"' "${INPUT_FILE}" | yq -P -oy | yq '.. style="double"'
@@ -345,7 +349,6 @@ function fail()
 function warn()
 {
     printf "\n \e[1;93mWARNING:\e[22m $*\e[0m\n"
-    exit 1
 }
 
 #===================================================================
