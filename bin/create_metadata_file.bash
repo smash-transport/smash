@@ -182,7 +182,21 @@ function print_authors_section()
     esac
     number=$(jq ".\"${label}\" | length" "${INPUT_FILE}")
     for ((index=0; index<number; index++)); do
-        print_${type}_author "$(jq ".\"${label}\"[${index}]" "${INPUT_FILE}")"
+        if [[ "${label}" = 'SMASH team' ]]; then # Alphabetically reverse sort on surnames
+            print_${type}_author \
+                "$(jq "
+                    [
+                        .\"${label}\"[] ] | sort_by(.\"last name\") | reverse | .[${index}
+                    ]"\
+                "${INPUT_FILE}")"
+        else # Sort on years
+            print_${type}_author \
+                "$(jq "
+                    [
+                        .\"${label}\"[] ] | sort_by(.years) | .[${index}
+                    ]"\
+                "${INPUT_FILE}")"
+        fi
     done
 }
 
