@@ -533,7 +533,7 @@ std::ostream &operator<<(std::ostream &out,
  * \param[in] log_area Logging area for the warning
  * \param[inout] mass_warning Whether to warn about mass discrepancies
  * \param[inout] on_shell_warning Whether to warn about off-shell particles
- * \return
+ * \return Valid SMASH particle matching all given input quantities
  *
  * \note The boolean flags are passed by reference, since we want to allow
  * client code to warn the user only once per flag. Hence, this function is
