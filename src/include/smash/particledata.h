@@ -15,7 +15,6 @@
 #include "pdgcode.h"
 #include "processbranch.h"
 
-
 namespace smash {
 
 enum class BelongsTo : uint8_t {
@@ -422,7 +421,7 @@ class ParticleData {
   friend class Particles;
   /// Default constructor.
   ParticleData() = default;
-  
+
   /**
    * Copies some information of the particle to the given particle \p dst.
    *
