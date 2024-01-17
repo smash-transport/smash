@@ -32,9 +32,12 @@ function Parse_command_line_options()
     local option filename
     for option in "$@"; do
         if [[ ${option} =~ ^-(h|-help)$ ]]; then
-            printf '\nUsage: \e[96m%s [OPTIONS] [--] file_1 file_2 [further_files]...\e[0m\n\nAccepted options:\n' "${BASH_SOURCE}"
+            printf '\n Usage: \e[96m%s [OPTIONS] [--] file_1 file_2 [further_files]...\e[0m\n\n Accepted options:\n' "${BASH_SOURCE}"
             printf '\e[93m%20s\e[0m  ->  \e[96m%s\e[0m\n'\
                 '-a | --annotate' 'Which bars to annotate as Python bool or list (default: True).'
+            printf '\e[94m%s\e[0m\n'\
+                   $'\n NOTE: The order of the files matter as each benchmark'\
+                   '       is by default compared w.r.t. the previous one.'
             exit 0
         fi
     done
@@ -92,14 +95,14 @@ function Extract_Benchmarks_Timings_Into_Global_Arrays()
 
 function Compare_Two_Benchmarks()
 {
-    readonly version_old=$(Extract_version_from_filename "$1")
-    readonly version_new=$(Extract_version_from_filename "$2")
+    readonly version_1=$(Extract_version_from_filename "$1")
+    readonly version_2=$(Extract_version_from_filename "$2")
     # Print report
     local old_dismissed_benchmarks new_introduced_benchmarks benchmark
     old_dismissed_benchmarks=()
     new_introduced_benchmarks=()
     Set_length_longest_label "${!BM_timings_1[@]}" # TODO: Adjust if longest was dismissed
-    Print_report_header
+    Print_report_header "${version_1}" "${version_2}"
     for benchmark in "${!BM_timings_1[@]}"; do
         if [[ ${BM_timings_2["${benchmark}"]} = '' ]]; then
             old_dismissed_benchmarks+=( "${benchmark}" )
@@ -112,8 +115,8 @@ function Compare_Two_Benchmarks()
             new_introduced_benchmarks+=( "${benchmark}" )
         fi
     done
-    Print_list_of_benchmarks "dismissed after ${version_old}" "${old_dismissed_benchmarks[@]}"
-    Print_list_of_benchmarks "newly introduced ${version_new}" "${new_introduced_benchmarks[@]}"
+    Print_list_of_benchmarks "dismissed after ${version_1}" "${old_dismissed_benchmarks[@]}"
+    Print_list_of_benchmarks "newly introduced ${version_2}" "${new_introduced_benchmarks[@]}"
 }
 
 # Here we use the python plotting script in the same folder for which data
@@ -130,6 +133,10 @@ function Compare_Two_Benchmarks()
 #       Hence we create a reference to each array in a loop and use it as needed.
 function Make_Benchmark_Plot()
 {
+    if [[ $(pwd) != */bin/benchmarks ]]; then
+        Warn 'Run the script from the "bin/benchmarks" folder to be able to plot the outcome.'
+        return
+    fi
     local data_dictionary x_ticks number_of_arrays list_of_benchmarks index name
     number_of_arrays=$#
     list_of_benchmarks=()
@@ -233,7 +240,7 @@ function Set_length_longest_label()
 function Print_report_header()
 {
     printf "%${width_benchmark_column}s%25s%25s%18s\n"\
-           'BENCHMARK' "${version_old} {s}" "${version_new} {s}" 'Time change'
+           'BENCHMARK' "$1 {s}" "$2 {s}" 'Time change'
 }
 
 function Print_report_line()
@@ -260,6 +267,11 @@ function Fail()
 {
     printf "\n \e[1;91mERROR:\e[22m $*\e[0m\n" 1>&2
     exit 1
+}
+
+function Warn()
+{
+    printf "\n \e[1;93mWARNING:\e[22m $*\e[0m\n"
 }
 
 main "$@"
