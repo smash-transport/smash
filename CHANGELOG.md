@@ -39,6 +39,7 @@ Date:
 * Fix value of particles mass in SMASH IC ASCII output (the pole mass was printed instead of the real mass)
 * SMASH does not crash if `rho_eckart` is not specified in the `Thermodynamics` output
 * SMASH does not crash if the same output format is repeated
+* Fix bug when `Power_Particle_Formation` is explicitly specified
 
 ### Changed
 * Use updated gold radius of 6.55 fm instead of 6.38 fm and a diffusiveness of 0.523 fm instead of 0.535 fm

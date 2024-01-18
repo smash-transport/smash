@@ -953,6 +953,18 @@ Experiment<Modus>::Experiment(Configuration &config,
   logg[LExperiment].info("Using ", parameters_.n_ensembles,
                          " parallel ensembles.");
 
+  /* In collider setup with sqrts >= 200 GeV particles don't form continuously
+   *
+   * NOTE: This key has to be taken before the ScatterActionsFinder is created
+   *       because there the "String_Parameters" is extracted as sub-config and
+   *       all parameters but this one are taken. If this one is still there
+   *       the configuration temporary object will be destroyed not empty, hence
+   *       throwing an exception.
+   */
+  ParticleData::formation_power_ = config.take(
+      {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
+      modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
+
   // create finders
   if (dileptons_switch_) {
     dilepton_finder_ = std::make_unique<DecayActionsFinderDilepton>();
@@ -1093,10 +1105,6 @@ Experiment<Modus>::Experiment(Configuration &config,
         config.extract_sub_configuration({"Collision_Term", "Pauli_Blocking"}),
         parameters_);
   }
-  // In collider setup with sqrts >= 200 GeV particles don't form continuously
-  ParticleData::formation_power_ = config.take(
-      {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
-      modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
 
   /*!\Userguide
    * \page doxypage_output
