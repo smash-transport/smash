@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2021,2023
+ *    Copyright (c) 2012-2021,2023-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_SMASH_PARTICLETYPE_H_
 
 #include <cassert>
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>

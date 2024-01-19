@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022-2023
+ *    Copyright (c) 2014-2020,2022-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_BINARYOUTPUT_H_
 #define SRC_INCLUDE_SMASH_BINARYOUTPUT_H_
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
