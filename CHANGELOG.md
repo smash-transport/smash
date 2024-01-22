@@ -40,6 +40,7 @@ Date:
 * SMASH does not crash if `rho_eckart` is not specified in the `Thermodynamics` output
 * SMASH does not crash if the same output format is repeated
 * Fix bug when `Power_Particle_Formation` is explicitly specified
+* SMASH can now be built with GNU compiler `v13` that requires explicit inclusion of `cstdint` header
 
 ### Changed
 * Use updated gold radius of 6.55 fm instead of 6.38 fm and a diffusiveness of 0.523 fm instead of 0.535 fm

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022-2023
+ *    Copyright (c) 2014-2020,2022-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,6 +12,7 @@
 #include "smash/binaryoutput.h"
 
 #include <array>
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
