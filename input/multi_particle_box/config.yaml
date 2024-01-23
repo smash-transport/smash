@@ -26,7 +26,7 @@ Collision_Term:
     Multi_Particle_Reactions: ["Meson_3to1", "Deuteron_3to2"]
     Force_Decays_At_End:      False
     Strings:                  False
-
+    Total_Cross_Section_Strategy: "BottomUp"
 
 Modi:
     Box:

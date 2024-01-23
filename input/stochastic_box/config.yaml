@@ -22,7 +22,7 @@ Collision_Term:
     Isotropic:              True
     Elastic_Cross_Section:  10.0
     Collision_Criterion: Stochastic
-
+    Total_Cross_Section_Strategy: "BottomUp"
 
 Modi:
     Box:
