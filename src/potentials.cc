@@ -11,6 +11,7 @@
 
 #include "smash/constants.h"
 #include "smash/density.h"
+#include "smash/input_keys.h"
 
 namespace smash {
 
@@ -22,7 +23,9 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
       use_vdf_(conf.has_value({"VDF"})),
       use_momentum_dependence_(conf.has_value({"Momentum_Dependence"})),
       use_potentials_outside_lattice_(
-          conf.take({"Use_Potentials_Outside_Lattice"}, true)) {
+          conf.take({"Use_Potentials_Outside_Lattice"},
+                    InputKeys::potentials_use_potentials_outside_lattice
+                        .default_value())) {
   if (use_skyrme_) {
     skyrme_a_ = conf.take({"Skyrme", "Skyrme_A"});
     skyrme_b_ = conf.take({"Skyrme", "Skyrme_B"});

@@ -4906,7 +4906,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_potentials
    * \optional_key{key_potentials_use_potentials_outside_lattice_,
-   * Use_Potentials_Outside_Lattice, bool, True}
+   * Use_Potentials_Outside_Lattice, bool, true}
    *
    * Wether to include the potentials also for particles that have left the
    * lattice.
@@ -4915,7 +4915,7 @@ struct InputKeys {
    * \see_key{key_potentials_use_potentials_outside_lattice_}
    */
   inline static const Key<bool> potentials_use_potentials_outside_lattice{
-      {"Potentials", "Use_Potentials_Outside_Lattice"}, {"3.1"}};
+      {"Potentials", "Use_Potentials_Outside_Lattice"}, true, {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
