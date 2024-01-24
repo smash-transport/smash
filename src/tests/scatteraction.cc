@@ -18,8 +18,8 @@
 #include "setup.h"
 #include "smash/angles.h"
 #include "smash/random.h"
-#include "smash/scatteractionmulti.h"
 #include "smash/scatteraction.h"
+#include "smash/scatteractionmulti.h"
 
 using namespace smash;
 using smash::Test::Momentum;
@@ -221,7 +221,7 @@ TEST(spin_flip_in_elastic_scatterings) {
   // verify that particle's spin projections were flipped
   ParticleList in = act.incoming_particles();
   ParticleList out = act.outgoing_particles();
-  VERIFY((in[0].spin_projection() == -out[0].spin_projection() && 
+  VERIFY((in[0].spin_projection() == -out[0].spin_projection() &&
           in[1].spin_projection() == -out[1].spin_projection()));
 }
 
