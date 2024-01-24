@@ -958,8 +958,11 @@ Experiment<Modus>::Experiment(Configuration &config,
                   InputKeys::collTerm_totXsStrategy.default_value()) !=
           TotalCrossSectionStrategy::BottomUp) {
     logg[LExperiment].warn(
-        "It is recommended to use the BottomUp strategy for evaluating total "
-        "cross sections in a box, to preserve detailed balance.");
+        "To preserve detailed balance, in a box simulation, it is recommended "
+        "to use the bottom-up strategy for evaluating total cross sections.\n"
+        "Consider adding the following line to the 'Collision_Term' section "
+        "in your configuration file:\n"
+        "   Total_Cross_Section_Strategy: \"BottomUp\"");
   }
 
   /* In collider setup with sqrts >= 200 GeV particles don't form continuously
