@@ -95,7 +95,8 @@ void ParticleData::set_spin_projection(const int s_z) {
     } else {
       throw std::invalid_argument(
           "Invalid spin projection value s_z = " + std::to_string(s_z) +
-          " given for spin s = " + std::to_string(particle_spin) + " s_z % 2 = " + std::to_string(s_z % 2));
+          " given for spin s = " + std::to_string(particle_spin) +
+          " s_z % 2 = " + std::to_string(s_z % 2));
     }
   } else {
     throw std::invalid_argument(
