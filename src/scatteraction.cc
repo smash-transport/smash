@@ -747,8 +747,8 @@ void ScatterAction::string_excitation() {
 void ScatterAction::spin_interaction() {
   /* 2->2 elastic scattering */
   if (process_type_ == ProcessType::Elastic) {
-   // Spin flip as a first spin interaction. 
-    outgoing_particles_[0].flip_spin_projection() ;
+    // Spin flip as a first spin interaction.
+    outgoing_particles_[0].flip_spin_projection();
     outgoing_particles_[1].flip_spin_projection();
   }
   /* TODO: 2->2 inelastic scattering needs to be added */

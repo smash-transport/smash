@@ -67,7 +67,9 @@ class ParticleData {
    * \param[in] unique_id id of particle to be created
    */
   explicit ParticleData(const ParticleType &particle_type, int unique_id = -1)
-      : id_(unique_id), type_(&particle_type), spin_projection_(random_spin_projection()) {}
+      : id_(unique_id),
+        type_(&particle_type),
+        spin_projection_(random_spin_projection()) {}
 
   /**
    * Get the id of the particle
@@ -349,11 +351,11 @@ class ParticleData {
    * in multiples of 1/2. E.g. for a spin-1 particle \f$s_z=[-2, 0, +2]$
    * \param[in] s_z projection of particle's spin in multiples of 1/2
    */
-  void set_spin_projection(const int s_z) { spin_projection_ = s_z; }
+  void set_spin_projection(const int s_z);
   /**
-   * Determines one allowed spin projection randomly from a 
+   * Determines one allowed spin projection randomly from a
    * particle's spin in multiples of 1/2
-   * 
+   *
    * \return Random allowed spin projection in multiples of 1/2
    */
   int random_spin_projection();
@@ -403,7 +405,10 @@ class ParticleData {
    * \param[in] index index of the particle to be constructed
    */
   ParticleData(const ParticleType &ptype, int uid, int index)
-      : id_(uid), index_(index), type_(&ptype), spin_projection_(random_spin_projection()) {}
+      : id_(uid),
+        index_(index),
+        type_(&ptype),
+        spin_projection_(random_spin_projection()) {}
 
   /**
    * Return the cross section scaling factor at a given time.
@@ -487,7 +492,7 @@ class ParticleData {
    * The current spin projection of a particle in multiples of 1/2. For example
    * a spin-1 particle has projections [-1,0,+1], so spin_projection_=[-2,0,+2]
    */
-  int spin_projection_= -42;
+  int spin_projection_ = -42;
   /** Formation time at which the particle is fully formed
    *  given as an absolute value in the computational frame
    */
@@ -560,7 +565,7 @@ std::ostream &operator<<(std::ostream &out,
  *    adjusted to put the particle on its mass shell.
  *
  * This function possibly warns the user, if requested.
- * 
+ *
  * \param[in] pdgcode PdgCode  of the particle which is supposed to be checked
  * \param[in] mass Mass of the new particle
  * \param[in] four_position Position four vector of the new particle
