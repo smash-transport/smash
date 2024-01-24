@@ -953,6 +953,15 @@ Experiment<Modus>::Experiment(Configuration &config,
   logg[LExperiment].info("Using ", parameters_.n_ensembles,
                          " parallel ensembles.");
 
+  if (modus_.is_box() &&
+      config.read({"Collision_Term", "Total_Cross_Section_Strategy"},
+                  InputKeys::collTerm_totXsStrategy.default_value()) !=
+          TotalCrossSectionStrategy::BottomUp) {
+    logg[LExperiment].warn(
+        "It is recommended to use the BottomUp strategy for evaluating total "
+        "cross sections in a box, to preserve detailed balance.");
+  }
+
   /* In collider setup with sqrts >= 200 GeV particles don't form continuously
    *
    * NOTE: This key has to be taken before the ScatterActionsFinder is created

@@ -606,6 +606,11 @@ class Key {
  * code) is that \f$ 10\cdot\mathtt{Delta\_Time} \le \mathtt{Length} \f$,
  * and a smaller time step than the provided one might be needed in case SMASH
  * aborts with an error about this aspect.
+ *
+ * \warning Because the box modus is intended to simulate an equilibrated hadron
+ * gas, features that break detailed balance should not be used, such as
+ * `"Strings"` (see \ref key_CT_strings_ "here") and the `"TopDown"` approach of
+ * evaluating total cross sections (see \ref key_CT_totXsStrategy_ "here").
  */
 
 /*!\Userguide
@@ -2028,22 +2033,25 @@ struct InputKeys {
    *
    * Which strategy to use when evaluating total cross sections for collision
    * finding. Currently, possible options are
-   * - `BottomUp` &rarr;
+   * - `"BottomUp"` &rarr;
    *   Partial cross sections of a given initial state are summed up. This
    *   matches most inclusive experimental cross sections with the 3- and 4-star
    *   hadronic list from PDG2018, but is susceptible to changes once new
    *   resonances are added in the \ref doxypage_input_particles "particles"
    *   file.
-   * - `TopDown` &rarr;
+   * - `"TopDown"` &rarr;
    *   The total cross section of measured processes is parametrized, and the
    *   partial cross sections are rescaled to match it. Unmeasured processes use
    *   the high energy parametrization even in low energies, ignoring possible
    *   resonance peaks, and scaled with AQM. This is then insensitive to changes
    *   in the input hadronic list.
-   * - `TopDownMeasured` &rarr;
+   * - `"TopDownMeasured"` &rarr;
    *   Mixes the options above, with parametrizations only for \f$NN, N\bar{N},
    *   NK, N\pi,\f$ and \f$\pi\pi\f$. Remaining processes use sum of partial
    *   cross sections.
+   *
+   * \note In a box calculation, using the `"BottomUp"` strategy is recommended
+   * to preserve detailed balance.
    */
   /**
    * \see_key{key_CT_totXsStrategy_}
@@ -2065,19 +2073,19 @@ struct InputKeys {
    * the total cross section and the sum of cross sections from all processes
    * as a proxy for how large it is. Candidates are resonances that decay
    * into the incoming pair. Possible options for this key are
-   * - `None` &rarr;
+   * - `"None"` &rarr;
    *   No pseudo-resonance is created.
-   * - `Largest` &rarr;
+   * - `"Largest"` &rarr;
    *   Use the resonance with largest mass.
-   * - `Closest` &rarr;
+   * - `"Closest"` &rarr;
    *   Select the resonance that has the closest pole mass to the available
-   * energy (\f$\sqrt{s} of the incoming pair\f$).
-   * - `LargestFromUnstable` &rarr;
-   *   Same as `Largest` but a pseudo-resonance is used only for processes that
-   * have at least one incoming unstable particle.
-   * - `ClosestFromUnstable` &rarr;
-   *   Same as `Closest` but a pseudo-resonance is used only for processes that
-   * have at least one incoming unstable particle.
+   * energy (\f$\sqrt{s}\f$ of the incoming pair).
+   * - `"LargestFromUnstable"` &rarr;
+   *   Same as `"Largest"` but a pseudo-resonance is used only for processes
+   * that have at least one incoming unstable particle.
+   * - `"ClosestFromUnstable"` &rarr;
+   *   Same as `"Closest"` but a pseudo-resonance is used only for processes
+   * that have at least one incoming unstable particle.
    */
   /**
    * \see_key{key_CT_pseudoresonance_}
@@ -2174,6 +2182,10 @@ struct InputKeys {
    *
    * Detailed balance is preserved by these reaction switches: if a forward
    * reaction is off then the reverse is automatically off too.
+   *
+   * \warning If `"Elastic"` is the only process allowed, the
+   * `"Total_Cross_Section_Strategy"` must be set as `"BottomUp"`, otherwise
+   * SMASH fails. \see_key{key_CT_totXsStrategy_}
    */
   /**
    * \see_key{key_CT_included_2to2_}
@@ -6068,8 +6080,9 @@ General:
  * the provided default _particles.txt_ and _decaymodes.txt_ files by removing
  * 3-body and higher order decays from the decay modes file and all
  * corresponding particles that can no longer be produced from the particles
- * file. In addtion, strings need to be turned off, since they also break
- * detailed balance due to lacking backreactions.\n\n
+ * file. In addition, strings need to be turned off, since they also break
+ * detailed balance due to lacking backreactions, and the total cross section
+ * should be computed by summing the partial processes.\n\n
  * SMASH is shipped with example files (_config.yaml_, _particles.txt_ and
  * _decaymodes.txt_) meeting the above mentioned requirements to set up an
  * infinite matter simulation. These files are located in the _**input/box**_
