@@ -16,6 +16,32 @@
 
 namespace smash {
 
+/// PDG data on K- n total cross section: momentum in lab frame.
+const std::initializer_list<double> KMINUSN_TOT_PLAB = {
+    0.627,   0.728333, 0.846,   0.924,   1.01033, 1.09367, 1.259,   1.48,
+    1.72,    2.05333,  2.46667, 2.81667, 3.31667, 4.32667, 5.54333, 6.88333,
+    8.21667, 9.33333,  10.6667, 11.7667, 13.1,    14.1,    15.,     16.3333,
+    18.,     19.3333,  21.6667, 23.3333, 26.6667, 28.3333, 31.6667, 33.3333,
+    35.,     36.6667,  38.3333, 41.6667, 43.3333, 46.6667, 48.3333, 50.,
+    50.,     51.6667,  53.3333, 60.,     75.,     90.,     106.667, 123.333,
+    140.,    156.667,  173.333, 190.,    213.333, 240.,    276.667, 280.,
+    310.};
+
+/// An interpolation that gets lazily filled using the KMINUSN_TOT data.
+static std::unique_ptr<InterpolateDataLinear<double>>
+    kminusn_total_interpolation = nullptr;
+
+/// PDG data on K- n total cross section: cross section.
+const std::initializer_list<double> KMINUSN_TOT_SIG = {
+    26.2,    29.1333, 30.8,    33.9667, 36.1667, 35.5667, 30.8,    26.7,
+    24.4667, 23.2,    22.5667, 22.2667, 21.5667, 21.4,    21.4667, 21.2,
+    20.9333, 20.4667, 20.6333, 20.5667, 20.4,    20.3033, 20.1033, 20.17,
+    19.9,    19.75,   19.55,   19.6667, 19.5267, 19.66,   19.81,   19.8233,
+    19.7367, 19.57,   19.5333, 19.4067, 19.6733, 19.8033, 19.7867, 19.6867,
+    19.7233, 19.7633, 19.93,   19.92,   20.0267, 19.88,   19.99,   20.08,
+    20.0967, 20.1267, 20.26,   20.3567, 20.4567, 20.5833, 20.84,   20.9,
+    21.07};
+
 /// PDG data on K- p elastic cross section: momentum in lab frame.
 const std::initializer_list<double> KMINUSP_ELASTIC_P_LAB = {
     0.03000,   0.05000,   0.06287,   0.07000,  0.07044,  0.07300,  0.08730,
@@ -106,7 +132,7 @@ const std::initializer_list<double> KMINUSP_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     kminusp_elastic_interpolation = nullptr;
 
-/// PDG data on K- p total cross section: momentum in lab frame.
+/// PDG smoothed data on K- p total cross section: momentum in lab frame.
 const std::initializer_list<double> KMINUSP_TOT_PLAB = {
     0.245,   0.255,   0.265,   0.275,   0.285,   0.293,   0.293,   0.295,
     0.300,   0.305,   0.315,   0.325,   0.335,   0.345,   0.350,   0.350,
@@ -165,7 +191,7 @@ const std::initializer_list<double> KMINUSP_TOT_PLAB = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     kminusp_total_interpolation = nullptr;
 
-/// PDG data on K- p total cross section: cross section.
+/// PDG smoothed data on K- p total cross section: cross section.
 const std::initializer_list<double> KMINUSP_TOT_SIG = {
     113.80, 98.00, 94.00, 96.70, 75.10, 89.30, 90.70, 82.50, 79.40, 78.60,
     70.90,  76.00, 71.50, 71.30, 70.20, 69.30, 68.80, 69.32, 70.00, 81.80,

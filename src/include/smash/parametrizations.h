@@ -396,6 +396,17 @@ double kplusp_total(double mandelstam_s);
 double kplusn_total(double mandelstam_s);
 
 /**
+ * K- n total cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.8
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
+ *
+ * \note See \ref KN_note "this note" about return value.
+ */
+double kminusn_total(double mandelstam_s);
+
+/**
  * K- p total cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.8
  *

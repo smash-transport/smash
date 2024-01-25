@@ -511,12 +511,25 @@ double kminusp_total(double mandelstam_s) {
   if (kminusp_total_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
         dedup_avg<double>(KMINUSP_TOT_PLAB, KMINUSP_TOT_SIG);
-    dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
+    // Parametrization data is pre-smoothed
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 5);
     kminusp_total_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
   return (*kminusp_total_interpolation)(p_lab);
+}
+
+double kminusn_total(double mandelstam_s) {
+  if (kminusn_total_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(KMINUSN_TOT_PLAB, KMINUSN_TOT_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.05, 5);
+    kminusn_total_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
+  return (*kminusn_total_interpolation)(p_lab);
 }
 
 double kplusp_elastic_background(double mandelstam_s) {
