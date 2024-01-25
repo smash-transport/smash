@@ -4909,7 +4909,8 @@ struct InputKeys {
    * Use_Potentials_Outside_Lattice, bool, true}
    *
    * Wether to include the potentials also for particles that have left the
-   * lattice.
+   * lattice. If set to false, the particles will propagate on straight lines
+   * once they leave the volume that is covered by the lattice.
    */
   /**
    * \see_key{key_potentials_use_potentials_outside_lattice_}
