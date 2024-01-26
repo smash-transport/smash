@@ -4916,6 +4916,21 @@ struct InputKeys {
       {"Lattice", "Sizes"}, {"0.80"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_potentials
+   * \optional_key{key_potentials_use_potentials_outside_lattice_,
+   * Use_Potentials_Outside_Lattice, bool, true}
+   *
+   * Wether to include the potentials also for particles that have left the
+   * lattice. If set to false, the particles will propagate on straight lines
+   * once they leave the volume that is covered by the lattice.
+   */
+  /**
+   * \see_key{key_potentials_use_potentials_outside_lattice_}
+   */
+  inline static const Key<bool> potentials_use_potentials_outside_lattice{
+      {"Potentials", "Use_Potentials_Outside_Lattice"}, true, {"3.1"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
    * \required_key{key_potentials_skyrme_a_,Skyrme_A,double}
    *
@@ -5467,6 +5482,7 @@ struct InputKeys {
       std::cref(lattice_periodic),
       std::cref(lattice_potentialsAffectThreshold),
       std::cref(lattice_sizes),
+      std::cref(potentials_use_potentials_outside_lattice),
       std::cref(potentials_skyrme_skyrmeA),
       std::cref(potentials_skyrme_skyrmeB),
       std::cref(potentials_skyrme_skyrmeTau),
