@@ -1478,6 +1478,9 @@ MATHJAX_FORMAT         = HTML-CSS
 # MathJax from http://www.mathjax.org before deployment.
 # The default value is: http://cdn.mathjax.org/mathjax/latest.
 # This tag requires that the tag USE_MATHJAX is set to YES.
+#
+# NOTE: We do not use the default as CDN has been shut down in 2017, see
+#       https://www.mathjax.org/cdn-shutting-down/ for more information.
 
 MATHJAX_RELPATH        = https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/
 
