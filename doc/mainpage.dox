@@ -2,7 +2,8 @@
 \mainpage SMASH Development Documentation
 
 This development documentation details all classes and functions used in SMASH.
-For a quick overview on how to get started, see the <a href=../user/index.html> user guide </a>.
+For a quick overview on how to get started, see the
+<a href=../../userguide/current/index.html> user guide </a>.
 
 \par Important entry points
 - [Contributing](CONTRIBUTING.md)
