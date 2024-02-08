@@ -254,6 +254,7 @@ inline ExperimentParameters default_parameters(
       false,        // in thermodynamics outputs spectators are included
       false,        // do weak decays
       true,         // decay initial particles
+      false,        // no spin interactions
       std::nullopt  // use monash tune, not known
   };
 }
