@@ -67,9 +67,7 @@ class ParticleData {
    * \param[in] unique_id id of particle to be created
    */
   explicit ParticleData(const ParticleType &particle_type, int unique_id = -1)
-      : id_(unique_id),
-        type_(&particle_type),
-        spin_projection_(random_spin_projection()) {}
+      : id_(unique_id), type_(&particle_type) {}
 
   /**
    * Get the id of the particle
@@ -405,10 +403,7 @@ class ParticleData {
    * \param[in] index index of the particle to be constructed
    */
   ParticleData(const ParticleType &ptype, int uid, int index)
-      : id_(uid),
-        index_(index),
-        type_(&ptype),
-        spin_projection_(random_spin_projection()) {}
+      : id_(uid), index_(index), type_(&ptype) {}
 
   /**
    * Return the cross section scaling factor at a given time.
@@ -490,7 +485,9 @@ class ParticleData {
   FourVector position_;
   /**
    * The current spin projection of a particle in multiples of 1/2. For example
-   * a spin-1 particle has projections [-1,0,+1], so spin_projection_=[-2,0,+2]
+   * a spin-1 particle has projections [-1,0,+1], so spin_projection_=[-2,0,+2].
+   * As default we choose the clearly unphysical value -42. This helps debugging
+   * in case of a failed assignment.
    */
   int spin_projection_ = -42;
   /** Formation time at which the particle is fully formed
