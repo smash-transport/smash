@@ -578,7 +578,7 @@ void ScatterActionsFinder::dump_reactions() const {
             A.set_4momentum(A.pole_mass(), mom, 0.0, 0.0);
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = std::make_unique<ScatterAction>(
-                A, B, time, isotropic_, string_formation_time_, -1, false, 
+                A, B, time, isotropic_, string_formation_time_, -1, false,
                 finder_parameters_.spin_interactions);
             if (finder_parameters_.strings_switch) {
               act->set_string_interface(string_process_interface_.get());
@@ -963,7 +963,7 @@ void ScatterActionsFinder::dump_cross_sections(
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
     const ParticleList incoming = {a_data, b_data};
     ScatterActionPtr act = std::make_unique<ScatterAction>(
-        a_data, b_data, 0., isotropic_, string_formation_time_, -1, false, 
+        a_data, b_data, 0., isotropic_, string_formation_time_, -1, false,
         finder_parameters_.spin_interactions);
     if (finder_parameters_.strings_switch) {
       act->set_string_interface(string_process_interface_.get());

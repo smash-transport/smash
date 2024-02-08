@@ -324,7 +324,7 @@ class ScatterAction : public Action {
   std::optional<double> parametrized_total_cross_section_ = std::nullopt;
 
   /// Whether spin interactions are switched on
-  bool is_spin_interaction_on_ = false
+  bool is_spin_interaction_on_ = false;
 
   /// Lock for calling add_all_scatterings only once
   bool were_processes_added_ = false;
