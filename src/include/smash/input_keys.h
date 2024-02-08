@@ -2342,6 +2342,19 @@ struct InputKeys {
       {"Collision_Term", "Resonance_Lifetime_Modifier"}, 1.0, {"1.8"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_ct_spin
+   * \optional_key{key_CT_spin_interactions_,Spin_Interactions,bool,false}
+   *
+   * Whether or not to enable spin interactions in binary collisions.
+   * \note So far we only include a spin flip in elastic scatterings.
+   */
+  /**
+   * \see_key{key_CT_spin_interactions_}
+   */
+  inline static const Key<bool> collTerm_spinInteractions{
+      {"Collision_Term", "Spin_Interactions"}, false, {"3.2"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_strings_,Strings,bool,
    * (\ref key_gen_modus_ "Modus"!="Box")}
@@ -5284,6 +5297,7 @@ struct InputKeys {
       std::cref(collTerm_noCollisions),
       std::cref(collTerm_onlyWarnForHighProbability),
       std::cref(collTerm_resonanceLifetimeModifier),
+      std::cref(collTerm_spinInteractions),
       std::cref(collTerm_strings),
       std::cref(collTerm_stringsWithProbability),
       std::cref(collTerm_twoToOne),

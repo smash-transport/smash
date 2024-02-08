@@ -123,6 +123,8 @@ struct ScatterActionsFinderParameters {
   const TotalCrossSectionStrategy total_xs_strategy;
   /// Which pseudo-resonance to choose.
   const PseudoResonance pseudoresonance_method;
+  /// Switch to control whether to include spin interactions
+  const bool spin_interactions;
 };
 
 }  // namespace smash

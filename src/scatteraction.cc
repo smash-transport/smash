@@ -28,12 +28,14 @@ static constexpr int LScatterAction = LogArea::ScatterAction::id;
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b, double time,
                              bool isotropic, double string_formation_time,
-                             double box_length, bool is_total_parametrized)
+                             double box_length, bool is_total_parametrized,
+                             bool spin_interactions)
     : Action({in_part_a, in_part_b}, time),
       sum_of_partial_cross_sections_(0.),
       isotropic_(isotropic),
       string_formation_time_(string_formation_time),
-      is_total_parametrized_(is_total_parametrized) {
+      is_total_parametrized_(is_total_parametrized),
+      is_spin_interaction_on_(spin_interactions) {
   box_length_ = box_length;
   if (is_total_parametrized_) {
     parametrized_total_cross_section_ = NAN;
@@ -745,13 +747,15 @@ void ScatterAction::string_excitation() {
 }
 
 void ScatterAction::spin_interaction() {
-  /* 2->2 elastic scattering */
-  if (process_type_ == ProcessType::Elastic) {
-    // Spin flip as a first spin interaction.
-    outgoing_particles_[0].flip_spin_projection();
-    outgoing_particles_[1].flip_spin_projection();
+  if (is_spin_interaction_on_) {
+    /* 2->2 elastic scattering */
+    if (process_type_ == ProcessType::Elastic) {
+      // Spin flip as a first spin interaction.
+      outgoing_particles_[0].flip_spin_projection();
+      outgoing_particles_[1].flip_spin_projection();
+    }
+    /* TODO: 2->2 inelastic scattering needs to be added */
   }
-  /* TODO: 2->2 inelastic scattering needs to be added */
 }
 
 void ScatterAction::format_debug_output(std::ostream &out) const {
