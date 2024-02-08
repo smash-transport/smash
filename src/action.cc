@@ -342,7 +342,7 @@ void Action::sample_manybody_phasespace_impl(
     logg[LAction].error()
         << "An interaction requiring " << sqrts
         << "GeV was attempted below the minimum energy threshold" << msum_all
-        << " GeV, but was ignored. This is a known internal error which does "
+        << " GeV, but was ignored.\nThis is a known internal error which does "
            "not significantly affect physical results, and will be fixed in a "
            "near-future release.";
     throw StochasticBelowEnergyThreshold("Ignoring this action.");

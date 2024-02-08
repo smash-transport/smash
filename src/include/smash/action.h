@@ -333,9 +333,9 @@ class Action {
 
   /**
    * \ingroup exception
-   * Thrown for a temporary bugfix for when multiparticle interactions do not
-   * have the necessary energy to create the final state. This is used in a
-   * try/catch block, and will be removed in future releases.
+   * Exception for a temporary bugfix for when multiparticle interactions do
+   * not have the necessary energy to create the final state. This is used in
+   * a try/catch block, and will be removed in future releases.
    */
   class StochasticBelowEnergyThreshold : public std::runtime_error {
     using std::runtime_error::runtime_error;
