@@ -114,6 +114,10 @@ int ParticleData::random_spin_projection() {
   }
 }
 
+void ParticleData::set_random_spin_projection() {
+  set_spin_projection(random_spin_projection());
+}
+
 double ParticleData::xsec_scaling_factor(double delta_time) const {
   double time_of_interest = position_.x0() + delta_time;
   // cross section scaling factor at the time_of_interest

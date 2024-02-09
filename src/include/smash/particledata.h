@@ -358,6 +358,11 @@ class ParticleData {
    */
   int random_spin_projection();
   /**
+   * Set the spin projection s_z of a particle to an allowed but random value in
+   * multiples of 1/2
+   */
+  void set_random_spin_projection();
+  /**
    * Flip the spin projection s_z of a particle to -s_z.
    */
   void flip_spin_projection() { spin_projection_ = -spin_projection_; }

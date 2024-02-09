@@ -241,18 +241,22 @@ TEST(spin_projection) {
   for (int i = 0; i < 1000; i++) {
     // Pi+ (spin 0)
     ParticleData p1{ParticleType::find(smash::pdg::pi_p)};
+    p1.set_random_spin_projection();
     VERIFY(p1.spin_projection() == 0);
     // Proton (spin 1/2)
     ParticleData p2{ParticleType::find(smash::pdg::p)};
-    auto s2 = p2.spin_projection();
+    p2.set_random_spin_projection();
+    int s2 = p2.spin_projection();
     VERIFY(s2 == 1 || s2 == -1);
     // Rho (spin 1)
     ParticleData p3{ParticleType::find(0x113)};
-    auto s3 = p3.spin_projection();
+    p3.set_random_spin_projection();
+    int s3 = p3.spin_projection();
     VERIFY(s3 == -2 || s3 == -0 || s3 == 2);
     // Delta- (spin 3/2)
     ParticleData p4{ParticleType::find(0x1114)};
-    auto s4 = p4.spin_projection();
+    p4.set_random_spin_projection();
+    int s4 = p4.spin_projection();
     VERIFY(s4 == -3 || s4 == -1 || s4 == 1 || s4 == 3);
   }
 }
@@ -260,6 +264,7 @@ TEST(spin_projection) {
 TEST(spin_flip) {
   // S=0
   ParticleData p1{ParticleType::find(smash::pdg::pi_p)};
+  p1.set_random_spin_projection();
   // S=3/2
   ParticleData p2{ParticleType::find(0x1114)};
   ParticleData p3{ParticleType::find(0x1114)};
