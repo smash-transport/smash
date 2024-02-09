@@ -202,15 +202,15 @@ TEST(spin_flip_in_elastic_scatterings) {
   a = particles.insert(a);
   b = particles.insert(b);
 
-  // create action
+  // create action and switch spin interactions on
   constexpr double time = 1.;
-  ScatterAction act(a, b, time);
+  ScatterAction act(a, b, time, false, 1.0, -1.0, false, true);
 
   // add elastic channel
   constexpr double sigma = 10.0;
   act.add_all_scatterings(Test::default_finder_parameters(
       sigma, NNbarTreatment::NoAnnihilation, Test::all_reactions_included(),
-      false, false, false));
+      false, false, false, TotalCrossSectionStrategy::BottomUp, true));
 
   // generate final state
   act.generate_final_state();
