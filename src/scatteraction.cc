@@ -750,11 +750,10 @@ void ScatterAction::spin_interaction() {
   if (is_spin_interaction_on_) {
     /* 2->2 elastic scattering */
     if (process_type_ == ProcessType::Elastic) {
-      // Spin flip as a first spin interaction.
+      // Spin flip as a first spin interaction
       outgoing_particles_[0].flip_spin_projection();
       outgoing_particles_[1].flip_spin_projection();
     }
-    /* TODO: 2->2 inelastic scattering needs to be added */
   }
 }
 
