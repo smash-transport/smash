@@ -31,3 +31,4 @@ Collision_Term:
     NNbar_Treatment: "resonances"
     Elastic_NN_Cutoff_Sqrts: 1.8
     Total_Cross_Section_Strategy: "BottomUp"
+    Pseudoresonance: "None"
