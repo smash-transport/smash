@@ -343,7 +343,7 @@ class ParticleData {
    * of 1/2. E.g. for a spin-1 particle \f$s_z=[-2, 0, +2]\f$
    * \return current spin projection of a particle's spin in multiples of 1/2
    */
-  int spin_projection() { return spin_projection_; }
+  int spin_projection() const { return spin_projection_; }
   /**
    * Set the current spin projection s_z of a particle with given spin s
    * in multiples of 1/2. E.g. for a spin-1 particle \f$s_z=[-2, 0, +2]\f$
@@ -356,7 +356,7 @@ class ParticleData {
    *
    * \return Random allowed spin projection in multiples of 1/2
    */
-  int random_spin_projection();
+  int random_spin_projection() const;
   /**
    * Set the spin projection s_z of a particle to an allowed but random value in
    * multiples of 1/2

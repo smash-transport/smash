@@ -100,12 +100,12 @@ void ParticleData::set_spin_projection(const int s_z) {
     }
   } else {
     throw std::invalid_argument(
-        "The absolute of the spin projection cannot be greater than the spin "
-        "of a particle! ");
+        "The absolute value of the spin projection cannot be greater than the "
+        "spin of a particle! ");
   }
 }
 
-int ParticleData::random_spin_projection() {
+int ParticleData::random_spin_projection() const {
   const int particle_spin = spin();
   if (particle_spin == 0) {
     return 0;
