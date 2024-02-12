@@ -72,12 +72,14 @@
             \subpage doxypage_input_conf_ct_string_parameters
             \subpage doxypage_input_conf_ct_dileptons
             \subpage doxypage_input_conf_ct_photons
+            \subpage doxypage_input_conf_ct_spin
             </div>
             \page doxypage_input_conf_ct_pauliblocker Pauli blocking
             \page doxypage_input_conf_ct_string_transition String transition
             \page doxypage_input_conf_ct_string_parameters String parameters
             \page doxypage_input_conf_ct_dileptons Dileptons
             \page doxypage_input_conf_ct_photons Photons
+            \page doxypage_input_conf_ct_spin Spin interactions
         \page doxypage_input_conf_modi Modi
             <div class="invisible-content">
             \subpage doxypage_input_conf_modi_collider

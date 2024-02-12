@@ -343,6 +343,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
                   false),
       config.take({"Collision_Term", "Decay_Initial_Particles"},
                   InputKeys::collTerm_decayInitial.default_value()),
+      config.take({"Collision_Term", "Spin_Interactions"}, false),
       std::nullopt};
 }
 

@@ -18,6 +18,7 @@
 #include "smash/iomanipulators.h"
 #include "smash/logging.h"
 #include "smash/numerics.h"
+#include "smash/random.h"
 
 namespace smash {
 
@@ -81,6 +82,40 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
       history_.p2 = 0x0;
       break;
   }
+}
+
+void ParticleData::set_spin_projection(const int s_z) {
+  const int particle_spin = spin();
+  if (-particle_spin <= s_z && s_z <= particle_spin) {
+    // Spin and spin projection must both either be even or odd
+    // as a consequence of spin being saved in multiples of 1/2
+    if ((particle_spin % 2 == 0 && s_z % 2 == 0) ||
+        (particle_spin % 2 == 1 && std::abs(s_z % 2) == 1)) {
+      spin_projection_ = s_z;
+    } else {
+      throw std::invalid_argument(
+          "Invalid spin projection value s_z = " + std::to_string(s_z) +
+          " given for spin s = " + std::to_string(particle_spin) +
+          " s_z % 2 = " + std::to_string(s_z % 2));
+    }
+  } else {
+    throw std::invalid_argument(
+        "The absolute value of the spin projection cannot be greater than the "
+        "spin of a particle! ");
+  }
+}
+
+int ParticleData::random_spin_projection() const {
+  const int particle_spin = spin();
+  if (particle_spin == 0) {
+    return 0;
+  } else {
+    return 2 * smash::random::uniform_int(0, particle_spin) - particle_spin;
+  }
+}
+
+void ParticleData::set_random_spin_projection() {
+  set_spin_projection(random_spin_projection());
 }
 
 double ParticleData::xsec_scaling_factor(double delta_time) const {

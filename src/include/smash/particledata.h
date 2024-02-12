@@ -332,6 +332,40 @@ class ParticleData {
   void boost_momentum(const ThreeVector &v) {
     set_4momentum(momentum_.lorentz_boost(v));
   }
+  /**
+   * Get the (maximum positive) spin s of a particle in multiples of 1/2.
+   * E.g. for a spin-1 particle s=2.
+   * \return particle's spin in multiples of 1/2
+   */
+  int spin() const { return pdgcode().spin(); }
+  /**
+   * Get the current spin projection s_z of a particle's spin in multiples
+   * of 1/2. E.g. for a spin-1 particle \f$s_z=[-2, 0, +2]\f$
+   * \return current spin projection of a particle's spin in multiples of 1/2
+   */
+  int spin_projection() const { return spin_projection_; }
+  /**
+   * Set the current spin projection s_z of a particle with given spin s
+   * in multiples of 1/2. E.g. for a spin-1 particle \f$s_z=[-2, 0, +2]\f$
+   * \param[in] s_z projection of particle's spin in multiples of 1/2
+   */
+  void set_spin_projection(const int s_z);
+  /**
+   * Determines one allowed spin projection randomly from a
+   * particle's spin in multiples of 1/2
+   *
+   * \return Random allowed spin projection in multiples of 1/2
+   */
+  int random_spin_projection() const;
+  /**
+   * Set the spin projection s_z of a particle to an allowed but random value in
+   * multiples of 1/2
+   */
+  void set_random_spin_projection();
+  /**
+   * Flip the spin projection s_z of a particle to -s_z.
+   */
+  void flip_spin_projection() { spin_projection_ = -spin_projection_; }
 
   /// Setter for belongs_to label
   void set_belongs_to(BelongsTo label) { belongs_to_ = label; }
@@ -403,6 +437,7 @@ class ParticleData {
     dst.history_ = history_;
     dst.momentum_ = momentum_;
     dst.position_ = position_;
+    dst.spin_projection_ = spin_projection_;
     dst.formation_time_ = formation_time_;
     dst.initial_xsec_scaling_factor_ = initial_xsec_scaling_factor_;
     dst.begin_formation_time_ = begin_formation_time_;
@@ -453,6 +488,13 @@ class ParticleData {
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
+  /**
+   * The current spin projection of a particle in multiples of 1/2. For example
+   * a spin-1 particle has projections [-1,0,+1], so spin_projection_=[-2,0,+2].
+   * As default we choose the clearly unphysical value -42. This helps debugging
+   * in case of a failed assignment.
+   */
+  int spin_projection_ = -42;
   /** Formation time at which the particle is fully formed
    *  given as an absolute value in the computational frame
    */
