@@ -2107,7 +2107,11 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
                             " (discarded: invalid)");
     return false;
   }
-  action.generate_final_state();
+  try {
+    action.generate_final_state();
+  } catch (Action::StochasticBelowEnergyThreshold &) {
+    return false;
+  }
   logg[LExperiment].debug("Process Type is: ", action.get_type());
   if (include_pauli_blocking && pauli_blocker_ &&
       action.is_pauli_blocked(ensembles_, *pauli_blocker_)) {
