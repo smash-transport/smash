@@ -340,13 +340,13 @@ class ParticleData {
   int spin() const { return pdgcode().spin(); }
   /**
    * Get the current spin projection s_z of a particle's spin in multiples
-   * of 1/2. E.g. for a spin-1 particle \f$s_z=[-2, 0, +2]$
+   * of 1/2. E.g. for a spin-1 particle \f$s_z=[-2, 0, +2]\f$
    * \return current spin projection of a particle's spin in multiples of 1/2
    */
   int spin_projection() { return spin_projection_; }
   /**
    * Set the current spin projection s_z of a particle with given spin s
-   * in multiples of 1/2. E.g. for a spin-1 particle \f$s_z=[-2, 0, +2]$
+   * in multiples of 1/2. E.g. for a spin-1 particle \f$s_z=[-2, 0, +2]\f$
    * \param[in] s_z projection of particle's spin in multiples of 1/2
    */
   void set_spin_projection(const int s_z);
