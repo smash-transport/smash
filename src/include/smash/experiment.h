@@ -958,11 +958,22 @@ Experiment<Modus>::Experiment(Configuration &config,
                   InputKeys::collTerm_totXsStrategy.default_value()) !=
           TotalCrossSectionStrategy::BottomUp) {
     logg[LExperiment].warn(
-        "To preserve detailed balance, in a box simulation, it is recommended "
+        "To preserve detailed balance in a box simulation, it is recommended "
         "to use the bottom-up strategy for evaluating total cross sections.\n"
         "Consider adding the following line to the 'Collision_Term' section "
         "in your configuration file:\n"
         "   Total_Cross_Section_Strategy: \"BottomUp\"");
+  }
+  if (modus_.is_box() &&
+      config.read({"Collision_Term", "Pseudoresonance"},
+                  InputKeys::collTerm_pseudoresonance.default_value()) !=
+          PseudoResonance::None) {
+    logg[LExperiment].warn(
+        "To preserve detailed balance in a box simulation, it is recommended "
+        "to not include the pseudoresonances,\nas they artificially increase "
+        "the resonance production without changing the corresponding "
+        "decay.\nConsider adding the following line to the 'Collision_Term' "
+        "section in your configuration file:\n   Pseudoresonance: \"None\"");
   }
 
   /* In collider setup with sqrts >= 200 GeV particles don't form continuously
