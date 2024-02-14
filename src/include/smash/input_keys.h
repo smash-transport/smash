@@ -2134,6 +2134,12 @@ struct InputKeys {
    * \f$\Sigma\f$, \f$\pi\f$ or \f$\eta\f$. Note that for isospin violating
    * decay modes all possible isospin combination have to be manually specified
    * in the *decaymodes.txt* file.
+   *
+   * \warning If `true`, this option removes the particles that decay from the
+   * evolution, so the Dileptons output will not contain final state decays.
+   * Therefore we do not recommend its usage for dilepton studies. Because the
+   * key name is somewhat misleading, it is for now deprecated and will be
+   * renamed in the next release.
    */
   /**
    * \see_key{key_CT_include_decays_end_}
@@ -2141,7 +2147,7 @@ struct InputKeys {
   inline static const Key<bool> collTerm_includeDecaysAtTheEnd{
       {"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
       false,
-      {"2.2"}};
+      {"2.2", "3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term

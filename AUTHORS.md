@@ -4,12 +4,12 @@
 
 Author  |  &ensp;E-Mail&ensp; | Copyright ©
  :----:  |  :----: | :---------
-Agnieszka Wergieluk | [✉️](mailto:awergieluk@gmail.com) | `2019-2020`
+Agnieszka Wergieluk | [✉️](mailto:agnieszka.sorensen@gmail.com) | `2019-2020`
 Janus Weil | [✉️](mailto:weil@fias.uni-frankfurt.de) | `2014-2016,2019-2020`
 Joseph Tindall | [✉️](mailto:tindall@fias.uni-frankfurt.de) | `2016`
 Vinzent Steinberg | [✉️](mailto:steinberg@fias.uni-frankfurt.de) | `2015-2020`
 Jan Staudenmaier | [✉️](mailto:staudenmaier@fias.uni-frankfurt.de) | `2015-2022`
-Agnieszka Sorensen | [✉️](mailto:awergieluk@gmail.com) | `2020-`
+Agnieszka Sorensen | [✉️](mailto:agnieszka.sorensen@gmail.com) | `2020-`
 Alessandro Sciarra | [✉️](mailto:asciarra@fias.uni-frankfurt.de) | `2021-`
 Anna Schäfer | [✉️](mailto:aschaefer@fias.uni-frankfurt.de) | `2017-2022`
 Robin Sattler | [✉️](mailto:sattler@fias.uni-frankfurt.de) | `2023-`
