@@ -185,4 +185,12 @@ TEST(add_and_remove_particles) {
   eta.set_4position(FourVector(0.0, 2.0, 0.0, 0.0));
   exp->run_time_evolution(1., ParticleList{}, ParticleList{eta});
   VERIFY(exp->first_ensemble()->size() == 2);
+
+  /* Try to remove the same particle twice after adding it
+   * This also tests removing a particle, which is not a direct copy of the
+   * particle in ensembles_[0], but has only PDG code, position and momentum
+   * set.*/
+  exp->run_time_evolution(1., ParticleList{},
+                          ParticleList{pion_plus, pion_plus});
+  VERIFY(exp->first_ensemble()->size() == 1);
 }
