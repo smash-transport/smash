@@ -2296,17 +2296,37 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     }
     if (!remove_plist.empty()) {
       ParticleList found_particles_to_remove;
-      std::copy_if(
-          ensembles_[0].begin(), ensembles_[0].end(),
-          std::back_inserter(found_particles_to_remove),
-          [&remove_plist, &action_time](const ParticleData &p) {
-            return std::any_of(
-                remove_plist.begin(), remove_plist.end(),
-                [&p, &action_time](const ParticleData &particle_to_remove) {
+      for (const auto &particle_to_remove : remove_plist) {
+        const auto iterator_to_particle_to_be_removed_in_ensemble =
+            std::find_if(
+                ensembles_[0].begin(), ensembles_[0].end(),
+                [&particle_to_remove, &action_time](const ParticleData &p) {
                   return are_particles_identical_at_given_time(
                       particle_to_remove, p, action_time);
                 });
+        if (iterator_to_particle_to_be_removed_in_ensemble !=
+            ensembles_[0].end())
+          found_particles_to_remove.push_back(
+              *iterator_to_particle_to_be_removed_in_ensemble);
+      }
+      // Sort the particles found to be removed according to their id and look
+      // for duplicates (sorting is needed to call std::adjacent_find).
+      std::sort(found_particles_to_remove.begin(),
+                found_particles_to_remove.end(),
+                [](const ParticleData &p1, const ParticleData &p2) {
+                  return p1.id() < p2.id();
+                });
+      const auto iterator_to_first_duplicate = std::adjacent_find(
+          found_particles_to_remove.begin(), found_particles_to_remove.end(),
+          [](const ParticleData &p1, const ParticleData &p2) {
+            return p1.id() == p2.id();
           });
+      if (iterator_to_first_duplicate != found_particles_to_remove.end()) {
+        logg[LExperiment].error() << "The same particle has been asked to be "
+                                     "removed multiple times:\n"
+                                  << *iterator_to_first_duplicate;
+        throw std::logic_error("Particle cannot be removed twice!");
+      }
       if (auto delta = remove_plist.size() - found_particles_to_remove.size();
           delta > 0) {
         logg[LExperiment].warn(
