@@ -20,8 +20,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
-## SMASH-3.1rc
-Date:
+
+## SMASH-3.1
+Date: 2024-02-26
 
 ### Added
 * Added momentum dependence of the Skyrme potential using the cold nuclear matter approximation
