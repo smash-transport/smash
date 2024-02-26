@@ -2,9 +2,9 @@
   "Citation metadata": {
     "cff-version": "1.2.0",
     "message": "If you use this software, please cite it using these metadata.",
-    "title": "smash-transport/smash: SMASH-3.0",
-    "version": "SMASH-3.0",
-    "date-released": "2023-04-27",
+    "title": "smash-transport/smash: SMASH-3.1",
+    "version": "SMASH-3.1",
+    "date-released": "2024-02-26",
     "doi": "10.5281/zenodo.3484711",
     "license": "GPL-3.0-or-later",
     "repository-code": "https://github.com/smash-transport/smash",
