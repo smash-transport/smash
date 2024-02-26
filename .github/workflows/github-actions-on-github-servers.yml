@@ -69,6 +69,8 @@ jobs:
       run: |
         # we set the smash root directory
         export SMASH_ROOT=${PWD}
+        # we set the TERM environment variable (Pythia installation uses tput)
+        export TERM="xterm"
         # we install the missing packages
         if [ ${SITE} == "mac" ]; then
             brew install ${{ matrix.packages_to_add }}
