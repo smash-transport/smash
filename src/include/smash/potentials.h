@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2023
+ *    Copyright (c) 2014-2015,2017-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -684,7 +684,7 @@ class Potentials {
     const double fermi_momentum =
         std::cbrt(6. * M_PI * M_PI * rho / g);  // in 1/fm
     momentum = momentum / hbarc;                // convert to 1/fm
-    if (momentum < really_small) [[unlikely]] {
+    if (unlikely(momentum < really_small)) {
       return mev_to_gev * g * C / (M_PI * M_PI * nuclear_density) *
              (Lambda * Lambda * fermi_momentum -
               std::pow(Lambda, 3) * std::atan(fermi_momentum / Lambda));
