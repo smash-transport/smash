@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2023
+ *    Copyright (c) 2013-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -26,22 +26,6 @@
 #include "smash/pow.h"
 
 namespace smash {
-
-static constexpr int LCrossSections = LogArea::CrossSections::id;
-/**
- * Auxiliary function to print out-of-bound warnings
- *
- * \param[in] p_lab value requested for the interpolation
- * \param[in] last last abscissa data point in interpolation
- */
-static void warn_if_too_large_energy(double p_lab, double last) {
-  if (p_lab < last) {
-    logg[LCrossSections].warn()
-        << "Desired p_lab of " << p_lab << " GeV/c for total cross section"
-        << "parametrization exceeds maximum value of " << last
-        << ", which is used instead.";
-  }
-}
 
 bool parametrization_exists(const PdgCode& pdg_a, const PdgCode& pdg_b) {
   const bool two_nucleons = pdg_a.is_nucleon() && pdg_b.is_nucleon();
@@ -508,8 +492,6 @@ double kplusp_total(double mandelstam_s) {
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  const double last = *(KPLUSP_TOT_PLAB.end() - 1);
-  warn_if_too_large_energy(p_lab, last);
   return (*kplusp_total_interpolation)(p_lab);
 }
 
@@ -522,8 +504,6 @@ double kplusn_total(double mandelstam_s) {
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  const double last = *(KPLUSN_TOT_PLAB.end() - 1);
-  warn_if_too_large_energy(p_lab, last);
   return (*kplusn_total_interpolation)(p_lab);
 }
 
@@ -531,14 +511,25 @@ double kminusp_total(double mandelstam_s) {
   if (kminusp_total_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
         dedup_avg<double>(KMINUSP_TOT_PLAB, KMINUSP_TOT_SIG);
-    dedup_y = smooth(dedup_x, dedup_y, 0.1, 5);
+    // Parametrization data is pre-smoothed
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 5);
     kminusp_total_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
   }
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  const double last = *(KMINUSP_TOT_PLAB.end() - 1);
-  warn_if_too_large_energy(p_lab, last);
   return (*kminusp_total_interpolation)(p_lab);
+}
+
+double kminusn_total(double mandelstam_s) {
+  if (kminusn_total_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(KMINUSN_TOT_PLAB, KMINUSN_TOT_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.05, 5);
+    kminusn_total_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
+  }
+  const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
+  return (*kminusn_total_interpolation)(p_lab);
 }
 
 double kplusp_elastic_background(double mandelstam_s) {

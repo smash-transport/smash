@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2023
+ *    Copyright (c) 2014-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -329,6 +329,16 @@ class Action {
    */
   class InvalidResonanceFormation : public std::invalid_argument {
     using std::invalid_argument::invalid_argument;
+  };
+
+  /**
+   * \ingroup exception
+   * Exception for a temporary bugfix for when multiparticle interactions do
+   * not have the necessary energy to create the final state. This is used in
+   * a try/catch block, and will be removed in future releases.
+   */
+  class StochasticBelowEnergyThreshold : public std::runtime_error {
+    using std::runtime_error::runtime_error;
   };
 
   /**

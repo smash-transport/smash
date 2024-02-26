@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2012-2023
+#    Copyright (c) 2012-2024
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -11,8 +11,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 # The name, version and language of our project
-project(SMASH VERSION 3.0 LANGUAGES CXX)
-set(SMASH_VERSION "${SMASH_VERSION}-next")
+project(SMASH VERSION 3.1 LANGUAGES CXX)
 
 # Fail if cmake is called in the source directory
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2023
+ *    Copyright (c) 2014-2015,2017-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -81,17 +81,22 @@ class Potentials {
 
       if (jB_lattice && jB_lattice->value_at(position_left, jmu_left)) {
         net_4current_left = jmu_left.jmu_net();
-      } else {
+      } else if (use_potentials_outside_lattice_) {
         auto current = current_eckart(position_left, plist, param_,
                                       DensityType::Baryon, false, true);
         net_4current_left = std::get<1>(current);
+      } else {
+        return {0., 0., 0.};
       }
+
       if (jB_lattice && jB_lattice->value_at(position_right, jmu_right)) {
         net_4current_right = jmu_right.jmu_net();
-      } else {
+      } else if (use_potentials_outside_lattice_) {
         auto current = current_eckart(position_right, plist, param_,
                                       DensityType::Baryon, false, true);
         net_4current_right = std::get<1>(current);
+      } else {
+        return {0., 0., 0.};
       }
       result[i] =
           (calculation_frame_energy(momentum, net_4current_right, mass) -
@@ -458,6 +463,14 @@ class Potentials {
   /// \return cutoff radius in ntegration for coulomb potential in fm
   double coulomb_r_cut() const { return coulomb_r_cut_; }
 
+  /**
+   * \return Wether to take potentials into account for particles outside
+   * of the lattice
+   */
+  bool use_potentials_outside_lattice() const {
+    return use_potentials_outside_lattice_;
+  }
+
  private:
   /**
    * Struct that contains the gaussian smearing width \f$\sigma\f$,
@@ -529,6 +542,9 @@ class Potentials {
 
   /// Cutoff in integration for coulomb potential
   double coulomb_r_cut_;
+
+  /// Wether potentials should be included outside of the lattice
+  bool use_potentials_outside_lattice_;
 
   /**
    * Saturation density of nuclear matter used in the VDF potential; it may
@@ -668,7 +684,7 @@ class Potentials {
     const double fermi_momentum =
         std::cbrt(6. * M_PI * M_PI * rho / g);  // in 1/fm
     momentum = momentum / hbarc;                // convert to 1/fm
-    if (momentum < really_small) [[unlikely]] {
+    if (unlikely(momentum < really_small)) {
       return mev_to_gev * g * C / (M_PI * M_PI * nuclear_density) *
              (Lambda * Lambda * fermi_momentum -
               std::pow(Lambda, 3) * std::atan(fermi_momentum / Lambda));

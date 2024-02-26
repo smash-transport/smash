@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2020,2022-2023
+ *    Copyright (c) 2014-2015,2017-2020,2022-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -185,4 +185,25 @@ TEST(add_and_remove_particles) {
   eta.set_4position(FourVector(0.0, 2.0, 0.0, 0.0));
   exp->run_time_evolution(1., ParticleList{}, ParticleList{eta});
   VERIFY(exp->first_ensemble()->size() == 2);
+
+  /* Removing a particle, which is not a direct copy of the
+   * particle in ensembles_[0], but has only PDG code, position and momentum
+   * set.*/
+  exp->run_time_evolution(1., ParticleList{}, ParticleList{pion_plus});
+  VERIFY(exp->first_ensemble()->size() == 1);
+}
+
+TEST_CATCH(remove_particle_twice, std::logic_error) {
+  // Set up collider experiment without setting up initial state (no Au-Au)
+  auto config = get_collider_configuration();
+  auto exp = std::make_unique<Experiment<ColliderModus>>(config, ".");
+
+  // Add an eta
+  ParticleData eta{ParticleType::find(pdg::eta)};
+  eta.set_4momentum(FourVector(0.548, 0.0, 0.0, 0.0));
+  eta.set_4position(FourVector(0.0, 2.0, 0.0, 0.0));
+  exp->run_time_evolution(1., ParticleList{eta}, ParticleList{});
+
+  // Try to remove the eta twice
+  exp->run_time_evolution(1., ParticleList{}, ParticleList{eta, eta});
 }

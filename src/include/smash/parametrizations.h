@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2018,2020,2023
+ *    Copyright (c) 2013-2018,2020,2023-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -377,6 +377,10 @@ double deuteron_nucleon_elastic(double mandelstam_s);
  *
  * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
  * \return the parametrized cross-section [mb]
+ *
+ * \note \anchor KN_note In total parametrizations of KN processes,
+ * if the interaction energy exceeds the bounds of the interpolation,
+ * the last value available is returned, which is desired behavior.
  */
 double kplusp_total(double mandelstam_s);
 
@@ -386,8 +390,21 @@ double kplusp_total(double mandelstam_s);
  *
  * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
  * \return the parametrized cross-section [mb]
+ *
+ * \note See \ref KN_note "this note" about the return value.
  */
 double kplusn_total(double mandelstam_s);
+
+/**
+ * K- n total cross section parametrization.
+ * Source: \iref{Buss:2011mx}, B.3.8
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
+ * \return the parametrized cross-section [mb]
+ *
+ * \note See \ref KN_note "this note" about return value.
+ */
+double kminusn_total(double mandelstam_s);
 
 /**
  * K- p total cross section parametrization.
@@ -395,6 +412,8 @@ double kplusn_total(double mandelstam_s);
  *
  * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
  * \return the parametrized cross-section [mb]
+ *
+ * \note See \ref KN_note "this note" about return value.
  */
 double kminusp_total(double mandelstam_s);
 

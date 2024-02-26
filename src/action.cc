@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2023
+ *    Copyright (c) 2014-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -339,9 +339,13 @@ void Action::sample_manybody_phasespace_impl(
   const double msum_all = msum[n - 1];
   int rejection_counter = -1;
   if (sqrts <= msum_all) {
-    logg[LAction].error() << "sample_manybody_phasespace_impl: "
-                          << "Can't sample when sqrts = " << sqrts
-                          << " < msum = " << msum_all;
+    logg[LAction].error()
+        << "An interaction requiring " << sqrts
+        << "GeV was attempted below the minimum energy threshold" << msum_all
+        << " GeV, but was ignored.\nThis is a known internal error which does "
+           "not significantly affect physical results, and will be fixed in a "
+           "near-future release.";
+    throw StochasticBelowEnergyThreshold("Ignoring this action.");
   }
 
   double w, r01;

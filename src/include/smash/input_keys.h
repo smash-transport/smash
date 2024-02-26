@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022-2023
+ *    Copyright (c) 2022-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -606,6 +606,11 @@ class Key {
  * code) is that \f$ 10\cdot\mathtt{Delta\_Time} \le \mathtt{Length} \f$,
  * and a smaller time step than the provided one might be needed in case SMASH
  * aborts with an error about this aspect.
+ *
+ * \warning Because the box modus is intended to simulate an equilibrated hadron
+ * gas, features that break detailed balance should not be used, such as
+ * `"Strings"` (see \ref key_CT_strings_ "here") and the `"TopDown"` approach of
+ * evaluating total cross sections (see \ref key_CT_totXsStrategy_ "here").
  */
 
 /*!\Userguide
@@ -2024,38 +2029,41 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_totXsStrategy_,Total_Cross_Section_Strategy,string,"BottomUp"}
+   * \optional_key{key_CT_totXsStrategy_,Total_Cross_Section_Strategy,string,"TopDownMeasured"}
    *
    * Which strategy to use when evaluating total cross sections for collision
    * finding. Currently, possible options are
-   * - `BottomUp` &rarr;
+   * - `"BottomUp"` &rarr;
    *   Partial cross sections of a given initial state are summed up. This
    *   matches most inclusive experimental cross sections with the 3- and 4-star
    *   hadronic list from PDG2018, but is susceptible to changes once new
    *   resonances are added in the \ref doxypage_input_particles "particles"
    *   file.
-   * - `TopDown` &rarr;
+   * - `"TopDown"` &rarr;
    *   The total cross section of measured processes is parametrized, and the
    *   partial cross sections are rescaled to match it. Unmeasured processes use
    *   the high energy parametrization even in low energies, ignoring possible
    *   resonance peaks, and scaled with AQM. This is then insensitive to changes
    *   in the input hadronic list.
-   * - `TopDownMeasured` &rarr;
+   * - `"TopDownMeasured"` &rarr;
    *   Mixes the options above, with parametrizations only for \f$NN, N\bar{N},
    *   NK, N\pi,\f$ and \f$\pi\pi\f$. Remaining processes use sum of partial
    *   cross sections.
+   *
+   * \note In a box calculation, using the `"BottomUp"` strategy is recommended
+   * to preserve detailed balance.
    */
   /**
    * \see_key{key_CT_totXsStrategy_}
    */
   inline static const Key<TotalCrossSectionStrategy> collTerm_totXsStrategy{
       {"Collision_Term", "Total_Cross_Section_Strategy"},
-      TotalCrossSectionStrategy::BottomUp,
+      TotalCrossSectionStrategy::TopDownMeasured,
       {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,"None"}
+   * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,"LargestFromUnstable"}
    *
    * Due to the lack of known high-mass resonances for several processes, the
    * energy region between resonances and strings might lack inelastic
@@ -2065,25 +2073,27 @@ struct InputKeys {
    * the total cross section and the sum of cross sections from all processes
    * as a proxy for how large it is. Candidates are resonances that decay
    * into the incoming pair. Possible options for this key are
-   * - `None` &rarr;
+   * - `"None"` &rarr;
    *   No pseudo-resonance is created.
-   * - `Largest` &rarr;
+   * - `"Largest"` &rarr;
    *   Use the resonance with largest mass.
-   * - `Closest` &rarr;
+   * - `"Closest"` &rarr;
    *   Select the resonance that has the closest pole mass to the available
-   * energy (\f$\sqrt{s} of the incoming pair\f$).
-   * - `LargestFromUnstable` &rarr;
-   *   Same as `Largest` but a pseudo-resonance is used only for processes that
-   * have at least one incoming unstable particle.
-   * - `ClosestFromUnstable` &rarr;
-   *   Same as `Closest` but a pseudo-resonance is used only for processes that
-   * have at least one incoming unstable particle.
+   * energy (\f$\sqrt{s}\f$ of the incoming pair).
+   * - `"LargestFromUnstable"` &rarr;
+   *   Same as `"Largest"` but a pseudo-resonance is used only for processes
+   * that have at least one incoming unstable particle.
+   * - `"ClosestFromUnstable"` &rarr;
+   *   Same as `"Closest"` but a pseudo-resonance is used only for processes
+   * that have at least one incoming unstable particle.
    */
   /**
    * \see_key{key_CT_pseudoresonance_}
    */
   inline static const Key<PseudoResonance> collTerm_pseudoresonance{
-      {"Collision_Term", "Pseudoresonance"}, PseudoResonance::None, {"3.1"}};
+      {"Collision_Term", "Pseudoresonance"},
+      PseudoResonance::LargestFromUnstable,
+      {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2124,6 +2134,12 @@ struct InputKeys {
    * \f$\Sigma\f$, \f$\pi\f$ or \f$\eta\f$. Note that for isospin violating
    * decay modes all possible isospin combination have to be manually specified
    * in the *decaymodes.txt* file.
+   *
+   * \warning If `true`, this option removes the particles that decay from the
+   * evolution, so the Dileptons output will not contain final state decays.
+   * Therefore we do not recommend its usage for dilepton studies. Because the
+   * key name is somewhat misleading, it is for now deprecated and will be
+   * renamed in the next release.
    */
   /**
    * \see_key{key_CT_include_decays_end_}
@@ -2131,7 +2147,7 @@ struct InputKeys {
   inline static const Key<bool> collTerm_includeDecaysAtTheEnd{
       {"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
       false,
-      {"2.2"}};
+      {"2.2", "3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2172,6 +2188,10 @@ struct InputKeys {
    *
    * Detailed balance is preserved by these reaction switches: if a forward
    * reaction is off then the reverse is automatically off too.
+   *
+   * \warning If `"Elastic"` is the only process allowed, the
+   * `"Total_Cross_Section_Strategy"` must be set as `"BottomUp"`, otherwise
+   * SMASH fails. \see_key{key_CT_totXsStrategy_}
    */
   /**
    * \see_key{key_CT_included_2to2_}
@@ -4915,6 +4935,21 @@ struct InputKeys {
       {"Lattice", "Sizes"}, {"0.80"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_potentials
+   * \optional_key{key_potentials_use_potentials_outside_lattice_,
+   * Use_Potentials_Outside_Lattice, bool, true}
+   *
+   * Wether to include the potentials also for particles that have left the
+   * lattice. If set to false, the particles will propagate on straight lines
+   * once they leave the volume that is covered by the lattice.
+   */
+  /**
+   * \see_key{key_potentials_use_potentials_outside_lattice_}
+   */
+  inline static const Key<bool> potentials_use_potentials_outside_lattice{
+      {"Potentials", "Use_Potentials_Outside_Lattice"}, true, {"3.1"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
    * \required_key{key_potentials_skyrme_a_,Skyrme_A,double}
    *
@@ -5467,6 +5502,7 @@ struct InputKeys {
       std::cref(lattice_periodic),
       std::cref(lattice_potentialsAffectThreshold),
       std::cref(lattice_sizes),
+      std::cref(potentials_use_potentials_outside_lattice),
       std::cref(potentials_skyrme_skyrmeA),
       std::cref(potentials_skyrme_skyrmeB),
       std::cref(potentials_skyrme_skyrmeTau),
@@ -6080,8 +6116,9 @@ General:
  * the provided default _particles.txt_ and _decaymodes.txt_ files by removing
  * 3-body and higher order decays from the decay modes file and all
  * corresponding particles that can no longer be produced from the particles
- * file. In addtion, strings need to be turned off, since they also break
- * detailed balance due to lacking backreactions.\n\n
+ * file. In addition, strings need to be turned off, since they also break
+ * detailed balance due to lacking backreactions, and the total cross section
+ * should be computed by summing the partial processes.\n\n
  * SMASH is shipped with example files (_config.yaml_, _particles.txt_ and
  * _decaymodes.txt_) meeting the above mentioned requirements to set up an
  * infinite matter simulation. These files are located in the _**input/box**_

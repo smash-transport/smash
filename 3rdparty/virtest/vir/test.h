@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <cstdint>
 #include <fstream>
 #include <iomanip>
 #include <iostream>

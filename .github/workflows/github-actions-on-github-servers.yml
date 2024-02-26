@@ -68,9 +68,11 @@ jobs:
       # we run the step. We recall that in YAML the pipe symbol "|" means that the following lines, including newlines, are interpreted literally
       run: |
         # we set the smash root directory
-        export SMASH_ROOT=$PWD
+        export SMASH_ROOT=${PWD}
+        # we set the TERM environment variable (Pythia installation uses tput)
+        export TERM="xterm"
         # we install the missing packages
-        if [ $SITE == "mac" ]; then
+        if [ ${SITE} == "mac" ]; then
             brew install ${{ matrix.packages_to_add }}
         else
             sudo apt-get install ${{ matrix.packages_to_add }} -y
@@ -78,17 +80,19 @@ jobs:
         # we download and install Pythia
         wget https://pythia.org/download/pythia83/pythia8310.tgz && tar xf pythia8310.tgz && rm pythia8310.tgz && cd pythia8310
         ./configure --cxx-common="-std=c++17 -march=native -O3 -fPIC -pthread" && make -j$(nproc) && cd ..
+        export LD_LIBRARY_PATH=${SMASH_ROOT}/pythia8310/lib:${LD_LIBRARY_PATH} # To make sure it can be found at run time
         # we get eigen
-        wget http://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && tar -xf eigen-3.4.0.tar.gz -C $HOME
+        wget http://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && tar -xf eigen-3.4.0.tar.gz -C ${HOME}
+        export CMAKE_PREFIX_PATH=${HOME}/eigen-3.4.0/  # Let CMake find Eigen also when testing using SMASH as library
         # we get cpplint
-        wget https://raw.githubusercontent.com/cpplint/cpplint/1.6.0/cpplint.py && chmod +x cpplint.py && mkdir -p $HOME/bin && mv cpplint.py $HOME/bin
-        export PATH=$HOME/bin:$PATH
+        wget https://raw.githubusercontent.com/cpplint/cpplint/1.6.0/cpplint.py && chmod +x cpplint.py && mkdir -p ${HOME}/bin && mv cpplint.py ${HOME}/bin
+        export PATH=${HOME}/bin:${PATH}
         # now we build SMASH
         cd $SMASH_ROOT && mkdir build && cd build
-        cmake .. -DPythia_CONFIG_EXECUTABLE=$SMASH_ROOT/pythia8310/bin/pythia8-config -DCMAKE_INSTALL_PREFIX=$HOME/eigen-3.4.0/
+        cmake -DPythia_CONFIG_EXECUTABLE=${SMASH_ROOT}/pythia8310/bin/pythia8-config ..
         make -j$(nproc)
         # we check the building of the documentation for the current and the past Ubuntu LTS releases
-        if [ $SITE == "ubuntu-22.04-default-gcc" ] || [ $SITE == "ubuntu-20.04-minimum-gcc" ]; then make undocumented_test && make user; fi
+        if [ ${SITE} == "ubuntu-22.04-default-gcc" ] || [ ${SITE} == "ubuntu-20.04-minimum-gcc" ]; then make undocumented_test && make user; fi
         # we run the tests
         CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
     # We now setup python environment to then install cmake-format, but we do so on one site only
@@ -103,13 +107,13 @@ jobs:
       if: matrix.site == 'ubuntu-22.04-clang-13'
       run: |
         # we install cmake-format in a dedicated directory
-        mkdir $HOME/python-tools && pip install --target $HOME/python-tools cmakelang==0.6.13
-        export PATH=$HOME/python-tools/bin/:$PATH
-        export PYTHONPATH=$HOME/python-tools:$PYTHONPATH
+        mkdir ${HOME}/python-tools && pip install --target ${HOME}/python-tools cmakelang==0.6.13
+        export PATH=${HOME}/python-tools/bin/:${PATH}
+        export PYTHONPATH=${HOME}/python-tools:${PYTHONPATH}
         # we want to be sure that clang-format refers to clang-format version 13.0
-        mkdir -p $HOME/bin
-        ln -s /usr/bin/clang-format-13 $HOME/bin/clang-format
-        export PATH=$HOME/bin:$PATH
+        mkdir -p ${HOME}/bin
+        ln -s /usr/bin/clang-format-13 ${HOME}/bin/clang-format
+        export PATH=${HOME}/bin:${PATH}
         # we check the correct formatting of the code
         ./bin/codebase-format-helper.bash C++ -t
         ./bin/codebase-format-helper.bash CMake -t

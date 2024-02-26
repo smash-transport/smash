@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2023
+ *    Copyright (c) 2014-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -159,6 +159,12 @@ ScatterActionsFinderParameters create_finder_parameters(
   if (xs_strategy == TotalCrossSectionStrategy::BottomUp) {
     logg[LFindScatter].info(
         "Evaluating total cross sections from partial processes.");
+  } else if (parameters.included_2to2[IncludedReactions::Elastic] == 1 &&
+             parameters.included_2to2.count() == 1) {
+    throw std::invalid_argument(
+        "The BottomUp strategy for total cross section evaluation is needed to "
+        "have only elastic interactions, please change the configuration "
+        "accordingly.");
   } else if (xs_strategy == TotalCrossSectionStrategy::TopDown) {
     logg[LFindScatter].info(
         "Evaluating total cross sections from parametrizations.");

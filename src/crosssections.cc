@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2018-2023
+ *    Copyright (c) 2018-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -246,9 +246,8 @@ double CrossSections::parametrized_total(
                  (meson.code() == pdg::K_z && baryon.code() == -pdg::p) ||
                  (meson.code() == pdg::K_m && baryon.code() == pdg::n) ||
                  (meson.code() == pdg::Kbar_z && baryon.code() == pdg::p)) {
-        // K⁻n, K̅⁰p and anti-processes: similar total cross section to K⁻p
-        // overall
-        total_xs = kminusp_total(sqrt_s_ * sqrt_s_);
+        // K⁻n, K̅⁰p and anti-processes
+        total_xs = kminusn_total(sqrt_s_ * sqrt_s_);
       }
     } else if (meson.is_pion() && baryon.is_nucleon()) {
       // π⁺(p,nbar), π⁻(n,pbar)

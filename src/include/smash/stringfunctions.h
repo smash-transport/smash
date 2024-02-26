@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2018,2020,2022
+ *    Copyright (c) 2014-2018,2020,2022,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_STRINGFUNCTIONS_H_
 #define SRC_INCLUDE_SMASH_STRINGFUNCTIONS_H_
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

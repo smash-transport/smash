@@ -69,6 +69,7 @@ RUN <<EOF
     clang-tidy-13 \
     clang-tools-13 \
     coreutils  \
+    curl \
     cython3 \
     ddd  \
     debianutils  \

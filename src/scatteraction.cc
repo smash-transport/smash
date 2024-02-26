@@ -156,7 +156,7 @@ void ScatterAction::add_all_scatterings(
   ParticleTypePtr pseudoresonance =
       try_find_pseudoresonance(finder_parameters.pseudoresonance_method,
                                finder_parameters.transition_high_energy);
-  if (pseudoresonance) {
+  if (pseudoresonance && finder_parameters.two_to_one) {
     const double xs_total =
         is_total_parametrized_
             ? *parametrized_total_cross_section_

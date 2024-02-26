@@ -145,6 +145,9 @@ void update_momenta(
           (pot.use_skyrme() ? FB_lat->value_at(r, FB) : true) &&
           (pot.use_vdf() ? FB_lat->value_at(r, FB) : true) &&
           (pot.use_symmetry() ? FI3_lat->value_at(r, FI3) : true);
+      if (!use_lattice && !pot.use_potentials_outside_lattice()) {
+        continue;
+      }
       if (!pot.use_skyrme() && !pot.use_vdf()) {
         FB = std::make_pair(ThreeVector(0., 0., 0.), ThreeVector(0., 0., 0.));
       }

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2023
+ *    Copyright (c) 2013-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -953,6 +953,41 @@ Experiment<Modus>::Experiment(Configuration &config,
   logg[LExperiment].info("Using ", parameters_.n_ensembles,
                          " parallel ensembles.");
 
+  if (modus_.is_box() &&
+      config.read({"Collision_Term", "Total_Cross_Section_Strategy"},
+                  InputKeys::collTerm_totXsStrategy.default_value()) !=
+          TotalCrossSectionStrategy::BottomUp) {
+    logg[LExperiment].warn(
+        "To preserve detailed balance in a box simulation, it is recommended "
+        "to use the bottom-up strategy for evaluating total cross sections.\n"
+        "Consider adding the following line to the 'Collision_Term' section "
+        "in your configuration file:\n"
+        "   Total_Cross_Section_Strategy: \"BottomUp\"");
+  }
+  if (modus_.is_box() &&
+      config.read({"Collision_Term", "Pseudoresonance"},
+                  InputKeys::collTerm_pseudoresonance.default_value()) !=
+          PseudoResonance::None) {
+    logg[LExperiment].warn(
+        "To preserve detailed balance in a box simulation, it is recommended "
+        "to not include the pseudoresonances,\nas they artificially increase "
+        "the resonance production without changing the corresponding "
+        "decay.\nConsider adding the following line to the 'Collision_Term' "
+        "section in your configuration file:\n   Pseudoresonance: \"None\"");
+  }
+
+  /* In collider setup with sqrts >= 200 GeV particles don't form continuously
+   *
+   * NOTE: This key has to be taken before the ScatterActionsFinder is created
+   *       because there the "String_Parameters" is extracted as sub-config and
+   *       all parameters but this one are taken. If this one is still there
+   *       the configuration temporary object will be destroyed not empty, hence
+   *       throwing an exception.
+   */
+  ParticleData::formation_power_ = config.take(
+      {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
+      modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
+
   // create finders
   if (dileptons_switch_) {
     dilepton_finder_ = std::make_unique<DecayActionsFinderDilepton>();
@@ -1093,10 +1128,6 @@ Experiment<Modus>::Experiment(Configuration &config,
         config.extract_sub_configuration({"Collision_Term", "Pauli_Blocking"}),
         parameters_);
   }
-  // In collider setup with sqrts >= 200 GeV particles don't form continuously
-  ParticleData::formation_power_ = config.take(
-      {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
-      modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
 
   /*!\Userguide
    * \page doxypage_output
@@ -2091,7 +2122,11 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
                             " (discarded: invalid)");
     return false;
   }
-  action.generate_final_state();
+  try {
+    action.generate_final_state();
+  } catch (Action::StochasticBelowEnergyThreshold &) {
+    return false;
+  }
   logg[LExperiment].debug("Process Type is: ", action.get_type());
   if (include_pauli_blocking && pauli_blocker_ &&
       action.is_pauli_blocked(ensembles_, *pauli_blocker_)) {
@@ -2258,6 +2293,9 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
           "ensemble is used.");
     }
     const double action_time = parameters_.labclock->current_time();
+    /* Use two if statements. The first one is to check if the particles are
+     * valid. Since this might remove all particles, a second if statement is
+     * needed to avoid executing the action in that case.*/
     if (!add_plist.empty()) {
       validate_and_adjust_particle_list(add_plist);
     }
@@ -2267,35 +2305,62 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
           ParticleList{}, add_plist, action_time);
       perform_action(*action_add_particles, 0);
     }
+    // Also here 2 if statements are needed as above.
     if (!remove_plist.empty()) {
       validate_and_adjust_particle_list(remove_plist);
-      const auto number_of_particles_to_be_removed = remove_plist.size();
-      remove_plist.erase(
-          std::remove_if(
-              remove_plist.begin(), remove_plist.end(),
-              [this, &action_time](const ParticleData &particle_to_remove) {
-                return std::find_if(
-                           ensembles_[0].begin(), ensembles_[0].end(),
-                           [&particle_to_remove,
-                            &action_time](const ParticleData &p) {
-                             return are_particles_identical_at_given_time(
-                                 particle_to_remove, p, action_time);
-                           }) == ensembles_[0].end();
-              }),
-          remove_plist.end());
-      if (auto delta = number_of_particles_to_be_removed - remove_plist.size();
+    }
+    if (!remove_plist.empty()) {
+      ParticleList found_particles_to_remove;
+      for (const auto &particle_to_remove : remove_plist) {
+        const auto iterator_to_particle_to_be_removed_in_ensemble =
+            std::find_if(
+                ensembles_[0].begin(), ensembles_[0].end(),
+                [&particle_to_remove, &action_time](const ParticleData &p) {
+                  return are_particles_identical_at_given_time(
+                      particle_to_remove, p, action_time);
+                });
+        if (iterator_to_particle_to_be_removed_in_ensemble !=
+            ensembles_[0].end())
+          found_particles_to_remove.push_back(
+              *iterator_to_particle_to_be_removed_in_ensemble);
+      }
+      // Sort the particles found to be removed according to their id and look
+      // for duplicates (sorting is needed to call std::adjacent_find).
+      std::sort(found_particles_to_remove.begin(),
+                found_particles_to_remove.end(),
+                [](const ParticleData &p1, const ParticleData &p2) {
+                  return p1.id() < p2.id();
+                });
+      const auto iterator_to_first_duplicate = std::adjacent_find(
+          found_particles_to_remove.begin(), found_particles_to_remove.end(),
+          [](const ParticleData &p1, const ParticleData &p2) {
+            return p1.id() == p2.id();
+          });
+      if (iterator_to_first_duplicate != found_particles_to_remove.end()) {
+        logg[LExperiment].error() << "The same particle has been asked to be "
+                                     "removed multiple times:\n"
+                                  << *iterator_to_first_duplicate;
+        throw std::logic_error("Particle cannot be removed twice!");
+      }
+      if (auto delta = remove_plist.size() - found_particles_to_remove.size();
           delta > 0) {
         logg[LExperiment].warn(
             "When trying to remove particle(s) at the beginning ",
             "of the system evolution,\n", delta,
             " particle(s) could not be found and will be ignored.");
       }
-    }
-    if (!remove_plist.empty()) {
-      // Create and perform action to remove particles
-      auto action_remove_particles = std::make_unique<FreeforallAction>(
-          remove_plist, ParticleList{}, action_time);
-      perform_action(*action_remove_particles, 0);
+      if (!found_particles_to_remove.empty()) {
+        [[maybe_unused]] const auto number_particles_before_removal =
+            ensembles_[0].size();
+        // Create and perform action to remove particles
+        auto action_remove_particles = std::make_unique<FreeforallAction>(
+            found_particles_to_remove, ParticleList{}, action_time);
+        perform_action(*action_remove_particles, 0);
+
+        assert(number_particles_before_removal -
+                   found_particles_to_remove.size() ==
+               ensembles_[0].size());
+      }
     }
   }
 
