@@ -31,6 +31,7 @@ Date: 2024-02-26
 * Command-line option to run smash with `-n` to avoid caching integrals in the ***tabulations*** folder on the disk
 * ⚠️  The `Total_Cross_Section_Strategy` key determines how the total cross sections for collision finding are evaluated, whether from summing the partial contributions or using a parametrization; previously the default behavior was the former strategy (now accessible with the value `BottomUp`), but it has changed to the latter (accessible with `TopDownMeasured`)
 * ⚠️  Option `Pseudoresonance` which adds *ad hoc* inelastic 2→1 processes close to the energy regime around the transition to strings, where few resonances have been measured; by default, this is done for interactions where at least one of the incoming particles is unstable, and the heaviest possible resonance producible from the incoming pair is chosen
+* New `Use_Potentials_Outside_Lattice` option in the config file to specify where potentials are applied
 
 ### Fixed
 * Fix bug in the time step calculation of SMASH output in events successive to the first one when the `End_Time` is not a multiple of the `Output_Interval`
