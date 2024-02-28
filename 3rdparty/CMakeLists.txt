@@ -28,7 +28,7 @@ list(APPEND CMAKE_MESSAGE_INDENT "   ")
 set(YAML_CPP_BUILD_TESTS OFF CACHE INTERNAL "")
 set(YAML_CPP_BUILD_TOOLS OFF CACHE INTERNAL "")
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE INTERNAL "")
-add_subdirectory(yaml-cpp-0.7.0)
+add_subdirectory(yaml-cpp-0.8.0)
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 message(STATUS "Setting up YAML library - done")
 
@@ -43,7 +43,7 @@ install(CODE "execute_process(COMMAND ${CMAKE_COMMAND}
 install(FILES Cuba-4.2.2/cuba.h DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}/cuba")
 install(FILES einhard/einhard.hpp einhard/stacktrace.h
         DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}/einhard")
-install(DIRECTORY yaml-cpp-0.7.0/include/yaml-cpp
+install(DIRECTORY yaml-cpp-0.8.0/include/yaml-cpp
         DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}"
         FILES_MATCHING
         PATTERN "*.h")

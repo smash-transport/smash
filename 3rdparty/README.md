@@ -50,11 +50,10 @@ In general, SMASH installation deals with the third-party libraries in the *CMak
 We use [this library](https://github.com/jbeder/yaml-cpp) mainly for SMASH configuration files and we update it from time to time, since it is maintained and active.
 If you want to include a new version inside SMASH codebase, you need to do something along the following lines (from within the `3rdparty` folder).
 ```bash
-rm -r yaml-cpp-* 
+rm -r yaml-cpp-*
 YAML_VERSION='X.Y.Z' # Put in the right numbers
-wget https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-"${YAML_VERSION}".zip
-unzip yaml-cpp-"${YAML_VERSION}".zip
-mv yaml-cpp-yaml-cpp-"${YAML_VERSION}" yaml-cpp-"${YAML_VERSION}" && rm yaml-cpp-"${YAML_VERSION}".zip
+wget https://github.com/jbeder/yaml-cpp/archive/refs/tags/"${YAML_VERSION}".zip
+unzip "${YAML_VERSION}".zip && rm yaml-cpp-"${YAML_VERSION}".zip
 rm -r yaml-cpp-"${YAML_VERSION}"/{test,util}
 unset -v 'YAML_VERSION'
 ```
@@ -66,7 +65,7 @@ This is connected to the fact we do not build YAML tests or tools (cf. `YAML_CPP
 Of course, you should try to compile SMASH with the new version of the library and check that everything works fine.
 If third-party warnings pop up, have a look to them and see if something can be done about it.
 It is in general not desired to pollute compilation with warnings.
-For example, for version `0.7.0` the compiler flag `-Wno-shadow` has been added since some warnings otherwise where given and the YAML developers declared them [as fine](https://github.com/jbeder/yaml-cpp/issues/764).
+For example, for version `0.7.0` the compiler flag `-Wno-shadow` has been added since some warnings otherwise where given and the YAML developers declared them [as fine](https://github.com/jbeder/yaml-cpp/issues/764) and this was not needed anymore for version `0.8.0`.
 
 
 ## Cuba
