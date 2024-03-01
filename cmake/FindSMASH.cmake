@@ -150,14 +150,14 @@ else() # Use SMASH_DIR and SMASH_BUILD_DIR --> DEPRECATED!
          SMASH_INCLUDE_DIR
          $ENV{SMASH_DIR}/3rdparty/Cuba-4.2.2
          $ENV{SMASH_DIR}/3rdparty/einhard
-         $ENV{SMASH_DIR}/3rdparty/yaml-cpp-0.7.0/include
+         $ENV{SMASH_DIR}/3rdparty/yaml-cpp-0.8.0/include
          $ENV{SMASH_DIR}/src/include
          ${SMASH_BUILD_DIR}/src/include # For the decaymodes and particles header files
     )
     set(SMASH_INPUT_FILES_DIR "$ENV{SMASH_DIR}/input")
     find_library(SMASH_LIBRARY NAMES smash PATHS ${SMASH_BUILD_DIR}/src)
     find_library(EINHARD_LIBRARY NAMES einhard PATHS ${SMASH_BUILD_DIR}/3rdparty/einhard)
-    find_library(CPPYAML_LIBRARY NAMES yaml-cpp PATHS ${SMASH_BUILD_DIR}/3rdparty/yaml-cpp-0.7.0)
+    find_library(CPPYAML_LIBRARY NAMES yaml-cpp PATHS ${SMASH_BUILD_DIR}/3rdparty/yaml-cpp-0.8.0)
     find_library(INTEGRATION_LIBRARY NAMES cuhre
                  PATHS ${SMASH_BUILD_DIR}/3rdparty/Cuba-4.2.2/src/cuhre)
     set(smash_found_version "NOT-FOUND")

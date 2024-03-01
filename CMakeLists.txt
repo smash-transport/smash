@@ -167,7 +167,7 @@ endif()
 # add 3rd-party libraries (before setting compiler flags etc)
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2.2")
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.7.0/include")
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.8.0/include")
 add_subdirectory(3rdparty)
 
 # Set up compile options passed to all targets. From CMake documentation: "The flags in

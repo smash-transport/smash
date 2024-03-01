@@ -48,7 +48,6 @@ Date: 2024-02-26
 ### Changed
 * Use updated gold radius of 6.55 fm instead of 6.38 fm and a diffusiveness of 0.523 fm instead of 0.535 fm
 * Upgraded to Pythia 8.310
-* Upgraded to Cuba 4.2.2
 * SMASH installation procedure was improved and allows now to use SMASH as library relying on installation folder only
 * CMake module to find SMASH in an external project offers now a better approach based on the new installation procedure
 * Make `Clock` class comparison operators refer to internally represented time and not to `current_time()` return value
