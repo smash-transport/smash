@@ -165,7 +165,7 @@ TEST(parity) {
 }
 
 // Sets a spin projection and fails if no error is thrown
-void set_invalid_spin_projection_and_catch_error(ParticleData &p,
+static void set_invalid_spin_projection_and_catch_error(ParticleData &p,
                                                  int spin_projection) {
   try {
     p.set_spin_projection(spin_projection);
@@ -203,7 +203,7 @@ TEST(invalid_spin_projection) {
 }
 
 // Sets a spin projection and fails if an error is thrown
-void set_valid_spin_projection_and_catch_error(ParticleData &p,
+static void set_valid_spin_projection_and_catch_error(ParticleData &p,
                                                int spin_projection) {
   try {
     p.set_spin_projection(spin_projection);
