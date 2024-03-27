@@ -166,7 +166,7 @@ TEST(parity) {
 
 // Sets a spin projection and fails if no error is thrown
 static void set_invalid_spin_projection_and_catch_error(ParticleData &p,
-                                                 int spin_projection) {
+                                                        int spin_projection) {
   try {
     p.set_spin_projection(spin_projection);
   } catch (std::invalid_argument &e) {
@@ -204,7 +204,7 @@ TEST(invalid_spin_projection) {
 
 // Sets a spin projection and fails if an error is thrown
 static void set_valid_spin_projection_and_catch_error(ParticleData &p,
-                                               int spin_projection) {
+                                                      int spin_projection) {
   try {
     p.set_spin_projection(spin_projection);
   } catch (std::invalid_argument &e) {
