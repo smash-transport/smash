@@ -577,7 +577,7 @@ class Key {
  * switched position in x.
  */
 
- /*!\Userguide
+/*!\Userguide
  * \page doxypage_input_conf_modi_C_initial_conditions
  *
  * The existence of an initial conditions subsection in the output section of
@@ -586,7 +586,7 @@ class Key {
  * evolution. This proper time is taken from the \key Proper_Time field
  * in the \key Initial_Conditions subsection when configuring the output. If
  * this information is not provided, the default proper time corresponds to
- * the passing time of the two nuclei, where all primary interactions are 
+ * the passing time of the two nuclei, where all primary interactions are
  * expected to have occured: \f[ \tau_0 =
  * (r_\mathrm{p} \ + \ r_\mathrm{t}) \ \left(\left(\frac{\sqrt{s_\mathrm{NN}}}
  * {2 \ m_\mathrm{N}}\right)^2
@@ -3656,7 +3656,7 @@ struct InputKeys {
    */
   inline static const Key<std::vector<double>> modi_collider_impact_yields{
       {"Modi", "Collider", "Impact", "Yields"}, {"0.80"}};
-  
+
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_lower_bound_,Lower_Bound,double,0.5}
@@ -4556,7 +4556,7 @@ struct InputKeys {
    * \see_key{key_output_IC_lower_bound_}
    */
   inline static const Key<double> output_initialConditions_lowerBound{
-      {"Output", "Initial_Conditions", "Lower_Bound"}, 0.5, {"1.8","3.2"}};
+      {"Output", "Initial_Conditions", "Lower_Bound"}, 0.5, {"1.8", "3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4576,7 +4576,7 @@ struct InputKeys {
    * \see_key{key_output_IC_proper_time_}
    */
   inline static const Key<double> output_initialConditions_properTime{
-      {"Output", "Initial_Conditions", "Proper_Time"}, {"1.7","3.2"}};
+      {"Output", "Initial_Conditions", "Proper_Time"}, {"1.7", "3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4592,7 +4592,7 @@ struct InputKeys {
    * \see_key{key_output_IC_pt_cut_}
    */
   inline static const Key<double> output_initialConditions_pTCut{
-      {"Output", "Initial_Conditions", "pT_Cut"}, {"2.2","3.2"}};
+      {"Output", "Initial_Conditions", "pT_Cut"}, {"2.2", "3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4609,7 +4609,7 @@ struct InputKeys {
    * \see_key{key_output_IC_rapidity_cut_}
    */
   inline static const Key<double> output_initialConditions_rapidityCut{
-      {"Output", "Initial_Conditions", "Rapidity_Cut"}, {"2.2","3.2"}};
+      {"Output", "Initial_Conditions", "Rapidity_Cut"}, {"2.2", "3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output

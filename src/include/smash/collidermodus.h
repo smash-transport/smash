@@ -134,6 +134,14 @@ class ColliderModus : public ModusDefault {
   bool calculation_frame_is_fixed_target() const {
     return frame_ == CalculationFrame::FixedTarget ? true : false;
   }
+  /// \return Proper time of the hypersurface for IC
+  std::optional<double> proper_time() const { return IC_proper_time_; }
+  /// \return Lower bound on proper time of the hypersurface for IC
+  std::optional<double> lower_bound() const { return IC_lower_bound_; }
+  /// \return Maximum rapidity for IC
+  std::optional<double> rapidity_cut() const { return IC_rapidity_cut_; }
+  /// \return Maximum transverse momentum for IC
+  std::optional<double> pT_cut() const { return IC_pT_cut_; }
 
   /**
    * \ingroup exception
@@ -246,6 +254,15 @@ class ColliderModus : public ModusDefault {
    * Beam velocity of the target
    */
   double velocity_target_ = 0.0;
+  /// Hypersurface proper time in IC
+  std::optional<double> IC_proper_time_;
+  /// Lower bound for proper time in IC
+  std::optional<double> IC_lower_bound_;
+  /// Rapidity cut on hypersurface in IC
+  std::optional<double> IC_rapidity_cut_;
+  /// Transverse momentum cut on hypersurface IC
+  std::optional<double> IC_pT_cut_;
+
   /**
    * Get the frame dependent velocity for each nucleus, using
    * the current reference frame. \see frame_

@@ -1037,39 +1037,78 @@ Experiment<Modus>::Experiment(Configuration &config,
       throw std::runtime_error(
           "Initial conditions can only be extracted in collider modus.");
     }
+    // Due to an ongoing refactoring, the physics inputs for Initial Conditions
+    // are duplicated in both Output and Collider sections. If there are two
+    // inconsistent values, SMASH will not run. Otherwise it will follow the one
+    // present in the configuration. If none are present, the default is used.
+    // This duplication will be removed in the next release.
+    std::string deprecated_message =
+        "Some parameters in the Initial_Conditions section of Output are "
+        "deprecated. Please use the corresponding values in the "
+        "Initial_Conditions subsection under Collider.";
+
     double proper_time;
     if (config.has_value({"Output", "Initial_Conditions", "Proper_Time"})) {
       // Read in proper time from config
       proper_time =
           config.take({"Output", "Initial_Conditions", "Proper_Time"});
-    } else {
-      // Default proper time is the passing time of the two nuclei
-      double default_proper_time = modus_.nuclei_passing_time();
-      double lower_bound =
-          config.take({"Output", "Initial_Conditions", "Lower_Bound"}, 0.5);
-      if (default_proper_time >= lower_bound) {
-        proper_time = default_proper_time;
+      if (modus_.proper_time().has_value()) {
+        if (proper_time != modus_.proper_time().value_or(proper_time)) {
+          logg[LInitialConditions].fatal(
+              "Inconsistent values for Proper_Time in configuration.");
+          throw std::invalid_argument(deprecated_message);
+        }
+      } else if (modus_.proper_time().has_value()) {
+        proper_time = modus_.proper_time().value();
       } else {
-        logg[LInitialConditions].warn()
-            << "Nuclei passing time is too short, hypersurface proper time set "
-               "to tau = "
-            << lower_bound << " fm.";
-        proper_time = lower_bound;
+        double lower_bound = modus_.lower_bound().has_value()
+                                 ? modus_.lower_bound().value()
+                                 : 0.5;
+        ;
+        if (config.has_value({"Output", "Initial_Conditions", "Lower_Bound"})) {
+          lower_bound =
+              config.take({"Output", "Initial_Conditions", "Lower_Bound"});
+          if (modus_.lower_bound().has_value()) {
+            if (lower_bound != modus_.lower_bound().value_or(lower_bound)) {
+              logg[LInitialConditions].fatal(
+                  "Inconsistent values for Lower_Bound in configuration.");
+              throw std::invalid_argument(deprecated_message);
+            }
+          }
+        }
+        // Default proper time is the passing time of the two nuclei
+        double default_proper_time = modus_.nuclei_passing_time();
+        if (default_proper_time >= lower_bound) {
+          proper_time = default_proper_time;
+        } else {
+          logg[LInitialConditions].warn()
+              << "Nuclei passing time is too short, hypersurface proper time "
+                 "set to tau = "
+              << lower_bound << " fm.";
+          proper_time = lower_bound;
+        }
       }
     }
-
-    double rapidity_cut = 0.0;
+    double rapidity_cut =
+        modus_.rapidity_cut().has_value() ? modus_.rapidity_cut().value() : 0.0;
     if (config.has_value({"Output", "Initial_Conditions", "Rapidity_Cut"})) {
       rapidity_cut =
           config.take({"Output", "Initial_Conditions", "Rapidity_Cut"});
-      if (rapidity_cut <= 0.0) {
-        logg[LInitialConditions].fatal()
-            << "Rapidity cut for initial conditions configured as abs(y) < "
-            << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
-            << "non-zero value or employ SMASH without rapidity cut.";
-        throw std::runtime_error(
-            "Kinematic cut for initial conditions malconfigured.");
+      if (modus_.rapidity_cut().has_value()) {
+        if (rapidity_cut != modus_.rapidity_cut().value()) {
+          logg[LInitialConditions].fatal(
+              "Inconsistent values for Rapidity_Cut in configuration.");
+          throw std::invalid_argument(deprecated_message);
+        }
       }
+    }
+    if (rapidity_cut < 0.0) {
+      logg[LInitialConditions].fatal()
+          << "Rapidity cut for initial conditions configured as abs(y) < "
+          << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
+          << "non-zero value or employ SMASH without rapidity cut.";
+      throw std::runtime_error(
+          "Kinematic cut for initial conditions malconfigured.");
     }
 
     if (modus_.calculation_frame_is_fixed_target() && rapidity_cut != 0.0) {
@@ -1080,46 +1119,52 @@ Experiment<Modus>::Experiment(Configuration &config,
           "\"Calculation_Frame\" instead.");
     }
 
-    double transverse_momentum_cut = 0.0;
+    double pT_cut = modus_.pT_cut().has_value() ? modus_.pT_cut().value() : 0.0;
     if (config.has_value({"Output", "Initial_Conditions", "pT_Cut"})) {
-      transverse_momentum_cut =
-          config.take({"Output", "Initial_Conditions", "pT_Cut"});
-      if (transverse_momentum_cut <= 0.0) {
-        logg[LInitialConditions].fatal()
-            << "transverse momentum cut for initial conditions configured as "
-               "pT < "
-            << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
-            << "non-zero value or employ SMASH without pT cut.";
-        throw std::runtime_error(
-            "Kinematic cut for initial conditions misconfigured.");
+      pT_cut = config.take({"Output", "Initial_Conditions", "pT_Cut"});
+      if (modus_.pT_cut().has_value()) {
+        if (pT_cut != modus_.pT_cut().value()) {
+          logg[LInitialConditions].fatal(
+              "Inconsistent values for pT_Cut in configuration.");
+          throw std::invalid_argument(deprecated_message);
+        }
       }
     }
+    if (pT_cut < 0.0) {
+      logg[LInitialConditions].fatal()
+          << "transverse momentum cut for initial conditions configured as "
+             "pT < "
+          << pT_cut << " is unreasonable. \nPlease choose a positive, "
+          << "non-zero value or employ SMASH without pT cut.";
+      throw std::runtime_error(
+          "Kinematic cut for initial conditions misconfigured.");
+    }
 
-    if (rapidity_cut > 0.0 || transverse_momentum_cut > 0.0) {
+    if (rapidity_cut > 0.0 || pT_cut > 0.0) {
       kinematic_cuts_for_IC_output_ = true;
     }
 
-    if (rapidity_cut > 0.0 && transverse_momentum_cut > 0.0) {
+    if (rapidity_cut > 0.0 && pT_cut > 0.0) {
       logg[LInitialConditions].info()
           << "Extracting initial conditions in kinematic range: "
           << -rapidity_cut << " <= y <= " << rapidity_cut
-          << "; pT <= " << transverse_momentum_cut << " GeV.";
+          << "; pT <= " << pT_cut << " GeV.";
     } else if (rapidity_cut > 0.0) {
       logg[LInitialConditions].info()
           << "Extracting initial conditions in kinematic range: "
           << -rapidity_cut << " <= y <= " << rapidity_cut << ".";
-    } else if (transverse_momentum_cut > 0.0) {
+    } else if (pT_cut > 0.0) {
       logg[LInitialConditions].info()
           << "Extracting initial conditions in kinematic range: pT <= "
-          << transverse_momentum_cut << " GeV.";
+          << pT_cut << " GeV.";
     } else {
       logg[LInitialConditions].info()
           << "Extracting initial conditions without kinematic cuts.";
     }
 
     action_finders_.emplace_back(
-        std::make_unique<HyperSurfaceCrossActionsFinder>(
-            proper_time, rapidity_cut, transverse_momentum_cut));
+        std::make_unique<HyperSurfaceCrossActionsFinder>(proper_time,
+                                                         rapidity_cut, pT_cut));
   }
 
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
@@ -1311,23 +1356,22 @@ Experiment<Modus>::Experiment(Configuration &config,
 
   /*!\Userguide
    * \page doxypage_output_initial_conditions
-   * Once initial conditions are enabled, the output file named SMASH_IC (followed by
-   * the appropriate suffix) is generated when SMASH is executed. \n The output
-   * is available in Oscar1999, Oscar2013, binary and ROOT format, as well as in
-   * an additional ASCII format.
-   * The latter is meant to directly serve as an input for the vHLLE
-   * hydrodynamics code (I. Karpenko, P. Huovinen, M. Bleicher: Comput. Phys.
-   * Commun. 185, 3016 (2014)).\n \n
+   * Once initial conditions are enabled, the output file named SMASH_IC
+   * (followed by the appropriate suffix) is generated when SMASH is executed.
+   * \n The output is available in Oscar1999, Oscar2013, binary and ROOT format,
+   * as well as in an additional ASCII format. The latter is meant to directly
+   * serve as an input for the vHLLE hydrodynamics code (I. Karpenko, P.
+   * Huovinen, M. Bleicher: Comput. Phys. Commun. 185, 3016 (2014)).\n \n
    * ### Oscar output
    * In case
    * of the Oscar1999 and Oscar2013 format, the structure is identical to the
    * Oscar Particles Format (see \ref doxypage_output_oscar_particles). \n
    * In contrast
    * to the usual particles output however, the initial conditions output
-   * provides a **list of all particles removed from the evolution** at the 
-   * time when crossing the hypersurface. This implies that neither the 
+   * provides a **list of all particles removed from the evolution** at the
+   * time when crossing the hypersurface. This implies that neither the
    * initial particle list nor the particle list at each time step is printed.
-   * \n The general Oscar structure as described in 
+   * \n The general Oscar structure as described in
    * \ref doxypage_output_oscar_particles is preserved. \n \n
    * ### Binary output
    * The binary initial
@@ -2257,6 +2301,8 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
  * \param[in] particle_list The particle list which should be adjusted
  */
 void validate_and_adjust_particle_list(ParticleList &particle_list);
+std::optional<double> validate_duplicate_IC_config(
+    double, std::optional<double> collider);
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const double t_end,

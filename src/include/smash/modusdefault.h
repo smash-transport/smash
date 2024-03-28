@@ -104,6 +104,15 @@ class ModusDefault {
    * \return passing_time
    */
   double nuclei_passing_time() const { return 0.0; }
+  /// \return Proper time of the hypersurface for IC in ColliderModus
+  std::optional<double> proper_time() const { return -1; }
+  /// \return Lower bound on proper time of the hypersurface for IC in
+  /// ColliderModus
+  std::optional<double> lower_bound() const { return -1; }
+  /// \return Maximum rapidity for IC in ColliderModus
+  std::optional<double> rapidity_cut() const { return -1; }
+  /// \return Maximum transverse momentum for IC in ColliderModus
+  std::optional<double> pT_cut() const { return -1; }
 
   /**
    * Creates the Grid with normal boundary conditions.
