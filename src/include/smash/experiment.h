@@ -1311,32 +1311,10 @@ Experiment<Modus>::Experiment(Configuration &config,
 
   /*!\Userguide
    * \page doxypage_output_initial_conditions
-   * The existence of an initial conditions subsection in the output section of
-   * the configuration file enables the IC output. In addition, all particles
-   * that cross the hypersurface of predefined proper time are removed from the
-   * evolution. This proper time is taken from the \key Proper_Time field
-   * in the \key Initial_Conditions subsection when configuring the output. If
-   * this information
-   * is not provided, the default proper time corresponds to the passing time
-   * of the two nuclei, where all primary interactions are expected to have
-   * occured: \f[ \tau_0 =
-   * (r_\mathrm{p} \ + \ r_\mathrm{t}) \ \left(\left(\frac{\sqrt{s_\mathrm{NN}}}
-   * {2 \ m_\mathrm{N}}\right)^2
-   * - 1\right)^{-1/2} \f]
-   * Therein, \f$ r_\mathrm{p} \f$ and \f$ r_\mathrm{t} \f$ denote the radii of
-   * the projectile and target nucleus, respectively, \f$
-   * \sqrt{s_\mathrm{NN}}\f$
-   * is the collision energy per nucleon and \f$ m_\mathrm{N} \f$ the nucleon
-   * mass. Note though that, if the passing time is smaller than 0.5 fm, the
-   * default proper time of the hypersurface is taken to be \f$\tau = 0.5 \f$
-   * as a minimum bound to ensure the proper time is large enough
-   * to also extract reasonable initial conditions at RHIC/LHC energies. If
-   * desired, this lowest possible value can also be specified in the
-   * configuration file in the \key Lower_Bound field. \n Once
-   * initial conditions are enabled, the output file named SMASH_IC (followed by
+   * Once initial conditions are enabled, the output file named SMASH_IC (followed by
    * the appropriate suffix) is generated when SMASH is executed. \n The output
    * is available in Oscar1999, Oscar2013, binary and ROOT format, as well as in
-   * an additional ASCII format (see \ref doxypage_output_initial_conditions).
+   * an additional ASCII format.
    * The latter is meant to directly serve as an input for the vHLLE
    * hydrodynamics code (I. Karpenko, P. Huovinen, M. Bleicher: Comput. Phys.
    * Commun. 185, 3016 (2014)).\n \n
@@ -1346,13 +1324,11 @@ Experiment<Modus>::Experiment(Configuration &config,
    * Oscar Particles Format (see \ref doxypage_output_oscar_particles). \n
    * In contrast
    * to the usual particles output however, the initial conditions output
-   * provides a
-   * **list of all particles removed from the evolution** at the time when
-   * crossing the hypersurface. This implies that neither the initial particle
-   * list nor the particle list at each time step is printed.\n The general
-   * Oscar structure as described in \ref doxypage_output_oscar_particles is
-   * preserved. \n
-   * \n
+   * provides a **list of all particles removed from the evolution** at the 
+   * time when crossing the hypersurface. This implies that neither the 
+   * initial particle list nor the particle list at each time step is printed.
+   * \n The general Oscar structure as described in 
+   * \ref doxypage_output_oscar_particles is preserved. \n \n
    * ### Binary output
    * The binary initial
    * conditions output also provides a list of all particles removed from the
