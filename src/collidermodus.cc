@@ -268,6 +268,20 @@ ColliderModus::ColliderModus(Configuration modus_config,
   } else if (fermi_motion_ == FermiMotion::Off) {
     logg[LCollider].info() << "Fermi motion is OFF.";
   }
+
+  if (modus_cfg.has_value({"Initial_Conditions", "Proper_Time"})) {
+    IC_proper_time_ = modus_cfg.take({"Initial_Conditions", "Proper_Time"});
+  }
+  if (modus_cfg.has_value({"Initial_Conditions", "Lower_Bound"})) {
+    IC_lower_bound_ = modus_cfg.take({"Initial_Conditions", "Lower_Bound"});
+  }
+  if (modus_cfg.has_value({"Initial_Conditions", "Rapidity_Cut"})) {
+    IC_rapidity_cut_ = modus_cfg.take({"Initial_Conditions", "Rapidity_Cut"});
+  }
+  if (modus_cfg.has_value({"Initial_Conditions", "pT_Cut"})) {
+    IC_pT_cut_ = modus_cfg.take({"Initial_Conditions", "pT_Cut"});
+  }
+
 }
 
 std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {

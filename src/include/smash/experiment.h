@@ -1044,7 +1044,7 @@ Experiment<Modus>::Experiment(Configuration &config,
     // This duplication will be removed in the next release.
     std::string deprecated_message =
         "Some parameters in the Initial_Conditions section of Output are "
-        "deprecated. Please use the corresponding values in the "
+        "deprecated.\nPlease use the corresponding values in the "
         "Initial_Conditions subsection under Collider.";
 
     double proper_time;
@@ -1058,37 +1058,37 @@ Experiment<Modus>::Experiment(Configuration &config,
               "Inconsistent values for Proper_Time in configuration.");
           throw std::invalid_argument(deprecated_message);
         }
-      } else if (modus_.proper_time().has_value()) {
-        proper_time = modus_.proper_time().value();
-      } else {
-        double lower_bound = modus_.lower_bound().has_value()
-                                 ? modus_.lower_bound().value()
-                                 : 0.5;
-        ;
-        if (config.has_value({"Output", "Initial_Conditions", "Lower_Bound"})) {
-          lower_bound =
-              config.take({"Output", "Initial_Conditions", "Lower_Bound"});
-          if (modus_.lower_bound().has_value()) {
-            if (lower_bound != modus_.lower_bound().value_or(lower_bound)) {
-              logg[LInitialConditions].fatal(
-                  "Inconsistent values for Lower_Bound in configuration.");
-              throw std::invalid_argument(deprecated_message);
-            }
+      }
+    } else if (modus_.proper_time().has_value()) {
+      proper_time = modus_.proper_time().value();
+    } else {
+      double lower_bound = modus_.lower_bound().has_value()
+                               ? modus_.lower_bound().value()
+                               : 0.5;
+      if (config.has_value({"Output", "Initial_Conditions", "Lower_Bound"})) {
+        lower_bound =
+            config.take({"Output", "Initial_Conditions", "Lower_Bound"});
+        if (modus_.lower_bound().has_value()) {
+          if (lower_bound != modus_.lower_bound().value_or(lower_bound)) {
+            logg[LInitialConditions].fatal(
+                "Inconsistent values for Lower_Bound in configuration.");
+            throw std::invalid_argument(deprecated_message);
           }
         }
-        // Default proper time is the passing time of the two nuclei
-        double default_proper_time = modus_.nuclei_passing_time();
-        if (default_proper_time >= lower_bound) {
-          proper_time = default_proper_time;
-        } else {
-          logg[LInitialConditions].warn()
-              << "Nuclei passing time is too short, hypersurface proper time "
-                 "set to tau = "
-              << lower_bound << " fm.";
-          proper_time = lower_bound;
-        }
+      }
+      // Default proper time is the passing time of the two nuclei
+      double default_proper_time = modus_.nuclei_passing_time();
+      if (default_proper_time >= lower_bound) {
+        proper_time = default_proper_time;
+      } else {
+        logg[LInitialConditions].warn()
+            << "Nuclei passing time is too short, hypersurface proper time "
+               "set to tau = "
+            << lower_bound << " fm.";
+        proper_time = lower_bound;
       }
     }
+    
     double rapidity_cut =
         modus_.rapidity_cut().has_value() ? modus_.rapidity_cut().value() : 0.0;
     if (config.has_value({"Output", "Initial_Conditions", "Rapidity_Cut"})) {

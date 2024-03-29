@@ -3699,6 +3699,7 @@ struct InputKeys {
    * initial conditions for hydrodynamics. A positive value \unit{in GeV} is
    * expected. Only particles characterized by
    * \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed to the output file.
+   * A value of 0 corresponds to no cut.
    */
   /**
    * \see_key{key_output_IC_pt_cut_}
@@ -3715,7 +3716,7 @@ struct InputKeys {
    * conditions for hydrodynamics. A positive value is expected and the cut is
    * employed symmetrically around 0. Only particles characterized by
    * \f$|\mathrm{\texttt{Rapidity_Cut}}|<y\f$ are printed to the
-   * output file.
+   * output file. A value of 0 corresponds to no cut.
    */
   /**
    * \see_key{key_MC_IC_rapidity_cut_}
@@ -5522,6 +5523,10 @@ struct InputKeys {
       std::cref(modi_collider_impact_value),
       std::cref(modi_collider_impact_values),
       std::cref(modi_collider_impact_yields),
+      std::cref(modi_collider_initialConditions_lowerBound),
+      std::cref(modi_collider_initialConditions_properTime),
+      std::cref(modi_collider_initialConditions_pTCut),
+      std::cref(modi_collider_initialConditions_rapidityCut),
       std::cref(modi_sphere_initialMultiplicities),
       std::cref(modi_sphere_radius),
       std::cref(modi_sphere_startTime),
