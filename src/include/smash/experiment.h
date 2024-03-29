@@ -1062,9 +1062,8 @@ Experiment<Modus>::Experiment(Configuration &config,
     } else if (modus_.proper_time().has_value()) {
       proper_time = modus_.proper_time().value();
     } else {
-      double lower_bound = modus_.lower_bound().has_value()
-                               ? modus_.lower_bound().value()
-                               : 0.5;
+      double lower_bound =
+          modus_.lower_bound().has_value() ? modus_.lower_bound().value() : 0.5;
       if (config.has_value({"Output", "Initial_Conditions", "Lower_Bound"})) {
         lower_bound =
             config.take({"Output", "Initial_Conditions", "Lower_Bound"});
@@ -1088,7 +1087,7 @@ Experiment<Modus>::Experiment(Configuration &config,
         proper_time = lower_bound;
       }
     }
-    
+
     double rapidity_cut =
         modus_.rapidity_cut().has_value() ? modus_.rapidity_cut().value() : 0.0;
     if (config.has_value({"Output", "Initial_Conditions", "Rapidity_Cut"})) {

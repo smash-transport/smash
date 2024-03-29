@@ -254,6 +254,11 @@ class ColliderModus : public ModusDefault {
    * Beam velocity of the target
    */
   double velocity_target_ = 0.0;
+  /*
+   * Because of the ongoing IC output refactoring, these variables are
+   * `std::optional<double>` to *allow* for the key duplication
+   * consistently. In the next release, they will be turned to `double`.
+   */
   /// Hypersurface proper time in IC
   std::optional<double> IC_proper_time_;
   /// Lower bound for proper time in IC

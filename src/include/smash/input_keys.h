@@ -3659,6 +3659,23 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
+   *
+   * \required_key_no_line{key_MC_IC_type_,Type,string}
+   *
+   * Type of initial conditions provided. Currently only a hypersurface of
+   * constant \f$\tau\f$ is implemented.
+   */
+  /**
+   * \see_key{key_MC_IC_type_}
+   */
+  inline static const Key<FluidizationType>
+      modi_collider_initialConditions_type{
+          {"Modi", "Collider", "Initial_Conditions", "Type"},
+          FluidizationType::ConstantTau,
+          {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_lower_bound_,Lower_Bound,double,0.5}
    *
    * Lower bound \unit{in fm} for the IC proper time if
@@ -4548,6 +4565,11 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
+   *
+   * \note The following Initial Conditions options are deprecated in this
+   * section and being moved to a subsection under Collider (see \ref
+   * doxypage_input_conf_modi_C_initial_conditions), please prefer to use them.
+   *
    * \optional_key_no_line{key_output_IC_lower_bound_,Lower_Bound,double,0.5}
    *
    * Lower bound \unit{in fm} for the IC proper time if
@@ -5340,6 +5362,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<FermiMotion>>,
       std::reference_wrapper<const Key<FieldDerivativesMode>>,
+      std::reference_wrapper<const Key<FluidizationType>>,
       std::reference_wrapper<const Key<MultiParticleReactionsBitSet>>,
       std::reference_wrapper<const Key<NNbarTreatment>>,
       std::reference_wrapper<const Key<OutputOnlyFinal>>,
@@ -5527,6 +5550,7 @@ struct InputKeys {
       std::cref(modi_collider_initialConditions_properTime),
       std::cref(modi_collider_initialConditions_pTCut),
       std::cref(modi_collider_initialConditions_rapidityCut),
+      std::cref(modi_collider_initialConditions_type),
       std::cref(modi_sphere_initialMultiplicities),
       std::cref(modi_sphere_radius),
       std::cref(modi_sphere_startTime),
@@ -6095,6 +6119,34 @@ General:
              Yields: [0.000000, 2.999525, 5.959843, 6.995699]
  \endverbatim
  */
+
+/*!\Userguide
+* \page doxypage_input_conf_modi_C_initial_conditions
+* <hr>
+* ### Extracting initial conditions for hydrodynamic evolution
+*
+* The following example configures the initial conditions for hydrodynamics
+* for a Au+Au collision at \f$\sqrt{s_{NN}}=200\f$ \unit{GeV} at midrapidity
+* (\f$-1<y<1\f$). In addition, the extended OSCAR2013 and ASCII outputs
+* are enabled.
+*
+*\verbatim
+Output:
+    Initial_Conditions:
+        Format: ["ASCII","Oscar2013"]
+        Extended: True
+Modi:
+    Collider:
+        Projectile:
+            Particles: {2212: 79, 2112: 118} #Gold197
+        Target:
+            Particles: {2212: 79, 2112: 118} #Gold197
+        Sqrtsnn: 200
+        Initial_Conditions:
+            Type: "Constant_Tau"
+            Rapidity_Cut: 1
+\endverbatim
+*/
 
 /*!\Userguide
  * \page doxypage_input_conf_modi_sphere
