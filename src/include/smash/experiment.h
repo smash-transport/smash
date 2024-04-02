@@ -715,6 +715,17 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   out << e.modus_;
   return out;
 }
+/**
+ * Due to an ongoing refactoring, the physics inputs for Initial Conditions
+ * are duplicated in both Output and Collider sections, with the former
+ * being deprecated. This function checks whether there are two inconsistent
+ * values, in which case SMASH fails.
+ * When the deprecated way is removed, the key taking will be handled in the
+ * constructor of ColliderModus, and the logic here will be removed.
+ *
+ * \throws invalid_argument if inconsistent configuration inputs are supplied
+ */
+void validate_duplicate_IC_config(double, std::optional<double>, std::string);
 
 template <typename Modus>
 void Experiment<Modus>::create_output(const std::string &format,
@@ -1037,44 +1048,32 @@ Experiment<Modus>::Experiment(Configuration &config,
       throw std::runtime_error(
           "Initial conditions can only be extracted in collider modus.");
     }
-    // Due to an ongoing refactoring, the physics inputs for Initial Conditions
-    // are duplicated in both Output and Collider sections. If there are two
-    // inconsistent values, SMASH will not run. Otherwise it will follow the one
-    // present in the configuration. If none are present, the default is used.
-    // This duplication will be removed in the next release.
-    std::string deprecated_message =
-        "Some parameters in the Initial_Conditions section of Output are "
-        "deprecated.\nPlease use the corresponding values in the "
-        "Initial_Conditions subsection under Collider.";
-
-    double proper_time;
+    /*
+     * Due to an ongoing refactoring, the physics inputs for Initial Conditions
+     * are duplicated in both Output and Collider sections, with the former
+     * being deprecated. If there are two inconsistent values, SMASH will not
+     * run. Otherwise it will follow the one present in the configuration. If
+     * none are present, the default is used.
+     * When the deprecated way is removed, the key taking will be handled in the
+     * constructor of ColliderModus, and the logic here will be removed.
+     */
+    double proper_time = std::numeric_limits<double>::quiet_NaN();
     if (config.has_value({"Output", "Initial_Conditions", "Proper_Time"})) {
       // Read in proper time from config
       proper_time =
           config.take({"Output", "Initial_Conditions", "Proper_Time"});
-      if (modus_.proper_time().has_value()) {
-        if (proper_time != modus_.proper_time().value_or(proper_time)) {
-          logg[LInitialConditions].fatal(
-              "Inconsistent values for Proper_Time in configuration.");
-          throw std::invalid_argument(deprecated_message);
-        }
-      }
+      validate_duplicate_IC_config(proper_time, modus_.proper_time(),
+                                   "Proper_Time");
     } else if (modus_.proper_time().has_value()) {
       proper_time = modus_.proper_time().value();
     } else {
       double lower_bound =
           modus_.lower_bound().has_value() ? modus_.lower_bound().value() : 0.5;
-      if (config.has_value({"Output", "Initial_Conditions", "Lower_Bound"})) {
-        lower_bound =
-            config.take({"Output", "Initial_Conditions", "Lower_Bound"});
-        if (modus_.lower_bound().has_value()) {
-          if (lower_bound != modus_.lower_bound().value_or(lower_bound)) {
-            logg[LInitialConditions].fatal(
-                "Inconsistent values for Lower_Bound in configuration.");
-            throw std::invalid_argument(deprecated_message);
-          }
-        }
-      }
+      lower_bound = config.take({"Output", "Initial_Conditions", "Lower_Bound"},
+                                lower_bound);
+      validate_duplicate_IC_config(lower_bound, modus_.lower_bound(),
+                                   "Lower_Bound");
+
       // Default proper time is the passing time of the two nuclei
       double default_proper_time = modus_.nuclei_passing_time();
       if (default_proper_time >= lower_bound) {
@@ -1082,8 +1081,7 @@ Experiment<Modus>::Experiment(Configuration &config,
       } else {
         logg[LInitialConditions].warn()
             << "Nuclei passing time is too short, hypersurface proper time "
-               "set to tau = "
-            << lower_bound << " fm.";
+            << "set to tau = " << lower_bound << " fm.";
         proper_time = lower_bound;
       }
     }
@@ -1093,13 +1091,8 @@ Experiment<Modus>::Experiment(Configuration &config,
     if (config.has_value({"Output", "Initial_Conditions", "Rapidity_Cut"})) {
       rapidity_cut =
           config.take({"Output", "Initial_Conditions", "Rapidity_Cut"});
-      if (modus_.rapidity_cut().has_value()) {
-        if (rapidity_cut != modus_.rapidity_cut().value()) {
-          logg[LInitialConditions].fatal(
-              "Inconsistent values for Rapidity_Cut in configuration.");
-          throw std::invalid_argument(deprecated_message);
-        }
-      }
+      validate_duplicate_IC_config(rapidity_cut, modus_.rapidity_cut(),
+                                   "Rapidity_Cut");
     }
     if (rapidity_cut < 0.0) {
       logg[LInitialConditions].fatal()
@@ -1121,20 +1114,13 @@ Experiment<Modus>::Experiment(Configuration &config,
     double pT_cut = modus_.pT_cut().has_value() ? modus_.pT_cut().value() : 0.0;
     if (config.has_value({"Output", "Initial_Conditions", "pT_Cut"})) {
       pT_cut = config.take({"Output", "Initial_Conditions", "pT_Cut"});
-      if (modus_.pT_cut().has_value()) {
-        if (pT_cut != modus_.pT_cut().value()) {
-          logg[LInitialConditions].fatal(
-              "Inconsistent values for pT_Cut in configuration.");
-          throw std::invalid_argument(deprecated_message);
-        }
-      }
+      validate_duplicate_IC_config(pT_cut, modus_.pT_cut(), "pT_Cut");
     }
     if (pT_cut < 0.0) {
       logg[LInitialConditions].fatal()
           << "transverse momentum cut for initial conditions configured as "
-             "pT < "
-          << pT_cut << " is unreasonable. \nPlease choose a positive, "
-          << "non-zero value or employ SMASH without pT cut.";
+          << "pT < " << pT_cut << " is unreasonable. \nPlease choose a "
+          << "positive, non-zero value or employ SMASH without pT cut.";
       throw std::runtime_error(
           "Kinematic cut for initial conditions misconfigured.");
     }
@@ -2300,8 +2286,6 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
  * \param[in] particle_list The particle list which should be adjusted
  */
 void validate_and_adjust_particle_list(ParticleList &particle_list);
-std::optional<double> validate_duplicate_IC_config(
-    double, std::optional<double> collider);
 
 template <typename Modus>
 void Experiment<Modus>::run_time_evolution(const double t_end,

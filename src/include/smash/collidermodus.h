@@ -255,18 +255,21 @@ class ColliderModus : public ModusDefault {
    */
   double velocity_target_ = 0.0;
   /*
-   * Because of the ongoing IC output refactoring, these variables are
+   * At the moment there are two ways to specify IC input in the
+   * configuration, one of which is deprecated and will be removed
+   * in next release. For the moment, these variables are of type
    * `std::optional<double>` to *allow* for the key duplication
-   * consistently. In the next release, they will be turned to `double`.
+   * consistently. When the deprecated way is removed, they will
+   * be converted to `double`.
    */
   /// Hypersurface proper time in IC
-  std::optional<double> IC_proper_time_;
+  std::optional<double> IC_proper_time_ = std::nullopt;
   /// Lower bound for proper time in IC
-  std::optional<double> IC_lower_bound_;
+  std::optional<double> IC_lower_bound_ = std::nullopt;
   /// Rapidity cut on hypersurface in IC
-  std::optional<double> IC_rapidity_cut_;
+  std::optional<double> IC_rapidity_cut_ = std::nullopt;
   /// Transverse momentum cut on hypersurface IC
-  std::optional<double> IC_pT_cut_;
+  std::optional<double> IC_pT_cut_ = std::nullopt;
 
   /**
    * Get the frame dependent velocity for each nucleus, using

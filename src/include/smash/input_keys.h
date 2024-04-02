@@ -600,14 +600,7 @@ class Key {
  * as a minimum bound to ensure the proper time is large enough
  * to also extract reasonable initial conditions at RHIC/LHC energies. If
  * desired, this lowest possible value can also be specified in the
- * configuration file in the \key Lower_Bound field. \n Once
- * initial conditions are enabled, the output file named SMASH_IC (followed by
- * the appropriate suffix) is generated when SMASH is executed. \n The output
- * is available in Oscar1999, Oscar2013, binary and ROOT format, as well as in
- * an additional ASCII format (see \ref doxypage_output_initial_conditions).
- * The latter is meant to directly serve as an input for the vHLLE
- * hydrodynamics code (I. Karpenko, P. Huovinen, M. Bleicher: Comput. Phys.
- * Commun. 185, 3016 (2014)).\n
+ * configuration file in the \key Lower_Bound field.\n
  * <hr>
  */
 
@@ -3662,8 +3655,8 @@ struct InputKeys {
    *
    * \required_key_no_line{key_MC_IC_type_,Type,string}
    *
-   * Type of initial conditions provided. Currently only a hypersurface of
-   * constant \f$\tau\f$ is implemented.
+   * Type of initial conditions provided. Currently only one value is possible:
+   * - `"Constant_Tau"` &rarr; a hypersurface of constant \f$\tau\f$ is used.
    */
   /**
    * \see_key{key_MC_IC_type_}
@@ -4567,8 +4560,9 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    *
    * \note The following Initial Conditions options are deprecated in this
-   * section and being moved to a subsection under Collider (see \ref
-   * doxypage_input_conf_modi_C_initial_conditions), please prefer to use them.
+   * section and should be provided to a subsection under Collider (see \ref
+   * doxypage_input_conf_modi_C_initial_conditions). Prefer to use them, as
+   * these keys will be removed soon.
    *
    * \optional_key_no_line{key_output_IC_lower_bound_,Lower_Bound,double,0.5}
    *
