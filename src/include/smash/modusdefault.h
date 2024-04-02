@@ -23,6 +23,25 @@
 namespace smash {
 
 /**
+ * At the moment there are two ways to specify input for initial conditions in
+ * the configuration, one of which is deprecated and will be removed in a next
+ * release. For the moment, these variables are of type `std::optional<double>`
+ * to *allow* for the key duplication consistently. When more types of IC are
+ * implemented in the future, this will allow setting only the appropriate
+ * parameters.
+ */
+struct InitialConditionParameters {
+  /// Hypersurface proper time in IC
+  std::optional<double> proper_time = std::nullopt;
+  /// Lower bound for proper time in IC
+  std::optional<double> lower_bound = std::nullopt;
+  /// Rapidity cut on hypersurface in IC
+  std::optional<double> rapidity_cut = std::nullopt;
+  /// Transverse momentum cut on hypersurface IC
+  std::optional<double> pT_cut = std::nullopt;
+};
+
+/**
  * \ingroup modus
  * Base class for Modus classes that provides default function implementations.
  *
@@ -104,15 +123,24 @@ class ModusDefault {
    * \return passing_time
    */
   double nuclei_passing_time() const { return 0.0; }
+
+  /// Plain Old Data type to hold parameters for initial conditions
+  InitialConditionParameters IC_parameters_;
   /// \return Proper time of the hypersurface for IC in ColliderModus
-  std::optional<double> proper_time() const { return std::nullopt; }
+  std::optional<double> proper_time() const {
+    return IC_parameters_.proper_time;
+  }
   /// \return Lower bound on proper time of the hypersurface for IC in
   /// ColliderModus
-  std::optional<double> lower_bound() const { return std::nullopt; }
+  std::optional<double> lower_bound() const {
+    return IC_parameters_.lower_bound;
+  }
   /// \return Maximum rapidity for IC in ColliderModus
-  std::optional<double> rapidity_cut() const { return std::nullopt; }
+  std::optional<double> rapidity_cut() const {
+    return IC_parameters_.rapidity_cut;
+  }
   /// \return Maximum transverse momentum for IC in ColliderModus
-  std::optional<double> pT_cut() const { return std::nullopt; }
+  std::optional<double> pT_cut() const { return IC_parameters_.pT_cut; }
 
   /**
    * Creates the Grid with normal boundary conditions.

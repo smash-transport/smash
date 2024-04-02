@@ -134,14 +134,6 @@ class ColliderModus : public ModusDefault {
   bool calculation_frame_is_fixed_target() const {
     return frame_ == CalculationFrame::FixedTarget ? true : false;
   }
-  /// \return Proper time of the hypersurface for IC
-  std::optional<double> proper_time() const { return IC_proper_time_; }
-  /// \return Lower bound on proper time of the hypersurface for IC
-  std::optional<double> lower_bound() const { return IC_lower_bound_; }
-  /// \return Maximum rapidity for IC
-  std::optional<double> rapidity_cut() const { return IC_rapidity_cut_; }
-  /// \return Maximum transverse momentum for IC
-  std::optional<double> pT_cut() const { return IC_pT_cut_; }
 
   /**
    * \ingroup exception
@@ -254,22 +246,6 @@ class ColliderModus : public ModusDefault {
    * Beam velocity of the target
    */
   double velocity_target_ = 0.0;
-  /*
-   * At the moment there are two ways to specify IC input in the
-   * configuration, one of which is deprecated and will be removed
-   * in next release. For the moment, these variables are of type
-   * `std::optional<double>` to *allow* for the key duplication
-   * consistently. When the deprecated way is removed, they will
-   * be converted to `double`.
-   */
-  /// Hypersurface proper time in IC
-  std::optional<double> IC_proper_time_ = std::nullopt;
-  /// Lower bound for proper time in IC
-  std::optional<double> IC_lower_bound_ = std::nullopt;
-  /// Rapidity cut on hypersurface in IC
-  std::optional<double> IC_rapidity_cut_ = std::nullopt;
-  /// Transverse momentum cut on hypersurface IC
-  std::optional<double> IC_pT_cut_ = std::nullopt;
 
   /**
    * Get the frame dependent velocity for each nucleus, using
