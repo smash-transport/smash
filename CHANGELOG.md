@@ -55,6 +55,7 @@ Date: 2024-02-26
 
 ### Deprecated
 * Locate SMASH in external projects using the `SMASH_DIR` and not relying on an installation
+* Some physics-related input keys in `Output: Initial_Conditions` were deprecated and duplicated under `Modi: Collider: Initial_Conditions`; the duplication is needed to not interrupt ongoing work
 
 ### Removed
 * Some public setters of the `ListModus` class have been removed
