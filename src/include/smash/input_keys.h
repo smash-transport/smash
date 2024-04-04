@@ -4559,7 +4559,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_output
    *
-   * \note The following Initial Conditions options are deprecated in this
+   * \attention The following Initial Conditions options are deprecated in this
    * section and should be provided to a subsection under Collider (see \ref
    * doxypage_input_conf_modi_C_initial_conditions). Prefer to use them, as
    * these keys will be removed soon.

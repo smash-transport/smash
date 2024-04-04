@@ -716,12 +716,12 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   return out;
 }
 /**
- * Due to an ongoing refactoring, the physics inputs for Initial Conditions
- * are duplicated in both Output and Collider sections, with the former
- * being deprecated. This function checks whether there are two inconsistent
- * values, in which case SMASH fails.
+ * The physics inputs for Initial Conditions are currently duplicated in both
+ * Output and Collider sections, with the former being deprecated. This
+ * function checks whether there are two inconsistent values, in which case
+ * SMASH fails.
  * When the deprecated way is removed, the key taking will be handled in the
- * constructor of ColliderModus, and the logic here will be removed.
+ * constructor of ColliderModus, and this function will be removed.
  *
  * \throws invalid_argument if inconsistent configuration inputs are supplied
  */
@@ -1345,8 +1345,8 @@ Experiment<Modus>::Experiment(Configuration &config,
    * (followed by the appropriate suffix) is generated when SMASH is executed.
    * \n The output is available in Oscar1999, Oscar2013, binary and ROOT format,
    * as well as in an additional ASCII format. The latter is meant to directly
-   * serve as an input for the vHLLE hydrodynamics code (I. Karpenko, P.
-   * Huovinen, M. Bleicher: Comput. Phys. Commun. 185, 3016 (2014)).\n \n
+   * serve as input for the vHLLE hydrodynamics code \iref{Karpenko:2013wva}.
+   * \n \n
    * ### Oscar output
    * In case
    * of the Oscar1999 and Oscar2013 format, the structure is identical to the
