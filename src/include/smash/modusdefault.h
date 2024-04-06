@@ -21,7 +21,6 @@
 #include "potentials.h"
 
 namespace smash {
-
 /**
  * \ingroup modus
  * Base class for Modus classes that provides default function implementations.
@@ -104,7 +103,15 @@ class ModusDefault {
    * \return passing_time
    */
   double nuclei_passing_time() const { return 0.0; }
-
+  /// \return Proper time of the hypersurface for IC in ColliderModus
+  std::optional<double> proper_time() const { return std::nullopt; }
+  /// \return Lower bound on proper time of the hypersurface for IC in
+  /// ColliderModus
+  std::optional<double> lower_bound() const { return std::nullopt; }
+  /// \return Maximum rapidity for IC in ColliderModus
+  std::optional<double> rapidity_cut() const { return std::nullopt; }
+  /// \return Maximum transverse momentum for IC in ColliderModus
+  std::optional<double> pT_cut() const { return std::nullopt; }
   /**
    * Creates the Grid with normal boundary conditions.
    *

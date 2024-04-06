@@ -936,6 +936,24 @@ class Configuration {
     }
 
     /**
+     * Set condition of fluidization for hydrodynamic initial
+     * conditions.
+     *
+     * \return FluidizationType.
+     * \throw IncorrectTypeInAssignment in case a key that is
+     * not available is provided as a configuration value.
+     */
+    operator FluidizationType() const {
+      const std::string s = operator std::string();
+      if (s == "Constant_Tau") {
+        return FluidizationType::ConstantTau;
+      }
+      throw IncorrectTypeInAssignment("The value for key \"" +
+                                      std::string(key_) + "\" should be " +
+                                      "\"Constant_Tau\".");
+    }
+
+    /**
      * Set OutputOnlyFinal for particles output from configuration values.
      *
      * \return OutputOnlyFinal.

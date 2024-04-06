@@ -338,6 +338,11 @@ enum class PseudoResonance {
   ClosestFromUnstable,
 };
 
+enum class FluidizationType {
+  /// Hypersurface crossed at a fixed proper time
+  ConstantTau,
+};
+
 /// @cond
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;

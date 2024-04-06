@@ -134,6 +134,20 @@ class ColliderModus : public ModusDefault {
   bool calculation_frame_is_fixed_target() const {
     return frame_ == CalculationFrame::FixedTarget ? true : false;
   }
+  /// \return Proper time of the hypersurface for IC
+  std::optional<double> proper_time() const {
+    return IC_parameters_.proper_time;
+  }
+  /// \return Lower bound on proper time of the hypersurface for IC
+  std::optional<double> lower_bound() const {
+    return IC_parameters_.lower_bound;
+  }
+  /// \return Maximum rapidity for IC
+  std::optional<double> rapidity_cut() const {
+    return IC_parameters_.rapidity_cut;
+  }
+  /// \return Maximum transverse momentum for IC
+  std::optional<double> pT_cut() const { return IC_parameters_.pT_cut; }
 
   /**
    * \ingroup exception
@@ -144,6 +158,24 @@ class ColliderModus : public ModusDefault {
   };
 
  private:
+  /**
+   * At the moment there are two ways to specify input for initial conditions in
+   * the configuration, one of which is deprecated and will be removed in a next
+   * release. For the moment, these variables are of type
+   * `std::optional<double>` to *allow* for the key duplication consistently.
+   * When more types of IC are implemented in the future, this will allow
+   * setting only the appropriate parameters.
+   */
+  struct InitialConditionParameters {
+    /// Hypersurface proper time in IC
+    std::optional<double> proper_time = std::nullopt;
+    /// Lower bound for proper time in IC
+    std::optional<double> lower_bound = std::nullopt;
+    /// Rapidity cut on hypersurface in IC
+    std::optional<double> rapidity_cut = std::nullopt;
+    /// Transverse momentum cut on hypersurface IC
+    std::optional<double> pT_cut = std::nullopt;
+  };
   /**
    * Projectile.
    *
@@ -246,6 +278,9 @@ class ColliderModus : public ModusDefault {
    * Beam velocity of the target
    */
   double velocity_target_ = 0.0;
+  /// Plain Old Data type to hold parameters for initial conditions
+  InitialConditionParameters IC_parameters_;
+
   /**
    * Get the frame dependent velocity for each nucleus, using
    * the current reference frame. \see frame_

@@ -715,6 +715,17 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   out << e.modus_;
   return out;
 }
+/**
+ * The physics inputs for Initial Conditions are currently duplicated in both
+ * Output and Collider sections, with the former being deprecated. This
+ * function checks whether there are two inconsistent values, in which case
+ * SMASH fails.
+ * When the deprecated way is removed, the key taking will be handled in the
+ * constructor of ColliderModus, and this function will be removed.
+ *
+ * \throws invalid_argument if inconsistent configuration inputs are supplied
+ */
+void validate_duplicate_IC_config(double, std::optional<double>, std::string);
 
 template <typename Modus>
 void Experiment<Modus>::create_output(const std::string &format,
@@ -1037,39 +1048,59 @@ Experiment<Modus>::Experiment(Configuration &config,
       throw std::runtime_error(
           "Initial conditions can only be extracted in collider modus.");
     }
-    double proper_time;
+    /*
+     * Due to an ongoing refactoring, the physics inputs for Initial Conditions
+     * are duplicated in both Output and Collider sections, with the former
+     * being deprecated. If there are two inconsistent values, SMASH will not
+     * run. Otherwise it will follow the one present in the configuration. If
+     * none are present, the default is used.
+     * When the deprecated way is removed, the key taking will be handled in the
+     * constructor of ColliderModus, and the logic here will be removed.
+     */
+    double proper_time = std::numeric_limits<double>::quiet_NaN();
     if (config.has_value({"Output", "Initial_Conditions", "Proper_Time"})) {
       // Read in proper time from config
       proper_time =
           config.take({"Output", "Initial_Conditions", "Proper_Time"});
+      validate_duplicate_IC_config(proper_time, modus_.proper_time(),
+                                   "Proper_Time");
+    } else if (modus_.proper_time().has_value()) {
+      proper_time = modus_.proper_time().value();
     } else {
+      double lower_bound =
+          modus_.lower_bound().has_value() ? modus_.lower_bound().value() : 0.5;
+      lower_bound = config.take({"Output", "Initial_Conditions", "Lower_Bound"},
+                                lower_bound);
+      validate_duplicate_IC_config(lower_bound, modus_.lower_bound(),
+                                   "Lower_Bound");
+
       // Default proper time is the passing time of the two nuclei
       double default_proper_time = modus_.nuclei_passing_time();
-      double lower_bound =
-          config.take({"Output", "Initial_Conditions", "Lower_Bound"}, 0.5);
       if (default_proper_time >= lower_bound) {
         proper_time = default_proper_time;
       } else {
         logg[LInitialConditions].warn()
-            << "Nuclei passing time is too short, hypersurface proper time set "
-               "to tau = "
-            << lower_bound << " fm.";
+            << "Nuclei passing time is too short, hypersurface proper time "
+            << "set to tau = " << lower_bound << " fm.";
         proper_time = lower_bound;
       }
     }
 
-    double rapidity_cut = 0.0;
+    double rapidity_cut =
+        modus_.rapidity_cut().has_value() ? modus_.rapidity_cut().value() : 0.0;
     if (config.has_value({"Output", "Initial_Conditions", "Rapidity_Cut"})) {
       rapidity_cut =
           config.take({"Output", "Initial_Conditions", "Rapidity_Cut"});
-      if (rapidity_cut <= 0.0) {
-        logg[LInitialConditions].fatal()
-            << "Rapidity cut for initial conditions configured as abs(y) < "
-            << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
-            << "non-zero value or employ SMASH without rapidity cut.";
-        throw std::runtime_error(
-            "Kinematic cut for initial conditions malconfigured.");
-      }
+      validate_duplicate_IC_config(rapidity_cut, modus_.rapidity_cut(),
+                                   "Rapidity_Cut");
+    }
+    if (rapidity_cut < 0.0) {
+      logg[LInitialConditions].fatal()
+          << "Rapidity cut for initial conditions configured as abs(y) < "
+          << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
+          << "non-zero value or employ SMASH without rapidity cut.";
+      throw std::runtime_error(
+          "Kinematic cut for initial conditions malconfigured.");
     }
 
     if (modus_.calculation_frame_is_fixed_target() && rapidity_cut != 0.0) {
@@ -1080,46 +1111,45 @@ Experiment<Modus>::Experiment(Configuration &config,
           "\"Calculation_Frame\" instead.");
     }
 
-    double transverse_momentum_cut = 0.0;
+    double pT_cut = modus_.pT_cut().has_value() ? modus_.pT_cut().value() : 0.0;
     if (config.has_value({"Output", "Initial_Conditions", "pT_Cut"})) {
-      transverse_momentum_cut =
-          config.take({"Output", "Initial_Conditions", "pT_Cut"});
-      if (transverse_momentum_cut <= 0.0) {
-        logg[LInitialConditions].fatal()
-            << "transverse momentum cut for initial conditions configured as "
-               "pT < "
-            << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
-            << "non-zero value or employ SMASH without pT cut.";
-        throw std::runtime_error(
-            "Kinematic cut for initial conditions misconfigured.");
-      }
+      pT_cut = config.take({"Output", "Initial_Conditions", "pT_Cut"});
+      validate_duplicate_IC_config(pT_cut, modus_.pT_cut(), "pT_Cut");
+    }
+    if (pT_cut < 0.0) {
+      logg[LInitialConditions].fatal()
+          << "transverse momentum cut for initial conditions configured as "
+          << "pT < " << pT_cut << " is unreasonable. \nPlease choose a "
+          << "positive, non-zero value or employ SMASH without pT cut.";
+      throw std::runtime_error(
+          "Kinematic cut for initial conditions misconfigured.");
     }
 
-    if (rapidity_cut > 0.0 || transverse_momentum_cut > 0.0) {
+    if (rapidity_cut > 0.0 || pT_cut > 0.0) {
       kinematic_cuts_for_IC_output_ = true;
     }
 
-    if (rapidity_cut > 0.0 && transverse_momentum_cut > 0.0) {
+    if (rapidity_cut > 0.0 && pT_cut > 0.0) {
       logg[LInitialConditions].info()
           << "Extracting initial conditions in kinematic range: "
           << -rapidity_cut << " <= y <= " << rapidity_cut
-          << "; pT <= " << transverse_momentum_cut << " GeV.";
+          << "; pT <= " << pT_cut << " GeV.";
     } else if (rapidity_cut > 0.0) {
       logg[LInitialConditions].info()
           << "Extracting initial conditions in kinematic range: "
           << -rapidity_cut << " <= y <= " << rapidity_cut << ".";
-    } else if (transverse_momentum_cut > 0.0) {
+    } else if (pT_cut > 0.0) {
       logg[LInitialConditions].info()
           << "Extracting initial conditions in kinematic range: pT <= "
-          << transverse_momentum_cut << " GeV.";
+          << pT_cut << " GeV.";
     } else {
       logg[LInitialConditions].info()
           << "Extracting initial conditions without kinematic cuts.";
     }
 
     action_finders_.emplace_back(
-        std::make_unique<HyperSurfaceCrossActionsFinder>(
-            proper_time, rapidity_cut, transverse_momentum_cut));
+        std::make_unique<HyperSurfaceCrossActionsFinder>(proper_time,
+                                                         rapidity_cut, pT_cut));
   }
 
   if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
@@ -1311,48 +1341,23 @@ Experiment<Modus>::Experiment(Configuration &config,
 
   /*!\Userguide
    * \page doxypage_output_initial_conditions
-   * The existence of an initial conditions subsection in the output section of
-   * the configuration file enables the IC output. In addition, all particles
-   * that cross the hypersurface of predefined proper time are removed from the
-   * evolution. This proper time is taken from the \key Proper_Time field
-   * in the \key Initial_Conditions subsection when configuring the output. If
-   * this information
-   * is not provided, the default proper time corresponds to the passing time
-   * of the two nuclei, where all primary interactions are expected to have
-   * occured: \f[ \tau_0 =
-   * (r_\mathrm{p} \ + \ r_\mathrm{t}) \ \left(\left(\frac{\sqrt{s_\mathrm{NN}}}
-   * {2 \ m_\mathrm{N}}\right)^2
-   * - 1\right)^{-1/2} \f]
-   * Therein, \f$ r_\mathrm{p} \f$ and \f$ r_\mathrm{t} \f$ denote the radii of
-   * the projectile and target nucleus, respectively, \f$
-   * \sqrt{s_\mathrm{NN}}\f$
-   * is the collision energy per nucleon and \f$ m_\mathrm{N} \f$ the nucleon
-   * mass. Note though that, if the passing time is smaller than 0.5 fm, the
-   * default proper time of the hypersurface is taken to be \f$\tau = 0.5 \f$
-   * as a minimum bound to ensure the proper time is large enough
-   * to also extract reasonable initial conditions at RHIC/LHC energies. If
-   * desired, this lowest possible value can also be specified in the
-   * configuration file in the \key Lower_Bound field. \n Once
-   * initial conditions are enabled, the output file named SMASH_IC (followed by
-   * the appropriate suffix) is generated when SMASH is executed. \n The output
-   * is available in Oscar1999, Oscar2013, binary and ROOT format, as well as in
-   * an additional ASCII format (see \ref doxypage_output_initial_conditions).
-   * The latter is meant to directly serve as an input for the vHLLE
-   * hydrodynamics code (I. Karpenko, P. Huovinen, M. Bleicher: Comput. Phys.
-   * Commun. 185, 3016 (2014)).\n \n
+   * Once initial conditions are enabled, the output file named SMASH_IC
+   * (followed by the appropriate suffix) is generated when SMASH is executed.
+   * \n The output is available in Oscar1999, Oscar2013, binary and ROOT format,
+   * as well as in an additional ASCII format. The latter is meant to directly
+   * serve as input for the vHLLE hydrodynamics code \iref{Karpenko:2013wva}.
+   * \n \n
    * ### Oscar output
    * In case
    * of the Oscar1999 and Oscar2013 format, the structure is identical to the
    * Oscar Particles Format (see \ref doxypage_output_oscar_particles). \n
    * In contrast
    * to the usual particles output however, the initial conditions output
-   * provides a
-   * **list of all particles removed from the evolution** at the time when
-   * crossing the hypersurface. This implies that neither the initial particle
-   * list nor the particle list at each time step is printed.\n The general
-   * Oscar structure as described in \ref doxypage_output_oscar_particles is
-   * preserved. \n
-   * \n
+   * provides a **list of all particles removed from the evolution** at the
+   * time when crossing the hypersurface. This implies that neither the
+   * initial particle list nor the particle list at each time step is printed.
+   * \n The general Oscar structure as described in
+   * \ref doxypage_output_oscar_particles is preserved. \n \n
    * ### Binary output
    * The binary initial
    * conditions output also provides a list of all particles removed from the

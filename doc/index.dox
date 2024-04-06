@@ -92,9 +92,11 @@
                 <div class="invisible-content">
                 \subpage doxypage_input_conf_modi_C_proj_targ
                 \subpage doxypage_input_conf_modi_C_impact_parameter
+                \subpage doxypage_input_conf_modi_C_initial_conditions
                 </div>
                 \page doxypage_input_conf_modi_C_proj_targ Projectile and target
                 \page doxypage_input_conf_modi_C_impact_parameter Impact parameter
+                \page doxypage_input_conf_modi_C_initial_conditions Initial conditions
             \page doxypage_input_conf_modi_sphere Sphere
             \page doxypage_input_conf_modi_box Box
             \page doxypage_input_conf_modi_list List

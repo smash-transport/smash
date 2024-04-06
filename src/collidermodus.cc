@@ -22,6 +22,7 @@
 #include "smash/customnucleus.h"
 #include "smash/experimentparameters.h"
 #include "smash/fourvector.h"
+#include "smash/input_keys.h"
 #include "smash/logging.h"
 #include "smash/random.h"
 
@@ -267,6 +268,28 @@ ColliderModus::ColliderModus(Configuration modus_config,
     logg[LCollider].info() << "FROZEN Fermi motion is on.";
   } else if (fermi_motion_ == FermiMotion::Off) {
     logg[LCollider].info() << "Fermi motion is OFF.";
+  }
+
+  FluidizationType IC_type = modus_cfg.take(
+      {"Initial_Conditions", "Type"},
+      InputKeys::modi_collider_initialConditions_type.default_value());
+
+  if (IC_type == FluidizationType::ConstantTau) {
+    if (modus_cfg.has_value({"Initial_Conditions", "Proper_Time"})) {
+      IC_parameters_.proper_time =
+          modus_cfg.take({"Initial_Conditions", "Proper_Time"});
+    }
+    if (modus_cfg.has_value({"Initial_Conditions", "Lower_Bound"})) {
+      IC_parameters_.lower_bound =
+          modus_cfg.take({"Initial_Conditions", "Lower_Bound"});
+    }
+    if (modus_cfg.has_value({"Initial_Conditions", "Rapidity_Cut"})) {
+      IC_parameters_.rapidity_cut =
+          modus_cfg.take({"Initial_Conditions", "Rapidity_Cut"});
+    }
+    if (modus_cfg.has_value({"Initial_Conditions", "pT_Cut"})) {
+      IC_parameters_.pT_cut = modus_cfg.take({"Initial_Conditions", "pT_Cut"});
+    }
   }
 }
 

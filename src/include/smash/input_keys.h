@@ -578,6 +578,33 @@ class Key {
  */
 
 /*!\Userguide
+ * \page doxypage_input_conf_modi_C_initial_conditions
+ *
+ * The existence of an initial conditions subsection in the output section of
+ * the configuration file enables the IC output. In addition, all particles
+ * that cross the hypersurface of predefined proper time are removed from the
+ * evolution. This proper time is taken from the \key Proper_Time field
+ * in the \key Initial_Conditions subsection when configuring the output. If
+ * this information is not provided, the default proper time corresponds to
+ * the passing time of the two nuclei, where all primary interactions are
+ * expected to have occured: \f[ \tau_0 =
+ * (r_\mathrm{p} \ + \ r_\mathrm{t}) \ \left(\left(\frac{\sqrt{s_\mathrm{NN}}}
+ * {2 \ m_\mathrm{N}}\right)^2
+ * - 1\right)^{-1/2} \f]
+ * Therein, \f$ r_\mathrm{p} \f$ and \f$ r_\mathrm{t} \f$ denote the radii of
+ * the projectile and target nucleus, respectively, \f$
+ * \sqrt{s_\mathrm{NN}}\f$
+ * is the collision energy per nucleon and \f$ m_\mathrm{N} \f$ the nucleon
+ * mass. Note though that, if the passing time is smaller than 0.5 fm, the
+ * default proper time of the hypersurface is taken to be \f$\tau = 0.5 \f$
+ * as a minimum bound to ensure the proper time is large enough
+ * to also extract reasonable initial conditions at RHIC/LHC energies. If
+ * desired, this lowest possible value can also be specified in the
+ * configuration file in the \key Lower_Bound field.\n
+ * <hr>
+ */
+
+/*!\Userguide
  * \page doxypage_input_conf_modi_sphere
  */
 
@@ -3624,6 +3651,90 @@ struct InputKeys {
       {"Modi", "Collider", "Impact", "Yields"}, {"0.80"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   *
+   * \required_key_no_line{key_MC_IC_type_,Type,string}
+   *
+   * Type of initial conditions provided. Currently only one value is possible:
+   * - `"Constant_Tau"` &rarr; a hypersurface of constant \f$\tau\f$ is used.
+   */
+  /**
+   * \see_key{key_MC_IC_type_}
+   */
+  inline static const Key<FluidizationType>
+      modi_collider_initialConditions_type{
+          {"Modi", "Collider", "Initial_Conditions", "Type"},
+          FluidizationType::ConstantTau,
+          {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_lower_bound_,Lower_Bound,double,0.5}
+   *
+   * Lower bound \unit{in fm} for the IC proper time if
+   * <tt>\ref key_MC_IC_proper_time_ "Proper_Time"</tt> is not provided.
+   */
+  /**
+   * \see_key{key_MC_IC_lower_bound_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_lowerBound{
+      {"Modi", "Collider", "Initial_Conditions", "Lower_Bound"}, 0.5, {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_proper_time_,Proper_Time,double,
+   * </tt>\f$f(t_{np})\f$<tt>}
+   *
+   * Proper time \unit{in fm} at which hypersurface is created. Its default
+   * value depends on the nuclei passing time \f$t_{np}\f$ as follows,
+   * \f[
+   * f(t_{np})=\begin{cases}
+   * \mathrm{\texttt{Lower_Bound}}  & t_{np} \le \mathrm{\texttt{Lower_Bound}}\\
+   * t_{np} & t_{np} > \mathrm{\texttt{Lower_Bound}}
+   * \end{cases}\;.
+   * \f]
+   */
+  /**
+   * \see_key{key_MC_IC_proper_time_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_properTime{
+      {"Modi", "Collider", "Initial_Conditions", "Proper_Time"}, {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_pt_cut_,pT_Cut,double,
+   * </tt>No cut is done<tt>}
+   *
+   * If set, employ a transverse momentum cut for particles contributing to the
+   * initial conditions for hydrodynamics. A positive value \unit{in GeV} is
+   * expected. Only particles characterized by
+   * \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed to the output file.
+   * A value of 0 corresponds to no cut.
+   */
+  /**
+   * \see_key{key_output_IC_pt_cut_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_pTCut{
+      {"Modi", "Collider", "Initial_Conditions", "pT_Cut"}, {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_rapidity_cut_,Rapidity_Cut,double,
+   * </tt>No cut is done<tt>}
+   *
+   * If set, employ a rapidity cut for particles contributing to the initial
+   * conditions for hydrodynamics. A positive value is expected and the cut is
+   * employed symmetrically around 0. Only particles characterized by
+   * \f$|\mathrm{\texttt{Rapidity_Cut}}|<y\f$ are printed to the
+   * output file. A value of 0 corresponds to no cut.
+   */
+  /**
+   * \see_key{key_MC_IC_rapidity_cut_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_rapidityCut{
+      {"Modi", "Collider", "Initial_Conditions", "Rapidity_Cut"}, {"3.2"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * ### Mandatory keys
    */
@@ -4447,6 +4558,12 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
+   *
+   * \attention The following Initial Conditions options are deprecated in this
+   * section and should be provided to a subsection under Collider (see \ref
+   * doxypage_input_conf_modi_C_initial_conditions). Prefer to use them, as
+   * these keys will be removed soon.
+   *
    * \optional_key_no_line{key_output_IC_lower_bound_,Lower_Bound,double,0.5}
    *
    * Lower bound \unit{in fm} for the IC proper time if
@@ -4456,7 +4573,7 @@ struct InputKeys {
    * \see_key{key_output_IC_lower_bound_}
    */
   inline static const Key<double> output_initialConditions_lowerBound{
-      {"Output", "Initial_Conditions", "Lower_Bound"}, 0.5, {"1.8"}};
+      {"Output", "Initial_Conditions", "Lower_Bound"}, 0.5, {"1.8", "3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4476,7 +4593,7 @@ struct InputKeys {
    * \see_key{key_output_IC_proper_time_}
    */
   inline static const Key<double> output_initialConditions_properTime{
-      {"Output", "Initial_Conditions", "Proper_Time"}, {"1.7"}};
+      {"Output", "Initial_Conditions", "Proper_Time"}, {"1.7", "3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4492,7 +4609,7 @@ struct InputKeys {
    * \see_key{key_output_IC_pt_cut_}
    */
   inline static const Key<double> output_initialConditions_pTCut{
-      {"Output", "Initial_Conditions", "pT_Cut"}, {"2.2"}};
+      {"Output", "Initial_Conditions", "pT_Cut"}, {"2.2", "3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4509,7 +4626,7 @@ struct InputKeys {
    * \see_key{key_output_IC_rapidity_cut_}
    */
   inline static const Key<double> output_initialConditions_rapidityCut{
-      {"Output", "Initial_Conditions", "Rapidity_Cut"}, {"2.2"}};
+      {"Output", "Initial_Conditions", "Rapidity_Cut"}, {"2.2", "3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5239,6 +5356,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<FermiMotion>>,
       std::reference_wrapper<const Key<FieldDerivativesMode>>,
+      std::reference_wrapper<const Key<FluidizationType>>,
       std::reference_wrapper<const Key<MultiParticleReactionsBitSet>>,
       std::reference_wrapper<const Key<NNbarTreatment>>,
       std::reference_wrapper<const Key<OutputOnlyFinal>>,
@@ -5422,6 +5540,11 @@ struct InputKeys {
       std::cref(modi_collider_impact_value),
       std::cref(modi_collider_impact_values),
       std::cref(modi_collider_impact_yields),
+      std::cref(modi_collider_initialConditions_lowerBound),
+      std::cref(modi_collider_initialConditions_properTime),
+      std::cref(modi_collider_initialConditions_pTCut),
+      std::cref(modi_collider_initialConditions_rapidityCut),
+      std::cref(modi_collider_initialConditions_type),
       std::cref(modi_sphere_initialMultiplicities),
       std::cref(modi_sphere_radius),
       std::cref(modi_sphere_startTime),
@@ -5990,6 +6113,34 @@ General:
              Yields: [0.000000, 2.999525, 5.959843, 6.995699]
  \endverbatim
  */
+
+/*!\Userguide
+* \page doxypage_input_conf_modi_C_initial_conditions
+* <hr>
+* ### Extracting initial conditions for hydrodynamic evolution
+*
+* The following example configures the initial conditions for hydrodynamics
+* for a Au+Au collision at \f$\sqrt{s_{NN}}=200\f$ \unit{GeV} at midrapidity
+* (\f$-1<y<1\f$). In addition, the extended OSCAR2013 and ASCII outputs
+* are enabled.
+*
+*\verbatim
+Output:
+    Initial_Conditions:
+        Format: ["ASCII","Oscar2013"]
+        Extended: True
+Modi:
+    Collider:
+        Projectile:
+            Particles: {2212: 79, 2112: 118} #Gold197
+        Target:
+            Particles: {2212: 79, 2112: 118} #Gold197
+        Sqrtsnn: 200
+        Initial_Conditions:
+            Type: "Constant_Tau"
+            Rapidity_Cut: 1
+\endverbatim
+*/
 
 /*!\Userguide
  * \page doxypage_input_conf_modi_sphere
