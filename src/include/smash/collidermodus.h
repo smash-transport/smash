@@ -23,24 +23,6 @@
 namespace smash {
 
 struct ExperimentParameters;
-/**
- * At the moment there are two ways to specify input for initial conditions in
- * the configuration, one of which is deprecated and will be removed in a next
- * release. For the moment, these variables are of type `std::optional<double>`
- * to *allow* for the key duplication consistently. When more types of IC are
- * implemented in the future, this will allow setting only the appropriate
- * parameters.
- */
-struct InitialConditionParameters {
-  /// Hypersurface proper time in IC
-  std::optional<double> proper_time = std::nullopt;
-  /// Lower bound for proper time in IC
-  std::optional<double> lower_bound = std::nullopt;
-  /// Rapidity cut on hypersurface in IC
-  std::optional<double> rapidity_cut = std::nullopt;
-  /// Transverse momentum cut on hypersurface IC
-  std::optional<double> pT_cut = std::nullopt;
-};
 
 /**
  * \ingroup modus
@@ -176,6 +158,24 @@ class ColliderModus : public ModusDefault {
   };
 
  private:
+  /**
+   * At the moment there are two ways to specify input for initial conditions in
+   * the configuration, one of which is deprecated and will be removed in a next
+   * release. For the moment, these variables are of type
+   * `std::optional<double>` to *allow* for the key duplication consistently.
+   * When more types of IC are implemented in the future, this will allow
+   * setting only the appropriate parameters.
+   */
+  struct InitialConditionParameters {
+    /// Hypersurface proper time in IC
+    std::optional<double> proper_time = std::nullopt;
+    /// Lower bound for proper time in IC
+    std::optional<double> lower_bound = std::nullopt;
+    /// Rapidity cut on hypersurface in IC
+    std::optional<double> rapidity_cut = std::nullopt;
+    /// Transverse momentum cut on hypersurface IC
+    std::optional<double> pT_cut = std::nullopt;
+  };
   /**
    * Projectile.
    *
