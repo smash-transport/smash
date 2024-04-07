@@ -135,7 +135,7 @@ class ListModus : public ModusDefault {
    */
   void try_create_particle(Particles &particles, PdgCode pdgcode, double t,
                            double x, double y, double z, double mass, double E,
-                           double px, double py, double pz);
+                           double px, double py, double pz, int id);
 
   /** \ingroup exception
    * Used when external particle list cannot be found.

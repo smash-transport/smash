@@ -472,7 +472,7 @@ TEST(try_create_particle_func) {
     FourVector r = smashon.position(), p = smashon.momentum();
     PdgCode pdg = smashon.pdgcode();
     list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(),
-                                   r.x3(), m0, p.x0(), p.x1(), p.x2(), p.x3());
+                                   r.x3(), m0, p.x0(), p.x1(), p.x2(), p.x3(), i);
   }
   plist_fin = particles.copy_to_vector();
   for (int i = 0; i < npart; i++) {
@@ -500,7 +500,7 @@ TEST(try_create_particle_func) {
     const auto creation_energy = p.x0() + (i >= npart);
     list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(),
                                    r.x3(), creation_mass, creation_energy,
-                                   p.x1(), p.x2(), p.x3());
+                                   p.x1(), p.x2(), p.x3(), i);
   }
   plist_fin = particles.copy_to_vector();
   for (int i = 0; i < npart; i++) {
@@ -530,5 +530,5 @@ TEST_CATCH(create_particle_with_nan, std::invalid_argument) {
   // Create a particle with either a NAN value in the position
   // to trigger an invalid_argument error.
   list_modus.try_create_particle(particles, pdg, NAN, r.x1(), r.x2(), r.x3(),
-                                 m0, p.x0(), p.x1(), p.x2(), p.x3());
+                                 m0, p.x0(), p.x1(), p.x2(), p.x3(), 0);
 }
