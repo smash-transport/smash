@@ -472,7 +472,8 @@ TEST(try_create_particle_func) {
     FourVector r = smashon.position(), p = smashon.momentum();
     PdgCode pdg = smashon.pdgcode();
     list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(),
-                                   r.x3(), m0, p.x0(), p.x1(), p.x2(), p.x3(), i);
+                                   r.x3(), m0, p.x0(), p.x1(), p.x2(), p.x3(),
+                                   i);
   }
   plist_fin = particles.copy_to_vector();
   for (int i = 0; i < npart; i++) {
