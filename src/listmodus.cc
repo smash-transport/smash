@@ -159,7 +159,8 @@ double ListModus::initial_conditions(Particles *particles,
       logg[LList].error() << "Charge of pdg = " << pdgcode << " != " << charge;
       throw std::invalid_argument("Inconsistent input (charge).");
     }
-    try_create_particle(*particles, pdgcode, t, x, y, z, mass, E, px, py, pz, id);
+    try_create_particle(*particles, pdgcode, t, x, y, z,
+                        mass, E, px, py, pz, id);
   }
   if (particles->size() > 0) {
     backpropagate_to_same_time(*particles);
