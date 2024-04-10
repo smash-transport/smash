@@ -131,11 +131,12 @@ class ListModus : public ModusDefault {
    * \param[in] px      x-component of momentum of added particle
    * \param[in] py      y-component of momentum of added particle
    * \param[in] pz      z-component of momentum of added particle
+   * \param[in] id      id of added particle
    * \param[out] particles structure, to which the particle is added
    */
   void try_create_particle(Particles &particles, PdgCode pdgcode, double t,
                            double x, double y, double z, double mass, double E,
-                           double px, double py, double pz);
+                           double px, double py, double pz, int id);
 
   /** \ingroup exception
    * Used when external particle list cannot be found.

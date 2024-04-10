@@ -18,6 +18,8 @@ build*
 .cproject
 .project
 .settings/
+.idea
+cmake-build-debug/
 
 # Convenience directory for your own files that should not be tracked
 tmp
