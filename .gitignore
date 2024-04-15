@@ -18,6 +18,7 @@ build*
 .cproject
 .project
 .settings/
+__pycache__/
 
 # Convenience directory for your own files that should not be tracked
 tmp
