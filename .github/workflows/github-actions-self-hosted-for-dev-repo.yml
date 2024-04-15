@@ -16,48 +16,47 @@ jobs:
     runs-on: [self-hosted,gsi]
     # Name the Job
     name: test_gsi_system
-    
+
     steps:
        # Checks out a copy of the repository
       - uses: actions/checkout@v3
       - name: building_and_testing_SMASH
         run: |
-          # we count the number of available cpu cores          
+          # we count the number of available cpu cores
           export nproc=$(cat /proc/cpuinfo | grep processor | wc -l)
           # we set up the variables with the SMASH source and build directories
-          export SMASH_ROOT=$GITHUB_WORKSPACE
+          export SMASH_ROOT=${GITHUB_WORKSPACE}
           # variables dealing with the Singularity container
           export TOOLS_DIR=/scratch/smash/GH-actions-runners/tools_and_containers
-          export PATH=$TOOLS_DIR/clang13_0_0/bin/:$TOOLS_DIR/python-tools/bin/:$PATH
-          export PYTHONPATH=$TOOLS_DIR/python-tools:$PYTHONPATH
+          export PATH=${TOOLS_DIR}/clang13_0_0/bin/:${TOOLS_DIR}/python-tools/bin/:${PATH}
+          export PYTHONPATH=${TOOLS_DIR}/python-tools:${PYTHONPATH}
           export CC=gcc-8
           export CXX=g++-8
-          export container_file=$TOOLS_DIR/environment_gcc8_doxy_91_pythia8310.sif
-          # preliminarly, we check if the code is well formatted with clang-format and cmake-format
-          cd $SMASH_ROOT
+          export container_file=${TOOLS_DIR}/environment_gcc8_doxy_91_pythia8310.sif
+          # preliminarily, we check if the code is well formatted with clang-format and cmake-format
+          cd ${SMASH_ROOT}
           ./bin/codebase-format-helper.bash C++ -t
           ./bin/codebase-format-helper.bash CMake -t
           # we configure SMASH using the environment provided by a Singularity container
-          mkdir -p $SMASH_ROOT/build
-          cd $SMASH_ROOT/build
-          singularity exec $container_file cmake .. -DCMAKE_C_FLAGS="-O3 -mfpmath=sse -march=native" \
-          -DCMAKE_CXX_FLAGS="-O3 -mfpmath=sse -march=native"
+          mkdir -p ${SMASH_ROOT}/build
+          cd ${SMASH_ROOT}/build
+          singularity exec ${container_file} cmake ..
           # we check if the code is well formatted with cpplint
           export CTEST_OUTPUT_ON_FAILURE=1
-          singularity exec $container_file ctest -R "cpplint"
+          singularity exec ${container_file} ctest -R "cpplint"
           # we build the documentation
-          singularity exec $container_file make undocumented_test
-          singularity exec $container_file make user
+          singularity exec ${container_file} make undocumented_test
+          singularity exec ${container_file} make user
           # we build SMASH
-          singularity exec $container_file make -j $nproc
+          singularity exec ${container_file} make -j ${nproc}
           # now we run the tests, excluding cpplint (which has been already executed) and potentials*
-          singularity exec $container_file ctest -j$nproc -E "^(potentials(_run)?|cpplint)$"
+          singularity exec ${container_file} ctest -j${nproc} -E "^(potentials(_run)?|cpplint)$"
           # now we run the potentials* tests that require some additional care
-          singularity exec $container_file ctest -R "^potentials$" --repeat until-pass:3
-          singularity exec $container_file ctest -R "^potentials_run$" --timeout 3600
-          
-     
-  workflow-fias:      
+          singularity exec ${container_file} ctest -R "^potentials$" --repeat until-pass:3
+          singularity exec ${container_file} ctest -R "^potentials_run$" --timeout 3600
+
+
+  workflow-fias:
     runs-on: [self-hosted,fias]
     # Name the Job
     name: test_fias_system
