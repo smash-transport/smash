@@ -19,7 +19,7 @@ jobs:
 
     steps:
        # Checks out a copy of the repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: building_and_testing_SMASH
         run: |
           # we count the number of available cpu cores
@@ -63,7 +63,7 @@ jobs:
 
     steps:
       # Checks out a copy of the repository
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: building_and_testing_SMASH
         run: |
           # we count the number of available cpu cores
