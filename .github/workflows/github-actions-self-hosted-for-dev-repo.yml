@@ -22,8 +22,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: building_and_testing_SMASH
         run: |
-          # we count the number of available cpu cores
-          export nproc=$(cat /proc/cpuinfo | grep processor | wc -l)
           # we set up the variables with the SMASH source and build directories
           export SMASH_ROOT=${GITHUB_WORKSPACE}
           # variables dealing with the Singularity container
@@ -48,9 +46,9 @@ jobs:
           singularity exec ${container_file} make undocumented_test
           singularity exec ${container_file} make user
           # we build SMASH
-          singularity exec ${container_file} make -j ${nproc}
+          singularity exec ${container_file} make -j $(nproc)
           # now we run the tests, excluding cpplint (which has been already executed) and potentials*
-          singularity exec ${container_file} ctest -j${nproc} -E "^(potentials(_run)?|cpplint)$"
+          singularity exec ${container_file} ctest -j$(nproc) -E "^(potentials(_run)?|cpplint)$"
           # now we run the potentials* tests that require some additional care
           singularity exec ${container_file} ctest -R "^potentials$" --repeat until-pass:3
           singularity exec ${container_file} ctest -R "^potentials_run$" --timeout 3600
@@ -66,8 +64,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: building_and_testing_SMASH
         run: |
-          # we count the number of available cpu cores
-          export nproc=$(cat /proc/cpuinfo | grep processor | wc -l)
           # we set up the variables with the SMASH source and build directories
           export SMASH_ROOT=${GITHUB_WORKSPACE}
           # this directory contains Pythia, Clang, Eigen and other tools which are needed later
@@ -96,9 +92,9 @@ jobs:
           make undocumented_test
           make user
           # we build SMASH
-          make -j ${nproc}
+          make -j $(nproc)
           # now we run the tests, excluding cpplint (which has been already executed) and potentials*
-          ctest -j${nproc} -E "^(potentials(_run)?|cpplint)$"
+          ctest -j$(nproc) -E "^(potentials(_run)?|cpplint)$"
           # now we run the potentials* tests that require some additional care
           ctest -R "^potentials$" --repeat until-pass:3
           ctest -R "^potentials_run$" --timeout 3600
