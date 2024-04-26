@@ -23,6 +23,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Deprecated
 * Some physics-related input keys in `Output: Initial_Conditions` were deprecated and duplicated under `Modi: Collider: Initial_Conditions`
 
+### Changed
+* Upgraded to Pythia 8.311
+
 ## SMASH-3.1
 Date: 2024-02-26
 

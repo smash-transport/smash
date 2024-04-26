@@ -74,6 +74,14 @@ docker run -it -v path/to/smash/repo:/SMASH/smash_local  <image_id or tag>
 ```
 This creates the directory `/SMASH/smash_local` which matches the smash directory.
 All local changes will be reflected in this directory and SMASH can be build with those changes in the container.
+However, sometimes writing error permissions might occur, usually because the container user ID differs from the host one.
+You can make them match via
+```console
+docker run -it -u $(id -u) -v path/to/smash/repo:/SMASH/smash_local <image_id or tag>
+```
+but this will not give you total freedom in the container (basically you will not be root and you will not be able to change any root-owned file).
+If you are interested in more information and more advanced workarounds, you can refer to [this nice blog page](https://jtreminio.com/blog/running-docker-containers-as-current-host-user/).
+
 
 
 <a id="docker-to-singularity"></a>
