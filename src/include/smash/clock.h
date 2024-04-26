@@ -94,7 +94,7 @@ class Clock {
   /// \return the time of the next time step
   virtual double next_time() const = 0;
   /**
-   * reset the clock to the starting time of the simulation
+   * Reset the clock to the starting time of the simulation
    *
    * \param[in] start_time starting time of the simulation
    * \param[in] is_output_clock whether this is an output clock rather than a
@@ -416,7 +416,7 @@ class CustomClock : public Clock {
   /**
    * \return The start time if the clock has never been ticked or the current
    *         time otherwise.
-   * \throw \c std::out_of_range if the clock has ticked beyond the last time.
+   * \throw std::out_of_range if the clock has ticked beyond the last time.
    */
   double current_time() const override {
     if (counter_ == -1) {
@@ -431,7 +431,7 @@ class CustomClock : public Clock {
 
   /**
    * \return The next custom time.
-   * \throw \c std::out_of_range if the clock has ticked beyond last time.
+   * \throw std::out_of_range if the clock has ticked beyond last time.
    */
   double next_time() const override { return custom_times_.at(counter_ + 1); }
 
@@ -440,7 +440,13 @@ class CustomClock : public Clock {
     return next_time() - current_time();
   }
 
-  /// \copydoc Clock::reset
+  /**
+   * Reset the clock to the starting time of the simulation.
+   *
+   * \param[in] start_time starting time of the simulation
+   *
+   * \note The second \c bool parameter is irrelevant and unused here.
+   */
   void reset(double start_time, bool) override {
     counter_ = -1;
     start_time_ = start_time;
