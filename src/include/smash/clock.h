@@ -412,9 +412,11 @@ class CustomClock : public Clock {
     std::sort(custom_times_.begin(), custom_times_.end());
     counter_ = -1;
   }
+
   /**
-   * \copydoc Clock::current_time
-   * \throw runtime_error if the clock has never been advanced
+   * \return The start time if the clock has never been ticked or the current
+   *         time otherwise.
+   * \throw \c std::out_of_range if the clock has ticked beyond the last time.
    */
   double current_time() const override {
     if (counter_ == -1) {
@@ -423,14 +425,22 @@ class CustomClock : public Clock {
     } else if (counter_ < -1) {
       throw std::runtime_error("Trying to access undefined zeroth output time");
     } else {
-      return custom_times_[counter_];
+      return custom_times_.at(counter_);
     }
   }
-  /// \copydoc Clock::next_time
-  double next_time() const override { return custom_times_[counter_ + 1]; }
+
+  /**
+   * \return The next custom time.
+   * \throw \c std::out_of_range if the clock has ticked beyond last time.
+   */
+  double next_time() const override { return custom_times_.at(counter_ + 1); }
+
+  /// \copydoc Clock::timestep_duration
   double timestep_duration() const override {
     return next_time() - current_time();
   }
+
+  /// \copydoc Clock::reset
   void reset(double start_time, bool) override {
     counter_ = -1;
     start_time_ = start_time;
@@ -442,17 +452,19 @@ class CustomClock : public Clock {
    * \param[in] start_time starting time of the simulation
    */
   void remove_times_in_past(double start_time) override {
-    std::remove_if(custom_times_.begin(), custom_times_.end(),
-                   [start_time](double t) {
-                     if (t <= start_time) {
-                       logg[LClock].warn("Removing custom output time ", t,
-                                         " fm since it is earlier than the "
-                                         "starting time of the simulation");
-                       return true;
-                     } else {
-                       return false;
-                     }
-                   });
+    custom_times_.erase(
+        std::remove_if(custom_times_.begin(), custom_times_.end(),
+                       [start_time](double t) {
+                         if (t <= start_time) {
+                           logg[LClock].warn("Removing custom output time ", t,
+                                             " fm since it is earlier than the "
+                                             "starting time of the simulation");
+                           return true;
+                         } else {
+                           return false;
+                         }
+                       }),
+        custom_times_.end());
   }
 
  protected:
