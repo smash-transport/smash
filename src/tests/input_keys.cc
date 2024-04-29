@@ -12,9 +12,10 @@
 #include "smash/input_keys.h"
 
 using namespace smash;
+using namespace std::string_literals;
 
 template <typename T>
-static Key<T> get_test_key(std::optional<T> def_val = std::nullopt) {
+static Key<T> get_test_key(Default<T> def_val = Default<T>{}) {
   const Version v_intro = "1.0.0";
   return Key<T>{{"Test", "Key"}, def_val, {v_intro}};
 }
@@ -51,7 +52,8 @@ TEST_CATCH(not_deprecated_key, std::bad_optional_access) {
 
 TEST(deprecated_key) {
   const Version v_deprecation = "1.2.0";
-  const Key<std::string> key{{"Test"}, "Hello world", {"1.0.0", v_deprecation}};
+  const Key<std::string> key{
+      {"Test"}, "Hello world"s, {"1.0.0", v_deprecation}};
   VERIFY(key.is_allowed());
   VERIFY(key.is_deprecated());
   COMPARE(key.deprecated_in(), v_deprecation);
@@ -67,7 +69,7 @@ TEST(removed_key) {
   const Version v_deprecation = "1.2.0";
   const Version v_removal = "1.2.0";
   const Key<std::string> key{
-      {"Test"}, "Hello world", {"1.0.0", v_deprecation, v_removal}};
+      {"Test"}, "Hello world"s, {"1.0.0", v_deprecation, v_removal}};
   VERIFY(!key.is_allowed());
   COMPARE(key.removed_in(), v_removal);
 }
@@ -86,3 +88,52 @@ TEST(to_string) {
   const std::string result = "\"Test: Key\"";
   COMPARE(static_cast<std::string>(key), result);
 }
+
+/*
+
+// The following code is useful to print all keys in the database for debug
+// purposes and it is intentionally left as part of the codebase commented out
+// for future needs.
+
+template <typename T, typename = void>
+auto constexpr ostreamable_v = false;
+
+template <typename T>
+auto constexpr ostreamable_v<
+    T, std::void_t<decltype(std::cout << std::declval<T>())>> = true;
+
+template <typename T>
+std::enable_if_t<ostreamable_v<T>> print(T const& in) {
+  std::cout << in << '\n';
+}
+
+template <typename T>
+std::enable_if_t<!ostreamable_v<T>> print(T const& in) {
+  std::cout << "NOT PRINTABLE (" << typeid(in).name() << ")\n";
+}
+
+TEST(check_list) {
+  for (const auto& key : InputKeys::list) {
+    try {
+      std::visit(
+          [](auto&& arg) {
+            std::cout << std::setw(70) << std::string(arg.get()) << "  ";
+            if (arg.get().has_dependent_default())
+              std::cout << "--> dependent default!\n";
+            else {
+              const auto def = arg.get().default_value();
+              print(def);
+            }
+          },
+          key);
+    } catch (const std::bad_optional_access&) {
+      std::visit(
+          [](auto&&) {
+            std::cout << "--> Mandatory\n";
+          },
+          key);
+    }
+  }
+}
+
+*/
