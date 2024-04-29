@@ -39,6 +39,87 @@ using Version = std::string;
 using KeyLabels = std::vector<std::string>;
 
 /**
+ * @brief New type to explicit distinguish between mandatory and optional keys.
+ */
+enum class DefaultType {
+  /// Default "type" for mandatory keys
+  Null,
+  /// Normal default with a value associated to it
+  Value,
+  /// Default value which depends on other keys
+  Dependent
+};
+
+/**
+ * @brief Wrapper class around a type with the capability to both store the type
+ * of default and its value, if any exists. This class has 3 valid states:
+ *  - `type_ = DefaultType::Null` and `value_ = std::nullopt`
+ *  - `type_ = DefaultType::Value` and `value_ != std::nullopt`
+ *  - `type_ = DefaultType::Dependent` and `value_ = std::nullopt`
+ *
+ * There is a constructor for each of the cases above.
+ *
+ * @tparam T The default value type.
+ *
+ * \note This is an implementation detail of the \c Key class and it is meant to
+ * be rigid in its usage. E.g., the ctor specifying a \c DefaultType might
+ * appear strange, but it is meant to only accept \c DefaultType::Dependent
+ * because this is the only way we want it to be used.
+ */
+template <typename T>
+class Default {
+ public:
+  /**
+   * @brief Construct a new \c Default object which denotes a mandatory value
+   * without a default. This is meant to be used for required keys.
+   */
+  Default() : type_{DefaultType::Null} {}
+  /**
+   * @brief Construct a new \c Default object storing its default value.
+   *
+   * @param in The default value to be stored
+   */
+  Default(T in) : value_{std::move(in)} {}
+  /**
+   * @brief Construct a new \c Default object which has a value dependent on
+   * external information.
+   *
+   * @param type The type of default (it should be \c DefaultType::Dependent ).
+   *
+   * @throw std::logic_error if called with a type different from \c
+   * DefaultType::Dependent .
+   */
+  Default(DefaultType type) : type_{type} {
+    if (type != DefaultType::Dependent) {
+      throw std::logic_error("Default constructor used with invalid type!");
+    }
+  }
+
+  /**
+   * @brief Retrieve the default value stored in the object
+   *
+   * @return The default value stored
+   *
+   * @throw std::bad_optional_access If the object stores no default value.
+   */
+  T value() const { return value_.value(); }
+
+  /**
+   * @brief Ask whether the default value depends on other external information.
+   *
+   * @return \c true if this is the case,
+   * @return \c false if the default value is known or none exists.
+   */
+  bool is_dependent() const noexcept { return type_ == DefaultType::Dependent; }
+
+ private:
+  /// The type of default value
+  DefaultType type_ = DefaultType::Value;
+  /// The default value, if any
+  std::optional<T> value_ = std::nullopt;
+};
+
+/**
  * @brief Object to store a YAML input file key together with metadata
  * associated to it.
  *
