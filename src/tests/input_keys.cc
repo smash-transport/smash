@@ -15,14 +15,25 @@ using namespace smash;
 using namespace std::string_literals;
 
 template <typename T>
-static Key<T> get_test_key(Default<T> def_val = Default<T>{}) {
+static Key<T> get_test_key(std::optional<T> def_val = std::nullopt) {
   const Version v_intro = "1.0.0";
-  return Key<T>{{"Test", "Key"}, def_val, {v_intro}};
+  if(def_val)
+    return Key<T>{{"Test", "Key"}, *def_val, {v_intro}};
+  else
+    return Key<T>{{"Test", "Key"}, {v_intro}};
 }
 
 TEST(create_keys) {
   get_test_key<int>();
   get_test_key<double>(3.14);
+}
+
+TEST_CATCH(key_with_invalid_default_type_I, std::logic_error) {
+  Key<int> key({"Test"}, DefaultType::Null, {"1.0"});
+}
+
+TEST_CATCH(key_with_invalid_default_type_II, std::logic_error) {
+  Key<int> key({"Test"}, DefaultType::Value, {"1.0"});
 }
 
 TEST_CATCH(ask_not_available_default, std::bad_optional_access) {

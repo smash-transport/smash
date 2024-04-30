@@ -42,81 +42,12 @@ using KeyLabels = std::vector<std::string>;
  * @brief New type to explicit distinguish between mandatory and optional keys.
  */
 enum class DefaultType {
-  /// Default "type" for mandatory keys
+  /// %Default "type" for mandatory keys
   Null,
   /// Normal default with a value associated to it
   Value,
-  /// Default value which depends on other keys
+  /// %Default value which depends on other keys
   Dependent
-};
-
-/**
- * @brief Wrapper class around a type with the capability to both store the type
- * of default and its value, if any exists. This class has 3 valid states:
- *  - `type_ = DefaultType::Null` and `value_ = std::nullopt`
- *  - `type_ = DefaultType::Value` and `value_ != std::nullopt`
- *  - `type_ = DefaultType::Dependent` and `value_ = std::nullopt`
- *
- * There is a constructor for each of the cases above.
- *
- * @tparam T The default value type.
- *
- * \note This is an implementation detail of the \c Key class and it is meant to
- * be rigid in its usage. E.g., the ctor specifying a \c DefaultType might
- * appear strange, but it is meant to only accept \c DefaultType::Dependent
- * because this is the only way we want it to be used.
- */
-template <typename T>
-class Default {
- public:
-  /**
-   * @brief Construct a new \c Default object which denotes a mandatory value
-   * without a default. This is meant to be used for required keys.
-   */
-  Default() : type_{DefaultType::Null} {}
-  /**
-   * @brief Construct a new \c Default object storing its default value.
-   *
-   * @param in The default value to be stored
-   */
-  Default(T in) : value_{std::move(in)} {}
-  /**
-   * @brief Construct a new \c Default object which has a value dependent on
-   * external information.
-   *
-   * @param type The type of default (it should be \c DefaultType::Dependent ).
-   *
-   * @throw std::logic_error if called with a type different from \c
-   * DefaultType::Dependent .
-   */
-  Default(DefaultType type) : type_{type} {
-    if (type != DefaultType::Dependent) {
-      throw std::logic_error("Default constructor used with invalid type!");
-    }
-  }
-
-  /**
-   * @brief Retrieve the default value stored in the object
-   *
-   * @return The default value stored
-   *
-   * @throw std::bad_optional_access If the object stores no default value.
-   */
-  T value() const { return value_.value(); }
-
-  /**
-   * @brief Ask whether the default value depends on other external information.
-   *
-   * @return \c true if this is the case,
-   * @return \c false if the default value is known or none exists.
-   */
-  bool is_dependent() const noexcept { return type_ == DefaultType::Dependent; }
-
- private:
-  /// The type of default value
-  DefaultType type_ = DefaultType::Value;
-  /// The default value, if any
-  std::optional<T> value_ = std::nullopt;
 };
 
 /**
@@ -152,16 +83,10 @@ class Key {
    */
   explicit Key(const std::initializer_list<std::string_view>& labels,
                const std::initializer_list<std::string_view>& versions)
-      : Key{labels, Default<default_type>{DefaultType::Null}, versions} {}
+      : Key{labels, Default<default_type>{}, versions} {}
 
   /**
    * @brief Construct a new \c Key object with default value.
-   *
-   * Note that the default value could be simply taken as parameter of type
-   * \c default_type . However, this would complicate delegating construction
-   * in the other constructor and the caller can still pass a variable of type
-   * \c default_type and the \c std::optional will be constructed without
-   * problems.
    *
    * @param[in] labels The label(s) identifying the key in the YAML input file.
    * @param[in] value The key default value.
@@ -171,32 +96,26 @@ class Key {
    *
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    */
-  Key(const std::initializer_list<std::string_view>& labels,
-      const Default<default_type>& value,
+  Key(const std::initializer_list<std::string_view>& labels, default_type value,
       const std::initializer_list<std::string_view>& versions)
-      : default_{value}, labels_{labels.begin(), labels.end()} {
-    /*
-     * The following switch statement is a compact way to initialize the
-     * three version member variables without repetition and lots of logic
-     * clauses. The versions variable can have 1, 2 or 3 entries. The use of
-     * the iterator is needed, since std::initializer_list has no access
-     * operator.
-     */
-    switch (auto it = versions.end(); versions.size()) {
-      case 3:
-        removed_in_ = *(--it);
-        [[fallthrough]];
-      case 2:
-        deprecated_in_ = *(--it);
-        [[fallthrough]];
-      case 1:
-        introduced_in_ = *(--it);
-        break;
-      default:
-        throw WrongNumberOfVersions(
-            "Key constructor needs one, two or three version numbers.");
-    }
-  }
+      : Key{labels, Default<default_type>{value}, versions} {}
+
+  /**
+   * @brief Construct a new \c Key object which is supposed to have a default
+   * value, which however depends on other keys and will remain unset.
+   *
+   * @param[in] labels The label(s) identifying the key in the YAML input file.
+   * @param[in] type The type of default value.
+   * @param[in] versions A list of one, two or three version numbers identifying
+   * the versions in which the key has been introduced, deprecated and removed,
+   * respectively.
+   *
+   * @throw WrongNumberOfVersions If \c versions has the wrong size.
+   * @throw std::logic_error If \c type is not \c DefaultType::Dependent .
+   */
+  Key(const std::initializer_list<std::string_view>& labels, DefaultType type,
+      const std::initializer_list<std::string_view>& versions)
+      : Key{labels, Default<default_type>{type}, versions} {}
 
   /**
    * @brief Let the clients of this class have access to the key type.
@@ -292,6 +211,121 @@ class Key {
   const KeyLabels& labels() const { return labels_; }
 
  private:
+  /**
+   * @brief Wrapper class around a type with the capability to both store the
+   * type of default and its value, if any exists. This class has 3 valid
+   * states:
+   *
+   *  | State | `type_` | `value_` |
+   *  | :---: | :-----: | :------: |
+   *  | Required key | `DefaultType::Null`      | `std::nullopt`   |
+   *  | %Default value | `DefaultType::Value`     | ≠ `std::nullopt` |
+   *  | %Key with dependent default | `DefaultType::Dependent` | `std::nullopt`
+   * |
+   *
+   * There is a constructor for each of the cases above.
+   *
+   * @tparam T The default value type.
+   *
+   * \note This is an implementation detail of the \c Key class and it is meant
+   * to be rigid in its usage. E.g., the constructor specifying a \c DefaultType
+   * is meant to only accept \c DefaultType::Dependent because this is the only
+   * way we want it to be used.
+   */
+  template <typename T>
+  class Default {
+   public:
+    /**
+     * @brief Construct a new \c Default object which denotes a mandatory value
+     * without a default. This is meant to be used for required keys.
+     */
+    Default() : type_{DefaultType::Null} {}
+    /**
+     * @brief Construct a new \c Default object storing its default value.
+     *
+     * @param in The default value to be stored
+     */
+    explicit Default(T in) : value_{std::move(in)} {}
+    /**
+     * @brief Construct a new \c Default object which has a value dependent on
+     * external information.
+     *
+     * @param type The type of default (it should be \c DefaultType::Dependent
+     * ).
+     *
+     * @throw std::logic_error if called with a type different from \c
+     * DefaultType::Dependent .
+     */
+    explicit Default(DefaultType type) : type_{type} {
+      if (type != DefaultType::Dependent) {
+        throw std::logic_error("Default constructor used with invalid type!");
+      }
+    }
+
+    /**
+     * @brief Retrieve the default value stored in the object
+     *
+     * @return The default value stored
+     *
+     * @throw std::bad_optional_access If the object stores no default value.
+     */
+    T value() const { return value_.value(); }
+
+    /**
+     * @brief Ask whether the default value depends on other external
+     * information.
+     *
+     * @return \c true if this is the case,
+     * @return \c false if the default value is known or none exists.
+     */
+    bool is_dependent() const noexcept {
+      return type_ == DefaultType::Dependent;
+    }
+
+   private:
+    /// The type of default value
+    DefaultType type_ = DefaultType::Value;
+    /// The default value, if any
+    std::optional<T> value_ = std::nullopt;
+  };
+
+  /**
+   * @brief Private constructor of the Key object.
+   *
+   * This is meant to do the real construction, while the other public
+   * constructors just delegate to this one. This is possible because this
+   * constructor takes a \c Default argument and the other construct one to
+   * delegate construction.
+   *
+   * @see public constructor documentation for the parameters description.
+   */
+  Key(const std::initializer_list<std::string_view>& labels,
+      Default<default_type> value,
+      const std::initializer_list<std::string_view>& versions)
+      : default_{std::move(value)}, labels_{labels.begin(), labels.end()} {
+    /*
+     * The following switch statement is a compact way to initialize the
+     * three version member variables without repetition and lots of logic
+     * clauses. The versions variable can have 1, 2 or 3 entries. The use of
+     * the iterator is needed, since std::initializer_list has no access
+     * operator.
+     */
+    switch (auto it = versions.end(); versions.size()) {
+      case 3:
+        removed_in_ = *(--it);
+        [[fallthrough]];
+      case 2:
+        deprecated_in_ = *(--it);
+        [[fallthrough]];
+      case 1:
+        introduced_in_ = *(--it);
+        break;
+      default:
+        throw WrongNumberOfVersions(
+            "Key constructor needs one, two or three version numbers.");
+    }
+  }
+
   /// SMASH version in which the key has been introduced
   Version introduced_in_{};
   /// SMASH version in which the key has been deprecated, if any
