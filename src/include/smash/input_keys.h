@@ -216,12 +216,11 @@ class Key {
    * type of default and its value, if any exists. This class has 3 valid
    * states:
    *
-   *  | State | `type_` | `value_` |
-   *  | :---: | :-----: | :------: |
-   *  | Required key | `DefaultType::Null`      | `std::nullopt`   |
-   *  | %Default value | `DefaultType::Value`     | ≠ `std::nullopt` |
-   *  | %Key with dependent default | `DefaultType::Dependent` | `std::nullopt`
-   * |
+   * | State | `type_` | `value_` |
+   * | :---: | :-----: | :------: |
+   * | Required key | `DefaultType::Null`      | `std::nullopt`   |
+   * | %Default value | `DefaultType::Value`     | ≠ `std::nullopt` |
+   * | %Key with dependent default | `DefaultType::Dependent` | `std::nullopt` |
    *
    * There is a constructor for each of the cases above.
    *

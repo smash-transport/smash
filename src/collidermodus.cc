@@ -270,9 +270,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
     logg[LCollider].info() << "Fermi motion is OFF.";
   }
 
-  FluidizationType IC_type = modus_cfg.take(
-      {"Initial_Conditions", "Type"},
-      InputKeys::modi_collider_initialConditions_type.default_value());
+  FluidizationType IC_type = modus_cfg.take({"Initial_Conditions", "Type"},
+                                            FluidizationType::ConstantTau);
 
   if (IC_type == FluidizationType::ConstantTau) {
     if (modus_cfg.has_value({"Initial_Conditions", "Proper_Time"})) {
