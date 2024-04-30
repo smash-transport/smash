@@ -157,3 +157,36 @@ TEST_CATCH(overflow_large_increment, std::overflow_error) {
   ++labtime;
   labtime += (std::numeric_limits<Clock::Representation>::max() - 3);
 }
+
+TEST_CATCH(custom_clock_tick_beyond_last, std::out_of_range) {
+  CustomClock clock{{1, 2}};
+  // Start time is 0.0 and not ticking the clock gives it
+  VERIFY(clock.current_time() == 0);
+  ++clock;
+  VERIFY(clock.current_time() == 1);
+  ++clock;
+  VERIFY(clock.current_time() == 2);
+  ++clock;
+  clock.current_time();
+}
+TEST_CATCH(custom_clock_tick_till_end_ask_next_time, std::out_of_range) {
+  CustomClock clock{{42}};
+  ++clock;
+  clock.next_time();
+}
+
+TEST_CATCH(custom_clock_remove_times_in_the_past, std::out_of_range) {
+  CustomClock clock{{
+      -3.14,
+      -0.1,
+      0.0,
+      42,
+  }};
+  clock.remove_times_in_past(0.0);
+  // Start time is 0.0 and not ticking the clock gives it
+  VERIFY(clock.current_time() == 0.0);
+  ++clock;
+  VERIFY(clock.current_time() == 42);
+  ++clock;
+  clock.current_time();
+}

@@ -94,7 +94,7 @@ class Clock {
   /// \return the time of the next time step
   virtual double next_time() const = 0;
   /**
-   * reset the clock to the starting time of the simulation
+   * Reset the clock to the starting time of the simulation
    *
    * \param[in] start_time starting time of the simulation
    * \param[in] is_output_clock whether this is an output clock rather than a
@@ -412,25 +412,43 @@ class CustomClock : public Clock {
     std::sort(custom_times_.begin(), custom_times_.end());
     counter_ = -1;
   }
+
   /**
-   * \copydoc Clock::current_time
-   * \throw runtime_error if the clock has never been advanced
+   * \return The start time if the clock has never been ticked or the current
+   *         time otherwise.
+   * \throw std::out_of_range if the clock has ticked beyond the last time.
+   * \throw std::runtime_error if the clock has an internal broken state.
    */
   double current_time() const override {
     if (counter_ == -1) {
       // current time before the first output should be the starting time
       return start_time_;
     } else if (counter_ < -1) {
-      throw std::runtime_error("Trying to access undefined zeroth output time");
+      throw std::runtime_error(
+          "Trying to access time of clock in invalid state.");
     } else {
-      return custom_times_[counter_];
+      return custom_times_.at(counter_);
     }
   }
-  /// \copydoc Clock::next_time
-  double next_time() const override { return custom_times_[counter_ + 1]; }
+
+  /**
+   * \return The next custom time.
+   * \throw std::out_of_range if the clock has ticked beyond last time.
+   */
+  double next_time() const override { return custom_times_.at(counter_ + 1); }
+
+  /// \copydoc Clock::timestep_duration
   double timestep_duration() const override {
     return next_time() - current_time();
   }
+
+  /**
+   * Reset the clock to the starting time of the simulation.
+   *
+   * \param[in] start_time starting time of the simulation
+   *
+   * \note The second \c bool parameter is irrelevant and unused here.
+   */
   void reset(double start_time, bool) override {
     counter_ = -1;
     start_time_ = start_time;
@@ -442,17 +460,19 @@ class CustomClock : public Clock {
    * \param[in] start_time starting time of the simulation
    */
   void remove_times_in_past(double start_time) override {
-    std::remove_if(custom_times_.begin(), custom_times_.end(),
-                   [start_time](double t) {
-                     if (t <= start_time) {
-                       logg[LClock].warn("Removing custom output time ", t,
-                                         " fm since it is earlier than the "
-                                         "starting time of the simulation");
-                       return true;
-                     } else {
-                       return false;
-                     }
-                   });
+    custom_times_.erase(
+        std::remove_if(custom_times_.begin(), custom_times_.end(),
+                       [start_time](double t) {
+                         if (t <= start_time) {
+                           logg[LClock].warn("Removing custom output time ", t,
+                                             " fm since it is earlier than the "
+                                             "starting time of the simulation");
+                           return true;
+                         } else {
+                           return false;
+                         }
+                       }),
+        custom_times_.end());
   }
 
  protected:
