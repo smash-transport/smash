@@ -105,7 +105,7 @@ class Key {
    * value, which however depends on other keys and will remain unset.
    *
    * @param[in] labels The label(s) identifying the key in the YAML input file.
-   * @param[in] type The type of default value.
+   * @param[in] type_of_default The type of default value.
    * @param[in] versions A list of one, two or three version numbers identifying
    * the versions in which the key has been introduced, deprecated and removed,
    * respectively.
@@ -113,9 +113,10 @@ class Key {
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    * @throw std::logic_error If \c type is not \c DefaultType::Dependent .
    */
-  Key(const std::initializer_list<std::string_view>& labels, DefaultType type,
+  Key(const std::initializer_list<std::string_view>& labels,
+      DefaultType type_of_default,
       const std::initializer_list<std::string_view>& versions)
-      : Key{labels, Default<default_type>{type}, versions} {}
+      : Key{labels, Default<default_type>{type_of_default}, versions} {}
 
   /**
    * @brief Let the clients of this class have access to the key type.
@@ -3725,7 +3726,9 @@ struct InputKeys {
    * \see_key{key_MC_impact_range_}
    */
   inline static const Key<std::array<double, 2>> modi_collider_impact_range{
-      {"Modi", "Collider", "Impact", "Range"}, {{0.0, 0.0}}, {"0.50"}};
+      {"Modi", "Collider", "Impact", "Range"},
+      std::array<double, 2>{{0.0, 0.0}},
+      {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -5024,7 +5027,9 @@ struct InputKeys {
    * \see_key{key_output_thermo_position_}
    */
   inline static const Key<std::array<double, 3>> output_thermodynamics_position{
-      {"Output", "Thermodynamics", "Position"}, {{0.0, 0.0, 0.0}}, {"1.0"}};
+      {"Output", "Thermodynamics", "Position"},
+      std::array<double, 3>{{0.0, 0.0, 0.0}},
+      {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
