@@ -17,7 +17,7 @@ using namespace std::string_literals;
 template <typename T>
 static Key<T> get_test_key(std::optional<T> def_val = std::nullopt) {
   const Version v_intro = "1.0.0";
-  if(def_val)
+  if (def_val)
     return Key<T>{{"Test", "Key"}, *def_val, {v_intro}};
   else
     return Key<T>{{"Test", "Key"}, {v_intro}};
@@ -83,6 +83,15 @@ TEST(removed_key) {
       {"Test"}, "Hello world"s, {"1.0.0", v_deprecation, v_removal}};
   VERIFY(!key.is_allowed());
   COMPARE(key.removed_in(), v_removal);
+}
+
+TEST(dependent_default) {
+  const auto key_1 = get_test_key<int>();
+  VERIFY(!key_1.has_dependent_default());
+  const auto key_2 = get_test_key<int>(42);
+  VERIFY(!key_2.has_dependent_default());
+  Key<double> dependent_key{{"Test"}, DefaultType::Dependent, {"1.0.0"}};
+  VERIFY(dependent_key.has_dependent_default());
 }
 
 TEST(has_same_labels) {
