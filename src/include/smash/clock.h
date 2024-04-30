@@ -417,13 +417,15 @@ class CustomClock : public Clock {
    * \return The start time if the clock has never been ticked or the current
    *         time otherwise.
    * \throw std::out_of_range if the clock has ticked beyond the last time.
+   * \throw std::runtime_error if the clock has an internal broken state.
    */
   double current_time() const override {
     if (counter_ == -1) {
       // current time before the first output should be the starting time
       return start_time_;
     } else if (counter_ < -1) {
-      throw std::runtime_error("Trying to access undefined zeroth output time");
+      throw std::runtime_error(
+          "Trying to access time of clock in invalid state.");
     } else {
       return custom_times_.at(counter_);
     }
