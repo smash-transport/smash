@@ -482,6 +482,15 @@ class Action {
   void assign_formation_time_to_outgoing_particles();
 
   /**
+   * Assign an unpolarized spin vector to all outgoing particles.
+   *
+   * Note: Make sure to assign the spin vectors after the boosted 4-momentum of
+   * the outgoing particles has been set, as the function includes a boost to
+   * the lab frame.
+   */
+  void assign_unpolarized_spin_vector_to_outgoing_particles();
+
+  /**
    * \ingroup logging
    * Writes information about this action to the \p out stream.
    *

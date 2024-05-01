@@ -189,11 +189,14 @@ double BoxModus::initial_conditions(Particles *particles,
     data.set_formation_time(start_time_);
   }
 
-  /* Make total 3-momentum 0 */
+  /* Make total 3-momentum of the box 0 and initialize an unpolarized spin
+   * vector */
   for (ParticleData &data : *particles) {
     data.set_4momentum(data.momentum().abs(),
                        data.momentum().threevec() -
                            momentum_total.threevec() / particles->size());
+    // Initialize spin vector
+    data.set_unpolarized_spin_vector();
   }
 
   /* Add a single highly energetic particle in the center of the box (jet) */
@@ -203,6 +206,7 @@ double BoxModus::initial_conditions(Particles *particles,
     jet_particle.set_4position(FourVector(start_time_, 0., 0., 0.));
     jet_particle.set_4momentum(ParticleType::find(jet_pdg_.value()).mass(),
                                ThreeVector(jet_mom_, 0., 0.));
+    jet_particle.set_unpolarized_spin_vector();
   }
 
   /* Recalculate total momentum */

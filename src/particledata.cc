@@ -84,6 +84,42 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
   }
 }
 
+void ParticleData::set_unpolarized_spin_vector() {
+  // Check whether the velocity of a particle is set and not nan
+  if (std::isnan(velocity().x1()) || std::isnan(velocity().x2()) ||
+      std::isnan(velocity().x3())) {
+    std::cout << "Velocity not set!" << std::endl;
+  }
+
+  if (!std::isnan(spin_vector_.x0()) || !std::isnan(spin_vector_.x1()) ||
+      !std::isnan(spin_vector_.x2()) || !std::isnan(spin_vector_.x3())) {
+    std::cout << "Spin vector already set!" << std::endl;
+  }
+
+  const int total_spin = spin();
+  // For spin 0 all 4 components of the Pauli-Lubanski vector are zero
+  if (total_spin == 0) {
+    spin_vector_ = FourVector(0., 0., 0., 0.);
+    /**
+     * For finite spin states we use that \f$S^2 = -m^2*s(s+1)$ and that in the
+     * rest frame of the particle \f$S^0 = 0$. Therefore, we set all spatial
+     * components equally to \f$S^i = m*sqrt(\frac{s(s+1)}{3})$. This results in
+     * a completely unpolarized spin vector that fullfills \f$S^2 =
+     * -m^2*s(s+1)$. After setting all values, we need to boost the spin vector
+     * with the particle's velocity.
+     */
+  } else {
+    const double rest_mass = effective_mass();
+    const double spatial_spin_component =
+        rest_mass * std::sqrt(total_spin * (total_spin + 1) / 3.);
+    FourVector spin_vector =
+        FourVector(0., spatial_spin_component, spatial_spin_component,
+                   spatial_spin_component);
+    // Boost the spin vector to the particle's frame
+    spin_vector_ = spin_vector.lorentz_boost(velocity());
+  }
+}
+
 double ParticleData::xsec_scaling_factor(double delta_time) const {
   // if formation times are NaNs simply return a NaN to avoid floating-point
   // FE_INVALID errors (that would be raised by unordered comparisons with NaNs)
@@ -238,11 +274,14 @@ ParticleData create_valid_smash_particle_matching_provided_quantities(
     warn_if_needed(mass_warning, warnings[0]);
     smash_particle.set_4momentum(smash_particle.pole_mass(),
                                  four_momentum.threevec());
+    smash_particle.set_unpolarized_spin_vector();
   } else {
     smash_particle.set_4momentum(four_momentum);
+    smash_particle.set_unpolarized_spin_vector();
     if (is_particle_off_its_mass_shell(smash_particle)) {
       warn_if_needed(on_shell_warning, warnings[1]);
       smash_particle.set_4momentum(mass, four_momentum.threevec());
+      smash_particle.set_unpolarized_spin_vector();
     }
   }
 

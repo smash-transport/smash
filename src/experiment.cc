@@ -644,6 +644,7 @@ void validate_and_adjust_particle_list(ParticleList &particle_list) {
               warn_off_shell_particle);
       particle.set_4position(valid_smash_particle.position());
       particle.set_4momentum(valid_smash_particle.momentum());
+      particle.set_unpolarized_spin_vector();
       particle.set_cross_section_scaling_factor(
           valid_smash_particle.xsec_scaling_factor());
       it++;

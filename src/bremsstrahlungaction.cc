@@ -136,6 +136,9 @@ void BremsstrahlungAction::generate_final_state() {
         -total_momentum_of_outgoing_particles().velocity());
   }
 
+  // Set unpolarized spin vectors
+  assign_unpolarized_spin_vector_to_outgoing_particles();
+
   // Photons are not really part of the normal processes, so we have to set a
   // constant arbitrary number.
   const auto id_process = ID_PROCESS_PHOTON;

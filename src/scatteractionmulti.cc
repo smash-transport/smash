@@ -590,6 +590,7 @@ void ScatterActionMulti::annihilation() {
       total_momentum_of_outgoing_particles().abs(), 0., 0., 0.);
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
+  assign_unpolarized_spin_vector_to_outgoing_particles();
 
   logg[LScatterActionMulti].debug("Momentum of the new particle: ",
                                   outgoing_particles_[0].momentum());
@@ -599,6 +600,7 @@ void ScatterActionMulti::n_to_two() {
   sample_2body_phasespace();
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
+  assign_unpolarized_spin_vector_to_outgoing_particles();
   logg[LScatterActionMulti].debug(incoming_particles_.size(),
                                   "->2 scattering:", incoming_particles_,
                                   " -> ", outgoing_particles_);

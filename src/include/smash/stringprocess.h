@@ -820,6 +820,7 @@ class StringProcess {
     if (new_type) {
       ParticleData new_particle(ParticleType::find(pythia_code));
       new_particle.set_4momentum(momentum);
+      new_particle.set_unpolarized_spin_vector();
       intermediate_particles.push_back(new_particle);
       return true;
     } else {

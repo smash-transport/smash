@@ -852,7 +852,39 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
     const ParticleData &data) {
+<<<<<<< HEAD
   std::fprintf(file_.get(), "%s\n", formatter_.data_line(data).c_str());
+=======
+  const FourVector pos = data.position();
+  const FourVector mom = data.momentum();
+  if (Format == OscarFormat2013) {
+    std::fprintf(file_.get(), "%g %g %g %g %g %.9g %.9g %.9g %.9g %s %i %i\n",
+                 pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(),
+                 mom.x0(), mom.x1(), mom.x2(), mom.x3(),
+                 data.pdgcode().string().c_str(), data.id(),
+                 data.type().charge());
+  } else if (Format == OscarFormat2013Extended) {
+    const auto h = data.get_history();
+    std::fprintf(
+        file_.get(),
+        "%g %g %g %g %g %.9g %.9g %.9g"
+        " %.9g %s %i %i %i %g %g %i %i %g %s %s %i %i %g %g %g %g\n",
+        pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(), mom.x0(),
+        mom.x1(), mom.x2(), mom.x3(), data.pdgcode().string().c_str(),
+        data.id(), data.type().charge(), h.collisions_per_particle,
+        data.formation_time(), data.xsec_scaling_factor(), h.id_process,
+        static_cast<int>(h.process_type), h.time_last_collision,
+        h.p1.string().c_str(), h.p2.string().c_str(),
+        data.type().baryon_number(), data.type().strangeness(),
+        data.spin_vector().x0(), data.spin_vector().x1(),
+        data.spin_vector().x2(), data.spin_vector().x3());
+  } else {
+    std::fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n",
+                 data.id(), data.pdgcode().string().c_str(), 0, mom.x1(),
+                 mom.x2(), mom.x3(), mom.x0(), data.effective_mass(), pos.x1(),
+                 pos.x2(), pos.x3(), pos.x0());
+  }
+>>>>>>> cbba6ac78 (Replace spin projection by spin 4-vector and related functions)
 }
 
 namespace {

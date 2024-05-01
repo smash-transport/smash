@@ -614,11 +614,13 @@ void ScatterAction::inelastic_scattering() {
   // create new particles
   sample_2body_phasespace();
   assign_formation_time_to_outgoing_particles();
+  assign_unpolarized_spin_vector_to_outgoing_particles();
 }
 
 void ScatterAction::two_to_many_scattering() {
   sample_manybody_phasespace();
   assign_formation_time_to_outgoing_particles();
+  assign_unpolarized_spin_vector_to_outgoing_particles();
   logg[LScatterAction].debug("2->", outgoing_particles_.size(),
                              " scattering:", incoming_particles_, " -> ",
                              outgoing_particles_);
@@ -638,6 +640,7 @@ void ScatterAction::resonance_formation() {
   outgoing_particles_[0].set_4momentum(
       total_momentum_of_outgoing_particles().abs(), 0., 0., 0.);
   assign_formation_time_to_outgoing_particles();
+  assign_unpolarized_spin_vector_to_outgoing_particles();
   /* this momentum is evaluated in the computational frame. */
   logg[LScatterAction].debug("Momentum of the new particle: ",
                              outgoing_particles_[0].momentum());
@@ -752,6 +755,17 @@ void ScatterAction::string_excitation() {
       }
     } else {
       create_string_final_state();
+    }
+  }
+}
+
+void ScatterAction::spin_interaction() {
+  if (is_spin_interaction_on_) {
+    /* 2->2 elastic scattering */
+    if (process_type_ == ProcessType::Elastic) {
+      // Spin flip as a first spin interaction
+      // outgoing_particles_[0].flip_spin_projection();
+      // outgoing_particles_[1].flip_spin_projection();
     }
   }
 }

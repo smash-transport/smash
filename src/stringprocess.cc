@@ -313,6 +313,7 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   PdgCode hadron_code = is_AB_to_AX ? PDGcodes_[0] : PDGcodes_[1];
   ParticleData new_particle(ParticleType::find(hadron_code));
   new_particle.set_4momentum(pstrHcom);
+  new_particle.set_unpolarized_spin_vector();
   new_particle.set_cross_section_scaling_factor(1.);
   new_particle.set_formation_time(time_collision_);
   final_state_.push_back(new_particle);
@@ -1565,6 +1566,7 @@ bool StringProcess::next_BBbarAnn() {
       NpartString_[i] = 1;
       ParticleData new_particle(ParticleType::find(PDGcodes_[i]));
       new_particle.set_4momentum(pcom_[i]);
+      new_particle.set_unpolarized_spin_vector();
       new_particle.set_cross_section_scaling_factor(1.);
       new_particle.set_formation_time(time_collision_);
       final_state_.push_back(new_particle);

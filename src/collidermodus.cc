@@ -573,6 +573,16 @@ double ColliderModus::initial_conditions(Particles *particles,
   projectile_->shift(proj_z, +impact_ / 2.0, simulation_time);
   target_->shift(targ_z, -impact_ / 2.0, simulation_time);
 
+  // Set unpolarized spin vectors for the projectile and target nucleons.
+  for (auto particle = projectile_->begin(); particle != projectile_->end();
+       particle++) {
+    particle->set_unpolarized_spin_vector();
+  }
+  for (auto particle = target_->begin(); particle != target_->end();
+       particle++) {
+    particle->set_unpolarized_spin_vector();
+  }
+
   // Put the particles in the nuclei into code particles.
   projectile_->copy_particles(particles);
   target_->copy_particles(particles);

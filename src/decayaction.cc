@@ -92,6 +92,8 @@ void DecayAction::generate_final_state() {
       p.fluidize();
     }
   }
+  // Set unpolarized spin vectors
+  assign_unpolarized_spin_vector_to_outgoing_particles();
 }
 
 void DecayAction::sample_2body_phasespace() {

@@ -263,11 +263,12 @@ double SphereModus::initial_conditions(Particles *particles,
     }
   }
 
-  /* Make total 3-momentum 0 */
+  /* Make total 3-momentum in sphere 0 and set unpolarized spin vector  */
   for (ParticleData &data : *particles) {
     data.set_4momentum(data.momentum().abs(),
                        data.momentum().threevec() -
                            momentum_total.threevec() / particles->size());
+    data.set_unpolarized_spin_vector();
   }
 
   /* Add a single highly energetic particle in the center of the sphere (jet) */
@@ -289,6 +290,7 @@ double SphereModus::initial_conditions(Particles *particles,
       jet_antiparticle.set_4momentum(ParticleType::find(anti_pdg).mass(),
                                      ThreeVector(-jet_mom_, 0., 0.));
     }
+    jet_particle.set_unpolarized_spin_vector();
   }
 
   /* Recalculate total momentum */

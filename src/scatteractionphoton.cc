@@ -255,6 +255,8 @@ void ScatterActionPhoton::generate_final_state() {
     new_particle.boost_momentum(
         -total_momentum_of_outgoing_particles().velocity());
   }
+  // Set unpolarized spin vector for outgoing particles
+  assign_unpolarized_spin_vector_to_outgoing_particles();
 
   const double E_Photon = outgoing_particles_[1].momentum()[0];
 
