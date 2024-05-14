@@ -4521,9 +4521,9 @@ struct InputKeys {
    * \warning If a `Format` list in a content `section` is not given or it is
    * left empty, i.e. `Format: []`, SMASH will abort with a fatal error.
    * Furthermore, SMASH also aborts if a not existing format is given in the
-   * formats list. This is meant to prevent to e.g. loose output information
-   * because of a typo in the configuration file. If no output for a given
-   * content is desired, you can suppress it by using `Format: ["None"]`.
+   * formats list. This is meant to prevent against e.g. losing output
+   * information because of a typo in the configuration file. If no output for a
+   * given content is desired, you can suppress it by using `Format: ["None"]`.
    * However, it is not allowed to use valid formats together with the `"None"`
    * special "format" string.
    */
