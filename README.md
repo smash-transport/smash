@@ -52,7 +52,8 @@ Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable
 
 ### Compilation and installation
 
-From within the SMASH repository, use the following commands to build the codebase in a separate directory:
+Clone the SMASH repository with the help of `git clone`.
+From within the cloned repository, use the following commands to build the codebase in a separate directory:
 ```console
 mkdir build
 cd build
