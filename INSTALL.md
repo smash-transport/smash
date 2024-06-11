@@ -142,7 +142,8 @@ When setting up SMASH, use the `-DGSL_ROOT_DIR=${GSL}` CMake option to let CMake
 
 ## Building SMASH
 
-The bare minimum needed to build SMASH from within its repository reads:
+Clone the SMASH repository with the help of `git clone`.
+The bare minimum commands needed to build SMASH from within the cloned repository are:
 ```console
 mkdir build
 cd build
