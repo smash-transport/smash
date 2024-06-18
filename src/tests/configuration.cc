@@ -15,6 +15,7 @@
 
 #include "setup.h"
 #include "smash/forwarddeclarations.h"
+#include "smash/input_keys.h"
 #include "smash/macros.h"
 
 using namespace smash;
@@ -23,6 +24,11 @@ static Configuration make_test_configuration() {
   return Configuration{
       std::filesystem::path{TEST_CONFIG_PATH} / "src" / "tests",
       "test_config.yaml"};
+}
+
+template <typename T>
+static Key<T> get_key(std::initializer_list<std::string_view> labels) {
+  return Key<T>{labels, {"1.0"}};
 }
 
 TEST(create_object) {
@@ -47,49 +53,49 @@ TEST_CATCH(merge_with_incorrect_indent, Configuration::ParseError) {
 
 TEST(take) {
   Configuration conf = make_test_configuration();
-  double d = conf.take({"tamer", "pipit", "bushelling"});
+  const double d = conf.take(get_key<double>({"tamer", "pipit", "bushelling"}));
   COMPARE(d, 5.);
   conf.clear();
 }
 
 TEST(take_multiple) {
   Configuration conf = make_test_configuration();
-  double d = conf.take({"tamer", "Altaic", "Meccas"});
+  double d = conf.take(get_key<double>({"tamer", "Altaic", "Meccas"}));
   COMPARE(d, 10.);
-  d = conf.take({"tamer", "Altaic", "Kathleen"});
+  d = conf.take(get_key<double>({"tamer", "Altaic", "Kathleen"}));
   COMPARE(d, 0.2);
-  int i = conf.take({"tamer", "Altaic", "Brahmins"});
+  const int i = conf.take(get_key<int>({"tamer", "Altaic", "Brahmins"}));
   COMPARE(i, 1);
   conf.clear();
 }
 
 TEST_CATCH(take_incorrect_type, Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
-  int i = conf.take({"tamer", "pipit", "bushelling"});
-  COMPARE(i, 5);
+  const Key<double> key = get_key<double>({"tamer", "pipit", "bushelling"});
+  [[maybe_unused]] int i = conf.take(key);
 }
 
 TEST(take_always_converts_to_string) {
   Configuration conf = make_test_configuration();
-  std::string s = conf.take({"tamer", "pipit", "bushelling"});
+  std::string s = conf.take(get_key<double>({"tamer", "pipit", "bushelling"}));
   COMPARE(s, "5.0");
   conf.clear();
 }
 
 TEST_CATCH(take_not_existing_key, std::invalid_argument) {
   Configuration conf = make_test_configuration();
-  conf.take({"not existing key"});
+  conf.take(get_key<int>({"not existing key"}));
 }
 
 TEST_CATCH(take_not_existing_key_in_existing_section, std::invalid_argument) {
   Configuration conf = make_test_configuration();
-  conf.take({"tamer", "not existing key"});
+  conf.take(get_key<int>({"tamer", "not existing key"}));
 }
 
 TEST(take_array) {
   Configuration conf = make_test_configuration();
   conf.merge_yaml("{test: [123, 456, 789]}");
-  std::array<int, 3> x = conf.take({"test"});
+  std::array<int, 3> x = conf.take(get_key<std::array<int, 3>>({"test"}));
   VERIFY(x[0] == 123 && x[1] == 456 && x[2] == 789);
   conf.clear();
 }
@@ -97,14 +103,15 @@ TEST(take_array) {
 TEST_CATCH(take_array_wrong_n, Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
   conf.merge_yaml("{test: [123, 456, 789]}");
-  [[maybe_unused]] std::array<int, 4> x = conf.take({"test"});
+  [[maybe_unused]] std::array<int, 4> x =
+      conf.take(get_key<std::array<int, 3>>({"test"}));
 }
 
 TEST(take_reactions_bitset) {
   // Make sure that only the right bits are set
   Configuration conf = make_test_configuration();
   conf.merge_yaml("{test: [NN_to_NR, KN_to_KN]}");
-  ReactionsBitSet bs = conf.take({"test"});
+  ReactionsBitSet bs = conf.take(get_key<ReactionsBitSet>({"test"}));
   for (std::size_t i = 0; i < bs.size(); i++) {
     if (i == IncludedReactions::NN_to_NR || i == IncludedReactions::KN_to_KN) {
       VERIFY(bs.test(i));
@@ -114,13 +121,13 @@ TEST(take_reactions_bitset) {
   }
   // Make sure that all bits are set
   conf.merge_yaml("{test2: [All]}");
-  ReactionsBitSet bs2 = conf.take({"test2"});
+  ReactionsBitSet bs2 = conf.take(get_key<ReactionsBitSet>({"test2"}));
   for (std::size_t i = 0; i < bs2.size(); i++) {
     VERIFY(bs2.test(i));
   }
   // All means really ALL reactions are on
   conf.merge_yaml("{test3: [NN_to_NR, All]}");
-  ReactionsBitSet bs3 = conf.take({"test3"});
+  ReactionsBitSet bs3 = conf.take(get_key<ReactionsBitSet>({"test3"}));
   for (std::size_t i = 0; i < bs3.size(); i++) {
     VERIFY(bs3.test(i));
   }
@@ -130,7 +137,7 @@ TEST(take_reactions_bitset) {
 TEST(take_removes_entry) {
   Configuration conf = make_test_configuration();
   VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
-  conf.take({"tamer", "pipit", "bushelling"});
+  conf.take(get_key<double>({"tamer", "pipit", "bushelling"}));
   VERIFY(!conf.has_value({"tamer", "pipit", "bushelling"}));
   conf.clear();
 }
@@ -143,7 +150,7 @@ TEST(take_removes_empty_section) {
   )"};
   VERIFY(conf.has_value({"Section"}));
   VERIFY(conf.has_value({"Section", "Sub-section"}));
-  conf.take({"Section", "Sub-section", "Key"});
+  conf.take(get_key<std::string>({"Section", "Sub-section", "Key"}));
   VERIFY(!conf.has_value({"Section", "Sub-section"}));
   VERIFY(!conf.has_value({"Section"})) << "\n" << conf.to_string();
 }
@@ -155,7 +162,7 @@ TEST(take_removes_empty_section_but_not_empty_lists) {
         Key: "Value"
         Empty_list: []
   )"};
-  conf.take({"Section", "Sub-section", "Key"});
+  conf.take(get_key<std::string>({"Section", "Sub-section", "Key"}));
   VERIFY(conf.has_value({"Section", "Sub-section"}));
   conf.clear();
 }

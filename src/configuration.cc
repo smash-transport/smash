@@ -109,11 +109,11 @@ YAML::Node operator|=(YAML::Node a, const YAML::Node &b) {
  * @param keys The list of keys.
  * @return A \c std::string with the desired result.
  */
-std::string join_quoted(std::initializer_list<const char *> keys) {
+std::string join_quoted(std::vector<std::string_view> keys) {
   return std::accumulate(keys.begin(), keys.end(), std::string{"{"},
-                         [](const std::string &ss, const std::string &s) {
-                           return ss + ((ss.size() == 1) ? "\"" : ", \"") + s +
-                                  "\"";
+                         [](const std::string &ss, const std::string_view &s) {
+                           return ss + ((ss.size() == 1) ? "\"" : ", \"") +
+                                  std::string{s} + "\"";
                          }) +
          "}";
 }
@@ -205,39 +205,46 @@ std::vector<std::string> Configuration::list_upmost_nodes() {
   return r;
 }
 
-Configuration::Value Configuration::take(
-    std::initializer_list<const char *> keys) {
-  assert(keys.size() > 0);
+Configuration::Value Configuration::take(std::vector<std::string_view> labels) {
+  assert(labels.size() > 0);
   /* Here we want to descend the YAML tree but not all the way to the last key,
      because we need the node associated to the previous to last key in order to
      remove the taken key. */
-  auto last_key_it = keys.end() - 1;
-  auto previous_to_last_node = find_existing_node({keys.begin(), last_key_it});
+  auto last_key_it = labels.end() - 1;
+  auto previous_to_last_node =
+      find_existing_node({labels.begin(), last_key_it});
   auto to_be_returned{previous_to_last_node};
   descend_one_existing_level(to_be_returned, *last_key_it);
   if (!previous_to_last_node || !to_be_returned) {
     throw std::invalid_argument(
-        "Attempt to take value of a not existing key: " + join_quoted(keys));
+        "Attempt to take value of a not existing key: " + join_quoted(labels));
   }
   previous_to_last_node.value().remove(*last_key_it);
   root_node_ = remove_empty_maps(root_node_);
-  return {to_be_returned.value(), *last_key_it};
+  /* NOTE: The second argument in the returned statement to construct Value must
+   * point to a string that is outliving the function scope and it would be
+   * wrong to return e.g. something locally declared in the function. This is
+   * because that argument is underneath of type 'const char* const' and, then,
+   * if it was dangling after returning, it would be wrong to access it.
+   */
+  return {to_be_returned.value(), last_key_it->data()};
 }
 
 Configuration::Value Configuration::read(
     std::initializer_list<const char *> keys) const {
-  auto found_node = find_existing_node(keys);
+  auto found_node = find_existing_node({keys.begin(), keys.end()});
   if (found_node) {
     return {found_node.value(), keys.begin()[keys.size() - 1]};
   } else {
     throw std::invalid_argument(
-        "Attempt to read value of a not existing key: " + join_quoted(keys));
+        "Attempt to read value of a not existing key: " +
+        join_quoted({keys.begin(), keys.end()}));
   }
 }
 
 void Configuration::remove_all_entries_in_section_but_one(
     const std::string &key, std::initializer_list<const char *> section) {
-  auto found_node = find_existing_node(section);
+  auto found_node = find_existing_node({section.begin(), section.end()});
   if (found_node) {
     std::vector<std::string> to_remove{};
     bool key_exists = false;
@@ -251,7 +258,7 @@ void Configuration::remove_all_entries_in_section_but_one(
     if (!key_exists) {
       std::string section_string{" section "};
       if (section.size() > 0) {
-        section_string += join_quoted(section) + " ";
+        section_string += join_quoted({section.begin(), section.end()}) + " ";
       } else {
         section_string = " top-level" + section_string;
       }
@@ -266,7 +273,7 @@ void Configuration::remove_all_entries_in_section_but_one(
   } else {
     throw std::invalid_argument(
         "Attempt to remove entries in not existing section: " +
-        join_quoted(section));
+        join_quoted({section.begin(), section.end()}));
   }
 }
 
@@ -285,7 +292,7 @@ Configuration Configuration::extract_sub_configuration(
       return Configuration(YAML::Node{});
     else
       throw std::runtime_error("Attempt to extract not existing section " +
-                               join_quoted(keys));
+                               join_quoted({keys.begin(), keys.end()}));
   }
   /* Here sub_conf_root_node cannot be a nullopt, since if it was the function
      would have returned before and it cannot be that previous_to_section_node
@@ -295,7 +302,7 @@ Configuration Configuration::extract_sub_configuration(
     // Here we put together the cases of a key without value or with
     // an empty map {} as value (no need at the moment to distinguish)
     throw std::runtime_error("Attempt to extract empty section " +
-                             join_quoted(keys));
+                             join_quoted({keys.begin(), keys.end()}));
   } else if (sub_conf_root_node->IsMap() && sub_conf_root_node->size() != 0) {
     Configuration sub_config{*sub_conf_root_node};
     previous_to_section_node->remove(*last_key_it);
@@ -303,19 +310,19 @@ Configuration Configuration::extract_sub_configuration(
     return sub_config;
   } else {  // sequence or scalar or any future new YAML type
     throw std::runtime_error("Tried to extract configuration section at " +
-                             join_quoted(keys) +
+                             join_quoted({keys.begin(), keys.end()}) +
                              " to get a key value. Use take instead!");
   }
 }
 
 bool Configuration::has_value_including_empty(
     std::initializer_list<const char *> keys) const {
-  const auto found_node = find_existing_node(keys);
+  const auto found_node = find_existing_node({keys.begin(), keys.end()});
   return found_node.has_value();
 }
 
 bool Configuration::has_value(std::initializer_list<const char *> keys) const {
-  const auto found_node = find_existing_node(keys);
+  const auto found_node = find_existing_node({keys.begin(), keys.end()});
   return found_node.has_value() && !(found_node.value().IsNull());
 }
 
@@ -326,7 +333,7 @@ std::string Configuration::to_string() const {
 }
 
 std::optional<YAML::Node> Configuration::find_existing_node(
-    std::vector<const char *> keys) const {
+    std::vector<std::string_view> keys) const {
   /* Here we do not assert(keys.size()>0) and allow to pass in an empty vector,
      in which case the passed in YAML:Node is simply returned. This might happen
      e.g. in the take or extract_sub_configuration methods if called with a

@@ -23,6 +23,7 @@
 #include "yaml-cpp/yaml.h"
 
 #include "forwarddeclarations.h"
+#include "input_keys.h"
 
 namespace YAML {
 
@@ -1112,34 +1113,46 @@ class Configuration {
   /**
    * The default interface for SMASH to read configuration values.
    *
-   * The function returns the value at the specified \p keys and removes it from
-   * the Configuration object. Therefore, a subsequent call to take or has_value
-   * with the same \p keys returns an undefined value / \c false.
-   * By removing the value, the Configuration object keeps track which settings
-   * were never read.
+   * The function returns the value at the specified \p Key and removes its
+   * labels from the Configuration object. Therefore, a subsequent call to the
+   * \c take or \c has_value methods with the same \p Key returns an undefined
+   * \c Value or \c false .
+   * By removing the value, the Configuration object keeps track which keys were
+   * never taken.
    *
    * \note If taking a key leaves the parent key without a value, then this is
    *       in turn removed and so on. From a performance point of view, it might
-   *       be argued that this is not needed to be checkend and done at every
+   *       be argued that this is not needed to be checked and done at every
    *       \c take operation and it might be done once for all. However, on one
    *       hand it is a natural behaviour to expect and on the other hand this
    *       is hardly going to be an application bottle-neck.
    *
-   * \param[in] keys You can pass an arbitrary number of keys inside curly
-   * braces, following the nesting structure in the config file.
-   * For example, given
+   * \param[in] key The input key that should be taken. This is usually one of
+   * the \c InputKeys static members, i.e. one of the allowed keys. Of course,
+   * any \c Key would work. For example, given
    \verbatim
-     Group:
-         Key: Value
+   Group:
+     Key: 42
    \endverbatim
-   * call \code string value = config.take({"Group", "Key"}); \endcode
-   * to read the value. This will make the key \c "Group" also be removed from
+   * then
+   \verbatim
+   Key key<int>{{"Group", "Key"}, {"1.0"}};
+   string value = config.take(key);
+   \endverbatim
+   * will take the value. This will make the key \c "Group" also be removed from
    * the configuration, since it remains without any value.
    *
    * \return A proxy object that converts to the correct type automatically on
    *         assignment.
    */
-  Value take(std::initializer_list<const char *> keys);
+  template <typename T>
+  Value take(const Key<T> &key) {
+    return take({key.labels().begin(), key.labels().end()});
+  }
+
+  Value take(std::initializer_list<const char *> labels) {
+    return take({labels.begin(), labels.end()});
+  }
 
   /// \see take
   template <typename T>
@@ -1326,7 +1339,20 @@ class Configuration {
    *       exceptional path are expensive).
    */
   std::optional<YAML::Node> find_existing_node(
-      std::vector<const char *> keys) const;
+      std::vector<std::string_view> keys) const;
+
+  /**
+   * This is the implementation detail to take a key. It is called by the public
+   * methods templates and it is supposed to be called passing the \c begin and
+   * \c end of a vector container. We used here a specific iterator because
+   * making the iterator type a template parameter would force us to move the
+   * method definition into the header file, which we prefer to avoid.
+   *
+   * \param[in] labels the labels of the key to be taken
+   *
+   * @return The \c Value of the key
+   */
+  Value take(std::vector<std::string_view> labels);
 
   /// The general_config.yaml contents - fully parsed
   YAML::Node root_node_{YAML::NodeType::Map};
