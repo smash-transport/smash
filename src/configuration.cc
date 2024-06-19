@@ -315,12 +315,6 @@ Configuration Configuration::extract_sub_configuration(
   }
 }
 
-bool Configuration::has_value_including_empty(
-    std::initializer_list<const char *> keys) const {
-  const auto found_node = find_existing_node({keys.begin(), keys.end()});
-  return found_node.has_value();
-}
-
 bool Configuration::has_value(std::initializer_list<const char *> keys) const {
   const auto found_node = find_existing_node({keys.begin(), keys.end()});
   return found_node.has_value() && !(found_node.value().IsNull());

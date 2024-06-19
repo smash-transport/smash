@@ -1242,16 +1242,32 @@ class Configuration {
           Configuration::GetEmpty::No);
 
   /**
-   * Return whether there is a (maybe empty) value behind the requested \p keys.
-   * \param[in] keys List of keys to be checked for
+   * Return whether the configuration has a key, possibly without value.
+   * \param[in] key The key to be checked for
    */
-  bool has_value_including_empty(
-      std::initializer_list<const char *> keys) const;
+  template <typename T>
+  bool has_key(const Key<T> &key) const {
+    const auto found_node =
+        find_existing_node({key.labels().begin(), key.labels().end()});
+    return found_node.has_value();
+  }
+
   /**
    * Return whether there is a non-empty value behind the requested \p keys.
    * \param[in] keys List of keys to be checked for
    */
   bool has_value(std::initializer_list<const char *> keys) const;
+
+  /**
+   * Return whether there is a non-empty value behind the requested \p key .
+   * \param[in] key The key to be checked for
+   */
+  template <typename T>
+  bool has_value(const Key<T> &key) const {
+    const auto found_node =
+        find_existing_node({key.labels().begin(), key.labels().end()});
+    return found_node.has_value() && !(found_node.value().IsNull());
+  }
 
   /**
    * @return \c true if the object is empty;

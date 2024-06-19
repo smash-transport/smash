@@ -136,9 +136,10 @@ TEST(take_reactions_bitset) {
 
 TEST(take_removes_entry) {
   Configuration conf = make_test_configuration();
-  VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
-  conf.take(get_key<double>({"tamer", "pipit", "bushelling"}));
-  VERIFY(!conf.has_value({"tamer", "pipit", "bushelling"}));
+  const auto key = get_key<double>({"tamer", "pipit", "bushelling"});
+  VERIFY(conf.has_value(key));
+  conf.take(key);
+  VERIFY(!conf.has_value(key));
   conf.clear();
 }
 
@@ -148,11 +149,14 @@ TEST(take_removes_empty_section) {
       Sub-section:
         Key: "Value"
   )"};
-  VERIFY(conf.has_value({"Section"}));
-  VERIFY(conf.has_value({"Section", "Sub-section"}));
-  conf.take(get_key<std::string>({"Section", "Sub-section", "Key"}));
-  VERIFY(!conf.has_value({"Section", "Sub-section"}));
-  VERIFY(!conf.has_value({"Section"})) << "\n" << conf.to_string();
+  const auto section = get_key<std::string>({"Section"}),
+             subsection = get_key<std::string>({"Section", "Sub-section"}),
+             key = get_key<std::string>({"Section", "Sub-section", "Key"});
+  VERIFY(conf.has_value(section));
+  VERIFY(conf.has_value(subsection));
+  conf.take(key);
+  VERIFY(!conf.has_value(section));
+  VERIFY(!conf.has_value(subsection));
 }
 
 TEST(take_removes_empty_section_but_not_empty_lists) {
@@ -163,7 +167,7 @@ TEST(take_removes_empty_section_but_not_empty_lists) {
         Empty_list: []
   )"};
   conf.take(get_key<std::string>({"Section", "Sub-section", "Key"}));
-  VERIFY(conf.has_value({"Section", "Sub-section"}));
+  VERIFY(conf.has_value(get_key<std::string>({"Section", "Sub-section"})));
   conf.clear();
 }
 
@@ -218,9 +222,10 @@ TEST(set_existing_value) {
 
 TEST(set_new_value_on_non_empty_conf) {
   Configuration conf = make_test_configuration();
-  VERIFY(!conf.has_value({"Test"}));
+  const auto key = get_key<double>({"Test"});
+  VERIFY(!conf.has_value(key));
   conf.set_value({"Test"}, 1.);
-  VERIFY(conf.has_value({"Test"}));
+  VERIFY(conf.has_value(key));
   COMPARE(double(conf.read({"Test"})), 1.);
   conf.clear();
 }
@@ -228,8 +233,8 @@ TEST(set_new_value_on_non_empty_conf) {
 TEST(set_value_on_empty_conf) {
   auto conf = Configuration("");
   conf.set_value({"New section", "New key"}, 42);
-  VERIFY(conf.has_value({"New section"}));
-  VERIFY(conf.has_value({"New section", "New key"}));
+  VERIFY(conf.has_value(get_key<std::string>({"New section"})));
+  VERIFY(conf.has_value(get_key<std::string>({"New section", "New key"})));
   conf.clear();
 }
 
@@ -242,8 +247,8 @@ TEST(set_value_on_conf_created_with_empty_file) {
   }
   auto conf = Configuration{tmp_dir, tmp_file};
   conf.set_value({"New section", "New key"}, 42);
-  VERIFY(conf.has_value({"New section"}));
-  VERIFY(conf.has_value({"New section", "New key"}));
+  VERIFY(conf.has_value(get_key<std::string>({"New section"})));
+  VERIFY(conf.has_value(get_key<std::string>({"New section", "New key"})));
   ofs.close();
   std::filesystem::remove(tmp_dir / tmp_file);
   conf.clear();
@@ -260,7 +265,7 @@ TEST(remove_all_entries_in_section_but_one) {
 TEST(extract_sub_configuration) {
   Configuration conf = make_test_configuration();
   Configuration sub_conf = conf.extract_sub_configuration({"tamer", "pipit"});
-  VERIFY(!conf.has_value({"tamer", "pipit"}));
+  VERIFY(!conf.has_value(get_key<std::string>({"tamer", "pipit"})));
   COMPARE(sub_conf.to_string(), "bushelling: 5.0");
   sub_conf = conf.extract_sub_configuration({"fireballs"});
   const auto list_of_keys = sub_conf.list_upmost_nodes();
@@ -311,14 +316,15 @@ TEST(extract_not_existing_section_as_empty_conf) {
 
 TEST(has_value_including_empty) {
   Configuration conf = Configuration{"Empty:"};
-  VERIFY(!conf.has_value({"Empty"}));
-  VERIFY(conf.has_value_including_empty({"Empty"}));
+  const auto key = get_key<std::string>({"Empty"});
+  VERIFY(!conf.has_value(key));
+  VERIFY(conf.has_key(key));
   conf.clear();
 }
 
 TEST(has_value) {
   Configuration conf = make_test_configuration();
-  VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
+  VERIFY(conf.has_value(get_key<double>({"tamer", "pipit", "bushelling"})));
   conf.clear();
 }
 
