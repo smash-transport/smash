@@ -499,7 +499,7 @@ TEST(vdf_chain_rule_derivatives_vs_vdf_direct_derivatives) {
 
   // calculate how many particles of one type are needed in a cubic space of
   // given length to reproduce this density profile
-  const int N = rho_avg * length * length * length;
+  const int N = numeric_cast<int>(rho_avg * length * length * length);
 
   // generate numbers uniformly on the intervals (0,1) and (0, length)
   auto uniform_one = random::make_uniform_distribution(0.0, 1.0);
@@ -716,7 +716,7 @@ TEST(skyrme_vs_vdf_wo_lattice) {
 
   // calculate how many particles of one type are needed in a cubic space of
   // given length to reproduce this density profile
-  const int N = rho_avg * length * length * length;
+  const int N = numeric_cast<int>(rho_avg * length * length * length);
 
   // generate numbers uniformly on the intervals (0,1) and (0, length)
   auto uniform_one = random::make_uniform_distribution(0.0, 1.0);
@@ -834,9 +834,9 @@ static bool density_hist(Particles* P, int box_length, int cell_length,
     double x1 = it->position().x1();
     double x2 = it->position().x2();
     double x3 = it->position().x3();
-    const int index = int(floor(x1 / cell_length)) +
-                      int(floor(x2 / cell_length)) * factor +
-                      int(floor(x3 / cell_length)) * factor * factor;
+    const int index = static_cast<int>(
+        std::floor(x1 / cell_length) + std::floor(x2 / cell_length) * factor +
+        std::floor(x3 / cell_length) * factor * factor);
     // increase the local density of this cell
     cells[index] = cells[index] + 1 / (cell_length * cell_length * cell_length *
                                        saturation_density * test_p);
@@ -855,7 +855,8 @@ static bool density_hist(Particles* P, int box_length, int cell_length,
     }
   }
 
-  unsigned int hist_bin = ceil((max_bound - min_bound) / step);
+  unsigned int hist_bin =
+      numeric_cast<int>(std::ceil((max_bound - min_bound) / step));
   min_bound = min_bound / step;
   max_bound = max_bound / step;
   unsigned int histogram[hist_bin + 1];

@@ -12,6 +12,7 @@
 #include <random>
 
 #include "smash/logging.h"
+#include "smash/numeric_cast.h"
 
 namespace smash {
 static constexpr int LGrandcanThermalizer = LogArea::GrandcanThermalizer::id;
@@ -71,9 +72,9 @@ random::BesselSampler::BesselSampler(const double poisson_mean1,
 }
 
 std::pair<int, int> random::BesselSampler::sample() {
-  const int N_smaller = (m_ >= m_switch_method_)
-                            ? std::round(random::normal(mu_, sigma_))
-                            : dist_();
+  const int N_smaller = numeric_cast<int>(
+      (m_ >= m_switch_method_) ? std::round(random::normal(mu_, sigma_))
+                               : std::floor(dist_()));
   return N_is_positive_ ? std::make_pair(N_smaller + N_, N_smaller)
                         : std::make_pair(N_smaller, N_smaller + N_);
 }

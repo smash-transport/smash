@@ -195,12 +195,12 @@ TEST(woods_saxon) {
   // fill the histogram
   for (int i = 0; i < N_TEST; i++) {
     ThreeVector pos = projectile.distribute_nucleon();
-    int bin = pos.abs() / dx;
+    int bin = numeric_cast<int>(std::floor(pos.abs() / dx));
     ++histogram[bin];
   }
   // We'll compare to relative values (I don't know what the integral
   // is)
-  double value_at_radius = histogram.at(R / dx);
+  double value_at_radius = histogram.at(numeric_cast<int>(std::floor(R / dx)));
   double expected_at_radius = projectile.woods_saxon(R);
   // we'll probe at these values:
   double probes[9] = {1.0,    5.0,     7.2,     8.0,    8.5,
@@ -208,7 +208,8 @@ TEST(woods_saxon) {
   // now do probe these values:
   for (int i = 0; i < 9; ++i) {
     // value we have simulated:
-    double value = histogram.at(probes[i] / dx) / value_at_radius;
+    double value = histogram.at(numeric_cast<int>(std::floor(probes[i] / dx))) /
+                   value_at_radius;
     // value we have expected:
     double expec = projectile.woods_saxon(probes[i]) / expected_at_radius;
     // standard error we expect the histogram to have is 1/sqrt(N); we

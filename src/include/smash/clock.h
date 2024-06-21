@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "logging.h"
+#include "numeric_cast.h"
 
 namespace smash {
 
@@ -387,7 +388,7 @@ class UniformClock : public Clock {
 
   /// Convert a double \p x into the internal int representation.
   static Representation convert(double x) {
-    return std::round(x * from_double);
+    return numeric_cast<Representation>(std::round(x * from_double));
   }
   /// Convert an internal int value \p x into the double representation.
   static double convert(Representation x) { return x * to_double; }
