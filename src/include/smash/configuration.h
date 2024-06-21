@@ -1120,6 +1120,10 @@ class Configuration {
    * By removing the value, the Configuration object keeps track which keys were
    * never taken.
    *
+   * \attention If a not existent Key is taken, its default value is returned,
+   *            if any exists. If a not existing required key is taken, an error
+   *            will be given.
+   *
    * \note If taking a key leaves the parent key without a value, then this is
    *       in turn removed and so on. From a performance point of view, it might
    *       be argued that this is not needed to be checked and done at every
@@ -1146,12 +1150,49 @@ class Configuration {
    *         assignment.
    */
   template <typename T>
-  Value take(const Key<T> &key) {
-    return take({key.labels().begin(), key.labels().end()});
+  T take(const Key<T> &key) {
+    if (has_value(key)) {
+      // The following return statement converts a Value into T
+      return take({key.labels().begin(), key.labels().end()});
+    } else {
+      try {
+        return key.default_value();
+      } catch (std::bad_optional_access &) {
+        throw std::invalid_argument("Required key " + std::string{key} +
+                                    " taken, but missing in configuration.");
+      }
+    }
   }
 
   Value take(std::initializer_list<const char *> labels) {
     return take({labels.begin(), labels.end()});
+  }
+
+  /**
+   * Alternative method to take a key value, specifying the default value.
+   * \see take
+   *
+   * @tparam T The type of the key to be taken
+   * @param key The key to be taken
+   * @param default_value The default value to be returned if the key is not
+   *                      present in the configuration
+   * @return The value of the key
+   *
+   * \throw std::logic_error If the key has not a default value declared as
+   * dependent on external entities.
+   */
+  template <typename T>
+  T take(const Key<T> &key, T default_value) {
+    if (!key.has_dependent_default()) {
+      throw std::logic_error(
+          "An input Key without dependent default cannot be taken specifying a "
+          "default value! Either define the key as having a dependent default "
+          "or take it without a default value (which is a Key property).");
+    }
+    if (has_value(key)) {
+      return take(key);
+    }
+    return default_value;
   }
 
   /// \see take

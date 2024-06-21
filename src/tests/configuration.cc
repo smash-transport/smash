@@ -71,14 +71,15 @@ TEST(take_multiple) {
 
 TEST_CATCH(take_incorrect_type, Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
-  const Key<double> key = get_key<double>({"tamer", "pipit", "bushelling"});
+  const Key<int> key = get_key<int>({"tamer", "pipit", "bushelling"});
   [[maybe_unused]] int i = conf.take(key);
 }
 
-TEST(take_always_converts_to_string) {
+TEST(take_cannot_always_convert_to_string) {
   Configuration conf = make_test_configuration();
-  std::string s = conf.take(get_key<double>({"tamer", "pipit", "bushelling"}));
-  COMPARE(s, "5.0");
+  auto key = get_key<double>({"tamer", "pipit", "bushelling"});
+  const bool b = std::is_convertible_v<decltype(conf.take(key)), std::string>;
+  VERIFY(!b);
   conf.clear();
 }
 
@@ -100,12 +101,20 @@ TEST(take_array) {
   conf.clear();
 }
 
-TEST_CATCH(take_array_wrong_n, Configuration::IncorrectTypeInAssignment) {
+TEST(take_enum_key) {
   Configuration conf = make_test_configuration();
-  conf.merge_yaml("{test: [123, 456, 789]}");
-  [[maybe_unused]] std::array<int, 4> x =
-      conf.take(get_key<std::array<int, 3>>({"test"}));
+  conf.merge_yaml("{test: on}");
+  FermiMotion x = conf.take(get_key<FermiMotion>({"test"}));
+  VERIFY(x == FermiMotion::On);
+  conf.clear();
 }
+
+TEST_CATCH(take_array_wrong_n, Configuration::IncorrectTypeInAssignment) {
+   Configuration conf = make_test_configuration();
+  conf.merge_yaml("{test: [123, 456, 789]}");
+  auto key = get_key<std::array<int, 4>>({"test"});
+  conf.take(key);
+ }
 
 TEST(take_reactions_bitset) {
   // Make sure that only the right bits are set

@@ -216,8 +216,9 @@ Configuration::Value Configuration::take(std::vector<std::string_view> labels) {
   auto to_be_returned{previous_to_last_node};
   descend_one_existing_level(to_be_returned, *last_key_it);
   if (!previous_to_last_node || !to_be_returned) {
-    throw std::invalid_argument(
-        "Attempt to take value of a not existing key: " + join_quoted(labels));
+    throw std::runtime_error(
+        "Private Configuration::take method called with not existing key: " +
+        join_quoted(labels) + ". This should not have happened.");
   }
   previous_to_last_node.value().remove(*last_key_it);
   root_node_ = remove_empty_maps(root_node_);
