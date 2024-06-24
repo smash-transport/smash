@@ -143,7 +143,7 @@ void ScatterAction::add_all_scatterings(
    * of the string processes are counted by taking the difference between the
    * parametrized total and the sum of the non-strings. */
   if (!finder_parameters.strings_with_probability &&
-      xs.string_probability(finder_parameters)) {
+      xs.string_probability(finder_parameters) > 0) {
     const double xs_diff =
         xs.high_energy(finder_parameters.transition_high_energy) -
         sum_of_partial_cross_sections_;
