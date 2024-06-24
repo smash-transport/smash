@@ -7,6 +7,8 @@
 
 #include "smash/tabulation.h"
 
+#include "smash/numeric_cast.h"
+
 namespace smash {
 
 Tabulation::Tabulation(double x_min, double range, size_t num,
@@ -26,8 +28,8 @@ double Tabulation::get_value_step(double x) const {
   if (x < x_min_) {
     return 0.;
   }
-  // this rounds correctly because double -> int conversion truncates
-  const unsigned int n = (x - x_min_) * inv_dx_ + 0.5;
+  const unsigned int n =
+      numeric_cast<unsigned int>(std::floor((x - x_min_) * inv_dx_ + 0.5));
   if (n >= values_.size()) {
     return values_.back();
   } else {

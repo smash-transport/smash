@@ -12,6 +12,7 @@
 
 #include "smash/file.h"
 #include "smash/integrate.h"
+#include "smash/numeric_cast.h"
 
 namespace smash {
 
@@ -32,7 +33,7 @@ class Histogram1d {
 
   /// add an entry at position x
   void add(double x) {
-    int n = std::floor(x / dx_);
+    int n = numeric_cast<int>(std::floor(x / dx_));
     ++data_[n];
     ++entries_;
     if (n < min_)
@@ -129,7 +130,7 @@ void Histogram1d::test(Analytical analyt, const std::string& dbg_file) const {
       const double diff = (counts - ana) / stat_err;  // normalized deviation
       chi_sqr += diff * diff;                         // chi-squared
       // absolute value of deviation in units of sigma
-      int abs_diff = std::abs(diff);
+      int abs_diff = numeric_cast<int>(std::floor(std::abs(diff)));
       abs_diff = (abs_diff >= sigmabins) ? sigmabins - 1 : abs_diff;
       // this will be checked: how many points have been correct up to
       // one, two, three, ... sigmas?

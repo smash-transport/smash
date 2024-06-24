@@ -431,12 +431,11 @@ double ScatterActionMulti::calculate_I3(const double sqrts) const {
                      2 * m1 * m1 * m2 * m2 - 2 * m3 * m3 * sqrts * sqrts);
   const double c4 =
       -8 * m1 * m2 / tmp * smash::pow_int(sqrts * sqrts - m3 * m3, 2);
-  const double precision = 1.e-6;
   const double res =
-      c1 * gsl_sf_ellint_Kcomp(kappa, precision) +
-      c2 * gsl_sf_ellint_Ecomp(kappa, precision) +
-      c3 * gsl_sf_ellint_Pcomp(kappa, -qmp / qmm, precision) +
-      c4 * gsl_sf_ellint_Pcomp(kappa, -x1 * qmp / (x2 * qmm), precision);
+      c1 * gsl_sf_ellint_Kcomp(kappa, GSL_PREC_DOUBLE) +
+      c2 * gsl_sf_ellint_Ecomp(kappa, GSL_PREC_DOUBLE) +
+      c3 * gsl_sf_ellint_Pcomp(kappa, -qmp / qmm, GSL_PREC_DOUBLE) +
+      c4 * gsl_sf_ellint_Pcomp(kappa, -x1 * qmp / (x2 * qmm), GSL_PREC_DOUBLE);
   return res;
 }
 

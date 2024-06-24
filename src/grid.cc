@@ -14,6 +14,7 @@
 #include "smash/algorithms.h"
 #include "smash/fourvector.h"
 #include "smash/logging.h"
+#include "smash/numeric_cast.h"
 #include "smash/particledata.h"
 #include "smash/threevector.h"
 
@@ -139,10 +140,10 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
   // That would be overkill. Let max_cells³ ≤ particle_count (conversion to
   // int truncates). Limit only applied for geometric criteiron, where grid
   // is an optimisation and cells can be made larger.
-  const int max_cells =
+  const int max_cells = numeric_cast<int>(
       (O == GridOptions::Normal)
-          ? std::cbrt(particle_count)
-          : std::max(2, static_cast<int>(std::cbrt(particle_count)));
+          ? std::floor(std::cbrt(particle_count))
+          : std::max(2., std::floor(std::cbrt(particle_count))));
 
   // This normally equals 1/max_interaction_length. If the number of cells
   // is reduced (because of low density) then this value is smaller. If only
@@ -203,7 +204,6 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
       assert(index_factor[i] * length_[i] < number_of_cells_[i]);
     }
   }
-
   if (O == GridOptions::Normal &&
       all_of(number_of_cells_, [](SizeType n) { return n <= 2; })) {
     // dilute limit:
@@ -255,9 +255,12 @@ Grid<O>::Grid(const std::pair<std::array<double, 3>, std::array<double, 3>>
     // with index_factor to determine the 3 x,y,z indexes to pass to make_index.
     auto &&cell_index_for = [&](const ParticleData &p) {
       return make_index(
-          std::floor((p.position()[1] - min_position[0]) * index_factor[0]),
-          std::floor((p.position()[2] - min_position[1]) * index_factor[1]),
-          std::floor((p.position()[3] - min_position[2]) * index_factor[2]));
+          numeric_cast<SizeType>(std::floor(
+              (p.position()[1] - min_position[0]) * index_factor[0])),
+          numeric_cast<SizeType>(std::floor(
+              (p.position()[2] - min_position[1]) * index_factor[1])),
+          numeric_cast<SizeType>(std::floor(
+              (p.position()[3] - min_position[2]) * index_factor[2])));
     };
     for (const auto &p : particles) {
       if (!include_unformed_particles &&

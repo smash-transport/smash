@@ -80,7 +80,7 @@ double PauliBlocker::phasespace_dens(const ThreeVector &r, const ThreeVector &p,
       // 1st order interpolation using tabulated values
       const double i_real =
           std::sqrt(rdist_sqr) / (rr_ + rc_) * weights_.size();
-      const size_t i = std::floor(i_real);
+      const size_t i = numeric_cast<size_t>(std::floor(i_real));
       const double rest = i_real - i;
       if (likely(i + 1 < weights_.size())) {
         f += weights_[i] * rest + weights_[i + 1] * (1. - rest);

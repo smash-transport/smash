@@ -27,6 +27,7 @@
 #include "grandcan_thermalizer.h"
 #include "grid.h"
 #include "hypersurfacecrossingaction.h"
+#include "numeric_cast.h"
 #include "outputparameters.h"
 #include "pauliblocking.h"
 #include "potential_globals.h"
@@ -924,8 +925,8 @@ Experiment<Modus>::Experiment(Configuration &config,
         config.take({"General", "Minimum_Nonempty_Ensembles", "Number"});
     int max_ensembles = config.take(
         {"General", "Minimum_Nonempty_Ensembles", "Maximum_Ensembles_Run"});
-    max_events_ =
-        std::ceil(static_cast<double>(max_ensembles) / parameters_.n_ensembles);
+    max_events_ = numeric_cast<int>(std::ceil(
+        static_cast<double>(max_ensembles) / parameters_.n_ensembles));
   } else {
     event_counting_ = EventCounting::FixedNumber;
   }
@@ -1661,20 +1662,20 @@ Experiment<Modus>::Experiment(Configuration &config,
           l_default = {2 * max_xy, 2 * max_xy, 2 * max_z};
           // Go for approximately 0.8 fm cell size and contract
           // lattice in z by gamma factor
-          const int n_xy = std::ceil(2 * max_xy / 0.8);
-          int nz = std::ceil(2 * max_z / 0.8);
+          const int n_xy = numeric_cast<int>(std::ceil(2 * max_xy / 0.8));
+          int nz = numeric_cast<int>(std::ceil(2 * max_z / 0.8));
           // Contract lattice by gamma factor in case of smearing where
           // smearing length is bound to the lattice cell length
           if (parameters_.smearing_mode == SmearingMode::Discrete ||
               parameters_.smearing_mode == SmearingMode::Triangular) {
-            nz = static_cast<int>(std::ceil(2 * max_z / 0.8 * gam));
+            nz = numeric_cast<int>(std::ceil(2 * max_z / 0.8 * gam));
           }
           n_default = {n_xy, n_xy, nz};
         } else if (modus_.is_box()) {
           origin_default = {0., 0., 0.};
           const double bl = modus_.length();
           l_default = {bl, bl, bl};
-          const int n_xyz = std::ceil(bl / 0.5);
+          const int n_xyz = numeric_cast<int>(std::ceil(bl / 0.5));
           n_default = {n_xyz, n_xyz, n_xyz};
         } else if (modus_.is_sphere()) {
           // Maximal distance from (0, 0, 0) at which a particle
@@ -1683,7 +1684,7 @@ Experiment<Modus>::Experiment(Configuration &config,
           origin_default = {-max_d, -max_d, -max_d};
           l_default = {2 * max_d, 2 * max_d, 2 * max_d};
           // Go for approximately 0.8 fm cell size
-          const int n_xyz = std::ceil(2 * max_d / 0.8);
+          const int n_xyz = numeric_cast<int>(std::ceil(2 * max_d / 0.8));
           n_default = {n_xyz, n_xyz, n_xyz};
         }
         // Take lattice properties from config to assign them to all lattices

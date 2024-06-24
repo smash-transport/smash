@@ -10,43 +10,92 @@
 #ifndef SRC_INCLUDE_SMASH_NUMERIC_CAST_H_
 #define SRC_INCLUDE_SMASH_NUMERIC_CAST_H_
 
-#include <limits>
+#include <string>
+#include <string_view>
 
 namespace smash {
 
-/**
- * Function template to perform a safe numeric conversion between types.
- * \tparam D Destination type
- * \tparam S Source type
- * \param[in] value Input value to be converted
- * \return The input value converted to the new type \c D .
- * \throw std::overflow_error If the value to be converted cannot be represented
- * by any value of the destination type.
- *
- * \b NOTE: This template is only declared and not implemented! Only
- * specializations are implemented so that only given conversions do not result
- * in compilation errors.
- */
-template <typename D, typename S>
-constexpr D numeric_cast(const S value);
+namespace detail {
 
 /**
- * Function template specialization to perform a safe numeric conversion from
- * \c size_t to \c uint32_t .
- * \param[in] value Input value to be converted
- * \return The input value converted to the \c uint32_t type.
- * \throw std::overflow_error
- * If the value to be converted is larger than the maximum of \c uint32_t type.
+ * Get type of variable as string in a human-readable way.
+ *
+ * @tparam T The type to be returned.
+ * @return A \c std::string containing the name of the type.
  */
-template <>
-constexpr uint32_t numeric_cast(const size_t value) {
-  // Conversion from unsigned to unsigned
-  //  => the only possible problem is a positive overflow.
-  if (value > std::numeric_limits<uint32_t>::max()) {
-    throw std::overflow_error(
-        "Input value overflows the target uint32_t type!");
+template <typename T>
+constexpr auto type_name() {
+  std::string_view name, prefix, suffix;
+#ifdef __clang__
+  name = __PRETTY_FUNCTION__;
+  prefix = "auto smash::detail::type_name() [T = ";
+  suffix = "]";
+#elif defined(__GNUC__)
+  name = __PRETTY_FUNCTION__;
+  prefix = "constexpr auto smash::detail::type_name() [with T = ";
+  suffix = "]";
+#elif defined(_MSC_VER)
+  name = __FUNCSIG__;
+  prefix = "auto __cdecl smash::detail::type_name<";
+  suffix = ">(void)";
+#else
+  name = "UNKNOWN";
+  prefix = "";
+  suffix = "";
+#endif
+  name.remove_prefix(prefix.size());
+  name.remove_suffix(suffix.size());
+  return std::string{name};
+}
+
+}  // namespace detail
+
+/**
+ * Function template to perform a safe numeric conversion between types.
+ *
+ * \tparam To Destination type
+ * \tparam From Source type
+ * \tparam unnamed The last template parameter makes such that this function
+ * template participates in function overload only if the destination type \c To
+ * is an arithmetic type (typical usage of SFINAE).
+ *
+ * \param[in] from Input value to be converted
+ * \return The input value converted to the new type \c To .
+ * \throw std::domain_error If the value to be converted cannot be represented
+ * by any value of the destination type.
+ *
+ * \note This is adapted from the Microsoft implementation of \c narrow function
+ * in the C++ <a href="https://github.com/microsoft/GSL/tree/main">Guidelines
+ * Support Library</a>, which is released under MIT license.
+ */
+
+template <typename To, class From,
+          typename std::enable_if_t<std::is_arithmetic_v<To>, bool> = true>
+constexpr To numeric_cast(From from) noexcept(false) {
+  /* While this is technically undefined behavior in some cases (i.e., if the
+  source value is of floating-point type and cannot fit into the destination
+  integral type), the resultant behavior is benign on the platforms that we
+  target (i.e., no hardware trap representations are hit). */
+  const To to = static_cast<To>(from);
+
+  /*
+   * NOTE 1: NaN will always throw, since NaN != NaN
+   *
+   * NOTE 2: The first condition in the if-clause below is not enough because it
+   * might happen that the cast back is matching the initial value when casting
+   * signed to unsigned numbers or vice-versa because of the "wrapping around"
+   * behaviour. See https://stackoverflow.com/a/52863884 for more information.
+   */
+  constexpr const bool is_different_signedness =
+      (std::is_signed_v<To> != std::is_signed_v<From>);
+  if (static_cast<From>(to) != from ||
+      (is_different_signedness && ((to < To{}) != (from < From{})))) {
+    throw std::domain_error("Numeric cast failed converting '" +
+                            detail::type_name<From>() + "' to '" +
+                            detail::type_name<To>() + "'.");
   }
-  return static_cast<uint32_t>(value);
+
+  return to;
 }
 
 }  // namespace smash

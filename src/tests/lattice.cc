@@ -150,25 +150,28 @@ TEST(neighbor_indeces) {
   // the bounds of the lattice
   ThreeVector r1(4.0, 5.0, 6.0);
   // get indeces for r1
-  const int ix1 = std::floor((r1.x1() - (l.origin())[0]) / (l.cell_sizes())[0]);
-  const int iy1 = std::floor((r1.x2() - (l.origin())[1]) / (l.cell_sizes())[1]);
-  const int iz1 = std::floor((r1.x3() - (l.origin())[2]) / (l.cell_sizes())[2]);
+  const int ix1 = numeric_cast<int>(
+      std::floor((r1.x1() - (l.origin())[0]) / (l.cell_sizes())[0]));
+  const int iy1 = numeric_cast<int>(
+      std::floor((r1.x2() - (l.origin())[1]) / (l.cell_sizes())[1]));
+  const int iz1 = numeric_cast<int>(
+      std::floor((r1.x3() - (l.origin())[2]) / (l.cell_sizes())[2]));
   // get shifted coordinates in the case of a non-periodic lattice
-  double ix1_l =
+  const int ix1_l =
       ((r1.x1() - l.cell_sizes()[0]) < l.origin()[0]) ? ix1 : (ix1 - 1);
-  double ix1_r =
+  const int ix1_r =
       ((r1.x1() + l.cell_sizes()[0]) >= (l.origin()[0] + l.lattice_sizes()[0]))
           ? ix1
           : (ix1 + 1);
-  double iy1_d =
+  const int iy1_d =
       ((r1.x2() - l.cell_sizes()[1]) < l.origin()[1]) ? iy1 : (iy1 - 1);
-  double iy1_u =
+  const int iy1_u =
       ((r1.x2() + l.cell_sizes()[1]) >= (l.origin()[1] + l.lattice_sizes()[1]))
           ? iy1
           : (iy1 + 1);
-  double iz1_n =
+  const int iz1_n =
       ((r1.x3() - l.cell_sizes()[2]) < l.origin()[2]) ? iz1 : (iz1 - 1);
-  double iz1_f =
+  const int iz1_f =
       ((r1.x3() + l.cell_sizes()[2]) >= (l.origin()[2] + l.lattice_sizes()[2]))
           ? iz1
           : (iz1 + 1);
@@ -191,25 +194,28 @@ TEST(neighbor_indeces) {
   // remains unchanged (for a non-periodic lattice)
   ThreeVector r2(0.25, 6.7, 6.5);
   // get indeces for r2
-  const int ix2 = std::floor((r2.x1() - (l.origin())[0]) / (l.cell_sizes())[0]);
-  const int iy2 = std::floor((r2.x2() - (l.origin())[1]) / (l.cell_sizes())[1]);
-  const int iz2 = std::floor((r2.x3() - (l.origin())[2]) / (l.cell_sizes())[2]);
+  const int ix2 = numeric_cast<int>(
+      std::floor((r2.x1() - (l.origin())[0]) / (l.cell_sizes())[0]));
+  const int iy2 = numeric_cast<int>(
+      std::floor((r2.x2() - (l.origin())[1]) / (l.cell_sizes())[1]));
+  const int iz2 = numeric_cast<int>(
+      std::floor((r2.x3() - (l.origin())[2]) / (l.cell_sizes())[2]));
   // get shifted coordinates in the case of a non-periodic lattice
-  double ix_l =
+  const int ix_l =
       ((r2.x1() - l.cell_sizes()[0]) < l.origin()[0]) ? ix2 : (ix2 - 1);
-  double ix_r =
+  const int ix_r =
       ((r2.x1() + l.cell_sizes()[0]) >= (l.origin()[0] + l.lattice_sizes()[0]))
           ? ix2
           : (ix2 + 1);
-  double iy_d =
+  const int iy_d =
       ((r2.x2() - l.cell_sizes()[1]) < l.origin()[1]) ? iy2 : (iy2 - 1);
-  double iy_u =
+  const int iy_u =
       ((r2.x2() + l.cell_sizes()[1]) >= (l.origin()[1] + l.lattice_sizes()[1]))
           ? iy2
           : (iy2 + 1);
-  double iz_n =
+  const int iz_n =
       ((r2.x3() - l.cell_sizes()[2]) < l.origin()[2]) ? iz2 : (iz2 - 1);
-  double iz_f =
+  const int iz_f =
       ((r2.x3() + l.cell_sizes()[2]) >= (l.origin()[2] + l.lattice_sizes()[2]))
           ? iz2
           : (iz2 + 1);
@@ -250,26 +256,29 @@ TEST(neighbor_indeces_periodic) {
   // unchanged
   ThreeVector r(0.25, 6.7, 6.5);
   // get indeces for r
-  const int ix = std::floor((r.x1() - (l.origin())[0]) / (l.cell_sizes())[0]);
-  const int iy = std::floor((r.x2() - (l.origin())[1]) / (l.cell_sizes())[1]);
-  const int iz = std::floor((r.x3() - (l.origin())[2]) / (l.cell_sizes())[2]);
+  const int ix = numeric_cast<int>(
+      std::floor((r.x1() - (l.origin())[0]) / (l.cell_sizes())[0]));
+  const int iy = numeric_cast<int>(
+      std::floor((r.x2() - (l.origin())[1]) / (l.cell_sizes())[1]));
+  const int iz = numeric_cast<int>(
+      std::floor((r.x3() - (l.origin())[2]) / (l.cell_sizes())[2]));
 
   // get shifted coordinates
-  double ix_l =
+  const int ix_l =
       ((r.x1() - dx) < l.origin()[0]) ? (ix + l.n_cells()[0] - 1) : (ix - 1);
-  double ix_r = ((r.x1() + dx) >= l.lattice_sizes()[0])
-                    ? (ix - l.n_cells()[0] + 1)
-                    : (ix + 1);
-  double iy_d =
+  const int ix_r = ((r.x1() + dx) >= l.lattice_sizes()[0])
+                       ? (ix - l.n_cells()[0] + 1)
+                       : (ix + 1);
+  const int iy_d =
       ((r.x2() - dy) < l.origin()[1]) ? (iy + l.n_cells()[1] - 1) : (iy - 1);
-  double iy_u = ((r.x2() + dy) >= l.lattice_sizes()[1])
-                    ? (iy - l.n_cells()[1] + 1)
-                    : (iy + 1);
-  double iz_n =
+  const int iy_u = ((r.x2() + dy) >= l.lattice_sizes()[1])
+                       ? (iy - l.n_cells()[1] + 1)
+                       : (iy + 1);
+  const int iz_n =
       ((r.x3() - dz) < l.origin()[2]) ? (iz + l.n_cells()[2] - 1) : (iz - 1);
-  double iz_f = ((r.x3() + dz) >= l.lattice_sizes()[2])
-                    ? (iz - l.n_cells()[2] + 1)
-                    : (iz + 1);
+  const int iz_f = ((r.x3() + dz) >= l.lattice_sizes()[2])
+                       ? (iz - l.n_cells()[2] + 1)
+                       : (iz + 1);
 
   COMPARE(l.cell_center(ix_l, iy, iz), l.cell_center(l.index_left(ix, iy, iz)));
   COMPARE(l.cell_center(ix_r, iy, iz),
@@ -913,9 +922,12 @@ TEST(iterate_nearest_neighbors) {
   std::array<double, 3> cell_sizes = lattice->cell_sizes();
 
   // get the index of the cell to which r0 points
-  int ix_0 = std::floor((r0.x1() - origin[0]) / cell_sizes[0]);
-  int iy_0 = std::floor((r0.x2() - origin[1]) / cell_sizes[1]);
-  int iz_0 = std::floor((r0.x3() - origin[2]) / cell_sizes[2]);
+  int ix_0 =
+      numeric_cast<int>(std::floor((r0.x1() - origin[0]) / cell_sizes[0]));
+  int iy_0 =
+      numeric_cast<int>(std::floor((r0.x2() - origin[1]) / cell_sizes[1]));
+  int iz_0 =
+      numeric_cast<int>(std::floor((r0.x3() - origin[2]) / cell_sizes[2]));
   int center_index = lattice->index1d(ix_0, iy_0, iz_0);
   int left_index = lattice->index_left(ix_0, iy_0, iz_0);
   int right_index = lattice->index_right(ix_0, iy_0, iz_0);
@@ -962,9 +974,9 @@ TEST(iterate_nearest_neighbors) {
   cell_sizes = lattice->cell_sizes();
 
   // get the index of the cell to which r0 points
-  ix_0 = std::floor((r0.x1() - origin[0]) / cell_sizes[0]);
-  iy_0 = std::floor((r0.x2() - origin[1]) / cell_sizes[1]);
-  iz_0 = std::floor((r0.x3() - origin[2]) / cell_sizes[2]);
+  ix_0 = numeric_cast<int>(std::floor((r0.x1() - origin[0]) / cell_sizes[0]));
+  iy_0 = numeric_cast<int>(std::floor((r0.x2() - origin[1]) / cell_sizes[1]));
+  iz_0 = numeric_cast<int>(std::floor((r0.x3() - origin[2]) / cell_sizes[2]));
   center_index = lattice->index1d(ix_0, iy_0, iz_0);
   left_index = lattice->index_left(ix_0, iy_0, iz_0);
   right_index = lattice->index_right(ix_0, iy_0, iz_0);

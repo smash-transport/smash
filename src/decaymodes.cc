@@ -142,7 +142,7 @@ static int min_angular_momentum(int s0, int s1, int s2) {
     throw std::runtime_error(
         "min_angular_momentum: sum of spins should be integer");
   }
-  return min_L / 2.;
+  return min_L / 2;
 }
 
 static int min_angular_momentum(int s0, int s1, int s2, int s3) {
@@ -157,7 +157,7 @@ static int min_angular_momentum(int s0, int s1, int s2, int s3) {
     throw std::runtime_error(
         "min_angular_momentum: sum of spins should be integer");
   }
-  return min_L / 2.;
+  return min_L / 2;
 }
 
 void DecayModes::load_decaymodes(const std::string &input) {

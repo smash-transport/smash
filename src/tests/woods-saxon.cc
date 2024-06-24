@@ -46,18 +46,18 @@ TEST(woods_saxon) {
     // for all particles in the nucleus, save position in histograms.
     for (auto p : projectile) {
       double r = p.position().abs3();
-      ++hist_vanilla[0][floor(p.position().x1() / dx)];
-      ++hist_vanilla[1][floor(p.position().x2() / dx)];
-      ++hist_vanilla[2][floor(p.position().x3() / dx)];
-      ++hist_vanilla[3][r / dx];
+      ++hist_vanilla[0][numeric_cast<int>(std::floor(p.position().x1() / dx))];
+      ++hist_vanilla[1][numeric_cast<int>(std::floor(p.position().x2() / dx))];
+      ++hist_vanilla[2][numeric_cast<int>(std::floor(p.position().x3() / dx))];
+      ++hist_vanilla[3][numeric_cast<int>(std::floor(r / dx))];
       // we'll "center" the nucleus "by hand", i.e., we subtract com by
       // hand instead of doing it in a dedicated function / loop.
       FourVector centered = p.position() - com;
       double R = centered.abs3();
-      ++hist_centerd[0][floor(centered.x1() / dx)];
-      ++hist_centerd[1][floor(centered.x2() / dx)];
-      ++hist_centerd[2][floor(centered.x3() / dx)];
-      ++hist_centerd[3][R / dx];
+      ++hist_centerd[0][numeric_cast<int>(std::floor(centered.x1() / dx))];
+      ++hist_centerd[1][numeric_cast<int>(std::floor(centered.x2() / dx))];
+      ++hist_centerd[2][numeric_cast<int>(std::floor(centered.x3() / dx))];
+      ++hist_centerd[3][numeric_cast<int>(std::floor(R / dx))];
     }
   }
   constexpr int sigmabins = 4;
@@ -84,7 +84,8 @@ TEST(woods_saxon) {
       double margin = std::sqrt(vanilla + centerd);
       // we'll make another histogram from the errors divided by the
       // standard deviation (stored in margin).
-      int diffbin = std::abs(vanilla - centerd) / margin;
+      int diffbin =
+          numeric_cast<int>(std::floor(std::abs(vanilla - centerd) / margin));
       // everything with a larger deviation than sigmabins*margin is
       // collected in highest bin.
       diffbin = (diffbin >= sigmabins) ? sigmabins - 1 : diffbin;

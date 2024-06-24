@@ -19,6 +19,7 @@
 #include "forwarddeclarations.h"
 #include "fourvector.h"
 #include "logging.h"
+#include "numeric_cast.h"
 #include "numerics.h"
 
 namespace smash {
@@ -545,9 +546,12 @@ class RectangularLattice {
    * \todo (oliiny): maybe 1-order interpolation instead of 0-order?
    */
   bool value_at(const ThreeVector& r, T& value) {
-    const int ix = std::floor((r.x1() - origin_[0]) / cell_sizes_[0]);
-    const int iy = std::floor((r.x2() - origin_[1]) / cell_sizes_[1]);
-    const int iz = std::floor((r.x3() - origin_[2]) / cell_sizes_[2]);
+    const int ix =
+        numeric_cast<int>(std::floor((r.x1() - origin_[0]) / cell_sizes_[0]));
+    const int iy =
+        numeric_cast<int>(std::floor((r.x2() - origin_[1]) / cell_sizes_[1]));
+    const int iz =
+        numeric_cast<int>(std::floor((r.x3() - origin_[2]) / cell_sizes_[2]));
     if (out_of_bounds(ix, iy, iz)) {
       value = T();
       return false;
@@ -621,10 +625,10 @@ class RectangularLattice {
      * where i is index in any direction. Therefore we want cells with condition
      * (r-r_cut)/csize - 0.5 < i < (r+r_cut)/csize - 0.5, r = r_center - r_0 */
     for (int i = 0; i < 3; i++) {
-      l_bounds[i] =
-          std::ceil((point[i] - origin_[i] - r_cut) / cell_sizes_[i] - 0.5);
-      u_bounds[i] =
-          std::ceil((point[i] - origin_[i] + r_cut) / cell_sizes_[i] - 0.5);
+      l_bounds[i] = numeric_cast<int>(
+          std::ceil((point[i] - origin_[i] - r_cut) / cell_sizes_[i] - 0.5));
+      u_bounds[i] = numeric_cast<int>(
+          std::ceil((point[i] - origin_[i] + r_cut) / cell_sizes_[i] - 0.5));
     }
 
     if (!periodic_) {
@@ -690,10 +694,10 @@ class RectangularLattice {
      * r[i] = r_center[i] - r_0[i]
      */
     for (int i = 0; i < 3; i++) {
-      l_bounds[i] = std::ceil(
-          (point[i] - origin_[i] - rectangle[i]) / cell_sizes_[i] - 0.5);
-      u_bounds[i] = std::ceil(
-          (point[i] - origin_[i] + rectangle[i]) / cell_sizes_[i] - 0.5);
+      l_bounds[i] = numeric_cast<int>(std::ceil(
+          (point[i] - origin_[i] - rectangle[i]) / cell_sizes_[i] - 0.5));
+      u_bounds[i] = numeric_cast<int>(std::ceil(
+          (point[i] - origin_[i] + rectangle[i]) / cell_sizes_[i] - 0.5));
     }
 
     if (!periodic_) {
@@ -725,10 +729,13 @@ class RectangularLattice {
    */
   template <typename F>
   void iterate_nearest_neighbors(const ThreeVector& point, F&& func) {
-    // get the 3D indeces of the cell containing the given point
-    const int ix = std::floor((point.x1() - origin_[0]) / cell_sizes_[0]);
-    const int iy = std::floor((point.x2() - origin_[1]) / cell_sizes_[1]);
-    const int iz = std::floor((point.x3() - origin_[2]) / cell_sizes_[2]);
+    // get the 3D indices of the cell containing the given point
+    const int ix = numeric_cast<int>(
+        std::floor((point.x1() - origin_[0]) / cell_sizes_[0]));
+    const int iy = numeric_cast<int>(
+        std::floor((point.x2() - origin_[1]) / cell_sizes_[1]));
+    const int iz = numeric_cast<int>(
+        std::floor((point.x3() - origin_[2]) / cell_sizes_[2]));
 
     logg[LLattice].debug(
         "Iterating over nearest neighbors of the cell at ix = ", ix,
