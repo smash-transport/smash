@@ -13,34 +13,10 @@
 /// @cond
 // exclude most content here from documentation
 
+#include <bitset>
 #include <iosfwd>
 #include <memory>
 #include <vector>
-
-#ifdef _LIBCPP_BEGIN_NAMESPACE_STD
-_LIBCPP_BEGIN_NAMESPACE_STD
-#else
-namespace std {
-#endif
-
-template <typename T>
-class allocator;
-template <typename T, typename A>
-class vector;
-
-template <typename T>
-struct default_delete;
-template <typename T, typename Deleter>
-class unique_ptr;
-
-template <std::size_t N>
-class bitset;
-
-#ifdef _LIBCPP_END_NAMESPACE_STD
-_LIBCPP_END_NAMESPACE_STD
-#else
-}  // namespace std
-#endif
 
 namespace smash {
 
