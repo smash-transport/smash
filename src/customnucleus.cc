@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "smash/constants.h"
+#include "smash/logging.h"
 #include "smash/particletype.h"
 #include "smash/pdgcode.h"
 

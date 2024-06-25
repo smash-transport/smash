@@ -16,6 +16,8 @@
 #include "smash/constants.h"
 #include "smash/fourvector.h"
 #include "smash/logging.h"
+#include "smash/numerics.h"
+#include "smash/particles.h"
 #include "smash/random.h"
 #include "smash/threevector.h"
 

@@ -13,6 +13,7 @@
 #include <string>
 
 #include "smash/nucleus.h"
+#include "smash/numeric_cast.h"
 #include "smash/pdgcode.h"
 
 using namespace smash;

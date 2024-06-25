@@ -29,22 +29,6 @@ namespace smash {
 static constexpr int LDensity = LogArea::Density::id;
 
 /**
- * Allows to choose which kind of density to calculate.
- * The baryon density is necessary for the Skyrme potential.
- * For the symmetry potential one needs to know the isospin density.
- */
-enum class DensityType {
-  None = 0,
-  Hadron = 1,
-  Baryon = 2,
-  BaryonicIsospin = 3,
-  Pion = 4,
-  Isospin3_tot = 5,
-  Charge = 6,
-  Strangeness = 7,
-};
-
-/**
  * Create the output operator for the densities
  *
  * \param[out] os Output operator for the densities

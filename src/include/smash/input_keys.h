@@ -21,10 +21,14 @@
 #include <variant>
 #include <vector>
 
-#include "smash/configuration.h"
-#include "smash/stringfunctions.h"
+#include "einhard.hpp"
+
+#include "forwarddeclarations.h"
+#include "pdgcode.h"
+#include "stringfunctions.h"
 
 namespace smash {
+
 /**
  * Descriptive alias for storing SMASH versions associated to keys metadata.
  * At the moment simply a \c std::string .
