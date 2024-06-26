@@ -13,65 +13,39 @@
 /// @cond
 // exclude most content here from documentation
 
+#include <bitset>
 #include <iosfwd>
 #include <memory>
 #include <vector>
 
-#ifdef _LIBCPP_BEGIN_NAMESPACE_STD
-_LIBCPP_BEGIN_NAMESPACE_STD
-#else
-namespace std {
-#endif
-
-template <typename T>
-class allocator;
-template <typename T, typename A>
-class vector;
-
-template <typename T>
-struct default_delete;
-template <typename T, typename Deleter>
-class unique_ptr;
-
-template <std::size_t N>
-class bitset;
-
-#ifdef _LIBCPP_END_NAMESPACE_STD
-_LIBCPP_END_NAMESPACE_STD
-#else
-}  // namespace std
-#endif
-
 namespace smash {
-
-template <typename T>
-using build_unique_ptr_ = std::unique_ptr<T, std::default_delete<T>>;
-template <typename T>
-using build_vector_ = std::vector<T, std::allocator<T>>;
 
 class Action;
 class ScatterAction;
 class ScatterActionMulti;
 class BoxModus;
 class Clock;
+class CollisionBranch;
 class Configuration;
 class CrossSections;
+class DecayBranch;
 class DecayModes;
 class DecayType;
+class ExperimentBase;
 class FourVector;
-class ThreeVector;
+class IsoParticleType;
+template <typename T>
+class Key;
 class ModusDefault;
 class OutputInterface;
 class ParticleData;
 class Particles;
 class ParticleType;
 class ParticleTypePtr;
-class IsoParticleType;
 class PdgCode;
-class DecayBranch;
-class CollisionBranch;
 class Tabulation;
-class ExperimentBase;
+class ThreeVector;
+
 struct ExperimentParameters;
 struct ScatterActionsFinderParameters;
 struct StringTransitionParameters;
@@ -343,7 +317,28 @@ enum class FluidizationType {
   ConstantTau,
 };
 
+/**
+ * Allows to choose which kind of density to calculate.
+ * The baryon density is necessary for the Skyrme potential.
+ * For the symmetry potential one needs to know the isospin density.
+ */
+enum class DensityType {
+  None = 0,
+  Hadron = 1,
+  Baryon = 2,
+  BaryonicIsospin = 3,
+  Pion = 4,
+  Isospin3_tot = 5,
+  Charge = 6,
+  Strangeness = 7,
+};
+
 /// @cond
+template <typename T>
+using build_unique_ptr_ = std::unique_ptr<T, std::default_delete<T>>;
+template <typename T>
+using build_vector_ = std::vector<T, std::allocator<T>>;
+
 using ActionPtr = build_unique_ptr_<Action>;
 using ScatterActionPtr = build_unique_ptr_<ScatterAction>;
 using ScatterActionMultiPtr = build_unique_ptr_<ScatterActionMulti>;

@@ -22,7 +22,6 @@
 
 #include "yaml-cpp/yaml.h"
 
-#include "density.h"
 #include "forwarddeclarations.h"
 
 namespace YAML {

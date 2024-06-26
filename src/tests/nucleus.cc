@@ -13,6 +13,7 @@
 
 #include <map>
 
+#include "smash/numeric_cast.h"
 #include "smash/particles.h"
 #include "smash/pdgcode.h"
 #include "smash/pow.h"

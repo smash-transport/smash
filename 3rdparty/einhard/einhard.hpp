@@ -58,6 +58,9 @@
  * utilities to adjust the configuration.
  */
 
+#ifndef EINHARD_HPP_
+#define EINHARD_HPP_
+
 #include <assert.h>
 #include <iostream>
 #include <iomanip>
@@ -570,5 +573,7 @@ namespace einhard
 			}
 	};
 }
+
+#endif
 
 // vim: ts=4 sw=4 tw=100 noet

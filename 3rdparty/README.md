@@ -116,9 +116,13 @@ at the very top of the file and remove the call to `cmake_minimum_required`, e.g
 ## Einhard
 
 [This library](https://gitlab.com/Marix/Einhard) seems inactive, but it is sound and it has never given problems.
-Due to CMake policies, the minimum required CMake version has been implicitly increased as already described.
-It is planned to leave this library frozen, unless C++ problems arise.
-If anything will be changed at some point, **be sure not to forget the steps mentioned in the general remarks above**.
+Few changes have been done to integrate the library into SMASH.
+
+ * Due to CMake policies, the minimum required CMake version has been implicitly increased as already described.
+ * The main _einhard.hpp_ header file was not guarded and header guards have been added.
+
+It is planned to leave this library frozen as untouched as possible, unless C++ problems arise.
+If anything is changed at some point in the upstream and such a changes are meant to be pulled into SMASH, **be sure not to forget the steps mentioned in the general remarks above**.
 Futhermore, at every update, the `install` lines should be deleted, as we install the libraries differently from the *CMakeLists.txt* file in the ***3rdparty*** library.
 
 
