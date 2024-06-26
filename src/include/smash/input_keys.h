@@ -3640,7 +3640,7 @@ struct InputKeys {
   inline static const Key<double>
       modi_collider_target_deformed_orientation_theta{
           {"Modi", "Collider", "Target", "Deformed", "Orientation", "Theta"},
-          M_PI / 2,
+          0.0,
           {"0.50"}};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ

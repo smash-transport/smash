@@ -299,14 +299,14 @@ class Nucleus {
   void random_euler_angles();
 
   /**
-   * The Euler angle phi of the three Euler angles used to apply rotations to the
-   * nucleus. We do not use the Angles.h class here to keep a clear distinction
-   * between spherical coordinates and angles for rotations.
+   * The Euler angle phi of the three Euler angles used to apply rotations to
+   * the nucleus. We do not use the Angles.h class here to keep a clear
+   * distinction between spherical coordinates and angles for rotations.
    */
   double euler_phi_ = 0.0;
-  // Euler angle theta
+  /// Euler angle theta
   double euler_theta_ = 0.0;
-  // Euler angle psi
+  /// Euler angle psi
   double euler_psi_ = 0.0;
   /**
    * Whether the nucleus should be rotated randomly.
