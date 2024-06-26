@@ -3596,7 +3596,9 @@ struct InputKeys {
    * the nucleus by rotations which are performed about the axes of a coordinate
    * system that is fixed with respect to the nucleus and whose axes are
    * parallel to those of the computational frame before the first rotation.
-   * Note that the nucleus is first rotated by phi and then by theta.
+   * Note that the nucleus is first rotated around the z-axis by phi, then
+   * around the now rotated x-axis by theta and then around the rotated z-axis
+   * by psi.
    *
    * \optional_key_no_line{key_MC_PT_deformed_orientation_phi_,Phi,double,0.0}
    *
@@ -3617,12 +3619,34 @@ struct InputKeys {
       {"Modi", "Collider", "Target", "Deformed", "Orientation", "Phi"},
       0.0,
       {"0.50"}};
-
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_proj_targ
+   * \optional_key_no_line{key_MC_PT_deformed_orientation_theta_,Theta,double,0.0}
+   *
+   * The angle by which to rotate the nucleus about the rotated x-axis.
+   */
+  /**
+   * \see_key{key_MC_PT_deformed_orientation_theta_}
+   */
+  inline static const Key<double>
+      modi_collider_projectile_deformed_orientation_theta{
+          {"Modi", "Collider", "Projectile", "Deformed", "Orientation",
+           "Theta"},
+          0.0,
+          {"0.50"}};
+  /**
+   * \see_key{key_MC_PT_deformed_orientation_theta_}
+   */
+  inline static const Key<double>
+      modi_collider_target_deformed_orientation_theta{
+          {"Modi", "Collider", "Target", "Deformed", "Orientation", "Theta"},
+          M_PI / 2,
+          {"0.50"}};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_orientation_psi_,Psi,double,0.0}
    *
-   * The angle by which to rotate the nucleus about the rotated y-axis.
+   * The angle by which to rotate the nucleus about the rotated z-axis.
    */
   /**
    * \see_key{key_MC_PT_deformed_orientation_psi_}
@@ -3664,30 +3688,6 @@ struct InputKeys {
            "Random_Rotation"},
           false,
           {"1.7"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_orientation_theta_,Theta,double,π/2}
-   *
-   * The angle by which to rotate the nucleus about the rotated x-axis.
-   */
-  /**
-   * \see_key{key_MC_PT_deformed_orientation_theta_}
-   */
-  inline static const Key<double>
-      modi_collider_projectile_deformed_orientation_theta{
-          {"Modi", "Collider", "Projectile", "Deformed", "Orientation",
-           "Theta"},
-          M_PI / 2,
-          {"0.50"}};
-  /**
-   * \see_key{key_MC_PT_deformed_orientation_theta_}
-   */
-  inline static const Key<double>
-      modi_collider_target_deformed_orientation_theta{
-          {"Modi", "Collider", "Target", "Deformed", "Orientation", "Theta"},
-          M_PI / 2,
-          {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter

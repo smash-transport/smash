@@ -38,7 +38,7 @@ TEST(rotate_phi) {
   DeformedNucleus dnucleus(small_list, 1);
   // Plan is to rotate the (0, 1, 0, 1) vector by phi=pi/2.
   // Rotation by pi/2 means (0, 1, 0, 1) -> (0, 0, 1, 1)
-  dnucleus.set_azimuthal_angle(M_PI / 2);
+  dnucleus.set_euler_angle_phi(M_PI / 2);
   FourVector expectation = FourVector(0., 1., 1., 0.);
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     i->set_4position(FourVector(0., 1., 0., 1.));
@@ -58,7 +58,7 @@ TEST(rotate_theta) {
   DeformedNucleus dnucleus(small_list, 1);
   // Plan is to rotate the (0, 0, 0, -1) vector by theta=pi/2
   // Rotation by pi/2 means (0, 0, 0, -1) -> (0, 0, 1, 0)
-  dnucleus.set_polar_angle(M_PI / 2);
+  dnucleus.set_euler_angle_theta(M_PI / 2);
   FourVector expectation = FourVector(0., 0., 1., 0.);
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     i->set_4position(FourVector(0., 0., 0., -1.));
@@ -79,8 +79,8 @@ TEST(rotate_both) {
   // Plan is to rotate the (0, 1, 1, 0) vector by phi=pi
   // and then by theta=pi around the rotated x-axis
   // Result: (0, 1, 1, 0) -> (0, -1, -1, 0) -> (0, -1, 1, 0)
-  dnucleus.set_azimuthal_angle(M_PI);
-  dnucleus.set_polar_angle(M_PI);
+  dnucleus.set_euler_angle_phi(M_PI);
+  dnucleus.set_euler_angle_theta(M_PI);
   FourVector expectation = FourVector(0., -1., 1., 0.);
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     i->set_4position(FourVector(0., 1., 1., 0.));

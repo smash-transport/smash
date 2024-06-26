@@ -345,6 +345,71 @@ void Nucleus::set_parameters_from_config(Configuration &config) {
       static_cast<double>(config.take({"Saturation_Density"})));
 }
 
+void Nucleus::set_orientation_from_config(Configuration &orientation_config) {
+  // Read in orientation if provided, otherwise, the defaults are
+  // theta = pi/2, phi = 0, as declared in the angles class
+
+  if (orientation_config.has_value({"Theta"})) {
+    if (orientation_config.has_value({"Random_Rotation"}) &&
+        orientation_config.take({"Random_Rotation"})) {
+      throw std::domain_error(
+          "Random rotation of nuclei is activated although"
+          " theta is provided. Please specify only either of them. ");
+    } else {
+      set_euler_angle_theta(
+          static_cast<double>(orientation_config.take({"Theta"})));
+    }
+  }
+
+  if (orientation_config.has_value({"Phi"})) {
+    if (orientation_config.has_value({"Random_Rotation"}) &&
+        orientation_config.take({"Random_Rotation"})) {
+      throw std::domain_error(
+          "Random rotation of nuclei is activated although"
+          " phi is provided. Please specify only either of them. ");
+    } else {
+      set_euler_angle_phi(
+          static_cast<double>(orientation_config.take({"Phi"})));
+    }
+  }
+
+  if (orientation_config.has_value({"Psi"})) {
+    if (orientation_config.has_value({"Random_Rotation"}) &&
+        orientation_config.take({"Random_Rotation"})) {
+      throw std::domain_error(
+          "Random rotation of nuclei is activated although"
+          " psi is provided. Please specify only either of them. ");
+    } else {
+      set_euler_angle_psi(
+          static_cast<double>(orientation_config.take({"Psi"})));
+    }
+  }
+
+  if (orientation_config.take({"Random_Rotation"}, false)) {
+    random_rotation_ = true;
+  }
+}
+
+void Nucleus::rotate() {
+  if (random_rotation_) {
+    // Randomly generate euler angles for theta and phi. Psi needs not be
+    // assigned, as the nucleus objects are symmetric with respect to psi.
+    random_euler_angles();
+  }
+  if (!iszero(euler_phi_) && !iszero(euler_theta_) && !iszero(euler_psi_)) {
+    for (auto &particle : *this) {
+      /* Rotate every vector by the euler angles phi, theta and psi.
+       * This means applying the matrix for a rotation of phi around the z-axis,
+       * followed by the matrix for a rotation of theta around the rotated
+       * x-axis and the matrix for a rotation of psi around the rotated z-axis.
+       */
+      ThreeVector three_pos = particle.position().threevec();
+      three_pos.rotate(euler_phi_, euler_theta_, euler_psi_);
+      particle.set_3position(three_pos);
+    }
+  }
+}
+
 void Nucleus::generate_fermi_momenta() {
   const int N_n = std::count_if(begin(), end(), [](const ParticleData i) {
     return i.pdgcode() == pdg::n;
