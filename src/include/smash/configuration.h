@@ -246,17 +246,18 @@ namespace smash {
  * For the typical usage in SMASH one needs to read the value once. In that
  * case, use the Configuration::take function, for example:
  * \code
- * double sigma = config.take({"General", "SIGMA"});
+ * Key<double> key{{"General", "SIGMA"}, {"1.0"}};
+ * double value = config.take(key);
  * \endcode
- * Note the curly braces in the function call. It is a \c std::initializer_list
- * of strings. This allows an arbitrary nesting depth via the same function. But
- * as a consequence the keys must all be given as constant strings at compile
- * time.
+ * Note that only Key objects can be taken. This is done on purpose, because all
+ * SMASH allowed keys are gathered as static members of the InputKeys class.
+ * This allows calls like \c config.take(InputKeys::key_name) (where of course
+ * an existing member should be used).
  *
  * The opposite operation of \c take is the Configuration::set_value method,
  * which has a similar syntax, but needs the new value to be assigned, e.g.
  * \code
- * config.set_value({"General", "SIGMA"}, 3.1415);
+ * config.set_value(key, 3.1415);
  * \endcode
  *
  * If you need to delegate parsing of a section to some object, you can use the
