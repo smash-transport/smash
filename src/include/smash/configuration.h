@@ -23,7 +23,7 @@
 #include "yaml-cpp/yaml.h"
 
 #include "forwarddeclarations.h"
-#include "input_keys.h"
+#include "key.h"
 
 namespace YAML {
 
@@ -1256,8 +1256,8 @@ class Configuration {
    *                    specifying \c {} and the top-level section is
    *                    understood.
    */
-  void remove_all_entries_in_section_but_one(
-      const std::string &key, std::initializer_list<const char *> section = {});
+  void remove_all_entries_in_section_but_one(const std::string &key,
+                                             KeyLabels section = {});
 
   /**
    * Create a new configuration from a then-removed section of the present
@@ -1265,8 +1265,8 @@ class Configuration {
    * it will throw if used to extract a key value that is not a section (namely
    * a map in YAML language). Use \ref take for that purpose, instead.
    *
-   * \param[in] keys You can pass an arbitrary number of keys inside curly
-   *             braces, following the nesting structure in the config file.
+   * \param[in] section You can pass an arbitrary number of keys inside curly
+   *            braces, following the nesting structure in the config file.
    * \param[in] empty_if_not_existing
    *            Specify \c Configuration::GetEmpty::Yes if you want an empty
    *            Configuration in case the requested section does not exist.
@@ -1279,9 +1279,8 @@ class Configuration {
    * \return A new \c Configuration containing the chosen section.
    */
   Configuration extract_sub_configuration(
-      std::initializer_list<const char *> keys,
-      Configuration::GetEmpty empty_if_not_existing =
-          Configuration::GetEmpty::No);
+      KeyLabels section, Configuration::GetEmpty empty_if_not_existing =
+                             Configuration::GetEmpty::No);
 
   /**
    * Return whether the configuration has a key, possibly without value.

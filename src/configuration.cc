@@ -244,7 +244,7 @@ Configuration::Value Configuration::read(
 }
 
 void Configuration::remove_all_entries_in_section_but_one(
-    const std::string &key, std::initializer_list<const char *> section) {
+    const std::string &key, KeyLabels section) {
   auto found_node = find_existing_node({section.begin(), section.end()});
   if (found_node) {
     std::vector<std::string> to_remove{};
@@ -279,13 +279,12 @@ void Configuration::remove_all_entries_in_section_but_one(
 }
 
 Configuration Configuration::extract_sub_configuration(
-    std::initializer_list<const char *> keys,
-    Configuration::GetEmpty empty_if_not_existing) {
+    KeyLabels section, Configuration::GetEmpty empty_if_not_existing) {
   // Same logic as in take method
-  assert(keys.size() > 0);
-  auto last_key_it = keys.end() - 1;
+  assert(section.size() > 0);
+  auto last_key_it = section.end() - 1;
   auto previous_to_section_node =
-      find_existing_node({keys.begin(), last_key_it});
+      find_existing_node({section.begin(), last_key_it});
   auto sub_conf_root_node{previous_to_section_node};
   descend_one_existing_level(sub_conf_root_node, *last_key_it);
   if (!previous_to_section_node || !sub_conf_root_node) {
@@ -293,7 +292,7 @@ Configuration Configuration::extract_sub_configuration(
       return Configuration(YAML::Node{});
     else
       throw std::runtime_error("Attempt to extract not existing section " +
-                               join_quoted({keys.begin(), keys.end()}));
+                               join_quoted({section.begin(), section.end()}));
   }
   /* Here sub_conf_root_node cannot be a nullopt, since if it was the function
      would have returned before and it cannot be that previous_to_section_node
@@ -303,7 +302,7 @@ Configuration Configuration::extract_sub_configuration(
     // Here we put together the cases of a key without value or with
     // an empty map {} as value (no need at the moment to distinguish)
     throw std::runtime_error("Attempt to extract empty section " +
-                             join_quoted({keys.begin(), keys.end()}));
+                             join_quoted({section.begin(), section.end()}));
   } else if (sub_conf_root_node->IsMap() && sub_conf_root_node->size() != 0) {
     Configuration sub_config{*sub_conf_root_node};
     previous_to_section_node->remove(*last_key_it);
@@ -311,7 +310,7 @@ Configuration Configuration::extract_sub_configuration(
     return sub_config;
   } else {  // sequence or scalar or any future new YAML type
     throw std::runtime_error("Tried to extract configuration section at " +
-                             join_quoted({keys.begin(), keys.end()}) +
+                             join_quoted({section.begin(), section.end()}) +
                              " to get a key value. Use take instead!");
   }
 }
