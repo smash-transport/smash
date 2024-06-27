@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022
+ *    Copyright (c) 2022,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -9,7 +9,7 @@
 
 #include "vir/test.h"  // This include has to be first
 
-#include "smash/input_keys.h"
+#include "smash/key.h"
 
 using namespace smash;
 using namespace std::string_literals;
@@ -114,6 +114,8 @@ TEST(to_string) {
 // The following code is useful to print all keys in the database for debug
 // purposes and it is intentionally left as part of the codebase commented out
 // for future needs.
+
+#include "smash/input_keys.h"
 
 template <typename T, typename = void>
 auto constexpr ostreamable_v = false;
