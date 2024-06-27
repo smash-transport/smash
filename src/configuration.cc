@@ -340,7 +340,7 @@ std::optional<YAML::Node> Configuration::find_existing_node(
 }
 
 YAML::Node Configuration::find_node_creating_it_if_not_existing(
-    std::vector<const char *> keys) const {
+    std::vector<std::string_view> keys) const {
   assert(keys.size() > 0);
   YAML::Node node{root_node_};
   for (const auto &key : keys) {

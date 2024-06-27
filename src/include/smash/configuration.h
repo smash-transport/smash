@@ -1231,17 +1231,32 @@ class Configuration {
   }
 
   /**
-   * Overwrite the value of the specified YAML node.
+   * Overwrite the value of the YAML node corresponding to the specified key.
    *
-   * \param[in] keys You can pass an arbitrary number of keys inside curly
-   *                 braces, following the nesting structure in the config file.
+   * \param[in] key The input key that should be changed.
    * \param[in] value An arbitrary value that yaml-cpp can convert into YAML
    *                  representation. Any builtin type, strings, maps, and
-   *                  vectors can be used here.
+   *                  vectors can be used here. Of course, this has to match the
+   *                  Key type passed as first argument.
+   *
+   * \note This method creates a new entry in the configuration if the passed
+   *       key is not yet existing in it.
    */
+  template <typename T, typename std::enable_if_t<
+                            !std::is_lvalue_reference_v<T>, bool> = true>
+  // Note that the second template parameter is just a workaround at the moment
+  // to exclude this method from overload resolution with the original set_value
+  // and it will be removed as soon as the other overload is removed
+  void set_value(Key<T> key, T &&value) {
+    auto node = find_node_creating_it_if_not_existing(
+        {key.labels().begin(), key.labels().end()});
+    node = std::forward<T>(value);
+  }
+
   template <typename T>
-  void set_value(std::initializer_list<const char *> keys, T &&value) {
-    auto node = find_node_creating_it_if_not_existing(keys);
+  void set_value(std::initializer_list<const char *> labels, T &&value) {
+    auto node =
+        find_node_creating_it_if_not_existing({labels.begin(), labels.end()});
     node = std::forward<T>(value);
   }
 
@@ -1371,7 +1386,7 @@ class Configuration {
    * \return Node in the tree reached by using the provided keys.
    */
   YAML::Node find_node_creating_it_if_not_existing(
-      std::vector<const char *> keys) const;
+      std::vector<std::string_view> keys) const;
 
   /**
    * Descend in the YAML tree from the given node using the provided keys.
