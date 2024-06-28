@@ -396,7 +396,7 @@ void Nucleus::rotate() {
     // assigned, as the nucleus objects are symmetric with respect to psi.
     random_euler_angles();
   }
-  if (!iszero(euler_phi_) && !iszero(euler_theta_) && !iszero(euler_psi_)) {
+  if (!iszero(euler_phi_) || !iszero(euler_theta_) || !iszero(euler_psi_)) {
     for (auto &particle : *this) {
       /* Rotate every vector by the euler angles phi, theta and psi.
        * This means applying the matrix for a rotation of phi around the z-axis,

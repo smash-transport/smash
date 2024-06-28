@@ -39,7 +39,7 @@ TEST(rotate_phi) {
   // Plan is to rotate the (0, 1, 0, 1) vector by phi=pi/2.
   // Rotation by pi/2 means (0, 1, 0, 1) -> (0, 0, 1, 1)
   dnucleus.set_euler_angle_phi(M_PI / 2);
-  FourVector expectation = FourVector(0., 1., 1., 0.);
+  FourVector expectation = FourVector(0., 0., 1., 1.);
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     i->set_4position(FourVector(0., 1., 0., 1.));
   }
