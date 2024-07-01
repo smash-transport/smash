@@ -38,7 +38,8 @@ TEST(rotate_phi) {
   DeformedNucleus dnucleus(small_list, 1);
   // Plan is to rotate the (0, 1, 0, 1) vector by phi=pi/2.
   // Rotation by pi/2 means (0, 1, 0, 1) -> (0, 0, 1, 1)
-  dnucleus.set_euler_angle_phi(M_PI / 2);
+  Configuration config{"{Phi: 1.57079632679489661923}"};
+  dnucleus.set_orientation_from_config(config);
   FourVector expectation = FourVector(0., 0., 1., 1.);
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     i->set_4position(FourVector(0., 1., 0., 1.));
@@ -58,7 +59,8 @@ TEST(rotate_theta) {
   DeformedNucleus dnucleus(small_list, 1);
   // Plan is to rotate the (0, 0, 0, -1) vector by theta=pi/2
   // Rotation by pi/2 means (0, 0, 0, -1) -> (0, 0, 1, 0)
-  dnucleus.set_euler_angle_theta(M_PI / 2);
+  Configuration config{"{Theta: 1.57079632679489661923}"};
+  dnucleus.set_orientation_from_config(config);
   FourVector expectation = FourVector(0., 0., 1., 0.);
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     i->set_4position(FourVector(0., 0., 0., -1.));
@@ -79,9 +81,39 @@ TEST(rotate_both) {
   // Plan is to rotate the (0, 1, 1, 0) vector by phi=pi
   // and then by theta=pi around the rotated x-axis
   // Result: (0, 1, 1, 0) -> (0, -1, -1, 0) -> (0, -1, 1, 0)
-  dnucleus.set_euler_angle_phi(M_PI);
-  dnucleus.set_euler_angle_theta(M_PI);
+  Configuration config{R"(
+    Theta: 3.14159265358979323846
+    Phi: 3.14159265358979323846
+    )"};
+  dnucleus.set_orientation_from_config(config);
   FourVector expectation = FourVector(0., -1., 1., 0.);
+  for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
+    i->set_4position(FourVector(0., 1., 1., 0.));
+  }
+  dnucleus.rotate();
+  FourVector actual;
+  for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
+    actual = i->position();
+  }
+  COMPARE_ABSOLUTE_ERROR(actual.x0(), expectation.x0(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(actual.x1(), expectation.x1(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(actual.x2(), expectation.x2(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(actual.x3(), expectation.x3(), 1e-7);
+}
+
+TEST(rotate_all_three) {
+  DeformedNucleus dnucleus(small_list, 1);
+  // Plan is to rotate the (0, 1, 1, 0) vector by phi=pi around the z-axis, then
+  // by theta=pi around the rotated x-axis and finally by psi=pi around the
+  // rotated z-axis. Result: (0, 1, 1, 0) -> (0, -1, -1, 0) -> (0, -1, 1, 0) ->
+  // (0, 1,-1,0)
+  Configuration config{R"(
+    Theta: 3.14159265358979323846
+    Phi: 3.14159265358979323846
+    Psi: 3.14159265358979323846
+    )"};
+  dnucleus.set_orientation_from_config(config);
+  FourVector expectation = FourVector(0., 1., -1., 0.);
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     i->set_4position(FourVector(0., 1., 1., 0.));
   }

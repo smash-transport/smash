@@ -142,8 +142,6 @@ class Nucleus {
 
   /**
    * Rotates the nucleus using the three euler angles phi, theta and psi.
-   * Since the three angles are initialized to 0.0, there will be no rotation
-   * done if no angles are specified in the config file.
    */
   virtual void rotate();
 
@@ -300,7 +298,7 @@ class Nucleus {
 
   /**
    * The Euler angle phi of the three Euler angles used to apply rotations to
-   * the nucleus. We do not use the Angles.h class here to keep a clear
+   * the nucleus. We do not use the \c Angles class here to keep a clear
    * distinction between spherical coordinates and angles for rotations.
    */
   double euler_phi_ = 0.0;
@@ -308,9 +306,7 @@ class Nucleus {
   double euler_theta_ = 0.0;
   /// Euler angle psi
   double euler_psi_ = 0.0;
-  /**
-   * Whether the nucleus should be rotated randomly.
-   */
+  /// Whether the nucleus should be rotated randomly.
   bool random_rotation_ = false;
 
  public:
@@ -371,22 +367,6 @@ class Nucleus {
    * \see nuclear_radius
    */
   inline double get_nuclear_radius() const { return nuclear_radius_; }
-  /**
-   * Set the Euler angle phi.
-   * \param[in] phi Euler angle to rotate the nucleus around the z-axis
-   */
-  inline void set_euler_angle_phi(double phi) { euler_phi_ = phi; }
-  /**
-   * Set the Euler angle theta.
-   * \param[in] theta Euler angle to rotate the nucleus around the rotated
-   * x-axis
-   */
-  inline void set_euler_angle_theta(double theta) { euler_theta_ = theta; }
-  /**
-   * Set the euler angle psi.
-   * \param[in] psi Euler angle to rotate the nucleus around the rotated z-axis
-   */
-  inline void set_euler_angle_psi(double psi) { euler_psi_ = psi; }
   /**
    * Set angles for rotation of the nucleus from config file.
    * \param[in] orientation_config The configuration for the rotation of this

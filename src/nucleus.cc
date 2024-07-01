@@ -356,8 +356,7 @@ void Nucleus::set_orientation_from_config(Configuration &orientation_config) {
           "Random rotation of nuclei is activated although"
           " theta is provided. Please specify only either of them. ");
     } else {
-      set_euler_angle_theta(
-          static_cast<double>(orientation_config.take({"Theta"})));
+      euler_theta_ = orientation_config.take({"Theta"});
     }
   }
 
@@ -368,8 +367,7 @@ void Nucleus::set_orientation_from_config(Configuration &orientation_config) {
           "Random rotation of nuclei is activated although"
           " phi is provided. Please specify only either of them. ");
     } else {
-      set_euler_angle_phi(
-          static_cast<double>(orientation_config.take({"Phi"})));
+      euler_phi_ = orientation_config.take({"Phi"});
     }
   }
 
@@ -380,8 +378,7 @@ void Nucleus::set_orientation_from_config(Configuration &orientation_config) {
           "Random rotation of nuclei is activated although"
           " psi is provided. Please specify only either of them. ");
     } else {
-      set_euler_angle_psi(
-          static_cast<double>(orientation_config.take({"Psi"})));
+      euler_psi_ = orientation_config.take({"Psi"});
     }
   }
 
@@ -396,7 +393,7 @@ void Nucleus::rotate() {
     // assigned, as the nucleus objects are symmetric with respect to psi.
     random_euler_angles();
   }
-  if (!iszero(euler_phi_) || !iszero(euler_theta_) || !iszero(euler_psi_)) {
+  if (!(euler_phi_ == 0.0) || !(euler_theta_ == 0.0) || !(euler_psi_ == 0.0)) {
     for (auto &particle : *this) {
       /* Rotate every vector by the euler angles phi, theta and psi.
        * This means applying the matrix for a rotation of phi around the z-axis,
