@@ -1179,8 +1179,9 @@ class Configuration {
       try {
         return key.default_value();
       } catch (std::bad_optional_access &) {
-        throw std::invalid_argument("Required key " + std::string{key} +
-                                    " taken, but missing in configuration.");
+        throw std::invalid_argument(
+            "Key " + std::string{key} +
+            " without default value taken, but missing in configuration.");
       }
     }
   }
