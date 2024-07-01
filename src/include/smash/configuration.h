@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_CONFIGURATION_H_
 #define SRC_INCLUDE_SMASH_CONFIGURATION_H_
 
+#include <algorithm>
 #include <array>
 #include <exception>
 #include <filesystem>
@@ -290,13 +291,19 @@ class Configuration {
   struct ParseError : public std::runtime_error {
     using std::runtime_error::runtime_error;
   };
-
   /**
    * \ingroup exception
    * Thrown if the file does not exist.
    */
   struct FileDoesNotExist : public std::runtime_error {
     using std::runtime_error::runtime_error;
+  };
+  /**
+   * \ingroup exception
+   * Thrown if a Key is taken twice.
+   */
+  struct TakeSameKeyTwice : public std::logic_error {
+    using std::logic_error::logic_error;
   };
 
   /**
@@ -1116,10 +1123,9 @@ class Configuration {
    *
    * The function returns the value at the specified \p Key and removes its
    * labels from the Configuration object. Therefore, a subsequent call to the
-   * \c take or \c has_value methods with the same \p Key returns an undefined
-   * \c Value or \c false .
-   * By removing the value, the Configuration object keeps track which keys were
-   * never taken.
+   * \c take or \c has_value methods with the same \p Key throws or returns
+   * \c false respectively. By removing the value, the Configuration object
+   * keeps track which keys were never taken.
    *
    * \attention If a not existent Key is taken, its default value is returned,
    *            if any exists. If a not existing required key is taken, an error
@@ -1131,6 +1137,13 @@ class Configuration {
    *       \c take operation and it might be done once for all. However, on one
    *       hand it is a natural behaviour to expect and on the other hand this
    *       is hardly going to be an application bottle-neck.
+   *
+   * \warning Since \c take returns the default value when the key is not
+   *          present in the configuration, it is important to make it throw if
+   *          an existing key is attempted to be taken twice. Otherwise it would
+   *          happen that taking any existing key would return the user-defined
+   *          value tje first time and taking it again would return the key
+   *          default value. This is a misleading behaviour we want to avoid.
    *
    * \param[in] key The input key that should be taken. This is usually one of
    * the \c InputKeys static members, i.e. one of the allowed keys. Of course,
@@ -1147,14 +1160,21 @@ class Configuration {
    * will take the value. This will make the key \c "Group" also be removed from
    * the configuration, since it remains without any value.
    *
-   * \return A proxy object that converts to the correct type automatically on
-   *         assignment.
+   * \return The value of the taken key if present or its default value
+   *         otherwise.
+   *
+   * \throw TakeSameKeyTwice if a key was already previously taken.
+   * \throw std::invalid_argument if a key without a default is taken but it is
+   *        absent in the configuration.
    */
   template <typename T>
   T take(const Key<T> &key) {
     if (has_value(key)) {
       // The following return statement converts a Value into T
       return take({key.labels().begin(), key.labels().end()});
+    } else if (did_key_exist_and_was_it_taken(key)) {
+      throw TakeSameKeyTwice("Attempt to take key " + std::string{key} +
+                             " twice.");
     } else {
       try {
         return key.default_value();
@@ -1213,7 +1233,7 @@ class Configuration {
    * it from the Configuration object. Semantically, this means the value was
    * not used.
    *
-   * \param[in] keys You can pass an arbitrary number of keys inside curly
+   * \param[in] labels You can pass an arbitrary number of keys inside curly
    * braces, following the nesting structure in the config file.
    *
    * \return A proxy object that converts to the correct type automatically on
@@ -1437,11 +1457,29 @@ class Configuration {
    */
   Value read(std::vector<std::string_view> labels) const;
 
+  /**
+   * Find out whether the key has been already taken.
+   *
+   * \tparam T The key value type
+   * \param key The key to be checked
+   * \return \c true if the key was already taken,
+   * \return \c false otherwise.
+   */
+  template <typename T>
+  bool did_key_exist_and_was_it_taken(const Key<T> &key) {
+    return std::find(existing_keys_already_taken.begin(),
+                     existing_keys_already_taken.end(),
+                     key.labels()) != existing_keys_already_taken.end();
+  }
+
   /// The general_config.yaml contents - fully parsed
   YAML::Node root_node_{YAML::NodeType::Map};
 
   /// Counter to be able to optionally throw in destructor
   int uncaught_exceptions_{std::uncaught_exceptions()};
+
+  /// List of taken keys to throw on taking same key twice
+  std::vector<KeyLabels> existing_keys_already_taken{};
 };
 
 }  // namespace smash

@@ -69,6 +69,14 @@ TEST(take_multiple) {
   conf.clear();
 }
 
+TEST_CATCH(take_twice_optional_key, Configuration::TakeSameKeyTwice) {
+  Configuration conf = make_test_configuration();
+  const Key<double> optional_key{
+      {"tamer", "pipit", "bushelling"}, 3.14, {"1.0"}};
+  double d = conf.take(optional_key);
+  d = conf.take(optional_key);
+}
+
 TEST_CATCH(take_incorrect_type, Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
   const Key<int> key = get_key<int>({"tamer", "pipit", "bushelling"});
@@ -110,11 +118,11 @@ TEST(take_enum_key) {
 }
 
 TEST_CATCH(take_array_wrong_n, Configuration::IncorrectTypeInAssignment) {
-   Configuration conf = make_test_configuration();
+  Configuration conf = make_test_configuration();
   conf.merge_yaml("{test: [123, 456, 789]}");
   auto key = get_key<std::array<int, 4>>({"test"});
   conf.take(key);
- }
+}
 
 TEST(take_reactions_bitset) {
   // Make sure that only the right bits are set
