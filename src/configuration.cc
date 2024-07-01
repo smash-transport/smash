@@ -232,14 +232,15 @@ Configuration::Value Configuration::take(std::vector<std::string_view> labels) {
 }
 
 Configuration::Value Configuration::read(
-    std::initializer_list<const char *> keys) const {
-  auto found_node = find_existing_node({keys.begin(), keys.end()});
+    std::vector<std::string_view> labels) const {
+  auto found_node = find_existing_node({labels.begin(), labels.end()});
   if (found_node) {
-    return {found_node.value(), keys.begin()[keys.size() - 1]};
+    // The same remark about the take return value applies here.
+    return {found_node.value(), labels.back().data()};
   } else {
     throw std::invalid_argument(
         "Attempt to read value of a not existing key: " +
-        join_quoted({keys.begin(), keys.end()}));
+        join_quoted({labels.begin(), labels.end()}));
   }
 }
 

@@ -1219,7 +1219,9 @@ class Configuration {
    * \return A proxy object that converts to the correct type automatically on
    *         assignment.
    */
-  Value read(std::initializer_list<const char *> keys) const;
+  Value read(std::initializer_list<const char *> labels) const {
+    return read({labels.begin(), labels.end()});
+  }
 
   /// \see read
   template <typename T>
@@ -1421,6 +1423,19 @@ class Configuration {
    * \throw std::runtime_error if the key does not exist
    */
   Value take(std::vector<std::string_view> labels);
+
+  /**
+   * This is the implementation detail to read a key. Having a non-templated
+   * method for it it allows for defining the method in the source file, which
+   * isn't possible for a template.
+   *
+   * \param[in] labels the labels of the key to be read
+   *
+   * \return The \c Value of the key
+   *
+   * \throw std::runtime_error if the key does not exist
+   */
+  Value read(std::vector<std::string_view> labels) const;
 
   /// The general_config.yaml contents - fully parsed
   YAML::Node root_node_{YAML::NodeType::Map};
