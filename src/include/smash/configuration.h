@@ -1313,13 +1313,22 @@ class Configuration {
    *                  vectors can be used here. Of course, this has to match the
    *                  Key type passed as first argument.
    *
-   * \attention This method creates a new entry in the configuration if the passed
-   *            key is not yet existing in it.
-   * \note Removing qualifiers and the reference in the Key template argument is
-   *       needed to avoid conflicts in deducing the type T.
+   * \tparam T The type of the value to be assigned to the Key.
+   * \tparam U The type of the key value. This is by default \c T but
+   *           it has been allowed to be different from it, as long as it is
+   *           convertible to T. This enables e.g. to set a key with a string
+   *           value using a <tt>const char*</tt> second argument.
+   *
+   * \attention This method creates a new entry in the configuration if the
+   *            passed key is not yet existing in it.
+   *
+   * \note Removing qualifiers and the reference in the default value of the
+   *       second template argument is needed because the Key type is a plain
+   *       type and \c T might be deduced to a constant and/or reference type.
    */
-  template <typename T>
-  void set_value(Key<remove_cvref_t<T>> key, T &&value) {
+  template <typename T, typename U = remove_cvref_t<T>,
+            typename std::enable_if_t<std::is_convertible_v<T, U>, bool> = true>
+  void set_value(Key<U> key, T &&value) {
     auto node = find_node_creating_it_if_not_existing(
         {key.labels().begin(), key.labels().end()});
     node = std::forward<T>(value);
