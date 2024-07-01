@@ -1309,12 +1309,6 @@ class Configuration {
   }
 
   /**
-   * Return whether there is a non-empty value behind the requested \p keys.
-   * \param[in] keys List of keys to be checked for
-   */
-  bool has_value(std::initializer_list<const char *> keys) const;
-
-  /**
    * Return whether there is a non-empty value behind the requested \p key .
    * \param[in] key The key to be checked for
    */
@@ -1324,6 +1318,8 @@ class Configuration {
         find_existing_node({key.labels().begin(), key.labels().end()});
     return found_node.has_value() && !(found_node.value().IsNull());
   }
+
+  bool has_value(std::initializer_list<const char *> keys) const;
 
   /**
    * @return \c true if the object is empty;
@@ -1414,15 +1410,15 @@ class Configuration {
       std::vector<std::string_view> keys) const;
 
   /**
-   * This is the implementation detail to take a key. It is called by the public
-   * methods templates and it is supposed to be called passing the \c begin and
-   * \c end of a vector container. We used here a specific iterator because
-   * making the iterator type a template parameter would force us to move the
-   * method definition into the header file, which we prefer to avoid.
+   * This is the implementation detail to take a key. Having a non-templated
+   * method for it it allows for defining the method in the source file, which
+   * isn't possible for a template.
    *
    * \param[in] labels the labels of the key to be taken
    *
-   * @return The \c Value of the key
+   * \return The \c Value of the key
+   *
+   * \throw std::runtime_error if the key does not exist
    */
   Value take(std::vector<std::string_view> labels);
 
