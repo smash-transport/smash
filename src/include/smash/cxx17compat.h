@@ -1,7 +1,7 @@
 
 /*
  *
- *    Copyright (c) 2023
+ *    Copyright (c) 2023-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,6 +12,7 @@
 #define SRC_INCLUDE_SMASH_CXX17COMPAT_H_
 
 #include <optional>
+#include <type_traits>
 #include <utility>
 
 namespace smash {
@@ -37,6 +38,28 @@ std::optional<T> make_optional(T&& value) {
 #else
 using std::make_optional;
 #endif
+
+#if __cplusplus < 202002L
+/**
+ * Definition for remove_cvref type trait, which is in C++20's standard library
+ *
+ * \see https://en.cppreference.com/w/cpp/types/remove_cvref
+ */
+template <class T>
+struct remove_cvref {
+  /// The type with striped properties
+  using type = std::remove_cv_t<std::remove_reference_t<T>>;
+};
+/**
+ * Helper alias which is always defined next to a type trait.
+ */
+template <class T>
+using remove_cvref_t = typename remove_cvref<T>::type;
+#else
+using std::remove_cvref;
+using std::remove_cvref_t;
+#endif
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_CXX17COMPAT_H_

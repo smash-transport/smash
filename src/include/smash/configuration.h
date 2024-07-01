@@ -23,6 +23,7 @@
 
 #include "yaml-cpp/yaml.h"
 
+#include "cxx17compat.h"
 #include "forwarddeclarations.h"
 #include "key.h"
 
@@ -1312,15 +1313,13 @@ class Configuration {
    *                  vectors can be used here. Of course, this has to match the
    *                  Key type passed as first argument.
    *
-   * \note This method creates a new entry in the configuration if the passed
-   *       key is not yet existing in it.
+   * \attention This method creates a new entry in the configuration if the passed
+   *            key is not yet existing in it.
+   * \note Removing qualifiers and the reference in the Key template argument is
+   *       needed to avoid conflicts in deducing the type T.
    */
-  template <typename T, typename std::enable_if_t<
-                            !std::is_lvalue_reference_v<T>, bool> = true>
-  // Note that the second template parameter is just a workaround at the moment
-  // to exclude this method from overload resolution with the original set_value
-  // and it will be removed as soon as the other overload is removed
-  void set_value(Key<T> key, T &&value) {
+  template <typename T>
+  void set_value(Key<remove_cvref_t<T>> key, T &&value) {
     auto node = find_node_creating_it_if_not_existing(
         {key.labels().begin(), key.labels().end()});
     node = std::forward<T>(value);
