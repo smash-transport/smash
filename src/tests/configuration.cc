@@ -38,11 +38,13 @@ TEST(create_object) {
 
 TEST(merge_does_override) {
   Configuration conf = make_test_configuration();
-  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
-  COMPARE(int(conf.read({"fireballs", "classify"})), 1);
+  const auto key_1 = get_key<int>({"fireballs", "arena"});
+  const auto key_2 = get_key<int>({"fireballs", "classify"});
+  COMPARE(conf.read(key_1), 1000);
+  COMPARE(conf.read(key_2), 1);
   conf.merge_yaml("fireballs: { classify: 2 }");
-  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
-  COMPARE(int(conf.read({"fireballs", "classify"})), 2);
+  COMPARE(conf.read(key_1), 1000);
+  COMPARE(conf.read(key_2), 2);
   conf.clear();
 }
 
@@ -73,7 +75,7 @@ TEST_CATCH(take_twice_optional_key, Configuration::TakeSameKeyTwice) {
   Configuration conf = make_test_configuration();
   const Key<double> optional_key{
       {"tamer", "pipit", "bushelling"}, 3.14, {"1.0"}};
-  double d = conf.take(optional_key);
+  [[maybe_unused]] double d = conf.take(optional_key);
   d = conf.take(optional_key);
 }
 
@@ -192,39 +194,40 @@ TEST_CATCH(read_failed_sequence_conversion,
            Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
   conf.merge_yaml("{test: [123 456]}");
-  std::vector<int> x = conf.read({"test"});
+  [[maybe_unused]] auto x = conf.read(get_key<std::vector<int>>({"test"}));
 }
 
 TEST(read_check_config_general_contents) {
   Configuration conf = make_test_configuration();
 
-  std::string modus = conf.read({"fireballs", "extorting"});
+  auto modus = conf.read(get_key<std::string>({"fireballs", "extorting"}));
   COMPARE(modus, "feathered");
-  COMPARE(double(conf.read({"fireballs", "infection"})), 0.01);
-  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
-  COMPARE(int(conf.read({"fireballs", "pendulous"})), 10);
-  COMPARE(int(conf.read({"fireballs", "scudded"})), 1);
-  COMPARE(double(conf.read({"fireballs", "firebrands"})), 10.0);
-  COMPARE(int(conf.read({"fireballs", "joker"})), 1);
-  COMPARE(int(conf.read({"fireballs", "classify"})), 1);
+  COMPARE(conf.read(get_key<double>({"fireballs", "infection"})), 0.01);
+  COMPARE(conf.read(get_key<int>({"fireballs", "arena"})), 1000);
+  COMPARE(conf.read(get_key<int>({"fireballs", "pendulous"})), 10);
+  COMPARE(conf.read(get_key<int>({"fireballs", "scudded"})), 1);
+  COMPARE(conf.read(get_key<double>({"fireballs", "firebrands"})), 10.0);
+  COMPARE(conf.read(get_key<int>({"fireballs", "joker"})), 1);
+  COMPARE(conf.read(get_key<int>({"fireballs", "classify"})), 1);
   conf.clear();
 }
 
 TEST(read_check_config_collider_contents) {
   Configuration conf = make_test_configuration();
-  COMPARE(int(conf.read({"tamer", "schmoozed", "warbler"})), 211);
-  COMPARE(int(conf.read({"tamer", "schmoozed", "neglects"})), -211);
-  COMPARE(double(conf.read({"tamer", "schmoozed", "reedier"})), 1.0);
+  COMPARE(conf.read(get_key<int>({"tamer", "schmoozed", "warbler"})), 211);
+  COMPARE(conf.read(get_key<int>({"tamer", "schmoozed", "neglects"})), -211);
+  COMPARE(conf.read(get_key<double>({"tamer", "schmoozed", "reedier"})), 1.0);
   conf.clear();
 }
 
-TEST(read_does_not_take) {
+TEST(read_does_not_take_and_reading_multiple_times_is_fine) {
   Configuration conf = make_test_configuration();
-  int nevents = conf.read({"fireballs", "classify"});
+  const auto key = get_key<int>({"fireballs", "classify"});
+  auto nevents = conf.read(key);
   COMPARE(nevents, 1);
-  nevents = conf.read({"fireballs", "classify"});
+  nevents = conf.read(key);
   COMPARE(nevents, 1);
-  nevents = conf.take({"fireballs", "classify"});
+  nevents = conf.read(key);
   COMPARE(nevents, 1);
   conf.clear();
 }
@@ -232,8 +235,10 @@ TEST(read_does_not_take) {
 TEST(set_existing_value) {
   Configuration conf = make_test_configuration();
   const double new_value = 3.1415;
+  const auto key = get_key<double>({"tamer", "Altaic", "Meccas"});
+  // In the following we'll use key as soon as the older set_value is removed
   conf.set_value({"tamer", "Altaic", "Meccas"}, new_value);
-  COMPARE(double(conf.read({"tamer", "Altaic", "Meccas"})), new_value);
+  COMPARE(conf.read(key), new_value);
   conf.clear();
 }
 
@@ -241,9 +246,9 @@ TEST(set_new_value_on_non_empty_conf) {
   Configuration conf = make_test_configuration();
   const auto key = get_key<double>({"Test"});
   VERIFY(!conf.has_value(key));
-  conf.set_value({"Test"}, 1.);
+  conf.set_value(key, 1.);
   VERIFY(conf.has_value(key));
-  COMPARE(double(conf.read({"Test"})), 1.);
+  COMPARE(conf.read(key), 1.);
   conf.clear();
 }
 

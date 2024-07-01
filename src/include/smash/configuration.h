@@ -1160,8 +1160,7 @@ class Configuration {
    * will take the value. This will make the key \c "Group" also be removed from
    * the configuration, since it remains without any value.
    *
-   * \return The value of the taken key if present or its default value
-   *         otherwise.
+   * \return The value of the taken key if present, its default value otherwise.
    *
    * \throw TakeSameKeyTwice if a key was already previously taken.
    * \throw std::invalid_argument if a key without a default is taken but it is
@@ -1230,16 +1229,67 @@ class Configuration {
    * Additional interface for SMASH to read configuration values without
    * removing them.
    *
-   * The function returns the value at the specified \p keys but does not remove
+   * The function returns the value of the specified \c Key but does not remove
    * it from the Configuration object. Semantically, this means the value was
    * not used.
    *
-   * \param[in] labels You can pass an arbitrary number of keys inside curly
-   * braces, following the nesting structure in the config file.
+   * Also this method returns the default value of the key (or an error if none
+   * is available), if the key is not present in the configuration. \see take
    *
-   * \return A proxy object that converts to the correct type automatically on
-   *         assignment.
+   * \note Since reading a key does not remove it from the configuration, it is
+   *       not necessary to store the key read to avoid taking it multiple
+   *       times. Actually, doing so is safe and will return the same value.
+   *
+   * \param[in] key The input key that should be taken.
+   *
+   * \return The value of the taken key if present, its default value otherwise.
+   *
+   * \throw std::invalid_argument if a key without a default is taken but it is
+   *        absent in the configuration.
    */
+  template <typename T>
+  T read(const Key<T> &key) const {
+    if (has_value(key)) {
+      // The following return statement converts a Value into T
+      return read({key.labels().begin(), key.labels().end()});
+    } else {
+      try {
+        return key.default_value();
+      } catch (std::bad_optional_access &) {
+        throw std::invalid_argument(
+            "Key " + std::string{key} +
+            " without default value read, but missing in configuration.");
+      }
+    }
+  }
+
+  /**
+   * Alternative method to read a key value, specifying the default value.
+   * \see read
+   *
+   * @tparam T The type of the key to be read
+   * @param key The key to be read
+   * @param default_value The default value to be returned if the key is not
+   *                      present in the configuration
+   * @return The value of the key
+   *
+   * \throw std::logic_error If the key has not a default value declared as
+   * dependent on external entities.
+   */
+  template <typename T>
+  T read(const Key<T> &key, T default_value) {
+    if (!key.has_dependent_default()) {
+      throw std::logic_error(
+          "An input Key without dependent default cannot be read specifying a "
+          "default value! Either define the key as having a dependent default "
+          "or read it without a default value (which is a Key property).");
+    }
+    if (has_value(key)) {
+      return read(key);
+    }
+    return default_value;
+  }
+
   Value read(std::initializer_list<const char *> labels) const {
     return read({labels.begin(), labels.end()});
   }

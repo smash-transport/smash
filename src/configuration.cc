@@ -239,9 +239,9 @@ Configuration::Value Configuration::read(
     // The same remark about the take return value applies here.
     return {found_node.value(), labels.back().data()};
   } else {
-    throw std::invalid_argument(
-        "Attempt to read value of a not existing key: " +
-        join_quoted({labels.begin(), labels.end()}));
+    throw std::runtime_error(
+        "Private Configuration::read method called with not existing key: " +
+        join_quoted(labels) + ". This should not have happened.");
   }
 }
 
