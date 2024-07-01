@@ -54,10 +54,21 @@ enum class DefaultType {
  *       remove it in the same version, i.e. specifying the same version twice
  *       at construction.
  *
- * @tparam default_type Type of the key value.
+ * @tparam default_type Type of the key value. This \b must be a plain type, by
+ *         that meaning have no cv-qualifier and not being any among the
+ *         following types: array, pointer, function, or a mix of them.
  */
 template <typename default_type>
 class Key {
+  static_assert(!std::is_const_v<default_type>);
+  static_assert(!std::is_volatile_v<default_type>);
+  static_assert(!std::is_reference_v<default_type>);
+  static_assert(!std::is_pointer_v<default_type>);
+  static_assert(!std::is_array_v<default_type>);
+  static_assert(!std::is_function_v<default_type>);
+  static_assert(!std::is_member_object_pointer_v<default_type>);
+  static_assert(!std::is_member_function_pointer_v<default_type>);
+
  public:
   /**
    * \ingroup exception
@@ -332,6 +343,6 @@ class Key {
   KeyLabels labels_{};
 };
 
-}
+}  // namespace smash
 
 #endif
