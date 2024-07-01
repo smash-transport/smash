@@ -13,6 +13,7 @@
 
 #include "smash/configuration.h"
 #include "smash/decaymodes.h"
+#include "smash/input_keys.h"
 #include "smash/inputfunctions.h"
 #include "smash/isoparticletype.h"
 #include "smash/logging.h"
@@ -119,26 +120,30 @@ static void read_particles_and_decaymodes_files_setting_keys_in_configuration(
       load_particles_and_decaymodes(particles_path, decaymodes_path);
   /* For particles and decaymodes: external file is superior to config.
    * However, warn in case of conflict. */
-  if (configuration.has_value({"particles"}) && !particles_path.empty()) {
+  if (configuration.has_value(InputKeys::particles) &&
+      !particles_path.empty()) {
     logg[LMain].warn(
         "Ambiguity: particles from external file ", particles_path,
         " requested, but there is also particle list in the config."
         " Using particles from ",
         particles_path);
   }
-  if (!configuration.has_value({"particles"}) || !particles_path.empty()) {
-    configuration.set_value({"particles"}, particles_and_decays.first);
+  if (!configuration.has_value(InputKeys::particles) ||
+      !particles_path.empty()) {
+    configuration.set_value(InputKeys::particles, particles_and_decays.first);
   }
 
-  if (configuration.has_value({"decaymodes"}) && !decaymodes_path.empty()) {
+  if (configuration.has_value(InputKeys::decaymodes) &&
+      !decaymodes_path.empty()) {
     logg[LMain].warn(
         "Ambiguity: decaymodes from external file ", decaymodes_path,
         " requested, but there is also decaymodes list in the config."
         " Using decaymodes from",
         decaymodes_path);
   }
-  if (!configuration.has_value({"decaymodes"}) || !decaymodes_path.empty()) {
-    configuration.set_value({"decaymodes"}, particles_and_decays.second);
+  if (!configuration.has_value(InputKeys::decaymodes) ||
+      !decaymodes_path.empty()) {
+    configuration.set_value(InputKeys::decaymodes, particles_and_decays.second);
   }
 }
 

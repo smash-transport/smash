@@ -1334,13 +1334,6 @@ class Configuration {
     node = std::forward<T>(value);
   }
 
-  template <typename T>
-  void set_value(std::initializer_list<const char *> labels, T &&value) {
-    auto node =
-        find_node_creating_it_if_not_existing({labels.begin(), labels.end()});
-    node = std::forward<T>(value);
-  }
-
   /**
    * Remove all entries in the given section except for \p key.
    *

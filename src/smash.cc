@@ -629,16 +629,16 @@ int main(int argc, char *argv[]) {
       std::exit(EXIT_SUCCESS);
     }
     if (modus) {
-      configuration.set_value({"General", "Modus"}, std::string(modus));
+      configuration.set_value(InputKeys::gen_modus, std::string(modus));
     }
     if (end_time) {
-      configuration.set_value({"General", "End_Time"},
+      configuration.set_value(InputKeys::gen_endTime,
                               std::abs(std::atof(end_time)));
     }
 
-    int64_t seed = configuration.read({"General", "Randomseed"});
+    int64_t seed = configuration.read(InputKeys::gen_randomseed);
     if (seed < 0) {
-      configuration.set_value({"General", "Randomseed"},
+      configuration.set_value(InputKeys::gen_randomseed,
                               random::generate_63bit_seed());
     }
 

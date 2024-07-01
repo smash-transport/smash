@@ -236,8 +236,7 @@ TEST(set_existing_value) {
   Configuration conf = make_test_configuration();
   const double new_value = 3.1415;
   const auto key = get_key<double>({"tamer", "Altaic", "Meccas"});
-  // In the following we'll use key as soon as the older set_value is removed
-  conf.set_value({"tamer", "Altaic", "Meccas"}, new_value);
+  conf.set_value(key, new_value);
   COMPARE(conf.read(key), new_value);
   conf.clear();
 }
@@ -254,9 +253,10 @@ TEST(set_new_value_on_non_empty_conf) {
 
 TEST(set_value_on_empty_conf) {
   auto conf = Configuration("");
-  conf.set_value({"New section", "New key"}, 42);
+  const auto key = get_key<int>({"New section", "New key"});
+  conf.set_value(key, 42);
   VERIFY(conf.has_value(get_key<std::string>({"New section"})));
-  VERIFY(conf.has_value(get_key<std::string>({"New section", "New key"})));
+  VERIFY(conf.has_value(key));
   conf.clear();
 }
 
@@ -268,9 +268,10 @@ TEST(set_value_on_conf_created_with_empty_file) {
     FAIL() << "Unable to create empty temporary file!";
   }
   auto conf = Configuration{tmp_dir, tmp_file};
-  conf.set_value({"New section", "New key"}, 42);
+  const auto key = get_key<int>({"New section", "New key"});
+  conf.set_value(key, 42);
   VERIFY(conf.has_value(get_key<std::string>({"New section"})));
-  VERIFY(conf.has_value(get_key<std::string>({"New section", "New key"})));
+  VERIFY(conf.has_value(key));
   ofs.close();
   std::filesystem::remove(tmp_dir / tmp_file);
   conf.clear();

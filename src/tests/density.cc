@@ -158,8 +158,12 @@ TEST(smearing_factor_normalization) {
       Temperature: 0.2
       Start_Time: 0.0
   )"};
-  conf.set_value({"Box", "Init_Multiplicities", "2212"}, N);
-  conf.set_value({"Box", "Length"}, L);
+  // Note that it is not possible here to use set_value passing in the database
+  // InputKeys::modi_box_initialMultiplicities key as its value is of type
+  // std::map<PdgCode, int> and this cannot be set by YAML library automatically
+  conf.merge_yaml("{Box: {Init_Multiplicities: {2212: " + std::to_string(N) +
+                  "}}}");
+  conf.set_value(InputKeys::modi_box_length, L);
   ExperimentParameters par = smash::Test::default_parameters();
   par.box_length = L;
   const DensityParameters dens_par = DensityParameters(par);
