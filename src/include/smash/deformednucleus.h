@@ -84,18 +84,6 @@ class DeformedNucleus : public Nucleus {
   void set_deformation_parameters_from_config(Configuration &config);
 
   /**
-   * Set angles for orientation of nucleus from config file.
-   * \param[in] orientation_config The configuration for the deformation of this
-   * nucleus (projectile or target).
-   */
-  void set_orientation_from_config(Configuration &orientation_config);
-  /**
-   * Rotates the nucleus according to members nucleus_polar_angle_
-   * and nucleus_azimuthal_angle_ and updates nucleon positions.
-   */
-  void rotate() override;
-
-  /**
    * \return the saturation density of the deformed_nucleus
    * \see saturation_density_
    */
@@ -159,25 +147,6 @@ class DeformedNucleus : public Nucleus {
    */
   inline void set_beta_4(double b4) { beta4_ = b4; }
   /**
-   * Set the nucleus polar angle.
-   * \param[in] theta Polar angle of position inside nucleus
-   */
-  inline void set_polar_angle(double theta) {
-    nuclear_orientation_.set_theta(theta);
-  }
-  /**
-   * Set the nucleus azimuthal angle.
-   * \param[in] phi Azimuthal angle of position inside nucleus
-   */
-  inline void set_azimuthal_angle(double phi) {
-    nuclear_orientation_.set_phi(phi);
-  }
-  /**
-   * Set the angle psi.
-   * \param[in] psi Angle psi for properly rotating nucleus
-   */
-  inline void set_angle_psi(double psi) { nuclear_orientation_.set_psi(psi); }
-  /**
    * return the beta2 value.
    */
   inline double get_beta2() { return beta2_; }
@@ -199,15 +168,6 @@ class DeformedNucleus : public Nucleus {
   double beta3_ = 0.0;
   /// Deformation parameter for angular momentum l=4.
   double beta4_ = 0.0;
-  /**
-   * Nucleus orientation (initial profile in xz plane) in terms of
-   * a pair of angles (theta, phi)
-   */
-  Angles nuclear_orientation_;
-  /**
-   * Whether the nuclei should be rotated randomly.
-   */
-  bool random_rotation_ = false;
 };
 
 }  // namespace smash

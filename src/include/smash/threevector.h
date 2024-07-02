@@ -76,11 +76,11 @@ class ThreeVector {
    * about the rotated z-axis. To reverse the rotation one has to
    * therefore exchange phi and psi and use the negative values for all angles.
    * \param[in] phi angle by which the first rotation is done about the z-axis.
-   *        Range: [0,2&pi]
+   *        Range: \f$[0,2\pi]\f$
    * \param[in] theta angle by which the second rotation is done
-   *        about the rotated x-axis. Range: [0,&pi]
+   *        about the rotated x-axis. Range: \f$[0,\pi]\f$
    * \param[in] psi angle by which the third rotation is done
-   *        about the rotated z-axis. Range: [0,2&pi]
+   *        about the rotated z-axis. Range: \f$[0,2\pi]\f$
    *
    * Euler angles are used to make rotation of several (different) position
    * vectors belonging to one rigid body easy. A ThreeVector could be rotated

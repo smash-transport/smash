@@ -141,10 +141,9 @@ class Nucleus {
   void shift(double z_offset, double x_offset, double simulation_time);
 
   /**
-   * Rotates the nucleus. (Due to spherical symmetry of nondeformed nuclei,
-   * there is nothing to do.)
+   * Rotates the nucleus using the three euler angles phi, theta and psi.
    */
-  virtual void rotate() {}
+  virtual void rotate();
 
   /**
    * Copies the particles from this nucleus into the particle list.
@@ -297,12 +296,18 @@ class Nucleus {
    */
   void random_euler_angles();
 
-  /// Euler angel phi
-  double euler_phi_;
-  /// Euler angel theta
-  double euler_theta_;
-  /// Euler angel psi
-  double euler_psi_;
+  /**
+   * The Euler angle phi of the three Euler angles used to apply rotations to
+   * the nucleus. We do not use the \c Angles class here to keep a clear
+   * distinction between spherical coordinates and angles for rotations.
+   */
+  double euler_phi_ = 0.0;
+  /// Euler angle theta
+  double euler_theta_ = 0.0;
+  /// Euler angle psi
+  double euler_psi_ = 0.0;
+  /// Whether the nucleus should be rotated randomly.
+  bool random_rotation_ = false;
 
  public:
   /// For iterators over the particle list:
@@ -362,6 +367,12 @@ class Nucleus {
    * \see nuclear_radius
    */
   inline double get_nuclear_radius() const { return nuclear_radius_; }
+  /**
+   * Set angles for rotation of the nucleus from config file.
+   * \param[in] orientation_config The configuration for the rotation of this
+   * nucleus (projectile or target).
+   */
+  void set_orientation_from_config(Configuration &orientation_config);
   /**
    * \ingroup logging
    * Writes the state of the Nucleus object to the output stream.

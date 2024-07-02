@@ -25,6 +25,10 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Changed
 * Upgraded to Pythia 8.311
+* Changed the default value for theta from pi/2 to 0 in orientation section for deformed nucleii
+
+### Fixed
+* Fix a small error and added a more precise documentation for the orientation section for deformed nuclei
 
 ## SMASH-3.1
 Date: 2024-02-26
