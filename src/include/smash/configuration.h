@@ -1511,9 +1511,9 @@ class Configuration {
    */
   template <typename T>
   bool did_key_exist_and_was_it_taken(const Key<T> &key) {
-    return std::find(existing_keys_already_taken.begin(),
-                     existing_keys_already_taken.end(),
-                     key.labels()) != existing_keys_already_taken.end();
+    return std::find(existing_keys_already_taken_.begin(),
+                     existing_keys_already_taken_.end(),
+                     key.labels()) != existing_keys_already_taken_.end();
   }
 
   /// The general_config.yaml contents - fully parsed
@@ -1523,7 +1523,7 @@ class Configuration {
   int uncaught_exceptions_{std::uncaught_exceptions()};
 
   /// List of taken keys to throw on taking same key twice
-  std::vector<KeyLabels> existing_keys_already_taken{};
+  std::vector<KeyLabels> existing_keys_already_taken_{};
 };
 
 }  // namespace smash

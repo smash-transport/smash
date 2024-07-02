@@ -154,9 +154,12 @@ Configuration::Configuration(const std::filesystem::path &path,
 
 Configuration::Configuration(Configuration &&other)
     : root_node_(std::move(other.root_node_)),
-      uncaught_exceptions_(std::move(other.uncaught_exceptions_)) {
+      uncaught_exceptions_(std::move(other.uncaught_exceptions_)),
+      existing_keys_already_taken_(
+          std::move(other.existing_keys_already_taken_)) {
   other.root_node_.reset();
   other.uncaught_exceptions_ = 0;
+  other.existing_keys_already_taken_.clear();
 }
 
 Configuration &Configuration::operator=(Configuration &&other) {
@@ -164,8 +167,11 @@ Configuration &Configuration::operator=(Configuration &&other) {
   if (!(root_node_ == other.root_node_)) {
     root_node_ = std::move(other.root_node_);
     uncaught_exceptions_ = std::move(other.uncaught_exceptions_);
+    existing_keys_already_taken_ =
+        std::move(other.existing_keys_already_taken_);
     other.root_node_.reset();
     other.uncaught_exceptions_ = 0;
+    other.existing_keys_already_taken_.clear();
   }
   return *this;
 }
@@ -223,7 +229,7 @@ Configuration::Value Configuration::take(std::vector<std::string_view> labels) {
   }
   previous_to_last_node.value().remove(*last_key_it);
   root_node_ = remove_empty_maps(root_node_);
-  existing_keys_already_taken.push_back({labels.begin(), labels.end()});
+  existing_keys_already_taken_.push_back({labels.begin(), labels.end()});
   /* NOTE: The second argument in the returned statement to construct Value must
    * point to a string that is outliving the function scope and it would be
    * wrong to return e.g. something locally declared in the function. This is
