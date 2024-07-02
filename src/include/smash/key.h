@@ -11,11 +11,14 @@
 #define SRC_INCLUDE_SMASH_KEY_H_
 
 #include <optional>
+#include <sstream>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "stringfunctions.h"
+#include "traits.h"
 
 namespace smash {
 
@@ -210,6 +213,61 @@ class Key {
   }
 
   /**
+   * Build and return a YAML-formatted string in the compact form (using braces
+   * as single line).
+   *
+   * \param[in] value An \c std::optional value of the Key type. If a value is
+   *            passed, this is added to the resulting string if its type is
+   *            streamable using the \c << operator. If no value is passed and
+   *            the key has a streamable default, this is used.
+   *
+   * @return \c std::string with labels formatted in a compact YAML format.
+   */
+  std::string as_yaml(
+      std::optional<default_type> value = std::nullopt) const noexcept {
+    std::stringstream value_as_string{};
+    if constexpr (is_writable_to_stream<std::stringstream,
+                                        default_type>::value) {
+      if (value) {
+        value_as_string << *value;
+      } else if (default_.type_ == DefaultType::Value) {
+        value_as_string << default_value();
+      }
+    }
+    return as_yaml(value_as_string.str());
+  }
+
+  /**
+   * Overload of the method taking a string as value. This can be useful for non
+   * streamable types e.g. in tests.
+   *
+   * \note The passed \c value is not quoted and it is responsibility of the
+   *       caller to properly quote it, if needed. This enables setting e.g.
+   *       YAML maps as value.
+   *
+   * \see as_yaml
+   */
+  std::string as_yaml(std::string value) const noexcept {
+    std::stringstream result{};
+    result << "{" << smash::join(labels_, ": {") << ": " << value
+           << smash::join(std::vector<std::string>(labels_.size(), "}"), "");
+    return result.str();
+  }
+
+  /**
+   * Construct a new key with the top-level label dropped. This is useful e.g.
+   * in tests in order to use the database keys to build configurations that are
+   * a sub-section only of a typical SMASH configuration.
+   *
+   * \return Key<default_type> identical to \c *this but with different labels.
+   */
+  Key<default_type> drop_top_label() const {
+    Key<default_type> new_key(*this);
+    new_key.labels_.erase(new_key.labels_.begin());
+    return new_key;
+  }
+
+  /**
    * \brief Method to access the \c Key labels.
    *
    * \return A constant reference to the labels member for read-only access.
@@ -292,6 +350,9 @@ class Key {
     DefaultType type_ = DefaultType::Value;
     /// The default value, if any
     std::optional<T> value_ = std::nullopt;
+    // Make nested class friend of enclosing one. This class is anyhow an
+    // implementation detail and part of Key.
+    friend class Key<T>;
   };
 
   /**
@@ -345,4 +406,4 @@ class Key {
 
 }  // namespace smash
 
-#endif
+#endif  // SRC_INCLUDE_SMASH_KEY_H_

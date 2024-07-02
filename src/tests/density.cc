@@ -161,9 +161,10 @@ TEST(smearing_factor_normalization) {
   // Note that it is not possible here to use set_value passing in the database
   // InputKeys::modi_box_initialMultiplicities key as its value is of type
   // std::map<PdgCode, int> and this cannot be set by YAML library automatically
-  conf.merge_yaml("{Box: {Init_Multiplicities: {2212: " + std::to_string(N) +
-                  "}}}");
-  conf.set_value(InputKeys::modi_box_length, L);
+  conf.merge_yaml(
+      InputKeys::modi_box_initialMultiplicities.drop_top_label().as_yaml(
+          "{2212: " + std::to_string(N) + "}"));
+  conf.set_value(InputKeys::modi_box_length.drop_top_label(), L);
   ExperimentParameters par = smash::Test::default_parameters();
   par.box_length = L;
   const DensityParameters dens_par = DensityParameters(par);

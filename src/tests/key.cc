@@ -11,6 +11,8 @@
 
 #include "smash/key.h"
 
+#include <map>
+
 using namespace smash;
 using namespace std::string_literals;
 
@@ -107,6 +109,47 @@ TEST(to_string) {
   const auto key = get_test_key<int>();
   const std::string result = "\"Test: Key\"";
   COMPARE(static_cast<std::string>(key), result);
+}
+
+TEST(as_yaml) {
+  const auto key = get_test_key<int>();
+  const std::string result = "{Test: {Key: }}";
+  COMPARE(key.as_yaml(), result);
+}
+
+TEST(as_yaml_with_default_value) {
+  const auto key = get_test_key<int>(42);
+  const std::string result = "{Test: {Key: 42}}";
+  COMPARE(key.as_yaml(), result);
+}
+
+TEST(as_yaml_with_streamable_value) {
+  const auto key = get_test_key<int>();
+  const std::string result = "{Test: {Key: 666}}";
+  COMPARE(key.as_yaml(666), result);
+}
+
+TEST(as_yaml_with_not_streamable_value) {
+  const auto key = get_test_key<std::map<int, int>>();
+  const std::string result = "{Test: {Key: }}";
+  COMPARE(key.as_yaml(std::map<int, int>{{42,666}}), result);
+}
+
+TEST(as_yaml_with_string) {
+  const auto key_1 = get_test_key<int>();
+  std::string result = "{Test: {Key: Hi}}";
+  COMPARE(key_1.as_yaml("Hi"s), result);
+  auto key_2 = get_test_key<std::string>("Hi"s);
+  COMPARE(key_2.as_yaml(), result);
+  key_2 = get_test_key<std::string>();
+  COMPARE(key_2.as_yaml("Hi"s), result);
+}
+
+TEST(drop_top_level) {
+  const auto key_1 = get_test_key<int>();
+  const auto key_2 = key_1.drop_top_label();
+  COMPARE(key_2.labels().size(), 1);
+  COMPARE(key_2.labels()[0], "Key");
 }
 
 /*
