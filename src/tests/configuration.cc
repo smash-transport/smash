@@ -27,7 +27,7 @@ static Configuration make_test_configuration() {
 }
 
 template <typename T>
-static Key<T> get_key(std::initializer_list<std::string_view> labels) {
+static Key<T> get_key(KeyLabels labels) {
   return Key<T>{labels, {"1.0"}};
 }
 

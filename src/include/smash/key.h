@@ -23,10 +23,16 @@
 namespace smash {
 
 /**
- * Descriptive alias for storing SMASH versions associated to keys metadata.
+ * Descriptive alias for storing a SMASH version associated to keys metadata.
  * At the moment simply a \c std::string .
  */
 using Version = std::string;
+
+/**
+ * Descriptive alias for storing keys metadata. At the moment this is only a
+ * list of versions.
+ */
+using KeyMetadata = std::initializer_list<std::string_view>;
 
 /**
  * Descriptive alias for storing key labels, i.e. the series of strings that
@@ -89,8 +95,7 @@ class Key {
    * the versions in which the key has been introduced, deprecated and removed,
    * respectively.
    */
-  explicit Key(const std::initializer_list<std::string_view>& labels,
-               const std::initializer_list<std::string_view>& versions)
+  explicit Key(const KeyLabels& labels, const KeyMetadata& versions)
       : Key{labels, Default<default_type>{}, versions} {}
 
   /**
@@ -104,8 +109,7 @@ class Key {
    *
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    */
-  Key(const std::initializer_list<std::string_view>& labels, default_type value,
-      const std::initializer_list<std::string_view>& versions)
+  Key(const KeyLabels& labels, default_type value, const KeyMetadata& versions)
       : Key{labels, Default<default_type>{value}, versions} {}
 
   /**
@@ -121,9 +125,8 @@ class Key {
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    * @throw std::logic_error If \c type is not \c DefaultType::Dependent .
    */
-  Key(const std::initializer_list<std::string_view>& labels,
-      DefaultType type_of_default,
-      const std::initializer_list<std::string_view>& versions)
+  Key(const KeyLabels& labels, DefaultType type_of_default,
+      const KeyMetadata& versions)
       : Key{labels, Default<default_type>{type_of_default}, versions} {}
 
   /**
@@ -365,9 +368,8 @@ class Key {
    *
    * @see public constructor documentation for the parameters description.
    */
-  Key(const std::initializer_list<std::string_view>& labels,
-      Default<default_type> value,
-      const std::initializer_list<std::string_view>& versions)
+  Key(const KeyLabels& labels, Default<default_type> value,
+      const KeyMetadata& versions)
       : default_{std::move(value)}, labels_{labels.begin(), labels.end()} {
     /*
      * The following switch statement is a compact way to initialize the
