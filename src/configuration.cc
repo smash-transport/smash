@@ -113,7 +113,8 @@ std::string join_quoted(std::vector<std::string_view> keys) {
   return std::accumulate(keys.begin(), keys.end(), std::string{"{"},
                          [](const std::string &ss, const std::string_view &s) {
                            return ss + ((ss.size() == 1) ? "\"" : ", \"") +
-                                  std::string{s} + "\"";
+                                  std::string{s} +  // NOLINT(whitespace/braces)
+                                  "\"";
                          }) +
          "}";
 }

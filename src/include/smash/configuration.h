@@ -1173,14 +1173,15 @@ class Configuration {
       // The following return statement converts a Value into T
       return take({key.labels().begin(), key.labels().end()});
     } else if (did_key_exist_and_was_it_taken(key)) {
-      throw TakeSameKeyTwice("Attempt to take key " + std::string{key} +
+      throw TakeSameKeyTwice("Attempt to take key " +
+                             std::string{key} +  // NOLINT(whitespace/braces)
                              " twice.");
     } else {
       try {
         return key.default_value();
       } catch (std::bad_optional_access &) {
         throw std::invalid_argument(
-            "Key " + std::string{key} +
+            "Key " + std::string{key} +  // NOLINT(whitespace/braces)
             " without default value taken, but missing in configuration.");
       }
     }
@@ -1258,7 +1259,7 @@ class Configuration {
         return key.default_value();
       } catch (std::bad_optional_access &) {
         throw std::invalid_argument(
-            "Key " + std::string{key} +
+            "Key " + std::string{key} +  // NOLINT(whitespace/braces)
             " without default value read, but missing in configuration.");
       }
     }
