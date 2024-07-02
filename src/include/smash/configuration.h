@@ -1296,15 +1296,6 @@ class Configuration {
     return read({labels.begin(), labels.end()});
   }
 
-  /// \see read
-  template <typename T>
-  T read(std::initializer_list<const char *> keys, T default_value) {
-    if (has_value(keys)) {
-      return read(keys);
-    }
-    return default_value;
-  }
-
   /**
    * Overwrite the value of the YAML node corresponding to the specified key.
    *
