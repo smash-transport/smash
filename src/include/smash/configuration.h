@@ -1364,6 +1364,16 @@ class Configuration {
                              Configuration::GetEmpty::No);
 
   /**
+   * Alternative method to extract a sub-configuration, which retains the labels
+   * from the top-level in the returned object instead of dropping them.
+   *
+   * \see extract_sub_configuration
+   */
+  Configuration extract_complete_sub_configuration(
+      KeyLabels section, Configuration::GetEmpty empty_if_not_existing =
+                             Configuration::GetEmpty::No);
+
+  /**
    * Return whether the configuration has a key, possibly without value.
    * \param[in] key The key to be checked for
    */

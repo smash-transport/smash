@@ -337,6 +337,45 @@ TEST(extract_not_existing_section_as_empty_conf) {
   conf.clear();
 }
 
+TEST(extract_complete_sub_configuration) {
+  Configuration conf = make_test_configuration();
+  KeyLabels section{"tamer", "feathered", "dove", "floozy"};
+  Configuration sub_conf = conf.extract_complete_sub_configuration(section);
+  conf.clear();
+  const std::string result_as_string(R"(tamer:
+  feathered:
+    dove:
+      floozy: {2212: 1, 2112: 1})");
+  COMPARE(sub_conf.to_string(), result_as_string);
+  for ([[maybe_unused]] const auto &label : section) {
+    auto key = get_key<int>(
+        {section.begin(), section.end()});  // Type of key here irrelevant
+    VERIFY(sub_conf.has_value(key));
+    section.pop_back();
+  }
+  sub_conf.clear();
+}
+
+TEST(extract_complete_not_existing_section_as_empty_conf) {
+  Configuration conf = make_test_configuration();
+  KeyLabels section{"Not", "existing", "section"};
+  auto sub_conf = conf.extract_complete_sub_configuration(
+      section, Configuration::GetEmpty::Yes);
+  conf.clear();
+  const std::string result_as_string(R"(Not:
+  existing:
+    section:
+      {})");
+  COMPARE(sub_conf.to_string(), result_as_string);
+  for ([[maybe_unused]] const auto &label : section) {
+    auto key = get_key<int>(
+        {section.begin(), section.end()});  // Type of key here irrelevant
+    VERIFY(sub_conf.has_value(key));
+    section.pop_back();
+  }
+  sub_conf.clear();
+}
+
 TEST(has_value_including_empty) {
   Configuration conf = Configuration{"Empty:"};
   const auto key = get_key<std::string>({"Empty"});

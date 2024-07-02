@@ -324,6 +324,30 @@ Configuration Configuration::extract_sub_configuration(
   }
 }
 
+Configuration Configuration::extract_complete_sub_configuration(
+    KeyLabels section, Configuration::GetEmpty empty_if_not_existing) {
+  auto sub_configuration =
+      extract_sub_configuration(section, empty_if_not_existing);
+  /* If the sub-configuration is empty, force its root node to be a map. This is
+  not done in the extract_sub_configuration method, which leaves open the
+  possibility not to have a map node at root in the returned object. */
+  if (sub_configuration.root_node_.size() == 0) {
+    sub_configuration = Configuration{YAML::Node(YAML::NodeType::Map)};
+  }
+  /* Now create the configuration to be returned adding there the nested-map
+  structure. Refer to the descend_one_existing_level comment to understand
+  the usage of YAML::Node::operator[] and reset methods. */
+  Configuration result{YAML::Node(YAML::NodeType::Map)};
+  auto last_node = result.root_node_;
+  for (const auto &label : section) {
+    last_node[label] = YAML::Node(YAML::NodeType::Map);
+    last_node.reset(last_node[label]);
+  }
+  last_node = sub_configuration.root_node_;
+  sub_configuration.clear();
+  return result;
+}
+
 bool Configuration::has_value(std::initializer_list<const char *> keys) const {
   const auto found_node = find_existing_node({keys.begin(), keys.end()});
   return found_node.has_value() && !(found_node.value().IsNull());
