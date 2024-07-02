@@ -347,8 +347,7 @@ void Nucleus::set_parameters_from_config(Configuration &config) {
 
 void Nucleus::set_orientation_from_config(Configuration &orientation_config) {
   // Read in orientation if provided, otherwise, the defaults are
-  // theta = pi/2, phi = 0, as declared in the angles class
-
+  // phi = 0, theta = 0, psi = 0
   if (orientation_config.has_value({"Theta"})) {
     if (orientation_config.has_value({"Random_Rotation"}) &&
         orientation_config.take({"Random_Rotation"})) {
@@ -393,7 +392,7 @@ void Nucleus::rotate() {
     // assigned, as the nucleus objects are symmetric with respect to psi.
     random_euler_angles();
   }
-  if (!(euler_phi_ == 0.0) || !(euler_theta_ == 0.0) || !(euler_psi_ == 0.0)) {
+  if (euler_phi_ != 0.0 || euler_theta_ != 0.0 || euler_psi_ != 0.0) {
     for (auto &particle : *this) {
       /* Rotate every vector by the euler angles phi, theta and psi.
        * This means applying the matrix for a rotation of phi around the z-axis,

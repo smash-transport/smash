@@ -49,10 +49,10 @@ TEST(rotate_phi) {
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     actual = i->position();
   }
-  COMPARE_ABSOLUTE_ERROR(actual.x0(), expectation.x0(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(actual.x1(), expectation.x1(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(actual.x2(), expectation.x2(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(actual.x3(), expectation.x3(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(actual.x0(), expectation.x0(), 1e-14);
+  COMPARE_ABSOLUTE_ERROR(actual.x1(), expectation.x1(), 1e-14);
+  COMPARE_ABSOLUTE_ERROR(actual.x2(), expectation.x2(), 1e-14);
+  COMPARE_ABSOLUTE_ERROR(actual.x3(), expectation.x3(), 1e-14);
 }
 
 TEST(rotate_theta) {
@@ -70,10 +70,10 @@ TEST(rotate_theta) {
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     actual = i->position();
   }
-  COMPARE_ABSOLUTE_ERROR(actual.x0(), expectation.x0(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(actual.x1(), expectation.x1(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(actual.x2(), expectation.x2(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(actual.x3(), expectation.x3(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(actual.x0(), expectation.x0(), 1e-14);
+  COMPARE_ABSOLUTE_ERROR(actual.x1(), expectation.x1(), 1e-14);
+  COMPARE_ABSOLUTE_ERROR(actual.x2(), expectation.x2(), 1e-14);
+  COMPARE_ABSOLUTE_ERROR(actual.x3(), expectation.x3(), 1e-14);
 }
 
 TEST(rotate_both) {
@@ -95,10 +95,10 @@ TEST(rotate_both) {
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     actual = i->position();
   }
-  COMPARE_ABSOLUTE_ERROR(actual.x0(), expectation.x0(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(actual.x1(), expectation.x1(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(actual.x2(), expectation.x2(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(actual.x3(), expectation.x3(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(actual.x0(), expectation.x0(), 1e-14);
+  COMPARE_ABSOLUTE_ERROR(actual.x1(), expectation.x1(), 1e-14);
+  COMPARE_ABSOLUTE_ERROR(actual.x2(), expectation.x2(), 1e-14);
+  COMPARE_ABSOLUTE_ERROR(actual.x3(), expectation.x3(), 1e-14);
 }
 
 TEST(rotate_all_three) {
@@ -122,10 +122,10 @@ TEST(rotate_all_three) {
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
     actual = i->position();
   }
-  COMPARE_ABSOLUTE_ERROR(actual.x0(), expectation.x0(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(actual.x1(), expectation.x1(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(actual.x2(), expectation.x2(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(actual.x3(), expectation.x3(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(actual.x0(), expectation.x0(), 1e-14);
+  COMPARE_ABSOLUTE_ERROR(actual.x1(), expectation.x1(), 1e-14);
+  COMPARE_ABSOLUTE_ERROR(actual.x2(), expectation.x2(), 1e-14);
+  COMPARE_ABSOLUTE_ERROR(actual.x3(), expectation.x3(), 1e-14);
 }
 
 // Tests if the function for spherical harmonics
