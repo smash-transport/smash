@@ -547,7 +547,7 @@ class Experiment : public ExperimentBase {
    * nevents_ is number of times single phenomenon (particle
    * or nucleus-nucleus collision) will be simulated.
    */
-  const int nevents_ = 0;
+  int nevents_ = 0;
 
   /**
    * The number of ensembles, in which interactions take place, to be
@@ -895,7 +895,6 @@ Experiment<Modus>::Experiment(Configuration &config,
         return Modus{std::move(modus_config), parameters_};
       })),
       ensembles_(parameters_.n_ensembles),
-      nevents_(config.take({"General", "Nevents"}, 0)),
       end_time_(config.take({"General", "End_Time"})),
       delta_time_startup_(parameters_.labclock->timestep_duration()),
       force_decays_(
@@ -915,11 +914,19 @@ Experiment<Modus>::Experiment(Configuration &config,
           config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
   logg[LExperiment].info() << *this;
 
-  if (config.has_value({"General", "Minimum_Nonempty_Ensembles"})) {
-    if (config.has_value({"General", "Nevents"})) {
-      throw std::invalid_argument(
-          "Please specify either Nevents or Minimum_Nonempty_Ensembles.");
-    }
+  const bool user_wants_nevents = config.has_value({"General", "Nevents"});
+  const bool user_wants_min_nonempty =
+      config.has_value({"General", "Minimum_Nonempty_Ensembles", "Number"}) ||
+      config.has_value(
+          {"General", "Minimum_Nonempty_Ensembles", "Maximum_Ensembles_Run"});
+  if (user_wants_nevents == user_wants_min_nonempty) {
+    throw std::invalid_argument(
+        "Please specify either Nevents or Minimum_Nonempty_Ensembles.");
+  }
+  if (user_wants_nevents) {
+    event_counting_ = EventCounting::FixedNumber;
+    nevents_ = config.take({"General", "Nevents"});
+  } else {
     event_counting_ = EventCounting::MinimumNonEmpty;
     minimum_nonempty_ensembles_ =
         config.take({"General", "Minimum_Nonempty_Ensembles", "Number"});
@@ -927,8 +934,6 @@ Experiment<Modus>::Experiment(Configuration &config,
         {"General", "Minimum_Nonempty_Ensembles", "Maximum_Ensembles_Run"});
     max_events_ = numeric_cast<int>(std::ceil(
         static_cast<double>(max_ensembles) / parameters_.n_ensembles));
-  } else {
-    event_counting_ = EventCounting::FixedNumber;
   }
 
   // covariant derivatives can only be done with covariant smearing
