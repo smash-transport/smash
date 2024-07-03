@@ -4184,8 +4184,8 @@ struct InputKeys {
   /**
    * \see_key{key_output_density_type_}
    */
-  inline static const Key<std::string> output_densityType{
-      {"Output", "Density_Type"}, std::string{"none"}, {"0.60"}};
+  inline static const Key<DensityType> output_densityType{
+      {"Output", "Density_Type"}, DensityType::None, {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
