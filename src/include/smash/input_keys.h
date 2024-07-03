@@ -1870,74 +1870,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_totXsStrategy_,Total_Cross_Section_Strategy,string,"TopDownMeasured"}
-   *
-   * Which strategy to use when evaluating total cross sections for collision
-   * finding. Currently, possible options are
-   * - `"BottomUp"` &rarr;
-   *   Partial cross sections of a given initial state are summed up. This
-   *   matches most inclusive experimental cross sections with the 3- and 4-star
-   *   hadronic list from PDG2018, but is susceptible to changes once new
-   *   resonances are added in the \ref doxypage_input_particles "particles"
-   *   file.
-   * - `"TopDown"` &rarr;
-   *   The total cross section of measured processes is parametrized, and the
-   *   partial cross sections are rescaled to match it. Unmeasured processes use
-   *   the high energy parametrization even in low energies, ignoring possible
-   *   resonance peaks, and scaled with AQM. This is then insensitive to changes
-   *   in the input hadronic list.
-   * - `"TopDownMeasured"` &rarr;
-   *   Mixes the options above, with parametrizations only for \f$NN, N\bar{N},
-   *   NK, N\pi,\f$ and \f$\pi\pi\f$. Remaining processes use sum of partial
-   *   cross sections.
-   *
-   * \note In a box calculation, using the `"BottomUp"` strategy is recommended
-   * to preserve detailed balance.
-   */
-  /**
-   * \see_key{key_CT_totXsStrategy_}
-   */
-  inline static const Key<TotalCrossSectionStrategy> collTerm_totXsStrategy{
-      {"Collision_Term", "Total_Cross_Section_Strategy"},
-      TotalCrossSectionStrategy::TopDownMeasured,
-      {"3.1"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,"LargestFromUnstable"}
-   *
-   * Due to the lack of known high-mass resonances for several processes, the
-   * energy region between resonances and strings might lack inelastic
-   * processes, which is referred to as “inelastic gap”. To mitigate this,
-   * “pseudo-resonances” based on existing resonances can be extended to fill
-   * said gap, using the difference between the high energy parametrization of
-   * the total cross section and the sum of cross sections from all processes
-   * as a proxy for how large it is. Candidates are resonances that decay
-   * into the incoming pair. Possible options for this key are
-   * - `"None"` &rarr;
-   *   No pseudo-resonance is created.
-   * - `"Largest"` &rarr;
-   *   Use the resonance with largest mass.
-   * - `"Closest"` &rarr;
-   *   Select the resonance that has the closest pole mass to the available
-   * energy (\f$\sqrt{s}\f$ of the incoming pair).
-   * - `"LargestFromUnstable"` &rarr;
-   *   Same as `"Largest"` but a pseudo-resonance is used only for processes
-   * that have at least one incoming unstable particle.
-   * - `"ClosestFromUnstable"` &rarr;
-   *   Same as `"Closest"` but a pseudo-resonance is used only for processes
-   * that have at least one incoming unstable particle.
-   */
-  /**
-   * \see_key{key_CT_pseudoresonance_}
-   */
-  inline static const Key<PseudoResonance> collTerm_pseudoresonance{
-      {"Collision_Term", "Pseudoresonance"},
-      PseudoResonance::LargestFromUnstable,
-      {"3.1"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,double,2.5}
    *
    * The (minimal) length \unit{in fm} used for the grid cells of the stochastic
@@ -1963,32 +1895,6 @@ struct InputKeys {
    */
   inline static const Key<bool> collTerm_forceDecaysAtEnd{
       {"Collision_Term", "Force_Decays_At_End"}, true, {"0.60"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_include_decays_end_,Include_Weak_And_EM_Decays_At_The_End,bool,false}
-   *
-   * Enable to also perform weak and electro-magnetic decays at the end of the
-   * simulation. If enabled, all decays in the *decaymodes.txt* file are
-   * considered at the end, even for hadrons usually considered stable (i.e.
-   * with an on-shell width larger than the width_cutoff), for example
-   * \f$\Sigma\f$, \f$\pi\f$ or \f$\eta\f$. Note that for isospin violating
-   * decay modes all possible isospin combination have to be manually specified
-   * in the *decaymodes.txt* file.
-   *
-   * \warning If `true`, this option removes the particles that decay from the
-   * evolution, so the Dileptons output will not contain final state decays.
-   * Therefore we do not recommend its usage for dilepton studies. Because the
-   * key name is somewhat misleading, it is for now deprecated and will be
-   * renamed in the next release.
-   */
-  /**
-   * \see_key{key_CT_include_decays_end_}
-   */
-  inline static const Key<bool> collTerm_includeDecaysAtTheEnd{
-      {"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
-      false,
-      {"2.2", "3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2041,6 +1947,32 @@ struct InputKeys {
       {"Collision_Term", "Included_2to2"},
       ReactionsBitSet{}.set(),  // All interactions => all bit set
       {"1.3"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_include_decays_end_,Include_Weak_And_EM_Decays_At_The_End,bool,false}
+   *
+   * Enable to also perform weak and electro-magnetic decays at the end of the
+   * simulation. If enabled, all decays in the *decaymodes.txt* file are
+   * considered at the end, even for hadrons usually considered stable (i.e.
+   * with an on-shell width larger than the width_cutoff), for example
+   * \f$\Sigma\f$, \f$\pi\f$ or \f$\eta\f$. Note that for isospin violating
+   * decay modes all possible isospin combination have to be manually specified
+   * in the *decaymodes.txt* file.
+   *
+   * \warning If `true`, this option removes the particles that decay from the
+   * evolution, so the Dileptons output will not contain final state decays.
+   * Therefore we do not recommend its usage for dilepton studies. Because the
+   * key name is somewhat misleading, it is for now deprecated and will be
+   * renamed in the next release.
+   */
+  /**
+   * \see_key{key_CT_include_decays_end_}
+   */
+  inline static const Key<bool> collTerm_includeDecaysAtTheEnd{
+      {"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
+      false,
+      {"2.2", "3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2182,6 +2114,40 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,"LargestFromUnstable"}
+   *
+   * Due to the lack of known high-mass resonances for several processes, the
+   * energy region between resonances and strings might lack inelastic
+   * processes, which is referred to as “inelastic gap”. To mitigate this,
+   * “pseudo-resonances” based on existing resonances can be extended to fill
+   * said gap, using the difference between the high energy parametrization of
+   * the total cross section and the sum of cross sections from all processes
+   * as a proxy for how large it is. Candidates are resonances that decay
+   * into the incoming pair. Possible options for this key are
+   * - `"None"` &rarr;
+   *   No pseudo-resonance is created.
+   * - `"Largest"` &rarr;
+   *   Use the resonance with largest mass.
+   * - `"Closest"` &rarr;
+   *   Select the resonance that has the closest pole mass to the available
+   * energy (\f$\sqrt{s}\f$ of the incoming pair).
+   * - `"LargestFromUnstable"` &rarr;
+   *   Same as `"Largest"` but a pseudo-resonance is used only for processes
+   * that have at least one incoming unstable particle.
+   * - `"ClosestFromUnstable"` &rarr;
+   *   Same as `"Closest"` but a pseudo-resonance is used only for processes
+   * that have at least one incoming unstable particle.
+   */
+  /**
+   * \see_key{key_CT_pseudoresonance_}
+   */
+  inline static const Key<PseudoResonance> collTerm_pseudoresonance{
+      {"Collision_Term", "Pseudoresonance"},
+      PseudoResonance::LargestFromUnstable,
+      {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_res_lifetime_mod_,Resonance_Lifetime_Modifier,double,1.0}
    *
    * Multiplicative factor by which to scale the resonance lifetimes up or down.
@@ -2260,6 +2226,40 @@ struct InputKeys {
    */
   inline static const Key<bool> collTerm_stringsWithProbability{
       {"Collision_Term", "Strings_with_Probability"}, true, {"1.3"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_totXsStrategy_,Total_Cross_Section_Strategy,string,"TopDownMeasured"}
+   *
+   * Which strategy to use when evaluating total cross sections for collision
+   * finding. Currently, possible options are
+   * - `"BottomUp"` &rarr;
+   *   Partial cross sections of a given initial state are summed up. This
+   *   matches most inclusive experimental cross sections with the 3- and 4-star
+   *   hadronic list from PDG2018, but is susceptible to changes once new
+   *   resonances are added in the \ref doxypage_input_particles "particles"
+   *   file.
+   * - `"TopDown"` &rarr;
+   *   The total cross section of measured processes is parametrized, and the
+   *   partial cross sections are rescaled to match it. Unmeasured processes use
+   *   the high energy parametrization even in low energies, ignoring possible
+   *   resonance peaks, and scaled with AQM. This is then insensitive to changes
+   *   in the input hadronic list.
+   * - `"TopDownMeasured"` &rarr;
+   *   Mixes the options above, with parametrizations only for \f$NN, N\bar{N},
+   *   NK, N\pi,\f$ and \f$\pi\pi\f$. Remaining processes use sum of partial
+   *   cross sections.
+   *
+   * \note In a box calculation, using the `"BottomUp"` strategy is recommended
+   * to preserve detailed balance.
+   */
+  /**
+   * \see_key{key_CT_totXsStrategy_}
+   */
+  inline static const Key<TotalCrossSectionStrategy> collTerm_totXsStrategy{
+      {"Collision_Term", "Total_Cross_Section_Strategy"},
+      TotalCrossSectionStrategy::TopDownMeasured,
+      {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
