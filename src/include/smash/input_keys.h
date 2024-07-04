@@ -4873,7 +4873,7 @@ struct InputKeys {
   /**
    * \see_key{key_output_rivet_weights_no_multi_}
    */
-  inline static const Key<std::array<double, 2>> output_rivet_weights_noMulti{
+  inline static const Key<bool> output_rivet_weights_noMulti{
       InputSections::o_r_weights + "No_Multi",
       DefaultType::Dependent,
       {"2.0.2"}};
