@@ -16,6 +16,15 @@
 using namespace smash;
 using namespace std::string_literals;
 
+TEST(concatenate_key_labels) {
+  KeyLabels start{"A", "B", "C"};
+  const KeyLabels expected_result{"A", "B", "C", "XXX"};
+  const auto result = start + "XXX";
+  VERIFY(result.size() == 4);
+  for (int i = 0; i < 4; i++)
+    VERIFY(expected_result[i] == result[i]);
+}
+
 template <typename T>
 static Key<T> get_test_key(std::optional<T> def_val = std::nullopt) {
   const Version v_intro = "1.0.0";

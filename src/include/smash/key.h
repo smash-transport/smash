@@ -42,6 +42,39 @@ using KeyMetadata = std::initializer_list<std::string_view>;
 using KeyLabels = std::vector<std::string>;
 
 /**
+ * Overload of the \c + operator to add a label to a \c KeyLabels object.
+ *
+ * @param lhs Constant lvalue reference to the key labels.
+ * @param rhs Label to be added.
+ * @return A new \c KeyLabels containing the desired labels.
+ */
+inline KeyLabels operator+(const KeyLabels& lhs, std::string_view rhs) {
+  if (lhs.empty()) {
+    return KeyLabels{std::string{rhs}};
+  } else {
+    KeyLabels result{lhs};
+    result.push_back(std::string{rhs});
+    return result;
+  }
+}
+
+/**
+ * Overload of the \c + operator to add a label to a \c KeyLabels object.
+ *
+ * @param lhs rvalue reference to the key labels.
+ * @param rhs Label to be added.
+ * @return A new \c KeyLabels containing the desired labels.
+ */
+inline KeyLabels operator+(KeyLabels&& lhs, std::string_view rhs) {
+  if (lhs.empty()) {
+    return KeyLabels{std::string{rhs}};
+  } else {
+    lhs.push_back(std::string{rhs});
+    return std::move(lhs);  // See https://stackoverflow.com/a/14857144
+  }
+}
+
+/**
  * @brief New type to explicit distinguish between mandatory and optional keys.
  */
 enum class DefaultType {

@@ -27,6 +27,146 @@
 
 namespace smash {
 
+/**
+ * A container to keep track of all ever existed sections in the input file.
+ *
+ * In this struct with exclusively static constant members we collect all input
+ * sections without any metadata associated to it. This is why we simply use \c
+ * KeyLabels as type (after all a %YAML section is a key with a map as value).
+ *
+ * \note The naming convention for members of this class is the following: Any
+ *       subsection variable gets as prefix the first letter of the section it
+ *       is subsection of. Prefixes are separated by underscores and therefore
+ *       we use camel-case style in the variable name itself to separate words.
+ *       This is not consistent with the rest of the codebase, but for a good
+ *       reason. Also remember that a double underscore is reserved in C++ for
+ *       the C++ implementation (e.g STL).
+ *
+ * \attention Keep members of such a class in blocks corresponding to sections
+ *            from the top-level of the file. Keep blocks alphabetically sorted.
+ */
+struct InputSections {
+  /// Type alias to be more descriptive when declaring members
+  using Section = KeyLabels;
+
+  /// Section for the collision term
+  inline static const Section collisionTerm{"Collision_Term"};
+  /// Subsection for the dileptons
+  inline static const Section c_dileptons =
+      InputSections::collisionTerm + "Dileptons";
+  /// Subsection for the Pauli blocking mechanism
+  inline static const Section c_pauliBlocking =
+      InputSections::collisionTerm + "Pauli_Blocking";
+  /// Subsection for the photons
+  inline static const Section c_photons =
+      InputSections::collisionTerm + "Photons";
+  /// Subsection for the string parameters
+  inline static const Section c_stringParameters =
+      InputSections::collisionTerm + "String_Parameters";
+  /// Subsection for the string transition
+  inline static const Section c_stringTransition =
+      InputSections::collisionTerm + "String_Transition";
+
+  /// Section for the forced thermalization
+  inline static const Section forcedThermalization{"Forced_Thermalization"};
+
+  /// General section
+  inline static const Section general{"General"};
+  /// Subsection for the minimum-nonempty-ensembles mechanism
+  inline static const Section g_minEnsembles =
+      InputSections::general + "Minimum_Nonempty_Ensembles";
+
+  /// Section for the lattice
+  inline static const Section lattice{"Lattice"};
+
+  /// Section for the logging
+  inline static const Section logging{"Logging"};
+
+  /// Section for the modus specific information
+  inline static const Section modi{"Modi"};
+  /// Subsection for the box modus
+  inline static const Section m_box = InputSections::modi + "Box";
+  /// Subsection for the jet in box modus
+  inline static const Section m_b_jet = InputSections::m_box + "Jet";
+  /// Subsection for the collider modus
+  inline static const Section m_collider = InputSections::modi + "Collider";
+  /// Subsection for the impact information in collider modus
+  inline static const Section m_c_impact = InputSections::m_collider + "Impact";
+  /// Subsection for the initial conditions in collider modus
+  inline static const Section m_c_initialConditions =
+      InputSections::m_collider + "Initial_Conditions";
+  /// Subsection for the projectile in collider modus
+  inline static const Section m_c_projectile =
+      InputSections::m_collider + "Projectile";
+  /// Subsection for the custom projectile in collider modus
+  inline static const Section m_c_p_custom =
+      InputSections::m_c_projectile + "Custom";
+  /// Subsection for the deformed projectile in collider modus
+  inline static const Section m_c_p_deformed =
+      InputSections::m_c_projectile + "Deformed";
+  /// Subsection for the deformed projectile orientation in collider modus
+  inline static const Section m_c_p_d_orientation =
+      InputSections::m_c_p_deformed + "Orientation";
+  /// Subsection for the target in collider modus
+  inline static const Section m_c_target = InputSections::m_collider + "Target";
+  /// Subsection for the custom target in collider modus
+  inline static const Section m_c_t_custom =
+      InputSections::m_c_target + "Custom";
+  /// Subsection for the deformed target in collider modus
+  inline static const Section m_c_t_deformed =
+      InputSections::m_c_target + "Deformed";
+  /// Subsection for the deformed target orientation in collider modus
+  inline static const Section m_c_t_d_orientation =
+      InputSections::m_c_t_deformed + "Orientation";
+  /// Subsection for the list modus
+  inline static const Section m_list = InputSections::modi + "List";
+  /// Subsection for the list-box modus
+  inline static const Section m_listBox = InputSections::modi + "ListBox";
+  /// Subsection for the sphere modus
+  inline static const Section m_sphere = InputSections::modi + "Sphere";
+  /// Subsection for the jet in sphere modus
+  inline static const Section m_s_jet = InputSections::m_sphere + "Jet";
+
+  /// Section for the output information
+  inline static const Section output{"Output"};
+  /// Subsection for the output collisions content
+  inline static const Section o_collisions =
+      InputSections::output + "Collisions";
+  /// Subsection for the output Coulomb content
+  inline static const Section o_coulomb = InputSections::output + "Coulomb";
+  /// Subsection for the output dileptons content
+  inline static const Section o_dileptons = InputSections::output + "Dileptons";
+  /// Subsection for the output initial conditions content
+  inline static const Section o_initialConditions =
+      InputSections::output + "Initial_Conditions";
+  /// Subsection for the output particles content
+  inline static const Section o_particles = InputSections::output + "Particles";
+  /// Subsection for the output photons content
+  inline static const Section o_photons = InputSections::output + "Photons";
+  /// Subsection for the output Rivet content
+  inline static const Section o_rivet = InputSections::output + "Rivet";
+  /// Subsection for the output Rivet weights information
+  inline static const Section o_r_weights = InputSections::o_rivet + "Weights";
+  /// Subsection for the output thermodynamics content
+  inline static const Section o_thermodynamics =
+      InputSections::output + "Thermodynamics";
+
+  /// Section for the potentials information
+  inline static const Section potentials{"Potentials"};
+  /// Subsection for the Coulomb potentials information
+  inline static const Section p_coulomb = InputSections::potentials + "Coulomb";
+  /// Subsection for the momentum-dependent potentials information
+  inline static const Section p_momentumDependence =
+      InputSections::potentials + "Momentum_Dependence";
+  /// Subsection for the Skyrme potentials information
+  inline static const Section p_skyrme = InputSections::potentials + "Skyrme";
+  /// Subsection for the symmetry potentials information
+  inline static const Section p_symmetry =
+      InputSections::potentials + "Symmetry";
+  /// Subsection for the VDF potentials information
+  inline static const Section p_vdf = InputSections::potentials + "VDF";
+};
+
 /*!\Userguide
  * \page doxypage_input
  *
@@ -800,7 +940,7 @@ namespace smash {
  */
 
 /**
- * @brief A container to keep track of all ever existed input keys.
+ * A container to keep track of all ever existed input keys.
  *
  * @remark This class has been implemented in SMASH-3.0 and for all existing
  *         keys at that point in time it has been determined in which past
