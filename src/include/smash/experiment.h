@@ -900,21 +900,17 @@ Experiment<Modus>::Experiment(Configuration &config,
       ensembles_(parameters_.n_ensembles),
       end_time_(config.take({"General", "End_Time"})),
       delta_time_startup_(parameters_.labclock->timestep_duration()),
-      force_decays_(
-          config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
-      use_grid_(config.take({"General", "Use_Grid"}, true)),
-      metric_(
-          config.take({"General", "Metric_Type"}, ExpansionMode::NoExpansion),
-          config.take({"General", "Expansion_Rate"}, 0.1)),
-      dileptons_switch_(
-          config.take({"Collision_Term", "Dileptons", "Decays"}, false)),
-      photons_switch_(config.take(
-          {"Collision_Term", "Photons", "2to2_Scatterings"}, false)),
+      force_decays_(config.take(InputKeys::collTerm_forceDecaysAtEnd)),
+      use_grid_(config.take(InputKeys::gen_useGrid)),
+      metric_(config.take(InputKeys::gen_metricType),
+              config.take(InputKeys::gen_expansionRate)),
+      dileptons_switch_(config.take(InputKeys::collTerm_dileptons_decays)),
+      photons_switch_(
+          config.take(InputKeys::collTerm_photons_twoToTwoScatterings)),
       bremsstrahlung_switch_(
-          config.take({"Collision_Term", "Photons", "Bremsstrahlung"}, false)),
+          config.take(InputKeys::collTerm_photons_bremsstrahlung)),
       IC_output_switch_(config.has_value({"Output", "Initial_Conditions"})),
-      time_step_mode_(
-          config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
+      time_step_mode_(config.take(InputKeys::gen_timeStepMode)) {
   logg[LExperiment].info() << *this;
 
   const bool user_wants_nevents = config.has_value({"General", "Nevents"});
@@ -1000,9 +996,9 @@ Experiment<Modus>::Experiment(Configuration &config,
    *       the configuration temporary object will be destroyed not empty, hence
    *       throwing an exception.
    */
-  ParticleData::formation_power_ = config.take(
-      {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
-      modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
+  ParticleData::formation_power_ =
+      config.take(InputKeys::collTerm_stringParam_powerParticleFormation,
+                  modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
 
   // create finders
   if (dileptons_switch_) {
@@ -1010,7 +1006,7 @@ Experiment<Modus>::Experiment(Configuration &config,
   }
   if (photons_switch_ || bremsstrahlung_switch_) {
     n_fractional_photons_ =
-        config.take({"Collision_Term", "Photons", "Fractional_Photons"}, 100);
+        config.take(InputKeys::collTerm_photons_fractionalPhotons);
   }
   if (parameters_.two_to_one) {
     if (parameters_.res_lifetime_factor < 0.) {
@@ -1027,7 +1023,7 @@ Experiment<Modus>::Experiment(Configuration &config,
     action_finders_.emplace_back(std::make_unique<DecayActionsFinder>(
         parameters_.res_lifetime_factor, parameters_.do_weak_decays));
   }
-  bool no_coll = config.take({"Collision_Term", "No_Collisions"}, false);
+  bool no_coll = config.take(InputKeys::collTerm_noCollisions);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
        parameters_.included_multi.any() || parameters_.strings_switch) &&
       !no_coll) {
@@ -1074,8 +1070,9 @@ Experiment<Modus>::Experiment(Configuration &config,
     } else {
       double lower_bound =
           modus_.lower_bound().has_value() ? modus_.lower_bound().value() : 0.5;
-      lower_bound = config.take({"Output", "Initial_Conditions", "Lower_Bound"},
-                                lower_bound);
+      if (config.has_value(InputKeys::output_initialConditions_lowerBound))
+        lower_bound =
+            config.take(InputKeys::output_initialConditions_lowerBound);
       validate_duplicate_IC_config(lower_bound, modus_.lower_bound(),
                                    "Lower_Bound");
 
@@ -1385,7 +1382,7 @@ Experiment<Modus>::Experiment(Configuration &config,
   // create outputs
   logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
                           " create OutputInterface objects");
-  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
+  dens_type_ = config.take(InputKeys::output_densityType);
   logg[LExperiment].debug()
       << "Density type printed to headers: " << dens_type_;
 
@@ -1411,23 +1408,24 @@ Experiment<Modus>::Experiment(Configuration &config,
     logg[LExperiment].warn() << "No \"Output\" section found in the input "
                                 "file. No output file will be produced.";
   }
+  std::cout << output_conf.to_string() << "\n";
   const std::vector<std::string> output_contents =
       output_conf.list_upmost_nodes();
   std::vector<std::vector<std::string>> list_of_formats(output_contents.size());
   std::transform(
       output_contents.cbegin(), output_contents.cend(), list_of_formats.begin(),
       [&output_conf](std::string content) -> std::vector<std::string> {
-        /* Use here a default value for "Format" even though it is a required
-         * key, just because then here below the error for the user is more
-         * informative, if the key was not given in the input file. */
-        return output_conf.take({content.c_str(), "Format"},
-                                std::vector<std::string>{});
+        /* Note that the "Format" key has an empty list as default, although it
+         * is a required key, because then here below the error for the user is
+         * more informative, if the key was not given in the input file.
+         */
+        return output_conf.take(
+            InputKeys::get_output_format_key(content).drop_top_label());
       });
-  const OutputParameters output_parameters(std::move(output_conf));
-  std::size_t total_number_of_requested_formats = 0;
   auto abort_because_of_invalid_input_file = []() {
     throw std::invalid_argument("Invalid configuration input file.");
   };
+  const OutputParameters output_parameters(std::move(output_conf));
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
     const bool quantities_given_nonempty =
         output_parameters.quantities.count(output_contents[i]) &&
@@ -1480,7 +1478,12 @@ Experiment<Modus>::Experiment(Configuration &config,
           << "] -> [" << new_formats << "]'";
       list_of_formats[i].assign(tmp_set.begin(), tmp_set.end());
     }
+  }
 
+  /* Repeat loop over output_contents here to create all outputs after having
+   * validated all content specifications. This is more user-friendly. */
+  std::size_t total_number_of_requested_formats = 0;
+  for (std::size_t i = 0; i < output_contents.size(); ++i) {
     for (const auto &format : list_of_formats[i]) {
       create_output(format, output_contents[i], output_path, output_parameters);
       ++total_number_of_requested_formats;
@@ -1643,7 +1646,7 @@ Experiment<Modus>::Experiment(Configuration &config,
 
   // Create lattices
   if (config.has_value({"Lattice"})) {
-    bool automatic = config.take({"Lattice", "Automatic"}, false);
+    bool automatic = config.take(InputKeys::lattice_automatic);
     bool all_geometrical_properties_specified =
         config.has_value({"Lattice", "Cell_Number"}) &&
         config.has_value({"Lattice", "Origin"}) &&
@@ -1660,7 +1663,7 @@ Experiment<Modus>::Experiment(Configuration &config,
           "lattice geometrical properties were specified. In this case you\n"
           "need to set \"Automatic: False\".");
     }
-    bool periodic = config.take({"Lattice", "Periodic"}, modus_.is_box());
+    bool periodic = config.take(InputKeys::lattice_periodic, modus_.is_box());
     const auto [l, n, origin] = [&config, automatic, this]() {
       if (!automatic) {
         return std::make_tuple<std::array<double, 3>, std::array<int, 3>,
@@ -1714,9 +1717,9 @@ Experiment<Modus>::Experiment(Configuration &config,
         // Take lattice properties from config to assign them to all lattices
         return std::make_tuple<std::array<double, 3>, std::array<int, 3>,
                                std::array<double, 3>>(
-            config.take({"Lattice", "Sizes"}, l_default),
-            config.take({"Lattice", "Cell_Number"}, n_default),
-            config.take({"Lattice", "Origin"}, origin_default));
+            config.take(InputKeys::lattice_sizes, l_default),
+            config.take(InputKeys::lattice_cellNumber, n_default),
+            config.take(InputKeys::lattice_origin, origin_default));
       }
     }();
 

@@ -12,6 +12,7 @@
 #include <array>
 
 #include "smash/configuration.h"
+#include "smash/input_keys.h"
 #include "smash/stringfunctions.h"
 
 namespace smash {
@@ -111,8 +112,8 @@ inline typename std::enable_if<(index != 0)>::type create_all_loggers_impl(
   auto &logger = logg[LogAreaTag::id];
   const auto tmp = utf8::fill_both(LogAreaTag::textual(), longest_name);
   logger.setAreaName(tmp);
-  logger.setVerbosity(
-      config.take({LogAreaTag::textual()}, global_default_loglevel));
+  auto logging_key = InputKeys::get_logging_key(LogAreaTag::textual());
+  logger.setVerbosity(config.take(logging_key, global_default_loglevel));
   create_all_loggers_impl<index - 1, longest_name>(config);
 }
 

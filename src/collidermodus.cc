@@ -91,7 +91,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
 
   // Get the Fermi-Motion input (off, on, frozen)
   if (modus_cfg.has_value({"Fermi_Motion"})) {
-    fermi_motion_ = modus_cfg.take({"Fermi_Motion"}, FermiMotion::Off);
+    fermi_motion_ = modus_cfg.take(InputKeys::modi_collider_fermiMotion);
   }
 
   // Get the total nucleus-nucleus collision energy. Since there is
@@ -269,7 +269,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   /// \todo include a check that only one method of specifying impact is used
   // whether the direction of separation should be ramdomly smapled
   random_reaction_plane_ =
-      modus_cfg.take({"Impact", "Random_Reaction_Plane"}, false);
+      modus_cfg.take(InputKeys::modi_collider_impact_randomReactionPlane);
   // Look for user-defined initial separation between nuclei.
   if (modus_cfg.has_value({"Initial_Distance"})) {
     initial_z_displacement_ = modus_cfg.take({"Initial_Distance"});
@@ -278,8 +278,18 @@ ColliderModus::ColliderModus(Configuration modus_config,
     initial_z_displacement_ /= 2.0;
   }
 
-  FluidizationType IC_type = modus_cfg.take({"Initial_Conditions", "Type"},
-                                            FluidizationType::ConstantTau);
+  if (fermi_motion_ == FermiMotion::On) {
+    logg[LCollider].info() << "Fermi motion is ON.";
+  } else if (fermi_motion_ == FermiMotion::Frozen) {
+    logg[LCollider].info() << "FROZEN Fermi motion is on.";
+  } else if (fermi_motion_ == FermiMotion::Off) {
+    logg[LCollider].info() << "Fermi motion is OFF.";
+  }
+
+  FluidizationType IC_type = FluidizationType::ConstantTau;
+  if (modus_cfg.has_value(InputKeys::modi_collider_initialConditions_type)) {
+    IC_type = modus_cfg.take(InputKeys::modi_collider_initialConditions_type);
+  }
 
   if (IC_type == FluidizationType::ConstantTau) {
     if (modus_cfg.has_value({"Initial_Conditions", "Proper_Time"})) {

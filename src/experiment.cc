@@ -132,14 +132,14 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
 ExperimentParameters create_experiment_parameters(Configuration &config) {
   logg[LExperiment].trace() << SMASH_SOURCE_LOCATION;
 
-  const int ntest = config.take({"General", "Testparticles"}, 1);
+  const int ntest = config.take(InputKeys::gen_testparticles);
   if (ntest <= 0) {
     throw std::invalid_argument("Testparticle number should be positive!");
   }
 
   // sets whether to consider only participants in thermodynamic outputs or not
   const bool only_participants =
-      config.take({"Output", "Thermodynamics", "Only_Participants"}, false);
+      config.take(InputKeys::output_thermodynamics_onlyParticipants);
 
   if (only_participants && config.has_value({"Potentials"})) {
     throw std::invalid_argument(
@@ -163,7 +163,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   /* If this Delta_Time option is absent (this can be for timestepless mode)
    * just assign 1.0 fm, reasonable value will be set at event initialization
    */
-  const double dt = config.take({"General", "Delta_Time"}, 1.);
+  const double dt = config.take(InputKeys::gen_deltaTime);
   if (dt <= 0.) {
     throw std::invalid_argument("Delta_Time cannot be zero or negative.");
   }
@@ -193,7 +193,8 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     output_times.push_back(t_end + 1.);
     output_clock = std::make_unique<CustomClock>(output_times);
   } else {
-    const double output_dt = config.take({"Output", "Output_Interval"}, t_end);
+    const double output_dt =
+        config.take(InputKeys::output_outputInterval, t_end);
     if (output_dt <= 0.) {
       throw std::invalid_argument(
           "Output_Interval cannot be zero or negative.");
@@ -259,7 +260,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   /* Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded. */
   const double low_snn_cut =
-      config.take({"Collision_Term", "Elastic_NN_Cutoff_Sqrts"}, 1.98);
+      config.take(InputKeys::collTerm_elasticNNCutoffSqrts);
   const auto proton = ParticleType::try_find(pdg::p);
   const auto pion = ParticleType::try_find(pdg::pi_z);
   if (proton && pion &&
@@ -268,12 +269,10 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
                            " of the process: NN to NNpi");
   }
   const bool potential_affect_threshold =
-      config.take({"Lattice", "Potentials_Affect_Thresholds"}, false);
-  const double scale_xs =
-      config.take({"Collision_Term", "Cross_Section_Scaling"}, 1.0);
+      config.take(InputKeys::lattice_potentialsAffectThreshold);
+  const double scale_xs = config.take(InputKeys::collTerm_crossSectionScaling);
 
-  const auto criterion = config.take({"Collision_Term", "Collision_Criterion"},
-                                     CollisionCriterion::Covariant);
+  const auto criterion = config.take(InputKeys::collTerm_collisionCriterion);
 
   if (config.has_value({"Collision_Term", "Fixed_Min_Cell_Length"}) &&
       criterion != CollisionCriterion::Stochastic) {
@@ -301,50 +300,41 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   const double maximum_cross_section_default =
       ParticleType::exists("d'") ? 2000.0 : 200.0;
 
-  double maximum_cross_section =
-      config.take({"Collision_Term", "Maximum_Cross_Section"},
-                  maximum_cross_section_default);
+  double maximum_cross_section = config.take(
+      InputKeys::collTerm_maximumCrossSection, maximum_cross_section_default);
   maximum_cross_section *= scale_xs;
-  return {
-      std::make_unique<UniformClock>(0.0, dt, t_end),
-      std::move(output_clock),
-      config.take({"General", "Ensembles"}, 1),
-      ntest,
-      config.take({"General", "Derivatives_Mode"},
-                  DerivativesMode::CovariantGaussian),
-      config.has_value({"Potentials", "VDF"})
-          ? RestFrameDensityDerivativesMode::On
-          : RestFrameDensityDerivativesMode::Off,
-      config.take({"General", "Field_Derivatives_Mode"},
-                  FieldDerivativesMode::ChainRule),
-      config.take({"General", "Smearing_Mode"},
-                  SmearingMode::CovariantGaussian),
-      config.take({"General", "Gaussian_Sigma"}, 1.),
-      config.take({"General", "Gauss_Cutoff_In_Sigma"}, 4.),
-      config.take({"General", "Discrete_Weight"}, 1. / 3.0),
-      config.take({"General", "Triangular_Range"}, 2.0),
-      criterion,
-      config.take({"Collision_Term", "Two_to_One"}, true),
-      config.take({"Collision_Term", "Included_2to2"}, ReactionsBitSet().set()),
-      config.take({"Collision_Term", "Multi_Particle_Reactions"},
-                  MultiParticleReactionsBitSet().reset()),
-      config.take({"Collision_Term", "Strings"}, modus_chooser != "Box"),
-      config.take({"Collision_Term", "Resonance_Lifetime_Modifier"}, 1.),
-      config.take({"Collision_Term", "NNbar_Treatment"},
-                  NNbarTreatment::Strings),
-      low_snn_cut,
-      potential_affect_threshold,
-      box_length,
-      maximum_cross_section,
-      config.take({"Collision_Term", "Fixed_Min_Cell_Length"}, 2.5),
-      scale_xs,
-      only_participants,
-      config.take({"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
-                  false),
-      config.take({"Collision_Term", "Decay_Initial_Particles"},
-                  InputKeys::collTerm_decayInitial.default_value()),
-      config.take({"Collision_Term", "Spin_Interactions"}, false),
-      std::nullopt};
+  return {std::make_unique<UniformClock>(0.0, dt, t_end),
+          std::move(output_clock),
+          config.take(InputKeys::gen_ensembles),
+          ntest,
+          config.take(InputKeys::gen_derivativesMode),
+          config.has_value({"Potentials", "VDF"})
+              ? RestFrameDensityDerivativesMode::On
+              : RestFrameDensityDerivativesMode::Off,
+          config.take(InputKeys::gen_fieldDerivativesMode),
+          config.take(InputKeys::gen_smearingMode),
+          config.take(InputKeys::gen_smearingGaussianSigma),
+          config.take(InputKeys::gen_smearingGaussCutoffInSigma),
+          config.take(InputKeys::gen_smearingDiscreteWeight),
+          config.take(InputKeys::gen_smearingTriangularRange),
+          criterion,
+          config.take(InputKeys::collTerm_twoToOne),
+          config.take(InputKeys::collTerm_includedTwoToTwo),
+          config.take(InputKeys::collTerm_multiParticleReactions),
+          config.take(InputKeys::collTerm_strings, modus_chooser != "Box"),
+          config.take(InputKeys::collTerm_resonanceLifetimeModifier),
+          config.take(InputKeys::collTerm_nnbarTreatment),
+          low_snn_cut,
+          potential_affect_threshold,
+          box_length,
+          maximum_cross_section,
+          config.take(InputKeys::collTerm_fixedMinCellLength),
+          scale_xs,
+          only_participants,
+          config.take(InputKeys::collTerm_includeDecaysAtTheEnd),
+          config.take(InputKeys::collTerm_decayInitial),
+          config.take(InputKeys::collTerm_spinInteractions),
+          std::nullopt};
 }
 
 std::string format_measurements(const std::vector<Particles> &ensembles,

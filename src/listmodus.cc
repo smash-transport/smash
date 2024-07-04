@@ -39,33 +39,45 @@ ListModus::ListModus(Configuration modus_config,
                      const ExperimentParameters &param)
     : file_id_{std::nullopt}, event_id_{0} {
   /*
-   * Extract the only expected section of the configuration to make this
-   * constructor work also for children classes. These do the same but have a
-   * different section name (like for instance 'ListBox' instead of 'List')
+   * Make some logic on config to understand whether to extract parent or
+   * children keys. These have all the same keys but have a different section
+   * name (like for instance 'ListBox' instead of 'List'). At the moment there
+   * is only one child and this approach is fine enough, although ugly.
    */
-  const auto config_sections = modus_config.list_upmost_nodes();
-  assert(config_sections.size() == 1);
-  auto plain_config =
-      modus_config.extract_sub_configuration({config_sections[0].c_str()});
+  const bool is_list =
+      modus_config.has_value(InputKeys::modi_list_fileDirectory);
+  const bool is_list_box =
+      modus_config.has_value(InputKeys::modi_listBox_fileDirectory);
+  if (is_list == is_list_box) {
+    throw std::logic_error(
+        "Unexpected error in ListModus constructor. Either List or ListBox "
+        "sections must be present in configuration.");
+  }
+  Key<std::string> file_prefix_key = InputKeys::modi_list_filePrefix,
+                   file_directory_key = InputKeys::modi_list_fileDirectory,
+                   filename_key = InputKeys::modi_list_filename;
+  Key<int> shift_id_key = InputKeys::modi_list_shiftId;
+  if (is_list_box) {
+    file_prefix_key = InputKeys::modi_listBox_filePrefix;
+    file_directory_key = InputKeys::modi_listBox_fileDirectory;
+    filename_key = InputKeys::modi_listBox_filename;
+    shift_id_key = InputKeys::modi_listBox_shiftId;
+  }
   // Impose strict requirement on possible keys present in configuration file
-  bool file_prefix_used = plain_config.has_value({"File_Prefix"});
-  bool filename_used = plain_config.has_value({"Filename"});
+  const bool file_prefix_used = modus_config.has_value(file_prefix_key);
+  const bool filename_used = modus_config.has_value(filename_key);
   if (file_prefix_used == filename_used) {
     throw std::invalid_argument(
-        "Either 'Filename' or 'File_Prefix' key must be used in 'List' section "
+        "Either 'Filename' or 'File_Prefix' key must be used in 'Modi' section "
         "in configuration file. Please, adjust your configuration file.");
   }
-  std::string key_to_take = "Filename";
   if (file_prefix_used) {
-    key_to_take = "File_Prefix";
-    file_id_ = plain_config.take({"Shift_Id"}, 0);
+    particle_list_filename_or_prefix_ = modus_config.take(file_prefix_key);
+    file_id_ = modus_config.take(shift_id_key);
+  } else {
+    particle_list_filename_or_prefix_ = modus_config.take(filename_key);
   }
-  particle_list_filename_or_prefix_ =
-      plain_config.take({key_to_take.c_str()})
-          .convert_for(particle_list_filename_or_prefix_);
-  particle_list_file_directory_ =
-      plain_config.take({"File_Directory"})
-          .convert_for(particle_list_file_directory_);
+  particle_list_file_directory_ = modus_config.take(file_directory_key);
   if (param.n_ensembles > 1) {
     throw std::runtime_error("ListModus only makes sense with one ensemble");
   }

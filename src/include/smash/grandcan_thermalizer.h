@@ -17,6 +17,7 @@
 #include "distributions.h"
 #include "forwarddeclarations.h"
 #include "hadgas_eos.h"
+#include "input_keys.h"
 #include "lattice.h"
 #include "particledata.h"
 #include "quantumnumbers.h"
@@ -216,8 +217,8 @@ class GrandCanThermalizer {
             lat_sizes, conf.take({"Cell_Number"}), origin, periodicity,
             conf.take({"Critical_Edens"}), conf.take({"Start_Time"}),
             conf.take({"Timestep"}),
-            conf.take({"Algorithm"}, ThermalizationAlgorithm::BiasedBF),
-            conf.take({"Microcanonical"}, false)) {}
+            conf.take(InputKeys::forcedThermalization_algorithm),
+            conf.take(InputKeys::forcedThermalization_microcanonical)) {}
   /**
    * Check that the clock is close to n * period of thermalization, since
    * the thermalization only happens at these times

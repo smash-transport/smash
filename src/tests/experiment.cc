@@ -121,6 +121,36 @@ TEST_CATCH(create_experiment_with_invalid_output_interval,
   Test::experiment(std::move(config));
 }
 
+TEST_CATCH(create_experiment_with_empty_format, std::invalid_argument) {
+  auto config = get_collider_configuration();
+  config.merge_yaml(R"(
+    Output:
+      Particles:
+        Format: []
+  )");
+  Test::experiment(std::move(config));
+}
+
+TEST_CATCH(create_experiment_with_missing_format, std::invalid_argument) {
+  auto config = get_collider_configuration();
+  config.merge_yaml(R"(
+    Output:
+      Particles:
+        Only_Final: "Yes"
+  )");
+  Test::experiment(std::move(config));
+}
+
+TEST_CATCH(create_experiment_with_wrong_format_content, std::invalid_argument) {
+  auto config = get_collider_configuration();
+  config.merge_yaml(R"(
+    Output:
+      Not_existing_content:
+        Format: ["Oscar2013"]
+  )");
+  Test::experiment(std::move(config));
+}
+
 TEST_CATCH(run_experiment_beyond_end_time, std::logic_error) {
   auto config = get_collider_configuration();
   auto exp = std::make_unique<Experiment<ColliderModus>>(config, ".");

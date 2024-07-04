@@ -104,8 +104,7 @@ static void fully_validate_configuration(const Configuration &configuration) {
 }
 
 static void setup_logging(Configuration &configuration) {
-  set_default_loglevel(
-      configuration.take({"Logging", "default"}, einhard::ALL));
+  set_default_loglevel(configuration.take(InputKeys::log_default));
   create_all_loggers(configuration.extract_sub_configuration(
       {"Logging"}, Configuration::GetEmpty::Yes));
 }

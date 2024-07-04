@@ -97,46 +97,45 @@ struct OutputParameters {
       td_tmn_landau = (quan.count(ThermodynamicQuantity::TmnLandau) > 0);
       td_v_landau = (quan.count(ThermodynamicQuantity::LandauVelocity) > 0);
       td_jQBS = (quan.count(ThermodynamicQuantity::j_QBS) > 0);
-      td_dens_type = thermo_conf.take({"Type"}, DensityType::Baryon);
+      td_dens_type = thermo_conf.take(InputKeys::output_thermodynamics_type);
       if (td_dens_type == DensityType::None &&
           (td_rho_eckart || td_tmn || td_tmn_landau || td_v_landau)) {
         logg[LExperiment].warn(
             "Requested Thermodynamics output with Density type None. ",
             "Change the density type to avoid output being dropped.");
       }
-      td_smearing = thermo_conf.take({"Smearing"}, true);
-      td_only_participants = thermo_conf.take({"Only_Participants"}, false);
+      td_smearing = thermo_conf.take(InputKeys::output_thermodynamics_smearing);
+      td_only_participants =
+          thermo_conf.take(InputKeys::output_thermodynamics_onlyParticipants);
     }
 
     if (conf.has_value({"Particles"})) {
-      part_extended = conf.take({"Particles", "Extended"}, false);
-      part_only_final =
-          conf.take({"Particles", "Only_Final"}, OutputOnlyFinal::Yes);
-      auto part_quantities =
-          conf.take({"Particles", "Quantities"},
-                    InputKeys::output_particles_quantities.default_value());
+      part_extended = conf.take(InputKeys::output_particles_extended);
+      part_only_final = conf.take(InputKeys::output_particles_onlyFinal);
+      const auto part_quantities =
+          conf.take(InputKeys::output_particles_quantities);
       quantities.insert({"Particles", part_quantities});
     }
 
     if (conf.has_value({"Collisions"})) {
-      coll_extended = conf.take({"Collisions", "Extended"}, false);
-      coll_printstartend = conf.take({"Collisions", "Print_Start_End"}, false);
-      auto coll_quantities =
-          conf.take({"Collisions", "Quantities"},
-                    InputKeys::output_collisions_quantities.default_value());
+      coll_extended = conf.take(InputKeys::output_collisions_extended);
+      coll_printstartend =
+          conf.take(InputKeys::output_collisions_printStartEnd);
+      const auto coll_quantities =
+          conf.take(InputKeys::output_collisions_quantities);
       quantities.insert({"Collisions", coll_quantities});
     }
 
     if (conf.has_value({"Dileptons"})) {
-      dil_extended = conf.take({"Dileptons", "Extended"}, false);
+      dil_extended = conf.take(InputKeys::output_dileptons_extended);
     }
 
     if (conf.has_value({"Photons"})) {
-      photons_extended = conf.take({"Photons", "Extended"}, false);
+      photons_extended = conf.take(InputKeys::output_photons_extended);
     }
 
     if (conf.has_value({"Initial_Conditions"})) {
-      ic_extended = conf.take({"Initial_Conditions", "Extended"}, false);
+      ic_extended = conf.take(InputKeys::output_initialConditions_extended);
     }
 
     if (conf.has_value({"Rivet"})) {
@@ -180,7 +179,8 @@ struct OutputParameters {
         rivet_parameters.cross_sections = make_optional<std::array<double, 2>>(
             rivet_conf.take({"Cross_Section"}));
       }
-      rivet_parameters.ignore_beams = rivet_conf.take({"Ignore_Beams"}, true);
+      rivet_parameters.ignore_beams =
+          rivet_conf.take(InputKeys::output_rivet_ignoreBeams);
       if (rivet_conf.has_value({"Weights"})) {
         rivet_parameters.any_weight_parameter_was_given = true;
         if (rivet_conf.has_value({"Weights", "Select"})) {

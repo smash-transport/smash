@@ -15,6 +15,7 @@
 #include "smash/angles.h"
 #include "smash/constants.h"
 #include "smash/fourvector.h"
+#include "smash/input_keys.h"
 #include "smash/logging.h"
 #include "smash/numerics.h"
 #include "smash/particles.h"
@@ -348,43 +349,35 @@ void Nucleus::set_parameters_from_config(Configuration &config) {
 }
 
 void Nucleus::set_orientation_from_config(Configuration &orientation_config) {
-  // Read in orientation if provided, otherwise, the defaults are
-  // phi = 0, theta = 0, psi = 0
-  if (orientation_config.has_value({"Theta"})) {
-    if (orientation_config.has_value({"Random_Rotation"}) &&
-        orientation_config.take({"Random_Rotation"})) {
-      throw std::domain_error(
-          "Random rotation of nuclei is activated although"
-          " theta is provided. Please specify only either of them. ");
-    } else {
-      euler_theta_ = orientation_config.take({"Theta"});
-    }
-  }
+  /* Here it does not matter whether it is a projectile or a target nucleus,
+  just use one of the two keys to take the information about the random rotation
+  (and analogously for the other keys) dropping the first section labels.*/
+  const auto &rotation_key =
+      InputKeys::modi_collider_projectile_deformed_orientation_randomRotation
+          .drop_top_label(5);
+  random_rotation_ = orientation_config.take(rotation_key);
 
-  if (orientation_config.has_value({"Phi"})) {
-    if (orientation_config.has_value({"Random_Rotation"}) &&
-        orientation_config.take({"Random_Rotation"})) {
-      throw std::domain_error(
-          "Random rotation of nuclei is activated although"
-          " phi is provided. Please specify only either of them. ");
-    } else {
-      euler_phi_ = orientation_config.take({"Phi"});
-    }
-  }
-
-  if (orientation_config.has_value({"Psi"})) {
-    if (orientation_config.has_value({"Random_Rotation"}) &&
-        orientation_config.take({"Random_Rotation"})) {
-      throw std::domain_error(
-          "Random rotation of nuclei is activated although"
-          " psi is provided. Please specify only either of them. ");
-    } else {
-      euler_psi_ = orientation_config.take({"Psi"});
-    }
-  }
-
-  if (orientation_config.take({"Random_Rotation"}, false)) {
-    random_rotation_ = true;
+  // Read in orientation if provided and do needed logical checks
+  const auto &theta_key =
+                 InputKeys::modi_collider_projectile_deformed_orientation_theta
+                     .drop_top_label(5),
+             &phi_key =
+                 InputKeys::modi_collider_projectile_deformed_orientation_phi
+                     .drop_top_label(5),
+             &psi_key =
+                 InputKeys::modi_collider_projectile_deformed_orientation_psi
+                     .drop_top_label(5);
+  const bool was_any_angle_provided = orientation_config.has_value(theta_key) ||
+                                      orientation_config.has_value(phi_key) ||
+                                      orientation_config.has_value(psi_key);
+  if (random_rotation_ && was_any_angle_provided) {
+    throw std::domain_error(
+        "The random rotation of nuclei has been requested, but some specific "
+        "rotation angle is provided, too. Please specify only either of them.");
+  } else {
+    euler_theta_ = orientation_config.take(theta_key);
+    euler_phi_ = orientation_config.take(phi_key);
+    euler_psi_ = orientation_config.take(psi_key);
   }
 }
 
