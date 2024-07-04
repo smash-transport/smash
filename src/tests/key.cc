@@ -150,6 +150,10 @@ TEST(drop_top_level) {
   const auto key_2 = key_1.drop_top_label();
   COMPARE(key_2.labels().size(), 1);
   COMPARE(key_2.labels()[0], "Key");
+  const auto key_3 = Key<int>{{"Test", "Key", "With", "Many", "XXX"}, {"1.0"}};
+  const auto key_4 = key_3.drop_top_label(4);
+  COMPARE(key_4.labels().size(), 1);
+  COMPARE(key_4.labels()[0], "XXX");
 }
 
 /*

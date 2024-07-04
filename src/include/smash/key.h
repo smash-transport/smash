@@ -264,9 +264,10 @@ class Key {
    *
    * \return Key<default_type> identical to \c *this but with different labels.
    */
-  Key<default_type> drop_top_label() const {
+  Key<default_type> drop_top_label(size_t how_many_times = 1) const {
     Key<default_type> new_key(*this);
-    new_key.labels_.erase(new_key.labels_.begin());
+    new_key.labels_.erase(new_key.labels_.begin(),
+                          new_key.labels_.begin() + how_many_times);
     return new_key;
   }
 
