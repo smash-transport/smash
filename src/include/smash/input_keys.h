@@ -98,26 +98,32 @@ struct InputSections {
   /// Subsection for the projectile in collider modus
   inline static const Section m_c_projectile =
       InputSections::m_collider + "Projectile";
+  /// Subsection for the alpha-clustered projectile in collider modus
+  inline static const Section m_c_p_alphaClustered =
+      InputSections::m_c_projectile + "Alpha_Clustered";
   /// Subsection for the custom projectile in collider modus
   inline static const Section m_c_p_custom =
       InputSections::m_c_projectile + "Custom";
   /// Subsection for the deformed projectile in collider modus
   inline static const Section m_c_p_deformed =
       InputSections::m_c_projectile + "Deformed";
-  /// Subsection for the deformed projectile orientation in collider modus
-  inline static const Section m_c_p_d_orientation =
-      InputSections::m_c_p_deformed + "Orientation";
+  /// Subsection for the projectile orientation in collider modus
+  inline static const Section m_c_p_orientation =
+      InputSections::m_c_projectile + "Orientation";
   /// Subsection for the target in collider modus
   inline static const Section m_c_target = InputSections::m_collider + "Target";
+  /// Subsection for the alpha-clustered target in collider modus
+  inline static const Section m_c_t_alphaClustered =
+      InputSections::m_c_target + "Alpha_Clustered";
   /// Subsection for the custom target in collider modus
   inline static const Section m_c_t_custom =
       InputSections::m_c_target + "Custom";
   /// Subsection for the deformed target in collider modus
   inline static const Section m_c_t_deformed =
       InputSections::m_c_target + "Deformed";
-  /// Subsection for the deformed target orientation in collider modus
-  inline static const Section m_c_t_d_orientation =
-      InputSections::m_c_t_deformed + "Orientation";
+  /// Subsection for the target orientation in collider modus
+  inline static const Section m_c_t_orientation =
+      InputSections::m_c_target + "Orientation";
   /// Subsection for the list modus
   inline static const Section m_list = InputSections::modi + "List";
   /// Subsection for the list-box modus
@@ -952,9 +958,13 @@ struct InputSections {
  * @remark Each input key exists as static constant member and a reference to it
  *         is stored in the InputKeys::list container. Therefore, the following
  *         steps are needed in order to add a new key.
- *         -# Add a new member being consistent with the existing notation.
- *            Use \c _ to separate YAML sections in the variable name and use
- *            a name that reflects sections. A double underscore in C++ is
+ *         -# Add a new member being consistent with the existing notation. If
+ *            the new key belongs to a new section, you need to first create a
+ *            new member in InputSections staying consistent with the existing
+ *            notation there, too. Otherwise, find out the InputSections member
+ *            to which the new key belongs and use it in its initialisation.
+ *            Use \c _ to separate YAML sections in the new variable name and
+ *            use a name that reflects sections. A double underscore in C++ is
  *            reserved and should not be used in identifiers; hence it must not
  *            be used to separate sections. If any label consists of more than
  *            one word, use lowerCamelCase convention, although this violates
@@ -1029,8 +1039,8 @@ struct InputKeys {
   /**
    * \see_key{key_gen_end_time_}
    */
-  inline static const Key<double> gen_endTime{{"General", "End_Time"},
-                                              {"0.50"}};
+  inline static const Key<double> gen_endTime{
+      InputSections::general + "End_Time", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1055,8 +1065,8 @@ struct InputKeys {
   /**
    * \see_key{key_gen_modus_}
    */
-  inline static const Key<std::string> gen_modus{{"General", "Modus"},
-                                                 {"0.50"}};
+  inline static const Key<std::string> gen_modus{
+      InputSections::general + "Modus", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1071,7 +1081,8 @@ struct InputKeys {
   /**
    * \see_key{key_gen_nevents_}
    */
-  inline static const Key<int> gen_nevents{{"General", "Nevents"}, {"0.50"}};
+  inline static const Key<int> gen_nevents{InputSections::general + "Nevents",
+                                           {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1083,8 +1094,8 @@ struct InputKeys {
   /**
    * \see_key{key_gen_randomseed_}
    */
-  inline static const Key<int64_t> gen_randomseed{{"General", "Randomseed"},
-                                                  {"0.50"}};
+  inline static const Key<int64_t> gen_randomseed{
+      InputSections::general + "Randomseed", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general_mne
@@ -1097,8 +1108,7 @@ struct InputKeys {
    * \see_key{key_gen_mnee_maximum_ensembles_}
    */
   inline static const Key<int> gen_minNonEmptyEnsembles_maximumEnsembles{
-      {"General", "Minimum_Nonempty_Ensembles", "Maximum_Ensembles_Run"},
-      {"2.2"}};
+      InputSections::g_minEnsembles + "Maximum_Ensembles_Run", {"2.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general_mne
@@ -1110,7 +1120,7 @@ struct InputKeys {
    * \see_key{key_gen_mnee_number_}
    */
   inline static const Key<int> gen_minNonEmptyEnsembles_number{
-      {"General", "Minimum_Nonempty_Ensembles", "Number"}, {"1.3"}};
+      InputSections::g_minEnsembles + "Number", {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1141,7 +1151,7 @@ struct InputKeys {
    * \see_key{key_gen_delta_time_}
    */
   inline static const Key<double> gen_deltaTime{
-      {"General", "Delta_Time"}, 1.0, {"0.50"}};
+      InputSections::general + "Delta_Time", 1.0, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1164,7 +1174,7 @@ struct InputKeys {
    * \see_key{key_gen_derivatives_mode_}
    */
   inline static const Key<DerivativesMode> gen_derivativesMode{
-      {"General", "Derivatives_Mode"},
+      InputSections::general + "Derivatives_Mode",
       DerivativesMode::CovariantGaussian,
       {"2.1"}};
 
@@ -1181,7 +1191,7 @@ struct InputKeys {
    * \see_key{key_gen_discrete_weight_}
    */
   inline static const Key<double> gen_smearingDiscreteWeight{
-      {"General", "Discrete_Weight"}, 1. / 3, {"2.1"}};
+      InputSections::general + "Discrete_Weight", 1. / 3, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1211,7 +1221,7 @@ struct InputKeys {
    * \see_key{key_gen_ensembles_}
    */
   inline static const Key<int> gen_ensembles{
-      {"General", "Ensembles"}, 1, {"2.1"}};
+      InputSections::general + "Ensembles", 1, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1229,7 +1239,7 @@ struct InputKeys {
    * \see_key{key_gen_expansion_rate_}
    */
   inline static const Key<double> gen_expansionRate{
-      {"General", "Expansion_Rate"}, 0.1, {"1.1"}};
+      InputSections::general + "Expansion_Rate", 0.1, {"1.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1258,7 +1268,7 @@ struct InputKeys {
    * \see_key{key_gen_derivatives_mode_}
    */
   inline static const Key<FieldDerivativesMode> gen_fieldDerivativesMode{
-      {"General", "Field_Derivatives_Mode"},
+      InputSections::general + "Field_Derivatives_Mode",
       FieldDerivativesMode::ChainRule,
       {"2.1"}};
 
@@ -1273,7 +1283,7 @@ struct InputKeys {
    * \see_key{key_gen_gauss_cutoff_in_sigma_}
    */
   inline static const Key<double> gen_smearingGaussCutoffInSigma{
-      {"General", "Gauss_Cutoff_In_Sigma"}, 4.0, {"0.80"}};
+      InputSections::general + "Gauss_Cutoff_In_Sigma", 4.0, {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1286,7 +1296,7 @@ struct InputKeys {
    * \see_key{key_gen_gaussian_sigma_}
    */
   inline static const Key<double> gen_smearingGaussianSigma{
-      {"General", "Gaussian_Sigma"}, 1.0, {"0.60"}};
+      InputSections::general + "Gaussian_Sigma", 1.0, {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1303,7 +1313,9 @@ struct InputKeys {
    * \see_key{key_gen_metric_type_}
    */
   inline static const Key<ExpansionMode> gen_metricType{
-      {"General", "Metric_Type"}, ExpansionMode::NoExpansion, {"1.1"}};
+      InputSections::general + "Metric_Type",
+      ExpansionMode::NoExpansion,
+      {"1.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1318,7 +1330,7 @@ struct InputKeys {
    */
   inline static const Key<RestFrameDensityDerivativesMode>
       gen_restFrameDensityDerivativeMode{
-          {"General", "Rest_Frame_Density_Derivatives_Mode"},
+          InputSections::general + "Rest_Frame_Density_Derivatives_Mode",
           RestFrameDensityDerivativesMode::Off,
           {"2.1"}};
 
@@ -1377,7 +1389,9 @@ struct InputKeys {
    * \see_key{key_gen_smearing_mode_}
    */
   inline static const Key<SmearingMode> gen_smearingMode{
-      {"General", "Smearing_Mode"}, SmearingMode::CovariantGaussian, {"2.1"}};
+      InputSections::general + "Smearing_Mode",
+      SmearingMode::CovariantGaussian,
+      {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1407,7 +1421,7 @@ struct InputKeys {
    * \see_key{key_gen_testparticles_}
    */
   inline static const Key<int> gen_testparticles{
-      {"General", "Testparticles"}, 1, {"0.50"}};
+      InputSections::general + "Testparticles", 1, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1431,7 +1445,7 @@ struct InputKeys {
    * \see_key{key_gen_time_step_mode_}
    */
   inline static const Key<TimeStepMode> gen_timeStepMode{
-      {"General", "Time_Step_Mode"}, TimeStepMode::Fixed, {"0.85"}};
+      InputSections::general + "Time_Step_Mode", TimeStepMode::Fixed, {"0.85"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1444,7 +1458,7 @@ struct InputKeys {
    * \see_key{key_gen_triangular_range_}
    */
   inline static const Key<double> gen_smearingTriangularRange{
-      {"General", "Triangular_Range"}, 2.0, {"2.1"}};
+      InputSections::general + "Triangular_Range", 2.0, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1458,7 +1472,7 @@ struct InputKeys {
    * \see_key{key_gen_use_grid_}
    */
   inline static const Key<bool> gen_useGrid{
-      {"General", "Use_Grid"}, true, {"0.80"}};
+      InputSections::general + "Use_Grid", true, {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1473,7 +1487,7 @@ struct InputKeys {
    * \see_key{key_log_default_}
    */
   inline static const Key<einhard::LogLevel> log_default{
-      {"Logging", "default"}, einhard::ALL, {"0.50"}};
+      InputSections::logging + "default", einhard::ALL, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1488,7 +1502,7 @@ struct InputKeys {
    * \see_key{key_log_box_}
    */
   inline static const Key<einhard::LogLevel> log_box{
-      {"Logging", "Box"}, DefaultType::Dependent, {"0.30"}};
+      InputSections::logging + "Box", DefaultType::Dependent, {"0.30"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1500,7 +1514,7 @@ struct InputKeys {
    * \see_key{key_log_collider_}
    */
   inline static const Key<einhard::LogLevel> log_collider{
-      {"Logging", "Collider"}, DefaultType::Dependent, {"0.30"}};
+      InputSections::logging + "Collider", DefaultType::Dependent, {"0.30"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1512,7 +1526,9 @@ struct InputKeys {
    * \see_key{key_log_configuration_}
    */
   inline static const Key<einhard::LogLevel> log_yamlConfiguration{
-      {"Logging", "Configuration"}, DefaultType::Dependent, {"3.0"}};
+      InputSections::logging + "Configuration",
+      DefaultType::Dependent,
+      {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1524,7 +1540,7 @@ struct InputKeys {
    * \see_key{key_log_experiment_}
    */
   inline static const Key<einhard::LogLevel> log_experiment{
-      {"Logging", "Experiment"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Experiment", DefaultType::Dependent, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1536,7 +1552,9 @@ struct InputKeys {
    * \see_key{key_log_grandcan_thermalizer_}
    */
   inline static const Key<einhard::LogLevel> log_grandcanThermalizer{
-      {"Logging", "GrandcanThermalizer"}, DefaultType::Dependent, {"1.2"}};
+      InputSections::logging + "GrandcanThermalizer",
+      DefaultType::Dependent,
+      {"1.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1548,7 +1566,9 @@ struct InputKeys {
    * \see_key{key_log_initial_conditions_}
    */
   inline static const Key<einhard::LogLevel> log_initialConditions{
-      {"Logging", "InitialConditions"}, DefaultType::Dependent, {"1.8"}};
+      InputSections::logging + "InitialConditions",
+      DefaultType::Dependent,
+      {"1.8"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1560,7 +1580,7 @@ struct InputKeys {
    * \see_key{key_log_list_}
    */
   inline static const Key<einhard::LogLevel> log_list{
-      {"Logging", "List"}, DefaultType::Dependent, {"0.60"}};
+      InputSections::logging + "List", DefaultType::Dependent, {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1572,7 +1592,7 @@ struct InputKeys {
    * \see_key{key_log_main_}
    */
   inline static const Key<einhard::LogLevel> log_main{
-      {"Logging", "Main"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Main", DefaultType::Dependent, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1584,7 +1604,7 @@ struct InputKeys {
    * \see_key{key_log_output_}
    */
   inline static const Key<einhard::LogLevel> log_output{
-      {"Logging", "Output"}, DefaultType::Dependent, {"0.60"}};
+      InputSections::logging + "Output", DefaultType::Dependent, {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1596,7 +1616,7 @@ struct InputKeys {
    * \see_key{key_log_potentials_}
    */
   inline static const Key<einhard::LogLevel> log_potentials{
-      {"Logging", "Potentials"}, DefaultType::Dependent, {"3.1"}};
+      InputSections::logging + "Potentials", DefaultType::Dependent, {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1608,7 +1628,7 @@ struct InputKeys {
    * \see_key{key_log_rootsolver_}
    */
   inline static const Key<einhard::LogLevel> log_rootsolver{
-      {"Logging", "RootSolver"}, DefaultType::Dependent, {"3.1"}};
+      InputSections::logging + "RootSolver", DefaultType::Dependent, {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1620,7 +1640,7 @@ struct InputKeys {
    * \see_key{key_log_sphere_}
    */
   inline static const Key<einhard::LogLevel> log_sphere{
-      {"Logging", "Sphere"}, DefaultType::Dependent, {"0.30"}};
+      InputSections::logging + "Sphere", DefaultType::Dependent, {"0.30"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1635,7 +1655,7 @@ struct InputKeys {
    * \see_key{key_log_action_}
    */
   inline static const Key<einhard::LogLevel> log_action{
-      {"Logging", "Action"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Action", DefaultType::Dependent, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1647,7 +1667,7 @@ struct InputKeys {
    * \see_key{key_log_clock_}
    */
   inline static const Key<einhard::LogLevel> log_clock{
-      {"Logging", "Clock"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Clock", DefaultType::Dependent, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1659,7 +1679,9 @@ struct InputKeys {
    * \see_key{key_log_cross_sections_}
    */
   inline static const Key<einhard::LogLevel> log_crossSections{
-      {"Logging", "CrossSections"}, DefaultType::Dependent, {"1.3"}};
+      InputSections::logging + "CrossSections",
+      DefaultType::Dependent,
+      {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1671,7 +1693,7 @@ struct InputKeys {
    * \see_key{key_log_decay_modes_}
    */
   inline static const Key<einhard::LogLevel> log_decayModes{
-      {"Logging", "DecayModes"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "DecayModes", DefaultType::Dependent, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1683,7 +1705,7 @@ struct InputKeys {
    * \see_key{key_log_density_}
    */
   inline static const Key<einhard::LogLevel> log_density{
-      {"Logging", "Density"}, DefaultType::Dependent, {"0.60"}};
+      InputSections::logging + "Density", DefaultType::Dependent, {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1695,7 +1717,9 @@ struct InputKeys {
    * \see_key{key_log_distributions_}
    */
   inline static const Key<einhard::LogLevel> log_distributions{
-      {"Logging", "Distributions"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Distributions",
+      DefaultType::Dependent,
+      {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1707,7 +1731,7 @@ struct InputKeys {
    * \see_key{key_log_find_scatter_}
    */
   inline static const Key<einhard::LogLevel> log_findScatter{
-      {"Logging", "FindScatter"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "FindScatter", DefaultType::Dependent, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1719,7 +1743,7 @@ struct InputKeys {
    * \see_key{key_log_fpe_}
    */
   inline static const Key<einhard::LogLevel> log_fpe{
-      {"Logging", "Fpe"}, DefaultType::Dependent, {"0.80"}};
+      InputSections::logging + "Fpe", DefaultType::Dependent, {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1731,7 +1755,7 @@ struct InputKeys {
    * \see_key{key_log_grid_}
    */
   inline static const Key<einhard::LogLevel> log_grid{
-      {"Logging", "Grid"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Grid", DefaultType::Dependent, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1743,7 +1767,9 @@ struct InputKeys {
    * \see_key{key_log_hyper_surface_crossing_}
    */
   inline static const Key<einhard::LogLevel> log_hyperSurfaceCrossing{
-      {"Logging", "HyperSurfaceCrossing"}, DefaultType::Dependent, {"1.7"}};
+      InputSections::logging + "HyperSurfaceCrossing",
+      DefaultType::Dependent,
+      {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1755,7 +1781,7 @@ struct InputKeys {
    * \see_key{key_log_input_parser_}
    */
   inline static const Key<einhard::LogLevel> log_inputParser{
-      {"Logging", "InputParser"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "InputParser", DefaultType::Dependent, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1767,7 +1793,7 @@ struct InputKeys {
    * \see_key{key_log_lattice_}
    */
   inline static const Key<einhard::LogLevel> log_lattice{
-      {"Logging", "Lattice"}, DefaultType::Dependent, {"0.80"}};
+      InputSections::logging + "Lattice", DefaultType::Dependent, {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1779,7 +1805,7 @@ struct InputKeys {
    * \see_key{key_log_nucleus_}
    */
   inline static const Key<einhard::LogLevel> log_nucleus{
-      {"Logging", "Nucleus"}, DefaultType::Dependent, {"0.30"}};
+      InputSections::logging + "Nucleus", DefaultType::Dependent, {"0.30"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1791,7 +1817,9 @@ struct InputKeys {
    * \see_key{key_log_particle_type_}
    */
   inline static const Key<einhard::LogLevel> log_particleType{
-      {"Logging", "ParticleType"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "ParticleType",
+      DefaultType::Dependent,
+      {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1803,7 +1831,9 @@ struct InputKeys {
    * \see_key{key_log_pauli_blocking_}
    */
   inline static const Key<einhard::LogLevel> log_pauliBlocking{
-      {"Logging", "PauliBlocking"}, DefaultType::Dependent, {"0.7.1"}};
+      InputSections::logging + "PauliBlocking",
+      DefaultType::Dependent,
+      {"0.7.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1815,7 +1845,9 @@ struct InputKeys {
    * \see_key{key_log_propagation_}
    */
   inline static const Key<einhard::LogLevel> log_propagation{
-      {"Logging", "Propagation"}, DefaultType::Dependent, {"0.7.1"}};
+      InputSections::logging + "Propagation",
+      DefaultType::Dependent,
+      {"0.7.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1827,7 +1859,7 @@ struct InputKeys {
    * \see_key{key_log_pythia_}
    */
   inline static const Key<einhard::LogLevel> log_pythia{
-      {"Logging", "Pythia"}, DefaultType::Dependent, {"1.0"}};
+      InputSections::logging + "Pythia", DefaultType::Dependent, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1839,7 +1871,7 @@ struct InputKeys {
    * \see_key{key_log_resonances_}
    */
   inline static const Key<einhard::LogLevel> log_resonances{
-      {"Logging", "Resonances"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Resonances", DefaultType::Dependent, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1851,7 +1883,9 @@ struct InputKeys {
    * \see_key{key_log_scatter_action_}
    */
   inline static const Key<einhard::LogLevel> log_scatterAction{
-      {"Logging", "ScatterAction"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "ScatterAction",
+      DefaultType::Dependent,
+      {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1864,7 +1898,9 @@ struct InputKeys {
    * \see_key{key_log_scatter_action_multi_}
    */
   inline static const Key<einhard::LogLevel> log_scatterActionMulti{
-      {"Logging", "ScatterActionMulti"}, DefaultType::Dependent, {"2.0"}};
+      InputSections::logging + "ScatterActionMulti",
+      DefaultType::Dependent,
+      {"2.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1876,7 +1912,7 @@ struct InputKeys {
    * \see_key{key_log_tmn_}
    */
   inline static const Key<einhard::LogLevel> log_tmn{
-      {"Logging", "Tmn"}, DefaultType::Dependent, {"0.80"}};
+      InputSections::logging + "Tmn", DefaultType::Dependent, {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_version
@@ -1910,7 +1946,9 @@ struct InputKeys {
    * \see_key{key_CT_additional_el_cs_}
    */
   inline static const Key<double> collTerm_additionalElasticCrossSection{
-      {"Collision_Term", "Additional_Elastic_Cross_Section"}, 0.0, {"2.0"}};
+      InputSections::collisionTerm + "Additional_Elastic_Cross_Section",
+      0.0,
+      {"2.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -1956,7 +1994,7 @@ struct InputKeys {
    * \see_key{key_CT_collision_criterion_}
    */
   inline static const Key<CollisionCriterion> collTerm_collisionCriterion{
-      {"Collision_Term", "Collision_Criterion"},
+      InputSections::collisionTerm + "Collision_Criterion",
       CollisionCriterion::Covariant,
       {"1.7"}};
 
@@ -1973,7 +2011,7 @@ struct InputKeys {
    * \see_key{key_CT_cs_scaling_}
    */
   inline static const Key<double> collTerm_crossSectionScaling{
-      {"Collision_Term", "Cross_Section_Scaling"}, 1.0, {"2.0"}};
+      InputSections::collisionTerm + "Cross_Section_Scaling", 1.0, {"2.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -1988,7 +2026,7 @@ struct InputKeys {
    * \see_key{key_CT_elastic_cross_section_}
    */
   inline static const Key<double> collTerm_elasticCrossSection{
-      {"Collision_Term", "Elastic_Cross_Section"}, -1.0, {"1.2"}};
+      InputSections::collisionTerm + "Elastic_Cross_Section", -1.0, {"1.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2006,7 +2044,7 @@ struct InputKeys {
    * \see_key{key_CT_elastic_nn_cutoff_sqrts_}
    */
   inline static const Key<double> collTerm_elasticNNCutoffSqrts{
-      {"Collision_Term", "Elastic_NN_Cutoff_Sqrts"}, 1.98, {"1.0"}};
+      InputSections::collisionTerm + "Elastic_NN_Cutoff_Sqrts", 1.98, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2021,7 +2059,7 @@ struct InputKeys {
    * \see_key{key_CT_fixed_min_cell_length_}
    */
   inline static const Key<double> collTerm_fixedMinCellLength{
-      {"Collision_Term", "Fixed_Min_Cell_Length"}, 2.5, {"2.1"}};
+      InputSections::collisionTerm + "Fixed_Min_Cell_Length", 2.5, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2034,7 +2072,7 @@ struct InputKeys {
    * \see_key{key_CT_force_decays_at_end_}
    */
   inline static const Key<bool> collTerm_forceDecaysAtEnd{
-      {"Collision_Term", "Force_Decays_At_End"}, true, {"0.60"}};
+      InputSections::collisionTerm + "Force_Decays_At_End", true, {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2048,7 +2086,7 @@ struct InputKeys {
    * \see_key{key_CT_decay_initial_}
    */
   inline static const Key<bool> collTerm_decayInitial{
-      {"Collision_Term", "Decay_Initial_Particles"}, true, {"3.0"}};
+      InputSections::collisionTerm + "Decay_Initial_Particles", true, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2084,7 +2122,7 @@ struct InputKeys {
    * \see_key{key_CT_included_2to2_}
    */
   inline static const Key<ReactionsBitSet> collTerm_includedTwoToTwo{
-      {"Collision_Term", "Included_2to2"},
+      InputSections::collisionTerm + "Included_2to2",
       ReactionsBitSet{}.set(),  // All interactions => all bit set
       {"1.3"}};
 
@@ -2110,7 +2148,7 @@ struct InputKeys {
    * \see_key{key_CT_include_decays_end_}
    */
   inline static const Key<bool> collTerm_includeDecaysAtTheEnd{
-      {"Collision_Term", "Include_Weak_And_EM_Decays_At_The_End"},
+      InputSections::collisionTerm + "Include_Weak_And_EM_Decays_At_The_End",
       false,
       {"2.2", "3.1"}};
 
@@ -2124,7 +2162,7 @@ struct InputKeys {
    * \see_key{key_CT_isotropic_}
    */
   inline static const Key<bool> collTerm_isotropic{
-      {"Collision_Term", "Isotropic"}, false, {"0.7.1"}};
+      InputSections::collisionTerm + "Isotropic", false, {"0.7.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2146,7 +2184,7 @@ struct InputKeys {
    * \see_key{key_CT_max_cs_}
    */
   inline static const Key<double> collTerm_maximumCrossSection{
-      {"Collision_Term", "Maximum_Cross_Section"},
+      InputSections::collisionTerm + "Maximum_Cross_Section",
       DefaultType::Dependent,
       {"2.0"}};
 
@@ -2194,7 +2232,7 @@ struct InputKeys {
    */
   inline static const Key<MultiParticleReactionsBitSet>
       collTerm_multiParticleReactions{
-          {"Collision_Term", "Multi_Particle_Reactions"},
+          InputSections::collisionTerm + "Multi_Particle_Reactions",
           MultiParticleReactionsBitSet{}.reset(),  // Empty list => no bit set
           {"2.0"}};
 
@@ -2219,7 +2257,9 @@ struct InputKeys {
    * \see_key{key_CT_nnbar_treatment_}
    */
   inline static const Key<NNbarTreatment> collTerm_nnbarTreatment{
-      {"Collision_Term", "NNbar_Treatment"}, NNbarTreatment::Strings, {"1.3"}};
+      InputSections::collisionTerm + "NNbar_Treatment",
+      NNbarTreatment::Strings,
+      {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2234,7 +2274,7 @@ struct InputKeys {
    * \see_key{key_CT_no_collisions_}
    */
   inline static const Key<bool> collTerm_noCollisions{
-      {"Collision_Term", "No_Collisions"}, false, {"1.3"}};
+      InputSections::collisionTerm + "No_Collisions", false, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2250,7 +2290,9 @@ struct InputKeys {
    * \see_key{key_CT_warn_high_prob_}
    */
   inline static const Key<bool> collTerm_onlyWarnForHighProbability{
-      {"Collision_Term", "Only_Warn_For_High_Probability"}, false, {"3.0"}};
+      InputSections::collisionTerm + "Only_Warn_For_High_Probability",
+      false,
+      {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2282,7 +2324,7 @@ struct InputKeys {
    * \see_key{key_CT_pseudoresonance_}
    */
   inline static const Key<PseudoResonance> collTerm_pseudoresonance{
-      {"Collision_Term", "Pseudoresonance"},
+      InputSections::collisionTerm + "Pseudoresonance",
       PseudoResonance::LargestFromUnstable,
       {"3.1"}};
 
@@ -2308,7 +2350,9 @@ struct InputKeys {
    * \see_key{key_CT_res_lifetime_mod_}
    */
   inline static const Key<double> collTerm_resonanceLifetimeModifier{
-      {"Collision_Term", "Resonance_Lifetime_Modifier"}, 1.0, {"1.8"}};
+      InputSections::collisionTerm + "Resonance_Lifetime_Modifier",
+      1.0,
+      {"1.8"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_spin
@@ -2321,7 +2365,7 @@ struct InputKeys {
    * \see_key{key_CT_spin_interactions_}
    */
   inline static const Key<bool> collTerm_spinInteractions{
-      {"Collision_Term", "Spin_Interactions"}, false, {"3.2"}};
+      InputSections::collisionTerm + "Spin_Interactions", false, {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2335,7 +2379,9 @@ struct InputKeys {
    * \see_key{key_CT_strings_}
    */
   inline static const Key<bool> collTerm_strings{
-      {"Collision_Term", "Strings"}, DefaultType::Dependent, {"1.0"}};
+      InputSections::collisionTerm + "Strings",
+      DefaultType::Dependent,
+      {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2365,7 +2411,7 @@ struct InputKeys {
    * \see_key{key_CT_string_with_prob_}
    */
   inline static const Key<bool> collTerm_stringsWithProbability{
-      {"Collision_Term", "Strings_with_Probability"}, true, {"1.3"}};
+      InputSections::collisionTerm + "Strings_with_Probability", true, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2397,7 +2443,7 @@ struct InputKeys {
    * \see_key{key_CT_totXsStrategy_}
    */
   inline static const Key<TotalCrossSectionStrategy> collTerm_totXsStrategy{
-      {"Collision_Term", "Total_Cross_Section_Strategy"},
+      InputSections::collisionTerm + "Total_Cross_Section_Strategy",
       TotalCrossSectionStrategy::TopDownMeasured,
       {"3.1"}};
 
@@ -2411,7 +2457,7 @@ struct InputKeys {
    * \see_key{key_CT_two_to_one_}
    */
   inline static const Key<bool> collTerm_twoToOne{
-      {"Collision_Term", "Two_to_One"}, true, {"0.85"}};
+      InputSections::collisionTerm + "Two_to_One", true, {"0.85"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2441,7 +2487,7 @@ struct InputKeys {
    * \see_key{key_CT_use_aqm_}
    */
   inline static const Key<bool> collTerm_useAQM{
-      {"Collision_Term", "Use_AQM"}, true, {"1.3"}};
+      InputSections::collisionTerm + "Use_AQM", true, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
@@ -2453,7 +2499,7 @@ struct InputKeys {
    * \see_key{key_CT_PB_gaussian_cutoff_}
    */
   inline static const Key<double> collTerm_pauliBlocking_gaussianCutoff{
-      {"Collision_Term", "Pauli_Blocking", "Gaussian_Cutoff"}, 2.2, {"0.7.1"}};
+      InputSections::c_pauliBlocking + "Gaussian_Cutoff", 2.2, {"0.7.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
@@ -2466,7 +2512,7 @@ struct InputKeys {
    */
   inline static const Key<double>
       collTerm_pauliBlocking_momentumAveragingRadius{
-          {"Collision_Term", "Pauli_Blocking", "Momentum_Averaging_Radius"},
+          InputSections::c_pauliBlocking + "Momentum_Averaging_Radius",
           0.08,
           {"0.7.1"}};
 
@@ -2480,7 +2526,7 @@ struct InputKeys {
    * \see_key{key_CT_PB_spatial_averaging_radius_}
    */
   inline static const Key<double> collTerm_pauliBlocking_spatialAveragingRadius{
-      {"Collision_Term", "Pauli_Blocking", "Spatial_Averaging_Radius"},
+      InputSections::c_pauliBlocking + "Spatial_Averaging_Radius",
       1.86,
       {"0.7.1"}};
 
@@ -2494,7 +2540,7 @@ struct InputKeys {
    * \see_key{key_CT_ST_KN_offset_}
    */
   inline static const Key<double> collTerm_stringTrans_KNOffset{
-      {"Collision_Term", "String_Transition", "KN_Offset"}, 15.15, {"3.0"}};
+      InputSections::c_stringTransition + "KN_Offset", 15.15, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
@@ -2509,7 +2555,7 @@ struct InputKeys {
    * \see_key{key_CT_ST_pipi_offset_}
    */
   inline static const Key<double> collTerm_stringTrans_pipiOffset{
-      {"Collision_Term", "String_Transition", "PiPi_Offset"}, 1.12, {"3.0"}};
+      InputSections::c_stringTransition + "PiPi_Offset", 1.12, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
@@ -2522,7 +2568,7 @@ struct InputKeys {
    * \see_key{key_CT_ST_lower_}
    */
   inline static const Key<double> collTerm_stringTrans_lower{
-      {"Collision_Term", "String_Transition", "Sqrts_Lower"}, 0.9, {"3.0"}};
+      InputSections::c_stringTransition + "Sqrts_Lower", 0.9, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
@@ -2540,7 +2586,7 @@ struct InputKeys {
    */
   inline static const Key<std::pair<double, double>>
       collTerm_stringTrans_rangeNN{
-          {"Collision_Term", "String_Transition", "Sqrts_Range_NN"},
+          InputSections::c_stringTransition + "Sqrts_Range_NN",
           std::make_pair(3.5, 4.5),
           {"3.0"}};
 
@@ -2557,7 +2603,7 @@ struct InputKeys {
    */
   inline static const Key<std::pair<double, double>>
       collTerm_stringTrans_rangeNpi{
-          {"Collision_Term", "String_Transition", "Sqrts_Range_Npi"},
+          InputSections::c_stringTransition + "Sqrts_Range_Npi",
           std::make_pair(1.9, 2.2),
           {"3.0"}};
 
@@ -2573,9 +2619,7 @@ struct InputKeys {
    * \see_key{key_CT_ST_range_width_}
    */
   inline static const Key<double> collTerm_stringTrans_range_width{
-      {"Collision_Term", "String_Transition", "Sqrts_Range_Width"},
-      1.0,
-      {"3.0"}};
+      InputSections::c_stringTransition + "Sqrts_Range_Width", 1.0, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2588,7 +2632,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_diquark_supp_}
    */
   inline static const Key<double> collTerm_stringParam_diquarkSuppression{
-      {"Collision_Term", "String_Parameters", "Diquark_Supp"}, 0.036, {"1.3"}};
+      InputSections::c_stringParameters + "Diquark_Supp", 0.036, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2601,9 +2645,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_form_time_factor_}
    */
   inline static const Key<double> collTerm_stringParam_formTimeFactor{
-      {"Collision_Term", "String_Parameters", "Form_Time_Factor"},
-      1.0,
-      {"1.4"}};
+      InputSections::c_stringParameters + "Form_Time_Factor", 1.0, {"1.4"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2615,7 +2657,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_formation_time_}
    */
   inline static const Key<double> collTerm_stringParam_formationTime{
-      {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.0, {"1.0"}};
+      InputSections::c_stringParameters + "Formation_Time", 1.0, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2628,7 +2670,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_gluon_beta_}
    */
   inline static const Key<double> collTerm_stringParam_gluonBeta{
-      {"Collision_Term", "String_Parameters", "Gluon_Beta"}, 0.5, {"1.3"}};
+      InputSections::c_stringParameters + "Gluon_Beta", 0.5, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2642,7 +2684,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_gluon_pmin_}
    */
   inline static const Key<double> collTerm_stringParam_gluonPMin{
-      {"Collision_Term", "String_Parameters", "Gluon_Pmin"}, 0.001, {"1.3"}};
+      InputSections::c_stringParameters + "Gluon_Pmin", 0.001, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2656,7 +2698,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_m_dependent_formation_t_}
    */
   inline static const Key<bool> collTerm_stringParam_mDependentFormationTimes{
-      {"Collision_Term", "String_Parameters", "Mass_Dependent_Formation_Times"},
+      InputSections::c_stringParameters + "Mass_Dependent_Formation_Times",
       false,
       {"1.5.2"}};
 
@@ -2671,7 +2713,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_quark_alpha_}
    */
   inline static const Key<double> collTerm_stringParam_quarkAlpha{
-      {"Collision_Term", "String_Parameters", "Quark_Alpha"}, 2.0, {"1.3"}};
+      InputSections::c_stringParameters + "Quark_Alpha", 2.0, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2684,7 +2726,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_quark_beta_}
    */
   inline static const Key<double> collTerm_stringParam_quarkBeta{
-      {"Collision_Term", "String_Parameters", "Quark_Beta"}, 7.0, {"1.3"}};
+      InputSections::c_stringParameters + "Quark_Beta", 7.0, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2699,7 +2741,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_popcorn_rate_}
    */
   inline static const Key<double> collTerm_stringParam_popcornRate{
-      {"Collision_Term", "String_Parameters", "Popcorn_Rate"}, 0.15, {"1.6"}};
+      InputSections::c_stringParameters + "Popcorn_Rate", 0.15, {"1.6"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2715,7 +2757,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_power_part_formation_}
    */
   inline static const Key<double> collTerm_stringParam_powerParticleFormation{
-      {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
+      InputSections::c_stringParameters + "Power_Particle_Formation",
       DefaultType::Dependent,
       {"1.4"}};
 
@@ -2731,7 +2773,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_probability_p_to_duu_}
    */
   inline static const Key<double> collTerm_stringParam_probabilityPToDUU{
-      {"Collision_Term", "String_Parameters", "Prob_proton_to_d_uu"},
+      InputSections::c_stringParameters + "Prob_proton_to_d_uu",
       1.0 / 3,
       {"1.5"}};
 
@@ -2746,7 +2788,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_separate_fragment_bar_}
    */
   inline static const Key<bool> collTerm_stringParam_separateFragmentBaryon{
-      {"Collision_Term", "String_Parameters", "Separate_Fragment_Baryon"},
+      InputSections::c_stringParameters + "Separate_Fragment_Baryon",
       true,
       {"1.6"}};
 
@@ -2766,7 +2808,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_sigma_perp_}
    */
   inline static const Key<double> collTerm_stringParam_sigmaPerp{
-      {"Collision_Term", "String_Parameters", "Sigma_Perp"}, 0.42, {"1.3"}};
+      InputSections::c_stringParameters + "Sigma_Perp", 0.42, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2784,7 +2826,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_strange_supp_}
    */
   inline static const Key<double> collTerm_stringParam_strangeSuppression{
-      {"Collision_Term", "String_Parameters", "Strange_Supp"}, 0.16, {"1.3"}};
+      InputSections::c_stringParameters + "Strange_Supp", 0.16, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2797,7 +2839,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_string_sigma_t_}
    */
   inline static const Key<double> collTerm_stringParam_stringSigmaT{
-      {"Collision_Term", "String_Parameters", "String_Sigma_T"}, 0.5, {"1.3"}};
+      InputSections::c_stringParameters + "String_Sigma_T", 0.5, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2812,7 +2854,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_string_tension_}
    */
   inline static const Key<double> collTerm_stringParam_stringTension{
-      {"Collision_Term", "String_Parameters", "String_Tension"}, 1.0, {"1.3"}};
+      InputSections::c_stringParameters + "String_Tension", 1.0, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2825,7 +2867,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_a_}
    */
   inline static const Key<double> collTerm_stringParam_stringZA{
-      {"Collision_Term", "String_Parameters", "StringZ_A"}, 2.0, {"1.3"}};
+      InputSections::c_stringParameters + "StringZ_A", 2.0, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2839,9 +2881,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_a_leading_}
    */
   inline static const Key<double> collTerm_stringParam_stringZALeading{
-      {"Collision_Term", "String_Parameters", "StringZ_A_Leading"},
-      0.2,
-      {"1.6"}};
+      InputSections::c_stringParameters + "StringZ_A_Leading", 0.2, {"1.6"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2854,7 +2894,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_b_}
    */
   inline static const Key<double> collTerm_stringParam_stringZB{
-      {"Collision_Term", "String_Parameters", "StringZ_B"}, 0.55, {"1.3"}};
+      InputSections::c_stringParameters + "StringZ_B", 0.55, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2869,9 +2909,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_b_leading_}
    */
   inline static const Key<double> collTerm_stringParam_stringZBLeading{
-      {"Collision_Term", "String_Parameters", "StringZ_B_Leading"},
-      2.0,
-      {"1.6"}};
+      InputSections::c_stringParameters + "StringZ_B_Leading", 2.0, {"1.6"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -2888,9 +2926,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_use_monash_tune_}
    */
   inline static const Key<bool> collTerm_stringParam_useMonashTune{
-      {"Collision_Term", "String_Parameters", "Use_Monash_Tune"},
-      false,
-      {"3.0"}};
+      InputSections::c_stringParameters + "Use_Monash_Tune", false, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
@@ -2905,7 +2941,7 @@ struct InputKeys {
    * \see_key{key_CT_dileptons_decays_}
    */
   inline static const Key<bool> collTerm_dileptons_decays{
-      {"Collision_Term", "Dileptons", "Decays"}, false, {"0.50"}};
+      InputSections::c_dileptons + "Decays", false, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
@@ -2917,7 +2953,7 @@ struct InputKeys {
    * \see_key{key_CT_photons_2to2_scatterings_}
    */
   inline static const Key<bool> collTerm_photons_twoToTwoScatterings{
-      {"Collision_Term", "Photons", "2to2_Scatterings"}, false, {"1.8"}};
+      InputSections::c_photons + "2to2_Scatterings", false, {"1.8"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
@@ -2929,7 +2965,7 @@ struct InputKeys {
    * \see_key{key_CT_photons_bremsstrahlung_}
    */
   inline static const Key<bool> collTerm_photons_bremsstrahlung{
-      {"Collision_Term", "Photons", "Bremsstrahlung"}, false, {"1.8"}};
+      InputSections::c_photons + "Bremsstrahlung", false, {"1.8"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
@@ -2942,7 +2978,7 @@ struct InputKeys {
    * \see_key{key_CT_photons_fractional_photons}
    */
   inline static const Key<int> collTerm_photons_fractionalPhotons{
-      {"Collision_Term", "Photons", "Fractional_Photons"}, {"1.8"}};
+      InputSections::c_photons + "Fractional_Photons", {"1.8"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
@@ -2961,7 +2997,7 @@ struct InputKeys {
    * \see_key{key_MC_e_kin_}
    */
   inline static const Key<double> modi_collider_eKin{
-      {"Modi", "Collider", "E_Kin"}, {"0.50"}};
+      InputSections::m_collider + "E_Kin", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
@@ -2977,7 +3013,7 @@ struct InputKeys {
    * \see_key{key_MC_e_tot_}
    */
   inline static const Key<double> modi_collider_eTot{
-      {"Modi", "Collider", "E_Tot"}, {"2.0.2"}};
+      InputSections::m_collider + "E_Tot", {"2.0.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
@@ -2994,7 +3030,7 @@ struct InputKeys {
    * \see_key{key_MC_p_lab_}
    */
   inline static const Key<double> modi_collider_pLab{
-      {"Modi", "Collider", "P_Lab"}, {"0.50"}};
+      InputSections::m_collider + "P_Lab", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
@@ -3009,7 +3045,7 @@ struct InputKeys {
    * \see_key{key_MC_sqrtsnn_}
    */
   inline static const Key<double> modi_collider_sqrtSNN{
-      {"Modi", "Collider", "Sqrtsnn"}, {"0.50"}};
+      InputSections::m_collider + "Sqrtsnn", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
@@ -3033,7 +3069,7 @@ struct InputKeys {
    * \see_key{key_MC_calc_frame_}
    */
   inline static const Key<CalculationFrame> modi_collider_calculationFrame{
-      {"Modi", "Collider", "Calculation_Frame"},
+      InputSections::m_collider + "Calculation_Frame",
       CalculationFrame::CenterOfVelocity,
       {"0.50"}};
 
@@ -3049,7 +3085,7 @@ struct InputKeys {
    * \see_key{key_MC_collision_within_nucleus_}
    */
   inline static const Key<bool> modi_collider_collisionWithinNucleus{
-      {"Modi", "Collider", "Collisions_Within_Nucleus"}, false, {"1.0"}};
+      InputSections::m_collider + "Collisions_Within_Nucleus", false, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
@@ -3065,7 +3101,7 @@ struct InputKeys {
    * \see_key{key_MC_fermi_motion_}
    */
   inline static const Key<FermiMotion> modi_collider_fermiMotion{
-      {"Modi", "Collider", "Fermi_Motion"}, FermiMotion::Off, {"0.60"}};
+      InputSections::m_collider + "Fermi_Motion", FermiMotion::Off, {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
@@ -3081,7 +3117,7 @@ struct InputKeys {
    * \see_key{key_MC_initial_distance_}
    */
   inline static const Key<double> modi_collider_initialDistance{
-      {"Modi", "Collider", "Initial_Distance"}, 2.0, {"0.50"}};
+      InputSections::m_collider + "Initial_Distance", 2.0, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3102,14 +3138,14 @@ struct InputKeys {
    * \see_key{key_MC_PT_diffusiveness_}
    */
   inline static const Key<double> modi_collider_projectile_diffusiveness{
-      {"Modi", "Collider", "Projectile", "Diffusiveness"},
+      InputSections::m_c_projectile + "Diffusiveness",
       DefaultType::Dependent,
       {"0.90"}};
   /**
    * \see_key{key_MC_PT_diffusiveness_}
    */
   inline static const Key<double> modi_collider_target_diffusiveness{
-      {"Modi", "Collider", "Target", "Diffusiveness"},
+      InputSections::m_c_target + "Diffusiveness",
       DefaultType::Dependent,
       {"0.90"}};
 
@@ -3130,13 +3166,13 @@ struct InputKeys {
    */
   inline static const Key<std::map<PdgCode, int>>
       modi_collider_projectile_particles{
-          {"Modi", "Collider", "Projectile", "Particles"}, {"0.50"}};
+          InputSections::m_c_projectile + "Particles", {"0.50"}};
   /**
    * \see_key{key_MC_PT_particles_}
    */
   inline static const Key<std::map<PdgCode, int>>
-      modi_collider_target_particles{
-          {"Modi", "Collider", "Target", "Particles"}, {"0.50"}};
+      modi_collider_target_particles{InputSections::m_c_target + "Particles",
+                                     {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3156,16 +3192,14 @@ struct InputKeys {
    * \see_key{key_MC_PT_radius_}
    */
   inline static const Key<double> modi_collider_projectile_radius{
-      {"Modi", "Collider", "Projectile", "Radius"},
+      InputSections::m_c_projectile + "Radius",
       DefaultType::Dependent,
       {"0.50"}};
   /**
    * \see_key{key_MC_PT_radius_}
    */
   inline static const Key<double> modi_collider_target_radius{
-      {"Modi", "Collider", "Target", "Radius"},
-      DefaultType::Dependent,
-      {"0.50"}};
+      InputSections::m_c_target + "Radius", DefaultType::Dependent, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3181,14 +3215,14 @@ struct InputKeys {
    * \see_key{key_MC_PT_saturation_density_}
    */
   inline static const Key<double> modi_collider_projectile_saturationDensity{
-      {"Modi", "Collider", "Projectile", "Saturation_Density"},
+      InputSections::m_c_projectile + "Saturation_Density",
       DefaultType::Dependent,
       {"0.50"}};
   /**
    * \see_key{key_MC_PT_saturation_density_}
    */
   inline static const Key<double> modi_collider_target_saturationDensity{
-      {"Modi", "Collider", "Target", "Saturation_Density"},
+      InputSections::m_c_target + "Saturation_Density",
       DefaultType::Dependent,
       {"0.50"}};
 
@@ -3207,12 +3241,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_e_kin_}
    */
   inline static const Key<double> modi_collider_projectile_eKin{
-      {"Modi", "Collider", "Projectile", "E_Kin"}, {"0.50"}};
+      InputSections::m_c_projectile + "E_Kin", {"0.50"}};
   /**
    * \see_key{key_MC_PT_e_kin_}
    */
   inline static const Key<double> modi_collider_target_eKin{
-      {"Modi", "Collider", "Target", "E_Kin"}, {"0.50"}};
+      InputSections::m_c_target + "E_Kin", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3226,12 +3260,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_e_tot_}
    */
   inline static const Key<double> modi_collider_projectile_eTot{
-      {"Modi", "Collider", "Projectile", "E_Tot"}, {"2.0.2"}};
+      InputSections::m_c_projectile + "E_Tot", {"2.0.2"}};
   /**
    * \see_key{key_MC_PT_e_tot_}
    */
   inline static const Key<double> modi_collider_target_eTot{
-      {"Modi", "Collider", "Target", "E_Tot"}, {"2.0.2"}};
+      InputSections::m_c_target + "E_Tot", {"2.0.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3253,12 +3287,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_p_lab_}
    */
   inline static const Key<double> modi_collider_projectile_pLab{
-      {"Modi", "Collider", "Projectile", "P_Lab"}, {"0.50"}};
+      InputSections::m_c_projectile + "P_Lab", {"0.50"}};
   /**
    * \see_key{key_MC_PT_p_lab_}
    */
   inline static const Key<double> modi_collider_target_pLab{
-      {"Modi", "Collider", "Target", "P_Lab"}, {"0.50"}};
+      InputSections::m_c_target + "P_Lab", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3278,14 +3312,13 @@ struct InputKeys {
    */
   inline static const Key<std::string>
       modi_collider_projectile_custom_fileDirectory{
-          {"Modi", "Collider", "Projectile", "Custom", "File_Directory"},
-          {"1.6"}};
+          InputSections::m_c_p_custom + "File_Directory", {"1.6"}};
   /**
    * \see_key{key_MC_PT_custom_file_dir_}
    */
   inline static const Key<std::string>
       modi_collider_target_custom_fileDirectory{
-          {"Modi", "Collider", "Target", "Custom", "File_Directory"}, {"1.6"}};
+          InputSections::m_c_t_custom + "File_Directory", {"1.6"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3297,12 +3330,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_custom_file_name_}
    */
   inline static const Key<std::string> modi_collider_projectile_custom_fileName{
-      {"Modi", "Collider", "Projectile", "Custom", "File_Name"}, {"1.6"}};
+      InputSections::m_c_p_custom + "File_Name", {"1.6"}};
   /**
    * \see_key{key_MC_PT_custom_file_name_}
    */
   inline static const Key<std::string> modi_collider_target_custom_fileName{
-      {"Modi", "Collider", "Target", "Custom", "File_Name"}, {"1.6"}};
+      InputSections::m_c_t_custom + "File_Name", {"1.6"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3338,12 +3371,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_auto_}
    */
   inline static const Key<bool> modi_collider_projectile_deformed_automatic{
-      {"Modi", "Collider", "Projectile", "Deformed", "Automatic"}, {"1.5"}};
+      InputSections::m_c_p_deformed + "Automatic", {"1.5"}};
   /**
    * \see_key{key_MC_PT_deformed_auto_}
    */
   inline static const Key<bool> modi_collider_target_deformed_automatic{
-      {"Modi", "Collider", "Target", "Deformed", "Automatic"}, {"1.5"}};
+      InputSections::m_c_t_deformed + "Automatic", {"1.5"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3356,12 +3389,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaII_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta2{
-      {"Modi", "Collider", "Projectile", "Deformed", "Beta_2"}, 0.0, {"1.5"}};
+      InputSections::m_c_p_deformed + "Beta_2", 0.0, {"1.5"}};
   /**
    * \see_key{key_MC_PT_deformed_betaII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta2{
-      {"Modi", "Collider", "Target", "Deformed", "Beta_2"}, 0.0, {"1.5"}};
+      InputSections::m_c_t_deformed + "Beta_2", 0.0, {"1.5"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3374,12 +3407,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta3{
-      {"Modi", "Collider", "Projectile", "Deformed", "Beta_3"}, 0.0, {"3.0"}};
+      InputSections::m_c_p_deformed + "Beta_3", 0.0, {"3.0"}};
   /**
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta3{
-      {"Modi", "Collider", "Target", "Deformed", "Beta_3"}, 0.0, {"3.0"}};
+      InputSections::m_c_t_deformed + "Beta_3", 0.0, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3392,12 +3425,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta4{
-      {"Modi", "Collider", "Projectile", "Deformed", "Beta_4"}, 0.0, {"1.5"}};
+      InputSections::m_c_p_deformed + "Beta_4", 0.0, {"1.5"}};
   /**
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta4{
-      {"Modi", "Collider", "Target", "Deformed", "Beta_4"}, 0.0, {"1.5"}};
+      InputSections::m_c_t_deformed + "Beta_4", 0.0, {"1.5"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3410,12 +3443,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_gamma_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_gamma{
-      {"Modi", "Collider", "Projectile", "Deformed", "Gamma"}, 0.0, {"3.0"}};
+      InputSections::m_c_p_deformed + "Gamma", 0.0, {"3.0"}};
   /**
    * \see_key{key_MC_PT_deformed_gamma_}
    */
   inline static const Key<double> modi_collider_target_deformed_gamma{
-      {"Modi", "Collider", "Target", "Deformed", "Gamma"}, 0.0, {"3.0"}};
+      InputSections::m_c_t_deformed + "Gamma", 0.0, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3438,13 +3471,12 @@ struct InputKeys {
    */
   inline static const Key<bool>
       modi_collider_projectile_alphaClustered_automatic{
-          {"Modi", "Collider", "Projectile", "Alpha_Clustered", "Automatic"},
-          {"3.2"}};
+          InputSections::m_c_p_alphaClustered + "Automatic", {"3.2"}};
   /**
    * \see_key{key_MC_PT_alphaClustered_auto_}
    */
   inline static const Key<bool> modi_collider_target_alphaClustered_automatic{
-      {"Modi", "Collider", "Target", "Alpha_Clustered", "Automatic"}, {"3.2"}};
+      InputSections::m_c_t_alphaClustered + "Automatic", {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3458,17 +3490,13 @@ struct InputKeys {
    */
   inline static const Key<double>
       modi_collider_projectile_alphaClustered_sidelength{
-          {"Modi", "Collider", "Projectile", "Alpha_Clustered", "Sidelength"},
-          3.42,
-          {"3.2"}};
+          InputSections::m_c_p_alphaClustered + "Sidelength", 3.42, {"3.2"}};
   /**
    * \see_key{key_MC_PT_alphaClustered_sidelength_}
    */
   inline static const Key<double>
       modi_collider_target_alphaClustered_sidelength{
-          {"Modi", "Collider", "Target", "Alpha_Clustered", "Sidelength"},
-          3.42,
-          {"3.2"}};
+          InputSections::m_c_t_alphaClustered + "Sidelength", 3.42, {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3491,12 +3519,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_phi_}
    */
   inline static const Key<double> modi_collider_projectile_orientation_phi{
-      {"Modi", "Collider", "Projectile", "Orientation", "Phi"}, 0.0, {"0.50"}};
+      InputSections::m_c_p_orientation + "Phi", 0.0, {"0.50"}};
   /**
    * \see_key{key_MC_PT_orientation_phi_}
    */
   inline static const Key<double> modi_collider_target_orientation_phi{
-      {"Modi", "Collider", "Target", "Orientation", "Phi"}, 0.0, {"0.50"}};
+      InputSections::m_c_t_orientation + "Phi", 0.0, {"0.50"}};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_orientation_theta_,Theta,double,0.0}
@@ -3507,14 +3535,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_theta_}
    */
   inline static const Key<double> modi_collider_projectile_orientation_theta{
-      {"Modi", "Collider", "Projectile", "Orientation", "Theta"},
-      0.0,
-      {"0.50"}};
+      InputSections::m_c_p_orientation + "Theta", 0.0, {"0.50"}};
   /**
    * \see_key{key_MC_PT_orientation_theta_}
    */
   inline static const Key<double> modi_collider_target_orientation_theta{
-      {"Modi", "Collider", "Target", "Orientation", "Theta"}, 0.0, {"0.50"}};
+      InputSections::m_c_t_orientation + "Theta", 0.0, {"0.50"}};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_orientation_psi_,Psi,double,0.0}
@@ -3525,12 +3551,12 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_psi_}
    */
   inline static const Key<double> modi_collider_projectile_orientation_psi{
-      {"Modi", "Collider", "Projectile", "Orientation", "Psi"}, 0.0, {"3.0"}};
+      InputSections::m_c_p_orientation + "Psi", 0.0, {"3.0"}};
   /**
    * \see_key{key_MC_PT_orientation_psi_}
    */
   inline static const Key<double> modi_collider_target_orientation_psi{
-      {"Modi", "Collider", "Target", "Orientation", "Psi"}, 0.0, {"3.0"}};
+      InputSections::m_c_t_orientation + "Psi", 0.0, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3543,16 +3569,12 @@ struct InputKeys {
    */
   inline static const Key<bool>
       modi_collider_projectile_orientation_randomRotation{
-          {"Modi", "Collider", "Projectile", "Orientation", "Random_Rotation"},
-          false,
-          {"1.7"}};
+          InputSections::m_c_p_orientation + "Random_Rotation", false, {"1.7"}};
   /**
    * \see_key{key_MC_PT_orientation_random_}
    */
   inline static const Key<bool> modi_collider_target_orientation_randomRotation{
-      {"Modi", "Collider", "Target", "Orientation", "Random_Rotation"},
-      false,
-      {"1.7"}};
+      InputSections::m_c_t_orientation + "Random_Rotation", false, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -3565,7 +3587,7 @@ struct InputKeys {
    * \see_key{key_MC_impact_max_}
    */
   inline static const Key<double> modi_collider_impact_max{
-      {"Modi", "Collider", "Impact", "Max"}, 0.0, {"0.50"}};
+      InputSections::m_c_impact + "Max", 0.0, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -3578,7 +3600,7 @@ struct InputKeys {
    * \see_key{key_MC_impact_rnd_reaction_plane_}
    */
   inline static const Key<bool> modi_collider_impact_randomReactionPlane{
-      {"Modi", "Collider", "Impact", "Random_Reaction_Plane"}, false, {"1.8"}};
+      InputSections::m_c_impact + "Random_Reaction_Plane", false, {"1.8"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -3591,7 +3613,7 @@ struct InputKeys {
    * \see_key{key_MC_impact_range_}
    */
   inline static const Key<std::array<double, 2>> modi_collider_impact_range{
-      {"Modi", "Collider", "Impact", "Range"},
+      InputSections::m_c_impact + "Range",
       std::array<double, 2>{{0.0, 0.0}},
       {"0.50"}};
 
@@ -3612,7 +3634,7 @@ struct InputKeys {
    * \see_key{key_MC_impact_sample_}
    */
   inline static const Key<Sampling> modi_collider_impact_sample{
-      {"Modi", "Collider", "Impact", "Sample"}, Sampling::Quadratic, {"0.50"}};
+      InputSections::m_c_impact + "Sample", Sampling::Quadratic, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -3625,7 +3647,7 @@ struct InputKeys {
    * \see_key{key_MC_impact_value_}
    */
   inline static const Key<double> modi_collider_impact_value{
-      {"Modi", "Collider", "Impact", "Value"}, 0.0, {"0.50"}};
+      InputSections::m_c_impact + "Value", 0.0, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -3641,7 +3663,7 @@ struct InputKeys {
    * \see_key{key_MC_impact_values_}
    */
   inline static const Key<std::vector<double>> modi_collider_impact_values{
-      {"Modi", "Collider", "Impact", "Values"}, {"0.80"}};
+      InputSections::m_c_impact + "Values", {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -3655,7 +3677,7 @@ struct InputKeys {
    * \see_key{key_MC_impact_sample_}
    */
   inline static const Key<std::vector<double>> modi_collider_impact_yields{
-      {"Modi", "Collider", "Impact", "Yields"}, {"0.80"}};
+      InputSections::m_c_impact + "Yields", {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
@@ -3670,7 +3692,7 @@ struct InputKeys {
    */
   inline static const Key<FluidizationType>
       modi_collider_initialConditions_type{
-          {"Modi", "Collider", "Initial_Conditions", "Type"}, {"3.2"}};
+          InputSections::m_c_initialConditions + "Type", {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
@@ -3683,7 +3705,7 @@ struct InputKeys {
    * \see_key{key_MC_IC_lower_bound_}
    */
   inline static const Key<double> modi_collider_initialConditions_lowerBound{
-      {"Modi", "Collider", "Initial_Conditions", "Lower_Bound"}, 0.5, {"3.2"}};
+      InputSections::m_c_initialConditions + "Lower_Bound", 0.5, {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
@@ -3703,7 +3725,7 @@ struct InputKeys {
    * \see_key{key_MC_IC_proper_time_}
    */
   inline static const Key<double> modi_collider_initialConditions_properTime{
-      {"Modi", "Collider", "Initial_Conditions", "Proper_Time"},
+      InputSections::m_c_initialConditions + "Proper_Time",
       DefaultType::Dependent,
       {"3.2"}};
 
@@ -3722,7 +3744,7 @@ struct InputKeys {
    * \see_key{key_output_IC_pt_cut_}
    */
   inline static const Key<double> modi_collider_initialConditions_pTCut{
-      {"Modi", "Collider", "Initial_Conditions", "pT_Cut"},
+      InputSections::m_c_initialConditions + "pT_Cut",
       DefaultType::Dependent,
       {"3.2"}};
 
@@ -3741,7 +3763,7 @@ struct InputKeys {
    * \see_key{key_MC_IC_rapidity_cut_}
    */
   inline static const Key<double> modi_collider_initialConditions_rapidityCut{
-      {"Modi", "Collider", "Initial_Conditions", "Rapidity_Cut"},
+      InputSections::m_c_initialConditions + "Rapidity_Cut",
       DefaultType::Dependent,
       {"3.2"}};
 
@@ -3765,7 +3787,7 @@ struct InputKeys {
    */
   inline static const Key<std::map<PdgCode, int>>
       modi_sphere_initialMultiplicities{
-          {"Modi", "Sphere", "Init_Multiplicities"}, {"0.50"}};
+          InputSections::m_sphere + "Init_Multiplicities", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3777,7 +3799,7 @@ struct InputKeys {
    * \see_key{key_MS_radius_}
    */
   inline static const Key<double> modi_sphere_radius{
-      {"Modi", "Sphere", "Radius"}, {"0.50"}};
+      InputSections::m_sphere + "Radius", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3789,7 +3811,7 @@ struct InputKeys {
    * \see_key{key_MS_start_time_}
    */
   inline static const Key<double> modi_sphere_startTime{
-      {"Modi", "Sphere", "Start_Time"}, {"0.50"}};
+      InputSections::m_sphere + "Start_Time", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3801,7 +3823,7 @@ struct InputKeys {
    * \see_key{key_MS_radius_}
    */
   inline static const Key<double> modi_sphere_temperature{
-      {"Modi", "Sphere", "Temperature"}, {"1.5.2"}};
+      InputSections::m_sphere + "Temperature", {"1.5.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3823,7 +3845,7 @@ struct InputKeys {
    * \see_key{key_MS_account_res_widths_}
    */
   inline static const Key<bool> modi_sphere_accountResonanceWidths{
-      {"Modi", "Sphere", "Account_Resonance_Widths"}, true, {"1.7"}};
+      InputSections::m_sphere + "Account_Resonance_Widths", true, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3840,7 +3862,7 @@ struct InputKeys {
    * \see_key{key_MS_add_radial_velocity_}
    */
   inline static const Key<double> modi_sphere_addRadialVelocity{
-      {"Modi", "Sphere", "Add_Radial_Velocity"}, -1.0, {"2.2"}};
+      InputSections::m_sphere + "Add_Radial_Velocity", -1.0, {"2.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3855,7 +3877,7 @@ struct InputKeys {
    * \see_key{key_MS_use_bar_chem_pot_}
    */
   inline static const Key<double> modi_sphere_baryonChemicalPotential{
-      {"Modi", "Sphere", "Baryon_Chemical_Potential"}, 0.0, {"1.0"}};
+      InputSections::m_sphere + "Baryon_Chemical_Potential", 0.0, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3870,7 +3892,7 @@ struct InputKeys {
    * \see_key{key_MS_charge_chem_pot_}
    */
   inline static const Key<double> modi_sphere_chargeChemicalPotential{
-      {"Modi", "Sphere", "Charge_Chemical_Potential"}, 0.0, {"2.1"}};
+      InputSections::m_sphere + "Charge_Chemical_Potential", 0.0, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3894,7 +3916,7 @@ struct InputKeys {
    * \see_key{key_MS_initial_cond_}
    */
   inline static const Key<SphereInitialCondition> modi_sphere_initialCondition{
-      {"Modi", "Sphere", "Initial_Condition"},
+      InputSections::m_sphere + "Initial_Condition",
       SphereInitialCondition::ThermalMomentaBoltzmann,
       {"1.1"}};
 
@@ -3911,7 +3933,7 @@ struct InputKeys {
    * \see_key{key_MS_strange_chem_pot_}
    */
   inline static const Key<double> modi_sphere_strangeChemicalPotential{
-      {"Modi", "Sphere", "Strange_Chemical_Potential"}, 0.0, {"1.0"}};
+      InputSections::m_sphere + "Strange_Chemical_Potential", 0.0, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3931,7 +3953,7 @@ struct InputKeys {
    * \see_key{key_MS_use_thermal_mult_}
    */
   inline static const Key<bool> modi_sphere_useThermalMultiplicities{
-      {"Modi", "Sphere", "Use_Thermal_Multiplicities"}, false, {"1.0"}};
+      InputSections::m_sphere + "Use_Thermal_Multiplicities", false, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3954,7 +3976,7 @@ struct InputKeys {
    * \see_key{key_MS_jet_jet_momentum_}
    */
   inline static const Key<double> modi_sphere_jet_jetMomentum{
-      {"Modi", "Sphere", "Jet", "Jet_Momentum"}, 20.0, {"1.5.2"}};
+      InputSections::m_s_jet + "Jet_Momentum", 20.0, {"1.5.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -3966,7 +3988,7 @@ struct InputKeys {
    * \see_key{key_MS_jet_jet_pdg_}
    */
   inline static const Key<PdgCode> modi_sphere_jet_jetPdg{
-      {"Modi", "Sphere", "Jet", "Jet_PDG"}, {"1.5.2"}};
+      InputSections::m_s_jet + "Jet_PDG", {"1.5.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -3985,8 +4007,8 @@ struct InputKeys {
    * \see_key{key_MB_init_mult_}
    */
   inline static const Key<std::map<PdgCode, int>>
-      modi_box_initialMultiplicities{{"Modi", "Box", "Init_Multiplicities"},
-                                     {"0.50"}};
+      modi_box_initialMultiplicities{
+          InputSections::m_box + "Init_Multiplicities", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4006,7 +4028,7 @@ struct InputKeys {
    * \see_key{key_MB_initial_condition_}
    */
   inline static const Key<BoxInitialCondition> modi_box_initialCondition{
-      {"Modi", "Box", "Initial_Condition"}, {"0.50"}};
+      InputSections::m_box + "Initial_Condition", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4017,8 +4039,8 @@ struct InputKeys {
   /**
    * \see_key{key_MB_length_}
    */
-  inline static const Key<double> modi_box_length{{"Modi", "Box", "Length"},
-                                                  {"0.50"}};
+  inline static const Key<double> modi_box_length{
+      InputSections::m_box + "Length", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4031,7 +4053,7 @@ struct InputKeys {
    * \see_key{key_MB_start_time_}
    */
   inline static const Key<double> modi_box_startTime{
-      {"Modi", "Box", "Start_Time"}, {"0.50"}};
+      InputSections::m_box + "Start_Time", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4043,7 +4065,7 @@ struct InputKeys {
    * \see_key{key_MB_temperature_}
    */
   inline static const Key<double> modi_box_temperature{
-      {"Modi", "Box", "Temperature"}, {"0.50"}};
+      InputSections::m_box + "Temperature", {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4072,7 +4094,7 @@ struct InputKeys {
    * \see_key{key_MB_account_res_widths_}
    */
   inline static const Key<bool> modi_box_accountResonanceWidths{
-      {"Modi", "Box", "Account_Resonance_Widths"}, true, {"1.7"}};
+      InputSections::m_box + "Account_Resonance_Widths", true, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4085,7 +4107,7 @@ struct InputKeys {
    * \see_key{key_MB_use_bar_chem_pot_}
    */
   inline static const Key<double> modi_box_baryonChemicalPotential{
-      {"Modi", "Box", "Baryon_Chemical_Potential"}, 0.0, {"1.0"}};
+      InputSections::m_box + "Baryon_Chemical_Potential", 0.0, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4098,7 +4120,7 @@ struct InputKeys {
    * \see_key{key_MB_charge_chem_pot_}
    */
   inline static const Key<double> modi_box_chargeChemicalPotential{
-      {"Modi", "Box", "Charge_Chemical_Potential"}, 0.0, {"2.0"}};
+      InputSections::m_box + "Charge_Chemical_Potential", 0.0, {"2.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4114,7 +4136,7 @@ struct InputKeys {
    * \see_key{key_MB_equilibration_time_}
    */
   inline static const Key<double> modi_box_equilibrationTime{
-      {"Modi", "Box", "Equilibration_Time"}, -1.0, {"1.8"}};
+      InputSections::m_box + "Equilibration_Time", -1.0, {"1.8"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4128,7 +4150,7 @@ struct InputKeys {
    * \see_key{key_MB_strange_chem_pot_}
    */
   inline static const Key<double> modi_box_strangeChemicalPotential{
-      {"Modi", "Box", "Strange_Chemical_Potential"}, 0.0, {"1.0"}};
+      InputSections::m_box + "Strange_Chemical_Potential", 0.0, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4142,7 +4164,7 @@ struct InputKeys {
    * \see_key{key_MB_use_thermal_mult_}
    */
   inline static const Key<bool> modi_box_useThermalMultiplicities{
-      {"Modi", "Box", "Use_Thermal_Multiplicities"}, false, {"1.0"}};
+      InputSections::m_box + "Use_Thermal_Multiplicities", false, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4167,7 +4189,7 @@ struct InputKeys {
    * \see_key{key_MB_jet_jet_momentum_}
    */
   inline static const Key<double> modi_box_jet_jetMomentum{
-      {"Modi", "Box", "Jet", "Jet_Momentum"}, 20.0, {"1.7"}};
+      InputSections::m_b_jet + "Jet_Momentum", 20.0, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4180,7 +4202,7 @@ struct InputKeys {
    * \see_key{key_MB_jet_jet_pdg_}
    */
   inline static const Key<PdgCode> modi_box_jet_jetPdg{
-      {"Modi", "Box", "Jet", "Jet_PDG"}, {"1.7"}};
+      InputSections::m_b_jet + "Jet_PDG", {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
@@ -4194,7 +4216,7 @@ struct InputKeys {
    * \see_key{key_ML_file_dir_}
    */
   inline static const Key<std::string> modi_list_fileDirectory{
-      {"Modi", "List", "File_Directory"}, {"0.60"}};
+      InputSections::m_list + "File_Directory", {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
@@ -4209,7 +4231,7 @@ struct InputKeys {
    * \see_key{key_ML_filename_}
    */
   inline static const Key<std::string> modi_list_filename{
-      {"Modi", "List", "Filename"}, {"3.1"}};
+      InputSections::m_list + "Filename", {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
@@ -4222,7 +4244,7 @@ struct InputKeys {
    * \see_key{key_ML_file_prefix_}
    */
   inline static const Key<std::string> modi_list_filePrefix{
-      {"Modi", "List", "File_Prefix"}, {"0.60"}};
+      InputSections::m_list + "File_Prefix", {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
@@ -4239,7 +4261,7 @@ struct InputKeys {
    * \see_key{key_ML_shift_id_}
    */
   inline static const Key<int> modi_list_shiftId{
-      {"Modi", "List", "Shift_Id"}, 0, {"0.60"}};
+      InputSections::m_list + "Shift_Id", 0, {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -4252,7 +4274,7 @@ struct InputKeys {
    * \see_key{key_MLB_file_dir_}
    */
   inline static const Key<std::string> modi_listBox_fileDirectory{
-      {"Modi", "ListBox", "File_Directory"}, {"2.1"}};
+      InputSections::m_listBox + "File_Directory", {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -4265,7 +4287,7 @@ struct InputKeys {
    * \see_key{key_MLB_filename_}
    */
   inline static const Key<std::string> modi_listBox_filename{
-      {"Modi", "ListBox", "Filename"}, {"3.1"}};
+      InputSections::m_listBox + "Filename", {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -4278,7 +4300,7 @@ struct InputKeys {
    * \see_key{key_MLB_file_prefix_}
    */
   inline static const Key<std::string> modi_listBox_filePrefix{
-      {"Modi", "ListBox", "File_Prefix"}, {"2.1"}};
+      InputSections::m_listBox + "File_Prefix", {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -4291,7 +4313,7 @@ struct InputKeys {
    * \see_key{key_MLB_length_}
    */
   inline static const Key<double> modi_listBox_length{
-      {"Modi", "ListBox", "Length"}, {"2.1"}};
+      InputSections::m_listBox + "Length", {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -4304,7 +4326,7 @@ struct InputKeys {
    * \see_key{key_MLB_shift_id_}
    */
   inline static const Key<int> modi_listBox_shiftId{
-      {"Modi", "ListBox", "Shift_Id"}, 0, {"2.1"}};
+      InputSections::m_listBox + "Shift_Id", 0, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4325,7 +4347,7 @@ struct InputKeys {
    * \see_key{key_output_density_type_}
    */
   inline static const Key<DensityType> output_densityType{
-      {"Output", "Density_Type"}, DensityType::None, {"0.60"}};
+      InputSections::output + "Density_Type", DensityType::None, {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4340,7 +4362,9 @@ struct InputKeys {
    * \see_key{key_output_out_interval_}
    */
   inline static const Key<double> output_outputInterval{
-      {"Output", "Output_Interval"}, DefaultType::Dependent, {"0.50"}};
+      InputSections::output + "Output_Interval",
+      DefaultType::Dependent,
+      {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4362,7 +4386,7 @@ struct InputKeys {
    * \see_key{key_output_out_times_}
    */
   inline static const Key<std::vector<double>> output_outputTimes{
-      {"Output", "Output_Times"}, DefaultType::Dependent, {"1.7"}};
+      InputSections::output + "Output_Times", DefaultType::Dependent, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4399,45 +4423,51 @@ struct InputKeys {
    * a specified empty one and hence it makes it easier in the validation.
    */
   inline static const Key<std::vector<std::string>> output_particles_format{
-      {"Output", "Particles", "Format"}, std::vector<std::string>{}, {"1.2"}};
+      InputSections::o_particles + "Format",
+      std::vector<std::string>{},
+      {"1.2"}};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_collisions_format{
-      {"Output", "Collisions", "Format"}, std::vector<std::string>{}, {"1.2"}};
+      InputSections::o_collisions + "Format",
+      std::vector<std::string>{},
+      {"1.2"}};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_dileptons_format{
-      {"Output", "Dileptons", "Format"}, std::vector<std::string>{}, {"0.85"}};
+      InputSections::o_dileptons + "Format",
+      std::vector<std::string>{},
+      {"0.85"}};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_photons_format{
-      {"Output", "Photons", "Format"}, std::vector<std::string>{}, {"1.0"}};
+      InputSections::o_photons + "Format", std::vector<std::string>{}, {"1.0"}};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>>
       output_initialConditions_format{
-          {"Output", "Initial_Conditions", "Format"},
+          InputSections::o_initialConditions + "Format",
           std::vector<std::string>{},
           {"1.7"}};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_format{
-      {"Output", "Rivet", "Format"}, std::vector<std::string>{}, {"2.0.2"}};
+      InputSections::o_rivet + "Format", std::vector<std::string>{}, {"2.0.2"}};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_coulomb_format{
-      {"Output", "Coulomb", "Format"}, std::vector<std::string>{}, {"2.1"}};
+      InputSections::o_coulomb + "Format", std::vector<std::string>{}, {"2.1"}};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>>
-      output_thermodynamics_format{{"Output", "Thermodynamics", "Format"},
+      output_thermodynamics_format{InputSections::o_thermodynamics + "Format",
                                    std::vector<std::string>{},
                                    {"1.2"}};
 
@@ -4465,7 +4495,7 @@ struct InputKeys {
    * \see_key{key_output_particles_extended_}
    */
   inline static const Key<bool> output_particles_extended{
-      {"Output", "Particles", "Extended"}, false, {"1.2"}};
+      InputSections::o_particles + "Extended", false, {"1.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4500,7 +4530,9 @@ struct InputKeys {
    * \see_key{key_output_particles_only_final_}
    */
   inline static const Key<OutputOnlyFinal> output_particles_onlyFinal{
-      {"Output", "Particles", "Only_Final"}, OutputOnlyFinal::Yes, {"0.50"}};
+      InputSections::o_particles + "Only_Final",
+      OutputOnlyFinal::Yes,
+      {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4519,7 +4551,7 @@ struct InputKeys {
    * \see_key{key_output_collisions_extended_}
    */
   inline static const Key<bool> output_collisions_extended{
-      {"Output", "Collisions", "Extended"}, false, {"1.2"}};
+      InputSections::o_collisions + "Extended", false, {"1.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4552,7 +4584,7 @@ struct InputKeys {
    * \see_key{key_output_collisions_print_start_end_}
    */
   inline static const Key<bool> output_collisions_printStartEnd{
-      {"Output", "Collisions", "Print_Start_End"}, false, {"0.50"}};
+      InputSections::o_collisions + "Print_Start_End", false, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4570,7 +4602,7 @@ struct InputKeys {
    * \see_key{key_output_dileptons_extended_}
    */
   inline static const Key<bool> output_dileptons_extended{
-      {"Output", "Dileptons", "Extended"}, false, {"1.2"}};
+      InputSections::o_dileptons + "Extended", false, {"1.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4588,7 +4620,7 @@ struct InputKeys {
    * \see_key{key_output_photons_extended_}
    */
   inline static const Key<bool> output_photons_extended{
-      {"Output", "Photons", "Extended"}, false, {"1.5"}};
+      InputSections::o_photons + "Extended", false, {"1.5"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4607,7 +4639,7 @@ struct InputKeys {
    * \see_key{key_output_IC_extended_}
    */
   inline static const Key<bool> output_initialConditions_extended{
-      {"Output", "Initial_Conditions", "Extended"}, false, {"1.7"}};
+      InputSections::o_initialConditions + "Extended", false, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4626,7 +4658,7 @@ struct InputKeys {
    * \see_key{key_output_IC_lower_bound_}
    */
   inline static const Key<double> output_initialConditions_lowerBound{
-      {"Output", "Initial_Conditions", "Lower_Bound"}, 0.5, {"1.8", "3.2"}};
+      InputSections::o_initialConditions + "Lower_Bound", 0.5, {"1.8", "3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4646,7 +4678,7 @@ struct InputKeys {
    * \see_key{key_output_IC_proper_time_}
    */
   inline static const Key<double> output_initialConditions_properTime{
-      {"Output", "Initial_Conditions", "Proper_Time"},
+      InputSections::o_initialConditions + "Proper_Time",
       DefaultType::Dependent,
       {"1.7", "3.2"}};
 
@@ -4664,7 +4696,7 @@ struct InputKeys {
    * \see_key{key_output_IC_pt_cut_}
    */
   inline static const Key<double> output_initialConditions_pTCut{
-      {"Output", "Initial_Conditions", "pT_Cut"},
+      InputSections::o_initialConditions + "pT_Cut",
       DefaultType::Dependent,
       {"2.2", "3.2"}};
 
@@ -4683,7 +4715,7 @@ struct InputKeys {
    * \see_key{key_output_IC_rapidity_cut_}
    */
   inline static const Key<double> output_initialConditions_rapidityCut{
-      {"Output", "Initial_Conditions", "Rapidity_Cut"},
+      InputSections::o_initialConditions + "Rapidity_Cut",
       DefaultType::Dependent,
       {"2.2", "3.2"}};
 
@@ -4707,7 +4739,7 @@ struct InputKeys {
    * \see_key{key_output_rivet_analyses_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_analyses{
-      {"Output", "Rivet", "Analyses"}, DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_rivet + "Analyses", DefaultType::Dependent, {"2.0.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4720,7 +4752,9 @@ struct InputKeys {
    * \see_key{key_output_rivet_cross_sections_}
    */
   inline static const Key<std::array<double, 2>> output_rivet_crossSection{
-      {"Output", "Rivet", "Cross_Section"}, DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_rivet + "Cross_Section",
+      DefaultType::Dependent,
+      {"2.0.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4734,7 +4768,7 @@ struct InputKeys {
    * \see_key{key_output_rivet_ignore_beams_}
    */
   inline static const Key<bool> output_rivet_ignoreBeams{
-      {"Output", "Rivet", "Ignore_Beams"}, true, {"2.0.2"}};
+      InputSections::o_rivet + "Ignore_Beams", true, {"2.0.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4750,7 +4784,7 @@ struct InputKeys {
    */
   inline static const Key<std::map<std::string, std::string>>
       output_rivet_logging{
-          {"Output", "Rivet", "Logging"}, DefaultType::Dependent, {"0.50"}};
+          InputSections::o_rivet + "Logging", DefaultType::Dependent, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4764,7 +4798,7 @@ struct InputKeys {
    * \see_key{key_output_rivet_paths_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_paths{
-      {"Output", "Rivet", "Paths"}, DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_rivet + "Paths", DefaultType::Dependent, {"2.0.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4778,7 +4812,7 @@ struct InputKeys {
    * \see_key{key_output_rivet_preloads_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_preloads{
-      {"Output", "Rivet", "Preloads"}, DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_rivet + "Preloads", DefaultType::Dependent, {"2.0.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4796,7 +4830,7 @@ struct InputKeys {
    * \see_key{key_output_rivet_weights_cap_}
    */
   inline static const Key<double> output_rivet_weights_cap{
-      {"Output", "Rivet", "Weights", "Cap"}, DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_r_weights + "Cap", DefaultType::Dependent, {"2.0.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4809,7 +4843,7 @@ struct InputKeys {
    * \see_key{key_output_rivet_weights_deselect_}
    */
   inline static const Key<std::vector<std::string>>
-      output_rivet_weights_deselect{{"Output", "Rivet", "Weights", "Deselect"},
+      output_rivet_weights_deselect{InputSections::o_r_weights + "Deselect",
                                     DefaultType::Dependent,
                                     {"2.0.2"}};
 
@@ -4825,7 +4859,7 @@ struct InputKeys {
    * \see_key{key_output_rivet_weights_nlo_smearing_}
    */
   inline static const Key<double> output_rivet_weights_nloSmearing{
-      {"Output", "Rivet", "Weights", "NLO_Smearing"},
+      InputSections::o_r_weights + "NLO_Smearing",
       DefaultType::Dependent,
       {"2.0.2"}};
 
@@ -4840,7 +4874,7 @@ struct InputKeys {
    * \see_key{key_output_rivet_weights_no_multi_}
    */
   inline static const Key<std::array<double, 2>> output_rivet_weights_noMulti{
-      {"Output", "Rivet", "Weights", "No_Multi"},
+      InputSections::o_r_weights + "No_Multi",
       DefaultType::Dependent,
       {"2.0.2"}};
 
@@ -4855,7 +4889,7 @@ struct InputKeys {
    * \see_key{key_output_rivet_weights_nominal_}
    */
   inline static const Key<std::string> output_rivet_weights_nominal{
-      {"Output", "Rivet", "Weights", "Nominal"},
+      InputSections::o_r_weights + "Nominal",
       DefaultType::Dependent,
       {"2.0.2"}};
 
@@ -4870,9 +4904,7 @@ struct InputKeys {
    * \see_key{key_output_rivet_weights_select_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_weights_select{
-      {"Output", "Rivet", "Weights", "Select"},
-      DefaultType::Dependent,
-      {"2.0.2"}};
+      InputSections::o_r_weights + "Select", DefaultType::Dependent, {"2.0.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4918,7 +4950,7 @@ struct InputKeys {
    * \see_key{key_output_thermo_only_part_}
    */
   inline static const Key<bool> output_thermodynamics_onlyParticipants{
-      {"Output", "Thermodynamics", "Only_Participants"}, false, {"2.1"}};
+      InputSections::o_thermodynamics + "Only_Participants", false, {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4931,7 +4963,7 @@ struct InputKeys {
    * \see_key{key_output_thermo_position_}
    */
   inline static const Key<std::array<double, 3>> output_thermodynamics_position{
-      {"Output", "Thermodynamics", "Position"},
+      InputSections::o_thermodynamics + "Position",
       std::array<double, 3>{{0.0, 0.0, 0.0}},
       {"1.0"}};
 
@@ -4961,7 +4993,7 @@ struct InputKeys {
    */
   inline static const Key<std::set<ThermodynamicQuantity>>
       output_thermodynamics_quantites{
-          {"Output", "Thermodynamics", "Quantities"},
+          InputSections::o_thermodynamics + "Quantities",
           std::set<ThermodynamicQuantity>{},
           {"1.0"}};
 
@@ -5000,7 +5032,7 @@ struct InputKeys {
    * \see_key{key_output_thermo_smearing_}
    */
   inline static const Key<bool> output_thermodynamics_smearing{
-      {"Output", "Thermodynamics", "Smearing"}, true, {"1.0"}};
+      InputSections::o_thermodynamics + "Smearing", true, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5018,7 +5050,7 @@ struct InputKeys {
    * \see_key{key_output_thermo_type_}
    */
   inline static const Key<DensityType> output_thermodynamics_type{
-      {"Output", "Thermodynamics", "Type"}, DensityType::Baryon, {"1.0"}};
+      InputSections::o_thermodynamics + "Type", DensityType::Baryon, {"1.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
@@ -5044,8 +5076,8 @@ struct InputKeys {
   /**
    * \see_key{key_lattice_automatic_}
    */
-  inline static const Key<bool> lattice_automatic{{"Lattice", "Automatic"},
-                                                  {"3.0"}};
+  inline static const Key<bool> lattice_automatic{
+      InputSections::lattice + "Automatic", {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
@@ -5059,7 +5091,7 @@ struct InputKeys {
    * \see_key{key_lattice_cell_number_}
    */
   inline static const Key<std::array<int, 3>> lattice_cellNumber{
-      {"Lattice", "Cell_Number"}, DefaultType::Dependent, {"0.80"}};
+      InputSections::lattice + "Cell_Number", DefaultType::Dependent, {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
@@ -5078,7 +5110,7 @@ struct InputKeys {
    * \see_key{key_lattice_origin_}
    */
   inline static const Key<std::array<double, 3>> lattice_origin{
-      {"Lattice", "Origin"}, DefaultType::Dependent, {"0.80"}};
+      InputSections::lattice + "Origin", DefaultType::Dependent, {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
@@ -5095,7 +5127,7 @@ struct InputKeys {
    * \see_key{key_lattice_periodic_}
    */
   inline static const Key<bool> lattice_periodic{
-      {"Lattice", "Periodic"}, DefaultType::Dependent, {"0.80"}};
+      InputSections::lattice + "Periodic", DefaultType::Dependent, {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
@@ -5108,7 +5140,7 @@ struct InputKeys {
    * \see_key{key_lattice_pot_affect_threshold_}
    */
   inline static const Key<bool> lattice_potentialsAffectThreshold{
-      {"Lattice", "Potentials_Affect_Thresholds"}, false, {"1.3"}};
+      InputSections::lattice + "Potentials_Affect_Thresholds", false, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
@@ -5122,7 +5154,7 @@ struct InputKeys {
    * \see_key{key_lattice_sizes_}
    */
   inline static const Key<std::array<double, 3>> lattice_sizes{
-      {"Lattice", "Sizes"}, DefaultType::Dependent, {"0.80"}};
+      InputSections::lattice + "Sizes", DefaultType::Dependent, {"0.80"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_potentials
@@ -5137,7 +5169,9 @@ struct InputKeys {
    * \see_key{key_potentials_use_potentials_outside_lattice_}
    */
   inline static const Key<bool> potentials_use_potentials_outside_lattice{
-      {"Potentials", "Use_Potentials_Outside_Lattice"}, true, {"3.1"}};
+      InputSections::potentials + "Use_Potentials_Outside_Lattice",
+      true,
+      {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
@@ -5149,7 +5183,7 @@ struct InputKeys {
    * \see_key{key_potentials_skyrme_a_}
    */
   inline static const Key<double> potentials_skyrme_skyrmeA{
-      {"Potentials", "Skyrme", "Skyrme_A"}, {"0.60"}};
+      InputSections::p_skyrme + "Skyrme_A", {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
@@ -5161,7 +5195,7 @@ struct InputKeys {
    * \see_key{key_potentials_skyrme_b_}
    */
   inline static const Key<double> potentials_skyrme_skyrmeB{
-      {"Potentials", "Skyrme", "Skyrme_B"}, {"0.60"}};
+      InputSections::p_skyrme + "Skyrme_B", {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
@@ -5174,7 +5208,7 @@ struct InputKeys {
    * \see_key{key_potentials_skyrme_tau_}
    */
   inline static const Key<double> potentials_skyrme_skyrmeTau{
-      {"Potentials", "Skyrme", "Skyrme_Tau"}, {"0.60"}};
+      InputSections::p_skyrme + "Skyrme_Tau", {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_symmetry
@@ -5189,7 +5223,7 @@ struct InputKeys {
    * \see_key{key_potentials_symmetry_gamma_}
    */
   inline static const Key<double> potentials_symmetry_gamma{
-      {"Potentials", "Symmetry", "gamma"}, DefaultType::Dependent, {"1.7"}};
+      InputSections::p_symmetry + "gamma", DefaultType::Dependent, {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_symmetry
@@ -5201,7 +5235,7 @@ struct InputKeys {
    * \see_key{key_potentials_symmetry_s_pot_}
    */
   inline static const Key<double> potentials_symmetry_sPot{
-      {"Potentials", "Symmetry", "S_Pot"}, {"0.60"}};
+      InputSections::p_symmetry + "S_Pot", {"0.60"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_VDF
@@ -5213,7 +5247,7 @@ struct InputKeys {
    * \see_key{key_potentials_vdf_coeffs_}
    */
   inline static const Key<std::vector<double>> potentials_vdf_coeffs{
-      {"Potentials", "VDF", "Coeffs"}, {"2.1"}};
+      InputSections::p_vdf + "Coeffs", {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_VDF
@@ -5228,7 +5262,7 @@ struct InputKeys {
    * \see_key{key_potentials_vdf_powers_}
    */
   inline static const Key<std::vector<double>> potentials_vdf_powers{
-      {"Potentials", "VDF", "Powers"}, {"2.1"}};
+      InputSections::p_vdf + "Powers", {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_VDF
@@ -5240,7 +5274,7 @@ struct InputKeys {
    * \see_key{key_potentials_symmetry_gamma_}
    */
   inline static const Key<double> potentials_vdf_satRhoB{
-      {"Potentials", "VDF", "Sat_rhoB"}, {"2.1"}};
+      InputSections::p_vdf + "Sat_rhoB", {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_coulomb
@@ -5252,7 +5286,7 @@ struct InputKeys {
    * \see_key{key_potentials_coulomb_r_cut_}
    */
   inline static const Key<std::vector<double>> potentials_coulomb_rCut{
-      {"Potentials", "Coulomb", "R_Cut"}, {"2.1"}};
+      InputSections::p_coulomb + "R_Cut", {"2.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_momentum_dependence
@@ -5265,7 +5299,7 @@ struct InputKeys {
    * \see_key{key_potentials_momentum_dependence_C}
    */
   inline static const Key<double> potentials_momentum_dependence_C{
-      {"Potentials", "Momentum_Dependence", "C"}, {"3.1"}};
+      InputSections::p_momentumDependence + "C", {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_momentum_dependence
@@ -5278,7 +5312,7 @@ struct InputKeys {
    * \see_key{key_potentials_momentum_dependence_Lambda}
    */
   inline static const Key<double> potentials_momentum_dependence_Lambda{
-      {"Potentials", "Momentum_Dependence", "Lambda"}, {"3.1"}};
+      InputSections::p_momentumDependence + "Lambda", {"3.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -5297,7 +5331,7 @@ struct InputKeys {
    * \see_key{key_forced_therm_cell_number_}
    */
   inline static const Key<std::array<int, 3>> forcedThermalization_cellNumber{
-      {"Forced_Thermalization", "Cell_Number"}, {"1.1"}};
+      InputSections::forcedThermalization + "Cell_Number", {"1.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -5310,7 +5344,7 @@ struct InputKeys {
    * \see_key{key_forced_therm_critical_edens_}
    */
   inline static const Key<double> forcedThermalization_criticalEDensity{
-      {"Forced_Thermalization", "Critical_Edens"}, {"1.1"}};
+      InputSections::forcedThermalization + "Critical_Edens", {"1.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -5323,7 +5357,7 @@ struct InputKeys {
    * \see_key{key_forced_therm_start_time_}
    */
   inline static const Key<double> forcedThermalization_startTime{
-      {"Forced_Thermalization", "Start_Time"}, {"1.1"}};
+      InputSections::forcedThermalization + "Start_Time", {"1.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -5335,7 +5369,7 @@ struct InputKeys {
    * \see_key{key_forced_therm_timestep_}
    */
   inline static const Key<double> forcedThermalization_timestep{
-      {"Forced_Thermalization", "Timestep"}, {"1.1"}};
+      InputSections::forcedThermalization + "Timestep", {"1.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -5358,9 +5392,10 @@ struct InputKeys {
    * \see_key{key_forced_therm_algorithm_}
    */
   inline static const Key<ThermalizationAlgorithm>
-      forcedThermalization_algorithm{{"Forced_Thermalization", "Algorithm"},
-                                     ThermalizationAlgorithm::BiasedBF,
-                                     {"1.1"}};
+      forcedThermalization_algorithm{
+          InputSections::forcedThermalization + "Algorithm",
+          ThermalizationAlgorithm::BiasedBF,
+          {"1.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -5381,7 +5416,7 @@ struct InputKeys {
    */
   inline static const Key<std::array<double, 3>>
       forcedThermalization_latticeSizes{
-          {"Forced_Thermalization", "Lattice_Sizes"}, {"1.1"}};
+          InputSections::forcedThermalization + "Lattice_Sizes", {"1.1"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -5403,7 +5438,7 @@ struct InputKeys {
    * \see_key{key_forced_therm_microcanonical_}
    */
   inline static const Key<bool> forcedThermalization_microcanonical{
-      {"Forced_Thermalization", "Microcanonical"}, false, {"1.7"}};
+      InputSections::forcedThermalization + "Microcanonical", false, {"1.7"}};
 
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
