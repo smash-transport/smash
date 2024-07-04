@@ -14,6 +14,7 @@
 #include <array>
 #include <exception>
 #include <filesystem>
+#include <iostream>
 #include <optional>
 #include <set>
 #include <stdexcept>
@@ -1365,25 +1366,43 @@ class Configuration {
                              Configuration::GetEmpty::No);
 
   /**
-   * Return whether the configuration has a key, possibly without value.
-   * \param[in] key The key to be checked for
+   * Return whether the configuration has a (possibly empty) non-map key.
+   * Although %YAML keys can have maps as value, we rather refer to those as
+   * sections and we do not consider them as key in the SMASH database sense. A
+   * key has then either a scalar or sequence value.
+   *
+   * \param[in] key The key to be checked for.
    */
   template <typename T>
   bool has_key(const Key<T> &key) const {
     const auto found_node =
         find_existing_node({key.labels().begin(), key.labels().end()});
-    return found_node.has_value();
+    return found_node.has_value() && !(found_node.value().IsMap());
   }
 
   /**
-   * Return whether there is a non-empty value behind the requested \p key .
-   * \param[in] key The key to be checked for
+   * Return whether there is a \b non-empty value behind the requested \p key
+   * (which is supposed not to refer to a section). If there is a section with
+   * the same labels as the provided key has, this function returns \c false .
+   *
+   * \param[in] key The key to be checked for.
    */
   template <typename T>
   bool has_value(const Key<T> &key) const {
     const auto found_node =
         find_existing_node({key.labels().begin(), key.labels().end()});
-    return found_node.has_value() && !(found_node.value().IsNull());
+    return found_node.has_value() && !(found_node.value().IsNull()) &&
+           !(found_node.value().IsMap());
+  }
+
+  /**
+   * Return whether there is a (possibly empty) section with the given labels.
+   *
+   * \param[in] labels The labels of the section to be checked for.
+   */
+  bool has_section(const KeyLabels &labels) const {
+    const auto found_node = find_existing_node({labels.begin(), labels.end()});
+    return found_node.has_value() && found_node.value().IsMap();
   }
 
   bool has_value(std::initializer_list<const char *> keys) const;

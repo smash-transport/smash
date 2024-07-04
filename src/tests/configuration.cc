@@ -168,14 +168,13 @@ TEST(take_removes_empty_section) {
       Sub-section:
         Key: "Value"
   )"};
-  const auto section = get_key<std::string>({"Section"}),
-             subsection = get_key<std::string>({"Section", "Sub-section"}),
-             key = get_key<std::string>({"Section", "Sub-section", "Key"});
-  VERIFY(conf.has_value(section));
-  VERIFY(conf.has_value(subsection));
+  const KeyLabels section{"Section"}, subsection{"Section", "Sub-section"};
+  const auto key = get_key<std::string>({"Section", "Sub-section", "Key"});
+  VERIFY(conf.has_section(section));
+  VERIFY(conf.has_section(subsection));
   conf.take(key);
-  VERIFY(!conf.has_value(section));
-  VERIFY(!conf.has_value(subsection));
+  VERIFY(!conf.has_section(section));
+  VERIFY(!conf.has_section(subsection));
 }
 
 TEST(take_removes_empty_section_but_not_empty_lists) {
@@ -186,7 +185,7 @@ TEST(take_removes_empty_section_but_not_empty_lists) {
         Empty_list: []
   )"};
   conf.take(get_key<std::string>({"Section", "Sub-section", "Key"}));
-  VERIFY(conf.has_value(get_key<std::string>({"Section", "Sub-section"})));
+  VERIFY(conf.has_section({"Section", "Sub-section"}));
   conf.clear();
 }
 
@@ -255,7 +254,7 @@ TEST(set_value_on_empty_conf) {
   auto conf = Configuration("");
   const auto key = get_key<int>({"New section", "New key"});
   conf.set_value(key, 42);
-  VERIFY(conf.has_value(get_key<std::string>({"New section"})));
+  VERIFY(conf.has_section({"New section"}));
   VERIFY(conf.has_value(key));
   conf.clear();
 }
@@ -270,7 +269,7 @@ TEST(set_value_on_conf_created_with_empty_file) {
   auto conf = Configuration{tmp_dir, tmp_file};
   const auto key = get_key<int>({"New section", "New key"});
   conf.set_value(key, 42);
-  VERIFY(conf.has_value(get_key<std::string>({"New section"})));
+  VERIFY(conf.has_section({"New section"}));
   VERIFY(conf.has_value(key));
   ofs.close();
   std::filesystem::remove(tmp_dir / tmp_file);
@@ -348,9 +347,7 @@ TEST(extract_complete_sub_configuration) {
       floozy: {2212: 1, 2112: 1})");
   COMPARE(sub_conf.to_string(), result_as_string);
   for ([[maybe_unused]] const auto &label : section) {
-    auto key = get_key<int>(
-        {section.begin(), section.end()});  // Type of key here irrelevant
-    VERIFY(sub_conf.has_value(key));
+    VERIFY(sub_conf.has_section(section));
     section.pop_back();
   }
   sub_conf.clear();
@@ -368,25 +365,46 @@ TEST(extract_complete_not_existing_section_as_empty_conf) {
       {})");
   COMPARE(sub_conf.to_string(), result_as_string);
   for ([[maybe_unused]] const auto &label : section) {
-    auto key = get_key<int>(
-        {section.begin(), section.end()});  // Type of key here irrelevant
-    VERIFY(sub_conf.has_value(key));
+    VERIFY(sub_conf.has_section(section));
     section.pop_back();
   }
   sub_conf.clear();
 }
 
-TEST(has_value_including_empty) {
-  Configuration conf = Configuration{"Empty:"};
-  const auto key = get_key<std::string>({"Empty"});
-  VERIFY(!conf.has_value(key));
-  VERIFY(conf.has_key(key));
+TEST(has_possibly_empty_key) {
+  Configuration conf = Configuration{"{Key: 42, Array: [], Empty:}"};
+  const auto missing_key = get_key<std::string>({"XXX"});
+  const auto empty_key = get_key<std::string>({"Empty"});
+  const auto value_key = get_key<std::string>({"Key"});
+  const auto array_key = get_key<std::string>({"Key"});
+  VERIFY(!conf.has_value(missing_key));
+  VERIFY(!conf.has_key(missing_key));
+  VERIFY(!conf.has_value(empty_key));
+  VERIFY(conf.has_key(empty_key));
+  VERIFY(conf.has_value(value_key));
+  VERIFY(conf.has_key(value_key));
+  VERIFY(conf.has_value(array_key));
+  VERIFY(conf.has_key(array_key));
   conf.clear();
 }
 
 TEST(has_value) {
   Configuration conf = make_test_configuration();
   VERIFY(conf.has_value(get_key<double>({"tamer", "pipit", "bushelling"})));
+  VERIFY(!conf.has_value(get_key<double>({"tamer", "pipit"})));
+  conf.clear();
+}
+
+TEST(has_section) {
+  Configuration conf = make_test_configuration();
+  VERIFY(conf.has_section({"tamer", "pipit"}));
+  conf.clear();
+  conf = Configuration("{Empty_map: {}, Key: 42, Array: [1,2,3], Empty_key:}");
+  VERIFY(conf.has_section({"Empty_map"}));
+  VERIFY(!conf.has_section({"Key"}));
+  VERIFY(!conf.has_section({"Array"}));
+  VERIFY(!conf.has_section({"Empty_key"}));
+  VERIFY(!conf.has_section({"XXX"}));
   conf.clear();
 }
 
