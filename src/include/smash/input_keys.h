@@ -4254,6 +4254,9 @@ struct InputKeys {
    */
   /**
    * \see_key{key_output_content_format_}
+   *
+   * \note We use here an empty container as default, since no format is like
+   * a specified empty one and hence it makes it easier in the validation.
    */
   inline static const Key<std::vector<std::string>> output_particles_format{
       {"Output", "Particles", "Format"}, std::vector<std::string>{}, {"1.2"}};
@@ -5581,6 +5584,82 @@ struct InputKeys {
       std::cref(forcedThermalization_algorithm),
       std::cref(forcedThermalization_latticeSizes),
       std::cref(forcedThermalization_microcanonical)};
+
+  /**
+   * Get the logging Key given a logging area.
+   *
+   * @param area Logging area as \c std::string_view .
+   * @return Constant reference to the database key found.
+   */
+  static const Key<einhard::LogLevel> &get_logging_key(std::string_view area) {
+    return get_key_reference<einhard::LogLevel>({"Logging", std::string{area}});
+  }
+
+  /**
+   * Get the output format key object
+   *
+   * @param content The output content as \c std::string_view .
+   * @return Constant reference to the database key found.
+   */
+  static const Key<std::vector<std::string>> &get_output_format_key(
+      std::string_view content) {
+    return get_key_reference<std::vector<std::string>>(
+        {"Output", std::string{content}, "Format"});
+  }
+
+ private:
+  /**
+   * Get a key reference object given the key labels.
+   *
+   * @tparam T The type of the Key.
+   * @param labels The Key labels.
+   * @return The reference to the found Key.
+   *
+   * @throw std::invalid_argument if no Key was found.
+   *
+   * @note This function internally use another method into which it might have
+   *       been merged. This has not been done to separate the finding operation
+   *       with the reference extraction out from the variant.
+   */
+  template <typename T>
+  static const Key<T> &get_key_reference(const KeyLabels &labels) {
+    using key_reference = std::reference_wrapper<const Key<T>>;
+    auto candidate = InputKeys::find_key(labels);
+    if (candidate.has_value()) {
+      return std::get<key_reference>(candidate.value());
+    } else {
+      throw std::invalid_argument("No database key with keys \"" +
+                                  join(labels, ": ") + "\" was found.");
+    }
+  }
+
+  /**
+   * Find a Key in the database given its labels.
+   *
+   * @param labels The Key labels.
+   * @return An \c std::optional<key_references_variant> object which contains
+   *         the Key (in the \c std::variant of references) if found,
+   *         \c std::nullopt otherwise.
+   */
+  static std::optional<key_references_variant> find_key(
+      const KeyLabels &labels) {
+    if (labels.size() == 0)
+      return std::nullopt;
+    auto iterator_to_key_references_variant =
+        std::find_if(smash::InputKeys::list.begin(),
+                     smash::InputKeys::list.end(), [&labels](auto key) {
+                       return std::visit(
+                           [&labels](auto &&arg) {
+                             return arg.get().has_same_labels(labels);
+                           },
+                           key);
+                     });
+    if (iterator_to_key_references_variant == smash::InputKeys::list.end()) {
+      return std::nullopt;
+    } else {
+      return *iterator_to_key_references_variant;
+    }
+  }
 };
 
 /*!\Userguide
