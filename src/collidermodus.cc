@@ -24,6 +24,7 @@
 #include "smash/fourvector.h"
 #include "smash/input_keys.h"
 #include "smash/logging.h"
+#include "smash/nucleus.h"
 #include "smash/random.h"
 
 namespace smash {
@@ -34,30 +35,22 @@ ColliderModus::ColliderModus(Configuration modus_config,
   Configuration modus_cfg =
       modus_config.extract_sub_configuration({"Collider"});
   // Get the reference frame for the collision calculation.
-  if (modus_cfg.has_value({"Calculation_Frame"})) {
-    frame_ = modus_cfg.take({"Calculation_Frame"});
-  }
-  if (fermi_motion_ == FermiMotion::On) {
-    logg[LCollider].info() << "Fermi motion is ON.";
-  } else if (fermi_motion_ == FermiMotion::Frozen) {
-    logg[LCollider].info() << "FROZEN Fermi motion is on.";
-  } else if (fermi_motion_ == FermiMotion::Off) {
-    logg[LCollider].info() << "Fermi motion is OFF.";
-  }
+  frame_ = modus_cfg.take(InputKeys::modi_collider_calculationFrame);
+
   Configuration proj_cfg = modus_cfg.extract_sub_configuration({"Projectile"});
   Configuration targ_cfg = modus_cfg.extract_sub_configuration({"Target"});
   /* Needed to check if projectile and target in customnucleus are read from
    * the same input file.*/
   bool same_file = false;
   // Set up the projectile nucleus
-  if (proj_cfg.has_value({"Deformed"})) {
+  if (proj_cfg.has_section(InputSections::m_c_p_deformed)) {
     projectile_ =
         create_deformed_nucleus(proj_cfg, params.testparticles, "projectile");
-  } else if (proj_cfg.has_value({"Custom"})) {
+  } else if (proj_cfg.has_section(InputSections::m_c_p_custom)) {
     same_file = same_inputfile(proj_cfg, targ_cfg);
     projectile_ = std::make_unique<CustomNucleus>(
         proj_cfg, params.testparticles, same_file);
-  } else if (proj_cfg.has_value({"Alpha_Clustered"})) {
+  } else if (proj_cfg.has_section(InputSections::m_c_p_alphaClustered)) {
     logg[LCollider].info() << "Projectile is alpha-clustered with woods-saxon "
                               "parameters for the He-clusters listed below.";
     projectile_ = create_alphaclustered_nucleus(proj_cfg, params.testparticles,
@@ -71,12 +64,12 @@ ColliderModus::ColliderModus(Configuration modus_config,
   projectile_->set_label(BelongsTo::Projectile);
 
   // Set up the target nucleus
-  if (targ_cfg.has_value({"Deformed"})) {
+  if (targ_cfg.has_section(InputSections::m_c_t_deformed)) {
     target_ = create_deformed_nucleus(targ_cfg, params.testparticles, "target");
-  } else if (targ_cfg.has_value({"Custom"})) {
+  } else if (targ_cfg.has_section(InputSections::m_c_t_custom)) {
     target_ = std::make_unique<CustomNucleus>(targ_cfg, params.testparticles,
                                               same_file);
-  } else if (targ_cfg.has_value({"Alpha_Clustered"})) {
+  } else if (targ_cfg.has_section(InputSections::m_c_t_alphaClustered)) {
     logg[LCollider].info() << "Target is alpha-clustered with woods-saxon "
                               "parameters for the He-clusters listed below.";
     target_ =
@@ -90,8 +83,13 @@ ColliderModus::ColliderModus(Configuration modus_config,
   target_->set_label(BelongsTo::Target);
 
   // Get the Fermi-Motion input (off, on, frozen)
-  if (modus_cfg.has_value({"Fermi_Motion"})) {
-    fermi_motion_ = modus_cfg.take(InputKeys::modi_collider_fermiMotion);
+  fermi_motion_ = modus_cfg.take(InputKeys::modi_collider_fermiMotion);
+  if (fermi_motion_ == FermiMotion::On) {
+    logg[LCollider].info() << "Fermi motion is ON.";
+  } else if (fermi_motion_ == FermiMotion::Frozen) {
+    logg[LCollider].info() << "FROZEN Fermi motion is on.";
+  } else if (fermi_motion_ == FermiMotion::Off) {
+    logg[LCollider].info() << "Fermi motion is OFF.";
   }
 
   // Get the total nucleus-nucleus collision energy. Since there is
@@ -105,8 +103,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
       projectile_->mass() / projectile_->number_of_particles();
   const double mass_b = target_->mass() / target_->number_of_particles();
   // Option 1: Center of mass energy.
-  if (modus_cfg.has_value({"Sqrtsnn"})) {
-    sqrt_s_NN_ = modus_cfg.take({"Sqrtsnn"});
+  if (modus_cfg.has_value(InputKeys::modi_collider_sqrtSNN)) {
+    sqrt_s_NN_ = modus_cfg.take(InputKeys::modi_collider_sqrtSNN);
     // Check that input satisfies the lower bound (everything at rest).
     if (sqrt_s_NN_ <= mass_a + mass_b) {
       throw ModusDefault::InvalidEnergy(
@@ -122,8 +120,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
   }
   /* Option 2: Total energy per nucleon of the projectile nucleus
    * (target at rest).  */
-  if (modus_cfg.has_value({"E_Tot"})) {
-    const double e_tot = modus_cfg.take({"E_Tot"});
+  if (modus_cfg.has_value(InputKeys::modi_collider_eTot)) {
+    const double e_tot = modus_cfg.take(InputKeys::modi_collider_eTot);
     if (e_tot < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
@@ -137,8 +135,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
   }
   /* Option 3: Kinetic energy per nucleon of the projectile nucleus
    * (target at rest).  */
-  if (modus_cfg.has_value({"E_Kin"})) {
-    const double e_kin = modus_cfg.take({"E_Kin"});
+  if (modus_cfg.has_value(InputKeys::modi_collider_eKin)) {
+    const double e_kin = modus_cfg.take(InputKeys::modi_collider_eKin);
     if (e_kin < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
@@ -151,8 +149,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
     energy_input++;
   }
   // Option 4: Momentum of the projectile nucleus (target at rest).
-  if (modus_cfg.has_value({"P_Lab"})) {
-    const double p_lab = modus_cfg.take({"P_Lab"});
+  if (modus_cfg.has_value(InputKeys::modi_collider_pLab)) {
+    const double p_lab = modus_cfg.take(InputKeys::modi_collider_pLab);
     if (p_lab < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
@@ -165,9 +163,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
     energy_input++;
   }
   // Option 5: Total energy per nucleon of _each_ beam
-  if (proj_cfg.has_value({"E_Tot"}) && targ_cfg.has_value({"E_Tot"})) {
-    const double e_tot_p = proj_cfg.take({"E_Tot"});
-    const double e_tot_t = targ_cfg.take({"E_Tot"});
+  if (proj_cfg.has_value(InputKeys::modi_collider_projectile_eTot) &&
+      targ_cfg.has_value(InputKeys::modi_collider_target_eTot)) {
+    const double e_tot_p =
+        proj_cfg.take(InputKeys::modi_collider_projectile_eTot);
+    const double e_tot_t = targ_cfg.take(InputKeys::modi_collider_target_eTot);
     if (e_tot_p < 0 || e_tot_t < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
@@ -180,9 +180,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
     energy_input++;
   }
   // Option 6: Kinetic energy per nucleon of _each_ beam
-  if (proj_cfg.has_value({"E_Kin"}) && targ_cfg.has_value({"E_Kin"})) {
-    const double e_kin_p = proj_cfg.take({"E_Kin"});
-    const double e_kin_t = targ_cfg.take({"E_Kin"});
+  if (proj_cfg.has_value(InputKeys::modi_collider_projectile_eKin) &&
+      targ_cfg.has_value(InputKeys::modi_collider_target_eKin)) {
+    const double e_kin_p =
+        proj_cfg.take(InputKeys::modi_collider_projectile_eKin);
+    const double e_kin_t = targ_cfg.take(InputKeys::modi_collider_target_eKin);
     if (e_kin_p < 0 || e_kin_t < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
@@ -195,9 +197,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
     energy_input++;
   }
   // Option 7: Momentum per nucleon of _each_ beam
-  if (proj_cfg.has_value({"P_Lab"}) && targ_cfg.has_value({"P_Lab"})) {
-    const double p_lab_p = proj_cfg.take({"P_Lab"});
-    const double p_lab_t = targ_cfg.take({"P_Lab"});
+  if (proj_cfg.has_value(InputKeys::modi_collider_projectile_pLab) &&
+      targ_cfg.has_value(InputKeys::modi_collider_target_pLab)) {
+    const double p_lab_p =
+        proj_cfg.take(InputKeys::modi_collider_projectile_pLab);
+    const double p_lab_t = targ_cfg.take(InputKeys::modi_collider_target_pLab);
     if (p_lab_p < 0 || p_lab_t < 0) {
       throw ModusDefault::InvalidEnergy(
           "Input Error: "
@@ -222,25 +226,25 @@ ColliderModus::ColliderModus(Configuration modus_config,
 
   /* Impact parameter setting: Either "Value", "Range", "Max" or "Sample".
    * Unspecified means 0 impact parameter.*/
-  if (modus_cfg.has_value({"Impact", "Value"})) {
-    impact_ = modus_cfg.take({"Impact", "Value"});
+  if (modus_cfg.has_value(InputKeys::modi_collider_impact_value)) {
+    impact_ = modus_cfg.take(InputKeys::modi_collider_impact_value);
     imp_min_ = impact_;
     imp_max_ = impact_;
   } else {
     // If impact is not supplied by value, inspect sampling parameters:
-    if (modus_cfg.has_value({"Impact", "Sample"})) {
-      sampling_ = modus_cfg.take({"Impact", "Sample"});
+    if (modus_cfg.has_value(InputKeys::modi_collider_impact_sample)) {
+      sampling_ = modus_cfg.take(InputKeys::modi_collider_impact_sample);
       if (sampling_ == Sampling::Custom) {
-        if (!(modus_cfg.has_value({"Impact", "Values"}) ||
-              modus_cfg.has_value({"Impact", "Yields"}))) {
+        if (!(modus_cfg.has_value(InputKeys::modi_collider_impact_values) ||
+              modus_cfg.has_value(InputKeys::modi_collider_impact_yields))) {
           throw std::invalid_argument(
-              "Input Error: Need impact parameter spectrum for custom "
-              "sampling. "
-              "Please provide Values and Yields.");
+              "Input Error: Need impact parameter spectrum for custom sampling."
+              " Please provide Values and Yields.");
         }
         const std::vector<double> impacts =
-            modus_cfg.take({"Impact", "Values"});
-        const std::vector<double> yields = modus_cfg.take({"Impact", "Yields"});
+            modus_cfg.take(InputKeys::modi_collider_impact_values);
+        const std::vector<double> yields =
+            modus_cfg.take(InputKeys::modi_collider_impact_yields);
         if (impacts.size() != yields.size()) {
           throw std::invalid_argument(
               "Input Error: Need as many impact parameter values as yields. "
@@ -256,35 +260,26 @@ ColliderModus::ColliderModus(Configuration modus_config,
         yield_max_ = *std::max_element(yields.begin(), yields.end());
       }
     }
-    if (modus_cfg.has_value({"Impact", "Range"})) {
-      const std::array<double, 2> range = modus_cfg.take({"Impact", "Range"});
+    if (modus_cfg.has_value(InputKeys::modi_collider_impact_range)) {
+      const std::array<double, 2> range =
+          modus_cfg.take(InputKeys::modi_collider_impact_range);
       imp_min_ = range[0];
       imp_max_ = range[1];
     }
-    if (modus_cfg.has_value({"Impact", "Max"})) {
+    if (modus_cfg.has_value(InputKeys::modi_collider_impact_max)) {
       imp_min_ = 0.0;
-      imp_max_ = modus_cfg.take({"Impact", "Max"});
+      imp_max_ = modus_cfg.take(InputKeys::modi_collider_impact_max);
     }
   }
   /// \todo include a check that only one method of specifying impact is used
-  // whether the direction of separation should be ramdomly smapled
+  // whether the direction of separation should be randomly sampled
   random_reaction_plane_ =
       modus_cfg.take(InputKeys::modi_collider_impact_randomReactionPlane);
   // Look for user-defined initial separation between nuclei.
-  if (modus_cfg.has_value({"Initial_Distance"})) {
-    initial_z_displacement_ = modus_cfg.take({"Initial_Distance"});
-    // the displacement is half the distance (both nuclei are shifted
-    // initial_z_displacement_ away from origin)
-    initial_z_displacement_ /= 2.0;
-  }
-
-  if (fermi_motion_ == FermiMotion::On) {
-    logg[LCollider].info() << "Fermi motion is ON.";
-  } else if (fermi_motion_ == FermiMotion::Frozen) {
-    logg[LCollider].info() << "FROZEN Fermi motion is on.";
-  } else if (fermi_motion_ == FermiMotion::Off) {
-    logg[LCollider].info() << "Fermi motion is OFF.";
-  }
+  // The displacement is half the distance (both nuclei are shifted
+  // initial_z_displacement_ away from origin)
+  initial_z_displacement_ =
+      modus_cfg.take(InputKeys::modi_collider_initialDistance) / 2.0;
 
   FluidizationType IC_type = FluidizationType::ConstantTau;
   if (modus_cfg.has_value(InputKeys::modi_collider_initialConditions_type)) {
@@ -292,20 +287,24 @@ ColliderModus::ColliderModus(Configuration modus_config,
   }
 
   if (IC_type == FluidizationType::ConstantTau) {
-    if (modus_cfg.has_value({"Initial_Conditions", "Proper_Time"})) {
+    if (modus_cfg.has_value(
+            InputKeys::modi_collider_initialConditions_properTime)) {
       IC_parameters_.proper_time =
-          modus_cfg.take({"Initial_Conditions", "Proper_Time"});
+          modus_cfg.take(InputKeys::modi_collider_initialConditions_properTime);
     }
-    if (modus_cfg.has_value({"Initial_Conditions", "Lower_Bound"})) {
+    if (modus_cfg.has_value(
+            InputKeys::modi_collider_initialConditions_lowerBound)) {
       IC_parameters_.lower_bound =
-          modus_cfg.take({"Initial_Conditions", "Lower_Bound"});
+          modus_cfg.take(InputKeys::modi_collider_initialConditions_lowerBound);
     }
-    if (modus_cfg.has_value({"Initial_Conditions", "Rapidity_Cut"})) {
-      IC_parameters_.rapidity_cut =
-          modus_cfg.take({"Initial_Conditions", "Rapidity_Cut"});
+    if (modus_cfg.has_value(
+            InputKeys::modi_collider_initialConditions_rapidityCut)) {
+      IC_parameters_.rapidity_cut = modus_cfg.take(
+          InputKeys::modi_collider_initialConditions_rapidityCut);
     }
-    if (modus_cfg.has_value({"Initial_Conditions", "pT_Cut"})) {
-      IC_parameters_.pT_cut = modus_cfg.take({"Initial_Conditions", "pT_Cut"});
+    if (modus_cfg.has_value(InputKeys::modi_collider_initialConditions_pTCut)) {
+      IC_parameters_.pT_cut =
+          modus_cfg.take(InputKeys::modi_collider_initialConditions_pTCut);
     }
   }
 }
@@ -322,15 +321,32 @@ std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
 
 std::unique_ptr<DeformedNucleus> ColliderModus::create_deformed_nucleus(
     Configuration &nucleus_cfg, int ntest, const std::string &nucleus_type) {
-  bool automatic_deformation = nucleus_cfg.take({"Deformed", "Automatic"});
-  bool was_any_beta_given = nucleus_cfg.has_value({"Deformed", "Beta_2"}) ||
-                            nucleus_cfg.has_value({"Deformed", "Beta_3"}) ||
-                            nucleus_cfg.has_value({"Deformed", "Beta_4"});
+  const bool is_projectile = is_configuration_about_projectile(nucleus_cfg);
+  const auto &[automatic_key, beta2_key, beta3_key, beta4_key,
+               gamma_key] = [&is_projectile]() {
+    return is_projectile
+               ? std::make_tuple(
+                     InputKeys::modi_collider_projectile_deformed_automatic,
+                     InputKeys::modi_collider_projectile_deformed_beta2,
+                     InputKeys::modi_collider_projectile_deformed_beta3,
+                     InputKeys::modi_collider_projectile_deformed_beta4,
+                     InputKeys::modi_collider_projectile_deformed_gamma)
+               : std::make_tuple(
+                     InputKeys::modi_collider_target_deformed_automatic,
+                     InputKeys::modi_collider_target_deformed_beta2,
+                     InputKeys::modi_collider_target_deformed_beta3,
+                     InputKeys::modi_collider_target_deformed_beta4,
+                     InputKeys::modi_collider_target_deformed_gamma);
+  }();
+
+  bool automatic_deformation = nucleus_cfg.take(automatic_key);
+  bool was_any_beta_given = nucleus_cfg.has_value(beta2_key) ||
+                            nucleus_cfg.has_value(beta3_key) ||
+                            nucleus_cfg.has_value(beta4_key);
   bool was_any_deformation_parameter_given =
-      was_any_beta_given || nucleus_cfg.has_value({"Deformed", "Gamma"});
+      was_any_beta_given || nucleus_cfg.has_value(gamma_key);
   bool was_gamma_given_without_beta_2 =
-      nucleus_cfg.has_value({"Deformed", "Gamma"}) &&
-      !nucleus_cfg.has_value({"Deformed", "Beta_2"});
+      nucleus_cfg.has_value(gamma_key) && !nucleus_cfg.has_value(beta2_key);
 
   if (automatic_deformation && was_any_deformation_parameter_given) {
     throw std::invalid_argument(
@@ -358,10 +374,21 @@ std::unique_ptr<AlphaClusteredNucleus>
 ColliderModus::create_alphaclustered_nucleus(Configuration &nucleus_cfg,
                                              int ntest,
                                              const std::string &nucleus_type) {
-  bool automatic_alphaclustering =
-      nucleus_cfg.take({"Alpha_Clustered", "Automatic"});
-  bool was_sidelength_given =
-      nucleus_cfg.has_value({"Alpha_Clustered", "Sidelength"});
+  const bool is_projectile = is_configuration_about_projectile(nucleus_cfg);
+  const auto &[automatic_key, side_length_key] = [&is_projectile]() {
+    return is_projectile
+               ? std::make_tuple(
+                     InputKeys::
+                         modi_collider_projectile_alphaClustered_automatic,
+                     InputKeys::
+                         modi_collider_projectile_alphaClustered_sidelength)
+               : std::make_tuple(
+                     InputKeys::modi_collider_target_alphaClustered_automatic,
+                     InputKeys::modi_collider_target_alphaClustered_sidelength);
+  }();
+
+  bool automatic_alphaclustering = nucleus_cfg.take(automatic_key);
+  bool was_sidelength_given = nucleus_cfg.has_value(side_length_key);
 
   if (automatic_alphaclustering && was_sidelength_given) {
     throw std::invalid_argument(
@@ -401,8 +428,8 @@ double ColliderModus::initial_conditions(Particles *particles,
         "the center of velocity reference frame.");
   }
 
-  // Calculate the beam velocity of the projectile and the target, which will be
-  // used to calculate the beam momenta in experiment.cc
+  // Calculate the beam velocity of the projectile and the target, which will
+  // be used to calculate the beam momenta in experiment.cc
   if (fermi_motion_ == FermiMotion::Frozen) {
     velocity_projectile_ = v_a;
     velocity_target_ = v_b;
@@ -533,9 +560,10 @@ std::string ColliderModus::custom_file_path(const std::string &file_directory,
 bool ColliderModus::same_inputfile(Configuration &proj_config,
                                    Configuration &targ_config) {
   /* Check if both nuclei are custom
-   * Only check target as function is called after if statement for projectile.
+   * Only check target as function is called after if statement for
+   * projectile.
    */
-  if (!targ_config.has_value({"Custom"})) {
+  if (!targ_config.has_section(InputSections::m_c_t_custom)) {
     return false;
   }
   std::string projectile_file_directory =

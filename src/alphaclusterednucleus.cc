@@ -13,6 +13,7 @@
 #include "smash/configuration.h"
 #include "smash/constants.h"
 #include "smash/fourvector.h"
+#include "smash/input_keys.h"
 #include "smash/numerics.h"
 #include "smash/random.h"
 #include "smash/threevector.h"
@@ -41,7 +42,12 @@ AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int nTest,
     tetrahedron_sidelength_ = config.take({"Alpha_Clustered", "Sidelength"});
   }
   scale_tetrahedron_vertex_positions(tetrahedron_sidelength_);
-  if (config.has_value({"Orientation"})) {
+  const auto &orientation_section = [&config]() {
+    return is_configuration_about_projectile(config)
+               ? InputSections::m_c_p_orientation
+               : InputSections::m_c_t_orientation;
+  }();
+  if (config.has_section(orientation_section)) {
     Configuration sub_conf = config.extract_sub_configuration({"Orientation"});
     set_orientation_from_config(sub_conf);
   }

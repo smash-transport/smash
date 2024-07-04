@@ -36,22 +36,34 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
   std::map<PdgCode, int> part = config.take({"Particles"});
   fill_from_list(part, nTest);
   // Look for user-defined values or take the default parameters.
-  if (config.has_value({"Diffusiveness"}) && config.has_value({"Radius"}) &&
-      config.has_value({"Saturation_Density"})) {
+  const bool is_projectile = is_configuration_about_projectile(config);
+  const auto &[diffusiveness_key, radius_key,
+               saturation_key] = [&is_projectile]() {
+    return is_projectile
+               ? std::make_tuple(
+                     InputKeys::modi_collider_projectile_diffusiveness,
+                     InputKeys::modi_collider_projectile_radius,
+                     InputKeys::modi_collider_projectile_saturationDensity)
+               : std::make_tuple(
+                     InputKeys::modi_collider_target_diffusiveness,
+                     InputKeys::modi_collider_target_radius,
+                     InputKeys::modi_collider_target_saturationDensity);
+  }();
+  const bool is_diffusiveness_given = config.has_value(diffusiveness_key),
+             is_radius_given = config.has_value(radius_key),
+             is_saturation_given = config.has_value(saturation_key);
+  if (is_diffusiveness_given && is_radius_given && is_saturation_given) {
     set_parameters_from_config(config);
-  } else if (!config.has_value({"Diffusiveness"}) &&
-             !config.has_value({"Radius"}) &&
-             !config.has_value({"Saturation_Density"})) {
+  } else if (!is_diffusiveness_given && !is_radius_given &&
+             !is_saturation_given) {
     set_parameters_automatic();
     set_saturation_density(calculate_saturation_density());
   } else {
     throw std::invalid_argument(
-        "Diffusiveness, Radius and Saturation_Density "
-        "required to manually configure the Woods-Saxon"
-        " distribution. Only one/two were provided. \n"
-        "Providing none of the above mentioned "
-        "parameters automatically configures the "
-        "distribution based on the atomic number.");
+        "Diffusiveness, Radius and Saturation_Density required to manually "
+        "configure the Woods-Saxon distribution. Only one or two were provided."
+        "\nProviding none of the above mentioned parameters automatically "
+        "configures the distribution based on the atomic number.");
   }
 }
 
@@ -572,6 +584,16 @@ std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
              << format(n.size(), nullptr, 17) << format(n.mass(), nullptr, 13)
              << format(n.get_nuclear_radius(), nullptr, 14)
              << format(n.get_diffusiveness(), nullptr, 20);
+}
+
+bool is_configuration_about_projectile(const Configuration &config) {
+  const bool is_projectile = config.has_section(InputSections::m_c_projectile);
+  const bool is_target = config.has_section(InputSections::m_c_target);
+  if (is_projectile == is_target) {
+    throw std::logic_error(
+        "Error parsing configuration of either projectile or target.");
+  }
+  return is_projectile;
 }
 
 }  // namespace smash

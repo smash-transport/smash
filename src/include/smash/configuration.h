@@ -1405,8 +1405,6 @@ class Configuration {
     return found_node.has_value() && found_node.value().IsMap();
   }
 
-  bool has_value(std::initializer_list<const char *> keys) const;
-
   /**
    * @return \c true if the object is empty;
    * @return \c false if at least one key exists.

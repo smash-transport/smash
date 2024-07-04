@@ -59,7 +59,7 @@ SphereModus::SphereModus(Configuration modus_config,
        * are taken first, the section is removed from modus_config, because
        * empty, and that has_value({"Sphere", "Jet"}) method would return false.
        */
-      jet_pdg_(modus_config.has_value({"Sphere", "Jet"})
+      jet_pdg_(modus_config.has_section(InputSections::m_s_jet)
                    ? make_optional<PdgCode>(
                          modus_config.take({"Sphere", "Jet", "Jet_PDG"}))
                    : std::nullopt),

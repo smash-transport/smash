@@ -13,6 +13,7 @@
 #include "smash/configuration.h"
 #include "smash/constants.h"
 #include "smash/fourvector.h"
+#include "smash/input_keys.h"
 #include "smash/random.h"
 #include "smash/threevector.h"
 
@@ -31,8 +32,14 @@ DeformedNucleus::DeformedNucleus(Configuration &config, int nTest,
   } else {
     set_deformation_parameters_from_config(config);
   }
-  if (config.has_value({"Orientation"})) {
-    Configuration sub_conf = config.extract_sub_configuration({"Orientation"});
+  const auto &orientation_section = [&config]() {
+    return is_configuration_about_projectile(config)
+               ? InputSections::m_c_p_orientation
+               : InputSections::m_c_t_orientation;
+  }();
+  if (config.has_section(orientation_section)) {
+    Configuration sub_conf =
+        config.extract_sub_configuration(orientation_section);
     set_orientation_from_config(sub_conf);
   }
 }
@@ -156,18 +163,33 @@ void DeformedNucleus::set_deformation_parameters_automatic() {
 
 void DeformedNucleus::set_deformation_parameters_from_config(
     Configuration &config) {
+  const bool is_projectile = is_configuration_about_projectile(config);
+  const auto &[beta2_key, beta3_key, beta4_key,
+               gamma_key] = [&is_projectile]() {
+    return is_projectile
+               ? std::make_tuple(
+                     InputKeys::modi_collider_projectile_deformed_beta2,
+                     InputKeys::modi_collider_projectile_deformed_beta3,
+                     InputKeys::modi_collider_projectile_deformed_beta4,
+                     InputKeys::modi_collider_projectile_deformed_gamma)
+               : std::make_tuple(
+                     InputKeys::modi_collider_target_deformed_beta2,
+                     InputKeys::modi_collider_target_deformed_beta3,
+                     InputKeys::modi_collider_target_deformed_beta4,
+                     InputKeys::modi_collider_target_deformed_gamma);
+  }();
   // Deformation parameters.
-  if (config.has_value({"Deformed", "Beta_2"})) {
-    set_beta_2(static_cast<double>(config.take({"Deformed", "Beta_2"})));
+  if (config.has_value(beta2_key)) {
+    beta2_ = config.take(beta2_key);
   }
-  if (config.has_value({"Deformed", "Gamma"})) {
-    set_gamma(static_cast<double>(config.take({"Deformed", "Gamma"})));
+  if (config.has_value(gamma_key)) {
+    gamma_ = config.take(gamma_key);
   }
-  if (config.has_value({"Deformed", "Beta_3"})) {
-    set_beta_3(static_cast<double>(config.take({"Deformed", "Beta_3"})));
+  if (config.has_value(beta3_key)) {
+    beta3_ = config.take(beta3_key);
   }
-  if (config.has_value({"Deformed", "Beta_4"})) {
-    set_beta_4(static_cast<double>(config.take({"Deformed", "Beta_4"})));
+  if (config.has_value(beta4_key)) {
+    beta4_ = config.take(beta4_key);
   }
 }
 

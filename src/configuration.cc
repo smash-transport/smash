@@ -348,11 +348,6 @@ Configuration Configuration::extract_complete_sub_configuration(
   return result;
 }
 
-bool Configuration::has_value(std::initializer_list<const char *> keys) const {
-  const auto found_node = find_existing_node({keys.begin(), keys.end()});
-  return found_node.has_value() && !(found_node.value().IsNull());
-}
-
 std::string Configuration::to_string() const {
   std::stringstream s;
   s << root_node_;

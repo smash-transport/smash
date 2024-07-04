@@ -909,15 +909,13 @@ Experiment<Modus>::Experiment(Configuration &config,
           config.take(InputKeys::collTerm_photons_twoToTwoScatterings)),
       bremsstrahlung_switch_(
           config.take(InputKeys::collTerm_photons_bremsstrahlung)),
-      IC_output_switch_(config.has_value({"Output", "Initial_Conditions"})),
+      IC_output_switch_(config.has_section(InputSections::o_initialConditions)),
       time_step_mode_(config.take(InputKeys::gen_timeStepMode)) {
   logg[LExperiment].info() << *this;
 
-  const bool user_wants_nevents = config.has_value({"General", "Nevents"});
+  const bool user_wants_nevents = config.has_value(InputKeys::gen_nevents);
   const bool user_wants_min_nonempty =
-      config.has_value({"General", "Minimum_Nonempty_Ensembles", "Number"}) ||
-      config.has_value(
-          {"General", "Minimum_Nonempty_Ensembles", "Maximum_Ensembles_Run"});
+      config.has_section(InputSections::g_minEnsembles);
   if (user_wants_nevents == user_wants_min_nonempty) {
     throw std::invalid_argument(
         "Please specify either Nevents or Minimum_Nonempty_Ensembles.");
@@ -1059,10 +1057,8 @@ Experiment<Modus>::Experiment(Configuration &config,
      * constructor of ColliderModus, and the logic here will be removed.
      */
     double proper_time = std::numeric_limits<double>::quiet_NaN();
-    if (config.has_value({"Output", "Initial_Conditions", "Proper_Time"})) {
-      // Read in proper time from config
-      proper_time =
-          config.take({"Output", "Initial_Conditions", "Proper_Time"});
+    if (config.has_value(InputKeys::output_initialConditions_properTime)) {
+      proper_time = config.take(InputKeys::output_initialConditions_properTime);
       validate_duplicate_IC_config(proper_time, modus_.proper_time(),
                                    "Proper_Time");
     } else if (modus_.proper_time().has_value()) {
@@ -1090,9 +1086,9 @@ Experiment<Modus>::Experiment(Configuration &config,
 
     double rapidity_cut =
         modus_.rapidity_cut().has_value() ? modus_.rapidity_cut().value() : 0.0;
-    if (config.has_value({"Output", "Initial_Conditions", "Rapidity_Cut"})) {
+    if (config.has_value(InputKeys::output_initialConditions_rapidityCut)) {
       rapidity_cut =
-          config.take({"Output", "Initial_Conditions", "Rapidity_Cut"});
+          config.take(InputKeys::output_initialConditions_rapidityCut);
       validate_duplicate_IC_config(rapidity_cut, modus_.rapidity_cut(),
                                    "Rapidity_Cut");
     }
@@ -1114,8 +1110,8 @@ Experiment<Modus>::Experiment(Configuration &config,
     }
 
     double pT_cut = modus_.pT_cut().has_value() ? modus_.pT_cut().value() : 0.0;
-    if (config.has_value({"Output", "Initial_Conditions", "pT_Cut"})) {
-      pT_cut = config.take({"Output", "Initial_Conditions", "pT_Cut"});
+    if (config.has_value(InputKeys::output_initialConditions_pTCut)) {
+      pT_cut = config.take(InputKeys::output_initialConditions_pTCut);
       validate_duplicate_IC_config(pT_cut, modus_.pT_cut(), "pT_Cut");
     }
     if (pT_cut < 0.0) {
@@ -1154,10 +1150,10 @@ Experiment<Modus>::Experiment(Configuration &config,
                                                          rapidity_cut, pT_cut));
   }
 
-  if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
+  if (config.has_section(InputSections::c_pauliBlocking)) {
     logg[LExperiment].info() << "Pauli blocking is ON.";
     pauli_blocker_ = std::make_unique<PauliBlocker>(
-        config.extract_sub_configuration({"Collision_Term", "Pauli_Blocking"}),
+        config.extract_sub_configuration(InputSections::c_pauliBlocking),
         parameters_);
   }
 
@@ -1501,7 +1497,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * always have to take it, otherwise SMASH will complain about unused
    * options. We have to provide a default value for modi other than Collider.
    */
-  if (config.has_value({"Potentials"})) {
+  if (config.has_section(InputSections::potentials)) {
     if (time_step_mode_ == TimeStepMode::None) {
       logg[LExperiment].error() << "Potentials only work with time steps!";
       throw std::invalid_argument("Can't use potentials without time steps!");
@@ -1518,7 +1514,8 @@ Experiment<Modus>::Experiment(Configuration &config,
                              << parameters_.labclock->timestep_duration();
     // potentials need density calculation parameters from parameters_
     potentials_ = std::make_unique<Potentials>(
-        config.extract_sub_configuration({"Potentials"}), parameters_);
+        config.extract_sub_configuration(InputSections::potentials),
+        parameters_);
     // make sure that vdf potentials are not used together with Skyrme
     // or symmetry potentials
     if (potentials_->use_skyrme() && potentials_->use_vdf()) {
@@ -1645,12 +1642,12 @@ Experiment<Modus>::Experiment(Configuration &config,
   }
 
   // Create lattices
-  if (config.has_value({"Lattice"})) {
+  if (config.has_section(InputSections::lattice)) {
     bool automatic = config.take(InputKeys::lattice_automatic);
     bool all_geometrical_properties_specified =
-        config.has_value({"Lattice", "Cell_Number"}) &&
-        config.has_value({"Lattice", "Origin"}) &&
-        config.has_value({"Lattice", "Sizes"});
+        config.has_value(InputKeys::lattice_cellNumber) &&
+        config.has_value(InputKeys::lattice_origin) &&
+        config.has_value(InputKeys::lattice_sizes);
     if (!automatic && !all_geometrical_properties_specified) {
       throw std::invalid_argument(
           "The lattice was requested to be manually generated, but some\n"
@@ -1855,9 +1852,9 @@ Experiment<Modus>::Experiment(Configuration &config,
   }
 
   // Create forced thermalizer
-  if (config.has_value({"Forced_Thermalization"})) {
+  if (config.has_section(InputSections::forcedThermalization)) {
     Configuration th_conf =
-        config.extract_sub_configuration({"Forced_Thermalization"});
+        config.extract_sub_configuration(InputSections::forcedThermalization);
     thermalizer_ = modus_.create_grandcan_thermalizer(th_conf);
   }
 

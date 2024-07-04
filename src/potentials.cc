@@ -17,11 +17,12 @@ namespace smash {
 
 Potentials::Potentials(Configuration conf, const DensityParameters &param)
     : param_(param),
-      use_skyrme_(conf.has_value({"Skyrme"})),
-      use_symmetry_(conf.has_value({"Symmetry"})),
-      use_coulomb_(conf.has_value({"Coulomb"})),
-      use_vdf_(conf.has_value({"VDF"})),
-      use_momentum_dependence_(conf.has_value({"Momentum_Dependence"})),
+      use_skyrme_(conf.has_section(InputSections::p_skyrme)),
+      use_symmetry_(conf.has_section(InputSections::p_symmetry)),
+      use_coulomb_(conf.has_section(InputSections::p_coulomb)),
+      use_vdf_(conf.has_section(InputSections::p_vdf)),
+      use_momentum_dependence_(
+          conf.has_section(InputSections::p_momentumDependence)),
       use_potentials_outside_lattice_(
           conf.take(InputKeys::potentials_use_potentials_outside_lattice)) {
   if (use_skyrme_) {
@@ -36,7 +37,7 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
 
   if (use_symmetry_) {
     symmetry_S_Pot_ = conf.take({"Symmetry", "S_Pot"});
-    if (conf.has_value({"Symmetry", "gamma"})) {
+    if (conf.has_value(InputKeys::potentials_symmetry_gamma)) {
       symmetry_gamma_ = conf.take({"Symmetry", "gamma"});
       symmetry_is_rhoB_dependent_ = true;
     }

@@ -88,7 +88,7 @@ BoxModus::BoxModus(Configuration modus_config,
        * are taken first, the section is removed from modus_config, because
        * empty, and that has_value({"Box", "Jet"}) method would return false.
        */
-      jet_pdg_(modus_config.has_value({"Box", "Jet"})
+      jet_pdg_(modus_config.has_section(InputSections::m_b_jet)
                    ? make_optional<PdgCode>(
                          modus_config.take({"Box", "Jet", "Jet_PDG"}))
                    : std::nullopt),

@@ -341,11 +341,17 @@ void check_for_unused_config_values(const Configuration &configuration) {
  * outputs cross sections, resonance properties or possible reactions.
  */
 void ignore_simulation_config_values(Configuration &configuration) {
-  for (const std::string s :
-       {"particles", "decaymodes", "Modi", "General", "Output", "Lattice",
-        "Potentials", "Forced_Thermalization"}) {
-    if (configuration.has_value({s.c_str()})) {
-      configuration.take({s.c_str()});
+  for (const auto &key : {InputKeys::particles, InputKeys::decaymodes}) {
+    if (configuration.has_value(key)) {
+      configuration.take(key);
+    }
+  }
+  for (const auto &section :
+       {InputSections::modi, InputSections::general, InputSections::output,
+        InputSections::lattice, InputSections::potentials,
+        InputSections::forcedThermalization}) {
+    if (configuration.has_section(section)) {
+      configuration.extract_sub_configuration(section).clear();
     }
   }
 }
@@ -681,8 +687,8 @@ int main(int argc, char *argv[]) {
     auto experiment = ExperimentBase::create(configuration, output_path);
 
     // Version key is deprecated. If present, ignore it.
-    if (configuration.has_value({"Version"})) {
-      configuration.take({"Version"});
+    if (configuration.has_value(InputKeys::version)) {
+      configuration.take(InputKeys::version);
     }
     check_for_unused_config_values(configuration);
 

@@ -380,6 +380,16 @@ class Nucleus {
   friend std::ostream &operator<<(std::ostream &, const Nucleus &);
 };
 
+/**
+ * Find out whether a configuration is about projectile or target.
+ *
+ * \param config The configuration to be checked.
+ *
+ * \throw An \c std::logic_error if there is neither a projectile nor a target
+ * subsection or if both are present.
+ */
+bool is_configuration_about_projectile(const Configuration &config);
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_NUCLEUS_H_

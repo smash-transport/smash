@@ -141,7 +141,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   const bool only_participants =
       config.take(InputKeys::output_thermodynamics_onlyParticipants);
 
-  if (only_participants && config.has_value({"Potentials"})) {
+  if (only_participants && config.has_section(InputSections::potentials)) {
     throw std::invalid_argument(
         "Only_Participants option cannot be "
         "set to True when using Potentials.");
@@ -152,12 +152,11 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   config.remove_all_entries_in_section_but_one(modus_chooser, {"Modi"});
 
   double box_length = -1.0;
-  if (config.has_value({"Modi", "Box", "Length"})) {
-    box_length = config.read({"Modi", "Box", "Length"});
+  if (config.has_value(InputKeys::modi_box_length)) {
+    box_length = config.read(InputKeys::modi_box_length);
   }
-
-  if (config.has_value({"Modi", "ListBox", "Length"})) {
-    box_length = config.read({"Modi", "ListBox", "Length"});
+  if (config.has_value(InputKeys::modi_listBox_length)) {
+    box_length = config.read(InputKeys::modi_listBox_length);
   }
 
   /* If this Delta_Time option is absent (this can be for timestepless mode)
@@ -182,12 +181,13 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
   // define output clock
   std::unique_ptr<Clock> output_clock = nullptr;
-  if (config.has_value({"Output", "Output_Times"})) {
-    if (config.has_value({"Output", "Output_Interval"})) {
+  if (config.has_value(InputKeys::output_outputTimes)) {
+    if (config.has_value(InputKeys::output_outputInterval)) {
       throw std::invalid_argument(
           "Please specify either Output_Interval or Output_Times");
     }
-    std::vector<double> output_times = config.take({"Output", "Output_Times"});
+    std::vector<double> output_times =
+        config.take(InputKeys::output_outputTimes);
     // Add an output time larger than the end time so that the next time is
     // always defined during the time evolution
     output_times.push_back(t_end + 1.);
@@ -204,8 +204,8 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
   // Add proper error messages if photons are not configured properly.
   // 1) Missing Photon config section.
-  if (config.has_value({"Output", "Photons"}) &&
-      (!config.has_value({"Collision_Term", "Photons"}))) {
+  if (config.has_section(InputSections::o_photons) &&
+      (!config.has_section(InputSections::c_photons))) {
     throw std::invalid_argument(
         "Photon output is enabled although photon production is disabled. "
         "Photon production can be configured in the \"Photon\" subsection "
@@ -213,18 +213,11 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   }
 
   // 2) Missing Photon output section.
-  bool missing_output_2to2 = false;
-  bool missing_output_brems = false;
-  if (!(config.has_value({"Output", "Photons"}))) {
-    if (config.has_value({"Collision_Term", "Photons", "2to2_Scatterings"})) {
-      missing_output_2to2 =
-          config.read({"Collision_Term", "Photons", "2to2_Scatterings"});
-    }
-    if (config.has_value({"Collision_Term", "Photons", "Bremsstrahlung"})) {
-      missing_output_brems =
-          config.read({"Collision_Term", "Photons", "Bremsstrahlung"});
-    }
-
+  if (!(config.has_section(InputSections::o_photons))) {
+    const bool missing_output_2to2 =
+                   config.read(InputKeys::collTerm_photons_twoToTwoScatterings),
+               missing_output_brems =
+                   config.read(InputKeys::collTerm_photons_bremsstrahlung);
     if (missing_output_2to2 || missing_output_brems) {
       throw std::invalid_argument(
           "Photon output is disabled although photon production is enabled. "
@@ -234,8 +227,8 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
   // Add proper error messages if dileptons are not configured properly.
   // 1) Missing Dilepton config section.
-  if (config.has_value({"Output", "Dileptons"}) &&
-      (!config.has_value({"Collision_Term", "Dileptons"}))) {
+  if (config.has_section(InputSections::o_dileptons) &&
+      (!config.has_section(InputSections::c_dileptons))) {
     throw std::invalid_argument(
         "Dilepton output is enabled although dilepton production is disabled. "
         "Dilepton production can be configured in the \"Dileptons\" subsection "
@@ -243,13 +236,9 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   }
 
   // 2) Missing Dilepton output section.
-  bool missing_output_decays = false;
-  if (!(config.has_value({"Output", "Dileptons"}))) {
-    if (config.has_value({"Collision_Term", "Dileptons", "Decays"})) {
-      missing_output_decays =
-          config.read({"Collision_Term", "Dileptons", "Decays"});
-    }
-
+  if (!(config.has_section(InputSections::o_dileptons))) {
+    const bool missing_output_decays =
+        config.read(InputKeys::collTerm_dileptons_decays);
     if (missing_output_decays) {
       throw std::invalid_argument(
           "Dilepton output is disabled although dilepton production is "
@@ -274,19 +263,18 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
 
   const auto criterion = config.take(InputKeys::collTerm_collisionCriterion);
 
-  if (config.has_value({"Collision_Term", "Fixed_Min_Cell_Length"}) &&
+  if (config.has_value(InputKeys::collTerm_fixedMinCellLength) &&
       criterion != CollisionCriterion::Stochastic) {
     throw std::invalid_argument(
         "Only use a fixed minimal cell length with the stochastic collision "
         "criterion.");
   }
-  if (config.has_value({"Collision_Term", "Maximum_Cross_Section"}) &&
+  if (config.has_value(InputKeys::collTerm_maximumCrossSection) &&
       criterion == CollisionCriterion::Stochastic) {
     throw std::invalid_argument(
-        "Only use maximum cross section with the "
-        "geometric collision criterion. Use Fixed_Min_Cell_Length to change "
-        "the grid "
-        "size for the stochastic criterion.");
+        "Only use maximum cross section with the geometric collision "
+        "criterion. Use Fixed_Min_Cell_Length to change the grid size for the "
+        "stochastic criterion.");
   }
 
   /**
@@ -308,7 +296,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
           config.take(InputKeys::gen_ensembles),
           ntest,
           config.take(InputKeys::gen_derivativesMode),
-          config.has_value({"Potentials", "VDF"})
+          config.has_section(InputSections::p_vdf)
               ? RestFrameDensityDerivativesMode::On
               : RestFrameDensityDerivativesMode::Off,
           config.take(InputKeys::gen_fieldDerivativesMode),
