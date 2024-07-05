@@ -28,7 +28,7 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
   }
   logg[LExperiment].trace() << SMASH_SOURCE_LOCATION;
 
-  const std::string modus_chooser = config.read({"General", "Modus"});
+  const std::string modus_chooser = config.read(InputKeys::gen_modus);
   logg[LExperiment].debug() << "Modus for this calculation: " << modus_chooser;
 
   if (modus_chooser == "Box") {
@@ -167,7 +167,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     throw std::invalid_argument("Delta_Time cannot be zero or negative.");
   }
 
-  const double t_end = config.read({"General", "End_Time"});
+  const double t_end = config.read(InputKeys::gen_endTime);
   if (t_end <= 0.) {
     throw std::invalid_argument("End_Time cannot be zero or negative.");
   }

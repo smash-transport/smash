@@ -1284,10 +1284,6 @@ class Configuration {
     return default_value;
   }
 
-  Value read(std::initializer_list<const char *> labels) const {
-    return read({labels.begin(), labels.end()});
-  }
-
   /**
    * Overwrite the value of the YAML node corresponding to the specified key.
    *

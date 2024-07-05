@@ -566,12 +566,14 @@ bool ColliderModus::same_inputfile(Configuration &proj_config,
   if (!targ_config.has_section(InputSections::m_c_t_custom)) {
     return false;
   }
-  std::string projectile_file_directory =
-      proj_config.read({"Custom", "File_Directory"});
+  std::string projectile_file_directory = proj_config.read(
+      InputKeys::modi_collider_projectile_custom_fileDirectory);
   std::string target_file_directory =
-      targ_config.read({"Custom", "File_Directory"});
-  std::string projectile_file_name = proj_config.read({"Custom", "File_Name"});
-  std::string target_file_name = targ_config.read({"Custom", "File_Name"});
+      targ_config.read(InputKeys::modi_collider_target_custom_fileDirectory);
+  std::string projectile_file_name =
+      proj_config.read(InputKeys::modi_collider_projectile_custom_fileName);
+  std::string target_file_name =
+      targ_config.read(InputKeys::modi_collider_target_custom_fileName);
   // Check if files are the same for projectile and target
   std::string proj_path =
       custom_file_path(projectile_file_directory, projectile_file_name);
