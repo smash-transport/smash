@@ -65,12 +65,13 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
 
 BoxModus::BoxModus(Configuration modus_config,
                    const ExperimentParameters &parameters)
-    : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
-      length_(modus_config.take({"Box", "Length"})),
+    : initial_condition_(
+          modus_config.take(InputKeys::modi_box_initialCondition)),
+      length_(modus_config.take(InputKeys::modi_box_length)),
       equilibration_time_(
           modus_config.take(InputKeys::modi_box_equilibrationTime)),
-      temperature_(modus_config.take({"Box", "Temperature"})),
-      start_time_(modus_config.take({"Box", "Start_Time"})),
+      temperature_(modus_config.take(InputKeys::modi_box_temperature)),
+      start_time_(modus_config.take(InputKeys::modi_box_startTime)),
       use_thermal_(
           modus_config.take(InputKeys::modi_box_useThermalMultiplicities)),
       mub_(modus_config.take(InputKeys::modi_box_baryonChemicalPotential)),
@@ -78,10 +79,10 @@ BoxModus::BoxModus(Configuration modus_config,
       muq_(modus_config.take(InputKeys::modi_box_chargeChemicalPotential)),
       account_for_resonance_widths_(
           modus_config.take(InputKeys::modi_box_accountResonanceWidths)),
-      init_multipl_(use_thermal_
-                        ? std::map<PdgCode, int>()
-                        : modus_config.take({"Box", "Init_Multiplicities"})
-                              .convert_for(init_multipl_)),
+      init_multipl_(
+          use_thermal_
+              ? std::map<PdgCode, int>()
+              : modus_config.take(InputKeys::modi_box_initialMultiplicities)),
       /* Note that it is crucial not to take other keys from the Jet section
        * before Jet_PDG, since we want here the take to throw in case the user
        * had a Jet section without the mandatory Jet_PDG key. If all other keys
@@ -90,7 +91,7 @@ BoxModus::BoxModus(Configuration modus_config,
        */
       jet_pdg_(modus_config.has_section(InputSections::m_b_jet)
                    ? make_optional<PdgCode>(
-                         modus_config.take({"Box", "Jet", "Jet_PDG"}))
+                         modus_config.take(InputKeys::modi_box_jet_jetPdg))
                    : std::nullopt),
 
       jet_mom_(modus_config.take(InputKeys::modi_box_jet_jetMomentum)) {

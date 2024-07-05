@@ -1188,10 +1188,6 @@ class Configuration {
     }
   }
 
-  Value take(std::initializer_list<const char *> labels) {
-    return take({labels.begin(), labels.end()});
-  }
-
   /**
    * Alternative method to take a key value, specifying the default value.
    * \see take

@@ -89,14 +89,6 @@ class Nucleus {
   virtual void set_parameters_automatic();
 
   /**
-   * Sets the parameters of the Woods-Saxon according to
-   * manually added values in the configuration file.
-   *
-   * \param config The configuration for this nucleus (projectile or target).
-   */
-  virtual void set_parameters_from_config(Configuration &config);
-
-  /**
    * Generates momenta according to Fermi motion for the nucleons.
    * For neutrons and protons Fermi momenta are calculated as
    * \f$ p_{F} = (3 \pi^2 \rho)^{1/3}\f$, where \f$ rho \f$ is

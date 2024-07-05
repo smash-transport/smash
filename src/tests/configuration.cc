@@ -482,18 +482,18 @@ static void expect_lines(std::vector<std::string> expected,
 TEST(check_unused_report) {
   std::string reference;
   Configuration conf = make_test_configuration();
-  conf.take({"fireballs", "extorting"});
-  conf.take({"fireballs", "infection"});
-  conf.take({"fireballs", "arena"});
-  conf.take({"fireballs", "pendulous"});
-  conf.take({"fireballs", "scudded"});
-  conf.take({"fireballs", "firebrands"});
-  conf.take({"fireballs", "joker"});
-  conf.take({"fireballs", "classify"});
-  conf.take({"tamer", "Altaic", "Meccas"});
-  conf.take({"tamer", "Altaic", "Kathleen"});
-  conf.take({"tamer", "Altaic", "Brahmins"});
-  conf.take({"tamer", "feathered"});
+  conf.take(get_key<std::string>({"fireballs", "extorting"}));
+  conf.take(get_key<double>({"fireballs", "infection"}));
+  conf.take(get_key<int>({"fireballs", "arena"}));
+  conf.take(get_key<int>({"fireballs", "pendulous"}));
+  conf.take(get_key<int>({"fireballs", "scudded"}));
+  conf.take(get_key<double>({"fireballs", "firebrands"}));
+  conf.take(get_key<int>({"fireballs", "joker"}));
+  conf.take(get_key<int>({"fireballs", "classify"}));
+  conf.take(get_key<double>({"tamer", "Altaic", "Meccas"}));
+  conf.take(get_key<double>({"tamer", "Altaic", "Kathleen"}));
+  conf.take(get_key<int>({"tamer", "Altaic", "Brahmins"}));
+  conf.extract_sub_configuration({"tamer", "feathered"});
   {
     std::istringstream unused(conf.to_string());
     std::string line;
@@ -521,7 +521,7 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  conf.take({"tamer", "pipit", "bushelling"});
+  conf.take(get_key<double>({"tamer", "pipit", "bushelling"}));
   {
     std::istringstream unused(conf.to_string());
     std::string line;
@@ -534,7 +534,7 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  conf.take({"tamer", "schmoozed", "warbler"});
+  conf.take(get_key<int>({"tamer", "schmoozed", "warbler"}));
   {
     std::istringstream unused(conf.to_string());
     std::string line;
@@ -546,7 +546,7 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  conf.take({"tamer", "schmoozed", "reedier"});
+  conf.take(get_key<double>({"tamer", "schmoozed", "reedier"}));
   {
     std::istringstream unused(conf.to_string());
     std::string line;
@@ -559,7 +559,7 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  conf.take({"tamer", "schmoozed", "neglects"});
+  conf.take(get_key<int>({"tamer", "schmoozed", "neglects"}));
   reference = "{}";
   COMPARE(conf.to_string(), reference);
 }

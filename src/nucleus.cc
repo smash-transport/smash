@@ -32,28 +32,32 @@ Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
 }
 
 Nucleus::Nucleus(Configuration &config, int nTest) {
-  // Fill nuclei with particles.
-  std::map<PdgCode, int> part = config.take({"Particles"});
-  fill_from_list(part, nTest);
-  // Look for user-defined values or take the default parameters.
   const bool is_projectile = is_configuration_about_projectile(config);
-  const auto &[diffusiveness_key, radius_key,
+  const auto &[particles_key, diffusiveness_key, radius_key,
                saturation_key] = [&is_projectile]() {
     return is_projectile
                ? std::make_tuple(
+                     InputKeys::modi_collider_projectile_particles,
                      InputKeys::modi_collider_projectile_diffusiveness,
                      InputKeys::modi_collider_projectile_radius,
                      InputKeys::modi_collider_projectile_saturationDensity)
                : std::make_tuple(
+                     InputKeys::modi_collider_target_particles,
                      InputKeys::modi_collider_target_diffusiveness,
                      InputKeys::modi_collider_target_radius,
                      InputKeys::modi_collider_target_saturationDensity);
   }();
+  // Fill nuclei with particles.
+  std::map<PdgCode, int> part = config.take(particles_key);
+  fill_from_list(part, nTest);
+  // Look for user-defined values or take the default parameters.
   const bool is_diffusiveness_given = config.has_value(diffusiveness_key),
              is_radius_given = config.has_value(radius_key),
              is_saturation_given = config.has_value(saturation_key);
   if (is_diffusiveness_given && is_radius_given && is_saturation_given) {
-    set_parameters_from_config(config);
+    diffusiveness_ = config.take(diffusiveness_key);
+    nuclear_radius_ = config.take(radius_key);
+    saturation_density_ = config.take(saturation_key);
   } else if (!is_diffusiveness_given && !is_radius_given &&
              !is_saturation_given) {
     set_parameters_automatic();
@@ -352,44 +356,38 @@ void Nucleus::set_parameters_automatic() {
   }
 }
 
-void Nucleus::set_parameters_from_config(Configuration &config) {
-  set_diffusiveness(static_cast<double>(config.take({"Diffusiveness"})));
-  set_nuclear_radius(static_cast<double>(config.take({"Radius"})));
-  // Saturation density (normalization for accept/reject sampling)
-  set_saturation_density(
-      static_cast<double>(config.take({"Saturation_Density"})));
-}
-
-void Nucleus::set_orientation_from_config(Configuration &orientation_config) {
-  /* Here it does not matter whether it is a projectile or a target nucleus,
-  just use one of the two keys to take the information about the random rotation
-  (and analogously for the other keys) dropping the first section labels.*/
-  const auto &rotation_key =
-      InputKeys::modi_collider_projectile_deformed_orientation_randomRotation
-          .drop_top_label(5);
-  random_rotation_ = orientation_config.take(rotation_key);
-
-  // Read in orientation if provided and do needed logical checks
-  const auto &theta_key =
-                 InputKeys::modi_collider_projectile_deformed_orientation_theta
-                     .drop_top_label(5),
-             &phi_key =
-                 InputKeys::modi_collider_projectile_deformed_orientation_phi
-                     .drop_top_label(5),
-             &psi_key =
-                 InputKeys::modi_collider_projectile_deformed_orientation_psi
-                     .drop_top_label(5);
-  const bool was_any_angle_provided = orientation_config.has_value(theta_key) ||
-                                      orientation_config.has_value(phi_key) ||
-                                      orientation_config.has_value(psi_key);
+void Nucleus::set_orientation_from_config(Configuration &config) {
+  const bool is_projectile = is_configuration_about_projectile(config);
+  const auto &[rotation_key, theta_key, phi_key, psi_key] = [&is_projectile]() {
+    return is_projectile
+               ? std::make_tuple(
+                     InputKeys::
+                         modi_collider_projectile_orientation_randomRotation,
+                     InputKeys::
+                         modi_collider_projectile_orientation_theta,
+                     InputKeys::
+                         modi_collider_projectile_orientation_phi,
+                     InputKeys::
+                         modi_collider_projectile_orientation_psi)
+               : std::make_tuple(
+                     InputKeys::
+                         modi_collider_target_orientation_randomRotation,
+                     InputKeys::modi_collider_target_orientation_theta,
+                     InputKeys::modi_collider_target_orientation_phi,
+                     InputKeys::modi_collider_target_orientation_psi);
+  }();
+  const bool was_any_angle_provided = config.has_value(theta_key) ||
+                                      config.has_value(phi_key) ||
+                                      config.has_value(psi_key);
+  random_rotation_ = config.take(rotation_key);
   if (random_rotation_ && was_any_angle_provided) {
     throw std::domain_error(
         "The random rotation of nuclei has been requested, but some specific "
         "rotation angle is provided, too. Please specify only either of them.");
   } else {
-    euler_theta_ = orientation_config.take(theta_key);
-    euler_phi_ = orientation_config.take(phi_key);
-    euler_psi_ = orientation_config.take(psi_key);
+    euler_theta_ = config.take(theta_key);
+    euler_phi_ = config.take(phi_key);
+    euler_psi_ = config.take(psi_key);
   }
 }
 

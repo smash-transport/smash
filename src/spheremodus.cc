@@ -36,8 +36,9 @@ static constexpr int LSphere = LogArea::Sphere::id;
 
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
-    : radius_(modus_config.take({"Sphere", "Radius"})),
-      sphere_temperature_(modus_config.take({"Sphere", "Temperature"})),
+    : radius_(modus_config.take(InputKeys::modi_sphere_radius)),
+      sphere_temperature_(
+          modus_config.take(InputKeys::modi_sphere_temperature)),
       start_time_(modus_config.take(InputKeys::modi_sphere_startTime)),
       use_thermal_(
           modus_config.take(InputKeys::modi_sphere_useThermalMultiplicities)),
@@ -48,8 +49,8 @@ SphereModus::SphereModus(Configuration modus_config,
           modus_config.take(InputKeys::modi_sphere_accountResonanceWidths)),
       init_multipl_(use_thermal_
                         ? std::map<PdgCode, int>()
-                        : modus_config.take({"Sphere", "Init_Multiplicities"})
-                              .convert_for(init_multipl_)),
+                        : modus_config.take(
+                              InputKeys::modi_sphere_initialMultiplicities)),
       init_distr_(modus_config.take(InputKeys::modi_sphere_initialCondition)),
       radial_velocity_(
           modus_config.take(InputKeys::modi_sphere_addRadialVelocity)),
@@ -61,7 +62,7 @@ SphereModus::SphereModus(Configuration modus_config,
        */
       jet_pdg_(modus_config.has_section(InputSections::m_s_jet)
                    ? make_optional<PdgCode>(
-                         modus_config.take({"Sphere", "Jet", "Jet_PDG"}))
+                         modus_config.take(InputKeys::modi_sphere_jet_jetPdg))
                    : std::nullopt),
 
       jet_mom_(modus_config.take(InputKeys::modi_sphere_jet_jetMomentum)) {}

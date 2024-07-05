@@ -214,9 +214,11 @@ class GrandCanThermalizer {
                       const std::array<double, 3> lat_sizes,
                       const std::array<double, 3> origin, bool periodicity)
       : GrandCanThermalizer(
-            lat_sizes, conf.take({"Cell_Number"}), origin, periodicity,
-            conf.take({"Critical_Edens"}), conf.take({"Start_Time"}),
-            conf.take({"Timestep"}),
+            lat_sizes, conf.take(InputKeys::forcedThermalization_cellNumber),
+            origin, periodicity,
+            conf.take(InputKeys::forcedThermalization_criticalEDensity),
+            conf.take(InputKeys::forcedThermalization_startTime),
+            conf.take(InputKeys::forcedThermalization_timestep),
             conf.take(InputKeys::forcedThermalization_algorithm),
             conf.take(InputKeys::forcedThermalization_microcanonical)) {}
   /**

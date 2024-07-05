@@ -5285,7 +5285,7 @@ struct InputKeys {
   /**
    * \see_key{key_potentials_coulomb_r_cut_}
    */
-  inline static const Key<std::vector<double>> potentials_coulomb_rCut{
+  inline static const Key<double> potentials_coulomb_rCut{
       InputSections::p_coulomb + "R_Cut", {"2.1"}};
 
   /*!\Userguide

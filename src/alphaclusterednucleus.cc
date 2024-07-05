@@ -38,14 +38,20 @@ AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int nTest,
         "Alpha-Clustering is only implemented for oxygen nuclei. Please, check "
         "the 'Alpha_Clustered' section in your input file.");
   }
+  const bool is_projectile = is_configuration_about_projectile(config);
+
   if (!auto_alphaclustering) {
-    tetrahedron_sidelength_ = config.take({"Alpha_Clustered", "Sidelength"});
+    const auto &side_length_key = [&is_projectile]() {
+      return is_projectile
+                 ? InputKeys::modi_collider_projectile_alphaClustered_sidelength
+                 : InputKeys::modi_collider_target_alphaClustered_sidelength;
+    }();
+    tetrahedron_sidelength_ = config.take(side_length_key);
   }
   scale_tetrahedron_vertex_positions(tetrahedron_sidelength_);
-  const auto &orientation_section = [&config]() {
-    return is_configuration_about_projectile(config)
-               ? InputSections::m_c_p_orientation
-               : InputSections::m_c_t_orientation;
+  const auto &orientation_section = [&is_projectile]() {
+    return is_projectile ? InputSections::m_c_p_orientation
+                         : InputSections::m_c_t_orientation;
   }();
   if (config.has_section(orientation_section)) {
     Configuration sub_conf = config.extract_sub_configuration({"Orientation"});

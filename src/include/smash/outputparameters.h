@@ -88,10 +88,12 @@ struct OutputParameters {
     if (conf.has_section(InputSections::o_thermodynamics)) {
       auto thermo_conf = conf.extract_sub_configuration({"Thermodynamics"});
       if (thermo_conf.has_value(InputKeys::output_thermodynamics_position)) {
-        const std::array<double, 3> a = thermo_conf.take({"Position"});
+        const std::array<double, 3> a =
+            thermo_conf.take(InputKeys::output_thermodynamics_position);
         td_position = ThreeVector(a[0], a[1], a[2]);
       }
-      std::set<ThermodynamicQuantity> quan = thermo_conf.take({"Quantities"});
+      std::set<ThermodynamicQuantity> quan =
+          thermo_conf.take(InputKeys::output_thermodynamics_quantites);
       td_rho_eckart = (quan.count(ThermodynamicQuantity::EckartDensity) > 0);
       td_tmn = (quan.count(ThermodynamicQuantity::Tmn) > 0);
       td_tmn_landau = (quan.count(ThermodynamicQuantity::TmnLandau) > 0);

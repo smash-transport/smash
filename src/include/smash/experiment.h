@@ -898,7 +898,7 @@ Experiment<Modus>::Experiment(Configuration &config,
         return Modus{std::move(modus_config), parameters_};
       })),
       ensembles_(parameters_.n_ensembles),
-      end_time_(config.take({"General", "End_Time"})),
+      end_time_(config.take(InputKeys::gen_endTime)),
       delta_time_startup_(parameters_.labclock->timestep_duration()),
       force_decays_(config.take(InputKeys::collTerm_forceDecaysAtEnd)),
       use_grid_(config.take(InputKeys::gen_useGrid)),
@@ -922,13 +922,13 @@ Experiment<Modus>::Experiment(Configuration &config,
   }
   if (user_wants_nevents) {
     event_counting_ = EventCounting::FixedNumber;
-    nevents_ = config.take({"General", "Nevents"});
+    nevents_ = config.take(InputKeys::gen_nevents);
   } else {
     event_counting_ = EventCounting::MinimumNonEmpty;
     minimum_nonempty_ensembles_ =
-        config.take({"General", "Minimum_Nonempty_Ensembles", "Number"});
-    int max_ensembles = config.take(
-        {"General", "Minimum_Nonempty_Ensembles", "Maximum_Ensembles_Run"});
+        config.take(InputKeys::gen_minNonEmptyEnsembles_number);
+    int max_ensembles =
+        config.take(InputKeys::gen_minNonEmptyEnsembles_maximumEnsembles);
     max_events_ = numeric_cast<int>(std::ceil(
         static_cast<double>(max_ensembles) / parameters_.n_ensembles));
   }
@@ -1665,9 +1665,9 @@ Experiment<Modus>::Experiment(Configuration &config,
       if (!automatic) {
         return std::make_tuple<std::array<double, 3>, std::array<int, 3>,
                                std::array<double, 3>>(
-            config.take({"Lattice", "Sizes"}),
-            config.take({"Lattice", "Cell_Number"}),
-            config.take({"Lattice", "Origin"}));
+            config.take(InputKeys::lattice_sizes),
+            config.take(InputKeys::lattice_cellNumber),
+            config.take(InputKeys::lattice_origin));
       } else {
         std::array<double, 3> l_default{20., 20., 20.};
         std::array<int, 3> n_default{10, 10, 10};
@@ -1860,7 +1860,7 @@ Experiment<Modus>::Experiment(Configuration &config,
 
   /* Take the seed setting only after the configuration was stored to a file
    * in smash.cc */
-  seed_ = config.take({"General", "Randomseed"});
+  seed_ = config.take(InputKeys::gen_randomseed);
 }
 
 /// String representing a horizontal line.

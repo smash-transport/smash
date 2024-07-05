@@ -48,8 +48,9 @@ void initialize_particles_decays_and_tabulations(
     const std::string &tabulations_dir) {
   logg[LMain].trace(SMASH_SOURCE_LOCATION,
                     " create ParticleType and DecayModes");
-  const std::string particles_string = configuration.take({"particles"});
-  const std::string decaymodes_string = configuration.take({"decaymodes"});
+  const std::string particles_string = configuration.take(InputKeys::particles);
+  const std::string decaymodes_string =
+      configuration.take(InputKeys::decaymodes);
   ParticleType::create_type_list(particles_string);
   DecayModes::load_decaymodes(decaymodes_string);
   ParticleType::check_consistency();

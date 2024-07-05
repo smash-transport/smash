@@ -147,7 +147,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
         "set to True when using Potentials.");
   }
 
-  const std::string modus_chooser = config.take({"General", "Modus"});
+  const std::string modus_chooser = config.take(InputKeys::gen_modus);
   // remove config maps of unused Modi
   config.remove_all_entries_in_section_but_one(modus_chooser, {"Modi"});
 

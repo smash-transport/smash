@@ -285,7 +285,7 @@ bool ListModus::file_has_events_(std::filesystem::path filepath,
 
 ListBoxModus::ListBoxModus(Configuration modus_config,
                            const ExperimentParameters &param)
-    : ListModus(), length_(modus_config.take({"ListBox", "Length"})) {
+    : ListModus(), length_(modus_config.take(InputKeys::modi_listBox_length)) {
   /*
    * ATTENTION: In a child class initialization list nothing can be done before
    * calling the base constructor. However, here we cannot hand over the
