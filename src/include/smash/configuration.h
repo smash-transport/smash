@@ -15,6 +15,7 @@
 #include <exception>
 #include <filesystem>
 #include <iostream>
+#include <map>
 #include <optional>
 #include <set>
 #include <stdexcept>
@@ -1173,6 +1174,16 @@ class Configuration {
     if (has_value(key)) {
       // The following return statement converts a Value into T
       return take({key.labels().begin(), key.labels().end()});
+    } else if (has_section(key.labels())) {
+      // In this case, if the Key type is a map, we take it, otherwise fails
+      if constexpr (isMap<typename Key<T>::type>::value) {
+        return take({key.labels().begin(), key.labels().end()});
+      } else {
+        throw std::logic_error(
+            "Key " + std::string{key} +  // NOLINT(whitespace/braces)
+            " was taken, but its value is not a map, although there is a "
+            "section in the configuration with its labels.");
+      }
     } else if (did_key_exist_and_was_it_taken(key)) {
       throw TakeSameKeyTwice("Attempt to take key " +
                              std::string{key} +  // NOLINT(whitespace/braces)
@@ -1242,6 +1253,16 @@ class Configuration {
     if (has_value(key)) {
       // The following return statement converts a Value into T
       return read({key.labels().begin(), key.labels().end()});
+    } else if (has_section(key.labels())) {
+      // In this case, if the Key type is a map, we take it, otherwise fails
+      if constexpr (isMap<typename Key<T>::type>::value) {
+        return read({key.labels().begin(), key.labels().end()});
+      } else {
+        throw std::logic_error(
+            "Key " + std::string{key} +  // NOLINT(whitespace/braces)
+            " was read, but its value is not a map, although there is a "
+            "section in the configuration with its labels.");
+      }
     } else {
       try {
         return key.default_value();
@@ -1484,6 +1505,17 @@ class Configuration {
    */
   std::optional<YAML::Node> find_existing_node(
       std::vector<std::string_view> keys) const;
+
+  /**
+   * Utility type trait (general case) for the take and read public methods.
+   */
+  template <class T>
+  struct isMap : std::false_type {};
+  /**
+   * Utility type trait (special case) for the take and read public methods.
+   */
+  template <class Key, class Value>
+  struct isMap<std::map<Key, Value>> : std::true_type {};
 
   /**
    * This is the implementation detail to take a key. Having a non-templated

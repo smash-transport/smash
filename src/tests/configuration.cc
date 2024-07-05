@@ -104,19 +104,27 @@ TEST_CATCH(take_not_existing_key_in_existing_section, std::invalid_argument) {
 }
 
 TEST(take_array) {
-  Configuration conf = make_test_configuration();
-  conf.merge_yaml("{test: [123, 456, 789]}");
+  Configuration conf{"{test: [123, 456, 789]}"};
   std::array<int, 3> x = conf.take(get_key<std::array<int, 3>>({"test"}));
   VERIFY(x[0] == 123 && x[1] == 456 && x[2] == 789);
-  conf.clear();
+}
+
+TEST(take_map_key) {
+  Configuration conf{"{test: {42: 789}}"};
+  std::map<int, int> x = conf.take(get_key<std::map<int, int>>({"test"}));
+  VERIFY(x[42] == 789);
+}
+
+TEST_CATCH(take_section_as_non_map_key, std::logic_error) {
+  Configuration conf = make_test_configuration();
+  conf.merge_yaml("{test: {42: 789}}");
+  conf.take(get_key<int>({"test"}));
 }
 
 TEST(take_enum_key) {
-  Configuration conf = make_test_configuration();
-  conf.merge_yaml("{test: on}");
+  Configuration conf{"{test: on}"};
   FermiMotion x = conf.take(get_key<FermiMotion>({"test"}));
   VERIFY(x == FermiMotion::On);
-  conf.clear();
 }
 
 TEST_CATCH(take_array_wrong_n, Configuration::IncorrectTypeInAssignment) {
@@ -229,6 +237,19 @@ TEST(read_does_not_take_and_reading_multiple_times_is_fine) {
   nevents = conf.read(key);
   COMPARE(nevents, 1);
   conf.clear();
+}
+
+TEST(read_map_key) {
+  Configuration conf{"{test: {42: 789}}"};
+  std::map<int, int> x = conf.read(get_key<std::map<int, int>>({"test"}));
+  VERIFY(x[42] == 789);
+  conf.clear();
+}
+
+TEST_CATCH(read_section_as_non_map_key, std::logic_error) {
+  Configuration conf = make_test_configuration();
+  conf.merge_yaml("{test: {42: 789}}");
+  conf.read(get_key<int>({"test"}));
 }
 
 TEST(set_existing_value) {
@@ -493,7 +514,7 @@ TEST(check_unused_report) {
   conf.take(get_key<double>({"tamer", "Altaic", "Meccas"}));
   conf.take(get_key<double>({"tamer", "Altaic", "Kathleen"}));
   conf.take(get_key<int>({"tamer", "Altaic", "Brahmins"}));
-  conf.extract_sub_configuration({"tamer", "feathered"});
+  conf.extract_sub_configuration({"tamer", "feathered"}).clear();
   {
     std::istringstream unused(conf.to_string());
     std::string line;
