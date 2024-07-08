@@ -3567,13 +3567,12 @@ struct InputKeys {
   /**
    * \see_key{key_MC_PT_orientation_random_}
    */
-  inline static const Key<bool>
-      modi_collider_projectile_orientation_randomRotation{
-          InputSections::m_c_p_orientation + "Random_Rotation", false, {"1.7"}};
+  inline static const Key<bool> modi_collider_projectile_orientation_randRot{
+      InputSections::m_c_p_orientation + "Random_Rotation", false, {"1.7"}};
   /**
    * \see_key{key_MC_PT_orientation_random_}
    */
-  inline static const Key<bool> modi_collider_target_orientation_randomRotation{
+  inline static const Key<bool> modi_collider_target_orientation_randRot{
       InputSections::m_c_t_orientation + "Random_Rotation", false, {"1.7"}};
 
   /*!\Userguide
@@ -5642,8 +5641,8 @@ struct InputKeys {
       std::cref(modi_collider_target_orientation_phi),
       std::cref(modi_collider_projectile_orientation_psi),
       std::cref(modi_collider_target_orientation_psi),
-      std::cref(modi_collider_projectile_orientation_randomRotation),
-      std::cref(modi_collider_target_orientation_randomRotation),
+      std::cref(modi_collider_projectile_orientation_randRot),
+      std::cref(modi_collider_target_orientation_randRot),
       std::cref(modi_collider_projectile_orientation_theta),
       std::cref(modi_collider_target_orientation_theta),
       std::cref(modi_collider_impact_max),

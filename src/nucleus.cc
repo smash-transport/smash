@@ -363,17 +363,12 @@ void Nucleus::set_orientation_from_config(Configuration &config) {
   const auto &[rotation_key, theta_key, phi_key, psi_key] = [&is_projectile]() {
     return is_projectile
                ? std::make_tuple(
-                     InputKeys::
-                         modi_collider_projectile_orientation_randomRotation,
-                     InputKeys::
-                         modi_collider_projectile_orientation_theta,
-                     InputKeys::
-                         modi_collider_projectile_orientation_phi,
-                     InputKeys::
-                         modi_collider_projectile_orientation_psi)
+                     InputKeys::modi_collider_projectile_orientation_randRot,
+                     InputKeys::modi_collider_projectile_orientation_theta,
+                     InputKeys::modi_collider_projectile_orientation_phi,
+                     InputKeys::modi_collider_projectile_orientation_psi)
                : std::make_tuple(
-                     InputKeys::
-                         modi_collider_target_orientation_randomRotation,
+                     InputKeys::modi_collider_target_orientation_randRot,
                      InputKeys::modi_collider_target_orientation_theta,
                      InputKeys::modi_collider_target_orientation_phi,
                      InputKeys::modi_collider_target_orientation_psi);
