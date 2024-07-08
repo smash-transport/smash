@@ -1379,6 +1379,13 @@ class Configuration {
                              Configuration::GetEmpty::No);
 
   /**
+   * Enclose the configuration into the given section.
+   *
+   * @param section The section in which to enclose the configuration.
+   */
+  void enclose_into_section(KeyLabels section);
+
+  /**
    * Return whether the configuration has a (possibly empty) non-map key.
    * Although %YAML keys can have maps as value, we rather refer to those as
    * sections and we do not consider them as key in the SMASH database sense. A

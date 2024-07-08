@@ -392,6 +392,22 @@ TEST(extract_complete_not_existing_section_as_empty_conf) {
   sub_conf.clear();
 }
 
+TEST(enclose_into_section) {
+  Configuration conf("{Top: {Key: 42}}");
+  conf.enclose_into_section({"Enclosing"});
+  VERIFY(conf.has_section({"Enclosing"}));
+  conf.clear();
+}
+
+TEST(prepend_section_labels_to_empty_config) {
+  Configuration conf("");
+  VERIFY(conf.is_empty());
+  KeyLabels section{"Not_existing_section"};
+  conf.enclose_into_section({"Enclosing"});
+  VERIFY(conf.has_section({"Enclosing"}));
+  conf.clear();
+}
+
 TEST(has_possibly_empty_key) {
   Configuration conf = Configuration{"{Key: 42, Array: [], Empty:}"};
   const auto missing_key = get_key<std::string>({"XXX"});

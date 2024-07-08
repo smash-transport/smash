@@ -328,24 +328,30 @@ Configuration Configuration::extract_complete_sub_configuration(
     KeyLabels section, Configuration::GetEmpty empty_if_not_existing) {
   auto sub_configuration =
       extract_sub_configuration(section, empty_if_not_existing);
-  /* If the sub-configuration is empty, force its root node to be a map. This is
-  not done in the extract_sub_configuration method, which leaves open the
-  possibility not to have a map node at root in the returned object. */
-  if (sub_configuration.root_node_.size() == 0) {
-    sub_configuration = Configuration{YAML::Node(YAML::NodeType::Map)};
+  sub_configuration.enclose_into_section(section);
+  return sub_configuration;
+}
+
+void Configuration::enclose_into_section(KeyLabels section) {
+  /* If the configuration is empty, force its root node to be a map. This is not
+  done in the extract_sub_configuration method, which allows the possibility not
+  to have a map node at root in the returned object, but here we
+  know it will be a map. */
+  if (root_node_.size() == 0) {
+    root_node_ = YAML::Node(YAML::NodeType::Map);
   }
-  /* Now create the configuration to be returned adding there the nested-map
-  structure. Refer to the descend_one_existing_level comment to understand
-  the usage of YAML::Node::operator[] and reset methods. */
-  Configuration result{YAML::Node(YAML::NodeType::Map)};
-  auto last_node = result.root_node_;
+  /* Create a new configuration from an empty node adding there the nested-map
+  structure. Then add the old root node to it and reset it to the new root one.
+  Refer to the descend_one_existing_level comment to understand the usage of
+  YAML::Node::operator[] and reset methods. */
+  YAML::Node new_root_node{YAML::NodeType::Map};
+  auto last_node = new_root_node;
   for (const auto &label : section) {
     last_node[label] = YAML::Node(YAML::NodeType::Map);
     last_node.reset(last_node[label]);
   }
-  last_node = sub_configuration.root_node_;
-  sub_configuration.clear();
-  return result;
+  last_node = root_node_;
+  root_node_.reset(new_root_node);
 }
 
 std::string Configuration::to_string() const {
