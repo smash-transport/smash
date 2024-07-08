@@ -33,12 +33,14 @@ static constexpr int LCollider = LogArea::Collider::id;
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &params) {
   Configuration modus_cfg =
-      modus_config.extract_sub_configuration({"Collider"});
+      modus_config.extract_sub_configuration(InputSections::m_collider);
   // Get the reference frame for the collision calculation.
   frame_ = modus_cfg.take(InputKeys::modi_collider_calculationFrame);
 
-  Configuration proj_cfg = modus_cfg.extract_sub_configuration({"Projectile"});
-  Configuration targ_cfg = modus_cfg.extract_sub_configuration({"Target"});
+  Configuration proj_cfg =
+      modus_cfg.extract_sub_configuration(InputSections::m_c_projectile);
+  Configuration targ_cfg =
+      modus_cfg.extract_sub_configuration(InputSections::m_c_target);
   /* Needed to check if projectile and target in customnucleus are read from
    * the same input file.*/
   bool same_file = false;

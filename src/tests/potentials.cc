@@ -101,12 +101,12 @@ TEST(nucleus_potential_profile) {
   )"};
   conf.validate();
   ExperimentParameters param = smash::Test::default_parameters();
-  ColliderModus c(conf.extract_sub_configuration({"Modi"}), param);
+  ColliderModus c(conf.extract_sub_configuration(InputSections::modi), param);
   std::vector<Particles> P(1);
   c.initial_conditions(&(P[0]), param);
   ParticleList plist;
-  Potentials pot =
-      Potentials(conf.extract_sub_configuration({"Potentials"}), param);
+  Potentials pot = Potentials(
+      conf.extract_sub_configuration(InputSections::potentials), param);
 
   // Write potential XY map in a vtk output
   ThreeVector r;

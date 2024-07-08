@@ -891,7 +891,8 @@ Experiment<Modus>::Experiment(Configuration &config,
         auto &key = InputKeys::modi_collider_collisionWithinNucleus;
         const bool restore_key = config.has_value(key);
         const bool temporary_taken_key = config.take(key);
-        auto modus_config = config.extract_sub_configuration({"Modi"});
+        auto modus_config =
+            config.extract_sub_configuration(InputSections::modi);
         if (restore_key) {
           config.set_value(key, temporary_taken_key);
         }
