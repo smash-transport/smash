@@ -892,7 +892,7 @@ Experiment<Modus>::Experiment(Configuration &config,
         const bool restore_key = config.has_value(key);
         const bool temporary_taken_key = config.take(key);
         auto modus_config =
-            config.extract_sub_configuration(InputSections::modi);
+            config.extract_complete_sub_configuration(InputSections::modi);
         if (restore_key) {
           config.set_value(key, temporary_taken_key);
         }
@@ -1154,7 +1154,8 @@ Experiment<Modus>::Experiment(Configuration &config,
   if (config.has_section(InputSections::c_pauliBlocking)) {
     logg[LExperiment].info() << "Pauli blocking is ON.";
     pauli_blocker_ = std::make_unique<PauliBlocker>(
-        config.extract_sub_configuration(InputSections::c_pauliBlocking),
+        config.extract_complete_sub_configuration(
+            InputSections::c_pauliBlocking),
         parameters_);
   }
 
@@ -1385,7 +1386,7 @@ Experiment<Modus>::Experiment(Configuration &config,
 
   /* Parse configuration about output contents and formats, doing all logical
    * checks about specified formats, creating all needed output objects. */
-  auto output_conf = config.extract_sub_configuration(
+  auto output_conf = config.extract_complete_sub_configuration(
       {"Output"}, Configuration::GetEmpty::Yes);
   if (output_path == "") {
     throw std::invalid_argument(
@@ -1515,7 +1516,7 @@ Experiment<Modus>::Experiment(Configuration &config,
                              << parameters_.labclock->timestep_duration();
     // potentials need density calculation parameters from parameters_
     potentials_ = std::make_unique<Potentials>(
-        config.extract_sub_configuration(InputSections::potentials),
+        config.extract_complete_sub_configuration(InputSections::potentials),
         parameters_);
     // make sure that vdf potentials are not used together with Skyrme
     // or symmetry potentials

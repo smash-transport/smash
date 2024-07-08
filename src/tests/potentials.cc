@@ -101,12 +101,14 @@ TEST(nucleus_potential_profile) {
   )"};
   conf.validate();
   ExperimentParameters param = smash::Test::default_parameters();
-  ColliderModus c(conf.extract_sub_configuration(InputSections::modi), param);
+  ColliderModus c(conf.extract_complete_sub_configuration(InputSections::modi),
+                  param);
   std::vector<Particles> P(1);
   c.initial_conditions(&(P[0]), param);
   ParticleList plist;
   Potentials pot = Potentials(
-      conf.extract_sub_configuration(InputSections::potentials), param);
+      conf.extract_complete_sub_configuration(InputSections::potentials),
+      param);
 
   // Write potential XY map in a vtk output
   ThreeVector r;
@@ -293,12 +295,13 @@ TEST(ensembles_vs_testparticles) {
   }
 
   const char* conf_pot{R"(
-    Skyrme:
-        Skyrme_A: -209.2
-        Skyrme_B: 156.4
-        Skyrme_Tau: 1.35
-    Symmetry:
-        S_Pot: 18.0
+    Potentials:
+      Skyrme:
+          Skyrme_A: -209.2
+          Skyrme_B: 156.4
+          Skyrme_Tau: 1.35
+      Symmetry:
+          S_Pot: 18.0
   )"};
   Configuration conf1{conf_pot}, conf2{conf_pot};
   ExperimentParameters param1 = smash::Test::default_parameters(),
@@ -382,13 +385,14 @@ TEST(energy_gradient_vs_pot_gradient) {
       ncells[2] / 2)];  // density in the center (int division intended)
   // set up a potentials object without momentum dependence
   const char* conf_pot{R"(
-    Skyrme:
-        Skyrme_A: -209.2
-        Skyrme_B: 156.4
-        Skyrme_Tau: 1.35
-    Momentum_Dependence:
-        C: 0.0
-        Lambda: 2.13
+    Potentials:
+      Skyrme:
+          Skyrme_A: -209.2
+          Skyrme_B: 156.4
+          Skyrme_Tau: 1.35
+      Momentum_Dependence:
+          C: 0.0
+          Lambda: 2.13
   )"};
   Configuration conf{conf_pot};
   Potentials pot(std::move(conf), denspar);
@@ -478,10 +482,11 @@ TEST(vdf_chain_rule_derivatives_vs_vdf_direct_derivatives) {
   const int Ntest = 1000;
   // initialize the experiment parameters and potentials
   Configuration conf{R"(
-    VDF:
-      Sat_rhoB: 0.168
-      Powers: [2.0, 2.35]
-      Coeffs: [-209.2, 156.5]
+    Potentials:
+      VDF:
+        Sat_rhoB: 0.168
+        Powers: [2.0, 2.35]
+        Coeffs: [-209.2, 156.5]
   )"};
   ExperimentParameters param = default_parameters_vdf(Ntest);
   Potentials pot(std::move(conf), param);
@@ -687,17 +692,19 @@ TEST(skyrme_vs_vdf_wo_lattice) {
   const int Ntest = 1000;
   // initialize the experiment parameters and potentials
   Configuration conf_pot1{R"(
-    Skyrme:
-        Skyrme_A: -209.2
-        Skyrme_B: 156.4
-        Skyrme_Tau: 1.35
+    Potentials:
+      Skyrme:
+          Skyrme_A: -209.2
+          Skyrme_B: 156.4
+          Skyrme_Tau: 1.35
   )"};
 
   Configuration conf_pot2{R"(
-    VDF:
-      Sat_rhoB: 0.168
-      Powers: [2.0, 2.35]
-      Coeffs: [-209.2, 156.5]
+    Potentials:
+      VDF:
+        Sat_rhoB: 0.168
+        Powers: [2.0, 2.35]
+        Coeffs: [-209.2, 156.5]
   )"};
   ExperimentParameters param = default_parameters_vdf(Ntest);
   Potentials pot1(std::move(conf_pot1), param),
@@ -953,10 +960,11 @@ TEST(spinodal_dilute) {
 
   // initialize potential
   Configuration conf{R"(
-    VDF:
-      Sat_rhoB: 0.168
-      Powers: [2.0, 2.35]
-      Coeffs: [-209.2, 156.5]
+    Potentials:
+      VDF:
+        Sat_rhoB: 0.168
+        Powers: [2.0, 2.35]
+        Coeffs: [-209.2, 156.5]
   )"};
   ExperimentParameters param = default_parameters_vdf(Ntest, 0.1, 2.0);
 
