@@ -373,6 +373,13 @@ class Nucleus {
 };
 
 /**
+ * Find out whether a configuration has a projectile or a target sub-section.
+ *
+ * \param config The configuration to be checked.
+ */
+bool has_projectile_or_target(const Configuration &config);
+
+/**
  * Find out whether a configuration is about projectile or target.
  *
  * \param config The configuration to be checked.
@@ -380,7 +387,7 @@ class Nucleus {
  * \throw An \c std::logic_error if there is neither a projectile nor a target
  * subsection or if both are present.
  */
-bool is_configuration_about_projectile(const Configuration &config);
+bool is_about_projectile(const Configuration &config);
 
 }  // namespace smash
 

@@ -32,7 +32,8 @@ Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
 }
 
 Nucleus::Nucleus(Configuration &config, int nTest) {
-  const bool is_projectile = is_configuration_about_projectile(config);
+  assert(has_projectile_or_target(config));
+  const bool is_projectile = is_about_projectile(config);
   const auto &[particles_key, diffusiveness_key, radius_key,
                saturation_key] = [&is_projectile]() {
     return is_projectile
@@ -357,7 +358,8 @@ void Nucleus::set_parameters_automatic() {
 }
 
 void Nucleus::set_orientation_from_config(Configuration &config) {
-  const bool is_projectile = is_configuration_about_projectile(config);
+  const bool is_projectile =
+      has_projectile_or_target(config) ? is_about_projectile(config) : true;
   const auto &[rotation_key, theta_key, phi_key, psi_key] = [&is_projectile]() {
     return is_projectile
                ? std::make_tuple(
@@ -584,12 +586,20 @@ std::ostream &operator<<(std::ostream &out, const Nucleus &n) {
              << format(n.get_diffusiveness(), nullptr, 20);
 }
 
-bool is_configuration_about_projectile(const Configuration &config) {
+bool has_projectile_or_target(const Configuration &config) {
+  const bool is_projectile = config.has_section(InputSections::m_c_projectile);
+  const bool is_target = config.has_section(InputSections::m_c_target);
+  return is_projectile || is_target;
+}
+
+bool is_about_projectile(const Configuration &config) {
   const bool is_projectile = config.has_section(InputSections::m_c_projectile);
   const bool is_target = config.has_section(InputSections::m_c_target);
   if (is_projectile == is_target) {
     throw std::logic_error(
-        "Error parsing configuration of either projectile or target.");
+        "Error parsing configuration of EITHER projectile OR target.\n"
+        "Configuration tested for it contains the following:\n------------\n" +
+        config.to_string() + "\n------------\n");
   }
   return is_projectile;
 }

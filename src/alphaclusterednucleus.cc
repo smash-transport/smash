@@ -38,7 +38,7 @@ AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int nTest,
         "Alpha-Clustering is only implemented for oxygen nuclei. Please, check "
         "the 'Alpha_Clustered' section in your input file.");
   }
-  const bool is_projectile = is_configuration_about_projectile(config);
+  const bool is_projectile = is_about_projectile(config);
 
   if (!auto_alphaclustering) {
     const auto &side_length_key = [&is_projectile]() {

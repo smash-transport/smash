@@ -323,7 +323,8 @@ std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {
 
 std::unique_ptr<DeformedNucleus> ColliderModus::create_deformed_nucleus(
     Configuration &nucleus_cfg, int ntest, const std::string &nucleus_type) {
-  const bool is_projectile = is_configuration_about_projectile(nucleus_cfg);
+  assert(has_projectile_or_target(nucleus_cfg));
+  const bool is_projectile = is_about_projectile(nucleus_cfg);
   const auto &[automatic_key, beta2_key, beta3_key, beta4_key,
                gamma_key] = [&is_projectile]() {
     return is_projectile
@@ -376,7 +377,7 @@ std::unique_ptr<AlphaClusteredNucleus>
 ColliderModus::create_alphaclustered_nucleus(Configuration &nucleus_cfg,
                                              int ntest,
                                              const std::string &nucleus_type) {
-  const bool is_projectile = is_configuration_about_projectile(nucleus_cfg);
+  const bool is_projectile = is_about_projectile(nucleus_cfg);
   const auto &[automatic_key, side_length_key] = [&is_projectile]() {
     return is_projectile
                ? std::make_tuple(

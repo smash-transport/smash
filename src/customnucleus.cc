@@ -25,7 +25,8 @@ std::unique_ptr<std::ifstream> CustomNucleus::filestream_shared_ = nullptr;
 
 CustomNucleus::CustomNucleus(Configuration& config, int testparticles,
                              bool same_file) {
-  const bool is_projectile = is_configuration_about_projectile(config);
+  assert(has_projectile_or_target(config));
+  const bool is_projectile = is_about_projectile(config);
   const auto& [file_dir_key, filename_key, particles_key] = [&is_projectile]() {
     return is_projectile
                ? std::make_tuple(
