@@ -96,26 +96,29 @@ void ParticleData::set_unpolarized_spin_vector() {
     std::cout << "Spin vector already set!" << std::endl;
   }
 
+  // Set the mean and standard deviation for the normal distribution
+  // of the spin vector components. This random sampling is solely for
+  // initializing particle spin vectors and is not physical. Hence, the
+  // arbitrary standard deviation is set to a small value for testing.
+  double mean = 0.0;
+  double sigma = 0.75;
+
   const int total_spin = spin();
   // For spin 0 all 4 components of the Pauli-Lubanski vector are zero
   if (total_spin == 0) {
     spin_vector_ = FourVector(0., 0., 0., 0.);
     /**
-     * For finite spin states we use that \f$S^2 = -m^2*s(s+1)$ and that in the
-     * rest frame of the particle \f$S^0 = 0$. Therefore, we set all spatial
-     * components equally to \f$S^i = m*sqrt(\frac{s(s+1)}{3})$. This results in
-     * a completely unpolarized spin vector that fullfills \f$S^2 =
-     * -m^2*s(s+1)$. After setting all values, we need to boost the spin vector
-     * with the particle's velocity.
+     * For finite spin states, we need to choose the spin vector components such
+     * that the average polarization is zero. This is achieved by using \f$S^0 =
+     * 0$ in the particle rest frame. The spatial components of the spin vector
+     * are sampled from a normal distribution with mean 0. After sampling, we
+     * boost the spin vector to lab frame.
      */
   } else {
-    const double rest_mass = effective_mass();
-    const double spatial_spin_component =
-        rest_mass * std::sqrt(total_spin * (total_spin + 1) / 3.);
-    FourVector spin_vector =
-        FourVector(0., spatial_spin_component, spatial_spin_component,
-                   spatial_spin_component);
-    // Boost the spin vector to the particle's frame
+    FourVector spin_vector(0., random::normal(mean, sigma),
+                           random::normal(mean, sigma),
+                           random::normal(mean, sigma));
+    // Boost the spin vector to the lab frame
     spin_vector_ = spin_vector.lorentz_boost(velocity());
   }
 }

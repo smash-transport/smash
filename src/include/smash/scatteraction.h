@@ -251,6 +251,12 @@ class ScatterAction : public Action {
    */
   void string_excitation();
 
+  /// Perform spin interaction in binary interactions
+  void spin_interaction();
+
+  /// Boost the spin vectors of the outgoing particles after elastic scattering
+  void boost_spin_vectors_after_elastic_scattering();
+
   /**
    * \ingroup logging
    * Writes information about this scatter action to the \p out stream.

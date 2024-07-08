@@ -364,7 +364,7 @@ class ParticleData {
    * Set the mean spin 4-vector (Pauli-Lubanski vector) of the particle.
    * \param[in] s particle's mean spin 4-vector
    */
-  void set_spin_vector(const FourVector s);
+  void set_spin_vector(const FourVector s) { spin_vector_ = s; }
 
   /**
    * Set the 4 components of the spin vector such that the particle is

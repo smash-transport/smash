@@ -173,3 +173,148 @@ TEST(parity) {
   COMPARE(p * p, p);
   COMPARE(n * n, p);
 }
+
+TEST(unpolarized_particle_initialization) {
+  const int number_samples = 1000000;
+  const double small_value = 0.01;
+  FourVector mean_polarization;
+
+  for (int i = 0; i < number_samples; i++) {
+    ParticleData p{ParticleType::find(smash::pdg::p)};
+    ThreeVector M(1.1 + random::normal(0.0, 0.5),
+                  1.3 + random::normal(0.0, 0.5),
+                  30.5 + random::normal(0.0, 0.5));
+    p.set_4momentum(2.0, M.x1(), M.x2(), M.x3());
+    p.set_unpolarized_spin_vector();
+    // Boost to particle rest frame
+    FourVector restframe_polarization =
+        p.spin_vector().lorentz_boost(-p.velocity());
+    mean_polarization.operator+=(restframe_polarization);
+  }
+  mean_polarization.operator/=(number_samples);
+  
+std::cout << mean_polarization.x1() << " " << mean_polarization.x2() << " " << mean_polarization.x3() << std::endl;
+
+  VERIFY(mean_polarization.x1() < small_value);
+  VERIFY(mean_polarization.x2() < small_value);
+  VERIFY(mean_polarization.x3() < small_value);
+}
+
+// // Sets a spin projection and fails if no error is thrown
+// static void set_invalid_spin_projection_and_catch_error(ParticleData &p,
+//                                                         int spin_projection)
+//                                                         {
+//   try {
+//     p.set_spin_projection(spin_projection);
+//   } catch (std::invalid_argument &e) {
+//     return;
+//   }
+//   std::cout << "Initialization Error: Initialization of spin " << p.spin()
+//             << " particle with spin projection s_z= " << spin_projection
+//             << " detected as invalid!" << std::endl;
+//   FAIL();
+// }
+
+// TEST(invalid_spin_projection) {
+//   // Pi+ (spin 0)
+//   ParticleData p1{ParticleType::find(smash::pdg::pi_p)};
+//   for (int invalid_value :
+//        {-999, -6, -5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 999}) {
+//     set_invalid_spin_projection_and_catch_error(p1, invalid_value);
+//   }
+//   // Proton (spin 1/2)
+//   ParticleData p2{ParticleType::find(smash::pdg::p)};
+//   for (int invalid_value : {-999, -6, -5, -4, -3, -2, 0, 2, 3, 4, 5, 6, 999})
+//   {
+//     set_invalid_spin_projection_and_catch_error(p2, invalid_value);
+//   }
+//   // Rho (spin 1)
+//   ParticleData p3{ParticleType::find(0x113)};
+//   for (int invalid_value : {-999, -6, -5, -4, -3, -1, 1, 3, 4, 5, 6, 999}) {
+//     set_invalid_spin_projection_and_catch_error(p3, invalid_value);
+//   }
+//   // Delta- (spin 3/2)
+//   ParticleData p4{ParticleType::find(0x1114)};
+//   for (int invalid_value : {-999, -6, -5, -4, -2, 0, 2, 4, 5, 6, 999}) {
+//     set_invalid_spin_projection_and_catch_error(p4, invalid_value);
+//   }
+// }
+
+// // Sets a spin projection and fails if an error is thrown
+// static void set_valid_spin_projection_and_catch_error(ParticleData &p,
+//                                                       int spin_projection) {
+//   try {
+//     p.set_spin_projection(spin_projection);
+//   } catch (std::invalid_argument &e) {
+//     std::cout << "Initialization Error: Initialization of spin " << p.spin()
+//               << " particle with spin projection s_z= " << spin_projection
+//               << " falsely detected as valid!" << std::endl;
+//     FAIL();
+//   }
+//   return;
+// }
+
+// TEST(valid_spin_projection) {
+//   // Pi+ (spin 0)
+//   ParticleData p1{ParticleType::find(smash::pdg::pi_p)};
+//   set_valid_spin_projection_and_catch_error(p1, 0);
+//   // Proton (spin 1/2)
+//   ParticleData p2{ParticleType::find(smash::pdg::p)};
+//   for (int valid_value : {-1, 1}) {
+//     set_valid_spin_projection_and_catch_error(p2, valid_value);
+//   }
+//   // Rho (spin 1)
+//   ParticleData p3{ParticleType::find(0x113)};
+//   for (int valid_value : {-2, 0, 2}) {
+//     set_valid_spin_projection_and_catch_error(p3, valid_value);
+//   }
+//   // Delta- (spin 3/2)
+//   ParticleData p4{ParticleType::find(0x1114)};
+//   for (int valid_value : {-3, -1, 1, 3}) {
+//     set_valid_spin_projection_and_catch_error(p4, valid_value);
+//   }
+// }
+
+// TEST(spin_projection) {
+//   for (int i = 0; i < 1000; i++) {
+//     // Pi+ (spin 0)
+//     ParticleData p1{ParticleType::find(smash::pdg::pi_p)};
+//     p1.set_random_spin_projection();
+//     VERIFY(p1.spin_projection() == 0);
+//     // Proton (spin 1/2)
+//     ParticleData p2{ParticleType::find(smash::pdg::p)};
+//     p2.set_random_spin_projection();
+//     int s2 = p2.spin_projection();
+//     VERIFY(s2 == 1 || s2 == -1);
+//     // Rho (spin 1)
+//     ParticleData p3{ParticleType::find(0x113)};
+//     p3.set_random_spin_projection();
+//     int s3 = p3.spin_projection();
+//     VERIFY(s3 == -2 || s3 == -0 || s3 == 2);
+//     // Delta- (spin 3/2)
+//     ParticleData p4{ParticleType::find(0x1114)};
+//     p4.set_random_spin_projection();
+//     int s4 = p4.spin_projection();
+//     VERIFY(s4 == -3 || s4 == -1 || s4 == 1 || s4 == 3);
+//   }
+// }
+
+// TEST(spin_flip) {
+//   // S=0
+//   ParticleData p1{ParticleType::find(smash::pdg::pi_p)};
+//   p1.set_random_spin_projection();
+//   // S=3/2
+//   ParticleData p2{ParticleType::find(0x1114)};
+//   ParticleData p3{ParticleType::find(0x1114)};
+
+//   p2.set_spin_projection(-3);
+//   p3.set_spin_projection(1);
+
+//   // flip all spin projections
+//   p1.flip_spin_projection();
+//   p2.flip_spin_projection();
+//   p3.flip_spin_projection();
+
+//   VERIFY(p1.spin_projection() == 0 && p2.spin_projection() == 3 &&
+//          p3.spin_projection() == -1);
+// }

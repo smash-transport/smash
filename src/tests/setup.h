@@ -116,7 +116,6 @@ inline ParticleData smashon(const Position &position, int id = -1) {
 inline ParticleData smashon(const Momentum &momentum, int id = -1) {
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4momentum(momentum);
-  p.set_unpolarized_spin_vector();
   return p;
 }
 /**
@@ -161,7 +160,6 @@ inline ParticleData smashon_random(int id = -1) {
       {random_time, random_value(), random_value(), random_value()});
   p.set_4momentum(smashon_mass,
                   {random_value(), random_value(), random_value()});
-  p.set_unpolarized_spin_vector();
   return p;
 }
 

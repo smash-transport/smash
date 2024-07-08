@@ -608,6 +608,8 @@ void ScatterAction::elastic_scattering() {
   sample_angles({outgoing_particles_[0].effective_mass(),
                  outgoing_particles_[1].effective_mass()},
                 sqrt_s());
+  // Boost spin vectors
+  boost_spin_vectors_after_elastic_scattering();
 }
 
 void ScatterAction::inelastic_scattering() {
@@ -768,6 +770,17 @@ void ScatterAction::spin_interaction() {
       // outgoing_particles_[1].flip_spin_projection();
     }
   }
+}
+
+void ScatterAction::boost_spin_vectors_after_elastic_scattering() {
+  // Boost spin vectors
+  outgoing_particles_[0].set_spin_vector(
+      incoming_particles_[0].spin_vector().lorentz_boost(
+          outgoing_particles_[0].velocity()));
+
+  outgoing_particles_[1].set_spin_vector(
+      incoming_particles_[1].spin_vector().lorentz_boost(
+          outgoing_particles_[1].velocity()));
 }
 
 void ScatterAction::format_debug_output(std::ostream &out) const {
