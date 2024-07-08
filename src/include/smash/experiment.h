@@ -1385,9 +1385,14 @@ Experiment<Modus>::Experiment(Configuration &config,
       << "Density type printed to headers: " << dens_type_;
 
   /* Parse configuration about output contents and formats, doing all logical
-   * checks about specified formats, creating all needed output objects. */
-  auto output_conf = config.extract_complete_sub_configuration(
-      {"Output"}, Configuration::GetEmpty::Yes);
+   * checks about specified formats, creating all needed output objects. Note
+   * that we first extract the output sub configuration without the "Output:"
+   * enclosing section to easily get all output contents and then we reintroduce
+   * it for the actual parsing (remember we parse database keys which have
+   * labels from the top-level only).
+   */
+  auto output_conf = config.extract_sub_configuration(
+      InputSections::output, Configuration::GetEmpty::Yes);
   if (output_path == "") {
     throw std::invalid_argument(
         "Invalid empty output path provided to Experiment constructor.");
@@ -1402,13 +1407,14 @@ Experiment<Modus>::Experiment(Configuration &config,
                             "exists, but it is not a directory.");
     throw std::logic_error("Attempt to use invalid existing path.");
   }
+  const std::vector<std::string> output_contents =
+      output_conf.list_upmost_nodes();
   if (output_conf.is_empty()) {
     logg[LExperiment].warn() << "No \"Output\" section found in the input "
                                 "file. No output file will be produced.";
+  } else {
+    output_conf.enclose_into_section(InputSections::output);
   }
-  std::cout << output_conf.to_string() << "\n";
-  const std::vector<std::string> output_contents =
-      output_conf.list_upmost_nodes();
   std::vector<std::vector<std::string>> list_of_formats(output_contents.size());
   std::transform(
       output_contents.cbegin(), output_contents.cend(), list_of_formats.begin(),
@@ -1417,8 +1423,7 @@ Experiment<Modus>::Experiment(Configuration &config,
          * is a required key, because then here below the error for the user is
          * more informative, if the key was not given in the input file.
          */
-        return output_conf.take(
-            InputKeys::get_output_format_key(content).drop_top_label());
+        return output_conf.take(InputKeys::get_output_format_key(content));
       });
   auto abort_because_of_invalid_input_file = []() {
     throw std::invalid_argument("Invalid configuration input file.");

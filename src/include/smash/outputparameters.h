@@ -86,8 +86,8 @@ struct OutputParameters {
     logg[LExperiment].trace(SMASH_SOURCE_LOCATION);
 
     if (conf.has_section(InputSections::o_thermodynamics)) {
-      auto thermo_conf =
-          conf.extract_sub_configuration(InputSections::o_thermodynamics);
+      auto thermo_conf = conf.extract_complete_sub_configuration(
+          InputSections::o_thermodynamics);
       if (thermo_conf.has_value(InputKeys::output_thermodynamics_position)) {
         const std::array<double, 3> a =
             thermo_conf.take(InputKeys::output_thermodynamics_position);
@@ -142,7 +142,8 @@ struct OutputParameters {
     }
 
     if (conf.has_section(InputSections::o_rivet)) {
-      auto rivet_conf = conf.extract_sub_configuration(InputSections::o_rivet);
+      auto rivet_conf =
+          conf.extract_complete_sub_configuration(InputSections::o_rivet);
       /*
        * std::optional<T> can be assigned from a value using the
        *    template<class U = T> optional& operator=( U&& value );
