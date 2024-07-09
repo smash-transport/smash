@@ -154,39 +154,24 @@ TEST(as_yaml_with_string) {
   COMPARE(key_2.as_yaml("Hi"s), result);
 }
 
-TEST(drop_top_level) {
-  const auto key_1 = get_test_key<int>();
-  const auto key_2 = key_1.drop_top_label();
-  COMPARE(key_2.labels().size(), 1);
-  COMPARE(key_2.labels()[0], "Key");
-  const auto key_3 = Key<int>{{"Test", "Key", "With", "Many", "XXX"}, {"1.0"}};
-  const auto key_4 = key_3.drop_top_label(4);
-  COMPARE(key_4.labels().size(), 1);
-  COMPARE(key_4.labels()[0], "XXX");
-}
-
-/*
+#if 0
 
 // The following code is useful to print all keys in the database for debug
 // purposes and it is intentionally left as part of the codebase commented out
 // for future needs.
 
 #include "smash/input_keys.h"
-
-template <typename T, typename = void>
-auto constexpr ostreamable_v = false;
+#include "smash/traits.h"
 
 template <typename T>
-auto constexpr ostreamable_v<
-    T, std::void_t<decltype(std::cout << std::declval<T>())>> = true;
-
-template <typename T>
-std::enable_if_t<ostreamable_v<T>> print(T const& in) {
-  std::cout << in << '\n';
+std::enable_if_t<is_writable_to_stream_v<decltype(std::cout), T>> print(
+    T const& in) {
+  std::cout << std::boolalpha << in << '\n';
 }
 
 template <typename T>
-std::enable_if_t<!ostreamable_v<T>> print(T const& in) {
+std::enable_if_t<!is_writable_to_stream_v<decltype(std::cout), T>> print(
+    T const& in) {
   std::cout << "NOT PRINTABLE (" << typeid(in).name() << ")\n";
 }
 
@@ -205,13 +190,9 @@ TEST(check_list) {
           },
           key);
     } catch (const std::bad_optional_access&) {
-      std::visit(
-          [](auto&&) {
-            std::cout << "--> Mandatory\n";
-          },
-          key);
+      std::visit([](auto&&) { std::cout << "--> Mandatory\n"; }, key);
     }
   }
 }
 
-*/
+#endif

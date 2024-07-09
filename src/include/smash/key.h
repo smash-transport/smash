@@ -262,8 +262,7 @@ class Key {
   std::string as_yaml(
       std::optional<default_type> value = std::nullopt) const noexcept {
     std::stringstream value_as_string{};
-    if constexpr (is_writable_to_stream<std::stringstream,
-                                        default_type>::value) {
+    if constexpr (is_writable_to_stream_v<std::stringstream, default_type>) {
       if (value) {
         value_as_string << *value;
       } else if (default_.type_ == DefaultType::Value) {
@@ -288,20 +287,6 @@ class Key {
     result << "{" << smash::join(labels_, ": {") << ": " << value
            << smash::join(std::vector<std::string>(labels_.size(), "}"), "");
     return result.str();
-  }
-
-  /**
-   * Construct a new key with the top-level label dropped. This is useful e.g.
-   * in tests in order to use the database keys to build configurations that are
-   * a sub-section only of a typical SMASH configuration.
-   *
-   * \return Key<default_type> identical to \c *this but with different labels.
-   */
-  Key<default_type> drop_top_label(size_t how_many_times = 1) const {
-    Key<default_type> new_key(*this);
-    new_key.labels_.erase(new_key.labels_.begin(),
-                          new_key.labels_.begin() + how_many_times);
-    return new_key;
   }
 
   /**

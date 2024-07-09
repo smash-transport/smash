@@ -37,6 +37,13 @@ struct is_writable_to_stream<
     S, T, std::void_t<decltype(std::declval<S&>() << std::declval<T>())>>
     : std::true_type {};
 
+/**
+ * Helper alias which is always defined next to a type trait.
+ */
+template <typename S, typename T>
+inline constexpr bool is_writable_to_stream_v =
+    is_writable_to_stream<S, T>::value;
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_TRAITS_H_
