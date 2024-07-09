@@ -1145,8 +1145,11 @@ class Configuration {
    *          present in the configuration, it is important to make it throw if
    *          an existing key is attempted to be taken twice. Otherwise it would
    *          happen that taking any existing key would return the user-defined
-   *          value tje first time and taking it again would return the key
+   *          value the first time and taking it again would return the key
    *          default value. This is a misleading behaviour we want to avoid.
+   *          However, a key can be taken several times if it exists at take
+   *          time. For example, taking a key, setting its value and taking it
+   *          again is a valid behaviour.
    *
    * \param[in] key The input key that should be taken. This is usually one of
    * the \c InputKeys static members, i.e. one of the allowed keys. Of course,
@@ -1184,7 +1187,7 @@ class Configuration {
             " was taken, but its value is not a map, although there is a "
             "section in the configuration with its labels.");
       }
-    } else if (did_key_exist_and_was_it_taken(key)) {
+    } else if (did_key_exist_and_was_it_already_taken(key.labels())) {
       throw TakeSameKeyTwice("Attempt to take key " +
                              std::string{key} +  // NOLINT(whitespace/braces)
                              " twice.");
@@ -1551,18 +1554,16 @@ class Configuration {
   Value read(std::vector<std::string_view> labels) const;
 
   /**
-   * Find out whether the key has been already taken.
+   * Find out whether a key has been already taken.
    *
-   * \tparam T The key value type
-   * \param key The key to be checked
+   * \param labels The labels of the key to be checked
    * \return \c true if the key was already taken,
    * \return \c false otherwise.
    */
-  template <typename T>
-  bool did_key_exist_and_was_it_taken(const Key<T> &key) {
+  bool did_key_exist_and_was_it_already_taken(const KeyLabels &labels) const {
     return std::find(existing_keys_already_taken_.begin(),
                      existing_keys_already_taken_.end(),
-                     key.labels()) != existing_keys_already_taken_.end();
+                     labels) != existing_keys_already_taken_.end();
   }
 
   /// The general_config.yaml contents - fully parsed

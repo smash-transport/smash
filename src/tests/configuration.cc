@@ -79,6 +79,16 @@ TEST_CATCH(take_twice_optional_key, Configuration::TakeSameKeyTwice) {
   d = conf.take(optional_key);
 }
 
+TEST(take_set_and_take_again_is_fine) {
+  Configuration conf = make_test_configuration();
+  const auto key = get_key<double>({"tamer", "pipit", "bushelling"});
+  double d = conf.take(key);
+  conf.set_value(key, 3.14);
+  d = conf.take(key);
+  VERIFY(d == 3.14);
+  conf.clear();
+}
+
 TEST_CATCH(take_incorrect_type, Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
   const Key<int> key = get_key<int>({"tamer", "pipit", "bushelling"});

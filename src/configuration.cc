@@ -229,7 +229,10 @@ Configuration::Value Configuration::take(std::vector<std::string_view> labels) {
   }
   previous_to_last_node.value().remove(*last_key_it);
   root_node_ = remove_empty_maps(root_node_);
-  existing_keys_already_taken_.push_back({labels.begin(), labels.end()});
+  if (const KeyLabels key_labels{labels.begin(), labels.end()};
+      !did_key_exist_and_was_it_already_taken(key_labels)) {
+    existing_keys_already_taken_.push_back(key_labels);
+  }
   /* NOTE: The second argument in the returned statement to construct Value must
    * point to a string that is outliving the function scope and it would be
    * wrong to return e.g. something locally declared in the function. This is
