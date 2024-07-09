@@ -106,8 +106,12 @@ static void fully_validate_configuration(const Configuration &configuration) {
 
 static void setup_logging(Configuration &configuration) {
   set_default_loglevel(configuration.take(InputKeys::log_default));
-  create_all_loggers(configuration.extract_sub_configuration(
-      {"Logging"}, Configuration::GetEmpty::Yes));
+  auto logger_config = configuration.extract_sub_configuration(
+      InputSections::logging, Configuration::GetEmpty::Yes);
+  if (!logger_config.is_empty()) {
+    logger_config.enclose_into_section(InputSections::logging);
+  }
+  create_all_loggers(std::move(logger_config));
 }
 
 static void read_particles_and_decaymodes_files_setting_keys_in_configuration(
