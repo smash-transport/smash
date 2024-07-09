@@ -102,35 +102,36 @@ static void create_non_oscar_particlefile(
 
 static ListModus create_list_modus_for_test() {
   Configuration config{R"(
-    List:
-      File_Directory: ToBeSet
-      File_Prefix: event
+    Modi:
+      List:
+        File_Directory: ToBeSet
+        File_Prefix: event
     )"};
-  config.set_value(InputKeys::modi_list_fileDirectory.drop_top_label(),
-                   testoutputpath.string());
+  config.set_value(InputKeys::modi_list_fileDirectory, testoutputpath.string());
   return ListModus(std::move(config), parameters);
 }
 
 static ListBoxModus create_list_box_modus_for_test() {
   Configuration config{R"(
-    ListBox:
-      File_Directory: ToBeSet
-      File_Prefix: event
-      Length: 3
+    Modi:
+      ListBox:
+        File_Directory: ToBeSet
+        File_Prefix: event
+        Length: 3
     )"};
-  config.set_value(InputKeys::modi_listBox_fileDirectory.drop_top_label(),
+  config.set_value(InputKeys::modi_listBox_fileDirectory,
                    testoutputpath.string());
   return ListBoxModus(std::move(config), parameters);
 }
 
 static ListModus create_list_modus_with_single_file_for_test() {
   Configuration config{R"(
-    List:
-      File_Directory: ToBeSet
-      Filename: event0
+    Modi:
+      List:
+        File_Directory: ToBeSet
+        Filename: event0
     )"};
-  config.set_value(InputKeys::modi_list_fileDirectory.drop_top_label(),
-                   testoutputpath.string());
+  config.set_value(InputKeys::modi_list_fileDirectory, testoutputpath.string());
   return ListModus(std::move(config), parameters);
 }
 

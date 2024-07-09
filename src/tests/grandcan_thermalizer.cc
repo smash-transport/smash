@@ -26,23 +26,22 @@ TEST(create_part_list) {
 
 static BoxModus create_box_for_tests(const ExperimentParameters& par) {
   Configuration conf{R"(
-    Box:
-      Initial_Condition: "thermal momenta"
-      Start_Time: 0.0
+    Modi:
+      Box:
+        Initial_Condition: "thermal momenta"
+        Start_Time: 0.0
   )"};
   const int N = 30;
   const double T_init = 0.2;
-  conf.set_value(InputKeys::modi_box_length.drop_top_label(), par.box_length);
-  conf.set_value(InputKeys::modi_box_temperature.drop_top_label(), T_init);
+  conf.set_value(InputKeys::modi_box_length, par.box_length);
+  conf.set_value(InputKeys::modi_box_temperature, T_init);
   // Note that it is not possible here to use set_value passing in the database
   // InputKeys::modi_box_initialMultiplicities key as its value is of type
   // std::map<PdgCode, int> and this cannot be set by YAML library automatically
-  conf.merge_yaml(
-      InputKeys::modi_box_initialMultiplicities.drop_top_label().as_yaml(
-          "{2212: " + std::to_string(N) + "}"));
-  conf.merge_yaml(
-      InputKeys::modi_box_initialMultiplicities.drop_top_label().as_yaml(
-          "{311: " + std::to_string(N) + "}"));
+  conf.merge_yaml(InputKeys::modi_box_initialMultiplicities.as_yaml(
+      "{2212: " + std::to_string(N) + "}"));
+  conf.merge_yaml(InputKeys::modi_box_initialMultiplicities.as_yaml(
+      "{311: " + std::to_string(N) + "}"));
   return BoxModus(std::move(conf), par);
 }
 

@@ -31,9 +31,11 @@ TEST(init_particle_types) {
 
 static Configuration get_pauli_blocking_conf() {
   return Configuration{R"(
-    Spatial_Averaging_Radius: 1.86
-    Momentum_Averaging_Radius: 0.08
-    Gaussian_Cutoff: 2.2
+    Collision_Term:
+      Pauli_Blocking:
+        Spatial_Averaging_Radius: 1.86
+        Momentum_Averaging_Radius: 0.08
+        Gaussian_Cutoff: 2.2
   )"};
 }
 
