@@ -1860,8 +1860,8 @@ Experiment<Modus>::Experiment(Configuration &config,
 
   // Create forced thermalizer
   if (config.has_section(InputSections::forcedThermalization)) {
-    Configuration th_conf =
-        config.extract_sub_configuration(InputSections::forcedThermalization);
+    Configuration th_conf = config.extract_complete_sub_configuration(
+        InputSections::forcedThermalization);
     thermalizer_ = modus_.create_grandcan_thermalizer(th_conf);
   }
 
