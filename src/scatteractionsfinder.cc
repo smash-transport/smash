@@ -1062,11 +1062,11 @@ void ScatterActionsFinder::dump_cross_sections(
   std::cout << "# Dumping partial " << a.name() << b.name()
             << " cross-sections in mb, energies in GeV" << std::endl;
   std::cout << "   sqrt_s";
-  // Align everything to 16 unicode characters.
-  // This should be enough for the longest channel name (7 final-state
-  // particles).
+  // Align everything to 24 unicode characters.
+  // This should be enough for the longest channel name: 7 final-state
+  // particles, or 2 of the longest named resonances (currently Ds0*(2317)⁺).
   for (const auto& channel : all_channels) {
-    std::cout << utf8::fill_left(channel, 16, ' ');
+    std::cout << utf8::fill_left(channel, 24, ' ');
   }
   std::cout << std::endl;
 
