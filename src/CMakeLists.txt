@@ -206,6 +206,7 @@ set(smash_src
     decaymodes.cc
     decaytype.cc
     deformednucleus.cc
+    alphaclusterednucleus.cc
     density.cc
     decayactiondilepton.cc
     decayactionsfinderdilepton.cc

@@ -37,7 +37,13 @@ ColliderModus::ColliderModus(Configuration modus_config,
   if (modus_cfg.has_value({"Calculation_Frame"})) {
     frame_ = modus_cfg.take({"Calculation_Frame"});
   }
-
+  if (fermi_motion_ == FermiMotion::On) {
+    logg[LCollider].info() << "Fermi motion is ON.";
+  } else if (fermi_motion_ == FermiMotion::Frozen) {
+    logg[LCollider].info() << "FROZEN Fermi motion is on.";
+  } else if (fermi_motion_ == FermiMotion::Off) {
+    logg[LCollider].info() << "Fermi motion is OFF.";
+  }
   Configuration proj_cfg = modus_cfg.extract_sub_configuration({"Projectile"});
   Configuration targ_cfg = modus_cfg.extract_sub_configuration({"Target"});
   /* Needed to check if projectile and target in customnucleus are read from
@@ -51,6 +57,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
     same_file = same_inputfile(proj_cfg, targ_cfg);
     projectile_ = std::make_unique<CustomNucleus>(
         proj_cfg, params.testparticles, same_file);
+  } else if (proj_cfg.has_value({"Alpha_Clustered"})) {
+    logg[LCollider].info() << "Projectile is alpha-clustered with woods-saxon "
+                              "parameters for the He-clusters listed below.";
+    projectile_ = create_alphaclustered_nucleus(proj_cfg, params.testparticles,
+                                                "projectile");
   } else {
     projectile_ = std::make_unique<Nucleus>(proj_cfg, params.testparticles);
   }
@@ -65,6 +76,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
   } else if (targ_cfg.has_value({"Custom"})) {
     target_ = std::make_unique<CustomNucleus>(targ_cfg, params.testparticles,
                                               same_file);
+  } else if (targ_cfg.has_value({"Alpha_Clustered"})) {
+    logg[LCollider].info() << "Target is alpha-clustered with woods-saxon "
+                              "parameters for the He-clusters listed below.";
+    target_ =
+        create_alphaclustered_nucleus(targ_cfg, params.testparticles, "target");
   } else {
     target_ = std::make_unique<Nucleus>(targ_cfg, params.testparticles);
   }
@@ -262,14 +278,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
     initial_z_displacement_ /= 2.0;
   }
 
-  if (fermi_motion_ == FermiMotion::On) {
-    logg[LCollider].info() << "Fermi motion is ON.";
-  } else if (fermi_motion_ == FermiMotion::Frozen) {
-    logg[LCollider].info() << "FROZEN Fermi motion is on.";
-  } else if (fermi_motion_ == FermiMotion::Off) {
-    logg[LCollider].info() << "Fermi motion is OFF.";
-  }
-
   FluidizationType IC_type = modus_cfg.take({"Initial_Conditions", "Type"},
                                             FluidizationType::ConstantTau);
 
@@ -333,6 +341,32 @@ std::unique_ptr<DeformedNucleus> ColliderModus::create_deformed_nucleus(
   } else {
     return std::make_unique<DeformedNucleus>(nucleus_cfg, ntest,
                                              automatic_deformation);
+  }
+}
+
+std::unique_ptr<AlphaClusteredNucleus>
+ColliderModus::create_alphaclustered_nucleus(Configuration &nucleus_cfg,
+                                             int ntest,
+                                             const std::string &nucleus_type) {
+  bool automatic_alphaclustering =
+      nucleus_cfg.take({"Alpha_Clustered", "Automatic"});
+  bool was_sidelength_given =
+      nucleus_cfg.has_value({"Alpha_Clustered", "Sidelength"});
+
+  if (automatic_alphaclustering && was_sidelength_given) {
+    throw std::domain_error(
+        "Automatic alpha-clustering of " + nucleus_type +
+        " nucleus requested, but a sidelength was provided as"
+        " well. Please, check the 'Alpha_Clustered' section in your input "
+        "file.");
+  } else if (!automatic_alphaclustering && !was_sidelength_given) {
+    throw std::domain_error(
+        "Manual alpha-clustering of " + nucleus_type +
+        " nucleus requested, but no sidelength was provided."
+        " Please, check the 'Alpha_Clustered' section in your input file.");
+  } else {
+    return std::make_unique<AlphaClusteredNucleus>(nucleus_cfg, ntest,
+                                                   automatic_alphaclustering);
   }
 }
 
