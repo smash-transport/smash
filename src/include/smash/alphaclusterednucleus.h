@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2022
+ *    Copyright (c) 2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_SMASH_ALPHACLUSTEREDNUCLEUS_H_
 
 #include <map>
+#include <vector>
 
 #include "angles.h"
 #include "configuration.h"

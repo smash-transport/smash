@@ -20,12 +20,15 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+### Added
+* Added alpha-clustered oxygen nuclei that can be configured in a new `Alpha_Clustered` section in the `Projectile`/`Target` section
+
 ### Deprecated
 * Some physics-related input keys in `Output: Initial_Conditions` were deprecated and duplicated under `Modi: Collider: Initial_Conditions`
 
 ### Changed
 * Upgraded to Pythia 8.311
-* Moved the `orentation` section from `deformed` to the `projectile`/`target` section and changed the default value for theta from pi/2 to 0
+* Moved the `Orientation` section from `Deformed` to the `Projectile`/`Target` section and changed the default value for Theta from pi/2 to 0
 
 ### Fixed
 * Fix a small error and added a more precise documentation for the orientation section for deformed nuclei
@@ -41,7 +44,7 @@ Date: 2024-02-26
 * ⚠️  The `Total_Cross_Section_Strategy` key determines how the total cross sections for collision finding are evaluated, whether from summing the partial contributions or using a parametrization; previously the default behavior was the former strategy (now accessible with the value `BottomUp`), but it has changed to the latter (accessible with `TopDownMeasured`)
 * ⚠️  Option `Pseudoresonance` which adds *ad hoc* inelastic 2→1 processes close to the energy regime around the transition to strings, where few resonances have been measured; by default, this is done for interactions where at least one of the incoming particles is unstable, and the heaviest possible resonance producible from the incoming pair is chosen
 * New `Use_Potentials_Outside_Lattice` option in the config file to specify where potentials are applied
-* Added alpha-clustered oxygen nuclei that can be configured in a new `Alpha_Clustered` section in the `projectile`/`target` section
+
 ### Fixed
 * Fix bug in the time step calculation of SMASH output in events successive to the first one when the `End_Time` is not a multiple of the `Output_Interval`
 * SMASH now aborts with a user-friendly message if any input key among `End_Time`, `Delta_Time` or `Output_Interval` is zero
