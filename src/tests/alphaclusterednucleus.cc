@@ -69,11 +69,12 @@ TEST(tetrahedron_scaling) {
   alphaclusteredoxygen.set_diffusiveness(0.0);
   alphaclusteredoxygen.set_nuclear_radius(0.01);
   alphaclusteredoxygen.scale_tetrahedron_vertex_positions(
-      5);  // Sets the sidelength to 5
+      10);  // Sets the sidelength to 10
   alphaclusteredoxygen.arrange_nucleons();
   for (auto i = alphaclusteredoxygen.begin(); i != alphaclusteredoxygen.end();
        i++) {
-    COMPARE_RELATIVE_ERROR(i->position().threevec().abs(), std::sqrt(6) / 4 * 5,
-                           0.1);  // Checks if the Sidelength is 5
+    COMPARE_RELATIVE_ERROR(i->position().threevec().abs(),
+                           std::sqrt(6) / 4 * 10,
+                           0.05);  // Checks if the Sidelength is 10
   }
 }

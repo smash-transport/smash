@@ -215,7 +215,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
         "Please provide one of Sqrtsnn/E_Kin/P_Lab.");
   }
   if (energy_input > 1) {
-    throw std::domain_error(
+    throw std::invalid_argument(
         "Input Error: Redundant collision energy. "
         "Please provide only one of Sqrtsnn/E_Kin/P_Lab.");
   }
@@ -233,7 +233,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
       if (sampling_ == Sampling::Custom) {
         if (!(modus_cfg.has_value({"Impact", "Values"}) ||
               modus_cfg.has_value({"Impact", "Yields"}))) {
-          throw std::domain_error(
+          throw std::invalid_argument(
               "Input Error: Need impact parameter spectrum for custom "
               "sampling. "
               "Please provide Values and Yields.");
@@ -242,7 +242,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
             modus_cfg.take({"Impact", "Values"});
         const std::vector<double> yields = modus_cfg.take({"Impact", "Yields"});
         if (impacts.size() != yields.size()) {
-          throw std::domain_error(
+          throw std::invalid_argument(
               "Input Error: Need as many impact parameter values as yields. "
               "Please make sure that Values and Yields have the same length.");
         }
@@ -323,17 +323,17 @@ std::unique_ptr<DeformedNucleus> ColliderModus::create_deformed_nucleus(
       !nucleus_cfg.has_value({"Deformed", "Beta_2"});
 
   if (automatic_deformation && was_any_deformation_parameter_given) {
-    throw std::domain_error(
+    throw std::invalid_argument(
         "Automatic deformation of " + nucleus_type +
         " nucleus requested, but deformation parameter(s) were provided as"
         " well. Please, check the 'Deformed' section in your input file.");
   } else if (!automatic_deformation && !was_any_beta_given) {
-    throw std::domain_error(
+    throw std::invalid_argument(
         "Manual deformation of " + nucleus_type +
         " nucleus requested, but no deformation beta parameter was provided."
         " Please, check the 'Deformed' section in your input file.");
   } else if (!automatic_deformation && was_gamma_given_without_beta_2) {
-    throw std::domain_error(
+    throw std::invalid_argument(
         "Manual deformation of " + nucleus_type +
         " nucleus requested, but 'Gamma' parameter was provided without "
         "providing a value of 'Beta_2' having hence no deformation effect. "
@@ -354,13 +354,13 @@ ColliderModus::create_alphaclustered_nucleus(Configuration &nucleus_cfg,
       nucleus_cfg.has_value({"Alpha_Clustered", "Sidelength"});
 
   if (automatic_alphaclustering && was_sidelength_given) {
-    throw std::domain_error(
+    throw std::invalid_argument(
         "Automatic alpha-clustering of " + nucleus_type +
         " nucleus requested, but a sidelength was provided as"
         " well. Please, check the 'Alpha_Clustered' section in your input "
         "file.");
   } else if (!automatic_alphaclustering && !was_sidelength_given) {
-    throw std::domain_error(
+    throw std::invalid_argument(
         "Manual alpha-clustering of " + nucleus_type +
         " nucleus requested, but no sidelength was provided."
         " Please, check the 'Alpha_Clustered' section in your input file.");
@@ -407,7 +407,7 @@ double ColliderModus::initial_conditions(Particles *particles,
     target_->generate_fermi_momenta();
   } else if (fermi_motion_ == FermiMotion::Off) {
   } else {
-    throw std::domain_error("Invalid Fermi_Motion input.");
+    throw std::invalid_argument("Invalid Fermi_Motion input.");
   }
 
   // Boost the nuclei to the appropriate velocity.
@@ -503,7 +503,7 @@ std::pair<double, double> ColliderModus::get_velocities(double s, double m_a,
       v_a = fixed_target_projectile_v(s, m_a, m_b);
       break;
     default:
-      throw std::domain_error(
+      throw std::invalid_argument(
           "Invalid reference frame in "
           "ColliderModus::get_velocities.");
   }

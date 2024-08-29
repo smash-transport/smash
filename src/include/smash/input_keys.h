@@ -3595,10 +3595,10 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
-   * ### Alpha-Clustered nuclei
+   * ### Alpha-Clustered oxygen nuclei
    *
-   * It is possible to have alpha-clustered projectile and/or target nuclei
-   * using the `Alpha_Clustered` section, which should then contain some
+   * It is possible to have alpha-clustered projectile and/or target oxygen
+   * nuclei using the `Alpha_Clustered` section, which should then contain some
    * configuration, if given.
    *
    * \required_key_no_line{key_MC_PT_alphaClustered_auto_,Automatic,bool}

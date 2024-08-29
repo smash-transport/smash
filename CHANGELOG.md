@@ -28,7 +28,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Changed
 * Upgraded to Pythia 8.311
-* Moved the `Orientation` section from `Deformed` to the `Projectile`/`Target` section and changed the default value for Theta from pi/2 to 0
+* Moved the `Orientation` section from `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from pi/2 to 0
 
 ### Fixed
 * Fix a small error and added a more precise documentation for the orientation section for deformed nuclei
