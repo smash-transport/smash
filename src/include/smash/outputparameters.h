@@ -77,7 +77,8 @@ struct OutputParameters {
         dil_extended(false),
         photons_extended(false),
         ic_extended(false),
-        rivet_parameters{} {}
+        rivet_parameters{},
+        quantities{} {}
 
   /// Constructor from configuration
   explicit OutputParameters(Configuration conf) : OutputParameters() {
@@ -110,6 +111,7 @@ struct OutputParameters {
       part_extended = conf.take({"Particles", "Extended"}, false);
       part_only_final =
           conf.take({"Particles", "Only_Final"}, OutputOnlyFinal::Yes);
+      quantities = conf.take({"Particles", "Quantities"}, std::vector<std::string>{});
     }
 
     if (conf.has_value({"Collisions"})) {
@@ -281,6 +283,9 @@ struct OutputParameters {
 
   /// Rivet specfic parameters
   RivetOutputParameters rivet_parameters;
+
+  /// Quantities to be printed in the output
+  std::vector<std::string> quantities;
 };
 
 }  // namespace smash

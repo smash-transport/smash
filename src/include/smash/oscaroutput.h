@@ -17,6 +17,7 @@
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"
+#include "smash/outputformatter.h"
 
 namespace smash {
 
@@ -29,7 +30,8 @@ namespace smash {
 enum OscarOutputFormat {
   OscarFormat2013,
   OscarFormat2013Extended,
-  OscarFormat1999
+  OscarFormat1999,
+  ASCIICustom
 };
 
 /**
@@ -70,7 +72,31 @@ class OscarOutput : public OutputInterface {
    * \param[in] path Output path.
    * \param[in] name Name of the ouput.
    */
-  OscarOutput(const std::filesystem::path &path, const std::string &name);
+  OscarOutput(const std::filesystem::path &path, const std::string &name, 
+      const std::vector<std::string> quantities={
+            "t",
+            "x",
+            "y",
+            "z",
+            "mass",
+            "p0",
+            "px",
+            "py",
+            "pz",
+            "pdgcode",
+            "ID",
+            "charge",
+            "ncoll",
+            "form_time",
+            "xsecfac",
+            "proc_id_origin", 
+            "proc_type_origin", 
+            "t_last_coll",
+            "pdg_mother1",
+            "pdg_mother2",
+            "baryon_number",
+            "strangeness",
+            "spin"});
 
   /**
    * Writes the initial particle information of an event to the oscar output.
@@ -130,6 +156,9 @@ class OscarOutput : public OutputInterface {
 
   /// Full filepath of the output file.
   RenamingFilePtr file_;
+
+  /// Formatter of the output
+  OutputFormatter<ASCII> formatter_;
 };
 
 /**

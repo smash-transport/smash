@@ -4641,6 +4641,19 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_particles_quantities_,Quantities,list of strings,
+   * </tt><b>no default</b><tt>}
+   *
+   * &rArr; Incompatible with `VTK`, `HepMC_asciiv3` and `HepMC_treeroot`
+   */
+  /**
+   * \see_key{key_output_particles_quantities_}
+   */
+  inline static const Key<std::vector<std::string>> output_particles_quantities{
+      {"Output", "Particles", "Quantities"}, {}, {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_particles_only_final_,Only_Final,string,"Yes"}
    *
    * &rArr; Incompatible with `VTK`, `HepMC_asciiv3` and `HepMC_treeroot`
@@ -5805,6 +5818,7 @@ struct InputKeys {
       std::cref(output_coulomb_format),
       std::cref(output_thermodynamics_format),
       std::cref(output_particles_extended),
+      std::cref(output_particles_quantities),
       std::cref(output_particles_onlyFinal),
       std::cref(output_collisions_extended),
       std::cref(output_collisions_printStartEnd),

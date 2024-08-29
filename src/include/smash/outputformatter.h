@@ -16,6 +16,12 @@ namespace smash {
         std::string operator()(const T& value) const {
             return std::to_string(value);
         }
+        template <typename T>
+        std::string operator()(const T& value, const char* format) const {
+            char buffer[20];
+            std::sprintf(buffer, format, value);
+            return buffer;
+        }
         std::string operator()(const std::string& value) const {
             return value;
         }
@@ -37,183 +43,182 @@ namespace smash {
         OutputFormatter(const std::vector<std::string>& in_quantities)
         : quantities_(in_quantities) {
         for (const std::string& quantity : quantities_) {
-            if (quantity == "id") {
+            if (quantity == "t") {
                 getters_.push_back(
                     [this](const ParticleData& in) {
-                        return this->converter_(in.id());
-                    }
-                );
-            } 
-            else if (quantity == "pdgcode") {
-                getters_.push_back(
-                    [this](const ParticleData& in) {
-                        return this->converter_(in.pdgcode().string());
-                    }
-                );
-            } 
-           
-             else if (quantity == "formation_time") {
-                getters_.push_back(
-                    [this](const ParticleData& in) {
-                        return this->converter_(in.formation_time());
-                    }
-                );
-            } 
-            else if (quantity == "charge") {
-                getters_.push_back(
-                    [this](const ParticleData& in) {
-                        return this->converter_(in.type().charge());
+                        return this->converter_(in.position()[0], "%g");
                     }
                 );
             }
-
-         else if (quantity == "mass") {
+            else if (quantity == "x") {
                 getters_.push_back(
                     [this](const ParticleData& in) {
-                        return this->converter_(in.type().mass());
+                        return this->converter_(in.position()[1], "%g");
                     }
                 );
             } 
-          
-             else if (quantity == "spin") {
+            else if (quantity == "y") {
                 getters_.push_back(
                     [this](const ParticleData& in) {
-                        return this->converter_(in.spin());
+                        return this->converter_(in.position()[2], "%g");
                     }
                 );
             } 
+            else if (quantity == "z") {
+                getters_.push_back(
+                    [this](const ParticleData& in) {
+                        return this->converter_(in.position()[3], "%g");
+                    }
+                );
+            } 
+            else if (quantity == "mass") {
+                getters_.push_back(
+                    [this](const ParticleData& in) {
+                        return this->converter_(in.effective_mass(), "%g");
+                    }
+                );
+            }
+            else if (quantity == "p0") {
+                getters_.push_back(
+                    [this](const ParticleData& in) {
+                        return this->converter_(in.momentum()[0], "%.9g");
+                    }
+                );
+            } 
+            else if (quantity == "px") {
+                getters_.push_back(
+                    [this](const ParticleData& in) {
+                        return this->converter_(in.momentum()[1], "%.9g");
+                    }
+                );
+            } 
+            else if (quantity == "py") {
+                getters_.push_back(
+                    [this](const ParticleData& in) {
+                        return this->converter_(in.momentum()[2], "%.9g");
+                    }
+                );
+            } 
+            else if (quantity == "pz") {
+                getters_.push_back(
+                    [this](const ParticleData& in) {
+                        return this->converter_(in.momentum()[3], "%.9g");
+                    }
+                );
+            }
+            else if (quantity == "pdgcode") {
+                getters_.push_back(
+                    [this](const ParticleData& in) {
+                        return this->converter_(in.pdgcode().string().c_str(), "%s");
+                    }
+                );
+            }
+            else if (quantity == "ID") {
+                getters_.push_back(
+                    [this](const ParticleData& in) {
+                        return this->converter_(in.id(), "%i");
+                    }
+                );
+            }
+            else if (quantity == "charge") {
+                getters_.push_back(
+                    [this](const ParticleData& in) {
+                        return this->converter_(in.type().charge(), "%i");
+                    }
+                );
+            }
             else if (quantity == "ncoll") {
                 getters_.push_back(
                     [this](const ParticleData& in) {
-                        return this->converter_(in.get_history().collisions_per_particle);
+                        return this->converter_(in.get_history().collisions_per_particle, "%i");
                     }
                 );
-            } 
- 
+            }
+            else if (quantity == "form_time") {
+                getters_.push_back(
+                    [this](const ParticleData& in) {
+                        return this->converter_(in.formation_time(), "%g");
+                    }
+                );
+            }
+            else if (quantity == "xsecfac") {
+                getters_.push_back(
+                    [this](const ParticleData& in) {
+                        return this->converter_(in.xsec_scaling_factor(), "%g");
+                    }
+                );
+            }
             else if (quantity == "proc_id_origin") {
                 getters_.push_back(
                     [this](const ParticleData& in) {
-                        return this->converter_(in.get_history().id_process);
+                        return this->converter_(in.get_history().id_process, "%i");
                     }
                 );
-            } 
- 
+            }
             else if (quantity == "proc_type_origin") {
                 getters_.push_back(
                     [this](const ParticleData& in) {
-                        return this->converter_(static_cast<int>(in.get_history().process_type));
+                        return this->converter_(static_cast<int>(in.get_history().process_type), "%i");
                     }
                 );
             }
             else if (quantity == "t_last_coll") {
                 getters_.push_back(
                     [this](const ParticleData& in) {
-                        return this->converter_(in.get_history().time_last_collision);
+                        return this->converter_(in.get_history().time_last_collision, "%g");
                     }
                 );
             }
             else if (quantity == "pdg_mother1") {
                 getters_.push_back(
                     [this](const ParticleData& in) {
-                        return this->converter_(in.get_history().p1.string());
+                        return this->converter_(in.get_history().p1.string().c_str(), "%s");
                     }
                 );
             }
             else if (quantity == "pdg_mother2") {
                 getters_.push_back(
                     [this](const ParticleData& in) {
-                        return this->converter_(in.get_history().p2.string());
+                        return this->converter_(in.get_history().p2.string().c_str(), "%s");
                     }
                 );
             }
-
             else if (quantity == "baryon_number") {
                 getters_.push_back(
                     [this](const ParticleData& in) {
-                        return this->converter_(in.pdgcode().baryon_number());
+                        return this->converter_(in.pdgcode().baryon_number(), "%i");
                     }
                 );
             }
             else if (quantity == "strangeness") {
                 getters_.push_back(
                     [this](const ParticleData& in) {
-                        return this->converter_(in.pdgcode().strangeness());
+                        return this->converter_(in.pdgcode().strangeness(), "%i");
                     }
                 );
             }
-
-            else if (quantity == "x0") {
+            else if (quantity == "spin") {
                 getters_.push_back(
                     [this](const ParticleData& in) {
-                        return this->converter_(in.position()[0]);
+                        return this->converter_(in.spin_projection(), "%i");
                     }
                 );
-            } 
-            else if (quantity == "x1") {
-                getters_.push_back(
-                    [this](const ParticleData& in) {
-                        return this->converter_(in.position()[1]);
-                    }
-                );
-            } 
-            else if (quantity == "x2") {
-                getters_.push_back(
-                    [this](const ParticleData& in) {
-                        return this->converter_(in.position()[2]);
-                    }
-                );
-            } 
-            else if (quantity == "x3") {
-                getters_.push_back(
-                    [this](const ParticleData& in) {
-                        return this->converter_(in.position()[3]);
-                    }
-                );
-            } 
-            else if (quantity == "p0") {
-                getters_.push_back(
-                    [this](const ParticleData& in) {
-                        return this->converter_(in.momentum()[0]);
-                    }
-                );
-            } 
-            else if (quantity == "p1") {
-                getters_.push_back(
-                    [this](const ParticleData& in) {
-                        return this->converter_(in.momentum()[1]);
-                    }
-                );
-            } 
-            else if (quantity == "p2") {
-                getters_.push_back(
-                    [this](const ParticleData& in) {
-                        return this->converter_(in.momentum()[2]);
-                    }
-                );
-            } 
-            else if (quantity == "p3") {
-                getters_.push_back(
-                    [this](const ParticleData& in) {
-                        return this->converter_(in.momentum()[3]);
-                    }
-                );
-            } 
+            }
             else {
                 throw std::invalid_argument("OutputFormatter: Unknown quantity: " + quantity);
             }
         }
     }
 
-
-
     std::string data_line(const ParticleData& data){
         std::string line;
         for(const auto& getter : getters_){
-            line+= getter(data) + ",";
+            line+= getter(data) + " ";
 
         }
         if (!line.empty()) {
             line.pop_back();
+            line+="\n";
         }
         return line;
         
