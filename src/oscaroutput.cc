@@ -21,14 +21,15 @@ namespace smash {
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 template <OscarOutputFormat Format, int Contents>
-OscarOutput<Format, Contents>::OscarOutput(const std::filesystem::path &path,
-                                           const std::string &name,
-                                           const std::vector<std::string> quantities)
+OscarOutput<Format, Contents>::OscarOutput(
+    const std::filesystem::path &path, const std::string &name,
+    const std::vector<std::string> quantities)
     : OutputInterface(name),
-      file_{path /
-                (name + ".oscar" + ((Format == OscarFormat1999) ? "1999" : "")),
+      file_{path / (name + ((Format == ASCIICustom) ? ".dat" : ".oscar") +
+                    ((Format == OscarFormat1999) ? "1999" : "")),
             "w"},
-      formatter_(quantities) {
+      formatter_(quantities) {  // if Format == ASCII, start with this.
+                                // otherwise change quantities
   /*!\Userguide
    * \page doxypage_output_oscar
    * OSCAR outputs are a family of ASCII and binary formats that follow
@@ -78,14 +79,10 @@ OscarOutput<Format, Contents>::OscarOutput(const std::filesystem::path &path,
    * The collisions output contains all collisions / decays / box wall crossings
    * and optionally the initial and final configuration.
    */
-  if (Format == ASCIICustom) { // REN: change this
-    std::fprintf(file_.get(),
-                 "#!ASCIICustom %s t x y z mass "
-                 "p0 px py pz pdg ID charge\n",
-                 name.c_str());
-    std::fprintf(file_.get(),
-                 "# Units: fm fm fm fm "
-                 "GeV GeV GeV GeV GeV none none e\n");
+  if (Format == ASCIICustom) {
+    std::fprintf(file_.get(), "#!ASCIICustom %s %s\n", name.c_str(),
+                 formatter_.header().c_str());
+    std::fprintf(file_.get(), "# Units: %s\n", formatter_.unit_line().c_str());
   } else if (Format == OscarFormat2013) {
     std::fprintf(file_.get(),
                  "#!OSCAR2013 %s t x y z mass "
@@ -138,7 +135,8 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
                                                   const EventInfo &) {
   current_event_ = event_number;
   if (Contents & OscarAtEventstart) {
-    if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
+    if (Format == ASCIICustom || Format == OscarFormat2013 ||
+        Format == OscarFormat2013Extended) {
       std::fprintf(file_.get(), "# event %i in %zu\n", event_number,
                    particles.size());
     } else {
@@ -161,7 +159,8 @@ template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
                                                 const int event_number,
                                                 const EventInfo &event) {
-  if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
+  if (Format == ASCIICustom || Format == OscarFormat2013 ||
+      Format == OscarFormat2013Extended) {
     if (Contents & OscarParticlesAtEventend ||
         (Contents & OscarParticlesAtEventendIfNotEmpty && !event.empty_event)) {
       std::fprintf(file_.get(), "# event %i out %zu\n", event_number,
@@ -208,7 +207,8 @@ template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_interaction(const Action &action,
                                                    const double density) {
   if (Contents & OscarInteractions) {
-    if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
+    if (Format == ASCIICustom || Format == OscarFormat2013 ||
+        Format == OscarFormat2013Extended) {
       std::fprintf(file_.get(),
                    "# interaction in %zu out %zu rho %12.7f weight %12.7g"
                    " partial %12.7f type %5i\n",
@@ -247,7 +247,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
     const Particles &particles, const std::unique_ptr<Clock> &,
     const DensityParameters &, const EventInfo &) {
   if (Contents & OscarTimesteps) {
-    if (Format == OscarFormat2013 || Format == OscarFormat2013Extended) {
+    if (Format == ASCIICustom || Format == OscarFormat2013 ||
+        Format == OscarFormat2013Extended) {
       std::fprintf(file_.get(), "# event %i out %zu\n", current_event_,
                    particles.size());
     } else {
@@ -810,7 +811,8 @@ namespace {
 template <int Contents>
 std::unique_ptr<OutputInterface> create_select_format(
     bool modern_format, const std::filesystem::path &path,
-    const OutputParameters &out_par, const std::string &name, const bool custom_format = false) {
+    const OutputParameters &out_par, const std::string &name,
+    const bool custom_format = false) {
   bool extended_format = (Contents & OscarInteractions) ? out_par.coll_extended
                                                         : out_par.part_extended;
   if (custom_format) {
@@ -835,7 +837,8 @@ std::unique_ptr<OutputInterface> create_select_format(
 std::unique_ptr<OutputInterface> create_oscar_output(
     const std::string &format, const std::string &content,
     const std::filesystem::path &path, const OutputParameters &out_par) {
-  if (format != "Oscar2013" && format != "Oscar1999" && format != "ASCIICustom") {
+  if (format != "Oscar2013" && format != "Oscar1999" &&
+      format != "ASCIICustom") {
     throw std::invalid_argument("Creating Oscar output: unknown format");
   }
   const bool modern_format = (format == "Oscar2013");
@@ -843,15 +846,15 @@ std::unique_ptr<OutputInterface> create_oscar_output(
   if (content == "Particles") {
     if (out_par.part_only_final == OutputOnlyFinal::Yes) {
       return create_select_format<OscarParticlesAtEventend>(
-          modern_format, path, out_par, "particle_lists",custom_format);
+          modern_format, path, out_par, "particle_lists", custom_format);
     } else if (out_par.part_only_final == OutputOnlyFinal::IfNotEmpty) {
       return create_select_format<OscarParticlesAtEventendIfNotEmpty>(
-          modern_format, path, out_par, "particle_lists",custom_format);
+          modern_format, path, out_par, "particle_lists", custom_format);
 
     } else {  // out_par.part_only_final == OutputOnlyFinal::No
       return create_select_format<OscarTimesteps | OscarAtEventstart |
                                   OscarParticlesAtEventend>(
-          modern_format, path, out_par, "particle_lists",custom_format);
+          modern_format, path, out_par, "particle_lists", custom_format);
     }
   } else if (content == "Collisions") {
     if (out_par.coll_printstartend) {

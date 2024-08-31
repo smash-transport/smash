@@ -764,7 +764,8 @@ void Experiment<Modus>::create_output(const std::string &format,
       outputs_.emplace_back(std::make_unique<BinaryOutputInitialConditions>(
           output_path, content, out_par));
     }
-  } else if (format == "Oscar1999" || format == "Oscar2013" || format == "ASCIICustom") {
+  } else if (format == "Oscar1999" || format == "Oscar2013" ||
+             format == "ASCIICustom") {
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
   } else if (content == "Thermodynamics" && format == "ASCII") {

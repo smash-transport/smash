@@ -111,7 +111,8 @@ struct OutputParameters {
       part_extended = conf.take({"Particles", "Extended"}, false);
       part_only_final =
           conf.take({"Particles", "Only_Final"}, OutputOnlyFinal::Yes);
-      quantities = conf.take({"Particles", "Quantities"}, std::vector<std::string>{});
+      quantities =
+          conf.take({"Particles", "Quantities"}, std::vector<std::string>{});
     }
 
     if (conf.has_value({"Collisions"})) {

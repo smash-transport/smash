@@ -4641,7 +4641,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_particles_quantities_,Quantities,list of strings,
+   * \optional_key_no_line{key_output_particles_quantities_,Quantities,list of
+   * strings,
    * </tt><b>no default</b><tt>}
    *
    * &rArr; Incompatible with `VTK`, `HepMC_asciiv3` and `HepMC_treeroot`
