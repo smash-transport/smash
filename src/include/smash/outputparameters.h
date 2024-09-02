@@ -16,6 +16,7 @@
 #include "cxx17compat.h"
 #include "density.h"
 #include "forwarddeclarations.h"
+#include "input_keys.h"
 #include "logging.h"
 
 namespace smash {
@@ -78,7 +79,8 @@ struct OutputParameters {
         photons_extended(false),
         ic_extended(false),
         rivet_parameters{},
-        quantities{} {}
+        part_quantities{},
+        coll_quantities{} {}
 
   /// Constructor from configuration
   explicit OutputParameters(Configuration conf) : OutputParameters() {
@@ -111,13 +113,15 @@ struct OutputParameters {
       part_extended = conf.take({"Particles", "Extended"}, false);
       part_only_final =
           conf.take({"Particles", "Only_Final"}, OutputOnlyFinal::Yes);
-      quantities =
-          conf.take({"Particles", "Quantities"}, std::vector<std::string>{});
+      part_quantities =
+          conf.take({"Particles", "Quantities"}, InputKeys::output_particles_quantities.default_value());
     }
 
     if (conf.has_value({"Collisions"})) {
       coll_extended = conf.take({"Collisions", "Extended"}, false);
       coll_printstartend = conf.take({"Collisions", "Print_Start_End"}, false);
+      coll_quantities =
+          conf.take({"Collisions", "Quantities"}, InputKeys::output_collisions_quantities.default_value());
     }
 
     if (conf.has_value({"Dileptons"})) {
@@ -285,8 +289,11 @@ struct OutputParameters {
   /// Rivet specfic parameters
   RivetOutputParameters rivet_parameters;
 
-  /// Quantities to be printed in the output
-  std::vector<std::string> quantities;
+  /// Quantities to be printed in the particles output
+  std::vector<std::string> part_quantities;
+
+  /// Quantities to be printed in the collisions output
+  std::vector<std::string> coll_quantities;
 };
 
 }  // namespace smash

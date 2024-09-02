@@ -71,6 +71,7 @@ class OscarOutput : public OutputInterface {
    *
    * \param[in] path Output path.
    * \param[in] name Name of the ouput.
+   * \param[in] quantities List of quantities present in the output file.
    */
   OscarOutput(const std::filesystem::path &path, const std::string &name,
               const std::vector<std::string> quantities = {});
@@ -154,6 +155,38 @@ class OscarOutput : public OutputInterface {
 std::unique_ptr<OutputInterface> create_oscar_output(
     const std::string &format, const std::string &content,
     const std::filesystem::path &path, const OutputParameters &out_par);
+
+/// Quantities output in OSCAR2013 format
+static const std::vector<std::string> OSCAR2013_quantities = {
+    "t", "x", "y", "z", "mass", "p0", "px", "py", "pz", "pdg", "ID", "charge"};
+/// Quantities output in Extended OSCAR2013 format
+static const std::vector<std::string> OSCAR2013Extended_quantities = {
+    "t",
+    "x",
+    "y",
+    "z",
+    "mass",
+    "p0",
+    "px",
+    "py",
+    "pz",
+    "pdg",
+    "ID",
+    "charge",
+    "ncoll",
+    "form_time",
+    "xsecfac",
+    "proc_id_origin",
+    "proc_type_origin",
+    "time_last_coll",
+    "pdg_mother1",
+    "pdg_mother2",
+    "baryon_number",
+    "strangeness",
+    "spin_projection"};
+/// Quantities output in OSCAR1999 format
+static const std::vector<std::string> OSCAR1999_quantities = {
+    "id", "pdg", "0", "px", "py", "pz", "p0", "mass", "x", "y", "z", "t"};
 
 // @}
 

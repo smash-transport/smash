@@ -4644,14 +4644,13 @@ struct InputKeys {
    * \optional_key_no_line{key_output_particles_quantities_,Quantities,list of
    * strings,
    * </tt><b>no default</b><tt>}
-   *
-   * &rArr; Incompatible with `VTK`, `HepMC_asciiv3` and `HepMC_treeroot`
+   * 
+   * &rArr; Used only with the `ASCIICustom` format, ignored otherwise. See \ref doxypage_output_ascii for the possible values.
    */
   /**
    * \see_key{key_output_particles_quantities_}
    */
-  inline static const Key<std::vector<std::string>> output_particles_quantities{
-      {"Output", "Particles", "Quantities"}, {}, {"3.2"}};
+  inline static const Key<std::vector<std::string>> output_particles_quantities{ {"Output", "Particles", "Quantities"}, std::vector<std::string>{}, {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -4688,6 +4687,19 @@ struct InputKeys {
    */
   inline static const Key<bool> output_collisions_extended{
       {"Output", "Collisions", "Extended"}, false, {"1.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_collisions_quantities_,Quantities,list of
+   * strings,
+   * </tt><b>empty list</b><tt>}
+   * 
+   * &rArr; Used only with the `ASCIICustom` format, ignored otherwise. See \ref doxypage_output_ascii for the possible values.
+   */
+  /**
+   * \see_key{key_output_collisions_quantities_}
+   */
+  inline static const Key<std::vector<std::string>> output_collisions_quantities{ {"Output", "Collisions", "Quantities"}, std::vector<std::string>{}, {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5822,6 +5834,7 @@ struct InputKeys {
       std::cref(output_particles_quantities),
       std::cref(output_particles_onlyFinal),
       std::cref(output_collisions_extended),
+      std::cref(output_collisions_quantities),
       std::cref(output_collisions_printStartEnd),
       std::cref(output_dileptons_extended),
       std::cref(output_photons_extended),

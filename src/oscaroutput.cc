@@ -28,8 +28,11 @@ OscarOutput<Format, Contents>::OscarOutput(
       file_{path / (name + ((Format == ASCIICustom) ? ".dat" : ".oscar") +
                     ((Format == OscarFormat1999) ? "1999" : "")),
             "w"},
-      formatter_(quantities) {  // if Format == ASCII, start with this.
-                                // otherwise change quantities
+      formatter_{Format == ASCIICustom ? quantities
+                 : (Format == OscarFormat2013) ? OSCAR2013_quantities
+                 : (Format == OscarFormat2013Extended)
+                     ? OSCAR2013Extended_quantities
+                     : OSCAR1999_quantities} {
   /*!\Userguide
    * \page doxypage_output_oscar
    * OSCAR outputs are a family of ASCII and binary formats that follow
@@ -79,30 +82,21 @@ OscarOutput<Format, Contents>::OscarOutput(
    * The collisions output contains all collisions / decays / box wall crossings
    * and optionally the initial and final configuration.
    */
+  std::string format_name;
   if (Format == ASCIICustom) {
-    std::fprintf(file_.get(), "#!ASCIICustom %s %s\n", name.c_str(),
-                 formatter_.header().c_str());
-    std::fprintf(file_.get(), "# Units: %s\n", formatter_.unit_line().c_str());
+    format_name = "ASCIICustom";
   } else if (Format == OscarFormat2013) {
-    std::fprintf(file_.get(),
-                 "#!OSCAR2013 %s t x y z mass "
-                 "p0 px py pz pdg ID charge\n",
-                 name.c_str());
-    std::fprintf(file_.get(),
-                 "# Units: fm fm fm fm "
-                 "GeV GeV GeV GeV GeV none none e\n");
-    std::fprintf(file_.get(), "# %s\n", SMASH_VERSION);
+    format_name = "OSCAR2013";
   } else if (Format == OscarFormat2013Extended) {
-    std::fprintf(file_.get(),
-                 "#!OSCAR2013Extended %s t x y z mass p0 px py pz"
-                 " pdg ID charge ncoll form_time xsecfac proc_id_origin"
-                 " proc_type_origin time_last_coll pdg_mother1 pdg_mother2"
-                 " baryon_number strangeness spin_projection\n",
-                 name.c_str());
-    std::fprintf(
-        file_.get(),
-        "# Units: fm fm fm fm GeV GeV GeV GeV GeV"
-        " none none e none fm none none none fm none none none none none\n");
+    format_name = "OSCAR2013Extended";
+  } else {
+    format_name = "OSC1999A";
+  }
+  if (Format == ASCIICustom || Format == OscarFormat2013 ||
+      Format == OscarFormat2013Extended) {
+    std::fprintf(file_.get(), "#!%s %s %s\n", format_name.c_str(), name.c_str(),
+                 formatter_.quantities_line().c_str());
+    std::fprintf(file_.get(), "# Units: %s\n", formatter_.unit_line().c_str());
     std::fprintf(file_.get(), "# %s\n", SMASH_VERSION);
   } else {
     const std::string &oscar_name =
@@ -110,11 +104,11 @@ OscarOutput<Format, Contents>::OscarOutput(
     // This is necessary because OSCAR199A requires
     // this particular string for particle output.
 
-    std::fprintf(file_.get(), "# OSC1999A\n# %s\n# %s\n", oscar_name.c_str(),
-                 SMASH_VERSION);
+    std::fprintf(file_.get(), "# %s\n# %s\n# %s\n", format_name.c_str(),
+                 oscar_name.c_str(), SMASH_VERSION);
     std::fprintf(file_.get(), "# Block format:\n");
     std::fprintf(file_.get(), "# nin nout event_number\n");
-    std::fprintf(file_.get(), "# id pdg 0 px py pz p0 mass x y z t\n");
+    std::fprintf(file_.get(), "# %s\n", formatter_.quantities_line().c_str());
     std::fprintf(file_.get(),
                  "# End of event: 0 0 event_number"
                  " impact_parameter\n");
@@ -148,8 +142,8 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
                    event_number);
     }
     if (!(Contents & OscarParticlesIC)) {
-      // We do not want the inital particle list to be printed in case of IC
-      // output
+      // We do not want the inital particle list to be printed in case of
+      // IC output
       write(particles);
     }
   }
@@ -762,38 +756,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
     const ParticleData &data) {
-  const FourVector pos = data.position();
-  const FourVector mom = data.momentum();
-
-  if (Format == ASCIICustom) {
-    const std::string line = formatter_.data_line(data);
-    std::fprintf(file_.get(), "%s", line.c_str());
-  } else if (Format == OscarFormat2013) {
-    std::fprintf(file_.get(), "%g %g %g %g %g %.9g %.9g %.9g %.9g %s %i %i\n",
-                 pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(),
-                 mom.x0(), mom.x1(), mom.x2(), mom.x3(),
-                 data.pdgcode().string().c_str(), data.id(),
-                 data.type().charge());
-  } else if (Format == OscarFormat2013Extended) {
-    const auto h = data.get_history();
-    std::fprintf(file_.get(),
-                 "%g %g %g %g %g %.9g %.9g %.9g"
-                 " %.9g %s %i %i %i %g %g %i %i %g %s %s %i %i %i\n",
-                 pos.x0(), pos.x1(), pos.x2(), pos.x3(), data.effective_mass(),
-                 mom.x0(), mom.x1(), mom.x2(), mom.x3(),
-                 data.pdgcode().string().c_str(), data.id(),
-                 data.type().charge(), h.collisions_per_particle,
-                 data.formation_time(), data.xsec_scaling_factor(),
-                 h.id_process, static_cast<int>(h.process_type),
-                 h.time_last_collision, h.p1.string().c_str(),
-                 h.p2.string().c_str(), data.type().baryon_number(),
-                 data.type().strangeness(), data.spin_projection());
-  } else {
-    std::fprintf(file_.get(), "%i %s %i %g %g %g %g %g %g %g %g %g\n",
-                 data.id(), data.pdgcode().string().c_str(), 0, mom.x1(),
-                 mom.x2(), mom.x3(), mom.x0(), data.effective_mass(), pos.x1(),
-                 pos.x2(), pos.x3(), pos.x0());
-  }
+  std::fprintf(file_.get(), "%s", formatter_.data_line(data).c_str());
 }
 
 namespace {
@@ -806,6 +769,7 @@ namespace {
  * \param[in] path Path of output
  * \param[in] out_par Output parameters that hold the output configuration
  * \param[in] name (File)name of ouput
+ * \param[in] custom_format Whether the output has user-defined quantities
  * \return Unique pointer to oscar output
  */
 template <int Contents>
@@ -816,8 +780,11 @@ std::unique_ptr<OutputInterface> create_select_format(
   bool extended_format = (Contents & OscarInteractions) ? out_par.coll_extended
                                                         : out_par.part_extended;
   if (custom_format) {
-    return std::make_unique<OscarOutput<ASCIICustom, Contents>>(
-        path, name, out_par.quantities);
+    const auto &quantities = (Contents & OscarInteractions)
+                                 ? out_par.coll_quantities
+                                 : out_par.part_quantities;
+    return std::make_unique<OscarOutput<ASCIICustom, Contents>>(path, name,
+                                                                quantities);
   } else if (modern_format && extended_format) {
     return std::make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(
         path, name);
@@ -860,10 +827,10 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     if (out_par.coll_printstartend) {
       return create_select_format<OscarInteractions | OscarAtEventstart |
                                   OscarParticlesAtEventend>(
-          modern_format, path, out_par, "full_event_history");
+          modern_format, path, out_par, "full_event_history", custom_format);
     } else {
       return create_select_format<OscarInteractions>(
-          modern_format, path, out_par, "full_event_history");
+          modern_format, path, out_par, "full_event_history", custom_format);
     }
   } else if (content == "Dileptons") {
     if (modern_format && out_par.dil_extended) {

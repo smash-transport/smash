@@ -6,42 +6,95 @@
 #include <string>
 #include <vector>
 
-#include "smash/particledata.h"  // Assuming ParticleData is defined in the smash namespace
+#include "smash/particledata.h"
 
 namespace smash {
 
-// Function object to convert to ASCII
+/// Structure to convert a given value into ASCII
 struct ASCII {
+  /// Return type of this converter.
   using ReturnType = std::string;
 
+  /**
+   * Converts a value into a string with the default format specifier for the
+   * value type.
+   *
+   * \param[in] value Value to be written.
+   * \return Formatted string.
+   */
   template <typename T>
   std::string operator()(const T& value) const {
     return std::to_string(value);
   }
+  /**
+   * Overload of the above for when a string is given.
+   *
+   * \param[in] value string to be written.
+   * \return the same string.
+   */
+  std::string operator()(const std::string& value) const { return value; }
+  /**
+   * Overload of the above for when a literal string (sequence of chars) is
+   * given.
+   *
+   * \param[in] value string to be written.
+   * \return the same string.
+   */
+  std::string operator()(const char* value) const { return value; }
+
+  /**
+   * Converts a value into a string with a format specifier, occupying a maximum
+   * of 20 chars.
+   *
+   * \param[in] value Value to be written.
+   * \param[in] format Format specifier to use.
+   * \return Formatted string.
+   */
   template <typename T>
   std::string operator()(const T& value, const char* format) const {
+    // Maximum size of a string is 20.
     char buffer[20];
     std::sprintf(buffer, format, value);
     return buffer;
   }
-  std::string operator()(const std::string& value) const { return value; }
 };
 
-// Function object to convert to Binary
+/// Structure to convert a given value into Binary
 struct Binary {
+  /// Return type of this converter.
   using ReturnType = const void*;
 
+  /**
+   * Gives the pointer to the stored data with no format specified.
+   *
+   * \param[in] value Value to be written.
+   * \return a pointer to the value.
+   */
   template <typename T>
   const void* operator()(const T& value) const {
     return static_cast<const void*>(&value);
   }
 };
 
+/**
+ * \tparam Converter format desired for the output.
+ * A general formatter used for output purposes, which currently only works for
+ * ASCII-based formats.
+ */
 template <typename Converter>
 class OutputFormatter {
  public:
+  /**
+   * Creates the formatter. This reduces the number of literal strings flying
+   * around in the codebase, and since this is called only once per output file,
+   * in the beginning of the run, there is almost no efficiency lost compared to
+   * having fixed strings.
+   *
+   * \param[in] in_quantities list of quantities to be output.
+   */
   OutputFormatter(const std::vector<std::string>& in_quantities)
       : quantities_(in_quantities) {
+    validate_quantities();
     for (const std::string& quantity : quantities_) {
       if (quantity == "t") {
         getters_.push_back([this](const ParticleData& in) {
@@ -83,7 +136,7 @@ class OutputFormatter {
         getters_.push_back([this](const ParticleData& in) {
           return this->converter_(in.pdgcode().string().c_str(), "%s");
         });
-      } else if (quantity == "ID") {
+      } else if (quantity == "ID" || quantity == "id") {
         getters_.push_back([this](const ParticleData& in) {
           return this->converter_(in.id(), "%i");
         });
@@ -113,7 +166,7 @@ class OutputFormatter {
           return this->converter_(
               static_cast<int>(in.get_history().process_type), "%i");
         });
-      } else if (quantity == "t_last_coll") {
+      } else if (quantity == "time_last_coll") {
         getters_.push_back([this](const ParticleData& in) {
           return this->converter_(in.get_history().time_last_collision, "%g");
         });
@@ -137,17 +190,24 @@ class OutputFormatter {
         getters_.push_back([this](const ParticleData& in) {
           return this->converter_(in.spin_projection(), "%i");
         });
-      } else {
-        throw std::invalid_argument("OutputFormatter: Unknown quantity: " +
-                                    quantity);
+      } else if (quantity == "0") {  // for OSCAR1999
+        getters_.push_back([this]([[maybe_unused]] const ParticleData& in) {
+          return this->converter_(0, "%i");
+        });
       }
     }
   }
 
-  std::string data_line(const ParticleData& data) {
+  /**
+   * Produces the line with formatted data for the body of the output file.
+   *
+   * \param[in] p particle whose information is to be written.
+   * \return string with formatted data separated by a space.
+   */
+  const std::string data_line(const ParticleData& p) {
     std::string line;
     for (const auto& getter : getters_) {
-      line += getter(data) + " ";
+      line += getter(p) + " ";
     }
     if (!line.empty()) {
       line.pop_back();
@@ -156,30 +216,47 @@ class OutputFormatter {
     return line;
   }
 
-  std::string header() {
+  /**
+   * Produces the line with quantities for the header of the output file.
+   * \return string with name of quantities separated by a space.
+   */
+  const std::string quantities_line() {
     std::string header;
     for (const std::string& q : quantities_) {
-      header += q + " ";
+      header += this->converter_(q) + " ";
     }
     header.pop_back();
     return header;
   }
 
+  /**
+   * Produces the line with units for the header of the output file.
+   * \return string with units separated by a space.
+   */
   std::string unit_line() {
     std::string line;
     for (const std::string& q : quantities_) {
-      line += units_.at(q) + " ";
+      line += this->converter_(units_.at(q)) + " ";
     }
     line.pop_back();
     return line;
   }
-  // unit line (use map?)
+
  private:
+  /// Desired format for data conversion. Currently only ASCII is available.
   Converter converter_;
+
+  /// List of quantities to be written.
   std::vector<std::string> quantities_;
+
+  /// List of getters for the corresponding quantities.
   std::vector<
       std::function<typename Converter::ReturnType(const ParticleData&)>>
       getters_;
+
+  /**
+   *  Map with known quantities and corresponding units.
+   */
   const std::map<std::string, std::string> units_ = {
       {"t", "fm"},
       {"x", "fm"},
@@ -192,6 +269,7 @@ class OutputFormatter {
       {"pz", "GeV"},
       {"pdg", "none"},
       {"ID", "none"},
+      {"id", "none"},
       {"charge", "e"},
       {"ncoll", "none"},
       {"form_time", "fm"},
@@ -204,38 +282,17 @@ class OutputFormatter {
       {"baryon_number", "none"},
       {"strangeness", "none"},
       {"spin_projection", "none"},
-  };
-  // REN: To be filled
-  const std::vector<std::string> OSCAR2013_quantities_ = {
-      "t",  "x",  "y",  "z",   "mass", "p0",
-      "px", "py", "pz", "pdg", "ID",   "charge"};
-  const std::vector<std::string> OSCAR2013Extended_quantities_ = {
-      "t",
-      "x",
-      "y",
-      "z",
-      "mass",
-      "p0",
-      "px",
-      "py",
-      "pz",
-      "pdg",
-      "ID",
-      "charge",
-      "ncoll",
-      "form_time",
-      "xsecfac",
-      "proc_id_origin",
-      "proc_type_origin",
-      "time_last_coll",
-      "pdg_mother1",
-      "pdg_mother2",
-      "baryon_number",
-      "strangeness",
-      "spin_projection"};
-  // not sure what to do with "0"
-  // const std::vector<std::string> OSCAR1999_quantities_ =
-  // {"id","pdg","0","px","py","pz","p0","mass","x","y","z","t"};
+      {"0", "0"}};
+
+  /// Checks whether the quantities requested are known
+  void validate_quantities() {
+    for (auto& quantity : quantities_) {
+      if (units_.count(quantity) == 0) {
+        throw std::invalid_argument("OutputFormatter: Unknown quantity: " +
+                                    quantity);
+      }
+    }
+  }
 };
 
 }  // namespace smash

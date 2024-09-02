@@ -15,18 +15,28 @@
 
 using namespace smash;
 
-TEST_CATCH(invalid_quanitity, std::invalid_argument) {
+TEST(ASCII_converter) {
+  ASCII converter;
+  // int goes to an string containing int
+  VERIFY(converter(42) == static_cast<std::string>("42"));
+  // float precision behaves correctly
+  VERIFY(converter(3.1415, "%.3g") == static_cast<std::string>("3.14"));
+  VERIFY(converter(3.1415, "%.5g") == static_cast<std::string>("3.1415"));
+  VERIFY(converter(3.1415, "%.7g") == static_cast<std::string>("3.1415"));
+  // strings (literal and not) behave correctly
+  const std::string smash_str{"smash"};
+  VERIFY(converter(smash_str) == smash_str);
+  VERIFY(converter("smash") == smash_str);
+}
+
+TEST_CATCH(invalid_quantity, std::invalid_argument) {
   std::vector<std::string> invalid_quantities = {"gibberish"};
   OutputFormatter<ASCII> outputformatter(invalid_quantities);
 }
 
 TEST(valid_line_maker) {
-  ParticleType::create_type_list(
-      "# NAME MASS[GEV] WIDTH[GEV] PARITY PDG\n"
-      "π⁺ 0.1380 0      -  211\n");
-
-  PdgCode pdg = 0x211;
-  ParticleData p{ParticleType::find(pdg)};
+  Test::create_smashon_particletypes();
+  ParticleData p = Test::smashon_random();
 
   std::vector<std::string> valid_quantities = {"t",
                                                "x",
@@ -37,7 +47,7 @@ TEST(valid_line_maker) {
                                                "px",
                                                "py",
                                                "pz",
-                                               "pdgcode",
+                                               "pdg",
                                                "ID",
                                                "charge",
                                                "ncoll",
@@ -45,40 +55,44 @@ TEST(valid_line_maker) {
                                                "xsecfac",
                                                "proc_id_origin",
                                                "proc_type_origin",
-                                               "t_last_coll",
+                                               "time_last_coll",
                                                "pdg_mother1",
                                                "pdg_mother2",
                                                "baryon_number",
                                                "strangeness",
-                                               "spin"};
+                                               "spin_projection"};
 
   OutputFormatter<ASCII> formatter(valid_quantities);
-  std::string correct_line;
+  std::stringstream correct_line;
 
   for (int i = 0; i < 4; ++i) {
-    correct_line += std::to_string(p.position()[i]) + ",";
+    correct_line << p.position()[i] << " ";
   }
-  correct_line += std::to_string(p.effective_mass()) + ",";
+  correct_line << p.effective_mass() << " ";
+  // For momentum only, the default precision is 9
+  correct_line.precision(9);
   for (int i = 0; i < 4; ++i) {
-    correct_line += std::to_string(p.momentum()[i]) + ",";
+    correct_line << p.momentum()[i] << " ";
   }
-  correct_line += p.pdgcode().string() + ",";
-  correct_line += std::to_string(p.id()) + ",";
-  correct_line += std::to_string(p.type().charge()) + ",";
-  correct_line += std::to_string(p.get_history().collisions_per_particle) + ",";
-  correct_line += std::to_string(p.formation_time()) + ",";
-  correct_line += std::to_string(p.get_history().id_process) + ",";
-  correct_line +=
-      std::to_string(static_cast<int>(p.get_history().process_type)) + ",";
-  correct_line += std::to_string(p.get_history().time_last_collision) + ",";
-  correct_line += p.get_history().p1.string() + ",";
-  correct_line += p.get_history().p2.string() + ",";
-  correct_line += std::to_string(p.pdgcode().baryon_number()) + ",";
-  correct_line += std::to_string(p.pdgcode().strangeness()) + ",";
-  correct_line += std::to_string(p.spin_projection()) + ",";
-  correct_line.pop_back();
+  correct_line.precision(6);
+  correct_line << p.pdgcode().string() << " ";
+  correct_line << p.id() << " ";
+  correct_line << p.type().charge() << " ";
+  correct_line << p.get_history().collisions_per_particle << " ";
+  correct_line << p.formation_time() << " ";
+  correct_line << p.xsec_scaling_factor() << " ";
+  correct_line << p.get_history().id_process << " ";
+  correct_line << static_cast<int>(p.get_history().process_type) << " ";
+  correct_line << p.get_history().time_last_collision << " ";
+  correct_line << p.get_history().p1.string() << " ";
+  correct_line << p.get_history().p2.string() << " ";
+  correct_line << p.pdgcode().baryon_number() << " ";
+  correct_line << p.pdgcode().strangeness() << " ";
+  correct_line << p.spin_projection() << "\n";
+  VERIFY(correct_line.str() == formatter.data_line(p));
 
-  std::string tested_line = formatter.data_line(p);
-
-  VERIFY(correct_line == tested_line);
+  std::string units_line{
+      "fm fm fm fm GeV GeV GeV GeV GeV none none e none fm none none none fm "
+      "none none none none none"};
+  VERIFY(units_line == formatter.unit_line());
 }
