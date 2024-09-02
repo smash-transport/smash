@@ -3594,7 +3594,61 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \par Defining orientation
+   * <hr>
+   * ### Alpha-Clustered oxygen nuclei
+   *
+   * It is possible to have alpha-clustered projectile and/or target oxygen
+   * nuclei using the `Alpha_Clustered` section, which should then contain some
+   * configuration, if given.
+   *
+   * \required_key_no_line{key_MC_PT_alphaClustered_auto_,Automatic,bool}
+   *
+   * - `true` &rarr; Automatically set the sidelength of the tetrahedron used
+   * for alpha-clustering.
+   * - `false` &rarr; Manually set the sidelength of the tetrahedron used for
+   * alpha-clustering.
+   */
+  /**
+   * \see_key{key_MC_PT_alphaClustered_auto_}
+   */
+  inline static const Key<bool>
+      modi_collider_projectile_alphaClustered_automatic{
+          {"Modi", "Collider", "Projectile", "Alpha_Clustered", "Automatic"},
+          {"3.2"}};
+  /**
+   * \see_key{key_MC_PT_alphaClustered_auto_}
+   */
+  inline static const Key<bool> modi_collider_target_alphaClustered_automatic{
+      {"Modi", "Collider", "Target", "Alpha_Clustered", "Automatic"}, {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_proj_targ
+   * \optional_key_no_line{key_MC_PT_alphaClustered_sidelength_,Sidelength,double,3.42}
+   *
+   * The sidelength of the regular tetrahedron used for alpha-clustering. The
+   * default value of 3.42 was taken from \iref{Li:2020vrg}.
+   */
+  /**
+   * \see_key{key_MC_PT_alphaClustered_sidelength_}
+   */
+  inline static const Key<double>
+      modi_collider_projectile_alphaClustered_sidelength{
+          {"Modi", "Collider", "Projectile", "Alpha_Clustered", "Sidelength"},
+          3.42,
+          {"3.2"}};
+  /**
+   * \see_key{key_MC_PT_alphaClustered_sidelength_}
+   */
+  inline static const Key<double>
+      modi_collider_target_alphaClustered_sidelength{
+          {"Modi", "Collider", "Target", "Alpha_Clustered", "Sidelength"},
+          3.42,
+          {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_proj_targ
+   * <hr>
+   * ### Defining orientation
    *
    * In the `Orientation` section it is possible to specify the orientation of
    * the nucleus by rotations which are performed about the axes of a coordinate
@@ -3604,94 +3658,76 @@ struct InputKeys {
    * around the now rotated x-axis by theta and then around the rotated z-axis
    * by psi.
    *
-   * \optional_key_no_line{key_MC_PT_deformed_orientation_phi_,Phi,double,0.0}
+   * \optional_key_no_line{key_MC_PT_orientation_phi_,Phi,double,0.0}
    *
    * The angle by which to rotate the nucleus about the z-axis.
    */
   /**
-   * \see_key{key_MC_PT_deformed_orientation_phi_}
+   * \see_key{key_MC_PT_orientation_phi_}
    */
-  inline static const Key<double>
-      modi_collider_projectile_deformed_orientation_phi{
-          {"Modi", "Collider", "Projectile", "Deformed", "Orientation", "Phi"},
-          0.0,
-          {"0.50"}};
+  inline static const Key<double> modi_collider_projectile_orientation_phi{
+      {"Modi", "Collider", "Projectile", "Orientation", "Phi"}, 0.0, {"0.50"}};
   /**
-   * \see_key{key_MC_PT_deformed_orientation_phi_}
+   * \see_key{key_MC_PT_orientation_phi_}
    */
-  inline static const Key<double> modi_collider_target_deformed_orientation_phi{
-      {"Modi", "Collider", "Target", "Deformed", "Orientation", "Phi"},
-      0.0,
-      {"0.50"}};
+  inline static const Key<double> modi_collider_target_orientation_phi{
+      {"Modi", "Collider", "Target", "Orientation", "Phi"}, 0.0, {"0.50"}};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_orientation_theta_,Theta,double,0.0}
+   * \optional_key_no_line{key_MC_PT_orientation_theta_,Theta,double,0.0}
    *
    * The angle by which to rotate the nucleus about the rotated x-axis.
    */
   /**
-   * \see_key{key_MC_PT_deformed_orientation_theta_}
+   * \see_key{key_MC_PT_orientation_theta_}
    */
-  inline static const Key<double>
-      modi_collider_projectile_deformed_orientation_theta{
-          {"Modi", "Collider", "Projectile", "Deformed", "Orientation",
-           "Theta"},
-          0.0,
-          {"0.50"}};
+  inline static const Key<double> modi_collider_projectile_orientation_theta{
+      {"Modi", "Collider", "Projectile", "Orientation", "Theta"},
+      0.0,
+      {"0.50"}};
   /**
-   * \see_key{key_MC_PT_deformed_orientation_theta_}
+   * \see_key{key_MC_PT_orientation_theta_}
    */
-  inline static const Key<double>
-      modi_collider_target_deformed_orientation_theta{
-          {"Modi", "Collider", "Target", "Deformed", "Orientation", "Theta"},
-          0.0,
-          {"0.50"}};
+  inline static const Key<double> modi_collider_target_orientation_theta{
+      {"Modi", "Collider", "Target", "Orientation", "Theta"}, 0.0, {"0.50"}};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_orientation_psi_,Psi,double,0.0}
+   * \optional_key_no_line{key_MC_PT_orientation_psi_,Psi,double,0.0}
    *
    * The angle by which to rotate the nucleus about the rotated z-axis.
    */
   /**
-   * \see_key{key_MC_PT_deformed_orientation_psi_}
+   * \see_key{key_MC_PT_orientation_psi_}
    */
-  inline static const Key<double>
-      modi_collider_projectile_deformed_orientation_psi{
-          {"Modi", "Collider", "Projectile", "Deformed", "Orientation", "Psi"},
-          0.0,
-          {"3.0"}};
+  inline static const Key<double> modi_collider_projectile_orientation_psi{
+      {"Modi", "Collider", "Projectile", "Orientation", "Psi"}, 0.0, {"3.0"}};
   /**
-   * \see_key{key_MC_PT_deformed_orientation_psi_}
+   * \see_key{key_MC_PT_orientation_psi_}
    */
-  inline static const Key<double> modi_collider_target_deformed_orientation_psi{
-      {"Modi", "Collider", "Target", "Deformed", "Orientation", "Psi"},
-      0.0,
-      {"3.0"}};
+  inline static const Key<double> modi_collider_target_orientation_psi{
+      {"Modi", "Collider", "Target", "Orientation", "Psi"}, 0.0, {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_orientation_random_,Random_Rotation,bool,false}
+   * \optional_key_no_line{key_MC_PT_orientation_random_,Random_Rotation,bool,false}
    *
    * Whether the created nucleus object should be randomly rotated in space.
    */
   /**
-   * \see_key{key_MC_PT_deformed_orientation_random_}
+   * \see_key{key_MC_PT_orientation_random_}
    */
   inline static const Key<bool>
-      modi_collider_projectile_deformed_orientation_randomRotation{
-          {"Modi", "Collider", "Projectile", "Deformed", "Orientation",
-           "Random_Rotation"},
+      modi_collider_projectile_orientation_randomRotation{
+          {"Modi", "Collider", "Projectile", "Orientation", "Random_Rotation"},
           false,
           {"1.7"}};
   /**
-   * \see_key{key_MC_PT_deformed_orientation_random_}
+   * \see_key{key_MC_PT_orientation_random_}
    */
-  inline static const Key<bool>
-      modi_collider_target_deformed_orientation_randomRotation{
-          {"Modi", "Collider", "Target", "Deformed", "Orientation",
-           "Random_Rotation"},
-          false,
-          {"1.7"}};
+  inline static const Key<bool> modi_collider_target_orientation_randomRotation{
+      {"Modi", "Collider", "Target", "Orientation", "Random_Rotation"},
+      false,
+      {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -5698,14 +5734,18 @@ struct InputKeys {
       std::cref(modi_collider_target_deformed_beta4),
       std::cref(modi_collider_projectile_deformed_gamma),
       std::cref(modi_collider_target_deformed_gamma),
-      std::cref(modi_collider_projectile_deformed_orientation_phi),
-      std::cref(modi_collider_target_deformed_orientation_phi),
-      std::cref(modi_collider_projectile_deformed_orientation_psi),
-      std::cref(modi_collider_target_deformed_orientation_psi),
-      std::cref(modi_collider_projectile_deformed_orientation_randomRotation),
-      std::cref(modi_collider_target_deformed_orientation_randomRotation),
-      std::cref(modi_collider_projectile_deformed_orientation_theta),
-      std::cref(modi_collider_target_deformed_orientation_theta),
+      std::cref(modi_collider_projectile_alphaClustered_automatic),
+      std::cref(modi_collider_target_alphaClustered_automatic),
+      std::cref(modi_collider_projectile_alphaClustered_sidelength),
+      std::cref(modi_collider_target_alphaClustered_sidelength),
+      std::cref(modi_collider_projectile_orientation_phi),
+      std::cref(modi_collider_target_orientation_phi),
+      std::cref(modi_collider_projectile_orientation_psi),
+      std::cref(modi_collider_target_orientation_psi),
+      std::cref(modi_collider_projectile_orientation_randomRotation),
+      std::cref(modi_collider_target_orientation_randomRotation),
+      std::cref(modi_collider_projectile_orientation_theta),
+      std::cref(modi_collider_target_orientation_theta),
       std::cref(modi_collider_impact_max),
       std::cref(modi_collider_impact_randomReactionPlane),
       std::cref(modi_collider_impact_range),
@@ -6225,10 +6265,10 @@ General:
                  Beta_2: 0.1
                  Beta_3: 0.2
                  Beta_4: 0.3
-                 Orientation:
-                     Theta: 0.8
-                     Phi: 0.02
-                     Psi: 0.13
+             Orientation:
+                 Theta: 0.8
+                 Phi: 0.02
+                 Psi: 0.13
          Target:
              Particles: {2212: 29, 2112: 34}
              # manually set Woods-Saxon parameters
@@ -6238,9 +6278,9 @@ General:
              Deformed:
                  # Automatically set deformation parameters
                  Automatic: true
-                 Orientation:
-                     # Randomly rotate nucleus
-                     Random_Rotation: true
+             Orientation:
+                 # Randomly rotate nucleus
+                 Random_Rotation: true
          E_kin: 1.2
          Calculation_Frame: "fixed target"
  \endverbatim

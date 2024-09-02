@@ -20,12 +20,15 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+### Added
+* Added alpha-clustered oxygen nuclei that can be configured in a new `Alpha_Clustered` section in the `Projectile`/`Target` section
+
 ### Deprecated
 * Some physics-related input keys in `Output: Initial_Conditions` were deprecated and duplicated under `Modi: Collider: Initial_Conditions`
 
 ### Changed
 * Upgraded to Pythia 8.311
-* Changed the default value for theta from pi/2 to 0 in orientation section for deformed nucleii
+* Moved the `Orientation` section from `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from pi/2 to 0
 
 ### Fixed
 * Fix a small error and added a more precise documentation for the orientation section for deformed nuclei

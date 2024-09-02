@@ -31,9 +31,8 @@ DeformedNucleus::DeformedNucleus(Configuration &config, int nTest,
   } else {
     set_deformation_parameters_from_config(config);
   }
-  if (config.has_value({"Deformed", "Orientation"})) {
-    Configuration sub_conf =
-        config.extract_sub_configuration({"Deformed", "Orientation"});
+  if (config.has_value({"Orientation"})) {
+    Configuration sub_conf = config.extract_sub_configuration({"Orientation"});
     set_orientation_from_config(sub_conf);
   }
 }

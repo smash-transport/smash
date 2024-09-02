@@ -25,9 +25,9 @@ Modi:
                 Automatic: False
                 Beta_2: 2.0
                 Beta_4: 8.0
-                Orientation:
-                    Theta: 0.8
-                    Phi: 0.02
+            Orientation:
+                Theta: 0.8
+                Phi: 0.02
 
         Target:
             Particles: {2212: 79, 2112: 118} #Gold197
@@ -38,7 +38,7 @@ Modi:
                 Automatic: False
                 Beta_2: 2.0
                 Beta_4: 8.0
-                Orientation:
-                    Random_Rotation: True
+            Orientation:
+                Random_Rotation: True
 
         E_Kin: 1.23
