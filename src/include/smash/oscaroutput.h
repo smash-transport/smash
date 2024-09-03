@@ -12,6 +12,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "file.h"
 #include "forwarddeclarations.h"

@@ -1,5 +1,14 @@
-#ifndef OUTPUT_FORMATTER_H
-#define OUTPUT_FORMATTER_H
+/*
+ *
+ *    Copyright (c) 2024
+ *      SMASH Team
+ *
+ *    GNU General Public License (GPLv3 or later)
+ *
+ */
+
+#ifndef SRC_INCLUDE_SMASH_OUTPUTFORMATTER_H_
+#define SRC_INCLUDE_SMASH_OUTPUTFORMATTER_H_
 
 #include <functional>
 #include <map>
@@ -53,8 +62,9 @@ struct ASCII {
   template <typename T>
   std::string operator()(const T& value, const char* format) const {
     // Maximum size of a string is 20.
-    char buffer[20];
-    std::sprintf(buffer, format, value);
+    constexpr std::size_t kMaxSize = 20;
+    char buffer[kMaxSize];
+    std::snprintf(buffer, kMaxSize, format, value);
     return buffer;
   }
 };
@@ -92,7 +102,7 @@ class OutputFormatter {
    *
    * \param[in] in_quantities list of quantities to be output.
    */
-  OutputFormatter(const std::vector<std::string>& in_quantities)
+  explicit OutputFormatter(const std::vector<std::string>& in_quantities)
       : quantities_(in_quantities) {
     validate_quantities();
     for (const std::string& quantity : quantities_) {
@@ -297,4 +307,4 @@ class OutputFormatter {
 
 }  // namespace smash
 
-#endif  // OUTPUT_FORMATTER_H
+#endif  // SRC_INCLUDE_SMASH_OUTPUTFORMATTER_H_
