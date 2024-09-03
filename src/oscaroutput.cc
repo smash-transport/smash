@@ -28,7 +28,7 @@ OscarOutput<Format, Contents>::OscarOutput(
       file_{path / (name + ((Format == ASCIICustom) ? ".dat" : ".oscar") +
                     ((Format == OscarFormat1999) ? "1999" : "")),
             "w"},
-      formatter_{Format == ASCIICustom ? quantities
+      formatter_{Format == ASCIICustom         ? quantities
                  : (Format == OscarFormat2013) ? OSCAR2013_quantities
                  : (Format == OscarFormat2013Extended)
                      ? OSCAR2013Extended_quantities
@@ -751,6 +751,83 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * Note, that "event", "end" and "impact" are no variables, but words
  * that are printed.
+ **/
+
+/*!\Userguide
+ * \page doxypage_output_ascii
+ * The \c ASCIICustom format follows the general block structure of the OSCAR
+ * format: \ref doxypage_output_oscar, but offers more flexibility with the
+ * particle line quantities written in the file. It is available for the \c
+ * Particles and \c Collisions output contents (see \ref doxypage_output),
+ * creating files with the extension <em>.dat</em>. This format is useful to
+ * decrease storage usage.
+ * \n
+ * Available quantities
+ * ---------
+ * \li  \key t, \key x, \key y, \key z: Space-time coordinates
+ * \li \key mass: Particle's rest-mass
+ * \li \key p0, \key px, \key py, \key pz: Energy and 3-momentum
+ * \li \key pdg: PDG code of the particle (see http://pdg.lbl.gov/).
+ * It contains all quantum numbers and uniquely identifies its type.
+ * \li \key ID: Particle identifier in terms of an integer. It is unique
+ * for every particle in the event
+ * \li \key charge: Electric charge of the particle in units of the
+ * elementary charge e
+ * \li \key ncoll: Number of collisions the particle has undergone
+ * \li \key form_time: Formation time of the particle
+ * \li \key xsecfac: Cross section scaling factor (if the particles are not
+ * yet fully formed at the time of interaction, the cross section for the
+ * underlying process is scaled down by the cross section scaling factor)
+ * \li \key proc_id_origin: ID of the process of the particle's last interaction
+ * \li \key proc_type_origin: Type of the last process the particle has
+ * undergone. The possible process types are listed in
+ * \ref doxypage_output_oscar_particles_process_types
+ * \li \key t_last_coll: time of the particle's last interaction (except
+ * wall crossings)
+ * \li \key pdg_mother1: PDG code of the 1st mother particle (0 in case the
+ * particle is sampled in a thermal bubble. It is not updated by elastic
+ * scatterings.)
+ * \li \key pdg_mother2: PDG code of the 2nd mother particle (0 in
+ * case the particle results from the decay of a resonance or the appearance
+ * of a thermal bubble. In the former case, pdg_mother1 is the PDG code of this
+ * resonance. It is not updated by elastic scatterings.)
+ * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1
+ * for anti-baryons and 0 for mesons
+ * \li \key strangeness: Net-strangeness of the particles
+ * \li \key spin_projection: Projection of the total spin in multiples of 1/2.
+ * It can take the values [-spin, -spin+2, ... spin-2, spin]
+ *
+ * **Example**
+ *
+ * If one is interested, for example, in the rate of production/annihilation of
+ * resonances, for events divided into centrality classes based on the charged
+ * particle yield at midrapidity, the config file would contain the following:
+ *\verbatim
+ Output:
+     Particles:
+         Format:     ["ASCIICustom"]
+         Quantities: ["p0","pz","pdg","charge"]
+         Only_Final: IfNotEmpty
+     Collisions:
+         Format:     ["ASCIICustom"]
+         Quantities: ["t","pdg","ID","pdg_mother1","pdg_mother2"]
+ \endverbatim
+ *
+ * Then, the output files would have the following headers:
+ *
+ * *particle_lists.dat*
+ * \code
+ * #!ASCIICustom particle_lists p0 pz pdg charge
+ * # Units: GeV GeV none e
+ * # SMASH_version
+ * \endcode
+ *
+ * *full_event_history.dat*
+ * \code
+ * #!ASCIICustom full_event_history t pdg ID pdg_mother1 pdg_mother2
+ * # Units: fm none none none none
+ * # SMASH_version
+ * \endcode
  **/
 
 template <OscarOutputFormat Format, int Contents>

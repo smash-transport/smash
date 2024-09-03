@@ -114,14 +114,16 @@ struct OutputParameters {
       part_only_final =
           conf.take({"Particles", "Only_Final"}, OutputOnlyFinal::Yes);
       part_quantities =
-          conf.take({"Particles", "Quantities"}, InputKeys::output_particles_quantities.default_value());
+          conf.take({"Particles", "Quantities"},
+                    InputKeys::output_particles_quantities.default_value());
     }
 
     if (conf.has_value({"Collisions"})) {
       coll_extended = conf.take({"Collisions", "Extended"}, false);
       coll_printstartend = conf.take({"Collisions", "Print_Start_End"}, false);
       coll_quantities =
-          conf.take({"Collisions", "Quantities"}, InputKeys::output_collisions_quantities.default_value());
+          conf.take({"Collisions", "Quantities"},
+                    InputKeys::output_collisions_quantities.default_value());
     }
 
     if (conf.has_value({"Dileptons"})) {
