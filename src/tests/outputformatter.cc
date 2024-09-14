@@ -29,9 +29,19 @@ TEST(ASCII_converter) {
   VERIFY(converter("smash") == smash_str);
 }
 
+TEST_CATCH(empty_quantities, std::invalid_argument) {
+  std::vector<std::string> empty{};
+  OutputFormatter<ASCII> formatter(empty);
+}
+
 TEST_CATCH(invalid_quantity, std::invalid_argument) {
   std::vector<std::string> invalid_quantities = {"gibberish"};
-  OutputFormatter<ASCII> outputformatter(invalid_quantities);
+  OutputFormatter<ASCII> formatter(invalid_quantities);
+}
+
+TEST_CATCH(repeated_quantity, std::invalid_argument) {
+  std::vector<std::string> repeated_quantities = {"t", "t"};
+  OutputFormatter<ASCII> formatter(repeated_quantities);
 }
 
 TEST(valid_line_maker) {

@@ -1200,15 +1200,17 @@ Experiment<Modus>::Experiment(Configuration &config,
    * - \b Particles  List of particles at regular time intervals in the
    *                 computational frame or (optionally) only at the event end.
    *   - Available formats: \ref doxypage_output_oscar_particles, \ref
-   * doxypage_output_ascii, \ref doxypage_output_binary, \ref
-   * doxypage_output_root, \ref doxypage_output_vtk, \ref doxypage_output_hepmc
+   *                        doxypage_output_ascii, \ref doxypage_output_binary,
+   *                        \ref doxypage_output_root, \ref doxypage_output_vtk,
+   *                        \ref doxypage_output_hepmc
    * - \b Collisions List of interactions: collisions, decays, box wall
    *                 crossings and forced thermalizations. Information about
    *                 incoming, outgoing particles and the interaction itself
    *                 is printed out.
    *   - Available formats: \ref doxypage_output_oscar_collisions, \ref
-   * doxypage_output_ascii, \ref doxypage_output_binary, \ref
-   * doxypage_output_root, \ref doxypage_output_hepmc
+   *                        doxypage_output_ascii, \ref doxypage_output_binary,
+   *                        \ref doxypage_output_root, \ref
+   *                        doxypage_output_hepmc
    * - \b Dileptons  Special dilepton output, see
    *                 \ref doxypage_output_dileptons.
    *   - Available formats: \ref doxypage_output_oscar_collisions,
@@ -1248,7 +1250,8 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   - General block structure of OSCAR formats:
    *     \ref doxypage_output_oscar
    * - \b "ASCIICustom" - uses the OSCAR block structure, but with an
-   * user-defined set of columns: \ref doxypage_output_ascii
+   *                      user-defined set of columns: \ref
+   *                      doxypage_output_ascii
    * - \b "Binary" - binary, not human-readable output
    *   - Faster to read and write than text outputs
    *   - Saves coordinates and momenta with the full double precision

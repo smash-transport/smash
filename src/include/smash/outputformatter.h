@@ -25,8 +25,8 @@ struct ASCII {
   using ReturnType = std::string;
 
   /**
-   * Converts a value into a string with the default format specifier for the
-   * value type.
+   * Makes the struct callable. Converts a value into a string with the default
+   * format specifier for the value type.
    *
    * \param[in] value Value to be written.
    * \return Formatted string.
@@ -36,14 +36,14 @@ struct ASCII {
     return std::to_string(value);
   }
   /**
-   * Overload of the above for when a string is given.
+   * Overload the struct call for when a string is given.
    *
    * \param[in] value string to be written.
    * \return the same string.
    */
   std::string operator()(const std::string& value) const { return value; }
   /**
-   * Overload of the above for when a literal string (sequence of chars) is
+   * Overload the struct call for when a literal string (sequence of chars) is
    * given.
    *
    * \param[in] value string to be written.
@@ -69,11 +69,14 @@ struct ASCII {
   }
 };
 
-/// Structure to convert a given value into Binary
+/// Structure to convert a given value into Binary. This is not yet implemented,
+/// so the default constructor is deleted.
 struct Binary {
   /// Return type of this converter.
   using ReturnType = const void*;
 
+  // The binary conversion is not yet implemented
+  Binary() = delete;
   /**
    * Gives the pointer to the stored data with no format specified.
    *
@@ -279,7 +282,7 @@ class OutputFormatter {
       {"pz", "GeV"},
       {"pdg", "none"},
       {"ID", "none"},
-      {"id", "none"},
+      {"id", "none"},  // used in OSCAR1999
       {"charge", "e"},
       {"ncoll", "none"},
       {"form_time", "fm"},
@@ -292,16 +295,38 @@ class OutputFormatter {
       {"baryon_number", "none"},
       {"strangeness", "none"},
       {"spin_projection", "none"},
-      {"0", "0"}};
+      {"0", "0"}};  // for OSCAR1999
 
-  /// Checks whether the quantities requested are known
+  /// Checks whether the quantities requested are known and unique
   void validate_quantities() {
-    for (auto& quantity : quantities_) {
-      if (units_.count(quantity) == 0) {
-        throw std::invalid_argument("OutputFormatter: Unknown quantity: " +
-                                    quantity);
+    std::string error_message;
+    if (quantities_.empty()) {
+      throw std::invalid_argument(
+          "OutputFormatter: Quantities not given, "
+          "please fix the configuration file.");
+    }
+    std::string repeated;
+    for (const std::string& quantity : quantities_) {
+      if (std::count(quantities_.begin(), quantities_.end(), quantity) > 1) {
+        repeated += "'" + quantity + "',";
       }
     }
+    if (!repeated.empty()) {
+      error_message += "OutputFormatter: Repeated quantities: " + repeated +
+                       " please fix the configuration file.\n";
+    }
+    std::string unknown;
+    for (const std::string& quantity : quantities_) {
+      if (units_.count(quantity) == 0) {
+        unknown += "'" + quantity + "',";
+      }
+    }
+    if (!unknown.empty()) {
+      error_message += "OutputFormatter: Unknown quantities: " + unknown +
+                       " please fix the configuration file.\n";
+    }
+    if (!repeated.empty() || !unknown.empty())
+      throw std::invalid_argument(error_message);
   }
 };
 

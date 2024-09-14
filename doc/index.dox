@@ -68,7 +68,7 @@
         \page doxypage_input_conf_collision_term Collision term
             <div class="invisible-content">
             \subpage doxypage_input_conf_ct_pauliblocker
-            \subpage doxypage_input_conf_ct_string_transition 
+            \subpage doxypage_input_conf_ct_string_transition
             \subpage doxypage_input_conf_ct_string_parameters
             \subpage doxypage_input_conf_ct_dileptons
             \subpage doxypage_input_conf_ct_photons
@@ -131,7 +131,7 @@
     \subpage doxypage_output_photons
     \subpage doxypage_output_initial_conditions
     \subpage doxypage_output_rivet
-    \subpage doxypage_output_oscar    
+    \subpage doxypage_output_oscar
     \subpage doxypage_output_ascii
     \subpage doxypage_output_binary
     \subpage doxypage_output_root

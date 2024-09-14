@@ -4696,7 +4696,7 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_collisions_quantities_,Quantities,list of
    * strings,
-   * </tt><b>empty list</b><tt>}
+   * </tt><b>no default</b><tt>}
    *
    * &rArr; Used only with the `ASCIICustom` format, ignored otherwise. See \ref
    * doxypage_output_ascii for the possible values.

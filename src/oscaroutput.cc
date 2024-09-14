@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2023
+ *    Copyright (c) 2014-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -755,12 +755,12 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 
 /*!\Userguide
  * \page doxypage_output_ascii
- * The \c ASCIICustom format follows the general block structure of the OSCAR
- * format: \ref doxypage_output_oscar, but offers more flexibility with the
- * particle line quantities written in the file. It is available for the \c
- * Particles and \c Collisions output contents (see \ref doxypage_output),
- * creating files with the extension <em>.dat</em>. This format is useful to
- * decrease storage usage.
+ * The \c ASCIICustom format follows the general block structure of the \ref
+ * doxypage_output_oscar, but offers more flexibility with the particle line
+ * quantities written in the file. It is available for the \c Particles and
+ * \c Collisions output contents (see \ref doxypage_output), creating files
+ * with the extension <em>.dat</em>. This format is useful to decrease
+ * storage usage.
  * \n
  * Available quantities
  * ---------
@@ -768,9 +768,10 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key mass: Particle's rest-mass
  * \li \key p0, \key px, \key py, \key pz: Energy and 3-momentum
  * \li \key pdg: PDG code of the particle (see http://pdg.lbl.gov/).
- * It contains all quantum numbers and uniquely identifies its type.
- * \li \key ID: Particle identifier in terms of an integer. It is unique
- * for every particle in the event
+ * It contains all quantum numbers and uniquely identifies its type
+ * \li \key ID, id: Particle identifier in terms of an integer. It is unique
+ * for every particle in the event. \key ID is used in the OSCAR 2013 standard,
+ * while \key id is used in OSCAR 1999
  * \li \key charge: Electric charge of the particle in units of the
  * elementary charge e
  * \li \key ncoll: Number of collisions the particle has undergone
@@ -782,20 +783,21 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key proc_type_origin: Type of the last process the particle has
  * undergone. The possible process types are listed in
  * \ref doxypage_output_oscar_particles_process_types
- * \li \key t_last_coll: time of the particle's last interaction (except
+ * \li \key time_last_coll: Time of the particle's last interaction (except
  * wall crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle (0 in case the
  * particle is sampled in a thermal bubble. It is not updated by elastic
  * scatterings.)
  * \li \key pdg_mother2: PDG code of the 2nd mother particle (0 in
  * case the particle results from the decay of a resonance or the appearance
- * of a thermal bubble. In the former case, pdg_mother1 is the PDG code of this
- * resonance. It is not updated by elastic scatterings.)
+ * of a thermal bubble. In the former case, \key pdg_mother1 is the PDG code of
+ * this resonance. It is not updated by elastic scatterings.)
  * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1
  * for anti-baryons and 0 for mesons
  * \li \key strangeness: Net-strangeness of the particles
  * \li \key spin_projection: Projection of the total spin in multiples of 1/2.
  * It can take the values [-spin, -spin+2, ... spin-2, spin]
+ * \li \key 0: Prints a column of 0 (for compatibility with OSCAR 1999)
  *
  * **Example**
  *
@@ -888,6 +890,11 @@ std::unique_ptr<OutputInterface> create_oscar_output(
   const bool modern_format = (format == "Oscar2013");
   const bool custom_format = (format == "ASCIICustom");
   if (content == "Particles") {
+    if (!custom_format && !out_par.part_quantities.empty()) {
+      logg[LOutput].warn()
+          << "\"Quantities\" given in the config, please ensure that "
+             "\"ASCIICustom\" is an enabled format for Particles.";
+    }
     if (out_par.part_only_final == OutputOnlyFinal::Yes) {
       return create_select_format<OscarParticlesAtEventend>(
           modern_format, path, out_par, "particle_lists", custom_format);
@@ -901,6 +908,11 @@ std::unique_ptr<OutputInterface> create_oscar_output(
           modern_format, path, out_par, "particle_lists", custom_format);
     }
   } else if (content == "Collisions") {
+    if (!custom_format && !out_par.coll_quantities.empty()) {
+      logg[LOutput].warn()
+          << "\"Quantities\" given in the config, please ensure that "
+             "\"ASCIICustom\" is an enabled format for Collisions.";
+    }
     if (out_par.coll_printstartend) {
       return create_select_format<OscarInteractions | OscarAtEventstart |
                                   OscarParticlesAtEventend>(
