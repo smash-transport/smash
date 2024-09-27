@@ -27,7 +27,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * New: Implemented `ASCIICustom` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities`.
 
 ### Changed
-* Upgraded to Pythia 8.311
+* Upgraded to Pythia 8.312
 * Moved the `Orientation` section from the `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from `pi/2` to `0`
 * The interface of the `Configuration` class has been totally changed making it use `Key` objects instead of low-level strings
 
