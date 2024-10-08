@@ -1434,17 +1434,18 @@ Experiment<Modus>::Experiment(Configuration &config,
     throw std::invalid_argument("Invalid configuration input file.");
   };
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
-    // Check that if a Quantities line is given in the config, the corresponding
-    // content has the "ASCIICustom" format.
-    if (output_parameters.quantities.count(output_contents[i])) {
-      if (std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
-                    "ASCIICustom") == list_of_formats[i].end()) {
-        logg[LExperiment].fatal()
-            << "Quantities given for " << std::quoted(output_contents[i])
-            << " but \"ASCIICustom\" format not requested. Please include it "
-               "in the config.";
-        abort_because_of_invalid_input_file();
-      }
+    const bool quantities_given =
+        output_parameters.quantities.count(output_contents[i]);
+    const bool custom_requested =
+        std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
+                  "ASCIICustom") != list_of_formats[i].end();
+    if ((quantities_given && !custom_requested) ||
+        (!quantities_given && custom_requested)) {
+      logg[LExperiment].fatal()
+          << "Quantities and \"ASCIICustom\" format for "
+          << std::quoted(output_contents[i])
+          << " not given together. Please fix this in the config.";
+      abort_because_of_invalid_input_file();
     }
 
     if (list_of_formats[i].empty()) {
@@ -1484,11 +1485,13 @@ Experiment<Modus>::Experiment(Configuration &config,
           << "] -> [" << new_formats << "]'";
       list_of_formats[i].assign(tmp_set.begin(), tmp_set.end());
     }
+
     for (const auto &format : list_of_formats[i]) {
       create_output(format, output_contents[i], output_path, output_parameters);
       ++total_number_of_requested_formats;
     }
   }
+
   if (outputs_.size() != total_number_of_requested_formats) {
     logg[LExperiment].fatal()
         << "At least one invalid output format has been provided.";
