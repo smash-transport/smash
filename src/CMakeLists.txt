@@ -15,7 +15,7 @@ include(FindPkgConfig)
 # not test!
 if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
     set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Wfloat-conversion -Winit-self -Wundef -Wcast-align -Wformat=1 -Wold-style-cast -Werror=switch"
+        "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Wfloat-conversion -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch"
     )
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         set(CMAKE_CXX_FLAGS

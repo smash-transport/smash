@@ -29,10 +29,10 @@ OscarOutput<Format, Contents>::OscarOutput(
                     ((Format == OscarFormat1999) ? "1999" : "")),
             "w"},
       formatter_{Format == ASCIICustom         ? quantities
-                 : (Format == OscarFormat2013) ? OSCAR2013_quantities
+                 : (Format == OscarFormat2013) ? OSCAR2013_quantities_
                  : (Format == OscarFormat2013Extended)
-                     ? OSCAR2013Extended_quantities
-                     : OSCAR1999_quantities} {
+                     ? OSCAR2013Extended_quantities_
+                     : OSCAR1999_quantities_} {
   /*!\Userguide
    * \page doxypage_output_oscar
    * OSCAR outputs are a family of ASCII and binary formats that follow
@@ -82,6 +82,10 @@ OscarOutput<Format, Contents>::OscarOutput(
    * The collisions output contains all collisions / decays / box wall crossings
    * and optionally the initial and final configuration.
    */
+  if (Format != ASCIICustom && !quantities.empty()) {
+    throw std::logic_error(
+        "Non-empty Quantities given alongside format other than ASCIICustom.");
+  }
   std::string format_name;
   if (Format == ASCIICustom) {
     format_name = "ASCIICustom";
@@ -101,7 +105,7 @@ OscarOutput<Format, Contents>::OscarOutput(
   } else {
     const std::string &oscar_name =
         name == "particle_lists" ? "final_id_p_x" : name;
-    // This is necessary because OSCAR199A requires
+    // This is necessary because OSCAR1999A requires
     // this particular string for particle output.
 
     std::fprintf(file_.get(), "# %s\n# %s\n# %s\n", format_name.c_str(),
@@ -757,7 +761,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \page doxypage_output_ascii
  * The \c ASCIICustom format follows the general block structure of the \ref
  * doxypage_output_oscar, but offers more flexibility with the particle line
- * quantities written in the file. It is available for the \c Particles and
+ * quantities written in the file. It is available for the \c %Particles and
  * \c Collisions output contents (see \ref doxypage_output), creating files
  * with the extension <em>.dat</em>. This format is useful to decrease
  * storage usage.
@@ -835,7 +839,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
     const ParticleData &data) {
-  std::fprintf(file_.get(), "%s", formatter_.data_line(data).c_str());
+  std::fprintf(file_.get(), "%s\n", formatter_.data_line(data).c_str());
 }
 
 namespace {
@@ -843,7 +847,7 @@ namespace {
  * Helper function that creates the oscar output with the format selected by
  * create_oscar_output (except for dileptons and photons).
  *
- * \tparam Contents Determines what infomration will be written to the output
+ * \tparam Contents Determines what information will be written to the output
  * \param[in] modern_format Use the 1999 or 2013 format
  * \param[in] path Path of output
  * \param[in] out_par Output parameters that hold the output configuration
@@ -860,8 +864,8 @@ std::unique_ptr<OutputInterface> create_select_format(
                                                         : out_par.part_extended;
   if (custom_format) {
     const auto &quantities = (Contents & OscarInteractions)
-                                 ? out_par.coll_quantities
-                                 : out_par.part_quantities;
+                                 ? out_par.quantities.at("Collisions")
+                                 : out_par.quantities.at("Particles");
     return std::make_unique<OscarOutput<ASCIICustom, Contents>>(path, name,
                                                                 quantities);
   } else if (modern_format && extended_format) {
@@ -890,11 +894,6 @@ std::unique_ptr<OutputInterface> create_oscar_output(
   const bool modern_format = (format == "Oscar2013");
   const bool custom_format = (format == "ASCIICustom");
   if (content == "Particles") {
-    if (!custom_format && !out_par.part_quantities.empty()) {
-      logg[LOutput].warn()
-          << "\"Quantities\" given in the config, please ensure that "
-             "\"ASCIICustom\" is an enabled format for Particles.";
-    }
     if (out_par.part_only_final == OutputOnlyFinal::Yes) {
       return create_select_format<OscarParticlesAtEventend>(
           modern_format, path, out_par, "particle_lists", custom_format);
@@ -908,11 +907,6 @@ std::unique_ptr<OutputInterface> create_oscar_output(
           modern_format, path, out_par, "particle_lists", custom_format);
     }
   } else if (content == "Collisions") {
-    if (!custom_format && !out_par.coll_quantities.empty()) {
-      logg[LOutput].warn()
-          << "\"Quantities\" given in the config, please ensure that "
-             "\"ASCIICustom\" is an enabled format for Collisions.";
-    }
     if (out_par.coll_printstartend) {
       return create_select_format<OscarInteractions | OscarAtEventstart |
                                   OscarParticlesAtEventend>(
@@ -932,7 +926,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     } else if (!modern_format && !out_par.dil_extended) {
       return std::make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Dileptons");
-    } else if (!modern_format && out_par.dil_extended) {
+    } else if (!custom_format && !modern_format && out_par.dil_extended) {
       logg[LOutput].warn()
           << "Creating Oscar output: "
           << "There is no extended Oscar1999 (dileptons) format.";
@@ -948,7 +942,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     } else if (!modern_format && !out_par.photons_extended) {
       return std::make_unique<OscarOutput<OscarFormat1999, OscarInteractions>>(
           path, "Photons");
-    } else if (!modern_format && out_par.photons_extended) {
+    } else if (!custom_format && !modern_format && out_par.photons_extended) {
       logg[LOutput].warn()
           << "Creating Oscar output: "
           << "There is no extended Oscar1999 (photons) format.";
@@ -966,7 +960,7 @@ std::unique_ptr<OutputInterface> create_oscar_output(
       return std::make_unique<
           OscarOutput<OscarFormat1999, OscarParticlesIC | OscarAtEventstart>>(
           path, "SMASH_IC");
-    } else if (!modern_format && out_par.ic_extended) {
+    } else if (!custom_format && !modern_format && out_par.ic_extended) {
       logg[LOutput].warn()
           << "Creating Oscar output: "
           << "There is no extended Oscar1999 (initial conditions) format.";

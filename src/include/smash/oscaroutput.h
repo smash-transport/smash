@@ -137,7 +137,14 @@ class OscarOutput : public OutputInterface {
   RenamingFilePtr file_;
 
   /// Formatter of the output
-  OutputFormatter<ASCII> formatter_;
+  OutputFormatter<ToASCII> formatter_;
+
+  /// Quantities output in OSCAR2013 format
+  static const std::vector<std::string> OSCAR2013_quantities_;
+  /// Quantities output in Extended OSCAR2013 format
+  static const std::vector<std::string> OSCAR2013Extended_quantities_;
+  /// Quantities output in OSCAR1999 format
+  static const std::vector<std::string> OSCAR1999_quantities_;
 };
 
 /**
@@ -157,37 +164,43 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     const std::string &format, const std::string &content,
     const std::filesystem::path &path, const OutputParameters &out_par);
 
-/// Quantities output in OSCAR2013 format
-static const std::vector<std::string> OSCAR2013_quantities = {
-    "t", "x", "y", "z", "mass", "p0", "px", "py", "pz", "pdg", "ID", "charge"};
-/// Quantities output in Extended OSCAR2013 format
-static const std::vector<std::string> OSCAR2013Extended_quantities = {
-    "t",
-    "x",
-    "y",
-    "z",
-    "mass",
-    "p0",
-    "px",
-    "py",
-    "pz",
-    "pdg",
-    "ID",
-    "charge",
-    "ncoll",
-    "form_time",
-    "xsecfac",
-    "proc_id_origin",
-    "proc_type_origin",
-    "time_last_coll",
-    "pdg_mother1",
-    "pdg_mother2",
-    "baryon_number",
-    "strangeness",
-    "spin_projection"};
-/// Quantities output in OSCAR1999 format
-static const std::vector<std::string> OSCAR1999_quantities = {
-    "id", "pdg", "0", "px", "py", "pz", "p0", "mass", "x", "y", "z", "t"};
+template <OscarOutputFormat Format, int Contents>
+const std::vector<std::string>
+    OscarOutput<Format, Contents>::OSCAR2013_quantities_ = {
+        "t",  "x",  "y",  "z",   "mass", "p0",
+        "px", "py", "pz", "pdg", "ID",   "charge"};
+
+template <OscarOutputFormat Format, int Contents>
+const std::vector<std::string>
+    OscarOutput<Format, Contents>::OSCAR2013Extended_quantities_ = {
+        "t",
+        "x",
+        "y",
+        "z",
+        "mass",
+        "p0",
+        "px",
+        "py",
+        "pz",
+        "pdg",
+        "ID",
+        "charge",
+        "ncoll",
+        "form_time",
+        "xsecfac",
+        "proc_id_origin",
+        "proc_type_origin",
+        "time_last_coll",
+        "pdg_mother1",
+        "pdg_mother2",
+        "baryon_number",
+        "strangeness",
+        "spin_projection"};
+
+template <OscarOutputFormat Format, int Contents>
+const std::vector<std::string>
+    OscarOutput<Format, Contents>::OSCAR1999_quantities_ = {
+        "id", "pdg", "0", "px", "py", "pz", "p0", "mass", "x", "y", "z", "t"};
 
 // @}
 

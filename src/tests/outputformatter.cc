@@ -16,32 +16,33 @@
 using namespace smash;
 
 TEST(ASCII_converter) {
-  ASCII converter;
+  ToASCII converter;
   // int goes to an string containing int
-  VERIFY(converter(42) == static_cast<std::string>("42"));
+  VERIFY(converter.as_integer(42) == static_cast<std::string>("42"));
   // float precision behaves correctly
-  VERIFY(converter(3.1415, "%.3g") == static_cast<std::string>("3.14"));
-  VERIFY(converter(3.1415, "%.5g") == static_cast<std::string>("3.1415"));
-  VERIFY(converter(3.1415, "%.7g") == static_cast<std::string>("3.1415"));
+  const double pi = 3.1415926535897932384;
+  VERIFY(converter.as_double(pi) == static_cast<std::string>("3.14159"));
+  VERIFY(converter.as_precise_double(pi) ==
+         static_cast<std::string>("3.14159265"));
   // strings (literal and not) behave correctly
   const std::string smash_str{"smash"};
-  VERIFY(converter(smash_str) == smash_str);
-  VERIFY(converter("smash") == smash_str);
+  VERIFY(converter.as_string(smash_str) == smash_str);
+  VERIFY(converter.as_string("smash") == smash_str);
 }
 
 TEST_CATCH(empty_quantities, std::invalid_argument) {
   std::vector<std::string> empty{};
-  OutputFormatter<ASCII> formatter(empty);
+  OutputFormatter<ToASCII> formatter(empty);
 }
 
 TEST_CATCH(invalid_quantity, std::invalid_argument) {
   std::vector<std::string> invalid_quantities = {"gibberish"};
-  OutputFormatter<ASCII> formatter(invalid_quantities);
+  OutputFormatter<ToASCII> formatter(invalid_quantities);
 }
 
 TEST_CATCH(repeated_quantity, std::invalid_argument) {
   std::vector<std::string> repeated_quantities = {"t", "t"};
-  OutputFormatter<ASCII> formatter(repeated_quantities);
+  OutputFormatter<ToASCII> formatter(repeated_quantities);
 }
 
 TEST(valid_line_maker) {
@@ -72,9 +73,21 @@ TEST(valid_line_maker) {
                                                "strangeness",
                                                "spin_projection"};
 
-  OutputFormatter<ASCII> formatter(valid_quantities);
-  std::stringstream correct_line;
+  OutputFormatter<ToASCII> formatter(valid_quantities);
 
+  const auto quantities_line = std::accumulate(
+      std::begin(valid_quantities), std::end(valid_quantities), std::string{},
+      [](const std::string& ss, const std::string& s) {
+        return ss.empty() ? s : ss + " " + s;
+      });
+  VERIFY(quantities_line == formatter.quantities_line());
+
+  std::string units_line{
+      "fm fm fm fm GeV GeV GeV GeV GeV none none e none fm none none none fm "
+      "none none none none none"};
+  VERIFY(units_line == formatter.unit_line());
+
+  std::stringstream correct_line{};
   for (int i = 0; i < 4; ++i) {
     correct_line << p.position()[i] << " ";
   }
@@ -98,11 +111,9 @@ TEST(valid_line_maker) {
   correct_line << p.get_history().p2.string() << " ";
   correct_line << p.pdgcode().baryon_number() << " ";
   correct_line << p.pdgcode().strangeness() << " ";
-  correct_line << p.spin_projection() << "\n";
-  VERIFY(correct_line.str() == formatter.data_line(p));
+  correct_line << p.spin_projection();
 
-  std::string units_line{
-      "fm fm fm fm GeV GeV GeV GeV GeV none none e none fm none none none fm "
-      "none none none none none"};
-  VERIFY(units_line == formatter.unit_line());
+  std::cout << correct_line.str();
+
+  VERIFY(correct_line.str() == formatter.data_line(p));
 }

@@ -79,8 +79,7 @@ struct OutputParameters {
         photons_extended(false),
         ic_extended(false),
         rivet_parameters{},
-        part_quantities{},
-        coll_quantities{} {}
+        quantities{} {}
 
   /// Constructor from configuration
   explicit OutputParameters(Configuration conf) : OutputParameters() {
@@ -113,17 +112,19 @@ struct OutputParameters {
       part_extended = conf.take({"Particles", "Extended"}, false);
       part_only_final =
           conf.take({"Particles", "Only_Final"}, OutputOnlyFinal::Yes);
-      part_quantities =
+      auto part_quantities =
           conf.take({"Particles", "Quantities"},
                     InputKeys::output_particles_quantities.default_value());
+      quantities.insert({"Particles", part_quantities});
     }
 
     if (conf.has_value({"Collisions"})) {
       coll_extended = conf.take({"Collisions", "Extended"}, false);
       coll_printstartend = conf.take({"Collisions", "Print_Start_End"}, false);
-      coll_quantities =
+      auto coll_quantities =
           conf.take({"Collisions", "Quantities"},
                     InputKeys::output_collisions_quantities.default_value());
+      quantities.insert({"Collisions", coll_quantities});
     }
 
     if (conf.has_value({"Dileptons"})) {
@@ -291,11 +292,11 @@ struct OutputParameters {
   /// Rivet specfic parameters
   RivetOutputParameters rivet_parameters;
 
-  /// Quantities to be printed in the particles output
-  std::vector<std::string> part_quantities;
-
-  /// Quantities to be printed in the collisions output
-  std::vector<std::string> coll_quantities;
+  /**
+   * Map of quantities to be printed in the output. Keys are the different
+   * output contents
+   */
+  std::map<std::string, std::vector<std::string>> quantities;
 };
 
 }  // namespace smash

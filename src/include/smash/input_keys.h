@@ -4643,9 +4643,10 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_particles_quantities_,Quantities,list of
    * strings,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>empty list</b><tt>}
    *
-   * &rArr; Used only with the `ASCIICustom` format, ignored otherwise. See \ref
+   * &rArr; If using the `ASCIICustom` format, a non-empty list must be
+   * specified. When given alongside other formats, it is ignored. See \ref
    * doxypage_output_ascii for the possible values.
    */
   /**
@@ -4696,9 +4697,10 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_collisions_quantities_,Quantities,list of
    * strings,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>empty list</b><tt>}
    *
-   * &rArr; Used only with the `ASCIICustom` format, ignored otherwise. See \ref
+   * &rArr; If using the `ASCIICustom` format, a non-empty list must be
+   * specified. When given alongside other formats, it is ignored. See \ref
    * doxypage_output_ascii for the possible values.
    */
   /**

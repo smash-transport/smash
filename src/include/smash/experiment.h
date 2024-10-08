@@ -764,8 +764,11 @@ void Experiment<Modus>::create_output(const std::string &format,
       outputs_.emplace_back(std::make_unique<BinaryOutputInitialConditions>(
           output_path, content, out_par));
     }
-  } else if (format == "Oscar1999" || format == "Oscar2013" ||
-             format == "ASCIICustom") {
+  } else if (format == "Oscar1999" || format == "Oscar2013") {
+    outputs_.emplace_back(
+        create_oscar_output(format, content, output_path, out_par));
+  } else if (format == "ASCIICustom" &&
+             (content == "Particles" || content == "Collisions")) {
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
   } else if (content == "Thermodynamics" && format == "ASCII") {
@@ -1431,6 +1434,19 @@ Experiment<Modus>::Experiment(Configuration &config,
     throw std::invalid_argument("Invalid configuration input file.");
   };
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
+    // Check that if a Quantities line is given in the config, the corresponding
+    // content has the "ASCIICustom" format.
+    if (output_parameters.quantities.count(output_contents[i])) {
+      if (std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
+                    "ASCIICustom") == list_of_formats[i].end()) {
+        logg[LExperiment].fatal()
+            << "Quantities given for " << std::quoted(output_contents[i])
+            << " but \"ASCIICustom\" format not requested. Please include it "
+               "in the config.";
+        abort_because_of_invalid_input_file();
+      }
+    }
+
     if (list_of_formats[i].empty()) {
       logg[LExperiment].fatal()
           << "Empty or unspecified list of formats for "
