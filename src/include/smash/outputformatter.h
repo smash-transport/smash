@@ -33,17 +33,18 @@ struct ToASCII {
    *
    * \param[in] value number to convert
    */
-  type as_integer(const int value) const { return std::to_string(value); }
+  type as_integer(int value) const { return std::to_string(value); }
 
   /**
    * Converts a double with 6 digits of precision.
    *
    * \param[in] value number to convert
    */
-  type as_double(const double value) const {
-    std::ostringstream os{};
-    os << std::setprecision(6) << value;
-    return os.str();
+  type as_double(double value) const {
+    constexpr std::size_t kMaxSize = 20;
+    char buffer[kMaxSize];
+    std::snprintf(buffer, kMaxSize, "%g", value);
+    return buffer;
   }
 
   /**
@@ -51,10 +52,11 @@ struct ToASCII {
    *
    * \param[in] value number to convert
    */
-  type as_precise_double(const double value) const {
-    std::ostringstream os{};
-    os << std::setprecision(9) << value;
-    return os.str();
+  type as_precise_double(double value) const {
+    constexpr std::size_t kMaxSize = 20;
+    char buffer[kMaxSize];
+    std::snprintf(buffer, kMaxSize, "%.9g", value);
+    return buffer;
   }
 
   /**
@@ -67,13 +69,16 @@ struct ToASCII {
 };
 
 /**
- * \tparam Converter format desired for the output.
  * A general formatter used for output purposes, which currently only works for
  * ASCII-based formats. In the future, a Binary converter will be implemented.
  *
  * In case further quantities need to be made outputable, one needs to add them
  * in the constructor with the appropriate getter from ParticleData, as well as
  * insert the proper pair in the units map.
+ *
+ * \tparam Converter format desired for the output. It should be a class with
+ * the same interface as \c ToASCII, the only converter currently implemented,
+ * with a defined \c type and the same methods.
  */
 template <typename Converter,
           std::enable_if_t<std::is_same_v<Converter, ToASCII>, bool> = true>
@@ -205,9 +210,7 @@ class OutputFormatter {
   typename Converter::type data_line(const ParticleData& p) const {
     return std::accumulate(
         std::begin(getters_), std::end(getters_), std::string{},
-        [&](const std::string& ss,
-            const std::function<typename Converter::type(const ParticleData&)>
-                getter) {
+        [&p](const std::string& ss, const auto& getter) {
           return ss.empty() ? getter(p) : ss + " " + getter(p);
         });
   }
@@ -219,9 +222,9 @@ class OutputFormatter {
   typename Converter::type quantities_line() const {
     return std::accumulate(
         std::begin(quantities_), std::end(quantities_), std::string{},
-        [&](const std::string& ss, const std::string& s) {
-          return ss.empty() ? converter_.as_string(s)
-                            : ss + " " + converter_.as_string(s);
+        [this](const std::string& ss, const std::string& s) {
+          return ss.empty() ? this->converter_.as_string(s)
+                            : ss + " " + this->converter_.as_string(s);
         });
   }
 
@@ -232,20 +235,21 @@ class OutputFormatter {
   typename Converter::type unit_line() const {
     return std::accumulate(
         std::begin(quantities_), std::end(quantities_), std::string{},
-        [&](const std::string& ss, const std::string& s) {
-          return ss.empty() ? converter_.as_string(units_.at(s))
-                            : ss + " " + converter_.as_string(units_.at(s));
+        [this](const std::string& ss, const std::string& s) {
+          return ss.empty()
+                     ? this->converter_.as_string(units_.at(s))
+                     : ss + " " + this->converter_.as_string(units_.at(s));
         });
   }
 
  private:
-  /// Desired format for data conversion. Currently only ASCII is available.
+  /// Member to convert data into the correct output format.
   Converter converter_{};
 
   /// List of quantities to be written.
   std::vector<std::string> quantities_{};
 
-  /// List of getters for the corresponding quantities.
+  /// List of getters to extract output data from the `ParticleData` object.
   std::vector<std::function<typename Converter::type(const ParticleData&)>>
       getters_{};
 

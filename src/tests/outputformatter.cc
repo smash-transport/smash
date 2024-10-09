@@ -18,12 +18,11 @@ using namespace smash;
 TEST(ASCII_converter) {
   ToASCII converter;
   // int goes to an string containing int
-  VERIFY(converter.as_integer(42) == static_cast<std::string>("42"));
+  VERIFY(converter.as_integer(42) == std::string{"42"});
   // float precision behaves correctly
   const double pi = 3.1415926535897932384;
-  VERIFY(converter.as_double(pi) == static_cast<std::string>("3.14159"));
-  VERIFY(converter.as_precise_double(pi) ==
-         static_cast<std::string>("3.14159265"));
+  VERIFY(converter.as_double(pi) == std::string{"3.14159"});
+  VERIFY(converter.as_precise_double(pi) == std::string{"3.14159265"});
   // strings (literal and not) behave correctly
   const std::string smash_str{"smash"};
   VERIFY(converter.as_string(smash_str) == smash_str);

@@ -28,11 +28,12 @@ OscarOutput<Format, Contents>::OscarOutput(
       file_{path / (name + ((Format == ASCIICustom) ? ".dat" : ".oscar") +
                     ((Format == OscarFormat1999) ? "1999" : "")),
             "w"},
-      formatter_{Format == ASCIICustom         ? quantities
-                 : (Format == OscarFormat2013) ? OSCAR2013_quantities_
+      formatter_{Format == ASCIICustom ? quantities
+                 : (Format == OscarFormat2013)
+                     ? OutputDefaultQuantities::oscar2013
                  : (Format == OscarFormat2013Extended)
-                     ? OSCAR2013Extended_quantities_
-                     : OSCAR1999_quantities_} {
+                     ? OutputDefaultQuantities::oscar2013extended
+                     : OutputDefaultQuantities::oscar1999} {
   /*!\Userguide
    * \page doxypage_output_oscar
    * OSCAR outputs are a family of ASCII and binary formats that follow

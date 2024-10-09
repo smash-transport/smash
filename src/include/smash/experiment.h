@@ -1434,17 +1434,17 @@ Experiment<Modus>::Experiment(Configuration &config,
     throw std::invalid_argument("Invalid configuration input file.");
   };
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
-    const bool quantities_given =
-        output_parameters.quantities.count(output_contents[i]);
+    const bool quantities_given_nonempty =
+        output_parameters.quantities.count(output_contents[i]) &&
+        !output_parameters.quantities.at(output_contents[i]).empty();
     const bool custom_requested =
         std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
                   "ASCIICustom") != list_of_formats[i].end();
-    if ((quantities_given && !custom_requested) ||
-        (!quantities_given && custom_requested)) {
+    if ((quantities_given_nonempty && !custom_requested) ||
+        (!quantities_given_nonempty && custom_requested)) {
       logg[LExperiment].fatal()
-          << "Quantities and \"ASCIICustom\" format for "
-          << std::quoted(output_contents[i])
-          << " not given together. Please fix this in the config.";
+          << "Non-empty Quantities and \"ASCIICustom\" format for "
+          << std::quoted(output_contents[i]) << " not given together.";
       abort_because_of_invalid_input_file();
     }
 
