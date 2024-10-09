@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "configuration.h"
+#include "sha256.h"
 
 #ifndef SRC_INCLUDE_SMASH_LIBRARY_H_
 #define SRC_INCLUDE_SMASH_LIBRARY_H_
@@ -52,6 +53,11 @@ void initialize_particles_decays_and_tabulations(
     Configuration &configuration, const std::string &version,
     const std::string &tabulations_dir = {});
 
+const sha256::Hash initialize_particles_decays_and_return_hash(
+    Configuration &configuration, const std::string &version);
+
+void initialize_tabulations(const sha256::Hash& hash,
+    const std::string &tabulations_dir);
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_LIBRARY_H_

@@ -19,6 +19,7 @@
 #include "smash/logging.h"
 #include "smash/setup_particles_decaymodes.h"
 #include "smash/stringfunctions.h"
+#include "smash/sha256.h"
 
 namespace smash {
 static constexpr int LMain = LogArea::Main::id;
@@ -46,6 +47,12 @@ Configuration setup_config_and_logging(
 void initialize_particles_decays_and_tabulations(
     Configuration &configuration, const std::string &version,
     const std::string &tabulations_dir) {
+  const auto hash = initialize_particles_decays_and_return_hash(configuration, version);
+  initialize_tabulations(hash, tabulations_dir);
+}
+
+const sha256::Hash initialize_particles_decays_and_return_hash(
+    Configuration &configuration, const std::string &version) {
   logg[LMain].trace(SMASH_SOURCE_LOCATION,
                     " create ParticleType and DecayModes");
   const std::string particles_string = configuration.take(InputKeys::particles);
@@ -62,7 +69,11 @@ void initialize_particles_decays_and_tabulations(
   hash_context.update(decaymodes_string);
   const auto hash = hash_context.finalize();
   logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash);
+  return hash;
+}
 
+void initialize_tabulations(const sha256::Hash& hash,
+    const std::string &tabulations_dir) {
   logg[LMain].info("Tabulating cross section integrals...");
   std::filesystem::path tabulations_path(tabulations_dir);
   if (!tabulations_path.empty()) {
