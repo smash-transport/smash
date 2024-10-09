@@ -767,6 +767,10 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (format == "Oscar1999" || format == "Oscar2013") {
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
+  } else if (format == "ASCIICustom" &&
+             (content == "Particles" || content == "Collisions")) {
+    outputs_.emplace_back(
+        create_oscar_output(format, content, output_path, out_par));
   } else if (content == "Thermodynamics" && format == "ASCII") {
     outputs_.emplace_back(
         std::make_unique<ThermodynamicOutput>(output_path, content, out_par));
@@ -1198,17 +1202,18 @@ Experiment<Modus>::Experiment(Configuration &config,
    *
    * - \b Particles  List of particles at regular time intervals in the
    *                 computational frame or (optionally) only at the event end.
-   *   - Available formats: \ref doxypage_output_oscar_particles,
-   *                        \ref doxypage_output_binary, \ref
-   *                        doxypage_output_root, \ref doxypage_output_vtk, \ref
-   *                        doxypage_output_hepmc
+   *   - Available formats: \ref doxypage_output_oscar_particles, \ref
+   *                        doxypage_output_ascii, \ref doxypage_output_binary,
+   *                        \ref doxypage_output_root, \ref doxypage_output_vtk,
+   *                        \ref doxypage_output_hepmc
    * - \b Collisions List of interactions: collisions, decays, box wall
    *                 crossings and forced thermalizations. Information about
    *                 incoming, outgoing particles and the interaction itself
    *                 is printed out.
    *   - Available formats: \ref doxypage_output_oscar_collisions, \ref
-   *                        doxypage_output_binary, \ref doxypage_output_root,
-   *                        \ref doxypage_output_hepmc
+   *                        doxypage_output_ascii, \ref doxypage_output_binary,
+   *                        \ref doxypage_output_root, \ref
+   *                        doxypage_output_hepmc
    * - \b Dileptons  Special dilepton output, see
    *                 \ref doxypage_output_dileptons.
    *   - Available formats: \ref doxypage_output_oscar_collisions,
@@ -1247,6 +1252,9 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   - For "Collisions" content: \ref doxypage_output_oscar_collisions
    *   - General block structure of OSCAR formats:
    *     \ref doxypage_output_oscar
+   * - \b "ASCIICustom" - uses the OSCAR block structure, but with an
+   *                      user-defined set of columns: \ref
+   *                      doxypage_output_ascii
    * - \b "Binary" - binary, not human-readable output
    *   - Faster to read and write than text outputs
    *   - Saves coordinates and momenta with the full double precision
@@ -1426,6 +1434,20 @@ Experiment<Modus>::Experiment(Configuration &config,
     throw std::invalid_argument("Invalid configuration input file.");
   };
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
+    const bool quantities_given_nonempty =
+        output_parameters.quantities.count(output_contents[i]) &&
+        !output_parameters.quantities.at(output_contents[i]).empty();
+    const bool custom_requested =
+        std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
+                  "ASCIICustom") != list_of_formats[i].end();
+    if ((quantities_given_nonempty && !custom_requested) ||
+        (!quantities_given_nonempty && custom_requested)) {
+      logg[LExperiment].fatal()
+          << "Non-empty Quantities and \"ASCIICustom\" format for "
+          << std::quoted(output_contents[i]) << " not given together.";
+      abort_because_of_invalid_input_file();
+    }
+
     if (list_of_formats[i].empty()) {
       logg[LExperiment].fatal()
           << "Empty or unspecified list of formats for "
@@ -1463,11 +1485,13 @@ Experiment<Modus>::Experiment(Configuration &config,
           << "] -> [" << new_formats << "]'";
       list_of_formats[i].assign(tmp_set.begin(), tmp_set.end());
     }
+
     for (const auto &format : list_of_formats[i]) {
       create_output(format, output_contents[i], output_path, output_parameters);
       ++total_number_of_requested_formats;
     }
   }
+
   if (outputs_.size() != total_number_of_requested_formats) {
     logg[LExperiment].fatal()
         << "At least one invalid output format has been provided.";

@@ -68,7 +68,7 @@
         \page doxypage_input_conf_collision_term Collision term
             <div class="invisible-content">
             \subpage doxypage_input_conf_ct_pauliblocker
-            \subpage doxypage_input_conf_ct_string_transition 
+            \subpage doxypage_input_conf_ct_string_transition
             \subpage doxypage_input_conf_ct_string_parameters
             \subpage doxypage_input_conf_ct_dileptons
             \subpage doxypage_input_conf_ct_photons
@@ -132,6 +132,7 @@
     \subpage doxypage_output_initial_conditions
     \subpage doxypage_output_rivet
     \subpage doxypage_output_oscar
+    \subpage doxypage_output_ascii
     \subpage doxypage_output_binary
     \subpage doxypage_output_root
     \subpage doxypage_output_vtk
@@ -158,6 +159,7 @@
             \subpage doxypage_output_oscar_particles_process_types
             </div>
             \page doxypage_output_oscar_particles_process_types Process types
+    \page doxypage_output_ascii Custom ASCII format
     \page doxypage_output_binary Binary format
     \page doxypage_output_root ROOT format
     \page doxypage_output_vtk VTK format

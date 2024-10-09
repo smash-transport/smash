@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022
+ *    Copyright (c) 2014-2020,2022,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,11 +12,13 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "file.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"
+#include "smash/outputformatter.h"
 
 namespace smash {
 
@@ -29,7 +31,8 @@ namespace smash {
 enum OscarOutputFormat {
   OscarFormat2013,
   OscarFormat2013Extended,
-  OscarFormat1999
+  OscarFormat1999,
+  ASCIICustom
 };
 
 /**
@@ -69,8 +72,10 @@ class OscarOutput : public OutputInterface {
    *
    * \param[in] path Output path.
    * \param[in] name Name of the ouput.
+   * \param[in] quantities List of quantities present in the output file.
    */
-  OscarOutput(const std::filesystem::path &path, const std::string &name);
+  OscarOutput(const std::filesystem::path &path, const std::string &name,
+              const std::vector<std::string> quantities = {});
 
   /**
    * Writes the initial particle information of an event to the oscar output.
@@ -130,6 +135,9 @@ class OscarOutput : public OutputInterface {
 
   /// Full filepath of the output file.
   RenamingFilePtr file_;
+
+  /// Formatter of the output
+  OutputFormatter<ToASCII> formatter_;
 };
 
 /**

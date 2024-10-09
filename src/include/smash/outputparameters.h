@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2017-2023
+ *    Copyright (c) 2017-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -16,6 +16,7 @@
 #include "cxx17compat.h"
 #include "density.h"
 #include "forwarddeclarations.h"
+#include "input_keys.h"
 #include "logging.h"
 
 namespace smash {
@@ -77,7 +78,8 @@ struct OutputParameters {
         dil_extended(false),
         photons_extended(false),
         ic_extended(false),
-        rivet_parameters{} {}
+        rivet_parameters{},
+        quantities{} {}
 
   /// Constructor from configuration
   explicit OutputParameters(Configuration conf) : OutputParameters() {
@@ -110,11 +112,19 @@ struct OutputParameters {
       part_extended = conf.take({"Particles", "Extended"}, false);
       part_only_final =
           conf.take({"Particles", "Only_Final"}, OutputOnlyFinal::Yes);
+      auto part_quantities =
+          conf.take({"Particles", "Quantities"},
+                    InputKeys::output_particles_quantities.default_value());
+      quantities.insert({"Particles", part_quantities});
     }
 
     if (conf.has_value({"Collisions"})) {
       coll_extended = conf.take({"Collisions", "Extended"}, false);
       coll_printstartend = conf.take({"Collisions", "Print_Start_End"}, false);
+      auto coll_quantities =
+          conf.take({"Collisions", "Quantities"},
+                    InputKeys::output_collisions_quantities.default_value());
+      quantities.insert({"Collisions", coll_quantities});
     }
 
     if (conf.has_value({"Dileptons"})) {
@@ -281,6 +291,50 @@ struct OutputParameters {
 
   /// Rivet specfic parameters
   RivetOutputParameters rivet_parameters;
+
+  /**
+   * Map of quantities to be printed in the output. Keys are the different
+   * output contents
+   */
+  std::map<std::string, std::vector<std::string>> quantities;
+};
+
+/**
+ * Struct that holds quantities required by default output standards.
+ */
+struct OutputDefaultQuantities {
+  /// Quantities output in OSCAR2013 format
+  inline static const std::vector<std::string> oscar2013 = {
+      "t",  "x",  "y",  "z",   "mass", "p0",
+      "px", "py", "pz", "pdg", "ID",   "charge"};
+  /// Quantities output in Extended OSCAR2013 format
+  inline static const std::vector<std::string> oscar2013extended = {
+      "t",
+      "x",
+      "y",
+      "z",
+      "mass",
+      "p0",
+      "px",
+      "py",
+      "pz",
+      "pdg",
+      "ID",
+      "charge",
+      "ncoll",
+      "form_time",
+      "xsecfac",
+      "proc_id_origin",
+      "proc_type_origin",
+      "time_last_coll",
+      "pdg_mother1",
+      "pdg_mother2",
+      "baryon_number",
+      "strangeness",
+      "spin_projection"};
+  /// Quantities output in OSCAR1999 format
+  inline static const std::vector<std::string> oscar1999 = {
+      "id", "pdg", "0", "px", "py", "pz", "p0", "mass", "x", "y", "z", "t"};
 };
 
 }  // namespace smash
