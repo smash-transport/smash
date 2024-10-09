@@ -304,11 +304,11 @@ struct OutputParameters {
  */
 struct OutputDefaultQuantities {
   /// Quantities output in OSCAR2013 format
-  static inline const std::vector<std::string> oscar2013 = {
+  inline static const std::vector<std::string> oscar2013 = {
       "t",  "x",  "y",  "z",   "mass", "p0",
       "px", "py", "pz", "pdg", "ID",   "charge"};
   /// Quantities output in Extended OSCAR2013 format
-  static inline const std::vector<std::string> oscar2013extended = {
+  inline static const std::vector<std::string> oscar2013extended = {
       "t",
       "x",
       "y",
@@ -333,7 +333,7 @@ struct OutputDefaultQuantities {
       "strangeness",
       "spin_projection"};
   /// Quantities output in OSCAR1999 format
-  static inline const std::vector<std::string> oscar1999 = {
+  inline static const std::vector<std::string> oscar1999 = {
       "id", "pdg", "0", "px", "py", "pz", "p0", "mass", "x", "y", "z", "t"};
 };
 

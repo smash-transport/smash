@@ -38,25 +38,33 @@ struct ToASCII {
   /**
    * Converts a double with 6 digits of precision.
    *
+   * \note The usage of \ std::sprintf over \c std::ostringstream is
+   * because of performance reasons (in C++20 this will be replaced
+   * with \c std::format which is even better). The returned string is
+   * constructed from the buffer in a way to exclude the terminating
+   * null character from the buffer.
+   *
    * \param[in] value number to convert
    */
-  type as_double(double value) const {
-    constexpr std::size_t kMaxSize = 20;
-    char buffer[kMaxSize];
-    std::snprintf(buffer, kMaxSize, "%g", value);
-    return buffer;
+  type as_double(double value) {
+    char buffer[13];
+    const auto length =
+        std::sprintf(buffer, "%g", value);  // NOLINT(runtime/printf)
+    return std::string{buffer, buffer + length};
   }
 
   /**
    * Converts a double with 9 digits of precision.
    *
+   * See note in \ref as_double.
+   *
    * \param[in] value number to convert
    */
-  type as_precise_double(double value) const {
-    constexpr std::size_t kMaxSize = 20;
-    char buffer[kMaxSize];
-    std::snprintf(buffer, kMaxSize, "%.9g", value);
-    return buffer;
+  type as_precise_double(double value) {
+    char buffer[16];
+    const auto length =
+        std::sprintf(buffer, "%.9g", value);  // NOLINT(runtime/printf)
+    return std::string{buffer, buffer + length};
   }
 
   /**
