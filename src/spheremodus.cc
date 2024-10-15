@@ -57,8 +57,8 @@ SphereModus::SphereModus(Configuration modus_config,
       /* Note that it is crucial not to take other keys from the Jet section
        * before Jet_PDG, since we want here the take to throw in case the user
        * had a Jet section without the mandatory Jet_PDG key. If all other keys
-       * are taken first, the section is removed from modus_config, because
-       * empty, and that has_value({"Sphere", "Jet"}) method would return false.
+       * are taken first, the section is removed from the config because empty,
+       * and has_section(InputSections::m_s_jet) method would return false.
        */
       jet_pdg_(modus_config.has_section(InputSections::m_s_jet)
                    ? make_optional<PdgCode>(
