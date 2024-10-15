@@ -38,32 +38,48 @@ struct ToASCII {
   /**
    * Converts a double with 6 digits of precision.
    *
-   * \note The usage of \ std::sprintf over \c std::ostringstream is
-   * because of performance reasons (in C++20 this will be replaced
-   * with \c std::format which is even better). The returned string is
-   * constructed from the buffer in a way to exclude the terminating
-   * null character from the buffer.
+   * \note The usage of \c std::snprintf over \c std::ostringstream is because
+   * of performance reasons (in C++20 this will be replaced with \c std::format
+   * which is even better). The returned string is constructed from the buffer
+   * in a way to exclude the terminating null character from the buffer. The
+   * hard-coded buffer size should fit any number, but a couple of assert are
+   * used to possibly investigate unexpected behaviour.
+   *
+   * \warning Since the buffer size is needed twice, it makes sense to store it
+   * in a variable. However, cpplint complains if the variable name is not
+   * starting with \c k followed by CamelCase.
    *
    * \param[in] value number to convert
    */
   type as_double(double value) {
-    char buffer[13];
-    const auto length =
-        std::sprintf(buffer, "%g", value);  // NOLINT(runtime/printf)
+    constexpr size_t kBufferSize = 13;
+    char buffer[kBufferSize];
+    const auto length = std::snprintf(buffer, kBufferSize, "%g", value);
+    assert(length < kBufferSize);
+    assert(length > 0);
     return std::string{buffer, buffer + length};
   }
 
   /**
    * Converts a double with 9 digits of precision.
    *
-   * See note in \ref as_double.
+   * \see \c as_double for further information.
+   *
+   * \note The duplication of the code of the \c as_double method is done on
+   * purpose as naively extracting a function passing the \c std::snprintf
+   * format string as parameter would trigger a warning in compilation (the
+   * format has to be a literal in order to be checked by the compiler at
+   * compile time) and the effort to avoid this is not worth now, especially
+   * since this code will be changed anyhow when using C++20.
    *
    * \param[in] value number to convert
    */
   type as_precise_double(double value) {
-    char buffer[16];
-    const auto length =
-        std::sprintf(buffer, "%.9g", value);  // NOLINT(runtime/printf)
+    constexpr size_t kBufferSize = 16;
+    char buffer[kBufferSize];
+    const auto length = std::snprintf(buffer, kBufferSize, "%.9g", value);
+    assert(length < kBufferSize);
+    assert(length > 0);
     return std::string{buffer, buffer + length};
   }
 
