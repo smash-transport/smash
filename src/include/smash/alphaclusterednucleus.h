@@ -72,9 +72,9 @@ class AlphaClusteredNucleus : public Nucleus {
    */
   std::vector<ThreeVector> tetrahedron_vertex_positions_ = {
       {1, 0.0, 0.0},
-      {-1.0 / 3, sqrt(8) / 3, 0.0},
-      {-1.0 / 3, -sqrt(8) / 6, sqrt(24) / 6},
-      {-1.0 / 3, -sqrt(8) / 6, -sqrt(24) / 6}};
+      {-1.0 / 3, std::sqrt(8) / 3, 0.0},
+      {-1.0 / 3, -std::sqrt(8) / 6, std::sqrt(24) / 6},
+      {-1.0 / 3, -std::sqrt(8) / 6, -std::sqrt(24) / 6}};
 
   /**
    * An index to iterate through the vertices of the tetrahedron. Used in the
