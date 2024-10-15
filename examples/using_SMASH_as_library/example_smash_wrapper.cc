@@ -22,6 +22,7 @@ smash.cc, Experiment::run() and the functions library.h.
 #include "smash/config.h"
 #include "smash/experiment.h"
 #include "smash/forwarddeclarations.h"
+#include "smash/input_keys.h"
 #include "smash/library.h"
 
 int main() {
@@ -47,8 +48,8 @@ int main() {
                                                   decaymodes_file);
 
     // 2) Do additional configurations e.g. set a custom end time by
-    float new_end_time = 180.0;
-    config.set_value({"General", "End_Time"}, new_end_time);
+    double new_end_time = 180.0;
+    config.set_value(smash::InputKeys::gen_endTime, new_end_time);
     // ...
 
     std::string smash_version = SMASH_VERSION;

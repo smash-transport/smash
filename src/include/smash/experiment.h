@@ -886,56 +886,50 @@ Experiment<Modus>::Experiment(Configuration &config,
          * the ScatterActionsFinderParameters member. Here that key is taken
          * from the main configuration and put there back after the "Collider"
          * section is extracted. If this were not done in this way, the
-         * sub-configuration given to ColliderModus would be deleted at the end
-         * of its constructor not empty and this would throw an exception.*/
-        const std::initializer_list<const char *> key_labels = {
-            "Modi", "Collider", "Collisions_Within_Nucleus"};
-        const bool restore_key = config.has_value(key_labels);
-        const bool temporary_taken_key = config.take(key_labels, false);
-        auto modus_config = config.extract_sub_configuration({"Modi"});
+         * sub-configuration given to ColliderModus would be deleted not empty
+         * at the end of its constructor and this would throw an exception.*/
+        auto &key = InputKeys::modi_collider_collisionWithinNucleus;
+        const bool restore_key = config.has_value(key);
+        const bool temporary_taken_key = config.take(key);
+        auto modus_config =
+            config.extract_complete_sub_configuration(InputSections::modi);
         if (restore_key) {
-          config.set_value(key_labels, temporary_taken_key);
+          config.set_value(key, temporary_taken_key);
         }
         return Modus{std::move(modus_config), parameters_};
       })),
       ensembles_(parameters_.n_ensembles),
-      end_time_(config.take({"General", "End_Time"})),
+      end_time_(config.take(InputKeys::gen_endTime)),
       delta_time_startup_(parameters_.labclock->timestep_duration()),
-      force_decays_(
-          config.take({"Collision_Term", "Force_Decays_At_End"}, true)),
-      use_grid_(config.take({"General", "Use_Grid"}, true)),
-      metric_(
-          config.take({"General", "Metric_Type"}, ExpansionMode::NoExpansion),
-          config.take({"General", "Expansion_Rate"}, 0.1)),
-      dileptons_switch_(
-          config.take({"Collision_Term", "Dileptons", "Decays"}, false)),
-      photons_switch_(config.take(
-          {"Collision_Term", "Photons", "2to2_Scatterings"}, false)),
+      force_decays_(config.take(InputKeys::collTerm_forceDecaysAtEnd)),
+      use_grid_(config.take(InputKeys::gen_useGrid)),
+      metric_(config.take(InputKeys::gen_metricType),
+              config.take(InputKeys::gen_expansionRate)),
+      dileptons_switch_(config.take(InputKeys::collTerm_dileptons_decays)),
+      photons_switch_(
+          config.take(InputKeys::collTerm_photons_twoToTwoScatterings)),
       bremsstrahlung_switch_(
-          config.take({"Collision_Term", "Photons", "Bremsstrahlung"}, false)),
-      IC_output_switch_(config.has_value({"Output", "Initial_Conditions"})),
-      time_step_mode_(
-          config.take({"General", "Time_Step_Mode"}, TimeStepMode::Fixed)) {
+          config.take(InputKeys::collTerm_photons_bremsstrahlung)),
+      IC_output_switch_(config.has_section(InputSections::o_initialConditions)),
+      time_step_mode_(config.take(InputKeys::gen_timeStepMode)) {
   logg[LExperiment].info() << *this;
 
-  const bool user_wants_nevents = config.has_value({"General", "Nevents"});
+  const bool user_wants_nevents = config.has_value(InputKeys::gen_nevents);
   const bool user_wants_min_nonempty =
-      config.has_value({"General", "Minimum_Nonempty_Ensembles", "Number"}) ||
-      config.has_value(
-          {"General", "Minimum_Nonempty_Ensembles", "Maximum_Ensembles_Run"});
+      config.has_section(InputSections::g_minEnsembles);
   if (user_wants_nevents == user_wants_min_nonempty) {
     throw std::invalid_argument(
         "Please specify either Nevents or Minimum_Nonempty_Ensembles.");
   }
   if (user_wants_nevents) {
     event_counting_ = EventCounting::FixedNumber;
-    nevents_ = config.take({"General", "Nevents"});
+    nevents_ = config.take(InputKeys::gen_nevents);
   } else {
     event_counting_ = EventCounting::MinimumNonEmpty;
     minimum_nonempty_ensembles_ =
-        config.take({"General", "Minimum_Nonempty_Ensembles", "Number"});
-    int max_ensembles = config.take(
-        {"General", "Minimum_Nonempty_Ensembles", "Maximum_Ensembles_Run"});
+        config.take(InputKeys::gen_minNonEmptyEnsembles_number);
+    int max_ensembles =
+        config.take(InputKeys::gen_minNonEmptyEnsembles_maximumEnsembles);
     max_events_ = numeric_cast<int>(std::ceil(
         static_cast<double>(max_ensembles) / parameters_.n_ensembles));
   }
@@ -974,10 +968,8 @@ Experiment<Modus>::Experiment(Configuration &config,
   logg[LExperiment].info("Using ", parameters_.n_ensembles,
                          " parallel ensembles.");
 
-  if (modus_.is_box() &&
-      config.read({"Collision_Term", "Total_Cross_Section_Strategy"},
-                  InputKeys::collTerm_totXsStrategy.default_value()) !=
-          TotalCrossSectionStrategy::BottomUp) {
+  if (modus_.is_box() && config.read(InputKeys::collTerm_totXsStrategy) !=
+                             TotalCrossSectionStrategy::BottomUp) {
     logg[LExperiment].warn(
         "To preserve detailed balance in a box simulation, it is recommended "
         "to use the bottom-up strategy for evaluating total cross sections.\n"
@@ -985,10 +977,8 @@ Experiment<Modus>::Experiment(Configuration &config,
         "in your configuration file:\n"
         "   Total_Cross_Section_Strategy: \"BottomUp\"");
   }
-  if (modus_.is_box() &&
-      config.read({"Collision_Term", "Pseudoresonance"},
-                  InputKeys::collTerm_pseudoresonance.default_value()) !=
-          PseudoResonance::None) {
+  if (modus_.is_box() && config.read(InputKeys::collTerm_pseudoresonance) !=
+                             PseudoResonance::None) {
     logg[LExperiment].warn(
         "To preserve detailed balance in a box simulation, it is recommended "
         "to not include the pseudoresonances,\nas they artificially increase "
@@ -1005,9 +995,9 @@ Experiment<Modus>::Experiment(Configuration &config,
    *       the configuration temporary object will be destroyed not empty, hence
    *       throwing an exception.
    */
-  ParticleData::formation_power_ = config.take(
-      {"Collision_Term", "String_Parameters", "Power_Particle_Formation"},
-      modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
+  ParticleData::formation_power_ =
+      config.take(InputKeys::collTerm_stringParam_powerParticleFormation,
+                  modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
 
   // create finders
   if (dileptons_switch_) {
@@ -1015,7 +1005,7 @@ Experiment<Modus>::Experiment(Configuration &config,
   }
   if (photons_switch_ || bremsstrahlung_switch_) {
     n_fractional_photons_ =
-        config.take({"Collision_Term", "Photons", "Fractional_Photons"}, 100);
+        config.take(InputKeys::collTerm_photons_fractionalPhotons);
   }
   if (parameters_.two_to_one) {
     if (parameters_.res_lifetime_factor < 0.) {
@@ -1032,7 +1022,7 @@ Experiment<Modus>::Experiment(Configuration &config,
     action_finders_.emplace_back(std::make_unique<DecayActionsFinder>(
         parameters_.res_lifetime_factor, parameters_.do_weak_decays));
   }
-  bool no_coll = config.take({"Collision_Term", "No_Collisions"}, false);
+  bool no_coll = config.take(InputKeys::collTerm_noCollisions);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
        parameters_.included_multi.any() || parameters_.strings_switch) &&
       !no_coll) {
@@ -1068,10 +1058,8 @@ Experiment<Modus>::Experiment(Configuration &config,
      * constructor of ColliderModus, and the logic here will be removed.
      */
     double proper_time = std::numeric_limits<double>::quiet_NaN();
-    if (config.has_value({"Output", "Initial_Conditions", "Proper_Time"})) {
-      // Read in proper time from config
-      proper_time =
-          config.take({"Output", "Initial_Conditions", "Proper_Time"});
+    if (config.has_value(InputKeys::output_initialConditions_properTime)) {
+      proper_time = config.take(InputKeys::output_initialConditions_properTime);
       validate_duplicate_IC_config(proper_time, modus_.proper_time(),
                                    "Proper_Time");
     } else if (modus_.proper_time().has_value()) {
@@ -1079,8 +1067,9 @@ Experiment<Modus>::Experiment(Configuration &config,
     } else {
       double lower_bound =
           modus_.lower_bound().has_value() ? modus_.lower_bound().value() : 0.5;
-      lower_bound = config.take({"Output", "Initial_Conditions", "Lower_Bound"},
-                                lower_bound);
+      if (config.has_value(InputKeys::output_initialConditions_lowerBound))
+        lower_bound =
+            config.take(InputKeys::output_initialConditions_lowerBound);
       validate_duplicate_IC_config(lower_bound, modus_.lower_bound(),
                                    "Lower_Bound");
 
@@ -1098,9 +1087,9 @@ Experiment<Modus>::Experiment(Configuration &config,
 
     double rapidity_cut =
         modus_.rapidity_cut().has_value() ? modus_.rapidity_cut().value() : 0.0;
-    if (config.has_value({"Output", "Initial_Conditions", "Rapidity_Cut"})) {
+    if (config.has_value(InputKeys::output_initialConditions_rapidityCut)) {
       rapidity_cut =
-          config.take({"Output", "Initial_Conditions", "Rapidity_Cut"});
+          config.take(InputKeys::output_initialConditions_rapidityCut);
       validate_duplicate_IC_config(rapidity_cut, modus_.rapidity_cut(),
                                    "Rapidity_Cut");
     }
@@ -1122,8 +1111,8 @@ Experiment<Modus>::Experiment(Configuration &config,
     }
 
     double pT_cut = modus_.pT_cut().has_value() ? modus_.pT_cut().value() : 0.0;
-    if (config.has_value({"Output", "Initial_Conditions", "pT_Cut"})) {
-      pT_cut = config.take({"Output", "Initial_Conditions", "pT_Cut"});
+    if (config.has_value(InputKeys::output_initialConditions_pTCut)) {
+      pT_cut = config.take(InputKeys::output_initialConditions_pTCut);
       validate_duplicate_IC_config(pT_cut, modus_.pT_cut(), "pT_Cut");
     }
     if (pT_cut < 0.0) {
@@ -1162,10 +1151,11 @@ Experiment<Modus>::Experiment(Configuration &config,
                                                          rapidity_cut, pT_cut));
   }
 
-  if (config.has_value({"Collision_Term", "Pauli_Blocking"})) {
+  if (config.has_section(InputSections::c_pauliBlocking)) {
     logg[LExperiment].info() << "Pauli blocking is ON.";
     pauli_blocker_ = std::make_unique<PauliBlocker>(
-        config.extract_sub_configuration({"Collision_Term", "Pauli_Blocking"}),
+        config.extract_complete_sub_configuration(
+            InputSections::c_pauliBlocking),
         parameters_);
   }
 
@@ -1390,14 +1380,19 @@ Experiment<Modus>::Experiment(Configuration &config,
   // create outputs
   logg[LExperiment].trace(SMASH_SOURCE_LOCATION,
                           " create OutputInterface objects");
-  dens_type_ = config.take({"Output", "Density_Type"}, DensityType::None);
+  dens_type_ = config.take(InputKeys::output_densityType);
   logg[LExperiment].debug()
       << "Density type printed to headers: " << dens_type_;
 
   /* Parse configuration about output contents and formats, doing all logical
-   * checks about specified formats, creating all needed output objects. */
+   * checks about specified formats, creating all needed output objects. Note
+   * that we first extract the output sub configuration without the "Output:"
+   * enclosing section to easily get all output contents and then we reintroduce
+   * it for the actual parsing (remember we parse database keys which have
+   * labels from the top-level only).
+   */
   auto output_conf = config.extract_sub_configuration(
-      {"Output"}, Configuration::GetEmpty::Yes);
+      InputSections::output, Configuration::GetEmpty::Yes);
   if (output_path == "") {
     throw std::invalid_argument(
         "Invalid empty output path provided to Experiment constructor.");
@@ -1412,27 +1407,28 @@ Experiment<Modus>::Experiment(Configuration &config,
                             "exists, but it is not a directory.");
     throw std::logic_error("Attempt to use invalid existing path.");
   }
+  const std::vector<std::string> output_contents =
+      output_conf.list_upmost_nodes();
   if (output_conf.is_empty()) {
     logg[LExperiment].warn() << "No \"Output\" section found in the input "
                                 "file. No output file will be produced.";
+  } else {
+    output_conf.enclose_into_section(InputSections::output);
   }
-  const std::vector<std::string> output_contents =
-      output_conf.list_upmost_nodes();
   std::vector<std::vector<std::string>> list_of_formats(output_contents.size());
   std::transform(
       output_contents.cbegin(), output_contents.cend(), list_of_formats.begin(),
       [&output_conf](std::string content) -> std::vector<std::string> {
-        /* Use here a default value for "Format" even though it is a required
-         * key, just because then here below the error for the user is more
-         * informative, if the key was not given in the input file. */
-        return output_conf.take({content.c_str(), "Format"},
-                                std::vector<std::string>{});
+        /* Note that the "Format" key has an empty list as default, although it
+         * is a required key, because then here below the error for the user is
+         * more informative, if the key was not given in the input file.
+         */
+        return output_conf.take(InputKeys::get_output_format_key(content));
       });
-  const OutputParameters output_parameters(std::move(output_conf));
-  std::size_t total_number_of_requested_formats = 0;
   auto abort_because_of_invalid_input_file = []() {
     throw std::invalid_argument("Invalid configuration input file.");
   };
+  const OutputParameters output_parameters(std::move(output_conf));
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
     const bool quantities_given_nonempty =
         output_parameters.quantities.count(output_contents[i]) &&
@@ -1485,7 +1481,12 @@ Experiment<Modus>::Experiment(Configuration &config,
           << "] -> [" << new_formats << "]'";
       list_of_formats[i].assign(tmp_set.begin(), tmp_set.end());
     }
+  }
 
+  /* Repeat loop over output_contents here to create all outputs after having
+   * validated all content specifications. This is more user-friendly. */
+  std::size_t total_number_of_requested_formats = 0;
+  for (std::size_t i = 0; i < output_contents.size(); ++i) {
     for (const auto &format : list_of_formats[i]) {
       create_output(format, output_contents[i], output_path, output_parameters);
       ++total_number_of_requested_formats;
@@ -1503,7 +1504,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * always have to take it, otherwise SMASH will complain about unused
    * options. We have to provide a default value for modi other than Collider.
    */
-  if (config.has_value({"Potentials"})) {
+  if (config.has_section(InputSections::potentials)) {
     if (time_step_mode_ == TimeStepMode::None) {
       logg[LExperiment].error() << "Potentials only work with time steps!";
       throw std::invalid_argument("Can't use potentials without time steps!");
@@ -1520,7 +1521,8 @@ Experiment<Modus>::Experiment(Configuration &config,
                              << parameters_.labclock->timestep_duration();
     // potentials need density calculation parameters from parameters_
     potentials_ = std::make_unique<Potentials>(
-        config.extract_sub_configuration({"Potentials"}), parameters_);
+        config.extract_complete_sub_configuration(InputSections::potentials),
+        parameters_);
     // make sure that vdf potentials are not used together with Skyrme
     // or symmetry potentials
     if (potentials_->use_skyrme() && potentials_->use_vdf()) {
@@ -1647,12 +1649,12 @@ Experiment<Modus>::Experiment(Configuration &config,
   }
 
   // Create lattices
-  if (config.has_value({"Lattice"})) {
-    bool automatic = config.take({"Lattice", "Automatic"}, false);
+  if (config.has_section(InputSections::lattice)) {
+    bool automatic = config.take(InputKeys::lattice_automatic);
     bool all_geometrical_properties_specified =
-        config.has_value({"Lattice", "Cell_Number"}) &&
-        config.has_value({"Lattice", "Origin"}) &&
-        config.has_value({"Lattice", "Sizes"});
+        config.has_value(InputKeys::lattice_cellNumber) &&
+        config.has_value(InputKeys::lattice_origin) &&
+        config.has_value(InputKeys::lattice_sizes);
     if (!automatic && !all_geometrical_properties_specified) {
       throw std::invalid_argument(
           "The lattice was requested to be manually generated, but some\n"
@@ -1665,14 +1667,14 @@ Experiment<Modus>::Experiment(Configuration &config,
           "lattice geometrical properties were specified. In this case you\n"
           "need to set \"Automatic: False\".");
     }
-    bool periodic = config.take({"Lattice", "Periodic"}, modus_.is_box());
+    bool periodic = config.take(InputKeys::lattice_periodic, modus_.is_box());
     const auto [l, n, origin] = [&config, automatic, this]() {
       if (!automatic) {
         return std::make_tuple<std::array<double, 3>, std::array<int, 3>,
                                std::array<double, 3>>(
-            config.take({"Lattice", "Sizes"}),
-            config.take({"Lattice", "Cell_Number"}),
-            config.take({"Lattice", "Origin"}));
+            config.take(InputKeys::lattice_sizes),
+            config.take(InputKeys::lattice_cellNumber),
+            config.take(InputKeys::lattice_origin));
       } else {
         std::array<double, 3> l_default{20., 20., 20.};
         std::array<int, 3> n_default{10, 10, 10};
@@ -1719,9 +1721,9 @@ Experiment<Modus>::Experiment(Configuration &config,
         // Take lattice properties from config to assign them to all lattices
         return std::make_tuple<std::array<double, 3>, std::array<int, 3>,
                                std::array<double, 3>>(
-            config.take({"Lattice", "Sizes"}, l_default),
-            config.take({"Lattice", "Cell_Number"}, n_default),
-            config.take({"Lattice", "Origin"}, origin_default));
+            config.take(InputKeys::lattice_sizes, l_default),
+            config.take(InputKeys::lattice_cellNumber, n_default),
+            config.take(InputKeys::lattice_origin, origin_default));
       }
     }();
 
@@ -1857,15 +1859,15 @@ Experiment<Modus>::Experiment(Configuration &config,
   }
 
   // Create forced thermalizer
-  if (config.has_value({"Forced_Thermalization"})) {
-    Configuration th_conf =
-        config.extract_sub_configuration({"Forced_Thermalization"});
+  if (config.has_section(InputSections::forcedThermalization)) {
+    Configuration th_conf = config.extract_complete_sub_configuration(
+        InputSections::forcedThermalization);
     thermalizer_ = modus_.create_grandcan_thermalizer(th_conf);
   }
 
   /* Take the seed setting only after the configuration was stored to a file
    * in smash.cc */
-  seed_ = config.take({"General", "Randomseed"});
+  seed_ = config.take(InputKeys::gen_randomseed);
 }
 
 /// String representing a horizontal line.

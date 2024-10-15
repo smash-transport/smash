@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2016-2020,2022
+ *    Copyright (c) 2016-2020,2022,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -17,6 +17,7 @@
 #include "distributions.h"
 #include "forwarddeclarations.h"
 #include "hadgas_eos.h"
+#include "input_keys.h"
 #include "lattice.h"
 #include "particledata.h"
 #include "quantumnumbers.h"
@@ -213,11 +214,13 @@ class GrandCanThermalizer {
                       const std::array<double, 3> lat_sizes,
                       const std::array<double, 3> origin, bool periodicity)
       : GrandCanThermalizer(
-            lat_sizes, conf.take({"Cell_Number"}), origin, periodicity,
-            conf.take({"Critical_Edens"}), conf.take({"Start_Time"}),
-            conf.take({"Timestep"}),
-            conf.take({"Algorithm"}, ThermalizationAlgorithm::BiasedBF),
-            conf.take({"Microcanonical"}, false)) {}
+            lat_sizes, conf.take(InputKeys::forcedThermalization_cellNumber),
+            origin, periodicity,
+            conf.take(InputKeys::forcedThermalization_criticalEDensity),
+            conf.take(InputKeys::forcedThermalization_startTime),
+            conf.take(InputKeys::forcedThermalization_timestep),
+            conf.take(InputKeys::forcedThermalization_algorithm),
+            conf.take(InputKeys::forcedThermalization_microcanonical)) {}
   /**
    * Check that the clock is close to n * period of thermalization, since
    * the thermalization only happens at these times

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2018,2020,2022
+ *    Copyright (c) 2015-2018,2020,2022,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -31,9 +31,11 @@ TEST(init_particle_types) {
 
 static Configuration get_pauli_blocking_conf() {
   return Configuration{R"(
-    Spatial_Averaging_Radius: 1.86
-    Momentum_Averaging_Radius: 0.08
-    Gaussian_Cutoff: 2.2
+    Collision_Term:
+      Pauli_Blocking:
+        Spatial_Averaging_Radius: 1.86
+        Momentum_Averaging_Radius: 0.08
+        Gaussian_Cutoff: 2.2
   )"};
 }
 

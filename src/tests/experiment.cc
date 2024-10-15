@@ -30,7 +30,7 @@ static Configuration get_common_configuration() {
 
 static Configuration get_collider_configuration() {
   auto config = get_common_configuration();
-  config.set_value({"General", "Modus"}, "Collider");
+  config.set_value(InputKeys::gen_modus, "Collider");
   /* The 'Collisions_Within_Nucleus' key is here used with its default value to
    * make sure Experiment parses it correctly (it is in the "Collider" section,
    * but it is taken by ScatterActionsFinderParameters).*/
@@ -49,7 +49,7 @@ static Configuration get_collider_configuration() {
 
 TEST(create_box) {
   auto config = get_common_configuration();
-  config.set_value({"General", "Modus"}, "Box");
+  config.set_value(InputKeys::gen_modus, "Box");
   config.merge_yaml(R"(
     Modi:
       Box:
@@ -69,7 +69,7 @@ TEST(create_collider) {
 
 TEST(create_sphere) {
   auto config = get_common_configuration();
-  config.set_value({"General", "Modus"}, "Sphere");
+  config.set_value(InputKeys::gen_modus, "Sphere");
   config.merge_yaml(R"(
     Modi:
       Sphere:
@@ -99,13 +99,13 @@ TEST_CATCH(create_experiment_with_invalid_modus,
 
 TEST_CATCH(create_experiment_with_invalid_delta_time, std::invalid_argument) {
   auto config = get_collider_configuration();
-  config.set_value({"General", "Delta_Time"}, 0.0);
+  config.set_value(InputKeys::gen_deltaTime, 0.0);
   Test::experiment(std::move(config));
 }
 
 TEST_CATCH(create_experiment_with_invalid_end_time, std::invalid_argument) {
   auto config = get_collider_configuration();
-  config.set_value({"General", "End_Time"}, 0.0);
+  config.set_value(InputKeys::gen_endTime, 0.0);
   Test::experiment(std::move(config));
 }
 
@@ -116,6 +116,36 @@ TEST_CATCH(create_experiment_with_invalid_output_interval,
     Output:
       Output_Interval: 0.0
       Particles:
+        Format: ["Oscar2013"]
+  )");
+  Test::experiment(std::move(config));
+}
+
+TEST_CATCH(create_experiment_with_empty_format, std::invalid_argument) {
+  auto config = get_collider_configuration();
+  config.merge_yaml(R"(
+    Output:
+      Particles:
+        Format: []
+  )");
+  Test::experiment(std::move(config));
+}
+
+TEST_CATCH(create_experiment_with_missing_format, std::invalid_argument) {
+  auto config = get_collider_configuration();
+  config.merge_yaml(R"(
+    Output:
+      Particles:
+        Only_Final: "Yes"
+  )");
+  Test::experiment(std::move(config));
+}
+
+TEST_CATCH(create_experiment_with_wrong_format_content, std::invalid_argument) {
+  auto config = get_collider_configuration();
+  config.merge_yaml(R"(
+    Output:
+      Not_existing_content:
         Format: ["Oscar2013"]
   )");
   Test::experiment(std::move(config));

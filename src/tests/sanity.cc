@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2020,2022-2023
+ *    Copyright (c) 2014-2015,2017-2020,2022-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -86,17 +86,18 @@ TEST(sanity_default) {
 
 TEST(sanity_box) {
   Configuration conf{R"(
-    Box:
-      Initial_Condition: "peaked momenta"
-      Length:  5.0
-      Temperature:  0.13
-      Start_Time:  0.2
-      Init_Multiplicities:
-        2212: 50
-        2112: 50
-        211:  100
-        111:  100
-        -211: 100
+    Modi:
+      Box:
+        Initial_Condition: "peaked momenta"
+        Length:  5.0
+        Temperature:  0.13
+        Start_Time:  0.2
+        Init_Multiplicities:
+          2212: 50
+          2112: 50
+          211:  100
+          111:  100
+          -211: 100
   )"};
   ExperimentParameters param = smash::Test::default_parameters();
   param.box_length = 5.0;
@@ -108,12 +109,13 @@ TEST(sanity_box) {
 
 TEST(sanity_collider) {
   Configuration conf{R"(
-    Collider:
-      Projectile:
-          Particles: {661: 1}
-      Target:
-          Particles: {661: 1}
-      E_Kin: 1.0
+    Modi:
+      Collider:
+        Projectile:
+            Particles: {661: 1}
+        Target:
+            Particles: {661: 1}
+        E_Kin: 1.0
   )"};
   ExperimentParameters param = smash::Test::default_parameters();
   ColliderModus n(std::move(conf), param);
@@ -124,11 +126,12 @@ TEST(sanity_collider) {
 
 TEST(sanity_sphere) {
   Configuration conf{R"(
-    Sphere:
-      Radius: 10
-      Temperature: 0.2
-      Start_Time: 0.0
-      Init_Multiplicities: {661: 500}
+    Modi:
+      Sphere:
+        Radius: 10
+        Temperature: 0.2
+        Start_Time: 0.0
+        Init_Multiplicities: {661: 500}
   )"};
   ExperimentParameters param = smash::Test::default_parameters();
   SphereModus s(std::move(conf), param);

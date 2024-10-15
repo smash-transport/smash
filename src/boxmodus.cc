@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2020,2022-2023
+ *    Copyright (c) 2012-2020,2022-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -19,6 +19,7 @@
 #include "smash/constants.h"
 #include "smash/cxx17compat.h"
 #include "smash/experimentparameters.h"
+#include "smash/input_keys.h"
 #include "smash/logging.h"
 #include "smash/quantumsampling.h"
 #include "smash/random.h"
@@ -64,35 +65,36 @@ std::ostream &operator<<(std::ostream &out, const BoxModus &m) {
 
 BoxModus::BoxModus(Configuration modus_config,
                    const ExperimentParameters &parameters)
-    : initial_condition_(modus_config.take({"Box", "Initial_Condition"})),
-      length_(modus_config.take({"Box", "Length"})),
+    : initial_condition_(
+          modus_config.take(InputKeys::modi_box_initialCondition)),
+      length_(modus_config.take(InputKeys::modi_box_length)),
       equilibration_time_(
-          modus_config.take({"Box", "Equilibration_Time"}, -1.)),
-      temperature_(modus_config.take({"Box", "Temperature"})),
-      start_time_(modus_config.take({"Box", "Start_Time"}, 0.)),
+          modus_config.take(InputKeys::modi_box_equilibrationTime)),
+      temperature_(modus_config.take(InputKeys::modi_box_temperature)),
+      start_time_(modus_config.take(InputKeys::modi_box_startTime)),
       use_thermal_(
-          modus_config.take({"Box", "Use_Thermal_Multiplicities"}, false)),
-      mub_(modus_config.take({"Box", "Baryon_Chemical_Potential"}, 0.)),
-      mus_(modus_config.take({"Box", "Strange_Chemical_Potential"}, 0.)),
-      muq_(modus_config.take({"Box", "Charge_Chemical_Potential"}, 0.)),
+          modus_config.take(InputKeys::modi_box_useThermalMultiplicities)),
+      mub_(modus_config.take(InputKeys::modi_box_baryonChemicalPotential)),
+      mus_(modus_config.take(InputKeys::modi_box_strangeChemicalPotential)),
+      muq_(modus_config.take(InputKeys::modi_box_chargeChemicalPotential)),
       account_for_resonance_widths_(
-          modus_config.take({"Box", "Account_Resonance_Widths"}, true)),
-      init_multipl_(use_thermal_
-                        ? std::map<PdgCode, int>()
-                        : modus_config.take({"Box", "Init_Multiplicities"})
-                              .convert_for(init_multipl_)),
+          modus_config.take(InputKeys::modi_box_accountResonanceWidths)),
+      init_multipl_(
+          use_thermal_
+              ? std::map<PdgCode, int>()
+              : modus_config.take(InputKeys::modi_box_initialMultiplicities)),
       /* Note that it is crucial not to take other keys from the Jet section
        * before Jet_PDG, since we want here the take to throw in case the user
        * had a Jet section without the mandatory Jet_PDG key. If all other keys
-       * are taken first, the section is removed from modus_config, because
-       * empty, and that has_value({"Box", "Jet"}) method would return false.
+       * are taken first, the section is removed from the config because empty,
+       * and has_section(InputSections::m_b_jet) method would return false.
        */
-      jet_pdg_(modus_config.has_value({"Box", "Jet"})
+      jet_pdg_(modus_config.has_section(InputSections::m_b_jet)
                    ? make_optional<PdgCode>(
-                         modus_config.take({"Box", "Jet", "Jet_PDG"}))
+                         modus_config.take(InputKeys::modi_box_jet_jetPdg))
                    : std::nullopt),
 
-      jet_mom_(modus_config.take({"Box", "Jet", "Jet_Momentum"}, 20.)) {
+      jet_mom_(modus_config.take(InputKeys::modi_box_jet_jetMomentum)) {
   if (parameters.res_lifetime_factor < 0.) {
     throw std::invalid_argument(
         "Resonance lifetime modifier cannot be negative!");

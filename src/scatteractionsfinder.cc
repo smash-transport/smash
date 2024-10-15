@@ -34,10 +34,10 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration& config, const ExperimentParameters& parameters)
     : finder_parameters_(create_finder_parameters(config, parameters)),
-      isotropic_(config.take({"Collision_Term", "Isotropic"}, false)),
+      isotropic_(config.take(InputKeys::collTerm_isotropic)),
       box_length_(parameters.box_length),
-      string_formation_time_(config.take(
-          {"Collision_Term", "String_Parameters", "Formation_Time"}, 1.)) {
+      string_formation_time_(
+          config.take(InputKeys::collTerm_stringParam_formationTime)) {
   if (is_constant_elastic_isotropic()) {
     logg[LFindScatter].info(
         "Constant elastic isotropic cross-section mode:", " using ",
@@ -102,39 +102,36 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
 
   if (finder_parameters_.strings_switch) {
-    auto subconfig = config.extract_sub_configuration(
-        {"Collision_Term", "String_Parameters"}, Configuration::GetEmpty::Yes);
     string_process_interface_ = std::make_unique<StringProcess>(
-        subconfig.take({"String_Tension"}, 1.0), string_formation_time_,
-        subconfig.take({"Gluon_Beta"}, 0.5),
-        subconfig.take({"Gluon_Pmin"}, 0.001),
-        subconfig.take({"Quark_Alpha"}, 2.0),
-        subconfig.take({"Quark_Beta"}, 7.0),
-        subconfig.take({"Strange_Supp"}, 0.16),
-        subconfig.take({"Diquark_Supp"}, 0.036),
-        subconfig.take({"Sigma_Perp"}, 0.42),
-        subconfig.take({"StringZ_A_Leading"}, 0.2),
-        subconfig.take({"StringZ_B_Leading"}, 2.0),
-        subconfig.take({"StringZ_A"}, 2.0), subconfig.take({"StringZ_B"}, 0.55),
-        subconfig.take({"String_Sigma_T"}, 0.5),
-        subconfig.take({"Form_Time_Factor"}, 1.0),
-        subconfig.take({"Mass_Dependent_Formation_Times"}, false),
-        subconfig.take({"Prob_proton_to_d_uu"}, 1. / 3.),
-        subconfig.take({"Separate_Fragment_Baryon"}, true),
-        subconfig.take({"Popcorn_Rate"}, 0.15),
-        subconfig.take({"Use_Monash_Tune"},
-                       parameters.use_monash_tune_default.value()));
+        config.take(InputKeys::collTerm_stringParam_stringTension),
+        string_formation_time_,
+        config.take(InputKeys::collTerm_stringParam_gluonBeta),
+        config.take(InputKeys::collTerm_stringParam_gluonPMin),
+        config.take(InputKeys::collTerm_stringParam_quarkAlpha),
+        config.take(InputKeys::collTerm_stringParam_quarkBeta),
+        config.take(InputKeys::collTerm_stringParam_strangeSuppression),
+        config.take(InputKeys::collTerm_stringParam_diquarkSuppression),
+        config.take(InputKeys::collTerm_stringParam_sigmaPerp),
+        config.take(InputKeys::collTerm_stringParam_stringZALeading),
+        config.take(InputKeys::collTerm_stringParam_stringZBLeading),
+        config.take(InputKeys::collTerm_stringParam_stringZA),
+        config.take(InputKeys::collTerm_stringParam_stringZB),
+        config.take(InputKeys::collTerm_stringParam_stringSigmaT),
+        config.take(InputKeys::collTerm_stringParam_formTimeFactor),
+        config.take(InputKeys::collTerm_stringParam_mDependentFormationTimes),
+        config.take(InputKeys::collTerm_stringParam_probabilityPToDUU),
+        config.take(InputKeys::collTerm_stringParam_separateFragmentBaryon),
+        config.take(InputKeys::collTerm_stringParam_popcornRate),
+        config.take(InputKeys::collTerm_stringParam_useMonashTune));
   }
 }
 
 ScatterActionsFinderParameters create_finder_parameters(
     Configuration& config, const ExperimentParameters& parameters) {
   std::pair<double, double> sqrts_range_Npi =
-      config.take({"Collision_Term", "String_Transition", "Sqrts_Range_Npi"},
-                  InputKeys::collTerm_stringTrans_rangeNpi.default_value());
+      config.take(InputKeys::collTerm_stringTrans_rangeNpi);
   std::pair<double, double> sqrts_range_NN =
-      config.take({"Collision_Term", "String_Transition", "Sqrts_Range_NN"},
-                  InputKeys::collTerm_stringTrans_rangeNN.default_value());
+      config.take(InputKeys::collTerm_stringTrans_rangeNN);
   if (sqrts_range_Npi.first < nucleon_mass + pion_mass) {
     sqrts_range_Npi.first = nucleon_mass + pion_mass;
     if (sqrts_range_Npi.second < sqrts_range_Npi.first)
@@ -153,9 +150,7 @@ ScatterActionsFinderParameters create_finder_parameters(
         "threshold. New range is [",
         sqrts_range_NN.first, ',', sqrts_range_NN.second, "] GeV.");
   }
-  auto xs_strategy =
-      config.take({"Collision_Term", "Total_Cross_Section_Strategy"},
-                  InputKeys::collTerm_totXsStrategy.default_value());
+  auto xs_strategy = config.take(InputKeys::collTerm_totXsStrategy);
   if (xs_strategy == TotalCrossSectionStrategy::BottomUp) {
     logg[LFindScatter].info(
         "Evaluating total cross sections from partial processes.");
@@ -173,40 +168,31 @@ ScatterActionsFinderParameters create_finder_parameters(
         "Evaluating total cross sections from parametrizations only for "
         "measured processes.");
   }
-  return {
-      config.take({"Collision_Term", "Elastic_Cross_Section"}, -1.),
-      parameters.low_snn_cut,
-      parameters.scale_xs,
-      config.take({"Collision_Term", "Additional_Elastic_Cross_Section"}, 0.0),
-      parameters.maximum_cross_section,
-      parameters.coll_crit,
-      parameters.nnbar_treatment,
-      parameters.included_2to2,
-      parameters.included_multi,
-      parameters.testparticles,
-      parameters.two_to_one,
-      config.take({"Modi", "Collider", "Collisions_Within_Nucleus"}, false),
-      parameters.strings_switch,
-      config.take({"Collision_Term", "Use_AQM"}, true),
-      config.take({"Collision_Term", "Strings_with_Probability"}, true),
-      config.take({"Collision_Term", "Only_Warn_For_High_Probability"}, false),
-      StringTransitionParameters{
-          sqrts_range_Npi, sqrts_range_NN,
-          config.take({"Collision_Term", "String_Transition", "Sqrts_Lower"},
-                      InputKeys::collTerm_stringTrans_lower.default_value()),
-          config.take(
-              {"Collision_Term", "String_Transition", "Sqrts_Range_Width"},
-              InputKeys::collTerm_stringTrans_range_width.default_value()),
-          config.take(
-              {"Collision_Term", "String_Transition", "PiPi_Offset"},
-              InputKeys::collTerm_stringTrans_pipiOffset.default_value()),
-          config.take(
-              {"Collision_Term", "String_Transition", "KN_Offset"},
-              InputKeys::collTerm_stringTrans_KNOffset.default_value())},
-      xs_strategy,
-      config.take({"Collision_Term", "Pseudoresonance"},
-                  InputKeys::collTerm_pseudoresonance.default_value()),
-      parameters.spin_interactions};
+  return {config.take(InputKeys::collTerm_elasticCrossSection),
+          parameters.low_snn_cut,
+          parameters.scale_xs,
+          config.take(InputKeys::collTerm_additionalElasticCrossSection),
+          parameters.maximum_cross_section,
+          parameters.coll_crit,
+          parameters.nnbar_treatment,
+          parameters.included_2to2,
+          parameters.included_multi,
+          parameters.testparticles,
+          parameters.two_to_one,
+          config.take(InputKeys::modi_collider_collisionWithinNucleus),
+          parameters.strings_switch,
+          config.take(InputKeys::collTerm_useAQM),
+          config.take(InputKeys::collTerm_stringsWithProbability),
+          config.take(InputKeys::collTerm_onlyWarnForHighProbability),
+          StringTransitionParameters{
+              sqrts_range_Npi, sqrts_range_NN,
+              config.take(InputKeys::collTerm_stringTrans_lower),
+              config.take(InputKeys::collTerm_stringTrans_range_width),
+              config.take(InputKeys::collTerm_stringTrans_pipiOffset),
+              config.take(InputKeys::collTerm_stringTrans_KNOffset)},
+          xs_strategy,
+          config.take(InputKeys::collTerm_pseudoresonance),
+          parameters.spin_interactions};
 }
 
 ActionPtr ScatterActionsFinder::check_collision_two_part(

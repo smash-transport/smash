@@ -30,10 +30,12 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Changed
 * Upgraded to Pythia 8.311
-* Moved the `Orientation` section from `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from pi/2 to 0
+* Moved the `Orientation` section from the `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from `pi/2` to `0`
+* The interface of the `Configuration` class has been totally changed making it use `Key` objects instead of low-level strings
 
 ### Fixed
 * Fix a small error and added a more precise documentation for the orientation section for deformed nuclei
+* Make few keys really mandatory in code as it was already stated in the documentation
 
 ## SMASH-3.1
 Date: 2024-02-26

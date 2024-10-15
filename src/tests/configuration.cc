@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2023
+ *    Copyright (c) 2014-2015,2017-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,6 +15,7 @@
 
 #include "setup.h"
 #include "smash/forwarddeclarations.h"
+#include "smash/input_keys.h"
 #include "smash/macros.h"
 
 using namespace smash;
@@ -25,6 +26,11 @@ static Configuration make_test_configuration() {
       "test_config.yaml"};
 }
 
+template <typename T>
+static Key<T> get_key(KeyLabels labels) {
+  return Key<T>{labels, {"1.0"}};
+}
+
 TEST(create_object) {
   Configuration conf = make_test_configuration();
   conf.clear();
@@ -32,11 +38,13 @@ TEST(create_object) {
 
 TEST(merge_does_override) {
   Configuration conf = make_test_configuration();
-  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
-  COMPARE(int(conf.read({"fireballs", "classify"})), 1);
+  const auto key_1 = get_key<int>({"fireballs", "arena"});
+  const auto key_2 = get_key<int>({"fireballs", "classify"});
+  COMPARE(conf.read(key_1), 1000);
+  COMPARE(conf.read(key_2), 1);
   conf.merge_yaml("fireballs: { classify: 2 }");
-  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
-  COMPARE(int(conf.read({"fireballs", "classify"})), 2);
+  COMPARE(conf.read(key_1), 1000);
+  COMPARE(conf.read(key_2), 2);
   conf.clear();
 }
 
@@ -47,64 +55,100 @@ TEST_CATCH(merge_with_incorrect_indent, Configuration::ParseError) {
 
 TEST(take) {
   Configuration conf = make_test_configuration();
-  double d = conf.take({"tamer", "pipit", "bushelling"});
+  const double d = conf.take(get_key<double>({"tamer", "pipit", "bushelling"}));
   COMPARE(d, 5.);
   conf.clear();
 }
 
 TEST(take_multiple) {
   Configuration conf = make_test_configuration();
-  double d = conf.take({"tamer", "Altaic", "Meccas"});
+  double d = conf.take(get_key<double>({"tamer", "Altaic", "Meccas"}));
   COMPARE(d, 10.);
-  d = conf.take({"tamer", "Altaic", "Kathleen"});
+  d = conf.take(get_key<double>({"tamer", "Altaic", "Kathleen"}));
   COMPARE(d, 0.2);
-  int i = conf.take({"tamer", "Altaic", "Brahmins"});
+  const int i = conf.take(get_key<int>({"tamer", "Altaic", "Brahmins"}));
   COMPARE(i, 1);
+  conf.clear();
+}
+
+TEST_CATCH(take_twice_optional_key, Configuration::TakeSameKeyTwice) {
+  Configuration conf = make_test_configuration();
+  const Key<double> optional_key{
+      {"tamer", "pipit", "bushelling"}, 3.14, {"1.0"}};
+  [[maybe_unused]] double d = conf.take(optional_key);
+  d = conf.take(optional_key);
+}
+
+TEST(take_set_and_take_again_is_fine) {
+  Configuration conf = make_test_configuration();
+  const auto key = get_key<double>({"tamer", "pipit", "bushelling"});
+  double d = conf.take(key);
+  conf.set_value(key, 3.14);
+  d = conf.take(key);
+  VERIFY(d == 3.14);
   conf.clear();
 }
 
 TEST_CATCH(take_incorrect_type, Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
-  int i = conf.take({"tamer", "pipit", "bushelling"});
-  COMPARE(i, 5);
+  const Key<int> key = get_key<int>({"tamer", "pipit", "bushelling"});
+  [[maybe_unused]] int i = conf.take(key);
 }
 
-TEST(take_always_converts_to_string) {
+TEST(take_cannot_always_convert_to_string) {
   Configuration conf = make_test_configuration();
-  std::string s = conf.take({"tamer", "pipit", "bushelling"});
-  COMPARE(s, "5.0");
+  auto key = get_key<double>({"tamer", "pipit", "bushelling"});
+  const bool b = std::is_convertible_v<decltype(conf.take(key)), std::string>;
+  VERIFY(!b);
   conf.clear();
 }
 
 TEST_CATCH(take_not_existing_key, std::invalid_argument) {
   Configuration conf = make_test_configuration();
-  conf.take({"not existing key"});
+  conf.take(get_key<int>({"not existing key"}));
 }
 
 TEST_CATCH(take_not_existing_key_in_existing_section, std::invalid_argument) {
   Configuration conf = make_test_configuration();
-  conf.take({"tamer", "not existing key"});
+  conf.take(get_key<int>({"tamer", "not existing key"}));
 }
 
 TEST(take_array) {
-  Configuration conf = make_test_configuration();
-  conf.merge_yaml("{test: [123, 456, 789]}");
-  std::array<int, 3> x = conf.take({"test"});
+  Configuration conf{"{test: [123, 456, 789]}"};
+  std::array<int, 3> x = conf.take(get_key<std::array<int, 3>>({"test"}));
   VERIFY(x[0] == 123 && x[1] == 456 && x[2] == 789);
-  conf.clear();
+}
+
+TEST(take_map_key) {
+  Configuration conf{"{test: {42: 789}}"};
+  std::map<int, int> x = conf.take(get_key<std::map<int, int>>({"test"}));
+  VERIFY(x[42] == 789);
+}
+
+TEST_CATCH(take_section_as_non_map_key, std::logic_error) {
+  Configuration conf = make_test_configuration();
+  conf.merge_yaml("{test: {42: 789}}");
+  conf.take(get_key<int>({"test"}));
+}
+
+TEST(take_enum_key) {
+  Configuration conf{"{test: on}"};
+  FermiMotion x = conf.take(get_key<FermiMotion>({"test"}));
+  VERIFY(x == FermiMotion::On);
 }
 
 TEST_CATCH(take_array_wrong_n, Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
   conf.merge_yaml("{test: [123, 456, 789]}");
-  [[maybe_unused]] std::array<int, 4> x = conf.take({"test"});
+  auto key = get_key<std::array<int, 4>>({"test"});
+  conf.take(key);
 }
 
 TEST(take_reactions_bitset) {
   // Make sure that only the right bits are set
   Configuration conf = make_test_configuration();
   conf.merge_yaml("{test: [NN_to_NR, KN_to_KN]}");
-  ReactionsBitSet bs = conf.take({"test"});
+  ReactionsBitSet bs = conf.take(get_key<ReactionsBitSet>({"test"}));
   for (std::size_t i = 0; i < bs.size(); i++) {
     if (i == IncludedReactions::NN_to_NR || i == IncludedReactions::KN_to_KN) {
       VERIFY(bs.test(i));
@@ -114,13 +158,13 @@ TEST(take_reactions_bitset) {
   }
   // Make sure that all bits are set
   conf.merge_yaml("{test2: [All]}");
-  ReactionsBitSet bs2 = conf.take({"test2"});
+  ReactionsBitSet bs2 = conf.take(get_key<ReactionsBitSet>({"test2"}));
   for (std::size_t i = 0; i < bs2.size(); i++) {
     VERIFY(bs2.test(i));
   }
   // All means really ALL reactions are on
   conf.merge_yaml("{test3: [NN_to_NR, All]}");
-  ReactionsBitSet bs3 = conf.take({"test3"});
+  ReactionsBitSet bs3 = conf.take(get_key<ReactionsBitSet>({"test3"}));
   for (std::size_t i = 0; i < bs3.size(); i++) {
     VERIFY(bs3.test(i));
   }
@@ -129,9 +173,10 @@ TEST(take_reactions_bitset) {
 
 TEST(take_removes_entry) {
   Configuration conf = make_test_configuration();
-  VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
-  conf.take({"tamer", "pipit", "bushelling"});
-  VERIFY(!conf.has_value({"tamer", "pipit", "bushelling"}));
+  const auto key = get_key<double>({"tamer", "pipit", "bushelling"});
+  VERIFY(conf.has_value(key));
+  conf.take(key);
+  VERIFY(!conf.has_value(key));
   conf.clear();
 }
 
@@ -141,11 +186,13 @@ TEST(take_removes_empty_section) {
       Sub-section:
         Key: "Value"
   )"};
-  VERIFY(conf.has_value({"Section"}));
-  VERIFY(conf.has_value({"Section", "Sub-section"}));
-  conf.take({"Section", "Sub-section", "Key"});
-  VERIFY(!conf.has_value({"Section", "Sub-section"}));
-  VERIFY(!conf.has_value({"Section"})) << "\n" << conf.to_string();
+  const KeyLabels section{"Section"}, subsection{"Section", "Sub-section"};
+  const auto key = get_key<std::string>({"Section", "Sub-section", "Key"});
+  VERIFY(conf.has_section(section));
+  VERIFY(conf.has_section(subsection));
+  conf.take(key);
+  VERIFY(!conf.has_section(section));
+  VERIFY(!conf.has_section(subsection));
 }
 
 TEST(take_removes_empty_section_but_not_empty_lists) {
@@ -155,8 +202,8 @@ TEST(take_removes_empty_section_but_not_empty_lists) {
         Key: "Value"
         Empty_list: []
   )"};
-  conf.take({"Section", "Sub-section", "Key"});
-  VERIFY(conf.has_value({"Section", "Sub-section"}));
+  conf.take(get_key<std::string>({"Section", "Sub-section", "Key"}));
+  VERIFY(conf.has_section({"Section", "Sub-section"}));
   conf.clear();
 }
 
@@ -164,65 +211,82 @@ TEST_CATCH(read_failed_sequence_conversion,
            Configuration::IncorrectTypeInAssignment) {
   Configuration conf = make_test_configuration();
   conf.merge_yaml("{test: [123 456]}");
-  std::vector<int> x = conf.read({"test"});
+  [[maybe_unused]] auto x = conf.read(get_key<std::vector<int>>({"test"}));
 }
 
 TEST(read_check_config_general_contents) {
   Configuration conf = make_test_configuration();
 
-  std::string modus = conf.read({"fireballs", "extorting"});
+  auto modus = conf.read(get_key<std::string>({"fireballs", "extorting"}));
   COMPARE(modus, "feathered");
-  COMPARE(double(conf.read({"fireballs", "infection"})), 0.01);
-  COMPARE(int(conf.read({"fireballs", "arena"})), 1000);
-  COMPARE(int(conf.read({"fireballs", "pendulous"})), 10);
-  COMPARE(int(conf.read({"fireballs", "scudded"})), 1);
-  COMPARE(double(conf.read({"fireballs", "firebrands"})), 10.0);
-  COMPARE(int(conf.read({"fireballs", "joker"})), 1);
-  COMPARE(int(conf.read({"fireballs", "classify"})), 1);
+  COMPARE(conf.read(get_key<double>({"fireballs", "infection"})), 0.01);
+  COMPARE(conf.read(get_key<int>({"fireballs", "arena"})), 1000);
+  COMPARE(conf.read(get_key<int>({"fireballs", "pendulous"})), 10);
+  COMPARE(conf.read(get_key<int>({"fireballs", "scudded"})), 1);
+  COMPARE(conf.read(get_key<double>({"fireballs", "firebrands"})), 10.0);
+  COMPARE(conf.read(get_key<int>({"fireballs", "joker"})), 1);
+  COMPARE(conf.read(get_key<int>({"fireballs", "classify"})), 1);
   conf.clear();
 }
 
 TEST(read_check_config_collider_contents) {
   Configuration conf = make_test_configuration();
-  COMPARE(int(conf.read({"tamer", "schmoozed", "warbler"})), 211);
-  COMPARE(int(conf.read({"tamer", "schmoozed", "neglects"})), -211);
-  COMPARE(double(conf.read({"tamer", "schmoozed", "reedier"})), 1.0);
+  COMPARE(conf.read(get_key<int>({"tamer", "schmoozed", "warbler"})), 211);
+  COMPARE(conf.read(get_key<int>({"tamer", "schmoozed", "neglects"})), -211);
+  COMPARE(conf.read(get_key<double>({"tamer", "schmoozed", "reedier"})), 1.0);
   conf.clear();
 }
 
-TEST(read_does_not_take) {
+TEST(read_does_not_take_and_reading_multiple_times_is_fine) {
   Configuration conf = make_test_configuration();
-  int nevents = conf.read({"fireballs", "classify"});
+  const auto key = get_key<int>({"fireballs", "classify"});
+  auto nevents = conf.read(key);
   COMPARE(nevents, 1);
-  nevents = conf.read({"fireballs", "classify"});
+  nevents = conf.read(key);
   COMPARE(nevents, 1);
-  nevents = conf.take({"fireballs", "classify"});
+  nevents = conf.read(key);
   COMPARE(nevents, 1);
   conf.clear();
+}
+
+TEST(read_map_key) {
+  Configuration conf{"{test: {42: 789}}"};
+  std::map<int, int> x = conf.read(get_key<std::map<int, int>>({"test"}));
+  VERIFY(x[42] == 789);
+  conf.clear();
+}
+
+TEST_CATCH(read_section_as_non_map_key, std::logic_error) {
+  Configuration conf = make_test_configuration();
+  conf.merge_yaml("{test: {42: 789}}");
+  conf.read(get_key<int>({"test"}));
 }
 
 TEST(set_existing_value) {
   Configuration conf = make_test_configuration();
   const double new_value = 3.1415;
-  conf.set_value({"tamer", "Altaic", "Meccas"}, new_value);
-  COMPARE(double(conf.read({"tamer", "Altaic", "Meccas"})), new_value);
+  const auto key = get_key<double>({"tamer", "Altaic", "Meccas"});
+  conf.set_value(key, new_value);
+  COMPARE(conf.read(key), new_value);
   conf.clear();
 }
 
 TEST(set_new_value_on_non_empty_conf) {
   Configuration conf = make_test_configuration();
-  VERIFY(!conf.has_value({"Test"}));
-  conf.set_value({"Test"}, 1.);
-  VERIFY(conf.has_value({"Test"}));
-  COMPARE(double(conf.read({"Test"})), 1.);
+  const auto key = get_key<double>({"Test"});
+  VERIFY(!conf.has_value(key));
+  conf.set_value(key, 1.);
+  VERIFY(conf.has_value(key));
+  COMPARE(conf.read(key), 1.);
   conf.clear();
 }
 
 TEST(set_value_on_empty_conf) {
   auto conf = Configuration("");
-  conf.set_value({"New section", "New key"}, 42);
-  VERIFY(conf.has_value({"New section"}));
-  VERIFY(conf.has_value({"New section", "New key"}));
+  const auto key = get_key<int>({"New section", "New key"});
+  conf.set_value(key, 42);
+  VERIFY(conf.has_section({"New section"}));
+  VERIFY(conf.has_value(key));
   conf.clear();
 }
 
@@ -234,9 +298,10 @@ TEST(set_value_on_conf_created_with_empty_file) {
     FAIL() << "Unable to create empty temporary file!";
   }
   auto conf = Configuration{tmp_dir, tmp_file};
-  conf.set_value({"New section", "New key"}, 42);
-  VERIFY(conf.has_value({"New section"}));
-  VERIFY(conf.has_value({"New section", "New key"}));
+  const auto key = get_key<int>({"New section", "New key"});
+  conf.set_value(key, 42);
+  VERIFY(conf.has_section({"New section"}));
+  VERIFY(conf.has_value(key));
   ofs.close();
   std::filesystem::remove(tmp_dir / tmp_file);
   conf.clear();
@@ -253,7 +318,7 @@ TEST(remove_all_entries_in_section_but_one) {
 TEST(extract_sub_configuration) {
   Configuration conf = make_test_configuration();
   Configuration sub_conf = conf.extract_sub_configuration({"tamer", "pipit"});
-  VERIFY(!conf.has_value({"tamer", "pipit"}));
+  VERIFY(!conf.has_value(get_key<std::string>({"tamer", "pipit"})));
   COMPARE(sub_conf.to_string(), "bushelling: 5.0");
   sub_conf = conf.extract_sub_configuration({"fireballs"});
   const auto list_of_keys = sub_conf.list_upmost_nodes();
@@ -302,16 +367,91 @@ TEST(extract_not_existing_section_as_empty_conf) {
   conf.clear();
 }
 
-TEST(has_value_including_empty) {
-  Configuration conf = Configuration{"Empty:"};
-  VERIFY(!conf.has_value({"Empty"}));
-  VERIFY(conf.has_value_including_empty({"Empty"}));
+TEST(extract_complete_sub_configuration) {
+  Configuration conf = make_test_configuration();
+  KeyLabels section{"tamer", "feathered", "dove", "floozy"};
+  Configuration sub_conf = conf.extract_complete_sub_configuration(section);
+  conf.clear();
+  const std::string result_as_string(R"(tamer:
+  feathered:
+    dove:
+      floozy: {2212: 1, 2112: 1})");
+  COMPARE(sub_conf.to_string(), result_as_string);
+  for ([[maybe_unused]] const auto &label : section) {
+    VERIFY(sub_conf.has_section(section));
+    section.pop_back();
+  }
+  sub_conf.clear();
+}
+
+TEST(extract_complete_not_existing_section_as_empty_conf) {
+  Configuration conf = make_test_configuration();
+  KeyLabels section{"Not", "existing", "section"};
+  auto sub_conf = conf.extract_complete_sub_configuration(
+      section, Configuration::GetEmpty::Yes);
+  conf.clear();
+  const std::string result_as_string(R"(Not:
+  existing:
+    section:
+      {})");
+  COMPARE(sub_conf.to_string(), result_as_string);
+  for ([[maybe_unused]] const auto &label : section) {
+    VERIFY(sub_conf.has_section(section));
+    section.pop_back();
+  }
+  sub_conf.clear();
+}
+
+TEST(enclose_into_section) {
+  Configuration conf("{Top: {Key: 42}}");
+  conf.enclose_into_section({"Enclosing"});
+  VERIFY(conf.has_section({"Enclosing"}));
+  conf.clear();
+}
+
+TEST(prepend_section_labels_to_empty_config) {
+  Configuration conf("");
+  VERIFY(conf.is_empty());
+  KeyLabels section{"Not_existing_section"};
+  conf.enclose_into_section({"Enclosing"});
+  VERIFY(conf.has_section({"Enclosing"}));
+  conf.clear();
+}
+
+TEST(has_possibly_empty_key) {
+  Configuration conf = Configuration{"{Key: 42, Array: [], Empty:}"};
+  const auto missing_key = get_key<std::string>({"XXX"});
+  const auto empty_key = get_key<std::string>({"Empty"});
+  const auto value_key = get_key<std::string>({"Key"});
+  const auto array_key = get_key<std::string>({"Key"});
+  VERIFY(!conf.has_value(missing_key));
+  VERIFY(!conf.has_key(missing_key));
+  VERIFY(!conf.has_value(empty_key));
+  VERIFY(conf.has_key(empty_key));
+  VERIFY(conf.has_value(value_key));
+  VERIFY(conf.has_key(value_key));
+  VERIFY(conf.has_value(array_key));
+  VERIFY(conf.has_key(array_key));
   conf.clear();
 }
 
 TEST(has_value) {
   Configuration conf = make_test_configuration();
-  VERIFY(conf.has_value({"tamer", "pipit", "bushelling"}));
+  VERIFY(conf.has_value(get_key<double>({"tamer", "pipit", "bushelling"})));
+  VERIFY(!conf.has_value(get_key<double>({"tamer", "pipit"})));
+  conf.clear();
+}
+
+TEST(has_section) {
+  Configuration conf = make_test_configuration();
+  VERIFY(conf.has_section({"tamer", "pipit"}));
+  conf.clear();
+  conf = Configuration("{Empty_map: {}, Key: 42, Array: [1,2,3], Empty_key:}");
+  VERIFY(conf.has_section({"Empty_map"}));
+  VERIFY(!conf.has_section({"Key"}));
+  VERIFY(!conf.has_section({"Array"}));
+  VERIFY(!conf.has_section({"Empty_key"}));
+  VERIFY(!conf.has_section({"XXX"}));
   conf.clear();
 }
 
@@ -389,18 +529,18 @@ static void expect_lines(std::vector<std::string> expected,
 TEST(check_unused_report) {
   std::string reference;
   Configuration conf = make_test_configuration();
-  conf.take({"fireballs", "extorting"});
-  conf.take({"fireballs", "infection"});
-  conf.take({"fireballs", "arena"});
-  conf.take({"fireballs", "pendulous"});
-  conf.take({"fireballs", "scudded"});
-  conf.take({"fireballs", "firebrands"});
-  conf.take({"fireballs", "joker"});
-  conf.take({"fireballs", "classify"});
-  conf.take({"tamer", "Altaic", "Meccas"});
-  conf.take({"tamer", "Altaic", "Kathleen"});
-  conf.take({"tamer", "Altaic", "Brahmins"});
-  conf.take({"tamer", "feathered"});
+  conf.take(get_key<std::string>({"fireballs", "extorting"}));
+  conf.take(get_key<double>({"fireballs", "infection"}));
+  conf.take(get_key<int>({"fireballs", "arena"}));
+  conf.take(get_key<int>({"fireballs", "pendulous"}));
+  conf.take(get_key<int>({"fireballs", "scudded"}));
+  conf.take(get_key<double>({"fireballs", "firebrands"}));
+  conf.take(get_key<int>({"fireballs", "joker"}));
+  conf.take(get_key<int>({"fireballs", "classify"}));
+  conf.take(get_key<double>({"tamer", "Altaic", "Meccas"}));
+  conf.take(get_key<double>({"tamer", "Altaic", "Kathleen"}));
+  conf.take(get_key<int>({"tamer", "Altaic", "Brahmins"}));
+  conf.extract_sub_configuration({"tamer", "feathered"}).clear();
   {
     std::istringstream unused(conf.to_string());
     std::string line;
@@ -428,7 +568,7 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  conf.take({"tamer", "pipit", "bushelling"});
+  conf.take(get_key<double>({"tamer", "pipit", "bushelling"}));
   {
     std::istringstream unused(conf.to_string());
     std::string line;
@@ -441,7 +581,7 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  conf.take({"tamer", "schmoozed", "warbler"});
+  conf.take(get_key<int>({"tamer", "schmoozed", "warbler"}));
   {
     std::istringstream unused(conf.to_string());
     std::string line;
@@ -453,7 +593,7 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  conf.take({"tamer", "schmoozed", "reedier"});
+  conf.take(get_key<double>({"tamer", "schmoozed", "reedier"}));
   {
     std::istringstream unused(conf.to_string());
     std::string line;
@@ -466,7 +606,7 @@ TEST(check_unused_report) {
     VERIFY(unused.eof());
   }
 
-  conf.take({"tamer", "schmoozed", "neglects"});
+  conf.take(get_key<int>({"tamer", "schmoozed", "neglects"}));
   reference = "{}";
   COMPARE(conf.to_string(), reference);
 }

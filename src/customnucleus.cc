@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2019-2022
+ *    Copyright (c) 2019-2022,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "smash/constants.h"
+#include "smash/input_keys.h"
 #include "smash/logging.h"
 #include "smash/particletype.h"
 #include "smash/pdgcode.h"
@@ -24,12 +25,23 @@ std::unique_ptr<std::ifstream> CustomNucleus::filestream_shared_ = nullptr;
 
 CustomNucleus::CustomNucleus(Configuration& config, int testparticles,
                              bool same_file) {
+  assert(has_projectile_or_target(config));
+  const bool is_projectile = is_about_projectile(config);
+  const auto& [file_dir_key, filename_key, particles_key] = [&is_projectile]() {
+    return is_projectile
+               ? std::make_tuple(
+                     InputKeys::modi_collider_projectile_custom_fileDirectory,
+                     InputKeys::modi_collider_projectile_custom_fileName,
+                     InputKeys::modi_collider_projectile_particles)
+               : std::make_tuple(
+                     InputKeys::modi_collider_target_custom_fileDirectory,
+                     InputKeys::modi_collider_target_custom_fileName,
+                     InputKeys::modi_collider_target_particles);
+  }();
   // Read in file directory from config
-  const std::string particle_list_file_directory =
-      config.take({"Custom", "File_Directory"});
+  const std::string particle_list_file_directory = config.take(file_dir_key);
   // Read in file name from config
-  const std::string particle_list_file_name =
-      config.take({"Custom", "File_Name"});
+  const std::string particle_list_file_name = config.take(filename_key);
 
   if (particles_.size() != 0) {
     throw std::runtime_error(
@@ -44,7 +56,7 @@ CustomNucleus::CustomNucleus(Configuration& config, int testparticles,
    * nucleus and to restart at the listreading for the following
    * nucleus as one does not want to read configurations twice.
    */
-  std::map<PdgCode, int> particle_list = config.take({"Particles"});
+  std::map<PdgCode, int> particle_list = config.take(particles_key);
   for (const auto& particle : particle_list) {
     if (particle.first == pdg::p) {
       number_of_protons_ = particle.second * testparticles;

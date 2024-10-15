@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2020,2022
+ *    Copyright (c) 2014-2015,2017-2020,2022,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -38,7 +38,10 @@ TEST(rotate_phi) {
   DeformedNucleus dnucleus(small_list, 1);
   // Plan is to rotate the (0, 1, 0, 1) vector by phi=pi/2.
   // Rotation by pi/2 means (0, 1, 0, 1) -> (0, 0, 1, 1)
-  Configuration config{"{Phi: 1.57079632679489661923}"};
+  Configuration config{
+      InputKeys::modi_collider_projectile_orientation_phi
+          .as_yaml("1.57079632679489661923")  // as string to retain all digits
+          .c_str()};
   dnucleus.set_orientation_from_config(config);
   FourVector expectation = FourVector(0., 0., 1., 1.);
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
@@ -59,7 +62,10 @@ TEST(rotate_theta) {
   DeformedNucleus dnucleus(small_list, 1);
   // Plan is to rotate the (0, 0, 0, -1) vector by theta=pi/2
   // Rotation by pi/2 means (0, 0, 0, -1) -> (0, 0, 1, 0)
-  Configuration config{"{Theta: 1.57079632679489661923}"};
+  Configuration config{
+      InputKeys::modi_collider_projectile_orientation_theta
+          .as_yaml("1.57079632679489661923")  // as string to retain all digits
+          .c_str()};
   dnucleus.set_orientation_from_config(config);
   FourVector expectation = FourVector(0., 0., 1., 0.);
   for (auto i = dnucleus.begin(); i != dnucleus.end(); i++) {
@@ -82,8 +88,12 @@ TEST(rotate_both) {
   // and then by theta=pi around the rotated x-axis
   // Result: (0, 1, 1, 0) -> (0, -1, -1, 0) -> (0, -1, 1, 0)
   Configuration config{R"(
-    Theta: 3.14159265358979323846
-    Phi: 3.14159265358979323846
+    Modi:
+      Collider:
+        Projectile:
+          Orientation:
+            Theta: 3.14159265358979323846
+            Phi: 3.14159265358979323846
     )"};
   dnucleus.set_orientation_from_config(config);
   FourVector expectation = FourVector(0., -1., 1., 0.);
@@ -108,9 +118,13 @@ TEST(rotate_all_three) {
   // rotated z-axis. Result: (0, 1, 1, 0) -> (0, -1, -1, 0) -> (0, -1, 1, 0) ->
   // (0, 1,-1,0)
   Configuration config{R"(
-    Theta: 3.14159265358979323846
-    Phi: 3.14159265358979323846
-    Psi: 3.14159265358979323846
+    Modi:
+      Collider:
+        Target:
+          Orientation:
+            Theta: 3.14159265358979323846
+            Phi: 3.14159265358979323846
+            Psi: 3.14159265358979323846
     )"};
   dnucleus.set_orientation_from_config(config);
   FourVector expectation = FourVector(0., 1., -1., 0.);
@@ -141,15 +155,18 @@ TEST(ylm) {
 TEST(deformation_parameters_from_config) {
   // creates config for arbitrary nucleus (Gold in this case)
   Configuration conf{R"(
-    Particles:
-      2112: 118
-      2212: 79
-    Saturation_Density: 0.1968
-    Diffusiveness: 0.8
-    Radius: 2.0
-    Deformed:
-      Beta_2: 1
-      Beta_4: 2
+    Modi:
+      Collider:
+        Target:
+          Particles:
+            2112: 118
+            2212: 79
+          Saturation_Density: 0.1968
+          Diffusiveness: 0.8
+          Radius: 2.0
+          Deformed:
+            Beta_2: 1
+            Beta_4: 2
   )"};
   // verifies if the beta values have been transcribed correctly
   DeformedNucleus dnucleus(conf, 1, false);
@@ -160,10 +177,13 @@ TEST(deformation_parameters_from_config) {
 TEST(set_deformation_parameters_automatic) {
   auto create_conf = [](int n1, int n2) {
     std::string tmp{R"(
-      Saturation_Density: 0.1968
-      Diffusiveness: 1.0
-      Radius: 1.0
-      Particles: )"};
+    Modi:
+      Collider:
+        Projectile:
+          Saturation_Density: 0.1968
+          Diffusiveness: 1.0
+          Radius: 1.0
+          Particles: )"};
     std::string particles{"{2112: " + std::to_string(n1) +
                           ", 2212: " + std::to_string(n2) + "}"};
     return Configuration{(tmp + particles).c_str()};
@@ -201,12 +221,15 @@ TEST(nucleon_density) {
   // config with values for an easy analytic deformed-woods-saxon value
   // Uranium core with default values
   Configuration conf1{R"(
-    Particles: 
-      2112: 146
-      2212: 92
-    Saturation_Density: 0.166
-    Diffusiveness: 0.556
-    Radius: 6.86
+    Modi:
+      Collider:
+        Projectile:
+          Particles:
+            2112: 146
+            2212: 92
+          Saturation_Density: 0.166
+          Diffusiveness: 0.556
+          Radius: 6.86
   )"};
   // verifies that deformed Woods-Saxon is indeed 0 for some arbitrary values
   DeformedNucleus dnucleus1(conf1, 1, false);
@@ -216,12 +239,15 @@ TEST(nucleon_density) {
   // config with values for an easy analytic deformed Woods-Saxon value
   // Lead core with default values
   Configuration conf2{R"(
-    Particles:
-      2112: 126
-      2212: 82
-    Saturation_Density: 0.161
-    Diffusiveness: 0.54
-    Radius: 6.67
+    Modi:
+      Collider:
+        Projectile:
+          Particles:
+            2112: 126
+            2212: 82
+          Saturation_Density: 0.161
+          Diffusiveness: 0.54
+          Radius: 6.67
   )"};
   // verifies that deformed Woods-Saxon is indeed 0.5
   DeformedNucleus dnucleus2(conf2, 1, false);

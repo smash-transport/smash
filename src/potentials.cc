@@ -17,39 +17,41 @@ namespace smash {
 
 Potentials::Potentials(Configuration conf, const DensityParameters &param)
     : param_(param),
-      use_skyrme_(conf.has_value({"Skyrme"})),
-      use_symmetry_(conf.has_value({"Symmetry"})),
-      use_coulomb_(conf.has_value({"Coulomb"})),
-      use_vdf_(conf.has_value({"VDF"})),
-      use_momentum_dependence_(conf.has_value({"Momentum_Dependence"})),
+      use_skyrme_(conf.has_section(InputSections::p_skyrme)),
+      use_symmetry_(conf.has_section(InputSections::p_symmetry)),
+      use_coulomb_(conf.has_section(InputSections::p_coulomb)),
+      use_vdf_(conf.has_section(InputSections::p_vdf)),
+      use_momentum_dependence_(
+          conf.has_section(InputSections::p_momentumDependence)),
       use_potentials_outside_lattice_(
-          conf.take({"Use_Potentials_Outside_Lattice"},
-                    InputKeys::potentials_use_potentials_outside_lattice
-                        .default_value())) {
+          conf.take(InputKeys::potentials_use_potentials_outside_lattice)) {
   if (use_skyrme_) {
-    skyrme_a_ = conf.take({"Skyrme", "Skyrme_A"});
-    skyrme_b_ = conf.take({"Skyrme", "Skyrme_B"});
-    skyrme_tau_ = conf.take({"Skyrme", "Skyrme_Tau"});
+    skyrme_a_ = conf.take(InputKeys::potentials_skyrme_skyrmeA);
+    skyrme_b_ = conf.take(InputKeys::potentials_skyrme_skyrmeB);
+    skyrme_tau_ = conf.take(InputKeys::potentials_skyrme_skyrmeTau);
   }
   if (use_momentum_dependence_) {
-    mom_dependence_Lambda_ = conf.take({"Momentum_Dependence", "Lambda"});
-    mom_dependence_C_ = conf.take({"Momentum_Dependence", "C"});
+    mom_dependence_Lambda_ =
+        conf.take(InputKeys::potentials_momentum_dependence_Lambda);
+    mom_dependence_C_ = conf.take(InputKeys::potentials_momentum_dependence_C);
   }
 
   if (use_symmetry_) {
-    symmetry_S_Pot_ = conf.take({"Symmetry", "S_Pot"});
-    if (conf.has_value({"Symmetry", "gamma"})) {
-      symmetry_gamma_ = conf.take({"Symmetry", "gamma"});
+    symmetry_S_Pot_ = conf.take(InputKeys::potentials_symmetry_sPot);
+    if (conf.has_value(InputKeys::potentials_symmetry_gamma)) {
+      symmetry_gamma_ = conf.take(InputKeys::potentials_symmetry_gamma);
       symmetry_is_rhoB_dependent_ = true;
     }
   }
   if (use_coulomb_) {
-    coulomb_r_cut_ = conf.take({"Coulomb", "R_Cut"});
+    coulomb_r_cut_ = conf.take(InputKeys::potentials_coulomb_rCut);
   }
   if (use_vdf_) {
-    saturation_density_ = conf.take({"VDF", "Sat_rhoB"});
-    std::vector<double> aux_coeffs = conf.take({"VDF", "Coeffs"});
-    std::vector<double> aux_powers = conf.take({"VDF", "Powers"});
+    saturation_density_ = conf.take(InputKeys::potentials_vdf_satRhoB);
+    std::vector<double> aux_coeffs =
+        conf.take(InputKeys::potentials_vdf_coeffs);
+    std::vector<double> aux_powers =
+        conf.take(InputKeys::potentials_vdf_powers);
     if (aux_coeffs.size() != aux_powers.size()) {
       throw std::invalid_argument(
           "The number of coefficients should equal the number of powers.");

@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2012-2023
+#    Copyright (c) 2012-2024
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -289,6 +289,7 @@ smash_add_unittest(integrate)
 smash_add_unittest(interpolation)
 smash_add_unittest(interpolation2D)
 smash_add_unittest(isospin)
+smash_add_unittest(key)
 smash_add_unittest(kinematics)
 smash_add_unittest(lattice)
 smash_add_unittest(listmodus)
@@ -324,6 +325,7 @@ smash_add_unittest(spectral_functions)
 smash_add_unittest(stringfunctions)
 smash_add_unittest(tabulation)
 smash_add_unittest(threevector)
+smash_add_unittest(traits)
 smash_add_unittest(two_unstable_products)
 smash_add_unittest(vtkoutput)
 smash_add_unittest(width)

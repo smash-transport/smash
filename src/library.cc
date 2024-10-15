@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022
+ *    Copyright (c) 2022,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,6 +13,7 @@
 
 #include "smash/configuration.h"
 #include "smash/decaymodes.h"
+#include "smash/input_keys.h"
 #include "smash/inputfunctions.h"
 #include "smash/isoparticletype.h"
 #include "smash/logging.h"
@@ -47,8 +48,9 @@ void initialize_particles_decays_and_tabulations(
     const std::string &tabulations_dir) {
   logg[LMain].trace(SMASH_SOURCE_LOCATION,
                     " create ParticleType and DecayModes");
-  const std::string particles_string = configuration.take({"particles"});
-  const std::string decaymodes_string = configuration.take({"decaymodes"});
+  const std::string particles_string = configuration.take(InputKeys::particles);
+  const std::string decaymodes_string =
+      configuration.take(InputKeys::decaymodes);
   ParticleType::create_type_list(particles_string);
   DecayModes::load_decaymodes(decaymodes_string);
   ParticleType::check_consistency();
@@ -103,10 +105,13 @@ static void fully_validate_configuration(const Configuration &configuration) {
 }
 
 static void setup_logging(Configuration &configuration) {
-  set_default_loglevel(
-      configuration.take({"Logging", "default"}, einhard::ALL));
-  create_all_loggers(configuration.extract_sub_configuration(
-      {"Logging"}, Configuration::GetEmpty::Yes));
+  set_default_loglevel(configuration.take(InputKeys::log_default));
+  auto logger_config = configuration.extract_sub_configuration(
+      InputSections::logging, Configuration::GetEmpty::Yes);
+  if (!logger_config.is_empty()) {
+    logger_config.enclose_into_section(InputSections::logging);
+  }
+  create_all_loggers(std::move(logger_config));
 }
 
 static void read_particles_and_decaymodes_files_setting_keys_in_configuration(
@@ -119,26 +124,30 @@ static void read_particles_and_decaymodes_files_setting_keys_in_configuration(
       load_particles_and_decaymodes(particles_path, decaymodes_path);
   /* For particles and decaymodes: external file is superior to config.
    * However, warn in case of conflict. */
-  if (configuration.has_value({"particles"}) && !particles_path.empty()) {
+  if (configuration.has_value(InputKeys::particles) &&
+      !particles_path.empty()) {
     logg[LMain].warn(
         "Ambiguity: particles from external file ", particles_path,
         " requested, but there is also particle list in the config."
         " Using particles from ",
         particles_path);
   }
-  if (!configuration.has_value({"particles"}) || !particles_path.empty()) {
-    configuration.set_value({"particles"}, particles_and_decays.first);
+  if (!configuration.has_value(InputKeys::particles) ||
+      !particles_path.empty()) {
+    configuration.set_value(InputKeys::particles, particles_and_decays.first);
   }
 
-  if (configuration.has_value({"decaymodes"}) && !decaymodes_path.empty()) {
+  if (configuration.has_value(InputKeys::decaymodes) &&
+      !decaymodes_path.empty()) {
     logg[LMain].warn(
         "Ambiguity: decaymodes from external file ", decaymodes_path,
         " requested, but there is also decaymodes list in the config."
         " Using decaymodes from",
         decaymodes_path);
   }
-  if (!configuration.has_value({"decaymodes"}) || !decaymodes_path.empty()) {
-    configuration.set_value({"decaymodes"}, particles_and_decays.second);
+  if (!configuration.has_value(InputKeys::decaymodes) ||
+      !decaymodes_path.empty()) {
+    configuration.set_value(InputKeys::decaymodes, particles_and_decays.second);
   }
 }
 

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2022
+ *    Copyright (c) 2013-2022,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -159,7 +159,8 @@ class ModusDefault {
        If one wants to have a central cell with center at 0,0,0 then
        number of cells should be odd (2k+1) in every direction.
      */
-    const std::array<double, 3> l = conf.take({"Lattice_Sizes"});
+    const std::array<double, 3> l =
+        conf.take(InputKeys::forcedThermalization_latticeSizes);
     const std::array<double, 3> origin = {-0.5 * l[0], -0.5 * l[1],
                                           -0.5 * l[2]};
     const bool periodicity = false;

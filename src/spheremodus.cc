@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2023
+ *    Copyright (c) 2012-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -36,37 +36,36 @@ static constexpr int LSphere = LogArea::Sphere::id;
 
 SphereModus::SphereModus(Configuration modus_config,
                          const ExperimentParameters &)
-    : radius_(modus_config.take({"Sphere", "Radius"})),
-      sphere_temperature_(modus_config.take({"Sphere", "Temperature"})),
-      start_time_(modus_config.take({"Sphere", "Start_Time"}, 0.)),
+    : radius_(modus_config.take(InputKeys::modi_sphere_radius)),
+      sphere_temperature_(
+          modus_config.take(InputKeys::modi_sphere_temperature)),
+      start_time_(modus_config.take(InputKeys::modi_sphere_startTime)),
       use_thermal_(
-          modus_config.take({"Sphere", "Use_Thermal_Multiplicities"}, false)),
-      mub_(modus_config.take({"Sphere", "Baryon_Chemical_Potential"}, 0.)),
-      mus_(modus_config.take({"Sphere", "Strange_Chemical_Potential"}, 0.)),
-      muq_(modus_config.take({"Sphere", "Charge_Chemical_Potential"}, 0.)),
+          modus_config.take(InputKeys::modi_sphere_useThermalMultiplicities)),
+      mub_(modus_config.take(InputKeys::modi_sphere_baryonChemicalPotential)),
+      mus_(modus_config.take(InputKeys::modi_sphere_strangeChemicalPotential)),
+      muq_(modus_config.take(InputKeys::modi_sphere_chargeChemicalPotential)),
       account_for_resonance_widths_(
-          modus_config.take({"Sphere", "Account_Resonance_Widths"}, true)),
+          modus_config.take(InputKeys::modi_sphere_accountResonanceWidths)),
       init_multipl_(use_thermal_
                         ? std::map<PdgCode, int>()
-                        : modus_config.take({"Sphere", "Init_Multiplicities"})
-                              .convert_for(init_multipl_)),
-      init_distr_(
-          modus_config.take({"Sphere", "Initial_Condition"},
-                            SphereInitialCondition::ThermalMomentaBoltzmann)),
+                        : modus_config.take(
+                              InputKeys::modi_sphere_initialMultiplicities)),
+      init_distr_(modus_config.take(InputKeys::modi_sphere_initialCondition)),
       radial_velocity_(
-          modus_config.take({"Sphere", "Add_Radial_Velocity"}, -1.)),
+          modus_config.take(InputKeys::modi_sphere_addRadialVelocity)),
       /* Note that it is crucial not to take other keys from the Jet section
        * before Jet_PDG, since we want here the take to throw in case the user
        * had a Jet section without the mandatory Jet_PDG key. If all other keys
-       * are taken first, the section is removed from modus_config, because
-       * empty, and that has_value({"Sphere", "Jet"}) method would return false.
+       * are taken first, the section is removed from the config because empty,
+       * and has_section(InputSections::m_s_jet) method would return false.
        */
-      jet_pdg_(modus_config.has_value({"Sphere", "Jet"})
+      jet_pdg_(modus_config.has_section(InputSections::m_s_jet)
                    ? make_optional<PdgCode>(
-                         modus_config.take({"Sphere", "Jet", "Jet_PDG"}))
+                         modus_config.take(InputKeys::modi_sphere_jet_jetPdg))
                    : std::nullopt),
 
-      jet_mom_(modus_config.take({"Sphere", "Jet", "Jet_Momentum"}, 20.)) {}
+      jet_mom_(modus_config.take(InputKeys::modi_sphere_jet_jetMomentum)) {}
 
 /* console output on startup of sphere specific parameters */
 std::ostream &operator<<(std::ostream &out, const SphereModus &m) {

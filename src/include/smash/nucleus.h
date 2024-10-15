@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2022
+ *    Copyright (c) 2014-2022,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -87,14 +87,6 @@ class Nucleus {
    * \iref{Loizides:2017ack}).
    */
   virtual void set_parameters_automatic();
-
-  /**
-   * Sets the parameters of the Woods-Saxon according to
-   * manually added values in the configuration file.
-   *
-   * \param config The configuration for this nucleus (projectile or target).
-   */
-  virtual void set_parameters_from_config(Configuration &config);
 
   /**
    * Generates momenta according to Fermi motion for the nucleons.
@@ -379,6 +371,23 @@ class Nucleus {
    */
   friend std::ostream &operator<<(std::ostream &, const Nucleus &);
 };
+
+/**
+ * Find out whether a configuration has a projectile or a target sub-section.
+ *
+ * \param config The configuration to be checked.
+ */
+bool has_projectile_or_target(const Configuration &config);
+
+/**
+ * Find out whether a configuration is about projectile or target.
+ *
+ * \param config The configuration to be checked.
+ *
+ * \throw An \c std::logic_error if there is neither a projectile nor a target
+ * subsection or if both are present.
+ */
+bool is_about_projectile(const Configuration &config);
 
 }  // namespace smash
 

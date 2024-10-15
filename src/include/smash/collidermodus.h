@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2020,2022-2023
+ *    Copyright (c) 2012-2020,2022-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -249,11 +249,11 @@ class ColliderModus : public ModusDefault {
   /// Whether the reaction plane should be randomized
   bool random_reaction_plane_;
   /// Method used for sampling of impact parameter.
-  Sampling sampling_ = Sampling::Quadratic;
+  Sampling sampling_ = InputKeys::modi_collider_impact_sample.default_value();
   /// Minimum value of impact parameter.
-  double imp_min_ = 0.0;
+  double imp_min_ = InputKeys::modi_collider_impact_value.default_value();
   /// Maximum value of impact parameter.
-  double imp_max_ = 0.0;
+  double imp_max_ = InputKeys::modi_collider_impact_value.default_value();
   /// Maximum value of yield. Needed for custom impact parameter sampling.
   double yield_max_ = 0.0;
   /// Pointer to the impact parameter interpolation.
@@ -274,15 +274,15 @@ class ColliderModus : public ModusDefault {
    * and target on +(this value)*v_target/v_projectile. In this way
    * projectile and target touch at t=0 in z=0.
    **/
-  double initial_z_displacement_ = 2.0;
+  double initial_z_displacement_;
   /**
    * Reference frame for the system, as specified from config
    */
-  CalculationFrame frame_ = CalculationFrame::CenterOfVelocity;
+  CalculationFrame frame_;
   /**
    * An option to include Fermi motion ("off", "on", "frozen")
    */
-  FermiMotion fermi_motion_ = FermiMotion::Off;
+  FermiMotion fermi_motion_;
   /**
    * Beam velocity of the projectile
    */

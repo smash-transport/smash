@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2020,2022
+ *    Copyright (c) 2015-2020,2022,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,6 +10,7 @@
 #include "smash/pauliblocking.h"
 
 #include "smash/constants.h"
+#include "smash/input_keys.h"
 #include "smash/logging.h"
 
 namespace smash {
@@ -18,9 +19,9 @@ static constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
 PauliBlocker::PauliBlocker(Configuration conf,
                            const ExperimentParameters &param)
     : sig_(param.gaussian_sigma),
-      rc_(conf.take({"Gaussian_Cutoff"}, 2.2)),
-      rr_(conf.take({"Spatial_Averaging_Radius"}, 1.86)),
-      rp_(conf.take({"Momentum_Averaging_Radius"}, 0.08)),
+      rc_(conf.take(InputKeys::collTerm_pauliBlocking_gaussianCutoff)),
+      rr_(conf.take(InputKeys::collTerm_pauliBlocking_spatialAveragingRadius)),
+      rp_(conf.take(InputKeys::collTerm_pauliBlocking_momentumAveragingRadius)),
       ntest_(param.testparticles),
       n_ensembles_(param.n_ensembles) {
   if (ntest_ * n_ensembles_ < 20) {

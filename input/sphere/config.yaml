@@ -19,6 +19,7 @@ Modi:
         Radius: 5.0
         Temperature: 0.15
         Initial_Condition: "thermal momenta"
+        Start_Time: 0.0
         # The sphere is initialized with 35 pions of each charge state,
         # 10 protons and 10 neutrons. All other particles listed in
         # particles.txt can potentially be formed through interactions.

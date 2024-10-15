@@ -85,65 +85,65 @@ struct OutputParameters {
   explicit OutputParameters(Configuration conf) : OutputParameters() {
     logg[LExperiment].trace(SMASH_SOURCE_LOCATION);
 
-    if (conf.has_value({"Thermodynamics"})) {
-      auto thermo_conf = conf.extract_sub_configuration({"Thermodynamics"});
-      if (thermo_conf.has_value({"Position"})) {
-        const std::array<double, 3> a = thermo_conf.take({"Position"});
+    if (conf.has_section(InputSections::o_thermodynamics)) {
+      auto thermo_conf = conf.extract_complete_sub_configuration(
+          InputSections::o_thermodynamics);
+      if (thermo_conf.has_value(InputKeys::output_thermodynamics_position)) {
+        const std::array<double, 3> a =
+            thermo_conf.take(InputKeys::output_thermodynamics_position);
         td_position = ThreeVector(a[0], a[1], a[2]);
       }
-      std::set<ThermodynamicQuantity> quan = thermo_conf.take({"Quantities"});
+      std::set<ThermodynamicQuantity> quan =
+          thermo_conf.take(InputKeys::output_thermodynamics_quantites);
       td_rho_eckart = (quan.count(ThermodynamicQuantity::EckartDensity) > 0);
       td_tmn = (quan.count(ThermodynamicQuantity::Tmn) > 0);
       td_tmn_landau = (quan.count(ThermodynamicQuantity::TmnLandau) > 0);
       td_v_landau = (quan.count(ThermodynamicQuantity::LandauVelocity) > 0);
       td_jQBS = (quan.count(ThermodynamicQuantity::j_QBS) > 0);
-      td_dens_type = thermo_conf.take({"Type"}, DensityType::Baryon);
+      td_dens_type = thermo_conf.take(InputKeys::output_thermodynamics_type);
       if (td_dens_type == DensityType::None &&
           (td_rho_eckart || td_tmn || td_tmn_landau || td_v_landau)) {
         logg[LExperiment].warn(
             "Requested Thermodynamics output with Density type None. ",
             "Change the density type to avoid output being dropped.");
       }
-      td_smearing = thermo_conf.take({"Smearing"}, true);
-      td_only_participants = thermo_conf.take({"Only_Participants"}, false);
+      td_smearing = thermo_conf.take(InputKeys::output_thermodynamics_smearing);
+      td_only_participants =
+          thermo_conf.take(InputKeys::output_thermodynamics_onlyParticipants);
     }
 
-    if (conf.has_value({"Particles"})) {
-      part_extended = conf.take({"Particles", "Extended"}, false);
-      part_only_final =
-          conf.take({"Particles", "Only_Final"}, OutputOnlyFinal::Yes);
-      auto part_quantities =
-          conf.take({"Particles", "Quantities"},
-                    InputKeys::output_particles_quantities.default_value());
+    if (conf.has_section(InputSections::o_particles)) {
+      part_extended = conf.take(InputKeys::output_particles_extended);
+      part_only_final = conf.take(InputKeys::output_particles_onlyFinal);
+      const auto part_quantities =
+          conf.take(InputKeys::output_particles_quantities);
       quantities.insert({"Particles", part_quantities});
     }
 
-    if (conf.has_value({"Collisions"})) {
-      coll_extended = conf.take({"Collisions", "Extended"}, false);
-      coll_printstartend = conf.take({"Collisions", "Print_Start_End"}, false);
-      auto coll_quantities =
-          conf.take({"Collisions", "Quantities"},
-                    InputKeys::output_collisions_quantities.default_value());
+    if (conf.has_section(InputSections::o_collisions)) {
+      coll_extended = conf.take(InputKeys::output_collisions_extended);
+      coll_printstartend =
+          conf.take(InputKeys::output_collisions_printStartEnd);
+      const auto coll_quantities =
+          conf.take(InputKeys::output_collisions_quantities);
       quantities.insert({"Collisions", coll_quantities});
     }
 
-    if (conf.has_value({"Dileptons"})) {
-      dil_extended = conf.take({"Dileptons", "Extended"}, false);
+    if (conf.has_section(InputSections::o_dileptons)) {
+      dil_extended = conf.take(InputKeys::output_dileptons_extended);
     }
 
-    if (conf.has_value({"Photons"})) {
-      photons_extended = conf.take({"Photons", "Extended"}, false);
+    if (conf.has_section(InputSections::o_photons)) {
+      photons_extended = conf.take(InputKeys::output_photons_extended);
     }
 
-    if (conf.has_value({"Initial_Conditions"})) {
-      ic_extended = conf.take({"Initial_Conditions", "Extended"}, false);
+    if (conf.has_section(InputSections::o_initialConditions)) {
+      ic_extended = conf.take(InputKeys::output_initialConditions_extended);
     }
 
-    if (conf.has_value({"Rivet"})) {
-      auto rivet_conf = conf.extract_sub_configuration({"Rivet"});
-      logg[LOutput].debug() << "Reading Rivet section from configuration:\n"
-                            << rivet_conf.to_string() << "\n";
-
+    if (conf.has_section(InputSections::o_rivet)) {
+      auto rivet_conf =
+          conf.extract_complete_sub_configuration(InputSections::o_rivet);
       /*
        * std::optional<T> can be assigned from a value using the
        *    template<class U = T> optional& operator=( U&& value );
@@ -159,59 +159,58 @@ struct OutputParameters {
        * shipped within smash namespace is then used, while in all other cases
        * std::make_optional is used.
        */
-      if (rivet_conf.has_value({"Logging"})) {
+      if (rivet_conf.has_value(InputKeys::output_rivet_logging)) {
         rivet_parameters.logs =
             make_optional<std::map<std::string, std::string>>(
-                rivet_conf.take({"Logging"}));
+                rivet_conf.take(InputKeys::output_rivet_logging));
       }
-      if (rivet_conf.has_value({"Paths"})) {
-        rivet_parameters.paths =
-            make_optional<std::vector<std::string>>(rivet_conf.take({"Paths"}));
+      if (rivet_conf.has_value(InputKeys::output_rivet_paths)) {
+        rivet_parameters.paths = make_optional<std::vector<std::string>>(
+            rivet_conf.take(InputKeys::output_rivet_paths));
       }
-      if (rivet_conf.has_value({"Preloads"})) {
+      if (rivet_conf.has_value(InputKeys::output_rivet_preloads)) {
         rivet_parameters.preloads = make_optional<std::vector<std::string>>(
-            rivet_conf.take({"Preloads"}));
+            rivet_conf.take(InputKeys::output_rivet_preloads));
       }
-      if (rivet_conf.has_value({"Analyses"})) {
+      if (rivet_conf.has_value(InputKeys::output_rivet_analyses)) {
         rivet_parameters.analyses = make_optional<std::vector<std::string>>(
-            rivet_conf.take({"Analyses"}));
+            rivet_conf.take(InputKeys::output_rivet_analyses));
       }
-      if (rivet_conf.has_value({"Cross_Section"})) {
+      if (rivet_conf.has_value(InputKeys::output_rivet_crossSection)) {
         rivet_parameters.cross_sections = make_optional<std::array<double, 2>>(
-            rivet_conf.take({"Cross_Section"}));
+            rivet_conf.take(InputKeys::output_rivet_crossSection));
       }
-      rivet_parameters.ignore_beams = rivet_conf.take({"Ignore_Beams"}, true);
-      if (rivet_conf.has_value({"Weights"})) {
+      rivet_parameters.ignore_beams =
+          rivet_conf.take(InputKeys::output_rivet_ignoreBeams);
+      if (rivet_conf.has_section(InputSections::o_r_weights)) {
         rivet_parameters.any_weight_parameter_was_given = true;
-        if (rivet_conf.has_value({"Weights", "Select"})) {
+        if (rivet_conf.has_value(InputKeys::output_rivet_weights_select)) {
           rivet_parameters.to_be_enabled_weights =
               make_optional<std::vector<std::string>>(
-                  rivet_conf.take({"Weights", "Select"}));
+                  rivet_conf.take(InputKeys::output_rivet_weights_select));
         }
-        if (rivet_conf.has_value({"Weights", "Deselect"})) {
+        if (rivet_conf.has_value(InputKeys::output_rivet_weights_deselect)) {
           rivet_parameters.to_be_disabled_weights =
               make_optional<std::vector<std::string>>(
-                  rivet_conf.take({"Weights", "Deselect"}));
+                  rivet_conf.take(InputKeys::output_rivet_weights_deselect));
         }
-        if (rivet_conf.has_value({"Weights", "Nominal"})) {
+        if (rivet_conf.has_value(InputKeys::output_rivet_weights_nominal)) {
           rivet_parameters.nominal_weight_name = make_optional<std::string>(
-              rivet_conf.take({"Weights", "Nominal"}));
+              rivet_conf.take(InputKeys::output_rivet_weights_nominal));
         }
-        if (rivet_conf.has_value({"Weights", "Cap"})) {
-          rivet_parameters.cap_on_weights =
-              make_optional<double>(rivet_conf.take({"Weights", "Cap"}));
+        if (rivet_conf.has_value(InputKeys::output_rivet_weights_cap)) {
+          rivet_parameters.cap_on_weights = make_optional<double>(
+              rivet_conf.take(InputKeys::output_rivet_weights_cap));
         }
-        if (rivet_conf.has_value({"Weights", "NLO_Smearing"})) {
+        if (rivet_conf.has_value(InputKeys::output_rivet_weights_nloSmearing)) {
           rivet_parameters.nlo_smearing = make_optional<double>(
-              rivet_conf.take({"Weights", "NLO_Smearing"}));
+              rivet_conf.take(InputKeys::output_rivet_weights_nloSmearing));
         }
-        if (rivet_conf.has_value({"Weights", "No_Multi"})) {
-          rivet_parameters.no_multi_weight =
-              make_optional<bool>(rivet_conf.take({"Weights", "No_Multi"}));
+        if (rivet_conf.has_value(InputKeys::output_rivet_weights_noMulti)) {
+          rivet_parameters.no_multi_weight = make_optional<bool>(
+              rivet_conf.take(InputKeys::output_rivet_weights_noMulti));
         }
       }
-      logg[LOutput].debug() << "After processing configuration:\n"
-                            << rivet_conf.to_string() << "\n";
     }
   }
 
