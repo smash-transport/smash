@@ -3482,8 +3482,9 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_alphaClustered_sidelength_,Sidelength,double,3.42}
    *
-   * The sidelength of the regular tetrahedron used for alpha-clustering. The
-   * default value of 3.42 was taken from \iref{Li:2020vrg}.
+   * The sidelength \unit{in fm} of the regular tetrahedron used for
+   * alpha-clustering. The default value of 3.42 fm was taken from
+   * \iref{Li:2020vrg}.
    */
   /**
    * \see_key{key_MC_PT_alphaClustered_sidelength_}
