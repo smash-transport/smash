@@ -3480,24 +3480,24 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_alphaClustered_sidelength_,Sidelength,double,3.42}
+   * \optional_key_no_line{key_MC_PT_alphaClustered_sideLength_,Side_Length,double,3.42}
    *
    * The sidelength \unit{in fm} of the regular tetrahedron used for
    * alpha-clustering. The default value of 3.42 fm was taken from
    * \iref{Li:2020vrg}.
    */
   /**
-   * \see_key{key_MC_PT_alphaClustered_sidelength_}
+   * \see_key{key_MC_PT_alphaClustered_sideLength_}
    */
   inline static const Key<double>
-      modi_collider_projectile_alphaClustered_sidelength{
-          InputSections::m_c_p_alphaClustered + "Sidelength", 3.42, {"3.2"}};
+      modi_collider_projectile_alphaClustered_sideLength{
+          InputSections::m_c_p_alphaClustered + "Side_Length", 3.42, {"3.2"}};
   /**
-   * \see_key{key_MC_PT_alphaClustered_sidelength_}
+   * \see_key{key_MC_PT_alphaClustered_sideLength_}
    */
   inline static const Key<double>
-      modi_collider_target_alphaClustered_sidelength{
-          InputSections::m_c_t_alphaClustered + "Sidelength", 3.42, {"3.2"}};
+      modi_collider_target_alphaClustered_sideLength{
+          InputSections::m_c_t_alphaClustered + "Side_Length", 3.42, {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -5636,8 +5636,8 @@ struct InputKeys {
       std::cref(modi_collider_target_deformed_gamma),
       std::cref(modi_collider_projectile_alphaClustered_automatic),
       std::cref(modi_collider_target_alphaClustered_automatic),
-      std::cref(modi_collider_projectile_alphaClustered_sidelength),
-      std::cref(modi_collider_target_alphaClustered_sidelength),
+      std::cref(modi_collider_projectile_alphaClustered_sideLength),
+      std::cref(modi_collider_target_alphaClustered_sideLength),
       std::cref(modi_collider_projectile_orientation_phi),
       std::cref(modi_collider_target_orientation_phi),
       std::cref(modi_collider_projectile_orientation_psi),

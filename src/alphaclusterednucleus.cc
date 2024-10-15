@@ -43,8 +43,8 @@ AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int n_test,
   if (!automatic) {
     const auto &side_length_key = [&is_projectile]() {
       return is_projectile
-                 ? InputKeys::modi_collider_projectile_alphaClustered_sidelength
-                 : InputKeys::modi_collider_target_alphaClustered_sidelength;
+                 ? InputKeys::modi_collider_projectile_alphaClustered_sideLength
+                 : InputKeys::modi_collider_target_alphaClustered_sideLength;
     }();
     tetrahedron_side_length_ = config.take(side_length_key);
   }
