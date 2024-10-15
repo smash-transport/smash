@@ -21,12 +21,12 @@
 namespace smash {
 
 AlphaClusteredNucleus::AlphaClusteredNucleus(
-    const std::map<PdgCode, int> &particle_list, int nTest)
-    : Nucleus(particle_list, nTest) {}
+    const std::map<PdgCode, int> &particle_list, int n_test)
+    : Nucleus(particle_list, n_test) {}
 
-AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int nTest,
-                                             bool auto_alphaclustering)
-    : Nucleus(config, nTest) {
+AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int n_test,
+                                             bool automatic)
+    : Nucleus(config, n_test) {
   int A = Nucleus::number_of_particles();
   int Z = Nucleus::number_of_protons();
   if (A == 16 && Z == 8) {
@@ -40,15 +40,15 @@ AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int nTest,
   }
   const bool is_projectile = is_about_projectile(config);
 
-  if (!auto_alphaclustering) {
+  if (!automatic) {
     const auto &side_length_key = [&is_projectile]() {
       return is_projectile
                  ? InputKeys::modi_collider_projectile_alphaClustered_sidelength
                  : InputKeys::modi_collider_target_alphaClustered_sidelength;
     }();
-    tetrahedron_sidelength_ = config.take(side_length_key);
+    tetrahedron_side_length_ = config.take(side_length_key);
   }
-  scale_tetrahedron_vertex_positions(tetrahedron_sidelength_);
+  scale_tetrahedron_vertex_positions(tetrahedron_side_length_);
   const auto &orientation_section = [&is_projectile]() {
     return is_projectile ? InputSections::m_c_p_orientation
                          : InputSections::m_c_t_orientation;
@@ -69,9 +69,9 @@ ThreeVector AlphaClusteredNucleus::distribute_nucleon() {
 }
 
 void AlphaClusteredNucleus::scale_tetrahedron_vertex_positions(
-    double sidelength) {
+    double side_length) {
   for (auto &&i : tetrahedron_vertex_positions_) {
-    i = i * std::sqrt(6) / 4 * sidelength;
+    i = i * std::sqrt(6) / 4 * side_length;
   }
 }
 

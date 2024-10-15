@@ -32,20 +32,20 @@ class AlphaClusteredNucleus : public Nucleus {
    *
    * \param[in] particle_list Map with PDG code and number of particles which
    *                          make up the nucleus
-   * \param[in] nTest number of test particles
+   * \param[in] n_test number of test particles
    */
-  AlphaClusteredNucleus(const std::map<PdgCode, int> &particle_list, int nTest);
+  AlphaClusteredNucleus(const std::map<PdgCode, int> &particle_list,
+                        int n_test);
 
   /**
    * Constructor which takes a configuration and the number of test particles.
    *
    * \param[in] config the input configuration object
-   * \param[in] nTest number of test particles
-   * \param[in] auto_alphaclustering whether or not the alpha-clustering
-   *                                 parameters should be set automatically
+   * \param[in] n_test number of test particles
+   * \param[in] automatic whether or not the alpha-clustering parameters should
+   *                      be set automatically
    */
-  AlphaClusteredNucleus(Configuration &config, int nTest,
-                        bool auto_alphaclustering);
+  AlphaClusteredNucleus(Configuration &config, int n_test, bool automatic);
 
   /**
    * Alpha-clustering sampling routine. This routine samples the nucleon using
@@ -59,13 +59,13 @@ class AlphaClusteredNucleus : public Nucleus {
   /**
    * Scales the tetrahedron vertex positions to have the specified side length.
    *
-   * \param[in] sidelength Side length to be used to scale the tetrahedron
+   * \param[in] side_length Side length to be used to scale the tetrahedron
    */
-  void scale_tetrahedron_vertex_positions(double sidelength);
+  void scale_tetrahedron_vertex_positions(double side_length);
 
  private:
   /// Side length of the tetrahedron used for alpha-clustering.
-  double tetrahedron_sidelength_ = 3.42;
+  double tetrahedron_side_length_ = 3.42;
   /**
    * Positions of the vertices of the regular tetrahedron with center at (0,0,0)
    * used for alpha-clustering.
