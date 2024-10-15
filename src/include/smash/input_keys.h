@@ -3461,9 +3461,9 @@ struct InputKeys {
    *
    * \required_key_no_line{key_MC_PT_alphaClustered_auto_,Automatic,bool}
    *
-   * - `true` &rarr; Automatically set the sidelength of the tetrahedron used
+   * - `true` &rarr; Automatically set the side length of the tetrahedron used
    * for alpha-clustering.
-   * - `false` &rarr; Manually set the sidelength of the tetrahedron used for
+   * - `false` &rarr; Manually set the side length of the tetrahedron used for
    * alpha-clustering.
    */
   /**
@@ -6222,13 +6222,12 @@ General:
  * at the top-level of SMASH codebase.
  *
  * <hr>
- * \anchor input_modi_collider_projectile_and_target_ex2_
+ * \anchor input_modi_collider_projectile_and_target_ex3_
  * ### Configuring a deformed nucleus
  *
  * To configure a fixed target heavy-ion collision with deformed nuclei, whose
  * spherical deformation is explicitly declared, it can be done according to
- the
- * following example. For explanatory (and not physics) reasons, the
+ * the following example. For explanatory (and not physics) reasons, the
  * projectile's Woods-Saxon distribution is initialized automatically and
  * its spherical deformation manually, while the target nucleus is configured
  * just the opposite.
@@ -6261,6 +6260,32 @@ General:
                  Random_Rotation: true
          E_kin: 1.2
          Calculation_Frame: "fixed target"
+ \endverbatim
+ *
+ * <hr>
+ * \anchor input_modi_collider_projectile_and_target_ex4_
+ * ### Configuring an alpha-clustered nucleus
+ *
+ * The following example shows how to setup projectile and target using
+ * alpha-clustering in an O-O collision. The projectile is automatically
+ * initialized, while the target nucleus is manually configured specifying a
+ * side length of the tetrahedron (this serves only for demonstration purposes
+ * and in real situations projectile and target should be initialised in the
+ * same way).
+ *\verbatim
+ Modi:
+    Collider:
+        Projectile:
+            Particles: {2212: 8, 2112: 8} #Oxygen16
+            Alpha_Clustering:
+                Automatic: "True"  # Use default 3.42 for the side length
+        Target:
+            Particles: {2212: 8, 2112: 8} #Oxygen16
+            Alpha_Clustering:
+                Automatic: "False"
+                Side_Length: 4.2
+        Sqrtsnn: 200
+        Fermi_Motion: frozen
  \endverbatim
  */
 
