@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022
+ *    Copyright (c) 2022,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "configuration.h"
+#include "sha256.h"
 
 #ifndef SRC_INCLUDE_SMASH_LIBRARY_H_
 #define SRC_INCLUDE_SMASH_LIBRARY_H_
@@ -40,8 +41,8 @@ Configuration setup_config_and_logging(
     const std::vector<std::string> &extra_config = {});
 
 /**
- * Initialize the particles and decays from the given configuration,
- * plus tabulate the resonance integrals.
+ * Wrapper over a function that initializes the particles and decays from the
+ * given configuration, and over another that tabulates the resonance integrals.
  *
  * \param[in] configuration Fully-setup configuration i.e. including
  * particles and decaymodes.
@@ -52,6 +53,25 @@ void initialize_particles_decays_and_tabulations(
     Configuration &configuration, const std::string &version,
     const std::string &tabulations_dir = {});
 
+/**
+ * Initialize the particles and decays from the given configuration.
+ *
+ * \param[in] configuration Fully-setup configuration i.e. including
+ * particles and decaymodes.
+ * \param[in] version Current version of SMASH.
+ * \return hash of the version, particle list, and decay modes.
+ */
+sha256::Hash initialize_particles_decays_and_return_hash(
+    Configuration &configuration, const std::string &version);
+
+/**
+ * Tabulate the resonance integrals.
+ *
+ * \param[in] hash Hash of the SMASH version, particle list, and decay modes.
+ * \param[in] tabulations_dir Path where tabulations should be stored.
+ */
+void tabulate_resonance_integrals(const sha256::Hash &hash,
+                                  const std::string &tabulations_dir);
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_LIBRARY_H_

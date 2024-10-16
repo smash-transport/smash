@@ -46,6 +46,13 @@ Configuration setup_config_and_logging(
 void initialize_particles_decays_and_tabulations(
     Configuration &configuration, const std::string &version,
     const std::string &tabulations_dir) {
+  const auto hash =
+      initialize_particles_decays_and_return_hash(configuration, version);
+  tabulate_resonance_integrals(hash, tabulations_dir);
+}
+
+sha256::Hash initialize_particles_decays_and_return_hash(
+    Configuration &configuration, const std::string &version) {
   logg[LMain].trace(SMASH_SOURCE_LOCATION,
                     " create ParticleType and DecayModes");
   const std::string particles_string = configuration.take(InputKeys::particles);
@@ -62,7 +69,11 @@ void initialize_particles_decays_and_tabulations(
   hash_context.update(decaymodes_string);
   const auto hash = hash_context.finalize();
   logg[LMain].info() << "Config hash: " << sha256::hash_to_string(hash);
+  return hash;
+}
 
+void tabulate_resonance_integrals(const sha256::Hash &hash,
+                                  const std::string &tabulations_dir) {
   logg[LMain].info("Tabulating cross section integrals...");
   std::filesystem::path tabulations_path(tabulations_dir);
   if (!tabulations_path.empty()) {

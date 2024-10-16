@@ -54,13 +54,16 @@ int main() {
 
     std::string smash_version = SMASH_VERSION;
 
-    // 3) Initialize decay modes, particle types, tabulations
-    smash::initialize_particles_decays_and_tabulations(config, smash_version,
-                                                       tabulations_path);
+    // 3) Initialize decay modes, particle types
+    const auto hash = smash::initialize_particles_decays_and_return_hash(
+        config, smash_version);
 
     // Create experiment
     auto experiment =
         smash::Experiment<smash::ColliderModus>(config, output_path);
+
+    // Tabulate integrals
+    smash::tabulate_resonance_integrals(hash, tabulations_path);
 
     ////////////////////////////////////////////////////////////////////////////
     // Run the experiment in a special way here, mimicking new JETSCAPE features
