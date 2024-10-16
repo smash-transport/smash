@@ -13,7 +13,6 @@
 #include "smash/configuration.h"
 #include "smash/constants.h"
 #include "smash/fourvector.h"
-#include "smash/input_keys.h"
 #include "smash/numerics.h"
 #include "smash/random.h"
 #include "smash/threevector.h"

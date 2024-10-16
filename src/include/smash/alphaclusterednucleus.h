@@ -13,6 +13,7 @@
 #include "angles.h"
 #include "configuration.h"
 #include "forwarddeclarations.h"
+#include "input_keys.h"
 #include "nucleus.h"
 #include "threevector.h"
 
@@ -64,8 +65,16 @@ class AlphaClusteredNucleus : public Nucleus {
   void scale_tetrahedron_vertex_positions(double side_length);
 
  private:
-  /// Side length of the tetrahedron used for alpha-clustering.
-  double tetrahedron_side_length_ = 3.42;
+  /**
+   * Side length of the tetrahedron used for alpha-clustering.
+   *
+   * \note The default is set to the default of the projectile key, although
+   * this class is instantiated for the target, too. However, this should be
+   * fine since the keys defaults are forced to be the same in the database.
+   */
+  double tetrahedron_side_length_ =
+      InputKeys::modi_collider_projectile_alphaClustered_sideLength
+          .default_value();
   /**
    * Positions of the vertices of the regular tetrahedron with center at (0,0,0)
    * used for alpha-clustering.
