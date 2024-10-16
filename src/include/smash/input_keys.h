@@ -3394,7 +3394,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta2{
-      InputSections::m_c_t_deformed + "Beta_2", 0.0, {"1.5"}};
+      InputSections::m_c_t_deformed + "Beta_2",
+      InputKeys::modi_collider_projectile_deformed_beta2.default_value(),
+      {"1.5"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3412,7 +3414,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta3{
-      InputSections::m_c_t_deformed + "Beta_3", 0.0, {"3.0"}};
+      InputSections::m_c_t_deformed + "Beta_3",
+      InputKeys::modi_collider_projectile_deformed_beta3.default_value(),
+      {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3430,7 +3434,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta4{
-      InputSections::m_c_t_deformed + "Beta_4", 0.0, {"1.5"}};
+      InputSections::m_c_t_deformed + "Beta_4",
+      InputKeys::modi_collider_projectile_deformed_beta4.default_value(),
+      {"1.5"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3448,7 +3454,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_gamma_}
    */
   inline static const Key<double> modi_collider_target_deformed_gamma{
-      InputSections::m_c_t_deformed + "Gamma", 0.0, {"3.0"}};
+      InputSections::m_c_t_deformed + "Gamma",
+      InputKeys::modi_collider_projectile_deformed_gamma.default_value(),
+      {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3497,7 +3505,10 @@ struct InputKeys {
    */
   inline static const Key<double>
       modi_collider_target_alphaClustered_sideLength{
-          InputSections::m_c_t_alphaClustered + "Side_Length", 3.42, {"3.2"}};
+          InputSections::m_c_t_alphaClustered + "Side_Length",
+          InputKeys::modi_collider_projectile_alphaClustered_sideLength
+              .default_value(),
+          {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3525,7 +3536,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_phi_}
    */
   inline static const Key<double> modi_collider_target_orientation_phi{
-      InputSections::m_c_t_orientation + "Phi", 0.0, {"0.50"}};
+      InputSections::m_c_t_orientation + "Phi",
+      InputKeys::modi_collider_projectile_orientation_phi.default_value(),
+      {"0.50"}};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_orientation_theta_,Theta,double,0.0}
@@ -3541,7 +3554,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_theta_}
    */
   inline static const Key<double> modi_collider_target_orientation_theta{
-      InputSections::m_c_t_orientation + "Theta", 0.0, {"0.50"}};
+      InputSections::m_c_t_orientation + "Theta",
+      InputKeys::modi_collider_projectile_orientation_theta.default_value(),
+      {"0.50"}};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_orientation_psi_,Psi,double,0.0}
@@ -3557,7 +3572,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_psi_}
    */
   inline static const Key<double> modi_collider_target_orientation_psi{
-      InputSections::m_c_t_orientation + "Psi", 0.0, {"3.0"}};
+      InputSections::m_c_t_orientation + "Psi",
+      InputKeys::modi_collider_projectile_orientation_psi.default_value(),
+      {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3574,7 +3591,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_random_}
    */
   inline static const Key<bool> modi_collider_target_orientation_randRot{
-      InputSections::m_c_t_orientation + "Random_Rotation", false, {"1.7"}};
+      InputSections::m_c_t_orientation + "Random_Rotation",
+      InputKeys::modi_collider_projectile_orientation_randRot.default_value(),
+      {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
