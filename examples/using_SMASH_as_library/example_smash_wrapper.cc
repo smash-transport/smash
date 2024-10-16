@@ -55,7 +55,7 @@ int main() {
     std::string smash_version = SMASH_VERSION;
 
     // 3) Initialize decay modes, particle types
-    auto hash = smash::initialize_particles_decays_and_return_hash(
+    const auto hash = smash::initialize_particles_decays_and_return_hash(
         config, smash_version);
 
     // Create experiment

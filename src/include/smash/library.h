@@ -41,8 +41,8 @@ Configuration setup_config_and_logging(
     const std::vector<std::string> &extra_config = {});
 
 /**
- * Legacy wrapper that calls \ref initialize_particles_decays_and_return_hash
- * and \ref initialize_tabulations.
+ * Wrapper over a function that initializes the particles and decays from the
+ * given configuration, and over another that tabulates the resonance integrals.
  *
  * \param[in] configuration Fully-setup configuration i.e. including
  * particles and decaymodes.
@@ -61,7 +61,7 @@ void initialize_particles_decays_and_tabulations(
  * \param[in] version Current version of SMASH.
  * \return hash of the version, particle list, and decay modes.
  */
-const sha256::Hash initialize_particles_decays_and_return_hash(
+sha256::Hash initialize_particles_decays_and_return_hash(
     Configuration &configuration, const std::string &version);
 
 /**

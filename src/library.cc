@@ -18,7 +18,6 @@
 #include "smash/isoparticletype.h"
 #include "smash/logging.h"
 #include "smash/setup_particles_decaymodes.h"
-#include "smash/sha256.h"
 #include "smash/stringfunctions.h"
 
 namespace smash {
@@ -47,12 +46,12 @@ Configuration setup_config_and_logging(
 void initialize_particles_decays_and_tabulations(
     Configuration &configuration, const std::string &version,
     const std::string &tabulations_dir) {
-  const auto &hash =
+  const auto hash =
       initialize_particles_decays_and_return_hash(configuration, version);
   tabulate_resonance_integrals(hash, tabulations_dir);
 }
 
-const sha256::Hash initialize_particles_decays_and_return_hash(
+sha256::Hash initialize_particles_decays_and_return_hash(
     Configuration &configuration, const std::string &version) {
   logg[LMain].trace(SMASH_SOURCE_LOCATION,
                     " create ParticleType and DecayModes");

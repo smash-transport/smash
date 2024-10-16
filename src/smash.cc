@@ -679,7 +679,7 @@ int main(int argc, char *argv[]) {
         << "# Date     : " << BUILD_DATE << '\n'
         << configuration.to_string() << '\n';
 
-    const auto &hash =
+    const auto hash =
         initialize_particles_decays_and_return_hash(configuration, version);
 
     // Create an experiment
