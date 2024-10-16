@@ -28,17 +28,6 @@ namespace smash {
 class AlphaClusteredNucleus : public Nucleus {
  public:
   /**
-   * Constructor which takes a particle list and the number of test particles.
-   * This constructor is only used for testing purposes.
-   *
-   * \param[in] particle_list Map with PDG code and number of particles which
-   *                          make up the nucleus
-   * \param[in] n_test number of test particles
-   */
-  AlphaClusteredNucleus(const std::map<PdgCode, int> &particle_list,
-                        int n_test);
-
-  /**
    * Constructor which takes a configuration and the number of test particles.
    *
    * \param[in] config the input configuration object

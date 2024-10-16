@@ -19,10 +19,6 @@
 
 namespace smash {
 
-AlphaClusteredNucleus::AlphaClusteredNucleus(
-    const std::map<PdgCode, int> &particle_list, int n_test)
-    : Nucleus(particle_list, n_test) {}
-
 AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int n_test,
                                              bool automatic)
     : Nucleus(config, n_test) {
@@ -34,12 +30,17 @@ AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int n_test,
     set_nuclear_radius(1.676);
   } else {
     throw std::domain_error(
-        "Alpha-Clustering is only implemented for oxygen nuclei. Please, check "
+        "Alpha-clustering is only implemented for oxygen nuclei. Please, check "
         "the 'Alpha_Clustered' section in your input file.");
   }
-  const bool is_projectile = is_about_projectile(config);
 
-  if (!automatic) {
+  /* NOTE: Here the Nucleus parent class has been initialised and the Projectile
+   * or Target subsection could be already be entirely extracted. Therefore
+   * unconditionally call here the is_about_projectile function might fail.
+   * This has to be called where appropriate and repeating it is not a problem.
+   */
+  if (!automatic && has_projectile_or_target(config)) {
+    const bool is_projectile = is_about_projectile(config);
     const auto &side_length_key = [&is_projectile]() {
       return is_projectile
                  ? InputKeys::modi_collider_projectile_alphaClustered_sideLength
@@ -48,13 +49,17 @@ AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int n_test,
     tetrahedron_side_length_ = config.take(side_length_key);
   }
   scale_tetrahedron_vertex_positions(tetrahedron_side_length_);
-  const auto &orientation_section = [&is_projectile]() {
-    return is_projectile ? InputSections::m_c_p_orientation
-                         : InputSections::m_c_t_orientation;
-  }();
-  if (config.has_section(orientation_section)) {
-    Configuration sub_conf = config.extract_sub_configuration({"Orientation"});
-    set_orientation_from_config(sub_conf);
+  if (has_projectile_or_target(config)) {
+    const bool is_projectile = is_about_projectile(config);
+    const auto &orientation_section = [&is_projectile]() {
+      return is_projectile ? InputSections::m_c_p_orientation
+                           : InputSections::m_c_t_orientation;
+    }();
+    if (config.has_section(orientation_section)) {
+      Configuration sub_conf =
+          config.extract_sub_configuration(orientation_section);
+      set_orientation_from_config(sub_conf);
+    }
   }
 }
 

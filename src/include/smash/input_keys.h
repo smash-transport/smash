@@ -6296,11 +6296,11 @@ General:
     Collider:
         Projectile:
             Particles: {2212: 8, 2112: 8} #Oxygen16
-            Alpha_Clustering:
+            Alpha_Clustered:
                 Automatic: "True"  # Use default 3.42 for the side length
         Target:
             Particles: {2212: 8, 2112: 8} #Oxygen16
-            Alpha_Clustering:
+            Alpha_Clustered:
                 Automatic: "False"
                 Side_Length: 4.2
         Sqrtsnn: 200
