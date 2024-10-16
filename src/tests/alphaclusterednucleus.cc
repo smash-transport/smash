@@ -70,7 +70,10 @@ TEST(correct_clusters) {
   }
 }
 
-// Check if the tetrahedron has the side length that is specified
+/* NOTE: Since arranging nucleons is not deterministic, here both diffusiveness
+ * and the nuclear radius are set to 0, such that the position of the Helium
+ * nucleons is the same.
+ */
 TEST(tetrahedron_scaling) {
   auto config = Configuration{R"(
     Modi:
@@ -82,12 +85,34 @@ TEST(tetrahedron_scaling) {
   )"};
   AlphaClusteredNucleus alpha_clustered_oxygen(config, 1, false);
   alpha_clustered_oxygen.set_diffusiveness(0.0);
-  alpha_clustered_oxygen.set_nuclear_radius(0.01);
+  alpha_clustered_oxygen.set_nuclear_radius(0.0);
   alpha_clustered_oxygen.arrange_nucleons();
-  for (auto i = alpha_clustered_oxygen.begin();
-       i != alpha_clustered_oxygen.end(); i++) {
-    COMPARE_RELATIVE_ERROR(i->position().threevec().abs(),
-                           std::sqrt(6) / 4 * 10,
-                           0.05);  // Checks if the side length is 10
+  for (auto it = alpha_clustered_oxygen.begin();
+       it != alpha_clustered_oxygen.end(); it++) {
+    COMPARE_RELATIVE_ERROR(it->position().threevec().abs() * 4 / std::sqrt(6),
+                           10.,
+                           1.e-12);  // Checks if the side length is 10
+  }
+}
+
+TEST(scaling_tetrahedron_twice_does_not_change_it) {
+  auto config = get_oxygen_configuration();
+  AlphaClusteredNucleus alpha_clustered_oxygen(config, 1, true);
+  alpha_clustered_oxygen.set_diffusiveness(0.0);
+  alpha_clustered_oxygen.set_nuclear_radius(0.0);
+  alpha_clustered_oxygen.arrange_nucleons();
+  std::vector<ThreeVector> initial_positions{};
+  std::transform(alpha_clustered_oxygen.cbegin(), alpha_clustered_oxygen.cend(),
+                 std::back_inserter(initial_positions),
+                 [](auto in) { return in.position().threevec(); });
+  alpha_clustered_oxygen.scale_tetrahedron_vertex_positions(3.42);
+  alpha_clustered_oxygen.arrange_nucleons();
+  std::vector<ThreeVector> final_positions{};
+  std::transform(alpha_clustered_oxygen.cbegin(), alpha_clustered_oxygen.cend(),
+                 std::back_inserter(final_positions),
+                 [](auto in) { return in.position().threevec(); });
+  for (auto it1 = initial_positions.begin(), it2 = final_positions.begin();
+       it1 != initial_positions.end(); it1++, it2++) {
+    COMPARE_RELATIVE_ERROR(it1->abs(), it2->abs(), 1.e-12);
   }
 }

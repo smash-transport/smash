@@ -75,7 +75,7 @@ ThreeVector AlphaClusteredNucleus::distribute_nucleon() {
 void AlphaClusteredNucleus::scale_tetrahedron_vertex_positions(
     double side_length) {
   for (auto &position : tetrahedron_vertex_positions_) {
-    position = position * std::sqrt(6) / 4 * side_length;
+    position = position / position.abs() * std::sqrt(6) / 4 * side_length;
   }
 }
 
