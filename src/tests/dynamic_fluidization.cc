@@ -10,6 +10,7 @@
 #include "vir/test.h"  // This include has to be first
 
 #include "setup.h"
+#include "smash/colldermodus.h"
 #include "smash/dynamicfluidfinder.h"
 #include "smash/experiment.h"
 #include "smash/random.h"
@@ -22,6 +23,54 @@ ParticleData create_particle_at(PdgCode pdg, Position pos);
 
 static FourVector unit{1, 0, 0, 0};
 static DensityParameters dens_par(Test::default_parameters());
+
+/*
+ unit test ideas:
+ - above_threshold
+ - is_process_fluidizable
+ - create IC parameters, access correctly
+ functional tests:
+ - dense region fluidizes
+ - nondense doesnt fluidize
+ - formation time?
+ - queue working
+ - min/max times obeyed
+ - lattice resizing
+ - sensitivity to lattice parameters?
+*/
+
+TEST(fluidization_finder) {
+  Test::create_actual_particletypes();
+  Test::create_actual_decaymodes();
+  ParticleList mother{ParticleData(ParticleType::find(0x2124), -1)};
+  std::vector<Particles> ensembles(1);
+  ParticleData a =
+      ensembles[0].insert(create_particle_at(0x2212, Position{0, -5, -5, -5}));
+  ParticleData b =
+      ensembles[0].insert(create_particle_at(0x111, Position{0, 5, 5, 5}));
+
+  a.set_4momentum(unit);  // set rest mass to 1 GeV
+  ensembles[0].update_particle(a, a);
+
+  // create large and coarse lattice
+  const std::array<double, 3> l{20, 20, 20}, origin{-10, -10, -10};
+  const std::array<int, 3> n{2, 2, 2};
+  auto lat = std::make_unique<RectangularLattice<EnergyMomentumTensor>>(
+      l, n, origin, false, LatticeUpdate::EveryTimestep);
+  build_fluidization_lattice(0, ensembles, dens_par);
+
+  // create fake background
+  auto background = std::make_unique<std::map<int32_t, double>>();
+  background->emplace(a.id(), 1.0);
+  background->emplace(b.id(), 0.0);
+
+  // create finder with 1 GeV threshold
+  DynamicFluidizationFinder finder(*lat.get(), *background.get(), 1, 0, 1, 2);
+
+  // check that background works
+  VERIFY(finder.above_threshold(a));
+  VERIFY(!finder.above_threshold(b));
+}
 
 TEST(dynamic_fluidization_action) {
   Test::create_actual_particletypes();
@@ -41,7 +90,7 @@ TEST(dynamic_fluidization_action) {
   const std::array<int, 3> n{2, 2, 2};
   auto lat = std::make_unique<RectangularLattice<EnergyMomentumTensor>>(
       l, n, origin, false, LatticeUpdate::EveryTimestep);
-  build_fluidization_lattice(lat.get(), 0, ensembles, dens_par);
+  build_fluidization_lattice(0, ensembles, dens_par);
 
   // create fake background
   auto background = std::make_unique<std::map<int32_t, double>>();

@@ -507,11 +507,123 @@ class DensityOnLattice {
   FourVector drho_dxnu_;
 };
 
-/// Conveniency typedef for lattice of density
-typedef RectangularLattice<DensityOnLattice> DensityLattice;
-
 /**
  * Updates the contents on the lattice.
+ *
+ * \param[out] lat The lattice on which the content will be updated
+ * \param[in] update tells if called for update at printout or at timestep
+ * \param[in] dens_type density type to be computed on the lattice
+ * \param[in] par a structure containing testparticles number and gaussian
+ *            smearing parameters.
+ * \param[in] plist the particle list to compute the lattice quantities
+ * \param[in] compute_gradient Whether to compute the gradients
+ * \param[in] lattice_reset Whether to start with a new lattice
+ * \tparam T LatticeType
+ */
+template <typename T>
+void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
+                    const DensityType dens_type, const DensityParameters &par,
+                    const ParticleList &plist, const bool compute_gradient,
+                    const bool lattice_reset = true) {
+  // Do not proceed if lattice does not exists/update not required
+  if (lat == nullptr || lat->when_update() != update) {
+    return;
+  }
+  if (lattice_reset) {
+    lat->reset();
+  }
+  for (const ParticleData &part : plist) {
+    if (par.only_participants()) {
+      // if this conditions holds, the hadron is a spectator
+      if (part.get_history().collisions_per_particle == 0) {
+        continue;
+      }
+    }
+    const double dens_factor = density_factor(part.type(), dens_type);
+    if (std::abs(dens_factor) < really_small) {
+      continue;
+    }
+    const FourVector p_mu = part.momentum();
+    const ThreeVector pos = part.position().threevec();
+
+    // act accordingly to which smearing is used
+    if (par.smearing() == SmearingMode::CovariantGaussian) {
+      // get the normalization factor for the covariant Gaussian smearing
+      const double norm_factor_gaus = par.norm_factor_sf();
+      const double m = p_mu.abs();
+      if (unlikely(m < really_small)) {
+        logg[LDensity].warn("Gaussian smearing is undefined for momentum ",
+                            p_mu);
+        continue;
+      }
+      const double m_inv = 1.0 / m;
+
+      // unweighted contribution to density
+      const double common_weight = dens_factor * norm_factor_gaus;
+      lat->iterate_in_cube(
+          pos, par.r_cut(), [&](T &node, int ix, int iy, int iz) {
+            // find the weight for smearing
+            const ThreeVector r = lat->cell_center(ix, iy, iz);
+            const auto sf = unnormalized_smearing_factor(pos - r, p_mu, m_inv,
+                                                         par, compute_gradient);
+            node.add_particle(part, sf.first * common_weight);
+            if (par.derivatives() == DerivativesMode::CovariantGaussian) {
+              node.add_particle_for_derivatives(part, dens_factor,
+                                                sf.second * norm_factor_gaus);
+            }
+          });
+    } else if (par.smearing() == SmearingMode::Discrete) {
+      // get the volume of the cell and weights for discrete smearing
+      const double V_cell = (lat->cell_sizes())[0] * (lat->cell_sizes())[1] *
+                            (lat->cell_sizes())[2];
+      // weights for coarse smearing
+      const double big = par.central_weight();
+      const double small = (1.0 - big) / 6.0;
+      // unweighted contribution to density
+      const double common_weight =
+          dens_factor / (par.ntest() * par.nensembles() * V_cell);
+      lat->iterate_nearest_neighbors(
+          pos, [&](T &node, int iterated_index, int center_index) {
+            node.add_particle(
+                part, common_weight *
+                          // the contribution to density is weighted depending
+                          // on what node it is added to
+                          (iterated_index == center_index ? big : small));
+          });
+    } else if (par.smearing() == SmearingMode::Triangular) {
+      // get the radii for triangular smearing
+      const std::array<double, 3> triangular_radius = {
+          par.triangular_range() * (lat->cell_sizes())[0],
+          par.triangular_range() * (lat->cell_sizes())[1],
+          par.triangular_range() * (lat->cell_sizes())[2]};
+      const double prefactor_triangular =
+          1.0 /
+          (par.ntest() * par.nensembles() * triangular_radius[0] *
+           triangular_radius[0] * triangular_radius[1] * triangular_radius[1] *
+           triangular_radius[2] * triangular_radius[2]);
+      // unweighted contribution to density
+      const double common_weight = dens_factor * prefactor_triangular;
+      lat->iterate_in_rectangle(
+          pos, triangular_radius, [&](T &node, int ix, int iy, int iz) {
+            // compute the position of the node
+            const ThreeVector cell_center = lat->cell_center(ix, iy, iz);
+            // compute smearing weight
+            const double weight_x =
+                triangular_radius[0] - std::abs(cell_center[0] - pos[0]);
+            const double weight_y =
+                triangular_radius[1] - std::abs(cell_center[1] - pos[1]);
+            const double weight_z =
+                triangular_radius[2] - std::abs(cell_center[2] - pos[2]);
+            // add the contribution to the node
+            node.add_particle(part,
+                              common_weight * weight_x * weight_y * weight_z);
+          });
+    }
+  }
+}
+
+/**
+ * Updates the contents on the lattice when ensembles are used.
  *
  * \param[out] lat The lattice on which the content will be updated
  * \param[in] update tells if called for update at printout or at timestep
@@ -531,100 +643,15 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
   if (lat == nullptr || lat->when_update() != update) {
     return;
   }
-
   lat->reset();
-  // get the normalization factor for the covariant Gaussian smearing
-  const double norm_factor_gaus = par.norm_factor_sf();
-  // get the volume of the cell and weights for discrete smearing
-  const double V_cell =
-      (lat->cell_sizes())[0] * (lat->cell_sizes())[1] * (lat->cell_sizes())[2];
-  // weights for coarse smearing
-  const double big = par.central_weight();
-  const double small = (1.0 - big) / 6.0;
-  // get the radii for triangular smearing
-  const std::array<double, 3> triangular_radius = {
-      par.triangular_range() * (lat->cell_sizes())[0],
-      par.triangular_range() * (lat->cell_sizes())[1],
-      par.triangular_range() * (lat->cell_sizes())[2]};
-  const double prefactor_triangular =
-      1.0 /
-      (par.ntest() * par.nensembles() * triangular_radius[0] *
-       triangular_radius[0] * triangular_radius[1] * triangular_radius[1] *
-       triangular_radius[2] * triangular_radius[2]);
-
   for (const Particles &particles : ensembles) {
-    for (const ParticleData &part : particles) {
-      if (par.only_participants()) {
-        // if this conditions holds, the hadron is a spectator
-        if (part.get_history().collisions_per_particle == 0) {
-          continue;
-        }
-      }
-      const double dens_factor = density_factor(part.type(), dens_type);
-      if (std::abs(dens_factor) < really_small) {
-        continue;
-      }
-      const FourVector p_mu = part.momentum();
-      const ThreeVector pos = part.position().threevec();
-
-      // act accordingly to which smearing is used
-      if (par.smearing() == SmearingMode::CovariantGaussian) {
-        const double m = p_mu.abs();
-        if (unlikely(m < really_small)) {
-          logg[LDensity].warn("Gaussian smearing is undefined for momentum ",
-                              p_mu);
-          continue;
-        }
-        const double m_inv = 1.0 / m;
-
-        // unweighted contribution to density
-        const double common_weight = dens_factor * norm_factor_gaus;
-        lat->iterate_in_cube(
-            pos, par.r_cut(), [&](T &node, int ix, int iy, int iz) {
-              // find the weight for smearing
-              const ThreeVector r = lat->cell_center(ix, iy, iz);
-              const auto sf = unnormalized_smearing_factor(
-                  pos - r, p_mu, m_inv, par, compute_gradient);
-              node.add_particle(part, sf.first * common_weight);
-              if (par.derivatives() == DerivativesMode::CovariantGaussian) {
-                node.add_particle_for_derivatives(part, dens_factor,
-                                                  sf.second * norm_factor_gaus);
-              }
-            });
-      } else if (par.smearing() == SmearingMode::Discrete) {
-        // unweighted contribution to density
-        const double common_weight =
-            dens_factor / (par.ntest() * par.nensembles() * V_cell);
-        lat->iterate_nearest_neighbors(
-            pos, [&](T &node, int iterated_index, int center_index) {
-              node.add_particle(
-                  part, common_weight *
-                            // the contribution to density is weighted depending
-                            // on what node it is added to
-                            (iterated_index == center_index ? big : small));
-            });
-      } else if (par.smearing() == SmearingMode::Triangular) {
-        // unweighted contribution to density
-        const double common_weight = dens_factor * prefactor_triangular;
-        lat->iterate_in_rectangle(
-            pos, triangular_radius, [&](T &node, int ix, int iy, int iz) {
-              // compute the position of the node
-              const ThreeVector cell_center = lat->cell_center(ix, iy, iz);
-              // compute smearing weight
-              const double weight_x =
-                  triangular_radius[0] - std::abs(cell_center[0] - pos[0]);
-              const double weight_y =
-                  triangular_radius[1] - std::abs(cell_center[1] - pos[1]);
-              const double weight_z =
-                  triangular_radius[2] - std::abs(cell_center[2] - pos[2]);
-              // add the contribution to the node
-              node.add_particle(part,
-                                common_weight * weight_x * weight_y * weight_z);
-            });
-      }
-    }  // end of for (const ParticleData &part : particles)
-  }    // end of for (const Particles &particles : ensembles)
+    update_lattice(lat, update, dens_type, par, particles.copy_to_vector(),
+                   compute_gradient, false);
+  }
 }
+
+/// Conveniency typedef for lattice of density
+typedef RectangularLattice<DensityOnLattice> DensityLattice;
 
 /**
  * Updates the contents on the lattice of DensityOnLattice type.

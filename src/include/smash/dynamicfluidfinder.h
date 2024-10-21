@@ -51,7 +51,7 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
         max_time_{ic_params.max_time.value()},
         formation_time_fraction_{ic_params.formation_time_fraction.value()},
         fluid_cells_{ic_params.num_fluid_cells.value()},
-        fluidizable_processes_{ic_params.fluidizable_processes} {};
+        fluidizable_processes_{ic_params.fluidizable_processes.value()} {};
 
   /**
    * Find particles to fluidize, depending on the energy density around them.
@@ -84,13 +84,6 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
   ActionList find_final_actions(const Particles &, bool) const override {
     return {};
   }
-
-  /**
-   * Determine fluidization
-   * \param[in] pdata Particle to be checked for fluidization.
-   * \return Whether energy density around pdata is high enough.
-   */
-  bool above_threshold(const ParticleData &pdata) const;
 
  private:
   /**
@@ -131,6 +124,15 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
       InputKeys::modi_collider_initialConditions_fluidCells.default_value();
   /// Processes that create a fluidizable particle
   const FluidizableProcessesBitSet fluidizable_processes_;
+
+  /**
+   * Determine if fluidization condition is satisfied.
+   *
+   * \param[in] pdata Particle to be checked for fluidization.
+   * \return Whether energy density around pdata is high enough.
+   */
+  bool above_threshold(const ParticleData &pdata) const;
+
   /**
    * Checks if a given process type is in \ref fluidizable_processes_. In
    * particular, initially sampled hadrons are not fluidizable and have

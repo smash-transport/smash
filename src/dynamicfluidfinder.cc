@@ -26,7 +26,7 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
     const double t_end = t0 + dt;
     // Particles should not be removed before the nuclei collide, and after some
     // time max_time_ there won't be any fluidization, so this saves resources
-    if (t0 < min_time_ || t_end > max_time_) {
+    if (t_end < min_time_ || t0 > max_time_) {
       break;
     }
 

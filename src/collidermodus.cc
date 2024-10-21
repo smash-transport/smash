@@ -645,13 +645,22 @@ void ColliderModus::build_fluidization_lattice(
   if (fluid_lattice_ == nullptr) {
     return;
   }
-  // In most scenarios where dynamic fluidization is applicable, t > 20 fm is
+  if (t < IC_parameters_.min_time.value() ||
+      t > IC_parameters_.max_time.value()) {
+    return;
+  }
+  // In most scenarios where dynamic fluidization is applicable, t > 25 fm is
   // dilute enough to not need a very fine lattice.
-  if (t > 20) {
-    std::array<double, 3> new_l{2 * t, 2 * t, 2 * t};
-    std::array<double, 3> new_orig{-t, -t, -t};
+  const double minimum_resizing_time = 25;
+  const double resizing_rate = 5;
+  static int times_resized = 0;
+  if (t > minimum_resizing_time + resizing_rate * times_resized) {
+    times_resized++;
+    const double t_goal = minimum_resizing_time + resizing_rate * times_resized;
+    std::array<double, 3> new_l{2 * t_goal, 2 * t_goal, 2 * t_goal};
+    std::array<double, 3> new_orig{-t_goal, -t_goal, -t_goal};
     fluid_lattice_->reset_and_resize(new_l, new_orig);
-    logg[LCollider].debug() << "Lattice resizing at " << t;
+    logg[LCollider].debug() << "Fluidization lattice resizing at " << t << " fm";
   }
 
   update_lattice(fluid_lattice_.get(), LatticeUpdate::EveryTimestep,

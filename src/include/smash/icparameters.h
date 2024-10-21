@@ -29,7 +29,8 @@ struct InitialConditionParameters {
   FluidizationType type;
   /// Which processes can have outgoing particles transformed into fluid in
   /// dynamic IC
-  FluidizableProcessesBitSet fluidizable_processes;
+  std::optional<FluidizableProcessesBitSet> fluidizable_processes =
+      std::nullopt;
   /// Hypersurface proper time in IC
   std::optional<double> proper_time = std::nullopt;
   /// Lower bound for proper time in IC
@@ -44,7 +45,7 @@ struct InitialConditionParameters {
   std::optional<double> min_time = std::nullopt;
   /// Maximum time (in lab frame) in fm for dynamic IC
   std::optional<double> max_time = std::nullopt;
-  /// Number of interpolating cells for dynamic IC
+  /// Number of interpolating cells in each direction for dynamic IC
   std::optional<int> num_fluid_cells = std::nullopt;
   /**
    * Fraction of formation time to pass before particles can fluidize in

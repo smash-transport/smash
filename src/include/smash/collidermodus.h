@@ -151,9 +151,8 @@ class ColliderModus : public ModusDefault {
     return fluid_lattice_.get();
   }
   /**
-   * Build lattice of energy momentum tensor. If enough time has passed
-   * (t>20\unit{fm}), the lattice grows linearly at each time step to accomodate
-   * for the system expansion.
+   * Build lattice of energy momentum tensor. After t>20 \unit{fm}, the lattice
+   * grows at every 5 \unit{fm} to accomodate for the system expansion.
    *
    * \param[in] t Current time.
    * \param[in] ensembles Only the first Particles element is actually used.
