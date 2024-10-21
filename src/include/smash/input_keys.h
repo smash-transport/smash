@@ -3862,7 +3862,9 @@ struct InputKeys {
    * \optional_key_no_line{key_MC_IC_form_time_fraction_,Formation_Time_Fraction,
    * double,1.0}
    *
-   * Fraction of the formation time after which a particle can fluidize
+   * Fraction of the formation time after which a particle can fluidize. It is
+   * is non-negative, and can assume values above 1. Setting it to 0 corresponds
+   * to ignoring formation time.
    */
   /**
    * \see_key{key_MC_IC_form_time_fraction_}

@@ -41,14 +41,14 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
       const auto process_type = p.get_history().process_type;
       if (is_process_fluidizable(process_type)) {
         if (above_threshold(p)) {
-          double formation =
+          double fluidization_time =
               t0 + formation_time_fraction_ * (p.formation_time() - t0);
-          if (formation >= t_end) {
-            queue_.emplace(id, formation);
+          if (fluidization_time >= t_end) {
+            queue_.emplace(id, fluidization_time);
           } else {
             double time_until = (1 - p.xsec_scaling_factor() <= really_small)
                                     ? 0
-                                    : formation - t0;
+                                    : fluidization_time - t0;
             // RENAN: add option on leading hadrons
             actions.emplace_back(
                 std::make_unique<FluidizationAction>(p, p, time_until));
@@ -72,10 +72,10 @@ bool DynamicFluidizationFinder::above_threshold(
     const double e_den_particles =
         Tmunu.boosted(Tmunu.landau_frame_4velocity())[0];
     if (e_den_particles + background >= energy_density_threshold_) {
-      logg[LFluidization].warn()
-          << "Fluidize " << pdata.id() << " with " << e_den_particles
-          << " and background " << background << " GeV/fm^3 formed at "
-          << pdata.formation_time() << ", at " << pdata.position().x0();
+      logg[LFluidization].debug()
+          << "Fluidize " << pdata.id() << " with " << e_den_particles << "+"
+          << background << " GeV/fm^3 at " << pdata.position().x0()
+          << " fm, formed at" << pdata.formation_time() << " fm";
       return true;
     }
   }
