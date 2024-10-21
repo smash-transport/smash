@@ -3799,6 +3799,63 @@ struct InputKeys {
       {"3.2"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_eden_threshold_,Energy_Density_Threshold,double,0.5}
+   *
+   * Set the minimum energy density \unit{in GeV/fm³} for a particle to be
+   * considered fluid. It is only used if the dynamic initial condition is
+   * active.
+   */
+  /**
+   * \see_key{key_MC_IC_eden_threshold_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_eDenThreshold{
+      {"Modi", "Collider", "Initial_Conditions", "Energy_Density_Threshold"},
+      0.5,
+      {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_mintime_,Minimum_Time,double,0}
+   *
+   * Set the minimum time \unit{in fm} for a particle to be considered fluid. It
+   * is only used if the dynamic initial condition is active.
+   */
+  /**
+   * \see_key{key_MC_IC_mintime_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_minTime{
+      {"Modi", "Collider", "Initial_Conditions", "Minimum_Time"}, 0, {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_maxtime_,Maximum_Time,double,100}
+   *
+   * Set the maximum time \unit{in fm} for a particle to be considered fluid. It
+   * is only used if the dynamic initial condition is active.
+   */
+  /**
+   * \see_key{key_MC_IC_maxtime_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_maxTime{
+      {"Modi", "Collider", "Initial_Conditions", "Maximum_Time"}, 100, {"3.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_fluid_cells_,Fluidization_Cells,int,50}
+   *
+   * Fixed number of cells to select fluidizing particles. Ideally the cell
+   * should be small enough for a meaningful interpolation.
+   */
+  /**
+   * \see_key{key_MC_IC_fluid_cells_}
+   */
+  inline static const Key<int> modi_collider_initialConditions_fluidCells{
+      {"Modi", "Collider", "Initial_Conditions", "Fluidization_Cells"},
+      50,
+      {"3.1"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * ### Mandatory keys
    */
@@ -4752,74 +4809,6 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_dynamic_,Dynamic,bool,false}
-   *
-   * The initial condition is generated dynamically, depending on the local
-   * energy density, which is interpolated by a lattice. This lattice is
-   * constant until 20 fm, after that it grows at each time step, mantaining a
-   * fixed number of cells.
-   */
-  /**
-   * \see_key{key_output_IC_dynamic_}
-   */
-  inline static const Key<bool> output_initialConditions_dynamic{
-      {"Output", "Initial_Conditions", "Dynamic"}, false, {"3.1"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_eden_threshold_,Energy_Density_Threshold,double,0.5}
-   *
-   * Set the minimum energy density \unit{in GeV/fm³} for a particle to be considered fluid. It is only used if the dynamic initial condition is active.
-   */
-  /**
-   * \see_key{key_output_IC_eden_threshold_}
-   */
-  inline static const Key<double> output_initialConditions_eDenThreshold{
-      {"Output", "Initial_Conditions", "Energy_Density_Threshold"},
-      0.5,
-      {"3.1"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_mintime_,Minimum_Time,double,0}
-   *
-   * Set the minimum time \unit{in fm} for a particle to be considered fluid. It is only used if the dynamic initial condition is active.
-   */
-  /**
-   * \see_key{key_output_IC_mintime_}
-   */
-  inline static const Key<double> output_initialConditions_minTime{
-      {"Output", "Initial_Conditions", "Minimum_Time"}, 0, {"3.1"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_maxtime_,Maximum_Time,double,100}
-   *
-   * Set the maximum time \unit{in fm} for a particle to be considered fluid. It is only
-   * used if the dynamic initial condition is active.
-   */
-  /**
-   * \see_key{key_output_IC_maxtime_}
-   */
-  inline static const Key<double> output_initialConditions_maxTime{
-      {"Output", "Initial_Conditions", "Maximum_Time"}, 100, {"3.1"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_fluid_cells_,Fluidization_Cells,int,50}
-   *
-   * Fixed number of cells to select fluidizing particles. Ideally the cell
-   * should be small enough for a meaningful interpolation.
-   */
-  /**
-   * \see_key{key_output_IC_fluid_cells_}
-   */
-  inline static const Key<int> output_initialConditions_fluidCells{
-      {"Output", "Initial_Conditions", "Fluidization_Cells"}, 50, {"3.1"}};
->>>>>>> 9d47252fe (Improves naming of functions and default parameters in constructor of finder)
-
-  /*!\Userguide
-   * \page doxypage_input_conf_output
    * <hr> \anchor input_output_rivet_
    * ### &diams; Rivet
    * &rArr; Only `YODA` format (see \ref doxypage_output_rivet
@@ -5752,7 +5741,11 @@ struct InputKeys {
       std::cref(modi_collider_impact_value),
       std::cref(modi_collider_impact_values),
       std::cref(modi_collider_impact_yields),
+      std::cref(modi_collider_initialConditions_eDenThreshold),
+      std::cref(modi_collider_initialConditions_fluidCells),
       std::cref(modi_collider_initialConditions_lowerBound),
+      std::cref(modi_collider_initialConditions_maxTime),
+      std::cref(modi_collider_initialConditions_minTime),
       std::cref(modi_collider_initialConditions_properTime),
       std::cref(modi_collider_initialConditions_pTCut),
       std::cref(modi_collider_initialConditions_rapidityCut),
@@ -5816,11 +5809,6 @@ struct InputKeys {
       std::cref(output_initialConditions_properTime),
       std::cref(output_initialConditions_pTCut),
       std::cref(output_initialConditions_rapidityCut),
-      std::cref(output_initialConditions_dynamic),
-      std::cref(output_initialConditions_eDenThreshold),
-      std::cref(output_initialConditions_minTime),
-      std::cref(output_initialConditions_maxTime),
-      std::cref(output_initialConditions_fluidCells),
       std::cref(output_rivet_analyses),
       std::cref(output_rivet_crossSection),
       std::cref(output_rivet_ignoreBeams),

@@ -31,23 +31,27 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
  public:
   /**
    * Construct finder for fluidization action.
-   * \param[in] energy_density_lattice Lattice used for the energy density interpolation.
-   * \param[in] energy_density_background Background map between particle indices and the
-   * corresponding background. 
-   * \param[in] energy_threshold Minimum energy density required for a hadron to 
-   * fluidize \unit{in GeV/fm³}.
-   * \param[in] min_time Minimum time to start fluidization \unit{in fm}.
-   * \param[in] max_time Time to stop fluidization \unit{in fm}, useful to save
-   * runtime.
-   * \param[in] fluid_cells Number of lattice cells in each dimension to use
-   * for the threshold evaluation.
+   * \param[in] energy_density_lattice Lattice used for the energy density
+   * interpolation
+   * \param[in] energy_density_background Background map between particle
+   * indices and the corresponding background
+   * \param[in] energy_threshold Minimum energy density required for a
+   * hadron to fluidize \unit{in GeV/fm³}
+   * \param[in] min_time Minimum time to start fluidization \unit{in fm}
+   * \param[in] max_time Time to stop fluidization \unit{in fm}, useful to
+   * save runtime
+   * \param[in] fluid_cells Number of lattice cells in each dimension to
+   * use for the threshold evaluation
    *
-   * \note \c energy_density_lattice and \c energy_density_background are both "in" parameters because the class stores references, but the values are non constant. 
+   * \note \c energy_density_lattice and \c energy_density_background are both
+   * "in" parameters because the class stores references, but the values are non
+   * constant.
    */
-  DynamicFluidizationFinder(RectangularLattice<EnergyMomentumTensor> &energy_density_lattice,
-                            std::map<int32_t, double> &energy_density_background,
-                            double energy_threshold, double min_time,
-                            double max_time, int fluid_cells)
+  DynamicFluidizationFinder(
+      RectangularLattice<EnergyMomentumTensor> &energy_density_lattice,
+      std::map<int32_t, double> &energy_density_background,
+      double energy_threshold, double min_time, double max_time,
+      int fluid_cells)
       : energy_density_lattice_{energy_density_lattice},
         background_{energy_density_background},
         energy_density_threshold_{energy_threshold},
@@ -61,7 +65,7 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
    * \param[in] dt Time step duration \unit{in fm}.
    * \param[in] gcell_vol Volume of the grid cell \unit{in fm³},
    * \param[in] beam_momentum Unused.
-   * \return List of FluidizationActions that will happen at the corresponding
+   * \return List of fluidization actions that will happen at the corresponding
    * formation time.
    */
   ActionList find_actions_in_cell(
@@ -97,34 +101,36 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
  private:
   /**
    * Lattice where energy momentum tensor is computed
-   * \note It must be a reference so that it can be updated outside the class, without creating a new Finder object.
+   * \note It must be a reference so that it can be updated outside the class,
+   * without creating a new Finder object.
    */
   RectangularLattice<EnergyMomentumTensor> &energy_density_lattice_;
   /**
    *  Background energy density at positions of particles, using the id as key
-   * \note It is a reference so that it can be updated outside the class, e.g. by an external manager using SMASH as a library.
+   * \note It is a reference so that it can be updated outside the class, e.g.
+   * by an external manager using SMASH as a library.
    */
   std::map<int32_t, double> &background_;
   /**
    * Queue for future fluidizations, which will take place after the formation
    * time of particles. Keys are particle indices and values are absolute
    * formation time in the lab frame. \note It must be \c mutable so that
-   * \c finder_actions_in_cell, overriden as a \c const method from the parent class, can modify it.
+   * \c finder_actions_in_cell, overriden as a \c const method from the parent
+   * class, can modify it.
    */
   mutable std::map<int32_t, double> queue_{};
   /// Minimum energy density surrounding the particle to fluidize it
   const double energy_density_threshold_ =
-      InputKeys::output_initialConditions_eDenThreshold.default_value();
+      InputKeys::modi_collider_initialConditions_eDenThreshold.default_value();
   /// Minimum time (in lab frame) in fm to allow fluidization
   const double min_time_ =
-      InputKeys::output_initialConditions_minTime.default_value();
+      InputKeys::modi_collider_initialConditions_minTime.default_value();
   /// Maximum time (in lab frame) in fm to allow fluidization
   const double max_time_ =
-      InputKeys::output_initialConditions_maxTime.default_value();
+      InputKeys::modi_collider_initialConditions_maxTime.default_value();
   /// Number of cells to interpolate the energy density
   const int fluid_cells_ =
-      InputKeys::output_initialConditions_fluidCells.default_value();
-
+      InputKeys::modi_collider_initialConditions_fluidCells.default_value();
 };
 
 /**
@@ -132,8 +138,8 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
  * (t>20\unit{fm}), the lattice grows linearly at each time step to accomodate
  * for the system expansion.
  *
- * \param[inout] energy_density_lattice Lattice where the energy momentum tensor is to be
- * computed.
+ * \param[inout] energy_density_lattice Lattice where the energy momentum tensor
+ * is to be computed.
  * \param[in] t Current time.
  * \param[in] ensembles Only the first Particles element is actually used.
  * \param[in] dens_par Contains parameters for density smearing.

@@ -935,8 +935,8 @@ void ScatterActionsFinder::dump_cross_sections(
   std::map<std::string, double> outgoing_total_mass;
 
   ParticleData a_data(a), b_data(b);
-  int n_momentum_points = 400;
-  constexpr double momentum_step = 0.01;
+  int n_momentum_points = 200;
+  constexpr double momentum_step = 0.02;
   if (plab.size() > 0) {
     n_momentum_points = plab.size();
     // Remove duplicates.

@@ -31,8 +31,8 @@ class FluidizationAction : public Action {
    * crossing the hypersurface, in case of an iso-tau condition.
    * \param[in] time_until How long until the action is performed \unit{in fm}.
    */
-  FluidizationAction(const ParticleData &in_part,
-                             const ParticleData &out_part)
+  FluidizationAction(const ParticleData &in_part, const ParticleData &out_part,
+                     const double time_until)
       : Action(in_part, out_part, time_until,
                ProcessType::HyperSurfaceCrossing) {}
   double get_total_weight() const override { return 0.0; };
@@ -52,9 +52,9 @@ class FluidizationAction : public Action {
    *
    * \param[in] id_process process id only used for debugging output.
    */
-  double check_conservation(uint32_t id_process) const override;
+  double check_conservation(const uint32_t id_process) const override;
 };
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SMASH_HYPERSURFACECROSSINGACTION_H_
+#endif  // SRC_INCLUDE_SMASH_FLUIDIZATIONACTION_H_

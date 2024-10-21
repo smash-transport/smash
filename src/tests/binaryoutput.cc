@@ -24,6 +24,7 @@
 #include "smash/clock.h"
 #include "smash/config.h"
 #include "smash/file.h"
+#include "smash/fluidizationaction.h"
 #include "smash/outputinterface.h"
 #include "smash/processbranch.h"
 #include "smash/scatteraction.h"

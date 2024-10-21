@@ -17,6 +17,7 @@
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
 #include "grid.h"
+#include "icparameters.h"
 #include "outputinterface.h"
 #include "potentials.h"
 
@@ -112,6 +113,12 @@ class ModusDefault {
   std::optional<double> rapidity_cut() const { return std::nullopt; }
   /// \return Maximum transverse momentum for IC in ColliderModus
   std::optional<double> pT_cut() const { return std::nullopt; }
+  /// \return IC parameters in ColliderModus
+  std::optional<InitialConditionParameters> IC_parameters() const {
+    return std::nullopt;
+  };
+  std::map<int32_t, double>* fluid_background() { return nullptr; }
+  RectangularLattice<EnergyMomentumTensor>* fluid_lattice() { return nullptr; }
   /**
    * Creates the Grid with normal boundary conditions.
    *

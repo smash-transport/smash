@@ -38,7 +38,8 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
       }
     } else {
       const auto process_type = p.get_history().process_type;
-      if (process_type == ProcessType::Decay || is_string_soft_process(process_type) ||
+      if (process_type == ProcessType::Decay ||
+          is_string_soft_process(process_type) ||
           process_type == ProcessType::StringHard) {
         if (above_threshold(p)) {
           double formation = p.formation_time();
@@ -64,11 +65,13 @@ bool DynamicFluidizationFinder::above_threshold(
     const ParticleData &pdata) const {
   EnergyMomentumTensor Tmunu;
   // value_at returns false if pdata is out of bounds, this is desirable here
-  bool inside = energy_density_lattice_.value_at(pdata.position().threevec(), Tmunu);
+  bool inside =
+      energy_density_lattice_.value_at(pdata.position().threevec(), Tmunu);
   if (inside) {
     // If the particle is not in the map, the background evaluates to 0.
     const double background = background_[pdata.id()];
-    const double e_den_particles = Tmunu.boosted(Tmunu.landau_frame_4velocity())[0];
+    const double e_den_particles =
+        Tmunu.boosted(Tmunu.landau_frame_4velocity())[0];
     if (e_den_particles + background >= energy_density_threshold_) {
       logg[LFluidization].debug()
           << "Fluidize " << pdata.id() << " with " << e_den_particles
@@ -81,22 +84,23 @@ bool DynamicFluidizationFinder::above_threshold(
 }
 
 void build_fluidization_lattice(
-    RectangularLattice<EnergyMomentumTensor> *energy_density_lattice, const double t,
-    const std::vector<Particles> &ensembles,
+    RectangularLattice<EnergyMomentumTensor> *energy_density_lattice,
+    const double t, const std::vector<Particles> &ensembles,
     const DensityParameters &dens_par) {
   if (energy_density_lattice == nullptr) {
     return;
   }
-  // In most scenarios where dynamic fluidization is applicable, t > 20 fm is dilute enough to not need a very fine lattice.
+  // In most scenarios where dynamic fluidization is applicable, t > 20 fm is
+  // dilute enough to not need a very fine lattice.
   if (t > 20) {
     std::array<double, 3> new_l{2 * t, 2 * t, 2 * t};
     std::array<double, 3> new_orig{-t, -t, -t};
     energy_density_lattice->reset_and_resize(new_l, new_orig);
     logg[LFluidization].debug() << "Lattice resizing at " << t;
-  }  
+  }
 
-  update_lattice(energy_density_lattice, LatticeUpdate::EveryTimestep, DensityType::Hadron,
-                 dens_par, ensembles, false);
+  update_lattice(energy_density_lattice, LatticeUpdate::EveryTimestep,
+                 DensityType::Hadron, dens_par, ensembles, false);
 }
 
 }  // namespace smash

@@ -217,6 +217,7 @@ set(smash_src
     fields.cc
     file.cc
     filelock.cc
+    fluidizationaction.cc
     fourvector.cc
     fpenvironment.cc
     grandcan_thermalizer.cc

@@ -1408,10 +1408,12 @@ class Configuration {
       const std::string s = operator std::string();
       if (s == "Constant_Tau") {
         return FluidizationType::ConstantTau;
+      } else if (s == "Dynamic_Energy_Density") {
+        return FluidizationType::Dynamic;
       }
       throw IncorrectTypeInAssignment("The value for key \"" +
                                       std::string(key_) + "\" should be " +
-                                      "\"Constant_Tau\".");
+                                      "\"Constant_Tau\" or \"Dynamic\".");
     }
 
     /**

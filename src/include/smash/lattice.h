@@ -13,6 +13,7 @@
 #include <array>
 #include <cstring>
 #include <functional>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -827,15 +828,15 @@ class RectangularLattice {
   /// The lattice itself, array containing physical quantities.
   std::vector<T> lattice_;
   /// Lattice sizes in x, y, z directions.
-  const std::array<double, 3> lattice_sizes_;
+  std::array<double, 3> lattice_sizes_;
   /// Number of cells in x,y,z directions.
-  const std::array<int, 3> n_cells_;
+  std::array<int, 3> n_cells_;
   /// Cell sizes in x, y, z directions.
-  const std::array<double, 3> cell_sizes_;
+  std::array<double, 3> cell_sizes_;
   /// Volume of a cell.
-  const double cell_volume_;
+  double cell_volume_;
   /// Coordinates of the left down nearer corner.
-  const std::array<double, 3> origin_;
+  std::array<double, 3> origin_;
   /// Whether the lattice is periodic.
   const bool periodic_;
   /// When the lattice should be recalculated.

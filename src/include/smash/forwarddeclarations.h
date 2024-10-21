@@ -47,6 +47,7 @@ class Tabulation;
 class ThreeVector;
 
 struct ExperimentParameters;
+struct InitialConditionParameters;
 struct ScatterActionsFinderParameters;
 struct StringTransitionParameters;
 struct Nucleoncorr;
@@ -315,6 +316,8 @@ enum class PseudoResonance {
 enum class FluidizationType {
   /// Hypersurface crossed at a fixed proper time
   ConstantTau,
+  /// Dynamic fluidization based on local densities
+  Dynamic,
 };
 
 /**

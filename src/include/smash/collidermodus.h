@@ -16,6 +16,7 @@
 #include "deformednucleus.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
+#include "icparameters.h"
 #include "interpolation.h"
 #include "modusdefault.h"
 #include "nucleus.h"
@@ -150,6 +151,27 @@ class ColliderModus : public ModusDefault {
   /// \return Maximum transverse momentum for IC
   std::optional<double> pT_cut() const { return IC_parameters_.pT_cut; }
 
+  std::optional<InitialConditionParameters> IC_parameters() const {
+    return IC_parameters_;
+  }
+  std::map<int32_t, double> *fluid_background() const {
+    return fluid_background_.get();
+  }
+  RectangularLattice<EnergyMomentumTensor> *fluid_lattice() const {
+    return fluid_lattice_.get();
+  };
+
+  /**
+   * Update the background energy density due to hydrodynamics, to be
+   * called by an external manager.
+   *
+   * \param[in] background Map with particle indices as keys and their
+   * corresponding background energy density as values.
+   */
+  void update_fluidization_background(std::map<int32_t, double> background) {
+    *fluid_background_ = std::move(background);
+  }
+
   /**
    * \ingroup exception
    *  Thrown when either \a projectile_ or \a target_ nuclei are empty.
@@ -159,24 +181,6 @@ class ColliderModus : public ModusDefault {
   };
 
  private:
-  /**
-   * At the moment there are two ways to specify input for initial conditions in
-   * the configuration, one of which is deprecated and will be removed in a next
-   * release. For the moment, these variables are of type
-   * `std::optional<double>` to *allow* for the key duplication consistently.
-   * When more types of IC are implemented in the future, this will allow
-   * setting only the appropriate parameters.
-   */
-  struct InitialConditionParameters {
-    /// Hypersurface proper time in IC
-    std::optional<double> proper_time = std::nullopt;
-    /// Lower bound for proper time in IC
-    std::optional<double> lower_bound = std::nullopt;
-    /// Rapidity cut on hypersurface in IC
-    std::optional<double> rapidity_cut = std::nullopt;
-    /// Transverse momentum cut on hypersurface IC
-    std::optional<double> pT_cut = std::nullopt;
-  };
   /**
    * Projectile.
    *
@@ -293,6 +297,14 @@ class ColliderModus : public ModusDefault {
   double velocity_target_ = 0.0;
   /// Plain Old Data type to hold parameters for initial conditions
   InitialConditionParameters IC_parameters_;
+  /// Energy-momentum tensor lattice for dynamic fluidization
+  std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> fluid_lattice_ =
+      nullptr;
+  /**
+   * Energy density background from hydrodynamic evolution, with particle
+   * indices as keys. Useful when using SMASH as a library.
+   */
+  std::unique_ptr<std::map<int32_t, double>> fluid_background_ = nullptr;
 
   /**
    * Get the frame dependent velocity for each nucleus, using
