@@ -27,7 +27,8 @@ namespace smash {
 struct InitialConditionParameters {
   /// Type of initialization
   FluidizationType type;
-
+  /// Which processes can have outgoing particles transformed into fluid in
+  /// dynamic IC
   FluidizableProcessesBitSet fluidizable_processes;
   /// Hypersurface proper time in IC
   std::optional<double> proper_time = std::nullopt;

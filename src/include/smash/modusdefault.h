@@ -10,7 +10,9 @@
 #ifndef SRC_INCLUDE_SMASH_MODUSDEFAULT_H_
 #define SRC_INCLUDE_SMASH_MODUSDEFAULT_H_
 
+#include <map>
 #include <memory>
+#include <vector>
 
 #include "configuration.h"
 #include "forwarddeclarations.h"
@@ -104,21 +106,21 @@ class ModusDefault {
    * \return passing_time
    */
   double nuclei_passing_time() const { return 0.0; }
-  /// \return Proper time of the hypersurface for IC in ColliderModus
-  std::optional<double> proper_time() const { return std::nullopt; }
-  /// \return Lower bound on proper time of the hypersurface for IC in
-  /// ColliderModus
-  std::optional<double> lower_bound() const { return std::nullopt; }
-  /// \return Maximum rapidity for IC in ColliderModus
-  std::optional<double> rapidity_cut() const { return std::nullopt; }
-  /// \return Maximum transverse momentum for IC in ColliderModus
-  std::optional<double> pT_cut() const { return std::nullopt; }
   /// \return IC parameters in ColliderModus
   std::optional<InitialConditionParameters> IC_parameters() const {
     return std::nullopt;
-  };
+  }
+  /// \return pointer to background energy density map
   std::map<int32_t, double>* fluid_background() { return nullptr; }
+  /// \return pointer to lattice where fluidization is calculated
   RectangularLattice<EnergyMomentumTensor>* fluid_lattice() { return nullptr; }
+
+  /**
+   * Build lattice of energy momentum tensor. Currently only implemented in
+   * Collider modus. \param[in] t Current time. \param[in] ensembles Only the
+   * first Particles element is actually used. \param[in] dens_par Contains
+   * parameters for density smearing.
+   */
   void build_fluidization_lattice(
       [[maybe_unused]] const double t,
       [[maybe_unused]] const std::vector<Particles>& ensembles,

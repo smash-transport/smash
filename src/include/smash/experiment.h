@@ -1073,13 +1073,13 @@ Experiment<Modus>::Experiment(Configuration &config,
        * deprecated way is removed, the key taking will be handled in the
        * constructor of ColliderModus, and the logic here will be removed.
        */
-      double rapidity_cut = modus_.rapidity_cut().has_value()
-                                ? modus_.rapidity_cut().value()
+      double rapidity_cut = IC_parameters.rapidity_cut.has_value()
+                                ? IC_parameters.rapidity_cut.value()
                                 : 0.0;
       if (config.has_value({"Output", "Initial_Conditions", "Rapidity_Cut"})) {
         rapidity_cut =
             config.take({"Output", "Initial_Conditions", "Rapidity_Cut"});
-        validate_duplicate_IC_config(rapidity_cut, modus_.rapidity_cut(),
+        validate_duplicate_IC_config(rapidity_cut, IC_parameters.rapidity_cut,
                                      "Rapidity_Cut");
       }
 
@@ -1101,10 +1101,10 @@ Experiment<Modus>::Experiment(Configuration &config,
       }
 
       double pT_cut =
-          modus_.pT_cut().has_value() ? modus_.pT_cut().value() : 0.0;
+          IC_parameters.pT_cut.has_value() ? IC_parameters.pT_cut.value() : 0.0;
       if (config.has_value({"Output", "Initial_Conditions", "pT_Cut"})) {
         pT_cut = config.take({"Output", "Initial_Conditions", "pT_Cut"});
-        validate_duplicate_IC_config(pT_cut, modus_.pT_cut(), "pT_Cut");
+        validate_duplicate_IC_config(pT_cut, IC_parameters.pT_cut, "pT_Cut");
       }
       if (pT_cut < 0.0) {
         logg[LInitialConditions].fatal()

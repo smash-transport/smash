@@ -8,9 +8,11 @@
 #define SRC_INCLUDE_SMASH_COLLIDERMODUS_H_
 
 #include <cstring>
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "alphaclusterednucleus.h"
 #include "deformednucleus.h"
@@ -136,30 +138,27 @@ class ColliderModus : public ModusDefault {
   bool calculation_frame_is_fixed_target() const {
     return frame_ == CalculationFrame::FixedTarget ? true : false;
   }
-  /// \return Proper time of the hypersurface for IC
-  std::optional<double> proper_time() const {
-    return IC_parameters_.proper_time;
-  }
-  /// \return Lower bound on proper time of the hypersurface for IC
-  std::optional<double> lower_bound() const {
-    return IC_parameters_.lower_bound;
-  }
-  /// \return Maximum rapidity for IC
-  std::optional<double> rapidity_cut() const {
-    return IC_parameters_.rapidity_cut;
-  }
-  /// \return Maximum transverse momentum for IC
-  std::optional<double> pT_cut() const { return IC_parameters_.pT_cut; }
-
+  /// \return Parameters used in initial conditions for hydrodynamics
   std::optional<InitialConditionParameters> IC_parameters() const {
     return IC_parameters_;
   }
+  /// \return pointer to the background energy density map
   std::map<int32_t, double> *fluid_background() const {
     return fluid_background_.get();
   }
+  /// \return pointer to the lattice where fluidization is evaluated
   RectangularLattice<EnergyMomentumTensor> *fluid_lattice() const {
     return fluid_lattice_.get();
-  };
+  }
+  /**
+   * Build lattice of energy momentum tensor. If enough time has passed
+   * (t>20\unit{fm}), the lattice grows linearly at each time step to accomodate
+   * for the system expansion.
+   *
+   * \param[in] t Current time.
+   * \param[in] ensembles Only the first Particles element is actually used.
+   * \param[in] dens_par Contains parameters for density smearing.
+   */
   void build_fluidization_lattice(const double t,
                                   const std::vector<Particles> &ensembles,
                                   const DensityParameters &dens_par);

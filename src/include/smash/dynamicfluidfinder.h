@@ -131,24 +131,15 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
       InputKeys::modi_collider_initialConditions_fluidCells.default_value();
   /// Processes that create a fluidizable particle
   const FluidizableProcessesBitSet fluidizable_processes_;
-
+  /**
+   * Checks if a given process type is in \ref fluidizable_processes_. In
+   * particular, initially sampled hadrons are not fluidizable and have
+   * ProcessType::None, which falls in the default case for the switch.
+   *
+   * \return whether the process is fluidizable
+   */
   bool is_process_fluidizable(const ProcessType &type) const;
 };
-
-/**
- * Build lattice of energy momentum tensor. If enough time has passed
- * (t>20\unit{fm}), the lattice grows linearly at each time step to accomodate
- * for the system expansion.
- *
- * \param[inout] energy_density_lattice Lattice where the energy momentum tensor
- * is to be computed.
- * \param[in] t Current time.
- * \param[in] ensembles Only the first Particles element is actually used.
- * \param[in] dens_par Contains parameters for density smearing.
- */
-void build_fluidization_lattice(
-    RectangularLattice<EnergyMomentumTensor> *energy_density_lattice, double t,
-    const std::vector<Particles> &ensembles, const DensityParameters &dens_par);
 
 }  // namespace smash
 
