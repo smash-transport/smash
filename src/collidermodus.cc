@@ -284,10 +284,12 @@ ColliderModus::ColliderModus(Configuration modus_config,
   initial_z_displacement_ =
       modus_cfg.take(InputKeys::modi_collider_initialDistance) / 2.0;
 
-  IC_parameters_.type = modus_cfg.take(InputKeys::modi_collider_initialConditions_type);
+  IC_parameters_.type =
+      modus_cfg.take(InputKeys::modi_collider_initialConditions_type);
 
   if (IC_parameters_.type == FluidizationType::ConstantTau) {
-    if (modus_cfg.has_value(InputKeys::modi_collider_initialConditions_properTime)) {
+    if (modus_cfg.has_value(
+            InputKeys::modi_collider_initialConditions_properTime)) {
       IC_parameters_.proper_time =
           modus_cfg.take(InputKeys::modi_collider_initialConditions_properTime);
     }
@@ -306,23 +308,16 @@ ColliderModus::ColliderModus(Configuration modus_config,
           modus_cfg.take(InputKeys::modi_collider_initialConditions_pTCut);
     }
   } else if (IC_parameters_.type == FluidizationType::Dynamic) {
-    double threshold =
-        modus_cfg.take({"Initial_Conditions", "Energy_Density_Threshold"},
-                       InputKeys::modi_collider_initialConditions_eDenThreshold
-                           .default_value());
-    double min_time = modus_cfg.take(
-        {"Initial_Conditions", "Minimum_Time"},
-        InputKeys::modi_collider_initialConditions_minTime.default_value());
-    double max_time = modus_cfg.take(
-        {"Initial_Conditions", "Maximum_Time"},
-        InputKeys::modi_collider_initialConditions_maxTime.default_value());
-    int cells = modus_cfg.take(
-        {"Initial_Conditions", "Fluidization_Cells"},
-        InputKeys::modi_collider_initialConditions_fluidCells.default_value());
+    double threshold = modus_cfg.take(
+        InputKeys::modi_collider_initialConditions_eDenThreshold);
+    double min_time =
+        modus_cfg.take(InputKeys::modi_collider_initialConditions_minTime);
+    double max_time =
+        modus_cfg.take(InputKeys::modi_collider_initialConditions_maxTime);
+    int cells =
+        modus_cfg.take(InputKeys::modi_collider_initialConditions_fluidCells);
     double form_time_fraction = modus_cfg.take(
-        {"Initial_Conditions", "Formation_Time_Fraction"},
-        InputKeys::modi_collider_initialConditions_formTimeFraction
-            .default_value());
+        InputKeys::modi_collider_initialConditions_formTimeFraction);
     if (threshold <= 0 || max_time < min_time || min_time < 0 || cells < 2 ||
         form_time_fraction < 0) {
       logg[LCollider].fatal()
@@ -335,10 +330,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
       throw std::invalid_argument("Please adjust the configuration file.");
     }
 
-    IC_parameters_.fluidizable_processes =
-        modus_cfg.take({"Initial_Conditions", "Fluidizable_Processes"},
-                       InputKeys::modi_collider_initialConditions_fluidProcesses
-                           .default_value());
+    IC_parameters_.fluidizable_processes = modus_cfg.take(
+        InputKeys::modi_collider_initialConditions_fluidProcesses);
 
     double min_size = std::max(min_time, 10.);
     std::array<double, 3> l{2 * min_size, 2 * min_size, 2 * min_size};

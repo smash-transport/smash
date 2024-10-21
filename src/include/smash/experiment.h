@@ -1076,9 +1076,9 @@ Experiment<Modus>::Experiment(Configuration &config,
       double rapidity_cut = IC_parameters.rapidity_cut.has_value()
                                 ? IC_parameters.rapidity_cut.value()
                                 : 0.0;
-      if (config.has_value({"Output", "Initial_Conditions", "Rapidity_Cut"})) {
+      if (config.has_value(InputKeys::output_initialConditions_rapidityCut)) {
         rapidity_cut =
-            config.take({"Output", "Initial_Conditions", "Rapidity_Cut"});
+            config.take(InputKeys::output_initialConditions_rapidityCut);
         validate_duplicate_IC_config(rapidity_cut, IC_parameters.rapidity_cut,
                                      "Rapidity_Cut");
       }
@@ -1102,8 +1102,8 @@ Experiment<Modus>::Experiment(Configuration &config,
 
       double pT_cut =
           IC_parameters.pT_cut.has_value() ? IC_parameters.pT_cut.value() : 0.0;
-      if (config.has_value({"Output", "Initial_Conditions", "pT_Cut"})) {
-        pT_cut = config.take({"Output", "Initial_Conditions", "pT_Cut"});
+      if (config.has_value(InputKeys::output_initialConditions_pTCut)) {
+        pT_cut = config.take(InputKeys::output_initialConditions_pTCut);
         validate_duplicate_IC_config(pT_cut, IC_parameters.pT_cut, "pT_Cut");
       }
       if (pT_cut < 0.0) {
@@ -1138,18 +1138,17 @@ Experiment<Modus>::Experiment(Configuration &config,
       }
 
       double proper_time = std::numeric_limits<double>::quiet_NaN();
-      if (config.has_value({"Output", "Initial_Conditions", "Proper_Time"})) {
+      if (config.has_value(InputKeys::output_initialConditions_properTime)) {
         // Read in proper time from config
         proper_time =
-            config.take({"Output", "Initial_Conditions", "Proper_Time"});
+            config.take(InputKeys::output_initialConditions_properTime);
         validate_duplicate_IC_config(
             proper_time, IC_parameters.proper_time.value(), "Proper_Time");
       } else if (IC_parameters.proper_time.has_value()) {
         proper_time = IC_parameters.proper_time.value();
       } else {
-        double lower_bound = config.take(
-            {"Output", "Initial_Conditions", "Lower_Bound"},
-            InputKeys::output_initialConditions_lowerBound.default_value());
+        double lower_bound =
+            config.take(InputKeys::output_initialConditions_lowerBound);
         if (IC_parameters.lower_bound.has_value())
           validate_duplicate_IC_config(
               lower_bound, IC_parameters.lower_bound.value(), "Lower_Bound");
