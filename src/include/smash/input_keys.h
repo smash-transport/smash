@@ -3463,9 +3463,21 @@ struct InputKeys {
    * <hr>
    * ### Alpha-Clustered oxygen nuclei
    *
-   * It is possible to have alpha-clustered projectile and/or target oxygen
+   * It is possible to have alpha-clustered projectile and/or target **oxygen**
    * nuclei using the `Alpha_Clustered` section, which should then contain some
-   * configuration, if given.
+   * configuration, if given. This will create four Helium nuclei that are
+   * placed on the vertices of a regular tetrahedron with center in the origin,
+   * \f$\left(0,0,0\right)\f$. The initial positions of these vertices are the
+   * following:
+   * \f[
+   * \left(1,0,0\right),\;
+   * \left(-\frac{1}{3}, \frac{\sqrt{8}}{3}, 0\right),\;
+   * \left(-\frac{1}{3}, -\frac{\sqrt{8}}{6}, \frac{\sqrt{24}}{6}\right),\;
+   * \left(-\frac{1}{3}, -\frac{\sqrt{8}}{6}, -\frac{\sqrt{24}}{6}\right)\quad.
+   * \f]
+   * This means there is one vertex on the x-axis and the rest lie on a plane
+   * parallel to the y-z plane. For colliding them with a specific orientation
+   * refer to the `Orientation` section.
    *
    * \required_key_no_line{key_MC_PT_alphaClustered_auto_,Automatic,bool}
    *
