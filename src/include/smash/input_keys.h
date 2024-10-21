@@ -3715,8 +3715,10 @@ struct InputKeys {
    *
    * \required_key_no_line{key_MC_IC_type_,Type,string}
    *
-   * Type of initial conditions provided. Currently only one value is possible:
+   * Type of initial conditions provided. Possible values are:
    * - `"Constant_Tau"` &rarr; a hypersurface of constant \f$\tau\f$ is used.
+   * - `"Dynamic"` &rarr; regions with sufficient energy density become fluid
+   * cells, with its particles written to the IC output.
    */
   /**
    * \see_key{key_MC_IC_type_}
@@ -3825,7 +3827,7 @@ struct InputKeys {
    * \see_key{key_MC_IC_mintime_}
    */
   inline static const Key<double> modi_collider_initialConditions_minTime{
-      {"Modi", "Collider", "Initial_Conditions", "Minimum_Time"}, 0, {"3.1"}};
+      {"Modi", "Collider", "Initial_Conditions", "Minimum_Time"}, 0, {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
@@ -3838,7 +3840,7 @@ struct InputKeys {
    * \see_key{key_MC_IC_maxtime_}
    */
   inline static const Key<double> modi_collider_initialConditions_maxTime{
-      {"Modi", "Collider", "Initial_Conditions", "Maximum_Time"}, 100, {"3.1"}};
+      {"Modi", "Collider", "Initial_Conditions", "Maximum_Time"}, 100, {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
@@ -3853,7 +3855,46 @@ struct InputKeys {
   inline static const Key<int> modi_collider_initialConditions_fluidCells{
       {"Modi", "Collider", "Initial_Conditions", "Fluidization_Cells"},
       50,
-      {"3.1"}};
+      {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_form_time_fraction_,Formation_Time_Fraction,
+   * double,1.0}
+   *
+   * Fraction of the formation time after which a particle can fluidize
+   */
+  /**
+   * \see_key{key_MC_IC_form_time_fraction_}
+   */
+  inline static const Key<double>
+      modi_collider_initialConditions_formTimeFraction{
+          {"Modi", "Collider", "Initial_Conditions", "Formation_Time_Fraction"},
+          1.0,
+          {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key{key_MC_IC_fluidizable_processes,Fluidizable_Processes,list of
+   * strings,"All"}
+   *
+   * Determines which process types can have outgoing particles as fluidizable.
+   * Possible values are:
+   * - `"All"`
+   * - `"Elastic"` &rarr; Elastic \f$2\to2\f$
+   * - `"Decay"` &rarr; All \f$1\to N\f$ processes
+   * - `"Inelastic"` &rarr; All \f$N\to1\f$ processes
+   * - `"SoftString"`
+   * - `"HardString"`
+   */
+  /**
+   * \see_key{key_MC_IC_fluidizable_processes}
+   */
+  inline static const Key<FluidizableProcessesBitSet>
+      modi_collider_initialConditions_fluidProcesses{
+          {"Modi", "Collider", "Initial_Conditions", "Fluidizable_Processes"},
+          FluidizableProcessesBitSet{}.set(),  // all processes
+          {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -5553,6 +5594,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<FermiMotion>>,
       std::reference_wrapper<const Key<FieldDerivativesMode>>,
+      std::reference_wrapper<const Key<FluidizableProcessesBitSet>>,
       std::reference_wrapper<const Key<FluidizationType>>,
       std::reference_wrapper<const Key<MultiParticleReactionsBitSet>>,
       std::reference_wrapper<const Key<NNbarTreatment>>,
@@ -5743,6 +5785,8 @@ struct InputKeys {
       std::cref(modi_collider_impact_yields),
       std::cref(modi_collider_initialConditions_eDenThreshold),
       std::cref(modi_collider_initialConditions_fluidCells),
+      std::cref(modi_collider_initialConditions_formTimeFraction),
+      std::cref(modi_collider_initialConditions_fluidProcesses),
       std::cref(modi_collider_initialConditions_lowerBound),
       std::cref(modi_collider_initialConditions_maxTime),
       std::cref(modi_collider_initialConditions_minTime),

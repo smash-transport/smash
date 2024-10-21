@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2023
+ *    Copyright (c) 2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -26,8 +26,9 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
     const double t_end = t0 + dt;
     // Particles should not be removed before the nuclei collide, and after some
     // time max_time_ there won't be any fluidization, so this saves resources
-    if (t0 < min_time_ || t_end > max_time_)
+    if (t0 < min_time_ || t_end > max_time_) {
       break;
+    }
 
     const int32_t id = p.id();
     if (queue_.count(id)) {
@@ -38,19 +39,17 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
       }
     } else {
       const auto process_type = p.get_history().process_type;
-      if (process_type == ProcessType::Decay ||
-          is_string_soft_process(process_type) ||
-          process_type == ProcessType::StringHard) {
+      if (is_process_fluidizable(process_type)) {
         if (above_threshold(p)) {
-          double formation = p.formation_time();
+          double formation =
+              t0 + formation_time_fraction_ * (p.formation_time() - t0);
           if (formation >= t_end) {
             queue_.emplace(id, formation);
           } else {
             double time_until = (1 - p.xsec_scaling_factor() <= really_small)
                                     ? 0
                                     : formation - t0;
-            // todo(hirayama): add option to not wait for formation (also
-            // leading hadrons) or scale it
+            // RENAN: add option on leading hadrons
             actions.emplace_back(
                 std::make_unique<FluidizationAction>(p, p, time_until));
           }
@@ -73,34 +72,49 @@ bool DynamicFluidizationFinder::above_threshold(
     const double e_den_particles =
         Tmunu.boosted(Tmunu.landau_frame_4velocity())[0];
     if (e_den_particles + background >= energy_density_threshold_) {
-      logg[LFluidization].debug()
+      logg[LFluidization].warn()
           << "Fluidize " << pdata.id() << " with " << e_den_particles
-          << " and background " << background << " GeV/fm^3 at "
-          << pdata.formation_time();
+          << " and background " << background << " GeV/fm^3 formed at "
+          << pdata.formation_time() << ", at " << pdata.position().x0();
       return true;
     }
   }
   return false;
 }
 
-void build_fluidization_lattice(
-    RectangularLattice<EnergyMomentumTensor> *energy_density_lattice,
-    const double t, const std::vector<Particles> &ensembles,
-    const DensityParameters &dens_par) {
-  if (energy_density_lattice == nullptr) {
-    return;
+bool DynamicFluidizationFinder::is_process_fluidizable(
+    const ProcessType &type) const {
+  switch (type) {
+    case ProcessType::Elastic:
+      return fluidizable_processes_[IncludedFluidizableProcesses::From_Elastic];
+      break;
+    case ProcessType::Decay:
+      return fluidizable_processes_[IncludedFluidizableProcesses::From_Decay];
+      break;
+    case ProcessType::TwoToOne:
+    case ProcessType::TwoToTwo:
+    case ProcessType::TwoToThree:
+    case ProcessType::TwoToFour:
+    case ProcessType::TwoToFive:
+    case ProcessType::MultiParticleThreeMesonsToOne:
+    case ProcessType::MultiParticleThreeToTwo:
+    case ProcessType::MultiParticleFourToTwo:
+    case ProcessType::MultiParticleFiveToTwo:
+      return fluidizable_processes_
+          [IncludedFluidizableProcesses::From_Inelastic];
+      break;
+    case ProcessType::StringHard:
+      return fluidizable_processes_
+          [IncludedFluidizableProcesses::From_HardString];
+      break;
+    default:
+      return false;
   }
-  // In most scenarios where dynamic fluidization is applicable, t > 20 fm is
-  // dilute enough to not need a very fine lattice.
-  if (t > 20) {
-    std::array<double, 3> new_l{2 * t, 2 * t, 2 * t};
-    std::array<double, 3> new_orig{-t, -t, -t};
-    energy_density_lattice->reset_and_resize(new_l, new_orig);
-    logg[LFluidization].debug() << "Lattice resizing at " << t;
+  if (is_string_soft_process(type)) {
+    return fluidizable_processes_
+        [IncludedFluidizableProcesses::From_SoftString];
   }
-
-  update_lattice(energy_density_lattice, LatticeUpdate::EveryTimestep,
-                 DensityType::Hadron, dens_par, ensembles, false);
+  return false;
 }
 
 }  // namespace smash

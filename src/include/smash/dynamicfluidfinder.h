@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "actionfinderfactory.h"
+#include "icparameters.h"
 #include "input_keys.h"
 
 namespace smash {
@@ -31,33 +32,26 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
  public:
   /**
    * Construct finder for fluidization action.
-   * \param[in] energy_density_lattice Lattice used for the energy density
-   * interpolation
-   * \param[in] energy_density_background Background map between particle
-   * indices and the corresponding background
-   * \param[in] energy_threshold Minimum energy density required for a
-   * hadron to fluidize \unit{in GeV/fm³}
-   * \param[in] min_time Minimum time to start fluidization \unit{in fm}
-   * \param[in] max_time Time to stop fluidization \unit{in fm}, useful to
-   * save runtime
-   * \param[in] fluid_cells Number of lattice cells in each dimension to
-   * use for the threshold evaluation
+   * \param[in] lattice Lattice used for the energy density interpolation
+   * \param[in] background Background map between particle indices and the
+   * corresponding background energy density
+   * \param[in] ic_params Parameters for dynamic fluidization
    *
    * \note \c energy_density_lattice and \c energy_density_background are both
    * "in" parameters because the class stores references, but the values are non
    * constant.
    */
-  DynamicFluidizationFinder(
-      RectangularLattice<EnergyMomentumTensor> &energy_density_lattice,
-      std::map<int32_t, double> &energy_density_background,
-      double energy_threshold, double min_time, double max_time,
-      int fluid_cells)
-      : energy_density_lattice_{energy_density_lattice},
-        background_{energy_density_background},
-        energy_density_threshold_{energy_threshold},
-        min_time_{min_time},
-        max_time_{max_time},
-        fluid_cells_{fluid_cells} {};
+  DynamicFluidizationFinder(RectangularLattice<EnergyMomentumTensor> &lattice,
+                            std::map<int32_t, double> &background,
+                            const InitialConditionParameters &ic_params)
+      : energy_density_lattice_{lattice},
+        background_{background},
+        energy_density_threshold_{ic_params.energy_density_threshold.value()},
+        min_time_{ic_params.min_time.value()},
+        max_time_{ic_params.max_time.value()},
+        formation_time_fraction_{ic_params.formation_time_fraction.value()},
+        fluid_cells_{ic_params.num_fluid_cells.value()},
+        fluidizable_processes_{ic_params.fluidizable_processes} {};
 
   /**
    * Find particles to fluidize, depending on the energy density around them.
@@ -128,9 +122,17 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
   /// Maximum time (in lab frame) in fm to allow fluidization
   const double max_time_ =
       InputKeys::modi_collider_initialConditions_maxTime.default_value();
+  /// Fraction of formation time after which a particles can fluidize
+  const double formation_time_fraction_ =
+      InputKeys::modi_collider_initialConditions_formTimeFraction
+          .default_value();
   /// Number of cells to interpolate the energy density
   const int fluid_cells_ =
       InputKeys::modi_collider_initialConditions_fluidCells.default_value();
+  /// Processes that create a fluidizable particle
+  const FluidizableProcessesBitSet fluidizable_processes_;
+
+  bool is_process_fluidizable(const ProcessType &type) const;
 };
 
 /**

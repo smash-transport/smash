@@ -616,7 +616,7 @@ class Experiment : public ExperimentBase {
   const bool IC_output_switch_;
 
   /// This indicates if the IC is dynamic.
-  const bool IC_dynamic_ = true;
+  bool IC_dynamic_;
 
   /// This indicates whether to use time steps.
   const TimeStepMode time_step_mode_;
@@ -1054,75 +1054,15 @@ Experiment<Modus>::Experiment(Configuration &config,
           "Initial conditions can only be extracted in collider modus.");
     }
 
-    double rapidity_cut =
-        modus_.rapidity_cut().has_value() ? modus_.rapidity_cut().value() : 0.0;
-    if (config.has_value(InputKeys::output_initialConditions_rapidityCut)) {
-      rapidity_cut =
-          config.take(InputKeys::output_initialConditions_rapidityCut);
-      validate_duplicate_IC_config(rapidity_cut, modus_.rapidity_cut(),
-                                   "Rapidity_Cut");
-    }
-    if (rapidity_cut < 0.0) {
-      logg[LInitialConditions].fatal()
-          << "Rapidity cut for initial conditions configured as abs(y) < "
-          << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
-          << "non-zero value or employ SMASH without rapidity cut.";
-      throw std::runtime_error(
-          "Kinematic cut for initial conditions malconfigured.");
-    }
-
-    if (modus_.calculation_frame_is_fixed_target() && rapidity_cut != 0.0) {
-      throw std::runtime_error(
-          "Rapidity cut for initial conditions output is not implemented "
-          "in the fixed target calculation frame. \nPlease use "
-          "\"center of velocity\" or \"center of mass\" as a "
-          "\"Calculation_Frame\" instead.");
-    }
-
-    double pT_cut = modus_.pT_cut().has_value() ? modus_.pT_cut().value() : 0.0;
-    if (config.has_value(InputKeys::output_initialConditions_pTCut)) {
-      pT_cut = config.take(InputKeys::output_initialConditions_pTCut);
-      validate_duplicate_IC_config(pT_cut, modus_.pT_cut(), "pT_Cut");
-    }
-    if (pT_cut < 0.0) {
-      logg[LInitialConditions].fatal()
-          << "transverse momentum cut for initial conditions configured as "
-          << "pT < " << pT_cut << " is unreasonable. \nPlease choose a "
-          << "positive, non-zero value or employ SMASH without pT cut.";
-      throw std::runtime_error(
-          "Kinematic cut for initial conditions misconfigured.");
-    }
-
-    if (rapidity_cut > 0.0 || pT_cut > 0.0) {
-      kinematic_cuts_for_IC_output_ = true;
-    }
-
-    if (rapidity_cut > 0.0 && pT_cut > 0.0) {
-      logg[LInitialConditions].info()
-          << "Extracting initial conditions in kinematic range: "
-          << -rapidity_cut << " <= y <= " << rapidity_cut
-          << "; pT <= " << pT_cut << " GeV.";
-    } else if (rapidity_cut > 0.0) {
-      logg[LInitialConditions].info()
-          << "Extracting initial conditions in kinematic range: "
-          << -rapidity_cut << " <= y <= " << rapidity_cut << ".";
-    } else if (pT_cut > 0.0) {
-      logg[LInitialConditions].info()
-          << "Extracting initial conditions in kinematic range: pT <= "
-          << pT_cut << " GeV.";
-    } else {
-      logg[LInitialConditions].info()
-          << "Extracting initial conditions without kinematic cuts.";
-    }
-
-    const InitialConditionParameters &IC_parameters =
+    // RENAN: reference not working properly here?
+    const InitialConditionParameters IC_parameters =
         modus_.IC_parameters().value();
-    if (IC_dynamic_) {  // Dynamic fluidization
+    IC_dynamic_ = (IC_parameters.type == FluidizationType::Dynamic);
+
+    if (IC_dynamic_) {
+      // Dynamic fluidization
       action_finders_.emplace_back(std::make_unique<DynamicFluidizationFinder>(
-          *modus_.fluid_lattice(), *modus_.fluid_background(),
-          IC_parameters.energy_density_threshold.value(),
-          IC_parameters.min_time.value(), IC_parameters.max_time.value(),
-          IC_parameters.num_fluid_cells.value()));
+          *modus_.fluid_lattice(), *modus_.fluid_background(), IC_parameters));
     } else {
       // Iso-tau hypersurface
       /*
@@ -1133,6 +1073,70 @@ Experiment<Modus>::Experiment(Configuration &config,
        * deprecated way is removed, the key taking will be handled in the
        * constructor of ColliderModus, and the logic here will be removed.
        */
+      double rapidity_cut = modus_.rapidity_cut().has_value()
+                                ? modus_.rapidity_cut().value()
+                                : 0.0;
+      if (config.has_value({"Output", "Initial_Conditions", "Rapidity_Cut"})) {
+        rapidity_cut =
+            config.take({"Output", "Initial_Conditions", "Rapidity_Cut"});
+        validate_duplicate_IC_config(rapidity_cut, modus_.rapidity_cut(),
+                                     "Rapidity_Cut");
+      }
+
+      if (rapidity_cut < 0.0) {
+        logg[LInitialConditions].fatal()
+            << "Rapidity cut for initial conditions configured as abs(y) < "
+            << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
+            << "non-zero value or employ SMASH without rapidity cut.";
+        throw std::runtime_error(
+            "Kinematic cut for initial conditions malconfigured.");
+      }
+
+      if (modus_.calculation_frame_is_fixed_target() && rapidity_cut != 0.0) {
+        throw std::runtime_error(
+            "Rapidity cut for initial conditions output is not implemented "
+            "in the fixed target calculation frame. \nPlease use "
+            "\"center of velocity\" or \"center of mass\" as a "
+            "\"Calculation_Frame\" instead.");
+      }
+
+      double pT_cut =
+          modus_.pT_cut().has_value() ? modus_.pT_cut().value() : 0.0;
+      if (config.has_value({"Output", "Initial_Conditions", "pT_Cut"})) {
+        pT_cut = config.take({"Output", "Initial_Conditions", "pT_Cut"});
+        validate_duplicate_IC_config(pT_cut, modus_.pT_cut(), "pT_Cut");
+      }
+      if (pT_cut < 0.0) {
+        logg[LInitialConditions].fatal()
+            << "transverse momentum cut for initial conditions configured as "
+            << "pT < " << pT_cut << " is unreasonable. \nPlease choose a "
+            << "positive, non-zero value or employ SMASH without pT cut.";
+        throw std::runtime_error(
+            "Kinematic cut for initial conditions misconfigured.");
+      }
+
+      if (rapidity_cut > 0.0 || pT_cut > 0.0) {
+        kinematic_cuts_for_IC_output_ = true;
+      }
+
+      if (rapidity_cut > 0.0 && pT_cut > 0.0) {
+        logg[LInitialConditions].info()
+            << "Extracting initial conditions in kinematic range: "
+            << -rapidity_cut << " <= y <= " << rapidity_cut
+            << "; pT <= " << pT_cut << " GeV.";
+      } else if (rapidity_cut > 0.0) {
+        logg[LInitialConditions].info()
+            << "Extracting initial conditions in kinematic range: "
+            << -rapidity_cut << " <= y <= " << rapidity_cut << ".";
+      } else if (pT_cut > 0.0) {
+        logg[LInitialConditions].info()
+            << "Extracting initial conditions in kinematic range: pT <= "
+            << pT_cut << " GeV.";
+      } else {
+        logg[LInitialConditions].info()
+            << "Extracting initial conditions without kinematic cuts.";
+      }
+
       double proper_time = std::numeric_limits<double>::quiet_NaN();
       if (config.has_value({"Output", "Initial_Conditions", "Proper_Time"})) {
         // Read in proper time from config
@@ -1143,13 +1147,12 @@ Experiment<Modus>::Experiment(Configuration &config,
       } else if (IC_parameters.proper_time.has_value()) {
         proper_time = IC_parameters.proper_time.value();
       } else {
-        double lower_bound = IC_parameters.lower_bound.has_value()
-                                 ? IC_parameters.lower_bound.value()
-                                 : 0.5;
-        lower_bound = config.take(
-            {"Output", "Initial_Conditions", "Lower_Bound"}, lower_bound);
-        validate_duplicate_IC_config(
-            lower_bound, IC_parameters.lower_bound.value(), "Lower_Bound");
+        double lower_bound = config.take(
+            {"Output", "Initial_Conditions", "Lower_Bound"},
+            InputKeys::output_initialConditions_lowerBound.default_value());
+        if (IC_parameters.lower_bound.has_value())
+          validate_duplicate_IC_config(
+              lower_bound, IC_parameters.lower_bound.value(), "Lower_Bound");
 
         // Default proper time is the passing time of the two nuclei
         double default_proper_time = modus_.nuclei_passing_time();
@@ -2447,6 +2450,11 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
           perform_action(th_act, i_ens);
         }
       }
+    }
+
+    if (IC_dynamic_) {
+      modus_.build_fluidization_lattice(parameters_.labclock->current_time(),
+                                        ensembles_, density_param_);
     }
 
     std::vector<Actions> actions(parameters_.n_ensembles);

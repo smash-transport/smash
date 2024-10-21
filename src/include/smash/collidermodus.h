@@ -160,6 +160,9 @@ class ColliderModus : public ModusDefault {
   RectangularLattice<EnergyMomentumTensor> *fluid_lattice() const {
     return fluid_lattice_.get();
   };
+  void build_fluidization_lattice(const double t,
+                                  const std::vector<Particles> &ensembles,
+                                  const DensityParameters &dens_par);
 
   /**
    * Update the background energy density due to hydrodynamics, to be

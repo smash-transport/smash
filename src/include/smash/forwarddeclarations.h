@@ -313,12 +313,27 @@ enum class PseudoResonance {
   ClosestFromUnstable,
 };
 
+/// Possible methods to convert SMASH particle into fluid cells.
+/// \see_key{key_MC_IC_type_}
 enum class FluidizationType {
   /// Hypersurface crossed at a fixed proper time
   ConstantTau,
   /// Dynamic fluidization based on local densities
   Dynamic,
 };
+
+/// The different processes from where fluidizable particles are produced.
+/// \see_key{key_MC_IC_fluidizable_processes}
+// Because std::bitset does not handle enum classes, this is a simple enum.
+enum IncludedFluidizableProcesses {
+  From_Elastic = 0,
+  From_Decay = 1,
+  From_Inelastic = 2,
+  From_SoftString = 3,
+  From_HardString = 4,
+};
+
+typedef std::bitset<5> FluidizableProcessesBitSet;
 
 /**
  * Allows to choose which kind of density to calculate.

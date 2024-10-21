@@ -119,6 +119,10 @@ class ModusDefault {
   };
   std::map<int32_t, double>* fluid_background() { return nullptr; }
   RectangularLattice<EnergyMomentumTensor>* fluid_lattice() { return nullptr; }
+  void build_fluidization_lattice(
+      [[maybe_unused]] const double t,
+      [[maybe_unused]] const std::vector<Particles>& ensembles,
+      [[maybe_unused]] const DensityParameters& dens_par) {}
   /**
    * Creates the Grid with normal boundary conditions.
    *

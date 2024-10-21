@@ -284,14 +284,10 @@ ColliderModus::ColliderModus(Configuration modus_config,
   initial_z_displacement_ =
       modus_cfg.take(InputKeys::modi_collider_initialDistance) / 2.0;
 
-  FluidizationType IC_type = FluidizationType::ConstantTau;
-  if (modus_cfg.has_value(InputKeys::modi_collider_initialConditions_type)) {
-    IC_type = modus_cfg.take(InputKeys::modi_collider_initialConditions_type);
-  }
+  IC_parameters_.type = modus_cfg.take(InputKeys::modi_collider_initialConditions_type);
 
-  if (IC_type == FluidizationType::ConstantTau) {
-    if (modus_cfg.has_value(
-            InputKeys::modi_collider_initialConditions_properTime)) {
+  if (IC_parameters_.type == FluidizationType::ConstantTau) {
+    if (modus_cfg.has_value(InputKeys::modi_collider_initialConditions_properTime)) {
       IC_parameters_.proper_time =
           modus_cfg.take(InputKeys::modi_collider_initialConditions_properTime);
     }
@@ -309,7 +305,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
       IC_parameters_.pT_cut =
           modus_cfg.take(InputKeys::modi_collider_initialConditions_pTCut);
     }
-  } else if (IC_type == FluidizationType::Dynamic) {
+  } else if (IC_parameters_.type == FluidizationType::Dynamic) {
     double threshold =
         modus_cfg.take({"Initial_Conditions", "Energy_Density_Threshold"},
                        InputKeys::modi_collider_initialConditions_eDenThreshold
@@ -323,16 +319,27 @@ ColliderModus::ColliderModus(Configuration modus_config,
     int cells = modus_cfg.take(
         {"Initial_Conditions", "Fluidization_Cells"},
         InputKeys::modi_collider_initialConditions_fluidCells.default_value());
-    if (threshold <= 0 || max_time < min_time || min_time < 0 || cells < 2) {
+    double form_time_fraction = modus_cfg.take(
+        {"Initial_Conditions", "Formation_Time_Fraction"},
+        InputKeys::modi_collider_initialConditions_formTimeFraction
+            .default_value());
+    if (threshold <= 0 || max_time < min_time || min_time < 0 || cells < 2 ||
+        form_time_fraction < 0) {
       logg[LCollider].fatal()
           << "Bad parameters chosen for dynamic initial conditions. At least "
              "one of the following inequalities is violated:\n"
           << "  Energy_Density_Threshold = " << threshold << " > 0\n"
           << "  Maximum_Time = " << max_time << " > " << min_time
-          << " = Minimum_Time > 0\n"
-          << "  Fluidization_Cells = " << cells << " > 2";
+          << " = Minimum_Time > 0\n Fluidization_Cells = " << cells << " > 2\n"
+          << " Formation_Time_Fraction < 0";
       throw std::invalid_argument("Please adjust the configuration file.");
     }
+
+    IC_parameters_.fluidizable_processes =
+        modus_cfg.take({"Initial_Conditions", "Fluidizable_Processes"},
+                       InputKeys::modi_collider_initialConditions_fluidProcesses
+                           .default_value());
+
     double min_size = std::max(min_time, 10.);
     std::array<double, 3> l{2 * min_size, 2 * min_size, 2 * min_size};
     std::array<double, 3> origin{-min_size, -min_size, -min_size};
@@ -350,6 +357,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
                            << threshold
                            << " GeV/fm³ in energy density, between " << min_time
                            << " and " << max_time << " fm.";
+    IC_parameters_.formation_time_fraction = form_time_fraction;
   }
 }
 
@@ -629,6 +637,25 @@ bool ColliderModus::same_inputfile(Configuration &proj_config,
   } else {
     return false;
   }
+}
+
+void ColliderModus::build_fluidization_lattice(
+    const double t, const std::vector<Particles> &ensembles,
+    const DensityParameters &dens_par) {
+  if (fluid_lattice_ == nullptr) {
+    return;
+  }
+  // In most scenarios where dynamic fluidization is applicable, t > 20 fm is
+  // dilute enough to not need a very fine lattice.
+  if (t > 20) {
+    std::array<double, 3> new_l{2 * t, 2 * t, 2 * t};
+    std::array<double, 3> new_orig{-t, -t, -t};
+    fluid_lattice_->reset_and_resize(new_l, new_orig);
+    logg[LCollider].debug() << "Lattice resizing at " << t;
+  }
+
+  update_lattice(fluid_lattice_.get(), LatticeUpdate::EveryTimestep,
+                 DensityType::Hadron, dens_par, ensembles, false);
 }
 
 }  // namespace smash

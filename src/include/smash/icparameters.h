@@ -25,6 +25,10 @@ namespace smash {
  * setting only the appropriate parameters.
  */
 struct InitialConditionParameters {
+  /// Type of initialization
+  FluidizationType type;
+
+  FluidizableProcessesBitSet fluidizable_processes;
   /// Hypersurface proper time in IC
   std::optional<double> proper_time = std::nullopt;
   /// Lower bound for proper time in IC
@@ -41,6 +45,11 @@ struct InitialConditionParameters {
   std::optional<double> max_time = std::nullopt;
   /// Number of interpolating cells for dynamic IC
   std::optional<int> num_fluid_cells = std::nullopt;
+  /**
+   * Fraction of formation time to pass before particles can fluidize in
+   * dynamic IC
+   */
+  std::optional<double> formation_time_fraction = std::nullopt;
 };
 
 }  // namespace smash
