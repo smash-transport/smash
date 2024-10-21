@@ -13,20 +13,15 @@
 #include "smash/configuration.h"
 #include "smash/constants.h"
 #include "smash/fourvector.h"
-#include "smash/input_keys.h"
 #include "smash/numerics.h"
 #include "smash/random.h"
 #include "smash/threevector.h"
 
 namespace smash {
 
-AlphaClusteredNucleus::AlphaClusteredNucleus(
-    const std::map<PdgCode, int> &particle_list, int nTest)
-    : Nucleus(particle_list, nTest) {}
-
-AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int nTest,
-                                             bool auto_alphaclustering)
-    : Nucleus(config, nTest) {
+AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int n_test,
+                                             bool automatic)
+    : Nucleus(config, n_test) {
   int A = Nucleus::number_of_particles();
   int Z = Nucleus::number_of_protons();
   if (A == 16 && Z == 8) {
@@ -35,27 +30,36 @@ AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int nTest,
     set_nuclear_radius(1.676);
   } else {
     throw std::domain_error(
-        "Alpha-Clustering is only implemented for oxygen nuclei. Please, check "
+        "Alpha-clustering is only implemented for oxygen nuclei. Please, check "
         "the 'Alpha_Clustered' section in your input file.");
   }
-  const bool is_projectile = is_about_projectile(config);
 
-  if (!auto_alphaclustering) {
+  /* NOTE: Here the Nucleus parent class has been initialised and the Projectile
+   * or Target subsection could be already be entirely extracted. Therefore
+   * unconditionally call here the is_about_projectile function might fail.
+   * This has to be called where appropriate and repeating it is not a problem.
+   */
+  if (!automatic && has_projectile_or_target(config)) {
+    const bool is_projectile = is_about_projectile(config);
     const auto &side_length_key = [&is_projectile]() {
       return is_projectile
-                 ? InputKeys::modi_collider_projectile_alphaClustered_sidelength
-                 : InputKeys::modi_collider_target_alphaClustered_sidelength;
+                 ? InputKeys::modi_collider_projectile_alphaClustered_sideLength
+                 : InputKeys::modi_collider_target_alphaClustered_sideLength;
     }();
-    tetrahedron_sidelength_ = config.take(side_length_key);
+    tetrahedron_side_length_ = config.take(side_length_key);
   }
-  scale_tetrahedron_vertex_positions(tetrahedron_sidelength_);
-  const auto &orientation_section = [&is_projectile]() {
-    return is_projectile ? InputSections::m_c_p_orientation
-                         : InputSections::m_c_t_orientation;
-  }();
-  if (config.has_section(orientation_section)) {
-    Configuration sub_conf = config.extract_sub_configuration({"Orientation"});
-    set_orientation_from_config(sub_conf);
+  scale_tetrahedron_vertex_positions(tetrahedron_side_length_);
+  if (has_projectile_or_target(config)) {
+    const bool is_projectile = is_about_projectile(config);
+    const auto &orientation_section = [&is_projectile]() {
+      return is_projectile ? InputSections::m_c_p_orientation
+                           : InputSections::m_c_t_orientation;
+    }();
+    if (config.has_section(orientation_section)) {
+      Configuration sub_conf =
+          config.extract_sub_configuration(orientation_section);
+      set_orientation_from_config(sub_conf);
+    }
   }
 }
 
@@ -69,9 +73,9 @@ ThreeVector AlphaClusteredNucleus::distribute_nucleon() {
 }
 
 void AlphaClusteredNucleus::scale_tetrahedron_vertex_positions(
-    double sidelength) {
-  for (auto &&i : tetrahedron_vertex_positions_) {
-    i = i * std::sqrt(6) / 4 * sidelength;
+    double side_length) {
+  for (auto &position : tetrahedron_vertex_positions_) {
+    position = position / position.abs() * std::sqrt(6) / 4 * side_length;
   }
 }
 

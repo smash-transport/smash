@@ -3394,7 +3394,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta2{
-      InputSections::m_c_t_deformed + "Beta_2", 0.0, {"1.5"}};
+      InputSections::m_c_t_deformed + "Beta_2",
+      InputKeys::modi_collider_projectile_deformed_beta2.default_value(),
+      {"1.5"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3412,7 +3414,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta3{
-      InputSections::m_c_t_deformed + "Beta_3", 0.0, {"3.0"}};
+      InputSections::m_c_t_deformed + "Beta_3",
+      InputKeys::modi_collider_projectile_deformed_beta3.default_value(),
+      {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3430,7 +3434,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta4{
-      InputSections::m_c_t_deformed + "Beta_4", 0.0, {"1.5"}};
+      InputSections::m_c_t_deformed + "Beta_4",
+      InputKeys::modi_collider_projectile_deformed_beta4.default_value(),
+      {"1.5"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3448,22 +3454,36 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_gamma_}
    */
   inline static const Key<double> modi_collider_target_deformed_gamma{
-      InputSections::m_c_t_deformed + "Gamma", 0.0, {"3.0"}};
+      InputSections::m_c_t_deformed + "Gamma",
+      InputKeys::modi_collider_projectile_deformed_gamma.default_value(),
+      {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
    * ### Alpha-Clustered oxygen nuclei
    *
-   * It is possible to have alpha-clustered projectile and/or target oxygen
+   * It is possible to have alpha-clustered projectile and/or target **oxygen**
    * nuclei using the `Alpha_Clustered` section, which should then contain some
-   * configuration, if given.
+   * configuration, if given. This will create four Helium nuclei that are
+   * placed on the vertices of a regular tetrahedron with center in the origin,
+   * \f$\left(0,0,0\right)\f$. The initial positions of these vertices are the
+   * following:
+   * \f[
+   * \left(1,0,0\right),\;
+   * \left(-\frac{1}{3}, \frac{\sqrt{8}}{3}, 0\right),\;
+   * \left(-\frac{1}{3}, -\frac{\sqrt{8}}{6}, \frac{\sqrt{24}}{6}\right),\;
+   * \left(-\frac{1}{3}, -\frac{\sqrt{8}}{6}, -\frac{\sqrt{24}}{6}\right)\quad.
+   * \f]
+   * This means there is one vertex on the x-axis and the rest lie on a plane
+   * parallel to the y-z plane. For colliding them with a specific orientation
+   * refer to the `Orientation` section.
    *
    * \required_key_no_line{key_MC_PT_alphaClustered_auto_,Automatic,bool}
    *
-   * - `true` &rarr; Automatically set the sidelength of the tetrahedron used
+   * - `true` &rarr; Automatically set the side length of the tetrahedron used
    * for alpha-clustering.
-   * - `false` &rarr; Manually set the sidelength of the tetrahedron used for
+   * - `false` &rarr; Manually set the side length of the tetrahedron used for
    * alpha-clustering.
    */
   /**
@@ -3480,23 +3500,27 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_alphaClustered_sidelength_,Sidelength,double,3.42}
+   * \optional_key_no_line{key_MC_PT_alphaClustered_sideLength_,Side_Length,double,3.42}
    *
-   * The sidelength of the regular tetrahedron used for alpha-clustering. The
-   * default value of 3.42 was taken from \iref{Li:2020vrg}.
+   * The sidelength \unit{in fm} of the regular tetrahedron used for
+   * alpha-clustering. The default value of 3.42 fm was taken from
+   * \iref{Li:2020vrg}.
    */
   /**
-   * \see_key{key_MC_PT_alphaClustered_sidelength_}
+   * \see_key{key_MC_PT_alphaClustered_sideLength_}
    */
   inline static const Key<double>
-      modi_collider_projectile_alphaClustered_sidelength{
-          InputSections::m_c_p_alphaClustered + "Sidelength", 3.42, {"3.2"}};
+      modi_collider_projectile_alphaClustered_sideLength{
+          InputSections::m_c_p_alphaClustered + "Side_Length", 3.42, {"3.2"}};
   /**
-   * \see_key{key_MC_PT_alphaClustered_sidelength_}
+   * \see_key{key_MC_PT_alphaClustered_sideLength_}
    */
   inline static const Key<double>
-      modi_collider_target_alphaClustered_sidelength{
-          InputSections::m_c_t_alphaClustered + "Sidelength", 3.42, {"3.2"}};
+      modi_collider_target_alphaClustered_sideLength{
+          InputSections::m_c_t_alphaClustered + "Side_Length",
+          InputKeys::modi_collider_projectile_alphaClustered_sideLength
+              .default_value(),
+          {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3524,7 +3548,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_phi_}
    */
   inline static const Key<double> modi_collider_target_orientation_phi{
-      InputSections::m_c_t_orientation + "Phi", 0.0, {"0.50"}};
+      InputSections::m_c_t_orientation + "Phi",
+      InputKeys::modi_collider_projectile_orientation_phi.default_value(),
+      {"0.50"}};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_orientation_theta_,Theta,double,0.0}
@@ -3540,7 +3566,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_theta_}
    */
   inline static const Key<double> modi_collider_target_orientation_theta{
-      InputSections::m_c_t_orientation + "Theta", 0.0, {"0.50"}};
+      InputSections::m_c_t_orientation + "Theta",
+      InputKeys::modi_collider_projectile_orientation_theta.default_value(),
+      {"0.50"}};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_orientation_psi_,Psi,double,0.0}
@@ -3556,7 +3584,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_psi_}
    */
   inline static const Key<double> modi_collider_target_orientation_psi{
-      InputSections::m_c_t_orientation + "Psi", 0.0, {"3.0"}};
+      InputSections::m_c_t_orientation + "Psi",
+      InputKeys::modi_collider_projectile_orientation_psi.default_value(),
+      {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3573,7 +3603,9 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_random_}
    */
   inline static const Key<bool> modi_collider_target_orientation_randRot{
-      InputSections::m_c_t_orientation + "Random_Rotation", false, {"1.7"}};
+      InputSections::m_c_t_orientation + "Random_Rotation",
+      InputKeys::modi_collider_projectile_orientation_randRot.default_value(),
+      {"1.7"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
@@ -5635,8 +5667,8 @@ struct InputKeys {
       std::cref(modi_collider_target_deformed_gamma),
       std::cref(modi_collider_projectile_alphaClustered_automatic),
       std::cref(modi_collider_target_alphaClustered_automatic),
-      std::cref(modi_collider_projectile_alphaClustered_sidelength),
-      std::cref(modi_collider_target_alphaClustered_sidelength),
+      std::cref(modi_collider_projectile_alphaClustered_sideLength),
+      std::cref(modi_collider_target_alphaClustered_sideLength),
       std::cref(modi_collider_projectile_orientation_phi),
       std::cref(modi_collider_target_orientation_phi),
       std::cref(modi_collider_projectile_orientation_psi),
@@ -6221,13 +6253,12 @@ General:
  * at the top-level of SMASH codebase.
  *
  * <hr>
- * \anchor input_modi_collider_projectile_and_target_ex2_
+ * \anchor input_modi_collider_projectile_and_target_ex3_
  * ### Configuring a deformed nucleus
  *
  * To configure a fixed target heavy-ion collision with deformed nuclei, whose
  * spherical deformation is explicitly declared, it can be done according to
- the
- * following example. For explanatory (and not physics) reasons, the
+ * the following example. For explanatory (and not physics) reasons, the
  * projectile's Woods-Saxon distribution is initialized automatically and
  * its spherical deformation manually, while the target nucleus is configured
  * just the opposite.
@@ -6260,6 +6291,32 @@ General:
                  Random_Rotation: true
          E_kin: 1.2
          Calculation_Frame: "fixed target"
+ \endverbatim
+ *
+ * <hr>
+ * \anchor input_modi_collider_projectile_and_target_ex4_
+ * ### Configuring an alpha-clustered nucleus
+ *
+ * The following example shows how to setup projectile and target using
+ * alpha-clustering in an O-O collision. The projectile is automatically
+ * initialized, while the target nucleus is manually configured specifying a
+ * side length of the tetrahedron (this serves only for demonstration purposes
+ * and in real situations projectile and target should be initialised in the
+ * same way).
+ *\verbatim
+ Modi:
+    Collider:
+        Projectile:
+            Particles: {2212: 8, 2112: 8} #Oxygen16
+            Alpha_Clustered:
+                Automatic: "True"  # Use default 3.42 for the side length
+        Target:
+            Particles: {2212: 8, 2112: 8} #Oxygen16
+            Alpha_Clustered:
+                Automatic: "False"
+                Side_Length: 4.2
+        Sqrtsnn: 200
+        Fermi_Motion: frozen
  \endverbatim
  */
 

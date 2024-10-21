@@ -384,10 +384,10 @@ ColliderModus::create_alphaclustered_nucleus(Configuration &nucleus_cfg,
                      InputKeys::
                          modi_collider_projectile_alphaClustered_automatic,
                      InputKeys::
-                         modi_collider_projectile_alphaClustered_sidelength)
+                         modi_collider_projectile_alphaClustered_sideLength)
                : std::make_tuple(
                      InputKeys::modi_collider_target_alphaClustered_automatic,
-                     InputKeys::modi_collider_target_alphaClustered_sidelength);
+                     InputKeys::modi_collider_target_alphaClustered_sideLength);
   }();
 
   bool automatic_alphaclustering = nucleus_cfg.take(automatic_key);
