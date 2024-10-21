@@ -283,74 +283,78 @@ ColliderModus::ColliderModus(Configuration modus_config,
   // initial_z_displacement_ away from origin)
   initial_z_displacement_ =
       modus_cfg.take(InputKeys::modi_collider_initialDistance) / 2.0;
+  if (modus_cfg.has_section(InputSections::m_c_initialConditions)) {
+    IC_parameters_.type =
+        modus_cfg.take(InputKeys::modi_collider_initialConditions_type);
 
-  IC_parameters_.type =
-      modus_cfg.take(InputKeys::modi_collider_initialConditions_type);
+    if (IC_parameters_.type == FluidizationType::ConstantTau) {
+      if (modus_cfg.has_value(
+              InputKeys::modi_collider_initialConditions_properTime)) {
+        IC_parameters_.proper_time = modus_cfg.take(
+            InputKeys::modi_collider_initialConditions_properTime);
+      }
+      if (modus_cfg.has_value(
+              InputKeys::modi_collider_initialConditions_lowerBound)) {
+        IC_parameters_.lower_bound = modus_cfg.take(
+            InputKeys::modi_collider_initialConditions_lowerBound);
+      }
+      if (modus_cfg.has_value(
+              InputKeys::modi_collider_initialConditions_rapidityCut)) {
+        IC_parameters_.rapidity_cut = modus_cfg.take(
+            InputKeys::modi_collider_initialConditions_rapidityCut);
+      }
+      if (modus_cfg.has_value(
+              InputKeys::modi_collider_initialConditions_pTCut)) {
+        IC_parameters_.pT_cut =
+            modus_cfg.take(InputKeys::modi_collider_initialConditions_pTCut);
+      }
+    } else if (IC_parameters_.type == FluidizationType::Dynamic) {
+      double threshold = modus_cfg.take(
+          InputKeys::modi_collider_initialConditions_eDenThreshold);
+      double min_time =
+          modus_cfg.take(InputKeys::modi_collider_initialConditions_minTime);
+      double max_time =
+          modus_cfg.take(InputKeys::modi_collider_initialConditions_maxTime);
+      int cells =
+          modus_cfg.take(InputKeys::modi_collider_initialConditions_fluidCells);
+      double form_time_fraction = modus_cfg.take(
+          InputKeys::modi_collider_initialConditions_formTimeFraction);
+      if (threshold <= 0 || max_time < min_time || min_time < 0 || cells < 2 ||
+          form_time_fraction < 0) {
+        logg[LCollider].fatal()
+            << "Bad parameters chosen for dynamic initial conditions. At least "
+               "one of the following inequalities is violated:\n"
+            << "  Energy_Density_Threshold = " << threshold << " > 0\n"
+            << "  Maximum_Time = " << max_time << " > " << min_time
+            << " = Minimum_Time > 0\n Fluidization_Cells = " << cells
+            << " > 2\n"
+            << " Formation_Time_Fraction < 0";
+        throw std::invalid_argument("Please adjust the configuration file.");
+      }
 
-  if (IC_parameters_.type == FluidizationType::ConstantTau) {
-    if (modus_cfg.has_value(
-            InputKeys::modi_collider_initialConditions_properTime)) {
-      IC_parameters_.proper_time =
-          modus_cfg.take(InputKeys::modi_collider_initialConditions_properTime);
+      IC_parameters_.fluidizable_processes = modus_cfg.take(
+          InputKeys::modi_collider_initialConditions_fluidProcesses);
+
+      double min_size = std::max(min_time, 10.);
+      std::array<double, 3> l{2 * min_size, 2 * min_size, 2 * min_size};
+      std::array<double, 3> origin{-min_size, -min_size, -min_size};
+      std::array<int, 3> n{cells, cells, cells};
+
+      fluid_lattice_ =
+          std::make_unique<RectangularLattice<EnergyMomentumTensor>>(
+              l, n, origin, false, LatticeUpdate::EveryTimestep);
+      fluid_background_ = std::make_unique<std::map<int32_t, double>>();
+
+      IC_parameters_.energy_density_threshold = threshold;
+      IC_parameters_.min_time = min_time;
+      IC_parameters_.max_time = max_time;
+      IC_parameters_.num_fluid_cells = cells;
+      logg[LCollider].info()
+          << "Dynamic Initial Conditions with threshold " << threshold
+          << " GeV/fm³ in energy density, between " << min_time << " and "
+          << max_time << " fm.";
+      IC_parameters_.formation_time_fraction = form_time_fraction;
     }
-    if (modus_cfg.has_value(
-            InputKeys::modi_collider_initialConditions_lowerBound)) {
-      IC_parameters_.lower_bound =
-          modus_cfg.take(InputKeys::modi_collider_initialConditions_lowerBound);
-    }
-    if (modus_cfg.has_value(
-            InputKeys::modi_collider_initialConditions_rapidityCut)) {
-      IC_parameters_.rapidity_cut = modus_cfg.take(
-          InputKeys::modi_collider_initialConditions_rapidityCut);
-    }
-    if (modus_cfg.has_value(InputKeys::modi_collider_initialConditions_pTCut)) {
-      IC_parameters_.pT_cut =
-          modus_cfg.take(InputKeys::modi_collider_initialConditions_pTCut);
-    }
-  } else if (IC_parameters_.type == FluidizationType::Dynamic) {
-    double threshold = modus_cfg.take(
-        InputKeys::modi_collider_initialConditions_eDenThreshold);
-    double min_time =
-        modus_cfg.take(InputKeys::modi_collider_initialConditions_minTime);
-    double max_time =
-        modus_cfg.take(InputKeys::modi_collider_initialConditions_maxTime);
-    int cells =
-        modus_cfg.take(InputKeys::modi_collider_initialConditions_fluidCells);
-    double form_time_fraction = modus_cfg.take(
-        InputKeys::modi_collider_initialConditions_formTimeFraction);
-    if (threshold <= 0 || max_time < min_time || min_time < 0 || cells < 2 ||
-        form_time_fraction < 0) {
-      logg[LCollider].fatal()
-          << "Bad parameters chosen for dynamic initial conditions. At least "
-             "one of the following inequalities is violated:\n"
-          << "  Energy_Density_Threshold = " << threshold << " > 0\n"
-          << "  Maximum_Time = " << max_time << " > " << min_time
-          << " = Minimum_Time > 0\n Fluidization_Cells = " << cells << " > 2\n"
-          << " Formation_Time_Fraction < 0";
-      throw std::invalid_argument("Please adjust the configuration file.");
-    }
-
-    IC_parameters_.fluidizable_processes = modus_cfg.take(
-        InputKeys::modi_collider_initialConditions_fluidProcesses);
-
-    double min_size = std::max(min_time, 10.);
-    std::array<double, 3> l{2 * min_size, 2 * min_size, 2 * min_size};
-    std::array<double, 3> origin{-min_size, -min_size, -min_size};
-    std::array<int, 3> n{cells, cells, cells};
-
-    fluid_lattice_ = std::make_unique<RectangularLattice<EnergyMomentumTensor>>(
-        l, n, origin, false, LatticeUpdate::EveryTimestep);
-    fluid_background_ = std::make_unique<std::map<int32_t, double>>();
-
-    IC_parameters_.energy_density_threshold = threshold;
-    IC_parameters_.min_time = min_time;
-    IC_parameters_.max_time = max_time;
-    IC_parameters_.num_fluid_cells = cells;
-    logg[LCollider].info() << "Dynamic Initial Conditions with threshold "
-                           << threshold
-                           << " GeV/fm³ in energy density, between " << min_time
-                           << " and " << max_time << " fm.";
-    IC_parameters_.formation_time_fraction = form_time_fraction;
   }
 }
 
