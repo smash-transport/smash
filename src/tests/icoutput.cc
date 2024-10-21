@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2019-2020,2022-2023
+ *    Copyright (c) 2019-2020,2022-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,6 +14,7 @@
 #include <filesystem>
 
 #include "setup.h"
+#include "smash/fluidizationaction.h"
 #include "smash/outputinterface.h"
 
 using namespace smash;

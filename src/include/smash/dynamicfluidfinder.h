@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2023
+ *    Copyright (c) 2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -85,15 +85,34 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
     return {};
   }
 
+  /**
+   * Determine if fluidization condition is satisfied.
+   *
+   * \param[in] pdata Particle to be checked for fluidization.
+   * \return Whether energy density around pdata is high enough.
+   */
+  bool above_threshold(const ParticleData &pdata) const;
+
+  /**
+   * Checks if a given process type is in \ref fluidizable_processes_. In
+   * particular, initially sampled hadrons are not fluidizable and have
+   * ProcessType::None, which falls in the default case for the switch.
+   *
+   * \return whether the process is fluidizable
+   */
+  bool is_process_fluidizable(const ProcessType &type) const;
+
  private:
   /**
    * Lattice where energy momentum tensor is computed
+   *
    * \note It must be a reference so that it can be updated outside the class,
    * without creating a new Finder object.
    */
   RectangularLattice<EnergyMomentumTensor> &energy_density_lattice_;
   /**
-   *  Background energy density at positions of particles, using the id as key
+   * Background energy density at positions of particles, using the id as key
+   *
    * \note It is a reference so that it can be updated outside the class, e.g.
    * by an external manager using SMASH as a library.
    */
@@ -101,9 +120,10 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
   /**
    * Queue for future fluidizations, which will take place after the formation
    * time of particles. Keys are particle indices and values are absolute
-   * formation time in the lab frame. \note It must be \c mutable so that
-   * \c finder_actions_in_cell, overriden as a \c const method from the parent
-   * class, can modify it.
+   * formation time in the lab frame.
+   *
+   * \note It must be \c mutable so that \c finder_actions_in_cell, overriden
+   * as a \c const method from the parent class, can modify it.
    */
   mutable std::map<int32_t, double> queue_{};
   /// Minimum energy density surrounding the particle to fluidize it
@@ -124,23 +144,6 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
       InputKeys::modi_collider_initialConditions_fluidCells.default_value();
   /// Processes that create a fluidizable particle
   const FluidizableProcessesBitSet fluidizable_processes_;
-
-  /**
-   * Determine if fluidization condition is satisfied.
-   *
-   * \param[in] pdata Particle to be checked for fluidization.
-   * \return Whether energy density around pdata is high enough.
-   */
-  bool above_threshold(const ParticleData &pdata) const;
-
-  /**
-   * Checks if a given process type is in \ref fluidizable_processes_. In
-   * particular, initially sampled hadrons are not fluidizable and have
-   * ProcessType::None, which falls in the default case for the switch.
-   *
-   * \return whether the process is fluidizable
-   */
-  bool is_process_fluidizable(const ProcessType &type) const;
 };
 
 }  // namespace smash

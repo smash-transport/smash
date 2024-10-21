@@ -17,6 +17,7 @@
 
 #include "setup.h"
 #include "smash/config.h"
+#include "smash/fluidizationaction.h"
 #include "smash/oscaroutput.h"
 #include "smash/outputinterface.h"
 #include "smash/particles.h"

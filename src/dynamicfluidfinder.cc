@@ -24,8 +24,6 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
   for (const ParticleData &p : search_list) {
     const double t0 = p.position().x0();
     const double t_end = t0 + dt;
-    // Particles should not be removed before the nuclei collide, and after some
-    // time max_time_ there won't be any fluidization, so this saves resources
     if (t_end < min_time_ || t0 > max_time_) {
       break;
     }
@@ -38,8 +36,7 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
         queue_.erase(id);
       }
     } else {
-      const auto process_type = p.get_history().process_type;
-      if (is_process_fluidizable(process_type)) {
+      if (is_process_fluidizable(p.get_history().process_type)) {
         if (above_threshold(p)) {
           double fluidization_time =
               t0 + formation_time_fraction_ * (p.formation_time() - t0);
@@ -49,7 +46,6 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
             double time_until = (1 - p.xsec_scaling_factor() <= really_small)
                                     ? 0
                                     : fluidization_time - t0;
-            // RENAN: add option on leading hadrons
             actions.emplace_back(
                 std::make_unique<FluidizationAction>(p, p, time_until));
           }
@@ -63,11 +59,11 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
 bool DynamicFluidizationFinder::above_threshold(
     const ParticleData &pdata) const {
   EnergyMomentumTensor Tmunu;
-  // value_at returns false if pdata is out of bounds, this is desirable here
+  // value_at returns false if pdata is out of bounds
   bool inside =
       energy_density_lattice_.value_at(pdata.position().threevec(), Tmunu);
   if (inside) {
-    // If the particle is not in the map, the background evaluates to 0.
+    // If the particle is not in the map, the background evaluates to 0
     const double background = background_[pdata.id()];
     const double e_den_particles =
         Tmunu.boosted(Tmunu.landau_frame_4velocity())[0];
@@ -84,6 +80,10 @@ bool DynamicFluidizationFinder::above_threshold(
 
 bool DynamicFluidizationFinder::is_process_fluidizable(
     const ProcessType &type) const {
+  if (is_string_soft_process(type)) {
+    return fluidizable_processes_
+        [IncludedFluidizableProcesses::From_SoftString];
+  }
   switch (type) {
     case ProcessType::Elastic:
       return fluidizable_processes_[IncludedFluidizableProcesses::From_Elastic];
@@ -109,10 +109,6 @@ bool DynamicFluidizationFinder::is_process_fluidizable(
       break;
     default:
       return false;
-  }
-  if (is_string_soft_process(type)) {
-    return fluidizable_processes_
-        [IncludedFluidizableProcesses::From_SoftString];
   }
   return false;
 }

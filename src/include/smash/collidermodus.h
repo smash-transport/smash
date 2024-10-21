@@ -151,7 +151,7 @@ class ColliderModus : public ModusDefault {
     return fluid_lattice_.get();
   }
   /**
-   * Build lattice of energy momentum tensor. After t>20 \unit{fm}, the lattice
+   * Build lattice of energy momentum tensor. After t>25 \unit{fm}, the lattice
    * grows at every 5 \unit{fm} to accomodate for the system expansion.
    *
    * \param[in] t Current time.

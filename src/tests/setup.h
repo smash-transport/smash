@@ -330,6 +330,17 @@ inline std::unique_ptr<StringProcess> default_string_process_interface() {
       false);   // Use_Monash_Tune
 }
 
+/// Creates default parameters for dynamic IC
+inline InitialConditionParameters default_dynamic_IC_parameters() {
+  return {.type = FluidizationType::Dynamic,
+          .fluidizable_processes = FluidizableProcessesBitSet{}.set(),
+          .energy_density_threshold = 0.5,
+          .min_time = 0,
+          .max_time = 100,
+          .num_fluid_cells = 50,
+          .formation_time_fraction = 1};
+}
+
 /**
  * @}
  */

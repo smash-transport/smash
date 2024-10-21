@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2021,2024
+ *    Copyright (c) 2015-2021, 2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -799,13 +799,13 @@ class RectangularLattice {
    * \param[in] new_length 3-dimensional array indicates the new size of
    *            the lattice [fm].
    * \param[in] new_origin 3-dimensional array (nx,ny,nz) indicates the origin
-   * of the lattice. \param[in] new_cells 3-dimensional array with the new
+   * of the lattice.
+   * \param[in] new_cells 3-dimensional array with the new
    * number of lattice cells.
    */
-  void reset_and_resize(
-      const std::optional<std::array<double, 3>> new_length = std::nullopt,
-      const std::optional<std::array<double, 3>> new_origin = std::nullopt,
-      const std::optional<std::array<int, 3>> new_cells = std::nullopt) {
+  void reset_and_resize(const std::optional<std::array<double, 3>> new_length,
+                        const std::optional<std::array<double, 3>> new_origin,
+                        const std::optional<std::array<int, 3>> new_cells) {
     if (new_length || new_origin || new_cells) {
       reset();
       if (new_length)
@@ -819,8 +819,9 @@ class RectangularLattice {
                      lattice_sizes_[2] / n_cells_[2]};
       cell_volume_ = cell_sizes_[0] * cell_sizes_[1] * cell_sizes_[2];
     } else {
-      logg[LLattice].warn() << "RectangularLattice::reset_and_resize called "
-                               "without arguments, lattice was not changed.";
+      throw std::invalid_argument(
+          "RectangularLattice::reset_and_resize called "
+          "without arguments, lattice was not changed.");
     }
   }
 
