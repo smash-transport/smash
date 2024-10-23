@@ -384,8 +384,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *   ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
  *   t_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span></div>
  * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm GeV GeV
- * GeV GeV GeV none none e none fm none none none fm none none none none</span></div>
- * <div class="line"><span class="preprocessor">\# SMASH_version</span></div>
+ * GeV GeV GeV none none e none fm none none none fm none none none
+ *none</span></div> <div class="line"><span class="preprocessor">\#
+ *SMASH_version</span></div>
  * </div>
  *
  * \n
@@ -663,8 +664,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *   ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
  *   t_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span></div>
  * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm GeV GeV
- * GeV GeV GeV none none e none fm none none none fm none none none none</span></div>
- * <div class="line"><span class="preprocessor">\# SMASH_version</span></div>
+ * GeV GeV GeV none none e none fm none none none fm none none none
+ *none</span></div> <div class="line"><span class="preprocessor">\#
+ *SMASH_version</span></div>
  * </div>
  *
  * \n
