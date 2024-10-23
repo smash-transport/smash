@@ -1982,10 +1982,6 @@ void Experiment<Modus>::initialize_new_event() {
   }
   for (Particles &particles : ensembles_) {
     start_time = modus_.initial_conditions(&particles, parameters_);
-    for (ParticleData &particle : particles) {
-      // Initialize every particle with a valid but random spin projection
-      particle.set_random_spin_projection();
-    }
   }
   /* For box modus make sure that particles are in the box. In principle, after
    * a correct initialization they should be, so this is just playing it safe.

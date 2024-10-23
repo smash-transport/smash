@@ -329,8 +329,7 @@ struct OutputDefaultQuantities {
       "pdg_mother1",
       "pdg_mother2",
       "baryon_number",
-      "strangeness",
-      "spin_projection"};
+      "strangeness"};
   /// Quantities output in OSCAR1999 format
   inline static const std::vector<std::string> oscar1999 = {
       "id", "pdg", "0", "px", "py", "pz", "p0", "mass", "x", "y", "z", "t"};

@@ -96,7 +96,6 @@ static void compare_extended_particledata(
   COMPARE(std::atoi(datastring.at(20).c_str()),
           particle.type().baryon_number());
   COMPARE(std::atoi(datastring.at(21).c_str()), particle.type().strangeness());
-  COMPARE(std::atoi(datastring.at(22).c_str()), particle.spin_projection());
 }
 
 TEST(full2013_format) {
@@ -349,8 +348,7 @@ TEST(full_extended_oscar) {
             "#!OSCAR2013Extended full_event_history"
             " t x y z mass p0 px py pz pdg ID charge ncoll"
             " form_time xsecfac proc_id_origin proc_type_origin"
-            " time_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness"
-            " spin_projection");
+            " time_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness");
     std::getline(outputfile, line);
     COMPARE(line,
             "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none"

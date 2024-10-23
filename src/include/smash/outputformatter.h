@@ -213,10 +213,6 @@ class OutputFormatter {
         getters_.push_back([this](const ParticleData& in) {
           return this->converter_.as_integer(in.pdgcode().strangeness());
         });
-      } else if (quantity == "spin_projection") {
-        getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_integer(in.spin_projection());
-        });
       } else if (quantity == "0") {  // for OSCAR1999
         getters_.push_back([this]([[maybe_unused]] const ParticleData& in) {
           return this->converter_.as_integer(0);
@@ -302,7 +298,6 @@ class OutputFormatter {
       {"pdg_mother2", "none"},
       {"baryon_number", "none"},
       {"strangeness", "none"},
-      {"spin_projection", "none"},
       {"0", "0"}};  // for OSCAR1999
 
   /// Checks whether the quantities requested are known and unique

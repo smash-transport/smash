@@ -69,8 +69,7 @@ TEST(valid_line_maker) {
                                                "pdg_mother1",
                                                "pdg_mother2",
                                                "baryon_number",
-                                               "strangeness",
-                                               "spin_projection"};
+                                               "strangeness"};
 
   OutputFormatter<ToASCII> formatter(valid_quantities);
 
@@ -110,7 +109,6 @@ TEST(valid_line_maker) {
   correct_line << p.get_history().p2.string() << " ";
   correct_line << p.pdgcode().baryon_number() << " ";
   correct_line << p.pdgcode().strangeness() << " ";
-  correct_line << p.spin_projection();
 
   std::cout << correct_line.str();
 
