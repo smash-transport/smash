@@ -133,7 +133,9 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
                                                   const int event_number,
                                                   const EventInfo &) {
   current_event_ = event_number;
-  if (Contents & OscarAtEventstart) {
+  // We do not want the inital particle list or number to be printed in case of
+  // IC output
+  if (Contents & OscarAtEventstart && !(Contents & OscarParticlesIC)) {
     if (Format == ASCIICustom || Format == OscarFormat2013 ||
         Format == OscarFormat2013Extended) {
       std::fprintf(file_.get(), "# event %i in %zu\n", event_number,
@@ -146,10 +148,11 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
       std::fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
                    event_number);
     }
-    if (!(Contents & OscarParticlesIC)) {
-      // We do not want the inital particle list to be printed in case of
-      // IC output
-      write(particles);
+    write(particles);
+  } else if (Contents & OscarParticlesIC) {
+    if (Format == ASCIICustom || Format == OscarFormat2013 ||
+        Format == OscarFormat2013Extended) {
+      std::fprintf(file_.get(), "# event %i start\n", event_number);
     }
   }
 }
@@ -167,11 +170,15 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
       write(particles);
     }
     // Comment end of an event
-    const char *empty_event_str = event.empty_event ? "no" : "yes";
-    std::fprintf(
-        file_.get(),
-        "# event %i end 0 impact %7.3f scattering_projectile_target %s\n",
-        event_number, event.impact_parameter, empty_event_str);
+    if (!(Contents & OscarParticlesIC)) {
+      const char *empty_event_str = event.empty_event ? "no" : "yes";
+      std::fprintf(
+          file_.get(),
+          "# event %i end 0 impact %7.3f scattering_projectile_target %s\n",
+          event_number, event.impact_parameter, empty_event_str);
+    } else {
+      std::fprintf(file_.get(), "# event %i end\n", event_number);
+    }
   } else {
     /* OSCAR line prefix : initial particles; final particles; event id
      * Last block of an event: initial = number of particles, final = 0
