@@ -28,7 +28,7 @@ using namespace smash;
 
 static const double accuracy = 1.0e-4;
 static const int data_elements = 12;
-static const int data_elements_extended = 23;
+static const int data_elements_extended = 22;
 static const std::filesystem::path testoutputpath =
     std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
 static auto random_value = random::make_uniform_distribution(-15.0, +15.0);
@@ -353,7 +353,7 @@ TEST(full_extended_oscar) {
     std::getline(outputfile, line);
     COMPARE(line,
             "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none"
-            " e none fm none none none fm none none none none none");
+            " e none fm none none none fm none none none none");
     std::getline(outputfile, line);
     COMPARE(line, "# " SMASH_VERSION);
     /* Check initial particle list description line */

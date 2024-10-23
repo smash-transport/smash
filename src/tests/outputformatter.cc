@@ -82,7 +82,7 @@ TEST(valid_line_maker) {
 
   std::string units_line{
       "fm fm fm fm GeV GeV GeV GeV GeV none none e none fm none none none fm "
-      "none none none none none"};
+      "none none none none"};
   VERIFY(units_line == formatter.unit_line());
 
   std::stringstream correct_line{};
@@ -108,9 +108,7 @@ TEST(valid_line_maker) {
   correct_line << p.get_history().p1.string() << " ";
   correct_line << p.get_history().p2.string() << " ";
   correct_line << p.pdgcode().baryon_number() << " ";
-  correct_line << p.pdgcode().strangeness() << " ";
-
-  std::cout << correct_line.str();
+  correct_line << p.pdgcode().strangeness();
 
   VERIFY(correct_line.str() == formatter.data_line(p));
 }

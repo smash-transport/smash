@@ -41,7 +41,7 @@ TEST(directory_is_created) {
 
 TEST(init_particletypes) { Test::create_smashon_particletypes(); }
 
-static const int current_format_version = 10;
+static const int current_format_version = 9;
 
 /* A set of convenient functions to read binary */
 
