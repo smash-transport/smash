@@ -382,11 +382,11 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <div class="line"><span class="preprocessor">#!OSCAR2013 particle_lists
  *   t x y z mass p0 px py pz pdg
  *   ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
- *   t_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness
- *   spin_projection</span></div>
+ *   t_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span></div>
  * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm GeV GeV
- * GeV GeV GeV none none e none fm none none none fm none none none</span></div>
- * <div class="line"><span class="preprocessor">\# SMASH_version</span></div>
+ * GeV GeV GeV none none e none fm none none none fm none none none
+ *none</span></div> <div class="line"><span class="preprocessor">\#
+ *SMASH_version</span></div>
  * </div>
  *
  * \n
@@ -435,8 +435,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <div class="fragment">
  * <div class="line"><span class="preprocessor">t x y z mass p0 px py pz pdg
  * ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
- * time_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness
- * spin_projection</span></div>
+ * time_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span></div>
  * </div>
  *
  * \anchor extended_output_format_
@@ -464,9 +463,6 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1 for
  *     anti-baryons and 0 for mesons.
  * \li \key strangeness: Strangeness of the particle.
- * \li \key spin_projection: Projection of the total spin in multiples of 1/2.
- *     spin_projection can take the values [-spin, -spin+2, ... spin-2, spin]
- *
  *
  * The mother particles are also set in case of an elastic scattering process.
  *
@@ -668,8 +664,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *   ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
  *   t_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span></div>
  * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm GeV GeV
- * GeV GeV GeV none none e none fm none none none fm none none</span></div>
- * <div class="line"><span class="preprocessor">\# SMASH_version</span></div>
+ * GeV GeV GeV none none e none fm none none none fm none none none
+ *none</span></div> <div class="line"><span class="preprocessor">\#
+ *SMASH_version</span></div>
  * </div>
  *
  * \n
@@ -800,8 +797,6 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1
  * for anti-baryons and 0 for mesons
  * \li \key strangeness: Net-strangeness of the particles
- * \li \key spin_projection: Projection of the total spin in multiples of 1/2.
- * It can take the values [-spin, -spin+2, ... spin-2, spin]
  * \li \key 0: Prints a column of 0 (for compatibility with OSCAR 1999)
  *
  * **Example**

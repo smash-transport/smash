@@ -321,7 +321,6 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
           only_participants,
           config.take(InputKeys::collTerm_includeDecaysAtTheEnd),
           config.take(InputKeys::collTerm_decayInitial),
-          config.take(InputKeys::collTerm_spinInteractions),
           std::nullopt};
 }
 

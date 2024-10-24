@@ -191,8 +191,7 @@ ScatterActionsFinderParameters create_finder_parameters(
               config.take(InputKeys::collTerm_stringTrans_pipiOffset),
               config.take(InputKeys::collTerm_stringTrans_KNOffset)},
           xs_strategy,
-          config.take(InputKeys::collTerm_pseudoresonance),
-          parameters.spin_interactions};
+          config.take(InputKeys::collTerm_pseudoresonance)};
 }
 
 ActionPtr ScatterActionsFinder::check_collision_two_part(
@@ -246,7 +245,7 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   // Create ScatterAction object.
   ScatterActionPtr act = std::make_unique<ScatterAction>(
       data_a, data_b, time_until_collision, isotropic_, string_formation_time_,
-      box_length_, incoming_parametrized, finder_parameters_.spin_interactions);
+      box_length_, incoming_parametrized);
 
   if (finder_parameters_.coll_crit == CollisionCriterion::Stochastic) {
     act->set_stochastic_pos_idx();
@@ -570,8 +569,7 @@ void ScatterActionsFinder::dump_reactions() const {
             A.set_4momentum(A.pole_mass(), mom, 0.0, 0.0);
             B.set_4momentum(B.pole_mass(), -mom, 0.0, 0.0);
             ScatterActionPtr act = std::make_unique<ScatterAction>(
-                A, B, time, isotropic_, string_formation_time_, -1, false,
-                finder_parameters_.spin_interactions);
+                A, B, time, isotropic_, string_formation_time_, -1, false);
             if (finder_parameters_.strings_switch) {
               act->set_string_interface(string_process_interface_.get());
             }
@@ -955,8 +953,7 @@ void ScatterActionsFinder::dump_cross_sections(
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
     const ParticleList incoming = {a_data, b_data};
     ScatterActionPtr act = std::make_unique<ScatterAction>(
-        a_data, b_data, 0., isotropic_, string_formation_time_, -1, false,
-        finder_parameters_.spin_interactions);
+        a_data, b_data, 0., isotropic_, string_formation_time_, -1, false);
     if (finder_parameters_.strings_switch) {
       act->set_string_interface(string_process_interface_.get());
     }

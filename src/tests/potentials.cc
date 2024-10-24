@@ -458,7 +458,6 @@ static ExperimentParameters default_parameters_vdf(
       false,        // in thermodynamics outputs spectators are included
       false,        // do weak decays
       true,         // can decay initial particles
-      false,        // no spin interactions
       std::nullopt  // use monash tune, not known
   };
 }
