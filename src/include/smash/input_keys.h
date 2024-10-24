@@ -213,7 +213,6 @@ struct InputSections {
  * \par The available keys are documented on the following pages:
  * \li \ref doxypage_input_conf_general
  * \li \ref doxypage_input_conf_logging
- * \li \ref doxypage_input_conf_version
  * \li \ref doxypage_input_conf_collision_term
  * \li \ref doxypage_input_conf_modi
  * \li \ref doxypage_input_conf_output
@@ -228,7 +227,9 @@ struct InputSections {
  * by developer in some version and been removed in a later release. Therefore,
  * it can be easily read in the code in which version a key has been introduced,
  * deprecated or removed. Refer to the documentation of the `InputKeys` class in
- * the developer guide for further information.
+ * the developer guide for further information. For completeness, removed keys
+ * are not entirely removed from the documentation and they are collected in a
+ * \ref doxypage_input_conf_removed_keys "dedicated page".
  *
  * \par Information on formatting of the input file
  *
@@ -258,6 +259,13 @@ struct InputSections {
  * \li \ref ListModus
  * \li \ref ListBoxModus
  * \endif
+ */
+
+/*!\Userguide
+ * \page doxypage_input_conf_removed_keys
+ *
+ * The following list collects all configuration keys that have been removed at
+ * some point from SMASH.
  */
 
 /*!\Userguide
@@ -343,10 +351,6 @@ struct InputSections {
  * sake of completeness, though, we list here all possible logging areas, trying
  * to list first those logging areas that might most likely be relevant for the
  * user.
- */
-
-/*!\Userguide
- * \page doxypage_input_conf_version
  */
 
 /*!\Userguide
@@ -997,15 +1001,18 @@ struct InputSections {
  *            constructor invocation. <b>Do not remove a member if that key
  *            is not valid any more!</b> It is intended to track here keys
  *            that were existing in the past and are not accepted anymore.
- *            Instead, after having added the version in which the key
- *            has been deprecated or removed, <b>adjust the user documentation
- *            by marking the key as deprecated or by removing the key and
- *            its description (in the user guide, only)</b>. If doing so a full
- *            page is removed, make sure that all reference to it are removed,
- *            too. If a key is removed and no user guide to refer to exists
- *            anymore, change the `\see_key` Doxygen alias to `\removed_key` in
- *            the member documentation (pass the SMASH version number to it in
- *            which the key has been removed).
+ *            After having added the version in which the key has been
+ *            deprecated or removed to the member definition, <b>adjust the user
+ *            documentation by either saying that the key is deprecated or by
+ *            moving it to the list of removed keys in the dedicated page (in
+ *            the user guide, only)</b>. This shall be done using the
+ *            `\list_removed_key` Doxygen alias. If doing so a full page is
+ *            removed, make sure that all reference to it are removed, too. If a
+ *            key is removed and no user guide to refer to exists anymore (which
+ *            is almost always the case), change the `\see_key` Doxygen alias to
+ *            `\removed_key` in the member documentation (pass the SMASH version
+ *            number to it in which the key has been removed as second
+ *            additional argument). Look at already removed keys for an example.
  *
  * @note Ordering of members in this class is imposed by how keys shall appear
  *       in the documentation. For example, in the `General` section, all
@@ -1915,22 +1922,15 @@ struct InputKeys {
       InputSections::logging + "Tmn", DefaultType::Dependent, {"0.80"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_version
-   * \anchor key_version_
-   * \warning The `Version` key is now deprecated and specifying it has no
-   * effect, because it is completely ignored.
+   * \page doxypage_input_conf_removed_keys
    *
-   * This entry in the `config.yaml` file used to set the version number of the
-   * configuration file. Its intent was to ensure comptability with the SMASH
-   * version used. Refer to previous versions documentation to know how it was
-   * intended to be used. Now that the input file is validated by SMASH, the
-   * user will get all needed information in case deprecated or invalid keys are
-   * tried to be used.
+   * \list_removed_key{key_version_,Version,3.2}
    */
   /**
-   * \see_key{key_version_}
+   * \removed_key{key_version_,3.2}
    */
-  inline static const Key<std::string> version{{"Version"}, {"1.0", "3.0"}};
+  inline static const Key<std::string> version{{"Version"},
+                                               {"1.0", "3.0", "3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
