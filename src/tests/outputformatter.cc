@@ -116,3 +116,45 @@ TEST(valid_line_maker) {
 
   VERIFY(correct_line.str() == formatter.data_line(p));
 }
+
+
+TEST(binary){
+  ParticleData p = Test::smashon_random();
+    std::vector<std::string> quantities = {"t"};
+
+  OutputFormatter<ToBinary> formatter(quantities);
+
+  std::vector<char> chunk = formatter.binary_chunk(p);
+  double t = *reinterpret_cast<double*>(chunk.data());
+
+  std::cout << t << " , " << p.position()[0];
+  VERIFY(t == p.position()[0]);
+}
+
+TEST(binary_chunk) {
+  ParticleData p = Test::smashon_random();
+  std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
+  OutputFormatter<ToBinary> formatter(quantities);
+
+  std::vector<char> chunk = formatter.binary_chunk(p);
+
+  double t = *reinterpret_cast<double*>(chunk.data());
+  double x = *reinterpret_cast<double*>(chunk.data() + sizeof(double));
+  double y = *reinterpret_cast<double*>(chunk.data() + 2 * sizeof(double));
+  double z = *reinterpret_cast<double*>(chunk.data() + 3 * sizeof(double));
+  int32_t id = *reinterpret_cast<int32_t*>(chunk.data() + 4 * sizeof(double));
+/** 
+  std::cout << "Serialized values:\n";
+  std::cout << "t: " << t << " , expected: " << p.position()[0] << "\n";
+  std::cout << "x: " << x << " , expected: " << p.position()[1] << "\n";
+  std::cout << "y: " << y << " , expected: " << p.position()[2] << "\n";
+  std::cout << "z: " << z << " , expected: " << p.position()[3] << "\n";
+  std::cout << "ID: " << id << " , expected: " << p.id() << "\n";
+*/
+
+  assert(t == p.position()[0]);
+  assert(x == p.position()[1]);
+  assert(y == p.position()[2]);
+  assert(z == p.position()[3]);
+  assert(id == p.id());
+}

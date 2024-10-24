@@ -8,7 +8,6 @@
  */
 
 #include "smash/binaryoutput.h"
-
 #include <cstdint>
 #include <filesystem>
 #include <string>
@@ -136,12 +135,19 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
                                    const std::string &mode,
                                    const std::string &name,
-                                   bool extended_format)
-    : OutputInterface(name), file_{path, mode}, extended_(extended_format) {
+                                   bool extended_format,
+                                   const std::vector<std::string>& quantities
+                                   
+                                   )
+    : OutputInterface(name), file_{path, mode}, extended_(extended_format), 
+      formatter_(quantities.empty() ? (extended_ ? OutputDefaultQuantities::oscar2013extended : OutputDefaultQuantities::oscar2013) : quantities)
+
+    
+    {
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
   std::uint16_t format_variant = static_cast<uint16_t>(extended_);
-  write(format_variant);
+  write(format_variant );
   write(SMASH_VERSION);
 }
 
@@ -149,6 +155,10 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
 void BinaryOutputBase::write(const char c) {
   std::fwrite(&c, sizeof(char), 1, file_.get());
 }
+void BinaryOutputBase::write(const std::vector<char>& chunk) {
+  std::fwrite(chunk.data(), sizeof(char), chunk.size(), file_.get());
+}
+
 
 void BinaryOutputBase::write(const std::string &s) {
   const auto size = smash::numeric_cast<uint32_t>(s.size());
@@ -176,29 +186,10 @@ void BinaryOutputBase::write(const ParticleList &particles) {
   }
 }
 
-void BinaryOutputBase::write_particledata(const ParticleData &p) {
-  write(p.position());
-  double mass = p.effective_mass();
-  std::fwrite(&mass, sizeof(mass), 1, file_.get());
-  write(p.momentum());
-  write(p.pdgcode().get_decimal());
-  write(p.id());
-  write(p.type().charge());
-  if (extended_) {
-    const auto history = p.get_history();
-    write(history.collisions_per_particle);
-    write(p.formation_time());
-    write(p.xsec_scaling_factor());
-    write(history.id_process);
-    write(static_cast<int32_t>(history.process_type));
-    write(history.time_last_collision);
-    write(history.p1.get_decimal());
-    write(history.p2.get_decimal());
-    write(p.type().baryon_number());
-    write(p.type().strangeness());
-    write(p.spin_projection());
-  }
+void BinaryOutputBase::write_particledata(const ParticleData&p){
+  write(formatter_.binary_chunk(p));
 }
+
 
 BinaryOutputCollisions::BinaryOutputCollisions(
     const std::filesystem::path &path, std::string name,

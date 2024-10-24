@@ -76,8 +76,7 @@ static bool compare_particle(const ParticleData &p, const FilePtr &file) {
   read_binary(pdgcode, file);
   read_binary(id, file);
   read_binary(charge, file);
-  // std::cout << p.id() << " " << id << std::endl;
-  // std::cout << p.pdgcode().get_decimal() << " " << pdgcode << std::endl;
+
   return (p.id() == id) && (p.pdgcode().get_decimal() == pdgcode) &&
          (pos == p.position()) &&
          (mom == p.momentum() && charge == p.type().charge());
@@ -285,6 +284,8 @@ TEST(particles_format) {
     OutputParameters output_par = OutputParameters();
     output_par.part_extended = false;
     output_par.part_only_final = OutputOnlyFinal::No;
+    //output_par.quantities["Particles"] = OutputDefaultQuantities::oscar2013;
+
     /* Create an instance of binary output */
     auto bin_output = std::make_unique<BinaryOutputParticles>(
         testoutputpath, "Particles", output_par);
@@ -522,3 +523,7 @@ TEST(initial_conditions_format) {
   }
   VERIFY(std::filesystem::remove(particleoutputpath));
 }
+
+
+
+

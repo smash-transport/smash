@@ -20,6 +20,33 @@
 
 namespace smash {
 
+struct ToBinary {
+    using type = std::vector<char>; // Use std::vector<char>
+
+    type as_integer(int value) const {
+        type binary_data(sizeof(int)); // Create a vector of the size of an integer
+        std::memcpy(binary_data.data(), &value, sizeof(int)); // Copy the integer value into the vector
+        return binary_data; // Return the binary data as a vector of char
+    }
+
+    type as_double(double value) const {
+        type binary_data(sizeof(double)); // Create a vector of the size of a double
+        std::memcpy(binary_data.data(), &value, sizeof(double)); // Copy the double value into the vector
+        return binary_data; // Return the binary data as a vector of char
+    }
+
+    type as_precise_double(double value) const {
+        return as_double(value); // For precise double, simply call as_double
+    }
+
+    type as_string(const std::string& str) const {
+        type binary_data(str.begin(), str.end()); // Convert string to vector of char
+        return binary_data; // Return the binary data as a vector of char
+    }
+};
+
+
+
 /**
  * Structure to convert a given value into ASCII format, such that all methods
  * return a \c std::string.
@@ -105,7 +132,7 @@ struct ToASCII {
  * with a defined \c type and the same methods.
  */
 template <typename Converter,
-          std::enable_if_t<std::is_same_v<Converter, ToASCII>, bool> = true>
+          std::enable_if_t<std::is_same_v<Converter, ToASCII > || std::is_same_v<Converter, ToBinary > , bool> = true>
 class OutputFormatter {
  public:
   /**
@@ -158,7 +185,7 @@ class OutputFormatter {
         });
       } else if (quantity == "pdg") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_string(in.pdgcode().string().c_str());
+          return this->converter_.as_integer(in.pdgcode().get_decimal());
         });
       } else if (quantity == "ID" || quantity == "id") {
         getters_.push_back([this](const ParticleData& in) {
@@ -197,13 +224,13 @@ class OutputFormatter {
         });
       } else if (quantity == "pdg_mother1") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_string(
-              in.get_history().p1.string().c_str());
+          return this->converter_.as_integer(
+              in.get_history().p1.get_decimal());
         });
       } else if (quantity == "pdg_mother2") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_string(
-              in.get_history().p2.string().c_str());
+          return this->converter_.as_integer(
+              in.get_history().p2.get_decimal());
         });
       } else if (quantity == "baryon_number") {
         getters_.push_back([this](const ParticleData& in) {
@@ -224,6 +251,19 @@ class OutputFormatter {
       }
     }
   }
+
+typename Converter::type binary_chunk(const ParticleData& p) {
+    return std::accumulate(
+        std::begin(getters_), std::end(getters_), std::vector<char>{},
+        [&p](std::vector<char> ss, const auto& getter) {
+            // Get the value using the getter and convert it to binary
+            auto binary_data = getter(p); 
+            
+            // Append the binary data to the accumulator
+            ss.insert(ss.end(), binary_data.begin(), binary_data.end());
+            return ss;
+        });
+}
 
   /**
    * Produces the line with formatted data for the body of the output file.
