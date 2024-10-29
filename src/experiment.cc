@@ -82,7 +82,7 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
          Format:    ["Oscar2013"]
  \endverbatim
  *
- * Additionally, the thermodynsamics output can be activated. In this example,
+ * Additionally, the thermodynamics output can be activated. In this example,
  * thermodynamic output is activated for hadrons. The quanities that are printed
  * are the density in the Eckart rest frame and the energy momentum tensor in
  * the Landau rest frame. These quantities are printed at each time step for the
