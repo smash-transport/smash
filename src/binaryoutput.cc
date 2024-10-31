@@ -146,8 +146,8 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
     {
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
-  std::uint16_t format_variant = static_cast<uint16_t>(extended_);
-  write(format_variant );
+  std::uint16_t format_variant = static_cast<uint16_t>(extended_format);
+  write(quantities.empty() ? format_variant : format_custom);
   write(SMASH_VERSION);
 }
 
@@ -196,7 +196,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(
     const OutputParameters &out_par)
     : BinaryOutputBase(
           path / ((name == "Collisions" ? "collisions_binary" : name) + ".bin"),
-          "wb", name, out_par.get_coll_extended(name)),
+          "wb", name, out_par.get_coll_extended(name), out_par.getQuantities("Collisions")),
       print_start_end_(out_par.coll_printstartend) {}
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
@@ -252,7 +252,7 @@ BinaryOutputParticles::BinaryOutputParticles(const std::filesystem::path &path,
                                              std::string name,
                                              const OutputParameters &out_par)
     : BinaryOutputBase(path / "particles_binary.bin", "wb", name,
-                       out_par.part_extended),
+                       out_par.part_extended,out_par.getQuantities("Particles")),
       only_final_(out_par.part_only_final) {}
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles, const int,

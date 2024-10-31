@@ -128,6 +128,7 @@ class BinaryOutputBase : public OutputInterface {
   const uint16_t format_version_ = 10;
   /// Option for extended output
   bool extended_;
+  const uint16_t format_custom = 2;
 
   OutputFormatter<ToBinary> formatter_;
 };
