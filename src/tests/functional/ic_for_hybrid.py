@@ -26,7 +26,7 @@ parser.add_argument('--binary', required=True, help='build directory')
 parser.add_argument('--skip-smash', action='store_true')
 args = parser.parse_args()
 
-output_dir = "./test_output/initial_conditions_run"
+output_dir = "./test_output/ic_for_hybrid"
 # Run smash with apropriate configuration
 if not args.skip_smash:
     smash_config_file = args.source+"/input/config.yaml"
@@ -34,11 +34,17 @@ if not args.skip_smash:
         "Output: {Initial_Conditions: {Format: [ASCII, Binary, Oscar2013]}}"
     smash_config_ic = \
         "Modi: {Collider: {Initial_Conditions: {Type: Constant_Tau}}}"
-    subp.run(["smash", "-i", smash_config_file,
+    run = subp.run(["smash", "-i", smash_config_file,
             "-c", smash_config_output,
             "-c", smash_config_ic,
-            "-o", output_dir,"-q"],
+            "-o", output_dir,"-f","-q"],
             cwd=args.binary)
+    try:
+        run.check_returncode()
+    except subp.CalledProcessError:
+        print("SMASH did not run properly. Please check that " + output_dir +
+              " is clean.")
+        sys.exit(1)
 
 # Check if output is consistent
 ascii_file = args.binary + '/' + output_dir + '/SMASH_IC.dat'

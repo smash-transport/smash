@@ -75,6 +75,11 @@ macro(smash_add_unittest name)
     smash_add_test(${name} ${name} ${name})
 endmacro()
 
+macro(smash_add_functionaltest name)
+    add_test(NAME functional_${name} COMMAND python3 ${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py
+                                  --source ${PROJECT_SOURCE_DIR} --binary ${PROJECT_BINARY_DIR})
+endmacro()
+
 # helper macro to run smash with certain arguments, choosing an output directory according to the
 # test name
 macro(smash_add_runtest name depends)
@@ -369,10 +374,8 @@ smash_add_runtest(custom_nucleus_run smash smash
                   -c "Modi: {Collider: {Projectile: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
                   -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
 )
-smash_add_runtest(initial_conditions_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/config.yaml
-                  -c "Output: {Initial_Conditions: {Format: [Binary, Oscar2013]}}"
-                  -c "Modi: {Collider: {Initial_Conditions: {Type: Constant_Tau}}}")
+
+smash_add_functionaltest(ic_for_hybrid)
 
 if(ROOT_FOUND AND HepMC3_FOUND AND Rivet_FOUND)
     smash_add_runtest(third_party_output_run smash smash
