@@ -213,7 +213,8 @@ void update_lattice(
     }
   }
 
-  update_lattice(lat, update, dens_type, par, ensembles, compute_gradient);
+  update_lattice_accumulating_ensembles(lat, update, dens_type, par, ensembles,
+                                        compute_gradient);
 
   // calculate the gradients for finite difference derivatives
   if (par.derivatives() == DerivativesMode::FiniteDifference) {

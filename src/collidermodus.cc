@@ -284,31 +284,32 @@ ColliderModus::ColliderModus(Configuration modus_config,
   initial_z_displacement_ =
       modus_cfg.take(InputKeys::modi_collider_initialDistance) / 2.0;
   if (modus_cfg.has_section(InputSections::m_c_initialConditions)) {
-    IC_parameters_.type =
+    IC_parameters_ = std::make_unique<InitialConditionParameters>();
+    IC_parameters_->type =
         modus_cfg.take(InputKeys::modi_collider_initialConditions_type);
 
-    if (IC_parameters_.type == FluidizationType::ConstantTau) {
+    if (IC_parameters_->type == FluidizationType::ConstantTau) {
       if (modus_cfg.has_value(
               InputKeys::modi_collider_initialConditions_properTime)) {
-        IC_parameters_.proper_time = modus_cfg.take(
+        IC_parameters_->proper_time = modus_cfg.take(
             InputKeys::modi_collider_initialConditions_properTime);
       }
       if (modus_cfg.has_value(
               InputKeys::modi_collider_initialConditions_lowerBound)) {
-        IC_parameters_.lower_bound = modus_cfg.take(
+        IC_parameters_->lower_bound = modus_cfg.take(
             InputKeys::modi_collider_initialConditions_lowerBound);
       }
       if (modus_cfg.has_value(
               InputKeys::modi_collider_initialConditions_rapidityCut)) {
-        IC_parameters_.rapidity_cut = modus_cfg.take(
+        IC_parameters_->rapidity_cut = modus_cfg.take(
             InputKeys::modi_collider_initialConditions_rapidityCut);
       }
       if (modus_cfg.has_value(
               InputKeys::modi_collider_initialConditions_pTCut)) {
-        IC_parameters_.pT_cut =
+        IC_parameters_->pT_cut =
             modus_cfg.take(InputKeys::modi_collider_initialConditions_pTCut);
       }
-    } else if (IC_parameters_.type == FluidizationType::Dynamic) {
+    } else if (IC_parameters_->type == FluidizationType::Dynamic) {
       double threshold = modus_cfg.take(
           InputKeys::modi_collider_initialConditions_eDenThreshold);
       double min_time =
@@ -332,28 +333,28 @@ ColliderModus::ColliderModus(Configuration modus_config,
         throw std::invalid_argument("Please adjust the configuration file.");
       }
 
-      IC_parameters_.fluidizable_processes = modus_cfg.take(
+      IC_parameters_->fluidizable_processes = modus_cfg.take(
           InputKeys::modi_collider_initialConditions_fluidProcesses);
 
       double min_size = std::max(min_time, 10.);
-      std::array<double, 3> l{2 * min_size, 2 * min_size, 2 * min_size};
+      std::array<double, 3> length{2 * min_size, 2 * min_size, 2 * min_size};
       std::array<double, 3> origin{-min_size, -min_size, -min_size};
-      std::array<int, 3> n{cells, cells, cells};
+      std::array<int, 3> cell_array{cells, cells, cells};
 
       fluid_lattice_ =
           std::make_unique<RectangularLattice<EnergyMomentumTensor>>(
-              l, n, origin, false, LatticeUpdate::EveryTimestep);
+              length, cell_array, origin, false, LatticeUpdate::EveryTimestep);
       fluid_background_ = std::make_unique<std::map<int32_t, double>>();
 
-      IC_parameters_.energy_density_threshold = threshold;
-      IC_parameters_.min_time = min_time;
-      IC_parameters_.max_time = max_time;
-      IC_parameters_.num_fluid_cells = cells;
+      IC_parameters_->energy_density_threshold = threshold;
+      IC_parameters_->min_time = min_time;
+      IC_parameters_->max_time = max_time;
+      IC_parameters_->num_fluid_cells = cells;
       logg[LCollider].info()
           << "Dynamic Initial Conditions with threshold " << threshold
           << " GeV/fm³ in energy density, between " << min_time << " and "
           << max_time << " fm.";
-      IC_parameters_.formation_time_fraction = form_time_fraction;
+      IC_parameters_->formation_time_fraction = form_time_fraction;
     }
   }
 }
@@ -640,25 +641,28 @@ void ColliderModus::build_fluidization_lattice(
     const double t, const std::vector<Particles> &ensembles,
     const DensityParameters &dens_par) {
   if (fluid_lattice_ == nullptr) {
-    return;
+    throw std::logic_error(
+        "Trying to build fluidization lattice with unset pointer in "
+        "ColliderModus.");
   }
-  if (t < IC_parameters_.min_time.value() ||
-      t > IC_parameters_.max_time.value()) {
+  if (t < IC_parameters_->min_time.value() ||
+      t > IC_parameters_->max_time.value()) {
     return;
   }
   const double resizing_rate = 5;
   double side = fluid_lattice_->lattice_sizes()[0] / 2.;
   if (t > side) {
     side += resizing_rate;
-    std::array<double, 3> new_l{2 * side, 2 * side, 2 * side};
-    std::array<double, 3> new_orig{-side, -side, -side};
-    fluid_lattice_->reset_and_resize(new_l, new_orig, std::nullopt);
+    std::array<double, 3> new_length{2 * side, 2 * side, 2 * side};
+    std::array<double, 3> new_origin{-side, -side, -side};
+    fluid_lattice_->reset_and_resize(new_length, new_origin, std::nullopt);
     logg[LCollider].debug() << "Fluidization lattice resizing at " << t
                             << " fm to " << 2 * side << " fm";
   }
 
-  update_lattice(fluid_lattice_.get(), LatticeUpdate::EveryTimestep,
-                 DensityType::Hadron, dens_par, ensembles, false);
+  update_lattice_accumulating_ensembles(
+      fluid_lattice_.get(), LatticeUpdate::EveryTimestep, DensityType::Hadron,
+      dens_par, ensembles, false);
 }
 
 }  // namespace smash

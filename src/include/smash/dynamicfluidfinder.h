@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_DYNAMICFLUIDFINDER_H_
 #define SRC_INCLUDE_SMASH_DYNAMICFLUIDFINDER_H_
 
+#include <limits>
 #include <map>
 #include <vector>
 
@@ -42,7 +43,7 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
    * constant.
    */
   DynamicFluidizationFinder(RectangularLattice<EnergyMomentumTensor> &lattice,
-                            std::map<int32_t, double> &background,
+                            const std::map<int32_t, double> &background,
                             const InitialConditionParameters &ic_params)
       : energy_density_lattice_{lattice},
         background_{background},
@@ -116,7 +117,7 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
    * \note It is a reference so that it can be updated outside the class, e.g.
    * by an external manager using SMASH as a library.
    */
-  std::map<int32_t, double> &background_;
+  const std::map<int32_t, double> &background_;
   /**
    * Queue for future fluidizations, which will take place after the formation
    * time of particles. Keys are particle indices and values are absolute
@@ -127,21 +128,15 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
    */
   mutable std::map<int32_t, double> queue_{};
   /// Minimum energy density surrounding the particle to fluidize it
-  const double energy_density_threshold_ =
-      InputKeys::modi_collider_initialConditions_eDenThreshold.default_value();
+  const double energy_density_threshold_ = NAN;
   /// Minimum time (in lab frame) in fm to allow fluidization
-  const double min_time_ =
-      InputKeys::modi_collider_initialConditions_minTime.default_value();
+  const double min_time_ = NAN;
   /// Maximum time (in lab frame) in fm to allow fluidization
-  const double max_time_ =
-      InputKeys::modi_collider_initialConditions_maxTime.default_value();
+  const double max_time_ = NAN;
   /// Fraction of formation time after which a particles can fluidize
-  const double formation_time_fraction_ =
-      InputKeys::modi_collider_initialConditions_formTimeFraction
-          .default_value();
+  const double formation_time_fraction_ = NAN;
   /// Number of cells to interpolate the energy density
-  const int fluid_cells_ =
-      InputKeys::modi_collider_initialConditions_fluidCells.default_value();
+  const int fluid_cells_ = std::numeric_limits<int>::quiet_NaN();
   /// Processes that create a fluidizable particle
   const FluidizableProcessesBitSet fluidizable_processes_;
 };

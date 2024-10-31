@@ -139,26 +139,26 @@ class ColliderModus : public ModusDefault {
     return frame_ == CalculationFrame::FixedTarget ? true : false;
   }
   /// \return Parameters used in initial conditions for hydrodynamics
-  std::optional<InitialConditionParameters> IC_parameters() const {
-    return IC_parameters_;
+  const InitialConditionParameters &IC_parameters() const {
+    return *IC_parameters_;
   }
-  /// \return pointer to the background energy density map
-  std::map<int32_t, double> *fluid_background() const {
-    return fluid_background_.get();
+  /// \return The background energy density map
+  const std::map<int32_t, double> &fluid_background() const {
+    return *fluid_background_.get();
   }
-  /// \return pointer to the lattice where fluidization is evaluated
+  /// \return Pointer to the lattice where fluidization is evaluated
   RectangularLattice<EnergyMomentumTensor> *fluid_lattice() const {
     return fluid_lattice_.get();
   }
   /**
-   * Build lattice of energy momentum tensor. After t>25 \unit{fm}, the lattice
-   * grows at every 5 \unit{fm} to accomodate for the system expansion.
+   * Build lattice of energy momentum tensor. After t>25 fm, the lattice
+   * grows at every 5 \unit{fm} to accommodate for the system expansion.
    *
    * \param[in] t Current time.
    * \param[in] ensembles Only the first Particles element is actually used.
    * \param[in] dens_par Contains parameters for density smearing.
    */
-  void build_fluidization_lattice(const double t,
+  void build_fluidization_lattice(double t,
                                   const std::vector<Particles> &ensembles,
                                   const DensityParameters &dens_par);
 
@@ -169,7 +169,7 @@ class ColliderModus : public ModusDefault {
    * \param[in] background Map with particle indices as keys and their
    * corresponding background energy density as values.
    */
-  void update_fluidization_background(std::map<int32_t, double> background) {
+  void update_fluidization_background(std::map<int32_t, double> &&background) {
     *fluid_background_ = std::move(background);
   }
 
@@ -297,7 +297,7 @@ class ColliderModus : public ModusDefault {
    */
   double velocity_target_ = 0.0;
   /// Plain Old Data type to hold parameters for initial conditions
-  InitialConditionParameters IC_parameters_;
+  std::unique_ptr<InitialConditionParameters> IC_parameters_;
   /// Energy-momentum tensor lattice for dynamic fluidization
   std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> fluid_lattice_ =
       nullptr;

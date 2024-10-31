@@ -42,6 +42,7 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
               t0 + formation_time_fraction_ * (p.formation_time() - t0);
           if (fluidization_time >= t_end) {
             queue_.emplace(id, fluidization_time);
+            continue;
           } else {
             double time_until = (1 - p.xsec_scaling_factor() <= really_small)
                                     ? 0
@@ -60,18 +61,19 @@ bool DynamicFluidizationFinder::above_threshold(
     const ParticleData &pdata) const {
   EnergyMomentumTensor Tmunu;
   // value_at returns false if pdata is out of bounds
-  bool inside =
+  const bool inside =
       energy_density_lattice_.value_at(pdata.position().threevec(), Tmunu);
   if (inside) {
     // If the particle is not in the map, the background evaluates to 0
-    const double background = background_[pdata.id()];
+    const double background =
+        background_.count(pdata.id()) ? background_.at(pdata.id()) : 0;
     const double e_den_particles =
         Tmunu.boosted(Tmunu.landau_frame_4velocity())[0];
     if (e_den_particles + background >= energy_density_threshold_) {
-      logg[LFluidization].debug()
+      logg[LFluidization].warn()
           << "Fluidize " << pdata.id() << " with " << e_den_particles << "+"
           << background << " GeV/fm^3 at " << pdata.position().x0()
-          << " fm, formed at" << pdata.formation_time() << " fm";
+          << " fm, formed at " << pdata.formation_time() << " fm";
       return true;
     }
   }

@@ -10,12 +10,6 @@
 #include <optional>
 
 namespace smash {
-
-/*
- * This struct is separated from the rest of ColliderModus because its
- * implementation needs to be known by Experiment, so including this file won't
- * include the full collidermodus.h
- */
 /**
  * At the moment there are two ways to specify input for initial conditions in
  * the configuration, one of which is deprecated and will be removed in a next

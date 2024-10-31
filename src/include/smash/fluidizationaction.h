@@ -29,7 +29,7 @@ class FluidizationAction : public Action {
    * \param[in] in_part Incoming particle which surpass the energy density.
    * \param[in] out_part Same particle as above, but propagated to the point of
    * crossing the hypersurface, in case of an iso-tau condition.
-   * \param[in] time_until How long until the action is performed \unit{in fm}.
+   * \param[in] time_until How long until the action is performed in fm.
    */
   FluidizationAction(const ParticleData &in_part, const ParticleData &out_part,
                      const double time_until)

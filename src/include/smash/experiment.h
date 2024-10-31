@@ -616,7 +616,7 @@ class Experiment : public ExperimentBase {
   const bool IC_output_switch_;
 
   /// This indicates if the IC is dynamic.
-  bool IC_dynamic_;
+  const bool IC_dynamic_;
 
   /// This indicates whether to use time steps.
   const TimeStepMode time_step_mode_;
@@ -916,6 +916,10 @@ Experiment<Modus>::Experiment(Configuration &config,
       bremsstrahlung_switch_(
           config.take(InputKeys::collTerm_photons_bremsstrahlung)),
       IC_output_switch_(config.has_section(InputSections::o_initialConditions)),
+      IC_dynamic_(
+          IC_output_switch_ && modus_.is_collider()
+              ? (modus_.IC_parameters().type == FluidizationType::Dynamic)
+              : false),
       time_step_mode_(config.take(InputKeys::gen_timeStepMode)) {
   logg[LExperiment].info() << *this;
 
@@ -1054,15 +1058,12 @@ Experiment<Modus>::Experiment(Configuration &config,
           "Initial conditions can only be extracted in collider modus.");
     }
 
-    // RENAN: reference not working properly here?
-    const InitialConditionParameters IC_parameters =
-        modus_.IC_parameters().value();
-    IC_dynamic_ = (IC_parameters.type == FluidizationType::Dynamic);
+    const InitialConditionParameters &IC_parameters = modus_.IC_parameters();
 
     if (IC_dynamic_) {
       // Dynamic fluidization
       action_finders_.emplace_back(std::make_unique<DynamicFluidizationFinder>(
-          *modus_.fluid_lattice(), *modus_.fluid_background(), IC_parameters));
+          *modus_.fluid_lattice(), modus_.fluid_background(), IC_parameters));
     } else {
       // Iso-tau hypersurface
       /*
@@ -2723,17 +2724,18 @@ void Experiment<Modus>::intermediate_output() {
       if (printout_rho_eckart_) {
         switch (dens_type_lattice_printout_) {
           case DensityType::Baryon:
-            update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
-                           density_param_, ensembles_, false);
+            update_lattice_accumulating_ensembles(
+                jmu_B_lat_.get(), lat_upd, DensityType::Baryon, density_param_,
+                ensembles_, false);
             output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                           DensityType::Baryon, *jmu_B_lat_);
             output->thermodynamics_lattice_output(*jmu_B_lat_,
                                                   computational_frame_time);
             break;
           case DensityType::BaryonicIsospin:
-            update_lattice(jmu_I3_lat_.get(), lat_upd,
-                           DensityType::BaryonicIsospin, density_param_,
-                           ensembles_, false);
+            update_lattice_accumulating_ensembles(
+                jmu_I3_lat_.get(), lat_upd, DensityType::BaryonicIsospin,
+                density_param_, ensembles_, false);
             output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                           DensityType::BaryonicIsospin,
                                           *jmu_I3_lat_);
@@ -2743,9 +2745,9 @@ void Experiment<Modus>::intermediate_output() {
           case DensityType::None:
             break;
           default:
-            update_lattice(jmu_custom_lat_.get(), lat_upd,
-                           dens_type_lattice_printout_, density_param_,
-                           ensembles_, false);
+            update_lattice_accumulating_ensembles(
+                jmu_custom_lat_.get(), lat_upd, dens_type_lattice_printout_,
+                density_param_, ensembles_, false);
             output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                           dens_type_lattice_printout_,
                                           *jmu_custom_lat_);
@@ -2754,8 +2756,9 @@ void Experiment<Modus>::intermediate_output() {
         }
       }
       if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
-        update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
-                       density_param_, ensembles_, false);
+        update_lattice_accumulating_ensembles(
+            Tmn_.get(), lat_upd, dens_type_lattice_printout_, density_param_,
+            ensembles_, false);
         if (printout_tmn_) {
           output->thermodynamics_output(ThermodynamicQuantity::Tmn,
                                         dens_type_lattice_printout_, *Tmn_);
@@ -2842,8 +2845,9 @@ void Experiment<Modus>::update_potentials() {
       }
     }
     if (potentials_->use_coulomb()) {
-      update_lattice(jmu_el_lat_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::Charge, density_param_, ensembles_, true);
+      update_lattice_accumulating_ensembles(
+          jmu_el_lat_.get(), LatticeUpdate::EveryTimestep, DensityType::Charge,
+          density_param_, ensembles_, true);
       for (size_t i = 0; i < EM_lat_->size(); i++) {
         ThreeVector electric_field = {0., 0., 0.};
         ThreeVector position = jmu_el_lat_->cell_center(i);

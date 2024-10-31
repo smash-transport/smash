@@ -543,13 +543,12 @@ struct InputSections {
  * ## Fluidization conditions
  *
  * Currently there are two implemented conditions for selecting hadrons from a
- * collision as input for a hydrodynamic evolution, controlled by the \key Type
- * key, as described below. Namely, they are `Constant_Tau`, which relies on the
- * hadron's hyperbolic time, and `Energy_Density_Threshold`, where the condition
- * is on the local energy density around the hadron. In both cases, particles
- * that obey the fluidization condition are removed from the evolution and
- * written to the \key Initial_Conditions output, which must be included in the
- * config.
+ * collision as input for a hydrodynamic evolution, controlled by \key Type.
+ * Namely, they are `Constant_Tau`, which relies on the hadron's hyperbolic
+ * time, and `Energy_Density_Threshold`, where the condition is over the local
+ * energy density around the hadron. In both cases, particles that obey the
+ * fluidization condition are removed from the evolution and written to the \key
+ * Initial_Conditions output, which must be included in the config.
  *
  * ### Iso-tau
  *
@@ -558,7 +557,8 @@ struct InputSections {
  * information is not provided, the default value corresponds to the passing
  * time of the two nuclei, where all primary interactions are expected to
  * have occured:
- * \f[ \tau_0 = (r_\mathrm{p} \ + \ r_\mathrm{t})
+ * \f[
+ * \tau_0 = (r_\mathrm{p} \ + \ r_\mathrm{t})
  * \ \left(\left(\frac{\sqrt{s_\mathrm{NN}}} {2 \ m_\mathrm{N}}\right)^2 -
  * 1\right)^{-1/2} \f] Therein, \f$ r_\mathrm{p} \f$ and \f$ r_\mathrm{t} \f$
  * denote the radii of the projectile and target nucleus, respectively, \f$

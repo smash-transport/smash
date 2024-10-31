@@ -107,19 +107,25 @@ class ModusDefault {
    */
   double nuclei_passing_time() const { return 0.0; }
   /// \return IC parameters in ColliderModus
-  std::optional<InitialConditionParameters> IC_parameters() const {
-    return std::nullopt;
+  const InitialConditionParameters& IC_parameters() const {
+    throw std::logic_error(
+        "Only ColliderModus has parameters for initial conditions.");
   }
-  /// \return pointer to background energy density map
-  std::map<int32_t, double>* fluid_background() { return nullptr; }
+  /// \return Background energy density map
+  const std::map<int32_t, double>& fluid_background() {
+    throw std::logic_error("Only ColliderModus has fluid background.");
+  }
   /// \return pointer to lattice where fluidization is calculated
-  RectangularLattice<EnergyMomentumTensor>* fluid_lattice() { return nullptr; }
+  RectangularLattice<EnergyMomentumTensor>* fluid_lattice() {
+    throw std::logic_error("Only ColliderModus has fluid lattice.");
+  }
 
   /**
    * Build lattice of energy momentum tensor. Currently only implemented in
-   * Collider modus. \param[in] t Current time. \param[in] ensembles Only the
-   * first Particles element is actually used. \param[in] dens_par Contains
-   * parameters for density smearing.
+   * Collider modus.
+   * \param[in] t Current time.
+   * \param[in] ensembles Only the first Particles element is actually used.
+   * \param[in] dens_par Contains parameters for density smearing.
    */
   void build_fluidization_lattice(
       [[maybe_unused]] const double t,
@@ -129,7 +135,7 @@ class ModusDefault {
    * Creates the Grid with normal boundary conditions.
    *
    * \param[in] particles The Particles object containing all particles of the
-   *                  currently running Experiment.
+   * currently running Experiment.
    * \param[in] min_cell_length The minimal length of the grid cells.
    * \param[in] timestep_duration Duration of the timestep. It is necessary for
    * formation times treatment: if particle is fully or partially formed before

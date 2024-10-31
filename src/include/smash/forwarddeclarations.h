@@ -226,6 +226,7 @@ enum class OutputOnlyFinal {
 };
 
 /// The different groups of 2 to 2 reactions that one can include
+// Because std::bitset does not handle enum classes, this is a simple enum.
 enum IncludedReactions {
   All = 50,
   Elastic = 0,
@@ -244,6 +245,7 @@ enum IncludedReactions {
 typedef std::bitset<10> ReactionsBitSet;
 
 /// The different groups of multi-particle reactions that one can include
+// Because std::bitset does not handle enum classes, this is a simple enum.
 enum IncludedMultiParticleReactions {
   Meson_3to1 = 0,
   Deuteron_3to2 = 1,

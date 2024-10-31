@@ -507,10 +507,13 @@ class DensityOnLattice {
   FourVector drho_dxnu_;
 };
 
+/// Conveniency typedef for lattice of density
+typedef RectangularLattice<DensityOnLattice> DensityLattice;
+
 /**
  * Updates the contents on the lattice.
  *
- * \param[out] lat The lattice on which the content will be updated
+ * \param[inout] lat The lattice on which the content will be updated
  * \param[in] update tells if called for update at printout or at timestep
  * \param[in] dens_type density type to be computed on the lattice
  * \param[in] par a structure containing testparticles number and gaussian
@@ -521,10 +524,13 @@ class DensityOnLattice {
  * \tparam T LatticeType
  */
 template <typename T>
-void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
-                    const DensityType dens_type, const DensityParameters &par,
-                    const ParticleList &plist, const bool compute_gradient,
-                    const bool lattice_reset = true) {
+void update_lattice_with_list_of_particles(RectangularLattice<T> *lat,
+                                           const LatticeUpdate update,
+                                           const DensityType dens_type,
+                                           const DensityParameters &par,
+                                           const ParticleList &plist,
+                                           const bool compute_gradient,
+                                           const bool lattice_reset = true) {
   // Do not proceed if lattice does not exists/update not required
   if (lat == nullptr || lat->when_update() != update) {
     return;
@@ -635,23 +641,21 @@ void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
  * \tparam T LatticeType
  */
 template <typename T>
-void update_lattice(RectangularLattice<T> *lat, const LatticeUpdate update,
-                    const DensityType dens_type, const DensityParameters &par,
-                    const std::vector<Particles> &ensembles,
-                    const bool compute_gradient) {
+void update_lattice_accumulating_ensembles(
+    RectangularLattice<T> *lat, const LatticeUpdate update,
+    const DensityType dens_type, const DensityParameters &par,
+    const std::vector<Particles> &ensembles, const bool compute_gradient) {
   // Do not proceed if lattice does not exists/update not required
   if (lat == nullptr || lat->when_update() != update) {
     return;
   }
   lat->reset();
   for (const Particles &particles : ensembles) {
-    update_lattice(lat, update, dens_type, par, particles.copy_to_vector(),
-                   compute_gradient, false);
+    update_lattice_with_list_of_particles(lat, update, dens_type, par,
+                                          particles.copy_to_vector(),
+                                          compute_gradient, false);
   }
 }
-
-/// Conveniency typedef for lattice of density
-typedef RectangularLattice<DensityOnLattice> DensityLattice;
 
 /**
  * Updates the contents on the lattice of DensityOnLattice type.

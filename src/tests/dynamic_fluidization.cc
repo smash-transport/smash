@@ -30,6 +30,7 @@ static ParticleData create_particle_at(PdgCode pdg, Position pos) {
   return particle;
 }
 
+// Functional tests for the fluidization finder
 TEST(fluidization_finder) {
   Test::create_actual_particletypes();
   Test::create_actual_decaymodes();
@@ -44,12 +45,13 @@ TEST(fluidization_finder) {
   particles.update_particle(a, a);
 
   // create large and coarse lattice
-  const std::array<double, 3> l{20, 20, 20}, origin{-10, -10, -10};
-  const std::array<int, 3> n{2, 2, 2};
+  const std::array<double, 3> length{20, 20, 20}, origin{-10, -10, -10};
+  const std::array<int, 3> cell_array{2, 2, 2};
   auto lat = std::make_unique<RectangularLattice<EnergyMomentumTensor>>(
-      l, n, origin, false, LatticeUpdate::EveryTimestep);
-  update_lattice(lat.get(), LatticeUpdate::EveryTimestep, DensityType::Hadron,
-                 dens_par, ensembles, false);
+      length, cell_array, origin, false, LatticeUpdate::EveryTimestep);
+  update_lattice_accumulating_ensembles(lat.get(), LatticeUpdate::EveryTimestep,
+                                        DensityType::Hadron, dens_par,
+                                        ensembles, false);
 
   // create fake background
   auto background = std::make_unique<std::map<int32_t, double>>();
@@ -130,13 +132,14 @@ TEST(dense_region) {
     ensembles[0].insert(create_particle_at(0x2212, Position{0, x, y, z}));
   }
   // create small and fine lattice
-  const std::array<double, 3> l{2, 2, 2}, origin{-1, -1, -1};
-  const std::array<int, 3> n{20, 20, 20};
+  const std::array<double, 3> length{2, 2, 2}, origin{-1, -1, -1};
+  const std::array<int, 3> cell_array{20, 20, 20};
   auto lat = std::make_unique<RectangularLattice<EnergyMomentumTensor>>(
-      l, n, origin, false, LatticeUpdate::EveryTimestep);
+      length, cell_array, origin, false, LatticeUpdate::EveryTimestep);
 
-  update_lattice(lat.get(), LatticeUpdate::EveryTimestep, DensityType::Hadron,
-                 dens_par, ensembles, false);
+  update_lattice_accumulating_ensembles(lat.get(), LatticeUpdate::EveryTimestep,
+                                        DensityType::Hadron, dens_par,
+                                        ensembles, false);
   auto background = std::make_unique<std::map<int32_t, double>>();
   DynamicFluidizationFinder finder(*lat.get(), *background.get(), ic_par);
 

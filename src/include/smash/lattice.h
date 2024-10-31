@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2021, 2024
+ *    Copyright (c) 2015-2021,2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -794,35 +794,35 @@ class RectangularLattice {
   /**
    * Rebuilds the lattice with a different size, reseting it to zero values. The
    * parameters are all optional with different types, if none are passed the
-   * function is skipped.
+   * function throws.
    *
    * \param[in] new_length 3-dimensional array indicates the new size of
-   *            the lattice [fm].
+   * the lattice [fm].
    * \param[in] new_origin 3-dimensional array (nx,ny,nz) indicates the origin
    * of the lattice.
    * \param[in] new_cells 3-dimensional array with the new
    * number of lattice cells.
+   * \throw std::invalid_argument if no arguments are given.
    */
-  void reset_and_resize(const std::optional<std::array<double, 3>> new_length,
-                        const std::optional<std::array<double, 3>> new_origin,
-                        const std::optional<std::array<int, 3>> new_cells) {
-    if (new_length || new_origin || new_cells) {
-      reset();
-      if (new_length)
-        lattice_sizes_ = new_length.value();
-      if (new_origin)
-        origin_ = new_origin.value();
-      if (new_cells)
-        n_cells_ = new_cells.value();
-      cell_sizes_ = {lattice_sizes_[0] / n_cells_[0],
-                     lattice_sizes_[1] / n_cells_[1],
-                     lattice_sizes_[2] / n_cells_[2]};
-      cell_volume_ = cell_sizes_[0] * cell_sizes_[1] * cell_sizes_[2];
-    } else {
+  void reset_and_resize(std::optional<std::array<double, 3>> new_length,
+                        std::optional<std::array<double, 3>> new_origin,
+                        std::optional<std::array<int, 3>> new_cells) {
+    if (!new_length && !new_origin && !new_cells) {
       throw std::invalid_argument(
           "RectangularLattice::reset_and_resize called "
           "without arguments, lattice was not changed.");
     }
+    reset();
+    if (new_length)
+      lattice_sizes_ = *new_length;
+    if (new_origin)
+      origin_ = *new_origin;
+    if (new_cells)
+      n_cells_ = *new_cells;
+    cell_sizes_ = {lattice_sizes_[0] / n_cells_[0],
+                   lattice_sizes_[1] / n_cells_[1],
+                   lattice_sizes_[2] / n_cells_[2]};
+    cell_volume_ = cell_sizes_[0] * cell_sizes_[1] * cell_sizes_[2];
   }
 
  protected:
