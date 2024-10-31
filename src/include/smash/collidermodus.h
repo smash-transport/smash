@@ -138,6 +138,8 @@ class ColliderModus : public ModusDefault {
   bool calculation_frame_is_fixed_target() const {
     return frame_ == CalculationFrame::FixedTarget ? true : false;
   }
+  /// \return Whether this is an initial condition for hydrodynamics
+  bool is_IC_for_hybrid() const { return IC_for_hybrid_; }
   /// \return Parameters used in initial conditions for hydrodynamics
   const InitialConditionParameters &IC_parameters() const {
     return *IC_parameters_;
@@ -253,6 +255,8 @@ class ColliderModus : public ModusDefault {
   double impact_ = 0.;
   /// Whether the reaction plane should be randomized
   bool random_reaction_plane_;
+  /// Whether the particles will serve as initial conditions for hydrodynamics
+  bool IC_for_hybrid_ = false;
   /// Method used for sampling of impact parameter.
   Sampling sampling_ = InputKeys::modi_collider_impact_sample.default_value();
   /// Minimum value of impact parameter.

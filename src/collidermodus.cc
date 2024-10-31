@@ -284,6 +284,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
   initial_z_displacement_ =
       modus_cfg.take(InputKeys::modi_collider_initialDistance) / 2.0;
   if (modus_cfg.has_section(InputSections::m_c_initialConditions)) {
+    IC_for_hybrid_ = true;
     IC_parameters_ = std::make_unique<InitialConditionParameters>();
     IC_parameters_->type =
         modus_cfg.take(InputKeys::modi_collider_initialConditions_type);

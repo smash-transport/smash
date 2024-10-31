@@ -612,7 +612,10 @@ class Experiment : public ExperimentBase {
   /// This indicates whether bremsstrahlung is switched on.
   const bool bremsstrahlung_switch_;
 
-  /// This indicates whether the IC output is enabled.
+  /**
+   * This indicates whether the experiment will be used as initial condition for
+   * hydrodynamics. Currently only the Collider modus can achieve this.
+   */
   const bool IC_switch_;
 
   /// This indicates if the IC is dynamic.
@@ -916,11 +919,10 @@ Experiment<Modus>::Experiment(Configuration &config,
       bremsstrahlung_switch_(
           config.take(InputKeys::collTerm_photons_bremsstrahlung)),
       IC_switch_(config.has_section(InputSections::o_initialConditions) &&
-                 config.has_section(InputSections::m_c_initialConditions)),
-      IC_dynamic_(
-          IC_switch_ && modus_.is_collider()
-              ? (modus_.IC_parameters().type == FluidizationType::Dynamic)
-              : false),
+                 modus_.is_IC_for_hybrid()),
+      IC_dynamic_(IC_switch_ ? (modus_.IC_parameters().type ==
+                                FluidizationType::Dynamic)
+                             : false),
       time_step_mode_(config.take(InputKeys::gen_timeStepMode)) {
   logg[LExperiment].info() << *this;
 
@@ -997,6 +999,14 @@ Experiment<Modus>::Experiment(Configuration &config,
         "section in your configuration file:\n   Pseudoresonance: \"None\"");
   }
 
+  const bool IC_output = config.has_section(InputSections::o_initialConditions);
+  if ((IC_output && !modus_.is_IC_for_hybrid()) ||
+      (!IC_output && modus_.is_IC_for_hybrid())) {
+    throw std::invalid_argument(
+        "Initial_Conditions must be a subsection of both Output and Modi: "
+        "Collider.");
+  }
+
   /* In collider setup with sqrts >= 200 GeV particles don't form continuously
    *
    * NOTE: This key has to be taken before the ScatterActionsFinder is created
@@ -1054,20 +1064,7 @@ Experiment<Modus>::Experiment(Configuration &config,
         std::make_unique<WallCrossActionsFinder>(parameters_.box_length));
   }
 
-  if ((config.has_section(InputSections::o_initialConditions) &&
-       !config.has_section(InputSections::m_c_initialConditions)) ||
-      (!config.has_section(InputSections::o_initialConditions) &&
-       config.has_section(InputSections::m_c_initialConditions))) {
-    throw std::invalid_argument(
-        "Initial_Conditions must be a subsection of both Output and Modi: "
-        "Collider in the configuration file.");
-  }
   if (IC_switch_) {
-    if (!modus_.is_collider()) {
-      throw std::invalid_argument(
-          "Initial conditions can only be extracted in collider modus.");
-    }
-
     const InitialConditionParameters &IC_parameters = modus_.IC_parameters();
     if (IC_dynamic_) {
       // Dynamic fluidization

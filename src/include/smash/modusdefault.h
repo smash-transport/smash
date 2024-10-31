@@ -106,6 +106,8 @@ class ModusDefault {
    * \return passing_time
    */
   double nuclei_passing_time() const { return 0.0; }
+  /// \return Whether this is an initial condition for hydrodynamics
+  bool is_IC_for_hybrid() const { return false; }
   /// \return IC parameters in ColliderModus
   const InitialConditionParameters& IC_parameters() const {
     throw std::logic_error(
@@ -113,11 +115,11 @@ class ModusDefault {
   }
   /// \return Background energy density map
   const std::map<int32_t, double>& fluid_background() {
-    throw std::logic_error("Only ColliderModus has fluid background.");
+    throw std::logic_error("Only ColliderModus has a fluid background.");
   }
   /// \return Lattice where fluidization is calculated
   const RectangularLattice<EnergyMomentumTensor>& fluid_lattice() {
-    throw std::logic_error("Only ColliderModus has fluid lattice.");
+    throw std::logic_error("Only ColliderModus has a fluid lattice.");
   }
 
   /**
