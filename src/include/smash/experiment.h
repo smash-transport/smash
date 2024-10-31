@@ -613,7 +613,7 @@ class Experiment : public ExperimentBase {
   const bool bremsstrahlung_switch_;
 
   /// This indicates whether the IC output is enabled.
-  const bool IC_output_switch_;
+  const bool IC_switch_;
 
   /// This indicates if the IC is dynamic.
   const bool IC_dynamic_;
@@ -915,9 +915,10 @@ Experiment<Modus>::Experiment(Configuration &config,
           config.take(InputKeys::collTerm_photons_twoToTwoScatterings)),
       bremsstrahlung_switch_(
           config.take(InputKeys::collTerm_photons_bremsstrahlung)),
-      IC_output_switch_(config.has_section(InputSections::o_initialConditions)),
+      IC_switch_(config.has_section(InputSections::o_initialConditions) &&
+                 config.has_section(InputSections::m_c_initialConditions)),
       IC_dynamic_(
-          IC_output_switch_ && modus_.is_collider()
+          IC_switch_ && modus_.is_collider()
               ? (modus_.IC_parameters().type == FluidizationType::Dynamic)
               : false),
       time_step_mode_(config.take(InputKeys::gen_timeStepMode)) {
@@ -1052,18 +1053,26 @@ Experiment<Modus>::Experiment(Configuration &config,
     action_finders_.emplace_back(
         std::make_unique<WallCrossActionsFinder>(parameters_.box_length));
   }
-  if (IC_output_switch_) {
+
+  if ((config.has_section(InputSections::o_initialConditions) &&
+       !config.has_section(InputSections::m_c_initialConditions)) ||
+      (!config.has_section(InputSections::o_initialConditions) &&
+       config.has_section(InputSections::m_c_initialConditions))) {
+    throw std::invalid_argument(
+        "Initial_Conditions must be a subsection of both Output and Modi: "
+        "Collider in the configuration file.");
+  }
+  if (IC_switch_) {
     if (!modus_.is_collider()) {
-      throw std::runtime_error(
+      throw std::invalid_argument(
           "Initial conditions can only be extracted in collider modus.");
     }
 
     const InitialConditionParameters &IC_parameters = modus_.IC_parameters();
-
     if (IC_dynamic_) {
       // Dynamic fluidization
       action_finders_.emplace_back(std::make_unique<DynamicFluidizationFinder>(
-          *modus_.fluid_lattice(), modus_.fluid_background(), IC_parameters));
+          modus_.fluid_lattice(), modus_.fluid_background(), IC_parameters));
     } else {
       // Iso-tau hypersurface
       /*
@@ -2467,7 +2476,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
                                 min_cell_length);
         /* For the hyper-surface-crossing actions also unformed particles are
          * searched and therefore needed on the grid. */
-        const bool include_unformed_particles = IC_output_switch_;
+        const bool include_unformed_particles = IC_switch_;
         const auto &grid =
             use_grid_ ? modus_.create_grid(ensembles_[i_ens], min_cell_length,
                                            dt, parameters_.coll_crit,
@@ -2539,7 +2548,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
      * only in average.  If string fragmentation is on, then energy and
      * momentum are only very roughly conserved in high-energy collisions. */
     if (!potentials_ && !parameters_.strings_switch &&
-        metric_.mode_ == ExpansionMode::NoExpansion && !IC_output_switch_) {
+        metric_.mode_ == ExpansionMode::NoExpansion && !IC_switch_) {
       std::string err_msg = conserved_initial_.report_deviations(ensembles_);
       if (!err_msg.empty()) {
         logg[LExperiment].error() << err_msg;
@@ -2979,7 +2988,7 @@ void Experiment<Modus>::final_output() {
     for (const Particles &particles : ensembles_) {
       total_particles += particles.size();
     }
-    if (IC_output_switch_ && (total_particles == 0)) {
+    if (IC_switch_ && (total_particles == 0)) {
       const double initial_system_energy_plus_Pythia_violations =
           conserved_initial_.momentum().x0() + total_energy_violated_by_Pythia_;
       const double fraction_of_total_system_energy_removed =

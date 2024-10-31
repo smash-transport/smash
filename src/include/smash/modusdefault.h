@@ -115,8 +115,8 @@ class ModusDefault {
   const std::map<int32_t, double>& fluid_background() {
     throw std::logic_error("Only ColliderModus has fluid background.");
   }
-  /// \return pointer to lattice where fluidization is calculated
-  RectangularLattice<EnergyMomentumTensor>* fluid_lattice() {
+  /// \return Lattice where fluidization is calculated
+  const RectangularLattice<EnergyMomentumTensor>& fluid_lattice() {
     throw std::logic_error("Only ColliderModus has fluid lattice.");
   }
 

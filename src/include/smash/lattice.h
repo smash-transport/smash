@@ -522,8 +522,13 @@ class RectangularLattice {
    * \param[in] iy The index of the cell in y direction.
    * \param[in] iz The index of the cell in z direction.
    * \return Physical quantity evaluated at the cell center.
+   *
+   * \note This serves as an accessor to the lattice node, since there overload
+   * of \c operator[] can only receive one argument. Because we do not want to
+   * allow for localized changes from outside the class, only the const version
+   * is implemented.
    */
-  T& node(int ix, int iy, int iz) {
+  const T& node(int ix, int iy, int iz) const {
     return periodic_
                ? lattice_[positive_modulo(ix, n_cells_[0]) +
                           n_cells_[0] *
@@ -546,7 +551,7 @@ class RectangularLattice {
    *
    * \todo (oliiny): maybe 1-order interpolation instead of 0-order?
    */
-  bool value_at(const ThreeVector& r, T& value) {
+  bool value_at(const ThreeVector& r, T& value) const {
     const int ix =
         numeric_cast<int>(std::floor((r.x1() - origin_[0]) / cell_sizes_[0]));
     const int iy =

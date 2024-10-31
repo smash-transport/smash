@@ -147,8 +147,8 @@ class ColliderModus : public ModusDefault {
     return *fluid_background_.get();
   }
   /// \return Pointer to the lattice where fluidization is evaluated
-  RectangularLattice<EnergyMomentumTensor> *fluid_lattice() const {
-    return fluid_lattice_.get();
+  const RectangularLattice<EnergyMomentumTensor> &fluid_lattice() const {
+    return *fluid_lattice_.get();
   }
   /**
    * Build lattice of energy momentum tensor. After t>25 fm, the lattice

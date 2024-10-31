@@ -42,9 +42,10 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
    * "in" parameters because the class stores references, but the values are non
    * constant.
    */
-  DynamicFluidizationFinder(RectangularLattice<EnergyMomentumTensor> &lattice,
-                            const std::map<int32_t, double> &background,
-                            const InitialConditionParameters &ic_params)
+  DynamicFluidizationFinder(
+      const RectangularLattice<EnergyMomentumTensor> &lattice,
+      const std::map<int32_t, double> &background,
+      const InitialConditionParameters &ic_params)
       : energy_density_lattice_{lattice},
         background_{background},
         energy_density_threshold_{ic_params.energy_density_threshold.value()},
@@ -110,7 +111,7 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
    * \note It must be a reference so that it can be updated outside the class,
    * without creating a new Finder object.
    */
-  RectangularLattice<EnergyMomentumTensor> &energy_density_lattice_;
+  const RectangularLattice<EnergyMomentumTensor> &energy_density_lattice_;
   /**
    * Background energy density at positions of particles, using the id as key
    *
