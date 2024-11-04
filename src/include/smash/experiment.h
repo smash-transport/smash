@@ -793,6 +793,9 @@ void Experiment<Modus>::create_output(const std::string &format,
     outputs_.emplace_back(
         std::make_unique<VtkOutput>(output_path, content, out_par));
   } else if (content == "Initial_Conditions" && format == "ASCII") {
+    if (IC_dynamic_) {
+      throw std::invalid_argument("Dynamic initial conditions are only available in Oscar2013 and Binary formats.");
+    }
     outputs_.emplace_back(
         std::make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
   } else if ((format == "HepMC") || (format == "HepMC_asciiv3") ||
