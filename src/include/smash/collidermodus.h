@@ -146,11 +146,11 @@ class ColliderModus : public ModusDefault {
   }
   /// \return The background energy density map
   const std::map<int32_t, double> &fluid_background() const {
-    return *fluid_background_.get();
+    return *fluid_background_;
   }
-  /// \return Pointer to the lattice where fluidization is evaluated
+  /// \return Lattice where fluidization is evaluated
   const RectangularLattice<EnergyMomentumTensor> &fluid_lattice() const {
-    return *fluid_lattice_.get();
+    return *fluid_lattice_;
   }
   /**
    * Build lattice of energy momentum tensor. After t>25 fm, the lattice

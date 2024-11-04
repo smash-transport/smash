@@ -523,10 +523,10 @@ class RectangularLattice {
    * \param[in] iz The index of the cell in z direction.
    * \return Physical quantity evaluated at the cell center.
    *
-   * \note This serves as an accessor to the lattice node, since there overload
-   * of \c operator[] can only receive one argument. Because we do not want to
-   * allow for localized changes from outside the class, only the const version
-   * is implemented.
+   * \note This serves as an accessor to the lattice node, since (prios to
+   * C++23) the overload of \c operator[] can only receive one argument. Because
+   * we do not want to allow for localized changes from outside the class, only
+   * the const version is implemented.
    */
   const T& node(int ix, int iy, int iz) const {
     return periodic_

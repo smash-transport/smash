@@ -794,7 +794,9 @@ void Experiment<Modus>::create_output(const std::string &format,
         std::make_unique<VtkOutput>(output_path, content, out_par));
   } else if (content == "Initial_Conditions" && format == "ASCII") {
     if (IC_dynamic_) {
-      throw std::invalid_argument("Dynamic initial conditions are only available in Oscar2013 and Binary formats.");
+      throw std::invalid_argument(
+          "Dynamic initial conditions are only available in Oscar2013 and "
+          "Binary formats.");
     }
     outputs_.emplace_back(
         std::make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
@@ -1003,11 +1005,10 @@ Experiment<Modus>::Experiment(Configuration &config,
   }
 
   const bool IC_output = config.has_section(InputSections::o_initialConditions);
-  if ((IC_output && !modus_.is_IC_for_hybrid()) ||
-      (!IC_output && modus_.is_IC_for_hybrid())) {
+  if (IC_output != modus_.is_IC_for_hybrid()) {
     throw std::invalid_argument(
-        "Initial_Conditions must be a subsection of both Output and Modi: "
-        "Collider.");
+        "The 'Initial_Conditions' subsection must be present in both 'Output' "
+        "and 'Modi: Collider' sections.");
   }
 
   /* In collider setup with sqrts >= 200 GeV particles don't form continuously
@@ -1401,10 +1402,10 @@ Experiment<Modus>::Experiment(Configuration &config,
    * preserved.\n \n
    * ### ROOT output
    * The initial conditions output in shape of a list of all particles removed
-   * from the SMASH evolution when crossing the hypersurface is also available
-   * in ROOT format. Neither the initial nor the final particle lists are
-   * printed, but the general structure for particle TTrees, as described in
-   * \ref doxypage_output_root, is preserved.
+   * from the SMASH evolution with a \c "Constant_Tau" fluidization criterion
+   * is also available in ROOT format. Neither the initial nor the final
+   * particle lists are printed, but the general structure for particle TTrees,
+   * as described in \ref doxypage_output_root, is preserved.
    */
 
   // create outputs

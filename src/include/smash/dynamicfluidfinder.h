@@ -25,9 +25,9 @@ namespace smash {
  * Finder for dynamic fluidizations.
  * Loops through all particles and checks if they reach the energy density
  * threshold. This happens at the end of every time step for all hadrons that
- * originate in a decay or string fragmentation. For the latter process,
- * fluidization happens only after the formation time of the particle, but it
- * will happen if it passes the threshold at any point in the propagation.
+ * participated in a fluidizable process. For string fragmentation products,
+ * fluidization happens only after the fraction of formation time of the
+ * particle, controlled by \key Formation_Time_Fraction.
  */
 class DynamicFluidizationFinder : public ActionFinderInterface {
  public:

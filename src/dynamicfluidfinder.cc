@@ -70,7 +70,7 @@ bool DynamicFluidizationFinder::above_threshold(
     const double e_den_particles =
         Tmunu.boosted(Tmunu.landau_frame_4velocity())[0];
     if (e_den_particles + background >= energy_density_threshold_) {
-      logg[LFluidization].warn()
+      logg[LFluidization].debug()
           << "Fluidize " << pdata.id() << " with " << e_den_particles << "+"
           << background << " GeV/fm^3 at " << pdata.position().x0()
           << " fm, formed at " << pdata.formation_time() << " fm";
