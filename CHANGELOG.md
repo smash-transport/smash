@@ -25,9 +25,6 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Output
 * New: Implemented `ASCIICustom` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities`.
 
-### Deprecated
-* Some physics-related input keys in `Output: Initial_Conditions` were deprecated and duplicated under `Modi: Collider: Initial_Conditions`
-
 ### Changed
 * Upgraded to Pythia 8.311
 * Moved the `Orientation` section from the `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from `pi/2` to `0`
@@ -36,6 +33,13 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Fixed
 * Fix a small error and added a more precise documentation for the orientation section for deformed nuclei
 * Make few keys really mandatory in code as it was already stated in the documentation
+
+### Deprecated
+* Some physics-related input keys in `Output: Initial_Conditions` were deprecated and duplicated under `Modi: Collider: Initial_Conditions`
+
+### Removed
+* The deprecated `Version` key in the configuration file is not accepted anymore
+
 
 ## SMASH-3.1
 Date: 2024-02-26

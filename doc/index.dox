@@ -49,7 +49,6 @@
     \page doxypage_input_configuration %Configuration
         <div class="invisible-content">
         \subpage doxypage_input_conf_general
-        \subpage doxypage_input_conf_version
         \subpage doxypage_input_conf_logging
         \subpage doxypage_input_conf_collision_term
         \subpage doxypage_input_conf_modi
@@ -57,6 +56,7 @@
         \subpage doxypage_input_conf_lattice
         \subpage doxypage_input_conf_potentials
         \subpage doxypage_input_conf_forced_therm
+        \subpage doxypage_input_conf_removed_keys
         </div>
         \page doxypage_input_conf_general General
             <div class="invisible-content">
@@ -64,7 +64,6 @@
             </div>
             \page doxypage_input_conf_general_mne Minimum non-empty ensembles
         \page doxypage_input_conf_logging Logging
-        \page doxypage_input_conf_version Version
         \page doxypage_input_conf_collision_term Collision term
             <div class="invisible-content">
             \subpage doxypage_input_conf_ct_pauliblocker
@@ -119,6 +118,7 @@
             \page doxypage_input_conf_pot_coulomb Coulomb
             \page doxypage_input_conf_pot_momentum_dependence Momentum Dependence
         \page doxypage_input_conf_forced_therm Forced Thermalization
+        \page doxypage_input_conf_removed_keys Removed keys
     \page doxypage_input_particles %Particles
     \page doxypage_input_decaymodes Decay modes
 \page doxypage_output Output

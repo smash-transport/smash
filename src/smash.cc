@@ -685,10 +685,6 @@ int main(int argc, char *argv[]) {
     // Create an experiment
     logg[LMain].trace(SMASH_SOURCE_LOCATION, " create Experiment");
     auto experiment = ExperimentBase::create(configuration, output_path);
-    // Version key is deprecated. If present, ignore it.
-    if (configuration.has_value(InputKeys::version)) {
-      configuration.take(InputKeys::version);
-    }
     check_for_unused_config_values(configuration);
     tabulate_resonance_integrals(hash, tabulations_path);
 
