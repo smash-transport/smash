@@ -544,28 +544,58 @@ struct InputSections {
 /*!\Userguide
  * \page doxypage_input_conf_modi_C_initial_conditions
  *
- * The existence of an initial conditions subsection in the output section of
- * the configuration file enables the IC output. In addition, all particles
- * that cross the hypersurface of predefined proper time are removed from the
- * evolution. This proper time is taken from the \key Proper_Time field
- * in the \key Initial_Conditions subsection when configuring the output. If
- * this information is not provided, the default proper time corresponds to
- * the passing time of the two nuclei, where all primary interactions are
- * expected to have occured: \f[ \tau_0 =
- * (r_\mathrm{p} \ + \ r_\mathrm{t}) \ \left(\left(\frac{\sqrt{s_\mathrm{NN}}}
- * {2 \ m_\mathrm{N}}\right)^2
- * - 1\right)^{-1/2} \f]
- * Therein, \f$ r_\mathrm{p} \f$ and \f$ r_\mathrm{t} \f$ denote the radii of
- * the projectile and target nucleus, respectively, \f$
- * \sqrt{s_\mathrm{NN}}\f$
- * is the collision energy per nucleon and \f$ m_\mathrm{N} \f$ the nucleon
- * mass. Note though that, if the passing time is smaller than 0.5 fm, the
- * default proper time of the hypersurface is taken to be \f$\tau = 0.5 \f$
- * as a minimum bound to ensure the proper time is large enough
- * to also extract reasonable initial conditions at RHIC/LHC energies. If
- * desired, this lowest possible value can also be specified in the
- * configuration file in the \key Lower_Bound field.\n
- * <hr>
+ * ## Fluidization conditions
+ *
+ * Currently there are two implemented conditions for selecting hadrons from a
+ * collision as input for a hydrodynamic evolution, controlled by \key Type.
+ * Namely, they are `Constant_Tau`, which relies on the hadron's hyperbolic
+ * time, and `Dynamic`, where the condition is that the energy density around
+ * the hadron exceeds a defined threshold. In both cases, particles that obey
+ * the fluidization condition are removed from the evolution and written to the
+ * \key Initial_Conditions output, which must be included in the config.
+ *
+ * ### Constant tau
+ *
+ * The hyperbolic time is taken from the \key Proper_Time field in the
+ * \key Initial_Conditions subsection when configuring the output. If this
+ * information is not provided, the default value corresponds to the passing
+ * time of the two nuclei, where all primary interactions are expected to
+ * have occured:
+ * \f[
+ * \tau_0 = (r_\mathrm{p} \ + \ r_\mathrm{t})
+ * \ \left(\left(\frac{\sqrt{s_\mathrm{NN}}} {2 \ m_\mathrm{N}}\right)^2 -
+ * 1\right)^{-1/2} \f] Therein, \f$ r_\mathrm{p} \f$ and \f$ r_\mathrm{t} \f$
+ * denote the radii of the projectile and target nucleus, respectively, \f$
+ * \sqrt{s_\mathrm{NN}}\f$ is the collision energy per nucleon and \f$
+ * m_\mathrm{N} \f$ the nucleon mass. Note though that, if the passing time is
+ * smaller than 0.5 fm, the default proper time of the hypersurface is taken to
+ * be \f$\tau = 0.5\ \mathrm{fm}\f$ as a minimum bound to ensure the proper time
+ * is large enough to also extract reasonable initial conditions at RHIC/LHC
+ * energies. If desired, this lowest possible value can also be specified in the
+ * configuration file with the \key Lower_Bound field. This is best applied to
+ * higher beam energies, where the majority of the system is expected to behave
+ * as a fluid starting with a Bjorken picture.
+ *
+ * ### Dynamic with energy density
+ *
+ * Hydrodynamics is in general applicable for systems in or close to
+ * equilibrium. A hadron gas will always be driven towards equilibration, but
+ * this will be faster if the temperature or density is higher. This can be
+ * effectively captured by conditioning the fluid-like behavior to the local
+ * energy density: if it is higher than a given value, then this region can be
+ * considered a fluid. By default, the threshold energy density is set to 0.5
+ * GeV/fm³, but this can be controlled with the \key Energy_Density_Threshold.
+ * This procedure is based on \iref{Akamatsu:2018olk}, where particles
+ * that suffered elastic collisions are not fluidizable, but here they are
+ * included by default. If desired, this can be changed with the
+ * \key Fluidizable_Processes key.\n \n
+ *
+ * The threshold condition is evaluated at every time step in a lattice
+ * centered at the origin that starts with a fixed length of 40 fm in each
+ * direction (for zero \key Minimum_Time), but grows linearly every 5 fm after
+ * the first 20 fm until \key Maximum_Time, such that even particles at the
+ * speed of light are always contained in the lattice. The number of cells is
+ * fixed, meaning that each cell increases in size. <hr>
  */
 
 /*!\Userguide
@@ -3702,8 +3732,13 @@ struct InputKeys {
    *
    * \required_key_no_line{key_MC_IC_type_,Type,string}
    *
-   * Type of initial conditions provided. Currently only one value is possible:
+   * Type of initial conditions provided. Possible values are:
    * - `"Constant_Tau"` &rarr; a hypersurface of constant \f$\tau\f$ is used.
+   * - `"Dynamic"` &rarr; regions with sufficient energy density become fluid
+   * cells, with its particles written to the IC output. \n
+   * .
+   * The parameters for each are described below. If a key that does not match
+   * the type is present in the configuration file, SMASH will throw. <hr>
    */
   /**
    * \see_key{key_MC_IC_type_}
@@ -3714,10 +3749,12 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
+   * ### Parameters for fluidization at constant tau
    * \optional_key_no_line{key_MC_IC_lower_bound_,Lower_Bound,double,0.5}
    *
    * Lower bound \unit{in fm} for the IC proper time if
-   * <tt>\ref key_MC_IC_proper_time_ "Proper_Time"</tt> is not provided.
+   * <tt>\ref key_MC_IC_proper_time_ "Proper_Time"</tt> is not provided. It is
+   * only used if the constant tau initial condition is active.
    */
   /**
    * \see_key{key_MC_IC_lower_bound_}
@@ -3738,6 +3775,7 @@ struct InputKeys {
    * t_{np} & t_{np} > \mathrm{\texttt{Lower_Bound}}
    * \end{cases}\;.
    * \f]
+   * It is only used if the constant tau initial condition is active.
    */
   /**
    * \see_key{key_MC_IC_proper_time_}
@@ -3756,7 +3794,8 @@ struct InputKeys {
    * initial conditions for hydrodynamics. A positive value \unit{in GeV} is
    * expected. Only particles characterized by
    * \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed to the output file.
-   * A value of 0 corresponds to no cut.
+   * A value of 0 corresponds to no cut. It is only used if the constant tau
+   * initial condition is active.
    */
   /**
    * \see_key{key_output_IC_pt_cut_}
@@ -3775,7 +3814,8 @@ struct InputKeys {
    * conditions for hydrodynamics. A positive value is expected and the cut is
    * employed symmetrically around 0. Only particles characterized by
    * \f$|\mathrm{\texttt{Rapidity_Cut}}|<y\f$ are printed to the
-   * output file. A value of 0 corresponds to no cut.
+   * output file. A value of 0 corresponds to no cut. It is only used if the
+   * constant tau initial condition is active.
    */
   /**
    * \see_key{key_MC_IC_rapidity_cut_}
@@ -3784,6 +3824,112 @@ struct InputKeys {
       InputSections::m_c_initialConditions + "Rapidity_Cut",
       DefaultType::Dependent,
       {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * <hr>
+   * ### Parameters for dynamic fluidization
+   * \optional_key_no_line{key_MC_IC_eden_threshold_,Energy_Density_Threshold,double,0.5}
+   *
+   * Set the minimum energy density \unit{in GeV/fm³} for a particle to be
+   * considered fluid. It is only used if the dynamic initial condition is
+   * active.
+   */
+  /**
+   * \see_key{key_MC_IC_eden_threshold_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_eDenThreshold{
+      InputSections::m_c_initialConditions + "Energy_Density_Threshold",
+      0.5,
+      {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_mintime_,Minimum_Time,double,0}
+   *
+   * Set the minimum time \unit{in fm} for a particle to be considered fluid.
+   * If larger than 10 fm, the initial lattice size also increases. It is only
+   * used if the dynamic initial condition is active.
+   */
+  /**
+   * \see_key{key_MC_IC_mintime_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_minTime{
+      InputSections::m_c_initialConditions + "Minimum_Time", 0, {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_maxtime_,Maximum_Time,double,100}
+   *
+   * Set the maximum time \unit{in fm} for a particle to be considered fluid.
+   * For efficiency in production runs, it is recommended to set to a lower
+   * value. It is only used if the dynamic initial condition is active.
+   */
+  /**
+   * \see_key{key_MC_IC_maxtime_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_maxTime{
+      InputSections::m_c_initialConditions + "Maximum_Time", 100, {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_fluid_cells_,Fluidization_Cells,int,80}
+   *
+   * Fixed number of cells in each direction to select fluidizing particles.
+   * Ideally the cell should be small enough for a meaningful interpolation,
+   */
+  /**
+   * \see_key{key_MC_IC_fluid_cells_}
+   */
+  inline static const Key<int> modi_collider_initialConditions_fluidCells{
+      InputSections::m_c_initialConditions + "Fluidization_Cells", 80, {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_fluidizable_processes,Fluidizable_Processes,
+   * list of strings,"All"}
+   *
+   * Determines which process types can have outgoing particles as fluidizable.
+   * Possible values are:
+   * - `"All"`
+   * - `"Elastic"`: Elastic \f$2\to2\f$
+   * - `"Decay"`: All \f$1\to N\f$ processes
+   * - `"Inelastic"`: All \f$N\to1\f$ processes
+   * - `"SoftString"`
+   * - `"HardString"`
+   *
+   * The argument for allowing string processes to produce fluidizable hadrons,
+   * even though they break detailed balance, is that the system is expanding,
+   * so the fragmentation products are driven towards equilibration when the
+   * medium becomes large enough, which happens if the fluidization happens
+   * after their formation time.
+   */
+  /**
+   * \see_key{key_MC_IC_fluidizable_processes}
+   */
+  inline static const Key<FluidizableProcessesBitSet>
+      modi_collider_initialConditions_fluidProcesses{
+          InputSections::m_c_initialConditions + "Fluidizable_Processes",
+          FluidizableProcessesBitSet{}.set(),  // all processes
+          {"3.2"}};
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_form_time_fraction_,Formation_Time_Fraction,
+   * double,1.0}
+   *
+   * Fraction of the formation time after which a particle can fluidize. It is
+   * is non-negative, and can assume values above 1. Setting it to 0 corresponds
+   * to ignoring formation time. This is only relevant if string fragmentation
+   * can produce fluidizable particles.
+   */
+  /**
+   * \see_key{key_MC_IC_form_time_fraction_}
+   */
+  inline static const Key<double>
+      modi_collider_initialConditions_formTimeFraction{
+          InputSections::m_c_initialConditions + "Formation_Time_Fraction",
+          1.0,
+          {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -4644,8 +4790,10 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * <hr>
    * ### &diams; Initial_Conditions
-   * &rArr; Only `Oscar1999`, `Oscar2013`, `Binary`, `ROOT` and `ASCII` (special
-   * ASCII IC, see \ref doxypage_output_initial_conditions) formats.
+   * &rArr; Only `Oscar1999`, `Oscar2013`, `Binary`, `ROOT` and `ASCII` formats.
+   * The latter is only available for `Constant_Tau` fluidizations, see the
+   * pages for Output: \ref doxypage_output_initial_conditions and Modi:
+   * Collider: \ref doxypage_input_conf_modi_C_initial_conditions.
    *
    * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
    *
@@ -5483,6 +5631,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<FermiMotion>>,
       std::reference_wrapper<const Key<FieldDerivativesMode>>,
+      std::reference_wrapper<const Key<FluidizableProcessesBitSet>>,
       std::reference_wrapper<const Key<FluidizationType>>,
       std::reference_wrapper<const Key<MultiParticleReactionsBitSet>>,
       std::reference_wrapper<const Key<NNbarTreatment>>,
@@ -5670,7 +5819,13 @@ struct InputKeys {
       std::cref(modi_collider_impact_value),
       std::cref(modi_collider_impact_values),
       std::cref(modi_collider_impact_yields),
+      std::cref(modi_collider_initialConditions_eDenThreshold),
+      std::cref(modi_collider_initialConditions_fluidCells),
+      std::cref(modi_collider_initialConditions_formTimeFraction),
+      std::cref(modi_collider_initialConditions_fluidProcesses),
       std::cref(modi_collider_initialConditions_lowerBound),
+      std::cref(modi_collider_initialConditions_maxTime),
+      std::cref(modi_collider_initialConditions_minTime),
       std::cref(modi_collider_initialConditions_properTime),
       std::cref(modi_collider_initialConditions_pTCut),
       std::cref(modi_collider_initialConditions_rapidityCut),
@@ -6353,7 +6508,7 @@ General:
 * ### Extracting initial conditions for hydrodynamic evolution
 *
 * The following example configures the initial conditions for hydrodynamics
-* for a Au+Au collision at \f$\sqrt{s_{NN}}=200\f$ \unit{GeV} at midrapidity
+* for a Au+Au collision at \f$\sqrt{s_{NN}}=200\ \mathrm{GeV}\f$ at midrapidity
 * (\f$-1<y<1\f$). In addition, the extended OSCAR2013 and ASCII outputs
 * are enabled.
 *

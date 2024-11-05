@@ -271,6 +271,7 @@ smash_add_unittest(deformednucleus)
 smash_add_unittest(density)
 smash_add_unittest(dileptons)
 smash_add_unittest(distributions)
+smash_add_unittest(dynamic_fluidization)
 smash_add_unittest(enable_float_traps)
 smash_add_unittest(energymomentumtensor)
 smash_add_unittest(experiment)
@@ -368,8 +369,10 @@ smash_add_runtest(custom_nucleus_run smash smash
                   -c "Modi: {Collider: {Projectile: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
                   -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
 )
-smash_add_runtest(initial_conditions_run smash smash -i ${PROJECT_SOURCE_DIR}/input/config.yaml
-                  -c "Output: {Initial_Conditions: {Format: [Binary, Oscar2013]}}")
+smash_add_runtest(initial_conditions_run smash smash
+                  -i ${PROJECT_SOURCE_DIR}/input/config.yaml
+                  -c "Output: {Initial_Conditions: {Format: [Binary, Oscar2013]}}"
+                  -c "Modi: {Collider: {Initial_Conditions: {Type: Constant_Tau}}}")
 
 if(ROOT_FOUND AND HepMC3_FOUND AND Rivet_FOUND)
     smash_add_runtest(third_party_output_run smash smash

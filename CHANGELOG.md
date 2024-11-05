@@ -21,6 +21,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Added
 * Added alpha-clustered oxygen nuclei that can be configured in a new `Alpha_Clustered` section in the `Projectile`/`Target` section
+* Implemented dynamic initial conditions for hydrodynamics, available under `Modi: Collider: Initial_Conditions: Type: "Dynamic"`
 
 ### Output
 * New: Implemented `ASCIICustom` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities`.

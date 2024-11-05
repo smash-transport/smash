@@ -13,6 +13,7 @@
 #include <array>
 #include <cstring>
 #include <functional>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -521,8 +522,13 @@ class RectangularLattice {
    * \param[in] iy The index of the cell in y direction.
    * \param[in] iz The index of the cell in z direction.
    * \return Physical quantity evaluated at the cell center.
+   *
+   * \note This serves as an accessor to the lattice node, since (prios to
+   * C++23) the overload of \c operator[] can only receive one argument. Because
+   * we do not want to allow for localized changes from outside the class, only
+   * the const version is implemented.
    */
-  T& node(int ix, int iy, int iz) {
+  const T& node(int ix, int iy, int iz) const {
     return periodic_
                ? lattice_[positive_modulo(ix, n_cells_[0]) +
                           n_cells_[0] *
@@ -545,7 +551,7 @@ class RectangularLattice {
    *
    * \todo (oliiny): maybe 1-order interpolation instead of 0-order?
    */
-  bool value_at(const ThreeVector& r, T& value) {
+  bool value_at(const ThreeVector& r, T& value) const {
     const int ix =
         numeric_cast<int>(std::floor((r.x1() - origin_[0]) / cell_sizes_[0]));
     const int iy =
@@ -790,19 +796,53 @@ class RectangularLattice {
            periodic_ == lat->periodic();
   }
 
+  /**
+   * Rebuilds the lattice with a different size, reseting it to zero values. The
+   * parameters are all optional with different types, if none are passed the
+   * function throws.
+   *
+   * \param[in] new_length 3-dimensional array indicates the new size of
+   * the lattice [fm].
+   * \param[in] new_origin 3-dimensional array (nx,ny,nz) indicates the origin
+   * of the lattice.
+   * \param[in] new_cells 3-dimensional array with the new
+   * number of lattice cells.
+   * \throw std::invalid_argument if no arguments are given.
+   */
+  void reset_and_resize(std::optional<std::array<double, 3>> new_length,
+                        std::optional<std::array<double, 3>> new_origin,
+                        std::optional<std::array<int, 3>> new_cells) {
+    if (!new_length && !new_origin && !new_cells) {
+      throw std::invalid_argument(
+          "RectangularLattice::reset_and_resize called "
+          "without arguments, lattice was not changed.");
+    }
+    reset();
+    if (new_length)
+      lattice_sizes_ = *new_length;
+    if (new_origin)
+      origin_ = *new_origin;
+    if (new_cells)
+      n_cells_ = *new_cells;
+    cell_sizes_ = {lattice_sizes_[0] / n_cells_[0],
+                   lattice_sizes_[1] / n_cells_[1],
+                   lattice_sizes_[2] / n_cells_[2]};
+    cell_volume_ = cell_sizes_[0] * cell_sizes_[1] * cell_sizes_[2];
+  }
+
  protected:
   /// The lattice itself, array containing physical quantities.
   std::vector<T> lattice_;
   /// Lattice sizes in x, y, z directions.
-  const std::array<double, 3> lattice_sizes_;
+  std::array<double, 3> lattice_sizes_;
   /// Number of cells in x,y,z directions.
-  const std::array<int, 3> n_cells_;
+  std::array<int, 3> n_cells_;
   /// Cell sizes in x, y, z directions.
-  const std::array<double, 3> cell_sizes_;
+  std::array<double, 3> cell_sizes_;
   /// Volume of a cell.
-  const double cell_volume_;
+  double cell_volume_;
   /// Coordinates of the left down nearer corner.
-  const std::array<double, 3> origin_;
+  std::array<double, 3> origin_;
   /// Whether the lattice is periodic.
   const bool periodic_;
   /// When the lattice should be recalculated.

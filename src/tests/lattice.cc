@@ -90,9 +90,6 @@ TEST(iterators) {
   auto lattice = create_lattice(false);
   // 1) Check that lattice size is as expected
   COMPARE(lattice->size(), 4u * 8u * 3u);
-  // Check node and index accessors
-  lattice->node(1, 3, 2) = FourVector(1., 2., 3., 4.);
-  COMPARE((*lattice)[8 * 4 * 2 + 4 * 3 + 1], FourVector(1., 2., 3., 4.));
 
   // 2) Iterate lattice around a point, but take radius so big, that all
   //    the lattice is iterated. Check if really all the lattice was iterated

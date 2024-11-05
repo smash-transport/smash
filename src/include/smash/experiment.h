@@ -21,12 +21,14 @@
 #include "chrono.h"
 #include "decayactionsfinder.h"
 #include "decayactionsfinderdilepton.h"
+#include "dynamicfluidfinder.h"
 #include "energymomentumtensor.h"
 #include "fields.h"
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
 #include "grid.h"
-#include "hypersurfacecrossingaction.h"
+#include "hypersurfacecrossingfinder.h"
+#include "icparameters.h"
 #include "numeric_cast.h"
 #include "outputparameters.h"
 #include "pauliblocking.h"
@@ -610,8 +612,14 @@ class Experiment : public ExperimentBase {
   /// This indicates whether bremsstrahlung is switched on.
   const bool bremsstrahlung_switch_;
 
-  /// This indicates whether the IC output is enabled.
-  const bool IC_output_switch_;
+  /**
+   * This indicates whether the experiment will be used as initial condition for
+   * hydrodynamics. Currently only the Collider modus can achieve this.
+   */
+  const bool IC_switch_;
+
+  /// This indicates if the IC is dynamic.
+  const bool IC_dynamic_;
 
   /// This indicates whether to use time steps.
   const TimeStepMode time_step_mode_;
@@ -785,6 +793,11 @@ void Experiment<Modus>::create_output(const std::string &format,
     outputs_.emplace_back(
         std::make_unique<VtkOutput>(output_path, content, out_par));
   } else if (content == "Initial_Conditions" && format == "ASCII") {
+    if (IC_dynamic_) {
+      throw std::invalid_argument(
+          "Dynamic initial conditions are only available in Oscar2013 and "
+          "Binary formats.");
+    }
     outputs_.emplace_back(
         std::make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
   } else if ((format == "HepMC") || (format == "HepMC_asciiv3") ||
@@ -910,7 +923,11 @@ Experiment<Modus>::Experiment(Configuration &config,
           config.take(InputKeys::collTerm_photons_twoToTwoScatterings)),
       bremsstrahlung_switch_(
           config.take(InputKeys::collTerm_photons_bremsstrahlung)),
-      IC_output_switch_(config.has_section(InputSections::o_initialConditions)),
+      IC_switch_(config.has_section(InputSections::o_initialConditions) &&
+                 modus_.is_IC_for_hybrid()),
+      IC_dynamic_(IC_switch_ ? (modus_.IC_parameters().type ==
+                                FluidizationType::Dynamic)
+                             : false),
       time_step_mode_(config.take(InputKeys::gen_timeStepMode)) {
   logg[LExperiment].info() << *this;
 
@@ -987,6 +1004,13 @@ Experiment<Modus>::Experiment(Configuration &config,
         "section in your configuration file:\n   Pseudoresonance: \"None\"");
   }
 
+  const bool IC_output = config.has_section(InputSections::o_initialConditions);
+  if (IC_output != modus_.is_IC_for_hybrid()) {
+    throw std::invalid_argument(
+        "The 'Initial_Conditions' subsection must be present in both 'Output' "
+        "and 'Modi: Collider' sections.");
+  }
+
   /* In collider setup with sqrts >= 200 GeV particles don't form continuously
    *
    * NOTE: This key has to be taken before the ScatterActionsFinder is created
@@ -1043,112 +1067,119 @@ Experiment<Modus>::Experiment(Configuration &config,
     action_finders_.emplace_back(
         std::make_unique<WallCrossActionsFinder>(parameters_.box_length));
   }
-  if (IC_output_switch_) {
-    if (!modus_.is_collider()) {
-      throw std::runtime_error(
-          "Initial conditions can only be extracted in collider modus.");
-    }
-    /*
-     * Due to an ongoing refactoring, the physics inputs for Initial Conditions
-     * are duplicated in both Output and Collider sections, with the former
-     * being deprecated. If there are two inconsistent values, SMASH will not
-     * run. Otherwise it will follow the one present in the configuration. If
-     * none are present, the default is used.
-     * When the deprecated way is removed, the key taking will be handled in the
-     * constructor of ColliderModus, and the logic here will be removed.
-     */
-    double proper_time = std::numeric_limits<double>::quiet_NaN();
-    if (config.has_value(InputKeys::output_initialConditions_properTime)) {
-      proper_time = config.take(InputKeys::output_initialConditions_properTime);
-      validate_duplicate_IC_config(proper_time, modus_.proper_time(),
-                                   "Proper_Time");
-    } else if (modus_.proper_time().has_value()) {
-      proper_time = modus_.proper_time().value();
-    } else {
-      double lower_bound =
-          modus_.lower_bound().has_value() ? modus_.lower_bound().value() : 0.5;
-      if (config.has_value(InputKeys::output_initialConditions_lowerBound))
-        lower_bound =
-            config.take(InputKeys::output_initialConditions_lowerBound);
-      validate_duplicate_IC_config(lower_bound, modus_.lower_bound(),
-                                   "Lower_Bound");
 
-      // Default proper time is the passing time of the two nuclei
-      double default_proper_time = modus_.nuclei_passing_time();
-      if (default_proper_time >= lower_bound) {
-        proper_time = default_proper_time;
-      } else {
-        logg[LInitialConditions].warn()
-            << "Nuclei passing time is too short, hypersurface proper time "
-            << "set to tau = " << lower_bound << " fm.";
-        proper_time = lower_bound;
+  if (IC_switch_) {
+    const InitialConditionParameters &IC_parameters = modus_.IC_parameters();
+    if (IC_dynamic_) {
+      // Dynamic fluidization
+      action_finders_.emplace_back(std::make_unique<DynamicFluidizationFinder>(
+          modus_.fluid_lattice(), modus_.fluid_background(), IC_parameters));
+    } else {
+      // Iso-tau hypersurface
+      /*
+       * Due to an ongoing refactoring, the physics inputs for Initial
+       * Conditions the former being deprecated. If there are two inconsistent
+       * values, SMASH will not run. Otherwise it will follow the one present in
+       * the configuration. If none are present, the default is used. When the
+       * deprecated way is removed, the key taking will be handled in the
+       * constructor of ColliderModus, and the logic here will be removed.
+       */
+      double rapidity_cut = IC_parameters.rapidity_cut.has_value()
+                                ? IC_parameters.rapidity_cut.value()
+                                : 0.0;
+      if (config.has_value(InputKeys::output_initialConditions_rapidityCut)) {
+        rapidity_cut =
+            config.take(InputKeys::output_initialConditions_rapidityCut);
+        validate_duplicate_IC_config(rapidity_cut, IC_parameters.rapidity_cut,
+                                     "Rapidity_Cut");
       }
-    }
 
-    double rapidity_cut =
-        modus_.rapidity_cut().has_value() ? modus_.rapidity_cut().value() : 0.0;
-    if (config.has_value(InputKeys::output_initialConditions_rapidityCut)) {
-      rapidity_cut =
-          config.take(InputKeys::output_initialConditions_rapidityCut);
-      validate_duplicate_IC_config(rapidity_cut, modus_.rapidity_cut(),
-                                   "Rapidity_Cut");
-    }
-    if (rapidity_cut < 0.0) {
-      logg[LInitialConditions].fatal()
-          << "Rapidity cut for initial conditions configured as abs(y) < "
-          << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
-          << "non-zero value or employ SMASH without rapidity cut.";
-      throw std::runtime_error(
-          "Kinematic cut for initial conditions malconfigured.");
-    }
+      if (rapidity_cut < 0.0) {
+        logg[LInitialConditions].fatal()
+            << "Rapidity cut for initial conditions configured as abs(y) < "
+            << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
+            << "non-zero value or employ SMASH without rapidity cut.";
+        throw std::runtime_error(
+            "Kinematic cut for initial conditions malconfigured.");
+      }
 
-    if (modus_.calculation_frame_is_fixed_target() && rapidity_cut != 0.0) {
-      throw std::runtime_error(
-          "Rapidity cut for initial conditions output is not implemented "
-          "in the fixed target calculation frame. \nPlease use "
-          "\"center of velocity\" or \"center of mass\" as a "
-          "\"Calculation_Frame\" instead.");
-    }
+      if (modus_.calculation_frame_is_fixed_target() && rapidity_cut != 0.0) {
+        throw std::runtime_error(
+            "Rapidity cut for initial conditions output is not implemented "
+            "in the fixed target calculation frame. \nPlease use "
+            "\"center of velocity\" or \"center of mass\" as a "
+            "\"Calculation_Frame\" instead.");
+      }
 
-    double pT_cut = modus_.pT_cut().has_value() ? modus_.pT_cut().value() : 0.0;
-    if (config.has_value(InputKeys::output_initialConditions_pTCut)) {
-      pT_cut = config.take(InputKeys::output_initialConditions_pTCut);
-      validate_duplicate_IC_config(pT_cut, modus_.pT_cut(), "pT_Cut");
-    }
-    if (pT_cut < 0.0) {
-      logg[LInitialConditions].fatal()
-          << "transverse momentum cut for initial conditions configured as "
-          << "pT < " << pT_cut << " is unreasonable. \nPlease choose a "
-          << "positive, non-zero value or employ SMASH without pT cut.";
-      throw std::runtime_error(
-          "Kinematic cut for initial conditions misconfigured.");
-    }
+      double pT_cut =
+          IC_parameters.pT_cut.has_value() ? IC_parameters.pT_cut.value() : 0.0;
+      if (config.has_value(InputKeys::output_initialConditions_pTCut)) {
+        pT_cut = config.take(InputKeys::output_initialConditions_pTCut);
+        validate_duplicate_IC_config(pT_cut, IC_parameters.pT_cut, "pT_Cut");
+      }
+      if (pT_cut < 0.0) {
+        logg[LInitialConditions].fatal()
+            << "transverse momentum cut for initial conditions configured as "
+            << "pT < " << pT_cut << " is unreasonable. \nPlease choose a "
+            << "positive, non-zero value or employ SMASH without pT cut.";
+        throw std::runtime_error(
+            "Kinematic cut for initial conditions misconfigured.");
+      }
 
-    if (rapidity_cut > 0.0 || pT_cut > 0.0) {
-      kinematic_cuts_for_IC_output_ = true;
-    }
+      if (rapidity_cut > 0.0 || pT_cut > 0.0) {
+        kinematic_cuts_for_IC_output_ = true;
+      }
 
-    if (rapidity_cut > 0.0 && pT_cut > 0.0) {
-      logg[LInitialConditions].info()
-          << "Extracting initial conditions in kinematic range: "
-          << -rapidity_cut << " <= y <= " << rapidity_cut
-          << "; pT <= " << pT_cut << " GeV.";
-    } else if (rapidity_cut > 0.0) {
-      logg[LInitialConditions].info()
-          << "Extracting initial conditions in kinematic range: "
-          << -rapidity_cut << " <= y <= " << rapidity_cut << ".";
-    } else if (pT_cut > 0.0) {
-      logg[LInitialConditions].info()
-          << "Extracting initial conditions in kinematic range: pT <= "
-          << pT_cut << " GeV.";
-    } else {
-      logg[LInitialConditions].info()
-          << "Extracting initial conditions without kinematic cuts.";
-    }
+      if (rapidity_cut > 0.0 && pT_cut > 0.0) {
+        logg[LInitialConditions].info()
+            << "Extracting initial conditions in kinematic range: "
+            << -rapidity_cut << " <= y <= " << rapidity_cut
+            << "; pT <= " << pT_cut << " GeV.";
+      } else if (rapidity_cut > 0.0) {
+        logg[LInitialConditions].info()
+            << "Extracting initial conditions in kinematic range: "
+            << -rapidity_cut << " <= y <= " << rapidity_cut << ".";
+      } else if (pT_cut > 0.0) {
+        logg[LInitialConditions].info()
+            << "Extracting initial conditions in kinematic range: pT <= "
+            << pT_cut << " GeV.";
+      } else {
+        logg[LInitialConditions].info()
+            << "Extracting initial conditions without kinematic cuts.";
+      }
 
-    action_finders_.emplace_back(
-        std::make_unique<HyperSurfaceCrossActionsFinder>(proper_time,
-                                                         rapidity_cut, pT_cut));
+      double proper_time = std::numeric_limits<double>::quiet_NaN();
+      if (config.has_value(InputKeys::output_initialConditions_properTime)) {
+        // Read in proper time from config
+        proper_time =
+            config.take(InputKeys::output_initialConditions_properTime);
+        validate_duplicate_IC_config(
+            proper_time, IC_parameters.proper_time.value(), "Proper_Time");
+      } else if (IC_parameters.proper_time.has_value()) {
+        proper_time = IC_parameters.proper_time.value();
+      } else {
+        double lower_bound =
+            config.take(InputKeys::output_initialConditions_lowerBound);
+        if (IC_parameters.lower_bound.has_value())
+          validate_duplicate_IC_config(
+              lower_bound, IC_parameters.lower_bound.value(), "Lower_Bound");
+
+        // Default proper time is the passing time of the two nuclei
+        double default_proper_time = modus_.nuclei_passing_time();
+        if (default_proper_time >= lower_bound) {
+          proper_time = default_proper_time;
+        } else {
+          logg[LInitialConditions].warn()
+              << "Nuclei passing time is too short, hypersurface proper time "
+              << "set to tau = " << lower_bound << " fm.";
+          proper_time = lower_bound;
+        }
+      }
+
+      action_finders_.emplace_back(
+          std::make_unique<HyperSurfaceCrossActionsFinder>(
+              proper_time, rapidity_cut, pT_cut));
+    }
   }
 
   if (config.has_section(InputSections::c_pauliBlocking)) {
@@ -1371,10 +1402,10 @@ Experiment<Modus>::Experiment(Configuration &config,
    * preserved.\n \n
    * ### ROOT output
    * The initial conditions output in shape of a list of all particles removed
-   * from the SMASH evolution when crossing the hypersurface is also available
-   * in ROOT format. Neither the initial nor the final particle lists are
-   * printed, but the general structure for particle TTrees, as described in
-   * \ref doxypage_output_root, is preserved.
+   * from the SMASH evolution with a \c "Constant_Tau" fluidization criterion
+   * is also available in ROOT format. Neither the initial nor the final
+   * particle lists are printed, but the general structure for particle TTrees,
+   * as described in \ref doxypage_output_root, is preserved.
    */
 
   // create outputs
@@ -2427,6 +2458,11 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
       }
     }
 
+    if (IC_dynamic_) {
+      modus_.build_fluidization_lattice(parameters_.labclock->current_time(),
+                                        ensembles_, density_param_);
+    }
+
     std::vector<Actions> actions(parameters_.n_ensembles);
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
       actions[i_ens].clear();
@@ -2437,7 +2473,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
                                 min_cell_length);
         /* For the hyper-surface-crossing actions also unformed particles are
          * searched and therefore needed on the grid. */
-        const bool include_unformed_particles = IC_output_switch_;
+        const bool include_unformed_particles = IC_switch_;
         const auto &grid =
             use_grid_ ? modus_.create_grid(ensembles_[i_ens], min_cell_length,
                                            dt, parameters_.coll_crit,
@@ -2509,7 +2545,7 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
      * only in average.  If string fragmentation is on, then energy and
      * momentum are only very roughly conserved in high-energy collisions. */
     if (!potentials_ && !parameters_.strings_switch &&
-        metric_.mode_ == ExpansionMode::NoExpansion && !IC_output_switch_) {
+        metric_.mode_ == ExpansionMode::NoExpansion && !IC_switch_) {
       std::string err_msg = conserved_initial_.report_deviations(ensembles_);
       if (!err_msg.empty()) {
         logg[LExperiment].error() << err_msg;
@@ -2694,17 +2730,18 @@ void Experiment<Modus>::intermediate_output() {
       if (printout_rho_eckart_) {
         switch (dens_type_lattice_printout_) {
           case DensityType::Baryon:
-            update_lattice(jmu_B_lat_.get(), lat_upd, DensityType::Baryon,
-                           density_param_, ensembles_, false);
+            update_lattice_accumulating_ensembles(
+                jmu_B_lat_.get(), lat_upd, DensityType::Baryon, density_param_,
+                ensembles_, false);
             output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                           DensityType::Baryon, *jmu_B_lat_);
             output->thermodynamics_lattice_output(*jmu_B_lat_,
                                                   computational_frame_time);
             break;
           case DensityType::BaryonicIsospin:
-            update_lattice(jmu_I3_lat_.get(), lat_upd,
-                           DensityType::BaryonicIsospin, density_param_,
-                           ensembles_, false);
+            update_lattice_accumulating_ensembles(
+                jmu_I3_lat_.get(), lat_upd, DensityType::BaryonicIsospin,
+                density_param_, ensembles_, false);
             output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                           DensityType::BaryonicIsospin,
                                           *jmu_I3_lat_);
@@ -2714,9 +2751,9 @@ void Experiment<Modus>::intermediate_output() {
           case DensityType::None:
             break;
           default:
-            update_lattice(jmu_custom_lat_.get(), lat_upd,
-                           dens_type_lattice_printout_, density_param_,
-                           ensembles_, false);
+            update_lattice_accumulating_ensembles(
+                jmu_custom_lat_.get(), lat_upd, dens_type_lattice_printout_,
+                density_param_, ensembles_, false);
             output->thermodynamics_output(ThermodynamicQuantity::EckartDensity,
                                           dens_type_lattice_printout_,
                                           *jmu_custom_lat_);
@@ -2725,8 +2762,9 @@ void Experiment<Modus>::intermediate_output() {
         }
       }
       if (printout_tmn_ || printout_tmn_landau_ || printout_v_landau_) {
-        update_lattice(Tmn_.get(), lat_upd, dens_type_lattice_printout_,
-                       density_param_, ensembles_, false);
+        update_lattice_accumulating_ensembles(
+            Tmn_.get(), lat_upd, dens_type_lattice_printout_, density_param_,
+            ensembles_, false);
         if (printout_tmn_) {
           output->thermodynamics_output(ThermodynamicQuantity::Tmn,
                                         dens_type_lattice_printout_, *Tmn_);
@@ -2813,8 +2851,9 @@ void Experiment<Modus>::update_potentials() {
       }
     }
     if (potentials_->use_coulomb()) {
-      update_lattice(jmu_el_lat_.get(), LatticeUpdate::EveryTimestep,
-                     DensityType::Charge, density_param_, ensembles_, true);
+      update_lattice_accumulating_ensembles(
+          jmu_el_lat_.get(), LatticeUpdate::EveryTimestep, DensityType::Charge,
+          density_param_, ensembles_, true);
       for (size_t i = 0; i < EM_lat_->size(); i++) {
         ThreeVector electric_field = {0., 0., 0.};
         ThreeVector position = jmu_el_lat_->cell_center(i);
@@ -2946,7 +2985,7 @@ void Experiment<Modus>::final_output() {
     for (const Particles &particles : ensembles_) {
       total_particles += particles.size();
     }
-    if (IC_output_switch_ && (total_particles == 0)) {
+    if (IC_switch_ && (total_particles == 0)) {
       const double initial_system_energy_plus_Pythia_violations =
           conserved_initial_.momentum().x0() + total_energy_violated_by_Pythia_;
       const double fraction_of_total_system_energy_removed =

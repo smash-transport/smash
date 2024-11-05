@@ -1408,10 +1408,12 @@ class Configuration {
       const std::string s = operator std::string();
       if (s == "Constant_Tau") {
         return FluidizationType::ConstantTau;
+      } else if (s == "Dynamic") {
+        return FluidizationType::Dynamic;
       }
       throw IncorrectTypeInAssignment("The value for key \"" +
                                       std::string(key_) + "\" should be " +
-                                      "\"Constant_Tau\".");
+                                      "\"Constant_Tau\" or \"Dynamic\".");
     }
 
     /**
@@ -1435,6 +1437,41 @@ class Configuration {
       throw IncorrectTypeInAssignment("The value for key \"" +
                                       std::string(key_) + "\" should be " +
                                       "\"Yes\", \"No\" or \"IfNotEmpty\".");
+    }
+
+    /**
+     * Set FluidizableProcessesBitSet from configuration values.
+     *
+     * \return FluidizableProcessesBitSet with all included reaction types.
+     * \throw IncorrectTypeInAssignment in case a reaction type that is not
+     * available is provided as a configuration value.
+     */
+    operator FluidizableProcessesBitSet() const {
+      const std::vector<std::string> v = operator std::vector<std::string>();
+      FluidizableProcessesBitSet s;
+      for (const auto &x : v) {
+        if (x == "All") {
+          s.set();
+          break;
+        } else if (x == "Elastic") {
+          s.set(IncludedFluidizableProcesses::From_Elastic);
+        } else if (x == "Decay") {
+          s.set(IncludedFluidizableProcesses::From_Decay);
+        } else if (x == "Inelastic") {
+          s.set(IncludedFluidizableProcesses::From_Inelastic);
+        } else if (x == "SoftString") {
+          s.set(IncludedFluidizableProcesses::From_SoftString);
+        } else if (x == "HardString") {
+          s.set(IncludedFluidizableProcesses::From_HardString);
+        } else {
+          throw IncorrectTypeInAssignment(
+              "The value for key \"" + std::string(key_) +
+              "\" should be \"All\", \"Elastic\", \"Decay\", "
+              "\"Inelastic\", \"SoftString\", \"HardString\", "
+              "or any combination of these.");
+        }
+      }
+      return s;
     }
   };
 

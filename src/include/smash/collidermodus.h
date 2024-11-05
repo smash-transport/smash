@@ -8,14 +8,17 @@
 #define SRC_INCLUDE_SMASH_COLLIDERMODUS_H_
 
 #include <cstring>
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "alphaclusterednucleus.h"
 #include "deformednucleus.h"
 #include "forwarddeclarations.h"
 #include "fourvector.h"
+#include "icparameters.h"
 #include "interpolation.h"
 #include "modusdefault.h"
 #include "nucleus.h"
@@ -135,20 +138,42 @@ class ColliderModus : public ModusDefault {
   bool calculation_frame_is_fixed_target() const {
     return frame_ == CalculationFrame::FixedTarget ? true : false;
   }
-  /// \return Proper time of the hypersurface for IC
-  std::optional<double> proper_time() const {
-    return IC_parameters_.proper_time;
+  /// \return Whether this is an initial condition for hydrodynamics
+  bool is_IC_for_hybrid() const { return IC_for_hybrid_; }
+  /// \return Parameters used in initial conditions for hydrodynamics
+  const InitialConditionParameters &IC_parameters() const {
+    return *IC_parameters_;
   }
-  /// \return Lower bound on proper time of the hypersurface for IC
-  std::optional<double> lower_bound() const {
-    return IC_parameters_.lower_bound;
+  /// \return The background energy density map
+  const std::map<int32_t, double> &fluid_background() const {
+    return *fluid_background_;
   }
-  /// \return Maximum rapidity for IC
-  std::optional<double> rapidity_cut() const {
-    return IC_parameters_.rapidity_cut;
+  /// \return Lattice where fluidization is evaluated
+  const RectangularLattice<EnergyMomentumTensor> &fluid_lattice() const {
+    return *fluid_lattice_;
   }
-  /// \return Maximum transverse momentum for IC
-  std::optional<double> pT_cut() const { return IC_parameters_.pT_cut; }
+  /**
+   * Build lattice of energy momentum tensor. After t>25 fm, the lattice
+   * grows at every 5 \unit{fm} to accommodate for the system expansion.
+   *
+   * \param[in] t Current time.
+   * \param[in] ensembles Only the first Particles element is actually used.
+   * \param[in] dens_par Contains parameters for density smearing.
+   */
+  void build_fluidization_lattice(double t,
+                                  const std::vector<Particles> &ensembles,
+                                  const DensityParameters &dens_par);
+
+  /**
+   * Update the background energy density due to hydrodynamics, to be
+   * called by an external manager.
+   *
+   * \param[in] background Map with particle indices as keys and their
+   * corresponding background energy density as values.
+   */
+  void update_fluidization_background(std::map<int32_t, double> &&background) {
+    *fluid_background_ = std::move(background);
+  }
 
   /**
    * \ingroup exception
@@ -159,24 +184,6 @@ class ColliderModus : public ModusDefault {
   };
 
  private:
-  /**
-   * At the moment there are two ways to specify input for initial conditions in
-   * the configuration, one of which is deprecated and will be removed in a next
-   * release. For the moment, these variables are of type
-   * `std::optional<double>` to *allow* for the key duplication consistently.
-   * When more types of IC are implemented in the future, this will allow
-   * setting only the appropriate parameters.
-   */
-  struct InitialConditionParameters {
-    /// Hypersurface proper time in IC
-    std::optional<double> proper_time = std::nullopt;
-    /// Lower bound for proper time in IC
-    std::optional<double> lower_bound = std::nullopt;
-    /// Rapidity cut on hypersurface in IC
-    std::optional<double> rapidity_cut = std::nullopt;
-    /// Transverse momentum cut on hypersurface IC
-    std::optional<double> pT_cut = std::nullopt;
-  };
   /**
    * Projectile.
    *
@@ -248,6 +255,8 @@ class ColliderModus : public ModusDefault {
   double impact_ = 0.;
   /// Whether the reaction plane should be randomized
   bool random_reaction_plane_;
+  /// Whether the particles will serve as initial conditions for hydrodynamics
+  bool IC_for_hybrid_ = false;
   /// Method used for sampling of impact parameter.
   Sampling sampling_ = InputKeys::modi_collider_impact_sample.default_value();
   /// Minimum value of impact parameter.
@@ -292,7 +301,15 @@ class ColliderModus : public ModusDefault {
    */
   double velocity_target_ = 0.0;
   /// Plain Old Data type to hold parameters for initial conditions
-  InitialConditionParameters IC_parameters_;
+  std::unique_ptr<InitialConditionParameters> IC_parameters_;
+  /// Energy-momentum tensor lattice for dynamic fluidization
+  std::unique_ptr<RectangularLattice<EnergyMomentumTensor>> fluid_lattice_ =
+      nullptr;
+  /**
+   * Energy density background from hydrodynamic evolution, with particle
+   * indices as keys. Useful when using SMASH as a library.
+   */
+  std::unique_ptr<std::map<int32_t, double>> fluid_background_ = nullptr;
 
   /**
    * Get the frame dependent velocity for each nucleus, using
