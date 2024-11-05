@@ -20,31 +20,60 @@
 
 namespace smash {
 
-struct ToBinary {
-    using type = std::vector<char>; // Use std::vector<char>
 
+/**
+ * Structure to convert a given value into binary format, such that all methods
+ * return a \c std::vector<char>.
+ */
+struct ToBinary {
+    /// Return type of this converter.
+    using type = std::vector<char>; 
+
+    /**
+     * Converts an integer to binary format.
+     *
+     * \param[in] value number to convert
+     * \return a vector of char representing the binary format of the integer
+     */
     type as_integer(int value) const {
         type binary_data(sizeof(int)); // Create a vector of the size of an integer
         std::memcpy(binary_data.data(), &value, sizeof(int)); // Copy the integer value into the vector
         return binary_data; // Return the binary data as a vector of char
     }
 
+    /**
+     * Converts a double to binary format.
+     *
+     * \param[in] value number to convert
+     * \return a vector of char representing the binary format of the double
+     */
     type as_double(double value) const {
         type binary_data(sizeof(double)); // Create a vector of the size of a double
         std::memcpy(binary_data.data(), &value, sizeof(double)); // Copy the double value into the vector
         return binary_data; // Return the binary data as a vector of char
     }
 
+    /**
+     * Converts a double to binary format, intended for precise representation.
+     *
+     * \param[in] value number to convert
+     * \return a vector of char representing the binary format of the double
+     */
     type as_precise_double(double value) const {
         return as_double(value); // For precise double, simply call as_double
     }
 
+    /**
+     * Converts a string to binary format.
+     *
+     * \param[in] str string to convert
+     * \return a vector of char representing the binary format of the string
+     */
     type as_string(const std::string& str) const {
-        type binary_data(str.begin(), str.end()); // Convert string to vector of char
+        type binary_data(str.begin(), str.end()); // Create a vector from string data
         return binary_data; // Return the binary data as a vector of char
     }
 };
-
 
 
 /**
@@ -251,7 +280,11 @@ class OutputFormatter {
       }
     }
   }
-
+/**
+ * Produced a chunk of binary representing a particle line for the output file.
+ * \param[in] p particle whose information is to be written.
+ * \return string with formatted data sperated by a space.
+ */
 typename Converter::type binary_chunk(const ParticleData& p) {
     return std::accumulate(
         std::begin(getters_), std::end(getters_), std::vector<char>{},

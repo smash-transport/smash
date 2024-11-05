@@ -44,6 +44,11 @@ class BinaryOutputBase : public OutputInterface {
                             
                             );
 
+  /** 
+   * Write several bytes to the binary output.
+   * \param[in] chunk vector of bytes to be written.
+   * 
+  */
   void write(const std::vector<char>& chunk);
 
 
@@ -128,6 +133,7 @@ class BinaryOutputBase : public OutputInterface {
   const uint16_t format_version_ = 10;
   /// Option for extended output
   bool extended_;
+  /// If custom is used extended field is set to:
   const uint16_t format_custom = 2;
 
   OutputFormatter<ToBinary> formatter_;
