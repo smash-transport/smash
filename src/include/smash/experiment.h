@@ -814,7 +814,7 @@ void Experiment<Modus>::create_output(const std::string &format,
 #else
         logg[LExperiment].error(
             "Requested HepMC_treeroot output not available, "
-            "ROOT or HepMC3 ROOTIO missing or not found by cmake.");
+            "ROOT or HepMC3_ROOTIO missing or not found by cmake.");
 #endif
       }
     } else if (content == "Collisions") {
@@ -828,7 +828,7 @@ void Experiment<Modus>::create_output(const std::string &format,
 #else
         logg[LExperiment].error(
             "Requested HepMC_treeroot output not available, "
-            "ROOT or HepMC3 ROOTIO missing or not found by cmake.");
+            "ROOT or HepMC3_ROOTIO missing or not found by cmake.");
 #endif
       }
     } else {
