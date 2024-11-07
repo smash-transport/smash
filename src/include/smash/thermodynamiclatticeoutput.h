@@ -65,6 +65,10 @@ class ThermodynamicLatticeOutput : public OutputInterface {
    * \param[in] tq Thermodynamic quantity to deal with
    * \param[in] dens_type Density type for the reference frame.
    * \param[in] lattice Specialized Lattice for DensityOnLattice
+   *
+   * \note This method takes the event number and not the ensemble number as the
+   * lattice is meant to contain an average over ensembles if multiple ensembles
+   * are used.
    */
   void at_eventstart(
       const int event_number, const ThermodynamicQuantity tq,
@@ -77,6 +81,10 @@ class ThermodynamicLatticeOutput : public OutputInterface {
    * \param[in] tq Thermodynamic quantity to deal with.
    * \param[in] dens_type Density type for the reference frame.
    * \param[in] lattice Specialized Lattice for EnergyMomentumTensor
+   *
+   * \note This method takes the event number and not the ensemble number as the
+   * lattice is meant to contain an average over ensembles if multiple ensembles
+   * are used.
    */
   void at_eventstart(
       const int event_number, const ThermodynamicQuantity tq,
