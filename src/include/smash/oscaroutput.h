@@ -80,20 +80,20 @@ class OscarOutput : public OutputInterface {
   /**
    * Writes the initial particle information of an event to the oscar output.
    * \param[in] particles Current list of all particles.
-   * \param[in] event_number Number of event.
+   * \param[in] event_label Numbers of event/ensemble.
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles, const int event_number,
+  void at_eventstart(const Particles &particles, const EventLabel &event_label,
                      const EventInfo &event) override;
 
   /**
    * Writes the final particle information of an event to the oscar output.
    * \param[in] particles Current list of particles.
-   * \param[in] event_number Number of event.
+   * \param[in] event_label Numbers of event/ensemble.
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventend(const Particles &particles, const int event_number,
-                   const EventInfo &) override;
+  void at_eventend(const Particles &particles, const EventLabel &event_label,
+                   const EventInfo &event) override;
 
   /**
    * Writes a interaction prefix line and a line for every incoming and
@@ -109,11 +109,13 @@ class OscarOutput : public OutputInterface {
    * \param[in] particles Current list of particles.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
+   * \param[in] event_label Numbers of event/ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
                             const DensityParameters &dens_param,
+                            const EventLabel &event_label,
                             const EventInfo &event) override;
 
  private:
@@ -129,9 +131,6 @@ class OscarOutput : public OutputInterface {
    * \param[in] particles List of particles to be written
    */
   void write(const Particles &particles);
-
-  /// Keep track of event number.
-  int current_event_ = 0;
 
   /// Full filepath of the output file.
   RenamingFilePtr file_;

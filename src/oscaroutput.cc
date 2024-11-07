@@ -112,11 +112,11 @@ OscarOutput<Format, Contents>::OscarOutput(
     std::fprintf(file_.get(), "# %s\n# %s\n# %s\n", format_name.c_str(),
                  oscar_name.c_str(), SMASH_VERSION);
     std::fprintf(file_.get(), "# Block format:\n");
-    std::fprintf(file_.get(), "# nin nout event_number\n");
+    std::fprintf(file_.get(), "# nin nout event_number ensemble_number\n");
     std::fprintf(file_.get(), "# %s\n", formatter_.quantities_line().c_str());
-    std::fprintf(file_.get(),
-                 "# End of event: 0 0 event_number"
-                 " impact_parameter\n");
+    std::fprintf(
+        file_.get(),
+        "# End of event: 0 0 event_number ensemble_number impact_parameter\n");
     std::fprintf(file_.get(), "#\n");
   }
 }
@@ -130,57 +130,62 @@ inline void OscarOutput<Format, Contents>::write(const Particles &particles) {
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
-                                                  const int event_number,
+                                                  const EventLabel &event_label,
                                                   const EventInfo &) {
-  current_event_ = event_number;
   // We do not want the inital particle list or number to be printed in case of
   // IC output
   if (Contents & OscarAtEventstart && !(Contents & OscarParticlesIC)) {
     if (Format == ASCIICustom || Format == OscarFormat2013 ||
         Format == OscarFormat2013Extended) {
-      std::fprintf(file_.get(), "# event %i in %zu\n", event_number,
+      std::fprintf(file_.get(), "# event %i ensemble %i in %zu\n",
+                   event_label.event_number, event_label.ensemble_number,
                    particles.size());
     } else {
       /* OSCAR line prefix : initial particles; final particles; event id
        * First block of an event: initial = 0, final = number of particles
        */
       const size_t zero = 0;
-      std::fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
-                   event_number);
+      std::fprintf(file_.get(), "%zu %zu %i %i\n", zero, particles.size(),
+                   event_label.event_number, event_label.ensemble_number);
     }
     write(particles);
   } else if (Contents & OscarParticlesIC) {
     if (Format == ASCIICustom || Format == OscarFormat2013 ||
         Format == OscarFormat2013Extended) {
-      std::fprintf(file_.get(), "# event %i start\n", event_number);
+      std::fprintf(file_.get(), "# event %i ensemble %i start\n",
+                   event_label.event_number, event_label.ensemble_number);
     } else if (Format == OscarFormat1999) {
       const size_t zero = 0;
-      std::fprintf(file_.get(), "%zu %zu %i\n", zero, zero, event_number);
+      std::fprintf(file_.get(), "%zu %zu %i %i\n", zero, zero,
+                   event_label.event_number, event_label.ensemble_number);
     }
   }
 }
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
-                                                const int event_number,
+                                                const EventLabel &event_label,
                                                 const EventInfo &event) {
   if (Format == ASCIICustom || Format == OscarFormat2013 ||
       Format == OscarFormat2013Extended) {
     if (Contents & OscarParticlesAtEventend ||
         (Contents & OscarParticlesAtEventendIfNotEmpty && !event.empty_event)) {
-      std::fprintf(file_.get(), "# event %i out %zu\n", event_number,
+      std::fprintf(file_.get(), "# event %i ensemble %i out %zu\n",
+                   event_label.event_number, event_label.ensemble_number,
                    particles.size());
       write(particles);
     }
     // Comment end of an event
     if (!(Contents & OscarParticlesIC)) {
       const char *empty_event_str = event.empty_event ? "no" : "yes";
-      std::fprintf(
-          file_.get(),
-          "# event %i end 0 impact %7.3f scattering_projectile_target %s\n",
-          event_number, event.impact_parameter, empty_event_str);
+      std::fprintf(file_.get(),
+                   "# event %i ensemble %i end 0 impact %7.3f "
+                   "scattering_projectile_target %s\n",
+                   event_label.event_number, event_label.ensemble_number,
+                   event.impact_parameter, empty_event_str);
     } else {
-      std::fprintf(file_.get(), "# event %i end\n", event_number);
+      std::fprintf(file_.get(), "# event %i ensemble %i end\n",
+                   event_label.event_number, event_label.ensemble_number);
     }
   } else {
     /* OSCAR line prefix : initial particles; final particles; event id
@@ -189,12 +194,13 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
     const size_t zero = 0;
     if (Contents & OscarParticlesAtEventend ||
         (Contents & OscarParticlesAtEventendIfNotEmpty && !event.empty_event)) {
-      std::fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
-                   event_number);
+      std::fprintf(file_.get(), "%zu %zu %i %i\n", particles.size(), zero,
+                   event_label.event_number, event_label.ensemble_number);
       write(particles);
     }
     // Null interaction marks the end of an event
-    std::fprintf(file_.get(), "%zu %zu %i %7.3f\n", zero, zero, event_number,
+    std::fprintf(file_.get(), "%zu %zu %i %i %7.3f\n", zero, zero,
+                 event_label.event_number, event_label.ensemble_number,
                  event.impact_parameter);
   }
   // Flush to disk
@@ -254,16 +260,18 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_intermediate_time(
     const Particles &particles, const std::unique_ptr<Clock> &,
-    const DensityParameters &, const EventInfo &) {
+    const DensityParameters &, const EventLabel &event_label,
+    const EventInfo &) {
   if (Contents & OscarTimesteps) {
     if (Format == ASCIICustom || Format == OscarFormat2013 ||
         Format == OscarFormat2013Extended) {
-      std::fprintf(file_.get(), "# event %i out %zu\n", current_event_,
+      std::fprintf(file_.get(), "# event %i ensemble %i out %zu\n",
+                   event_label.event_number, event_label.ensemble_number,
                    particles.size());
     } else {
       const size_t zero = 0;
-      std::fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
-                   current_event_);
+      std::fprintf(file_.get(), "%zu %zu %i %i\n", particles.size(), zero,
+                   event_label.event_number, event_label.ensemble_number);
     }
     write(particles);
   }
@@ -310,7 +318,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * -# SMASH version
  *
  * \n
- * **Extended Output: Header** \n
+ * **Extended Output: Header**
+ *
  * If desired, the OSCAR2013 output can be extended
  * by additional particle properties. This requires enabling the extended
  * output in the configuration file, see the \key Extended switch in
@@ -330,36 +339,39 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * </div>
  *
  * \n
- * **Output block header**\n
- * Just as the OSCAR1999 format, the OSCAR2013 format is based on a block
- * structure. The beginning of a new block is marked by either the start of a
- * new event or a new intermediate output (at the next timestep). \n
- * \n
+ * **Output block header**
+ *
+ * The OSCAR2013 format is based on a block structure. The beginning of a new
+ * block is marked by either the start of a new event or a new intermediate
+ * output (at the next timestep).
+ *
  * Output block header for a new event:
  * \code
- * # event ev_num in Nparticles
+ * # event ev_num ensemble ens_num in Nparticles
  * \endcode
  * Where
  * \li \key ev_num: Event number
+ * \li \key ens_num: Ensemble number
  * \li \key Nparticles: Number of particles initialized at the beginning of
  * the event
  *
- * Note that 'event' and 'in' are no variables, but words that are printed in
- * the header. \n
- * \n
+ * Note that `event`, `ensemble` and `in` are no variables, but words that are
+ * printed in the header.
+ *
  * Output block header for an intermediate output:
  * \code
- * # event ev_num out Nparticles
+ * # event ev_num ensemble ens_num out Nparticles
  * \endcode
  * Where
  * \li \key ev_num: Event number
+ * \li \key ens_num: Ensemble number
  * \li \key Nparticles: Number of particles at the end of the timestep
  *
- * Note that 'event' and 'out' are no variables, but words that are printed in
- * the header. \n
- * \n
+ * Note that `event`, `ensemble` and `out` are no variables, but words that are
+ * printed in the header.
  *
- * **Particle line**\n
+ * **Particle line**
+ *
  * The particle lines are formatted as follows:
  * \code
  * t x y z mass p0 px py pz pdg ID charge
@@ -445,9 +457,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # final_id_p_x
  * # smash <version>
  * # Block format:
- * # nin nout event_number
+ * # nin nout event_number ensemble_number
  * # id pdg 0 px py pz p0 mass x y z t
- * # End of event: 0 0 event_number impact_parameter
+ * # End of event: 0 0 event_number ensemble_number impact_parameter
  * #
  * \endcode
  * The header consists of 8 lines starting with '#', of which the last one
@@ -458,17 +470,18 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * -# The SMASH version with which the oputput was generated
  * -# - 7. Info on the block structure
  *
- * \n
- * **Output block header** \n
+ * **Output block header**
+ *
  * Each output block starts with a line indicating the numbers of ingoing and
- * outgoing particles as well the number of the event.
+ * outgoing particles as well the number of the event and ensemble.
  * \code
- * nin nout event_number
+ * nin nout event_number ensemble_number
  * \endcode
  * With
  * \li \key nin: Number of ingoing particles
  * \li \key nout: Number of outgoing particles
  * \li \key event_number: Number of the event
+ * \li \key ensemble_number: Number of the ensemble
  *
  * For initial timesteps, (nin, nout) = (0, Nparticles), while (nin, nout) =
  * (Nparticles, 0) for intermediate and final timesteps. Nparticles is the
@@ -477,8 +490,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * elastic scatterings. The output block header is followed by Nparticles
  * particle lines. In the Initial_Conditions output, Nparticles is always 0.
  *
- * \n
- * **Particle line** \n
+ * **Particle line**
+ *
  * The particle lines are formatted as follows:
  * \code
  * id pdg 0 px py pz p0 mass x y z t
@@ -487,15 +500,16 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * Apart from the order, the entries are identical to those of the OSCAR2013
  * output.
  *
- * \n
- * **Event end line** \n
+ * **Event end line**
+ *
  * The end of an event is indicated by the following line:
  * \code
- * 0 0 event_number impact_parameter
+ * 0 0 event_number ensemble_number impact_parameter
  * \endcode
  *
  * With
  * \li \key event_number: Number of the event
+ * \li \key ensemble_number: Number of the ensemble
  * \li \key impact_parameter: Impact parameter of the collisions. In case of
  * a box or sphere setup, this value is 0.0.
  *
