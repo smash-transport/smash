@@ -62,18 +62,19 @@ TEST(vtkoutputfile) {
   /* Create output object */
   std::unique_ptr<VtkOutput> vtkop =
       std::make_unique<VtkOutput>(testoutputpath, "Particles", out_par);
-  int event_id = 0;
+  const EventLabel event_id = {0, 0};
   /* Initial output */
   EventInfo event = Test::default_event_info();
   vtkop->at_eventstart(particles, event_id, event);
-  const std::filesystem::path outputfilename = "pos_ev00000_tstep00000.vtk";
+  const std::filesystem::path outputfilename =
+      "pos_ev00000_ens00000_tstep00000.vtk";
   const std::filesystem::path outputfilepath = testoutputpath / outputfilename;
   VERIFY(std::filesystem::exists(outputfilepath));
   /* Time step output */
   DensityParameters dens_par(Test::default_parameters());
-  vtkop->at_intermediate_time(particles, nullptr, dens_par, event);
+  vtkop->at_intermediate_time(particles, nullptr, dens_par, event_id, event);
   const std::filesystem::path outputfile2path =
-      testoutputpath / "pos_ev00000_tstep00001.vtk";
+      testoutputpath / "pos_ev00000_ens00000_tstep00001.vtk";
   VERIFY(std::filesystem::exists(outputfile2path));
 
   {

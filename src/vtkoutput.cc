@@ -46,7 +46,7 @@ VtkOutput::~VtkOutput() {}
  * every period of time \f$ \Delta t \f$, where \f$ \Delta t \f$ is regulated
  * by option (see \ref doxypage_input_conf_general). For every new output moment
  * a separate VTK file is written. File names are constructed as follows:
- * pos_ev<event>_tstep<output_number>.vtk.
+ * `pos_ev<event>_ens<ensemble>_tstep<output_number>.vtk`.
  *
  * Files contain particle coordinates, momenta, PDG codes, cross-section
  * scaling factors, ID, number of collisions baryon number, strangeness and
@@ -60,38 +60,45 @@ VtkOutput::~VtkOutput() {}
  **/
 
 void VtkOutput::at_eventstart(const Particles &particles,
-                              const int event_number, const EventInfo &) {
-  vtk_output_counter_ = 0;
+                              const EventLabel &event_label,
+                              const EventInfo &) {
   vtk_density_output_counter_ = 0;
   vtk_tmn_output_counter_ = 0;
   vtk_tmn_landau_output_counter_ = 0;
   vtk_v_landau_output_counter_ = 0;
   vtk_fluidization_counter_ = 0;
 
-  current_event_ = event_number;
+  current_event_ = event_label.event_number;
+  current_ensemble_ = event_label.ensemble_number;
+  vtk_output_counter_[counter_key()] = 0;
   if (!is_thermodynamics_output_ && !is_fields_output_) {
     write(particles);
-    vtk_output_counter_++;
+    vtk_output_counter_[counter_key()]++;
   }
 }
 
 void VtkOutput::at_eventend(const Particles & /*particles*/,
-                            const int /*event_number*/, const EventInfo &) {}
+                            const EventLabel & /*event_number*/,
+                            const EventInfo &) {}
 
 void VtkOutput::at_intermediate_time(const Particles &particles,
                                      const std::unique_ptr<Clock> &,
                                      const DensityParameters &,
+                                     const EventLabel &event_label,
                                      const EventInfo &) {
+  current_event_ = event_label.event_number;
+  current_ensemble_ = event_label.ensemble_number;
   if (!is_thermodynamics_output_ && !is_fields_output_) {
     write(particles);
-    vtk_output_counter_++;
+    vtk_output_counter_[counter_key()]++;
   }
 }
 
 void VtkOutput::write(const Particles &particles) {
-  char filename[32];
-  snprintf(filename, sizeof(filename), "pos_ev%05i_tstep%05i.vtk",
-           current_event_, vtk_output_counter_);
+  char filename[64];
+  snprintf(filename, sizeof(filename), "pos_ev%05i_ens%05i_tstep%05i.vtk",
+           current_event_, current_ensemble_,
+           vtk_output_counter_[counter_key()]);
   FilePtr file_{std::fopen((base_path_ / filename).native().c_str(), "w")};
 
   /* Legacy VTK file format */
@@ -168,11 +175,10 @@ void VtkOutput::write(const Particles &particles) {
 
 /*!\Userguide
  * \page doxypage_output_vtk_lattice
- * Density on the lattice can be printed out in the VTK format of
- * structured grid. At every output moment a new vtk file is created.
- * The name format is
- * \<density_name\>_\<event_number\>_tstep\<number_of_output_moment\>.vtk,
- * Files can be opened directly with ParaView (http://paraview.org).
+ * Density on the lattice can be printed out in the VTK format of structured
+ * grid. At every output moment a new vtk file is created. The name format is
+ * `<density_name>_<event_number>_tstep<number_of_output_moment>.vtk`. Files can
+ * be opened directly with <a href="http://paraview.org">ParaView</a>.
  */
 
 template <typename T>
@@ -258,11 +264,9 @@ void VtkOutput::thermodynamics_output(
  * energy-momentum tensor in Landau rest frame \f$T^{\mu\nu}_L \f$ and
  * velocity of Landau rest frame \f$v_L\f$ on the lattice can be printed out
  * in the VTK format of structured grid. At every output moment a new vtk file
- * is created.
- * The name format is
- * \<quantity\>_\<event_number\>_tstep\<number_of_output_moment\>.vtk. Files can
- * be opened
- * directly with ParaView (http://paraview.org).
+ * is created. The name format is
+ * `<quantity>_<event_number>_tstep<number_of_output_moment>.vtk`. Files can
+ * be opened directly with <a href="http://paraview.org">ParaView</a>.
  *
  * For configuring the output see \ref input_output_content_specific_
  * "content-specific output options".
