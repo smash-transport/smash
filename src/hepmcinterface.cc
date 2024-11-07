@@ -55,15 +55,20 @@ HepMcInterface::HepMcInterface(const std::string& name, const bool full_event)
 }
 
 void HepMcInterface::at_eventstart(const Particles& particles,
-                                   const int event_number,
+                                   const EventLabel& event_label,
                                    const EventInfo& event) {
+  if (event.n_ensembles != 1) {
+    throw std::invalid_argument(
+        "HepMC output is not available with multiple parallel ensembles.");
+  }
+
   // Clear event and mapping and set event number
   clear();
 
   // Set header stuff on event
   ion_->impact_parameter = event.impact_parameter;
   xs_->set_cross_section(1, 1);  // Dummy values
-  event_.set_event_number(event_number);
+  event_.set_event_number(event_label.event_number);
   event_.set_heavy_ion(ion_);
 
   // Create IP only if final state
@@ -162,9 +167,12 @@ void HepMcInterface::at_interaction(const Action& action,
   }
 }
 
-void HepMcInterface::at_eventend(const Particles& particles,
-                                 const int32_t /*event_number*/,
+void HepMcInterface::at_eventend(const Particles& particles, const EventLabel&,
                                  const EventInfo& event) {
+  if (event.n_ensembles != 1) {
+    throw std::invalid_argument(
+        "HepMC output is not available with multiple parallel ensembles.");
+  }
   // We evaluate if it is a heavy ion collision event
   bool is_coll = (event.impact_parameter >= 0.0);
   // In case this was an empty event
