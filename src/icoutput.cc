@@ -19,6 +19,8 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 /*!\Userguide
  * \page doxypage_output_initial_conditions
+ *
+ * ---
  * The ASCII initial conditions output (SMASH_IC.dat) contains a list of
  * particles on a hypersurface of constant proper time. This output is formatted
  * such that it is directly compatible with the
@@ -33,7 +35,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  *
  * \n
  * The ASCII initial conditions output is formatted as follows:
- * \n
+ *
  * **Header**
  * \code
  * # **smash_version** initial conditions: hypersurface of constant proper time
@@ -49,17 +51,19 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * **Output block header**
  *
  * The ASCII initial conditions output is, similar to the OSCAR output, based on
- * a block structure, where each block consists of 1 event. The header for a
- * new event is structured as follows:
+ * a block structure, where each block consists of 1 event (multiple ensembles,
+ * if used, are separated as well). The header for a new event is structured as
+ * follows:
  * \code
- * # event ev_num start
+ * # event ev_num ensemble ens_num start
  * \endcode
  * where
  * \li \key ev_num: The number of the current event
+ * \li \key ens_num: The number of the current ensemble
  *
- * Note that 'event' and 'start' are no variables, but words that are
- * printed in the header. \n
- * \n
+ * Note that 'event', 'ensemble' and 'start' are not variables, but words that
+ * are printed in the header.
+ *
  * **Particle line**
  *
  * The particle lines are formatted as follows:
@@ -84,13 +88,14 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  *
  * The end of an event is indicated by the following line:
  * \code
- * # event ev_num end
+ * # event ev_num  ensemble ens_num end
  * \endcode
  * where
  * \li \key ev_num: The number of the current event
+ * \li \key ens_num: The number of the current ensemble
  *
- * Note that 'event' and 'end' are no variables, but words that are
- * printed in the header. \n
+ * Note that 'event', 'ensemble' and 'start' are not variables, but words that
+ * are printed in the header.
  *
  * \note
  * If SMASH is run with test particles (necessary e.g. for potentials), the
@@ -117,14 +122,17 @@ ICOutput::ICOutput(const std::filesystem::path &path, const std::string &name,
 
 ICOutput::~ICOutput() {}
 
-void ICOutput::at_eventstart(const Particles &, const int event_number,
+void ICOutput::at_eventstart(const Particles &, const EventLabel &event_label,
                              const EventInfo &) {
-  std::fprintf(file_.get(), "# event %i start\n", event_number);
+  std::fprintf(file_.get(), "# event %i ensemble %i start\n",
+               event_label.event_number, event_label.ensemble_number);
 }
 
-void ICOutput::at_eventend(const Particles &particles, const int event_number,
+void ICOutput::at_eventend(const Particles &particles,
+                           const EventLabel &event_label,
                            const EventInfo &event) {
-  std::fprintf(file_.get(), "# event %i end\n", event_number);
+  std::fprintf(file_.get(), "# event %i ensemble %i end\n",
+               event_label.event_number, event_label.ensemble_number);
 
   // If the runtime is too short some particles might not yet have
   // reached the hypersurface. Warning is printed.
@@ -139,7 +147,7 @@ void ICOutput::at_eventend(const Particles &particles, const int event_number,
 void ICOutput::at_intermediate_time(const Particles &,
                                     const std::unique_ptr<Clock> &,
                                     const DensityParameters &,
-                                    const EventInfo &) {
+                                    const EventLabel &, const EventInfo &) {
   // Dummy, but virtual function needs to be declared.
 }
 
