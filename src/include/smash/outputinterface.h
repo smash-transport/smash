@@ -61,6 +61,23 @@ struct EventInfo {
 /**
  * \ingroup output
  *
+ * \brief Structure to contain information about the event/ensemble numbering
+ *
+ * \anchor event_label
+ * This structure is intended to hold and conveniently pass information to
+ * create a unique label for each block of output about a given ensemble of a
+ * given event.
+ */
+struct EventLabel {
+  /// The number of the event
+  int32_t event_number;
+  /// The number of the ensemble
+  int32_t ensemble_number;
+};
+
+/**
+ * \ingroup output
+ *
  * \brief Abstraction of generic output
  *
  * Any output should inherit this class. It provides virtual methods that will
@@ -84,6 +101,12 @@ struct EventInfo {
  * as irrelevant for the empty implementation. However, every child class which
  * overrides some methods documents them in detail. Refer to them for further
  * information.
+ *
+ * \attention Some methods take an \c EventLabel parameter and some just an
+ * integer. The former contains both the number of event and the number of
+ * ensemble while the latter is meant to be the number of the event, only.
+ * Passing the number of event only is meant to emphasise that the method will
+ * average physics quantities over different ensembles, when multiple are used.
  */
 class OutputInterface {
  public:
@@ -105,7 +128,8 @@ class OutputInterface {
    * Output launched at event start after initialization, when particles are
    * generated but not yet propagated.
    */
-  virtual void at_eventstart(const Particles &, const int, const EventInfo &) {}
+  virtual void at_eventstart(const Particles &, const EventLabel &,
+                             const EventInfo &) {}
 
   /**
    * Output launched at event start after initialization, when particles are
@@ -139,7 +163,8 @@ class OutputInterface {
    * Output launched at event end. Event end is determined by maximal time-step
    * option.
    */
-  virtual void at_eventend(const Particles &, const int, const EventInfo &) {}
+  virtual void at_eventend(const Particles &, const EventLabel &,
+                           const EventInfo &) {}
   /**
    * Output launched at event end. Event end is determined by maximal time-step
    * option.
@@ -157,7 +182,7 @@ class OutputInterface {
   virtual void at_intermediate_time(const Particles &,
                                     const std::unique_ptr<Clock> &,
                                     const DensityParameters &,
-                                    const EventInfo &) {}
+                                    const EventLabel &, const EventInfo &) {}
   /**
    * Output launched after every N'th timestep. N is controlled by an option.
    */
