@@ -59,7 +59,7 @@ const int RootOutput::max_buffer_size_ = 500000;
  * Every physical quantity corresponds to a separate TBranch.
  * One entry in the \c particles TTree is:
  * \code
- * ev tcounter npart test_p modus_l current_t impact_b empty_event
+ * ev ens tcounter npart test_p modus_l current_t impact_b empty_event
  * pdgcode[npart] charge[npart] t[npart] x[npart] y[npart] z[npart] p0[npart]
  * px[npart] py[npart] pz[npart] E_kinetic_tot E_fields_tot E_tot
  * \endcode
@@ -70,6 +70,7 @@ const int RootOutput::max_buffer_size_ = 500000;
  * \c tcounter and \c ev. The fields have the following meaning:
  *
  * \li \c ev is event number
+ * \li \c ens is ensemble number
  * \li \c tcounter is number of output block in a given event in terms of
  * OSCAR
  * \li \c npart is number of particles in the block
@@ -254,6 +255,7 @@ void RootOutput::init_trees() {
     particles_tree_ = new TTree("particles", "particles");
 
     particles_tree_->Branch("ev", &ev_, "ev/I");
+    particles_tree_->Branch("ens", &ens_, "ens/I");
     particles_tree_->Branch("tcounter", &tcounter_, "tcounter/I");
     particles_tree_->Branch("npart", &npart_, "npart/I");
     particles_tree_->Branch("test_p", &test_p_, "test_p/I");
@@ -309,6 +311,7 @@ void RootOutput::init_trees() {
     collisions_tree_->Branch("nout", &nout_, "nout/I");
     collisions_tree_->Branch("npart", &npart_, "npart/I");
     collisions_tree_->Branch("ev", &ev_, "ev/I");
+    collisions_tree_->Branch("ens", &ens_, "ens/I");
     collisions_tree_->Branch("weight", &wgt_, "weight/D");
     collisions_tree_->Branch("partial_weight", &par_wgt_, "partial_weight/D");
 
@@ -360,9 +363,11 @@ RootOutput::~RootOutput() {
 }
 
 void RootOutput::at_eventstart(const Particles &particles,
-                               const int event_number, const EventInfo &event) {
-  // save event number
-  current_event_ = event_number;
+                               const EventLabel &event_label,
+                               const EventInfo &event) {
+  // save event/ensemble number
+  current_event_ = event_label.event_number;
+  current_ensemble_ = event_label.ensemble_number;
 
   modus_l_ = event.modus_length;
   test_p_ = event.test_particles;
@@ -384,6 +389,7 @@ void RootOutput::at_eventstart(const Particles &particles,
 void RootOutput::at_intermediate_time(const Particles &particles,
                                       const std::unique_ptr<Clock> &,
                                       const DensityParameters &,
+                                      const EventLabel &,
                                       const EventInfo &event) {
   modus_l_ = event.modus_length;
   test_p_ = event.test_particles;
@@ -398,8 +404,7 @@ void RootOutput::at_intermediate_time(const Particles &particles,
   }
 }
 
-void RootOutput::at_eventend(const Particles &particles,
-                             const int /*event_number*/,
+void RootOutput::at_eventend(const Particles &particles, const EventLabel &,
                              const EventInfo &event) {
   modus_l_ = event.modus_length;
   test_p_ = event.test_particles;
@@ -417,7 +422,10 @@ void RootOutput::at_eventend(const Particles &particles,
   }
   /* Forced regular dump from operational memory to disk. Very demanding!
    * If program crashes written data will NOT be lost. */
-  if (current_event_ > 0 && current_event_ % autosave_frequency_ == 0) {
+  if (current_event_ > 0 &&
+      (event.n_ensembles * current_event_ + current_ensemble_) %
+              autosave_frequency_ ==
+          0) {
     if (write_particles_ || write_initial_conditions_) {
       particles_tree_->AutoSave("SaveSelf");
     }
@@ -456,6 +464,7 @@ void RootOutput::particles_to_tree(T &particles) {
   int i = 0;
 
   ev_ = current_event_;
+  ens_ = current_ensemble_;
   tcounter_ = output_counter_;
   bool exceeded_buffer_message = true;
 
@@ -520,6 +529,7 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
                                     const double weight,
                                     const double partial_weight) {
   ev_ = current_event_;
+  ens_ = current_ensemble_;
   nin_ = incoming.size();
   nout_ = outgoing.size();
   npart_ = nin_ + nout_;
