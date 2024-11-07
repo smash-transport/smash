@@ -3079,24 +3079,16 @@ void Experiment<Modus>::final_output() {
     // For thermodynamic lattice output
     if (printout_rho_eckart_) {
       if (dens_type_lattice_printout_ != DensityType::None) {
-        output->at_eventend(event_, ThermodynamicQuantity::EckartDensity,
-                            dens_type_lattice_printout_);
         output->at_eventend(ThermodynamicQuantity::EckartDensity);
       }
     }
     if (printout_tmn_) {
-      output->at_eventend(event_, ThermodynamicQuantity::Tmn,
-                          dens_type_lattice_printout_);
       output->at_eventend(ThermodynamicQuantity::Tmn);
     }
     if (printout_tmn_landau_) {
-      output->at_eventend(event_, ThermodynamicQuantity::TmnLandau,
-                          dens_type_lattice_printout_);
       output->at_eventend(ThermodynamicQuantity::TmnLandau);
     }
     if (printout_v_landau_) {
-      output->at_eventend(event_, ThermodynamicQuantity::LandauVelocity,
-                          dens_type_lattice_printout_);
       output->at_eventend(ThermodynamicQuantity::LandauVelocity);
     }
     if (printout_j_QBS_) {

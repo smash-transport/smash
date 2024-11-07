@@ -133,13 +133,6 @@ class OutputInterface {
    * Output launched at event end. Event end is determined by maximal time-step
    * option.
    */
-  virtual void at_eventend(const int, const ThermodynamicQuantity,
-                           const DensityType) {}
-
-  /**
-   * Output launched at event end. Event end is determined by maximal time-step
-   * option.
-   */
   virtual void at_eventend(const ThermodynamicQuantity) {}
 
   /**
