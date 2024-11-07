@@ -150,20 +150,20 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * Writes the initial particle information list of an event to the binary
    * output.
    * \param[in] particles Current list of all particles.
-   * \param[in] event_number Unused, needed since inherited.
+   * \param[in] event_label Numbers of event/ensemble.
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles, const int event_number,
+  void at_eventstart(const Particles &particles, const EventLabel &event_label,
                      const EventInfo &event) override;
 
   /**
    * Writes the final particle information list of an event to the binary
    * output.
    * \param[in] particles Current list of particles.
-   * \param[in] event_number Number of event.
+   * \param[in] event_label Numbers of event/ensemble.
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventend(const Particles &particles, const int32_t event_number,
+  void at_eventend(const Particles &particles, const EventLabel &event_label,
                    const EventInfo &event) override;
 
   /**
@@ -209,19 +209,19 @@ class BinaryOutputParticles : public BinaryOutputBase {
   /**
    * Writes the initial particle information of an event to the binary output.
    * \param[in] particles Current list of all particles.
-   * \param[in] event_number Unused, needed since inherited.
+   * \param[in] event_label Numbers of event/ensemble.
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles, const int event_number,
+  void at_eventstart(const Particles &particles, const EventLabel &event_label,
                      const EventInfo &event) override;
 
   /**
    * Writes the final particle information of an event to the binary output.
    * \param[in] particles Current list of particles.
-   * \param[in] event_number Number of event.
+   * \param[in] event_label Numbers of event/ensemble.
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventend(const Particles &particles, const int event_number,
+  void at_eventend(const Particles &particles, const EventLabel &event_label,
                    const EventInfo &event) override;
 
   /**
@@ -229,11 +229,13 @@ class BinaryOutputParticles : public BinaryOutputBase {
    * \param[in] particles Current list of particles.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
+   * \param[in] event_label Numbers of event/ensemble.
    * \param[in] event Event info, see \ref event_info.
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
                             const DensityParameters &dens_param,
+                            const EventLabel &event_label,
                             const EventInfo &event) override;
 
  private:
@@ -271,15 +273,16 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
    * Writes the initial particle information of an event to the binary output.
    * Function unused for IC output. Needed since inherited.
    */
-  void at_eventstart(const Particles &, const int, const EventInfo &) override;
+  void at_eventstart(const Particles &, const EventLabel &,
+                     const EventInfo &) override;
 
   /**
    * Writes the final particle information of an event to the binary output.
    * \param[in] particles Current list of particles.
-   * \param[in] event_number Number of event.
+   * \param[in] event_label Number of event/ensemble.
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventend(const Particles &particles, const int event_number,
+  void at_eventend(const Particles &particles, const EventLabel &event_label,
                    const EventInfo &event) override;
 
   /**

@@ -51,9 +51,11 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * **Output block header**\n
  * At start of event, end of event or any other particle output:
  * \code
- * char uint32_t
- * 'p'  n_part_lines
+ * char    int32_t       int32_t     uint32_t
+ * 'p'  event_number ensemble_number n_part_lines
  * \endcode
+ * \li \key event_number: Number of the event, starting with 0.
+ * \li \key ensemble_number: Number of the ensemble, starting with 0.
  * \li \c n_part_lines is the number of particle lines in the block that follows
  *
  * At interaction:
@@ -99,11 +101,12 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  *
  * **Event end line**
  * \code
- * char    uint32_t      double      char
- * 'f' event_number impact_parameter empty
+ * char   int32_t       int32_t          double      char
+ * 'f' event_number ensemble_number impact_parameter empty
  * \endcode
  * Where
  * \li \key event_number: Number of the event, starting with 0.
+ * \li \key ensemble_number: Number of the ensemble, starting with 0.
  * \li \key impact_parameter: Impact parameter [fm] of the collision in case of
  * a collider setup, 0.0 otherwise.
  * \li \key empty: 0 if there was an interaction between the projectile
@@ -208,21 +211,26 @@ BinaryOutputCollisions::BinaryOutputCollisions(
       print_start_end_(out_par.coll_printstartend) {}
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
-                                           const int, const EventInfo &) {
+                                           const EventLabel &event_label,
+                                           const EventInfo &) {
   const char pchar = 'p';
   if (print_start_end_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
+    write(event_label.event_number);
+    write(event_label.ensemble_number);
     write(particles.size());
     write(particles);
   }
 }
 
 void BinaryOutputCollisions::at_eventend(const Particles &particles,
-                                         const int32_t event_number,
+                                         const EventLabel &event_label,
                                          const EventInfo &event) {
   const char pchar = 'p';
   if (print_start_end_) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
+    write(event_label.event_number);
+    write(event_label.ensemble_number);
     write(particles.size());
     write(particles);
   }
@@ -230,7 +238,8 @@ void BinaryOutputCollisions::at_eventend(const Particles &particles,
   // Event end line
   const char fchar = 'f';
   std::fwrite(&fchar, sizeof(char), 1, file_.get());
-  write(event_number);
+  write(event_label.event_number);
+  write(event_label.ensemble_number);
   write(event.impact_parameter);
   const char empty = event.empty_event;
   write(empty);
@@ -263,22 +272,27 @@ BinaryOutputParticles::BinaryOutputParticles(const std::filesystem::path &path,
                        out_par.part_extended),
       only_final_(out_par.part_only_final) {}
 
-void BinaryOutputParticles::at_eventstart(const Particles &particles, const int,
+void BinaryOutputParticles::at_eventstart(const Particles &particles,
+                                          const EventLabel &event_label,
                                           const EventInfo &) {
   const char pchar = 'p';
   if (only_final_ == OutputOnlyFinal::No) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
+    write(event_label.event_number);
+    write(event_label.ensemble_number);
     write(particles.size());
     write(particles);
   }
 }
 
 void BinaryOutputParticles::at_eventend(const Particles &particles,
-                                        const int event_number,
+                                        const EventLabel &event_label,
                                         const EventInfo &event) {
   const char pchar = 'p';
   if (!(event.empty_event && only_final_ == OutputOnlyFinal::IfNotEmpty)) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
+    write(event_label.event_number);
+    write(event_label.ensemble_number);
     write(particles.size());
     write(particles);
   }
@@ -286,7 +300,8 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
   // Event end line
   const char fchar = 'f';
   std::fwrite(&fchar, sizeof(char), 1, file_.get());
-  write(event_number);
+  write(event_label.event_number);
+  write(event_label.ensemble_number);
   write(event.impact_parameter);
   const char empty = event.empty_event;
   write(empty);
@@ -298,10 +313,13 @@ void BinaryOutputParticles::at_eventend(const Particles &particles,
 void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
                                                  const std::unique_ptr<Clock> &,
                                                  const DensityParameters &,
+                                                 const EventLabel &event_label,
                                                  const EventInfo &) {
   const char pchar = 'p';
   if (only_final_ == OutputOnlyFinal::No) {
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
+    write(event_label.event_number);
+    write(event_label.ensemble_number);
     write(particles.size());
     write(particles);
   }
@@ -313,16 +331,18 @@ BinaryOutputInitialConditions::BinaryOutputInitialConditions(
     : BinaryOutputBase(path / "SMASH_IC.bin", "wb", name, out_par.ic_extended) {
 }
 
-void BinaryOutputInitialConditions::at_eventstart(const Particles &, const int,
+void BinaryOutputInitialConditions::at_eventstart(const Particles &,
+                                                  const EventLabel &,
                                                   const EventInfo &) {}
 
 void BinaryOutputInitialConditions::at_eventend(const Particles &particles,
-                                                const int event_number,
+                                                const EventLabel &event_label,
                                                 const EventInfo &event) {
   // Event end line
   const char fchar = 'f';
   std::fwrite(&fchar, sizeof(char), 1, file_.get());
-  write(event_number);
+  write(event_label.event_number);
+  write(event_label.ensemble_number);
   write(event.impact_parameter);
   const char empty = event.empty_event;
   write(empty);
