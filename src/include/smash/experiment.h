@@ -2108,10 +2108,7 @@ void Experiment<Modus>::initialize_new_event() {
       auto event_info = fill_event_info(
           ensembles_, E_mean_field, modus_.impact_parameter(), parameters_,
           projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
-      output->at_eventstart(ensembles_[i_ens],
-                            // Pretend each ensemble is an independent event
-                            event_ * parameters_.n_ensembles + i_ens,
-                            event_info);
+      output->at_eventstart(ensembles_[i_ens], {event_, i_ens}, event_info);
     }
     // For thermodynamic output
     output->at_eventstart(ensembles_, event_);
@@ -2719,7 +2716,8 @@ void Experiment<Modus>::intermediate_output() {
             projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
 
         output->at_intermediate_time(ensembles_[i_ens], parameters_.outputclock,
-                                     density_param_, event_info);
+                                     density_param_, {event_, i_ens},
+                                     event_info);
         computational_frame_time = event_info.current_time;
       }
       // For thermodynamic output
@@ -3069,9 +3067,7 @@ void Experiment<Modus>::final_output() {
       auto event_info = fill_event_info(
           ensembles_, E_mean_field, modus_.impact_parameter(), parameters_,
           projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
-      output->at_eventend(ensembles_[i_ens],
-                          // Pretend each ensemble is an independent event
-                          event_ * parameters_.n_ensembles + i_ens, event_info);
+      output->at_eventend(ensembles_[i_ens], {event_, i_ens}, event_info);
     }
     // For thermodynamic output
     output->at_eventend(ensembles_, event_);
