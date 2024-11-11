@@ -75,9 +75,19 @@ macro(smash_add_unittest name)
     smash_add_test(${name} ${name} ${name})
 endmacro()
 
+
+# make wrapper function to add/run functional tests, so that requirements and venv must be used once?
+find_package(Python COMPONENTS Interpreter Development)
+find_program(VIRTUALENV virtualenv)
+if(NOT VIRTUALENV)
+    message(FATAL_ERROR "Could not find `virtualenv`")
+endif()
+
 macro(smash_add_functionaltest name)
-    add_test(NAME functional_${name} COMMAND python3 ${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py
-                                  --source ${PROJECT_SOURCE_DIR} --binary ${PROJECT_BINARY_DIR})
+    add_test(NAME functional_${name}
+             COMMAND ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py
+                    --source ${PROJECT_SOURCE_DIR}
+                    --binary ${PROJECT_BINARY_DIR})
 endmacro()
 
 # helper macro to run smash with certain arguments, choosing an output directory according to the
