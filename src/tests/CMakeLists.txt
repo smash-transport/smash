@@ -75,19 +75,11 @@ macro(smash_add_unittest name)
     smash_add_test(${name} ${name} ${name})
 endmacro()
 
-
-# make wrapper function to add/run functional tests, so that requirements and venv must be used once?
-find_package(Python COMPONENTS Interpreter Development)
-find_program(VIRTUALENV virtualenv)
-if(NOT VIRTUALENV)
-    message(FATAL_ERROR "Could not find `virtualenv`")
-endif()
-
 macro(smash_add_functionaltest name)
     add_test(NAME functional_${name}
-             COMMAND ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py
-                    --source ${PROJECT_SOURCE_DIR}
-                    --binary ${PROJECT_BINARY_DIR})
+             COMMAND ${PROJECT_BINARY_DIR}/venv/bin/python
+                     ${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py --source
+                     ${PROJECT_SOURCE_DIR} --binary ${PROJECT_BINARY_DIR})
 endmacro()
 
 # helper macro to run smash with certain arguments, choosing an output directory according to the
@@ -384,6 +376,24 @@ smash_add_runtest(custom_nucleus_run smash smash
                   -c "Modi: {Collider: {Projectile: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
                   -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
 )
+
+# add cmake build flag to indicate whether functional tests should be run? (true by default)
+# venv should be setup only once per compilation
+find_package(Python COMPONENTS Interpreter Development)
+find_program(VIRTUALENV virtualenv)
+if(NOT VIRTUALENV)
+    message(FATAL_ERROR "Could not find `virtualenv`")
+endif()
+
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/venv COMMAND ${VIRTUALENV} -p ${Python_EXECUTABLE}
+                                                             ${PROJECT_BINARY_DIR}/venv)
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/venv.stamp
+                   DEPENDS ${PROJECT_BINARY_DIR}/venv
+                           ${PROJECT_SOURCE_DIR}/src/tests/functional/requirements.txt
+                   COMMAND ${PROJECT_BINARY_DIR}/venv/bin/pip install -r
+                           ${PROJECT_SOURCE_DIR}/src/tests/functional/requirements.txt --upgrade)
+add_custom_target(setup_venv ALL DEPENDS ${PROJECT_BINARY_DIR}/venv.stamp
+                  SOURCES ${PROJECT_SOURCE_DIR}/src/tests/functional/requirements.txt)
 
 smash_add_functionaltest(ic_for_hybrid)
 
