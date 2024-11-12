@@ -471,10 +471,12 @@ TEST(to_string) {
 TEST(validate) {
   // Disable logger output -> reenable if needed to e.g. debug
   logg[LogArea::Configuration::id].setVerbosity(einhard::OFF);
-  Configuration invalid_conf = make_test_configuration();
+  Configuration invalid_conf = Configuration{"Version: 1.8"};
   VERIFY(invalid_conf.validate(false) == Configuration::Is::Invalid);
   VERIFY(invalid_conf.validate(true) == Configuration::Is::Invalid);
-  Configuration deprecated_conf = Configuration{"Version: 1.8"};
+  Configuration deprecated_conf = Configuration{R"(
+  Collision_Term:
+    Include_Weak_And_EM_Decays_At_The_End: True)"};
   VERIFY(deprecated_conf.validate() == Configuration::Is::Deprecated);
   invalid_conf.clear();
   deprecated_conf.clear();

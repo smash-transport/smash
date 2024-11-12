@@ -7,51 +7,18 @@
  *
  */
 
-#include "smash/hypersurfacecrossingaction.h"
+#include "smash/hypersurfacecrossingfinder.h"
 
+#include "smash/fluidizationaction.h"
 #include "smash/logging.h"
-#include "smash/quantumnumbers.h"
 
 namespace smash {
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
-void HypersurfacecrossingAction::generate_final_state() {
-  logg[LHyperSurfaceCrossing].debug("Process: Hypersurface Crossing. ");
-
-  ParticleList empty_list;
-
-  // check that there is only 1 incoming particle
-  assert(incoming_particles_.size() == 1);
-
-  // Return empty list because we want to remove the incoming particle
-  outgoing_particles_ = empty_list;
-}
-
-double HypersurfacecrossingAction::check_conservation(
-    const uint32_t id_process) const {
-  QuantumNumbers before(incoming_particles_);
-  QuantumNumbers after(outgoing_particles_);
-  if (before == after) {
-    // Conservation laws should not be conserved since particles are removed
-    // from the evolution
-    throw std::runtime_error(
-        "Conservation laws conserved in the hypersurface "
-        "crossing action. Particle was not properly removed in process: " +
-        std::to_string(id_process));
-  }
-
-  if (outgoing_particles_.size() != 0) {
-    throw std::runtime_error(
-        "Particle was not removed successfully in "
-        "hypersurface crossing action.");
-  }
-  return 0.;
-}
-
 ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     const ParticleList &plist, double dt, const double,
     const std::vector<FourVector> &beam_momentum) const {
-  std::vector<ActionPtr> actions;
+  ActionList actions;
 
   for (const ParticleData &p : plist) {
     ParticleData pdata_before_propagation = p;
@@ -139,7 +106,7 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
 
       ParticleData outgoing_particle(p);
       outgoing_particle.set_4position(crossing_position);
-      ActionPtr action = std::make_unique<HypersurfacecrossingAction>(
+      ActionPtr action = std::make_unique<FluidizationAction>(
           p, outgoing_particle, time_until_crossing);
       actions.emplace_back(std::move(action));
     }

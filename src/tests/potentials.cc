@@ -378,8 +378,9 @@ TEST(energy_gradient_vs_pot_gradient) {
   ExperimentParameters exp_par = Test::default_parameters();
   exp_par.testparticles = 50;
   DensityParameters denspar(exp_par);
-  update_lattice(lat.get(), LatticeUpdate::EveryTimestep, DensityType::Baryon,
-                 denspar, ensembles, true);
+  update_lattice_accumulating_ensembles(lat.get(), LatticeUpdate::EveryTimestep,
+                                        DensityType::Baryon, denspar, ensembles,
+                                        true);
   DensityOnLattice jB = (*lat)[lat->index1d(
       ncells[0] / 2, ncells[1] / 2,
       ncells[2] / 2)];  // density in the center (int division intended)
@@ -458,7 +459,6 @@ static ExperimentParameters default_parameters_vdf(
       false,        // in thermodynamics outputs spectators are included
       false,        // do weak decays
       true,         // can decay initial particles
-      false,        // no spin interactions
       std::nullopt  // use monash tune, not known
   };
 }

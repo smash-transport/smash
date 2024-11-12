@@ -127,7 +127,7 @@ class BinaryOutputBase : public OutputInterface {
 
  private:
   /// Binary file format version number
-  const uint16_t format_version_ = 10;
+  const uint16_t format_version_ = 9;
   /// Option for extended output
   bool extended_;
   /// If custom is used extended field is set to:

@@ -143,7 +143,7 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
 endif()
 
 # find Pythia
-find_package(Pythia 8.311 EXACT REQUIRED)
+find_package(Pythia 8.312 EXACT REQUIRED)
 if(Pythia_FOUND)
     # the BEFORE at the line below is due to
     # https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
@@ -210,18 +210,20 @@ set(smash_src
     density.cc
     decayactiondilepton.cc
     decayactionsfinderdilepton.cc
+    dynamicfluidfinder.cc
     distributions.cc
     energymomentumtensor.cc
     experiment.cc
     fields.cc
     file.cc
     filelock.cc
+    fluidizationaction.cc
     fourvector.cc
     fpenvironment.cc
     grandcan_thermalizer.cc
     grid.cc
     hadgas_eos.cc
-    hypersurfacecrossingaction.cc
+    hypersurfacecrossingfinder.cc
     icoutput.cc
     inputfunctions.cc
     interpolation.cc

@@ -50,7 +50,7 @@ RUN mkdir /MNT
 
 # Install pythia
 
-ARG pythiaV="8311"
+ARG pythiaV="8312"
 ENV PYTHIA8=/SMASH/pythia_install/
 RUN <<EOF
   set -eux

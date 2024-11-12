@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2019-2020,2022-2023
+ *    Copyright (c) 2019-2020,2022-2024
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,6 +14,7 @@
 #include <filesystem>
 
 #include "setup.h"
+#include "smash/fluidizationaction.h"
 #include "smash/outputinterface.h"
 
 using namespace smash;
@@ -52,7 +53,7 @@ TEST(particlelist_format) {
   p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
 
   // Create and perform action ("hypersurface crossing")
-  ActionPtr action = std::make_unique<HypersurfacecrossingAction>(p1, p1, 0.0);
+  ActionPtr action = std::make_unique<FluidizationAction>(p1, p1, 0.0);
   action->generate_final_state();
   action->perform(&particles, 1);
 

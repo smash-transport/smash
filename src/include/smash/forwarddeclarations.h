@@ -47,6 +47,7 @@ class Tabulation;
 class ThreeVector;
 
 struct ExperimentParameters;
+struct InitialConditionParameters;
 struct ScatterActionsFinderParameters;
 struct StringTransitionParameters;
 struct Nucleoncorr;
@@ -225,6 +226,7 @@ enum class OutputOnlyFinal {
 };
 
 /// The different groups of 2 to 2 reactions that one can include
+// Because std::bitset does not handle enum classes, this is a simple enum.
 enum IncludedReactions {
   All = 50,
   Elastic = 0,
@@ -243,6 +245,7 @@ enum IncludedReactions {
 typedef std::bitset<10> ReactionsBitSet;
 
 /// The different groups of multi-particle reactions that one can include
+// Because std::bitset does not handle enum classes, this is a simple enum.
 enum IncludedMultiParticleReactions {
   Meson_3to1 = 0,
   Deuteron_3to2 = 1,
@@ -312,10 +315,27 @@ enum class PseudoResonance {
   ClosestFromUnstable,
 };
 
+/// Possible methods to convert SMASH particle into fluid cells.
+/// \see_key{key_MC_IC_type_}
 enum class FluidizationType {
   /// Hypersurface crossed at a fixed proper time
   ConstantTau,
+  /// Dynamic fluidization based on local densities
+  Dynamic,
 };
+
+/// The different processes from where fluidizable particles are produced.
+/// \see_key{key_MC_IC_fluidizable_processes}
+// Because std::bitset does not handle enum classes, this is a simple enum.
+enum IncludedFluidizableProcesses {
+  From_Elastic = 0,
+  From_Decay = 1,
+  From_Inelastic = 2,
+  From_SoftString = 3,
+  From_HardString = 4,
+};
+
+typedef std::bitset<5> FluidizableProcessesBitSet;
 
 /**
  * Allows to choose which kind of density to calculate.
