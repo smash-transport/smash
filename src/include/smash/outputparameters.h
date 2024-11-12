@@ -297,23 +297,21 @@ struct OutputParameters {
    */
   std::map<std::string, std::vector<std::string>> quantities;
 
-/**
- * Safe way to acess the quantities map
- */
+  /**
+   * Safe way to acess the quantities map
+   */
 
-std::vector<std::string> getQuantities(const std::string& key) const {
+  std::vector<std::string> getQuantities(const std::string& key) const {
     // Check if the key exists in the map
     auto it = quantities.find(key);
     if (it != quantities.end()) {
-        // If the key exists, return the corresponding vector
-        return it->second;
+      // If the key exists, return the corresponding vector
+      return it->second;
     } else {
-        // If the key does not exist, return an empty vector
-        return std::vector<std::string>();
+      // If the key does not exist, return an empty vector
+      return std::vector<std::string>();
     }
-}
-
-
+  }
 };
 
 /**

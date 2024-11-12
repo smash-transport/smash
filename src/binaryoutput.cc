@@ -8,6 +8,7 @@
  */
 
 #include "smash/binaryoutput.h"
+
 #include <cstdint>
 #include <filesystem>
 #include <string>
@@ -136,14 +137,18 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
                                    const std::string &mode,
                                    const std::string &name,
                                    bool extended_format,
-                                   const std::vector<std::string>& quantities
-                                   
-                                   )
-    : OutputInterface(name), file_{path, mode}, extended_(extended_format), 
-      formatter_(quantities.empty() ? (extended_ ? OutputDefaultQuantities::oscar2013extended : OutputDefaultQuantities::oscar2013) : quantities)
+                                   const std::vector<std::string> &quantities
 
-    
-    {
+                                   )
+    : OutputInterface(name),
+      file_{path, mode},
+      extended_(extended_format),
+      formatter_(quantities.empty()
+                     ? (extended_ ? OutputDefaultQuantities::oscar2013extended
+                                  : OutputDefaultQuantities::oscar2013)
+                     : quantities)
+
+{
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
   std::uint16_t format_variant = static_cast<uint16_t>(extended_format);
@@ -155,10 +160,9 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
 void BinaryOutputBase::write(const char c) {
   std::fwrite(&c, sizeof(char), 1, file_.get());
 }
-void BinaryOutputBase::write(const std::vector<char>& chunk) {
+void BinaryOutputBase::write(const std::vector<char> &chunk) {
   std::fwrite(chunk.data(), sizeof(char), chunk.size(), file_.get());
 }
-
 
 void BinaryOutputBase::write(const std::string &s) {
   const auto size = smash::numeric_cast<uint32_t>(s.size());
@@ -186,17 +190,17 @@ void BinaryOutputBase::write(const ParticleList &particles) {
   }
 }
 
-void BinaryOutputBase::write_particledata(const ParticleData&p){
+void BinaryOutputBase::write_particledata(const ParticleData &p) {
   write(formatter_.binary_chunk(p));
 }
-
 
 BinaryOutputCollisions::BinaryOutputCollisions(
     const std::filesystem::path &path, std::string name,
     const OutputParameters &out_par)
     : BinaryOutputBase(
           path / ((name == "Collisions" ? "collisions_binary" : name) + ".bin"),
-          "wb", name, out_par.get_coll_extended(name), out_par.getQuantities("Collisions")),
+          "wb", name, out_par.get_coll_extended(name),
+          out_par.getQuantities("Collisions")),
       print_start_end_(out_par.coll_printstartend) {}
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
@@ -252,7 +256,8 @@ BinaryOutputParticles::BinaryOutputParticles(const std::filesystem::path &path,
                                              std::string name,
                                              const OutputParameters &out_par)
     : BinaryOutputBase(path / "particles_binary.bin", "wb", name,
-                       out_par.part_extended,out_par.getQuantities("Particles")),
+                       out_par.part_extended,
+                       out_par.getQuantities("Particles")),
       only_final_(out_par.part_only_final) {}
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles, const int,

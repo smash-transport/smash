@@ -9,8 +9,6 @@
 
 #ifndef SRC_INCLUDE_SMASH_BINARYOUTPUT_H_
 #define SRC_INCLUDE_SMASH_BINARYOUTPUT_H_
-#include "outputformatter.h"
-
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -18,6 +16,7 @@
 #include "file.h"
 #include "forwarddeclarations.h"
 #include "numeric_cast.h"
+#include "outputformatter.h"
 #include "outputinterface.h"
 #include "outputparameters.h"
 
@@ -40,18 +39,16 @@ class BinaryOutputBase : public OutputInterface {
   explicit BinaryOutputBase(const std::filesystem::path &path,
                             const std::string &mode, const std::string &name,
                             bool extended_format,
-                            const std::vector<std::string>& quantities ={}
-                            
-                            );
+                            const std::vector<std::string> &quantities = {}
 
-  /** 
+  );
+
+  /**
    * Write several bytes to the binary output.
    * \param[in] chunk vector of bytes to be written.
-   * 
-  */
-  void write(const std::vector<char>& chunk);
-
-
+   *
+   */
+  void write(const std::vector<char> &chunk);
 
   /**
    * Write byte to binary output.

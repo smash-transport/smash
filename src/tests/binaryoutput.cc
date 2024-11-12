@@ -49,7 +49,8 @@ static void read_binary(std::string &s, const FilePtr &file) {
   std::int32_t size = s.size();
   COMPARE(std::fread(&size, sizeof(std::int32_t), 1, file.get()), 1u);
   std::vector<char> buf(size);
-  COMPARE(std::fread(&buf[0], sizeof(char), size, file.get()), static_cast<size_t>(size));
+  COMPARE(std::fread(&buf[0], sizeof(char), size, file.get()),
+          static_cast<size_t>(size));
   s.assign(&buf[0], size);
 }
 
@@ -540,16 +541,16 @@ TEST(initial_conditions_format) {
 }
 
 /* Function to read and compare particle with custom quantities */
-static bool compare_particle_custom(const ParticleData &p, const FilePtr &file) {
+static bool compare_particle_custom(const ParticleData &p,
+                                    const FilePtr &file) {
   int charge, strangeness;
   FourVector pos;
   read_binary(pos, file);
   read_binary(charge, file);
   read_binary(strangeness, file);
 
-
-  return 
-         (pos == p.position()) && (charge == p.type().charge()) && (strangeness == p.type().strangeness());
+  return (pos == p.position()) && (charge == p.type().charge()) &&
+         (strangeness == p.type().strangeness());
 }
 
 TEST(custom) {
@@ -571,7 +572,8 @@ TEST(custom) {
     OutputParameters output_par = OutputParameters();
     output_par.part_extended = false;
     output_par.part_only_final = OutputOnlyFinal::No;
-    output_par.quantities["Particles"] = {"t","x","y","z","charge","strangeness"};
+    output_par.quantities["Particles"] = {"t", "x",      "y",
+                                          "z", "charge", "strangeness"};
 
     /* Create an instance of binary output */
     auto bin_output = std::make_unique<BinaryOutputParticles>(
@@ -646,4 +648,3 @@ TEST(custom) {
 
   VERIFY(std::filesystem::remove(particleoutputpath));
 }
-

@@ -20,61 +20,63 @@
 
 namespace smash {
 
-
 /**
  * Structure to convert a given value into binary format, such that all methods
  * return a \c std::vector<char>.
  */
 struct ToBinary {
-    /// Return type of this converter.
-    using type = std::vector<char>; 
+  /// Return type of this converter.
+  using type = std::vector<char>;
 
-    /**
-     * Converts an integer to binary format.
-     *
-     * \param[in] value number to convert
-     * \return a vector of char representing the binary format of the integer
-     */
-    type as_integer(int value) const {
-        type binary_data(sizeof(int)); // Create a vector of the size of an integer
-        std::memcpy(binary_data.data(), &value, sizeof(int)); // Copy the integer value into the vector
-        return binary_data; // Return the binary data as a vector of char
-    }
+  /**
+   * Converts an integer to binary format.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the integer
+   */
+  type as_integer(int value) const {
+    type binary_data(sizeof(int));  // Create a vector of the size of an integer
+    std::memcpy(binary_data.data(), &value,
+                sizeof(int));  // Copy the integer value into the vector
+    return binary_data;        // Return the binary data as a vector of char
+  }
 
-    /**
-     * Converts a double to binary format.
-     *
-     * \param[in] value number to convert
-     * \return a vector of char representing the binary format of the double
-     */
-    type as_double(double value) const {
-        type binary_data(sizeof(double)); // Create a vector of the size of a double
-        std::memcpy(binary_data.data(), &value, sizeof(double)); // Copy the double value into the vector
-        return binary_data; // Return the binary data as a vector of char
-    }
+  /**
+   * Converts a double to binary format.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the double
+   */
+  type as_double(double value) const {
+    type binary_data(
+        sizeof(double));  // Create a vector of the size of a double
+    std::memcpy(binary_data.data(), &value,
+                sizeof(double));  // Copy the double value into the vector
+    return binary_data;           // Return the binary data as a vector of char
+  }
 
-    /**
-     * Converts a double to binary format, intended for precise representation.
-     *
-     * \param[in] value number to convert
-     * \return a vector of char representing the binary format of the double
-     */
-    type as_precise_double(double value) const {
-        return as_double(value); // For precise double, simply call as_double
-    }
+  /**
+   * Converts a double to binary format, intended for precise representation.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the double
+   */
+  type as_precise_double(double value) const {
+    return as_double(value);  // For precise double, simply call as_double
+  }
 
-    /**
-     * Converts a string to binary format.
-     *
-     * \param[in] str string to convert
-     * \return a vector of char representing the binary format of the string
-     */
-    type as_string(const std::string& str) const {
-        type binary_data(str.begin(), str.end()); // Create a vector from string data
-        return binary_data; // Return the binary data as a vector of char
-    }
+  /**
+   * Converts a string to binary format.
+   *
+   * \param[in] str string to convert
+   * \return a vector of char representing the binary format of the string
+   */
+  type as_string(const std::string& str) const {
+    type binary_data(str.begin(),
+                     str.end());  // Create a vector from string data
+    return binary_data;           // Return the binary data as a vector of char
+  }
 };
-
 
 /**
  * Structure to convert a given value into ASCII format, such that all methods
@@ -161,7 +163,9 @@ struct ToASCII {
  * with a defined \c type and the same methods.
  */
 template <typename Converter,
-          std::enable_if_t<std::is_same_v<Converter, ToASCII > || std::is_same_v<Converter, ToBinary > , bool> = true>
+          std::enable_if_t<std::is_same_v<Converter, ToASCII> ||
+                               std::is_same_v<Converter, ToBinary>,
+                           bool> = true>
 class OutputFormatter {
  public:
   /**
@@ -253,13 +257,11 @@ class OutputFormatter {
         });
       } else if (quantity == "pdg_mother1") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_integer(
-              in.get_history().p1.get_decimal());
+          return this->converter_.as_integer(in.get_history().p1.get_decimal());
         });
       } else if (quantity == "pdg_mother2") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_integer(
-              in.get_history().p2.get_decimal());
+          return this->converter_.as_integer(in.get_history().p2.get_decimal());
         });
       } else if (quantity == "baryon_number") {
         getters_.push_back([this](const ParticleData& in) {
@@ -280,23 +282,23 @@ class OutputFormatter {
       }
     }
   }
-/**
- * Produced a chunk of binary representing a particle line for the output file.
- * \param[in] p particle whose information is to be written.
- * \return string with formatted data sperated by a space.
- */
-typename Converter::type binary_chunk(const ParticleData& p) {
+  /**
+   * Produced a chunk of binary representing a particle line for the output
+   * file. \param[in] p particle whose information is to be written. \return
+   * string with formatted data sperated by a space.
+   */
+  typename Converter::type binary_chunk(const ParticleData& p) {
     return std::accumulate(
         std::begin(getters_), std::end(getters_), std::vector<char>{},
         [&p](std::vector<char> ss, const auto& getter) {
-            // Get the value using the getter and convert it to binary
-            auto binary_data = getter(p); 
-            
-            // Append the binary data to the accumulator
-            ss.insert(ss.end(), binary_data.begin(), binary_data.end());
-            return ss;
+          // Get the value using the getter and convert it to binary
+          auto binary_data = getter(p);
+
+          // Append the binary data to the accumulator
+          ss.insert(ss.end(), binary_data.begin(), binary_data.end());
+          return ss;
         });
-}
+  }
 
   /**
    * Produces the line with formatted data for the body of the output file.
