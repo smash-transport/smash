@@ -78,7 +78,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * <div class="line">
  *   9*double       int32_t int32_t int32_t int32_t double
  *     double                    int32_t            int32_t
- *     double        int32_t         int32_t
+ *     double        int32_t         int32_t        int32_t         int32_t
  * </div>
  * <div class="line">
  * t x y z mass p0 px py pz pdg ID charge ncoll form_time xsecfac
