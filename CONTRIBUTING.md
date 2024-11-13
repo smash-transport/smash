@@ -565,11 +565,13 @@ following way:
 
 All C++ code has to be formatted by running [`clang-format`](https://releases.llvm.org/download.html),
 (version `13.0.0`) while CMake code requires [`cmake-format`](https://github.com/cheshirekow/cmake_format)
-(version `0.6.13`) to be run. These two programs automatically format the code in SMASH correctly.
+(version `0.6.13`) to be run. Python scripts are formatted using [`autopep8`](https://github.com/hhatto/autopep8)
+(version `2.3.1`), instead. These programs automatically format the code in SMASH correctly.
 Use the helper script in SMASH's _**bin**_ directory to format the source code via
 
     ./codebase-format-helper.bash C++ -p
     ./codebase-format-helper.bash CMake -p
+    ./codebase-format-helper.bash Python -p
 
 or by simply using
 
