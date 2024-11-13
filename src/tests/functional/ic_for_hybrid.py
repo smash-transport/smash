@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-#===================================================
+
+# ===================================================
 #
 #    Copyright (c) 2024
 #      SMASH Team
 #
 #    GNU General Public License (GPLv3 or later)
 #
-#===================================================
+# ===================================================
 
 import argparse
 import sys
@@ -14,10 +15,12 @@ import subprocess as subp
 import numpy as np
 import pandas as pd
 
+
 def cartesian_to_milne(t, z):
     tau = np.sqrt(t**2 - z**2)
     eta = 0.5*np.log((t+z)/(t-z))
     return tau, eta
+
 
 parser = argparse.ArgumentParser(
     description='Functional test for iso-tau initial conditions.')
@@ -36,10 +39,10 @@ if not args.skip_smash:
     smash_config_ic = \
         "Modi: {Collider: {Initial_Conditions: {Type: Constant_Tau}}}"
     run = subp.run([smash_executable, "-i", smash_config_file,
-            "-c", smash_config_output,
-            "-c", smash_config_ic,
-            "-o", output_dir,"-f","-q"],
-            cwd=args.binary)
+                    "-c", smash_config_output,
+                    "-c", smash_config_ic,
+                    "-o", output_dir, "-f", "-q"],
+                   cwd=args.binary)
     try:
         run.check_returncode()
     except subp.CalledProcessError:
@@ -53,7 +56,7 @@ oscar_file = args.binary + '/' + output_dir + '/SMASH_IC.oscar'
 
 # Read output files
 with open(ascii_file, 'r') as f:
-    next(f) #ignore first line
+    next(f)  # ignore first line
     ascii_quantities = f.readline().split()[1:]
 with open(oscar_file, 'r') as f:
     oscar_quantities = f.readline().split()[2:]
@@ -70,13 +73,13 @@ if (number_of_spectators < 0):
 oscar['tau'], oscar['eta'] = cartesian_to_milne(oscar['t'], oscar['z'])
 oscar['mt'], oscar['Rap'] = cartesian_to_milne(oscar['p0'], oscar['pz'])
 
-quantities_to_compare_exact = ['x','y','pdg']
+quantities_to_compare_exact = ['x', 'y', 'pdg']
 # px and py are given with default precision in ASCII, but with %.9 in OSCAR.
 # If this changes, they should be compared exactly
-quantities_to_compare_fuzzy = ['px','py','eta','tau','mt','Rap']
+quantities_to_compare_fuzzy = ['px', 'py', 'eta', 'tau', 'mt', 'Rap']
 compare_df = pd.merge(ascii[quantities_to_compare_exact],
-                  oscar[quantities_to_compare_exact],
-                  on=quantities_to_compare_exact, how='left', indicator='exists')
+                      oscar[quantities_to_compare_exact],
+                      on=quantities_to_compare_exact, how='left', indicator='exists')
 if set(compare_df['exists']) != {'both'}:
     print("Failed comparison of quantities that should be exactly equal.")
     sys.exit(1)
@@ -88,7 +91,7 @@ spectators = pd.concat([ascii[quantities_to_compare_exact],
                         oscar[quantities_to_compare_exact]]).drop_duplicates(keep=False)
 if len(spectators) != number_of_spectators:
     sys.exit(1)
-if not set(spectators['pdg']).issubset([2212,2112]):
+if not set(spectators['pdg']).issubset([2212, 2112]):
     print("Some spectators seem to not be nucleons.")
     sys.exit(1)
 oscar = oscar.drop(spectators.index.values).reset_index()
