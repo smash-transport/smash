@@ -35,6 +35,7 @@ jobs:
           cd ${SMASH_ROOT}
           ./bin/codebase-format-helper.bash C++ -t
           ./bin/codebase-format-helper.bash CMake -t
+          ./bin/codebase-format-helper.bash Python -t
           # we configure SMASH using the environment provided by a Singularity container
           mkdir -p ${SMASH_ROOT}/build
           cd ${SMASH_ROOT}/build
@@ -81,6 +82,7 @@ jobs:
           cd ${SMASH_ROOT}
           ./bin/codebase-format-helper.bash C++ -t
           ./bin/codebase-format-helper.bash CMake -t
+          ./bin/codebase-format-helper.bash Python -t
           # now we configure SMASH
           mkdir -p ${SMASH_ROOT}/build
           cd ${SMASH_ROOT}/build
