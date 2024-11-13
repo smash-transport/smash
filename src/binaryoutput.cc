@@ -43,7 +43,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * magic_number, format_version, format_variant, len,      smash_version
  * \endcode
  * \li magic_number - 4 bytes that in ASCII read as "SMSH".
- * \li Format version is an integer number, currently it is 7.
+ * \li Format version is an integer number, currently it is 9.
  * \li Format variant is an integer number: 0 for default, 1 for extended.
  * \li len is the length of smash version string
  * \li smash_version is len chars that give information about the SMASH version.
