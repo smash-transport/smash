@@ -77,9 +77,8 @@ endmacro()
 
 macro(smash_add_functionaltest name)
     add_test(NAME functional_${name}
-             COMMAND ${PROJECT_BINARY_DIR}/venv/bin/python
-                     ${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py --source
-                     ${PROJECT_SOURCE_DIR} --binary ${PROJECT_BINARY_DIR})
+             COMMAND ${Python3_EXECUTABLE} "${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py"
+                     --source "${PROJECT_SOURCE_DIR}" --binary "${PROJECT_BINARY_DIR}")
 endmacro()
 
 # helper macro to run smash with certain arguments, choosing an output directory according to the
@@ -377,25 +376,61 @@ smash_add_runtest(custom_nucleus_run smash smash
                   -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
 )
 
-# add cmake build flag to indicate whether functional tests should be run? (true by default)
-# venv should be setup only once per compilation
-find_package(Python COMPONENTS Interpreter Development)
-find_program(VIRTUALENV virtualenv)
-if(NOT VIRTUALENV)
-    message(FATAL_ERROR "Could not find `virtualenv`")
+# Setup of functional tests. Since these are written in Python, here the interpreter is found, a
+# virtual environment is setup, the interpreter of the virtual environment is looked for and the
+# needed Python requirements are installed. If any step fails, functional tests are disabled.
+option(ENABLE_FUNCTIONAL_TESTS "Turn this off to disable SMASH functional tests." ON)
+if(ENABLE_FUNCTIONAL_TESTS)
+    message(STATUS "Looking for Python3")
+    find_package(Python3 3.3 QUIET COMPONENTS Interpreter Development)
+    if(Python3_FOUND)
+        # Set up virtual environment and skip functional tests if anything fails
+        set(PYTHON_VENV_PATH "${PROJECT_BINARY_DIR}/python_venv")
+        execute_process(COMMAND ${Python3_EXECUTABLE} -m venv "${PYTHON_VENV_PATH}"
+                        RESULT_VARIABLE venv_result)
+        if(venv_result AND NOT venv_result EQUAL 0)
+            message(ATTENTION "Setting up Python3 venv failed. Functional tests disabled.")
+            set(ENABLE_FUNCTIONAL_TESTS OFF)
+        endif()
+        # Look again for Python, this time to locate that of the venv (taken from CMake discourse)
+        set(SYSTEM_PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
+        set(ENV{VIRTUAL_ENV} "${PYTHON_VENV_PATH}") # Update the environment with VIRTUAL_ENV
+                                                    # variable (mimic the activate script)
+        set(Python3_FIND_VIRTUALENV FIRST) # Change the context of the search
+        unset(Python3_EXECUTABLE) # Needed as it is also an input variable for find_package
+        find_package(Python3 QUIET COMPONENTS Interpreter Development)
+        if(SYSTEM_PYTHON_EXECUTABLE STREQUAL Python3_EXECUTABLE)
+            message(FATAL_ERROR " \n" " Python3 venv executable is the same as the system one.\n"
+                                " This should not happen and needs to be investigated.\n")
+        endif()
+        message(STATUS "Python3 venv for functional tests setup at '${PYTHON_VENV_PATH}'.")
+        message(STATUS "Found Python3: ${Python3_EXECUTABLE}")
+    else()
+        message(ATTENTION "Python3 not found. Functional tests disabled.")
+        set(ENABLE_FUNCTIONAL_TESTS OFF)
+    endif()
 endif()
-
-add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/venv COMMAND ${VIRTUALENV} -p ${Python_EXECUTABLE}
-                                                             ${PROJECT_BINARY_DIR}/venv)
-add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/venv.stamp
-                   DEPENDS ${PROJECT_BINARY_DIR}/venv
-                           ${PROJECT_SOURCE_DIR}/src/tests/functional/requirements.txt
-                   COMMAND ${PROJECT_BINARY_DIR}/venv/bin/pip install -r
-                           ${PROJECT_SOURCE_DIR}/src/tests/functional/requirements.txt --upgrade)
-add_custom_target(setup_venv ALL DEPENDS ${PROJECT_BINARY_DIR}/venv.stamp
-                  SOURCES ${PROJECT_SOURCE_DIR}/src/tests/functional/requirements.txt)
-
-smash_add_functionaltest(ic_for_hybrid)
+if(ENABLE_FUNCTIONAL_TESTS)
+    message(STATUS "Installing Python3 requirements for functional tests into venv")
+    execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --upgrade pip -r
+                            "${PROJECT_SOURCE_DIR}/src/tests/functional/requirements.txt"
+                    RESULT_VARIABLE pip_install_result
+                    OUTPUT_FILE "${PYTHON_VENV_PATH}/pip_install_requirements.log")
+    if(pip_install_result AND NOT pip_install_result EQUAL 0)
+        message(ATTENTION "Installing Python3 requirements failed. Functional tests disabled.")
+        set(ENABLE_FUNCTIONAL_TESTS OFF)
+    else()
+        message(STATUS "Installing Python3 requirements for functional tests into venv - done")
+    endif()
+endif()
+# Finally create functional tests. Note that it is not necessary to activate or deactivate the
+# virtual environment because we run functional tests explicitly using the Python_EXECUTABLE which
+# is now set to that of the virtual environment.
+if(ENABLE_FUNCTIONAL_TESTS)
+    smash_add_functionaltest(ic_for_hybrid)
+else()
+    message(STATUS "Functional tests disabled.")
+endif()
 
 if(ROOT_FOUND AND HepMC3_FOUND AND Rivet_FOUND)
     smash_add_runtest(third_party_output_run smash smash
