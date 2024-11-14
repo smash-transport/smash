@@ -58,8 +58,8 @@ void HepMcInterface::at_eventstart(const Particles& particles,
                                    const EventLabel& event_label,
                                    const EventInfo& event) {
   if (event.n_ensembles != 1) {
-    throw std::invalid_argument(
-        "HepMC output is not available with multiple parallel ensembles.");
+    throw std::logic_error(
+        "HepMcInterface shouldn't be used with multiple parallel ensembles.");
   }
 
   // Clear event and mapping and set event number
@@ -170,8 +170,8 @@ void HepMcInterface::at_interaction(const Action& action,
 void HepMcInterface::at_eventend(const Particles& particles, const EventLabel&,
                                  const EventInfo& event) {
   if (event.n_ensembles != 1) {
-    throw std::invalid_argument(
-        "HepMC output is not available with multiple parallel ensembles.");
+    throw std::logic_error(
+        "HepMcInterface shouldn't be used with multiple parallel ensembles.");
   }
   // We evaluate if it is a heavy ion collision event
   bool is_coll = (event.impact_parameter >= 0.0);

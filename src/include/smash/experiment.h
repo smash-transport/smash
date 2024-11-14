@@ -802,6 +802,10 @@ void Experiment<Modus>::create_output(const std::string &format,
         std::make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
   } else if ((format == "HepMC") || (format == "HepMC_asciiv3") ||
              (format == "HepMC_treeroot")) {
+    if (ensembles_.size() > 1) {
+      throw std::invalid_argument(
+          "HepMC output is not available with multiple parallel ensembles.");
+    }
 #ifdef SMASH_USE_HEPMC
     if (content == "Particles") {
       if ((format == "HepMC") || (format == "HepMC_asciiv3")) {
@@ -845,6 +849,10 @@ void Experiment<Modus>::create_output(const std::string &format,
     outputs_.emplace_back(
         std::make_unique<VtkOutput>(output_path, "Fields", out_par));
   } else if (content == "Rivet") {
+    if (ensembles_.size() > 1) {
+      throw std::invalid_argument(
+          "Rivet output is not available with multiple parallel ensembles.");
+    }
 #ifdef SMASH_USE_RIVET
     // flag to ensure that the Rivet format has not been already assigned
     static bool rivet_format_already_selected = false;

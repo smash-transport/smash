@@ -28,6 +28,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * New: Implemented `ASCIICustom` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities`
 * ⚠️ The ensemble number is now included in the output next to the event number - **this is a potentially breaking change for analysis software, especially if using the binary output**; refer to the documentation of each output type for further details
 * Bump binary output format version from 9 to 10
+* HepMC output disabled when SMASH is run with multiple ensembles
 
 ### Changed
 * Upgraded to Pythia 8.312
