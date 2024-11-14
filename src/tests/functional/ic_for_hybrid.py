@@ -29,7 +29,7 @@ parser.add_argument('--binary', required=True, help='build directory')
 parser.add_argument('--skip-smash', action='store_true')
 args = parser.parse_args()
 
-output_dir = "./test_output/ic_for_hybrid"
+output_directory = "./test_output/ic_for_hybrid"
 # Run smash with appropriate configuration
 if not args.skip_smash:
     smash_executable = args.binary + "/smash"
@@ -41,18 +41,18 @@ if not args.skip_smash:
     run = subp.run([smash_executable, "-i", smash_config_file,
                     "-c", smash_config_output,
                     "-c", smash_config_ic,
-                    "-o", output_dir, "-f", "-q"],
+                    "-o", output_directory, "-f", "-q"],
                    cwd=args.binary)
     try:
         run.check_returncode()
     except subp.CalledProcessError:
-        print("SMASH did not run properly. Please check that " + output_dir +
-              " is clean.")
+        print("SMASH did not run properly. Please check that " +
+              output_directory + " is clean.")
         sys.exit(1)
 
 # Check if output is consistent
-ascii_file = args.binary + '/' + output_dir + '/SMASH_IC.dat'
-oscar_file = args.binary + '/' + output_dir + '/SMASH_IC.oscar'
+ascii_file = args.binary + '/' + output_directory + '/SMASH_IC.dat'
+oscar_file = args.binary + '/' + output_directory + '/SMASH_IC.oscar'
 
 # Read output files
 with open(ascii_file, 'r') as f:
@@ -77,10 +77,10 @@ quantities_to_compare_exact = ['x', 'y', 'pdg']
 # px and py are given with default precision in ASCII, but with %.9 in OSCAR.
 # If this changes, they should be compared exactly
 quantities_to_compare_fuzzy = ['px', 'py', 'eta', 'tau', 'mt', 'Rap']
-compare_df = pd.merge(ascii[quantities_to_compare_exact],
-                      oscar[quantities_to_compare_exact],
-                      on=quantities_to_compare_exact, how='left', indicator='exists')
-if set(compare_df['exists']) != {'both'}:
+comparison_exact = pd.merge(ascii[quantities_to_compare_exact],
+                            oscar[quantities_to_compare_exact],
+                            on=quantities_to_compare_exact, how='left', indicator='exists')
+if set(comparison_exact['exists']) != {'both'}:
     print("Failed comparison of quantities that should be exactly equal.")
     sys.exit(1)
 
@@ -98,6 +98,7 @@ oscar = oscar.drop(spectators.index.values).reset_index()
 
 # The required precision is arbitrary.
 for quantity in quantities_to_compare_fuzzy:
-    if any(abs((ascii[quantity] - oscar[quantity])/ascii[quantity]) > 10**-5):
-        print("Relative difference in "+quantity+" above 10⁻⁵.")
+    comparison_fuzzy = abs((ascii[quantity] - oscar[quantity])/ascii[quantity])
+    if any(comparison_fuzzy > 10**-5):
+        print("Relative difference in " + quantity + " above 10⁻⁵.")
         sys.exit(1)

@@ -102,14 +102,16 @@ function check_formatter_version()
     local language required found
     language="$1"
     found=$(${FORMATTER_COMMAND[${language}]} --version)
+    regex='[0-9]+([.][0-9]+)+'
     if [[ ${language} = 'C++' ]]; then
         required=${clang_format_required_version}
+        regex='[0-9]+[.][0-9]+' 
     elif [[ ${language} = 'CMake' ]]; then
         required=${cmake_format_required_version}
     elif [[ ${language} = 'Python' ]]; then
         required=${python_format_required_version}
     fi
-    found=$(grep -oE '[1-9][0-9]*([.][0-9]+)+' <<< "${found}" | head -n1)
+    found=$(grep -oE "${regex}" <<< "${found}" | head -n1)
     if [[ "${found}" != "${required}" ]]; then
         fail "Wrong ${FORMATTER_COMMAND[${language}]} version found: ${found} (${required} is required)."
     fi
