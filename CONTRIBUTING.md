@@ -70,15 +70,15 @@ the folder.
 
 ### Functional tests
 
-The functional tests require Python3.3, to create a virtual environment where modules can be imported. They are enabled by default, but can be disabled during build with 
+The functional tests require Python3.3, to create a virtual environment where modules can be imported. They are enabled by default, but can be disabled during build with
 
-    cmake .. -DENABLE_FUNCTIONAL_TESTS=False
+    cmake -DENABLE_FUNCTIONAL_TESTS=OFF ..
 
 They can be run collectively with
 
     ctest -R functional
 
-Notice that there is no executable created for them, and so are not run by calling <code> make </code> as for the unit tests.
+Notice that there is no executable created for them, and so they cannot be run by calling `make` as for the unit tests.
 
 ### Runtime memory checking with valgrind
 
