@@ -88,7 +88,7 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  *
  * The end of an event is indicated by the following line:
  * \code
- * # event ev_num  ensemble ens_num end
+ * # event ev_num ensemble ens_num end
  * \endcode
  * where
  * \li \key ev_num: The number of the current event
@@ -123,7 +123,11 @@ ICOutput::ICOutput(const std::filesystem::path &path, const std::string &name,
 ICOutput::~ICOutput() {}
 
 void ICOutput::at_eventstart(const Particles &, const EventLabel &event_label,
-                             const EventInfo &) {
+                             const EventInfo &event) {
+  if (event.n_ensembles != 1) {
+    throw std::logic_error(
+        "ICOutput shouldn't be used with multiple parallel ensembles.");
+  }
   std::fprintf(file_.get(), "# event %i ensemble %i start\n",
                event_label.event_number, event_label.ensemble_number);
 }
@@ -131,6 +135,10 @@ void ICOutput::at_eventstart(const Particles &, const EventLabel &event_label,
 void ICOutput::at_eventend(const Particles &particles,
                            const EventLabel &event_label,
                            const EventInfo &event) {
+  if (event.n_ensembles != 1) {
+    throw std::logic_error(
+        "ICOutput shouldn't be used with multiple parallel ensembles.");
+  }
   std::fprintf(file_.get(), "# event %i ensemble %i end\n",
                event_label.event_number, event_label.ensemble_number);
 

@@ -44,9 +44,10 @@ class ICOutput : public OutputInterface {
   /**
    * Write event start line.
    * \param[in] event_label Numbers of the current event/ensemble.
+   * \param[in] event Event info, see \ref event_info
    */
   void at_eventstart(const Particles &, const EventLabel &event_label,
-                     const EventInfo &) override;
+                     const EventInfo &event) override;
 
   /**
    * Write event end line.
