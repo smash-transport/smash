@@ -29,7 +29,10 @@ parser.add_argument('--binary', required=True, help='build directory')
 parser.add_argument('--skip-smash', action='store_true')
 args = parser.parse_args()
 
-output_directory = "./test_output/ic_for_hybrid"
+# Each functional test should have its own output folder as functional tests
+# might be run in parallel and, in that case, smash would fail if different
+# smash executables would try to print to the same output folder.
+output_directory = args.binary + "/functional_test_output/ic_for_hybrid"
 # Run smash with appropriate configuration
 if not args.skip_smash:
     smash_executable = args.binary + "/smash"
@@ -51,8 +54,8 @@ if not args.skip_smash:
         sys.exit(1)
 
 # Check if output is consistent
-ascii_file = args.binary + '/' + output_directory + '/SMASH_IC.dat'
-oscar_file = args.binary + '/' + output_directory + '/SMASH_IC.oscar'
+ascii_file = output_directory + '/SMASH_IC.dat'
+oscar_file = output_directory + '/SMASH_IC.oscar'
 
 # Read output files
 with open(ascii_file, 'r') as f:

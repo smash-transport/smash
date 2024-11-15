@@ -79,6 +79,7 @@ macro(smash_add_functionaltest name)
     add_test(NAME functional_${name}
              COMMAND ${Python3_EXECUTABLE} "${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py"
                      --source "${PROJECT_SOURCE_DIR}" --binary "${PROJECT_BINARY_DIR}")
+    set_tests_properties(functional_${name} PROPERTIES FIXTURES_REQUIRED fixture_compile_smash)
 endmacro()
 
 # helper macro to run smash with certain arguments, choosing an output directory according to the
@@ -427,6 +428,18 @@ endif()
 # virtual environment because we run functional tests explicitly using the Python_EXECUTABLE which
 # is now set to that of the virtual environment.
 if(ENABLE_FUNCTIONAL_TESTS)
+    # Since all functional tests need smash executable to be compiled before running, we want ctest
+    # to first compile SMASH and then run the functional tests. In order to do so we use tests
+    # fixtures setting up a "test" to compile SMASH and using this as setup fixture. See CMake doc
+    # https://cmake.org/cmake/help/latest/prop_test/FIXTURES_REQUIRED.html for further information.
+    # Please note that we do not want to always compile SMASH before each test and hence we wrap the
+    # SMASH compilation into a small bash test to skip it if the smash exectuable exists.
+    set(BASH_CODE_FOR_TEST
+        "[[ ! -f '${CMAKE_BINARY_DIR}/smash' ]] && \
+            ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --config ${CMAKE_BUILD_TYPE} \
+                             --target smash  || exit 0")
+    add_test(NAME compile_smash_executable COMMAND bash -c ${BASH_CODE_FOR_TEST})
+    set_tests_properties(compile_smash_executable PROPERTIES FIXTURES_SETUP fixture_compile_smash)
     smash_add_functionaltest(ic_for_hybrid)
 else()
     message(STATUS "Functional tests disabled.")
