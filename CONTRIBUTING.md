@@ -47,7 +47,7 @@ to nomenclature and whatever else you might notice.
 
 ## Testing
 
-### Running tests
+### Unit tests
 
 To run the various unit tests, use the following:
 
@@ -68,6 +68,17 @@ If a test crashes, there might be some leftover in the `test_output` folder,
 causing the test to always fail when run again. To fix this problem, just remove
 the folder.
 
+### Functional tests
+
+The functional tests require Python3.3, to create a virtual environment where modules can be imported. They are enabled by default, but can be disabled during build with 
+
+    cmake .. -DENABLE_FUNCTIONAL_TESTS=False
+
+They can be run collectively with
+
+    ctest -R functional
+
+Notice that there is no executable created for them, and so are not run by calling <code> make </code> as for the unit tests.
 
 ### Runtime memory checking with valgrind
 
