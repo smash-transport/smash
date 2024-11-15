@@ -105,7 +105,7 @@ function check_formatter_version()
     regex='[0-9]+([.][0-9]+)+'
     if [[ ${language} = 'C++' ]]; then
         required=${clang_format_required_version}
-        regex='[0-9]+[.][0-9]+' 
+        regex='[0-9]+[.][0-9]+'
     elif [[ ${language} = 'CMake' ]]; then
         required=${cmake_format_required_version}
     elif [[ ${language} = 'Python' ]]; then
