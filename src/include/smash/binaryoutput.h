@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "file.h"
 #include "forwarddeclarations.h"
@@ -39,9 +40,7 @@ class BinaryOutputBase : public OutputInterface {
   explicit BinaryOutputBase(const std::filesystem::path &path,
                             const std::string &mode, const std::string &name,
                             bool extended_format,
-                            const std::vector<std::string> &quantities = {}
-
-  );
+                            const std::vector<std::string> &quantities = {});
 
   /**
    * Write several bytes to the binary output.

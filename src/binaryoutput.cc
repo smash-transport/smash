@@ -146,9 +146,7 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
       formatter_(quantities.empty()
                      ? (extended_ ? OutputDefaultQuantities::oscar2013extended
                                   : OutputDefaultQuantities::oscar2013)
-                     : quantities)
-
-{
+                     : quantities) {
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
   std::uint16_t format_variant = static_cast<uint16_t>(extended_format);
