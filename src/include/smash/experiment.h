@@ -760,6 +760,12 @@ void Experiment<Modus>::create_output(const std::string &format,
     if (content == "Rivet") {
       abort_because_of("Rivet");
     }
+    if (content == "Collisions") {
+      logg[LExperiment].warn(
+          "Multiple ensembles in 'Collisions' output are not distinguishable. "
+          "Such an output with\nmultiple parallel ensembles should only be "
+          "used to compute ensemble-averaged quantities.");
+    }
   }
 
   if (format == "VTK" && content == "Particles") {
@@ -1279,8 +1285,13 @@ Experiment<Modus>::Experiment(Configuration &config,
    *    - Available formats: \ref doxypage_output_rivet
    *
    * \attention At the moment, the \b Initial_Conditions and \b Rivet outputs
-   * content as well as the \b HepMC format cannot be used with multiple
-   * parallel ensembles and SMASH will abort if the user tries to do so.
+   * content as well as the \b HepMC format cannot be used <u>with multiple
+   * parallel ensembles</u> and SMASH will abort if the user tries to do so.
+   * The \b Collisions content, instead, is allowed, although in it collisions
+   * coming from different ensembles are simply printed all together in an
+   * effectively unpredictable order and it is not possible to know which one
+   * belongs to which ensemble. Therefore SMASH warns the user about this fact
+   * and this setup should only be used to compute ensemble-averaged quantities.
    *
    * \n
    *
