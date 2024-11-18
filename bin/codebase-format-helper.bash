@@ -17,6 +17,7 @@ trap 'printf "\n"' EXIT
 declare -rg minimum_bash_version='4.3.0'
 declare -rg clang_format_required_version='13.0'
 declare -rg cmake_format_required_version='0.6.13'
+declare -rg python_format_required_version='2.3.1'
 
 #===================================================================
 # Principal functions
@@ -36,6 +37,7 @@ function do_variables_and_shell_options_setup()
     declare -gA FORMATTER_COMMAND=(
         ['C++']='clang-format-'${clang_format_required_version%%.*}
         ['CMake']='cmake-format'
+        ['Python']='autopep8'
     )
     MODE_PERFORM='FALSE'
     MODE_TEST='FALSE'
@@ -100,12 +102,16 @@ function check_formatter_version()
     local language required found
     language="$1"
     found=$(${FORMATTER_COMMAND[${language}]} --version)
+    regex='[0-9]+([.][0-9]+)+'
     if [[ ${language} = 'C++' ]]; then
         required=${clang_format_required_version}
-        found=$(grep -oE '[1-9][0-9]*[.][0-9]+' <<< "${found}" | head -n1)
+        regex='[0-9]+[.][0-9]+'
     elif [[ ${language} = 'CMake' ]]; then
         required=${cmake_format_required_version}
+    elif [[ ${language} = 'Python' ]]; then
+        required=${python_format_required_version}
     fi
+    found=$(grep -oE "${regex}" <<< "${found}" | head -n1)
     if [[ "${found}" != "${required}" ]]; then
         fail "Wrong ${FORMATTER_COMMAND[${language}]} version found: ${found} (${required} is required)."
     fi
@@ -117,7 +123,7 @@ function look_for_files_to_format()
     language="$1"
     base_dir="$(dirname ${BASH_SOURCE[0]})/.."
     if [[ ${language} = 'C++' ]]; then
-        # C++ extenstions accepted by GNU compiler: https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html
+        # C++ extensions accepted by GNU compiler: https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html
         FILES_TO_FORMAT=(
             "${base_dir}/"{src,examples}/**/*.{h,hh,H,hp,hxx,hpp,HPP,h++,tcc,cc,cp,cxx,cpp,CPP,c++,C,ii}
         )
@@ -134,6 +140,10 @@ function look_for_files_to_format()
             fi
         done
         FILES_TO_FORMAT=("${FILES_TO_FORMAT[@]}")
+    elif [[ ${language} = 'Python' ]]; then
+        FILES_TO_FORMAT=(
+            "${base_dir}/"{bin,examples,src}/**/*.py
+        )
     fi
 }
 
@@ -176,7 +186,7 @@ function test_formatting()
 function usage()
 {
     printf '\n\e[96m Helper script to format source files in the codebase.\n\n Usage: '
-    printf "\e[93m${BASH_SOURCE[0]} [C++|CMake] <option>\e[0m\n\n"
+    printf "\e[93m${BASH_SOURCE[0]} [C++|CMake|Python] <option>\e[0m\n\n"
     printf '\e[96m Possible options:\n\n'
     printf '    \e[93m%-15s\e[0m  ->  \e[96m%s\e[0m\n' \
            '-p | --perform' 'Perform automatic formatting (for developers)' \
@@ -199,8 +209,8 @@ function parse_command_line_arguments()
         usage
         exit 0
     fi
-    if [[ ! $1 =~ ^C(\+\+|Make)$ ]]; then
-        CHOSEN_LANGUAGES=( 'C++' 'CMake' )
+    if [[ ! $1 =~ ^(C\+\+|CMake|Python)$ ]]; then
+        CHOSEN_LANGUAGES=( 'C++' 'CMake' 'Python' )
     else
         CHOSEN_LANGUAGES=( "$1" )
         shift
@@ -217,7 +227,7 @@ function parse_command_line_arguments()
                 VERBOSE='FALSE'
                 ;;
             *)
-                fail "Unrecognised option."
+                fail "Unrecognized option."
                 ;;
         esac
         shift

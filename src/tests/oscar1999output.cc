@@ -294,7 +294,7 @@ TEST(initial_conditions_format) {
   ParticleData p1 = particles.insert(Test::smashon_random());
   p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
 
-  // Create action ("hypersurface crossing")
+  // Create action
   ActionPtr action = std::make_unique<FluidizationAction>(p1, p1, 0.0);
   action->generate_final_state();
 
@@ -319,7 +319,7 @@ TEST(initial_conditions_format) {
     /* Initial state output (note that this should not do anything!) */
     oscfinal->at_eventstart(particles, event_id, event);
 
-    /* Write particle removied in action to */
+    /* Write particle removed in action */
     action->perform(&particles, 1);
     oscfinal->at_interaction(*action, 0.);
 
@@ -355,7 +355,7 @@ TEST(initial_conditions_format) {
       outputfile >> item;
       COMPARE(std::stoul(item), particles.size());
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), 1);
+      COMPARE(std::atoi(item.c_str()), 0);
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), event_id);
 
