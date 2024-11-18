@@ -36,6 +36,7 @@ class BinaryOutputBase : public OutputInterface {
    * \param[in] mode Is used to determine the file access mode.
    * \param[in] name Name of the output.
    * \param[in] extended_format Is the written output extended.
+   * \param[in] quantities is the vector of quantities passed to the OutPutFormatter.
    */
   explicit BinaryOutputBase(const std::filesystem::path &path,
                             const std::string &mode, const std::string &name,
@@ -131,7 +132,7 @@ class BinaryOutputBase : public OutputInterface {
   bool extended_;
   /// If custom is used extended field is set to:
   const uint16_t format_custom = 2;
-
+  /// The output formatter
   OutputFormatter<ToBinary> formatter_;
 };
 
