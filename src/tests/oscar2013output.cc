@@ -471,7 +471,7 @@ TEST(initial_conditions_2013_format) {
       COMPARE(line, "# " SMASH_VERSION);
       /* Check initial particle list description line */
       std::string initial_line =
-          "# event " + std::to_string(event_id) + " in " + std::to_string(1);
+          "# event " + std::to_string(event_id) + " start";
       std::getline(outputfile, line);
       COMPARE(line, initial_line);
       /* Check initial particle data lines item by item */
@@ -488,8 +488,7 @@ TEST(initial_conditions_2013_format) {
       outputfile.get();
       /* Check for event end line */
       std::getline(outputfile, line);
-      std::string end_line = "# event " + std::to_string(event_id) + " end 0" +
-                             " impact   1.783 scattering_projectile_target yes";
+      std::string end_line = "# event " + std::to_string(event_id) + " end";
       COMPARE(line, end_line);
     }
   }
