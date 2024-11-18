@@ -3122,7 +3122,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \optional_key{key_MC_initial_distance_,Initial_Distance,double,2.0}
+   * \optional_key{key_MC_initial_distance_,Initial_Distance,double,4.0}
    *
    * The initial distance of the two nuclei \unit{in fm}:
    * \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
@@ -3134,7 +3134,7 @@ struct InputKeys {
    * \see_key{key_MC_initial_distance_}
    */
   inline static const Key<double> modi_collider_initialDistance{
-      InputSections::m_collider + "Initial_Distance", 2.0, {"0.50"}};
+      InputSections::m_collider + "Initial_Distance", 4.0, {"0.50"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
