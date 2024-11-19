@@ -122,7 +122,7 @@ TEST(fullhistory_format) {
           "# " SMASH_VERSION
           "\n"
           "# Block format:\n"
-          "# nin nout event_number ensemble_number\n"
+          "# nin nout density tot_weight part_weight proc_type\n"
           "# id pdg 0 px py pz p0 mass x y z t\n"
           "# End of event: 0 0 event_number ensemble_number impact_parameter\n"
           "#\n";

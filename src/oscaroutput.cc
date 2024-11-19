@@ -112,7 +112,12 @@ OscarOutput<Format, Contents>::OscarOutput(
     std::fprintf(file_.get(), "# %s\n# %s\n# %s\n", format_name.c_str(),
                  oscar_name.c_str(), SMASH_VERSION);
     std::fprintf(file_.get(), "# Block format:\n");
-    std::fprintf(file_.get(), "# nin nout event_number ensemble_number\n");
+    if (oscar_name == "full_event_history") {
+      std::fprintf(file_.get(),
+                   "# nin nout density tot_weight part_weight proc_type\n");
+    } else {
+      std::fprintf(file_.get(), "# nin nout event_number ensemble_number\n");
+    }
     std::fprintf(file_.get(), "# %s\n", formatter_.quantities_line().c_str());
     std::fprintf(
         file_.get(),
@@ -660,7 +665,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # full_event_history
  * # smash <version>
  * # Block format:
- * # nin nout event_number
+ * # nin nout density tot_weight part_weight proc_type
  * # id pdg 0 px py pz p0 mass x y z t
  * # End of event: 0 0 event_number
  * #
