@@ -2583,6 +2583,16 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     }
   }
 
+  /* Increment once more the output clock in order to have it prepared for the
+   * final_output() call. Once close to the end time, the while-loop above to
+   * produce intermediate output is not entered as the next_output_time() is
+   * never strictly smaller than end_timestep_time (they are usually equal).
+   * Since in the final_output() function the current time of the output clock
+   * is used to produce the output, this has to be incremented before producing
+   * the final output and it makes sense to do it here.
+   */
+  ++(*parameters_.outputclock);
+
   if (pauli_blocker_) {
     logg[LExperiment].info(
         "Interactions: Pauli-blocked/performed = ", total_pauli_blocked_, "/",
