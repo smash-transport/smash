@@ -389,8 +389,9 @@ void RootOutput::at_eventstart(const Particles &particles,
 void RootOutput::at_intermediate_time(const Particles &particles,
                                       const std::unique_ptr<Clock> &,
                                       const DensityParameters &,
-                                      const EventLabel &,
+                                      const EventLabel &event_label,
                                       const EventInfo &event) {
+  current_ensemble_ = event_label.ensemble_number;
   modus_l_ = event.modus_length;
   test_p_ = event.test_particles;
   current_t_ = event.current_time;
@@ -404,8 +405,10 @@ void RootOutput::at_intermediate_time(const Particles &particles,
   }
 }
 
-void RootOutput::at_eventend(const Particles &particles, const EventLabel &,
+void RootOutput::at_eventend(const Particles &particles,
+                             const EventLabel &event_label,
                              const EventInfo &event) {
+  current_ensemble_ = event_label.ensemble_number;
   modus_l_ = event.modus_length;
   test_p_ = event.test_particles;
   current_t_ = event.current_time;
