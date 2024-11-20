@@ -97,6 +97,24 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1 for
  * anti-baryons and 0 for mesons.
  *
+ * **Custom Particle line**
+ *
+ * Similar to the custom ASCII format (see \ref doxypage_output_ascii), the
+ binary format also supports
+ * custom quantities for particle lines. An example of particle quantities is
+ shown below:
+
+ \verbatim
+   Output:
+     Particles:
+         Format:     ["Binary"]
+         Quantities: ["p0", "pz", "pdg", "charge"]
+ \endverbatim
+ * Here, the particle data will be serialized in the same order as they appear
+ in the Quantities list.
+ *
+ *
+ *
  * **Event end line**
  * \code
  * char    uint32_t      double      char
@@ -147,6 +165,12 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
                      ? (extended_ ? OutputDefaultQuantities::oscar2013extended
                                   : OutputDefaultQuantities::oscar2013)
                      : quantities) {
+  if (extended_format == 1 && !quantities.empty()) {
+    throw std::invalid_argument(
+        "Conflicting options: 'custom format' and 'extended format' cannot be "
+        "enabled simultaneously.");
+  }
+
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
   std::uint16_t format_variant = static_cast<uint16_t>(extended_format);
