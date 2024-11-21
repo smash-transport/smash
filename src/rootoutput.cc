@@ -239,7 +239,6 @@ RootOutput::RootOutput(const std::filesystem::path &path,
       write_particles_(name == "Particles"),
       write_initial_conditions_(name == "SMASH_IC"),
       particles_only_final_(out_par.part_only_final),
-      autosave_frequency_(1000),
       part_extended_(out_par.part_extended),
       coll_extended_(out_par.coll_extended),
       ic_extended_(out_par.ic_extended) {
@@ -423,12 +422,20 @@ void RootOutput::at_eventend(const Particles &particles,
         particles_only_final_ == OutputOnlyFinal::IfNotEmpty)) {
     particles_to_tree(particles);
   }
+  /* Calculate the autosave frequency to be used. In case multiple ensembles are
+   * used this has to be at least 1, so set it to 1 if the number of ensembles
+   * is larger than the initial value of the autosave frequency. The evaluation
+   * of the actual frequency to be used has to be done only once, i.e. when the
+   * autosave_frequency_ has still its meaningless initial negative value. */
+  if (autosave_frequency_ < 0) {
+    autosave_frequency_ = 1000 / event.n_ensembles;
+    if (autosave_frequency_ == 0) {
+      autosave_frequency_ = 1;
+    }
+  }
   /* Forced regular dump from operational memory to disk. Very demanding!
    * If program crashes written data will NOT be lost. */
-  if (current_event_ > 0 &&
-      (event.n_ensembles * current_event_ + current_ensemble_) %
-              autosave_frequency_ ==
-          0) {
+  if (current_event_ > 0 && current_event_ % autosave_frequency_ == 0) {
     if (write_particles_ || write_initial_conditions_) {
       particles_tree_->AutoSave("SaveSelf");
     }
@@ -542,7 +549,7 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
   int i = 0;
 
   /* It is assumed that nin + nout < max_buffer_size_
-   * This is true for any possible reaction for current buffer size: 10000
+   * This is true for any possible reaction for current buffer size
    * But if one wants initial/final particles written to collisions
    * then implementation should be updated. */
 

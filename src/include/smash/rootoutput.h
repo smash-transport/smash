@@ -227,15 +227,18 @@ class RootOutput : public OutputInterface {
   OutputOnlyFinal particles_only_final_;
 
   /**
-   * Root file cannot be read if it was not properly closed and finalized.
-   * It can happen that SMASH simulation crashed and root file was not closed.
+   * ROOT file cannot be read if it was not properly closed and finalized.
+   * It can happen that SMASH simulation crashed and ROOT file was not closed.
    * To save results of simulation in such case, "AutoSave" is applied every N
-   * events. If multiple ensembles are used, N refers to the number of ensembles
-   * generated till that moment. The autosave_frequency_ sets this N (default
-   * N=1000). Note that "AutoSave" operation is very time-consuming, so the
-   * Autosave_Frequency is always a compromise between safety and speed.
+   * events. If multiple ensembles are used, N is divided by the number of
+   * ensembles per event. This makes sense especially in case of a large number
+   * of ensembles and, at the same time, it ensures that all ensembles belonging
+   * to the same event are saved. The autosave_frequency_ sets this N (at the
+   * moment N=1000 hard-coded). Note that "AutoSave" operation is very
+   * time-consuming, so the autosave frequency is always a compromise between
+   * safety and speed.
    */
-  int autosave_frequency_;
+  int autosave_frequency_ = -1;
 
   /// Whether extended particle output is on
   const bool part_extended_;
