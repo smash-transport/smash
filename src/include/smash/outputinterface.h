@@ -106,7 +106,7 @@ struct EventLabel {
  * integer. The former contains both the number of event and the number of
  * ensemble while the latter is meant to be the number of the event, only.
  * Passing the number of event only is meant to emphasise that the method will
- * average physics quantities over different ensembles, when multiple are used.
+ * combine input from different ensembles, when multiple are used.
  */
 class OutputInterface {
  public:

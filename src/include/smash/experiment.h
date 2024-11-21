@@ -762,9 +762,10 @@ void Experiment<Modus>::create_output(const std::string &format,
     }
     if (content == "Collisions") {
       logg[LExperiment].warn(
-          "Multiple ensembles in 'Collisions' output are not distinguishable. "
-          "Such an output with\nmultiple parallel ensembles should only be "
-          "used to compute ensemble-averaged quantities.");
+          "Information coming from different ensembles in 'Collisions' output "
+          "is not distinguishable.\nSuch an output with multiple parallel "
+          "ensembles should only be used if later in the data analysis\nit is "
+          "not necessary to trace back which data belongs to which ensemble.");
     }
   }
 
@@ -1291,7 +1292,8 @@ Experiment<Modus>::Experiment(Configuration &config,
    * coming from different ensembles are simply printed all together in an
    * effectively unpredictable order and it is not possible to know which one
    * belongs to which ensemble. Therefore SMASH warns the user about this fact
-   * and this setup should only be used to compute ensemble-averaged quantities.
+   * and this setup should only be used if in the data analysis it is not
+   * necessary to trace back which data belongs to which ensemble.
    *
    * \n
    *

@@ -66,7 +66,7 @@ const int RootOutput::max_buffer_size_ = 500000;
  * The maximal
  * number of particles in one entry is limited to 500000. This is done to limit
  * the buffer size needed for ROOT output. If the number of particles in one
- * block exceeds 500000, then they are written in separate blocks with the same
+ * block exceeds 500000, then they are written in separate entries with the same
  * \c tcounter and \c ev. The fields have the following meaning:
  *
  * \li \c ev is event number
