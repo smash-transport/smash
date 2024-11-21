@@ -93,7 +93,7 @@ class RootOutput : public OutputInterface {
   /**
    * update event number and writes intermediate particles to a tree.
    * \param[in] particles Particles to be written to output.
-   * \param[in] event_label event/ensemble numbers to be used in ROOT output.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_eventstart(const Particles &particles, const EventLabel &event_label,
@@ -102,7 +102,7 @@ class RootOutput : public OutputInterface {
    * update event number and impact parameter,
    * and writes intermediate particles to a tree.
    * \param[in] particles Particles to be written to output.
-   * \param[in] event_label event/ensemble numbers to be used in ROOT output.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const EventLabel &event_label,
@@ -113,7 +113,7 @@ class RootOutput : public OutputInterface {
    * \param[in] particles Particles to be written to output.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
-   * \param[in] event_label event/ensemble numbers to be used in ROOT output.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_intermediate_time(const Particles &particles,

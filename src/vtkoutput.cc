@@ -46,7 +46,7 @@ VtkOutput::~VtkOutput() {}
  * every period of time \f$ \Delta t \f$, where \f$ \Delta t \f$ is regulated
  * by option (see \ref doxypage_input_conf_general). For every new output moment
  * a separate VTK file is written. File names are constructed as follows:
- * `pos_ev<event>_ens<ensemble>_tstep<output_number>.vtk`.
+ * `pos_ev<event>_ens<ensemble>_tstep<timestep_counter>.vtk`.
  *
  * Files contain particle coordinates, momenta, PDG codes, cross-section
  * scaling factors, ID, number of collisions baryon number, strangeness and
@@ -177,8 +177,8 @@ void VtkOutput::write(const Particles &particles) {
  * \page doxypage_output_vtk_lattice
  * Density on the lattice can be printed out in the VTK format of structured
  * grid. At every output moment a new vtk file is created. The name format is
- * `<density_name>_<event_number>_tstep<number_of_output_moment>.vtk`. Files can
- * be opened directly with <a href="http://paraview.org">ParaView</a>.
+ * `<density_type>_<density_name>_<event_number>_tstep<timestep_counter>.vtk`.
+ * Files can be opened directly with <a href="http://paraview.org">ParaView</a>.
  */
 
 template <typename T>
@@ -265,8 +265,8 @@ void VtkOutput::thermodynamics_output(
  * velocity of Landau rest frame \f$v_L\f$ on the lattice can be printed out
  * in the VTK format of structured grid. At every output moment a new vtk file
  * is created. The name format is
- * `<quantity>_<event_number>_tstep<number_of_output_moment>.vtk`. Files can
- * be opened directly with <a href="http://paraview.org">ParaView</a>.
+ * `<density_type>_<quantity>_<event_number>_tstep<timestep_counter>.vtk`. Files
+ * can be opened directly with <a href="http://paraview.org">ParaView</a>.
  *
  * For configuring the output see \ref input_output_content_specific_
  * "content-specific output options".

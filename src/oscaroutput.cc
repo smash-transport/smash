@@ -478,7 +478,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * **Output block header**
  *
  * Each output block starts with a line indicating the numbers of ingoing and
- * outgoing particles as well the number of the event and ensemble.
+ * outgoing particles as well the numbers of the event and ensemble.
  * \code
  * nin nout event_number ensemble_number
  * \endcode

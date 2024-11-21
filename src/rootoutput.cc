@@ -364,7 +364,7 @@ RootOutput::~RootOutput() {
 void RootOutput::at_eventstart(const Particles &particles,
                                const EventLabel &event_label,
                                const EventInfo &event) {
-  // save event/ensemble number
+  // save event and ensemble numbers
   current_event_ = event_label.event_number;
   current_ensemble_ = event_label.ensemble_number;
 

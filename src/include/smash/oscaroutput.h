@@ -80,7 +80,7 @@ class OscarOutput : public OutputInterface {
   /**
    * Writes the initial particle information of an event to the oscar output.
    * \param[in] particles Current list of all particles.
-   * \param[in] event_label Numbers of event/ensemble.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_eventstart(const Particles &particles, const EventLabel &event_label,
@@ -89,7 +89,7 @@ class OscarOutput : public OutputInterface {
   /**
    * Writes the final particle information of an event to the oscar output.
    * \param[in] particles Current list of particles.
-   * \param[in] event_label Numbers of event/ensemble.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const EventLabel &event_label,
@@ -109,7 +109,7 @@ class OscarOutput : public OutputInterface {
    * \param[in] particles Current list of particles.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
-   * \param[in] event_label Numbers of event/ensemble.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_intermediate_time(const Particles &particles,

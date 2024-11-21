@@ -61,7 +61,7 @@ struct EventInfo {
 /**
  * \ingroup output
  *
- * \brief Structure to contain information about the event/ensemble numbering
+ * \brief Structure to contain information about the event and ensemble numbers
  *
  * \anchor event_label
  * This structure is intended to hold and conveniently pass information to

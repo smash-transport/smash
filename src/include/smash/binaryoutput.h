@@ -150,7 +150,7 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * Writes the initial particle information list of an event to the binary
    * output.
    * \param[in] particles Current list of all particles.
-   * \param[in] event_label Numbers of event/ensemble.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_eventstart(const Particles &particles, const EventLabel &event_label,
@@ -160,7 +160,7 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * Writes the final particle information list of an event to the binary
    * output.
    * \param[in] particles Current list of particles.
-   * \param[in] event_label Numbers of event/ensemble.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const EventLabel &event_label,
@@ -209,7 +209,7 @@ class BinaryOutputParticles : public BinaryOutputBase {
   /**
    * Writes the initial particle information of an event to the binary output.
    * \param[in] particles Current list of all particles.
-   * \param[in] event_label Numbers of event/ensemble.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_eventstart(const Particles &particles, const EventLabel &event_label,
@@ -218,7 +218,7 @@ class BinaryOutputParticles : public BinaryOutputBase {
   /**
    * Writes the final particle information of an event to the binary output.
    * \param[in] particles Current list of particles.
-   * \param[in] event_label Numbers of event/ensemble.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const EventLabel &event_label,
@@ -229,7 +229,7 @@ class BinaryOutputParticles : public BinaryOutputBase {
    * \param[in] particles Current list of particles.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
-   * \param[in] event_label Numbers of event/ensemble.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info.
    */
   void at_intermediate_time(const Particles &particles,
@@ -279,7 +279,7 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
   /**
    * Writes the final particle information of an event to the binary output.
    * \param[in] particles Current list of particles.
-   * \param[in] event_label Number of event/ensemble.
+   * \param[in] event_label Number of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_eventend(const Particles &particles, const EventLabel &event_label,

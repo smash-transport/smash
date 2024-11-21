@@ -45,7 +45,7 @@ class VtkOutput : public OutputInterface {
    * output.
    *
    * \param particles Current list of all particles.
-   * \param event_label Numbers of the current event/ensemble.
+   * \param event_label Numbers of the current event and ensemble.
    * \param event Event info, see \ref event_info
    */
   void at_eventstart(const Particles &particles, const EventLabel &event_label,
@@ -69,7 +69,7 @@ class VtkOutput : public OutputInterface {
    * \param particles Current list of particles.
    * \param clock Unused, needed since inherited.
    * \param dens_param Unused, needed since inherited.
-   * \param event_label Numbers of the current event/ensemble.
+   * \param event_label Numbers of the current event and ensemble.
    * \param event Event info, see \ref event_info
    */
   void at_intermediate_time(const Particles &particles,
