@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_VTKOUTPUT_H_
 
 #include <filesystem>
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
@@ -44,10 +45,10 @@ class VtkOutput : public OutputInterface {
    * output.
    *
    * \param particles Current list of all particles.
-   * \param event_number Number of the current event.
+   * \param event_label Numbers of the current event and ensemble.
    * \param event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles, const int event_number,
+  void at_eventstart(const Particles &particles, const EventLabel &event_label,
                      const EventInfo &event) override;
 
   /**
@@ -55,11 +56,11 @@ class VtkOutput : public OutputInterface {
    * output. This currently does not do anything, because it is not
    * required for the VTK output.
    *
-   * \param particles Unused. Current list of particles.
-   * \param event_number Unused. Number of event.
+   * \param particles Unused, needed since inherited.
+   * \param event_label Unused, needed since inherited.
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventend(const Particles &particles, const int event_number,
+  void at_eventend(const Particles &particles, const EventLabel &event_label,
                    const EventInfo &event) override;
 
   /**
@@ -68,11 +69,13 @@ class VtkOutput : public OutputInterface {
    * \param particles Current list of particles.
    * \param clock Unused, needed since inherited.
    * \param dens_param Unused, needed since inherited.
+   * \param event_label Numbers of the current event and ensemble.
    * \param event Event info, see \ref event_info
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
                             const DensityParameters &dens_param,
+                            const EventLabel &event_label,
                             const EventInfo &event) override;
 
   /**
@@ -172,13 +175,28 @@ class VtkOutput : public OutputInterface {
   void write_vtk_vector(std::ofstream &file, RectangularLattice<T> &lat,
                         const std::string &varname, F &&function);
 
+  /**
+   * Create the key to access the \c vtk_output_counter_ map.
+   *
+   * \return std::pair<int, int> The key to access the map.
+   */
+  std::pair<int, int> counter_key() {
+    return {current_event_, current_ensemble_};
+  }
+
   /// filesystem path for output
   const std::filesystem::path base_path_;
 
   /// Event number
   int current_event_ = 0;
-  /// Number of vtk output in current event
-  int vtk_output_counter_ = 0;
+  /// Ensemble number
+  int current_ensemble_ = 0;
+  /**
+   * Counters to keep track of time steps per event and per ensemble. The first
+   * pair index runs over events and the second one over ensembles, but this is
+   * encapsulated in the \c counter_key method which is used to change this map.
+   */
+  std::map<std::pair<int, int>, int> vtk_output_counter_{};
 
   /// Number of density lattice vtk output in current event
   int vtk_density_output_counter_ = 0;

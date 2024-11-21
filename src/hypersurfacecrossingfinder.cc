@@ -13,7 +13,8 @@
 #include "smash/logging.h"
 
 namespace smash {
-static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
+[[maybe_unused]] static constexpr int LHyperSurfaceCrossing =
+    LogArea::HyperSurfaceCrossing::id;
 
 ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     const ParticleList &plist, double dt, const double,

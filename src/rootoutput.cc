@@ -59,17 +59,18 @@ const int RootOutput::max_buffer_size_ = 500000;
  * Every physical quantity corresponds to a separate TBranch.
  * One entry in the \c particles TTree is:
  * \code
- * ev tcounter npart test_p modus_l current_t impact_b empty_event
+ * ev ens tcounter npart test_p modus_l current_t impact_b empty_event
  * pdgcode[npart] charge[npart] t[npart] x[npart] y[npart] z[npart] p0[npart]
  * px[npart] py[npart] pz[npart] E_kinetic_tot E_fields_tot E_tot
  * \endcode
  * The maximal
  * number of particles in one entry is limited to 500000. This is done to limit
  * the buffer size needed for ROOT output. If the number of particles in one
- * block exceeds 500000, then they are written in separate blocks with the same
+ * block exceeds 500000, then they are written in separate entries with the same
  * \c tcounter and \c ev. The fields have the following meaning:
  *
  * \li \c ev is event number
+ * \li \c ens is ensemble number
  * \li \c tcounter is number of output block in a given event in terms of
  * OSCAR
  * \li \c npart is number of particles in the block
@@ -238,7 +239,6 @@ RootOutput::RootOutput(const std::filesystem::path &path,
       write_particles_(name == "Particles"),
       write_initial_conditions_(name == "SMASH_IC"),
       particles_only_final_(out_par.part_only_final),
-      autosave_frequency_(1000),
       part_extended_(out_par.part_extended),
       coll_extended_(out_par.coll_extended),
       ic_extended_(out_par.ic_extended) {
@@ -254,6 +254,7 @@ void RootOutput::init_trees() {
     particles_tree_ = new TTree("particles", "particles");
 
     particles_tree_->Branch("ev", &ev_, "ev/I");
+    particles_tree_->Branch("ens", &ens_, "ens/I");
     particles_tree_->Branch("tcounter", &tcounter_, "tcounter/I");
     particles_tree_->Branch("npart", &npart_, "npart/I");
     particles_tree_->Branch("test_p", &test_p_, "test_p/I");
@@ -309,6 +310,7 @@ void RootOutput::init_trees() {
     collisions_tree_->Branch("nout", &nout_, "nout/I");
     collisions_tree_->Branch("npart", &npart_, "npart/I");
     collisions_tree_->Branch("ev", &ev_, "ev/I");
+    collisions_tree_->Branch("ens", &ens_, "ens/I");
     collisions_tree_->Branch("weight", &wgt_, "weight/D");
     collisions_tree_->Branch("partial_weight", &par_wgt_, "partial_weight/D");
 
@@ -360,9 +362,11 @@ RootOutput::~RootOutput() {
 }
 
 void RootOutput::at_eventstart(const Particles &particles,
-                               const int event_number, const EventInfo &event) {
-  // save event number
-  current_event_ = event_number;
+                               const EventLabel &event_label,
+                               const EventInfo &event) {
+  // save event and ensemble numbers
+  current_event_ = event_label.event_number;
+  current_ensemble_ = event_label.ensemble_number;
 
   modus_l_ = event.modus_length;
   test_p_ = event.test_particles;
@@ -384,7 +388,9 @@ void RootOutput::at_eventstart(const Particles &particles,
 void RootOutput::at_intermediate_time(const Particles &particles,
                                       const std::unique_ptr<Clock> &,
                                       const DensityParameters &,
+                                      const EventLabel &event_label,
                                       const EventInfo &event) {
+  current_ensemble_ = event_label.ensemble_number;
   modus_l_ = event.modus_length;
   test_p_ = event.test_particles;
   current_t_ = event.current_time;
@@ -399,8 +405,9 @@ void RootOutput::at_intermediate_time(const Particles &particles,
 }
 
 void RootOutput::at_eventend(const Particles &particles,
-                             const int /*event_number*/,
+                             const EventLabel &event_label,
                              const EventInfo &event) {
+  current_ensemble_ = event_label.ensemble_number;
   modus_l_ = event.modus_length;
   test_p_ = event.test_particles;
   current_t_ = event.current_time;
@@ -414,6 +421,17 @@ void RootOutput::at_eventend(const Particles &particles,
       !(event.empty_event &&
         particles_only_final_ == OutputOnlyFinal::IfNotEmpty)) {
     particles_to_tree(particles);
+  }
+  /* Calculate the autosave frequency to be used. In case multiple ensembles are
+   * used this has to be at least 1, so set it to 1 if the number of ensembles
+   * is larger than the initial value of the autosave frequency. The evaluation
+   * of the actual frequency to be used has to be done only once, i.e. when the
+   * autosave_frequency_ has still its meaningless initial negative value. */
+  if (autosave_frequency_ < 0) {
+    autosave_frequency_ = 1000 / event.n_ensembles;
+    if (autosave_frequency_ == 0) {
+      autosave_frequency_ = 1;
+    }
   }
   /* Forced regular dump from operational memory to disk. Very demanding!
    * If program crashes written data will NOT be lost. */
@@ -456,6 +474,7 @@ void RootOutput::particles_to_tree(T &particles) {
   int i = 0;
 
   ev_ = current_event_;
+  ens_ = current_ensemble_;
   tcounter_ = output_counter_;
   bool exceeded_buffer_message = true;
 
@@ -520,6 +539,7 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
                                     const double weight,
                                     const double partial_weight) {
   ev_ = current_event_;
+  ens_ = current_ensemble_;
   nin_ = incoming.size();
   nout_ = outgoing.size();
   npart_ = nin_ + nout_;
@@ -529,7 +549,7 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
   int i = 0;
 
   /* It is assumed that nin + nout < max_buffer_size_
-   * This is true for any possible reaction for current buffer size: 10000
+   * This is true for any possible reaction for current buffer size
    * But if one wants initial/final particles written to collisions
    * then implementation should be updated. */
 
