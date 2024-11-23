@@ -294,7 +294,6 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * see \ref input_output_content_specific_ "Content-specific output options" for
  * further details.
  *
- * \n
  * **Unless IC output is enabled, the Particle output always provides the
  * current particle list at a specific time.** See \ref
  * doxypage_output_initial_conditions for details about the particles IC output.
@@ -309,7 +308,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * Oscar2013 is an ASCII (text) human-readable output following the OSCAR 2013
  * standard. The format specifics are the following:\n
  * \n
- * **Header**
+ * **File header**
  * \code
  * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID charge
  * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none e
@@ -322,8 +321,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * -# Units of the quantities in the particle lines
  * -# SMASH version
  *
- * \n
- * **Extended Output: Header**
+ * **File header for extended output**
  *
  * If desired, the OSCAR2013 output can be extended
  * by additional particle properties. This requires enabling the extended
@@ -343,8 +341,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *SMASH_version</span></div>
  * </div>
  *
- * \n
- * **Output block header**
+ * **Block header**
  *
  * The OSCAR2013 format is based on a block structure. The beginning of a new
  * block is marked by either the start of a new event or a new intermediate
@@ -393,8 +390,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key charge: the electric charge of the particle in units of the
  * elementary charge e
  *
- * \n
- * For the extended version the particle line contains
+ * For the **extended output** the particle line contains
  *
  * <div class="fragment">
  * <div class="line"><span class="preprocessor">t x y z mass p0 px py pz pdg
@@ -414,24 +410,22 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key proc_id_origin: ID of the process of the particle's last interaction
  * \li \key proc_type_origin: Type of the last process the particle has
  *     undergone. The possible process types are listed in
- *     \ref doxypage_output_oscar_particles_process_types.
+ *     \ref doxypage_output_oscar_particles_process_types
  * \li \key t_last_coll: time of the particle's last interaction (except wall
  *     crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle (0 in case the
  *     particle is sampled in a thermal bubble. It is not updated by elastic
- *     scatterings.)
+ *     scatterings)
  * \li \key pdg_mother2: PDG code of the 2nd mother particle (0 in case the
  *     particle results from the decay of a resonance or the appearance of a
  *     thermal bubble. In the former case, \key pdg_mother1 is the PDG code of
- *     this resonance. It is not updated by elastic scatterings.)
+ *     this resonance. It is not updated by elastic scatterings)
  * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1 for
- *     anti-baryons and 0 for mesons.
- * \li \key strangeness: Strangeness of the particle.
+ *     anti-baryons and 0 for mesons
+ * \li \key strangeness: Strangeness of the particle
  *
  * The mother particles are also set in case of an elastic scattering process.
  *
- * \page doxypage_output_oscar_particles
- * \n
  * **Event end line**\n
  * The end of an event is indicated by the following line:
  * \code
@@ -441,22 +435,20 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key ev_num: Event number
  * \li \key ens_num: Ensemble number
  * \li \key impact_parameter: Impact parameter of the collision in case of a
- *          collider setup, 0.0 otherwise.
+ *          collider setup, 0.0 otherwise
  * \li \key yes_or_no: "no" if there was an interaction between the projectile
  * and the target, "yes" otherwise. For non-collider setups, this is always
- * "no".
+ * "no"
  *
  * Note that `event`, `end`, `impact` and `empty` are no variables, but words
- * that are printed in the header. \n
+ * that are printed in the header.
  *
- * \n
  * Oscar1999
  * ---------
  * Oscar1999 is an ASCII (text) human-readable output following the OSCAR 1999
  * standard. The format specifics are the following:
  *
- * \n
- * **Header**
+ * **File header**
  * \code
  * # OSC1999A
  * # final_id_p_x
@@ -475,7 +467,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * -# The SMASH version with which the oputput was generated
  * -# - 7. Info on the block structure
  *
- * **Output block header**
+ * **Block header**
  *
  * Each output block starts with a line indicating the numbers of ingoing and
  * outgoing particles as well the numbers of the event and ensemble.
@@ -516,7 +508,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key event_number: Number of the event
  * \li \key ensemble_number: Number of the ensemble
  * \li \key impact_parameter: Impact parameter of the collisions. In case of
- * a box or sphere setup, this value is 0.0.
+ * a box or sphere setup, this value is 0.0
  *
  * \page doxypage_output_oscar_particles_process_types
  * The available process types are summarized in the following table.
@@ -594,7 +586,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *  Oscar2013 is an ASCII (text) human-readable output following the OSCAR 2013
  * standard. The format specifics are the following:\n
  * \n
- * **Header**
+ * **File header**
  * \code
  * #!OSCAR2013 full_event_history t x y z mass p0 px py pz pdg ID charge
  * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
@@ -608,7 +600,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * -# SMASH version
  *
  * \n
- * **Extended Output: Header** \n
+ * **Extended output: File header** \n
  * If desired, the OSCAR2013 output can be extended
  * by additional particle properties. This requires enabling the extended
  * output in the configuration file, see the \key Extended switch in
@@ -628,7 +620,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * </div>
  *
  * \n
- * **Output block header**\n
+ * **Event block header**\n
  * Just as the OSCAR1999 format, the OSCAR2013 format is based on a block
  * structure, where each block corresponds to one interaction. Each block starts
  * with a line formatted as follows:
@@ -651,7 +643,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *     doxypage_output_oscar_particles_process_types for possible types.
  *
  * Note, that "interaction", "in", "out", "rho", "weight", "partial" and "type"
- * are no variables, but words that are printed.\n
+ * are no variables, but words that are printed.
  *
  * \n
  * Oscar1999
