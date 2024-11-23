@@ -577,10 +577,9 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * See also \ref doxypage_output_collisions_box_modus. \n
  *
- * \note The particle and event end lines are identical as in the
- * \ref doxypage_output_oscar_particles.
+ * \note The particle and event end lines for both OSCAR 2013 and 1999 formats
+ * are identical as in the \ref doxypage_output_oscar_particles.
  *
- * \n
  * Oscar2013
  * ---------
  *  Oscar2013 is an ASCII (text) human-readable output following the OSCAR 2013
@@ -595,12 +594,11 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * The header consists of 3 lines starting with '#'. They contain the following
  * information:
  * -# Output version (OSCAR2013) and the type of output (particle_lists),
- * followed by the substructure of the particle lines.
+ * followed by the substructure of the particle lines
  * -# Units of the quantities in the particle lines
  * -# SMASH version
  *
- * \n
- * **Extended output: File header** \n
+ * **File header for extended output** \n
  * If desired, the OSCAR2013 output can be extended
  * by additional particle properties. This requires enabling the extended
  * output in the configuration file, see the \key Extended switch in
@@ -619,11 +617,10 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * SMASH_version</span></div>
  * </div>
  *
- * \n
  * **Event block header**\n
- * Just as the OSCAR1999 format, the OSCAR2013 format is based on a block
- * structure, where each block corresponds to one interaction. Each block starts
- * with a line formatted as follows:
+ * The OSCAR2013 format is based on a block structure, where each block
+ * corresponds to one interaction. Each block starts with a line formatted
+ * as follows:
  * <div class="fragment">
  * <div class="line"> <span class="preprocessor">
  *  \# interaction in nin out nout rho density weight tot_weight partial
@@ -636,22 +633,21 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key tot_weight: Total weight of the interaction. This is the total
  *     cross section in case of a scattering and the total decay width in case
  *     of a decay. If there is no weight for the specific process, e.g. a wall
- *     crossing, it's value is 0.0.
+ *     crossing, it's value is 0.0
  * \li \key part_weight: The partial weight of the interaction. This is the
- *     specific weight for the chosen final state.
+ *     specific weight for the chosen final state
  * \li \key proc_type: The type of the underlying process. See \ref
- *     doxypage_output_oscar_collisions_process_types for possible types.
+ *     doxypage_output_oscar_collisions_process_types for possible types
  *
  * Note, that "interaction", "in", "out", "rho", "weight", "partial" and "type"
  * are no variables, but words that are printed.
  *
- * \n
  * Oscar1999
  * ---------
  * Oscar1999 is an ASCII (text) human-readable output following the OSCAR 1999
- * standard. The format specifics are the following: \n
- * \n
- * **Header**
+ * standard. The format specifics are the following:
+ *
+ * **File header**
  * \code
  * # OSC1999A
  * # full_event_history
@@ -670,8 +666,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * -# The SMASH version with which the oputput was generated
  * -# - 7. Info on the block structure
  *
- * \n
- * **Output block header**\n
+ * **Block header**\n
  * Each output block starts with a line of the following format:
  * \code
  * nin nout density tot_weight part_weight proc_type
@@ -683,11 +678,11 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key tot_weight: Total weight of the interaction. This is the total cross
  * section in case of a scattering and the total decay width in case of a decay.
  * If there is no weight for the specific process, e.g. a wall crossing, it's
- * value is 0.0.
+ * value is 0.0
  * \li \key part_weight: The partial weight of the interaction. This is the
- * specific weight for the chosen final state.
+ * specific weight for the chosen final state
  * \li \key proc_type: The type of the underlying process. See
- * \ref doxypage_output_oscar_collisions_process_types for possible types.
+ * \ref doxypage_output_oscar_collisions_process_types for possible types
  *
  * If the \key Print_Start_End option is set (see \ref
  * input_output_content_specific_ "content-specific output options" for
