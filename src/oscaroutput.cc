@@ -410,7 +410,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key proc_id_origin: ID of the process of the particle's last interaction
  * \li \key proc_type_origin: Type of the last process the particle has
  *     undergone. The possible process types are listed in
- *     \ref doxypage_output_oscar_particles_process_types
+ *     \ref doxypage_output_oscar_collisions_process_types
  * \li \key t_last_coll: time of the particle's last interaction (except wall
  *     crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle (0 in case the
@@ -510,7 +510,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key impact_parameter: Impact parameter of the collisions. In case of
  * a box or sphere setup, this value is 0.0
  *
- * \page doxypage_output_oscar_particles_process_types
+ * \page doxypage_output_oscar_collisions_process_types
  * The available process types are summarized in the following table.
  *
  * <table>
@@ -640,7 +640,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key part_weight: The partial weight of the interaction. This is the
  *     specific weight for the chosen final state.
  * \li \key proc_type: The type of the underlying process. See \ref
- *     doxypage_output_oscar_particles_process_types for possible types.
+ *     doxypage_output_oscar_collisions_process_types for possible types.
  *
  * Note, that "interaction", "in", "out", "rho", "weight", "partial" and "type"
  * are no variables, but words that are printed.
@@ -687,7 +687,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key part_weight: The partial weight of the interaction. This is the
  * specific weight for the chosen final state.
  * \li \key proc_type: The type of the underlying process. See
- * \ref doxypage_output_oscar_particles_process_types for possible types.
+ * \ref doxypage_output_oscar_collisions_process_types for possible types.
  *
  * If the \key Print_Start_End option is set (see \ref
  * input_output_content_specific_ "content-specific output options" for
@@ -724,7 +724,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key proc_id_origin: ID of the process of the particle's last interaction
  * \li \key proc_type_origin: Type of the last process the particle has
  * undergone. The possible process types are listed in
- * \ref doxypage_output_oscar_particles_process_types
+ * \ref doxypage_output_oscar_collisions_process_types
  * \li \key time_last_coll: Time of the particle's last interaction (except
  * wall crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle (0 in case the

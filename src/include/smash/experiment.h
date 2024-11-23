@@ -1399,7 +1399,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * \li \key part_weight: Always 0.0 for photon processes, as they
    * are hardcoded.
    * \li \key proc_type: The type of the underlying process. See
-   * \ref doxypage_output_oscar_particles_process_types for possible types.
+   * \ref doxypage_output_oscar_collisions_process_types for possible types.
    *
    * Note, that "interaction", "in", "out", "rho", "weight", "partial" and
    * "type" are no variables, but words that are printed. \n
