@@ -148,15 +148,15 @@
     \page doxypage_output_rivet Rivet output
     \page doxypage_output_oscar OSCAR format
         <div class="invisible-content">
-        \subpage doxypage_output_oscar_collisions
         \subpage doxypage_output_oscar_particles
+        \subpage doxypage_output_oscar_collisions
         </div>
-        \page doxypage_output_oscar_collisions OSCAR collisions format
         \page doxypage_output_oscar_particles OSCAR particles format
+        \page doxypage_output_oscar_collisions OSCAR collisions format
             <div class="invisible-content">
-            \subpage doxypage_output_oscar_particles_process_types
+            \subpage doxypage_output_oscar_collisions_process_types
             </div>
-            \page doxypage_output_oscar_particles_process_types Process types
+            \page doxypage_output_oscar_collisions_process_types Process types
     \page doxypage_output_ascii Custom ASCII format
     \page doxypage_output_binary Binary format
     \page doxypage_output_root ROOT format
