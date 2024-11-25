@@ -24,7 +24,8 @@ namespace smash {
  * Structure to convert a given value into binary format, such that all methods
  * return a \c std::vector<char>.
  */
-struct ToBinary {
+class ToBinary {
+ public:
   /// Return type of this converter.
   using type = std::vector<char>;
 
@@ -34,12 +35,7 @@ struct ToBinary {
    * \param[in] value number to convert
    * \return a vector of char representing the binary format of the integer
    */
-  type as_integer(int value) const {
-    type binary_data(sizeof(int));  // Create a vector of the size of an integer
-    std::memcpy(binary_data.data(), &value,
-                sizeof(int));  // Copy the integer value into the vector
-    return binary_data;        // Return the binary data as a vector of char
-  }
+  type as_integer(int value) const { return as_binary_data(value); }
 
   /**
    * Converts a double to binary format.
@@ -47,13 +43,7 @@ struct ToBinary {
    * \param[in] value number to convert
    * \return a vector of char representing the binary format of the double
    */
-  type as_double(double value) const {
-    type binary_data(
-        sizeof(double));  // Create a vector of the size of a double
-    std::memcpy(binary_data.data(), &value,
-                sizeof(double));  // Copy the double value into the vector
-    return binary_data;           // Return the binary data as a vector of char
-  }
+  type as_double(double value) const { return as_binary_data(value); }
 
   /**
    * Converts a double to binary format, intended for precise representation.
@@ -61,9 +51,7 @@ struct ToBinary {
    * \param[in] value number to convert
    * \return a vector of char representing the binary format of the double
    */
-  type as_precise_double(double value) const {
-    return as_double(value);  // For precise double, simply call as_double
-  }
+  type as_precise_double(double value) const { return as_double(value); }
 
   /**
    * Converts a string to binary format.
@@ -72,9 +60,22 @@ struct ToBinary {
    * \return a vector of char representing the binary format of the string
    */
   type as_string(const std::string& str) const {
-    type binary_data(str.begin(),
-                     str.end());  // Create a vector from string data
-    return binary_data;           // Return the binary data as a vector of char
+    type binary_data(str.begin(), str.end());
+    return binary_data;
+  }
+
+ private:
+  /**
+   * Template method to convert numbers into binary format.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the number
+   */
+  template <typename T>
+  type as_binary_data(T value) const {
+    type binary_data(sizeof(T));
+    std::memcpy(binary_data.data(), &value, sizeof(T));
+    return binary_data;
   }
 };
 
@@ -151,16 +152,24 @@ struct ToASCII {
 };
 
 /**
- * A general formatter used for output purposes, which currently only works for
- * ASCII-based formats. In the future, a Binary converter will be implemented.
+ * A general-purpose formatter for output, supporting both ASCII and binary
+ * formats.
  *
- * In case further quantities need to be made outputable, one needs to add them
- * in the constructor with the appropriate getter from ParticleData, as well as
- * insert the proper pair in the units map.
+ * This class allows the output of particle data in a flexible and configurable
+ * manner, either in human-readable ASCII format or compact binary format. It
+ * uses a template parameter `Converter` to determine the desired output format,
+ * which must conform to the interface of either \c ToASCII or \c ToBinary.
  *
- * \tparam Converter format desired for the output. It should be a class with
- * the same interface as \c ToASCII, the only converter currently implemented,
- * with a defined \c type and the same methods.
+ * New quantities can be added for output by:
+ * 1. Adding their corresponding getter to the constructor, which extracts the
+ *    value from a \c ParticleData instance.
+ * 2. Adding the proper key-value pair to the \c units_ map, specifying the unit
+ *    of the quantity.
+ *
+ * \tparam Converter The desired output format. It must be a class implementing
+ *                   the same interface as \c ToASCII or \c ToBinary.
+ *                   Examples include `ToASCII` for human-readable text and
+ *                   `ToBinary` for compact binary output.
  */
 template <typename Converter,
           std::enable_if_t<std::is_same_v<Converter, ToASCII> ||
@@ -279,18 +288,17 @@ class OutputFormatter {
     }
   }
   /**
-   * Produced a chunk of binary representing a particle line for the output
-   * file. \param[in] p particle whose information is to be written. \return
-   * string with formatted data sperated by a space.
+   * Produces a chunk of binary representing a particle line for the output
+   * file.
+   *
+   * \param[in] p Particle whose information is to be written.
+   * \return vector of char of the formatted data.
    */
   typename Converter::type binary_chunk(const ParticleData& p) {
     return std::accumulate(
         std::begin(getters_), std::end(getters_), std::vector<char>{},
         [&p](std::vector<char> ss, const auto& getter) {
-          // Get the value using the getter and convert it to binary
           auto binary_data = getter(p);
-
-          // Append the binary data to the accumulator
           ss.insert(ss.end(), binary_data.begin(), binary_data.end());
           return ss;
         });

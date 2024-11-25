@@ -100,18 +100,19 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * **Custom Particle line**
  *
  * Similar to the custom ASCII format (see \ref doxypage_output_ascii), the
- binary format also supports
+ * binary format also supports
  * custom quantities for particle lines. An example of particle quantities is
- shown below:
-
- \verbatim
-   Output:
-     Particles:
-         Format:     ["Binary"]
-         Quantities: ["p0", "pz", "pdg", "charge"]
- \endverbatim
+ * shown below:
+ * \verbatim
+     Output:
+       Particles:
+           Format:     ["Binary"]
+           Quantities: ["p0", "pz", "pdg", "charge"]
+   \endverbatim
  * Here, the particle data will be serialized in the same order as they appear
- in the Quantities list.
+ * in the Quantities list. Refer to \ref doxypage_output_ascii table in order to
+ * know the types of the quantities written in the file and be able to correctly
+ read the output e.g. in an analysis software.
  *
  *
  *
@@ -155,9 +156,7 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
                                    const std::string &mode,
                                    const std::string &name,
                                    bool extended_format,
-                                   const std::vector<std::string> &quantities
-
-                                   )
+                                   const std::vector<std::string> &quantities)
     : OutputInterface(name),
       file_{path, mode},
       extended_(extended_format),
@@ -165,16 +164,18 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
                      ? (extended_ ? OutputDefaultQuantities::oscar2013extended
                                   : OutputDefaultQuantities::oscar2013)
                      : quantities) {
-  if (extended_format == 1 && !quantities.empty()) {
+  if (extended_format && !quantities.empty()) {
     throw std::invalid_argument(
-        "Conflicting options: 'custom format' and 'extended format' cannot be "
-        "enabled simultaneously.");
+        "The 'Extended' key cannot be used together with the 'Quantities' one. "
+        "Please fix your configuration file about the binary output.");
   }
 
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
-  std::uint16_t format_variant = static_cast<uint16_t>(extended_format);
-  write(quantities.empty() ? format_variant : format_custom);
+  std::uint16_t format_variant = quantities.empty()
+                                     ? static_cast<uint16_t>(extended_format)
+                                     : format_custom;
+  write(format_variant);
   write(SMASH_VERSION);
 }
 
@@ -222,7 +223,9 @@ BinaryOutputCollisions::BinaryOutputCollisions(
     : BinaryOutputBase(
           path / ((name == "Collisions" ? "collisions_binary" : name) + ".bin"),
           "wb", name, out_par.get_coll_extended(name),
-          out_par.getQuantities("Collisions")),
+          out_par.quantities.find("Collisions") != out_par.quantities.end()
+              ? out_par.quantities.at("Collisions")
+              : std::vector<std::string>{}),
       print_start_end_(out_par.coll_printstartend) {}
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
@@ -277,9 +280,11 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
 BinaryOutputParticles::BinaryOutputParticles(const std::filesystem::path &path,
                                              std::string name,
                                              const OutputParameters &out_par)
-    : BinaryOutputBase(path / "particles_binary.bin", "wb", name,
-                       out_par.part_extended,
-                       out_par.getQuantities("Particles")),
+    : BinaryOutputBase(
+          path / "particles_binary.bin", "wb", name, out_par.part_extended,
+          out_par.quantities.find("Particles") != out_par.quantities.end()
+              ? out_par.quantities.at("Particles")
+              : std::vector<std::string>{}),
       only_final_(out_par.part_only_final) {}
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles, const int,

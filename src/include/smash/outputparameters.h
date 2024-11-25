@@ -293,25 +293,12 @@ struct OutputParameters {
 
   /**
    * Map of quantities to be printed in the output. Keys are the different
-   * output contents
+   * output contents. It is initialised in a way such that it is guaranteed that
+   * an entry for every content requested by the user exists. When the user
+   * requests the output content without specifying a list of quantities, the
+   * corresponding entry in the map will be an empty vector.
    */
   std::map<std::string, std::vector<std::string>> quantities;
-
-  /**
-   * Safe way to acess the quantities map
-   */
-
-  std::vector<std::string> getQuantities(const std::string& key) const {
-    // Check if the key exists in the map
-    auto it = quantities.find(key);
-    if (it != quantities.end()) {
-      // If the key exists, return the corresponding vector
-      return it->second;
-    } else {
-      // If the key does not exist, return an empty vector
-      return std::vector<std::string>();
-    }
-  }
 };
 
 /**

@@ -125,8 +125,6 @@ static bool compare_particles_block_header(const int &npart,
   char c_read;
   COMPARE(std::fread(&c_read, sizeof(char), 1, file.get()), 1u);
   read_binary(npart_read, file);
-  // std::cout << c_read << std::endl;
-  // std::cout << npart_read << " " << npart << std::endl;
   return (c_read == 'p') && (npart_read == npart);
 }
 
@@ -145,10 +143,6 @@ static bool compare_interaction_block_header(const int &nin, const int &nout,
   COMPARE(std::fread(&weight_read, sizeof(double), 1, file.get()), 1u);
   COMPARE(std::fread(&partial_weight_read, sizeof(double), 1, file.get()), 1u);
   read_binary(process_type_read, file);
-  // std::cout << c_read << std::endl;
-  // std::cout << nin_read << " " << nin << std::endl;
-  // std::cout << nout_read << " " << nout << std::endl;
-  // std::cout << rho << std::endl;
   return (c_read == 'i') && (nin_read == nin) && (nout_read == nout) &&
          (rho_read == rho) && (weight_read == action.get_total_weight()) &&
          (partial_weight_read == action.get_partial_weight()) &&
