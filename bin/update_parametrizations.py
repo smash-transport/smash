@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
-#===================================================
+# ===================================================
 #
 #    Copyright (c) 2016-2017,2019,2023
 #      SMASH Team
 #
 #    GNU General Public License (GPLv3 or later)
 #
-#===================================================
+# ===================================================
 
 import argparse
 import numpy as np
 
 parser = argparse.ArgumentParser(
     description='Parse parametrization from SMASH analysis output')
-parser.add_argument('source', help='File with SMASH analysis cross section output')
+parser.add_argument(
+    'source', help='File with SMASH analysis cross section output')
 parser.add_argument('name', help='Prefix for C++ variable names')
 args = parser.parse_args()
 
@@ -26,13 +27,14 @@ with open(source, 'r') as f:
         f.readline()
     d = np.loadtxt(f)
 
-sqrts = d[:,0]
-elastic_contribution = d[:,3]
+sqrts = d[:, 0]
+elastic_contribution = d[:, 3]
 
 # Close to the production threshold, there can be numerical issues when doing
 # the interpolation. To avoid these, it suffices to slightly modify the first
 # energy.
 sqrts[0] += 0.0025
+
 
 def join_values(values, max_values_per_line, padding, precision):
     # center values on dot
@@ -46,9 +48,10 @@ def join_values(values, max_values_per_line, padding, precision):
 
     # make sure there are no duplicates
     duplicates = len(formatted_values) - len(set(formatted_values))
-    assert(duplicates >= 0)
+    assert (duplicates >= 0)
     if duplicates > 0:
-        raise ValueError('Got {} duplicates after rounding.'.format(duplicates))
+        raise ValueError(
+            'Got {} duplicates after rounding.'.format(duplicates))
 
     # arange values in table
     indent = '  '
@@ -67,6 +70,7 @@ def join_values(values, max_values_per_line, padding, precision):
     if l[-1] == ', ':
         l[-1] = ''
     return ''.join(l)
+
 
 s = '''/// Center-of-mass energy.
 const std::initializer_list<double> {name}_RES_SQRTS = {{

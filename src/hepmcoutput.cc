@@ -43,6 +43,10 @@ namespace smash {
  * when using a binary precompiled distribution, the appropriate rootIO
  * package must be installed.
  *
+ * \attention
+ * At the moment **it is not possible to produce HepMC output with multiple
+ * parallel ensembles** and trying to do so will result in an error.
+ *
  * \note
  * - Since some HepMC readers (e.g. Rivet) need a value for the
  * nuclei-nuclei cross section, a dummy cross section of 1.0 is written to the
@@ -85,14 +89,14 @@ namespace smash {
  *   afterwards to allow tracking of the individual nucleons.
  *
  * \attention
- * - If the HepMC output is intended to be part of a Rivet analysis that requires 
- * access to the parent particles of the final state particles, then the \key Collisions 
+ * - If the HepMC output is intended to be part of a Rivet analysis that requires
+ * access to the parent particles of the final state particles, then the \key Collisions
  * output should be used.
  * - By default, SMASH exclusively handles strong decays at the end of the evolution.
- * If one intends to include weak and electromagnetic decays as well, 
- * the \key Include_Weak_And_EM_Decays_At_The_End option in the 
+ * If one intends to include weak and electromagnetic decays as well,
+ * the \key Include_Weak_And_EM_Decays_At_The_End option in the
  * \ref doxypage_input_conf_collision_term section of the configuration should be enabled.
- * 
+ *
  * \section output_hepmc_asciiv3_ ASCII HepMC Format
  *
  * In this case the information about each event is inserted into a plain,
@@ -102,7 +106,7 @@ namespace smash {
  * however it can be useful to have a basic knowledge about the most important
  * pieces of information contained there. We refer to the official HepMC
  * documentation for more details.
- *  
+ *
  * Here there is an example of the first lines of the HepMC_asciiv3 output, in
  * \key Collider modus and \key Particles output type:
 
@@ -115,13 +119,13 @@ namespace smash {
  E 0 1 772
  U GEV MM
  W 1.0000000000000000000000e+00
- A 0 GenHeavyIon v0 -1 -1 -1 -1 -1 -1 -1 -1 -1 1.6090284 -1 -1 -1 -1 -1 -1 -1 -1 -1 0 0 
+ A 0 GenHeavyIon v0 -1 -1 -1 -1 -1 -1 -1 -1 -1 1.6090284 -1 -1 -1 -1 -1 -1 -1 -1 -1 0 0
  P 1 0 1000791970 -1.0269562977782698e-15 1.3877787807814457e-16 3.0788744605039813e+02 3.6105628807654466e+02 1.8859205636552139e+02 4
  P 2 0 1000791970 -5.6898930012039273e-16 9.7144514654701197e-17 -3.0817189202123001e+02 3.6138985479939856e+02 1.8876628968114440e+02 4
- V -1 0 [1,2] 
- P 3 -1 2112 -1.3955349705352910e-01 -3.2052252367927581e-01 -1.3070952483948553e-01 1.0095240693561323e+00 9.3799999999999994e-01 1 
- P 4 -1 2112 2.2504221328938548e-02 -8.1112446752570233e-02 1.8331677117778440e+00 2.0609302580389826e+00 9.3799999999999994e-01 1 
- P 5 -1 111 -1.7932505641335714e-01 -2.3234517783752556e-01 7.9030334352518175e-02 3.3381364751890524e-01 1.3800000000000001e-01 1 
+ V -1 0 [1,2]
+ P 3 -1 2112 -1.3955349705352910e-01 -3.2052252367927581e-01 -1.3070952483948553e-01 1.0095240693561323e+00 9.3799999999999994e-01 1
+ P 4 -1 2112 2.2504221328938548e-02 -8.1112446752570233e-02 1.8331677117778440e+00 2.0609302580389826e+00 9.3799999999999994e-01 1
+ P 5 -1 111 -1.7932505641335714e-01 -2.3234517783752556e-01 7.9030334352518175e-02 3.3381364751890524e-01 1.3800000000000001e-01 1
  P 6 -1 -211 5.3428615692750892e-01 9.5409650270284543e-02 -1.6651817800882954e-01 5.8424053475982385e-01 1.3800000000000001e-01 1
 
  \endverbatim
@@ -131,7 +135,7 @@ namespace smash {
  * repeated.
  *
  * Row 5: "E 0 1 772" marks the beginning of a new event, with the numbers
- * referring to the event ID, the number of vertexes and the number of 
+ * referring to the event ID, the number of vertexes and the number of
  * particles, respectively, which have been recorded.
  *
  * The content of line 8 _"A 0 GenHeavyIon ..."_ is described in
@@ -172,7 +176,7 @@ namespace smash {
  *   "A -6311 weight 100.876",
  *   where the weights are total cross sections
  * - a list of particles and vertexes, in which the interaction code now
- *   can be also one of those used by SMASH, shifted by 100 (e.g. 103 or 145) 
+ *   can be also one of those used by SMASH, shifted by 100 (e.g. 103 or 145)
  *
  * In both cases, the HepMC output file ends with the line:
  * _HepMC::Asciiv3-END_EVENT_LISTING_, followed by an empty line.
@@ -275,13 +279,13 @@ HepMcOutput::~HepMcOutput() {
 }
 
 void HepMcOutput::at_eventend(const Particles &particles,
-                              const int32_t event_number,
+                              const EventLabel &event_label,
                               const EventInfo &event) {
-  HepMcInterface::at_eventend(particles, event_number, event);
-  logg[LOutput].debug() << "Writing event " << event_number << " with "
-                        << event_.particles().size() << " particles and "
-                        << event_.vertices().size() << " vertices to output "
-                        << std::endl;
+  HepMcInterface::at_eventend(particles, event_label, event);
+  logg[LOutput].debug() << "Writing event " << event_label.event_number
+                        << " with " << event_.particles().size()
+                        << " particles and " << event_.vertices().size()
+                        << " vertices to output " << std::endl;
   output_file_->write_event(event_);
 }
 

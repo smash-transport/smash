@@ -56,7 +56,7 @@ static std::filesystem::path create_particlefile(
     const bool empty_event = false;        // just a dummy value as well
     EventInfo default_event_info =
         Test::default_event_info(impact_parameter, empty_event);
-    osc2013final->at_eventend(particles, event, default_event_info);
+    osc2013final->at_eventend(particles, {event, 0}, default_event_info);
   }
 
   // release and let destructor rename the file

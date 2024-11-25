@@ -41,7 +41,7 @@ namespace smash {
  * The class serves as a base class for output routines that utilizes
  * the HepMC event format (currently HepMcOutput and RivetOutput).
  *
- * A techincal point: We need to generate HepMC::GenParticle objects,
+ * A technical point: We need to generate HepMC::GenParticle objects,
  * and we need to keep track of which HepMC::GenParticle corresponds
  * to which smash::ParticleData.  We therefor set up a map from the
  * smash::ParticleData identifier (integer) to HepMC::GenParticlePtr.
@@ -62,8 +62,8 @@ namespace smash {
  * For outgoing particles this is a bit different.  In case of elastic
  * scatterings, SMASH will keep the incoming particle around as an
  * outgoing particle. This is not how the HepMC event record is
- * invisioned.  Indeed, the particle has changed momentum and that
- * should be recorded in the event record.  In that case, we therefore
+ * envisioned. Indeed, the particle has changed momentum and that
+ * should be recorded in the event record. In that case, we therefore
  * generate a new particle which we add as outgoing particle.
  *
  * All outgoing particles of a vertex have their initial status set to
@@ -73,7 +73,7 @@ namespace smash {
  * If the outgoing particle corresponds to an incoming particle, and
  * in particular if the incoming particle is a beam particle (or later
  * fragment thereof), we need to fragment the ion so that the outgoing
- * particle is dissociated from the incoming particle.  To that end,
+ * particle is dissociated from the incoming particle. To that end,
  * we check if the outgoing particle was part of the beam particles.
  * If so, we remove the outgoing particle from the register of
  * identifiers that make up the beam particle, and create a new beam
@@ -94,16 +94,16 @@ class HepMcInterface : public OutputInterface {
   HepMcInterface(const std::string& name, const bool full_event);
   /**
    * Add the initial particles information of an event to the
-   * central vertex.  Construct projectile and target particles with
+   * central vertex. Construct projectile and target particles with
    * nuclear pdg code if collider.
    *
-   * \param[in] particles    Current list of all particles.
-   * \param[in] event_number Current event number
-   * \param[in] event        Event information
+   * \param[in] particles   Current list of all particles.
+   * \param[in] event_label Event/ensemble numbers
+   * \param[in] event       Event information
    * \throw std::runtime_error if nuclei with non-nucleon particle
    *                   (like hypernuclei) are tried to be constructed
    */
-  void at_eventstart(const Particles& particles, const int event_number,
+  void at_eventstart(const Particles& particles, const EventLabel& event_label,
                      const EventInfo& event) override;
   /**
    * Writes collisions to event.
@@ -118,10 +118,10 @@ class HepMcInterface : public OutputInterface {
    * Store impact paramter and write event.
    *
    * \param[in] particles Current list of particles.
-   * \param[in] event_number Number of event.
+   * \param[in] event_label Event/ensemble numbers
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventend(const Particles& particles, const int32_t event_number,
+  void at_eventend(const Particles& particles, const EventLabel& event_label,
                    const EventInfo& event) override;
 
  protected:

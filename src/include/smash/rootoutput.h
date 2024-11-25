@@ -93,19 +93,19 @@ class RootOutput : public OutputInterface {
   /**
    * update event number and writes intermediate particles to a tree.
    * \param[in] particles Particles to be written to output.
-   * \param[in] event_number event number to be used in ROOT output.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventstart(const Particles &particles, const int event_number,
+  void at_eventstart(const Particles &particles, const EventLabel &event_label,
                      const EventInfo &event) override;
   /**
    * update event number and impact parameter,
    * and writes intermediate particles to a tree.
    * \param[in] particles Particles to be written to output.
-   * \param[in] event_number event number to be used in ROOT output.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
-  void at_eventend(const Particles &particles, const int event_number,
+  void at_eventend(const Particles &particles, const EventLabel &event_label,
                    const EventInfo &event) override;
   /**
    * Writes intermediate particles to a tree defined by treename,
@@ -113,11 +113,13 @@ class RootOutput : public OutputInterface {
    * \param[in] particles Particles to be written to output.
    * \param[in] clock Unused, needed since inherited.
    * \param[in] dens_param Unused, needed since inherited.
+   * \param[in] event_label Numbers of event and ensemble.
    * \param[in] event Event info, see \ref event_info
    */
   void at_intermediate_time(const Particles &particles,
                             const std::unique_ptr<Clock> &clock,
                             const DensityParameters &dens_param,
+                            const EventLabel &event_label,
                             const EventInfo &event) override;
   /**
    * Writes collisions to a tree defined by treename.
@@ -168,6 +170,8 @@ class RootOutput : public OutputInterface {
   int output_counter_ = 0;
   /// Number of current event.
   int current_event_ = 0;
+  /// Number of current ensemble.
+  int current_ensemble_ = 0;
 
   /**
    * Maximal buffer size.
@@ -204,7 +208,7 @@ class RootOutput : public OutputInterface {
   std::vector<int> pdg_mother2_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> baryon_number_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> strangeness_ = std::vector<int>(max_buffer_size_, 0);
-  int npart_, tcounter_, ev_, nin_, nout_, test_p_;
+  int npart_, tcounter_, ev_, ens_, nin_, nout_, test_p_;
   double wgt_, par_wgt_, impact_b_, modus_l_, current_t_;
   double E_kinetic_tot_, E_fields_tot_, E_tot_;
   bool empty_event_;
@@ -223,15 +227,18 @@ class RootOutput : public OutputInterface {
   OutputOnlyFinal particles_only_final_;
 
   /**
-   * Root file cannot be read if it was not properly closed and finalized.
-   * It can happen that SMASH simulation crashed and root file was not closed.
-   * To save results of simulation in such case, "AutoSave" is
-   * applied every N events. The autosave_frequency_ sets
-   * this N (default N = 1000). Note that "AutoSave" operation is very
-   * time-consuming, so the Autosave_Frequency is
-   * always a compromise between safety and speed.
+   * ROOT file cannot be read if it was not properly closed and finalized.
+   * It can happen that SMASH simulation crashed and ROOT file was not closed.
+   * To save results of simulation in such case, "AutoSave" is applied every N
+   * events. If multiple ensembles are used, N is divided by the number of
+   * ensembles per event. This makes sense especially in case of a large number
+   * of ensembles and, at the same time, it ensures that all ensembles belonging
+   * to the same event are saved. The autosave_frequency_ sets this N (at the
+   * moment N=1000 hard-coded). Note that "AutoSave" operation is very
+   * time-consuming, so the autosave frequency is always a compromise between
+   * safety and speed.
    */
-  int autosave_frequency_;
+  int autosave_frequency_ = -1;
 
   /// Whether extended particle output is on
   const bool part_extended_;

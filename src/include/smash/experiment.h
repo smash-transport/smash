@@ -744,6 +744,31 @@ void Experiment<Modus>::create_output(const std::string &format,
   logg[LExperiment].info() << "Adding output " << content << " of format "
                            << format << std::endl;
 
+  // Disable output which do not properly work with multiple ensembles
+  if (ensembles_.size() > 1) {
+    auto abort_because_of = [](const std::string &s) {
+      throw std::invalid_argument(
+          s + " output is not available with multiple parallel ensembles.");
+    };
+    if (content == "Initial_Conditions") {
+      abort_because_of("Initial_Conditions");
+    }
+    if ((format == "HepMC") || (format == "HepMC_asciiv3") ||
+        (format == "HepMC_treeroot")) {
+      abort_because_of("HepMC");
+    }
+    if (content == "Rivet") {
+      abort_because_of("Rivet");
+    }
+    if (content == "Collisions") {
+      logg[LExperiment].warn(
+          "Information coming from different ensembles in 'Collisions' output "
+          "is not distinguishable.\nSuch an output with multiple parallel "
+          "ensembles should only be used if later in the data analysis\nit is "
+          "not necessary to trace back which data belongs to which ensemble.");
+    }
+  }
+
   if (format == "VTK" && content == "Particles") {
     outputs_.emplace_back(
         std::make_unique<VtkOutput>(output_path, content, out_par));
@@ -814,7 +839,7 @@ void Experiment<Modus>::create_output(const std::string &format,
 #else
         logg[LExperiment].error(
             "Requested HepMC_treeroot output not available, "
-            "ROOT or HepMC3 ROOTIO missing or not found by cmake.");
+            "ROOT or HepMC3_ROOTIO missing or not found by cmake.");
 #endif
       }
     } else if (content == "Collisions") {
@@ -828,7 +853,7 @@ void Experiment<Modus>::create_output(const std::string &format,
 #else
         logg[LExperiment].error(
             "Requested HepMC_treeroot output not available, "
-            "ROOT or HepMC3 ROOTIO missing or not found by cmake.");
+            "ROOT or HepMC3_ROOTIO missing or not found by cmake.");
 #endif
       }
     } else {
@@ -1260,6 +1285,15 @@ Experiment<Modus>::Experiment(Configuration &config,
    *            details.
    *    - Available formats: \ref doxypage_output_rivet
    *
+   * \attention At the moment, the \b Initial_Conditions and \b Rivet outputs
+   * content as well as the \b HepMC format cannot be used <u>with multiple
+   * parallel ensembles</u> and SMASH will abort if the user tries to do so.
+   * The \b Collisions content, instead, is allowed, although in it collisions
+   * coming from different ensembles are simply printed all together in an
+   * effectively unpredictable order and it is not possible to know which one
+   * belongs to which ensemble. Therefore SMASH warns the user about this fact
+   * and this setup should only be used if in the data analysis it is not
+   * necessary to trace back which data belongs to which ensemble.
    *
    * \n
    *
@@ -1365,7 +1399,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * \li \key part_weight: Always 0.0 for photon processes, as they
    * are hardcoded.
    * \li \key proc_type: The type of the underlying process. See
-   * \ref doxypage_output_oscar_particles_process_types for possible types.
+   * \ref doxypage_output_oscar_collisions_process_types for possible types.
    *
    * Note, that "interaction", "in", "out", "rho", "weight", "partial" and
    * "type" are no variables, but words that are printed. \n
@@ -2108,10 +2142,7 @@ void Experiment<Modus>::initialize_new_event() {
       auto event_info = fill_event_info(
           ensembles_, E_mean_field, modus_.impact_parameter(), parameters_,
           projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
-      output->at_eventstart(ensembles_[i_ens],
-                            // Pretend each ensemble is an independent event
-                            event_ * parameters_.n_ensembles + i_ens,
-                            event_info);
+      output->at_eventstart(ensembles_[i_ens], {event_, i_ens}, event_info);
     }
     // For thermodynamic output
     output->at_eventstart(ensembles_, event_);
@@ -2554,6 +2585,16 @@ void Experiment<Modus>::run_time_evolution(const double t_end,
     }
   }
 
+  /* Increment once more the output clock in order to have it prepared for the
+   * final_output() call. Once close to the end time, the while-loop above to
+   * produce intermediate output is not entered as the next_output_time() is
+   * never strictly smaller than end_timestep_time (they are usually equal).
+   * Since in the final_output() function the current time of the output clock
+   * is used to produce the output, this has to be incremented before producing
+   * the final output and it makes sense to do it here.
+   */
+  ++(*parameters_.outputclock);
+
   if (pauli_blocker_) {
     logg[LExperiment].info(
         "Interactions: Pauli-blocked/performed = ", total_pauli_blocked_, "/",
@@ -2719,7 +2760,8 @@ void Experiment<Modus>::intermediate_output() {
             projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
 
         output->at_intermediate_time(ensembles_[i_ens], parameters_.outputclock,
-                                     density_param_, event_info);
+                                     density_param_, {event_, i_ens},
+                                     event_info);
         computational_frame_time = event_info.current_time;
       }
       // For thermodynamic output
@@ -3069,9 +3111,7 @@ void Experiment<Modus>::final_output() {
       auto event_info = fill_event_info(
           ensembles_, E_mean_field, modus_.impact_parameter(), parameters_,
           projectile_target_interact_[i_ens], kinematic_cuts_for_IC_output_);
-      output->at_eventend(ensembles_[i_ens],
-                          // Pretend each ensemble is an independent event
-                          event_ * parameters_.n_ensembles + i_ens, event_info);
+      output->at_eventend(ensembles_[i_ens], {event_, i_ens}, event_info);
     }
     // For thermodynamic output
     output->at_eventend(ensembles_, event_);
@@ -3079,24 +3119,16 @@ void Experiment<Modus>::final_output() {
     // For thermodynamic lattice output
     if (printout_rho_eckart_) {
       if (dens_type_lattice_printout_ != DensityType::None) {
-        output->at_eventend(event_, ThermodynamicQuantity::EckartDensity,
-                            dens_type_lattice_printout_);
         output->at_eventend(ThermodynamicQuantity::EckartDensity);
       }
     }
     if (printout_tmn_) {
-      output->at_eventend(event_, ThermodynamicQuantity::Tmn,
-                          dens_type_lattice_printout_);
       output->at_eventend(ThermodynamicQuantity::Tmn);
     }
     if (printout_tmn_landau_) {
-      output->at_eventend(event_, ThermodynamicQuantity::TmnLandau,
-                          dens_type_lattice_printout_);
       output->at_eventend(ThermodynamicQuantity::TmnLandau);
     }
     if (printout_v_landau_) {
-      output->at_eventend(event_, ThermodynamicQuantity::LandauVelocity,
-                          dens_type_lattice_printout_);
       output->at_eventend(ThermodynamicQuantity::LandauVelocity);
     }
     if (printout_j_QBS_) {

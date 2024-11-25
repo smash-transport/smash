@@ -47,7 +47,7 @@ to nomenclature and whatever else you might notice.
 
 ## Testing
 
-### Running tests
+### Unit tests
 
 To run the various unit tests, use the following:
 
@@ -68,6 +68,17 @@ If a test crashes, there might be some leftover in the `test_output` folder,
 causing the test to always fail when run again. To fix this problem, just remove
 the folder.
 
+### Functional tests
+
+The functional tests require Python3.3, to create a virtual environment where modules can be imported. They are enabled by default, but can be disabled during build with
+
+    cmake -DENABLE_FUNCTIONAL_TESTS=OFF ..
+
+They can be run collectively with
+
+    ctest -R functional
+
+Notice that there is no executable created for them, and so they cannot be run by calling `make` as for the unit tests.
 
 ### Runtime memory checking with valgrind
 
@@ -565,11 +576,13 @@ following way:
 
 All C++ code has to be formatted by running [`clang-format`](https://releases.llvm.org/download.html),
 (version `13.0.0`) while CMake code requires [`cmake-format`](https://github.com/cheshirekow/cmake_format)
-(version `0.6.13`) to be run. These two programs automatically format the code in SMASH correctly.
+(version `0.6.13`) to be run. Python scripts are formatted using [`autopep8`](https://github.com/hhatto/autopep8)
+(version `2.3.1`), instead. These programs automatically format the code in SMASH correctly.
 Use the helper script in SMASH's _**bin**_ directory to format the source code via
 
     ./codebase-format-helper.bash C++ -p
     ./codebase-format-helper.bash CMake -p
+    ./codebase-format-helper.bash Python -p
 
 or by simply using
 

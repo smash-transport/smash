@@ -57,7 +57,7 @@ TEST(particlelist_format) {
   action->generate_final_state();
   action->perform(&particles, 1);
 
-  const int event_id = 0;
+  const EventLabel event_id = {0, 0};
   const bool empty_event = false;
   const double impact_parameter = 0.0;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
@@ -102,7 +102,7 @@ TEST(particlelist_format) {
           "baryon_number strangeness\n"
           "# fm fm fm none GeV GeV GeV none none e "
           "none none\n"
-          "# event 0 start\n";
+          "# event 0 ensemble 0 start\n";
       int line_number = 0;
       do {
         line_number++;

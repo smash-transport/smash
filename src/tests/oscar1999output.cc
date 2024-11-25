@@ -31,6 +31,7 @@ static const double accuracy = 1.0e-4;
 static const std::filesystem::path testoutputpath =
     std::filesystem::absolute(SMASH_TEST_OUTPUT_PATH);
 static auto random_value = random::make_uniform_distribution(-15.0, +15.0);
+static const EventLabel event_id = {0, 0};
 
 TEST(directory_is_created) {
   std::filesystem::create_directories(testoutputpath);
@@ -78,7 +79,6 @@ TEST(fullhistory_format) {
   action->generate_final_state();
   const ParticleList final_particles = action->outgoing_particles();
 
-  const int event_id = 0;
   const double impact_parameter = 3.7;
   const bool empty_event = false;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
@@ -122,9 +122,9 @@ TEST(fullhistory_format) {
           "# " SMASH_VERSION
           "\n"
           "# Block format:\n"
-          "# nin nout event_number\n"
+          "# nin nout density tot_weight part_weight proc_type\n"
           "# id pdg 0 px py pz p0 mass x y z t\n"
-          "# End of event: 0 0 event_number impact_parameter\n"
+          "# End of event: 0 0 event_number ensemble_number impact_parameter\n"
           "#\n";
       do {
         std::getline(outputfile, line);
@@ -137,7 +137,9 @@ TEST(fullhistory_format) {
       outputfile >> item;
       COMPARE(std::stoul(item), 2u);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id);
+      COMPARE(std::atoi(item.c_str()), event_id.event_number);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id.ensemble_number);
       /* Check initial particle data lines item by item */
       for (const ParticleData &data : action->incoming_particles()) {
         std::array<std::string, 12> datastring;
@@ -173,7 +175,9 @@ TEST(fullhistory_format) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 0);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id);
+      COMPARE(std::atoi(item.c_str()), event_id.event_number);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id.ensemble_number);
       for (ParticleData &data : particles) {
         std::array<std::string, 12> datastring;
         for (int j = 0; j < 12; j++) {
@@ -187,7 +191,9 @@ TEST(fullhistory_format) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 0);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id);
+      COMPARE(std::atoi(item.c_str()), event_id.event_number);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id.ensemble_number);
       outputfile >> item;
       COMPARE(std::stod(item.c_str()), impact_parameter);
     }
@@ -205,7 +211,6 @@ TEST(particlelist_format) {
   ScatterActionPtr action = std::make_unique<ScatterAction>(p1, p2, 0.);
   action->add_all_scatterings(Test::default_finder_parameters());
   action->generate_final_state();
-  const int event_id = 0;
   const double impact_parameter = 2.4;
   const bool empty_event = false;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
@@ -250,9 +255,9 @@ TEST(particlelist_format) {
           "# " SMASH_VERSION
           "\n"
           "# Block format:\n"
-          "# nin nout event_number\n"
+          "# nin nout event_number ensemble_number\n"
           "# id pdg 0 px py pz p0 mass x y z t\n"
-          "# End of event: 0 0 event_number impact_parameter\n"
+          "# End of event: 0 0 event_number ensemble_number impact_parameter\n"
           "#\n";
       do {
         std::getline(outputfile, line);
@@ -265,7 +270,9 @@ TEST(particlelist_format) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 0);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id);
+      COMPARE(std::atoi(item.c_str()), event_id.event_number);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id.ensemble_number);
 
       for (ParticleData &data : particles) {
         std::array<std::string, 12> datastring;
@@ -280,7 +287,9 @@ TEST(particlelist_format) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 0);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id);
+      COMPARE(std::atoi(item.c_str()), event_id.event_number);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id.ensemble_number);
       outputfile >> item;
       COMPARE(std::stod(item.c_str()), impact_parameter);
     }
@@ -294,11 +303,10 @@ TEST(initial_conditions_format) {
   ParticleData p1 = particles.insert(Test::smashon_random());
   p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
 
-  // Create action ("hypersurface crossing")
+  // Create action
   ActionPtr action = std::make_unique<FluidizationAction>(p1, p1, 0.0);
   action->generate_final_state();
 
-  const int event_id = 0;
   const bool empty_event = false;
   const double impact_parameter = 2.4;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
@@ -319,7 +327,7 @@ TEST(initial_conditions_format) {
     /* Initial state output (note that this should not do anything!) */
     oscfinal->at_eventstart(particles, event_id, event);
 
-    /* Write particle removied in action to */
+    /* Write particle removed in action */
     action->perform(&particles, 1);
     oscfinal->at_interaction(*action, 0.);
 
@@ -342,9 +350,9 @@ TEST(initial_conditions_format) {
           "# " SMASH_VERSION
           "\n"
           "# Block format:\n"
-          "# nin nout event_number\n"
+          "# nin nout event_number ensemble_number\n"
           "# id pdg 0 px py pz p0 mass x y z t\n"
-          "# End of event: 0 0 event_number impact_parameter\n"
+          "# End of event: 0 0 event_number ensemble_number impact_parameter\n"
           "#\n";
       do {
         std::getline(outputfile, line);
@@ -355,9 +363,11 @@ TEST(initial_conditions_format) {
       outputfile >> item;
       COMPARE(std::stoul(item), particles.size());
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), 1);
+      COMPARE(std::atoi(item.c_str()), 0);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id);
+      COMPARE(std::atoi(item.c_str()), event_id.event_number);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id.ensemble_number);
 
       for (const ParticleData &data : action->incoming_particles()) {
         std::array<std::string, 12> datastring;
@@ -372,7 +382,9 @@ TEST(initial_conditions_format) {
       outputfile >> item;
       COMPARE(std::atoi(item.c_str()), 0);
       outputfile >> item;
-      COMPARE(std::atoi(item.c_str()), event_id);
+      COMPARE(std::atoi(item.c_str()), event_id.event_number);
+      outputfile >> item;
+      COMPARE(std::atoi(item.c_str()), event_id.ensemble_number);
       outputfile >> item;
       COMPARE(std::stod(item.c_str()), impact_parameter);
     }

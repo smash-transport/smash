@@ -10,11 +10,12 @@
    3. [SMASH output slightly differs on different platforms. Why?](#fuse-math-expr)
    4. [SMASH does not compile with pre-compiled ROOT binaries. What should I do?](#precompiled-root)
    5. [I run out of disk space compiling the code. Why?](#out-of-disk-space)
-   6. [How can I use a different compiler?](#different-compilers)
-   7. [How to use the LLVM implementation of the C++ standard library?](#llvm-STL)
-   8. [How can I use SMASH as an external library?](#smash-as-an-external-library)
-   9. [Can I disable ROOT or HepMC support?](#disable-root-hempc)
-   10. [ROOT or HepMC are installed but CMake does not find them. What should I do?](#root-hepmc-not-found)
+   6. [Can I disable tests or part of them?](#disabling-tests)
+   7. [How can I use a different compiler?](#different-compilers)
+   8. [How to use the LLVM implementation of the C++ standard library?](#llvm-STL)
+   9. [How can I use SMASH as an external library?](#smash-as-an-external-library)
+   10. [Can I disable ROOT or HepMC support?](#disable-root-hempc)
+   11. [ROOT or HepMC are installed but CMake does not find them. What should I do?](#root-hepmc-not-found)
 
 ---
 
@@ -263,6 +264,21 @@ By default, the unit tests are always compiled, which requires a lot of the disk
 If disk space is restricted, consider to just run `make smash`, which will only compile the SMASH binary.
 However, it is still recommended to run the unit tests at least once when compiling in a new environment to ensure that everything works as expected.
 To see how to run the tests, see [CONTRIBUTING](CONTRIBUTING.md).
+
+<a id="disabling-tests"></a>
+
+### Can I disable tests or part of them?
+
+SMASH is shipped with many tests of different type.
+Most of them are unit and integration tests which have been kept separated from functional tests.
+When CMake configure the project (i.e. when running `cmake` from the ***build*** folder), unit and integration tests are always setup to be later compiled and each of them has an executable associated.
+However, [as mentioned](#out-of-disk-space), one is not obliged to compile everything, as it is possible to pass a given target to `make`.
+
+On the other hand, functional tests are only setup if the CMake option `ENABLE_FUNCTIONAL_TESTS` is set to `ON`, which is the default case.
+Pass `-DENABLE_FUNCTIONAL_TESTS=OFF` to `cmake` in order to exclude these tests when setting up the project.
+If doing so, `ctest` will not see these tests at all.
+Functional tests are written in Python and they run SMASH as black-box.
+In this sense they do not need to be compiled, but the `smash` executable has to be created prior to their execution.
 
 <a id="different-compilers"></a>
 

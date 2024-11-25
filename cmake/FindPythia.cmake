@@ -50,7 +50,8 @@ if(NOT ("${Pythia_CONFIG_EXECUTABLE}" STREQUAL ""))
         message(FATAL_ERROR "pythia8-config executable not found, please check \"-DPythia_CONFIG_EXECUTABLE\" or use \"-DPYTHIA_ROOT_DIR\""
         )
     else()
-        exec_program(${Pythia_CONFIG_EXECUTABLE} ARGS "--prefix" OUTPUT_VARIABLE PYTHIA_ROOT_DIR)
+        execute_process(COMMAND ${Pythia_CONFIG_EXECUTABLE} --prefix OUTPUT_VARIABLE PYTHIA_ROOT_DIR
+                        OUTPUT_STRIP_TRAILING_WHITESPACE)
     endif()
 endif()
 

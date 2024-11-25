@@ -30,6 +30,11 @@ namespace smash {
  *
  * The results of the analyses are written to YODA files.
  *
+ * \attention
+ * Being inherently connected to HepMC output and being this not possible to be
+ * used with multiple parallel ensembles, trying to produce Rivet output with
+ * multiple parallel ensemble will also result in an error.
+ *
  * \section rivet_output_user_guide_format_ Internal event formats
  *
  * Internally, this output module generates HepMC events.  These can
@@ -100,25 +105,25 @@ RivetOutput::RivetOutput(const std::filesystem::path& path, std::string name,
 }
 
 RivetOutput::~RivetOutput() {
-  logg[LOutput].debug() << "Writing Rivet results to " << filename_
-                        << std::endl;
+  logg[LOutput].debug() << "Writing Rivet results to " << filename_ << "\n";
   analysis_handler_proxy()->finalize();
   analysis_handler_proxy()->writeData(filename_.string());
 }
 
 void RivetOutput::at_eventend(const Particles& particles,
-                              const int32_t event_number,
+                              const EventLabel& event_label,
                               const EventInfo& event) {
-  HepMcInterface::at_eventend(particles, event_number, event);
+  HepMcInterface::at_eventend(particles, event_label, event);
 
   // Initialize Rivet on first event
   if (need_init_) {
-    logg[LOutput].debug() << "Initialising Rivet" << std::endl;
+    logg[LOutput].debug() << "Initialising Rivet\n";
     need_init_ = false;
     analysis_handler_proxy()->init(event_);
   }
 
-  logg[LOutput].debug() << "Analysing event " << event_number << std::endl;
+  logg[LOutput].debug() << "Analyzing event " << event_label.event_number
+                        << "\n";
   // Let Rivet analyse the event
   analysis_handler_proxy()->analyze(event_);
 }
@@ -137,8 +142,7 @@ void RivetOutput::add_preload(const std::string& file) {
 }
 
 void RivetOutput::set_ignore_beams(bool ignore) {
-  logg[LOutput].info() << "Ignore beams? " << (ignore ? "yes" : "no")
-                       << std::endl;
+  logg[LOutput].info() << "Ignore beams? " << (ignore ? "yes" : "no") << "\n";
   analysis_handler_proxy()->setIgnoreBeams(ignore);
 }
 

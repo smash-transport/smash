@@ -22,18 +22,24 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Added
 * Added alpha-clustered oxygen nuclei that can be configured in a new `Alpha_Clustered` section in the `Projectile`/`Target` section
 * Implemented dynamic initial conditions for hydrodynamics, available under `Modi: Collider: Initial_Conditions: Type: "Dynamic"`
+* Infrastructure for functional tests, which require at least Python3.3
 
 ### Output
-* New: Implemented `ASCIICustom` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities`.
+* New: Implemented `ASCIICustom` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities`
+* ⚠️ The ensemble number is now included in the output next to the event number - **this is a potentially breaking change for analysis software, especially if using the binary output**; refer to the documentation of each output type for further details
+* Bump binary output format version from 9 to 10
+* Initial conditions, HepMC and Rivet outputs disabled when SMASH is run with multiple ensembles
 
 ### Changed
 * Upgraded to Pythia 8.312
 * Moved the `Orientation` section from the `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from `pi/2` to `0`
-* The interface of the `Configuration` class has been totally changed making it use `Key` objects instead of low-level strings
+* The interface of the `Configuration` class has been totally changed making it use `Key` objects instead of low-level strings 
 
 ### Fixed
 * Fix a small error and added a more precise documentation for the orientation section for deformed nuclei
 * Make few keys really mandatory in code as it was already stated in the documentation
+* Oscar2013 Format for Initial Conditions no longer show the number of particles
+* Fix the number of each event in output files when using multiple parallel ensembles
 
 ### Deprecated
 * Some physics-related input keys in `Output: Initial_Conditions` were deprecated and duplicated under `Modi: Collider: Initial_Conditions`

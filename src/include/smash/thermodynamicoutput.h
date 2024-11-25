@@ -50,25 +50,26 @@ class ThermodynamicOutput : public OutputInterface {
   ~ThermodynamicOutput();
 
   /**
-   *  writes the event header
-   *  \param[in] ensembles Dummy, is just here to satisfy inheritance
-   *  \param[in] event_number Current event number,
-   *             that will be written to the header
+   * Write the event header
+   *
+   * \param[in] ensembles Dummy, is just here to satisfy inheritance
+   * \param[in] event_number Event number to be written to the header
    */
   void at_eventstart(const std::vector<Particles> &ensembles,
                      const int event_number) override;
 
   /**
-   *  only flushes the output the file
-   *  \param[in] ensembles Dummy, is just here to satisfy inheritance
-   *  \param[in] event_number Dummy, is just here to satisfy inheritance
+   * Only flush the output the file
+   *
+   * \param[in] ensembles Dummy, is just here to satisfy inheritance
+   * \param[in] event_number Dummy, is just here to satisfy inheritance
    */
   void at_eventend(const std::vector<Particles> &ensembles,
                    const int event_number) override;
 
   /**
-   *  Writes thermodynamics every fixed time interval. For configuring
-   *  the output see \ref doxypage_output_thermodyn.
+   * Write thermodynamics every fixed time interval. For configuring the output
+   * see \ref doxypage_output_thermodyn.
    *
    * \param[in] ensembles Particles, from which thermodynamic variables are
    *            computed
@@ -82,8 +83,9 @@ class ThermodynamicOutput : public OutputInterface {
                             const DensityParameters &dens_param) override;
 
   /**
-   * Prints density along the specified line. Useful to make 1D plots of
-   * density profiles.
+   * Print density along the specified line. Useful to make 1D plots of density
+   * profiles.
+   *
    * \param[in] file_name name of the file to print out
    * \param[in] param Parameters for density calculation
    * \param[in] plist particles, from which density is computed

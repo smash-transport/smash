@@ -112,11 +112,16 @@ OscarOutput<Format, Contents>::OscarOutput(
     std::fprintf(file_.get(), "# %s\n# %s\n# %s\n", format_name.c_str(),
                  oscar_name.c_str(), SMASH_VERSION);
     std::fprintf(file_.get(), "# Block format:\n");
-    std::fprintf(file_.get(), "# nin nout event_number\n");
+    if (oscar_name == "full_event_history") {
+      std::fprintf(file_.get(),
+                   "# nin nout density tot_weight part_weight proc_type\n");
+    } else {
+      std::fprintf(file_.get(), "# nin nout event_number ensemble_number\n");
+    }
     std::fprintf(file_.get(), "# %s\n", formatter_.quantities_line().c_str());
-    std::fprintf(file_.get(),
-                 "# End of event: 0 0 event_number"
-                 " impact_parameter\n");
+    std::fprintf(
+        file_.get(),
+        "# End of event: 0 0 event_number ensemble_number impact_parameter\n");
     std::fprintf(file_.get(), "#\n");
   }
 }
@@ -130,48 +135,63 @@ inline void OscarOutput<Format, Contents>::write(const Particles &particles) {
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
-                                                  const int event_number,
+                                                  const EventLabel &event_label,
                                                   const EventInfo &) {
-  current_event_ = event_number;
-  if (Contents & OscarAtEventstart) {
+  // We do not want the inital particle list or number to be printed in case of
+  // IC output
+  if (Contents & OscarAtEventstart && !(Contents & OscarParticlesIC)) {
     if (Format == ASCIICustom || Format == OscarFormat2013 ||
         Format == OscarFormat2013Extended) {
-      std::fprintf(file_.get(), "# event %i in %zu\n", event_number,
+      std::fprintf(file_.get(), "# event %i ensemble %i in %zu\n",
+                   event_label.event_number, event_label.ensemble_number,
                    particles.size());
     } else {
       /* OSCAR line prefix : initial particles; final particles; event id
        * First block of an event: initial = 0, final = number of particles
        */
       const size_t zero = 0;
-      std::fprintf(file_.get(), "%zu %zu %i\n", zero, particles.size(),
-                   event_number);
+      std::fprintf(file_.get(), "%zu %zu %i %i\n", zero, particles.size(),
+                   event_label.event_number, event_label.ensemble_number);
     }
-    if (!(Contents & OscarParticlesIC)) {
-      // We do not want the inital particle list to be printed in case of
-      // IC output
-      write(particles);
+    write(particles);
+  } else if (Contents & OscarParticlesIC) {
+    if (Format == ASCIICustom || Format == OscarFormat2013 ||
+        Format == OscarFormat2013Extended) {
+      std::fprintf(file_.get(), "# event %i ensemble %i start\n",
+                   event_label.event_number, event_label.ensemble_number);
+    } else if (Format == OscarFormat1999) {
+      const size_t zero = 0;
+      std::fprintf(file_.get(), "%zu %zu %i %i\n", zero, zero,
+                   event_label.event_number, event_label.ensemble_number);
     }
   }
 }
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
-                                                const int event_number,
+                                                const EventLabel &event_label,
                                                 const EventInfo &event) {
   if (Format == ASCIICustom || Format == OscarFormat2013 ||
       Format == OscarFormat2013Extended) {
     if (Contents & OscarParticlesAtEventend ||
         (Contents & OscarParticlesAtEventendIfNotEmpty && !event.empty_event)) {
-      std::fprintf(file_.get(), "# event %i out %zu\n", event_number,
+      std::fprintf(file_.get(), "# event %i ensemble %i out %zu\n",
+                   event_label.event_number, event_label.ensemble_number,
                    particles.size());
       write(particles);
     }
     // Comment end of an event
-    const char *empty_event_str = event.empty_event ? "no" : "yes";
-    std::fprintf(
-        file_.get(),
-        "# event %i end 0 impact %7.3f scattering_projectile_target %s\n",
-        event_number, event.impact_parameter, empty_event_str);
+    if (!(Contents & OscarParticlesIC)) {
+      const char *empty_event_str = event.empty_event ? "no" : "yes";
+      std::fprintf(file_.get(),
+                   "# event %i ensemble %i end 0 impact %7.3f "
+                   "scattering_projectile_target %s\n",
+                   event_label.event_number, event_label.ensemble_number,
+                   event.impact_parameter, empty_event_str);
+    } else {
+      std::fprintf(file_.get(), "# event %i ensemble %i end\n",
+                   event_label.event_number, event_label.ensemble_number);
+    }
   } else {
     /* OSCAR line prefix : initial particles; final particles; event id
      * Last block of an event: initial = number of particles, final = 0
@@ -179,12 +199,13 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
     const size_t zero = 0;
     if (Contents & OscarParticlesAtEventend ||
         (Contents & OscarParticlesAtEventendIfNotEmpty && !event.empty_event)) {
-      std::fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
-                   event_number);
+      std::fprintf(file_.get(), "%zu %zu %i %i\n", particles.size(), zero,
+                   event_label.event_number, event_label.ensemble_number);
       write(particles);
     }
     // Null interaction marks the end of an event
-    std::fprintf(file_.get(), "%zu %zu %i %7.3f\n", zero, zero, event_number,
+    std::fprintf(file_.get(), "%zu %zu %i %i %7.3f\n", zero, zero,
+                 event_label.event_number, event_label.ensemble_number,
                  event.impact_parameter);
   }
   // Flush to disk
@@ -244,16 +265,18 @@ void OscarOutput<Format, Contents>::at_interaction(const Action &action,
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_intermediate_time(
     const Particles &particles, const std::unique_ptr<Clock> &,
-    const DensityParameters &, const EventInfo &) {
+    const DensityParameters &, const EventLabel &event_label,
+    const EventInfo &) {
   if (Contents & OscarTimesteps) {
     if (Format == ASCIICustom || Format == OscarFormat2013 ||
         Format == OscarFormat2013Extended) {
-      std::fprintf(file_.get(), "# event %i out %zu\n", current_event_,
+      std::fprintf(file_.get(), "# event %i ensemble %i out %zu\n",
+                   event_label.event_number, event_label.ensemble_number,
                    particles.size());
     } else {
       const size_t zero = 0;
-      std::fprintf(file_.get(), "%zu %zu %i\n", particles.size(), zero,
-                   current_event_);
+      std::fprintf(file_.get(), "%zu %zu %i %i\n", particles.size(), zero,
+                   event_label.event_number, event_label.ensemble_number);
     }
     write(particles);
   }
@@ -269,86 +292,15 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * doxypage_input_conf_output), a so-called \c particle_lists.oscar file is
  * produced when executing SMASH. It allows for a certain degree of flexibility,
  * see \ref input_output_content_specific_ "Content-specific output options" for
- * further details. \n
+ * further details.
+ *
  * **Unless IC output is enabled, the Particle output always provides the
  * current particle list at a specific time.** See \ref
  * doxypage_output_initial_conditions for details about the particles IC output.
+ * Even though they are compatible, we do not recommend using Oscar1999 for the
+ * Initial_Conditions output.
  * \n
  *
- * \n
- * Oscar1999
- * ---------
- * Oscar1999 is an ASCII (text) human-readable output following the OSCAR 1999
- * standard. The format specifics are the following:
- *
- * \n
- * **Header**
- * \code
- * # OSC1999A
- * # final_id_p_x
- * # smash <version>
- * # Block format:
- * # nin nout event_number
- * # id pdg 0 px py pz p0 mass x y z t
- * # End of event: 0 0 event_number impact_parameter
- * #
- * \endcode
- * The header consists of 8 lines starting with '#', of which the last one
- * is basically empty.
- * They contain the following information:
- * -# The specific OSCAR1999 version the formatting follows - OSCAR1999A
- * -# The substructure of each particle line: (id - momentum - coordinates)
- * -# The SMASH version with which the oputput was generated
- * -# - 7. Info on the block structure
- *
- * \n
- * **Output block header** \n
- * Each output block starts with a line indicating the numbers of ingoing and
- * outgoing particles as well the number of the event.
- * \code
- * nin nout event_number
- * \endcode
- * With
- * \li \key nin: Number of ingoing particles
- * \li \key nout: Number of outgoing particles
- * \li \key event_number: Number of the event
- *
- * For initial timesteps, (nin, nout) = (0, Nparticles), while (nin, nout) =
- * (Nparticles, 0) for intermediate and final timesteps. Nparticles is the
- * total number of particles at the specific timestep. It may differ from one
- * timestep to another if the test case allows more interactions than only
- * elastic scatterings. The output block header is followed by Nparticles
- * particle lines.
- *
- * \n
- * **Particle line** \n
- * The particle lines are formatted as follows:
- * \code
- * id pdg 0 px py pz p0 mass x y z t
- * \endcode
- *
- * Where
- * \li \key id: Particle identifier in terms of an integer.
- *     It is unique for every particle in the event.
- * \li \key pdg: PDG code of the particle (see http://pdg.lbl.gov/).
- * It contains all quantum numbers and uniquely identifies its type.
- * \li \key px, \key py, \key pz, \key p0: 3-momentum and energy
- * \li \key mass: Particle's rest-mass
- * \li \key x, \key y, \key z, \key t: Space-time coordinates
- *
- * \n
- * **Event end line** \n
- * The end of an event is indicated by the following line:
- * \code
- * 0 0 event_number impact_parameter
- * \endcode
- *
- * With
- * \li \key event_number: Number of the event
- * \li \key impact_parameter: Impact parameter of the collisions. In case of
- * a box or sphere setup, this value is 0.0.
- *
- * \n
  * \anchor oscar2013_format
  * Oscar2013
  * ---------
@@ -356,7 +308,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * Oscar2013 is an ASCII (text) human-readable output following the OSCAR 2013
  * standard. The format specifics are the following:\n
  * \n
- * **Header**
+ * **File header**
  * \code
  * #!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID charge
  * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none e
@@ -369,8 +321,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * -# Units of the quantities in the particle lines
  * -# SMASH version
  *
- * \n
- * **Extended Output: Header** \n
+ * **File header for extended output**
+ *
  * If desired, the OSCAR2013 output can be extended
  * by additional particle properties. This requires enabling the extended
  * output in the configuration file, see the \key Extended switch in
@@ -389,48 +341,56 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *SMASH_version</span></div>
  * </div>
  *
- * \n
- * **Output block header**\n
- * Just as the OSCAR1999 format, the OSCAR2013 format is based on a block
- * structure. The beginning of a new block is marked by either the start of a
- * new event or a new intermediate output (at the next timestep). \n
- * \n
+ * **Block header**
+ *
+ * The OSCAR2013 format is based on a block structure. The beginning of a new
+ * block is marked by either the start of a new event or a new intermediate
+ * output (at the next timestep).
+ *
  * Output block header for a new event:
  * \code
- * # event ev_num in Nparticles
+ * # event ev_num ensemble ens_num in Nparticles
  * \endcode
  * Where
  * \li \key ev_num: Event number
+ * \li \key ens_num: Ensemble number
  * \li \key Nparticles: Number of particles initialized at the beginning of
  * the event
  *
- * Note that 'event' and 'in' are no variables, but words that are printed in
- * the header. \n
- * \n
+ * Note that `event`, `ensemble` and `in` are no variables, but words that are
+ * printed in the header.
+ *
  * Output block header for an intermediate output:
  * \code
- * # event ev_num out Nparticles
+ * # event ev_num ensemble ens_num out Nparticles
  * \endcode
  * Where
  * \li \key ev_num: Event number
+ * \li \key ens_num: Ensemble number
  * \li \key Nparticles: Number of particles at the end of the timestep
  *
- * Note that 'event' and 'out' are no variables, but words that are printed in
- * the header. \n
- * \n
+ * Note that `event`, `ensemble` and `out` are no variables, but words that are
+ * printed in the header.
  *
- * **Particle line**\n
+ * **Particle line**
+ *
  * The particle lines are formatted as follows:
  * \code
  * t x y z mass p0 px py pz pdg ID charge
  * \endcode
- * Apart from the order, the entries are identical to those of the OSCAR1999
- * output, the only additional one is:
- * \li \key charge: the electric charge of the particle in units of the
- * elementary charge e.
  *
- * \n
- * For the extended version the particle line contains
+ * where
+ * \li \key t, \key x, \key y, \key z: Space-time coordinates
+ * \li \key mass: Rest-mass
+ * \li \key p0, \key px, \key py, \key pz: Energy and 3-momentum
+ * \li \key pdg: PDG code of the particle (see http://pdg.lbl.gov/).
+ * It contains all quantum numbers and uniquely identifies its type
+ * \li \key id: Particle identifier in terms of an integer, it is
+ * unique for each particle in the event
+ * \li \key charge: the electric charge of the particle in units of the
+ * elementary charge e
+ *
+ * For the **extended output** the particle line contains
  *
  * <div class="fragment">
  * <div class="line"><span class="preprocessor">t x y z mass p0 px py pz pdg
@@ -450,23 +410,107 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key proc_id_origin: ID of the process of the particle's last interaction
  * \li \key proc_type_origin: Type of the last process the particle has
  *     undergone. The possible process types are listed in
- *     \ref doxypage_output_oscar_particles_process_types.
+ *     \ref doxypage_output_oscar_collisions_process_types
  * \li \key t_last_coll: time of the particle's last interaction (except wall
  *     crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle (0 in case the
  *     particle is sampled in a thermal bubble. It is not updated by elastic
- *     scatterings.)
+ *     scatterings)
  * \li \key pdg_mother2: PDG code of the 2nd mother particle (0 in case the
  *     particle results from the decay of a resonance or the appearance of a
  *     thermal bubble. In the former case, \key pdg_mother1 is the PDG code of
- *     this resonance. It is not updated by elastic scatterings.)
+ *     this resonance. It is not updated by elastic scatterings)
  * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1 for
- *     anti-baryons and 0 for mesons.
- * \li \key strangeness: Strangeness of the particle.
+ *     anti-baryons and 0 for mesons
+ * \li \key strangeness: Strangeness of the particle
  *
  * The mother particles are also set in case of an elastic scattering process.
  *
- * \page doxypage_output_oscar_particles_process_types
+ * **Event end line**\n
+ * The end of an event is indicated by the following line:
+ * \code
+ * # event ev_num ensemble ens_num end 0 impact impact_parameter empty yes_or_no
+ * \endcode
+ * Where
+ * \li \key ev_num: Event number
+ * \li \key ens_num: Ensemble number
+ * \li \key impact_parameter: Impact parameter of the collision in case of a
+ *          collider setup, 0.0 otherwise
+ * \li \key yes_or_no: "no" if there was an interaction between the projectile
+ * and the target, "yes" otherwise. For non-collider setups, this is always
+ * "no"
+ *
+ * Note that `event`, `end`, `impact` and `empty` are no variables, but words
+ * that are printed in the header.
+ *
+ * Oscar1999
+ * ---------
+ * Oscar1999 is an ASCII (text) human-readable output following the OSCAR 1999
+ * standard. The format specifics are the following:
+ *
+ * **File header**
+ * \code
+ * # OSC1999A
+ * # final_id_p_x
+ * # smash <version>
+ * # Block format:
+ * # nin nout event_number ensemble_number
+ * # id pdg 0 px py pz p0 mass x y z t
+ * # End of event: 0 0 event_number ensemble_number impact_parameter
+ * #
+ * \endcode
+ * The header consists of 8 lines starting with '#', of which the last one
+ * is basically empty.
+ * They contain the following information:
+ * -# The specific OSCAR1999 version the formatting follows - OSCAR1999A
+ * -# The substructure of each particle line: (id - momentum - coordinates)
+ * -# The SMASH version with which the oputput was generated
+ * -# - 7. Info on the block structure
+ *
+ * **Block header**
+ *
+ * Each output block starts with a line indicating the numbers of ingoing and
+ * outgoing particles as well the numbers of the event and ensemble.
+ * \code
+ * nin nout event_number ensemble_number
+ * \endcode
+ * With
+ * \li \key nin: Number of ingoing particles
+ * \li \key nout: Number of outgoing particles
+ * \li \key event_number: Number of the event
+ * \li \key ensemble_number: Number of the ensemble
+ *
+ * For initial timesteps, (nin, nout) = (0, Nparticles), while (nin, nout) =
+ * (Nparticles, 0) for intermediate and final timesteps. Nparticles is the
+ * total number of particles at the specific timestep. It may differ from one
+ * timestep to another if the test case allows more interactions than only
+ * elastic scatterings. The output block header is followed by Nparticles
+ * particle lines. In the Initial_Conditions output, Nparticles is always 0.
+ *
+ * **Particle line**
+ *
+ * The particle lines are formatted as follows:
+ * \code
+ * id pdg 0 px py pz p0 mass x y z t
+ * \endcode
+ *
+ * Apart from the order, the entries are identical to those of the OSCAR2013
+ * output.
+ *
+ * **Event end line**
+ *
+ * The end of an event is indicated by the following line:
+ * \code
+ * 0 0 event_number ensemble_number impact_parameter
+ * \endcode
+ *
+ * With
+ * \li \key event_number: Number of the event
+ * \li \key ensemble_number: Number of the ensemble
+ * \li \key impact_parameter: Impact parameter of the collisions. In case of
+ * a box or sphere setup, this value is 0.0
+ *
+ * \page doxypage_output_oscar_collisions_process_types
  * The available process types are summarized in the following table.
  *
  * <table>
@@ -517,25 +561,6 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *                   a 1 &rarr; 0 process.
  * </table>
  *
- * \page doxypage_output_oscar_particles
- * \n
- * **Event end line**\n
- * The end of an event is indicated by the following line:
- * \code
- * # event ev_num end 0 impact impact_parameter empty yes_or_no
- * \endcode
- * Where
- * \li \key ev_num: Event number
- * \li \key Nparticles: Number of particles at the end of the timestep
- * \li \key impact_parameter: Impact parameter of the collision in case of a
- * collider setup, 0.0 otherwise.
- * \li \key yes_or_no: "no" if there was an interaction between the projectile
- * and the target, "yes" otherwise. For non-collider setups, this is always
- * "no".
- *
- * Note that 'event', 'end', 'impact' and 'empty' are no variables, but words
- * that are printed in the header. \n
- * \n
  * \page doxypage_output_oscar_collisions
  * The OSCAR particles format follows the general block structure of the
  * \ref doxypage_output_oscar. We distinguish between two versions, OSCAR2013
@@ -552,89 +577,15 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * See also \ref doxypage_output_collisions_box_modus. \n
  *
- * Oscar1999
- * ---------
- * Oscar1999 is an ASCII (text) human-readable output following the OSCAR 1999
- * standard. The format specifics are the following: \n
- * \n
- * **Header**
- * \code
- * # OSC1999A
- * # full_event_history
- * # smash <version>
- * # Block format:
- * # nin nout event_number
- * # id pdg 0 px py pz p0 mass x y z t
- * # End of event: 0 0 event_number
- * #
- * \endcode
- * The header consists of 8 lines starting with '#', of which the last one
- * is basically empty.
- * They contain the following information:
- * -# The specific OSCAR1999 version the formatting follows - OSC1999A
- * -# The filename
- * -# The SMASH version with which the oputput was generated
- * -# - 7. Info on the block structure
+ * \note The particle and event end lines for both OSCAR 2013 and 1999 formats
+ * are identical as in the \ref doxypage_output_oscar_particles.
  *
- * \n
- * **Output block header**\n
- * Each output block starts with a line of the following format:
- * \code
- * nin nout density tot_weight part_weight proc_type
- * \endcode
- * With
- * \li \key nin: Number of ingoing particles (initial state particles)
- * \li \key nout: Number of outgoing particles (final state particles)
- * \li \key density: Density at the interaction point
- * \li \key tot_weight: Total weight of the interaction. This is the total cross
- * section in case of a scattering and the total decay width in case of a decay.
- * If there is no weight for the specific process, e.g. a wall crossing, it's
- * value is 0.0.
- * \li \key part_weight: The partial weight of the interaction. This is the
- * specific weight for the chosen final state.
- * \li \key proc_type: The type of the underlying process. See
- * \ref doxypage_output_oscar_particles_process_types for possible types.
- *
- * If the \key Print_Start_End option is set (see \ref
- * input_output_content_specific_ "content-specific output options" for
- * details), (nin, nout) = (0, Nparticles) in the
- * initial timestep and (nin, nout) = (Nparticles, 0) in the final timestep.
- *
- * \n
- * **Particle line**\n
- * The particle lines are formatted as follows:
- * \code
- * id pdg 0 px py pz p0 mass x y z t
- * \endcode
- *
- * Where
- * \li \key id: Particle identifier in terms of an integer.
- *     It is unique for every particle in the event.
- * \li \key pdg: PDG code of the particle (see http://pdg.lbl.gov/).
- * It contains all quantum numbers and uniquely identifies its type.
- * \li \key px, \key py, \key pz, \key p0: 3-momentum and energy
- * \li \key mass: Particle's rest-mass
- * \li \key x, \key y, \key z, \key t: Space-time coordinates
- *
- * \n
- * **Event end line** \n
- * The end of an event is indicated by the following line:
- * \code
- * 0 0 event_number impact_parameter
- * \endcode
- *
- * With
- * \li \key event_number: Number of the event
- * \li \key impact_parameter: Impact parameter of the collisions. In case of
- * a box or sphere setup, this value is 0.0.
- *
- * \n
  * Oscar2013
  * ---------
  *  Oscar2013 is an ASCII (text) human-readable output following the OSCAR 2013
  * standard. The format specifics are the following:\n
  * \n
- * **Header**
+ * **File header**
  * \code
  * #!OSCAR2013 full_event_history t x y z mass p0 px py pz pdg ID charge
  * # Units: fm fm fm fm GeV GeV GeV GeV GeV none none
@@ -643,13 +594,11 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * The header consists of 3 lines starting with '#'. They contain the following
  * information:
  * -# Output version (OSCAR2013) and the type of output (particle_lists),
- * followed by the substructure of the particle lines.
+ * followed by the substructure of the particle lines
  * -# Units of the quantities in the particle lines
  * -# SMASH version
  *
- * \n
- *
- * **Extended Output: Header** \n
+ * **File header for extended output** \n
  * If desired, the OSCAR2013 output can be extended
  * by additional particle properties. This requires enabling the extended
  * output in the configuration file, see the \key Extended switch in
@@ -664,15 +613,14 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *   t_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span></div>
  * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm GeV GeV
  * GeV GeV GeV none none e none fm none none none fm none none none
- *none</span></div> <div class="line"><span class="preprocessor">\#
- *SMASH_version</span></div>
+ * none</span></div> <div class="line"><span class="preprocessor">\#
+ * SMASH_version</span></div>
  * </div>
  *
- * \n
- * **Output block header**\n
- * Just as the OSCAR1999 format, the OSCAR2013 format is based on a block
- * structure, where each block corresponds to one interaction. Each block starts
- * with a line formatted as follows:
+ * **Event block header**\n
+ * The OSCAR2013 format is based on a block structure, where each block
+ * corresponds to one interaction. Each block starts with a line formatted
+ * as follows:
  * <div class="fragment">
  * <div class="line"> <span class="preprocessor">
  *  \# interaction in nin out nout rho density weight tot_weight partial
@@ -685,73 +633,61 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key tot_weight: Total weight of the interaction. This is the total
  *     cross section in case of a scattering and the total decay width in case
  *     of a decay. If there is no weight for the specific process, e.g. a wall
- *     crossing, it's value is 0.0.
+ *     crossing, it's value is 0.0
  * \li \key part_weight: The partial weight of the interaction. This is the
- *     specific weight for the chosen final state.
+ *     specific weight for the chosen final state
  * \li \key proc_type: The type of the underlying process. See \ref
- *     doxypage_output_oscar_particles_process_types for possible types.
+ *     doxypage_output_oscar_collisions_process_types for possible types
  *
  * Note, that "interaction", "in", "out", "rho", "weight", "partial" and "type"
- * are no variables, but words that are printed.\n
+ * are no variables, but words that are printed.
  *
- * \n
- * **Particle line** \n
- * The particle lines are formatted as follows:
+ * Oscar1999
+ * ---------
+ * Oscar1999 is an ASCII (text) human-readable output following the OSCAR 1999
+ * standard. The format specifics are the following:
+ *
+ * **File header**
  * \code
- * t x y z mass p0 px py pz pdg ID charge
+ * # OSC1999A
+ * # full_event_history
+ * # smash <version>
+ * # Block format:
+ * # nin nout density tot_weight part_weight proc_type
+ * # id pdg 0 px py pz p0 mass x y z t
+ * # End of event: 0 0 event_number
+ * #
  * \endcode
- * Apart from the order, the entries are identical to those of the OSCAR1999
- * output, the only additional one is:
- * \li \key charge: the electric charge of the particle in units of the
- * elementary charge e.
+ * The header consists of 8 lines starting with '#', of which the last one
+ * is basically empty.
+ * They contain the following information:
+ * -# The specific OSCAR1999 version the formatting follows - OSC1999A
+ * -# The filename
+ * -# The SMASH version with which the oputput was generated
+ * -# - 7. Info on the block structure
  *
- * \n
- * For the extended version the particle line contains
- *
- * <div class="fragment">
- * <div class="line"><span class="preprocessor">t x y z
- *  mass p0 px py pz pdg ID charge Ncoll formation_time
- *  xsecfac process_ID_origin process_type_origin t_last_coll
- *  PDG_mother1 PDG_mother2 baryon_number strangeness</span></div>
- * </div>
- *
- * The additional particle properties available in the extended output format
- * are:
- * \li \key ncoll: Number of collisions the particle has undergone
- * \li \key form_time: Formation time of the particle
- * \li \key xsecfac: Cross section scaling factor (if the particles are
- *     not yet fully formed at the time of interaction, the cross section for
- *     the underlying process is scaled down by the cross section scaling
- *     factor)
- * \li \key proc_id_origin: ID of the process of the particle's last interaction
- * \li \key proc_type_origin: Type of the last process the particle has
- *     undergone. The possible process types are listed in \ref
- *     doxypage_output_oscar_particles_process_types.
- * \li \key t_last_coll: time of the particle's last interaction (except wall
- *     crossings)
- * \li \key pdg_mother1: PDG code of the 1st mother particle
- * \li \key pdg_mother2: PDG code of the 2nd mother particle (0 in case the
- *     particle results from the decay of a resonance, then \key pdg_mother1 is
- *     the PDG code of this resonance)
- * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1 for
- *     anti-baryons and 0 for mesons.
- *
- * The mother particles are also set in case of an elastic scattering process.
- * \n
- * \n
- *
- * **Event end line** \n
- * The end of an event is indicated by the following line:
+ * **Block header**\n
+ * Each output block starts with a line of the following format:
  * \code
- * # event ev_num end 0 impact impact_parameter
+ * nin nout density tot_weight part_weight proc_type
  * \endcode
- * where
- * \li \key ev_num: The event's number
- * \li \key impact_parameter: impact parameter of the collision in case of a
- * collider setup, otherwise 0.0.
+ * With
+ * \li \key nin: Number of ingoing particles (initial state particles)
+ * \li \key nout: Number of outgoing particles (final state particles)
+ * \li \key density: Density at the interaction point
+ * \li \key tot_weight: Total weight of the interaction. This is the total cross
+ * section in case of a scattering and the total decay width in case of a decay.
+ * If there is no weight for the specific process, e.g. a wall crossing, it's
+ * value is 0.0
+ * \li \key part_weight: The partial weight of the interaction. This is the
+ * specific weight for the chosen final state
+ * \li \key proc_type: The type of the underlying process. See
+ * \ref doxypage_output_oscar_collisions_process_types for possible types
  *
- * Note, that "event", "end" and "impact" are no variables, but words
- * that are printed.
+ * If the \key Print_Start_End option is set (see \ref
+ * input_output_content_specific_ "content-specific output options" for
+ * details), (nin, nout) = (0, Nparticles) in the
+ * initial timestep and (nin, nout) = (Nparticles, 0) in the final timestep.
  **/
 
 /*!\Userguide
@@ -764,7 +700,6 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * storage usage.
  * \n
  *
-
  * <table>
  * <tr><th>Key(s)<th>C++ type <th> Description<th></tr>
  * <tr><td>\key t, \key x, \key y, \key z<td> \c double <td>Space-time

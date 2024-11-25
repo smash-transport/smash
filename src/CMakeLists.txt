@@ -105,7 +105,7 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
         add_definitions(-DSMASH_USE_HEPMC)
         if((NOT HEPMC3_ROOTIO_LIB) OR (NOT ROOT_FOUND))
             message(STATUS "HepMC3_treeroot output disabled, missing ROOT and/or "
-                           "HepMC3 ROOT Io support")
+                           "HepMC3 ROOT I/O support")
         else()
             message(STATUS "HepMC3_treeroot output support enabled")
             add_definitions(-DSMASH_USE_HEPMC_ROOTIO)

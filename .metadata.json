@@ -77,7 +77,8 @@
       "first name": "Robin",
       "email": "sattler@itp.uni-frankfurt.de",
       "years": "2023-",
-      "affiliation": "Institute for Theoretical Physics, Goethe University Frankfurt, Max-von-Laue-Straße 1, 60438 Frankfurt am Main, Germany"
+      "affiliation": "Institute for Theoretical Physics, Goethe University Frankfurt, Max-von-Laue-Straße 1, 60438 Frankfurt am Main, Germany",
+      "orcid": "0009-0008-1737-6879"
     },
     {
       "last name": "Sass",
@@ -99,6 +100,13 @@
       "years": "2017-2019"
     },
     {
+      "last name": "Rosenkvist",
+      "first name": "Carl",
+      "email": "rosenkvist@itp.uni-frankfurt.de",
+      "years": "2024-",
+      "affiliation": "Frankfurt Institute for Advanced Studies, Ruth-Moufang-Straße 1, 60438 Frankfurt am Main, Germany"
+    },
+    {
       "last name": "Rose",
       "first name": "Jean-Bernard",
       "email": "rose@fias.uni-frankfurt.de",
@@ -108,7 +116,7 @@
       "last name": "Roch",
       "first name": "Hendrik",
       "email": "roch@fias.uni-frankfurt.de",
-      "years": "2022-",
+      "years": "2022-2024",
       "affiliation": "Department of Physics and Astronomy, Wayne State University, 666 W. Hancock St., Detroit, MI 48201, USA",
       "orcid": "0000-0002-0187-6843"
     },
@@ -128,7 +136,7 @@
       "last name": "Paulinyova",
       "first name": "Zuzana",
       "email": "paulinyova@fias.uni-frankfurt.de",
-      "years": "2023-",
+      "years": "2023-2024",
       "affiliation": "Pavol Jozef Šafárik University, Šrobárova 2, Košice, Slovakia",
       "orcid": "0009-0006-9557-9925"
     },
@@ -208,7 +216,7 @@
       "last name": "Hammelmann",
       "first name": "Jan",
       "email": "hammelmann@itp.uni-frankfurt.de",
-      "years": "2019-",
+      "years": "2019-2023",
       "affiliation": "Institute for Theoretical Physics, Goethe University Frankfurt, Max-von-Laue-Straße 1, 60438 Frankfurt am Main, Germany"
     },
     {
@@ -256,6 +264,14 @@
       "first name": "Niklas",
       "email": "ehlert@fias.uni-frankfurt.de",
       "years": "2016"
+    },
+    {
+      "last name": "Constantin",
+      "first name": "Lucas",
+      "email": "constantin@itp.uni-frankfurt.de",
+      "years": "2024-",
+      "affiliation": "Institute for Theoretical Physics, Goethe University Frankfurt, Max-von-Laue-Straße 1, 60438 Frankfurt am Main, Germany",
+      "orcid": "0009-0002-8310-1933"
     },
     {
       "last name": "Bäuchle",
