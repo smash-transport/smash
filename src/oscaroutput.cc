@@ -726,7 +726,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  particle's last interaction</tr>
  * <tr><td>\key proc_type_origin<td>\c int32_t <td>Type of the last process the
  particle has undergone. The possible process types are listed in \ref
- doxypage_output_oscar_particles_process_types</tr>
+ doxypage_output_oscar_collisions_process_types</tr>
  * <tr><td>\key time_last_coll<td> \c double <td>Time of the particle's last
  interaction (except wall crossings)</tr>
  * <tr><td>\key pdg_mother1<td> \c int32_t <td>PDG code of the 1st mother
