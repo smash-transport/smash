@@ -1220,70 +1220,79 @@ Experiment<Modus>::Experiment(Configuration &config,
    *
    * \section output_directory_ Output directory
    *
-   *
-   * Per default, the selected output files
-   * will be saved in the directory ./data/\<run_id\>, where \<run_id\> is an
-   * integer number starting from 0. At the beginning of a run SMASH checks,
-   * if the ./data/0 directory exists. If it does not exist, it is created and
-   * all output files are written there. If the directory already exists,
-   * SMASH tries for ./data/1, ./data/2 and so on until it finds a free
-   * number.
+   * Per default, the selected output files will be saved in the directory
+   * `./data/<run_id>`, where `<run_id>` is an integer number starting from 0.
+   * At the beginning of a run SMASH checks if the `./data/0` directory exists.
+   * If it does not exist, it is created and all output files are written there.
+   * If the directory already exists, SMASH tries for `./data/1`, `./data/2` and
+   * so on until it finds a free number.
    *
    * The user can change output directory by a command line option, if
    * desired:
    * \code smash -o <user_output_dir> \endcode
+   * SMASH, by default, will create the specified folder if not existing or will
+   * use it if the specified folder exists and is empty. However, if the folder
+   * exists and is not empty SMASH will abort with an error to avoid overwriting
+   * existing files.
+   *
+   * ---
    *
    * \section output_contents_ Output content
    *
    * Output in SMASH is distinguished by _content_ and _format_, where content
    * means the physical information contained in the output (e.g. list of
    * particles, list of interactions, thermodynamics, etc) and format (e.g.
-   * Oscar, binary or ROOT). The same content can be printed out in several
+   * ASCII, binary or ROOT). The same content can be printed out in several
    * formats _simultaneously_.
    *
    * For an example of choosing specific output contents see
    * \ref doxypage_output_conf_examples.
    *
-   * The list of possible contents follows:
+   * These are the possible contents offered by SMASH:
    *
-   * - \b Particles  List of particles at regular time intervals in the
-   *                 computational frame or (optionally) only at the event end.
-   *   - Available formats: \ref doxypage_output_oscar_particles, \ref
-   *                        doxypage_output_ascii, \ref doxypage_output_binary,
-   *                        \ref doxypage_output_root, \ref doxypage_output_vtk,
-   *                        \ref doxypage_output_hepmc
-   * - \b Collisions List of interactions: collisions, decays, box wall
-   *                 crossings and forced thermalizations. Information about
-   *                 incoming, outgoing particles and the interaction itself
-   *                 is printed out.
-   *   - Available formats: \ref doxypage_output_oscar_collisions, \ref
-   *                        doxypage_output_ascii, \ref doxypage_output_binary,
-   *                        \ref doxypage_output_root, \ref
-   *                        doxypage_output_hepmc
-   * - \b Dileptons  Special dilepton output, see
-   *                 \ref doxypage_output_dileptons.
-   *   - Available formats: \ref doxypage_output_oscar_collisions,
-   *                        \ref doxypage_output_binary and \ref
-   *                        doxypage_output_root
-   * - \b Photons   Special photon output, see
-   *                \ref doxypage_output_photons.
-   *   - Available formats: \ref doxypage_output_oscar_collisions,
-   *                        \ref doxypage_output_binary and \ref
-   *                        doxypage_output_root.
-   * - \b Thermodynamics   This output allows to print out thermodynamic
-   *                       quantities, see \ref input_output_thermodynamics_.
-   *    - Available formats: \ref doxypage_output_thermodyn,
-   *                         \ref doxypage_output_thermodyn_lattice,
-   *                         \ref doxypage_output_vtk_lattice
-   * - \b Initial_Conditions  Special initial conditions output, see
-   *                          \ref doxypage_output_initial_conditions for
-   *                          details.
-   *   - Available formats: \ref doxypage_output_oscar_particles, \ref
-   *                        doxypage_output_initial_conditions
-   * - \b Rivet Run Rivet analysis on generated events and output
-   *            results, see \ref doxypage_output_rivet for
-   *            details.
-   *    - Available formats: \ref doxypage_output_rivet
+   * - \b %Particles:
+   *         List of particles at regular time intervals in the computational
+   *         frame or (optionally) only at the event end.
+   *   - Available formats:
+   *         \ref doxypage_output_oscar_particles, \ref doxypage_output_ascii,
+   *         \ref doxypage_output_binary, \ref doxypage_output_root,
+   *         \ref doxypage_output_vtk, \ref doxypage_output_hepmc.
+   * - \b Collisions:
+   *         List of interactions: collisions, decays, box wall crossings and
+   *         forced thermalizations. Information about incoming, outgoing
+   *         particles and the interaction itself is printed out.
+   *   - Available formats:
+   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_ascii,
+   *         \ref doxypage_output_binary, \ref doxypage_output_root,
+   *         \ref doxypage_output_hepmc.
+   * - \b Dileptons:
+   *          Special dilepton output, see \ref doxypage_output_dileptons.
+   *   - Available formats:
+   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_binary,
+   *         \ref doxypage_output_root.
+   * - \b Photons:
+   *          Special photon output, see \ref doxypage_output_photons.
+   *   - Available formats:
+   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_binary,
+   *         \ref doxypage_output_root.
+   * - \b Thermodynamics:
+   *          This output allows to print out thermodynamic quantities, see \ref
+   *          input_output_thermodynamics_.
+   *    - Available formats:
+   *          \ref doxypage_output_thermodyn,
+   *          \ref doxypage_output_thermodyn_lattice,
+   *          \ref doxypage_output_vtk_lattice.
+   * - \b Initial_Conditions:
+   *          Special initial conditions output, see
+   *          \ref doxypage_output_initial_conditions for details.
+   *   - Available formats:
+   *         \ref doxypage_output_oscar_particles,
+   *         \ref doxypage_output_initial_conditions.
+   * - \b Rivet:
+   *          Run Rivet analysis on generated events and output results, see
+   *          \ref doxypage_output_rivet for details.
+   *    - Available formats:
+   *          \ref doxypage_output_rivet.
    *
    * \attention At the moment, the \b Initial_Conditions and \b Rivet outputs
    * content as well as the \b HepMC format cannot be used <u>with multiple
@@ -1295,7 +1304,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * and this setup should only be used if in the data analysis it is not
    * necessary to trace back which data belongs to which ensemble.
    *
-   * \n
+   * ---
    *
    * \section list_of_output_formats Output formats
    *
