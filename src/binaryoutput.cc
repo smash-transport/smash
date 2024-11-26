@@ -226,9 +226,7 @@ BinaryOutputCollisions::BinaryOutputCollisions(
     : BinaryOutputBase(
           path / ((name == "Collisions" ? "collisions_binary" : name) + ".bin"),
           "wb", name, out_par.get_coll_extended(name),
-          out_par.quantities.find("Collisions") != out_par.quantities.end()
-              ? out_par.quantities.at("Collisions")
-              : std::vector<std::string>{}),
+          out_par.quantities.at("Collisions")),
       print_start_end_(out_par.coll_printstartend) {}
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
@@ -289,11 +287,9 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
 BinaryOutputParticles::BinaryOutputParticles(const std::filesystem::path &path,
                                              std::string name,
                                              const OutputParameters &out_par)
-    : BinaryOutputBase(
-          path / "particles_binary.bin", "wb", name, out_par.part_extended,
-          out_par.quantities.find("Particles") != out_par.quantities.end()
-              ? out_par.quantities.at("Particles")
-              : std::vector<std::string>{}),
+    : BinaryOutputBase(path / "particles_binary.bin", "wb", name,
+                       out_par.part_extended,
+                       out_par.quantities.at("Particles")),
       only_final_(out_par.part_only_final) {}
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles,

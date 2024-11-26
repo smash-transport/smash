@@ -221,7 +221,7 @@ TEST(fullhistory_format) {
     OutputParameters output_par = OutputParameters();
     output_par.coll_printstartend = true;
     output_par.coll_extended = false;
-
+    output_par.quantities["Collisions"] = {};
     /* Create an instance of binary output */
     auto bin_output = std::make_unique<BinaryOutputCollisions>(
         testoutputpath, "Collisions", output_par);
@@ -307,6 +307,7 @@ TEST(particles_format) {
     output_par.part_extended = false;
     output_par.part_only_final = OutputOnlyFinal::No;
 
+    output_par.quantities["Particles"] = {};
     /* Create an instance of binary output */
     auto bin_output = std::make_unique<BinaryOutputParticles>(
         testoutputpath, "Particles", output_par);
@@ -407,7 +408,7 @@ TEST(extended) {
     OutputParameters output_par = OutputParameters();
     output_par.coll_printstartend = true;
     output_par.coll_extended = true;
-
+    output_par.quantities["Collisions"] = {};
     /* Create an instance of binary output */
     auto bin_output = std::make_unique<BinaryOutputCollisions>(
         testoutputpath, "Collisions", output_par);
