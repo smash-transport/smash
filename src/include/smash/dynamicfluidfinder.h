@@ -119,15 +119,6 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
    * by an external manager using SMASH as a library.
    */
   const std::map<int32_t, double> &background_;
-  /**
-   * Queue for future fluidizations, which will take place after the formation
-   * time of particles. Keys are particle indices and values are absolute
-   * formation time in the lab frame.
-   *
-   * \note It must be \c mutable so that \c finder_actions_in_cell, overriden
-   * as a \c const method from the parent class, can modify it.
-   */
-  mutable std::map<int32_t, double> queue_{};
   /// Minimum energy density surrounding the particle to fluidize it
   const double energy_density_threshold_ = NAN;
   /// Minimum time (in lab frame) in fm to allow fluidization

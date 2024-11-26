@@ -27,29 +27,16 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
     if (t_end < min_time_ || t0 > max_time_) {
       break;
     }
-
-    const int32_t id = p.id();
-    if (queue_.count(id)) {
-      if (queue_[id] < t_end) {
-        actions.emplace_back(
-            std::make_unique<FluidizationAction>(p, p, queue_[id] - t0));
-        queue_.erase(id);
-      }
-    } else {
+    const double fluidization_time =
+        t0 + formation_time_fraction_ * (p.formation_time() - t0);
+    if (fluidization_time < t_end) {
       if (is_process_fluidizable(p.get_history().process_type)) {
         if (above_threshold(p)) {
-          double fluidization_time =
-              t0 + formation_time_fraction_ * (p.formation_time() - t0);
-          if (fluidization_time >= t_end) {
-            queue_.emplace(id, fluidization_time);
-            continue;
-          } else {
-            double time_until = (1 - p.xsec_scaling_factor() <= really_small)
-                                    ? 0
-                                    : fluidization_time - t0;
-            actions.emplace_back(
-                std::make_unique<FluidizationAction>(p, p, time_until));
-          }
+          double time_until = (1 - p.xsec_scaling_factor() <= really_small)
+                                  ? 0
+                                  : fluidization_time - t0;
+          actions.emplace_back(
+              std::make_unique<FluidizationAction>(p, p, time_until));
         }
       }
     }
