@@ -342,7 +342,6 @@ TEST(particles_format) {
     // Header
     std::vector<char> buf(4);
     std::string magic, smash_version;
-
     uint16_t format_version_number, extended_format;
 
     COMPARE(std::fread(&buf[0], 1, 4, binF.get()), 4u);  // magic number
@@ -525,7 +524,6 @@ TEST(initial_conditions_format) {
     // Header
     std::vector<char> buf(4);
     std::string magic, smash_version;
-
     uint16_t format_version_number, extended_format;
 
     COMPARE(std::fread(&buf[0], 1, 4, binF.get()), 4u);  // magic number

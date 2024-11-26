@@ -21,65 +21,6 @@
 namespace smash {
 
 /**
- * Structure to convert a given value into binary format, such that all methods
- * return a \c std::vector<char>.
- */
-class ToBinary {
- public:
-  /// Return type of this converter.
-  using type = std::vector<char>;
-
-  /**
-   * Converts an integer to binary format.
-   *
-   * \param[in] value number to convert
-   * \return a vector of char representing the binary format of the integer
-   */
-  type as_integer(int value) const { return as_binary_data(value); }
-
-  /**
-   * Converts a double to binary format.
-   *
-   * \param[in] value number to convert
-   * \return a vector of char representing the binary format of the double
-   */
-  type as_double(double value) const { return as_binary_data(value); }
-
-  /**
-   * Converts a double to binary format, intended for precise representation.
-   *
-   * \param[in] value number to convert
-   * \return a vector of char representing the binary format of the double
-   */
-  type as_precise_double(double value) const { return as_double(value); }
-
-  /**
-   * Converts a string to binary format.
-   *
-   * \param[in] str string to convert
-   * \return a vector of char representing the binary format of the string
-   */
-  type as_string(const std::string& str) const {
-    type binary_data(str.begin(), str.end());
-    return binary_data;
-  }
-
- private:
-  /**
-   * Template method to convert numbers into binary format.
-   *
-   * \param[in] value number to convert
-   * \return a vector of char representing the binary format of the number
-   */
-  template <typename T>
-  type as_binary_data(T value) const {
-    type binary_data(sizeof(T));
-    std::memcpy(binary_data.data(), &value, sizeof(T));
-    return binary_data;
-  }
-};
-
-/**
  * Structure to convert a given value into ASCII format, such that all methods
  * return a \c std::string.
  */
@@ -152,6 +93,68 @@ struct ToASCII {
 };
 
 /**
+ * Structure to convert a given value into binary format, such that all methods
+ * return a \c std::vector<char>.
+ */
+class ToBinary {
+ public:
+  /// Return type of this converter.
+  using type = std::vector<char>;
+
+  /**
+   * Converts an integer to binary format.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the integer
+   */
+  type as_integer(int value) const { return as_binary_data(value); }
+
+  /**
+   * Converts a double to binary format.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the double
+   */
+  type as_double(double value) const { return as_binary_data(value); }
+
+  /**
+   * Converts a double to binary format, intended for precise representation.
+   * Note that for binary output there is no difference between this and the
+   * \c ToBinary::as_double method, but this method has still to be introduced
+   * to allow other classes to get the converter class as a template parameter.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the double
+   */
+  type as_precise_double(double value) const { return as_double(value); }
+
+  /**
+   * Converts a string to binary format.
+   *
+   * \param[in] str string to convert
+   * \return a vector of char representing the binary format of the string
+   */
+  type as_string(const std::string& str) const {
+    type binary_data(str.begin(), str.end());
+    return binary_data;
+  }
+
+ private:
+  /**
+   * Template method to convert numbers into binary format.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the number
+   */
+  template <typename T>
+  type as_binary_data(T value) const {
+    type binary_data(sizeof(T));
+    std::memcpy(binary_data.data(), &value, sizeof(T));
+    return binary_data;
+  }
+};
+
+/**
  * A general-purpose formatter for output, supporting both ASCII and binary
  * formats.
  *
@@ -166,10 +169,8 @@ struct ToASCII {
  * 2. Adding the proper key-value pair to the \c units_ map, specifying the unit
  *    of the quantity.
  *
- * \tparam Converter The desired output format. It must be a class implementing
- *                   the same interface as \c ToASCII or \c ToBinary.
- *                   Examples include `ToASCII` for human-readable text and
- *                   `ToBinary` for compact binary output.
+ * \tparam Converter The desired output format. At the moment it must be either
+ *                   \c ToASCII or `ToBinary`.
  */
 template <typename Converter,
           std::enable_if_t<std::is_same_v<Converter, ToASCII> ||

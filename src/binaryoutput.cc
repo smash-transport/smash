@@ -114,11 +114,10 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * Here, the particle data will be serialized in the same order as they appear
  * in the Quantities list. Refer to \ref doxypage_output_ascii table in order to
  * know the types of the quantities written in the file and be able to correctly
- read the output e.g. in an analysis software.
- *
- *
+ * read the output e.g. in an analysis software.
  *
  * **Event end line**
+ *
  * \code
  * char   int32_t       int32_t          double      char
  * 'f' event_number ensemble_number impact_parameter empty
@@ -186,7 +185,7 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
 void BinaryOutputBase::write(const char c) {
   std::fwrite(&c, sizeof(char), 1, file_.get());
 }
-void BinaryOutputBase::write(const std::vector<char> &chunk) {
+void BinaryOutputBase::write(const ToBinary::type &chunk) {
   std::fwrite(chunk.data(), sizeof(char), chunk.size(), file_.get());
 }
 
