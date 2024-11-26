@@ -800,7 +800,7 @@ void Experiment<Modus>::create_output(const std::string &format,
   } else if (format == "Oscar1999" || format == "Oscar2013") {
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
-  } else if (format == "ASCIICustom" &&
+  } else if (format == "ASCII" &&
              (content == "Particles" || content == "Collisions")) {
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
@@ -1307,7 +1307,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   - For "Collisions" content: \ref doxypage_output_oscar_collisions
    *   - General block structure of OSCAR formats:
    *     \ref doxypage_output_oscar
-   * - \b "ASCIICustom" - uses the OSCAR block structure, but with an
+   * - \b "ASCII" - uses the OSCAR block structure, but with an
    *                      user-defined set of columns: \ref
    *                      doxypage_output_ascii
    * - \b "Binary" - binary, not human-readable output
@@ -1500,11 +1500,11 @@ Experiment<Modus>::Experiment(Configuration &config,
         !output_parameters.quantities.at(output_contents[i]).empty();
     const bool custom_requested =
         std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
-                  "ASCIICustom") != list_of_formats[i].end();
+                  "ASCII") != list_of_formats[i].end();
     if ((quantities_given_nonempty && !custom_requested) ||
         (!quantities_given_nonempty && custom_requested)) {
       logg[LExperiment].fatal()
-          << "Non-empty Quantities and \"ASCIICustom\" format for "
+          << "Non-empty Quantities and \"ASCII\" format for "
           << std::quoted(output_contents[i]) << " not given together.";
       abort_because_of_invalid_input_file();
     }

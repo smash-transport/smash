@@ -4678,7 +4678,7 @@ struct InputKeys {
    * strings,
    * </tt><b>empty list</b><tt>}
    *
-   * &rArr; If using the `ASCIICustom` format, a non-empty list must be
+   * &rArr; If using the `ASCII` format, a non-empty list must be
    * specified. When given alongside other formats, it is ignored. See \ref
    * doxypage_output_ascii for the possible values.
    */
@@ -4734,7 +4734,7 @@ struct InputKeys {
    * strings,
    * </tt><b>empty list</b><tt>}
    *
-   * &rArr; If using the `ASCIICustom` format, a non-empty list must be
+   * &rArr; If using the `ASCII` format, a non-empty list must be
    * specified. When given alongside other formats, it is ignored. See \ref
    * doxypage_output_ascii for the possible values.
    */

@@ -25,10 +25,10 @@ OscarOutput<Format, Contents>::OscarOutput(
     const std::filesystem::path &path, const std::string &name,
     const std::vector<std::string> quantities)
     : OutputInterface(name),
-      file_{path / (name + ((Format == ASCIICustom) ? ".dat" : ".oscar") +
+      file_{path / (name + ((Format == ASCII) ? ".dat" : ".oscar") +
                     ((Format == OscarFormat1999) ? "1999" : "")),
             "w"},
-      formatter_{Format == ASCIICustom ? quantities
+      formatter_{Format == ASCII ? quantities
                  : (Format == OscarFormat2013)
                      ? OutputDefaultQuantities::oscar2013
                  : (Format == OscarFormat2013Extended)
@@ -83,13 +83,13 @@ OscarOutput<Format, Contents>::OscarOutput(
    * The collisions output contains all collisions / decays / box wall crossings
    * and optionally the initial and final configuration.
    */
-  if (Format != ASCIICustom && !quantities.empty()) {
+  if (Format != ASCII && !quantities.empty()) {
     throw std::logic_error(
-        "Non-empty Quantities given alongside format other than ASCIICustom.");
+        "Non-empty Quantities given alongside format other than ASCII.");
   }
   std::string format_name;
-  if (Format == ASCIICustom) {
-    format_name = "ASCIICustom";
+  if (Format == ASCII) {
+    format_name = "ASCII";
   } else if (Format == OscarFormat2013) {
     format_name = "OSCAR2013";
   } else if (Format == OscarFormat2013Extended) {
@@ -97,7 +97,7 @@ OscarOutput<Format, Contents>::OscarOutput(
   } else {
     format_name = "OSC1999A";
   }
-  if (Format == ASCIICustom || Format == OscarFormat2013 ||
+  if (Format == ASCII || Format == OscarFormat2013 ||
       Format == OscarFormat2013Extended) {
     std::fprintf(file_.get(), "#!%s %s %s\n", format_name.c_str(), name.c_str(),
                  formatter_.quantities_line().c_str());
@@ -140,7 +140,7 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
   // We do not want the inital particle list or number to be printed in case of
   // IC output
   if (Contents & OscarAtEventstart && !(Contents & OscarParticlesIC)) {
-    if (Format == ASCIICustom || Format == OscarFormat2013 ||
+    if (Format == ASCII || Format == OscarFormat2013 ||
         Format == OscarFormat2013Extended) {
       std::fprintf(file_.get(), "# event %i ensemble %i in %zu\n",
                    event_label.event_number, event_label.ensemble_number,
@@ -155,7 +155,7 @@ void OscarOutput<Format, Contents>::at_eventstart(const Particles &particles,
     }
     write(particles);
   } else if (Contents & OscarParticlesIC) {
-    if (Format == ASCIICustom || Format == OscarFormat2013 ||
+    if (Format == ASCII || Format == OscarFormat2013 ||
         Format == OscarFormat2013Extended) {
       std::fprintf(file_.get(), "# event %i ensemble %i start\n",
                    event_label.event_number, event_label.ensemble_number);
@@ -171,7 +171,7 @@ template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
                                                 const EventLabel &event_label,
                                                 const EventInfo &event) {
-  if (Format == ASCIICustom || Format == OscarFormat2013 ||
+  if (Format == ASCII || Format == OscarFormat2013 ||
       Format == OscarFormat2013Extended) {
     if (Contents & OscarParticlesAtEventend ||
         (Contents & OscarParticlesAtEventendIfNotEmpty && !event.empty_event)) {
@@ -227,7 +227,7 @@ template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::at_interaction(const Action &action,
                                                    const double density) {
   if (Contents & OscarInteractions) {
-    if (Format == ASCIICustom || Format == OscarFormat2013 ||
+    if (Format == ASCII || Format == OscarFormat2013 ||
         Format == OscarFormat2013Extended) {
       std::fprintf(file_.get(),
                    "# interaction in %zu out %zu rho %12.7f weight %12.7g"
@@ -268,7 +268,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
     const DensityParameters &, const EventLabel &event_label,
     const EventInfo &) {
   if (Contents & OscarTimesteps) {
-    if (Format == ASCIICustom || Format == OscarFormat2013 ||
+    if (Format == ASCII || Format == OscarFormat2013 ||
         Format == OscarFormat2013Extended) {
       std::fprintf(file_.get(), "# event %i ensemble %i out %zu\n",
                    event_label.event_number, event_label.ensemble_number,
@@ -692,7 +692,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 
 /*!\Userguide
  * \page doxypage_output_ascii
- * The \c ASCIICustom format follows the general block structure of the \ref
+ * The \c ASCII format follows the general block structure of the \ref
  * doxypage_output_oscar, but offers more flexibility with the particle line
  * quantities written in the file. It is available for the \c %Particles and
  * \c Collisions output contents (see \ref doxypage_output), creating files
@@ -808,11 +808,11 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *\verbatim
  Output:
      Particles:
-         Format:     ["ASCIICustom"]
+         Format:     ["ASCII"]
          Quantities: ["p0","pz","pdg","charge"]
          Only_Final: IfNotEmpty
      Collisions:
-         Format:     ["ASCIICustom"]
+         Format:     ["ASCII"]
          Quantities: ["t","pdg","ID","pdg_mother1","pdg_mother2"]
  \endverbatim
  *
@@ -820,14 +820,14 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *
  * *particle_lists.dat*
  * \code
- * #!ASCIICustom particle_lists p0 pz pdg charge
+ * #!ASCII particle_lists p0 pz pdg charge
  * # Units: GeV GeV none e
  * # SMASH_version
  * \endcode
  *
  * *full_event_history.dat*
  * \code
- * #!ASCIICustom full_event_history t pdg ID pdg_mother1 pdg_mother2
+ * #!ASCII full_event_history t pdg ID pdg_mother1 pdg_mother2
  * # Units: fm none none none none
  * # SMASH_version
  * \endcode
@@ -863,7 +863,7 @@ std::unique_ptr<OutputInterface> create_select_format(
     const auto &quantities = (Contents & OscarInteractions)
                                  ? out_par.quantities.at("Collisions")
                                  : out_par.quantities.at("Particles");
-    return std::make_unique<OscarOutput<ASCIICustom, Contents>>(path, name,
+    return std::make_unique<OscarOutput<ASCII, Contents>>(path, name,
                                                                 quantities);
   } else if (modern_format && extended_format) {
     return std::make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(
@@ -885,11 +885,11 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     const std::string &format, const std::string &content,
     const std::filesystem::path &path, const OutputParameters &out_par) {
   if (format != "Oscar2013" && format != "Oscar1999" &&
-      format != "ASCIICustom") {
+      format != "ASCII") {
     throw std::invalid_argument("Creating Oscar output: unknown format");
   }
   const bool modern_format = (format == "Oscar2013");
-  const bool custom_format = (format == "ASCIICustom");
+  const bool custom_format = (format == "ASCII");
   if (content == "Particles") {
     if (out_par.part_only_final == OutputOnlyFinal::Yes) {
       return create_select_format<OscarParticlesAtEventend>(

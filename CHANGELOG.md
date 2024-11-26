@@ -25,16 +25,16 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Infrastructure for functional tests, which require at least Python3.3
 
 ### Output
-* New: Implemented `ASCIICustom` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities`
+* Implemented a new `ASCII` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities` (the existing `Oscar1999` and `Oscar2013` formats are simply a convenient alias for specifying `ASCII` and a given list of `Quantities`)
 * ⚠️ The ensemble number is now included in the output next to the event number - **this is a potentially breaking change for analysis software, especially if using the binary output**; refer to the documentation of each output type for further details
 * Bump binary output format version from 9 to 10
-* Initial conditions, HepMC and Rivet outputs disabled when SMASH is run with multiple ensembles
+* Initial conditions, HepMC and Rivet outputs disabled when SMASH is run with multiple parallel ensembles
 
 ### Changed
 * Upgraded to Pythia 8.312
 * Moved the `Orientation` section from the `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from `pi/2` to `0`
 * The interface of the `Configuration` class has been totally changed making it use `Key` objects instead of low-level strings
-* The `List` modus now validates particles from all event at the very beginning and aborts if more than 2 particles are at the same identical position in any event
+* The `List` modus now validates particles from all events at the very beginning and aborts if more than 2 particles are at the same identical position in any event
 
 ### Fixed
 * Fix a small error and added a more precise documentation for the orientation section for deformed nuclei

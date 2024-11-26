@@ -32,7 +32,7 @@ enum OscarOutputFormat {
   OscarFormat2013,
   OscarFormat2013Extended,
   OscarFormat1999,
-  ASCIICustom
+  ASCII
 };
 
 /**
