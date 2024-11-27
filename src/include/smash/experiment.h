@@ -1308,36 +1308,43 @@ Experiment<Modus>::Experiment(Configuration &config,
    *
    * \section list_of_output_formats Output formats
    *
-   * For choosing output formats see
-   * \ref doxypage_output_conf_examples.
+   * For choosing output formats see \ref doxypage_output_conf_examples.
    * Every output content can be printed out in several formats:
-   * - \b "Oscar1999", \b "Oscar2013" - human-readable text output\n
-   *   - For "Particles" content: \ref doxypage_output_oscar_particles
-   *   - For "Collisions" content: \ref doxypage_output_oscar_collisions
-   *   - General block structure of OSCAR formats:
-   *     \ref doxypage_output_oscar
-   * - \b "ASCII" - uses the OSCAR block structure, but with an
-   *                      user-defined set of columns: \ref
-   *                      doxypage_output_ascii
-   * - \b "Binary" - binary, not human-readable output
-   *   - Faster to read and write than text outputs
-   *   - Saves coordinates and momenta with the full double precision
-   *   - General file structure is similar to \ref doxypage_output_oscar
-   *   - Detailed description: \ref doxypage_output_binary
-   * - \b "Root" - binary output in the format used by ROOT software
-   *     (http://root.cern.ch)
+   *
+   * - \b "ASCII" - a human-readable text-format table of values.
+   *   - For `"Particles"` (\ref doxypage_output_oscar_particles) and
+   *     `"Collisions"` (\ref doxypage_output_oscar_collisions) contents, it
+   *     uses the \ref doxypage_output_oscar "OSCAR block structure".\n In these
+   *     cases it is possible to customize the quantities to be printed into the
+   *     output file (\ref doxypage_output_ascii).
+   *   - For `"Initial_Conditions"` content the output has \ref
+   *     doxypage_output_initial_conditions "a fixed block structure".
+   *   - For `"Thermodynamics"` content the information stored in the output
+   *     file depends on few input keys. Furthermore,
+   *      - using \b "ASCII" as format, the \ref doxypage_output_thermodyn
+   *        "standard thermodynamics output" is produced;
+   *      - using \b "Lattice_ASCII", the \ref doxypage_output_thermodyn_lattice
+   *        "the quantities on a lattice" are printed out.
+   * - \b "Binary" - a binary, not human-readable list of values.
+   *   - The \ref doxypage_output_binary "binary output" is faster to read and
+   *     write than text outputs and all floating point numbers are printed with
+   *     their full precision.
+   *   - For `"Particles"` and `"Collisions"` contents, it is basically a binary
+   *     version of the corresponding ASCII output.\n Also for binary format it
+   *     is possible to customize the quantities to be printed into the file.
+   *   - For the other contents the corresponding documentation pages about the
+   *     ASCII format contain further information.
+   * - \b "Oscar1999", \b "Oscar2013" - aliases for the \b "ASCII" format with a
+   *   given set of quantities.
+   * - \b "Root" - binary output in the format used by
+   *   <a href="http://root.cern.ch">the ROOT software</a>
    *   - Even faster to read and write, requires less disk space
    *   - Format description: \ref doxypage_output_root
-   * - \b "VTK" - text output suitable for an easy
-   *     visualization using paraview software
-   *   - This output can be opened by paraview to see the visulalization.
+   * - \b "VTK" - text output suitable for an easy visualization using Paraview
+   *   software
+   *   - This output can be opened by Paraview to see the visualization.
    *   - For "Particles" content \ref doxypage_output_vtk
    *   - For "Thermodynamics" content \ref doxypage_output_vtk_lattice
-   * - \b "ASCII" - a human-readable text-format table of values
-   *   - Used for "Thermodynamics" and "Initial_Conditions", see
-   * \ref doxypage_output_thermodyn
-   * \ref doxypage_output_thermodyn_lattice
-   * \ref doxypage_output_initial_conditions
    * - \b "HepMC_asciiv3", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
    *   Tree ROOT format see \ref doxypage_output_hepmc for details
    * - \b "YODA", \b "YODA-full" - compact ASCII text format used by the
