@@ -1502,8 +1502,7 @@ Experiment<Modus>::Experiment(Configuration &config,
       [&output_conf](std::string content) -> std::vector<std::string> {
         /* Note that the "Format" key has an empty list as default, although it
          * is a required key, because then here below the error for the user is
-         * more informative, if the key was not given in the input file.
-         */
+         * more informative, if the key was not given in the input file. */
         return output_conf.take(InputKeys::get_output_format_key(content));
       });
   auto abort_because_of_invalid_input_file = []() {
@@ -1511,17 +1510,20 @@ Experiment<Modus>::Experiment(Configuration &config,
   };
   const OutputParameters output_parameters(std::move(output_conf));
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
+    /* Note that here output_contentsp[i] might be something like Rivet that has
+     * nothing to do with the custom ASCII format and therefore it is important
+     * to check whether the content is present in output_parameters.quantities
+     * map before using at to access it. */
     const bool quantities_given_nonempty =
         output_parameters.quantities.count(output_contents[i]) &&
         !output_parameters.quantities.at(output_contents[i]).empty();
     const bool custom_requested =
         std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
                   "ASCII") != list_of_formats[i].end();
-    if ((quantities_given_nonempty && !custom_requested) ||
-        (!quantities_given_nonempty && custom_requested)) {
+    if (quantities_given_nonempty != custom_requested) {
       logg[LExperiment].fatal()
-          << "Non-empty Quantities and \"ASCII\" format for "
-          << std::quoted(output_contents[i]) << " not given together.";
+          << "Non-empty \"Quantities\" and \"ASCII\" format for "
+          << std::quoted(output_contents[i]) << " were not given together.";
       abort_because_of_invalid_input_file();
     }
 
