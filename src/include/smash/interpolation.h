@@ -200,7 +200,7 @@ InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
       x, [&](T const& a, T const& b) { return a < b; });
   x_ = apply_permutation(x, p);
   check_duplicates(x_, "InterpolateDataLinear");
-  std::vector<T> y_sorted = std::move(apply_permutation(y, p));
+  std::vector<T> y_sorted = apply_permutation(y, p);
   f_.reserve(n - 1);
   for (size_t i = 0; i < n - 1; i++) {
     f_.emplace_back(
