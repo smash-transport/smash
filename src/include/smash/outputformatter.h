@@ -55,7 +55,7 @@ struct ToASCII {
     constexpr size_t kBufferSize = 13;
     char buffer[kBufferSize];
     const auto length = std::snprintf(buffer, kBufferSize, "%g", value);
-    assert(length < kBufferSize);
+    assert(static_cast<size_t>(length) < kBufferSize);
     assert(length > 0);
     return std::string{buffer, buffer + length};
   }
@@ -78,7 +78,7 @@ struct ToASCII {
     constexpr size_t kBufferSize = 16;
     char buffer[kBufferSize];
     const auto length = std::snprintf(buffer, kBufferSize, "%.9g", value);
-    assert(length < kBufferSize);
+    assert(static_cast<size_t>(length) < kBufferSize);
     assert(length > 0);
     return std::string{buffer, buffer + length};
   }
