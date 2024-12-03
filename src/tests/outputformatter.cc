@@ -112,3 +112,23 @@ TEST(valid_line_maker) {
 
   VERIFY(correct_line.str() == formatter.data_line(p));
 }
+
+TEST(binary_chunk) {
+  ParticleData p = Test::smashon_random();
+  std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
+  OutputFormatter<ToBinary> formatter(quantities);
+
+  std::vector<char> chunk = formatter.binary_chunk(p);
+
+  double t = *reinterpret_cast<double*>(chunk.data());
+  double x = *reinterpret_cast<double*>(chunk.data() + sizeof(double));
+  double y = *reinterpret_cast<double*>(chunk.data() + 2 * sizeof(double));
+  double z = *reinterpret_cast<double*>(chunk.data() + 3 * sizeof(double));
+  int32_t id = *reinterpret_cast<int32_t*>(chunk.data() + 4 * sizeof(double));
+
+  VERIFY(t == p.position()[0]);
+  VERIFY(x == p.position()[1]);
+  VERIFY(y == p.position()[2]);
+  VERIFY(z == p.position()[3]);
+  VERIFY(id == p.id());
+}

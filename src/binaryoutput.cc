@@ -99,7 +99,25 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1 for
  * anti-baryons and 0 for mesons.
  *
+ * **Custom Particle line**
+ *
+ * Similar to the custom ASCII format (see \ref doxypage_output_ascii), the
+ * binary format also supports
+ * custom quantities for particle lines. An example of particle quantities is
+ * shown below:
+ * \verbatim
+     Output:
+       Particles:
+           Format:     ["Binary"]
+           Quantities: ["p0", "pz", "pdg", "charge"]
+   \endverbatim
+ * Here, the particle data will be serialized in the same order as they appear
+ * in the Quantities list. Refer to \ref doxypage_output_ascii table in order to
+ * know the types of the quantities written in the file and be able to correctly
+ * read the output e.g. in an analysis software.
+ *
  * **Event end line**
+ *
  * \code
  * char   int32_t       int32_t          double      char
  * 'f' event_number ensemble_number impact_parameter empty
@@ -139,11 +157,26 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
                                    const std::string &mode,
                                    const std::string &name,
-                                   bool extended_format)
-    : OutputInterface(name), file_{path, mode}, extended_(extended_format) {
+                                   bool extended_format,
+                                   const std::vector<std::string> &quantities)
+    : OutputInterface(name),
+      file_{path, mode},
+      extended_(extended_format),
+      formatter_(quantities.empty()
+                     ? (extended_ ? OutputDefaultQuantities::oscar2013extended
+                                  : OutputDefaultQuantities::oscar2013)
+                     : quantities) {
+  if (extended_format && !quantities.empty()) {
+    throw std::invalid_argument(
+        "The 'Extended' key cannot be used together with the 'Quantities' one. "
+        "Please fix your configuration file about the binary output.");
+  }
+
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
-  std::uint16_t format_variant = static_cast<uint16_t>(extended_);
+  std::uint16_t format_variant = quantities.empty()
+                                     ? static_cast<uint16_t>(extended_format)
+                                     : format_custom;
   write(format_variant);
   write(SMASH_VERSION);
 }
@@ -151,6 +184,9 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
 // write functions:
 void BinaryOutputBase::write(const char c) {
   std::fwrite(&c, sizeof(char), 1, file_.get());
+}
+void BinaryOutputBase::write(const ToBinary::type &chunk) {
+  std::fwrite(chunk.data(), sizeof(char), chunk.size(), file_.get());
 }
 
 void BinaryOutputBase::write(const std::string &s) {
@@ -180,26 +216,7 @@ void BinaryOutputBase::write(const ParticleList &particles) {
 }
 
 void BinaryOutputBase::write_particledata(const ParticleData &p) {
-  write(p.position());
-  double mass = p.effective_mass();
-  std::fwrite(&mass, sizeof(mass), 1, file_.get());
-  write(p.momentum());
-  write(p.pdgcode().get_decimal());
-  write(p.id());
-  write(p.type().charge());
-  if (extended_) {
-    const auto history = p.get_history();
-    write(history.collisions_per_particle);
-    write(p.formation_time());
-    write(p.xsec_scaling_factor());
-    write(history.id_process);
-    write(static_cast<int32_t>(history.process_type));
-    write(history.time_last_collision);
-    write(history.p1.get_decimal());
-    write(history.p2.get_decimal());
-    write(p.type().baryon_number());
-    write(p.type().strangeness());
-  }
+  write(formatter_.binary_chunk(p));
 }
 
 BinaryOutputCollisions::BinaryOutputCollisions(
@@ -207,7 +224,8 @@ BinaryOutputCollisions::BinaryOutputCollisions(
     const OutputParameters &out_par)
     : BinaryOutputBase(
           path / ((name == "Collisions" ? "collisions_binary" : name) + ".bin"),
-          "wb", name, out_par.get_coll_extended(name)),
+          "wb", name, out_par.get_coll_extended(name),
+          out_par.quantities.at("Collisions")),
       print_start_end_(out_par.coll_printstartend) {}
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
@@ -269,7 +287,8 @@ BinaryOutputParticles::BinaryOutputParticles(const std::filesystem::path &path,
                                              std::string name,
                                              const OutputParameters &out_par)
     : BinaryOutputBase(path / "particles_binary.bin", "wb", name,
-                       out_par.part_extended),
+                       out_par.part_extended,
+                       out_par.quantities.at("Particles")),
       only_final_(out_par.part_only_final) {}
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles,

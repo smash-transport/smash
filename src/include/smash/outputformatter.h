@@ -93,19 +93,89 @@ struct ToASCII {
 };
 
 /**
- * A general formatter used for output purposes, which currently only works for
- * ASCII-based formats. In the future, a Binary converter will be implemented.
+ * Structure to convert a given value into binary format, such that all methods
+ * return a \c std::vector<char>.
+ */
+class ToBinary {
+ public:
+  /// Return type of this converter.
+  using type = std::vector<char>;
+
+  /**
+   * Converts an integer to binary format.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the integer
+   */
+  type as_integer(int value) const { return as_binary_data(value); }
+
+  /**
+   * Converts a double to binary format.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the double
+   */
+  type as_double(double value) const { return as_binary_data(value); }
+
+  /**
+   * Converts a double to binary format, intended for precise representation.
+   * Note that for binary output there is no difference between this and the
+   * \c ToBinary::as_double method, but this method has still to be introduced
+   * to allow other classes to get the converter class as a template parameter.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the double
+   */
+  type as_precise_double(double value) const { return as_double(value); }
+
+  /**
+   * Converts a string to binary format.
+   *
+   * \param[in] str string to convert
+   * \return a vector of char representing the binary format of the string
+   */
+  type as_string(const std::string& str) const {
+    type binary_data(str.begin(), str.end());
+    return binary_data;
+  }
+
+ private:
+  /**
+   * Template method to convert numbers into binary format.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the number
+   */
+  template <typename T>
+  type as_binary_data(T value) const {
+    type binary_data(sizeof(T));
+    std::memcpy(binary_data.data(), &value, sizeof(T));
+    return binary_data;
+  }
+};
+
+/**
+ * A general-purpose formatter for output, supporting both ASCII and binary
+ * formats.
  *
- * In case further quantities need to be made outputable, one needs to add them
- * in the constructor with the appropriate getter from ParticleData, as well as
- * insert the proper pair in the units map.
+ * This class allows the output of particle data in a flexible and configurable
+ * manner, either in human-readable ASCII format or compact binary format. It
+ * uses a template parameter `Converter` to determine the desired output format,
+ * which must conform to the interface of either \c ToASCII or \c ToBinary.
  *
- * \tparam Converter format desired for the output. It should be a class with
- * the same interface as \c ToASCII, the only converter currently implemented,
- * with a defined \c type and the same methods.
+ * New quantities can be added for output by:
+ * 1. Adding their corresponding getter to the constructor, which extracts the
+ *    value from a \c ParticleData instance.
+ * 2. Adding the proper key-value pair to the \c units_ map, specifying the unit
+ *    of the quantity.
+ *
+ * \tparam Converter The desired output format. At the moment it must be either
+ *                   \c ToASCII or `ToBinary`.
  */
 template <typename Converter,
-          std::enable_if_t<std::is_same_v<Converter, ToASCII>, bool> = true>
+          std::enable_if_t<std::is_same_v<Converter, ToASCII> ||
+                               std::is_same_v<Converter, ToBinary>,
+                           bool> = true>
 class OutputFormatter {
  public:
   /**
@@ -158,7 +228,7 @@ class OutputFormatter {
         });
       } else if (quantity == "pdg") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_string(in.pdgcode().string().c_str());
+          return this->converter_.as_integer(in.pdgcode().get_decimal());
         });
       } else if (quantity == "ID" || quantity == "id") {
         getters_.push_back([this](const ParticleData& in) {
@@ -197,13 +267,11 @@ class OutputFormatter {
         });
       } else if (quantity == "pdg_mother1") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_string(
-              in.get_history().p1.string().c_str());
+          return this->converter_.as_integer(in.get_history().p1.get_decimal());
         });
       } else if (quantity == "pdg_mother2") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_string(
-              in.get_history().p2.string().c_str());
+          return this->converter_.as_integer(in.get_history().p2.get_decimal());
         });
       } else if (quantity == "baryon_number") {
         getters_.push_back([this](const ParticleData& in) {
@@ -219,6 +287,22 @@ class OutputFormatter {
         });
       }
     }
+  }
+  /**
+   * Produces a chunk of binary representing a particle line for the output
+   * file.
+   *
+   * \param[in] p Particle whose information is to be written.
+   * \return vector of char of the formatted data.
+   */
+  typename Converter::type binary_chunk(const ParticleData& p) {
+    return std::accumulate(
+        std::begin(getters_), std::end(getters_), std::vector<char>{},
+        [&p](std::vector<char> ss, const auto& getter) {
+          auto binary_data = getter(p);
+          ss.insert(ss.end(), binary_data.begin(), binary_data.end());
+          return ss;
+        });
   }
 
   /**

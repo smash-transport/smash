@@ -699,41 +699,107 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * with the extension <em>.dat</em>. This format is useful to decrease
  * storage usage.
  * \n
- * Available quantities
- * ---------
- * \li  \key t, \key x, \key y, \key z: Space-time coordinates
- * \li \key mass: Particle's rest-mass
- * \li \key p0, \key px, \key py, \key pz: Energy and 3-momentum
- * \li \key pdg: PDG code of the particle (see http://pdg.lbl.gov/).
- * It contains all quantum numbers and uniquely identifies its type
- * \li \key ID, id: Particle identifier in terms of an integer. It is unique
- * for every particle in the event. \key ID is used in the OSCAR 2013 standard,
- * while \key id is used in OSCAR 1999
- * \li \key charge: Electric charge of the particle in units of the
- * elementary charge e
- * \li \key ncoll: Number of collisions the particle has undergone
- * \li \key form_time: Formation time of the particle
- * \li \key xsecfac: Cross section scaling factor (if the particles are not
- * yet fully formed at the time of interaction, the cross section for the
- * underlying process is scaled down by the cross section scaling factor)
- * \li \key proc_id_origin: ID of the process of the particle's last interaction
- * \li \key proc_type_origin: Type of the last process the particle has
- * undergone. The possible process types are listed in
- * \ref doxypage_output_oscar_collisions_process_types
- * \li \key time_last_coll: Time of the particle's last interaction (except
- * wall crossings)
- * \li \key pdg_mother1: PDG code of the 1st mother particle (0 in case the
- * particle is sampled in a thermal bubble. It is not updated by elastic
- * scatterings.)
- * \li \key pdg_mother2: PDG code of the 2nd mother particle (0 in
- * case the particle results from the decay of a resonance or the appearance
- * of a thermal bubble. In the former case, \key pdg_mother1 is the PDG code of
- * this resonance. It is not updated by elastic scatterings.)
- * \li \key baryon_number: Baryon number of the particle. 1 for baryons, -1
- * for anti-baryons and 0 for mesons
- * \li \key strangeness: Net-strangeness of the particles
- * \li \key 0: Prints a column of 0 (for compatibility with OSCAR 1999)
  *
+ * <table>
+ * <tr><th>Key(s)<th>C++ type <th> Description<th></tr>
+ * <tr>
+ * <td>\key t, \key x, \key y, \key z
+ * <td> \c double <td>Space-time coordinates
+ * </tr>
+ * <tr>
+ * <td>\key mass
+ * <td>\c double
+ * <td>Particle's rest-mass
+ * </tr>
+ * <tr>
+ * <td>\key p0, \key px, \key py, \key pz
+ * <td> \c double <td>Energy and 3-momentum
+ * </tr>
+ * <tr>
+ * <td>\key pdg
+ * <td>\c int32_t
+ * <td>PDG code of the particle (see http://pdg.lbl.gov/). It contains all
+ *     quantum numbers and uniquely identifies its type
+ * </tr>
+ * <tr>
+ * <td>\key ID, id
+ * <td> \c int32_t
+ * <td>Particle identifier in terms of an integer. It is unique for every
+ *     particle in the event. \key ID is used in the OSCAR 2013 standard, while
+ *     \key id is used in OSCAR 1999
+ * </tr>
+ * <tr>
+ * <td>\key charge
+ * <td>\c int32_t
+ * <td>Electric charge of the particle in units of the elementary charge \f$e\f$
+ * </tr>
+ * <tr>
+ * <td>\key ncoll
+ * <td>\c int32_t
+ * <td>Number of collisions the particle has undergone
+ * </tr>
+ * <tr>
+ * <td>\key form_time
+ * <td>\c double
+ * <td>Formation time of the particle
+ * </tr>
+ * <tr>
+ * <td>\key xsecfac
+ * <td>\c double
+ * <td>Cross section scaling factor (if the particles are not yet fully formed
+ *     at the time of interaction, the cross section for the underlying process
+ *     is scaled down by the cross section scaling factor)
+ * </tr>
+ * <tr>
+ * <td>\key proc_id_origin
+ * <td>\c int32_t
+ * <td>ID of the process of the particle's last interaction
+ * </tr>
+ * <tr>
+ * <td>\key proc_type_origin
+ * <td>\c int32_t
+ * <td>Type of the last process the particle has undergone. The possible process
+ *     types are listed in \ref doxypage_output_oscar_collisions_process_types
+ * </tr>
+ * <tr>
+ * <td>
+ * \key time_last_coll
+ * <td>\c double
+ * <td>Time of the particle's last interaction (except wall crossings)
+ * </tr>
+ * <tr>
+ * <td>\key pdg_mother1
+ * <td>\c int32_t
+ * <td>PDG code of the 1st mother particle (0 in case the particle is sampled in
+ *     a thermal bubble. It is not updated by elastic scatterings)
+ * </tr>
+ * <tr>
+ * <td>\key pdg_mother2
+ * <td>\c int32_t
+ * <td>PDG code of the 2nd mother particle (0 in case the particle results from
+ *     the decay of a resonance or the appearance of a thermal bubble. In the
+ *     former case, \key pdg_mother1 is the PDG code of this resonance. It is
+ *     not updated by elastic scatterings)
+ * </tr>
+ * <tr>
+ * <td>\key baryon_number
+ * <td>\c int32_t
+ * <td>Baryon number of the particle: 1 for baryons, -1 for anti-baryons and 0
+ *     for mesons
+ * </tr>
+ * <tr>
+ * <td>\key strangeness
+ * <td>\c int32_t
+ * <td>Net-strangeness of the particles
+ * </tr>
+ * <tr>
+ * <td>\key 0
+ * <td> -
+ * <td>Prints a column of 0 (for compatibility with OSCAR 1999)
+ * </tr>
+ * </table>
+
+
  * **Example**
  *
  * If one is interested, for example, in the rate of production/annihilation of

@@ -9,14 +9,15 @@
 
 #ifndef SRC_INCLUDE_SMASH_BINARYOUTPUT_H_
 #define SRC_INCLUDE_SMASH_BINARYOUTPUT_H_
-
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "file.h"
 #include "forwarddeclarations.h"
 #include "numeric_cast.h"
+#include "outputformatter.h"
 #include "outputinterface.h"
 #include "outputparameters.h"
 
@@ -35,10 +36,21 @@ class BinaryOutputBase : public OutputInterface {
    * \param[in] mode Is used to determine the file access mode.
    * \param[in] name Name of the output.
    * \param[in] extended_format Is the written output extended.
+   * \param[in] quantities is the vector of quantities passed to the
+   * OutPutFormatter.
    */
   explicit BinaryOutputBase(const std::filesystem::path &path,
                             const std::string &mode, const std::string &name,
-                            bool extended_format);
+                            bool extended_format,
+                            const std::vector<std::string> &quantities = {});
+
+  /**
+   * Write several bytes to the binary output. Meant to be used by the
+   * OutputFormatter.
+   *
+   * \param[in] chunk vector of bytes to be written.
+   */
+  void write(const ToBinary::type &chunk);
 
   /**
    * Write byte to binary output.
@@ -120,6 +132,10 @@ class BinaryOutputBase : public OutputInterface {
   const uint16_t format_version_ = 10;
   /// Option for extended output
   bool extended_;
+  /// Format variant number associated to the custom quantities case
+  const uint16_t format_custom = 2;
+  /// The output formatter
+  OutputFormatter<ToBinary> formatter_;
 };
 
 /**
