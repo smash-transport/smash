@@ -11,16 +11,16 @@ General:
 Output:
     Output_Interval:  1.0
     Collisions:
-        Format:  ["Binary"]
+        Format:  ["Oscar2013_bin"]
         Print_Start_End:    False
     Particles:
-        Format:  ["Binary"]
+        Format:  ["Oscar2013_bin"]
         Only_Final:         No
 
 
 Collision_Term:
     Collision_Criterion:      Stochastic
-    # Value below choosen to optimze tests runtime, remove for production runs with deuterons
+    # Value below chosen to optimize tests runtime, remove for production runs with deuterons
     Fixed_Min_Cell_Length:    2.5
     Included_2to2:            ["Elastic"]
     Multi_Particle_Reactions: ["Meson_3to1", "Deuteron_3to2"]
