@@ -21,6 +21,30 @@ namespace smash {
 
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
+static auto get_binary_filename(const std::string &content,
+                                const std::vector<std::string> &quantities) {
+  std::string filename = content;
+  if (content == "Particles" || content == "Collisions") {
+    std::transform(filename.begin(), filename.end(), filename.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    if (quantities == OutputDefaultQuantities::oscar2013) {
+      filename += "_oscar2013";
+    } else if (quantities == OutputDefaultQuantities::oscar2013extended) {
+      filename += "_oscar2013_extended";
+    } else {
+      filename += "_binary";
+    }
+  } else if (content == "Photons" || content == "Dileptons") {
+    // Nothing to be done here
+  } else if (content == "Initial_Conditions") {
+    filename = "SMASH_IC";
+  } else {
+    throw std::invalid_argument(
+        "Unknown content to get the binary output filename.");
+  }
+  return filename + ".bin";
+}
+
 /*!\Userguide
  * \page doxypage_output_binary
  * SMASH supports a binary output version similar to the OSCAR 2013 standard.
