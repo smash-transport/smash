@@ -197,7 +197,7 @@ static auto get_binary_filename(const std::string &content,
  * indicating the types of the reaction, such as resonance decay,
  * elastic scattering, soft string process, hard string process, etc.,
  * are written in the 'process_type' blocks. For options of this output see the
- * \ref input_output_content_specific_"content-specific output options".
+ * \ref input_output_content_specific_ "content-specific output options".
  *
  * See also \ref doxypage_output_collisions_box_modus.
  **/
