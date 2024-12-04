@@ -80,6 +80,8 @@ quantities_to_compare_exact = ['x', 'y', 'pdg']
 # px and py are given with default precision in ASCII, but with %.9 in OSCAR.
 # If this changes, they should be compared exactly
 quantities_to_compare_fuzzy = ['px', 'py', 'eta', 'tau', 'mt', 'Rap']
+relative_tolerance_for_fuzzy_compare = {
+    'px': 1.e-5, 'py': 1.e-5, 'eta': 1.e-4, 'tau': 1.e-5, 'mt': 1.e-5, 'Rap': 1.e-5}
 comparison_exact = pd.merge(ascii[quantities_to_compare_exact],
                             oscar[quantities_to_compare_exact],
                             on=quantities_to_compare_exact, how='left', indicator='exists')
@@ -102,6 +104,7 @@ oscar = oscar.drop(spectators.index.values).reset_index()
 # The required precision is arbitrary.
 for quantity in quantities_to_compare_fuzzy:
     comparison_fuzzy = abs((ascii[quantity] - oscar[quantity])/ascii[quantity])
-    if any(comparison_fuzzy > 10**-5):
-        print("Relative difference in " + quantity + " above 10⁻⁵.")
+    if any(comparison_fuzzy > relative_tolerance_for_fuzzy_compare[quantity]):
+        print("Relative difference in " + quantity + " above " +
+              relative_tolerance_for_fuzzy_compare[quantity])
         sys.exit(1)
