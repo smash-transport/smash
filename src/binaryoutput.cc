@@ -21,6 +21,10 @@ namespace smash {
 
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
+static auto get_list_of_binary_quantities(const std::string &content,
+                                          const std::string &format,
+                                          const OutputParameters &parameters);
+
 static auto get_binary_filename(const std::string &content,
                                 const std::vector<std::string> &quantities) {
   std::string filename = content;
@@ -410,6 +414,50 @@ void BinaryOutputInitialConditions::at_interaction(const Action &action,
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(action.incoming_particles().size());
     write(action.incoming_particles());
+  }
+}
+
+static auto get_list_of_binary_quantities(const std::string &content,
+                                          const std::string &format,
+                                          const OutputParameters &parameters) {
+  const bool is_extended = std::invoke([&content, &parameters]() {
+    if (content == "Particles")
+      return parameters.part_extended;
+    else if (content == "Collision")
+      return parameters.coll_extended;
+    else if (content == "Dileptons")
+      return parameters.dil_extended;
+    else if (content == "Photons")
+      return parameters.photons_extended;
+    else if (content == "Initial_Conditions")
+      return parameters.ic_extended;
+    else
+      return false;
+  });
+  const auto default_quantities =
+      (is_extended) ? OutputDefaultQuantities::oscar2013extended
+                    : OutputDefaultQuantities::oscar2013;
+  if (format == "Oscar2013_bin" || content == "Dileptons" ||
+      content == "Photons" || content == "Initial_Conditions") {
+    return default_quantities;
+  } else if (format == "Binary") {
+    if (content == "Particles" || content == "Collisions") {
+      auto list_of_quantities = parameters.quantities.at(content);
+      if (list_of_quantities.empty()) {
+        return default_quantities;
+      } else {
+        return list_of_quantities;
+      }
+    } else {
+      /* Note that this function should not be called with "Binary" format for
+       * output contents which do not support custom binary quantities. Hence we
+       * throw here to prevent such a case.*/
+      throw std::invalid_argument(
+          "Unknown content to get the list of quantities for binary output.");
+    }
+  } else {
+    throw std::invalid_argument(
+        "Unknown format to get the list of quantities for binary output.");
   }
 }
 }  // namespace smash
