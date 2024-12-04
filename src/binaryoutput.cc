@@ -205,21 +205,12 @@ static auto get_binary_filename(const std::string &content,
 BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
                                    const std::string &mode,
                                    const std::string &name,
-                                   bool extended_format,
                                    const std::vector<std::string> &quantities)
-    : OutputInterface(name),
-      file_{path, mode},
-      extended_(extended_format),
-      formatter_(quantities.empty()
-                     ? (extended_ ? OutputDefaultQuantities::oscar2013extended
-                                  : OutputDefaultQuantities::oscar2013)
-                     : quantities) {
-  if (extended_format && !quantities.empty()) {
+    : OutputInterface(name), file_{path, mode}, formatter_(quantities) {
+  if (quantities.empty()) {
     throw std::invalid_argument(
-        "The 'Extended' key cannot be used together with the 'Quantities' one. "
-        "Please fix your configuration file about the binary output.");
+        "Empty quantities list passed to 'BinaryOutputBase' cconstructor.");
   }
-
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
   std::uint16_t format_variant{};
@@ -274,11 +265,9 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
 
 BinaryOutputCollisions::BinaryOutputCollisions(
     const std::filesystem::path &path, std::string name,
-    const OutputParameters &out_par)
-    : BinaryOutputBase(
-          path / ((name == "Collisions" ? "collisions_binary" : name) + ".bin"),
-          "wb", name, out_par.get_coll_extended(name),
-          out_par.quantities.at("Collisions")),
+    const OutputParameters &out_par, const std::vector<std::string> &quantities)
+    : BinaryOutputBase(path / get_binary_filename(name, quantities), "wb", name,
+                       quantities),
       print_start_end_(out_par.coll_printstartend) {}
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
@@ -336,12 +325,11 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
   write(action.outgoing_particles());
 }
 
-BinaryOutputParticles::BinaryOutputParticles(const std::filesystem::path &path,
-                                             std::string name,
-                                             const OutputParameters &out_par)
-    : BinaryOutputBase(path / "particles_binary.bin", "wb", name,
-                       out_par.part_extended,
-                       out_par.quantities.at("Particles")),
+BinaryOutputParticles::BinaryOutputParticles(
+    const std::filesystem::path &path, std::string name,
+    const OutputParameters &out_par, const std::vector<std::string> &quantities)
+    : BinaryOutputBase(path / get_binary_filename(name, quantities), "wb", name,
+                       quantities),
       only_final_(out_par.part_only_final) {}
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles,
@@ -399,9 +387,9 @@ void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
 
 BinaryOutputInitialConditions::BinaryOutputInitialConditions(
     const std::filesystem::path &path, std::string name,
-    const OutputParameters &out_par)
-    : BinaryOutputBase(path / "SMASH_IC.bin", "wb", name, out_par.ic_extended) {
-}
+    const std::vector<std::string> &quantities)
+    : BinaryOutputBase(path / get_binary_filename(name, quantities), "wb", name,
+                       quantities) {}
 
 void BinaryOutputInitialConditions::at_eventstart(const Particles &,
                                                   const EventLabel &,
