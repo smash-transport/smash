@@ -864,7 +864,7 @@ std::unique_ptr<OutputInterface> create_select_format(
                                  ? out_par.quantities.at("Collisions")
                                  : out_par.quantities.at("Particles");
     return std::make_unique<OscarOutput<ASCII, Contents>>(path, name,
-                                                                quantities);
+                                                          quantities);
   } else if (modern_format && extended_format) {
     return std::make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(
         path, name);
@@ -884,8 +884,7 @@ std::unique_ptr<OutputInterface> create_select_format(
 std::unique_ptr<OutputInterface> create_oscar_output(
     const std::string &format, const std::string &content,
     const std::filesystem::path &path, const OutputParameters &out_par) {
-  if (format != "Oscar2013" && format != "Oscar1999" &&
-      format != "ASCII") {
+  if (format != "Oscar2013" && format != "Oscar1999" && format != "ASCII") {
     throw std::invalid_argument("Creating Oscar output: unknown format");
   }
   const bool modern_format = (format == "Oscar2013");
