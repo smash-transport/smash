@@ -28,6 +28,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Implemented a new `ASCII` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities` (the existing `Oscar1999` and `Oscar2013` formats are simply a convenient alias for specifying `ASCII` and a given list of `Quantities`)
 * ⚠️ The ensemble number is now included in the output next to the event number - **this is a potentially breaking change for analysis software, especially if using the binary output**; refer to the documentation of each output type for further details
 * Bump binary output format version from 9 to 10
+* Some binary output files have been renamed to better track their content
 * Initial conditions, HepMC and Rivet outputs disabled when SMASH is run with multiple parallel ensembles
 
 ### Changed
