@@ -214,23 +214,6 @@ struct OutputParameters {
     }
   }
 
-  /**
-   * Pass correct extended flag to binary collision output constructor
-   * \param[in] name (File)name of the output.
-   * \return Extended flag for binary output.
-   */
-  bool get_coll_extended(std::string name) const {
-    if (name == "Collisions") {
-      return coll_extended;
-    } else if (name == "Dileptons") {
-      return dil_extended;
-    } else if (name == "Photons") {
-      return photons_extended;
-    } else {
-      return false;  // error
-    }
-  }
-
   /// Point, where thermodynamic quantities are calculated
   ThreeVector td_position;
 
