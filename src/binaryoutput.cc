@@ -485,4 +485,26 @@ static auto get_list_of_binary_quantities(const std::string &content,
         "Unknown format to get the list of quantities for binary output.");
   }
 }
+
+std::unique_ptr<OutputInterface> create_binary_output(
+    const std::string &format, const std::string &content,
+    const std::filesystem::path &path, const OutputParameters &out_par) {
+  if (content == "Particles") {
+    return std::make_unique<BinaryOutputParticles>(
+        path, content, out_par,
+        get_list_of_binary_quantities(content, format, out_par));
+  } else if (content == "Collisions" || content == "Dileptons" ||
+             content == "Photons") {
+    return std::make_unique<BinaryOutputCollisions>(
+        path, content, out_par,
+        get_list_of_binary_quantities(content, format, out_par));
+  } else if (content == "Initial_Conditions") {
+    return std::make_unique<BinaryOutputInitialConditions>(
+        path, content, get_list_of_binary_quantities(content, format, out_par));
+  } else {
+    throw std::invalid_argument("Binary output not available for '" + content +
+                                "' content.");
+  }
+}
+
 }  // namespace smash

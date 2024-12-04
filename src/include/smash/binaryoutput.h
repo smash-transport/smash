@@ -310,6 +310,24 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
   void at_interaction(const Action &action, const double) override;
 };
 
+/**
+ * \ingroup output
+ *
+ * \brief Create a binary output object. This is a helper function for the \c
+ * Experiment class to facilitate the logic when creating the output objects.
+ *
+ * \param[in] format The output format as string, e.g. \c "Oscar2013"
+ * \param[in] content The output content as string, e.g. \c "Particles"
+ * \param[in] path The path to the output directory
+ * \param[in] out_par The output parameters object containing output metadata
+ *
+ * \return A \c std::unique_ptr<OutputInterface> polymorphically initialised to
+ * the correct binary output object.
+ */
+std::unique_ptr<OutputInterface> create_binary_output(
+    const std::string &format, const std::string &content,
+    const std::filesystem::path &path, const OutputParameters &out_par);
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_BINARYOUTPUT_H_
