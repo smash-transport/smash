@@ -112,22 +112,26 @@ struct OutputParameters {
           thermo_conf.take(InputKeys::output_thermodynamics_onlyParticipants);
     }
 
-    if (conf.has_section(InputSections::o_particles)) {
-      part_extended = conf.take(InputKeys::output_particles_extended);
-      part_only_final = conf.take(InputKeys::output_particles_onlyFinal);
-      const auto part_quantities =
-          conf.take(InputKeys::output_particles_quantities);
-      quantities.insert({"Particles", part_quantities});
-    }
-
-    if (conf.has_section(InputSections::o_collisions)) {
-      coll_extended = conf.take(InputKeys::output_collisions_extended);
-      coll_printstartend =
-          conf.take(InputKeys::output_collisions_printStartEnd);
-      const auto coll_quantities =
-          conf.take(InputKeys::output_collisions_quantities);
-      quantities.insert({"Collisions", coll_quantities});
-    }
+    /* Unconditionally take quantities from the configuration file. This is
+     * needed because the 'Format' key in the output content subsection is taken
+     * before this object is instantiated and that might be the only present key
+     * making the sub-section disappear before the configuration is handed over
+     * to this constructor. As a positive consequence, the quantities map has
+     * always the entry set, at least to an empty list. This is  assumed
+     * elsewhere in the code and it ensured here. */
+    const auto part_quantities =
+        conf.take(InputKeys::output_particles_quantities);
+    quantities.insert({"Particles", part_quantities});
+    const auto coll_quantities =
+        conf.take(InputKeys::output_collisions_quantities);
+    quantities.insert({"Collisions", coll_quantities});
+    /* In the same spirit, always take also other particles and collisions keys.
+     * This makes the class behaviour bounded to the key default value and not
+     * to the class member initial value. */
+    part_extended = conf.take(InputKeys::output_particles_extended);
+    part_only_final = conf.take(InputKeys::output_particles_onlyFinal);
+    coll_extended = conf.take(InputKeys::output_collisions_extended);
+    coll_printstartend = conf.take(InputKeys::output_collisions_printStartEnd);
 
     if (conf.has_section(InputSections::o_dileptons)) {
       dil_extended = conf.take(InputKeys::output_dileptons_extended);
