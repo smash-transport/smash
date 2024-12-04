@@ -133,7 +133,7 @@ class BinaryOutputBase : public OutputInterface {
   /// Option for extended output
   bool extended_;
   /// Format variant number associated to the custom quantities case
-  const uint16_t format_custom = 2;
+  const uint16_t format_custom_ = 2;
   /// The output formatter
   OutputFormatter<ToBinary> formatter_;
 };

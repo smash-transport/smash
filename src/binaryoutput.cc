@@ -72,7 +72,10 @@ static auto get_binary_filename(const std::string &content,
  * \endcode
  * \li magic_number - 4 bytes that in ASCII read as "SMSH".
  * \li Format version is an integer number, currently it is 10.
- * \li Format variant is an integer number: 0 for default, 1 for extended.
+ * \li Format variant is an integer number:
+ *     \li 0 for quantities corresponding to OSCAR 2013 format;
+ *     \li 1 for quantities corresponding to OSCAR 2013 extended format;
+ *     \li 2 for custom list of quantities.
  * \li len is the length of smash version string
  * \li smash_version is len chars that give information about the SMASH version.
  *
@@ -144,6 +147,10 @@ static auto get_binary_filename(const std::string &content,
  * know the types of the quantities written in the file and be able to correctly
  * read the output e.g. in an analysis software.
  *
+ * \attention If a custom binary format is used, there is no way to know which
+ * quantities were stored from the output file. It is user's responsibility to
+ * keep track of this information in their projects.
+ *
  * **Event end line**
  *
  * \code
@@ -160,24 +167,37 @@ static auto get_binary_filename(const std::string &content,
  *
  * Particles output
  * ----------------
- * The particles output is Written to the \c particles_binary.bin file.
- * It contains the current particle list at specific moments of time. Every
- * moment of time is written as a 'p' block. For options of this output see
- * \ref input_output_content_specific_ "content-specific output options".
+ * The name of particles output file depends on its content:
+ *  \li \c particles_binary.bin &rarr; this is the default;
+ *  \li \c particles_oscar2013.bin &rarr;
+ *      if the list of quantities corresponds to the OSCAR2013 format;
+ *  \li \c particles_oscar2013_extended.bin &rarr;
+ *      if the list of quantities corresponds to the extended OSCAR2013 format.
+ *
+ * The output file contains the current particle list at specific moments of
+ * time. Every moment of time is written as a \c 'p' block. For options of this
+ * output see the corresponding \ref input_output_content_specific_
+ * "content-specific output options".
  *
  * Collisions output
  * -----------------
- * The collisions output is Written to the \c collisions_binary.bin file.
+ * The name of collisions output file depends on its content:
+ *  \li \c collisions_binary.bin &rarr; this is the default;
+ *  \li \c collisions_oscar2013.bin &rarr;
+ *      if the list of quantities corresponds to the OSCAR2013 format;
+ *  \li \c collisions_oscar2013_extended.bin &rarr;
+ *      if the list of quantities corresponds to the extended OSCAR2013 format.
+ *
  * It contains interactions (collisions, decays, box wall crossings) and
  * optionally the initial and final configuration. The interactions are written
- * in computational frame time-ordered fashion, in 'i' blocks, which contains
+ * in computational frame time-ordered fashion, in \c 'i' blocks, which contains
  * the information of the incoming and the outgoing particles of each reaction
  * written in the 'incoming' and 'outgoing' blocks respectively.
- * Initial and final states are written as 'p' blocks. The process IDs
+ * Initial and final states are written as \c 'p' blocks. The process IDs
  * indicating the types of the reaction, such as resonance decay,
  * elastic scattering, soft string process, hard string process, etc.,
- * are written in the 'process_type' blocks. For options of this output see
- * \ref input_output_content_specific_ "content-specific output options".
+ * are written in the 'process_type' blocks. For options of this output see the
+ * \ref input_output_content_specific_"content-specific output options".
  *
  * See also \ref doxypage_output_collisions_box_modus.
  **/
@@ -202,9 +222,14 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
 
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
-  std::uint16_t format_variant = quantities.empty()
-                                     ? static_cast<uint16_t>(extended_format)
-                                     : format_custom;
+  std::uint16_t format_variant{};
+  if (quantities == OutputDefaultQuantities::oscar2013) {
+    format_variant = 0;
+  } else if (quantities == OutputDefaultQuantities::oscar2013extended) {
+    format_variant = 1;
+  } else {
+    format_variant = format_custom_;
+  }
   write(format_variant);
   write(SMASH_VERSION);
 }
