@@ -44,7 +44,7 @@ TEST(directory_is_created) {
 
 TEST(init_particletypes) { Test::create_smashon_particletypes(); }
 
-static const int16_t current_format_version = 10;
+static const uint16_t current_format_version = 10;
 
 /* A set of convenient functions to read binary */
 
@@ -66,10 +66,6 @@ static void read_binary(std::uint16_t &x, const FilePtr &file) {
 }
 
 static void read_binary(std::int32_t &x, const FilePtr &file) {
-  COMPARE(std::fread(&x, sizeof(x), 1, file.get()), 1u);
-}
-
-static void read_binary(std::int16_t &x, const FilePtr &file) {
   COMPARE(std::fread(&x, sizeof(x), 1, file.get()), 1u);
 }
 
@@ -212,7 +208,7 @@ TEST(fullhistory_format) {
   const double rho = 0.123;
 
   const std::filesystem::path collisionsoutputfilepath =
-      testoutputpath / "collisions_binary.bin";
+      testoutputpath / "collisions_oscar2013.bin";
   std::filesystem::path collisionsoutputfilepath_unfinished =
       collisionsoutputfilepath;
   collisionsoutputfilepath_unfinished += ".unfinished";
@@ -223,8 +219,8 @@ TEST(fullhistory_format) {
     output_par.coll_extended = false;
     output_par.quantities["Collisions"] = {};
     /* Create an instance of binary output */
-    auto bin_output = std::make_unique<BinaryOutputCollisions>(
-        testoutputpath, "Collisions", output_par);
+    auto bin_output = create_binary_output("Oscar2013_bin", "Collisions",
+                                           testoutputpath, output_par);
     VERIFY(std::filesystem::exists(collisionsoutputfilepath_unfinished));
 
     /* Write initial state output: the two smashons we created */
@@ -298,7 +294,7 @@ TEST(particles_format) {
   const ParticleList initial_particles = particles->copy_to_vector();
 
   const std::filesystem::path particleoutputpath =
-      testoutputpath / "particles_binary.bin";
+      testoutputpath / "particles_oscar2013.bin";
   std::filesystem::path particleoutputpath_unfinished = particleoutputpath;
   particleoutputpath_unfinished += ".unfinished";
   {
@@ -309,8 +305,8 @@ TEST(particles_format) {
 
     output_par.quantities["Particles"] = {};
     /* Create an instance of binary output */
-    auto bin_output = std::make_unique<BinaryOutputParticles>(
-        testoutputpath, "Particles", output_par);
+    auto bin_output = create_binary_output("Oscar2013_bin", "Particles",
+                                           testoutputpath, output_par);
     VERIFY(bool(bin_output));
     VERIFY(std::filesystem::exists(particleoutputpath_unfinished));
 
@@ -399,7 +395,7 @@ TEST(extended) {
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
   const std::filesystem::path collisionsoutputfilepath =
-      testoutputpath / "collisions_binary.bin";
+      testoutputpath / "collisions_oscar2013_extended.bin";
   std::filesystem::path collisionsoutputfilepath_unfinished =
       collisionsoutputfilepath;
   collisionsoutputfilepath_unfinished += ".unfinished";
@@ -409,8 +405,8 @@ TEST(extended) {
     output_par.coll_extended = true;
     output_par.quantities["Collisions"] = {};
     /* Create an instance of binary output */
-    auto bin_output = std::make_unique<BinaryOutputCollisions>(
-        testoutputpath, "Collisions", output_par);
+    auto bin_output = create_binary_output("Oscar2013_bin", "Collisions",
+                                           testoutputpath, output_par);
     VERIFY(std::filesystem::exists(collisionsoutputfilepath_unfinished));
 
     /* Write initial state output: the two smashons we created */
@@ -500,8 +496,8 @@ TEST(initial_conditions_format) {
     output_par.part_extended = false;
     double density = 0.0;
     /* Create an instance of binary output */
-    auto bin_output = std::make_unique<BinaryOutputInitialConditions>(
-        testoutputpath, "SMASH_IC", output_par);
+    auto bin_output = create_binary_output("Binary", "Initial_Conditions",
+                                           testoutputpath, output_par);
     VERIFY(bool(bin_output));
     VERIFY(std::filesystem::exists(particleoutputpath_unfinished));
 
@@ -582,8 +578,8 @@ TEST(custom) {
                                           "z", "charge", "strangeness"};
 
     /* Create an instance of binary output */
-    auto bin_output = std::make_unique<BinaryOutputParticles>(
-        testoutputpath, "Particles", output_par);
+    auto bin_output =
+        create_binary_output("Binary", "Particles", testoutputpath, output_par);
     VERIFY(bool(bin_output));
     VERIFY(std::filesystem::exists(particleoutputpath_unfinished));
 
