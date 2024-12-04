@@ -785,18 +785,16 @@ void Experiment<Modus>::create_output(const std::string &format,
     logg[LExperiment].error(
         "Root output requested, but Root support not compiled in");
 #endif
-  } else if (format == "Binary") {
-    if (content == "Collisions" || content == "Dileptons" ||
-        content == "Photons") {
-      outputs_.emplace_back(std::make_unique<BinaryOutputCollisions>(
-          output_path, content, out_par));
-    } else if (content == "Particles") {
-      outputs_.emplace_back(std::make_unique<BinaryOutputParticles>(
-          output_path, content, out_par));
-    } else if (content == "Initial_Conditions") {
-      outputs_.emplace_back(std::make_unique<BinaryOutputInitialConditions>(
-          output_path, content, out_par));
-    }
+  } else if (format == "Binary" &&
+             (content == "Collisions" || content == "Dileptons" ||
+              content == "Photons" || content == "Particles" ||
+              content == "Initial_Conditions")) {
+    outputs_.emplace_back(
+        create_binary_output(format, content, output_path, out_par));
+  } else if (format == "Oscar2013_bin" &&
+             (content == "Collisions" || content == "Particles")) {
+    outputs_.emplace_back(
+        create_binary_output(format, content, output_path, out_par));
   } else if (format == "Oscar1999" || format == "Oscar2013") {
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
@@ -1334,6 +1332,8 @@ Experiment<Modus>::Experiment(Configuration &config,
    *     is possible to customize the quantities to be printed into the file.
    *   - For the other contents the corresponding documentation pages about the
    *     ASCII format contain further information.
+   * - \b "Oscar2013_bin" - alias for the \b "Binary" format with a given set of
+   *   quantities.
    * - \b "Oscar1999", \b "Oscar2013" - aliases for the \b "ASCII" format with a
    *   given set of quantities.
    * - \b "Root" - binary output in the format used by
