@@ -436,7 +436,7 @@ static auto get_list_of_binary_quantities(const std::string &content,
   const bool is_extended = std::invoke([&content, &parameters]() {
     if (content == "Particles")
       return parameters.part_extended;
-    else if (content == "Collision")
+    else if (content == "Collisions")
       return parameters.coll_extended;
     else if (content == "Dileptons")
       return parameters.dil_extended;
