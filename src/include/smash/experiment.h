@@ -1178,16 +1178,16 @@ Experiment<Modus>::Experiment(Configuration &config,
         // Read in proper time from config
         proper_time =
             config.take(InputKeys::output_initialConditions_properTime);
-        validate_duplicate_IC_config(
-            proper_time, IC_parameters.proper_time.value(), "Proper_Time");
+        validate_duplicate_IC_config(proper_time, IC_parameters.proper_time,
+                                     "Proper_Time");
       } else if (IC_parameters.proper_time.has_value()) {
         proper_time = IC_parameters.proper_time.value();
       } else {
         double lower_bound =
             config.take(InputKeys::output_initialConditions_lowerBound);
         if (IC_parameters.lower_bound.has_value())
-          validate_duplicate_IC_config(
-              lower_bound, IC_parameters.lower_bound.value(), "Lower_Bound");
+          validate_duplicate_IC_config(lower_bound, IC_parameters.lower_bound,
+                                       "Lower_Bound");
 
         // Default proper time is the passing time of the two nuclei
         double default_proper_time = modus_.nuclei_passing_time();
