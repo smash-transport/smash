@@ -80,10 +80,8 @@ class ListModus : public ModusDefault {
    * \param[in] parameters Unused, but necessary because of templated use of
    *                       this function
    * \return The starting time of the simulation
-   * \throw runtime_error if an input list file could not be found
-   * \throw LoadFailure if an input list file is not correctly formatted
-   * \throw invalid_argument if the listed charge of a particle does not
-   *                         correspond to its pdg charge
+   *
+   * \see read_particles_from_next_event_ for possible exceptions thrown.
    */
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
@@ -152,6 +150,18 @@ class ListModus : public ModusDefault {
   double start_time_ = 0.;
 
  private:
+  /**
+   * Read the next event from file.
+   *
+   * @param particles The list of particles where the read information is stored
+   *
+   * \throw runtime_error if an input list file could not be found
+   * \throw LoadFailure if an input list file is not correctly formatted
+   * \throw invalid_argument if the listed charge of a particle does not
+   *                         correspond to its pdg charge
+   */
+  void read_particles_from_next_event_(Particles &particles);
+
   /**
    * Check if the file given by filepath has events left after streampos
    * last_position

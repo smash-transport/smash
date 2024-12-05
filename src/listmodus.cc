@@ -148,6 +148,18 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
 /* initial_conditions - sets particle data for @particles */
 double ListModus::initial_conditions(Particles *particles,
                                      const ExperimentParameters &) {
+  read_particles_from_next_event_(*particles);
+  if (particles->size() > 0) {
+    backpropagate_to_same_time(*particles);
+  } else {
+    start_time_ = 0.0;
+  }
+  event_id_++;
+
+  return start_time_;
+}
+
+void ListModus::read_particles_from_next_event_(Particles &particles) {
   std::string particle_list = next_event_();
   for (const Line &line : line_parser(particle_list)) {
     std::istringstream lineinput(line.text);
@@ -172,20 +184,8 @@ double ListModus::initial_conditions(Particles *particles,
       logg[LList].error() << "Charge of pdg = " << pdgcode << " != " << charge;
       throw std::invalid_argument("Inconsistent input (charge).");
     }
-    try_create_particle(*particles, pdgcode, t, x, y, z, mass, E, px, py, pz);
+    try_create_particle(particles, pdgcode, t, x, y, z, mass, E, px, py, pz);
   }
-  if (particles->size() > 0) {
-    /* Note that it is more user-friendly to first validate the particles and
-     * then back-propagate them in order to print the input position(s) to the
-     * user in case of error. */
-    validate_list_of_particles(*particles);
-    backpropagate_to_same_time(*particles);
-  } else {
-    start_time_ = 0.0;
-  }
-  event_id_++;
-
-  return start_time_;
 }
 
 std::filesystem::path ListModus::file_path_(std::optional<int> file_id) {
