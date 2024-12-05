@@ -1515,15 +1515,47 @@ Experiment<Modus>::Experiment(Configuration &config,
       assert(output_parameters.quantities.count(output_contents[i]) > 0);
       const bool quantities_given_nonempty =
           !output_parameters.quantities.at(output_contents[i]).empty();
+      auto formats_contains = [&list_of_formats, &i](const std::string &label) {
+        return std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
+                         label) != list_of_formats[i].end();
+      };
+      const bool custom_ascii_requested = formats_contains("ASCII");
+      const bool custom_binary_requested = formats_contains("Binary");
       const bool custom_requested =
-          std::find_if(list_of_formats[i].begin(), list_of_formats[i].end(),
-                       [](const std::string &format) {
-                         return format == "ASCII" || format == "Binary";
-                       }) != list_of_formats[i].end();
+          custom_ascii_requested || custom_binary_requested;
+      const bool oscar2013_requested = formats_contains("Oscar2013");
+      const bool oscar2013_bin_requested = formats_contains("Oscar2013_bin");
+      const bool is_extended = (output_contents[i] == "Particles")
+                                   ? output_parameters.part_extended
+                                   : output_parameters.coll_extended;
+      const auto &default_quantities =
+          (is_extended) ? OutputDefaultQuantities::oscar2013extended
+                        : OutputDefaultQuantities::oscar2013;
+      const bool are_given_quantities_oscar2013_ones =
+          output_parameters.quantities.at(output_contents[i]) ==
+          default_quantities;
       if (quantities_given_nonempty != custom_requested) {
         logg[LExperiment].fatal()
             << "Non-empty \"Quantities\" and \"ASCII\"/\"Binary\" format for "
             << std::quoted(output_contents[i]) << " were not given together.";
+        abort_because_of_invalid_input_file();
+      }
+      if (custom_ascii_requested && oscar2013_requested &&
+          are_given_quantities_oscar2013_ones) {
+        logg[LExperiment].fatal()
+            << "The specified \"Quantities\" are the same as those of the "
+               "requested \"Oscar2013\"\nformat for "
+            << std::quoted(output_contents[i])
+            << " and this would produce twice the same output file.";
+        abort_because_of_invalid_input_file();
+      }
+      if (custom_binary_requested && oscar2013_bin_requested &&
+          are_given_quantities_oscar2013_ones) {
+        logg[LExperiment].fatal()
+            << "The specified \"Quantities\" are the same as those of the "
+               "requested \"Oscar2013_bin\"\nformat for "
+            << std::quoted(output_contents[i])
+            << " and this would produce twice the same output file.";
         abort_because_of_invalid_input_file();
       }
     }
