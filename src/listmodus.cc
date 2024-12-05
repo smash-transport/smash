@@ -293,7 +293,7 @@ bool ListModus::file_has_events_(std::filesystem::path filepath,
 /* In this method, which is called from the constructor only, we "abuse" of the
  * class functionality to read in all events and validate them. In order not to
  * modify the original object we work on an utility copy. Note that the copy
- * constructor provided by the compiler is enough the class has only STL or
+ * constructor provided by the compiler is enough as the class has only STL or
  * builtin members.
  */
 void ListModus::validate_list_of_particles_of_all_events_() const {

@@ -61,10 +61,10 @@ class ListModus : public ModusDefault {
    * Gathers all configuration variables for the List.
    *
    * \param[in] modus_config The configuration object that sets all
-   *                         initial conditions of the experiment.
-   * \param[in] parameters Necessary because of templated usage in Experiment.
+   *                         initial conditions of the experiment
+   * \param[in] parameters Necessary because of templated usage in Experiment
    *
-   * \throw InvalidEvents if more than 2 particles are at the same position in
+   * \throw InvalidEvents If more than 2 particles are at the same position in
    *        any of the events.
    */
   explicit ListModus(Configuration modus_config,
@@ -96,7 +96,7 @@ class ListModus : public ModusDefault {
    * If particles are at different times, calculate earliest formation
    * time as start_time_ and free-stream all particles back to this time.
    *
-   * \param particles particles to be checked and possibly back-streamed
+   * \param particles %Particles to be checked and possibly back-streamed
    */
   void backpropagate_to_same_time(Particles &particles);
 
@@ -122,17 +122,17 @@ class ListModus : public ModusDefault {
    * same as charged pion). On-shellness violation typically comes from the
    * insufficient number of significant digits in the input file + rounding.
    *
-   * \param[in] pdgcode pdg code of added particle
-   * \param[in] t       time of added particle
+   * \param[in] pdgcode PDG code of added particle
+   * \param[in] t       Time of added particle
    * \param[in] x       x-coordinate of added particle
    * \param[in] y       y-coordinate of added particle
    * \param[in] z       z-coordinate of added particle
-   * \param[in] mass    mass of added particle
-   * \param[in] E       energy of added particle
+   * \param[in] mass    Mass of added particle
+   * \param[in] E       Energy of added particle
    * \param[in] px      x-component of momentum of added particle
    * \param[in] py      y-component of momentum of added particle
    * \param[in] pz      z-component of momentum of added particle
-   * \param[out] particles structure, to which the particle is added
+   * \param[out] particles Object to which the particle is added
    */
   void try_create_particle(Particles &particles, PdgCode pdgcode, double t,
                            double x, double y, double z, double mass, double E,
@@ -165,22 +165,22 @@ class ListModus : public ModusDefault {
    *
    * @param particles The list of particles where the read information is stored
    *
-   * \throw runtime_error if an input list file could not be found
-   * \throw LoadFailure if an input list file is not correctly formatted
-   * \throw invalid_argument if the listed charge of a particle does not
+   * \throw runtime_error If an input list file could not be found
+   * \throw LoadFailure If an input list file is not correctly formatted
+   * \throw invalid_argument If the listed charge of a particle does not
    *                         correspond to its pdg charge
    */
   void read_particles_from_next_event_(Particles &particles);
 
   /**
-   * Check if the file given by filepath has events left after streampos
-   * last_position
+   * Check if the given file has events left after the given position.
    *
    * \param[in] filepath Path to file to be checked
    * \param[in] last_position Stream position in file after which check is
    *                          performed
-   * \return True if there is at least one event left, false otherwise
-   * \throws runtime_error If file could not be read for whatever reason.
+   * \return \c true if there is at least one event left, \c false otherwise
+   *
+   * \throw runtime_error If file could not be read for whatever reason
    */
   bool file_has_events_(std::filesystem::path filepath,
                         std::streampos last_position);
@@ -193,19 +193,18 @@ class ListModus : public ModusDefault {
    * particle_list_file_directory_ folder.
    *
    * \param[in] file_id An \c std::optional integer
-   * \return Absolute file path to file
+   * \return The absolute file path to file
    *
-   * \throws runtime_error if file does not exist.
+   * \throw runtime_error If file does not exist.
    */
   std::filesystem::path file_path_(std::optional<int> file_id);
 
   /**
    * Read the next event. Either from the current file if it has more events
-   * or from the next file (with file_id += 1)
+   * or from the next file (with \c file_id_ += 1)
    *
-   * \returns
-   *  One event as string.
-   *  \throws runtime_error If file could not be read for whatever reason.
+   * \return One event as string.
+   * \throw runtime_error If file could not be read for whatever reason.
    */
   std::string next_event_();
 
@@ -214,8 +213,8 @@ class ListModus : public ModusDefault {
    * their positions and errors are reported if more than 2 particles have the
    * same identical position.
    *
-   * \throw InvalidEvents if more than 2 particles with the same identical
-   *        position are found.
+   * \throw InvalidEvents If more than 2 particles with the same identical
+   *                      position are found.
    */
   void validate_list_of_particles_of_all_events_() const;
 
@@ -242,13 +241,15 @@ class ListModus : public ModusDefault {
   /// Auxiliary flag to warn about off-shell particles only once per instance
   bool warn_about_off_shell_particles_ = true;
 
-  /**\ingroup logging
+  /**
+   * \ingroup logging
+   *
    * Writes the initial state for the List to the output stream.
    *
    * \param[in] out The ostream into which to output
    * \param[in] m The ListModus object to write into out
    */
-  friend std::ostream &operator<<(std::ostream &, const ListModus &);
+  friend std::ostream &operator<<(std::ostream &out, const ListModus &m);
 };
 
 /**

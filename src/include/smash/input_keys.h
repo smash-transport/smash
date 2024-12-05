@@ -651,8 +651,8 @@ struct InputSections {
  * (usually small) overhead at the beginning of the run, all events are checked
  * before starting the simulation and possible errors about all events are
  * reported. This is preferred to have SMASH crash after a (potentially large)
- * number of events. It is the user responsibility to decide how to handle such
- * cases, depending on their framework and setup.
+ * number of events. It is the user's responsibility to decide how to handle
+ * such cases, depending on their framework and setup.
  *
  * \attention
  * In `List` modus, the provided list of particles has to match information
@@ -662,8 +662,8 @@ struct InputSections {
  * mismatch, the latter is used (modifying its energy to put the particle back
  * on shell) and the user warned. Furthermore, all particles have to be on their
  * mass shell. If not, their energy is adjusted and the user warned. Note that
- * this type of warning is given only once and <b>it is the user responsibility
- * to ensure that this is a desired behaviour</b>.
+ * this type of warning is given only once and <b>it is the user's
+ * responsibility to ensure that this is a desired behaviour</b>.
  */
 
 /*!\Userguide
@@ -2323,9 +2323,9 @@ struct InputKeys {
    *
    * Only warn and not error for reaction probabilities higher than 1.
    * This switch is meant for very long production runs with the stochastic
-   * criterion. It has no effect on the other criteria. If enabled, it is user
-   * responsibility to make sure that the warning, that the probability has
-   * slipped above 1, is printed very rarely.
+   * criterion. It has no effect on the other criteria. If enabled, it is the
+   * user's responsibility to make sure that the warning, that the probability
+   * has slipped above 1, is printed very rarely.
    */
   /**
    * \see_key{key_CT_warn_high_prob_}
