@@ -22,7 +22,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Added
 * Added alpha-clustered oxygen nuclei that can be configured in a new `Alpha_Clustered` section in the `Projectile`/`Target` section
 * Implemented dynamic initial conditions for hydrodynamics, available under `Modi: Collider: Initial_Conditions: Type: "Dynamic"`
-* Infrastructure for functional tests, which require at least Python3.3
+* Infrastructure for functional tests, which requires at least Python3.3, and first functional test
 
 ### Output
 * Implemented a new `ASCII` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities` (the existing `Oscar1999` and `Oscar2013` formats are simply a convenient alias for specifying `ASCII` and a given list of `Quantities`)

@@ -274,9 +274,10 @@ Most of them are unit and integration tests which have been kept separated from 
 When CMake configure the project (i.e. when running `cmake` from the ***build*** folder), unit and integration tests are always setup to be later compiled and each of them has an executable associated.
 However, [as mentioned](#out-of-disk-space), one is not obliged to compile everything, as it is possible to pass a given target to `make`.
 
-On the other hand, functional tests are only setup if the CMake option `ENABLE_FUNCTIONAL_TESTS` is set to `ON`, which is the default case.
-Pass `-DENABLE_FUNCTIONAL_TESTS=OFF` to `cmake` in order to exclude these tests when setting up the project.
-If doing so, `ctest` will not see these tests at all.
+On the other hand, functional tests are only setup if the CMake option `ENABLE_FUNCTIONAL_TESTS` is set to `ON`, which is **NOT** the default case.
+This is due to the fact that, in order to setup these tests, CMake will create a Python virtual environment installing requirements in it and this might take some time (usually the first time only) if some required packages (e.g. `pandas`) need to be built from source.
+If these tests are not enabled, `ctest` will not see them at all.
+Pass `-DENABLE_FUNCTIONAL_TESTS=ON` to `cmake` in order to include these tests when setting up the project.
 Functional tests are written in Python and they run SMASH as black-box.
 In this sense they do not need to be compiled, but the `smash` executable has to be created prior to their execution.
 
