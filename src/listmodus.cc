@@ -35,6 +35,8 @@
 namespace smash {
 static constexpr int LList = LogArea::List::id;
 
+static void validate_list_of_particles(const Particles &);
+
 ListModus::ListModus(Configuration modus_config,
                      const ExperimentParameters &param)
     : file_id_{std::nullopt}, event_id_{0} {
@@ -173,6 +175,10 @@ double ListModus::initial_conditions(Particles *particles,
     try_create_particle(*particles, pdgcode, t, x, y, z, mass, E, px, py, pz);
   }
   if (particles->size() > 0) {
+    /* Note that it is more user-friendly to first validate the particles and
+     * then back-propagate them in order to print the input position(s) to the
+     * user in case of error. */
+    validate_list_of_particles(*particles);
     backpropagate_to_same_time(*particles);
   } else {
     start_time_ = 0.0;
@@ -328,4 +334,40 @@ int ListBoxModus::impose_boundary_conditions(Particles *particles,
   return wraps;
 }
 
+/* This function is meant to throw if there are more than two particles at the
+ * same position. To be more user-friendly we first check all particles and then
+ * report about all faulty groups of particles with their position. Only
+ * afterwards the simulation is aborted. */
+static void validate_list_of_particles(const Particles &particles) {
+  /* In order to make the desired check, particles are classified in an std::map
+   * using their position as a key. However, to do so, the operator< of the
+   * FourVector class is not suitable since in a std::map, by default, two keys
+   * a and b are considered equivalent if !(a<b) && !(b<a). Therefore we convert
+   * the 4-postion to a string and use this as key. Note that this should also
+   * work in the case in which the file contains apparently different positions,
+   * i.e. with differences in the decimals beyond double precision. At this
+   * point the file has been already read and the 4-positions are stored in
+   * double position.*/
+  auto to_string = [](const FourVector &v) {
+    return "(" + std::to_string(v[0]) + ", " + std::to_string(v[1]) + ", " +
+           std::to_string(v[2]) + ", " + std::to_string(v[3]) + ")";
+  };
+  std::map<std::string, int> checker{};
+  for (const auto &p : particles) {
+    checker[to_string(p.position())]++;
+  }
+  bool abort = false;
+  for (const auto &[key, value] : checker) {
+    if (value > 2) {
+      logg[LList].error() << "Found " << value
+                          << " particles at same position: " << key;
+      abort = true;
+    }
+  }
+  if (abort) {
+    throw std::invalid_argument(
+        "Found more than 2 particles with the same 4-position.\nPlease, check "
+        "your particles list file.");
+  }
+}
 }  // namespace smash
