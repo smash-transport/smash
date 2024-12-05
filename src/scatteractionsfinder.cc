@@ -126,7 +126,8 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
 }
 
-static StringTransitionParameters create_string_transition_parameters (Configuration& config) {
+static StringTransitionParameters create_string_transition_parameters(
+    Configuration& config) {
   auto sqrts_range_Npi = config.take(InputKeys::collTerm_stringTrans_rangeNpi);
   auto sqrts_range_NN = config.take(InputKeys::collTerm_stringTrans_rangeNN);
 
@@ -149,11 +150,12 @@ static StringTransitionParameters create_string_transition_parameters (Configura
         sqrts_range_NN.first, ',', sqrts_range_NN.second, "] GeV.");
   }
 
-return {sqrts_range_Npi, sqrts_range_NN,
-      config.take(InputKeys::collTerm_stringTrans_lower),
-      config.take(InputKeys::collTerm_stringTrans_range_width),
-      config.take(InputKeys::collTerm_stringTrans_pipiOffset),
-      config.take(InputKeys::collTerm_stringTrans_KNOffset)};
+  return {sqrts_range_Npi,
+          sqrts_range_NN,
+          config.take(InputKeys::collTerm_stringTrans_lower),
+          config.take(InputKeys::collTerm_stringTrans_range_width),
+          config.take(InputKeys::collTerm_stringTrans_pipiOffset),
+          config.take(InputKeys::collTerm_stringTrans_KNOffset)};
 };
 
 ScatterActionsFinderParameters::ScatterActionsFinderParameters(
