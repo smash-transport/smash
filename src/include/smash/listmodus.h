@@ -63,6 +63,9 @@ class ListModus : public ModusDefault {
    * \param[in] modus_config The configuration object that sets all
    *                         initial conditions of the experiment.
    * \param[in] parameters Necessary because of templated usage in Experiment.
+   *
+   * \throw InvalidEvents if more than 2 particles are at the same position in
+   *        any of the events.
    */
   explicit ListModus(Configuration modus_config,
                      const ExperimentParameters &parameters);
@@ -142,6 +145,13 @@ class ListModus : public ModusDefault {
     using std::runtime_error::runtime_error;
   };
 
+  /** \ingroup exception
+   * Used when external particle list is invalid.
+   */
+  struct InvalidEvents : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
+
   /// \return whether the modus is list modus (which is, yes, trivially true)
   bool is_list() const { return true; }
 
@@ -204,7 +214,7 @@ class ListModus : public ModusDefault {
    * their positions and errors are reported if more than 2 particles have the
    * same identical position.
    *
-   * \throw invalid_argument if more than 2 particles with the same identical
+   * \throw InvalidEvents if more than 2 particles with the same identical
    *        position are found.
    */
   void validate_list_of_particles_of_all_events_() const;

@@ -578,7 +578,7 @@ TEST_CATCH(create_particle_with_nan, std::invalid_argument) {
                                  m0, p.x0(), p.x1(), p.x2(), p.x3());
 }
 
-TEST_CATCH(create_particles_at_same_position, std::invalid_argument) {
+TEST_CATCH(create_particles_at_same_position, ListModus::InvalidEvents) {
   const OutputParameters out_par = OutputParameters();
   create_particle_file_with_multiple_particles_at_same_position(out_par);
   ListModus list_modus = create_list_modus_with_single_file_for_test();

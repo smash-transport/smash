@@ -312,9 +312,9 @@ void ListModus::validate_list_of_particles_of_all_events_() const {
     }
   }
   if (are_there_faulty_events) {
-    throw std::invalid_argument(
-        "Some events contain more than 2 particles with the same "
-        "4-position.\nPlease, check your particles list file.");
+    throw InvalidEvents(
+        "More than 2 particles with the same 4-position have been found in the "
+        "same event.\nPlease, check your particles list file.");
   }
 }
 
