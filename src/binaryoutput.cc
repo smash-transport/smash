@@ -148,8 +148,8 @@ static auto get_binary_filename(const std::string &content,
  * read the output e.g. in an analysis software.
  *
  * \attention If a custom binary format is used, there is no way to know which
- * quantities were stored from the output file. It is user's responsibility to
- * keep track of this information in their projects.
+ * quantities were stored from the output file. It is the user's responsibility
+ * to keep track of this information in their projects.
  *
  * **Event end line**
  *

@@ -1340,9 +1340,15 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   <a href="http://root.cern.ch">the ROOT software</a>
    *   - Even faster to read and write, requires less disk space
    *   - Format description: \ref doxypage_output_root
-   * - \b "VTK" - text output suitable for an easy visualization using Paraview
-   *   software
-   *   - This output can be opened by Paraview to see the visualization.
+   * - \b "VTK" - text output suitable for an easy visualization using
+   *   third-party software
+   *   - There are many different programs that can open a VTK file, although
+   *     their functionality varies.
+   *   - This output can be for example visualized with
+   *     <a href="http://paraview.org/">Paraview</a>. Alternatives are e.g.
+   *     <a href=https://docs.enthought.com/mayavi/mayavi/data.html>Mayavi</a>
+   *     or <a
+   *     href=https://reference.wolfram.com/language/ref/format/VTK.html>Mathematica</a>.
    *   - For "Particles" content \ref doxypage_output_vtk
    *   - For "Thermodynamics" content \ref doxypage_output_vtk_lattice
    * - \b "HepMC_asciiv3", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or

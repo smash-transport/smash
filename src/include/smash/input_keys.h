@@ -4677,9 +4677,10 @@ struct InputKeys {
    * \optional_key_no_line{key_output_particles_quantities_,Quantities,list of
    * strings,[]}
    *
-   * &rArr; If using the `ASCII` format, a non-empty list must be
-   * specified. It is an error to specify this key alongside other formats. See
-   * \ref doxypage_output_ascii for the possible values.
+   * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
+   * specified. An error will be produced if an non-empty `Quantities` key is
+   * specified alongside other formats only. See \ref doxypage_output_ascii for
+   * the possible values.
    */
   /**
    * \see_key{key_output_particles_quantities_}
@@ -4733,9 +4734,10 @@ struct InputKeys {
    * strings,
    * </tt><b>empty list</b><tt>}
    *
-   * &rArr; If using the `ASCII` format, a non-empty list must be
-   * specified. It is an error to specify this key alongside other formats. See
-   * \ref doxypage_output_ascii for the possible values.
+   * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
+   * specified. An error will be produced if an non-empty `Quantities` key is
+   * specified alongside other formats only. See \ref doxypage_output_ascii for
+   * the possible values.
    */
   /**
    * \see_key{key_output_collisions_quantities_}
