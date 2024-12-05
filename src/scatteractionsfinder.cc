@@ -156,7 +156,7 @@ static StringTransitionParameters create_string_transition_parameters(
           config.take(InputKeys::collTerm_stringTrans_range_width),
           config.take(InputKeys::collTerm_stringTrans_pipiOffset),
           config.take(InputKeys::collTerm_stringTrans_KNOffset)};
-};
+}
 
 ScatterActionsFinderParameters::ScatterActionsFinderParameters(
     Configuration& config, const ExperimentParameters& parameters)
@@ -182,7 +182,11 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
           config.take(InputKeys::collTerm_onlyWarnForHighProbability)),
       transition_high_energy{create_string_transition_parameters(config)},
       total_xs_strategy(config.take(InputKeys::collTerm_totXsStrategy)),
-      pseudoresonance_method(config.take(InputKeys::collTerm_pseudoresonance)) {
+      pseudoresonance_method(config.take(InputKeys::collTerm_pseudoresonance)),
+      AQM_charm_suppression(
+          config.take(InputKeys::collTerm_HF_AQMcSuppression)),
+      AQM_bottom_suppression(
+          config.take(InputKeys::collTerm_HF_AQMbSuppression)) {
   if (total_xs_strategy == TotalCrossSectionStrategy::BottomUp) {
     logg[LFindScatter].info(
         "Evaluating total cross sections from partial processes.");
@@ -199,6 +203,12 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
     logg[LFindScatter].info(
         "Evaluating total cross sections from parametrizations only for "
         "measured processes.");
+  }
+
+  if (AQM_charm_suppression < 0 || AQM_bottom_suppression < 0 ||
+      AQM_charm_suppression > 1 || AQM_bottom_suppression > 1) {
+    throw std::invalid_argument(
+        "Suppression factor for AQM should be a number between 0 and 1.");
   }
 }
 

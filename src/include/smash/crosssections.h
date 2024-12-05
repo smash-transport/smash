@@ -182,15 +182,15 @@ class CrossSections {
    * explicitly implemented channels at low energy (elastic, resonance
    * excitation, etc).
    *
-   * \param[in] total_string_xs Total cross section for the string process [mb].
+   * \param[in] total_string_xs Total cross section for the string process [mb]
    * \param[in] string_process a pointer to the StringProcess object,
-   *            which is used for string excitation and fragmentation.
-   * \param[in] use_AQM whether to extend string cross-sections with AQM
-   * \return List of subprocesses (single-diffractive,
-   *        double-diffractive and non-diffractive) with their cross sections.
+   *            which is used for string excitation and fragmentation
+   * \param[in] finder_parameters parameters for collision finding and cross
+   * sections
+   * \return List of subprocesses (single-diffractive, double-diffractive and
+   * non-diffractive) with their cross sections
    *
-   * \throw std::runtime_error
-   *        if string_process is a null pointer.
+   * \throw std::runtime_error if string_process is a null pointer
    *
    * This method has to be called after all other processes
    * have been determined.
@@ -303,6 +303,9 @@ class CrossSections {
    * Nucleon-Pion scatterings currently.
    *
    * This is rescaled by AQM factors.
+   *
+   * \param[in] finder_parameters parameters for collision finding and cross
+   * sections.
    */
   double high_energy(
       const ScatterActionsFinderParameters& finder_parameters) const;
@@ -361,9 +364,10 @@ class CrossSections {
    * Choose the appropriate parametrizations for given incoming particles and
    * return the (parametrized) elastic cross section.
    *
-   * \param[in] use_AQM Whether to extend string cross-sections with AQM.
-   * \param[in] pipi_offset Offset to the minimum energy for string production
-   * in \f$\pi\pi \f$ scatterings
+   * \param[in] finder_parameters parameters for collision finding and cross
+   * sections, containing whether to extend string cross-sections with AQM and
+   * the offset to the minimum energy for string production in \f$\pi\pi \f$
+   * scatterings
    *
    * \return Elastic cross section
    */

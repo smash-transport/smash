@@ -60,6 +60,9 @@ struct InputSections {
   /// Subsection for the photons
   inline static const Section c_photons =
       InputSections::collisionTerm + "Photons";
+  /// Subsection for heavy flavor
+  inline static const Section c_heavyFlavor =
+      InputSections::collisionTerm + "Heavy_Flavor";
   /// Subsection for the string parameters
   inline static const Section c_stringParameters =
       InputSections::collisionTerm + "String_Parameters";
@@ -1961,6 +1964,32 @@ struct InputKeys {
    */
   inline static const Key<std::string> version{{"Version"},
                                                {"1.0", "3.0", "3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_AQM_b_suppression_,AQM_Bottom_Suppression,double,0.8}
+   *
+   * Suppression parameter for AQM cross sections involving a bottom hadron.
+   * Default value taken from Angantyr.
+   */
+  /**
+   * \see_key{key_CT_additional_el_cs_}
+   */
+  inline static const Key<double> collTerm_HF_AQMbSuppression{
+      InputSections::c_heavyFlavor + "AQM_Bottom_Suppression", 0.93, {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_collision_term
+   * \optional_key{key_CT_AQM_c_suppression_,AQM_Charm_Suppression,double,0.8}
+   *
+   * Suppression parameter for AQM cross sections involving a charm hadron.
+   * Default value taken from Angantyr.
+   */
+  /**
+   * \see_key{key_CT_additional_el_cs_}
+   */
+  inline static const Key<double> collTerm_HF_AQMcSuppression{
+      InputSections::c_heavyFlavor + "AQM_Charm_Suppression", 0.8, {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -5764,6 +5793,8 @@ struct InputKeys {
       std::cref(collTerm_photons_twoToTwoScatterings),
       std::cref(collTerm_photons_bremsstrahlung),
       std::cref(collTerm_photons_fractionalPhotons),
+      std::cref(collTerm_HF_AQMbSuppression),
+      std::cref(collTerm_HF_AQMcSuppression),
       std::cref(modi_collider_eKin),
       std::cref(modi_collider_eTot),
       std::cref(modi_collider_pLab),

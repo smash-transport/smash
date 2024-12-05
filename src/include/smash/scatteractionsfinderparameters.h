@@ -57,13 +57,24 @@ struct StringTransitionParameters {
 };
 
 /**
- * Helper structure for ScatterActionsFinder.
+ * Helper class for ScatterActionsFinder.
  *
- * ScatterActionsFinder has one member of this struct, which just collects
- * general parameters, for easier function argument passing.
+ * ScatterActionsFinder has one member of this class, which just collects
+ * general parameters, for easier function argument passing. In practice it is
+ * almost a POD structure containing constants defined externally, but allows
+ * for methods that depend on simple inputs, such as AQM_factor.
  */
 class ScatterActionsFinderParameters {
  public:
+  /**
+   * Class constructor.
+   *
+   * \param[in] config contains the relevant keys
+   * \param[in] parameters contains the relevant parameters that were already
+   * taken by ExperimentParameters
+   *
+   * \throw std::invalid_argument when parameters taken are physically invalid
+   */
   ScatterActionsFinderParameters(Configuration& config,
                                  const ExperimentParameters& parameters);
   /// Elastic cross section parameter (in mb).
@@ -128,17 +139,25 @@ class ScatterActionsFinderParameters {
   const PseudoResonance pseudoresonance_method;
 
   /**
-   * AQM scaling factor for a hadron. Taken from Angantyr.
+   * AQM scaling factor for a hadron. The suppression factor for strangeness is
+   * fixed to 40%, while the charm and bottom can be configured.
+   *
+   * \param[in] pdg of the particle
    */
   double AQM_factor(const PdgCode& pdg) const {
-    return (1 - 0.4 * pdg.frac_strange() -
-            AQM_charm_suppression * pdg.frac_charm() -
-            AQM_bottom_suppression * pdg.frac_bottom());
+    return (1 - AQM_strange_suppression * pdg.frac_strange()) *
+           (1 - AQM_charm_suppression * pdg.frac_charm()) *
+           (1 - AQM_bottom_suppression * pdg.frac_bottom());
   }
 
  private:
-  const double AQM_charm_suppression = 0.8;
-  const double AQM_bottom_suppression = 0.93;
+  /// Factor to reduce cross sections for strange hadrons, this is currently
+  /// fixed.
+  const double AQM_strange_suppression = 0.4;
+  /// Factor to reduce cross sections for charmed hadrons
+  const double AQM_charm_suppression;
+  /// Factor to reduce cross sections for bottomed hadrons
+  const double AQM_bottom_suppression;
 };
 
 }  // namespace smash

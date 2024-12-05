@@ -224,7 +224,10 @@ inline MultiParticleReactionsBitSet no_multiparticle_reactions() {
  */
 inline ExperimentParameters default_parameters(
     int testparticles = 1, double dt = 0.1,
-    CollisionCriterion crit = CollisionCriterion::Geometric) {
+    CollisionCriterion criterion = CollisionCriterion::Geometric,
+    bool strings = false,
+    NNbarTreatment nnbar_treatment = NNbarTreatment::NoAnnihilation,
+    ReactionsBitSet included_2to2 = all_reactions_included()) {
   return ExperimentParameters{
       std::make_unique<UniformClock>(0., dt, 300.0),  // labclock
       std::make_unique<UniformClock>(0., 1., 300.0),  // outputclock
@@ -238,13 +241,13 @@ inline ExperimentParameters default_parameters(
       4.0,                                   // Gaussian smearing cut-off
       0.333333,                              // discrete smearing weight
       2.0,                                   // triangular smearing range
-      crit,
-      true,  // two_to_one
-      all_reactions_included(),
+      criterion,                             // collision criterion
+      true,                                  // two_to_one
+      included_2to2,
       no_multiparticle_reactions(),
-      false,  // strings switch
+      strings,
       1.0,
-      NNbarTreatment::NoAnnihilation,
+      nnbar_treatment,
       0.,           // low energy sigma_NN cut-off
       false,        // potential_affect_threshold
       -1.0,         // box_length
@@ -274,36 +277,13 @@ inline ScatterActionsFinderParameters default_finder_parameters(
     bool strings_with_probability = false,
     TotalCrossSectionStrategy xs_strategy =
         TotalCrossSectionStrategy::BottomUp) {
-  Configuration config{R"(
+  Configuration config{
+      R"(
   Collision_Term:
-    Elastic_NN_Cutoff_Sqrts: 0
-    Collision_Criterion: Geometric
     Only_Warn_For_High_Probability: true
     Pseudoresonance: None
   )"};
   config.set_value(InputKeys::collTerm_elasticCrossSection, elastic_parameter);
-  if (nnbar_treatment == NNbarTreatment::NoAnnihilation) {
-    config.merge_yaml(
-        InputKeys::collTerm_nnbarTreatment.as_yaml("no annihilation"));
-  } else if (nnbar_treatment == NNbarTreatment::Resonances) {
-    config.merge_yaml(InputKeys::collTerm_nnbarTreatment.as_yaml("resonances"));
-  } else if (nnbar_treatment == NNbarTreatment::TwoToFive) {
-    config.merge_yaml(
-        InputKeys::collTerm_nnbarTreatment.as_yaml("two to five"));
-  } else if (nnbar_treatment == NNbarTreatment::Strings) {
-    config.merge_yaml(InputKeys::collTerm_nnbarTreatment.as_yaml("strings"));
-  }
-  // These are the only values currently used in unit tests
-  if (included_2to2 == ReactionsBitSet()) {
-    config.merge_yaml(InputKeys::collTerm_includedTwoToTwo.as_yaml("[]"));
-  } else if (included_2to2 == all_reactions_included()) {
-    config.merge_yaml(InputKeys::collTerm_includedTwoToTwo.as_yaml("[All]"));
-  } else {
-    throw std::invalid_argument(
-        "Default finder parameters for tests only allow for all or no 2-to-2 "
-        "reactions. If a new value is needed, please implement the case.");
-  }
-  config.set_value(InputKeys::collTerm_strings, strings_switch);
   config.set_value(InputKeys::collTerm_useAQM, use_AQM);
   config.set_value(InputKeys::collTerm_stringsWithProbability,
                    strings_with_probability);
@@ -315,7 +295,10 @@ inline ScatterActionsFinderParameters default_finder_parameters(
     config.merge_yaml(
         InputKeys::collTerm_totXsStrategy.as_yaml("TopDownMeasured"));
   }
-  return ScatterActionsFinderParameters(config, default_parameters());
+  return ScatterActionsFinderParameters(
+      config,
+      default_parameters(1, 0.1, CollisionCriterion::Geometric, strings_switch,
+                         nnbar_treatment, included_2to2));
 }
 
 /// Creates default EventInfo object for testing purposes

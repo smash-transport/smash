@@ -305,6 +305,7 @@ double CrossSections::parametrized_total(
 CollisionBranchPtr CrossSections::elastic(
     const ScatterActionsFinderParameters& finder_parameters) const {
   double elastic_xs = 0.;
+
   if (finder_parameters.elastic_parameter >= 0.) {
     // use constant elastic cross section from config file
     elastic_xs = finder_parameters.elastic_parameter;

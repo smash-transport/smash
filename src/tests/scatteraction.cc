@@ -520,6 +520,7 @@ TEST(top_down_sum_matches_parametrization) {
     double p_x = random::uniform(0., 0.5);
     p1.set_4momentum(p1.pole_mass(), p_x, 0., 0.);
     p2.set_4momentum(p2.pole_mass(), -p_x, 0., 0.);
+    std::cout << "Testing following pair:\n" << p1 << "\n" << p2 << std::endl;
 
     ScatterActionPtr act_topdown =
         std::make_unique<ScatterAction>(p1, p2, 0.1, false, 1.0, -1.0, true);
