@@ -35,7 +35,7 @@
 namespace smash {
 static constexpr int LList = LogArea::List::id;
 
-static bool is_list_of_particles_valid(const Particles &, int);
+static bool is_list_of_particles_invalid(const Particles &, int);
 
 ListModus::ListModus(Configuration modus_config,
                      const ExperimentParameters &param)
@@ -303,7 +303,7 @@ void ListModus::validate_list_of_particles_of_all_events_() const {
     try {
       Particles particles{};
       utility_copy.read_particles_from_next_event_(particles);
-      if (is_list_of_particles_valid(particles, utility_copy.event_id_)) {
+      if (is_list_of_particles_invalid(particles, utility_copy.event_id_)) {
         are_there_faulty_events = true;
       }
       utility_copy.event_id_++;
@@ -367,7 +367,8 @@ int ListBoxModus::impose_boundary_conditions(Particles *particles,
  * same position. To be more user-friendly we first check all particles and then
  * report about all faulty groups of particles with their position. Only
  * afterwards the simulation is aborted. */
-static bool is_list_of_particles_valid(const Particles &particles, int event) {
+static bool is_list_of_particles_invalid(const Particles &particles,
+                                         int event) {
   /* In order to make the desired check, particles are classified in an std::map
    * using their position as a key. However, to do so, the operator< of the
    * FourVector class is not suitable since in a std::map, by default, two keys
