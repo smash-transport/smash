@@ -124,28 +124,22 @@
 \page doxypage_output Output
     <div class="invisible-content">
     \subpage doxypage_output_conf_examples
-    \subpage doxypage_output_hepmc
-    \subpage doxypage_output_dileptons
-    \subpage doxypage_output_photons
-    \subpage doxypage_output_initial_conditions
-    \subpage doxypage_output_rivet
     \subpage doxypage_output_oscar
     \subpage doxypage_output_ascii
     \subpage doxypage_output_binary
+    \subpage doxypage_output_dileptons
+    \subpage doxypage_output_photons
+    \subpage doxypage_output_initial_conditions
     \subpage doxypage_output_root
+    \subpage doxypage_output_hepmc
+    \subpage doxypage_output_rivet
     \subpage doxypage_output_vtk
     \subpage doxypage_output_vtk_lattice
     \subpage doxypage_output_thermodyn
     \subpage doxypage_output_thermodyn_lattice
-    \subpage doxypage_output_initial_conditions
     \subpage doxypage_output_collisions_box_modus
     </div>
     \page doxypage_output_conf_examples Output configuration examples
-    \page doxypage_output_hepmc HepMC Output
-    \page doxypage_output_dileptons Dileptons
-    \page doxypage_output_photons Photons
-    \page doxypage_output_initial_conditions Initial conditions
-    \page doxypage_output_rivet Rivet output
     \page doxypage_output_oscar OSCAR format
         <div class="invisible-content">
         \subpage doxypage_output_oscar_particles
@@ -159,7 +153,12 @@
             \page doxypage_output_oscar_collisions_process_types Process types
     \page doxypage_output_ascii ASCII format
     \page doxypage_output_binary Binary format
+    \page doxypage_output_dileptons Dileptons
+    \page doxypage_output_photons Photons
+    \page doxypage_output_initial_conditions Initial conditions
     \page doxypage_output_root ROOT format
+    \page doxypage_output_hepmc HepMC Output
+    \page doxypage_output_rivet Rivet output
     \page doxypage_output_vtk VTK format
     \page doxypage_output_vtk_lattice Thermodynamics VTK output
     \page doxypage_output_thermodyn ASCII thermodynamics output
