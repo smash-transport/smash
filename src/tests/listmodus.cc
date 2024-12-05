@@ -64,10 +64,9 @@ static std::filesystem::path create_particlefile(
 
   VERIFY(std::filesystem::exists(outputfilepath));
   // Rename the oscar file to match listmodus format
-  const std::string pathstring = "event" + std::to_string(file_number);
-  const std::filesystem::path listinputfile = pathstring;
-  const std::filesystem::path inputfilepath = testoutputpath / listinputfile;
-  std::rename(outputfilepath.native().c_str(), inputfilepath.native().c_str());
+  const std::filesystem::path inputfilepath =
+      testoutputpath / ("event" + std::to_string(file_number));
+  std::filesystem::rename(outputfilepath, inputfilepath);
 
   VERIFY(std::filesystem::exists(inputfilepath));
 
@@ -97,7 +96,49 @@ static void create_non_oscar_particlefile(
       tmp_file << line << '\n';
     }
   }
-  std::rename(tmp_path.native().c_str(), input_path.native().c_str());
+  std::filesystem::rename(tmp_path, input_path);
+}
+
+static void create_particle_file_with_multiple_particles_at_same_position(
+    const OutputParameters out_par) {
+  std::unique_ptr<OutputInterface> oscar_output =
+      create_oscar_output("Oscar2013", "Particles", testoutputpath, out_par);
+
+  const std::filesystem::path outputfilename = "particle_lists.oscar";
+  const std::filesystem::path outputfilepath = testoutputpath / outputfilename;
+
+  // Create some random particles with many at same 4-position
+  for (int event = 0; event < 2; event++) {
+    Particles particles;
+    for (int i = 0; i < 3; i++) {
+      particles.insert(Test::smashon_random());
+    }
+    auto particle = Test::smashon_random();
+    for (int i = 0; i < event * 3; i++) {
+      particles.insert(particle);
+      particle.boost_momentum({0.1, 0.2, 0.3});
+    }
+    particle = Test::smashon_random();
+    for (int i = 0; i < event + 3; i++) {
+      particles.insert(particle);
+      particle.boost_momentum({0.01, 0.02, 0.03});
+    }
+
+    // Print them to file in OSCAR 2013 format
+    const double impact_parameter = 2.34;  // just a dummy value here
+    const bool empty_event = false;        // just a dummy value as well
+    EventInfo default_event_info =
+        Test::default_event_info(impact_parameter, empty_event);
+    oscar_output->at_eventend(particles, {event, 0}, default_event_info);
+  }
+
+  // release and let destructor rename the file
+  oscar_output.reset();
+
+  VERIFY(std::filesystem::exists(outputfilepath));
+  // Rename the oscar file to match listmodus format
+  const std::filesystem::path inputfilepath = testoutputpath / "event0";
+  std::filesystem::rename(outputfilepath, inputfilepath);
 }
 
 static ListModus create_list_modus_for_test() {
@@ -535,4 +576,10 @@ TEST_CATCH(create_particle_with_nan, std::invalid_argument) {
   // to trigger an invalid_argument error.
   list_modus.try_create_particle(particles, pdg, NAN, r.x1(), r.x2(), r.x3(),
                                  m0, p.x0(), p.x1(), p.x2(), p.x3());
+}
+
+TEST_CATCH(create_particles_at_same_position, ListModus::InvalidEvents) {
+  const OutputParameters out_par = OutputParameters();
+  create_particle_file_with_multiple_particles_at_same_position(out_par);
+  ListModus list_modus = create_list_modus_with_single_file_for_test();
 }

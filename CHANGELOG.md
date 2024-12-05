@@ -33,7 +33,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Changed
 * Upgraded to Pythia 8.312
 * Moved the `Orientation` section from the `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from `pi/2` to `0`
-* The interface of the `Configuration` class has been totally changed making it use `Key` objects instead of low-level strings 
+* The interface of the `Configuration` class has been totally changed making it use `Key` objects instead of low-level strings
+* The `List` modus now validates particles from all event at the very beginning and aborts if more than 2 particles are at the same identical position in any event
 
 ### Fixed
 * Fix a small error and added a more precise documentation for the orientation section for deformed nuclei

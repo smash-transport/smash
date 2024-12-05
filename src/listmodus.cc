@@ -35,6 +35,8 @@
 namespace smash {
 static constexpr int LList = LogArea::List::id;
 
+static bool is_list_of_particles_invalid(const Particles &, int);
+
 ListModus::ListModus(Configuration modus_config,
                      const ExperimentParameters &param)
     : file_id_{std::nullopt}, event_id_{0} {
@@ -81,6 +83,7 @@ ListModus::ListModus(Configuration modus_config,
   if (param.n_ensembles > 1) {
     throw std::runtime_error("ListModus only makes sense with one ensemble");
   }
+  validate_list_of_particles_of_all_events_();
 }
 
 /* console output on startup of List specific parameters */
@@ -146,6 +149,18 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
 /* initial_conditions - sets particle data for @particles */
 double ListModus::initial_conditions(Particles *particles,
                                      const ExperimentParameters &) {
+  read_particles_from_next_event_(*particles);
+  if (particles->size() > 0) {
+    backpropagate_to_same_time(*particles);
+  } else {
+    start_time_ = 0.0;
+  }
+  event_id_++;
+
+  return start_time_;
+}
+
+void ListModus::read_particles_from_next_event_(Particles &particles) {
   std::string particle_list = next_event_();
   for (const Line &line : line_parser(particle_list)) {
     std::istringstream lineinput(line.text);
@@ -167,19 +182,14 @@ double ListModus::initial_conditions(Particles *particles,
 
     // Charge consistency check
     if (pdgcode.charge() != charge) {
-      logg[LList].error() << "Charge of pdg = " << pdgcode << " != " << charge;
+      if (verbose_) {
+        logg[LList].error()
+            << "Charge of pdg = " << pdgcode << " != " << charge;
+      }
       throw std::invalid_argument("Inconsistent input (charge).");
     }
-    try_create_particle(*particles, pdgcode, t, x, y, z, mass, E, px, py, pz);
+    try_create_particle(particles, pdgcode, t, x, y, z, mass, E, px, py, pz);
   }
-  if (particles->size() > 0) {
-    backpropagate_to_same_time(*particles);
-  } else {
-    start_time_ = 0.0;
-  }
-  event_id_++;
-
-  return start_time_;
 }
 
 std::filesystem::path ListModus::file_path_(std::optional<int> file_id) {
@@ -194,13 +204,15 @@ std::filesystem::path ListModus::file_path_(std::optional<int> file_id) {
   logg[LList].debug() << "File: " << std::filesystem::absolute(fpath) << '\n';
 
   if (!std::filesystem::exists(fpath)) {
-    logg[LList].fatal()
-        << fpath.filename().native() << " does not exist! \n\n"
-        << "Usage of smash with external particle lists:\n"
-        << "  1. Put the external particle lists in one or more files\n"
-        << "     according to the user guide instructions.\n"
-        << "  2. Particles info: t x y z mass p0 px py pz pdg ID charge\n"
-        << "     in units of: fm fm fm fm GeV GeV GeV GeV GeV none none e\n";
+    if (verbose_) {
+      logg[LList].fatal()
+          << fpath.filename().native() << " does not exist! \n\n"
+          << "Usage of smash with external particle lists:\n"
+          << "  1. Put the external particle lists in one or more files\n"
+          << "     according to the user guide instructions.\n"
+          << "  2. Particles info: t x y z mass p0 px py pz pdg ID charge\n"
+          << "     in units of: fm fm fm fm GeV GeV GeV GeV GeV none none e\n";
+    }
     throw std::runtime_error("External particle list does not exist!");
   }
 
@@ -221,7 +233,7 @@ std::string ListModus::next_event_() {
       return next_event_();
     } else {
       throw std::runtime_error(
-          "Attempt to read in next event in Listmodus object but no further "
+          "Attempt to read in next event in ListModus object but no further "
           "data found in single provided file. Please, check your setup.");
     }
   }
@@ -240,7 +252,10 @@ std::string ListModus::next_event_() {
   }
 
   if (!ifs.eof() && (ifs.fail() || ifs.bad())) {
-    logg[LList].fatal() << "Error while reading " << fpath.filename().native();
+    if (verbose_) {
+      logg[LList].fatal() << "Error while reading "
+                          << fpath.filename().native();
+    }
     throw std::runtime_error("Error while reading external particle list");
   }
   // save position for next event read
@@ -274,13 +289,44 @@ bool ListModus::file_has_events_(std::filesystem::path filepath,
   }
 
   if (!ifs.good()) {
-    logg[LList].fatal() << "Error while reading "
-                        << filepath.filename().native();
+    if (verbose_) {
+      logg[LList].fatal() << "Error while reading "
+                          << filepath.filename().native();
+    }
     throw std::runtime_error("Error while reading external particle list");
   }
 
   ifs.close();
   return true;
+}
+
+/* In this method, which is called from the constructor only, we "abuse" of the
+ * class functionality to read in all events and validate them. In order not to
+ * modify the original object we work on an utility copy. Note that the copy
+ * constructor provided by the compiler is enough as the class has only STL or
+ * builtin members.
+ */
+void ListModus::validate_list_of_particles_of_all_events_() const {
+  ListModus utility_copy{*this};
+  utility_copy.verbose_ = false;
+  bool are_there_faulty_events = false;
+  while (true) {
+    try {
+      Particles particles{};
+      utility_copy.read_particles_from_next_event_(particles);
+      if (is_list_of_particles_invalid(particles, utility_copy.event_id_)) {
+        are_there_faulty_events = true;
+      }
+      utility_copy.event_id_++;
+    } catch (const std::exception &) {
+      break;
+    }
+  }
+  if (are_there_faulty_events) {
+    throw InvalidEvents(
+        "More than 2 particles with the same 4-position have been found in the "
+        "same event.\nPlease, check your particles list file.");
+  }
 }
 
 ListBoxModus::ListBoxModus(Configuration modus_config,
@@ -328,4 +374,37 @@ int ListBoxModus::impose_boundary_conditions(Particles *particles,
   return wraps;
 }
 
+/* This function is meant to throw if there are more than two particles at the
+ * same position. To be more user-friendly we first check all particles and then
+ * report about all faulty groups of particles with their position. Only
+ * afterwards the simulation is aborted. */
+static bool is_list_of_particles_invalid(const Particles &particles,
+                                         int event) {
+  /* In order to make the desired check, particles are classified in an std::map
+   * using their position as a key. However, to do so, the operator< of the
+   * FourVector class is not suitable since in a std::map, by default, two keys
+   * a and b are considered equivalent if !(a<b) && !(b<a). Therefore we convert
+   * the 4-postion to a string and use this as key. Note that this should also
+   * work in the case in which the file contains apparently different positions,
+   * i.e. with differences in the decimals beyond double precision. At this
+   * point the file has been already read and the 4-positions are stored in
+   * double position. */
+  auto to_string = [](const FourVector &v) {
+    return "(" + std::to_string(v[0]) + ", " + std::to_string(v[1]) + ", " +
+           std::to_string(v[2]) + ", " + std::to_string(v[3]) + ")";
+  };
+  std::map<std::string, int> checker{};
+  for (const auto &p : particles) {
+    checker[to_string(p.position())]++;
+  }
+  bool error_found = false;
+  for (const auto &[key, value] : checker) {
+    if (value > 2) {
+      logg[LList].error() << "Event " << event << ": Found " << value
+                          << " particles at same position " << key;
+      error_found = true;
+    }
+  }
+  return error_found;
+}
 }  // namespace smash
