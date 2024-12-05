@@ -132,10 +132,9 @@ static auto get_binary_filename(const std::string &content,
  *
  * **Custom Particle line**
  *
- * Similar to the custom ASCII format (see \ref doxypage_output_ascii), the
- * binary format also supports
- * custom quantities for particle lines. An example of particle quantities is
- * shown below:
+ * Similar to the \ref doxypage_output_ascii "ASCII format", the binary format
+ * also supports custom quantities for particle lines. An example of particle
+ * quantities is shown below:
  * \verbatim
      Output:
        Particles:
@@ -143,9 +142,9 @@ static auto get_binary_filename(const std::string &content,
            Quantities: ["p0", "pz", "pdg", "charge"]
    \endverbatim
  * Here, the particle data will be serialized in the same order as they appear
- * in the Quantities list. Refer to \ref doxypage_output_ascii table in order to
- * know the types of the quantities written in the file and be able to correctly
- * read the output e.g. in an analysis software.
+ * in the Quantities list. The \ref doxypage_output_ascii "ASCII format table"
+ * contains the types of the quantities written in the file and be able to
+ * correctly read the output e.g. in an analysis software.
  *
  * \attention If a custom binary format is used, there is no way to know which
  * quantities were stored from the output file. It is the user's responsibility

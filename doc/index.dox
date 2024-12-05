@@ -157,7 +157,7 @@
             \subpage doxypage_output_oscar_collisions_process_types
             </div>
             \page doxypage_output_oscar_collisions_process_types Process types
-    \page doxypage_output_ascii Custom ASCII format
+    \page doxypage_output_ascii ASCII format
     \page doxypage_output_binary Binary format
     \page doxypage_output_root ROOT format
     \page doxypage_output_vtk VTK format

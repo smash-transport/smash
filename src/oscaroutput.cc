@@ -334,11 +334,12 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <div class="line"><span class="preprocessor">#!OSCAR2013 particle_lists
  *   t x y z mass p0 px py pz pdg
  *   ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
- *   t_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span></div>
+ *   time_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span>
+ * </div>
  * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm GeV GeV
- * GeV GeV GeV none none e none fm none none none fm none none none
- *none</span></div> <div class="line"><span class="preprocessor">\#
- *SMASH_version</span></div>
+ * GeV GeV GeV none none e none fm none none none fm none none none none</span>
+ * </div> <div class="line"><span class="preprocessor">\# SMASH_version</span>
+ * </div>
  * </div>
  *
  * **Block header**
@@ -411,7 +412,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key proc_type_origin: Type of the last process the particle has
  *     undergone. The possible process types are listed in
  *     \ref doxypage_output_oscar_collisions_process_types
- * \li \key t_last_coll: time of the particle's last interaction (except wall
+ * \li \key time_last_coll: time of the particle's last interaction (except wall
  *     crossings)
  * \li \key pdg_mother1: PDG code of the 1st mother particle (0 in case the
  *     particle is sampled in a thermal bubble. It is not updated by elastic
@@ -610,7 +611,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <div class="line"><span class="preprocessor">#!OSCAR2013 particle_lists
  *   t x y z mass p0 px py pz pdg
  *   ID charge ncoll form_time xsecfac proc_id_origin proc_type_origin
- *   t_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span></div>
+ *   time_last_coll pdg_mother1 pdg_mother2 baryon_number strangeness</span>
+ * </div>
  * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm GeV GeV
  * GeV GeV GeV none none e none fm none none none fm none none none
  * none</span></div> <div class="line"><span class="preprocessor">\#
@@ -722,7 +724,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  *     quantum numbers and uniquely identifies its type
  * </tr>
  * <tr>
- * <td>\key ID, id
+ * <td>\key ID, \key id
  * <td> \c int32_t
  * <td>Particle identifier in terms of an integer. It is unique for every
  *     particle in the event. \key ID is used in the OSCAR 2013 standard, while
