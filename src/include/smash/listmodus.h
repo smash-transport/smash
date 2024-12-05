@@ -166,9 +166,9 @@ class ListModus : public ModusDefault {
    * Check if the file given by filepath has events left after streampos
    * last_position
    *
-   * \param[in] filepath Path to file to be checked.
+   * \param[in] filepath Path to file to be checked
    * \param[in] last_position Stream position in file after which check is
-   * performed
+   *                          performed
    * \return True if there is at least one event left, false otherwise
    * \throws runtime_error If file could not be read for whatever reason.
    */
@@ -198,6 +198,16 @@ class ListModus : public ModusDefault {
    *  \throws runtime_error If file could not be read for whatever reason.
    */
   std::string next_event_();
+
+  /**
+   * Read and validate all events particles. At the moment this is done w.r.t.
+   * their positions and errors are reported if more than 2 particles have the
+   * same identical position.
+   *
+   * \throw invalid_argument if more than 2 particles with the same identical
+   *        position are found.
+   */
+  void validate_list_of_particles_of_all_events_() const;
 
   /// File directory of the particle list
   std::string particle_list_file_directory_;

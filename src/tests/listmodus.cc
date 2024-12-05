@@ -107,28 +107,30 @@ static void create_particle_file_with_multiple_particles_at_same_position(
   const std::filesystem::path outputfilename = "particle_lists.oscar";
   const std::filesystem::path outputfilepath = testoutputpath / outputfilename;
 
-  // Create some random particles with many at same 4-position (just one event)
-  Particles particles;
-  for (int i = 0; i < 3; i++) {
-    particles.insert(Test::smashon_random());
-  }
-  auto particle = Test::smashon_random();
-  for (int i = 0; i < 3; i++) {
-    particles.insert(particle);
-    particle.boost_momentum({0.1, 0.2, 0.3});
-  }
-  particle = Test::smashon_random();
-  for (int i = 0; i < 4; i++) {
-    particles.insert(particle);
-    particle.boost_momentum({0.01, 0.02, 0.03});
-  }
+  // Create some random particles with many at same 4-position
+  for (int event = 0; event < 2; event++) {
+    Particles particles;
+    for (int i = 0; i < 3; i++) {
+      particles.insert(Test::smashon_random());
+    }
+    auto particle = Test::smashon_random();
+    for (int i = 0; i < event * 3; i++) {
+      particles.insert(particle);
+      particle.boost_momentum({0.1, 0.2, 0.3});
+    }
+    particle = Test::smashon_random();
+    for (int i = 0; i < event + 3; i++) {
+      particles.insert(particle);
+      particle.boost_momentum({0.01, 0.02, 0.03});
+    }
 
-  // Print them to file in OSCAR 2013 format
-  const double impact_parameter = 2.34;  // just a dummy value here
-  const bool empty_event = false;        // just a dummy value as well
-  EventInfo default_event_info =
-      Test::default_event_info(impact_parameter, empty_event);
-  oscar_output->at_eventend(particles, {0, 0}, default_event_info);
+    // Print them to file in OSCAR 2013 format
+    const double impact_parameter = 2.34;  // just a dummy value here
+    const bool empty_event = false;        // just a dummy value as well
+    EventInfo default_event_info =
+        Test::default_event_info(impact_parameter, empty_event);
+    oscar_output->at_eventend(particles, {event, 0}, default_event_info);
+  }
 
   // release and let destructor rename the file
   oscar_output.reset();
@@ -580,6 +582,4 @@ TEST_CATCH(create_particles_at_same_position, std::invalid_argument) {
   const OutputParameters out_par = OutputParameters();
   create_particle_file_with_multiple_particles_at_same_position(out_par);
   ListModus list_modus = create_list_modus_with_single_file_for_test();
-  Particles particles{};
-  list_modus.initial_conditions(&particles, parameters);
 }

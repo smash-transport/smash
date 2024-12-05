@@ -35,7 +35,7 @@
 namespace smash {
 static constexpr int LList = LogArea::List::id;
 
-static void validate_list_of_particles(const Particles &);
+static bool is_list_of_particles_valid(const Particles &, int);
 
 ListModus::ListModus(Configuration modus_config,
                      const ExperimentParameters &param)
@@ -83,6 +83,7 @@ ListModus::ListModus(Configuration modus_config,
   if (param.n_ensembles > 1) {
     throw std::runtime_error("ListModus only makes sense with one ensemble");
   }
+  validate_list_of_particles_of_all_events_();
 }
 
 /* console output on startup of List specific parameters */
@@ -289,6 +290,34 @@ bool ListModus::file_has_events_(std::filesystem::path filepath,
   return true;
 }
 
+/* In this method, which is called from the constructor only, we "abuse" of the
+ * class functionality to read in all events and validate them. In order not to
+ * modify the original object we work on an utility copy. Note that the copy
+ * constructor provided by the compiler is enough the class has only STL or
+ * builtin members.
+ */
+void ListModus::validate_list_of_particles_of_all_events_() const {
+  ListModus utility_copy{*this};
+  bool are_there_faulty_events = false;
+  while (true) {
+    try {
+      Particles particles{};
+      utility_copy.read_particles_from_next_event_(particles);
+      if (is_list_of_particles_valid(particles, utility_copy.event_id_)) {
+        are_there_faulty_events = true;
+      }
+      utility_copy.event_id_++;
+    } catch (const std::exception &) {
+      break;
+    }
+  }
+  if (are_there_faulty_events) {
+    throw std::invalid_argument(
+        "Some events contain more than 2 particles with the same "
+        "4-position.\nPlease, check your particles list file.");
+  }
+}
+
 ListBoxModus::ListBoxModus(Configuration modus_config,
                            const ExperimentParameters &param)
     : ListModus(), length_(modus_config.take(InputKeys::modi_listBox_length)) {
@@ -338,7 +367,7 @@ int ListBoxModus::impose_boundary_conditions(Particles *particles,
  * same position. To be more user-friendly we first check all particles and then
  * report about all faulty groups of particles with their position. Only
  * afterwards the simulation is aborted. */
-static void validate_list_of_particles(const Particles &particles) {
+static bool is_list_of_particles_valid(const Particles &particles, int event) {
   /* In order to make the desired check, particles are classified in an std::map
    * using their position as a key. However, to do so, the operator< of the
    * FourVector class is not suitable since in a std::map, by default, two keys
@@ -347,7 +376,7 @@ static void validate_list_of_particles(const Particles &particles) {
    * work in the case in which the file contains apparently different positions,
    * i.e. with differences in the decimals beyond double precision. At this
    * point the file has been already read and the 4-positions are stored in
-   * double position.*/
+   * double position. */
   auto to_string = [](const FourVector &v) {
     return "(" + std::to_string(v[0]) + ", " + std::to_string(v[1]) + ", " +
            std::to_string(v[2]) + ", " + std::to_string(v[3]) + ")";
@@ -356,18 +385,14 @@ static void validate_list_of_particles(const Particles &particles) {
   for (const auto &p : particles) {
     checker[to_string(p.position())]++;
   }
-  bool abort = false;
+  bool error_found = false;
   for (const auto &[key, value] : checker) {
     if (value > 2) {
-      logg[LList].error() << "Found " << value
-                          << " particles at same position: " << key;
-      abort = true;
+      logg[LList].error() << "Event " << event << ": Found " << value
+                          << " particles at same position " << key;
+      error_found = true;
     }
   }
-  if (abort) {
-    throw std::invalid_argument(
-        "Found more than 2 particles with the same 4-position.\nPlease, check "
-        "your particles list file.");
-  }
+  return error_found;
 }
 }  // namespace smash
