@@ -259,6 +259,9 @@ class ParticleType {
     return is_nucleus() && std::abs(pdgcode_.get_decimal()) == 1000010021;
   }
 
+  /// \return whether the particle is a cc̅ state
+  inline bool is_charmonia() const { return pdgcode_.is_charmonia(); }
+
   /**
    * The minimum mass of the resonance that is kinematically allowed.
    *

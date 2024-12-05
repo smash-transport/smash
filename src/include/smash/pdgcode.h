@@ -377,6 +377,16 @@ class PdgCode {
             !is_nucleus());
   }
 
+  /// \return true if this is a neutrino.
+  inline bool is_neutrino() const {
+    return (is_lepton() && digits_.n_J_ % 2 == 0);
+  }
+
+  /// \return whether this is a charmonia
+  inline bool is_charmonia() const {
+    return is_meson() && digits_.n_q2_ == 4 && digits_.n_q3_ == 4;
+  }
+
   /// \return the baryon number of the particle.
   inline int baryon_number() const {
     if (is_nucleus()) {
@@ -527,6 +537,58 @@ class PdgCode {
         return std::abs(strangeness()) / 3.;
       } else if (is_meson()) {
         return std::abs(strangeness()) / 2.;
+      } else {
+        /* If not baryon or meson, this should be 0, as AQM does not
+         * extend to non-hadrons */
+        return 0.;
+      }
+    }
+  }
+
+  /**
+   * \return the fraction number of charm quarks
+   *         (charm + anti-charm) / total
+   *
+   * This is useful for the AQM cross-section scaling, and needs to
+   * be positive definite.
+   */
+  inline double frac_charm() const {
+    /* The charmonium state has 0 net charmness
+     *  but there are actually 2 charm quarks out of 2 total */
+    if (is_hadron() && digits_.n_q3_ == 4 && digits_.n_q2_ == 4) {
+      return 1.;
+    } else {
+      // For all other cases, there isn't both a charm and anti-charm
+      if (is_baryon()) {
+        return std::abs(charmness()) / 3.;
+      } else if (is_meson()) {
+        return std::abs(charmness()) / 2.;
+      } else {
+        /* If not baryon or meson, this should be 0, as AQM does not
+         * extend to non-hadrons */
+        return 0.;
+      }
+    }
+  }
+
+  /**
+   * \return the fraction number of bottom quarks
+   *         (bottom + anti-bottom) / total
+   *
+   * This is useful for the AQM cross-section scaling, and needs to
+   * be positive definite.
+   */
+  inline double frac_bottom() const {
+    /* The bottomonium state has 0 net bottomness
+     *  but there are actually 2 bottom quarks out of 2 total */
+    if (is_hadron() && digits_.n_q3_ == 3 && digits_.n_q2_ == 3) {
+      return 1.;
+    } else {
+      // For all other cases, there isn't both a bottom and anti-bottom
+      if (is_baryon()) {
+        return std::abs(bottomness()) / 3.;
+      } else if (is_meson()) {
+        return std::abs(bottomness()) / 2.;
       } else {
         /* If not baryon or meson, this should be 0, as AQM does not
          * extend to non-hadrons */
@@ -1119,7 +1181,8 @@ inline bool is_dilepton(const PdgCode pdg1, const PdgCode pdg2) {
   const auto c2 = pdg2.code();
   const auto min = std::min(c1, c2);
   const auto max = std::max(c1, c2);
-  return (max == 0x11 && min == -0x11) || (max == 0x13 && min == -0x13);
+  return (max == 0x11 && min == -0x11) || (max == 0x13 && min == -0x13) ||
+         (max == 0x12 && min == -0x11) || (max == 0x11 && min == -0x12);
 }
 
 /**

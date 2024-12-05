@@ -94,6 +94,32 @@ constexpr int rho_m = -0x213;
 /// h₁(1170).
 constexpr int h1 = 0x10223;
 
+/// D⁺.
+constexpr int D_p = 0x411;
+/// D⁰.
+constexpr int D_z = 0x421;
+/// D̅⁰.
+constexpr int D_z_bar = -0x421;
+/// D̅⁻.
+constexpr int D_m = -0x411;
+
+/// D(2007)⁺.
+constexpr int D2007_p = 0x413;
+/// D(2007)⁰.
+constexpr int D2007_z = 0x423;
+/// D̅(2007)⁰.
+constexpr int D2007_z_bar = -0x423;
+/// D̅(2007)⁻.
+constexpr int D2007_m = -0x413;
+
+/// J/Ψ
+constexpr int JPsi = 0x443;
+
+/// Λc
+constexpr int Lambdac = 0x4122;
+/// ̅Λc
+constexpr int Lambdac_bar = -0x4122;
+
 /*
  * Constants representing PDG codes of nuclei.
  */
