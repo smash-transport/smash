@@ -62,7 +62,10 @@ struct StringTransitionParameters {
  * ScatterActionsFinder has one member of this struct, which just collects
  * general parameters, for easier function argument passing.
  */
-struct ScatterActionsFinderParameters {
+class ScatterActionsFinderParameters {
+ public:
+  ScatterActionsFinderParameters(Configuration& config,
+                                 const ExperimentParameters& parameters);
   /// Elastic cross section parameter (in mb).
   const double elastic_parameter;
   /**
@@ -123,6 +126,19 @@ struct ScatterActionsFinderParameters {
   const TotalCrossSectionStrategy total_xs_strategy;
   /// Which pseudo-resonance to choose.
   const PseudoResonance pseudoresonance_method;
+
+  /**
+   * AQM scaling factor for a hadron. Taken from Angantyr.
+   */
+  double AQM_factor(const PdgCode& pdg) const {
+    return (1 - 0.4 * pdg.frac_strange() -
+            AQM_charm_suppression * pdg.frac_charm() -
+            AQM_bottom_suppression * pdg.frac_bottom());
+  }
+
+ private:
+  const double AQM_charm_suppression = 0.8;
+  const double AQM_bottom_suppression = 0.93;
 };
 
 }  // namespace smash

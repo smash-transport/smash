@@ -33,7 +33,7 @@ static constexpr int LFindScatter = LogArea::FindScatter::id;
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration& config, const ExperimentParameters& parameters)
-    : finder_parameters_(create_finder_parameters(config, parameters)),
+    : finder_parameters_(config, parameters),
       isotropic_(config.take(InputKeys::collTerm_isotropic)),
       box_length_(parameters.box_length),
       string_formation_time_(
@@ -126,12 +126,10 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
 }
 
-ScatterActionsFinderParameters create_finder_parameters(
-    Configuration& config, const ExperimentParameters& parameters) {
-  std::pair<double, double> sqrts_range_Npi =
-      config.take(InputKeys::collTerm_stringTrans_rangeNpi);
-  std::pair<double, double> sqrts_range_NN =
-      config.take(InputKeys::collTerm_stringTrans_rangeNN);
+static StringTransitionParameters create_string_transition_parameters (Configuration& config) {
+  auto sqrts_range_Npi = config.take(InputKeys::collTerm_stringTrans_rangeNpi);
+  auto sqrts_range_NN = config.take(InputKeys::collTerm_stringTrans_rangeNN);
+
   if (sqrts_range_Npi.first < nucleon_mass + pion_mass) {
     sqrts_range_Npi.first = nucleon_mass + pion_mass;
     if (sqrts_range_Npi.second < sqrts_range_Npi.first)
@@ -150,8 +148,40 @@ ScatterActionsFinderParameters create_finder_parameters(
         "threshold. New range is [",
         sqrts_range_NN.first, ',', sqrts_range_NN.second, "] GeV.");
   }
-  auto xs_strategy = config.take(InputKeys::collTerm_totXsStrategy);
-  if (xs_strategy == TotalCrossSectionStrategy::BottomUp) {
+
+return {sqrts_range_Npi, sqrts_range_NN,
+      config.take(InputKeys::collTerm_stringTrans_lower),
+      config.take(InputKeys::collTerm_stringTrans_range_width),
+      config.take(InputKeys::collTerm_stringTrans_pipiOffset),
+      config.take(InputKeys::collTerm_stringTrans_KNOffset)};
+};
+
+ScatterActionsFinderParameters::ScatterActionsFinderParameters(
+    Configuration& config, const ExperimentParameters& parameters)
+    : elastic_parameter(config.take(InputKeys::collTerm_elasticCrossSection)),
+      low_snn_cut(parameters.low_snn_cut),
+      scale_xs(parameters.scale_xs),
+      additional_el_xs(
+          config.take(InputKeys::collTerm_additionalElasticCrossSection)),
+      maximum_cross_section(parameters.maximum_cross_section),
+      coll_crit(parameters.coll_crit),
+      nnbar_treatment(parameters.nnbar_treatment),
+      included_2to2(parameters.included_2to2),
+      included_multi(parameters.included_multi),
+      testparticles(parameters.testparticles),
+      two_to_one(parameters.two_to_one),
+      allow_collisions_within_nucleus(
+          config.take(InputKeys::modi_collider_collisionWithinNucleus)),
+      strings_switch(parameters.strings_switch),
+      use_AQM(config.take(InputKeys::collTerm_useAQM)),
+      strings_with_probability(
+          config.take(InputKeys::collTerm_stringsWithProbability)),
+      only_warn_for_high_prob(
+          config.take(InputKeys::collTerm_onlyWarnForHighProbability)),
+      transition_high_energy{create_string_transition_parameters(config)},
+      total_xs_strategy(config.take(InputKeys::collTerm_totXsStrategy)),
+      pseudoresonance_method(config.take(InputKeys::collTerm_pseudoresonance)) {
+  if (total_xs_strategy == TotalCrossSectionStrategy::BottomUp) {
     logg[LFindScatter].info(
         "Evaluating total cross sections from partial processes.");
   } else if (parameters.included_2to2[IncludedReactions::Elastic] == 1 &&
@@ -160,38 +190,14 @@ ScatterActionsFinderParameters create_finder_parameters(
         "The BottomUp strategy for total cross section evaluation is needed to "
         "have only elastic interactions, please change the configuration "
         "accordingly.");
-  } else if (xs_strategy == TotalCrossSectionStrategy::TopDown) {
+  } else if (total_xs_strategy == TotalCrossSectionStrategy::TopDown) {
     logg[LFindScatter].info(
         "Evaluating total cross sections from parametrizations.");
-  } else if (xs_strategy == TotalCrossSectionStrategy::TopDownMeasured) {
+  } else if (total_xs_strategy == TotalCrossSectionStrategy::TopDownMeasured) {
     logg[LFindScatter].info(
         "Evaluating total cross sections from parametrizations only for "
         "measured processes.");
   }
-  return {config.take(InputKeys::collTerm_elasticCrossSection),
-          parameters.low_snn_cut,
-          parameters.scale_xs,
-          config.take(InputKeys::collTerm_additionalElasticCrossSection),
-          parameters.maximum_cross_section,
-          parameters.coll_crit,
-          parameters.nnbar_treatment,
-          parameters.included_2to2,
-          parameters.included_multi,
-          parameters.testparticles,
-          parameters.two_to_one,
-          config.take(InputKeys::modi_collider_collisionWithinNucleus),
-          parameters.strings_switch,
-          config.take(InputKeys::collTerm_useAQM),
-          config.take(InputKeys::collTerm_stringsWithProbability),
-          config.take(InputKeys::collTerm_onlyWarnForHighProbability),
-          StringTransitionParameters{
-              sqrts_range_Npi, sqrts_range_NN,
-              config.take(InputKeys::collTerm_stringTrans_lower),
-              config.take(InputKeys::collTerm_stringTrans_range_width),
-              config.take(InputKeys::collTerm_stringTrans_pipiOffset),
-              config.take(InputKeys::collTerm_stringTrans_KNOffset)},
-          xs_strategy,
-          config.take(InputKeys::collTerm_pseudoresonance)};
 }
 
 ActionPtr ScatterActionsFinder::check_collision_two_part(

@@ -196,9 +196,9 @@ class CrossSections {
    * have been determined.
    * \todo Same assumption made by NNbar_annihilation. Resolve.
    */
-  CollisionBranchList string_excitation(double total_string_xs,
-                                        StringProcess* string_process,
-                                        bool use_AQM) const;
+  CollisionBranchList string_excitation(
+      double total_string_xs, StringProcess* string_process,
+      const ScatterActionsFinderParameters& finder_parameters) const;
 
   /**
    * Determine the cross section for NNbar annihilation, which is given by the
@@ -305,7 +305,7 @@ class CrossSections {
    * This is rescaled by AQM factors.
    */
   double high_energy(
-      const StringTransitionParameters& transition_high_energy) const;
+      const ScatterActionsFinderParameters& finder_parameters) const;
 
   /**
    * \return the probability whether the scattering between the incoming
@@ -367,7 +367,8 @@ class CrossSections {
    *
    * \return Elastic cross section
    */
-  double elastic_parametrization(bool use_AQM, double pipi_offset) const;
+  double elastic_parametrization(
+      const ScatterActionsFinderParameters& finder_parameters) const;
 
   /**
    * Determine the (parametrized) elastic cross section for a

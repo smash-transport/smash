@@ -141,11 +141,10 @@ void ScatterAction::add_all_scatterings(
   if (!finder_parameters.strings_with_probability &&
       xs.string_probability(finder_parameters) > 0) {
     const double xs_diff =
-        xs.high_energy(finder_parameters.transition_high_energy) -
-        sum_of_partial_cross_sections_;
+        xs.high_energy(finder_parameters) - sum_of_partial_cross_sections_;
     if (xs_diff > 0.) {
-      add_collisions(xs.string_excitation(xs_diff, string_process_,
-                                          finder_parameters.use_AQM));
+      add_collisions(
+          xs.string_excitation(xs_diff, string_process_, finder_parameters));
     }
   }
 
@@ -153,10 +152,9 @@ void ScatterAction::add_all_scatterings(
       try_find_pseudoresonance(finder_parameters.pseudoresonance_method,
                                finder_parameters.transition_high_energy);
   if (pseudoresonance && finder_parameters.two_to_one) {
-    const double xs_total =
-        is_total_parametrized_
-            ? *parametrized_total_cross_section_
-            : xs.high_energy(finder_parameters.transition_high_energy);
+    const double xs_total = is_total_parametrized_
+                                ? *parametrized_total_cross_section_
+                                : xs.high_energy(finder_parameters);
     const double xs_gap = xs_total - sum_of_partial_cross_sections_;
     // The pseudo-resonance is only created if there is a (positive) cross
     // section gap
