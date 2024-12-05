@@ -64,10 +64,9 @@ static std::filesystem::path create_particlefile(
 
   VERIFY(std::filesystem::exists(outputfilepath));
   // Rename the oscar file to match listmodus format
-  const std::string pathstring = "event" + std::to_string(file_number);
-  const std::filesystem::path listinputfile = pathstring;
-  const std::filesystem::path inputfilepath = testoutputpath / listinputfile;
-  std::rename(outputfilepath.native().c_str(), inputfilepath.native().c_str());
+  const std::filesystem::path inputfilepath =
+      testoutputpath / ("event" + std::to_string(file_number));
+  std::filesystem::rename(outputfilepath, inputfilepath);
 
   VERIFY(std::filesystem::exists(inputfilepath));
 
@@ -97,7 +96,7 @@ static void create_non_oscar_particlefile(
       tmp_file << line << '\n';
     }
   }
-  std::rename(tmp_path.native().c_str(), input_path.native().c_str());
+  std::filesystem::rename(tmp_path, input_path);
 }
 
 static ListModus create_list_modus_for_test() {
