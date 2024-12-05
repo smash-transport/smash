@@ -182,7 +182,10 @@ void ListModus::read_particles_from_next_event_(Particles &particles) {
 
     // Charge consistency check
     if (pdgcode.charge() != charge) {
-      logg[LList].error() << "Charge of pdg = " << pdgcode << " != " << charge;
+      if (verbose_) {
+        logg[LList].error()
+            << "Charge of pdg = " << pdgcode << " != " << charge;
+      }
       throw std::invalid_argument("Inconsistent input (charge).");
     }
     try_create_particle(particles, pdgcode, t, x, y, z, mass, E, px, py, pz);
@@ -201,13 +204,15 @@ std::filesystem::path ListModus::file_path_(std::optional<int> file_id) {
   logg[LList].debug() << "File: " << std::filesystem::absolute(fpath) << '\n';
 
   if (!std::filesystem::exists(fpath)) {
-    logg[LList].fatal()
-        << fpath.filename().native() << " does not exist! \n\n"
-        << "Usage of smash with external particle lists:\n"
-        << "  1. Put the external particle lists in one or more files\n"
-        << "     according to the user guide instructions.\n"
-        << "  2. Particles info: t x y z mass p0 px py pz pdg ID charge\n"
-        << "     in units of: fm fm fm fm GeV GeV GeV GeV GeV none none e\n";
+    if (verbose_) {
+      logg[LList].fatal()
+          << fpath.filename().native() << " does not exist! \n\n"
+          << "Usage of smash with external particle lists:\n"
+          << "  1. Put the external particle lists in one or more files\n"
+          << "     according to the user guide instructions.\n"
+          << "  2. Particles info: t x y z mass p0 px py pz pdg ID charge\n"
+          << "     in units of: fm fm fm fm GeV GeV GeV GeV GeV none none e\n";
+    }
     throw std::runtime_error("External particle list does not exist!");
   }
 
@@ -228,7 +233,7 @@ std::string ListModus::next_event_() {
       return next_event_();
     } else {
       throw std::runtime_error(
-          "Attempt to read in next event in Listmodus object but no further "
+          "Attempt to read in next event in ListModus object but no further "
           "data found in single provided file. Please, check your setup.");
     }
   }
@@ -247,7 +252,10 @@ std::string ListModus::next_event_() {
   }
 
   if (!ifs.eof() && (ifs.fail() || ifs.bad())) {
-    logg[LList].fatal() << "Error while reading " << fpath.filename().native();
+    if (verbose_) {
+      logg[LList].fatal() << "Error while reading "
+                          << fpath.filename().native();
+    }
     throw std::runtime_error("Error while reading external particle list");
   }
   // save position for next event read
@@ -281,8 +289,10 @@ bool ListModus::file_has_events_(std::filesystem::path filepath,
   }
 
   if (!ifs.good()) {
-    logg[LList].fatal() << "Error while reading "
-                        << filepath.filename().native();
+    if (verbose_) {
+      logg[LList].fatal() << "Error while reading "
+                          << filepath.filename().native();
+    }
     throw std::runtime_error("Error while reading external particle list");
   }
 
@@ -298,6 +308,7 @@ bool ListModus::file_has_events_(std::filesystem::path filepath,
  */
 void ListModus::validate_list_of_particles_of_all_events_() const {
   ListModus utility_copy{*this};
+  utility_copy.verbose_ = false;
   bool are_there_faulty_events = false;
   while (true) {
     try {

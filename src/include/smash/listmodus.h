@@ -242,6 +242,14 @@ class ListModus : public ModusDefault {
   bool warn_about_off_shell_particles_ = true;
 
   /**
+   * Flag to suppress some error messages. This is used during the validation
+   * of particles in all events, because there we do not know how many events
+   * exist and we simply try to read the next one till an error occurs. This
+   * triggers an error message which should not be printed to the user.
+   */
+  bool verbose_ = true;
+
+  /**
    * \ingroup logging
    *
    * Writes the initial state for the List to the output stream.
