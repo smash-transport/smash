@@ -113,12 +113,12 @@ struct OutputParameters {
     }
 
     /* Unconditionally take quantities from the configuration file. This is
-     * needed because the 'Format' key in the output content subsection is taken
-     * before this object is instantiated and that might be the only present key
-     * making the sub-section disappear before the configuration is handed over
-     * to this constructor. As a positive consequence, the quantities map has
-     * always the entry set, at least to an empty list. This is  assumed
-     * elsewhere in the code and it ensured here. */
+     * needed because the 'Format' key in the output content sub-section is
+     * taken before this object is instantiated and that might be the only
+     * present key making the sub-section disappear before the configuration is
+     * handed over to this constructor. As a positive consequence, the
+     * quantities map has always the entry set, at least to an empty list. This
+     * is assumed elsewhere in the code and it ensured here. */
     const auto part_quantities =
         conf.take(InputKeys::output_particles_quantities);
     quantities.insert({"Particles", part_quantities});

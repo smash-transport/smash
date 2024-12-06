@@ -106,7 +106,7 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  * The initial conditions output can be enabled as follows:
  *\verbatim
      Initial_Conditions:
-         Format:    ["ASCII", "Oscar1999", "Oscar2013", "Binary", "ROOT"]
+         Format:    ["ASCII", "Oscar1999", "Oscar2013", "Binary", "Root"]
          Extended: False
          Proper_Time: 1.5
  \endverbatim

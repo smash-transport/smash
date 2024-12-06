@@ -276,7 +276,7 @@ However, [as mentioned](#out-of-disk-space), one is not obliged to compile every
 
 On the other hand, functional tests are only setup if the CMake option `ENABLE_FUNCTIONAL_TESTS` is set to `ON`, which is **NOT** the default case.
 This is due to the fact that, in order to setup these tests, CMake will create a Python virtual environment installing requirements in it and this might take some time (usually the first time only) if some required packages (e.g. `pandas`) need to be built from source.
-If these tests are not enabled, `ctest` will not see them at all.
+If these tests are not enabled, they will not be visible and cannot be executed when running `ctest`.
 Pass `-DENABLE_FUNCTIONAL_TESTS=ON` to `cmake` in order to include these tests when setting up the project.
 Functional tests are written in Python and they run SMASH as black-box.
 In this sense they do not need to be compiled, but the `smash` executable has to be created prior to their execution.

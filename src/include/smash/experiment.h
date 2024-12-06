@@ -741,9 +741,6 @@ void Experiment<Modus>::create_output(const std::string &format,
                                       const std::string &content,
                                       const std::filesystem::path &output_path,
                                       const OutputParameters &out_par) {
-  logg[LExperiment].info() << "Adding output " << content << " of format "
-                           << format << std::endl;
-
   // Disable output which do not properly work with multiple ensembles
   if (ensembles_.size() > 1) {
     auto abort_because_of = [](const std::string &s) {
@@ -899,6 +896,9 @@ void Experiment<Modus>::create_output(const std::string &format,
         << "Unknown combination of format (" << format << ") and content ("
         << content << "). Fix the config.";
   }
+
+  logg[LExperiment].info() << "Added output " << content << " of format "
+                           << format << "\n";
 }
 
 /**
@@ -1322,7 +1322,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    *      - using \b "ASCII" as format, the \ref doxypage_output_thermodyn
    *        "standard thermodynamics output" is produced;
    *      - using \b "Lattice_ASCII", the \ref doxypage_output_thermodyn_lattice
-   *        "the quantities on a lattice" are printed out.
+   *        "quantities on a lattice" are printed out.
    * - \b "Binary" - a binary, not human-readable list of values.
    *   - The \ref doxypage_output_binary "binary output" is faster to read and
    *     write than text outputs and all floating point numbers are printed with
@@ -1332,10 +1332,10 @@ Experiment<Modus>::Experiment(Configuration &config,
    *     is possible to customize the quantities to be printed into the file.
    *   - For the other contents the corresponding documentation pages about the
    *     ASCII format contain further information.
-   * - \b "Oscar2013_bin" - alias for the \b "Binary" format with a given set of
-   *   quantities.
+   * - \b "Oscar2013_bin" - alias for the \b "Binary" format with a predefined
+   *   set of quantities.
    * - \b "Oscar1999", \b "Oscar2013" - aliases for the \b "ASCII" format with a
-   *   given set of quantities.
+   *   predefined set of quantities.
    * - \b "Root" - binary output in the format used by
    *   <a href="http://root.cern.ch">the ROOT software</a>
    *   - Even faster to read and write, requires less disk space
@@ -1542,26 +1542,27 @@ Experiment<Modus>::Experiment(Configuration &config,
           default_quantities;
       if (quantities_given_nonempty != custom_requested) {
         logg[LExperiment].fatal()
-            << "Non-empty \"Quantities\" and \"ASCII\"/\"Binary\" format for "
-            << std::quoted(output_contents[i]) << " were not given together.";
+            << "Non-empty \"Quantities\" and \"ASCII\"/\"Binary\" format have "
+            << "not been specified both for " << std::quoted(output_contents[i])
+            << " in config file.";
         abort_because_of_invalid_input_file();
       }
       if (custom_ascii_requested && oscar2013_requested &&
           are_given_quantities_oscar2013_ones) {
         logg[LExperiment].fatal()
-            << "The specified \"Quantities\" are the same as those of the "
-               "requested \"Oscar2013\"\nformat for "
+            << "The specified \"Quantities\" for the ASCII format are the same "
+               "as those of the requested \"Oscar2013\"\nformat for "
             << std::quoted(output_contents[i])
-            << " and this would produce twice the same output file.";
+            << " and this would produce the same output file twice.";
         abort_because_of_invalid_input_file();
       }
       if (custom_binary_requested && oscar2013_bin_requested &&
           are_given_quantities_oscar2013_ones) {
         logg[LExperiment].fatal()
-            << "The specified \"Quantities\" are the same as those of the "
-               "requested \"Oscar2013_bin\"\nformat for "
+            << "The specified \"Quantities\" for the binary format are the "
+               "same as those of the requested \"Oscar2013_bin\"\nformat for "
             << std::quoted(output_contents[i])
-            << " and this would produce twice the same output file.";
+            << " and this would produce the same output file twice.";
         abort_because_of_invalid_input_file();
       }
     }

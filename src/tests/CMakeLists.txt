@@ -380,7 +380,7 @@ smash_add_runtest(custom_nucleus_run smash smash
 # Setup of functional tests. Since these are written in Python, here the interpreter is found, a
 # virtual environment is setup, the interpreter of the virtual environment is looked for and the
 # needed Python requirements are installed. If any step fails, functional tests are disabled.
-option(ENABLE_FUNCTIONAL_TESTS "Turn this off to disable SMASH functional tests." OFF)
+option(ENABLE_FUNCTIONAL_TESTS "Turn this on to enable SMASH functional tests." OFF)
 if(ENABLE_FUNCTIONAL_TESTS)
     message(STATUS "Looking for Python3")
     find_package(Python3 3.3 QUIET COMPONENTS Interpreter Development)
