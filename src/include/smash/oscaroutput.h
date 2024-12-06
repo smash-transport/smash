@@ -32,7 +32,7 @@ enum OscarOutputFormat {
   OscarFormat2013,
   OscarFormat2013Extended,
   OscarFormat1999,
-  ASCIICustom
+  ASCII
 };
 
 /**
@@ -143,9 +143,8 @@ class OscarOutput : public OutputInterface {
  * \return A new OscarOutput object using information from \p config to
  * select the correct implementation.
  *
- * \param[in] format A string: "Oscar2013" or "Oscar1999"
- * \param[in] content A string: "Particles", "Collisions", "Photons"
-               or "Dileptons".
+ * \param[in] format The output format as string, e.g. \c "Oscar2013"
+ * \param[in] content The output content as string, e.g. \c "Particles"
  * \param[in] path The path to the output directory where the file(s) will be
  *             placed.
  * \param[in] out_par A structure containing parameters of the output, in

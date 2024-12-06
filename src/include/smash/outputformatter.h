@@ -185,6 +185,11 @@ class OutputFormatter {
    * having fixed strings.
    *
    * \param[in] in_quantities list of quantities to be output.
+   *
+   * \throw std::invalid_argument if the list of quantities is empty
+   * \throw std::invalid_argument if unknown quantities exist in the list
+   * \throw std::invalid_argument if incompatible quantities exist in the list
+   * \throw std::invalid_argument if there are repeated quantities
    */
   explicit OutputFormatter(const std::vector<std::string>& in_quantities)
       : quantities_(in_quantities) {
@@ -388,8 +393,7 @@ class OutputFormatter {
   void validate_quantities() {
     if (quantities_.empty()) {
       throw std::invalid_argument(
-          "OutputFormatter: Quantities not given, "
-          "please fix the configuration file.");
+          "OutputFormatter: Empty quantities handed over to the class.");
     }
     std::string error_message{};
     std::string repeated{};
@@ -399,7 +403,7 @@ class OutputFormatter {
       }
     }
     if (!repeated.empty()) {
-      error_message += "OutputFormatter: Repeated quantities: " + repeated +
+      error_message += "Repeated \"Quantities\": " + repeated +
                        " please fix the configuration file.\n";
     }
     std::string unknown{};
@@ -409,11 +413,23 @@ class OutputFormatter {
       }
     }
     if (!unknown.empty()) {
-      error_message += "OutputFormatter: Unknown quantities: " + unknown +
+      error_message += "Unknown \"Quantities\": " + unknown +
                        " please fix the configuration file.\n";
     }
     if (!repeated.empty() || !unknown.empty())
       throw std::invalid_argument(error_message);
+
+    const bool oscar1999_id_is_given =
+        std::find(quantities_.begin(), quantities_.end(), "id") !=
+        quantities_.end();
+    const bool oscar2013_id_is_given =
+        std::find(quantities_.begin(), quantities_.end(), "ID") !=
+        quantities_.end();
+    if (oscar1999_id_is_given && oscar2013_id_is_given) {
+      throw std::invalid_argument(
+          "Both 'id' and 'ID' cannot be provided in the \"Quantities\" key "
+          "together. Please, fix the configuration file.");
+    }
   }
 };
 

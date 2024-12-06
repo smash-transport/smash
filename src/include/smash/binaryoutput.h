@@ -35,14 +35,13 @@ class BinaryOutputBase : public OutputInterface {
    * \param[in] path Output path.
    * \param[in] mode Is used to determine the file access mode.
    * \param[in] name Name of the output.
-   * \param[in] extended_format Is the written output extended.
-   * \param[in] quantities is the vector of quantities passed to the
-   * OutPutFormatter.
+   * \param[in] quantities The list of quantities printed to the output.
+   *
+   * \throw std::invalid_argument if the list of quantities is empty.
    */
   explicit BinaryOutputBase(const std::filesystem::path &path,
                             const std::string &mode, const std::string &name,
-                            bool extended_format,
-                            const std::vector<std::string> &quantities = {});
+                            const std::vector<std::string> &quantities);
 
   /**
    * Write several bytes to the binary output. Meant to be used by the
@@ -130,10 +129,8 @@ class BinaryOutputBase : public OutputInterface {
  private:
   /// Binary file format version number
   const uint16_t format_version_ = 10;
-  /// Option for extended output
-  bool extended_;
   /// Format variant number associated to the custom quantities case
-  const uint16_t format_custom = 2;
+  const uint16_t format_custom_ = 2;
   /// The output formatter
   OutputFormatter<ToBinary> formatter_;
 };
@@ -158,9 +155,11 @@ class BinaryOutputCollisions : public BinaryOutputBase {
    * \param[in] path Output path.
    * \param[in] name Name of the output.
    * \param[in] out_par A structure containing parameters of the output.
+   * \param[in] quantities The list of quantities printed to the output.
    */
   BinaryOutputCollisions(const std::filesystem::path &path, std::string name,
-                         const OutputParameters &out_par);
+                         const OutputParameters &out_par,
+                         const std::vector<std::string> &quantities);
 
   /**
    * Writes the initial particle information list of an event to the binary
@@ -218,9 +217,11 @@ class BinaryOutputParticles : public BinaryOutputBase {
    * \param[in] path Output path.
    * \param[in] name Name of the ouput.
    * \param[in] out_par A structure containing the parameters of the output.
+   * \param[in] quantities The list of quantities printed to the output.
    */
   BinaryOutputParticles(const std::filesystem::path &path, std::string name,
-                        const OutputParameters &out_par);
+                        const OutputParameters &out_par,
+                        const std::vector<std::string> &quantities);
 
   /**
    * Writes the initial particle information of an event to the binary output.
@@ -279,11 +280,11 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
    *
    * \param[in] path Output path.
    * \param[in] name Name of the ouput.
-   * \param[in] out_par A structure containing the parameters of the output.
+   * \param[in] quantities The list of quantities printed to the output.
    */
   BinaryOutputInitialConditions(const std::filesystem::path &path,
                                 std::string name,
-                                const OutputParameters &out_par);
+                                const std::vector<std::string> &quantities);
 
   /**
    * Writes the initial particle information of an event to the binary output.
@@ -309,6 +310,24 @@ class BinaryOutputInitialConditions : public BinaryOutputBase {
    */
   void at_interaction(const Action &action, const double) override;
 };
+
+/**
+ * \ingroup output
+ *
+ * \brief Create a binary output object. This is a helper function for the \c
+ * Experiment class to facilitate the logic when creating the output objects.
+ *
+ * \param[in] format The output format as string, e.g. \c "Oscar2013"
+ * \param[in] content The output content as string, e.g. \c "Particles"
+ * \param[in] path The path to the output directory
+ * \param[in] out_par The output parameters object containing output metadata
+ *
+ * \return A \c std::unique_ptr<OutputInterface> polymorphically initialised to
+ * the correct binary output object.
+ */
+std::unique_ptr<OutputInterface> create_binary_output(
+    const std::string &format, const std::string &content,
+    const std::filesystem::path &path, const OutputParameters &out_par);
 
 }  // namespace smash
 

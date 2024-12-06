@@ -39,7 +39,7 @@ jobs:
           # we configure SMASH using the environment provided by a Singularity container
           mkdir -p ${SMASH_ROOT}/build
           cd ${SMASH_ROOT}/build
-          singularity exec ${container_file} cmake ..
+          singularity exec ${container_file} cmake -DENABLE_FUNCTIONAL_TESTS=ON ..
           # we check if the code is well formatted with cpplint
           export CTEST_OUTPUT_ON_FAILURE=1
           singularity exec ${container_file} ctest -R "cpplint"
@@ -86,7 +86,7 @@ jobs:
           # now we configure SMASH
           mkdir -p ${SMASH_ROOT}/build
           cd ${SMASH_ROOT}/build
-          cmake -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8312/bin/pythia8-config ..
+          cmake -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8312/bin/pythia8-config -DENABLE_FUNCTIONAL_TESTS=ON ..
           # we check if the code is well formatted with cpplint
           export CTEST_OUTPUT_ON_FAILURE=1
           ctest -R "cpplint"

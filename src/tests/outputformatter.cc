@@ -44,6 +44,11 @@ TEST_CATCH(repeated_quantity, std::invalid_argument) {
   OutputFormatter<ToASCII> formatter(repeated_quantities);
 }
 
+TEST_CATCH(incompatible_quantity, std::invalid_argument) {
+  std::vector<std::string> repeated_quantities = {"id", "ID"};
+  OutputFormatter<ToASCII> formatter(repeated_quantities);
+}
+
 TEST(valid_line_maker) {
   Test::create_smashon_particletypes();
   ParticleData p = Test::smashon_random();

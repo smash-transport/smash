@@ -741,9 +741,6 @@ void Experiment<Modus>::create_output(const std::string &format,
                                       const std::string &content,
                                       const std::filesystem::path &output_path,
                                       const OutputParameters &out_par) {
-  logg[LExperiment].info() << "Adding output " << content << " of format "
-                           << format << std::endl;
-
   // Disable output which do not properly work with multiple ensembles
   if (ensembles_.size() > 1) {
     auto abort_because_of = [](const std::string &s) {
@@ -785,22 +782,20 @@ void Experiment<Modus>::create_output(const std::string &format,
     logg[LExperiment].error(
         "Root output requested, but Root support not compiled in");
 #endif
-  } else if (format == "Binary") {
-    if (content == "Collisions" || content == "Dileptons" ||
-        content == "Photons") {
-      outputs_.emplace_back(std::make_unique<BinaryOutputCollisions>(
-          output_path, content, out_par));
-    } else if (content == "Particles") {
-      outputs_.emplace_back(std::make_unique<BinaryOutputParticles>(
-          output_path, content, out_par));
-    } else if (content == "Initial_Conditions") {
-      outputs_.emplace_back(std::make_unique<BinaryOutputInitialConditions>(
-          output_path, content, out_par));
-    }
+  } else if (format == "Binary" &&
+             (content == "Collisions" || content == "Dileptons" ||
+              content == "Photons" || content == "Particles" ||
+              content == "Initial_Conditions")) {
+    outputs_.emplace_back(
+        create_binary_output(format, content, output_path, out_par));
+  } else if (format == "Oscar2013_bin" &&
+             (content == "Collisions" || content == "Particles")) {
+    outputs_.emplace_back(
+        create_binary_output(format, content, output_path, out_par));
   } else if (format == "Oscar1999" || format == "Oscar2013") {
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
-  } else if (format == "ASCIICustom" &&
+  } else if (format == "ASCII" &&
              (content == "Particles" || content == "Collisions")) {
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
@@ -901,6 +896,9 @@ void Experiment<Modus>::create_output(const std::string &format,
         << "Unknown combination of format (" << format << ") and content ("
         << content << "). Fix the config.";
   }
+
+  logg[LExperiment].info() << "Added output " << content << " of format "
+                           << format << "\n";
 }
 
 /**
@@ -1178,16 +1176,16 @@ Experiment<Modus>::Experiment(Configuration &config,
         // Read in proper time from config
         proper_time =
             config.take(InputKeys::output_initialConditions_properTime);
-        validate_duplicate_IC_config(
-            proper_time, IC_parameters.proper_time.value(), "Proper_Time");
+        validate_duplicate_IC_config(proper_time, IC_parameters.proper_time,
+                                     "Proper_Time");
       } else if (IC_parameters.proper_time.has_value()) {
         proper_time = IC_parameters.proper_time.value();
       } else {
         double lower_bound =
             config.take(InputKeys::output_initialConditions_lowerBound);
         if (IC_parameters.lower_bound.has_value())
-          validate_duplicate_IC_config(
-              lower_bound, IC_parameters.lower_bound.value(), "Lower_Bound");
+          validate_duplicate_IC_config(lower_bound, IC_parameters.lower_bound,
+                                       "Lower_Bound");
 
         // Default proper time is the passing time of the two nuclei
         double default_proper_time = modus_.nuclei_passing_time();
@@ -1220,70 +1218,79 @@ Experiment<Modus>::Experiment(Configuration &config,
    *
    * \section output_directory_ Output directory
    *
-   *
-   * Per default, the selected output files
-   * will be saved in the directory ./data/\<run_id\>, where \<run_id\> is an
-   * integer number starting from 0. At the beginning of a run SMASH checks,
-   * if the ./data/0 directory exists. If it does not exist, it is created and
-   * all output files are written there. If the directory already exists,
-   * SMASH tries for ./data/1, ./data/2 and so on until it finds a free
-   * number.
+   * Per default, the selected output files will be saved in the directory
+   * `./data/<run_id>`, where `<run_id>` is an integer number starting from 0.
+   * At the beginning of a run SMASH checks if the `./data/0` directory exists.
+   * If it does not exist, it is created and all output files are written there.
+   * If the directory already exists, SMASH tries for `./data/1`, `./data/2` and
+   * so on until it finds a free number.
    *
    * The user can change output directory by a command line option, if
    * desired:
    * \code smash -o <user_output_dir> \endcode
+   * SMASH, by default, will create the specified folder if not existing or will
+   * use it if the specified folder exists and is empty. However, if the folder
+   * exists and is not empty SMASH will abort with an error to avoid overwriting
+   * existing files.
+   *
+   * ---
    *
    * \section output_contents_ Output content
    *
    * Output in SMASH is distinguished by _content_ and _format_, where content
    * means the physical information contained in the output (e.g. list of
    * particles, list of interactions, thermodynamics, etc) and format (e.g.
-   * Oscar, binary or ROOT). The same content can be printed out in several
+   * ASCII, binary or ROOT). The same content can be printed out in several
    * formats _simultaneously_.
    *
    * For an example of choosing specific output contents see
    * \ref doxypage_output_conf_examples.
    *
-   * The list of possible contents follows:
+   * These are the possible contents offered by SMASH:
    *
-   * - \b Particles  List of particles at regular time intervals in the
-   *                 computational frame or (optionally) only at the event end.
-   *   - Available formats: \ref doxypage_output_oscar_particles, \ref
-   *                        doxypage_output_ascii, \ref doxypage_output_binary,
-   *                        \ref doxypage_output_root, \ref doxypage_output_vtk,
-   *                        \ref doxypage_output_hepmc
-   * - \b Collisions List of interactions: collisions, decays, box wall
-   *                 crossings and forced thermalizations. Information about
-   *                 incoming, outgoing particles and the interaction itself
-   *                 is printed out.
-   *   - Available formats: \ref doxypage_output_oscar_collisions, \ref
-   *                        doxypage_output_ascii, \ref doxypage_output_binary,
-   *                        \ref doxypage_output_root, \ref
-   *                        doxypage_output_hepmc
-   * - \b Dileptons  Special dilepton output, see
-   *                 \ref doxypage_output_dileptons.
-   *   - Available formats: \ref doxypage_output_oscar_collisions,
-   *                        \ref doxypage_output_binary and \ref
-   *                        doxypage_output_root
-   * - \b Photons   Special photon output, see
-   *                \ref doxypage_output_photons.
-   *   - Available formats: \ref doxypage_output_oscar_collisions,
-   *                        \ref doxypage_output_binary and \ref
-   *                        doxypage_output_root.
-   * - \b Thermodynamics   This output allows to print out thermodynamic
-   *                       quantities, see \ref input_output_thermodynamics_.
-   *    - Available formats: \ref doxypage_output_thermodyn,
-   *                         \ref doxypage_output_thermodyn_lattice,
-   *                         \ref doxypage_output_vtk_lattice
-   * - \b Initial_Conditions  Special initial conditions output, see
-   *                          \ref doxypage_output_initial_conditions for
-   *                          details.
-   *   - Available formats: \ref doxypage_output_oscar_particles, \ref
-   *                        doxypage_output_initial_conditions
-   * - \b Rivet Run Rivet analysis on generated events and output
-   *            results, see \ref doxypage_output_rivet for
-   *            details.
-   *    - Available formats: \ref doxypage_output_rivet
+   * - \b %Particles:
+   *         List of particles at regular time intervals in the computational
+   *         frame or (optionally) only at the event end.
+   *   - Available formats:
+   *         \ref doxypage_output_oscar_particles, \ref doxypage_output_ascii,
+   *         \ref doxypage_output_binary, \ref doxypage_output_root,
+   *         \ref doxypage_output_vtk, \ref doxypage_output_hepmc.
+   * - \b Collisions:
+   *         List of interactions: collisions, decays, box wall crossings and
+   *         forced thermalizations. Information about incoming, outgoing
+   *         particles and the interaction itself is printed out.
+   *   - Available formats:
+   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_ascii,
+   *         \ref doxypage_output_binary, \ref doxypage_output_root,
+   *         \ref doxypage_output_hepmc.
+   * - \b Dileptons:
+   *          Special dilepton output, see \ref doxypage_output_dileptons.
+   *   - Available formats:
+   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_binary,
+   *         \ref doxypage_output_root.
+   * - \b Photons:
+   *          Special photon output, see \ref doxypage_output_photons.
+   *   - Available formats:
+   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_binary,
+   *         \ref doxypage_output_root.
+   * - \b Thermodynamics:
+   *          This output allows to print out thermodynamic quantities, see \ref
+   *          input_output_thermodynamics_.
+   *    - Available formats:
+   *          \ref doxypage_output_thermodyn,
+   *          \ref doxypage_output_thermodyn_lattice,
+   *          \ref doxypage_output_vtk_lattice.
+   * - \b Initial_Conditions:
+   *          Special initial conditions output, see
+   *          \ref doxypage_output_initial_conditions for details.
+   *   - Available formats:
+   *         \ref doxypage_output_oscar_particles,
+   *         \ref doxypage_output_initial_conditions.
+   * - \b Rivet:
+   *          Run Rivet analysis on generated events and output results, see
+   *          \ref doxypage_output_rivet for details.
+   *    - Available formats:
+   *          \ref doxypage_output_rivet.
    *
    * \attention At the moment, the \b Initial_Conditions and \b Rivet outputs
    * content as well as the \b HepMC format cannot be used <u>with multiple
@@ -1295,40 +1302,55 @@ Experiment<Modus>::Experiment(Configuration &config,
    * and this setup should only be used if in the data analysis it is not
    * necessary to trace back which data belongs to which ensemble.
    *
-   * \n
+   * ---
    *
    * \section list_of_output_formats Output formats
    *
-   * For choosing output formats see
-   * \ref doxypage_output_conf_examples.
+   * For choosing output formats see \ref doxypage_output_conf_examples.
    * Every output content can be printed out in several formats:
-   * - \b "Oscar1999", \b "Oscar2013" - human-readable text output\n
-   *   - For "Particles" content: \ref doxypage_output_oscar_particles
-   *   - For "Collisions" content: \ref doxypage_output_oscar_collisions
-   *   - General block structure of OSCAR formats:
-   *     \ref doxypage_output_oscar
-   * - \b "ASCIICustom" - uses the OSCAR block structure, but with an
-   *                      user-defined set of columns: \ref
-   *                      doxypage_output_ascii
-   * - \b "Binary" - binary, not human-readable output
-   *   - Faster to read and write than text outputs
-   *   - Saves coordinates and momenta with the full double precision
-   *   - General file structure is similar to \ref doxypage_output_oscar
-   *   - Detailed description: \ref doxypage_output_binary
-   * - \b "Root" - binary output in the format used by ROOT software
-   *     (http://root.cern.ch)
+   *
+   * - \b "ASCII" - a human-readable text-format table of values.
+   *   - For `"Particles"` (\ref doxypage_output_oscar_particles) and
+   *     `"Collisions"` (\ref doxypage_output_oscar_collisions) contents, it
+   *     uses the \ref doxypage_output_oscar "OSCAR block structure".\n In these
+   *     cases it is possible to customize the quantities to be printed into the
+   *     output file (\ref doxypage_output_ascii).
+   *   - For `"Initial_Conditions"` content the output has \ref
+   *     doxypage_output_initial_conditions "a fixed block structure".
+   *   - For `"Thermodynamics"` content the information stored in the output
+   *     file depends on few input keys. Furthermore,
+   *      - using \b "ASCII" as format, the \ref doxypage_output_thermodyn
+   *        "standard thermodynamics output" is produced;
+   *      - using \b "Lattice_ASCII", the \ref doxypage_output_thermodyn_lattice
+   *        "quantities on a lattice" are printed out.
+   * - \b "Binary" - a binary, not human-readable list of values.
+   *   - The \ref doxypage_output_binary "binary output" is faster to read and
+   *     write than text outputs and all floating point numbers are printed with
+   *     their full precision.
+   *   - For `"Particles"` and `"Collisions"` contents, it is basically a binary
+   *     version of the corresponding ASCII output.\n Also for binary format it
+   *     is possible to customize the quantities to be printed into the file.
+   *   - For the other contents the corresponding documentation pages about the
+   *     ASCII format contain further information.
+   * - \b "Oscar2013_bin" - alias for the \b "Binary" format with a predefined
+   *   set of quantities.
+   * - \b "Oscar1999", \b "Oscar2013" - aliases for the \b "ASCII" format with a
+   *   predefined set of quantities.
+   * - \b "Root" - binary output in the format used by
+   *   <a href="http://root.cern.ch">the ROOT software</a>
    *   - Even faster to read and write, requires less disk space
    *   - Format description: \ref doxypage_output_root
-   * - \b "VTK" - text output suitable for an easy
-   *     visualization using paraview software
-   *   - This output can be opened by paraview to see the visulalization.
+   * - \b "VTK" - text output suitable for an easy visualization using
+   *   third-party software
+   *   - There are many different programs that can open a VTK file, although
+   *     their functionality varies.
+   *   - This output can be for example visualized with
+   *     <a href="http://paraview.org/">Paraview</a>. Alternatives are e.g.
+   *     <a href=https://docs.enthought.com/mayavi/mayavi/data.html>Mayavi</a>
+   *     or <a
+   *     href=https://reference.wolfram.com/language/ref/format/VTK.html>Mathematica</a>.
    *   - For "Particles" content \ref doxypage_output_vtk
    *   - For "Thermodynamics" content \ref doxypage_output_vtk_lattice
-   * - \b "ASCII" - a human-readable text-format table of values
-   *   - Used for "Thermodynamics" and "Initial_Conditions", see
-   * \ref doxypage_output_thermodyn
-   * \ref doxypage_output_thermodyn_lattice
-   * \ref doxypage_output_initial_conditions
    * - \b "HepMC_asciiv3", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
    *   Tree ROOT format see \ref doxypage_output_hepmc for details
    * - \b "YODA", \b "YODA-full" - compact ASCII text format used by the
@@ -1486,8 +1508,7 @@ Experiment<Modus>::Experiment(Configuration &config,
       [&output_conf](std::string content) -> std::vector<std::string> {
         /* Note that the "Format" key has an empty list as default, although it
          * is a required key, because then here below the error for the user is
-         * more informative, if the key was not given in the input file.
-         */
+         * more informative, if the key was not given in the input file. */
         return output_conf.take(InputKeys::get_output_format_key(content));
       });
   auto abort_because_of_invalid_input_file = []() {
@@ -1495,18 +1516,55 @@ Experiment<Modus>::Experiment(Configuration &config,
   };
   const OutputParameters output_parameters(std::move(output_conf));
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
-    const bool quantities_given_nonempty =
-        output_parameters.quantities.count(output_contents[i]) &&
-        !output_parameters.quantities.at(output_contents[i]).empty();
-    const bool custom_requested =
-        std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
-                  "ASCIICustom") != list_of_formats[i].end();
-    if ((quantities_given_nonempty && !custom_requested) ||
-        (!quantities_given_nonempty && custom_requested)) {
-      logg[LExperiment].fatal()
-          << "Non-empty Quantities and \"ASCIICustom\" format for "
-          << std::quoted(output_contents[i]) << " not given together.";
-      abort_because_of_invalid_input_file();
+    if (output_contents[i] == "Particles" ||
+        output_contents[i] == "Collisions") {
+      assert(output_parameters.quantities.count(output_contents[i]) > 0);
+      const bool quantities_given_nonempty =
+          !output_parameters.quantities.at(output_contents[i]).empty();
+      auto formats_contains = [&list_of_formats, &i](const std::string &label) {
+        return std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
+                         label) != list_of_formats[i].end();
+      };
+      const bool custom_ascii_requested = formats_contains("ASCII");
+      const bool custom_binary_requested = formats_contains("Binary");
+      const bool custom_requested =
+          custom_ascii_requested || custom_binary_requested;
+      const bool oscar2013_requested = formats_contains("Oscar2013");
+      const bool oscar2013_bin_requested = formats_contains("Oscar2013_bin");
+      const bool is_extended = (output_contents[i] == "Particles")
+                                   ? output_parameters.part_extended
+                                   : output_parameters.coll_extended;
+      const auto &default_quantities =
+          (is_extended) ? OutputDefaultQuantities::oscar2013extended
+                        : OutputDefaultQuantities::oscar2013;
+      const bool are_given_quantities_oscar2013_ones =
+          output_parameters.quantities.at(output_contents[i]) ==
+          default_quantities;
+      if (quantities_given_nonempty != custom_requested) {
+        logg[LExperiment].fatal()
+            << "Non-empty \"Quantities\" and \"ASCII\"/\"Binary\" format have "
+            << "not been specified both for " << std::quoted(output_contents[i])
+            << " in config file.";
+        abort_because_of_invalid_input_file();
+      }
+      if (custom_ascii_requested && oscar2013_requested &&
+          are_given_quantities_oscar2013_ones) {
+        logg[LExperiment].fatal()
+            << "The specified \"Quantities\" for the ASCII format are the same "
+               "as those of the requested \"Oscar2013\"\nformat for "
+            << std::quoted(output_contents[i])
+            << " and this would produce the same output file twice.";
+        abort_because_of_invalid_input_file();
+      }
+      if (custom_binary_requested && oscar2013_bin_requested &&
+          are_given_quantities_oscar2013_ones) {
+        logg[LExperiment].fatal()
+            << "The specified \"Quantities\" for the binary format are the "
+               "same as those of the requested \"Oscar2013_bin\"\nformat for "
+            << std::quoted(output_contents[i])
+            << " and this would produce the same output file twice.";
+        abort_because_of_invalid_input_file();
+      }
     }
 
     if (list_of_formats[i].empty()) {

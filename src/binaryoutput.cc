@@ -21,6 +21,34 @@ namespace smash {
 
 static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
+static auto get_list_of_binary_quantities(const std::string &content,
+                                          const std::string &format,
+                                          const OutputParameters &parameters);
+
+static auto get_binary_filename(const std::string &content,
+                                const std::vector<std::string> &quantities) {
+  std::string filename = content;
+  if (content == "Particles" || content == "Collisions") {
+    std::transform(filename.begin(), filename.end(), filename.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    if (quantities == OutputDefaultQuantities::oscar2013) {
+      filename += "_oscar2013";
+    } else if (quantities == OutputDefaultQuantities::oscar2013extended) {
+      filename += "_oscar2013_extended";
+    } else {
+      filename += "_binary";
+    }
+  } else if (content == "Photons" || content == "Dileptons") {
+    // Nothing to be done here
+  } else if (content == "Initial_Conditions") {
+    filename = "SMASH_IC";
+  } else {
+    throw std::invalid_argument(
+        "Unknown content to get the binary output filename.");
+  }
+  return filename + ".bin";
+}
+
 /*!\Userguide
  * \page doxypage_output_binary
  * SMASH supports a binary output version similar to the OSCAR 2013 standard.
@@ -44,7 +72,10 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  * \endcode
  * \li magic_number - 4 bytes that in ASCII read as "SMSH".
  * \li Format version is an integer number, currently it is 10.
- * \li Format variant is an integer number: 0 for default, 1 for extended.
+ * \li Format variant is an integer number:
+ *     \li 0 for quantities corresponding to OSCAR 2013 format;
+ *     \li 1 for quantities corresponding to OSCAR 2013 extended format;
+ *     \li 2 for custom list of quantities.
  * \li len is the length of smash version string
  * \li smash_version is len chars that give information about the SMASH version.
  *
@@ -101,10 +132,9 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  *
  * **Custom Particle line**
  *
- * Similar to the custom ASCII format (see \ref doxypage_output_ascii), the
- * binary format also supports
- * custom quantities for particle lines. An example of particle quantities is
- * shown below:
+ * Similar to the \ref doxypage_output_ascii "ASCII format", the binary format
+ * also supports custom quantities for particle lines. An example of particle
+ * quantities is shown below:
  * \verbatim
      Output:
        Particles:
@@ -112,9 +142,13 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
            Quantities: ["p0", "pz", "pdg", "charge"]
    \endverbatim
  * Here, the particle data will be serialized in the same order as they appear
- * in the Quantities list. Refer to \ref doxypage_output_ascii table in order to
- * know the types of the quantities written in the file and be able to correctly
- * read the output e.g. in an analysis software.
+ * in the Quantities list. The \ref doxypage_output_ascii "ASCII format table"
+ * contains the types of the quantities written in the file and be able to
+ * correctly read the output e.g. in an analysis software.
+ *
+ * \attention If a custom binary format is used, there is no way to know which
+ * quantities were stored from the output file. It is the user's responsibility
+ * to keep track of this information in their projects.
  *
  * **Event end line**
  *
@@ -132,23 +166,36 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
  *
  * Particles output
  * ----------------
- * The particles output is Written to the \c particles_binary.bin file.
- * It contains the current particle list at specific moments of time. Every
- * moment of time is written as a 'p' block. For options of this output see
- * \ref input_output_content_specific_ "content-specific output options".
+ * The name of particles output file depends on its content:
+ *  \li \c particles_binary.bin &rarr; this is the default;
+ *  \li \c particles_oscar2013.bin &rarr;
+ *      if the list of quantities corresponds to the OSCAR2013 format;
+ *  \li \c particles_oscar2013_extended.bin &rarr;
+ *      if the list of quantities corresponds to the extended OSCAR2013 format.
+ *
+ * The output file contains the current particle list at specific moments of
+ * time. Every moment of time is written as a \c 'p' block. For options of this
+ * output see the corresponding \ref input_output_content_specific_
+ * "content-specific output options".
  *
  * Collisions output
  * -----------------
- * The collisions output is Written to the \c collisions_binary.bin file.
+ * The name of collisions output file depends on its content:
+ *  \li \c collisions_binary.bin &rarr; this is the default;
+ *  \li \c collisions_oscar2013.bin &rarr;
+ *      if the list of quantities corresponds to the OSCAR2013 format;
+ *  \li \c collisions_oscar2013_extended.bin &rarr;
+ *      if the list of quantities corresponds to the extended OSCAR2013 format.
+ *
  * It contains interactions (collisions, decays, box wall crossings) and
  * optionally the initial and final configuration. The interactions are written
- * in computational frame time-ordered fashion, in 'i' blocks, which contains
+ * in computational frame time-ordered fashion, in \c 'i' blocks, which contains
  * the information of the incoming and the outgoing particles of each reaction
  * written in the 'incoming' and 'outgoing' blocks respectively.
- * Initial and final states are written as 'p' blocks. The process IDs
+ * Initial and final states are written as \c 'p' blocks. The process IDs
  * indicating the types of the reaction, such as resonance decay,
  * elastic scattering, soft string process, hard string process, etc.,
- * are written in the 'process_type' blocks. For options of this output see
+ * are written in the 'process_type' blocks. For options of this output see the
  * \ref input_output_content_specific_ "content-specific output options".
  *
  * See also \ref doxypage_output_collisions_box_modus.
@@ -157,26 +204,22 @@ static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
                                    const std::string &mode,
                                    const std::string &name,
-                                   bool extended_format,
                                    const std::vector<std::string> &quantities)
-    : OutputInterface(name),
-      file_{path, mode},
-      extended_(extended_format),
-      formatter_(quantities.empty()
-                     ? (extended_ ? OutputDefaultQuantities::oscar2013extended
-                                  : OutputDefaultQuantities::oscar2013)
-                     : quantities) {
-  if (extended_format && !quantities.empty()) {
+    : OutputInterface(name), file_{path, mode}, formatter_(quantities) {
+  if (quantities.empty()) {
     throw std::invalid_argument(
-        "The 'Extended' key cannot be used together with the 'Quantities' one. "
-        "Please fix your configuration file about the binary output.");
+        "Empty quantities list passed to 'BinaryOutputBase' cconstructor.");
   }
-
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
-  std::uint16_t format_variant = quantities.empty()
-                                     ? static_cast<uint16_t>(extended_format)
-                                     : format_custom;
+  std::uint16_t format_variant{};
+  if (quantities == OutputDefaultQuantities::oscar2013) {
+    format_variant = 0;
+  } else if (quantities == OutputDefaultQuantities::oscar2013extended) {
+    format_variant = 1;
+  } else {
+    format_variant = format_custom_;
+  }
   write(format_variant);
   write(SMASH_VERSION);
 }
@@ -221,11 +264,9 @@ void BinaryOutputBase::write_particledata(const ParticleData &p) {
 
 BinaryOutputCollisions::BinaryOutputCollisions(
     const std::filesystem::path &path, std::string name,
-    const OutputParameters &out_par)
-    : BinaryOutputBase(
-          path / ((name == "Collisions" ? "collisions_binary" : name) + ".bin"),
-          "wb", name, out_par.get_coll_extended(name),
-          out_par.quantities.at("Collisions")),
+    const OutputParameters &out_par, const std::vector<std::string> &quantities)
+    : BinaryOutputBase(path / get_binary_filename(name, quantities), "wb", name,
+                       quantities),
       print_start_end_(out_par.coll_printstartend) {}
 
 void BinaryOutputCollisions::at_eventstart(const Particles &particles,
@@ -283,12 +324,11 @@ void BinaryOutputCollisions::at_interaction(const Action &action,
   write(action.outgoing_particles());
 }
 
-BinaryOutputParticles::BinaryOutputParticles(const std::filesystem::path &path,
-                                             std::string name,
-                                             const OutputParameters &out_par)
-    : BinaryOutputBase(path / "particles_binary.bin", "wb", name,
-                       out_par.part_extended,
-                       out_par.quantities.at("Particles")),
+BinaryOutputParticles::BinaryOutputParticles(
+    const std::filesystem::path &path, std::string name,
+    const OutputParameters &out_par, const std::vector<std::string> &quantities)
+    : BinaryOutputBase(path / get_binary_filename(name, quantities), "wb", name,
+                       quantities),
       only_final_(out_par.part_only_final) {}
 
 void BinaryOutputParticles::at_eventstart(const Particles &particles,
@@ -346,9 +386,9 @@ void BinaryOutputParticles::at_intermediate_time(const Particles &particles,
 
 BinaryOutputInitialConditions::BinaryOutputInitialConditions(
     const std::filesystem::path &path, std::string name,
-    const OutputParameters &out_par)
-    : BinaryOutputBase(path / "SMASH_IC.bin", "wb", name, out_par.ic_extended) {
-}
+    const std::vector<std::string> &quantities)
+    : BinaryOutputBase(path / get_binary_filename(name, quantities), "wb", name,
+                       quantities) {}
 
 void BinaryOutputInitialConditions::at_eventstart(const Particles &,
                                                   const EventLabel &,
@@ -388,4 +428,70 @@ void BinaryOutputInitialConditions::at_interaction(const Action &action,
     write(action.incoming_particles());
   }
 }
+
+static auto get_list_of_binary_quantities(const std::string &content,
+                                          const std::string &format,
+                                          const OutputParameters &parameters) {
+  const bool is_extended = std::invoke([&content, &parameters]() {
+    if (content == "Particles")
+      return parameters.part_extended;
+    else if (content == "Collisions")
+      return parameters.coll_extended;
+    else if (content == "Dileptons")
+      return parameters.dil_extended;
+    else if (content == "Photons")
+      return parameters.photons_extended;
+    else if (content == "Initial_Conditions")
+      return parameters.ic_extended;
+    else
+      return false;
+  });
+  const auto default_quantities =
+      (is_extended) ? OutputDefaultQuantities::oscar2013extended
+                    : OutputDefaultQuantities::oscar2013;
+  if (format == "Oscar2013_bin" || content == "Dileptons" ||
+      content == "Photons" || content == "Initial_Conditions") {
+    return default_quantities;
+  } else if (format == "Binary") {
+    if (content == "Particles" || content == "Collisions") {
+      auto list_of_quantities = parameters.quantities.at(content);
+      if (list_of_quantities.empty()) {
+        return default_quantities;
+      } else {
+        return list_of_quantities;
+      }
+    } else {
+      /* Note that this function should not be called with "Binary" format for
+       * output contents which do not support custom binary quantities. Hence we
+       * throw here to prevent such a case.*/
+      throw std::invalid_argument(
+          "Unknown content to get the list of quantities for binary output.");
+    }
+  } else {
+    throw std::invalid_argument(
+        "Unknown format to get the list of quantities for binary output.");
+  }
+}
+
+std::unique_ptr<OutputInterface> create_binary_output(
+    const std::string &format, const std::string &content,
+    const std::filesystem::path &path, const OutputParameters &out_par) {
+  if (content == "Particles") {
+    return std::make_unique<BinaryOutputParticles>(
+        path, content, out_par,
+        get_list_of_binary_quantities(content, format, out_par));
+  } else if (content == "Collisions" || content == "Dileptons" ||
+             content == "Photons") {
+    return std::make_unique<BinaryOutputCollisions>(
+        path, content, out_par,
+        get_list_of_binary_quantities(content, format, out_par));
+  } else if (content == "Initial_Conditions") {
+    return std::make_unique<BinaryOutputInitialConditions>(
+        path, content, get_list_of_binary_quantities(content, format, out_par));
+  } else {
+    throw std::invalid_argument("Binary output not available for '" + content +
+                                "' content.");
+  }
+}
+
 }  // namespace smash
