@@ -27,8 +27,10 @@ static double thermal_average_sigmavrel(const ParticleTypePtr A_type,
   const double norm =
       1.0 / (4.0 * ma * ma * mb * mb * T * gsl_sf_bessel_Kn(2, ma / T) *
              gsl_sf_bessel_Kn(2, mb / T));
-  // The keys under General are not used in this example but are required to
-  // create the experiment parameters.
+  /* The keys under General are not used in this example but some of them are
+   * required to create the experiment parameters. For demonstrative purposes we
+   * provide here a pretty complete configuration, which is not strictly
+   * speaking needed to create the ScatterActionsFinderParameters object. */
   Configuration exp_config{R"(
   General:
     Modus: Box
@@ -42,13 +44,26 @@ static double thermal_average_sigmavrel(const ParticleTypePtr A_type,
     Included_2to2: []
     Multi_Particle_Reactions: [Deuteron_3to2, A3_Nuclei_4to2]
     NNbar_Treatment: "no annihilation"
-    )"};
+  Modi:
+    Box:
+      Length: 10.0
+      Temperature: 0.2
+      Start_Time: 0.0
+      Use_Thermal_Multiplicities: True
+      Initial_Condition: "thermal momenta"
+  )",
+                           Configuration::InitializeFromYAMLString};
   Configuration finder_config{R"(
   Collision_Term:
     Only_Warn_For_High_Probability: true
-    )"};
+  )",
+                              Configuration::InitializeFromYAMLString};
   const ScatterActionsFinderParameters finder_params(
       finder_config, smash::create_experiment_parameters(exp_config));
+  // Clear configurations since we did not consume them all (the Configuration
+  // destructor will give an error if called on a non-empty instance).
+  exp_config.clear();
+  finder_config.clear();
   const auto integral = integrate(0.0, 1.0, [&](double x) {
     const double m = (ma + mb) / x;
     const double jac = m / x;

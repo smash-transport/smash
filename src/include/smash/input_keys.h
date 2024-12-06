@@ -6639,6 +6639,7 @@ Modi:
  Modi:
      Box:
          Length: 10.0
+         Start_Time: 0.0
          Temperature: 0.2
          Initial_Condition: "thermal momenta"
          Start_Time: 10.0
@@ -6655,6 +6656,7 @@ Modi:
  Modi:
      Box:
          Length: 10.0
+         Start_Time: 0.0
          Temperature: 0.2
          Use_Thermal_Multiplicities: True
          Initial_Condition: "thermal momenta"
