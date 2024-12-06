@@ -141,13 +141,12 @@ CollisionBranchList CrossSections::generate_collision_list(
      * from all other present channels. */
     const double sig_current = sum_xs_of(process_list);
     const double sig_string = std::max(
-        0., finder_parameters.scale_xs *
-                    high_energy(finder_parameters.transition_high_energy) -
+        0., finder_parameters.scale_xs * high_energy(finder_parameters) -
                 sig_current);
-    append_list(process_list,
-                string_excitation(sig_string, string_process,
-                                  finder_parameters.use_AQM),
-                p_pythia);
+    append_list(
+        process_list,
+        string_excitation(sig_string, string_process, finder_parameters),
+        p_pythia);
     append_list(process_list, rare_two_to_two(),
                 p_pythia * finder_parameters.scale_xs);
   }
@@ -217,8 +216,8 @@ double CrossSections::parametrized_total(
       // NNbar
       total_xs = ppbar_total(sqrt_s_ * sqrt_s_);
     }
-    total_xs *=
-        (1 - 0.4 * pdg_a.frac_strange()) * (1 - 0.4 * pdg_b.frac_strange());
+    total_xs *= finder_parameters.AQM_scaling_factor(pdg_a) *
+                finder_parameters.AQM_scaling_factor(pdg_b);
   } else if ((pdg_a.is_baryon() && pdg_b.is_meson()) ||
              (pdg_a.is_meson() && pdg_b.is_baryon())) {
     const PdgCode& meson = pdg_a.is_meson() ? pdg_a : pdg_b;
@@ -266,8 +265,8 @@ double CrossSections::parametrized_total(
     } else {
       // M*+B* goes to AQM high energy π⁻p
       total_xs = piminusp_high_energy(sqrt_s_ * sqrt_s_) *
-                 (1 - 0.4 * pdg_a.frac_strange()) *
-                 (1 - 0.4 * pdg_b.frac_strange());
+                 finder_parameters.AQM_scaling_factor(pdg_a) *
+                 finder_parameters.AQM_scaling_factor(pdg_b);
     }
   } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
     if (pdg_a.is_pion() && pdg_b.is_pion()) {
@@ -295,8 +294,8 @@ double CrossSections::parametrized_total(
     } else {
       // M*+M* goes to AQM high energy π⁻p
       total_xs = (2. / 3.) * piminusp_high_energy(sqrt_s_ * sqrt_s_) *
-                 (1 - 0.4 * pdg_a.frac_strange()) *
-                 (1 - 0.4 * pdg_b.frac_strange());
+                 finder_parameters.AQM_scaling_factor(pdg_a) *
+                 finder_parameters.AQM_scaling_factor(pdg_b);
     }
   }
   return (total_xs + finder_parameters.additional_el_xs) *
@@ -306,14 +305,13 @@ double CrossSections::parametrized_total(
 CollisionBranchPtr CrossSections::elastic(
     const ScatterActionsFinderParameters& finder_parameters) const {
   double elastic_xs = 0.;
+
   if (finder_parameters.elastic_parameter >= 0.) {
     // use constant elastic cross section from config file
     elastic_xs = finder_parameters.elastic_parameter;
   } else {
     // use parametrization
-    elastic_xs = elastic_parametrization(
-        finder_parameters.use_AQM,
-        finder_parameters.transition_high_energy.pipi_offset);
+    elastic_xs = elastic_parametrization(finder_parameters);
   }
   /* when using a factor to scale the cross section and an additional
    * contribution to the elastic cross section, the contribution is added first
@@ -338,8 +336,11 @@ CollisionBranchList CrossSections::rare_two_to_two() const {
   return process_list;
 }
 
-double CrossSections::elastic_parametrization(const bool use_AQM,
-                                              const double pipi_offset) const {
+double CrossSections::elastic_parametrization(
+    const ScatterActionsFinderParameters& finder_parameters) const {
+  const bool use_AQM = finder_parameters.use_AQM;
+  const double pipi_offset =
+      finder_parameters.transition_high_energy.pipi_offset;
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
   double elastic_xs = 0.0;
@@ -393,8 +394,8 @@ double CrossSections::elastic_parametrization(const bool use_AQM,
         elastic_xs = 2. / 3. * piplusp_elastic_AQM(s, m1, m2);
       }
     }
-    elastic_xs *=
-        (1. - 0.4 * pdg_a.frac_strange()) * (1. - 0.4 * pdg_b.frac_strange());
+    elastic_xs *= finder_parameters.AQM_scaling_factor(pdg_a) *
+                  finder_parameters.AQM_scaling_factor(pdg_b);
   }
   return elastic_xs;
 }
@@ -2457,7 +2458,8 @@ CollisionBranchList CrossSections::dn_xx(
 }
 
 CollisionBranchList CrossSections::string_excitation(
-    double total_string_xs, StringProcess* string_process, bool use_AQM) const {
+    double total_string_xs, StringProcess* string_process,
+    const ScatterActionsFinderParameters& finder_parameters) const {
   if (!string_process) {
     throw std::runtime_error("string_process should be initialized.");
   }
@@ -2474,11 +2476,11 @@ CollisionBranchList CrossSections::string_excitation(
    * Also calculate the multiplicative factor for AQM
    * based on the quark contents. */
   std::array<int, 2> pdgid;
-  double AQM_factor = 1.;
+  double AQM_scaling = 1.;
   for (int i = 0; i < 2; i++) {
     PdgCode pdg = incoming_particles_[i].type().pdgcode();
     pdgid[i] = StringProcess::pdg_map_for_pythia(pdg);
-    AQM_factor *= (1. - 0.4 * pdg.frac_strange());
+    AQM_scaling *= finder_parameters.AQM_scaling_factor(pdg);
   }
 
   /* Determine if the initial state is a baryon-antibaryon pair,
@@ -2511,9 +2513,9 @@ CollisionBranchList CrossSections::string_excitation(
    * matter. */
   std::array<double, 3> xs =
       string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
-  if (use_AQM) {
+  if (finder_parameters.use_AQM) {
     for (int ip = 0; ip < 3; ip++) {
-      xs[ip] *= AQM_factor;
+      xs[ip] *= AQM_scaling;
     }
   }
   double single_diffr_AX = xs[0], single_diffr_XB = xs[1], double_diffr = xs[2];
@@ -2530,8 +2532,8 @@ CollisionBranchList CrossSections::string_excitation(
      * the parametrized cross section for annihilation will be added.
      * See xs_ppbar_annihilation(). */
     double xs_param = xs_ppbar_annihilation(sqrt_s_ * sqrt_s_);
-    if (use_AQM) {
-      xs_param *= AQM_factor;
+    if (finder_parameters.use_AQM) {
+      xs_param *= AQM_scaling;
     }
     sig_annihilation = std::min(total_string_xs, xs_param);
   }
@@ -2553,7 +2555,7 @@ CollisionBranchList CrossSections::string_excitation(
     /* Hard string process is added by hard cross section
      * in conjunction with multipartion interaction picture
      * \iref{Sjostrand:1987su}. */
-    const double hard_xsec = AQM_factor * string_hard_cross_section();
+    const double hard_xsec = AQM_scaling * string_hard_cross_section();
     nondiffractive_soft =
         nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
     nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
@@ -2592,7 +2594,7 @@ CollisionBranchList CrossSections::string_excitation(
 }
 
 double CrossSections::high_energy(
-    const StringTransitionParameters& transition_high_energy) const {
+    const ScatterActionsFinderParameters& finder_parameters) const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
 
@@ -2618,7 +2620,8 @@ double CrossSections::high_energy(
       }
       /* Transition between low and high energy is set to be consistent with
        * that defined in string_probability(). */
-      auto [region_lower, region_upper] = transition_high_energy.sqrts_range_NN;
+      auto [region_lower, region_upper] =
+          finder_parameters.transition_high_energy.sqrts_range_NN;
       double prob_high = probability_transit_high(region_lower, region_upper);
       xs = xs_l * (1. - prob_high) + xs_h * prob_high;
     }
@@ -2649,7 +2652,8 @@ double CrossSections::high_energy(
   }
 
   // AQM scaling for cross-sections
-  xs *= (1. - 0.4 * pdg_a.frac_strange()) * (1. - 0.4 * pdg_b.frac_strange());
+  xs *= finder_parameters.AQM_scaling_factor(pdg_a) *
+        finder_parameters.AQM_scaling_factor(pdg_b);
 
   return xs;
 }

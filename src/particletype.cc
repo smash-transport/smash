@@ -164,7 +164,8 @@ static std::string antiname(const std::string &name, PdgCode code) {
   }
 
   // baryons & strange mesons: insert a bar
-  if (code.baryon_number() != 0 || code.strangeness() != 0) {
+  if (code.baryon_number() != 0 || code.strangeness() != 0 ||
+      code.charmness() != 0 || code.is_neutrino()) {
     constexpr char bar[] = "\u0305";
     basename.insert(utf8::sequence_length(basename.begin()), bar);
   }
