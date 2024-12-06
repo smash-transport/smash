@@ -800,8 +800,11 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <td>Prints a column of 0 (for compatibility with OSCAR 1999)
  * </tr>
  * </table>
-
-
+ *
+ * \attention Not all combinations of quantities are allowed and, in particular:
+ *  - `id` and `ID` cannot be given together;
+ *  - the same quantity cannot be repeated.
+ *
  * **Example**
  *
  * If one is interested, for example, in the rate of production/annihilation of
