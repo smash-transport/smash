@@ -3,6 +3,7 @@
 #include "gsl/gsl_sf_bessel.h"
 
 #include "smash/decaymodes.h"
+#include "smash/experiment.h"
 #include "smash/forwarddeclarations.h"
 #include "smash/hadgas_eos.h"
 #include "smash/integrate.h"
@@ -23,39 +24,31 @@ static double thermal_average_sigmavrel(const ParticleTypePtr A_type,
   const double ma = A.pole_mass(), mb = B.pole_mass();
   double time = 0.0, string_formation_time = 0.0;
   bool isotropic = true;
-  double elastic_parameter = -1.0;
-  bool two_to_one = true;
-  double scale_xs = 1.0;
-  double addition_elastic_xs = 0.0;
-  // No geometric criterion reactions
-  ReactionsBitSet incl_set = ReactionsBitSet().reset();
-  // For stochastic allow only reactions involving nuclei
-  MultiParticleReactionsBitSet incl_multi_set =
-      MultiParticleReactionsBitSet().reset();
-  incl_multi_set.set(IncludedMultiParticleReactions::Deuteron_3to2);
-  incl_multi_set.set(IncludedMultiParticleReactions::A3_Nuclei_4to2);
-  double low_snn_cut = 0.0;
-  bool strings_switch = false, use_AQM = true, strings_with_probability = true;
   const double norm =
       1.0 / (4.0 * ma * ma * mb * mb * T * gsl_sf_bessel_Kn(2, ma / T) *
              gsl_sf_bessel_Kn(2, mb / T));
-  ScatterActionsFinderParameters finder_params{elastic_parameter,
-                                               low_snn_cut,
-                                               scale_xs,
-                                               addition_elastic_xs,
-                                               200.,
-                                               CollisionCriterion::Stochastic,
-                                               NNbarTreatment::NoAnnihilation,
-                                               incl_set,
-                                               incl_multi_set,
-                                               1,
-                                               two_to_one,
-                                               false,
-                                               strings_switch,
-                                               use_AQM,
-                                               strings_with_probability,
-                                               true};
-
+  // The keys under General are not used in this example but are required to
+  // create the experiment parameters.
+  Configuration exp_config{R"(
+  General:
+    Modus: Box
+    End_Time: 100
+    Nevents: 1
+    Randomseed: -1
+  Collision_Term:
+    Collision_Criterion: Stochastic
+    Strings: false
+    Elastic_NN_Cutoff_Sqrts: 0
+    Included_2to2: []
+    Multi_Particle_Reactions: [Deuteron_3to2, A3_Nuclei_4to2]
+    NNbar_Treatment: "no annihilation"
+    )"};
+  Configuration finder_config{R"(
+  Collision_Term:
+    Only_Warn_For_High_Probability: true
+    )"};
+  const ScatterActionsFinderParameters finder_params(
+      finder_config, smash::create_experiment_parameters(exp_config));
   const auto integral = integrate(0.0, 1.0, [&](double x) {
     const double m = (ma + mb) / x;
     const double jac = m / x;

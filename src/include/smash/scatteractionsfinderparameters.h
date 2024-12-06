@@ -62,18 +62,17 @@ struct StringTransitionParameters {
  * ScatterActionsFinder has one member of this class, which just collects
  * general parameters, for easier function argument passing. In practice it is
  * almost a POD structure containing constants defined externally, but allows
- * for methods that depend on simple inputs, such as AQM_factor.
+ * for methods that depend on simple inputs, such as AQM_scaling_factor.
  */
 class ScatterActionsFinderParameters {
  public:
   /**
    * Class constructor.
+   * \param[in] config The relevant section from the user configuration
+   * \param[in] parameters The Experiment parameters
    *
-   * \param[in] config contains the relevant keys
-   * \param[in] parameters contains the relevant parameters that were already
-   * taken by ExperimentParameters
-   *
-   * \throw std::invalid_argument when parameters taken are physically invalid
+   * \throw std::invalid_argument If configuration parameters are physically
+   * invalid
    */
   ScatterActionsFinderParameters(Configuration& config,
                                  const ExperimentParameters& parameters);
@@ -144,7 +143,7 @@ class ScatterActionsFinderParameters {
    *
    * \param[in] pdg of the particle
    */
-  double AQM_factor(const PdgCode& pdg) const {
+  double AQM_scaling_factor(const PdgCode& pdg) const {
     return (1 - AQM_strange_suppression * pdg.frac_strange()) *
            (1 - AQM_charm_suppression * pdg.frac_charm()) *
            (1 - AQM_bottom_suppression * pdg.frac_bottom());

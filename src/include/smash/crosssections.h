@@ -305,7 +305,7 @@ class CrossSections {
    * This is rescaled by AQM factors.
    *
    * \param[in] finder_parameters parameters for collision finding and cross
-   * sections.
+   *                              sections.
    */
   double high_energy(
       const ScatterActionsFinderParameters& finder_parameters) const;

@@ -208,7 +208,7 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
   if (AQM_charm_suppression < 0 || AQM_bottom_suppression < 0 ||
       AQM_charm_suppression > 1 || AQM_bottom_suppression > 1) {
     throw std::invalid_argument(
-        "Suppression factor for AQM should be a number between 0 and 1.");
+        "Suppression factors for AQM should be between 0 and 1.");
   }
 }
 

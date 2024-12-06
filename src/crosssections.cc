@@ -216,8 +216,8 @@ double CrossSections::parametrized_total(
       // NNbar
       total_xs = ppbar_total(sqrt_s_ * sqrt_s_);
     }
-    total_xs *= finder_parameters.AQM_factor(pdg_a) *
-                finder_parameters.AQM_factor(pdg_b);
+    total_xs *= finder_parameters.AQM_scaling_factor(pdg_a) *
+                finder_parameters.AQM_scaling_factor(pdg_b);
   } else if ((pdg_a.is_baryon() && pdg_b.is_meson()) ||
              (pdg_a.is_meson() && pdg_b.is_baryon())) {
     const PdgCode& meson = pdg_a.is_meson() ? pdg_a : pdg_b;
@@ -265,8 +265,8 @@ double CrossSections::parametrized_total(
     } else {
       // M*+B* goes to AQM high energy π⁻p
       total_xs = piminusp_high_energy(sqrt_s_ * sqrt_s_) *
-                 finder_parameters.AQM_factor(pdg_a) *
-                 finder_parameters.AQM_factor(pdg_b);
+                 finder_parameters.AQM_scaling_factor(pdg_a) *
+                 finder_parameters.AQM_scaling_factor(pdg_b);
     }
   } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
     if (pdg_a.is_pion() && pdg_b.is_pion()) {
@@ -294,8 +294,8 @@ double CrossSections::parametrized_total(
     } else {
       // M*+M* goes to AQM high energy π⁻p
       total_xs = (2. / 3.) * piminusp_high_energy(sqrt_s_ * sqrt_s_) *
-                 finder_parameters.AQM_factor(pdg_a) *
-                 finder_parameters.AQM_factor(pdg_b);
+                 finder_parameters.AQM_scaling_factor(pdg_a) *
+                 finder_parameters.AQM_scaling_factor(pdg_b);
     }
   }
   return (total_xs + finder_parameters.additional_el_xs) *
@@ -394,8 +394,8 @@ double CrossSections::elastic_parametrization(
         elastic_xs = 2. / 3. * piplusp_elastic_AQM(s, m1, m2);
       }
     }
-    elastic_xs *= finder_parameters.AQM_factor(pdg_a) *
-                  finder_parameters.AQM_factor(pdg_b);
+    elastic_xs *= finder_parameters.AQM_scaling_factor(pdg_a) *
+                  finder_parameters.AQM_scaling_factor(pdg_b);
   }
   return elastic_xs;
 }
@@ -2476,11 +2476,11 @@ CollisionBranchList CrossSections::string_excitation(
    * Also calculate the multiplicative factor for AQM
    * based on the quark contents. */
   std::array<int, 2> pdgid;
-  double AQM_scaling_factor = 1.;
+  double AQM_scaling = 1.;
   for (int i = 0; i < 2; i++) {
     PdgCode pdg = incoming_particles_[i].type().pdgcode();
     pdgid[i] = StringProcess::pdg_map_for_pythia(pdg);
-    AQM_scaling_factor *= finder_parameters.AQM_factor(pdg);
+    AQM_scaling *= finder_parameters.AQM_scaling_factor(pdg);
   }
 
   /* Determine if the initial state is a baryon-antibaryon pair,
@@ -2515,7 +2515,7 @@ CollisionBranchList CrossSections::string_excitation(
       string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
   if (finder_parameters.use_AQM) {
     for (int ip = 0; ip < 3; ip++) {
-      xs[ip] *= AQM_scaling_factor;
+      xs[ip] *= AQM_scaling;
     }
   }
   double single_diffr_AX = xs[0], single_diffr_XB = xs[1], double_diffr = xs[2];
@@ -2533,7 +2533,7 @@ CollisionBranchList CrossSections::string_excitation(
      * See xs_ppbar_annihilation(). */
     double xs_param = xs_ppbar_annihilation(sqrt_s_ * sqrt_s_);
     if (finder_parameters.use_AQM) {
-      xs_param *= AQM_scaling_factor;
+      xs_param *= AQM_scaling;
     }
     sig_annihilation = std::min(total_string_xs, xs_param);
   }
@@ -2555,7 +2555,7 @@ CollisionBranchList CrossSections::string_excitation(
     /* Hard string process is added by hard cross section
      * in conjunction with multipartion interaction picture
      * \iref{Sjostrand:1987su}. */
-    const double hard_xsec = AQM_scaling_factor * string_hard_cross_section();
+    const double hard_xsec = AQM_scaling * string_hard_cross_section();
     nondiffractive_soft =
         nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
     nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
@@ -2652,8 +2652,8 @@ double CrossSections::high_energy(
   }
 
   // AQM scaling for cross-sections
-  xs *=
-      finder_parameters.AQM_factor(pdg_a) * finder_parameters.AQM_factor(pdg_b);
+  xs *= finder_parameters.AQM_scaling_factor(pdg_a) *
+        finder_parameters.AQM_scaling_factor(pdg_b);
 
   return xs;
 }

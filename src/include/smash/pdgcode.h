@@ -528,7 +528,7 @@ class PdgCode {
    */
   inline double frac_strange() const {
     /* The quarkonium state has 0 net strangeness
-     *  but there are actually 2 strange quarks out of 2 total */
+     * but there are actually 2 strange quarks out of 2 total */
     if (is_hadron() && digits_.n_q3_ == 3 && digits_.n_q2_ == 3) {
       return 1.;
     } else {
@@ -554,7 +554,7 @@ class PdgCode {
    */
   inline double frac_charm() const {
     /* The charmonium state has 0 net charmness
-     *  but there are actually 2 charm quarks out of 2 total */
+     * but there are actually 2 charm quarks out of 2 total */
     if (is_hadron() && digits_.n_q3_ == 4 && digits_.n_q2_ == 4) {
       return 1.;
     } else {
@@ -580,7 +580,7 @@ class PdgCode {
    */
   inline double frac_bottom() const {
     /* The bottomonium state has 0 net bottomness
-     *  but there are actually 2 bottom quarks out of 2 total */
+     * but there are actually 2 bottom quarks out of 2 total */
     if (is_hadron() && digits_.n_q3_ == 3 && digits_.n_q2_ == 3) {
       return 1.;
     } else {
