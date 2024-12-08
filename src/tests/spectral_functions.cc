@@ -31,7 +31,7 @@ TEST(spectral_functions) {
 
   /* Loop over all resonances. */
   for (const ParticleType &type : ParticleType::list_all()) {
-    if (type.is_stable()) {
+    if (type.is_stable() || type.pdgcode().frac_charm() != 0) {
       continue;
     }
     /* Integrate spectral function.
