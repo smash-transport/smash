@@ -1067,7 +1067,7 @@ Experiment<Modus>::Experiment(Configuration &config,
           "hang.");
     }
     action_finders_.emplace_back(std::make_unique<DecayActionsFinder>(
-        parameters_.res_lifetime_factor, parameters_.do_weak_decays));
+        parameters_.res_lifetime_factor, parameters_.do_non_strong_decays));
   }
   bool no_coll = config.take(InputKeys::collTerm_noCollisions);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
