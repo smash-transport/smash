@@ -24,6 +24,10 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Implemented dynamic initial conditions for hydrodynamics, available under `Modi: Collider: Initial_Conditions: Type: "Dynamic"`
 * Infrastructure for functional tests, which requires at least Python3.3, and first functional test
 
+### Input
+* Moved the `Orientation` section from the `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from `pi/2` to `0`
+* The `Include_Weak_And_EM_Decays_At_The_End` was renamed to `Ignore_Minimum_Decay_Width_For_Decays_At_The_End`
+
 ### Output
 * Implemented a new `ASCII` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities` (the existing `Oscar1999` and `Oscar2013` formats are simply a convenient alias for specifying `ASCII` and a predefined list of `Quantities`)
 * ⚠️ The ensemble number is now included in the output next to the event number - **this is a potentially breaking change for analysis software, especially if using the binary output**; refer to the documentation of each output type for further details
@@ -33,7 +37,6 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Changed
 * Upgraded to Pythia 8.312
-* Moved the `Orientation` section from the `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from `pi/2` to `0`
 * The interface of the `Configuration` class has been totally changed making it use `Key` objects instead of low-level strings
 * The `List` modus now validates particles from all events at the very beginning and aborts if more than 2 particles are at the same identical position in any event
 
@@ -48,6 +51,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Removed
 * The deprecated `Version` key in the configuration file is not accepted anymore
+* The `Include_Weak_And_EM_Decays_At_The_End` key has been renamed and hence is not accepted anymore
 
 
 ## SMASH-3.1

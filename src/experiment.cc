@@ -319,7 +319,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
           config.take(InputKeys::collTerm_fixedMinCellLength),
           scale_xs,
           only_participants,
-          config.take(InputKeys::collTerm_includeDecaysAtTheEnd),
+          config.take(InputKeys::collTerm_ignoreDecaysWidthAtTheEnd),
           config.take(InputKeys::collTerm_decayInitial),
           std::nullopt};
 }
