@@ -77,7 +77,7 @@ class DecayActionsFinder : public ActionFinderInterface {
   /// Multiplicative factor to be applied to resonance lifetimes
   const double res_lifetime_factor_ = 1.;
 
-  /// Do all non-strong decays, so including electro-magnetic decays as well
+  /// Do all non-strong decays (including weak and electro-magnetic ones)
   const bool do_final_non_strong_decays_;
 
   /**

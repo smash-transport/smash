@@ -218,13 +218,15 @@ namespace smash {
  * It is possible to add comments to `decaymodes.txt` using the `#` character.
  * Everything after `#` until the end of the line is ignored.
  *
- * Note that SMASH has an internal width cut-off (currently 10 keV), below which
+ * \note
+ * Note that SMASH has an internal width cutoff (currently 10 keV), below which
  * particles cannot decay, even if decays are specified in `decaymodes.txt`.
  * This only changes when `Ignore_Minimum_Decay_Width_For_Decays_At_The_End` is
  * enabled, then all decays are considered in the final decays, no matter their
  * decay width.
  *
- * Note further, that the decaymodes file will need to be modified when running
+ * \note
+ * Note further, that the decay modes file will need to be modified when running
  * a box simulation in which detailed balance is expected to be conserved. See
  * \ref doxypage_input_conf_modi_box for further information.
  */

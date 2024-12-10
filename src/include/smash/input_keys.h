@@ -2201,7 +2201,7 @@ struct InputKeys {
    *
    * \list_removed_key{key_CT_include_decays_end_,
    * Include_Weak_And_EM_Decays_At_The_End,3.2}.
-   * This key was renamed as <tt>\ref key_CT_ignore_decays_end_
+   * This key was renamed as <tt>\ref key_CT_ignore_decay_width_end_
    * "Ignore_Minimum_Decay_Width_For_Decays_At_The_End"</tt>.
    */
   /**
@@ -2214,25 +2214,26 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_ignore_decays_end_,
+   * \optional_key{key_CT_ignore_decay_width_end_,
    * Ignore_Minimum_Decay_Width_For_Decays_At_The_End,bool,false}
    *
    * If enabled, all non-strong decays are performed at the end of the
    * simulation, including weak and electro-magnetic ones. In particular, all
    * decays in the *decaymodes.txt* file are considered at the end, even for
-   * hadrons usually considered stable (i.e. with an on-shell width larger than
-   * the width_cutoff), for example \f$\Sigma\f$, \f$\pi\f$ or \f$\eta\f$. Note
-   * that for isospin violating decay modes all possible isospin combination
-   * have to be manually specified in the *decaymodes.txt* file.
+   * hadrons usually considered stable (i.e. with an on-shell width smaller than
+   * the width cutoff, see note in \ref doxypage_input_decaymodes), for example
+   * \f$\Sigma\f$, \f$\pi\f$ or \f$\eta\f$. Note that for isospin violating
+   * decay modes all possible isospin combination have to be manually specified
+   * in the *decaymodes.txt* file.
    *
    * \warning If `true`, this option removes the particles that decay from the
    * evolution, so the Dileptons output will not contain final state decays.
    * Therefore we do not recommend its usage for dilepton studies.
    */
   /**
-   * \see_key{key_CT_ignore_decays_end_}
+   * \see_key{key_CT_ignore_decay_width_end_}
    */
-  inline static const Key<bool> collTerm_ignoreDecaysWidthAtTheEnd{
+  inline static const Key<bool> collTerm_ignoreDecayWidthAtTheEnd{
       InputSections::collisionTerm +
           "Ignore_Minimum_Decay_Width_For_Decays_At_The_End",
       false,
@@ -5773,7 +5774,7 @@ struct InputKeys {
       std::cref(collTerm_pseudoresonance),
       std::cref(collTerm_fixedMinCellLength),
       std::cref(collTerm_forceDecaysAtEnd),
-      std::cref(collTerm_ignoreDecaysWidthAtTheEnd),
+      std::cref(collTerm_ignoreDecayWidthAtTheEnd),
       std::cref(collTerm_includeDecaysAtTheEnd),
       std::cref(collTerm_decayInitial),
       std::cref(collTerm_includedTwoToTwo),
