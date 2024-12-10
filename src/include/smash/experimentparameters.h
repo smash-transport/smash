@@ -145,8 +145,8 @@ struct ExperimentParameters {
    */
   bool only_participants;
 
-  /// Do weak decays at the end
-  bool do_weak_decays;
+  /// Do non-strong decays at the end
+  bool do_non_strong_decays;
 
   /**
    * Whether to decay initial state particles.

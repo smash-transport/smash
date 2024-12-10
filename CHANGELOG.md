@@ -24,23 +24,27 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Implemented dynamic initial conditions for hydrodynamics, available under `Modi: Collider: Initial_Conditions: Type: "Dynamic"`
 * Infrastructure for functional tests, which requires at least Python3.3, and first functional test
 
+### Input
+* Moved the `Orientation` section from the `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from `pi/2` to `0`
+* The `Include_Weak_And_EM_Decays_At_The_End` was renamed to `Ignore_Minimum_Decay_Width_For_Decays_At_The_End`
+
 ### Output
-* Implemented a new `ASCII` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities` (the existing `Oscar1999` and `Oscar2013` formats are simply a convenient alias for specifying `ASCII` and a predefined list of `Quantities`)
+* Implemented a new `ASCII` value for the `Format` key of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities` (the existing `Oscar1999` and `Oscar2013` formats are simply a convenient alias for specifying `ASCII` and a predefined list of `Quantities`)
 * ⚠️ The ensemble number is now included in the output next to the event number - **this is a potentially breaking change for analysis software, especially if using the binary output**; refer to the documentation of each output type for further details
+* ⚠️ The former `Binary` format has been renamed to `Oscar2013_bin` and the `Binary` format now exists as a user-customizable output w.r.t. the output quantities (it works analogously to the `ASCII` format)
 * Bump binary output format version from 9 to 10
 * Some binary output files have been renamed to better track their content
 * Initial conditions, HepMC and Rivet outputs disabled when SMASH is run with multiple parallel ensembles
 
 ### Changed
 * Upgraded to Pythia 8.312
-* Moved the `Orientation` section from the `Deformed` to the `Projectile`/`Target` section and changed the default value for `Theta` from `pi/2` to `0`
 * The interface of the `Configuration` class has been totally changed making it use `Key` objects instead of low-level strings
 * The `List` modus now validates particles from all events at the very beginning and aborts if more than 2 particles are at the same identical position in any event
 
 ### Fixed
 * Fix a small error and added a more precise documentation for the orientation section for deformed nuclei
 * Make few keys really mandatory in code as it was already stated in the documentation
-* Oscar2013 Format for Initial Conditions no longer show the number of particles
+* Oscar2013 format for Initial Conditions no longer show the number of particles
 * Fix the number of each event in output files when using multiple parallel ensembles
 
 ### Deprecated
@@ -48,6 +52,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Removed
 * The deprecated `Version` key in the configuration file is not accepted anymore
+* The `Include_Weak_And_EM_Decays_At_The_End` key has been renamed and hence is not accepted anymore
 
 
 ## SMASH-3.1
@@ -169,7 +174,7 @@ Date: 2022-05-10
 
 ### Added
 * Light nuclei (A=3) production via 4-to-2 reactions
-* Possibility to perform weak decays at the end of the calculation
+* Possibility to perform non-strong decays at the end of the calculation
 * Possibility to impose transverse momentum or rapidity cut when extracting initial conditions for hydrodynamics
 * Option to add a velocity field of the form `u_r = u_0 * r / R` in radial direction to the sphere mode
 * Interface functions to initialize SMASH conveniently (see new `library.h`)

@@ -30,11 +30,12 @@ class DecayActionsFinder : public ActionFinderInterface {
    *
    * \param[in] res_lifetime_factor The multiplicative factor to be applied to
    *                                resonance lifetimes; default is 1
-   * \param[in] do_weak_decays whether to perform weak decays at the end
+   * \param[in] do_non_strong_decays whether to do non-strong decays at the end
    */
-  explicit DecayActionsFinder(double res_lifetime_factor, bool do_weak_decays)
+  explicit DecayActionsFinder(double res_lifetime_factor,
+                              bool do_non_strong_decays)
       : res_lifetime_factor_(res_lifetime_factor),
-        do_final_weak_decays_(do_weak_decays) {}
+        do_final_non_strong_decays_(do_non_strong_decays) {}
 
   /**
    * Check the whole particle list for decays.
@@ -76,11 +77,8 @@ class DecayActionsFinder : public ActionFinderInterface {
   /// Multiplicative factor to be applied to resonance lifetimes
   const double res_lifetime_factor_ = 1.;
 
-  /**
-   * Do weak decays at the end? Weak here means all non-strong decays,
-   * so electro-magnetic decays are done as well.
-   */
-  const bool do_final_weak_decays_;
+  /// Do all non-strong decays (including weak and electro-magnetic ones)
+  const bool do_final_non_strong_decays_;
 
   /**
    * Whether to initial state particles can decay. Useful for analyzing

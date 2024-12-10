@@ -78,7 +78,7 @@ ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
   ActionList actions;
 
   for (const auto &p : search_list) {
-    if (!do_final_weak_decays_ && p.type().is_stable()) {
+    if (!do_final_non_strong_decays_ && p.type().is_stable()) {
       continue;  // particle is stable with respect to strong interaction
     }
 

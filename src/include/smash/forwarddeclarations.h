@@ -43,12 +43,12 @@ class Particles;
 class ParticleType;
 class ParticleTypePtr;
 class PdgCode;
+class ScatterActionsFinderParameters;
 class Tabulation;
 class ThreeVector;
 
 struct ExperimentParameters;
 struct InitialConditionParameters;
-struct ScatterActionsFinderParameters;
 struct StringTransitionParameters;
 struct Nucleoncorr;
 
