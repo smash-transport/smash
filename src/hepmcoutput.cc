@@ -93,8 +93,8 @@ namespace smash {
  * access to the parent particles of the final state particles, then the \key Collisions
  * output should be used.
  * - By default, SMASH exclusively handles strong decays at the end of the evolution.
- * If one intends to include weak and electromagnetic decays as well,
- * the \key Include_Weak_And_EM_Decays_At_The_End option in the
+ * If one intends to include all non-strong decays as well,
+ * the \key Ignore_Minimum_Decay_Width_For_Decays_At_The_End option in the
  * \ref doxypage_input_conf_collision_term section of the configuration should be enabled.
  *
  * \section output_hepmc_asciiv3_ ASCII HepMC Format

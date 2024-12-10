@@ -457,7 +457,7 @@ static ExperimentParameters default_parameters_vdf(
       2.5,          // fixed min. cell length
       1.0,          // cross section scaling
       false,        // in thermodynamics outputs spectators are included
-      false,        // do weak decays
+      false,        // do non-strong decays
       true,         // can decay initial particles
       std::nullopt  // use monash tune, not known
   };
