@@ -29,8 +29,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * The `Include_Weak_And_EM_Decays_At_The_End` was renamed to `Ignore_Minimum_Decay_Width_For_Decays_At_The_End`
 
 ### Output
-* Implemented a new `ASCII` key for the `Format` subsection of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities` (the existing `Oscar1999` and `Oscar2013` formats are simply a convenient alias for specifying `ASCII` and a predefined list of `Quantities`)
+* Implemented a new `ASCII` value for the `Format` key of `Output: Particles` and `Output: Collisions`  which creates a *.dat* file containing columns based on a list of user-input `Quantities` (the existing `Oscar1999` and `Oscar2013` formats are simply a convenient alias for specifying `ASCII` and a predefined list of `Quantities`)
 * ⚠️ The ensemble number is now included in the output next to the event number - **this is a potentially breaking change for analysis software, especially if using the binary output**; refer to the documentation of each output type for further details
+* ⚠️ The former `Binary` format has been renamed to `Oscar2013_bin` and the `Binary` format now exists as a user-customizable output w.r.t. the output quantities (it works analogously to the `ASCII` format)
 * Bump binary output format version from 9 to 10
 * Some binary output files have been renamed to better track their content
 * Initial conditions, HepMC and Rivet outputs disabled when SMASH is run with multiple parallel ensembles
@@ -43,7 +44,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Fixed
 * Fix a small error and added a more precise documentation for the orientation section for deformed nuclei
 * Make few keys really mandatory in code as it was already stated in the documentation
-* Oscar2013 Format for Initial Conditions no longer show the number of particles
+* Oscar2013 format for Initial Conditions no longer show the number of particles
 * Fix the number of each event in output files when using multiple parallel ensembles
 
 ### Deprecated
