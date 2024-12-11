@@ -874,7 +874,15 @@ N(2250)
 # d'
 # 1.      1   N N
 
-################## open charm mesons ######################
+###############################################################
+### Most of the values for charm hadrons were extracted with ##
+### the PDG API. When unavailable or inconsistent with basic ##
+### SMASH assumptions, they were adapted as feasible. For #####
+### decay modes, the most important feature is that charmed ###
+### resonances decay back into the base states (D,Ds,Λc,J/Ψ) ##
+### while producing roughly the appropriate number of pions ###
+### and kaons in the final state. #############################
+###################### open charm mesons ######################
 
 D
 0.45 0 f₀(980) K

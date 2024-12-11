@@ -172,10 +172,14 @@ ve 0.000001 0 + 12
 # you will get double counting
 #d' 1.8856 0.100 -  1000010021
 
-################## open charm mesons ######################
+###############################################################
+### Most of the values for charm hadrons were extracted with ##
+### the PDG API. When unavailable or inconsistent with basic ##
+### SMASH assumptions, they were adapted as feasible. #########
+###################### open charm mesons ######################
 
 D               1.868   1.102e-12 -    411   421
-D*(2007)        2.007   8.339e-05 -    413   423    #PDG width < 2.1 MeV
+D*(2007)        2.007   8.339e-05 -    413   423    #merged with D*(2010)
 D₀*(2300)       2.343   2.293e-01 +  10411   10421
 D₁(2420)        2.422   3.134e-02 +  10413   10423
 D₁(2430)        2.412   3.141e-01 +  20413   20423  #pythia width 0.384
