@@ -31,7 +31,9 @@ TEST(spectral_functions) {
 
   /* Loop over all resonances. */
   for (const ParticleType &type : ParticleType::list_all()) {
-    if (type.is_stable()) {
+    // Since charm hadrons may not be well described by a Breit-Wigner
+    // distribution, this test ignores them
+    if (type.is_stable() || type.pdgcode().frac_charm() != 0) {
       continue;
     }
     /* Integrate spectral function.
