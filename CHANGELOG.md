@@ -19,7 +19,12 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+## SMASH-3.2rc
+Date:
+
 ### Added
+* Strangeness production by resonances tuned to elementary production cross sections using a genetic algorithm
+* Added charmed particles with corresponding interactions (AQM for elastic scatterings and resonance production and decay for inelastic interactions)
 * Added alpha-clustered oxygen nuclei that can be configured in a new `Alpha_Clustered` section in the `Projectile`/`Target` section
 * Implemented dynamic initial conditions for hydrodynamics, available under `Modi: Collider: Initial_Conditions: Type: "Dynamic"`
 * Infrastructure for functional tests, which requires at least Python3.3, and first functional test
@@ -34,6 +39,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * ⚠️ The former `Binary` format has been renamed to `Oscar2013_bin` and the `Binary` format now exists as a user-customizable output w.r.t. the output quantities (it works analogously to the `ASCII` format)
 * Bump binary output format version from 9 to 10
 * Some binary output files have been renamed to better track their content
+* Removed the information on the number of particles from the initial conditions output
 * Initial conditions, HepMC and Rivet outputs disabled when SMASH is run with multiple parallel ensembles
 
 ### Changed
@@ -53,6 +59,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Removed
 * The deprecated `Version` key in the configuration file is not accepted anymore
 * The `Include_Weak_And_EM_Decays_At_The_End` key has been renamed and hence is not accepted anymore
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-3.1...SMASH-3.2)
 
 
 ## SMASH-3.1
