@@ -2,7 +2,7 @@
 
 #===================================================
 #
-#    Copyright (c) 2018-2019,2021-2023
+#    Copyright (c) 2018-2019,2021-2024
 #      SMASH Team
 #
 #    GNU General Public License (GPLv3 or later)
