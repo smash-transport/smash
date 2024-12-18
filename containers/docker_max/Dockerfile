@@ -16,16 +16,8 @@ SHELL ["/bin/bash", "-c"]
 ARG TARGET_ARCHITECTURE="x86-64"
 
 # Declare all together the versions of the going to be installed codebases
-#
-# ATTENTION: Versions 6.28.XX of ROOT are affected by some memory leaks in ROOT's internal
-#            C++ interpreter (Cling). On one hand this will make SMASH tests fail, as they
-#            are built with the address sanitizer switched on. On the other hand, such a leak
-#            leads to a small but constant increase of memory used by a SMASH run and we do
-#            not want to offer such a behaviour in our container. Therefore we stick to the
-#            last ROOT version without this problem. It has to be checked if future versions
-#            solve the problem before using them.
 
-ARG ROOT_VERSION="6.26.10"
+ARG ROOT_VERSION="6.34.00"
 ARG HEPMC_VERSION="3.2.6"
 ARG CPPCHECK_VERSION="2.8"
 ARG CPPLINT_VERSION="1.6.0"
@@ -36,15 +28,30 @@ ARG FJCONTRIB_VERSION="1.049"
 ARG JULIA_VERSION="1.9.3"
 ARG YQ_VERSION="4.40.3"
 
+# Set a label to keep track of all versions (these can be viewed with "docker inspect")
+# Separate them with a '|' to potentially make them easily parsable
+
+LABEL installed.software.versions="\
+ROOT ${ROOT_VERSION}\
+ | HepMC ${HEPMC_VERSION}\
+ | Rivet ${RIVET_VERSION}\
+ | Yoda ${YODA_VERSION}\
+ | Fastjet ${FASTJET_VERSION}\
+ | Fjcontrib ${FJCONTRIB_VERSION}\
+ | Cppcheck ${CPPCHECK_VERSION}\
+ | Cpplint ${CPPLINT_VERSION}\
+ | Julia ${JULIA_VERSION}\
+ | yq ${YQ_VERSION}"
+
 # Add some info about authors and contents using the rules o the OCI Image Format Specification
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
 
-LABEL org.opencontainers.image.title "SMASH-max"
-LABEL org.opencontainers.image.authors "SMASH team"
-LABEL org.opencontainers.image.url "https://smash-transport.github.io"
-LABEL org.opencontainers.image.source "https://github.com/smash-transport/smash"
-LABEL org.opencontainers.image.description \
-      "SMASH with ROOT ${ROOT_VERSION}, HepMC3 ${HEPMC_VERSION}, Rivet ${RIVET_VERSION} and several other tools"
+LABEL org.opencontainers.image.title="SMASH-max"
+LABEL org.opencontainers.image.authors="SMASH team"
+LABEL org.opencontainers.image.url="https://smash-transport.github.io"
+LABEL org.opencontainers.image.source="https://github.com/smash-transport/smash"
+LABEL org.opencontainers.image.description="\
+SMASH with ROOT ${ROOT_VERSION}, HepMC3 ${HEPMC_VERSION}, Rivet ${RIVET_VERSION} and several other tools"
 
 # Update the distribution installing several additional packages non interactively
 
@@ -179,7 +186,6 @@ RUN <<EOF
     python3-yaml  \
     python3-zipp  \
     qiv  \
-    screen  \
     sed  \
     sensible-utils  \
     sqlite3  \
@@ -212,6 +218,21 @@ RUN <<EOF
     zenity  \
     zip
 EOF
+
+# Set PATH-like environment variables to comply with Docker suggestion to always define these
+# before using them (otherwise an UndefinedVar warning is given by Docker at build time). Note
+# that the base image already define LD_LIBRARY_PATH and we clearly do not want to reset this one.
+
+ENV PYTHONPATH=''
+ENV MANPATH=''
+ENV CMAKE_PREFIX_PATH=''
+ENV JUPYTER_PATH=''
+ENV JUPYTER_CONFIG_DIR=''
+ENV TEXMFHOME=''
+ENV HOMETEXMF=''
+ENV TEXMFCNF=''
+ENV TEXINPUTS=''
+ENV LATEXINPUTS=''
 
 # Set cpu architecture flags for compilation
 # ARG sets these flags as temporary environment variables that are used by cmake and by other tools
@@ -463,41 +484,4 @@ EOF
 ENV LC_ALL=en_US.UTF-8
 ENV LANG en=US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
-
-# Shell prompt when using the container image under Docker
-
-ENV PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+(${debian_chroot})}\u@\h:\w\$ "
-
-# Shell prompt when using the container image under Singularity (CUSTOM_ENV file automatically sourced by Singularity).
-
-RUN <<'EOF'
-  set -eux
-  mkdir -p /.singularity.d/env/
-  CUSTOM_ENV=/.singularity.d/env/99-zz_custom_env.sh
-  printf '%s\n'\
-         '#!/bin/bash'\
-         'PS1="S - \[\e]0;\u@\h: \w\a\]${debian_chroot:+(${debian_chroot})}\u@\h:\w\$ "' > "${CUSTOM_ENV}"
-  chmod 755 "${CUSTOM_ENV}"
-EOF
-
-# Build wrapper script around screen executable to make it usable from within the container
-# (it needs write access to SCREENDIR folder). Note that quoting the sentinel word in the
-# here-doc construct prevents to expand any ${...} inside (which is what we want here).
-
-RUN <<EOF
-  set -eux
-  mv /usr/bin/screen /usr/bin/screen.exe
-  cat > /usr/bin/screen <<'INTERNAL_EOF'
-    printf '%s\n'\
-          'Executing screen wrapper script around original program /usr/bin/screen.exe'\
-          'We try to set the environment variable SCREENDIR to ${HOME}/.screen_dir,'\
-          'if this directory is not accessible, please, manually set SCREENDIR to another directory'\
-          'before launching /usr/bin/screen.exe'
-    sleep 3
-    export SCREENDIR="${HOME}/.screen_dir"
-    mkdir -p "${SCREENDIR}"
-    chmod 700 "${SCREENDIR}"
-    /usr/bin/screen.exe "$@"
-INTERNAL_EOF
-  chmod 755 /usr/bin/screen
-EOF
+ENV PROMPT_CONTAINER_NAME='SMASH-max'
