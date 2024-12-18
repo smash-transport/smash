@@ -120,7 +120,8 @@ bool IsoParticleType::has_anti_multiplet() const {
 }
 
 const ParticleTypePtr IsoParticleType::find_state(const std::string &n) {
-  const IsoParticleType &multiplet = IsoParticleType::find(multiplet_name(n));
+  const auto name = multiplet_name(n);
+  const IsoParticleType &multiplet = IsoParticleType::find(name);
   auto found = std::find_if(multiplet.states_.begin(), multiplet.states_.end(),
                             [&n](ParticleTypePtr p) { return p->name() == n; });
   if (found == multiplet.states_.end()) {
