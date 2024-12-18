@@ -3,7 +3,17 @@
 Information about Docker can be found on the [Docker official page](https://docs.docker.com/).
 The links to download Docker for Linux, Mac and Windows10 are also [officially available](https://www.docker.com/get-started).
 The instructions to build SMASH are written in the file _Dockerfile_ and, apart from the different syntax, the procedure is the same as in the case of Singularity (see [following section](#docker-to-singularity)).
-As explained in the [SMASH README file](../README.md), Docker images are provided as [packages in the Github organisation](https://github.com/orgs/smash-transport/packages) and can be pulled from there and directly run. 
+As explained in the [SMASH README file](../README.md), Docker images are provided as [packages in the Github organisation](https://github.com/orgs/smash-transport/packages) and can be pulled from there and directly run.
+
+### Inspecting images
+
+The `docker inspect` command can be used to retrieve information from the image itself.
+The `SMASH-max` image contains lots of auxiliary software and it might be useful to know which versions of third-party libraries have been installed.
+Use the command
+```console
+docker inspect -f '{{index .Config.Labels "installed.software.versions" }}' <tag_name>
+```
+to obtain a ` | ` separated list of the installed software version.
 
 ### Building a Docker image for SMASH
 
