@@ -76,11 +76,22 @@ inline void ensure_all_read(std::istream &input, const Line &line) { /*{{{*/
  *
  * \note There's no slicing here: the actual istream object is a temporary that
  * is not destroyed until read_all returns.
+ *
+ * \warning The GNU compiler reports false positive warnings here because of
+ * <a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105580">this bug</a>
+ * and therefore we temporary manually disable that diagnostic.
  */
+#if defined(__GNUC__) && (__GNUC__ >= 12) && (__GNUC__ < 15)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnull-dereference"
+#endif
 inline std::string read_all(std::istream &&input) {
   return {std::istreambuf_iterator<char>{input},
           std::istreambuf_iterator<char>{}};
 }
+#if defined(__GNUC__) && (__GNUC__ >= 12) && (__GNUC__ < 15)
+#pragma GCC diagnostic pop
+#endif
 
 /** Check if a line in the string ends with \\r\\n. This may happen when a file
  * was edited on Windows.
