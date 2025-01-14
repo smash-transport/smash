@@ -3000,7 +3000,9 @@ struct InputKeys {
    * \see_key{key_CT_SP_use_monash_tune_}
    */
   inline static const Key<bool> collTerm_stringParam_useMonashTune{
-      InputSections::c_stringParameters + "Use_Monash_Tune", false, {"3.0"}};
+      InputSections::c_stringParameters + "Use_Monash_Tune",
+      DefaultType::Dependent,
+      {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
