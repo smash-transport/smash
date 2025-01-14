@@ -322,8 +322,8 @@ class ScatterAction : public Action {
   bool were_processes_added_ = false;
 
   /// Warn about zero cross section only once per particle type pair
-  static inline std::set<std::pair<ParticleTypePtr, ParticleTypePtr>>
-      warned_no_rescaling_available;
+  static inline std::set<std::set<ParticleTypePtr>>
+      warned_no_rescaling_available{};
 };
 
 }  // namespace smash

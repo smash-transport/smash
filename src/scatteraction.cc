@@ -186,8 +186,9 @@ void ScatterAction::rescale_outgoing_branches() {
   if (sum_of_partial_cross_sections_ < really_small) {
     const ParticleTypePtr type_a = &incoming_particles_[0].type();
     const ParticleTypePtr type_b = &incoming_particles_[1].type();
-    const auto pair =
-        std::pair<ParticleTypePtr, ParticleTypePtr>(type_a, type_b);
+    // This is a std::set instead of std::pair because the order of particles
+    // does not matter here
+    const std::set<ParticleTypePtr> pair{type_a, type_b};
     if (!warned_no_rescaling_available.count(pair)) {
       logg[LScatterAction].warn()
           << "Total cross section between " << type_a->name() << " and "
