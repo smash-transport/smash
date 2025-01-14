@@ -320,6 +320,10 @@ class ScatterAction : public Action {
 
   /// Lock for calling add_all_scatterings only once
   bool were_processes_added_ = false;
+
+  /// Warn about zero cross section only once per particle type pair
+  static inline std::set<std::set<ParticleTypePtr>>
+      warned_no_rescaling_available{};
 };
 
 }  // namespace smash

@@ -184,14 +184,24 @@ void ScatterAction::rescale_outgoing_branches() {
         "This function can only be called after having added processes.");
   }
   if (sum_of_partial_cross_sections_ < really_small) {
-    logg[LScatterAction].warn() << "Current total cross section is roughly "
-                                   "zero and no rescaling to match "
-                                   "the parametrized one will be done.\nAn "
-                                   "elastic process will be added,"
-                                   "instead, to match the total cross section.";
+    const ParticleTypePtr type_a = &incoming_particles_[0].type();
+    const ParticleTypePtr type_b = &incoming_particles_[1].type();
+    // This is a std::set instead of std::pair because the order of particles
+    // does not matter here
+    const std::set<ParticleTypePtr> pair{type_a, type_b};
+    if (!warned_no_rescaling_available.count(pair)) {
+      logg[LScatterAction].warn()
+          << "Total cross section between " << type_a->name() << " and "
+          << type_b->name() << "is roughly zero at sqrt(s) = " << sqrt_s()
+          << " GeV, and no rescaling to match the parametrized value will be "
+             "done.\nAn elastic process will be added, instead, to match the "
+             "total cross section.\nFor this pair of particles, this warning "
+             "will be subsequently suppressed.";
+      warned_no_rescaling_available.insert(pair);
+    }
     auto elastic_branch = std::make_unique<CollisionBranch>(
-        incoming_particles_[0].type(), incoming_particles_[1].type(),
-        *parametrized_total_cross_section_, ProcessType::Elastic);
+        *type_a, *type_b, *parametrized_total_cross_section_,
+        ProcessType::Elastic);
     add_collision(std::move(elastic_branch));
   } else {
     const double reweight =
