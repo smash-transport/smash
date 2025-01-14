@@ -1,4 +1,4 @@
-# 19.2814 minutes on Mac
+# 12 minutes on Mac
 Logging:
     default: INFO
 
@@ -9,7 +9,8 @@ General:
     End_Time:      50.0
     Randomseed:    -1
     Nevents:       1
-    Testparticles: 20
+    Testparticles: 10
+    Ensembles: 20
 
 
 Output:
@@ -27,16 +28,26 @@ Modi:
         E_Kin: 1.23
         Fermi_Motion: on
 
-Potentials:
+Potentials: # incomressibility 348.2 MeV
     Skyrme:
-        Skyrme_A: -209.2
-        Skyrme_B: 156.4
-        Skyrme_Tau: 1.35
+        Skyrme_A: -15.4367459528553
+        Skyrme_B: 42.5791599330548
+        Skyrme_Tau: 2.17489852989658
+    Momentum_Dependence:
+        C: -63.1052345564237
+        Lambda: 2.11952307496017
+    Use_Potentials_Outside_Lattice: False
     Symmetry:
-        S_Pot: 18.0
+        S_Pot: 15.8
 
 Collision_Term:
     Pauli_Blocking:
         Spatial_Averaging_Radius:   1.86
         Momentum_Averaging_Radius:  0.08
         Gaussian_Cutoff:            2.2
+
+Lattice:
+    Automatic: False
+    Origin: [-40.0, -40.0, -40.0]
+    Sizes: [80.0 ,80.0 ,80.0]
+    Cell_Number: [80, 80, 80]
