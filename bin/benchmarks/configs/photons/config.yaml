@@ -15,12 +15,15 @@ Output:
 
 Modi:
     Box:
+        Start_Time: 0.0
         Length: 10.0
         Temperature: 0.15
         Initial_Condition: "thermal momenta"
         Use_Thermal_Multiplicities: True
 
 Collision_Term:
+    Total_Cross_Section_Strategy: "BottomUp"
+    Pseudoresonance: "None"
     Force_Decays_At_End: False
     Strings: False
     Elastic_Cross_Section:  30.0
