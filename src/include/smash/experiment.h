@@ -3080,7 +3080,7 @@ void Experiment<Modus>::final_output() {
 
       if (parameters_.coll_crit == CollisionCriterion::Stochastic &&
           precent_discarded > 1.0) {
-        // The choosen threshold of 1% is a heuristical value
+        // The chosen threshold of 1% is a heuristical value
         logg[LExperiment].warn()
             << msg_discarded.str()
             << "\nThe number of discarded interactions is large, which means "

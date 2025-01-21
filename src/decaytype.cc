@@ -344,12 +344,12 @@ double ThreeBodyDecayDilepton::diff_width(double m_par, double m_l,
   }
 
   // abbreviations
-  const double m_dil_sqr = m_dil * m_dil;
-  const double m_par_sqr = m_par * m_par;
-  const double m_par_cubed = m_par * m_par * m_par;
-  const double m_other_sqr = m_other * m_other;
-  const double ph_sp_factor = std::sqrt(1. - 4. * m_l * m_l / m_dil_sqr) *
-                              (1. + 2. * m_l * m_l / m_dil_sqr);
+  const double m_dil_sqr = square(m_dil);
+  const double m_par_sqr = square(m_par);
+  const double m_par_cubed = cube(m_par);
+  const double m_other_sqr = square(m_other);
+  const double ph_sp_factor = std::sqrt(1. - 4. * square(m_l) / m_dil_sqr) *
+                              (1. + 2. * square(m_l) / m_dil_sqr);
 
   PdgCode pdg = t->pdgcode();
   if (pdg.is_meson()) {

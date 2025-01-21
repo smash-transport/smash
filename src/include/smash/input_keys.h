@@ -4110,7 +4110,7 @@ struct InputKeys {
    * \optional_key_no_line{key_MS_account_res_widths_,Account_Resonance_Widths,bool,true}
    *
    * This key is considered only in case of thermal initialization and the
-   * following two behaviors can be choosen:
+   * following two behaviors can be chosen:
    * - `true` &rarr; Account for resonance spectral functions, while computing
    *   multiplicities and sampling masses.
    * - `false` &rarr; Simply use pole masses.
@@ -4211,6 +4211,18 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
+   * \optional_key{key_MS_hf_multiplier_,Heavy_Flavor_Multiplier,double,0.0}
+   *
+   * Multiply the thermal multiplicity of heavy flavor particles.
+   */
+  /**
+   * \see_key{key_MS_hf_multiplier_}
+   */
+  inline static const Key<double> modi_sphere_heavyFlavorMultiplier{
+      InputSections::m_sphere + "Heavy_Flavor_Multiplier", 0.0, {"3.3"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
    *
    * If this option is set to `true` then <tt>\ref key_MS_init_mult_
@@ -4251,6 +4263,18 @@ struct InputKeys {
    */
   inline static const Key<double> modi_sphere_jet_jetMomentum{
       InputSections::m_s_jet + "Jet_Momentum", 20.0, {"1.5.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
+   * \optional_key_no_line{key_MS_jet_backtoback_,Back_To_Back,bool,false}
+   *
+   * Whether to create a back to back jet with the corresponding antiparticle.
+   */
+  /**
+   * \see_key{key_MS_jet_backtoback_}
+   */
+  inline static const Key<bool> modi_sphere_jet_backToBack{
+      InputSections::m_s_jet + "Back_To_Back", false, {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -5999,9 +6023,11 @@ struct InputKeys {
       std::cref(modi_sphere_chargeChemicalPotential),
       std::cref(modi_sphere_initialCondition),
       std::cref(modi_sphere_strangeChemicalPotential),
+      std::cref(modi_sphere_heavyFlavorMultiplier),
       std::cref(modi_sphere_useThermalMultiplicities),
       std::cref(modi_sphere_jet_jetMomentum),
       std::cref(modi_sphere_jet_jetPdg),
+      std::cref(modi_sphere_jet_backToBack),
       std::cref(modi_box_initialMultiplicities),
       std::cref(modi_box_initialCondition),
       std::cref(modi_box_length),

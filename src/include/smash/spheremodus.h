@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2023
+ *    Copyright (c) 2013-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -94,23 +94,29 @@ class SphereModus : public ModusDefault {
   const bool use_thermal_ = false;
   /**
    *  Baryon chemical potential for thermal initialization;
-   *  only used if use_thermal_ is true
+   *  only used if \key use_thermal_ is true
    */
   const double mub_;
   /**
    * Strange chemical potential for thermal initialization;
-   * only used if use_thermal_ is true
+   * only used if \key use_thermal_ is true
    */
   const double mus_;
   /**
    *  Charge chemical potential for thermal initialization;
-   *  only used if use_thermal_ is true
+   *  only used if \key use_thermal_ is true
    */
   const double muq_;
   /**
-   * In case of thermal initialization: true -- account for resonance
-   * spectral functions, while computing multiplicities and sampling masses,
-   * false -- simply use pole masses.
+   * Multiplicative factor for thermal multiplicity of heavy flavored hadrons;
+   * only used if \key use_thermal_ is true
+   */
+  const double hf_multiplier_;
+  /**
+   * In case of thermal initialization:
+   * - true -- account for resonance spectral functions, while computing
+   * multiplicities and sampling masses,
+   * - false -- simply use pole masses.
    */
   const bool account_for_resonance_widths_;
   /**
@@ -142,6 +148,8 @@ class SphereModus : public ModusDefault {
    * its momentum.
    */
   const std::optional<PdgCode> jet_pdg_;
+  /// Create the back to back jet with the corresponding antiparticle
+  const bool jet_back_;
   /**
    * Initial momentum of the jet particle; only used if jet_pdg_ is not nullopt
    */

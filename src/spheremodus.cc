@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2024
+ *    Copyright (c) 2012-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -45,6 +45,8 @@ SphereModus::SphereModus(Configuration modus_config,
       mub_(modus_config.take(InputKeys::modi_sphere_baryonChemicalPotential)),
       mus_(modus_config.take(InputKeys::modi_sphere_strangeChemicalPotential)),
       muq_(modus_config.take(InputKeys::modi_sphere_chargeChemicalPotential)),
+      hf_multiplier_(
+          modus_config.take(InputKeys::modi_sphere_heavyFlavorMultiplier)),
       account_for_resonance_widths_(
           modus_config.take(InputKeys::modi_sphere_accountResonanceWidths)),
       init_multipl_(use_thermal_
@@ -64,7 +66,7 @@ SphereModus::SphereModus(Configuration modus_config,
                    ? make_optional<PdgCode>(
                          modus_config.take(InputKeys::modi_sphere_jet_jetPdg))
                    : std::nullopt),
-
+      jet_back_(modus_config.take(InputKeys::modi_sphere_jet_backToBack)),
       jet_mom_(modus_config.take(InputKeys::modi_sphere_jet_jetMomentum)) {}
 
 /* console output on startup of sphere specific parameters */
@@ -105,7 +107,11 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   if (m.jet_pdg_) {
     ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_.value());
     out << "Adding a " << ptype->name() << " as a jet in the middle "
-        << "of the sphere with " << m.jet_mom_ << " GeV initial momentum.\n";
+        << "of the sphere with " << m.jet_mom_ << " GeV initial momentum"; 
+    if (m.jet_back_) {
+      out << " and its antiparticle back to back";
+    }
+    out << ".\n";
   }
   return out;
 }
@@ -120,10 +126,15 @@ double SphereModus::initial_conditions(Particles *particles,
   if (use_thermal_) {
     if (average_multipl_.empty()) {
       for (const ParticleType &ptype : ParticleType::list_all()) {
-        if (HadronGasEos::is_eos_particle(ptype)) {
+        const bool is_eos_particle = HadronGasEos::is_eos_particle(ptype);
+        const bool use_heavy_flavor = ptype.pdgcode().is_heavy_flavor() && (hf_multiplier_ > really_small);
+        if (is_eos_particle || use_heavy_flavor) {
           const double n = HadronGasEos::partial_density(
               ptype, T, mub_, mus_, muq_, account_for_resonance_widths_);
           average_multipl_[ptype.pdgcode()] = n * V * parameters.testparticles;
+          if (ptype.pdgcode().is_heavy_flavor()) {
+            average_multipl_[ptype.pdgcode()] *= hf_multiplier_;
+          }
         }
       }
     }
@@ -236,6 +247,15 @@ double SphereModus::initial_conditions(Particles *particles,
     jet_particle.set_4position(FourVector(start_time_, 0., 0., 0.));
     jet_particle.set_4momentum(ParticleType::find(jet_pdg_.value()).mass(),
                                ThreeVector(jet_mom_, 0., 0.));
+    if (jet_back_) {
+      auto &jet_antiparticle =
+          particles->create(jet_pdg_.value().get_antiparticle());
+      jet_antiparticle.set_formation_time(start_time_);
+      jet_antiparticle.set_4position(FourVector(start_time_, 0., 0., 0.));
+      jet_antiparticle.set_4momentum(
+          ParticleType::find(jet_pdg_.value()).mass(),
+          ThreeVector(-jet_mom_, 0., 0.));
+    }
   }
 
   /* Recalculate total momentum */
