@@ -4213,7 +4213,17 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_hf_multiplier_,Heavy_Flavor_Multiplier,double,0.0}
    *
-   * Multiply the thermal multiplicity of heavy flavor particles.
+   * Multiply the thermal multiplicity of heavy flavor particles. This is a way
+   * to perturbatively obtain more statistics on heavy hadron observables with
+   * fewer events, under the assumption that these hadrons are sufficiently rare
+   * to not interact with each other. It is the user's responsibility to ensure
+   * that such assumption holds and that particle yields are properly normalized
+   * in the analysis.
+   *
+   * By default, it is set to 0 so that no heavy flavor is initialized. For any
+   * positive value, a partial density is computed as described in \key
+   * key_MS_use_thermal_mult_ and multiplied by it. Naturally, with a value of
+   * 1, each hadron corresponds to a real thermalized hadron.
    */
   /**
    * \see_key{key_MS_hf_multiplier_}

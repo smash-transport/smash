@@ -107,7 +107,7 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   if (m.jet_pdg_) {
     ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_.value());
     out << "Adding a " << ptype->name() << " as a jet in the middle "
-        << "of the sphere with " << m.jet_mom_ << " GeV initial momentum"; 
+        << "of the sphere with " << m.jet_mom_ << " GeV initial momentum";
     if (m.jet_back_) {
       out << " and its antiparticle back to back";
     }
@@ -127,7 +127,8 @@ double SphereModus::initial_conditions(Particles *particles,
     if (average_multipl_.empty()) {
       for (const ParticleType &ptype : ParticleType::list_all()) {
         const bool is_eos_particle = HadronGasEos::is_eos_particle(ptype);
-        const bool use_heavy_flavor = ptype.pdgcode().is_heavy_flavor() && (hf_multiplier_ > really_small);
+        const bool use_heavy_flavor = ptype.pdgcode().is_heavy_flavor() &&
+                                      (hf_multiplier_ > really_small);
         if (is_eos_particle || use_heavy_flavor) {
           const double n = HadronGasEos::partial_density(
               ptype, T, mub_, mus_, muq_, account_for_resonance_widths_);
@@ -242,19 +243,19 @@ double SphereModus::initial_conditions(Particles *particles,
 
   /* Add a single highly energetic particle in the center of the sphere (jet) */
   if (jet_pdg_) {
-    auto &jet_particle = particles->create(jet_pdg_.value());
+    auto &pdg = jet_pdg_.value();
+    auto &jet_particle = particles->create(pdg);
     jet_particle.set_formation_time(start_time_);
     jet_particle.set_4position(FourVector(start_time_, 0., 0., 0.));
-    jet_particle.set_4momentum(ParticleType::find(jet_pdg_.value()).mass(),
+    jet_particle.set_4momentum(ParticleType::find(pdg).mass(),
                                ThreeVector(jet_mom_, 0., 0.));
     if (jet_back_) {
-      auto &jet_antiparticle =
-          particles->create(jet_pdg_.value().get_antiparticle());
+      auto &anti_pdg = pdg.has_antiparticle() ? pdg.get_antiparticle() : pdg;
+      auto &jet_antiparticle = particles->create(anti_pdg);
       jet_antiparticle.set_formation_time(start_time_);
       jet_antiparticle.set_4position(FourVector(start_time_, 0., 0., 0.));
-      jet_antiparticle.set_4momentum(
-          ParticleType::find(jet_pdg_.value()).mass(),
-          ThreeVector(-jet_mom_, 0., 0.));
+      jet_antiparticle.set_4momentum(ParticleType::find(anti_pdg).mass(),
+                                     ThreeVector(-jet_mom_, 0., 0.));
     }
   }
 
