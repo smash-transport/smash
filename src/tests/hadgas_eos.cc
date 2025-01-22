@@ -31,17 +31,17 @@ TEST(td_simple_gas) {
   // The current values are from running SMASH with the parameters in the input
   // folder.
   COMPARE_ABSOLUTE_ERROR(HadronGasEos::net_baryon_density(T, mub, mus, muq),
-                         0.5832753159, 1.e-6);
+                         0.5837291219, 1.e-6);
   COMPARE_ABSOLUTE_ERROR(HadronGasEos::net_strange_density(T, mub, mus, muq),
-                         -0.03686360221, 1.e-6);
+                         -0.03682598947, 1.e-6);
   COMPARE_ABSOLUTE_ERROR(HadronGasEos::net_charge_density(T, mub, mus, muq),
-                         0.4236041139, 1.e-6);
-  COMPARE_ABSOLUTE_ERROR(HadronGasEos::density(T, mub, mus, muq), 0.6232158477,
+                         0.4239069314, 1.e-6);
+  COMPARE_ABSOLUTE_ERROR(HadronGasEos::density(T, mub, mus, muq), 0.623611185,
                          1.e-6);
-  COMPARE_ABSOLUTE_ERROR(HadronGasEos::pressure(T, mub, mus, muq),
-                         0.06232158477, 1.e-6);
+  COMPARE_ABSOLUTE_ERROR(HadronGasEos::pressure(T, mub, mus, muq), 0.0623611185,
+                         1.e-6);
   COMPARE_ABSOLUTE_ERROR(HadronGasEos::energy_density(T, mub, mus, muq),
-                         0.7325009276, 1.e-6);
+                         0.7332580388, 1.e-6);
 }
 
 TEST(mu_zero_net_strangeness) {
