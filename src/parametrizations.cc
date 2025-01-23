@@ -478,9 +478,10 @@ double deuteron_pion_elastic(double mandelstam_s) {
 }
 
 double deuteron_nucleon_elastic(double mandelstam_s) {
-  const double s = mandelstam_s;
-  return 2500.0 * std::exp(-smash::square(s - 7.93) / 0.003) +
-         600.0 * std::exp(-smash::square(s - 7.93) / 0.1) + 10.0;
+  const double excess = (mandelstam_s - 7.93);
+  const double excess_sqr = excess * excess;
+  return 2500.0 * std::exp(-excess_sqr / 0.003) +
+         600.0 * std::exp(-excess_sqr / 0.1) + 10.0;
 }
 
 double kplusp_total(double mandelstam_s) {
@@ -782,19 +783,19 @@ double kminusp_kbar0n(double mandelstam_s) {
 }
 
 double kminusp_piminussigmaplus(double sqrts) {
-  return 0.0788265 / smash::square(sqrts - 1.38841);
+  return 0.0788265 / ((sqrts - 1.38841) * (sqrts - 1.38841));
 }
 
 double kminusp_piplussigmaminus(double sqrts) {
-  return 0.0196741 / smash::square(sqrts - 1.42318);
+  return 0.0196741 / ((sqrts - 1.42318) * (sqrts - 1.42318));
 }
 
 double kminusp_pi0sigma0(double sqrts) {
-  return 0.0403364 / smash::square(sqrts - 1.39830305);
+  return 0.0403364 / ((sqrts - 1.39830305) * (sqrts - 1.39830305));
 }
 
 double kminusp_pi0lambda(double sqrts) {
-  return 0.05932562 / smash::square(sqrts - 1.38786692);
+  return 0.05932562 / ((sqrts - 1.38786692) * (sqrts - 1.38786692));
 }
 
 double kminusn_piminussigma0(double sqrts) {
