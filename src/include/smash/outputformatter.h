@@ -286,6 +286,22 @@ class OutputFormatter {
         getters_.push_back([this](const ParticleData& in) {
           return this->converter_.as_integer(in.pdgcode().strangeness());
         });
+      } else if (quantity == "spin0") {
+        getters_.push_back([this](const ParticleData& in) {
+          return this->converter_.as_integer(in.spin_vector()[0]);
+        });
+      } else if (quantity == "spinx") {
+        getters_.push_back([this](const ParticleData& in) {
+          return this->converter_.as_integer(in.spin_vector()[1]);
+        });
+      } else if (quantity == "spiny") {
+        getters_.push_back([this](const ParticleData& in) {
+          return this->converter_.as_integer(in.spin_vector()[2]);
+        });
+      } else if (quantity == "spinz") {
+        getters_.push_back([this](const ParticleData& in) {
+          return this->converter_.as_integer(in.spin_vector()[3]);
+        });
       } else if (quantity == "0") {  // for OSCAR1999
         getters_.push_back([this]([[maybe_unused]] const ParticleData& in) {
           return this->converter_.as_integer(0);
