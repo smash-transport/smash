@@ -57,7 +57,7 @@ AlphaClusteredNucleus::AlphaClusteredNucleus(Configuration &config, int n_test,
     }();
     if (config.has_section(orientation_section)) {
       Configuration sub_conf =
-          config.extract_sub_configuration(orientation_section);
+          config.extract_complete_sub_configuration(orientation_section);
       set_orientation_from_config(sub_conf);
     }
   }
