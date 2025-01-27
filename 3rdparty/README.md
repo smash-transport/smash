@@ -120,6 +120,7 @@ Few changes have been done to integrate the library into SMASH.
 
  * Due to CMake policies, the minimum required CMake version has been implicitly increased as already described.
  * The main _einhard.hpp_ header file was not guarded and header guards have been added.
+ * Some warnings with recent compilers have been fixed into commit `be60566e2c307171ac03df0e768660afd9c28190`.
 
 It is planned to leave this library frozen as untouched as possible, unless C++ problems arise.
 If anything is changed at some point in the upstream and such a changes are meant to be pulled into SMASH, **be sure not to forget the steps mentioned in the general remarks above**.

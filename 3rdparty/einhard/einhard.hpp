@@ -5,19 +5,20 @@
  *
  * Copyright 2010 Matthias Bach <marix@marix.org>
  * Copyright 2014 Matthias Kretz <kretz@kde.org>
+ * Copyright 2025 SMASH Team
  *
  * This file is part of Einhard.
- * 
+ *
  * Einhard is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Einhard is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Einhard.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -293,7 +294,7 @@ namespace einhard
 								const char *areaName,
 								std::integral_constant<LogLevel, VERBOSITY>,
 								std::FILE *outfile_ = stdout )
-			    : UnconditionalOutput( colorize_ ), enabled( enabled_ ), outfile( outfile_ )
+			    : UnconditionalOutput( colorize_ ), outfile( outfile_ ), enabled( enabled_ )
 			{
 				if( enabled )
 				{
@@ -346,7 +347,7 @@ namespace einhard
      * time up to the level restriction given by the template parameter.
      *
      * The class can automatically detect non-tty output and will not colorize output in that case.
-     */ 
+     */
 	template<LogLevel MAX = ALL> class Logger
 	{
 		private:
@@ -362,7 +363,7 @@ namespace einhard
 			 * The object will automatically colorize output on ttys and not colorize output
 			 * on non ttys.
 			 */
-			Logger( const LogLevel verbosity = WARN ) : verbosity( verbosity )
+			Logger( const LogLevel verbosity_in = WARN ) : verbosity( verbosity_in )
 			{
 				// use some, sadly not c++-ways to figure out whether we are writing ot a terminal
 				// only colorize when we are writing ot a terminal
@@ -375,8 +376,8 @@ namespace einhard
 			 * Be aware that if output colorization is selected output will even be colorized if
 			 * output is to a non tty.
 			 */
-			Logger( const LogLevel verbosity, const bool colorize )
-			    : verbosity( verbosity ), colorize_stdout( colorize ), colorize_stderr( colorize ) {};
+			Logger( const LogLevel verbosity_in, const bool colorize )
+			    : verbosity( verbosity_in ), colorize_stdout( colorize ), colorize_stderr( colorize ) {};
 
 			/**
 			 * Set an area name. This will be printed after the LogLevel to identify the
@@ -422,7 +423,7 @@ namespace einhard
 				{
 					UnconditionalOutput o{colorize_stdout, areaName,
 							      std::integral_constant<LogLevel, TRACE>()};
-					auto &&unused = {&( o << args )...};
+					((o << args), ...);
 					o.doCleanup();
 				}
 			}
@@ -448,7 +449,7 @@ namespace einhard
 				{
 					UnconditionalOutput o{colorize_stdout, areaName,
 							  std::integral_constant<LogLevel, DEBUG>()};
-					auto &&unused = {&( o << args )...};
+					((o << args), ...);
 					o.doCleanup();
 				}
 			}
@@ -465,7 +466,7 @@ namespace einhard
 				{
 					UnconditionalOutput o{colorize_stdout, areaName,
 							  std::integral_constant<LogLevel, INFO>()};
-					auto &&unused = {&( o << args )...};
+					((o << args), ...);
 					o.doCleanup();
 				}
 			}
@@ -481,7 +482,7 @@ namespace einhard
 				{
 					UnconditionalOutput o{colorize_stderr, areaName,
 							  std::integral_constant<LogLevel, WARN>()};
-					auto &&unused = {&( o << args )...};
+					((o << args), ...);
 					o.doCleanup(stderr);
 				}
 			}
@@ -497,7 +498,7 @@ namespace einhard
 				{
 					UnconditionalOutput o{colorize_stderr, areaName,
 							  std::integral_constant<LogLevel, ERROR>()};
-					auto &&unused = {&( o << args )...};
+					((o << args), ...);
 					o.doCleanup(stderr);
 				}
 			}
@@ -514,7 +515,7 @@ namespace einhard
 				{
 					UnconditionalOutput o{colorize_stderr, areaName,
 							  std::integral_constant<LogLevel, FATAL>()};
-					auto &&unused = {&( o << args )...};
+					((o << args), ...);
 					o.doCleanup(stderr);
 					print_stacktrace(stderr, 63, 2);
 				}
@@ -535,9 +536,9 @@ namespace einhard
 			 * Be aware that the verbosity can not be increased over the level given by the template
 			 * parameter
 			 */
-			inline void setVerbosity( LogLevel verbosity ) noexcept
+			inline void setVerbosity( LogLevel verbosity_in ) noexcept
 			{
-				this->verbosity = verbosity;
+				this->verbosity = verbosity_in;
 			}
 			/** Retrieve the current log level.
 			 *
