@@ -317,19 +317,22 @@ ColliderModus::ColliderModus(Configuration modus_config,
           modus_cfg.take(InputKeys::modi_collider_initialConditions_minTime);
       double max_time =
           modus_cfg.take(InputKeys::modi_collider_initialConditions_maxTime);
+      double max_3momentum = modus_cfg.take(
+          InputKeys::modi_collider_initialConditions_max3Momentum);
       int cells =
           modus_cfg.take(InputKeys::modi_collider_initialConditions_fluidCells);
       double form_time_fraction = modus_cfg.take(
           InputKeys::modi_collider_initialConditions_formTimeFraction);
-      if (threshold <= 0 || max_time < min_time || min_time < 0 || cells < 2 ||
-          form_time_fraction < 0) {
+      if (threshold <= 0 || max_time < min_time || min_time < 0 ||
+          max_3momentum <= 0 || cells < 2 || form_time_fraction < 0) {
         logg[LCollider].fatal()
             << "Bad parameters chosen for dynamic initial conditions. At least "
                "one of the following inequalities is violated:\n"
             << "  Energy_Density_Threshold = " << threshold << " > 0\n"
             << "  Maximum_Time = " << max_time << " > " << min_time
-            << " = Minimum_Time > 0\n Fluidization_Cells = " << cells
-            << " > 2\n"
+            << " = Minimum_Time > 0\n Maximum_3Momentum > 0\n "
+               "Fluidization_Cells = "
+            << cells << " > 2\n"
             << " Formation_Time_Fraction < 0";
         throw std::invalid_argument("Please adjust the configuration file.");
       }
@@ -350,9 +353,10 @@ ColliderModus::ColliderModus(Configuration modus_config,
       IC_parameters_->energy_density_threshold = threshold;
       IC_parameters_->min_time = min_time;
       IC_parameters_->max_time = max_time;
+      IC_parameters_->max_3momentum = max_3momentum;
       IC_parameters_->num_fluid_cells = cells;
       logg[LCollider].info()
-          << "Dynamic Initial Conditions with threshold " << threshold
+          << "Preparing dynamic Initial Conditions with threshold " << threshold
           << " GeV/fm³ in energy density, between " << min_time << " and "
           << max_time << " fm.";
       IC_parameters_->formation_time_fraction = form_time_fraction;

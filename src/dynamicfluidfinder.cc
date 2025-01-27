@@ -29,16 +29,23 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
     }
     const double fluidization_time =
         t0 + formation_time_fraction_ * (p.formation_time() - t0);
-    if (fluidization_time < t_end) {
-      if (is_process_fluidizable(p.get_history().process_type)) {
-        if (above_threshold(p)) {
-          double time_until = (1 - p.xsec_scaling_factor() <= really_small)
-                                  ? 0
-                                  : fluidization_time - t0;
-          actions.emplace_back(
-              std::make_unique<FluidizationAction>(p, p, time_until));
-        }
+    if (fluidization_time >= t_end) {
+      continue;
+    }
+    if (!is_process_fluidizable(p.get_history().process_type)) {
+      continue;
+    }
+    if (!std::isnan(max_3momentum_)) {
+      if (p.momentum().abs3() >= max_3momentum_) {
+        continue;
       }
+    }
+    if (above_threshold(p)) {
+      double time_until = (1 - p.xsec_scaling_factor() <= really_small)
+                              ? 0
+                              : fluidization_time - t0;
+      actions.emplace_back(
+          std::make_unique<FluidizationAction>(p, p, time_until));
     }
   }  // search_list loop
   return actions;

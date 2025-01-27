@@ -51,6 +51,7 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
         energy_density_threshold_{ic_params.energy_density_threshold.value()},
         min_time_{ic_params.min_time.value()},
         max_time_{ic_params.max_time.value()},
+        max_3momentum_{ic_params.max_3momentum.value()},
         formation_time_fraction_{ic_params.formation_time_fraction.value()},
         fluid_cells_{ic_params.num_fluid_cells.value()},
         fluidizable_processes_{ic_params.fluidizable_processes.value()} {};
@@ -125,6 +126,8 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
   const double min_time_ = NAN;
   /// Maximum time (in lab frame) in fm to allow fluidization
   const double max_time_ = NAN;
+  /// Maximum 3-momentum for a fluidizable particle
+  const double max_3momentum_ = NAN;
   /// Fraction of formation time after which a particles can fluidize
   const double formation_time_fraction_ = NAN;
   /// Number of cells to interpolate the energy density
