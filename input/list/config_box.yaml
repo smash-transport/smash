@@ -26,3 +26,7 @@ Modi:
         File_Prefix: "box_list"
         Shift_Id: 0
         Length: 10.0
+
+Collision_Term:
+    Total_Cross_Section_Strategy: "BottomUp"
+    Pseudoresonance: "None"

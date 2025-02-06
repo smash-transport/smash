@@ -1011,7 +1011,7 @@ Experiment<Modus>::Experiment(Configuration &config,
   if (modus_.is_box() && config.read(InputKeys::collTerm_totXsStrategy) !=
                              TotalCrossSectionStrategy::BottomUp) {
     logg[LExperiment].warn(
-        "To preserve detailed balance in a box simulation, it is recommended "
+        "To preserve detailed balance in a box simulation, it is recommended\n"
         "to use the bottom-up strategy for evaluating total cross sections.\n"
         "Consider adding the following line to the 'Collision_Term' section "
         "in your configuration file:\n"
