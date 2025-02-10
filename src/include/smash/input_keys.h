@@ -4278,7 +4278,9 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_sphere
    * \optional_key_no_line{key_MS_jet_backtoback_,Back_To_Back,bool,false}
    *
-   * Whether to create a back to back jet with the corresponding antiparticle.
+   * Whether to create a jet with the corresponding antiparticle in the opposite
+   * direction with the same momentum. If the particle is a singlet, such as the
+   * neutral pion, it is its own antiparticle.
    */
   /**
    * \see_key{key_MS_jet_backtoback_}

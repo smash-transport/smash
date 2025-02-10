@@ -109,7 +109,9 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
     out << "Adding a " << ptype->name() << " as a jet in the middle "
         << "of the sphere with " << m.jet_mom_ << " GeV initial momentum";
     if (m.jet_back_) {
-      out << " and its antiparticle back to back";
+      ParticleTypePtr anti =
+          ptype->has_antiparticle() ? ptype->get_antiparticle() : ptype;
+      out << " and its antiparticle " << anti->name() << " back to back";
     }
     out << ".\n";
   }
