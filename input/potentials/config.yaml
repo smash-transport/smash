@@ -28,7 +28,7 @@ Modi:
         E_Kin: 1.23
         Fermi_Motion: on
 
-Potentials: # incomressibility 348.2 MeV
+Potentials: # incompressibility 348.2 MeV
     Skyrme:
         Skyrme_A: -15.4367459528553
         Skyrme_B: 42.5791599330548
