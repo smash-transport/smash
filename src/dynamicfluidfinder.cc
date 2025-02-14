@@ -23,12 +23,14 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
 
   for (const ParticleData &p : search_list) {
     const double t0 = p.position().x0();
+    const double t_creation = p.begin_formation_time();
     const double t_end = t0 + dt;
     if (t_end < min_time_ || t0 > max_time_) {
       break;
     }
     const double fluidization_time =
-        t0 + formation_time_fraction_ * (p.formation_time() - t0);
+        t_creation +
+        formation_time_fraction_ * (p.formation_time() - t_creation);
     if (fluidization_time >= t_end) {
       continue;
     }
