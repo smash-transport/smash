@@ -66,8 +66,20 @@ SphereModus::SphereModus(Configuration modus_config,
                    ? make_optional<PdgCode>(
                          modus_config.take(InputKeys::modi_sphere_jet_jetPdg))
                    : std::nullopt),
+      jet_mom_(modus_config.take(InputKeys::modi_sphere_jet_jetMomentum)),
+      jet_pos_(modus_config.take(InputKeys::modi_sphere_jet_jetPosition)),
       jet_back_(modus_config.take(InputKeys::modi_sphere_jet_backToBack)),
-      jet_mom_(modus_config.take(InputKeys::modi_sphere_jet_jetMomentum)) {}
+      jet_back_separation_(
+          jet_back_ ? modus_config.take(
+                          InputKeys::modi_sphere_jet_backToBackSeparation)
+                    : 0) {
+  if (!jet_back_ &&
+      modus_config.has_value(InputKeys::modi_sphere_jet_backToBackSeparation)) {
+    throw std::invalid_argument(
+        "In order to specify 'Back_To_Back_Separation', 'Back_To_Back' must be "
+        "true.");
+  }
+}
 
 /* console output on startup of sphere specific parameters */
 std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
@@ -106,14 +118,19 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   }
   if (m.jet_pdg_) {
     ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_.value());
-    out << "Adding a " << ptype->name() << " as a jet in the middle "
-        << "of the sphere with " << m.jet_mom_ << " GeV initial momentum";
+    const auto pos = m.jet_pos_;
     if (m.jet_back_) {
       ParticleTypePtr anti =
           ptype->has_antiparticle() ? ptype->get_antiparticle() : ptype;
-      out << " and its antiparticle " << anti->name() << " back to back";
+      out << "Adding a dijet " << ptype->name() << anti->name()
+          << " centered at (" << pos.x1() << ", " << pos.x2() << ", "
+          << pos.x3() << ") separated by " << m.jet_back_separation_
+          << " fm,\neach with " << m.jet_mom_ << " GeV of initial momentum.\n";
+    } else {
+      out << "Adding a " << ptype->name() << " as a jet at (" << pos.x1()
+          << ", " << pos.x2() << ", " << pos.x3() << ") fm with " << m.jet_mom_
+          << " GeV of initial momentum.\n";
     }
-    out << ".\n";
   }
   return out;
 }
@@ -247,15 +264,18 @@ double SphereModus::initial_conditions(Particles *particles,
   if (jet_pdg_) {
     auto &pdg = jet_pdg_.value();
     auto &jet_particle = particles->create(pdg);
+    auto displacement = ThreeVector(jet_back_separation_ / 2., 0., 0.);
     jet_particle.set_formation_time(start_time_);
-    jet_particle.set_4position(FourVector(start_time_, 0., 0., 0.));
+    jet_particle.set_4position(
+        FourVector(start_time_, jet_pos_ + displacement));
     jet_particle.set_4momentum(ParticleType::find(pdg).mass(),
                                ThreeVector(jet_mom_, 0., 0.));
     if (jet_back_) {
       auto &anti_pdg = pdg.has_antiparticle() ? pdg.get_antiparticle() : pdg;
       auto &jet_antiparticle = particles->create(anti_pdg);
       jet_antiparticle.set_formation_time(start_time_);
-      jet_antiparticle.set_4position(FourVector(start_time_, 0., 0., 0.));
+      jet_antiparticle.set_4position(
+          FourVector(start_time_, jet_pos_ - displacement));
       jet_antiparticle.set_4momentum(ParticleType::find(anti_pdg).mass(),
                                      ThreeVector(-jet_mom_, 0., 0.));
     }

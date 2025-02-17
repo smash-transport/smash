@@ -148,12 +148,22 @@ class SphereModus : public ModusDefault {
    * its momentum.
    */
   const std::optional<PdgCode> jet_pdg_;
-  /// Create the back to back jet with the corresponding antiparticle
-  const bool jet_back_;
   /**
    * Initial momentum of the jet particle; only used if jet_pdg_ is not nullopt
    */
   const double jet_mom_;
+  /**
+   * Initial position of the jet particle; only used if jet_pdg_ is not nullopt
+   */
+  const ThreeVector jet_pos_;
+  /// Create the back to back jet with the corresponding antiparticle; only used
+  /// if jet_pdg_ is not nullopt
+  const bool jet_back_;
+  /**
+   * Initial separation between the back to back jets; can only be set by the
+   * user if jet_back_ is true
+   */
+  const double jet_back_separation_ = NAN;
   /**\ingroup logging
    * Writes the initial state for the Sphere to the output stream.
    *

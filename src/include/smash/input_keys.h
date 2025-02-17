@@ -4052,8 +4052,8 @@ struct InputKeys {
    *
    * Initial multiplicities per particle species. The value of this key shall be
    * a map of PDG number and amount corresponding to it. Use this key to specify
-   * how many particles of each species will be initialized. This key has to be
-   * omitted if <tt>\ref key_MS_use_thermal_mult_
+   * how many particles of each species will be initialized. This key cannot be
+   * used if <tt>\ref key_MS_use_thermal_mult_
    * "Use_Thermal_Multiplicities"</tt> is `true`.
    */
   /**
@@ -4236,15 +4236,16 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
    *
-   * If this option is set to `true` then <tt>\ref key_MS_init_mult_
-   * "Init_Multiplicities"</tt> are ignored and the system is initialized with
-   * all particle species of the particle table that belong to the hadron gas
-   * equation of state, see HadronGasEos::is_eos_particle(). The multiplicities
-   * are sampled from Poisson distributions \f$\mathrm{Poi}(n_i V)\f$, where
-   * \f$n_i\f$ are the grand-canonical thermal densities of the corresponding
-   * species and \f$V\f$ is the system volume. This option simulates the
-   * grand-canonical ensemble, where the number of particles is not fixed from
-   * event to event.
+   * The system is initialized with all particle species of the particle table
+   * that belong to the hadron gas equation of state, see
+   * HadronGasEos::is_eos_particle(). The multiplicities are sampled from
+   * Poisson distributions \f$\mathrm{Poi}(n_i V)\f$, where \f$n_i\f$ are the
+   * grand-canonical thermal densities of the corresponding species and \f$V\f$
+   * is the system volume. This option simulates the grand-canonical ensemble,
+   * where the number of particles is not fixed from event to event.
+   *
+   * If this option is set to `true`, <tt>\ref key_MS_init_mult_
+   * "Init_Multiplicities"</tt> cannot be used.
    */
   /**
    * \see_key{key_MS_use_thermal_mult_}
@@ -4265,6 +4266,18 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
+   * \required_key_no_line{key_MS_jet_jet_pdg_,Jet_PDG,int}
+   *
+   * The type of particle to be used as a jet, as given by its PDG code.
+   */
+  /**
+   * \see_key{key_MS_jet_jet_pdg_}
+   */
+  inline static const Key<PdgCode> modi_sphere_jet_jetPdg{
+      InputSections::m_s_jet + "Jet_PDG", {"1.5.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
    * \optional_key_no_line{key_MS_jet_jet_momentum_,Jet_Momentum,double,20.0}
    *
    * The initial momentum \unit{in GeV} to give to the jet particle.
@@ -4277,11 +4290,26 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
+   * \optional_key_no_line{key_MS_jet_jet_position_,Jet_Position,list of 3
+   * doubles,[0.0,\ 0.0,\ 0.0]}
+   *
+   * Coordinates (x,y,z) \unit{in fm} where the jet particle is positioned.
+   */
+  /**
+   * \see_key{key_MS_jet_jet_position_}
+   */
+  inline static const Key<std::array<double, 3>> modi_sphere_jet_jetPosition{
+      InputSections::m_s_jet + "Jet_Position",
+      std::array<double, 3>{{0.0, 0.0, 0.0}},
+      {"3.3"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
    * \optional_key_no_line{key_MS_jet_backtoback_,Back_To_Back,bool,false}
    *
    * Whether to create a jet with the corresponding antiparticle in the opposite
    * direction with the same momentum. If the particle is a singlet, such as the
-   * neutral pion, it is its own antiparticle.
+   * neutral pion, it is considered its own antiparticle.
    */
   /**
    * \see_key{key_MS_jet_backtoback_}
@@ -4291,15 +4319,19 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \required_key_no_line{key_MS_jet_jet_pdg_,Jet_PDG,int}
+   * \optional_key_no_line{key_MS_jet_b2b_separation,Back_To_Back_Separation,
+   * double,0.01}
    *
-   * The type of particle to be used as a jet, as given by its PDG code.
+   * Separation in \unit{in fm} between the back to back jets. Each jet particle
+   * is translated by half of this vector in the appropriate direction. Can only
+   * be used if \ref key_MS_jet_backtoback_ is true. A small value is used by
+   * default to prevent collisions between both jets.
    */
   /**
-   * \see_key{key_MS_jet_jet_pdg_}
+   * \see_key{key_MS_jet_b2b_separation}
    */
-  inline static const Key<PdgCode> modi_sphere_jet_jetPdg{
-      InputSections::m_s_jet + "Jet_PDG", {"1.5.2"}};
+  inline static const Key<double> modi_sphere_jet_backToBackSeparation{
+      InputSections::m_s_jet + "Back_To_Back_Separation", 0.01, {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -6038,9 +6070,11 @@ struct InputKeys {
       std::cref(modi_sphere_strangeChemicalPotential),
       std::cref(modi_sphere_heavyFlavorMultiplier),
       std::cref(modi_sphere_useThermalMultiplicities),
-      std::cref(modi_sphere_jet_jetMomentum),
       std::cref(modi_sphere_jet_jetPdg),
+      std::cref(modi_sphere_jet_jetMomentum),
+      std::cref(modi_sphere_jet_jetPosition),
       std::cref(modi_sphere_jet_backToBack),
+      std::cref(modi_sphere_jet_backToBackSeparation),
       std::cref(modi_box_initialMultiplicities),
       std::cref(modi_box_initialCondition),
       std::cref(modi_box_length),
