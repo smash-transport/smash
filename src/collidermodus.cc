@@ -340,7 +340,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
       IC_parameters_->fluidizable_processes = modus_cfg.take(
           InputKeys::modi_collider_initialConditions_fluidProcesses);
 
-      double min_size = std::max(min_time, 10.);
+      double min_size = std::max(min_time, 40.);
       std::array<double, 3> length{2 * min_size, 2 * min_size, 2 * min_size};
       std::array<double, 3> origin{-min_size, -min_size, -min_size};
       std::array<int, 3> cell_array{cells, cells, cells};

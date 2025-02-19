@@ -3932,21 +3932,17 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
-   * \optional_key_no_line{key_MC_IC_max_3momentum_,Maximum_3Momentum,double,7}
+   * \optional_key_no_line{key_MC_IC_max_3momentum_,Maximum_3Momentum,double,100}
    *
    * Set the maximum 3-momentum \unit{in GeV} for a particle to be fluidizable.
    * The physical motivation is that a particle traversing a fluid medium with
-   * too much momentum will not diffuse into it. Numerically, this prevents a
-   * non-diagonalizable energy-momentum tensor in the hydrodynamic evolution.
-   *
-   * The default is chosen based on the largest value that doesn't break vHLLE
-   * runs, while keeping a sizeable energy/particle number deposition.
+   * too much momentum will not diffuse into it.
    */
   /**
    * \see_key{key_MC_IC_max_3momentum_}
    */
   inline static const Key<double> modi_collider_initialConditions_max3Momentum{
-      InputSections::m_c_initialConditions + "Maximum_3Momentum", 7, {"3.3"}};
+      InputSections::m_c_initialConditions + "Maximum_3Momentum", 100, {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
@@ -3959,7 +3955,9 @@ struct InputKeys {
    * \see_key{key_MC_IC_fluid_cells_}
    */
   inline static const Key<int> modi_collider_initialConditions_fluidCells{
-      InputSections::m_c_initialConditions + "Fluidization_Cells", 80, {"3.2"}};
+      InputSections::m_c_initialConditions + "Fluidization_Cells",
+      100,
+      {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
