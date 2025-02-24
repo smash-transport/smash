@@ -26,24 +26,22 @@ TEST(td_simple_gas) {
   const double mub = 0.8;
   const double mus = 0.1;
   const double muq = 0.05;
-
   // The EOS (Equation of State) is sensitive to resonance parameters.
   // If decaymodes.txt or particles.txt are changed, these tests might fail.
   // The current values are from running SMASH with the parameters in the input
   // folder.
-
   COMPARE_ABSOLUTE_ERROR(HadronGasEos::net_baryon_density(T, mub, mus, muq),
-                         0.5837416595, 1.e-6);
+                         0.5832753159, 1.e-6);
   COMPARE_ABSOLUTE_ERROR(HadronGasEos::net_strange_density(T, mub, mus, muq),
                          -0.03686360221, 1.e-6);
   COMPARE_ABSOLUTE_ERROR(HadronGasEos::net_charge_density(T, mub, mus, muq),
-                         0.4238943938, 1.e-6);
-  COMPARE_ABSOLUTE_ERROR(HadronGasEos::density(T, mub, mus, muq), 0.6236821914,
+                         0.4236041139, 1.e-6);
+  COMPARE_ABSOLUTE_ERROR(HadronGasEos::density(T, mub, mus, muq), 0.6232158477,
                          1.e-6);
   COMPARE_ABSOLUTE_ERROR(HadronGasEos::pressure(T, mub, mus, muq),
-                         0.06236821914, 1.e-6);
+                         0.06232158477, 1.e-6);
   COMPARE_ABSOLUTE_ERROR(HadronGasEos::energy_density(T, mub, mus, muq),
-                         0.7333501146, 1.e-6);
+                         0.7325009276, 1.e-6);
 }
 
 TEST(mu_zero_net_strangeness) {
