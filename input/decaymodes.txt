@@ -409,16 +409,16 @@ N(1710)
 0.131    0  N(1535) π
 
 N(1720)
-0.148    1  N π
-0.0296   1  N η
-0.119    1  N ω
-0.0616   1  Λ K
-0.435    1  Δ π
-0.0889   3  Δ π
-0.079    2  N σ
-0.00988  1  N ρ
-0.00988  1  N(1440) π
-0.0198   0  N(1520) π
+0.15   1  N π    #  8 - 14 %
+0.03   1  N η    #  1 -  5 %
+0.12   1  N ω    # 12 - 40 %, tuned for pp dileptons
+0.05   1  Λ K    #  4 -  5 %, HADES PWA 8 ± 7 %, tuned for Nπ->ΛK
+0.44   1  Δ π    # 47 - 77 %
+0.09   3  Δ π    # < 12 %
+0.08   2  N σ    #  2 - 14 %
+0.01   1  N ρ    #  1 -  2 %, KSU value used
+0.01   1  N(1440) π  # < 2 %
+0.02   0  N(1520) π  # 1 - 5 %
 
 N(1875)
 0.0329   2  N π
@@ -504,16 +504,16 @@ N(2060)
 0.197    0  N(1680) π
 
 N(2080)
-0.354    1  N π
-0.0442   1  N η
-0.0774   1  N ω
-0.221    1  N ρ
-0.0553   2  N σ
-0.111    2  N(1535) ρ
-0.111    1  Δ π
-0.0114   1  Λ K
-0.006    1  N φ
-0.0076   2  N f₀(980)
+0.32   1  N π  # tuned for Nπ cross section
+0.04   1  N η
+0.07   1  N ω  # modified relative to UrQMD to better fit
+0.20   1  N ρ  # the dilepton spectra
+0.05   2  N σ
+0.10   2  N(1535) ρ
+0.10   1  Δ π
+0.005  1  Λ K  # tuned for Nπ->ΛK
+0.010  1  N φ  # tuned for p Nb dileptons and pp -> ppKK
+0.001  2  N f₀(980)  # tuned for pp -> ppKK
 # From UrQMD, not yet confirmed by PDG
 # Crucial for pi- p cross section
 
