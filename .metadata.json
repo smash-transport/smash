@@ -21,12 +21,6 @@
   },
   "SMASH team": [
     {
-      "last name": "Wergieluk",
-      "first name": "Agnieszka",
-      "email": "agnieszka.sorensen@gmail.com",
-      "years": "2019-2020"
-    },
-    {
       "last name": "Weil",
       "first name": "Janus",
       "email": "weil@fias.uni-frankfurt.de",
@@ -54,7 +48,7 @@
       "last name": "Sorensen",
       "first name": "Agnieszka",
       "email": "agnieszka.sorensen@gmail.com",
-      "years": "2020-",
+      "years": "2019-",
       "affiliation": "Institute for Nuclear Theory, University of Washington, Box 351550, Seattle, Washington 98195, USA",
       "orcid": "0000-0002-1984-8023"
     },
@@ -101,7 +95,7 @@
     },
     {
       "last name": "Rosenkvist",
-      "first name": "Carl",
+      "first name": "Carl B.",
       "email": "rosenkvist@itp.uni-frankfurt.de",
       "years": "2024-",
       "affiliation": "Frankfurt Institute for Advanced Studies, Ruth-Moufang-Straße 1, 60438 Frankfurt am Main, Germany"
@@ -119,12 +113,6 @@
       "years": "2022-2024",
       "affiliation": "Department of Physics and Astronomy, Wayne State University, 666 W. Hancock St., Detroit, MI 48201, USA",
       "orcid": "0000-0002-0187-6843"
-    },
-    {
-      "last name": "Petersen",
-      "first name": "Hannah",
-      "email": "petersen@fias.uni-frankfurt.de",
-      "years": "2013-2018"
     },
     {
       "last name": "Prinz",
@@ -205,7 +193,7 @@
       "orcid": "0000-0002-4059-120X"
     },
     {
-      "last name": "Hirayama",
+      "last name": "Góes-Hirayama",
       "first name": "Renan",
       "email": "hirayama@itp.uni-frankfurt.de",
       "years": "2021-",
@@ -255,7 +243,7 @@
       "last name": "Elfner",
       "first name": "Hannah",
       "email": "elfner@itp.uni-frankfurt.de",
-      "years": "2018-",
+      "years": "2013-",
       "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, Planckstraße 1, 64291 Darmstadt, Germany",
       "orcid": "0000-0002-6213-3613"
     },
