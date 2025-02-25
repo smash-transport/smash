@@ -19,8 +19,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
-## SMASH-3.2rc
-Date:
+## SMASH-3.2
+Date: 2025-02-25
 
 ### Added
 * Strangeness production by resonances tuned to elementary production cross sections using a genetic algorithm
