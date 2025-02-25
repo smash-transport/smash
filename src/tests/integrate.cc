@@ -11,35 +11,47 @@
 
 #include "smash/integrate.h"
 
-// test one-dimensional integration
+/* Test one-dimensional integration: using simple integration function, the
+ * result is expected to be few ULP away from the analytical result. We tolerate
+ * 3 at most here. The comparison with the absolute error calculated by GSL
+ * cannot be done "at one sigma" and therefore we double the error in the
+ * absolute comparison. Note that the Integrator class has an accuracy_absolute_
+ * member which by default is way larger then the GSL returned error in these
+ * simple cases. */
+constexpr int fuzzyness = 3;
 
 TEST(one_dim_no_arguments) {
-  // The used algorithm sometimes underestimates the true error by a few bits
-  // of precision.
-  constexpr double eps = std::numeric_limits<double>::epsilon() * 5;
+  // This test performse used algorithm sometimes underestimates the true error
+  // by a few bits of precision.
+  vir::test::setFuzzyness<double>(fuzzyness);
   smash::Integrator integrate;
   for (int i = 0; i < 10; ++i) {
     const auto result = integrate(0, i, [](double) { return 1.; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), double(i), result.error() + eps);
+    FUZZY_COMPARE(result.value(), double(i));
+    COMPARE_ABSOLUTE_ERROR(result.value(), double(i), 2 * result.error());
   }
   for (int i = 0; i < 10; ++i) {
     const auto result = integrate(0, i, [](double x) { return x; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * 0.5, result.error() + eps);
+    FUZZY_COMPARE(result.value(), i * i * 0.5);
+    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * 0.5, 2 * result.error());
   }
 }
 
 TEST(one_dim_with_lambda_captures) {
+  vir::test::setFuzzyness<double>(fuzzyness);
   smash::Integrator integrate;
   for (int i = 0; i < 10; ++i) {
     const auto result = integrate(0, i, [i](double x) { return x + i; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * 1.5, 1.2 * result.error())
+    FUZZY_COMPARE(result.value(), i * i * 1.5);
+    COMPARE_ABSOLUTE_ERROR(result.value(), i * i * 1.5, 2 * result.error())
         << "i = " << i;
   }
   for (int i = 0; i < 10; ++i) {
-    double y = i * 2.;
+    const double y = i * 2.;
     const auto result = integrate(0, i, [&](double x) { return x * y + i; });
-    COMPARE_ABSOLUTE_ERROR(result.value(), i * i + i * i * y * 0.5,
-                           result.error())
+    const double exact_result = i * i * (i + 1);
+    FUZZY_COMPARE(result.value(), exact_result);
+    COMPARE_ABSOLUTE_ERROR(result.value(), exact_result, 2 * result.error())
         << "\ni = " << i;
   }
 }
