@@ -2271,9 +2271,18 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles)) {
     discarded_interactions_total_++;
-    logg[LExperiment].debug(~einhard::DRed(), "✘ ", action,
-                            " (discarded: invalid)");
+    logg[LExperiment].warn(~einhard::DRed(), "✘ ", action,
+                           " (discarded: invalid)");
     return false;
+  }
+  if (action.get_type() == ProcessType::FluidizationNoRemoval) {
+    auto &incoming = action.incoming_particles()[0];
+    if (incoming.is_fluidized()) {
+      // If one of the incoming particles is fluidized, the action should
+      // not happen. This if should never be entered!
+      logg[LExperiment].fatal() << "Discarding " << incoming.id();
+      return false;
+    }
   }
   try {
     action.generate_final_state();
@@ -2313,7 +2322,7 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   if (action.get_type() == ProcessType::Wall) {
     wall_actions_total_++;
   }
-  if (action.get_type() == ProcessType::HyperSurfaceCrossing) {
+  if (action.get_type() == ProcessType::Fluidization) {
     total_hypersurface_crossing_actions_++;
     total_energy_removed_ += action.incoming_particles()[0].momentum().x0();
   }
@@ -2345,14 +2354,14 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
    * position could be either at 10 fm or at 5 fm.
    */
   for (const auto &output : outputs_) {
-    if (output->is_dilepton_output() || output->is_photon_output()) {
-      continue;
-    }
-    if (output->is_IC_output() &&
-        action.get_type() != ProcessType::HyperSurfaceCrossing) {
-      continue;
-    } else {
-      output->at_interaction(action, rho);
+    if (!output->is_dilepton_output() && !output->is_photon_output()) {
+      if (output->is_IC_output() &&
+          (action.get_type() == ProcessType::Fluidization ||
+           action.get_type() == ProcessType::FluidizationNoRemoval)) {
+        output->at_interaction(action, rho);
+      } else if (!output->is_IC_output()) {
+        output->at_interaction(action, rho);
+      }
     }
   }
 

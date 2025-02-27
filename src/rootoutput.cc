@@ -452,7 +452,8 @@ void RootOutput::at_interaction(const Action &action,
   }
 
   if (write_initial_conditions_ &&
-      action.get_type() == ProcessType::HyperSurfaceCrossing) {
+      (action.get_type() == ProcessType::Fluidization ||
+       action.get_type() == ProcessType::FluidizationNoRemoval)) {
     particles_to_tree(action.incoming_particles());
   }
 }

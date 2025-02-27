@@ -344,6 +344,11 @@ class ParticleData {
   /// Getter for belongs_to label
   BelongsTo belongs_to() const { return belongs_to_; }
 
+  /// Fluidize the particle
+  void fluidize() { fluidized_ = true; }
+  /// Check whether the particle is fluidized
+  bool is_fluidized() const { return fluidized_; }
+
   /**
    * Check whether two particles have the same id
    * \param[in] a particle to compare to
@@ -413,6 +418,7 @@ class ParticleData {
     dst.initial_xsec_scaling_factor_ = initial_xsec_scaling_factor_;
     dst.begin_formation_time_ = begin_formation_time_;
     dst.belongs_to_ = belongs_to_;
+    dst.fluidized_ = fluidized_;
   }
 
   /**
@@ -454,6 +460,11 @@ class ParticleData {
    * \see Particles::data_
    */
   bool hole_ = false;
+
+  /// If the particle is part of a pseudofluid.
+  // A particle cannot be un-fluidized, and any children it produces inherits
+  // this trait.
+  bool fluidized_ = false;
 
   /// momenta of the particle: x0, x1, x2, x3 as E, px, py, pz
   FourVector momentum_;

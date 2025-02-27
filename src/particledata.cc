@@ -34,7 +34,7 @@ double ParticleData::effective_mass() const {
 void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
                                double time_last_coll,
                                const ParticleList &plist) {
-  if (pt != ProcessType::Wall) {
+  if ((pt != ProcessType::Wall) && (pt != ProcessType::FluidizationNoRemoval)) {
     history_.collisions_per_particle = ncoll;
     history_.time_last_collision = time_last_coll;
   }
@@ -48,10 +48,11 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
       history_.p2 = 0x0;
       break;
     case ProcessType::Elastic:
-    case ProcessType::HyperSurfaceCrossing:
     case ProcessType::FailedString:
+    case ProcessType::Fluidization:
+    case ProcessType::FluidizationNoRemoval:
       // Parent particles are not updated by the elastic scatterings,
-      // hypersurface crossings or failed string processes
+      // failed string processes, or fluidizations
       break;
     case ProcessType::TwoToOne:
     case ProcessType::TwoToTwo:

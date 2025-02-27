@@ -21,24 +21,42 @@ void FluidizationAction::generate_final_state() {
   // check that there is only 1 incoming particle
   assert(incoming_particles_.size() == 1);
 
-  // Return empty list because we want to remove the incoming particle
-  outgoing_particles_ = {};
+  if (remove_particle_) {
+    // Return empty list because we want to remove the incoming particle
+    outgoing_particles_ = {};
+  } else {
+    outgoing_particles_ = incoming_particles_;
+    outgoing_particles_[0].fluidize();
+  }
 }
 
 double FluidizationAction::check_conservation(const uint32_t id_process) const {
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);
-  if (unlikely(before == after)) {
-    throw std::runtime_error(
-        "Conservation laws obeyed during fluidization, which should not happen "
-        "as particles are removed. Particle was not properly removed in "
-        "process: " +
-        std::to_string(id_process));
-  }
+  if (remove_particle_) {
+    if (unlikely(before == after)) {
+      throw std::runtime_error(
+          "Conservation laws obeyed during fluidization, which should not "
+          "happen as particles are removed. Particle was not properly removed "
+          "in process: " +
+          std::to_string(id_process));
+    }
 
-  if (unlikely(outgoing_particles_.size() != 0)) {
-    throw std::runtime_error(
-        "Particle was not removed successfully in fluidization action.");
+    if (unlikely(outgoing_particles_.size() != 0)) {
+      throw std::runtime_error(
+          "Particle was not removed successfully in fluidization action.");
+    }
+  } else {
+    if (unlikely(before != after)) {
+      throw std::runtime_error(
+          "Conservation laws not obeyed during fluidization, but they should "
+          "since supposedly no removal was done.");
+    }
+
+    if (unlikely(outgoing_particles_.size() == 0)) {
+      throw std::runtime_error(
+          "Particle was removed in a FluidizationNoRemoval process.");
+    }
   }
 
   return 0.;

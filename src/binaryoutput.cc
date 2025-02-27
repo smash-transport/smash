@@ -410,7 +410,8 @@ void BinaryOutputInitialConditions::at_eventend(
 
 void BinaryOutputInitialConditions::at_interaction(const Action &action,
                                                    const double) {
-  if (action.get_type() == ProcessType::HyperSurfaceCrossing) {
+  if (action.get_type() == ProcessType::Fluidization ||
+      action.get_type() == ProcessType::FluidizationNoRemoval) {
     const char pchar = 'p';
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(action.incoming_particles().size());

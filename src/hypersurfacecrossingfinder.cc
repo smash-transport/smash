@@ -31,6 +31,9 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     if (t_end < 0.0) {
       continue;
     }
+    if (p.is_fluidized()) {
+      continue;
+    }
 
     // For frozen Fermi motion:
     // Fermi momenta are only applied if particles interact. The particle

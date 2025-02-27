@@ -150,7 +150,8 @@ void ICOutput::at_intermediate_time(const Particles &,
 }
 
 void ICOutput::at_interaction(const Action &action, const double) {
-  assert(action.get_type() == ProcessType::HyperSurfaceCrossing);
+  assert(action.get_type() == ProcessType::Fluidization ||
+         action.get_type() == ProcessType::FluidizationNoRemoval);
   assert(action.incoming_particles().size() == 1);
 
   ParticleData particle = action.incoming_particles()[0];

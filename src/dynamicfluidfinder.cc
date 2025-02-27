@@ -28,6 +28,9 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
     if (t_end < min_time_ || t0 > max_time_) {
       break;
     }
+    if (p.is_fluidized()) {
+      continue;
+    }
     const double fluidization_time =
         t_creation +
         formation_time_fraction_ * (p.formation_time() - t_creation);
@@ -45,7 +48,7 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
     if (above_threshold(p)) {
       double time_until = (1 - p.xsec_scaling_factor() <= really_small)
                               ? 0
-                              : fluidization_time - t0;
+                              : std::max(fluidization_time - t0, 0.);
       actions.emplace_back(
           std::make_unique<FluidizationAction>(p, p, time_until));
     }

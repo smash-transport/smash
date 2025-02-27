@@ -80,7 +80,7 @@ TEST(hypersurface_crossing_action) {
     action->generate_final_state();
     action->perform(&particles, id_process);
 
-    COMPARE(action->get_type(), ProcessType::HyperSurfaceCrossing);
+    COMPARE(action->get_type(), ProcessType::Fluidization);
     // 1 incoming, no outgoing particles expected (particle removed)
     COMPARE(action->incoming_particles().size(), 1u);
     COMPARE(action->outgoing_particles().size(), 0u);

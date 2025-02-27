@@ -34,7 +34,8 @@ class FluidizationAction : public Action {
   FluidizationAction(const ParticleData &in_part, const ParticleData &out_part,
                      const double time_until)
       : Action(in_part, out_part, time_until,
-               ProcessType::HyperSurfaceCrossing) {}
+               (remove_particle_ ? ProcessType::Fluidization
+                                 : ProcessType::FluidizationNoRemoval)) {}
   double get_total_weight() const override { return 0.0; };
   double get_partial_weight() const override { return 0.0; };
   void format_debug_output(std::ostream &out) const override {
@@ -53,6 +54,9 @@ class FluidizationAction : public Action {
    * \param[in] id_process process id only used for debugging output.
    */
   double check_conservation(const uint32_t id_process) const override;
+
+  /// Whether fluidization actions remove the particle from the evolution.
+  static const bool remove_particle_ = false;  // REN: shall be true by default.
 };
 
 }  // namespace smash
