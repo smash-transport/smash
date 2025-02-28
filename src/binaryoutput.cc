@@ -206,7 +206,7 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
     : OutputInterface(name), file_{path, mode}, formatter_(quantities) {
   if (quantities.empty()) {
     throw std::invalid_argument(
-        "Empty quantities list passed to 'BinaryOutputBase' cconstructor.");
+        "Empty quantities list passed to 'BinaryOutputBase' constructor.");
   }
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
@@ -252,6 +252,9 @@ void BinaryOutputBase::write(const Particles &particles) {
 
 void BinaryOutputBase::write(const ParticleList &particles) {
   for (const auto &p : particles) {
+    if (p.is_fluidized()) {
+      continue;
+    }
     write_particledata(p);
   }
 }

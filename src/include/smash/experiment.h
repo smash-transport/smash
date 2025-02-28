@@ -2278,9 +2278,9 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   if (action.get_type() == ProcessType::FluidizationNoRemoval) {
     auto &incoming = action.incoming_particles()[0];
     if (incoming.is_fluidized()) {
-      // If one of the incoming particles is fluidized, the action should
-      // not happen. This if should never be entered!
-      logg[LExperiment].fatal() << "Discarding " << incoming.id();
+      // If one of the incoming particles is already fluidized,
+      // the action should not happen.
+      logg[LExperiment].debug() << "Discarding " << incoming.id();
       return false;
     }
   }
