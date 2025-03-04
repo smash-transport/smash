@@ -95,7 +95,7 @@ function ask_confirmation()
     if user_said_no
     then
        printf "OK. We restart from the beginning.\n\n"
-       main  
+       main
     fi
 }
 
@@ -116,12 +116,20 @@ function change_pythia_version()
                            "${smash_sources_root_dir}"/containers/**/Dockerfile
                            "${smash_sources_root_dir}"/examples/**/README.md
                            "${smash_sources_root_dir}"/src/CMakeLists.txt
-                           )   
-    sed -i -r -e 's/([pP]ythia.*)'"${current_pythia_version}"'/\1'"${new_pythia_version}"'/g'\
+                           )
+    # NOTE: We use -i'.bkp' here so that this script works with both GNU and BSD sed implementations.
+    #       The only drawback is that we need to remove '.bkp' files if sed succeeds.
+    sed -i'.bkp' -r -e 's/([pP]ythia.*)'"${current_pythia_version}"'/\1'"${new_pythia_version}"'/g'\
         -e 's/([pP]ythia.*)'"${current_pythia_version_no_dots}"'/\1'"${new_pythia_version_no_dots}"'/g'\
         -e 's/pythia'"${current_pythia_version_no_dots}"'/pythia'"${new_pythia_version_no_dots}"'/g'\
         -e 's/download\/pythia'"${current_pythia_main_version}"'/download\/pythia'"${new_pythia_main_version}"'/g'\
         "${files_to_be_processed[@]}"
+    if [[ $? -eq 0 ]]; then
+        rm "${files_to_be_processed[@]/%/.bkp}"
+    else
+        printf "\nThe sed command to automatically change Pythia version failed! Leaving backup files, please investigate!\n"
+        inform_about_ending_and_exit
+    fi
 }
 
 #=================================================
@@ -159,7 +167,7 @@ function user_said_no()
 {
     ! user_said_yes
 }
-      
+
 function print_closing_message()
 {
     printf "\n\e[35mPythia version changed. \e[1;35mPlease, remember to mention this operation in the file CHANGELOG.md!\e[0m\n"
