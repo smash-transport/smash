@@ -392,9 +392,9 @@ void BinaryOutputInitialConditions::at_eventstart(const Particles &,
                                                   const EventLabel &,
                                                   const EventInfo &) {}
 
-void BinaryOutputInitialConditions::at_eventend([[maybe_unused]] const Particles &particles,
-                                                const EventLabel &event_label,
-                                                const EventInfo &event) {
+void BinaryOutputInitialConditions::at_eventend(
+    [[maybe_unused]] const Particles &particles, const EventLabel &event_label,
+    const EventInfo &event) {
   // Event end line
   const char fchar = 'f';
   std::fwrite(&fchar, sizeof(char), 1, file_.get());

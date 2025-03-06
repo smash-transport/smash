@@ -184,14 +184,17 @@ FourVector HyperSurfaceCrossActionsFinder::coordinates_on_hypersurface(
   return crossing_position;
 }
 
-ActionList HyperSurfaceCrossActionsFinder::find_final_actions(const Particles &search_list, [[maybe_unused]] bool only_res) const {
+ActionList HyperSurfaceCrossActionsFinder::find_final_actions(
+    const Particles &search_list, [[maybe_unused]] bool only_res) const {
   static bool warned = false;
-  const bool impose_kinematic_cut_for_SMASH_IC = (rap_cut_>0.0) && (pT_cut_>0.0);
-  if (search_list.size() != 0 && !impose_kinematic_cut_for_SMASH_IC && !warned) {
+  const bool impose_kinematic_cut_for_SMASH_IC =
+      (rap_cut_ > 0.0) && (pT_cut_ > 0.0);
+  if (search_list.size() != 0 && !impose_kinematic_cut_for_SMASH_IC &&
+      !warned) {
     logg[LHyperSurfaceCrossing].warn(
-       "End time might be too small for initial conditions output. "
-       "Hypersurface has not yet been crossed by ",
-       search_list.size(), " particle(s).");
+        "End time might be too small for initial conditions output. "
+        "Hypersurface has not yet been crossed by ",
+        search_list.size(), " particle(s).");
     warned = true;
   }
   return {};

@@ -102,23 +102,4 @@ bool DynamicFluidizationFinder::is_process_fluidizable(
   return false;
 }
 
-ActionList DynamicFluidizationFinder::find_final_actions(
-    const Particles &search_list, [[maybe_unused]] bool only_res) const {
-  int fluidized_remaining = 0;
-  ActionList actions;
-  for (const auto &p : search_list) {
-    if (p.is_fluidized()) {
-      fluidized_remaining++;
-      actions.emplace_back(std::make_unique<FreeforallAction>(
-          ParticleList{p}, ParticleList{}, p.position().x0()));
-    }
-  }
-  if (fluidized_remaining > 0) {
-    logg[LFluidization].warn()
-        << "End time might be too small for dynamic fluidization, "
-        << fluidized_remaining << " particles remained fluidized.";
-  }
-  return actions;
-};
-
 }  // namespace smash

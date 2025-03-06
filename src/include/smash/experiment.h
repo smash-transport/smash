@@ -2332,9 +2332,9 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   /*!\Userguide
    * \page doxypage_output_collisions_box_modus
    * \note When SMASH is running in the box modus, particle coordinates
-   * in the collision output can be out of the box. This is not an error.  Box
-   * boundary conditions are intentionally not imposed before collision output
-   * to allow unambiguous finding of the interaction point.
+   * in the collision output can be out of the box. This is not an error.
+   * Box boundary conditions are intentionally not imposed before collision
+   * output to allow unambiguous finding of the interaction point.
    * <I>Example</I>: two particles in the box have x coordinates 0.1 and
    * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
    * For calculating collision the first one is wrapped to 10.1 fm.
@@ -2345,13 +2345,14 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
    * position could be either at 10 fm or at 5 fm.
    */
   for (const auto &output : outputs_) {
-    if (!output->is_dilepton_output() && !output->is_photon_output()) {
-      if (output->is_IC_output() &&
-          action.get_type() == ProcessType::HyperSurfaceCrossing) {
-        output->at_interaction(action, rho);
-      } else if (!output->is_IC_output()) {
-        output->at_interaction(action, rho);
-      }
+    if (output->is_dilepton_output() || output->is_photon_output()) {
+      continue;
+    }
+    if (output->is_IC_output() &&
+        action.get_type() == ProcessType::HyperSurfaceCrossing) {
+      output->at_interaction(action, rho);
+    } else if (!output->is_IC_output()) {
+      output->at_interaction(action, rho);
     }
   }
 
