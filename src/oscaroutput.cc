@@ -18,7 +18,6 @@
 #include "smash/forwarddeclarations.h"
 
 namespace smash {
-static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(
@@ -210,17 +209,6 @@ void OscarOutput<Format, Contents>::at_eventend(const Particles &particles,
   }
   // Flush to disk
   std::fflush(file_.get());
-
-  if (Contents & OscarParticlesIC) {
-    // If the runtime is too short some particles might not yet have
-    // reached the hypersurface. Warning is printed.
-    if (particles.size() != 0 && !event.impose_kinematic_cut_for_SMASH_IC) {
-      logg[LHyperSurfaceCrossing].warn(
-          "End time might be too small for initial conditions output. "
-          "Hypersurface has not yet been crossed by ",
-          particles.size(), " particle(s).");
-    }
-  }
 }
 
 template <OscarOutputFormat Format, int Contents>

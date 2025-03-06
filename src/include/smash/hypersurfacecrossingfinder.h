@@ -67,9 +67,7 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
   }
 
   /// No final actions for hypersurface crossing
-  ActionList find_final_actions(const Particles &, bool) const override {
-    return {};
-  }
+  ActionList find_final_actions(const Particles &, bool) const override;
 
  private:
   /// Proper time of the hypersurface in fm.

@@ -83,9 +83,7 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
   }
 
   /// No final actions after fluidizing
-  ActionList find_final_actions(const Particles &, bool) const override {
-    return {};
-  }
+  ActionList find_final_actions(const Particles &, bool) const override;
 
   /**
    * Determine if fluidization condition is satisfied.

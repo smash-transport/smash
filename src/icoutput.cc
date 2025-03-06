@@ -15,7 +15,6 @@
 #include "smash/action.h"
 
 namespace smash {
-static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 /*!\Userguide
  * \page doxypage_output_initial_conditions
@@ -132,7 +131,7 @@ void ICOutput::at_eventstart(const Particles &, const EventLabel &event_label,
                event_label.event_number, event_label.ensemble_number);
 }
 
-void ICOutput::at_eventend(const Particles &particles,
+void ICOutput::at_eventend([[maybe_unused]] const Particles &particles,
                            const EventLabel &event_label,
                            const EventInfo &event) {
   if (event.n_ensembles != 1) {
@@ -141,15 +140,6 @@ void ICOutput::at_eventend(const Particles &particles,
   }
   std::fprintf(file_.get(), "# event %i ensemble %i end\n",
                event_label.event_number, event_label.ensemble_number);
-
-  // If the runtime is too short some particles might not yet have
-  // reached the hypersurface. Warning is printed.
-  if (particles.size() != 0 && !event.impose_kinematic_cut_for_SMASH_IC) {
-    logg[LHyperSurfaceCrossing].warn(
-        "End time might be too small for initial conditions output. "
-        "Hypersurface has not yet been crossed by ",
-        particles.size(), " particle(s).");
-  }
 }
 
 void ICOutput::at_intermediate_time(const Particles &,
