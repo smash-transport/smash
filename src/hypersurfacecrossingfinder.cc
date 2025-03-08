@@ -31,7 +31,7 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     if (t_end < 0.0) {
       continue;
     }
-    if (p.is_fluidized()) {
+    if (p.is_core()) {
       continue;
     }
 

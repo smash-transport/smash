@@ -103,9 +103,9 @@ void ScatterAction::generate_final_state() {
           ", PDGcode2=" + incoming_particles_[1].pdgcode().string() + ")");
   }
 
-  const bool fluidized_in_incoming =
+  const bool core_in_incoming =
       std::any_of(incoming_particles_.begin(), incoming_particles_.end(),
-                  [](const ParticleData &p) { return p.is_fluidized(); });
+                  [](const ParticleData &p) { return p.is_core(); });
   for (ParticleData &new_particle : outgoing_particles_) {
     // Boost to the computational frame
     new_particle.boost_momentum(
@@ -114,7 +114,7 @@ void ScatterAction::generate_final_state() {
     if (proc->get_type() != ProcessType::Elastic) {
       new_particle.set_4position(middle_point);
     }
-    if (fluidized_in_incoming) {
+    if (core_in_incoming) {
       new_particle.fluidize();
     }
   }

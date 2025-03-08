@@ -24,6 +24,7 @@
 #include "dynamicfluidfinder.h"
 #include "energymomentumtensor.h"
 #include "fields.h"
+#include "fluidizationaction.h"
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
 #include "grid.h"
@@ -2268,20 +2269,31 @@ template <typename Modus>
 bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
                                        bool include_pauli_blocking) {
   Particles &particles = ensembles_[i_ensemble];
+  auto &incoming = action.incoming_particles();
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles)) {
     discarded_interactions_total_++;
-    logg[LExperiment].warn(~einhard::DRed(), "✘ ", action,
-                           " (discarded: invalid)");
+    logg[LExperiment].debug(~einhard::DRed(), "✘ ", action,
+                            " (discarded: invalid)");
     return false;
   }
-  if (action.get_type() == ProcessType::FluidizationNoRemoval) {
-    auto &incoming = action.incoming_particles()[0];
-    if (incoming.is_fluidized()) {
-      // If one of the incoming particles is already fluidized,
-      // the action should not happen.
-      logg[LExperiment].debug() << "Discarding " << incoming.id();
+  const bool core_in_incoming =
+      std::any_of(incoming.begin(), incoming.end(),
+                  [](const ParticleData &p) { return p.is_core(); });
+  if (core_in_incoming) {
+    if (action.get_type() == ProcessType::FluidizationNoRemoval) {
+      // If the incoming particle is already core, the action should not happen.
+      logg[LExperiment].debug() << "Discarding " << incoming[0].id();
       return false;
+    } else {
+      /* No collisions can happen between core and corona particles
+       * (1→N can still happen) */
+      const bool all_core_in_incoming =
+          std::all_of(incoming.begin(), incoming.end(),
+                      [](const ParticleData &p) { return p.is_core(); });
+      if (!all_core_in_incoming) {
+        return false;
+      }
     }
   }
   try {
@@ -2300,10 +2312,10 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   // to signal that there was some interaction in this event
   if (modus_.is_collider()) {
     int count_target = 0, count_projectile = 0;
-    for (const auto &incoming : action.incoming_particles()) {
-      if (incoming.belongs_to() == BelongsTo::Projectile) {
+    for (const auto &p : incoming) {
+      if (p.belongs_to() == BelongsTo::Projectile) {
         count_projectile++;
-      } else if (incoming.belongs_to() == BelongsTo::Target) {
+      } else if (p.belongs_to() == BelongsTo::Target) {
         count_target++;
       }
     }
@@ -2354,14 +2366,16 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
    * position could be either at 10 fm or at 5 fm.
    */
   for (const auto &output : outputs_) {
-    if (!output->is_dilepton_output() && !output->is_photon_output()) {
-      if (output->is_IC_output() &&
-          (action.get_type() == ProcessType::Fluidization ||
-           action.get_type() == ProcessType::FluidizationNoRemoval)) {
-        output->at_interaction(action, rho);
-      } else if (!output->is_IC_output()) {
+    if (output->is_dilepton_output() || output->is_photon_output()) {
+      continue;
+    }
+    if (output->is_IC_output()) {
+      if (action.get_type() == ProcessType::Fluidization ||
+          action.get_type() == ProcessType::FluidizationNoRemoval) {
         output->at_interaction(action, rho);
       }
+    } else {
+      output->at_interaction(action, rho);
     }
   }
 

@@ -10,6 +10,7 @@
 #include "smash/dynamicfluidfinder.h"
 
 #include "smash/fluidizationaction.h"
+#include "smash/freeforallaction.h"
 #include "smash/logging.h"
 
 namespace smash {
@@ -28,7 +29,7 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
     if (t_end < min_time_ || t0 > max_time_) {
       break;
     }
-    if (p.is_fluidized()) {
+    if (p.is_core()) {
       continue;
     }
     const double fluidization_time =
@@ -68,7 +69,9 @@ bool DynamicFluidizationFinder::above_threshold(
         background_.count(pdata.id()) ? background_.at(pdata.id()) : 0;
     const double e_den_particles =
         Tmunu.boosted(Tmunu.landau_frame_4velocity())[0];
-    if (e_den_particles + background >= energy_density_threshold_ + pdata.pole_mass()/std::pow(2*M_PI, 1.5)) {
+    if (e_den_particles + background >=
+        energy_density_threshold_ +
+            pdata.pole_mass() / std::pow(2 * M_PI, 1.5)) {
       logg[LFluidization].debug()
           << "Fluidize " << pdata.id() << " with " << e_den_particles << "+"
           << background << " GeV/fm^3 at " << pdata.position().x0()
@@ -88,10 +91,8 @@ bool DynamicFluidizationFinder::is_process_fluidizable(
   switch (type) {
     case ProcessType::Elastic:
       return fluidizable_processes_[IncludedFluidizableProcesses::From_Elastic];
-      break;
     case ProcessType::Decay:
       return fluidizable_processes_[IncludedFluidizableProcesses::From_Decay];
-      break;
     case ProcessType::TwoToOne:
     case ProcessType::TwoToTwo:
     case ProcessType::TwoToThree:
@@ -103,15 +104,36 @@ bool DynamicFluidizationFinder::is_process_fluidizable(
     case ProcessType::MultiParticleFiveToTwo:
       return fluidizable_processes_
           [IncludedFluidizableProcesses::From_Inelastic];
-      break;
     case ProcessType::StringHard:
       return fluidizable_processes_
           [IncludedFluidizableProcesses::From_HardString];
-      break;
     default:
       return false;
   }
-  return false;
+}
+
+ActionList DynamicFluidizationFinder::find_final_actions(
+    const Particles &search_list, [[maybe_unused]] bool only_res) const {
+  ActionList actions;
+  static int fluidized_particles = 0;
+  static double energy = 0.;
+  bool print_warning = true;
+  for (auto &p : search_list) {
+    if (p.is_core()) {
+      actions.emplace_back(std::make_unique<FreeforallAction>(
+          ParticleList{p}, ParticleList{}, p.position().x0()));
+      fluidized_particles++;
+      energy += p.momentum()[0];
+      print_warning = false;  // print only at the final call
+    }
+  }
+  if (print_warning) {
+    logg[LFluidization].info() << fluidized_particles
+                               << " particles were part of the core at the end"
+                                  " of the evolution with energy "
+                               << energy << " GeV.";
+  }
+  return actions;
 }
 
 }  // namespace smash

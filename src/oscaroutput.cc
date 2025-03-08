@@ -128,9 +128,6 @@ OscarOutput<Format, Contents>::OscarOutput(
 template <OscarOutputFormat Format, int Contents>
 inline void OscarOutput<Format, Contents>::write(const Particles &particles) {
   for (const ParticleData &data : particles) {
-    if (data.is_fluidized()) {
-      continue;
-    }
     write_particledata(data);
   }
 }

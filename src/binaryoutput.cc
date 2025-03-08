@@ -252,9 +252,6 @@ void BinaryOutputBase::write(const Particles &particles) {
 
 void BinaryOutputBase::write(const ParticleList &particles) {
   for (const auto &p : particles) {
-    if (p.is_fluidized()) {
-      continue;
-    }
     write_particledata(p);
   }
 }

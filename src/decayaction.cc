@@ -63,9 +63,9 @@ void DecayAction::generate_final_state() {
           std::to_string(incoming_particles_[0].effective_mass()) + ")");
   }
 
-  const bool fluidized_in_incoming =
+  const bool core_in_incoming =
       std::any_of(incoming_particles_.begin(), incoming_particles_.end(),
-                  [](const ParticleData &p) { return p.is_fluidized(); });
+                  [](const ParticleData &p) { return p.is_core(); });
   // Set formation time.
   for (auto &p : outgoing_particles_) {
     logg[LDecayModes].debug("particle momenta in lrf ", p);
@@ -74,7 +74,7 @@ void DecayAction::generate_final_state() {
     // Boost to the computational frame
     p.boost_momentum(-total_momentum_of_outgoing_particles().velocity());
     logg[LDecayModes].debug("particle momenta in comp ", p);
-    if (fluidized_in_incoming) {
+    if (core_in_incoming) {
       p.fluidize();
     }
   }
