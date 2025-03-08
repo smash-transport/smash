@@ -33,9 +33,11 @@ class DecayActionsFinder : public ActionFinderInterface {
    * \param[in] do_non_strong_decays whether to do non-strong decays at the end
    */
   explicit DecayActionsFinder(double res_lifetime_factor,
-                              bool do_non_strong_decays)
+                              bool do_non_strong_decays,
+                              bool force_decays_at_end)
       : res_lifetime_factor_(res_lifetime_factor),
-        do_final_non_strong_decays_(do_non_strong_decays) {}
+        do_final_non_strong_decays_(do_non_strong_decays),
+        find_final_decays_(force_decays_at_end) {}
 
   /**
    * Check the whole particle list for decays.
@@ -79,6 +81,9 @@ class DecayActionsFinder : public ActionFinderInterface {
 
   /// Do all non-strong decays (including weak and electro-magnetic ones)
   const bool do_final_non_strong_decays_;
+
+  /// Whether to find final decay actions
+  const bool find_final_decays_;
 
   /**
    * Whether to initial state particles can decay. Useful for analyzing

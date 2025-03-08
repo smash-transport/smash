@@ -249,7 +249,7 @@ class Experiment : public ExperimentBase {
    *
    * \throws runtime_error if found actions cannot be performed
    */
-  void do_final_decays();
+  void do_final_interactions();
 
   /// Output at the end of an event
   void final_output();
@@ -1068,7 +1068,7 @@ Experiment<Modus>::Experiment(Configuration &config,
           "hang.");
     }
     action_finders_.emplace_back(std::make_unique<DecayActionsFinder>(
-        parameters_.res_lifetime_factor, parameters_.do_non_strong_decays));
+        parameters_.res_lifetime_factor, parameters_.do_non_strong_decays, force_decays_));
   }
   bool no_coll = config.take(InputKeys::collTerm_noCollisions);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
@@ -3027,19 +3027,15 @@ void Experiment<Modus>::update_potentials() {
 }
 
 template <typename Modus>
-void Experiment<Modus>::do_final_decays() {
+void Experiment<Modus>::do_final_interactions() {
   /* At end of time evolution: Force all resonances to decay. In order to handle
    * decay chains, we need to loop until no further actions occur. */
-  bool actions_performed, decays_found;
+  bool actions_performed, actions_found;
   uint64_t interactions_old;
-  for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
-    if (IC_switch_ && !IC_dynamic_) {
-      HyperSurfaceCrossActionsFinder::warn_if_some_particles_did_not_cross(
-          ensembles_[i_ens].size(), kinematic_cuts_for_IC_output_);
-    }
-    do {
-      decays_found = false;
-      interactions_old = interactions_total_;
+  do {
+    actions_found = false;
+    interactions_old = interactions_total_;
+    for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
       Actions actions;
       // Dileptons: shining of remaining resonances
       if (dilepton_finder_ != nullptr) {
@@ -3052,21 +3048,22 @@ void Experiment<Modus>::do_final_decays() {
         auto found_actions = finder->find_final_actions(ensembles_[i_ens]);
         if (!found_actions.empty()) {
           actions.insert(std::move(found_actions));
-          decays_found = true;
+          actions_found = true;
         }
       }
       // Perform actions.
       while (!actions.is_empty()) {
         perform_action(*actions.pop(), i_ens, false);
       }
-      actions_performed = interactions_total_ > interactions_old;
-      // Throw an error if actions were found but not performed
-      if (decays_found && !actions_performed) {
-        throw std::runtime_error("Final decays were found but not performed.");
-      }
-      // loop until no more decays occur
-    } while (actions_performed);
-  }
+    }
+    actions_performed = interactions_total_ > interactions_old;
+    // Throw an error if actions were found but not performed
+    if (actions_found && !actions_performed) {
+      throw std::runtime_error("Final actions were found but not performed.");
+    }
+    // loop until no more decays occur
+  } while (actions_performed);
+
   // Dileptons: shining of stable particles at the end
   if (dilepton_finder_ != nullptr) {
     for (const auto &output : outputs_) {
@@ -3272,9 +3269,7 @@ void Experiment<Modus>::run() {
 
     run_time_evolution(end_time_);
 
-    if (force_decays_) {
-      do_final_decays();
-    }
+    do_final_interactions();
 
     // Output at event end
     final_output();
