@@ -184,20 +184,14 @@ FourVector HyperSurfaceCrossActionsFinder::coordinates_on_hypersurface(
   return crossing_position;
 }
 
-ActionList HyperSurfaceCrossActionsFinder::find_final_actions(
-    const Particles &search_list, [[maybe_unused]] bool only_res) const {
-  static bool warned = false;
-  const bool impose_kinematic_cut_for_SMASH_IC =
-      (rap_cut_ > 0.0) && (pT_cut_ > 0.0);
-  if (search_list.size() != 0 && !impose_kinematic_cut_for_SMASH_IC &&
-      !warned) {
+void HyperSurfaceCrossActionsFinder::warn_if_some_particles_did_not_cross(
+    const size_t number_of_particles, bool impose_kinematic_cut) {
+  if (number_of_particles != 0 && !impose_kinematic_cut) {
     logg[LHyperSurfaceCrossing].warn(
         "End time might be too small for initial conditions output. "
         "Hypersurface has not yet been crossed by ",
-        search_list.size(), " particle(s).");
-    warned = true;
+        number_of_particles, " particle(s).");
   }
-  return {};
 }
 
 }  // namespace smash
