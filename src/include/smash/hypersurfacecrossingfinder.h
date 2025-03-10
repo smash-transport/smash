@@ -71,6 +71,14 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
     return {};
   }
 
+  /**
+   * Gives a warning if \p number_of_particles is not 0 and there are no
+   * kinematic cuts. If this is the case, it may be that the end time set
+   * by the user is too small.
+   *
+   * \param[in] number_of_particles how many particles are in the system
+   * \param[in] impose_kinematic_cut whether kinematic cuts were applied
+   */
   static void warn_if_some_particles_did_not_cross(
       const size_t number_of_particles, bool impose_kinematic_cut);
 
