@@ -2332,9 +2332,9 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   /*!\Userguide
    * \page doxypage_output_collisions_box_modus
    * \note When SMASH is running in the box modus, particle coordinates
-   * in the collision output can be out of the box. This is not an error.  Box
-   * boundary conditions are intentionally not imposed before collision output
-   * to allow unambiguous finding of the interaction point.
+   * in the collision output can be out of the box. This is not an error.
+   * Box boundary conditions are intentionally not imposed before collision
+   * output to allow unambiguous finding of the interaction point.
    * <I>Example</I>: two particles in the box have x coordinates 0.1 and
    * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
    * For calculating collision the first one is wrapped to 10.1 fm.
@@ -2345,13 +2345,14 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
    * position could be either at 10 fm or at 5 fm.
    */
   for (const auto &output : outputs_) {
-    if (!output->is_dilepton_output() && !output->is_photon_output()) {
-      if (output->is_IC_output() &&
-          action.get_type() == ProcessType::HyperSurfaceCrossing) {
-        output->at_interaction(action, rho);
-      } else if (!output->is_IC_output()) {
-        output->at_interaction(action, rho);
-      }
+    if (output->is_dilepton_output() || output->is_photon_output()) {
+      continue;
+    }
+    if (output->is_IC_output() &&
+        action.get_type() != ProcessType::HyperSurfaceCrossing) {
+      continue;
+    } else {
+      output->at_interaction(action, rho);
     }
   }
 
@@ -3008,12 +3009,15 @@ void Experiment<Modus>::do_final_decays() {
    * decay chains, we need to loop until no further actions occur. */
   bool actions_performed, decays_found;
   uint64_t interactions_old;
-  do {
-    decays_found = false;
-    interactions_old = interactions_total_;
-    for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
+  for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
+    if (IC_switch_ && !IC_dynamic_) {
+      HyperSurfaceCrossActionsFinder::warn_if_some_particles_did_not_cross(
+          ensembles_[i_ens].size(), kinematic_cuts_for_IC_output_);
+    }
+    do {
+      decays_found = false;
+      interactions_old = interactions_total_;
       Actions actions;
-
       // Dileptons: shining of remaining resonances
       if (dilepton_finder_ != nullptr) {
         for (const auto &output : outputs_) {
@@ -3032,15 +3036,14 @@ void Experiment<Modus>::do_final_decays() {
       while (!actions.is_empty()) {
         perform_action(*actions.pop(), i_ens, false);
       }
-    }
-    actions_performed = interactions_total_ > interactions_old;
-    // Throw an error if actions were found but not performed
-    if (decays_found && !actions_performed) {
-      throw std::runtime_error("Final decays were found but not performed.");
-    }
-    // loop until no more decays occur
-  } while (actions_performed);
-
+      actions_performed = interactions_total_ > interactions_old;
+      // Throw an error if actions were found but not performed
+      if (decays_found && !actions_performed) {
+        throw std::runtime_error("Final decays were found but not performed.");
+      }
+      // loop until no more decays occur
+    } while (actions_performed);
+  }
   // Dileptons: shining of stable particles at the end
   if (dilepton_finder_ != nullptr) {
     for (const auto &output : outputs_) {

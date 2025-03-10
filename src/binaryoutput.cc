@@ -19,8 +19,6 @@
 
 namespace smash {
 
-static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
-
 static auto get_list_of_binary_quantities(const std::string &content,
                                           const std::string &format,
                                           const OutputParameters &parameters);
@@ -394,9 +392,9 @@ void BinaryOutputInitialConditions::at_eventstart(const Particles &,
                                                   const EventLabel &,
                                                   const EventInfo &) {}
 
-void BinaryOutputInitialConditions::at_eventend(const Particles &particles,
-                                                const EventLabel &event_label,
-                                                const EventInfo &event) {
+void BinaryOutputInitialConditions::at_eventend(
+    [[maybe_unused]] const Particles &particles, const EventLabel &event_label,
+    const EventInfo &event) {
   // Event end line
   const char fchar = 'f';
   std::fwrite(&fchar, sizeof(char), 1, file_.get());
@@ -408,15 +406,6 @@ void BinaryOutputInitialConditions::at_eventend(const Particles &particles,
 
   // Flush to disk
   std::fflush(file_.get());
-
-  // If the runtime is too short some particles might not yet have
-  // reached the hypersurface. Warning is printed.
-  if (particles.size() != 0 && !event.impose_kinematic_cut_for_SMASH_IC) {
-    logg[LHyperSurfaceCrossing].warn(
-        "End time might be too small for initial conditions output. "
-        "Hypersurface has not yet been crossed by ",
-        particles.size(), " particle(s).");
-  }
 }
 
 void BinaryOutputInitialConditions::at_interaction(const Action &action,
