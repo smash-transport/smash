@@ -42,12 +42,17 @@ void test_distribution(int n_test, double dx, Chi get_chi,
 
 using namespace smash;
 
+std::unique_ptr<StringProcess> dummy_string_process() {
+  auto sp = std::make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1.,
+                                            .0, .0, .5, .0, .21, .0, .0, true,
+                                            1. / 3., true, 0., false);
+
+  return sp;
+}
+
 TEST(common_setup) {
   // StringProcess to use member functions
-  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
-      1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
-      1. / 3., true, 0., false);
-
+  std::unique_ptr<StringProcess> sp = dummy_string_process();
   // Pythia object to work with
   Pythia8::Pythia pythia_interface{PYTHIA_XML_DIR, false};
   sp->common_setup_pythia(&pythia_interface, 1.0, 1.0, .3, .5, .7, .9);
@@ -57,7 +62,7 @@ TEST(common_setup) {
   FUZZY_COMPARE(pythia_interface.settings.parm("MultipartonInteractions:pTmin"),
                 1.5);
   VERIFY(pythia_interface.settings.mode("MultipartonInteractions:nSample") ==
-         10000);
+         100000);
   FUZZY_COMPARE(pythia_interface.settings.parm("StringPT:sigma"), .9);
   FUZZY_COMPARE(pythia_interface.settings.parm("StringFlav:probQQtoQ"), 1.0);
   FUZZY_COMPARE(pythia_interface.settings.parm("StringFlav:probStoUD"), 1.0);
@@ -80,9 +85,7 @@ TEST(common_setup) {
 
 TEST(append_final) {
   // Create StringProcess to work with
-  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
-      1.0, 1.0, .0, 0.001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
-      1. / 3., true, 0., false);
+  std::unique_ptr<StringProcess> sp = dummy_string_process();
 
   // ParticleData object to calculate final state for
   ParticleData a{ParticleType::find(0x211)};
@@ -116,10 +119,7 @@ TEST(append_final) {
 }
 
 TEST(initialization) {
-  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
-      1.0, 1.0, .0, 0.001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
-      1. / 3., true, 0., false);
-
+  std::unique_ptr<StringProcess> sp = dummy_string_process();
   ParticleData a{ParticleType::find(0x2212)};
   a.set_4momentum(1., 0., 0., 1.);
 
@@ -159,10 +159,7 @@ TEST(initialization) {
 
 TEST(rearrange_ex) {
   // StringProcess to use member functions
-  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
-      1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
-      1. / 3., true, 0., false);
-
+  std::unique_ptr<StringProcess> sp = dummy_string_process();
   // Array for total quark numbers
   std::array<int, 5> tot_quark = {0, 0, 0, 0, 0};
   // Arrays with the excess constituents
@@ -194,10 +191,7 @@ TEST(rearrange_ex) {
 
 TEST(find_excess) {
   // StringProcess to use member functions
-  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
-      1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
-      1. / 3., true, 0., false);
-
+  std::unique_ptr<StringProcess> sp = dummy_string_process();
   // PDG codes for proton and neutron
   PdgCode actual = pdg::p;
   PdgCode mapped = pdg::n;
@@ -227,10 +221,7 @@ TEST(find_excess) {
 
 TEST(restore_constituents) {
   // Create StringProcess to work with member functions
-  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
-      1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
-      1. / 3., true, 0., false);
-
+  std::unique_ptr<StringProcess> sp = dummy_string_process();
   // create Pythia class object to simulate p-p collision
   Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
   pythia.readString("Print:quiet = on");
@@ -284,10 +275,7 @@ TEST(restore_constituents) {
 
 TEST(replace_const) {
   // Create StringProcess to work with member functions
-  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
-      1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
-      1. / 3., true, 0., false);
-
+  std::unique_ptr<StringProcess> sp = dummy_string_process();
   // Create particle entry for an electron
   Pythia8::ParticleDataEntry entry1(11, "e", "e+");
   // Create Pythia Particle, an electron in this case
@@ -358,9 +346,7 @@ TEST(find_total_number_constituent) {
   intermediate.init("intermediate partons", &pythia_hadron->particleData);
 
   // String process to be able to call the member functions
-  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
-      1., 1., .0, .001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
-      1. / 3., true, 0., false);
+  std::unique_ptr<StringProcess> sp = dummy_string_process();
 
   // Arrays for quark and antiquark content
   std::array<int, 5> nquark;
@@ -387,9 +373,7 @@ TEST(string_zlund) {
 }
 
 TEST(string_incoming_lightcone_momenta) {
-  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
-      1.0, 1.0, .0, 0.001, .0, .0, 1., 1., .0, .0, .5, .0, .0, .0, .0, true,
-      1. / 3., true, 0., false);
+  std::unique_ptr<StringProcess> sp = dummy_string_process();
 
   ParticleData a{ParticleType::find(0x2212)};
   a.set_4momentum(0.938, 0., 0., 1.);
@@ -418,9 +402,7 @@ TEST(string_lightcone_final_two) {
   double b = .0;
   double c = .0;
   double d = .0;
-  std::unique_ptr<StringProcess> sp = std::make_unique<StringProcess>(
-      1.0, 1.0, 0.5, 0.001, 1.0, 2.5, 0.217, 0.081, 0.7, 0.7, 0.25, 0.68, 0.98,
-      0.25, 1.0, true, 1. / 3., true, 0.2, false);
+  std::unique_ptr<StringProcess> sp = dummy_string_process();
 
   // returns false because mTsqr_string < 0.
   VERIFY(sp->make_lightcone_final_two(false, -1., 1., .0, .0, a, b, c, d) ==
