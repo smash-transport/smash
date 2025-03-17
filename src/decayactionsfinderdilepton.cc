@@ -39,7 +39,7 @@ void DecayActionsFinderDilepton::shine(const Particles &search_list,
      * in find_final_actions and ignore them here, also unformed
      * resonances cannot decay */
     if (dil_modes.size() == n_all_modes || p.type().is_stable() ||
-        (p.formation_time() > p.position().x0())) {
+        (p.formation_time() > p.position().x0()) || p.is_core()) {
       continue;
     }
 
@@ -66,7 +66,7 @@ void DecayActionsFinderDilepton::shine_final(const Particles &search_list,
   for (const auto &p : search_list) {
     const ParticleType &t = p.type();
     if (t.decay_modes().decay_mode_list().empty() ||
-        (only_res && t.is_stable())) {
+        (only_res && t.is_stable()) || p.is_core()) {
       continue;
     }
 
