@@ -1192,6 +1192,8 @@ Experiment<Modus>::Experiment(Configuration &config,
         double default_proper_time = modus_.nuclei_passing_time();
         if (default_proper_time >= lower_bound) {
           proper_time = default_proper_time;
+          logg[LInitialConditions].info()
+              << "Nuclei passing time is " << proper_time << " fm.";
         } else {
           logg[LInitialConditions].warn()
               << "Nuclei passing time is too short, hypersurface proper time "

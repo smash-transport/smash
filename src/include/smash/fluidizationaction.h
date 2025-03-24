@@ -56,7 +56,7 @@ class FluidizationAction : public Action {
   double check_conservation(const uint32_t id_process) const override;
 
   /// Whether fluidization actions remove the particle from the evolution.
-  static const bool remove_particle_ = false;  // REN: shall be true by default.
+  inline static bool remove_particle_; // true in Constant Tau, false in Dynamic Fluid
 };
 
 }  // namespace smash

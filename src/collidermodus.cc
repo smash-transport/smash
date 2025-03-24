@@ -21,6 +21,7 @@
 #include "smash/configuration.h"
 #include "smash/customnucleus.h"
 #include "smash/experimentparameters.h"
+#include "smash/fluidizationaction.h"
 #include "smash/fourvector.h"
 #include "smash/icparameters.h"
 #include "smash/input_keys.h"
@@ -290,6 +291,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
         modus_cfg.take(InputKeys::modi_collider_initialConditions_type);
 
     if (IC_parameters_->type == FluidizationType::ConstantTau) {
+      FluidizationAction::remove_particle_ = true;
       if (modus_cfg.has_value(
               InputKeys::modi_collider_initialConditions_properTime)) {
         IC_parameters_->proper_time = modus_cfg.take(
@@ -311,6 +313,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
             modus_cfg.take(InputKeys::modi_collider_initialConditions_pTCut);
       }
     } else if (IC_parameters_->type == FluidizationType::Dynamic) {
+      FluidizationAction::remove_particle_ = false;
       double threshold = modus_cfg.take(
           InputKeys::modi_collider_initialConditions_eDenThreshold);
       double min_time =
