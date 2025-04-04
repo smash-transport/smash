@@ -13,7 +13,7 @@
    6. [Can I disable tests or part of them?](#disabling-tests)
    7. [How can I use a different compiler?](#different-compilers)
    8. [How to use the LLVM implementation of the C++ standard library?](#llvm-STL)
-   9. [How can I use SMASH as an external library?](#smash-as-an-external-library)
+   9. [How can I use SMASH as an external library?](#how-can-i-use-smash-as-an-external-library)
    10. [Can I disable ROOT or HepMC support?](#disable-root-hempc)
    11. [ROOT or HepMC are installed but CMake does not find them. What should I do?](#root-hepmc-not-found)
 
@@ -154,6 +154,9 @@ make
 
 However, CMake offers plenty of possible customizations, partly natively and partly created ad-hoc for SMASH.
 In the following, the relevant explanation about these can be found and users should collect the relevant information for their case and build the appropriate `cmake` command according to their needs.
+
+Please note that the `make` command builds everything (executables, tests, and libraries) and this might take a while.
+You can use `make smash` if you are interested only in the executables or use `make smash_shared` to exclusively build the libraries (needed e.g. in another project [using SMASH as a library](#how-can-i-use-smash-as-an-external-library)).
 
 #### Alternatives to specify the installation directory of Pythia
 
@@ -337,19 +340,26 @@ All of this is needed to let the executable find the library ABI at run time.
 
 **NOTE:** Remember to compile Pythia using LLVM implementation, too, as [previously described](#pythia).
 
-<a id="smash-as-an-external-library"></a>
+<a id="how-can-i-use-smash-as-an-external-library"></a>
 
 ### How can I use SMASH as an external library?
 
-The recommended way to use SMASH as a library in another software is to first install it according to the [instructions above](#customizing).
+The recommended way to use SMASH as a library in another software is to first install it according to the [instructions in the install section](#customizing).
 This will build and copy all necessary SMASH files to the installation folder and, therefore, prevent unexpected surprises in your software behavior in case the SMASH source code changes (e.g. because of git operations).
 In your software you can then use the files in the SMASH installation directory and manually pass them to the compiler.
+
+Another possibility would be to build SMASH following the [instructions in the building section](#building).
+Please be aware that in this case, using `make` (builds executables, tests, and libraries) or `make smash_shared` (exclusively builds the libraries) will both work, whereas `make smash` will not since this only builds the `smash` executable.
+Be aware that this build is just local and you would have to refer to the path of it in the project that needs to access the SMASH libraries.
+
 However, we encourage you to set up your project with CMake, too.
 In that case, you can use the _FindSMASH.cmake_ module shipped in the ***cmake*** folder.
 Refer to the *examples/using_SMASH_as_library/CMakeLists.txt* file for an example.
 There are two important aspects to mention, in order to let the CMake `find_package(SMASH)` command succeed:
 1. The folder where *FindSMASH.cmake* is needs to be in the `CMAKE_MODULE_PATH` CMake variable;
 2. The `SMASH_INSTALL_DIR` environment variable must be correctly set.
+
+If you are interested how to set up SMASH as an external library for your project, check out the [example how to do this in a CMake project](https://github.com/smash-transport/smash/tree/main/examples/using_SMASH_as_library).
 
 <a id="disable-root-hempc"></a>
 

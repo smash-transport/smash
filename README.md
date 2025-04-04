@@ -60,15 +60,15 @@ cd build
 cmake -DPythia_CONFIG_EXECUTABLE=/path/to/pythia8312/bin/pythia8-config ..
 make
 ```
-Please note that the `make` command builds everything (executables, tests and libraries) and might take a while.
-You can use `make smash` if you are interest in the SMASH executable only or use `make smash_shared` to exclusively build the libraries (needed e.g. in another project using SMASH as library).
+Please note that the `make` command builds everything (executables, tests, and libraries) and this might take a while.
+You can use `make smash` if you are interested only in the SMASH executable or use `make smash_shared` to exclusively build the libraries (needed e.g. in another project using SMASH as a library -- refer to the [INSTALL](INSTALL.md) FAQ for more detailed information).
 
 You can run SMASH with specific settings (e.g. at a given collision energy or impact parameter) by modifying the config.yaml file, for example with
 ```console
 vi config.yaml
 ./smash
 ```
-Refer to the [section below](README.md#running-smash-with-example-input-files) for more information.
+Refer to the [section below](#running-smash-with-example-input-files) for more information.
 
 If you want to install SMASH system-wide (into `/usr/local`) use
 ```console
@@ -116,6 +116,8 @@ For example:
 docker run --platform=linux/amd64 -it ghcr.io/smash-transport/smash:newest
 ```
 However, this is not always guaranteed to work and it might be necessary to build an image for the ARM architecture, as described [here](containers/README.md).
+
+<a id="running-smash-with-example-input-files"></a>
 
 ## Running SMASH with Example Input Files
 
@@ -170,4 +172,4 @@ SMASH source and documentation are provided to check and reproduce published res
 Cooperation and joint projects with outside researchers are encouraged and comparison to results by experimental collaborations is supported.
 If you are interested in starting a project, please contact us to avoid interference with current thesis topics.
 If your project involves changes to the code, please refer to [CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and helpful tools.
-SMASH can also be used as a 3rd party library, for examples see the ***examples*** folder in the repository.
+SMASH can also be used as a 3rd party library -- refer to the [INSTALL](INSTALL.md) FAQ for more detailed information.
