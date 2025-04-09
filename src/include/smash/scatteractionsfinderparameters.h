@@ -157,6 +157,8 @@ class ScatterActionsFinderParameters {
   const double AQM_charm_suppression;
   /// Factor to reduce cross sections for bottomed hadrons
   const double AQM_bottom_suppression;
+  /// Switch to control whether to include spin interactions
+  const SpinInteractionType spin_interaction_type;
 };
 
 }  // namespace smash

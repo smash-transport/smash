@@ -365,6 +365,17 @@ class ParticleData {
    * \param[in] s particle's mean spin 4-vector
    */
   void set_spin_vector(const FourVector s) { spin_vector_ = s; }
+  /**
+   * Set a single component of the mean spin 4-vector (Pauli-Lubanski vector).
+   * \param[in] index component index (0-3)
+   * \param[in] value component value
+   */
+  void set_spin_vector_component(int index, double value) {
+    if (index < 0 || index > 3) {
+      throw std::out_of_range("Invalid spin vector component index");
+    }
+    spin_vector_[index] = value;
+  }
 
   /**
    * Set the 4 components of the spin vector such that the particle is

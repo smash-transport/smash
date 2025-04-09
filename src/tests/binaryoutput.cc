@@ -95,7 +95,7 @@ static void compare_particle_extended(const ParticleData &p,
                                       const FilePtr &file) {
   VERIFY(compare_particle(p, file));
   int32_t collisions_per_particle, id_process, process_type, p1pdg, p2pdg,
-      baryon_number, strangeness;
+      baryon_number, strangeness; // spin_projection;
   double formation_time, xs_scaling_factor, time_last_collision;
   const auto h = p.get_history();
   read_binary(collisions_per_particle, file);
@@ -108,10 +108,7 @@ static void compare_particle_extended(const ParticleData &p,
   read_binary(p2pdg, file);
   read_binary(baryon_number, file);
   read_binary(strangeness, file);
-<<<<<<< HEAD
-=======
   // read_binary(spin_projection, file);
->>>>>>> 5a42b1258 (Comment out old spin_projection tests before replacing them)
   COMPARE(collisions_per_particle, h.collisions_per_particle);
   COMPARE(formation_time, p.formation_time());
   COMPARE(xs_scaling_factor, p.xsec_scaling_factor());

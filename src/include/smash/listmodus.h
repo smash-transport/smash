@@ -111,6 +111,8 @@ class ListModus : public ModusDefault {
    * (for example the mass of neutral pion is artificially forced to be the
    * same as charged pion). On-shellness violation typically comes from the
    * insufficient number of significant digits in the input file + rounding.
+   * The chosen unphysical value of -999.9 for the spin components is a clear
+   * indicator that the spin is not used.
    *
    * \param[in] pdgcode PDG code of added particle
    * \param[in] t       Time of added particle
@@ -274,6 +276,10 @@ class ListModus : public ModusDefault {
   /**
    * \ingroup logging
    *
+  /// Auxiliary flag to inddicate the type of spin interaction used
+  SpinInteractionType spin_interaction_type_ = SpinInteractionType::Off;
+
+  /**\ingroup logging
    * Writes the initial state for the List to the output stream.
    *
    * \param[in] out The ostream into which to output

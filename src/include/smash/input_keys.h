@@ -2518,6 +2518,21 @@ struct InputKeys {
       {"1.8"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_ct_spin
+   * \optional_key{key_CT_spin_interactions_,Spin_Interactions,bool,false}
+   *
+   * Whether or not to enable spin interactions in binary collisions.
+   * \note So far we only include a spin flip in elastic scatterings.
+   */
+  /**
+   * \see_key{key_CT_spin_interactions_}
+   */
+  inline static const Key<SpinInteractionType> collTerm_spinInteractions{
+      InputSections::collisionTerm + "Spin_Interactions",
+      SpinInteractionType::Off,
+      {"3.2"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_strings_,Strings,bool,
    * (\ref key_gen_modus_ "Modus"!="Box")}
@@ -6004,6 +6019,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<FluidizableProcessesBitSet>>,
       std::reference_wrapper<const Key<FluidizationType>>,
       std::reference_wrapper<const Key<MultiParticleReactionsBitSet>>,
+      std::reference_wrapper<const Key<SpinInteractionType>>,
       std::reference_wrapper<const Key<NNbarTreatment>>,
       std::reference_wrapper<const Key<OutputOnlyFinal>>,
       std::reference_wrapper<const Key<PdgCode>>,

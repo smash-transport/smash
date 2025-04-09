@@ -288,19 +288,19 @@ class OutputFormatter {
         });
       } else if (quantity == "spin0") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_integer(in.spin_vector()[0]);
+          return this->converter_.as_double(in.spin_vector()[0]);
         });
       } else if (quantity == "spinx") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_integer(in.spin_vector()[1]);
+          return this->converter_.as_double(in.spin_vector()[1]);
         });
       } else if (quantity == "spiny") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_integer(in.spin_vector()[2]);
+          return this->converter_.as_double(in.spin_vector()[2]);
         });
       } else if (quantity == "spinz") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_integer(in.spin_vector()[3]);
+          return this->converter_.as_double(in.spin_vector()[3]);
         });
       } else if (quantity == "0") {  // for OSCAR1999
         getters_.push_back([this]([[maybe_unused]] const ParticleData& in) {
@@ -427,6 +427,10 @@ class OutputFormatter {
       {"mt", "GeV"},
       {"Rap", "none"},
       {"y_rap", "none"}};
+      {"spin0", "none"},
+      {"spinx", "none"},
+      {"spiny", "none"},
+      {"spinz", "none"}};
 
   /// Checks whether the quantities requested are known and unique
   void validate_quantities() {

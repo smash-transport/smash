@@ -255,16 +255,17 @@ inline ExperimentParameters default_parameters(
       strings,
       1.0,
       nnbar_treatment,
-      0.,           // low energy sigma_NN cut-off
-      false,        // potential_affect_threshold
-      -1.0,         // box_length
-      200.0,        // max. cross section
-      2.5,          // fixed min. cell length
-      1.0,          // cross section scaling
-      false,        // in thermodynamics outputs spectators are included
-      false,        // do non-strong decays
-      true,         // decay initial particles
-      std::nullopt  // use monash tune, not known
+      0.,     // low energy sigma_NN cut-off
+      false,  // potential_affect_threshold
+      -1.0,   // box_length
+      200.0,  // max. cross section
+      2.5,    // fixed min. cell length
+      1.0,    // cross section scaling
+      false,  // in thermodynamics outputs spectators are included
+      false,  // do weak decays
+      true,   // decay initial particles
+      SpinInteractionType::Off,  // no spin interactions
+      std::nullopt               // use monash tune, not known
   };
 }
 
@@ -282,8 +283,8 @@ inline ScatterActionsFinderParameters default_finder_parameters(
     ReactionsBitSet included_2to2 = all_reactions_included(),
     bool strings_switch = true, bool use_AQM = false,
     bool strings_with_probability = false,
-    TotalCrossSectionStrategy xs_strategy =
-        TotalCrossSectionStrategy::BottomUp) {
+    TotalCrossSectionStrategy xs_strategy = TotalCrossSectionStrategy::BottomUp,
+    SpinInteractionType spin_interaction_type = SpinInteractionType::Off) {
   Configuration config{
       R"(
   Collision_Term:
@@ -294,6 +295,8 @@ inline ScatterActionsFinderParameters default_finder_parameters(
   config.set_value(InputKeys::collTerm_useAQM, use_AQM);
   config.set_value(InputKeys::collTerm_stringsWithProbability,
                    strings_with_probability);
+  config.set_value(InputKeys::collTerm_spinInteractions, spin_interaction_type);
+
   if (xs_strategy == TotalCrossSectionStrategy::BottomUp) {
     config.merge_yaml(InputKeys::collTerm_totXsStrategy.as_yaml("BottomUp"));
   } else if (xs_strategy == TotalCrossSectionStrategy::TopDown) {

@@ -256,6 +256,16 @@ enum IncludedMultiParticleReactions {
 /// Container for the n to m reactions in the code
 typedef std::bitset<4> MultiParticleReactionsBitSet;
 
+/// Possible spin interaction types
+enum class SpinInteractionType {
+  /// All spin interactions
+  On,
+  /// No spin interactions
+  Off,
+  /// Spin flips in elastic collisions only
+  Elastic,
+};
+
 /**
  * Defines the algorithm used for the forced thermalization.
  *  For the description of algorithms see \iref{Oliinychenko:2016vkg}.

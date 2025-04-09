@@ -28,12 +28,14 @@ static constexpr int LScatterAction = LogArea::ScatterAction::id;
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
                              const ParticleData &in_part_b, double time,
                              bool isotropic, double string_formation_time,
-                             double box_length, bool is_total_parametrized)
+                             double box_length, bool is_total_parametrized,
+                             SpinInteractionType spin_interaction_type)
     : Action({in_part_a, in_part_b}, time),
       sum_of_partial_cross_sections_(0.),
       isotropic_(isotropic),
       string_formation_time_(string_formation_time),
-      is_total_parametrized_(is_total_parametrized) {
+      is_total_parametrized_(is_total_parametrized),
+      spin_interaction_type_(spin_interaction_type) {
   box_length_ = box_length;
   if (is_total_parametrized_) {
     parametrized_total_cross_section_ = smash_NaN<double>;
@@ -80,6 +82,7 @@ void ScatterAction::generate_final_state() {
       /* 2->2 inelastic scattering */
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
+      // spin_interaction();
       break;
     case ProcessType::TwoToThree:
     case ProcessType::TwoToFour:
@@ -608,8 +611,6 @@ void ScatterAction::elastic_scattering() {
   sample_angles({outgoing_particles_[0].effective_mass(),
                  outgoing_particles_[1].effective_mass()},
                 sqrt_s());
-  // Boost spin vectors
-  boost_spin_vectors_after_elastic_scattering();
 }
 
 void ScatterAction::inelastic_scattering() {
@@ -762,24 +763,45 @@ void ScatterAction::string_excitation() {
 }
 
 void ScatterAction::spin_interaction() {
-  if (is_spin_interaction_on_) {
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
     /* 2->2 elastic scattering */
-    if (process_type_ == ProcessType::Elastic) {
+    if (process_type_ == ProcessType::Elastic &&
+        spin_interaction_type_ == SpinInteractionType::Elastic) {
       // Spin flip as a first spin interaction
-      // outgoing_particles_[0].flip_spin_projection();
-      // outgoing_particles_[1].flip_spin_projection();
+      // Store a copy of the spin vectors to boost them to the particle's rest
+      // frame
+      FourVector spin_a = outgoing_particles_[0].spin_vector();
+      FourVector spin_b = outgoing_particles_[1].spin_vector();
+
+      // Boost the spin vectors to the particle's rest frame
+      spin_a = spin_a.lorentz_boost(outgoing_particles_[0].velocity());
+      spin_b = spin_b.lorentz_boost(outgoing_particles_[1].velocity());
+
+      // Flip the y component of the spin vectors
+      spin_a.set_x2(-spin_a.x2());
+      spin_b.set_x2(-spin_b.x2());
+
+      // Boost the spin vectors back to the computational frame
+      spin_a = spin_a.lorentz_boost(-outgoing_particles_[0].velocity());
+      spin_b = spin_b.lorentz_boost(-outgoing_particles_[1].velocity());
+
+      // Set the new spin vectors
+      outgoing_particles_[0].set_spin_vector(spin_a);
+      outgoing_particles_[1].set_spin_vector(spin_b);
     }
+    // Final boost to the outgoing particle momenta
+    boost_spin_vectors_after_elastic_scattering();
   }
 }
 
 void ScatterAction::boost_spin_vectors_after_elastic_scattering() {
   // Boost spin vectors
   outgoing_particles_[0].set_spin_vector(
-      incoming_particles_[0].spin_vector().lorentz_boost(
+      outgoing_particles_[0].spin_vector().lorentz_boost(
           outgoing_particles_[0].velocity()));
 
   outgoing_particles_[1].set_spin_vector(
-      incoming_particles_[1].spin_vector().lorentz_boost(
+      outgoing_particles_[1].spin_vector().lorentz_boost(
           outgoing_particles_[1].velocity()));
 }
 

@@ -19,6 +19,7 @@
 #include <sstream>
 #include <utility>
 #include <vector>
+#include <array>
 
 #include "smash/algorithms.h"
 #include "smash/boxmodus.h"
@@ -69,6 +70,10 @@ ListModus::ListModus(Configuration modus_config,
     shift_id_key = InputKeys::modi_listBox_shiftId;
     optional_quantities_key = InputKeys::modi_listBox_optionalQuantities;
   }
+
+  // Set the default values for the spin interaction type
+  spin_interaction_type_ = param.spin_interaction_type;
+
   // Impose strict requirement on possible keys present in configuration file
   const bool file_prefix_used = modus_config.has_value(file_prefix_key);
   const bool filename_used = modus_config.has_value(filename_key);
@@ -146,8 +151,12 @@ void ListModus::try_create_particle(
 void ListModus::insert_optional_quantities_to_(
     ParticleData &p,
     const std::vector<std::string> &optional_quantities) const {
-  HistoryData hist = p.get_history();
+    HistoryData hist = p.get_history();
   std::ostringstream error_message{"", std::ios_base::ate};
+
+  // Track spin component presence for validation (index 0..3)
+  std::array<bool, 4> has_spin{{false, false, false, false}};
+
   for (size_t i = 0; i < optional_fields_.size(); ++i) {
     size_t len{};
     auto field = optional_fields_[i];
@@ -190,6 +199,22 @@ void ListModus::insert_optional_quantities_to_(
       }
       hist.p2 = PdgCode(quantity);
       len = quantity.size();
+    } else if (field == "spin0") {
+      const double s0 = std::stod(quantity, &len);
+      p.set_spin_vector_component(0, s0);
+      has_spin[0] = true;
+    } else if (field == "spinx") {
+      const double s1 = std::stod(quantity, &len);
+      p.set_spin_vector_component(1, s1);
+      has_spin[1] = true;
+    } else if (field == "spiny") {
+      const double s2 = std::stod(quantity, &len);
+      p.set_spin_vector_component(2, s2);
+      has_spin[2] = true;
+    } else if (field == "spinz") {
+      const double s3 = std::stod(quantity, &len);
+      p.set_spin_vector_component(3, s3);
+      has_spin[3] = true;
     } else {
       error_message << " Unknown quantities given in the configuration.\n";
     }
@@ -201,6 +226,18 @@ void ListModus::insert_optional_quantities_to_(
           << " not read exactly as written in the input particle list.\n";
     }
   }
+  // Validate spin components presence if spin interactions are used
+  // If spin interactions are enabled, require all four spin components.
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    for (int c = 0; c < 4; ++c) {
+      if (!has_spin[c]) {
+        error_message << "Missing spin component s" << c
+                      << " while spin interactions are enabled. "
+                         "Provide all four (s0/spint, spinx, spiny, spinz).\n";
+      }
+    }
+  }
+  
   if (error_message.str().size() > 0) {
     logg[LList].error()
         << "The reading-in of optional quantities had the following problems:"
