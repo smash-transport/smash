@@ -126,6 +126,7 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
   const double max_time_ = NAN;
   /// Fraction of formation time after which a particles can fluidize
   const double formation_time_fraction_ = NAN;
+  /// Smearing kernel at the position of the particle of interest
   const double smearing_kernel_at_0_ = NAN;
   /// Number of cells to interpolate the energy density
   const int fluid_cells_ = std::numeric_limits<int>::quiet_NaN();

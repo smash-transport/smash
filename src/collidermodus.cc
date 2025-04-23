@@ -324,8 +324,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
           modus_cfg.take(InputKeys::modi_collider_initialConditions_fluidCells);
       double form_time_fraction = modus_cfg.take(
           InputKeys::modi_collider_initialConditions_formTimeFraction);
-      if (threshold <= 0 || max_time < min_time || min_time < 0 ||
-          cells < 2 || form_time_fraction < 0) {
+      if (threshold <= 0 || max_time < min_time || min_time < 0 || cells < 2 ||
+          form_time_fraction < 0) {
         logg[LCollider].fatal()
             << "Bad parameters chosen for dynamic initial conditions. At least "
                "one of the following inequalities is violated:\n"
@@ -360,7 +360,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
           << " GeV/fm³ in energy density, between " << min_time << " and "
           << max_time << " fm.";
       IC_parameters_->formation_time_fraction = form_time_fraction;
-      IC_parameters_->smearing_kernel_at_0 = std::pow(2*M_PI*params.gaussian_sigma, -1.5);
+      IC_parameters_->smearing_kernel_at_0 =
+          std::pow(2 * M_PI * params.gaussian_sigma, -1.5);
     }
   }
 }

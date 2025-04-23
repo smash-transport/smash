@@ -343,7 +343,7 @@ inline InitialConditionParameters default_dynamic_IC_parameters() {
   parameters.max_time = 100;
   parameters.num_fluid_cells = 50;
   parameters.formation_time_fraction = 1;
-  parameters.smearing_kernel_at_0 = std::pow(2*M_PI, -1.5);
+  parameters.smearing_kernel_at_0 = std::pow(2 * M_PI, -1.5);
   return parameters;
 }
 

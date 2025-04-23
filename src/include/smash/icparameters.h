@@ -46,6 +46,7 @@ struct InitialConditionParameters {
    * dynamic IC
    */
   std::optional<double> formation_time_fraction = std::nullopt;
+  /// Smearing kernel at 0 for dynamic IC
   std::optional<double> smearing_kernel_at_0 = std::nullopt;
 };
 
