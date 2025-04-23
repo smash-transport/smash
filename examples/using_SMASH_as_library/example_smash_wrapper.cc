@@ -87,7 +87,7 @@ int main() {
     } while (current_time < new_end_time);
 
     std::cout << "Last time: " << current_time << '\n';
-    experiment.do_final_decays();
+    experiment.do_final_interactions();
     experiment.final_output();
 
   } catch (std::exception &e) {
