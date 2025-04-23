@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2014,2017-2018,2020-2024
+#    Copyright (c) 2014,2017-2018,2020-2025
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -9,17 +9,18 @@
 
 # NOTE: If the minimum required version of Doxygen is increased, the documentation configuration
 # files must be updated. To do so, run 'doxygen -u Doxyfile.in' and 'doxygen -u DoxyUser.in' from
-# the doc folder, making sure to be using the lowest required Doxygen version.
+# the doc folder (in the top-level directory of the smash repository), making sure to be using the
+# lowest required Doxygen version.
 find_package(Doxygen 1.9.1 OPTIONAL_COMPONENTS dot)
 if(DOXYGEN_FOUND)
     if(DOXYGEN_VERSION VERSION_GREATER "1.9.5")
         message(ATTENTION "Your Doxygen version has not been tested. "
-                          "Only versions 1.9.[1-3] are known to correctly work. "
-                          "Warnings and/or unexpected behavior might occurr.")
-    elseif(DOXYGEN_VERSION VERSION_GREATER "1.9.3")
+                          "Only versions 1.9.[1-2] are known to work properly. "
+                          "Warnings and/or unexpected behavior might occur.")
+    elseif(DOXYGEN_VERSION VERSION_GREATER "1.9.2")
         message(ATTENTION "Doxygen version ${DOXYGEN_VERSION} is known "
                           "not to build SMASH documentation fully as expected. "
-                          "Only versions 1.9.[1-3] are known to correctly work. "
+                          "Only versions 1.9.[1-2] are known to work properly. "
                           "Use at your own risk.")
     endif()
 
