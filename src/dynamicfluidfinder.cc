@@ -41,11 +41,6 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
     if (!is_process_fluidizable(p.get_history().process_type)) {
       continue;
     }
-    if (!std::isnan(max_3momentum_)) {
-      if (p.momentum().abs3() >= max_3momentum_) {
-        continue;
-      }
-    }
     if (above_threshold(p)) {
       double time_until = (1 - p.xsec_scaling_factor() <= really_small)
                               ? 0
@@ -71,7 +66,7 @@ bool DynamicFluidizationFinder::above_threshold(
         Tmunu.boosted(Tmunu.landau_frame_4velocity())[0];
     if (e_den_particles + background >=
         energy_density_threshold_ +
-            pdata.pole_mass() / std::pow(2 * M_PI, 1.5)) {
+            pdata.pole_mass() * smearing_kernel_at_0_) {
       logg[LFluidization].debug()
           << "Fluidize " << pdata.id() << " with " << e_den_particles << "+"
           << background << " GeV/fm^3 at " << pdata.position().x0()

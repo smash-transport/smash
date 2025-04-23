@@ -39,8 +39,6 @@ struct InitialConditionParameters {
   std::optional<double> min_time = std::nullopt;
   /// Maximum time (in lab frame) in fm for dynamic IC
   std::optional<double> max_time = std::nullopt;
-  /// Maximum 3-momentum for a fluidizable particle in dynamical IC
-  std::optional<double> max_3momentum = std::nullopt;
   /// Number of interpolating cells in each direction for dynamic IC
   std::optional<int> num_fluid_cells = std::nullopt;
   /**
@@ -48,6 +46,7 @@ struct InitialConditionParameters {
    * dynamic IC
    */
   std::optional<double> formation_time_fraction = std::nullopt;
+  std::optional<double> smearing_kernel_at_0 = std::nullopt;
 };
 
 }  // namespace smash
