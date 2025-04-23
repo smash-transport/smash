@@ -353,8 +353,7 @@ class HadronGasEos {
 
   /// Check if a particle belongs to the EoS
   static bool is_eos_particle(const ParticleType& ptype) {
-    return ptype.is_hadron() && ptype.pdgcode().frac_charm() == 0 &&
-           ptype.pdgcode().frac_bottom() == 0;
+    return ptype.is_hadron() && !ptype.pdgcode().is_heavy_flavor();
   }
 
   /// Create an EoS table or not?

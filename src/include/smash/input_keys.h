@@ -4052,7 +4052,7 @@ struct InputKeys {
    *
    * Initial multiplicities per particle species. The value of this key shall be
    * a map of PDG number and amount corresponding to it. Use this key to specify
-   * how many particles of each species will be initialized. This key can be
+   * how many particles of each species will be initialized. This key has to be
    * omitted if <tt>\ref key_MS_use_thermal_mult_
    * "Use_Thermal_Multiplicities"</tt> is `true`.
    */
@@ -4221,9 +4221,10 @@ struct InputKeys {
    * in the analysis.
    *
    * By default, it is set to 0 so that no heavy flavor is initialized. For any
-   * positive value, a partial density is computed as described in \key
-   * key_MS_use_thermal_mult_ and multiplied by it. Naturally, with a value of
-   * 1, each hadron corresponds to a real thermalized hadron.
+   * positive value, a partial density is computed as described in \ref
+   * key_MS_use_thermal_mult_  "Use_Thermal_Multiplicities" and multiplied by
+   * it. Naturally, with a value of 1, each hadron corresponds to a real
+   * thermalized hadron.
    */
   /**
    * \see_key{key_MS_hf_multiplier_}
