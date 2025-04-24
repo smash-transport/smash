@@ -362,6 +362,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
       IC_parameters_->formation_time_fraction = form_time_fraction;
       IC_parameters_->smearing_kernel_at_0 =
           std::pow(2 * M_PI * params.gaussian_sigma, -1.5);
+      IC_parameters_->delay_initial_elastic = modus_cfg.take(
+          InputKeys::modi_collider_initialConditions_delayInitialElastic);
     }
   }
 }

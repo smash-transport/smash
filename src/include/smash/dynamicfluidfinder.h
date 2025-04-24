@@ -54,7 +54,8 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
         formation_time_fraction_{ic_params.formation_time_fraction.value()},
         smearing_kernel_at_0_{ic_params.smearing_kernel_at_0.value()},
         fluid_cells_{ic_params.num_fluid_cells.value()},
-        fluidizable_processes_{ic_params.fluidizable_processes.value()} {};
+        fluidizable_processes_{ic_params.fluidizable_processes.value()},
+        delay_initial_elastic_{ic_params.delay_initial_elastic.value()} {};
 
   /**
    * Find particles to fluidize, depending on the energy density around them.
@@ -132,6 +133,8 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
   const int fluid_cells_ = std::numeric_limits<int>::quiet_NaN();
   /// Processes that create a fluidizable particle
   const FluidizableProcessesBitSet fluidizable_processes_;
+  /// Whether the first elastic interaction of an initial nucleon is fluidizable
+  const bool delay_initial_elastic_ = NAN;
 };
 
 }  // namespace smash

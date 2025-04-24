@@ -3973,6 +3973,13 @@ struct InputKeys {
           InputSections::m_c_initialConditions + "Fluidizable_Processes",
           FluidizableProcessesBitSet{}.set(),  // all processes
           {"3.2"}};
+
+  inline static const Key<bool>
+      modi_collider_initialConditions_delayInitialElastic{
+          InputSections::m_c_initialConditions + "Delay_Initial_Elastic",
+          true,
+          {"3.3"}};
+
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_form_time_fraction_,Formation_Time_Fraction,
@@ -5885,6 +5892,7 @@ struct InputKeys {
       std::cref(modi_collider_impact_values),
       std::cref(modi_collider_impact_yields),
       std::cref(modi_collider_initialConditions_eDenThreshold),
+      std::cref(modi_collider_initialConditions_delayInitialElastic),
       std::cref(modi_collider_initialConditions_fluidCells),
       std::cref(modi_collider_initialConditions_formTimeFraction),
       std::cref(modi_collider_initialConditions_fluidProcesses),

@@ -85,7 +85,7 @@ bool DynamicFluidizationFinder::is_process_fluidizable(
   }
   switch (type) {
     case ProcessType::Elastic:
-      if (history.collisions_per_particle == 1) {
+      if (history.collisions_per_particle == 1 && delay_initial_elastic_) {
         return false;
       }
       return fluidizable_processes_[IncludedFluidizableProcesses::From_Elastic];
