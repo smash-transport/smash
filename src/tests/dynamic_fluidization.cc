@@ -73,7 +73,7 @@ TEST(fluidization_finder) {
   COMPARE(Tmunu[0], dens_par.norm_factor_sf());
 
   // initial particles are not fluidizable and there is no action
-  VERIFY(!finder.is_process_fluidizable(a.get_history().process_type));
+  VERIFY(!finder.is_process_fluidizable(a.get_history()));
   ActionList actions =
       finder.find_actions_in_cell(particles.copy_to_vector(), 1, 0, {});
   COMPARE(actions.size(), 0u);
@@ -85,7 +85,7 @@ TEST(fluidization_finder) {
   particles.update_particle(b, b);
 
   // decays are fluidizable by default
-  VERIFY(finder.is_process_fluidizable(a.get_history().process_type));
+  VERIFY(finder.is_process_fluidizable(a.get_history()));
   actions = finder.find_actions_in_cell(particles.copy_to_vector(), 1, 0, {});
   COMPARE(actions.size(), 1u);
 

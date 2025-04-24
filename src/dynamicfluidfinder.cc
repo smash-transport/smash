@@ -38,7 +38,7 @@ ActionList DynamicFluidizationFinder::find_actions_in_cell(
     if (fluidization_time >= t_end) {
       continue;
     }
-    if (!is_process_fluidizable(p.get_history().process_type)) {
+    if (!is_process_fluidizable(p.get_history())) {
       continue;
     }
     if (above_threshold(p)) {
@@ -77,13 +77,17 @@ bool DynamicFluidizationFinder::above_threshold(
 }
 
 bool DynamicFluidizationFinder::is_process_fluidizable(
-    const ProcessType &type) const {
+    const HistoryData &history) const {
+  const ProcessType &type = history.process_type;
   if (is_string_soft_process(type)) {
     return fluidizable_processes_
         [IncludedFluidizableProcesses::From_SoftString];
   }
   switch (type) {
     case ProcessType::Elastic:
+      if (history.collisions_per_particle == 1) {
+        return false;
+      }
       return fluidizable_processes_[IncludedFluidizableProcesses::From_Elastic];
     case ProcessType::Decay:
       return fluidizable_processes_[IncludedFluidizableProcesses::From_Decay];

@@ -101,7 +101,7 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
    *
    * \return whether the process is fluidizable
    */
-  bool is_process_fluidizable(const ProcessType &type) const;
+  bool is_process_fluidizable(const HistoryData &history) const;
 
  private:
   /**
