@@ -4290,8 +4290,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key_no_line{key_MS_jet_jet_position_,Jet_Position,list of 3
-   * doubles,[0.0,\ 0.0,\ 0.0]}
+   * \optional_key_no_line{key_MS_jet_jet_position_,Jet_Position,
+   * list of 3 doubles,[0.0\, 0.0\, 0.0]}
    *
    * Coordinates (x,y,z) \unit{in fm} where the jet particle is positioned.
    */
@@ -4325,7 +4325,7 @@ struct InputKeys {
    * Separation in \unit{in fm} between the back to back jets. Each jet particle
    * is translated by half of this vector in the appropriate direction. Can only
    * be used if \ref key_MS_jet_backtoback_ is true. A small value is used by
-   * default to prevent collisions between both jets.
+   * default to prevent interactions between the jets.
    */
   /**
    * \see_key{key_MS_jet_b2b_separation}
