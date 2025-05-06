@@ -81,9 +81,7 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     bool is_within_y_cut = true;
     // Check whether particle is in desired rapidity range
     if (rap_cut_ > 0.0) {
-      const double rapidity =
-          0.5 * std::log((p.momentum().x0() + p.momentum().x3()) /
-                         (p.momentum().x0() - p.momentum().x3()));
+      const double rapidity = p.rapidity();
       if (std::fabs(rapidity) > rap_cut_) {
         is_within_y_cut = false;
       }

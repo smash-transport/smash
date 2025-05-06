@@ -2288,8 +2288,8 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
       // If the incoming particle is already core, the action should not happen.
       logg[LExperiment].debug() << "Discarding " << incoming[0].id();
       return false;
-    } else {
-      /* No collisions can happen between core and corona particles
+    } else if (action.get_type() != ProcessType::Elastic) {
+      /* Only elastic collisions can happen between core and corona particles
        * (1→N can still happen) */
       const bool all_core_in_incoming =
           std::all_of(incoming.begin(), incoming.end(),

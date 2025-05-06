@@ -3974,6 +3974,18 @@ struct InputKeys {
           FluidizableProcessesBitSet{}.set(),  // all processes
           {"3.2"}};
 
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_delay_initial_elastic,Delay_Initial_Elastic,
+   * bool,true}
+   *
+   * Whether the first elastic scatterings of initial nucleons are excluded from
+   * the list of fluidizable processes. Since the core-corona interaction is
+   * only elastic, this prevents some instantaneous fluidization.
+   */
+  /**
+   * \see_key{key_MC_IC_delay_initial_elastic}
+   */
   inline static const Key<bool>
       modi_collider_initialConditions_delayInitialElastic{
           InputSections::m_c_initialConditions + "Delay_Initial_Elastic",

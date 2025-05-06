@@ -113,9 +113,9 @@ void ScatterAction::generate_final_state() {
     /* Set positions of the outgoing particles */
     if (proc->get_type() != ProcessType::Elastic) {
       new_particle.set_4position(middle_point);
-    }
-    if (core_in_incoming) {
-      new_particle.fluidize();
+      if (core_in_incoming) {
+        new_particle.fluidize();
+      }
     }
   }
 }

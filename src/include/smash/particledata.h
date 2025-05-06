@@ -348,6 +348,8 @@ class ParticleData {
   void fluidize() { core_ = true; }
   /// Check whether the particle is core
   bool is_core() const { return core_; }
+  /// Particle rapidity
+  double rapidity() const { return std::atanh(momentum_[3] / momentum_[0]); }
 
   /**
    * Check whether two particles have the same id

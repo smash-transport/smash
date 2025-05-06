@@ -162,9 +162,7 @@ void ICOutput::at_interaction(const Action &action, const double) {
                 particle.momentum()[1] * particle.momentum()[1] +
                 particle.momentum()[2] * particle.momentum()[2]);
   // momentum space rapidity
-  const double rapidity =
-      0.5 * std::log((particle.momentum()[0] + particle.momentum()[3]) /
-                     (particle.momentum()[0] - particle.momentum()[3]));
+  const double rapidity = particle.rapidity();
 
   // Determine if particle is spectator:
   // Fulfilled if particle is initial nucleon, aka has no prior interactions
