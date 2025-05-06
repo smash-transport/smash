@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2018,2020,2022-2024
+ *    Copyright (c) 2014-2018,2020,2022-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -91,10 +91,20 @@ TEST(set_get) {
   COMPARE(p.id(), 4);
   COMPARE(p.pdgcode(), smashon);
   COMPARE(p.is_hadron(), smashon.is_hadron());
+  VERIFY(std::isnan(p.formation_time()));
+  VERIFY(std::isnan(p.begin_formation_time()));
+  VERIFY(std::isnan(p.get_history().time_last_collision));
+  p.set_formation_time(0.1);
+  COMPARE(p.formation_time(), p.get_history().time_last_collision);
   p.set_history(3, 5, ProcessType::None, 1.2, ParticleList{});
   COMPARE(p.id_process(), 5u);
   COMPARE(p.get_history().collisions_per_particle, 3);
   COMPARE(p.get_history().time_last_collision, 1.2);
+  VERIFY(p.formation_time() != p.get_history().time_last_collision);
+  p.set_formation_time(0.42);
+  VERIFY(p.formation_time() != p.get_history().time_last_collision);
+  p.set_formation_time(1.2);
+  VERIFY(p.formation_time() == p.get_history().time_last_collision);
   p.set_history(4, 6, ProcessType::None, 2.5, ParticleList{});
   COMPARE(p.id_process(), 6u);
   COMPARE(p.get_history().collisions_per_particle, 4);
