@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015,2017-2024
+ *    Copyright (c) 2015,2017-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -106,6 +106,7 @@ inline ParticleData smashon(int id = -1) {
 inline ParticleData smashon(const Position &position, int id = -1) {
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4position(position);
+  p.set_formation_time(position[0]);
   return p;
 }
 /**
@@ -126,6 +127,7 @@ inline ParticleData smashon(const Position &position, const Momentum &momentum,
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4position(position);
   p.set_4momentum(momentum);
+  p.set_formation_time(position[0]);
   return p;
 }
 /**
@@ -140,6 +142,7 @@ inline ParticleData smashon(const Momentum &momentum, const Position &position,
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4position(position);
   p.set_4momentum(momentum);
+  p.set_formation_time(position[0]);
   return p;
 }
 /**
@@ -149,8 +152,10 @@ inline ParticleData smashon(const Momentum &momentum, const Position &position,
 inline ParticleData smashon_random(int id = -1) {
   auto random_value = random::make_uniform_distribution(-15.0, +15.0);
   ParticleData p{ParticleType::find(0x661), id};
+  auto random_time = random_value();
+  p.set_formation_time(random_time);
   p.set_4position(
-      {random_value(), random_value(), random_value(), random_value()});
+      {random_time, random_value(), random_value(), random_value()});
   p.set_4momentum(smashon_mass,
                   {random_value(), random_value(), random_value()});
   return p;

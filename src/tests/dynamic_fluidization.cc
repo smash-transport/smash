@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2023-2024
+ *    Copyright (c) 2023-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -38,8 +38,10 @@ TEST(fluidization_finder) {
   Particles &particles = ensembles[0];
   ParticleData a =
       particles.insert(create_particle_at(0x2212, Position{0, -5, -5, -5}));
+  a.set_formation_time(0);
   ParticleData b =
       particles.insert(create_particle_at(0x111, Position{0, 5, 5, 5}));
+  b.set_formation_time(0);
 
   a.set_4momentum(unit);  // set rest mass to 1 GeV
   particles.update_particle(a, a);
@@ -145,6 +147,7 @@ TEST(dense_region) {
 
   for (ParticleData &p : particles) {
     background->emplace(p.id(), 0.0);
+    p.set_formation_time(0);
     p.set_history(1, p.id_process(), ProcessType::Decay, 0, mother);
   }
 

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2020,2022-2024
+ *    Copyright (c) 2012-2020,2022-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -40,7 +40,7 @@ struct HistoryData {
    * time of the particle, since only formed particles can freeze out
    * The full coordinate space 4-vector can be obtained by back-propagation
    */
-  double time_last_collision = 0.0;
+  double time_last_collision = NAN;
   /// PdgCode of the first parent particles
   PdgCode p1 = 0x0;
   /// PdgCode of the second parent particles
@@ -146,10 +146,10 @@ class ParticleData {
    * \param[in] ncoll particle's number of collisions
    * \param[in] pid id of the particle's latest process
    * \param[in] pt process type of the particle's latest process
-   * \param[in] time_of_or time of latest collision [fm]
+   * \param[in] time_last_coll time of latest collision [fm]
    * \param[in] plist list of parent particles */
-  void set_history(int ncoll, uint32_t pid, ProcessType pt, double time_of_or,
-                   const ParticleList &plist);
+  void set_history(int ncoll, uint32_t pid, ProcessType pt,
+                   double time_last_coll, const ParticleList &plist);
 
   /**
    * Get the particle's 4-momentum
@@ -248,10 +248,14 @@ class ParticleData {
    * of time.
    * \param[in] form_time absolute formation time
    */
-  void set_formation_time(const double &form_time) {
+  void set_formation_time(double form_time) {
     formation_time_ = form_time;
     // cross section scaling factor will be a step function in time
     begin_formation_time_ = form_time;
+    // if time of the last collision is NAN set it to the formation time
+    if (std::isnan(history_.time_last_collision)) {
+      history_.time_last_collision = form_time;
+    }
   }
   /**
    * Set the time, when the cross section scaling factor begins, and finishes
@@ -265,6 +269,9 @@ class ParticleData {
   void set_slow_formation_times(double begin_form_time, double form_time) {
     begin_formation_time_ = begin_form_time;
     formation_time_ = form_time;
+    if (std::isnan(history_.time_last_collision)) {
+      history_.time_last_collision = form_time;
+    }
   }
 
   /**
@@ -475,9 +482,9 @@ class ParticleData {
   /** Formation time at which the particle is fully formed
    *  given as an absolute value in the computational frame
    */
-  double formation_time_ = 0.0;
+  double formation_time_ = NAN;
   /// time when the cross section scaling factor starts to increase to 1
-  double begin_formation_time_ = 0.0;
+  double begin_formation_time_ = NAN;
   /**
    * Initial cross section scaling factor.
    * 1 by default, since a particle is fully formed in this case.
