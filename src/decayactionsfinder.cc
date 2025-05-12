@@ -76,20 +76,21 @@ ActionList DecayActionsFinder::find_actions_in_cell(
 ActionList DecayActionsFinder::find_final_actions(const Particles &search_list,
                                                   bool /*only_res*/) const {
   ActionList actions;
+  if (find_final_decays_) {
+    for (const auto &p : search_list) {
+      if (!do_final_non_strong_decays_ && p.type().is_stable()) {
+        continue;  // particle is stable with respect to strong interaction
+      }
 
-  for (const auto &p : search_list) {
-    if (!do_final_non_strong_decays_ && p.type().is_stable()) {
-      continue;  // particle is stable with respect to strong interaction
+      if (p.type().decay_modes().is_empty()) {
+        continue;  // particle cannot decay (not even e.m. or weakly)
+      }
+
+      auto act = std::make_unique<DecayAction>(p, 0.);
+      act->add_decays(p.type().get_partial_widths(
+          p.momentum(), p.position().threevec(), WhichDecaymodes::All));
+      actions.emplace_back(std::move(act));
     }
-
-    if (p.type().decay_modes().is_empty()) {
-      continue;  // particle cannot decay (not even e.m. or weakly)
-    }
-
-    auto act = std::make_unique<DecayAction>(p, 0.);
-    act->add_decays(p.type().get_partial_widths(
-        p.momentum(), p.position().threevec(), WhichDecaymodes::All));
-    actions.emplace_back(std::move(act));
   }
   return actions;
 }

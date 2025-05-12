@@ -387,7 +387,7 @@ class OutputFormatter {
       {"pdg_mother2", "none"},
       {"baryon_number", "none"},
       {"strangeness", "none"},
-      {"0", "0"}};  // for OSCAR1999
+      {"0", "0"}};  // for OSCAR1999};
 
   /// Checks whether the quantities requested are known and unique
   void validate_quantities() {

@@ -150,7 +150,8 @@ void ICOutput::at_intermediate_time(const Particles &,
 }
 
 void ICOutput::at_interaction(const Action &action, const double) {
-  assert(action.get_type() == ProcessType::HyperSurfaceCrossing);
+  assert(action.get_type() == ProcessType::Fluidization ||
+         action.get_type() == ProcessType::FluidizationNoRemoval);
   assert(action.incoming_particles().size() == 1);
 
   ParticleData particle = action.incoming_particles()[0];
@@ -161,9 +162,7 @@ void ICOutput::at_interaction(const Action &action, const double) {
                 particle.momentum()[1] * particle.momentum()[1] +
                 particle.momentum()[2] * particle.momentum()[2]);
   // momentum space rapidity
-  const double rapidity =
-      0.5 * std::log((particle.momentum()[0] + particle.momentum()[3]) /
-                     (particle.momentum()[0] - particle.momentum()[3]));
+  const double rapidity = particle.rapidity();
 
   // Determine if particle is spectator:
   // Fulfilled if particle is initial nucleon, aka has no prior interactions

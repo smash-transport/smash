@@ -58,7 +58,9 @@ enum class ProcessType {
   /// \see_process_type{7}
   Thermalization = 7,
   /// \see_process_type{8}
-  HyperSurfaceCrossing = 8,
+  Fluidization = 8,
+  /// \see_process_type{21}
+  FluidizationNoRemoval = 21,
   /// \see_process_type{9}
   Bremsstrahlung = 9,
   /// \see_process_type{10}

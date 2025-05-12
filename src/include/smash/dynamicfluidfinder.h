@@ -52,8 +52,10 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
         min_time_{ic_params.min_time.value()},
         max_time_{ic_params.max_time.value()},
         formation_time_fraction_{ic_params.formation_time_fraction.value()},
+        smearing_kernel_at_0_{ic_params.smearing_kernel_at_0.value()},
         fluid_cells_{ic_params.num_fluid_cells.value()},
-        fluidizable_processes_{ic_params.fluidizable_processes.value()} {};
+        fluidizable_processes_{ic_params.fluidizable_processes.value()},
+        delay_initial_elastic_{ic_params.delay_initial_elastic.value()} {};
 
   /**
    * Find particles to fluidize, depending on the energy density around them.
@@ -83,9 +85,7 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
   }
 
   /// No final actions after fluidizing
-  ActionList find_final_actions(const Particles &, bool) const override {
-    return {};
-  }
+  ActionList find_final_actions(const Particles &, bool) const override;
 
   /**
    * Determine if fluidization condition is satisfied.
@@ -102,7 +102,7 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
    *
    * \return whether the process is fluidizable
    */
-  bool is_process_fluidizable(const ProcessType &type) const;
+  bool is_process_fluidizable(const HistoryData &history) const;
 
  private:
   /**
@@ -127,10 +127,19 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
   const double max_time_ = NAN;
   /// Fraction of formation time after which a particles can fluidize
   const double formation_time_fraction_ = NAN;
+  /// Smearing kernel at the position of the particle of interest
+  const double smearing_kernel_at_0_ = NAN;
   /// Number of cells to interpolate the energy density
   const int fluid_cells_ = std::numeric_limits<int>::quiet_NaN();
   /// Processes that create a fluidizable particle
   const FluidizableProcessesBitSet fluidizable_processes_;
+  /// Whether the first elastic interaction of an initial nucleon is fluidizable
+  const bool delay_initial_elastic_ = NAN;
+
+  /// Accumulated number of core particles
+  mutable int particles_in_core_ = 0;
+  /// Accumulated energy of core particles
+  mutable double energy_in_core_ = 0.;
 };
 
 }  // namespace smash

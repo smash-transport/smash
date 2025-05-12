@@ -103,6 +103,9 @@ void ScatterAction::generate_final_state() {
           ", PDGcode2=" + incoming_particles_[1].pdgcode().string() + ")");
   }
 
+  const bool core_in_incoming =
+      std::any_of(incoming_particles_.begin(), incoming_particles_.end(),
+                  [](const ParticleData &p) { return p.is_core(); });
   for (ParticleData &new_particle : outgoing_particles_) {
     // Boost to the computational frame
     new_particle.boost_momentum(
@@ -110,6 +113,9 @@ void ScatterAction::generate_final_state() {
     /* Set positions of the outgoing particles */
     if (proc->get_type() != ProcessType::Elastic) {
       new_particle.set_4position(middle_point);
+      if (core_in_incoming) {
+        new_particle.fluidize();
+      }
     }
   }
 }

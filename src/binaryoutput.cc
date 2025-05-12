@@ -206,7 +206,7 @@ BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
     : OutputInterface(name), file_{path, mode}, formatter_(quantities) {
   if (quantities.empty()) {
     throw std::invalid_argument(
-        "Empty quantities list passed to 'BinaryOutputBase' cconstructor.");
+        "Empty quantities list passed to 'BinaryOutputBase' constructor.");
   }
   std::fwrite("SMSH", 4, 1, file_.get());  // magic number
   write(format_version_);                  // file format version number
@@ -410,7 +410,8 @@ void BinaryOutputInitialConditions::at_eventend(
 
 void BinaryOutputInitialConditions::at_interaction(const Action &action,
                                                    const double) {
-  if (action.get_type() == ProcessType::HyperSurfaceCrossing) {
+  if (action.get_type() == ProcessType::Fluidization ||
+      action.get_type() == ProcessType::FluidizationNoRemoval) {
     const char pchar = 'p';
     std::fwrite(&pchar, sizeof(char), 1, file_.get());
     write(action.incoming_particles().size());

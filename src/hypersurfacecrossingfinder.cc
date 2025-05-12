@@ -31,6 +31,9 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     if (t_end < 0.0) {
       continue;
     }
+    if (p.is_core()) {
+      continue;
+    }
 
     // For frozen Fermi motion:
     // Fermi momenta are only applied if particles interact. The particle
@@ -78,9 +81,7 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     bool is_within_y_cut = true;
     // Check whether particle is in desired rapidity range
     if (rap_cut_ > 0.0) {
-      const double rapidity =
-          0.5 * std::log((p.momentum().x0() + p.momentum().x3()) /
-                         (p.momentum().x0() - p.momentum().x3()));
+      const double rapidity = p.rapidity();
       if (std::fabs(rapidity) > rap_cut_) {
         is_within_y_cut = false;
       }
