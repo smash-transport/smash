@@ -554,8 +554,8 @@ struct InputSections {
  * Namely, they are `Constant_Tau`, which relies on the hadron's hyperbolic
  * time, and `Dynamic`, where the condition is that the energy density around
  * the hadron exceeds a defined threshold. In both cases, particles that obey
- * the fluidization condition are removed from the evolution and written to the
- * \key Initial_Conditions output, which must be included in the config.
+ * the fluidization condition are written to the \key Initial_Conditions output,
+ * which must be included in the config.
  *
  * ### Constant tau
  *
@@ -578,6 +578,9 @@ struct InputSections {
  * configuration file with the \key Lower_Bound field. This is best applied to
  * higher beam energies, where the majority of the system is expected to behave
  * as a fluid starting with a Bjorken picture.
+ *
+ * Internally, the particles that cross the hypersurface are removed from the
+ * evolution.
  *
  * ### Dynamic with energy density
  *
@@ -6209,6 +6212,8 @@ General:
  *   them. The are weighted with a "shining weight" to compensate for the
  *   over-production.
  * - The shining weight can be found in the weight element of the output.
+ * - String products are further weighted by their cross section scaling
+ *   parameter, which depends on the formation time.
  * - The shining method is implemented in the DecayActionsFinderDilepton,
  *   which is automatically enabled together with the dilepton output.
  *

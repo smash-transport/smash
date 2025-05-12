@@ -113,23 +113,22 @@ bool DynamicFluidizationFinder::is_process_fluidizable(
 ActionList DynamicFluidizationFinder::find_final_actions(
     const Particles &search_list, [[maybe_unused]] bool only_res) const {
   ActionList actions;
-  static int fluidized_particles = 0;
-  static double energy = 0.;
-  bool print_warning = true;
-  for (auto &p : search_list) {
-    if (p.is_core()) {
-      actions.emplace_back(std::make_unique<FreeforallAction>(
-          ParticleList{p}, ParticleList{}, p.position().x0()));
-      fluidized_particles++;
-      energy += p.momentum()[0];
-      print_warning = false;  // print only at the final call
+  const bool are_there_core_particles =
+      std::any_of(search_list.begin(), search_list.end(),
+                  [](const ParticleData &p) { return p.is_core(); });
+  if (are_there_core_particles) {
+    for (auto &p : search_list) {
+      if (p.is_core()) {
+        actions.emplace_back(std::make_unique<FreeforallAction>(
+            ParticleList{p}, ParticleList{}, p.position().x0()));
+        particles_in_core_++;
+        energy_in_core_ += p.momentum()[0];
+      }
     }
-  }
-  if (print_warning) {
-    logg[LFluidization].info() << fluidized_particles
-                               << " particles were part of the core at the end"
-                                  " of the evolution with energy "
-                               << energy << " GeV.";
+  } else {
+    logg[LFluidization].info()
+        << particles_in_core_ << " particles were part of the core with energy "
+        << energy_in_core_ << " GeV.";
   }
   return actions;
 }
