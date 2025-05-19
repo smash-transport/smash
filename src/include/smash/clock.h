@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022-2024
+ *    Copyright (c) 2014-2020,2022-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -462,17 +462,25 @@ class CustomClock : public Clock {
    */
   void remove_times_in_past(double start_time) override {
     custom_times_.erase(
-        std::remove_if(custom_times_.begin(), custom_times_.end(),
-                       [start_time](double t) {
-                         if (t <= start_time) {
-                           logg[LClock].warn("Removing custom output time ", t,
-                                             " fm since it is earlier than the "
-                                             "starting time of the simulation");
-                           return true;
-                         } else {
-                           return false;
-                         }
-                       }),
+        std::remove_if(
+            custom_times_.begin(), custom_times_.end(),
+            [start_time](double t) {
+              if (t < start_time) {
+                logg[LClock].warn("Removing custom output time ", t,
+                                  " fm since it is earlier than the "
+                                  "starting time of the simulation");
+                return true;
+              } else if (t == start_time) {
+                logg[LClock].debug(
+                    "The start time ", t,
+                    " fm has to be removed from the 'custom_times_' vector "
+                    "since it will be otherwise considered twice in the actual "
+                    "output time steps");
+                return true;
+              } else {
+                return false;
+              }
+            }),
         custom_times_.end());
   }
 
