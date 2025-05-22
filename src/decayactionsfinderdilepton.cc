@@ -36,16 +36,17 @@ void DecayActionsFinderDilepton::shine(const Particles &search_list,
         p.momentum(), p.position().threevec(), WhichDecaymodes::Dileptons);
 
     /* If particle can only decay into dileptons or is stable, use shining only
-     * in find_final_actions and ignore them here, also unformed
-     * resonances cannot decay */
+     * in find_final_actions and ignore them here, also core cannot shine */
     if (dil_modes.size() == n_all_modes || p.type().is_stable() ||
-        (p.formation_time() > p.position().x0())) {
+        p.is_core()) {
       continue;
     }
 
     for (DecayBranchPtr &mode : dil_modes) {
       // SHINING as described in \iref{Schmidt:2008hm}, chapter 2D
-      const double shining_weight = dt * inv_gamma * mode->weight() / hbarc;
+      // If the formation time has not passed, the weight will be reduced
+      const double shining_weight =
+          dt * inv_gamma * mode->weight() * p.xsec_scaling_factor() / hbarc;
 
       if (shining_weight > 0.0) {  // decays that can happen
         DecayActionDilepton act(p, 0., shining_weight);
@@ -66,7 +67,7 @@ void DecayActionsFinderDilepton::shine_final(const Particles &search_list,
   for (const auto &p : search_list) {
     const ParticleType &t = p.type();
     if (t.decay_modes().decay_mode_list().empty() ||
-        (only_res && t.is_stable())) {
+        (only_res && t.is_stable()) || p.is_core()) {
       continue;
     }
 

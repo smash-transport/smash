@@ -4,23 +4,21 @@
 
 Author  |  &ensp;E-Mail&ensp; | Copyright ©
  :----:  |  :----: | :---------
-Agnieszka Wergieluk | [✉️](mailto:agnieszka.sorensen@gmail.com) | `2019-2020`
 Janus Weil | [✉️](mailto:weil@fias.uni-frankfurt.de) | `2014-2016,2019-2020`
 Joseph Tindall | [✉️](mailto:tindall@fias.uni-frankfurt.de) | `2016`
 Vinzent Steinberg | [✉️](mailto:steinberg@fias.uni-frankfurt.de) | `2015-2020`
 Jan Staudenmaier | [✉️](mailto:staudenmaier@fias.uni-frankfurt.de) | `2015-2022`
-Agnieszka Sorensen | [✉️](mailto:agnieszka.sorensen@gmail.com) | `2020-`
+Agnieszka Sorensen | [✉️](mailto:agnieszka.sorensen@gmail.com) | `2019-`
 Alessandro Sciarra | [✉️](mailto:sciarra@itp.uni-frankfurt.de) | `2021-`
 Anna Schäfer | [✉️](mailto:aschaefer@fias.uni-frankfurt.de) | `2017-2022`
 Robin Sattler | [✉️](mailto:sattler@itp.uni-frankfurt.de) | `2023-`
 Nils Sass | [✉️](mailto:nsass@itp.uni-frankfurt.de) | `2023-`
 Sangwook Ryu | [✉️](mailto:ryu@fias.uni-frankfurt.de) | `2017-2019`
 Jonas Rothermel | [✉️](mailto:rothermel@fias.uni-frankfurt.de) | `2017-2019`
-Carl Rosenkvist | [✉️](mailto:rosenkvist@itp.uni-frankfurt.de) | `2024-`
+Carl B. Rosenkvist | [✉️](mailto:rosenkvist@itp.uni-frankfurt.de) | `2024-`
 Jean-Bernard Rose | [✉️](mailto:rose@fias.uni-frankfurt.de) | `2016-2019`
 Hendrik Roch | [✉️](mailto:roch@fias.uni-frankfurt.de) | `2022-2024`
 Lukas Prinz | [✉️](mailto:lprinz@fias.uni-frankfurt.de) | `2019`
-Hannah Petersen | [✉️](mailto:petersen@fias.uni-frankfurt.de) | `2013-2018`
 Zuzana Paulinyova | [✉️](mailto:paulinyova@fias.uni-frankfurt.de) | `2023-2024`
 Long-Gang Pang | [✉️](mailto:pang@fias.uni-frankfurt.de) | `2015-2017`
 Dmytro Oliinychenko | [✉️](mailto:oliiny@fias.uni-frankfurt.de) | `2014-2022`
@@ -32,14 +30,14 @@ Natey Kübler | [✉️](mailto:kuebler@fias.uni-frankfurt.de) | `2020-2021`
 Matthias Kretz | [✉️](mailto:kretz@compeng.uni-frankfurt.de) | `2014-2015,2020`
 Thomas Kehrenberg | [✉️](mailto:kehrenberg@fias.uni-frankfurt.de) | `2015`
 Gabriele Inghirami | [✉️](mailto:inghirami@fias.uni-frankfurt.de) | `2021-`
-Renan Hirayama | [✉️](mailto:hirayama@itp.uni-frankfurt.de) | `2021-`
 Jan Hammelmann | [✉️](mailto:hammelmann@itp.uni-frankfurt.de) | `2019-2023`
 Niklas Götz | [✉️](mailto:goetz@itp.uni-frankfurt.de) | `2021-`
+Renan Góes-Hirayama | [✉️](mailto:hirayama@itp.uni-frankfurt.de) | `2021-`
 Julia Groebel | [✉️](mailto:groebel@fias.uni-frankfurt.de) | `2022`
 Andy Goldschmidt | [✉️](mailto:goldschmidt@fias.uni-frankfurt.de) | `2014`
 Leon Geiger | [✉️](mailto:geiger@fias.uni-frankfurt.de) | `2019-2020`
 Oscar Garcia-Montero | [✉️](mailto:garcia@fias.uni-frankfurt.de) | `2020-2021`
-Hannah Elfner | [✉️](mailto:elfner@itp.uni-frankfurt.de) | `2018-`
+Hannah Elfner | [✉️](mailto:elfner@itp.uni-frankfurt.de) | `2013-`
 Niklas Ehlert | [✉️](mailto:ehlert@fias.uni-frankfurt.de) | `2016`
 Lucas Constantin | [✉️](mailto:constantin@itp.uni-frankfurt.de) | `2024-`
 Bjørn Bäuchle | [✉️](mailto:baeuchle@fias.uni-frankfurt.de) | `2012-2014`

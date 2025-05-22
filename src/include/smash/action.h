@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2024
+ *    Copyright (c) 2014-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -420,9 +420,8 @@ class Action {
     /* Should never get here. */
     logg[LAction].fatal(SMASH_SOURCE_LOCATION,
                         "Problem in choose_channel: ", subprocesses.size(), " ",
-                        weight_sum, " ", total_weight, " ",
-                        //          random_weight, "\n", *this);
-                        random_weight, "\n");
+                        weight_sum, " ", total_weight, " ", random_weight, "\n",
+                        *this);
     std::abort();
   }
 

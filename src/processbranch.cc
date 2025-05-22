@@ -131,8 +131,9 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
     case ProcessType::Thermalization:
       os << "Thermalization";
       break;
-    case ProcessType::HyperSurfaceCrossing:
-      os << "Hypersurface crossing";
+    case ProcessType::Fluidization:
+    case ProcessType::FluidizationNoRemoval:
+      os << "Fluidization";
       break;
     case ProcessType::MultiParticleThreeMesonsToOne:
       os << "ThreeMesonsToOne";

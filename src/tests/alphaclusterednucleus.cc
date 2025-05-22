@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2024
+ *    Copyright (c) 2024-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -115,4 +115,21 @@ TEST(scaling_tetrahedron_twice_does_not_change_it) {
        it1 != initial_positions.end(); it1++, it2++) {
     COMPARE_RELATIVE_ERROR(it1->abs(), it2->abs(), 1.e-12);
   }
+}
+
+TEST(initialize_alpha_clustered_nucleus) {
+  auto config = Configuration{R"(
+  Modi:
+    Collider:
+      Projectile:
+        Particles: {2212: 8, 2112: 8}
+        Alpha_Clustered:
+          Side_Length: 10
+        Orientation:
+          Phi: 3.14
+          Psi: 3.14
+          Theta: 3.14
+          Random_Rotation: "False"
+  )"};
+  AlphaClusteredNucleus alpha_clustered_oxygen(config, 1, false);
 }

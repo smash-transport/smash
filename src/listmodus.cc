@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2024
+ *    Copyright (c) 2015-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -309,6 +309,8 @@ bool ListModus::file_has_events_(std::filesystem::path filepath,
 void ListModus::validate_list_of_particles_of_all_events_() const {
   ListModus utility_copy{*this};
   utility_copy.verbose_ = false;
+  utility_copy.warn_about_mass_discrepancy_ = false;
+  utility_copy.warn_about_off_shell_particles_ = false;
   bool are_there_faulty_events = false;
   while (true) {
     try {

@@ -13,8 +13,7 @@
 #include "smash/logging.h"
 
 namespace smash {
-[[maybe_unused]] static constexpr int LHyperSurfaceCrossing =
-    LogArea::HyperSurfaceCrossing::id;
+static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     const ParticleList &plist, double dt, const double,
@@ -32,6 +31,9 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     if (t_end < 0.0) {
       continue;
     }
+    if (p.is_core()) {
+      continue;
+    }
 
     // For frozen Fermi motion:
     // Fermi momenta are only applied if particles interact. The particle
@@ -41,7 +43,7 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     // (and not with p.velocity()).
     // To identify the corresponding hypersurface crossings the finding for
     // those paricles without prior interactions has to be performed with
-    // v = vbeam instead of p.velcocity().
+    // v = vbeam instead of p.velocity().
     // Note: The beam_momentum vector is empty in case frozen Fermi motion is
     // not applied.
     const bool no_prior_interactions =
@@ -79,9 +81,7 @@ ActionList HyperSurfaceCrossActionsFinder::find_actions_in_cell(
     bool is_within_y_cut = true;
     // Check whether particle is in desired rapidity range
     if (rap_cut_ > 0.0) {
-      const double rapidity =
-          0.5 * std::log((p.momentum().x0() + p.momentum().x3()) /
-                         (p.momentum().x0() - p.momentum().x3()));
+      const double rapidity = p.rapidity();
       if (std::fabs(rapidity) > rap_cut_) {
         is_within_y_cut = false;
       }
@@ -183,6 +183,16 @@ FourVector HyperSurfaceCrossActionsFinder::coordinates_on_hypersurface(
   crossing_position.set_x0(sol1);
 
   return crossing_position;
+}
+
+void HyperSurfaceCrossActionsFinder::warn_if_some_particles_did_not_cross(
+    const size_t number_of_particles, bool impose_kinematic_cut) {
+  if (number_of_particles != 0 && !impose_kinematic_cut) {
+    logg[LHyperSurfaceCrossing].warn(
+        "End time might be too small for initial conditions output. "
+        "Hypersurface has not yet been crossed by ",
+        number_of_particles, " particle(s).");
+  }
 }
 
 }  // namespace smash

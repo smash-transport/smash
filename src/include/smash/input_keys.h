@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022-2024
+ *    Copyright (c) 2022-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -554,8 +554,8 @@ struct InputSections {
  * Namely, they are `Constant_Tau`, which relies on the hadron's hyperbolic
  * time, and `Dynamic`, where the condition is that the energy density around
  * the hadron exceeds a defined threshold. In both cases, particles that obey
- * the fluidization condition are removed from the evolution and written to the
- * \key Initial_Conditions output, which must be included in the config.
+ * the fluidization condition are written to the \key Initial_Conditions output,
+ * which must be included in the config.
  *
  * ### Constant tau
  *
@@ -578,6 +578,9 @@ struct InputSections {
  * configuration file with the \key Lower_Bound field. This is best applied to
  * higher beam energies, where the majority of the system is expected to behave
  * as a fluid starting with a Bjorken picture.
+ *
+ * Internally, the particles that cross the hypersurface are removed from the
+ * evolution.
  *
  * ### Dynamic with energy density
  *
@@ -3004,7 +3007,9 @@ struct InputKeys {
    * \see_key{key_CT_SP_use_monash_tune_}
    */
   inline static const Key<bool> collTerm_stringParam_useMonashTune{
-      InputSections::c_stringParameters + "Use_Monash_Tune", false, {"3.0"}};
+      InputSections::c_stringParameters + "Use_Monash_Tune",
+      DefaultType::Dependent,
+      {"3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
@@ -3943,7 +3948,9 @@ struct InputKeys {
    * \see_key{key_MC_IC_fluid_cells_}
    */
   inline static const Key<int> modi_collider_initialConditions_fluidCells{
-      InputSections::m_c_initialConditions + "Fluidization_Cells", 80, {"3.2"}};
+      InputSections::m_c_initialConditions + "Fluidization_Cells",
+      100,
+      {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
@@ -3973,6 +3980,25 @@ struct InputKeys {
           InputSections::m_c_initialConditions + "Fluidizable_Processes",
           FluidizableProcessesBitSet{}.set(),  // all processes
           {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_delay_initial_elastic,Delay_Initial_Elastic,
+   * bool,true}
+   *
+   * Whether the first elastic scatterings of initial nucleons are excluded from
+   * the list of fluidizable processes. Since the core-corona interaction is
+   * only elastic, this prevents some instantaneous fluidization.
+   */
+  /**
+   * \see_key{key_MC_IC_delay_initial_elastic}
+   */
+  inline static const Key<bool>
+      modi_collider_initialConditions_delayInitialElastic{
+          InputSections::m_c_initialConditions + "Delay_Initial_Elastic",
+          true,
+          {"3.3"}};
+
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_form_time_fraction_,Formation_Time_Fraction,
@@ -5885,6 +5911,7 @@ struct InputKeys {
       std::cref(modi_collider_impact_values),
       std::cref(modi_collider_impact_yields),
       std::cref(modi_collider_initialConditions_eDenThreshold),
+      std::cref(modi_collider_initialConditions_delayInitialElastic),
       std::cref(modi_collider_initialConditions_fluidCells),
       std::cref(modi_collider_initialConditions_formTimeFraction),
       std::cref(modi_collider_initialConditions_fluidProcesses),
@@ -6189,6 +6216,8 @@ General:
  *   them. The are weighted with a "shining weight" to compensate for the
  *   over-production.
  * - The shining weight can be found in the weight element of the output.
+ * - String products are further weighted by their cross section scaling
+ *   parameter, which depends on the formation time.
  * - The shining method is implemented in the DecayActionsFinderDilepton,
  *   which is automatically enabled together with the dilepton output.
  *

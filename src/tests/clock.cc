@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2020,2022-2024
+ *    Copyright (c) 2014-2015,2017-2020,2022-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -112,6 +112,11 @@ TEST_CATCH(reset_time_bigger_than_end_time, std::range_error) {
 
 TEST_CATCH(init_zero_dt, std::range_error) {
   UniformClock labtime(4.4, 0.0, 300);
+}
+
+TEST_CATCH(set_zero_dt, std::range_error) {
+  UniformClock labtime(4.4, 0.2, 300.0);
+  labtime.set_timestep_duration(0.0);
 }
 
 TEST_CATCH(init_negative_dt, std::range_error) {

@@ -17,7 +17,6 @@
 #include "smash/particles.h"
 
 namespace smash {
-static constexpr int LHyperSurfaceCrossing = LogArea::HyperSurfaceCrossing::id;
 
 const int RootOutput::max_buffer_size_ = 500000;
 
@@ -443,17 +442,6 @@ void RootOutput::at_eventend(const Particles &particles,
       collisions_tree_->AutoSave("SaveSelf");
     }
   }
-
-  if (write_initial_conditions_) {
-    // If the runtime is too short some particles might not yet have
-    // reached the hypersurface. Warning is printed.
-    if (particles.size() != 0 && !event.impose_kinematic_cut_for_SMASH_IC) {
-      logg[LHyperSurfaceCrossing].warn(
-          "End time might be too small for initial conditions output. "
-          "Hypersurface has not yet been crossed by ",
-          particles.size(), " particle(s).");
-    }
-  }
 }
 
 void RootOutput::at_interaction(const Action &action,
@@ -464,7 +452,8 @@ void RootOutput::at_interaction(const Action &action,
   }
 
   if (write_initial_conditions_ &&
-      action.get_type() == ProcessType::HyperSurfaceCrossing) {
+      (action.get_type() == ProcessType::Fluidization ||
+       action.get_type() == ProcessType::FluidizationNoRemoval)) {
     particles_to_tree(action.incoming_particles());
   }
 }

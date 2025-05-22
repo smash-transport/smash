@@ -44,9 +44,9 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
    * \param[in] plist List of all particles.
    * \param[in] dt Time until crossing can appear (until end of timestep). [fm]
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
-   * only necessary for frozen Fermi motion
-   * necessary if frozen Fermi Motion is activated \return List of all found
-   * wall crossings.
+   * only necessary if frozen Fermi Motion is activated
+   *
+   * \return List of all found hypersurface crossings.
    */
   ActionList find_actions_in_cell(
       const ParticleList &plist, double dt, const double,
@@ -70,6 +70,17 @@ class HyperSurfaceCrossActionsFinder : public ActionFinderInterface {
   ActionList find_final_actions(const Particles &, bool) const override {
     return {};
   }
+
+  /**
+   * Gives a warning if \p number_of_particles is not 0 and there are no
+   * kinematic cuts. If this is the case, it may be that the end time set
+   * by the user is too small.
+   *
+   * \param[in] number_of_particles how many particles are in the system
+   * \param[in] impose_kinematic_cut whether kinematic cuts were applied
+   */
+  static void warn_if_some_particles_did_not_cross(
+      const size_t number_of_particles, bool impose_kinematic_cut);
 
  private:
   /// Proper time of the hypersurface in fm.

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2024
+ *    Copyright (c) 2014-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -122,7 +122,8 @@ ScatterActionsFinder::ScatterActionsFinder(
         config.take(InputKeys::collTerm_stringParam_probabilityPToDUU),
         config.take(InputKeys::collTerm_stringParam_separateFragmentBaryon),
         config.take(InputKeys::collTerm_stringParam_popcornRate),
-        config.take(InputKeys::collTerm_stringParam_useMonashTune));
+        config.take(InputKeys::collTerm_stringParam_useMonashTune,
+                    parameters.use_monash_tune_default.value()));
   }
 }
 

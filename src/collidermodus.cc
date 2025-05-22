@@ -21,6 +21,7 @@
 #include "smash/configuration.h"
 #include "smash/customnucleus.h"
 #include "smash/experimentparameters.h"
+#include "smash/fluidizationaction.h"
 #include "smash/fourvector.h"
 #include "smash/icparameters.h"
 #include "smash/input_keys.h"
@@ -290,6 +291,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
         modus_cfg.take(InputKeys::modi_collider_initialConditions_type);
 
     if (IC_parameters_->type == FluidizationType::ConstantTau) {
+      FluidizationAction::remove_particle_ = true;
       if (modus_cfg.has_value(
               InputKeys::modi_collider_initialConditions_properTime)) {
         IC_parameters_->proper_time = modus_cfg.take(
@@ -311,6 +313,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
             modus_cfg.take(InputKeys::modi_collider_initialConditions_pTCut);
       }
     } else if (IC_parameters_->type == FluidizationType::Dynamic) {
+      FluidizationAction::remove_particle_ = false;
       double threshold = modus_cfg.take(
           InputKeys::modi_collider_initialConditions_eDenThreshold);
       double min_time =
@@ -328,8 +331,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
                "one of the following inequalities is violated:\n"
             << "  Energy_Density_Threshold = " << threshold << " > 0\n"
             << "  Maximum_Time = " << max_time << " > " << min_time
-            << " = Minimum_Time > 0\n Fluidization_Cells = " << cells
-            << " > 2\n"
+            << " = Minimum_Time > 0\n"
+               "Fluidization_Cells = "
+            << cells << " > 2\n"
             << " Formation_Time_Fraction < 0";
         throw std::invalid_argument("Please adjust the configuration file.");
       }
@@ -337,7 +341,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
       IC_parameters_->fluidizable_processes = modus_cfg.take(
           InputKeys::modi_collider_initialConditions_fluidProcesses);
 
-      double min_size = std::max(min_time, 10.);
+      double min_size = std::max(min_time, 40.);
       std::array<double, 3> length{2 * min_size, 2 * min_size, 2 * min_size};
       std::array<double, 3> origin{-min_size, -min_size, -min_size};
       std::array<int, 3> cell_array{cells, cells, cells};
@@ -352,10 +356,14 @@ ColliderModus::ColliderModus(Configuration modus_config,
       IC_parameters_->max_time = max_time;
       IC_parameters_->num_fluid_cells = cells;
       logg[LCollider].info()
-          << "Dynamic Initial Conditions with threshold " << threshold
+          << "Preparing dynamic Initial Conditions with threshold " << threshold
           << " GeV/fm³ in energy density, between " << min_time << " and "
           << max_time << " fm.";
       IC_parameters_->formation_time_fraction = form_time_fraction;
+      IC_parameters_->smearing_kernel_at_0 =
+          std::pow(2 * M_PI * params.gaussian_sigma, -1.5);
+      IC_parameters_->delay_initial_elastic = modus_cfg.take(
+          InputKeys::modi_collider_initialConditions_delayInitialElastic);
     }
   }
 }

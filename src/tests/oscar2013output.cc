@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022-2024
+ *    Copyright (c) 2014-2020,2022-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -86,13 +86,14 @@ static void compare_extended_particledata(
   compare_particledata(smaller_datastring, particle, id);
   const auto h = particle.get_history();
   COMPARE(std::atoi(datastring.at(12).c_str()), h.collisions_per_particle);
-  COMPARE(std::atoi(datastring.at(13).c_str()), particle.formation_time());
-  COMPARE(std::atoi(datastring.at(14).c_str()), particle.xsec_scaling_factor());
+  COMPARE_ABSOLUTE_ERROR(std::stod(datastring.at(13)),
+                         particle.formation_time(), accuracy);
+  COMPARE(std::stod(datastring.at(14)), particle.xsec_scaling_factor());
   COMPARE(std::atoi(datastring.at(15).c_str()), static_cast<int>(h.id_process));
   COMPARE(std::atoi(datastring.at(16).c_str()),
           static_cast<int>(h.process_type));
-  COMPARE_ABSOLUTE_ERROR(std::atof(datastring.at(17).c_str()),
-                         h.time_last_collision, accuracy);
+  COMPARE_ABSOLUTE_ERROR(std::stod(datastring.at(17)), h.time_last_collision,
+                         accuracy);
   COMPARE(datastring.at(18), h.p1.string());
   COMPARE(datastring.at(19), h.p2.string());
   COMPARE(std::atoi(datastring.at(20).c_str()),

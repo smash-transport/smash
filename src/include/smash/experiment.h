@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2024
+ *    Copyright (c) 2013-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -24,6 +24,7 @@
 #include "dynamicfluidfinder.h"
 #include "energymomentumtensor.h"
 #include "fields.h"
+#include "fluidizationaction.h"
 #include "fourvector.h"
 #include "grandcan_thermalizer.h"
 #include "grid.h"
@@ -248,7 +249,7 @@ class Experiment : public ExperimentBase {
    *
    * \throws runtime_error if found actions cannot be performed
    */
-  void do_final_decays();
+  void do_final_interactions();
 
   /// Output at the end of an event
   void final_output();
@@ -1011,7 +1012,7 @@ Experiment<Modus>::Experiment(Configuration &config,
   if (modus_.is_box() && config.read(InputKeys::collTerm_totXsStrategy) !=
                              TotalCrossSectionStrategy::BottomUp) {
     logg[LExperiment].warn(
-        "To preserve detailed balance in a box simulation, it is recommended "
+        "To preserve detailed balance in a box simulation, it is recommended\n"
         "to use the bottom-up strategy for evaluating total cross sections.\n"
         "Consider adding the following line to the 'Collision_Term' section "
         "in your configuration file:\n"
@@ -1067,7 +1068,8 @@ Experiment<Modus>::Experiment(Configuration &config,
           "hang.");
     }
     action_finders_.emplace_back(std::make_unique<DecayActionsFinder>(
-        parameters_.res_lifetime_factor, parameters_.do_non_strong_decays));
+        parameters_.res_lifetime_factor, parameters_.do_non_strong_decays,
+        force_decays_));
   }
   bool no_coll = config.take(InputKeys::collTerm_noCollisions);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
@@ -1191,6 +1193,8 @@ Experiment<Modus>::Experiment(Configuration &config,
         double default_proper_time = modus_.nuclei_passing_time();
         if (default_proper_time >= lower_bound) {
           proper_time = default_proper_time;
+          logg[LInitialConditions].info()
+              << "Nuclei passing time is " << proper_time << " fm.";
         } else {
           logg[LInitialConditions].warn()
               << "Nuclei passing time is too short, hypersurface proper time "
@@ -2268,12 +2272,32 @@ template <typename Modus>
 bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
                                        bool include_pauli_blocking) {
   Particles &particles = ensembles_[i_ensemble];
+  auto &incoming = action.incoming_particles();
   // Make sure to skip invalid and Pauli-blocked actions.
   if (!action.is_valid(particles)) {
     discarded_interactions_total_++;
     logg[LExperiment].debug(~einhard::DRed(), "✘ ", action,
                             " (discarded: invalid)");
     return false;
+  }
+  const bool core_in_incoming =
+      std::any_of(incoming.begin(), incoming.end(),
+                  [](const ParticleData &p) { return p.is_core(); });
+  if (core_in_incoming) {
+    if (action.get_type() == ProcessType::FluidizationNoRemoval) {
+      // If the incoming particle is already core, the action should not happen.
+      logg[LExperiment].debug() << "Discarding " << incoming[0].id();
+      return false;
+    } else if (action.get_type() != ProcessType::Elastic) {
+      /* Only elastic collisions can happen between core and corona particles
+       * (1→N can still happen) */
+      const bool all_core_in_incoming =
+          std::all_of(incoming.begin(), incoming.end(),
+                      [](const ParticleData &p) { return p.is_core(); });
+      if (!all_core_in_incoming) {
+        return false;
+      }
+    }
   }
   try {
     action.generate_final_state();
@@ -2291,10 +2315,10 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   // to signal that there was some interaction in this event
   if (modus_.is_collider()) {
     int count_target = 0, count_projectile = 0;
-    for (const auto &incoming : action.incoming_particles()) {
-      if (incoming.belongs_to() == BelongsTo::Projectile) {
+    for (const auto &p : incoming) {
+      if (p.belongs_to() == BelongsTo::Projectile) {
         count_projectile++;
-      } else if (incoming.belongs_to() == BelongsTo::Target) {
+      } else if (p.belongs_to() == BelongsTo::Target) {
         count_target++;
       }
     }
@@ -2313,7 +2337,7 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   if (action.get_type() == ProcessType::Wall) {
     wall_actions_total_++;
   }
-  if (action.get_type() == ProcessType::HyperSurfaceCrossing) {
+  if (action.get_type() == ProcessType::Fluidization) {
     total_hypersurface_crossing_actions_++;
     total_energy_removed_ += action.incoming_particles()[0].momentum().x0();
   }
@@ -2332,9 +2356,9 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
   /*!\Userguide
    * \page doxypage_output_collisions_box_modus
    * \note When SMASH is running in the box modus, particle coordinates
-   * in the collision output can be out of the box. This is not an error.  Box
-   * boundary conditions are intentionally not imposed before collision output
-   * to allow unambiguous finding of the interaction point.
+   * in the collision output can be out of the box. This is not an error.
+   * Box boundary conditions are intentionally not imposed before collision
+   * output to allow unambiguous finding of the interaction point.
    * <I>Example</I>: two particles in the box have x coordinates 0.1 and
    * 9.9 fm, while box L = 10 fm. Suppose these particles collide.
    * For calculating collision the first one is wrapped to 10.1 fm.
@@ -2345,13 +2369,16 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
    * position could be either at 10 fm or at 5 fm.
    */
   for (const auto &output : outputs_) {
-    if (!output->is_dilepton_output() && !output->is_photon_output()) {
-      if (output->is_IC_output() &&
-          action.get_type() == ProcessType::HyperSurfaceCrossing) {
-        output->at_interaction(action, rho);
-      } else if (!output->is_IC_output()) {
+    if (output->is_dilepton_output() || output->is_photon_output()) {
+      continue;
+    }
+    if (output->is_IC_output()) {
+      if (action.get_type() == ProcessType::Fluidization ||
+          action.get_type() == ProcessType::FluidizationNoRemoval) {
         output->at_interaction(action, rho);
       }
+    } else {
+      output->at_interaction(action, rho);
     }
   }
 
@@ -3003,17 +3030,16 @@ void Experiment<Modus>::update_potentials() {
 }
 
 template <typename Modus>
-void Experiment<Modus>::do_final_decays() {
+void Experiment<Modus>::do_final_interactions() {
   /* At end of time evolution: Force all resonances to decay. In order to handle
    * decay chains, we need to loop until no further actions occur. */
-  bool actions_performed, decays_found;
+  bool actions_performed, actions_found;
   uint64_t interactions_old;
   do {
-    decays_found = false;
+    actions_found = false;
     interactions_old = interactions_total_;
     for (int i_ens = 0; i_ens < parameters_.n_ensembles; i_ens++) {
       Actions actions;
-
       // Dileptons: shining of remaining resonances
       if (dilepton_finder_ != nullptr) {
         for (const auto &output : outputs_) {
@@ -3025,7 +3051,7 @@ void Experiment<Modus>::do_final_decays() {
         auto found_actions = finder->find_final_actions(ensembles_[i_ens]);
         if (!found_actions.empty()) {
           actions.insert(std::move(found_actions));
-          decays_found = true;
+          actions_found = true;
         }
       }
       // Perform actions.
@@ -3035,8 +3061,8 @@ void Experiment<Modus>::do_final_decays() {
     }
     actions_performed = interactions_total_ > interactions_old;
     // Throw an error if actions were found but not performed
-    if (decays_found && !actions_performed) {
-      throw std::runtime_error("Final decays were found but not performed.");
+    if (actions_found && !actions_performed) {
+      throw std::runtime_error("Final actions were found but not performed.");
     }
     // loop until no more decays occur
   } while (actions_performed);
@@ -3246,9 +3272,7 @@ void Experiment<Modus>::run() {
 
     run_time_evolution(end_time_);
 
-    if (force_decays_) {
-      do_final_decays();
-    }
+    do_final_interactions();
 
     // Output at event end
     final_output();

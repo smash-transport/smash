@@ -129,8 +129,10 @@ double Action::perform(Particles *particles, uint32_t id_process) {
   assert(id_process != 0);
   double energy_violation = 0.;
   for (ParticleData &p : outgoing_particles_) {
-    // store the history info
-    if (process_type_ != ProcessType::Wall) {
+    /* Store the history info. Wall crossing and fluidization don't change the
+     * last collision a particle went through. */
+    if ((process_type_ != ProcessType::Wall) &&
+        (process_type_ != ProcessType::FluidizationNoRemoval)) {
       p.set_history(p.get_history().collisions_per_particle + 1, id_process,
                     process_type_, time_of_execution_, incoming_particles_);
     }
@@ -139,9 +141,10 @@ double Action::perform(Particles *particles, uint32_t id_process) {
   /* For elastic collisions and box wall crossings it is not necessary to remove
    * particles from the list and insert new ones, it is enough to update their
    * properties. */
-  particles->update(incoming_particles_, outgoing_particles_,
-                    (process_type_ != ProcessType::Elastic) &&
-                        (process_type_ != ProcessType::Wall));
+  const bool replace = (process_type_ != ProcessType::Elastic) &&
+                       (process_type_ != ProcessType::Wall) &&
+                       (process_type_ != ProcessType::FluidizationNoRemoval);
+  particles->update(incoming_particles_, outgoing_particles_, replace);
 
   logg[LAction].debug("Particle map now has ", particles->size(), " elements.");
 

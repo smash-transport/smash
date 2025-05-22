@@ -135,6 +135,9 @@ CollisionBranchList CrossSections::generate_collision_list(
   if (incl_elastic && !reject_by_nucleon_elastic_cutoff) {
     process_list.emplace_back(elastic(finder_parameters));
   }
+  if (incoming_particles_[0].is_core() ^ incoming_particles_[1].is_core()) {
+    return process_list;
+  }
   if (p_pythia > 0.) {
     /* String-excitation cross section =
      * Parametrized total cross - the contributions

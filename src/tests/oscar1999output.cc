@@ -304,6 +304,7 @@ TEST(initial_conditions_format) {
   p1.set_4position(FourVector(2.3, 1.35722, 1.42223, 1.5));  // tau = 1.74356
 
   // Create action
+  FluidizationAction::remove_particle_ = true;
   ActionPtr action = std::make_unique<FluidizationAction>(p1, p1, 0.0);
   action->generate_final_state();
 

@@ -2,7 +2,7 @@
 
 #===================================================
 #
-#    Copyright (c) 2018-2021,2023
+#    Copyright (c) 2018-2021,2023,2025
 #      SMASH Team
 #
 #    GNU General Public License (GPLv3 or later)
@@ -120,7 +120,7 @@ dilepton_perf=$(benchmark_run dileptons "${SMASH_ROOT}/input/dileptons" $PART_DE
 echo "$dilepton_perf" | grep -E "time elapsed"
 
 echo "   Started benchmark for photons ..."
-photons_perf=$(benchmark_run photons "${SCRIPTPATH}/configs/photons" "${SCRIPTPATH}/configs/photons")
+photons_perf=$(benchmark_run photons "${SMASH_ROOT}/input/photons" "${SMASH_ROOT}/input/photons")
 echo "$photons_perf" | grep -E "time elapsed"
 
 echo "   Started benchmark for testparticles ..."
