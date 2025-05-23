@@ -792,10 +792,16 @@ struct InputSections {
  * - \ref doxypage_input_conf_pot_coulomb
  * - \ref doxypage_input_conf_pot_momentum_dependence
  *
+ * \warning A large enough number of <tt>\ref key_gen_ensembles_
+ * "Ensembles"</tt>,  <tt>\ref key_gen_testparticles_ "Testparticles"</tt>,
+ * or a combination of both must be used for a stable evaluation of densities
+ * needed to compute the potentials. We recommend minimal values of 20 ensembles
+ * and 10 testparticles (see \iref{Mohs:2024gyc}).
+ *
  * ### Configuring potentials
  *
- * The following snippet of the configuration file configures SMASH such
- * that the Skyrme as well as the Symmetry potential are activated for the
+ * The following snippet of the configuration file configures SMASH such that
+ * the Skyrme as well as the Symmetry potential are activated for the
  * simulation. There is however no requirement to include both simultaneously.
  * They can be switched on and off individually.
  *\verbatim
@@ -849,12 +855,10 @@ struct InputSections {
  * The momentum-dependent term can be added to the Skyrme potential. In order
  * to activate it one has to specify the parameters C and Lambda in MeV and
  * 1/fm respectively in the "Momentum_Dependence" section under "Potentials".
- * Note that the parameters from the momentum-dependent term
- * and the Skyrme potential need to be consistent in order to reproduce nuclear
- * ground
- * state properties. An example of parameters corresponding to a medium-stiff
-(K=290 MeV) equation of state
- * is given in the following.
+ * Note that the parameters from the momentum-dependent term and the Skyrme
+ * potential need to be consistent in order to reproduce nuclear ground
+ * state properties. An example of parameters corresponding to a
+ * medium-stiff (K=290 MeV) equation of state is given in the following.
  * \verbatim
  Potentials:
   Symmetry:
