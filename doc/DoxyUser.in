@@ -266,7 +266,7 @@ ALIASES                = "key=\c" \
                          "required_key_no_line{3}=\aux_key{,\1,\2,\3,required,}" \
                          "optional_key{4}=\aux_key{<hr>,\1,\2,\3,optional\, default = ,<tt>\4</tt>}" \
                          "optional_key_no_line{4}=\aux_key{,\1,\2,\3,optional\, default = ,<tt>\4</tt>}" \
-                         "list_removed_key{3}=\li \anchor \1 <b>\key \2</b> &mdash; removed in <tt>SMASH-\3</tt>" \
+                         "list_removed_key{3}=\li \anchor \1 <b>\key <tt>\2</tt></b> &mdash; removed in <tt>SMASH-\3</tt>" \
                          "see_key{1}=See \ref \1 \"user guide description\" for more information." \
                          "removed_key{2}=This key \ref \1 \"has been removed\" in <tt>SMASH-\2</tt> version." \
                          "unit{1}=<b>\1</b>" \

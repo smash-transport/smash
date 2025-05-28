@@ -34,7 +34,7 @@ namespace smash {
  * here an explicit members description and we simply refer to the user guide.
  * If you add a new process type here, document the new member as the other
  * existing ones and include the corresponding description in the Doxygen page
- * with anchor "doxypage_output_oscar_collisions_process_types".
+ * with anchor "doxypage_output_process_types".
  */
 enum class ProcessType {
   /// \see_process_type{0}

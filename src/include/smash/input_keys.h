@@ -268,7 +268,11 @@ struct InputSections {
  * \page doxypage_input_conf_removed_keys
  *
  * The following list collects all configuration keys that have been removed at
- * some point from SMASH.
+ * some point from SMASH. Each removed key is written here using its YAML full
+ * path in the YAML tree, i.e. including section names from the top-level. Full
+ * stops are used as separators as they are never included in key names. For
+ * example, a key listed as <tt>Top.Sub.Name</tt> refers to the \c Name key in
+ * the \c Sub section which in turn is contained in the \c Top section.
  */
 
 /*!\Userguide
@@ -2206,8 +2210,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
    *
-   * \list_removed_key{key_CT_include_decays_end_,
-   * Include_Weak_And_EM_Decays_At_The_End,3.2}.
+   * \list_removed_key{key_CT_include_decays_end_,Collision_Term.Include_Weak_And_EM_Decays_At_The_End,3.2}.
    * This key was renamed as <tt>\ref key_CT_ignore_decay_width_end_
    * "Ignore_Minimum_Decay_Width_For_Decays_At_The_End"</tt>.
    */
@@ -4896,82 +4899,64 @@ struct InputKeys {
       InputSections::o_initialConditions + "Extended", false, {"1.7"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_output
+   * \page doxypage_input_conf_removed_keys
    *
-   * \attention The following Initial Conditions options are deprecated in this
-   * section and should be provided to a subsection under Collider (see \ref
-   * doxypage_input_conf_modi_C_initial_conditions). Prefer to use them, as
-   * these keys will be removed soon.
-   *
-   * \optional_key_no_line{key_output_IC_lower_bound_,Lower_Bound,double,0.5}
-   *
-   * Lower bound \unit{in fm} for the IC proper time if
-   * <tt>\ref key_output_IC_proper_time_ "Proper_Time"</tt> is not provided.
+   * \list_removed_key{key_output_IC_lower_bound_,Output.Initial_Conditions.Lower_Bound,3.3}.
+   * This key was moved from the Output section into <tt>\ref
+   * key_MC_IC_lower_bound_ "Modi.Collider.Initial_Conditions"</tt>.
    */
   /**
-   * \see_key{key_output_IC_lower_bound_}
+   * \removed_key{key_output_IC_lower_bound_,3.3}
    */
   inline static const Key<double> output_initialConditions_lowerBound{
-      InputSections::o_initialConditions + "Lower_Bound", 0.5, {"1.8", "3.2"}};
+      InputSections::o_initialConditions + "Lower_Bound",
+      0.5,
+      {"1.8", "3.2", "3.3"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_proper_time_,Proper_Time,double,
-   * </tt>\f$f(t_{np})\f$<tt>}
+   * \page doxypage_input_conf_removed_keys
    *
-   * Proper time \unit{in fm} at which hypersurface is created. Its default
-   * value depends on the nuclei passing time \f$t_{np}\f$ as follows,
-   * \f[
-   * f(t_{np})=\begin{cases}
-   * \mathrm{\texttt{Lower_Bound}}  & t_{np} \le \mathrm{\texttt{Lower_Bound}}\\
-   * t_{np} & t_{np} > \mathrm{\texttt{Lower_Bound}}
-   * \end{cases}\;.
-   * \f]
+   * \list_removed_key{key_output_IC_proper_time_,Output.Initial_Conditions.Proper_Time,3.3}.
+   * This key was moved from the Output section into <tt>\ref
+   * key_MC_IC_proper_time_ "Modi.Collider.Initial_Conditions"</tt>.
    */
   /**
-   * \see_key{key_output_IC_proper_time_}
+   * \removed_key{key_output_IC_proper_time_,3.3}
    */
   inline static const Key<double> output_initialConditions_properTime{
       InputSections::o_initialConditions + "Proper_Time",
       DefaultType::Dependent,
-      {"1.7", "3.2"}};
+      {"1.7", "3.2", "3.3"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_pt_cut_,pT_Cut,double,
-   * </tt>No cut is done<tt>}
+   * \page doxypage_input_conf_removed_keys
    *
-   * If set, employ a transverse momentum cut for particles contributing to the
-   * initial conditions for hydrodynamics. A positive value \unit{in GeV} is
-   * expected. Only particles characterized by
-   * \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed to the output file.
+   * \list_removed_key{key_output_IC_pt_cut_,Output.Initial_Conditions.pT_Cut,3.3}.
+   * This key was moved from the Output section into <tt>\ref key_MC_IC_pt_cut_
+   * "Modi.Collider.Initial_Conditions"</tt>.
    */
   /**
-   * \see_key{key_output_IC_pt_cut_}
+   * \removed_key{key_output_IC_pt_cut_,3.3}
    */
   inline static const Key<double> output_initialConditions_pTCut{
       InputSections::o_initialConditions + "pT_Cut",
       DefaultType::Dependent,
-      {"2.2", "3.2"}};
+      {"2.2", "3.2", "3.3"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_rapidity_cut_,Rapidity_Cut,double,
-   * </tt>No cut is done<tt>}
+   * \page doxypage_input_conf_removed_keys
    *
-   * If set, employ a rapidity cut for particles contributing to the initial
-   * conditions for hydrodynamics. A positive value is expected and the cut is
-   * employed symmetrically around 0. Only particles characterized by
-   * \f$|\mathrm{\texttt{Rapidity_Cut}}|<y\f$ are printed to the
-   * output file.
+   * \list_removed_key{key_output_IC_rapidity_cut_,Output.Initial_Conditions.Rapidity_Cut,3.3}.
+   * This key was moved from the Output section into <tt>\ref
+   * key_MC_IC_rapidity_cut_ "Modi.Collider.Initial_Conditions"</tt>.
    */
   /**
-   * \see_key{key_output_IC_rapidity_cut_}
+   * \removed_key{key_output_IC_rapidity_cut_,3.3}
    */
   inline static const Key<double> output_initialConditions_rapidityCut{
       InputSections::o_initialConditions + "Rapidity_Cut",
       DefaultType::Dependent,
-      {"2.2", "3.2"}};
+      {"2.2", "3.2", "3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
