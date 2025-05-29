@@ -3870,9 +3870,7 @@ struct InputKeys {
    * \see_key{key_output_IC_pt_cut_}
    */
   inline static const Key<double> modi_collider_initialConditions_pTCut{
-      InputSections::m_c_initialConditions + "pT_Cut",
-      DefaultType::Dependent,
-      {"3.2"}};
+      InputSections::m_c_initialConditions + "pT_Cut", 0.0, {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
@@ -3890,9 +3888,7 @@ struct InputKeys {
    * \see_key{key_MC_IC_rapidity_cut_}
    */
   inline static const Key<double> modi_collider_initialConditions_rapidityCut{
-      InputSections::m_c_initialConditions + "Rapidity_Cut",
-      DefaultType::Dependent,
-      {"3.2"}};
+      InputSections::m_c_initialConditions + "Rapidity_Cut", 0.0, {"3.2"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions

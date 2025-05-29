@@ -651,20 +651,4 @@ void validate_and_adjust_particle_list(ParticleList &particle_list) {
   }
 }
 
-void validate_duplicate_IC_config(double output, std::optional<double> collider,
-                                  std::string key) {
-  const std::string deprecated_message =
-      "Configuration key for initial conditions was provided twice and "
-      "inconsistently.\nSome parameters in the Initial_Conditions section of "
-      "Output are deprecated.\nPlease use the corresponding values in the "
-      "Initial_Conditions subsection under Collider.";
-  if (collider.has_value()) {
-    if (output != collider) {
-      logg[LInitialConditions].fatal("Inconsistent values for ", key,
-                                     " in configuration.");
-      throw std::invalid_argument(deprecated_message);
-    }
-  }
-}
-
 }  // namespace smash

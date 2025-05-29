@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2024
+ *    Copyright (c) 2012-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -31,6 +31,7 @@
 
 namespace smash {
 static constexpr int LCollider = LogArea::Collider::id;
+static constexpr int LInitialConditions = LogArea::InitialConditions::id;
 
 ColliderModus::ColliderModus(Configuration modus_config,
                              const ExperimentParameters &params) {
@@ -297,21 +298,13 @@ ColliderModus::ColliderModus(Configuration modus_config,
         IC_parameters_->proper_time = modus_cfg.take(
             InputKeys::modi_collider_initialConditions_properTime);
       }
-      if (modus_cfg.has_value(
-              InputKeys::modi_collider_initialConditions_lowerBound)) {
-        IC_parameters_->lower_bound = modus_cfg.take(
-            InputKeys::modi_collider_initialConditions_lowerBound);
-      }
-      if (modus_cfg.has_value(
-              InputKeys::modi_collider_initialConditions_rapidityCut)) {
-        IC_parameters_->rapidity_cut = modus_cfg.take(
-            InputKeys::modi_collider_initialConditions_rapidityCut);
-      }
-      if (modus_cfg.has_value(
-              InputKeys::modi_collider_initialConditions_pTCut)) {
-        IC_parameters_->pT_cut =
-            modus_cfg.take(InputKeys::modi_collider_initialConditions_pTCut);
-      }
+      IC_parameters_->lower_bound =
+          modus_cfg.take(InputKeys::modi_collider_initialConditions_lowerBound);
+      IC_parameters_->rapidity_cut = modus_cfg.take(
+          InputKeys::modi_collider_initialConditions_rapidityCut);
+      IC_parameters_->pT_cut =
+          modus_cfg.take(InputKeys::modi_collider_initialConditions_pTCut);
+      validate_IC_kinematic_range();
     } else if (IC_parameters_->type == FluidizationType::Dynamic) {
       FluidizationAction::remove_particle_ = false;
       double threshold = modus_cfg.take(
@@ -326,7 +319,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
           InputKeys::modi_collider_initialConditions_formTimeFraction);
       if (threshold <= 0 || max_time < min_time || min_time < 0 || cells < 2 ||
           form_time_fraction < 0) {
-        logg[LCollider].fatal()
+        logg[LInitialConditions].fatal()
             << "Bad parameters chosen for dynamic initial conditions. At least "
                "one of the following inequalities is violated:\n"
             << "  Energy_Density_Threshold = " << threshold << " > 0\n"
@@ -355,7 +348,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
       IC_parameters_->min_time = min_time;
       IC_parameters_->max_time = max_time;
       IC_parameters_->num_fluid_cells = cells;
-      logg[LCollider].info()
+      logg[LInitialConditions].info()
           << "Preparing dynamic Initial Conditions with threshold " << threshold
           << " GeV/fm³ in energy density, between " << min_time << " and "
           << max_time << " fm.";
@@ -366,6 +359,48 @@ ColliderModus::ColliderModus(Configuration modus_config,
           InputKeys::modi_collider_initialConditions_delayInitialElastic);
     }
   }
+}
+
+void ColliderModus::validate_IC_kinematic_range() {
+  bool bad_cuts = false;
+  const double rapidity = IC_parameters_->rapidity_cut.value();
+  const double pT = IC_parameters_->pT_cut.value();
+  if (rapidity < 0.0) {
+    logg[LInitialConditions].fatal()
+        << "Rapidity cut for initial conditions configured as |y| < "
+        << rapidity
+        << " is unreasonable. \nPlease choose a positive, non-zero value or "
+           "employ SMASH without rapidity cut.";
+    bad_cuts = true;
+  }
+  if (pT < 0.0) {
+    logg[LInitialConditions].fatal()
+        << "Transverse momentum cut for initial conditions configured as pT < "
+        << pT
+        << " is unreasonable. \nPlease choose a positive, non-zero value or "
+           "employ SMASH without pT cut.";
+    bad_cuts = true;
+  }
+  if (bad_cuts) {
+    throw std::runtime_error(
+        "Kinematic cut for initial conditions malconfigured.");
+  }
+
+  std::ostringstream message;
+  message << "Extracting iso-tau initial conditions ";
+  if (rapidity > 0.0 || pT > 0.0) {
+    message << "in kinematic range: ";
+    if (rapidity > 0.0 && pT > 0.0) {
+      message << "|y| <= " << rapidity << "; pT <= " << pT << " GeV.";
+    } else if (rapidity > 0.0) {
+      message << "|y| <= " << rapidity << ".";
+    } else if (pT > 0.0) {
+      message << "pT <= " << pT << " GeV.";
+    }
+  } else {
+    message << "without kinematic cuts.";
+  }
+  logg[LInitialConditions].info() << message.str();
 }
 
 std::ostream &operator<<(std::ostream &out, const ColliderModus &m) {

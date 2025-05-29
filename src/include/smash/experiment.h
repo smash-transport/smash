@@ -725,17 +725,6 @@ std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   out << e.modus_;
   return out;
 }
-/**
- * The physics inputs for Initial Conditions are currently duplicated in both
- * Output and Collider sections, with the former being deprecated. This
- * function checks whether there are two inconsistent values, in which case
- * SMASH fails.
- * When the deprecated way is removed, the key taking will be handled in the
- * constructor of ColliderModus, and this function will be removed.
- *
- * \throws invalid_argument if inconsistent configuration inputs are supplied
- */
-void validate_duplicate_IC_config(double, std::optional<double>, std::string);
 
 template <typename Modus>
 void Experiment<Modus>::create_output(const std::string &format,
@@ -1101,32 +1090,9 @@ Experiment<Modus>::Experiment(Configuration &config,
           modus_.fluid_lattice(), modus_.fluid_background(), IC_parameters));
     } else {
       // Iso-tau hypersurface
-      /*
-       * Due to an ongoing refactoring, the physics inputs for Initial
-       * Conditions the former being deprecated. If there are two inconsistent
-       * values, SMASH will not run. Otherwise it will follow the one present in
-       * the configuration. If none are present, the default is used. When the
-       * deprecated way is removed, the key taking will be handled in the
-       * constructor of ColliderModus, and the logic here will be removed.
-       */
       double rapidity_cut = IC_parameters.rapidity_cut.has_value()
                                 ? IC_parameters.rapidity_cut.value()
                                 : 0.0;
-      if (config.has_value(InputKeys::output_initialConditions_rapidityCut)) {
-        rapidity_cut =
-            config.take(InputKeys::output_initialConditions_rapidityCut);
-        validate_duplicate_IC_config(rapidity_cut, IC_parameters.rapidity_cut,
-                                     "Rapidity_Cut");
-      }
-
-      if (rapidity_cut < 0.0) {
-        logg[LInitialConditions].fatal()
-            << "Rapidity cut for initial conditions configured as abs(y) < "
-            << rapidity_cut << " is unreasonable. \nPlease choose a positive, "
-            << "non-zero value or employ SMASH without rapidity cut.";
-        throw std::runtime_error(
-            "Kinematic cut for initial conditions malconfigured.");
-      }
 
       if (modus_.calculation_frame_is_fixed_target() && rapidity_cut != 0.0) {
         throw std::runtime_error(
@@ -1138,56 +1104,15 @@ Experiment<Modus>::Experiment(Configuration &config,
 
       double pT_cut =
           IC_parameters.pT_cut.has_value() ? IC_parameters.pT_cut.value() : 0.0;
-      if (config.has_value(InputKeys::output_initialConditions_pTCut)) {
-        pT_cut = config.take(InputKeys::output_initialConditions_pTCut);
-        validate_duplicate_IC_config(pT_cut, IC_parameters.pT_cut, "pT_Cut");
-      }
-      if (pT_cut < 0.0) {
-        logg[LInitialConditions].fatal()
-            << "transverse momentum cut for initial conditions configured as "
-            << "pT < " << pT_cut << " is unreasonable. \nPlease choose a "
-            << "positive, non-zero value or employ SMASH without pT cut.";
-        throw std::runtime_error(
-            "Kinematic cut for initial conditions misconfigured.");
-      }
-
       if (rapidity_cut > 0.0 || pT_cut > 0.0) {
         kinematic_cuts_for_IC_output_ = true;
       }
 
-      if (rapidity_cut > 0.0 && pT_cut > 0.0) {
-        logg[LInitialConditions].info()
-            << "Extracting initial conditions in kinematic range: "
-            << -rapidity_cut << " <= y <= " << rapidity_cut
-            << "; pT <= " << pT_cut << " GeV.";
-      } else if (rapidity_cut > 0.0) {
-        logg[LInitialConditions].info()
-            << "Extracting initial conditions in kinematic range: "
-            << -rapidity_cut << " <= y <= " << rapidity_cut << ".";
-      } else if (pT_cut > 0.0) {
-        logg[LInitialConditions].info()
-            << "Extracting initial conditions in kinematic range: pT <= "
-            << pT_cut << " GeV.";
-      } else {
-        logg[LInitialConditions].info()
-            << "Extracting initial conditions without kinematic cuts.";
-      }
-
       double proper_time = std::numeric_limits<double>::quiet_NaN();
-      if (config.has_value(InputKeys::output_initialConditions_properTime)) {
-        // Read in proper time from config
-        proper_time =
-            config.take(InputKeys::output_initialConditions_properTime);
-        validate_duplicate_IC_config(proper_time, IC_parameters.proper_time,
-                                     "Proper_Time");
-      } else if (IC_parameters.proper_time.has_value()) {
+      if (IC_parameters.proper_time.has_value()) {
         proper_time = IC_parameters.proper_time.value();
       } else {
-        double lower_bound =
-            config.take(InputKeys::output_initialConditions_lowerBound);
-        if (IC_parameters.lower_bound.has_value())
-          validate_duplicate_IC_config(lower_bound, IC_parameters.lower_bound,
-                                       "Lower_Bound");
+        double lower_bound = IC_parameters.lower_bound.value();
 
         // Default proper time is the passing time of the two nuclei
         double default_proper_time = modus_.nuclei_passing_time();
