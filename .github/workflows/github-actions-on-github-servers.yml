@@ -78,9 +78,9 @@ jobs:
             sudo apt-get install ${{ matrix.packages_to_add }} -y
         fi
         # we download and install Pythia
-        wget https://pythia.org/download/pythia83/pythia8314.tgz && tar xf pythia8314.tgz && rm pythia8314.tgz && cd pythia8314
+        wget https://pythia.org/download/pythia83/pythia8315.tgz && tar xf pythia8315.tgz && rm pythia8315.tgz && cd pythia8315
         ./configure --cxx-common="-std=c++17 -march=native -O3 -fPIC -pthread" && make -j$(nproc) && cd ..
-        export LD_LIBRARY_PATH=${SMASH_ROOT}/pythia8314/lib:${LD_LIBRARY_PATH} # To make sure it can be found at run time
+        export LD_LIBRARY_PATH=${SMASH_ROOT}/pythia8315/lib:${LD_LIBRARY_PATH} # To make sure it can be found at run time
         # we get eigen
         wget http://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && tar -xf eigen-3.4.0.tar.gz -C ${HOME}
         export CMAKE_PREFIX_PATH=${HOME}/eigen-3.4.0/  # Let CMake find Eigen also when testing using SMASH as library
@@ -89,7 +89,7 @@ jobs:
         export PATH=${HOME}/bin:${PATH}
         # now we build SMASH
         cd $SMASH_ROOT && mkdir build && cd build
-        cmake -DPythia_CONFIG_EXECUTABLE=${SMASH_ROOT}/pythia8314/bin/pythia8-config ..
+        cmake -DPythia_CONFIG_EXECUTABLE=${SMASH_ROOT}/pythia8315/bin/pythia8-config ..
         make -j$(nproc)
         # we check the building of the documentation for the current and the past Ubuntu LTS releases
         if [ ${SITE} == "ubuntu-22.04-default-gcc" ] || [ ${SITE} == "ubuntu-20.04-minimum-gcc" ]; then make undocumented_test && make user; fi
