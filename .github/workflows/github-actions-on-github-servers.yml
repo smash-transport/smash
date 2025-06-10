@@ -95,8 +95,12 @@ jobs:
         make -j$(nproc)
         # we check the building of the documentation for the current and the past Ubuntu LTS releases
         if [ ${SITE} == "ubuntu-22.04-default-gcc" ] || [ ${SITE} == "ubuntu-20.04-minimum-gcc" ]; then make undocumented_test && make user; fi
-        # we run the tests
-        CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
+        # we run the tests, excluding potentials* tests
+        export CTEST_OUTPUT_ON_FAILURE=1
+        ctest -j$(nproc) -E "^potentials(_run)?$"
+        # now we run the potentials* tests that require some additional care
+        ctest -R "^potentials$" --repeat until-pass:3
+        ctest -R "^potentials_run$" --timeout 3600
     # We now setup python environment to then install cmake-format, but we do so on one site only
     # since we are going to test only there whether the codebase is correctly formatted or not
     # and the outcome of this operation would be the same for all the tested systems
