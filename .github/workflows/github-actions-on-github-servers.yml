@@ -102,9 +102,9 @@ jobs:
     # and the outcome of this operation would be the same for all the tested systems
     - if: matrix.site == 'ubuntu-22.04-clang-13'
       # this is another GitHub action to properly setup the python environment
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.13'
     - name: code_format_check
       if: matrix.site == 'ubuntu-22.04-clang-13'
       run: |
@@ -119,3 +119,4 @@ jobs:
         # we check the correct formatting of the code
         ./bin/codebase-format-helper.bash C++ -t
         ./bin/codebase-format-helper.bash CMake -t
+        ./bin/codebase-format-helper.bash Python -t
