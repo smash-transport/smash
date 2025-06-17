@@ -477,9 +477,12 @@ TEST(validate) {
     Include_Weak_And_EM_Decays_At_The_End: True)"};
   VERIFY(invalid_conf.validate(false) == Configuration::Is::Invalid);
   VERIFY(invalid_conf.validate(true) == Configuration::Is::Invalid);
+  invalid_conf.clear();
   // As there are no keys currently deprecated, there is no check for the
   // Is::Deprecated property.
-  invalid_conf.clear();
+  Configuration deprecated_conf = Configuration{R"()"};
+  VERIFY(deprecated_conf.validate() != Configuration::Is::Deprecated);
+  deprecated_conf.clear();
   // Reenable logger output (it is global)
   logg[LogArea::Configuration::id].setVerbosity(einhard::ALL);
 }

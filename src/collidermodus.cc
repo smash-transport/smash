@@ -363,6 +363,8 @@ ColliderModus::ColliderModus(Configuration modus_config,
 
 void ColliderModus::validate_IC_kinematic_range() {
   bool bad_cuts = false;
+  assert(IC_parameters_->rapidity_cut.has_value());
+  assert(IC_parameters_->pT_cut.has_value());
   const double rapidity = IC_parameters_->rapidity_cut.value();
   const double pT = IC_parameters_->pT_cut.value();
   if (rapidity < 0.0) {
@@ -386,17 +388,19 @@ void ColliderModus::validate_IC_kinematic_range() {
         "Kinematic cut for initial conditions malconfigured.");
   }
 
-  std::ostringstream message;
-  message << "Extracting iso-tau initial conditions ";
-  if (rapidity > 0.0 || pT > 0.0) {
-    message << "in kinematic range: ";
-    if (rapidity > 0.0 && pT > 0.0) {
-      message << "|y| <= " << rapidity << "; pT <= " << pT << " GeV.";
-    } else if (rapidity > 0.0) {
-      message << "|y| <= " << rapidity << ".";
-    } else if (pT > 0.0) {
-      message << "pT <= " << pT << " GeV.";
-    }
+  std::ostringstream message{"Extracting iso-tau initial conditions ",
+                             std::ios_base::ate};
+  std::vector<std::string> cuts{};
+  if (rapidity > 0.0) {
+    cuts.emplace_back("|y| <= ");
+    cuts.back() += std::to_string(rapidity);
+  }
+  if (pT > 0.0) {
+    cuts.emplace_back("pT <= ");
+    cuts.back() += std::to_string(pT) + " GeV.";
+  }
+  if (cuts.size() > 0) {
+    message << "in kinematic range: " << join(cuts, "; ") << ".";
   } else {
     message << "without kinematic cuts.";
   }

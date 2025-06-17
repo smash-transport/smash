@@ -268,8 +268,8 @@ struct InputSections {
  * \page doxypage_input_conf_removed_keys
  *
  * The following list collects all configuration keys that have been removed at
- * some point from SMASH. Each removed key is written here using its YAML full
- * path in the YAML tree, i.e. including section names from the top-level. Full
+ * some point from SMASH. Each removed key is written here using its %YAML full
+ * path in the %YAML tree, i.e. including section names from the top-level. Full
  * stops are used as separators as they are never included in key names. For
  * example, a key listed as <tt>Top.Sub.Name</tt> refers to the \c Name key in
  * the \c Sub section which in turn is contained in the \c Top section.
@@ -4898,8 +4898,8 @@ struct InputKeys {
    * \page doxypage_input_conf_removed_keys
    *
    * \list_removed_key{key_output_IC_lower_bound_,Output.Initial_Conditions.Lower_Bound,3.3}.
-   * This key was moved from the Output section into <tt>\ref
-   * key_MC_IC_lower_bound_ "Modi.Collider.Initial_Conditions"</tt>.
+   * This key \ref key_MC_IC_lower_bound_ "was moved" into the
+   * <tt>Modi.Collider.Initial_Conditions</tt> section.
    */
   /**
    * \removed_key{key_output_IC_lower_bound_,3.3}
@@ -4913,8 +4913,8 @@ struct InputKeys {
    * \page doxypage_input_conf_removed_keys
    *
    * \list_removed_key{key_output_IC_proper_time_,Output.Initial_Conditions.Proper_Time,3.3}.
-   * This key was moved from the Output section into <tt>\ref
-   * key_MC_IC_proper_time_ "Modi.Collider.Initial_Conditions"</tt>.
+   * This key \ref key_MC_IC_proper_time_ "was moved" into the
+   * <tt>Modi.Collider.Initial_Conditions</tt> section.
    */
   /**
    * \removed_key{key_output_IC_proper_time_,3.3}
@@ -4928,8 +4928,8 @@ struct InputKeys {
    * \page doxypage_input_conf_removed_keys
    *
    * \list_removed_key{key_output_IC_pt_cut_,Output.Initial_Conditions.pT_Cut,3.3}.
-   * This key was moved from the Output section into <tt>\ref key_MC_IC_pt_cut_
-   * "Modi.Collider.Initial_Conditions"</tt>.
+   * This key \ref key_MC_IC_pt_cut_ "was moved" into the
+   * <tt>Modi.Collider.Initial_Conditions</tt> section.
    */
   /**
    * \removed_key{key_output_IC_pt_cut_,3.3}
@@ -4943,8 +4943,8 @@ struct InputKeys {
    * \page doxypage_input_conf_removed_keys
    *
    * \list_removed_key{key_output_IC_rapidity_cut_,Output.Initial_Conditions.Rapidity_Cut,3.3}.
-   * This key was moved from the Output section into <tt>\ref
-   * key_MC_IC_rapidity_cut_ "Modi.Collider.Initial_Conditions"</tt>.
+   * This key \ref key_MC_IC_rapidity_cut_ "was moved" into the
+   * <tt>Modi.Collider.Initial_Conditions</tt> section.
    */
   /**
    * \removed_key{key_output_IC_rapidity_cut_,3.3}
