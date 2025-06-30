@@ -383,6 +383,14 @@ class ParticleData {
    * particles at creation.
    */
   void set_unpolarized_spin_vector();
+
+  /// Reset the spin vector to NaN
+  void reset_spin_vector() {
+    spin_vector_[0] = std::numeric_limits<double>::quiet_NaN();
+    spin_vector_[1] = std::numeric_limits<double>::quiet_NaN();
+    spin_vector_[2] = std::numeric_limits<double>::quiet_NaN();
+    spin_vector_[3] = std::numeric_limits<double>::quiet_NaN();
+  }
   /// Setter for belongs_to label
   void set_belongs_to(BelongsTo label) { belongs_to_ = label; }
   /// Getter for belongs_to label

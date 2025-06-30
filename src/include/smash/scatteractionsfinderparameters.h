@@ -109,6 +109,8 @@ class ScatterActionsFinderParameters {
   /// If particles within the same nucleus are allowed to collide for their
   /// first time
   const bool allow_collisions_within_nucleus;
+  // Switch to control whether to include spin interactions
+  const SpinInteractionType spin_interaction_type;
   /// Indicates whether string fragmentation is switched on
   const bool strings_switch;
   /// Switch to control whether to use AQM or not
@@ -157,8 +159,6 @@ class ScatterActionsFinderParameters {
   const double AQM_charm_suppression;
   /// Factor to reduce cross sections for bottomed hadrons
   const double AQM_bottom_suppression;
-  /// Switch to control whether to include spin interactions
-  const SpinInteractionType spin_interaction_type;
 };
 
 }  // namespace smash

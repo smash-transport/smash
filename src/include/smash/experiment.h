@@ -1432,6 +1432,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * #### SMASH Afterburner
    * In the afterburner mode, the components of the mean spin vector are set by
    * the SMASH-hadron-sampler and passed back to SMASH in the afterburner mode.
+   */
 
   // create outputs
   logg[LExperiment].trace(SMASH_SOURCE_LOCATION,

@@ -27,6 +27,7 @@ static constexpr int LNucleus = LogArea::Nucleus::id;
 
 Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
   fill_from_list(particle_list, nTest);
+  make_nucleus_unpolarized();
   set_parameters_automatic();
   set_saturation_density(calculate_saturation_density());
 }
@@ -50,7 +51,8 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
   }();
   // Fill nuclei with particles.
   std::map<PdgCode, int> part = config.take(particles_key);
-  fill_from_list(part, nTest);
+  fill_from_list(part, nTest);  
+  make_nucleus_unpolarized();
   // Look for user-defined values or take the default parameters.
   const bool is_diffusiveness_given = config.has_value(diffusiveness_key),
              is_radius_given = config.has_value(radius_key),

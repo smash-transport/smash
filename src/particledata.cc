@@ -93,7 +93,7 @@ void ParticleData::set_unpolarized_spin_vector() {
 
   if (!std::isnan(spin_vector_.x0()) || !std::isnan(spin_vector_.x1()) ||
       !std::isnan(spin_vector_.x2()) || !std::isnan(spin_vector_.x3())) {
-    std::cout << "Spin vector already set!" << std::endl;
+    std::cout << "Spin vector already set for particle index: " << index_ << std::endl;
   }
 
   // Set the mean and standard deviation for the normal distribution
@@ -277,14 +277,14 @@ ParticleData create_valid_smash_particle_matching_provided_quantities(
     warn_if_needed(mass_warning, warnings[0]);
     smash_particle.set_4momentum(smash_particle.pole_mass(),
                                  four_momentum.threevec());
-    smash_particle.set_unpolarized_spin_vector();
+    //smash_particle.set_unpolarized_spin_vector();
   } else {
     smash_particle.set_4momentum(four_momentum);
-    smash_particle.set_unpolarized_spin_vector();
+    //smash_particle.set_unpolarized_spin_vector();
     if (is_particle_off_its_mass_shell(smash_particle)) {
       warn_if_needed(on_shell_warning, warnings[1]);
       smash_particle.set_4momentum(mass, four_momentum.threevec());
-      smash_particle.set_unpolarized_spin_vector();
+      //smash_particle.set_unpolarized_spin_vector();
     }
   }
 

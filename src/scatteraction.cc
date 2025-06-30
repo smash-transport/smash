@@ -73,6 +73,7 @@ void ScatterAction::generate_final_state() {
     case ProcessType::Elastic:
       /* 2->2 elastic scattering */
       elastic_scattering();
+      spin_interaction();
       break;
     case ProcessType::TwoToOne:
       /* resonance formation */
@@ -82,7 +83,7 @@ void ScatterAction::generate_final_state() {
       /* 2->2 inelastic scattering */
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
-      // spin_interaction();
+      spin_interaction();
       break;
     case ProcessType::TwoToThree:
     case ProcessType::TwoToFour:
@@ -767,9 +768,9 @@ void ScatterAction::spin_interaction() {
     /* 2->2 elastic scattering */
     if (process_type_ == ProcessType::Elastic &&
         spin_interaction_type_ == SpinInteractionType::Elastic) {
-      // Spin flip as a first spin interaction
-      // Store a copy of the spin vectors to boost them to the particle's rest
-      // frame
+      //  Spin flip as a first spin interaction
+      //  Store a copy of the spin vectors to boost them to the particle's rest
+      //  frame
       FourVector spin_a = outgoing_particles_[0].spin_vector();
       FourVector spin_b = outgoing_particles_[1].spin_vector();
 

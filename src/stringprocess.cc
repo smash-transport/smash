@@ -306,6 +306,12 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
     NpartString_[0] = 0;
     return false;
   }
+
+  // Set an unpolarized spin vector for the new intermediate particles
+  for (ParticleData &new_particle : new_intermediate_particles) {
+    new_particle.set_unpolarized_spin_vector();
+  }
+
   NpartString_[0] =
       append_final_state(new_intermediate_particles, ustrXcom, evec);
 
@@ -380,6 +386,12 @@ bool StringProcess::make_final_state_2strings(
       NpartString_[i] = 0;
       return false;
     }
+
+    // Set an unpolarized spin vector for the new intermediate particles
+    for (ParticleData &new_particle : new_intermediate_particles) {
+      new_particle.set_unpolarized_spin_vector();
+    }
+
     NpartString_[i] =
         append_final_state(new_intermediate_particles, ustr_com[i], evec);
     assert(nfrag == NpartString_[i]);
@@ -752,6 +764,11 @@ bool StringProcess::next_NDiffHard() {
       break;
     }
 
+    // Set an unpolarized spin vector for the new intermediate particles
+    for (ParticleData &new_particle : new_intermediate_particles) {
+      new_particle.set_unpolarized_spin_vector();
+    }
+
     FourVector uString = FourVector(1., 0., 0., 0.);
     ThreeVector evec = find_forward_string ? evecBasisAB_[0] : -evecBasisAB_[0];
     int nfrag = append_final_state(new_intermediate_particles, uString, evec);
@@ -765,6 +782,7 @@ bool StringProcess::next_NDiffHard() {
     for (ParticleData data : new_non_hadron_particles) {
       data.set_cross_section_scaling_factor(1.);
       data.set_formation_time(time_collision_);
+      data.set_unpolarized_spin_vector();
       final_state_.push_back(data);
     }
   } else {
@@ -1628,6 +1646,11 @@ bool StringProcess::next_BBbarAnn() {
       NpartString_[i] = 0;
       return false;
     }
+    // Set an unpolarized spin vector for the new intermediate particles
+    for (ParticleData &intermediate_particle : new_intermediate_particles) {
+      intermediate_particle.set_unpolarized_spin_vector();
+    }
+
     NpartString_[i] =
         append_final_state(new_intermediate_particles, ustrcom[i], evec);
   }

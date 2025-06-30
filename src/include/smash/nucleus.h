@@ -274,6 +274,13 @@ class Nucleus {
   /// Number of testparticles per physical particle
   size_t testparticles_ = 1;
 
+  /// Set unpolarized spin vectors for all particles in the nucleus
+  void make_nucleus_unpolarized() {
+    for (auto &particle : particles_) {
+      particle.set_unpolarized_spin_vector();
+    }
+  }
+
  protected:
   /// Particles associated with this nucleus.
   std::vector<ParticleData> particles_;

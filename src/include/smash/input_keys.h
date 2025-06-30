@@ -6113,6 +6113,7 @@ struct InputKeys {
       std::cref(collTerm_noCollisions),
       std::cref(collTerm_onlyWarnForHighProbability),
       std::cref(collTerm_resonanceLifetimeModifier),
+      std::cref(collTerm_spinInteractions),
       std::cref(collTerm_strings),
       std::cref(collTerm_stringsWithProbability),
       std::cref(collTerm_twoToOne),

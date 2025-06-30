@@ -276,12 +276,6 @@ class ListModus : public ModusDefault {
    */
   bool verbose_ = true;
 
-  /**
-   * \ingroup logging
-   *
-  /// Auxiliary flag to inddicate the type of spin interaction used
-  SpinInteractionType spin_interaction_type_ = SpinInteractionType::Off;
-
   /**\ingroup logging
    * Writes the initial state for the List to the output stream.
    *

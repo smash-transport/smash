@@ -283,8 +283,8 @@ inline ScatterActionsFinderParameters default_finder_parameters(
     ReactionsBitSet included_2to2 = all_reactions_included(),
     bool strings_switch = true, bool use_AQM = false,
     bool strings_with_probability = false,
-    TotalCrossSectionStrategy xs_strategy = TotalCrossSectionStrategy::BottomUp,
-    SpinInteractionType spin_interaction_type = SpinInteractionType::Off) {
+    TotalCrossSectionStrategy xs_strategy =
+        TotalCrossSectionStrategy::BottomUp) {
   Configuration config{
       R"(
   Collision_Term:
@@ -295,7 +295,6 @@ inline ScatterActionsFinderParameters default_finder_parameters(
   config.set_value(InputKeys::collTerm_useAQM, use_AQM);
   config.set_value(InputKeys::collTerm_stringsWithProbability,
                    strings_with_probability);
-  config.set_value(InputKeys::collTerm_spinInteractions, spin_interaction_type);
 
   if (xs_strategy == TotalCrossSectionStrategy::BottomUp) {
     config.merge_yaml(InputKeys::collTerm_totXsStrategy.as_yaml("BottomUp"));

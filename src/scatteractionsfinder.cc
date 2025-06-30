@@ -175,6 +175,7 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
       two_to_one(parameters.two_to_one),
       allow_collisions_within_nucleus(
           config.take(InputKeys::modi_collider_collisionWithinNucleus)),
+      spin_interaction_type(parameters.spin_interaction_type),
       strings_switch(parameters.strings_switch),
       use_AQM(config.take(InputKeys::collTerm_useAQM)),
       strings_with_probability(
@@ -184,7 +185,6 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
       transition_high_energy{create_string_transition_parameters(config)},
       total_xs_strategy(config.take(InputKeys::collTerm_totXsStrategy)),
       pseudoresonance_method(config.take(InputKeys::collTerm_pseudoresonance)),
-      spin_interaction_type(parameters.spin_interaction_type),
       AQM_charm_suppression(
           config.take(InputKeys::collTerm_HF_AQMcSuppression)),
       AQM_bottom_suppression(
