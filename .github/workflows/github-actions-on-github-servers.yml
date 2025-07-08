@@ -25,17 +25,19 @@ jobs:
         #here we set up the various matrix elements
         #the entries in each matrix element are just variables, not keywords, with (hopefully) self-explaining names
         # 1st matrix element, previous LTS Ubuntu distribution, minimum supported GNU compiler version
-        - os: ubuntu-20.04
-          site: "ubuntu-20.04-minimum-gcc"
-          packages_to_add: "g++-8 libgsl-dev doxygen-latex graphviz"
-          c_compiler_to_use: "gcc-8"
-          cxx_compiler_to_use: "g++-8"
+        #  ↳ this is temporarily commented out as GitHub does not support Ubuntu 20.04 anymore. To be updated soon.
+        #- os: ubuntu-20.04
+        #  site: "ubuntu-20.04-minimum-gcc"
+        #  packages_to_add: "g++-8 libgsl-dev doxygen-latex graphviz"
+        #  c_compiler_to_use: "gcc-8"
+        #  cxx_compiler_to_use: "g++-8"
         # 2st matrix element, previous LTS Ubuntu distribution, default clang compiler
-        - os: ubuntu-20.04
-          site: "ubuntu-20.04-default-clang"
-          packages_to_add: "libgsl-dev clang"
-          c_compiler_to_use: "clang"
-          cxx_compiler_to_use: "clang++"
+        #  ↳ this is temporarily commented out as GitHub does not support Ubuntu 20.04 anymore. To be updated soon.
+        #- os: ubuntu-20.04
+        #  site: "ubuntu-20.04-default-clang"
+        #  packages_to_add: "libgsl-dev clang"
+        #  c_compiler_to_use: "clang"
+        #  cxx_compiler_to_use: "clang++"
         # 3nd matrix element, current LTS Ubuntu distribution with default gcc
         - os: ubuntu-22.04
           site: "ubuntu-22.04-default-gcc"
