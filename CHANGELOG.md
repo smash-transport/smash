@@ -19,6 +19,16 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+## SMASH-3.2.1
+Date: 2025-07-08
+
+### Changed
+* Upgraded to Pythia 8.315, which contains a bug-fix (see [here](https://pythia.org/pdfdoc/aextra.pdf) for further information).
+  This hot-fix is meant to provide a SMASH version including the updated Pythia version.
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-3.2...SMASH-3.2.1)
+
+
 ## SMASH-3.2
 Date: 2025-02-25
 

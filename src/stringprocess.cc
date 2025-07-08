@@ -97,7 +97,7 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
   /* choose minimum transverse momentum scale
    * involved in partonic interactions */
   pythia_in->readString("MultipartonInteractions:pTmin = 1.5");
-  pythia_in->readString("MultipartonInteractions:nSample = 10000");
+  pythia_in->readString("MultipartonInteractions:nSample = 100000");
   // transverse momentum spread in string fragmentation
   pythia_in->readString("StringPT:sigma = " + std::to_string(string_sigma_T));
   // diquark suppression factor in string fragmentation
