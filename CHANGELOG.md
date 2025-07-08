@@ -23,6 +23,17 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * The `ParticleData` class now initially sets the formation time and the time of the last collision to `NAN` and overwrites them with the real values the first time the objects are used. Previously, these values were initially set to `0.0`, which could be misleading if the time evolution started at negative times.
 * The procedure for dynamic initial conditions was updated, fluidized hadrons are no longer removed from the evolution, in order to provide energy density to the surrounding particles, being internally named as "core" particles. Core and corona (non-core) particles can only interact elastically.
 
+
+## SMASH-3.2.1
+Date: 2025-07-08
+
+### Changed
+* Upgraded to Pythia 8.315, which contains a bug-fix (see [here](https://pythia.org/pdfdoc/aextra.pdf) for further information).
+  This hot-fix is meant to provide a SMASH version including the updated Pythia version.
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-3.2...SMASH-3.2.1)
+
+
 ## SMASH-3.2
 Date: 2025-02-25
 
