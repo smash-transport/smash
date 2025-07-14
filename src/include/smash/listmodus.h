@@ -88,17 +88,6 @@ class ListModus : public ModusDefault {
    */
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
-  /**
-   * Judge whether formation times are the same for all the particles;
-   * Don't do anti-freestreaming if all particles start already at the same
-   * time.
-   *
-   * If particles are at different times, calculate earliest formation
-   * time as start_time_ and free-stream all particles back to this time.
-   *
-   * \param particles %Particles to be checked and possibly back-streamed
-   */
-  void backpropagate_to_same_time(Particles &particles);
 
   /**
    * Tries to add a new particle to particles and performs consistency checks:
@@ -134,9 +123,10 @@ class ListModus : public ModusDefault {
    * \param[in] pz      z-component of momentum of added particle
    * \param[out] particles Object to which the particle is added
    */
-  void try_create_particle(Particles &particles, PdgCode pdgcode, double t,
-                           double x, double y, double z, double mass, double E,
-                           double px, double py, double pz);
+  void try_create_particle(
+      Particles &particles, PdgCode pdgcode, double t, double x, double y,
+      double z, double mass, double E, double px, double py, double pz,
+      const std::vector<std::string> &optional_quantities = {});
 
   /** \ingroup exception
    * Used when external particle list cannot be found.
@@ -218,6 +208,21 @@ class ListModus : public ModusDefault {
    */
   void validate_list_of_particles_of_all_events_() const;
 
+  /**
+   * Judge whether times are the same for all the particles; Don't do
+   * anti-freestreaming if all particles start already at the same time.
+   *
+   * If particles are at different times, calculate earliest time as
+   * start_time_ and free-stream all particles back to this time.
+   *
+   * \param particles %Particles to be checked and possibly back-streamed
+   */
+  void backpropagate_to_same_time_if_needed_(Particles &particles);
+
+  void insert_optional_fields_to_(
+      ParticleData &p,
+      const std::vector<std::string> &optional_quantities) const;
+
   /// File directory of the particle list
   std::string particle_list_file_directory_;
 
@@ -230,6 +235,8 @@ class ListModus : public ModusDefault {
   /// The id of the current file
   std::optional<int> file_id_;
 
+  /// Optional fields to be read
+  std::vector<std::string> optional_fields_{};
   /// The unique id of the current event
   int event_id_;
 

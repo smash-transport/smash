@@ -83,6 +83,24 @@ double propagate_straight_line(Particles *particles, double to_time,
   return dt;
 }
 
+void backpropagate_straight_line(Particles *particles, double to_time) {
+  bool positive_dt_error = false;
+  for (ParticleData &data : *particles) {
+    const double t = data.position().x0();
+    if (t < to_time && !positive_dt_error) {
+      // Print error message once, not for every particle
+      positive_dt_error = true;
+      logg[LPropagation].error(
+          to_time,
+          " in backpropagate_straight_line is after the earliest particle.");
+    }
+    assert(t >= to_time);
+    const double dt = to_time - t;
+    const ThreeVector r = data.position().threevec() + dt * data.velocity();
+    data.set_4position(FourVector(to_time, r));
+  }
+}
+
 void expand_space_time(Particles *particles,
                        const ExperimentParameters &parameters,
                        const ExpansionProperties &metric) {

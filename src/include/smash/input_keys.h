@@ -4529,6 +4529,19 @@ struct InputKeys {
       InputSections::m_list + "Shift_Id", 0, {"0.60"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_modi_list
+   * \optional_key{key_ML_optional_fields_,Optional_Fields,list of strings,{}}
+   *
+   */
+  /**
+   * \see_key{key_ML_optional_fields_}
+   */
+  inline static const Key<std::vector<std::string>> modi_list_optionalFields{
+      InputSections::m_list + "Optional_Fields",
+      std::vector<std::string>{},
+      {"3.3"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
    * \required_key{key_MLB_file_dir_,File_Directory,string}
    *
@@ -4592,6 +4605,19 @@ struct InputKeys {
    */
   inline static const Key<int> modi_listBox_shiftId{
       InputSections::m_listBox + "Shift_Id", 0, {"2.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_listbox
+   * \optional_key{key_MLB_optional_fields_,Optional_Fields,list of strings,{}}
+   *
+   */
+  /**
+   * \see_key{key_MLB_optional_fields_}
+   */
+  inline static const Key<std::vector<std::string>> modi_listBox_optionalFields{
+      InputSections::m_listBox + "Optional_Fields",
+      std::vector<std::string>{},
+      {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5948,11 +5974,13 @@ struct InputKeys {
       std::cref(modi_list_filename),
       std::cref(modi_list_filePrefix),
       std::cref(modi_list_shiftId),
+      std::cref(modi_list_optionalFields),
       std::cref(modi_listBox_fileDirectory),
       std::cref(modi_listBox_filename),
       std::cref(modi_listBox_filePrefix),
       std::cref(modi_listBox_length),
       std::cref(modi_listBox_shiftId),
+      std::cref(modi_listBox_optionalFields),
       std::cref(output_densityType),
       std::cref(output_outputInterval),
       std::cref(output_outputTimes),
