@@ -1090,7 +1090,7 @@ Experiment<Modus>::Experiment(Configuration &config,
           modus_.fluid_lattice(), modus_.fluid_background(), IC_parameters));
     } else {
       // Iso-tau hypersurface
-      double rapidity_cut = IC_parameters.rapidity_cut.value_or(0.0);
+      double rapidity_cut = IC_parameters.rapidity_cut.value();
 
       if (modus_.calculation_frame_is_fixed_target() && rapidity_cut != 0.0) {
         throw std::runtime_error(
@@ -1100,7 +1100,7 @@ Experiment<Modus>::Experiment(Configuration &config,
             "\"Calculation_Frame\" instead.");
       }
 
-      double pT_cut = IC_parameters.pT_cut.value_or(0.0);
+      double pT_cut = IC_parameters.pT_cut.value();
       if (rapidity_cut > 0.0 || pT_cut > 0.0) {
         kinematic_cuts_for_IC_output_ = true;
       }
