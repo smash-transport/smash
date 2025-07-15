@@ -146,21 +146,70 @@ void ListModus::try_create_particle(
 void ListModus::insert_optional_fields_to_(
     ParticleData &p,
     const std::vector<std::string> &optional_quantities) const {
-  if (optional_fields_.size() != optional_quantities.size()) {
-    throw std::runtime_error(
-        "List of quantities read does not match the optional fields given in "
-        "the configuration.");
-  }
+  HistoryData hist = p.get_history();
+  std::ostringstream error_message{"", std::ios_base::ate};
   for (size_t i = 0; i < optional_fields_.size(); ++i) {
-    std::cout << "formtime " << optional_quantities[i] << std::endl;
-    if (optional_fields_[i] == "form_time") {
-      p.set_formation_time(std::stod(optional_quantities[i]));
+    size_t len{};
+    auto field = optional_fields_[i];
+    auto qty = optional_quantities[i];
+    if (field == "ncoll") {
+      const int ncoll = std::stoi(optional_quantities[i], &len);
+      if (ncoll < 0) {
+        error_message << "ncoll < 0" << std::endl;
+      }
+      hist.collisions_per_particle = ncoll;
+    } else if (field == "form_time") {
+      p.set_formation_time(std::stod(qty, &len));
+    } else if (field == "xsecfac") {
+      const double xsecfac = std::stod(qty, &len);
+      if (xsecfac < 0 || xsecfac > 1) {
+        error_message << "xsecfac < 0 or xsecfac > 1" << std::endl;
+      }
+      p.set_cross_section_scaling_factor(xsecfac);
+    } else if (field == "proc_type") {
+      const int proc_type = std::stoi(qty, &len);
+      if (!is_valid_process_type(proc_type)) {
+        error_message << "Invalid proc_type" << std::endl;
+      }
+      hist.process_type = static_cast<ProcessType>(proc_type);
+    } else if (field == "time_last_coll") {
+      const double t_last_coll = std::stod(qty, &len);
+      if (t_last_coll > p.position().x0()) {
+        error_message << "time_last_coll > particle time" << std::endl;
+      }
+      hist.time_last_collision = t_last_coll;
+    } else if (field == "pdg_mother1" || qty == "0") {
+      if (!ParticleType::exists(PdgCode(qty))) {
+        error_message << "pdg_mother1 cannot be " << qty << std::endl;
+      }
+      hist.p1 = PdgCode(qty);
+      len = qty.size();
+    } else if (field == "pdg_mother2" || qty == "0") {
+      if (!ParticleType::exists(PdgCode(qty))) {
+        error_message << "pdg_mother2 cannot be " << qty << std::endl;
+      }
+      hist.p2 = PdgCode(qty);
+      len = qty.size();
     } else {
-      throw std::invalid_argument(
-          optional_fields_[i] +
-          " is not a known quantity to be set by the ListModus.");
+      error_message << " Unknown fields given in the configuration";
+    }
+    /* This is to assist the user, in case of a mistype in the inputfile.
+     * We do not throw here because it may be intentional. */
+    if (len != qty.size()) {
+      logg[LList].warn()
+          << field << "=" << qty
+          << " not read exactly as written in the input particle list.";
     }
   }
+  if (error_message.str().size() > 0) {
+    logg[LList].error()
+        << "The reading-in of optional fields had the following problems:"
+        << std::endl
+        << error_message.str();
+    throw std::invalid_argument(
+        "Please fix the list of input particles or configuration.");
+  }
+  p.set_history(std::move(hist));
 }
 
 /* initial_conditions - sets particle data for @particles */
@@ -186,14 +235,12 @@ void ListModus::read_particles_from_next_event_(Particles &particles) {
     std::string pdg_string;
     lineinput >> t >> x >> y >> z >> mass >> E >> px >> py >> pz >>
         pdg_string >> id >> charge;
-
-    std::string opt{};
     std::vector<std::string> optional_quantities{};
     for (size_t i = 0; i < optional_fields_.size(); ++i) {
+      std::string opt{};
       lineinput >> opt;
       optional_quantities.push_back(opt);
     }
-
     if (lineinput.fail()) {
       throw LoadFailure(
           build_error_string("While loading external particle lists data:\n"

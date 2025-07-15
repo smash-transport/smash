@@ -12,6 +12,7 @@
 #include <list>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
@@ -121,6 +122,7 @@ class ListModus : public ModusDefault {
    * \param[in] px      x-component of momentum of added particle
    * \param[in] py      y-component of momentum of added particle
    * \param[in] pz      z-component of momentum of added particle
+   * \param[in] optional_quantities Extra values present in the input list
    * \param[out] particles Object to which the particle is added
    */
   void try_create_particle(
@@ -215,10 +217,19 @@ class ListModus : public ModusDefault {
    * If particles are at different times, calculate earliest time as
    * start_time_ and free-stream all particles back to this time.
    *
-   * \param particles %Particles to be checked and possibly back-streamed
+   * \param particles %Particles to be checked and possibly back-streamed.
    */
   void backpropagate_to_same_time_if_needed_(Particles &particles);
 
+  /**
+   * Sets the optional fields given in the input list into a particle.
+   *
+   * \param[in] p particle to be modified
+   * \param[in] optional_quantities list of values to be set
+   * \warning if the file is not read exactly as given, which happens if a float
+   * is present in an integer-related field. \throw std::invalid_argument if the
+   * quantities in the input file do not obey the appropriate bounds.
+   */
   void insert_optional_fields_to_(
       ParticleData &p,
       const std::vector<std::string> &optional_quantities) const;

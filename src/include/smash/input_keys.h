@@ -4532,6 +4532,32 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_list
    * \optional_key{key_ML_optional_fields_,Optional_Fields,list of strings,{}}
    *
+   * Give extra fields to the input list of particles. This is useful to e.g.
+   * continue a SMASH run that was paused while taking into account the
+   * formation time and cross section scaling properly.
+   *
+   * The order in the fields should respect the order of values in the input.
+   * Available fields:
+   * - "ncoll" &rarr; Number of collisions the particle already went through.
+   * - "form_time" &rarr;  Formation time. By default it is set to the time
+   * coordinate (first column in the input).
+   * - "xsecfac" &rarr;  Scaling factor for the cross section, limited between 0
+   *    and 1. By default it is 1.
+   * - "proc_type" &rarr; Type of the last interaction (See
+   *   \ref doxypage_output_oscar_collisions_process_types)
+   * - "time_last_coll" &rarr; Time when the last interaction happened.
+   * - "pdg_mother1" &rarr; Parent of the particle.
+   * - "pdg_mother2" &rarr; Second parent of the particle.
+   *
+   * Unless stated differently, the default value for these fields is 0.
+   *
+   * \attention The code does a minimal validation to see if the fields are
+   * internally meaningful, but no check is done on the physics content.
+   * For instance, SMASH will not complain if a proton is said to originate
+   * from a pion via wall crossing. Ensuring the correctnes of the input is
+   * the user's resposibility.
+   * \note If a floating point is given where an integer should be, only a
+   * warning is issued, as that might be on purpose.
    */
   /**
    * \see_key{key_ML_optional_fields_}
@@ -4610,6 +4636,8 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_listbox
    * \optional_key{key_MLB_optional_fields_,Optional_Fields,list of strings,{}}
    *
+   * See &nbsp;
+   * <tt>\ref key_ML_optional_fields_ "List: Optional_Fields"</tt>.
    */
   /**
    * \see_key{key_MLB_optional_fields_}
@@ -4627,7 +4655,7 @@ struct InputKeys {
    * \optional_key_no_line{key_output_density_type_,Density_Type,string,"none"}
    *
    * Determines which kind of density is printed into the headers of the
-   * collision files. Possible valuesare:
+   * collision files. Possible values are:
    * - `"hadron"` &rarr; Total hadronic density
    * - `"baryon"` &rarr; Net baryon density
    * - `"baryonic isospin"` &rarr; Baryonic isospin density

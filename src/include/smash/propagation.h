@@ -72,7 +72,6 @@ double calc_hubble(double time, const ExpansionProperties &metric);
 double propagate_straight_line(Particles *particles, double to_time,
                                const std::vector<FourVector> &beam_momentum);
 
-
 void backpropagate_straight_line(Particles *particles, double to_time);
 
 /**
