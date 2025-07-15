@@ -4544,7 +4544,7 @@ struct InputKeys {
    * - "xsecfac" &rarr;  Scaling factor for the cross section, limited between 0
    *    and 1. By default it is 1.
    * - "proc_type" &rarr; Type of the last interaction (See
-   *   \ref doxypage_output_oscar_collisions_process_types)
+   *   \ref doxypage_output_process_types)
    * - "time_last_coll" &rarr; Time when the last interaction happened.
    * - "pdg_mother1" &rarr; Parent of the particle.
    * - "pdg_mother2" &rarr; Second parent of the particle.
