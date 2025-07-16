@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2020,2022-2024
+ *    Copyright (c) 2012-2020,2022-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -221,7 +221,7 @@ class ColliderModus : public ModusDefault {
    * \param[in] nucleus_type String 'projectile' or 'target'. To display an
    * appropriate error message.
    * \return Pointer to the created deformed nucleus object.
-   * **/
+   */
   static std::unique_ptr<DeformedNucleus> create_deformed_nucleus(
       Configuration &nucleus_cfg, const int ntest,
       const std::string &nucleus_type);
@@ -233,7 +233,7 @@ class ColliderModus : public ModusDefault {
    * \param[in] nucleus_type String 'projectile' or 'target'. To display an
    * appropriate error message.
    * \return Pointer to the created deformed nucleus object.
-   * **/
+   */
   static std::unique_ptr<AlphaClusteredNucleus> create_alphaclustered_nucleus(
       Configuration &nucleus_cfg, const int ntest,
       const std::string &nucleus_type);
@@ -241,10 +241,19 @@ class ColliderModus : public ModusDefault {
    * Checks if target and projectile are read from the same external file if
    * they are both initialized as a customnucleus. Function is only called if,
    * projectile is customnucleus.
-   * /param[in] proj_config Configuration of projectile nucleus
-   * /param[in] targ_config Configuration of target nucleus
-   **/
+   * \param[in] proj_config Configuration of projectile nucleus
+   * \param[in] targ_config Configuration of target nucleus
+   */
   bool same_inputfile(Configuration &proj_config, Configuration &targ_config);
+
+  /**
+   * Validate whether the input kinematic range for the Initial Conditions
+   * output is valid and inform the user.
+   *
+   * \throw std::invalid_argument when the cuts are invalid
+   */
+  void validate_IC_kinematic_range();
+
   /**
    * Impact parameter.
    *

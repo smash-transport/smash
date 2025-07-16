@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2024
+ *    Copyright (c) 2024-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,12 +11,10 @@
 
 namespace smash {
 /**
- * At the moment there are two ways to specify input for initial conditions in
- * the configuration, one of which is deprecated and will be removed in a next
- * release. For the moment, these variables are of type
- * `std::optional<double>` to *allow* for the key duplication consistently.
- * When more types of IC are implemented in the future, this will allow
- * setting only the appropriate parameters.
+ * The variables in this POD struct are of type `std::optional<double>` so that
+ * only the relevant parameters are set for the different types of initial
+ * conditions. Only \c type is the exception, as it is a required key for the IC
+ * runs.
  */
 struct InitialConditionParameters {
   /// Type of initialization

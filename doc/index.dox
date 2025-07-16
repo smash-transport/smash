@@ -124,6 +124,7 @@
 \page doxypage_output Output
     <div class="invisible-content">
     \subpage doxypage_output_conf_examples
+    \subpage doxypage_output_process_types
     \subpage doxypage_output_oscar
     \subpage doxypage_output_ascii
     \subpage doxypage_output_binary
@@ -140,6 +141,7 @@
     \subpage doxypage_output_collisions_box_modus
     </div>
     \page doxypage_output_conf_examples Output configuration examples
+    \page doxypage_output_process_types Process types
     \page doxypage_output_oscar OSCAR format
         <div class="invisible-content">
         \subpage doxypage_output_oscar_particles
@@ -147,10 +149,6 @@
         </div>
         \page doxypage_output_oscar_particles OSCAR particles format
         \page doxypage_output_oscar_collisions OSCAR collisions format
-            <div class="invisible-content">
-            \subpage doxypage_output_oscar_collisions_process_types
-            </div>
-            \page doxypage_output_oscar_collisions_process_types Process types
     \page doxypage_output_ascii ASCII format
     \page doxypage_output_binary Binary format
     \page doxypage_output_dileptons Dileptons
