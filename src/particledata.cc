@@ -277,14 +277,11 @@ ParticleData create_valid_smash_particle_matching_provided_quantities(
     warn_if_needed(mass_warning, warnings[0]);
     smash_particle.set_4momentum(smash_particle.pole_mass(),
                                  four_momentum.threevec());
-    //smash_particle.set_unpolarized_spin_vector();
   } else {
     smash_particle.set_4momentum(four_momentum);
-    //smash_particle.set_unpolarized_spin_vector();
     if (is_particle_off_its_mass_shell(smash_particle)) {
       warn_if_needed(on_shell_warning, warnings[1]);
       smash_particle.set_4momentum(mass, four_momentum.threevec());
-      //smash_particle.set_unpolarized_spin_vector();
     }
   }
 

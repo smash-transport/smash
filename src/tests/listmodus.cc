@@ -564,6 +564,29 @@ TEST(try_create_particle_func) {
   }
 }
 
+// Test that try_create_particle correctly stores the provided spin vector
+// when spin interactions are enabled.
+TEST(try_create_particle_with_spin_func) {
+  ListModus list_modus = create_list_modus_for_test();
+  list_modus.spin_interaction_type_ = SpinInteractionType::On;
+
+  Particles particles;
+  ParticleData smashon = Test::smashon_random();
+
+  FourVector spin_vec(0.1, 0.2, 0.3, 0.4);
+
+  list_modus.try_create_particle(particles, pdg,
+                                 r.x0(), r.x1(), r.x2(), r.x3(),
+                                 Test::smashon_mass,
+                                 p.x0(), p.x1(), p.x2(), p.x3(),
+                                 spin_vec[0], spin_vec[1], spin_vec[2], spin_vec[3]);
+
+  ParticleList plist = particles.copy_to_vector();
+  ParticleData created = plist.back();
+
+  compare_fourvector(created.spin_vector(), spin_vec);
+}
+
 TEST_CATCH(create_particle_with_nan, std::invalid_argument) {
   ListModus list_modus = create_list_modus_for_test();
   Particles particles;
