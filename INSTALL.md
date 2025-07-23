@@ -126,7 +126,8 @@ wget ftp://ftp.gnu.org/gnu/gsl/gsl-latest.tar.gz
 tar -zxvf gsl-latest.tar.gz
 ```
 
-This creates a folder named `gsl-[version_number]`, which is called `${GSL}` here.
+This creates a folder named `gsl-[version_number]`.
+In the following terminal commands, the absolute path to this folder is called `${GSL}`.
 To build and install the downloaded source use
 ```console
 cd "${GSL}"
