@@ -51,7 +51,7 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
   }();
   // Fill nuclei with particles.
   std::map<PdgCode, int> part = config.take(particles_key);
-  fill_from_list(part, nTest);  
+  fill_from_list(part, nTest);
   make_nucleus_unpolarized();
   // Look for user-defined values or take the default parameters.
   const bool is_diffusiveness_given = config.has_value(diffusiveness_key),

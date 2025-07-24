@@ -265,7 +265,8 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
   // Create ScatterAction object.
   ScatterActionPtr act = std::make_unique<ScatterAction>(
       data_a, data_b, time_until_collision, isotropic_, string_formation_time_,
-      box_length_, incoming_parametrized, finder_parameters_.spin_interaction_type);
+      box_length_, incoming_parametrized,
+      finder_parameters_.spin_interaction_type);
 
   if (finder_parameters_.coll_crit == CollisionCriterion::Stochastic) {
     act->set_stochastic_pos_idx();

@@ -607,7 +607,7 @@ TEST(try_create_particle_with_spin_func) {
         File_Prefix: event
     )"};
   config.set_value(InputKeys::modi_list_fileDirectory, testoutputpath.string());
-  
+
   ListModus list_modus = ListModus(std::move(config), parameters_with_spin);
   Particles particles;
   ParticleData smashon = Test::smashon_random();

@@ -95,7 +95,7 @@ static void compare_particle_extended(const ParticleData &p,
                                       const FilePtr &file) {
   VERIFY(compare_particle(p, file));
   int32_t collisions_per_particle, id_process, process_type, p1pdg, p2pdg,
-      baryon_number, strangeness; // spin_projection;
+      baryon_number, strangeness;  // spin_projection;
   double formation_time, xs_scaling_factor, time_last_collision;
   const auto h = p.get_history();
   read_binary(collisions_per_particle, file);

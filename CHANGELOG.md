@@ -23,6 +23,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * The `Sphere` modus now can include thermal heavy flavor particles, via the `Modi: Sphere: Heavy_Flavor_Multiplier` key, a value that multiplies their partial density.
 * Back to back jets were introduced to the `Sphere` modus with the  `Modi: Sphere: Jet: Back_To_Back` and `Modi: Sphere: Jet: Back_To_Back_Separation` keys.
 * The initial `Sphere` modus velocity profile can now be tuned with  `Modi: Sphere: Add_Radial_Velocity_Exponent`.
+* All particles are assigned a full spin 4-vector. The spin vector is by default initialized unpolarized in the `Initial_Conditions` mode. In the `List` mode it is initialized according to the given input.
+* Added a new key `Collision_Term: Spin_Interactions` in config to enable spin interactions with values `On`and `Off`.
 
 ### Changed
 * Update to Pythia8.316
@@ -56,6 +58,11 @@ Date: 2025-09-19
 
 [Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-3.2.1...SMASH-3.2.2)
 
+### Input
+* If `Spin_Interactions` is not `Off`, the `List` modus will read four additional columns expected to be the components of the spin 4-vector (s_0, s_1, s_2, s_3).
+
+### Output
+* Added the spin components to the user defined `Quantities` list for the customizable `ASCII` output. The keys are `spin0`, `spinx`, `spiny`, `spinz`
 
 ## SMASH-3.2.1
 Date: 2025-07-08

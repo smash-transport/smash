@@ -93,7 +93,8 @@ void ParticleData::set_unpolarized_spin_vector() {
 
   if (!std::isnan(spin_vector_.x0()) || !std::isnan(spin_vector_.x1()) ||
       !std::isnan(spin_vector_.x2()) || !std::isnan(spin_vector_.x3())) {
-    std::cout << "Spin vector already set for particle index: " << index_ << std::endl;
+    std::cout << "Spin vector already set for particle index: " << index_
+              << std::endl;
   }
 
   // Set the mean and standard deviation for the normal distribution
