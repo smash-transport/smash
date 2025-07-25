@@ -85,43 +85,56 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
 }
 
 void ParticleData::set_unpolarized_spin_vector() {
-  // Check whether the velocity of a particle is set and not nan
-  if (std::isnan(velocity().x1()) || std::isnan(velocity().x2()) ||
-      std::isnan(velocity().x3())) {
-    std::cout << "Velocity not set!" << std::endl;
+  // For massless particles, a rest frame does not exist,
+  // so the spin 4-vector cannot be defined via a rest-frame boost.
+  // In such cases, we assign a vanishing spin vector to ensure
+  // numerical stability and well-defined behavior.
+  if (pole_mass() == 0.0) {
+    spin_vector_ = FourVector(0., 0., 0., 0.);
+    return;
   }
 
+  // For spin-0 particles, the spin 4-vector is physically zero
+  if (spin() == 0) {
+    spin_vector_ = FourVector(0., 0., 0., 0.);
+    return;
+  }
+
+  // Check whether the spin vector is already set
   if (!std::isnan(spin_vector_.x0()) || !std::isnan(spin_vector_.x1()) ||
       !std::isnan(spin_vector_.x2()) || !std::isnan(spin_vector_.x3())) {
-    std::cout << "Spin vector already set for particle index: " << index_
+    std::cout << "Spin vector already set for particle with index: " << index_
               << std::endl;
   }
 
-  // Set the mean and standard deviation for the normal distribution
-  // of the spin vector components. This random sampling is solely for
-  // initializing particle spin vectors and is not physical. Hence, the
-  // arbitrary standard deviation is set to a small value for testing.
-  double mean = 0.0;
-  double sigma = 0.75;
-
-  const int total_spin = spin();
-  // For spin 0 all 4 components of the Pauli-Lubanski vector are zero
-  if (total_spin == 0) {
-    spin_vector_ = FourVector(0., 0., 0., 0.);
-    /**
-     * For finite spin states, we need to choose the spin vector components such
-     * that the average polarization is zero. This is achieved by using \f$S^0 =
-     * 0$ in the particle rest frame. The spatial components of the spin vector
-     * are sampled from a normal distribution with mean 0. After sampling, we
-     * boost the spin vector to lab frame.
-     */
-  } else {
-    FourVector spin_vector(0., random::normal(mean, sigma),
-                           random::normal(mean, sigma),
-                           random::normal(mean, sigma));
-    // Boost the spin vector to the lab frame
-    spin_vector_ = spin_vector.lorentz_boost(velocity());
+  // Check whether the velocity of a particle is set and not nan
+  const ThreeVector v = velocity();
+  if (std::isnan(v.x1()) || std::isnan(v.x2()) || std::isnan(v.x3())) {
+    throw std::runtime_error("Cannot set spin vector for particle with index " +
+                             std::to_string(index_) +
+                             " because velocity is not set.");
   }
+
+  /**
+   * For finite-spin particles, we assign unpolarized spin vectors by sampling
+   * the spatial components from a normal distribution with mean 0 in the
+   * particle rest frame, ensuring ⟨S⟩ = 0 on average. The time component S⁰ is
+   * set to 0. The resulting spin vector is then Lorentz-boosted to the lab
+   * frame.
+   *
+   * This initialization is not physical spin quantization, but a statistically
+   * unpolarized setup. The standard deviation is arbitrary and chosen small to
+   * avoid unphysical artifacts.
+   */
+  constexpr double mean = 0.0;
+  constexpr double sigma = 0.75;
+
+  const FourVector rest_frame_spin(0., random::normal(mean, sigma),
+                                   random::normal(mean, sigma),
+                                   random::normal(mean, sigma));
+
+  // Boost the spin vector from rest frame to lab frame
+  spin_vector_ = rest_frame_spin.lorentz_boost(v);
 }
 
 double ParticleData::xsec_scaling_factor(double delta_time) const {

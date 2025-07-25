@@ -774,7 +774,7 @@ void ScatterAction::spin_interaction() {
       FourVector spin_a = outgoing_particles_[0].spin_vector();
       FourVector spin_b = outgoing_particles_[1].spin_vector();
 
-      // Boost the spin vectors to the particle's rest frame
+      // Boost the spin vectors to the lab frame using the particle's velocity
       spin_a = spin_a.lorentz_boost(outgoing_particles_[0].velocity());
       spin_b = spin_b.lorentz_boost(outgoing_particles_[1].velocity());
 

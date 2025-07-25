@@ -177,6 +177,22 @@ TEST(parity) {
   COMPARE(n * n, p);
 }
 
+// Test that setting the spin vector with a missing velocity throws an error
+// with a try-catch block.
+TEST(set_unpolarized_spin_vector_with_missing_velocity) {
+  ParticleData p{ParticleType::find(smash::pdg::p)};
+  // Set the 3-momentum to nan to simulate a missing velocity
+  p.set_4momentum(p.pole_mass(), std::nan(""), std::nan(""), std::nan(""));
+  try {
+    p.set_unpolarized_spin_vector();
+    // If we reach this point, the test should fail
+    VERIFY(false);
+  } catch (const std::runtime_error &e) {
+    // Expected exception, test passes
+    VERIFY(true);
+  }
+}
+
 TEST(unpolarized_particle_initialization) {
   const int number_samples = 1000000;
   const double small_value = 0.01;

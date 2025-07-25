@@ -265,7 +265,7 @@ class ListModus : public ModusDefault {
   /// Auxiliary flag to warn about off-shell particles only once per instance
   bool warn_about_off_shell_particles_ = true;
 
-  /// Auxiliary flag to inddicate the type of spin interaction used
+  /// Auxiliary flag to indicate the type of spin interaction used
   SpinInteractionType spin_interaction_type_ = SpinInteractionType::Off;
 
   /**
