@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2024
+ *    Copyright (c) 2014-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -527,21 +527,20 @@ class PdgCode {
    * be positive definite.
    */
   inline double frac_strange() const {
-    /* The quarkonium state has 0 net strangeness
-     * but there are actually 2 strange quarks out of 2 total */
-    if (is_hadron() && digits_.n_q3_ == 3 && digits_.n_q2_ == 3) {
-      return 1.;
-    } else {
-      // For all other cases, there isn't both a strange and anti-strange
-      if (is_baryon()) {
-        return std::abs(strangeness()) / 3.;
-      } else if (is_meson()) {
-        return std::abs(strangeness()) / 2.;
+    if (is_baryon()) {
+      return std::abs(strangeness()) / 3.;
+    } else if (is_meson()) {
+      /* The quarkonium state has 0 net strangeness
+       * but there are actually 2 strange quarks out of 2 total */
+      if (digits_.n_q3_ == 3 && digits_.n_q2_ == 3) {
+        return 1.;
       } else {
-        /* If not baryon or meson, this should be 0, as AQM does not
-         * extend to non-hadrons */
-        return 0.;
+        return std::abs(strangeness()) / 2.;
       }
+    } else {
+      /* If not baryon or meson, this should be 0, as AQM does not
+       * extend to non-hadrons */
+      return 0.;
     }
   }
 
@@ -553,21 +552,20 @@ class PdgCode {
    * be positive definite.
    */
   inline double frac_charm() const {
-    /* The charmonium state has 0 net charmness
-     * but there are actually 2 charm quarks out of 2 total */
-    if (is_hadron() && digits_.n_q3_ == 4 && digits_.n_q2_ == 4) {
-      return 1.;
-    } else {
-      // For all other cases, there isn't both a charm and anti-charm
-      if (is_baryon()) {
-        return std::abs(charmness()) / 3.;
-      } else if (is_meson()) {
-        return std::abs(charmness()) / 2.;
+    if (is_baryon()) {
+      return std::abs(charmness()) / 3.;
+    } else if (is_meson()) {
+      /* The charmonium state has 0 net charmness
+       * but there are actually 2 charm quarks out of 2 total */
+      if (digits_.n_q3_ == 4 && digits_.n_q2_ == 4) {
+        return 1.;
       } else {
-        /* If not baryon or meson, this should be 0, as AQM does not
-         * extend to non-hadrons */
-        return 0.;
+        return std::abs(charmness()) / 2.;
       }
+    } else {
+      /* If not baryon or meson, this should be 0, as AQM does not
+       * extend to non-hadrons */
+      return 0.;
     }
   }
 
@@ -579,21 +577,20 @@ class PdgCode {
    * be positive definite.
    */
   inline double frac_bottom() const {
-    /* The bottomonium state has 0 net bottomness
-     * but there are actually 2 bottom quarks out of 2 total */
-    if (is_hadron() && digits_.n_q3_ == 3 && digits_.n_q2_ == 3) {
-      return 1.;
-    } else {
-      // For all other cases, there isn't both a bottom and anti-bottom
-      if (is_baryon()) {
-        return std::abs(bottomness()) / 3.;
-      } else if (is_meson()) {
-        return std::abs(bottomness()) / 2.;
+    if (is_baryon()) {
+      return std::abs(bottomness()) / 3.;
+    } else if (is_meson()) {
+      /* The bottomonium state has 0 net bottomness
+       * but there are actually 2 bottom quarks out of 2 total */
+      if (digits_.n_q3_ == 5 && digits_.n_q2_ == 5) {
+        return 1.;
       } else {
-        /* If not baryon or meson, this should be 0, as AQM does not
-         * extend to non-hadrons */
-        return 0.;
+        return std::abs(bottomness()) / 2.;
       }
+    } else {
+      /* If not baryon or meson, this should be 0, as AQM does not
+       * extend to non-hadrons */
+      return 0.;
     }
   }
 
