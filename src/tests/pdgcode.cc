@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2023
+ *    Copyright (c) 2014-2023,2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -52,6 +52,7 @@ PdgCode xi_c(0x4322);
 PdgCode omega_c_bar(-0x4332);
 PdgCode xi_cc_bar(-0x4422);
 PdgCode omega_bc(0x5432);
+PdgCode omega_bb(0x5532);
 PdgCode deuteron("1000010020");
 PdgCode antideutron("-1000010020");
 PdgCode triton("1000010030");
@@ -349,6 +350,7 @@ TEST(strangeness) {
   COMPARE(omega_c_bar.strangeness(), +2);
   COMPARE(xi_cc_bar.strangeness(), 0);
   COMPARE(omega_bc.strangeness(), -1);
+  COMPARE(omega_bb.strangeness(), -1);
   COMPARE(deuteron.strangeness(), 0);
   COMPARE(antideutron.strangeness(), 0);
   COMPARE(H3L.strangeness(), -1);
@@ -377,6 +379,7 @@ TEST(charmness) {
   COMPARE(omega_c_bar.charmness(), -1);
   COMPARE(xi_cc_bar.charmness(), -2);
   COMPARE(omega_bc.charmness(), +1);
+  COMPARE(omega_bb.charmness(), 0);
   COMPARE(deuteron.charmness(), 0);
 }
 TEST(bottomness) {
@@ -403,7 +406,89 @@ TEST(bottomness) {
   COMPARE(omega_c_bar.bottomness(), 0);
   COMPARE(xi_cc_bar.bottomness(), 0);
   COMPARE(omega_bc.bottomness(), -1);
+  COMPARE(omega_bb.bottomness(), -2);
   COMPARE(deuteron.bottomness(), 0);
+}
+TEST(frac_strange) {
+  COMPARE(electron.frac_strange(), 0);
+  COMPARE(antimu.frac_strange(), 0);
+  COMPARE(photon.frac_strange(), 0);
+  COMPARE(pion.frac_strange(), 0);
+  COMPARE(K0.frac_strange(), 1. / 2);
+  COMPARE(Kminus.frac_strange(), 1. / 2);
+  COMPARE(dminus.frac_strange(), 0);
+  COMPARE(bnulls.frac_strange(), 1. / 2);
+  COMPARE(bPcbar.frac_strange(), 0);
+  COMPARE(eta_pr.frac_strange(), 1);
+  COMPARE(j_psi.frac_strange(), 0);
+  COMPARE(proton.frac_strange(), 0);
+  COMPARE(antidelta.frac_strange(), 0);
+  COMPARE(sigma.frac_strange(), 1. / 3);
+  COMPARE(lambda.frac_strange(), 1. / 3);
+  COMPARE(antixi.frac_strange(), 2. / 3);
+  COMPARE(omega_bar.frac_strange(), 1);
+  COMPARE(lambda_c.frac_strange(), 0);
+  COMPARE(sigma_c_bar.frac_strange(), 0);
+  COMPARE(xi_c.frac_strange(), 1. / 3);
+  COMPARE(omega_c_bar.frac_strange(), 2. / 3);
+  COMPARE(xi_cc_bar.frac_strange(), 0);
+  COMPARE(omega_bc.frac_strange(), 1. / 3);
+  COMPARE(omega_bb.frac_strange(), 1. / 3);
+  COMPARE(deuteron.frac_strange(), 0);
+}
+TEST(frac_bottom) {
+  COMPARE(electron.frac_bottom(), 0);
+  COMPARE(antimu.frac_bottom(), 0);
+  COMPARE(photon.frac_bottom(), 0);
+  COMPARE(pion.frac_bottom(), 0);
+  COMPARE(K0.frac_bottom(), 0);
+  COMPARE(Kminus.frac_bottom(), 0);
+  COMPARE(dminus.frac_bottom(), 0);
+  COMPARE(bnulls.frac_bottom(), 1. / 2);
+  COMPARE(bPcbar.frac_bottom(), 1. / 2);
+  COMPARE(eta_pr.frac_bottom(), 0);
+  COMPARE(j_psi.frac_bottom(), 0);
+  COMPARE(proton.frac_bottom(), 0);
+  COMPARE(antidelta.frac_bottom(), 0);
+  COMPARE(sigma.frac_bottom(), 0);
+  COMPARE(lambda.frac_bottom(), 0);
+  COMPARE(antixi.frac_bottom(), 0);
+  COMPARE(omega_bar.frac_bottom(), 0);
+  COMPARE(lambda_c.frac_bottom(), 0);
+  COMPARE(sigma_c_bar.frac_bottom(), 0);
+  COMPARE(xi_c.frac_bottom(), 0);
+  COMPARE(omega_c_bar.frac_bottom(), 0);
+  COMPARE(xi_cc_bar.frac_bottom(), 0);
+  COMPARE(omega_bc.frac_bottom(), 1. / 3);
+  COMPARE(omega_bb.frac_bottom(), 2. / 3);
+  COMPARE(deuteron.frac_bottom(), 0);
+}
+TEST(frac_charm) {
+  COMPARE(electron.frac_charm(), 0);
+  COMPARE(antimu.frac_charm(), 0);
+  COMPARE(photon.frac_charm(), 0);
+  COMPARE(pion.frac_charm(), 0);
+  COMPARE(K0.frac_charm(), 0);
+  COMPARE(Kminus.frac_charm(), 0);
+  COMPARE(dminus.frac_charm(), 1. / 2);
+  COMPARE(bnulls.frac_charm(), 0);
+  COMPARE(bPcbar.frac_charm(), 1. / 2);
+  COMPARE(eta_pr.frac_charm(), 0);
+  COMPARE(j_psi.frac_charm(), 1);
+  COMPARE(proton.frac_charm(), 0);
+  COMPARE(antidelta.frac_charm(), 0);
+  COMPARE(sigma.frac_charm(), 0);
+  COMPARE(lambda.frac_charm(), 0);
+  COMPARE(antixi.frac_charm(), 0);
+  COMPARE(omega_bar.frac_charm(), 0);
+  COMPARE(lambda_c.frac_charm(), 1. / 3);
+  COMPARE(sigma_c_bar.frac_charm(), 1. / 3);
+  COMPARE(xi_c.frac_charm(), 1. / 3);
+  COMPARE(omega_c_bar.frac_charm(), 1. / 3);
+  COMPARE(xi_cc_bar.frac_charm(), 2. / 3);
+  COMPARE(omega_bc.frac_charm(), 1. / 3);
+  COMPARE(omega_bb.frac_charm(), 0);
+  COMPARE(deuteron.frac_charm(), 0);
 }
 TEST(charge) {
   COMPARE(electron.charge(), -1);
