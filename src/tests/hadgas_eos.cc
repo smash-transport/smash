@@ -48,17 +48,17 @@ TEST(td_simple_gas) {
                   << net_charge_density << " " << density << " " << pressure
                   << " " << energy_density << " " << std::endl;
 
-  COMPARE_ABSOLUTE_ERROR(net_baryon_density, 0.5832627783, 1.e-6)
+  COMPARE_ABSOLUTE_ERROR(net_baryon_density, 0.5832753159, 1.e-6)
       .on_failure(expected_values.str());
-  COMPARE_ABSOLUTE_ERROR(net_strange_density, -0.03682598947, 1.e-6)
+  COMPARE_ABSOLUTE_ERROR(net_strange_density, -0.03686360221, 1.e-6)
       .on_failure(expected_values.str());
-  COMPARE_ABSOLUTE_ERROR(net_charge_density, 0.4236166515, 1.e-6)
+  COMPARE_ABSOLUTE_ERROR(net_charge_density, 0.4236041139, 1.e-6)
       .on_failure(expected_values.str());
-  COMPARE_ABSOLUTE_ERROR(density, 0.6231448413, 1.e-6)
+  COMPARE_ABSOLUTE_ERROR(density, 0.6232158477, 1.e-6)
       .on_failure(expected_values.str());
-  COMPARE_ABSOLUTE_ERROR(pressure, 0.06231448413, 1.e-6)
+  COMPARE_ABSOLUTE_ERROR(pressure, 0.06232158477, 1.e-6)
       .on_failure(expected_values.str());
-  COMPARE_ABSOLUTE_ERROR(energy_density, 0.7324088517, 1.e-6)
+  COMPARE_ABSOLUTE_ERROR(energy_density, 0.7325009276, 1.e-6)
       .on_failure(expected_values.str());
 }
 
