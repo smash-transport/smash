@@ -416,6 +416,7 @@ struct InputSections {
  * - \ref doxypage_input_conf_ct_string_parameters
  * - \ref doxypage_input_conf_ct_dileptons
  * - \ref doxypage_input_conf_ct_photons
+ * - \ref doxypage_input_conf_ct_heavy_flavor
  */
 
 /*!\Userguide
@@ -474,6 +475,20 @@ struct InputSections {
  * Photon production can be enabled in the corresponding `Photon` section
  * in the `Collision_Term` one of the configuration file.
  * Remember to also activate the photon output in the output section.
+ */
+
+/*!\Userguide
+ * \page doxypage_input_conf_ct_heavy_flavor
+ *
+ * The subsection `Heavy_Flavor` of the `Collision_Term` section can be used to
+ * modify the suppression parameters for AQM cross sections regarding bottom and
+ * charm hadrons. For example:
+ *\verbatim
+ Collision_Term:
+     Heavy_Flavor:
+         AQM_Bottom_Suppression: 0.93
+         AQM_Charm_Suppression: 0.8
+ \endverbatim
  */
 
 /*!\Userguide
@@ -1988,8 +2003,8 @@ struct InputKeys {
                                                {"1.0", "3.0", "3.2"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_AQM_b_suppression_,AQM_Bottom_Suppression,double,0.8}
+   * \page doxypage_input_conf_ct_heavy_flavor
+   * \optional_key{key_CT_HF_AQM_b_suppression_,AQM_Bottom_Suppression,double,0.93}
    *
    * Suppression parameter for AQM cross sections involving a bottom hadron.
    * Default value taken from Angantyr.
@@ -2001,8 +2016,8 @@ struct InputKeys {
       InputSections::c_heavyFlavor + "AQM_Bottom_Suppression", 0.93, {"3.2"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_AQM_c_suppression_,AQM_Charm_Suppression,double,0.8}
+   * \page doxypage_input_conf_ct_heavy_flavor
+   * \optional_key{key_CT_HF_AQM_c_suppression_,AQM_Charm_Suppression,double,0.8}
    *
    * Suppression parameter for AQM cross sections involving a charm hadron.
    * Default value taken from Angantyr.
