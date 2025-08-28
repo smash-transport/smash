@@ -22,34 +22,33 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        #here we set up the various matrix elements
-        #the entries in each matrix element are just variables, not keywords, with (hopefully) self-explaining names
-        # 1st matrix element, previous LTS Ubuntu distribution, minimum supported GNU compiler version
-        #  ↳ this is temporarily commented out as GitHub does not support Ubuntu 20.04 anymore. To be updated soon.
-        #- os: ubuntu-20.04
-        #  site: "ubuntu-20.04-minimum-gcc"
-        #  packages_to_add: "g++-8 libgsl-dev doxygen-latex graphviz"
-        #  c_compiler_to_use: "gcc-8"
-        #  cxx_compiler_to_use: "g++-8"
-        # 2st matrix element, previous LTS Ubuntu distribution, default clang compiler
-        #  ↳ this is temporarily commented out as GitHub does not support Ubuntu 20.04 anymore. To be updated soon.
-        #- os: ubuntu-20.04
-        #  site: "ubuntu-20.04-default-clang"
-        #  packages_to_add: "libgsl-dev clang"
-        #  c_compiler_to_use: "clang"
-        #  cxx_compiler_to_use: "clang++"
-        # 3nd matrix element, current LTS Ubuntu distribution with default gcc
+        # Here we set up the various matrix elements: the entries in each matrix element are just variables,
+        # not keywords, with (hopefully) self-explaining names
+        #
+        # 1st matrix element, previous LTS Ubuntu distribution, oldest supported GNU compiler version
         - os: ubuntu-22.04
-          site: "ubuntu-22.04-default-gcc"
-          packages_to_add: "libgsl-dev doxygen-latex graphviz"
-          c_compiler_to_use: "gcc"
-          cxx_compiler_to_use: "g++"
-        # 4rd matrix element, current LTS Ubuntu distribution with clang 13.0
+          site: "ubuntu-22.04-oldest-supported-gcc"
+          packages_to_add: "g++-9 libgsl-dev doxygen-latex graphviz"
+          c_compiler_to_use: "gcc-9"
+          cxx_compiler_to_use: "g++-9"
+        # 2st matrix element, previous LTS Ubuntu distribution, clang 13.0
         - os: ubuntu-22.04
           site: "ubuntu-22.04-clang-13"
           packages_to_add: "libgsl-dev clang-13 clang-format-13 clang-tidy-13"
           c_compiler_to_use: "clang-13"
           cxx_compiler_to_use: "clang++-13"
+        # 3nd matrix element, current LTS Ubuntu distribution with default gcc
+        - os: ubuntu-24.04
+          site: "ubuntu-24.04-default-gcc"
+          packages_to_add: "libgsl-dev doxygen-latex graphviz"
+          c_compiler_to_use: "gcc"
+          cxx_compiler_to_use: "g++"
+        # 4rd matrix element, current LTS Ubuntu distribution with default clang
+        - os: ubuntu-24.04
+          site: "ubuntu-24.04-default-clang"
+          packages_to_add: "libgsl-dev clang"
+          c_compiler_to_use: "clang"
+          cxx_compiler_to_use: "clang++"
         # 5th matrix element, recent osx with default clang
         - os: macos-latest
           site: "mac"
@@ -94,7 +93,7 @@ jobs:
         cmake -DPythia_CONFIG_EXECUTABLE=${SMASH_ROOT}/pythia8315/bin/pythia8-config ..
         make -j$(nproc)
         # we check the building of the documentation for the current and the past Ubuntu LTS releases
-        if [ ${SITE} == "ubuntu-22.04-default-gcc" ] || [ ${SITE} == "ubuntu-20.04-minimum-gcc" ]; then make undocumented_test && make user; fi
+        if [ ${SITE} == "ubuntu-24.04-default-gcc" ] || [ ${SITE} == "ubuntu-22.04-oldest-supported-gcc" ]; then make undocumented_test && make user; fi
         # we run the tests, excluding potentials* tests
         export CTEST_OUTPUT_ON_FAILURE=1
         ctest -j$(nproc) -E "^potentials(_run)?$"
