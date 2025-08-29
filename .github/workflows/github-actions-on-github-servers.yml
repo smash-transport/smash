@@ -58,9 +58,32 @@ jobs:
     steps:
     # this is an action provided by GitHub to checkout the repository
     - uses: actions/checkout@v4
-    # we set the name of the step, collecting all the tests here except those about formatting
+    # We first setup python environment to then install cmake-format, but we do so on one site only
+    # since we are going to test only there whether the codebase is correctly formatted or not
+    # and the outcome of this operation would be the same for all the tested systems
+    - if: matrix.site == 'ubuntu-22.04-clang-13'
+      # this is another GitHub action to properly setup the python environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    - name: code_format_check
+      if: matrix.site == 'ubuntu-22.04-clang-13'
+      run: |
+        # we install cmake-format in a dedicated directory
+        mkdir ${HOME}/python-tools && pip install --target ${HOME}/python-tools cmakelang==0.6.13 autopep8==2.3.1
+        export PATH=${HOME}/python-tools/bin/:${PATH}
+        export PYTHONPATH=${HOME}/python-tools:${PYTHONPATH}
+        # we want to be sure that clang-format refers to clang-format version 13.0
+        mkdir -p ${HOME}/bin
+        ln -s /usr/bin/clang-format-13 ${HOME}/bin/clang-format
+        export PATH=${HOME}/bin:${PATH}
+        # we check the correct formatting of the code
+        ./bin/codebase-format-helper.bash C++ -t
+        ./bin/codebase-format-helper.bash CMake -t
+        ./bin/codebase-format-helper.bash Python -t
+    # We now prepare the OS, compile SMASH and run all the tests except those about formatting
     - name: code_check
-    # we set some environment variables for the specific OS version
+      # we set some environment variables for the specific OS version
       env:
         CC: ${{ matrix.c_compiler_to_use }}
         CXX: ${{ matrix.cxx_compiler_to_use }}
@@ -100,26 +123,3 @@ jobs:
         # now we run the potentials* tests that require some additional care
         ctest -R "^potentials$" --repeat until-pass:3
         ctest -R "^potentials_run$" --timeout 3600
-    # We now setup python environment to then install cmake-format, but we do so on one site only
-    # since we are going to test only there whether the codebase is correctly formatted or not
-    # and the outcome of this operation would be the same for all the tested systems
-    - if: matrix.site == 'ubuntu-22.04-clang-13'
-      # this is another GitHub action to properly setup the python environment
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.13'
-    - name: code_format_check
-      if: matrix.site == 'ubuntu-22.04-clang-13'
-      run: |
-        # we install cmake-format in a dedicated directory
-        mkdir ${HOME}/python-tools && pip install --target ${HOME}/python-tools cmakelang==0.6.13 autopep8==2.3.1
-        export PATH=${HOME}/python-tools/bin/:${PATH}
-        export PYTHONPATH=${HOME}/python-tools:${PYTHONPATH}
-        # we want to be sure that clang-format refers to clang-format version 13.0
-        mkdir -p ${HOME}/bin
-        ln -s /usr/bin/clang-format-13 ${HOME}/bin/clang-format
-        export PATH=${HOME}/bin:${PATH}
-        # we check the correct formatting of the code
-        ./bin/codebase-format-helper.bash C++ -t
-        ./bin/codebase-format-helper.bash CMake -t
-        ./bin/codebase-format-helper.bash Python -t
