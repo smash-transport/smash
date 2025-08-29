@@ -112,7 +112,7 @@ jobs:
       if: matrix.site == 'ubuntu-22.04-clang-13'
       run: |
         # we install cmake-format in a dedicated directory
-        mkdir ${HOME}/python-tools && pip install --target ${HOME}/python-tools cmakelang==0.6.13
+        mkdir ${HOME}/python-tools && pip install --target ${HOME}/python-tools cmakelang==0.6.13 autopep8==2.3.1
         export PATH=${HOME}/python-tools/bin/:${PATH}
         export PYTHONPATH=${HOME}/python-tools:${PYTHONPATH}
         # we want to be sure that clang-format refers to clang-format version 13.0
