@@ -138,7 +138,7 @@ class Key {
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    */
   explicit Key(const KeyLabels& labels, const KeyMetadata& versions,
-               std::optional<validator_type> validator = std::nullopt)
+               validator_type validator = default_validator_)
       : Key{labels, Default<default_type>{}, versions, validator} {}
 
   /**
@@ -155,7 +155,7 @@ class Key {
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    */
   Key(const KeyLabels& labels, default_type value, const KeyMetadata& versions,
-      std::optional<validator_type> validator = std::nullopt)
+      validator_type validator = default_validator_)
       : Key{labels, Default<default_type>{value}, versions, validator} {}
 
   /**
@@ -175,7 +175,7 @@ class Key {
    */
   Key(const KeyLabels& labels, DefaultType type_of_default,
       const KeyMetadata& versions,
-      std::optional<validator_type> validator = std::nullopt)
+      validator_type validator = default_validator_)
       : Key{labels, Default<default_type>{type_of_default}, versions,
             validator} {}
 
@@ -247,16 +247,11 @@ class Key {
    *
    * @param[in] value The value to be validated.
    *
-   * @return \c true if the given value is valid or if there is no validator,
+   * @return \c true if the given value is valid,
    * @return \c false otherwise.
    */
   bool validate(const default_type& value) const noexcept {
-    if (validator_) {
-      return (*validator_)(value);
-    } else {
-      // If a key has no validator consider all values as valid
-      return true;
-    }
+      return validator_(value);
   }
 
   /**
@@ -422,7 +417,7 @@ class Key {
    * @see public constructor documentation for the parameters description.
    */
   Key(const KeyLabels& labels, Default<default_type> value,
-      const KeyMetadata& versions, std::optional<validator_type> validator)
+      const KeyMetadata& versions, validator_type validator)
       : default_{std::move(value)},
         labels_{labels.begin(), labels.end()},
         validator_{std::move(validator)} {
@@ -449,6 +444,10 @@ class Key {
     }
   }
 
+  /// Default trivial validator as static member
+  inline static const validator_type default_validator_ =
+      [](const default_type&) { return true; };
+
   /// SMASH version in which the key has been introduced
   Version introduced_in_{};
   /// SMASH version in which the key has been deprecated, if any
@@ -460,7 +459,7 @@ class Key {
   /// The label(s) identifying the key in the YAML input file
   KeyLabels labels_{};
   /// The functor to validate key values
-  std::optional<validator_type> validator_{};
+  validator_type validator_{default_validator_};
 };
 
 }  // namespace smash
