@@ -12,6 +12,7 @@
 #include "smash/key.h"
 
 #include <map>
+#include <set>
 
 using namespace smash;
 using namespace std::string_literals;
@@ -37,6 +38,16 @@ static Key<T> get_test_key(std::optional<T> def_val = std::nullopt) {
 TEST(create_keys) {
   get_test_key<int>();
   get_test_key<double>(3.14);
+}
+
+TEST(create_keys_with_validator) {
+  Key<int> key_1{{"Test", "Key"}, {"1.0"}, [](int value) { return value > 0; }};
+  Key<int> key_2{
+      {"Test", "Key"}, 33, {"1.0"}, [](int value) { return value < 42; }};
+  Key<int> key_3{
+      {"Test", "Key"}, DefaultType::Dependent, {"1.0"}, [](int value) {
+        return value < 0;
+      }};
 }
 
 TEST_CATCH(key_with_invalid_default_type_I, std::logic_error) {
@@ -103,6 +114,28 @@ TEST(dependent_default) {
   VERIFY(!key_2.has_dependent_default());
   Key<double> dependent_key{{"Test"}, DefaultType::Dependent, {"1.0.0"}};
   VERIFY(dependent_key.has_dependent_default());
+}
+
+TEST(validate_key) {
+  Key<int> key{{"Test", "Key"}, {"1.0"}, [](const int& value) {
+                 return value > 0 && value <= 42;
+               }};
+  VERIFY(key.validate(33));
+  VERIFY(key.validate(42));
+  VERIFY(!key.validate(0));
+  VERIFY(!key.validate(-666));
+  Key<std::string> another_key{
+      {"Test", "Key"}, {"1.0"}, [](const std::string& value) {
+        std::set<std::string> valid_values{"Hello", "Hola", "Ciao"};
+        return valid_values.count(value) == 1;
+      }};
+  VERIFY(another_key.validate("Hola"));
+  VERIFY(!another_key.validate("Hi"));
+}
+
+TEST(validate_key_without_validator) {
+  auto key = get_test_key<int>();
+  VERIFY(key.validate(42));
 }
 
 TEST(has_same_labels) {

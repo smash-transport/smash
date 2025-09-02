@@ -121,15 +121,25 @@ class Key {
   };
 
   /**
+   * @brief Descriptive alias for the key validator.
+   */
+  using validator_type = std::function<bool(const default_type&)>;
+
+  /**
    * @brief Construct a new \c Key object without default value.
    *
    * @param[in] labels The label(s) identifying the key in the YAML input file.
    * @param[in] versions A list of one, two or three version numbers identifying
    * the versions in which the key has been introduced, deprecated and removed,
    * respectively.
+   * @param[in] validator An optional functor that takes a default_type
+   * parameters and returns a bool variable.
+   *
+   * @throw WrongNumberOfVersions If \c versions has the wrong size.
    */
-  explicit Key(const KeyLabels& labels, const KeyMetadata& versions)
-      : Key{labels, Default<default_type>{}, versions} {}
+  explicit Key(const KeyLabels& labels, const KeyMetadata& versions,
+               std::optional<validator_type> validator = std::nullopt)
+      : Key{labels, Default<default_type>{}, versions, validator} {}
 
   /**
    * @brief Construct a new \c Key object with default value.
@@ -139,11 +149,14 @@ class Key {
    * @param[in] versions A list of one, two or three version numbers identifying
    * the versions in which the key has been introduced, deprecated and removed,
    * respectively.
+   * @param[in] validator An optional functor that takes a default_type
+   * parameters and returns a bool variable.
    *
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    */
-  Key(const KeyLabels& labels, default_type value, const KeyMetadata& versions)
-      : Key{labels, Default<default_type>{value}, versions} {}
+  Key(const KeyLabels& labels, default_type value, const KeyMetadata& versions,
+      std::optional<validator_type> validator = std::nullopt)
+      : Key{labels, Default<default_type>{value}, versions, validator} {}
 
   /**
    * @brief Construct a new \c Key object which is supposed to have a default
@@ -154,13 +167,17 @@ class Key {
    * @param[in] versions A list of one, two or three version numbers identifying
    * the versions in which the key has been introduced, deprecated and removed,
    * respectively.
+   * @param[in] validator An optional functor that takes a default_type
+   * parameters and returns a bool variable.
    *
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    * @throw std::logic_error If \c type is not \c DefaultType::Dependent .
    */
   Key(const KeyLabels& labels, DefaultType type_of_default,
-      const KeyMetadata& versions)
-      : Key{labels, Default<default_type>{type_of_default}, versions} {}
+      const KeyMetadata& versions,
+      std::optional<validator_type> validator = std::nullopt)
+      : Key{labels, Default<default_type>{type_of_default}, versions,
+            validator} {}
 
   /**
    * @brief Let the clients of this class have access to the key type.
@@ -224,6 +241,23 @@ class Key {
    * @return \c true if the key is allowed, \c false otherwise.
    */
   bool is_allowed() const noexcept { return !removed_in_.has_value(); }
+
+  /**
+   * @brief Get whether the given key value is valid.
+   *
+   * @param[in] value The value to be validated.
+   *
+   * @return \c true if the given value is valid or if there is no validator,
+   * @return \c false otherwise.
+   */
+  bool validate(const default_type& value) const noexcept {
+    if (validator_) {
+      return (*validator_)(value);
+    } else {
+      // If a key has no validator consider all values as valid
+      return true;
+    }
+  }
 
   /**
    * @brief Check if given labels are the same as those of this object.
@@ -388,8 +422,10 @@ class Key {
    * @see public constructor documentation for the parameters description.
    */
   Key(const KeyLabels& labels, Default<default_type> value,
-      const KeyMetadata& versions)
-      : default_{std::move(value)}, labels_{labels.begin(), labels.end()} {
+      const KeyMetadata& versions, std::optional<validator_type> validator)
+      : default_{std::move(value)},
+        labels_{labels.begin(), labels.end()},
+        validator_{std::move(validator)} {
     /*
      * The following switch statement is a compact way to initialize the
      * three version member variables without repetition and lots of logic
@@ -423,6 +459,8 @@ class Key {
   Default<default_type> default_{};
   /// The label(s) identifying the key in the YAML input file
   KeyLabels labels_{};
+  /// The functor to validate key values
+  std::optional<validator_type> validator_{};
 };
 
 }  // namespace smash
