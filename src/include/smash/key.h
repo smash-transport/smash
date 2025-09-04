@@ -153,6 +153,7 @@ class Key {
    * parameters and returns a bool variable.
    *
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
+   * @throw std::invalid_argument If \c validator(value) returns \c false .
    */
   Key(const KeyLabels& labels, default_type value, const KeyMetadata& versions,
       validator_type validator = get_default_validator_())
@@ -251,7 +252,7 @@ class Key {
    * @return \c false otherwise.
    */
   bool validate(const default_type& value) const noexcept {
-      return validator_(value);
+    return validator_(value);
   }
 
   /**
@@ -441,6 +442,16 @@ class Key {
       default:
         throw WrongNumberOfVersions(
             "Key constructor needs one, two or three version numbers.");
+    }
+    /* Assert validator_ is set, which is usually the case unless in
+     * particularly nasty scenarios to debug (e.g. calling this constructor from
+     * a static/global object using a static/global validator and hence hitting
+     * the undefined order of static initialisation). */
+    assert(validator_);
+    if (default_.value_ && validator_(*(default_.value_)) == false) {
+      throw std::logic_error(
+          "Key " + static_cast<std::string>(*this) +
+          " has been declared with an invalid default value.");
     }
   }
 

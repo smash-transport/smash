@@ -50,6 +50,11 @@ TEST(create_keys_with_validator) {
       }};
 }
 
+TEST_CATCH(key_with_invalid_default_value, std::logic_error) {
+  Key<int> key({"Test", "key", "with", "sections"}, 42, {"1.0"},
+               [](int x) { return x < 0; });
+}
+
 TEST_CATCH(key_with_invalid_default_type_I, std::logic_error) {
   Key<int> key({"Test"}, DefaultType::Null, {"1.0"});
 }
