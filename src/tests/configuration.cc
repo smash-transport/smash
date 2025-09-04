@@ -27,8 +27,10 @@ static Configuration make_test_configuration() {
 }
 
 template <typename T>
-static Key<T> get_key(KeyLabels labels) {
-  return Key<T>{labels, {"1.0"}};
+static Key<T> get_key(
+    KeyLabels labels, typename Key<T>::validator_type validator =
+                          [](const T &) { return true; }) {
+  return Key<T>{labels, {"1.0"}, validator};
 }
 
 TEST(create_object) {
@@ -58,6 +60,59 @@ TEST(take) {
   const double d = conf.take(get_key<double>({"tamer", "pipit", "bushelling"}));
   COMPARE(d, 5.);
   conf.clear();
+}
+
+TEST(take_valid_value) {
+  Configuration conf = make_test_configuration();
+  const double d = conf.take(get_key<double>({"tamer", "pipit", "bushelling"},
+                                             [](double x) { return x > 0; }));
+  COMPARE(d, 5.);
+  conf.clear();
+}
+
+TEST_CATCH(take_invalid_value, std::invalid_argument) {
+  Configuration conf = make_test_configuration();
+  auto key_to_be_taken = get_key<double>({"tamer", "pipit", "bushelling"},
+                                         [](double x) { return x < 3; });
+  [[maybe_unused]] const double d = conf.take(key_to_be_taken);
+}
+
+TEST(take_missing_key_which_has_valid_default) {
+  Configuration conf = make_test_configuration();
+  const Key<int> new_key{
+      {"tamer", "pipit", "new"}, 42, {"1.0"}, [](int x) { return x > 0; }};
+  const int N = conf.take(new_key);
+  COMPARE(N, 42.);
+  conf.clear();
+}
+
+TEST(take_with_default_and_valid_value) {
+  Configuration conf = make_test_configuration();
+  const Key<int> optional_key{
+      {"tamer", "pipit", "new"}, DefaultType::Dependent, {"1.0"}, [](int x) {
+        return x < 50;
+      }};
+  int N = conf.take(optional_key, 42);
+  COMPARE(N, 42);
+  conf.clear();
+}
+
+TEST_CATCH(take_with_default_but_invalid_value, std::invalid_argument) {
+  Configuration conf = make_test_configuration();
+  const Key<double> optional_key{{"tamer", "pipit", "bushelling"},
+                                 DefaultType::Dependent,
+                                 {"1.0"},
+                                 [](int x) { return x > 50; }};
+  [[maybe_unused]] double N = conf.take(optional_key, 123.4);
+}
+
+TEST_CATCH(take_with_default_but_invalid_default, std::logic_error) {
+  Configuration conf = make_test_configuration();
+  const Key<int> optional_key{
+      {"tamer", "pipit", "new"}, DefaultType::Dependent, {"1.0"}, [](int x) {
+        return x > 50;
+      }};
+  [[maybe_unused]] int N = conf.take(optional_key, 42);
 }
 
 TEST(take_multiple) {
