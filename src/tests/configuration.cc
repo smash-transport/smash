@@ -292,6 +292,59 @@ TEST(read_check_config_collider_contents) {
   conf.clear();
 }
 
+TEST(read_valid_value) {
+  Configuration conf = make_test_configuration();
+  const int N = conf.read(get_key<int>({"tamer", "schmoozed", "warbler"},
+                                       [](int x) { return x > 0; }));
+  COMPARE(N, 211);
+  conf.clear();
+}
+
+TEST_CATCH(read_invalid_value, std::invalid_argument) {
+  Configuration conf = make_test_configuration();
+  auto key_to_be_read = get_key<int>({"tamer", "schmoozed", "warbler"},
+                                     [](int x) { return x < 42; });
+  [[maybe_unused]] const int N = conf.read(key_to_be_read);
+}
+
+TEST(read_missing_key_which_has_valid_default) {
+  Configuration conf = make_test_configuration();
+  const Key<int> new_key{
+      {"tamer", "schmoozed", "new"}, 42, {"1.0"}, [](int x) { return x > 0; }};
+  const int N = conf.read(new_key);
+  COMPARE(N, 42.);
+  conf.clear();
+}
+
+TEST(read_with_default_and_valid_value) {
+  Configuration conf = make_test_configuration();
+  const Key<int> optional_key{{"tamer", "schmoozed", "new"},
+                              DefaultType::Dependent,
+                              {"1.0"},
+                              [](int x) { return x > 0; }};
+  int N = conf.read(optional_key, 42);
+  COMPARE(N, 42);
+  conf.clear();
+}
+
+TEST_CATCH(read_with_default_but_invalid_value, std::invalid_argument) {
+  Configuration conf = make_test_configuration();
+  const Key<int> optional_key{{"tamer", "schmoozed", "warbler"},
+                              DefaultType::Dependent,
+                              {"1.0"},
+                              [](int x) { return x < 42; }};
+  [[maybe_unused]] const int N = conf.read(optional_key, 0);
+}
+
+TEST_CATCH(read_with_default_but_invalid_default, std::logic_error) {
+  Configuration conf = make_test_configuration();
+  const Key<int> optional_key{{"tamer", "schmoozed", "new"},
+                              DefaultType::Dependent,
+                              {"1.0"},
+                              [](int x) { return x < 42; }};
+  [[maybe_unused]] const int N = conf.read(optional_key, 666);
+}
+
 TEST(read_does_not_take_and_reading_multiple_times_is_fine) {
   Configuration conf = make_test_configuration();
   const auto key = get_key<int>({"fireballs", "classify"});
