@@ -138,7 +138,7 @@ class Key {
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    */
   explicit Key(const KeyLabels& labels, const KeyMetadata& versions,
-               validator_type validator = default_validator_)
+               validator_type validator = get_default_validator_())
       : Key{labels, Default<default_type>{}, versions, validator} {}
 
   /**
@@ -155,7 +155,7 @@ class Key {
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    */
   Key(const KeyLabels& labels, default_type value, const KeyMetadata& versions,
-      validator_type validator = default_validator_)
+      validator_type validator = get_default_validator_())
       : Key{labels, Default<default_type>{value}, versions, validator} {}
 
   /**
@@ -175,7 +175,7 @@ class Key {
    */
   Key(const KeyLabels& labels, DefaultType type_of_default,
       const KeyMetadata& versions,
-      validator_type validator = default_validator_)
+      validator_type validator = get_default_validator_())
       : Key{labels, Default<default_type>{type_of_default}, versions,
             validator} {}
 
@@ -444,9 +444,26 @@ class Key {
     }
   }
 
-  /// Default trivial validator as static member
-  inline static const validator_type default_validator_ =
-      [](const default_type&) { return true; };
+  /**
+   * Static method to get the default trivial validator.
+   *
+   * @return A functor that always returns \c true .
+   *
+   * @attention It might look unnecessary to have a static method and you might
+   * think that the functor as a static member would be enough. However, this
+   * would be in general wrong because this functor is used in the keys
+   * constructors which are used by the \c InputKeys class, that is a collection
+   * of static <tt>Keys</tt>. Hence, we would have static members using each
+   * others and initialization of static members in C++ is undefined. We use
+   * therefore the "construct on first use idiom", making the functor a static
+   * object in a function scope. For more information, refer to <a
+   * href="https://isocpp.org/wiki/faq/ctors#static-init-order-on-first-use-members">ISO
+   * C++ FAQ</a>.
+   */
+  static validator_type get_default_validator_() {
+    static auto always_true_functor = [](const default_type&) { return true; };
+    return always_true_functor;
+  }
 
   /// SMASH version in which the key has been introduced
   Version introduced_in_{};
@@ -459,7 +476,7 @@ class Key {
   /// The label(s) identifying the key in the YAML input file
   KeyLabels labels_{};
   /// The functor to validate key values
-  validator_type validator_{default_validator_};
+  validator_type validator_{get_default_validator_()};
 };
 
 }  // namespace smash
