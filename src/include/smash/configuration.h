@@ -1581,7 +1581,7 @@ class Configuration {
    * @param key The key whose value should be validated.
    * @param value The value of the key to be validated.
    *
-   * @return The validated value of the key
+   * @return The validated value of the key.
    *
    * @throw std::invalid_argument If the value is invalid w.r.t. the key
    *        validator.
@@ -1597,6 +1597,17 @@ class Configuration {
     }
   }
 
+  /**
+   * Take a key unconditionally, validate and return its value.
+   *
+   * \tparam T The type of the key to be taken.
+   * \param key The key to be taken.
+   *
+   * \return T The validated value of the taken key.
+   *
+   * \note This method internally calls the private \c take method and you
+   * should refer to it e.g. for possible exceptions thrown.
+   */
   template <typename T>
   T unconditionally_take_and_validate(const Key<T> &key) {
     // The following assignment converts a Configuration::Value into T
@@ -1604,6 +1615,17 @@ class Configuration {
     return get_validated_key_value(key, value);
   }
 
+  /**
+   * Read a key unconditionally, validate and return its value.
+   *
+   * \tparam T The type of the key to be taken.
+   * \param key The key to be taken.
+   *
+   * \return T The validated value of the key.
+   *
+   * \note This method internally calls the private \c read method and you
+   * should refer to it e.g. for possible exceptions thrown.
+   */
   template <typename T>
   T unconditionally_read_and_validate(const Key<T> &key) const {
     // The following assignment converts a Configuration::Value into T
@@ -1616,11 +1638,11 @@ class Configuration {
    * method for it it allows for defining the method in the source file, which
    * isn't possible for a template.
    *
-   * \param[in] labels the labels of the key to be taken
+   * \param[in] labels the labels of the key to be taken.
    *
-   * \return The \c Value of the key
+   * \return The \c Value of the key.
    *
-   * \throw std::runtime_error if the key does not exist
+   * \throw std::runtime_error if the key does not exist.
    */
   Value take(std::vector<std::string_view> labels);
 
@@ -1629,18 +1651,19 @@ class Configuration {
    * method for it it allows for defining the method in the source file, which
    * isn't possible for a template.
    *
-   * \param[in] labels the labels of the key to be read
+   * \param[in] labels the labels of the key to be read.
    *
-   * \return The \c Value of the key
+   * \return The \c Value of the key.
    *
-   * \throw std::runtime_error if the key does not exist
+   * \throw std::runtime_error if the key does not exist.
    */
   Value read(std::vector<std::string_view> labels) const;
 
   /**
    * Find out whether a key has been already taken.
    *
-   * \param labels The labels of the key to be checked
+   * \param labels The labels of the key to be checked.
+   *
    * \return \c true if the key was already taken,
    * \return \c false otherwise.
    */
