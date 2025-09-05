@@ -21,11 +21,15 @@ using namespace smash;
 
 namespace std {
 // helpers for printing sets/pairs on test failure
-template <typename T, typename U>
+template <
+    typename T, typename U,
+    typename = std::enable_if_t<is_writable_to_stream_v<std::ostream, T> &&
+                                is_writable_to_stream_v<std::ostream, U>>>
 ostream &operator<<(ostream &s, const pair<T, U> &p) {
   return s << '<' << p.first << '|' << p.second << '>';
 }
-template <typename T>
+template <typename T,
+          typename = std::enable_if_t<is_writable_to_stream_v<std::ostream, T>>>
 ostream &operator<<(ostream &s, const set<T> &set) {
   s << '{';
   for (auto &&x : set) {
@@ -33,7 +37,8 @@ ostream &operator<<(ostream &s, const set<T> &set) {
   }
   return s << '}';
 }
-template <typename T>
+template <typename T,
+          typename = std::enable_if_t<is_writable_to_stream_v<std::ostream, T>>>
 static inline ostream &operator<<(ostream &s, const unordered_set<T> &data) {
   s << '{';
   for (auto &&x : data) {
@@ -188,7 +193,10 @@ typename Container::const_iterator find(const Container &c, const T &value) {
 }
 
 namespace std {
-template <typename T, typename U>
+template <
+    typename T, typename U,
+    typename = std::enable_if_t<is_writable_to_stream_v<std::ostream, T> &&
+                                is_writable_to_stream_v<std::ostream, U>>>
 std::ostream &operator<<(std::ostream &s,
                          const std::vector<std::pair<T, U>> &l) {
   for (auto &&p : l) {
