@@ -139,9 +139,9 @@ class ParticleData {
    */
   HistoryData get_history() const { return history_; }
   /**
-   * Move assignment of history_. Meant to be used only in special situations
-   * e.g. in the ListModus, where a temporary HistoryData is constructed from
-   * the user input.
+   * Set history from rvalue reference of history_. Meant to be used only in
+   * special situations e.g. in the ListModus, where a temporary HistoryData
+   * is constructed from the user input.
    *
    * \param[in] history object to be moved.
    */

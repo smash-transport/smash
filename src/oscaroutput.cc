@@ -514,7 +514,6 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \process_type{6} Box wall crossing (due to periodic boundary conditions)
  * \process_type{7} Forced thermalization, many particles are replaced by a
  *                  thermalized ensemble
-<<<<<<< HEAD
  * \process_type{8} Fluidization, particles that obey the fluidization
  *                  condition given in the configuration file are removed
  *                  from the evolution and printed to a separate output, to
@@ -522,13 +521,6 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \process_type{21} Fluidization as above, but particles are not removed from
  *                   the evolution. They are instead tagged as core.
  * \process_type{9}  Bremsstrahlung process: a + b &rarr; a + b + photon
-=======
- * \process_type{8} Hypersurface crossing, Particles are removed from the
- *                  evolution and printed to a separate output to serve as
- *                  initial conditions for hybrid models.
- * \process_type{21} Same as above, but without removing the particles.
- * \process_type{9} Bremsstrahlung process: a + b &rarr; a + b + photon
->>>>>>> 3c387c964 (Implement extra fields and necessary validation. Some refactoring was necessary on HistoryData and ProcessType)
  * \process_type{10} Inelastic multi-particle meson scattering (3 &rarr; 1)
  * \process_type{11} Inelastic multi-particle scattering (3 &rarr; 2)
  * \process_type{12} Inelastic multi-particle scattering (5 &rarr; 2)

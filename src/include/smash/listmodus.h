@@ -211,7 +211,7 @@ class ListModus : public ModusDefault {
   void validate_list_of_particles_of_all_events_() const;
 
   /**
-   * Judge whether times are the same for all the particles; Don't do
+   * Judge whether times are the same for all the particles; don't do
    * anti-freestreaming if all particles start already at the same time.
    *
    * If particles are at different times, calculate earliest time as
@@ -230,7 +230,7 @@ class ListModus : public ModusDefault {
    * is present in an integer-related field. \throw std::invalid_argument if the
    * quantities in the input file do not obey the appropriate bounds.
    */
-  void insert_optional_fields_to_(
+  void insert_optional_quantities_to_(
       ParticleData &p,
       const std::vector<std::string> &optional_quantities) const;
 
@@ -246,7 +246,7 @@ class ListModus : public ModusDefault {
   /// The id of the current file
   std::optional<int> file_id_;
 
-  /// Optional fields to be read
+  /// Fields with optional quantities to be read
   std::vector<std::string> optional_fields_{};
   /// The unique id of the current event
   int event_id_;

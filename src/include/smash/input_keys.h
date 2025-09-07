@@ -4530,17 +4530,19 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
-   * \optional_key{key_ML_optional_fields_,Optional_Fields,list of strings,{}}
+   * \optional_key{key_ML_optional_quantities_,Optional_Quantities,list of
+   * strings,{}}
    *
-   * Give extra fields to the input list of particles. This is useful to e.g.
-   * continue a SMASH run that was paused while taking into account the
-   * formation time and cross section scaling properly.
+   * Extra columns to be expected in the input file containing the list of
+   * particles. This is useful to e.g. continue a SMASH run that was paused
+   * while taking into account the formation time and cross section scaling
+   * properly.
    *
-   * The order in the fields should respect the order of values in the input.
-   * Available fields:
+   * The order of the quantities in the key value should respect the order of
+   * the extra columns in the input file. Available quantities:
    * - "ncoll" &rarr; Number of collisions the particle already went through.
    * - "form_time" &rarr;  Formation time. By default it is set to the time
-   * coordinate (first column in the input).
+   *   coordinate (first column in the input).
    * - "xsecfac" &rarr;  Scaling factor for the cross section, limited between 0
    *    and 1. By default it is 1.
    * - "proc_type" &rarr; Type of the last interaction (See
@@ -4549,23 +4551,27 @@ struct InputKeys {
    * - "pdg_mother1" &rarr; Parent of the particle.
    * - "pdg_mother2" &rarr; Second parent of the particle.
    *
-   * Unless stated differently, the default value for these fields is 0.
+   * Optional quantities that are not provided by the user as extra column in
+   * the input file are set to their default value when SMASH reads in the input
+   * file with the list of particles. Unless stated differently, this default
+   * value is 0.
    *
-   * \attention The code does a minimal validation to see if the fields are
+   * \attention The code does a minimal validation to see if the quantities are
    * internally meaningful, but no check is done on the physics content.
    * For instance, SMASH will not complain if a proton is said to originate
-   * from a pion via wall crossing. Ensuring the correctnes of the input is
+   * from a pion via wall crossing. Ensuring the correctness of the input is
    * the user's resposibility.
    * \note If a floating point is given where an integer should be, only a
    * warning is issued, as that might be on purpose.
    */
   /**
-   * \see_key{key_ML_optional_fields_}
+   * \see_key{key_ML_optional_quantities_}
    */
-  inline static const Key<std::vector<std::string>> modi_list_optionalFields{
-      InputSections::m_list + "Optional_Fields",
-      std::vector<std::string>{},
-      {"3.3"}};
+  inline static const Key<std::vector<std::string>>
+      modi_list_optionalQuantities{
+          InputSections::m_list + "Optional_Quantities",
+          std::vector<std::string>{},
+          {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
@@ -4634,18 +4640,20 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
-   * \optional_key{key_MLB_optional_fields_,Optional_Fields,list of strings,{}}
+   * \optional_key{key_MLB_optional_quantities_,Optional_Quantities,list of
+   * strings,{}}
    *
    * See &nbsp;
-   * <tt>\ref key_ML_optional_fields_ "List: Optional_Fields"</tt>.
+   * <tt>\ref key_ML_optional_quantities_ "List: Optional_Quantities"</tt>.
    */
   /**
-   * \see_key{key_MLB_optional_fields_}
+   * \see_key{key_MLB_optional_quantities_}
    */
-  inline static const Key<std::vector<std::string>> modi_listBox_optionalFields{
-      InputSections::m_listBox + "Optional_Fields",
-      std::vector<std::string>{},
-      {"3.3"}};
+  inline static const Key<std::vector<std::string>>
+      modi_listBox_optionalQuantities{
+          InputSections::m_listBox + "Optional_Quantities",
+          std::vector<std::string>{},
+          {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -6002,13 +6010,13 @@ struct InputKeys {
       std::cref(modi_list_filename),
       std::cref(modi_list_filePrefix),
       std::cref(modi_list_shiftId),
-      std::cref(modi_list_optionalFields),
+      std::cref(modi_list_optionalQuantities),
       std::cref(modi_listBox_fileDirectory),
       std::cref(modi_listBox_filename),
       std::cref(modi_listBox_filePrefix),
       std::cref(modi_listBox_length),
       std::cref(modi_listBox_shiftId),
-      std::cref(modi_listBox_optionalFields),
+      std::cref(modi_listBox_optionalQuantities),
       std::cref(output_densityType),
       std::cref(output_outputInterval),
       std::cref(output_outputTimes),
