@@ -22,46 +22,68 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        #here we set up the various matrix elements
-        #the entries in each matrix element are just variables, not keywords, with (hopefully) self-explaining names
-        # 1st matrix element, previous LTS Ubuntu distribution, minimum supported GNU compiler version
-        #  ↳ this is temporarily commented out as GitHub does not support Ubuntu 20.04 anymore. To be updated soon.
-        #- os: ubuntu-20.04
-        #  site: "ubuntu-20.04-minimum-gcc"
-        #  packages_to_add: "g++-8 libgsl-dev doxygen-latex graphviz"
-        #  c_compiler_to_use: "gcc-8"
-        #  cxx_compiler_to_use: "g++-8"
-        # 2st matrix element, previous LTS Ubuntu distribution, default clang compiler
-        #  ↳ this is temporarily commented out as GitHub does not support Ubuntu 20.04 anymore. To be updated soon.
-        #- os: ubuntu-20.04
-        #  site: "ubuntu-20.04-default-clang"
-        #  packages_to_add: "libgsl-dev clang"
-        #  c_compiler_to_use: "clang"
-        #  cxx_compiler_to_use: "clang++"
-        # 3nd matrix element, current LTS Ubuntu distribution with default gcc
+        # Here we set up the various matrix elements: the entries in each matrix element are just variables,
+        # not keywords, with (hopefully) self-explaining names
+        #
+        # 1st matrix element, previous LTS Ubuntu distribution, oldest supported GNU compiler version
         - os: ubuntu-22.04
-          site: "ubuntu-22.04-default-gcc"
-          packages_to_add: "libgsl-dev doxygen-latex graphviz"
-          c_compiler_to_use: "gcc"
-          cxx_compiler_to_use: "g++"
-        # 4rd matrix element, current LTS Ubuntu distribution with clang 13.0
+          site: "ubuntu-22.04-oldest-supported-gcc"
+          packages_to_add: "g++-9 libgsl-dev libeigen3-dev doxygen-latex graphviz"
+          c_compiler_to_use: "gcc-9"
+          cxx_compiler_to_use: "g++-9"
+        # 2st matrix element, previous LTS Ubuntu distribution, clang 13.0
         - os: ubuntu-22.04
           site: "ubuntu-22.04-clang-13"
-          packages_to_add: "libgsl-dev clang-13 clang-format-13 clang-tidy-13"
+          packages_to_add: "libgsl-dev libeigen3-dev clang-13 clang-format-13 clang-tidy-13"
           c_compiler_to_use: "clang-13"
           cxx_compiler_to_use: "clang++-13"
+        # 3nd matrix element, current LTS Ubuntu distribution with default gcc
+        - os: ubuntu-24.04
+          site: "ubuntu-24.04-default-gcc"
+          packages_to_add: "libgsl-dev libeigen3-dev doxygen-latex graphviz"
+          c_compiler_to_use: "gcc"
+          cxx_compiler_to_use: "g++"
+        # 4rd matrix element, current LTS Ubuntu distribution with default clang
+        - os: ubuntu-24.04
+          site: "ubuntu-24.04-default-clang"
+          packages_to_add: "libgsl-dev libeigen3-dev clang"
+          c_compiler_to_use: "clang"
+          cxx_compiler_to_use: "clang++"
         # 5th matrix element, recent osx with default clang
         - os: macos-latest
           site: "mac"
-          packages_to_add: "gsl coreutils"
+          packages_to_add: "gsl coreutils eigen"
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
     steps:
     # this is an action provided by GitHub to checkout the repository
     - uses: actions/checkout@v4
-    # we set the name of the step, collecting all the tests here except those about formatting
+    # We first setup python environment to then install cmake-format, but we do so on one site only
+    # since we are going to test only there whether the codebase is correctly formatted or not
+    # and the outcome of this operation would be the same for all the tested systems
+    - if: matrix.site == 'ubuntu-22.04-clang-13'
+      # this is another GitHub action to properly setup the python environment
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    - name: code_format_check
+      if: matrix.site == 'ubuntu-22.04-clang-13'
+      run: |
+        # we install cmake-format in a dedicated directory
+        mkdir ${HOME}/python-tools && pip install --target ${HOME}/python-tools cmakelang==0.6.13 autopep8==2.3.1
+        export PATH=${HOME}/python-tools/bin/:${PATH}
+        export PYTHONPATH=${HOME}/python-tools:${PYTHONPATH}
+        # we want to be sure that clang-format refers to clang-format version 13.0
+        mkdir -p ${HOME}/bin
+        ln -s /usr/bin/clang-format-13 ${HOME}/bin/clang-format
+        export PATH=${HOME}/bin:${PATH}
+        # we check the correct formatting of the code
+        ./bin/codebase-format-helper.bash C++ -t
+        ./bin/codebase-format-helper.bash CMake -t
+        ./bin/codebase-format-helper.bash Python -t
+    # We now prepare the OS, compile SMASH and run all the tests except those about formatting
     - name: code_check
-    # we set some environment variables for the specific OS version
+      # we set some environment variables for the specific OS version
       env:
         CC: ${{ matrix.c_compiler_to_use }}
         CXX: ${{ matrix.cxx_compiler_to_use }}
@@ -83,9 +105,6 @@ jobs:
         wget https://pythia.org/download/pythia83/pythia8315.tgz && tar xf pythia8315.tgz && rm pythia8315.tgz && cd pythia8315
         ./configure --cxx-common="-std=c++17 -march=native -O3 -fPIC -pthread" && make -j$(nproc) && cd ..
         export LD_LIBRARY_PATH=${SMASH_ROOT}/pythia8315/lib:${LD_LIBRARY_PATH} # To make sure it can be found at run time
-        # we get eigen
-        wget http://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz && tar -xf eigen-3.4.0.tar.gz -C ${HOME}
-        export CMAKE_PREFIX_PATH=${HOME}/eigen-3.4.0/  # Let CMake find Eigen also when testing using SMASH as library
         # we get cpplint
         wget https://raw.githubusercontent.com/cpplint/cpplint/1.6.0/cpplint.py && chmod +x cpplint.py && mkdir -p ${HOME}/bin && mv cpplint.py ${HOME}/bin
         export PATH=${HOME}/bin:${PATH}
@@ -94,28 +113,10 @@ jobs:
         cmake -DPythia_CONFIG_EXECUTABLE=${SMASH_ROOT}/pythia8315/bin/pythia8-config ..
         make -j$(nproc)
         # we check the building of the documentation for the current and the past Ubuntu LTS releases
-        if [ ${SITE} == "ubuntu-22.04-default-gcc" ] || [ ${SITE} == "ubuntu-20.04-minimum-gcc" ]; then make undocumented_test && make user; fi
-        # we run the tests
-        CTEST_OUTPUT_ON_FAILURE=1 ctest -j$(nproc)
-    # We now setup python environment to then install cmake-format, but we do so on one site only
-    # since we are going to test only there whether the codebase is correctly formatted or not
-    # and the outcome of this operation would be the same for all the tested systems
-    - if: matrix.site == 'ubuntu-22.04-clang-13'
-      # this is another GitHub action to properly setup the python environment
-      uses: actions/setup-python@v3
-      with:
-        python-version: '3.10'
-    - name: code_format_check
-      if: matrix.site == 'ubuntu-22.04-clang-13'
-      run: |
-        # we install cmake-format in a dedicated directory
-        mkdir ${HOME}/python-tools && pip install --target ${HOME}/python-tools cmakelang==0.6.13
-        export PATH=${HOME}/python-tools/bin/:${PATH}
-        export PYTHONPATH=${HOME}/python-tools:${PYTHONPATH}
-        # we want to be sure that clang-format refers to clang-format version 13.0
-        mkdir -p ${HOME}/bin
-        ln -s /usr/bin/clang-format-13 ${HOME}/bin/clang-format
-        export PATH=${HOME}/bin:${PATH}
-        # we check the correct formatting of the code
-        ./bin/codebase-format-helper.bash C++ -t
-        ./bin/codebase-format-helper.bash CMake -t
+        if [ ${SITE} == "ubuntu-24.04-default-gcc" ] || [ ${SITE} == "ubuntu-22.04-oldest-supported-gcc" ]; then make undocumented_test && make user; fi
+        # we run the tests, excluding potentials* tests
+        export CTEST_OUTPUT_ON_FAILURE=1
+        ctest -j$(nproc) -E "^potentials(_run)?$"
+        # now we run the potentials* tests that require some additional care
+        ctest -R "^potentials$" --repeat until-pass:3
+        ctest -R "^potentials_run$" --timeout 3600
