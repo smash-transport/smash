@@ -10,6 +10,8 @@
 #ifndef SRC_INCLUDE_SMASH_KEY_H_
 #define SRC_INCLUDE_SMASH_KEY_H_
 
+#include <cassert>
+#include <functional>
 #include <optional>
 #include <sstream>
 #include <string>
