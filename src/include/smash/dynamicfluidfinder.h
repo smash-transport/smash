@@ -134,7 +134,7 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
   /// Processes that create a fluidizable particle
   const FluidizableProcessesBitSet fluidizable_processes_;
   /// Whether the first elastic interaction of an initial nucleon is fluidizable
-  const bool delay_initial_elastic_ = NAN;
+  const bool delay_initial_elastic_ = true;
 
   /// Accumulated number of core particles
   mutable int particles_in_core_ = 0;

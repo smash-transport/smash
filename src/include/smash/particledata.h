@@ -139,11 +139,11 @@ class ParticleData {
    */
   HistoryData get_history() const { return history_; }
   /**
-   * Set history from rvalue reference of history_. Meant to be used only in
+   * Set history_ from rvalue reference. Meant to be used only in
    * special situations e.g. in the ListModus, where a temporary HistoryData
    * is constructed from the user input.
    *
-   * \param[in] history object to be moved.
+   * \param[in] history object to be moved from.
    */
   void set_history(HistoryData &&history) { history_ = std::move(history); }
 

@@ -224,10 +224,14 @@ class ListModus : public ModusDefault {
   /**
    * Sets the optional fields given in the input list into a particle.
    *
+   * A warning is issued if the file is not read exactly as given, which
+   * happens if, for example, a float is present in an integer-related
+   * field.
+   *
    * \param[in] p particle to be modified
    * \param[in] optional_quantities list of values to be set
-   * \warning if the file is not read exactly as given, which happens if a float
-   * is present in an integer-related field. \throw std::invalid_argument if the
+   *
+   * \throw std::invalid_argument if the
    * quantities in the input file do not obey the appropriate bounds.
    */
   void insert_optional_quantities_to_(
