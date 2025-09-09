@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015-2024
+ *    Copyright (c) 2015-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,6 +12,7 @@
 #include <list>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "forwarddeclarations.h"
 #include "modusdefault.h"
@@ -88,17 +89,6 @@ class ListModus : public ModusDefault {
    */
   double initial_conditions(Particles *particles,
                             const ExperimentParameters &parameters);
-  /**
-   * Judge whether formation times are the same for all the particles;
-   * Don't do anti-freestreaming if all particles start already at the same
-   * time.
-   *
-   * If particles are at different times, calculate earliest formation
-   * time as start_time_ and free-stream all particles back to this time.
-   *
-   * \param particles %Particles to be checked and possibly back-streamed
-   */
-  void backpropagate_to_same_time(Particles &particles);
 
   /**
    * Tries to add a new particle to particles and performs consistency checks:
@@ -132,11 +122,13 @@ class ListModus : public ModusDefault {
    * \param[in] px      x-component of momentum of added particle
    * \param[in] py      y-component of momentum of added particle
    * \param[in] pz      z-component of momentum of added particle
+   * \param[in] optional_quantities Extra values present in the input list
    * \param[out] particles Object to which the particle is added
    */
-  void try_create_particle(Particles &particles, PdgCode pdgcode, double t,
-                           double x, double y, double z, double mass, double E,
-                           double px, double py, double pz);
+  void try_create_particle(
+      Particles &particles, PdgCode pdgcode, double t, double x, double y,
+      double z, double mass, double E, double px, double py, double pz,
+      const std::vector<std::string> &optional_quantities = {});
 
   /** \ingroup exception
    * Used when external particle list cannot be found.
@@ -218,6 +210,34 @@ class ListModus : public ModusDefault {
    */
   void validate_list_of_particles_of_all_events_() const;
 
+  /**
+   * Judge whether times are the same for all the particles; don't do
+   * anti-freestreaming if all particles start already at the same time.
+   *
+   * If particles are at different times, calculate earliest time as
+   * start_time_ and free-stream all particles back to this time.
+   *
+   * \param particles %Particles to be checked and possibly back-streamed.
+   */
+  void backpropagate_to_same_time_if_needed_(Particles &particles);
+
+  /**
+   * Sets the optional fields given in the input list into a particle.
+   *
+   * A warning is issued if the file is not read exactly as given, which
+   * happens if, for example, a float is present in an integer-related
+   * field.
+   *
+   * \param[in] p particle to be modified
+   * \param[in] optional_quantities list of values to be set
+   *
+   * \throw std::invalid_argument if the
+   * quantities in the input file do not obey the appropriate bounds.
+   */
+  void insert_optional_quantities_to_(
+      ParticleData &p,
+      const std::vector<std::string> &optional_quantities) const;
+
   /// File directory of the particle list
   std::string particle_list_file_directory_;
 
@@ -230,6 +250,8 @@ class ListModus : public ModusDefault {
   /// The id of the current file
   std::optional<int> file_id_;
 
+  /// Fields with optional quantities to be read
+  std::vector<std::string> optional_fields_{};
   /// The unique id of the current event
   int event_id_;
 

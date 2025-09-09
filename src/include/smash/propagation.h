@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2023
+ *    Copyright (c) 2013-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -71,6 +71,8 @@ double calc_hubble(double time, const ExpansionProperties &metric);
  */
 double propagate_straight_line(Particles *particles, double to_time,
                                const std::vector<FourVector> &beam_momentum);
+
+void backpropagate_straight_line(Particles *particles, double to_time);
 
 /**
  * Modifies positions and momentum of all particles to account for

@@ -29,6 +29,7 @@
 #include "smash/inputfunctions.h"
 #include "smash/logging.h"
 #include "smash/particledata.h"
+#include "smash/propagation.h"
 #include "smash/threevector.h"
 #include "smash/wallcrossingaction.h"
 
@@ -59,11 +60,14 @@ ListModus::ListModus(Configuration modus_config,
                    file_directory_key = InputKeys::modi_list_fileDirectory,
                    filename_key = InputKeys::modi_list_filename;
   Key<int> shift_id_key = InputKeys::modi_list_shiftId;
+  Key<std::vector<std::string>> optional_quantities_key =
+      InputKeys::modi_list_optionalQuantities;
   if (is_list_box) {
     file_prefix_key = InputKeys::modi_listBox_filePrefix;
     file_directory_key = InputKeys::modi_listBox_fileDirectory;
     filename_key = InputKeys::modi_listBox_filename;
     shift_id_key = InputKeys::modi_listBox_shiftId;
+    optional_quantities_key = InputKeys::modi_listBox_optionalQuantities;
   }
   // Impose strict requirement on possible keys present in configuration file
   const bool file_prefix_used = modus_config.has_value(file_prefix_key);
@@ -83,6 +87,7 @@ ListModus::ListModus(Configuration modus_config,
   if (param.n_ensembles > 1) {
     throw std::runtime_error("ListModus only makes sense with one ensemble");
   }
+  optional_fields_ = modus_config.take(optional_quantities_key);
   validate_list_of_particles_of_all_events_();
 }
 
@@ -93,7 +98,7 @@ std::ostream &operator<<(std::ostream &out, const ListModus &m) {
   return out;
 }
 
-void ListModus::backpropagate_to_same_time(Particles &particles) {
+void ListModus::backpropagate_to_same_time_if_needed_(Particles &particles) {
   /* (1) If particles are already at the same time - don't touch them
          AND start at the start_time_ from the config. */
   double earliest_formation_time = DBL_MAX;
@@ -117,28 +122,20 @@ void ListModus::backpropagate_to_same_time(Particles &particles) {
   bool anti_streaming_needed = (formation_time_difference > really_small);
   start_time_ = earliest_formation_time;
   if (anti_streaming_needed) {
-    for (auto &particle : particles) {
-      /* for hydro output where formation time is different */
-      const double t = particle.position().x0();
-      const double delta_t = t - start_time_;
-      const ThreeVector r =
-          particle.position().threevec() - delta_t * particle.velocity();
-      particle.set_4position(FourVector(start_time_, r));
-      particle.set_formation_time(t);
-      particle.set_cross_section_scaling_factor(0.0);
-    }
+    backpropagate_straight_line(&particles, start_time_);
   }
 }
 
-void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
-                                    double t, double x, double y, double z,
-                                    double mass, double E, double px, double py,
-                                    double pz) {
+void ListModus::try_create_particle(
+    Particles &particles, PdgCode pdgcode, double t, double x, double y,
+    double z, double mass, double E, double px, double py, double pz,
+    const std::vector<std::string> &optional_quantities) {
   try {
     ParticleData new_particle =
         create_valid_smash_particle_matching_provided_quantities(
             pdgcode, mass, {t, x, y, z}, {E, px, py, pz}, LList,
             warn_about_mass_discrepancy_, warn_about_off_shell_particles_);
+    insert_optional_quantities_to_(new_particle, optional_quantities);
     particles.insert(new_particle);
   } catch (ParticleType::PdgNotFoundFailure &) {
     logg[LList].warn() << "SMASH does not recognize pdg code " << pdgcode
@@ -146,12 +143,81 @@ void ListModus::try_create_particle(Particles &particles, PdgCode pdgcode,
   }
 }
 
+void ListModus::insert_optional_quantities_to_(
+    ParticleData &p,
+    const std::vector<std::string> &optional_quantities) const {
+  HistoryData hist = p.get_history();
+  std::ostringstream error_message{"", std::ios_base::ate};
+  for (size_t i = 0; i < optional_fields_.size(); ++i) {
+    size_t len{};
+    auto field = optional_fields_[i];
+    auto quantity = optional_quantities[i];
+    if (field == "ncoll") {
+      const int ncoll = std::stoi(optional_quantities[i], &len);
+      if (ncoll < 0) {
+        error_message << "ncoll < 0.\n";
+      }
+      hist.collisions_per_particle = ncoll;
+    } else if (field == "form_time") {
+      p.set_formation_time(std::stod(quantity, &len));
+    } else if (field == "xsecfac") {
+      const double xsecfac = std::stod(quantity, &len);
+      if (xsecfac < 0 || xsecfac > 1) {
+        error_message << "xsecfac < 0 or xsecfac > 1.\n";
+      }
+      p.set_cross_section_scaling_factor(xsecfac);
+    } else if (field == "proc_type") {
+      const int proc_type = std::stoi(quantity, &len);
+      if (!is_valid_process_type(proc_type)) {
+        error_message << "Invalid proc_type.\n";
+      }
+      hist.process_type = static_cast<ProcessType>(proc_type);
+    } else if (field == "time_last_coll") {
+      const double t_last_coll = std::stod(quantity, &len);
+      if (t_last_coll > p.position().x0()) {
+        error_message << "time_last_coll > particle time.\n";
+      }
+      hist.time_last_collision = t_last_coll;
+    } else if (field == "pdg_mother1" || quantity == "0") {
+      if (!ParticleType::exists(PdgCode(quantity))) {
+        error_message << "pdg_mother1 cannot be " << quantity << ".\n";
+      }
+      hist.p1 = PdgCode(quantity);
+      len = quantity.size();
+    } else if (field == "pdg_mother2" || quantity == "0") {
+      if (!ParticleType::exists(PdgCode(quantity))) {
+        error_message << "pdg_mother2 cannot be " << quantity << ".\n";
+      }
+      hist.p2 = PdgCode(quantity);
+      len = quantity.size();
+    } else {
+      error_message << " Unknown quantities given in the configuration.\n";
+    }
+    /* This is to assist the user, in case of a mistype in the inputfile.
+     * We do not throw here because it may be intentional. */
+    if (len != quantity.size()) {
+      logg[LList].warn()
+          << field << "=" << quantity
+          << " not read exactly as written in the input particle list.\n";
+    }
+  }
+  if (error_message.str().size() > 0) {
+    logg[LList].error()
+        << "The reading-in of optional quantities had the following problems:"
+        << std::endl
+        << error_message.str();
+    throw std::invalid_argument(
+        "Please fix the list of input particles and/or configuration.");
+  }
+  p.set_history(std::move(hist));
+}
+
 /* initial_conditions - sets particle data for @particles */
 double ListModus::initial_conditions(Particles *particles,
                                      const ExperimentParameters &) {
   read_particles_from_next_event_(*particles);
   if (particles->size() > 0) {
-    backpropagate_to_same_time(*particles);
+    backpropagate_to_same_time_if_needed_(*particles);
   } else {
     start_time_ = 0.0;
   }
@@ -169,6 +235,12 @@ void ListModus::read_particles_from_next_event_(Particles &particles) {
     std::string pdg_string;
     lineinput >> t >> x >> y >> z >> mass >> E >> px >> py >> pz >>
         pdg_string >> id >> charge;
+    std::vector<std::string> optional_quantities(optional_fields_.size());
+    for (size_t i = 0; i < optional_fields_.size(); ++i) {
+      std::string opt{};
+      lineinput >> opt;
+      optional_quantities[i] = std::move(opt);
+    }
     if (lineinput.fail()) {
       throw LoadFailure(
           build_error_string("While loading external particle lists data:\n"
@@ -188,7 +260,8 @@ void ListModus::read_particles_from_next_event_(Particles &particles) {
       }
       throw std::invalid_argument("Inconsistent input (charge).");
     }
-    try_create_particle(particles, pdgcode, t, x, y, z, mass, E, px, py, pz);
+    try_create_particle(particles, pdgcode, t, x, y, z, mass, E, px, py, pz,
+                        optional_quantities);
   }
 }
 

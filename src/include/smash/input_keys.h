@@ -4529,6 +4529,51 @@ struct InputKeys {
       InputSections::m_list + "Shift_Id", 0, {"0.60"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_modi_list
+   * \optional_key{key_ML_optional_quantities_,Optional_Quantities,list of
+   * strings,{}}
+   *
+   * Extra columns to be expected in the input file containing the list of
+   * particles. This is useful to e.g. continue a SMASH run that was paused
+   * while taking into account the formation time and cross section scaling
+   * properly.
+   *
+   * The order of the quantities in the key value should respect the order of
+   * the extra columns in the input file. Available quantities:
+   * - "ncoll" &rarr; Number of collisions the particle already went through.
+   * - "form_time" &rarr;  Formation time. By default it is set to the time
+   *   coordinate (first column in the input).
+   * - "xsecfac" &rarr;  Scaling factor for the cross section, limited between 0
+   *    and 1. By default it is 1.
+   * - "proc_type" &rarr; Type of the last interaction (See
+   *   \ref doxypage_output_process_types)
+   * - "time_last_coll" &rarr; Time when the last interaction happened.
+   * - "pdg_mother1" &rarr; Parent of the particle.
+   * - "pdg_mother2" &rarr; Second parent of the particle.
+   *
+   * Optional quantities that are not provided by the user as extra column in
+   * the input file are set to their default value when SMASH reads in the input
+   * file with the list of particles. Unless stated differently, this default
+   * value is 0.
+   *
+   * \attention The code does a minimal validation to see if the quantities are
+   * internally meaningful, but no check is done on the physics content.
+   * For instance, SMASH will not complain if a proton is said to originate
+   * from a pion via wall crossing. Ensuring the correctness of the input is
+   * the user's resposibility.
+   * \note If a floating point is given where an integer should be, only a
+   * warning is issued, as that might be on purpose.
+   */
+  /**
+   * \see_key{key_ML_optional_quantities_}
+   */
+  inline static const Key<std::vector<std::string>>
+      modi_list_optionalQuantities{
+          InputSections::m_list + "Optional_Quantities",
+          std::vector<std::string>{},
+          {"3.3"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
    * \required_key{key_MLB_file_dir_,File_Directory,string}
    *
@@ -4594,6 +4639,23 @@ struct InputKeys {
       InputSections::m_listBox + "Shift_Id", 0, {"2.1"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_modi_listbox
+   * \optional_key{key_MLB_optional_quantities_,Optional_Quantities,list of
+   * strings,{}}
+   *
+   * See &nbsp;
+   * <tt>\ref key_ML_optional_quantities_ "List: Optional_Quantities"</tt>.
+   */
+  /**
+   * \see_key{key_MLB_optional_quantities_}
+   */
+  inline static const Key<std::vector<std::string>>
+      modi_listBox_optionalQuantities{
+          InputSections::m_listBox + "Optional_Quantities",
+          std::vector<std::string>{},
+          {"3.3"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_output
    *
    * ## General output configuration parameters
@@ -4601,7 +4663,7 @@ struct InputKeys {
    * \optional_key_no_line{key_output_density_type_,Density_Type,string,"none"}
    *
    * Determines which kind of density is printed into the headers of the
-   * collision files. Possible valuesare:
+   * collision files. Possible values are:
    * - `"hadron"` &rarr; Total hadronic density
    * - `"baryon"` &rarr; Net baryon density
    * - `"baryonic isospin"` &rarr; Baryonic isospin density
@@ -5948,11 +6010,13 @@ struct InputKeys {
       std::cref(modi_list_filename),
       std::cref(modi_list_filePrefix),
       std::cref(modi_list_shiftId),
+      std::cref(modi_list_optionalQuantities),
       std::cref(modi_listBox_fileDirectory),
       std::cref(modi_listBox_filename),
       std::cref(modi_listBox_filePrefix),
       std::cref(modi_listBox_length),
       std::cref(modi_listBox_shiftId),
+      std::cref(modi_listBox_optionalQuantities),
       std::cref(output_densityType),
       std::cref(output_outputInterval),
       std::cref(output_outputTimes),

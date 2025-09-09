@@ -8,6 +8,7 @@
 #define SRC_INCLUDE_SMASH_PARTICLEDATA_H_
 
 #include <limits>
+#include <utility>
 
 #include "forwarddeclarations.h"
 #include "fourvector.h"
@@ -137,6 +138,15 @@ class ParticleData {
    * \return particle history struct
    */
   HistoryData get_history() const { return history_; }
+  /**
+   * Set history_ from rvalue reference. Meant to be used only in
+   * special situations e.g. in the ListModus, where a temporary HistoryData
+   * is constructed from the user input.
+   *
+   * \param[in] history object to be moved from.
+   */
+  void set_history(HistoryData &&history) { history_ = std::move(history); }
+
   /**
    * Store history information
    *
