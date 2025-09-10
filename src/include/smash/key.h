@@ -291,8 +291,8 @@ class Key {
    *
    * @return \c std::string with labels formatted in a compact YAML format.
    */
-  std::string as_yaml(
-      std::optional<default_type> value = std::nullopt) const noexcept {
+  std::string as_yaml([[maybe_unused]] std::optional<default_type> value =
+                          std::nullopt) const noexcept {
     std::stringstream value_as_string{};
     if constexpr (is_writable_to_stream_v<std::stringstream, default_type>) {
       if (value) {
