@@ -273,9 +273,10 @@ TEST(set_existing_value) {
 
 TEST(set_new_value_of_enum_type) {
   Configuration conf = make_test_configuration();
-  const FermiMotion new_value = FermiMotion::On;
-  conf.set_value(InputKeys::modi_collider_fermiMotion, new_value);
-  COMPARE(conf.read(InputKeys::modi_collider_fermiMotion), new_value);
+  const FermiMotion new_value_enum = FermiMotion::On;
+  const auto new_value_string = "on";
+  conf.set_value(InputKeys::modi_collider_fermiMotion, new_value_string);
+  COMPARE(conf.read(InputKeys::modi_collider_fermiMotion), new_value_enum);
   conf.clear();
 }
 
