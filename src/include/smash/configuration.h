@@ -46,7 +46,12 @@ struct convert {
    * \param[in] x Value that is to be converted to a YAML::Node.
    * \return YAML node
    */
-  static Node encode(const T &x) { return Node{static_cast<std::string>(x)}; }
+  static Node encode(const T &x) {
+    static_assert(std::is_convertible_v<T, std::string>,
+                  "Encoding type T to YAML::Node requires T to be convertible "
+                  "to an std::string.");
+    return Node{static_cast<std::string>(x)};
+  }
 
   /**
    * Deserialization: Converts a YAML::Node to any SMASH-readable data type and
