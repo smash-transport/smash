@@ -26,16 +26,6 @@ void FluidizationAction::generate_final_state() {
 }
 
 double FluidizationAction::check_conservation(const uint32_t id_process) const {
-  QuantumNumbers before(incoming_particles_);
-  QuantumNumbers after(outgoing_particles_);
-  if (unlikely(before == after)) {
-    throw std::runtime_error(
-        "Conservation laws obeyed during fluidization, which should not happen "
-        "as particles are removed. Particle was not properly removed in "
-        "process: " +
-        std::to_string(id_process));
-  }
-
   if (unlikely(outgoing_particles_.size() != 0)) {
     throw std::runtime_error(
         "Particle was not removed successfully in fluidization action.");

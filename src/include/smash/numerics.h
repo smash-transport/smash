@@ -10,8 +10,11 @@
 #ifndef SRC_INCLUDE_SMASH_NUMERICS_H_
 #define SRC_INCLUDE_SMASH_NUMERICS_H_
 
+#include <algorithm>
 #include <cmath>
 #include <initializer_list>
+#include <limits>
+#include <type_traits>
 
 #include "constants.h"
 
@@ -21,62 +24,101 @@
  * Generic numerical functions
  *
  * This file collects generic numerical functions such as for
- * approximate equality checks between to floating point values.
+ * approximate equality checks between two floating point values.
  */
+
+namespace details {
+
+/**
+ * \brief Relative (by default) approximate equality for floating-point numbers.
+ *
+ * Uses the **maximum magnitude** as scale:
+ * \f[
+ *   |a - b| \le \text{rel\_tol} \cdot \max(|a|, |b|)
+ * \f]
+ *
+ * If \p abs_tol > 0, uses a mixed criterion:
+ * \f[
+ *   |a - b| \le \max\!\Big(\text{abs\_tol},\ \text{rel\_tol} \cdot \max(|a|,
+ * |b|)\Big). \f]
+ *
+ * - Fast-path equality returns true (also handles +0 == -0 and equal
+ * infinities).
+ * - If either operand is non-finite (NaN or infinity) and not equal by the fast
+ * path, returns false.
+ */
+template <typename Float,
+          typename = std::enable_if_t<std::is_floating_point_v<Float>>>
+bool almost_equal_knuthish(Float a, Float b, Float rel_tol,
+                           Float abs_tol = Float(0)) noexcept {
+  if (a == b)
+    return true;
+
+  if constexpr (std::numeric_limits<Float>::is_iec559) {
+    if (!std::isfinite(a) || !std::isfinite(b))
+      return false;
+  }
+
+  const Float a_abs = std::abs(a);
+  const Float b_abs = std::abs(b);
+  const Float diff = std::abs(a - b);
+  const Float scale = std::max(a_abs, b_abs);
+  const Float rlimit = rel_tol * scale;
+
+  if (abs_tol > Float(0)) {
+    return diff <= std::max(abs_tol, rlimit);
+  }
+  return diff <= rlimit;
+}
+
+}  // namespace details
 
 namespace smash {
+
 /**
- * Checks two numbers for relative approximate equality.
+ * \brief Checks two numbers for **relative-only** approximate equality.
  *
- * \tparam N Number type.
- * \param x Left-hand side.
- * \param y Right-hand side.
- * \return true if the difference between x and y is less than or equal to
- * \f$\delta = \f$smash::really_small or that times the average of
- * \f$|x|\f$ and \f$|y|\f$:
+ * Pure relative criterion using \c smash::really_small and the max-magnitude
+ * scale: \f[ |x - y| \le \texttt{smash::really\_small} \cdot \max(|x|, |y|).
+ * \f]
  *
- * \f[|x - y| \stackrel{?}{\le} \delta \mbox{ or } |x - y|
- * \stackrel{?}{\le} \frac{|x| + |y|}{2} \cdot \delta\f]
- *
- * \see smash::really_small
+ * \note No absolute floor is used.
  */
-template <typename N>
-bool almost_equal(const N x, const N y) {
-  return (std::abs(x - y) <= N(really_small) ||
-          std::abs(x - y) <=
-              N(0.5 * really_small) * (std::abs(x) + std::abs(y)));
-}
-/**
- * Same as smash::almost_equal, but for physical checks like energy-momentum
- * conservation small_number is enough precision-wise
- *
- * \tparam N Number type.
- * \param x Left-hand side.
- * \param y Right-hand side.
- * \return true if the difference between x and y is less than or equal to
- * \f$\delta = \f$smash::small_number or that times the average of
- * \f$|x|\f$ and \f$|y|\f$:
- *
- * \see smash::small_number
- * \see smash::almost_equal
- */
-template <typename N>
-bool almost_equal_physics(const N x, const N y) {
-  return (std::abs(x - y) <= N(small_number) ||
-          std::abs(x - y) <=
-              N(0.5 * small_number) * (std::abs(x) + std::abs(y)));
+template <typename Float,
+          typename = std::enable_if_t<std::is_floating_point_v<Float>>>
+bool almost_equal(Float x, Float y) {
+  return details::almost_equal_knuthish<Float>(
+      x, y, static_cast<Float>(really_small), static_cast<Float>(0));
 }
 
 /**
- * This function iterates through the elements of a collection and checks if any
- * of them is NaN using the \c std::isnan function. NaN is a special
- * floating-point value that represents undefined or unrepresentable values.
+ * \brief Like smash::almost_equal but with an **absolute floor** = \c
+ * smash::small_number.
  *
- * \tparam T The type of the collection. It can be any iterable container of
- *         numeric values.
- * \param collection The collection to be checked for NaN
- *        values.
- * \return \c true if any element in the collection is NaN, \c false otherwise
+ * Mixed criterion with max-magnitude scaling:
+ * \f[
+ *   |x - y| \le \max\!\Big(\texttt{smash::small\_number},\
+ *                           \texttt{smash::small\_number} \cdot \max(|x|,
+ * |y|)\Big). \f]
+ */
+template <typename Float,
+          typename = std::enable_if_t<std::is_floating_point_v<Float>>>
+bool almost_equal_physics(Float x, Float y) {
+  const auto eps = static_cast<Float>(small_number);
+  return details::almost_equal_knuthish<Float>(x, y, eps, eps);
+}
+
+/**
+ * \brief Returns whether any element in a collection is NaN.
+ *
+ * This function iterates through the elements of a collection and checks if any
+ * of them is NaN using \c std::isnan. NaN is a special floating-point value
+ * that represents undefined or unrepresentable values.
+ *
+ * \tparam T Iterable container of numeric values (defaults to \c
+ * std::initializer_list<double>). \param collection The collection to be
+ * checked for NaN values. \return \c true if any element in the collection is
+ * NaN, \c false otherwise.
  */
 template <typename T = std::initializer_list<double>>
 bool is_any_nan(const T& collection) {

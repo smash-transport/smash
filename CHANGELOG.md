@@ -19,6 +19,13 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+## SMASH-3.2.2
+Date: ???
+
+### Changed
+* Bug related to energy-momentum conservartion check at high energies fixed
+* Removed absolute tolerance in float comparision method `almost_equal`
+
 ## SMASH-3.2.1
 Date: 2025-07-08
 
