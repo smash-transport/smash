@@ -287,6 +287,19 @@ TEST(set_new_value_of_vector_type) {
   conf.clear();
 }
 
+TEST(set_new_value_of_bitset_type) {
+  Configuration conf = make_test_configuration();
+  const std::vector<IncludedReactions> new_value = {IncludedReactions::Elastic,
+                                                    IncludedReactions::NNbar};
+  ReactionsBitSet bits{};
+  for (auto e : new_value) {
+    bits.set(e);
+  }
+  conf.set_value(InputKeys::collTerm_includedTwoToTwo, bits);
+  COMPARE(conf.read(InputKeys::collTerm_includedTwoToTwo), bits);
+  conf.clear();
+}
+
 TEST(set_new_value_on_non_empty_conf) {
   Configuration conf = make_test_configuration();
   const auto key = get_key<double>({"Test"});
