@@ -28,6 +28,7 @@
 #include "cxx17compat.h"
 #include "forwarddeclarations.h"
 #include "key.h"
+#include "stringify.h"
 
 namespace YAML {
 
@@ -47,10 +48,14 @@ struct convert {
    * \return YAML node
    */
   static Node encode(const T &x) {
-    static_assert(std::is_convertible_v<T, std::string>,
-                  "Encoding type T to YAML::Node requires T to be convertible "
-                  "to an std::string.");
-    return Node{static_cast<std::string>(x)};
+    if constexpr (std::is_convertible_v<T, std::string>) {
+      return Node{static_cast<std::string>(x)};
+    } else {
+      static_assert(smash::has_to_string_v<T>,
+                    "Encoding type T to YAML::Node requires an overload of "
+                    "smash::to_string(T) to convert T to an std::string.");
+      return Node{smash::to_string(x)};
+    }
   }
 
   /**
@@ -73,34 +78,6 @@ struct convert {
 }  // namespace YAML
 
 namespace smash {
-
-namespace detail {
-
-/**
- * Type trait to infer if a key type should be considered in the
- * Configuration::set_value overload to set YAML::Node values using a plain
- * string. At the moment only \c enum types have a \c value member set to true.
- *
- * \tparam T The type to be tested.
- *
- * \note This is a customization point for client code using SMASH as a library,
- *       since it is always possible to add more specializations of the template
- *       to let more types be settable using a plain string. This is also the
- *       reason why this trait has not been implemented inside the Configuration
- *       class.
- */
-template <typename T>
-struct must_be_settable_from_string_in_configuration
-    : std::bool_constant<std::is_enum_v<T>> {};
-
-/**
- * Helper alias which is common to be defined next to a type trait.
- */
-template <typename T>
-inline constexpr bool must_be_settable_from_string_in_configuration_v =
-    must_be_settable_from_string_in_configuration<T>::value;
-
-}  // namespace detail
 
 /*!\Userguide
  * \page doxypage_input_particles
@@ -674,11 +651,7 @@ class Configuration {
    * \tparam U The type of the key value. This is by default \c T but
    *           it has been allowed to be different from it, as long as it is
    *           convertible to T. This enables e.g. to set a key with a string
-   *           value using a <tt>const char*</tt> second argument. This template
-   *           is excluded from overload resolution if the type \c U is one of
-   *           those that should be settable from a plain string.
-   *
-   * \see detail::must_be_settable_from_string_in_configuration
+   *           value using a <tt>const char*</tt> second argument.
    *
    * \attention This method creates a new entry in the configuration if the
    *            passed key is not yet existing in it.
@@ -688,39 +661,11 @@ class Configuration {
    *       type and \c T might be deduced to a constant and/or reference type.
    */
   template <typename T, typename U = remove_cvref_t<T>,
-            typename std::enable_if_t<
-                !detail::must_be_settable_from_string_in_configuration_v<U> &&
-                    std::is_convertible_v<T, U>,
-                bool> = true>
+            typename std::enable_if_t<std::is_convertible_v<T, U>, bool> = true>
   void set_value(Key<U> key, T &&value) {
     auto node = find_node_creating_it_if_not_existing(
         {key.labels().begin(), key.labels().end()});
     node = std::forward<T>(value);
-  }
-
-  /**
-   * Overwrite the value of the YAML node corresponding to the specified key
-   * using an <tt>std::string</tt> independently from the key type.
-   *
-   * \see set_value for the parameters description.
-   * \see detail::must_be_settable_from_string_in_configuration for more
-   *      information about to which types this overload applies.
-   *
-   * \warning The new value passed to this method is not validated and it is the
-   *          caller responsibility to ensure its validity.
-   *
-   * \note If client code needs this method to apply to more types, it is always
-   *       possible to add specializations of the used type trait
-   *       <tt>detail::must_be_settable_from_string_in_configuration</tt>.
-   */
-  template <typename U,
-            typename std::enable_if_t<
-                detail::must_be_settable_from_string_in_configuration_v<U>,
-                bool> = true>
-  void set_value(Key<U> key, const std::string &value) {
-    auto node = find_node_creating_it_if_not_existing(
-        {key.labels().begin(), key.labels().end()});
-    node = value;
   }
 
   /**
