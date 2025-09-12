@@ -256,6 +256,7 @@ set(smash_src
     sha256.cc
     spheremodus.cc
     stringfunctions.cc
+    stringify.cc
     tabulation.cc
     thermalizationaction.cc
     thermodynamiclatticeoutput.cc

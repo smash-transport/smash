@@ -566,10 +566,11 @@ following way:
 
 * If the key has not a C++ built-in type, add a new `enum class` to
   _forwarddeclarations.h_ for the new key type.
-* Add `Configuration::Value` cast operator overload.
+* If the key requires a new `enum`, add `Configuration::Value` cast operator overload.
 * Declare the new key in the _input_keys.h_ file according to the
   instructions you find in the documentation of the `InputKeys` class.
   Doing so you will also add the needed description for the User Guide.
+* If the key requires a new `enum`, add a `to_string(...)` overload to convert the `enum` to a `std::string`.
 
 
 ### Code formatting with used utilities

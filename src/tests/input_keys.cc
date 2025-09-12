@@ -11,6 +11,8 @@
 
 #include "smash/input_keys.h"
 
+#include "smash/stringify.h"
+
 using namespace smash;
 
 TEST(get_logging_key) {
