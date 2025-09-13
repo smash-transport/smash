@@ -11,6 +11,7 @@
 
 #include <stdexcept>
 #include <string_view>
+#include <vector>
 
 namespace smash {
 
@@ -19,49 +20,6 @@ static void throw_unhandled_enum(std::string_view enum_name, int value) {
   throw std::invalid_argument("Unhandled " + std::string(enum_name) +
                               " enum value " + std::to_string(value) +
                               " passed to conversion function to_string().");
-}
-
-std::string to_string(IncludedReactions reaction) {
-  switch (reaction) {
-    case IncludedReactions::All:
-      return "All";
-    case IncludedReactions::Elastic:
-      return "Elastic";
-    case IncludedReactions::NN_to_NR:
-      return "NN_to_NR";
-    case IncludedReactions::NN_to_DR:
-      return "NN_to_DR";
-    case IncludedReactions::KN_to_KN:
-      return "KN_to_KN";
-    case IncludedReactions::KN_to_KDelta:
-      return "KN_to_KDelta";
-    case IncludedReactions::Strangeness_exchange:
-      return "Strangeness_exchange";
-    case IncludedReactions::NNbar:
-      return "NNbar";
-    case IncludedReactions::PiDeuteron_to_NN:
-      return "PiDeuteron_to_NN";
-    case IncludedReactions::PiDeuteron_to_pidprime:
-      return "PiDeuteron_to_pidprime";
-    case IncludedReactions::NDeuteron_to_Ndprime:
-      return "NDeuteron_to_Ndprime";
-  }
-  throw_unhandled_enum("IncludedReactions", static_cast<int>(reaction));
-}
-
-std::string to_string(IncludedMultiParticleReactions reaction) {
-  switch (reaction) {
-    case IncludedMultiParticleReactions::Meson_3to1:
-      return "Meson_3to1";
-    case IncludedMultiParticleReactions::Deuteron_3to2:
-      return "Deuteron_3to2";
-    case IncludedMultiParticleReactions::NNbar_5to2:
-      return "NNbar_5to2";
-    case IncludedMultiParticleReactions::A3_Nuclei_4to2:
-      return "A3_Nuclei_4to2";
-  }
-  throw_unhandled_enum("IncludedMultiParticleReactions",
-                       static_cast<int>(reaction));
 }
 
 std::string to_string(ThermodynamicQuantity quantity) {
@@ -314,22 +272,6 @@ std::string to_string(OutputOnlyFinal o) {
   throw_unhandled_enum("OutputOnlyFinal", static_cast<int>(o));
 }
 
-std::string to_string(IncludedFluidizableProcesses p) {
-  switch (p) {
-    case IncludedFluidizableProcesses::From_Elastic:
-      return "Elastic";
-    case IncludedFluidizableProcesses::From_Decay:
-      return "Decay";
-    case IncludedFluidizableProcesses::From_Inelastic:
-      return "Inelastic";
-    case IncludedFluidizableProcesses::From_SoftString:
-      return "SoftString";
-    case IncludedFluidizableProcesses::From_HardString:
-      return "HardString";
-  }
-  throw_unhandled_enum("IncludedFluidizableProcesses", static_cast<int>(p));
-}
-
 std::string to_string(einhard::LogLevel level) {
   switch (level) {
     case einhard::LogLevel::ALL:
@@ -349,7 +291,60 @@ std::string to_string(einhard::LogLevel level) {
     case einhard::LogLevel::OFF:
       return "OFF";
   }
-  throw_unhandled_enum("IncludedFluidizableProcesses", static_cast<int>(level));
+  throw_unhandled_enum("einhard::LogLevel", static_cast<int>(level));
+}
+
+std::vector<std::string> to_string(const ReactionsBitSet &s) {
+  std::vector<std::string> result{};
+  if (s.test(IncludedReactions::Elastic))
+    result.push_back("Elastic");
+  if (s.test(IncludedReactions::NN_to_NR))
+    result.push_back("NN_to_NR");
+  if (s.test(IncludedReactions::NN_to_DR))
+    result.push_back("NN_to_DR");
+  if (s.test(IncludedReactions::KN_to_KN))
+    result.push_back("KN_to_KN");
+  if (s.test(IncludedReactions::KN_to_KDelta))
+    result.push_back("KN_to_KDelta");
+  if (s.test(IncludedReactions::Strangeness_exchange))
+    result.push_back("Strangeness_exchange");
+  if (s.test(IncludedReactions::NNbar))
+    result.push_back("NNbar");
+  if (s.test(IncludedReactions::PiDeuteron_to_NN))
+    result.push_back("PiDeuteron_to_NN");
+  if (s.test(IncludedReactions::PiDeuteron_to_pidprime))
+    result.push_back("PiDeuteron_to_pidprime");
+  if (s.test(IncludedReactions::NDeuteron_to_Ndprime))
+    result.push_back("NDeuteron_to_Ndprime");
+  return result;
+}
+
+std::vector<std::string> to_string(const MultiParticleReactionsBitSet &s) {
+  std::vector<std::string> result{};
+  if (s.test(IncludedMultiParticleReactions::Meson_3to1))
+    result.push_back("Meson_3to1");
+  if (s.test(IncludedMultiParticleReactions::Deuteron_3to2))
+    result.push_back("Deuteron_3to2");
+  if (s.test(IncludedMultiParticleReactions::NNbar_5to2))
+    result.push_back("NNbar_5to2");
+  if (s.test(IncludedMultiParticleReactions::A3_Nuclei_4to2))
+    result.push_back("A3_Nuclei_4to2");
+  return result;
+}
+
+std::vector<std::string> to_string(const FluidizableProcessesBitSet &s) {
+  std::vector<std::string> result{};
+  if (s.test(IncludedFluidizableProcesses::From_Elastic))
+    result.push_back("Elastic");
+  if (s.test(IncludedFluidizableProcesses::From_Decay))
+    result.push_back("Decay");
+  if (s.test(IncludedFluidizableProcesses::From_Inelastic))
+    result.push_back("Inelastic");
+  if (s.test(IncludedFluidizableProcesses::From_SoftString))
+    result.push_back("SoftString");
+  if (s.test(IncludedFluidizableProcesses::From_HardString))
+    result.push_back("HardString");
+  return result;
 }
 
 }  // namespace smash

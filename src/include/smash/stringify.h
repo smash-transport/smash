@@ -11,33 +11,13 @@
 #define SRC_INCLUDE_SMASH_STRINGIFY_H_
 
 #include <string>
+#include <vector>
 
 #include "einhard.hpp"
 
 #include "forwarddeclarations.h"
 
 namespace smash {
-
-/**
- * Convert an IncludedReactions enum value to its corresponding string.
- *
- * \param[in] reaction The IncludedReactions enum value to convert.
- *
- * \return std::string Corresponding string representation.
- * \throws std::invalid_argument If the enum value is unhandled.
- */
-std::string to_string(IncludedReactions reaction);
-
-/**
- * Convert an IncludedMultiParticleReactions enum value to its corresponding
- * string.
- *
- * \param[in] reaction The IncludedMultiParticleReactions enum value to convert.
- *
- * \return std::string Corresponding string representation.
- * \throws std::invalid_argument If the enum value is unhandled.
- */
-std::string to_string(IncludedMultiParticleReactions reaction);
 
 /**
  * Convert a ThermodynamicQuantity enum value to its corresponding string.
@@ -230,17 +210,6 @@ std::string to_string(FluidizationType f);
 std::string to_string(OutputOnlyFinal o);
 
 /**
- * Convert an IncludedFluidizableProcesses enum value to its corresponding
- * string.
- *
- * \param[in] p The IncludedFluidizableProcesses enum value to convert.
- *
- * \return std::string Corresponding string representation.
- * \throws std::invalid_argument If the enum value is unhandled.
- */
-std::string to_string(IncludedFluidizableProcesses p);
-
-/**
  * Convert a LogLevel enum value to its corresponding string.
  *
  * \param[in] level The LogLevel enum value to convert.
@@ -249,6 +218,35 @@ std::string to_string(IncludedFluidizableProcesses p);
  * \throws std::invalid_argument If the enum value is unhandled.
  */
 std::string to_string(einhard::LogLevel level);
+
+/**
+ * Convert a ReactionsBitSet to a vector of strings for all set reactions.
+ *
+ * \param[in] s The ReactionsBitSet to convert.
+ *
+ * \return std::vector<std::string> Vector of all set reaction names.
+ */
+std::vector<std::string> to_string(const ReactionsBitSet &s);
+
+/**
+ * Convert a MultiParticleReactionsBitSet to a vector of strings for all set
+ * reactions.
+ *
+ * \param[in] s The MultiParticleReactionsBitSet to convert.
+ *
+ * \return std::vector<std::string> Vector of all set reaction names.
+ */
+std::vector<std::string> to_string(const MultiParticleReactionsBitSet &s);
+
+/**
+ * Convert a FluidizableProcessesBitSet to a vector of strings for all set
+ * processes.
+ *
+ * \param[in] s The FluidizableProcessesBitSet to convert.
+ *
+ * \return std::vector<std::string> Vector of all set process names.
+ */
+std::vector<std::string> to_string(const FluidizableProcessesBitSet &s);
 
 }  // namespace smash
 
