@@ -80,8 +80,8 @@ jobs:
           export PATH=${TOOLS_DIR}/bin:${TOOLS_DIR}/python-tools/bin/:${PATH}
           export LD_LIBRARY_PATH=${TOOLS_DIR}/pythia8315/lib:${LD_LIBRARY_PATH}
           export PYTHONPATH=${TOOLS_DIR}/python-tools:${PYTHONPATH}
-          export CC=gcc-11
-          export CXX=g++-11
+          export CC=gcc-13
+          export CXX=g++-13
           # preliminarily, we check if the code is well formatted
           cd ${SMASH_ROOT}
           ./bin/codebase-format-helper.bash C++ -t
