@@ -25,7 +25,8 @@ void FluidizationAction::generate_final_state() {
   outgoing_particles_ = {};
 }
 
-double FluidizationAction::check_conservation(const uint32_t id_process) const {
+double FluidizationAction::check_conservation(
+    [[maybe_unused]] const uint32_t id_process) const {
   if (unlikely(outgoing_particles_.size() != 0)) {
     throw std::runtime_error(
         "Particle was not removed successfully in fluidization action.");

@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_NUMERICS_H_
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <initializer_list>
 #include <limits>
@@ -27,85 +28,79 @@
  * approximate equality checks between two floating point values.
  */
 
-namespace details {
-
-/**
- * \brief Relative (by default) approximate equality for floating-point numbers.
- *
- * Uses the **maximum magnitude** as scale:
- * \f[
- *   |a - b| \le \text{rel\_tol} \cdot \max(|a|, |b|)
- * \f]
- *
- * If \p abs_tol > 0, uses a mixed criterion:
- * \f[
- *   |a - b| \le \max\!\Big(\text{abs\_tol},\ \text{rel\_tol} \cdot \max(|a|,
- * |b|)\Big). \f]
- *
- * - Fast-path equality returns true (also handles +0 == -0 and equal
- * infinities).
- * - If either operand is non-finite (NaN or infinity) and not equal by the fast
- * path, returns false.
- */
-template <typename Float,
-          typename = std::enable_if_t<std::is_floating_point_v<Float>>>
-bool almost_equal_knuthish(Float a, Float b, Float rel_tol,
-                           Float abs_tol = Float(0)) noexcept {
-  if (a == b)
-    return true;
-
-  if constexpr (std::numeric_limits<Float>::is_iec559) {
-    if (!std::isfinite(a) || !std::isfinite(b))
-      return false;
-  }
-
-  const Float a_abs = std::abs(a);
-  const Float b_abs = std::abs(b);
-  const Float diff = std::abs(a - b);
-  const Float scale = std::max(a_abs, b_abs);
-  const Float rlimit = rel_tol * scale;
-
-  if (abs_tol > Float(0)) {
-    return diff <= std::max(abs_tol, rlimit);
-  }
-  return diff <= rlimit;
-}
-
-}  // namespace details
-
 namespace smash {
 
+namespace detail {
+
 /**
- * \brief Checks two numbers for **relative-only** approximate equality.
+ * Compare whether two floating-point numbers are approximately equal à la Knuth
+ * up to a given tolerance. On top of Knuth's tolerance predicate some corner
+ * cases are treated and the caller can specify a threshold as last parameter to
+ * make the test consider numbers equal if the absolute value of their
+ * difference is below of it.
  *
- * Pure relative criterion using \c smash::really_small and the max-magnitude
- * scale: \f[ |x - y| \le \texttt{smash::really\_small} \cdot \max(|x|, |y|).
- * \f]
+ * \param[in] x First of the two numbers.
+ * \param[in] y Second of the two numbers.
+ * \param[in] epsilon The relative tolerance for the test.
+ * \param[in] threshold Threshold for the number comparison. By default this is
+ * zero, implying no threshold is considered.
  *
- * \note No absolute floor is used.
+ * \return \c false if either \c x or \c y is not a finite number, provided that
+ * the type supports non-numeric representations (i.e. is infinite or NAN);
+ * \return \c true if <tt>x == y</tt>;
+ * \return \c true if <tt>x == 0</tt> and if \f$ |x| \le \varepsilon\f$;
+ * \return \c true if <tt>y == 0</tt> and if \f$ |y| \le \varepsilon\f$;
+ * \return \c true if \f$ |x - y| \le M_\mathrm{threshold} \f$;
+ * \return \c true if \f$ |x - y| \le \varepsilon \cdot \max(|x|, |y|) \f$
+ * (Knuth's tolerance predicate);
+ * \return \c false otherwise.
  */
-template <typename Float,
-          typename = std::enable_if_t<std::is_floating_point_v<Float>>>
-bool almost_equal(Float x, Float y) {
-  return details::almost_equal_knuthish<Float>(
-      x, y, static_cast<Float>(really_small), static_cast<Float>(0));
+template <typename N, typename = std::enable_if_t<std::is_floating_point_v<N>>>
+bool almost_equal_knuthish(const N x, const N y, const N epsilon,
+                           const N threshold = N{0.0}) noexcept {
+  assert(epsilon > 0);
+  assert(threshold >= 0);
+  if constexpr (std::numeric_limits<N>::is_iec559) {
+    if (!std::isfinite(x) || !std::isfinite(y)) {
+      return false;
+    }
+  }
+  if (x == y)
+    return true;
+  else if (x == 0)
+    return std::abs(y) <= epsilon;
+  else if (y == 0)
+    return std::abs(x) <= epsilon;
+  else
+    return std::abs(x - y) <= threshold ||
+           std::abs(x - y) <= epsilon * std::max(std::abs(x), std::abs(y));
+}
+
+}  // namespace detail
+
+/**
+ * Checks whether two floating-point numbers are almost equal. This is done
+ * using \c smash::really_small as relative tolerance. All numbers are tested
+ * for equality, no matter which order of magnitude they have.
+ *
+ * \see detail::almost_equal_knuthish for more information.
+ */
+template <typename N, typename = std::enable_if_t<std::is_floating_point_v<N>>>
+bool almost_equal(const N x, const N y) {
+  return detail::almost_equal_knuthish<N>(x, y, static_cast<N>(really_small));
 }
 
 /**
- * \brief Like smash::almost_equal but with an **absolute floor** = \c
- * smash::small_number.
- *
- * Mixed criterion with max-magnitude scaling:
- * \f[
- *   |x - y| \le \max\!\Big(\texttt{smash::small\_number},\
- *                           \texttt{smash::small\_number} \cdot \max(|x|,
- * |y|)\Big). \f]
+ * Like \c smash::almost_equal, but using a less strict tolerance,
+ * <tt>smash::small_number</tt>. Furthermore, numbers smaller than a given
+ * threshold, <tt>smash::really_small</tt>, are now considered equal (in the
+ * sense that, for SMASH physics, their difference has no physical effect).
  */
-template <typename Float,
-          typename = std::enable_if_t<std::is_floating_point_v<Float>>>
-bool almost_equal_physics(Float x, Float y) {
-  const auto eps = static_cast<Float>(small_number);
-  return details::almost_equal_knuthish<Float>(x, y, eps, eps);
+template <typename N, typename = std::enable_if_t<std::is_floating_point_v<N>>>
+bool almost_equal_physics(const N x, const N y) {
+  const auto threshold = static_cast<N>(really_small);
+  const auto epsilon = static_cast<N>(small_number);
+  return detail::almost_equal_knuthish<N>(x, y, epsilon, threshold);
 }
 
 /**
@@ -116,9 +111,11 @@ bool almost_equal_physics(Float x, Float y) {
  * that represents undefined or unrepresentable values.
  *
  * \tparam T Iterable container of numeric values (defaults to \c
- * std::initializer_list<double>). \param collection The collection to be
- * checked for NaN values. \return \c true if any element in the collection is
- * NaN, \c false otherwise.
+ * std::initializer_list<double>).
+ * \param[in] collection The collection to be checked for NaN values.
+ *
+ * \return \c true if any element in the collection is NaN,
+ * \return \c false otherwise.
  */
 template <typename T = std::initializer_list<double>>
 bool is_any_nan(const T& collection) {

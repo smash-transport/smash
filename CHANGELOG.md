@@ -19,12 +19,11 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
-## SMASH-3.2.2
-Date: ???
+### Fixed
+* Fix too strict energy-momentum conservation leading to failures at high energies
 
 ### Changed
-* Bug related to energy-momentum conservartion check at high energies fixed
-* Removed absolute tolerance in float comparision method `almost_equal`
+* The `almost_equal` and `almost_equal_physics` functions to compare floating point numbers have been improved to perform a relative comparison à la Knuth (the latter considers numbers below a given threshold as equal).
 
 ## SMASH-3.2.1
 Date: 2025-07-08
