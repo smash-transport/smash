@@ -271,6 +271,35 @@ TEST(set_existing_value) {
   conf.clear();
 }
 
+TEST(set_new_value_of_enum_type) {
+  Configuration conf = make_test_configuration();
+  const FermiMotion new_value = FermiMotion::On;
+  conf.set_value(InputKeys::modi_collider_fermiMotion, new_value);
+  COMPARE(conf.read(InputKeys::modi_collider_fermiMotion), new_value);
+  conf.clear();
+}
+
+TEST(set_new_value_of_vector_type) {
+  Configuration conf = make_test_configuration();
+  const std::vector<double> new_value = {1.2, 2.3, 3.4};
+  conf.set_value(InputKeys::output_outputTimes, new_value);
+  COMPARE(conf.read(InputKeys::output_outputTimes), new_value);
+  conf.clear();
+}
+
+TEST(set_new_value_of_bitset_type) {
+  Configuration conf = make_test_configuration();
+  const std::vector<IncludedReactions> new_value = {IncludedReactions::Elastic,
+                                                    IncludedReactions::NNbar};
+  ReactionsBitSet bits{};
+  for (auto e : new_value) {
+    bits.set(e);
+  }
+  conf.set_value(InputKeys::collTerm_includedTwoToTwo, bits);
+  COMPARE(conf.read(InputKeys::collTerm_includedTwoToTwo), bits);
+  conf.clear();
+}
+
 TEST(set_new_value_on_non_empty_conf) {
   Configuration conf = make_test_configuration();
   const auto key = get_key<double>({"Test"});

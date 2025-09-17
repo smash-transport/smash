@@ -89,8 +89,8 @@ enum class DerivativesMode {
 };
 
 /**
- * Modes of calculating the gradients: whether to calculate the rest frame
- * density derivatives.
+ * This enum is here only to serve InputKeys class, but it is unused and
+ * referring to a removed SMASH input key.
  */
 enum class RestFrameDensityDerivativesMode {
   On,
