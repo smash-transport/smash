@@ -36,7 +36,10 @@ std::string QuantumNumbers::report_deviations(const QuantumNumbers& rhs) const {
        mu < 4; ++here_iter, ++rhs_iter, ++mu) {
     if (!almost_equal_physics(*here_iter, *rhs_iter)) {
       error_msg << " P_" << mu << ": " << *here_iter << " vs. " << *rhs_iter
-                << "; Δ = " << (*here_iter - *rhs_iter) << "\n";
+                << "; Δ_abs = " << (*here_iter - *rhs_iter) << "; Δ_rel = "
+                << (*here_iter - *rhs_iter) /
+                       std::max(std::abs(*here_iter), std::abs(*rhs_iter))
+                << "\n";
     }
   }
   if (charge_ != rhs.charge_) {

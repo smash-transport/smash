@@ -204,31 +204,10 @@ class QuantumNumbers {
    * \see FourVector::operator==
    */
   bool operator==(const QuantumNumbers& rhs) const {
-    // clang-format off
-    // invariant mass of the current momentum
-    const double m0_invariant = std::sqrt(std::fabs(momentum_.sqr()));
-    // invariant mass of the momentum to be compared
-    const double m1_invariant = std::sqrt(std::fabs(rhs.momentum_.sqr()));
-    // average invariant mass
-    const double avg_m_inv = 0.5 * (m0_invariant + m1_invariant);
-    // difference in the four-momentum
-    FourVector momentum_diff = momentum_ - rhs.momentum_;
-    /* Check whether momentum is conserved.
-     * The momentum is considered to be conserved when the deviation
-     * is small enough compared to the given invariant mass. */
-    bool momentum_conserved =
-        (std::fabs(momentum_diff.x0()) <= small_number * avg_m_inv &&
-         std::fabs(momentum_diff.x1()) <= small_number * avg_m_inv &&
-         std::fabs(momentum_diff.x2()) <= small_number * avg_m_inv &&
-         std::fabs(momentum_diff.x3()) <= small_number * avg_m_inv);
-    return (momentum_conserved &&
-            charge_ == rhs.charge_ &&
-            isospin3_ == rhs.isospin3_ &&
-            strangeness_ == rhs.strangeness_ &&
-            charmness_ == rhs.charmness_ &&
-            bottomness_ == rhs.bottomness_ &&
+    return (momentum_ == rhs.momentum_ && charge_ == rhs.charge_ &&
+            isospin3_ == rhs.isospin3_ && strangeness_ == rhs.strangeness_ &&
+            charmness_ == rhs.charmness_ && bottomness_ == rhs.bottomness_ &&
             baryon_number_ == rhs.baryon_number_);
-    // clang-format on
   }
   /// Logical complement of QuantumNumbers::operator==.
   bool operator!=(const QuantumNumbers& rhs) const { return !(*this == rhs); }

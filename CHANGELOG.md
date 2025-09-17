@@ -19,6 +19,13 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+### Fixed
+* Fix too strict energy-momentum conservation leading to failures at high energies
+
+### Changed
+* The `almost_equal` and `almost_equal_physics` functions to compare floating point numbers have been improved to perform a relative comparison à la Knuth (the latter considers numbers below a given threshold as equal)
+* Offer conversion to string for all input keys so that, when using SMASH as library, setting `Configuration` key values does not require to implement specializations of the `YAML::convert` class template for key types not convertible to strings
+
 ## SMASH-3.2.1
 Date: 2025-07-08
 
