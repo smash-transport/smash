@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 project(SMASH_as_a_library_example)
 
 # Tell cmake where to find modules (also append ../../cmake for testing)
