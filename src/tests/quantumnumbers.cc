@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2018,2020,2022
+ *    Copyright (c) 2014-2015,2017-2018,2020,2022,2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -95,14 +95,14 @@ TEST(difference) {
 TEST(report_deviations) {
   FourVector P(1, 2, 3, 4);
   FourVector Q(2, 3, 4, 4);
-  // FourVector Q(1,2,4,4);
   QuantumNumbers A(P, 5, 6, 7, 8, 9, 0);
   QuantumNumbers H(Q, 5, 6, 1, -8, 12358, -15);
+  // clang-format off
   COMPARE(A.report_deviations(H),
           "Deviation in Four-Momentum:\n"
-          " P_0: 1.000000e+00 vs. 2.000000e+00; Δ = -1.000000e+00\n"
-          " P_1: 2.000000e+00 vs. 3.000000e+00; Δ = -1.000000e+00\n"
-          " P_2: 3.000000e+00 vs. 4.000000e+00; Δ = -1.000000e+00\n"
+          " P_0: 1.000000e+00 vs. 2.000000e+00; Δ_abs = -1.000000e+00; Δ_rel = -5.000000e-01\n"
+          " P_1: 2.000000e+00 vs. 3.000000e+00; Δ_abs = -1.000000e+00; Δ_rel = -3.333333e-01\n"
+          " P_2: 3.000000e+00 vs. 4.000000e+00; Δ_abs = -1.000000e+00; Δ_rel = -2.500000e-01\n"
           "Deviation in Strangeness:\n"
           " 7 vs. 1\n"
           "Deviation in Charmness:\n"
@@ -111,6 +111,7 @@ TEST(report_deviations) {
           " 9 vs. 12358\n"
           "Deviation in Baryon Number:\n"
           " 0 vs. -15\n");
+  // clang-format on
   // small deviation in FourVector should satisfy ==:
   FourVector R(2 + 2e-13, 3, 4, 4);
   QuantumNumbers J(R, 5, 6, 1, -8, 12358, -15);
@@ -166,13 +167,13 @@ TEST(count_from_particles) {
   QuantumNumbers check4(P + Q + R + S, 2, 5, -1, 0, 1, 0);
   std::printf("%s", check4.report_deviations(four).c_str());
   COMPARE(four, check4);
-
+  // clang-format off
   COMPARE(three.report_deviations(list),
           "Deviation in Four-Momentum:\n"
-          " P_0: 6.000000e+00 vs. 0.000000e+00; Δ = 6.000000e+00\n"
-          " P_1: 9.000000e+00 vs. 0.000000e+00; Δ = 9.000000e+00\n"
-          " P_2: 1.200000e+01 vs. 0.000000e+00; Δ = 1.200000e+01\n"
-          " P_3: 1.500000e+01 vs. 0.000000e+00; Δ = 1.500000e+01\n"
+          " P_0: 6.000000e+00 vs. 0.000000e+00; Δ_abs = 6.000000e+00; Δ_rel = 1.000000e+00\n"
+          " P_1: 9.000000e+00 vs. 0.000000e+00; Δ_abs = 9.000000e+00; Δ_rel = 1.000000e+00\n"
+          " P_2: 1.200000e+01 vs. 0.000000e+00; Δ_abs = 1.200000e+01; Δ_rel = 1.000000e+00\n"
+          " P_3: 1.500000e+01 vs. 0.000000e+00; Δ_abs = 1.500000e+01; Δ_rel = 1.000000e+00\n"
           "Deviation in Charge:\n"
           " 3 vs. 2\n"
           "Deviation in Charmness:\n"
@@ -181,4 +182,5 @@ TEST(count_from_particles) {
           " 0 vs. 1\n"
           "Deviation in Baryon Number:\n"
           " 1 vs. 0\n");
+  // clang-format on
 }

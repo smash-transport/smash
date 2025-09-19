@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 # The name, version and language of our project
-project(SMASH VERSION 3.2.1 LANGUAGES CXX)
+project(SMASH VERSION 3.2.2 LANGUAGES CXX)
 set(SMASH_VERSION "${SMASH_VERSION}-next")
 
 # Fail if cmake is called in the source directory
