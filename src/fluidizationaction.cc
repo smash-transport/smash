@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022-2024
+ *    Copyright (c) 2022-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -25,17 +25,8 @@ void FluidizationAction::generate_final_state() {
   outgoing_particles_ = {};
 }
 
-double FluidizationAction::check_conservation(const uint32_t id_process) const {
-  QuantumNumbers before(incoming_particles_);
-  QuantumNumbers after(outgoing_particles_);
-  if (unlikely(before == after)) {
-    throw std::runtime_error(
-        "Conservation laws obeyed during fluidization, which should not happen "
-        "as particles are removed. Particle was not properly removed in "
-        "process: " +
-        std::to_string(id_process));
-  }
-
+double FluidizationAction::check_conservation(
+    [[maybe_unused]] const uint32_t id_process) const {
   if (unlikely(outgoing_particles_.size() != 0)) {
     throw std::runtime_error(
         "Particle was not removed successfully in fluidization action.");

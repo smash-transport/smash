@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2024
+ *    Copyright (c) 2014-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -28,6 +28,7 @@
 #include "cxx17compat.h"
 #include "forwarddeclarations.h"
 #include "key.h"
+#include "stringify.h"
 
 namespace YAML {
 
@@ -46,7 +47,16 @@ struct convert {
    * \param[in] x Value that is to be converted to a YAML::Node.
    * \return YAML node
    */
-  static Node encode(const T &x) { return Node{static_cast<std::string>(x)}; }
+  static Node encode(const T &x) {
+    if constexpr (std::is_convertible_v<T, std::string>) {
+      return Node{static_cast<std::string>(x)};
+    } else {
+      static_assert(smash::has_to_string_v<T>,
+                    "Encoding type T to YAML::Node requires an overload of "
+                    "smash::to_string(T) to convert T to an std::string.");
+      return Node{smash::to_string(x)};
+    }
+  }
 
   /**
    * Deserialization: Converts a YAML::Node to any SMASH-readable data type and

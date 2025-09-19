@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2012-2024
+#    Copyright (c) 2012-2025
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -256,6 +256,7 @@ set(smash_src
     sha256.cc
     spheremodus.cc
     stringfunctions.cc
+    stringify.cc
     tabulation.cc
     thermalizationaction.cc
     thermodynamiclatticeoutput.cc

@@ -1379,11 +1379,20 @@ struct InputKeys {
   /**
    * \see_key{key_gen_rfdd_mode_}
    */
+
+  /*!\Userguide
+   * \page doxypage_input_conf_removed_keys
+   *
+   * \list_removed_key{key_gen_rfdd_mode_,General.Rest_Frame_Density_Derivatives_Mode,3.0}.
+   */
+  /**
+   * \removed_key{key_gen_rfdd_mode_,3.0}
+   */
   inline static const Key<RestFrameDensityDerivativesMode>
       gen_restFrameDensityDerivativeMode{
           InputSections::general + "Rest_Frame_Density_Derivatives_Mode",
           RestFrameDensityDerivativesMode::Off,
-          {"2.1"}};
+          {"2.1", "3.0", "3.0"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -4559,7 +4568,7 @@ struct InputKeys {
    * \optional_key_no_line{key_output_density_type_,Density_Type,string,"none"}
    *
    * Determines which kind of density is printed into the headers of the
-   * collision files. Possible valuesare:
+   * collision files. Possible values are:
    * - `"hadron"` &rarr; Total hadronic density
    * - `"baryon"` &rarr; Net baryon density
    * - `"baryonic isospin"` &rarr; Baryonic isospin density
