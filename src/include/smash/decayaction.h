@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_DECAYACTION_H_
 #define SRC_INCLUDE_SMASH_DECAYACTION_H_
 
+#include <optional>
 #include <utility>
 
 #include "action.h"
@@ -61,7 +62,12 @@ class DecayAction : public Action {
    */
   std::pair<double, double> sample_masses(
       double kinetic_energy_cm) const override;
+  /**
+   * sample the full 2-body phase-space (masses, momenta, angles)
+   * in the center-of-mass frame for the final state particles.
+   */
 
+  void sample_2body_phasespace() override;
   /// Return the total width of the decay process.
   double get_total_weight() const override { return total_width_; }
 
@@ -92,6 +98,15 @@ class DecayAction : public Action {
    * Writes information about this decay action to the \p out stream.
    */
   void format_debug_output(std::ostream &out) const override;
+
+  /**
+   * Sample outgoing particle types, masses and angles
+   * return success of sampling
+   */
+  bool sample_outgoing_particles();
+
+  /// Optional success flag for sampling outgoing particles
+  std::optional<bool> was_phase_space_sampled_as_valid_ = std::nullopt;
 
   /// List of possible decays
   DecayBranchList decay_channels_;

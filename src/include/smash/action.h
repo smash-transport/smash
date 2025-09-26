@@ -451,10 +451,10 @@ class Action {
                              double kinetic_energy_cm);
 
   /**
-   * Sample the full 2-body phase-space (masses, momenta, angles)
+   * sample the full 2-body phase-space (masses, momenta, angles)
    * in the center-of-mass frame for the final state particles.
    */
-  void sample_2body_phasespace();
+  virtual void sample_2body_phasespace();
 
   /**
    * Sample the full n-body phase-space (masses, momenta, angles)
