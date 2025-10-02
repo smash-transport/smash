@@ -4293,7 +4293,8 @@ struct InputKeys {
    * \optional_key_no_line{key_MS_jet_jet_position_,Jet_Position,
    * list of 3 doubles,[0.0\, 0.0\, 0.0]}
    *
-   * Coordinates (x,y,z) \unit{in fm} where the jet particle is positioned.
+   * Coordinates (x,y,z) \unit{in fm} where the jet particle is initially
+   * positioned.
    */
   /**
    * \see_key{key_MS_jet_jet_position_}
@@ -4322,10 +4323,10 @@ struct InputKeys {
    * \optional_key_no_line{key_MS_jet_b2b_separation,Back_To_Back_Separation,
    * double,0.01}
    *
-   * Separation in \unit{in fm} between the back to back jets. Each jet particle
-   * is translated by half of this vector in the appropriate direction. Can only
-   * be used if \ref key_MS_jet_backtoback_ is true. A small value is used by
-   * default to prevent interactions between the jets.
+   * Separation \unit{in fm} between the back to back jets. Each jet particle
+   * is translated by half of this value in the direction of motion. Can only
+   * be used if \ref key_MS_jet_backtoback_ "Back_To_Back" is true. A small
+   * value is used by default to prevent interactions between the jets.
    */
   /**
    * \see_key{key_MS_jet_b2b_separation}

@@ -594,7 +594,7 @@ class PdgCode {
     }
   }
 
-  /// \return whether the hadron has a charm or bottom quark
+  /// \return whether the hadron contains a charm or bottom quark
   inline bool is_heavy_flavor() const {
     return (frac_charm() != 0) || (frac_bottom() != 0);
   }

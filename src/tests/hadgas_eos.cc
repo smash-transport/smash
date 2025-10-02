@@ -42,7 +42,7 @@ TEST(td_simple_gas) {
   std::stringstream expected_values;
   expected_values << std::setprecision(10);
   expected_values
-      << "\nExpected values:\n net_baryon_density net_strange_density "
+      << "\nExpected values:\n " << "net_baryon_density net_strange_density "
          "net_charge_density density pressure energy_density\n";
   expected_values << net_baryon_density << " " << net_strange_density << " "
                   << net_charge_density << " " << density << " " << pressure
