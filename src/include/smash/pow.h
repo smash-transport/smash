@@ -27,17 +27,6 @@ inline constexpr T pow_int(const T base, unsigned const exponent) {
              : base * pow_int(base, exponent - 1);
 }
 
-/**
- * Efficient template for calculating the square.
- * \tparam T Type that implements multiplication.
- * \param[in] base value that gets squared
- * \return result of squaring base
- */
-template <class T>
-inline constexpr T square(const T base) {
-  return pow_int(base, 2);
-}
-
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_POW_H_

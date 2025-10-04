@@ -490,6 +490,33 @@ TEST(frac_charm) {
   COMPARE(omega_bb.frac_charm(), 0);
   COMPARE(deuteron.frac_charm(), 0);
 }
+TEST(heavy_flavor) {
+  COMPARE(electron.is_heavy_flavor(), 0);
+  COMPARE(antimu.is_heavy_flavor(), 0);
+  COMPARE(photon.is_heavy_flavor(), 0);
+  COMPARE(pion.is_heavy_flavor(), 0);
+  COMPARE(K0.is_heavy_flavor(), 0);
+  COMPARE(Kminus.is_heavy_flavor(), 0);
+  COMPARE(dminus.is_heavy_flavor(), 1);
+  COMPARE(bnulls.is_heavy_flavor(), 1);
+  COMPARE(bPcbar.is_heavy_flavor(), 1);
+  COMPARE(eta_pr.is_heavy_flavor(), 0);
+  COMPARE(j_psi.is_heavy_flavor(), 1);
+  COMPARE(proton.is_heavy_flavor(), 0);
+  COMPARE(antidelta.is_heavy_flavor(), 0);
+  COMPARE(sigma.is_heavy_flavor(), 0);
+  COMPARE(lambda.is_heavy_flavor(), 0);
+  COMPARE(antixi.is_heavy_flavor(), 0);
+  COMPARE(omega_bar.is_heavy_flavor(), 0);
+  COMPARE(lambda_c.is_heavy_flavor(), 1);
+  COMPARE(sigma_c_bar.is_heavy_flavor(), 1);
+  COMPARE(xi_c.is_heavy_flavor(), 1);
+  COMPARE(omega_c_bar.is_heavy_flavor(), 1);
+  COMPARE(xi_cc_bar.is_heavy_flavor(), 1);
+  COMPARE(omega_bc.is_heavy_flavor(), 1);
+  COMPARE(omega_bb.is_heavy_flavor(), 1);
+  COMPARE(deuteron.is_heavy_flavor(), 0);
+}
 TEST(charge) {
   COMPARE(electron.charge(), -1);
   COMPARE(antimu.charge(), +1);

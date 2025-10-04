@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2020,2022,2024
+ *    Copyright (c) 2014-2015,2017-2020,2022,2024-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -42,6 +42,15 @@ class ThreeVector {
    * \param[in] y3 value of the third component
    */
   ThreeVector(double y1, double y2, double y3) : x_({y1, y2, y3}) {}
+
+  /**
+   * Constructor for ThreeVector that takes an array of 3 doubles to set up a
+   * ThreeVector with desired values for the components
+   *
+   * \param[in] arr the 3-component array
+   */
+  explicit ThreeVector(std::array<double, 3> arr)
+      : x_({arr[0], arr[1], arr[2]}) {}
 
   /// access the component at offset \p i.
   double &operator[](std::size_t i) { return x_[i]; }

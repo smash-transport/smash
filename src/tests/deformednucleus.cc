@@ -272,7 +272,7 @@ TEST(nucleon_density_norm) {
     // Transform integral from (0, oo) to (0, 1) via r = (1 - t) / t.
     const auto result = integrate(0, 1, -1, 1, [&](double t, double cosx) {
       const double r = (1 - t) / t;
-      return twopi * square(r) * nucl.nucleon_density(r, cosx, 0.0) / square(t);
+      return twopi * r * r * nucl.nucleon_density(r, cosx, 0.0) / (t * t);
     });
     const size_t Z = nucl.number_of_protons(), A = nucl.number_of_particles();
     logg[0].debug() << "Z: " << Z << "  A: " << A << '\n'

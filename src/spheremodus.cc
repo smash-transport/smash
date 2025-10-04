@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2024
+ *    Copyright (c) 2012-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -45,6 +45,8 @@ SphereModus::SphereModus(Configuration modus_config,
       mub_(modus_config.take(InputKeys::modi_sphere_baryonChemicalPotential)),
       mus_(modus_config.take(InputKeys::modi_sphere_strangeChemicalPotential)),
       muq_(modus_config.take(InputKeys::modi_sphere_chargeChemicalPotential)),
+      hf_multiplier_(
+          modus_config.take(InputKeys::modi_sphere_heavyFlavorMultiplier)),
       account_for_resonance_widths_(
           modus_config.take(InputKeys::modi_sphere_accountResonanceWidths)),
       init_multipl_(use_thermal_
@@ -64,8 +66,20 @@ SphereModus::SphereModus(Configuration modus_config,
                    ? make_optional<PdgCode>(
                          modus_config.take(InputKeys::modi_sphere_jet_jetPdg))
                    : std::nullopt),
-
-      jet_mom_(modus_config.take(InputKeys::modi_sphere_jet_jetMomentum)) {}
+      jet_mom_(modus_config.take(InputKeys::modi_sphere_jet_jetMomentum)),
+      jet_pos_(modus_config.take(InputKeys::modi_sphere_jet_jetPosition)),
+      jet_back_(modus_config.take(InputKeys::modi_sphere_jet_backToBack)),
+      jet_back_separation_(
+          jet_back_ ? modus_config.take(
+                          InputKeys::modi_sphere_jet_backToBackSeparation)
+                    : 0) {
+  if (!jet_back_ &&
+      modus_config.has_value(InputKeys::modi_sphere_jet_backToBackSeparation)) {
+    throw std::invalid_argument(
+        "In order to specify 'Back_To_Back_Separation', 'Back_To_Back' must be "
+        "true.");
+  }
+}
 
 /* console output on startup of sphere specific parameters */
 std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
@@ -104,8 +118,19 @@ std::ostream &operator<<(std::ostream &out, const SphereModus &m) {
   }
   if (m.jet_pdg_) {
     ParticleTypePtr ptype = &ParticleType::find(m.jet_pdg_.value());
-    out << "Adding a " << ptype->name() << " as a jet in the middle "
-        << "of the sphere with " << m.jet_mom_ << " GeV initial momentum.\n";
+    const auto pos = m.jet_pos_;
+    if (m.jet_back_) {
+      ParticleTypePtr anti =
+          ptype->has_antiparticle() ? ptype->get_antiparticle() : ptype;
+      out << "Adding a dijet " << ptype->name() << anti->name()
+          << " centered at (" << pos.x1() << ", " << pos.x2() << ", "
+          << pos.x3() << ") separated by " << m.jet_back_separation_
+          << " fm,\neach with " << m.jet_mom_ << " GeV of initial momentum.\n";
+    } else {
+      out << "Adding a " << ptype->name() << " as a jet at (" << pos.x1()
+          << ", " << pos.x2() << ", " << pos.x3() << ") fm with " << m.jet_mom_
+          << " GeV of initial momentum.\n";
+    }
   }
   return out;
 }
@@ -120,10 +145,16 @@ double SphereModus::initial_conditions(Particles *particles,
   if (use_thermal_) {
     if (average_multipl_.empty()) {
       for (const ParticleType &ptype : ParticleType::list_all()) {
-        if (HadronGasEos::is_eos_particle(ptype)) {
+        const bool is_eos_particle = HadronGasEos::is_eos_particle(ptype);
+        const bool use_heavy_flavor = ptype.pdgcode().is_heavy_flavor() &&
+                                      (hf_multiplier_ > really_small);
+        if (is_eos_particle || use_heavy_flavor) {
           const double n = HadronGasEos::partial_density(
               ptype, T, mub_, mus_, muq_, account_for_resonance_widths_);
           average_multipl_[ptype.pdgcode()] = n * V * parameters.testparticles;
+          if (ptype.pdgcode().is_heavy_flavor()) {
+            average_multipl_[ptype.pdgcode()] *= hf_multiplier_;
+          }
         }
       }
     }
@@ -231,11 +262,23 @@ double SphereModus::initial_conditions(Particles *particles,
 
   /* Add a single highly energetic particle in the center of the sphere (jet) */
   if (jet_pdg_) {
-    auto &jet_particle = particles->create(jet_pdg_.value());
+    auto &pdg = jet_pdg_.value();
+    auto &jet_particle = particles->create(pdg);
+    auto displacement = ThreeVector(jet_back_separation_ / 2., 0., 0.);
     jet_particle.set_formation_time(start_time_);
-    jet_particle.set_4position(FourVector(start_time_, 0., 0., 0.));
-    jet_particle.set_4momentum(ParticleType::find(jet_pdg_.value()).mass(),
+    jet_particle.set_4position(
+        FourVector(start_time_, jet_pos_ + displacement));
+    jet_particle.set_4momentum(ParticleType::find(pdg).mass(),
                                ThreeVector(jet_mom_, 0., 0.));
+    if (jet_back_) {
+      auto &anti_pdg = pdg.has_antiparticle() ? pdg.get_antiparticle() : pdg;
+      auto &jet_antiparticle = particles->create(anti_pdg);
+      jet_antiparticle.set_formation_time(start_time_);
+      jet_antiparticle.set_4position(
+          FourVector(start_time_, jet_pos_ - displacement));
+      jet_antiparticle.set_4momentum(ParticleType::find(anti_pdg).mass(),
+                                     ThreeVector(-jet_mom_, 0., 0.));
+    }
   }
 
   /* Recalculate total momentum */
