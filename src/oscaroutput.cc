@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2024
+ *    Copyright (c) 2014-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -838,14 +838,16 @@ void OscarOutput<Format, Contents>::write_particledata(
 namespace {
 /**
  * Helper function that creates the oscar output with the format selected by
- * create_oscar_output (except for dileptons and photons).
+ * create_oscar_output (except for initial conditions).
  *
  * \tparam Contents Determines what information will be written to the output
- * \param[in] modern_format Use the 1999 or 2013 format
  * \param[in] path Path of output
- * \param[in] out_par Output parameters that hold the output configuration
  * \param[in] name (File)name of ouput
+ * \param[in] modern_format Use the 1999 or 2013 format
+ * \param[in] extended_format Whether the format is extended
  * \param[in] custom_format Whether the output has user-defined quantities
+ * \param[in] quantities The user-defined quantities
+ *
  * \return Unique pointer to oscar output
  */
 template <int Contents>
@@ -884,9 +886,9 @@ std::unique_ptr<OutputInterface> create_oscar_output(
     throw std::logic_error(
         "Oscar2013 and ASCII should not be called at the same time.");
   }
-  // This *requires* that keys in out_par.quantities are the same strings as the content 
   const auto &quantities = custom_format ? out_par.quantities.at(content)
                                          : std::vector<std::string>{};
+
   if (content == "Particles") {
     if (out_par.part_only_final == OutputOnlyFinal::Yes) {
       return create_select_format<OscarParticlesAtEventend>(
@@ -914,17 +916,10 @@ std::unique_ptr<OutputInterface> create_oscar_output(
           custom_format, quantities);
     }
   } else if (content == "Dileptons") {
-    if (custom_format) {
-      throw std::invalid_argument(
-          "Custom format not implemented for Dileptons.");
-    }
     return create_select_format<OscarInteractions>(
         path, "Dileptons", modern_format, out_par.dil_extended, custom_format,
         quantities);
   } else if (content == "Photons") {
-    if (custom_format) {
-      throw std::invalid_argument("Custom format not implemented for Photons.");
-    }
     return create_select_format<OscarInteractions>(
         path, "Photons", modern_format, out_par.photons_extended, custom_format,
         quantities);

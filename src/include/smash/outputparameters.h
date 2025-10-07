@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2017-2024
+ *    Copyright (c) 2017-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -125,6 +125,12 @@ struct OutputParameters {
     const auto coll_quantities =
         conf.take(InputKeys::output_collisions_quantities);
     quantities.insert({"Collisions", coll_quantities});
+    const auto dil_quantities =
+        conf.take(InputKeys::output_dileptons_quantities);
+    quantities.insert({"Dileptons", dil_quantities});
+    const auto photons_quantities =
+        conf.take(InputKeys::output_photons_quantities);
+    quantities.insert({"Photons", photons_quantities});
     /* In the same spirit, always take also other particles and collisions keys.
      * This makes the class behaviour bounded to the key default value and not
      * to the class member initial value. */
