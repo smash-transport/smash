@@ -4917,7 +4917,7 @@ struct InputKeys {
    * \see_key{key_output_particles_quantities_}
    */
   inline static const Key<std::vector<std::string>> output_particles_quantities{
-      {"Output", "Particles", "Quantities"},
+      InputSections::o_particles + "Quantities",
       std::vector<std::string>{},
       {"3.2"}};
 
@@ -4974,7 +4974,7 @@ struct InputKeys {
    * \see_key{key_output_collisions_quantities_}
    */
   inline static const Key<std::vector<std::string>>
-      output_collisions_quantities{{"Output", "Collisions", "Quantities"},
+      output_collisions_quantities{InputSections::o_collisions + "Quantities",
                                    std::vector<std::string>{},
                                    {"3.2"}};
 
@@ -5013,6 +5013,25 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_dileptons_quantities_,Quantities,list of
+   * strings,
+   * </tt><b>empty list</b><tt>}
+   *
+   * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
+   * specified. An error will be produced if a non-empty `Quantities` key is
+   * specified without including `ASCII` or `Binary` as format.
+   * See \ref doxypage_output_ascii for the possible values.
+   */
+  /**
+   * \see_key{key_output_dileptons_quantities_}
+   */
+  inline static const Key<std::vector<std::string>> output_dileptons_quantities{
+      InputSections::o_dileptons + "Quantities",
+      std::vector<std::string>{},
+      {"3.3"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
    * <hr>
    * ### &diams; Photons
    * &rArr; Only `Oscar1999`, `Oscar2013` and `Binary` formats.
@@ -5028,6 +5047,25 @@ struct InputKeys {
    */
   inline static const Key<bool> output_photons_extended{
       InputSections::o_photons + "Extended", false, {"1.5"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_photons_quantities_,Quantities,list of
+   * strings,
+   * </tt><b>empty list</b><tt>}
+   *
+   * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
+   * specified. An error will be produced if a non-empty `Quantities` key is
+   * specified without including `ASCII` or `Binary` as format.
+   * See \ref doxypage_output_ascii for the possible values.
+   */
+  /**
+   * \see_key{key_output_photons_quantities_}
+   */
+  inline static const Key<std::vector<std::string>> output_photons_quantities{
+      InputSections::o_photons + "Quantities",
+      std::vector<std::string>{},
+      {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5049,6 +5087,26 @@ struct InputKeys {
    */
   inline static const Key<bool> output_initialConditions_extended{
       InputSections::o_initialConditions + "Extended", false, {"1.7"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_initialConditions_quantities_,Quantities,list
+   * of strings,
+   * </tt><b>empty list</b><tt>}
+   *
+   * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
+   * specified. An error will be produced if a non-empty `Quantities` key is
+   * specified without including `ASCII` or `Binary` as format.
+   * See \ref doxypage_output_ascii for the possible values.
+   */
+  /**
+   * \see_key{key_output_initialConditions_quantities_}
+   */
+  inline static const Key<std::vector<std::string>>
+      output_initialConditions_quantities{
+          InputSections::o_initialConditions + "Quantities",
+          std::vector<std::string>{},
+          {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -6118,8 +6176,11 @@ struct InputKeys {
       std::cref(output_collisions_quantities),
       std::cref(output_collisions_printStartEnd),
       std::cref(output_dileptons_extended),
+      std::cref(output_dileptons_quantities),
       std::cref(output_photons_extended),
+      std::cref(output_photons_quantities),
       std::cref(output_initialConditions_extended),
+      std::cref(output_initialConditions_quantities),
       std::cref(output_initialConditions_lowerBound),
       std::cref(output_initialConditions_properTime),
       std::cref(output_initialConditions_pTCut),

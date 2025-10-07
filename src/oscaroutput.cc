@@ -850,17 +850,15 @@ namespace {
  */
 template <int Contents>
 std::unique_ptr<OutputInterface> create_select_format(
-    bool modern_format, const std::filesystem::path &path,
-    const OutputParameters &out_par, const std::string &name,
-    const bool custom_format = false) {
-  bool extended_format = (Contents & OscarInteractions) ? out_par.coll_extended
-                                                        : out_par.part_extended;
+    const std::filesystem::path &path, const std::string &name,
+    bool modern_format, bool extended_format, bool custom_format, const std::vector<std::string> &quantities) {
+/*  bool extended_format = out_par.part_extended;
+  if (Contents & OscarInteractions) {
+    // If not dileptons or photons it is collisions
+    extended_format = (name=="Dileptons") ? out_par.dil_extended : (name=="Photons") ? out_par.photons_extended : out_par.coll_extended;
+  } */
   if (custom_format) {
-    const auto &quantities = (Contents & OscarInteractions)
-                                 ? out_par.quantities.at("Collisions")
-                                 : out_par.quantities.at("Particles");
-    return std::make_unique<OscarOutput<ASCII, Contents>>(path, name,
-                                                          quantities);
+    return std::make_unique<OscarOutput<ASCII, Contents>>(path, name, quantities);
   } else if (modern_format && extended_format) {
     return std::make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(
         path, name);
@@ -887,27 +885,24 @@ std::unique_ptr<OutputInterface> create_oscar_output(
   const bool custom_format = (format == "ASCII");
   if (content == "Particles") {
     if (out_par.part_only_final == OutputOnlyFinal::Yes) {
-      return create_select_format<OscarParticlesAtEventend>(
-          modern_format, path, out_par, "particle_lists", custom_format);
+      return create_select_format<OscarParticlesAtEventend>(path, "particle_lists", modern_format, out_par.part_extended, custom_format, out_par.quantities.at(content));
     } else if (out_par.part_only_final == OutputOnlyFinal::IfNotEmpty) {
-      return create_select_format<OscarParticlesAtEventendIfNotEmpty>(
-          modern_format, path, out_par, "particle_lists", custom_format);
-
+      return create_select_format<OscarParticlesAtEventendIfNotEmpty>(path, "particle_lists", modern_format, out_par.part_extended, custom_format, out_par.quantities.at(content));
     } else {  // out_par.part_only_final == OutputOnlyFinal::No
       return create_select_format<OscarTimesteps | OscarAtEventstart |
-                                  OscarParticlesAtEventend>(
-          modern_format, path, out_par, "particle_lists", custom_format);
+                                  OscarParticlesAtEventend>(path, "particle_lists", modern_format, out_par.part_extended, custom_format, out_par.quantities.at(content));
     }
   } else if (content == "Collisions") {
     if (out_par.coll_printstartend) {
       return create_select_format<OscarInteractions | OscarAtEventstart |
-                                  OscarParticlesAtEventend>(
-          modern_format, path, out_par, "full_event_history", custom_format);
+                                  OscarParticlesAtEventend>(path,"full_event_history", modern_format, out_par.coll_extended, custom_format, out_par.quantities.at(content));
     } else {
-      return create_select_format<OscarInteractions>(
-          modern_format, path, out_par, "full_event_history", custom_format);
+      return create_select_format<OscarInteractions>(path, "full_event_history", modern_format, out_par.coll_extended, custom_format, out_par.quantities.at(content));
     }
   } else if (content == "Dileptons") {
+      if(custom_format) {
+        throw std::invalid_argument("Custom format not implemented for Dileptons.");
+      }
     if (modern_format && out_par.dil_extended) {
       return std::make_unique<
           OscarOutput<OscarFormat2013Extended, OscarInteractions>>(path,
