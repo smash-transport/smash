@@ -687,10 +687,10 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \page doxypage_output_ascii
  * The \c ASCII format follows the general block structure of the \ref
  * doxypage_output_oscar, but offers more flexibility with the particle line
- * quantities written in the file. It is available for the \c %Particles and
- * \c Collisions output contents (see \ref doxypage_output), creating files
- * with the extension <em>.dat</em>. This format is useful to decrease
- * storage usage.
+ * quantities written in the file. It is available for the \c %Particles,
+ * \c Collisions, \c Dileptons, and \c Photons output contents (see \ref
+ * doxypage_output), creating files with the extension <em>.dat</em>.
+ * This format is useful to decrease storage usage.
  * \n
  *
  * <table>

@@ -1193,13 +1193,13 @@ Experiment<Modus>::Experiment(Configuration &config,
    * - \b Dileptons:
    *          Special dilepton output, see \ref doxypage_output_dileptons.
    *   - Available formats:
-   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_binary,
-   *         \ref doxypage_output_root.
+   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_ascii,
+   *         \ref doxypage_output_binary, \ref doxypage_output_root.
    * - \b Photons:
    *          Special photon output, see \ref doxypage_output_photons.
    *   - Available formats:
-   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_binary,
-   *         \ref doxypage_output_root.
+   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_ascii,
+   *         \ref doxypage_output_binary, \ref doxypage_output_root.
    * - \b Thermodynamics:
    *          This output allows to print out thermodynamic quantities, see \ref
    *          input_output_thermodynamics_.
@@ -1237,11 +1237,12 @@ Experiment<Modus>::Experiment(Configuration &config,
    * Every output content can be printed out in several formats:
    *
    * - \b "ASCII" - a human-readable text-format table of values.
-   *   - For `"Particles"` (\ref doxypage_output_oscar_particles) and
-   *     `"Collisions"` (\ref doxypage_output_oscar_collisions) contents, it
-   *     uses the \ref doxypage_output_oscar "OSCAR block structure".\n In these
-   *     cases it is possible to customize the quantities to be printed into the
-   *     output file (\ref doxypage_output_ascii).
+   *   - For `"Particles"` (\ref doxypage_output_oscar_particles),
+   *     `"Collisions"`, `"Dileptons"`, and `"Photons"` (\ref
+   * doxypage_output_oscar_collisions) contents, it uses the \ref
+   * doxypage_output_oscar "OSCAR block structure".\n In these cases it is
+   * possible to customize the quantities to be printed into the output file
+   * (\ref doxypage_output_ascii).
    *   - For `"Initial_Conditions"` content the output has \ref
    *     doxypage_output_initial_conditions "a fixed block structure".
    *   - For `"Thermodynamics"` content the information stored in the output

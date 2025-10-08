@@ -4906,7 +4906,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_particles_quantities_,Quantities,list of
-   * strings,[]}
+   * strings,</tt><b>empty list</b><tt>}
    *
    * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
