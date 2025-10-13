@@ -789,9 +789,10 @@ void ScatterAction::spin_interaction() {
       // Set the new spin vectors
       outgoing_particles_[0].set_spin_vector(spin_a);
       outgoing_particles_[1].set_spin_vector(spin_b);
+
+      // Final boost to the outgoing particle momenta
+      boost_spin_vectors_after_elastic_scattering();
     }
-    // Final boost to the outgoing particle momenta
-    boost_spin_vectors_after_elastic_scattering();
   }
 }
 

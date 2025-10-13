@@ -183,47 +183,6 @@ TEST(outgoing_valid) {
   COMPARE(outgoing_particles[0].position(), FourVector(0.2, interaction_point));
 }
 
-// TEST(spin_flip_in_elastic_scatterings) {
-//   // put particles in list
-//   Particles particles;
-//   ParticleData a{ParticleType::find(smash::pdg::p)};  // Proton
-//   a.set_4position(pos_a);
-//   a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
-//   a.set_spin_projection(1);
-//   a.set_history(3, 1, ProcessType::None, 1.2, ParticleList{});
-
-//   ParticleData b{ParticleType::find(0x1114)};  // Delta-
-//   b.set_4position(pos_b);
-//   b.set_4momentum(Momentum{1.1, -1.0, 0., 0.});
-//   b.set_spin_projection(-3);
-//   b.set_history(3, 1, ProcessType::None, 1.2, ParticleList{});
-
-//   a = particles.insert(a);
-//   b = particles.insert(b);
-
-//   // create action and switch spin interactions on
-//   constexpr double time = 1.;
-//   ScatterAction act(a, b, time, false, 1.0, -1.0, false, true);
-
-//   // add elastic channel
-//   constexpr double sigma = 10.0;
-//   act.add_all_scatterings(Test::default_finder_parameters(
-//       sigma, NNbarTreatment::NoAnnihilation, Test::all_reactions_included(),
-//       false, false, false, TotalCrossSectionStrategy::BottomUp, true));
-
-//   // generate final state
-//   act.generate_final_state();
-
-//   // verify that the action is indeed elastic
-//   COMPARE(act.get_type(), ProcessType::Elastic);
-
-//   // verify that particle's spin projections were flipped
-//   ParticleList in = act.incoming_particles();
-//   ParticleList out = act.outgoing_particles();
-//   VERIFY((in[0].spin_projection() == -out[0].spin_projection() &&
-//           in[1].spin_projection() == -out[1].spin_projection()));
-// }
-
 TEST(cross_sections_symmetric) {
   // create a list of all particles
   const auto& all_types = ParticleType::list_all();
