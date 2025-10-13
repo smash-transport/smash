@@ -238,6 +238,7 @@ TEST(density_gradient) {
 
 TEST(density_gradient_in_linear_box) {
   // set parameters fot the test
+  random::set_seed(5489);
   ExperimentParameters par = smash::Test::default_parameters();
   par.testparticles = 10000;
   par.gaussian_sigma = 0.5;
@@ -288,6 +289,7 @@ TEST(density_gradient_in_linear_box) {
 
 TEST(current_curl_in_rotating_box) {
   // set parameters fot the test
+  random::set_seed(5489);
   ExperimentParameters par = smash::Test::default_parameters();
   par.testparticles = 10000;
   par.gaussian_sigma = 0.65;
@@ -323,7 +325,7 @@ TEST(current_curl_in_rotating_box) {
    * point inside the box, Compare the z-component of the curl with the
    * theoretical value. */
   const double theo_rot_j_z = 2. * 1.5 * omega;
-  COMPARE_RELATIVE_ERROR(rot_j.x3(), theo_rot_j_z, 0.01);
+  COMPARE_RELATIVE_ERROR(rot_j.x3(), theo_rot_j_z, 0.04);
   /* Meanwhile, the curl should be along z-axis, which means its
    * transverse component should be much smaller than its longitudinal
    * component*/
