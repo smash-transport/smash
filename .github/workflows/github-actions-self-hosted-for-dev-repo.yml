@@ -34,7 +34,7 @@ jobs:
           export PYTHONPATH=${TOOLS_DIR}/python-tools:${PYTHONPATH}
           export CC=gcc-8
           export CXX=g++-8
-          export container_file=${TOOLS_DIR}/ubuntu-20-with-gnu-8-pythia-8315.sif
+          export container_file=${TOOLS_DIR}/ubuntu-20-with-gnu-8-pythia-8316.sif
           # preliminarily, we check if the code is well formatted with clang-format and cmake-format
           cd ${SMASH_ROOT}
           ./bin/codebase-format-helper.bash C++ -t
@@ -78,7 +78,7 @@ jobs:
           #       This is needed when using the GNU compiler but not for some reason with LLVM one.
           export TOOLS_DIR=/home/ag-elfner/GitHub/GH-actions-runners/tools_and_containers
           export PATH=${TOOLS_DIR}/bin:${TOOLS_DIR}/python-tools/bin/:${PATH}
-          export LD_LIBRARY_PATH=${TOOLS_DIR}/pythia8315/lib:${LD_LIBRARY_PATH}
+          export LD_LIBRARY_PATH=${TOOLS_DIR}/pythia8316/lib:${LD_LIBRARY_PATH}
           export PYTHONPATH=${TOOLS_DIR}/python-tools:${PYTHONPATH}
           export CC=gcc-13
           export CXX=g++-13
@@ -90,7 +90,7 @@ jobs:
           # now we configure SMASH
           mkdir -p ${SMASH_ROOT}/build
           cd ${SMASH_ROOT}/build
-          cmake -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8315/bin/pythia8-config -DENABLE_FUNCTIONAL_TESTS=ON ..
+          cmake -DPythia_CONFIG_EXECUTABLE=$TOOLS_DIR/pythia8316/bin/pythia8-config -DENABLE_FUNCTIONAL_TESTS=ON ..
           # we check if the code is well formatted with cpplint
           export CTEST_OUTPUT_ON_FAILURE=1
           ctest -R "cpplint"
