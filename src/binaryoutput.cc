@@ -245,15 +245,11 @@ void BinaryOutputBase::write(const FourVector &v) {
 }
 
 void BinaryOutputBase::write(const Particles &particles) {
-  for (const auto &p : particles) {
-    write_particledata(p);
-  }
+  write(formatter_.binary_chunk(particles));
 }
 
 void BinaryOutputBase::write(const ParticleList &particles) {
-  for (const auto &p : particles) {
-    write_particledata(p);
-  }
+  write(formatter_.binary_chunk(particles));
 }
 
 void BinaryOutputBase::write_particledata(const ParticleData &p) {

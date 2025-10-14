@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "smash/particledata.h"
-
+#include "smash/particles.h"
 namespace smash {
 
 /**
@@ -343,6 +343,35 @@ class OutputFormatter {
         });
   }
 
+  /**
+   * Produces a chunk of binary representing a block of particles for the output
+   * file.
+   *
+   * Instead of writing one chunk per particle, this method concatenates the
+   * binary data for all particles in the container into a single contiguous
+   * buffer. This allows the output to be written with a single `std::fwrite`
+   * call, significantly reducing I/O overhead.
+   *
+   * \tparam Range A container type holding `ParticleData` objects
+   *         (e.g. `Particles` or `ParticleList`).
+   * \param[in] particles Container of particles whose information is to be
+   * written. \return vector of char containing the formatted binary data for
+   * the entire particle block.
+   *
+   * \see binary_chunk(const ParticleData&)
+   */
+  template <class Range,
+            std::enable_if_t<std::is_same_v<Range, Particles> ||
+                                 std::is_same_v<Range, ParticleList>,
+                             int> = 0>
+  typename Converter::type binary_chunk(const Range& particles) {
+    std::vector<char> chunk;
+    for (const auto& p : particles) {
+      auto pc = binary_chunk(p);  // reuse single-particle version
+      chunk.insert(chunk.end(), pc.begin(), pc.end());
+    }
+    return chunk;
+  }
   /**
    * Produces the line with formatted data for the body of the output file.
    *
