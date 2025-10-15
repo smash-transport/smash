@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2024
+ *    Copyright (c) 2014-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -290,8 +290,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \n
  *
  * \anchor oscar2013_format
- * Oscar2013
- * ---------
+ * <h2> Oscar2013 </h2>
  *
  * Oscar2013 is an ASCII (text) human-readable output following the OSCAR 2013
  * standard. The format specifics are the following:\n
@@ -432,8 +431,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * Note that `event`, `end`, `impact` and `empty` are no variables, but words
  * that are printed in the header.
  *
- * Oscar1999
- * ---------
+ * <h2> Oscar1999 </h2>
+ *
  * Oscar1999 is an ASCII (text) human-readable output following the OSCAR 1999
  * standard. The format specifics are the following:
  *
@@ -572,8 +571,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \note The particle and event end lines for both OSCAR 2013 and 1999 formats
  * are identical as in the \ref doxypage_output_oscar_particles.
  *
- * Oscar2013
- * ---------
+ * <h2> Oscar2013 </h2>
+ *
  *  Oscar2013 is an ASCII (text) human-readable output following the OSCAR 2013
  * standard. The format specifics are the following:\n
  * \n
@@ -635,8 +634,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * Note, that "interaction", "in", "out", "rho", "weight", "partial" and "type"
  * are no variables, but words that are printed.
  *
- * Oscar1999
- * ---------
+ * <h2> Oscar1999 </h2>
+ *
  * Oscar1999 is an ASCII (text) human-readable output following the OSCAR 1999
  * standard. The format specifics are the following:
  *

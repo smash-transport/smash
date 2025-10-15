@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2015,2017-2022
+ *    Copyright (c) 2013-2015,2017-2022,2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -155,7 +155,7 @@ class FourVector {
    * \param[in] v (\f$\mathbf{v}\f$ in the explanation below) is a ThreeVector
    * representing the boost velocity
    *
-   * ### Algorithmic
+   * <h3> Algorithmic </h3>
    *
    * Notation:
    *  - \f$\mathbf{a}\f$ is a Three-Vector,

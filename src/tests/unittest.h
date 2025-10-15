@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2018,2020-2022
+ *    Copyright (c) 2014-2018,2020-2022,2025
  *      SMASH Team
  */
 
@@ -303,7 +303,7 @@
  * vir::test::setFuzzyness<double>(7);
  * \endcode
  *
- * ### ulp
+ * <h3> ulp </h3>
  * Unit of least precision is a unit that is derived from the the least
  * significant bit in the mantissa of a floating-point value. Consider a
  * single-precision number (23 mantissa bits) with exponent \f$e\f$. Then 1
@@ -329,7 +329,7 @@
  * -0.5
  * * `FUZZY_COMPARE(1., 0.999999940395355224609375)` will show a distance of 1
  *
- * ### Comparing to 0
+ * <h3> Comparing to 0 </h3>
  * Distance to 0 is implemented as comparing to
  * <tt>std::numeric_limits<T>::min()</tt>
  * instead and adding 1 to the resulting distance.
