@@ -16,7 +16,8 @@
 namespace smash {
 
 // Throw because an enum value was not handled in the \c to_string function.
-static void throw_unhandled_enum(std::string_view enum_name, int value) {
+[[noreturn]] static void throw_unhandled_enum(std::string_view enum_name,
+                                              int value) {
   throw std::invalid_argument("Unhandled " + std::string(enum_name) +
                               " enum value " + std::to_string(value) +
                               " passed to conversion function to_string().");
