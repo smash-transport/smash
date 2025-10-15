@@ -1364,7 +1364,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * as well as in an additional ASCII format. The latter is meant to directly
    * serve as input for the vHLLE hydrodynamics code \iref{Karpenko:2013wva}.
    * \n \n
-   * ### Oscar output
+   * <h3> Oscar output </h3>
    * In case
    * of the Oscar1999 and Oscar2013 format, the structure is identical to the
    * Oscar Particles Format (see \ref doxypage_output_oscar_particles). \n
@@ -1375,14 +1375,14 @@ Experiment<Modus>::Experiment(Configuration &config,
    * initial particle list nor the particle list at each time step is printed.
    * \n The general Oscar structure as described in
    * \ref doxypage_output_oscar_particles is preserved. \n \n
-   * ### Binary output
+   * <h3> Binary output </h3>
    * The binary initial
    * conditions output also provides a list of all particles removed from the
    * evolution at the time when crossing the hypersurface. For each removed
    * particle a 'p' block is created stores the particle data. The general
    * binary output structure as described in \ref doxypage_output_binary is
    * preserved.\n \n
-   * ### ROOT output
+   * <h3> ROOT output </h3>
    * The initial conditions output in shape of a list of all particles removed
    * from the SMASH evolution with a \c "Constant_Tau" fluidization criterion
    * is also available in ROOT format. Neither the initial nor the final
