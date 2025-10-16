@@ -41,12 +41,20 @@ TEST(create_keys) {
 }
 
 TEST(create_keys_with_validator) {
-  Key<int> key_1{{"Test", "Key"}, {"1.0"}, [](int value) { return value > 0; }};
+  Key<int> key_1{
+      {"Test", "Key"}, {"1.0"}, [](int value) noexcept { return value > 0; }};
   Key<int> key_2{
       {"Test", "Key"}, 33, {"1.0"}, [](int value) { return value < 42; }};
   Key<int> key_3{
       {"Test", "Key"}, DefaultType::Dependent, {"1.0"}, [](int value) {
         return value < 0;
+      }};
+}
+
+TEST(create_key_with_throwing_validator) {
+  Key<int> key{
+      {"Test", "Key"}, {"1.0"}, []([[maybe_unused]] int value) -> bool {
+        throw std::runtime_error("This validator does not make sense");
       }};
 }
 
@@ -141,6 +149,16 @@ TEST(validate_key) {
 TEST(validate_key_without_validator) {
   auto key = get_test_key<int>();
   VERIFY(key.validate(42));
+}
+
+TEST(validate_key_with_throwing_validator) {
+  Key<int> key{
+      {"Test", "Key"}, {"1.0"}, []([[maybe_unused]] int value) -> bool {
+        throw std::runtime_error("This validator does not make sense");
+      }};
+  // Disable logger output -> reenable if needed to e.g. debug
+  logg[LogArea::Configuration::id].setVerbosity(einhard::OFF);
+  VERIFY(!key.validate(42));
 }
 
 TEST(has_same_labels) {

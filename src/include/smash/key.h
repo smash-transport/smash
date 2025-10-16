@@ -19,6 +19,7 @@
 #include <utility>
 #include <vector>
 
+#include "logging.h"
 #include "stringfunctions.h"
 #include "traits.h"
 
@@ -124,6 +125,15 @@ class Key {
 
   /**
    * @brief Descriptive alias for the key validator.
+   *
+   * @attention Since C++17 the \c noexcept specification of a function is part
+   * of the function signature but the \c std::function class template is not
+   * specialized on it as new C++23 class templates \c std::move_only_function
+   * or \c std::copyable_function are. Therefore it is not possible here to add
+   * and enforce the \c noexcept specification in the template argument. Doing
+   * so would lead to a compilation error as the generic class template in the
+   * STL library is not implemented and it would be selected at instantiation
+   * time by the compiler.
    */
   using validator_type = std::function<bool(const default_type&)>;
 
@@ -248,13 +258,27 @@ class Key {
   /**
    * @brief Get whether the given key value is valid.
    *
+   * @note Since at the moment not-noexcept validators are accepted from this
+   * class, but we still want the \c noexcept specification for this method, we
+   * wrap the validation in a \c try block and give a non-fatal error if an
+   * exception is thrown by the validator. Note that the not-exceptional branch
+   * should always be run and, hence, no performance impact should occur.
+   *
    * @param[in] value The value to be validated.
    *
    * @return \c true if the given value is valid,
    * @return \c false otherwise.
    */
   bool validate(const default_type& value) const noexcept {
-    return validator_(value);
+    try {
+      return validator_(value);
+    } catch (...) {
+      logg[LogArea::Configuration::id].error(
+          "Validator of key " + static_cast<std::string>(*this) +
+          " threw an exception.\nThis should not happen. Considering value "
+          "invalid.");
+      return false;
+    }
   }
 
   /**
@@ -445,11 +469,14 @@ class Key {
         throw WrongNumberOfVersions(
             "Key constructor needs one, two or three version numbers.");
     }
-    /* Assert validator_ is set, which is usually the case unless in
+    /* Ensure validator_ is set, which is usually the case unless in
      * particularly nasty scenarios to debug (e.g. calling this constructor from
      * a static/global object using a static/global validator and hence hitting
      * the undefined order of static initialisation). */
-    assert(validator_);
+    if (!validator_) {
+      throw std::logic_error("Key " + static_cast<std::string>(*this) +
+                             " validator unset at construction time!");
+    }
     if (default_.value_ && validator_(*(default_.value_)) == false) {
       throw std::logic_error(
           "Key " + static_cast<std::string>(*this) +
@@ -464,17 +491,19 @@ class Key {
    *
    * @attention It might look unnecessary to have a static method and you might
    * think that the functor as a static member would be enough. However, this
-   * would be in general wrong because this functor is used in the keys
+   * would be in general wrong because this functor is used in the \c Key
    * constructors which are used by the \c InputKeys class, that is a collection
-   * of static <tt>Keys</tt>. Hence, we would have static members using each
-   * others and initialization of static members in C++ is undefined. We use
-   * therefore the "construct on first use idiom", making the functor a static
-   * object in a function scope. For more information, refer to <a
+   * of static <tt>Key</tt>s. Hence, we would have static members using each
+   * others and initialization order of static members in C++ is undefined. We
+   * use therefore the "construct on first use idiom", making the functor a
+   * static object in a function scope. For more information, refer to <a
    * href="https://isocpp.org/wiki/faq/ctors#static-init-order-on-first-use-members">ISO
    * C++ FAQ</a>.
    */
   static validator_type get_default_validator_() {
-    static auto always_true_functor = [](const default_type&) { return true; };
+    static auto always_true_functor = [](const default_type&) noexcept {
+      return true;
+    };
     return always_true_functor;
   }
 
