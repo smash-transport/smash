@@ -9,8 +9,8 @@
 
 #include "smash/decayaction.h"
 
-#include <cmath>   // std::isnan
-#include <limits>  // for quiet_NaN()
+#include <cmath>
+#include <limits>
 
 #include "smash/decaymodes.h"
 #include "smash/logging.h"
@@ -54,10 +54,14 @@ bool DecayAction::sample_outgoing_particles() {
   switch (outgoing_particles_.size()) {
     case 2:
       sample_2body_phasespace();
-      break;
+      if (pot_pointer) {
+        return was_2body_phase_space_sampled_with_potentials_as_valid_.value();
+      } else {
+        return true;
+      }
     case 3:
       sample_manybody_phasespace();
-      break;
+      return true;
     default:
       throw InvalidDecay(
           "DecayAction::perform: Only 1->2 or 1->3 processes are supported. "
@@ -67,16 +71,11 @@ bool DecayAction::sample_outgoing_particles() {
           incoming_particles_[0].pdgcode().string() + ", mass=" +
           std::to_string(incoming_particles_[0].effective_mass()) + ")");
   }
-
-  if (was_phase_space_sampled_as_valid_)
-    return was_phase_space_sampled_as_valid_.value();
-  else
-    return true;
 }
 
 void DecayAction::generate_final_state() {
-  int NTRY = 1000;
-  while (NTRY--) {
+  int n_try = 1000;
+  while (n_try--) {
     if (sample_outgoing_particles())
       break;
   }
@@ -99,26 +98,22 @@ void DecayAction::generate_final_state() {
 }
 
 void DecayAction::sample_2body_phasespace() {
-  /* This function only operates on 2-particle final states. */
   assert(outgoing_particles_.size() == 2);
   const FourVector p_tot = total_momentum_of_outgoing_particles();
   const double cm_kin_energy = p_tot.abs();
-  // first sample the masses
   const std::pair<double, double> masses = sample_masses(cm_kin_energy);
 
-  bool invalid = std::isnan(masses.first) || std::isnan(masses.second);
+  const bool is_valid = !std::isnan(masses.first) || !std::isnan(masses.second);
 
-  if (invalid) {
-    was_phase_space_sampled_as_valid_ = false;
+  if (pot_pointer) {
+    was_2body_phase_space_sampled_with_potentials_as_valid_ = is_valid;
   }
 
-  // after the masses are fixed (and thus also pcm), sample the angles
   sample_angles(masses, cm_kin_energy);
 }
 
 /* This is overridden from the Action class in order to
  * take care of the angular momentum L_. */
-
 std::pair<double, double> DecayAction::sample_masses(
     double kinetic_energy_cm) const {
   const ParticleType &t_a = outgoing_particles_[0].type();
@@ -126,25 +121,23 @@ std::pair<double, double> DecayAction::sample_masses(
 
   // start with pole masses
   std::pair<double, double> masses = {t_a.mass(), t_b.mass()};
-  const bool failed_sampling =
+
+  const bool below_threshold_energy =
       kinetic_energy_cm < t_a.min_mass_kinematic() + t_b.min_mass_kinematic();
 
-  if (failed_sampling) {
-    if (pot_pointer == nullptr) {
-      const std::string reaction =
-          incoming_particles_[0].type().name() + "→" + t_a.name() + t_b.name();
-      throw InvalidResonanceFormation(
-          reaction + ": not enough energy, " +
-          std::to_string(kinetic_energy_cm) + " < " +
-          std::to_string(t_a.min_mass_kinematic()) + " + " +
-          std::to_string(t_b.min_mass_kinematic()));
-    } else {
-      // return NaNs
-      return {std::numeric_limits<double>::quiet_NaN(),
-              std::numeric_limits<double>::quiet_NaN()};
-    }
-  }
+  const bool return_nan_on_failure = pot_pointer != nullptr;
 
+  if (below_threshold_energy && return_nan_on_failure) {
+    return {std::numeric_limits<double>::quiet_NaN(),
+            std::numeric_limits<double>::quiet_NaN()};
+  } else if (below_threshold_energy) {
+    const std::string reaction =
+        incoming_particles_[0].type().name() + "→" + t_a.name() + t_b.name();
+    throw InvalidResonanceFormation(
+        reaction + ": not enough energy, " + std::to_string(kinetic_energy_cm) +
+        " < " + std::to_string(t_a.min_mass_kinematic()) + " + " +
+        std::to_string(t_b.min_mass_kinematic()));
+  }
   // If one of the particles is a resonance, sample its mass.
   if (!t_a.is_stable() && t_b.is_stable()) {
     masses.first = t_a.sample_resonance_mass(t_b.mass(), kinetic_energy_cm, L_);
@@ -158,6 +151,7 @@ std::pair<double, double> DecayAction::sample_masses(
 
   return masses;
 }
+
 void DecayAction::format_debug_output(std::ostream &out) const {
   out << "Decay of " << incoming_particles_ << " to " << outgoing_particles_
       << ", sqrt(s)=" << format(sqrt_s(), "GeV", 11, 9);
