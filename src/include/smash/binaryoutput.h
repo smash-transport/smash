@@ -132,7 +132,7 @@ class BinaryOutputBase : public OutputInterface {
   /// Format variant number associated to the custom quantities case
   const uint16_t format_custom_ = 2;
   /// The output formatter
-  OutputFormatter<ToBinary> formatter_;
+  OutputFormatterBinary formatter_;
 };
 
 /**

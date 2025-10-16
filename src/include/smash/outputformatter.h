@@ -10,14 +10,22 @@
 #ifndef SRC_INCLUDE_SMASH_OUTPUTFORMATTER_H_
 #define SRC_INCLUDE_SMASH_OUTPUTFORMATTER_H_
 
+#include <algorithm>
+#include <cassert>
+#include <cstdio>
+#include <cstring>
 #include <functional>
 #include <map>
+#include <numeric>
 #include <sstream>
+#include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include "smash/particledata.h"
 #include "smash/particles.h"
+
 namespace smash {
 
 /**
@@ -176,7 +184,7 @@ template <typename Converter,
           std::enable_if_t<std::is_same_v<Converter, ToASCII> ||
                                std::is_same_v<Converter, ToBinary>,
                            bool> = true>
-class OutputFormatter {
+class OutputFormatterBase {
  public:
   /**
    * Creates the formatter. This reduces the number of literal strings flying
@@ -191,7 +199,7 @@ class OutputFormatter {
    * \throw std::invalid_argument if incompatible quantities exist in the list
    * \throw std::invalid_argument if there are repeated quantities
    */
-  explicit OutputFormatter(const std::vector<std::string>& in_quantities)
+  explicit OutputFormatterBase(const std::vector<std::string>& in_quantities)
       : quantities_(in_quantities) {
     validate_quantities();
     for (const std::string& quantity : quantities_) {
@@ -326,94 +334,8 @@ class OutputFormatter {
       }
     }
   }
-  /**
-   * Produces a chunk of binary representing a particle line for the output
-   * file.
-   *
-   * \param[in] p Particle whose information is to be written.
-   * \return vector of char of the formatted data.
-   */
-  typename Converter::type binary_chunk(const ParticleData& p) {
-    return std::accumulate(
-        std::begin(getters_), std::end(getters_), std::vector<char>{},
-        [&p](std::vector<char> ss, const auto& getter) {
-          auto binary_data = getter(p);
-          ss.insert(ss.end(), binary_data.begin(), binary_data.end());
-          return ss;
-        });
-  }
 
-  /**
-   * Produces a chunk of binary representing a block of particles for the output
-   * file.
-   *
-   * Instead of writing one chunk per particle, this method concatenates the
-   * binary data for all particles in the container into a single contiguous
-   * buffer. This allows the output to be written with a single `std::fwrite`
-   * call, significantly reducing I/O overhead.
-   *
-   * \tparam Range A container type holding `ParticleData` objects
-   *         (e.g. `Particles` or `ParticleList`).
-   * \param[in] particles Container of particles whose information is to be
-   * written. \return vector of char containing the formatted binary data for
-   * the entire particle block.
-   *
-   * \see binary_chunk(const ParticleData&)
-   */
-  template <class Range,
-            std::enable_if_t<std::is_same_v<Range, Particles> ||
-                                 std::is_same_v<Range, ParticleList>,
-                             int> = 0>
-  typename Converter::type binary_chunk(const Range& particles) {
-    std::vector<char> chunk;
-    for (const auto& p : particles) {
-      auto pc = binary_chunk(p);  // reuse single-particle version
-      chunk.insert(chunk.end(), pc.begin(), pc.end());
-    }
-    return chunk;
-  }
-  /**
-   * Produces the line with formatted data for the body of the output file.
-   *
-   * \param[in] p particle whose information is to be written.
-   * \return string with formatted data separated by a space.
-   */
-  typename Converter::type data_line(const ParticleData& p) const {
-    return std::accumulate(
-        std::begin(getters_), std::end(getters_), std::string{},
-        [&p](const std::string& ss, const auto& getter) {
-          return ss.empty() ? getter(p) : ss + " " + getter(p);
-        });
-  }
-
-  /**
-   * Produces the line with quantities for the header of the output file.
-   * \return string with name of quantities separated by a space.
-   */
-  typename Converter::type quantities_line() const {
-    return std::accumulate(
-        std::begin(quantities_), std::end(quantities_), std::string{},
-        [this](const std::string& ss, const std::string& s) {
-          return ss.empty() ? this->converter_.as_string(s)
-                            : ss + " " + this->converter_.as_string(s);
-        });
-  }
-
-  /**
-   * Produces the line with units for the header of the output file.
-   * \return string with units separated by a space.
-   */
-  typename Converter::type unit_line() const {
-    return std::accumulate(
-        std::begin(quantities_), std::end(quantities_), std::string{},
-        [this](const std::string& ss, const std::string& s) {
-          return ss.empty()
-                     ? this->converter_.as_string(units_.at(s))
-                     : ss + " " + this->converter_.as_string(units_.at(s));
-        });
-  }
-
- private:
+ protected:
   /// Member to convert data into the correct output format.
   Converter converter_{};
 
@@ -505,6 +427,167 @@ class OutputFormatter {
   }
 };
 
+/**
+ * Binary formatter
+ */
+class OutputFormatterBinary : public OutputFormatterBase<ToBinary> {
+ public:
+  using Base = OutputFormatterBase<ToBinary>;
+  using Base::Base;
+
+  /**
+   * Computes (once) and returns the total number of bytes required to encode
+   * a single particle using all registered getters.
+   *
+   * This method caches the result after the first computation to avoid
+   * repeated work. The size is assumed to be invariant across particles.
+   *
+   * \return Total byte size of one particle's binary representation.
+   */
+  std::size_t compute_single_size(const ParticleData& sample) const {
+    if (cached_single_size_ != 0)
+      return cached_single_size_;
+
+    std::size_t sz = 0;
+    for (const auto& getter : getters_) {
+      const ToBinary::type tmp = getter(sample);  // only to learn size
+      sz += tmp.size();
+    }
+    cached_single_size_ = sz;
+    return cached_single_size_;
+  }
+
+  /**
+   * Produces a contiguous binary chunk representing a single particle
+   * suitable for writing to an output file.
+   *
+   * \param[in] p Particle whose information is to be written.
+   * \return A binary buffer containing the formatted data.
+   *
+   * \see fill_binary_buffer(const ParticleData&, ToBinary::type&)
+   */
+  ToBinary::type binary_chunk(const ParticleData& p) {
+    ToBinary::type chunk{};
+    chunk.reserve(compute_single_size(p));
+
+    for (const auto& get : getters_) {
+      const ToBinary::type data = get(p);
+      chunk.insert(chunk.end(), data.begin(), data.end());
+    }
+    return chunk;
+  }
+
+  /**
+   * Appends the binary representation of a single particle to an existing
+   * buffer, avoiding intermediate allocations when building large blocks.
+   *
+   * \param[in]  p       Particle whose information is to be appended.
+   * \param[out] buffer  Destination buffer to which the bytes are appended.
+   */
+  void fill_binary_buffer(const ParticleData& p, ToBinary::type& buffer) {
+    buffer.reserve(buffer.size() + compute_single_size(p));
+
+    for (const auto& get : getters_) {
+      const ToBinary::type data = get(p);
+      buffer.insert(buffer.end(), data.begin(), data.end());
+    }
+  }
+
+ 
+/**
+ * Produces a contiguous binary chunk representing a block of particles
+ * for efficient batched output.
+ *
+ * Instead of writing one chunk per particle, this method concatenates the
+ * binary data for all particles in the container into a single contiguous
+ * buffer. This enables writing with a single `std::fwrite` call to
+ * significantly reduce write calls.
+ *
+ * \tparam Range Container type — enforced to be either `Particles`
+ *         or `ParticleList`.
+ * \param[in] particles Container of particles whose information is to be
+ *            written.
+ * \return A binary buffer containing the formatted data for the entire block.
+ *
+ * \see binary_chunk(const ParticleData&)
+ * \see fill_binary_buffer(const ParticleData&, ToBinary::type&)
+ */
+  template <class Range,
+            std::enable_if_t<std::is_same_v<Range, Particles> ||
+                                 std::is_same_v<Range, ParticleList>,
+                             bool> = true>
+  ToBinary::type binary_chunk(const Range& particles) {
+    ToBinary::type chunk{};
+    auto it = particles.begin();
+    if (it == particles.end())
+      return chunk;
+
+    // Reserve once using the size learned from the first particle
+    chunk.reserve(particles.size() * compute_single_size(*it));
+    for (const ParticleData& p : particles) {
+      fill_binary_buffer(p, chunk);
+    }
+    return chunk;
+  }
+
+ private:
+  /// Cached size of a single particle's binary representation.
+  /// This avoids recomputing the total byte size on every call to
+  /// `binary_chunk` or `fill_binary_buffer`.
+  mutable std::size_t cached_single_size_{0};
+};
+
+/**
+ * ASCII formatter
+ */
+class OutputFormatterASCII : public OutputFormatterBase<ToASCII> {
+ public:
+  using Base = OutputFormatterBase<ToASCII>;
+  using Base::Base;
+
+  /**
+   * Produces the line with formatted data for the body of the output file.
+   *
+   * \param[in] p particle whose information is to be written.
+   * \return string with formatted data separated by a space.
+   */
+  ToASCII::type data_line(const ParticleData& p) const {
+    return std::accumulate(
+        std::begin(getters_), std::end(getters_), std::string{},
+        [&p](const std::string& ss, const auto& getter) {
+          return ss.empty() ? getter(p) : ss + " " + getter(p);
+        });
+  }
+
+  /**
+   * Produces the line with quantities for the header of the output file.
+   * \return string with name of quantities separated by a space.
+   */
+  ToASCII::type quantities_line() const {
+    return std::accumulate(
+        std::begin(quantities_), std::end(quantities_), std::string{},
+        [this](const std::string& ss, const std::string& s) {
+          return ss.empty() ? this->converter_.as_string(s)
+                            : ss + " " + this->converter_.as_string(s);
+        });
+  }
+
+  /**
+   * Produces the line with units for the header of the output file.
+   * \return string with units separated by a space.
+   */
+  ToASCII::type unit_line() const {
+    return std::accumulate(
+        std::begin(quantities_), std::end(quantities_), std::string{},
+        [this](const std::string& ss, const std::string& s) {
+          return ss.empty()
+                     ? this->converter_.as_string(units_.at(s))
+                     : ss + " " + this->converter_.as_string(units_.at(s));
+        });
+  }
+};
+
 }  // namespace smash
+// namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_OUTPUTFORMATTER_H_

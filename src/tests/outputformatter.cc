@@ -31,22 +31,22 @@ TEST(ASCII_converter) {
 
 TEST_CATCH(empty_quantities, std::invalid_argument) {
   std::vector<std::string> empty{};
-  OutputFormatter<ToASCII> formatter(empty);
+  OutputFormatterASCII formatter(empty);
 }
 
 TEST_CATCH(invalid_quantity, std::invalid_argument) {
   std::vector<std::string> invalid_quantities = {"gibberish"};
-  OutputFormatter<ToASCII> formatter(invalid_quantities);
+  OutputFormatterASCII formatter(invalid_quantities);
 }
 
 TEST_CATCH(repeated_quantity, std::invalid_argument) {
   std::vector<std::string> repeated_quantities = {"t", "t"};
-  OutputFormatter<ToASCII> formatter(repeated_quantities);
+  OutputFormatterASCII formatter(repeated_quantities);
 }
 
 TEST_CATCH(incompatible_quantity, std::invalid_argument) {
   std::vector<std::string> repeated_quantities = {"id", "ID"};
-  OutputFormatter<ToASCII> formatter(repeated_quantities);
+  OutputFormatterASCII formatter(repeated_quantities);
 }
 
 TEST(valid_line_maker) {
@@ -76,7 +76,7 @@ TEST(valid_line_maker) {
                                                "baryon_number",
                                                "strangeness"};
 
-  OutputFormatter<ToASCII> formatter(valid_quantities);
+  OutputFormatterASCII formatter(valid_quantities);
 
   const auto quantities_line = std::accumulate(
       std::begin(valid_quantities), std::end(valid_quantities), std::string{},
@@ -121,7 +121,7 @@ TEST(valid_line_maker) {
 TEST(binary_chunk) {
   ParticleData p = Test::smashon_random();
   std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
-  OutputFormatter<ToBinary> formatter(quantities);
+  OutputFormatterBinary formatter(quantities);
 
   std::vector<char> chunk = formatter.binary_chunk(p);
 
@@ -136,4 +136,31 @@ TEST(binary_chunk) {
   VERIFY(y == p.position()[2]);
   VERIFY(z == p.position()[3]);
   VERIFY(id == p.id());
+}
+
+TEST(per_particle_binary_chunk_same_as_particles_chunk) {
+  ParticleList particles;
+  const std::size_t N = 33;
+  particles.reserve(N);
+
+  for (std::size_t i = 0; i < N; ++i) {
+    particles.push_back(Test::smashon_random());  // no default-ctor needed
+  }
+
+  std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
+  OutputFormatterBinary formatter(quantities);
+
+  // Chunk for whole container
+  std::vector<char> particles_chunk = formatter.binary_chunk(particles);
+
+  // Chunk by concatenating per-particle
+  std::vector<char> per_particle_chunk;
+  per_particle_chunk.reserve(particles_chunk.size());
+  for (const auto& p : particles) {
+    auto data = formatter.binary_chunk(p);
+    per_particle_chunk.insert(per_particle_chunk.end(), data.begin(),
+                              data.end());
+  }
+
+  VERIFY(particles_chunk == per_particle_chunk);
 }

@@ -136,7 +136,7 @@ class OscarOutput : public OutputInterface {
   RenamingFilePtr file_;
 
   /// Formatter of the output
-  OutputFormatter<ToASCII> formatter_;
+  OutputFormatterASCII formatter_;
 };
 
 /**
