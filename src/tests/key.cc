@@ -151,7 +151,7 @@ TEST(validate_key_without_validator) {
   VERIFY(key.validate(42));
 }
 
-TEST(validate_key_with_throwing_validator) {
+TEST(validate_key_with_throwing_or_empty_validator) {
   Key<int> key{
       {"Test", "Key"}, {"1.0"}, []([[maybe_unused]] int value) -> bool {
         throw std::runtime_error("This validator does not make sense");
@@ -159,6 +159,8 @@ TEST(validate_key_with_throwing_validator) {
   // Disable logger output -> reenable if needed to e.g. debug
   logg[LogArea::Configuration::id].setVerbosity(einhard::OFF);
   VERIFY(!key.validate(42));
+  Key<int> key_2{{"Test", "Key"}, {"1.0"}, std::function<bool(int)>{}};
+  VERIFY(key_2.validate(42));
 }
 
 TEST(has_same_labels) {

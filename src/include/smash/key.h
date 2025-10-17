@@ -89,6 +89,57 @@ enum class DefaultType {
   Dependent
 };
 
+namespace detail {
+
+/**
+ * @brief Class template to store Key traits outside the Key class, allowing for
+ * reuse both in the Key class itself and in helper implementation details.
+ *
+ * \tparam T The type of the key.
+ */
+template <typename T>
+struct KeyTraits {
+  /**
+   * @brief Descriptive alias for the key validator.
+   *
+   * @attention Since C++17 the \c noexcept specification of a function is part
+   * of the function signature but the \c std::function class template is not
+   * specialized on it as new C++23 class templates \c std::move_only_function
+   * or \c std::copyable_function are. Therefore it is not possible here to add
+   * and enforce the \c noexcept specification in the \c std::function template
+   * argument. Doing so would lead to a compilation error as the generic class
+   * template in the STL library is not implemented and it would be selected at
+   * instantiation time by the compiler.
+   */
+  using validator_type = std::function<bool(const T&)>;
+};
+
+/**
+ * Function template to get a default trivial validator.
+ *
+ * @return A const reference to a functor that always returns \c true .
+ *
+ * @attention It might look unnecessary to have a function returning the functor
+ * and you might think that the functor as a constant global variable template
+ * would be enough. However, this would be in general wrong because this functor
+ * is used in the \c Key constructors which are used by the \c InputKeys class,
+ * that is a collection of static <tt>Key</tt>s. Hence, since initialization
+ * order of static/global objects in C++ is undefined, we need to to do
+ * something else. We use therefore the "construct on first use idiom", making
+ * the functor a static object in a function scope. For more information, refer
+ * for example to <a
+ * href="https://isocpp.org/wiki/faq/ctors#static-init-order-on-first-use-members">ISO
+ * C++ FAQ</a>.
+ */
+template <typename T>
+const typename KeyTraits<T>::validator_type& get_default_validator() noexcept {
+  static const typename KeyTraits<T>::validator_type always_true =
+      [](const T&) noexcept { return true; };
+  return always_true;
+}
+
+}  // namespace detail
+
 /**
  * @brief Object to store a YAML input file key together with metadata
  * associated to it.
@@ -124,18 +175,10 @@ class Key {
   };
 
   /**
-   * @brief Descriptive alias for the key validator.
-   *
-   * @attention Since C++17 the \c noexcept specification of a function is part
-   * of the function signature but the \c std::function class template is not
-   * specialized on it as new C++23 class templates \c std::move_only_function
-   * or \c std::copyable_function are. Therefore it is not possible here to add
-   * and enforce the \c noexcept specification in the template argument. Doing
-   * so would lead to a compilation error as the generic class template in the
-   * STL library is not implemented and it would be selected at instantiation
-   * time by the compiler.
+   * \see detail::KeyTraits<T>::validator_type
    */
-  using validator_type = std::function<bool(const default_type&)>;
+  using validator_type =
+      typename detail::KeyTraits<default_type>::validator_type;
 
   /**
    * @brief Construct a new \c Key object without default value.
@@ -149,8 +192,9 @@ class Key {
    *
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    */
-  explicit Key(const KeyLabels& labels, const KeyMetadata& versions,
-               validator_type validator = get_default_validator_())
+  explicit Key(
+      const KeyLabels& labels, const KeyMetadata& versions,
+      validator_type validator = detail::get_default_validator<default_type>())
       : Key{labels, Default<default_type>{}, versions, validator} {}
 
   /**
@@ -168,7 +212,7 @@ class Key {
    * @throw std::invalid_argument If \c validator(value) returns \c false .
    */
   Key(const KeyLabels& labels, default_type value, const KeyMetadata& versions,
-      validator_type validator = get_default_validator_())
+      validator_type validator = detail::get_default_validator<default_type>())
       : Key{labels, Default<default_type>{value}, versions, validator} {}
 
   /**
@@ -188,7 +232,7 @@ class Key {
    */
   Key(const KeyLabels& labels, DefaultType type_of_default,
       const KeyMetadata& versions,
-      validator_type validator = get_default_validator_())
+      validator_type validator = detail::get_default_validator<default_type>())
       : Key{labels, Default<default_type>{type_of_default}, versions,
             validator} {}
 
@@ -275,8 +319,8 @@ class Key {
     } catch (...) {
       logg[LogArea::Configuration::id].error(
           "Validator of key " + static_cast<std::string>(*this) +
-          " threw an exception.\nThis should not happen. Considering value "
-          "invalid.");
+          " threw an exception when validating key value.\nThis should not "
+          "happen. Considering value invalid.");
       return false;
     }
   }
@@ -469,42 +513,27 @@ class Key {
         throw WrongNumberOfVersions(
             "Key constructor needs one, two or three version numbers.");
     }
-    /* Ensure validator_ is set, which is usually the case unless in
-     * particularly nasty scenarios to debug (e.g. calling this constructor from
+    /* Ensure validator_ is set, which is usually the case unless in scenarios
+     * that are particularly nasty to debug (e.g. calling this constructor from
      * a static/global object using a static/global validator and hence hitting
-     * the undefined order of static initialisation). */
+     * the undefined order of static initialisation).
+     *
+     * NOTE: Do NOT throw from here. For non-local static keys we prefer to
+     * assign the canonical default validator when an empty functor is provided;
+     * throwing during static initialization can cause termination or even
+     * undefined behavior.
+     */
     if (!validator_) {
-      throw std::logic_error("Key " + static_cast<std::string>(*this) +
-                             " validator unset at construction time!");
+      logg[LogArea::Configuration::id].error(
+          "Empty validator used at Key construction time.\nThis should not "
+          "happen. Using default validator instead.");
+      validator_ = detail::get_default_validator<default_type>();
     }
     if (default_.value_ && validator_(*(default_.value_)) == false) {
       throw std::logic_error(
           "Key " + static_cast<std::string>(*this) +
           " has been declared with an invalid default value.");
     }
-  }
-
-  /**
-   * Static method to get the default trivial validator.
-   *
-   * @return A functor that always returns \c true .
-   *
-   * @attention It might look unnecessary to have a static method and you might
-   * think that the functor as a static member would be enough. However, this
-   * would be in general wrong because this functor is used in the \c Key
-   * constructors which are used by the \c InputKeys class, that is a collection
-   * of static <tt>Key</tt>s. Hence, we would have static members using each
-   * others and initialization order of static members in C++ is undefined. We
-   * use therefore the "construct on first use idiom", making the functor a
-   * static object in a function scope. For more information, refer to <a
-   * href="https://isocpp.org/wiki/faq/ctors#static-init-order-on-first-use-members">ISO
-   * C++ FAQ</a>.
-   */
-  static validator_type get_default_validator_() {
-    static auto always_true_functor = [](const default_type&) noexcept {
-      return true;
-    };
-    return always_true_functor;
   }
 
   /// SMASH version in which the key has been introduced
@@ -518,7 +547,7 @@ class Key {
   /// The label(s) identifying the key in the YAML input file
   KeyLabels labels_{};
   /// The functor to validate key values
-  validator_type validator_{get_default_validator_()};
+  validator_type validator_{detail::get_default_validator<default_type>()};
 };
 
 }  // namespace smash
