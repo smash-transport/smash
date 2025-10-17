@@ -432,8 +432,13 @@ class OutputFormatterBase {
  */
 class OutputFormatterBinary : public OutputFormatterBase<ToBinary> {
  public:
-  using Base = OutputFormatterBase<ToBinary>;
-  using Base::Base;
+  /**
+   * \brief Base class typedef for convenience.
+   *
+   * This alias makes the underlying template base class more
+   * readable and simplifies access to inherited members.
+   */
+  using OutputFormatterBase<ToBinary>::OutputFormatterBase;
 
   /**
    * Computes (once) and returns the total number of bytes required to encode
@@ -484,7 +489,7 @@ class OutputFormatterBinary : public OutputFormatterBase<ToBinary> {
    * \param[in]  p       Particle whose information is to be appended.
    * \param[out] buffer  Destination buffer to which the bytes are appended.
    */
-  void fill_binary_buffer(const ParticleData& p, ToBinary::type& buffer) {
+  void fill_binary_buffer(const ParticleData& p, ToBinary::type& buffer) const {
     buffer.reserve(buffer.size() + compute_single_size(p));
 
     for (const auto& get : getters_) {
@@ -493,25 +498,24 @@ class OutputFormatterBinary : public OutputFormatterBase<ToBinary> {
     }
   }
 
- 
-/**
- * Produces a contiguous binary chunk representing a block of particles
- * for efficient batched output.
- *
- * Instead of writing one chunk per particle, this method concatenates the
- * binary data for all particles in the container into a single contiguous
- * buffer. This enables writing with a single `std::fwrite` call to
- * significantly reduce write calls.
- *
- * \tparam Range Container type — enforced to be either `Particles`
- *         or `ParticleList`.
- * \param[in] particles Container of particles whose information is to be
- *            written.
- * \return A binary buffer containing the formatted data for the entire block.
- *
- * \see binary_chunk(const ParticleData&)
- * \see fill_binary_buffer(const ParticleData&, ToBinary::type&)
- */
+  /**
+   * Produces a contiguous binary chunk representing a block of particles
+   * for efficient batched output.
+   *
+   * Instead of writing one chunk per particle, this method concatenates the
+   * binary data for all particles in the container into a single contiguous
+   * buffer. This enables writing with a single `std::fwrite` call to
+   * significantly reduce write calls.
+   *
+   * \tparam Range Container type — enforced to be either `Particles`
+   *         or `ParticleList`.
+   * \param[in] particles Container of particles whose information is to be
+   *            written.
+   * \return A binary buffer containing the formatted data for the entire block.
+   *
+   * \see binary_chunk(const ParticleData&)
+   * \see fill_binary_buffer(const ParticleData&, ToBinary::type&)
+   */
   template <class Range,
             std::enable_if_t<std::is_same_v<Range, Particles> ||
                                  std::is_same_v<Range, ParticleList>,
@@ -542,8 +546,13 @@ class OutputFormatterBinary : public OutputFormatterBase<ToBinary> {
  */
 class OutputFormatterASCII : public OutputFormatterBase<ToASCII> {
  public:
-  using Base = OutputFormatterBase<ToASCII>;
-  using Base::Base;
+  /**
+   * \brief Base class typedef for convenience.
+   *
+   * This alias makes the underlying template base class more
+   * readable and simplifies access to inherited members.
+   */
+  using OutputFormatterBase<ToASCII>::OutputFormatterBase;
 
   /**
    * Produces the line with formatted data for the body of the output file.

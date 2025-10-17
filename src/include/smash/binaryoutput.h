@@ -123,6 +123,71 @@ class BinaryOutputBase : public OutputInterface {
    */
   void write_particledata(const ParticleData &p);
 
+  /**
+   * \brief Writes particle data in multiple chunks if the total buffer size
+   *        exceeds a predefined maximum.
+   *
+   * This method avoids creating a single excessively large binary buffer when
+   * writing many particles at once. Instead, it splits the write into several
+   * smaller chunks. This can prevent excessive memory usage and improve
+   * stability on systems or filesystems that may have trouble with very large
+   * write calls.
+   *
+   * The maximum buffer size is currently set to 1 GB (10^9 bytes), but this can
+   * be adapted in the future if needed. If the total data size of the particle
+   * block is below this threshold, the method simply delegates to the regular
+   * `write` function to perform a single write call.
+   *
+   * Otherwise, the data is accumulated particle by particle until the buffer
+   * reaches the threshold. The buffer is then flushed to disk, cleared, and the
+   * process continues.
+   *
+   * \tparam Range Container type — enforced to be either `Particles` or
+   *         `ParticleList`.
+   * \param[in] particles Container of particles whose binary representation
+   *            is to be written.
+   *
+   * \see binary_chunk(const Range&)
+   * \see fill_binary_buffer(const ParticleData&, ToBinary::type&)
+   */
+  template <class Range,
+            std::enable_if_t<std::is_same_v<Range, Particles> ||
+                                 std::is_same_v<Range, ParticleList>,
+                             bool> = true>
+  void write_in_chunk(const Range &particles) {
+    constexpr std::size_t max_buffer_size =
+        sizeof(char) * static_cast<std::size_t>(std::pow(10.0, 9.0));
+
+    if (particles.empty()) {
+      return;
+    }
+
+    const std::size_t size_of_single_particledata =
+        formatter_.compute_single_size(particles.front());
+    const std::size_t total_size =
+        size_of_single_particledata * particles.size();
+
+    if (total_size <= max_buffer_size) {
+      write(particles);
+      return;
+    }
+
+    ToBinary::type buffer{};
+    buffer.reserve(max_buffer_size);
+
+    for (const ParticleData &part : particles) {
+      formatter_.fill_binary_buffer(part, buffer);
+      if (buffer.size() >= max_buffer_size) {
+        write(buffer);
+        buffer.clear();
+      }
+    }
+
+    if (!buffer.empty()) {
+      write(buffer);
+    }
+  }
+
   /// Binary particles output file path
   RenamingFilePtr file_;
 
