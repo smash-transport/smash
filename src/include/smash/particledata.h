@@ -41,7 +41,7 @@ struct HistoryData {
    * time of the particle, since only formed particles can freeze out
    * The full coordinate space 4-vector can be obtained by back-propagation
    */
-  double time_last_collision = NAN;
+  double time_last_collision = smash_NaN<double>;
   /// PdgCode of the first parent particles
   PdgCode p1 = 0x0;
   /// PdgCode of the second parent particles
@@ -262,7 +262,7 @@ class ParticleData {
     formation_time_ = form_time;
     // cross section scaling factor will be a step function in time
     begin_formation_time_ = form_time;
-    // if time of the last collision is NAN set it to the formation time
+    // if time of the last collision is NaN set it to the formation time
     if (std::isnan(history_.time_last_collision)) {
       history_.time_last_collision = form_time;
     }
@@ -492,9 +492,9 @@ class ParticleData {
   /** Formation time at which the particle is fully formed
    *  given as an absolute value in the computational frame
    */
-  double formation_time_ = NAN;
+  double formation_time_ = smash_NaN<double>;
   /// time when the cross section scaling factor starts to increase to 1
-  double begin_formation_time_ = NAN;
+  double begin_formation_time_ = smash_NaN<double>;
   /**
    * Initial cross section scaling factor.
    * 1 by default, since a particle is fully formed in this case.

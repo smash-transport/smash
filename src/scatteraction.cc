@@ -36,7 +36,7 @@ ScatterAction::ScatterAction(const ParticleData &in_part_a,
       is_total_parametrized_(is_total_parametrized) {
   box_length_ = box_length;
   if (is_total_parametrized_) {
-    parametrized_total_cross_section_ = NAN;
+    parametrized_total_cross_section_ = smash_NaN<double>;
   }
 }
 

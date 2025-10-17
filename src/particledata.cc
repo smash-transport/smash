@@ -88,7 +88,7 @@ double ParticleData::xsec_scaling_factor(double delta_time) const {
   // if formation times are NaNs simply return a NaN to avoid floating-point
   // FE_INVALID errors (that would be raised by unordered comparisons with NaNs)
   if (std::isnan(formation_time_) || std::isnan(begin_formation_time_)) {
-    return NAN;
+    return smash_NaN<double>;
   }
 
   double time_of_interest = position_.x0() + delta_time;

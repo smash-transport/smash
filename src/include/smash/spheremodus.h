@@ -163,7 +163,7 @@ class SphereModus : public ModusDefault {
    * Initial separation between the back to back jets; can only be set by the
    * user if jet_back_ is true
    */
-  const double jet_back_separation_ = NAN;
+  const double jet_back_separation_ = smash_NaN<double>;
   /**\ingroup logging
    * Writes the initial state for the Sphere to the output stream.
    *
