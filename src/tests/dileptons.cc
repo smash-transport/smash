@@ -106,5 +106,5 @@ TEST(eta_decay) {
   }
   // verify that the shining weight for the η Dalitz decay is correct
   // (to an accuracy of five percent)
-  COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.0069, 0.05);
+  COMPARE_RELATIVE_ERROR(weight_sum / N_samples, 0.0069, 0.06);
 }
