@@ -4916,7 +4916,7 @@ struct InputKeys {
    * \anchor input_output_content_specific_
    *
    * Every possible content-specific section is documented in the following.
-   * Refer to \ref doxypage_output_conf_examples "this page" for concrete output
+   * Refer to \ref config_output_examples "this page" for concrete output
    * configuration examples.
    *
    * <hr>

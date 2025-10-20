@@ -30,6 +30,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Input
 * `ListModus` now accepts `Optional_Quantities`, extra to the default values used in Oscar2013.
+
+### Output
 * `Dileptons` and `Photons` now accept the `ASCII` custom format.
 
 

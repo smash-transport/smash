@@ -48,9 +48,11 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
 }
 
 /*!\Userguide
- * \n
- * \page doxypage_output_conf_examples
- * **Example: Configuring the SMASH Output**\n
+ * \page doxypage_input_conf_output
+ *
+ * ---
+ *
+ * \section config_output_examples Examples for configuring the SMASH output
  * The following example configures the output to be printed in an interval of
  * 1 fm and with the net baryon density being printed to the header.
  * The particles output is generated in "Oscar1999", VTK and "Root" format,
@@ -100,9 +102,9 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  \endverbatim
  * SMASH can further be applied to extract initial conditions for hydrodynamic
  * simulations, either in a hypersurface of constant hyperbolic time or based on
- the local energy density, as controlled by the key <tt>\ref key_MC_IC_type_
-   * "Modi: Collider: Initial_Conditions: Type"</tt>. The "ASCII" output format
- is only available in conjunction with the iso-tau hypersurface option.\n
+ * the local energy density, as controlled by the key <tt>\ref key_MC_IC_type_
+ * "Modi: Collider: Initial_Conditions: Type"</tt>. The "ASCII" output format
+ * is only available in conjunction with the iso-tau hypersurface option.\n
  * The initial conditions output can be enabled as follows:
  *\verbatim
  Output:
@@ -116,9 +118,9 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  *\verbatim
  Output:
      Particles:
-         Format:          ["HepMC_asciiv3","HepMC_treeroot"]
+         Format:  ["HepMC_asciiv3","HepMC_treeroot"]
      Collisions:
-         Format:          ["HepMC_asciiv3","HepMC_treeroot"]
+         Format:  ["HepMC_asciiv3","HepMC_treeroot"]
  \endverbatim
  * If a lattice is configured and coulomb potentials are enabled, a VTK output
  * for the electric and magnetic fields is available. It can be obtained by

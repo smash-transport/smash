@@ -31,7 +31,7 @@ namespace smash {
  * - _HepMC_treeroot_ ROOT Tree binary format, readable by ROOT
  *
  * You can find a snippet of the configuration for this output in \ref
- * doxypage_output_conf_examples.
+ * config_output_examples.
  *
  * Producing HepMC output in asciiv3 format requires HepMC3 to be installed.
  * Download the tarball from http://hepmc.web.cern.ch/hepmc/
@@ -75,7 +75,7 @@ namespace smash {
  * However, in SMASH it is possible to filter the amount of information
  * available in the output, depending on whether the HepMC_asciiv3 or
  * HepMC_treeroot output options are specified under \key %Particles or
- * \key Collisions (see  \ref doxypage_output_conf_examples for a clarifying example).
+ * \key Collisions (see  \ref doxypage_input_conf_output for an example).
  * - \key %Particles: the output only provides a particle
  *   <b>list of the final state</b>. In HepMC only one central vertex is created.
  *   All initial state particles are incoming particles and all final state

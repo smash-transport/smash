@@ -1168,10 +1168,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * means the physical information contained in the output (e.g. list of
    * particles, list of interactions, thermodynamics, etc) and format (e.g.
    * ASCII, binary or ROOT). The same content can be printed out in several
-   * formats _simultaneously_.
-   *
-   * For an example of choosing specific output contents see
-   * \ref doxypage_output_conf_examples.
+   * formats _simultaneously_. See \ref config_output_examples for examples.
    *
    * These are the possible contents offered by SMASH:
    *
@@ -1233,16 +1230,16 @@ Experiment<Modus>::Experiment(Configuration &config,
    *
    * \section list_of_output_formats Output formats
    *
-   * For choosing output formats see \ref doxypage_output_conf_examples.
    * Every output content can be printed out in several formats:
    *
    * - \b "ASCII" - a human-readable text-format table of values.
-   *   - For `"Particles"` (\ref doxypage_output_oscar_particles),
-   *     `"Collisions"`, `"Dileptons"`, and `"Photons"` (\ref
-   * doxypage_output_oscar_collisions) contents, it uses the \ref
-   * doxypage_output_oscar "OSCAR block structure".\n In these cases it is
-   * possible to customize the quantities to be printed into the output file
-   * (\ref doxypage_output_ascii).
+   *   - For\n
+   *     &emsp;&emsp;`"Particles"` (\ref doxypage_output_oscar_particles),\n
+   *     &emsp;&emsp;`"Collisions"`, `"Dileptons"`, and `"Photons"` (\ref
+   *     doxypage_output_oscar_collisions)\n contents, it uses the \ref
+   *     doxypage_output_oscar "OSCAR block structure".\n In these cases it is
+   *     possible to customize the quantities to be printed into the output file
+   *     (\ref doxypage_output_ascii).
    *   - For `"Initial_Conditions"` content the output has \ref
    *     doxypage_output_initial_conditions "a fixed block structure".
    *   - For `"Thermodynamics"` content the information stored in the output
@@ -1450,7 +1447,6 @@ Experiment<Modus>::Experiment(Configuration &config,
       assert(output_parameters.quantities.count(output_contents[i]) > 0);
       const bool quantities_given_nonempty =
           !output_parameters.quantities.at(output_contents[i]).empty();
-
       auto formats_contains = [&list_of_formats, &i](const std::string &label) {
         return std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
                          label) != list_of_formats[i].end();

@@ -850,25 +850,30 @@ namespace {
  * \return Unique pointer to oscar output
  */
 template <int Contents>
-std::unique_ptr<OutputInterface> create_select_format(
+std::unique_ptr<OutputInterface> create_selected_format(
     const std::filesystem::path &path, const std::string &name,
     bool modern_format, bool extended_format, bool custom_format,
     const std::vector<std::string> &quantities) {
   if (custom_format) {
     return std::make_unique<OscarOutput<ASCII, Contents>>(path, name,
                                                           quantities);
-  } else if (modern_format && extended_format) {
-    return std::make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(
-        path, name);
-  } else if (modern_format && !extended_format) {
-    return std::make_unique<OscarOutput<OscarFormat2013, Contents>>(path, name);
-  } else if (!modern_format && !extended_format) {
-    return std::make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
   } else {
-    // Only remaining possibility: (!modern_format && extended_format)
-    logg[LOutput].warn() << "Creating Oscar output: "
-                         << "There is no extended Oscar1999 format.";
-    return std::make_unique<OscarOutput<OscarFormat1999, Contents>>(path, name);
+    if (modern_format && extended_format) {
+      return std::make_unique<OscarOutput<OscarFormat2013Extended, Contents>>(
+          path, name);
+    } else if (modern_format && !extended_format) {
+      return std::make_unique<OscarOutput<OscarFormat2013, Contents>>(path,
+                                                                      name);
+    } else if (!modern_format && !extended_format) {
+      return std::make_unique<OscarOutput<OscarFormat1999, Contents>>(path,
+                                                                      name);
+    } else {
+      // Only remaining possibility: (!modern_format && extended_format)
+      logg[LOutput].warn() << "There is no extended Oscar1999 format, creating "
+                              "a regular Oscar1999 output instead.";
+      return std::make_unique<OscarOutput<OscarFormat1999, Contents>>(path,
+                                                                      name);
+    }
   }
 }
 }  // unnamed namespace
@@ -890,36 +895,36 @@ std::unique_ptr<OutputInterface> create_oscar_output(
 
   if (content == "Particles") {
     if (out_par.part_only_final == OutputOnlyFinal::Yes) {
-      return create_select_format<OscarParticlesAtEventend>(
+      return create_selected_format<OscarParticlesAtEventend>(
           path, "particle_lists", modern_format, out_par.part_extended,
           custom_format, quantities);
     } else if (out_par.part_only_final == OutputOnlyFinal::IfNotEmpty) {
-      return create_select_format<OscarParticlesAtEventendIfNotEmpty>(
+      return create_selected_format<OscarParticlesAtEventendIfNotEmpty>(
           path, "particle_lists", modern_format, out_par.part_extended,
           custom_format, quantities);
     } else {  // out_par.part_only_final == OutputOnlyFinal::No
-      return create_select_format<OscarTimesteps | OscarAtEventstart |
-                                  OscarParticlesAtEventend>(
+      return create_selected_format<OscarTimesteps | OscarAtEventstart |
+                                    OscarParticlesAtEventend>(
           path, "particle_lists", modern_format, out_par.part_extended,
           custom_format, quantities);
     }
   } else if (content == "Collisions") {
     if (out_par.coll_printstartend) {
-      return create_select_format<OscarInteractions | OscarAtEventstart |
-                                  OscarParticlesAtEventend>(
+      return create_selected_format<OscarInteractions | OscarAtEventstart |
+                                    OscarParticlesAtEventend>(
           path, "full_event_history", modern_format, out_par.coll_extended,
           custom_format, quantities);
     } else {
-      return create_select_format<OscarInteractions>(
+      return create_selected_format<OscarInteractions>(
           path, "full_event_history", modern_format, out_par.coll_extended,
           custom_format, quantities);
     }
   } else if (content == "Dileptons") {
-    return create_select_format<OscarInteractions>(
+    return create_selected_format<OscarInteractions>(
         path, "Dileptons", modern_format, out_par.dil_extended, custom_format,
         quantities);
   } else if (content == "Photons") {
-    return create_select_format<OscarInteractions>(
+    return create_selected_format<OscarInteractions>(
         path, "Photons", modern_format, out_par.photons_extended, custom_format,
         quantities);
   } else if (content == "Initial_Conditions") {
