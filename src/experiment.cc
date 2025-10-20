@@ -75,6 +75,7 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  * the dilepton output is generated in extended "Oscar2013" and "Binary" format
  * and the photon output is printed in "Oscar2013" format.
  *\verbatim
+ Output:
      Dileptons:
          Format:    ["Oscar2013", "Binary"]
          Extended: True
@@ -89,6 +90,7 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  * position (0,0,0). Gaussian smearing is not applied. The output is provided
  * in "ASCII" and "VTK" format.
  *\verbatim
+ Output:
      Thermodynamics:
          Format:    ["ASCII", "VTK"]
          Type: "hadron"
@@ -97,18 +99,16 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
          Smearing: False
  \endverbatim
  * SMASH can further be applied to extract initial conditions for hydrodynamic
- * simulations. The corresponding output provides the particle list on a
- * hypersurface of constant proper time. If desired, the proper time can be set
- * manually from the configuration file (in the following example at \f$\tau =
- * 1.5 \f$ fm). If not provided, the default proper time corresponds to the
- * moment when both nuclei have entirely passed through each other, while this
- * proper time is greater than 0.5 fm. Else it is set to \f$\tau = 0.5 \f$ fm.\n
+ * simulations, either in a hypersurface of constant hyperbolic time or based on
+ the local energy density, as controlled by the key <tt>\ref key_MC_IC_type_
+   * "Modi: Collider: Initial_Conditions: Type"</tt>. The "ASCII" output format
+ is only available in conjunction with the iso-tau hypersurface option.\n
  * The initial conditions output can be enabled as follows:
  *\verbatim
+ Output:
      Initial_Conditions:
          Format:    ["ASCII", "Oscar1999", "Oscar2013", "Binary", "Root"]
          Extended: False
-         Proper_Time: 1.5
  \endverbatim
  * The HepMC_asciiv3 and/or HepMC_treeroot ouputs are enabled by specifying
  * these output options under Particles or Collisions depdening on the content
