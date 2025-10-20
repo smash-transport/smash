@@ -607,17 +607,20 @@ TEST(try_create_particle_with_spin_func) {
         File_Prefix: event
     )"};
   config.set_value(InputKeys::modi_list_fileDirectory, testoutputpath.string());
-
+  config.set_value(
+      InputKeys::modi_list_optionalQuantities,
+      std::vector<std::string>{"spin0", "spinx", "spiny", "spinz"});
   ListModus list_modus = ListModus(std::move(config), parameters_with_spin);
   Particles particles;
   ParticleData smashon = Test::smashon_random();
   FourVector r = smashon.position(), p = smashon.momentum();
   PdgCode pdg = smashon.pdgcode();
+  // Spin vector components as 4-vector and optional values
   FourVector spin_vec(0.1, 0.2, 0.3, 0.4);
+  std::vector<std::string> opt_vals = {"0.1", "0.2", "0.3", "0.4"};
   list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(), r.x3(),
                                  Test::smashon_mass, p.x0(), p.x1(), p.x2(),
-                                 p.x3(), spin_vec[0], spin_vec[1], spin_vec[2],
-                                 spin_vec[3]);
+                                 p.x3(), opt_vals);
 
   ParticleList plist = particles.copy_to_vector();
   ParticleData created = plist.back();

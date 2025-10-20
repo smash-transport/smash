@@ -177,6 +177,15 @@ TEST(parity) {
   COMPARE(n * n, p);
 }
 
+TEST(set_spin_vector_component) {
+  ParticleData p{ParticleType::find(smash::pdg::p)};
+  std::array<double, 4> expected_components = {0.7, -13.4, 99.9, -0.01};
+  for (int i = 0; i < 4; i++) {
+    p.set_spin_vector_component(i, expected_components[i]);
+    COMPARE(p.spin_vector()[i], expected_components[i]);
+  }
+}
+
 // Test that setting the spin vector with a missing velocity throws an error
 // with a try-catch block.
 TEST(set_unpolarized_spin_vector_with_missing_velocity) {
