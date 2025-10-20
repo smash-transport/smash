@@ -9,6 +9,7 @@
 
 #include "smash/listmodus.h"
 
+#include <array>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -19,7 +20,6 @@
 #include <sstream>
 #include <utility>
 #include <vector>
-#include <array>
 
 #include "smash/algorithms.h"
 #include "smash/boxmodus.h"
@@ -151,7 +151,7 @@ void ListModus::try_create_particle(
 void ListModus::insert_optional_quantities_to_(
     ParticleData &p,
     const std::vector<std::string> &optional_quantities) const {
-    HistoryData hist = p.get_history();
+  HistoryData hist = p.get_history();
   std::ostringstream error_message{"", std::ios_base::ate};
 
   // Track spin component presence for validation (index 0..3)
@@ -187,18 +187,22 @@ void ListModus::insert_optional_quantities_to_(
         error_message << "time_last_coll > particle time.\n";
       }
       hist.time_last_collision = t_last_coll;
-    } else if (field == "pdg_mother1" || quantity == "0") {
-      if (!ParticleType::exists(PdgCode(quantity))) {
-        error_message << "pdg_mother1 cannot be " << quantity << ".\n";
+    } else if (field == "pdg_mother1") {
+      if (quantity != "0") {
+        if (!ParticleType::exists(PdgCode(quantity))) {
+          error_message << "pdg_mother1 cannot be " << quantity << ".\n";
+        }
+        hist.p1 = PdgCode(quantity);
+        len = quantity.size();
       }
-      hist.p1 = PdgCode(quantity);
-      len = quantity.size();
-    } else if (field == "pdg_mother2" || quantity == "0") {
-      if (!ParticleType::exists(PdgCode(quantity))) {
-        error_message << "pdg_mother2 cannot be " << quantity << ".\n";
+    } else if (field == "pdg_mother2") {
+      if (quantity != "0") {
+        if (!ParticleType::exists(PdgCode(quantity))) {
+          error_message << "pdg_mother2 cannot be " << quantity << ".\n";
+        }
+        hist.p2 = PdgCode(quantity);
+        len = quantity.size();
       }
-      hist.p2 = PdgCode(quantity);
-      len = quantity.size();
     } else if (field == "spin0") {
       const double s0 = std::stod(quantity, &len);
       p.set_spin_vector_component(0, s0);
@@ -233,11 +237,11 @@ void ListModus::insert_optional_quantities_to_(
       if (!has_spin[c]) {
         error_message << "Missing spin component s" << c
                       << " while spin interactions are enabled. "
-                         "Provide all four (s0/spint, spinx, spiny, spinz).\n";
+                         "Provide all four (spin0, spinx, spiny, spinz).\n";
       }
     }
   }
-  
+
   if (error_message.str().size() > 0) {
     logg[LList].error()
         << "The reading-in of optional quantities had the following problems:"

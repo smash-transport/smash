@@ -4735,6 +4735,10 @@ struct InputKeys {
    * - "time_last_coll" &rarr; Time when the last interaction happened.
    * - "pdg_mother1" &rarr; Parent of the particle.
    * - "pdg_mother2" &rarr; Second parent of the particle.
+   * - "spin0" &rarr; 0-th component of the spin vector (if contained).
+   * - "spin1" &rarr; 1-st component of the spin vector (if contained).
+   * - "spin2" &rarr; 2-nd component of the spin vector (if contained).
+   * - "spin3" &rarr; 3-rd component of the spin vector (if contained).
    *
    * Optional quantities that are not provided by the user as extra column in
    * the input file are set to their default value when SMASH reads in the input
