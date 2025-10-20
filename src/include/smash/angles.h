@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2018,2020,2022
+ *    Copyright (c) 2014-2015,2017-2018,2020,2022,2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -24,8 +24,8 @@ namespace smash {
  * Angles provides a common interface for generating directions: i.e.,
  * two angles that should be interpreted as azimuthal and polar angles.
  *
- * Usage:
- * ------
+ * <h2> Usage: </h2>
+ *
  * \code
  * #include "Angles.h"
  *
@@ -42,16 +42,16 @@ namespace smash {
  *
  */
 /*
- * Internals
- * ---------
+ * <h2> Internals </h2>
+ *
  *
  * The object internally stores the azimuthal angle \f$\varphi\f$ and
  * the cosine of the polar angle \f$\cos\vartheta\f$. Nobody should rely
  * on this never changing, though; the interface user should be totally
  * oblivious to this.
  *
- * Possible future improvements
- * ----------------------------
+ * <h2> Possible future improvements </h2>
+ *
  *
  * More distributions need to be implemented once there is a physics
  * case to use them.

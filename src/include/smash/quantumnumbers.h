@@ -38,8 +38,7 @@ namespace smash {
  * conserved, hence this is what is stored and compared with this
  * class.)
  *
- * Usage
- * -----
+ * <h2> Usage </h2>
  *
  * \code
  * QuantumNumbers before(particlelist);

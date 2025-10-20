@@ -46,7 +46,7 @@ static constexpr int LClock = LogArea::Clock::id;
  *    suited for output. Ticking this clock means to consider the following
  *    point in time. Ticking beyond the last time point is considered an error.
  *
- * ### Potential usage for adapting time steps:
+ * <h3> Potential usage for adapting time steps: </h3>
  *
  * \code
  *   const double end_time = 10.;
@@ -65,7 +65,7 @@ static constexpr int LClock = LogArea::Clock::id;
  *   }
  * \endcode
  *
- * ### Possible actions for Clock
+ * <h3> Possible actions for Clock </h3>
  *
  * \li look at it and find out the current time
  * \see current_time()
@@ -188,7 +188,7 @@ class Clock {
 
 /** Clock with uniformly spaced time steps
  *
- * ### Internal clock mechanisms
+ * <h3> Internal clock mechanisms </h3>
  *
  * This clock stores a time step size \f$\Delta t\f$, a base time \f$t_0\f$ as
  * well as an end time \f$t_{end}\f$ and a counter \f$n\f$. The current time is

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022-2024
+ *    Copyright (c) 2014-2020,2022-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -28,8 +28,8 @@ class Particles;
 /**
  * \ingroup output
  *
- * \brief SMASH output to ROOT file
- * ----------------------------------------------------------------------------
+ * \brief <h2> SMASH output to ROOT file </h2>
+ *
  * SMASH supports ROOT output as an option (see http://root.cern.ch).
  * The ROOT framework needs to be installed before building SMASH, otherwise
  * ROOT support will be disabled.

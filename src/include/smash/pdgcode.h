@@ -36,8 +36,8 @@ namespace smash {
  *
  * \see http://pdg.lbl.gov/2014/reviews/rpp2014-rev-monte-carlo-numbering.pdf
  *
- * Usage:
- * ------
+ * <h2> Usage: </h2>
+ *
  * \code
  * #include "include/pdgcode.h"
  *
@@ -65,8 +65,7 @@ namespace smash {
  * This class contains a collection of smart accessors to the PDG code
  * so that quantum numbers etc can easily be read off.
  *
- * Internals
- * ---------
+ * <h2> Internals </h2>
  *
  * The content is stored in hexadecimal digits, i.e., the number '545'
  * is interpreted as '0x221', i.e., an eta-meson. To check if a given
@@ -80,8 +79,7 @@ namespace smash {
  * involved with successive divisions by 10 and taking the remainder
  * etc.).
  *
- * Representing nuclei
- * -------------------
+ * <h2> Representing nuclei </h2>
  *
  * Following PDG standard, nuclei are represented by codes ±10LZZZAAAI, where
  * L is number of Lambdas inside the nucleus, ZZZ is charge, AAA is mass
@@ -94,8 +92,7 @@ namespace smash {
  * interesting to study light nuclei production, considering them as single
  * pointlike hadrons. This justifies introduction of nuclear PDG codes here.
  *
- * Limitations:
- * ------------
+ * <h2> Limitations: </h2>
  *
  * The code is tuned to non-colored objects at the moment. That means
  * that colored objects (Diquarks and Quarks) are not easily useable
