@@ -137,6 +137,84 @@ class OscarOutput : public OutputInterface {
 
   /// Formatter of the output
   OutputFormatterASCII formatter_;
+
+  /**
+   * \brief Write particle data to the output file in fixed-size chunks.
+   *
+   * This method writes large particle containers in manageable chunks,
+   * to avoid allocating or holding a single very large buffer in memory.
+   *
+   * The function computes the total byte size of the buffer needed for
+   * all particles:
+   *   \f[
+   *      \text{total\_size} = \text{bytes\_per\_particle} \times
+   * N_{\text{particles}} \f] If the total size fits within \c max_buffer_size
+   * (currently 1 GB), the entire block is assembled in one call to
+   * `formatter_.particles_chunk()` and written in one I/O operation.
+   *
+   * Otherwise, the function accumulates particle records into an intermediate
+   * buffer until adding another particle would exceed \c max_buffer_size.
+   * At that point the buffer is flushed to disk with `fprintf`, cleared, and
+   * reused. The loop then continues with the remaining particles.
+   *
+   * This strategy reduces peak memory usage while keeping I/O efficient.
+   *
+   * \tparam Range Container type. Must be either \c Particles or \c
+   * ParticleList. \param[in] particles Container of particle data to be
+   * written.
+   *
+   * \note
+   *  - The buffer size is set to 1 GB by default but can be made configurable.
+   */
+  template <class Range,
+            std::enable_if_t<std::is_same_v<Range, Particles> ||
+                                 std::is_same_v<Range, ParticleList>,
+                             bool> = true>
+  void write_in_chunks(const Range &particles) {
+    using std::begin;
+    using std::end;
+
+    const auto first = begin(particles);
+    const auto last = end(particles);
+    if (first == last)
+      return;  // nothing to write
+
+    // Maximum buffer size in bytes (1 GB)
+    const std::size_t max_buffer_size =
+        sizeof(char) * static_cast<std::size_t>(std::pow(10.0, 9.0));
+
+    // Compute bytes required per particle (exact for both ASCII and binary)
+    const std::size_t bytes_per_particle =
+        formatter_.compute_single_size(*first);
+
+    // Total size of the entire buffer
+    const std::size_t total_size = bytes_per_particle * particles.size();
+
+    // --- Fast path: write everything in one go if it fits ---
+    if (total_size <= max_buffer_size) {
+      std::fprintf(file_.get(), "%s",
+                   formatter_.particles_chunk(particles).c_str());
+      return;
+    }
+
+    // --- Chunked path: write in blocks ---
+    ToASCII::type buffer{};
+    buffer.reserve(max_buffer_size);
+
+    for (const ParticleData &part : particles) {
+      // If adding another record would exceed the buffer capacity, flush now
+      if (bytes_per_particle + buffer.size() >= max_buffer_size) {
+        std::fprintf(file_.get(), "%s", buffer.c_str());
+        buffer.clear();
+      }
+      formatter_.fill_buffer(part, buffer);
+    }
+
+    // Flush remaining buffer content
+    if (!buffer.empty()) {
+      std::fprintf(file_.get(), "%s", buffer.c_str());
+    }
+  }
 };
 
 /**

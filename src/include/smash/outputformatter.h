@@ -36,6 +36,38 @@ struct ToASCII {
   /// Return type of this converter.
   using type = std::string;
 
+  /// ASCII policy: insert a separator between fields and an end-of-record char.
+  static constexpr bool has_sep = true;
+
+  /// Character used to separate fields in ASCII output.
+  static constexpr char sep_char = ' ';
+
+  /// Indicates whether an end-of-record character is appended (true for ASCII).
+  static constexpr bool has_end = true;
+
+  /// Character used to mark the end of a record in ASCII output.
+  static constexpr char end_char = '\n';
+
+  /**
+   * \brief Indicates whether the byte size varies between particles.
+   *
+   * For variable-length types (e.g. strings), this returns \c true since
+   * different ParticleData instances may have different sizes.
+   */
+  constexpr bool size_varies() const { return true; }
+
+  /**
+   * \brief Returns the byte size of the given data.
+   *
+   * Assumes 1 byte per element (string stores chars).
+   *
+   * \param[in] data Data object.
+   * \return Total size in bytes.
+   */
+  std::size_t size_of_type(const type& data) const {
+    return sizeof(char) * data.size();
+  }
+
   /**
    * Converts an integer.
    *
@@ -44,18 +76,7 @@ struct ToASCII {
   type as_integer(int value) const { return std::to_string(value); }
 
   /**
-   * Converts a double with 6 digits of precision.
-   *
-   * \note The usage of \c std::snprintf over \c std::ostringstream is because
-   * of performance reasons (in C++20 this will be replaced with \c std::format
-   * which is even better). The returned string is constructed from the buffer
-   * in a way to exclude the terminating null character from the buffer. The
-   * hard-coded buffer size should fit any number, but a couple of assert are
-   * used to possibly investigate unexpected behaviour.
-   *
-   * \warning Since the buffer size is needed twice, it makes sense to store it
-   * in a variable. However, cpplint complains if the variable name is not
-   * starting with \c k followed by CamelCase.
+   * Converts a double with default precision (~6 significant digits).
    *
    * \param[in] value number to convert
    */
@@ -70,15 +91,6 @@ struct ToASCII {
 
   /**
    * Converts a double with 9 digits of precision.
-   *
-   * \see \c as_double for further information.
-   *
-   * \note The duplication of the code of the \c as_double method is done on
-   * purpose as naively extracting a function passing the \c std::snprintf
-   * format string as parameter would trigger a warning in compilation (the
-   * format has to be a literal in order to be checked by the compiler at
-   * compile time) and the effort to avoid this is not worth now, especially
-   * since this code will be changed anyhow when using C++20.
    *
    * \param[in] value number to convert
    */
@@ -95,7 +107,7 @@ struct ToASCII {
    * Because %ToASCII converts into strings, this simply returns the string
    * itself.
    *
-   * \param[inout] str string to be written
+   * \param[in] str string to be written
    */
   type as_string(const std::string& str) const { return str; }
 };
@@ -108,6 +120,40 @@ class ToBinary {
  public:
   /// Return type of this converter.
   using type = std::vector<char>;
+
+  /// Binary policy: no separators between fields, no end-of-record char.
+  static constexpr bool has_sep = false;
+
+  /// Character used to separate fields (unused for binary).
+  static constexpr char sep_char = 0;
+
+  /// Indicates whether an end-of-record character is appended (false for
+  /// binary).
+  static constexpr bool has_end = false;
+
+  /// Character used to mark the end of a record (unused for binary).
+  static constexpr char end_char = 0;
+
+  /**
+   * \brief Indicates whether the byte size varies between particles.
+   *
+   * For the current set of binary fields (fixed-size scalars), this is \c
+   * false. If variable-length fields are ever added to binary output, flip
+   * this.
+   */
+  constexpr bool size_varies() const { return false; }
+
+  /**
+   * \brief Returns the byte size of the given data.
+   *
+   * Assumes 1 byte per element (vector of char).
+   *
+   * \param[in] data Data object.
+   * \return Total size in bytes.
+   */
+  std::size_t size_of_type(const type& data) const {
+    return sizeof(char) * data.size();
+  }
 
   /**
    * Converts an integer to binary format.
@@ -126,25 +172,18 @@ class ToBinary {
   type as_double(double value) const { return as_binary_data(value); }
 
   /**
-   * Converts a double to binary format, intended for precise representation.
-   * Note that for binary output there is no difference between this and the
-   * \c ToBinary::as_double method, but this method has still to be introduced
-   * to allow other classes to get the converter class as a template parameter.
-   *
-   * \param[in] value number to convert
-   * \return a vector of char representing the binary format of the double
+   * Converts a double to binary format (same as as_double for binary).
    */
   type as_precise_double(double value) const { return as_double(value); }
 
   /**
-   * Converts a string to binary format.
+   * Converts a string to binary format (raw bytes).
    *
    * \param[in] str string to convert
-   * \return a vector of char representing the binary format of the string
+   * \return a vector of char representing the string content
    */
   type as_string(const std::string& str) const {
-    type binary_data(str.begin(), str.end());
-    return binary_data;
+    return type(str.begin(), str.end());
   }
 
  private:
@@ -177,8 +216,8 @@ class ToBinary {
  * 2. Adding the proper key-value pair to the \c units_ map, specifying the unit
  *    of the quantity.
  *
- * \tparam Converter The desired output format. At the moment it must be either
- *                   \c ToASCII or `ToBinary`.
+ * \tparam Converter The desired output format. Must be either \c ToASCII or \c
+ * ToBinary.
  */
 template <typename Converter,
           std::enable_if_t<std::is_same_v<Converter, ToASCII> ||
@@ -335,6 +374,121 @@ class OutputFormatterBase {
     }
   }
 
+  /**
+   * Computes and returns the total bytes used by a single particle using
+   * all registered getters.
+   *
+   * For ASCII, includes the single-byte field separators inserted between
+   * values, and includes the end-of-record character (e.g., '\n').
+   *
+   * \return Total byte size of one particle´s representation.
+   */
+  std::size_t compute_single_size(const ParticleData& sample) const {
+    std::size_t size = 0;
+    for (const auto& getter : getters_) {
+      const typename Converter::type tmp = getter(sample);
+      size += converter_.size_of_type(tmp);
+    }
+    if constexpr (Converter::has_sep) {
+      if (!getters_.empty())
+        size += (getters_.size() - 1);  // separators
+    }
+    if constexpr (Converter::has_end) {
+      size += 1;  // end-of-record char
+    }
+    return size;
+  }
+
+  /**
+   * Appends the Converter::type representation of a single particle to an
+   * existing buffer, avoiding intermediate allocations when building large
+   * blocks.
+   *
+   * For ASCII (policy: has_sep=true, has_end=true), a single-byte separator is
+   * inserted between fields and a trailing end-of-record character is appended.
+   * For binary (policy: has_sep=false, has_end=false), neither is added.
+   *
+   * \param[in]  p       Particle whose information is to be appended.
+   * \param[out] buffer  Destination buffer to which the data is appended.
+   */
+  void fill_buffer(const ParticleData& p,
+                   typename Converter::type& buffer) const {
+    bool first = true;
+    for (const auto& get : getters_) {
+      if constexpr (Converter::has_sep) {
+        if (!first)
+          buffer.push_back(Converter::sep_char);
+        first = false;
+      }
+      const auto data = get(p);
+      buffer.insert(buffer.end(), data.begin(), data.end());
+    }
+    if constexpr (Converter::has_end) {
+      buffer.push_back(Converter::end_char);
+    }
+  }
+
+  /**
+   * Produces a data chunk representing a single particle
+   * suitable for writing to an output file.
+   *
+   * For ASCII (policy: has_end=true), this returns the space-separated fields
+   * **including** a trailing newline. For binary, this returns the packed
+   * scalar bytes with no separators and no trailing newline.
+   *
+   * \param[in] p Particle whose information is to be written.
+   * \return A buffer containing the formatted data.
+   *
+   * \see fill_buffer(const ParticleData&, Converter::type&)
+   */
+  typename Converter::type data_line(const ParticleData& p) const {
+    typename Converter::type chunk{};
+    // For binary this is exact; for ASCII it's exact as well since we count
+    // separators and the end-of-record char.
+    chunk.reserve(compute_single_size(p));
+    fill_buffer(p, chunk);
+    return chunk;
+  }
+
+  /**
+   * Produces a data chunk representing a block of particles
+   * for efficient batched output.
+   *
+   * Instead of writing one chunk per particle, this method concatenates the
+   * data for all particles in the container into a single contiguous
+   * buffer. The ASCII policy (if enabled) ensures per-record separators and
+   * end-of-record characters are present in the buffer.
+   *
+   * \tparam Range Container type — enforced to be either `Particles`
+   *         or `ParticleList`.
+   * \param[in] particles Container of particles whose information is to be
+   *            written.
+   * \return A Converter::type buffer containing the formatted data for the
+   * entire block.
+   *
+   * \see fill_buffer(const ParticleData&, typename Converter::type&)
+   */
+  template <class Range,
+            std::enable_if_t<std::is_same_v<Range, Particles> ||
+                                 std::is_same_v<Range, ParticleList>,
+                             bool> = true>
+  typename Converter::type particles_chunk(const Range& particles) const {
+    typename Converter::type chunk{};
+    auto it = particles.begin();
+    if (it == particles.end())
+      return chunk;
+
+    // Reserve based on first particle (exact for current binary payloads; exact
+    // for ASCII too since compute_single_size includes separators and
+    // end-of-record char).
+    chunk.reserve(particles.size() * compute_single_size(*it));
+
+    for (const ParticleData& p : particles) {
+      fill_buffer(p, chunk);
+    }
+    return chunk;
+  }
+
  protected:
   /// Member to convert data into the correct output format.
   Converter converter_{};
@@ -346,7 +500,7 @@ class OutputFormatterBase {
   std::vector<std::function<typename Converter::type(const ParticleData&)>>
       getters_{};
 
-  ///  Map with known quantities and corresponding units.
+  /// Map with known quantities and corresponding units.
   const std::map<std::string, std::string> units_ = {
       {"t", "fm"},
       {"x", "fm"},
@@ -359,7 +513,7 @@ class OutputFormatterBase {
       {"pz", "GeV"},
       {"pdg", "none"},
       {"ID", "none"},
-      {"id", "none"},  // used in OSCAR1999
+      {"id", "none"},
       {"charge", "e"},
       {"ncoll", "none"},
       {"form_time", "fm"},
@@ -439,106 +593,6 @@ class OutputFormatterBinary : public OutputFormatterBase<ToBinary> {
    * readable and simplifies access to inherited members.
    */
   using OutputFormatterBase<ToBinary>::OutputFormatterBase;
-
-  /**
-   * Computes (once) and returns the total number of bytes required to encode
-   * a single particle using all registered getters.
-   *
-   * This method caches the result after the first computation to avoid
-   * repeated work. The size is assumed to be invariant across particles.
-   *
-   * \return Total byte size of one particle's binary representation.
-   */
-  std::size_t compute_single_size(const ParticleData& sample) const {
-    if (cached_single_size_ != 0)
-      return cached_single_size_;
-
-    std::size_t sz = 0;
-    for (const auto& getter : getters_) {
-      const ToBinary::type tmp = getter(sample);  // only to learn size
-      sz += tmp.size();
-    }
-    cached_single_size_ = sz;
-    return cached_single_size_;
-  }
-
-  /**
-   * Produces a contiguous binary chunk representing a single particle
-   * suitable for writing to an output file.
-   *
-   * \param[in] p Particle whose information is to be written.
-   * \return A binary buffer containing the formatted data.
-   *
-   * \see fill_binary_buffer(const ParticleData&, ToBinary::type&)
-   */
-  ToBinary::type binary_chunk(const ParticleData& p) {
-    ToBinary::type chunk{};
-    chunk.reserve(compute_single_size(p));
-
-    for (const auto& get : getters_) {
-      const ToBinary::type data = get(p);
-      chunk.insert(chunk.end(), data.begin(), data.end());
-    }
-    return chunk;
-  }
-
-  /**
-   * Appends the binary representation of a single particle to an existing
-   * buffer, avoiding intermediate allocations when building large blocks.
-   *
-   * \param[in]  p       Particle whose information is to be appended.
-   * \param[out] buffer  Destination buffer to which the bytes are appended.
-   */
-  void fill_binary_buffer(const ParticleData& p, ToBinary::type& buffer) const {
-    buffer.reserve(buffer.size() + compute_single_size(p));
-
-    for (const auto& get : getters_) {
-      const ToBinary::type data = get(p);
-      buffer.insert(buffer.end(), data.begin(), data.end());
-    }
-  }
-
-  /**
-   * Produces a contiguous binary chunk representing a block of particles
-   * for efficient batched output.
-   *
-   * Instead of writing one chunk per particle, this method concatenates the
-   * binary data for all particles in the container into a single contiguous
-   * buffer. This enables writing with a single `std::fwrite` call to
-   * significantly reduce write calls.
-   *
-   * \tparam Range Container type — enforced to be either `Particles`
-   *         or `ParticleList`.
-   * \param[in] particles Container of particles whose information is to be
-   *            written.
-   * \return A binary buffer containing the formatted data for the entire block.
-   *
-   * \see binary_chunk(const ParticleData&)
-   * \see fill_binary_buffer(const ParticleData&, ToBinary::type&)
-   */
-  template <class Range,
-            std::enable_if_t<std::is_same_v<Range, Particles> ||
-                                 std::is_same_v<Range, ParticleList>,
-                             bool> = true>
-  ToBinary::type binary_chunk(const Range& particles) {
-    ToBinary::type chunk{};
-    auto it = particles.begin();
-    if (it == particles.end())
-      return chunk;
-
-    // Reserve once using the size learned from the first particle
-    chunk.reserve(particles.size() * compute_single_size(*it));
-    for (const ParticleData& p : particles) {
-      fill_binary_buffer(p, chunk);
-    }
-    return chunk;
-  }
-
- private:
-  /// Cached size of a single particle's binary representation.
-  /// This avoids recomputing the total byte size on every call to
-  /// `binary_chunk` or `fill_binary_buffer`.
-  mutable std::size_t cached_single_size_{0};
 };
 
 /**
@@ -553,20 +607,6 @@ class OutputFormatterASCII : public OutputFormatterBase<ToASCII> {
    * readable and simplifies access to inherited members.
    */
   using OutputFormatterBase<ToASCII>::OutputFormatterBase;
-
-  /**
-   * Produces the line with formatted data for the body of the output file.
-   *
-   * \param[in] p particle whose information is to be written.
-   * \return string with formatted data separated by a space.
-   */
-  ToASCII::type data_line(const ParticleData& p) const {
-    return std::accumulate(
-        std::begin(getters_), std::end(getters_), std::string{},
-        [&p](const std::string& ss, const auto& getter) {
-          return ss.empty() ? getter(p) : ss + " " + getter(p);
-        });
-  }
 
   /**
    * Produces the line with quantities for the header of the output file.
@@ -590,13 +630,13 @@ class OutputFormatterASCII : public OutputFormatterBase<ToASCII> {
         std::begin(quantities_), std::end(quantities_), std::string{},
         [this](const std::string& ss, const std::string& s) {
           return ss.empty()
-                     ? this->converter_.as_string(units_.at(s))
-                     : ss + " " + this->converter_.as_string(units_.at(s));
+                     ? this->converter_.as_string(this->units_.at(s))
+                     : ss + " " +
+                           this->converter_.as_string(this->units_.at(s));
         });
   }
 };
 
 }  // namespace smash
-// namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_OUTPUTFORMATTER_H_

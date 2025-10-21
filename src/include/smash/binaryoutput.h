@@ -155,20 +155,21 @@ class BinaryOutputBase : public OutputInterface {
                                  std::is_same_v<Range, ParticleList>,
                              bool> = true>
   void write_in_chunk(const Range &particles) {
-    constexpr std::size_t max_buffer_size =
-        sizeof(char) * static_cast<std::size_t>(std::pow(10.0, 9.0));
+    using std::begin;
+    using std::end;
 
-    if (particles.empty()) {
+    const auto first = begin(particles);
+    const auto last = end(particles);
+    if (first == last)
       return;
-    }
 
-    const std::size_t size_of_single_particledata =
-        formatter_.compute_single_size(particles.front());
-    const std::size_t total_size =
-        size_of_single_particledata * particles.size();
-
+    const std::size_t max_buffer_size =
+        sizeof(char) * static_cast<std::size_t>(std::pow(10.0, 9.0));
+    const std::size_t bytes_per_particle =
+        formatter_.compute_single_size(*first);
+    const std::size_t total_size = bytes_per_particle * particles.size();
     if (total_size <= max_buffer_size) {
-      write(particles);
+      write(formatter_.particles_chunk(particles));
       return;
     }
 
@@ -176,11 +177,11 @@ class BinaryOutputBase : public OutputInterface {
     buffer.reserve(max_buffer_size);
 
     for (const ParticleData &part : particles) {
-      formatter_.fill_binary_buffer(part, buffer);
-      if (buffer.size() >= max_buffer_size) {
+      if (bytes_per_particle + buffer.size() >= max_buffer_size) {
         write(buffer);
         buffer.clear();
       }
+      formatter_.fill_buffer(part, buffer);
     }
 
     if (!buffer.empty()) {

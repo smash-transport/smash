@@ -113,17 +113,16 @@ TEST(valid_line_maker) {
   correct_line << p.get_history().p1.string() << " ";
   correct_line << p.get_history().p2.string() << " ";
   correct_line << p.pdgcode().baryon_number() << " ";
-  correct_line << p.pdgcode().strangeness();
-
+  correct_line << p.pdgcode().strangeness() << "\n";
   VERIFY(correct_line.str() == formatter.data_line(p));
 }
 
-TEST(binary_chunk) {
+TEST(binary_data_line) {
   ParticleData p = Test::smashon_random();
   std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
   OutputFormatterBinary formatter(quantities);
 
-  std::vector<char> chunk = formatter.binary_chunk(p);
+  std::vector<char> chunk = formatter.data_line(p);
 
   double t = *reinterpret_cast<double*>(chunk.data());
   double x = *reinterpret_cast<double*>(chunk.data() + sizeof(double));
@@ -138,7 +137,7 @@ TEST(binary_chunk) {
   VERIFY(id == p.id());
 }
 
-TEST(per_particle_binary_chunk_same_as_particles_chunk) {
+TEST(per_particle_binary_data_line_same_as_particles_chunk) {
   ParticleList particles;
   const std::size_t N = 33;
   particles.reserve(N);
@@ -151,13 +150,13 @@ TEST(per_particle_binary_chunk_same_as_particles_chunk) {
   OutputFormatterBinary formatter(quantities);
 
   // Chunk for whole container
-  std::vector<char> particles_chunk = formatter.binary_chunk(particles);
+  std::vector<char> particles_chunk = formatter.particles_chunk(particles);
 
   // Chunk by concatenating per-particle
   std::vector<char> per_particle_chunk;
   per_particle_chunk.reserve(particles_chunk.size());
   for (const auto& p : particles) {
-    auto data = formatter.binary_chunk(p);
+    auto data = formatter.data_line(p);
     per_particle_chunk.insert(per_particle_chunk.end(), data.begin(),
                               data.end());
   }

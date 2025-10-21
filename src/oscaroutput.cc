@@ -127,9 +127,7 @@ OscarOutput<Format, Contents>::OscarOutput(
 
 template <OscarOutputFormat Format, int Contents>
 inline void OscarOutput<Format, Contents>::write(const Particles &particles) {
-  for (const ParticleData &data : particles) {
-    write_particledata(data);
-  }
+  write_in_chunks(particles);
 }
 
 template <OscarOutputFormat Format, int Contents>
@@ -852,7 +850,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
     const ParticleData &data) {
-  std::fprintf(file_.get(), "%s\n", formatter_.data_line(data).c_str());
+  std::fprintf(file_.get(), "%s", formatter_.data_line(data).c_str());
 }
 
 namespace {
