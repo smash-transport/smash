@@ -36,15 +36,11 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Input
 * `ListModus` now accepts `Optional_Quantities`, extra to the default values used in Oscar2013.
-<<<<<<< HEAD
 * Added the `Proper_Time_Scaling` key in the `Initial_Conditions` section under `Modi: Collider:`, that scales the switching proper time when using constant tau initial conditions.
-=======
-* Add spin 4-vector components (`spin0`, `spinx`, `spiny`, `spinz`) to `Optional_Quantities`.
 * If `Spin_Interactions` is not `Off`, the `List` modus will read four additional columns expected to be the components of the spin 4-vector (s_0, s_1, s_2, s_3).
 
 ### Output
 * Added the spin components to the user defined `Quantities` list for the customizable `ASCII` output. The keys are `spin0`, `spinx`, `spiny`, `spinz`
->>>>>>> 5d840a334 (Adjust CHANGELOG)
 
 ### Output
 * `Dileptons`, `Photons`, and `Initial_Conditions` now accept the `ASCII` and `Binary` custom format, and require setting the desired `Quantities`.
