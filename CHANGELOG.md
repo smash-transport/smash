@@ -33,7 +33,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Output
 * `Dileptons` and `Photons` now accept the `ASCII` custom format.
-* ⚠️ The `ASCII` format for `Output: Initial_Conditions:Format` key was renamed to `for_vHLLE`. **This breaks the workflows for hybrid models using SMASH as initial conditions!**
+* ⚠️ The `ASCII` format for `Output: Initial_Conditions:Format` key was renamed to `for_vHLLE`, and the corresponding file to `SMASH_IC_for_vHLLE.dat`. **This breaks the workflows for hybrid models using SMASH as initial conditions!**
 
 
 ## SMASH-3.2.2

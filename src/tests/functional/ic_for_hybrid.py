@@ -54,7 +54,7 @@ if not args.skip_smash:
         sys.exit(1)
 
 # Check if output is consistent
-ascii_file = output_directory + '/SMASH_IC.dat'
+ascii_file = output_directory + '/SMASH_IC_for_vHLLE.dat'
 oscar_file = output_directory + '/SMASH_IC.oscar'
 
 # Read output files

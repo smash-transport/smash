@@ -810,7 +810,7 @@ void Experiment<Modus>::create_output(const std::string &format,
           "Binary formats.");
     }
     outputs_.emplace_back(
-        std::make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
+        std::make_unique<ICOutput>(output_path, "SMASH_IC_for_vHLLE", out_par));
   } else if ((format == "HepMC") || (format == "HepMC_asciiv3") ||
              (format == "HepMC_treeroot")) {
 #ifdef SMASH_USE_HEPMC
@@ -1360,13 +1360,11 @@ Experiment<Modus>::Experiment(Configuration &config,
    * Once initial conditions are enabled, the output file named SMASH_IC
    * (followed by the appropriate suffix) is generated when SMASH is executed.
    * \n The output is available in Oscar1999, Oscar2013, binary and ROOT format,
-   * as well as in an additional "for_vHLLE" format. The latter is meant to directly serve as input for the vHLLE hydrodynamics code \iref{Karpenko:2013wva}.
-   * \n \n
-   * <h3> Oscar output </h3>
-   * In case
-   * of the Oscar1999 and Oscar2013 format, the structure is identical to the
-   * Oscar Particles Format (see \ref doxypage_output_oscar_particles). \n
-   * In contrast
+   * as well as in an additional "for_vHLLE" format. The latter is meant to
+   * directly serve as input for the vHLLE hydrodynamics code
+   * \iref{Karpenko:2013wva}. \n \n <h3> Oscar output </h3> In case of the
+   * Oscar1999 and Oscar2013 format, the structure is identical to the Oscar
+   * Particles Format (see \ref doxypage_output_oscar_particles). \n In contrast
    * to the usual particles output however, the initial conditions output
    * provides a **list of all particles removed from the evolution** at the
    * time when crossing the hypersurface. This implies that neither the

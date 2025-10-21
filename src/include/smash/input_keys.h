@@ -5103,7 +5103,10 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * <hr>
    * <h3> &diams; Initial_Conditions </h3>
-   * &rArr; Only `Oscar1999`, `Oscar2013`, `Binary`, `ROOT` and `for_vHLLE` formats. The latter is only available for `Constant_Tau` fluidizations, see the pages for Output: \ref doxypage_output_initial_conditions and Modi: Collider: \ref doxypage_input_conf_modi_C_initial_conditions.
+   * &rArr; Only `Oscar1999`, `Oscar2013`, `Binary`, `ROOT` and `for_vHLLE`
+   * formats. The latter is only available for `Constant_Tau` fluidizations, see
+   * the pages for Output: \ref doxypage_output_initial_conditions and Modi:
+   * Collider: \ref doxypage_input_conf_modi_C_initial_conditions.
    *
    * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
    *
