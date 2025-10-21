@@ -5121,6 +5121,26 @@ struct InputKeys {
       InputSections::o_initialConditions + "Extended", false, {"1.7"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_IC_quantities_,Quantities,list of
+   * strings,
+   * </tt><b>empty list</b><tt>}
+   *
+   * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
+   * specified. An error will be produced if a non-empty `Quantities` key is
+   * specified without including `ASCII` or `Binary` as format.
+   * See \ref doxypage_output_ascii for the possible values.
+   */
+  /**
+   * \see_key{key_output_IC_quantities_}
+   */
+  inline static const Key<std::vector<std::string>>
+      output_initialConditions_quantities{
+          InputSections::o_initialConditions + "Quantities",
+          std::vector<std::string>{},
+          {"3.3"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_removed_keys
    *
    * \list_removed_key{key_output_IC_lower_bound_,Output.Initial_Conditions.Lower_Bound,3.3}.
@@ -6192,6 +6212,7 @@ struct InputKeys {
       std::cref(output_photons_extended),
       std::cref(output_photons_quantities),
       std::cref(output_initialConditions_extended),
+      std::cref(output_initialConditions_quantities),
       std::cref(output_initialConditions_lowerBound),
       std::cref(output_initialConditions_properTime),
       std::cref(output_initialConditions_pTCut),

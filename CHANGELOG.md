@@ -32,8 +32,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * `ListModus` now accepts `Optional_Quantities`, extra to the default values used in Oscar2013.
 
 ### Output
-* `Dileptons` and `Photons` now accept the `ASCII` custom format.
-* ⚠️ The `ASCII` format for `Output: Initial_Conditions:Format` key was renamed to `for_vHLLE`, and the corresponding file to `SMASH_IC_for_vHLLE.dat`. **This breaks the workflows for hybrid models using SMASH as initial conditions!**
+* `Dileptons`, `Photons`, and `Initial_Conditions` now accept the `ASCII` custom format, and require setting the desired `Quantities`.
+* ⚠️ The previous `ASCII` option for `Output: Initial_Conditions:Format` key was renamed to `for_vHLLE`, and the corresponding file to `SMASH_IC_for_vHLLE.dat`. **This breaks the workflows for hybrid models using SMASH as initial conditions!**
 
 
 ## SMASH-3.2.2

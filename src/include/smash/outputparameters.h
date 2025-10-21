@@ -131,6 +131,9 @@ struct OutputParameters {
     const auto photons_quantities =
         conf.take(InputKeys::output_photons_quantities);
     quantities.insert({"Photons", photons_quantities});
+    const auto IC_quantities =
+        conf.take(InputKeys::output_initialConditions_quantities);
+    quantities.insert({"Initial_Conditions", IC_quantities});
     /* In the same spirit, always take also other particles and collisions keys.
      * This makes the class behaviour bounded to the key default value and not
      * to the class member initial value. */

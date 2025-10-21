@@ -787,7 +787,8 @@ void Experiment<Modus>::create_output(const std::string &format,
         create_oscar_output(format, content, output_path, out_par));
   } else if (format == "ASCII" &&
              (content == "Particles" || content == "Collisions" ||
-              content == "Dileptons" || content == "Photons")) {
+              content == "Dileptons" || content == "Photons" ||
+              content == "Initial_Conditions")) {
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
   } else if (content == "Thermodynamics" && format == "ASCII") {
@@ -1440,7 +1441,8 @@ Experiment<Modus>::Experiment(Configuration &config,
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
     if (output_contents[i] == "Particles" ||
         output_contents[i] == "Collisions" ||
-        output_contents[i] == "Dileptons" || output_contents[i] == "Photons") {
+        output_contents[i] == "Dileptons" || output_contents[i] == "Photons" ||
+        output_contents[i] == "Initial_Conditions") {
       assert(output_parameters.quantities.count(output_contents[i]) > 0);
       const bool quantities_given_nonempty =
           !output_parameters.quantities.at(output_contents[i]).empty();

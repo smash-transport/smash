@@ -837,7 +837,7 @@ void OscarOutput<Format, Contents>::write_particledata(
 namespace {
 /**
  * Helper function that creates the oscar output with the format selected by
- * create_oscar_output (except for initial conditions).
+ * create_oscar_output.
  *
  * \tparam Contents Determines what information will be written to the output
  * \param[in] path Path of output
@@ -924,23 +924,9 @@ std::unique_ptr<OutputInterface> create_oscar_output(
         path, "Photons", modern_format, out_par.photons_extended, custom_format,
         quantities);
   } else if (content == "Initial_Conditions") {
-    if (modern_format && !out_par.ic_extended) {
-      return std::make_unique<
-          OscarOutput<OscarFormat2013, OscarParticlesIC | OscarAtEventstart>>(
-          path, "SMASH_IC");
-    } else if (modern_format && out_par.ic_extended) {
-      return std::make_unique<OscarOutput<
-          OscarFormat2013Extended, OscarParticlesIC | OscarAtEventstart>>(
-          path, "SMASH_IC");
-    } else if (!modern_format && !out_par.ic_extended) {
-      return std::make_unique<
-          OscarOutput<OscarFormat1999, OscarParticlesIC | OscarAtEventstart>>(
-          path, "SMASH_IC");
-    } else if (!custom_format && !modern_format && out_par.ic_extended) {
-      logg[LOutput].warn()
-          << "Creating Oscar output: "
-          << "There is no extended Oscar1999 (initial conditions) format.";
-    }
+    return create_selected_format<OscarParticlesIC | OscarAtEventstart>(
+        path, "SMASH_IC", modern_format, out_par.ic_extended, custom_format,
+        quantities);
   }
 
   throw std::invalid_argument("Create_oscar_output got unknown content.");
