@@ -831,7 +831,6 @@ static bool density_hist(Particles* P, int box_length, int cell_length,
   // number of cells per a side of the box
   const double factor = box_length / cell_length;
 
-  // double cells[num_cell];
   std::vector<double> cells(num_cell, 0.0);
 
   int count = 0;
