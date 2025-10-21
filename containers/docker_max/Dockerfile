@@ -11,7 +11,7 @@ FROM ghcr.io/smash-transport/smash:newest
 SHELL ["/bin/bash", "-c"]
 
 # Set the proper general cpu family architecture flag.
-# Please, for more information refer to the documention of your compiler.
+# Please, for more information refer to the documentation of your compiler.
 
 ARG TARGET_ARCHITECTURE="x86-64"
 

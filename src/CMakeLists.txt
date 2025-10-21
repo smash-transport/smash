@@ -5,7 +5,7 @@
 #
 #    BSD 3-clause license
 #
-#########################################################
+########################################################
 
 include(CheckLibraryExists)
 include(AddCompilerFlag)

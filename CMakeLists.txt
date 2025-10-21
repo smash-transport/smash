@@ -5,7 +5,7 @@
 #
 #    BSD 3-clause license
 #
-#########################################################
+########################################################
 
 # Minimum cmake version this is tested on
 cmake_minimum_required(VERSION 3.16)
