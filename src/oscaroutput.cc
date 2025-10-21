@@ -886,10 +886,6 @@ std::unique_ptr<OutputInterface> create_oscar_output(
   }
   const bool modern_format = (format == "Oscar2013");
   const bool custom_format = (format == "ASCII");
-  if (modern_format && custom_format) {
-    throw std::logic_error(
-        "Oscar2013 and ASCII should not be called at the same time.");
-  }
   const auto &quantities = custom_format ? out_par.quantities.at(content)
                                          : std::vector<std::string>{};
 
