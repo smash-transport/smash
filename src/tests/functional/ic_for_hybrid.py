@@ -38,7 +38,7 @@ if not args.skip_smash:
     smash_executable = args.binary + "/smash"
     smash_config_file = args.source + "/input/config.yaml"
     smash_config_output = \
-        "Output: {Initial_Conditions: {Format: [for_vHLLE, Binary, Oscar2013]}}"
+        "Output: {Initial_Conditions: {Format: [for_vHLLE, Oscar2013_bin, Oscar2013]}}"
     smash_config_ic = \
         "Modi: {Collider: {Initial_Conditions: {Type: Constant_Tau}}}"
     run = subp.run([smash_executable, "-i", smash_config_file,
