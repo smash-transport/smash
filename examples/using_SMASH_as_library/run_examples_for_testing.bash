@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
 
+########################################################
+#
+#    Copyright (c) 2015,2019-2020,2022
+#      SMASH Team
+#
+#    GNU General Public License (GPLv3 or later)
+#
+########################################################
+
 # Stricter bash mode
 set -euo pipefail
 
