@@ -39,6 +39,7 @@ if(DOXYGEN_FOUND)
     # Prepare list of files to be used as input for user guide and development documentation
     set(COMMON_GENERIC_FILES
         "README.md"
+        "LICENSE.md"
         "INSTALL.md"
         "CHANGELOG.md"
         "CONTRIBUTING.md"

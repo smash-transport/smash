@@ -1,12 +1,18 @@
+### Overview
+
 This document contains the licenses currently in use for SMASH:
- - GPLv3
- - BSD 3-clause
- - Creative Commons Zero v1.0 Universal
- - The Unlicense
+ 1. [GPLv3](#gplv3)
+ 2. [BSD 3-clause](#bsd3)
+ 3. [Creative Commons Zero v1.0 Universal](#cc0)
+ 4. [The Unlicense](#unlicense)
 
+---
 
-#######################################################################
+<a id="gplv3"></a>
 
+## GPLv3
+
+```
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
@@ -79,7 +85,7 @@ modification follow.
 
                        TERMS AND CONDITIONS
 
-  0. Definitions.
+  1. Definitions.
 
   "This License" refers to version 3 of the GNU General Public License.
 
@@ -681,12 +687,13 @@ may consider it more useful to permit linking proprietary applications with
 the library.  If this is what you want to do, use the GNU Lesser General
 Public License instead of this License.  But first, please read
 <http://www.gnu.org/philosophy/why-not-lgpl.html>.
+```
 
+<a id="bsd3"></a>
 
-########################################################################
+## BSD 3-clause
 
-BSD 3-clause
-
+```
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
 are met:
@@ -714,12 +721,15 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
 
+<a id="cc0"></a>
 
-########################################################################
+## Creative Commons Zero v1.0 Universal
 
 Creative Commons Legal Code
 
+```
 CC0 1.0 Universal
 
     CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
@@ -839,12 +849,13 @@ express Statement of Purpose.
  d. Affirmer understands and acknowledges that Creative Commons is not a
     party to this document and has no duty or obligation with respect to
     this CC0 or use of the Work.
+```
 
+<a id="unlicense"></a>
 
-#######################################################################
+## The Unlicense
 
-The Unlicense
-
+```
 This is free and unencumbered software released into the public domain.
 
 Anyone is free to copy, modify, publish, use, compile, sell, or
@@ -869,3 +880,4 @@ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to <https://unlicense.org>
+```

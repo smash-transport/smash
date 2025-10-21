@@ -166,15 +166,15 @@ Different licenses apply to different files:
  - The CMake build scripts are licensed under terms of the BSD 3-clause license.
  - The following auxiliary files are licensed under the terms of the Creative Commons Zero v1.0 Universal license:
     - example and benchmarks SMASH input configuration files;
-    - further auxiliary material in the ***input*** folder;
+    - further auxiliary material in the 📁 ***input*** folder;
     - yaml workflow files for CI runners.
  - The following auxiliary files are licensed under the terms of the Unlicense license:
     - Docker files;
     - documentation auxiliary files (`.{xml,html,css,dox,bib}`);
-    - example code in the ***examples*** folder.
+    - example code in the 📁 ***examples*** folder.
  - Third-party code included in this codebase complies with its license, which might differ from case to case (see the corresponding license notice in the files to know what applies).
 
-For more information about the licenses, see [LICENSE](LICENSE).
+For more information about the licenses, see [LICENSE](LICENSE.md).
 
 > [!CAUTION]
 > All rights for files not explicitly mentioned here above are reserved to the SMASH team.
