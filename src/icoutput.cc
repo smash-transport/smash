@@ -30,7 +30,7 @@ namespace smash {
  * though that for all other output formats the full particle list is printed to
  * the IC output, including spectators. The particle data is provided in the
  * computational frame. For further details, see \ref
- * doxypage_output_initial_conditions. \n
+ * doxypage_input_conf_modi_C_initial_conditions. \n
  *
  * \n
  * The ASCII initial conditions output is formatted as follows:

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2024
+ *    Copyright (c) 2014-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -81,11 +81,9 @@ double Nucleus::mass() const {
 }
 
 /**
- * Woods-Saxon-distribution
- * ========================
+ * <h1> Woods-Saxon-distribution </h1>
  *
- * The distribution
- * ----------------
+ * <h2> The distribution </h2>
  *
  * Nucleons in nuclei are distributed according to a
  * Woods-Saxon-distribution (see \iref{Woods:1954zz})
@@ -113,8 +111,7 @@ double Nucleus::mass() const {
  *
  * \f[p(B) = \frac{B^2}{\exp(B-R) + 1}.\f]
  *
- * Splitting it up in two regimes
- * ------------------------------
+ * <h2> Splitting it up in two regimes </h2>
  *
  * We shift the distribution so that \f$B-R\f$ is 0 at \f$t = 0\f$: \f$t
  * = B-R\f$:
@@ -155,8 +152,7 @@ double Nucleus::mass() const {
  *
  * (the tilde \f$\tilde{p}\f$ means that this is normalized).
  *
- * Four parts inside the rejection
- * -------------------------------
+ * <h2> Four parts inside the rejection </h2>
  *
  * Let \f$c_1 = 1+3/R+6/R^2+6/R^3\f$. The above means:
  *
@@ -180,7 +176,7 @@ double Nucleus::mass() const {
  * For simple distributions (only one \f$\chi\f$ involved), we invert
  * \f$t(\chi)\f$, derive it w.r.t. \f$t\f$ and normalize.
  *
- * ### Case I: \f$p^{({\rm I})}\f$
+ * <h3> Case I: \f$p^{({\rm I})}\f$ </h3>
  *
  * Simply from one random number:
  *
@@ -188,7 +184,7 @@ double Nucleus::mass() const {
  * \f[\tilde p^{({\rm I})} = \frac{3}{R^3}(t+R)^2 \mbox{ for } -R \le t
  * \le 0\f]
  *
- * ### Case II: \f$p^{({\rm II})}\f$
+ * <h3> Case II: \f$p^{({\rm II})}\f$ </h3>
  *
  * Again, from one only:
  *
@@ -196,7 +192,7 @@ double Nucleus::mass() const {
  * \f[p(t) = \frac{d\chi}{dt}\f]
  * \f[p^{({\rm II})} = e^{-t} \mbox{ for } t > 0\f]
  *
- * ### Case III: \f$p^{({\rm III})}\f$
+ * <h3> Case III: \f$p^{({\rm III})}\f$ </h3>
  *
  * Here, we need two variables:
  *
@@ -208,7 +204,7 @@ double Nucleus::mass() const {
  * \f[p^{({\rm III})} = \int_{-\infty}^{\infty} d\tau e^{-\tau} e^{-(t-\tau)}
  * \Theta(\tau) \Theta(t-\tau) = t e^{-t} \mbox{ for } t > 0\f]
  *
- * ### Case IV: \f$p^{({\rm IV})}\f$
+ * <h3> Case IV: \f$p^{({\rm IV})}\f$ </h3>
  *
  * Three variables needed:
  *
@@ -226,8 +222,7 @@ double Nucleus::mass() const {
  * \f$\tau\f$ yields \f$t\f$], integrated over all possible combinations
  * that have that property.
  *
- * From the beginning
- * ------------------
+ * <h2> From the beginning </h2>
  *
  *  So, the algorithm needs to do all this from the end:
  *

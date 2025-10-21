@@ -94,9 +94,12 @@ struct check_to_string_for_enums<std::variant<Ts...>> {
              static_assert(has_to_string_v<typename Ts::type::type>,
                            "Missing to_string overload for this bitset type");
            }
-         }(),  // <-- immediately invoked lambda
-         0),   // <-- turns each lambda call into an int for the fold.
-     ...);     // <-- fold over all Ts
+         }(),      // <-- immediately invoked lambda
+         void()),  // <-- The comma operator discards the lambda's result and
+                   // yields nothing, void(), giving each pack element a common
+                   // type for the fold; only side-effects inside the lambda are
+                   // intended
+     ...);         // <-- fold over all Ts
   }
 };
 

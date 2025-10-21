@@ -502,19 +502,23 @@ class Configuration {
    *
    * \return The value of the taken key if present, its default value otherwise.
    *
-   * \throw TakeSameKeyTwice if a key was already previously taken.
-   * \throw std::invalid_argument if a key without a default is taken but it is
+   * \throw TakeSameKeyTwice If a key was already previously taken.
+   * \throw std::logic_error If the taken key has not an \c std::map type but
+   *        refers to a section in the configuration file.
+   * \throw std::invalid_argument If a key without a default is taken but it is
    *        absent in the configuration.
+   * \throw std::invalid_argument If the taken key has an invalid value w.r.t.
+   *        its validator.
    */
   template <typename T>
   T take(const Key<T> &key) {
     if (has_value(key)) {
       // The following return statement converts a Value into T
-      return take({key.labels().begin(), key.labels().end()});
+      return unconditionally_take_and_validate(key);
     } else if (has_section(key.labels())) {
       // In this case, if the Key type is a map, we take it, otherwise fails
       if constexpr (isMap<typename Key<T>::type>::value) {
-        return take({key.labels().begin(), key.labels().end()});
+        return unconditionally_take_and_validate(key);
       } else {
         throw std::logic_error(
             "Key " + std::string{key} +  // NOLINT(whitespace/braces)
@@ -527,6 +531,8 @@ class Configuration {
                              " twice.");
     } else {
       try {
+        /* Note that a key with invalid default value cannot be constructed,
+           hence we do not validate its default value here. */
         return key.default_value();
       } catch (std::bad_optional_access &) {
         throw std::invalid_argument(
@@ -538,7 +544,8 @@ class Configuration {
 
   /**
    * Alternative method to take a key value, specifying the default value.
-   * \see take
+   * \see take which is used in one branch of this method (e.g. for possible
+   * thrown exceptions).
    *
    * @tparam T The type of the key to be taken
    * @param key The key to be taken
@@ -547,7 +554,9 @@ class Configuration {
    * @return The value of the key
    *
    * \throw std::logic_error If the key has not a default value declared as
-   * dependent on external entities.
+   *        dependent on external entities.
+   * \throw std::logic_error If the passed default value is invalid w.r.t. the
+   *        key validator.
    */
   template <typename T>
   T take(const Key<T> &key, T default_value) {
@@ -556,6 +565,10 @@ class Configuration {
           "An input Key without dependent default cannot be taken specifying a "
           "default value! Either define the key as having a dependent default "
           "or take it without a default value (which is a Key property).");
+    }
+    if (!key.validate(default_value)) {
+      throw std::logic_error("Invalid default value passed when taking " +
+                             static_cast<std::string>(key) + " key.");
     }
     if (has_value(key)) {
       return take(key);
@@ -578,22 +591,26 @@ class Configuration {
    *       not necessary to store the key read to avoid taking it multiple
    *       times. Actually, doing so is safe and will return the same value.
    *
-   * \param[in] key The input key that should be taken.
+   * \param[in] key The input key that should be read.
    *
    * \return The value of the taken key if present, its default value otherwise.
    *
-   * \throw std::invalid_argument if a key without a default is taken but it is
+   * \throw std::logic_error If the read key has not an \c std::map type but
+   *        refers to a section in the configuration file.
+   * \throw std::invalid_argument If a key without a default is read but it is
    *        absent in the configuration.
+   * \throw std::invalid_argument If the read key has an invalid value w.r.t.
+   *        its validator.
    */
   template <typename T>
   T read(const Key<T> &key) const {
     if (has_value(key)) {
       // The following return statement converts a Value into T
-      return read({key.labels().begin(), key.labels().end()});
+      return unconditionally_read_and_validate(key);
     } else if (has_section(key.labels())) {
       // In this case, if the Key type is a map, we take it, otherwise fails
       if constexpr (isMap<typename Key<T>::type>::value) {
-        return read({key.labels().begin(), key.labels().end()});
+        return unconditionally_read_and_validate(key);
       } else {
         throw std::logic_error(
             "Key " + std::string{key} +  // NOLINT(whitespace/braces)
@@ -602,6 +619,8 @@ class Configuration {
       }
     } else {
       try {
+        /* Note that a key with invalid default value cannot be constructed,
+           hence we do not validate its default value here. */
         return key.default_value();
       } catch (std::bad_optional_access &) {
         throw std::invalid_argument(
@@ -613,7 +632,8 @@ class Configuration {
 
   /**
    * Alternative method to read a key value, specifying the default value.
-   * \see read
+   * \see read which is used in one branch of this method (e.g. for possible
+   * thrown exceptions).
    *
    * @tparam T The type of the key to be read
    * @param key The key to be read
@@ -622,15 +642,21 @@ class Configuration {
    * @return The value of the key
    *
    * \throw std::logic_error If the key has not a default value declared as
-   * dependent on external entities.
+   *        dependent on external entities.
+   * \throw std::logic_error If the passed default value is invalid w.r.t. the
+   *        key validator.
    */
   template <typename T>
-  T read(const Key<T> &key, T default_value) {
+  T read(const Key<T> &key, T default_value) const {
     if (!key.has_dependent_default()) {
       throw std::logic_error(
           "An input Key without dependent default cannot be read specifying a "
           "default value! Either define the key as having a dependent default "
           "or read it without a default value (which is a Key property).");
+    }
+    if (!key.validate(default_value)) {
+      throw std::logic_error("Invalid default value passed when reading " +
+                             static_cast<std::string>(key) + " key.");
     }
     if (has_value(key)) {
       return read(key);
@@ -1549,15 +1575,74 @@ class Configuration {
   struct isMap<std::map<Key, Value>> : std::true_type {};
 
   /**
+   * Validate and return the passed key value
+   *
+   * @tparam T The type of the key whose value should be validated.
+   * @param key The key whose value should be validated.
+   * @param value The value of the key to be validated.
+   *
+   * @return The validated value of the key.
+   *
+   * @throw std::invalid_argument If the value is invalid w.r.t. the key
+   *        validator.
+   */
+  template <typename T>
+  T get_validated_key_value(const Key<T> &key, const T &value) const {
+    if (key.validate(value)) {
+      return value;
+    } else {
+      throw std::invalid_argument(
+          "Invalid value detected in configuration file:\n " +
+          key.as_yaml(value));
+    }
+  }
+
+  /**
+   * Take a key unconditionally, validate and return its value.
+   *
+   * \tparam T The type of the key to be taken.
+   * \param key The key to be taken.
+   *
+   * \return T The validated value of the taken key.
+   *
+   * \note This method internally calls the private \c take method and you
+   * should refer to it e.g. for possible exceptions thrown.
+   */
+  template <typename T>
+  T unconditionally_take_and_validate(const Key<T> &key) {
+    // The following assignment converts a Configuration::Value into T
+    T value = take({key.labels().begin(), key.labels().end()});
+    return get_validated_key_value(key, value);
+  }
+
+  /**
+   * Read a key unconditionally, validate and return its value.
+   *
+   * \tparam T The type of the key to be taken.
+   * \param key The key to be taken.
+   *
+   * \return T The validated value of the key.
+   *
+   * \note This method internally calls the private \c read method and you
+   * should refer to it e.g. for possible exceptions thrown.
+   */
+  template <typename T>
+  T unconditionally_read_and_validate(const Key<T> &key) const {
+    // The following assignment converts a Configuration::Value into T
+    T value = read({key.labels().begin(), key.labels().end()});
+    return get_validated_key_value(key, value);
+  }
+
+  /**
    * This is the implementation detail to take a key. Having a non-templated
    * method for it it allows for defining the method in the source file, which
    * isn't possible for a template.
    *
-   * \param[in] labels the labels of the key to be taken
+   * \param[in] labels the labels of the key to be taken.
    *
-   * \return The \c Value of the key
+   * \return The \c Value of the key.
    *
-   * \throw std::runtime_error if the key does not exist
+   * \throw std::runtime_error if the key does not exist.
    */
   Value take(std::vector<std::string_view> labels);
 
@@ -1566,18 +1651,19 @@ class Configuration {
    * method for it it allows for defining the method in the source file, which
    * isn't possible for a template.
    *
-   * \param[in] labels the labels of the key to be read
+   * \param[in] labels the labels of the key to be read.
    *
-   * \return The \c Value of the key
+   * \return The \c Value of the key.
    *
-   * \throw std::runtime_error if the key does not exist
+   * \throw std::runtime_error if the key does not exist.
    */
   Value read(std::vector<std::string_view> labels) const;
 
   /**
    * Find out whether a key has been already taken.
    *
-   * \param labels The labels of the key to be checked
+   * \param labels The labels of the key to be checked.
+   *
    * \return \c true if the key was already taken,
    * \return \c false otherwise.
    */

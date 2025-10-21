@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022-2024
+ *    Copyright (c) 2014-2020,2022-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -162,8 +162,8 @@ static auto get_binary_filename(const std::string &content,
  * \li \key empty: 0 if there was an interaction between the projectile
  * and the target, 1 otherwise. For non-collider setups, this is always 0.
  *
- * Particles output
- * ----------------
+ * <h2> %Particles output </h2>
+ *
  * The name of particles output file depends on its content:
  *  \li \c particles_binary.bin &rarr; this is the default;
  *  \li \c particles_oscar2013.bin &rarr;
@@ -176,8 +176,8 @@ static auto get_binary_filename(const std::string &content,
  * output see the corresponding \ref input_output_content_specific_
  * "content-specific output options".
  *
- * Collisions output
- * -----------------
+ * <h2> Collisions output </h2>
+ *
  * The name of collisions output file depends on its content:
  *  \li \c collisions_binary.bin &rarr; this is the default;
  *  \li \c collisions_oscar2013.bin &rarr;

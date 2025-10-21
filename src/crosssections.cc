@@ -97,6 +97,23 @@ static void append_list(CollisionBranchList& main_list,
   }
 }
 
+/**
+ * Helper function:
+ * Shift the energy of a collision for AQM rescaled cross sections.
+ *
+ * \param[in] mandelstam_s the rest frame total energy squared
+ * \param[in] m1 effective mass of incoming first particle
+ * \param[in] m2 effective mass of incoming second particle
+ * \param[in] m1_ref mass of the first AQM reference
+ * \param[in] m2_ref mass of the second AQM reference
+ * \return the shifted center of mass energy squared
+ */
+static double effective_AQM_s(double mandelstam_s, double m1, double m2,
+                              double m1_ref, double m2_ref) {
+  const double eff_sqrt_s = std::sqrt(mandelstam_s) - m1 - m2 + m1_ref + m2_ref;
+  return eff_sqrt_s * eff_sqrt_s;
+}
+
 CrossSections::CrossSections(const ParticleList& incoming_particles,
                              const double sqrt_s,
                              const std::pair<FourVector, FourVector> potentials)
@@ -407,20 +424,29 @@ double CrossSections::nn_el() const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
 
-  const double s = sqrt_s_ * sqrt_s_;
-
   // Use parametrized cross sections.
   double sig_el = -1.;
-  if (pdg_a.antiparticle_sign() == -pdg_b.antiparticle_sign()) {
-    sig_el = ppbar_elastic(s);
-  } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon()) {
-    sig_el = (pdg_a == pdg_b) ? pp_elastic(s) : np_elastic(s);
+  const double s = sqrt_s_ * sqrt_s_;
+  const bool is_NN_pair = pdg_a.is_nucleon() && pdg_b.is_nucleon();
+  if (is_NN_pair) {
+    if (is_BBbar_pair_) {
+      // npbar and ppbar
+      sig_el = ppbar_elastic(s);
+    } else {
+      sig_el = (pdg_a == pdg_b) ? pp_elastic(s) : np_elastic(s);
+    }
   } else {
     // AQM - Additive Quark Model
     const double m1 = incoming_particles_[0].effective_mass();
     const double m2 = incoming_particles_[1].effective_mass();
-    sig_el = pp_elastic_high_energy(s, m1, m2);
+    if (is_BBbar_pair_) {
+      sig_el =
+          ppbar_elastic(effective_AQM_s(s, m1, m2, nucleon_mass, nucleon_mass));
+    } else {
+      sig_el = pp_elastic_high_energy(s, m1, m2);
+    }
   }
+
   if (sig_el > 0.) {
     return sig_el;
   } else {
@@ -2472,6 +2498,7 @@ CollisionBranchList CrossSections::string_excitation(
     return channel_list;
   }
 
+  double mandelstam_s = sqrt_s_ * sqrt_s_;
   /* Get mapped PDG id for evaluation of the parametrized cross sections
    * for diffractive processes.
    * This must be rescaled according to additive quark model
@@ -2504,6 +2531,25 @@ CollisionBranchList CrossSections::string_excitation(
     }
   }
 
+  /* The case for baryon/anti-baryon annihilation is treated separately,
+   * as in this case we use only one way to break up the particles, namely
+   * into 2 mesonic strings of equal mass after annihilating one quark-
+   * anti-quark pair. See StringProcess::next_BBbarAnn() */
+  double sig_annihilation = 0.0;
+  if (can_annihilate) {
+    /* In the case of baryon-antibaryon pair,
+     * the parametrized cross section for annihilation will be added.
+     * See xs_ppbar_annihilation(). */
+    mandelstam_s = effective_AQM_s(
+        mandelstam_s, incoming_particles_[0].effective_mass(),
+        incoming_particles_[1].effective_mass(), nucleon_mass, nucleon_mass);
+    double xs_param = xs_ppbar_annihilation(mandelstam_s);
+    if (finder_parameters.use_AQM) {
+      xs_param *= AQM_scaling;
+    }
+    sig_annihilation = std::min(total_string_xs, xs_param);
+  }
+
   /* Total parametrized cross-section (I) and pythia-produced total
    * cross-section (II) do not necessarily coincide. If I > II then
    * non-diffractive cross-section is reinforced to get I == II.
@@ -2514,8 +2560,8 @@ CollisionBranchList CrossSections::string_excitation(
    * The way it is done here is not unique. I (ryu) think that at high energy
    * collision this is not an issue, but at sqrt_s < 10 GeV it may
    * matter. */
-  std::array<double, 3> xs =
-      string_process->cross_sections_diffractive(pdgid[0], pdgid[1], sqrt_s_);
+  std::array<double, 3> xs = string_process->cross_sections_diffractive(
+      pdgid[0], pdgid[1], std::sqrt(mandelstam_s));
   if (finder_parameters.use_AQM) {
     for (int ip = 0; ip < 3; ip++) {
       xs[ip] *= AQM_scaling;
@@ -2524,22 +2570,6 @@ CollisionBranchList CrossSections::string_excitation(
   double single_diffr_AX = xs[0], single_diffr_XB = xs[1], double_diffr = xs[2];
   double single_diffr = single_diffr_AX + single_diffr_XB;
   double diffractive = single_diffr + double_diffr;
-
-  /* The case for baryon/anti-baryon annihilation is treated separately,
-   * as in this case we use only one way to break up the particles, namely
-   * into 2 mesonic strings of equal mass after annihilating one quark-
-   * anti-quark pair. See StringProcess::next_BBbarAnn() */
-  double sig_annihilation = 0.0;
-  if (can_annihilate) {
-    /* In the case of baryon-antibaryon pair,
-     * the parametrized cross section for annihilation will be added.
-     * See xs_ppbar_annihilation(). */
-    double xs_param = xs_ppbar_annihilation(sqrt_s_ * sqrt_s_);
-    if (finder_parameters.use_AQM) {
-      xs_param *= AQM_scaling;
-    }
-    sig_annihilation = std::min(total_string_xs, xs_param);
-  }
 
   const double nondiffractive_all =
       std::max(0., total_string_xs - sig_annihilation - diffractive);
@@ -2606,20 +2636,23 @@ double CrossSections::high_energy(
 
   // Currently all BB collisions use the nucleon-nucleon parametrizations.
   if (pdg_a.is_baryon() && pdg_b.is_baryon()) {
+    const double eff_s = effective_AQM_s(
+        s, incoming_particles_[0].effective_mass(),
+        incoming_particles_[1].effective_mass(), nucleon_mass, nucleon_mass);
     if (pdg_a == pdg_b) {
-      xs = pp_high_energy(s);  // pp, nn
+      xs = pp_high_energy(eff_s);  // pp, nn
     } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == 1) {
-      xs = np_high_energy(s);  // np, nbarpbar
+      xs = np_high_energy(eff_s);  // np, nbarpbar
     } else if (pdg_a.antiparticle_sign() * pdg_b.antiparticle_sign() == -1) {
       /* In the case of baryon-antibaryon interactions,
        * the low-energy cross section must be involved
        * due to annihilation processes (via strings). */
-      double xs_l = ppbar_total(s);
+      double xs_l = ppbar_total(eff_s);
       double xs_h = 0.;
       if (pdg_a.is_antiparticle_of(pdg_b)) {
-        xs_h = ppbar_high_energy(s);  // ppbar, nnbar
+        xs_h = ppbar_high_energy(eff_s);  // ppbar, nnbar
       } else {
-        xs_h = npbar_high_energy(s);  // npbar, nbarp
+        xs_h = npbar_high_energy(eff_s);  // npbar, nbarp
       }
       /* Transition between low and high energy is set to be consistent with
        * that defined in string_probability(). */
@@ -2673,7 +2706,10 @@ double CrossSections::string_hard_cross_section() const {
 
   if (data_a.is_baryon() && data_b.is_baryon()) {
     // Nucleon-nucleon cross section is used for all baryon-baryon cases.
-    cross_sec = NN_string_hard(sqrt_s_ * sqrt_s_);
+    const double eff_s =
+        effective_AQM_s(sqrt_s_ * sqrt_s_, data_a.effective_mass(),
+                        data_b.effective_mass(), nucleon_mass, nucleon_mass);
+    cross_sec = NN_string_hard(eff_s);
   } else if (data_a.is_baryon() || data_b.is_baryon()) {
     // Nucleon-pion cross section is used for all baryon-meson cases.
     cross_sec = Npi_string_hard(sqrt_s_ * sqrt_s_);

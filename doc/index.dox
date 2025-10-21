@@ -125,7 +125,6 @@
     \page doxypage_input_decaymodes Decay modes
 \page doxypage_output Output
     <div class="invisible-content">
-    \subpage doxypage_output_conf_examples
     \subpage doxypage_output_process_types
     \subpage doxypage_output_oscar
     \subpage doxypage_output_ascii
@@ -142,7 +141,6 @@
     \subpage doxypage_output_thermodyn_lattice
     \subpage doxypage_output_collisions_box_modus
     </div>
-    \page doxypage_output_conf_examples Output configuration examples
     \page doxypage_output_process_types Process types
     \page doxypage_output_oscar OSCAR format
         <div class="invisible-content">

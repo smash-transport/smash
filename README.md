@@ -61,7 +61,7 @@ cmake -DPythia_CONFIG_EXECUTABLE=/path/to/pythia8316/bin/pythia8-config ..
 make
 ```
 Please note that the `make` command builds everything (executables, tests, and libraries) and this might take a while.
-You can use `make smash` if you are interested only in the SMASH executable or use `make smash_shared` to exclusively build the libraries (needed e.g. in another project using SMASH as a library -- refer to the [INSTALL](INSTALL.md) FAQ for more detailed information).
+You can use `make smash` if you are interested only in the SMASH executable or use `make smash_shared` to exclusively build the libraries (needed e.g. in another project using SMASH as a library &ndash; refer to the [INSTALL](INSTALL.md) FAQ for more detailed information).
 
 You can run SMASH with specific settings (e.g. at a given collision energy or impact parameter) by modifying the config.yaml file, for example with
 ```console
@@ -172,4 +172,4 @@ SMASH source and documentation are provided to check and reproduce published res
 Cooperation and joint projects with outside researchers are encouraged and comparison to results by experimental collaborations is supported.
 If you are interested in starting a project, please contact us to avoid interference with current thesis topics.
 If your project involves changes to the code, please refer to [CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and helpful tools.
-SMASH can also be used as a 3rd party library -- refer to the [INSTALL](INSTALL.md) FAQ for more detailed information.
+SMASH can also be used as a 3rd party library &ndash; refer to the [INSTALL](INSTALL.md) FAQ for more detailed information.

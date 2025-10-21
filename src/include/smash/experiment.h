@@ -786,7 +786,8 @@ void Experiment<Modus>::create_output(const std::string &format,
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
   } else if (format == "ASCII" &&
-             (content == "Particles" || content == "Collisions")) {
+             (content == "Particles" || content == "Collisions" ||
+              content == "Dileptons" || content == "Photons")) {
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
   } else if (content == "Thermodynamics" && format == "ASCII") {
@@ -1167,10 +1168,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * means the physical information contained in the output (e.g. list of
    * particles, list of interactions, thermodynamics, etc) and format (e.g.
    * ASCII, binary or ROOT). The same content can be printed out in several
-   * formats _simultaneously_.
-   *
-   * For an example of choosing specific output contents see
-   * \ref doxypage_output_conf_examples.
+   * formats _simultaneously_. See \ref config_output_examples for examples.
    *
    * These are the possible contents offered by SMASH:
    *
@@ -1192,13 +1190,13 @@ Experiment<Modus>::Experiment(Configuration &config,
    * - \b Dileptons:
    *          Special dilepton output, see \ref doxypage_output_dileptons.
    *   - Available formats:
-   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_binary,
-   *         \ref doxypage_output_root.
+   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_ascii,
+   *         \ref doxypage_output_binary, \ref doxypage_output_root.
    * - \b Photons:
    *          Special photon output, see \ref doxypage_output_photons.
    *   - Available formats:
-   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_binary,
-   *         \ref doxypage_output_root.
+   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_ascii,
+   *         \ref doxypage_output_binary, \ref doxypage_output_root.
    * - \b Thermodynamics:
    *          This output allows to print out thermodynamic quantities, see \ref
    *          input_output_thermodynamics_.
@@ -1232,15 +1230,16 @@ Experiment<Modus>::Experiment(Configuration &config,
    *
    * \section list_of_output_formats Output formats
    *
-   * For choosing output formats see \ref doxypage_output_conf_examples.
    * Every output content can be printed out in several formats:
    *
    * - \b "ASCII" - a human-readable text-format table of values.
-   *   - For `"Particles"` (\ref doxypage_output_oscar_particles) and
-   *     `"Collisions"` (\ref doxypage_output_oscar_collisions) contents, it
-   *     uses the \ref doxypage_output_oscar "OSCAR block structure".\n In these
-   *     cases it is possible to customize the quantities to be printed into the
-   *     output file (\ref doxypage_output_ascii).
+   *   - For\n
+   *     &emsp;&emsp;`"Particles"` (\ref doxypage_output_oscar_particles),\n
+   *     &emsp;&emsp;`"Collisions"`, `"Dileptons"`, and `"Photons"` (\ref
+   *     doxypage_output_oscar_collisions)\n contents, it uses the \ref
+   *     doxypage_output_oscar "OSCAR block structure".\n In these cases it is
+   *     possible to customize the quantities to be printed into the output file
+   *     (\ref doxypage_output_ascii).
    *   - For `"Initial_Conditions"` content the output has \ref
    *     doxypage_output_initial_conditions "a fixed block structure".
    *   - For `"Thermodynamics"` content the information stored in the output
@@ -1364,7 +1363,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * as well as in an additional ASCII format. The latter is meant to directly
    * serve as input for the vHLLE hydrodynamics code \iref{Karpenko:2013wva}.
    * \n \n
-   * ### Oscar output
+   * <h3> Oscar output </h3>
    * In case
    * of the Oscar1999 and Oscar2013 format, the structure is identical to the
    * Oscar Particles Format (see \ref doxypage_output_oscar_particles). \n
@@ -1375,14 +1374,14 @@ Experiment<Modus>::Experiment(Configuration &config,
    * initial particle list nor the particle list at each time step is printed.
    * \n The general Oscar structure as described in
    * \ref doxypage_output_oscar_particles is preserved. \n \n
-   * ### Binary output
+   * <h3> Binary output </h3>
    * The binary initial
    * conditions output also provides a list of all particles removed from the
    * evolution at the time when crossing the hypersurface. For each removed
    * particle a 'p' block is created stores the particle data. The general
    * binary output structure as described in \ref doxypage_output_binary is
    * preserved.\n \n
-   * ### ROOT output
+   * <h3> ROOT output </h3>
    * The initial conditions output in shape of a list of all particles removed
    * from the SMASH evolution with a \c "Constant_Tau" fluidization criterion
    * is also available in ROOT format. Neither the initial nor the final
@@ -1443,7 +1442,8 @@ Experiment<Modus>::Experiment(Configuration &config,
   const OutputParameters output_parameters(std::move(output_conf));
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
     if (output_contents[i] == "Particles" ||
-        output_contents[i] == "Collisions") {
+        output_contents[i] == "Collisions" ||
+        output_contents[i] == "Dileptons" || output_contents[i] == "Photons") {
       assert(output_parameters.quantities.count(output_contents[i]) > 0);
       const bool quantities_given_nonempty =
           !output_parameters.quantities.at(output_contents[i]).empty();
