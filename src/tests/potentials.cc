@@ -15,6 +15,7 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <vector>
 
 #include "setup.h"
 #include "smash/algorithms.h"
@@ -830,8 +831,8 @@ static bool density_hist(Particles* P, int box_length, int cell_length,
   // number of cells per a side of the box
   const double factor = box_length / cell_length;
 
-  double cells[num_cell];
-  memset(cells, 0, num_cell * sizeof(double));
+  // double cells[num_cell];
+  std::vector<double> cells(num_cell, 0.0);
 
   int count = 0;
   // go through the particle list
@@ -853,27 +854,21 @@ static bool density_hist(Particles* P, int box_length, int cell_length,
 
   // construct a histogram over densities, counting how many cells have density
   // that falls within density range for a given histogram bin
-  for (int i = 0; i < num_cell; i++) {
-    if (cells[i] < min_bound) {
-      min_bound = cells[i];
-    }
-    if (cells[i] > max_bound) {
-      max_bound = cells[i];
-    }
+  for (double c : cells) {
+    min_bound = std::min(min_bound, c);
+    max_bound = std::max(max_bound, c);
   }
 
   unsigned int hist_bin =
       numeric_cast<int>(std::ceil((max_bound - min_bound) / step));
   min_bound = min_bound / step;
   max_bound = max_bound / step;
-  unsigned int histogram[hist_bin + 1];
-  memset(histogram, 0, (hist_bin + 1) * sizeof(unsigned int));
+  std::vector<unsigned int> histogram(hist_bin + 1, 0);
 
-  for (int i = 0; i < num_cell; i++) {
-    // increase the histogram counter for the density of the cell
-    double position = std::max(0.0, (cells[i] / step - min_bound));
+  for (double c : cells) {
+    double position = std::max(0.0, (c / step - min_bound));
     position = std::min(max_bound - min_bound, position);
-    histogram[int(round(position))]++;
+    histogram[int(std::round(position))]++;
   }
   // get the number of cells which have the two test densities and the mean
   // density
