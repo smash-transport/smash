@@ -161,7 +161,7 @@
     \page doxypage_output_vtk_lattice Thermodynamics VTK output
     \page doxypage_output_thermodyn ASCII thermodynamics output
     \page doxypage_output_thermodyn_lattice Thermodynamics lattice output
-    \page doxypage_output_initial_conditions ASCII initial conditions output
+    \page doxypage_output_initial_conditions "for vHLLE" initial conditions output
     \page doxypage_output_collisions_box_modus Collision output in box modus
 \page doxypage_smash_invocation SMASH invocation
 \ifnot user

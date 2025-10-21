@@ -20,20 +20,20 @@ namespace smash {
  * \page doxypage_output_initial_conditions
  *
  * ---
- * The ASCII initial conditions output (SMASH_IC.dat) contains a list of
- * particles on a hypersurface of constant proper time. This output is formatted
- * such that it is directly compatible with the
- * vHLLE hydrodynamics code (I. Karpenko, P. Huovinen, M.
- * Bleicher: Comput. Phys. Commun. 185, 3016 (2014)). As a consequence,
- * **spectators are not written to the ASCII IC output** as they would need to
- * be excluded anyways in order to initialize the hydrodynamics evolution. Note
- * though that for all other output formats the full particle list is printed to
- * the IC output, including spectators. The particle data is provided in the
- * computational frame. For further details, see \ref
- * doxypage_input_conf_modi_C_initial_conditions. \n
+ * The "for_vHLLE" initial conditions output **SMASH_IC.dat** contains a 
+ * list of particles on a hypersurface of constant proper time. This output is
+ * formatted such that it is directly compatible with the vHLLE hydrodynamics
+ *  code (I. Karpenko, P. Huovinen, M. Bleicher: Comput. Phys. Commun. 185,
+ * 3016 (2014)). 
+ * As a consequence, **spectators are not written to the IC output** as
+ * they would need to be excluded anyways in order to initialize the
+ * hydrodynamics evolution. Note though that for all other output formats the
+ * full particle list is printed to the IC output, including spectators. The
+ * particle data is provided in the computational frame. For further details,
+ * see \ref doxypage_input_conf_modi_C_initial_conditions. \n
  *
  * \n
- * The ASCII initial conditions output is formatted as follows:
+ * The "for_vHLLE" initial conditions output is formatted as follows:
  *
  * **Header**
  * \code
@@ -49,10 +49,10 @@ namespace smash {
  *
  * **Output block header**
  *
- * The ASCII initial conditions output is, similar to the OSCAR output, based on
- * a block structure, where each block consists of 1 event (multiple ensembles,
- * if used, are separated as well). The header for a new event is structured as
- * follows:
+ * The initial conditions output for vHLLE is, similar to the OSCAR output, 
+ * based on a block structure, where each block consists of 1 event (multiple
+ * ensembles, if used, are separated as well). The header for a new event is
+ * structured as follows:
  * \code
  * # event ev_num ensemble ens_num start
  * \endcode
@@ -98,7 +98,7 @@ namespace smash {
  *
  * \note
  * If SMASH is run with test particles (necessary e.g. for potentials), the
- * ASCII output will contain Ntest * Npart particle entries. Remember to weigh
+ * output will contain Ntest * Npart particle entries. Remember to weigh
  * each of those particles with 1/Ntest.
  */
 

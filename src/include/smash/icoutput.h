@@ -24,9 +24,9 @@ namespace smash {
 /**
  * \ingroup output
  *
- * SMASH output in ASCII format containing initial conditions for hydrodynamic
- * codes. Formatted such that it can be directly processed by vHLLE
- * \iref{Karpenko:2015xea}.
+ * SMASH output in a format containing initial conditions for hydrodynamic
+ * codes ("for_vHLLE"). Formatted such that it can be directly processed by
+ * vHLLE \iref{Karpenko:2015xea}.
  */
 class ICOutput : public OutputInterface {
  public:

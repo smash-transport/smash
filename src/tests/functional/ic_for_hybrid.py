@@ -38,7 +38,7 @@ if not args.skip_smash:
     smash_executable = args.binary + "/smash"
     smash_config_file = args.source + "/input/config.yaml"
     smash_config_output = \
-        "Output: {Initial_Conditions: {Format: [ASCII, Binary, Oscar2013]}}"
+        "Output: {Initial_Conditions: {Format: [for_vHLLE, Binary, Oscar2013]}}"
     smash_config_ic = \
         "Modi: {Collider: {Initial_Conditions: {Type: Constant_Tau}}}"
     run = subp.run([smash_executable, "-i", smash_config_file,
@@ -71,13 +71,13 @@ oscar = pd.read_csv(oscar_file, comment='#', delimiter=' ',
 # Oscar particles are the ascii particles plus spectators
 number_of_spectators = len(oscar) - len(ascii)
 if (number_of_spectators < 0):
-    print("ASCII should not have more particles than OSCAR.")
+    print("output for vHLLE should not have more particles than OSCAR.")
     sys.exit(1)
 oscar['tau'], oscar['eta'] = cartesian_to_milne(oscar['t'], oscar['z'])
 oscar['mt'], oscar['Rap'] = cartesian_to_milne(oscar['p0'], oscar['pz'])
 
 quantities_to_compare_exact = ['x', 'y', 'pdg']
-# px and py are given with default precision in ASCII, but with %.9 in OSCAR.
+# px and py are given with default precision in "for_vHLLE", but with %.9 in OSCAR.
 # If this changes, they should be compared exactly
 quantities_to_compare_fuzzy = {
     'px': 1.e-5, 'py': 1.e-5, 'eta': 1.e-4, 'tau': 1.e-5, 'mt': 1.e-5, 'Rap': 1.e-5}

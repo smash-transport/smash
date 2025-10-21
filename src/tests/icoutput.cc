@@ -35,7 +35,7 @@ TEST(particlelist_format) {
   ParticleData p1 = particles.insert(Test::smashon_random());
   /*
   We need a little trick here to make sure the particle is actually written to
-  the output. By construction, the ASCII IC output does not contain spectator
+  the output. By construction, the IC output does not contain spectator
   particles. This is triggered by whether or not the particle has prior
   interactions (collisions_per_particle in the particle HistoryData). The test
   particle p1 has no prior interactions, so we manually have to change it's

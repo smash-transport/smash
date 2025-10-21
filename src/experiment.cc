@@ -103,13 +103,13 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  * SMASH can further be applied to extract initial conditions for hydrodynamic
  * simulations, either in a hypersurface of constant hyperbolic time or based on
  * the local energy density, as controlled by the key <tt>\ref key_MC_IC_type_
- * "Modi: Collider: Initial_Conditions: Type"</tt>. The "ASCII" output format
+ * "Modi: Collider: Initial_Conditions: Type"</tt>. The "for_vHLLE" output format
  * is only available in conjunction with the iso-tau hypersurface option.\n
  * The initial conditions output can be enabled as follows:
  *\verbatim
  Output:
      Initial_Conditions:
-         Format:    ["ASCII", "Oscar1999", "Oscar2013", "Binary", "Root"]
+         Format:    ["for_vHLLE", "Oscar1999", "Oscar2013", "Binary", "Root"]
          Extended: False
  \endverbatim
  * The HepMC_asciiv3 and/or HepMC_treeroot ouputs are enabled by specifying

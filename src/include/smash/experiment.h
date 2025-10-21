@@ -803,7 +803,7 @@ void Experiment<Modus>::create_output(const std::string &format,
     printout_lattice_td_ = true;
     outputs_.emplace_back(
         std::make_unique<VtkOutput>(output_path, content, out_par));
-  } else if (content == "Initial_Conditions" && format == "ASCII") {
+  } else if (content == "Initial_Conditions" && format == "for_vHLLE") {
     if (IC_dynamic_) {
       throw std::invalid_argument(
           "Dynamic initial conditions are only available in Oscar2013 and "
@@ -1360,8 +1360,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * Once initial conditions are enabled, the output file named SMASH_IC
    * (followed by the appropriate suffix) is generated when SMASH is executed.
    * \n The output is available in Oscar1999, Oscar2013, binary and ROOT format,
-   * as well as in an additional ASCII format. The latter is meant to directly
-   * serve as input for the vHLLE hydrodynamics code \iref{Karpenko:2013wva}.
+   * as well as in an additional "for_vHLLE" format. The latter is meant to directly serve as input for the vHLLE hydrodynamics code \iref{Karpenko:2013wva}.
    * \n \n
    * <h3> Oscar output </h3>
    * In case
