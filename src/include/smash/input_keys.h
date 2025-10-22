@@ -3768,8 +3768,10 @@ struct InputKeys {
    *   probability of an input parameter range is proportional to the area
    *   corresponding to that range, uniform in \f$b^2\f$:
    *   \f$dP(b) = b\,db\f$).
-   * - `"custom"` &rarr; requires `Values` and `Yields` to interpolate the
-   *   impact parameter distribution and use rejection sampling.
+   * - `"custom"` &rarr; takes a number of (impact parameter value, 
+   *   corresponding yield) data points and interpolates between them with piecewise 
+   *   linear functions. This creates a custom distribution from which the 
+   *   impact parameter will be sampled randomly using rejection sampling.
    */
   /**
    * \see_key{key_MC_impact_sample_}
@@ -3796,7 +3798,10 @@ struct InputKeys {
    * \par Custom sampling
    * \required_key_no_line{key_MC_impact_values_,Values,list of doubles}
    *
-   * Values of the impact parameter \unit{in fm}, with corresponding `Yields`.
+   * Values of the impact parameter \unit{in fm}. Each element of `Values` 
+   * corresponds to an element of `Yields`, making up a number of data points. 
+   * The specified data points are connected through piecewise linear functions to build the custom
+   * distribution.
    * Must be same length as `Yields`. This key can be omitted if `Sample` is not
    * set to `"custom"`.
    */
@@ -3810,8 +3815,10 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_C_impact_parameter
    * \required_key_no_line{key_MC_impact_yields_,Yields,list of doubles}
    *
-   * Values of the particle yields, corresponding to `Values`, i.e. the value
-   * of the custom distribution at this value. Must be same length as `Values`.
+   * Each element of `Yields` indicates the likelihood of sampling the corresponding 
+   * impact parameter in `Values`. Between the specified data points of `Values` and 
+   * `Yields`, linear interpolation is used to build the custom distribution.
+   * `Yields` must be same length as `Values`.
    * This key can be omitted if `Sample` is not set to `"custom"`.
    */
   /**
