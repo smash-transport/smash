@@ -11,6 +11,7 @@
 
 #include "smash/potentials.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <map>
@@ -826,8 +827,9 @@ static bool density_hist(Particles* P, int box_length, int cell_length,
       << "We expect the cell length of the density histogram to be a divisor "
          "of the box length. Instead we got "
       << box_length << " " << cell_length;
-  static const int num_cell = int(box_length * box_length * box_length /
-                                  (cell_length * cell_length * cell_length));
+  static const int num_cell =
+      static_cast<int>(box_length * box_length * box_length /
+                       (cell_length * cell_length * cell_length));
   // number of cells per a side of the box
   const double factor = box_length / cell_length;
 
@@ -848,26 +850,24 @@ static bool density_hist(Particles* P, int box_length, int cell_length,
     cells[index] = cells[index] + 1 / (cell_length * cell_length * cell_length *
                                        saturation_density * test_p);
   }
-  double min_bound = DBL_MAX;
-  double max_bound = 0;
 
   // construct a histogram over densities, counting how many cells have density
   // that falls within density range for a given histogram bin
-  for (double c : cells) {
-    min_bound = std::min(min_bound, c);
-    max_bound = std::max(max_bound, c);
-  }
+  const auto [min_it, max_it] = std::minmax_element(cells.begin(), cells.end());
+  double min_bound = *min_it;
+  double max_bound = *max_it;
 
   unsigned int hist_bin =
       numeric_cast<int>(std::ceil((max_bound - min_bound) / step));
-  min_bound = min_bound / step;
-  max_bound = max_bound / step;
+
+  min_bound /= step;
+  max_bound /= step;
   std::vector<unsigned int> histogram(hist_bin + 1, 0);
 
   for (double c : cells) {
     double position = std::max(0.0, (c / step - min_bound));
     position = std::min(max_bound - min_bound, position);
-    histogram[int(std::round(position))]++;
+    histogram[static_cast<int>(std::round(position))]++;
   }
   // get the number of cells which have the two test densities and the mean
   // density
@@ -882,8 +882,9 @@ static bool density_hist(Particles* P, int box_length, int cell_length,
   // decomposition: in a box in which the average density is mean_density, many
   // cells are expected to have a lower density test_left, and we ecpect to have
   // at least one cell with a higher density test_right
-  if (histogram[int(round(position_b))] <= histogram[int(round(position_a))] and
-      histogram[int(round(position_c))] > 0) {
+  if (histogram[static_cast<int>(round(position_b))] <=
+          histogram[static_cast<int>(round(position_a))] &&
+      histogram[static_cast<int>(round(position_c))] > 0) {
     peak_test = true;
   } else {
     std::cout << " Density histogram " << std::endl;
