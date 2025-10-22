@@ -105,17 +105,14 @@ ICOutput::ICOutput(const std::filesystem::path &path, const std::string &name,
                    const OutputParameters &out_par)
     : OutputInterface(name),
       file_{path / "SMASH_IC_for_vHLLE.dat", "w"},
-      out_par_(out_par) {
+      out_par_(out_par),
+      formatter_{OutputDefaultQuantities::ic_for_vHLLE} {
   std::fprintf(
       file_.get(),
       "# %s initial conditions: hypersurface of constant proper time\n",
       SMASH_VERSION);
-  std::fprintf(file_.get(),
-               "# tau x y eta mt px py Rap pdg charge "
-               "baryon_number strangeness\n");
-  std::fprintf(file_.get(),
-               "# fm fm fm none GeV GeV GeV none none e "
-               "none none\n");
+  std::fprintf(file_.get(), "# %s\n", formatter_.quantities_line().c_str());
+  std::fprintf(file_.get(), "# %s\n", formatter_.unit_line().c_str());
 }
 
 ICOutput::~ICOutput() {}
@@ -153,15 +150,7 @@ void ICOutput::at_interaction(const Action &action, const double) {
          action.get_type() == ProcessType::FluidizationNoRemoval);
   assert(action.incoming_particles().size() == 1);
 
-  ParticleData particle = action.incoming_particles()[0];
-
-  // transverse mass
-  const double m_trans =
-      std::sqrt(particle.effective_mass() * particle.effective_mass() +
-                particle.momentum()[1] * particle.momentum()[1] +
-                particle.momentum()[2] * particle.momentum()[2]);
-  // momentum space rapidity
-  const double rapidity = particle.rapidity();
+  const ParticleData &particle = action.incoming_particles()[0];
 
   // Determine if particle is spectator:
   // Fulfilled if particle is initial nucleon, aka has no prior interactions
@@ -169,13 +158,7 @@ void ICOutput::at_interaction(const Action &action, const double) {
 
   // write particle data excluding spectators
   if (!is_spectator) {
-    std::fprintf(file_.get(), "%g %g %g %g %g %g %g %g %s %i %i %i \n",
-                 particle.position().tau(), particle.position()[1],
-                 particle.position()[2], particle.position().eta(), m_trans,
-                 particle.momentum()[1], particle.momentum()[2], rapidity,
-                 particle.pdgcode().string().c_str(), particle.type().charge(),
-                 particle.type().baryon_number(),
-                 particle.type().strangeness());
+    std::fprintf(file_.get(), "%s\n", formatter_.data_line(particle).c_str());
   }
 
   if (IC_proper_time_ < 0.0) {

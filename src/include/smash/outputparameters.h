@@ -332,6 +332,10 @@ struct OutputDefaultQuantities {
   /// Quantities output in OSCAR1999 format
   inline static const std::vector<std::string> oscar1999 = {
       "id", "pdg", "0", "px", "py", "pz", "p0", "mass", "x", "y", "z", "t"};
+  /// Quantities output in initial conditions format for vHLLE
+  inline static const std::vector<std::string> ic_for_vHLLE = {
+      "tau", "x",   "y",      "eta",           "mt",         "px", "py",
+      "Rap", "pdg", "charge", "baryon_number", "strangeness"};
 };
 
 }  // namespace smash

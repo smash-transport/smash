@@ -18,7 +18,7 @@
 #include "outputinterface.h"
 #include "outputparameters.h"
 #include "smash/config.h"
-
+#include "smash/outputformatter.h"
 namespace smash {
 
 /**
@@ -87,6 +87,9 @@ class ICOutput : public OutputInterface {
    * in at_interaction().
    */
   double IC_proper_time_ = -1.0;
+
+  /// Formatter of the output
+  OutputFormatter<ToASCII> formatter_;
 };
 
 }  // namespace smash

@@ -366,7 +366,7 @@ class ParticleData {
   /// Check whether the particle is core
   bool is_core() const { return core_; }
   /// Particle rapidity
-  double rapidity() const { return std::atanh(momentum_[3] / momentum_[0]); }
+  double rapidity() const { return momentum_.eta(); }
 
   /**
    * Check whether two particles have the same id
