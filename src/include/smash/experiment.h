@@ -1107,25 +1107,26 @@ Experiment<Modus>::Experiment(Configuration &config,
         kinematic_cuts_for_IC_output_ = true;
       }
 
-      double proper_time = std::numeric_limits<double>::quiet_NaN();
-      if (IC_parameters.proper_time.has_value()) {
-        proper_time = IC_parameters.proper_time.value();
-      } else {
-        double lower_bound = IC_parameters.lower_bound.value();
-
-        // Default proper time is the passing time of the two nuclei
-        double default_proper_time = modus_.nuclei_passing_time();
-        if (default_proper_time >= lower_bound) {
-          proper_time = default_proper_time;
-          logg[LInitialConditions].info()
-              << "Nuclei passing time is " << proper_time << " fm.";
+      const double proper_time = std::invoke([&]() {
+        if (IC_parameters.proper_time.has_value()) {
+          return IC_parameters.proper_time.value();
         } else {
-          logg[LInitialConditions].warn()
-              << "Nuclei passing time is too short, hypersurface proper time "
-              << "set to tau = " << lower_bound << " fm.";
-          proper_time = lower_bound;
+          double lower_bound = IC_parameters.lower_bound.value();
+
+          // Default proper time is the passing time of the two nuclei
+          double default_proper_time = modus_.nuclei_passing_time();
+          if (default_proper_time >= lower_bound) {
+            logg[LInitialConditions].info()
+                << "Nuclei passing time is " << default_proper_time << " fm.";
+            return default_proper_time;
+          } else {
+            logg[LInitialConditions].warn()
+                << "Nuclei passing time is too short, hypersurface proper time "
+                << "set to tau = " << lower_bound << " fm.";
+            return lower_bound;
+          }
         }
-      }
+      });
 
       action_finders_.emplace_back(
           std::make_unique<HyperSurfaceCrossActionsFinder>(

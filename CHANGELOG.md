@@ -18,7 +18,7 @@ The major categories to group changes in this log are:
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 ## Unreleased
-
+* Update to Pythia8.316
 ### Added
 * The `SphereModus` now can include thermal heavy flavor particles, via the `Modi: Sphere: Heavy_Flavor_Multiplier` key, a value that multiplies their partial density. 
 * Back to back jets were introduced to the `SphereModus` with the  `Modi: Sphere: Jet: Back_To_Back` and `Modi: Sphere: Jet: Back_To_Back_Separation` keys.
