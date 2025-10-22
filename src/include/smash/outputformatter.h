@@ -292,19 +292,19 @@ class OutputFormatter {
         });
       } else if (quantity == "tau") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_double(in.position().tau());
+          return this->converter_.as_double(in.hyperbolic_time());
         });
       } else if (quantity == "eta") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_double(in.position().eta());
+          return this->converter_.as_double(in.spatial_rapidity());
         });
       } else if (quantity == "mt") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_double(in.momentum().tau());
+          return this->converter_.as_double(in.transverse_mass());
         });
-      } else if (quantity == "Rap") {
+      } else if (quantity == "Rap") {  // "Rap" is used for vHLLE IC
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_double(in.momentum().eta());
+          return this->converter_.as_double(in.rapidity());
         });
       }
     }

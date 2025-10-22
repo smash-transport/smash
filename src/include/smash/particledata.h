@@ -365,7 +365,13 @@ class ParticleData {
   void fluidize() { core_ = true; }
   /// Check whether the particle is core
   bool is_core() const { return core_; }
-  /// Particle rapidity
+  /// Particle \f$tau\f$ (hyperbolic time)
+  double hyperbolic_time() const { return position_.tau(); }
+  /// Particle spacetime rapidity \f$\eta_s\f$
+  double spatial_rapidity() const { return position_.eta(); }
+  /// Particle \f$m_T\f$
+  double transverse_mass() const { return momentum_.tau(); }
+  /// Particle momentum rapidity \f$y_\mathrm{rap}\f$
   double rapidity() const { return momentum_.eta(); }
 
   /**

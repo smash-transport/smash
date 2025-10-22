@@ -163,10 +163,10 @@ void ICOutput::at_interaction(const Action &action, const double) {
 
   if (IC_proper_time_ < 0.0) {
     // First particle that is removed, overwrite negative default
-    IC_proper_time_ = particle.position().tau();
+    IC_proper_time_ = particle.hyperbolic_time();
   } else {
     // Verify that all other particles have the same proper time
-    const double next_proper_time = particle.position().tau();
+    const double next_proper_time = particle.hyperbolic_time();
     if (!((next_proper_time - IC_proper_time_) < really_small))
       throw std::runtime_error(
           "Hypersurface proper time changed during evolution.");
