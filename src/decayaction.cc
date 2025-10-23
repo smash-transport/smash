@@ -128,16 +128,15 @@ std::pair<double, double> DecayAction::sample_masses(
   const bool return_nan_on_failure = pot_pointer != nullptr;
 
   if (below_threshold_energy) {
-    if(return_nan_on_failure){
-      return {std::numeric_limits<double>::quiet_NaN(),
-              std::numeric_limits<double>::quiet_NaN()};
-    }
-    else {
+    if (return_nan_on_failure) {
+      return {smash_NaN<double>, smash_NaN<double>};
+    } else {
       const std::string reaction =
-        incoming_particles_[0].type().name() + "→" + t_a.name() + t_b.name();
-        throw InvalidResonanceFormation(
-          reaction + ": not enough energy, " + std::to_string(kinetic_energy_cm) +
-          " < " + std::to_string(t_a.min_mass_kinematic()) + " + " +
+          incoming_particles_[0].type().name() + "→" + t_a.name() + t_b.name();
+      throw InvalidResonanceFormation(
+          reaction + ": not enough energy, " +
+          std::to_string(kinetic_energy_cm) + " < " +
+          std::to_string(t_a.min_mass_kinematic()) + " + " +
           std::to_string(t_b.min_mass_kinematic()));
     }
   }

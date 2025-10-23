@@ -105,7 +105,6 @@ class DecayAction : public Action {
   };
 
  private:
-  
   /**
    * Optional success flag for sampling outgoing particles.
    *
@@ -122,8 +121,8 @@ class DecayAction : public Action {
    */
   std::optional<bool> was_2body_phase_space_sampled_with_potentials_as_valid_ =
       std::nullopt;
- 
-protected:
+
+ protected:
   /**
    * \ingroup logging
    * Writes information about this decay action to the \p out stream.
