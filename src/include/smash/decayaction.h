@@ -105,22 +105,25 @@ class DecayAction : public Action {
   };
 
  private:
-  /// Optional success flag for sampling outgoing particles.
-  ///
-  /// Set to `true` if 2-body phase-space sampling succeeded, `false` if
-  /// `sample_masses()` signaled failure via NaNs (e.g., because the
-  /// chosen channel turned out to be kinematically forbidden after
-  /// considering potentials), or `std::nullopt` if not sampled yet.
-  ///
-  /// This is a **temporary workaround**: the decay channel is currently
-  /// chosen without knowledge of the potentials, and kinematic failure
-  /// is handled a posteriori. In the future, this should be replaced by
-  /// a proper channel selection that already accounts for potential
-  /// effects during the decision, avoiding the need for this flag.
+  
+  /**
+   * Optional success flag for sampling outgoing particles.
+   *
+   * Set to `true` if 2-body phase-space sampling succeeded, `false` if
+   * `sample_masses()` signaled failure via NaNs (e.g., because the
+   * chosen channel turned out to be kinematically forbidden after
+   * considering potentials), or `std::nullopt` if not sampled yet.
+   *
+   * This is a **temporary workaround**: the decay channel is currently
+   * chosen without knowledge of the potentials, and kinematic failure
+   * is handled a posteriori. In the future, this should be replaced by
+   * a proper channel selection that already accounts for potential
+   * effects during the decision, avoiding the need for this flag.
+   */
   std::optional<bool> was_2body_phase_space_sampled_with_potentials_as_valid_ =
       std::nullopt;
-
- protected:
+ 
+protected:
   /**
    * \ingroup logging
    * Writes information about this decay action to the \p out stream.

@@ -103,7 +103,7 @@ void DecayAction::sample_2body_phasespace() {
   const double cm_kin_energy = p_tot.abs();
   const std::pair<double, double> masses = sample_masses(cm_kin_energy);
 
-  const bool is_valid = !std::isnan(masses.first) || !std::isnan(masses.second);
+  const bool is_valid = !std::isnan(masses.first) && !std::isnan(masses.second);
 
   if (pot_pointer) {
     was_2body_phase_space_sampled_with_potentials_as_valid_ = is_valid;
@@ -127,16 +127,19 @@ std::pair<double, double> DecayAction::sample_masses(
 
   const bool return_nan_on_failure = pot_pointer != nullptr;
 
-  if (below_threshold_energy && return_nan_on_failure) {
-    return {std::numeric_limits<double>::quiet_NaN(),
-            std::numeric_limits<double>::quiet_NaN()};
-  } else if (below_threshold_energy) {
-    const std::string reaction =
+  if (below_threshold_energy) {
+    if(return_nan_on_failure){
+      return {std::numeric_limits<double>::quiet_NaN(),
+              std::numeric_limits<double>::quiet_NaN()};
+    }
+    else {
+      const std::string reaction =
         incoming_particles_[0].type().name() + "→" + t_a.name() + t_b.name();
-    throw InvalidResonanceFormation(
-        reaction + ": not enough energy, " + std::to_string(kinetic_energy_cm) +
-        " < " + std::to_string(t_a.min_mass_kinematic()) + " + " +
-        std::to_string(t_b.min_mass_kinematic()));
+        throw InvalidResonanceFormation(
+          reaction + ": not enough energy, " + std::to_string(kinetic_energy_cm) +
+          " < " + std::to_string(t_a.min_mass_kinematic()) + " + " +
+          std::to_string(t_b.min_mass_kinematic()));
+    }
   }
   // If one of the particles is a resonance, sample its mass.
   if (!t_a.is_stable() && t_b.is_stable()) {
