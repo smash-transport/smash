@@ -3768,10 +3768,11 @@ struct InputKeys {
    *   probability of an input parameter range is proportional to the area
    *   corresponding to that range, uniform in \f$b^2\f$:
    *   \f$dP(b) = b\,db\f$).
-   * - `"custom"` &rarr; takes a number of (impact parameter value, 
-   *   corresponding yield) data points and interpolates between them with piecewise 
-   *   linear functions. This creates a custom distribution from which the 
-   *   impact parameter will be sampled randomly using rejection sampling.
+   * - `"custom"` &rarr; creates a custom distribution of piecewise linear 
+   *   functions based on the provided impact parameter `Values` and the 
+   *   corresponding `Yields` (likelihood of that impact parameter value 
+   *   to be sampled). This distribution is used to randomly sample the 
+   *   impact parameter using rejection sampling.
    */
   /**
    * \see_key{key_MC_impact_sample_}
@@ -3798,12 +3799,11 @@ struct InputKeys {
    * \par Custom sampling
    * \required_key_no_line{key_MC_impact_values_,Values,list of doubles}
    *
-   * Values of the impact parameter \unit{in fm}. Each element of `Values` 
-   * corresponds to an element of `Yields`, making up a number of data points. 
-   * The specified data points are connected through piecewise linear functions to build the custom
-   * distribution.
-   * Must be same length as `Yields`. This key can be omitted if `Sample` is not
-   * set to `"custom"`.
+   * Impact parameter `Values` \unit{in fm} used to build the custom distribution. 
+   * Each element of `Values` corresponds to an element of `Yields`, 
+   * these are connected through piecewise linear functions to create the
+   * distribution. Must be same length as `Yields`. This key can be omitted 
+   * if `Sample` is not set to `"custom"`.
    */
   /**
    * \see_key{key_MC_impact_values_}
@@ -3816,9 +3816,9 @@ struct InputKeys {
    * \required_key_no_line{key_MC_impact_yields_,Yields,list of doubles}
    *
    * Each element of `Yields` indicates the likelihood of sampling the corresponding 
-   * impact parameter in `Values`. Between the specified data points of `Values` and 
+   * impact parameter in `Values`. Between the specified points of `Values` and 
    * `Yields`, linear interpolation is used to build the custom distribution.
-   * `Yields` must be same length as `Values`.
+   * `Yields` must be same length as `Values`. It does not need to be normed.
    * This key can be omitted if `Sample` is not set to `"custom"`.
    */
   /**
