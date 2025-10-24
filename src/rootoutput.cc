@@ -273,9 +273,9 @@ void RootOutput::init_trees() {
     particles_tree_->Branch("pdgcode", &pdgcode_[0], "pdgcode[npart]/I");
     particles_tree_->Branch("charge", &charge_[0], "charge[npart]/I");
     particles_tree_->Branch("formation_time", &formation_time_[0],
-			    "formation_time[npart]/D");
+                            "formation_time[npart]/D");
     particles_tree_->Branch("time_last_collision", &time_last_collision_[0],
-			    "time_last_collision[npart]/D");
+                            "time_last_collision[npart]/D");
 
     particles_tree_->Branch("p0", &p0_[0], "p0[npart]/D");
     particles_tree_->Branch("px", &px_[0], "px[npart]/D");
@@ -326,9 +326,9 @@ void RootOutput::init_trees() {
     collisions_tree_->Branch("pdgcode", &pdgcode_[0], "pdgcode[npart]/I");
     collisions_tree_->Branch("charge", &charge_[0], "charge[npart]/I");
     collisions_tree_->Branch("formation_time", &formation_time_[0],
-			     "formation_time[npart]/D");
+                             "formation_time[npart]/D");
     collisions_tree_->Branch("time_last_collision", &time_last_collision_[0],
-			     "time_last_collision[npart]/D");
+                             "time_last_collision[npart]/D");
 
     collisions_tree_->Branch("p0", &p0_[0], "p0[npart]/D");
     collisions_tree_->Branch("px", &px_[0], "px[npart]/D");
@@ -500,7 +500,7 @@ void RootOutput::particles_to_tree(T &particles) {
       id_[i] = p.id();
       pdgcode_[i] = p.pdgcode().get_decimal();
       charge_[i] = p.type().charge();
-      formation_time_[i] = p.formation_time();     
+      formation_time_[i] = p.formation_time();
       time_last_collision_[i] = p.get_history().time_last_collision;
 
       p0_[i] = p.momentum().x0();
@@ -514,8 +514,8 @@ void RootOutput::particles_to_tree(T &particles) {
       z_[i] = p.position().x3();
 
       if (part_extended_ || ic_extended_) {
-	const auto h = p.get_history();
-	coll_per_part_[i] = h.collisions_per_particle;
+        const auto h = p.get_history();
+        coll_per_part_[i] = h.collisions_per_particle;
         xsec_factor_[i] = p.xsec_scaling_factor();
         proc_id_origin_[i] = h.id_process;
         proc_type_origin_[i] = static_cast<int>(h.process_type);
@@ -574,14 +574,14 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
 
       if (coll_extended_) {
         const auto h = p.get_history();
-	coll_per_part_[i] = h.collisions_per_particle;
+        coll_per_part_[i] = h.collisions_per_particle;
         xsec_factor_[i] = p.xsec_scaling_factor();
         proc_id_origin_[i] = h.id_process;
         proc_type_origin_[i] = static_cast<int>(h.process_type);
         pdg_mother1_[i] = h.p1.get_decimal();
         pdg_mother2_[i] = h.p2.get_decimal();
         baryon_number_[i] = p.type().baryon_number();
-	strangeness_[i] = p.type().strangeness();
+        strangeness_[i] = p.type().strangeness();
       }
 
       i++;

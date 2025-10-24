@@ -236,9 +236,9 @@ class RootOutput : public OutputInterface {
   std::vector<int> pdgcode_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> charge_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<double> formation_time_ =
-    std::vector<double>(max_buffer_size_, 0.0);
+      std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> time_last_collision_ =
-    std::vector<double>(max_buffer_size_, 0.0);
+      std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> p0_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> px_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> py_ = std::vector<double>(max_buffer_size_, 0.0);
